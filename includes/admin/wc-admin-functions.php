@@ -216,7 +216,6 @@ function wc_maybe_adjust_line_item_product_stock( $item, $item_quantity = -1 ) {
 	$already_reduced_stock  = wc_stock_amount( $item->get_meta( '_reduced_stock', true ) );
 	$restock_refunded_items = wc_stock_amount( $item->get_meta( '_restock_refunded_items', true ) );
 	$order                  = $item->get_order();
-	$order_version          = $order->get_version();
 	$refunded_item_quantity = $order->get_qty_refunded_for_item( $item->get_id() );
 
 	$diff = $item_quantity - $restock_refunded_items - $already_reduced_stock;
