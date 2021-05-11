@@ -392,6 +392,10 @@ class CartItemSchema extends ProductSchema {
 	protected function format_variation_data( $variation_data, $product ) {
 		$return = [];
 
+		if ( ! is_iterable( $variation_data ) ) {
+			return $return;
+		}
+
 		foreach ( $variation_data as $key => $value ) {
 			$taxonomy = wc_attribute_taxonomy_name( str_replace( 'attribute_pa_', '', urldecode( $key ) ) );
 
