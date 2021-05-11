@@ -7,6 +7,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
  * Internal dependencies
  */
 import { ReviewsPanel } from '../';
+import { getByTextWithMarkup } from '../../../../../tests/js/util';
 
 const REVIEW = {
 	id: 10,
@@ -47,13 +48,6 @@ const REVIEW = {
 	},
 };
 
-jest.mock( '@woocommerce/components', () => ( {
-	...jest.requireActual( '@woocommerce/components' ),
-	Link: ( { children } ) => {
-		return <>{ children }</>;
-	},
-} ) );
-
 jest.mock( '../checkmark-circle-icon', () =>
 	jest.fn().mockImplementation( () => '[checkmark-circle-icon]' )
 );
@@ -66,6 +60,7 @@ describe( 'ReviewsPanel', () => {
 				isError={ false }
 				isRequesting={ false }
 				reviews={ [] }
+				createNotice={ () => {} }
 			/>
 		);
 		expect( screen.queryByRole( 'section' ) ).toBeNull();
@@ -78,9 +73,11 @@ describe( 'ReviewsPanel', () => {
 				isError={ false }
 				isRequesting={ false }
 				reviews={ [ REVIEW ] }
+				createNotice={ () => {} }
 			/>
 		);
-		expect( screen.getByText( 'Reviewer reviewed Cap' ) ).not.toBeNull();
+
+		expect( getByTextWithMarkup( 'Reviewer reviewed Cap' ) ).not.toBeNull();
 	} );
 
 	it( 'should render checkmark circle icon in the review title, if review is verfied owner', () => {
@@ -90,6 +87,7 @@ describe( 'ReviewsPanel', () => {
 				isError={ false }
 				isRequesting={ false }
 				reviews={ [ { ...REVIEW, verified: true } ] }
+				createNotice={ () => {} }
 			/>
 		);
 		const header = screen.getByRole( 'heading', { level: 3 } );
@@ -104,6 +102,7 @@ describe( 'ReviewsPanel', () => {
 					isError={ false }
 					isRequesting={ false }
 					reviews={ [ REVIEW ] }
+					createNotice={ () => {} }
 				/>
 			);
 			expect( screen.queryByText( 'Approve' ) ).toBeInTheDocument();
@@ -122,6 +121,7 @@ describe( 'ReviewsPanel', () => {
 					isRequesting={ false }
 					reviews={ [ REVIEW ] }
 					updateReview={ clickHandler }
+					createNotice={ () => {} }
 				/>
 			);
 			fireEvent.click( screen.getByText( 'Approve' ) );
@@ -141,6 +141,7 @@ describe( 'ReviewsPanel', () => {
 					isRequesting={ false }
 					reviews={ [ REVIEW ] }
 					updateReview={ clickHandler }
+					createNotice={ () => {} }
 				/>
 			);
 			fireEvent.click( screen.getByText( 'Mark as spam' ) );
@@ -160,6 +161,7 @@ describe( 'ReviewsPanel', () => {
 					isRequesting={ false }
 					reviews={ [ REVIEW ] }
 					deleteReview={ clickHandler }
+					createNotice={ () => {} }
 				/>
 			);
 			fireEvent.click( screen.getByText( 'Delete' ) );

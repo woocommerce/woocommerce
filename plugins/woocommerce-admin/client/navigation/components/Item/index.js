@@ -7,7 +7,7 @@ import { WooNavigationItem } from '@woocommerce/navigation';
 
 const Item = ( { item } ) => {
 	const slot = useSlot( 'woocommerce_navigation_' + item.id );
-	const hasFills = Boolean( slot.fills && slot.fills.length );
+	const hasFills = Boolean( slot?.fills?.length );
 
 	const trackClick = ( id ) => {
 		recordEvent( 'navigation_click', {

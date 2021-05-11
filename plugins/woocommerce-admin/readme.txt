@@ -74,7 +74,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 == Changelog ==
 
 == Unreleased ==
-
+- Enhancement: Adding Slotfills for remote payments and SettingsForm component. #6932
 - Fix: Make `Search` accept synchronous `autocompleter.options`. #6884
 - Add: Consume remote payment methods on frontend #6867
 - Add: Add plugin installer to allow installation of plugins via URL #6805

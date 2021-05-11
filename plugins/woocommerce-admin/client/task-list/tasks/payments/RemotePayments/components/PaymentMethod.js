@@ -9,9 +9,11 @@ import {
 	PLUGINS_STORE_NAME,
 	pluginNames,
 } from '@woocommerce/data';
-import { Plugins, Stepper } from '@woocommerce/components';
+import { Plugins, Stepper, WooRemotePayment } from '@woocommerce/components';
+
 import { recordEvent } from '@woocommerce/tracks';
 import { useSelect } from '@wordpress/data';
+import { useSlot } from '@woocommerce/experimental';
 
 /**
  * Internal dependencies
@@ -24,7 +26,15 @@ export const PaymentMethod = ( {
 	method,
 	recordConnectStartEvent,
 } ) => {
-	const { key, plugins, title } = method;
+	const {
+		key,
+		plugins,
+		title,
+		post_install_script: postInstallScript,
+	} = method;
+	const slot = useSlot( `woocommerce_remote_payment_${ key }` );
+	const hasFills = Boolean( slot?.fills?.length );
+
 	useEffect( () => {
 		recordEvent( 'payments_task_stepper_view', {
 			payment_method: key,
@@ -71,6 +81,12 @@ export const PaymentMethod = ( {
 						recordEvent( 'tasklist_payment_install_method', {
 							plugins,
 						} );
+
+						if ( postInstallScript ) {
+							const script = document.createElement( 'script' );
+							script.src = postInstallScript;
+							document.body.append( script );
+						}
 					} }
 					onError={ ( errors, response ) =>
 						createNoticesFromResponse( response )
@@ -102,19 +118,31 @@ export const PaymentMethod = ( {
 		};
 	}, [ title ] );
 
+	const DefaultStepper = ( props ) => (
+		<Stepper
+			isVertical
+			isPending={ ! installStep.isComplete || isOptionsRequesting }
+			currentStep={ installStep.isComplete ? 'connect' : 'install' }
+			steps={ [ installStep, connectStep ] }
+			{ ...props }
+		/>
+	);
+
 	return (
 		<Card className="woocommerce-task-payment-method woocommerce-task-card">
 			<CardBody>
-				<Stepper
-					isVertical
-					isPending={
-						! installStep.isComplete || isOptionsRequesting
-					}
-					currentStep={
-						installStep.isComplete ? 'connect' : 'install'
-					}
-					steps={ [ installStep, connectStep ] }
-				/>
+				{ hasFills ? (
+					<WooRemotePayment.Slot
+						fillProps={ {
+							defaultStepper: DefaultStepper,
+							defaultInstallStep: installStep,
+							defaultConnectStep: connectStep,
+						} }
+						id={ key }
+					/>
+				) : (
+					<DefaultStepper />
+				) }
 			</CardBody>
 		</Card>
 	);
