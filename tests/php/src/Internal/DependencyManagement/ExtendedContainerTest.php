@@ -104,6 +104,20 @@ class ExtendedContainerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox 'replace' should allow to replace existing registrations with anonymous classes.
+	 */
+	public function test_replace_allows_replacing_existing_registrations_with_anonymous_classes() {
+		$instance_1 = new DependencyClass();
+		$instance_2 = new class() extends DependencyClass {};
+
+		$this->sut->add( DependencyClass::class, $instance_1, true );
+		$this->assertSame( $instance_1, $this->sut->get( DependencyClass::class ) );
+
+		$this->sut->replace( DependencyClass::class, $instance_2, true );
+		$this->assertSame( $instance_2, $this->sut->get( DependencyClass::class ) );
+	}
+
+	/**
 	 * @testdox 'reset_all_resolved' should discard cached resolutions for classes registered as 'shared'.
 	 */
 	public function test_reset_all_resolved_discards_cached_shared_resolutions() {

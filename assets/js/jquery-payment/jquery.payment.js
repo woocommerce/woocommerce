@@ -554,8 +554,8 @@ jQuery( function( $ ) {
     if (!(month && year)) {
       return false;
     }
-    month = $.trim(month);
-    year = $.trim(year);
+    month = 'string' === typeof month ? month.trim() : '';
+    year = 'string' === typeof year ? year.trim() : '';
     if (!/^\d+$/.test(month)) {
       return false;
     }
@@ -584,7 +584,7 @@ jQuery( function( $ ) {
 
   $.payment.validateCardCVC = function(cvc, type) {
     var card, _ref;
-    cvc = $.trim(cvc);
+    cvc = 'string' === typeof cvc ? cvc.trim() : '';
     if (!/^\d+$/.test(cvc)) {
       return false;
     }
