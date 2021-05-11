@@ -62,6 +62,7 @@ This package provides support for enabling retries in tests:
 - `WP_ADMIN_ANALYTICS_PAGES` - WooCommerce analytics page root
 - `WP_ADMIN_WC_SETTINGS` - WooCommerce settings page root
 - `WP_ADMIN_NEW_SHIPPING_ZONE` - WooCommerce new shipping zone
+- `WP_ADMIN_WC_EXTENSIONS` - WooCommerce extensions page
 
 #### Front end
 
@@ -100,6 +101,7 @@ This package provides support for enabling retries in tests:
 | `openAnalyticsPage` | | Open any Analytics page |
 | `openAllUsersView` | | Open the All Users page |
 | `openImportProducts` | | Open the Import Products page |
+| `openExtensions` | | Go to WooCommerce -> Extensions |
 
 ### Shopper `shopper`
 
@@ -181,6 +183,7 @@ This package provides support for enabling retries in tests:
 | `selectOrderAction` | `action` | Helper method to select an order action in the `Order Actions` postbox |
 | `clickUpdateOrder` | `noticeText`, `waitForSave` | Helper method to click the Update button on the order details page |
 | `deleteAllShippingZones` | | Delete all the existing shipping zones |
+| `waitForSelectorWithoutThrow` | `selector`, `timeoutInSeconds` | conditionally wait for a selector without throwing an error. Default timeout is 5 seconds |
 
 ### Test Utilities
 

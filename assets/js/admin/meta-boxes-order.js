@@ -22,7 +22,7 @@ jQuery( function ( $ ) {
 				this.states = JSON.parse( woocommerce_admin_meta_boxes_order.countries.replace( /&quot;/g, '"' ) );
 			}
 
-			$( '.js_field-country' ).selectWoo().change( this.change_country );
+			$( '.js_field-country' ).selectWoo().on( 'change', this.change_country );
 			$( '.js_field-country' ).trigger( 'change', [ true ] );
 			$( document.body ).on( 'change', 'select.js_field-state', this.change_state );
 			$( '#woocommerce-order-actions input, #woocommerce-order-actions a' ).on( 'click', function() {
@@ -140,7 +140,7 @@ jQuery( function ( $ ) {
 				is_billing     = Boolean( $edit_address.find( 'input[name^="_billing_"]' ).length );
 
 			$address.hide();
-			$this.parent().find( 'a' ).toggle();
+			$this.parent().find( 'a' ).trigger( 'toggle' );
 
 			if ( ! $country_input.val() ) {
 				$country_input.val( woocommerce_admin_meta_boxes_order.default_country ).trigger( 'change' );
@@ -1470,7 +1470,7 @@ jQuery( function ( $ ) {
 				'fadeIn':     50,
 				'fadeOut':    50,
 				'delay':      0
-			}).focus();
+			}).trigger( 'focus' );
 		},
 
 		/**
@@ -1483,7 +1483,7 @@ jQuery( function ( $ ) {
 				'fadeIn':     50,
 				'fadeOut':    50,
 				'delay':      0
-			}).focus();
+			}).trigger( 'focus' );
 		}
 	};
 

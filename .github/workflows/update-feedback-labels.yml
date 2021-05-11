@@ -15,8 +15,10 @@ jobs:
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         labels: 'has feedback'
-    - name: remove needs feedback
+    - name: remove needs feedback, stale
       uses: actions-ecosystem/action-remove-labels@v1
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        labels: 'needs feedback'
+        labels: |
+          'needs feedback'
+          'Stale'

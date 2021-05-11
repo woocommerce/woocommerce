@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "11158f53934e897bd84be190a184ec87",
+    "content-hash": "a604678b268820c78736d599e1eb6726",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -86,16 +86,16 @@
         },
         {
             "name": "composer/installers",
-            "version": "v1.10.0",
+            "version": "v1.11.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/composer/installers.git",
-                "reference": "1a0357fccad9d1cc1ea0c9a05b8847fbccccb78d"
+                "reference": "ae03311f45dfe194412081526be2e003960df74b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/composer/installers/zipball/1a0357fccad9d1cc1ea0c9a05b8847fbccccb78d",
-                "reference": "1a0357fccad9d1cc1ea0c9a05b8847fbccccb78d",
+                "url": "https://api.github.com/repos/composer/installers/zipball/ae03311f45dfe194412081526be2e003960df74b",
+                "reference": "ae03311f45dfe194412081526be2e003960df74b",
                 "shasum": ""
             },
             "require": {
@@ -189,6 +189,7 @@
                 "majima",
                 "mako",
                 "mediawiki",
+                "miaoxing",
                 "modulework",
                 "modx",
                 "moodle",
@@ -206,6 +207,7 @@
                 "sydes",
                 "sylius",
                 "symfony",
+                "tastyigniter",
                 "typo3",
                 "wordpress",
                 "yawik",
@@ -226,7 +228,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-01-14T11:07:16+00:00"
+            "time": "2021-04-28T06:42:17+00:00"
         },
         {
             "name": "maxmind-db/reader",
@@ -501,16 +503,16 @@
         },
         {
             "name": "woocommerce/woocommerce-admin",
-            "version": "2.2.1",
+            "version": "2.2.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-admin.git",
-                "reference": "78cc9c5ef7de5be5bd0f9208483e5ae97422be9a"
+                "reference": "161e6afa01a3fb69533cfa2b245a71df7512ec3f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/78cc9c5ef7de5be5bd0f9208483e5ae97422be9a",
-                "reference": "78cc9c5ef7de5be5bd0f9208483e5ae97422be9a",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/65c5a4d0b0c3a7c7457e250c9ba1f7c15cac6cb8",
+                "reference": "65c5a4d0b0c3a7c7457e250c9ba1f7c15cac6cb8",
                 "shasum": ""
             },
             "require": {
@@ -542,7 +544,7 @@
             ],
             "description": "A modern, javascript-driven WooCommerce Admin experience.",
             "homepage": "https://github.com/woocommerce/woocommerce-admin",
-            "time": "2021-04-02T19:30:03+00:00"
+            "time": "2021-04-29T14:11:48+00:00"
         },
         {
             "name": "woocommerce/woocommerce-blocks",
@@ -589,10 +591,6 @@
                 "gutenberg",
                 "woocommerce"
             ],
-            "support": {
-                "issues": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues",
-                "source": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/v4.9.1"
-            },
             "time": "2021-04-13T16:11:16+00:00"
         }
     ],

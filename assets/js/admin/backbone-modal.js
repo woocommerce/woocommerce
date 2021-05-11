@@ -72,7 +72,7 @@
 			_.bindAll( this, 'render' );
 			this.render();
 
-			$( window ).resize(function() {
+			$( window ).on( 'resize', function() {
 				view.resizeContent();
 			});
 		},
@@ -88,7 +88,7 @@
 			}).append( this.$el );
 
 			this.resizeContent();
-			this.$( '.wc-backbone-modal-content' ).attr( 'tabindex' , '0' ).focus();
+			this.$( '.wc-backbone-modal-content' ).attr( 'tabindex' , '0' ).trigger( 'focus' );
 
 			$( document.body ).trigger( 'init_tooltips' );
 

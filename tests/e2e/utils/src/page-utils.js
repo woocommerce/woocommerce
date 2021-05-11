@@ -83,6 +83,32 @@ export const uiUnblocked = async () => {
 };
 
 /**
+ * Wait for backbone blocking to end.
+ */
+export const backboneUnblocked = async () => {
+	await page.waitForFunction( () => ! Boolean( document.querySelector( '.wc-backbone-modal' ) ) );
+};
+
+/**
+ * Conditionally wait for a selector without throwing an error.
+ *
+ * @param selector
+ * @param timeoutInSeconds
+ * @returns {Promise<boolean>}
+ */
+export const waitForSelectorWithoutThrow = async ( selector, timeoutInSeconds = 5 ) => {
+	let selected = await page.$( selector );
+	for ( let s = 0; s < timeoutInSeconds; s++ ) {
+		if ( selected ) {
+			break;
+		}
+		await page.waitFor( 1000 );
+		selected = await page.$( selector );
+	}
+	return Boolean( selected );
+};
+
+/**
  * Publish, verify that item was published. Trash, verify that item was trashed.
  *
  * @param {string} button (Publish)
@@ -221,9 +247,8 @@ export const selectOptionInSelect2 = async ( value, selector = 'input.select2-se
 export const searchForOrder = async (value, orderId, customerName) => {
 	await clearAndFillInput('#post-search-input', value);
 	await expect(page).toMatchElement('#post-search-input', value);
-	await expect(page).toClick('#search-submit');
-	await page.waitForSelector('#the-list');
-	await page.waitFor(1000);
+	await expect(page).toClick('#search-submit' );
+	await page.waitForSelector('#the-list', { timeout: 10000 } );
 	await expect(page).toMatchElement('.order_number > a.order-view', {text: `#${orderId} ${customerName}`});
 };
 
@@ -236,6 +261,10 @@ export const searchForOrder = async (value, orderId, customerName) => {
  */
 export const applyCoupon = async ( couponCode ) => {
 	try {
+		await Promise.all([
+			page.reload(),
+			page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+		]);
 		await expect(page).toClick('a', {text: 'Click here to enter your code'});
 		await uiUnblocked();
 		await clearAndFillInput('#coupon_code', couponCode);
@@ -255,6 +284,10 @@ export const applyCoupon = async ( couponCode ) => {
  * @returns {Promise<void>}
  */
 export const removeCoupon = async ( couponCode ) => {
+	await Promise.all([
+		page.reload(),
+		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+	]);
 	await expect(page).toClick('[data-coupon="'+couponCode.toLowerCase()+'"]', {text: '[Remove]'});
 	await uiUnblocked();
 	await expect(page).toMatchElement('.woocommerce-message', {text: 'Coupon has been removed.'});

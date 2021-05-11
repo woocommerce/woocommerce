@@ -137,7 +137,7 @@ const shopper = {
 		// Remove products if they exist
 		if ( await page.$( '.remove' ) !== null ) {
 			products = await page.$( '.remove' );
-			while ( products.length > 0 ) {
+			while ( products && products.length > 0 ) {
 				for (let p = 0; p < products.length; p++ ) {
 					await page.click( p );
 					await uiUnblocked();
