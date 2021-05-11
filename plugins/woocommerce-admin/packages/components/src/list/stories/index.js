@@ -3,15 +3,16 @@
  */
 import Gridicon from 'gridicons';
 import { withConsole } from '@storybook/addon-console';
+import {
+	List as ExperimentalList,
+	ListItem as ExperimentalListItem,
+	CollapsibleList as ExperimentalCollapsibleList,
+} from '@woocommerce/experimental';
 
 /**
  * Internal dependencies
  */
-import List, {
-	ExperimentalList,
-	ExperimentalListItem,
-	ExperimentalCollapsibleList,
-} from '../';
+import List from '../';
 import './style.scss';
 
 function logItemClick( event ) {
