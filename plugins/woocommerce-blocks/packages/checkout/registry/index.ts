@@ -61,7 +61,7 @@ const getCheckoutFilters = ( filterName: string ): CheckoutFilterFunction[] => {
 export const __experimentalApplyCheckoutFilter = < T >( {
 	filterName,
 	defaultValue,
-	extensions,
+	extensions = {},
 	arg = null,
 	validation = returnTrue,
 }: {
@@ -70,7 +70,7 @@ export const __experimentalApplyCheckoutFilter = < T >( {
 	/** Default value to filter. */
 	defaultValue: T;
 	/** Values extend to REST API response. */
-	extensions: Record< string, unknown >;
+	extensions?: Record< string, unknown >;
 	/** Object containing arguments for the filter function. */
 	arg: CheckoutFilterArguments;
 	/** Function that needs to return true when the filtered value is passed in order for the filter to be applied. */
