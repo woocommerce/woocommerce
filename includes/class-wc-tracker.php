@@ -374,11 +374,12 @@ class WC_Tracker {
 	 * @return array
 	 */
 	private static function get_orders() {
-		$order_dates  = self::get_order_dates();
-		$order_counts = self::get_order_counts();
-		$order_totals = self::get_order_totals();
+		$order_dates    = self::get_order_dates();
+		$order_counts   = self::get_order_counts();
+		$order_totals   = self::get_order_totals();
+		$order_gateways = self::get_orders_by_gateway();
 
-		return array_merge( $order_dates, $order_counts, $order_totals );
+		return array_merge( $order_dates, $order_counts, $order_totals, $order_gateways );
 	}
 
 	/**
@@ -472,6 +473,50 @@ class WC_Tracker {
 		}
 
 		return array_merge( $min_max, $processing_min_max );
+	}
+
+	/**
+	 * Get order details by gateway
+	 *
+	 * @return array
+	 */
+	public static function get_orders_by_gateway() {
+		global $wpdb;
+
+		$orders_by_gateway = $wpdb->get_results(
+			"
+			SELECT
+				gateway, currency, SUM(total) AS totals, COUNT(order_id) AS counts
+			FROM (
+				SELECT
+					orders.id AS order_id,
+					MAX(CASE WHEN meta_key = '_payment_method' THEN meta_value END) gateway,
+					MAX(CASE WHEN meta_key = '_order_total' THEN meta_value END) total,
+					MAX(CASE WHEN meta_key = '_order_currency' THEN meta_value END) currency
+				FROM
+					{$wpdb->prefix}posts orders
+				LEFT JOIN
+					{$wpdb->prefix}postmeta order_meta ON order_meta.post_id = orders.id
+				WHERE orders.post_type = 'shop_order'
+					AND orders.post_status in ( 'wc-completed', 'wc-processing', 'wc-refunded' )
+					AND meta_key in( '_payment_method','_order_total','_order_currency')
+				GROUP BY orders.id
+			) order_gateways
+			GROUP BY gateway, currency
+			"
+		);
+
+		foreach ( $orders_by_gateway as $orders_details ) {
+			$gateway  = 'gateway_' . $orders_details->gateway;
+			$currency = $orders_details->currency;
+			$count    = $gateway . '_' . $currency . '_count';
+			$total    = $gateway . '_' . $currency . '_total';
+
+			$orders_by_gateway_currency[ $count ] = $orders_details->counts;
+			$orders_by_gateway_currency[ $total ] = $orders_details->totals;
+		}
+
+		return $orders_by_gateway_currency;
 	}
 
 	/**
