@@ -8,6 +8,7 @@ namespace Automattic\WooCommerce\Admin\Features\RemotePaymentMethods;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\RemoteInboxNotifications\SpecRunner;
+use Automattic\WooCommerce\Admin\Features\RemotePaymentMethods\PaymentGatewaysController;
 
 /**
  * Remote Payment Methods engine.
@@ -21,6 +22,7 @@ class Init {
 	 */
 	public function __construct() {
 		add_action( 'change_locale', array( __CLASS__, 'delete_specs_transient' ) );
+		PaymentGatewaysController::init();
 	}
 
 	/**
