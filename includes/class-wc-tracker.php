@@ -506,6 +506,7 @@ class WC_Tracker {
 			"
 		);
 
+		$orders_by_gateway_currency = array();
 		foreach ( $orders_by_gateway as $orders_details ) {
 			$gateway  = 'gateway_' . $orders_details->gateway;
 			$currency = $orders_details->currency;
