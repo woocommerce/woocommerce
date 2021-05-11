@@ -34,7 +34,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "axios": "0.19.2",
+    "axios": "0.21.1",
     "create-hmac": "1.1.7",
     "oauth-1.0a": "2.2.6"
   },
