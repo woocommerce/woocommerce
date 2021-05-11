@@ -41,6 +41,7 @@ final class Container implements \Psr\Container\ContainerInterface {
 		ProxiesServiceProvider::class,
 		DownloadPermissionsAdjusterServiceProvider::class,
 		AssignDefaultCategoryServiceProvider::class,
+		RestockRefundedItemsAdjusterServiceProvider::class,
 	);
 
 	/**
