@@ -18,7 +18,8 @@ const deleteAllRepositoryObjects = async ( repository, defaultObjectId = null ) 
 	const minimum = defaultObjectId == null ? 0 : 1;
 	const statuses = ['publish','trash'];
 
-	statuses.forEach( async ( status ) => {
+	for ( let s = 0; s < statuses.length; s++ ) {
+		const status = statuses[ s ];
 		objects = await repository.list( { status } );
 		while (objects.length > minimum) {
 			for (let o = 0; o < objects.length; o++) {
@@ -26,11 +27,12 @@ const deleteAllRepositoryObjects = async ( repository, defaultObjectId = null ) 
 				if (objects[o].id == defaultObjectId) {
 					continue;
 				}
-				await repository.delete(objects[o].id);
+				try {
+					await repository.delete(objects[o].id);
+				} catch (e) {}
 			}
-			objects = await repository.list( { status } );
 		}
-	} );
+	}
 };
 
 /**
