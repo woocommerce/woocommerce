@@ -1736,7 +1736,6 @@ return array(
 		'AP' => __( 'Armed Forces (AP)', 'woocommerce' ),
 	),
 	'VE' => array( // Venezuela States. Ref: https://github.com/unicode-org/cldr/blob/release-38-1/common/subdivisions/en.xml#L5426-L5451
-
 		'A' => __( 'Capital', 'woocommerce' ),
 		'B' => __( 'Anzoátegui', 'woocommerce' ),
 		'C' => __( 'Apure', 'woocommerce' ),
