@@ -8,6 +8,7 @@ namespace Automattic\WooCommerce;
 use Automattic\WooCommerce\Internal\DependencyManagement\ExtendedContainer;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\DownloadPermissionsAdjusterServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\AssignDefaultCategoryServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\RestockRefundedItemsAdjusterServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ProxiesServiceProvider;
 
 /**
@@ -37,6 +38,7 @@ final class Container implements \Psr\Container\ContainerInterface {
 		ProxiesServiceProvider::class,
 		DownloadPermissionsAdjusterServiceProvider::class,
 		AssignDefaultCategoryServiceProvider::class,
+		RestockRefundedItemsAdjusterServiceProvider::class,
 	);
 
 	/**

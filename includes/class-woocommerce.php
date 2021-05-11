@@ -9,6 +9,7 @@
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\DownloadPermissionsAdjuster;
+use Automattic\WooCommerce\Internal\RestockRefundedItemsAdjuster;
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 
@@ -209,6 +210,7 @@ final class WooCommerce {
 		// These classes set up hooks on instantiation.
 		wc_get_container()->get( DownloadPermissionsAdjuster::class );
 		wc_get_container()->get( AssignDefaultCategory::class );
+		wc_get_container()->get( RestockRefundedItemsAdjuster::class );
 	}
 
 	/**

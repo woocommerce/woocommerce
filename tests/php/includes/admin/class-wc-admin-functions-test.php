@@ -289,7 +289,6 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test adjust line item function when order item is refunded with restock and then update order.
-	 * This only works with orders placed after WC 5.4.
 	 *
 	 * @link https://github.com/woocommerce/woocommerce/issues/29502.
 	 */
@@ -302,10 +301,6 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 		$product->save();
 
 		$order = WC_Helper_Order::create_order();
-
-		if ( version_compare( $order->get_version(), '5.4', '<' ) ) {
-			$this->markTestSkipped( 'Requires WC 5.4+' );
-		}
 
 		$order->set_status( 'on-hold' );
 		$order_item_id = $order->add_product( $product, 10 );
@@ -353,7 +348,6 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test adjust line item function when order item is refunded without restock and then update order.
-	 * This only works with orders placed after WC 5.4.
 	 *
 	 * @link https://github.com/woocommerce/woocommerce/issues/29502.
 	 */
@@ -366,10 +360,6 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 		$product->save();
 
 		$order = WC_Helper_Order::create_order();
-
-		if ( version_compare( $order->get_version(), '5.4', '<' ) ) {
-			$this->markTestSkipped( 'Requires WC 5.4+' );
-		}
 
 		$order->set_status( 'on-hold' );
 		$order_item_id = $order->add_product( $product, 10 );
