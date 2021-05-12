@@ -549,8 +549,8 @@ class WC_Admin_Addons {
 
 		$section_object = (object) $section;
 
-		if ( ! empty( $section_object->geowhitelist ) ) {
-			$section_object->geowhitelist = explode( ',', $section_object->geowhitelist );
+		if ( ! empty( $section_object->geo_allow_list ) ) {
+			$section_object->geo_allow_list = explode( ',', $section_object->geo_allow_list );
 		}
 
 		if ( ! self::show_extension( $section_object ) ) {
@@ -788,11 +788,11 @@ class WC_Admin_Addons {
 	 */
 	public static function show_extension( $item ) {
 		$location = WC()->countries->get_base_country();
-		if ( isset( $item->geowhitelist ) && ! in_array( $location, $item->geowhitelist, true ) ) {
+		if ( isset( $item->geo_allow_list ) && ! in_array( $location, $item->geo_allow_list, true ) ) {
 			return false;
 		}
 
-		if ( isset( $item->geoblacklist ) && in_array( $location, $item->geoblacklist, true ) ) {
+		if ( isset( $item->geo_block_list ) && in_array( $location, $item->geo_block_list, true ) ) {
 			return false;
 		}
 
