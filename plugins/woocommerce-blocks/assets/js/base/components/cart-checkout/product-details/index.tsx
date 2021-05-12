@@ -37,7 +37,7 @@ const ProductDetails = ( {
 					: '';
 				return (
 					<li
-						key={ detail.name + ( detail.display || detail.name ) }
+						key={ detail.name + ( detail.display || detail.value ) }
 						className={ className }
 					>
 						{ detail.name && (
