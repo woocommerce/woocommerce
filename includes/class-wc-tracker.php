@@ -355,7 +355,7 @@ class WC_Tracker {
 	}
 
 	/**
-	 * Get order counts
+	 * Get order counts.
 	 *
 	 * @return array
 	 */
@@ -383,7 +383,7 @@ class WC_Tracker {
 	}
 
 	/**
-	 * Get order totals
+	 * Get order totals.
 	 *
 	 * @since 5.4.0
 	 * @return array
@@ -430,7 +430,7 @@ class WC_Tracker {
 	}
 
 	/**
-	 * Get last order date
+	 * Get last order date.
 	 *
 	 * @return string
 	 */
@@ -477,7 +477,7 @@ class WC_Tracker {
 	}
 
 	/**
-	 * Get order details by gateway
+	 * Get order details by gateway.
 	 *
 	 * @return array
 	 */
