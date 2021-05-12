@@ -553,6 +553,10 @@ class WC_Admin_Addons {
 			$section_object->geowhitelist = explode( ',', $section_object->geowhitelist );
 		}
 
+		if ( ! empty( $section_object->geoblacklist ) ) {
+			$section_object->geoblacklist = explode( ',', $section_object->geoblacklist );
+		}
+
 		if ( ! self::show_extension( $section_object ) ) {
 			return;
 		}
