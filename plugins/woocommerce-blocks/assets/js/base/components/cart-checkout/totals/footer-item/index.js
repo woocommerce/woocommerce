@@ -24,11 +24,16 @@ const SHOW_TAXES =
 
 const TotalsFooterItem = ( { currency, values } ) => {
 	const { total_price: totalPrice, total_tax: totalTax } = values;
-	const { extensions } = useStoreCart();
+
+	// Prepare props to pass to the __experimentalApplyCheckoutFilter filter.
+	// We need to pluck out receiveCart.
+	// eslint-disable-next-line no-unused-vars
+	const { receiveCart, ...cart } = useStoreCart();
 	const label = __experimentalApplyCheckoutFilter( {
 		filterName: 'totalLabel',
 		defaultValue: __( 'Total', 'woo-gutenberg-products-block' ),
-		extensions,
+		extensions: cart.extensions,
+		arg: { cart },
 		// Only accept strings.
 		validation: mustBeString,
 	} );

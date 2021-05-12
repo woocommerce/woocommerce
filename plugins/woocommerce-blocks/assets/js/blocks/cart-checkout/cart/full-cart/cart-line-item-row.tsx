@@ -9,6 +9,7 @@ import ProductName from '@woocommerce/base-components/product-name';
 import {
 	useStoreCartItemQuantity,
 	useStoreEvents,
+	useStoreCart,
 } from '@woocommerce/base-context/hooks';
 import {
 	ProductBackorderBadge,
@@ -110,6 +111,23 @@ const CartLineItemRow = ( {
 	} = useStoreCartItemQuantity( lineItem );
 	const { dispatchStoreEvent } = useStoreEvents();
 
+	const productPriceValidation = useCallback(
+		( value ) => mustBeString( value ) && mustContain( value, '<price/>' ),
+		[]
+	);
+
+	// Prepare props to pass to the __experimentalApplyCheckoutFilter filter.
+	// We need to pluck out receiveCart.
+	// eslint-disable-next-line no-unused-vars
+	const { receiveCart, ...cart } = useStoreCart();
+	const arg = useMemo(
+		() => ( {
+			context: 'cart',
+			cartItem: lineItem,
+			cart,
+		} ),
+		[ lineItem, cart ]
+	);
 	const priceCurrency = getCurrencyFromPriceResponse( prices );
 	const name = __experimentalApplyCheckoutFilter( {
 		filterName: 'itemName',

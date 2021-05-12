@@ -11,6 +11,7 @@ import PropTypes from 'prop-types';
 import Dinero from 'dinero.js';
 import { getSetting } from '@woocommerce/settings';
 import { useCallback, useMemo } from '@wordpress/element';
+import { useStoreCart } from '@woocommerce/base-context/hooks';
 
 /**
  * Internal dependencies
@@ -36,6 +37,25 @@ const OrderSummaryItem = ( { cartItem } ) => {
 		totals,
 		extensions = {},
 	} = cartItem;
+
+	// Prepare props to pass to the __experimentalApplyCheckoutFilter filter.
+	// We need to pluck out receiveCart.
+	// eslint-disable-next-line no-unused-vars
+	const { receiveCart, ...cart } = useStoreCart();
+
+	const productPriceValidation = useCallback(
+		( value ) => mustBeString( value ) && mustContain( value, '<price/>' ),
+		[]
+	);
+
+	const arg = useMemo(
+		() => ( {
+			context: 'summary',
+			cartItem,
+			cart,
+		} ),
+		[ cartItem, cart ]
+	);
 
 	const priceCurrency = getCurrencyFromPriceResponse( prices );
 
