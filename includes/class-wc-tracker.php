@@ -480,7 +480,7 @@ class WC_Tracker {
 	 *
 	 * @return array
 	 */
-	public static function get_orders_by_gateway() {
+	private static function get_orders_by_gateway() {
 		global $wpdb;
 
 		$orders_by_gateway = $wpdb->get_results(
