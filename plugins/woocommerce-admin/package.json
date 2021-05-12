@@ -233,7 +233,7 @@
 		"react-docgen": "5.3.1",
 		"readline-sync": "1.4.10",
 		"recast": "0.20.4",
-		"replace": "1.2.0",
+		"replace": "1.2.1",
 		"rimraf": "3.0.2",
 		"rtlcss": "2.5.0",
 		"sass-loader": "8.0.2",
