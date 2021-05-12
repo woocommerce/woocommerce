@@ -688,15 +688,15 @@ class WC_Checkout {
 			$is_checkout_page = isset( $_REQUEST['woocommerce-process-checkout-nonce'] );
 
 			foreach ( $fieldset as $key => $field ) {
-				if ( isset( $_POST[ $key ] ) ) { // phpcs:disable WordPress.Security.NonceVerification.Missing
+				$type = sanitize_title( isset( $field['type'] ) ? $field['type'] : 'text' );
+
+				if ( isset( $_POST[ $key ] ) && '' !== $_POST[ $key ] ) { // phpcs:disable WordPress.Security.NonceVerification.Missing
 					$value = wp_unslash( $_POST[ $key ] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-				} elseif ( isset( $field['default'] ) && ! $is_checkout_page ) {
-					$value = '1' === (string) $field['default'] ? 1 : '';
+				} elseif ( isset( $field['default'] ) && 'checkbox' !== $type ) {
+					$value = $field['default'];
 				} else {
 					$value = '';
 				}
-
-				$type = sanitize_title( isset( $field['type'] ) ? $field['type'] : 'text' );
 
 				if ( '' !== $value ) {
 					switch ( $type ) {
