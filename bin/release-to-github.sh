@@ -27,8 +27,8 @@ read -r VERSION
 
 CURRENTBRANCH="$(git rev-parse --abbrev-ref HEAD)"
 
-if [ ! -d "dist" ]; then
-	echo "Dist directory not found. Aborting."
+if [ ! -d "build" ]; then
+	echo "Build directory not found. Aborting."
 	exit 1
 fi
 
