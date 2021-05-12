@@ -73,9 +73,8 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 		$this->assertEquals( '13.58', WC()->cart->get_total( 'edit' ) );
 		$this->assertEquals( 0.66, WC()->cart->get_total_tax() );
-		$this->assertEquals( 4.17, WC()->cart->get_discount_total() );
-		$this->assertEquals( 0.83, WC()->cart->get_discount_tax() );
-
+		$this->assertEquals( 0.83, wc_format_decimal( WC()->cart->get_discount_tax(), 2 ) );
+		$this->assertEquals( 4.17, wc_format_decimal( WC()->cart->get_discount_total(), 2 ) );
 	}
 
 	/**
@@ -302,7 +301,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 		WC()->cart->calculate_totals();
-		$this->assertEquals( 599, WC()->cart->subtotal );
+		$this->assertEquals( 599, wc_format_decimal( WC()->cart->subtotal, wc_get_price_decimals() ) );
 		$this->assertEquals( 599, WC()->cart->total );
 	}
 
