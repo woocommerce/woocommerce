@@ -51,6 +51,7 @@ if [[ $1 == '' || $2 == '' ]]
     exit 1
 fi
 
+
 printf "This script will build files and create a tag on GitHub based on your local branch."
 echo
 echo
@@ -59,6 +60,9 @@ echo
 echo
 printf "The /dist/ directory will also be pushed to the tagged release."
 echo
+if [ $DRY_RUN ]; then
+  output 2 "This is a dry run, only the zip will be generated."
+fi
 echo
 echo "Before proceeding:"
 echo " • Ensure you have checked out the branch you wish to release"
@@ -89,45 +93,53 @@ fi
 output 2 "Starting release to GitHub..."
 echo
 
-# Create a release branch.
 BRANCH="build/${VERSION}"
+
+NOOP_ARG=""
+DRY_RUN_ARG=""
+if [ $DRY_RUN ]; then
+  NOOP_ARG="--noop"
+  DRY_RUN_ARG="--dry-run"
+fi
+
+# Create a release branch.
 git checkout -b $BRANCH
 
 # Force add feature-config.php
-git add includes/feature-config.php --force
-git add .
-git commit -m "Adding feature-config.php directory to release" --no-verify
-
+git add includes/feature-config.php --force $DRY_RUN_ARG
+git add . $DRY_RUN_ARG
+git commit -m "Adding feature-config.php directory to release" --no-verify $DRY_RUN_ARG
+  
 # Force add language files
-git add languages/woocommerce-admin.pot --force
-git add .
-git commit -m "Adding translations to release" --no-verify
-
+git add languages/woocommerce-admin.pot --force $DRY_RUN_ARG
+git add . $DRY_RUN_ARG
+git commit -m "Adding translations to release" --no-verify $DRY_RUN_ARG
+  
 # Force add build directory and commit.
-git add dist/. --force
-git add .
-git commit -m "Adding /dist directory to release" --no-verify
-
+git add dist/. --force $DRY_RUN_ARG
+git add . $DRY_RUN_ARG
+git commit -m "Adding /dist directory to release" --no-verify $DRY_RUN_ARG
+  
 # Force add vendor directory and commit.
-git add vendor/. --force
-git add .
-git commit -m "Adding /vendor directory to release" --no-verify
+git add vendor/. --force $DRY_RUN_ARG
+git add . $DRY_RUN_ARG
+git commit -m "Adding /vendor directory to release" --no-verify $DRY_RUN_ARG
 
 # Push branch upstream
-git push origin $BRANCH
+git push origin $BRANCH $DRY_RUN_ARG
 
 # Create the zip archive
 ./bin/make-zip.sh $ZIP_FILE
 
 # Create the new release.
 if [ $IS_PRE_RELEASE = true ]; then
-	hub release create -m $VERSION -m "Release of version $VERSION. See readme.txt for details." -t $BRANCH --prerelease "v${VERSION}" --attach "${ZIP_FILE}"
+	hub $NOOP_ARG release create -m $VERSION -m "Release of version $VERSION. See readme.txt for details." -t $BRANCH --prerelease "v${VERSION}" --attach "${ZIP_FILE}"
 else
-	hub release create -m $VERSION -m "Release of version $VERSION. See readme.txt for details." -t $BRANCH "v${VERSION}" --attach "${ZIP_FILE}"
+	hub $NOOP_ARG release create -m $VERSION -m "Release of version $VERSION. See readme.txt for details." -t $BRANCH "v${VERSION}" --attach "${ZIP_FILE}"
 fi
 
 git checkout $CURRENTBRANCH
 git branch -D $BRANCH
-git push origin --delete $BRANCH
+git push origin --delete $BRANCH $DRY_RUN_ARG
 
 output 2 "GitHub release complete."

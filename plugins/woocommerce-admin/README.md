@@ -21,6 +21,7 @@ Now you can build the files using one of these commands:
 -   `npm run dev` : Build a development version
 -   `npm start` : Build a development version, watch files for changes
 -   `npm run build:release` : Build a WordPress plugin ZIP file (`woocommerce-admin.zip` will be created in the repository root)
+-   `DRY_RUN=1 npm run build:release` : Builds a Wordpress plugin ZIP **without** pushing it to Github and creating a release.
 
 For more helper scripts [see here](./CONTRIBUTING.md#helper-scripts)
 
