@@ -29,7 +29,7 @@ function Options( {
 
 	const deleteOptionByName = ( optionName ) => {
 		// eslint-disable-next-line no-alert
-		if ( confirm( 'Are you sure you want to delete?' ) ) {
+		if ( confirm( 'Are you sure you want to delete this option?' ) ) {
 			deleteOption( optionName );
 		}
 	};
@@ -149,14 +149,14 @@ function Options( {
 							className="screen-reader-text"
 							htmlFor="post-search-input"
 						>
-							Search products:
+							Search options:
 						</label>
 						<input type="search" name="search" />
 						<input
 							type="submit"
 							id="search-submit"
 							className="button"
-							value="Search Option"
+							value="Search options"
 						/>
 					</div>
 				</form>

@@ -31,7 +31,7 @@ export function addMessage( source, message ) {
 	};
 }
 
-export function updateMssage( source, message, status ) {
+export function updateMessage( source, message, status ) {
 	return {
 		type: TYPES.ADD_MESSAGE,
 		source,
@@ -47,16 +47,16 @@ export function removeMessage( source ) {
 	};
 }
 
-function* runCommand( id, func ) {
+function* runCommand( commandName, func ) {
 	try {
-		yield addCurrentlyRunning( id );
-		yield addMessage( id, 'Executing...' );
+		yield addCurrentlyRunning( commandName );
+		yield addMessage( commandName, 'Executing...' );
 		yield func();
-		yield removeCurrentlyRunning( id );
-		yield updateMssage( id, 'Successful!' );
+		yield removeCurrentlyRunning( commandName );
+		yield updateMessage( commandName, 'Successful!' );
 	} catch ( e ) {
-		yield updateMssage( id, e.message, 'error' );
-		yield removeCurrentlyRunning( id );
+		yield updateMessage( commandName, e.message, 'error' );
+		yield removeCurrentlyRunning( commandName );
 	}
 }
 
@@ -93,13 +93,13 @@ export function* resetJetpackConnection() {
 }
 
 export function* enableTrackingDebug() {
-	yield runCommand( 'Enable WC Admin Tracking Deubg Mode', function* () {
+	yield runCommand( 'Enable WC Admin Tracking Debug Mode', function* () {
 		window.localStorage.setItem( 'debug', 'wc-admin:*' );
 	} );
 }
 
 export function* updateStoreAge() {
-	yield runCommand( 'Update Instllation timestamp', function* () {
+	yield runCommand( 'Update Installation timestamp', function* () {
 		const today = new Date();
 		const dd = String( today.getDate() ).padStart( 2, '0' );
 		const mm = String( today.getMonth() + 1 ).padStart( 2, '0' ); //January is 0!
@@ -107,14 +107,14 @@ export function* updateStoreAge() {
 
 		// eslint-disable-next-line no-alert
 		const numberOfDays = window.prompt(
-			'Please enter a date in mm/dd/yyy format',
-			mm + '/' + dd + '/' + yyyy
+			'Please enter a date in yyyy/mm/dd format',
+			yyyy + '/' + mm + '/' + dd
 		);
 
 		if ( numberOfDays !== null ) {
 			const dates = numberOfDays.split( '/' );
 			const newTimestamp = Math.round(
-				new Date( dates[ 2 ], dates[ 0 ] - 1, dates[ 1 ] ).getTime() /
+				new Date( dates[ 0 ], dates[ 1 ] - 1, dates[ 2 ] ).getTime() /
 					1000
 			);
 			const payload = {
