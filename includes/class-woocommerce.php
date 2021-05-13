@@ -184,7 +184,7 @@ final class WooCommerce {
 		do_action( 'woocommerce_loaded' );
 	}
 
-		/**
+	/**
 	 * Hook into actions and filters.
 	 *
 	 * @since 2.3
@@ -221,9 +221,9 @@ final class WooCommerce {
 	 * P2 post can be found at https://wp.me/paJDYF-1uJ.
 	 */
 	public function add_woocommerce_inbox_variant() {
-		$config_name = 'woocommerce_inbox_variant_binary';
+		$config_name = 'woocommerce_inbox_variant_assignment';
 		if ( false === get_option( $config_name, false ) ) {
-			update_option( $config_name, wp_rand( 1, 2 ) );
+			update_option( $config_name, wp_rand( 1, 12 ) );
 		}
 	}
 	/**
