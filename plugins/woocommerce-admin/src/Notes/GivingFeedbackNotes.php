@@ -31,9 +31,7 @@ class GivingFeedbackNotes {
 	 * @return Note
 	 */
 	protected static function get_note() {
-		// We need to show Admin Giving feeback notification after 8 days of install.
-		$eight_days_in_seconds = 8 * DAY_IN_SECONDS;
-		if ( ! self::wc_admin_active_for( $eight_days_in_seconds ) ) {
+		if ( ! self::is_wc_admin_active_in_date_range( 'week-1-4' ) ) {
 			return;
 		}
 

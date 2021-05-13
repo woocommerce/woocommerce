@@ -31,8 +31,7 @@ class InsightFirstSale {
 	 * @return Note
 	 */
 	public static function get_note() {
-		// We want to show the note after eight days.
-		if ( ! self::wc_admin_active_for( 8 * DAY_IN_SECONDS ) ) {
+		if ( ! self::is_wc_admin_active_in_date_range( 'week-1-4' ) ) {
 			return;
 		}
 

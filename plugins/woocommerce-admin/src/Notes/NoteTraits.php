@@ -21,8 +21,18 @@ trait NoteTraits {
 	 * @param int $seconds Time in seconds to check.
 	 * @return bool Whether or not WooCommerce admin has been active for $seconds.
 	 */
-	public static function wc_admin_active_for( $seconds ) {
+	private static function wc_admin_active_for( $seconds ) {
 		return WCAdminHelper::is_wc_admin_active_for( $seconds );
+	}
+
+	/**
+	 * Test if WooCommerce Admin has been active within a pre-defined range.
+	 *
+	 * @param string $range range available in WC_ADMIN_STORE_AGE_RANGES.
+	 * @return bool Whether or not WooCommerce admin has been active within the range.
+	 */
+	private static function is_wc_admin_active_in_date_range( $range ) {
+		return WCAdminHelper::is_wc_admin_active_in_date_range( $range );
 	}
 
 	/**

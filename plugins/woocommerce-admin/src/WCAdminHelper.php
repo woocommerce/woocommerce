@@ -18,6 +18,28 @@ class WCAdminHelper {
 	 */
 	const WC_ADMIN_TIMESTAMP_OPTION = 'woocommerce_admin_install_timestamp';
 
+	const WC_ADMIN_STORE_AGE_RANGES = array(
+		'week-1'    => array(
+			'start' => 0,
+			'end'   => WEEK_IN_SECONDS,
+		),
+		'week-1-4'  => array(
+			'start' => WEEK_IN_SECONDS,
+			'end'   => WEEK_IN_SECONDS * 4,
+		),
+		'month-1-3' => array(
+			'start' => MONTH_IN_SECONDS,
+			'end'   => MONTH_IN_SECONDS * 3,
+		),
+		'month-3-6' => array(
+			'start' => MONTH_IN_SECONDS * 3,
+			'end'   => MONTH_IN_SECONDS * 6,
+		),
+		'month-6+'  => array(
+			'start' => MONTH_IN_SECONDS * 6,
+		),
+	);
+
 	/**
 	 * Get the number of seconds that the store has been active.
 	 *
@@ -45,5 +67,31 @@ class WCAdminHelper {
 		$wc_admin_active_for = self::get_wcadmin_active_for_in_seconds();
 
 		return ( $wc_admin_active_for >= $seconds );
+	}
+
+	/**
+	 * Test if WooCommerce Admin has been active within a pre-defined range.
+	 *
+	 * @param string $range range available in WC_ADMIN_STORE_AGE_RANGES.
+	 * @throws \InvalidArgumentException Throws exception when invalid $range is passed in.
+	 * @return bool Whether or not WooCommerce admin has been active within the range.
+	 */
+	public static function is_wc_admin_active_in_date_range( $range ) {
+		if ( ! array_key_exists( $range, self::WC_ADMIN_STORE_AGE_RANGES ) ) {
+			throw new \InvalidArgumentException(
+				sprintf(
+					'"%s" range is not supported, use one of: %s',
+					$range,
+					implode( ', ', array_keys( self::WC_ADMIN_STORE_AGE_RANGES ) )
+				)
+			);
+		}
+		$wc_admin_active_for = self::get_wcadmin_active_for_in_seconds();
+
+		$range_data = self::WC_ADMIN_STORE_AGE_RANGES[ $range ];
+		if ( $range_data && $wc_admin_active_for >= $range_data['start'] ) {
+			return isset( $range_data['end'] ) ? $wc_admin_active_for < $range_data['end'] : true;
+		}
+		return false;
 	}
 }
