@@ -795,14 +795,22 @@ class WC_AJAX {
 		$loop         = intval( $_POST['loop'] );
 		$file_counter = 0;
 		$order        = wc_get_order( $order_id );
-		$items        = $order->get_items();
 
 		foreach ( $product_ids as $product_id ) {
 			$product = wc_get_product( $product_id );
 			$files   = $product->get_downloads();
 
-			if ( ! $order->get_billing_email() ) {
-				wp_die();
+		foreach ( $product_ids as $product_id ) {
+			$product = wc_get_product( $product_id );
+
+			if ( isset( $data[ $product->get_id() ] ) ) {
+				$download_data = $data[ $product->get_id() ];
+			} else {
+				$download_data = array(
+					'files'      => $product->get_downloads(),
+					'quantity'   => 1,
+					'order_item' => null,
+				);
 			}
 
 			if ( ! empty( $files ) ) {
