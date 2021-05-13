@@ -119,9 +119,50 @@ class CartUpdateCustomer extends AbstractCartRoute {
 		);
 		wc()->customer->save();
 
-		$cart->calculate_shipping();
-		$cart->calculate_totals();
+		$this->calculate_totals();
+		$this->maybe_update_order();
 
 		return rest_ensure_response( $this->schema->get_item_response( $cart ) );
+	}
+
+	/**
+	 * If there is a draft order, update customer data there also.
+	 *
+	 * @return void
+	 */
+	protected function maybe_update_order() {
+		$draft_order_id = wc()->session->get( 'store_api_draft_order', 0 );
+		$draft_order    = $draft_order_id ? wc_get_order( $draft_order_id ) : false;
+
+		if ( ! $draft_order ) {
+			return;
+		}
+
+		$draft_order->set_props(
+			[
+				'billing_first_name'  => wc()->customer->get_billing_first_name(),
+				'billing_last_name'   => wc()->customer->get_billing_last_name(),
+				'billing_company'     => wc()->customer->get_billing_company(),
+				'billing_address_1'   => wc()->customer->get_billing_address_1(),
+				'billing_address_2'   => wc()->customer->get_billing_address_2(),
+				'billing_city'        => wc()->customer->get_billing_city(),
+				'billing_state'       => wc()->customer->get_billing_state(),
+				'billing_postcode'    => wc()->customer->get_billing_postcode(),
+				'billing_country'     => wc()->customer->get_billing_country(),
+				'billing_email'       => wc()->customer->get_billing_email(),
+				'billing_phone'       => wc()->customer->get_billing_phone(),
+				'shipping_first_name' => wc()->customer->get_shipping_first_name(),
+				'shipping_last_name'  => wc()->customer->get_shipping_last_name(),
+				'shipping_company'    => wc()->customer->get_shipping_company(),
+				'shipping_address_1'  => wc()->customer->get_shipping_address_1(),
+				'shipping_address_2'  => wc()->customer->get_shipping_address_2(),
+				'shipping_city'       => wc()->customer->get_shipping_city(),
+				'shipping_state'      => wc()->customer->get_shipping_state(),
+				'shipping_postcode'   => wc()->customer->get_shipping_postcode(),
+				'shipping_country'    => wc()->customer->get_shipping_country(),
+			]
+		);
+
+		$draft_order->save();
 	}
 }
