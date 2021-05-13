@@ -82,6 +82,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Add: Extend payment gateways REST endpoint #6919
 - Add: Add remote payment gateway recommendations initial docs #6962
 - Add: Note date range logic for GivingFeedback, and InsightFirstSale note. #6969
+- Add: Add transient notices feature #6809
 - Dev: Add data source filter to remote inbox notification system #6794
 - Dev: Add A/A test #6669
 - Dev: Add support for nonces in note actions #6726

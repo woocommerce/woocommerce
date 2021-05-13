@@ -13,6 +13,7 @@ jest.mock( '@wordpress/data' );
 
 useDispatch.mockReturnValue( {
 	removeNotice: jest.fn(),
+	createNotice: jest.fn(),
 } );
 
 jest.mock( '../snackbar/list', () =>
@@ -42,5 +43,62 @@ describe( 'TransientNotices', () => {
 		const { queryByText } = render( <TransientNotices /> );
 		expect( queryByText( 'first' ) ).toBeInTheDocument();
 		expect( queryByText( 'second' ) ).not.toBeInTheDocument();
+	} );
+
+	it( 'should create notices from the queued notices', () => {
+		useSelect.mockReturnValue( {
+			noticesQueue: [
+				{
+					id: 'test-queued-notice',
+					status: 'success',
+					content: 'Test message',
+				},
+			],
+		} );
+		const createNotice = jest.fn();
+		useDispatch.mockReturnValue( {
+			createNotice,
+		} );
+
+		render( <TransientNotices /> );
+		expect( createNotice ).toHaveBeenCalledWith(
+			'success',
+			'Test message',
+			expect.anything()
+		);
+	} );
+
+	it( 'should only show user specific notices', () => {
+		useSelect.mockReturnValue( {
+			currentUser: {
+				id: 1,
+			},
+			noticesQueue: [
+				{
+					id: 'user-specific-notice',
+					status: 'success',
+					content: 'User specific message',
+					user_id: 1,
+				},
+				{
+					id: 'different-user-notice',
+					status: 'success',
+					content: 'Should not be shown',
+					user_id: 2,
+				},
+			],
+		} );
+		const createNotice = jest.fn();
+		useDispatch.mockReturnValue( {
+			createNotice,
+		} );
+
+		render( <TransientNotices /> );
+		expect( createNotice ).toHaveBeenCalledTimes( 1 );
+		expect( createNotice ).toHaveBeenCalledWith(
+			'success',
+			'User specific message',
+			expect.anything()
+		);
 	} );
 } );

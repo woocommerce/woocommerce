@@ -10,22 +10,18 @@ namespace Automattic\WooCommerce\Admin;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Plugins;
+use Automattic\WooCommerce\Admin\Features\TransientNotices;
 
 /**
  * Class PluginsInstaller
  */
 class PluginsInstaller {
-	/**
-	 * Message option name.
-	 */
-	const MESSAGE_OPTION = 'woocommerce_admin_plugin_installer_message';
 
 	/**
 	 * Constructor
 	 */
 	public static function init() {
 		add_action( 'admin_init', array( __CLASS__, 'possibly_install_activate_plugins' ) );
-		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'display_message' ) );
 	}
 
 	/**
@@ -58,42 +54,36 @@ class PluginsInstaller {
 				break;
 		}
 
-		self::cache_results( $install_result, $activate_result );
+		self::cache_results( $plugins, $install_result, $activate_result );
 		self::redirect_to_referer();
 	}
 
 	/**
 	 * Display the results of installation and activation on the page.
 	 *
-	 * @param array $install_result Result of installation.
-	 * @param array $activate_result Result of activation.
+	 * @param string $plugins Comma separated list of plugins.
+	 * @param array  $install_result Result of installation.
+	 * @param array  $activate_result Result of activation.
 	 */
-	public static function cache_results( $install_result, $activate_result ) {
+	public static function cache_results( $plugins, $install_result, $activate_result ) {
 		if ( ! $install_result && ! $activate_result ) {
 			return;
 		}
 
-		$message = $activate_result ? $activate_result['message'] : $install_result['message'];
-
-		// Show install error message if one exists.
-		if ( $install_result && ! $install_result['success'] ) {
-			$message = $install_result['message'];
+		if ( is_wp_error( $install_result ) || is_wp_error( $activate_result ) ) {
+			$message = $activate_result ? $activate_result->get_error_message() : $install_result->get_error_message();
+		} else {
+			$message = $activate_result ? $activate_result['message'] : $install_result['message'];
 		}
 
-		update_option( self::MESSAGE_OPTION, $message );
-	}
-
-	/**
-	 * Display the results of installation and activation on the page.
-	 */
-	public static function display_message() {
-		$message = get_option( self::MESSAGE_OPTION );
-
-		if ( ! $message ) {
-			return;
-		}
-
-		delete_option( self::MESSAGE_OPTION );
+		TransientNotices::add(
+			array(
+				'user_id' => get_current_user_id(),
+				'id'      => 'plugin-installer-' . str_replace( ',', '-', $plugins ),
+				'status'  => 'success',
+				'content' => $message,
+			)
+		);
 	}
 
 	/**
@@ -115,5 +105,4 @@ class PluginsInstaller {
 		wp_safe_redirect( $url );
 		exit();
 	}
-
 }
