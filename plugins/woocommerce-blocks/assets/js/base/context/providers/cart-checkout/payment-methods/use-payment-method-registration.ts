@@ -103,11 +103,15 @@ const usePaymentMethodRegistration = (
 				continue;
 			}
 
-			// In front end, ask payment method if it should be available.
+			// See if payment method should be available. This always evaluates to true in the editor context.
 			try {
-				const canPay = await Promise.resolve(
-					paymentMethod.canMakePayment( canPayArgument.current )
-				);
+				const canPay = isEditor
+					? true
+					: await Promise.resolve(
+							paymentMethod.canMakePayment(
+								canPayArgument.current
+							)
+					  );
 
 				if ( !! canPay ) {
 					if (
