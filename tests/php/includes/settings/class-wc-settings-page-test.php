@@ -8,6 +8,7 @@
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
 
 require_once __DIR__ . '/class-wc-settings-example.php';
+require_once __DIR__ . '/class-wc-legacy-settings-example.php';
 
 /**
  * Unit tests for the base functionality of WC_Settings_Page.
@@ -222,6 +223,33 @@ HTML;
 	}
 
 	/**
+	 * Test for output on a legacy settings class.
+	 */
+	public function test_output_on_legacy_class() {
+		global $current_section;
+
+		$actual = null;
+
+		StaticMockerHack::add_method_mocks(
+			array(
+				'WC_Admin_Settings' => array(
+					'output_fields' => function( $settings ) use ( &$actual ) {
+						$actual = $settings;
+					},
+				),
+			)
+		);
+
+		$sut = new WC_Legacy_Settings_Example();
+
+		$current_section = 'foobar';
+		$sut->output();
+
+		$expected = array( 'foo' => 'bar' );
+		$this->assertEquals( $expected, $actual );
+	}
+
+	/**
 	 * Test for save (invokes the save_fields method).
 	 */
 	public function test_save__saves_fields() {
@@ -240,6 +268,33 @@ HTML;
 		);
 
 		$sut = new WC_Settings_Example();
+
+		$current_section = 'foobar';
+		$sut->save();
+
+		$expected = array( 'foo' => 'bar' );
+		$this->assertEquals( $expected, $actual );
+	}
+
+	/**
+	 * Test for save (invokes the save_fields method) on a legacy settings class.
+	 */
+	public function test_save_on_legacy_class__saves_fields() {
+		global $current_section;
+
+		$actual = null;
+
+		StaticMockerHack::add_method_mocks(
+			array(
+				'WC_Admin_Settings' => array(
+					'save_fields' => function( $settings ) use ( &$actual ) {
+						$actual = $settings;
+					},
+				),
+			)
+		);
+
+		$sut = new WC_Legacy_Settings_Example();
 
 		$current_section = 'foobar';
 		$sut->save();
