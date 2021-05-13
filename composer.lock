@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3f82e5bd9e485ba6bcd94111391f6f11",
+    "content-hash": "ac338dadb8929c73ad9606426621f9ba",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -532,16 +532,16 @@
         },
         {
             "name": "woocommerce/woocommerce-admin",
-            "version": "2.2.6",
+            "version": "2.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-admin.git",
-                "reference": "65c5a4d0b0c3a7c7457e250c9ba1f7c15cac6cb8"
+                "reference": "c690969d301ddb7145b43e72e4dd99c84cc8ba66"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/65c5a4d0b0c3a7c7457e250c9ba1f7c15cac6cb8",
-                "reference": "65c5a4d0b0c3a7c7457e250c9ba1f7c15cac6cb8",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/c690969d301ddb7145b43e72e4dd99c84cc8ba66",
+                "reference": "c690969d301ddb7145b43e72e4dd99c84cc8ba66",
                 "shasum": ""
             },
             "require": {
@@ -550,7 +550,7 @@
                 "php": ">=7.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "7.5.20",
+                "bamarni/composer-bin-plugin": "^1.4",
                 "suin/phpcs-psr4-sniff": "^2.2",
                 "woocommerce/woocommerce-sniffs": "0.1.0"
             },
@@ -560,6 +560,9 @@
                     "test": "Run unit tests",
                     "phpcs": "Analyze code against the WordPress coding standards with PHP_CodeSniffer",
                     "phpcbf": "Fix coding standards warnings/errors automatically with PHP Code Beautifier"
+                },
+                "bamarni-bin": {
+                    "target-directory": "bin/composer"
                 }
             },
             "autoload": {
@@ -575,9 +578,9 @@
             "homepage": "https://github.com/woocommerce/woocommerce-admin",
             "support": {
                 "issues": "https://github.com/woocommerce/woocommerce-admin/issues",
-                "source": "https://github.com/woocommerce/woocommerce-admin/tree/v2.2.6"
+                "source": "https://github.com/woocommerce/woocommerce-admin/tree/v2.3.0"
             },
-            "time": "2021-05-07T21:29:02+00:00"
+            "time": "2021-05-12T15:20:07+00:00"
         },
         {
             "name": "woocommerce/woocommerce-blocks",
