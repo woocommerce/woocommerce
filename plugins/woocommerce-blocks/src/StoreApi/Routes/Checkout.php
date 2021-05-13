@@ -264,7 +264,13 @@ class Checkout extends AbstractCartRoute {
 		/**
 		 * Process the payment and return the results.
 		 */
-		$payment_result = $this->order->needs_payment() ? $this->process_payment( $request ) : $this->process_without_payment( $request );
+		$payment_result = new PaymentResult();
+
+		if ( $this->order->needs_payment() ) {
+			$this->process_payment( $request, $payment_result );
+		} else {
+			$this->process_without_payment( $request, $payment_result );
+		}
 
 		return $this->prepare_item_for_response(
 			(object) [
@@ -478,33 +484,35 @@ class Checkout extends AbstractCartRoute {
 	 * For orders which do not require payment, just update status.
 	 *
 	 * @param WP_REST_Request $request Request object.
-	 * @return PaymentResult
+	 * @param PaymentResult   $payment_result Payment result object.
 	 */
-	private function process_without_payment( WP_REST_Request $request ) {
+	private function process_without_payment( WP_REST_Request $request, PaymentResult $payment_result ) {
+		// Transition the order to pending, and then completed. This ensures transactional emails fire for pending_to_complete events.
+		$this->order->update_status( 'pending' );
 		$this->order->payment_complete();
 
-		$result = new PaymentResult( 'success' );
-		$result->set_redirect_url( $this->order->get_checkout_order_received_url() );
-
-		return $result;
+		// Mark the payment as successful.
+		$payment_result->set_status( 'success' );
+		$payment_result->set_redirect_url( $this->order->get_checkout_order_received_url() );
 	}
 
 	/**
 	 * Fires an action hook instructing active payment gateways to process the payment for an order and provide a result.
 	 *
 	 * @throws RouteException On error.
+	 *
 	 * @param WP_REST_Request $request Request object.
-	 * @return PaymentResult
+	 * @param PaymentResult   $payment_result Payment result object.
 	 */
-	private function process_payment( WP_REST_Request $request ) {
+	private function process_payment( WP_REST_Request $request, PaymentResult $payment_result ) {
 		try {
-			$result  = new PaymentResult();
+			// Transition the order to pending before making payment.
+			$this->order->update_status( 'pending' );
+
+			// Prepare the payment context object to pass through payment hooks.
 			$context = new PaymentContext();
 			$context->set_payment_method( $this->get_request_payment_method_id( $request ) );
 			$context->set_payment_data( $this->get_request_payment_data( $request ) );
-
-			// Orders are made pending before attempting payment.
-			$this->order->update_status( 'pending' );
 			$context->set_order( $this->order );
 
 			/**
@@ -512,19 +520,16 @@ class Checkout extends AbstractCartRoute {
 			 *
 			 * @hook woocommerce_rest_checkout_process_payment_with_context
 			 *
-			 * @throws Exception If there is an error taking payment, an Exception object can be thrown
-			 *                                     with an error message.
+			 * @throws Exception If there is an error taking payment, an Exception object can be thrown with an error message.
 			 *
-			 * @param PaymentContext $context Holds context for the payment, including order ID and payment method.
-			 * @param PaymentResult  $result Result object for the transaction.
+			 * @param PaymentContext $context        Holds context for the payment, including order ID and payment method.
+			 * @param PaymentResult  $payment_result Result object for the transaction.
 			 */
-			do_action_ref_array( 'woocommerce_rest_checkout_process_payment_with_context', [ $context, &$result ] );
+			do_action_ref_array( 'woocommerce_rest_checkout_process_payment_with_context', [ $context, &$payment_result ] );
 
-			if ( ! $result instanceof PaymentResult ) {
+			if ( ! $payment_result instanceof PaymentResult ) {
 				throw new RouteException( 'woocommerce_rest_checkout_invalid_payment_result', __( 'Invalid payment result received from payment method.', 'woo-gutenberg-products-block' ), 500 );
 			}
-
-			return $result;
 		} catch ( Exception $e ) {
 			throw new RouteException( 'woocommerce_rest_checkout_process_payment_error', $e->getMessage(), 400 );
 		}
