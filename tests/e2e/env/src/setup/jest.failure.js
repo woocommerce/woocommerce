@@ -4,10 +4,8 @@ import {
 	sendFailedTestMessageToSlack,
 } from '../slack';
 
-const path = require( 'path' );
-const mkdirp = require( 'mkdirp' );
 import { bind } from 'jest-each';
-const { getAppRoot } = require( '../../utils' );
+const { takeScreenshotFor } = require( '../../utils' );
 
 /**
  * Override the test case method so we can take screenshots of assertion failures.
@@ -88,22 +86,11 @@ const screenshotTest = async ( testName, callback ) => {
 	try {
 		await callback();
 	} catch ( e ) {
-		const testTitle = testName.replace( /\.$/, '' );
-		const appPath = getAppRoot();
-		const savePath = path.resolve( appPath, 'tests/e2e/screenshots' );
-		const filePath = path.join(
-			savePath,
-			`${ testTitle }.png`.replace( /[^a-z0-9.-]+/gi, '-' )
-		);
-
-		mkdirp.sync( savePath );
-		await page.screenshot( {
-			path: filePath,
-			fullPage: true,
-		} );
-
-		await sendFailedTestMessageToSlack( testTitle );
-		await sendFailedTestScreenshotToSlack( filePath );
+		const { title, filePath } = await takeScreenshotFor( testName );
+		await sendFailedTestMessageToSlack( title );
+		if ( filePath ) {
+			await sendFailedTestScreenshotToSlack( filePath );
+		}
 
 		throw ( e );
 	}

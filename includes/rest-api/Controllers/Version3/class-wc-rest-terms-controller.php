@@ -10,6 +10,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+use Automattic\WooCommerce\Internal\AssignDefaultCategory;
+
 /**
  * Terms controller class.
  */
@@ -562,6 +564,9 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 		if ( ! $retval ) {
 			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'The resource cannot be deleted.', 'woocommerce' ), array( 'status' => 500 ) );
 		}
+
+		// Schedule action to assign default category.
+		wc_get_container()->get( AssignDefaultCategory::class )->schedule_action();
 
 		/**
 		 * Fires after a single term is deleted via the REST API.

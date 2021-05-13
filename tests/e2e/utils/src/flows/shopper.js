@@ -24,6 +24,8 @@ const {
 	SHOP_PRODUCT_PAGE
 } = require( './constants' );
 
+const { uiUnblocked } = require( '../page-utils' );
+
 const gotoMyAccount = async () => {
 	await page.goto( SHOP_MY_ACCOUNT_PAGE, {
 		waitUntil: 'networkidle0',
@@ -125,6 +127,33 @@ const shopper = {
 
 		const [removeButton] = await page.$x(removeItemXPath);
 		await removeButton.click();
+	},
+
+	emptyCart: async () => {
+		await page.goto( SHOP_CART_PAGE, {
+			waitUntil: 'networkidle0',
+		} );
+
+		// Remove products if they exist
+		if ( await page.$( '.remove' ) !== null ) {
+			products = await page.$( '.remove' );
+			while ( products && products.length > 0 ) {
+				for (let p = 0; p < products.length; p++ ) {
+					await page.click( p );
+					await uiUnblocked();
+				}
+				products = await page.$( '.remove' );
+			}
+		}
+
+		// Remove coupons if they exist
+		if ( await page.$( '.woocommerce-remove-coupon' ) !== null ) {
+			await page.click( '.woocommerce-remove-coupon' );
+			await uiUnblocked();
+		}
+
+		await page.waitForSelector('.woocommerce-info');
+		await expect( page ).toMatchElement( '.woocommerce-info', { text: 'Your cart is currently empty.' } );
 	},
 
 	setCartQuantity: async ( productTitle, quantityValue ) => {

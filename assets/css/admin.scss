@@ -161,6 +161,43 @@
 		}
 	}
 
+	.addons-promotion-block {
+		display: flex;
+		padding: 20px;
+
+		.addons-img {
+			height: auto;
+			width: 200px;
+		}
+	}
+
+	.addons-promotion-block-content {
+		display: flex;
+		flex-direction: column;
+		margin-left: 24px;
+	}
+
+	.addons-promotion-block-description {
+		margin-bottom: 20px;
+	}
+
+	.addons-promotion-block-title {
+		margin: 0 0 16px;
+		padding: 0;
+	}
+
+	.addons-promotion-block-buttons {
+		margin-top: auto;
+
+		.addons-button {
+			margin-right: 8px;
+
+			&:last-child {
+				margin-right: 0;
+			}
+		}
+	}
+
 	.addons-shipping-methods .addons-wcs-banner-block {
 		margin-left: 0;
 		margin-right: 0;
@@ -362,6 +399,12 @@
 	.addons-button-solid {
 		background-color: #674399;
 		color: #fff;
+	}
+
+	.addons-button-expandable {
+		display: inline-block;
+		padding: 0 16px;
+		width: auto;
 	}
 
 	.addons-button-solid:hover {
@@ -2640,6 +2683,30 @@ ul.wc_coupon_list_block {
 
 		td.column-order_status {
 			float: right;
+		}
+	}
+
+	.wc_addons_wrap {
+
+		.addons-promotion-block {
+			flex-direction: column;
+			padding: 24px;
+
+			.addons-img {
+				height: auto;
+				width: 100%;
+				max-width: 240px;
+				margin: 0 auto 20px;
+			}
+		}
+
+		.addons-promotion-block-content {
+			display: block;
+			margin-left: 0;
+		}
+
+		.addons-promotion-block-title {
+			margin-top: 4px;
 		}
 	}
 }

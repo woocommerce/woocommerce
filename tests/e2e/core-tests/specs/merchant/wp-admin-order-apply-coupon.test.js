@@ -27,11 +27,11 @@ const runOrderApplyCouponTest = () => {
 	describe('WooCommerce Orders > Apply coupon', () => {
 		beforeAll(async () => {
 			await merchant.login();
+			await createSimpleProduct();
+			couponCode = await createCoupon();
+			orderId = await createSimpleOrder('Pending payment', simpleProductName);
 			await Promise.all([
-				await createSimpleProduct(),
-				couponCode = await createCoupon(),
-				orderId = await createSimpleOrder('Pending payment', simpleProductName),
-				await addProductToOrder(orderId, simpleProductName),
+				addProductToOrder(orderId, simpleProductName),
 
 				// We need to remove any listeners on the `dialog` event otherwise we can't catch the dialog below
 				page.removeAllListeners('dialog'),
@@ -42,15 +42,14 @@ const runOrderApplyCouponTest = () => {
 		} );
 
 		it('can apply a coupon', async () => {
+			await page.waitForSelector('button.add-coupon');
 			const couponDialog = await expect(page).toDisplayDialog(async () => {
-				await expect(page).toClick('button.add-coupon');
+				await evalAndClick('button.add-coupon');
 			});
-
 			expect(couponDialog.message()).toMatch(couponDialogMessage);
 
 			// Accept the dialog with the coupon code
 			await couponDialog.accept(couponCode);
-
 			await uiUnblocked();
 
 			// Verify the coupon list is showing

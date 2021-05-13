@@ -343,9 +343,9 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 			} );
 			jQuery( '.section' ).slideUp( 100, function() {
 				<?php if ( empty( $this->coupon_codes ) ) : ?>
-					jQuery( '.section_title:eq(1)' ).click();
+					jQuery( '.section_title:eq(1)' ).trigger( 'click' );
 				<?php else : ?>
-					jQuery( '.section_title:eq(0)' ).click();
+					jQuery( '.section_title:eq(0)' ).trigger( 'click' );
 				<?php endif; ?>
 			} );
 		</script>
@@ -551,15 +551,15 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 						}
 					);
 
-					jQuery('.chart-placeholder').resize();
+					jQuery('.chart-placeholder').trigger( 'resize' );
 				}
 
 				drawGraph();
 
-				jQuery('.highlight_series').hover(
+				jQuery('.highlight_series').on( 'mouseenter',
 					function() {
 						drawGraph( jQuery(this).data('series') );
-					},
+					} ).on( 'mouseleave',
 					function() {
 						drawGraph();
 					}

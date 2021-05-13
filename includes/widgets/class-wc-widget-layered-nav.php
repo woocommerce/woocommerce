@@ -252,7 +252,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			if ( '' === get_option( 'permalink_structure' ) ) {
 				$form_action = remove_query_arg( array( 'page', 'paged' ), add_query_arg( $wp->query_string, '', home_url( $wp->request ) ) );
 			} else {
-				$form_action = preg_replace( '%\/page/[0-9]+%', '', home_url( trailingslashit( $wp->request ) ) );
+				$form_action = preg_replace( '%\/page/[0-9]+%', '', home_url( user_trailingslashit( $wp->request ) ) );
 			}
 
 			echo '<form method="get" action="' . esc_url( $form_action ) . '" class="woocommerce-widget-layered-nav-dropdown">';
@@ -297,13 +297,13 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			wc_enqueue_js(
 				"
 				// Update value on change.
-				jQuery( '.dropdown_layered_nav_" . esc_js( $taxonomy_filter_name ) . "' ).change( function() {
+				jQuery( '.dropdown_layered_nav_" . esc_js( $taxonomy_filter_name ) . "' ).on( 'change', function() {
 					var slug = jQuery( this ).val();
 					jQuery( ':input[name=\"filter_" . esc_js( $taxonomy_filter_name ) . "\"]' ).val( slug );
 
 					// Submit form on change if standard dropdown.
 					if ( ! jQuery( this ).attr( 'multiple' ) ) {
-						jQuery( this ).closest( 'form' ).submit();
+						jQuery( this ).closest( 'form' ).trigger( 'submit' );
 					}
 				});
 

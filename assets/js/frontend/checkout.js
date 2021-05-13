@@ -58,7 +58,7 @@ jQuery( function( $ ) {
 				$( document.body ).trigger( 'init_checkout' );
 			}
 			if ( wc_checkout_params.option_guest_checkout === 'yes' ) {
-				$( 'input#createaccount' ).change( this.toggle_create_account ).trigger( 'change' );
+				$( 'input#createaccount' ).on( 'change', this.toggle_create_account ).trigger( 'change' );
 			}
 		},
 		init_payment_methods: function() {
@@ -449,12 +449,12 @@ jQuery( function( $ ) {
 			$( window ).on('beforeunload', this.handleUnloadEvent);
 		},
 		detachUnloadEventsOnSubmit: function() {
-			$( window ).unbind('beforeunload', this.handleUnloadEvent);
+			$( window ).off('beforeunload', this.handleUnloadEvent);
 		},
 		blockOnSubmit: function( $form ) {
-			var form_data = $form.data();
+			var isBlocked = $form.data( 'blockUI.isBlocked' );
 
-			if ( 1 !== form_data['blockUI.isBlocked'] ) {
+			if ( 1 !== isBlocked ) {
 				$form.block({
 					message: null,
 					overlayCSS: {
@@ -589,11 +589,11 @@ jQuery( function( $ ) {
 		init: function() {
 			$( document.body ).on( 'click', 'a.showcoupon', this.show_coupon_form );
 			$( document.body ).on( 'click', '.woocommerce-remove-coupon', this.remove_coupon );
-			$( 'form.checkout_coupon' ).hide().submit( this.submit );
+			$( 'form.checkout_coupon' ).hide().on( 'submit', this.submit );
 		},
 		show_coupon_form: function() {
 			$( '.checkout_coupon' ).slideToggle( 400, function() {
-				$( '.checkout_coupon' ).find( ':input:eq(0)' ).focus();
+				$( '.checkout_coupon' ).find( ':input:eq(0)' ).trigger( 'focus' );
 			});
 			return false;
 		},

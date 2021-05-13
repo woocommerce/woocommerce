@@ -1,4 +1,4 @@
-/* eslint-disable jest/no-export, jest/no-disabled-tests, */
+/* eslint-disable jest/no-export, jest/no-disabled-tests, jest/expect-expect */
 
 /**
  * Internal dependencies
@@ -6,131 +6,173 @@
 const {
 	merchant,
 	clearAndFillInput,
-	selectOptionInSelect2,
 	searchForOrder,
 	createSimpleProduct,
 	addProductToOrder,
 	clickUpdateOrder,
+	factories,
+	selectOptionInSelect2,
 } = require( '@woocommerce/e2e-utils' );
+
+const searchString = 'John Doe';
+const customerBilling = {
+	first_name: 'John',
+	last_name: 'Doe',
+	company: 'Automattic',
+	country: 'US',
+	address_1: 'address1',
+	address_2: 'address2',
+	city: 'San Francisco',
+	state: 'CA',
+	postcode: '94107',
+	phone: '123456789',
+	email: 'john.doe@example.com',
+};
+const customerShipping = {
+	first_name: 'Tim',
+	last_name: 'Clark',
+	company: 'Automattic',
+	country: 'US',
+	address_1: 'Oxford Ave',
+	address_2: 'Linwood Ave',
+	city: 'Buffalo',
+	state: 'NY',
+	postcode: '14201',
+	phone: '123456789',
+	email: 'john.doe@example.com',
+};
+
+/**
+ * Set the billing fields for the customer account for this test suite.
+ *
+ * @returns {Promise<void>}
+ */
+const updateCustomerBilling = async () => {
+	const client = factories.api.withDefaultPermalinks;
+	const customerEndpoint = 'wc/v3/customers/';
+	const customers = await client.get( customerEndpoint, {
+		search: 'Jane',
+		role: 'all',
+	} );
+	if ( ! customers.data | ! customers.data.length ) {
+		return;
+	}
+
+	const customerId = customers.data[0].id;
+	const customerData = {
+		id: customerId,
+		billing: customerBilling,
+		shipping: customerShipping,
+	};
+	await client.put( customerEndpoint + customerId, customerData );
+};
 
 const runOrderSearchingTest = () => {
 	describe('WooCommerce Orders > Search orders', () => {
 		let orderId;
-		beforeAll(async () => {
-			await merchant.login();
+		beforeAll( async () => {
 			await createSimpleProduct('Wanted Product');
+			await updateCustomerBilling();
 
-			await Promise.all([
-				// Create new order for testing
-				await merchant.openNewOrder(),
-				await page.waitForSelector('#order_status'),
-				await page.click('#customer_user'),
-				await page.click('span.select2-search > input.select2-search__field'),
-				await page.type('span.select2-search > input.select2-search__field', 'Customer'),
-				await page.waitFor(2000), // to avoid flakyness
-				await page.keyboard.press('Enter'),
-			]);
-
-			await Promise.all([
-				// Change the shipping data
-				await page.waitFor(1000), // to avoid flakiness
-				await page.waitForSelector('#_shipping_first_name'),
-				await clearAndFillInput('#_shipping_first_name', 'Tim'),
-				await clearAndFillInput('#_shipping_last_name', 'Clark'),
-				await clearAndFillInput('#_shipping_address_1', 'Oxford Ave'),
-				await clearAndFillInput('#_shipping_address_2', 'Linwood Ave'),
-				await clearAndFillInput('#_shipping_city', 'Buffalo'),
-				await clearAndFillInput('#_shipping_postcode', '14201'),
-				await page.keyboard.press('Tab'),
-				await page.keyboard.press('Tab'),
-				await page.keyboard.press('Enter'),
-				await page.select('select[name="_shipping_state"]', 'NY'),
-			]);
+			// Create new order for testing
+			await merchant.login();
+			await merchant.openNewOrder();
+			await page.waitForSelector('#order_status');
+			await page.click('#customer_user');
+			await page.click('span.select2-search > input.select2-search__field');
+			await page.type('span.select2-search > input.select2-search__field', 'Jane Smith');
+			await page.waitFor(2000); // to avoid flakyness
+			await page.keyboard.press('Enter');
 
 			// Get the post id
 			const variablePostId = await page.$('#post_ID');
 			orderId = (await(await variablePostId.getProperty('value')).jsonValue());
 
-			// Save new order
+			// Save new order and add desired product to order
 			await clickUpdateOrder('Order updated.', true);
 			await addProductToOrder(orderId, 'Wanted Product');
+
+			// Open All Orders view
 			await merchant.openAllOrdersView();
 		});
 
 		it('can search for order by order id', async () => {
-			await searchForOrder(orderId, orderId, 'John Doe');
+			await searchForOrder(orderId, orderId, searchString);
 		});
 
 		it('can search for order by billing first name', async () => {
-			await searchForOrder('John', orderId, 'John Doe');
+			await searchForOrder(customerBilling.first_name, orderId, searchString);
 		})
 
 		it('can search for order by billing last name', async () => {
-			await searchForOrder('Doe', orderId, 'John Doe');
+			await searchForOrder(customerBilling.last_name, orderId, searchString);
 		})
 
 		it('can search for order by billing company name', async () => {
-			await searchForOrder('Automattic', orderId, 'John Doe');
+			await searchForOrder(customerBilling.company, orderId, searchString);
 		})
 
 		it('can search for order by billing first address', async () => {
-			await searchForOrder('addr 1', orderId, 'John Doe');
+			await searchForOrder(customerBilling.address_1, orderId, searchString);
 		})
 
 		it('can search for order by billing second address', async () => {
-			await searchForOrder('addr 2', orderId, 'John Doe');
+			await searchForOrder(customerBilling.address_2, orderId, searchString);
 		})
 
 		it('can search for order by billing city name', async () => {
-			await searchForOrder('San Francisco', orderId, 'John Doe');
+			await searchForOrder(customerBilling.city, orderId, searchString);
 		})
 
 		it('can search for order by billing post code', async () => {
-			await searchForOrder('94107', orderId, 'John Doe');
+			await searchForOrder(customerBilling.postcode, orderId, searchString);
 		})
 
 		it('can search for order by billing email', async () => {
-			await searchForOrder('john.doe@example.com', orderId, 'John Doe');
+			await searchForOrder(customerBilling.email, orderId, searchString);
 		})
 
 		it('can search for order by billing phone', async () => {
-			await searchForOrder('123456789', orderId, 'John Doe');
+			await searchForOrder(customerBilling.phone, orderId, searchString);
 		})
 
 		it('can search for order by billing state', async () => {
-			await searchForOrder('CA', orderId, 'John Doe');
+			await searchForOrder(customerBilling.state, orderId, searchString);
 		})
 
 		it('can search for order by shipping first name', async () => {
-			await searchForOrder('Tim', orderId, 'John Doe');
+			await searchForOrder(customerShipping.first_name, orderId, searchString);
 		})
 
 		it('can search for order by shipping last name', async () => {
-			await searchForOrder('Clark', orderId, 'John Doe');
+			await searchForOrder(customerShipping.last_name, orderId, searchString);
 		})
 
 		it('can search for order by shipping first address', async () => {
-			await searchForOrder('Oxford Ave', orderId, 'John Doe');
+			await searchForOrder(customerShipping.address_1, orderId, searchString);
 		})
 
 		it('can search for order by shipping second address', async () => {
-			await searchForOrder('Linwood Ave', orderId, 'John Doe');
+			await searchForOrder(customerShipping.address_2, orderId, searchString);
 		})
 
 		it('can search for order by shipping city name', async () => {
-			await searchForOrder('Buffalo', orderId, 'John Doe');
+			await searchForOrder(customerShipping.city, orderId, searchString);
 		})
 
 		it('can search for order by shipping postcode name', async () => {
-			await searchForOrder('14201', orderId, 'John Doe');
+			await searchForOrder(customerShipping.postcode, orderId, searchString);
 		})
 
-		it('can search for order by shipping state name', async () => {
-			await searchForOrder('NY', orderId, 'John Doe');
+		/**
+		 * shipping state is abbreviated. This test passes if billing and shipping state are the same
+		 */
+		it.skip('can search for order by shipping state name', async () => {
+			await searchForOrder('New York', orderId, searchString);
 		})
 
 		it('can search for order by item name', async () => {
-			await searchForOrder('Wanted Product', orderId, 'John Doe');
+			await searchForOrder('Wanted Product', orderId, searchString);
 		})
 	});
 };

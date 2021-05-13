@@ -3,11 +3,12 @@
  * Internal dependencies
  */
 const {
+	shopper,
 	merchant,
 	clickTab,
 	uiUnblocked,
 	evalAndClick,
-	setCheckbox,
+	verifyAndPublish,
 } = require( '@woocommerce/e2e-utils' );
 const {
 	waitAndClick,
@@ -24,7 +25,8 @@ const {
 } = require( '@jest/globals' );
 const config = require( 'config' );
 
-const simpleProductName = config.get( 'products.simple.name' );
+const VirtualProductName = 'Virtual Product Name';
+const NonVirtualProductName = 'Non-Virtual Product Name';
 const simpleProductPrice = config.has('products.simple.price') ? config.get('products.simple.price') : '9.99';
 
 const verifyPublishAndTrash = async () => {
@@ -61,35 +63,74 @@ const runAddSimpleProductTest = () => {
 			await merchant.login();
 		});
 
-		it('can create simple virtual product titled "Simple Product" with regular price $9.99', async () => {
+		it('can create simple virtual product and add it to the cart', async () => {
 			await openNewProductAndVerify();
 
-			// Set product data
-			await expect(page).toFill('#title', simpleProductName);
+			// Set product data and publish the product
+			await expect(page).toFill('#title', VirtualProductName);
 			await expect(page).toClick('#_virtual');
 			await clickTab('General');
 			await expect(page).toFill('#_regular_price', simpleProductPrice);
+			await verifyAndPublish();
 
-			// Publish product, verify that it was published. Trash product, verify that it was trashed.
-			await verifyPublishAndTrash(
-				'#publish',
-				'.updated.notice',
-				'Product published.',
-				'Move to Trash',
-				'1 product moved to the Trash.'
-			);
+			await merchant.logout();
+
+			// See product in the shop and add it to the cart
+			await shopper.goToShop();
+			await shopper.addToCartFromShopPage(VirtualProductName);
+			await shopper.goToCart();
+			await shopper.productIsInCart(VirtualProductName);
+
+			// Assert that the page does not contain shipping calculation button
+			await expect(page).not.toMatchElement('a.shipping-calculator-button');
+
+			// Remove product from cart
+			await shopper.removeFromCart(VirtualProductName);
+		});
+
+		it('can create simple non-virtual product and add it to the cart', async () => {
+			await merchant.login();
+			await openNewProductAndVerify();
+
+			// Set product data and publish the product
+			await expect(page).toFill('#title', NonVirtualProductName);
+			await clickTab('General');
+			await expect(page).toFill('#_regular_price', simpleProductPrice);
+			await verifyAndPublish();
+
+			await merchant.logout();
+
+			// See product in the shop and add it to the cart
+			await shopper.goToShop();
+			await shopper.addToCartFromShopPage(NonVirtualProductName);
+			await shopper.goToCart();
+			await shopper.productIsInCart(NonVirtualProductName);
+
+			// Assert that the page does contain shipping calculation button
+			await page.waitForSelector('a.shipping-calculator-button');
+			await expect(page).toMatchElement('a.shipping-calculator-button');
+
+			// Remove product from cart
+			await shopper.removeFromCart(NonVirtualProductName);
 		});
 	});
 };
 
 const runAddVariableProductTest = () => {
 	describe('Add New Variable Product Page', () => {
+		beforeAll(async () => {
+			await merchant.login();
+		});
+
 		it('can create product with variations', async () => {
 			await openNewProductAndVerify();
 
 			// Set product data
 			await expect(page).toFill('#title', 'Variable Product with Three Variations');
 			await expect(page).toSelect('#product-type', 'Variable product');
+		});
+
+		it('can create set variable product attributes', async () => {
 
 			// Create attributes for variations
 			await waitAndClick( page, '.attribute_tab a' );
@@ -111,7 +152,9 @@ const runAddVariableProductTest = () => {
 			// Wait for attribute form to save (triggers 2 UI blocks)
 			await uiUnblocked();
 			await uiUnblocked();
+		});
 
+		it('can create variable product variations', async () => {
 			// Create variations from attributes
 			await waitForSelector( page, '.variations_tab' );
 			await waitAndClick( page, '.variations_tab a' );
@@ -129,8 +172,11 @@ const runAddVariableProductTest = () => {
 			// Set some variation data
 			await uiUnblocked();
 			await uiUnblocked();
+		});
 
+		it('can create variation attributes', async () => {
 			await waitAndClick( page, '.variations_tab a' );
+			await uiUnblocked();
 			await waitForSelector(
 				page,
 				'select[name="attribute_attr-1[0]"]',
