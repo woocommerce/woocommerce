@@ -184,13 +184,14 @@ final class WooCommerce {
 		do_action( 'woocommerce_loaded' );
 	}
 
-	/**
+		/**
 	 * Hook into actions and filters.
 	 *
 	 * @since 2.3
 	 */
 	private function init_hooks() {
 		register_activation_hook( WC_PLUGIN_FILE, array( 'WC_Install', 'install' ) );
+		register_activation_hook( WC_PLUGIN_FILE, array( $this, 'add_woocommerce_inbox_variant' ) );
 		register_shutdown_function( array( $this, 'log_errors' ) );
 
 		add_action( 'plugins_loaded', array( $this, 'on_plugins_loaded' ), -1 );
@@ -206,6 +207,8 @@ final class WooCommerce {
 		add_action( 'activated_plugin', array( $this, 'activated_plugin' ) );
 		add_action( 'deactivated_plugin', array( $this, 'deactivated_plugin' ) );
 		add_filter( 'woocommerce_rest_prepare_note', array( 'WC_Admin_Notices', 'prepare_note_with_nonce' ) );
+		add_action( 'woocommerce_installed', array( $this, 'add_woocommerce_inbox_variant' ) );
+		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_inbox_variant' ) );
 
 		// These classes set up hooks on instantiation.
 		wc_get_container()->get( DownloadPermissionsAdjuster::class );
@@ -213,6 +216,17 @@ final class WooCommerce {
 		wc_get_container()->get( DataRegenerator::class );
 	}
 
+	/**
+	 * Add woocommerce_inbox_variant for the Remote Inbox Notification.
+	 *
+	 * P2 post can be found at https://wp.me/paJDYF-1uJ.
+	 */
+	public function add_woocommerce_inbox_variant() {
+		$config_name = 'woocommerce_inbox_variant_binary';
+		if ( false === get_option( $config_name, false ) ) {
+			update_option( $config_name, wp_rand( 1, 2 ) );
+		}
+	}
 	/**
 	 * Ensures fatal errors are logged so they can be picked up in the status report.
 	 *
