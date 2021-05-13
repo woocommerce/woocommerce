@@ -206,7 +206,9 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		public function output() {
 			global $current_section;
 
-			$settings = $this->get_settings_for_section( $current_section );
+			// We can't use "get_settings_for_section" here
+			// for compatibility with derived classes overriding "get_settings".
+			$settings = $this->get_settings( $current_section );
 
 			WC_Admin_Settings::output_fields( $settings );
 		}
@@ -225,7 +227,9 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		protected function save_settings_for_current_section() {
 			global $current_section;
 
-			$settings = $this->get_settings_for_section( $current_section );
+			// We can't use "get_settings_for_section" here
+			// for compatibility with derived classes overriding "get_settings".
+			$settings = $this->get_settings( $current_section );
 			WC_Admin_Settings::save_fields( $settings );
 		}
 
