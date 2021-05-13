@@ -95,7 +95,7 @@ class Cart extends TestCase {
 		$this->assertEquals( true, $data['needs_shipping'] );
 		$this->assertEquals( '30', $data['items_weight'] );
 
-		$this->assertEquals( 'GBP', $data['totals']->currency_code );
+		$this->assertEquals( 'USD', $data['totals']->currency_code );
 		$this->assertEquals( 2, $data['totals']->currency_minor_unit );
 		$this->assertEquals( '3000', $data['totals']->total_items );
 		$this->assertEquals( '0', $data['totals']->total_items_tax );
