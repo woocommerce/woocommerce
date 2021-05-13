@@ -4,15 +4,23 @@
 import { __ } from '@wordpress/i18n';
 import { Icon, check } from '@wordpress/icons';
 import { Button, Tooltip } from '@wordpress/components';
-import { Text, ListItem } from '@woocommerce/experimental';
 import NoticeOutline from 'gridicons/dist/notice-outline';
 import classnames from 'classnames';
+import { sanitize } from 'dompurify';
 
 /**
  * Internal dependencies
  */
-import './task-item.scss';
-import sanitizeHTML from '../lib/sanitize-html';
+import { Text, ListItem } from '../';
+
+const ALLOWED_TAGS = [ 'a', 'b', 'em', 'i', 'strong', 'p', 'br' ];
+const ALLOWED_ATTR = [ 'target', 'href', 'rel', 'name', 'download' ];
+
+const sanitizeHTML = ( html: string ) => {
+	return {
+		__html: sanitize( html, { ALLOWED_TAGS, ALLOWED_ATTR } ),
+	};
+};
 
 type TaskLevel = 1 | 2 | 3;
 

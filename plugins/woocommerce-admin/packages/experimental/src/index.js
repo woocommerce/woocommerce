@@ -36,3 +36,4 @@ export const useSlot = useSlotHook || __experimentalUseSlot;
 export { ExperimentalListItem as ListItem } from './experimental-list/experimental-list-item';
 export { ExperimentalList as List } from './experimental-list/experimental-list';
 export { ExperimentalCollapsibleList as CollapsibleList } from './experimental-list/collapsible-list';
+export { TaskItem } from './experimental-list/task-item';

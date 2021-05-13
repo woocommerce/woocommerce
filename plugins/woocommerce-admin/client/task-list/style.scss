@@ -19,32 +19,6 @@
 				}
 			}
 
-			.woocommerce-list__item:not(.complete) {
-				.woocommerce-task__icon {
-					border: 1px solid $gray-100;
-					background: $white;
-				}
-			}
-
-			.woocommerce-list__item.complete {
-				.woocommerce-list__item-title {
-					color: $gray-700;
-				}
-			}
-
-			.woocommerce-list__item-before .woocommerce-task__icon {
-				border-radius: 50%;
-				width: 32px;
-				height: 32px;
-			}
-
-			.woocommerce-list__item-before .woocommerce-task__icon svg {
-				fill: $white;
-				position: relative;
-				top: 4px;
-				left: 5px;
-			}
-
 			.woocommerce-list__item-text {
 				.woocommerce-pill {
 					padding: 1px $gap-smaller;
@@ -56,13 +30,6 @@
 				min-width: unset;
 			}
 		}
-	}
-
-	.woocommerce-task__additional-info,
-	.woocommerce-task__estimated-time {
-		color: $gray-700;
-		font-weight: 400;
-		font-size: 12px;
 	}
 
 	#wpbody-content {

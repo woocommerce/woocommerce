@@ -33,6 +33,13 @@ $task-alert-yellow: #f0b849;
 		color: $foreground-color;
 	}
 
+	.woocommerce-task__additional-info,
+	.woocommerce-task__estimated-time {
+		color: $gray-700;
+		font-weight: 400;
+		font-size: 12px;
+	}
+
 	.woocommerce-task-list__item-before {
 		display: flex;
 		align-items: center;
@@ -81,6 +88,13 @@ $task-alert-yellow: #f0b849;
 
 		.woocommerce-task-list__item-content {
 			display: none;
+		}
+	}
+
+	&:not(.complete) {
+		.woocommerce-task__icon {
+			border: 1px solid $gray-100;
+			background: $white;
 		}
 	}
 

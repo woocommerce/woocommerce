@@ -9,12 +9,12 @@ import { EllipsisMenu, Badge } from '@woocommerce/components';
 import { updateQueryString } from '@woocommerce/navigation';
 import { OPTIONS_STORE_NAME, ONBOARDING_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import { Text, List, CollapsibleList } from '@woocommerce/experimental';
-
-/**
- * Internal dependencies
- */
-import { TaskItem } from './task-item';
+import {
+	Text,
+	List,
+	CollapsibleList,
+	TaskItem,
+} from '@woocommerce/experimental';
 
 export const TaskList = ( {
 	query,
