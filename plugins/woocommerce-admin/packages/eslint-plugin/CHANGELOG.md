@@ -1,4 +1,4 @@
-# Unreleased
+# 1.2.0
 
 -   Updated `dependency-group` rule to have imports starting with `~/` labeled as local. #6517
 

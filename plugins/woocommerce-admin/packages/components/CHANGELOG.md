@@ -1,4 +1,4 @@
-# Unreleased
+# 6.2.0
 
 -   Fix `autocompleter` for custom Search in `CompareFilter` #6911
 -   SelectControl: automatically scroll to selected options when list is displayed. #6906

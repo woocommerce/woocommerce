@@ -1,4 +1,4 @@
-# Unreleased
+# 1.3.0
 
 -   Fix parsing bad JSON string data in useUserPreferences hook. #6819
 -   Removed allowed keys list for adding woocommerce_meta data. #6889
