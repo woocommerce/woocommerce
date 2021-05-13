@@ -3,7 +3,6 @@
  */
 import { CompareFilter } from '@woocommerce/components';
 
-const path = new URL( document.location ).searchParams.get( 'path' );
 const query = {};
 const compareFilter = {
 	type: 'products',
@@ -19,9 +18,9 @@ const compareFilter = {
 	},
 };
 
-export const Basic = () => (
-	<CompareFilter path={ path } query={ query } { ...compareFilter } />
-);
+export const Basic = ( {
+	path = new URL( document.location ).searchParams.get( 'path' ),
+} ) => <CompareFilter path={ path } query={ query } { ...compareFilter } />;
 
 export default {
 	title: 'WooCommerce Admin/components/CompareFilter',

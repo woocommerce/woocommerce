@@ -91,7 +91,7 @@ export class CompareFilter extends Component {
 	}
 
 	render() {
-		const { labels, type } = this.props;
+		const { labels, type, autocompleter } = this.props;
 		const { selected } = this.state;
 		return (
 			<Card className="woocommerce-filters__compare">
@@ -100,6 +100,7 @@ export class CompareFilter extends Component {
 				</CardHeader>
 				<CardBody>
 					<Search
+						autocompleter={ autocompleter }
 						type={ type }
 						selected={ selected }
 						placeholder={ labels.placeholder }
@@ -165,6 +166,10 @@ CompareFilter.propTypes = {
 	 * Which type of autocompleter should be used in the Search
 	 */
 	type: PropTypes.string.isRequired,
+	/**
+	 * The custom autocompleter to be forwarded to the `Search` component.
+	 */
+	autocompleter: PropTypes.object,
 };
 
 CompareFilter.defaultProps = {

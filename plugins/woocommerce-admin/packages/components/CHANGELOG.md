@@ -1,5 +1,6 @@
 # Unreleased
 
+-   Fix `autocompleter` for custom Search in `CompareFilter` #6911
 -   SelectControl: automatically scroll to selected options when list is displayed. #6906
 -   SelectControl: no longer auto selects on rendering list. #6906
 -   Make `Search` accept synchronous `autocompleter.options`. #6884
