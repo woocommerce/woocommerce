@@ -9,6 +9,7 @@ import isShallowEqual from '@wordpress/is-shallow-equal';
 import {
 	formatStoreApiErrorMessage,
 	pluckAddress,
+	pluckEmail,
 } from '@woocommerce/base-utils';
 import type {
 	CartResponseBillingAddress,
@@ -26,8 +27,16 @@ declare type CustomerData = {
 import { useStoreCart } from './cart/use-store-cart';
 import { useStoreNotices } from './use-store-notices';
 
+function instanceOfCartResponseBillingAddress(
+	address: CartResponseBillingAddress | CartResponseShippingAddress
+): address is CartResponseBillingAddress {
+	return 'email' in address;
+}
+
 /**
- * Does a shallow compare of important address data to determine if the cart needs updating.
+ * Does a shallow compare of important address data to determine if the cart needs updating on the server.
+ *
+ * This takes the current and previous address into account, as well as the billing email field.
  *
  * @param {Object} previousAddress An object containing all previous address information
  * @param {Object} address An object containing all address information
@@ -40,12 +49,20 @@ const shouldUpdateAddressStore = <
 	previousAddress: T,
 	address: T
 ): boolean => {
-	if ( ! address.country ) {
-		return false;
+	if (
+		instanceOfCartResponseBillingAddress( address ) &&
+		pluckEmail( address ) !==
+			pluckEmail( previousAddress as CartResponseBillingAddress )
+	) {
+		return true;
 	}
-	return ! isShallowEqual(
-		pluckAddress( previousAddress ),
-		pluckAddress( address )
+
+	return (
+		!! address.country &&
+		! isShallowEqual(
+			pluckAddress( previousAddress ),
+			pluckAddress( address )
+		)
 	);
 };
 
