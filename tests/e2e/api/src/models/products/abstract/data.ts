@@ -1,6 +1,6 @@
 import { Model } from '../../model';
-import { MetaData, PostStatus } from '../../shared-types';
-import { ProductImage, ProductLinks } from '../shared';
+import { MetaData, PostStatus, ObjectLinks } from '../../shared-types';
+import { ProductImage } from '../shared';
 
 /**
  * Base product data.
@@ -93,9 +93,9 @@ export abstract class AbstractProductData extends Model {
 	/**
 	 * The product data links.
 	 *
-	 * @type {ReadonlyArray.<ProductLinks>}
+	 * @type {ReadonlyArray.<ObjectLinks>}
 	 */
-	public readonly links: ProductLinks = {
+	public readonly links: ObjectLinks = {
 		collection: [ { href: '' } ],
 		self: [ { href: '' } ],
 	};

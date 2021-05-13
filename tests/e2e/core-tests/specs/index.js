@@ -52,6 +52,7 @@ const runExternalProductAPITest = require( './api/external-product.test' );
 const runCouponApiTest = require( './api/coupon.test' );
 const runGroupedProductAPITest = require( './api/grouped-product.test' );
 const runVariableProductAPITest = require( './api/variable-product.test' );
+const runOrderApiTest = require( './api/order.test' );
 
 const runSetupOnboardingTests = () => {
 	runActivationTest();
@@ -106,6 +107,7 @@ const runApiTests = () => {
 	runGroupedProductAPITest();
 	runVariableProductAPITest();
 	runCouponApiTest();
+	runOrderApiTest();
 }
 
 module.exports = {
@@ -135,6 +137,7 @@ module.exports = {
 	runUpdateGeneralSettingsTest,
 	runProductSettingsTest,
 	runTaxSettingsTest,
+	runOrderApiTest,
 	runOrderStatusFiltersTest,
 	runOrderRefundTest,
 	runOrderApplyCouponTest,
