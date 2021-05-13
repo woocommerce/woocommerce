@@ -11,7 +11,7 @@
 
 ## Breaking Changes
 
-- The `HTTPClientFactory` API was changed to make it easier to configure instances with
+- The `HTTPClientFactory` API was changed to make it easier to configure instances
 
 ## Added
 

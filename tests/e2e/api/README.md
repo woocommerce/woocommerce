@@ -6,7 +6,7 @@ features:
 - [x] TypeScript Definitions
 - [x] Axios API Client with support for OAuth & basic auth
 - [x] Repositories to simplify interaction with basic data types
-- [ ] Service classes for common activities such as changing settings
+- [x] Service classes for common activities such as changing settings
 
 ## Usage
 
@@ -51,12 +51,20 @@ httpClient.get( '/wc/v3/products' ).then( ( response ) => {
 
 As a convenience utility we've created repositories for core data types that can simplify interacting with the API:
 
+#### Parent/Base Repositories
+
 - `SimpleProduct`
 - `ExternalProduct`
 - `GroupedProduct`
 - `VariableProduct`
-- `ProductVariation`
 - `Coupon`
+- `Order`
+- `SettingsGroup`
+
+#### Child Repositories
+
+- `ProductVariation`
+- `Setting`
 
 These repositories provide CRUD methods for ease-of-use:
 
@@ -80,7 +88,7 @@ product.id;
 
 #### Repository Methods
 
-The following methods are available on all repositories:
+The following methods are available on all repositories if the corresponding method is available on the API endpoint:
 
 - `create( {...properties} )` - Create a single object of the model type
 - `delete( objectId )` - Delete a single object of the model type
@@ -90,14 +98,14 @@ The following methods are available on all repositories:
 
 #### Child Repositories
 
-`ProductVariation` is a child model repository. In child model repositories, each method requires the `parentId` as the first parameter:
+In child model repositories, each method requires the `parentId` as the first parameter:
 
 ```javascript
 import { HTTPClientFactory, VariableProduct, ProductVariation } from '@woocommerce/api';
 
 const httpClient = HTTPClientFactory.build( 'https://example.com' )
     .withBasicAuth( 'username', 'password' )
-	.withIndexPermalinks()
+    .withIndexPermalinks()
     .create();
 
 const productRepository = VariableProduct.restRepository( httpClient );
