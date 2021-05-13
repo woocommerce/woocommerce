@@ -191,7 +191,6 @@ final class WooCommerce {
 	 */
 	private function init_hooks() {
 		register_activation_hook( WC_PLUGIN_FILE, array( 'WC_Install', 'install' ) );
-		register_activation_hook( WC_PLUGIN_FILE, array( $this, 'add_woocommerce_inbox_variant' ) );
 		register_shutdown_function( array( $this, 'log_errors' ) );
 
 		add_action( 'plugins_loaded', array( $this, 'on_plugins_loaded' ), -1 );
