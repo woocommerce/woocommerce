@@ -303,7 +303,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 		// Check flag to use post_date vs post_date_gmt.
 		if ( true === $request['dates_are_gmt'] ) {
 			if ( isset( $request['before'] ) || isset( $request['after'] ) ) {
-				$args['date_query']['column'] = 'post_date_gmt';
+				$args['date_query'][0]['column'] = 'post_date_gmt';
 			}
 		}
 
