@@ -85,6 +85,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Add: Add remote payment gateway recommendations initial docs #6962
 - Add: Note date range logic for GivingFeedback, and InsightFirstSale note. #6969
 - Add: Add transient notices feature #6809
+- Add: Add transformers in remote inbox notifications #6948
 - Dev: Add data source filter to remote inbox notification system #6794
 - Dev: Add A/A test #6669
 - Dev: Add support for nonces in note actions #6726
