@@ -18,6 +18,7 @@ const wcAdminPackages = [
 	'number',
 	'data',
 	'tracks',
+	'experimental',
 ];
 
 module.exports = ( { config: storybookConfig } ) => {

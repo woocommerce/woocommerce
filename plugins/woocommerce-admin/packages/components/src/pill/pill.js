@@ -1,7 +1,7 @@
 /**
- * External dependencies
+ * Internal dependencies
  */
-import { Text } from '@woocommerce/experimental';
+import { Text } from '../experimental';
 
 export function Pill( { children } ) {
 	return (

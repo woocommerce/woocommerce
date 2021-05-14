@@ -12,7 +12,6 @@ import {
 } from '@wordpress/components';
 import { isEqual, isFunction } from 'lodash';
 import PropTypes from 'prop-types';
-import { Text } from '@woocommerce/experimental';
 import { getIdsFromQuery, updateQueryString } from '@woocommerce/navigation';
 
 /**
@@ -20,6 +19,7 @@ import { getIdsFromQuery, updateQueryString } from '@woocommerce/navigation';
  */
 import CompareButton from './button';
 import Search from '../search';
+import { Text } from '../experimental';
 
 export { default as CompareButton } from './button';
 

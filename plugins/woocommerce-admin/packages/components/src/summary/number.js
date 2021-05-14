@@ -7,12 +7,12 @@ import classnames from 'classnames';
 import ChevronDownIcon from 'gridicons/dist/chevron-down';
 import { isNil, noop } from 'lodash';
 import PropTypes from 'prop-types';
-import { Text } from '@woocommerce/experimental';
 
 /**
  * Internal dependencies
  */
 import Link from '../link';
+import { Text } from '../experimental';
 
 /**
  * A component to show a value, label, and optionally a change percentage and children node. Can also act as a link to a specific report focus.

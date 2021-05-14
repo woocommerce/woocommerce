@@ -10,6 +10,7 @@
 -   Add `controlId` and `name` props to `<SearchListItem>`. #6871
 -   Minor styling tweaks and fixes to `<SearchListcontrol>`. #6871
 -   Fix `autocompleter` for custom Search in `FilterPicker` #6880
+-   Remove `woocommerce/experimental` dependency. #6986
 
 # 6.1.2
 

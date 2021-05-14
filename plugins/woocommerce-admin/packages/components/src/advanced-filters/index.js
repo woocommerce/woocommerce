@@ -23,13 +23,13 @@ import {
 	getQueryFromActiveFilters,
 	getHistory,
 } from '@woocommerce/navigation';
-import { Text } from '@woocommerce/experimental';
 
 /**
  * Internal dependencies
  */
 import Link from '../link';
 import AdvancedFilterItem from './item';
+import { Text } from '../experimental';
 
 const matches = [
 	{ value: 'all', label: __( 'All', 'woocommerce-admin' ) },

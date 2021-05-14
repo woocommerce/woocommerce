@@ -4,10 +4,15 @@
 import Gridicon from 'gridicons';
 import { withConsole } from '@storybook/addon-console';
 import {
-	List as ExperimentalList,
-	ListItem as ExperimentalListItem,
-	CollapsibleList as ExperimentalCollapsibleList,
-} from '@woocommerce/experimental';
+	Title,
+	Subtitle,
+	Description,
+	Primary,
+	ArgsTable,
+	Stories,
+	PRIMARY_STORY,
+} from '@storybook/addon-docs/blocks';
+import { withLinks } from '@storybook/addon-links';
 
 /**
  * Internal dependencies
@@ -35,7 +40,32 @@ function logItemClick( event ) {
 export default {
 	title: 'WooCommerce Admin/components/List',
 	component: List,
-	decorators: [ ( storyFn, context ) => withConsole()( storyFn )( context ) ],
+	decorators: [
+		( storyFn, context ) => withConsole()( storyFn )( context ),
+		withLinks,
+	],
+	parameters: {
+		docs: {
+			page: () => (
+				<>
+					<Title />
+					<Subtitle />
+					<Description
+						markdown={ `[deprecated] and will be replaced by
+						<a
+							data-sb-kind="woocommerce-admin-experimental-list"
+							data-sb-story="default"
+						>
+							ExperimentalList
+						</a>` }
+					/>
+					<Primary />
+					<ArgsTable story={ PRIMARY_STORY } />
+					<Stories />
+				</>
+			),
+		},
+	},
 };
 
 export const Default = () => {
@@ -146,67 +176,3 @@ export const CustomStyleAndTags = () => {
 };
 
 CustomStyleAndTags.storyName = 'Custom style and tags (deprecated)';
-
-export const ExperimentalListExample = () => {
-	return (
-		<ExperimentalList>
-			<ExperimentalListItem disableGutters onClick={ () => {} }>
-				<div>Without gutters no padding is added to the list item.</div>
-			</ExperimentalListItem>
-			<ExperimentalListItem onClick={ () => {} }>
-				<div>Any markup can go here.</div>
-			</ExperimentalListItem>
-			<ExperimentalListItem onClick={ () => {} }>
-				<div>Any markup can go here.</div>
-			</ExperimentalListItem>
-			<ExperimentalListItem onClick={ () => {} }>
-				<div>Any markup can go here.</div>
-			</ExperimentalListItem>
-		</ExperimentalList>
-	);
-};
-
-ExperimentalListExample.storyName = 'ExperimentalList / ExperimentalListItem.';
-
-export const ExperimentalCollapsibleListExample = () => {
-	return (
-		<ExperimentalCollapsibleList
-			collapseLabel="Show less"
-			expandLabel="Show more items"
-			show={ 2 }
-			onCollapse={ () => {
-				// eslint-disable-next-line no-console
-				console.log( 'collapsed' );
-			} }
-			onExpand={ () => {
-				// eslint-disable-next-line no-console
-				console.log( 'expanded' );
-			} }
-		>
-			<ExperimentalListItem onClick={ () => {} }>
-				<div>Any markup can go here.</div>
-			</ExperimentalListItem>
-			<ExperimentalListItem onClick={ () => {} }>
-				<div>Any markup can go here.</div>
-			</ExperimentalListItem>
-			<ExperimentalListItem onClick={ () => {} }>
-				<div>
-					Any markup can go here.
-					<br />
-					Bigger task item
-					<br />
-					Another line
-				</div>
-			</ExperimentalListItem>
-			<ExperimentalListItem onClick={ () => {} }>
-				<div>Any markup can go here.</div>
-			</ExperimentalListItem>
-			<ExperimentalListItem onClick={ () => {} }>
-				<div>Any markup can go here.</div>
-			</ExperimentalListItem>
-		</ExperimentalCollapsibleList>
-	);
-};
-
-ExperimentalCollapsibleListExample.storyName =
-	'ExperimentalList with ExperimentalCollapsibleListItem.';
