@@ -4,22 +4,22 @@
 
 **WooCommerce**
 
-* Tweak - Updates the date_query usage in the CRUD controller to be consistent, generating an array of queries. #29909
-* Dev - Refactored Tracker to use direct DB calls instead of CRUD. #29877
+* Localization - Added Venezuelan states. #29477
 * Add - Feature WooCommerce Payments in the extensions store for stores in the US, Canada, UK, Ireland, Australia and New Zealand. #29843
 * Add - Product attributes lookup table and debug tools to manually fill or delete it. #29778
-* Fix - Bulk edit on external products causes an error when changing the Backorders setting. #29766
-* Fix - wc_get_low_stock_amount was returning a string, not an integer, for products not having an explicit low stock value set. #29721
+* Add - dates_are_gmt parameters in REST API to searched posts using the post_date_gmt column.
 * Enhancement - Improved accessibility of the country and state address fields. #29706
+* Tweak - Updates the date_query usage in the CRUD controller to be consistent, generating an array of queries. #29909
 * Tweak - Search all extension categories instead of just searching the selected category. #29694
-* Fix - Products left without default category assignment when all categories are deleted. #29681
 * Tweak - Use WC Admin's native notice nonce generation. #29637
 * Tweak - Change email settings help text to include troubleshooting steps. #29599
-* Localization - Added Venezuelan states. #29477
+* Fix - Bulk edit on external products causes an error when changing the Backorders setting. #29766
+* Fix - wc_get_low_stock_amount was returning a string, not an integer, for products not having an explicit low stock value set. #29721
+* Fix - Products left without default category assignment when all categories are deleted. #29681
 * Fix - Removed rounding at several places to better support precision when prices are entered more than 2dp. #29318
 * Fix - Migrate deprecated jQuery 3 functions. #29044
 * Fix - Controls to change image and thumbnail sizes in theme customisation UI are now displayed even if there's a theme support class defining default values for those. #28187
-* Add - dates_are_gmt parameters in REST API to searched posts using the post_date_gmt column.
+* Dev - Refactored Tracker to use direct DB calls instead of CRUD. #29877
 
 **WooCommerce Admin - 2.3.0**
 
@@ -76,10 +76,10 @@
 * Add - Added support to the Store API for batching requests. This allows multiple POST requests to be made at once to reduce the number of separate requests being made to the API. #4075
 * Tweak - Improve error message displayed when a payment method didn't have all its dependencies registered. #4176
 * Tweak - Improvements to `emitEventWithAbort`. #4158
-* Fix - Prevent parts of old addresses being displayed in the shipping calculator when changing countries. #4038
-* Fix - issue in which email and phone fields are cleared when using a separate billing address. #4162
 * Tweak - Rename onCheckoutBeforeProcessing to onCheckoutValidationBeforeProcessing.
 * Tweak - Switched to `rest_preload_api_request` for API hydration in cart and checkout blocks. #4090
+* Fix - Prevent parts of old addresses being displayed in the shipping calculator when changing countries. #4038
+* Fix - issue in which email and phone fields are cleared when using a separate billing address. #4162
 
 = 5.3.0 2021-05-11 =
 
