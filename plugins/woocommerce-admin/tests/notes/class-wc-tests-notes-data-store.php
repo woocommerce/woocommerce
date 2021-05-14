@@ -241,4 +241,35 @@ class WC_Tests_Notes_Data_Store extends WC_Unit_Test_Case {
 		$this->assertFalse( $note );
 		$this->assertEquals( 1, did_action( 'woocommerce_caught_exception' ) );
 	}
+
+	/**
+	 * Test that sources are correctly added to where clause.
+	 */
+	public function test_get_notes_where_clauses_with_sources() {
+		$data_store = WC_Data_Store::load( 'admin-note' );
+
+		$where_clause = $data_store->get_notes_where_clauses(
+			array(
+				'source' => array( 'source', 'another-source' ),
+			)
+		);
+		$this->assertEquals( " AND source IN ('source','another-source') AND is_deleted = 0", $where_clause );
+	}
+
+	/**
+	 * Test that invalid types are filtered out.
+	 */
+	public function test_get_notes_where_clauses_with_invalid_types() {
+		$data_store = WC_Data_Store::load( 'admin-note' );
+
+		$where_clause = $data_store->get_notes_where_clauses(
+			array(
+				'type' => array( 'random', Note::E_WC_ADMIN_NOTE_MARKETING ),
+			)
+		);
+		$this->assertEquals(
+			sprintf( " AND type IN ('%s') AND is_deleted = 0", Note::E_WC_ADMIN_NOTE_MARKETING ),
+			$where_clause
+		);
+	}
 }

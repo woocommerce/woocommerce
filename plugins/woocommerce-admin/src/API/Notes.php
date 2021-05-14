@@ -192,6 +192,7 @@ class Notes extends \WC_REST_CRUD_Controller {
 		$args['page']       = $request['page'];
 		$args['type']       = isset( $request['type'] ) ? $request['type'] : array();
 		$args['status']     = isset( $request['status'] ) ? $request['status'] : array();
+		$args['source']     = isset( $request['source'] ) ? $request['source'] : array();
 		$args['is_deleted'] = 0;
 
 		if ( 'date' === $args['orderby'] ) {
@@ -568,6 +569,15 @@ class Notes extends \WC_REST_CRUD_Controller {
 			'validate_callback' => 'rest_validate_request_arg',
 			'items'             => array(
 				'enum' => Note::get_allowed_statuses(),
+				'type' => 'string',
+			),
+		);
+		$params['source']   = array(
+			'description'       => __( 'Source of note.', 'woocommerce-admin' ),
+			'type'              => 'array',
+			'sanitize_callback' => 'wp_parse_list',
+			'validate_callback' => 'rest_validate_request_arg',
+			'items'             => array(
 				'type' => 'string',
 			),
 		);

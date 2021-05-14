@@ -381,6 +381,28 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 	}
 
 	/**
+	 * Parses the query arguments passed in as arrays and escapes the values.
+	 *
+	 * @param array      $args the query arguments.
+	 * @param string     $key the key of the specific argument.
+	 * @param array|null $allowed_types optional allowed_types if only a specific set is allowed.
+	 * @return array the escaped array of argument values.
+	 */
+	private function get_escaped_arguments_array_by_key( $args = array(), $key = '', $allowed_types = null ) {
+		$arg_array = array();
+		if ( isset( $args[ $key ] ) ) {
+			foreach ( $args[ $key ] as $args_type ) {
+				$args_type = trim( $args_type );
+				$allowed   = is_null( $allowed_types ) || in_array( $args_type, $allowed_types, true );
+				if ( $allowed ) {
+					$arg_array[] = sprintf( "'%s'", esc_sql( $args_type ) );
+				}
+			}
+		}
+		return $arg_array;
+	}
+
+	/**
 	 * Return where clauses for getting notes by status and type. For use in both the count and listing queries.
 	 *
 	 *  @param array $args Array of args to pass.
@@ -388,43 +410,23 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 	 */
 	public function get_notes_where_clauses( $args = array() ) {
 		$allowed_types    = Note::get_allowed_types();
-		$where_type_array = array();
-		if ( isset( $args['type'] ) ) {
-			foreach ( $args['type'] as $args_type ) {
-				$args_type = trim( $args_type );
-				if ( in_array( $args_type, $allowed_types, true ) ) {
-					$where_type_array[] = "'" . esc_sql( $args_type ) . "'";
-				}
-			}
-		}
+		$where_type_array = $this->get_escaped_arguments_array_by_key( $args, 'type', $allowed_types );
 
 		$allowed_statuses   = Note::get_allowed_statuses();
-		$where_status_array = array();
-		if ( isset( $args['status'] ) ) {
-			foreach ( $args['status'] as $args_status ) {
-				$args_status = trim( $args_status );
-				if ( in_array( $args_status, $allowed_statuses, true ) ) {
-					$where_status_array[] = "'" . esc_sql( $args_status ) . "'";
-				}
-			}
-		}
+		$where_status_array = $this->get_escaped_arguments_array_by_key( $args, 'status', $allowed_statuses );
 
 		$escaped_is_deleted = '';
 		if ( isset( $args['is_deleted'] ) ) {
 			$escaped_is_deleted = esc_sql( $args['is_deleted'] );
 		}
 
-		$where_name_array = [];
-		if ( isset( $args['name'] ) ) {
-			foreach ( $args['name'] as $args_name ) {
-				$args_name          = trim( $args_name );
-				$where_name_array[] = sprintf( "'%s'", esc_sql( $args_name ) );
-			}
-		}
+		$where_name_array   = $this->get_escaped_arguments_array_by_key( $args, 'name' );
+		$where_source_array = $this->get_escaped_arguments_array_by_key( $args, 'source' );
 
 		$escaped_where_types  = implode( ',', $where_type_array );
 		$escaped_where_status = implode( ',', $where_status_array );
 		$escaped_where_names  = implode( ',', $where_name_array );
+		$escaped_where_source = implode( ',', $where_source_array );
 		$where_clauses        = '';
 
 		if ( ! empty( $escaped_where_types ) ) {
@@ -437,6 +439,10 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 
 		if ( ! empty( $escaped_where_names ) ) {
 			$where_clauses .= " AND name IN ($escaped_where_names)";
+		}
+
+		if ( ! empty( $escaped_where_source ) ) {
+			$where_clauses .= " AND source IN ($escaped_where_source)";
 		}
 
 		$where_clauses .= $escaped_is_deleted ? ' AND is_deleted = 1' : ' AND is_deleted = 0';

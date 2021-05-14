@@ -100,6 +100,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Dev: Add payment method selector to onboarding store #6921
 - Dev: Add disabled prop to SelectControl #6902
 - Dev: Add filter variation to tracks data in products analytics. #6913
+- Dev: Add source param support for notes query. #6979
 - Enhancement: Add recommended payment methods in payment settings. #6760
 - Enhancement: Add expand/collapse to extendable task list. #6910
 - Enhancement: Add task hierarchy support to extended task list. #6916

@@ -286,6 +286,59 @@ class WC_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test note with source.
+	 */
+	public function test_get_notes_with_one_source() {
+		wp_set_current_user( $this->user );
+
+		$note = new Note();
+		$note->set_name( 'note name' );
+		$note->set_title( 'note from a-source' );
+		$note->set_content( 'PHPUNIT_TEST_NOTE_CONTENT' );
+		$note->set_source( 'a-source' );
+		$note->save();
+
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params( array( 'source' => 'a-source' ) );
+		$response = $this->server->dispatch( $request );
+		$notes    = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 1, count( $notes ) );
+		$this->assertEquals( $notes[0]['title'], 'note from a-source' );
+	}
+
+	/**
+	 * Test note with source.
+	 */
+	public function test_get_notes_with_multiple_sources() {
+		wp_set_current_user( $this->user );
+
+		$note = new Note();
+		$note->set_name( 'note name' );
+		$note->set_title( 'note from source-1' );
+		$note->set_content( 'PHPUNIT_TEST_NOTE_CONTENT' );
+		$note->set_source( 'source-1' );
+		$note->save();
+		$note = new Note();
+		$note->set_name( 'note name' );
+		$note->set_title( 'note from source-2' );
+		$note->set_content( 'PHPUNIT_TEST_NOTE_CONTENT' );
+		$note->set_source( 'source-2' );
+		$note->save();
+
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params( array( 'source' => 'source-1,source-2' ) );
+		$response = $this->server->dispatch( $request );
+		$notes    = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 2, count( $notes ) );
+		$this->assertEquals( $notes[0]['title'], 'note from source-1' );
+		$this->assertEquals( $notes[1]['title'], 'note from source-2' );
+	}
+
+	/**
 	 * Test ordering of notes.
 	 */
 	public function test_order_notes() {
