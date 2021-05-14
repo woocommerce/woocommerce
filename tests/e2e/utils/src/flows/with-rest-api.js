@@ -16,7 +16,7 @@ const userEndpoint = '/wp/v2/users';
 const deleteAllRepositoryObjects = async ( repository, defaultObjectId = null ) => {
 	let objects;
 	const minimum = defaultObjectId == null ? 0 : 1;
-	const statuses = ['publish','trash'];
+	const statuses = ['draft','publish','trash'];
 
 	for ( let s = 0; s < statuses.length; s++ ) {
 		const status = statuses[ s ];
