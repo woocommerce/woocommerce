@@ -36,6 +36,18 @@ describe( `${ block.name } Block (frontend)`, () => {
 	let productPermalink;
 
 	beforeAll( async () => {
+		//prevent CartCheckoutCompatibilityNotice from appearing
+		await page.evaluate( () => {
+			localStorage.removeItem(
+				'wc-blocks_dismissed_compatibility_notices'
+			);
+		} );
+		await page.evaluate( () => {
+			localStorage.setItem(
+				'wc-blocks_dismissed_compatibility_notices',
+				'["checkout"]'
+			);
+		} );
 		await merchant.login();
 
 		// Go to general settings page
@@ -111,12 +123,18 @@ describe( `${ block.name } Block (frontend)`, () => {
 
 	afterAll( async () => {
 		await shopper.removeFromCart( simpleProductName );
+		await page.evaluate( () => {
+			localStorage.removeItem(
+				'wc-blocks_dismissed_compatibility_notices'
+			);
+		} );
 	} );
 
 	it( 'should display cart items in order summary', async () => {
 		await page.goto( productPermalink );
 		await shopper.addToCart();
 		await shopper.goToCheckoutBlock();
+
 		await shopper.productIsInCheckoutBlock(
 			simpleProductName,
 			`1`,
@@ -128,6 +146,7 @@ describe( `${ block.name } Block (frontend)`, () => {
 		await page.goto( productPermalink );
 		await shopper.addToCart();
 		await shopper.goToCheckoutBlock();
+
 		await shopper.productIsInCheckoutBlock(
 			simpleProductName,
 			`2`,
