@@ -6,8 +6,8 @@ The Blocks plugin follows the same patterns as Gutenberg, therefore for instruct
 
 We have two kinds of JavaScript tests:
 
-- JavaScript unit tests - test APIs, hooks, library functionality that we use to build blocks or expose to plugin authors.
-- End-to-end (e2e) tests - test blocks from the user interface.
+-   JavaScript unit tests - test APIs, hooks, library functionality that we use to build blocks or expose to plugin authors.
+-   End-to-end (e2e) tests - test blocks from the user interface.
 
 These tests are all run automatically on open PRs by Travis CI.
 
@@ -38,18 +38,19 @@ Since these drive the user interface, they need to run against a test environmen
 
 To set up to run e2e tests:
 
-- `npm run build:e2e-test` builds the assets (js/css), you can exclude this step if you've already got built files to test with.
-- `npm run wp-env start` to start the test environment
+-   `npm run build:e2e-test` builds the assets (js/css), you can exclude this step if you've already got built files to test with.
+-   `npm run wp-env clean` to clean the test env
+-   `npm run wp-env start` to start the test environment
 
-Then, to run the tests:
+    Then, to run the tests:
 
-- `npm run test:e2e`
+-   `npm run test:e2e`
 
 When you're iterating on a new test you'll often run this repeatedly, as you develop, until your test is just right.
 
 When you're done, you may want to shut down the test environment:
 
-- `npm run wp-env stop` to stop the test environment
+-   `npm run wp-env stop` to stop the test environment
 
 **Note:** There are a number of other useful `wp-env` commands. You can find out more in the [wp-env docs](https://github.com/WordPress/gutenberg/blob/master/packages/env/README.md).
 
@@ -81,10 +82,10 @@ For that, we run end-to-end tests against all of those versions, and because we 
 
 When a new version of WordPress is released, we drop support for the oldest version we have, so if the latest version is 5.6, we would test against:
 
-- WordPress 5.4
-- WordPress 5.5
-- WordPress 5.6
-- WordPress 5.6 + Gutenberg
+-   WordPress 5.4
+-   WordPress 5.5
+-   WordPress 5.6
+-   WordPress 5.6 + Gutenberg
 
 When 5.7 is released, we would drop support for 5.4, and update our `./.github/workflows/php-js-e2e-tests.yml` file.
 
