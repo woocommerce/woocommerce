@@ -11,13 +11,15 @@ import { allSettings } from './settings-init';
 /**
  * Retrieves a setting value from the setting state.
  *
- * If a setting with key `name` does not exist, the `fallback` will be returned instead. An optional `filter` callback
- * can be passed to format the returned value.
+ * If a setting with key `name` does not exist or is undefined,
+ * the `fallback` will be returned instead. An optional `filter`
+ * callback can be passed to format the returned value.
  */
 export const getSetting = (
 	name: string,
 	fallback: unknown = false,
-	filter = ( val: unknown, fb: unknown ) => val || fb
+	filter = ( val: unknown, fb: unknown ) =>
+		typeof val !== 'undefined' ? val : fb
 ): unknown => {
 	const value = name in allSettings ? allSettings[ name ] : fallback;
 	return filter( value, fallback );
