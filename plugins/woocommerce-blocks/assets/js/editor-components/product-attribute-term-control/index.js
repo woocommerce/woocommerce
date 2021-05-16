@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { find } from 'lodash';
 import PropTypes from 'prop-types';
 import { SearchListControl, SearchListItem } from '@woocommerce/components';
 import { SelectControl, Spinner } from '@wordpress/components';
@@ -139,7 +138,11 @@ const ProductAttributeTermControl = ( {
 				list={ currentList }
 				isLoading={ isLoading }
 				selected={ selected
-					.map( ( { id } ) => find( currentList, { id } ) )
+					.map( ( { id } ) =>
+						currentList.find(
+							( currentListItem ) => currentListItem.id === id
+						)
+					)
 					.filter( Boolean ) }
 				onChange={ onChange }
 				renderItem={ renderItem }

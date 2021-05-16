@@ -3,7 +3,7 @@
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
-import { debounce, find } from 'lodash';
+import { debounce } from 'lodash';
 import PropTypes from 'prop-types';
 import { SearchListControl, SearchListItem } from '@woocommerce/components';
 import { SelectControl } from '@wordpress/components';
@@ -132,7 +132,9 @@ class ProductTagControl extends Component {
 					list={ list }
 					isLoading={ loading }
 					selected={ selected
-						.map( ( id ) => find( list, { id } ) )
+						.map( ( { id } ) =>
+							list.find( ( listItem ) => listItem.id === id )
+						)
 						.filter( Boolean ) }
 					onChange={ onChange }
 					onSearch={ limitTags ? this.debouncedOnSearch : null }

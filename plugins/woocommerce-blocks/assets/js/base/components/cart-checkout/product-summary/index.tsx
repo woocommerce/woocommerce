@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import PropTypes from 'prop-types';
 import Summary from '@woocommerce/base-components/summary';
 import { blocksConfig } from '@woocommerce/block-settings';
 
