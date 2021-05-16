@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { find } from 'lodash';
 import PropTypes from 'prop-types';
 import { SearchListControl, SearchListItem } from '@woocommerce/components';
 import { SelectControl } from '@wordpress/components';
@@ -137,7 +136,9 @@ const ProductCategoryControl = ( {
 				list={ categories }
 				isLoading={ isLoading }
 				selected={ selected
-					.map( ( id ) => find( categories, { id } ) )
+					.map( ( id ) =>
+						categories.find( ( category ) => category.id === id )
+					)
 					.filter( Boolean ) }
 				onChange={ onChange }
 				renderItem={ renderItem }

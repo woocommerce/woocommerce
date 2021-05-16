@@ -28,14 +28,16 @@ import type { ResponseError } from '../types';
  *
  * @param  {CartResponse}      response
  */
-export const receiveCart = ( response: CartResponse ) => {
+export const receiveCart = (
+	response: CartResponse
+): { type: string; response: Cart } => {
 	const cart = ( mapKeys( response, ( _, key ) =>
 		camelCase( key )
 	) as unknown ) as Cart;
 	return {
 		type: types.RECEIVE_CART,
 		response: cart,
-	} as const;
+	};
 };
 
 /**
