@@ -679,13 +679,13 @@ class WC_Checkout {
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
 		$skipped = array();
+		$form_was_shown = isset( $_POST['woocommerce-process-checkout-nonce'] );
+
 		foreach ( $this->get_checkout_fields() as $fieldset_key => $fieldset ) {
 			if ( $this->maybe_skip_fieldset( $fieldset_key, $data ) ) {
 				$skipped[] = $fieldset_key;
 				continue;
 			}
-
-			$form_was_shown = isset( $_REQUEST['woocommerce-process-checkout-nonce'] );
 
 			foreach ( $fieldset as $key => $field ) {
 				$type = sanitize_title( isset( $field['type'] ) ? $field['type'] : 'text' );
