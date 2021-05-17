@@ -157,6 +157,7 @@ export interface CartResponseItem {
 export interface CartResponseTotalsTaxLineItem {
 	name: string;
 	price: string;
+	rate: string;
 }
 
 export interface CartResponseFeeItemTotals extends CurrencyResponseInfo {

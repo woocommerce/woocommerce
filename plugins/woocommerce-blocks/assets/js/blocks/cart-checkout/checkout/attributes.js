@@ -53,6 +53,10 @@ const blockAttributes = {
 		type: 'boolean',
 		default: getSetting( 'hasDarkEditorStyleSupport', false ),
 	},
+	showRateAfterTaxName: {
+		type: 'boolean',
+		default: getSetting( 'displayCartPricesIncludingTax', false ),
+	},
 };
 
 export default blockAttributes;

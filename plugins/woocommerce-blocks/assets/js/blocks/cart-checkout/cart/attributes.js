@@ -21,6 +21,10 @@ const blockAttributes = {
 		type: 'boolean',
 		default: getSetting( 'hasDarkEditorStyleSupport', false ),
 	},
+	showRateAfterTaxName: {
+		type: 'boolean',
+		default: true,
+	},
 };
 
 export default blockAttributes;
