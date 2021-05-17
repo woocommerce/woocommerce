@@ -39,6 +39,7 @@ const BlockSettings = ( { attributes, setAttributes } ) => {
 		isShippingCalculatorEnabled,
 		checkoutPageId,
 		hasDarkControls,
+		showRateAfterTaxName,
 	} = attributes;
 	const { currentPostId } = useEditorContext();
 	const { current: savedCheckoutPageId } = useRef( checkoutPageId );
@@ -95,6 +96,30 @@ const BlockSettings = ( { attributes, setAttributes } ) => {
 					/>
 				</PanelBody>
 			) }
+			{ getSetting( 'taxesEnabled' ) &&
+				getSetting( 'displayItemizedTaxes', false ) &&
+				! getSetting( 'displayCartPricesIncludingTax', false ) && (
+					<PanelBody
+						title={ __( 'Taxes', 'woo-gutenberg-products-block' ) }
+					>
+						<ToggleControl
+							label={ __(
+								'Show rate after tax name',
+								'woo-gutenberg-products-block'
+							) }
+							help={ __(
+								'Show the percentage rate alongside each tax line in the summary.',
+								'woo-gutenberg-products-block'
+							) }
+							checked={ showRateAfterTaxName }
+							onChange={ () =>
+								setAttributes( {
+									showRateAfterTaxName: ! showRateAfterTaxName,
+								} )
+							}
+						/>
+					</PanelBody>
+				) }
 			{ ! (
 				currentPostId === CART_PAGE_ID && savedCheckoutPageId === 0
 			) && (

@@ -6,12 +6,6 @@
 		padding-top: em($gap-small);
 	}
 
-	.wc-block-components-shipping-rates-control__package-title {
-		@include text-heading();
-		font-weight: bold;
-		margin: 0;
-	}
-
 	// Remove panel padding because we are adding bottom padding to `.wc-block-components-radio-control`
 	// and `.wc-block-components-radio-control__option-layout` in the next ruleset.
 	.wc-block-components-panel__content {

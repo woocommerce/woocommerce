@@ -51,11 +51,11 @@ const TotalsCoupon = ( {
 			title={
 				<Label
 					label={ __(
-						'Coupon Code?',
+						'Coupon code',
 						'woo-gutenberg-products-block'
 					) }
 					screenReaderLabel={ __(
-						'Introduce Coupon Code',
+						'Apply a coupon code',
 						'woo-gutenberg-products-block'
 					) }
 					htmlFor={ textInputId }

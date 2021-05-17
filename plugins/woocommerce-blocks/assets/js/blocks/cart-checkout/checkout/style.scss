@@ -10,6 +10,12 @@
 		// Required by IE11.
 		flex-basis: 0;
 	}
+	.wc-block-components-totals-taxes,
+	.wc-block-components-totals-footer-item {
+		@include with-translucent-border(1px 0 0);
+		margin: 0;
+		padding: em($gap-small) 0;
+	}
 }
 
 .wc-block-checkout__actions {

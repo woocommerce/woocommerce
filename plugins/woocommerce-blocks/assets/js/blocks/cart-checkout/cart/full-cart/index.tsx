@@ -48,6 +48,7 @@ interface CartAttributes {
 	isShippingCalculatorEnabled: boolean;
 	checkoutPageId: number;
 	isPreview: boolean;
+	showRateAfterTaxName: boolean;
 }
 
 interface CartProps {
@@ -60,7 +61,11 @@ interface CartProps {
  * @param {Object} props.attributes Incoming attributes for block.
  */
 const Cart = ( { attributes }: CartProps ) => {
-	const { isShippingCalculatorEnabled, hasDarkControls } = attributes;
+	const {
+		isShippingCalculatorEnabled,
+		hasDarkControls,
+		showRateAfterTaxName,
+	} = attributes;
 
 	const {
 		cartItems,
@@ -141,6 +146,12 @@ const Cart = ( { attributes }: CartProps ) => {
 						removeCoupon={ removeCoupon }
 						values={ cartTotals }
 					/>
+					{ getSetting( 'couponsEnabled', true ) && (
+						<TotalsCoupon
+							onSubmit={ applyCoupon }
+							isLoading={ isApplyingCoupon }
+						/>
+					) }
 					{ cartNeedsShipping && (
 						<TotalsShipping
 							showCalculator={ isShippingCalculatorEnabled }
@@ -154,16 +165,12 @@ const Cart = ( { attributes }: CartProps ) => {
 						false
 					) && (
 						<TotalsTaxes
+							showRateAfterTaxName={ showRateAfterTaxName }
 							currency={ totalsCurrency }
 							values={ cartTotals }
 						/>
 					) }
-					{ getSetting( 'couponsEnabled', true ) && (
-						<TotalsCoupon
-							onSubmit={ applyCoupon }
-							isLoading={ isApplyingCoupon }
-						/>
-					) }
+
 					<TotalsFooterItem
 						currency={ totalsCurrency }
 						values={ cartTotals }

@@ -155,6 +155,7 @@ const Checkout = ( { attributes, scrollToTop } ) => {
 						cartItems={ cartItems }
 						cartTotals={ cartTotals }
 						cartFees={ cartFees }
+						showRateAfterTaxName={ attributes.showRateAfterTaxName }
 					/>
 				</Sidebar>
 			</SidebarLayout>

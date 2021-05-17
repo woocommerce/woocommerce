@@ -12,6 +12,7 @@ import { default as fetchMock } from 'jest-fetch-mock';
  */
 import CartBlock from '../block';
 import { defaultCartState } from '../../../../data/default-states';
+import { allSettings } from '../../../../settings/shared/settings-init';
 
 describe( 'Testing cart', () => {
 	beforeEach( async () => {
@@ -47,6 +48,59 @@ describe( 'Testing cart', () => {
 		expect( fetchMock ).toHaveBeenCalledTimes( 1 );
 		// ["`select` control in `@wordpress/data-controls` is deprecated. Please use built-in `resolveSelect` control in `@wordpress/data` instead."]
 		expect( console ).toHaveWarned();
+	} );
+
+	it( 'Contains a Taxes section if Core options are set to show it', async () => {
+		allSettings.displayCartPricesIncludingTax = false;
+		// The criteria for showing the Taxes section is:
+		// Display prices during basket and checkout: 'Excluding tax'.
+		const { container } = render(
+			<CartBlock
+				emptyCart={ null }
+				attributes={ {
+					isShippingCalculatorEnabled: false,
+				} }
+			/>
+		);
+		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
+		expect( container ).toMatchSnapshot();
+	} );
+
+	it( 'Shows individual tax lines if the store is set to do so', async () => {
+		allSettings.displayCartPricesIncludingTax = false;
+		allSettings.displayItemizedTaxes = true;
+		// The criteria for showing the lines in the Taxes section is:
+		// Display prices during basket and checkout: 'Excluding tax'.
+		// Display tax totals: 'Itemized';
+		const { container } = render(
+			<CartBlock
+				emptyCart={ null }
+				attributes={ {
+					isShippingCalculatorEnabled: false,
+				} }
+			/>
+		);
+		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
+		expect( container ).toMatchSnapshot();
+	} );
+
+	it( 'Shows rate percentages after tax lines if the block is set to do so', async () => {
+		allSettings.displayCartPricesIncludingTax = false;
+		allSettings.displayItemizedTaxes = true;
+		// The criteria for showing the lines in the Taxes section is:
+		// Display prices during basket and checkout: 'Excluding tax'.
+		// Display tax totals: 'Itemized';
+		const { container } = render(
+			<CartBlock
+				emptyCart={ null }
+				attributes={ {
+					showRateAfterTaxName: true,
+					isShippingCalculatorEnabled: false,
+				} }
+			/>
+		);
+		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
+		expect( container ).toMatchSnapshot();
 	} );
 
 	it( 'renders empty cart if there are no items in the cart', async () => {

@@ -1,0 +1,6 @@
+.wc-block-components-totals-item__description
+.wc-block-components-totals-item.wc-block-components-totals-taxes__tax-line {
+	padding: 0;
+	@include font-size(small);
+	margin: $gap-smallest / 2;
+}
