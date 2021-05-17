@@ -368,7 +368,11 @@ class WC_Frontend_Scripts {
 			self::enqueue_style( 'select2' );
 
 			// Password strength meter. Load in checkout, account login and edit account page.
-			if ( ( 'no' === get_option( 'woocommerce_registration_generate_password' ) && ! is_user_logged_in() ) || is_edit_account_page() || is_lost_password_page() ) {
+			if ( is_edit_account_page() ||
+				is_lost_password_page() ||
+				'yes' === get_option( 'woocommerce_registration_generate_password_overwrite' ) ||
+				( 'no' === get_option( 'woocommerce_registration_generate_password' ) && ! is_user_logged_in() )
+			) {
 				self::enqueue_script( 'wc-password-strength-meter' );
 			}
 		}
@@ -476,8 +480,8 @@ class WC_Frontend_Scripts {
 				break;
 			case 'wc-geolocation':
 				$params = array(
-					'wc_ajax_url'  => WC_AJAX::get_endpoint( '%%endpoint%%' ),
-					'home_url'     => remove_query_arg( 'lang', home_url() ), // FIX for WPML compatibility.
+					'wc_ajax_url' => WC_AJAX::get_endpoint( '%%endpoint%%' ),
+					'home_url'    => remove_query_arg( 'lang', home_url() ), // FIX for WPML compatibility.
 				);
 				break;
 			case 'wc-single-product':

@@ -585,6 +585,7 @@ class WC_Tracker {
 			'enable_myaccount_registration'         => get_option( 'woocommerce_enable_myaccount_registration' ),
 			'registration_generate_username'        => get_option( 'woocommerce_registration_generate_username' ),
 			'registration_generate_password'        => get_option( 'woocommerce_registration_generate_password' ),
+			'registration_generate_password_overwrite' => get_option( 'woocommerce_registration_generate_password' ),
 		);
 	}
 
