@@ -2,16 +2,17 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
+import apiFetch from '@wordpress/api-fetch';
 import { Card, CardBody } from '@wordpress/components';
-import { useEffect, useMemo } from '@wordpress/element';
+import { enqueueScript } from '@woocommerce/wc-admin-settings';
 import {
 	OPTIONS_STORE_NAME,
 	PLUGINS_STORE_NAME,
 	pluginNames,
 } from '@woocommerce/data';
 import { Plugins, Stepper, WooRemotePayment } from '@woocommerce/components';
-
 import { recordEvent } from '@woocommerce/tracks';
+import { useEffect, useState } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { useSlot } from '@woocommerce/experimental';
 
@@ -26,14 +27,13 @@ export const PaymentMethod = ( {
 	method,
 	recordConnectStartEvent,
 } ) => {
-	const {
-		key,
-		plugins,
-		title,
-		post_install_script: postInstallScript,
-	} = method;
+	const { key, plugins, title } = method;
 	const slot = useSlot( `woocommerce_remote_payment_${ key }` );
 	const hasFills = Boolean( slot?.fills?.length );
+	const [ isFetchingPaymentGateway, setIsFetchingPaymentGateway ] = useState(
+		false
+	);
+	const [ paymentGateway, setPaymentGateway ] = useState( null );
 
 	useEffect( () => {
 		recordEvent( 'payments_task_stepper_view', {
@@ -55,73 +55,99 @@ export const PaymentMethod = ( {
 		return isOptionsUpdating();
 	} );
 
-	const installStep = useMemo( () => {
-		if ( ! plugins || ! plugins.length ) {
+	const pluginsToInstall = plugins.filter(
+		( m ) => ! activePlugins.includes( m )
+	);
+
+	useEffect( () => {
+		if (
+			pluginsToInstall.length ||
+			paymentGateway ||
+			isFetchingPaymentGateway
+		) {
 			return;
 		}
+		fetchGateway();
+	}, [ pluginsToInstall ] );
 
-		const pluginsToInstall = plugins.filter(
-			( m ) => ! activePlugins.includes( m )
-		);
-		const pluginNamesString = plugins
-			.map( ( pluginSlug ) => pluginNames[ pluginSlug ] )
-			.join( ' ' + __( 'and', 'woocommerce-admin' ) + ' ' );
+	// @todo This should updated to use the data store in https://github.com/woocommerce/woocommerce-admin/pull/6918
+	const fetchGateway = () => {
+		setIsFetchingPaymentGateway( true );
+		apiFetch( {
+			path: 'wc/v3/payment_gateways/' + key,
+		} ).then( async ( results ) => {
+			const { post_install_scripts: postInstallScripts } = results;
+			if ( postInstallScripts ) {
+				const scriptPromises = postInstallScripts.map( ( script ) =>
+					enqueueScript( script )
+				);
+				await Promise.all( scriptPromises );
+			}
+			setPaymentGateway( results );
+			setIsFetchingPaymentGateway( false );
+		} );
+	};
 
-		return {
-			key: 'install',
-			label: sprintf(
-				/* translators: %s = one or more plugin names joined by "and" */
-				__( 'Install %s', 'woocommerce-admin' ),
-				pluginNamesString
-			),
-			content: (
-				<Plugins
-					onComplete={ ( installedPlugins, response ) => {
-						createNoticesFromResponse( response );
-						recordEvent( 'tasklist_payment_install_method', {
-							plugins,
-						} );
+	const pluginNamesString = plugins
+		.map( ( pluginSlug ) => pluginNames[ pluginSlug ] )
+		.join( ' ' + __( 'and', 'woocommerce-admin' ) + ' ' );
 
-						if ( postInstallScript ) {
-							const script = document.createElement( 'script' );
-							script.src = postInstallScript;
-							document.body.append( script );
-						}
-					} }
-					onError={ ( errors, response ) =>
-						createNoticesFromResponse( response )
-					}
-					autoInstall
-					pluginSlugs={ plugins }
-				/>
-			),
-			isComplete: ! pluginsToInstall.length,
-		};
-	}, [ activePlugins, plugins ] );
+	const installStep =
+		plugins && plugins.length
+			? {
+					key: 'install',
+					label: sprintf(
+						/* translators: %s = one or more plugin names joined by "and" */
+						__( 'Install %s', 'woocommerce-admin' ),
+						pluginNamesString
+					),
+					content: (
+						<Plugins
+							onComplete={ ( installedPlugins, response ) => {
+								createNoticesFromResponse( response );
+								recordEvent(
+									'tasklist_payment_install_method',
+									{
+										plugins,
+									}
+								);
+							} }
+							onError={ ( errors, response ) =>
+								createNoticesFromResponse( response )
+							}
+							autoInstall
+							pluginSlugs={ plugins }
+						/>
+					),
+					isComplete: ! pluginsToInstall.length,
+			  }
+			: null;
 
-	const connectStep = useMemo( () => {
-		return {
-			key: 'connect',
-			label: sprintf(
-				__( 'Connect your %(title)s account', 'woocommerce-admin' ),
-				{
-					title,
-				}
-			),
-			content: (
-				<PaymentConnect
-					method={ method }
-					markConfigured={ markConfigured }
-					recordConnectStartEvent={ recordConnectStartEvent }
-				/>
-			),
-		};
-	}, [ title ] );
+	const connectStep = {
+		key: 'connect',
+		label: sprintf(
+			__( 'Connect your %(title)s account', 'woocommerce-admin' ),
+			{
+				title,
+			}
+		),
+		content: paymentGateway ? (
+			<PaymentConnect
+				method={ method }
+				markConfigured={ markConfigured }
+				recordConnectStartEvent={ recordConnectStartEvent }
+			/>
+		) : null,
+	};
 
 	const DefaultStepper = ( props ) => (
 		<Stepper
 			isVertical
-			isPending={ ! installStep.isComplete || isOptionsRequesting }
+			isPending={
+				! installStep.isComplete ||
+				isOptionsRequesting ||
+				isFetchingPaymentGateway
+			}
 			currentStep={ installStep.isComplete ? 'connect' : 'install' }
 			steps={ [ installStep, connectStep ] }
 			{ ...props }
