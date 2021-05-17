@@ -64,7 +64,6 @@ class WC_Cache_Helper {
 			$set_cache = true;
 		}
 
-		// Note that is_cart() will return true even for checkout page.
 		if ( false !== strpos( $agent, 'Chrome' ) && is_cart() ) {
 			$set_cache = true;
 		}
