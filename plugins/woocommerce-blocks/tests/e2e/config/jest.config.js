@@ -5,7 +5,7 @@ module.exports = {
 	clearMocks: true,
 
 	// An array of file extensions your modules use
-	moduleFileExtensions: [ 'js' ],
+	moduleFileExtensions: [ 'js', 'ts' ],
 
 	moduleNameMapper: {
 		'@woocommerce/blocks-test-utils': '<rootDir>/tests/utils',
