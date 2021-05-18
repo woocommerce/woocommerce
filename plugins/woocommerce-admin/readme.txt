@@ -76,6 +76,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 == Unreleased ==
 
 - Fix: Autocompleter for custom Search in CompareFilter #6911
+- Dev: Converting <SettingsForm /> component to TypeScript. #6981
 - Enhancement: Adding Slotfills for remote payments and SettingsForm component. #6932
 - Fix: Make `Search` accept synchronous `autocompleter.options`. #6884
 - Add: Consume remote payment methods on frontend #6867

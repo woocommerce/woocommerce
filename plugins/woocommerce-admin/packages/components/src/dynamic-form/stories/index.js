@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { SettingsForm } from '@woocommerce/components';
+import { DynamicForm } from '@woocommerce/components';
 import { useState } from '@wordpress/element';
 
 const fields = [
@@ -48,8 +48,8 @@ const fields = [
 		label: 'Checkbox style',
 		description: 'This is an example checkbox field.',
 		type: 'checkbox',
-		value: 'yes',
-		default: 'yes',
+		value: 'no',
+		default: 'no',
 		tip: 'This is an example checkbox field.',
 		placeholder: '',
 	},
@@ -64,22 +64,19 @@ const validate = ( values ) => {
 	for ( const [ key, value ] of Object.entries( values ) ) {
 		const field = getField( key );
 
-		if ( ! value ) {
-			errors[ key ] =
-				field.type === 'checkbox'
-					? 'This is required'
-					: `Please enter your ${ field.label.toLowerCase() }`;
+		if ( ! ( value || field.type === 'checkbox' ) ) {
+			errors[ key ] = `Please enter your ${ field.label.toLowerCase() }`;
 		}
 	}
 
 	return errors;
 };
 
-const SettingsExample = () => {
+const DynamicExample = () => {
 	const [ submitted, setSubmitted ] = useState( null );
 	return (
 		<>
-			<SettingsForm
+			<DynamicForm
 				fields={ fields }
 				onSubmit={ ( values ) => setSubmitted( values ) }
 				validate={ validate }
@@ -90,9 +87,9 @@ const SettingsExample = () => {
 	);
 };
 
-export const Basic = () => <SettingsExample />;
+export const Basic = () => <DynamicExample />;
 
 export default {
-	title: 'WooCommerce Admin/components/SettingsForm',
-	component: SettingsForm,
+	title: 'WooCommerce Admin/components/DynamicForm',
+	component: DynamicForm,
 };

@@ -6,8 +6,8 @@ import interpolateComponents from 'interpolate-components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import {
 	Link,
-	SettingsForm,
-	WooRemotePaymentSettings,
+	DynamicForm,
+	WooRemotePaymentForm,
 	Spinner,
 } from '@woocommerce/components';
 import apiFetch from '@wordpress/api-fetch';
@@ -29,7 +29,7 @@ export const PaymentConnect = ( {
 
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const { createNotice } = useDispatch( 'core/notices' );
-	const slot = useSlot( `woocommerce_remote_payment_settings_${ key }` );
+	const slot = useSlot( `woocommerce_remote_payment_form_${ key }` );
 	const hasFills = Boolean( slot?.fills?.length );
 	const [ state, setState ] = useState( 'loading' );
 	const [ fields, setFields ] = useState( null );
@@ -70,6 +70,8 @@ export const PaymentConnect = ( {
 	} );
 
 	const updateSettings = async ( values ) => {
+		recordConnectStartEvent( key );
+
 		const options = {};
 
 		fields.forEach( ( field ) => {
@@ -107,15 +109,15 @@ export const PaymentConnect = ( {
 		const getField = ( fieldId ) =>
 			fields.find( ( field ) => field.id === fieldId );
 
-		for ( const [ valueKey, value ] of Object.entries( values ) ) {
-			const field = getField( valueKey );
+		for ( const [ fieldKey, value ] of Object.entries( values ) ) {
+			const field = getField( fieldKey );
 			// Matches any word that is capitalized aside from abrevitions like ID.
 			const label = field.label.replace( /([A-Z][a-z]+)/g, ( val ) =>
 				val.toLowerCase()
 			);
 
-			if ( ! value ) {
-				errors[ valueKey ] = `Please enter your ${ label }`;
+			if ( ! ( value || field.type === 'checkbox' ) ) {
+				errors[ fieldKey ] = `Please enter your ${ label }`;
 			}
 		}
 
@@ -138,13 +140,12 @@ export const PaymentConnect = ( {
 		},
 	} );
 
-	const DefaultSettings = ( props ) => (
-		<SettingsForm
+	const DefaultForm = ( props ) => (
+		<DynamicForm
 			fields={ fields }
 			isBusy={ isOptionsRequesting }
 			onSubmit={ updateSettings }
-			onButtonClick={ () => recordConnectStartEvent( key ) }
-			buttonLabel={ __( 'Proceed', 'woocommerce-admin' ) }
+			submitLabel={ __( 'Proceed', 'woocommerce-admin' ) }
 			validate={ validate }
 			{ ...props }
 		/>
@@ -168,9 +169,9 @@ export const PaymentConnect = ( {
 	return (
 		<>
 			{ hasFills ? (
-				<WooRemotePaymentSettings.Slot
+				<WooRemotePaymentForm.Slot
 					fillProps={ {
-						defaultSettings: DefaultSettings,
+						defaultForm: DefaultForm,
 						defaultSubmit: updateSettings,
 						defaultFields: fields,
 						markConfigured: () => markConfigured( key ),
@@ -179,7 +180,7 @@ export const PaymentConnect = ( {
 				/>
 			) : (
 				<>
-					<DefaultSettings />
+					<DefaultForm />
 					<p>{ helpText }</p>
 				</>
 			) }

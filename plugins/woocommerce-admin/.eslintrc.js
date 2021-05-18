@@ -37,6 +37,7 @@ module.exports = {
 				// Making use of typescript no-shadow instead, fixes issues with enum.
 				'no-shadow': 'off',
 				'@typescript-eslint/no-shadow': [ 'error' ],
+				'@typescript-eslint/no-empty-function': 'off',
 			},
 		},
 	],
