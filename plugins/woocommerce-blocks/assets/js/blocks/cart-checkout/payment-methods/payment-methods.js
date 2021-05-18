@@ -3,7 +3,7 @@
  */
 import { usePaymentMethods } from '@woocommerce/base-context/hooks';
 import { __ } from '@wordpress/i18n';
-import Label from '@woocommerce/base-components/label';
+import { Label } from '@woocommerce/blocks-checkout';
 import { usePaymentMethodDataContext } from '@woocommerce/base-context';
 
 /**

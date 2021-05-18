@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
-import Button from '@woocommerce/base-components/button';
+import { Button } from '@woocommerce/blocks-checkout';
 import { Icon, done as doneIcon } from '@woocommerce/icons';
 import { useState, useEffect } from '@wordpress/element';
 import { useAddToCartFormContext } from '@woocommerce/base-context';

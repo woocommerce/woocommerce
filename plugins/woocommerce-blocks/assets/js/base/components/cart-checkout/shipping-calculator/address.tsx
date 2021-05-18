@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import Button from '@woocommerce/base-components/button';
+import { Button } from '@woocommerce/blocks-checkout';
 import { useState } from '@wordpress/element';
 import isShallowEqual from '@wordpress/is-shallow-equal';
 import { useValidationContext } from '@woocommerce/base-context';

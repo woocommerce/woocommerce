@@ -5,11 +5,11 @@ import { forwardRef } from 'react';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import { useState } from '@wordpress/element';
+import { Label } from '@woocommerce/blocks-checkout';
 
 /**
  * Internal dependencies
  */
-import Label from '../label';
 import './style.scss';
 
 const TextInput = forwardRef(
