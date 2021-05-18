@@ -34,7 +34,6 @@ const shippingZoneNameSF = 'SF with Local pickup';
 const runAddNewShippingZoneTest = () => {
 	describe('WooCommerce Shipping Settings - Add new shipping zone', () => {
 		beforeAll(async () => {
-			await merchant.login();
 			await createSimpleProduct();
 			await deleteAllShippingZones();
 		});

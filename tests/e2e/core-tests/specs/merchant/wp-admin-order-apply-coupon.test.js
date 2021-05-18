@@ -4,7 +4,6 @@
  * Internal dependencies
  */
 const {
-	merchant,
 	createSimpleProduct,
 	createSimpleOrder,
 	createCoupon,
@@ -26,7 +25,6 @@ let orderId;
 const runOrderApplyCouponTest = () => {
 	describe('WooCommerce Orders > Apply coupon', () => {
 		beforeAll(async () => {
-			await merchant.login();
 			await createSimpleProduct();
 			couponCode = await createCoupon();
 			orderId = await createSimpleOrder('Pending payment', simpleProductName);
