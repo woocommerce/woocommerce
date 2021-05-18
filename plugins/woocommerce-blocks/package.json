@@ -96,6 +96,7 @@
 		"@types/react": "16.14.6",
 		"@types/wordpress__data": "4.6.9",
 		"@types/wordpress__data-controls": "1.0.4",
+		"@types/wordpress__deprecated": "^2.4.2",
 		"@types/wordpress__element": "2.4.1",
 		"@types/wordpress__keycodes": "2.3.1",
 		"@typescript-eslint/eslint-plugin": "4.14.1",
