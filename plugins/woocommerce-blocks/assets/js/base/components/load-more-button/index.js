@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import PropTypes from 'prop-types';
-import Label from '@woocommerce/base-components/label';
+import { Label } from '@woocommerce/blocks-checkout';
 
 /**
  * Internal dependencies

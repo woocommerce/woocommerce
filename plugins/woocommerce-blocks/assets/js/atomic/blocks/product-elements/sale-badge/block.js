@@ -4,7 +4,7 @@
 import PropTypes from 'prop-types';
 import { __ } from '@wordpress/i18n';
 import classnames from 'classnames';
-import Label from '@woocommerce/base-components/label';
+import { Label } from '@woocommerce/blocks-checkout';
 import {
 	useInnerBlockLayoutContext,
 	useProductDataContext,

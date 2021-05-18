@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { useCheckoutSubmit } from '@woocommerce/base-context/hooks';
 import { Icon, done } from '@woocommerce/icons';
-import Button from '@woocommerce/base-components/button';
+import { Button } from '@woocommerce/blocks-checkout';
 
 const PlaceOrderButton = () => {
 	const {
