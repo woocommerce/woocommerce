@@ -92,7 +92,7 @@ The following methods are available on all repositories if the corresponding met
 
 - `create( {...properties} )` - Create a single object of the model type
 - `delete( objectId )` - Delete a single object of the model type
-- `list` - Retrieve a list of the existing objects of that model type
+- `list( {...parameters} )` - Retrieve a list of the existing objects of that model type
 - `read( objectId )` - Read a single object of the model type
 - `update( objectId, {...properties} )` - Update a single object of the model type
 
