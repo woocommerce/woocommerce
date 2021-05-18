@@ -66,7 +66,7 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 								'type'        => 'string',
 							),
 							'password' => array(
-								'required'    => 'no' === get_option( 'woocommerce_registration_generate_password', 'no' ) || 'yes' === get_option( 'woocommerce_registration_generate_password_overwrite' ),
+								'required'    => 'no' === get_option( 'woocommerce_registration_generate_password', 'no' ),
 								'description' => __( 'New user password.', 'woocommerce' ),
 								'type'        => 'string',
 							),
@@ -336,7 +336,7 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 	 *
 	 * @throws WC_REST_Exception Throws error if rest cannot create a source.
 	 */
-	public function create_item( WP_REST_Request $request ) {
+	public function create_item( $request ) {
 		try {
 			if ( ! empty( $request['id'] ) ) {
 				throw new WC_REST_Exception( 'woocommerce_rest_customer_exists', __( 'Cannot create existing resource.', 'woocommerce' ), 400 );
