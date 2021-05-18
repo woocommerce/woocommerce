@@ -250,7 +250,7 @@ class StoreDetails extends Component {
 
 				<Form
 					initialValues={ this.initialValues }
-					onSubmitCallback={ this.onSubmit }
+					onSubmit={ this.onSubmit }
 					validate={ validateStoreAddress }
 				>
 					{ ( {

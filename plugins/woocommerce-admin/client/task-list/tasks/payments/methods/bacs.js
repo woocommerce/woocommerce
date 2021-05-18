@@ -70,7 +70,7 @@ class Bacs extends Component {
 		return (
 			<Form
 				initialValues={ this.getInitialConfigValues() }
-				onSubmitCallback={ this.updateSettings }
+				onSubmit={ this.updateSettings }
 				validate={ this.validate }
 			>
 				{ ( { getInputProps, handleSubmit } ) => {

@@ -22,7 +22,7 @@ const validate = ( values ) => {
 };
 
 // eslint-disable-next-line no-console
-const onSubmitCallback = ( values ) => console.log( values );
+const onSubmit = ( values ) => console.log( values );
 const initialValues = {
 	firstName: '',
 	lastName: '',
@@ -34,7 +34,7 @@ const initialValues = {
 export const Basic = () => (
 	<Form
 		validate={ validate }
-		onSubmitCallback={ onSubmitCallback }
+		onSubmit={ onSubmit }
 		initialValues={ initialValues }
 	>
 		{ ( { getInputProps, values, errors, handleSubmit } ) => (

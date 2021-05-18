@@ -378,7 +378,7 @@ class BusinessDetails extends Component {
 		return (
 			<Form
 				initialValues={ this.initialValues }
-				onSubmitCallback={ this.onContinue }
+				onSubmit={ this.onContinue }
 				validate={ this.validate }
 			>
 				{ ( { getInputProps, handleSubmit, values, isValidForm } ) => {

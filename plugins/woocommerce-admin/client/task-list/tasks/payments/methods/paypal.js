@@ -386,7 +386,7 @@ class PayPal extends Component {
 		return (
 			<Form
 				initialValues={ this.getInitialConfigValues() }
-				onSubmitCallback={ this.setCredentials }
+				onSubmit={ this.setCredentials }
 				validate={ this.validate }
 			>
 				{ ( { getInputProps, handleSubmit } ) => {

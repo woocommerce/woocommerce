@@ -83,7 +83,7 @@ export default class StoreLocation extends Component {
 		return (
 			<Form
 				initialValues={ this.getInitialValues() }
-				onSubmitCallback={ this.onSubmit }
+				onSubmit={ this.onSubmit }
 				validate={ validateStoreAddress }
 			>
 				{ ( { getInputProps, handleSubmit, setValue } ) => (

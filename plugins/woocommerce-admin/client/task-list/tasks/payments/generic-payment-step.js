@@ -112,7 +112,7 @@ export function GenericPaymentStep( {
 		return (
 			<Form
 				initialValues={ getInitialConfigValues() }
-				onSubmitCallback={ updateSettings }
+				onSubmit={ updateSettings }
 				validate={ validate }
 			>
 				{ ( { getInputProps, handleSubmit } ) => {

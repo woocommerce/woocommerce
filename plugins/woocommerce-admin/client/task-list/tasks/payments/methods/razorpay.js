@@ -89,7 +89,7 @@ const renderConnectStep = ( {
 	return (
 		<Form
 			initialValues={ INITIAL_CONFIG }
-			onSubmitCallback={ onSubmit }
+			onSubmit={ onSubmit }
 			validate={ validate }
 		>
 			{ ( { getInputProps, handleSubmit } ) => {

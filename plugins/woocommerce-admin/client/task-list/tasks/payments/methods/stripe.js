@@ -219,7 +219,7 @@ class Stripe extends Component {
 		return (
 			<Form
 				initialValues={ this.getInitialConfigValues() }
-				onSubmitCallback={ this.updateSettings }
+				onSubmit={ this.updateSettings }
 				validate={ this.validateManualConfig }
 			>
 				{ ( { getInputProps, handleSubmit } ) => {

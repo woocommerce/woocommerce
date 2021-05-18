@@ -261,7 +261,7 @@ class BusinessDetails extends Component {
 				initialValues={
 					this.state.savedValues || this.props.initialValues
 				}
-				onSubmitCallback={ ( values ) => {
+				onSubmit={ ( values ) => {
 					this.setState( {
 						savedValues: values,
 						currentTab: 'free-features',
@@ -269,7 +269,7 @@ class BusinessDetails extends Component {
 
 					this.trackBusinessDetailsStep( values );
 				} }
-				onChangeCallback={ ( _, values, isValid ) => {
+				onChange={ ( _, values, isValid ) => {
 					this.setState( { savedValues: values, isValid } );
 				} }
 				validate={ this.validate }

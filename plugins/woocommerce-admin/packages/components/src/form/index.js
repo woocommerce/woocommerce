@@ -3,6 +3,7 @@
  */
 import { cloneElement, Component } from '@wordpress/element';
 import PropTypes from 'prop-types';
+import deprecated from '@wordpress/deprecated';
 
 /**
  * A form component to handle form state and provide input helper props.
@@ -45,9 +46,19 @@ class Form extends Component {
 			} ),
 			() => {
 				this.validate( () => {
-					// onChangeCallback keeps track of validity, so needs to
+					// onChange keeps track of validity, so needs to
 					// happen after setting the error state.
-					this.props.onChangeCallback(
+					const { onChange, onChangeCallback } = this.props;
+					const callback = onChange ? onChange : onChangeCallback;
+
+					if ( onChangeCallback ) {
+						deprecated( 'onChangeCallback', {
+							version: '5.1.2',
+							alternative: 'onChange',
+							plugin: '@woocommerce/components',
+						} );
+					}
+					callback(
 						{ name, value },
 						this.state.values,
 						! Object.keys( this.state.errors || {} ).length
@@ -84,12 +95,23 @@ class Form extends Component {
 
 	async handleSubmit() {
 		const { values } = this.state;
+		const { onSubmitCallback, onSubmit } = this.props;
 		const touched = {};
 		Object.keys( values ).map( ( name ) => ( touched[ name ] = true ) );
 		this.setState( { touched } );
 
 		if ( await this.isValidForm() ) {
-			this.props.onSubmitCallback( values );
+			const callback = onSubmit ? onSubmit : onSubmitCallback;
+
+			if ( onSubmitCallback ) {
+				deprecated( 'onSubmitCallback', {
+					version: '5.1.2',
+					alternative: 'onSubmit',
+					plugin: '@woocommerce/components',
+				} );
+			}
+
+			callback( values );
 		}
 	}
 
@@ -143,13 +165,29 @@ Form.propTypes = {
 	 */
 	initialValues: PropTypes.object.isRequired,
 	/**
+	 * This prop helps determine whether or not a field has received focus
+	 */
+	touched: PropTypes.object,
+	/**
 	 * Function to call when a form is submitted with valid fields.
+	 *
+	 * @deprecated
 	 */
 	onSubmitCallback: PropTypes.func,
 	/**
+	 * Function to call when a form is submitted with valid fields.
+	 */
+	onSubmit: PropTypes.func,
+	/**
 	 * Function to call when a value changes in the form.
+	 *
+	 * @deprecated
 	 */
 	onChangeCallback: PropTypes.func,
+	/**
+	 * Function to call when a value changes in the form.
+	 */
+	onChange: PropTypes.func,
 	/**
 	 * A function that is passed a list of all values and
 	 * should return an `errors` object with error response.
@@ -160,8 +198,10 @@ Form.propTypes = {
 Form.defaultProps = {
 	errors: {},
 	initialValues: {},
-	onSubmitCallback: () => {},
-	onChangeCallback: () => {},
+	onSubmitCallback: null,
+	onSubmit: () => {},
+	onChangeCallback: null,
+	onChange: () => {},
 	touched: {},
 	validate: () => {},
 };

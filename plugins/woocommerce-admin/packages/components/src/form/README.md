@@ -44,4 +44,5 @@ Name | Type | Default | Description
 `initialValues` | Object | `{}` | Object key:value pair list of all initial field values
 `onSubmitCallback` | Function | `noop` | Function to call when a form is submitted with valid fields
 `validate` | Function | `noop` | A function that is passed a list of all values and should return an `errors` object with error response
-`touched` |  | `{}` | 
+`touched` | Object | `{}` | This prop helps determine whether or not a field has received focus
+`onChange` | Function | `null` | A function that receives the value of the input; called when selected items change, whether added, edited, or removed

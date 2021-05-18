@@ -220,7 +220,7 @@ class ShippingRates extends Component {
 		return (
 			<Form
 				initialValues={ this.getInitialValues() }
-				onSubmitCallback={ this.updateShippingZones }
+				onSubmit={ this.updateShippingZones }
 				validate={ this.validate }
 			>
 				{ ( {
