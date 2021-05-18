@@ -20,6 +20,7 @@ export const QuickLink = ( { icon, title, href, linkType, onClick } ) => {
 				onClick={ onClick }
 				href={ href }
 				type={ linkType }
+				target={ isExternal ? '_blank' : null }
 				className="woocommerce-quick-links__item-link"
 			>
 				<Icon

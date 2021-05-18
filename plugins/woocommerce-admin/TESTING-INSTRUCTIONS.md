@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+### Set target to blank for the external links #6999
+
+1. Clone this repository.
+2. Complete the OBW
+3. Navigate to WooCommerce -> Home
+4. Hide the Setup task list on the Home screen.
+5. Note that the Store Management section appears on the Home screen.
+6. Click on the Visit My Store link.
+7. Observe that the link opens in a new tab.
+
 ### Exclude WC Shipping for store that are only offering downloadable products #6917
 
 1. Start OBW and enter an address that is in the US.
