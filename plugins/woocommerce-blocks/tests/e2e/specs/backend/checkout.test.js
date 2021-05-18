@@ -30,21 +30,13 @@ if ( process.env.WOOCOMMERCE_BLOCKS_PHASE < 2 ) {
 describe( `${ block.name } Block`, () => {
 	describe( `before compatibility notice is dismissed`, () => {
 		beforeAll( async () => {
-			await page.evaluate( () => {
-				localStorage.setItem(
-					'wc-blocks_dismissed_compatibility_notices',
-					'[]'
-				);
-			} );
-			await visitBlockPage( `${ block.name } Block` );
-		} );
-
-		afterEach( async () => {
+			// make sure CartCheckoutCompatibilityNotice will appear
 			await page.evaluate( () => {
 				localStorage.removeItem(
 					'wc-blocks_dismissed_compatibility_notices'
 				);
 			} );
+			await visitBlockPage( `${ block.name } Block` );
 		} );
 
 		it( 'shows compatibility notice', async () => {
@@ -58,11 +50,6 @@ describe( `${ block.name } Block`, () => {
 	describe( 'after compatibility notice is dismissed', () => {
 		beforeAll( async () => {
 			await page.evaluate( () => {
-				localStorage.removeItem(
-					'wc-blocks_dismissed_compatibility_notices'
-				);
-			} );
-			await page.evaluate( () => {
 				localStorage.setItem(
 					'wc-blocks_dismissed_compatibility_notices',
 					'["checkout"]'
@@ -70,6 +57,13 @@ describe( `${ block.name } Block`, () => {
 			} );
 			await switchUserToAdmin();
 			await visitBlockPage( `${ block.name } Block` );
+		} );
+		afterAll( async () => {
+			await page.evaluate( () => {
+				localStorage.removeItem(
+					'wc-blocks_dismissed_compatibility_notices'
+				);
+			} );
 		} );
 
 		it( 'can only be inserted once', async () => {

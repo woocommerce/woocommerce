@@ -51,8 +51,9 @@ describe( `${ block.name } Block (frontend)`, () => {
 		await page.goto( productPermalink );
 		await shopper.addToCart();
 	} );
-
 	afterAll( async () => {
+		// empty cart from shortcode page
+		await shopper.goToCart();
 		await shopper.removeFromCart( 'Woo Single #1' );
 		await page.evaluate( () => {
 			localStorage.removeItem(
@@ -133,11 +134,8 @@ describe( `${ block.name } Block (frontend)`, () => {
 		] );
 
 		// go to checkout page
-		await page.waitForSelector( 'h1' );
-		let element = await page.$( 'h1' );
-		let title = await page.evaluate( ( el ) => el.textContent, element );
-		// shortcode checkout on CI / block on local env
-		expect( title ).toContain( 'Checkout' );
+		// note: shortcode checkout on CI / block on local env
+		await page.waitForSelector( 'h1', { text: 'Checkout' } );
 
 		// navigate back to cart block page
 		await page.goBack( { waitUntil: 'networkidle0' } );

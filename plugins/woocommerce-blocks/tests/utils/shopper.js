@@ -19,24 +19,28 @@ export const shopper = {
 		await page.goto( checkoutBlockPermalink, {
 			waitUntil: 'networkidle0',
 		} );
+		await page.waitForSelector( 'h1', { text: 'Checkout' } );
 	},
 
 	productIsInCheckoutBlock: async ( productTitle, quantity, total ) => {
-		await expect( page ).toClick( '.wc-block-components-panel__button' );
-		await expect( page ).toMatchElement(
-			'.wc-block-components-product-name',
-			{
-				text: productTitle,
-			}
+		// Make sure Order summary is expanded
+		const [ button ] = await page.$x(
+			`//button[contains(@aria-expanded, 'false')]//span[contains(text(), 'Order summary')]`
 		);
-		await expect( page ).toMatchElement(
-			'.wc-block-components-order-summary-item__quantity',
+		if ( button ) {
+			await button.click();
+		}
+		await page.waitForSelector( 'span', {
+			text: productTitle,
+		} );
+		await page.waitForSelector(
+			'div.wc-block-components-order-summary-item__quantity',
 			{
 				text: quantity,
 			}
 		);
-		await expect( page ).toMatchElement(
-			'.wc-block-components-product-price__value',
+		await page.waitForSelector(
+			'span.wc-block-components-product-price__value',
 			{
 				text: total,
 			}
