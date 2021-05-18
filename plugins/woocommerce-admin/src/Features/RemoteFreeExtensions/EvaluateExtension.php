@@ -14,29 +14,22 @@ use Automattic\WooCommerce\Admin\RemoteInboxNotifications\RuleEvaluator;
  */
 class EvaluateExtension {
 	/**
-	 * Evaluates the spec and returns the method.
+	 * Evaluates the spec and returns the extension.
 	 *
-	 * @param array $spec The method to evaluate.
-	 * @return array The evaluated method.
+	 * @param array $spec The extension section to evaluate.
+	 * @return array The evaluated extension section.
 	 */
 	public static function evaluate( $spec ) {
 		$rule_evaluator = new RuleEvaluator();
-		$method         = $spec;
 
-		if ( isset( $spec->is_visible ) ) {
-			$is_visible         = $rule_evaluator->evaluate( $spec->is_visible );
-			$method->is_visible = $is_visible;
-			// Return early if visibility does not pass.
-			if ( ! $is_visible ) {
-				return $method;
+		foreach ( $spec->plugins as $plugin ) {
+
+			if ( isset( $plugin->is_visible ) ) {
+				$is_visible         = $rule_evaluator->evaluate( $plugin->is_visible );
+				$plugin->is_visible = $is_visible;
 			}
 		}
 
-		if ( isset( $spec->is_configured ) ) {
-			$is_configured         = $rule_evaluator->evaluate( $method->is_configured );
-			$method->is_configured = $is_configured;
-		}
-
-		return $method;
+		return $spec;
 	}
 }

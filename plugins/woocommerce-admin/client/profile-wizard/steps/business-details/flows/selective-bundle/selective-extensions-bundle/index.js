@@ -2,18 +2,16 @@
  * External dependencies
  */
 import { useEffect, useState } from '@wordpress/element';
-import {
-	Button,
-	Card,
-	CheckboxControl,
-	__experimentalText as Text,
-} from '@wordpress/components';
+import { Button, Card, CheckboxControl, Spinner } from '@wordpress/components';
+import { Text } from '@woocommerce/experimental';
 import { Link } from '@woocommerce/components';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { Icon, chevronDown, chevronUp } from '@wordpress/icons';
 import interpolateComponents from 'interpolate-components';
-import { pluginNames } from '@woocommerce/data';
+import { pluginNames, SETTINGS_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
+import apiFetch from '@wordpress/api-fetch';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -53,9 +51,10 @@ const generatePluginDescriptionWithLink = (
 	} );
 };
 
-const installableExtensions = [
+const installableExtensionsData = [
 	{
 		title: __( 'Get the basics', 'woocommerce-admin' ),
+		key: 'basics',
 		plugins: [
 			{
 				slug: 'woocommerce-payments',
@@ -139,7 +138,8 @@ const installableExtensions = [
 		],
 	},
 	{
-		title: 'Grow your store',
+		title: __( 'Grow your store', 'woocommerce-admin' ),
+		key: 'grow',
 		plugins: [
 			{
 				slug: 'mailpoet',
@@ -319,6 +319,45 @@ const getVisiblePlugins = ( plugins, country, industry, productTypes ) => {
 	);
 };
 
+const transformRemoteExtensions = ( extensionData ) => {
+	return extensionData.map( ( section ) => {
+		const plugins = section.plugins.map( ( plugin ) => {
+			return {
+				...plugin,
+				description: generatePluginDescriptionWithLink(
+					plugin.description,
+					plugin.key
+				),
+				slug: plugin.key,
+				isVisible: () => true,
+			};
+		} );
+		return {
+			...section,
+			plugins,
+		};
+	} );
+};
+
+const baseValues = { install_extensions: true };
+const createInitialValues = ( extensions, country, industry, productTypes ) => {
+	return extensions.reduce( ( acc, curr ) => {
+		const plugins = getVisiblePlugins(
+			curr.plugins,
+			country,
+			industry,
+			productTypes
+		).reduce( ( pluginAcc, { slug } ) => {
+			return { ...pluginAcc, [ slug ]: true };
+		}, {} );
+
+		return {
+			...acc,
+			...plugins,
+		};
+	}, baseValues );
+};
+
 export const SelectiveExtensionsBundle = ( {
 	isInstallingActivating,
 	onSubmit,
@@ -327,29 +366,63 @@ export const SelectiveExtensionsBundle = ( {
 	productTypes,
 } ) => {
 	const [ showExtensions, setShowExtensions ] = useState( false );
-	const [ values, setValues ] = useState( {} );
+	const [ values, setValues ] = useState( baseValues );
+	const [ installableExtensions, setInstallableExtensions ] = useState( [
+		{ key: 'spinner', plugins: [] },
+	] );
+	const [ isFetching, setIsFetching ] = useState( true );
+
+	const allowMarketplaceSuggestions = useSelect( ( select ) =>
+		select( SETTINGS_STORE_NAME ).getSetting(
+			'wc_admin',
+			'allowMarketplaceSuggestions'
+		)
+	);
 
 	useEffect( () => {
-		const initialValues = installableExtensions.reduce(
-			( acc, curr ) => {
-				const plugins = getVisiblePlugins(
-					curr.plugins,
-					country,
-					industry,
-					productTypes
-				).reduce( ( pluginAcc, { slug } ) => {
-					return { ...pluginAcc, [ slug ]: true };
-				}, {} );
+		const setLocalInstallableExtensions = () => {
+			const initialValues = createInitialValues(
+				installableExtensionsData,
+				country,
+				industry,
+				productTypes
+			);
+			setInstallableExtensions( installableExtensionsData );
+			setValues( initialValues );
+			setIsFetching( false );
+		};
 
-				return {
-					...acc,
-					...plugins,
-				};
-			},
-			{ install_extensions: true }
-		);
-		setValues( initialValues );
-	}, [ country ] );
+		if (
+			window.wcAdminFeatures &&
+			window.wcAdminFeatures[ 'remote-extensions-list' ] === true &&
+			allowMarketplaceSuggestions
+		) {
+			apiFetch( {
+				path: '/wc-admin/onboarding/free-extensions',
+			} )
+				.then( ( results ) => {
+					const transformedExtensions = transformRemoteExtensions(
+						results
+					);
+					const initialValues = createInitialValues(
+						transformedExtensions,
+						country,
+						industry,
+						productTypes
+					);
+					setInstallableExtensions( transformedExtensions );
+					setValues( initialValues );
+					setIsFetching( false );
+				} )
+				.catch( () => {
+					// An error has occurred, default to local config
+					setLocalInstallableExtensions();
+				} );
+		} else {
+			// Use local config
+			setLocalInstallableExtensions();
+		}
+	}, [ country, industry, productTypes, allowMarketplaceSuggestions ] );
 
 	const getCheckboxChangeHandler = ( slug ) => {
 		return ( checked ) => {
@@ -415,28 +488,34 @@ export const SelectiveExtensionsBundle = ( {
 						/>
 					</div>
 					{ showExtensions &&
-						installableExtensions.map( ( { plugins, title } ) => (
-							<div key={ title }>
-								<div className="woocommerce-admin__business-details__selective-extensions-bundle__category">
-									{ title }
+						installableExtensions.map(
+							( { plugins, title, key } ) => (
+								<div key={ key }>
+									<div className="woocommerce-admin__business-details__selective-extensions-bundle__category">
+										{ title }
+									</div>
+									{ isFetching ? (
+										<Spinner />
+									) : (
+										getVisiblePlugins(
+											plugins,
+											country,
+											industry,
+											productTypes
+										).map( ( { description, slug } ) => (
+											<BundleExtensionCheckbox
+												key={ slug }
+												description={ description }
+												isChecked={ values[ slug ] }
+												onChange={ getCheckboxChangeHandler(
+													slug
+												) }
+											/>
+										) )
+									) }
 								</div>
-								{ getVisiblePlugins(
-									plugins,
-									country,
-									industry,
-									productTypes
-								).map( ( { description, slug } ) => (
-									<BundleExtensionCheckbox
-										key={ slug }
-										description={ description }
-										isChecked={ values[ slug ] }
-										onChange={ getCheckboxChangeHandler(
-											slug
-										) }
-									/>
-								) ) }
-							</div>
-						) ) }
+							)
+						) }
 				</div>
 				<div className="woocommerce-profile-wizard__business-details__free-features__action">
 					<Button

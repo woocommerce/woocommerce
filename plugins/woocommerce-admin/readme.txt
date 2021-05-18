@@ -85,6 +85,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Add: Add transient notices feature #6809
 - Add: Add transformers in remote inbox notifications #6948
 - Add: Get post install scripts from gateway and enqueue in client #6967
+- Add: Free extension list powered by remote config #6952
 - Dev: Update package-lock to fix versioning of local packages. #6843
 - Dev: Use rule processing for remote payment methods #6830
 - Dev: Update E2E jest config, so it correctly creates screenshots on failure. #6858
