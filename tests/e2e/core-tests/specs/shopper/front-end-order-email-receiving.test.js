@@ -29,7 +29,6 @@ const {
 const runOrderEmailReceivingTest = () => {
 	describe('Shopper Order Email Receiving', () => {
 		beforeAll(async () => {
-			await merchant.login();
 			await deleteAllEmailLogs();
 			simplePostIdValue = await createSimpleProduct();
 			await merchant.logout();

@@ -27,7 +27,6 @@ let customerOrderId;
 const runCheckoutPageTest = () => {
 	describe('Checkout page', () => {
 		beforeAll(async () => {
-			await merchant.login();
 			await createSimpleProduct();
 
 			// Set free shipping within California

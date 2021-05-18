@@ -15,7 +15,6 @@ let productId;
 const runProductEditDetailsTest = () => {
 	describe('Products > Edit Product', () => {
 		beforeAll(async () => {
-			await merchant.login();
 			productId = await createSimpleProduct();
 		});
 

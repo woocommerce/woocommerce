@@ -28,7 +28,6 @@ const runCartRedirectionTest = () => {
 	describe('Cart > Redirect to cart from shop', () => {
 		let simplePostIdValue;
 		beforeAll(async () => {
-			await merchant.login();
 			simplePostIdValue = await createSimpleProduct();
 
 			// Set checkbox in settings to enable cart redirection

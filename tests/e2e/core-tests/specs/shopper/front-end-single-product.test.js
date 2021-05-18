@@ -20,7 +20,6 @@ const simpleProductName = config.get( 'products.simple.name' );
 const runSingleProductPageTest = () => {
 	describe('Single Product Page', () => {
 		beforeAll(async () => {
-			await merchant.login();
 			simplePostIdValue = await createSimpleProduct();
 			await merchant.logout();
 		});
