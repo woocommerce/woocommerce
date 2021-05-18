@@ -345,7 +345,7 @@ const onCheckoutProcessingData = {
 	redirectUrl,
 	orderId,
 	customerId,
-	customerNote,
+	orderNotes,
 	processingResponse,
 };
 ```
@@ -355,7 +355,7 @@ The properties are:
 -   `redirectUrl`: This is a string that is the url the checkout will redirect to as returned by the processing on the server.
 -   `orderId`: Is the id of the current order being processed.
 -   `customerId`: Is the id for the customer making the purchase (that is attached to the order).
--   `customerNote`: This will be any custom note the customer left on the order.
+-   `orderNotes`: This will be any custom note the customer left on the order.
 -   `processingResponse`: This is the value of [`payment_result` from the checkout response](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/34e17c3622637dbe8b02fac47b5c9b9ebf9e3596/src/RestApi/StoreApi/Schemas/CheckoutSchema.php#L103-L138). The data exposed on this object is (via the object properties):
     -   `paymentStatus`: Whatever the status is for the payment after it was processed server side. Will be one of `success`, `failure`, `pending`, `error`.
     -   `paymentDetails`: This will be an arbitrary object that contains any data the payment method processing server side sends back to the client in the checkout processing response. Payment methods are able to hook in on the processing server side and set this data for returning.
