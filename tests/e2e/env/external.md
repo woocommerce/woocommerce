@@ -23,7 +23,11 @@ Each project will have its own begin test state and initialization script. For e
 wp core install --url=http://localhost:8084 --admin_user=admin --admin_password=password --admin_email=wooadmin@example.org
 wp plugin activate woocommerce
 wp theme install twentynineteen --activate
-wp user create customer customer@woocommercecoree2etestsuite.com --user_pass=password --role=customer
+wp user create customer customer@woocommercecoree2etestsuite.com \
+	--user_pass=password \
+	--role=subscriber \
+	--first_name='Jane' \
+	--last_name='Smith'
 ```
 
 ### Test Sequencer Setup

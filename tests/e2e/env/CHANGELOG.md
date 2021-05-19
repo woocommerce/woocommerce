@@ -1,5 +1,7 @@
 # Unreleased
 
+# 0.2.2
+
 ## Added
 
 - `takeScreenshotFor` utility function to take screenshots within tests
