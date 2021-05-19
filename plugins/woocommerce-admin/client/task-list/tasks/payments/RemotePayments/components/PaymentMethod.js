@@ -133,8 +133,8 @@ export const PaymentMethod = ( {
 		),
 		content: paymentGateway ? (
 			<PaymentConnect
-				method={ method }
 				markConfigured={ markConfigured }
+				paymentGateway={ paymentGateway }
 				recordConnectStartEvent={ recordConnectStartEvent }
 			/>
 		) : null,

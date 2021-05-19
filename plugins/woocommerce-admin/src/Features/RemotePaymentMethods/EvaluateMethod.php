@@ -21,21 +21,11 @@ class EvaluateMethod {
 	 */
 	public static function evaluate( $spec ) {
 		$rule_evaluator = new RuleEvaluator();
-		$method         = $spec;
+		$method         = (object) $spec;
 
-		if ( isset( $spec->is_visible ) ) {
-			$is_visible         = $rule_evaluator->evaluate( $spec->is_visible );
+		if ( isset( $method->is_visible ) ) {
+			$is_visible         = $rule_evaluator->evaluate( $method->is_visible );
 			$method->is_visible = $is_visible;
-			// Return early if visibility does not pass.
-			if ( ! $is_visible ) {
-				$method->is_configured = false;
-				return $method;
-			}
-		}
-
-		if ( isset( $spec->is_configured ) ) {
-			$is_configured         = $rule_evaluator->evaluate( $method->is_configured );
-			$method->is_configured = $is_configured;
 		}
 
 		return $method;

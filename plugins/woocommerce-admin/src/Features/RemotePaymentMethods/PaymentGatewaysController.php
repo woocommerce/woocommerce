@@ -38,6 +38,10 @@ class PaymentGatewaysController {
 			$data['oauth_connection_url'] = $gateway->get_oauth_connection_url();
 		}
 
+		if ( method_exists( $gateway, 'get_setup_help_text' ) ) {
+			$data['setup_help_text'] = $gateway->get_setup_help_text();
+		}
+
 		if ( method_exists( $gateway, 'get_required_settings_keys' ) ) {
 			$data['required_settings_keys'] = $gateway->get_required_settings_keys();
 		}

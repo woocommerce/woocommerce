@@ -365,7 +365,7 @@ class OnboardingTasks {
 	 *
 	 * @return array
 	 */
-	private static function get_stripe_supported_countries() {
+	public static function get_stripe_supported_countries() {
 		// https://stripe.com/global.
 		return array(
 			'AU',
