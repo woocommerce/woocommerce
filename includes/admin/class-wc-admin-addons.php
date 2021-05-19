@@ -535,6 +535,73 @@ class WC_Admin_Addons {
 	}
 
 	/**
+	 * Handles the output of a full-width block.
+	 *
+	 * @param array $section Section data.
+	 */
+	public static function output_promotion_block( $section ) {
+		if (
+			! current_user_can( 'install_plugins' ) ||
+			! current_user_can( 'activate_plugins' )
+		) {
+			return;
+		}
+
+		$section_object = (object) $section;
+
+		if ( ! empty( $section_object->geowhitelist ) ) {
+			$section_object->geowhitelist = explode( ',', $section_object->geowhitelist );
+		}
+
+		if ( ! empty( $section_object->geoblacklist ) ) {
+			$section_object->geoblacklist = explode( ',', $section_object->geoblacklist );
+		}
+
+		if ( ! self::show_extension( $section_object ) ) {
+			return;
+		}
+
+		?>
+		<div class="addons-banner-block addons-promotion-block">
+			<img
+				class="addons-img"
+				src="<?php echo esc_url( $section['image'] ); ?>"
+				alt="<?php echo esc_attr( $section['image_alt'] ); ?>"
+			/>
+			<div class="addons-promotion-block-content">
+				<h1 class="addons-promotion-block-title"><?php echo esc_html( $section['title'] ); ?></h1>
+				<div class="addons-promotion-block-description">
+					<?php echo wp_kses_post( $section['description'] ); ?>
+				</div>
+				<div class="addons-promotion-block-buttons">
+					<?php
+
+					if ( $section['button_1'] ) {
+						self::output_button(
+							$section['button_1_href'],
+							$section['button_1'],
+							'addons-button-expandable addons-button-solid',
+							$section['plugin']
+						);
+					}
+
+					if ( $section['button_2'] ) {
+						self::output_button(
+							$section['button_2_href'],
+							$section['button_2'],
+							'addons-button-expandable addons-button-outline-purple',
+							$section['plugin']
+						);
+					}
+
+					?>
+				</div>
+			</div>
+		</div>
+		<?php
+	}
+
+	/**
 	 * Handles the outputting of featured sections
 	 *
 	 * @param array $sections Section data.
@@ -565,6 +632,9 @@ class WC_Admin_Addons {
 					break;
 				case 'wcpay_banner_block':
 					self::output_wcpay_banner_block( (array) $section );
+					break;
+				case 'promotion_block':
+					self::output_promotion_block( (array) $section );
 					break;
 			}
 		}

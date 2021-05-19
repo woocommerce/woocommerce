@@ -109,24 +109,23 @@ class WC_Notes_Run_Db_Update {
 	 * @return int Created/Updated note id
 	 */
 	private static function update_needed_notice( $note_id = null ) {
-		$update_url = html_entity_decode(
+		$update_url =
 			add_query_arg(
 				array(
 					'do_update_woocommerce' => 'true',
-					'_nonce_action'         => 'wc_db_update',
-					'_nonce_name'           => 'wc_db_update_nonce',
 				),
 				wc_get_current_admin_url() ? wc_get_current_admin_url() : admin_url( 'admin.php?page=wc-settings' )
-			)
-		);
+			);
 
 		$note_actions = array(
 			array(
-				'name'    => 'update-db_run',
-				'label'   => __( 'Update WooCommerce Database', 'woocommerce' ),
-				'url'     => $update_url,
-				'status'  => 'unactioned',
-				'primary' => true,
+				'name'         => 'update-db_run',
+				'label'        => __( 'Update WooCommerce Database', 'woocommerce' ),
+				'url'          => $update_url,
+				'status'       => 'unactioned',
+				'primary'      => true,
+				'nonce_action' => 'wc_db_update',
+				'nonce_name'   => 'wc_db_update_nonce',
 			),
 			array(
 				'name'    => 'update-db_learn-more',
@@ -166,6 +165,10 @@ class WC_Notes_Run_Db_Update {
 		$note->clear_actions();
 		foreach ( $note_actions as $note_action ) {
 			$note->add_action( ...array_values( $note_action ) );
+
+			if ( isset( $note_action['nonce_action'] ) ) {
+				$note->add_nonce_to_action( $note_action['name'], $note_action['nonce_action'], $note_action['nonce_name'] );
+			}
 		}
 
 		return $note->save();
@@ -212,8 +215,6 @@ class WC_Notes_Run_Db_Update {
 			add_query_arg(
 				array(
 					'wc-hide-notice' => 'update',
-					'_nonce_action'  => 'woocommerce_hide_notices_nonce',
-					'_nonce_name'    => '_wc_notice_nonce',
 				),
 				wc_get_current_admin_url() ? remove_query_arg( 'do_update_woocommerce', wc_get_current_admin_url() ) : admin_url( 'admin.php?page=wc-settings' )
 			)
@@ -221,11 +222,13 @@ class WC_Notes_Run_Db_Update {
 
 		$note_actions = array(
 			array(
-				'name'    => 'update-db_done',
-				'label'   => __( 'Thanks!', 'woocommerce' ),
-				'url'     => $hide_notices_url,
-				'status'  => 'actioned',
-				'primary' => true,
+				'name'         => 'update-db_done',
+				'label'        => __( 'Thanks!', 'woocommerce' ),
+				'url'          => $hide_notices_url,
+				'status'       => 'actioned',
+				'primary'      => true,
+				'nonce_action' => 'woocommerce_hide_notices_nonce',
+				'nonce_name'   => '_wc_notice_nonce',
 			),
 		);
 
@@ -242,6 +245,10 @@ class WC_Notes_Run_Db_Update {
 		$note->clear_actions();
 		foreach ( $note_actions as $note_action ) {
 			$note->add_action( ...array_values( $note_action ) );
+
+			if ( isset( $note_action['nonce_action'] ) ) {
+				$note->add_nonce_to_action( $note_action['name'], $note_action['nonce_action'], $note_action['nonce_name'] );
+			}
 		}
 
 		$note->save();

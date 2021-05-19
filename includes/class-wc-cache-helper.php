@@ -42,14 +42,33 @@ class WC_Cache_Helper {
 	 */
 	public static function additional_nocache_headers( $headers ) {
 		$agent = isset( $_SERVER['HTTP_USER_AGENT'] ) ? wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+		$set_cache = false;
+
 		/**
 		 * Allow plugins to enable nocache headers. Enabled for Google weblight.
 		 *
-		 * @see   https://support.google.com/webmasters/answer/1061943?hl=en
 		 * @param bool $enable_nocache_headers Flag indicating whether to add nocache headers. Default: false.
 		 */
-		if ( false !== strpos( $agent, 'googleweblight' ) || apply_filters( 'woocommerce_enable_nocache_headers', false ) ) {
+		if ( apply_filters( 'woocommerce_enable_nocache_headers', false ) ) {
+			$set_cache = true;
+		}
+
+		/**
+		 * Enabled for Google weblight.
+		 *
+		 * @see https://support.google.com/webmasters/answer/1061943?hl=en
+		 */
+		if ( false !== strpos( $agent, 'googleweblight' ) ) {
 			// no-transform: Opt-out of Google weblight. https://support.google.com/webmasters/answer/6211428?hl=en.
+			$set_cache = true;
+		}
+
+		if ( false !== strpos( $agent, 'Chrome' ) && is_cart() ) {
+			$set_cache = true;
+		}
+
+		if ( $set_cache ) {
 			$headers['Cache-Control'] = 'no-transform, no-cache, no-store, must-revalidate';
 		}
 		return $headers;
