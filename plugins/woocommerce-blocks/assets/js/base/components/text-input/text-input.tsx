@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { forwardRef } from 'react';
-import PropTypes from 'prop-types';
+import { forwardRef, InputHTMLAttributes } from 'react';
 import classnames from 'classnames';
 import { useState } from '@wordpress/element';
 import { Label } from '@woocommerce/blocks-checkout';
@@ -12,7 +11,24 @@ import { Label } from '@woocommerce/blocks-checkout';
  */
 import './style.scss';
 
-const TextInput = forwardRef(
+interface TextInputProps
+	extends Omit<
+		InputHTMLAttributes< HTMLInputElement >,
+		'onChange' | 'onBlur'
+	> {
+	id: string;
+	ariaLabel?: string;
+	label?: string;
+	ariaDescribedBy?: string;
+	screenReaderLabel?: string;
+	help?: string;
+	feedback?: boolean | JSX.Element;
+	autoComplete?: string;
+	onChange: ( newValue: string ) => void;
+	onBlur?: ( newValue: string ) => void;
+}
+
+const TextInput = forwardRef< HTMLInputElement, TextInputProps >(
 	(
 		{
 			className,
@@ -29,7 +45,9 @@ const TextInput = forwardRef(
 			value = '',
 			onChange,
 			required = false,
-			onBlur = () => {},
+			onBlur = () => {
+				/* Do nothing */
+			},
 			feedback,
 		},
 		ref
@@ -57,8 +75,8 @@ const TextInput = forwardRef(
 						onChange( event.target.value );
 					} }
 					onFocus={ () => setIsActive( true ) }
-					onBlur={ () => {
-						onBlur();
+					onBlur={ ( event ) => {
+						onBlur( event.target.value );
 						setIsActive( false );
 					} }
 					aria-label={ ariaLabel || label }
@@ -92,20 +110,5 @@ const TextInput = forwardRef(
 		);
 	}
 );
-
-TextInput.propTypes = {
-	id: PropTypes.string.isRequired,
-	onChange: PropTypes.func.isRequired,
-	value: PropTypes.string,
-	ariaLabel: PropTypes.string,
-	ariaDescribedBy: PropTypes.string,
-	label: PropTypes.string,
-	screenReaderLabel: PropTypes.string,
-	disabled: PropTypes.bool,
-	help: PropTypes.string,
-	autoCapitalize: PropTypes.string,
-	autoComplete: PropTypes.string,
-	required: PropTypes.bool,
-};
 
 export default TextInput;
