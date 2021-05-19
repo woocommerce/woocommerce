@@ -34,4 +34,9 @@ export default [
 		description: 'Run wc_admin_daily job',
 		action: 'runWcAdminDailyJob',
 	},
+	{
+		command: 'Delete all products',
+		description: 'Delete all products',
+		action: 'deleteAllProducts',
+	},
 ];

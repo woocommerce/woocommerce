@@ -138,3 +138,16 @@ export function* runWcAdminDailyJob() {
 		} );
 	} );
 }
+
+export function* deleteAllProducts() {
+	if ( ! confirm( 'Are you sure you want to delete all of the products?' ) ) {
+		return;
+	}
+	
+	yield runCommand( 'Delete all products', function* () {
+		yield apiFetch( {
+			path: `${ API_NAMESPACE }/tools/delete-all-products/v1`,
+			method: 'POST',
+		} );
+	} );
+}

@@ -31,3 +31,4 @@ require( 'admin-notes/add-note.php' );
 require( 'tools/trigger-wca-install.php' );
 require( 'tools/run-wc-admin-daily.php' );
 require( 'options/rest-api.php' );
+require( 'tools/delete-all-products.php');
