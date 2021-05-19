@@ -1002,6 +1002,8 @@ class WC_AJAX {
 			);
 
 			if ( strstr( $amount, '%' ) ) {
+				// We need to calculate totals first, so that $order->get_total() is correct.
+				$order->calculate_totals( false );
 				$formatted_amount = $amount;
 				$percent          = floatval( trim( $amount, '%' ) );
 				$amount           = $order->get_total() * ( $percent / 100 );
