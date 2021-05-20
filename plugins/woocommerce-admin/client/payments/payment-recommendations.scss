@@ -1,7 +1,7 @@
 .woocommerce-recommended-payments-card {
 	margin: 0 15px 10px 0;
 	animation: isLoaded;
-	animation-duration: 2000ms;
+	animation-duration: 250ms;
 
 	.woocommerce-list__item {
 		> .woocommerce-list__item-inner {
@@ -44,6 +44,10 @@
 
 	.components-card__footer {
 		padding: $gap $gap-large;
+
+		.gridicon {
+			margin-left: $gap-smallest;
+		}
 	}
 
 	.woocommerce-list__item-enter {

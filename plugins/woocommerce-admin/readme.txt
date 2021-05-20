@@ -117,6 +117,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Update: Task list component with new Experimental Task list. #6849
 - Update: Experimental task list import to the experimental package. #6950
 - Update: Redirect to WC Home after setting up a payment method #6891
+- Update: Payment recommendation screen transition and add external link icon. #7022
 
 == 2.3.0 5/13/2021 ==
 - Add: Add plugin installer to allow installation of plugins via URL #6805

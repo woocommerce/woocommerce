@@ -23,6 +23,7 @@ import {
 	OPTIONS_STORE_NAME,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
+import ExternalIcon from 'gridicons/dist/external';
 
 /**
  * Internal dependencies
@@ -218,6 +219,7 @@ const PaymentRecommendations: React.FC = () => {
 			<CardFooter>
 				<Button href={ SEE_MORE_LINK } isTertiary>
 					{ __( 'See more options', 'woocommerce-admin' ) }
+					<ExternalIcon size={ 18 } />
 				</Button>
 			</CardFooter>
 		</Card>
