@@ -315,7 +315,6 @@ class WC_Auth {
 	 */
 	protected function auth_endpoint( $route ) {
 		ob_start();
-
 		$consumer_data = array();
 
 		try {
@@ -326,6 +325,18 @@ class WC_Auth {
 
 			// Login endpoint.
 			if ( 'login' === $route && ! is_user_logged_in() ) {
+
+				if ( defined( 'JETPACK__PLUGIN_DIR' ) ) {
+					require_once JETPACK__PLUGIN_DIR . 'modules/sso.php';
+					$want_to_bypass = Jetpack_SSO_Helpers::bypass_login_forward_wpcom();
+					global $action;
+					$action = 'login'; // TODO, work out safer way to do this bit
+					$url = $this->build_url( $data, 'authorize' );
+					// Set this so that jetpack saves the redirect cookie correctly
+					$_GET['redirect_to'] = $url;
+					do_action( 'login_init' );
+				}
+
 				wc_get_template(
 					'auth/form-login.php', array(
 						'app_name'     => wc_clean( $data['app_name'] ),
