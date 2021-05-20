@@ -602,9 +602,12 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 				$i = 1;
 				foreach ( $downloads as $download ) {
 					/* translators: %s: download number */
+					$this->column_names[ 'downloads:id' . $i ] = sprintf( __( 'Download %d ID', 'woocommerce' ), $i );
+					/* translators: %s: download number */
 					$this->column_names[ 'downloads:name' . $i ] = sprintf( __( 'Download %d name', 'woocommerce' ), $i );
 					/* translators: %s: download number */
 					$this->column_names[ 'downloads:url' . $i ] = sprintf( __( 'Download %d URL', 'woocommerce' ), $i );
+					$row[ 'downloads:id' . $i ]                 = $download->get_id();
 					$row[ 'downloads:name' . $i ]               = $download->get_name();
 					$row[ 'downloads:url' . $i ]                = $download->get_file();
 					$i++;
