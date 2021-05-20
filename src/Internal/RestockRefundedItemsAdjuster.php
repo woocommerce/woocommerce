@@ -45,7 +45,10 @@ class RestockRefundedItemsAdjuster {
 		if ( version_compare( $order_version, '5.4', '>=' ) ) {
 			return;
 		}
-
+       // If there are no refund lines, then this migration isn't necessary because restock related meta's wouldn't be set.
+		if ( 0 === count( $order->get_refunds() ) ) {
+			return;
+		}
 		if ( isset( $items['order_item_id'] ) ) {
 			foreach ( $items['order_item_id'] as $item_id ) {
 				$item = $this->order_factory::get_order_item( absint( $item_id ) );
