@@ -46,6 +46,8 @@ const runRefundOrderTest = () => {
 	describe('WooCommerce Orders > Refund an order', () => {
 		beforeAll(async () => {
 			await createSimpleProduct();
+
+			await merchant.login();
 			orderId = await createSimpleOrder();
 			await addProductToOrder(orderId, simpleProductName);
 

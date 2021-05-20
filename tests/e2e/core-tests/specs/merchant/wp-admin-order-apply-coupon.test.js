@@ -10,6 +10,7 @@ const {
 	uiUnblocked,
 	addProductToOrder,
 	evalAndClick,
+	merchant
 } = require( '@woocommerce/e2e-utils' );
 
 const config = require( 'config' );
@@ -27,7 +28,10 @@ const runOrderApplyCouponTest = () => {
 		beforeAll(async () => {
 			await createSimpleProduct();
 			couponCode = await createCoupon();
+			
+			await merchant.login();
 			orderId = await createSimpleOrder('Pending payment', simpleProductName);
+			
 			await Promise.all([
 				addProductToOrder(orderId, simpleProductName),
 
