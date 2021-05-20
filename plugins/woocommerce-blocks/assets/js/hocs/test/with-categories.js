@@ -97,7 +97,7 @@ describe( 'withCategories Component', () => {
 			expect( formatError ).toHaveBeenCalledTimes( 1 );
 			expect( props.error ).toEqual( formattedError );
 			expect( props.isLoading ).toBe( false );
-			expect( props.categories ).toBeNull();
+			expect( props.categories ).toEqual( [] );
 		} );
 	} );
 } );

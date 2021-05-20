@@ -112,6 +112,7 @@ class ProductsByTagBlock extends Component {
 						onOperatorChange={ ( value = 'any' ) =>
 							setAttributes( { tagOperator: value } )
 						}
+						isCompact={ true }
 					/>
 				</PanelBody>
 				<PanelBody

@@ -48,9 +48,15 @@
 	}
 }
 
-// This border has been upstreamed to WooCommerce Admin, so it can be removed
-// from here once @woocommerce/components gets updated.
-// https://github.com/woocommerce/woocommerce-admin/pull/5901
-.woocommerce-search-list__list {
-	border: 1px solid $gray-200;
+// Selectors with extra specificity to override some editor styles.
+.woocommerce-search-list__list.woocommerce-search-list__list {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+
+.woocommerce-search-list__selected.woocommerce-search-list__selected > ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
 }

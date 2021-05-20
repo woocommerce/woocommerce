@@ -214,7 +214,7 @@ const getMainConfig = ( options = {} ) => {
 		],
 		resolve: {
 			...resolve,
-			extensions: [ '.js', '.ts', '.tsx' ],
+			extensions: [ '.js', '.jsx', '.ts', '.tsx' ],
 		},
 	};
 };

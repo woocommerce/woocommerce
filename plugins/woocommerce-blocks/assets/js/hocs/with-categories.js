@@ -22,7 +22,7 @@ const withCategories = createHigherOrderComponent( ( OriginalComponent ) => {
 			this.state = {
 				error: null,
 				loading: false,
-				categories: null,
+				categories: [],
 			};
 			this.loadCategories = this.loadCategories.bind( this );
 		}
@@ -46,7 +46,7 @@ const withCategories = createHigherOrderComponent( ( OriginalComponent ) => {
 					const error = await formatError( e );
 
 					this.setState( {
-						categories: null,
+						categories: [],
 						loading: false,
 						error,
 					} );

@@ -18,6 +18,7 @@ import ErrorMessage from '@woocommerce/editor-components/error-placeholder/error
  * @param {Array}    props.selected  An array of selected products.
  * @param {Array}    props.products  An array of products to select from.
  * @param {boolean}  props.isLoading Whether or not the products are being loaded.
+ * @param {boolean}  props.isCompact Whether or not the control should have compact styles.
  *
  * @return {Function} A functional component.
  */
@@ -28,6 +29,7 @@ const ProductsControl = ( {
 	selected,
 	products,
 	isLoading,
+	isCompact,
 } ) => {
 	const messages = {
 		clear: __( 'Clear all products', 'woo-gutenberg-products-block' ),
@@ -65,6 +67,7 @@ const ProductsControl = ( {
 		<SearchListControl
 			className="woocommerce-products"
 			list={ products }
+			isCompact={ isCompact }
 			isLoading={ isLoading }
 			selected={ products.filter( ( { id } ) =>
 				selected.includes( id )
@@ -81,12 +84,14 @@ ProductsControl.propTypes = {
 	onSearch: PropTypes.func,
 	selected: PropTypes.array,
 	products: PropTypes.array,
+	isCompact: PropTypes.bool,
 	isLoading: PropTypes.bool,
 };
 
 ProductsControl.defaultProps = {
 	selected: [],
 	products: [],
+	isCompact: false,
 	isLoading: true,
 };
 

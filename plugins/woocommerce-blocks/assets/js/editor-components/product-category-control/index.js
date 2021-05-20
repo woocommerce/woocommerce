@@ -7,6 +7,7 @@ import { SearchListControl, SearchListItem } from '@woocommerce/components';
 import { SelectControl } from '@wordpress/components';
 import { withCategories } from '@woocommerce/block-hocs';
 import ErrorMessage from '@woocommerce/editor-components/error-placeholder/error-message.js';
+import classNames from 'classnames';
 
 /**
  * Internal dependencies
@@ -21,18 +22,12 @@ const ProductCategoryControl = ( {
 	onOperatorChange,
 	operator,
 	selected,
+	isCompact,
 	isSingle,
 	showReviewCount,
 } ) => {
 	const renderItem = ( args ) => {
 		const { item, search, depth = 0 } = args;
-		const classes = [ 'woocommerce-product-categories__item' ];
-		if ( search.length ) {
-			classes.push( 'is-searching' );
-		}
-		if ( depth === 0 && item.parent !== 0 ) {
-			classes.push( 'is-skip-level' );
-		}
 
 		const accessibleName = ! item.breadcrumbs.length
 			? item.name
@@ -66,8 +61,8 @@ const ProductCategoryControl = ( {
 			? sprintf(
 					/* translators: %d is the count of reviews. */
 					_n(
-						'%d Review',
-						'%d Reviews',
+						'%d review',
+						'%d reviews',
 						item.review_count,
 						'woo-gutenberg-products-block'
 					),
@@ -76,8 +71,8 @@ const ProductCategoryControl = ( {
 			: sprintf(
 					/* translators: %d is the count of products. */
 					_n(
-						'%d Product',
-						'%d Products',
+						'%d product',
+						'%d products',
 						item.count,
 						'woo-gutenberg-products-block'
 					),
@@ -85,9 +80,15 @@ const ProductCategoryControl = ( {
 			  );
 		return (
 			<SearchListItem
-				className={ classes.join( ' ' ) }
+				className={ classNames(
+					'woocommerce-product-categories__item',
+					'has-count',
+					{
+						'is-searching': search.length > 0,
+						'is-skip-level': depth === 0 && item.parent !== 0,
+					}
+				) }
 				{ ...args }
-				showCount
 				countLabel={ listItemCountLabel }
 				aria-label={ listItemAriaLabel }
 			/>
@@ -143,6 +144,7 @@ const ProductCategoryControl = ( {
 				onChange={ onChange }
 				renderItem={ renderItem }
 				messages={ messages }
+				isCompact={ isCompact }
 				isHierarchical
 				isSingle={ isSingle }
 			/>
@@ -204,6 +206,7 @@ ProductCategoryControl.propTypes = {
 	 * The list of currently selected category IDs.
 	 */
 	selected: PropTypes.array.isRequired,
+	isCompact: PropTypes.bool,
 	/**
 	 * Allow only a single selection. Defaults to false.
 	 */
@@ -212,6 +215,7 @@ ProductCategoryControl.propTypes = {
 
 ProductCategoryControl.defaultProps = {
 	operator: 'any',
+	isCompact: false,
 	isSingle: false,
 };
 
