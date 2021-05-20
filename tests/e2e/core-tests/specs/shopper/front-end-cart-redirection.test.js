@@ -31,6 +31,7 @@ const runCartRedirectionTest = () => {
 			simplePostIdValue = await createSimpleProduct();
 
 			// Set checkbox in settings to enable cart redirection
+			await merchant.login();
 			await merchant.openSettings('products');
 			await setCheckbox('#woocommerce_cart_redirect_after_add');
 			await settingsPageSaveChanges();
