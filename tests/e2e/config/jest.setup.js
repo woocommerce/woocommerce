@@ -19,19 +19,21 @@ async function trashExistingPosts() {
 
 	// If this selector doesn't exist there are no posts for us to delete.
 	const bulkSelector = await page.$( '#bulk-action-selector-top' );
-	if ( bulkSelector ) {
-		// Select all posts.
-		await page.waitForSelector( '#cb-select-all-1' );
-		await page.click( '#cb-select-all-1' );
-		// Select the "bulk actions" > "trash" option.
-		await page.select( '#bulk-action-selector-top', 'trash' );
-		// Submit the form to send all draft/scheduled/published posts to the trash.
-		await page.click( '#doaction' );
-		await page.waitForXPath(
-			'//*[contains(@class, "updated notice")]/p[contains(text(), "moved to the Trash.")]'
-		);
+	if ( ! bulkSelector ) {
+		await merchant.logout();
+		return;
 	}
-	
+
+	// Select all posts.
+	await page.waitForSelector( '#cb-select-all-1' );
+	await page.click( '#cb-select-all-1' );
+	// Select the "bulk actions" > "trash" option.
+	await page.select( '#bulk-action-selector-top', 'trash' );
+	// Submit the form to send all draft/scheduled/published posts to the trash.
+	await page.click( '#doaction' );
+	await page.waitForXPath(
+		'//*[contains(@class, "updated notice")]/p[contains(text(), "moved to the Trash.")]'
+	);
 	await merchant.logout();
 }
 
