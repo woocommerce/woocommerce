@@ -60,7 +60,10 @@ class RestockRefundedItemsAdjuster {
 				if ( 'line_item' !== $item->get_type() ) {
 					continue;
 				}
-
+    // there could be code paths in custom code which don't update version number but still update the items.
+	if ( '' !== $item->get_meta( '_restock_refunded_items', true ) ) {
+					continue;
+	}
 				$refunded_item_quantity = abs( $order->get_qty_refunded_for_item( $item->get_id() ) );
 				$item->add_meta_data( '_restock_refunded_items', $refunded_item_quantity, false );
 				$item->save();
