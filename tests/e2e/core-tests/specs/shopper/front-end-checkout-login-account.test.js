@@ -29,6 +29,7 @@ const runCheckoutLoginAccountTest = () => {
 			await createSimpleProduct();
 
 			// Set checkbox for logging to account during checkout
+			await merchant.login();
 			await merchant.openSettings('account');
 			await setCheckbox('#woocommerce_enable_checkout_login_reminder');
 			await settingsPageSaveChanges();
