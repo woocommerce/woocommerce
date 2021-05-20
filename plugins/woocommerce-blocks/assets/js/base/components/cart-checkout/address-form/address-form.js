@@ -2,7 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
-import { ValidatedTextInput } from '@woocommerce/blocks-checkout';
+import { ValidatedTextInput } from '@woocommerce/base-components/text-input';
 import {
 	BillingCountryInput,
 	ShippingCountryInput,
@@ -11,10 +11,7 @@ import {
 	BillingStateInput,
 	ShippingStateInput,
 } from '@woocommerce/base-components/state-input';
-import {
-	useValidationContext,
-	ValidationInputError,
-} from '@woocommerce/base-context';
+import { useValidationContext } from '@woocommerce/base-context';
 import { useEffect, useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { withInstanceId } from '@woocommerce/base-hocs/with-instance-id';
@@ -77,19 +74,9 @@ const AddressForm = ( {
 } ) => {
 	const {
 		getValidationError,
-		getValidationErrorId,
 		setValidationErrors,
 		clearValidationError,
-		hideValidationError,
 	} = useValidationContext();
-
-	const textInputValidationFunctions = {
-		getValidationError,
-		getValidationErrorId,
-		setValidationErrors,
-		clearValidationError,
-		hideValidationError,
-	};
 
 	const currentFields = useShallowEqual( fields );
 
@@ -214,9 +201,8 @@ const AddressForm = ( {
 								[ field.key ]: newValue,
 							} )
 						}
+						errorMessage={ field.errorMessage }
 						required={ field.required }
-						inputErrorComponent={ ValidationInputError }
-						{ ...textInputValidationFunctions }
 					/>
 				);
 			} ) }

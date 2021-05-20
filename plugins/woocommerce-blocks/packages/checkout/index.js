@@ -1,7 +1,6 @@
 export * from './totals';
 export * from './utils';
 export * from './slot';
-export * from './text-input';
 export * from './registry';
 export { default as ExperimentalOrderMeta } from './order-meta';
 export { default as ExperimentalOrderShippingPackages } from './order-shipping-packages';

@@ -2,11 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { ValidatedTextInput } from '@woocommerce/blocks-checkout';
-import {
-	useValidationContext,
-	ValidationInputError,
-} from '@woocommerce/base-context';
+import { ValidatedTextInput } from '@woocommerce/base-components/text-input';
 
 /**
  * Renders a phone number input.
@@ -18,21 +14,6 @@ import {
  * @return {*} The component.
  */
 const PhoneNumber = ( { isRequired = false, value = '', onChange } ) => {
-	const {
-		getValidationError,
-		getValidationErrorId,
-		setValidationErrors,
-		clearValidationError,
-		hideValidationError,
-	} = useValidationContext();
-
-	const textInputValidationFunctions = {
-		getValidationError,
-		getValidationErrorId,
-		setValidationErrors,
-		clearValidationError,
-		hideValidationError,
-	};
 	return (
 		<ValidatedTextInput
 			id="phone"
@@ -46,8 +27,6 @@ const PhoneNumber = ( { isRequired = false, value = '', onChange } ) => {
 			}
 			value={ value }
 			onChange={ onChange }
-			inputErrorComponent={ ValidationInputError }
-			{ ...textInputValidationFunctions }
 		/>
 	);
 };
