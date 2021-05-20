@@ -4,12 +4,12 @@
 import { forwardRef, InputHTMLAttributes } from 'react';
 import classnames from 'classnames';
 import { useState } from '@wordpress/element';
-import { Label } from '@woocommerce/blocks-checkout';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
+import Label from '../label';
 
 interface TextInputProps
 	extends Omit<
@@ -49,18 +49,21 @@ const TextInput = forwardRef< HTMLInputElement, TextInputProps >(
 				/* Do nothing */
 			},
 			feedback,
+			...rest
 		},
 		ref
 	) => {
 		const [ isActive, setIsActive ] = useState( false );
-
 		return (
 			<div
 				className={ classnames(
 					'wc-block-components-text-input',
 					className,
 					{
-						'is-active': isActive || value,
+						'is-active':
+							isActive ||
+							value ||
+							( value === 0 && type === 'number' ),
 					}
 				) }
 			>
@@ -87,6 +90,7 @@ const TextInput = forwardRef< HTMLInputElement, TextInputProps >(
 							: ariaDescribedBy
 					}
 					required={ required }
+					{ ...rest }
 				/>
 				<Label
 					label={ label }

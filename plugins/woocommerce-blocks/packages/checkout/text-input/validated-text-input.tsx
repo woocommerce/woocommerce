@@ -2,12 +2,8 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useCallback, useRef, useEffect, useState } from 'react';
+import { useCallback, useRef, useEffect, useState, Component } from 'react';
 import classnames from 'classnames';
-import {
-	ValidationInputError,
-	useValidationContext,
-} from '@woocommerce/base-context';
 import { withInstanceId } from '@woocommerce/base-hocs/with-instance-id';
 
 /**
@@ -37,6 +33,18 @@ type ValidatedTextInputProps = (
 	focusOnMount?: boolean;
 	showError?: boolean;
 	onChange: ( newValue: string ) => void;
+	// @todo Type this properly when validation context is typed
+	getValidationError: (
+		errorId: string
+	) => {
+		message?: string;
+		hidden?: boolean;
+	};
+	hideValidationError: ( errorId: string ) => void;
+	setValidationErrors: ( errors: Record< string, unknown > ) => void;
+	clearValidationError: ( errorId: string ) => void;
+	getValidationErrorId: ( errorId: string ) => string;
+	inputErrorComponent: typeof Component;
 };
 
 const ValidatedTextInput = ( {
@@ -49,18 +57,16 @@ const ValidatedTextInput = ( {
 	focusOnMount = false,
 	onChange,
 	showError = true,
+	getValidationError,
+	hideValidationError,
+	setValidationErrors,
+	clearValidationError,
+	getValidationErrorId,
+	inputErrorComponent: ValidationInputError,
 	...rest
 }: ValidatedTextInputProps ) => {
 	const [ isPristine, setIsPristine ] = useState( true );
 	const inputRef = useRef< HTMLInputElement >( null );
-	const {
-		getValidationError,
-		hideValidationError,
-		setValidationErrors,
-		clearValidationError,
-		getValidationErrorId,
-	} = useValidationContext();
-
 	const textInputId =
 		typeof id !== 'undefined' ? id : 'textinput-' + instanceId;
 	const errorIdString = errorId !== undefined ? errorId : textInputId;
