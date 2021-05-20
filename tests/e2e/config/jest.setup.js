@@ -1,10 +1,8 @@
-import { SimpleProduct, Coupon } from '@woocommerce/api';
 import {
 	visitAdminPage,
-	switchUserToTest,
 	clearLocalStorage,
 	setBrowserViewport,
-	withRestApi,
+	withRestApi
 } from '@woocommerce/e2e-utils';
 
 const { merchant } = require( '@woocommerce/e2e-utils' );
@@ -35,7 +33,7 @@ async function trashExistingPosts() {
 	await page.waitForXPath(
 		'//*[contains(@class, "updated notice")]/p[contains(text(), "moved to the Trash.")]'
 	);
-	await switchUserToTest();
+	await merchant.logout();
 }
 
 // Before every test suite run, delete all content created by the test. This ensures
