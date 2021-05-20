@@ -35,6 +35,7 @@ const runAddNewShippingZoneTest = () => {
 	describe('WooCommerce Shipping Settings - Add new shipping zone', () => {
 		beforeAll(async () => {
 			await createSimpleProduct();
+			await merchant.login();
 			await deleteAllShippingZones();
 		});
 

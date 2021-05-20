@@ -16,6 +16,7 @@ const runProductEditDetailsTest = () => {
 	describe('Products > Edit Product', () => {
 		beforeAll(async () => {
 			productId = await createSimpleProduct();
+			await merchant.login();
 		});
 
 		it('can edit a product and save the changes', async () => {

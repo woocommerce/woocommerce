@@ -42,6 +42,8 @@ const runCartCalculateShippingTest = () => {
 		beforeAll(async () => {
 			await createSimpleProduct(firstProductName);
 			await createSimpleProduct(secondProductName, secondProductPrice);
+
+			await merchant.login();
 			await merchant.openNewShipping();
 
 			// Add a new shipping zone Germany with Free shipping
