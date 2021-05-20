@@ -3,8 +3,12 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useState, useEffect, useRef } from '@wordpress/element';
-import { Button, Panel, Label } from '@woocommerce/blocks-checkout';
-import { ValidatedTextInput } from '@woocommerce/base-components/text-input';
+import {
+	Button,
+	Panel,
+	Label,
+	ValidatedTextInput,
+} from '@woocommerce/blocks-checkout';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
 import PropTypes from 'prop-types';
 import { withInstanceId } from '@woocommerce/base-hocs/with-instance-id';
@@ -26,7 +30,21 @@ const TotalsCoupon = ( {
 } ) => {
 	const [ couponValue, setCouponValue ] = useState( '' );
 	const currentIsLoading = useRef( false );
-	const { getValidationError, getValidationErrorId } = useValidationContext();
+	const {
+		getValidationError,
+		getValidationErrorId,
+		setValidationErrors,
+		clearValidationError,
+		hideValidationError,
+	} = useValidationContext();
+
+	const textInputValidationFunctions = {
+		getValidationError,
+		getValidationErrorId,
+		setValidationErrors,
+		clearValidationError,
+		hideValidationError,
+	};
 
 	const validationError = getValidationError( 'coupon' );
 
@@ -88,6 +106,8 @@ const TotalsCoupon = ( {
 							validateOnMount={ false }
 							focusOnMount={ true }
 							showError={ false }
+							inputErrorComponent={ ValidationInputError }
+							{ ...textInputValidationFunctions }
 						/>
 						<Button
 							className="wc-block-components-totals-coupon__button"

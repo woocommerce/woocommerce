@@ -1,6 +1,6 @@
 {
 	"extends": "../../../../tsconfig.base.json",
 	"compilerOptions": {},
-	"include": [ ".", "../../../../packages/prices", "../context/hooks", "../../type-defs" ],
+	"include": [ ".", "../../../../packages/prices", "../../../../packages/checkout", "../context/hooks", "../../type-defs" ],
 	"exclude": [ "**/test/**" ]
 }
