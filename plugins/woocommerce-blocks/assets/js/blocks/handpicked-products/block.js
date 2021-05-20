@@ -106,6 +106,7 @@ class ProductsBlock extends Component {
 							const ids = value.map( ( { id } ) => id );
 							setAttributes( { products: ids } );
 						} }
+						isCompact={ true }
 					/>
 				</PanelBody>
 			</InspectorControls>

@@ -4,9 +4,12 @@
 import { __, _n, sprintf } from '@wordpress/i18n';
 import PropTypes from 'prop-types';
 import { SearchListControl, SearchListItem } from '@woocommerce/components';
-import { SelectControl, Spinner } from '@wordpress/components';
+import { SelectControl } from '@wordpress/components';
+import { withInstanceId } from '@wordpress/compose';
 import { withAttributes } from '@woocommerce/block-hocs';
 import ErrorMessage from '@woocommerce/editor-components/error-placeholder/error-message.js';
+import classNames from 'classnames';
+import ExpandableSearchListItem from '@woocommerce/editor-components/expandable-search-list-item/expandable-search-list-item.tsx';
 
 /**
  * Internal dependencies
@@ -20,43 +23,54 @@ const ProductAttributeTermControl = ( {
 	onChange,
 	onExpandAttribute,
 	onOperatorChange,
+	instanceId,
+	isCompact,
 	isLoading,
 	operator,
 	selected,
 	termsAreLoading,
 	termsList,
 } ) => {
-	const onSelectAttribute = ( item ) => {
-		return () => {
-			onChange( [] );
-			onExpandAttribute( item.id );
-		};
-	};
-
 	const renderItem = ( args ) => {
 		const { item, search, depth = 0 } = args;
 		const classes = [
 			'woocommerce-product-attributes__item',
 			'woocommerce-search-list__item',
+			{
+				'is-searching': search.length > 0,
+				'is-skip-level': depth === 0 && item.parent !== 0,
+			},
 		];
-		if ( search.length ) {
-			classes.push( 'is-searching' );
-		}
-		if ( depth === 0 && item.parent ) {
-			classes.push( 'is-skip-level' );
-		}
 
 		if ( ! item.breadcrumbs.length ) {
-			return [
-				<SearchListItem
-					key={ `attr-${ item.id }` }
+			const isSelected = expandedAttribute === item.id;
+			return (
+				<ExpandableSearchListItem
 					{ ...args }
-					className={ classes.join( ' ' ) }
-					isSelected={ expandedAttribute === item.id }
-					onSelect={ onSelectAttribute }
-					isSingle
+					className={ classNames( ...classes, {
+						'is-selected': isSelected,
+					} ) }
+					isSelected={ isSelected }
+					item={ item }
+					isLoading={ termsAreLoading }
 					disabled={ item.count === '0' }
-					aria-expanded={ expandedAttribute === item.id }
+					onSelect={ ( { id } ) => {
+						return () => {
+							onChange( [] );
+							onExpandAttribute( id );
+						};
+					} }
+					name={ `attributes-${ instanceId }` }
+					countLabel={ sprintf(
+						/* translators: %d is the count of terms. */
+						_n(
+							'%d term',
+							'%d terms',
+							item.count,
+							'woo-gutenberg-products-block'
+						),
+						item.count
+					) }
 					aria-label={ sprintf(
 						/* translators: %1$s is the item name, %2$d is the count of terms for the item. */
 						_n(
@@ -68,27 +82,38 @@ const ProductAttributeTermControl = ( {
 						item.name,
 						item.count
 					) }
-				/>,
-				expandedAttribute === item.id && termsAreLoading && (
-					<div
-						key="loading"
-						className={
-							'woocommerce-search-list__item woocommerce-product-attributes__item' +
-							'depth-1 is-loading is-not-active'
-						}
-					>
-						<Spinner />
-					</div>
-				),
-			];
+				/>
+			);
 		}
+
+		const itemName = `${ item.breadcrumbs[ 0 ] }: ${ item.name }`;
 
 		return (
 			<SearchListItem
-				className={ classes.join( ' ' ) }
 				{ ...args }
-				showCount
-				aria-label={ `${ item.breadcrumbs[ 0 ] }: ${ item.name }` }
+				name={ `terms-${ instanceId }` }
+				className={ classNames( ...classes, 'has-count' ) }
+				countLabel={ sprintf(
+					/* translators: %d is the count of products. */
+					_n(
+						'%d product',
+						'%d products',
+						item.count,
+						'woo-gutenberg-products-block'
+					),
+					item.count
+				) }
+				aria-label={ sprintf(
+					/* translators: %1$s is the attribute name, %2$d is the count of products for that attribute. */
+					_n(
+						'%1$s, has %2$d product',
+						'%1$s, has %2$d products',
+						item.count,
+						'woo-gutenberg-products-block'
+					),
+					itemName,
+					item.count
+				) }
 			/>
 		);
 	};
@@ -147,6 +172,7 @@ const ProductAttributeTermControl = ( {
 				onChange={ onChange }
 				renderItem={ renderItem }
 				messages={ messages }
+				isCompact={ isCompact }
 				isHierarchical
 			/>
 			{ !! onOperatorChange && (
@@ -212,13 +238,15 @@ ProductAttributeTermControl.propTypes = {
 	error: PropTypes.object,
 	expandedAttribute: PropTypes.number,
 	onExpandAttribute: PropTypes.func,
+	isCompact: PropTypes.bool,
 	isLoading: PropTypes.bool,
 	termsAreLoading: PropTypes.bool,
 	termsList: PropTypes.object,
 };
 
 ProductAttributeTermControl.defaultProps = {
+	isCompact: false,
 	operator: 'any',
 };
 
-export default withAttributes( ProductAttributeTermControl );
+export default withAttributes( withInstanceId( ProductAttributeTermControl ) );
