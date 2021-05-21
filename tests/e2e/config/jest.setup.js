@@ -1,4 +1,3 @@
-import { SimpleProduct, Coupon } from '@woocommerce/api';
 import {
 	visitAdminPage,
 	switchUserToTest,
@@ -8,6 +7,10 @@ import {
 } from '@woocommerce/e2e-utils';
 
 const { merchant } = require( '@woocommerce/e2e-utils' );
+const { addConsoleSuppression } = require( '@woocommerce/e2e-environment' );
+
+// @todo: remove this once https://github.com/woocommerce/woocommerce-admin/issues/6992 has been addressed
+addConsoleSuppression( 'woocommerce_shared_settings' );
 
 /**
  * Navigates to the post listing screen and bulk-trashes any posts which exist.
