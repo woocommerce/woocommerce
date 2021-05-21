@@ -1,6 +1,6 @@
 export const TaskTitles = {
 	storeDetails: 'Store details',
-	addPayments: 'Choose payment methods',
+	addPayments: 'Set up payments',
 	wooPayments:
 		'Set up WooCommerce PaymentsBy setting up, you are agreeing to the Terms of Service2 minutes',
 	addProducts: 'Add products',

@@ -95,14 +95,14 @@ export function getAllTasks( {
 	).includes( 'woocommerce-payments' );
 
 	let purchaseAndInstallText = __(
-		'Add paid extensions to your store',
+		'Add paid extensions to my store',
 		'woocommerce-admin'
 	);
 
 	if ( uniqueItemsList.length === 1 ) {
 		const { name: itemName } = uniqueItemsList[ 0 ];
 		const purchaseAndInstallFormat = __(
-			'Add %s to your store',
+			'Add %s to my store',
 			'woocommerce-admin'
 		);
 		purchaseAndInstallText = sprintf( purchaseAndInstallFormat, itemName );
@@ -138,7 +138,7 @@ export function getAllTasks( {
 		},
 		{
 			key: 'products',
-			title: __( 'Add products', 'woocommerce-admin' ),
+			title: __( 'Add my products', 'woocommerce-admin' ),
 			container: <Products />,
 			onClick: () => {
 				onTaskSelect( 'products' );
@@ -195,7 +195,7 @@ export function getAllTasks( {
 		},
 		{
 			key: 'payments',
-			title: __( 'Choose payment methods', 'woocommerce-admin' ),
+			title: __( 'Set up payments', 'woocommerce-admin' ),
 			container: <Payments />,
 			completed: hasPaymentGateway,
 			onClick: () => {
@@ -211,7 +211,7 @@ export function getAllTasks( {
 		},
 		{
 			key: 'tax',
-			title: __( 'Add tax rates', 'woocommerce-admin' ),
+			title: __( 'Set up tax', 'woocommerce-admin' ),
 			container: <Tax />,
 			onClick: () => {
 				onTaskSelect( 'tax' );
@@ -224,7 +224,7 @@ export function getAllTasks( {
 		},
 		{
 			key: 'shipping',
-			title: __( 'Set up shipping costs', 'woocommerce-admin' ),
+			title: __( 'Set up shipping', 'woocommerce-admin' ),
 			container: <Shipping />,
 			onClick: () => {
 				if ( shippingZonesCount > 0 ) {
@@ -246,7 +246,7 @@ export function getAllTasks( {
 		},
 		{
 			key: 'appearance',
-			title: __( 'Personalize your store', 'woocommerce-admin' ),
+			title: __( 'Personalize my store', 'woocommerce-admin' ),
 			container: <Appearance />,
 			onClick: () => {
 				onTaskSelect( 'appearance' );

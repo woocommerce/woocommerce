@@ -67,7 +67,7 @@ const getPageTitle = ( defaultTitle ) => {
 	// If it's the task list then render a title based on which task the user is on.
 	return (
 		{
-			payments: __( 'Choose payment methods', 'woocommerce-admin' ),
+			payments: __( 'Set up payments', 'woocommerce-admin' ),
 			tax: __( 'Add tax rates', 'woocommerce-admin' ),
 			appearance: __( 'Personalize your store', 'woocommerce-admin' ),
 			products: __( 'Add products', 'woocommerce-admin' ),

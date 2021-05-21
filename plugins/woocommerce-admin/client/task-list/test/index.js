@@ -39,7 +39,7 @@ jest.mock( '@wordpress/data', () => ( {
 	useDispatch: jest.fn(),
 } ) );
 
-const TASK_LIST_HEADING = 'Get ready to start selling';
+const TASK_LIST_HEADING = 'Finish setup';
 const EXTENDED_TASK_LIST_HEADING = 'Things to do next';
 
 describe( 'TaskDashboard and TaskList', () => {
@@ -144,7 +144,7 @@ describe( 'TaskDashboard and TaskList', () => {
 		type: 'extension',
 	};
 
-	it( 'renders the "Get ready to start selling" and "Things to do next" tasks lists', async () => {
+	it( 'renders the "Finish setup" and "Things to do next" tasks lists', async () => {
 		apiFetch.mockResolvedValue( {} );
 		getAllTasks.mockReturnValue( tasks );
 		const { container } = render( <TaskDashboard query={ {} } /> );

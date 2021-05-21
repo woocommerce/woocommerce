@@ -86,9 +86,7 @@ describe( 'Header', () => {
 			queryByTestId( 'header-back-button' )
 		).not.toBeEmptyDOMElement();
 
-		expect(
-			queryByText( 'Choose payment methods' )
-		).not.toBeEmptyDOMElement();
+		expect( queryByText( 'Set up payments' ) ).not.toBeEmptyDOMElement();
 	} );
 
 	it( 'should render decoded breadcrumb name', () => {
