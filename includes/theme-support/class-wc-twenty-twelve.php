@@ -7,8 +7,6 @@
  * @package WooCommerce\Classes
  */
 
-use Automattic\WooCommerce\Internal\ThemeSupport;
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -32,7 +30,8 @@ class WC_Twenty_Twelve {
 		add_theme_support( 'wc-product-gallery-zoom' );
 		add_theme_support( 'wc-product-gallery-lightbox' );
 		add_theme_support( 'wc-product-gallery-slider' );
-		wc_get_container()->get( ThemeSupport::class )->add_default_options(
+		add_theme_support(
+			'woocommerce',
 			array(
 				'thumbnail_image_width' => 200,
 				'single_image_width'    => 300,
