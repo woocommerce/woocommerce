@@ -102,6 +102,7 @@ function wc_importer_default_special_english_mappings( $mappings ) {
 		'Attribute %d visible'  => 'attributes:visible',
 		'Attribute %d global'   => 'attributes:taxonomy',
 		'Attribute %d default'  => 'attributes:default',
+		'Download %d ID'        => 'downloads:id',
 		'Download %d name'      => 'downloads:name',
 		'Download %d URL'       => 'downloads:url',
 		'Meta: %s'              => 'meta:',
