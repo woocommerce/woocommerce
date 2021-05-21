@@ -47,6 +47,7 @@ final class BlockTypesController {
 	protected function init() {
 		add_action( 'init', array( $this, 'register_blocks' ) );
 		add_action( 'woocommerce_login_form_end', array( $this, 'redirect_to_field' ) );
+		add_filter( 'widget_types_to_hide_from_legacy_widget_block', array( $this, 'hide_legacy_widgets_with_block_equivalent' ) );
 	}
 
 	/**
@@ -74,6 +75,18 @@ final class BlockTypesController {
 			return;
 		}
 		echo '<input type="hidden" name="redirect" value="' . esc_attr( esc_url_raw( wp_unslash( $_GET['redirect_to'] ) ) ) . '" />'; // phpcs:ignore WordPress.Security.NonceVerification
+	}
+
+	/**
+	 * Hide legacy widgets with a feature complete block equivalent in the inserter
+	 * and prevent them from showing as an option in the Legacy Widget block.
+	 *
+	 * @param array $widget_types An array of widgets hidden in core.
+	 * @return array $widget_types An array inluding the WooCommerce widgets to hide.
+	 */
+	public function hide_legacy_widgets_with_block_equivalent( $widget_types ) {
+		array_push( $widget_types, 'woocommerce_product_search', 'woocommerce_product_categories', 'woocommerce_recent_reviews' );
+		return $widget_types;
 	}
 
 	/**
