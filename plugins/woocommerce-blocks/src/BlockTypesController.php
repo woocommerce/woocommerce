@@ -118,7 +118,7 @@ final class BlockTypesController {
 		/**
 		 * This disables specific blocks in Widget Areas by not registering them.
 		 */
-		if ( 'themes.php' === $pagenow ) {
+		if ( in_array( $pagenow, [ 'themes.php', 'customize.php' ], true ) ) {
 			$block_types = array_diff(
 				$block_types,
 				[
