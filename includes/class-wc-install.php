@@ -620,8 +620,8 @@ class WC_Install {
 		add_option( 'woocommerce_demo_store', 'no', '', 'no' );
 
 		// Define initial tax classes.
-		if (is_new_install()) {
-			//Moved behind only for new install
+		if ( self::is_new_install() ) {
+			// Moved behind only for new install.
 			WC_Tax::create_tax_class( __( 'Reduced rate', 'woocommerce' ) );
 			WC_Tax::create_tax_class( __( 'Zero rate', 'woocommerce' ) );
 		}
