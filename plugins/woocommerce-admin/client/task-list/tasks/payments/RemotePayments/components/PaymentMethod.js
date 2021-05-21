@@ -12,7 +12,7 @@ import {
 } from '@woocommerce/data';
 import { Plugins, Stepper, WooRemotePayment } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
-import { useEffect, useState } from '@wordpress/element';
+import { useEffect, useState, useMemo, useCallback } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { useSlot } from '@woocommerce/experimental';
 
@@ -92,8 +92,8 @@ export const PaymentMethod = ( {
 		.map( ( pluginSlug ) => pluginNames[ pluginSlug ] )
 		.join( ' ' + __( 'and', 'woocommerce-admin' ) + ' ' );
 
-	const installStep =
-		plugins && plugins.length
+	const installStep = useMemo( () => {
+		return plugins && plugins.length
 			? {
 					key: 'install',
 					label: sprintf(
@@ -122,6 +122,7 @@ export const PaymentMethod = ( {
 					isComplete: ! pluginsToInstall.length,
 			  }
 			: null;
+	}, [ pluginsToInstall.length ] );
 
 	const connectStep = {
 		key: 'connect',
@@ -140,18 +141,22 @@ export const PaymentMethod = ( {
 		) : null,
 	};
 
-	const DefaultStepper = ( props ) => (
-		<Stepper
-			isVertical
-			isPending={
-				! installStep.isComplete ||
-				isOptionsRequesting ||
-				isFetchingPaymentGateway
-			}
-			currentStep={ installStep.isComplete ? 'connect' : 'install' }
-			steps={ [ installStep, connectStep ] }
-			{ ...props }
-		/>
+	const stepperPending =
+		! installStep.isComplete ||
+		isOptionsRequesting ||
+		isFetchingPaymentGateway;
+
+	const DefaultStepper = useCallback(
+		( props ) => (
+			<Stepper
+				isVertical
+				isPending={ stepperPending }
+				currentStep={ installStep.isComplete ? 'connect' : 'install' }
+				steps={ [ installStep, connectStep ] }
+				{ ...props }
+			/>
+		),
+		[ stepperPending, installStep ]
 	);
 
 	return (

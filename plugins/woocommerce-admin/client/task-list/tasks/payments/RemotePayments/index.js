@@ -6,7 +6,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
 import { OPTIONS_STORE_NAME, ONBOARDING_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import { useMemo, useState } from '@wordpress/element';
+import { useMemo, useState, useCallback } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -90,34 +90,39 @@ export const RemotePayments = ( { query } ) => {
 		[ methods ]
 	);
 
-	const markConfigured = async ( methodKey, queryParams = {} ) => {
-		const method = methods.find( ( option ) => option.key === methodKey );
+	const markConfigured = useCallback(
+		async ( methodKey, queryParams = {} ) => {
+			const method = methods.find(
+				( option ) => option.key === methodKey
+			);
 
-		if ( ! method ) {
-			throw `Method ${ methodKey } not found in available methods list`;
-		}
+			if ( ! method ) {
+				throw `Method ${ methodKey } not found in available methods list`;
+			}
 
-		setEnabledMethods( {
-			...enabledMethods,
-			[ methodKey ]: true,
-		} );
+			setEnabledMethods( {
+				...enabledMethods,
+				[ methodKey ]: true,
+			} );
 
-		enableMethod( method.optionName );
+			enableMethod( method.optionName );
 
-		recordEvent( 'tasklist_payment_connect_method', {
-			payment_method: methodKey,
-		} );
+			recordEvent( 'tasklist_payment_connect_method', {
+				payment_method: methodKey,
+			} );
 
-		getHistory().push(
-			getNewPath( { ...queryParams, task: 'payments' }, '/', {} )
-		);
-	};
+			getHistory().push(
+				getNewPath( { ...queryParams, task: 'payments' }, '/', {} )
+			);
+		},
+		[ enabledMethods, methods ]
+	);
 
-	const recordConnectStartEvent = ( methodName ) => {
+	const recordConnectStartEvent = useCallback( ( methodName ) => {
 		recordEvent( 'tasklist_payment_connect_start', {
 			payment_method: methodName,
 		} );
-	};
+	}, [] );
 
 	const currentMethod = useMemo( () => {
 		if ( ! query.method || isResolving || ! methods.length ) {
