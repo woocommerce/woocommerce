@@ -76,7 +76,7 @@ jQuery( function( $ ) {
 		wp.customize.widgetsPreview.WidgetPartial
 	);
 	if ( hasSelectiveRefresh ) {
-		wp.customize.selectiveRefresh.on( 'partial-content-rendered', function() {
+		wp.customize.selectiveRefresh.bind( 'partial-content-rendered', function() {
 			init_price_filter();
 		} );
 	}
