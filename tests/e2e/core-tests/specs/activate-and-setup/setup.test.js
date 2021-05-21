@@ -27,6 +27,9 @@ const {
 
 const runInitialStoreSettingsTest = () => {
 	describe('Store owner can finish initial store setup', () => {
+		beforeAll(async () => {
+			await merchant.login();
+		});
 
 		it('can enable tax rates and calculations', async () => {
 			// Go to general settings page
