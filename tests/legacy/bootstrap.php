@@ -103,13 +103,7 @@ class WC_Unit_Tests_Bootstrap {
 	 * @throws Exception Error when initializing one of the hacks.
 	 */
 	private function initialize_code_hacker() {
-		$wp_dir = getenv( 'WP_TESTS_WP_DIR' ) ? getenv( 'WP_TESTS_WP_DIR' ) : sys_get_temp_dir() . '/wordpress';
-		CodeHacker::initialize(
-			array(
-				$this->plugin_dir . '/includes/',
-				$wp_dir . '/wp-includes/class-wp-customize-manager.php',
-			)
-		);
+		CodeHacker::initialize( array( __DIR__ . '/../../includes/' ) );
 
 		$replaceable_functions = include_once __DIR__ . '/mockable-functions.php';
 		if ( ! empty( $replaceable_functions ) ) {
