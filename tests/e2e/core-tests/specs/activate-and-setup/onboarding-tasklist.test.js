@@ -24,6 +24,10 @@ const shippingZoneNameUS = config.get( 'addresses.customer.shipping.country' );
 
 const runOnboardingFlowTest = () => {
 	describe('Store owner can go through store Onboarding', () => {
+		beforeAll(async () => {
+			await merchant.login();
+		});
+
 		if ( IS_RETEST_MODE ) {
 			it('can reset onboarding to default settings', async () => {
 				await withRestApi.resetOnboarding();
@@ -48,6 +52,10 @@ const runOnboardingFlowTest = () => {
 
 const runTaskListTest = () => {
 	describe('Store owner can go through setup Task List', () => {
+		beforeAll(async () => {
+			await merchant.login();
+		});
+		
 		it('can setup shipping', async () => {
 			await page.evaluate(() => {
 				document.querySelector('.woocommerce-list__item-title').scrollIntoView();

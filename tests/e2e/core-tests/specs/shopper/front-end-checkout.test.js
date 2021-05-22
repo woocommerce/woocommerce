@@ -27,10 +27,10 @@ let customerOrderId;
 const runCheckoutPageTest = () => {
 	describe('Checkout page', () => {
 		beforeAll(async () => {
-			await merchant.login();
 			await createSimpleProduct();
 
 			// Set free shipping within California
+			await merchant.login();
 			await addShippingZoneAndMethod('Free Shipping CA', 'state:US:CA', ' ', 'free_shipping');
 			// Go to general settings page
 			await merchant.openSettings('general');

@@ -17,9 +17,7 @@ const simpleProductName = config.get( 'products.simple.name' );
 const runMyAccountPayOrderTest = () => {
 	describe('Customer can pay for their order through My Account', () => {
 		beforeAll(async () => {
-			await merchant.login();
 			simplePostIdValue = await createSimpleProduct();
-			await merchant.logout();
 			await shopper.login();
 			await shopper.goToProduct(simplePostIdValue);
 			await shopper.addToCart(simpleProductName);

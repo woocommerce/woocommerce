@@ -45,8 +45,9 @@ const clickAndWaitForSelector = async ( buttonSelector, resultSelector ) => {
 const runRefundOrderTest = () => {
 	describe('WooCommerce Orders > Refund an order', () => {
 		beforeAll(async () => {
-			await merchant.login();
 			await createSimpleProduct();
+
+			await merchant.login();
 			orderId = await createSimpleOrder();
 			await addProductToOrder(orderId, simpleProductName);
 
