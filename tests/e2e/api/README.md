@@ -34,7 +34,7 @@ client = HTTPClientFactory.build( 'https://example.com' )
     .create();
 
 // You can then use the client to make API requests.
-httpClient.get( '/wc/v3/products' ).then( ( response ) => {
+client.get( '/wc/v3/products' ).then( ( response ) => {
   // Access the status code from the response.
   response.statusCode;
   // Access the headers from the response.
