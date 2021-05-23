@@ -78,8 +78,11 @@ class WC_Payment_Gateways {
 			'WC_Gateway_BACS',
 			'WC_Gateway_Cheque',
 			'WC_Gateway_COD',
-			'WC_Gateway_Paypal',
 		);
+
+		if ( $this->should_load_paypal_standard() ) {
+			$load_gateways[] = 'WC_Gateway_Paypal';
+		}
 
 		// Filter.
 		$load_gateways = apply_filters( 'woocommerce_payment_gateways', $load_gateways );
@@ -218,5 +221,16 @@ class WC_Payment_Gateways {
 		}
 
 		update_option( 'woocommerce_gateway_order', $order );
+	}
+
+	/**
+	 * Determines if PayPal Standard should be loaded.
+	 *
+	 * @since 5.5.0
+	 * @return bool Whether PayPal Standard should be loaded or not.
+	 */
+	protected function should_load_paypal_standard() {
+		$paypal = new WC_Gateway_Paypal();
+		return $paypal->should_load();
 	}
 }
