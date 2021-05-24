@@ -66,7 +66,7 @@ class InstalledExtensions {
 			'mailchimp-for-woocommerce',
 			'creative-mail-by-constant-contact',
 			'facebook-for-woocommerce',
-			'kliken-marketing-for-google',
+			'google-listings-and-ads',
 			'hubspot-for-woocommerce',
 			'woocommerce-amazon-ebay-integration',
 		];
@@ -158,7 +158,7 @@ class InstalledExtensions {
 	 * @return array|bool
 	 */
 	protected static function get_google_extension_data() {
-		$slug = 'kliken-marketing-for-google';
+		$slug = 'google-listings-and-ads';
 
 		if ( ! PluginsHelper::is_plugin_installed( $slug ) ) {
 			return false;
@@ -167,17 +167,18 @@ class InstalledExtensions {
 		$data         = self::get_extension_base_data( $slug );
 		$data['icon'] = plugins_url( 'images/marketing/google.svg', WC_ADMIN_PLUGIN_FILE );
 
-		if ( 'activated' === $data['status'] && function_exists( 'kk_wc_plugin' ) && class_exists( '\Kliken\WcPlugin\Helper' ) ) {
+		if ( 'activated' === $data['status'] && function_exists( 'woogle_get_container' ) && class_exists( '\Automattic\WooCommerce\GoogleListingsAndAds\MerchantCenter\MerchantCenterService' ) ) {
 
-			$kliken_settings = \Kliken\WcPlugin\Helper::get_plugin_options();
+			$merchant_center = woogle_get_container()->get( \Automattic\WooCommerce\GoogleListingsAndAds\MerchantCenter\MerchantCenterService::class );
 
-			// Use same check as the Kliken Get Started Page.
-			if ( \Kliken\WcPlugin\Helper::is_valid_account_id( $kliken_settings['account_id'] ) ) {
-				$data['status'] = 'configured';
+			if ( $merchant_center->is_setup_complete() ) {
+				$data['status']      = 'configured';
+				$data['settingsUrl'] = admin_url( 'admin.php?page=wc-admin&path=/google/settings' );
+			} else {
+				$data['settingsUrl'] = admin_url( 'admin.php?page=wc-admin&path=/google/start' );
 			}
 
-			$data['settingsUrl'] = admin_url( 'admin.php?page=wc-settings&tab=integration&section=kk_wcintegration' );
-			$data['docsUrl']     = 'https://docs.woocommerce.com/document/google-ads/';
+			$data['docsUrl'] = 'https://docs.woocommerce.com/document/google-listings-and-ads/';
 		}
 
 		return $data;
