@@ -4,6 +4,7 @@
 
 - Support for re-running setup and shopper tests
 - Shopper Order Email Receiving
+- New tests - See [README.md](https://github.com/woocommerce/woocommerce/blob/trunk/tests/e2e/core-tests/README.md) for list of available tests
 
 ## Fixed
 
