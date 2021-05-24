@@ -56,6 +56,8 @@ export { getLeaderboard, searchItemsByString } from './items/utils';
 export { NAVIGATION_STORE_NAME } from './navigation';
 export { withNavigationHydration } from './navigation/with-navigation-hydration';
 
+export { PAYMENT_GATEWAYS_STORE_NAME } from './payment-gateways';
+
 export {
 	getFilterQuery,
 	getSummaryNumbers,
