@@ -6,7 +6,9 @@ import TYPES from './action-types';
 const DEFAULT_STATE = {
 	currentlyRunning: {},
 	errorMessages: [],
+	cronJobs: false,
 	messages: {},
+	params: [],
 	status: '',
 };
 
@@ -52,6 +54,18 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 				currentlyRunning: {
 					...state,
 					[ action.command ]: false,
+				},
+			};
+		case TYPES.SET_CRON_JOBS:
+			return {
+				...state,
+				cronJobs: action.cronJobs,
+			};
+		case TYPES.ADD_COMMAND_PARAMS:
+			return {
+				...state,
+				params: {
+					[ action.source ]: action.params,
 				},
 			};
 		default:
