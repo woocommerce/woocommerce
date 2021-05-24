@@ -57,7 +57,7 @@ const installableExtensionsData = [
 		key: 'basics',
 		plugins: [
 			{
-				slug: 'woocommerce-payments',
+				key: 'woocommerce-payments',
 				description: generatePluginDescriptionWithLink(
 					__(
 						'Accept credit cards with {{link}}WooCommerce Payments{{/link}}',
@@ -67,15 +67,18 @@ const installableExtensionsData = [
 				),
 				isVisible: ( countryCode, industry ) => {
 					const hasCbdIndustry = ( industry || [] ).some(
-						( { slug } ) => {
-							return slug === 'cbd-other-hemp-derived-products';
+						( { industrySlug } ) => {
+							return (
+								industrySlug ===
+								'cbd-other-hemp-derived-products'
+							);
 						}
 					);
 					return isWCPaySupported( countryCode ) && ! hasCbdIndustry;
 				},
 			},
 			{
-				slug: 'woocommerce-services:shipping',
+				key: 'woocommerce-services:shipping',
 				description: generatePluginDescriptionWithLink(
 					__(
 						'Print shipping labels with {{link}}WooCommerce Shipping{{/link}}',
@@ -100,7 +103,7 @@ const installableExtensionsData = [
 				},
 			},
 			{
-				slug: 'woocommerce-services:tax',
+				key: 'woocommerce-services:tax',
 				description: generatePluginDescriptionWithLink(
 					__(
 						'Get automated sales tax with {{link}}WooCommerce Tax{{/link}}',
@@ -126,7 +129,7 @@ const installableExtensionsData = [
 				},
 			},
 			{
-				slug: 'jetpack',
+				key: 'jetpack',
 				description: generatePluginDescriptionWithLink(
 					__(
 						'Enhance speed and security with {{link}}Jetpack{{/link}}',
@@ -142,7 +145,7 @@ const installableExtensionsData = [
 		key: 'grow',
 		plugins: [
 			{
-				slug: 'mailpoet',
+				key: 'mailpoet',
 				description: generatePluginDescriptionWithLink(
 					__(
 						'Level up your email marketing with {{link}}MailPoet{{/link}}',
@@ -153,7 +156,7 @@ const installableExtensionsData = [
 				),
 			},
 			{
-				slug: 'facebook-for-woocommerce',
+				key: 'facebook-for-woocommerce',
 				description: generatePluginDescriptionWithLink(
 					__(
 						'Market on {{link}}Facebook{{/link}}',
@@ -163,7 +166,7 @@ const installableExtensionsData = [
 				),
 			},
 			{
-				slug: 'google-listings-and-ads',
+				key: 'google-listings-and-ads',
 				description: generatePluginDescriptionWithLink(
 					__(
 						'Drive sales with {{link}}Google Listings and Ads{{/link}}',
@@ -173,7 +176,7 @@ const installableExtensionsData = [
 				),
 			},
 			{
-				slug: 'mailchimp-for-woocommerce',
+				key: 'mailchimp-for-woocommerce',
 				description: generatePluginDescriptionWithLink(
 					__(
 						'Contact customers with {{link}}Mailchimp{{/link}}',
@@ -183,7 +186,7 @@ const installableExtensionsData = [
 				),
 			},
 			{
-				slug: 'creative-mail-by-constant-contact',
+				key: 'creative-mail-by-constant-contact',
 				description: generatePluginDescriptionWithLink(
 					__(
 						'Emails made easy with {{link}}Creative Mail{{/link}}',
@@ -326,10 +329,9 @@ const transformRemoteExtensions = ( extensionData ) => {
 				...plugin,
 				description: generatePluginDescriptionWithLink(
 					plugin.description,
-					plugin.key
+					plugin.product
 				),
-				slug: plugin.key,
-				isVisible: () => true,
+				isVisible: () => plugin.is_visible,
 			};
 		} );
 		return {
@@ -347,8 +349,8 @@ const createInitialValues = ( extensions, country, industry, productTypes ) => {
 			country,
 			industry,
 			productTypes
-		).reduce( ( pluginAcc, { slug } ) => {
-			return { ...pluginAcc, [ slug ]: true };
+		).reduce( ( pluginAcc, { key } ) => {
+			return { ...pluginAcc, [ key ]: true };
 		}, {} );
 
 		return {
@@ -424,11 +426,11 @@ export const SelectiveExtensionsBundle = ( {
 		}
 	}, [ country, industry, productTypes, allowMarketplaceSuggestions ] );
 
-	const getCheckboxChangeHandler = ( slug ) => {
+	const getCheckboxChangeHandler = ( key ) => {
 		return ( checked ) => {
 			const newState = {
 				...values,
-				[ slug ]: checked,
+				[ key ]: checked,
 			};
 
 			const allExtensionsDisabled =
@@ -444,7 +446,7 @@ export const SelectiveExtensionsBundle = ( {
 			} else {
 				setValues( {
 					...values,
-					[ slug ]: checked,
+					[ key ]: checked,
 					install_extensions: true,
 				} );
 			}
@@ -489,8 +491,8 @@ export const SelectiveExtensionsBundle = ( {
 					</div>
 					{ showExtensions &&
 						installableExtensions.map(
-							( { plugins, title, key } ) => (
-								<div key={ key }>
+							( { plugins, title, key: sectionKey } ) => (
+								<div key={ sectionKey }>
 									<div className="woocommerce-admin__business-details__selective-extensions-bundle__category">
 										{ title }
 									</div>
@@ -502,13 +504,13 @@ export const SelectiveExtensionsBundle = ( {
 											country,
 											industry,
 											productTypes
-										).map( ( { description, slug } ) => (
+										).map( ( { description, key } ) => (
 											<BundleExtensionCheckbox
-												key={ slug }
+												key={ key }
 												description={ description }
-												isChecked={ values[ slug ] }
+												isChecked={ values[ key ] }
 												onChange={ getCheckboxChangeHandler(
-													slug
+													key
 												) }
 											/>
 										) )
