@@ -326,13 +326,32 @@ class WC_Auth {
 			// Login endpoint.
 			if ( 'login' === $route && ! is_user_logged_in() ) {
 
+				/**
+				* If a merchant is using the WordPress SSO (handled through Jetpack)
+				* to manage their authorisation then it is likely they'll find that
+				* their username and password do not work through this form. We
+				* instead need to redirect them to the WordPress login so that they
+				* can then be redirected back here with a valid token.
+				*
+				* @since 5.3.0
+				*/
 				if ( defined( 'JETPACK__PLUGIN_DIR' ) ) {
 					require_once JETPACK__PLUGIN_DIR . 'modules/sso.php';
+					// Jetpack SSO uses the global action to determine whether or not
+					// it should insert itself, unfortunately we don't have an action
+					// at this point (likely because it's been sanitised out) so
+					// we need to force set it.
 					global $action;
-					$action = 'login'; // TODO, work out safer way to do this bit
-					$url = $this->build_url( $data, 'authorize' );
-					// Set this so that jetpack saves the redirect cookie correctly
+					$action = 'login';
+					$url    = $this->build_url( $data, 'authorize' );
+
+					// Jetpack uses the contents of this $_GET variable
+					// to set the redirect cookie so we need to set it here before
+					// triggering the login to ensure that the rest of the flow works.
 					$_GET['redirect_to'] = $url;
+
+					// Jetpack hooks into this action to decide whether or not to
+					// perform the redirect.
 					do_action( 'login_init' );
 				}
 
