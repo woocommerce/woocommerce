@@ -110,7 +110,7 @@
 
 		// Select all/none
 		$( '.woocommerce' ).on( 'click', '.select_all', function() {
-			$( this ).closest( 'td' ).find( 'select option' ).attr( 'selected', 'selected' );
+			$( this ).closest( 'td' ).find( 'select option' ).prop( 'selected', true );
 			$( this ).closest( 'td' ).find( 'select' ).trigger( 'change' );
 			return false;
 		});
