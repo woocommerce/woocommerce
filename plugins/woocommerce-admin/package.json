@@ -128,7 +128,7 @@
 		"react-transition-group": "4.4.1",
 		"react-visibility-sensor": "5.1.1",
 		"redux": "4.0.5",
-		"typescript": "4.2.2"
+		"typescript": "4.2.4"
 	},
 	"devDependencies": {
 		"@automattic/color-studio": "2.5.0",
