@@ -242,15 +242,16 @@ class Chart extends Component {
 		};
 
 		return (
-			<SelectControl
-				className="woocommerce-chart__interval-select"
-				value={ interval }
-				options={ allowedIntervals.map( ( allowedInterval ) => ( {
-					value: allowedInterval,
-					label: intervalLabels[ allowedInterval ],
-				} ) ) }
-				onChange={ this.setInterval }
-			/>
+			<div className="woocommerce-chart__interval-select">
+				<SelectControl
+					value={ interval }
+					options={ allowedIntervals.map( ( allowedInterval ) => ( {
+						value: allowedInterval,
+						label: intervalLabels[ allowedInterval ],
+					} ) ) }
+					onChange={ this.setInterval }
+				/>
+			</div>
 		);
 	}
 

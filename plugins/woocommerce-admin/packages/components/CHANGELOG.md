@@ -1,3 +1,7 @@
+# Unreleased
+
+-   Fix style regression with the Chart header. #7002
+
 # 6.2.0
 
 -   Fix `autocompleter` for custom Search in `CompareFilter` #6911

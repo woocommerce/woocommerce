@@ -87,8 +87,20 @@
 		border: 0;
 		box-shadow: none;
 
+		.components-input-control__backdrop {
+			display: none;
+		}
+
 		&:not(:disabled):not([aria-disabled='true']):focus {
 			@include button-style__focus-active();
+
+			& ~ .components-input-control__backdrop {
+				display: block;
+			}
+		}
+
+		& ~ .components-input-control__backdrop {
+			display: none;
 		}
 	}
 }
