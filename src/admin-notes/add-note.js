@@ -2,9 +2,8 @@
  * External dependencies.
  */
 import { useState } from '@wordpress/element';
-import { Button } from '@wordpress/components';
+import { Button, SelectControl } from '@wordpress/components';
 import apiFetch from '@wordpress/api-fetch';
-import { SelectControl } from '@wordpress/components';
 
 
 export const AddNote = () => {
