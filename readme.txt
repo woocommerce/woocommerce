@@ -160,7 +160,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 5.4.0 Beta 2021-05-18 =
+= 5.4.0 RC 2021-05-24 =
 
 **WooCommerce**
 
@@ -178,8 +178,9 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Localization - Added Venezuelan states. #29477
 * Fix - Removed rounding at several places to better support precision when prices are entered more than 2dp. #29318
 * Fix - Migrate deprecated jQuery 3 functions. #29044
-* Fix - Controls to change image and thumbnail sizes in theme customisation UI are now displayed even if there's a theme support class defining default values for those. #28187
 * Add - dates_are_gmt parameters in REST API to searched posts using the post_date_gmt column.
+* Add - labels and searching terms in WooCommerce Navigation link block variations. #29772
+* dev: Introduce an option for assignment of variations for Remote Inbox Notification A/B testing
 
 **WooCommerce Admin - 2.3.0**
 
