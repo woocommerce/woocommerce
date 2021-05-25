@@ -73,7 +73,7 @@ export const useCustomerData = (): {
 	billingData: CartResponseBillingAddress;
 	shippingAddress: CartResponseShippingAddress;
 	setBillingData: ( data: CartResponseBillingAddress ) => void;
-	setShippingAddress: ( data: CartResponseBillingAddress ) => void;
+	setShippingAddress: ( data: CartResponseShippingAddress ) => void;
 } => {
 	const { updateCustomerData } = useDispatch( storeKey );
 	const { addErrorNotice, removeNotice } = useStoreNotices();

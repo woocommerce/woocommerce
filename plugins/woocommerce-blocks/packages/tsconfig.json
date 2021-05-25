@@ -5,7 +5,7 @@
 		".",
 		"../assets/js/icons",
 		"../assets/js/settings",
-		"../assets/js/type-defs",
+		"../assets/js/types",
 		"../assets/js/base/components",
 		"../assets/js/base/hooks",
 		"../settings/shared/index.ts",

@@ -1,26 +1,17 @@
 /* eslint-disable camelcase -- API responses have camelcase properties */
 /**
- * External dependencies
+ * Internal dependencies
  */
+import { CurrencyResponse } from './currency';
 import {
 	CartImageItem,
 	CartItemPrices,
 	CartItemTotals,
 	CartVariationItem,
 	CatalogVisibility,
-} from '@woocommerce/type-defs/cart';
+} from './cart';
 
-export interface CurrencyResponseInfo {
-	currency_code: string;
-	currency_symbol: string;
-	currency_minor_unit: number;
-	currency_decimal_separator: string;
-	currency_thousand_separator: string;
-	currency_prefix: string;
-	currency_suffix: string;
-}
-
-export interface CartResponseTotalsItem extends CurrencyResponseInfo {
+export interface CartResponseTotalsItem extends CurrencyResponse {
 	total_discount: string;
 	total_discount_tax: string;
 }
@@ -61,7 +52,7 @@ export type ExtensionsData =
 	| Record< string, never >;
 
 export interface CartResponseShippingPackageShippingRate
-	extends CurrencyResponseInfo {
+	extends CurrencyResponse {
 	rate_id: string;
 	name: string;
 	description: string;
@@ -110,7 +101,7 @@ export interface CartResponseVariationItem {
 	value: string;
 }
 
-export interface CartResponseItemPrices extends CurrencyResponseInfo {
+export interface CartResponseItemPrices extends CurrencyResponse {
 	price: string;
 	regular_price: string;
 	sale_price: string;
@@ -123,7 +114,7 @@ export interface CartResponseItemPrices extends CurrencyResponseInfo {
 	};
 }
 
-export interface CartResponseItemTotals extends CurrencyResponseInfo {
+export interface CartResponseItemTotals extends CurrencyResponse {
 	line_subtotal: string;
 	line_subtotal_tax: string;
 	line_total: string;
@@ -160,7 +151,7 @@ export interface CartResponseTotalsTaxLineItem {
 	rate: string;
 }
 
-export interface CartResponseFeeItemTotals extends CurrencyResponseInfo {
+export interface CartResponseFeeItemTotals extends CurrencyResponse {
 	total: string;
 	total_tax: string;
 }
@@ -171,7 +162,7 @@ export type CartResponseFeeItem = {
 	totals: CartResponseFeeItemTotals;
 };
 
-export interface CartResponseTotals extends CurrencyResponseInfo {
+export interface CartResponseTotals extends CurrencyResponse {
 	total_items: string;
 	total_items_tax: string;
 	total_fees: string;

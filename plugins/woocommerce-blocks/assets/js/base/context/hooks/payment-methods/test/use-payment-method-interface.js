@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { prepareTotalItems } from '../use-payment-method-interface';
+import { prepareTotalItems } from '../utils';
 
 describe( 'prepareTotalItems', () => {
 	const fixture = {
@@ -17,21 +17,25 @@ describe( 'prepareTotalItems', () => {
 	};
 	const expected = [
 		{
+			key: 'total_items',
 			label: 'Subtotal:',
 			value: 200,
 			valueWithTax: 220,
 		},
 		{
+			key: 'total_fees',
 			label: 'Fees:',
 			value: 100,
 			valueWithTax: 110,
 		},
 		{
+			key: 'total_discount',
 			label: 'Discount:',
 			value: 350,
 			valueWithTax: 400,
 		},
 		{
+			key: 'total_tax',
 			label: 'Taxes:',
 			value: 30,
 			valueWithTax: 30,
@@ -40,6 +44,7 @@ describe( 'prepareTotalItems', () => {
 	const expectedWithShipping = [
 		...expected,
 		{
+			key: 'total_shipping',
 			label: 'Shipping:',
 			value: 50,
 			valueWithTax: 55,

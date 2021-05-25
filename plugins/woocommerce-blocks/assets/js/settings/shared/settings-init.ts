@@ -1,3 +1,8 @@
+/**
+ * External dependencies
+ */
+import { SymbolPosition } from '@woocommerce/type-defs/currency';
+
 declare global {
 	interface Window {
 		wcSettings: Record< string, unknown >;
@@ -12,7 +17,7 @@ export interface WooCommerceSiteCurrency {
 	// The symbol for the currency (eg '$')
 	symbol: string;
 	// The position for the symbol ('left', or 'right')
-	symbolPosition: 'left' | 'right' | 'left_space' | 'right_space';
+	symbolPosition: SymbolPosition;
 	// The string used for the decimal separator.
 	decimalSeparator: string;
 	// The string used for the thousands separator.
