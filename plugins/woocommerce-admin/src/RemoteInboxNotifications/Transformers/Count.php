@@ -16,10 +16,11 @@ class Count implements TransformerInterface {
 	 *
 	 * @param array         $value an array to count.
 	 * @param stdClass|null $arguments arguments.
+	 * @param string|null   $default default value.
 	 *
 	 * @return number
 	 */
-	public function transform( $value, stdClass $arguments = null ) {
+	public function transform( $value, stdClass $arguments = null, $default = null ) {
 		return count( $value );
 	}
 
