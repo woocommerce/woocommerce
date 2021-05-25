@@ -10,6 +10,7 @@ const {
 	getPaymentsConfig,
 	getExtensionsConfig,
 	getStylingConfig,
+	getCoreEditorConfig,
 } = require( './bin/webpack-configs.js' );
 
 // Only options shared between all configs should be defined here.
@@ -37,6 +38,12 @@ const sharedConfig = {
 const CoreConfig = {
 	...sharedConfig,
 	...getCoreConfig( { alias: getAlias() } ),
+};
+
+// Core config for shared libraries to be run inside the editor.
+const CoreEditorConfig = {
+	...sharedConfig,
+	...getCoreEditorConfig( { alias: getAlias() } ),
 };
 
 // Main Blocks config for registering Blocks and for the Editor.
@@ -166,4 +173,5 @@ module.exports = [
 	ExtensionsConfig,
 	PaymentsConfig,
 	StylingConfig,
+	CoreEditorConfig,
 ];

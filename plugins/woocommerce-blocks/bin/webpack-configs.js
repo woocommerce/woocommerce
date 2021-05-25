@@ -22,6 +22,8 @@ const {
 	CHECK_CIRCULAR_DEPS,
 	requestToExternal,
 	requestToHandle,
+	requestToExternalInsideGB,
+	requestToHandleInsideGB,
 	findModuleMatch,
 } = require( './webpack-helpers' );
 
@@ -40,6 +42,20 @@ const sharedPlugins = [
 	} ),
 ].filter( Boolean );
 
+const mainBlocksPlugins = [
+	CHECK_CIRCULAR_DEPS === 'true'
+		? new CircularDependencyPlugin( {
+				exclude: /node_modules/,
+				cwd: process.cwd(),
+				failOnError: 'warn',
+		  } )
+		: false,
+	new DependencyExtractionWebpackPlugin( {
+		injectPolyfill: true,
+		requestToExternal: requestToExternalInsideGB,
+		requestToHandle: requestToHandleInsideGB,
+	} ),
+].filter( Boolean );
 const getProgressBarPluginConfig = ( name, fileSuffix ) => {
 	const isLegacy = fileSuffix && fileSuffix === 'legacy';
 	const progressBarPrefix = isLegacy ? 'Legacy ' : '';
@@ -136,7 +152,44 @@ woocommerce_blocks_env = ${ NODE_ENV }
 		},
 	};
 };
-
+// @todo delete getCoreEditorConfig when wordpress/gutenberg#27462 or rquivalent is merged.
+// This is meant to fix issue #3839 in which we have two instances of SlotFillProvider context. Should be deleted once wordpress/gutenberg#27462.
+const getCoreEditorConfig = ( options = {} ) => {
+	return {
+		...getCoreConfig( options ),
+		entry: {
+			blocksCheckout: './packages/checkout/index.js',
+		},
+		output: {
+			filename: ( chunkData ) => {
+				return `${ kebabCase( chunkData.chunk.name ) }-editor.js`;
+			},
+			path: path.resolve( __dirname, '../build/' ),
+			library: [ 'wc', '[name]' ],
+			libraryTarget: 'this',
+			// This fixes an issue with multiple webpack projects using chunking
+			// overwriting each other's chunk loader function.
+			// See https://webpack.js.org/configuration/output/#outputjsonpfunction
+			jsonpFunction: 'webpackWcBlocksJsonp',
+		},
+		plugins: [
+			...mainBlocksPlugins,
+			new ProgressBarPlugin(
+				getProgressBarPluginConfig( 'Core', options.fileSuffix )
+			),
+			new CreateFileWebpack( {
+				path: './',
+				// file name
+				fileName: 'blocks.ini',
+				// content of the file
+				content: `
+woocommerce_blocks_phase = ${ process.env.WOOCOMMERCE_BLOCKS_PHASE || 3 }
+woocommerce_blocks_env = ${ NODE_ENV }
+`.trim(),
+			} ),
+		],
+	};
+};
 const getMainConfig = ( options = {} ) => {
 	let { fileSuffix } = options;
 	const { alias, resolvePlugins = [] } = options;
@@ -661,4 +714,5 @@ module.exports = {
 	getPaymentsConfig,
 	getExtensionsConfig,
 	getStylingConfig,
+	getCoreEditorConfig,
 };
