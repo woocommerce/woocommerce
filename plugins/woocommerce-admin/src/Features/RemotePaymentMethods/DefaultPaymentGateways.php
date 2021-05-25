@@ -69,6 +69,16 @@ class DefaultPaymentGateways {
 				),
 			),
 			array(
+				'key'        => 'woo-mercado-pago-custom',
+				'title'      => __( 'Mercado Pago Checkout Pro & Custom', 'woocommerce-admin' ),
+				'content'    => __( 'Accept credit and debit cards, offline (cash or bank transfer) and logged-in payments with money in Mercado Pago. Safe and secure payments with the leading payment processor in LATAM.', 'woocommerce-admin' ),
+				'image'      => plugins_url( 'images/onboarding/mercadopago.png', WC_ADMIN_PLUGIN_FILE ),
+				'plugins'    => array( 'woocommerce-mercadopago' ),
+				'is_visible' => array(
+					self::get_rules_for_countries( array( 'AR', 'BR', 'CL', 'CO', 'MX', 'PE', 'UY' ) ),
+				),
+			),
+			array(
 				'key'        => 'ppcp-gateway',
 				'title'      => __( 'PayPal Payments', 'woocommerce-admin' ),
 				'content'    => __( "Safe and secure payments using credit cards or your customer's PayPal account.", 'woocommerce-admin' ),

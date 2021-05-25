@@ -85,6 +85,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Add: Note date range logic for GivingFeedback, and InsightFirstSale note. #6969
 - Add: Add transient notices feature #6809
 - Add: Add transformers in remote inbox notifications #6948
+- Add: Add Mercado Pago as default fallback payment gateway #7043
 - Add: Get post install scripts from gateway and enqueue in client #6967
 - Add: Free extension list powered by remote config #6952
 - Add: Add PayPal to fallback payment gateways #7001
