@@ -25,7 +25,7 @@
 		"@wordpress/components": "10.2.0",
 		"@wordpress/element": "2.19.0",
 		"@wordpress/i18n": "3.17.0",
-		"@wordpress/icons": "2.9.0",
+		"@wordpress/icons": "2.10.3",
 		"@wordpress/keycodes": "2.18.0",
 		"classnames": "^2.3.1",
 		"dompurify": "2.2.8",

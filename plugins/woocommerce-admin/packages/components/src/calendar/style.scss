@@ -113,11 +113,11 @@
 .woocommerce-calendar__input {
 	position: relative;
 
-	.dashicons-calendar {
+	.calendar-icon {
 		position: absolute;
 		top: 50%;
 		transform: translateY(-50%);
-		left: 10px;
+		left: 7px;
 
 		path {
 			fill: $gray-700;
@@ -133,13 +133,13 @@
 	}
 
 	&.is-empty {
-		.dashicons-calendar path {
+		.calendar-icon path {
 			fill: $gray-700;
 		}
 	}
 
 	&.is-error {
-		.dashicons-calendar path {
+		.calendar-icon path {
 			fill: $error-red;
 		}
 

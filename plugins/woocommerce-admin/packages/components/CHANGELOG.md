@@ -1,6 +1,7 @@
 # Unreleased
 
 -   Fix style regression with the Chart header. #7002
+-   Remove the use of Dashicons and replace with @wordpress/icons or gridicons #7020
 
 # 6.2.0
 

@@ -44,9 +44,7 @@ describe( 'FavoriteButton', () => {
 
 		const { container } = render( <FavoriteButton id="my-item" /> );
 
-		expect(
-			container.querySelector( '.dashicons-star-empty' )
-		).not.toBeNull();
+		expect( container.querySelector( '.star-empty-icon' ) ).not.toBeNull();
 	} );
 
 	test( 'should show the filled star when item is favorited', () => {
@@ -57,9 +55,7 @@ describe( 'FavoriteButton', () => {
 
 		const { container } = render( <FavoriteButton id="my-item" /> );
 
-		expect(
-			container.querySelector( '.dashicons-star-filled' )
-		).not.toBeNull();
+		expect( container.querySelector( '.star-filled-icon' ) ).not.toBeNull();
 	} );
 
 	test( 'should remove the favorite when toggling a favorited item', () => {

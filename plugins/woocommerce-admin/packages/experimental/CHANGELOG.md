@@ -1,3 +1,7 @@
+# Unreleased
+
+-   Remove the use of Dashicons and replace with @wordpress/icons or gridicons #7020
+
 # 1.2.0
 
 -   Add task item component. #6978

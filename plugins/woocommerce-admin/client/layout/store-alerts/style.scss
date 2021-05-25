@@ -18,10 +18,6 @@
 
 	.components-card__header {
 		margin-bottom: 12px;
-
-		svg {
-			margin-right: 6px;
-		}
 	}
 
 	a.components-button {
@@ -110,8 +106,8 @@
 		padding: 4px;
 
 		/*!rtl:ignore*/
-		.rtl & .dashicons-arrow-left-alt2,
-		.rtl & .dashicons-arrow-right-alt2 {
+		.rtl & .arrow-left-icon,
+		.rtl & .arrow-right-icon {
 			transform: scaleX(-1);
 		}
 	}

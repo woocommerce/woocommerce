@@ -6,7 +6,7 @@ import { Fragment, useState } from '@wordpress/element';
 import { Card, CardBody } from '@wordpress/components';
 import {
 	Icon,
-	templatePartSidebar,
+	sidebar,
 	chevronRight,
 	plusCircle,
 	archive,
@@ -34,7 +34,7 @@ const subTasks = [
 			'Use a template to add physical, digital, and variable products',
 			'woocommerce-admin'
 		),
-		before: <Icon icon={ templatePartSidebar }></Icon>,
+		before: <Icon icon={ sidebar }></Icon>,
 		after: <Icon icon={ chevronRight } />,
 		onClick: () =>
 			recordEvent( 'tasklist_add_product', {

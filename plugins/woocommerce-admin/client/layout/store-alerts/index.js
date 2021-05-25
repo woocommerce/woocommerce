@@ -9,7 +9,6 @@ import {
 	CardBody,
 	CardFooter,
 	CardHeader,
-	Dashicon,
 	SelectControl,
 } from '@wordpress/components';
 import classnames from 'classnames';
@@ -210,9 +209,6 @@ export class StoreAlerts extends Component {
 			<Card className={ className } size={ null }>
 				<CardHeader isBorderless>
 					<Text variant="title.medium" as="h2">
-						{ alert.icon && (
-							<Dashicon key="icon" icon={ alert.icon } />
-						) }
 						{ alert.title }
 					</Text>
 					{ numberOfAlerts > 1 && (
@@ -225,7 +221,10 @@ export class StoreAlerts extends Component {
 									'woocommerce-admin'
 								) }
 							>
-								<Icon icon={ chevronLeft } />
+								<Icon
+									icon={ chevronLeft }
+									className="arrow-left-icon"
+								/>
 							</Button>
 							<span
 								className="woocommerce-store-alerts__pagination-label"
@@ -259,7 +258,10 @@ export class StoreAlerts extends Component {
 									'woocommerce-admin'
 								) }
 							>
-								<Icon icon={ chevronRight } />
+								<Icon
+									icon={ chevronRight }
+									className="arrow-right-icon"
+								/>
 							</Button>
 						</div>
 					) }

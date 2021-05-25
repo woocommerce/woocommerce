@@ -2,7 +2,8 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { Button, Icon } from '@wordpress/components';
+import { Button } from '@wordpress/components';
+import { Icon, cancelCircleFilled } from '@wordpress/icons';
 import { Component, Fragment } from '@wordpress/element';
 import { findIndex } from 'lodash';
 import PropTypes from 'prop-types';
@@ -74,7 +75,10 @@ class Tags extends Component {
 						isLink
 						onClick={ this.removeAll }
 					>
-						<Icon icon="dismiss" />
+						<Icon
+							icon={ cancelCircleFilled }
+							className="clear-icon"
+						/>
 						<span className="screen-reader-text">
 							{ __( 'Clear all', 'woocommerce-admin' ) }
 						</span>

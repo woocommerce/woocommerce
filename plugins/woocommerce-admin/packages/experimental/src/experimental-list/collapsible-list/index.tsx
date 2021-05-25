@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Dashicon } from '@wordpress/components';
+import { Icon, chevronUp, chevronDown } from '@wordpress/icons';
 import { useState, useCallback, Children } from '@wordpress/element';
 import { Transition } from 'react-transition-group';
 
@@ -114,11 +114,10 @@ export const ExperimentalCollapsibleList: React.FC< CollapsibleListProps > = ( {
 				>
 					<p>{ isCollapsed ? expandLabel : collapseLabel }</p>
 
-					<Dashicon
+					<Icon
 						className="list-item-collapse__icon"
-						icon={
-							isCollapsed ? 'arrow-down-alt2' : 'arrow-up-alt2'
-						}
+						size={ 30 }
+						icon={ isCollapsed ? chevronDown : chevronUp }
 					/>
 				</ExperimentalListItem>
 			) : null }

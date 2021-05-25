@@ -2,7 +2,10 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Icon, TextControl } from '@wordpress/components';
+import { TextControl } from '@wordpress/components';
+import { trash, Icon } from '@wordpress/icons';
+import arrowUp from 'gridicons/dist/chevron-up';
+import arrowDown from 'gridicons/dist/chevron-down';
 import { Component, Fragment } from '@wordpress/element';
 import { MenuItem } from '@woocommerce/components';
 
@@ -52,8 +55,10 @@ class SectionControls extends Component {
 					{ ! isFirst && (
 						<MenuItem isClickable onInvoke={ this.onMoveUp }>
 							<Icon
-								icon={ 'arrow-up-alt2' }
+								icon={ arrowUp }
 								label={ __( 'Move up' ) }
+								size={ 20 }
+								className="icon-control"
 							/>
 							{ __( 'Move up', 'woocommerce-admin' ) }
 						</MenuItem>
@@ -61,14 +66,21 @@ class SectionControls extends Component {
 					{ ! isLast && (
 						<MenuItem isClickable onInvoke={ this.onMoveDown }>
 							<Icon
-								icon={ 'arrow-down-alt2' }
+								icon={ arrowDown }
+								size={ 20 }
 								label={ __( 'Move Down' ) }
+								className="icon-control"
 							/>
 							{ __( 'Move Down', 'woocommerce-admin' ) }
 						</MenuItem>
 					) }
 					<MenuItem isClickable onInvoke={ onRemove }>
-						<Icon icon={ 'trash' } label={ __( 'Remove block' ) } />
+						<Icon
+							icon={ trash }
+							size={ 20 }
+							label={ __( 'Remove block' ) }
+							className="icon-control"
+						/>
 						{ __( 'Remove section', 'woocommerce-admin' ) }
 					</MenuItem>
 				</div>

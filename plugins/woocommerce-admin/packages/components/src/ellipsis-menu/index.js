@@ -4,7 +4,8 @@
 import { Component } from '@wordpress/element';
 import classnames from 'classnames';
 import { Button, Dropdown, NavigableMenu } from '@wordpress/components';
-import { Icon, more } from '@wordpress/icons';
+import { Icon } from '@wordpress/icons';
+import Ellipsis from 'gridicons/dist/ellipsis';
 import PropTypes from 'prop-types';
 
 /**
@@ -29,11 +30,10 @@ class EllipsisMenu extends Component {
 				<Button
 					className={ toggleClassname }
 					onClick={ onToggle }
-					icon="ellipsis"
 					title={ label }
 					aria-expanded={ isOpen }
 				>
-					<Icon icon={ more } />
+					<Icon icon={ <Ellipsis /> } />
 				</Button>
 			);
 		};

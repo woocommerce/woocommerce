@@ -57,9 +57,7 @@
 
 	.wc-admin-shipping-banner-install-error {
 		color: #d63638;
-		> .dashicon {
-			width: 16px;
-			height: 16px;
+		> .warning-icon {
 			margin-right: 3px;
 			vertical-align: middle;
 			margin-top: -2px;
@@ -74,7 +72,6 @@
 }
 
 .components-modal__frame.wc-admin-shipping-banner__dismiss-modal {
-
 	width: 500px;
 	max-width: 100%;
 
@@ -83,10 +80,9 @@
 		margin: 4px 0;
 		padding: 0;
 		height: 50px;
-		.components-button.components-icon-button {
-
+		.components-button.has-icon {
 			left: 15px;
-			svg.dashicon {
+			svg {
 				width: 30px;
 				height: 30px;
 			}
@@ -99,7 +95,6 @@
 		font-size: 20px;
 		line-height: 32px;
 	}
-
 
 	.wc-admin-shipping-banner__dismiss-modal-help-text {
 		font-size: 16px;

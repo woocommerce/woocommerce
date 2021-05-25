@@ -5,6 +5,8 @@ import { __ } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
 import { lazy, Suspense } from '@wordpress/element';
 import { Spinner } from '@woocommerce/components';
+import { arrowRight, chartBar } from '@wordpress/icons';
+import ListOrdered from 'gridicons/dist/list-ordered';
 
 /**
  * Internal dependencies
@@ -45,7 +47,7 @@ export default applyFilters( DEFAULT_SECTIONS_FILTER, [
 		component: StorePerformance,
 		title: __( 'Performance', 'woocommerce-admin' ),
 		isVisible: true,
-		icon: 'arrow-right-alt',
+		icon: arrowRight,
 		hiddenBlocks: [
 			'coupons/amount',
 			'coupons/orders_count',
@@ -64,7 +66,7 @@ export default applyFilters( DEFAULT_SECTIONS_FILTER, [
 		component: DashboardCharts,
 		title: __( 'Charts', 'woocommerce-admin' ),
 		isVisible: true,
-		icon: 'chart-bar',
+		icon: chartBar,
 		hiddenBlocks: [
 			'orders_avg_order_value',
 			'avg_items_per_order',
@@ -85,7 +87,7 @@ export default applyFilters( DEFAULT_SECTIONS_FILTER, [
 		component: Leaderboards,
 		title: __( 'Leaderboards', 'woocommerce-admin' ),
 		isVisible: true,
-		icon: 'editor-ol',
+		icon: <ListOrdered />,
 		hiddenBlocks: [ 'coupons', 'customers' ],
 	},
 ] );

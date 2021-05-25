@@ -5,9 +5,9 @@ import { __, sprintf } from '@wordpress/i18n';
 import { Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { partial } from 'lodash';
-import { Dropdown, Button, Icon } from '@wordpress/components';
+import { Dropdown, Button } from '@wordpress/components';
 import { applyFilters } from '@wordpress/hooks';
-import { Icon as WPIcon, plusCircleFilled } from '@wordpress/icons';
+import { Icon, plusCircleFilled } from '@wordpress/icons';
 import { withSelect } from '@wordpress/data';
 import { H } from '@woocommerce/components';
 import { SETTINGS_STORE_NAME, useUserPreferences } from '@woocommerce/data';
@@ -53,6 +53,10 @@ const mergeSectionsWithDefaults = ( prefSections ) => {
 		const prefSection = prefSections.find(
 			( section ) => section.key === key
 		);
+		// Not defined by a string anymore.
+		if ( prefSection ) {
+			delete prefSection.icon;
+		}
 
 		sections.push( {
 			...defaultSection,
@@ -74,12 +78,15 @@ const CustomizableDashboard = ( { defaultDateRange, path, query } ) => {
 
 	const updateSection = ( updatedKey, newSettings ) => {
 		const newSections = sections.map( ( section ) => {
+			// Do not save section icon as it is a component.
+			delete section.icon;
 			if ( section.key === updatedKey ) {
 				return {
 					...section,
 					...newSettings,
 				};
 			}
+
 			return section;
 		} );
 		updateSections( newSections );
@@ -170,7 +177,7 @@ const CustomizableDashboard = ( { defaultDateRange, path, query } ) => {
 						title={ __( 'Add more sections', 'woocommerce-admin' ) }
 						aria-expanded={ isOpen }
 					>
-						<WPIcon icon={ plusCircleFilled } />
+						<Icon icon={ plusCircleFilled } />
 					</Button>
 				) }
 				renderContent={ ( { onToggle } ) => (
@@ -197,6 +204,7 @@ const CustomizableDashboard = ( { defaultDateRange, path, query } ) => {
 										) }
 									>
 										<Icon
+											className={ section.key + '__icon' }
 											icon={ section.icon }
 											size={ 30 }
 										/>

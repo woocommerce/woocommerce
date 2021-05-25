@@ -99,6 +99,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Dev: Add disabled prop to SelectControl #6902
 - Dev: Add filter variation to tracks data in products analytics. #6913
 - Dev: Add source param support for notes query. #6979
+- Dev: Remove the use of Dashicons and replace with @wordpress/icons or gridicons. #7020
 - Enhancement: Add expand/collapse to extendable task list. #6910
 - Enhancement: Add task hierarchy support to extended task list. #6916
 - Fix: Rule Processing Transformer to handle dotNotation default value #7009

@@ -62,7 +62,7 @@
 		height: auto;
 	}
 
-	.dashicons-arrow-right-alt {
+	.store-performance__icon {
 		transform: rotate(-45deg);
 	}
 }
@@ -76,9 +76,10 @@
 	border-top: $border-width solid $gray-100;
 	padding-top: $gap-smaller;
 
-	.dashicon {
+	.icon-control {
 		margin: 0 $gap-smaller 0 0;
 		vertical-align: bottom;
+		fill: $gray-700;
 	}
 
 	.woocommerce-ellipsis-menu__item {

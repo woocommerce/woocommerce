@@ -6,6 +6,7 @@ import { Button } from '@wordpress/components';
 import { NAVIGATION_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { useDispatch, useSelect } from '@wordpress/data';
+import { Icon, starEmpty, starFilled } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -47,7 +48,6 @@ export const FavoriteButton = ( { id } ) => {
 			className="woocommerce-navigation-favorite-button"
 			isTertiary
 			onClick={ toggleFavorite }
-			icon={ isFavorited ? 'star-filled' : 'star-empty' }
 			aria-label={
 				isFavorited
 					? __(
@@ -59,7 +59,12 @@ export const FavoriteButton = ( { id } ) => {
 							'woocommerce-admin'
 					  )
 			}
-		/>
+		>
+			<Icon
+				icon={ isFavorited ? starFilled : starEmpty }
+				className={ `star-${ isFavorited ? 'filled' : 'empty' }-icon` }
+			/>
+		</Button>
 	);
 };
 

@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { Dashicon, Popover } from '@wordpress/components';
+import { Popover } from '@wordpress/components';
+import { Icon, calendar } from '@wordpress/icons';
 import classnames from 'classnames';
 import { uniqueId, noop } from 'lodash';
 import PropTypes from 'prop-types';
@@ -47,7 +48,7 @@ const DateInput = ( {
 					{ error }
 				</Popover>
 			) }
-			<Dashicon icon="calendar" />
+			<Icon icon={ calendar } className="calendar-icon" />
 			<p className="screen-reader-text" id={ `${ id }-message` }>
 				{ error || describedBy }
 			</p>

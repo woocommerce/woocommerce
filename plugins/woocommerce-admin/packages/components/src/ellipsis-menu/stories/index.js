@@ -3,7 +3,8 @@
  */
 import { withState } from '@wordpress/compose';
 import { Fragment } from '@wordpress/element';
-import { Icon } from '@wordpress/components';
+import { Icon } from '@wordpress/icons';
+import CrossSmall from 'gridicons/dist/cross-small';
 import { EllipsisMenu, MenuItem, MenuTitle } from '@woocommerce/components';
 
 const ExampleEllipsisMenu = withState( {
@@ -34,7 +35,7 @@ const ExampleEllipsisMenu = withState( {
 					Show Orders
 				</MenuItem>
 				<MenuItem isClickable onInvoke={ onToggle }>
-					<Icon icon="no-alt" />
+					<Icon icon={ <CrossSmall /> } />
 					Close Menu
 				</MenuItem>
 			</Fragment>

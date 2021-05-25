@@ -100,7 +100,7 @@
 		"@wordpress/hooks": "2.11.0",
 		"@wordpress/html-entities": "2.10.0",
 		"@wordpress/i18n": "3.17.0",
-		"@wordpress/icons": "2.9.0",
+		"@wordpress/icons": "2.10.3",
 		"@wordpress/keycodes": "2.18.0",
 		"@wordpress/notices": "1.12.0",
 		"@wordpress/plugins": "2.24.1",

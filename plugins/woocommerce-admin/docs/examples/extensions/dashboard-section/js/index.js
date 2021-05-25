@@ -4,6 +4,7 @@
 
 import { addFilter } from '@wordpress/hooks';
 import { Component, Fragment } from '@wordpress/element';
+import { wordpress } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -141,7 +142,7 @@ addFilter(
 				component: Section,
 				title: __( 'Apples', 'woocommerce-admin' ),
 				isVisible: true,
-				icon: 'carrot',
+				icon: wordpress,
 				hiddenBlocks: [],
 			},
 		];
