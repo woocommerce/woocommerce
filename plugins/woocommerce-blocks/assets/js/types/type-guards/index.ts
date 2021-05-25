@@ -17,11 +17,11 @@ export const isObject = < T extends Record< string, unknown >, U >(
 };
 
 export function objectHasProp< P extends PropertyKey >(
-	target: Record< string, unknown >,
+	target: unknown,
 	property: P
 ): target is { [ K in P ]: unknown } {
 	// The `in` operator throws a `TypeError` for non-object values.
-	return property in target;
+	return isObject( target ) && property in target;
 }
 
 // eslint-disable-next-line @typescript-eslint/ban-types

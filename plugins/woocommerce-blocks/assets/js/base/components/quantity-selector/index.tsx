@@ -6,12 +6,12 @@ import { speak } from '@wordpress/a11y';
 import classNames from 'classnames';
 import { useCallback } from '@wordpress/element';
 import { DOWN, UP } from '@wordpress/keycodes';
+import { isNumber } from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import { isNumber } from '../../utils/type-guards';
 
 interface QuantitySelectorProps {
 	className?: string;

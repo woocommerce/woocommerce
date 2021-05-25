@@ -1,15 +1,11 @@
 /* eslint-disable camelcase -- API responses have camelcase properties */
-export interface CurrencyResponseInfo {
-	currency_code: string;
-	currency_symbol: string;
-	currency_minor_unit: number;
-	currency_decimal_separator: string;
-	currency_thousand_separator: string;
-	currency_prefix: string;
-	currency_suffix: string;
-}
 
-export interface ProductResponseItemPrices extends CurrencyResponseInfo {
+/**
+ * Internal dependencies
+ */
+import { CurrencyResponse } from './currency';
+
+export interface ProductResponseItemPrices extends CurrencyResponse {
 	price: string;
 	regular_price: string;
 	sale_price: string;

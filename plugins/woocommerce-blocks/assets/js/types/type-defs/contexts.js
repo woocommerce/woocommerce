@@ -13,8 +13,8 @@
  *
  * @property {BillingData}          billingData        The current billing data, including address and email.
  * @property {CartShippingAddress}  shippingAddress    The current set address for shipping.
- * @property {Function}             setBillingData     A function for setting billing data.
- * @property {Function}             setShippingAddress A function for setting shipping address.
+ * @property {function()}           setBillingData     A function for setting billing data.
+ * @property {function()}           setShippingAddress A function for setting shipping address.
  */
 
 /**
@@ -27,10 +27,10 @@
  * @property {CartShippingOption[]} shippingRates               An array of available shipping rates.
  * @property {boolean}              shippingRatesLoading        Whether or not the shipping rates are being loaded.
  * @property {string[]}             selectedRates               The ids of the rates that are selected.
- * @property {Function}             setSelectedRates            Function for setting the selected rates.
+ * @property {function()}           setSelectedRates            Function for setting the selected rates.
  * @property {boolean}              isSelectingRate             True when rate is being selected.
  * @property {CartShippingAddress}  shippingAddress             The current set address for shipping.
- * @property {Function}             setShippingAddress          Function for setting the shipping address.
+ * @property {function()}           setShippingAddress          Function for setting the shipping address.
  * @property {function()}           onShippingRateSuccess       Used to register a callback to be invoked when shipping
  *                                                              rates are retrieved.
  * @property {function()}           onShippingRateSelectSuccess Used to register a callback to be invoked when shipping

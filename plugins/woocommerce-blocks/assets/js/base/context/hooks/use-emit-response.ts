@@ -1,7 +1,7 @@
 /**
- * Internal dependencies
+ * External dependencies
  */
-import { isObject } from '../../utils/type-guards';
+import { isObject } from '@woocommerce/types';
 
 export enum responseTypes {
 	SUCCESS = 'success',

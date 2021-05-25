@@ -13,6 +13,7 @@ import {
 import { __ } from '@wordpress/i18n';
 import { usePrevious } from '@woocommerce/base-hooks';
 import deprecated from '@wordpress/deprecated';
+import { isObject } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -41,7 +42,6 @@ import { useStoreNotices } from '../../../hooks/use-store-notices';
 import { useStoreEvents } from '../../../hooks/use-store-events';
 import { useCheckoutNotices } from '../../../hooks/use-checkout-notices';
 import { useEmitResponse } from '../../../hooks/use-emit-response';
-import { isObject } from '../../../../utils/type-guards';
 
 /**
  * @typedef {import('@woocommerce/type-defs/contexts').CheckoutDataContext} CheckoutDataContext

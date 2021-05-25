@@ -12,7 +12,7 @@ import type {
 	CartResponseShippingRate,
 	CartResponse,
 } from './cart-response';
-import type { ResponseError } from '../data/types';
+import type { ResponseError } from '../../data/types';
 export interface StoreCartItemQuantity {
 	isPendingDelete: boolean;
 	quantity: number;

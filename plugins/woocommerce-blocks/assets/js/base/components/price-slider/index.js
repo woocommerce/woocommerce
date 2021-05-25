@@ -12,7 +12,7 @@ import {
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-monetary-amount';
-import { isObject } from '@woocommerce/base-utils';
+import { isObject } from '@woocommerce/types';
 
 /**
  * Internal dependencies

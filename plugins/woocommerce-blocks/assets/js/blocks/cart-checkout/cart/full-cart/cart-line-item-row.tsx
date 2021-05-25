@@ -30,7 +30,7 @@ import {
 import Dinero from 'dinero.js';
 import { useCallback, useMemo } from '@wordpress/element';
 import type { CartItem } from '@woocommerce/type-defs/cart';
-import { objectHasProp } from '@woocommerce/base-utils';
+import { objectHasProp } from '@woocommerce/types';
 import { getSetting } from '@woocommerce/settings';
 
 /**

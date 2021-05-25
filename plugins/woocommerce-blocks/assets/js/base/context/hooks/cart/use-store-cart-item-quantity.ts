@@ -7,19 +7,20 @@ import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
 import { useDebounce } from 'use-debounce';
 import { usePrevious } from '@woocommerce/base-hooks';
 import { triggerFragmentRefresh } from '@woocommerce/base-utils';
-import type { CartItem, StoreCartItemQuantity } from '@woocommerce/types';
+import {
+	CartItem,
+	StoreCartItemQuantity,
+	isNumber,
+	isObject,
+	isString,
+	objectHasProp,
+} from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
 import { useStoreCart } from './use-store-cart';
 import { useCheckoutContext } from '../../providers/cart-checkout';
-import {
-	isNumber,
-	isObject,
-	isString,
-	objectHasProp,
-} from '../../../utils/type-guards';
 
 /**
  * Ensures the object passed has props key: string and quantity: number
