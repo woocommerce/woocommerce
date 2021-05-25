@@ -73,16 +73,9 @@
 		"create-wc-extension": "node ./bin/starter-pack/starter-pack.js",
 		"storybook": "./bin/import-wp-css-storybook.sh && start-storybook  -c ./storybook -p 6007 --ci",
 		"build-storybook": "build-storybook  -c ./storybook",
-		"changelog": "node ./bin/changelog --changelogSrcType='ZENHUB_RELEASE'",
 		"bump-version": "npm run -s install-if-deps-outdated && php ./bin/update-version.php",
 		"wp-env-mysql-port": "node ./docker/wc-admin-wp-env/mysql-port.js",
 		"create-hook-reference": "node ./bin/hook-reference/index.js"
-	},
-	"changelog": {
-		"labelPrefix": "[Type]",
-		"skipLabel": "skip-changelog",
-		"defaultPrefix": "dev",
-		"repo": "woocommerce/woocommerce-admin"
 	},
 	"husky": {
 		"hooks": {

@@ -15,7 +15,7 @@
 ### Exclude WC Shipping for store that are only offering downloadable products #6917
 
 1. Start OBW and enter an address that is in the US.
-2. Choose "food and drink" from the Industry 
+2. Choose "food and drink" from the Industry
 3. Choose "Downloads" from the Product Types step.
 4. When you get to the Business Details step, expand "Add recommended business features to my site" by clicking the down arrow.
 5. Note that "WooCommerce Shipping" is not listed.
@@ -37,43 +37,13 @@
 7. Click Continue, before the page redirects click Continue again
 8. Confirm no error has been recorded in your browser console.
 
-### Remove PayPal for India #6828
+### Fix an issue with OBW when wc-pay and Jetpack are both being installed. #6957
 
--   Setup a new store and set your country to `India`.
--   Go to 'Choose Payment method' Checklist on the home page.
--   Verify that PayPal is not presented as a payment method.
+- Complete the OBW until you get to the business details step.
+- Deselect "Add recommended business features to my site", and select only Jetpack and WooCommerce Payments for installation.
+- The plugins should be installed and activated correctly, and you should be able to continue in the flow.
 
-### Add event recording to start of gateway connections #6801
-
--   Enable debug messages inside browser devtools, you can do it by running `localStorage.setItem( 'debug', 'wc-admin:*' );` in your browser console. And don't forget to enable all log levels.
--   Create a new store with event tracking enabled.
--   Select `United States` or `UK` as the store country.
--   Visit the Payments task and click to setup `Stripe` and `PayPal`.
--   Verify the event `wcadmin_payments_task_stepper_view` with the right `payment_method was recorded correctly.
--   Press `Proceed` and verify the event `wcadmin_tasklist_payment_connect_start` with the right `payment_method` was recorded.
--   Verify that the event `wcadmin_tasklist_payment_connect_start` also is recorded for the payment gateways: Square, eWAY (for AU and NZ) and generic gateways like PayFast (for ZA) and PayStack (for ZA, GH, and NG).
-
-### Use the store timezone to make time data requests #6632
-
-1. Go to Settings -> General.
-2. Set your store timezone significantly ahead of or behind the timezone you currently reside in.
-3. Create a test order and mark complete.
-4. Navigate to various analytics reports and note the time filter is based on the current store time. E.g., If your store timezone is 12 hours ahead of your current time, you may see `1st - 23rd` instead of `1st - 22nd` for "Month to date" depending on your time of day.
-5. Note that the recently added order shows up in analytics reports.
-6. Change your timezone and repeat, testing with both locations (e.g., `Amsterdam`) and also UTC offsets (e.g., `UTC-6`).
-
-### Add plugin installer to allow installation of plugins via URL #6805
-
-1. Visit any admin page with the params `plugin_action` (`install`, `activate`, or `install-activate`) and `plugins` (list of comma separated plugins). `wp-admin/admin.php?page=wc-admin&plugin_action=install&plugins=jetpack`
-2. If visiting this URL from a link, make sure you are sent back to the referer.
-3. Check that the plugins provided are installed, activated, or both depending on your query.
-
-### Update the checked input radio button margin style #6701
-
-1. Go to Home.
-2. Click on 'Add my products'.
-3. Select 'Start with a template'.
-4. Click on the input radio button and see that render as expected.
+## 2.3.0
 
 ### Retain persisted queries when navigating to Homescreen #6614
 
@@ -85,13 +55,91 @@
 6. Navigate back to previous Analytics Report.
 7. Ensure that the time period is _still_ what you set on step 2.
 
-### Refactor payments to allow management of methods #6786
+### Set up shipping costs task, redirect to shipping settings after completion. #6791
 
-1. Do not select "CBD industry" as a store industry during onboarding.
-2. Make various payment methods visible by switching to different countries.
-3. Attempt to set up various payment methods.
-4. Make sure that after setup, a `Manage` link is shown that links to the payment method settings page.
-5. Check that simple methods like, cash delivery or bank transfer initially have an `Enable` option.
+-   Create a new store, and finish the Onboarding flow
+-   Go to **WooCommerce > Home** and select the **Set up shipping costs** task, it should show the standard stepper
+-   Type some number in the 'Shipping cost' input
+-   Click the 'Rest of the world' toggle to toggle it on.
+-   Type some number in the 'Shipping cost' input box under the 'Rest of the world' label
+-   Finish the set up, but don't need to install the shipping label plugin
+-   Once on home screen the **Set up shipping costs** task should show as finished
+-   Click on the task again
+-   It should now redirect to the shipping settings page.
+
+### New Google Listings & Ads extension in onboarding #6939
+
+- On a new WooCommerce site/install
+- Go through all the onboarding steps till we reach `Included business features`
+- Ensure the plugin shows up correctly with the right naming and select it as the only extension to add
+![image](https://user-images.githubusercontent.com/11388669/117138107-7be75f00-ada2-11eb-9077-c839cee2155e.png)
+- Continue and confirm the `plugins were successfully activated` notice shows up
+- Finish onboarding and confirm that the extension was actually activated
+
+**New Google Listings & Ads extension support in Installed Marketing Extensions section**
+
+- View the installed marketing extensions section on the page Marketing > Overview
+- The extension should appear in the following states:
+
+1. Extension not installed (should not be included in the list, if the list is empty this section won't show at all)
+![image](https://user-images.githubusercontent.com/11388669/117135419-d2529e80-ad9e-11eb-9752-081f00beb11c.png)
+
+2. Extension installed but not activated (click activate to confirm it works)
+![image](https://user-images.githubusercontent.com/11388669/117135541-fb732f00-ad9e-11eb-95f9-d3739fc715da.png)
+
+3. Extension installed and activated but not setup yet (click "Finish setup" to confirm we get redirected to the get started page)
+![image](https://user-images.githubusercontent.com/11388669/117135812-602e8980-ad9f-11eb-83f8-29889cdb7202.png)
+
+4. Extension installed, activated and setup (click settings to confirm we get redirected to the settings page)
+![image](https://user-images.githubusercontent.com/11388669/117135999-ab489c80-ad9f-11eb-874b-5f6f5ec4ce5d.png)
+Note: The documentation link is not active yet (still in draft)
+
+### Add plugin installer to allow installation of plugins via URL #6805
+
+1. Visit any admin page with the params `plugin_action` (`install`, `activate`, or `install-activate`) and `plugins` (list of comma separated plugins). `wp-admin/admin.php?page=wc-admin&plugin_action=install&plugins=jetpack`
+2. If visiting this URL from a link, make sure you are sent back to the referer.
+3. Check that the plugins provided are installed, activated, or both depending on your query.
+
+### Add event recording to start of gateway connections #6801
+
+-   Enable debug messages inside browser devtools, you can do it by running `localStorage.setItem( 'debug', 'wc-admin:*' );` in your browser console. And don't forget to enable all log levels.
+-   Create a new store with event tracking enabled.
+-   Select `United States` or `UK` as the store country.
+-   Visit the Payments task and click to setup `Stripe` and `PayPal`.
+-   Verify the event `wcadmin_payments_task_stepper_view` with the right `payment_method was recorded correctly.
+-   Press `Proceed` and verify the event `wcadmin_tasklist_payment_connect_start` with the right `payment_method` was recorded.
+-   Verify that the event `wcadmin_tasklist_payment_connect_start` also is recorded for the payment gateways: Square, eWAY (for AU and NZ) and generic gateways like PayFast (for ZA) and PayStack (for ZA, GH, and NG).
+
+### Add recommended payment methods in payment settings. #6760
+
+-   Create a new store and finish the onboarding flow, making sure your store location is filled out and within US | PR | AU | CA | GB | IE | NZ
+-   Visit **Woocommerce > Settings > Payments** you might have to wait a couple seconds, but it should show a card with **Recommended ways to get paid** listing 3 different payment providers (WC Payments, Stripe, and Paypal).
+-   Click `Get started` on one of the providers, it will show a loading icon (installing the plugin), once done it should redirect you to the plugin set up page.
+-   Check if the plugin is installed and activated.
+-   Go back to the payment settings page
+-   Notice how the plugin you had previously installed and activated does not display anymore.
+-   Go to **WooCommerce > Settings > Advanced > WooCommerce.com** and un-select **Show Suggestions** and save
+-   Go to the payments setting screen again, the card should not be displayed.
+-   Enable the **Show Suggestions** again in **WooCommerce > Settings > Advanced > WooCommerce.com**
+-   Go to the payments setting screen again, the card should be displayed.
+-   Click on the 3 dots of the card, click `Hide this`, it should make the card disappear, it should also not show on refresh.
+    This can't be shown again unless the `woocommerce_show_marketplace_suggestions` option is deleted (through PHPMyAdmin or using `wp option delete woocommerce_show_marketplace_suggestions`).
+
+### Use the store timezone to make time data requests #6632
+
+1. Go to Settings -> General.
+2. Set your store timezone significantly ahead of or behind the timezone you currently reside in.
+3. Create a test order and mark complete.
+4. Navigate to various analytics reports and note the time filter is based on the current store time. E.g., If your store timezone is 12 hours ahead of your current time, you may see `1st - 23rd` instead of `1st - 22nd` for "Month to date" depending on your time of day.
+5. Note that the recently added order shows up in analytics reports.
+6. Change your timezone and repeat, testing with both locations (e.g., `Amsterdam`) and also UTC offsets (e.g., `UTC-6`).
+
+### Update the checked input radio button margin style #6701
+
+1. Go to Home.
+2. Click on 'Add my products'.
+3. Select 'Start with a template'.
+4. Click on the input radio button and see that render as expected.
 
 ### Fix varation bug with Products reports #6647
 
@@ -110,12 +158,6 @@ Product B - size:medium
 
 In case the report shows "no data", please reimport historical data by following the guide on [here](https://docs.woocommerce.com/document/woocommerce-analytics/#analytics-settings__import-historical-data)
 
-### Update WC Payments plugin copy #6734
-
-1. Install WooCommerce with WooCommerce Payments
-2. Clone this branch and run npm start (only needed if you are using dev version)
-3. Navigate to WooCommerce -> Home and observe the copy change.
-
 ### Check active plugins before getting the PayPal onboarding status #6625
 
 -   Go to the WooCommerce home page
@@ -123,38 +165,25 @@ In case the report shows "no data", please reimport historical data by following
 -   Choose payment methods
 -   See no error message
 
-### Set up shipping costs task, redirect to shipping settings after completion. #6791
+### Remove PayPal for India #6828
 
--   Create a new store, and finish the Onboarding flow
--   Go to **WooCommerce > Home** and select the **Set up shipping costs** task, it should show the standard stepper
--   Type some number in the 'Shipping cost' input
--   Click the 'Rest of the world' toggle to toggle it on.
--   Type some number in the 'Shipping cost' input box under the 'Rest of the world' label
--   Finish the set up, but don't need to install the shipping label plugin
--   Once on home screen the **Set up shipping costs** task should show as finished
--   Click on the task again
--   It should now redirect to the shipping settings page.
+-   Setup a new store and set your country to `India`.
+-   Go to 'Choose Payment method' Checklist on the home page.
+-   Verify that PayPal is not presented as a payment method.
 
-### Add recommended payment methods in payment settings. #6760
+### Refactor payments to allow management of methods #6786
 
--   Create a new store and finish the onboarding flow, making sure your store location is filled out and within US | PR | AU | CA | GB | IE | NZ
--   Visit **Woocommerce > Settings > Payments** you might have to wait a couple seconds, but it should show a card with **Recommended ways to get paid** listing 3 different payment providers (WC Payments, Stripe, and Paypal).
--   Click `Get started` on one of the providers, it will show a loading icon (installing the plugin), once done it should redirect you to the plugin set up page.
--   Check if the plugin is installed and activated.
--   Go back to the payment settings page
--   Notice how the plugin you had previously installed and activated does not display anymore.
--   Go to **WooCommerce > Settings > Advanced > WooCommerce.com** and un-select **Show Suggestions** and save
--   Go to the payments setting screen again, the card should not be displayed.
--   Enable the **Show Suggestions** again in **WooCommerce > Settings > Advanced > WooCommerce.com**
--   Go to the payments setting screen again, the card should be displayed.
--   Click on the 3 dots of the card, click `Hide this`, it should make the card disappear, it should also not show on refresh.
-    This can't be shown again unless the `woocommerce_show_marketplace_suggestions` option is deleted (through PHPMyAdmin or using `wp option delete woocommerce_show_marketplace_suggestions`).
+1. Do not select "CBD industry" as a store industry during onboarding.
+2. Make various payment methods visible by switching to different countries.
+3. Attempt to set up various payment methods.
+4. Make sure that after setup, a `Manage` link is shown that links to the payment method settings page.
+5. Check that simple methods like, cash delivery or bank transfer initially have an `Enable` option.
 
-### Fix an issue with OBW when wc-pay and Jetpack are both being installed. #6957
+### Update WC Payments plugin copy #6734
 
-- Complete the OBW until you get to the business details step.
-- Deselect "Add recommended business features to my site", and select only Jetpack and WooCommerce Payments for installation.
-- The plugins should be installed and activated correctly, and you should be able to continue in the flow.
+1. Install WooCommerce with WooCommerce Payments
+2. Clone this branch and run npm start (only needed if you are using dev version)
+3. Navigate to WooCommerce -> Home and observe the copy change.
 
 ## 2.2.0
 
