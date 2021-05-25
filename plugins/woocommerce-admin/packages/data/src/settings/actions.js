@@ -3,7 +3,8 @@
  */
 
 import { __ } from '@wordpress/i18n';
-import { apiFetch, select } from '@wordpress/data-controls';
+import { apiFetch } from '@wordpress/data-controls';
+import { controls } from '@wordpress/data';
 import { concat } from 'lodash';
 
 /**
@@ -58,7 +59,11 @@ export function* persistSettingsForGroup( group ) {
 	// first dispatch the is persisting action
 	yield setIsRequesting( group, true );
 	// get all dirty keys with select control
-	const dirtyKeys = yield select( STORE_NAME, 'getDirtyKeys', group );
+	const dirtyKeys = yield controls.resolveSelect(
+		STORE_NAME,
+		'getDirtyKeys',
+		group
+	);
 	// if there is nothing dirty, bail
 	if ( dirtyKeys.length === 0 ) {
 		yield setIsRequesting( group, false );
@@ -66,7 +71,7 @@ export function* persistSettingsForGroup( group ) {
 	}
 
 	// get data slice for keys
-	const dirtyData = yield select(
+	const dirtyData = yield controls.resolveSelect(
 		STORE_NAME,
 		'getSettingsForGroup',
 		group,

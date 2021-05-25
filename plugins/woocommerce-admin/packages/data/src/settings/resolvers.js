@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { apiFetch, dispatch } from '@wordpress/data-controls';
+import { apiFetch } from '@wordpress/data-controls';
+import { controls } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -18,7 +19,7 @@ function settingsToSettingsResource( settings ) {
 }
 
 export function* getSettings( group ) {
-	yield dispatch( STORE_NAME, 'setIsRequesting', group, true );
+	yield controls.dispatch( STORE_NAME, 'setIsRequesting', group, true );
 
 	try {
 		const url = NAMESPACE + '/settings/' + group;

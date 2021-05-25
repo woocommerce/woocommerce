@@ -8,15 +8,20 @@
 import { getAdminLink } from '@woocommerce/wc-admin-settings';
 
 jest.mock( '@wordpress/data-controls', () => ( {
-	dispatch: jest.fn(),
-	select: jest.fn(),
 	apiFetch: jest.fn(),
+} ) );
+
+jest.mock( '@wordpress/data', () => ( {
+	controls: {
+		dispatch: jest.fn(),
+		select: jest.fn(),
+	},
 } ) );
 
 /**
  * External dependencies
  */
-import { dispatch } from '@wordpress/data-controls';
+import { controls } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -48,14 +53,16 @@ describe( 'installJetPackAndConnect', () => {
 		// Run the install
 		installer.next();
 
-		expect( dispatch ).toHaveBeenCalledWith( STORE_NAME, 'installPlugins', [
-			'jetpack',
-		] );
+		expect( controls.dispatch ).toHaveBeenCalledWith(
+			STORE_NAME,
+			'installPlugins',
+			[ 'jetpack' ]
+		);
 
 		// Run the activate
 		installer.next();
 
-		expect( dispatch ).toHaveBeenCalledWith(
+		expect( controls.dispatch ).toHaveBeenCalledWith(
 			STORE_NAME,
 			'activatePlugins',
 			[ 'jetpack' ]

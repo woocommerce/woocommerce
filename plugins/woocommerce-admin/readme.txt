@@ -116,6 +116,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix: Call existing filters for leaderboards in analytics. #6626
 - Fix: Set target to blank for the external links #6999
 - Fix style regression with the Chart header. #7002
+- Fix: Deprecated warnings from select control @wordpress/data-controls. #7007
 - Tweak: Only fetch remote payment gateway recommendations when opted in #6964
 - Tweak: Setup checklist copy revert. #7015
 - Update: Task list component with new Experimental Task list. #6849

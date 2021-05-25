@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { apiFetch, select } from '@wordpress/data-controls';
+import { apiFetch } from '@wordpress/data-controls';
+import { controls } from '@wordpress/data';
 import { addQueryArgs } from '@wordpress/url';
 
 /**
@@ -115,7 +116,7 @@ function* setOnboardingStatusWithOptions() {
 		merchant_id_production: string;
 		client_id_production: string;
 		client_secret_production: string;
-	} = yield select(
+	} = yield controls.resolveSelect(
 		OPTIONS_STORE_NAME,
 		'getOption',
 		'woocommerce-ppcp-settings'
@@ -136,7 +137,9 @@ function* setOnboardingStatusWithOptions() {
 export function* getPaypalOnboardingStatus() {
 	yield setIsRequesting( 'getPaypalOnboardingStatus', true );
 
-	const errorData: { data?: { status: number } } = yield select(
+	const errorData: {
+		data?: { status: number };
+	} = yield controls.resolveSelect(
 		STORE_NAME,
 		'getPluginsError',
 		'getPaypalOnboardingStatus'
