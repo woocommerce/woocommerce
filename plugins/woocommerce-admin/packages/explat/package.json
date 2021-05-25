@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/explat",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "WooCommerce component and utils for A/B testing.",
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
@@ -25,8 +25,8 @@
 		"access": "public"
 	},
 	"dependencies": {
-		"@automattic/explat-client": "0.0.1",
-		"@automattic/explat-client-react-helpers": "0.0.1",
+		"@automattic/explat-client": "0.0.2",
+		"@automattic/explat-client-react-helpers": "0.0.2",
 		"cookie": "^0.4.1",
 		"qs": "6.9.6"
 	},
