@@ -33,7 +33,9 @@ export const PaymentConnect = ( {
 	const slot = useSlot( `woocommerce_remote_payment_form_${ key }` );
 	const hasFills = Boolean( slot?.fills?.length );
 	const fields = settingKeys
-		? settingKeys.map( ( settingKey ) => settings[ settingKey ] )
+		? settingKeys
+				.map( ( settingKey ) => settings[ settingKey ] )
+				.filter( Boolean )
 		: [];
 
 	const isOptionsRequesting = useSelect( ( select ) => {

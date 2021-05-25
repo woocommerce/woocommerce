@@ -68,6 +68,21 @@ class DefaultPaymentGateways {
 					self::get_rules_for_cbd( false ),
 				),
 			),
+			array(
+				'key'        => 'ppcp-gateway',
+				'title'      => __( 'PayPal Payments', 'woocommerce-admin' ),
+				'content'    => __( "Safe and secure payments using credit cards or your customer's PayPal account.", 'woocommerce-admin' ),
+				'image'      => WC()->plugin_url() . '/assets/images/paypal.png',
+				'plugins'    => array( 'woocommerce-paypal-payments' ),
+				'is_visible' => array(
+					(object) array(
+						'type'      => 'base_location_country',
+						'value'     => 'IN',
+						'operation' => '!=',
+					),
+					self::get_rules_for_cbd( false ),
+				),
+			),
 		);
 	}
 
