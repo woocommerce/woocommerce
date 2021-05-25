@@ -56,7 +56,7 @@ class WC_Marketplace_Suggestions {
 	}
 
 	/**
-	 * Render additional panels in the proudct data metabox.
+	 * Render additional panels in the product data metabox.
 	 */
 	public static function product_data_panels() {
 		include dirname( __FILE__ ) . '/templates/html-product-data-extensions.php';
