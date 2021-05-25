@@ -9,10 +9,7 @@ const CHECK_CIRCULAR_DEPS = process.env.CHECK_CIRCULAR_DEPS || false;
 
 // If a package is not available, or missing functionality, in an old but __supported__ version of WordPress, it should be listed here.
 // Some packages are not available in legacy versions of WordPress, so we don't want to extract them.
-const requiredPackagesInWPLegacy = [
-	// The package included in WP 5.4 version doesn't include `useResizeObserver`. This can be removed when we support 5.5+.
-	'@wordpress/compose',
-];
+const requiredPackagesInWPLegacy = [];
 
 const wcDepMap = {
 	'@woocommerce/blocks-registry': [ 'wc', 'wcBlocksRegistry' ],
@@ -109,6 +106,13 @@ const requestToExternal = ( request ) => {
 	}
 };
 
+const requestToExternalInsideGB = ( request ) => {
+	if ( request === 'wordpress-components' ) {
+		return [ 'wp', 'components' ];
+	}
+	return requestToExternal( request );
+};
+
 const requestToHandle = ( request ) => {
 	if ( requiredPackagesInWPLegacy.includes( request ) ) {
 		return false;
@@ -116,6 +120,13 @@ const requestToHandle = ( request ) => {
 	if ( wcHandleMap[ request ] ) {
 		return wcHandleMap[ request ];
 	}
+};
+
+const requestToHandleInsideGB = ( request ) => {
+	if ( request === 'wordpress-components' ) {
+		return 'wp-components';
+	}
+	return requestToHandle( request );
 };
 
 module.exports = {
@@ -126,4 +137,6 @@ module.exports = {
 	findModuleMatch,
 	requestToHandle,
 	requestToExternal,
+	requestToHandleInsideGB,
+	requestToExternalInsideGB,
 };
