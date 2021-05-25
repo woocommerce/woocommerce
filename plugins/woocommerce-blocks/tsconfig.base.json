@@ -20,7 +20,7 @@
 		"composite": true,
 		"rootDir": ".",
 		"typeRoots": [ "./node_modules/@types" ],
-		"types": [],
+		"types": ["jest"],
 		"paths": {
 			"@woocommerce/atomic-blocks": [ "assets/js/base/atomic/blocks" ],
 			"@woocommerce/atomic-blocks/*": [
