@@ -286,4 +286,122 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 		// Stocks should have been increased to orignal amount minus the partially refunded stock.
 		$this->assertEquals( 95, $product->get_stock_quantity() );
 	}
+
+	/**
+	 * Test adjust line item function when order item is refunded with restock and then update order.
+	 *
+	 * @link https://github.com/woocommerce/woocommerce/issues/29502.
+	 */
+	public function test_admin_refund_with_restock_and_update_order() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 100 );
+		$product->set_price( 100 );
+		$product->set_regular_price( 100 );
+		$product->save();
+
+		$order = WC_Helper_Order::create_order();
+
+		$order->set_status( 'on-hold' );
+		$order_item_id = $order->add_product( $product, 10 );
+		$order_item = new WC_Order_Item_Product( $order_item_id );
+
+		// Stocks have not reduced yet.
+		$product = wc_get_product( $product->get_id() );
+		$this->assertEquals( 100, $product->get_stock_quantity() );
+
+		wc_maybe_adjust_line_item_product_stock( $order_item );
+
+		$product = wc_get_product( $product->get_id() );
+		$this->assertEquals( 90, $product->get_stock_quantity() );
+
+		$args = array(
+			'amount'     => 10,
+			'order_id'   => $order->get_id(),
+			'line_items' => array(
+				$order_item_id => array(
+					'qty'          => 5,
+					'refund_total' => 0,
+				),
+			),
+			'refund_payment' => false,
+			'restock_items'  => true,
+		);
+
+		wc_create_refund( $args );
+
+		wc_maybe_adjust_line_item_product_stock( $order_item );
+
+		$product = wc_get_product( $product->get_id() );
+
+		// Stocks should remain unchanged from after restocking via refund operation.
+		$this->assertEquals( 95, $product->get_stock_quantity() );
+
+		// Repeating steps above again to make sure nothing changes.
+		wc_maybe_adjust_line_item_product_stock( $order_item );
+
+		$product = wc_get_product( $product->get_id() );
+
+		// Stocks should remain unchanged from after restocking via refund operation.
+		$this->assertEquals( 95, $product->get_stock_quantity() );
+	}
+
+	/**
+	 * Test adjust line item function when order item is refunded without restock and then update order.
+	 *
+	 * @link https://github.com/woocommerce/woocommerce/issues/29502.
+	 */
+	public function test_admin_refund_without_restock_and_update_order() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 100 );
+		$product->set_price( 100 );
+		$product->set_regular_price( 100 );
+		$product->save();
+
+		$order = WC_Helper_Order::create_order();
+
+		$order->set_status( 'on-hold' );
+		$order_item_id = $order->add_product( $product, 10 );
+		$order_item = new WC_Order_Item_Product( $order_item_id );
+
+		// Stocks have not reduced yet.
+		$product = wc_get_product( $product->get_id() );
+		$this->assertEquals( 100, $product->get_stock_quantity() );
+
+		wc_maybe_adjust_line_item_product_stock( $order_item );
+
+		$product = wc_get_product( $product->get_id() );
+		$this->assertEquals( 90, $product->get_stock_quantity() );
+
+		$args = array(
+			'amount'     => 10,
+			'order_id'   => $order->get_id(),
+			'line_items' => array(
+				$order_item_id => array(
+					'qty'          => 5,
+					'refund_total' => 0,
+				),
+			),
+			'refund_payment' => false,
+			'restock_items'  => false,
+		);
+
+		wc_create_refund( $args );
+
+		wc_maybe_adjust_line_item_product_stock( $order_item );
+
+		$product = wc_get_product( $product->get_id() );
+
+		// Stocks should remain unchanged from the original order.
+		$this->assertEquals( 90, $product->get_stock_quantity() );
+
+		// Repeating steps above again to make sure nothing changes.
+		wc_maybe_adjust_line_item_product_stock( $order_item );
+
+		$product = wc_get_product( $product->get_id() );
+
+		// Stocks should remain unchanged from the original order.
+		$this->assertEquals( 90, $product->get_stock_quantity() );
+	}
 }

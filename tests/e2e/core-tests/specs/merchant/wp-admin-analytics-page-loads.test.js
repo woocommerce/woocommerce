@@ -4,6 +4,7 @@
  */
  const {
 	merchant,
+	waitForSelectorWithoutThrow,
 } = require( '@woocommerce/e2e-utils' );
 
 /**
@@ -25,7 +26,14 @@ const {
 const checkHeadingAndElement = async (
 	pageTitle, element = '.d3-chart__empty-message', elementText = 'No data for the selected date range') => {
 	await expect(page).toMatchElement('h1', {text: pageTitle});
-	await expect(page).toMatchElement(element, elementText);
+
+	// Depending on order of tests the chart may not be empty.
+	const found = await waitForSelectorWithoutThrow( element );
+	if ( found ) {
+		await expect(page).toMatchElement(element, {text: elementText});
+	} else {
+		await expect(page).toMatchElement( '.woocommerce-chart' );
+	}
  };
 
 const runAnalyticsPageLoadsTest = () => {

@@ -454,6 +454,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 				'method_id',
 				'cost',
 				'_reduced_stock',
+				'_restock_refunded_items',
 			)
 		);
 

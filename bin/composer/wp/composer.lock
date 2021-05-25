@@ -155,16 +155,16 @@
         },
         {
             "name": "mck89/peast",
-            "version": "v1.12.0",
+            "version": "v1.13.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mck89/peast.git",
-                "reference": "833be7a294627a8c5b1c482cbf489f73bf9b8086"
+                "reference": "db38b1524f5bda921cbda2385e440c2bb71d18b4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mck89/peast/zipball/833be7a294627a8c5b1c482cbf489f73bf9b8086",
-                "reference": "833be7a294627a8c5b1c482cbf489f73bf9b8086",
+                "url": "https://api.github.com/repos/mck89/peast/zipball/db38b1524f5bda921cbda2385e440c2bb71d18b4",
+                "reference": "db38b1524f5bda921cbda2385e440c2bb71d18b4",
                 "shasum": ""
             },
             "require": {
@@ -176,7 +176,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.12.0-dev"
+                    "dev-master": "1.13.0-dev"
                 }
             },
             "autoload": {
@@ -187,7 +187,7 @@
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
-                "MIT"
+                "BSD-3-Clause"
             ],
             "authors": [
                 {
@@ -198,9 +198,9 @@
             "description": "Peast is PHP library that generates AST for JavaScript code",
             "support": {
                 "issues": "https://github.com/mck89/peast/issues",
-                "source": "https://github.com/mck89/peast/tree/v1.12.0"
+                "source": "https://github.com/mck89/peast/tree/v1.13.0"
             },
-            "time": "2021-01-08T15:16:19+00:00"
+            "time": "2021-05-22T16:06:09+00:00"
         },
         {
             "name": "mustache/mustache",
@@ -532,16 +532,16 @@
         },
         {
             "name": "wp-cli/wp-cli",
-            "version": "dev-master",
+            "version": "v2.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wp-cli/wp-cli.git",
-                "reference": "4c4746d06640af7698f3792cc4c327a8482dc40f"
+                "reference": "0bcf0c54f4d35685211d435e25219cc7acbe6d48"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wp-cli/wp-cli/zipball/4c4746d06640af7698f3792cc4c327a8482dc40f",
-                "reference": "4c4746d06640af7698f3792cc4c327a8482dc40f",
+                "url": "https://api.github.com/repos/wp-cli/wp-cli/zipball/0bcf0c54f4d35685211d435e25219cc7acbe6d48",
+                "reference": "0bcf0c54f4d35685211d435e25219cc7acbe6d48",
                 "shasum": ""
             },
             "require": {
@@ -565,7 +565,6 @@
                 "ext-readline": "Include for a better --prompt implementation",
                 "ext-zip": "Needed to support extraction of ZIP archives when doing downloads or updates"
             },
-            "default-branch": true,
             "bin": [
                 "bin/wp",
                 "bin/wp.bat"
@@ -600,7 +599,7 @@
                 "issues": "https://github.com/wp-cli/wp-cli/issues",
                 "source": "https://github.com/wp-cli/wp-cli"
             },
-            "time": "2021-05-13T09:36:33+00:00"
+            "time": "2021-05-14T13:44:51+00:00"
         }
     ],
     "aliases": [],

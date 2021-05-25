@@ -15,11 +15,12 @@ const simpleProductPrice = config.has('products.simple.price') ? config.get('pro
 const runProductSearchTest = () => {
 	describe('Products > Search and View a product', () => {
 		beforeAll(async () => {
-			await merchant.login();
 			await createSimpleProduct();
 
 			// Make sure the simple product name is greater than 1 to do a search
 			await expect(simpleProductName.length).toBeGreaterThan(1);
+
+			await merchant.login();
 		});
 
 		beforeEach(async () => {
