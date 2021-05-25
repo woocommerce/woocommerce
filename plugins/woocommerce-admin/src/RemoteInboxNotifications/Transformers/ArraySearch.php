@@ -17,12 +17,13 @@ class ArraySearch implements TransformerInterface {
 	 *
 	 * @param mixed         $value a value to transform.
 	 * @param stdClass|null $arguments required argument 'value'.
+	 * @param string|null   $default default value.
 	 *
 	 * @throws InvalidArgumentException Throws when the required 'value' is missing.
 	 *
 	 * @return mixed|null
 	 */
-	public function transform( $value, stdClass $arguments = null ) {
+	public function transform( $value, stdClass $arguments = null, $default = null ) {
 		$key = array_search( $arguments->value, $value, true );
 		if ( false !== $key ) {
 			return $value[ $key ];

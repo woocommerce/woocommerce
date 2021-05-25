@@ -51,4 +51,22 @@ class WC_Tests_RemoteInboxNotifications_Transformers_DotNotation extends WC_Unit
 		$result       = $dot_notation->transform( $items, $arguments );
 		$this->assertEquals( 'nice!', $result );
 	}
+
+	/**
+	 * Test it returns default value when path is undefined
+	 */
+	public function test_it_can_get_default_value_by_dot_notation() {
+		$arguments = (object) array( 'path' => 'teams.property_that_does_not_exist' );
+
+		$items = array(
+			'teams' => array(
+				'mothra' => 'nice!',
+			),
+		);
+
+		$dot_notation = new DotNotation();
+		$default      = 'default value';
+		$result       = $dot_notation->transform( $items, $arguments, $default );
+		$this->assertEquals( $default, $result );
+	}
 }

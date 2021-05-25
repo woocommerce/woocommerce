@@ -101,6 +101,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Dev: Add source param support for notes query. #6979
 - Enhancement: Add expand/collapse to extendable task list. #6910
 - Enhancement: Add task hierarchy support to extended task list. #6916
+- Fix: Rule Processing Transformer to handle dotNotation default value #7009
 - Fix: Remove Navigation's uneeded SlotFill context #6832
 - Fix: Report filters expecting specific ordering. #6847
 - Fix: Render bug with report comparison mode selections. #6862

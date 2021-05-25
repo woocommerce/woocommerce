@@ -17,12 +17,13 @@ class ArrayColumn implements TransformerInterface {
 	 *
 	 * @param mixed         $value a value to transform.
 	 * @param stdClass|null $arguments required arguments 'key'.
+	 * @param string|null   $default default value.
 	 *
 	 * @throws InvalidArgumentException Throws when the required argument 'key' is missing.
 	 *
 	 * @return mixed
 	 */
-	public function transform( $value, stdClass $arguments = null ) {
+	public function transform( $value, stdClass $arguments = null, $default = null ) {
 		return array_column( $value, $arguments->key );
 	}
 

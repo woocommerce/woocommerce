@@ -11,25 +11,26 @@ use stdClass;
  *
  * @package Automattic\WooCommerce\Admin\RemoteInboxNotifications\Transformers
  */
-class DotNotation implements  TransformerInterface {
+class DotNotation implements TransformerInterface {
 
 	/**
 	 * Find given path from the given value.
 	 *
 	 * @param mixed         $value a value to transform.
 	 * @param stdClass|null $arguments required argument 'path'.
+	 * @param string|null   $default default value.
 	 *
 	 * @throws InvalidArgumentException Throws when the required 'path' is missing.
 	 *
 	 * @return mixed
 	 */
-	public function transform( $value, stdclass $arguments = null ) {
+	public function transform( $value, stdclass $arguments = null, $default = null ) {
 		if ( is_object( $value ) ) {
 			// if the value is an object, convert it to an array.
 			$value = json_decode( wp_json_encode( $value ), true );
 		}
 
-		return $this->get( $value, $arguments->path );
+		return $this->get( $value, $arguments->path, $default );
 	}
 
 	/**

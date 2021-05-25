@@ -34,13 +34,14 @@ class TransformerService {
 	/**
 	 * Apply transformers to the given value.
 	 *
-	 * @param mixed $target_value a value to transform.
-	 * @param array $transformer_configs transform configuration.
+	 * @param mixed  $target_value a value to transform.
+	 * @param array  $transformer_configs transform configuration.
+	 * @param string $default default value.
 	 *
 	 * @throws InvalidArgumentException Throws when one of the requried arguments is missing.
 	 * @return mixed|null
 	 */
-	public static function apply( $target_value, array $transformer_configs ) {
+	public static function apply( $target_value, array $transformer_configs, $default ) {
 		foreach ( $transformer_configs as $transformer_config ) {
 			if ( ! isset( $transformer_config->use ) ) {
 				throw new InvalidArgumentException( 'Missing required config value: use' );
@@ -55,7 +56,7 @@ class TransformerService {
 				throw new InvalidArgumentException( "Unable to find a transformer by name: {$transformer_config->use}" );
 			}
 
-			$transformed_value = $transformer->transform( $target_value, $transformer_config->arguments );
+			$transformed_value = $transformer->transform( $target_value, $transformer_config->arguments, $default );
 			// if the transformer returns null, then return the previously transformed value.
 			if ( null === $transformed_value ) {
 				return $target_value;

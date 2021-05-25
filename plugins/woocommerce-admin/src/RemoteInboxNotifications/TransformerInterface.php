@@ -17,10 +17,11 @@ interface TransformerInterface {
 	 *
 	 * @param mixed         $value a value to transform.
 	 * @param stdClass|null $arguments arguments.
+	 * @param string|null   $default default value.
 	 *
 	 * @return mixed|null
 	 */
-	public function transform( $value, stdClass $arguments = null);
+	public function transform( $value, stdClass $arguments = null, $default = null);
 
 	/**
 	 * Validate Transformer arguments.

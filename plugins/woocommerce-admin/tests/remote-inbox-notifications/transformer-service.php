@@ -33,7 +33,7 @@ class WC_Tests_RemoteInboxNotifications_TransformerService extends WC_Unit_Test_
 	 * @expectedExceptionMessage Missing required config value: use
 	 */
 	public function test_it_throw_exception_when_transformer_config_is_missing_use() {
-		TransformerService::apply( array( 'value' ), array( new stdClass() ) );
+		TransformerService::apply( array( 'value' ), array( new stdClass() ), null );
 	}
 
 	/**
@@ -42,7 +42,7 @@ class WC_Tests_RemoteInboxNotifications_TransformerService extends WC_Unit_Test_
 	 */
 	public function test_it_throws_exception_when_transformer_is_not_found() {
 		$transformer = $this->transformer_config( 'i_do_not_exist' );
-		TransformerService::apply( array( 'value' ), array( $transformer ) );
+		TransformerService::apply( array( 'value' ), array( $transformer ), null );
 	}
 
 	/**
@@ -56,7 +56,7 @@ class WC_Tests_RemoteInboxNotifications_TransformerService extends WC_Unit_Test_
 		$items        = array(
 			'industries' => array( 'item1', 'item2' ),
 		);
-		$result       = TransformerService::apply( $items, array( $dot_notation, $array_search ) );
+		$result       = TransformerService::apply( $items, array( $dot_notation, $array_search ), null );
 		$this->assertEquals( $result, $items['industries'] );
 	}
 
@@ -93,7 +93,7 @@ class WC_Tests_RemoteInboxNotifications_TransformerService extends WC_Unit_Test_
 		$array_flatten = $this->transformer_config( 'array_flatten' );
 		$array_search  = $this->transformer_config( 'array_search', array( 'value' => 'mothra-member' ) );
 
-		$result = TransformerService::apply( $items, array( $dot_notation, $array_column, $array_flatten, $array_search ) );
+		$result = TransformerService::apply( $items, array( $dot_notation, $array_column, $array_flatten, $array_search ), null );
 
 		// Then.
 		$this->assertEquals( 'mothra-member', $result );
