@@ -20,34 +20,46 @@ import { PaymentAction } from '../../../components/PaymentAction';
 import { RecommendedRibbon } from '../../../components/RecommendedRibbon';
 import { SetupRequired } from '../../../components/SetupRequired';
 
-import './PaymentMethodList.scss';
+import './RecommendedPaymentGatewayList.scss';
 
-export const PaymentMethodList = ( {
+export const RecommendedPaymentGatewayList = ( {
 	recommendedMethod,
 	heading,
-	methods,
+	installedPaymentGateways,
+	recommendedPaymentGateways,
 	markConfigured,
 } ) => (
 	<Card>
 		<CardHeader as="h2">{ heading }</CardHeader>
-		{ methods.map( ( method, index ) => {
+		{ recommendedPaymentGateways.map( ( method, index ) => {
 			const {
 				image,
 				content,
-				fields,
-				is_enabled: isEnabled,
-				is_configured: isConfigured,
 				key,
-				plugins,
+				plugins = [],
 				title,
 				is_visible: isVisible,
 				loading,
-				manage_url: manageUrl,
 			} = method;
 
 			if ( ! isVisible ) {
 				return null;
 			}
+
+			const installedPaymentGateway = installedPaymentGateways[ key ];
+			const {
+				enabled: isEnabled = false,
+				needs_setup: needsSetup = false,
+				required_settings_keys: requiredSettingsKeys = [],
+				settings_url: manageUrl,
+			} = installedPaymentGateway || {};
+
+			const isConfigured = ! needsSetup;
+			const hasSetup = Boolean(
+				plugins.length || requiredSettingsKeys.length
+			);
+			const isRecommended = key === recommendedMethod && ! isConfigured;
+			const showRecommendedRibbon = isRecommended;
 
 			const classes = classnames(
 				'woocommerce-task-payment',
@@ -55,9 +67,6 @@ export const PaymentMethodList = ( {
 				! isConfigured && 'woocommerce-task-payment-not-configured',
 				'woocommerce-task-payment-' + key
 			);
-
-			const isRecommended = key === recommendedMethod && ! isConfigured;
-			const showRecommendedRibbon = isRecommended;
 
 			return (
 				<Fragment key={ key }>
@@ -88,17 +97,15 @@ export const PaymentMethodList = ( {
 							<PaymentAction
 								manageUrl={ manageUrl }
 								methodKey={ key }
-								hasSetup={ Boolean(
-									plugins.length || fields.length
-								) }
+								hasSetup={ hasSetup }
 								isConfigured={ isConfigured }
-								isEnabled={ method.isEnabled }
+								isEnabled={ isEnabled }
 								isRecommended={ isRecommended }
 								isLoading={ loading }
 								markConfigured={ markConfigured }
 								onSetup={ () =>
 									recordEvent( 'tasklist_payment_setup', {
-										options: methods.map(
+										options: recommendedPaymentGateways.map(
 											( option ) => option.key
 										),
 										selected: key,

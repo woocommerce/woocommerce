@@ -1,0 +1,1 @@
+export { RecommendedPaymentGatewayList } from './RecommendedPaymentGatewayList';

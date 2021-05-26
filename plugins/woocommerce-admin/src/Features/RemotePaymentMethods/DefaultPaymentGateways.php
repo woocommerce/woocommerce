@@ -33,12 +33,7 @@ class DefaultPaymentGateways {
 						'value'     => 'ZA',
 						'operation' => '=',
 					),
-					(object) array(
-						'type'        => 'option',
-						'option_name' => 'woocommerce_onboarding_profile',
-						'value'       => 'cbd-other-hemp-derived-products',
-						'operation'   => '!contains',
-					),
+					self::get_rules_for_cbd( false ),
 				),
 			),
 			array(
@@ -49,12 +44,7 @@ class DefaultPaymentGateways {
 				'plugins'    => array( 'woocommerce-gateway-stripe' ),
 				'is_visible' => array(
 					self::get_rules_for_countries( OnboardingTasks::get_stripe_supported_countries() ),
-					(object) array(
-						'type'        => 'option',
-						'option_name' => 'woocommerce_onboarding_profile',
-						'value'       => 'cbd-other-hemp-derived-products',
-						'operation'   => '!contains',
-					),
+					self::get_rules_for_cbd( false ),
 				),
 			),
 			array(
@@ -90,6 +80,15 @@ class DefaultPaymentGateways {
 						'value'     => 'IN',
 						'operation' => '!=',
 					),
+					self::get_rules_for_cbd( false ),
+				),
+			),
+			array(
+				'key'        => 'cod',
+				'title'      => __( 'Cash on delivery', 'woocommerce-admin' ),
+				'content'    => __( 'Take payments in cash upon delivery.', 'woocommerce-admin' ),
+				'image'      => plugins_url( 'images/onboarding/cod.svg', WC_ADMIN_PLUGIN_FILE ),
+				'is_visible' => array(
 					self::get_rules_for_cbd( false ),
 				),
 			),
