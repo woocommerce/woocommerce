@@ -128,6 +128,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 == 2.3.1 5/24/2021 ==
 - Tweak: Store profiler - Changed MailPoet's title and description #6990
 - Update: Payment recommendation screen transition and add external link icon. #7022
+- Fix: A JS exception being thrown on the product tags page. #7053
 - Fix: Show Google Listing and Ads in installed marketing extensions section. #7029
 - Tweak: Adjust WC Pay supported countries #7048
 

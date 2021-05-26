@@ -62,9 +62,10 @@ if ( appRoot ) {
 
 	// Render notices just above the WP content div.
 	const wpBody = document.getElementById( 'wpbody-content' );
+
 	const wrap =
 		wpBody.querySelector( '.wrap.woocommerce' ) ||
-		wpBody.querySelector( '[class="wrap"]' );
+		wpBody.querySelector( '.wrap' );
 	const noticeContainer = document.createElement( 'div' );
 
 	render(
