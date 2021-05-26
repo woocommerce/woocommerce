@@ -34,7 +34,7 @@
 		"access": "public"
 	},
 	"devDependencies": {
-		"@testing-library/react": "11.2.6",
+		"@testing-library/react": "11.2.7",
 		"@types/wordpress__components": "9.8.6"
 	}
 }
