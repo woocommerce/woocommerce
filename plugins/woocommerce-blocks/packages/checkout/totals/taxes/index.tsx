@@ -40,29 +40,38 @@ const TotalsTaxes = ( {
 		return null;
 	}
 
-	const itemisedTaxItems: ReactElement | null = getSetting(
+	const showItemisedTaxes = getSetting(
 		'displayItemizedTaxes',
 		false
-	) ? (
-		<>
-			{ taxLines.map( ( { name, rate }, i ) => {
+	) as boolean;
+
+	const itemisedTaxItems: ReactElement | null = showItemisedTaxes ? (
+		<div
+			className={ classnames(
+				'wc-block-components-totals-taxes',
+				className
+			) }
+		>
+			{ taxLines.map( ( { name, rate, price }, i ) => {
 				const label = `${ name }${
 					showRateAfterTaxName ? ` ${ rate }` : ''
 				}`;
 				return (
 					<TotalsItem
 						key={ `tax-line-${ i }` }
-						className="wc-block-components-totals-taxes__tax-line"
+						className="wc-block-components-totals-taxes__grouped-rate"
 						currency={ currency }
 						label={ label }
-						value={ null }
+						value={ parseInt( price, 10 ) }
 					/>
 				);
 			} ) }{ ' ' }
-		</>
+		</div>
 	) : null;
 
-	return (
+	return showItemisedTaxes ? (
+		itemisedTaxItems
+	) : (
 		<>
 			<TotalsItem
 				className={ classnames(
@@ -72,7 +81,7 @@ const TotalsTaxes = ( {
 				currency={ currency }
 				label={ __( 'Taxes', 'woo-gutenberg-products-block' ) }
 				value={ parseInt( totalTax, 10 ) }
-				description={ itemisedTaxItems }
+				description={ null }
 			/>
 		</>
 	);
