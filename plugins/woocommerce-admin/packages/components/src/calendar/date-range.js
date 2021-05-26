@@ -13,6 +13,8 @@ import PropTypes from 'prop-types';
 import { withViewportMatch } from '@wordpress/viewport';
 
 import { validateDateInputForRange } from '@woocommerce/date';
+import 'react-dates/initialize';
+// ^^ The above: Turn on react-dates classes/styles, see https://github.com/airbnb/react-dates#initialize.
 
 /**
  * Internal dependencies

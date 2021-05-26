@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import EllipsisMenu from '../ellipsis-menu';
-import { H } from '../section';
+import { H } from '../section/header';
 import { validateComponent } from '../lib/proptype-validator';
 
 /**

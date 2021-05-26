@@ -115,7 +115,7 @@ function buildJsFile( file, silent ) {
  */
 async function buildPackageScss( packagePath ) {
 	const srcDir = path.resolve( packagePath, SRC_DIR );
-	const scssFiles = glob.sync( `${ srcDir }/*.scss` );
+	const scssFiles = glob.sync( `${ srcDir }/**/*.scss` );
 
 	// Build scss files individually.
 	return Promise.all( scssFiles.map( ( file ) => buildScssFile( file ) ) );

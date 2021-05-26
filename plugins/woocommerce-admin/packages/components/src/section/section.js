@@ -1,0 +1,50 @@
+/**
+ * External dependencies
+ */
+import PropTypes from 'prop-types';
+
+/**
+ * Internal dependencies
+ */
+import { Level } from './context';
+
+/**
+ * The section wrapper, used to indicate a sub-section (and change the header level context).
+ *
+ * @param {Object} props
+ * @param {string} props.component
+ * @param {Node} props.children
+ * @return {Object} -
+ */
+export function Section( { component, children, ...props } ) {
+	const Component = component || 'div';
+	return (
+		<Level.Consumer>
+			{ ( level ) => (
+				<Level.Provider value={ level + 1 }>
+					{ component === false ? (
+						children
+					) : (
+						<Component { ...props }>{ children }</Component>
+					) }
+				</Level.Provider>
+			) }
+		</Level.Consumer>
+	);
+}
+
+Section.propTypes = {
+	/**
+	 * The wrapper component for this section. Optional, defaults to `div`. If passed false, no wrapper is used. Additional props
+	 * passed to Section are passed on to the component.
+	 */
+	component: PropTypes.oneOfType( [
+		PropTypes.func,
+		PropTypes.string,
+		PropTypes.bool,
+	] ),
+	/**
+	 * The children inside this section, rendered in the `component`. This increases the context level for the next heading used.
+	 */
+	children: PropTypes.node,
+};

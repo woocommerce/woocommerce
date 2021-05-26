@@ -17,13 +17,17 @@ function camelCaseDash( string ) {
 	return string.replace( /-([a-z])/g, ( _, letter ) => letter.toUpperCase() );
 }
 
-const wooRequestToExternal = ( request ) => {
+const wooRequestToExternal = ( request, excludedExternals ) => {
 	if ( packages.includes( request ) ) {
 		const handle = request.substring( WOOCOMMERCE_NAMESPACE.length );
 		const irregularExternalMap = {
 			'blocks-registry': [ 'wc', 'wcBlocksRegistry' ],
 			settings: [ 'wc', 'wcSettings' ],
 		};
+
+		if ( ( excludedExternals || [] ).includes( request ) ) {
+			return;
+		}
 
 		if ( irregularExternalMap[ handle ] ) {
 			return irregularExternalMap[ handle ];
@@ -63,7 +67,10 @@ class DependencyExtractionWebpackPlugin extends WPDependencyExtractionWebpackPlu
 			typeof externalRequest === 'undefined' &&
 			this.options.useDefaults
 		) {
-			externalRequest = wooRequestToExternal( request );
+			externalRequest = wooRequestToExternal(
+				request,
+				this.options.bundledPackages || []
+			);
 		}
 
 		if ( externalRequest ) {

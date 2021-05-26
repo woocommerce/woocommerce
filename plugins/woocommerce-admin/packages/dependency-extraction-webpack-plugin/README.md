@@ -33,3 +33,26 @@ Additional module requests on top of Wordpress [Dependency Extraction Webpack Pl
 | `@woocommerce/blocks-registry` | `wc['wcBlocksRegistry']` | `wc-blocks-registry` |
 | `@woocommerce/settings`        | `wc['wcSettings']`       | `wc-settings`        |
 | `@woocommerce/*`               | `wc['*']`                | `wc-*`               |
+
+#### Options
+
+An object can be passed to the constructor to customize the behavior, for example:
+
+```js
+module.exports = {
+	plugins: [
+		new WooCommerceDependencyExtractionWebpackPlugin( {
+			bundledPackages: [ '@woocommerce/components' ],
+		} ),
+	],
+};
+```
+
+##### `bundledPackages`
+
+-   Type: array
+-   Default: []
+
+A list of potential WooCommerce excluded packages, this will include the excluded package within the bundle (example above).
+
+For more supported options see the original [dependency extraction plugin](https://github.com/WordPress/gutenberg/blob/trunk/packages/dependency-extraction-webpack-plugin/README.md#options).

@@ -1,3 +1,7 @@
+# Unreleased
+
+-   Add new `bundledPackages` option to bundle in specific packages.
+
 # 1.5.0
 
 -   Add `@woocommerce/explat` to list of packages.

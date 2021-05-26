@@ -10,7 +10,8 @@ import { isArray, isNumber, isString } from 'lodash';
  * @param {Array<string|Node>} components array of components
  *
  * @return {string} concatenated text content of all nodes
- */ export function textContent( components ) {
+ */
+export function textContent( components ) {
 	let text = '';
 
 	const toText = ( component ) => {
