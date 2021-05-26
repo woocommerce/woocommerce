@@ -1312,35 +1312,26 @@ exports[`Testing cart Shows individual tax lines if the store is set to do so 1`
         </fieldset>
       </div>
       <div
-        class="wc-block-components-totals-item wc-block-components-totals-taxes"
+        class="wc-block-components-totals-taxes"
       >
-        <span
-          class="wc-block-components-totals-item__label"
-        >
-          Taxes
-        </span>
-        <span
-          class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-item__value"
-        >
-          $6.00
-        </span>
         <div
-          class="wc-block-components-totals-item__description"
+          class="wc-block-components-totals-item wc-block-components-totals-taxes__grouped-rate"
         >
-          <div
-            class="wc-block-components-totals-item wc-block-components-totals-taxes__tax-line"
+          <span
+            class="wc-block-components-totals-item__label"
           >
-            <span
-              class="wc-block-components-totals-item__label"
-            >
-              Sales tax
-            </span>
-            <div
-              class="wc-block-components-totals-item__description"
-            />
-          </div>
-           
+            Sales tax
+          </span>
+          <span
+            class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-item__value"
+          >
+            $6.00
+          </span>
+          <div
+            class="wc-block-components-totals-item__description"
+          />
         </div>
+         
       </div>
       <div
         class="wc-block-components-totals-item wc-block-components-totals-footer-item"
@@ -2017,35 +2008,26 @@ exports[`Testing cart Shows rate percentages after tax lines if the block is set
         </fieldset>
       </div>
       <div
-        class="wc-block-components-totals-item wc-block-components-totals-taxes"
+        class="wc-block-components-totals-taxes"
       >
-        <span
-          class="wc-block-components-totals-item__label"
-        >
-          Taxes
-        </span>
-        <span
-          class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-item__value"
-        >
-          $6.00
-        </span>
         <div
-          class="wc-block-components-totals-item__description"
+          class="wc-block-components-totals-item wc-block-components-totals-taxes__grouped-rate"
         >
-          <div
-            class="wc-block-components-totals-item wc-block-components-totals-taxes__tax-line"
+          <span
+            class="wc-block-components-totals-item__label"
           >
-            <span
-              class="wc-block-components-totals-item__label"
-            >
-              Sales tax 20%
-            </span>
-            <div
-              class="wc-block-components-totals-item__description"
-            />
-          </div>
-           
+            Sales tax 20%
+          </span>
+          <span
+            class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-item__value"
+          >
+            $6.00
+          </span>
+          <div
+            class="wc-block-components-totals-item__description"
+          />
         </div>
+         
       </div>
       <div
         class="wc-block-components-totals-item wc-block-components-totals-footer-item"

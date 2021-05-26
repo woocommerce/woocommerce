@@ -1,6 +1,10 @@
-.wc-block-components-totals-item__description
-.wc-block-components-totals-item.wc-block-components-totals-taxes__tax-line {
-	padding: 0;
-	@include font-size(small);
-	margin: $gap-smallest / 2;
+.wc-block-components-totals-item.wc-block-components-totals-taxes__grouped-rate {
+	margin: $gap-smallest 0;
+	&:first-child {
+		margin-top: 0;
+	}
+
+	&:last-child {
+		margin-bottom: 0;
+	}
 }
