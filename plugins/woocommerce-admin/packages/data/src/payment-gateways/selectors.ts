@@ -4,6 +4,7 @@
 import {
 	PaymentGateway,
 	PluginsState,
+	RestApiError,
 	WPDataSelector,
 	WPDataSelectors,
 } from './types';
@@ -23,17 +24,19 @@ export function getPaymentGateways(
 	return state.paymentGateways;
 }
 
-export function isPaymentGatewayRequesting(
+export function getPaymentGatewayError(
 	state: PluginsState,
 	selector: string
-): boolean {
-	return state.requesting[ selector ] || false;
+): RestApiError | null {
+	return state.errors[ selector ] || null;
+}
+
+export function isPaymentGatewayUpdating( state: PluginsState ): boolean {
+	return state.isUpdating || false;
 }
 
 export type PaymentSelectors = {
 	getPaymentGateway: WPDataSelector< typeof getPaymentGateway >;
 	getPaymentGateways: WPDataSelector< typeof getPaymentGateways >;
-	isPaymentGatewayRequesting: WPDataSelector<
-		typeof isPaymentGatewayRequesting
-	>;
+	isPaymentGatewayUpdating: WPDataSelector< typeof isPaymentGatewayUpdating >;
 } & WPDataSelectors;

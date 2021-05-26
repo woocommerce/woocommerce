@@ -12,7 +12,7 @@ import { paymentGatewaysStub } from '../test-helpers/stub';
 
 const defaultState: PluginsState = {
 	paymentGateways: [],
-	requesting: {},
+	isUpdating: false,
 	errors: {},
 };
 
@@ -31,28 +31,12 @@ describe( 'plugins reducer', () => {
 		expect( state ).not.toBe( defaultState );
 	} );
 
-	it( 'should handle GET_PAYMENT_GATEWAY_REQUEST', () => {
-		const state = reducer( defaultState, {
-			type: ACTION_TYPES.GET_PAYMENT_GATEWAY_REQUEST,
-		} );
-
-		expect( state.requesting.getPaymentGateway ).toBe( true );
-	} );
-
-	it( 'should handle GET_PAYMENT_GATEWAYS_REQUEST', () => {
-		const state = reducer( defaultState, {
-			type: ACTION_TYPES.GET_PAYMENT_GATEWAYS_REQUEST,
-		} );
-
-		expect( state.requesting.getPaymentGateways ).toBe( true );
-	} );
-
 	it( 'should handle UPDATE_PAYMENT_GATEWAY_REQUEST', () => {
 		const state = reducer( defaultState, {
 			type: ACTION_TYPES.UPDATE_PAYMENT_GATEWAY_REQUEST,
 		} );
 
-		expect( state.requesting.updatePaymentGateway ).toBe( true );
+		expect( state.isUpdating ).toBe( true );
 	} );
 
 	it( 'should handle GET_PAYMENT_GATEWAYS_ERROR', () => {
@@ -62,7 +46,6 @@ describe( 'plugins reducer', () => {
 		} );
 
 		expect( state.errors.getPaymentGateways ).toBe( restApiError );
-		expect( state.requesting.getPaymentGateways ).toBe( false );
 	} );
 
 	it( 'should handle GET_PAYMENT_GATEWAY_ERROR', () => {
@@ -72,7 +55,6 @@ describe( 'plugins reducer', () => {
 		} );
 
 		expect( state.errors.getPaymentGateway ).toBe( restApiError );
-		expect( state.requesting.getPaymentGateway ).toBe( false );
 	} );
 
 	it( 'should handle UPDATE_PAYMENT_GATEWAY_ERROR', () => {
@@ -82,7 +64,7 @@ describe( 'plugins reducer', () => {
 		} );
 
 		expect( state.errors.updatePaymentGateway ).toBe( restApiError );
-		expect( state.requesting.updatePaymentGateway ).toBe( false );
+		expect( state.isUpdating ).toBe( false );
 	} );
 
 	it( 'should handle GET_PAYMENT_GATEWAYS_SUCCESS', () => {

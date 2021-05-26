@@ -124,6 +124,7 @@ export function* updatePaymentGateway(
 		}
 	} catch ( e ) {
 		yield updatePaymentGatewayError( e );
+		throw e;
 	}
 }
 

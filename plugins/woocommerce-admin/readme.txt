@@ -125,6 +125,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Update: Task list component with new Experimental Task list. #6849
 - Update: Experimental task list import to the experimental package. #6950
 - Update: Redirect to WC Home after setting up a payment method #6891
+- Update: Hook up payments gateway data store #7038
 
 == 2.3.1 5/24/2021 ==
 - Tweak: Store profiler - Changed MailPoet's title and description #6990

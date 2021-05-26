@@ -2,13 +2,12 @@
  * Internal dependencies
  */
 import { ACTION_TYPES } from './action-types';
-import { PluginsState, SelectorKeysWithActions, PaymentGateway } from './types';
+import { PluginsState, PaymentGateway } from './types';
 import { Actions } from './actions';
 
 function updatePaymentGatewayList(
 	state: PluginsState,
-	paymentGateway: PaymentGateway,
-	selector: SelectorKeysWithActions
+	paymentGateway: PaymentGateway
 ): PluginsState {
 	const targetIndex = state.paymentGateways.findIndex(
 		( gateway ) => gateway.id === paymentGateway.id
@@ -18,10 +17,7 @@ function updatePaymentGatewayList(
 		return {
 			...state,
 			paymentGateways: [ ...state.paymentGateways, paymentGateway ],
-			requesting: {
-				...state.requesting,
-				[ selector ]: false,
-			},
+			isUpdating: false,
 		};
 	}
 
@@ -32,17 +28,14 @@ function updatePaymentGatewayList(
 			paymentGateway,
 			...state.paymentGateways.slice( targetIndex + 1 ),
 		],
-		requesting: {
-			...state.requesting,
-			[ selector ]: false,
-		},
+		isUpdating: false,
 	};
 }
 
 const reducer = (
 	state: PluginsState = {
 		paymentGateways: [],
-		requesting: {},
+		isUpdating: false,
 		errors: {},
 	},
 	payload?: Actions
@@ -50,29 +43,12 @@ const reducer = (
 	if ( payload && 'type' in payload ) {
 		switch ( payload.type ) {
 			case ACTION_TYPES.GET_PAYMENT_GATEWAYS_REQUEST:
-				return {
-					...state,
-					requesting: {
-						...state.requesting,
-						getPaymentGateways: true,
-					},
-				};
 			case ACTION_TYPES.GET_PAYMENT_GATEWAY_REQUEST:
-				return {
-					...state,
-					requesting: {
-						...state.requesting,
-						getPaymentGateway: true,
-					},
-				};
+				return state;
 			case ACTION_TYPES.GET_PAYMENT_GATEWAYS_SUCCESS:
 				return {
 					...state,
 					paymentGateways: payload.paymentGateways,
-					requesting: {
-						...state.requesting,
-						getPaymentGateways: false,
-					},
 				};
 			case ACTION_TYPES.GET_PAYMENT_GATEWAYS_ERROR:
 				return {
@@ -80,10 +56,6 @@ const reducer = (
 					errors: {
 						...state.errors,
 						getPaymentGateways: payload.error,
-					},
-					requesting: {
-						...state.requesting,
-						getPaymentGateways: false,
 					},
 				};
 			case ACTION_TYPES.GET_PAYMENT_GATEWAY_ERROR:
@@ -93,30 +65,21 @@ const reducer = (
 						...state.errors,
 						getPaymentGateway: payload.error,
 					},
-					requesting: {
-						...state.requesting,
-						getPaymentGateway: false,
-					},
 				};
 			case ACTION_TYPES.UPDATE_PAYMENT_GATEWAY_REQUEST:
 				return {
 					...state,
-					requesting: {
-						...state.requesting,
-						updatePaymentGateway: true,
-					},
+					isUpdating: true,
 				};
 			case ACTION_TYPES.UPDATE_PAYMENT_GATEWAY_SUCCESS:
 				return updatePaymentGatewayList(
 					state,
-					payload.paymentGateway,
-					'updatePaymentGateway'
+					payload.paymentGateway
 				);
 			case ACTION_TYPES.GET_PAYMENT_GATEWAY_SUCCESS:
 				return updatePaymentGatewayList(
 					state,
-					payload.paymentGateway,
-					'getPaymentGateway'
+					payload.paymentGateway
 				);
 
 			case ACTION_TYPES.UPDATE_PAYMENT_GATEWAY_ERROR:
@@ -126,10 +89,7 @@ const reducer = (
 						...state.errors,
 						updatePaymentGateway: payload.error,
 					},
-					requesting: {
-						...state.requesting,
-						updatePaymentGateway: false,
-					},
+					isUpdating: false,
 				};
 		}
 	}
