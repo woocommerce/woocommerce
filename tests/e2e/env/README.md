@@ -133,6 +133,24 @@ module.exports = puppeteerConfig;
 
 Jest provides [setup and teardown functions](https://jestjs.io/docs/setup-teardown) similar to PHPUnit. The default setup and teardown is in [`tests/e2e/env/src/setup/jest.setup.js`](src/setup/jest.setup.js). Additional setup and teardown functions can be added to [`tests/e2e/config/jest.setup.js`](../config/jest.setup.js)
 
+#### Console filtering
+
+**Added version 0.2.3**
+By default, messages logged to the console are included in the test results. The test runner suppresses 404 not found and proxy connection messages. 
+
+Pages that you are testing may contain repetitive console output that you expect. Use `addConsoleSuppression` in your jest setup script to filter these repetitive messages:
+
+```js
+addConsoleSuppression( 'suppress this after the first instance' );
+addConsoleSuppression( 'suppress this completely', false );
+```
+
+Console suppressions can be removed with `removeConsoleSuppression`. The `searchString` parameter needs to match the `addConsoleSuppression` parameter:
+
+```js
+removeConsoleSuppression( 'suppress this after the first instance' );
+```
+
 ### Container Setup
 
 Depending on the project and testing scenario, the built in testing environment container might not be the best solution for testing. This could be local testing where there is already a testing container, a repository that isn't a plugin or theme and there are multiple folders mapped into the container, or similar. The `e2e-environment` test runner supports using either the built in container or an external container. See the appropriate readme for  details:
