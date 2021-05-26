@@ -107,11 +107,11 @@ class RemoteInboxNotificationsEngine {
 	 * WooCommerceAdminUpdatedRuleProcessor trigger on WCA update.
 	 */
 	public static function run_on_woocommerce_admin_updated() {
-		update_option( self::WCA_UPDATED_OPTION_NAME, true );
+		update_option( self::WCA_UPDATED_OPTION_NAME, true, false );
 
 		self::run();
 
-		update_option( self::WCA_UPDATED_OPTION_NAME, false );
+		update_option( self::WCA_UPDATED_OPTION_NAME, false, false );
 	}
 
 	/**
@@ -130,7 +130,12 @@ class RemoteInboxNotificationsEngine {
 				$stored_state
 			);
 
-			add_option( self::STORED_STATE_OPTION_NAME, $stored_state );
+			add_option(
+				self::STORED_STATE_OPTION_NAME,
+				$stored_state,
+				'',
+				false
+			);
 		}
 
 		return $stored_state;
@@ -155,6 +160,6 @@ class RemoteInboxNotificationsEngine {
 	 * @param object $stored_state The stored state.
 	 */
 	public static function update_stored_state( $stored_state ) {
-		update_option( self::STORED_STATE_OPTION_NAME, $stored_state );
+		update_option( self::STORED_STATE_OPTION_NAME, $stored_state, false );
 	}
 }
