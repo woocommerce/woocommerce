@@ -3707,7 +3707,7 @@ S2.define('select2/data/tags',[
   };
 
   Tags.prototype.createTag = function (decorated, params) {
-    var term = params.term.trim();
+    var term = 'string' === typeof params.term ? params.term.trim() : '';
 
     if (term === '') {
       return null;
@@ -4941,7 +4941,7 @@ S2.define('select2/defaults',[
 
     function matcher (params, data) {
       // Always return the object if there is nothing to compare
-      if ( params.term.trim() === '' ) {
+      if ( 'undefined' === typeof params.term || ( 'string' === typeof params.term && '' === params.term.trim() ) ) {
         return data;
       }
 
@@ -5801,7 +5801,7 @@ S2.define('select2/compat/utils',[
   function syncCssClasses ($dest, $src, adapter) {
     var classes, replacements = [], adapted;
 
-    classes = $dest.attr('class').trim();
+    classes = 'string' === typeof $dest.attr('class') ? $dest.attr('class').trim() : '';
 
     if (classes) {
       classes = '' + classes; // for IE which returns object
@@ -5814,7 +5814,7 @@ S2.define('select2/compat/utils',[
       });
     }
 
-    classes = $src.attr('class').trim();
+    classes = 'string' === typeof $src.attr('class') ? $src.attr('class').trim() : '';
 
     if (classes) {
       classes = '' + classes; // for IE which returns object
@@ -6131,7 +6131,7 @@ S2.define('select2/compat/matcher',[
     function wrappedMatcher (params, data) {
       var match = $.extend(true, {}, data);
 
-      if (params.term == null || params.term.trim() === '') {
+      if ( params.term == null || ( 'string' === typeof params.term && '' === params.term.trim() ) ) {
         return match;
       }
 
