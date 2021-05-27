@@ -485,7 +485,11 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 			'class'            => 'wp-block-button__link add_to_cart_button',
 		);
 
-		if ( $product->supports( 'ajax_add_to_cart' ) ) {
+		if (
+			$product->supports( 'ajax_add_to_cart' ) &&
+			$product->is_purchasable() &&
+			( $product->is_in_stock() || $product->backorders_allowed() )
+		) {
 			$attributes['class'] .= ' ajax_add_to_cart';
 		}
 
