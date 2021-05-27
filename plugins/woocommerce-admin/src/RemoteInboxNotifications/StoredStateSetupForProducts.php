@@ -14,12 +14,31 @@ use \Automattic\WooCommerce\Admin\RemoteInboxNotifications\SpecRunner;
  * Handles stored state setup for products.
  */
 class StoredStateSetupForProducts {
+	const ASYNC_RUN_REMOTE_NOTIFICATIONS_ACTION_NAME =
+		'woocommerce_admin/stored_state_setup_for_products/async/run_remote_notifications';
+
 	/**
-	 * Initialize the class
+	 * Initialize the class via the admin_init hook.
 	 */
-	public static function init() {
+	public static function admin_init() {
 		add_action( 'product_page_product_importer', array( __CLASS__, 'run_on_product_importer' ) );
 		add_action( 'transition_post_status', array( __CLASS__, 'run_on_transition_post_status' ), 10, 3 );
+	}
+
+	/**
+	 * Initialize the class via the init hook.
+	 */
+	public static function init() {
+		add_action( self::ASYNC_RUN_REMOTE_NOTIFICATIONS_ACTION_NAME, array( __CLASS__, 'run_remote_notifications' ) );
+	}
+
+	/**
+	 * Run the remote notifications engine. This is triggered by
+	 * action-scheduler after a product is added. It also cleans up from
+	 * setting the product count increment.
+	 */
+	public static function run_remote_notifications() {
+		RemoteInboxNotificationsEngine::run();
 	}
 
 	/**
@@ -74,7 +93,7 @@ class StoredStateSetupForProducts {
 		$stored_state->there_are_now_products = true;
 		RemoteInboxNotificationsEngine::update_stored_state( $stored_state );
 
-		RemoteInboxNotificationsEngine::run();
+		self::enqueue_async_run_remote_notifications();
 	}
 
 	/**
@@ -96,17 +115,16 @@ class StoredStateSetupForProducts {
 		$stored_state                         = RemoteInboxNotificationsEngine::get_stored_state();
 		$stored_state->there_are_now_products = true;
 
-		// This is used to increment the product count yielded by the query,
-		// which is one less than the actual product count at this point in the
-		// product publish lifecycle. This is currently being used by
-		// ProductCountRuleProcessor.
-		$stored_state->new_product_count = 1;
-
 		RemoteInboxNotificationsEngine::update_stored_state( $stored_state );
 
-		RemoteInboxNotificationsEngine::run();
+		self::enqueue_async_run_remote_notifications();
+	}
 
-		$stored_state->new_product_count = 0;
-		RemoteInboxNotificationsEngine::update_stored_state( $stored_state );
+	/**
+	 * Enqueues an async action (using action-scheduler) to run remote
+	 * notifications.
+	 */
+	private static function enqueue_async_run_remote_notifications() {
+		as_enqueue_async_action( self::ASYNC_RUN_REMOTE_NOTIFICATIONS_ACTION_NAME );
 	}
 }

@@ -25,6 +25,9 @@ class RemoteInboxNotificationsEngine {
 	 * Initialize the engine.
 	 */
 	public static function init() {
+		// Init things that need to happen before admin_init.
+		add_action( 'init', array( __CLASS__, 'on_init' ), 0, 0 );
+
 		// Continue init via admin_init.
 		add_action( 'admin_init', array( __CLASS__, 'on_admin_init' ) );
 
@@ -73,10 +76,19 @@ class RemoteInboxNotificationsEngine {
 
 		add_action( 'activated_plugin', array( __CLASS__, 'run' ) );
 		add_action( 'deactivated_plugin', array( __CLASS__, 'run_on_deactivated_plugin' ), 10, 1 );
-		StoredStateSetupForProducts::init();
+		StoredStateSetupForProducts::admin_init();
 
 		// Pre-fetch stored state so it has the correct initial values.
 		self::get_stored_state();
+	}
+
+	/**
+	 * An init hook is used here so that StoredStateSetupForProducts can set
+	 * up a hook that gets triggered by action-scheduler - this is needed
+	 * because the admin_init hook doesn't get triggered by WP Cron.
+	 */
+	public static function on_init() {
+		StoredStateSetupForProducts::init();
 	}
 
 	/**
