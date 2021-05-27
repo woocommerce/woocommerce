@@ -41,12 +41,11 @@ Definition example:
 
 This uses PHP's built-in `array_column` to select values by a given array key.
 
-
 Arguments:
 
-|name|description|
-|----|---------|
-| key | array key name |
+| name | description    |
+| ---- | -------------- |
+| key  | array key name |
 
 Definition:
 
@@ -78,6 +77,7 @@ Definition:
 ```
 
 ### ArrayKeys (array_keys)
+
 This uses PHP's built-in `array_keys` to return keys from an array.
 
 Arguments: N/A
@@ -139,12 +139,12 @@ Let's say we have the following array.
 ```php
 $items = [
     'name' => 'name',
-    'members' => ['member1', 'member2'] 
+    'members' => ['member1', 'member2']
 ];
 ```
 
+Example definition to select `$items['name']`:
 
- Example definition to select `$items['name']`:
 ```php
 "transformers": [
     {
@@ -167,3 +167,20 @@ Example definition to select `$items['members'][0]`:
         }
     }
 ],
+```
+
+### Count (count)
+
+This uses PHP's built-in count to return the number of values from a countable, such as an array.
+
+Arguments: N/A
+
+Definition:
+
+```php
+"transformers": [
+    {
+        "use": "count"
+    }
+],
+```
