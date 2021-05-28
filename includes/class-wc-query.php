@@ -61,6 +61,13 @@ class WC_Query {
 	}
 
 	/**
+	 * Reset the chosen attributes so that get_layered_nav_chosen_attributes will get them from the query again.
+	 */
+	public static function reset_chosen_attributes() {
+		self::$chosen_attributes = null;
+	}
+
+	/**
 	 * Get any errors from querystring.
 	 */
 	public function get_errors() {
