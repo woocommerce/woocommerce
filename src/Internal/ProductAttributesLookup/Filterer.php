@@ -220,9 +220,8 @@ class Filterer {
 
 					$count = count( $term_ids_to_filter_by );
 					if ( 0 !== $count ) {
-						$query['where'] .= ' AND product_or_parent_id IN (';
 						if ( 'and' === $attributes_to_filter_by[ $taxonomy ]['query_type'] ) {
-							$query['where'] .= "
+							$query['where'] .= "  AND product_or_parent_id IN (
 								SELECT product_or_parent_id
 								FROM {$this->lookup_table_name} lt
 								WHERE is_variation_attribute=0
@@ -238,11 +237,7 @@ class Filterer {
 								AND term_id in {$term_ids_to_filter_by_list}
 							)";
 						} else {
-							$query['where'] .= "
-								SELECT product_or_parent_id FROM {$this->lookup_table_name}
-								WHERE term_id in {$term_ids_to_filter_by_list}
-								{$in_stock_clause}
-							)";
+							$query['where'] .= $in_stock_clause;
 						}
 					}
 				}
