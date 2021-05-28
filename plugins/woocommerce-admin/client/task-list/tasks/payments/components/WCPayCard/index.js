@@ -1,1 +1,0 @@
-export { WCPayCard } from './WCPayCard';

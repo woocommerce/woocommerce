@@ -1,8 +1,8 @@
-export default () => (
+export default ( { width = 196, height = 41 } ) => (
 	<svg
-		width="196"
-		height="41"
-		viewBox="0 0 196 41"
+		width={ width }
+		height={ height }
+		viewBox={ `0 0 ${ width } ${ height }` }
 		fill="none"
 		xmlns="http://www.w3.org/2000/svg"
 	>

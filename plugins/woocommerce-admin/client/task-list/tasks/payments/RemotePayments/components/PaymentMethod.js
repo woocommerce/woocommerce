@@ -10,7 +10,8 @@ import {
 	PLUGINS_STORE_NAME,
 	pluginNames,
 } from '@woocommerce/data';
-import { Plugins, Stepper, WooRemotePayment } from '@woocommerce/components';
+import { Plugins, Stepper } from '@woocommerce/components';
+import { WooRemotePayment } from '@woocommerce/onboarding';
 import { recordEvent } from '@woocommerce/tracks';
 import { useEffect, useState, useMemo, useCallback } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';

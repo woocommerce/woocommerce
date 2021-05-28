@@ -16,12 +16,12 @@ import { useMemo, useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { WCPayCard } from './components/WCPayCard';
 import { PaymentMethodList } from './components/PaymentMethodList';
+import { WCPayMethodCard } from './components/WCPayMethodCard';
 import { getCountryCode } from '../../../dashboard/utils';
 import { getPaymentMethods } from './methods';
 import { PaymentSetup } from './components/PaymentSetup';
-import { sift } from '../../../utils';
+import { sift } from '~/utils';
 
 export const setMethodEnabledOption = async (
 	optionName,
@@ -223,7 +223,9 @@ export const LocalPayments = ( { query } ) => {
 
 	return (
 		<div className="woocommerce-task-payments">
-			{ !! wcPayMethod && <WCPayCard method={ wcPayMethod[ 0 ] } /> }
+			{ !! wcPayMethod && (
+				<WCPayMethodCard method={ wcPayMethod[ 0 ] } />
+			) }
 
 			{ !! enabledCardMethods.length && (
 				<PaymentMethodList

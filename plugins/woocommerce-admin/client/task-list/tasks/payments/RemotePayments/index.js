@@ -15,11 +15,15 @@ import { useMemo, useCallback } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { WCPayCard } from '../components/WCPayCard';
 import { RecommendedPaymentGatewayList } from './components/RecommendedPaymentGatewayList';
 import { PaymentMethod } from './components/PaymentMethod';
+import { WCPayMethodCard } from '../components/WCPayMethodCard';
 
-const RECOMMENDED_GATEWAY_KEYS = [ 'wcpay', 'mercadopago', 'stripe' ];
+const RECOMMENDED_GATEWAY_KEYS = [
+	'woocommerce_payments',
+	'mercadopago',
+	'stripe',
+];
 
 export const RemotePayments = ( { query } ) => {
 	const { updatePaymentGateway } = useDispatch( PAYMENT_GATEWAYS_STORE_NAME );
@@ -148,14 +152,27 @@ export const RemotePayments = ( { query } ) => {
 		);
 	}
 
-	const wcPayGateway = additionalPaymentGatewayRecommendations.get( 'wcpay' );
+	const wcPayGateway = additionalPaymentGatewayRecommendations.get(
+		'woocommerce_payments'
+	);
+
 	if ( wcPayGateway ) {
-		additionalPaymentGatewayRecommendations.delete( 'wcpay' );
+		additionalPaymentGatewayRecommendations.delete(
+			'woocommerce_payments'
+		);
 	}
 
 	return (
 		<div className="woocommerce-task-payments">
-			{ !! wcPayGateway && <WCPayCard method={ wcPayGateway } /> }
+			{ !! wcPayGateway && (
+				<WCPayMethodCard
+					isEnabled={
+						'woocommerce_payments' in installedPaymentGateways &&
+						installedPaymentGateways.woocommerce_payments.enabled
+					}
+					method={ wcPayGateway }
+				/>
+			) }
 
 			{ !! enabledPaymentGatewayRecommendations.size && (
 				<RecommendedPaymentGatewayList

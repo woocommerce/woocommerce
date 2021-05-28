@@ -4,12 +4,26 @@
 		margin-bottom: $gap-large;
 	}
 
+	> .components-card__header {
+		margin-bottom: $gap-small;
+
+		.woocommerce-pill {
+			margin-left: $gap-small;
+		}
+	}
+
 	> .components-card__footer {
 		flex-direction: column;
 		align-items: flex-start;
 
 		.components-button {
 			margin-top: $gap;
+		}
+	}
+
+	> .components-card__body {
+		h2 {
+			margin: 0 0 20px 0;
 		}
 	}
 

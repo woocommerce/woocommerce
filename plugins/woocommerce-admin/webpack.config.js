@@ -37,6 +37,7 @@ const wcAdminPackages = [
 	'number',
 	'data',
 	'tracks',
+	'onboarding',
 ];
 
 const entryPoints = {};

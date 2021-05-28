@@ -4,8 +4,9 @@
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { DynamicForm, WooRemotePaymentForm } from '@woocommerce/components';
 import { PAYMENT_GATEWAYS_STORE_NAME } from '@woocommerce/data';
+import { DynamicForm } from '@woocommerce/components';
+import { WooRemotePaymentForm } from '@woocommerce/onboarding';
 import { useSlot } from '@woocommerce/experimental';
 
 /**

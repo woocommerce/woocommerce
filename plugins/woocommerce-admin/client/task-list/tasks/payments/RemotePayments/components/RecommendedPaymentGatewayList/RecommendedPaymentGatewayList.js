@@ -12,13 +12,12 @@ import {
 } from '@wordpress/components';
 import { Text } from '@woocommerce/experimental';
 import { recordEvent } from '@woocommerce/tracks';
+import { RecommendedRibbon, SetupRequired } from '@woocommerce/onboarding';
 
 /**
  * Internal dependencies
  */
 import { PaymentAction } from '../../../components/PaymentAction';
-import { RecommendedRibbon } from '../../../components/RecommendedRibbon';
-import { SetupRequired } from '../../../components/SetupRequired';
 
 import './RecommendedPaymentGatewayList.scss';
 

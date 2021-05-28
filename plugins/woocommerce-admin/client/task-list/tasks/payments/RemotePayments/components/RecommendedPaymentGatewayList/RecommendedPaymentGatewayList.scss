@@ -5,27 +5,6 @@
 	position: relative;
 	overflow: hidden;
 
-	.woocommerce-task-payment__recommended-ribbon {
-		position: absolute;
-		transform: rotate(-45deg) translate(-50%, -50%);
-		background: $studio-gray-80;
-		color: $studio-white;
-		font-size: 11px;
-		line-height: 20px;
-		position: absolute;
-		top: 0;
-		left: 0;
-		line-height: 1;
-		padding: 7px $gap-largest;
-		transform-origin: top left;
-		margin-top: 32px;
-		margin-left: 32px;
-
-		span {
-			max-width: 70px;
-		}
-	}
-
 	.components-card__media {
 		width: 170px;
 		flex-shrink: 0;
@@ -72,12 +51,6 @@
 
 	@include breakpoint( '<600px' ) {
 		flex-wrap: wrap;
-
-		.woocommerce-task-payment__recommended-ribbon {
-			margin-top: 24px;
-			margin-left: 24px;
-			font-size: 9px;
-		}
 
 		.woocommerce-task-payment__content {
 			margin: 0;
