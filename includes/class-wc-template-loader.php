@@ -96,23 +96,53 @@ class WC_Template_Loader {
 	}
 
 	/**
-	 * Get the default filename for a template.
+	 * Checks whether a block template with that name exists.
+	 *
+	 * @since  5.5.0
+	 * @param string $template_name Template to check.
+	 * @return boolean
+	 */
+	private static function has_block_template( $template_name ) {
+		if ( ! $template_name ) {
+			return false;
+		}
+
+		return is_readable(
+			get_stylesheet_directory() . '/block-templates/' . $template_name . '.html'
+		);
+	}
+
+	/**
+	 * Get the default filename for a template except if a block template with
+	 * the same name exists.
 	 *
 	 * @since  3.0.0
+	 * @since  5.5.0 If a block template with the same name exists, return an
+	 * empty string.
 	 * @return string
 	 */
 	private static function get_template_loader_default_file() {
-		if ( is_singular( 'product' ) ) {
+		if (
+			is_singular( 'product' ) &&
+			! self::has_block_template( 'single-product' )
+		) {
 			$default_file = 'single-product.php';
 		} elseif ( is_product_taxonomy() ) {
 			$object = get_queried_object();
 
 			if ( is_tax( 'product_cat' ) || is_tax( 'product_tag' ) ) {
-				$default_file = 'taxonomy-' . $object->taxonomy . '.php';
-			} else {
+				if ( self::has_block_template( 'taxonomy-' . $object->taxonomy ) ) {
+					$default_file = '';
+				} else {
+					$default_file = 'taxonomy-' . $object->taxonomy . '.php';
+				}
+			} elseif ( ! self::has_block_template( 'archive-product' ) ) {
 				$default_file = 'archive-product.php';
 			}
-		} elseif ( is_post_type_archive( 'product' ) || is_page( wc_get_page_id( 'shop' ) ) ) {
+		} elseif (
+			( is_post_type_archive( 'product' ) || is_page( wc_get_page_id( 'shop' ) ) ) &&
+			! self::has_block_template( 'archive-product' )
+		) {
 			$default_file = self::$theme_support ? 'archive-product.php' : '';
 		} else {
 			$default_file = '';
