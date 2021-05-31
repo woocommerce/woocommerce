@@ -1,3 +1,7 @@
+# Unreleased
+
+-	Fix, state md5 as npm dependency. #7087
+
 # 1.3.0
 
 -   Fix parsing bad JSON string data in useUserPreferences hook. #6819
