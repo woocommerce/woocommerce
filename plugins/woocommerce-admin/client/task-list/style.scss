@@ -32,6 +32,18 @@
 		}
 	}
 
+	.woocommerce-task__additional-info,
+	.woocommerce-task__estimated-time,
+	.woocommerce-task-list__item-content {
+		color: $gray-700;
+		font-weight: 400;
+		font-size: 12px;
+	}
+
+	.woocommerce-task-list__item-content {
+		font-size: 13px;
+	}
+
 	#wpbody-content {
 		position: relative;
 	}

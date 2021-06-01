@@ -43,6 +43,14 @@ const taskDashboardSelect = ( select ) => {
 	const countryCode = getCountryCode(
 		generalSettings.woocommerce_default_country
 	);
+	const {
+		woocommerce_store_address: storeAddress,
+		woocommerce_default_country: defaultCountry,
+		woocommerce_store_postcode: storePostCode,
+	} = generalSettings;
+	const hasCompleteAddress = Boolean(
+		storeAddress && defaultCountry && storePostCode
+	);
 
 	const activePlugins = getActivePlugins();
 	const installedPlugins = getInstalledPlugins();
@@ -65,6 +73,7 @@ const taskDashboardSelect = ( select ) => {
 		onboardingStatus,
 		profileItems,
 		trackedCompletedTasks,
+		hasCompleteAddress,
 	};
 };
 
@@ -85,6 +94,7 @@ const TaskDashboard = ( { userPreferences, query } ) => {
 		isTaskListComplete,
 		isExtendedTaskListHidden,
 		isExtendedTaskListComplete,
+		hasCompleteAddress,
 	} = useSelect( taskDashboardSelect );
 
 	const [ isCartModalOpen, setIsCartModalOpen ] = useState( false );
@@ -173,6 +183,7 @@ const TaskDashboard = ( { userPreferences, query } ) => {
 		query,
 		toggleCartModal,
 		onTaskSelect,
+		hasCompleteAddress,
 	} );
 
 	const { extension, setup: setupTasks } = allTasks;

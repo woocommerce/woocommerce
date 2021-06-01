@@ -56,6 +56,7 @@ export function getAllTasks( {
 	query,
 	toggleCartModal,
 	onTaskSelect,
+	hasCompleteAddress,
 } ) {
 	const {
 		hasPaymentGateway,
@@ -84,6 +85,8 @@ export function getAllTasks( {
 
 	const woocommercePaymentsInstalled =
 		installedPlugins.indexOf( 'woocommerce-payments' ) !== -1;
+	const woocommerceServicesActive =
+		activePlugins.indexOf( 'woocommerce-services' ) !== -1;
 	const {
 		completed: profilerCompleted,
 		product_types: productTypes,
@@ -94,10 +97,11 @@ export function getAllTasks( {
 		businessExtensions || []
 	).includes( 'woocommerce-payments' );
 
-	let purchaseAndInstallText = __(
+	let purchaseAndInstallTitle = __(
 		'Add paid extensions to my store',
 		'woocommerce-admin'
 	);
+	let purchaseAndInstallContent;
 
 	if ( uniqueItemsList.length === 1 ) {
 		const { name: itemName } = uniqueItemsList[ 0 ];
@@ -105,14 +109,64 @@ export function getAllTasks( {
 			'Add %s to my store',
 			'woocommerce-admin'
 		);
-		purchaseAndInstallText = sprintf( purchaseAndInstallFormat, itemName );
+		purchaseAndInstallTitle = sprintf( purchaseAndInstallFormat, itemName );
+		purchaseAndInstallContent = products.find(
+			( { label } ) => label === itemName
+		)?.description;
+	} else {
+		const uniqueProductNames = uniqueItemsList.map( ( { name } ) => name );
+		const lastProduct = uniqueProductNames.pop();
+		let firstProducts = uniqueProductNames.join( ', ' );
+		if ( uniqueProductNames.length > 1 ) {
+			firstProducts += ',';
+		}
+		/* translators: %1$s: list of product names comma separated, %2%s the last product name */
+		purchaseAndInstallContent = sprintf(
+			__(
+				'Good choice! You chose to add %1$s and %2$s to your store.',
+				'woocommerce-admin'
+			),
+			firstProducts,
+			lastProduct
+		);
+	}
+
+	const {
+		automatedTaxSupportedCountries = [],
+		taxJarActivated,
+	} = onboardingStatus;
+
+	const isTaxJarSupported =
+		! taxJarActivated && // WCS integration doesn't work with the official TaxJar plugin.
+		automatedTaxSupportedCountries.includes( countryCode );
+
+	const canUseAutomatedTaxes =
+		hasCompleteAddress && woocommerceServicesActive && isTaxJarSupported;
+
+	let taxAction = __( "Let's go", 'woocommerce-admin' );
+	let taxContent = __(
+		'Set your store location and configure tax rate settings.',
+		'woocommerce-admin'
+	);
+
+	if ( canUseAutomatedTaxes ) {
+		taxAction = __( 'Yes please', 'woocommerce-admin' );
+		taxContent = __(
+			'Good news! WooCommerce Services and Jetpack can automate your sales tax calculations for you.',
+			'woocommerce-admin'
+		);
 	}
 
 	const tasks = [
 		{
 			key: 'store_details',
 			title: __( 'Store details', 'woocommerce-admin' ),
+			content: __(
+				'Your store address is required to set the origin country for shipping, currencies, and payment options.',
+				'woocommerce-admin'
+			),
 			container: null,
+			action: __( "Let's go", 'woocommerce-admin' ),
 			onClick: () => {
 				onTaskSelect( 'store_details' );
 				getHistory().push( getNewPath( {}, '/setup-wizard', {} ) );
@@ -124,8 +178,10 @@ export function getAllTasks( {
 		},
 		{
 			key: 'purchase',
-			title: purchaseAndInstallText,
+			title: purchaseAndInstallTitle,
+			content: purchaseAndInstallContent,
 			container: null,
+			action: __( 'Purchase & install now', 'woocommerce-admin' ),
 			onClick: () => {
 				onTaskSelect( 'purchase' );
 				return remainingProducts.length ? toggleCartModal() : null;
@@ -139,6 +195,10 @@ export function getAllTasks( {
 		{
 			key: 'products',
 			title: __( 'Add my products', 'woocommerce-admin' ),
+			content: __(
+				'Start by adding the first product to your store. You can add your products manually, via CSV, or import them from another service.',
+				'woocommerce-admin'
+			),
 			container: <Products />,
 			onClick: () => {
 				onTaskSelect( 'products' );
@@ -155,6 +215,12 @@ export function getAllTasks( {
 				'Get paid with WooCommerce Payments',
 				'woocommerce-admin'
 			),
+			content: __(
+				"You're only one step away from getting paid. Verify your business details to start managing transactions with WooCommerce Payments.",
+				'woocommerce-admin'
+			),
+			action: __( 'Finish setup', 'woocommmerce-admin' ),
+			expanded: true,
 			container: <Fragment />,
 			completed: wcPayIsConnected,
 			onClick: async ( e ) => {
@@ -196,6 +262,10 @@ export function getAllTasks( {
 		{
 			key: 'payments',
 			title: __( 'Set up payments', 'woocommerce-admin' ),
+			content: __(
+				'Choose payment providers and enable payment methods at checkout.',
+				'woocommerce-admin'
+			),
 			container: <Payments />,
 			completed: hasPaymentGateway,
 			onClick: () => {
@@ -212,10 +282,19 @@ export function getAllTasks( {
 		{
 			key: 'tax',
 			title: __( 'Set up tax', 'woocommerce-admin' ),
+			content: taxContent,
 			container: <Tax />,
-			onClick: () => {
+			action: taxAction,
+			onClick: ( e, args = {} ) => {
+				// The expanded item CTA allows us to enable
+				// automated taxes for eligible stores.
+				// Note: this will be initially part of an A/B test.
+				const { isExpanded } = args;
 				onTaskSelect( 'tax' );
-				updateQueryString( { task: 'tax' } );
+				updateQueryString( {
+					task: 'tax',
+					auto: canUseAutomatedTaxes && isExpanded,
+				} );
 			},
 			completed: isTaxComplete,
 			visible: true,
@@ -225,7 +304,12 @@ export function getAllTasks( {
 		{
 			key: 'shipping',
 			title: __( 'Set up shipping', 'woocommerce-admin' ),
+			content: __(
+				"Set your store location and where you'll ship to.",
+				'woocommerce-admin'
+			),
 			container: <Shipping />,
+			action: __( "Let's go", 'woocommerce-admin' ),
 			onClick: () => {
 				if ( shippingZonesCount > 0 ) {
 					window.location = getLinkTypeAndHref( {
@@ -247,7 +331,12 @@ export function getAllTasks( {
 		{
 			key: 'appearance',
 			title: __( 'Personalize my store', 'woocommerce-admin' ),
+			content: __(
+				'Add your logo, create a homepage, and start designing your store.',
+				'woocommerce-admin'
+			),
 			container: <Appearance />,
+			action: __( "Let's go", 'woocommerce-admin' ),
 			onClick: () => {
 				onTaskSelect( 'appearance' );
 				updateQueryString( { task: 'appearance' } );

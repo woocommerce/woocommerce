@@ -46,7 +46,13 @@ class Tax extends Component {
 	}
 
 	componentDidMount() {
+		const { query } = this.props;
+		const { auto } = query;
 		this.reset();
+
+		if ( auto === 'true' ) {
+			this.enableAutomatedTax();
+		}
 	}
 
 	reset() {
@@ -396,6 +402,13 @@ class Tax extends Component {
 		return filter( steps, ( step ) => step.visible );
 	}
 
+	enableAutomatedTax() {
+		recordEvent( 'tasklist_tax_setup_automated_proceed', {
+			setup_automatically: true,
+		} );
+		this.updateAutomatedTax( true );
+	}
+
 	renderSuccessScreen() {
 		const { isPending } = this.props;
 
@@ -427,12 +440,7 @@ class Tax extends Component {
 					disabled={ isPending }
 					isPrimary
 					isBusy={ isPending }
-					onClick={ () => {
-						recordEvent( 'tasklist_tax_setup_automated_proceed', {
-							setup_automatically: true,
-						} );
-						this.updateAutomatedTax( true );
-					} }
+					onClick={ this.enableAutomatedTax }
 				>
 					{ __( 'Yes please', 'woocommerce-admin' ) }
 				</Button>

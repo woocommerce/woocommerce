@@ -1,6 +1,7 @@
 # Unreleased
 
 -   Remove the use of Dashicons and replace with @wordpress/icons or gridicons #7020
+-   Add expanded item text and CTA button. #6956
 
 # 1.2.0
 

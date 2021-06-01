@@ -3,6 +3,7 @@ $task-alert-yellow: #f0b849;
 
 .woocommerce-task-list__item {
 	position: relative;
+	padding-right: $gap-large;
 
 	&::before {
 		content: '';
@@ -56,6 +57,16 @@ $task-alert-yellow: #f0b849;
 		}
 	}
 
+	.woocommerce-task-list__item-content {
+		margin-top: $gap-smallest;
+		margin-bottom: $gap-smallest;
+	}
+
+	.woocommerce-task-list__item-action {
+		margin-top: $gap-smallest;
+		margin-bottom: $gap-smaller;
+	}
+
 	.woocommerce-task-list__item-after {
 		margin-left: $gap;
 		margin-right: $gap-large;
@@ -87,7 +98,8 @@ $task-alert-yellow: #f0b849;
 			color: $gray-700;
 		}
 
-		.woocommerce-task-list__item-content {
+		.woocommerce-task-list__item-content,
+		.woocommerce-task__estimated-time {
 			display: none;
 		}
 	}
