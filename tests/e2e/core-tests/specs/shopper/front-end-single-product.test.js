@@ -45,9 +45,7 @@ const runSingleProductPageTest = () => {
 
 	describe.skip('Variable Product Page', () => {
 		beforeAll(async () => {
-			await merchant.login();
 			variablePostIdValue = await createVariableProduct();
-			await merchant.logout();
 		});
 
 		it('should be able to add variation products to the cart', async () => {

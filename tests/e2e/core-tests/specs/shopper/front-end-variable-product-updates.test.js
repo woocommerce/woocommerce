@@ -15,9 +15,7 @@ const cartDialogMessage = 'Please select some product options before adding this
 const runVariableProductUpdateTest = () => {
 	describe('Shopper > Update variable product',() => {
 		beforeAll(async () => {
-			await merchant.login();
 			variablePostIdValue = await createVariableProduct();
-			await merchant.logout();
 		});
 
 		it('shopper can change variable attributes to the same value', async () => {
