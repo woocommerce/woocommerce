@@ -478,7 +478,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_filtering_simple_product_in_stock_using_lookup_table( $attributes, $filter_type, $expected_to_be_visible ) {
 		$this->set_use_lookup_table( true );
-		$this->base_test_filtering_simple_product_in_stock( $attributes, $filter_type, $expected_to_be_visible );
+		$this->base_test_filtering_simple_product_in_stock( $attributes, $filter_type, $expected_to_be_visible, true );
 	}
 
 	/**
@@ -492,7 +492,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_filtering_simple_product_in_stock_not_using_lookup_table( $attributes, $filter_type, $expected_to_be_visible ) {
 		$this->set_use_lookup_table( false );
-		$this->base_test_filtering_simple_product_in_stock( $attributes, $filter_type, $expected_to_be_visible );
+		$this->base_test_filtering_simple_product_in_stock( $attributes, $filter_type, $expected_to_be_visible, false );
 	}
 
 	/**
@@ -501,8 +501,9 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	 * @param array  $attributes The color attribute names that will be included in the query.
 	 * @param string $filter_type The filtering type, "or" or "and".
 	 * @param bool   $expected_to_be_visible True if the product is expected to be returned by the query, false otherwise.
+	 * @param bool   $using_lookup_table Are we using the lookup table?.
 	 */
-	private function base_test_filtering_simple_product_in_stock( $attributes, $filter_type, $expected_to_be_visible ) {
+	private function base_test_filtering_simple_product_in_stock( $attributes, $filter_type, $expected_to_be_visible, $using_lookup_table ) {
 		$this->create_product_attribute( 'Color', array( 'Blue', 'Red', 'Green' ) );
 
 		$product = $this->create_simple_product(
@@ -523,7 +524,17 @@ class FiltererTest extends \WC_Unit_Test_Case {
 			$this->assertEmpty( $filtered_product_ids );
 		}
 
-		$expected_to_be_included_in_count = 'or' === $filter_type || $expected_to_be_visible;
+		/*
+		 * If a variable product defines an attribute value that isn't used by any variation:
+		 * When using the lookup table: that value is not included in the count.
+		 * When not using the lookup table: the value is included in the count since it is part of the parent product.
+		 */
+		if ( $using_lookup_table && 'or' === $filter_type && array( 'Green' ) === $attributes ) {
+			$expected_to_be_included_in_count = false;
+		} else {
+			$expected_to_be_included_in_count = 'or' === $filter_type || $expected_to_be_visible;
+		}
+
 		$this->assert_counters( 'Color', $expected_to_be_included_in_count ? array( 'Blue', 'Red' ) : array(), $filter_type );
 	}
 
@@ -728,7 +739,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_filtering_variable_product_in_stock_for_non_variation_defining_attributes_using_lookup_table( $attributes, $filter_type, $expected_to_be_visible ) {
 		$this->set_use_lookup_table( true );
-		$this->base_test_filtering_variable_product_in_stock_for_non_variation_defining_attributes( $attributes, $filter_type, $expected_to_be_visible );
+		$this->base_test_filtering_variable_product_in_stock_for_non_variation_defining_attributes( $attributes, $filter_type, $expected_to_be_visible, true );
 	}
 
 	/**
@@ -742,7 +753,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_filtering_variable_product_in_stock_for_non_variation_defining_attributes_not_using_lookup_table( $attributes, $filter_type, $expected_to_be_visible ) {
 		$this->set_use_lookup_table( false );
-		$this->base_test_filtering_variable_product_in_stock_for_non_variation_defining_attributes( $attributes, $filter_type, $expected_to_be_visible );
+		$this->base_test_filtering_variable_product_in_stock_for_non_variation_defining_attributes( $attributes, $filter_type, $expected_to_be_visible, false );
 	}
 
 	/**
@@ -751,8 +762,9 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	 * @param array  $attributes The feature attribute names that will be included in the query.
 	 * @param string $filter_type The filtering type, "or" or "and".
 	 * @param bool   $expected_to_be_visible True if the product is expected to be returned by the query, false otherwise.
+	 * @param bool   $using_lookup_table Are we using the lookup table?.
 	 */
-	private function base_test_filtering_variable_product_in_stock_for_non_variation_defining_attributes( $attributes, $filter_type, $expected_to_be_visible ) {
+	private function base_test_filtering_variable_product_in_stock_for_non_variation_defining_attributes( $attributes, $filter_type, $expected_to_be_visible, $using_lookup_table ) {
 		$this->create_product_attribute( 'Color', array( 'Blue', 'Red' ) );
 		$this->create_product_attribute( 'Features', array( 'Washable', 'Ironable', 'Elastic' ) );
 
@@ -789,7 +801,16 @@ class FiltererTest extends \WC_Unit_Test_Case {
 			$this->assertEmpty( $filtered_product_ids );
 		}
 
-		$expected_to_be_included_in_count = 'or' === $filter_type || $expected_to_be_visible;
+		/*
+		 * If a variable product defines an attribute value that isn't used by any variation:
+		 * When using the lookup table: that value is not included in the count.
+		 * When not using the lookup table: the value is included in the count since it is part of the parent product.
+		 */
+		if ( $using_lookup_table && 'or' === $filter_type && array( 'Elastic' ) === $attributes ) {
+			$expected_to_be_included_in_count = false;
+		} else {
+			$expected_to_be_included_in_count = 'or' === $filter_type || $expected_to_be_visible;
+		}
 		$this->assert_counters( 'Features', $expected_to_be_included_in_count ? array( 'Washable', 'Ironable' ) : array(), $filter_type );
 	}
 
@@ -955,7 +976,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_filtering_variable_product_in_stock_for_variation_defining_attributes_using_lookup_table( $attributes, $filter_type, $expected_to_be_visible ) {
 		$this->set_use_lookup_table( true );
-		$this->base_test_filtering_variable_product_in_stock_for_variation_defining_attributes( $attributes, $filter_type, $expected_to_be_visible );
+		$this->base_test_filtering_variable_product_in_stock_for_variation_defining_attributes( $attributes, $filter_type, $expected_to_be_visible, true );
 	}
 
 	/**
@@ -988,7 +1009,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_filtering_variable_product_in_stock_for_variation_defining_attributes_not_using_lookup_table( $attributes, $filter_type, $expected_to_be_visible ) {
 		$this->set_use_lookup_table( false );
-		$this->base_test_filtering_variable_product_in_stock_for_variation_defining_attributes( $attributes, $filter_type, $expected_to_be_visible );
+		$this->base_test_filtering_variable_product_in_stock_for_variation_defining_attributes( $attributes, $filter_type, $expected_to_be_visible, false );
 	}
 
 	/**
@@ -997,8 +1018,9 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	 * @param array  $attributes The color attribute names that will be included in the query.
 	 * @param string $filter_type The filtering type, "or" or "and".
 	 * @param bool   $expected_to_be_visible True if the product is expected to be returned by the query, false otherwise.
+	 * @param bool   $using_lookup_table Are we using the lookup table?.
 	 */
-	private function base_test_filtering_variable_product_in_stock_for_variation_defining_attributes( $attributes, $filter_type, $expected_to_be_visible ) {
+	private function base_test_filtering_variable_product_in_stock_for_variation_defining_attributes( $attributes, $filter_type, $expected_to_be_visible, $using_lookup_table ) {
 		$this->create_product_attribute( 'Color', array( 'Blue', 'Red', 'Green' ) );
 
 		$product = $this->create_variable_product(
@@ -1032,7 +1054,17 @@ class FiltererTest extends \WC_Unit_Test_Case {
 			$this->assertEmpty( $filtered_product_ids );
 		}
 
-		$expected_counted_attributes = 'or' === $filter_type || $expected_to_be_visible ? array( 'Blue', 'Red' ) : array();
+		/*
+		 * If a variable product defines an attribute value that isn't used by any variation:
+		 * When using the lookup table: that value is not included in the count.
+		 * When not using the lookup table: the value is included in the count since it is part of the parent product.
+		 */
+		if ( $using_lookup_table && 'or' === $filter_type && array( 'Green' ) === $attributes ) {
+			$expected_counted_attributes = array();
+		} else {
+			$expected_counted_attributes = 'or' === $filter_type || $expected_to_be_visible ? array( 'Blue', 'Red' ) : array();
+		}
+
 		$this->assert_counters( 'Color', $expected_counted_attributes, $filter_type );
 	}
 
@@ -1085,7 +1117,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_filtering_variable_product_in_stock_for_variation_defining_attributes_with_any_value_using_lookup_table( $attributes, $filter_type, $expected_to_be_visible ) {
 		$this->set_use_lookup_table( true );
-		$this->base_test_filtering_variable_product_in_stock_for_variation_defining_attributes_with_any_value( $attributes, $filter_type, $expected_to_be_visible );
+		$this->base_test_filtering_variable_product_in_stock_for_variation_defining_attributes_with_any_value( $attributes, $filter_type, $expected_to_be_visible, true );
 	}
 
 	/**
@@ -1116,7 +1148,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_filtering_variable_product_in_stock_for_variation_defining_attributes_with_any_value_not_using_lookup_table( $attributes, $filter_type, $expected_to_be_visible ) {
 		$this->set_use_lookup_table( false );
-		$this->base_test_filtering_variable_product_in_stock_for_variation_defining_attributes_with_any_value( $attributes, $filter_type, $expected_to_be_visible );
+		$this->base_test_filtering_variable_product_in_stock_for_variation_defining_attributes_with_any_value( $attributes, $filter_type, $expected_to_be_visible, false );
 	}
 
 	/**
@@ -1125,8 +1157,9 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	 * @param array  $attributes The color attribute names that will be included in the query.
 	 * @param string $filter_type The filtering type, "or" or "and".
 	 * @param bool   $expected_to_be_visible True if the product is expected to be returned by the query, false otherwise.
+	 * @param bool   $using_lookup_table Are we using the lookup table?.
 	 */
-	private function base_test_filtering_variable_product_in_stock_for_variation_defining_attributes_with_any_value( $attributes, $filter_type, $expected_to_be_visible ) {
+	private function base_test_filtering_variable_product_in_stock_for_variation_defining_attributes_with_any_value( $attributes, $filter_type, $expected_to_be_visible, $using_lookup_table ) {
 		$this->create_product_attribute( 'Color', array( 'Blue', 'Red', 'Green', 'White' ) );
 
 		$product = $this->create_variable_product(
@@ -1154,7 +1187,17 @@ class FiltererTest extends \WC_Unit_Test_Case {
 			$this->assertEmpty( $filtered_product_ids );
 		}
 
-		$expected_to_be_included_in_count = 'or' === $filter_type || $expected_to_be_visible;
+		/*
+		 * If a variable product defines an attribute value that isn't used by any variation:
+		 * When using the lookup table: that value is not included in the count.
+		 * When not using the lookup table: the value is included in the count since it is part of the parent product.
+		 */
+		if ( $using_lookup_table && 'or' === $filter_type && array( 'White' ) === $attributes ) {
+			$expected_to_be_included_in_count = false;
+		} else {
+			$expected_to_be_included_in_count = 'or' === $filter_type || $expected_to_be_visible;
+		}
+
 		$this->assert_counters( 'Color', $expected_to_be_included_in_count ? array( 'Blue', 'Red', 'Green' ) : array(), $filter_type );
 	}
 
