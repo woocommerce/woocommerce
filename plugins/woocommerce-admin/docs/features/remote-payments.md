@@ -44,12 +44,13 @@ Information concerning the configuration and status of the payment gateway is de
 
 Additional information is added to the existing payment gateway in the WooCommerce REST API response. The following public methods can be added to the payment gateway class to pass information to the recommended payment gateways task:
 
-| Name                           | Return  | Default | Description                                                                                                                                                                                                                |
-| ------------------------------ | ------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `needs_setup()`                | boolean | `false` | Used to determine if the gateway still requires setup in order to be used.                                                                                                                                                 |
-| `get_required_settings_keys()` | array   | `[]`    | An array of keys for fields required to properly configure the gateway. The keys must match those of already registered form fields in the payment gateway.                                                                |
-| `get_oauth_connection_url()`   | string  | `null`  | The oAuth connection URL to be used to quickly connect a payment gateway provider. If provided, this will be used in place of required setting fields.                                                                     |
-| `get_post_install_script()`    | string  | `null`  | An abolute URL to a script that will be dynamically loaded into a page after a gateway has been installed. This is primarily used for `SlotFill`, but can allow any script to be added to assist in payment gateway setup. |
+Name | Return | Default | Description
+--- | --- | --- | ---
+`needs_setup()` | boolean | `false` | Used to determine if the gateway still requires setup in order to be used.
+`get_required_settings_keys()` | array | `[]` | An array of keys for fields required to properly configure the gateway.  The keys must match those of already registered form fields in the payment gateway.
+`get_oauth_connection_url()` | string | `null` | The oAuth connection URL to be used to quickly connect a payment gateway provider.  If provided, this will be used in place of required setting fields.
+`get_post_install_script_handles()` | array | `[]` | An array of script handles previously registered with `wp_register_script` to enqueue after the payment gateway has been installed.  This is primarily used to `SlotFill` the payment connection step, but can allow any script to be added to assist in payment gateway setup.
+`get_setup_help_text()` | string | `null` | Help text to be shown above the connection step's submit button.
 
 ## SlotFill
 
@@ -57,4 +58,4 @@ Payment gateway tasks can be SlotFilled to provide custom experiences. This is u
 
 The entire payment gateway card can be SlotFilled using [WooRemotePayment](https://github.com/woocommerce/woocommerce-admin/tree/main/packages/tasks/src/woo-remote-payment) or simply SlotFill [WooRemotePaymentForm](https://github.com/woocommerce/woocommerce-admin/tree/main/packages/tasks/src/woo-remote-payment-form) to leave the default installation and stepper in place.
 
-Note that since plugin installation happens asynchronously, a full page reload will not occur between gateway installation and configuration. This renders functions like `wp_enqueue_script` ineffective. To solve this issue and allow `SlotFill` to work on a newly installed plugin, the gateway can provide a URL to be loaded immediately after installation using `get_post_install_script()`.
+Note that since plugin installation happens asynchronously, a full page reload will not occur between gateway installation and configuration.  This renders functions like `wp_enqueue_script` ineffective.  To solve this issue and allow `SlotFill` to work on a newly installed plugin, the gateway can provide a URL to be loaded immediately after installation using `get_post_install_script_handles()`.
