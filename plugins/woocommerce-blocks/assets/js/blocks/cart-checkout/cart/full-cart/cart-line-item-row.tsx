@@ -24,7 +24,6 @@ import {
 } from '@woocommerce/price-format';
 import {
 	__experimentalApplyCheckoutFilter,
-	mustBeString,
 	mustContain,
 } from '@woocommerce/blocks-checkout';
 import Dinero from 'dinero.js';
@@ -112,7 +111,7 @@ const CartLineItemRow = ( {
 	const { dispatchStoreEvent } = useStoreEvents();
 
 	const productPriceValidation = useCallback(
-		( value ) => mustBeString( value ) && mustContain( value, '<price/>' ),
+		( value ) => mustContain( value, '<price/>' ),
 		[]
 	);
 
@@ -134,7 +133,6 @@ const CartLineItemRow = ( {
 		defaultValue: initialName,
 		extensions,
 		arg,
-		validation: mustBeString,
 	} );
 
 	const regularAmountSingle = Dinero( {
