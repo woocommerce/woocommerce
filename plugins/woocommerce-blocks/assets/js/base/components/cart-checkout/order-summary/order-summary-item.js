@@ -7,7 +7,6 @@ import ProductName from '@woocommerce/base-components/product-name';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import {
 	__experimentalApplyCheckoutFilter,
-	mustBeString,
 	mustContain,
 	Label,
 } from '@woocommerce/blocks-checkout';
@@ -48,7 +47,7 @@ const OrderSummaryItem = ( { cartItem } ) => {
 	const { receiveCart, ...cart } = useStoreCart();
 
 	const productPriceValidation = useCallback(
-		( value ) => mustBeString( value ) && mustContain( value, '<price/>' ),
+		( value ) => mustContain( value, '<price/>' ),
 		[]
 	);
 
@@ -68,7 +67,6 @@ const OrderSummaryItem = ( { cartItem } ) => {
 		defaultValue: initialName,
 		extensions,
 		arg,
-		validation: mustBeString,
 	} );
 
 	const regularPriceSingle = Dinero( {

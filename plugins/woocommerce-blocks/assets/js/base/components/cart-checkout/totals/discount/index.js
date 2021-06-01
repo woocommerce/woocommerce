@@ -7,7 +7,6 @@ import { RemovableChip } from '@woocommerce/base-components/chip';
 import PropTypes from 'prop-types';
 import {
 	__experimentalApplyCheckoutFilter,
-	mustBeString,
 	TotalsItem,
 } from '@woocommerce/blocks-checkout';
 import { getSetting } from '@woocommerce/settings';
@@ -60,7 +59,6 @@ const TotalsDiscount = ( {
 							{ cartCoupons.map( ( cartCoupon ) => {
 								const filteredCouponCode = __experimentalApplyCheckoutFilter(
 									{
-										validation: mustBeString,
 										arg: {
 											context: 'summary',
 											coupon: cartCoupon,

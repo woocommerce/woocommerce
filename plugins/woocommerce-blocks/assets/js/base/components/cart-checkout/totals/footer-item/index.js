@@ -7,7 +7,6 @@ import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-mone
 import PropTypes from 'prop-types';
 import {
 	__experimentalApplyCheckoutFilter,
-	mustBeString,
 	TotalsItem,
 } from '@woocommerce/blocks-checkout';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
@@ -34,8 +33,6 @@ const TotalsFooterItem = ( { currency, values } ) => {
 		defaultValue: __( 'Total', 'woo-gutenberg-products-block' ),
 		extensions: cart.extensions,
 		arg: { cart },
-		// Only accept strings.
-		validation: mustBeString,
 	} );
 
 	const parsedTaxValue = parseInt( totalTax, 10 );
