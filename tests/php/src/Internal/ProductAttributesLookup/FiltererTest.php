@@ -1157,4 +1157,244 @@ class FiltererTest extends \WC_Unit_Test_Case {
 		$expected_to_be_included_in_count = 'or' === $filter_type || $expected_to_be_visible;
 		$this->assert_counters( 'Color', $expected_to_be_included_in_count ? array( 'Blue', 'Red', 'Green' ) : array(), $filter_type );
 	}
+
+	/**
+	 * @testdox Products not in "publish" state aren't shown.
+	 *
+	 * @testWith [true, ["Red"]]
+	 *           [false, ["Blue", "Red"]]
+	 *
+	 * @param bool  $using_lookup_table Use the lookup table?.
+	 * @param array $expected_colors_included_in_counters Expected colors to be included in the widget counters.
+	 */
+	public function test_filtering_excludes_non_published_products( $using_lookup_table, $expected_colors_included_in_counters ) {
+		$this->set_use_lookup_table( $using_lookup_table );
+		$this->create_product_attribute( 'Color', array( 'Blue', 'Red' ) );
+		$this->create_product_attribute( 'Features', array( 'Washable', 'Ironable' ) );
+
+		$product_simple_1 = $this->create_simple_product(
+			array( 'Features' => array( 'Washable' ) ),
+			true
+		);
+
+		$product_simple_2 = $this->create_simple_product(
+			array( 'Features' => array( 'Ironable' ) ),
+			true
+		);
+
+		$product_variable_1 = $this->create_variable_product(
+			array(
+				'variation_attributes'     => array(
+					'Color' => array( 'Blue', 'Red' ),
+				),
+				'non_variation_attributes' => array(),
+				'variations'               => array(
+					array(
+						'in_stock'            => true,
+						'defining_attributes' => array(
+							'Color' => 'Blue',
+						),
+					),
+				),
+			)
+		);
+
+		$product_variable_2 = $this->create_variable_product(
+			array(
+				'variation_attributes'     => array(
+					'Color' => array( 'Blue', 'Red' ),
+				),
+				'non_variation_attributes' => array(),
+				'variations'               => array(
+					array(
+						'in_stock'            => true,
+						'defining_attributes' => array(
+							'Color' => 'Red',
+						),
+					),
+				),
+			)
+		);
+
+		$post_data       = array( 'post_status' => 'draft' );
+		$post_data['ID'] = $product_simple_1->get_id();
+		wp_update_post( $post_data );
+		$post_data['ID'] = $product_variable_1['id'];
+		wp_update_post( $post_data );
+
+		$filtered_product_ids = $this->do_product_request( array() );
+
+		$this->assertEquals( array( $product_simple_2->get_id(), $product_variable_2['id'] ), $filtered_product_ids );
+
+		$this->assert_counters( 'Color', $expected_colors_included_in_counters );
+		$this->assert_counters( 'Features', array( 'Ironable' ) );
+	}
+
+	/**
+	 * @testdox Hidden products aren't shown.
+	 *
+	 * @testWith [true, ["Red"]]
+	 *           [false, ["Blue", "Red"]]
+	 *
+	 * @param bool  $using_lookup_table Use the lookup table?.
+	 * @param array $expected_colors_included_in_counters Expected colors to be included in the widget counters.
+	 */
+	public function test_filtering_excludes_hidden_products( $using_lookup_table, $expected_colors_included_in_counters ) {
+		$this->set_use_lookup_table( $using_lookup_table );
+		$this->create_product_attribute( 'Color', array( 'Blue', 'Red' ) );
+		$this->create_product_attribute( 'Features', array( 'Washable', 'Ironable' ) );
+
+		$product_simple_1 = $this->create_simple_product(
+			array( 'Features' => array( 'Washable' ) ),
+			true
+		);
+
+		$product_simple_2 = $this->create_simple_product(
+			array( 'Features' => array( 'Ironable' ) ),
+			true
+		);
+
+		$product_variable_1 = $this->create_variable_product(
+			array(
+				'variation_attributes'     => array(
+					'Color' => array( 'Blue', 'Red' ),
+				),
+				'non_variation_attributes' => array(),
+				'variations'               => array(
+					array(
+						'in_stock'            => true,
+						'defining_attributes' => array(
+							'Color' => 'Blue',
+						),
+					),
+				),
+			)
+		);
+
+		$product_variable_2 = $this->create_variable_product(
+			array(
+				'variation_attributes'     => array(
+					'Color' => array( 'Blue', 'Red' ),
+				),
+				'non_variation_attributes' => array(),
+				'variations'               => array(
+					array(
+						'in_stock'            => true,
+						'defining_attributes' => array(
+							'Color' => 'Red',
+						),
+					),
+				),
+			)
+		);
+
+		$terms = array( 'exclude-from-catalog' );
+		wp_set_object_terms( $product_simple_1->get_id(), $terms, 'product_visibility' );
+		wp_set_object_terms( $product_variable_1['id'], $terms, 'product_visibility' );
+
+		$filtered_product_ids = $this->do_product_request( array() );
+
+		$this->assertEquals( array( $product_simple_2->get_id(), $product_variable_2['id'] ), $filtered_product_ids );
+
+		$this->assert_counters( 'Color', $expected_colors_included_in_counters );
+		$this->assert_counters( 'Features', array( 'Ironable' ) );
+	}
+
+	/**
+	 * Data provider for the test_filtering_variable_product_for_variation_defining_attributes_by_multiple_attributes tests.
+	 *
+	 * @return array[]
+	 */
+	public function data_provider_for_test_filtering_variable_product_for_variation_defining_attributes_by_multiple_attributes() {
+		return array(
+			array( array(), array(), true ),
+			array( array( 'Blue' ), array(), true ),
+			array( array(), array( 'Medium' ), true ),
+			array( array( 'Blue' ), array( 'Medium' ), true ),
+			array( array( 'Red' ), array(), false ),
+			array( array(), array( 'Large' ), false ),
+			array( array( 'Blue' ), array( 'Large' ), false ),
+			array( array( 'Red' ), array( 'Medium' ), false ),
+		);
+	}
+
+	/**
+	 * @testdox The product query shows a variable product only if it's not filtered out by the specified attribute filters (when filtering by multiple attributes), using the lookup table.
+	 *
+	 * Worth noting that multiple attributes are always combined in an AND fashion for filtering.
+	 *
+	 * @dataProvider data_provider_for_test_filtering_variable_product_for_variation_defining_attributes_by_multiple_attributes
+	 *
+	 * @param array $attributes_1 The color attribute names that will be included in the query.
+	 * @param array $attributes_2 The size attribute names that will be included in the query.
+	 * @param bool  $expected_to_be_visible True if the product is expected to be returned by the query, false otherwise.
+	 */
+	public function test_filtering_variable_product_for_variation_defining_attributes_by_multiple_attributes_using_lookup_table( $attributes_1, $attributes_2, $expected_to_be_visible ) {
+		$this->set_use_lookup_table( true );
+		$this->base_test_filtering_variable_product_for_variation_defining_attributes_by_multiple_attributes( $attributes_1, $attributes_2, $expected_to_be_visible );
+	}
+
+	/**
+	 * @testdox The product query shows a variable product only if it's not filtered out by the specified attribute filters (when filtering by multiple attributes), not using the lookup table.
+	 *
+	 * Worth noting that multiple attributes are always combined in an AND fashion for filtering.
+	 *
+	 * @dataProvider data_provider_for_test_filtering_variable_product_for_variation_defining_attributes_by_multiple_attributes
+	 *
+	 * @param array $attributes_1 The color attribute names that will be included in the query.
+	 * @param array $attributes_2 The size attribute names that will be included in the query.
+	 * @param bool  $expected_to_be_visible True if the product is expected to be returned by the query, false otherwise.
+	 */
+	public function test_filtering_variable_product_for_variation_defining_attributes_by_multiple_attributes_not_using_lookup_table( $attributes_1, $attributes_2, $expected_to_be_visible ) {
+		$this->set_use_lookup_table( false );
+		$this->base_test_filtering_variable_product_for_variation_defining_attributes_by_multiple_attributes( $attributes_1, $attributes_2, $expected_to_be_visible );
+	}
+
+	/**
+	 * Main code for the test_filtering_variable_product_for_variation_defining_attributes_by_multiple_attributes tests.
+	 *
+	 * @param array $attributes_1 The color attribute names that will be included in the query.
+	 * @param array $attributes_2 The size attribute names that will be included in the query.
+	 * @param bool  $expected_to_be_visible True if the product is expected to be returned by the query, false otherwise.
+	 */
+	private function base_test_filtering_variable_product_for_variation_defining_attributes_by_multiple_attributes( $attributes_1, $attributes_2, $expected_to_be_visible ) {
+		$this->set_use_lookup_table( false );
+		$this->create_product_attribute( 'Color', array( 'Blue', 'Red' ) );
+		$this->create_product_attribute( 'Size', array( 'Large', 'Medium' ) );
+
+		$product = $this->create_variable_product(
+			array(
+				'variation_attributes'     => array(
+					'Color' => array( 'Blue' ),
+					'Size'  => array( 'Medium' ),
+				),
+				'non_variation_attributes' => array(),
+				'variations'               => array(
+					array(
+						'in_stock'            => true,
+						'defining_attributes' => array(
+							'Color' => 'Blue',
+							'Size'  => 'Medium',
+						),
+					),
+				),
+			)
+		);
+
+		$filtered_product_ids = $this->do_product_request(
+			array(
+				'Color' => $attributes_1,
+				'Size'  => $attributes_2,
+			)
+		);
+
+		if ( $expected_to_be_visible ) {
+			$this->assertEquals( array( $product['id'] ), $filtered_product_ids );
+		} else {
+			$this->assertEmpty( $filtered_product_ids );
+		}
+
+		$this->assert_counters( 'Color', $expected_to_be_visible ? array( 'Blue' ) : array() );
+		$this->assert_counters( 'Size', $expected_to_be_visible ? array( 'Medium' ) : array() );
+	}
 }
