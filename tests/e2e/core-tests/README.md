@@ -50,6 +50,7 @@ The functions to access the core tests are:
 ### Merchant
 
 - `runMerchantTests` - Run all merchant tests
+  - `runAddShippingClassesTest` - Merchant can create shipping classes and let shopper test them
   - `runAddNewShippingZoneTest` - Merchant can create shipping zones and let shopper test them
   - `runAddSimpleProductTest` - Merchant can create a simple product
   - `runAddVariableProductTest` - Merchant can create a variable product
@@ -57,6 +58,7 @@ The functions to access the core tests are:
   - `runCreateOrderTest` - Merchant can create order
   - `runMerchantOrdersCustomerPaymentPage` - Merchant can visit the customer payment page
   - `runMerchantOrderEmailsTest` - Merchant can receive order emails and resend emails by Order Actions
+  - `runEditOrderTest` - Merchant can edit an order in the dashboard
   - `runOrderStatusFilterTest` - Merchant can filter orders by order status
   - `runOrderRefundTest` - Merchant can refund an order
   - `runOrderApplyCouponTest` - Merchant can apply a coupon to an order
@@ -69,6 +71,7 @@ The functions to access the core tests are:
   - `runMerchantOrderEmailsTest` - Merchant can receive order emails and resend emails by Order Actions
   - `runAnalyticsPageLoadsTest` - Merchant can load and see all pages in Analytics
   - `runImportProductsTest` - Merchant can import products via CSV file
+  - `runInitiateWccomConnectionTest` - Merchant can initiate connection to WooCommerce.com
 
 ### Shopper
 
@@ -85,6 +88,7 @@ The functions to access the core tests are:
   - `runCheckoutCreateAccountTest` - Shopper can create an account during checkout
   - `runCheckoutLoginAccountTest` - Shopper can login to an account during checkout
   - `runMyAccountCreateAccountTest` - Shopper can create an account via my account page
+  - `runCartCalculateShippingTest` - Shopper can calculate shipping in the cart
   - `runCartRedirectionTest` - Shopper is redirected to the cart page after adding to cart
   - `runOrderEmailReceivingTest` - Shopper can receive an email for his order
 
@@ -95,7 +99,7 @@ The functions to access the core tests are:
   - `runGroupedProductAPITest` - Can create, read, and delete a grouped product
   - `runVariableProductAPITest` - Can create, read, and delete a variable product and its variations
   - `runCouponApiTest` - Can create, read, and delete a coupon
-
+  - `runOrderApiTest` - Can create, read, and delete an order
 
 ## Contributing a new test
 

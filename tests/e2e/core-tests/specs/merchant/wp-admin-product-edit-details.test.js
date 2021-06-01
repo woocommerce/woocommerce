@@ -15,8 +15,8 @@ let productId;
 const runProductEditDetailsTest = () => {
 	describe('Products > Edit Product', () => {
 		beforeAll(async () => {
-			await merchant.login();
 			productId = await createSimpleProduct();
+			await merchant.login();
 		});
 
 		it('can edit a product and save the changes', async () => {
@@ -35,7 +35,6 @@ const runProductEditDetailsTest = () => {
 			await expect(page).toFill('#_regular_price', '100.05');
 
 			// Save the changes
-			await expect(page).toClick('#publish');
 			await verifyAndPublish('Product updated.');
 			await uiUnblocked();
 

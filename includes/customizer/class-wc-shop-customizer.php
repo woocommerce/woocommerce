@@ -117,7 +117,7 @@ class WC_Shop_Customizer {
 				} );
 
 				wp.customize.bind( 'ready', function() { // Ready?
-					$( '.woocommerce-cropping-control' ).find( 'input:checked' ).change();
+					$( '.woocommerce-cropping-control' ).find( 'input:checked' ).trigger( 'change' );
 				} );
 
 				wp.customize( 'woocommerce_demo_store', function( setting ) {
@@ -769,7 +769,7 @@ class WC_Shop_Customizer {
 			);
 		} else {
 			$choose_pages = array(
-				'woocommerce_terms_page_id'  => __( 'Terms and conditions', 'woocommerce' ),
+				'woocommerce_terms_page_id' => __( 'Terms and conditions', 'woocommerce' ),
 			);
 		}
 		$pages        = get_pages(

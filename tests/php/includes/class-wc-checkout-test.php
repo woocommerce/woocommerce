@@ -32,6 +32,8 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 			}
 		};
 		// phpcs:enable Generic.CodeAnalysis, Squiz.Commenting
+
+		WC()->cart->empty_cart();
 	}
 
 	/**

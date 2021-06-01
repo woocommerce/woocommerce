@@ -1,5 +1,14 @@
 # Unreleased
 
+# 0.2.0
+
+## Added
+
+- Support for orders.
+
+## Changed
+
+- `delete()` now deletes products and coupons instead of moving to `trash`.
 
 # 0.1.2
 
@@ -14,7 +23,7 @@
 
 ## Breaking Changes
 
-- The `HTTPClientFactory` API was changed to make it easier to configure instances with
+- The `HTTPClientFactory` API was changed to make it easier to configure instances
 
 ## Added
 

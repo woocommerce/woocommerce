@@ -81,7 +81,7 @@ class ExtendedContainer extends BaseContainer {
 		}
 
 		$concrete_class = $this->get_class_from_concrete( $concrete );
-		if ( isset( $concrete_class ) && ! $this->is_class_allowed( $concrete_class ) ) {
+		if ( isset( $concrete_class ) && ! $this->is_class_allowed( $concrete_class ) && ! $this->is_anonymous_class( $concrete_class ) ) {
 			throw new ContainerException( "You cannot use concrete '$concrete_class', only classes in the {$this->woocommerce_namespace} namespace are allowed." );
 		}
 
@@ -148,5 +148,15 @@ class ExtendedContainer extends BaseContainer {
 	 */
 	protected function is_class_allowed( string $class_name ): bool {
 		return StringUtil::starts_with( $class_name, $this->woocommerce_namespace, false ) || in_array( $class_name, $this->registration_whitelist, true );
+	}
+
+	/**
+	 * Check if a class name corresponds to an anonymous class.
+	 *
+	 * @param string $class_name The class name to check.
+	 * @return bool True if the name corresponds to an anonymous class.
+	 */
+	protected function is_anonymous_class( string $class_name ): bool {
+		return StringUtil::starts_with( $class_name, 'class@anonymous' );
 	}
 }

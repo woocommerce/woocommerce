@@ -7,6 +7,7 @@
 
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\CodeHacker;
+use PHPUnit\Framework\Constraint\IsType;
 
 /**
  * WC Unit Test Case.
@@ -245,5 +246,17 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 */
 	public function register_legacy_proxy_class_mocks( array $mocks ) {
 		wc_get_container()->get( LegacyProxy::class )->register_class_mocks( $mocks );
+	}
+
+	/**
+	 * Asserts that a variable is of type int.
+	 * TODO: After upgrading to PHPUnit 8 or newer, remove this method and replace calls with PHPUnit's built-in 'assertIsInt'.
+	 *
+	 * @param mixed $actual The value to check.
+	 * @param mixed $message Error message to use if the assertion fails.
+	 * @return bool mixed True if the value is of integer type, false otherwise.
+	 */
+	public static function assertIsInteger( $actual, $message = '' ) {
+		return self::assertInternalType( 'int', $actual, $message );
 	}
 }

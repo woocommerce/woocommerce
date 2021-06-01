@@ -29,7 +29,7 @@ do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 <?php /* translators: %s: Customer first name */ ?>
 <p><?php printf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $order->get_billing_first_name() ) ); ?></p>
 
-<?php if ( $order->has_status( 'pending' ) ) { ?>
+<?php if ( $order->needs_payment() ) { ?>
 	<p>
 	<?php
 	printf(

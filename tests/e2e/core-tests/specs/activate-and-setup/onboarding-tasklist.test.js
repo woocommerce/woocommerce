@@ -24,6 +24,10 @@ const shippingZoneNameUS = config.get( 'addresses.customer.shipping.country' );
 
 const runOnboardingFlowTest = () => {
 	describe('Store owner can go through store Onboarding', () => {
+		beforeAll(async () => {
+			await merchant.login();
+		});
+
 		if ( IS_RETEST_MODE ) {
 			it('can reset onboarding to default settings', async () => {
 				await withRestApi.resetOnboarding();
@@ -41,7 +45,6 @@ const runOnboardingFlowTest = () => {
 		}
 
 		it('can start and complete onboarding when visiting the site for the first time.', async () => {
-			await merchant.runSetupWizard();
 			await completeOnboardingWizard();
 		});
 	});
@@ -49,6 +52,10 @@ const runOnboardingFlowTest = () => {
 
 const runTaskListTest = () => {
 	describe('Store owner can go through setup Task List', () => {
+		beforeAll(async () => {
+			await merchant.login();
+		});
+		
 		it('can setup shipping', async () => {
 			await page.evaluate(() => {
 				document.querySelector('.woocommerce-list__item-title').scrollIntoView();
@@ -62,7 +69,6 @@ const runTaskListTest = () => {
 				// Click on "Set up shipping" task to move to the next step
 				const [ setupTaskListItem ] = await page.$x( '//div[contains(text(),"Set up shipping")]' );
 				await setupTaskListItem.click();
-				await page.waitForNavigation({waitUntil: 'networkidle0'});
 
 				// Wait for "Proceed" button to become active
 				await page.waitForSelector('button.is-primary:not(:disabled)');

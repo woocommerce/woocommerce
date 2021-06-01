@@ -9,6 +9,7 @@
 	uiUnblocked,
 	setCheckbox,
 	settingsPageSaveChanges,
+	addShippingZoneAndMethod,
 	withRestApi,
 } = require( '@woocommerce/e2e-utils' );
 
@@ -36,6 +37,10 @@ const runCheckoutCreateAccountTest = () => {
 			await merchant.openSettings('account');
 			await setCheckbox('#woocommerce_enable_signup_and_login_from_checkout');
 			await settingsPageSaveChanges();
+
+			// Set free shipping within California
+			await addShippingZoneAndMethod('Free Shipping CA', 'state:US:CA', ' ', 'free_shipping');
+
 			await merchant.logout();
 
 			// Add simple product to cart and proceed to checkout

@@ -55,14 +55,17 @@ jQuery( function( $ ) {
 
 		var wc_country_select_select2 = function() {
 			$( 'select.country_select:visible, select.state_select:visible' ).each( function() {
+				var $this = $( this );
+
 				var select2_args = $.extend({
-					placeholder: $( this ).attr( 'data-placeholder' ) || $( this ).attr( 'placeholder' ) || '',
+					placeholder: $this.attr( 'data-placeholder' ) || $this.attr( 'placeholder' ) || '',
+					label: $this.attr( 'data-label' ) || null,
 					width: '100%'
 				}, getEnhancedSelectFormatString() );
 
 				$( this )
 					.on( 'select2:select', function() {
-						$( this ).focus(); // Maintain focus after select https://github.com/select2/select2/issues/4384
+						$( this ).trigger( 'focus' ); // Maintain focus after select https://github.com/select2/select2/issues/4384
 					} )
 					.selectWoo( select2_args );
 			});

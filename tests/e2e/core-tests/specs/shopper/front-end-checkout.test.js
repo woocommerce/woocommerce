@@ -9,7 +9,8 @@ const {
 	setCheckbox,
 	settingsPageSaveChanges,
 	uiUnblocked,
-	verifyCheckboxIsSet
+	verifyCheckboxIsSet,
+	addShippingZoneAndMethod,
 } = require( '@woocommerce/e2e-utils' );
 
 const config = require( 'config' );
@@ -26,9 +27,11 @@ let customerOrderId;
 const runCheckoutPageTest = () => {
 	describe('Checkout page', () => {
 		beforeAll(async () => {
-			await merchant.login();
 			await createSimpleProduct();
 
+			// Set free shipping within California
+			await merchant.login();
+			await addShippingZoneAndMethod('Free Shipping CA', 'state:US:CA', ' ', 'free_shipping');
 			// Go to general settings page
 			await merchant.openSettings('general');
 
@@ -137,7 +140,7 @@ const runCheckoutPageTest = () => {
 			// Get order ID from the order received html element on the page
 			let orderReceivedHtmlElement = await page.$('.woocommerce-order-overview__order.order');
 			let orderReceivedText = await page.evaluate(element => element.textContent, orderReceivedHtmlElement);
-			return guestOrderId = orderReceivedText.split(/(\s+)/)[6].toString();
+			guestOrderId = orderReceivedText.split(/(\s+)/)[6].toString();
 		});
 
 		it('allows existing customer to place order', async () => {
@@ -160,7 +163,7 @@ const runCheckoutPageTest = () => {
 			// Get order ID from the order received html element on the page
 			let orderReceivedHtmlElement = await page.$('.woocommerce-order-overview__order.order');
 			let orderReceivedText = await page.evaluate(element => element.textContent, orderReceivedHtmlElement);
-			return customerOrderId = orderReceivedText.split(/(\s+)/)[6].toString();
+			customerOrderId = orderReceivedText.split(/(\s+)/)[6].toString();
 		});
 
 		it('store owner can confirm the order was received', async () => {

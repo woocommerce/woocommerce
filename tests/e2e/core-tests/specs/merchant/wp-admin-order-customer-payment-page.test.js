@@ -20,8 +20,9 @@ let orderId;
 const runMerchantOrdersCustomerPaymentPage = () => {
 	describe('WooCommerce Merchant Flow: Orders > Customer Payment Page', () => {
 		beforeAll(async () => {
-			await merchant.login();
 			await createSimpleProduct();
+			
+			await merchant.login();
 			orderId = await createSimpleOrder();
 			await addProductToOrder( orderId, simpleProductName );
 

@@ -24,7 +24,7 @@ const takeScreenshotFor = async ( message ) => {
 		});
 	} catch ( error ) {
 		return {
-			title: 'no screenshot',
+			title,
 			filePath: '',
 		};
 	}

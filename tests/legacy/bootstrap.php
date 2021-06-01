@@ -104,6 +104,7 @@ class WC_Unit_Tests_Bootstrap {
 	 */
 	private function initialize_code_hacker() {
 		CodeHacker::initialize( array( __DIR__ . '/../../includes/' ) );
+
 		$replaceable_functions = include_once __DIR__ . '/mockable-functions.php';
 		if ( ! empty( $replaceable_functions ) ) {
 			FunctionsMockerHack::initialize( $replaceable_functions );
