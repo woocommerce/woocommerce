@@ -50,11 +50,11 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	}
 
 	/**
-	 * Get sections.
+	 * Get own sections.
 	 *
 	 * @return array
 	 */
-	public function get_sections() {
+	protected function get_own_sections() {
 		$sections = array(
 			''         => __( 'Tax options', 'woocommerce' ),
 			'standard' => __( 'Standard rates', 'woocommerce' ),
@@ -68,22 +68,16 @@ class WC_Settings_Tax extends WC_Settings_Page {
 			$sections[ sanitize_title( $class ) ] = sprintf( __( '%s rates', 'woocommerce' ), $class );
 		}
 
-		return apply_filters( 'woocommerce_get_sections_' . $this->id, $sections );
+		return $sections;
 	}
 
 	/**
 	 * Get settings array.
 	 *
-	 * @param string $current_section Current section being shown.
 	 * @return array
 	 */
-	public function get_settings( $current_section = '' ) {
-		$settings = array();
-
-		if ( '' === $current_section ) {
-			$settings = include __DIR__ . '/views/settings-tax.php';
-		}
-		return apply_filters( 'woocommerce_get_settings_' . $this->id, $settings, $current_section );
+	public function get_settings_for_default_section() {
+		return include __DIR__ . '/views/settings-tax.php';
 	}
 
 	/**
@@ -97,9 +91,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 		if ( 'standard' === $current_section || in_array( $current_section, array_filter( $tax_classes ), true ) ) {
 			$this->output_tax_rates();
 		} else {
-			$settings = $this->get_settings();
-
-			WC_Admin_Settings::output_fields( $settings );
+			parent::output();
 		}
 	}
 
@@ -111,19 +103,18 @@ class WC_Settings_Tax extends WC_Settings_Page {
 		global $current_section;
 
 		if ( ! $current_section ) {
-			$settings = $this->get_settings();
-			WC_Admin_Settings::save_fields( $settings );
+			$this->save_settings_for_current_section();
 
 			if ( isset( $_POST['woocommerce_tax_classes'] ) ) {
 				$this->save_tax_classes( wp_unslash( $_POST['woocommerce_tax_classes'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			}
 		} elseif ( ! empty( $_POST['tax_rate_country'] ) ) {
 			$this->save_tax_rates();
+		} else {
+			$this->save_settings_for_current_section();
 		}
 
-		if ( $current_section ) {
-			do_action( 'woocommerce_update_options_' . $this->id . '_' . $current_section );
-		}
+		$this->do_update_options_action();
 
 		// Invalidate caches.
 		WC_Cache_Helper::invalidate_cache_group( 'taxes' );
@@ -212,8 +203,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 				'wc_tax_nonce'  => wp_create_nonce( 'wc_tax_nonce-class:' . $current_class ),
 				'base_url'      => $base_url,
 				'rates'         => array_values( WC_Tax::get_rates_for_tax_class( $current_class ) ),
-				// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				'page'          => ! empty( $_GET['p'] ) ? absint( $_GET['p'] ) : 1,
+				'page'          => ! empty( $_GET['p'] ) ? absint( $_GET['p'] ) : 1, // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				'limit'         => 100,
 				'countries'     => $countries,
 				'states'        => $states,
@@ -281,6 +271,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	 * @return array
 	 */
 	private function get_posted_tax_rate( $key, $order, $class ) {
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- this is called from 'save_tax_rates' only, where nonce is already verified.
 		$tax_rate      = array();
 		$tax_rate_keys = array(
 			'tax_rate_country',
@@ -304,12 +295,14 @@ class WC_Settings_Tax extends WC_Settings_Page {
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
 		return $tax_rate;
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
 	}
 
 	/**
 	 * Save tax rates.
 	 */
 	public function save_tax_rates() {
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- this is called via "do_action('woocommerce_settings_save_'...") in base class, where nonce is verified first.
 		global $wpdb;
 
 		$current_class = sanitize_title( $this->get_current_tax_class() );

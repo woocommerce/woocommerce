@@ -49,8 +49,4 @@
 	<listeners>
 		<listener class="SpeedTrapListener" file="tests/legacy/includes/listener-loader.php" />
 	</listeners>
-	<extensions>
-		<extension class="\Automattic\WooCommerce\Testing\Tools\CodeHacking\CodeHackerTestHook" />
-		<extension class="\Automattic\WooCommerce\Testing\Tools\DependencyManagement\DependencyManagementTestHook" />
-	</extensions>
 </phpunit>
