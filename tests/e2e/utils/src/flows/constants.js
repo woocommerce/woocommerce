@@ -36,6 +36,7 @@ export const WP_ADMIN_SETUP_WIZARD = WP_ADMIN_WC_HOME + '&path=%2Fsetup-wizard';
 export const WP_ADMIN_ANALYTICS_PAGES = WP_ADMIN_WC_HOME + '&path=%2Fanalytics%2F';
 export const WP_ADMIN_WC_SETTINGS = WP_ADMIN_PLUGIN_PAGE + 'wc-settings&tab=';
 export const WP_ADMIN_NEW_SHIPPING_ZONE = WP_ADMIN_WC_SETTINGS + 'shipping&zone_id=new';
+export const WP_ADMIN_WC_EXTENSIONS = WP_ADMIN_PLUGIN_PAGE + 'wc-addons';
 /**
  * Shop pages.
  * @type {string}

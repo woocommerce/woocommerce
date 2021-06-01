@@ -1,7 +1,7 @@
 /*!
  * jquery.zeroclipboard
  * Bind to the `beforecopy`, `copy`, `aftercopy`, and `copy-error` events, custom DOM-like events for clipboard injection generated using jQuery's Special Events API and ZeroClipboard's Core module.
- * Copyright (c) 2014 
+ * Copyright (c) 2014
  * Licensed MIT
  * https://github.com/zeroclipboard/jquery.zeroclipboard
  * v0.2.0

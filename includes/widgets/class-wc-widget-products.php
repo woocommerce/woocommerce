@@ -20,7 +20,7 @@ class WC_Widget_Products extends WC_Widget {
 		$this->widget_cssclass    = 'woocommerce widget_products';
 		$this->widget_description = __( "A list of your store's products.", 'woocommerce' );
 		$this->widget_id          = 'woocommerce_products';
-		$this->widget_name        = __( 'Products', 'woocommerce' );
+		$this->widget_name        = __( 'Products list', 'woocommerce' );
 		$this->settings           = array(
 			'title'       => array(
 				'type'  => 'text',
@@ -185,6 +185,8 @@ class WC_Widget_Products extends WC_Widget {
 		}
 
 		ob_start();
+
+		wc_set_loop_prop( 'name', 'widget' );
 
 		$products = $this->get_products( $args, $instance );
 		if ( $products && $products->have_posts() ) {

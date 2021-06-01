@@ -40,9 +40,10 @@ const shippingCountryFR = 'country:FR';
 const runCartCalculateShippingTest = () => {
 	describe('Cart Calculate Shipping', () => {
 		beforeAll(async () => {
-			await merchant.login();
 			await createSimpleProduct(firstProductName);
 			await createSimpleProduct(secondProductName, secondProductPrice);
+
+			await merchant.login();
 			await merchant.openNewShipping();
 
 			// Add a new shipping zone Germany with Free shipping

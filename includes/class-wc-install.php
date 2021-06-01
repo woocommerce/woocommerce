@@ -619,9 +619,11 @@ class WC_Install {
 		add_option( 'woocommerce_checkout_highlight_required_fields', 'yes', '', 'yes' );
 		add_option( 'woocommerce_demo_store', 'no', '', 'no' );
 
-		// Define initial tax classes.
-		WC_Tax::create_tax_class( __( 'Reduced rate', 'woocommerce' ) );
-		WC_Tax::create_tax_class( __( 'Zero rate', 'woocommerce' ) );
+		if ( self::is_new_install() ) {
+			// Define initial tax classes.
+			WC_Tax::create_tax_class( __( 'Reduced rate', 'woocommerce' ) );
+			WC_Tax::create_tax_class( __( 'Zero rate', 'woocommerce' ) );
+		}
 	}
 
 	/**
@@ -1332,7 +1334,12 @@ CREATE TABLE {$wpdb->prefix}wc_reserved_stock (
 			'post_content'   => '',
 			'post_status'    => 'inherit',
 		);
-		$attach_id  = wp_insert_attachment( $attachment, $filename );
+
+		$attach_id = wp_insert_attachment( $attachment, $filename );
+		if ( is_wp_error( $attach_id ) ) {
+			update_option( 'woocommerce_placeholder_image', 0 );
+			return;
+		}
 
 		update_option( 'woocommerce_placeholder_image', $attach_id );
 

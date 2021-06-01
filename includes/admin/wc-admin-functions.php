@@ -206,17 +206,19 @@ function wc_maybe_adjust_line_item_product_stock( $item, $item_quantity = -1 ) {
 		return false;
 	}
 
-	$product               = $item->get_product();
-	$item_quantity         = wc_stock_amount( $item_quantity >= 0 ? $item_quantity : $item->get_quantity() );
-	$already_reduced_stock = wc_stock_amount( $item->get_meta( '_reduced_stock', true ) );
+	$product = $item->get_product();
 
 	if ( ! $product || ! $product->managing_stock() ) {
 		return false;
 	}
 
+	$item_quantity          = wc_stock_amount( $item_quantity >= 0 ? $item_quantity : $item->get_quantity() );
+	$already_reduced_stock  = wc_stock_amount( $item->get_meta( '_reduced_stock', true ) );
+	$restock_refunded_items = wc_stock_amount( $item->get_meta( '_restock_refunded_items', true ) );
 	$order                  = $item->get_order();
 	$refunded_item_quantity = $order->get_qty_refunded_for_item( $item->get_id() );
-	$diff                   = $item_quantity + $refunded_item_quantity - $already_reduced_stock;
+
+	$diff = $item_quantity - $restock_refunded_items - $already_reduced_stock;
 
 	/*
 	 * 0 as $item_quantity usually indicates we're deleting the order item.
@@ -238,7 +240,7 @@ function wc_maybe_adjust_line_item_product_stock( $item, $item_quantity = -1 ) {
 		return $new_stock;
 	}
 
-	$item->update_meta_data( '_reduced_stock', $item_quantity + $refunded_item_quantity );
+	$item->update_meta_data( '_reduced_stock', $item_quantity - $restock_refunded_items );
 	$item->save();
 
 	if ( $item_quantity > 0 ) {

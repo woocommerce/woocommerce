@@ -26,10 +26,10 @@ const simpleProductName = config.get('products.simple.name');
 const runCheckoutLoginAccountTest = () => {
 	describe('Shopper Checkout Login Account', () => {
 		beforeAll(async () => {
-			await merchant.login();
 			await createSimpleProduct();
 
 			// Set checkbox for logging to account during checkout
+			await merchant.login();
 			await merchant.openSettings('account');
 			await setCheckbox('#woocommerce_enable_checkout_login_reminder');
 			await settingsPageSaveChanges();

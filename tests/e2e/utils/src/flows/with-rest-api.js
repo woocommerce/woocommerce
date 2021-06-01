@@ -16,17 +16,24 @@ const userEndpoint = '/wp/v2/users';
 const deleteAllRepositoryObjects = async ( repository, defaultObjectId = null ) => {
 	let objects;
 	const minimum = defaultObjectId == null ? 0 : 1;
+	const statuses = ['draft','publish','trash'];
 
-	objects = await repository.list();
-	while ( objects.length > minimum ) {
-		for (let o = 0; o < objects.length; o++ ) {
-			// Skip default data store object
-			if ( objects[ o ].id == defaultObjectId ) {
-				continue;
+	for ( let s = 0; s < statuses.length; s++ ) {
+		const status = statuses[ s ];
+		objects = await repository.list( { status } );
+		while (objects.length > minimum) {
+			for (let o = 0; o < objects.length; o++) {
+				// Skip default data store object
+				if (objects[o].id == defaultObjectId) {
+					continue;
+				}
+				// We may be getting a cached copy of the dataset and the object has already been deleted.
+				try {
+					await repository.delete(objects[o].id);
+				} catch (e) {}
 			}
-			await repository.delete( objects[ o ].id );
+			objects = await repository.list( { status } );
 		}
-		objects = await repository.list();
 	}
 };
 

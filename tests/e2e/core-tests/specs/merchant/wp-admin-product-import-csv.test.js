@@ -5,7 +5,7 @@
  const {
 	merchant,
 	setCheckbox,
-	moveAllItemsToTrash
+	withRestApi,
 } = require( '@woocommerce/e2e-utils' );
 const getCoreTestsRoot = require( '../../core-tests-root' );
 
@@ -63,7 +63,7 @@ const runImportProductsTest = () => {
 			await expect(page).toClick('button[value="Run the importer"]');
 
 			// Waiting for importer to finish
-			await page.waitForSelector('section.woocommerce-importer-done', {visible:true, timeout: 60000});
+			await page.waitForSelector('section.woocommerce-importer-done', {visible:true, timeout: 120000});
 			await page.waitForSelector('.woocommerce-importer-done');
 			await expect(page).toMatchElement('.woocommerce-importer-done', {text: 'Import complete!'});
 		});
@@ -108,10 +108,12 @@ const runImportProductsTest = () => {
 
 			// Gathering product names
 			await page.waitForSelector('a.row-title');
-			const productTitles = await page.$$eval('a.row-title',
-			 elements => elements.map(item => item.innerHTML));
+			const productTitles = await page.$$eval(
+				'a.row-title',
+				elements => elements.map(item => item.innerHTML)
+			);
 
-			// Compare overriden product names
+			// Compare overridden product names
 			expect(productTitles.sort()).toEqual(productNamesOverride.sort());
 
 			// Gathering product prices
@@ -119,12 +121,11 @@ const runImportProductsTest = () => {
 			const productPrices = await page.$$eval('.amount',
 			 elements => elements.map(item => item.innerText));
 
-			// Compare overriden product prices
+			// Compare overridden product prices
 			expect(productPrices.sort()).toEqual(productPricesOverride.sort());
 
-			// Move all imported products to trash
-			await moveAllItemsToTrash();
-
+			// Delete imported products
+			await withRestApi.deleteAllProducts();
 		});
 	});
 };

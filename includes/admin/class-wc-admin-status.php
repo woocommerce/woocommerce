@@ -7,6 +7,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Utilities\ArrayUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -37,7 +38,8 @@ class WC_Admin_Status {
 			wp_die( 'Cannot load the REST API to access WC_REST_System_Status_Tools_Controller.' );
 		}
 
-		$tools = self::get_tools();
+		$tools                 = self::get_tools();
+		$tool_requires_refresh = false;
 
 		if ( ! empty( $_GET['action'] ) && ! empty( $_REQUEST['_wpnonce'] ) && wp_verify_nonce( wp_unslash( $_REQUEST['_wpnonce'] ), 'debug_action' ) ) { // WPCS: input var ok, sanitization ok.
 			$tools_controller = new WC_REST_System_Status_Tools_Controller();
@@ -46,14 +48,16 @@ class WC_Admin_Status {
 			if ( array_key_exists( $action, $tools ) ) {
 				$response = $tools_controller->execute_tool( $action );
 
-				$tool = $tools[ $action ];
-				$tool = array(
+				$tool                  = $tools[ $action ];
+				$tool_requires_refresh = ArrayUtil::get_value_or_default( $tool, 'requires_refresh', false );
+				$tool                  = array(
 					'id'          => $action,
 					'name'        => $tool['name'],
 					'action'      => $tool['button'],
 					'description' => $tool['desc'],
+					'disabled'    => ArrayUtil::get_value_or_default( $tool, 'disabled', false ),
 				);
-				$tool = array_merge( $tool, $response );
+				$tool                  = array_merge( $tool, $response );
 
 				/**
 				 * Fires after a WooCommerce system status tool has been executed.
@@ -78,6 +82,10 @@ class WC_Admin_Status {
 		// Display message if settings settings have been saved.
 		if ( isset( $_REQUEST['settings-updated'] ) ) { // WPCS: input var ok.
 			echo '<div class="updated inline"><p>' . esc_html__( 'Your changes have been saved.', 'woocommerce' ) . '</p></div>';
+		}
+
+		if ( $tool_requires_refresh ) {
+			$tools = self::get_tools();
 		}
 
 		include_once __DIR__ . '/views/html-admin-page-status-tools.php';

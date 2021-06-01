@@ -38,7 +38,7 @@ jQuery( function( $ ) {
 				}
 			} );
 
-			$( '#woocommerce_paypal_testmode' ).change();
+			$( '#woocommerce_paypal_testmode' ).trigger( 'change' );
 		}
 	};
 

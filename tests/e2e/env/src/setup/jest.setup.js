@@ -7,10 +7,8 @@ import {
 	enablePageDialogAccept,
 	isOfflineMode,
 	setBrowserViewport,
-	switchUserToAdmin,
-	switchUserToTest,
-	visitAdminPage,
 } from '@wordpress/e2e-test-utils';
+import { consoleShouldSuppress, addConsoleSuppression } from '../../utils';
 
 /**
  * Array of page event tuples of [ eventName, handler ].
@@ -18,21 +16,13 @@ import {
  * @type {Array}
  */
 const pageEvents = [];
+
 /**
  * Set of logged messages that will only be logged once.
- *
- * @type {Object<string,object>}
  */
-const loggedMessages = {
-	proxy: {
-		logged: false,
-		text: 'Failed to load resource: net::ERR_PROXY_CONNECTION_FAILED',
-	},
-	http404: {
-		logged: false,
-		text: 'the server responded with a status of 404',
-	},
-};
+addConsoleSuppression('Failed to load resource: net::ERR_PROXY_CONNECTION_FAILED');
+addConsoleSuppression('the server responded with a status of 404');
+
 /**
  * Set of console logging types observed to protect against unexpected yet
  * handled (i.e. not catastrophic) errors or warnings. Each key corresponds
@@ -143,19 +133,11 @@ function observeConsoleLogging() {
 
 		const logFunction = OBSERVED_CONSOLE_MESSAGE_TYPES[ type ];
 
-		// Limit warnings on missing resources.
-		let previouslyLogged = false;
-		Object.keys( loggedMessages ).forEach( function( key ) {
-			if ( text.includes( loggedMessages[ key ].text ) ) {
-				if ( loggedMessages[ key ].logged ) {
-					previouslyLogged = true;
-				}
-				loggedMessages[ key ].logged = true;
-			}
-		} );
-		if ( previouslyLogged ) {
+		// Limit repeated warnings.
+		if ( consoleShouldSuppress( text ) ) {
 			return;
 		}
+
 		// As of Puppeteer 1.6.1, `message.text()` wrongly returns an object of
 		// type JSHandle for error logging, instead of the expected string.
 		//

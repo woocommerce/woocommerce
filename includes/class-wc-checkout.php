@@ -679,6 +679,8 @@ class WC_Checkout {
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
 		$skipped = array();
+		$form_was_shown = isset( $_POST['woocommerce-process-checkout-nonce'] ); // phpcs:disable WordPress.Security.NonceVerification.Missing
+
 		foreach ( $this->get_checkout_fields() as $fieldset_key => $fieldset ) {
 			if ( $this->maybe_skip_fieldset( $fieldset_key, $data ) ) {
 				$skipped[] = $fieldset_key;
@@ -688,25 +690,32 @@ class WC_Checkout {
 			foreach ( $fieldset as $key => $field ) {
 				$type = sanitize_title( isset( $field['type'] ) ? $field['type'] : 'text' );
 
-				// phpcs:disable WordPress.Security.NonceVerification.Missing
-				switch ( $type ) {
-					case 'checkbox':
-						$value = isset( $_POST[ $key ] ) ? 1 : '';
-						break;
-					case 'multiselect':
-						$value = isset( $_POST[ $key ] ) ? implode( ', ', wc_clean( wp_unslash( $_POST[ $key ] ) ) ) : '';
-						break;
-					case 'textarea':
-						$value = isset( $_POST[ $key ] ) ? wc_sanitize_textarea( wp_unslash( $_POST[ $key ] ) ) : '';
-						break;
-					case 'password':
-						$value = isset( $_POST[ $key ] ) ? wp_unslash( $_POST[ $key ] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-						break;
-					default:
-						$value = isset( $_POST[ $key ] ) ? wc_clean( wp_unslash( $_POST[ $key ] ) ) : '';
-						break;
+				if ( isset( $_POST[ $key ] ) && '' !== $_POST[ $key ] ) { // phpcs:disable WordPress.Security.NonceVerification.Missing
+					$value = wp_unslash( $_POST[ $key ] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+				} elseif ( isset( $field['default'] ) && 'checkbox' !== $type && ! $form_was_shown ) {
+					$value = $field['default'];
+				} else {
+					$value = '';
 				}
-				// phpcs:enable WordPress.Security.NonceVerification.Missing
+
+				if ( '' !== $value ) {
+					switch ( $type ) {
+						case 'checkbox':
+							$value = 1;
+							break;
+						case 'multiselect':
+							$value = implode( ', ', wc_clean( $value ) );
+							break;
+						case 'textarea':
+							$value = wc_sanitize_textarea( $value );
+							break;
+						case 'password':
+							break;
+						default:
+							$value = wc_clean( $value );
+							break;
+					}
+				}
 
 				$data[ $key ] = apply_filters( 'woocommerce_process_checkout_' . $type . '_field', apply_filters( 'woocommerce_process_checkout_field_' . $key, $value ) );
 			}
@@ -1123,7 +1132,7 @@ class WC_Checkout {
 	 */
 	public function process_checkout() {
 		try {
-			$nonce_value = wc_get_var( $_REQUEST['woocommerce-process-checkout-nonce'], wc_get_var( $_REQUEST['_wpnonce'], '' ) ); // @codingStandardsIgnoreLine.
+			$nonce_value = wc_get_var( $_REQUEST['woocommerce-process-checkout-nonce'], wc_get_var( $_REQUEST['_wpnonce'], '' ) ); // phpcs:ignore
 
 			if ( empty( $nonce_value ) || ! wp_verify_nonce( $nonce_value, 'woocommerce-process_checkout' ) ) {
 				WC()->session->set( 'refresh_totals', true );

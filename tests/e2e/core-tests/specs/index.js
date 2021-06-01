@@ -45,12 +45,14 @@ const runMerchantOrderEmailsTest = require( './merchant/wp-admin-order-emails.te
 const runOrderSearchingTest = require( './merchant/wp-admin-order-searching.test' );
 const runAnalyticsPageLoadsTest = require( './merchant/wp-admin-analytics-page-loads.test' );
 const runImportProductsTest = require( './merchant/wp-admin-product-import-csv.test' );
+const runInitiateWccomConnectionTest = require( './merchant/wp-admin-extensions-connect-wccom.test' );
 
 // REST API tests
 const runExternalProductAPITest = require( './api/external-product.test' );
 const runCouponApiTest = require( './api/coupon.test' );
 const runGroupedProductAPITest = require( './api/grouped-product.test' );
 const runVariableProductAPITest = require( './api/variable-product.test' );
+const runOrderApiTest = require( './api/order.test' );
 
 const runSetupOnboardingTests = () => {
 	runActivationTest();
@@ -97,6 +99,7 @@ const runMerchantTests = () => {
 	runProductSearchTest();
 	runMerchantOrdersCustomerPaymentPage();
 	runAnalyticsPageLoadsTest();
+	runInitiateWccomConnectionTest();
 }
 
 const runApiTests = () => {
@@ -104,6 +107,7 @@ const runApiTests = () => {
 	runGroupedProductAPITest();
 	runVariableProductAPITest();
 	runCouponApiTest();
+	runOrderApiTest();
 }
 
 module.exports = {
@@ -133,6 +137,7 @@ module.exports = {
 	runUpdateGeneralSettingsTest,
 	runProductSettingsTest,
 	runTaxSettingsTest,
+	runOrderApiTest,
 	runOrderStatusFiltersTest,
 	runOrderRefundTest,
 	runOrderApplyCouponTest,
@@ -154,4 +159,5 @@ module.exports = {
 	runCartRedirectionTest,
 	runMyAccountCreateAccountTest,
 	runOrderEmailReceivingTest,
+	runInitiateWccomConnectionTest,
 };

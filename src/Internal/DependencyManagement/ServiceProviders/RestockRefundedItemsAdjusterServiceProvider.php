@@ -1,17 +1,17 @@
 <?php
 /**
- * ThemeManagementServiceProvider class file.
+ * RestockRefundedItemsAdjusterServiceProvider class file.
  */
 
 namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;
 
-use Automattic\WooCommerce\Internal\ThemeSupport;
 use Automattic\WooCommerce\Internal\DependencyManagement\AbstractServiceProvider;
+use Automattic\WooCommerce\Internal\RestockRefundedItemsAdjuster;
 
 /**
- * Service provider for the classes in the Automattic\WooCommerce\ThemeManagement namespace.
+ * Service provider for the RestockRefundedItemsAdjuster class.
  */
-class ThemeManagementServiceProvider extends AbstractServiceProvider {
+class RestockRefundedItemsAdjusterServiceProvider extends AbstractServiceProvider {
 
 	/**
 	 * The classes/interfaces that are serviced by this service provider.
@@ -19,13 +19,13 @@ class ThemeManagementServiceProvider extends AbstractServiceProvider {
 	 * @var array
 	 */
 	protected $provides = array(
-		ThemeSupport::class,
+		RestockRefundedItemsAdjuster::class,
 	);
 
 	/**
 	 * Register the classes.
 	 */
 	public function register() {
-		$this->share_with_auto_arguments( ThemeSupport::class );
+		$this->share( RestockRefundedItemsAdjuster::class );
 	}
 }

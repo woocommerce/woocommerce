@@ -4,7 +4,6 @@
  */
 const {
 	shopper,
-	merchant,
 	createSimpleProduct,
 	uiUnblocked
 } = require( '@woocommerce/e2e-utils' );
@@ -26,9 +25,7 @@ const twoProductPrice = singleProductPrice * 2;
 const runCartPageTest = () => {
 	describe('Cart page', () => {
 		beforeAll(async () => {
-			await merchant.login();
 			await createSimpleProduct();
-			await merchant.logout();
 		});
 
 		it('should display no item in the cart', async () => {

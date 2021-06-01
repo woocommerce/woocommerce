@@ -4,13 +4,13 @@
  * Internal dependencies
  */
 const {
-	merchant,
 	createSimpleProduct,
 	createSimpleOrder,
 	createCoupon,
 	uiUnblocked,
 	addProductToOrder,
 	evalAndClick,
+	merchant
 } = require( '@woocommerce/e2e-utils' );
 
 const config = require( 'config' );
@@ -26,10 +26,12 @@ let orderId;
 const runOrderApplyCouponTest = () => {
 	describe('WooCommerce Orders > Apply coupon', () => {
 		beforeAll(async () => {
-			await merchant.login();
 			await createSimpleProduct();
 			couponCode = await createCoupon();
+			
+			await merchant.login();
 			orderId = await createSimpleOrder('Pending payment', simpleProductName);
+			
 			await Promise.all([
 				addProductToOrder(orderId, simpleProductName),
 
