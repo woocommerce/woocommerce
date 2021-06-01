@@ -60,7 +60,7 @@ class Report extends Component {
 		const { isError } = this.props;
 
 		if ( isError ) {
-			return <ReportError isError />;
+			return <ReportError />;
 		}
 
 		const reportParam = getReportParam( this.props );

@@ -63,7 +63,7 @@ class ProductsReport extends Component {
 		} = this.props;
 
 		if ( isError ) {
-			return <ReportError isError />;
+			return <ReportError />;
 		}
 
 		const chartQuery = {

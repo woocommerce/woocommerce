@@ -208,7 +208,7 @@ export class ReportChart extends Component {
 		const { isRequesting, primaryData } = this.props;
 
 		if ( primaryData.isError ) {
-			return <ReportError isError />;
+			return <ReportError />;
 		}
 
 		const isChartRequesting = isRequesting || primaryData.isRequesting;
@@ -225,7 +225,7 @@ export class ReportChart extends Component {
 		const { isRequesting, primaryData, secondaryData } = this.props;
 
 		if ( ! primaryData || primaryData.isError || secondaryData.isError ) {
-			return <ReportError isError />;
+			return <ReportError />;
 		}
 
 		const isChartRequesting =

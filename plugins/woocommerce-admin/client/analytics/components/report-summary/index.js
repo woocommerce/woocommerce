@@ -64,7 +64,7 @@ export class ReportSummary extends Component {
 		const { isError, isRequesting } = summaryData;
 
 		if ( isError ) {
-			return <ReportError isError />;
+			return <ReportError />;
 		}
 
 		if ( isRequesting ) {

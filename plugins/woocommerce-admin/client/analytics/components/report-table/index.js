@@ -82,7 +82,7 @@ const ReportTable = ( props ) => {
 	const isError = tableData.isError || primaryData.isError;
 
 	if ( isError ) {
-		return <ReportError isError />;
+		return <ReportError />;
 	}
 
 	let userPrefColumns = [];
