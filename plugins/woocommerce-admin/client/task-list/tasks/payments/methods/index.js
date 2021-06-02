@@ -16,7 +16,6 @@ import BacsLogo from '../images/bacs';
 import CodLogo from '../images/cod';
 import WCPayLogo from '../images/wcpay';
 import RazorpayLogo from '../images/razorpay';
-import { MollieLogo } from '../images/mollie';
 import { PayUIndiaLogo } from '../images/payu-india';
 import Stripe from './stripe';
 import Square from './square';
@@ -342,7 +341,15 @@ export function getPaymentMethods( {
 		{
 			key: 'mollie',
 			title: __( 'Mollie Payments for WooCommerce', 'woocommerce-admin' ),
-			before: <MollieLogo />,
+			before: (
+				<img
+					src={ wcAdminAssetUrl + '/onboarding/mollie.svg' }
+					alt={ __(
+						'Mollie Payments for WooCommerce logo',
+						'woocommerce-admin'
+					) }
+				/>
+			),
 			plugins: [ 'mollie-payments-for-woocommerce' ],
 			isConfigured: activePlugins.includes(
 				'mollie-payments-for-woocommerce'

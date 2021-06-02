@@ -59,6 +59,30 @@ class DefaultPaymentGateways {
 				),
 			),
 			array(
+				'key'        => 'mollie_wc_gateway_banktransfer',
+				'title'      => __( 'Mollie', 'woocommerce-admin' ),
+				'content'    => __( 'Effortless payments by Mollie: Offer global and local payment methods, get onboarded in minutes, and supported in your language.', 'woocommerce-admin' ),
+				'image'      => plugins_url( 'images/onboarding/mollie.svg', WC_ADMIN_PLUGIN_FILE ),
+				'plugins'    => array( 'mollie-payments-for-woocommerce' ),
+				'is_visible' => array(
+					self::get_rules_for_countries(
+						array(
+							'FR',
+							'DE',
+							'GB',
+							'AT',
+							'CH',
+							'ES',
+							'IT',
+							'PL',
+							'FI',
+							'NL',
+							'BE',
+						)
+					),
+				),
+			),
+			array(
 				'key'        => 'woo-mercado-pago-custom',
 				'title'      => __( 'Mercado Pago Checkout Pro & Custom', 'woocommerce-admin' ),
 				'content'    => __( 'Accept credit and debit cards, offline (cash or bank transfer) and logged-in payments with money in Mercado Pago. Safe and secure payments with the leading payment processor in LATAM.', 'woocommerce-admin' ),

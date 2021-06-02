@@ -138,6 +138,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Dev: Remove react-docgen docs in favor of Storybook #7055
 - Update: Hook up payments gateway data store #7038
 - Update: Update remote payment docs gateway methods #7079
+- Add: Add Mollie to the default payment gateways. #7092
 
 == 2.3.1 5/24/2021 ==
 - Tweak: Store profiler - Changed MailPoet's title and description #6990
