@@ -45,29 +45,30 @@ const TotalsTaxes = ( {
 		false
 	) as boolean;
 
-	const itemisedTaxItems: ReactElement | null = showItemisedTaxes ? (
-		<div
-			className={ classnames(
-				'wc-block-components-totals-taxes',
-				className
-			) }
-		>
-			{ taxLines.map( ( { name, rate, price }, i ) => {
-				const label = `${ name }${
-					showRateAfterTaxName ? ` ${ rate }` : ''
-				}`;
-				return (
-					<TotalsItem
-						key={ `tax-line-${ i }` }
-						className="wc-block-components-totals-taxes__grouped-rate"
-						currency={ currency }
-						label={ label }
-						value={ parseInt( price, 10 ) }
-					/>
-				);
-			} ) }{ ' ' }
-		</div>
-	) : null;
+	const itemisedTaxItems: ReactElement | null =
+		showItemisedTaxes && taxLines.length > 0 ? (
+			<div
+				className={ classnames(
+					'wc-block-components-totals-taxes',
+					className
+				) }
+			>
+				{ taxLines.map( ( { name, rate, price }, i ) => {
+					const label = `${ name }${
+						showRateAfterTaxName ? ` ${ rate }` : ''
+					}`;
+					return (
+						<TotalsItem
+							key={ `tax-line-${ i }` }
+							className="wc-block-components-totals-taxes__grouped-rate"
+							currency={ currency }
+							label={ label }
+							value={ parseInt( price, 10 ) }
+						/>
+					);
+				} ) }{ ' ' }
+			</div>
+		) : null;
 
 	return showItemisedTaxes ? (
 		itemisedTaxItems
