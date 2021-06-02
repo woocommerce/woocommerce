@@ -1,6 +1,8 @@
 import { HTTPClientFactory } from '@woocommerce/api';
 const config = require( 'config' );
 import { simpleProductFactory } from './factories/simple-product';
+import { variableProductFactory } from './factories/variable-product';
+import { variationFactory } from './factories/variation';
 
 const apiUrl = config.get( 'url' );
 const adminUsername = config.get( 'users.admin.username' );
@@ -20,6 +22,8 @@ const factories = {
 	},
 	products: {
 		simple: simpleProductFactory( withDefaultPermalinks ),
+		variable: variableProductFactory( withDefaultPermalinks ),
+		variation: variationFactory( withDefaultPermalinks )
 	},
 };
 

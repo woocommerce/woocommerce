@@ -18,7 +18,8 @@ import {
 	waitForSelectorWithoutThrow,
 } from './page-utils';
 import factories from './factories';
-import { Coupon, VariableProduct, ProductVariation } from '@woocommerce/api';
+import { Coupon, ProductVariation } from '@woocommerce/api';
+import { variableProductFactory } from './factories/variable-product';
 
 const client = factories.api.withDefaultPermalinks;
 const config = require( 'config' );
@@ -221,22 +222,21 @@ const createSimpleProductWithCategory = async ( productName, productPrice, categ
 
 /**
  * Create variable product.
+ * 
+ * @returns the ID of the variable product
  */
 const createVariableProduct = async () => {
-	// mytodo convert to factory
-	// Create a variable product with attributes (no variations yet)
-	const defaultVariableProduct = config.get( 'products.variable' );
-	const variableProductRepo = VariableProduct.restRepository( client );
-	const variableProduct = await variableProductRepo.create( defaultVariableProduct );
-
-	// Create variations for this product
+	const variableProduct = await factories.products.variable.create();
 	const defaultVariations = config.get( 'products.variations' );
-	const variationsRepo = ProductVariation.restRepository( client );
+
 	for( const variation of defaultVariations ){
-		await variationsRepo.create( variableProduct.id, variation );
+		await factories.products.variation.create({
+			productId: variableProduct.id,
+			variation: variation
+		});
 	}
 
-	return variableProduct;
+	return variableProduct.id;
 };
 
 /**
