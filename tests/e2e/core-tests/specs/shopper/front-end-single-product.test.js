@@ -11,11 +11,19 @@ const {
 	uiUnblocked
 } = require( '@woocommerce/e2e-utils' );
 
-let simplePostIdValue;
-let variablePostIdValue;
-let groupedPostIdValue;
 const config = require( 'config' );
+
+// Variables for simple product
+let simplePostIdValue;
 const simpleProductName = config.get( 'products.simple.name' );
+
+// Variables for variable product
+let variableProduct;
+const variations = config.get( 'products.variations' );
+const attributes = variations[0].attributes;
+
+// Variables for grouped product
+let groupedPostIdValue;
 
 const runSingleProductPageTest = () => {
 	describe('Single Product Page', () => {
@@ -43,28 +51,33 @@ const runSingleProductPageTest = () => {
 		});
 	});
 
-	describe.skip('Variable Product Page', () => {
+	describe('Variable Product Page', () => {
 		beforeAll(async () => {
-			variablePostIdValue = await createVariableProduct();
+			variableProduct = await createVariableProduct();
 		});
 
 		it('should be able to add variation products to the cart', async () => {
 			// Add a product with one set of variations to cart
-			await shopper.goToProduct(variablePostIdValue);
-			await expect(page).toSelect('#attr-1', 'val1');
-			await expect(page).toSelect('#attr-2', 'val1');
-			await expect(page).toSelect('#attr-3', 'val1');
+			await shopper.goToProduct( variableProduct.id );
+			
+			for( const attr of attributes ){
+				const selectElem = `#${attr.name.toLowerCase()}`;
+				const value = attr.option;
+
+				await expect(page).toSelect(selectElem, value);
+			}
+			
 			await shopper.addToCart();
 			await expect(page).toMatchElement('.woocommerce-message', {text: 'has been added to your cart.'});
 
 			// Verify cart contents
 			await shopper.goToCart();
-			await shopper.productIsInCart('Variable Product with Three Variations');
+			await shopper.productIsInCart(variableProduct.name);
 		});
 
 		it('should be able to remove variation products from the cart', async () => {
 			// Remove items from cart
-			await shopper.removeFromCart('Variable Product with Three Variations');
+			await shopper.removeFromCart(variableProduct.name);
 			await uiUnblocked();
 			await expect(page).toMatchElement('.cart-empty', {text: 'Your cart is currently empty.'});
 		});
