@@ -202,7 +202,7 @@
 		"css-loader": "3.6.0",
 		"docsify-cli": "4.4.3",
 		"eslint-import-resolver-typescript": "2.4.0",
-		"eslint-import-resolver-webpack": "0.13.0",
+		"eslint-import-resolver-webpack": "0.13.1",
 		"eslint-plugin-import": "2.22.1",
 		"fork-ts-checker-webpack-plugin": "6.2.7",
 		"fs-extra": "8.1.0",
