@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Allows access to tracker snapshot for transparency and debugging.
  *
- * @since x.x.x
+ * @since 5.5.0
  * @package WooCommerce
  */
 class WC_CLI_Tracker_Command {
