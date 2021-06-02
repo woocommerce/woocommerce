@@ -316,7 +316,7 @@ class AssetDataRegistry {
 			$this->handle,
 			'build/wc-settings.js',
 			[],
-			false
+			true
 		);
 	}
 
