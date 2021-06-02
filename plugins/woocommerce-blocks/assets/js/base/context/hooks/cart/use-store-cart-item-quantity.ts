@@ -83,7 +83,6 @@ export const useStoreCartItemQuantity = (
 		},
 		[ cartItemKey ]
 	);
-	const previousIsPending = usePrevious( isPending );
 
 	const removeItem = () => {
 		return cartItemKey
@@ -112,32 +111,30 @@ export const useStoreCartItemQuantity = (
 	] );
 
 	useEffect( () => {
-		if ( typeof previousIsPending === 'undefined' ) {
-			return;
-		}
-		if ( previousIsPending.quantity !== isPending.quantity ) {
-			if ( isPending.quantity ) {
-				dispatchActions.incrementCalculating();
-			} else {
-				dispatchActions.decrementCalculating();
-			}
-		}
-		if ( previousIsPending.delete !== isPending.delete ) {
-			if ( isPending.delete ) {
-				dispatchActions.incrementCalculating();
-			} else {
-				dispatchActions.decrementCalculating();
-			}
+		if ( isPending.delete ) {
+			dispatchActions.incrementCalculating();
+		} else {
+			dispatchActions.decrementCalculating();
 		}
 		return () => {
-			if ( isPending.quantity ) {
-				dispatchActions.decrementCalculating();
-			}
 			if ( isPending.delete ) {
 				dispatchActions.decrementCalculating();
 			}
 		};
-	}, [ dispatchActions, isPending, previousIsPending ] );
+	}, [ dispatchActions, isPending.delete ] );
+
+	useEffect( () => {
+		if ( isPending.quantity || debouncedQuantity !== quantity ) {
+			dispatchActions.incrementCalculating();
+		} else {
+			dispatchActions.decrementCalculating();
+		}
+		return () => {
+			if ( isPending.quantity || debouncedQuantity !== quantity ) {
+				dispatchActions.decrementCalculating();
+			}
+		};
+	}, [ dispatchActions, isPending.quantity, debouncedQuantity, quantity ] );
 
 	return {
 		isPendingDelete: isPending.delete,
