@@ -14,13 +14,14 @@ const {
 const config = require( 'config' );
 
 // Variables for simple product
-let simplePostIdValue;
 const simpleProductName = config.get( 'products.simple.name' );
+let simplePostIdValue;
 
 // Variables for variable product
-let variableProduct;
+const variableProductName = config.get( 'products.variable.name' );
 const variations = config.get( 'products.variations' );
 const attributes = variations[0].attributes;
+let variableProductId;
 
 // Variables for grouped product
 let groupedPostIdValue;
@@ -53,12 +54,12 @@ const runSingleProductPageTest = () => {
 
 	describe('Variable Product Page', () => {
 		beforeAll(async () => {
-			variableProduct = await createVariableProduct();
+			variableProductId = await createVariableProduct();
 		});
 
 		it('should be able to add variation products to the cart', async () => {
 			// Add a product with one set of variations to cart
-			await shopper.goToProduct( variableProduct.id );
+			await shopper.goToProduct( variableProductId );
 			
 			for( const attr of attributes ){
 				const selectElem = `#${attr.name.toLowerCase()}`;
@@ -72,12 +73,12 @@ const runSingleProductPageTest = () => {
 
 			// Verify cart contents
 			await shopper.goToCart();
-			await shopper.productIsInCart(variableProduct.name);
+			await shopper.productIsInCart(variableProductName);
 		});
 
 		it('should be able to remove variation products from the cart', async () => {
 			// Remove items from cart
-			await shopper.removeFromCart(variableProduct.name);
+			await shopper.removeFromCart(variableProductName);
 			await uiUnblocked();
 			await expect(page).toMatchElement('.cart-empty', {text: 'Your cart is currently empty.'});
 		});
