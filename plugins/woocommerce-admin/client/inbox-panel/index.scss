@@ -1,0 +1,40 @@
+.woocommerce-homepage-notes-wrapper {
+	padding-top: $gap-large;
+}
+
+#activity-panel-inbox {
+	margin: 0 $gap-large;
+}
+.woocommerce-layout__inbox-panel-header {
+	padding: $gap-large;
+
+	.woocommerce-homepage-column & {
+		padding: 0 24px;
+	}
+}
+
+.woocommerce-inbox-message-enter {
+	opacity: 0;
+	max-height: 0;
+	transform: translateX(50%);
+}
+
+.woocommerce-inbox-message-enter-active {
+	opacity: 1;
+	max-height: 100vh;
+	transform: translateX(0%);
+	transition: opacity 500ms, transform 500ms, max-height 500ms;
+}
+
+.woocommerce-inbox-message-exit {
+	opacity: 1;
+	max-height: 100vh;
+	transform: translateX(0%);
+}
+
+.woocommerce-inbox-message-exit-active {
+	opacity: 0;
+	max-height: 0;
+	transform: translateX(50%);
+	transition: opacity 500ms, transform 500ms, max-height 500ms;
+}

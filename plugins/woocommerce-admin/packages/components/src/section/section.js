@@ -12,9 +12,10 @@ import { Level } from './context';
  * The section wrapper, used to indicate a sub-section (and change the header level context).
  *
  * @param {Object} props
- * @param {string} props.component
- * @param {Node} props.children
- * @return {Object} -
+ * @param {import('react').ComponentType=} props.component
+ * @param {import('react').ReactNode} props.children Children to render in the tip.
+ * @param {string=} props.className
+ * @return {JSX.Element} -
  */
 export function Section( { component, children, ...props } ) {
 	const Component = component || 'div';
@@ -47,4 +48,8 @@ Section.propTypes = {
 	 * The children inside this section, rendered in the `component`. This increases the context level for the next heading used.
 	 */
 	children: PropTypes.node,
+	/**
+	 * Optional classname
+	 */
+	className: PropTypes.string,
 };

@@ -37,3 +37,4 @@ export { ExperimentalListItem as ListItem } from './experimental-list/experiment
 export { ExperimentalList as List } from './experimental-list/experimental-list';
 export { ExperimentalCollapsibleList as CollapsibleList } from './experimental-list/collapsible-list';
 export { TaskItem } from './experimental-list/task-item';
+export * from './inbox-note';

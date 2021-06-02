@@ -13,8 +13,7 @@ import { Level } from './context';
  * (`h2`, `h3`, …) you can use `<H />` to create "section headings", which look to the parent `<Section />`s for the appropriate
  * heading level.
  *
- * @param {Object} props -
- * @return {Object} -
+ * @type {HTMLElement}
  */
 export function H( props ) {
 	const level = useContext( Level );
