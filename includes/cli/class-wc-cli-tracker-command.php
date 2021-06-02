@@ -26,14 +26,30 @@ class WC_CLI_Tracker_Command {
 
 	/**
 	 * Dump tracker snapshot data to screen.
+	 *
+	 * ## EXAMPLES
+	 *
+	 * wp wc tracker snapshot --format=yaml
+	 * wp wc tracker snapshot --format=json
+	 *
+	 * ## OPTIONS
+	 *
+	 * [--format=<format>]
+	 * : Render output in a particular format, see WP_CLI\Formatter for details.
+	 *
+	 * @see \WP_CLI\Formatter
+	 * @see WC_Tracker::get_tracking_data()
+	 * @param array $args WP-CLI positional arguments.
+	 * @param array $assoc_args WP-CLI associative arguments.
 	 */
-	public static function show_tracker_snapshot() {
+	public static function show_tracker_snapshot( $args, $assoc_args ) {
 		$snapshot_data = WC_Tracker::get_tracking_data();
 
-		// Using print_r as a convenient way to dump the snapshot data to screen in a readable form.
-		WP_CLI::log( print_r( $snapshot_data, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
-		// Could improve this, e.g. flatten keys (join nested fields with `-`) and render as CSV or json.
+		$formatter = new \WP_CLI\Formatter(
+			$assoc_args,
+			array_keys( $snapshot_data )
+		);
 
-		WP_CLI::success( 'Printed tracker data.' );
+		$formatter->display_items( array( $snapshot_data ) );
 	}
 }
