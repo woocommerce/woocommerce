@@ -18,10 +18,11 @@ const QUEUE_OPTION = 'woocommerce_admin_transient_notices_queue';
 const QUEUED_NOTICE_FILTER = 'woocommerce_admin_queued_notice_filter';
 
 function TransientNotices( props ) {
-	const { createNotice, removeNotice: onRemove } = useDispatch(
-		'core/notices2'
-	);
-	const { removeNotice: onRemove2 } = useDispatch( 'core/notices2' );
+	const { removeNotice: onRemove } = useDispatch( 'core/notices' );
+	const {
+		createNotice: createNotice2,
+		removeNotice: onRemove2,
+	} = useDispatch( 'core/notices2' );
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const {
 		currentUser = {},
@@ -59,7 +60,7 @@ function TransientNotices( props ) {
 		getCurrentUserNotices().forEach( ( queuedNotice ) => {
 			const notice = applyFilters( QUEUED_NOTICE_FILTER, queuedNotice );
 
-			createNotice( notice.status, notice.content, {
+			createNotice2( notice.status, notice.content, {
 				onDismiss: () => {
 					dequeueNotice( notice.id );
 				},

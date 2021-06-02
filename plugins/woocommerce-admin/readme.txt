@@ -127,6 +127,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix style regression with the Chart header. #7002
 - Fix styling of the advanced filter operator selection. #7005
 - Fix: Deprecated warnings from select control @wordpress/data-controls. #7007
+- Fix: Notices not dissapearing. #7077
 - Tweak: Only fetch remote payment gateway recommendations when opted in #6964
 - Tweak: Setup checklist copy revert. #7015
 - Update: Task list component with new Experimental Task list. #6849
