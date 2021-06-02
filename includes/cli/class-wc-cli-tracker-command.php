@@ -21,7 +21,7 @@ class WC_CLI_Tracker_Command {
 	 * Registers a command for showing WooCommerce Tracker snapshot data.
 	 */
 	public static function register_commands() {
-		WP_CLI::add_command( 'wc tracker-snapshot', array( 'WC_CLI_Tracker_Command', 'show_tracker_snapshot' ) );
+		WP_CLI::add_command( 'wc tracker snapshot', array( 'WC_CLI_Tracker_Command', 'show_tracker_snapshot' ) );
 	}
 
 	/**
