@@ -370,7 +370,7 @@ class WC_Frontend_Scripts {
 			// Password strength meter. Load in checkout, account login and edit account page.
 			if ( is_edit_account_page() ||
 				is_lost_password_page() ||
-				'yes' === get_option( 'woocommerce_registration_generate_password_overwrite' ) ||
+				'yes' === get_option( 'woocommerce_registration_generate_password_allow_overwrite' ) ||
 				( 'no' === get_option( 'woocommerce_registration_generate_password' ) && ! is_user_logged_in() )
 			) {
 				self::enqueue_script( 'wc-password-strength-meter' );

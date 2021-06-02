@@ -254,11 +254,11 @@ class WC_Checkout {
 			);
 		}
 
-		if ( 'no' === get_option( 'woocommerce_registration_generate_password' ) ) {
+		if ( 'no' === get_option( 'woocommerce_registration_generate_password' ) || 'yes' === get_option( 'woocommerce_registration_generate_password_allow_overwrite' ) ) {
 			$this->fields['account']['account_password'] = array(
 				'type'        => 'password',
 				'label'       => __( 'Create account password', 'woocommerce' ),
-				'required'    => true,
+				'required'    => 'no' === get_option( 'woocommerce_registration_generate_password_allow_overwrite' ),
 				'placeholder' => esc_attr__( 'Password', 'woocommerce' ),
 			);
 		}
