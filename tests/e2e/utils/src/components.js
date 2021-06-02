@@ -223,6 +223,7 @@ const createSimpleProductWithCategory = async ( productName, productPrice, categ
  * Create variable product.
  */
 const createVariableProduct = async () => {
+	// mytodo convert to factory
 	// Create a variable product with attributes (no variations yet)
 	const defaultVariableProduct = config.get( 'products.variable' );
 	const variableProductRepo = VariableProduct.restRepository( client );
