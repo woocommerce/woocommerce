@@ -223,19 +223,19 @@ const createSimpleProductWithCategory = async ( productName, productPrice, categ
  * Create variable product.
  */
 const createVariableProduct = async () => {
-	// Create a Variable Product (no variations yet)
+	// Create a variable product with attributes (no variations yet)
 	const defaultVariableProduct = config.get( 'products.variable' );
 	const variableProductRepo = VariableProduct.restRepository( client );
 	const variableProduct = await variableProductRepo.create( defaultVariableProduct );
 
-	// Create Variations
+	// Create variations for this product
 	const defaultVariations = config.get( 'products.variations' );
 	const variationsRepo = ProductVariation.restRepository( client );
 	for( const variation of defaultVariations ){
 		await variationsRepo.create( variableProduct.id, variation );
 	}
 
-	return variableProduct.id;
+	return variableProduct;
 };
 
 /**
