@@ -18,6 +18,7 @@ import { useMemo, useCallback } from '@wordpress/element';
 import { RecommendedPaymentGatewayList } from './components/RecommendedPaymentGatewayList';
 import { PaymentMethod } from './components/PaymentMethod';
 import { WCPayMethodCard } from '../components/WCPayMethodCard';
+import './components/BacsPaymentGatewaySetup';
 
 const RECOMMENDED_GATEWAY_KEYS = [
 	'woocommerce_payments',
@@ -73,16 +74,6 @@ export const RemotePayments = ( { query } ) => {
 		};
 	} );
 
-	const recommendedMethod = useMemo( () => {
-		for ( const key in RECOMMENDED_GATEWAY_KEYS ) {
-			const gateway = paymentGatewayRecommendations.get( key );
-			if ( gateway && gateway.visible ) {
-				return gateway;
-			}
-		}
-		return null;
-	}, [ paymentGatewayRecommendations ] );
-
 	const enablePaymentGateway = ( paymentGatewayKey ) => {
 		if ( ! paymentGatewayKey ) {
 			return;
@@ -123,6 +114,16 @@ export const RemotePayments = ( { query } ) => {
 			payment_method: methodName,
 		} );
 	}, [] );
+
+	const recommendedPaymentGateway = useMemo( () => {
+		for ( const key in RECOMMENDED_GATEWAY_KEYS ) {
+			const gateway = paymentGatewayRecommendations.get( key );
+			if ( gateway && gateway.visible ) {
+				return gateway;
+			}
+		}
+		return null;
+	}, [ paymentGatewayRecommendations ] );
 
 	const currentPaymentGateway = useMemo( () => {
 		if (
@@ -176,23 +177,27 @@ export const RemotePayments = ( { query } ) => {
 
 			{ !! enabledPaymentGatewayRecommendations.size && (
 				<RecommendedPaymentGatewayList
-					recommendedMethod={ recommendedMethod }
-					heading={ __( 'Enabled payment methods', 'wc-admin' ) }
-					installedPaymentGateways={ installedPaymentGateways }
-					recommendedPaymentGateways={ Array.from(
-						enabledPaymentGatewayRecommendations.values()
+					heading={ __(
+						'Enabled payment methods',
+						'woocommerce-admin'
 					) }
+					recommendedPaymentGateway={ recommendedPaymentGateway }
+					recommendedPaymentGateways={
+						enabledPaymentGatewayRecommendations
+					}
 				/>
 			) }
 
 			{ !! additionalPaymentGatewayRecommendations.size && (
 				<RecommendedPaymentGatewayList
-					recommendedMethod={ recommendedMethod }
-					heading={ __( 'Additional payment methods', 'wc-admin' ) }
-					installedPaymentGateways={ installedPaymentGateways }
-					recommendedPaymentGateways={ Array.from(
-						additionalPaymentGatewayRecommendations.values()
+					heading={ __(
+						'Additional payment methods',
+						'woocommerce-admin'
 					) }
+					recommendedPaymentGateways={
+						additionalPaymentGatewayRecommendations
+					}
+					recommendedPaymentGateway={ recommendedPaymentGateway }
 					markConfigured={ markConfigured }
 				/>
 			) }

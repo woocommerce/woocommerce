@@ -119,6 +119,7 @@ export const PaymentConnect = ( {
 					defaultSubmit: handleSubmit,
 					defaultFields: fields,
 					markConfigured: () => markConfigured( id ),
+					paymentGateway,
 				} }
 				id={ id }
 			/>

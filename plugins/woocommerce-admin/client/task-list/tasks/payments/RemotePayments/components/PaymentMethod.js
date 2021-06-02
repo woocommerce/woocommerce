@@ -28,7 +28,7 @@ export const PaymentMethod = ( {
 	method,
 	recordConnectStartEvent,
 } ) => {
-	const { key, plugins, title } = method;
+	const { key, plugins = [], title } = method;
 	const slot = useSlot( `woocommerce_remote_payment_${ key }` );
 	const hasFills = Boolean( slot?.fills?.length );
 	const [ isPluginLoaded, setIsPluginLoaded ] = useState( false );
@@ -139,7 +139,7 @@ export const PaymentMethod = ( {
 	};
 
 	const stepperPending =
-		! installStep.isComplete ||
+		! installStep?.isComplete ||
 		isOptionUpdating ||
 		isPaymentGatewayResolving ||
 		! isPluginLoaded;
@@ -149,7 +149,7 @@ export const PaymentMethod = ( {
 			<Stepper
 				isVertical
 				isPending={ stepperPending }
-				currentStep={ installStep.isComplete ? 'connect' : 'install' }
+				currentStep={ installStep?.isComplete ? 'connect' : 'install' }
 				steps={ [ installStep, connectStep ] }
 				{ ...props }
 			/>
@@ -166,6 +166,8 @@ export const PaymentMethod = ( {
 							defaultStepper: DefaultStepper,
 							defaultInstallStep: installStep,
 							defaultConnectStep: connectStep,
+							markConfigured: () => markConfigured( key ),
+							paymentGateway,
 						} }
 						id={ key }
 					/>

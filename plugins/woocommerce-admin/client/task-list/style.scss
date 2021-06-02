@@ -223,6 +223,10 @@
 			max-width: 70px;
 		}
 	}
+
+	.components-card__divider:last-child {
+		display: none;
+	}
 }
 
 .woocommerce-task-payment-method {

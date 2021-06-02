@@ -92,6 +92,15 @@ class DefaultPaymentGateways {
 					self::get_rules_for_cbd( false ),
 				),
 			),
+			array(
+				'key'        => 'bacs',
+				'title'      => __( 'Direct bank transfer', 'woocommerce-admin' ),
+				'content'    => __( 'Take payments via bank transfer.', 'woocommerce-admin' ),
+				'image'      => plugins_url( 'images/onboarding/bacs.svg', WC_ADMIN_PLUGIN_FILE ),
+				'is_visible' => array(
+					self::get_rules_for_cbd( false ),
+				),
+			),
 		);
 	}
 
