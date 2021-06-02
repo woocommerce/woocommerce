@@ -18,14 +18,14 @@ export type ListProps = {
 
 export const ExperimentalList: React.FC< ListProps > = ( {
 	children,
-	listType = 'ul',
+	listType,
 	animation = 'none',
 	// Allow passing any other property overrides that are legal on an HTML element
 	...otherProps
 } ) => {
 	return (
 		<TransitionGroup
-			component={ listType }
+			component={ listType || 'ul' }
 			className="woocommerce-experimental-list"
 			{ ...otherProps }
 		>

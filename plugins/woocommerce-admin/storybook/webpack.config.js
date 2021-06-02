@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
-const MiniCssExtractPlugin = require( '@automattic/mini-css-extract-plugin-with-rtl' );
 const path = require( 'path' );
+const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 
 /**
  * External dependencies
@@ -21,15 +21,8 @@ const wcAdminPackages = [
 	'experimental',
 ];
 
-module.exports = ( { config: storybookConfig } ) => {
-	storybookConfig.module.rules.push(
-		{
-			test: /\/stories\/.+\.js$/,
-			loaders: [ require.resolve( '@storybook/source-loader' ) ],
-			enforce: 'pre',
-		},
-		...wcAdminWebpackConfig.module.rules
-	);
+module.exports = ( storybookConfig ) => {
+	storybookConfig.module.rules.push( ...wcAdminWebpackConfig.module.rules );
 
 	storybookConfig.resolve.alias = wcAdminWebpackConfig.resolve.alias;
 
@@ -39,15 +32,40 @@ module.exports = ( { config: storybookConfig } ) => {
 		] = path.resolve( __dirname, `../packages/${ name }/src` );
 	} );
 
+	storybookConfig.resolve.alias[ '@woocommerce/settings' ] = path.resolve(
+		__dirname,
+		`../client/wc-admin-settings/index`
+	);
+
 	storybookConfig.resolve.modules = [
 		path.join( __dirname, '../client' ),
 		'node_modules',
 	];
 
 	storybookConfig.plugins.push(
-		new MiniCssExtractPlugin( {
-			filename: '[name].css',
-		} )
+		...wcAdminWebpackConfig.plugins,
+		new CopyWebpackPlugin( [
+			{
+				from: path.resolve( __dirname, 'wordpress/css' ),
+				to: 'wordpress/css',
+			},
+			{
+				from: path.resolve(
+					__dirname,
+					`../packages/components/build-style/*.css`
+				),
+				to: `./component-css`,
+				flatten: true,
+			},
+			{
+				from: path.resolve(
+					__dirname,
+					`../packages/experimental/build-style/*.css`
+				),
+				to: `./experimental-css`,
+				flatten: true,
+			},
+		] )
 	);
 
 	return storybookConfig;

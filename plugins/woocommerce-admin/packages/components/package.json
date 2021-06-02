@@ -69,5 +69,9 @@
 	},
 	"publishConfig": {
 		"access": "public"
+	},
+	"devDependencies": {
+		"@storybook/addon-console": "^1.2.3",
+		"@storybook/react": "^6.2.9"
 	}
 }

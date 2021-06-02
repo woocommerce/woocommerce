@@ -132,6 +132,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Update: Task list component with new Experimental Task list. #6849
 - Update: Experimental task list import to the experimental package. #6950
 - Update: Redirect to WC Home after setting up a payment method #6891
+- Dev: Remove react-docgen docs in favor of Storybook #7055
 - Update: Hook up payments gateway data store #7038
 - Update: Update remote payment docs gateway methods #7079
 

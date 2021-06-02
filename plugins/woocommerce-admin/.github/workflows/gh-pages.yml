@@ -1,0 +1,28 @@
+name: Publish docs
+on:
+    push:
+        branches:
+            - main
+jobs:
+    deploy:
+        runs-on: ubuntu-18.04
+        steps:
+            - uses: actions/checkout@v2
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v2-beta
+              with:
+                  node-version: '14'
+
+            - name: Build
+              run: |
+                  npm i
+                  npm run build
+                  npm run docs
+
+            - name: Deploy docs
+              uses: peaceiris/actions-gh-pages@v3
+              with:
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
+                  publish_branch: gh-pages
+                  publish_dir: ./docs

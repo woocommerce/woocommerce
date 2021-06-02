@@ -1,12 +1,16 @@
 /**
  * External dependencies
  */
-import { AnimationSlider } from '@woocommerce/components';
 import { Component } from '@wordpress/element';
 
+/**
+ * Internal dependencies
+ */
+import AnimationSlider from '../';
+
 class BasicExample extends Component {
-	constructor() {
-		super( arguments );
+	constructor( props ) {
+		super( props );
 		this.state = {
 			pages: [ 44, 55, 66, 77, 88 ],
 			page: 0,

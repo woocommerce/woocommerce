@@ -1,4 +1,1 @@
-Components
-==========
-
-This folder contains components used in `woocommerce-admin`. They are divided in [analytics components](components/analytics), only available internally, and [package components](components/packages), which are available for plugins and third-party developers.
+[storybook](storybook/index.html ':include :type=iframe width=100% height=100%')

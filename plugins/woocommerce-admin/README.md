@@ -61,6 +61,36 @@ Run a single test by adding the path to the file name:
 npx wc-e2e test:e2e-dev tests/e2e/specs/activate-and-setup/complete-onboarding-wizard.test.ts
 ```
 
+### Documentation
+
+There is documentation in 2 forms available in the repo. A static set of documentation supported by docsify and also a Storybook containing component documentation for `@woocommerce/components`.
+
+To view the docsify docs locally you can do:
+
+```
+npm install
+cd docs
+npx docsify serve
+```
+
+When deployed the docsify docs also host an embedded version of the storybook docs. To generate that and test it locally in docsify you'll need to run:
+
+```
+npm install
+npm run docs
+cd docs
+npx docsify serve
+```
+
+Then navigate to `Components` from the left hand menu in the docs.
+
+If you would like to view the storybook docs hosted standalone, then you can run:
+
+```
+npm install
+npm run storybook
+```
+
 ## Common Issues
 
 If you're encountering any issue setting things up, chances are we have been there too. Please have a look at our [wiki](https://github.com/woocommerce/woocommerce-admin/wiki/Common-Issues) for a list of common problems.

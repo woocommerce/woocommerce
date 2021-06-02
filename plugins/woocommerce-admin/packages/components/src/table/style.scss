@@ -28,15 +28,14 @@
 	}
 
 	$row-text-height: 1.1375rem;
-	$row-height: #{$gap * 2} + #{$row-text-height} + 1px;
-	$header-row-height: #{$gap-smaller * 2} + #{$row-text-height} + 1px;
+	$row-height: '#{$gap * 2} + #{$row-text-height} + 1px';
+	$header-row-height: '#{$gap-smaller * 2} + #{$row-text-height} + 1px';
 	&.is-empty {
 		align-items: center;
 		background: $gray-100;
 		color: $gray-700;
 		display: flex;
-		// Default to 5 rows for browsers not supporting custom properties (IE11)
-		height: calc(#{$header-row-height} + ( #{$row-height} ) * 5);
+
 		height: calc(#{$header-row-height} + ( #{$row-height} ) * var(--number-of-rows));
 		justify-content: center;
 		padding: $gap;
