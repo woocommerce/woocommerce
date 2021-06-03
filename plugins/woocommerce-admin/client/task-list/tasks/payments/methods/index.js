@@ -13,7 +13,6 @@ import {
  */
 import Bacs from './bacs';
 import BacsLogo from '../images/bacs';
-import WCPayLogo from '../images/wcpay';
 import { PayUIndiaLogo } from '../images/payu-india';
 import Stripe from './stripe';
 import Square from './square';
@@ -577,7 +576,12 @@ export function getPaymentMethods( {
 					<WCPayUsageModal />
 				</>
 			),
-			before: <WCPayLogo />,
+			before: (
+				<img
+					src={ wcAdminAssetUrl + 'onboarding/wcpay.png' }
+					alt={ __( 'WooCommerce Payments', 'woocommerce-admin' ) }
+				/>
+			),
 			onClick: ( resolve, reject ) => {
 				return installActivateAndConnectWcpay(
 					reject,

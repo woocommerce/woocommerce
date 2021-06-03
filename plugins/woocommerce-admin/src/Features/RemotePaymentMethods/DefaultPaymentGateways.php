@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Admin\Features\RemotePaymentMethods;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks;
 
 /**
@@ -126,6 +127,21 @@ class DefaultPaymentGateways {
 				),
 			),
 			array(
+				'key'         => 'woocommerce_payments',
+				'title'       => __( 'WooCommerce Payments', 'woocommerce-admin' ),
+				'content'     => __(
+					'Manage transactions without leaving your WordPress Dashboard. Only with WooCommerce Payments.',
+					'woocommerce-admin'
+				),
+				'image'       => plugins_url( 'images/onboarding/wcpay.svg', WC_ADMIN_PLUGIN_FILE ),
+				'plugins'     => array( 'woocommerce-payments' ),
+				'description' => 'Try the new way to get paid. Securely accept credit and debit cards on your site. Manage transactions without leaving your WordPress dashboard. Only with WooCommerce Payments.',
+				'is_visible'  => array(
+					self::get_rules_for_cbd( false ),
+					self::get_rules_for_countries( self::get_wcpay_countries() ),
+				),
+			),
+			array(
 				'key'        => 'razorpay',
 				'title'      => __( 'Razorpay', 'woocommerce-admin' ),
 				'content'    => __( 'The official Razorpay extension for WooCommerce allows you to accept credit cards, debit cards, netbanking, wallet, and UPI payments.', 'woocommerce-admin' ),
@@ -138,9 +154,22 @@ class DefaultPaymentGateways {
 						'operation' => '!=',
 					),
 					self::get_rules_for_cbd( false ),
+
 				),
 			),
 		);
+	}
+
+	/**
+	 * Get array of countries supported by WCPay depending on feature flag.
+	 *
+	 * @return array Array of countries.
+	 */
+	public static function get_wcpay_countries() {
+		$countries               = array( 'US', 'PR' );
+		$countries_international = array( 'AU', 'CA', 'DE', 'ES', 'FR', 'GB', 'IE', 'IT', 'NZ' );
+
+		return Features::is_enabled( 'wcpay/support-international-countries' ) ? array_merge( $countries, $countries_international ) : $countries;
 	}
 
 	/**

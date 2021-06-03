@@ -38,7 +38,7 @@ const TosPrompt = () =>
 	} );
 
 const ButtonComponent = ( {
-	method: { id: methodKey, isConfigured, loading, onClick },
+	method: { key: methodKey, isConfigured, loading, onClick },
 	isEnabled,
 } ) => (
 	<PaymentAction

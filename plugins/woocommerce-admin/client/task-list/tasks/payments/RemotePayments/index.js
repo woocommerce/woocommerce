@@ -35,6 +35,7 @@ export const RemotePayments = ( { query } ) => {
 		installedPaymentGateways,
 		paymentGatewayRecommendations,
 		isResolving,
+		wcPayGateway,
 	} = useSelect( ( select ) => {
 		const paymentGateways = select( PAYMENT_GATEWAYS_STORE_NAME )
 			.getPaymentGateways()
@@ -45,10 +46,24 @@ export const RemotePayments = ( { query } ) => {
 
 		const enabled = new Map();
 		const additional = new Map();
+		let wcPay = null;
 		const recommendations = select( ONBOARDING_STORE_NAME )
 			.getPaymentMethodRecommendations()
 			.reduce( ( map, gateway ) => {
 				map.set( gateway.key, gateway );
+
+				// WCPay is handled separately when not installed and configured
+				if (
+					gateway.key === 'woocommerce_payments' &&
+					! (
+						paymentGateways[ gateway.key ] &&
+						! paymentGateways[ gateway.key ].needs_setup
+					)
+				) {
+					wcPay = gateway;
+					return map;
+				}
+
 				if (
 					paymentGateways[ gateway.key ] &&
 					paymentGateways[ gateway.key ].enabled
@@ -57,6 +72,7 @@ export const RemotePayments = ( { query } ) => {
 				} else {
 					additional.set( gateway.key, gateway );
 				}
+
 				return map;
 			}, new Map() );
 
@@ -71,6 +87,7 @@ export const RemotePayments = ( { query } ) => {
 				'getPaymentMethodRecommendations'
 			),
 			paymentGatewayRecommendations: recommendations,
+			wcPayGateway: wcPay,
 		};
 	} );
 
@@ -118,7 +135,7 @@ export const RemotePayments = ( { query } ) => {
 	const recommendedPaymentGateway = useMemo( () => {
 		for ( const key in RECOMMENDED_GATEWAY_KEYS ) {
 			const gateway = paymentGatewayRecommendations.get( key );
-			if ( gateway && gateway.visible ) {
+			if ( gateway ) {
 				return gateway;
 			}
 		}
@@ -150,16 +167,6 @@ export const RemotePayments = ( { query } ) => {
 				markConfigured={ markConfigured }
 				recordConnectStartEvent={ recordConnectStartEvent }
 			/>
-		);
-	}
-
-	const wcPayGateway = additionalPaymentGatewayRecommendations.get(
-		'woocommerce_payments'
-	);
-
-	if ( wcPayGateway ) {
-		additionalPaymentGatewayRecommendations.delete(
-			'woocommerce_payments'
 		);
 	}
 

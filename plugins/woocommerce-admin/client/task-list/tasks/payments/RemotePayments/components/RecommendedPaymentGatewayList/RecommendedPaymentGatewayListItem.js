@@ -29,7 +29,6 @@ export const RecommendedPaymentGatewayListItem = ( {
 		key,
 		plugins = [],
 		title,
-		is_visible: isVisible,
 		loading,
 	} = paymentGateway;
 
@@ -40,10 +39,6 @@ export const RecommendedPaymentGatewayListItem = ( {
 			select( PAYMENT_GATEWAYS_STORE_NAME ).getPaymentGateway( key ) || {}
 		);
 	} );
-
-	if ( ! isVisible ) {
-		return null;
-	}
 
 	const {
 		enabled: isEnabled = false,

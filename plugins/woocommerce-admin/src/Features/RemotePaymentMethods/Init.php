@@ -38,7 +38,15 @@ class Init {
 			$methods[] = $method;
 		}
 
-		return $methods;
+		return array_values(
+			array_filter(
+				$methods,
+				function( $method ) {
+					return ! property_exists( $method, 'is_visible' ) || $method->is_visible;
+				}
+			)
+		);
+
 	}
 
 	/**
