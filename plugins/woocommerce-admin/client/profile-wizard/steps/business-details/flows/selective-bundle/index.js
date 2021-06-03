@@ -505,7 +505,7 @@ class BusinessDetails extends Component {
 
 BusinessDetails.contextType = CurrencyContext;
 
-export const SelectiveFeaturesBusinessStep = compose(
+export const BusinessFeaturesList = compose(
 	withSelect( ( select ) => {
 		const { getSettings, getSettingsError } = select( SETTINGS_STORE_NAME );
 		const { getProfileItems, getOnboardingError } = select(

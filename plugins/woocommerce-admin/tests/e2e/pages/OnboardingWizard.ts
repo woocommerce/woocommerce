@@ -1,5 +1,4 @@
 import { Page } from 'puppeteer';
-import { BenefitsSection } from '../sections/onboarding/BenefitsSection';
 import { BusinessSection } from '../sections/onboarding/BusinessSection';
 import { IndustrySection } from '../sections/onboarding/IndustrySection';
 import { ProductTypeSection } from '../sections/onboarding/ProductTypesSection';
@@ -15,7 +14,6 @@ export class OnboardingWizard extends BasePage {
 	productTypes: ProductTypeSection;
 	business: BusinessSection;
 	themes: ThemeSection;
-	benefits: BenefitsSection;
 
 	constructor( page: Page ) {
 		super( page );
@@ -24,7 +22,6 @@ export class OnboardingWizard extends BasePage {
 		this.productTypes = new ProductTypeSection( page );
 		this.business = new BusinessSection( page );
 		this.themes = new ThemeSection( page );
-		this.benefits = new BenefitsSection( page );
 	}
 
 	async skipStoreSetup() {

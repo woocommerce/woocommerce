@@ -19,7 +19,6 @@ import {
 	PLUGINS_STORE_NAME,
 	withPluginsHydration,
 	QUERY_DEFAULTS,
-	SETTINGS_STORE_NAME,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { getAdminLink } from '@woocommerce/wc-admin-settings';
@@ -27,7 +26,6 @@ import { getAdminLink } from '@woocommerce/wc-admin-settings';
 /**
  * Internal dependencies
  */
-import { BenefitsLayout } from './steps/benefits';
 import { BusinessDetailsStep } from './steps/business-details';
 import Industry from './steps/industry';
 import ProductTypes from './steps/product-types';
@@ -35,7 +33,6 @@ import ProfileWizardHeader from './header';
 import StoreDetails from './steps/store-details';
 import Theme from './steps/theme';
 import './style.scss';
-import { isSelectiveBundleInstallSegmentation } from './steps/business-details/data/segmentation';
 
 const STEPS_FILTER = 'woocommerce_admin_profile_wizard_steps';
 
@@ -96,12 +93,7 @@ class ProfileWizard extends Component {
 	}
 
 	getSteps() {
-		const {
-			profileItems,
-			query,
-			selectiveBundleInstallSegmentation,
-		} = this.props;
-		const { step } = query;
+		const { profileItems } = this.props;
 		const steps = [];
 
 		steps.push( {
@@ -129,9 +121,7 @@ class ProfileWizard extends Component {
 				profileItems.product_types !== null,
 		} );
 		steps.push( {
-			key: selectiveBundleInstallSegmentation
-				? 'business-features'
-				: 'business-details',
+			key: 'business-features',
 			container: BusinessDetailsStep,
 			label: __( 'Business Details', 'woocommerce-admin' ),
 			isComplete:
@@ -146,18 +136,6 @@ class ProfileWizard extends Component {
 				profileItems.hasOwnProperty( 'theme' ) &&
 				profileItems.theme !== null,
 		} );
-
-		if (
-			! selectiveBundleInstallSegmentation &&
-			( ! this.cachedActivePlugins.includes( 'woocommerce-services' ) ||
-				! this.cachedActivePlugins.includes( 'jetpack' ) ||
-				step === 'benefits' )
-		) {
-			steps.push( {
-				key: 'benefits',
-				container: BenefitsLayout,
-			} );
-		}
 
 		return applyFilters( STEPS_FILTER, steps );
 	}
@@ -300,20 +278,8 @@ export default compose(
 			getPluginsError,
 			isJetpackConnected,
 		} = select( PLUGINS_STORE_NAME );
-		const { general: generalSettings } = select(
-			SETTINGS_STORE_NAME
-		).getSettings( 'general' );
 
 		const profileItems = getProfileItems();
-		const country = generalSettings.woocommerce_default_country || null;
-		const industrySlugs = ( profileItems.industry || [] ).map(
-			( industry ) => industry.slug
-		);
-
-		const selectiveBundleInstallSegmentation = isSelectiveBundleInstallSegmentation(
-			country,
-			industrySlugs
-		);
 
 		const notesQuery = {
 			page: 1,
@@ -334,7 +300,6 @@ export default compose(
 			notes,
 			profileItems,
 			activePlugins,
-			selectiveBundleInstallSegmentation,
 		};
 	} ),
 	withDispatch( ( dispatch ) => {

@@ -63,10 +63,6 @@
 			margin-right: auto;
 		}
 
-		&.benefits {
-			text-align: center;
-		}
-
 		@include breakpoint( '<782px' ) {
 			padding-left: $gap;
 			padding-right: $gap;
@@ -154,51 +150,6 @@
 		&:last-child p {
 			border-bottom: 0;
 			margin-bottom: 0;
-		}
-	}
-
-	.woocommerce-profile-wizard__benefits {
-		display: grid;
-		grid-gap: $gap;
-		grid-auto-columns: 1fr;
-		grid-auto-flow: column;
-
-		@include breakpoint( '<960px' ) {
-			justify-items: center;
-			grid-auto-flow: row;
-		}
-	}
-
-	.woocommerce-profile-wizard__benefits-logo {
-		display: block;
-		margin: 0 auto;
-	}
-
-	.woocommerce-profile-wizard__benefit-card {
-		display: flex;
-		flex-direction: column;
-		justify-self: center;
-		background: $studio-gray-0;
-		width: 100%;
-		max-width: 295px;
-		overflow: hidden;
-		text-align: left;
-
-		.woocommerce-profile-wizard__benefit-card-title {
-			font-size: 16px;
-			font-weight: 600;
-			margin-top: 0;
-			margin-bottom: $gap-smaller;
-		}
-
-		.woocommerce-profile-wizard__benefit-card-content {
-			padding: #{$gap-small * 2} #{$gap * 2} #{$gap * 2} #{$gap * 2};
-
-			p {
-				padding: 0;
-				margin: 0;
-				font-size: 14px;
-			}
 		}
 	}
 
@@ -343,17 +294,6 @@
 	}
 }
 
-.woocommerce-profile-wizard__benefits-card.components-card {
-	display: inline-block;
-	max-width: 100%;
-	text-align: center;
-
-	.woocommerce-profile-wizard__benefits-install-notice {
-		font-size: 14px;
-		color: $studio-gray-40;
-	}
-}
-
 .woocommerce-profile-wizard__plugins-card {
 	.woocommerce-profile-wizard__plugins-actions {
 		text-align: left;
@@ -422,31 +362,5 @@
 
 	.woocommerce-business-extensions__popover-wrapper {
 		margin-left: auto;
-	}
-
-	.woocommerce-business-extensions__benefits {
-		padding: 4px;
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		max-width: 100%;
-		min-width: 580px;
-		font-size: 14px;
-
-		@include breakpoint( '<782px' ) {
-			grid-template-columns: 1fr;
-			min-width: 300px;
-		}
-
-		.woocommerce-business-extensions__benefit {
-			padding: 10px;
-			font-size: 14px;
-			display: inline-flex;
-
-			.woocommerce-business-extensions__benefit__check-icon {
-				fill: var(--wp-admin-theme-color);
-				margin-right: $gap;
-				min-width: 24px;
-			}
-		}
 	}
 }
