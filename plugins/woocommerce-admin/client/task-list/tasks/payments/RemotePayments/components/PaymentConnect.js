@@ -21,7 +21,7 @@ export const PaymentConnect = ( {
 } ) => {
 	const {
 		id,
-		oauth_connection_url: oAuthConnectionUrl,
+		connection_url: connectionUrl,
 		setup_help_text: setupHelpText,
 		required_settings_keys: settingKeys,
 		settings,
@@ -126,11 +126,11 @@ export const PaymentConnect = ( {
 		);
 	}
 
-	if ( oAuthConnectionUrl ) {
+	if ( connectionUrl ) {
 		return (
 			<>
 				{ helpText }
-				<Button isPrimary href={ oAuthConnectionUrl }>
+				<Button isPrimary href={ connectionUrl }>
 					{ __( 'Connect', 'woocommerce-admin' ) }
 				</Button>
 			</>

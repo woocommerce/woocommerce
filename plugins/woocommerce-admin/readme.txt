@@ -98,6 +98,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Add: Add COD method to default payment gateway recommendations #7057
 - Add: Add BACS as default fallback payment gateway #7073
 - Add: A/B test of progressive checklist features. #7089
+- Add: Add payment gateway return URL and action #7095
 - Dev: Update package-lock to fix versioning of local packages. #6843
 - Dev: Use rule processing for remote payment methods #6830
 - Dev: Update E2E jest config, so it correctly creates screenshots on failure. #6858

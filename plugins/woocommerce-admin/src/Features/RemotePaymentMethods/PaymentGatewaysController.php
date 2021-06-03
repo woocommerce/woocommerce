@@ -17,6 +17,7 @@ class PaymentGatewaysController {
 	 */
 	public static function init() {
 		add_filter( 'woocommerce_rest_prepare_payment_gateway', array( __CLASS__, 'extend_response' ), 10, 3 );
+		add_filter( 'admin_init', array( __CLASS__, 'possibly_do_connection_return_action' ) );
 	}
 
 	/**
@@ -34,8 +35,9 @@ class PaymentGatewaysController {
 		$data['post_install_scripts'] = self::get_post_install_scripts( $gateway );
 		$data['settings_url']         = admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . strtolower( $gateway->id ) );
 
-		if ( method_exists( $gateway, 'get_oauth_connection_url' ) ) {
-			$data['oauth_connection_url'] = $gateway->get_oauth_connection_url();
+		if ( method_exists( $gateway, 'get_connection_url' ) ) {
+			$return_url             = wc_admin_url( '&task=payments&connection-return=' . strtolower( $gateway->id ) );
+			$data['connection_url'] = $gateway->get_connection_url( $return_url );
 		}
 
 		if ( method_exists( $gateway, 'get_setup_help_text' ) ) {
@@ -72,5 +74,27 @@ class PaymentGatewaysController {
 		}
 
 		return $scripts;
+	}
+
+	/**
+	 * Call an action after a gating has been successfully returned.
+	 */
+	public static function possibly_do_connection_return_action() {
+		// phpcs:disable WordPress.Security.NonceVerification
+		if (
+			! isset( $_GET['page'] ) ||
+			'wc-admin' !== $_GET['page'] ||
+			! isset( $_GET['task'] ) ||
+			'payments' !== $_GET['task'] ||
+			! isset( $_GET['connection-return'] )
+		) {
+			return;
+		}
+
+		$gateway_id = sanitize_text_field( wp_unslash( $_GET['connection-return'] ) );
+
+		// phpcs:enable WordPress.Security.NonceVerification
+
+		do_action( 'woocommerce_admin_payment_gateway_connection_return', $gateway_id );
 	}
 }

@@ -48,7 +48,7 @@ Name | Return | Default | Description
 --- | --- | --- | ---
 `needs_setup()` | boolean | `false` | Used to determine if the gateway still requires setup in order to be used.
 `get_required_settings_keys()` | array | `[]` | An array of keys for fields required to properly configure the gateway.  The keys must match those of already registered form fields in the payment gateway.
-`get_oauth_connection_url()` | string | `null` | The oAuth connection URL to be used to quickly connect a payment gateway provider.  If provided, this will be used in place of required setting fields.
+`get_connection_url()` | string | `null` | The connection URL to be used to quickly connect a payment gateway provider. If provided, this will be used in place of required setting fields. 
 `get_post_install_script_handles()` | array | `[]` | An array of script handles previously registered with `wp_register_script` to enqueue after the payment gateway has been installed.  This is primarily used to `SlotFill` the payment connection step, but can allow any script to be added to assist in payment gateway setup.
 `get_setup_help_text()` | string | `null` | Help text to be shown above the connection step's submit button.
 
