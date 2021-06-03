@@ -87,6 +87,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Add: Consume remote payment methods on frontend #6867
 - Add: Extend payment gateways REST endpoint #6919
 - Add: Add remote payment gateway recommendations initial docs #6962
+- Add: Add loading placeholders for payment gateways task #7123
 - Add: Note date range logic for GivingFeedback, and InsightFirstSale note. #6969
 - Add: Add transient notices feature #6809
 - Add: Add transformers in remote inbox notifications #6948

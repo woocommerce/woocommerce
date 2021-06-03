@@ -21,7 +21,8 @@ import { useSlot } from '@woocommerce/experimental';
  * Internal dependencies
  */
 import { createNoticesFromResponse } from '~/lib/notices';
-import { PaymentConnect } from './PaymentConnect';
+import { PaymentConnect } from '../PaymentConnect';
+import './PaymentMethod.scss';
 
 export const PaymentMethod = ( {
 	markConfigured,

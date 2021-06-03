@@ -10,10 +10,22 @@
 		flex-shrink: 0;
 
 		img,
-		svg {
+		svg,
+		.is-placeholder {
 			margin: auto;
 			max-width: 100px;
 			display: block;
+		}
+
+		.is-placeholder {
+			height: 36px;
+		}
+	}
+
+	.woocommerce-task-payment__footer {
+		.is-placeholder {
+			width: 70px;
+			height: 36px;
 		}
 	}
 
@@ -77,5 +89,14 @@
 			order: 2;
 			text-align: right;
 		}
+	}
+}
+
+.woocommerce-recommended-payment-gateway-list-placeholder {
+	.is-placeholder {
+		@include placeholder();
+		display: inline-block;
+		max-width: 240px;
+		width: 80%;
 	}
 }

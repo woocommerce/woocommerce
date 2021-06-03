@@ -111,12 +111,16 @@ export const Layout = ( {
 	};
 
 	const renderTaskList = () => {
-		if ( requestingTaskList ) {
+		const isSingleTask = Boolean( query.task );
+
+		if ( requestingTaskList && ! isSingleTask ) {
 			return <TaskListPlaceholder />;
 		}
 
 		return (
-			<Suspense fallback={ <TaskListPlaceholder /> }>
+			<Suspense
+				fallback={ isSingleTask ? null : <TaskListPlaceholder /> }
+			>
 				<TaskList query={ query } userPreferences={ userPrefs } />
 			</Suspense>
 		);
