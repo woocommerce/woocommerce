@@ -18,8 +18,7 @@ import {
 	waitForSelectorWithoutThrow,
 } from './page-utils';
 import factories from './factories';
-import { Coupon, ProductVariation } from '@woocommerce/api';
-import { variableProductFactory } from './factories/variable-product';
+import { Coupon } from '@woocommerce/api';
 
 const client = factories.api.withDefaultPermalinks;
 const config = require( 'config' );
