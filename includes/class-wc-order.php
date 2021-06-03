@@ -71,6 +71,7 @@ class WC_Order extends WC_Abstract_Order {
 			'state'      => '',
 			'postcode'   => '',
 			'country'    => '',
+			'phone'      => '',
 		),
 		'payment_method'       => '',
 		'payment_method_title' => '',
@@ -743,6 +744,16 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
+	 * Get shipping phone.
+	 *
+	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @return string
+	 */
+	public function get_shipping_phone( $context = 'view' ) {
+		return $this->get_address_prop( 'phone', 'shipping', $context );
+	}
+
+	/**
 	 * Get the payment method.
 	 *
 	 * @param  string $context What the value is for. Valid values are view and edit.
@@ -1230,6 +1241,16 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	public function set_shipping_country( $value ) {
 		$this->set_address_prop( 'country', 'shipping', $value );
+	}
+
+	/**
+	 * Set shipping phone.
+	 *
+	 * @param string $value Shipping phone.
+	 * @throws WC_Data_Exception Throws exception when invalid data is found.
+	 */
+	public function set_shipping_phone( $value ) {
+		$this->set_address_prop( 'phone', 'shipping', $value );
 	}
 
 	/**
