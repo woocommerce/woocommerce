@@ -18,14 +18,10 @@ View [the full Component documentation](https://woocommerce.github.io/woocommerc
 /**
  * Woocommerce dependencies
  */
-import { Card } from '@woocommerce/components';
+import { Badge } from '@woocommerce/components';
 
-export default function MyCard() {
-	return (
-		<Card title="Store Performance" description="Key performance metrics">
-			<p>Your stuff in a Card.</p>
-		</Card>
-	);
+export default function MyBadge() {
+	return <Badge count={ 15 } />;
 }
 ```
 

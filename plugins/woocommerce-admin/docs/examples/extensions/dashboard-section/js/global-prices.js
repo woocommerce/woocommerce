@@ -6,7 +6,8 @@ import moment from 'moment';
 /**
  * WooCommerce dependencies
  */
-import { Card, Chart } from '@woocommerce/components';
+import { Card } from '@wordpress/components';
+import { Chart } from '@woocommerce/components';
 import Currency from '@woocommerce/currency';
 
 const storeCurrency = Currency();
