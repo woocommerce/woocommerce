@@ -102,7 +102,7 @@ class DefaultPaymentGateways {
 					(object) array(
 						'type'      => 'base_location_country',
 						'value'     => 'IN',
-						'operation' => '!=',
+						'operation' => '=',
 					),
 					self::get_rules_for_cbd( false ),
 				),
@@ -122,6 +122,21 @@ class DefaultPaymentGateways {
 				'content'    => __( 'Take payments via bank transfer.', 'woocommerce-admin' ),
 				'image'      => plugins_url( 'images/onboarding/bacs.svg', WC_ADMIN_PLUGIN_FILE ),
 				'is_visible' => array(
+					self::get_rules_for_cbd( false ),
+				),
+			),
+			array(
+				'key'        => 'razorpay',
+				'title'      => __( 'Razorpay', 'woocommerce-admin' ),
+				'content'    => __( 'The official Razorpay extension for WooCommerce allows you to accept credit cards, debit cards, netbanking, wallet, and UPI payments.', 'woocommerce-admin' ),
+				'image'      => plugins_url( 'images/onboarding/razorpay.svg', WC_ADMIN_PLUGIN_FILE ),
+				'plugins'    => array( 'woo-razorpay' ),
+				'is_visible' => array(
+					(object) array(
+						'type'      => 'base_location_country',
+						'value'     => 'IN',
+						'operation' => '!=',
+					),
 					self::get_rules_for_cbd( false ),
 				),
 			),
