@@ -6,10 +6,6 @@
  * @version  3.1.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
 /**
  * WC_Importer_Interface class.
  */
