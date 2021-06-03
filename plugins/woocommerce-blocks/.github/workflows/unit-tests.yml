@@ -94,6 +94,8 @@ jobs:
           echo -e 'woocommerce_blocks_phase = 3\nwoocommerce_blocks_env = tests' > blocks.ini
 
       - name: Run PHP Unit tests
+        env:
+          WOO_VERSION: 5.3.0
         run: |
           npm run phpunit
 

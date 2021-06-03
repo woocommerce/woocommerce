@@ -1,5 +1,7 @@
 FROM wordpress:latest
 
+ARG WOO_INSTALL_VERSION=latest
+
 CMD echo "Installing dependencies..."
 
 RUN apt-get update && \
@@ -9,6 +11,7 @@ CMD echo "Installing tests..."
 
 ENV WP_TESTS_DIR=/tmp/wordpress-tests-lib
 ENV WP_CORE_DIR=/tmp/src/wordpress
+ENV WOO_VERSION=$WOO_INSTALL_VERSION
 
 COPY install-wp-tests.sh /usr/local/bin/dockerInit
 RUN chmod +x /usr/local/bin/dockerInit

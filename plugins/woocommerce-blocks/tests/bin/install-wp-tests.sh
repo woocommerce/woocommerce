@@ -11,6 +11,7 @@ DB_PASS=$3
 DB_HOST=${4-localhost}
 WP_VERSION=${5-latest}
 SKIP_DB_CREATE=${6-false}
+WOO_VERSION=${WOO_VERSION-latest}
 
 # directories
 TMPDIR=${TMPDIR-/tmp}
@@ -149,21 +150,25 @@ install_db() {
 }
 
 install_woocommerce() {
+	WOO_INSTALL_VERSION=$WOO_VERSION
+	echo "Woo Version: $WOO_VERSION"
+	if [ $WOO_VERSION == 'latest' ] ; then
+		WOO_INSTALL_VERSION=latest-stable
+	fi
+	echo "Woo Install Version: $WOO_INSTALL_VERSION";
 	# get built plugin from .org
-	download https://downloads.wordpress.org/plugin/woocommerce.latest-stable.zip "$TMPDIR/woocommerce.zip"
+	download "https://downloads.wordpress.org/plugin/woocommerce.$WOO_INSTALL_VERSION.zip" "$TMPDIR/woocommerce.zip"
 	unzip -q $TMPDIR/woocommerce.zip -d "$WP_CORE_DIR/wp-content/plugins"
 
-	# Script Variables
-	BRANCH=$TRAVIS_BRANCH
-	REPO=$TRAVIS_REPO_SLUG
-
-	# Get github version
-	if [ "$TRAVIS_PULL_REQUEST_BRANCH" != "" ]; then
-		BRANCH=$TRAVIS_PULL_REQUEST_BRANCH
-		REPO=$TRAVIS_PULL_REQUEST_SLUG
+	git clone "https://github.com/woocommerce/woocommerce.git" "$TMPDIR/woocommerce-git"
+	# if specific version, then checkout the tag
+	if [ $WOO_VERSION != 'latest' ] ; then
+		echo "Checking out specific Woo Version test suite (tag)"
+		cd "$TMPDIR/woocommerce-git"
+		git checkout ${WOO_VERSION}
+		cd ..
 	fi
 
-	git clone --depth 1 "https://github.com/woocommerce/woocommerce.git" "$TMPDIR/woocommerce-git"
 	mv "$TMPDIR/woocommerce-git/tests" "$WP_CORE_DIR/wp-content/plugins/woocommerce"
 }
 
