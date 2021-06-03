@@ -78,10 +78,6 @@
           {
             "name": "Colour",
             "option": "Red"
-          },
-          {
-            "name": "Logo",
-            "option": "Woo"
           }
         ]
       },
@@ -95,10 +91,6 @@
           {
             "name": "Colour",
             "option": "Green"
-          },
-          {
-            "name": "Logo",
-            "option": "Woo"
           }
         ]
       },
@@ -112,10 +104,6 @@
           {
             "name": "Colour",
             "option": "Blue"
-          },
-          {
-            "name": "Logo",
-            "option": "Woo"
           }
         ]
       }
