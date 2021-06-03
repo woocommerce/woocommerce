@@ -191,7 +191,7 @@ class WC_Privacy_Exporters {
 				'billing_postcode'    => __( 'Billing Postal/Zip Code', 'woocommerce' ),
 				'billing_state'       => __( 'Billing State', 'woocommerce' ),
 				'billing_country'     => __( 'Billing Country / Region', 'woocommerce' ),
-				'billing_phone'       => __( 'Phone Number', 'woocommerce' ),
+				'billing_phone'       => __( 'Billing Phone Number', 'woocommerce' ),
 				'billing_email'       => __( 'Email Address', 'woocommerce' ),
 				'shipping_first_name' => __( 'Shipping First Name', 'woocommerce' ),
 				'shipping_last_name'  => __( 'Shipping Last Name', 'woocommerce' ),
@@ -202,6 +202,7 @@ class WC_Privacy_Exporters {
 				'shipping_postcode'   => __( 'Shipping Postal/Zip Code', 'woocommerce' ),
 				'shipping_state'      => __( 'Shipping State', 'woocommerce' ),
 				'shipping_country'    => __( 'Shipping Country / Region', 'woocommerce' ),
+				'shipping_phone'      => __( 'Shipping Phone Number', 'woocommerce' ),
 			),
 			$customer
 		);
@@ -257,6 +258,7 @@ class WC_Privacy_Exporters {
 				'formatted_shipping_address' => __( 'Shipping Address', 'woocommerce' ),
 				'billing_phone'              => __( 'Phone Number', 'woocommerce' ),
 				'billing_email'              => __( 'Email Address', 'woocommerce' ),
+				'shipping_phone'             => __( 'Shipping Phone Number', 'woocommerce' ),
 			),
 			$order
 		);
@@ -367,11 +369,11 @@ class WC_Privacy_Exporters {
 			),
 			array(
 				'name'  => __( 'Access granted', 'woocommerce' ),
-				'value' => date( 'Y-m-d', $download->get_access_granted( 'edit' )->getTimestamp() ),
+				'value' => gmdate( 'Y-m-d', $download->get_access_granted( 'edit' )->getTimestamp() ),
 			),
 			array(
 				'name'  => __( 'Access expires', 'woocommerce' ),
-				'value' => ! is_null( $download->get_access_expires( 'edit' ) ) ? date( 'Y-m-d', $download->get_access_expires( 'edit' )->getTimestamp() ) : null,
+				'value' => ! is_null( $download->get_access_expires( 'edit' ) ) ? gmdate( 'Y-m-d', $download->get_access_expires( 'edit' )->getTimestamp() ) : null,
 			),
 		);
 
