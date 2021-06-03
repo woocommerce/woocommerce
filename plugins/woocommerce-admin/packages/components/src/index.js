@@ -52,7 +52,6 @@ export { default as Tag } from './tag';
 export { default as TextControl } from './text-control';
 export { default as TextControlWithAffixes } from './text-control-with-affixes';
 export { default as Timeline } from './timeline';
-export { default as useFilters } from './higher-order/use-filters';
 export { default as ViewMoreList } from './view-more-list';
 export { default as WebPreview } from './web-preview';
 export { Badge } from './badge';
