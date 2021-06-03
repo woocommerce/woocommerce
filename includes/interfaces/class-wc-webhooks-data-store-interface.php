@@ -6,10 +6,6 @@
  * @package  WooCommerce\Interface
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
 /**
  * WooCommerce Webhook data store interface.
  */
