@@ -139,6 +139,8 @@ final class BlockTypesController {
 					'PriceFilter',
 					'AttributeFilter',
 					'ActiveFilters',
+					'Cart',
+					'Checkout',
 				]
 			);
 		}
