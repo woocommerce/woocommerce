@@ -48,6 +48,7 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 		'shipping_first_name',
 		'shipping_last_name',
 		'shipping_company',
+		'shipping_phone',
 	);
 
 	/**
