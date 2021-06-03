@@ -9,6 +9,7 @@ const {
 	uiUnblocked,
 	applyCoupon,
 	removeCoupon,
+	waitForSelectorWithoutThrow,
 } = require( '@woocommerce/e2e-utils' );
 
 /**
@@ -33,6 +34,7 @@ const runCheckoutApplyCouponsTest = () => {
 			couponFixedProduct = await createCoupon('5', 'Fixed product discount');
 			await shopper.emptyCart();
 			await shopper.goToShop();
+			await waitForSelectorWithoutThrow( '.add_to_cart_button' );
 			await shopper.addToCartFromShopPage('Simple product');
 			await uiUnblocked();
 			await shopper.goToCheckout();
