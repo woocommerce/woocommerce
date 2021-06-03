@@ -493,22 +493,22 @@
         },
         {
             "name": "woocommerce/action-scheduler",
-            "version": "3.1.6",
+            "version": "3.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/action-scheduler.git",
-                "reference": "275d0ba54b1c263dfc62688de2fa9a25a373edf8"
+                "reference": "12c91fd20af0cdfb6107b8db9df78d133f512b04"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/action-scheduler/zipball/275d0ba54b1c263dfc62688de2fa9a25a373edf8",
-                "reference": "275d0ba54b1c263dfc62688de2fa9a25a373edf8",
+                "url": "https://api.github.com/repos/woocommerce/action-scheduler/zipball/12c91fd20af0cdfb6107b8db9df78d133f512b04",
+                "reference": "12c91fd20af0cdfb6107b8db9df78d133f512b04",
                 "shasum": ""
             },
             "require-dev": {
-                "phpunit/phpunit": "^5.6",
-                "woocommerce/woocommerce-sniffs": "0.0.8",
-                "wp-cli/wp-cli": "~1.5.1"
+                "phpunit/phpunit": "^7.5",
+                "woocommerce/woocommerce-sniffs": "0.1.0",
+                "wp-cli/wp-cli": "~2.5.0"
             },
             "type": "wordpress-plugin",
             "extra": {
@@ -526,9 +526,9 @@
             "homepage": "https://actionscheduler.org/",
             "support": {
                 "issues": "https://github.com/woocommerce/action-scheduler/issues",
-                "source": "https://github.com/woocommerce/action-scheduler/tree/master"
+                "source": "https://github.com/woocommerce/action-scheduler/tree/3.2.0"
             },
-            "time": "2020-05-12T16:22:33+00:00"
+            "time": "2021-06-03T16:41:18+00:00"
         },
         {
             "name": "woocommerce/woocommerce-admin",
