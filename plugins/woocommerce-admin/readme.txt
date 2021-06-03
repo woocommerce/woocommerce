@@ -144,6 +144,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Update: Hook up payments gateway data store #7038
 - Update: Update remote payment docs gateway methods #7079
 - Add: Add Mollie to the default payment gateways. #7092
+- Dev: Remove support for IE11. #7112
 - Update: Remove original business step flow #7103
 
 == 2.3.1 5/24/2021 ==

@@ -178,7 +178,7 @@
 		"@woocommerce/onboarding": "file:packages/onboarding",
 		"@wordpress/babel-plugin-makepot": "2.1.3",
 		"@wordpress/babel-preset-default": "5.0.1",
-		"@wordpress/browserslist-config": "2.7.0",
+		"@wordpress/browserslist-config": "4.0.1",
 		"@wordpress/custom-templated-path-webpack-plugin": "1.7.0",
 		"@wordpress/e2e-test-utils": "4.16.1",
 		"@wordpress/eslint-plugin": "8.0.0",
