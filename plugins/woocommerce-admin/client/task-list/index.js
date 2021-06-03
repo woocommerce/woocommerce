@@ -62,6 +62,9 @@ const taskDashboardSelect = ( select ) => {
 		activePlugins,
 		countryCode,
 		dismissedTasks: getOption( 'woocommerce_task_list_dismissed_tasks' ),
+		remindMeLaterTasks: getOption(
+			'woocommerce_task_list_remind_me_later_tasks'
+		),
 		isExtendedTaskListComplete:
 			getOption( 'woocommerce_extended_task_list_complete' ) === 'yes',
 		isExtendedTaskListHidden:
@@ -93,6 +96,7 @@ const TaskDashboard = ( { userPreferences, query } ) => {
 		profileItems,
 		isSetupTaskListHidden,
 		dismissedTasks,
+		remindMeLaterTasks,
 		isTaskListComplete,
 		isExtendedTaskListHidden,
 		isExtendedTaskListComplete,
@@ -225,6 +229,7 @@ const TaskDashboard = ( { userPreferences, query } ) => {
 							experimentAssignment?.variationName === 'treatment'
 						}
 						dismissedTasks={ dismissedTasks || [] }
+						remindMeLaterTasks={ remindMeLaterTasks || [] }
 						isComplete={ isTaskListComplete }
 						query={ query }
 						tasks={ setupTasks }
@@ -272,6 +277,7 @@ const TaskDashboard = ( { userPreferences, query } ) => {
 					eventName="extended_tasklist"
 					collapsible
 					dismissedTasks={ dismissedTasks || [] }
+					remindMeLaterTasks={ remindMeLaterTasks || [] }
 					isComplete={ isExtendedTaskListComplete }
 					query={ query }
 					tasks={ extensionTasks }

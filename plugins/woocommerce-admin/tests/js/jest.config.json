@@ -8,6 +8,7 @@
 	"moduleNameMapper": {
 		"tinymce": "<rootDir>/tests/js/mocks/tinymce",
 		"@woocommerce/(settings|wc-admin-settings)": "<rootDir>/client/wc-admin-settings/index.js",
+		"@woocommerce/([a-z]+)/build/(.*)": "<rootDir>/packages/$1/src/$2",
 		"@woocommerce/(.*)": "<rootDir>/packages/$1/src",
 		"~/(.*)": "<rootDir>/client/$1",
 		"\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/tests/js/mocks/static",

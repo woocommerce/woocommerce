@@ -31,7 +31,7 @@ type ListItemProps = {
 } & Partial< CSSTransitionProps > &
 	React.AllHTMLAttributes< HTMLElement >;
 
-export type ListAnimation = 'slide-right' | 'none';
+export type ListAnimation = 'slide-right' | 'none' | 'custom';
 
 export const ExperimentalListItem: React.FC< ListItemProps > = ( {
 	children,
@@ -70,7 +70,7 @@ export const ExperimentalListItem: React.FC< ListItemProps > = ( {
 	return (
 		<CSSTransition
 			timeout={ 500 }
-			classNames="woocommerce-list__item"
+			classNames={ className || 'woocommerce-list__item' }
 			in={ transitionIn }
 			exit={ exit }
 			enter={ enter }

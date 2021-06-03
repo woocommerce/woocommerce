@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { Icon, check } from '@wordpress/icons';
 import { Button, Tooltip } from '@wordpress/components';
 import NoticeOutline from 'gridicons/dist/notice-outline';
+import { EllipsisMenu } from '@woocommerce/components';
 import classnames from 'classnames';
 import { sanitize } from 'dompurify';
 
@@ -31,9 +32,9 @@ type ActionArgs = {
 type TaskItemProps = {
 	title: string;
 	completed: boolean;
-	onClick?: () => void;
-	isDismissable?: boolean;
+	onClick: () => void;
 	onDismiss?: () => void;
+	remindMeLater?: () => void;
 	additionalInfo?: string;
 	time?: string;
 	content: string;
@@ -72,8 +73,8 @@ const OptionalTaskTooltip: React.FC< {
 export const TaskItem: React.FC< TaskItemProps > = ( {
 	completed,
 	title,
-	isDismissable,
 	onDismiss,
+	remindMeLater,
 	onClick,
 	additionalInfo,
 	time,
@@ -89,13 +90,10 @@ export const TaskItem: React.FC< TaskItemProps > = ( {
 		'level-1': level === 1 && ! completed,
 	} );
 
+	const showEllipsisMenu = ( onDismiss || remindMeLater ) && ! completed;
+
 	return (
-		<ListItem
-			disableGutters
-			className={ className }
-			onClick={ onClick }
-			animation="slide-right"
-		>
+		<ListItem disableGutters className={ className } onClick={ onClick }>
 			<OptionalTaskTooltip level={ level } completed={ completed }>
 				<div className="woocommerce-task-list__item-before">
 					{ level === 1 && ! completed ? (
@@ -146,21 +144,45 @@ export const TaskItem: React.FC< TaskItemProps > = ( {
 					) }
 				</Text>
 			</div>
-			{ onDismiss && isDismissable && ! completed && (
-				<div className="woocommerce-task-list__item-after">
-					<Button
-						data-testid={ `dismiss-button` }
-						isTertiary
-						onClick={ (
-							event: React.MouseEvent | React.KeyboardEvent
-						) => {
-							event.stopPropagation();
-							onDismiss();
-						} }
-					>
-						{ __( 'Dismiss', 'woocommerce-admin' ) }
-					</Button>
-				</div>
+			{ showEllipsisMenu && (
+				<EllipsisMenu
+					label={ __( 'Task Options', 'woocommerce-admin' ) }
+					className="woocommerce-task-list__item-after"
+					onToggle={ ( e: React.MouseEvent | React.KeyboardEvent ) =>
+						e.stopPropagation()
+					}
+					renderContent={ () => (
+						<div className="woocommerce-task-card__section-controls">
+							{ onDismiss && (
+								<Button
+									onClick={ (
+										e:
+											| React.MouseEvent
+											| React.KeyboardEvent
+									) => {
+										e.stopPropagation();
+										onDismiss();
+									} }
+								>
+									{ __( 'Dismiss', 'woocommerce-admin' ) }
+								</Button>
+							) }
+							{ remindMeLater && (
+								<Button
+									onClick={ ( e: React.MouseEvent ) => {
+										e.stopPropagation();
+										remindMeLater();
+									} }
+								>
+									{ __(
+										'Remind me later',
+										'woocommerce-admin'
+									) }
+								</Button>
+							) }
+						</div>
+					) }
+				/>
 			) }
 		</ListItem>
 	);

@@ -3,7 +3,14 @@ $task-alert-yellow: #f0b849;
 
 .woocommerce-task-list__item {
 	position: relative;
-	padding-right: $gap-large;
+	display: grid;
+	grid-template-columns: 72px auto 48px;
+
+	// IE doesn't support `align-items` on grid container
+
+	& > * {
+		align-self: center;
+	}
 
 	&::before {
 		content: '';
@@ -45,7 +52,7 @@ $task-alert-yellow: #f0b849;
 	.woocommerce-task-list__item-before {
 		display: flex;
 		align-items: center;
-		padding: $gap 20px $gap $gap-large;
+		padding: $gap 0 $gap $gap-large;
 	}
 
 	.woocommerce-task-list__item-text {
@@ -68,12 +75,8 @@ $task-alert-yellow: #f0b849;
 	}
 
 	.woocommerce-task-list__item-after {
-		margin-left: $gap;
-		margin-right: $gap-large;
 		display: flex;
 		align-items: center;
-		margin-left: auto;
-		padding: $gap 0;
 	}
 
 	.woocommerce-task-list__item-before .woocommerce-task__icon {
@@ -114,5 +117,9 @@ $task-alert-yellow: #f0b849;
 	.components-tooltip .components-popover__content {
 		width: 160px;
 		white-space: normal;
+	}
+
+	.woocommerce-task-card__section-controls {
+		text-align: left;
 	}
 }

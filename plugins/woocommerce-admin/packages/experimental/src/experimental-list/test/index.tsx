@@ -2,6 +2,7 @@
  * External dependencies
  */
 import {
+	act,
 	render,
 	screen,
 	waitForElementToBeRemoved,
@@ -14,6 +15,26 @@ import userEvent from '@testing-library/user-event';
 import { ExperimentalList } from '../experimental-list';
 import { ExperimentalListItem } from '../experimental-list-item';
 import { ExperimentalCollapsibleList } from '../collapsible-list';
+
+jest.mock( 'react-transition-group', () => {
+	const EmptyTransition: React.FC< { component?: string } > = ( {
+		children,
+		component,
+	} ) => {
+		if ( component === 'ul' ) {
+			return <ul>{ children }</ul>;
+		}
+		if ( component === 'ol' ) {
+			return <ol>{ children }</ol>;
+		}
+		return <div>{ children }</div>;
+	};
+	return {
+		...jest.requireActual( 'react-transition-group' ),
+		TransitionGroup: EmptyTransition,
+		CSSTransition: EmptyTransition,
+	};
+} );
 
 describe( 'Experimental List', () => {
 	it( 'should render the new List which defaults to a ul component if items are not passed in', () => {
@@ -264,6 +285,80 @@ describe( 'Experimental List', () => {
 			expect( container ).not.toHaveTextContent( 'Show less' );
 			expect( onExpand ).toHaveBeenCalledTimes( 1 );
 			expect( onCollapse ).toHaveBeenCalledTimes( 1 );
+		} );
+
+		describe( 'staggering transition', () => {
+			const StaggerTestComponent = ( { list }: { list: string[] } ) => {
+				return (
+					<ExperimentalCollapsibleList
+						collapseLabel="Show less"
+						expandLabel="Show more items"
+						show={ 2 }
+					>
+						{ list.map( ( item ) => (
+							<div key={ item }>{ item }</div>
+						) ) }
+					</ExperimentalCollapsibleList>
+				);
+			};
+
+			beforeEach( () => {
+				jest.useFakeTimers();
+			} );
+
+			afterEach( () => {
+				jest.runOnlyPendingTimers();
+				jest.useRealTimers();
+			} );
+
+			it( 'should only update the shown items at first', () => {
+				const { queryByText, rerender } = render(
+					<StaggerTestComponent
+						list={ [ 'item-1', 'item-2', 'item-3' ] }
+					/>
+				);
+
+				expect( queryByText( 'Show more items' ) ).toBeInTheDocument();
+
+				act( () =>
+					rerender(
+						<StaggerTestComponent list={ [ 'item-1', 'item-3' ] } />
+					)
+				);
+
+				expect( queryByText( 'Show more items' ) ).toBeInTheDocument();
+				expect( queryByText( 'item-2' ) ).not.toBeInTheDocument();
+
+				act( () => {
+					jest.runAllTimers();
+				} );
+			} );
+
+			it( 'should update the hidden items as well after a 500ms timeout', () => {
+				const { queryByText, rerender } = render(
+					<StaggerTestComponent
+						list={ [ 'item-1', 'item-2', 'item-3' ] }
+					/>
+				);
+
+				expect( queryByText( 'Show more items' ) ).toBeInTheDocument();
+
+				act( () =>
+					rerender(
+						<StaggerTestComponent list={ [ 'item-1', 'item-3' ] } />
+					)
+				);
+
+				expect( queryByText( 'item-3' ) ).not.toBeInTheDocument();
+
+				act( () => {
+					jest.advanceTimersByTime( 500 );
+				} );
+				expect(
+					queryByText( 'Show more items' )
+				).not.toBeInTheDocument();
+				expect( queryByText( 'item-3' ) ).toBeInTheDocument();
+			} );
 		} );
 	} );
 } );

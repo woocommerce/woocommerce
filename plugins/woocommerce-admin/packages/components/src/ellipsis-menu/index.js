@@ -13,7 +13,7 @@ import PropTypes from 'prop-types';
  */
 class EllipsisMenu extends Component {
 	render() {
-		const { label, renderContent } = this.props;
+		const { label, renderContent, className } = this.props;
 		if ( ! renderContent ) {
 			return null;
 		}
@@ -29,7 +29,12 @@ class EllipsisMenu extends Component {
 			return (
 				<Button
 					className={ toggleClassname }
-					onClick={ onToggle }
+					onClick={ ( e ) => {
+						if ( this.props.onToggle ) {
+							this.props.onToggle( e );
+						}
+						onToggle( e );
+					} }
 					title={ label }
 					aria-expanded={ isOpen }
 				>
@@ -45,7 +50,12 @@ class EllipsisMenu extends Component {
 		);
 
 		return (
-			<div className="woocommerce-ellipsis-menu">
+			<div
+				className={ classnames(
+					className,
+					'woocommerce-ellipsis-menu'
+				) }
+			>
 				<Dropdown
 					contentClassName="woocommerce-ellipsis-menu__popover"
 					position="bottom left"
@@ -66,6 +76,14 @@ EllipsisMenu.propTypes = {
 	 * A function returning `MenuTitle`/`MenuItem` components as a render prop. Arguments from Dropdown passed as function arguments.
 	 */
 	renderContent: PropTypes.func,
+	/**
+	 * Classname to add to ellipsis menu.
+	 */
+	className: PropTypes.string,
+	/**
+	 * Callback function when dropdown button is clicked, it provides the click event.
+	 */
+	onToggle: PropTypes.func,
 };
 
 export default EllipsisMenu;

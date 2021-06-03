@@ -16,12 +16,20 @@ import {
 	TaskItem,
 } from '@woocommerce/experimental';
 
+/**
+ * Internal dependencies
+ */
+import './task-list.scss';
+
+const DAY_IN_MS = 24 * 60 * 60 * 1000;
+
 export const TaskList = ( {
 	query,
 	name,
 	eventName,
 	isComplete,
 	dismissedTasks,
+	remindMeLaterTasks,
 	tasks,
 	trackedCompletedTasks: totalTrackedCompletedTasks,
 	title: listTitle,
@@ -58,8 +66,13 @@ export const TaskList = ( {
 		possiblyTrackCompletedTasks();
 	}, [ query ] );
 
+	const nowTimestamp = Date.now();
 	const visibleTasks = tasks.filter(
-		( task ) => task.visible && ! dismissedTasks.includes( task.key )
+		( task ) =>
+			task.visible &&
+			! dismissedTasks.includes( task.key ) &&
+			( ! remindMeLaterTasks[ task.key ] ||
+				remindMeLaterTasks[ task.key ] < nowTimestamp )
 	);
 
 	const completedTaskKeys = visibleTasks
@@ -148,7 +161,7 @@ export const TaskList = ( {
 			],
 		} );
 
-		recordEvent( 'tasklist_dismiss_task', { task_name: key } );
+		recordEvent( `${ eventName }_dismiss_task`, { task_name: key } );
 
 		updateOptions( {
 			woocommerce_task_list_dismissed_tasks: [ ...dismissedTasks, key ],
@@ -165,6 +178,53 @@ export const TaskList = ( {
 
 		updateOptions( {
 			woocommerce_task_list_dismissed_tasks: updatedDismissedTasks,
+		} );
+		recordEvent( `${ eventName }_undo_dismiss_task`, {
+			task_name: key,
+		} );
+	};
+
+	const remindTaskLater = ( { key, onDismiss } ) => {
+		createNotice(
+			'success',
+			__( 'Task postponed until tomorrow', 'woocommerce-admin' ),
+			{
+				actions: [
+					{
+						label: __( 'Undo', 'woocommerce-admin' ),
+						onClick: () => undoRemindTaskLater( key ),
+					},
+				],
+			}
+		);
+		recordEvent( `${ eventName }_remindmelater_task`, {
+			task_name: key,
+		} );
+
+		const dismissTime = Date.now() + DAY_IN_MS;
+		updateOptions( {
+			woocommerce_task_list_remind_me_later_tasks: {
+				...remindMeLaterTasks,
+				[ key ]: dismissTime,
+			},
+		} );
+		if ( onDismiss ) {
+			onDismiss();
+		}
+	};
+
+	const undoRemindTaskLater = ( key ) => {
+		const {
+			// eslint-disable-next-line no-unused-vars
+			[ key ]: oldValue,
+			...updatedRemindMeLaterTasks
+		} = remindMeLaterTasks;
+
+		updateOptions( {
+			woocommerce_task_list_remind_me_later_tasks: updatedRemindMeLaterTasks,
+		} );
+		recordEvent( `${ eventName }_undo_remindmelater_task`, {
+			task_name: key,
 		} );
 	};
 
@@ -220,6 +280,9 @@ export const TaskList = ( {
 	const listTasks = visibleTasks.map( ( task ) => {
 		if ( ! task.onClick ) {
 			task.onClick = ( e ) => {
+				recordEvent( `${ eventName }_click`, {
+					task_name: task.key,
+				} );
 				if ( e.target.nodeName === 'A' ) {
 					// This is a nested link, so don't activate this task.
 					return false;
@@ -274,7 +337,7 @@ export const TaskList = ( {
 						{ renderMenu() }
 					</CardHeader>
 					<CardBody>
-						<ListComp animation="slide-right" { ...listProps }>
+						<ListComp animation="custom" { ...listProps }>
 							{ listTasks.map( ( task ) => (
 								<TaskItem
 									key={ task.key }
@@ -290,8 +353,16 @@ export const TaskList = ( {
 										expandingItems &&
 										currentTask === task.key
 									}
-									isDismissable={ task.isDismissable }
-									onDismiss={ () => dismissTask( task ) }
+									onDismiss={
+										task.isDismissable
+											? () => dismissTask( task )
+											: undefined
+									}
+									remindMeLater={
+										task.allowRemindMeLater
+											? () => remindTaskLater( task )
+											: undefined
+									}
 									time={ task.time }
 									level={ task.level }
 									action={ task.onClick }
