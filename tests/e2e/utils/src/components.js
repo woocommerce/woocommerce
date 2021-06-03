@@ -25,7 +25,8 @@ const client = factories.api.withDefaultPermalinks;
 const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );
 const simpleProductPrice = config.has('products.simple.price') ? config.get('products.simple.price') : '9.99';
-
+const defaultVariableProduct = config.get( 'products.variable' );
+const defaultVariations = config.get( 'products.variation' );
 
 /**
  * Verify and publish
@@ -223,16 +224,17 @@ const createSimpleProductWithCategory = async ( productName, productPrice, categ
 /**
  * Create variable product.
  * 
- * @returns the ID of the variable product
+ * @param varProduct Defaults to the variable product object in `default.json`
+ * @param variations Defaults to the variation object in `default.json`
+ * @returns the ID of the created variable product
  */
-const createVariableProduct = async () => {
-	const variableProduct = await factories.products.variable.create();
-	const defaultVariations = config.get( 'products.variations' );
+const createVariableProduct = async ( varProduct = defaultVariableProduct, variations = defaultVariations ) => {
+	const variableProduct = await factories.products.variable.create( varProduct );
 
-	for( const variation of defaultVariations ){
+	for( const v of variations ){
 		await factories.products.variation.create({
 			productId: variableProduct.id,
-			variation: variation
+			variation: v
 		});
 	}
 

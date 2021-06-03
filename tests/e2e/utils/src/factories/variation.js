@@ -1,6 +1,5 @@
 import { ProductVariation } from '@woocommerce/api';
 import { Factory } from 'fishery';
-import config from 'config';
 
 /**
  * Creates a new factory for creating a product variation.
@@ -10,8 +9,6 @@ import config from 'config';
  */
 export function variationFactory(httpClient) {
     const repository = ProductVariation.restRepository(httpClient);
-    const defaultVariations = config.get('products.variations');
-    const defaultVariation = defaultVariations[0];
 
     return Factory.define(({ params, onCreate }) => {
         const { productId, variation } = params;
@@ -21,8 +18,8 @@ export function variationFactory(httpClient) {
         });
 
         return {
-            regularPrice: variation.regularPrice ?? defaultVariation.regularPrice,
-            attributes: variation.attributes ?? defaultVariation.attributes
+            regularPrice: variation.regularPrice,
+            attributes: variation.attributes
         };
     });
 }
