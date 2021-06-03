@@ -18,17 +18,20 @@ services:
       - db
     build:
       context: ./tests/bin
+      args:
+        WOO_INSTALL_VERSION: ${WOO_VERSION}
     ports:
       - 8085:80
     restart: on-failure
     environment:
-      WORDPRESS_DB_HOST:
-      WORDPRESS_DB_NAME:
-      WORDPRESS_DB_USER:
-      WORDPRESS_DB_PASSWORD:
-      WORDPRESS_TABLE_PREFIX: wp_test_
-      WP_CORE_DIR: /var/www/html
-      WP_TESTS_DIR: /tmp/wordpress-tests-lib
+      - WORDPRESS_DB_HOST
+      - WORDPRESS_DB_NAME
+      - WORDPRESS_DB_USER
+      - WORDPRESS_DB_PASSWORD
+      - WORDPRESS_TABLE_PREFIX=wp_test_
+      - WP_CORE_DIR=/var/www/html
+      - WP_TESTS_DIR=/tmp/wordpress-tests-lib
+      - WOO_VERSION
     volumes:
       - "./:/var/www/html/wp-content/plugins/woocommerce-gutenberg-products-block"
       - wordpress:/var/www/html
