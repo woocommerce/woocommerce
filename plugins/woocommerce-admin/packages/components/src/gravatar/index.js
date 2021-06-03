@@ -7,6 +7,7 @@ import PropTypes from 'prop-types';
 import url from 'url';
 import { isString } from 'lodash';
 import md5 from 'md5';
+import deprecated from '@wordpress/deprecated';
 
 /**
  * Display a users Gravatar.
@@ -20,6 +21,13 @@ import md5 from 'md5';
  * @return {Object} -
  */
 const Gravatar = ( { alt, title, size, user, className } ) => {
+	deprecated( 'Gravatar', {
+		version: '7.2.0',
+		plugin: 'WooCommerce',
+		hint:
+			'The Gravatar component will be removed in the next version of @woocommerce/components, please consider using another library to perform this function.',
+	} );
+
 	const classes = classnames( 'woocommerce-gravatar', className, {
 		'is-placeholder': ! user,
 	} );
