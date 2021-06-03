@@ -21,7 +21,7 @@ class TransformerService {
 	 * @return TransformerInterface|null
 	 */
 	public static function create_transformer( $name ) {
-		$camel_cased = lcfirst( str_replace( ' ', '', ucwords( str_replace( '_', ' ', $name ) ) ) );
+		$camel_cased = str_replace( ' ', '', ucwords( str_replace( '_', ' ', $name ) ) );
 
 		$classname = __NAMESPACE__ . '\\Transformers\\' . $camel_cased;
 		if ( ! class_exists( $classname ) ) {
