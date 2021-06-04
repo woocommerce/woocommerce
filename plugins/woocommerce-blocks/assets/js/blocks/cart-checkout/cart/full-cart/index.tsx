@@ -13,8 +13,8 @@ import {
 	TotalsFees,
 	TotalsTaxes,
 	ExperimentalOrderMeta,
+	ExperimentalDiscountsMeta,
 } from '@woocommerce/blocks-checkout';
-
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import {
 	useStoreCartCoupons,
@@ -40,7 +40,6 @@ import CheckoutButton from '../checkout-button';
 import CartLineItemsTitle from './cart-line-items-title';
 import CartLineItemsTable from './cart-line-items-table';
 import { CartExpressPayment } from '../../payment-methods';
-
 import './style.scss';
 
 interface CartAttributes {
@@ -114,6 +113,11 @@ const Cart = ( { attributes }: CartProps ) => {
 		cart,
 	};
 
+	const discountsSlotFillProps = {
+		extensions,
+		cart,
+	};
+
 	return (
 		<>
 			<CartLineItemsTitle itemCount={ cartItemsCount } />
@@ -152,6 +156,10 @@ const Cart = ( { attributes }: CartProps ) => {
 							isLoading={ isApplyingCoupon }
 						/>
 					) }
+					<ExperimentalDiscountsMeta.Slot
+						{ ...discountsSlotFillProps }
+					/>
+
 					{ cartNeedsShipping && (
 						<TotalsShipping
 							showCalculator={ isShippingCalculatorEnabled }

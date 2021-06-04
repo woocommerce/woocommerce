@@ -9,6 +9,7 @@ import {
 	useValidationContext,
 } from '@woocommerce/base-context';
 import { withInstanceId } from '@woocommerce/base-hocs/with-instance-id';
+import { isString } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -36,6 +37,7 @@ type ValidatedTextInputProps = (
 	validateOnMount?: boolean;
 	focusOnMount?: boolean;
 	showError?: boolean;
+	errorMessage?: string;
 	onChange: ( newValue: string ) => void;
 };
 
@@ -49,6 +51,7 @@ const ValidatedTextInput = ( {
 	focusOnMount = false,
 	onChange,
 	showError = true,
+	errorMessage: passedErrorMessage = '',
 	...rest
 }: ValidatedTextInputProps ) => {
 	const [ isPristine, setIsPristine ] = useState( true );
@@ -123,6 +126,9 @@ const ValidatedTextInput = ( {
 		message?: string;
 		hidden?: boolean;
 	};
+	if ( isString( passedErrorMessage ) && passedErrorMessage !== '' ) {
+		errorMessage.message = passedErrorMessage;
+	}
 	const hasError = errorMessage.message && ! errorMessage.hidden;
 	const describedBy =
 		showError && hasError && getValidationErrorId( errorIdString )
