@@ -12,13 +12,14 @@ import * as selectors from './selectors';
 import * as actions from './actions';
 import * as resolvers from './resolvers';
 import reducer, { State } from './reducers';
-import { controls } from '../shared-controls';
+import { controls as sharedControls } from '../shared-controls';
+import { controls } from './controls';
 
 registerStore< State >( STORE_KEY, {
 	reducer,
 	actions,
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	controls: { ...dataControls, ...controls } as any,
+	controls: { ...dataControls, ...sharedControls, ...controls } as any,
 	selectors,
 	resolvers,
 } );
