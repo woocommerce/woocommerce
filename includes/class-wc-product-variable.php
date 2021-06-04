@@ -449,47 +449,31 @@ class WC_Product_Variable extends WC_Product {
 	}
 
 	/**
-	 * Save data (either create or update depending on if we are working on an existing product).
+	 * Do any extra processing needed before the actual product save
+	 * (but after triggering the 'woocommerce_before_..._object_save' action)
 	 *
-	 * @since 3.0.0
+	 * @return mixed A state value that will be passed to after_data_store_save_or_update.
 	 */
-	public function save() {
-		$this->validate_props();
-
-		if ( ! $this->data_store ) {
-			return $this->get_id();
-		}
-
-		/**
-		 * Trigger action before saving to the DB. Allows you to adjust object props before save.
-		 *
-		 * @param WC_Data          $this The object being saved.
-		 * @param WC_Data_Store_WP $data_store The data store persisting the data.
-		 */
-		do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
-
+	protected function before_data_store_save_or_update() {
 		// Get names before save.
 		$previous_name = $this->data['name'];
 		$new_name      = $this->get_name( 'edit' );
 
-		if ( $this->get_id() ) {
-			$this->data_store->update( $this );
-		} else {
-			$this->data_store->create( $this );
-		}
+		return array(
+			'previous_name' => $previous_name,
+			'new_name'      => $new_name,
+		);
+	}
 
-		$this->data_store->sync_variation_names( $this, $previous_name, $new_name );
+	/**
+	 * Do any extra processing needed after the actual product save
+	 * (but before triggering the 'woocommerce_after_..._object_save' action)
+	 *
+	 * @param mixed $state The state object that was returned by before_data_store_save_or_update.
+	 */
+	protected function after_data_store_save_or_update( $state ) {
+		$this->data_store->sync_variation_names( $this, $state['previous_name'], $state['new_name'] );
 		$this->data_store->sync_managed_variation_stock_status( $this );
-
-		/**
-		 * Trigger action after saving to the DB.
-		 *
-		 * @param WC_Data          $this The object being saved.
-		 * @param WC_Data_Store_WP $data_store The data store persisting the data.
-		 */
-		do_action( 'woocommerce_after_' . $this->object_type . '_object_save', $this, $this->data_store );
-
-		return $this->get_id();
 	}
 
 	/*
