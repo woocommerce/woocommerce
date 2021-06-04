@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { registerBlockType } from '@wordpress/blocks';
+import { createBlock, registerBlockType } from '@wordpress/blocks';
 import { Icon, search } from '@woocommerce/icons';
 /**
  * Internal dependencies
@@ -69,6 +69,25 @@ registerBlockType( 'woocommerce/product-search', {
 			type: 'string',
 			default: '',
 		},
+	},
+
+	transforms: {
+		from: [
+			{
+				type: 'block',
+				blocks: [ 'core/legacy-widget' ],
+				// We can't transform if raw instance isn't shown in the REST API.
+				isMatch: ( { idBase, instance } ) =>
+					idBase === 'woocommerce_product_search' && !! instance?.raw,
+				transform: ( { instance } ) =>
+					createBlock( 'woocommerce/product-search', {
+						label:
+							instance.raw.title === ''
+								? __( 'Search', 'woo-gutenberg-products-block' )
+								: instance.raw.title,
+					} ),
+			},
+		],
 	},
 
 	edit,
