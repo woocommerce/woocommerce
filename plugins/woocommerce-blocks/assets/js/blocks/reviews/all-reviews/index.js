@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { registerBlockType } from '@wordpress/blocks';
+import { createBlock, registerBlockType } from '@wordpress/blocks';
 import { Icon, discussion } from '@woocommerce/icons';
 
 /**
@@ -49,6 +49,27 @@ registerBlockType( 'woocommerce/all-reviews', {
 			type: 'boolean',
 			default: true,
 		},
+	},
+
+	transforms: {
+		from: [
+			{
+				type: 'block',
+				blocks: [ 'core/legacy-widget' ],
+				// We can't transform if raw instance isn't shown in the REST API.
+				isMatch: ( { idBase, instance } ) =>
+					idBase === 'woocommerce_recent_reviews' && !! instance?.raw,
+				transform: ( { instance } ) =>
+					createBlock( 'woocommerce/all-reviews', {
+						reviewsOnPageLoad: instance.raw.number,
+						imageType: 'product',
+						showLoadMore: false,
+						showOrderby: false,
+						showReviewDate: false,
+						showReviewContent: false,
+					} ),
+			},
+		],
 	},
 
 	/**
