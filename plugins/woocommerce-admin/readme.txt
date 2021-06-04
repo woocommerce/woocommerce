@@ -74,6 +74,8 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 == Changelog ==
 
 == Unreleased ==
+
+- Dev: Add Jetpack Backup admin note #6738
 - Add: Adding WCPay payment configuration defaults. #7097
 - Fix: Transformer casing is incorrect and creates an error on case-sensitive systems #7104
 - Dev: Reduce the specificity and complexity of the ReportError component #6846
