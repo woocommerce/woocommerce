@@ -456,6 +456,9 @@ exports[`Testing cart Contains a Taxes section if Core options are set to show i
         </div>
       </div>
       <div
+        class="wc-block-components-discounts-meta"
+      />
+      <div
         class="wc-block-components-totals-shipping"
       >
         <div
@@ -1146,6 +1149,9 @@ exports[`Testing cart Shows individual tax lines if the store is set to do so 1`
           </div>
         </div>
       </div>
+      <div
+        class="wc-block-components-discounts-meta"
+      />
       <div
         class="wc-block-components-totals-shipping"
       >
@@ -1842,6 +1848,9 @@ exports[`Testing cart Shows rate percentages after tax lines if the block is set
           </div>
         </div>
       </div>
+      <div
+        class="wc-block-components-discounts-meta"
+      />
       <div
         class="wc-block-components-totals-shipping"
       >

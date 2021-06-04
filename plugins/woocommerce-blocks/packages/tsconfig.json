@@ -10,7 +10,8 @@
 		"../assets/js/base/hooks",
 		"../settings/shared/index.ts",
 		"../settings/blocks/index.ts",
-		"../type-defs"
+		"../type-defs",
+	  	"../assets/js/data"
 	],
 	"exclude": [ "**/test/**" ]
 }
