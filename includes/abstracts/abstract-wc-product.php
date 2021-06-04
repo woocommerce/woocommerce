@@ -1374,13 +1374,15 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		 */
 		do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
 
+		$state = $this->before_data_store_save_or_update();
+
 		if ( $this->get_id() ) {
 			$this->data_store->update( $this );
 		} else {
 			$this->data_store->create( $this );
 		}
 
-		$this->maybe_defer_product_sync();
+		$this->after_data_store_save_or_update( $state );
 
 		/**
 		 * Trigger action after saving to the DB.
@@ -1391,6 +1393,25 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		do_action( 'woocommerce_after_' . $this->object_type . '_object_save', $this, $this->data_store );
 
 		return $this->get_id();
+	}
+
+	/**
+	 * Do any extra processing needed before the actual product save
+	 * (but after triggering the 'woocommerce_before_..._object_save' action)
+	 *
+	 * @return mixed A state value that will be passed to after_data_store_save_or_update.
+	 */
+	protected function before_data_store_save_or_update() {
+	}
+
+	/**
+	 * Do any extra processing needed after the actual product save
+	 * (but before triggering the 'woocommerce_after_..._object_save' action)
+	 *
+	 * @param mixed $state The state object that was returned by before_data_store_save_or_update.
+	 */
+	protected function after_data_store_save_or_update( $state ) {
+		$this->maybe_defer_product_sync();
 	}
 
 	/**
