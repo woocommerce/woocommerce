@@ -24,8 +24,7 @@ const client = factories.api.withDefaultPermalinks;
 const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );
 const simpleProductPrice = config.has('products.simple.price') ? config.get('products.simple.price') : '9.99';
-const defaultVariableProduct = config.get( 'products.variable' );
-const defaultVariations = config.get( 'products.variation' );
+const defaultVariableProduct = config.get('products.variable');
 
 /**
  * Verify and publish
@@ -222,22 +221,73 @@ const createSimpleProductWithCategory = async ( productName, productPrice, categ
 
 /**
  * Create variable product.
- * 
+ *
  * @param varProduct Defaults to the variable product object in `default.json`
- * @param variations Defaults to the variation object in `default.json`
  * @returns the ID of the created variable product
  */
-const createVariableProduct = async ( varProduct = defaultVariableProduct, variations = defaultVariations ) => {
-	const variableProduct = await factories.products.variable.create( varProduct );
+const createVariableProduct = async (varProduct = defaultVariableProduct) => {
+	const { attributes } = varProduct;
+	const { id } = await factories.products.variable.create(varProduct);
+	const variations = [];
+	const buffer = []; // accumulated attributes while looping
+	const aIdx = 0; // attributes[] index
 
-	for( const v of variations ){
+	// Create variation for all attributes
+	const createVariation = (aIdx) => {
+		const { name, options } = attributes[aIdx];
+		const isLastAttribute = aIdx === attributes.length - 1;
+
+		// Add each attribute value to the buffer.
+		options.forEach((opt) => {
+			buffer.push({
+				name: name,
+				option: opt
+			});
+
+			if (isLastAttribute) {
+				// If this is the last attribute, it means the variation is now complete.
+				// Save whatever's been accumulated in the buffer to the `variations[]` array.
+				variations.push({
+					attributes: [...buffer]
+				});
+			} else {
+				// Otherwise, move to the next attribute first
+				// before proceeding to the next value in this attribute.
+				createVariation(aIdx + 1);
+			}
+
+			buffer.pop();
+		});
+	};
+	createVariation(aIdx);
+
+	// Set some properties of 1st variation
+	variations[0].regularPrice = '9.99';
+	variations[0].virtual = true;
+
+	// Set some properties of 2nd variation
+	variations[1].regularPrice = '11.99';
+	variations[1].virtual = true;
+
+	// Set some properties of 3rd variation
+	variations[2].regularPrice = '20';
+	variations[2].weight = '200';
+	variations[2].dimensions = {
+		length: '10',
+		width: '20',
+		height: '15'
+	};
+	variations[2].manage_stock = true;
+
+	// Use API to create each variation
+	for (const v of variations) {
 		await factories.products.variation.create({
-			productId: variableProduct.id,
+			productId: id,
 			variation: v
 		});
 	}
 
-	return variableProduct.id;
+	return id;
 };
 
 /**
