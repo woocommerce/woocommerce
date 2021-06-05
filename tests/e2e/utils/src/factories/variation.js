@@ -17,9 +17,6 @@ export function variationFactory(httpClient) {
             return repository.create(productId, model);
         });
 
-        return {
-            regularPrice: variation.regularPrice,
-            attributes: variation.attributes
-        };
+        return variation;
     });
 }
