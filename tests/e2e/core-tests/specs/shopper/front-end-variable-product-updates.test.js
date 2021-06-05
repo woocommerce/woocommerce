@@ -72,37 +72,50 @@ const runVariableProductUpdateTest = () => {
 			);
 		});
 
-		// mytodo continue transforming from here
 		it('shopper can change variable product attributes to variation with a different price', async () => {
 			await shopper.goToProduct(variablePostIdValue);
-			await expect(page).toSelect('#attr-1', 'val1');
-			await expect(page).toSelect('#attr-2', 'val1');
-			await expect(page).toSelect('#attr-3', 'val2');
+			await expect(page).toSelect(
+				`#${attributes[0].name.toLowerCase()}`,
+				attributes[0].options[0]
+			);
+			await expect(page).toSelect(
+				`#${attributes[1].name.toLowerCase()}`,
+				attributes[1].options[0]
+			);
+			await expect(page).toSelect(
+				`#${attributes[2].name.toLowerCase()}`,
+				attributes[2].options[1]
+			);
 
 			await expect(page).toMatchElement('.woocommerce-variation-price', { text: '11.99' });
 		});
 
 		it('shopper can reset variations', async () => {
 			await shopper.goToProduct(variablePostIdValue);
-			await expect(page).toSelect('#attr-1', 'val1');
-			await expect(page).toSelect('#attr-2', 'val2');
-			await expect(page).toSelect('#attr-3', 'val1');
+			await expect(page).toSelect(
+				`#${attributes[0].name.toLowerCase()}`,
+				attributes[0].options[0]
+			);
+			await expect(page).toSelect(
+				`#${attributes[1].name.toLowerCase()}`,
+				attributes[1].options[1]
+			);
+			await expect(page).toSelect(
+				`#${attributes[2].name.toLowerCase()}`,
+				attributes[2].options[0]
+			);
 
 			await expect(page).toClick('.reset_variations');
 
 			// Verify the reset by attempting to add the product to the cart
-			const couponDialog = await expect(page).toDisplayDialog(async () => {
-				await expect(page).toClick('.single_add_to_cart_button');
-			});
-
+			const couponDialog = await expect(page).toDisplayDialog(
+				async () => {
+					await expect(page).toClick('.single_add_to_cart_button');
+				}
+			);
 			expect(couponDialog.message()).toMatch(cartDialogMessage);
-
-			// Accept the dialog
-			await couponDialog.accept();
 		});
-
 	});
-
 };
 
 module.exports = runVariableProductUpdateTest;
