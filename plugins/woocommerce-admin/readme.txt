@@ -96,6 +96,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Add: Add Mercado Pago as default fallback payment gateway #7043
 - Add: Add in Razorpay as default fallback payment gateway #7096
 - Add: Get post install scripts from gateway and enqueue in client #6967
+- Add: Add eWAY as default fallback gateway #7108
 - Add: Free extension list powered by remote config #6952
 - Add: Add PayPal to fallback payment gateways #7001
 - Add: Add a data store for WC Payments REST APIs #6918
