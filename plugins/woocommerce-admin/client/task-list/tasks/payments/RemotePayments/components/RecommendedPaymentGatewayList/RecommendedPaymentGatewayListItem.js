@@ -4,11 +4,9 @@
 import classnames from 'classnames';
 import { Fragment } from '@wordpress/element';
 import { CardBody, CardMedia, CardDivider } from '@wordpress/components';
-import { PAYMENT_GATEWAYS_STORE_NAME } from '@woocommerce/data';
 import { RecommendedRibbon, SetupRequired } from '@woocommerce/onboarding';
 import { recordEvent } from '@woocommerce/tracks';
 import { Text, useSlot } from '@woocommerce/experimental';
-import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -18,6 +16,7 @@ import { PaymentAction } from '../../../components/PaymentAction';
 import './RecommendedPaymentGatewayList.scss';
 
 export const RecommendedPaymentGatewayListItem = ( {
+	installedPaymentGateways,
 	isRecommended,
 	paymentGateway,
 	markConfigured,
@@ -34,17 +33,13 @@ export const RecommendedPaymentGatewayListItem = ( {
 
 	const slot = useSlot( `woocommerce_remote_payment_${ key }` );
 
-	const installedPaymentGateway = useSelect( ( select ) => {
-		return (
-			select( PAYMENT_GATEWAYS_STORE_NAME ).getPaymentGateway( key ) || {}
-		);
-	} );
+	const installedPaymentGateway = installedPaymentGateways[ key ] || {};
 
 	const {
 		enabled: isEnabled = false,
 		needs_setup: needsSetup = false,
 		required_settings_keys: requiredSettingsKeys = [],
-		settings_url: manageUrl,
+		settings_url: manageUrl = null,
 	} = installedPaymentGateway;
 
 	const isConfigured = ! needsSetup;

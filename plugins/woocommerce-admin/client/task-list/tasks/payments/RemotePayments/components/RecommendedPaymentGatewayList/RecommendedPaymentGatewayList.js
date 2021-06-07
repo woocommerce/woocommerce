@@ -12,6 +12,7 @@ import './RecommendedPaymentGatewayList.scss';
 
 export const RecommendedPaymentGatewayList = ( {
 	heading,
+	installedPaymentGateways,
 	recommendedPaymentGateway,
 	recommendedPaymentGateways,
 	markConfigured,
@@ -28,6 +29,9 @@ export const RecommendedPaymentGatewayList = ( {
 							markConfigured={ markConfigured }
 							paymentGateway={ paymentGateway }
 							isRecommended={ recommendedPaymentGateway === key }
+							installedPaymentGateways={
+								installedPaymentGateways
+							}
 							recommendedPaymentGatewayKeys={ recommendedPaymentGateways.keys() }
 						/>
 					);

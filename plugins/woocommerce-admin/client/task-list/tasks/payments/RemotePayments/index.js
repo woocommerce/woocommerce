@@ -202,6 +202,7 @@ export const RemotePayments = ( { query } ) => {
 						'Enabled payment methods',
 						'woocommerce-admin'
 					) }
+					installedPaymentGateways={ installedPaymentGateways }
 					recommendedPaymentGateway={ recommendedPaymentGateway }
 					recommendedPaymentGateways={
 						enabledPaymentGatewayRecommendations
@@ -215,6 +216,7 @@ export const RemotePayments = ( { query } ) => {
 						'Additional payment methods',
 						'woocommerce-admin'
 					) }
+					installedPaymentGateways={ installedPaymentGateways }
 					recommendedPaymentGateways={
 						additionalPaymentGatewayRecommendations
 					}

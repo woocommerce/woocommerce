@@ -141,6 +141,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Tweak: Only fetch remote payment gateway recommendations when opted in #6964
 - Tweak: Setup checklist copy revert. #7015
 - Update: Task list component with new Experimental Task list. #6849
+- Update: Optimize payment gateway resolution #7124
 - Update: Experimental task list import to the experimental package. #6950
 - Update: Redirect to WC Home after setting up a payment method #6891
 - Dev: Remove react-docgen docs in favor of Storybook #7055
