@@ -44,7 +44,7 @@ jest.mock( '@woocommerce/explat', () => ( {
 	useExperiment: jest.fn().mockReturnValue( [ false, {} ] ),
 } ) );
 
-const TASK_LIST_HEADING = 'Finish setup';
+const TASK_LIST_HEADING = 'Get ready to start selling';
 const EXTENDED_TASK_LIST_HEADING = 'Things to do next';
 
 describe( 'TaskDashboard and TaskList', () => {

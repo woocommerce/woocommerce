@@ -233,7 +233,10 @@ const TaskDashboard = ( { userPreferences, query } ) => {
 						isComplete={ isTaskListComplete }
 						query={ query }
 						tasks={ setupTasks }
-						title={ __( 'Finish setup', 'woocommerce-admin' ) }
+						title={ __(
+							'Get ready to start selling',
+							'woocommerce-admin'
+						) }
 						trackedCompletedTasks={ trackedCompletedTasks || [] }
 						onComplete={ () =>
 							updateOptions( {

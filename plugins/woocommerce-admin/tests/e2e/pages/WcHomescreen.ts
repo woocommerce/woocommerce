@@ -27,7 +27,7 @@ export class WcHomescreen extends BasePage {
 		await page.waitForSelector(
 			'.woocommerce-task-card .woocommerce-task-list__item-title'
 		);
-		await waitForElementByText( 'p', 'Finish setup' );
+		await waitForElementByText( 'p', 'Get ready to start selling' );
 		const list = await this.page.$$eval(
 			'.woocommerce-task-card .woocommerce-task-list__item-title',
 			( items ) => items.map( ( item ) => item.textContent )
