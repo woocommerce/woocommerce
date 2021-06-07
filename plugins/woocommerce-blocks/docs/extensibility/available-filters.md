@@ -116,6 +116,32 @@ interface CartCoupon {
   }
 }
 ```
+### Snackbar notices
+
+There is a snackbar at the bottom of the page used to display notices to the customer, it looks like this:
+
+<img src="https://user-images.githubusercontent.com/5656702/120882329-d573c100-c5ce-11eb-901b-d7f206f74a66.png" width=300 />
+
+It may be desirable to hide this (by removing it from the array) or to change the text in the notice.
+
+| Filter name  | Description | Return type  |
+|---|---|---|
+| `snackbarNotices`  | An array of notices waiting to be shown in the snackbar | `SnackbarNotice[]`
+
+These are the relevant members of a `SnackbarNotice` object.
+
+```typescript
+SnackbarNotice {
+  content: string;
+  explicitDismiss: boolean;
+  icon: string | null;
+  isDismissable: boolean;
+  onDismiss: Function;
+  spokenMessage: string;
+  status: string;
+  type: string
+}
+```
 
 ## Examples
 
