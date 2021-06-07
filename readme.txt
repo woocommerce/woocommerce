@@ -4,7 +4,7 @@ Tags: e-commerce, store, sales, sell, woo, shop, cart, checkout, downloadable, d
 Requires at least: 5.5
 Tested up to: 5.7
 Requires PHP: 7.0
-Stable tag: 5.3.0
+Stable tag: 5.4.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -160,29 +160,29 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 5.4.0 RC 2021-05-24 =
+= 5.4.0 2021-06-08 =
 
 **WooCommerce**
 
-* Tweak - Updates the date_query usage in the CRUD controller to be consistent, generating an array of queries. #29909
-* Dev - Refactored Tracker to use direct DB calls instead of CRUD. #29877
+* Localization - Added Venezuelan states. #29477
 * Add - Feature WooCommerce Payments in the extensions store for stores in the US, Canada, UK, Ireland, Australia and New Zealand. #29843
 * Add - Product attributes lookup table and debug tools to manually fill or delete it. #29778
-* Fix - Bulk edit on external products causes an error when changing the Backorders setting. #29766
-* Fix - wc_get_low_stock_amount was returning a string, not an integer, for products not having an explicit low stock value set. #29721
-* Enhancement - Improved accessibility of the country and state address fields. #29706
-* Tweak - Search all extension categories instead of just searching the selected category. #29694
-* Fix - Products left without default category assignment when all categories are deleted. #29681
-* Tweak - Use WC Admin's native notice nonce generation. #29637
-* Tweak - Change email settings help text to include troubleshooting steps. #29599
-* Localization - Added Venezuelan states. #29477
-* Fix - Removed rounding at several places to better support precision when prices are entered more than 2dp. #29318
-* Fix - Migrate deprecated jQuery 3 functions. #29044
 * Add - dates_are_gmt parameters in REST API to searched posts using the post_date_gmt column.
 * Add - labels and searching terms in WooCommerce Navigation link block variations. #29772
-* dev: Introduce an option for assignment of variations for Remote Inbox Notification A/B testing
+* Enhancement - Improved accessibility of the country and state address fields. #29706
+* Tweak - Updates the date_query usage in the CRUD controller to be consistent, generating an array of queries. #29909
+* Tweak - Search all extension categories instead of just searching the selected category. #29694
+* Tweak - Use WC Admin's native notice nonce generation. #29637
+* Tweak - Change email settings help text to include troubleshooting steps. #29599
+* Fix - Bulk edit on external products causes an error when changing the Backorders setting. #29766
+* Fix - wc_get_low_stock_amount was returning a string, not an integer, for products not having an explicit low stock value set. #29721
+* Fix - Products left without default category assignment when all categories are deleted. #29681
+* Fix - Removed rounding at several places to better support precision when prices are entered more than 2dp. #29318
+* Fix - Migrate deprecated jQuery 3 functions. #29044
+* Dev - Refactored Tracker to use direct DB calls instead of CRUD. #29877
+* Dev - Introduce an option for assignment of variations for Remote Inbox Notification A/B testing. #29894
 
-**WooCommerce Admin - 2.3.0**
+**WooCommerce Admin - 2.3.0 & 2.3.1**
 
 * Add - Add plugin installer to allow installation of plugins via URL #6805
 * Add - Optional children prop to SummaryNumber component #6748
@@ -213,6 +213,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Remove PayPal for India #6828
 * Fix - Address an issue with OBW when installing only WooCommerce payments and Jetpack. #6957
 * Fix - Calling of get_script_asset_filename with extra parameter #6955
+* Fix - Show Google Listing and Ads in installed marketing extensions section. #7029
 * Performance - Avoid updating customer info synchronously from the front end. #6765
 * Tweak - Add settings_section event prop for CES #6762
 * Tweak - Refactor payments to allow management of methods #6786
@@ -222,10 +223,13 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Tweak - Sort the extension task list by completion status and allow toggling visibility. #6792
 * Tweak - Update PayU logo #6829
 * Tweak - Store profiler - Changed MailPoet's title and description #6886
+* Tweak - Store profiler - Changed MailPoet's title and description #6990
+* Tweak - Adjust WC Pay supported countries #7048
 * Update - Replace marketing extension - Google Listings and Ads. #6939
 * Update - Update choose niche note cta URL #6733
 * Update - UI updates to Payment Task screen #6766
 * Update - Adding setup required icon for non-configured payment methods #6811
+* Update - Payment recommendation screen transition and add external link icon. #7022
 
 **WooCommerce Blocks Package - 5.1.0**
 
@@ -237,9 +241,9 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Add - Added support to the Store API for batching requests. This allows multiple POST requests to be made at once to reduce the number of separate requests being made to the API. #4075
 * Tweak - Improve error message displayed when a payment method didn't have all its dependencies registered. #4176
 * Tweak - Improvements to `emitEventWithAbort`. #4158
-* Fix - Prevent parts of old addresses being displayed in the shipping calculator when changing countries. #4038
-* Fix - issue in which email and phone fields are cleared when using a separate billing address. #4162
 * Tweak - Rename onCheckoutBeforeProcessing to onCheckoutValidationBeforeProcessing.
 * Tweak - Switched to `rest_preload_api_request` for API hydration in cart and checkout blocks. #4090
+* Fix - Prevent parts of old addresses being displayed in the shipping calculator when changing countries. #4038
+* Fix - issue in which email and phone fields are cleared when using a separate billing address. #4162
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
