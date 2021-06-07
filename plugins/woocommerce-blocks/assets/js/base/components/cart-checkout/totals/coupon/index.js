@@ -27,7 +27,6 @@ const TotalsCoupon = ( {
 	const [ couponValue, setCouponValue ] = useState( '' );
 	const currentIsLoading = useRef( false );
 	const { getValidationError, getValidationErrorId } = useValidationContext();
-
 	const validationError = getValidationError( 'coupon' );
 
 	useEffect( () => {

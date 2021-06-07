@@ -2,6 +2,8 @@
 namespace Automattic\WooCommerce\Blocks\Domain\Services;
 
 use Automattic\WooCommerce\Blocks\Domain\Package;
+use Automattic\WooCommerce\Blocks\StoreApi\Routes\RouteException;
+use Automattic\WooCommerce\Blocks\StoreApi\Schemas\CartExtensionsSchema;
 use Automattic\WooCommerce\Blocks\StoreApi\Schemas\CartItemSchema;
 use Automattic\WooCommerce\Blocks\StoreApi\Schemas\CartSchema;
 use Automattic\WooCommerce\Blocks\StoreApi\Formatters;
@@ -62,6 +64,13 @@ final class ExtendRestApi {
 	private $extend_data = [];
 
 	/**
+	 * Data to be extended
+	 *
+	 * @var array
+	 */
+	private $callback_methods = [];
+
+	/**
 	 * Array of payment requirements
 	 *
 	 * @var array
@@ -116,6 +125,79 @@ final class ExtendRestApi {
 		];
 
 		return true;
+	}
+
+	/**
+	 * Add callback functions that can be executed by the cart/extensions endpoint.
+	 *
+	 * @param array $args {
+	 *     An array of elements that make up the callback configuration.
+	 *
+	 *     @type string   $endpoint The endpoint to extend.
+	 *     @type string   $namespace Plugin namespace.
+	 *     @type callable $callback The function/callable to execute.
+	 * }
+	 *
+	 * @throws RouteException On failure to register.
+	 * @returns boolean True on success.
+	 */
+	public function register_update_callback( $args ) {
+		if ( ! array_key_exists( 'namespace', $args ) || ! is_string( $args['namespace'] ) ) {
+			throw new RouteException(
+				'woocommerce_rest_cart_extensions_error',
+				'You must provide a plugin namespace when extending a Store REST endpoint.',
+				400
+			);
+		}
+
+		if ( ! array_key_exists( 'callback', $args ) || ! is_callable( $args['callback'] ) ) {
+			throw new RouteException(
+				'woocommerce_rest_cart_extensions_error',
+				'There is no valid callback supplied to register_update_callback.',
+				400
+			);
+		}
+
+		$this->callback_methods[ $args['namespace'] ] = [
+			'callback' => $args['callback'],
+		];
+		return true;
+	}
+
+	/**
+	 * Get callback for a specific endpoint and namespace.
+	 *
+	 * @param string $namespace The namespace to get callbacks for.
+	 *
+	 * @return callable The callback registered by the extension.
+	 * @throws RouteException When callback is not callable or parameters are incorrect.
+	 */
+	public function get_update_callback( $namespace ) {
+		$method = null;
+		if ( ! is_string( $namespace ) ) {
+			throw new RouteException(
+				'woocommerce_rest_cart_extensions_error',
+				'You must provide a plugin namespace when extending a Store REST endpoint.',
+				400
+			);
+		}
+
+		if ( ! array_key_exists( $namespace, $this->callback_methods ) ) {
+			throw new RouteException(
+				'woocommerce_rest_cart_extensions_error',
+				sprintf( 'There is no such namespace registered: %1$s.', $namespace ),
+				400
+			);
+		}
+
+		if ( ! array_key_exists( 'callback', $this->callback_methods[ $namespace ] ) || ! is_callable( $this->callback_methods[ $namespace ]['callback'] ) ) {
+			throw new RouteException(
+				'woocommerce_rest_cart_extensions_error',
+				sprintf( 'There is no valid callback registered for: %1$s.', $namespace ),
+				400
+			);
+		}
+		return $this->callback_methods[ $namespace ]['callback'];
 	}
 
 	/**

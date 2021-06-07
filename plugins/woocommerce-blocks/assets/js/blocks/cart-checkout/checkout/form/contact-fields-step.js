@@ -23,7 +23,6 @@ const ContactFieldsStep = ( {
 		shouldCreateAccount,
 		setShouldCreateAccount,
 	} = useCheckoutContext();
-
 	const createAccountUI = ! customerId &&
 		allowCreateAccount &&
 		getSetting( 'checkoutAllowsGuest', false ) &&

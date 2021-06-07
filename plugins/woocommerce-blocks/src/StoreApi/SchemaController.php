@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Blocks\StoreApi\Schemas\CartShippingRateSchema;
 use Automattic\WooCommerce\Blocks\StoreApi\Schemas\CartSchema;
 use Automattic\WooCommerce\Blocks\StoreApi\Schemas\CartItemSchema;
 use Automattic\WooCommerce\Blocks\StoreApi\Schemas\CartCouponSchema;
+use Automattic\WooCommerce\Blocks\StoreApi\Schemas\CartExtensionsSchema;
 use Automattic\WooCommerce\Blocks\StoreApi\Schemas\CartFeeSchema;
 use Automattic\WooCommerce\Blocks\StoreApi\Schemas\ErrorSchema;
 use Automattic\WooCommerce\Blocks\StoreApi\Schemas\CheckoutSchema;
@@ -94,6 +95,9 @@ class SchemaController {
 			$this->schemas[ ShippingAddressSchema::IDENTIFIER ],
 			$this->schemas[ BillingAddressSchema::IDENTIFIER ],
 			$this->schemas[ ErrorSchema::IDENTIFIER ]
+		);
+		$this->schemas[ CartExtensionsSchema::IDENTIFIER ]   = new CartExtensionsSchema(
+			$this->extend
 		);
 		$this->schemas[ CheckoutSchema::IDENTIFIER ]         = new CheckoutSchema(
 			$this->extend,
