@@ -9,6 +9,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore as ProductAttributesLookupDataStore;
+
 /**
  * Legacy product contains all deprecated methods for this class and can be
  * removed in the future.
@@ -1421,10 +1423,12 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return bool result
 	 */
 	public function delete( $force_delete = false ) {
-		$deleted = parent::delete( $force_delete );
+		$product_id = $this->get_id();
+		$deleted    = parent::delete( $force_delete );
 
 		if ( $deleted ) {
 			$this->maybe_defer_product_sync();
+			wc_get_container()->get( ProductAttributesLookupDataStore::class )->on_product_deleted( $product_id );
 		}
 
 		return $deleted;
