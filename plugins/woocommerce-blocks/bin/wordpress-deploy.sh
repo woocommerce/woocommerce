@@ -142,7 +142,7 @@ fi
 
 # Copy GIT directory to trunk
 output 2 "Copying project files to SVN trunk..."
-sh ${RELEASER_PATH}/bin/copy-plugin-files.sh "$GIT_PATH" "$SVN_PATH/trunk"
+sh "${RELEASER_PATH}/bin/copy-plugin-files.sh" "$GIT_PATH" "$SVN_PATH/trunk"
 cd "$SVN_PATH"
 
 # Update stable tag on trunk/readme.txt
