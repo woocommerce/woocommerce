@@ -6,6 +6,13 @@
 	}
 }
 
+.wc-block-components-panel.has-border.no-top-border {
+	@include with-translucent-border( 1px 0 );
+	&::after {
+		border-top-width: 0;
+	}
+}
+
 .wc-block-components-panel__button {
 	@include reset-box();
 	height: auto;

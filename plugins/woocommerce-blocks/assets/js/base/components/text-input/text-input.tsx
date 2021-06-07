@@ -11,13 +11,6 @@ import { Label } from '@woocommerce/blocks-checkout';
  */
 import './style.scss';
 
-interface TextInputPropsWithNumberType {
-	type: 'number';
-	step?: number;
-	min?: number;
-	max?: number;
-}
-
 interface TextInputProps
 	extends Omit<
 		InputHTMLAttributes< HTMLInputElement >,
@@ -35,10 +28,7 @@ interface TextInputProps
 	onBlur?: ( newValue: string ) => void;
 }
 
-const TextInput = forwardRef<
-	HTMLInputElement,
-	TextInputProps & ( Record< string, never > | TextInputPropsWithNumberType )
->(
+const TextInput = forwardRef< HTMLInputElement, TextInputProps >(
 	(
 		{
 			className,
@@ -54,40 +44,16 @@ const TextInput = forwardRef<
 			autoComplete = 'off',
 			value = '',
 			onChange,
-			min,
-			max,
-			step,
 			required = false,
 			onBlur = () => {
 				/* Do nothing */
 			},
 			feedback,
+			...rest
 		},
 		ref
 	) => {
 		const [ isActive, setIsActive ] = useState( false );
-
-		const numberAttributesFromProps: {
-			[ prop: string ]: string | number | undefined;
-		} =
-			type === 'number'
-				? {
-						step,
-						min,
-						max,
-				  }
-				: {};
-
-		const numberProps: {
-			[ prop: string ]: string | number | undefined;
-		} = {};
-
-		Object.keys( numberAttributesFromProps ).forEach( ( key ) => {
-			if ( typeof numberAttributesFromProps[ key ] === 'undefined' ) {
-				return;
-			}
-			numberProps[ key ] = numberAttributesFromProps[ key ];
-		} );
 
 		return (
 			<div
@@ -122,7 +88,7 @@ const TextInput = forwardRef<
 							: ariaDescribedBy
 					}
 					required={ required }
-					{ ...numberProps }
+					{ ...rest }
 				/>
 				<Label
 					label={ label }

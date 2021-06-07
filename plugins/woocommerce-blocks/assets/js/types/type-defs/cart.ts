@@ -194,3 +194,7 @@ export interface CartMeta {
 	applyingCoupon: string;
 	removingCoupon: string;
 }
+export interface ExtensionCartUpdateArgs {
+	data: Record< string, unknown >;
+	namespace: string;
+}

@@ -146,7 +146,10 @@ const ValidatedTextInput = ( {
 			} }
 			feedback={
 				showError && (
-					<ValidationInputError propertyName={ errorIdString } />
+					<ValidationInputError
+						errorMessage={ passedErrorMessage }
+						propertyName={ errorIdString }
+					/>
 				)
 			}
 			ref={ inputRef }
