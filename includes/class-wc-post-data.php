@@ -8,6 +8,8 @@
  * @version 2.2.0
  */
 
+use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore as ProductAttributesLookupDataStore;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -307,16 +309,20 @@ class WC_Post_Data {
 				$data_store = WC_Data_Store::load( 'product-variable' );
 				$data_store->delete_variations( $id, true );
 				$data_store->delete_from_lookup_table( $id, 'wc_product_meta_lookup' );
-				$parent_id = wp_get_post_parent_id( $id );
+				wc_get_container()->get( ProductAttributesLookupDataStore::class )->on_product_deleted( $id );
 
+				$parent_id = wp_get_post_parent_id( $id );
 				if ( $parent_id ) {
 					wc_delete_product_transients( $parent_id );
 				}
+
 				break;
 			case 'product_variation':
 				$data_store = WC_Data_Store::load( 'product' );
 				$data_store->delete_from_lookup_table( $id, 'wc_product_meta_lookup' );
 				wc_delete_product_transients( wp_get_post_parent_id( $id ) );
+				wc_get_container()->get( ProductAttributesLookupDataStore::class )->on_product_deleted( $id );
+
 				break;
 			case 'shop_order':
 				global $wpdb;
@@ -360,6 +366,9 @@ class WC_Post_Data {
 		} elseif ( 'product' === $post_type ) {
 			$data_store = WC_Data_Store::load( 'product-variable' );
 			$data_store->delete_variations( $id, false );
+			wc_get_container()->get( ProductAttributesLookupDataStore::class )->on_product_deleted( $id );
+		} elseif ( 'product_variation' === $post_type ) {
+			wc_get_container()->get( ProductAttributesLookupDataStore::class )->on_product_deleted( $id );
 		}
 	}
 
