@@ -79,6 +79,11 @@
 					$tbody.on( 'change', { view: this }, this.updateModelOnChange );
 					$tbody.on( 'sortupdate', { view: this }, this.updateModelOnSort );
 					$( window ).on( 'beforeunload', { view: this }, this.unloadConfirmation );
+					$( document.body ).on( 'click', '.wc-shipping-zone-add', { view: this }, this.onAddNewRow );
+				},
+				onAddNewRow: function() {
+					var $link = $( this );
+					window.location.href = $link.attr( 'href' );
 				},
 				block: function() {
 					$( this.el ).block({
