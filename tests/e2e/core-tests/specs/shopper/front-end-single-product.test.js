@@ -18,9 +18,7 @@ const simpleProductName = config.get( 'products.simple.name' );
 let simplePostIdValue;
 
 // Variables for variable product
-const variableProductName = config.get( 'products.variable.name' );
-const variations = config.get( 'products.variations' );
-const attributes = variations[0].attributes;
+const defaultVariableProduct = config.get( 'products.variable' );
 let variableProductId;
 
 // Variables for grouped product
@@ -59,26 +57,29 @@ const runSingleProductPageTest = () => {
 
 		it('should be able to add variation products to the cart', async () => {
 			// Add a product with one set of variations to cart
-			await shopper.goToProduct( variableProductId );
-			
-			for( const attr of attributes ){
-				const selectElem = `#${attr.name.toLowerCase()}`;
-				const value = attr.option;
+			await shopper.goToProduct(variableProductId);
+
+			for (const attr of defaultVariableProduct.attributes) {
+				const { name, options } = attr;
+				const selectElem = `#${name.toLowerCase()}`;
+				const value = options[0];
 
 				await expect(page).toSelect(selectElem, value);
 			}
-			
+
 			await shopper.addToCart();
-			await expect(page).toMatchElement('.woocommerce-message', {text: 'has been added to your cart.'});
+			await expect(page).toMatchElement('.woocommerce-message', {
+				text: 'has been added to your cart.'
+			});
 
 			// Verify cart contents
 			await shopper.goToCart();
-			await shopper.productIsInCart(variableProductName);
+			await shopper.productIsInCart(defaultVariableProduct.name);
 		});
 
 		it('should be able to remove variation products from the cart', async () => {
 			// Remove items from cart
-			await shopper.removeFromCart(variableProductName);
+			await shopper.removeFromCart(defaultVariableProduct.name);
 			await uiUnblocked();
 			await expect(page).toMatchElement('.cart-empty', {text: 'Your cart is currently empty.'});
 		});
