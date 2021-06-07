@@ -221,6 +221,7 @@ const createSimpleProductWithCategory = async ( productName, productPrice, categ
 
 /**
  * Create variable product.
+ * Also, create variations for all attributes.
  *
  * @param varProduct Defaults to the variable product object in `default.json`
  * @returns the ID of the created variable product
