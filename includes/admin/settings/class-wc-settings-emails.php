@@ -29,15 +29,14 @@ class WC_Settings_Emails extends WC_Settings_Page {
 	}
 
 	/**
-	 * Get sections.
+	 * Get own sections.
 	 *
 	 * @return array
 	 */
-	public function get_sections() {
-		$sections = array(
+	protected function get_own_sections() {
+		return array(
 			'' => __( 'Email options', 'woocommerce' ),
 		);
-		return apply_filters( 'woocommerce_get_sections_' . $this->id, $sections );
 	}
 
 	/**
@@ -45,7 +44,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 	 *
 	 * @return array
 	 */
-	public function get_settings() {
+	protected function get_settings_for_default_section() {
 		$desc_help_text = sprintf(
 		/* translators: %1$s: Link to WP Mail Logging plugin, %2$s: Link to Email FAQ support page. */
 			__( 'To ensure your store&rsquo;s notifications arrive in your and your customers&rsquo; inboxes, we recommend connecting your email address to your domain and setting up a dedicated SMTP server. If something doesn&rsquo;t seem to be sending correctly, install the <a href="%1$s">WP Mail Logging Plugin</a> or check the <a href="%2$s">Email FAQ page</a>.', 'woocommerce' ),
@@ -221,7 +220,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 			)
 		);
 
-		return apply_filters( 'woocommerce_get_settings_' . $this->id, $settings );
+		return apply_filters( 'woocommerce_email_settings', $settings );
 	}
 
 	/**
@@ -237,14 +236,23 @@ class WC_Settings_Emails extends WC_Settings_Page {
 		if ( $current_section ) {
 			foreach ( $email_templates as $email_key => $email ) {
 				if ( strtolower( $email_key ) === $current_section ) {
-					$email->admin_options();
+					$this->run_email_admin_options( $email );
 					break;
 				}
 			}
-		} else {
-			$settings = $this->get_settings();
-			WC_Admin_Settings::output_fields( $settings );
 		}
+
+		parent::output();
+	}
+
+	/**
+	 * Run the 'admin_options' method on a given email.
+	 * This method exists to easy unit testing.
+	 *
+	 * @param object $email The email object to run the method on.
+	 */
+	protected function run_email_admin_options( $email ) {
+		$email->admin_options();
 	}
 
 	/**
@@ -254,19 +262,20 @@ class WC_Settings_Emails extends WC_Settings_Page {
 		global $current_section;
 
 		if ( ! $current_section ) {
-			WC_Admin_Settings::save_fields( $this->get_settings() );
-
+			$this->save_settings_for_current_section();
+			$this->do_update_options_action();
 		} else {
 			$wc_emails = WC_Emails::instance();
 
 			if ( in_array( $current_section, array_map( 'sanitize_title', array_keys( $wc_emails->get_emails() ) ), true ) ) {
 				foreach ( $wc_emails->get_emails() as $email_id => $email ) {
 					if ( sanitize_title( $email_id ) === $current_section ) {
-						do_action( 'woocommerce_update_options_' . $this->id . '_' . $email->id );
+						$this->do_update_options_action( $email->id );
 					}
 				}
 			} else {
-				do_action( 'woocommerce_update_options_' . $this->id . '_' . $current_section );
+				$this->save_settings_for_current_section();
+				$this->do_update_options_action();
 			}
 		}
 	}
