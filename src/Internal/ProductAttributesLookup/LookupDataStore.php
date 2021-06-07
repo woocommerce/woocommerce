@@ -29,6 +29,15 @@ class LookupDataStore {
 	private $is_feature_visible;
 
 	/**
+	 * Does the lookup table exist?
+	 *
+	 * TODO: Remove once the lookup table is created via data migration.
+	 *
+	 * @var bool
+	 */
+	private $lookup_table_exists;
+
+	/**
 	 * LookupDataStore constructor. Makes the feature hidden by default.
 	 */
 	public function __construct() {
@@ -36,6 +45,30 @@ class LookupDataStore {
 
 		$this->lookup_table_name  = $wpdb->prefix . 'wc_product_attributes_lookup';
 		$this->is_feature_visible = false;
+
+		$this->lookup_table_exists = $this->check_lookup_table_exists();
+	}
+
+	/**
+	 * Check if the lookup table exists in the database.
+	 *
+	 * TODO: Remove this method and references to it once the lookup table is created via data migration.
+	 *
+	 * @return bool
+	 */
+	public function check_lookup_table_exists() {
+		global $wpdb;
+
+		$query = $wpdb->prepare(
+			'SELECT count(*)
+FROM information_schema.tables
+WHERE table_schema = DATABASE()
+AND table_name = %s;',
+			$this->lookup_table_name
+		);
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		return 0 !== $wpdb->get_var( $query );
 	}
 
 	/**
@@ -59,6 +92,27 @@ class LookupDataStore {
 	 */
 	public function hide_feature() {
 		$this->is_feature_visible = false;
+	}
+
+	/**
+	 * Delete the lookup table contents related to a given product or variation,
+	 * if it's a variable product it deletes the information for variations too.
+	 * This must be invoked after a product or a variation is trashed or deleted.
+	 *
+	 * @param int|\WC_Product $product Product object or product id.
+	 */
+	public function on_product_deleted( $product ) {
+		if ( ! $this->lookup_table_exists ) {
+			return;
+		}
+
+		if ( is_a( $product, \WC_Product::class ) ) {
+			$product_id = $product->get_id();
+		} else {
+			$product_id = $product;
+		}
+
+		$this->delete_lookup_table_entries_for( $product_id );
 	}
 
 	/**
@@ -89,8 +143,8 @@ class LookupDataStore {
 	}
 
 	/**
-	 * Delete all the lookup table entries for a given product
-	 * (entries are identified by the "parent_or_product_id" field)
+	 * Delete all the lookup table entries for a given product,
+	 * if it's a variable product information for variations is deleted too.
 	 *
 	 * @param int $product_id Simple product id, or main/parent product id for variable products.
 	 */
@@ -100,7 +154,8 @@ class LookupDataStore {
 		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 		$wpdb->query(
 			$wpdb->prepare(
-				'DELETE FROM ' . $this->lookup_table_name . ' WHERE product_or_parent_id = %d',
+				'DELETE FROM ' . $this->lookup_table_name . ' WHERE product_id = %d OR product_or_parent_id = %d',
+				$product_id,
 				$product_id
 			)
 		);
