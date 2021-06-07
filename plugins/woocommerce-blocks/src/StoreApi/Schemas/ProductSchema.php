@@ -556,7 +556,12 @@ class ProductSchema extends AbstractSchema {
 		}
 		global $wpdb;
 
-		$variation_ids               = $product->get_visible_children();
+		$variation_ids = $product->get_visible_children();
+
+		if ( ! count( $variation_ids ) ) {
+			return [];
+		}
+
 		$attributes                  = array_filter( $product->get_attributes(), [ $this, 'filter_variation_attribute' ] );
 		$default_variation_meta_data = array_reduce(
 			$attributes,
