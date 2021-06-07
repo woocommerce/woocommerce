@@ -7,10 +7,8 @@
  */
 import { merchant, IS_RETEST_MODE } from './flows';
 import {
-	clickTab,
 	uiUnblocked,
 	verifyCheckboxIsUnset,
-	selectOptionInSelect2,
 	setCheckbox,
 	unsetCheckbox,
 	evalAndClick,
@@ -293,37 +291,29 @@ const createVariableProduct = async (varProduct = defaultVariableProduct) => {
 
 /**
  * Create grouped product.
+ * 
+ * @returns ID of the grouped product
  */
 const createGroupedProduct = async () => {
 	// Create two products to be linked in a grouped product after
-	await factories.products.simple.create( {
+	const simple1 = await factories.products.simple.create({
 		name: simpleProductName + ' 1',
 		regularPrice: simpleProductPrice
-	} );
-	await factories.products.simple.create( {
+	});
+	const simple2 = await factories.products.simple.create({
 		name: simpleProductName + ' 2',
 		regularPrice: simpleProductPrice
-	} );
+	});
+	const groupedProduct = {
+		name: 'Grouped Product',
+		type: 'grouped',
+		groupedProducts: [simple1.id, simple2.id]
+	};
 
-	// Go to "add product" page
-	await merchant.openNewProduct();
+	const { id } = await factories.products.grouped.create(groupedProduct);
 
-	// Make sure we're on the add product page
-	await expect( page.title() ).resolves.toMatch( 'Add new product' );
-
-	// Set product data and save the product
-	await expect( page ).toFill( '#title', 'Grouped Product' );
-	await expect( page ).toSelect( '#product-type', 'Grouped product' );
-	await clickTab( 'Linked Products' );
-	await selectOptionInSelect2( simpleProductName + ' 1' );
-	await selectOptionInSelect2( simpleProductName + ' 2' );
-	await verifyAndPublish();
-
-	// Get product ID
-	const groupedPostId = await page.$( '#post_ID' );
-	let groupedPostIdValue = ( await ( await groupedPostId.getProperty( 'value' ) ).jsonValue() );
-	return groupedPostIdValue;
-}
+	return id;
+};
 
 /**
  * Create a basic order with the provided order status.

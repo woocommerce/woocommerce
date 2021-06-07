@@ -86,9 +86,7 @@ const runSingleProductPageTest = () => {
 
 	describe('Grouped Product Page', () => {
 		beforeAll(async () => {
-			await merchant.login();
 			groupedPostIdValue = await createGroupedProduct();
-			await merchant.logout();
 		});
 
 		it('should be able to add grouped products to the cart', async () => {
