@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Add target to the button to open it in a new tab #7110
+
+1. Navigate to WooCommerce -> Settings -> Payments
+2. Wait a few seconds until the Recommended ways to get paid section appears.
+3. Click on the See more options button.
+4. A new tab/window should open.
+
 ### Set target to blank for the external links #6999
 
 1. Clone this repository.

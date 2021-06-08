@@ -217,7 +217,7 @@ const PaymentRecommendations: React.FC = () => {
 				<List items={ pluginsList } />
 			</CardBody>
 			<CardFooter>
-				<Button href={ SEE_MORE_LINK } isTertiary>
+				<Button href={ SEE_MORE_LINK } target="_blank" isTertiary>
 					{ __( 'See more options', 'woocommerce-admin' ) }
 					<ExternalIcon size={ 18 } />
 				</Button>

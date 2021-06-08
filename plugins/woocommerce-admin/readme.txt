@@ -82,6 +82,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Add: Create onboarding package to house refactored WCPay card and relevant components #7058
 - Fix: Preventing redundant notices when installing plugins via payments task list. #7026
 - Fix: Autocompleter for custom Search in CompareFilter #6911
+- Fix: Add target to the button to open it in a new tab  #7110
 - Dev: Converting <SettingsForm /> component to TypeScript. #6981
 - Enhancement: Adding Slotfills for remote payments and SettingsForm component. #6932
 - Fix: Make `Search` accept synchronous `autocompleter.options`. #6884
