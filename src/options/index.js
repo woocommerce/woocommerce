@@ -13,6 +13,14 @@ import { STORE_KEY } from './data/constants';
 import { default as OptionEditor } from './OptionEditor';
 import './data';
 
+function shorten( input ) {
+	if ( input.length > 20 ) {
+		return input.substring( 0, 20 ) + '...';
+	}
+
+	return input;
+}
+
 function Options( {
 	options,
 	getOptions,
@@ -51,7 +59,7 @@ function Options( {
 	const renderLoading = () => {
 		return (
 			<tr>
-				<td colSpan="5" align="center">
+				<td colSpan="6" align="center">
 					Loading...
 				</td>
 			</tr>
@@ -62,7 +70,7 @@ function Options( {
 		if ( options.length === 0 ) {
 			return (
 				<tr>
-					<td colSpan="5" align="center">
+					<td colSpan="6" align="center">
 						No Options Found
 					</td>
 				</tr>
@@ -71,17 +79,20 @@ function Options( {
 
 		return options.map( ( option ) => {
 			// eslint-disable-next-line camelcase
-			const { option_id, option_name, autoload } = option;
+			const { option_id, option_name, option_value, autoload } = option;
 
 			// eslint-disable-next-line camelcase
 			const optionId = option_id;
 			// eslint-disable-next-line camelcase
 			const optionName = option_name;
+			// eslint-disable-next-line camelcase
+			const optionValue = shorten( option_value );
 
 			return (
 				<tr key={ optionId }>
 					<td key={ 0 }>{ optionId }</td>
 					<td key={ 1 }>{ optionName }</td>
+					<td key={ 'optionValue' }>{ optionValue }</td>
 					<td className="align-center" key={ 2 }>
 						{ autoload }
 					</td>
@@ -175,6 +186,12 @@ function Options( {
 								key={ 1 }
 							>
 								Name
+							</td>
+							<td
+								className="manage-column column-thumb"
+								key={ 'optionValue' }
+							>
+								Value
 							</td>
 							<td
 								className="manage-column column-thumb align-center"

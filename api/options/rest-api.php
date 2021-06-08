@@ -62,7 +62,7 @@ function wca_test_helper_get_options( $request ) {
 	$search   = $request->get_param( 'search' );
 
 	$query = "
-        select option_id, option_name, autoload
+        select option_id, option_name, option_value, autoload
         from {$wpdb->prefix}options
     ";
 
