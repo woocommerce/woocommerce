@@ -349,6 +349,7 @@ export const TaskList = ( {
 											? task.onClick
 											: () => setCurrentTask( task.key )
 									}
+									expandable={ expandingItems }
 									expanded={
 										expandingItems &&
 										currentTask === task.key

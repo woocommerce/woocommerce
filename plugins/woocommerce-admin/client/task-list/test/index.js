@@ -85,7 +85,7 @@ describe( 'TaskDashboard and TaskList', () => {
 				isDismissable: false,
 				type: 'setup',
 				action: 'CTA (required)',
-				content: 'This is the require task content',
+				content: 'This is the required task content',
 			},
 			{
 				key: 'completed',
@@ -108,6 +108,8 @@ describe( 'TaskDashboard and TaskList', () => {
 				time: '1 minute',
 				isDismissable: true,
 				type: 'extension',
+				action: 'CTA (extension)',
+				content: 'This is the extension task content',
 			},
 		],
 	};
@@ -663,9 +665,12 @@ describe( 'TaskDashboard and TaskList', () => {
 			isExtendedTaskListHidden: true,
 			profileItems: {},
 		} ) );
-		const { queryByText } = render( <TaskDashboard query={ {} } /> );
-		expect( queryByText( 'This is the optional task content' ) ).toBeNull();
-		expect( queryByText( 'CTA (optional)' ) ).toBeNull();
+		act( () => {
+			const { queryByText } = render( <TaskDashboard query={ {} } /> );
+			expect(
+				queryByText( 'This is the optional task content' )
+			).not.toHaveClass( 'woocommerce-task-list__item-content-appear' );
+		} );
 	} );
 
 	it( 'setup task list renders expandable items in experiment variant', async () => {
@@ -683,21 +688,24 @@ describe( 'TaskDashboard and TaskList', () => {
 				variationName: 'treatment',
 			},
 		] );
-		const { container, queryByText } = render(
-			<TaskDashboard query={ {} } />
-		);
+		await act( async () => {
+			const { container, queryByText } = render(
+				<TaskDashboard query={ {} } />
+			);
 
-		// Expect the first incomplete task to be expanded
-		expect(
-			await findByText( container, 'This is the optional task content' )
-		).not.toBeNull();
-		expect(
-			await findByText( container, 'CTA (optional)' )
-		).not.toBeNull();
+			// Expect the first incomplete task to be expanded
+			expect(
+				await findByText(
+					container,
+					'This is the optional task content'
+				)
+			).toHaveClass( 'woocommerce-task-list__item-content-appear' );
 
-		// Expect the second not to be.
-		expect( queryByText( 'This is the required task content' ) ).toBeNull();
-		expect( queryByText( 'CTA (required)' ) ).toBeNull();
+			// Expect the second not to be.
+			expect(
+				queryByText( 'This is the required task content' )
+			).not.toHaveClass( 'woocommerce-task-list__item-content-appear' );
+		} );
 	} );
 
 	describe( 'getVisibleTasks', () => {

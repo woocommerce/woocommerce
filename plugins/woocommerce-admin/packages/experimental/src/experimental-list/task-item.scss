@@ -65,13 +65,50 @@ $task-alert-yellow: #f0b849;
 	}
 
 	.woocommerce-task-list__item-content {
+		max-height: 0;
+		opacity: 0;
 		margin-top: $gap-smallest;
-		margin-bottom: $gap-smallest;
+		overflow: hidden;
+
+		&.woocommerce-task-list__item-content-enter {
+			opacity: 0;
+			max-height: 0;
+		}
+
+		&.woocommerce-task-list__item-content-enter-active {
+			opacity: 1;
+			max-height: 100vh;
+			transition: opacity 500ms, max-height 500ms;
+		}
+
+		&.woocommerce-task-list__item-content-appear,
+		&.woocommerce-task-list__item-content-appear-active,
+		&.woocommerce-task-list__item-content-appear-done,
+		&.woocommerce-task-list__item-content-enter-done {
+			opacity: 1;
+			max-height: 100vh;
+		}
+
+		&.woocommerce-task-list__item-content-exit {
+			opacity: 1;
+			max-height: 100vh;
+		}
+
+		&.woocommerce-task-list__item-content-exit-active {
+			opacity: 0;
+			max-height: 0;
+			transition: opacity 500ms, max-height 500ms;
+		}
+
+		.woocommerce-task__additional-info {
+			margin-top: $gap-smaller;
+		}
 	}
 
 	.woocommerce-task-list__item-action {
-		margin-top: $gap-smallest;
-		margin-bottom: $gap-smaller;
+		margin-top: $gap-smaller;
+		margin-bottom: $gap-smallest;
+		display: block;
 	}
 
 	.woocommerce-task-list__item-after {

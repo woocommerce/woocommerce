@@ -8,6 +8,7 @@ import NoticeOutline from 'gridicons/dist/notice-outline';
 import { EllipsisMenu } from '@woocommerce/components';
 import classnames from 'classnames';
 import { sanitize } from 'dompurify';
+import { CSSTransition } from 'react-transition-group';
 
 /**
  * Internal dependencies
@@ -38,6 +39,7 @@ type TaskItemProps = {
 	additionalInfo?: string;
 	time?: string;
 	content: string;
+	expandable?: boolean;
 	expanded?: boolean;
 	level?: TaskLevel;
 	action: (
@@ -79,6 +81,7 @@ export const TaskItem: React.FC< TaskItemProps > = ( {
 	additionalInfo,
 	time,
 	content,
+	expandable = false,
 	expanded = false,
 	level = 3,
 	action,
@@ -110,32 +113,48 @@ export const TaskItem: React.FC< TaskItemProps > = ( {
 					<span className="woocommerce-task-list__item-title">
 						{ title }
 					</span>
-					{ expanded && (
+					<CSSTransition
+						appear
+						timeout={ 500 }
+						in={ expanded }
+						classNames="woocommerce-task-list__item-content"
+					>
 						<div className="woocommerce-task-list__item-content">
 							{ content }
+							{ expandable && ! completed && additionalInfo && (
+								<div
+									className="woocommerce-task__additional-info"
+									dangerouslySetInnerHTML={ sanitizeHTML(
+										additionalInfo
+									) }
+								></div>
+							) }
+							{ ! completed && (
+								<Button
+									className="woocommerce-task-list__item-action"
+									isPrimary
+									onClick={ (
+										event:
+											| React.MouseEvent
+											| React.KeyboardEvent
+									) => {
+										event.stopPropagation();
+										action( event, { isExpanded: true } );
+									} }
+								>
+									{ actionLabel || title }
+								</Button>
+							) }
 						</div>
-					) }
-					{ additionalInfo && (
+					</CSSTransition>
+
+					{ ! expandable && ! completed && additionalInfo && (
 						<div
 							className="woocommerce-task__additional-info"
 							dangerouslySetInnerHTML={ sanitizeHTML(
 								additionalInfo
 							) }
 						></div>
-					) }
-					{ expanded && ! completed && (
-						<Button
-							className="woocommerce-task-list__item-action"
-							isPrimary
-							onClick={ (
-								event: React.MouseEvent | React.KeyboardEvent
-							) => {
-								event.stopPropagation();
-								action( event, { isExpanded: true } );
-							} }
-						>
-							{ actionLabel || title }
-						</Button>
 					) }
 					{ time && (
 						<div className="woocommerce-task__estimated-time">
