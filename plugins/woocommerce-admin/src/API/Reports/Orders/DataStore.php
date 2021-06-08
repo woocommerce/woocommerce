@@ -11,6 +11,8 @@ use \Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
 use \Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 use \Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
 use \Automattic\WooCommerce\Admin\API\Reports\Cache;
+use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
+
 
 /**
  * API\Reports\Orders\DataStore.
@@ -128,13 +130,13 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$included_coupons = $this->get_included_coupons( $query_args );
 		$excluded_coupons = $this->get_excluded_coupons( $query_args );
 		if ( $included_coupons || $excluded_coupons ) {
-			$this->subquery->add_sql_clause( 'join', "JOIN {$order_coupon_lookup_table} ON {$order_stats_lookup_table}.order_id = {$order_coupon_lookup_table}.order_id" );
+			$this->subquery->add_sql_clause( 'join', "LEFT JOIN {$order_coupon_lookup_table} ON {$order_stats_lookup_table}.order_id = {$order_coupon_lookup_table}.order_id" );
 		}
 		if ( $included_coupons ) {
 			$where_subquery[] = "{$order_coupon_lookup_table}.coupon_id IN ({$included_coupons})";
 		}
 		if ( $excluded_coupons ) {
-			$where_subquery[] = "{$order_coupon_lookup_table}.coupon_id NOT IN ({$excluded_coupons})";
+			$where_subquery[] = "({$order_coupon_lookup_table}.coupon_id IS NULL OR {$order_coupon_lookup_table}.coupon_id NOT IN ({$excluded_coupons}))";
 		}
 
 		$included_products = $this->get_included_products( $query_args );
@@ -213,8 +215,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'page'              => 1,
 			'order'             => 'DESC',
 			'orderby'           => 'date_created',
-			'before'            => '',
-			'after'             => '',
+			'before'            => TimeInterval::default_before(),
+			'after'             => TimeInterval::default_after(),
 			'fields'            => '*',
 			'product_includes'  => array(),
 			'product_excludes'  => array(),
@@ -252,11 +254,13 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$selections = $this->selected_columns( $query_args );
 			$params     = $this->get_limit_params( $query_args );
 			$this->add_sql_query_params( $query_args );
+			/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
 			$db_records_count = (int) $wpdb->get_var(
 				"SELECT COUNT(*) FROM (
 					{$this->subquery->get_query_statement()}
 				) AS tt"
-			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+			);
+			/* phpcs:enable */
 
 			if ( 0 === $params['per_page'] ) {
 				$total_pages = 0;
@@ -277,10 +281,12 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$this->subquery->add_sql_clause( 'select', $selections );
 			$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
 			$this->subquery->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
+			/* phpcs:disable WordPress.DB.PreparedSQL.NotPrepared */
 			$orders_data = $wpdb->get_results(
 				$this->subquery->get_query_statement(),
 				ARRAY_A
-			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+			);
+			/* phpcs:enable */
 
 			if ( null === $orders_data ) {
 				return $data;
@@ -429,6 +435,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$order_product_lookup_table = $wpdb->prefix . 'wc_order_product_lookup';
 		$included_order_ids         = implode( ',', $order_ids );
 
+		/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
 		$products = $wpdb->get_results(
 			"SELECT
 				order_id,
@@ -449,7 +456,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				order_id IN ({$included_order_ids})
 			",
 			ARRAY_A
-		); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+		);
+		/* phpcs:enable */
 
 		return $products;
 	}
@@ -476,11 +484,13 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			return array();
 		}
 
+		/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
 		$customer_ids = implode( ',', $customer_ids );
 		$customers    = $wpdb->get_results(
 			"SELECT * FROM {$customer_lookup_table} WHERE customer_id IN ({$customer_ids})",
 			ARRAY_A
-		); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+		);
+		/* phpcs:enable */
 
 		return $customers;
 	}
@@ -496,6 +506,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$order_coupon_lookup_table = $wpdb->prefix . 'wc_order_coupon_lookup';
 		$included_order_ids        = implode( ',', $order_ids );
 
+		/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
 		$coupons = $wpdb->get_results(
 			"SELECT order_id, coupon_id, post_title as coupon_code
 				FROM {$wpdb->posts}
@@ -504,7 +515,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 					order_id IN ({$included_order_ids})
 				",
 			ARRAY_A
-		); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+		);
+		/* phpcs:enable */
 
 		return $coupons;
 	}
@@ -521,10 +533,12 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$statuses  = Cache::get( $cache_key );
 
 		if ( false === $statuses ) {
+			/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
 			$table_name = self::get_db_table_name();
 			$statuses   = $wpdb->get_col(
 				"SELECT DISTINCT status FROM {$table_name}"
-			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+			);
+			/* phpcs:enable */
 
 			Cache::set( $cache_key, $statuses );
 		}

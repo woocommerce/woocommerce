@@ -139,6 +139,8 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix style regression with the Chart header. #7002
 - Fix styling of the advanced filter operator selection. #7005
 - Fix: Deprecated warnings from select control @wordpress/data-controls. #7007
+- Fix: Bug with Orders Report coupon exclusion filter. #7021
+- Fix: Show Google Listing and Ads in installed marketing extensions section. #7029
 - Fix: Notices not dissapearing. #7077
 - Tweak: Only fetch remote payment gateway recommendations when opted in #6964
 - Tweak: Setup checklist copy revert. #7015
