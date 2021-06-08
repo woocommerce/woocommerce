@@ -74,6 +74,12 @@ class Filterer {
 			$all_terms                  = get_terms( $taxonomy, array( 'hide_empty' => false ) );
 			$term_ids_by_slug           = wp_list_pluck( $all_terms, 'term_id', 'slug' );
 			$term_ids_to_filter_by      = array_values( array_intersect_key( $term_ids_by_slug, array_flip( $data['terms'] ) ) );
+			$term_ids_to_filter_by      = array_map(
+				function( $id ) {
+					return (int) $id;
+				},
+				$term_ids_to_filter_by
+			);
 			$term_ids_to_filter_by_list = '(' . join( ',', $term_ids_to_filter_by ) . ')';
 			$is_and_query               = 'and' === $data['query_type'];
 
