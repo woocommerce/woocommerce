@@ -233,7 +233,7 @@ CREATE TABLE ' . $this->lookup_table_name . '(
 		}
 
 		foreach ( $product_ids as $id ) {
-			$this->data_store->update_data_for_product( $id );
+			$this->data_store->insert_data_for_product( $id );
 		}
 
 		update_option( 'woocommerce_attribute_lookup__last_products_page_processed', $current_products_page );

@@ -400,6 +400,10 @@ class WC_Post_Data {
 			$data_store->untrash_variations( $id );
 
 			wc_product_force_unique_sku( $id );
+
+			wc_get_container()->get( ProductAttributesLookupDataStore::class )->on_product_changed( $id );
+		} elseif ( 'product_variation' === $post_type ) {
+			wc_get_container()->get( ProductAttributesLookupDataStore::class )->on_product_changed( $id );
 		}
 	}
 
