@@ -95,6 +95,39 @@ AND table_name = %s;',
 	}
 
 	/**
+	 * Insert/update the appropriate lookup table entries for a new or modified product or variation.
+	 * This must be invoked after a product or a variation is created (including untrashing and duplication)
+	 * or modified.
+	 *
+	 * @param int|\WC_Product $product Product object or product id.
+	 * @param null|array      $changeset Changes as provided by 'get_changes' method in the product object, null if it's being created.
+	 */
+	public function on_product_changed( $product, $changeset = null ) {
+		if ( ! $this->lookup_table_exists ) {
+			return;
+		}
+
+		if ( ! is_a( $product, \WC_Product::class ) ) {
+			$product = WC()->call_function( 'wc_get_product', $product );
+		}
+
+		// No changeset available: the product/variation is new, so just insert its data.
+
+		if ( is_null( $changeset ) ) {
+			$this->delete_lookup_table_entries_for( $product->get_id() );
+			if ( $this->is_variation( $product ) ) {
+				$this->insert_data_for_variation( $product );
+			} else {
+				$this->insert_data_for_product( $product );
+			}
+		}
+
+		// Changeset available: process it.
+
+		// TODO: Implement changeset processing.
+	}
+
+	/**
 	 * Delete the lookup table contents related to a given product or variation,
 	 * if it's a variable product it deletes the information for variations too.
 	 * This must be invoked after a product or a variation is trashed or deleted.
@@ -116,21 +149,19 @@ AND table_name = %s;',
 	}
 
 	/**
-	 * Insert or update the lookup data for a given product or variation.
-	 * If a variable product is passed the information is updated for all of its variations.
+	 * Insert the lookup data for a given product or variation.
+	 * If a variable product is passed the information is created for all of its variations.
 	 *
 	 * @param int|WC_Product $product Product object or id.
 	 * @throws \Exception A variation object is passed.
 	 */
-	public function update_data_for_product( $product ) {
-		// TODO: For now data is always deleted and fully regenerated, existing data should be updated instead.
-
+	public function insert_data_for_product( $product ) {
 		if ( ! is_a( $product, \WC_Product::class ) ) {
 			$product = WC()->call_function( 'wc_get_product', $product );
 		}
 
 		if ( $this->is_variation( $product ) ) {
-			throw new \Exception( "LookupDataStore::update_data_for_product can't be called for variations." );
+			throw new \Exception( "LookupDataStore::insert_data_for_product can't be called for variations." );
 		}
 
 		$this->delete_lookup_table_entries_for( $product->get_id() );
@@ -216,17 +247,53 @@ AND table_name = %s;',
 
 		foreach ( $variation_attributes_data as $taxonomy => $data ) {
 			foreach ( $variations as $variation ) {
-				$variation_id                 = $variation->get_id();
-				$variation_has_stock          = $variation->is_in_stock();
-				$variation_definition_term_id = $this->get_variation_definition_term_id( $variation, $taxonomy, $term_ids_by_slug_cache );
-				if ( $variation_definition_term_id ) {
-					$this->insert_lookup_table_data( $variation_id, $main_product_id, $taxonomy, $variation_definition_term_id, true, $variation_has_stock );
-				} else {
-					$term_ids_for_taxonomy = $data['term_ids'];
-					foreach ( $term_ids_for_taxonomy as $term_id ) {
-						$this->insert_lookup_table_data( $variation_id, $main_product_id, $taxonomy, $term_id, true, $variation_has_stock );
-					}
-				}
+				$this->insert_lookup_table_data_for_variation( $variation, $taxonomy, $main_product_id, $data['term_ids'], $term_ids_by_slug_cache );
+			}
+		}
+	}
+
+	/**
+	 * Create all the necessary lookup data for a given variation.
+	 *
+	 * @param \WC_Product_Variation $variation The variation to create entries for.
+	 */
+	private function insert_data_for_variation( \WC_Product_Variation $variation ) {
+		$main_product = wc_get_product( $variation->get_parent_id() );
+
+		$product_attributes_data   = $this->get_attribute_taxonomies( $main_product );
+		$variation_attributes_data = array_filter(
+			$product_attributes_data,
+			function( $item ) {
+				return $item['used_for_variations'];
+			}
+		);
+
+		$term_ids_by_slug_cache = $this->get_term_ids_by_slug_cache( array_keys( $variation_attributes_data ) );
+
+		foreach ( $variation_attributes_data as $taxonomy => $data ) {
+			$this->insert_lookup_table_data_for_variation( $variation, $taxonomy, $main_product->get_id(), $data['term_ids'], $term_ids_by_slug_cache );
+		}
+	}
+
+	/**
+	 * Create lookup table entries for a given variation, corresponding to a given taxonomy and a set of term ids.
+	 *
+	 * @param \WC_Product_Variation $variation The variation to create entries for.
+	 * @param string                $taxonomy The taxonomy to create the entries for.
+	 * @param int                   $main_product_id The parent product id.
+	 * @param array                 $term_ids The term ids to create entries for.
+	 * @param array                 $term_ids_by_slug_cache A dictionary of term ids by term slug, as returned by 'get_term_ids_by_slug_cache'.
+	 */
+	private function insert_lookup_table_data_for_variation( \WC_Product_Variation $variation, string $taxonomy, int $main_product_id, array $term_ids, array $term_ids_by_slug_cache ) {
+		$variation_id                 = $variation->get_id();
+		$variation_has_stock          = $variation->is_in_stock();
+		$variation_definition_term_id = $this->get_variation_definition_term_id( $variation, $taxonomy, $term_ids_by_slug_cache );
+		if ( $variation_definition_term_id ) {
+			$this->insert_lookup_table_data( $variation_id, $main_product_id, $taxonomy, $variation_definition_term_id, true, $variation_has_stock );
+		} else {
+			$term_ids_for_taxonomy = $term_ids;
+			foreach ( $term_ids_for_taxonomy as $term_id ) {
+				$this->insert_lookup_table_data( $variation_id, $main_product_id, $taxonomy, $term_id, true, $variation_has_stock );
 			}
 		}
 	}
