@@ -6,7 +6,7 @@ import { Button } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { PAYMENT_GATEWAYS_STORE_NAME } from '@woocommerce/data';
 import { DynamicForm } from '@woocommerce/components';
-import { WooRemotePaymentForm } from '@woocommerce/onboarding';
+import { WooPaymentGatewayConnect } from '@woocommerce/onboarding';
 import { useSlot } from '@woocommerce/experimental';
 
 /**
@@ -14,7 +14,7 @@ import { useSlot } from '@woocommerce/experimental';
  */
 import sanitizeHTML from '~/lib/sanitize-html';
 
-export const PaymentConnect = ( {
+export const Connect = ( {
 	markConfigured,
 	paymentGateway,
 	recordConnectStartEvent,
@@ -31,7 +31,7 @@ export const PaymentConnect = ( {
 
 	const { createNotice } = useDispatch( 'core/notices' );
 	const { updatePaymentGateway } = useDispatch( PAYMENT_GATEWAYS_STORE_NAME );
-	const slot = useSlot( `woocommerce_remote_payment_form_${ id }` );
+	const slot = useSlot( `woocommerce_payment_gateway_connect_${ id }` );
 	const hasFills = Boolean( slot?.fills?.length );
 	const fields = settingKeys
 		? settingKeys
@@ -113,7 +113,7 @@ export const PaymentConnect = ( {
 
 	if ( hasFills ) {
 		return (
-			<WooRemotePaymentForm.Slot
+			<WooPaymentGatewayConnect.Slot
 				fillProps={ {
 					defaultForm: DefaultForm,
 					defaultSubmit: handleSubmit,

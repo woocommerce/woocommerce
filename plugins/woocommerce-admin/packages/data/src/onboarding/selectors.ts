@@ -15,7 +15,7 @@ export const getTasksStatus = (
 	return state.tasksStatus || {};
 };
 
-export const getPaymentMethodRecommendations = (
+export const getPaymentGatewaySuggestions = (
 	state: OnboardingState
 ): PaymentMethodsState[] => {
 	return state.paymentMethods || [];
@@ -39,8 +39,8 @@ export const isOnboardingRequesting = (
 export type OnboardingSelectors = {
 	getProfileItems: () => ReturnType< typeof getProfileItems >;
 	getTasksStatus: () => ReturnType< typeof getTasksStatus >;
-	getPaymentMethodRecommendations: () => ReturnType<
-		typeof getPaymentMethodRecommendations
+	getPaymentGatewaySuggestions: () => ReturnType<
+		typeof getPaymentGatewaySuggestions
 	>;
 	getOnboardingError: () => ReturnType< typeof getOnboardingError >;
 	isOnboardingRequesting: () => ReturnType< typeof isOnboardingRequesting >;

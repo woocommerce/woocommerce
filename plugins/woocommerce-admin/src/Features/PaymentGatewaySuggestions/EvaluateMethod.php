@@ -3,7 +3,7 @@
  * Evaluates the spec and returns a status.
  */
 
-namespace Automattic\WooCommerce\Admin\Features\RemotePaymentMethods;
+namespace Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions;
 
 defined( 'ABSPATH' ) || exit;
 

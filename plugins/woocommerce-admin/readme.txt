@@ -190,12 +190,14 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Tweak: Refactor payments to allow management of methods #6786
 - Tweak: Add tracking data for the preview site button #6623
 - Tweak: Update WC Payments copy on the task list #6734
+- Tweak: Update payment gateway suggestions semantics to be more consistent #7130
 - Tweak: Add check to see if value for contains is array, show warning if not. #6645
 - Tweak: Sort the extension task list by completion status and allow toggling visibility. #6792
 - Tweak: Only fetch remote payment gateway recommendations when opted in #6964
 - Update: Replace marketing extension - Google Listings and Ads. #6939
 - Update: Update choose niche note cta URL #6733
 - Update: UI updates to Payment Task screen #6766
+- Update: Update payment gateway suggestions semantics to be more consistent #7130
 - Update: Adding setup required icon for non-configured payment methods #6811
 
 == 2.2.6 5/7/2021 ==

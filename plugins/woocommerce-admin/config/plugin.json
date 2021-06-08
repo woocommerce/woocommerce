@@ -14,7 +14,7 @@
 		"onboarding": true,
 		"remote-inbox-notifications": true,
 		"remote-extensions-list": false,
-		"remote-payment-methods": false,
+		"payment-gateway-suggestions": false,
 		"settings": false,
 		"shipping-label-banner": true,
 		"store-alerts": true,

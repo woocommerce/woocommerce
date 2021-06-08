@@ -1,18 +1,18 @@
-# WooRemotePayment Slot & Fill
+# WooPaymentGatewaySetup Slot & Fill
 
 A Slotfill component that will replace the <Stepper /> involved in the installation for a gateway via the payment task.
 
 ## Usage
 
 ```jsx
-<WooRemotePayment id={ key }>
+<WooPaymentGatewaySetup id={ key }>
   {({defaultStepper: DefaultStepper}) => <p>Fill Content</p>}
-</WooRemotePayment>
+</WooPaymentGatewaySetup>
 
-<WooRemotePayment.Slot id={ key } />
+<WooPaymentGatewaySetup.Slot id={ key } />
 ```
 
-### WooRemotePayment (fill)
+### WooPaymentGatewaySetup (fill)
 
 This is the fill component. You must provide the `id` prop to identify the slot that this will occupy. If you provide a function as the child of your fill (as shown above), you will receive some helper props to assist in creating your fill:
 
@@ -22,7 +22,7 @@ This is the fill component. You must provide the `id` prop to identify the slot 
 | `defaultInstallStep` | Object    | The object that describes the default step configuration for installation of the gateway             |
 | `defaultConnectStep` | Object    | The object that describes the default step configuration for configuration of the gateway            |
 
-### WooRemotePayment.Slot (slot)
+### WooPaymentGatewaySetup.Slot (slot)
 
 This is the slot component, and will not be used as frequently. It must also receive the required `id` prop that will be identical to the fill `id`.
 

@@ -11,7 +11,7 @@ import {
 	pluginNames,
 } from '@woocommerce/data';
 import { Plugins, Stepper } from '@woocommerce/components';
-import { WooRemotePayment } from '@woocommerce/onboarding';
+import { WooPaymentGatewaySetup } from '@woocommerce/onboarding';
 import { recordEvent } from '@woocommerce/tracks';
 import { useEffect, useState, useMemo, useCallback } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
@@ -21,22 +21,22 @@ import { useSlot } from '@woocommerce/experimental';
  * Internal dependencies
  */
 import { createNoticesFromResponse } from '~/lib/notices';
-import { PaymentConnect } from '../PaymentConnect';
-import './PaymentMethod.scss';
+import { Connect } from './Connect';
+import './Setup.scss';
 
-export const PaymentMethod = ( {
+export const Setup = ( {
 	markConfigured,
-	method,
+	suggestion,
 	recordConnectStartEvent,
 } ) => {
-	const { key, plugins = [], title } = method;
-	const slot = useSlot( `woocommerce_remote_payment_${ key }` );
+	const { id, plugins = [], title } = suggestion;
+	const slot = useSlot( `woocommerce_payment_gateway_setup_${ id }` );
 	const hasFills = Boolean( slot?.fills?.length );
 	const [ isPluginLoaded, setIsPluginLoaded ] = useState( false );
 
 	useEffect( () => {
 		recordEvent( 'payments_task_stepper_view', {
-			payment_method: key,
+			payment_method: id,
 		} );
 	}, [] );
 
@@ -58,10 +58,10 @@ export const PaymentMethod = ( {
 		return {
 			isOptionUpdating: isOptionsUpdating(),
 			isPaymentGatewayResolving: isResolving( 'getPaymentGateway', [
-				key,
+				id,
 			] ),
 			paymentGateway: ! pluginsToInstall.length
-				? getPaymentGateway( key )
+				? getPaymentGateway( id )
 				: null,
 			needsPluginInstall: !! pluginsToInstall.length,
 		};
@@ -131,7 +131,7 @@ export const PaymentMethod = ( {
 			}
 		),
 		content: paymentGateway ? (
-			<PaymentConnect
+			<Connect
 				markConfigured={ markConfigured }
 				paymentGateway={ paymentGateway }
 				recordConnectStartEvent={ recordConnectStartEvent }
@@ -162,15 +162,15 @@ export const PaymentMethod = ( {
 		<Card className="woocommerce-task-payment-method woocommerce-task-card">
 			<CardBody>
 				{ hasFills ? (
-					<WooRemotePayment.Slot
+					<WooPaymentGatewaySetup.Slot
 						fillProps={ {
 							defaultStepper: DefaultStepper,
 							defaultInstallStep: installStep,
 							defaultConnectStep: connectStep,
-							markConfigured: () => markConfigured( key ),
+							markConfigured: () => markConfigured( id ),
 							paymentGateway,
 						} }
-						id={ key }
+						id={ id }
 					/>
 				) : (
 					<DefaultStepper />

@@ -4,20 +4,20 @@
 import { __ } from '@wordpress/i18n';
 import { Button, Spinner } from '@wordpress/components';
 import { updateQueryString } from '@woocommerce/navigation';
+import { recordEvent } from '@woocommerce/tracks';
 import { useState } from '@wordpress/element';
 
 export const PaymentAction = ( {
 	hasSetup = false,
-	isConfigured = false,
+	needsSetup = true,
+	id,
 	isEnabled = false,
 	isLoading = false,
 	isRecommended = false,
 	manageUrl = null,
 	markConfigured,
-	methodKey,
 	onSetUp = () => {},
 	onSetupCallback,
-	onManageButtonClick = () => {},
 	setupButtonText = __( 'Set up', 'woocommerce-admin' ),
 } ) => {
 	const [ isBusy, setIsBusy ] = useState( false );
@@ -29,7 +29,7 @@ export const PaymentAction = ( {
 	}
 
 	const handleClick = async () => {
-		onSetUp( methodKey );
+		onSetUp( id );
 
 		if ( onSetupCallback ) {
 			setIsBusy( true );
@@ -45,7 +45,7 @@ export const PaymentAction = ( {
 		}
 
 		updateQueryString( {
-			method: methodKey,
+			id,
 		} );
 	};
 
@@ -54,7 +54,7 @@ export const PaymentAction = ( {
 			className={ classes }
 			isSecondary
 			href={ manageUrl }
-			onClick={ onManageButtonClick }
+			onClick={ () => recordEvent( 'tasklist_payment_manage', { id } ) }
 		>
 			{ __( 'Manage', 'woocommerce-admin' ) }
 		</Button>
@@ -66,7 +66,7 @@ export const PaymentAction = ( {
 				<Button
 					className={ classes }
 					isSecondary
-					onClick={ () => markConfigured( methodKey ) }
+					onClick={ () => markConfigured( id ) }
 				>
 					{ __( 'Enable', 'woocommerce-admin' ) }
 				</Button>
@@ -93,7 +93,7 @@ export const PaymentAction = ( {
 		);
 	}
 
-	if ( ! isConfigured ) {
+	if ( needsSetup ) {
 		return (
 			<div>
 				<Button

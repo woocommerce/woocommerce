@@ -3,7 +3,7 @@
  * Handles polling and storage of specs
  */
 
-namespace Automattic\WooCommerce\Admin\Features\RemotePaymentMethods;
+namespace Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -43,7 +43,7 @@ class DataSourcePoller {
 	 */
 	public static function read_specs_from_data_sources() {
 		$specs        = array();
-		$data_sources = apply_filters( 'woocommerce_admin_remote_payment_methods_data_sources', self::DATA_SOURCES );
+		$data_sources = apply_filters( 'woocommerce_admin_payment_gateway_suggestions_data_sources', self::DATA_SOURCES );
 
 		// Note that this merges the specs from the data sources based on the
 		// key - last one wins.

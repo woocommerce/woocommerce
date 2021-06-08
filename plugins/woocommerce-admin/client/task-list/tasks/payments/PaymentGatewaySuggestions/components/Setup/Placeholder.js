@@ -5,7 +5,7 @@ import classnames from 'classnames';
 import { Card, CardBody } from '@wordpress/components';
 import { Stepper } from '@woocommerce/components';
 
-export const PaymentMethodPlaceholder = () => {
+export const Placeholder = () => {
 	const classes = classnames(
 		'is-loading',
 		'woocommerce-task-payment-method',

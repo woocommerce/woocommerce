@@ -13,51 +13,48 @@ import { Text, useSlot } from '@woocommerce/experimental';
  */
 import { PaymentAction } from '../../../components/PaymentAction';
 
-import './RecommendedPaymentGatewayList.scss';
+import './List.scss';
 
-export const RecommendedPaymentGatewayListItem = ( {
-	installedPaymentGateways,
+export const Item = ( {
 	isRecommended,
-	paymentGateway,
 	markConfigured,
-	recommendedPaymentGatewayKeys,
+	paymentGateways,
+	suggestion,
+	suggestionKeys,
 } ) => {
-	const {
-		image,
-		content,
-		key,
-		plugins = [],
-		title,
-		loading,
-	} = paymentGateway;
+	const { image, content, id, plugins = [], title, loading } = suggestion;
 
-	const slot = useSlot( `woocommerce_remote_payment_${ key }` );
+	const connectSlot = useSlot(
+		`woocommerce_payment_gateway_connect_${ id }`
+	);
+	const setupSlot = useSlot( `woocommerce_payment_gateway_setup_${ id }` );
 
-	const installedPaymentGateway = installedPaymentGateways[ key ] || {};
+	const paymentGateway = paymentGateways[ id ] || {};
 
 	const {
 		enabled: isEnabled = false,
 		needs_setup: needsSetup = false,
 		required_settings_keys: requiredSettingsKeys = [],
-		settings_url: manageUrl = null,
-	} = installedPaymentGateway;
+		settings_url: manageUrl,
+	} = paymentGateway;
 
-	const isConfigured = ! needsSetup;
-	const hasFills = Boolean( slot?.fills?.length );
+	const hasFills =
+		Boolean( connectSlot?.fills?.length ) ||
+		Boolean( setupSlot?.fills?.length );
 	const hasSetup = Boolean(
 		plugins.length || requiredSettingsKeys.length || hasFills
 	);
-	const showRecommendedRibbon = isRecommended && ! isConfigured;
+	const showRecommendedRibbon = isRecommended && needsSetup;
 
 	const classes = classnames(
 		'woocommerce-task-payment',
 		'woocommerce-task-card',
-		! isConfigured && 'woocommerce-task-payment-not-configured',
-		'woocommerce-task-payment-' + key
+		needsSetup && 'woocommerce-task-payment-not-configured',
+		'woocommerce-task-payment-' + id
 	);
 
 	return (
-		<Fragment key={ key }>
+		<Fragment key={ id }>
 			<CardBody
 				style={ { paddingLeft: 0, marginBottom: 0 } }
 				className={ classes }
@@ -69,7 +66,7 @@ export const RecommendedPaymentGatewayListItem = ( {
 					{ showRecommendedRibbon && <RecommendedRibbon /> }
 					<Text as="h3" className="woocommerce-task-payment__title">
 						{ title }
-						{ isEnabled && ! isConfigured && <SetupRequired /> }
+						{ isEnabled && needsSetup && <SetupRequired /> }
 					</Text>
 					<div className="woocommerce-task-payment__content">
 						{ content }
@@ -78,17 +75,17 @@ export const RecommendedPaymentGatewayListItem = ( {
 				<div className="woocommerce-task-payment__footer">
 					<PaymentAction
 						manageUrl={ manageUrl }
-						methodKey={ key }
+						id={ id }
 						hasSetup={ hasSetup }
-						isConfigured={ isConfigured }
+						needsSetup={ needsSetup }
 						isEnabled={ isEnabled }
 						isRecommended={ isRecommended }
 						isLoading={ loading }
 						markConfigured={ markConfigured }
 						onSetup={ () =>
 							recordEvent( 'tasklist_payment_setup', {
-								options: recommendedPaymentGatewayKeys,
-								selected: key,
+								options: suggestionKeys,
+								selected: id,
 							} )
 						}
 					/>

@@ -1,6 +1,13 @@
 /**
  * External dependencies
  */
+import { __ } from '@wordpress/i18n';
+import interpolateComponents from 'interpolate-components';
+import { Link, Pill } from '@woocommerce/components';
+import { PAYMENT_GATEWAYS_STORE_NAME } from '@woocommerce/data';
+import { recordEvent } from '@woocommerce/tracks';
+import { Text } from '@woocommerce/experimental';
+import { useSelect } from '@wordpress/data';
 import {
 	WCPayCard,
 	WCPayCardHeader,
@@ -8,11 +15,6 @@ import {
 	WCPayCardBody,
 	SetupRequired,
 } from '@woocommerce/onboarding';
-import { __ } from '@wordpress/i18n';
-import { Text } from '@woocommerce/experimental';
-import { Link, Pill } from '@woocommerce/components';
-import { recordEvent } from '@woocommerce/tracks';
-import interpolateComponents from 'interpolate-components';
 
 /**
  * Internal dependencies
@@ -37,26 +39,14 @@ const TosPrompt = () =>
 		},
 	} );
 
-const ButtonComponent = ( {
-	method: { key: methodKey, isConfigured, loading, onClick },
-	isEnabled,
-} ) => (
-	<PaymentAction
-		methodKey={ methodKey }
-		hasSetup={ true }
-		isConfigured={ isConfigured }
-		isEnabled={ isEnabled }
-		isRecommended={ true }
-		isLoading={ loading }
-		onSetup={ () => {} }
-		onSetupCallback={ onClick }
-		setupButtonText={ __( 'Get started', 'woocommerce-admin' ) }
-		onManageButtonClick={ () => recordEvent( 'tasklist_payment_manage' ) }
-	/>
-);
-
-export const WCPayMethodCard = ( { method, isEnabled } ) => {
-	const { description } = method;
+export const WCPayMethodCard = ( { suggestion } ) => {
+	const { description, id } = suggestion;
+	const paymentGateway = useSelect( ( select ) => {
+		return (
+			select( PAYMENT_GATEWAYS_STORE_NAME ).getPaymentGateway( id ) || {}
+		);
+	} );
+	const { enabled: isEnabled, needs_setup: needsSetup } = paymentGateway;
 
 	return (
 		<WCPayCard>
@@ -79,9 +69,16 @@ export const WCPayMethodCard = ( { method, isEnabled } ) => {
 					<Text>
 						<TosPrompt />
 					</Text>
-					<ButtonComponent
+					<PaymentAction
+						id={ id }
+						hasSetup={ true }
+						needsSetup={ needsSetup }
 						isEnabled={ isEnabled }
-						method={ method }
+						isRecommended={ true }
+						setupButtonText={ __(
+							'Get started',
+							'woocommerce-admin'
+						) }
 					/>
 				</>
 			</WCPayCardFooter>

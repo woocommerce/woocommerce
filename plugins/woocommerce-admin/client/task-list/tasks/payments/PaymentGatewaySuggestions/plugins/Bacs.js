@@ -7,7 +7,7 @@ import { Form, H, TextControl } from '@woocommerce/components';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { registerPlugin } from '@wordpress/plugins';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { WooRemotePayment } from '@woocommerce/onboarding';
+import { WooPaymentGatewaySetup } from '@woocommerce/onboarding';
 
 const initialFormValues = {
 	account_name: '',
@@ -69,7 +69,7 @@ const BacsPaymentGatewaySetup = () => {
 
 	return (
 		<>
-			<WooRemotePayment id="bacs">
+			<WooPaymentGatewaySetup id="bacs">
 				{ ( { markConfigured } ) => {
 					return (
 						<Form
@@ -168,7 +168,7 @@ const BacsPaymentGatewaySetup = () => {
 						</Form>
 					);
 				} }
-			</WooRemotePayment>
+			</WooPaymentGatewaySetup>
 		</>
 	);
 };

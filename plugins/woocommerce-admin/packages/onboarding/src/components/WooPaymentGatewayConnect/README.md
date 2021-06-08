@@ -1,18 +1,18 @@
-# WooRemotePaymentForm Slot & Fill
+# WooPaymentGatewayConnect Slot & Fill
 
 A Slotfill component that will replace the <DynamicForm /> component involved in displaying the form while adding a gateway via the payment task.
 
 ## Usage
 
 ```jsx
-<WooRemotePaymentForm id={ key }>
+<WooPaymentGatewayConnect id={ key }>
   {({defaultForm: DefaultForm}) => <p>Fill Content</p>}
-</WooRemotePaymentForm>
+</WooPaymentGatewayConnect>
 
-<WooRemotePaymentForm.Slot id={ key } />
+<WooPaymentGatewayConnect.Slot id={ key } />
 ```
 
-### WooRemotePaymentForm (fill)
+### WooPaymentGatewayConnect (fill)
 
 This is the fill component. You must provide the `id` prop to identify the slot that this will occupy. If you provide a function as the child of your fill (as shown above), you will receive some helper props to assist in creating your fill:
 
@@ -23,7 +23,7 @@ This is the fill component. You must provide the `id` prop to identify the slot 
 | `defaultFields`  | Array     | An array of the field configuration objects provided by the API                                          |
 | `markConfigured` | Function  | A helper function that will mark your gateway as configured                                              |
 
-### WooRemotePaymentForm.Slot (slot)
+### WooPaymentGatewayConnect.Slot (slot)
 
 This is the slot component, and will not be used as frequently. It must also receive the required `id` prop that will be identical to the fill `id`.
 

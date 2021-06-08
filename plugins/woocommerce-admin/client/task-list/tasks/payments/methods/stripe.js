@@ -90,7 +90,7 @@ class Stripe extends Component {
 				method: 'POST',
 				data: {
 					returnUrl: getAdminLink(
-						'admin.php?page=wc-admin&task=payments&method=stripe&stripe-connect=1'
+						'admin.php?page=wc-admin&task=payments&id=stripe&stripe-connect=1'
 					),
 				},
 			} );

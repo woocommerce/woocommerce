@@ -3,7 +3,7 @@
  * Logic for extending WC_REST_Payment_Gateways_Controller.
  */
 
-namespace Automattic\WooCommerce\Admin\Features\RemotePaymentMethods;
+namespace Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions;
 
 defined( 'ABSPATH' ) || exit;
 

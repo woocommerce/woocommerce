@@ -177,14 +177,14 @@ export const LocalPayments = ( { query } ) => {
 	};
 
 	const currentMethod = useMemo( () => {
-		if ( ! query.method ) {
+		if ( ! query.id ) {
 			return null;
 		}
 
-		const method = methods.find( ( m ) => m.key === query.method );
+		const method = methods.find( ( m ) => m.key === query.id );
 
 		if ( ! method ) {
-			throw `Current method ${ query.method } not found in available methods list`;
+			throw `Current method ${ query.id } not found in available methods list`;
 		}
 
 		return method;

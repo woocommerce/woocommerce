@@ -40,7 +40,7 @@ export function* getTasksStatus() {
 	}
 }
 
-export function* getPaymentMethodRecommendations() {
+export function* getPaymentGatewaySuggestions() {
 	try {
 		const results = yield apiFetch( {
 			path: WC_ADMIN_NAMESPACE + '/onboarding/payments',
@@ -49,6 +49,6 @@ export function* getPaymentMethodRecommendations() {
 
 		yield setPaymentMethods( results );
 	} catch ( error ) {
-		yield setError( 'getPaymentMethodRecommendations', error );
+		yield setError( 'getPaymentGatewaySuggestions', error );
 	}
 }
