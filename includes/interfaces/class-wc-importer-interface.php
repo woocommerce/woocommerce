@@ -68,6 +68,14 @@ interface WC_Importer_Interface {
 	public function get_file_position();
 
 	/**
+	 * Get the size of the file to be imported
+	 * The import is complete when get_file_position() equals get_file_size()
+	 *
+	 * @return int
+	 */
+	public function get_file_size();
+
+	/**
 	 * Get file pointer position as a percentage of file size.
 	 *
 	 * @return int

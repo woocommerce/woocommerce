@@ -151,7 +151,7 @@ class WC_Admin_Importers {
 			return;
 		}
 
-		$id          = absint( $_POST['import_id'] ); // PHPCS: input var ok.
+		$id          = absint( $_POST['import_id'] ); // PHPCS: input var ok, CSRF ok.
 		$file        = get_attached_file( $id );
 		$parser      = new WXR_Parser();
 		$import_data = $parser->parse( $file );
@@ -233,12 +233,14 @@ class WC_Admin_Importers {
 
 		$importer         = WC_Product_CSV_Importer_Controller::get_importer( $file, $params );
 		$results          = $importer->import();
+		$file_size        = $importer->get_file_size();
+		$file_position    = $importer->get_file_position();
 		$percent_complete = $importer->get_percent_complete();
 		$error_log        = array_merge( $error_log, $results['failed'], $results['skipped'] );
 
 		update_user_option( get_current_user_id(), 'product_import_error_log', $error_log );
 
-		if ( 100 === $percent_complete ) {
+		if ( $file_size === $file_position ) {
 			// @codingStandardsIgnoreStart.
 			$wpdb->delete( $wpdb->postmeta, array( 'meta_key' => '_original_id' ) );
 			$wpdb->delete( $wpdb->posts, array(
