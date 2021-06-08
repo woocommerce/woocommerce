@@ -1379,12 +1379,19 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		$state = $this->before_data_store_save_or_update();
 
 		if ( $this->get_id() ) {
+			$changeset = $this->get_changes();
 			$this->data_store->update( $this );
 		} else {
+			$changeset = null;
 			$this->data_store->create( $this );
 		}
 
 		$this->after_data_store_save_or_update( $state );
+
+		// Update attributes lookup table if the product is new OR it's not but there are actually any changes.
+		if ( is_null( $changeset ) || ! empty( $changeset ) ) {
+			wc_get_container()->get( ProductAttributesLookupDataStore::class )->on_product_changed( $this, $changeset );
+		}
 
 		/**
 		 * Trigger action after saving to the DB.
