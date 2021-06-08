@@ -21,15 +21,15 @@ class FiltererTest extends \WC_Unit_Test_Case {
 
 		$wpdb->query(
 			"
-          CREATE TABLE IF NOT EXISTS {$wpdb->prefix}wc_product_attributes_lookup (
-		  product_id bigint(20) NOT NULL,
-		  product_or_parent_id bigint(20) NOT NULL,
-		  taxonomy varchar(32) NOT NULL,
-		  term_id bigint(20) NOT NULL,
-		  is_variation_attribute tinyint(1) NOT NULL,
-		  in_stock tinyint(1) NOT NULL
- 		  );
-		"
+			  CREATE TABLE IF NOT EXISTS {$wpdb->prefix}wc_product_attributes_lookup (
+			  product_id bigint(20) NOT NULL,
+			  product_or_parent_id bigint(20) NOT NULL,
+			  taxonomy varchar(32) NOT NULL,
+			  term_id bigint(20) NOT NULL,
+			  is_variation_attribute tinyint(1) NOT NULL,
+			  in_stock tinyint(1) NOT NULL
+			  );
+			"
 		);
 
 		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_product_attributes_lookup" );

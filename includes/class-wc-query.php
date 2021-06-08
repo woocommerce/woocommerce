@@ -766,18 +766,16 @@ class WC_Query {
 			);
 		}
 
-		if ( ! $this->filterer->filtering_via_lookup_table_is_active() ) {
+		if ( $main_query && ! $this->filterer->filtering_via_lookup_table_is_active() ) {
 			// Layered nav filters on terms.
-			if ( $main_query ) {
-				foreach ( $this->get_layered_nav_chosen_attributes() as $taxonomy => $data ) {
-					$tax_query[] = array(
-						'taxonomy'         => $taxonomy,
-						'field'            => 'slug',
-						'terms'            => $data['terms'],
-						'operator'         => 'and' === $data['query_type'] ? 'AND' : 'IN',
-						'include_children' => false,
-					);
-				}
+			foreach ( $this->get_layered_nav_chosen_attributes() as $taxonomy => $data ) {
+				$tax_query[] = array(
+					'taxonomy'         => $taxonomy,
+					'field'            => 'slug',
+					'terms'            => $data['terms'],
+					'operator'         => 'and' === $data['query_type'] ? 'AND' : 'IN',
+					'include_children' => false,
+				);
 			}
 		}
 
