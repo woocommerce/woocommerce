@@ -103,6 +103,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Add: Add a data store for WC Payments REST APIs #6918
 - Add: Progressive setup checklist copy and call to action buttons. #6956
 - Add: Add Paystack as fallback gateway #7025
+- Add: Add Square as default fallback gateway #7107
 - Add: Add COD method to default payment gateway recommendations #7057
 - Add: Add BACS as default fallback payment gateway #7073
 - Add: A/B test of progressive checklist features. #7089

@@ -167,6 +167,28 @@ class DefaultPaymentGateways {
 					self::get_rules_for_cbd( false ),
 				),
 			),
+			array(
+				'key'        => 'square_credit_card',
+				'title'      => __( 'Square', 'woocommerce-admin' ),
+				'content'    => __( 'Securely accept credit and debit cards with one low rate, no surprise fees (custom rates available). Sell online and in store and track sales and inventory in one place.', 'woocommerce-admin' ),
+				'image'      => WC()->plugin_url() . '/assets/images/square-black.png',
+				'plugins'    => array( 'woocommerce-square' ),
+				'is_visible' => array(
+					(object) array(
+						'type'     => 'or',
+						'operands' => (object) array(
+							array(
+								self::get_rules_for_countries( array( 'US' ) ),
+								self::get_rules_for_cbd( true ),
+							),
+							array(
+								self::get_rules_for_countries( array( 'US', 'CA', 'JP', 'GB', 'AU', 'IE' ) ),
+								self::get_rules_for_selling_venues( array( 'brick-mortar', 'brick-mortar-other' ) ),
+							),
+						),
+					),
+				),
+			),
 		);
 	}
 
@@ -196,6 +218,38 @@ class DefaultPaymentGateways {
 				'type'      => 'base_location_country',
 				'value'     => $country,
 				'operation' => '=',
+			);
+		}
+
+		return (object) array(
+			'type'     => 'or',
+			'operands' => $rules,
+		);
+	}
+
+	/**
+	 * Get rules that match the store's selling venues.
+	 *
+	 * @param array $selling_venues Array of venues to match.
+	 * @return object Rules to match.
+	 */
+	public static function get_rules_for_selling_venues( $selling_venues ) {
+		$rules = array();
+
+		foreach ( $selling_venues as $venue ) {
+			$rules[] = (object) array(
+				'type'         => 'option',
+				'transformers' => array(
+					(object) array(
+						'use'       => 'dot_notation',
+						'arguments' => (object) array(
+							'path' => 'selling_venues',
+						),
+					),
+				),
+				'option_name'  => 'woocommerce_onboarding_profile',
+				'operation'    => '=',
+				'value'        => $venue,
 			);
 		}
 
