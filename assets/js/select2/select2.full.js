@@ -3707,7 +3707,7 @@ S2.define('select2/data/tags',[
   };
 
   Tags.prototype.createTag = function (decorated, params) {
-    var term = params.term.trim();
+    var term = ( params.term || 0 == params.term ) ? params.term.toString().trim() : '';
 
     if (term === '') {
       return null;
@@ -4936,12 +4936,12 @@ S2.define('select2/defaults',[
         return DIACRITICS[a] || a;
       }
 
-      return text.replace(/[^\u0000-\u007E]/g, match);
+      return text.replace(/[^\u0000-\u007E]/g, match)
     }
 
     function matcher (params, data) {
       // Always return the object if there is nothing to compare
-      if ( params.term.trim() === '' ) {
+      if ( params.term == null || params.term.toString().trim() === '' ) { 
         return data;
       }
 
@@ -5801,7 +5801,7 @@ S2.define('select2/compat/utils',[
   function syncCssClasses ($dest, $src, adapter) {
     var classes, replacements = [], adapted;
 
-    classes = $dest.attr('class').trim();
+    classes = ( $dest.attr('class') || 0 == $dest.attr('class') ) ? $dest.attr('class').toString().trim() : '';
 
     if (classes) {
       classes = '' + classes; // for IE which returns object
@@ -5814,7 +5814,7 @@ S2.define('select2/compat/utils',[
       });
     }
 
-    classes = $src.attr('class').trim();
+    classes = ( $src.attr('class') || 0 == $src.attr('class') ) ? $src.attr('class').toString().trim() : '';
 
     if (classes) {
       classes = '' + classes; // for IE which returns object
