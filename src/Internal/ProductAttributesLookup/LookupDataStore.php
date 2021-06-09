@@ -62,6 +62,15 @@ class LookupDataStore {
 	}
 
 	/**
+	 * Get the name of the lookup table.
+	 *
+	 * @return string
+	 */
+	public function get_lookup_table_name() {
+		return $this->lookup_table_name;
+	}
+
+	/**
 	 * Insert or update the lookup data for a given product or variation.
 	 * If a variable product is passed the information is updated for all of its variations.
 	 *
