@@ -22,6 +22,18 @@ let variableProductId;
 
 // Variables for grouped product
 const simpleProductPrice = config.has('products.simple.price') ? config.get('products.simple.price') : '9.99';
+const simple1 = {
+	name: simpleProductName + ' 1',
+	regularPrice: simpleProductPrice
+};
+const simple2 = {
+	name: simpleProductName + ' 2',
+	regularPrice: simpleProductPrice
+};
+const groupedProduct = {
+	name: 'Grouped Product',
+	groupedProducts: [simple1, simple2]
+};
 let groupedPostIdValue;
 
 const runSingleProductPageTest = () => {
@@ -85,21 +97,6 @@ const runSingleProductPageTest = () => {
 
 	describe('Grouped Product Page', () => {
 		beforeAll(async () => {
-			// Instantiate simple products to be grouped
-			const simple1 = {
-				name: simpleProductName + ' 1',
-				regularPrice: simpleProductPrice
-			};
-			const simple2 = {
-				name: simpleProductName + ' 2',
-				regularPrice: simpleProductPrice
-			};
-
-			// Create grouped product
-			const groupedProduct = {
-				name: 'Grouped Product',
-				groupedProducts: [simple1, simple2]
-			};
 			groupedPostIdValue = await createGroupedProduct(groupedProduct);
 		});
 
