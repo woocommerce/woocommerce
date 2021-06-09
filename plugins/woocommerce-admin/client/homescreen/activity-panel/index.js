@@ -26,6 +26,7 @@ import {
 } from './orders/utils';
 import { getAllPanels } from './panels';
 import { getUnapprovedReviews } from './reviews/utils';
+import { getUrlParams } from '../../utils';
 
 export const ActivityPanel = () => {
 	const panelsData = useSelect( ( select ) => {
@@ -69,6 +70,13 @@ export const ActivityPanel = () => {
 		return null;
 	}
 
+	const getInitialOpenState = ( panelId ) => {
+		const { opened_panel: openedPanel } = getUrlParams(
+			window.location.search
+		);
+		return panelId === openedPanel;
+	};
+
 	return (
 		<Panel className="woocommerce-activity-panel">
 			{ panels.map( ( panelData ) => {
@@ -96,7 +104,7 @@ export const ActivityPanel = () => {
 						] }
 						key={ id }
 						className={ className }
-						initialOpen={ initialOpen }
+						initialOpen={ getInitialOpenState( id ) || initialOpen }
 						collapsible={ collapsible }
 						disabled={ ! collapsible }
 						onToggle={ ( isOpen ) => {

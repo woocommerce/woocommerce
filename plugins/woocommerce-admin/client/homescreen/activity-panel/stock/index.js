@@ -107,8 +107,8 @@ export class StockPanel extends Component {
 		}
 
 		// Show placeholders only for the first products fetch.
-		if ( isRequesting && ! products.length ) {
-			const numPlaceholders = Math.min( 5, countLowStockProducts );
+		if ( isRequesting || ! products.length ) {
+			const numPlaceholders = Math.min( 5, countLowStockProducts ?? 1 );
 			const placeholders = Array.from(
 				new Array( numPlaceholders )
 			).map( ( v, idx ) => (

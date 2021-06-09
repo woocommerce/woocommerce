@@ -1,3 +1,4 @@
+export { default as AbbreviatedCard } from './abbreviated-card';
 export { default as AdvancedFilters } from './advanced-filters';
 export { default as AnimationSlider } from './animation-slider';
 export { default as Chart } from './chart';

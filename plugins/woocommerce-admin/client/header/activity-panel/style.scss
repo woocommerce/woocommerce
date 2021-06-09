@@ -198,7 +198,7 @@
 .woocommerce-layout__activity-panel-wrapper {
 	height: calc(100vh - #{$header-height + $adminbar-height-mobile});
 	background: $gray-100;
-	width: 510px;
+	width: 430px;
 	@include breakpoint( '<782px' ) {
 		width: 100%;
 	}

@@ -14,6 +14,7 @@ import {
 } from '@woocommerce/data';
 import { useExperiment } from '@woocommerce/explat';
 import { recordEvent } from '@woocommerce/tracks';
+import { ScrollTo } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -180,6 +181,23 @@ const TaskDashboard = ( { userPreferences, query } ) => {
 		return currentTask;
 	};
 
+	const getExtendedTaskList = ( extensionTasks ) => {
+		return (
+			<TaskList
+				name="extended_task_list"
+				eventName="extended_tasklist"
+				collapsible
+				dismissedTasks={ dismissedTasks || [] }
+				remindMeLaterTasks={ remindMeLaterTasks || [] }
+				isComplete={ isExtendedTaskListComplete }
+				query={ query }
+				tasks={ extensionTasks }
+				title={ __( 'Things to do next', 'woocommerce-admin' ) }
+				trackedCompletedTasks={ trackedCompletedTasks || [] }
+			/>
+		);
+	};
+
 	const allTasks = getAllTasks( {
 		activePlugins,
 		countryCode,
@@ -214,6 +232,9 @@ const TaskDashboard = ( { userPreferences, query } ) => {
 			<TaskStep taskContainer={ currentTask.container } query={ query } />
 		);
 	}
+
+	const scrollToExtendedList =
+		window.location.hash.substr( 1 ) === 'extended_task_list';
 
 	return (
 		<>
@@ -274,20 +295,15 @@ const TaskDashboard = ( { userPreferences, query } ) => {
 					</MenuGroup>
 				</DisplayOption>
 			) }
-			{ extensionTasks && ! isExtendedTaskListHidden && (
-				<TaskList
-					name="extended_task_list"
-					eventName="extended_tasklist"
-					collapsible
-					dismissedTasks={ dismissedTasks || [] }
-					remindMeLaterTasks={ remindMeLaterTasks || [] }
-					isComplete={ isExtendedTaskListComplete }
-					query={ query }
-					tasks={ extensionTasks }
-					title={ __( 'Things to do next', 'woocommerce-admin' ) }
-					trackedCompletedTasks={ trackedCompletedTasks || [] }
-				/>
-			) }
+			{ extensionTasks &&
+				! isExtendedTaskListHidden &&
+				( scrollToExtendedList ? (
+					<ScrollTo offset="-20">
+						{ getExtendedTaskList( extensionTasks ) }
+					</ScrollTo>
+				) : (
+					getExtendedTaskList( extensionTasks )
+				) ) }
 			{ isCartModalOpen && (
 				<CartModal
 					onClose={ () => toggleCartModal() }

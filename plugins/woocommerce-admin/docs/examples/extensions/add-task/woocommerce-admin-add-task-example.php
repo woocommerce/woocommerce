@@ -14,7 +14,7 @@ function add_task_register_script() {
 
 	if (
 		! class_exists( 'Automattic\WooCommerce\Admin\Loader' ) ||
-		! \Automattic\WooCommerce\Admin\Loader::is_admin_page() ||
+		! \Automattic\WooCommerce\Admin\Loader::is_admin_or_embed_page() ||
 		! Onboarding::should_show_tasks()
 	) {
 		return;

@@ -158,6 +158,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Dev: Remove support for IE11. #7112
 - Update: Remove original business step flow #7103
 - Dev: Drop styling support for IE11. #7137
+- Add: Show task and activity notifications in the Inbox panel #7017
 
 == 2.3.1 5/24/2021 ==
 - Tweak: Store profiler - Changed MailPoet's title and description #6990

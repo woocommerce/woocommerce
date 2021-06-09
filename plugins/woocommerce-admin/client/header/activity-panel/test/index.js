@@ -55,7 +55,7 @@ jest.mock( '../panel', () => {
 describe( 'Activity Panel', () => {
 	beforeEach( () => {
 		useSelect.mockImplementation( () => ( {
-			hasUnreadNotes: false,
+			hasUnreadNotifications: false,
 			requestingTaskListOptions: false,
 			setupTaskListComplete: false,
 			setupTaskListHidden: false,

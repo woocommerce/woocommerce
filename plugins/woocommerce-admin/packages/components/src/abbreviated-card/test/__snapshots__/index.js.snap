@@ -1,0 +1,35 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AbbreviatedCard it renders correctly 1`] = `
+<div>
+  <div
+    class="components-card is-size-medium woocommerce-abbreviated-card css-1xs3c37-CardUI e1q7k77g0"
+  >
+    <div
+      class="components-card__body css-xmjzce-BodyUI e1q7k77g3"
+    >
+      <a
+        data-link-type="wc-admin"
+        href="#"
+      >
+        <div
+          class="woocommerce-abbreviated-card__icon"
+        >
+          <div
+            size="24"
+          >
+            icon
+          </div>
+        </div>
+        <div
+          class="woocommerce-abbreviated-card__content"
+        >
+          <p>
+            Abbreviated card content
+          </p>
+        </div>
+      </a>
+    </div>
+  </div>
+</div>
+`;

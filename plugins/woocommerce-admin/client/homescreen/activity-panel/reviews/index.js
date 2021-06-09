@@ -349,7 +349,7 @@ class ReviewsPanel extends Component {
 		return (
 			<Fragment>
 				<Section>
-					{ isRequesting && ! reviews.length ? (
+					{ isRequesting || ! reviews.length ? (
 						<ActivityCardPlaceholder
 							className="woocommerce-review-activity-card"
 							hasAction
