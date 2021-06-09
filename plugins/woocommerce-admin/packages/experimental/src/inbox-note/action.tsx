@@ -4,7 +4,6 @@
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { useState } from '@wordpress/element';
-import { ADMIN_URL as adminUrl } from '@woocommerce/wc-admin-settings';
 
 type InboxNoteActionProps = {
 	onClick: () => void;
@@ -29,7 +28,15 @@ export const InboxNoteActionButton: React.FC< InboxNoteActionProps > = ( {
 		const targetHref = event.currentTarget.href || '';
 		let isActionable = true;
 
-		if ( targetHref.length && ! targetHref.startsWith( adminUrl ) ) {
+		let adminUrl = '';
+		if ( window.wcSettings ) {
+			adminUrl = window.wcSettings.adminUrl;
+		}
+
+		if (
+			targetHref.length &&
+			( ! adminUrl || ! targetHref.startsWith( adminUrl ) )
+		) {
 			event.preventDefault();
 			isActionable = false; // link buttons shouldn't be "busy".
 			window.open( targetHref, '_blank' );

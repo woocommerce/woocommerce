@@ -240,6 +240,8 @@ const InboxPanel = () => {
 				);
 				setDismiss( undefined );
 			}
+		} else {
+			setDismiss( undefined );
 		}
 	};
 

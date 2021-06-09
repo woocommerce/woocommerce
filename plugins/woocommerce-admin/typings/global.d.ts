@@ -2,6 +2,7 @@ declare global {
 	interface Window {
 		wcSettings: {
 			preloadOptions: Record< string, unknown >;
+			adminUrl: string;
 		};
 	}
 }

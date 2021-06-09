@@ -55,6 +55,7 @@ type InboxNoteProps = {
 	onNoteActionClick?: ( note: InboxNote, action: InboxNoteAction ) => void;
 	onBodyLinkClick?: ( note: InboxNote, link: string ) => void;
 	onNoteVisible?: ( note: InboxNote ) => void;
+	className?: string;
 };
 
 const DropdownWithPopoverProps = Dropdown as React.ComponentType<
@@ -68,6 +69,7 @@ const InboxNoteCard: React.FC< InboxNoteProps > = ( {
 	onNoteActionClick,
 	onBodyLinkClick,
 	onNoteVisible,
+	className,
 } ) => {
 	const [ clickedActionText, setClickedActionText ] = useState( false );
 	const hasBeenSeen = useRef( false );
@@ -105,8 +107,8 @@ const InboxNoteCard: React.FC< InboxNoteProps > = ( {
 		let isClickOutsideDropdown = false;
 		if ( relatedTarget && 'className' in relatedTarget ) {
 			const classNames = relatedTarget.className;
-			isClickOutsideDropdown = dropdownClasses.some( ( className ) =>
-				classNames.includes( className )
+			isClickOutsideDropdown = dropdownClasses.some( ( cName ) =>
+				classNames.includes( cName )
 			);
 		}
 		if ( isClickOutsideDropdown ) {
@@ -244,9 +246,14 @@ const InboxNoteCard: React.FC< InboxNoteProps > = ( {
 		new Date( dateCreatedGmt + 'Z' ).getTime() > lastRead;
 	const date = dateCreated;
 	const hasImage = layout !== 'plain' && layout !== '';
-	const cardClassName = classnames( 'woocommerce-inbox-message', layout, {
-		'message-is-unread': unread && status === 'unactioned',
-	} );
+	const cardClassName = classnames(
+		'woocommerce-inbox-message',
+		className,
+		layout,
+		{
+			'message-is-unread': unread && status === 'unactioned',
+		}
+	);
 
 	return (
 		<VisibilitySensor onChange={ onVisible }>
