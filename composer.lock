@@ -584,7 +584,7 @@
         },
         {
             "name": "woocommerce/woocommerce-blocks",
-            "version": "v5.1.0",
+            "version": "v5.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-gutenberg-products-block.git",
