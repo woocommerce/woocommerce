@@ -554,7 +554,9 @@ jQuery( function( $ ) {
     if (!(month && year)) {
       return false;
     }
+    month = 'number' === typeof month ? month.toString() : month;
     month = 'string' === typeof month ? month.trim() : '';
+    year = 'number' === typeof year ? year.toString() : year;
     year = 'string' === typeof year ? year.trim() : '';
     if (!/^\d+$/.test(month)) {
       return false;
@@ -584,6 +586,7 @@ jQuery( function( $ ) {
 
   $.payment.validateCardCVC = function(cvc, type) {
     var card, _ref;
+  	cvc = 'number' === typeof cvc ? cvc.toString() : cvc;
     cvc = 'string' === typeof cvc ? cvc.trim() : '';
     if (!/^\d+$/.test(cvc)) {
       return false;
