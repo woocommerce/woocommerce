@@ -2,6 +2,7 @@
  * Internal dependencies
  */
 import { filterBusinessExtensions } from '../flows/selective-bundle';
+import { createInitialValues } from '../flows/selective-bundle/selective-extensions-bundle';
 
 describe( 'BusinessDetails', () => {
 	test( 'filtering extensions', () => {
@@ -30,5 +31,42 @@ describe( 'BusinessDetails', () => {
 		const filteredExtensions = filterBusinessExtensions( extensions );
 
 		expect( filteredExtensions ).toEqual( expectedExtensions );
+	} );
+
+	describe( 'createInitialValues', () => {
+		test( 'selected by default', () => {
+			const extensions = [
+				{
+					plugins: [
+						{
+							key: 'visible-and-not-selected',
+							selected: false,
+							isVisible: () => true,
+						},
+						{
+							key: 'visible-and-selected',
+							selected: true,
+							isVisible: () => true,
+						},
+						{
+							key: 'this-should-not-show-at-all',
+							selected: true,
+							isVisible: () => false,
+						},
+					],
+				},
+			];
+
+			const values = createInitialValues( extensions, 'US', '', [] );
+
+			expect( values ).toEqual(
+				expect.objectContaining( {
+					'visible-and-not-selected': false,
+					'visible-and-selected': true,
+				} )
+			);
+
+			expect( values ).not.toContain( 'this-should-not-show-at-all' );
+		} );
 	} );
 } );

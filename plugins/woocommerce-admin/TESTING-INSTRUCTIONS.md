@@ -44,6 +44,13 @@
 7. Click Continue, before the page redirects click Continue again
 8. Confirm no error has been recorded in your browser console.
 
+### Business features uncheck creative mail by default #7139
+
+2. Complete the OBW until you get to the business details step.
+2. Continue setup until the Business Detail step.
+3. Open `Free Features` tab and toggle dropdown for `Add recommended business features to my site`.
+4. Observe that the list have `Creative Mail` unchecked by default.
+
 ### Fix an issue with OBW when wc-pay and Jetpack are both being installed. #6957
 
 - Complete the OBW until you get to the business details step.
