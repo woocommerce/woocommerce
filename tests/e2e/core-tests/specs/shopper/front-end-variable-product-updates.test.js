@@ -49,27 +49,11 @@ const runVariableProductUpdateTest = () => {
 				attributes[2].options[0]
 			);
 
-			await expect(page).toMatchElement('.woocommerce-variation-price', {
-				text: '20.00'
-			});
-			await expect(page).toMatchElement(
-				'.woocommerce-variation-availability',
-				{
-					text: 'Out of stock'
-				}
-			);
-			await expect(page).toMatchElement(
-				'.woocommerce-product-attributes-item--weight',
-				{
-					text: '200 kg'
-				}
-			);
-			await expect(
-				page
-			).toMatchElement(
-				'.woocommerce-product-attributes-item--dimensions',
-				{ text: '10 × 20 × 15 cm' }
-			);
+			await expect(page).toMatchElement('.woocommerce-variation-price', { text: '20.00' });
+			await expect(page).toMatchElement('.woocommerce-variation-availability', { text: 'Out of stock' });
+			await expect(page).toMatchElement('.woocommerce-product-attributes-item--weight', { text: '200 kg' });
+			await expect(page).toMatchElement('.woocommerce-product-attributes-item--dimensions', { text: '10 × 20 × 15 cm' });
+
 		});
 
 		it('shopper can change variable product attributes to variation with a different price', async () => {
@@ -108,14 +92,15 @@ const runVariableProductUpdateTest = () => {
 			await expect(page).toClick('.reset_variations');
 
 			// Verify the reset by attempting to add the product to the cart
-			const couponDialog = await expect(page).toDisplayDialog(
-				async () => {
+			const couponDialog = await expect(page).toDisplayDialog(async () => {
 					await expect(page).toClick('.single_add_to_cart_button');
-				}
-			);
+				});
+
 			expect(couponDialog.message()).toMatch(cartDialogMessage);
 		});
+
 	});
+	
 };
 
 module.exports = runVariableProductUpdateTest;
