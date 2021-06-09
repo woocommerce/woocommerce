@@ -4,7 +4,6 @@
  */
 const {
 	shopper,
-	merchant,
 	createSimpleProduct,
 	createVariableProduct,
 	createGroupedProduct,
