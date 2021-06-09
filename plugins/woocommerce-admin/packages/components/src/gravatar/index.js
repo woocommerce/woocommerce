@@ -22,7 +22,7 @@ import deprecated from '@wordpress/deprecated';
  */
 const Gravatar = ( { alt, title, size, user, className } ) => {
 	deprecated( 'Gravatar', {
-		version: '7.2.0',
+		version: '8.0.0',
 		plugin: 'WooCommerce',
 		hint:
 			'The Gravatar component will be removed in the next version of @woocommerce/components, please consider using another library to perform this function.',

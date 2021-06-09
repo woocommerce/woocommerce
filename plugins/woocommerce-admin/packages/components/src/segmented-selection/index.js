@@ -22,7 +22,7 @@ class SegmentedSelection extends Component {
 		} = this.props;
 
 		deprecated( 'SegmentedSelection', {
-			version: '7.2.0',
+			version: '8.0.0',
 			plugin: 'WooCommerce',
 			hint:
 				'The SegmentedSelection component will be removed in the next version of @woocommerce/components, please consider using another library to perform this function.',

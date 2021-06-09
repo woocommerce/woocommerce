@@ -15,7 +15,7 @@ import deprecated from '@wordpress/deprecated';
  */
 const Count = ( { count, label } ) => {
 	deprecated( 'Count', {
-		version: '7.2.0',
+		version: '8.0.0',
 		alternative: '@woocommerce/components Badge',
 		plugin: 'WooCommerce',
 		hint: 'Use `import { Badge } from "@woocommerce/components"`',
