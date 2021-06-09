@@ -60,7 +60,18 @@ class DefaultPaymentGateways {
 				),
 			),
 			array(
-				'id'         => 'mollie_wc_gateway_banktransfer',
+				'key'        => 'kco',
+				'title'      => __( 'Klarna', 'woocommerce-admin' ),
+				'content'    => __( 'Choose the payment that you want, pay now, pay later or slice it. No credit card numbers, no passwords, no worries.', 'woocommerce-admin' ),
+				'image'      => WC()->plugin_url() . '/assets/images/klarna-black.png',
+				'plugins'    => array( 'klarna-checkout-for-woocommerce' ),
+				'is_visible' => array(
+					self::get_rules_for_countries( array( 'SE', 'FI', 'NO' ) ),
+					self::get_rules_for_cbd( false ),
+				),
+			),
+			array(
+				'key'        => 'mollie_wc_gateway_banktransfer',
 				'title'      => __( 'Mollie', 'woocommerce-admin' ),
 				'content'    => __( 'Effortless payments by Mollie: Offer global and local payment methods, get onboarded in minutes, and supported in your language.', 'woocommerce-admin' ),
 				'image'      => plugins_url( 'images/onboarding/mollie.svg', WC_ADMIN_PLUGIN_FILE ),
