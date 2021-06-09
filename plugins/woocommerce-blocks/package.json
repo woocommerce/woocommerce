@@ -158,7 +158,7 @@
 		"progress-bar-webpack-plugin": "2.1.0",
 		"promptly": "3.2.0",
 		"puppeteer": "npm:puppeteer-core@5.5.0",
-		"react-test-renderer": "17.0.1",
+		"react-test-renderer": "17.0.2",
 		"request-promise": "4.2.6",
 		"rimraf": "3.0.2",
 		"sass-loader": "10.1.0",
