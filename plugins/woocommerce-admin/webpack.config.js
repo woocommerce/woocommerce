@@ -67,7 +67,6 @@ const webpackConfig = {
 	mode: NODE_ENV,
 	entry: {
 		app: './client/index.js',
-		ie: './client/ie.scss',
 		...entryPoints,
 	},
 	output: {

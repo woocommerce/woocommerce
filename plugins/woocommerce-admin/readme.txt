@@ -157,6 +157,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Add: Add Mollie to the default payment gateways. #7092
 - Dev: Remove support for IE11. #7112
 - Update: Remove original business step flow #7103
+- Dev: Drop styling support for IE11. #7137
 
 == 2.3.1 5/24/2021 ==
 - Tweak: Store profiler - Changed MailPoet's title and description #6990

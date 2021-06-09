@@ -425,13 +425,6 @@ class Loader {
 		);
 		wp_style_add_data( 'wc-components', 'rtl', 'replace' );
 
-		wp_register_style(
-			'wc-components-ie',
-			self::get_url( 'components/ie', 'css' ),
-			array(),
-			$css_file_version
-		);
-
 		wp_style_add_data( 'wc-components-ie', 'rtl', 'replace' );
 
 		wp_register_style(
@@ -466,13 +459,6 @@ class Loader {
 			WC_ADMIN_APP,
 			self::get_url( "app/style{$rtl}", 'css' ),
 			array( 'wc-components', 'wc-customer-effort-score', 'wp-components', 'wc-experimental' ),
-			$css_file_version
-		);
-
-		wp_register_style(
-			'wc-admin-ie',
-			self::get_url( "ie/style{$rtl}", 'css' ),
-			array( WC_ADMIN_APP ),
 			$css_file_version
 		);
 
