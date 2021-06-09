@@ -1,4 +1,4 @@
-# Unreleased
+# 1.6.0
 
 -   Add new `bundledPackages` option to bundle in specific packages.
 

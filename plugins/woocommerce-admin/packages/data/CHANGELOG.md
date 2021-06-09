@@ -1,6 +1,6 @@
-# Unreleased
+# 1.3.1
 
--	Fix, state md5 as npm dependency. #7087
+-   Fix, state md5 as npm dependency. #7087
 
 # 1.3.0
 

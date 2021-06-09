@@ -1,4 +1,4 @@
-# Unreleased
+# 7.0.0
 
 -   Fix style regression with the Chart header. #7002
 -   Fix styling of the advanced filter operator selection. #7005
@@ -10,6 +10,7 @@
 -   Deprecate the Count component, with plan to remove in next major version. #7115
 -   Remove the long deprecated Card component (use Card from `@wordpress/components` instead). #7114
 -   Add `<AbbreviatedCard />` component. #7017
+-   Remove support for IE11. #7112
 
 # 6.2.0
 

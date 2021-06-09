@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/notices",
-	"version": "2.11.0",
+	"version": "3.0.0",
 	"description": "State management for notices.",
 	"author": "The WordPress Contributors",
 	"license": "GPL-2.0-or-later",
