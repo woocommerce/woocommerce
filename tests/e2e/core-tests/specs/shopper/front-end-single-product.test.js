@@ -68,9 +68,7 @@ const runSingleProductPageTest = () => {
 			}
 
 			await shopper.addToCart();
-			await expect(page).toMatchElement('.woocommerce-message', {
-				text: 'has been added to your cart.'
-			});
+			await expect(page).toMatchElement('.woocommerce-message', {text: 'has been added to your cart.'});
 
 			// Verify cart contents
 			await shopper.goToCart();
@@ -110,51 +108,37 @@ const runSingleProductPageTest = () => {
 			await shopper.goToProduct(groupedPostIdValue);
 			await page.waitForSelector('form.grouped_form');
 			await shopper.addToCart();
-			await expect(page).toMatchElement('.woocommerce-error', {
-				text:
-					'Please choose the quantity of items you wish to add to your cart…'
-			});
+			await expect(page).toMatchElement('.woocommerce-error',
+			 {text: 'Please choose the quantity of items you wish to add to your cart…'});
 			const quantityFields = await page.$$('div.quantity input.qty');
-			await quantityFields[0].click({ clickCount: 3 });
+			await quantityFields[0].click({clickCount: 3});
 			await quantityFields[0].type('5');
-			await quantityFields[1].click({ clickCount: 3 });
+			await quantityFields[1].click({clickCount: 3});
 			await quantityFields[1].type('5');
 			await shopper.addToCart();
-			await expect(page).toMatchElement('.woocommerce-message', {
-				text:
-					'“' +
-					simpleProductName +
-					' 1” and “' +
-					simpleProductName +
-					' 2” have been added to your cart.'
-			});
+			await expect(page).toMatchElement('.woocommerce-message',
+			{text: '“'+simpleProductName+' 1” and “'+simpleProductName+' 2” have been added to your cart.'});
 
 			// Verify cart contents
 			await shopper.goToCart();
-			await shopper.productIsInCart(simpleProductName + ' 1');
-			await shopper.productIsInCart(simpleProductName + ' 2');
+			await shopper.productIsInCart(simpleProductName+' 1');
+			await shopper.productIsInCart(simpleProductName+' 2');
 		});
 
 		it('should be able to remove grouped products from the cart', async () => {
 			// Remove items from cart
-			await shopper.removeFromCart(simpleProductName + ' 1');
+			await shopper.removeFromCart(simpleProductName+' 1');
 			await uiUnblocked();
-			await expect(page).toMatchElement('.woocommerce-message', {
-				text: '“' + simpleProductName + ' 1” removed.'
-			});
-			await Promise.all([
+			await expect(page).toMatchElement('.woocommerce-message', {text: '“'+simpleProductName+' 1” removed.'});
+			await Promise.all( [
 				// Reload page and perform item removal, since removeFromCart won't remove it when placed in a row
 				page.reload(),
-				page.waitForNavigation({ waitUntil: 'networkidle0' })
-			]);
-			await shopper.removeFromCart(simpleProductName + ' 2');
+				page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+			] );
+			await shopper.removeFromCart(simpleProductName+' 2');
 			await uiUnblocked();
-			await expect(page).toMatchElement('.woocommerce-message', {
-				text: '“' + simpleProductName + ' 2” removed.'
-			});
-			await expect(page).toMatchElement('.cart-empty', {
-				text: 'Your cart is currently empty.'
-			});
+			await expect(page).toMatchElement('.woocommerce-message', {text: '“'+simpleProductName+' 2” removed.'});
+			await expect(page).toMatchElement('.cart-empty', {text: 'Your cart is currently empty.'});
 		});
 	});
 };
