@@ -14,6 +14,23 @@ In an admin editor context we must also ensure asset _data_ is available when th
 
 Note: `enqueue_block_editor_assets` fires regardless of whether or not a block has been rendered in the editor context, so unless handled correctly, block data may be loaded twice. The `AbstractBlock` class below handles this for you, or you can track whether or not assets have been loaded already with a class variable.
 
+## Choosing Handles for Assets (and scripts in general)
+
+When creating a script or style assets, the following rules should be followed to keep asset names consistent, and to avoid
+conflicts with other similarly named scripts.
+
+1. All asset handles should have a `wc-` prefix.
+2. If the asset handle is for a Block (in editor context) use the `-block` suffix.
+3. If the asset handle is for a Block (in frontend context) use the `-block-frontend` suffix.
+4. If the asset is for any other script being consumed or enqueued by the blocks plugin, use the `wc-blocks-` prefix.
+
+Some examples:
+
+1. A Block called 'featured-product' would have asset handles named: `wc-featured-product-block` and `wc-featured-product-block-frontend`.
+2. A script being used by a block, for example, named 'tag-manager' would have the handle: `wc-blocks-tag-manager`.
+
+These rules also apply to styles.
+
 ## Using the `AbstractBlock` class
 
 The [`AbstractBlock` class](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/src/BlockTypes/AbstractBlock.php) has some helper methods to make asset management easier. Most Block Types in this plugin extend this class.

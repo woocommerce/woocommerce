@@ -21,7 +21,7 @@ class ReviewsByProduct extends AbstractBlock {
 	 */
 	protected function get_block_type_script( $key = null ) {
 		$script = [
-			'handle'       => 'wc-reviews-frontend',
+			'handle'       => 'wc-reviews-block-frontend',
 			'path'         => $this->asset_api->get_block_asset_build_path( 'reviews-frontend' ),
 			'dependencies' => [],
 		];

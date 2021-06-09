@@ -189,9 +189,9 @@ abstract class AbstractBlock {
 	 */
 	protected function get_block_type_editor_script( $key = null ) {
 		$script = [
-			'handle'       => 'wc-' . $this->block_name,
+			'handle'       => 'wc-' . $this->block_name . '-block',
 			'path'         => $this->asset_api->get_block_asset_build_path( $this->block_name ),
-			'dependencies' => [ 'wc-vendors', 'wc-blocks' ],
+			'dependencies' => [ 'wc-blocks' ],
 		];
 		return $key ? $script[ $key ] : $script;
 	}
@@ -203,7 +203,7 @@ abstract class AbstractBlock {
 	 * @return string|null
 	 */
 	protected function get_block_type_editor_style() {
-		return 'wc-block-editor';
+		return 'wc-blocks-editor-style';
 	}
 
 	/**
@@ -215,7 +215,7 @@ abstract class AbstractBlock {
 	 */
 	protected function get_block_type_script( $key = null ) {
 		$script = [
-			'handle'       => 'wc-' . $this->block_name . '-frontend',
+			'handle'       => 'wc-' . $this->block_name . '-block-frontend',
 			'path'         => $this->asset_api->get_block_asset_build_path( $this->block_name . '-frontend' ),
 			'dependencies' => [],
 		];
@@ -229,7 +229,7 @@ abstract class AbstractBlock {
 	 * @return string|null
 	 */
 	protected function get_block_type_style() {
-		return 'wc-block-style';
+		return 'wc-blocks-style';
 	}
 
 	/**

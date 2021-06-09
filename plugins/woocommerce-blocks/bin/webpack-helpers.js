@@ -15,8 +15,8 @@ const wcDepMap = {
 	'@woocommerce/blocks-registry': [ 'wc', 'wcBlocksRegistry' ],
 	'@woocommerce/settings': [ 'wc', 'wcSettings' ],
 	'@woocommerce/block-data': [ 'wc', 'wcBlocksData' ],
-	'@woocommerce/shared-context': [ 'wc', 'wcSharedContext' ],
-	'@woocommerce/shared-hocs': [ 'wc', 'wcSharedHocs' ],
+	'@woocommerce/shared-context': [ 'wc', 'wcBlocksSharedContext' ],
+	'@woocommerce/shared-hocs': [ 'wc', 'wcBlocksSharedHocs' ],
 	'@woocommerce/price-format': [ 'wc', 'priceFormat' ],
 	'@woocommerce/blocks-checkout': [ 'wc', 'blocksCheckout' ],
 };
@@ -26,8 +26,8 @@ const wcHandleMap = {
 	'@woocommerce/settings': 'wc-settings',
 	'@woocommerce/block-settings': 'wc-settings',
 	'@woocommerce/block-data': 'wc-blocks-data-store',
-	'@woocommerce/shared-context': 'wc-shared-context',
-	'@woocommerce/shared-hocs': 'wc-shared-hocs',
+	'@woocommerce/shared-context': 'wc-blocks-shared-context',
+	'@woocommerce/shared-hocs': 'wc-blocks-shared-hocs',
 	'@woocommerce/price-format': 'wc-price-format',
 	'@woocommerce/blocks-checkout': 'wc-blocks-checkout',
 };
