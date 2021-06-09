@@ -222,7 +222,7 @@ const getMainConfig = ( options = {} ) => {
 				cacheGroups: {
 					commons: {
 						test: /[\\/]node_modules[\\/]/,
-						name: 'vendors',
+						name: 'wc-blocks-vendors',
 						chunks: 'all',
 						enforce: true,
 					},
@@ -575,7 +575,7 @@ const getStylingConfig = ( options = {} ) => {
 				minSize: 0,
 				automaticNameDelimiter: '--',
 				cacheGroups: {
-					editor: {
+					editorStyle: {
 						// Capture all `editor` stylesheets and editor-components stylesheets.
 						test: ( module = {} ) =>
 							module.constructor.name === 'CssModule' &&
@@ -584,21 +584,20 @@ const getStylingConfig = ( options = {} ) => {
 									module,
 									/[\\/]assets[\\/]js[\\/]editor-components[\\/]/
 								) ),
-						name: 'editor',
+						name: 'wc-blocks-editor-style',
 						chunks: 'all',
 						priority: 10,
 					},
-					'vendors-style': {
+					vendorsStyle: {
 						test: /\/node_modules\/.*?style\.s?css$/,
-						name: 'vendors-style',
+						name: 'wc-blocks-vendors-style',
 						chunks: 'all',
 						priority: 7,
 					},
-					style: {
-						// Capture all stylesheets with name `style` or
-						// name that starts with underscore (abstracts).
+					blocksStyle: {
+						// Capture all stylesheets with name `style` or name that starts with underscore (abstracts).
 						test: /(style|_.*)\.scss$/,
-						name: 'style',
+						name: 'wc-blocks-style',
 						chunks: 'all',
 						priority: 5,
 					},

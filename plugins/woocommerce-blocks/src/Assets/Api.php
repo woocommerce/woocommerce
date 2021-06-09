@@ -61,22 +61,21 @@ class Api {
 	}
 
 	/**
-	 * Registers a script according to `wp_register_script`, additionally
-	 * loading the translations for the file.
+	 * Registers a script according to `wp_register_script`, adding the correct prefix, and additionally loading translations.
+	 *
+	 * When creating script assets, the following rules should be followed:
+	 *   1. All asset handles should have a `wc-` prefix.
+	 *   2. If the asset handle is for a Block (in editor context) use the `-block` suffix.
+	 *   3. If the asset handle is for a Block (in frontend context) use the `-block-frontend` suffix.
+	 *   4. If the asset is for any other script being consumed or enqueued by the blocks plugin, use the `wc-blocks-` prefix.
 	 *
 	 * @since 2.5.0
-	 *
-	 * @param string $handle        Name of the script. Should be unique.
-	 * @param string $relative_src  Relative url for the script to the path
-	 *                              from plugin root.
-	 * @param array  $dependencies  Optional. An array of registered script
-	 *                              handles this script depends on. Default
-	 *                              empty array.
-	 * @param bool   $has_i18n      Optional. Whether to add a script
-	 *                              translation call to this file. Default:
-	 *                              true.
-	 *
 	 * @throws Exception If the registered script has a dependency on itself.
+	 *
+	 * @param string $handle        Unique name of the script.
+	 * @param string $relative_src  Relative url for the script to the path from plugin root.
+	 * @param array  $dependencies  Optional. An array of registered script handles this script depends on. Default empty array.
+	 * @param bool   $has_i18n      Optional. Whether to add a script translation call to this file. Default: true.
 	 */
 	public function register_script( $handle, $relative_src, $dependencies = [], $has_i18n = true ) {
 		$src     = '';

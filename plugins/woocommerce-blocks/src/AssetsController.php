@@ -43,20 +43,19 @@ final class AssetsController {
 	 * Register block scripts & styles.
 	 */
 	public function register_assets() {
-		$this->register_style( 'wc-block-vendors-style', plugins_url( $this->api->get_block_asset_build_path( 'vendors-style', 'css' ), __DIR__ ) );
-		$this->register_style( 'wc-block-editor', plugins_url( $this->api->get_block_asset_build_path( 'editor', 'css' ), __DIR__ ), array( 'wp-edit-blocks' ) );
-		$this->register_style( 'wc-block-style', plugins_url( $this->api->get_block_asset_build_path( 'style', 'css' ), __DIR__ ), array( 'wc-block-vendors-style' ) );
-
-		wp_style_add_data( 'wc-block-editor', 'rtl', 'replace' );
-		wp_style_add_data( 'wc-block-style', 'rtl', 'replace' );
+		$this->register_style( 'wc-blocks-vendors-style', plugins_url( $this->api->get_block_asset_build_path( 'wc-blocks-vendors-style', 'css' ), __DIR__ ) );
+		$this->register_style( 'wc-blocks-editor-style', plugins_url( $this->api->get_block_asset_build_path( 'wc-blocks-editor-style', 'css' ), __DIR__ ), [ 'wp-edit-blocks' ], 'all', true );
+		$this->register_style( 'wc-blocks-style', plugins_url( $this->api->get_block_asset_build_path( 'wc-blocks-style', 'css' ), __DIR__ ), [ 'wc-blocks-vendors-style' ], 'all', true );
 
 		$this->api->register_script( 'wc-blocks-middleware', 'build/wc-blocks-middleware.js', [], false );
 		$this->api->register_script( 'wc-blocks-data-store', 'build/wc-blocks-data.js', [ 'wc-blocks-middleware' ] );
-		$this->api->register_script( 'wc-blocks', $this->api->get_block_asset_build_path( 'blocks' ), [], false );
-		$this->api->register_script( 'wc-vendors', $this->api->get_block_asset_build_path( 'vendors' ), [], false );
+		$this->api->register_script( 'wc-blocks-vendors', $this->api->get_block_asset_build_path( 'wc-blocks-vendors' ), [], false );
 		$this->api->register_script( 'wc-blocks-registry', 'build/wc-blocks-registry.js', [], false );
-		$this->api->register_script( 'wc-shared-context', 'build/wc-shared-context.js', [] );
-		$this->api->register_script( 'wc-shared-hocs', 'build/wc-shared-hocs.js', [], false );
+		$this->api->register_script( 'wc-blocks', $this->api->get_block_asset_build_path( 'wc-blocks' ), [ 'wc-blocks-vendors' ], false );
+		$this->api->register_script( 'wc-blocks-shared-context', 'build/wc-blocks-shared-context.js', [] );
+		$this->api->register_script( 'wc-blocks-shared-hocs', 'build/wc-blocks-shared-hocs.js', [], false );
+
+		// The price package is shared externally so has no blocks prefix.
 		$this->api->register_script( 'wc-price-format', 'build/price-format.js', [], false );
 
 		if ( Package::feature()->is_feature_plugin_build() ) {
@@ -109,15 +108,21 @@ final class AssetsController {
 	/**
 	 * Registers a style according to `wp_register_style`.
 	 *
-	 * @param string $handle Name of the stylesheet. Should be unique.
-	 * @param string $src    Full URL of the stylesheet, or path of the stylesheet relative to the WordPress root directory.
-	 * @param array  $deps   Optional. An array of registered stylesheet handles this stylesheet depends on. Default empty array.
-	 * @param string $media  Optional. The media for which this stylesheet has been defined. Default 'all'. Accepts media types like
-	 *                       'all', 'print' and 'screen', or media queries like '(orientation: portrait)' and '(max-width: 640px)'.
+	 * @param string  $handle Name of the stylesheet. Should be unique.
+	 * @param string  $src    Full URL of the stylesheet, or path of the stylesheet relative to the WordPress root directory.
+	 * @param array   $deps   Optional. An array of registered stylesheet handles this stylesheet depends on. Default empty array.
+	 * @param string  $media  Optional. The media for which this stylesheet has been defined. Default 'all'. Accepts media types like
+	 *                        'all', 'print' and 'screen', or media queries like '(orientation: portrait)' and '(max-width: 640px)'.
+	 * @param boolean $rtl   Optional. Whether or not to register RTL styles.
 	 */
-	protected function register_style( $handle, $src, $deps = [], $media = 'all' ) {
+	protected function register_style( $handle, $src, $deps = [], $media = 'all', $rtl = false ) {
 		$filename = str_replace( plugins_url( '/', __DIR__ ), '', $src );
 		$ver      = self::get_file_version( $filename );
+
 		wp_register_style( $handle, $src, $deps, $ver, $media );
+
+		if ( $rtl ) {
+			wp_style_add_data( $handle, 'rtl', 'replace' );
+		}
 	}
 }
