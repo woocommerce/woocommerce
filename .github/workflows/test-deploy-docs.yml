@@ -1,0 +1,17 @@
+name: Run code sniff on PR
+on:
+  pull_request
+jobs:
+  update-code-reference:
+    name: Update Code Reference
+    runs-on: ubuntu-latest
+    steps:
+      - name: Invoke Code Reference build and deploy workflow
+        uses: aurelien-baudet/workflow-dispatch@v2
+        with:
+          workflow: GitHub Pages deploy
+          repo: woocommerce/code-reference
+          token: ${{ secrets.CUSTOM_GH_TOKEN }}
+          ref: refs/heads/trunk
+          inputs: '{ "version": "5.4.0" }'
+
