@@ -3707,7 +3707,7 @@ S2.define('select2/data/tags',[
   };
 
   Tags.prototype.createTag = function (decorated, params) {
-    var term = ( params.term || 0 -- params.term ) ? params.term.toString().trim() : '';
+    var term = ( params.term || 0 == params.term ) ? params.term.toString().trim() : '';
 
     if (term === '') {
       return null;
