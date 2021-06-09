@@ -218,9 +218,12 @@ const renderBusinessExtensionHelpText = ( values, isInstallingActivating ) => {
 	}
 
 	const extensionsList = extensions
-		.map( ( extension ) => {
-			return pluginNames[ extension ];
-		} )
+		.reduce( ( uniqueExtensionList, extension ) => {
+			const extensionName = pluginNames[ extension ];
+			return uniqueExtensionList.includes( extensionName )
+				? uniqueExtensionList
+				: [ ...uniqueExtensionList, extensionName ];
+		}, [] )
 		.join( ', ' );
 
 	if ( isInstallingActivating ) {

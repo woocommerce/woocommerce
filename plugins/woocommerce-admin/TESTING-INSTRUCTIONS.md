@@ -9,6 +9,60 @@
 3. Click on the See more options button.
 4. A new tab/window should open.
 
+### Remote Fee Extensions List #7144
+
+1. Make sure you have Marketplace suggestions turned off `wp option set woocommerce_show_marketplace_suggestions no`
+2. Set your store to a US address
+3. Be sure to deactivate the following extensions if they are active
+
+-   WooCommerce Payments
+-   WooCommerce Services
+-   Jetpack
+-   Mailpoet
+-   Facebook for WooCommerce
+-   Google Listings and Ads
+-   Mailchimp for WooCommerce
+-   Creative Mail
+
+5. Set product types to "Physical" at `/wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard&step=product-types`
+6. Set the industry to anything other than CBD at `/wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard&step=industry`
+
+#### Scenario 1: Default functionality remains
+
+1. Go to Business Details step of the OBW `/wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard&step=business-features`
+2. Click on "Free features" tab
+3. Click the dropdown "Add recommended business features to my site" to see the list of free extensions.
+4. See 9 total suggestions
+
+<img width="520" alt="Screen Shot 2021-05-28 at 12 18 57 PM" src="https://user-images.githubusercontent.com/1922453/119912118-ea3ccd00-bfae-11eb-979c-82d2cb85ed4c.png">
+
+#### Scenario 2: Default functionality remains
+
+1. Turn Marketplace Suggestions on `wp option set woocommerce_show_marketplace_suggestions yes`
+2. Repeat steps in Scenario 1 and see the same result
+
+#### Scenario 3: CBD industry
+
+1. Select CBD industry only at `/wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard&step=industry`
+2. Visit the free features of Business Details and see that WooCommerce Payments is no longer being shown
+3. Add another industry in addition to CBD and confirm WooCommerce Payments is still not being shown
+
+#### Scenario 4: Downloads Product Type
+
+1. Set the product type to "downloads" only at `/wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard&step=product-types`
+2. Visit the free features of Business Details and see that WooCommerce Shipping is not shown
+3. Add another product type, such as "physical" and confirm WooCommerce Shipping is now being shown
+
+#### Scenario 5: Location
+
+1. Set your store location to South Africa
+2. Confirm WooCommerce Payments, WooCommerce Services Shipping, and WooCommerce Services Tax are not shown.
+
+#### Scenario 6: Extension already activated
+
+1. Install and activate Jetpack
+2. Confirm Jetpack in not show in Free features list
+
 ### Set target to blank for the external links #6999
 
 1. Clone this repository.
@@ -53,9 +107,9 @@
 
 ### Fix an issue with OBW when wc-pay and Jetpack are both being installed. #6957
 
-- Complete the OBW until you get to the business details step.
-- Deselect "Add recommended business features to my site", and select only Jetpack and WooCommerce Payments for installation.
-- The plugins should be installed and activated correctly, and you should be able to continue in the flow.
+-   Complete the OBW until you get to the business details step.
+-   Deselect "Add recommended business features to my site", and select only Jetpack and WooCommerce Payments for installation.
+-   The plugins should be installed and activated correctly, and you should be able to continue in the flow.
 
 ## 2.3.0
 
@@ -83,30 +137,30 @@
 
 ### New Google Listings & Ads extension in onboarding #6939
 
-- On a new WooCommerce site/install
-- Go through all the onboarding steps till we reach `Included business features`
-- Ensure the plugin shows up correctly with the right naming and select it as the only extension to add
-![image](https://user-images.githubusercontent.com/11388669/117138107-7be75f00-ada2-11eb-9077-c839cee2155e.png)
-- Continue and confirm the `plugins were successfully activated` notice shows up
-- Finish onboarding and confirm that the extension was actually activated
+-   On a new WooCommerce site/install
+-   Go through all the onboarding steps till we reach `Included business features`
+-   Ensure the plugin shows up correctly with the right naming and select it as the only extension to add
+    ![image](https://user-images.githubusercontent.com/11388669/117138107-7be75f00-ada2-11eb-9077-c839cee2155e.png)
+-   Continue and confirm the `plugins were successfully activated` notice shows up
+-   Finish onboarding and confirm that the extension was actually activated
 
 **New Google Listings & Ads extension support in Installed Marketing Extensions section**
 
-- View the installed marketing extensions section on the page Marketing > Overview
-- The extension should appear in the following states:
+-   View the installed marketing extensions section on the page Marketing > Overview
+-   The extension should appear in the following states:
 
 1. Extension not installed (should not be included in the list, if the list is empty this section won't show at all)
-![image](https://user-images.githubusercontent.com/11388669/117135419-d2529e80-ad9e-11eb-9752-081f00beb11c.png)
+   ![image](https://user-images.githubusercontent.com/11388669/117135419-d2529e80-ad9e-11eb-9752-081f00beb11c.png)
 
 2. Extension installed but not activated (click activate to confirm it works)
-![image](https://user-images.githubusercontent.com/11388669/117135541-fb732f00-ad9e-11eb-95f9-d3739fc715da.png)
+   ![image](https://user-images.githubusercontent.com/11388669/117135541-fb732f00-ad9e-11eb-95f9-d3739fc715da.png)
 
 3. Extension installed and activated but not setup yet (click "Finish setup" to confirm we get redirected to the get started page)
-![image](https://user-images.githubusercontent.com/11388669/117135812-602e8980-ad9f-11eb-83f8-29889cdb7202.png)
+   ![image](https://user-images.githubusercontent.com/11388669/117135812-602e8980-ad9f-11eb-83f8-29889cdb7202.png)
 
 4. Extension installed, activated and setup (click settings to confirm we get redirected to the settings page)
-![image](https://user-images.githubusercontent.com/11388669/117135999-ab489c80-ad9f-11eb-874b-5f6f5ec4ce5d.png)
-Note: The documentation link is not active yet (still in draft)
+   ![image](https://user-images.githubusercontent.com/11388669/117135999-ab489c80-ad9f-11eb-874b-5f6f5ec4ce5d.png)
+   Note: The documentation link is not active yet (still in draft)
 
 ### Add plugin installer to allow installation of plugins via URL #6805
 

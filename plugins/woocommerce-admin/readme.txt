@@ -125,6 +125,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Enhancement: Add expand/collapse to extendable task list. #6910
 - Enhancement: Add task hierarchy support to extended task list. #6916
 - Enhancement: Add remind me later option to task list. #6923
+- Enhancement: Enable Remote Free Extensions List #7144
 - Fix: Rule Processing Transformer to handle dotNotation default value #7009
 - Fix: Remove Navigation's uneeded SlotFill context #6832
 - Fix: Report filters expecting specific ordering. #6847
