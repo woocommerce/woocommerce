@@ -586,7 +586,7 @@ jQuery( function( $ ) {
 
   $.payment.validateCardCVC = function(cvc, type) {
     var card, _ref;
-  	cvc = 'number' === typeof cvc ? cvc.toString() : cvc;
+    cvc = 'number' === typeof cvc ? cvc.toString() : cvc;
     cvc = 'string' === typeof cvc ? cvc.trim() : '';
     if (!/^\d+$/.test(cvc)) {
       return false;
