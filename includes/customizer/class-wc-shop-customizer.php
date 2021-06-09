@@ -270,7 +270,6 @@ class WC_Shop_Customizer {
 	 *
 	 * FSE themes hide the "Customize" link in the Appearance menu. In WooCommerce we have several options that can currently
 	 * only be edited via the Customizer. For now, we are thus adding a new link for WooCommerce specific Customizer options.
-	 * For further details see pca54o-1zX-p2.
 	 */
 	public function add_fse_customize_link() {
 
