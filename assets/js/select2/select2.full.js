@@ -4936,7 +4936,7 @@ S2.define('select2/defaults',[
         return DIACRITICS[a] || a;
       }
 
-      return text.replace(/[^\u0000-\u007E]/g, match)
+      return text.replace(/[^\u0000-\u007E]/g, match);
     }
 
     function matcher (params, data) {
