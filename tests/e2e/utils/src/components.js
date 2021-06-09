@@ -23,6 +23,7 @@ const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );
 const simpleProductPrice = config.has('products.simple.price') ? config.get('products.simple.price') : '9.99';
 const defaultVariableProduct = config.get('products.variable');
+const defaultGroupedProduct = config.get('products.grouped');
 
 /**
  * Verify and publish
@@ -226,7 +227,7 @@ const createSimpleProductWithCategory = async ( productName, productPrice, categ
  */
 const createVariableProduct = async (varProduct = defaultVariableProduct) => {
 	const { attributes } = varProduct;
-	const { id } = await factories.products.variable.create(varProduct);
+	const { id } = await factories.products.variable.create(varProduct); // create the variable product
 	const variations = [];
 	const buffer = []; // accumulated attributes while looping
 	const aIdx = 0; // attributes[] index
@@ -292,25 +293,28 @@ const createVariableProduct = async (varProduct = defaultVariableProduct) => {
 /**
  * Create grouped product.
  * 
+ * @param groupedProduct Defaults to the grouped product object in `default.json`
  * @returns ID of the grouped product
  */
-const createGroupedProduct = async () => {
-	// Create two products to be linked in a grouped product after
-	const simple1 = await factories.products.simple.create({
-		name: simpleProductName + ' 1',
-		regularPrice: simpleProductPrice
-	});
-	const simple2 = await factories.products.simple.create({
-		name: simpleProductName + ' 2',
-		regularPrice: simpleProductPrice
-	});
-	const groupedProduct = {
-		name: 'Grouped Product',
-		type: 'grouped',
-		groupedProducts: [simple1.id, simple2.id]
-	};
+const createGroupedProduct = async (groupedProduct = defaultGroupedProduct) => {
+	const { name, groupedProducts } = groupedProduct;
+	const simpleProductIds = [];
+	let groupedProductRequest;
 
-	const { id } = await factories.products.grouped.create(groupedProduct);
+	// Using the api, create simple products to be grouped
+	for (const simpleProduct of groupedProducts) {
+		const { id } = await factories.products.simple.create(simpleProduct);
+		simpleProductIds.push(id);
+	}
+
+	// Using the api, create the grouped product
+	groupedProductRequest = {
+		name: name,
+		groupedProducts: simpleProductIds
+	};
+	const { id } = await factories.products.grouped.create(
+		groupedProductRequest
+	);
 
 	return id;
 };
