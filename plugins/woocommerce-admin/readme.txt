@@ -145,6 +145,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix: Bug with Orders Report coupon exclusion filter. #7021
 - Fix: Show Google Listing and Ads in installed marketing extensions section. #7029
 - Fix: Notices not dissapearing. #7077
+- Fix: Keyboard accessibility on the free features tab. #7149
 - Fix: Fix error handling when remote free extension API returns empty array. #7147
 - Tweak: Only fetch remote payment gateway recommendations when opted in #6964
 - Tweak: Setup checklist copy revert. #7015
