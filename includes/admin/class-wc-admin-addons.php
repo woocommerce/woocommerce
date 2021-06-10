@@ -393,10 +393,10 @@ class WC_Admin_Addons {
 		);
 
 		$defaults = array(
-			'image'       => WC()->plugin_url() . '/assets/images/wcs-extensions-banner-3x.png',
+			'image'       => WC()->plugin_url() . '/assets/images/wcs-extensions-banner-3x.jpg',
 			'image_alt'   => __( 'WooCommerce Shipping', 'woocommerce' ),
-			'title'       => __( 'Buy discounted shipping labels — then print them from your dashboard.', 'woocommerce' ),
-			'description' => __( 'Integrate your store with USPS to buy discounted shipping labels, and print them directly from your WooCommerce dashboard. Powered by WooCommerce Shipping.', 'woocommerce' ),
+			'title'       => __( 'Save time and money with WooCommerce Shipping', 'woocommerce' ),
+			'description' => __( 'Print discounted USPS and DHL labels straight from your WooCommerce dashboard and save on shipping.', 'woocommerce' ),
 			'button'      => __( 'Free - Install now', 'woocommerce' ),
 			'href'        => $button_url,
 			'logos'       => array(),
@@ -412,6 +412,10 @@ class WC_Admin_Addons {
 								'link' => WC()->plugin_url() . '/assets/images/wcs-usps-logo.png',
 								'alt'  => 'USPS logo',
 							),
+							array(
+								'link' => WC()->plugin_url() . '/assets/images/wcs-dhlexpress-logo.png',
+								'alt'  => 'DHL Express logo',
+							),
 						)
 					),
 				);
@@ -423,7 +427,7 @@ class WC_Admin_Addons {
 		$block_data = array_merge( $defaults, $local_defaults, $block );
 		?>
 		<div class="addons-wcs-banner-block">
-			<div class="addons-wcs-banner-block-image">
+			<div class="addons-wcs-banner-block-image is-full-image">
 				<img
 					class="addons-img"
 					src="<?php echo esc_url( $block_data['image'] ); ?>"
@@ -433,7 +437,7 @@ class WC_Admin_Addons {
 			<div class="addons-wcs-banner-block-content">
 				<h1><?php echo esc_html( $block_data['title'] ); ?></h1>
 				<p><?php echo esc_html( $block_data['description'] ); ?></p>
-				<ul>
+				<ul class="wcs-logos-container">
 					<?php foreach ( $block_data['logos'] as $logo ) : ?>
 						<li>
 							<img
