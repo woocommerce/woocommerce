@@ -375,7 +375,7 @@ class WC_Admin_Addons {
 		$location  = wc_get_base_location();
 
 		if (
-			! in_array( $location['country'], array( 'US', 'CA' ), true ) ||
+			! in_array( $location['country'], array( 'US' ), true ) ||
 			$is_active ||
 			! current_user_can( 'install_plugins' ) ||
 			! current_user_can( 'activate_plugins' )
@@ -403,22 +403,6 @@ class WC_Admin_Addons {
 		);
 
 		switch ( $location['country'] ) {
-			case 'CA':
-				$local_defaults = array(
-					'image'       => WC()->plugin_url() . '/assets/images/wcs-truck-banner-3x.png',
-					'title'       => __( 'Show Canada Post shipping rates', 'woocommerce' ),
-					'description' => __( 'Display live rates from Canada Post at checkout to make shipping a breeze. Powered by WooCommerce Shipping.', 'woocommerce' ),
-					'logos'       => array_merge(
-						$defaults['logos'],
-						array(
-							array(
-								'link' => WC()->plugin_url() . '/assets/images/wcs-canada-post-logo.jpg',
-								'alt'  => 'Canada Post logo',
-							),
-						)
-					),
-				);
-				break;
 			case 'US':
 				$local_defaults = array(
 					'logos' => array_merge(
