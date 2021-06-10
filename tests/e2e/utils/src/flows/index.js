@@ -6,6 +6,7 @@ const flowExpressions = require( './expressions' );
 const merchant = require( './merchant' );
 const shopper = require( './shopper' );
 const { withRestApi } = require( './with-rest-api' );
+const utils = require( './utils' );
 
 module.exports = {
 	...flowConstants,
@@ -13,4 +14,5 @@ module.exports = {
 	merchant,
 	shopper,
 	withRestApi,
+	utils,
 };

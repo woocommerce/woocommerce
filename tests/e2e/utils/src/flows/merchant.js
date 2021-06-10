@@ -1,3 +1,4 @@
+/* eslint-disable jest/no-standalone-expect */
 /**
  * External dependencies
  */
@@ -25,8 +26,10 @@ const {
 	WP_ADMIN_ANALYTICS_PAGES,
 	WP_ADMIN_ALL_USERS_VIEW,
 	WP_ADMIN_IMPORT_PRODUCTS,
+	WP_ADMIN_PLUGIN_INSTALL,
 	IS_RETEST_MODE,
 } = require( './constants' );
+const { getSlug } = require('./utils');
 
 const baseUrl = config.get( 'url' );
 const WP_ADMIN_SINGLE_CPT_VIEW = ( postId ) => baseUrl + `wp-admin/post.php?post=${ postId }&action=edit`;
@@ -210,10 +213,85 @@ const merchant = {
 		} );
 	},
 
-  openImportProducts: async () => {
+  	openImportProducts: async () => {
 		await page.goto( WP_ADMIN_IMPORT_PRODUCTS , {
 			waitUntil: 'networkidle0',
 		} );
+	},
+
+	uploadAndActivatePlugin: async ( pluginFilePath, pluginName ) => {
+		await merchant.openPlugins();
+
+		// Deactivate and delete the plugin if it exists
+		let pluginSlug = getSlug( pluginName );
+		if ( await page.$( `a#deactivate-${pluginSlug}` ) !== null ) {
+			await merchant.deactivatePlugin( pluginName, true );
+		}
+
+		// Open the plugin install page
+		await page.goto( WP_ADMIN_PLUGIN_INSTALL, {
+			waitUntil: 'networkidle0',
+		} );
+
+		// Upload the plugin zip
+		await page.click( 'a.upload-view-toggle' );
+
+		await expect( page ).toMatchElement(
+			'p.install-help',
+			{
+				text: 'If you have a plugin in a .zip format, you may install or update it by uploading it here.'
+			}
+		);
+
+		const uploader = await page.$( 'input[type=file]' );
+
+		await uploader.uploadFile( pluginFilePath );
+
+		// Manually update the button to `enabled` so we can submit the file
+		await page.evaluate(() => {
+			document.getElementById( 'install-plugin-submit' ).disabled = false;
+		 });
+
+		// Click to upload the file
+		await page.click( '#install-plugin-submit' );
+
+		await page.waitForNavigation( { waitUntil: 'networkidle0' } );
+
+		// Click to activate the plugin
+		await page.click( '.button-primary' );
+
+		await page.waitForNavigation( { waitUntil: 'networkidle0' } );
+
+		await expect( page ).toMatchElement( 'div.updated.notice.is-dismissible', { text: 'Plugin activated.' } );
+	},
+
+	activatePlugin: async ( pluginName ) => {
+		let pluginSlug = getSlug( pluginName );
+
+		await expect( page ).toClick( `a#activate-${pluginSlug}` );
+
+		await page.waitForNavigation( { waitUntil: 'networkidle0' } );
+	},
+
+	deactivatePlugin: async ( pluginName, deletePlugin = false ) => {
+		let pluginSlug = getSlug( pluginName );
+
+		await expect( page ).toClick( `a#deactivate-${pluginSlug}` );
+
+		await page.waitForNavigation( { waitUntil: 'networkidle0' } );
+
+		if ( deletePlugin ) {
+			await merchant.deletePlugin( pluginName );
+		}
+	},
+
+	deletePlugin: async ( pluginName ) => {
+		let pluginSlug = getSlug( pluginName );
+
+		await expect( page ).toClick( `a#delete-${pluginSlug}` );
+
+		// Wait for Ajax calls to finish
+		await page.waitForResponse( response => response.status() === 200 );
 	},
 };
 

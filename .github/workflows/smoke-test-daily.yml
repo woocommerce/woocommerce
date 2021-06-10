@@ -26,6 +26,14 @@ jobs:
           composer install --no-dev
           npm run build:assets
           npm install jest
+
+      - name: Get the latest WooCommerce nightly zip.
+        run: |
+          cd ${{ github.workspace }}/tests/e2e/env/deps && { curl -LO "https://github.com/woocommerce/woocommerce/releases/download/nightly/woocommerce-trunk-nightly.zip" ; cd -; }
+
+      - name: Validate the zip file.
+        run: ./.github/scripts/validate-zip.sh
+        shell: bash
           
       - name: Run smoke test.
         env:
@@ -38,5 +46,6 @@ jobs:
           E2E_RETEST: 1
           E2E_SLACK_TOKEN: ${{ secrets.SMOKE_TEST_SLACK_TOKEN }}
           E2E_SLACK_CHANNEL: ${{ secrets.SMOKE_TEST_SLACK_CHANNEL }}
+          INSTALL_WC_PLUGIN: 1
         run: |
           npx wc-e2e test:e2e

@@ -54,6 +54,10 @@ const runGroupedProductAPITest = require( './api/grouped-product.test' );
 const runVariableProductAPITest = require( './api/variable-product.test' );
 const runOrderApiTest = require( './api/order.test' );
 
+// Plugin workflow tests
+const runPluginWorkflowTest = require( './plugins/plugin-workflow.test' );
+const runUploadPluginTest = require( './plugins/upload-plugin.test' );
+
 const runSetupOnboardingTests = () => {
 	runActivationTest();
 	runOnboardingFlowTest();
@@ -110,6 +114,12 @@ const runApiTests = () => {
 	runOrderApiTest();
 }
 
+const runPluginWorkflowTests = () => {
+	runPluginWorkflowTest();
+	runDownloadPluginTest();
+	runUploadPluginTest();
+}
+
 module.exports = {
 	runActivationTest,
 	runOnboardingFlowTest,
@@ -160,4 +170,7 @@ module.exports = {
 	runMyAccountCreateAccountTest,
 	runOrderEmailReceivingTest,
 	runInitiateWccomConnectionTest,
+	runPluginWorkflowTest,
+	runUploadPluginTest,
+	runPluginWorkflowTests,
 };
