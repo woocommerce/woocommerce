@@ -154,10 +154,20 @@
 		border: 1px solid #e6e6e6;
 		margin-right: 2em;
 		padding: 4em;
+		max-width: 200px;
 
 		.addons-img {
 			max-height: 86px;
 			max-width: 97px;
+		}
+
+		&.is-full-image {
+			padding: 0;
+
+			.addons-img {
+				max-height: 100%;
+				max-width: 100%;
+			}
 		}
 	}
 
@@ -217,6 +227,20 @@
 
 		p {
 			margin-bottom: 0;
+		}
+
+		.wcs-logos-container {
+			display: flex;
+			align-items: center;
+			flex-direction: row;
+
+			li {
+				margin-right: 8px;
+
+				&:last-child {
+					margin-right: 0;
+				}
+			}
 		}
 
 		.wcs-service-logo {
