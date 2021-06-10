@@ -18,31 +18,32 @@ import './List.scss';
 export const Item = ( {
 	isRecommended,
 	markConfigured,
-	paymentGateways,
-	suggestion,
-	suggestionKeys,
+	paymentGateway,
+	gatewayIds,
 } ) => {
-	const { image, content, id, plugins = [], title, loading } = suggestion;
+	const {
+		image,
+		content,
+		id,
+		plugins = [],
+		title,
+		loading,
+		enabled: isEnabled = false,
+		needsSetup = false,
+		requiredSettings,
+		settingsUrl: manageUrl,
+	} = paymentGateway;
 
 	const connectSlot = useSlot(
 		`woocommerce_payment_gateway_connect_${ id }`
 	);
 	const setupSlot = useSlot( `woocommerce_payment_gateway_setup_${ id }` );
 
-	const paymentGateway = paymentGateways[ id ] || {};
-
-	const {
-		enabled: isEnabled = false,
-		needs_setup: needsSetup = false,
-		required_settings_keys: requiredSettingsKeys = [],
-		settings_url: manageUrl,
-	} = paymentGateway;
-
 	const hasFills =
 		Boolean( connectSlot?.fills?.length ) ||
 		Boolean( setupSlot?.fills?.length );
 	const hasSetup = Boolean(
-		plugins.length || requiredSettingsKeys.length || hasFills
+		plugins.length || requiredSettings.length || hasFills
 	);
 	const showRecommendedRibbon = isRecommended && needsSetup;
 
@@ -84,7 +85,7 @@ export const Item = ( {
 						markConfigured={ markConfigured }
 						onSetup={ () =>
 							recordEvent( 'tasklist_payment_setup', {
-								options: suggestionKeys,
+								options: gatewayIds,
 								selected: id,
 							} )
 						}

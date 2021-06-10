@@ -75,6 +75,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 
 == Unreleased ==
 
+- Fix: WCPay not working in local payments task #7151
 - Dev: Add Jetpack Backup admin note #6738
 - Add: Adding WCPay payment configuration defaults. #7097
 - Fix: Transformer casing is incorrect and creates an error on case-sensitive systems #7104

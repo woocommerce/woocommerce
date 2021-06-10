@@ -13,23 +13,23 @@ import './List.scss';
 export const List = ( {
 	heading,
 	markConfigured,
-	paymentGateways,
 	recommendation,
-	suggestions,
+	paymentGateways,
 } ) => {
 	return (
 		<Card>
 			<CardHeader as="h2">{ heading }</CardHeader>
-			{ Array.from( suggestions.values() ).map( ( suggestion ) => {
-				const { id } = suggestion;
+			{ paymentGateways.map( ( paymentGateway ) => {
+				const { id } = paymentGateway;
 				return (
 					<Item
 						key={ id }
 						isRecommended={ recommendation === id }
 						markConfigured={ markConfigured }
-						paymentGateways={ paymentGateways }
-						suggestion={ suggestion }
-						suggestionKeys={ suggestions.keys() }
+						paymentGateway={ paymentGateway }
+						gatewayIds={ paymentGateways.map(
+							( gateway ) => gateway.id
+						) }
 					/>
 				);
 			} ) }

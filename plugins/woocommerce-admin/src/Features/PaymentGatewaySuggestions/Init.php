@@ -106,26 +106,6 @@ class Init {
 			$data = (object) array_merge( (array) $locale, (array) $spec );
 			unset( $data->locales );
 
-			$data->fields = array();
-
-			// Loop over and localize fields.
-			foreach ( $spec->fields as $field ) {
-				if ( ! isset( $field->locales ) ) {
-					continue;
-				}
-
-				$locale = SpecRunner::get_locale( $field->locales );
-
-				if ( ! $locale ) {
-					continue;
-				}
-
-				$field_data = (object) array_merge( (array) $field, (array) $locale );
-				unset( $field_data->locale );
-				unset( $field_data->locales );
-				$data->fields[] = $field_data;
-			}
-
 			$localized_specs[] = $data;
 		}
 

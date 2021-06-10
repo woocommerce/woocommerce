@@ -17,7 +17,7 @@ import { useMemo, useState } from '@wordpress/element';
  * Internal dependencies
  */
 import { PaymentMethodList } from './components/PaymentMethodList';
-import { WCPayMethodCard } from './components/WCPayMethodCard';
+import { WCPaySuggestion } from './components/WCPaySuggestion';
 import { getCountryCode } from '../../../dashboard/utils';
 import { getPaymentMethods } from './methods';
 import { PaymentSetup } from './components/PaymentSetup';
@@ -219,12 +219,21 @@ export const LocalPayments = ( { query } ) => {
 	const wcPayMethod =
 		wcPayIndex === -1
 			? null
-			: additionalCardMethods.splice( wcPayIndex, 1 );
+			: additionalCardMethods.splice( wcPayIndex, 1 )[ 0 ];
 
 	return (
 		<div className="woocommerce-task-payments">
 			{ !! wcPayMethod && (
-				<WCPayMethodCard method={ wcPayMethod[ 0 ] } />
+				<WCPaySuggestion
+					onSetupCallback={ wcPayMethod.onClick }
+					paymentGateway={ {
+						...wcPayMethod,
+						description: __(
+							'Try the new way to get paid. Securely accept credit and debit cards on your site. Manage transactions without leaving your WordPress dashboard. Only with WooCommerce Payments.',
+							'wc-admin'
+						),
+					} }
+				/>
 			) }
 
 			{ !! enabledCardMethods.length && (

@@ -14,7 +14,7 @@ import { Plugins, Stepper } from '@woocommerce/components';
 import { WooPaymentGatewaySetup } from '@woocommerce/onboarding';
 import { recordEvent } from '@woocommerce/tracks';
 import { useEffect, useState, useMemo, useCallback } from '@wordpress/element';
-import { useSelect } from '@wordpress/data';
+import { useSelect, useDispatch } from '@wordpress/data';
 import { useSlot } from '@woocommerce/experimental';
 
 /**
@@ -26,10 +26,16 @@ import './Setup.scss';
 
 export const Setup = ( {
 	markConfigured,
-	suggestion,
+	paymentGateway,
 	recordConnectStartEvent,
 } ) => {
-	const { id, plugins = [], title } = suggestion;
+	const {
+		id,
+		plugins = [],
+		title,
+		postInstallScripts,
+		installed: gatewayInstalled,
+	} = paymentGateway;
 	const slot = useSlot( `woocommerce_payment_gateway_setup_${ id }` );
 	const hasFills = Boolean( slot?.fills?.length );
 	const [ isPluginLoaded, setIsPluginLoaded ] = useState( false );
@@ -40,16 +46,17 @@ export const Setup = ( {
 		} );
 	}, [] );
 
+	const { invalidateResolutionForStoreSelector } = useDispatch(
+		PAYMENT_GATEWAYS_STORE_NAME
+	);
+
 	const {
 		isOptionUpdating,
 		isPaymentGatewayResolving,
 		needsPluginInstall,
-		paymentGateway,
 	} = useSelect( ( select ) => {
 		const { isOptionsUpdating } = select( OPTIONS_STORE_NAME );
-		const { getPaymentGateway, isResolving } = select(
-			PAYMENT_GATEWAYS_STORE_NAME
-		);
+		const { isResolving } = select( PAYMENT_GATEWAYS_STORE_NAME );
 		const activePlugins = select( PLUGINS_STORE_NAME ).getActivePlugins();
 		const pluginsToInstall = plugins.filter(
 			( m ) => ! activePlugins.includes( m )
@@ -57,22 +64,16 @@ export const Setup = ( {
 
 		return {
 			isOptionUpdating: isOptionsUpdating(),
-			isPaymentGatewayResolving: isResolving( 'getPaymentGateway', [
-				id,
-			] ),
-			paymentGateway: ! pluginsToInstall.length
-				? getPaymentGateway( id )
-				: null,
+			isPaymentGatewayResolving: isResolving( 'getPaymentGateways' ),
 			needsPluginInstall: !! pluginsToInstall.length,
 		};
 	} );
 
 	useEffect( () => {
-		if ( ! paymentGateway ) {
+		if ( needsPluginInstall ) {
 			return;
 		}
 
-		const { post_install_scripts: postInstallScripts } = paymentGateway;
 		if ( postInstallScripts && postInstallScripts.length ) {
 			const scriptPromises = postInstallScripts.map( ( script ) =>
 				enqueueScript( script )
@@ -84,7 +85,7 @@ export const Setup = ( {
 		}
 
 		setIsPluginLoaded( true );
-	}, [ paymentGateway ] );
+	}, [ postInstallScripts, needsPluginInstall ] );
 
 	const pluginNamesString = plugins
 		.map( ( pluginSlug ) => pluginNames[ pluginSlug ] )
@@ -103,6 +104,9 @@ export const Setup = ( {
 						<Plugins
 							onComplete={ ( installedPlugins, response ) => {
 								createNoticesFromResponse( response );
+								invalidateResolutionForStoreSelector(
+									'getPaymentGateways'
+								);
 								recordEvent(
 									'tasklist_payment_install_method',
 									{
@@ -122,22 +126,25 @@ export const Setup = ( {
 			: null;
 	}, [ needsPluginInstall ] );
 
-	const connectStep = {
-		key: 'connect',
-		label: sprintf(
-			__( 'Connect your %(title)s account', 'woocommerce-admin' ),
-			{
-				title,
-			}
-		),
-		content: paymentGateway ? (
-			<Connect
-				markConfigured={ markConfigured }
-				paymentGateway={ paymentGateway }
-				recordConnectStartEvent={ recordConnectStartEvent }
-			/>
-		) : null,
-	};
+	const connectStep = useMemo(
+		() => ( {
+			key: 'connect',
+			label: sprintf(
+				__( 'Connect your %(title)s account', 'woocommerce-admin' ),
+				{
+					title,
+				}
+			),
+			content: gatewayInstalled ? (
+				<Connect
+					markConfigured={ markConfigured }
+					paymentGateway={ paymentGateway }
+					recordConnectStartEvent={ recordConnectStartEvent }
+				/>
+			) : null,
+		} ),
+		[ gatewayInstalled ]
+	);
 
 	const stepperPending =
 		! installStep?.isComplete ||
@@ -155,7 +162,7 @@ export const Setup = ( {
 				{ ...props }
 			/>
 		),
-		[ stepperPending, installStep ]
+		[ stepperPending, installStep, connectStep ]
 	);
 
 	return (

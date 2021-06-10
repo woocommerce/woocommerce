@@ -21,6 +21,7 @@ This is the fill component. You must provide the `id` prop to identify the slot 
 | `defaultStepper`     | Component | The default instance of the <Stepper> component. Any provided props will override the given defaults |
 | `defaultInstallStep` | Object    | The object that describes the default step configuration for installation of the gateway             |
 | `defaultConnectStep` | Object    | The object that describes the default step configuration for configuration of the gateway            |
+| `paymentGateway`     | Object    | An object describing all of the relevant data pertaining to this payment gateway                     |
 
 ### WooPaymentGatewaySetup.Slot (slot)
 

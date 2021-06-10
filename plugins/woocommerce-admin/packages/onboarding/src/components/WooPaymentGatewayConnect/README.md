@@ -22,6 +22,7 @@ This is the fill component. You must provide the `id` prop to identify the slot 
 | `defaultSubmit`  | Function  | The default submit handler that is provided to the <Form> component                                      |
 | `defaultFields`  | Array     | An array of the field configuration objects provided by the API                                          |
 | `markConfigured` | Function  | A helper function that will mark your gateway as configured                                              |
+| `paymentGateway` | Object    | An object describing all of the relevant data pertaining to this payment gateway                         |
 
 ### WooPaymentGatewayConnect.Slot (slot)
 

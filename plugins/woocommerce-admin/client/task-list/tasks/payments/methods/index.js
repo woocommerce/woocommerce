@@ -578,7 +578,7 @@ export function getPaymentMethods( {
 			),
 			before: (
 				<img
-					src={ wcAdminAssetUrl + 'onboarding/wcpay.png' }
+					src={ wcAdminAssetUrl + 'onboarding/wcpay.svg' }
 					alt={ __( 'WooCommerce Payments', 'woocommerce-admin' ) }
 				/>
 			),
