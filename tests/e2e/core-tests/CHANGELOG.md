@@ -1,5 +1,7 @@
 # Unreleased
 
+- Support for providing an optional WooCommerce zip plugin to upload and install
+
 ## Added
 
 - Support for re-running setup and shopper tests
