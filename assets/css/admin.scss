@@ -163,6 +163,8 @@
 
 		&.is-full-image {
 			padding: 0;
+			background: none;
+			border: none;
 
 			.addons-img {
 				max-height: 100%;
@@ -244,7 +246,7 @@
 		}
 
 		.wcs-service-logo {
-			max-width: 40px;
+			max-width: 45px;
 		}
 	}
 
