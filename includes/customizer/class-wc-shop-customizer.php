@@ -21,6 +21,7 @@ class WC_Shop_Customizer {
 		add_action( 'customize_controls_print_styles', array( $this, 'add_styles' ) );
 		add_action( 'customize_controls_print_scripts', array( $this, 'add_scripts' ), 30 );
 		add_action( 'wp_enqueue_scripts', array( $this, 'add_frontend_scripts' ) );
+		add_action( 'admin_menu', array( $this, 'add_fse_customize_link' ) );
 	}
 
 	/**
@@ -83,6 +84,19 @@ class WC_Shop_Customizer {
 				width: auto;
 				display: inline-block;
 			}
+			<?php
+			// For FSE themes hide the back button so we only surface WooCommerce options.
+			if ( function_exists( 'gutenberg_is_fse_theme' ) && gutenberg_is_fse_theme() ) {
+				?>
+					#sub-accordion-panel-woocommerce .customize-panel-back{
+						display: none;
+					}
+					#customize-controls #sub-accordion-panel-woocommerce .panel-meta.customize-info .accordion-section-title {
+						margin-left: 0;
+					}
+				<?php
+			}
+			?>
 		</style>
 		<?php
 	}
@@ -249,6 +263,29 @@ class WC_Shop_Customizer {
 			} );
 		</script>
 		<?php
+	}
+
+	/**
+	 * For FSE themes add a "Customize WooCommerce" link to the Appearance menu.
+	 *
+	 * FSE themes hide the "Customize" link in the Appearance menu. In WooCommerce we have several options that can currently
+	 * only be edited via the Customizer. For now, we are thus adding a new link for WooCommerce specific Customizer options.
+	 */
+	public function add_fse_customize_link() {
+
+		// Exit early if the FSE theme feature isn't present or the current theme is not a FSE theme.
+		if ( ! function_exists( 'gutenberg_is_fse_theme' ) || function_exists( 'gutenberg_is_fse_theme' ) && ! gutenberg_is_fse_theme() ) {
+			return;
+		}
+
+		// Add a link to the WooCommerce panel in the Customizer.
+		add_submenu_page(
+			'themes.php',
+			__( 'Customize WooCommerce', 'woocommerce' ),
+			__( 'Customize WooCommerce', 'woocommerce' ),
+			'edit_theme_options',
+			admin_url( 'customize.php?autofocus[panel]=woocommerce' )
+		);
 	}
 
 	/**

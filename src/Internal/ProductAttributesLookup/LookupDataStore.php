@@ -95,6 +95,15 @@ AND table_name = %s;',
 	}
 
 	/**
+	* Get the name of the lookup table.
+	*
+	* @return string
+	*/
+   public function get_lookup_table_name() {
+	   return $this->lookup_table_name;
+   }
+
+	/**
 	 * Insert/update the appropriate lookup table entries for a new or modified product or variation.
 	 * This must be invoked after a product or a variation is created (including untrashing and duplication)
 	 * or modified.
