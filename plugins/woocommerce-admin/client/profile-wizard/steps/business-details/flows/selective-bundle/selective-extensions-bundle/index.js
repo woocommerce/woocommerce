@@ -414,6 +414,11 @@ export const SelectiveExtensionsBundle = ( {
 				path: '/wc-admin/onboarding/free-extensions',
 			} )
 				.then( ( results ) => {
+					if ( ! results?.length ) {
+						// Assuming empty array or null results is err.
+						setLocalInstallableExtensions();
+						return;
+					}
 					const transformedExtensions = transformRemoteExtensions(
 						results
 					);
