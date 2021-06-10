@@ -54,8 +54,8 @@
 }
 
 .woocommerce-pagination__page-arrows-label {
-	margin-top: $spacing / 2;
-	margin-right: $spacing / 2;
+	margin-top: math.div($spacing, 2);
+	margin-right: math.div($spacing, 2);
 }
 
 .woocommerce-pagination__page-picker {
@@ -66,7 +66,7 @@
 		margin-left: 0;
 	}
 	.woocommerce-pagination__page-picker-input {
-		margin-left: $spacing / 2;
+		margin-left: math.div($spacing, 2);
 		width: 60px;
 		height: 34px;
 		box-shadow: none;
@@ -98,7 +98,7 @@
 		}
 
 		.components-base-control__label {
-			margin-right: $spacing / 2;
+			margin-right: math.div($spacing, 2);
 		}
 	}
 }

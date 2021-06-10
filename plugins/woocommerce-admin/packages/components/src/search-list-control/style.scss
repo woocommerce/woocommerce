@@ -191,7 +191,7 @@
 
 		.woocommerce-search-list__item-count {
 			flex: 0 1 auto;
-			padding: $gap-smallest/2 $gap-smaller;
+			padding: math.div($gap-smallest, 2) $gap-smaller;
 			border: 1px solid $gray-100;
 			border-radius: 12px;
 			font-size: 0.8em;

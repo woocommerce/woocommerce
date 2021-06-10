@@ -1,7 +1,7 @@
 // Rem output with px fallback
 @mixin font-size( $sizeValue: 16, $lineHeight: false ) {
 	font-size: $sizeValue + px;
-	font-size: ( $sizeValue / 16 ) + rem;
+	font-size: math.div($sizeValue, 16) + rem;
 	@if ( $lineHeight ) {
 		line-height: $lineHeight;
 	}
@@ -168,8 +168,8 @@
 		&:nth-child(#{$i}) {
 			grid-column-start: #{($i - 1) % $wrap-after + 1};
 			grid-column-end: #{($i - 1) % $wrap-after + 2};
-			grid-row-start: #{floor(( $i - 1 ) / $wrap-after) + 1};
-			grid-row-end: #{floor(( $i - 1 ) / $wrap-after) + 2};
+			grid-row-start: #{floor(math.div($i - 1, $wrap-after)) + 1};
+			grid-row-end: #{floor(math.div($i - 1, $wrap-after)) + 2};
 		}
 	}
 }

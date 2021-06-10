@@ -1,9 +1,7 @@
-
-
 .woocommerce-settings-historical-data__columns {
 	display: grid;
 	grid-column-gap: $gap-large;
-	grid-template-columns: calc(50% - #{$gap-large/2}) calc(50% - #{$gap-large/2});
+	grid-template-columns: calc(50% - #{math.div($gap-large, 2)}) calc(50% - #{math.div($gap-large, 2)});
 
 	.woocommerce-settings-historical-data__column {
 		align-self: end;

@@ -143,6 +143,7 @@ const webpackConfig = {
 							},
 							webpackImporter: true,
 							additionalData:
+								'@use "sass:math";' +
 								'@import "_colors"; ' +
 								'@import "_variables"; ' +
 								'@import "_breakpoints"; ' +

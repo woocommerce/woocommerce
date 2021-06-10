@@ -115,7 +115,7 @@
 		align-self: flex-start;
 		flex-grow: 1;
 		border-bottom: 1px solid $gray-100;
-		margin-top: $step-icon-size / 2 + $gap-smaller;
+		margin-top: math.div($step-icon-size, 2) + $gap-smaller;
 
 		&:last-child {
 			display: none;
@@ -146,7 +146,7 @@
 		.woocommerce-stepper__step::after {
 			content: '';
 			position: absolute;
-			left: $step-icon-size / 2 + $gap-smaller;
+			left: math.div($step-icon-size, 2) + $gap-smaller;
 			top: $step-icon-size + ( $gap-smaller * 2 );
 			height: calc(100% - #{$step-icon-size} - #{$gap-smaller * 2});
 			border-left: 1px solid $gray-100;

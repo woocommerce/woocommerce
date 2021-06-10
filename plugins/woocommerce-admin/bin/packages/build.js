@@ -139,9 +139,11 @@ async function buildScssFile( styleFile ) {
 			path.resolve( __dirname, '../../node_modules' ),
 		],
 		data:
+			'@forward "sass:math"; @use "sass:math";' +
 			[ 'colors', 'variables', 'breakpoints', 'mixins' ]
 				.map( ( imported ) => `@import "_${ imported }";` )
-				.join( ' ' ) + fs.readFileSync( styleFile, 'utf8' ),
+				.join( ' ' ) +
+			fs.readFileSync( styleFile, 'utf8' ),
 	} );
 
 	const postCSSConfig = require( '@wordpress/postcss-plugins-preset' );

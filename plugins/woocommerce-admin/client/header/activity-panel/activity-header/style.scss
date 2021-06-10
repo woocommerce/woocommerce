@@ -37,10 +37,10 @@
 }
 
 .woocommerce-layout__inbox-badge {
-	margin-left: $gap-small / 2;
+	margin-left: math.div($gap-small, 2);
 	background-color: $gray-700;
 	border-radius: 13px;
-	padding: 0 $gap-small / 2;
+	padding: 0 math.div($gap-small, 2);
 	color: $white;
 	display: inline-block;
 	text-align: center;
