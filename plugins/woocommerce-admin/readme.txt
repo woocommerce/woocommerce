@@ -172,7 +172,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Add: Add plugin installer to allow installation of plugins via URL #6805
 - Add: Optional children prop to SummaryNumber component #6748
 - Dev: Add data source filter to remote inbox notification system #6794
-- Dev: Add A/A test #6669
+- Dev: Introduce usage of ExPlat, an A/B testing tool. See https://woocommerce.com/usage-tracking/ for more #6669
 - Dev: Add support for nonces in note actions #6726
 - Dev: Add support for running php unit tests in PHP 8. #6678
 - Dev: Add event recording to start of gateway connections #6801
