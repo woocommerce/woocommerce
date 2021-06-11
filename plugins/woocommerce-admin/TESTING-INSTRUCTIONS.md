@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 2.4.0
+
 ### Add target to the button to open it in a new tab #7110
 
 1. Navigate to WooCommerce -> Settings -> Payments

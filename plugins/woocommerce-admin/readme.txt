@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, store, sales, reports, analytics, dashboard, activi
 Requires at least: 5.4.0
 Tested up to: 5.7.0
 Requires PHP: 7.0
-Stable tag: 2.4.0-dev
+Stable tag: 2.5.0-dev
 License: GPLv3
 License URI: https://github.com/woocommerce/woocommerce-admin/blob/main/license.txt
 
@@ -76,18 +76,8 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 == Unreleased ==
 
 - Fix: WCPay not working in local payments task #7151
-- Dev: Add Jetpack Backup admin note #6738
-- Add: Adding WCPay payment configuration defaults. #7097
-- Fix: Transformer casing is incorrect and creates an error on case-sensitive systems #7104
-- Dev: Reduce the specificity and complexity of the ReportError component #6846
-- Add: Create onboarding package to house refactored WCPay card and relevant components #7058
-- Fix: Preventing redundant notices when installing plugins via payments task list. #7026
-- Fix: Autocompleter for custom Search in CompareFilter #6911
-- Fix: Add target to the button to open it in a new tab  #7110
-- Dev: Converting <SettingsForm /> component to TypeScript. #6981
-- Enhancement: Adding Slotfills for remote payments and SettingsForm component. #6932
-- Fix: Make `Search` accept synchronous `autocompleter.options`. #6884
-- Fix: Set autoload to false for all remote inbox notifications options. #7060
+
+== 2.4.0 6/10/2021 ==
 - Add: Consume remote payment methods on frontend #6867
 - Add: Extend payment gateways REST endpoint #6919
 - Add: Add remote payment gateway recommendations initial docs #6962
@@ -109,6 +99,13 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Add: Add BACS as default fallback payment gateway #7073
 - Add: A/B test of progressive checklist features. #7089
 - Add: Add payment gateway return URL and action #7095
+- Add: Add Mollie to the default payment gateways. #7092
+- Add: Show task and activity notifications in the Inbox panel #7017
+- Add: Adding WCPay payment configuration defaults. #7097
+- Add: Create onboarding package to house refactored WCPay card and relevant components #7058
+- Dev: Add Jetpack Backup admin note #6738
+- Dev: Reduce the specificity and complexity of the ReportError component #6846
+- Dev: Converting <SettingsForm /> component to TypeScript. #6981
 - Dev: Update package-lock to fix versioning of local packages. #6843
 - Dev: Use rule processing for remote payment methods #6830
 - Dev: Update E2E jest config, so it correctly creates screenshots on failure. #6858
@@ -123,10 +120,14 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Dev: Remove the use of Dashicons and replace with @wordpress/icons or gridicons. #7020
 - Dev: Refactor inbox panel components and moved to experimental package. #7006
 - Dev: Business features uncheck creative mail by default #7139
+- Dev: Remove support for IE11. #7112
+- Dev: Drop styling support for IE11. #7137
+- Dev: Remove react-docgen docs in favor of Storybook #7055
 - Enhancement: Add expand/collapse to extendable task list. #6910
 - Enhancement: Add task hierarchy support to extended task list. #6916
 - Enhancement: Add remind me later option to task list. #6923
 - Enhancement: Enable Remote Free Extensions List #7144
+- Enhancement: Adding Slotfills for remote payments and SettingsForm component. #6932
 - Fix: Rule Processing Transformer to handle dotNotation default value #7009
 - Fix: Remove Navigation's uneeded SlotFill context #6832
 - Fix: Report filters expecting specific ordering. #6847
@@ -148,21 +149,22 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix: Notices not dissapearing. #7077
 - Fix: Keyboard accessibility on the free features tab. #7149
 - Fix: Fix error handling when remote free extension API returns empty array. #7147
+- Fix: Transformer casing is incorrect and creates an error on case-sensitive systems #7104
+- Fix: Preventing redundant notices when installing plugins via payments task list. #7026
+- Fix: Autocompleter for custom Search in CompareFilter #6911
+- Fix: Add target to the button to open it in a new tab  #7110
+- Fix: Make `Search` accept synchronous `autocompleter.options`. #6884
+- Fix: Set autoload to false for all remote inbox notifications options. #7060
 - Tweak: Only fetch remote payment gateway recommendations when opted in #6964
 - Tweak: Setup checklist copy revert. #7015
 - Update: Task list component with new Experimental Task list. #6849
 - Update: Optimize payment gateway resolution #7124
 - Update: Experimental task list import to the experimental package. #6950
 - Update: Redirect to WC Home after setting up a payment method #6891
-- Dev: Remove react-docgen docs in favor of Storybook #7055
 - Update: Hook up payments gateway data store #7038
 - Update: Update remote payment docs gateway methods #7079
-- Add: Add Mollie to the default payment gateways. #7092
-- Dev: Remove support for IE11. #7112
 - Update: Remove original business step flow #7103
-- Dev: Drop styling support for IE11. #7137
 - Update: WooCommerce Shipping copy on onboarding steps #7148
-- Add: Show task and activity notifications in the Inbox panel #7017
 
 == 2.3.1 5/24/2021 ==
 - Tweak: Store profiler - Changed MailPoet's title and description #6990
