@@ -76,8 +76,17 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 == Unreleased ==
 
 - Fix: WCPay not working in local payments task #7151
-
+- Fix: Include onboarding settings on the analytic pages #7109
 == 2.4.0 6/10/2021 ==
+- Dev: Reduce the specificity and complexity of the ReportError component #6846
+- Add: Create onboarding package to house refactored WCPay card and relevant components #7058
+- Fix: Preventing redundant notices when installing plugins via payments task list. #7026
+- Fix: Autocompleter for custom Search in CompareFilter #6911
+- Fix: Include onboarding settings on the analytic pages #7109
+- Dev: Converting <SettingsForm /> component to TypeScript. #6981
+- Enhancement: Adding Slotfills for remote payments and SettingsForm component. #6932
+- Fix: Make `Search` accept synchronous `autocompleter.options`. #6884
+- Fix: Set autoload to false for all remote inbox notifications options. #7060
 - Add: Consume remote payment methods on frontend #6867
 - Add: Extend payment gateways REST endpoint #6919
 - Add: Add remote payment gateway recommendations initial docs #6962

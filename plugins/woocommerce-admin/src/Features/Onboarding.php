@@ -626,18 +626,17 @@ class Onboarding {
 	}
 
 	/**
-	 * Determine if the current page is home or setup wizard.
+	 * Determine if the current page is one of the WC Admin pages.
 	 *
 	 * @return bool
 	 */
-	protected function is_home_or_setup_wizard_page() {
-		$allowed_paths = array( 'wc-admin', 'wc-admin&path=/setup-wizard' );
-		$current_page  = PageController::get_instance()->get_current_page();
+	protected function is_wc_pages() {
+		$current_page = PageController::get_instance()->get_current_page();
 		if ( ! $current_page || ! isset( $current_page['path'] ) ) {
 			return false;
 		}
 
-		return in_array( $current_page['path'], $allowed_paths, true );
+		return 0 === strpos( $current_page['path'], 'wc-admin' );
 	}
 
 	/**
@@ -658,7 +657,7 @@ class Onboarding {
 		if (
 			( ! self::should_show_profiler() && ! self::should_show_tasks()
 			||
-			! $this->is_home_or_setup_wizard_page()
+			! $this->is_wc_pages()
 		)
 		) {
 			return $settings;
