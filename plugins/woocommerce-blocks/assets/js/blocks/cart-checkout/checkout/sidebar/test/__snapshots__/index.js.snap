@@ -97,6 +97,9 @@ exports[`Testing checkout sidebar Shows rate percentages after tax lines if the 
     </div>
   </div>
   <div
+    class="wc-block-components-discounts-meta"
+  />
+  <div
     class="wc-block-components-totals-taxes"
   >
     <div

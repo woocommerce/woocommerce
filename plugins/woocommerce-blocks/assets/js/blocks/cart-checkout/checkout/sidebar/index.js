@@ -14,6 +14,7 @@ import {
 	TotalsFees,
 	TotalsTaxes,
 	ExperimentalOrderMeta,
+	ExperimentalDiscountsMeta,
 } from '@woocommerce/blocks-checkout';
 
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
@@ -50,6 +51,11 @@ const CheckoutSidebar = ( {
 		cart,
 	};
 
+	const discountsSlotFillProps = {
+		extensions,
+		cart,
+	};
+
 	return (
 		<>
 			<OrderSummary cartItems={ cartItems } />
@@ -69,6 +75,7 @@ const CheckoutSidebar = ( {
 					isLoading={ isApplyingCoupon }
 				/>
 			) }
+			<ExperimentalDiscountsMeta.Slot { ...discountsSlotFillProps } />
 			{ needsShipping && (
 				<TotalsShipping
 					showCalculator={ false }
