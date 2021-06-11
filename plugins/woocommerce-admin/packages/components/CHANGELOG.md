@@ -1,3 +1,7 @@
+# Unreleased
+
+-   Revert Card component removal #7167.
+
 # 7.0.0
 
 -   Fix style regression with the Chart header. #7002

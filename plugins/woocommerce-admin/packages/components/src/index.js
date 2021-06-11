@@ -3,6 +3,7 @@ export { default as AdvancedFilters } from './advanced-filters';
 export { default as AnimationSlider } from './animation-slider';
 export { default as Chart } from './chart';
 export { default as ChartPlaceholder } from './chart/placeholder';
+export { default as Card } from './card';
 export { default as Count } from './count';
 export { CompareButton, CompareFilter } from './compare-filter';
 export { default as Date } from './date';
