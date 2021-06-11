@@ -42,19 +42,19 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox `insert_data_for_product` throws an exception if a variation is passed.
+	 * @testdox `create_data_for_product` throws an exception if a variation is passed.
 	 */
-	public function test_insert_data_for_product_throws_if_variation_is_passed() {
+	public function test_create_data_for_product_throws_if_variation_is_passed() {
 		$product = new \WC_Product_Variation();
 
 		$this->expectException( \Exception::class );
-		$this->expectExceptionMessage( "LookupDataStore::insert_data_for_product can't be called for variations." );
+		$this->expectExceptionMessage( "LookupDataStore::create_data_for_product can't be called for variations." );
 
-		$this->sut->insert_data_for_product( $product );
+		$this->sut->create_data_for_product( $product );
 	}
 
 	/**
-	 * @testdox `insert_data_for_product` creates the appropriate entries for simple products, skipping custom product attributes.
+	 * @testdox `create_data_for_product` creates the appropriate entries for simple products, skipping custom product attributes.
 	 *
 	 * @testWith [true]
 	 *           [false]
@@ -90,7 +90,7 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 			$expected_in_stock = 0;
 		}
 
-		$this->sut->insert_data_for_product( $product );
+		$this->sut->create_data_for_product( $product );
 
 		$expected = array(
 			array(
@@ -133,7 +133,7 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox `insert_data_for_product` creates the appropriate entries for variable products.
+	 * @testdox `create_data_for_product` creates the appropriate entries for variable products.
 	 */
 	public function test_update_data_for_variable_product() {
 		$products = array();
@@ -239,7 +239,7 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 		$products[1001] = $variation_1;
 		$products[1002] = $variation_2;
 
-		$this->sut->insert_data_for_product( $product );
+		$this->sut->create_data_for_product( $product );
 
 		$expected = array(
 			// Main product: one entry for each of the regular attribute values,
