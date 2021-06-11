@@ -51,7 +51,7 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 		$this->lookup_data_store = new class() extends LookupDataStore {
 			public $passed_products = array();
 
-			public function insert_data_for_product( $product ) {
+			public function create_data_for_product( $product ) {
 				$this->passed_products[] = $product;
 			}
 		};
