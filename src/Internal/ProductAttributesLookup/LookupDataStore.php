@@ -15,6 +15,15 @@ defined( 'ABSPATH' ) || exit;
 class LookupDataStore {
 
 	/**
+	 * Types of updates to perform depending on the current changest
+	 */
+
+	const ACTION_NONE         = 0;
+	const ACTION_INSERT       = 1;
+	const ACTION_UPDATE_STOCK = 2;
+	const ACTION_DELETE       = 3;
+
+	/**
 	 * The lookup table name.
 	 *
 	 * @var string
@@ -104,27 +113,38 @@ AND table_name = %s;',
 	}
 
 	/**
-	 * Insert the lookup data for a given product or variation.
-	 * If a variable product is passed the information is created for all of its variations.
+	 * Create the lookup data for a given product, if a variable product is passed
+	 * the information is created for all of its variations.
+	 * This method is intended to be called from the data regenerator.
 	 *
 	 * @param int|WC_Product $product Product object or id.
 	 * @throws \Exception A variation object is passed.
 	 */
-	public function insert_data_for_product( $product ) {
+	public function create_data_for_product( $product ) {
 		if ( ! is_a( $product, \WC_Product::class ) ) {
 			$product = WC()->call_function( 'wc_get_product', $product );
 		}
 
 		if ( $this->is_variation( $product ) ) {
-			throw new \Exception( "LookupDataStore::insert_data_for_product can't be called for variations." );
+			throw new \Exception( "LookupDataStore::create_data_for_product can't be called for variations." );
 		}
 
-		$this->delete_lookup_table_entries_for( $product->get_id() );
+		$this->delete_data_for( $product->get_id() );
+		$this->create_data_for( $product );
+	}
 
-		if ( $this->is_variable_product( $product ) ) {
-			$this->create_lookup_table_entries_for_variable_product( $product );
+	/**
+	 * Create lookup table data for a given product.
+	 *
+	 * @param \WC_Product $product The product to create the data for.
+	 */
+	private function create_data_for( \WC_Product $product ) {
+		if ( $this->is_variation( $product ) ) {
+			$this->create_data_for_variation( $product );
+		} elseif ( $this->is_variable_product( $product ) ) {
+			$this->create_data_for_variable_product( $product );
 		} else {
-			$this->create_lookup_table_entries_for_simple_product( $product );
+			$this->create_data_for_simple_product( $product );
 		}
 	}
 
@@ -134,7 +154,7 @@ AND table_name = %s;',
 	 *
 	 * @param int $product_id Simple product id, or main/parent product id for variable products.
 	 */
-	private function delete_lookup_table_entries_for( int $product_id ) {
+	private function delete_data_for( int $product_id ) {
 		global $wpdb;
 
 		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
@@ -154,7 +174,7 @@ AND table_name = %s;',
 	 *
 	 * @param \WC_Product $product The product to create the entries for.
 	 */
-	private function create_lookup_table_entries_for_simple_product( \WC_Product $product ) {
+	private function create_data_for_simple_product( \WC_Product $product ) {
 		$product_attributes_data = $this->get_attribute_taxonomies( $product );
 		$has_stock               = $product->is_in_stock();
 		$product_id              = $product->get_id();
@@ -172,7 +192,7 @@ AND table_name = %s;',
 	 *
 	 * @param \WC_Product_Variable $product The product to create the entries for.
 	 */
-	private function create_lookup_table_entries_for_variable_product( \WC_Product_Variable $product ) {
+	private function create_data_for_variable_product( \WC_Product_Variable $product ) {
 		$product_attributes_data       = $this->get_attribute_taxonomies( $product );
 		$variation_attributes_data     = array_filter(
 			$product_attributes_data,
@@ -212,7 +232,7 @@ AND table_name = %s;',
 	 *
 	 * @param \WC_Product_Variation $variation The variation to create entries for.
 	 */
-	private function insert_data_for_variation( \WC_Product_Variation $variation ) {
+	private function create_data_for_variation( \WC_Product_Variation $variation ) {
 		$main_product = wc_get_product( $variation->get_parent_id() );
 
 		$product_attributes_data   = $this->get_attribute_taxonomies( $main_product );
