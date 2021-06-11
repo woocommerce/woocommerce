@@ -93,6 +93,8 @@ class DataRegenerator {
 	 * (Note how we are returning "false" since the class handles the step scheduling by itself).
 	 */
 	public function initiate_regeneration() {
+		$this->enable_or_disable_lookup_table_usage( false );
+
 		$this->delete_all_attributes_lookup_data();
 		$products_exist = $this->initialize_table_and_data();
 		if ( $products_exist ) {
