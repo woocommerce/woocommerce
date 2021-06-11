@@ -21,6 +21,7 @@ import {
 import { getHistory, getNewPath } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
 import { applyFilters } from '@wordpress/hooks';
+import { useSlot } from '@woocommerce/experimental';
 
 /**
  * Internal dependencies
@@ -39,6 +40,7 @@ import {
 	getUnreadOrders,
 } from '../../homescreen/activity-panel/orders/utils';
 import { getUnapprovedReviews } from '../../homescreen/activity-panel/reviews/utils';
+import { ABBREVIATED_NOTIFICATION_SLOT_NAME } from './panels/inbox/abbreviated-notifications-panel';
 
 const HelpPanel = lazy( () =>
 	import( /* webpackChunkName: "activity-panels-help" */ './panels/help' )
@@ -55,6 +57,8 @@ export const ActivityPanel = ( { isEmbedded, query, userPreferencesData } ) => {
 	const [ isPanelClosing, setIsPanelClosing ] = useState( false );
 	const [ isPanelOpen, setIsPanelOpen ] = useState( false );
 	const [ isPanelSwitching, setIsPanelSwitching ] = useState( false );
+	const { fills } = useSlot( ABBREVIATED_NOTIFICATION_SLOT_NAME );
+	const hasExtendedNotifications = Boolean( fills?.length );
 
 	const getPreviewSiteBtnTrackData = ( select, getOption ) => {
 		let trackData = {};
@@ -109,7 +113,8 @@ export const ActivityPanel = ( { isEmbedded, query, userPreferencesData } ) => {
 			thingsToDoNextCount > 0 ||
 			isOrdersCardVisible ||
 			isReviewsCardVisible ||
-			isLowStockCardVisible
+			isLowStockCardVisible ||
+			hasExtendedNotifications
 		);
 	}
 

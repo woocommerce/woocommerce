@@ -8,6 +8,7 @@ import { AbbreviatedCard } from '@woocommerce/components';
 import { useSelect } from '@wordpress/data';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { box, comment, page } from '@wordpress/icons';
+import { createSlotFill } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -25,6 +26,8 @@ const EXTENDED_TASK_LIST_ID = 'extended_task_list';
 const ORDER_PANEL_ID = 'orders-panel';
 const REVIEWS_PANEL_ID = 'reviews-panel';
 const STOCK_PANEL_ID = 'stock-panel';
+
+export const ABBREVIATED_NOTIFICATION_SLOT_NAME = 'AbbreviatedNotification';
 
 export const AbbreviatedNotificationsPanel = ( { thingsToDoNextCount } ) => {
 	const {
@@ -53,6 +56,7 @@ export const AbbreviatedNotificationsPanel = ( { thingsToDoNextCount } ) => {
 		} );
 	};
 
+	const { Slot } = createSlotFill( ABBREVIATED_NOTIFICATION_SLOT_NAME );
 	const isWCAdminPage = isWCAdmin( window.location.href );
 
 	return (
@@ -159,6 +163,7 @@ export const AbbreviatedNotificationsPanel = ( { thingsToDoNextCount } ) => {
 					</Text>
 				</AbbreviatedCard>
 			) }
+			{ ! isExtendedTaskListHidden && <Slot /> }
 		</div>
 	);
 };
