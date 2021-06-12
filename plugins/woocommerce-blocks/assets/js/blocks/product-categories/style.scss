@@ -36,7 +36,10 @@
 		border: 1px solid #eee;
 
 		img {
+			display: block;
+			height: auto;
 			margin: 0;
+			max-width: 100%;
 			padding: 0;
 		}
 	}
