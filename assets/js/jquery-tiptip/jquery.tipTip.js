@@ -58,7 +58,7 @@
 			}
 			if(org_title != ""){
 				if(!opts.content){
-					org_elem.prop(opts.attribute, false); //remove original Attribute
+					org_elem.removeAttr(opts.attribute); //remove original Attribute
 				}
 				var timeout = false;
 
