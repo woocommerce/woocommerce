@@ -29,6 +29,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		if ( false === $low_stock_count ) {
 			$low_stock_count = $this->get_low_stock_count();
 			set_transient( $low_stock_transient_name, $low_stock_count, $cache_expire );
+		} else {
+			$low_stock_count = intval( $low_stock_count );
 		}
 		$report_data['lowstock'] = $low_stock_count;
 
@@ -39,6 +41,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			if ( false === $count ) {
 				$count = $this->get_count( $status );
 				set_transient( $transient_name, $count, $cache_expire );
+			} else {
+				$count = intval( $count );
 			}
 			$report_data[ $status ] = $count;
 		}
@@ -48,6 +52,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		if ( false === $product_count ) {
 			$product_count = $this->get_product_count();
 			set_transient( $product_count_transient_name, $product_count, $cache_expire );
+		} else {
+			$product_count = intval( $product_count );
 		}
 		$report_data['products'] = $product_count;
 		return $report_data;

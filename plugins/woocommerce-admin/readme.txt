@@ -168,6 +168,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix: Add target to the button to open it in a new tab  #7110
 - Fix: Make `Search` accept synchronous `autocompleter.options`. #6884
 - Fix: Set autoload to false for all remote inbox notifications options. #7060
+- Fix: Issue where summary stats were not showing in Analytics > Stock. #7161
 - Tweak: Only fetch remote payment gateway recommendations when opted in #6964
 - Tweak: Setup checklist copy revert. #7015
 - Update: Task list component with new Experimental Task list. #6849
