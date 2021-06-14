@@ -75,10 +75,11 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 
 == Unreleased ==
 
+- Add: SlotFill to Abbreviated Notification panel #7091
+- Add: Add unit tests around extended payment gateway controller #7133
 - Fix: WCPay not working in local payments task #7151
 - Fix: Include onboarding settings on the analytic pages #7109
 - Tweak: Revert Card component removal #7167
-- Add: SlotFill to Abbreviated Notification panel #7091
 
 == 2.4.0 6/10/2021 ==
 - Dev: Reduce the specificity and complexity of the ReportError component #6846

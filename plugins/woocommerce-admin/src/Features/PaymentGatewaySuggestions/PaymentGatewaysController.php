@@ -35,18 +35,18 @@ class PaymentGatewaysController {
 		$data['post_install_scripts'] = self::get_post_install_scripts( $gateway );
 		$data['settings_url']         = admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . strtolower( $gateway->id ) );
 
-		if ( method_exists( $gateway, 'get_connection_url' ) ) {
-			$return_url             = wc_admin_url( '&task=payments&connection-return=' . strtolower( $gateway->id ) );
-			$data['connection_url'] = $gateway->get_connection_url( $return_url );
-		}
+		$return_url             = wc_admin_url( '&task=payments&connection-return=' . strtolower( $gateway->id ) );
+		$data['connection_url'] = method_exists( $gateway, 'get_connection_url' )
+			? $gateway->get_connection_url( $return_url )
+			: null;
 
-		if ( method_exists( $gateway, 'get_setup_help_text' ) ) {
-			$data['setup_help_text'] = $gateway->get_setup_help_text();
-		}
+		$data['setup_help_text'] = method_exists( $gateway, 'get_setup_help_text' )
+			? $gateway->get_setup_help_text()
+			: null;
 
-		if ( method_exists( $gateway, 'get_required_settings_keys' ) ) {
-			$data['required_settings_keys'] = $gateway->get_required_settings_keys();
-		}
+		$data['required_settings_keys'] = method_exists( $gateway, 'get_required_settings_keys' )
+			? $gateway->get_required_settings_keys()
+			: array();
 
 		$response->set_data( $data );
 
