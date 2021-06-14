@@ -1,5 +1,12 @@
 == Changelog ==
 
+= 5.4.1 2021-06-10 =
+
+**WooCommerce**
+
+* Fix - Update jQuery compatibility changes to trim functions to work with types other than string. #30074
+* Fix - Restores the option to load and copy addresses to orders edited in the dashboard. #30076
+
 = 5.4.0 2021-06-08 =
 
 **WooCommerce**
