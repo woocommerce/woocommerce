@@ -36,13 +36,13 @@ type ActivatePluginsResponse = PluginsResponse< {
 } >;
 
 function isWPError(
-	error: WPError< PluginNames > | string
+	error: WPError< PluginNames > | Error | string
 ): error is WPError< PluginNames > {
 	return ( error as WPError ).errors !== undefined;
 }
 
 export function formatErrors(
-	response: WPError< PluginNames > | string
+	response: WPError< PluginNames > | Error | string
 ): string {
 	if ( isWPError( response ) ) {
 		// Replace the slug with a plugin name if a constant exists.
@@ -60,8 +60,12 @@ export function formatErrors(
 				);
 			}
 		);
+	} else if ( typeof response === 'string' ) {
+		return response;
+	} else {
+		return response.message;
 	}
-	return response as string;
+	return '';
 }
 
 const formatErrorMessage = (
@@ -73,7 +77,7 @@ const formatErrorMessage = (
 		_n(
 			'Could not %(actionType)s %(pluginName)s plugin, %(error)s',
 			'Could not %(actionType)s the following plugins: %(pluginName)s with these Errors: %(error)s',
-			Object.keys( pluginErrors ).length,
+			Object.keys( pluginErrors ).length || 1,
 			'woocommerce-admin'
 		),
 		{
@@ -189,6 +193,10 @@ export function* installPlugins( plugins: string[] ) {
 
 		return results;
 	} catch ( error ) {
+		if ( plugins.length === 1 && ! error[ plugins[ 0 ] ] ) {
+			// Incase of a network error
+			error = { [ plugins[ 0 ] ]: error.message };
+		}
 		yield setError( 'installPlugins', error );
 		throw new Error( formatErrorMessage( error ) );
 	}
@@ -216,8 +224,12 @@ export function* activatePlugins( plugins: string[] ) {
 
 		return results;
 	} catch ( error ) {
+		if ( plugins.length === 1 && ! error[ plugins[ 0 ] ] ) {
+			// Incase of a network error
+			error = { [ plugins[ 0 ] ]: error.message };
+		}
 		yield setError( 'activatePlugins', error );
-		throw new Error( formatErrors( error ) );
+		throw new Error( formatErrorMessage( error, 'activate' ) );
 	}
 }
 
@@ -236,7 +248,12 @@ export function* installAndActivatePlugins( plugins: string[] ) {
 }
 
 export const createErrorNotice = ( errorMessage: string ) => {
-	return controls.dispatch( 'core/notices', 'createNotice', errorMessage );
+	return controls.dispatch(
+		'core/notices',
+		'createNotice',
+		'error',
+		errorMessage
+	);
 };
 
 export function* connectToJetpack(
