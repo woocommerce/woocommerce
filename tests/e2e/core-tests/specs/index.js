@@ -116,7 +116,6 @@ const runApiTests = () => {
 
 const runPluginWorkflowTests = () => {
 	runPluginWorkflowTest();
-	runDownloadPluginTest();
 	runUploadPluginTest();
 }
 
