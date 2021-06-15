@@ -79,6 +79,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Add: Add unit tests around extended payment gateway controller #7133
 - Fix: WCPay not working in local payments task #7151
 - Fix: Include onboarding settings on the analytic pages #7109
+- Fix: RemoteFreeExtension hide bundle when all of its plugins are not visible #7182
 - Tweak: Revert Card component removal #7167
 
 == 2.4.0 6/10/2021 ==

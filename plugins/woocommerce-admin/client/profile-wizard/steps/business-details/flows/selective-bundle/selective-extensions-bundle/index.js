@@ -328,6 +328,34 @@ const getVisiblePlugins = ( plugins, country, industry, productTypes ) => {
 	);
 };
 
+/**
+ * Returns bundles that have at least 1 visible plugin.
+ *
+ * @param {Array} bundles  list of bundles
+ * @param {string} country  Woo store country
+ * @param {Array} industry List of selected industries
+ * @param {Array} productTypes List of selected product types
+ *
+ * @return {Array} Array of visible bundles
+ */
+const getVisibleBundles = ( bundles, country, industry, productTypes ) => {
+	return bundles
+		.map( ( bundle ) => {
+			return {
+				...bundle,
+				plugins: getVisiblePlugins(
+					bundle.plugins,
+					country,
+					industry,
+					productTypes
+				),
+			};
+		} )
+		.filter( ( bundle ) => {
+			return bundle.plugins.length;
+		} );
+};
+
 const transformRemoteExtensions = ( extensionData ) => {
 	return extensionData.map( ( section ) => {
 		const plugins = section.plugins.map( ( plugin ) => {
@@ -400,7 +428,14 @@ export const SelectiveExtensionsBundle = ( {
 				industry,
 				productTypes
 			);
-			setInstallableExtensions( installableExtensionsData );
+			setInstallableExtensions(
+				getVisibleBundles(
+					installableExtensionsData,
+					country,
+					industry,
+					productTypes
+				)
+			);
 			setValues( initialValues );
 			setIsFetching( false );
 		};
@@ -428,7 +463,14 @@ export const SelectiveExtensionsBundle = ( {
 						industry,
 						productTypes
 					);
-					setInstallableExtensions( transformedExtensions );
+					setInstallableExtensions(
+						getVisibleBundles(
+							transformedExtensions,
+							country,
+							industry,
+							productTypes
+						)
+					);
 					setValues( initialValues );
 					setIsFetching( false );
 				} )
@@ -520,21 +562,18 @@ export const SelectiveExtensionsBundle = ( {
 									{ isFetching ? (
 										<Spinner />
 									) : (
-										getVisiblePlugins(
-											plugins,
-											country,
-											industry,
-											productTypes
-										).map( ( { description, key } ) => (
-											<BundleExtensionCheckbox
-												key={ key }
-												description={ description }
-												isChecked={ values[ key ] }
-												onChange={ getCheckboxChangeHandler(
-													key
-												) }
-											/>
-										) )
+										plugins.map(
+											( { description, key } ) => (
+												<BundleExtensionCheckbox
+													key={ key }
+													description={ description }
+													isChecked={ values[ key ] }
+													onChange={ getCheckboxChangeHandler(
+														key
+													) }
+												/>
+											)
+										)
 									) }
 								</div>
 							)
