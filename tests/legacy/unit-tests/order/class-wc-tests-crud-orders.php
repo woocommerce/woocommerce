@@ -1431,6 +1431,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 			'state'      => 'Boulder',
 			'postcode'   => '00001',
 			'country'    => 'US',
+			'phone'      => '',
 		);
 
 		$object->set_billing_first_name( 'Fred' );
