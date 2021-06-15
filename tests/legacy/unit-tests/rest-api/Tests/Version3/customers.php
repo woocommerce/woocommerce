@@ -408,6 +408,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 					'state'      => 'CA',
 					'postcode'   => '94110',
 					'country'    => 'US',
+					'phone'      => '',
 				),
 				'is_paying_customer' => false,
 				'meta_data'          => array(),
