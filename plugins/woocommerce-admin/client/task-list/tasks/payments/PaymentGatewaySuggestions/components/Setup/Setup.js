@@ -121,10 +121,9 @@ export const Setup = ( {
 							pluginSlugs={ plugins }
 						/>
 					),
-					isComplete: ! needsPluginInstall,
 			  }
 			: null;
-	}, [ needsPluginInstall ] );
+	}, [] );
 
 	const connectStep = useMemo(
 		() => ( {
@@ -147,7 +146,7 @@ export const Setup = ( {
 	);
 
 	const stepperPending =
-		! installStep?.isComplete ||
+		needsPluginInstall ||
 		isOptionUpdating ||
 		isPaymentGatewayResolving ||
 		! isPluginLoaded;
@@ -157,8 +156,8 @@ export const Setup = ( {
 			<Stepper
 				isVertical
 				isPending={ stepperPending }
-				currentStep={ installStep?.isComplete ? 'connect' : 'install' }
-				steps={ [ installStep, connectStep ] }
+				currentStep={ needsPluginInstall ? 'install' : 'connect' }
+				steps={ [ installStep, connectStep ].filter( Boolean ) }
 				{ ...props }
 			/>
 		),
