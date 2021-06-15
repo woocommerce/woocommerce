@@ -14,6 +14,26 @@ import { useSlot } from '@woocommerce/experimental';
  */
 import sanitizeHTML from '~/lib/sanitize-html';
 
+export const validateFields = ( values, fields ) => {
+	const errors = {};
+	const getField = ( fieldId ) =>
+		fields.find( ( field ) => field.id === fieldId );
+
+	for ( const [ fieldKey, value ] of Object.entries( values ) ) {
+		const field = getField( fieldKey );
+		// Matches any word that is capitalized aside from abrevitions like ID.
+		const label = field.label.replace( /([A-Z][a-z]+)/g, ( val ) =>
+			val.toLowerCase()
+		);
+
+		if ( ! ( value || field.type === 'checkbox' ) ) {
+			errors[ fieldKey ] = `Please enter your ${ label }`;
+		}
+	}
+
+	return errors;
+};
+
 export const Connect = ( {
 	markConfigured,
 	paymentGateway,
@@ -71,26 +91,6 @@ export const Connect = ( {
 			} );
 	};
 
-	const validate = ( values ) => {
-		const errors = {};
-		const getField = ( fieldId ) =>
-			fields.find( ( field ) => field.id === fieldId );
-
-		for ( const [ fieldKey, value ] of Object.entries( values ) ) {
-			const field = getField( fieldKey );
-			// Matches any word that is capitalized aside from abrevitions like ID.
-			const label = field.label.replace( /([A-Z][a-z]+)/g, ( val ) =>
-				val.toLowerCase()
-			);
-
-			if ( ! ( value || field.type === 'checkbox' ) ) {
-				errors[ fieldKey ] = `Please enter your ${ label }`;
-			}
-		}
-
-		return errors;
-	};
-
 	const helpText = setupHelpText && (
 		<p dangerouslySetInnerHTML={ sanitizeHTML( setupHelpText ) } />
 	);
@@ -100,7 +100,7 @@ export const Connect = ( {
 			isBusy={ isUpdating }
 			onSubmit={ handleSubmit }
 			submitLabel={ __( 'Proceed', 'woocommerce-admin' ) }
-			validate={ validate }
+			validate={ ( values ) => validateFields( values, fields ) }
 			{ ...props }
 		/>
 	);
