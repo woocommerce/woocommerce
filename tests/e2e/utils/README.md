@@ -44,6 +44,7 @@ This package provides support for enabling retries in tests:
 
 - `WP_ADMIN_LOGIN` - WordPress login
 - `WP_ADMIN_DASHBOARD` - WordPress dashboard
+- `WP_ADMIN_WP_UPDATES` - WordPress updates
 - `WP_ADMIN_PLUGINS` - Plugin list
 - `WP_ADMIN_PERMALINK_SETTINGS` - Permalink settings  
 - `WP_ADMIN_ALL_USERS_VIEW` - WordPress user list

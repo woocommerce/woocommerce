@@ -6,7 +6,7 @@ const config = require( 'config' );
 /**
  * Internal dependencies
  */
-const { clearAndFillInput } = require( '../page-utils' );
+const { clearAndFillInput, setCheckbox } = require( '../page-utils' );
 const {
 	WP_ADMIN_ALL_ORDERS_VIEW,
 	WP_ADMIN_ALL_PRODUCTS_VIEW,
