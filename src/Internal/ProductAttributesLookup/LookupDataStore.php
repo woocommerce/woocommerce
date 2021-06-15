@@ -56,6 +56,61 @@ class LookupDataStore {
 		$this->is_feature_visible = false;
 
 		$this->lookup_table_exists = $this->check_lookup_table_exists();
+
+		$this->init_hooks();
+	}
+
+	/**
+	 * Initialize the hooks used by the class.
+	 */
+	private function init_hooks() {
+		add_action(
+			'woocommerce_run_product_attribute_lookup_update_callback',
+			function ( $product_id, $action ) {
+				$this->run_update_callback( $product_id, $action );
+			},
+			10,
+			2
+		);
+
+		add_filter(
+			'woocommerce_get_sections_products',
+			function ( $products ) {
+				if ( $this->is_feature_visible() ) {
+					$products['advanced'] = __( 'Advanced', 'woocommerce' );
+				}
+				return $products;
+			},
+			100,
+			1
+		);
+
+		add_filter(
+			'woocommerce_get_settings_products',
+			function ( $settings, $section_id ) {
+				if ( 'advanced' === $section_id && $this->is_feature_visible() ) {
+					$settings[] =
+						array(
+							'title' => __( 'Product attributes lookup table', 'woocommerce' ),
+							'type'  => 'title',
+						);
+
+					$settings[] = array(
+						'title'         => __( 'Direct updates', 'woocommerce' ),
+						'desc'          => __( 'Update the table directly upon product changes, instead of scheduling a deferred update.', 'woocommerce' ),
+						'id'            => 'woocommerce_attribute_lookup__direct_updates',
+						'default'       => 'no',
+						'type'          => 'checkbox',
+						'checkboxgroup' => 'start',
+					);
+
+					$settings[] = array( 'type' => 'sectionend' );
+				}
+				return $settings;
+			},
+			100,
+			2
+		);
 	}
 
 	/**
@@ -129,9 +184,62 @@ AND table_name = %s;',
 			$product = WC()->call_function( 'wc_get_product', $product );
 		}
 
-		$update_type = $this->get_update_type( $changeset );
+		$action = $this->get_update_action( $changeset );
+		$this->maybe_schedule_update( $product->get_id(), $action );
+	}
 
-		switch ( $update_type ) {
+	/**
+	 * Schedule an update of the product attributes lookup table for a given product.
+	 * If an update for the same action is already scheduled, nothing is done.
+	 *
+	 * If the 'woocommerce_attribute_lookup__direct_update' option is set to 'yes',
+	 * the update is done directly, without scheduling.
+	 *
+	 * @param int $product_id The product id to schedule the update for.
+	 * @param int $action The action to perform, one of the ACTION_ constants.
+	 */
+	private function maybe_schedule_update( int $product_id, int $action ) {
+		if ( 'yes' === get_option( 'woocommerce_attribute_lookup__direct_updates' ) ) {
+			$this->run_update_callback( $product_id, $action );
+			return;
+		}
+
+		$args = array( $product_id, $action );
+
+		$queue             = WC()->get_instance_of( \WC_Queue::class );
+		$already_scheduled = $queue->search(
+			array(
+				'hook'   => 'woocommerce_run_product_attribute_lookup_update_callback',
+				'args'   => $args,
+				'status' => \ActionScheduler_Store::STATUS_PENDING,
+			),
+			'ids'
+		);
+
+		if ( empty( $already_scheduled ) ) {
+			$queue->schedule_single(
+				WC()->call_function( 'time' ) + 1,
+				'woocommerce_run_product_attribute_lookup_update_callback',
+				$args,
+				'woocommerce-db-updates'
+			);
+		}
+	}
+
+	/**
+	 * Perform an update of the lookup table for a specific product.
+	 *
+	 * @param int $product_id The product id to perform the update for.
+	 * @param int $action The action to perform, one of the ACTION_ constants.
+	 */
+	private function run_update_callback( int $product_id, int $action ) {
+		if ( ! $this->lookup_table_exists ) {
+			return;
+		}
+
+		$product = WC()->call_function( 'wc_get_product', $product_id );
+
+		switch ( $action ) {
 			case self::ACTION_INSERT:
 				$this->delete_data_for( $product->get_id() );
 				$this->create_data_for( $product );
@@ -151,7 +259,7 @@ AND table_name = %s;',
 	 * @param array|null $changeset The changeset received by on_product_changed.
 	 * @return int One of the ACTION_ constants.
 	 */
-	private function get_update_type( $changeset ) {
+	private function get_update_action( $changeset ) {
 		if ( is_null( $changeset ) ) {
 			// No changeset at all means that the product is new.
 			return self::ACTION_INSERT;
@@ -225,7 +333,7 @@ AND table_name = %s;',
 			$product_id = $product;
 		}
 
-		$this->delete_data_for( $product_id );
+		$this->maybe_schedule_update( $product_id, self::ACTION_DELETE );
 	}
 
 	/**

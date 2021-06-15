@@ -58,7 +58,7 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 		// phpcs:enable Squiz.Commenting
 
 		// This is needed to prevent the hook to act on the already registered LookupDataStore class.
-		remove_all_actions( 'woocommerce_run_product_attribute_lookup_update_callback' );
+		remove_all_actions( 'woocommerce_run_product_attribute_lookup_regeneration_callback' );
 
 		$container = wc_get_container();
 		$container->reset_all_resolved();
@@ -128,7 +128,7 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 			'method'    => 'schedule_single',
 			'args'      => array(),
 			'timestamp' => 1001,
-			'hook'      => 'woocommerce_run_product_attribute_lookup_update_callback',
+			'hook'      => 'woocommerce_run_product_attribute_lookup_regeneration_callback',
 			'group'     => 'woocommerce-db-updates',
 		);
 		$actual_enqueued   = current( $this->queue->methods_called );
@@ -188,7 +188,7 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 
 		update_option( 'woocommerce_attribute_lookup__last_products_page_processed', 7 );
 
-		do_action( 'woocommerce_run_product_attribute_lookup_update_callback' );
+		do_action( 'woocommerce_run_product_attribute_lookup_regeneration_callback' );
 
 		$this->assertEquals( array( 1, 2, 3 ), $this->lookup_data_store->passed_products );
 		$this->assertEquals( array( 8 ), $requested_products_pages );
@@ -198,7 +198,7 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 			'method'    => 'schedule_single',
 			'args'      => array(),
 			'timestamp' => 1001,
-			'hook'      => 'woocommerce_run_product_attribute_lookup_update_callback',
+			'hook'      => 'woocommerce_run_product_attribute_lookup_regeneration_callback',
 			'group'     => 'woocommerce-db-updates',
 		);
 		$actual_enqueued   = current( $this->queue->methods_called );
@@ -233,7 +233,7 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 		$this->sut->initiate_regeneration();
 		$this->queue->methods_called = array();
 
-		do_action( 'woocommerce_run_product_attribute_lookup_update_callback' );
+		do_action( 'woocommerce_run_product_attribute_lookup_regeneration_callback' );
 
 		$this->assertEquals( $product_ids, $this->lookup_data_store->passed_products );
 		$this->assertFalse( get_option( 'woocommerce_attribute_lookup__last_product_id_to_process' ) );
