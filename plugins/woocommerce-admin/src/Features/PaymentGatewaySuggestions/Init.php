@@ -29,20 +29,20 @@ class Init {
 	/**
 	 * Go through the specs and run them.
 	 */
-	public static function get_methods() {
-		$methods = array();
-		$specs   = self::get_specs();
+	public static function get_suggestions() {
+		$suggestions = array();
+		$specs       = self::get_specs();
 
 		foreach ( $specs as $spec ) {
-			$method    = EvaluateMethod::evaluate( $spec );
-			$methods[] = $method;
+			$suggestion    = EvaluateSuggestion::evaluate( $spec );
+			$suggestions[] = $suggestion;
 		}
 
 		return array_values(
 			array_filter(
-				$methods,
-				function( $method ) {
-					return ! property_exists( $method, 'is_visible' ) || $method->is_visible;
+				$suggestions,
+				function( $suggestion ) {
+					return ! property_exists( $suggestion, 'is_visible' ) || $suggestion->is_visible;
 				}
 			)
 		);
@@ -83,7 +83,7 @@ class Init {
 	}
 
 	/**
-	 * Localize the provided method.
+	 * Localize the provided suggestion.
 	 *
 	 * @param array $specs The specs to localize.
 	 * @return array Localized specs.

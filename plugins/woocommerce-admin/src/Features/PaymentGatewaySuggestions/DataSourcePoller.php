@@ -46,7 +46,7 @@ class DataSourcePoller {
 		$data_sources = apply_filters( 'woocommerce_admin_payment_gateway_suggestions_data_sources', self::DATA_SOURCES );
 
 		// Note that this merges the specs from the data sources based on the
-		// key - last one wins.
+		// id - last one wins.
 		foreach ( $data_sources as $url ) {
 			$specs_from_data_source = self::read_data_source( $url );
 			self::merge_specs( $specs_from_data_source, $specs, $url );
@@ -115,8 +115,8 @@ class DataSourcePoller {
 				continue;
 			}
 
-			$key           = $spec->key;
-			$specs[ $key ] = $spec;
+			$id           = $spec->id;
+			$specs[ $id ] = $spec;
 		}
 	}
 
@@ -132,9 +132,9 @@ class DataSourcePoller {
 		$logger         = self::get_logger();
 		$logger_context = array( 'source' => $url );
 
-		if ( ! isset( $spec->key ) ) {
+		if ( ! isset( $spec->id ) ) {
 			$logger->error(
-				'Spec is invalid because the key is missing in feed',
+				'Spec is invalid because the id is missing in feed',
 				$logger_context
 			);
 			// phpcs:ignore
