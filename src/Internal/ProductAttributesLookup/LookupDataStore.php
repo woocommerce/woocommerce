@@ -56,6 +56,61 @@ class LookupDataStore {
 		$this->is_feature_visible = false;
 
 		$this->lookup_table_exists = $this->check_lookup_table_exists();
+
+		$this->init_hooks();
+	}
+
+	/**
+	 * Initialize the hooks used by the class.
+	 */
+	private function init_hooks() {
+		add_action(
+			'woocommerce_run_product_attribute_lookup_update_callback',
+			function ( $product_id, $action ) {
+				$this->run_update_callback( $product_id, $action );
+			},
+			10,
+			2
+		);
+
+		add_filter(
+			'woocommerce_get_sections_products',
+			function ( $products ) {
+				if ( $this->is_feature_visible() ) {
+					$products['advanced'] = __( 'Advanced', 'woocommerce' );
+				}
+				return $products;
+			},
+			100,
+			1
+		);
+
+		add_filter(
+			'woocommerce_get_settings_products',
+			function ( $settings, $section_id ) {
+				if ( 'advanced' === $section_id && $this->is_feature_visible() ) {
+					$settings[] =
+						array(
+							'title' => __( 'Product attributes lookup table', 'woocommerce' ),
+							'type'  => 'title',
+						);
+
+					$settings[] = array(
+						'title'         => __( 'Direct updates', 'woocommerce' ),
+						'desc'          => __( 'Update the table directly upon product changes, instead of scheduling a deferred update.', 'woocommerce' ),
+						'id'            => 'woocommerce_attribute_lookup__direct_updates',
+						'default'       => 'no',
+						'type'          => 'checkbox',
+						'checkboxgroup' => 'start',
+					);
+
+					$settings[] = array( 'type' => 'sectionend' );
+				}
+				return $settings;
+			},
+			100,
+			2
+		);
 	}
 
 	/**
