@@ -81,6 +81,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix: Include onboarding settings on the analytic pages #7109
 - Fix: RemoteFreeExtension hide bundle when all of its plugins are not visible #7182
 - Tweak: Revert Card component removal #7167
+- Fix: Currency display on Orders activity card on homescreen #7181
 
 == 2.4.0 6/10/2021 ==
 - Dev: Reduce the specificity and complexity of the ReportError component #6846

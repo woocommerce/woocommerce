@@ -206,6 +206,27 @@ class Controller extends \WC_REST_Reports_Controller {
 	}
 
 	/**
+	 * Get the order total with the related currency formatting.
+	 * Returns the parent order total if the order is actually a refund.
+	 *
+	 * @param  int $order_id Order ID.
+	 * @return string
+	 */
+	public function get_total_formatted( $order_id ) {
+		$order = wc_get_order( $order_id );
+
+		if ( ! $order instanceof \WC_Order && ! $order instanceof \WC_Order_Refund ) {
+			return null;
+		}
+
+		if ( 'shop_order_refund' === $order->get_type() ) {
+			$order = wc_get_order( $order->get_parent_id() );
+		}
+
+		return wp_strip_all_tags( html_entity_decode( $order->get_formatted_order_total() ), true );
+	}
+
+	/**
 	 * Prepare a report object for serialization.
 	 *
 	 * @param stdClass        $report  Report data.

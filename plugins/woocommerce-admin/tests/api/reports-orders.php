@@ -116,7 +116,7 @@ class WC_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertEquals( 10, count( $properties ) );
+		$this->assertEquals( 11, count( $properties ) );
 		$this->assertArrayHasKey( 'date_created_gmt', $properties );
 		$this->assertArrayHasKey( 'order_id', $properties );
 		$this->assertArrayHasKey( 'order_number', $properties );
@@ -125,6 +125,7 @@ class WC_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'customer_id', $properties );
 		$this->assertArrayHasKey( 'net_total', $properties );
 		$this->assertArrayHasKey( 'num_items_sold', $properties );
+		$this->assertArrayHasKey( 'total_formatted', $properties );
 		$this->assertArrayHasKey( 'customer_type', $properties );
 		$this->assertArrayHasKey( 'extended_info', $properties );
 	}
@@ -405,5 +406,72 @@ class WC_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 1, count( $response_orders ) );
 		$this->assertEquals( $response_orders[0]['order_id'], $order_to_be_excluded->get_id() );
+	}
+
+	/**
+	 * Test filtering by product/variation exclusion.
+	 *
+	 * See: https://github.com/woocommerce/woocommerce-admin/issues/5803#issuecomment-738403405.
+	 */
+	public function test_order_price_formatting_with_different_base_currency() {
+		wp_set_current_user( $this->user );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		// Create a simple order with the base currency.
+		$first_simple_product = WC_Helper_Product::create_simple_product();
+		$first_order          = WC_Helper_Order::create_order( $this->user, $first_simple_product );
+		$first_order->set_currency( get_woocommerce_currency() );
+		$first_order->set_status( 'on-hold' );
+		$first_order->save();
+
+		// Create another simple order with another currency.
+		$currencies = get_woocommerce_currencies();
+		// prevent base currency to be selected again
+		unset( $currencies[ get_woocommerce_currency() ] );
+		$second_currency = array_rand( $currencies );
+
+		$second_simple_product = WC_Helper_Product::create_simple_product();
+		$second_order          = WC_Helper_Order::create_order( $this->user, $second_simple_product );
+		$second_order->set_currency( $second_currency );
+		$second_order->set_status( 'on-hold' );
+		$second_order->save();
+
+		WC_Helper_Queue::run_all_pending();
+
+		// Get the created orders from REST API
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'order_status' => array( 'on-hold' ),
+			)
+		);
+		$response        = $this->server->dispatch( $request );
+		$response_orders = $response->get_data();
+
+		$this->assertCount( 2, $response_orders );
+
+		// Replace keys with "order_id".
+		$response_orders = array_reduce(
+			$response_orders,
+			function ( array $result, $item ) {
+				$result[ $item['order_id'] ] = $item;
+				return $result;
+			},
+			array()
+		);
+
+		// Check if result has the correct orders.
+		$this->assertArrayHasKey( $first_order->get_id(), $response_orders );
+		$this->assertArrayHasKey( $second_order->get_id(), $response_orders );
+
+		// Check if result orders have the correct formatted totals.
+		$first_order_from_response   = $response_orders[ $first_order->get_id() ];
+		$first_order_formatted_total = wp_strip_all_tags( html_entity_decode( $first_order->get_formatted_order_total() ), true );
+		$this->assertEquals( $first_order_from_response['total_formatted'], $first_order_formatted_total );
+
+		$second_order_from_response   = $response_orders[ $second_order->get_id() ];
+		$second_order_formatted_total = wp_strip_all_tags( html_entity_decode( $second_order->get_formatted_order_total() ), true );
+		$this->assertEquals( $second_order_from_response['total_formatted'], $second_order_formatted_total );
+
 	}
 }

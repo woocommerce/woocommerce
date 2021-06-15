@@ -83,9 +83,10 @@ class Controller extends ReportsController implements ExportableInterface {
 		$data = array();
 
 		foreach ( $report_data->data as $orders_data ) {
-			$orders_data['order_number'] = $this->get_order_number( $orders_data['order_id'] );
-			$item                        = $this->prepare_item_for_response( $orders_data, $request );
-			$data[]                      = $this->prepare_response_for_collection( $item );
+			$orders_data['order_number']    = $this->get_order_number( $orders_data['order_id'] );
+			$orders_data['total_formatted'] = $this->get_total_formatted( $orders_data['order_id'] );
+			$item                           = $this->prepare_item_for_response( $orders_data, $request );
+			$data[]                         = $this->prepare_response_for_collection( $item );
 		}
 
 		$response = rest_ensure_response( $data );
@@ -214,6 +215,12 @@ class Controller extends ReportsController implements ExportableInterface {
 				'net_total'        => array(
 					'description' => __( 'Net total revenue.', 'woocommerce-admin' ),
 					'type'        => 'float',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'total_formatted'  => array(
+					'description' => __( 'Net total revenue (formatted).', 'woocommerce-admin' ),
+					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
@@ -523,15 +530,16 @@ class Controller extends ReportsController implements ExportableInterface {
 	 */
 	public function get_export_columns() {
 		$export_columns = array(
-			'date_created'   => __( 'Date', 'woocommerce-admin' ),
-			'order_number'   => __( 'Order #', 'woocommerce-admin' ),
-			'status'         => __( 'Status', 'woocommerce-admin' ),
-			'customer_name'  => __( 'Customer', 'woocommerce-admin' ),
-			'customer_type'  => __( 'Customer Type', 'woocommerce-admin' ),
-			'products'       => __( 'Product(s)', 'woocommerce-admin' ),
-			'num_items_sold' => __( 'Items Sold', 'woocommerce-admin' ),
-			'coupons'        => __( 'Coupon(s)', 'woocommerce-admin' ),
-			'net_total'      => __( 'N. Revenue', 'woocommerce-admin' ),
+			'date_created'    => __( 'Date', 'woocommerce-admin' ),
+			'order_number'    => __( 'Order #', 'woocommerce-admin' ),
+			'total_formatted' => __( 'N. Revenue (Formatted)', 'woocommerce-admin' ),
+			'status'          => __( 'Status', 'woocommerce-admin' ),
+			'customer_name'   => __( 'Customer', 'woocommerce-admin' ),
+			'customer_type'   => __( 'Customer Type', 'woocommerce-admin' ),
+			'products'        => __( 'Product(s)', 'woocommerce-admin' ),
+			'num_items_sold'  => __( 'Items Sold', 'woocommerce-admin' ),
+			'coupons'         => __( 'Coupon(s)', 'woocommerce-admin' ),
+			'net_total'       => __( 'N. Revenue', 'woocommerce-admin' ),
 		);
 
 		/**
@@ -554,15 +562,16 @@ class Controller extends ReportsController implements ExportableInterface {
 	 */
 	public function prepare_item_for_export( $item ) {
 		$export_item = array(
-			'date_created'   => $item['date_created'],
-			'order_number'   => $item['order_number'],
-			'status'         => $item['status'],
-			'customer_name'  => isset( $item['extended_info']['customer'] ) ? $this->get_customer_name( $item['extended_info']['customer'] ) : null,
-			'customer_type'  => $item['customer_type'],
-			'products'       => isset( $item['extended_info']['products'] ) ? $this->_get_products( $item['extended_info']['products'] ) : null,
-			'num_items_sold' => $item['num_items_sold'],
-			'coupons'        => isset( $item['extended_info']['coupons'] ) ? $this->_get_coupons( $item['extended_info']['coupons'] ) : null,
-			'net_total'      => $item['net_total'],
+			'date_created'    => $item['date_created'],
+			'order_number'    => $item['order_number'],
+			'total_formatted' => $item['total_formatted'],
+			'status'          => $item['status'],
+			'customer_name'   => isset( $item['extended_info']['customer'] ) ? $this->get_customer_name( $item['extended_info']['customer'] ) : null,
+			'customer_type'   => $item['customer_type'],
+			'products'        => isset( $item['extended_info']['products'] ) ? $this->_get_products( $item['extended_info']['products'] ) : null,
+			'num_items_sold'  => $item['num_items_sold'],
+			'coupons'         => isset( $item['extended_info']['coupons'] ) ? $this->_get_coupons( $item['extended_info']['coupons'] ) : null,
+			'net_total'       => $item['net_total'],
 		);
 
 		/**
