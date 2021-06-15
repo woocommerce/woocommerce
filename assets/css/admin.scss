@@ -235,6 +235,11 @@
 			display: flex;
 			align-items: center;
 			flex-direction: row;
+			justify-content: center;
+
+			@media screen and (max-width: 500px) {
+				justify-content: left;
+			}
 
 			li {
 				margin-right: 8px;
