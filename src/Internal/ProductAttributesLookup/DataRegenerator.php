@@ -61,7 +61,7 @@ class DataRegenerator {
 		);
 
 		add_action(
-			'woocommerce_run_product_attribute_lookup_update_callback',
+			'woocommerce_run_product_attribute_lookup_regeneration_callback',
 			function () {
 				$this->run_regeneration_step_callback();
 			}
@@ -202,7 +202,7 @@ CREATE TABLE ' . $this->lookup_table_name . '(
 		$queue = WC()->get_instance_of( \WC_Queue::class );
 		$queue->schedule_single(
 			WC()->call_function( 'time' ) + 1,
-			'woocommerce_run_product_attribute_lookup_update_callback',
+			'woocommerce_run_product_attribute_lookup_regeneration_callback',
 			array(),
 			'woocommerce-db-updates'
 		);
