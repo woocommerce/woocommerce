@@ -1,5 +1,11 @@
 # Unreleased
 
+- Added new constant for WordPress update page `WP_ADMIN_WP_UPDATES`
+- Added new merchant flow for `openWordPressUpdatesPage()`
+- Added new merchant flows:
+  - `openWordPressUpdatesPage()`
+  - `installAllUpdates()`
+
 # 0.1.5
 
 ## Added

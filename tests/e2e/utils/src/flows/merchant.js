@@ -6,7 +6,7 @@ const config = require( 'config' );
 /**
  * Internal dependencies
  */
-const { clearAndFillInput } = require( '../page-utils' );
+const { clearAndFillInput, setCheckbox } = require( '../page-utils' );
 const {
 	WP_ADMIN_ALL_ORDERS_VIEW,
 	WP_ADMIN_ALL_PRODUCTS_VIEW,
@@ -25,6 +25,7 @@ const {
 	WP_ADMIN_ANALYTICS_PAGES,
 	WP_ADMIN_ALL_USERS_VIEW,
 	WP_ADMIN_IMPORT_PRODUCTS,
+	WP_ADMIN_WP_UPDATES,
 	IS_RETEST_MODE,
 } = require( './constants' );
 
@@ -210,10 +211,52 @@ const merchant = {
 		} );
 	},
 
-  openImportProducts: async () => {
+  	openImportProducts: async () => {
 		await page.goto( WP_ADMIN_IMPORT_PRODUCTS , {
 			waitUntil: 'networkidle0',
 		} );
+	},
+
+	openWordPressUpdatesPage: async () => {
+		await page.goto( WP_ADMIN_WP_UPDATES, {
+			waitUntil: 'networkidle0',
+		} );
+	},
+
+	installAllUpdates: async ( updateWordPress = true, updatePlugins = true, updateThemes = true ) => {
+		if ( updateWordPress ) {
+			await merchant.openWordPressUpdatesPage();
+			if ( null !== await page.$( 'form[action="update-core.php?action=do-core-upgrade"][name="upgrade"]' ) ) {
+				await Promise.all([
+					expect( page ).toClick( 'input.button-primary' ),
+
+					// The WordPress update can take some time, so setting a longer timeout here
+					page.waitForNavigation( { waitUntil: 'networkidle0', timeout: 100000 } ),
+				]);
+			}
+		}
+
+		if ( updatePlugins ) {
+			await merchant.openWordPressUpdatesPage();
+			if ( null !== await page.$( 'form[action="update-core.php?action=do-plugin-upgrade"][name="upgrade-plugins"]' ) ) {
+				await setCheckbox( '#plugins-select-all' );
+				await Promise.all([
+					expect( page ).toClick( '#upgrade-plugins' ),
+					page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+				]);
+			}
+		}
+
+		if ( updateThemes ) {
+			await merchant.openWordPressUpdatesPage();
+			if (null !== await page.$( 'form[action="update-core.php?action=do-theme-upgrade"][name="upgrade-themes"]' )) {
+				await setCheckbox( '#themes-select-all' );
+				await Promise.all([
+					expect( page ).toClick( '#upgrade-themes' ),
+					page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+				]);
+			}
+		}
 	},
 };
 
