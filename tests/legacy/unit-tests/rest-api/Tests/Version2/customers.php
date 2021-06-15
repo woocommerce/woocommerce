@@ -93,6 +93,7 @@ class Customers_V2 extends WC_REST_Unit_Test_Case {
 					'state'      => 'CA',
 					'postcode'   => '94110',
 					'country'    => 'US',
+					'phone'      => '',
 				),
 				'is_paying_customer' => false,
 				'orders_count'       => 0,
