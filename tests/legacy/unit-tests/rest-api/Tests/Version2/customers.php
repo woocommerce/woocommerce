@@ -6,6 +6,12 @@
  * @since 3.0.0
  */
 
+/**
+ * Tests for the Customers REST API.
+ *
+ * @package WooCommerce\Tests\API
+ * @extends WC_REST_Unit_Test_Case
+ */
 class Customers_V2 extends WC_REST_Unit_Test_Case {
 
 	/**
@@ -177,6 +183,7 @@ class Customers_V2 extends WC_REST_Unit_Test_Case {
 					'state'      => '',
 					'postcode'   => '',
 					'country'    => '',
+					'phone'      => '',
 				),
 				'is_paying_customer' => false,
 				'meta_data'          => array(),
@@ -187,7 +194,7 @@ class Customers_V2 extends WC_REST_Unit_Test_Case {
 			$data
 		);
 
-		// Test extra data
+		// Test extra data.
 		$request = new WP_REST_Request( 'POST', '/wc/v2/customers' );
 		$request->set_body_params(
 			array(
@@ -245,6 +252,7 @@ class Customers_V2 extends WC_REST_Unit_Test_Case {
 					'state'      => 'CA',
 					'postcode'   => '',
 					'country'    => 'US',
+					'phone'      => '',
 				),
 				'is_paying_customer' => false,
 				'meta_data'          => array(),
@@ -255,7 +263,7 @@ class Customers_V2 extends WC_REST_Unit_Test_Case {
 			$data
 		);
 
-		// Test without required field
+		// Test without required field.
 		$request = new WP_REST_Request( 'POST', '/wc/v2/customers' );
 		$request->set_body_params(
 			array(
@@ -332,6 +340,7 @@ class Customers_V2 extends WC_REST_Unit_Test_Case {
 					'state'      => 'CA',
 					'postcode'   => '94110',
 					'country'    => 'US',
+					'phone'      => '',
 				),
 				'is_paying_customer' => false,
 				'meta_data'          => array(),
