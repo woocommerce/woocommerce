@@ -4,8 +4,8 @@
  * Sass variables
  */
 
-$headings: -apple-system, blinkmacsystemfont, "Helvetica Neue", helvetica, sans-serif;
-$body: nonbreakingspaceoverride, "Hoefler Text", garamond, "Times New Roman", serif;
+$headings: var(--heading--font-family);
+$body: var(--global--font-secondary);
 
 $body-color: currentColor;
 $highlights-color: #88a171;
