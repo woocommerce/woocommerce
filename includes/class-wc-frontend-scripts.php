@@ -194,7 +194,7 @@ class WC_Frontend_Scripts {
 			'jquery-payment'             => array(
 				'src'     => self::get_asset_url( 'assets/js/jquery-payment/jquery.payment' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
-				'version' => '3.0.0',
+				'version' => $version,
 			),
 			'photoswipe'                 => array(
 				'src'     => self::get_asset_url( 'assets/js/photoswipe/photoswipe' . $suffix . '.js' ),
