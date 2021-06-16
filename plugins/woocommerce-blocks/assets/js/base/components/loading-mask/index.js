@@ -4,13 +4,14 @@
 import { __ } from '@wordpress/i18n';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { Spinner } from 'wordpress-components';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
+import Spinner from '../spinner';
 
+// @todo Find a way to block buttons/form components when LoadingMask isLoading
 const LoadingMask = ( {
 	children,
 	className,
@@ -18,29 +19,27 @@ const LoadingMask = ( {
 	showSpinner = false,
 	isLoading = true,
 } ) => {
-	// If nothing is loading, just pass through the children.
-	if ( ! isLoading ) {
-		return children;
-	}
-
 	return (
 		<div
-			className={ classNames(
-				className,
-				'wc-block-components-loading-mask'
-			) }
+			className={ classNames( className, {
+				'wc-block-components-loading-mask': isLoading,
+			} ) }
 		>
-			{ showSpinner && <Spinner /> }
+			{ isLoading && showSpinner && <Spinner /> }
 			<div
-				className="wc-block-components-loading-mask__children"
-				aria-hidden={ true }
+				className={ classNames( {
+					'wc-block-components-loading-mask__children': isLoading,
+				} ) }
+				aria-hidden={ isLoading }
 			>
 				{ children }
 			</div>
-			<span className="screen-reader-text">
-				{ screenReaderLabel ||
-					__( 'Loading…', 'woo-gutenberg-products-block' ) }
-			</span>
+			{ isLoading && (
+				<span className="screen-reader-text">
+					{ screenReaderLabel ||
+						__( 'Loading…', 'woo-gutenberg-products-block' ) }
+				</span>
+			) }
 		</div>
 	);
 };

@@ -14,6 +14,9 @@ import type { PaymentMethods, CustomerPaymentMethod } from './types';
 export const getCustomerPaymentMethods = (
 	availablePaymentMethods: PaymentMethods = {}
 ): Record< string, CustomerPaymentMethod > => {
+	if ( Object.keys( availablePaymentMethods ).length === 0 ) {
+		return {};
+	}
 	const customerPaymentMethods = getSetting( 'customerPaymentMethods', {} );
 	const paymentMethodKeys = Object.keys( customerPaymentMethods );
 	const enabledCustomerPaymentMethods = {} as Record<

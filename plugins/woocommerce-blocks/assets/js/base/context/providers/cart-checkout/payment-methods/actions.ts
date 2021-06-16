@@ -2,106 +2,77 @@
  * Internal dependencies
  */
 import { ACTION, STATUS } from './constants';
-import type { PaymentMethods } from './types';
+import type { PaymentMethods, ExpressPaymentMethods } from './types';
 
 export interface ActionType {
 	type: ACTION | STATUS;
 	errorMessage?: string;
 	paymentMethodData?: Record< string, unknown >;
-	paymentMethods?: PaymentMethods;
+	paymentMethods?: PaymentMethods | ExpressPaymentMethods;
 	shouldSavePaymentMethod?: boolean;
 }
 
 /**
- * Used to dispatch a status update only for the given type.
+ * All the actions that can be dispatched for payment methods.
  */
-export const statusOnly = ( type: STATUS ): { type: STATUS } => ( { type } );
+export const actions = {
+	statusOnly: ( type: STATUS ): { type: STATUS } => ( { type } as const ),
+	error: ( errorMessage: string ): ActionType =>
+		( {
+			type: STATUS.ERROR,
+			errorMessage,
+		} as const ),
+	failed: ( {
+		errorMessage,
+		paymentMethodData,
+	}: {
+		errorMessage: string;
+		paymentMethodData: Record< string, unknown >;
+	} ): ActionType =>
+		( {
+			type: STATUS.FAILED,
+			errorMessage,
+			paymentMethodData,
+		} as const ),
+	success: ( {
+		paymentMethodData,
+	}: {
+		paymentMethodData?: Record< string, unknown >;
+	} ): ActionType =>
+		( {
+			type: STATUS.SUCCESS,
+			paymentMethodData,
+		} as const ),
+	started: ( {
+		paymentMethodData,
+	}: {
+		paymentMethodData?: Record< string, unknown >;
+	} ): ActionType =>
+		( {
+			type: STATUS.STARTED,
+			paymentMethodData,
+		} as const ),
+	setRegisteredPaymentMethods: (
+		paymentMethods: PaymentMethods
+	): ActionType =>
+		( {
+			type: ACTION.SET_REGISTERED_PAYMENT_METHODS,
+			paymentMethods,
+		} as const ),
+	setRegisteredExpressPaymentMethods: (
+		paymentMethods: ExpressPaymentMethods
+	): ActionType =>
+		( {
+			type: ACTION.SET_REGISTERED_EXPRESS_PAYMENT_METHODS,
+			paymentMethods,
+		} as const ),
+	setShouldSavePaymentMethod: (
+		shouldSavePaymentMethod: boolean
+	): ActionType =>
+		( {
+			type: ACTION.SET_SHOULD_SAVE_PAYMENT_METHOD,
+			shouldSavePaymentMethod,
+		} as const ),
+};
 
-/**
- * Used to dispatch an error message along with setting current payment status to ERROR.
- *
- * @param {string} errorMessage Whatever error message accompanying the error condition.
- * @return {ActionType} The action object.
- */
-export const error = ( errorMessage: string ): ActionType => ( {
-	type: STATUS.ERROR,
-	errorMessage,
-} );
-
-/**
- * Used to dispatch a payment failed status update.
- */
-export const failed = ( {
-	errorMessage,
-	paymentMethodData,
-}: {
-	errorMessage: string;
-	paymentMethodData: Record< string, unknown >;
-} ): ActionType => ( {
-	type: STATUS.FAILED,
-	errorMessage,
-	paymentMethodData,
-} );
-
-/**
- * Used to dispatch a payment success status update.
- */
-export const success = ( {
-	paymentMethodData,
-}: {
-	paymentMethodData?: Record< string, unknown >;
-} ): ActionType => ( {
-	type: STATUS.SUCCESS,
-	paymentMethodData,
-} );
-
-/**
- * Used to dispatch a payment started status update.
- */
-export const started = ( {
-	paymentMethodData,
-}: {
-	paymentMethodData?: Record< string, unknown >;
-} ): ActionType => ( {
-	type: STATUS.STARTED,
-	paymentMethodData,
-} );
-
-/**
- * Used to dispatch an action for updating a registered payment method in the state.
- *
- * @param {Object} paymentMethods Payment methods to register.
- * @return {Object} An action object.
- */
-export const setRegisteredPaymentMethods = (
-	paymentMethods: PaymentMethods
-): ActionType => ( {
-	type: ACTION.SET_REGISTERED_PAYMENT_METHODS,
-	paymentMethods,
-} );
-
-/**
- * Used to dispatch an action for updating a registered express payment method in the state.
- *
- * @param {Object} paymentMethods Payment methods to register.
- * @return {Object} An action object.
- */
-export const setRegisteredExpressPaymentMethods = (
-	paymentMethods: PaymentMethods
-): ActionType => ( {
-	type: ACTION.SET_REGISTERED_EXPRESS_PAYMENT_METHODS,
-	paymentMethods,
-} );
-
-/**
- * Set a flag indicating that the payment method info (e.g. a payment card) should be saved to user account after order completion.
- *
- * @param {boolean} shouldSavePaymentMethod
- * @return {Object} An action object.
- */
-export const setShouldSavePaymentMethod = (
-	shouldSavePaymentMethod: boolean
-): ActionType => ( {
-	type: ACTION.SET_SHOULD_SAVE_PAYMENT_METHOD,
-	shouldSavePaymentMethod,
-} );
+export default actions;

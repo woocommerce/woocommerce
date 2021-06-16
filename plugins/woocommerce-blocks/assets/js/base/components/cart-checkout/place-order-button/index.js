@@ -11,6 +11,7 @@ const PlaceOrderButton = () => {
 		submitButtonText,
 		onSubmit,
 		isCalculating,
+		isDisabled,
 		waitingForProcessing,
 		waitingForRedirect,
 	} = useCheckoutSubmit();
@@ -20,7 +21,10 @@ const PlaceOrderButton = () => {
 			className="wc-block-components-checkout-place-order-button"
 			onClick={ onSubmit }
 			disabled={
-				isCalculating || waitingForProcessing || waitingForRedirect
+				isCalculating ||
+				isDisabled ||
+				waitingForProcessing ||
+				waitingForRedirect
 			}
 			showSpinner={ waitingForProcessing }
 		>

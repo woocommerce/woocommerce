@@ -30,7 +30,7 @@ const PaymentMethodOptions = () => {
 		setActivePaymentMethod,
 		activeSavedToken,
 		setActiveSavedToken,
-		expressPaymentMethods,
+		isExpressPaymentMethodActive,
 		customerPaymentMethods,
 	} = usePaymentMethodDataContext();
 	const { paymentMethods } = usePaymentMethods();
@@ -38,9 +38,6 @@ const PaymentMethodOptions = () => {
 		activePaymentMethod,
 		...paymentMethodInterface
 	} = usePaymentMethodInterface();
-	const expressPaymentMethodActive = Object.keys(
-		expressPaymentMethods
-	).includes( activePaymentMethod );
 	const { noticeContexts } = useEmitResponse();
 	const { removeNotice } = useStoreNotices();
 	const { isEditor } = useEditorContext();
@@ -82,7 +79,7 @@ const PaymentMethodOptions = () => {
 		'disable-radio-control': isSinglePaymentMethod,
 	} );
 
-	return expressPaymentMethodActive ? null : (
+	return isExpressPaymentMethodActive ? null : (
 		<RadioControlAccordion
 			id={ 'wc-payment-method-options' }
 			className={ singleOptionClass }

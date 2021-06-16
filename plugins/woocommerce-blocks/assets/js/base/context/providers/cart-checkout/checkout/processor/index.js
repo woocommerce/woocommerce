@@ -52,6 +52,7 @@ const CheckoutProcessor = () => {
 	const { cartNeedsPayment, receiveCart } = useStoreCart();
 	const {
 		activePaymentMethod,
+		isExpressPaymentMethodActive,
 		currentStatus: currentPaymentStatus,
 		paymentMethodData,
 		expressPaymentMethods,
@@ -63,9 +64,6 @@ const CheckoutProcessor = () => {
 	const currentShippingAddress = useRef( shippingAddress );
 	const currentRedirectUrl = useRef( redirectUrl );
 	const [ isProcessingOrder, setIsProcessingOrder ] = useState( false );
-	const expressPaymentMethodActive = Object.keys(
-		expressPaymentMethods
-	).includes( activePaymentMethod );
 
 	const paymentMethodId = useMemo( () => {
 		const merged = { ...expressPaymentMethods, ...paymentMethods };
@@ -73,20 +71,20 @@ const CheckoutProcessor = () => {
 	}, [ activePaymentMethod, expressPaymentMethods, paymentMethods ] );
 
 	const checkoutWillHaveError =
-		( hasValidationErrors && ! expressPaymentMethodActive ) ||
+		( hasValidationErrors && ! isExpressPaymentMethodActive ) ||
 		currentPaymentStatus.hasError ||
 		shippingErrorStatus.hasError;
 
 	// If express payment method is active, let's suppress notices
 	useEffect( () => {
-		setIsSuppressed( expressPaymentMethodActive );
-	}, [ expressPaymentMethodActive, setIsSuppressed ] );
+		setIsSuppressed( isExpressPaymentMethodActive );
+	}, [ isExpressPaymentMethodActive, setIsSuppressed ] );
 
 	useEffect( () => {
 		if (
 			checkoutWillHaveError !== checkoutHasError &&
 			( checkoutIsProcessing || checkoutIsBeforeProcessing ) &&
-			! expressPaymentMethodActive
+			! isExpressPaymentMethodActive
 		) {
 			dispatchActions.setHasError( checkoutWillHaveError );
 		}
@@ -95,7 +93,7 @@ const CheckoutProcessor = () => {
 		checkoutHasError,
 		checkoutIsProcessing,
 		checkoutIsBeforeProcessing,
-		expressPaymentMethodActive,
+		isExpressPaymentMethodActive,
 		dispatchActions,
 	] );
 
@@ -146,21 +144,21 @@ const CheckoutProcessor = () => {
 
 	useEffect( () => {
 		let unsubscribeProcessing;
-		if ( ! expressPaymentMethodActive ) {
+		if ( ! isExpressPaymentMethodActive ) {
 			unsubscribeProcessing = onCheckoutValidationBeforeProcessing(
 				checkValidation,
 				0
 			);
 		}
 		return () => {
-			if ( ! expressPaymentMethodActive ) {
+			if ( ! isExpressPaymentMethodActive ) {
 				unsubscribeProcessing();
 			}
 		};
 	}, [
 		onCheckoutValidationBeforeProcessing,
 		checkValidation,
-		expressPaymentMethodActive,
+		isExpressPaymentMethodActive,
 	] );
 
 	const processOrder = useCallback( () => {
