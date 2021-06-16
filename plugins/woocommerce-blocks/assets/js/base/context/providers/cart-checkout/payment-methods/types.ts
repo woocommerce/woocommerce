@@ -62,11 +62,16 @@ export type CustomerPaymentMethods =
 	| Record< string, CustomerPaymentMethod >
 	| EmptyObjectType;
 
-export type PaymentMethodsDispatcherType = (
-	paymentMethods: PaymentMethods | ExpressPaymentMethods
-) => void;
+export type PaymentMethodDispatchers = {
+	setRegisteredPaymentMethods: ( paymentMethods: PaymentMethods ) => void;
+	setRegisteredExpressPaymentMethods: (
+		paymentMethods: ExpressPaymentMethods
+	) => void;
+	setShouldSavePayment: ( shouldSave: boolean ) => void;
+};
 
 export interface PaymentStatusDispatchers {
+	pristine: () => void;
 	started: ( paymentMethodData?: ObjectType | EmptyObjectType ) => void;
 	processing: () => void;
 	completed: () => void;
@@ -108,6 +113,8 @@ export type PaymentMethodCurrentStatusType = {
 	hasFailed: boolean;
 	// If true then the payment method has completed it's processing successfully.
 	isSuccessful: boolean;
+	// If true, an express payment is in progress.
+	isDoingExpressPayment: boolean;
 };
 
 export type PaymentMethodDataContextType = {
@@ -145,6 +152,8 @@ export type PaymentMethodDataContextType = {
 	onPaymentProcessing: ReturnType< typeof emitterCallback >;
 	// A function used by express payment methods to indicate an error for checkout to handle. It receives an error message string. Does not change payment status.
 	setExpressPaymentError: ( error: string ) => void;
+	// True if an express payment method is active.
+	isExpressPaymentMethodActive: boolean;
 	// A function used to set the shouldSavePayment value.
 	setShouldSavePayment: ( shouldSavePayment: boolean ) => void;
 	// True means that the configured payment method option is saved for the customer.

@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { useShallowEqual } from '@woocommerce/base-hooks';
+
+/**
  * Internal dependencies
  */
 import { usePaymentMethodDataContext } from '../../providers/cart-checkout/payment-methods';
@@ -10,12 +15,20 @@ const usePaymentMethodState = ( express = false ) => {
 		paymentMethodsInitialized,
 		expressPaymentMethodsInitialized,
 	} = usePaymentMethodDataContext();
-	return express
-		? {
-				paymentMethods: expressPaymentMethods,
-				isInitialized: expressPaymentMethodsInitialized,
-		  }
-		: { paymentMethods, isInitialized: paymentMethodsInitialized };
+
+	const currentPaymentMethods = useShallowEqual( paymentMethods );
+	const currentExpressPaymentMethods = useShallowEqual(
+		expressPaymentMethods
+	);
+
+	return {
+		paymentMethods: express
+			? currentExpressPaymentMethods
+			: currentPaymentMethods,
+		isInitialized: express
+			? expressPaymentMethodsInitialized
+			: paymentMethodsInitialized,
+	};
 };
 
 export const usePaymentMethods = () => usePaymentMethodState();

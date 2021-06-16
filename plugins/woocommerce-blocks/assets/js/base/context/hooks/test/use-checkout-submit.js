@@ -12,7 +12,12 @@ import { useCheckoutSubmit } from '../use-checkout-submit';
 const mockUseCheckoutContext = {
 	onSubmit: jest.fn(),
 };
-const mockUsePaymentMethodDataContext = {};
+const mockUsePaymentMethodDataContext = {
+	activePaymentMethod: '',
+	currentStatus: {
+		isDoingExpressPayment: false,
+	},
+};
 
 jest.mock( '../../providers/cart-checkout/checkout-state', () => ( {
 	useCheckoutContext: () => mockUseCheckoutContext,

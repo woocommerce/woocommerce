@@ -13,10 +13,10 @@ import {
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-monetary-amount';
 import {
-	useCheckoutContext,
 	useEditorContext,
 	useShippingDataContext,
 } from '@woocommerce/base-context';
+import { useCheckoutSubmit } from '@woocommerce/base-context/hooks';
 import { decodeEntities } from '@wordpress/html-entities';
 import { Notice } from 'wordpress-components';
 import classnames from 'classnames';
@@ -55,7 +55,7 @@ const renderShippingRatesControlOption = (
 };
 
 const ShippingOptionsStep = (): JSX.Element | null => {
-	const { isProcessing: checkoutIsProcessing } = useCheckoutContext();
+	const { isDisabled } = useCheckoutSubmit();
 	const { isEditor } = useEditorContext();
 	const {
 		shippingRates,
@@ -71,7 +71,7 @@ const ShippingOptionsStep = (): JSX.Element | null => {
 	return (
 		<FormStep
 			id="shipping-option"
-			disabled={ checkoutIsProcessing }
+			disabled={ isDisabled }
 			className="wc-block-checkout__shipping-option"
 			title={ __( 'Shipping options', 'woo-gutenberg-products-block' ) }
 			description={

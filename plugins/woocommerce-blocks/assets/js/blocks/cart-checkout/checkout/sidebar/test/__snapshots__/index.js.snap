@@ -58,41 +58,50 @@ exports[`Testing checkout sidebar Shows rate percentages after tax lines if the 
       hidden=""
     >
       <div
-        class="wc-block-components-totals-coupon__content"
+        class=""
       >
-        <form
-          class="wc-block-components-totals-coupon__form"
+        <div
+          aria-hidden="false"
+          class=""
         >
           <div
-            class="wc-block-components-text-input wc-block-components-totals-coupon__input is-active"
+            class="wc-block-components-totals-coupon__content"
           >
-            <input
-              aria-describedby="wc-block-components-totals-coupon__input-0"
-              aria-label="Enter code"
-              autocapitalize="off"
-              autocomplete="off"
-              id="wc-block-components-totals-coupon__input-0"
-              type="text"
-              value=""
-            />
-            <label
-              for="wc-block-components-totals-coupon__input-0"
+            <form
+              class="wc-block-components-totals-coupon__form"
             >
-              Enter code
-            </label>
+              <div
+                class="wc-block-components-text-input wc-block-components-totals-coupon__input is-active"
+              >
+                <input
+                  aria-describedby="wc-block-components-totals-coupon__input-0"
+                  aria-label="Enter code"
+                  autocapitalize="off"
+                  autocomplete="off"
+                  id="wc-block-components-totals-coupon__input-0"
+                  type="text"
+                  value=""
+                />
+                <label
+                  for="wc-block-components-totals-coupon__input-0"
+                >
+                  Enter code
+                </label>
+              </div>
+              <button
+                class="components-button wc-block-components-button wc-block-components-totals-coupon__button"
+                disabled=""
+                type="submit"
+              >
+                <span
+                  class="wc-block-components-button__text"
+                >
+                  Apply
+                </span>
+              </button>
+            </form>
           </div>
-          <button
-            class="components-button wc-block-components-button wc-block-components-totals-coupon__button"
-            disabled=""
-            type="submit"
-          >
-            <span
-              class="wc-block-components-button__text"
-            >
-              Apply
-            </span>
-          </button>
-        </form>
+        </div>
       </div>
     </div>
   </div>

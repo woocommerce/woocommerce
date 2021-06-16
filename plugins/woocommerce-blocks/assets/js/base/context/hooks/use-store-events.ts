@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { doAction } from '@wordpress/hooks';
-import { useCallback } from '@wordpress/element';
+import { useCallback, useRef, useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -22,6 +22,13 @@ export const useStoreEvents = (): {
 	dispatchCheckoutEvent: StoreEvent;
 } => {
 	const storeCart = useStoreCart();
+	const currentStoreCart = useRef( storeCart );
+
+	// Track the latest version of the cart so we can use the current value in our callback function below without triggering
+	// other useEffect hooks using dispatchCheckoutEvent as a dependency.
+	useEffect( () => {
+		currentStoreCart.current = storeCart;
+	}, [ storeCart ] );
 
 	const dispatchStoreEvent = useCallback( ( eventName, eventParams = {} ) => {
 		try {
@@ -43,7 +50,7 @@ export const useStoreEvents = (): {
 					`experimental__woocommerce_blocks-checkout-${ eventName }`,
 					{
 						...eventParams,
-						storeCart,
+						storeCart: currentStoreCart.current,
 					}
 				);
 			} catch ( e ) {
@@ -52,7 +59,7 @@ export const useStoreEvents = (): {
 				console.error( e );
 			}
 		},
-		[ storeCart ]
+		[]
 	);
 
 	return { dispatchStoreEvent, dispatchCheckoutEvent };

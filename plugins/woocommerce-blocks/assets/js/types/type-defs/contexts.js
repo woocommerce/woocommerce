@@ -13,8 +13,8 @@
  *
  * @property {BillingData}          billingData        The current billing data, including address and email.
  * @property {CartShippingAddress}  shippingAddress    The current set address for shipping.
- * @property {function()}           setBillingData     A function for setting billing data.
- * @property {function()}           setShippingAddress A function for setting shipping address.
+ * @property {function(Object)}     setBillingData     A function for setting billing data.
+ * @property {function(Object)}     setShippingAddress A function for setting shipping address.
  */
 
 /**
@@ -30,7 +30,7 @@
  * @property {function()}           setSelectedRates            Function for setting the selected rates.
  * @property {boolean}              isSelectingRate             True when rate is being selected.
  * @property {CartShippingAddress}  shippingAddress             The current set address for shipping.
- * @property {function()}           setShippingAddress          Function for setting the shipping address.
+ * @property {function(Object)}     setShippingAddress          Function for setting the shipping address.
  * @property {function()}           onShippingRateSuccess       Used to register a callback to be invoked when shipping
  *                                                              rates are retrieved.
  * @property {function()}           onShippingRateSelectSuccess Used to register a callback to be invoked when shipping

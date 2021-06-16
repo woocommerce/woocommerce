@@ -25,8 +25,14 @@ export const useCheckoutSubmit = () => {
 		hasError,
 	} = useCheckoutContext();
 	const { paymentMethods = {} } = usePaymentMethods();
-	const { activePaymentMethod } = usePaymentMethodDataContext();
+	const {
+		activePaymentMethod,
+		currentStatus: paymentStatus,
+	} = usePaymentMethodDataContext();
 	const paymentMethod = paymentMethods[ activePaymentMethod ] || {};
+	const waitingForProcessing =
+		isProcessing || isAfterProcessing || isBeforeProcessing;
+	const waitingForRedirect = isComplete && ! hasError;
 
 	return {
 		submitButtonText:
@@ -34,8 +40,8 @@ export const useCheckoutSubmit = () => {
 			__( 'Place Order', 'woo-gutenberg-products-block' ),
 		onSubmit,
 		isCalculating,
-		waitingForProcessing:
-			isProcessing || isAfterProcessing || isBeforeProcessing,
-		waitingForRedirect: isComplete && ! hasError,
+		isDisabled: isProcessing || paymentStatus.isDoingExpressPayment,
+		waitingForProcessing,
+		waitingForRedirect,
 	};
 };
