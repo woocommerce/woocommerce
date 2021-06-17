@@ -72,7 +72,13 @@ class FakeQueue implements \WC_Queue_Interface {
 	}
 
 	public function search( $args = array(), $return_format = OBJECT ) {
-		// TODO: Implement search() method.
+		$result = array();
+		foreach ( $this->methods_called as $method_called ) {
+			if ( $method_called['args'] === $args['args'] && $method_called['hook'] === $args['hook'] ) {
+				$result[] = $method_called;
+			}
+		}
+		return $result;
 	}
 
 	// phpcs:enable Squiz.Commenting.FunctionComment.Missing

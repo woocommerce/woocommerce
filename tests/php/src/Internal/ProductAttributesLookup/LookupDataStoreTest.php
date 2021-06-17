@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Testing\Tools\FakeQueue;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
+use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 
 /**
  * Tests for the LookupDataStore class.
@@ -24,12 +25,20 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 	private $sut;
 
 	/**
+	 * The lookup table name.
+	 *
+	 * @var string
+	 */
+	private $lookup_table_name;
+
+	/**
 	 * Runs before each test.
 	 */
 	public function setUp() {
 		global $wpdb;
 
-		$this->sut = new LookupDataStore();
+		$this->lookup_table_name = $wpdb->prefix . 'wc_product_attributes_lookup';
+		$this->sut               = new LookupDataStore();
 
 		// Initiating regeneration with a fake queue will just create the lookup table in the database.
 		add_filter(
@@ -39,6 +48,11 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 			}
 		);
 		$this->get_instance_of( DataRegenerator::class )->initiate_regeneration();
+
+		$queue                 = WC()->get_instance_of( \WC_Queue::class );
+		$queue->methods_called = array();
+
+		$this->reset_legacy_proxy_mocks();
 	}
 
 	/**
@@ -332,6 +346,329 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Deleting a simple product schedules deletion of lookup table entries when the "direct updates" option is off.
+	 *
+	 * @testWith ["wp_trash_post"]
+	 *           ["delete_post"]
+	 *           ["delete_method_in_product"]
+	 *           ["force_delete_method_in_product"]
+	 *
+	 * @param string $deletion_mechanism The mechanism used for deletion, one of: 'wp_trash_post', 'delete_post', 'delete_method_in_product', 'force_delete_method_in_product'.
+	 */
+	public function test_deleting_simple_product_schedules_deletion( $deletion_mechanism ) {
+		$this->set_direct_update_option( false );
+
+		$product    = new \WC_Product_Simple();
+		$product_id = 10;
+		$product->set_id( $product_id );
+		$this->save( $product );
+
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'get_post_type'    => function( $id ) use ( $product ) {
+					if ( $id === $product->get_id() || $id === $product ) {
+						return 'product';
+					} else {
+						return get_post_type( $id );
+					}
+				},
+				'time'             => function() {
+					return 100;
+				},
+				'current_user_can' => function( $capability, ...$args ) {
+					if ( 'delete_posts' === $capability ) {
+						return true;
+					} else {
+						return current_user_can( $capability, $args );
+					}
+				},
+			)
+		);
+
+		$this->delete_product( $product, $deletion_mechanism );
+
+		$queue_calls = WC()->get_instance_of( \WC_Queue::class )->methods_called;
+
+		$this->assertEquals( 1, count( $queue_calls ) );
+
+		$expected = array(
+			'method'    => 'schedule_single',
+			'args'      =>
+				array(
+					$product_id,
+					LookupDataStore::ACTION_DELETE,
+				),
+			'group'     => 'woocommerce-db-updates',
+			'timestamp' => 101,
+			'hook'      => 'woocommerce_run_product_attribute_lookup_update_callback',
+		);
+		$this->assertEquals( $expected, $queue_calls[0] );
+	}
+
+	/**
+	 * Delete a product or variation.
+	 *
+	 * @param \WC_Product $product The product to delete.
+	 * @param string      $deletion_mechanism The mechanism used for deletion, one of: 'wp_trash_post', 'delete_post', 'delete_method_in_product', 'force_delete_method_in_product'.
+	 */
+	private function delete_product( \WC_Product $product, string $deletion_mechanism ) {
+		// We can't use the 'wp_trash_post' and 'delete_post' functions directly
+		// because these invoke 'get_post', which fails because tests runs within an
+		// uncommitted database transaction. Being WP core functions they can't be mocked or hacked.
+		// So instead, we trigger the actions that the tested functionality captures.
+
+		switch ( $deletion_mechanism ) {
+			case 'wp_trash_post':
+				do_action( 'wp_trash_post', $product );
+				break;
+			case 'delete_post':
+				do_action( 'delete_post', $product->get_id() );
+				break;
+			case 'delete_method_in_product':
+				$product->delete( false );
+				break;
+			case 'force_delete_method_in_product':
+				$product->delete( true );
+				break;
+		}
+	}
+
+	/**
+	 * @testdox Deleting a variable product schedules deletion of lookup table entries when the "direct updates" option is off.
+	 *
+	 * @testWith ["wp_trash_post"]
+	 *           ["delete_post"]
+	 *           ["delete_method_in_product"]
+	 *           ["force_delete_method_in_product"]
+	 *
+	 * @param string $deletion_mechanism The mechanism used for deletion, one of: 'wp_trash_post', 'delete_post', 'delete_method_in_product', 'force_delete_method_in_product'.
+	 */
+	public function test_deleting_variable_product_schedules_deletion( $deletion_mechanism ) {
+		$this->set_direct_update_option( false );
+
+		$product = new \WC_Product_Variable();
+		$product->set_id( 1000 );
+
+		$variation = new \WC_Product_Variation();
+		$variation->set_id( 1001 );
+
+		$product->set_children( array( 1001 ) );
+		$this->save( $product );
+
+		$product_id = $product->get_id();
+
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'get_post_type'    => function( $id ) use ( $product, $variation ) {
+					if ( $id === $product->get_id() || $id === $product ) {
+						return 'product';
+					} elseif ( $id === $variation->get_id() || $id === $variation ) {
+						return 'product_variation';
+					} else {
+						return get_post_type( $id );
+					}
+				},
+				'time'             => function() {
+					return 100;
+				},
+				'current_user_can' => function( $capability, ...$args ) {
+					if ( 'delete_posts' === $capability ) {
+						return true;
+					} else {
+						return current_user_can( $capability, $args );
+					}
+				},
+			)
+		);
+
+		$this->delete_product( $product, $deletion_mechanism );
+
+		$queue_calls = WC()->get_instance_of( \WC_Queue::class )->methods_called;
+
+		$this->assertEquals( 1, count( $queue_calls ) );
+
+		$expected = array(
+			'method'    => 'schedule_single',
+			'args'      =>
+				array(
+					$product_id,
+					LookupDataStore::ACTION_DELETE,
+				),
+			'group'     => 'woocommerce-db-updates',
+			'timestamp' => 101,
+			'hook'      => 'woocommerce_run_product_attribute_lookup_update_callback',
+		);
+
+		$this->assertEquals( $expected, $queue_calls[0] );
+	}
+
+	/**
+	 * @testdox Deleting a variation schedules deletion of lookup table entries when the "direct updates" option is off.
+	 *
+	 * @testWith ["wp_trash_post"]
+	 *           ["delete_post"]
+	 *           ["delete_method_in_product"]
+	 *           ["force_delete_method_in_product"]
+	 *
+	 * @param string $deletion_mechanism The mechanism used for deletion, one of: 'wp_trash_post', 'delete_post', 'delete_method_in_product', 'force_delete_method_in_product'.
+	 */
+	public function test_deleting_variation_schedules_deletion( $deletion_mechanism ) {
+		$this->set_direct_update_option( false );
+
+		$product = new \WC_Product_Variable();
+		$product->set_id( 1000 );
+
+		$variation = new \WC_Product_Variation();
+		$variation->set_id( 1001 );
+
+		$product->set_children( array( 1001 ) );
+		$this->save( $product );
+
+		$variation_id = $product->get_id();
+
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'get_post_type'    => function( $id ) use ( $product, $variation ) {
+					if ( $id === $product->get_id() || $id === $product ) {
+						return 'product';
+					} elseif ( $id === $variation->get_id() || $id === $variation ) {
+						return 'product_variation';
+					} else {
+						return get_post_type( $id );
+					}
+				},
+				'time'             => function() {
+					return 100;
+				},
+				'current_user_can' => function( $capability, ...$args ) {
+					if ( 'delete_posts' === $capability ) {
+						return true;
+					} else {
+						return current_user_can( $capability, $args );
+					}
+				},
+			)
+		);
+
+		$this->delete_product( $product, $deletion_mechanism );
+
+		$queue_calls = WC()->get_instance_of( \WC_Queue::class )->methods_called;
+
+		$this->assertEquals( 1, count( $queue_calls ) );
+
+		$expected = array(
+			'method'    => 'schedule_single',
+			'args'      =>
+				array(
+					$variation_id,
+					LookupDataStore::ACTION_DELETE,
+				),
+			'group'     => 'woocommerce-db-updates',
+			'timestamp' => 101,
+			'hook'      => 'woocommerce_run_product_attribute_lookup_update_callback',
+		);
+
+		$this->assertEquals( $expected, $queue_calls[0] );
+	}
+
+	/**
+	 * @testdox 'on_product_deleted' doesn't schedule duplicate deletions (for the same product).
+	 */
+	public function test_no_duplicate_deletions_are_scheduled() {
+		$this->set_direct_update_option( false );
+
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'time' => function() {
+					return 100;
+				},
+			)
+		);
+
+		$this->sut->on_product_deleted( 1 );
+		$this->sut->on_product_deleted( 1 );
+		$this->sut->on_product_deleted( 2 );
+
+		$queue_calls = WC()->get_instance_of( \WC_Queue::class )->methods_called;
+
+		$this->assertEquals( 2, count( $queue_calls ) );
+
+		$expected = array(
+			array(
+				'method'    => 'schedule_single',
+				'args'      =>
+					array(
+						1,
+						LookupDataStore::ACTION_DELETE,
+					),
+				'group'     => 'woocommerce-db-updates',
+				'timestamp' => 101,
+				'hook'      => 'woocommerce_run_product_attribute_lookup_update_callback',
+			),
+			array(
+				'method'    => 'schedule_single',
+				'args'      =>
+					array(
+						2,
+						LookupDataStore::ACTION_DELETE,
+					),
+				'group'     => 'woocommerce-db-updates',
+				'timestamp' => 101,
+				'hook'      => 'woocommerce_run_product_attribute_lookup_update_callback',
+			),
+		);
+
+		$this->assertEquals( $expected, $queue_calls );
+	}
+
+	/**
+	 * @testdox 'on_product_deleted' deletes the data for a variation when the "direct updates" option is on.
+	 */
+	public function test_direct_deletion_of_variation() {
+		global $wpdb;
+
+		$this->set_direct_update_option( true );
+
+		$variation = new \WC_Product_Variation();
+		$variation->set_id( 2 );
+		$this->save( $variation );
+
+		$this->insert_lookup_table_data( 1, 1, 'pa_foo', 10, false, true );
+		$this->insert_lookup_table_data( 2, 1, 'pa_bar', 20, true, true );
+
+		$this->sut->on_product_deleted( $variation );
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$rows = $wpdb->get_results( 'SELECT DISTINCT product_id FROM ' . $this->lookup_table_name, ARRAY_N );
+
+		$this->assertEquals( array( 1 ), $rows[0] );
+	}
+
+	/**
+	 * @testdox 'on_product_deleted' deletes the data for a product and its variations when the "direct updates" option is on.
+	 */
+	public function test_direct_deletion_of_product() {
+		global $wpdb;
+
+		$this->set_direct_update_option( true );
+
+		$product = new \WC_Product();
+		$product->set_id( 1 );
+		$this->save( $product );
+
+		$this->insert_lookup_table_data( 1, 1, 'pa_foo', 10, false, true );
+		$this->insert_lookup_table_data( 2, 1, 'pa_bar', 20, true, true );
+		$this->insert_lookup_table_data( 3, 3, 'pa_foo', 10, false, true );
+
+		$this->sut->on_product_deleted( $product );
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$rows = $wpdb->get_results( 'SELECT DISTINCT product_id FROM ' . $this->lookup_table_name, ARRAY_N );
+
+		$this->assertEquals( array( 3 ), $rows[0] );
+	}
+
+	/**
 	 * Set the product attributes from an array with this format:
 	 *
 	 * [
@@ -379,5 +716,74 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 		}
 
 		return $result;
+	}
+
+	/**
+	 * Set the value of the option for direct lookup table updates.
+	 *
+	 * @param bool $value True to set the option to 'yes', false for 'no'.
+	 */
+	private function set_direct_update_option( bool $value ) {
+		update_option( 'woocommerce_attribute_lookup__direct_updates', $value ? 'yes' : 'no' );
+	}
+
+	/**
+	 * Save a product and delete any lookup table data that may have been automatically inserted
+	 * (for the purposes of unit testing we want to insert this data manually)
+	 *
+	 * @param \WC_Product $product The product to save and delete lookup table data for.
+	 */
+	private function save( \WC_Product $product ) {
+		global $wpdb;
+
+		$product->save();
+
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->prefix}wc_product_attributes_lookup WHERE product_id = %d",
+				$product->get_id()
+			)
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
+
+		$queue                 = WC()->get_instance_of( \WC_Queue::class );
+		$queue->methods_called = array();
+	}
+
+	/**
+	 * Insert one entry in the lookup table.
+	 *
+	 * @param int    $product_id The product id.
+	 * @param int    $product_or_parent_id The product id for non-variable products, the main/parent product id for variations.
+	 * @param string $taxonomy Taxonomy name.
+	 * @param int    $term_id Term id.
+	 * @param bool   $is_variation_attribute True if the taxonomy corresponds to an attribute used to define variations.
+	 * @param bool   $has_stock True if the product is in stock.
+	 */
+	private function insert_lookup_table_data( int $product_id, int $product_or_parent_id, string $taxonomy, int $term_id, bool $is_variation_attribute, bool $has_stock ) {
+		global $wpdb;
+
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+		$wpdb->query(
+			$wpdb->prepare(
+				'INSERT INTO ' . $this->lookup_table_name . ' (
+					  product_id,
+					  product_or_parent_id,
+					  taxonomy,
+					  term_id,
+					  is_variation_attribute,
+					  in_stock)
+					VALUES
+					  ( %d, %d, %s, %d, %d, %d )',
+				$product_id,
+				$product_or_parent_id,
+				$taxonomy,
+				$term_id,
+				$is_variation_attribute ? 1 : 0,
+				$has_stock ? 1 : 0
+			)
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 	}
 }

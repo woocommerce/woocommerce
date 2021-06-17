@@ -238,17 +238,20 @@ AND table_name = %s;',
 		}
 
 		$product = WC()->call_function( 'wc_get_product', $product_id );
+		if ( ! $product ) {
+			$action = self::ACTION_DELETE;
+		}
 
 		switch ( $action ) {
 			case self::ACTION_INSERT:
-				$this->delete_data_for( $product->get_id() );
+				$this->delete_data_for( $product_id );
 				$this->create_data_for( $product );
 				break;
 			case self::ACTION_UPDATE_STOCK:
 				$this->update_stock_status_for( $product );
 				break;
 			case self::ACTION_DELETE:
-				$this->delete_data_for( $product->get_id() );
+				$this->delete_data_for( $product_id );
 				break;
 		}
 	}
