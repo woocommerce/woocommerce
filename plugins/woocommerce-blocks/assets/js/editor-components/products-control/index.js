@@ -66,7 +66,15 @@ const ProductsControl = ( {
 	return (
 		<SearchListControl
 			className="woocommerce-products"
-			list={ products }
+			list={ products.map( ( product ) => {
+				const formattedSku = product.sku
+					? ' (' + product.sku + ')'
+					: '';
+				return {
+					...product,
+					name: `${ product.name }${ formattedSku }`,
+				};
+			} ) }
 			isCompact={ isCompact }
 			isLoading={ isLoading }
 			selected={ products.filter( ( { id } ) =>
