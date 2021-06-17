@@ -584,16 +584,16 @@
         },
         {
             "name": "woocommerce/woocommerce-blocks",
-            "version": "v5.1.0",
+            "version": "v5.3.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-gutenberg-products-block.git",
-                "reference": "a4f168596f3832e161b26dec636b69293039ee51"
+                "reference": "28c7c4f9b5cace9098fb2246ff93abe110a26bca"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/a4f168596f3832e161b26dec636b69293039ee51",
-                "reference": "a4f168596f3832e161b26dec636b69293039ee51",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/28c7c4f9b5cace9098fb2246ff93abe110a26bca",
+                "reference": "28c7c4f9b5cace9098fb2246ff93abe110a26bca",
                 "shasum": ""
             },
             "require": {
@@ -629,9 +629,9 @@
             ],
             "support": {
                 "issues": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues",
-                "source": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/v5.1.0"
+                "source": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/v5.3.1"
             },
-            "time": "2021-05-10T15:01:42+00:00"
+            "time": "2021-06-15T09:12:48+00:00"
         }
     ],
     "packages-dev": [
