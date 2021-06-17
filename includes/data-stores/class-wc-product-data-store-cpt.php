@@ -1821,16 +1821,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 		}
 
-		/*
-		 * This is added to support metas such as _stock_status
-		 * so it can be mapped correctly.
-		 */
-		if ( isset( $query_vars['meta_query'] ) ) {
-			foreach ( $query_vars['meta_query'] as $meta_query ) {
-				$query_vars[ ltrim( $meta_query['key'], '_' ) ] = $meta_query['value'];
-			}
-		}
-
 		$wp_query_args = parent::get_wp_query_args( $query_vars );
 
 		if ( ! isset( $wp_query_args['date_query'] ) ) {

@@ -854,16 +854,15 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * @return array|object
 	 */
 	public function query( $query_vars ) {
-		$args = $this->get_wp_query_args( $query_vars );
 
-		if ( ! empty( $args['errors'] ) ) {
+		if ( ! empty( $query_vars['errors'] ) ) {
 			$query = (object) array(
 				'posts'         => array(),
 				'found_posts'   => 0,
 				'max_num_pages' => 0,
 			);
 		} else {
-			$query = new WP_Query( $args );
+			$query = new WP_Query( $query_vars );
 		}
 
 		if ( isset( $query_vars['return'] ) && 'ids' === $query_vars['return'] ) {
@@ -871,7 +870,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		} else {
 			update_post_caches( $query->posts ); // We already fetching posts, might as well hydrate some caches.
 			$order_ids = wp_list_pluck( $query->posts, 'ID' );
-			$orders = $this->compile_orders( $order_ids, $query_vars, $query );
+			$orders    = $this->compile_orders( $order_ids, $query_vars, $query );
 		}
 
 		if ( isset( $query_vars['paginate'] ) && $query_vars['paginate'] ) {
