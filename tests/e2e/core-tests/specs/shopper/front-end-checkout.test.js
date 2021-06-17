@@ -82,7 +82,6 @@ const runCheckoutPageTest = () => {
 			await shopper.goToCheckout();
 			await shopper.productIsInCheckout(simpleProductName, `2`, twoProductPrice, twoProductPrice);
 
-			await expect(page).toClick('.wc_payment_method label', {text: 'PayPal'});
 			await expect(page).toClick('.wc_payment_method label', {text: 'Direct bank transfer'});
 			await expect(page).toClick('.wc_payment_method label', {text: 'Cash on delivery'});
 		});
