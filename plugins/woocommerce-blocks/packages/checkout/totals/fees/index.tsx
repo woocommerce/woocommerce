@@ -26,7 +26,7 @@ const TotalsFees = ( {
 }: TotalsFeesProps ): ReactElement | null => {
 	return (
 		<>
-			{ cartFees.map( ( { id, name, totals } ) => {
+			{ cartFees.map( ( { id, name, totals }, index ) => {
 				const feesValue = parseInt( totals.total, 10 );
 
 				if ( ! feesValue ) {
@@ -37,7 +37,7 @@ const TotalsFees = ( {
 
 				return (
 					<TotalsItem
-						key={ id }
+						key={ id || `${ index }-${ name }` }
 						className={ classnames(
 							'wc-block-components-totals-fees',
 							className
