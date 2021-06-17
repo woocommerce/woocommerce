@@ -137,7 +137,7 @@ const runOrderSearchingTest = () => {
 			await searchForOrder(orderId, orderId, searchString);
 		});
 
-		it.each(queries)('can search for order by $field using search term "$value"', async ({ value }) => {
+		it.each(queries)('can search for order by %o', async ({ value }) => {
 			await searchForOrder(value, orderId, searchString);
 		});
 
