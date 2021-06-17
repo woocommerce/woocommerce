@@ -3,8 +3,17 @@
 /**
  * External dependencies
  */
-import { defaultAddressFields, getSetting } from '@woocommerce/settings';
+import {
+	AddressField,
+	AddressFields,
+	CountryAddressFields,
+	defaultAddressFields,
+	getSetting,
+	KeyedAddressField,
+	LocaleSpecificAddressField,
+} from '@woocommerce/settings';
 import { __, sprintf } from '@wordpress/i18n';
+import { isNumber, isString } from '@woocommerce/types';
 
 /**
  * This is locale data from WooCommerce countries class. This doesn't match the shape of the new field data blocks uses,
@@ -12,7 +21,7 @@ import { __, sprintf } from '@wordpress/i18n';
  *
  * This supports new properties such as optionalLabel which are not used by core (yet).
  */
-const coreLocale = getSetting( 'countryLocale', {} );
+const coreLocale = getSetting< CountryAddressFields >( 'countryLocale', {} );
 
 /**
  * Gets props from the core locale, then maps them to the shape we require in the client.
@@ -22,8 +31,10 @@ const coreLocale = getSetting( 'countryLocale', {} );
  * @param {Object} localeField Locale fields from WooCommerce.
  * @return {Object} Supported locale fields.
  */
-const getSupportedCoreLocaleProps = ( localeField ) => {
-	const fields = {};
+const getSupportedCoreLocaleProps = (
+	localeField: LocaleSpecificAddressField
+): Partial< AddressField > => {
+	const fields: Partial< AddressField > = {};
 
 	if ( localeField.label !== undefined ) {
 		fields.label = localeField.label;
@@ -46,17 +57,22 @@ const getSupportedCoreLocaleProps = ( localeField ) => {
 	}
 
 	if ( localeField.priority ) {
-		fields.index = parseInt( localeField.priority, 10 );
+		if ( isNumber( localeField.priority ) ) {
+			fields.index = localeField.priority;
+		}
+		if ( isString( localeField.priority ) ) {
+			fields.index = parseInt( localeField.priority, 10 );
+		}
 	}
 
-	if ( localeField.hidden === true ) {
+	if ( localeField.hidden ) {
 		fields.required = false;
 	}
 
 	return fields;
 };
 
-const countryAddressFields = Object.entries( coreLocale )
+const countryAddressFields: CountryAddressFields = Object.entries( coreLocale )
 	.map( ( [ country, countryLocale ] ) => [
 		country,
 		Object.entries( countryLocale )
@@ -65,11 +81,15 @@ const countryAddressFields = Object.entries( coreLocale )
 				getSupportedCoreLocaleProps( localeField ),
 			] )
 			.reduce( ( obj, [ key, val ] ) => {
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore - Ignoring because it should be fine as long as the data from the server is correct. TS won't catch it anyway if it's not.
 				obj[ key ] = val;
 				return obj;
 			}, {} ),
 	] )
 	.reduce( ( obj, [ key, val ] ) => {
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore - Ignoring because it should be fine as long as the data from the server is correct. TS won't catch it anyway if it's not.
 		obj[ key ] = val;
 		return obj;
 	}, {} );
@@ -82,11 +102,15 @@ const countryAddressFields = Object.entries( coreLocale )
  * @param {string} addressCountry Address country code. If unknown, locale fields will not be merged.
  * @return {CountryAddressFields} Object containing address fields.
  */
-const prepareAddressFields = ( fields, fieldConfigs, addressCountry = '' ) => {
-	const localeConfigs =
+const prepareAddressFields = (
+	fields: ( keyof AddressFields )[],
+	fieldConfigs: Record< string, Partial< AddressField > >,
+	addressCountry = ''
+): KeyedAddressField[] => {
+	const localeConfigs: AddressFields =
 		addressCountry && countryAddressFields[ addressCountry ] !== undefined
 			? countryAddressFields[ addressCountry ]
-			: {};
+			: ( {} as AddressFields );
 
 	return fields
 		.map( ( field ) => {

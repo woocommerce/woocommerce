@@ -39,3 +39,18 @@ export const CART_URL = STORE_PAGES.cart.permalink;
 export const LOGIN_URL = STORE_PAGES.myaccount.permalink
 	? STORE_PAGES.myaccount.permalink
 	: getSetting( 'wpLoginUrl', '/wp-login.php' );
+export const SHIPPING_COUNTRIES = getSetting< Record< string, string > >(
+	'shippingCountries',
+	{}
+);
+export const ALLOWED_COUNTRIES = getSetting< Record< string, string > >(
+	'allowedCountries',
+	{}
+);
+export const SHIPPING_STATES = getSetting<
+	Record< string, Record< string, string > >
+>( 'shippingStates', {} );
+export const ALLOWED_STATES = getSetting< Record< string, string > >(
+	'allowedStates',
+	{}
+);

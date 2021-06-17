@@ -3,7 +3,6 @@
  */
 import { useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import PropTypes from 'prop-types';
 import { decodeEntities } from '@wordpress/html-entities';
 import classnames from 'classnames';
 
@@ -12,6 +11,7 @@ import classnames from 'classnames';
  */
 import { ValidatedSelect } from '../select';
 import './style.scss';
+import type { CountryInputWithCountriesProps } from './CountryInputProps';
 
 const CountryInput = ( {
 	className,
@@ -27,7 +27,7 @@ const CountryInput = ( {
 		'Please select a country.',
 		'woo-gutenberg-products-block'
 	),
-} ) => {
+}: CountryInputWithCountriesProps ): JSX.Element => {
 	const options = useMemo(
 		() =>
 			Object.keys( countries ).map( ( key ) => ( {
@@ -79,18 +79,6 @@ const CountryInput = ( {
 			) }
 		</div>
 	);
-};
-
-CountryInput.propTypes = {
-	countries: PropTypes.objectOf( PropTypes.string ).isRequired,
-	onChange: PropTypes.func.isRequired,
-	className: PropTypes.string,
-	id: PropTypes.string,
-	label: PropTypes.string,
-	value: PropTypes.string,
-	autoComplete: PropTypes.string,
-	errorId: PropTypes.string,
-	errorMessage: PropTypes.string,
 };
 
 export default CountryInput;
