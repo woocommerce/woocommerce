@@ -1631,7 +1631,9 @@ CREATE TABLE {$wpdb->prefix}wc_reserved_stock (
 	 */
 	private static function set_paypal_standard_load_eligibility() {
 		// Initiating the payment gateways sets the flag.
-		WC()->payment_gateways();
+		if ( class_exists( 'WC_Gateway_Paypal' ) ) {
+			( new WC_Gateway_Paypal() )->should_load();
+		}
 	}
 }
 
