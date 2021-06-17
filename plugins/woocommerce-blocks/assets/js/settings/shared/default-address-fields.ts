@@ -20,6 +20,10 @@ export interface AddressField {
 	index: number;
 }
 
+export interface LocaleSpecificAddressField extends AddressField {
+	priority: number;
+}
+
 export interface AddressFields {
 	// eslint-disable-next-line camelcase
 	first_name: AddressField;
@@ -36,6 +40,7 @@ export interface AddressFields {
 	postcode: AddressField;
 }
 
+export type AddressType = 'billing' | 'shipping';
 export interface EnteredAddress {
 	// eslint-disable-next-line camelcase
 	first_name: string;
@@ -54,6 +59,7 @@ export interface EnteredAddress {
 
 export type KeyedAddressField = AddressField & {
 	key: keyof AddressFields;
+	errorMessage?: string;
 };
 export type ShippingAddress = EnteredAddress;
 export type BillingAddress = EnteredAddress;

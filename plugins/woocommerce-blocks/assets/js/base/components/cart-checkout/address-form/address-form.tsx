@@ -16,7 +16,13 @@ import { useEffect, useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { withInstanceId } from '@woocommerce/base-hocs/with-instance-id';
 import { useShallowEqual } from '@woocommerce/base-hooks';
-import { defaultAddressFields } from '@woocommerce/settings';
+import {
+	AddressField,
+	AddressFields,
+	AddressType,
+	defaultAddressFields,
+	EnteredAddress,
+} from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -26,11 +32,11 @@ import prepareAddressFields from './prepare-address-fields';
 // If it's the shipping address form and the user starts entering address
 // values without having set the country first, show an error.
 const validateShippingCountry = (
-	values,
-	setValidationErrors,
-	clearValidationError,
-	hasValidationError
-) => {
+	values: EnteredAddress,
+	setValidationErrors: ( errors: Record< string, unknown > ) => void,
+	clearValidationError: ( error: string ) => void,
+	hasValidationError: boolean
+): void => {
 	if (
 		! hasValidationError &&
 		! values.country &&
@@ -51,6 +57,15 @@ const validateShippingCountry = (
 	}
 };
 
+interface AddressFormProps {
+	id: string;
+	instanceId: string;
+	fields: ( keyof AddressFields )[];
+	fieldConfig: Record< keyof AddressFields, Partial< AddressField > >;
+	onChange: ( newValue: EnteredAddress ) => void;
+	type: AddressType;
+	values: EnteredAddress;
+}
 /**
  * Checkout address form.
  *
@@ -65,13 +80,15 @@ const validateShippingCountry = (
  */
 const AddressForm = ( {
 	id,
-	fields = Object.keys( defaultAddressFields ),
-	fieldConfig = {},
+	fields = ( Object.keys(
+		defaultAddressFields
+	) as unknown ) as ( keyof AddressFields )[],
+	fieldConfig = {} as Record< keyof AddressFields, Partial< AddressField > >,
 	instanceId,
 	onChange,
 	type = 'shipping',
 	values,
-} ) => {
+}: AddressFormProps ): JSX.Element => {
 	const {
 		getValidationError,
 		setValidationErrors,
@@ -80,8 +97,12 @@ const AddressForm = ( {
 
 	const currentFields = useShallowEqual( fields );
 
-	const countryValidationError =
-		getValidationError( 'shipping-missing-country' ) || {};
+	const countryValidationError = ( getValidationError(
+		'shipping-missing-country'
+	) || {} ) as {
+		message: string;
+		hidden: boolean;
+	};
 
 	const addressFormFields = useMemo( () => {
 		return prepareAddressFields(
@@ -97,7 +118,7 @@ const AddressForm = ( {
 				values,
 				setValidationErrors,
 				clearValidationError,
-				countryValidationError.message &&
+				!! countryValidationError.message &&
 					! countryValidationError.hidden
 			);
 		}
@@ -195,7 +216,7 @@ const AddressForm = ( {
 						value={ values[ field.key ] }
 						autoCapitalize={ field.autocapitalize }
 						autoComplete={ field.autocomplete }
-						onChange={ ( newValue ) =>
+						onChange={ ( newValue: string ) =>
 							onChange( {
 								...values,
 								[ field.key ]: newValue,
