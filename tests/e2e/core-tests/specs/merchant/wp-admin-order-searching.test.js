@@ -68,40 +68,26 @@ const updateCustomerBilling = async () => {
 };
 
 /**
- * Function for creating individual search terms.
- * 
- * @param f field to be printed in the test results
- * @param v the search term to be typed into the search box
- * @returns object containing the field and search term
- */
-const createData = (f, v) => {
-	return {
-		field: f,
-		value: v
-	};
-};
-
-/**
  * Data table to be fed into `it.each()`.
  */
 const queries = [
-	createData('billing first name', customerBilling.first_name),
-	createData('billing last name', customerBilling.last_name),
-	createData('billing company name', customerBilling.company),
-	createData('billing first address', customerBilling.address_1),
-	createData('billing second address', customerBilling.address_2),
-	createData('billing city name', customerBilling.city),
-	createData('billing post code', customerBilling.postcode),
-	createData('billing email', customerBilling.email),
-	createData('billing phone', customerBilling.phone),
-	createData('billing state', customerBilling.state),
-	createData('shipping first name', customerShipping.first_name),
-	createData('shipping last name', customerShipping.last_name),
-	createData('shipping first address', customerShipping.address_1),
-	createData('shipping second address', customerShipping.address_2),
-	createData('shipping city name', customerShipping.city),
-	createData('shipping post code', customerShipping.postcode),
-	createData('shipping item name', itemName)
+	[customerBilling.first_name, 'billing first name'],
+	[customerBilling.last_name, 'billing last name'],
+	[customerBilling.company, 'billing company name'],
+	[customerBilling.address_1, 'billing first address'],
+	[customerBilling.address_2, 'billing second address'],
+	[customerBilling.city, 'billing city name'],
+	[customerBilling.postcode, 'billing post code'],
+	[customerBilling.email, 'billing email'],
+	[customerBilling.phone, 'billing phone'],
+	[customerBilling.state, 'billing state'],
+	[customerShipping.first_name, 'shipping first name'],
+	[customerShipping.last_name, 'shipping last name'],
+	[customerShipping.address_1, 'shipping first address'],
+	[customerShipping.address_2, 'shipping second address'],
+	[customerShipping.city, 'shipping city name'],
+	[customerShipping.postcode, 'shipping post code'],
+	[itemName, 'shipping item name']
 ];
 
 const runOrderSearchingTest = () => {
@@ -137,9 +123,12 @@ const runOrderSearchingTest = () => {
 			await searchForOrder(orderId, orderId, searchString);
 		});
 
-		it.each(queries)('can search for order by %o', async ({ value }) => {
-			await searchForOrder(value, orderId, searchString);
-		});
+		it.each(queries)(
+			'can search for order containing "%s" as the %s',
+			async (value) => {
+				await searchForOrder(value, orderId, searchString);
+			}
+		);
 
 		/**
 		 * shipping state is abbreviated. This test passes if billing and shipping state are the same
