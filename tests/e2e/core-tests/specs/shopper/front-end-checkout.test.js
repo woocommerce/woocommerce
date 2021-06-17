@@ -66,14 +66,6 @@ const runCheckoutPageTest = () => {
 			// Verify that settings have been saved
 			await verifyCheckboxIsSet('#woocommerce_cod_enabled');
 
-			// Enable PayPal payment method
-			await merchant.openSettings('checkout', 'paypal');
-			await setCheckbox('#woocommerce_paypal_enabled');
-			await settingsPageSaveChanges();
-
-			// Verify that settings have been saved
-			await verifyCheckboxIsSet('#woocommerce_paypal_enabled');
-
 			await merchant.logout();
 		});
 
