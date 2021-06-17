@@ -2040,16 +2040,15 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @return array|object
 	 */
 	public function query( $query_vars ) {
-		$args = $this->get_wp_query_args( $query_vars );
 
-		if ( ! empty( $args['errors'] ) ) {
+		if ( ! empty( $query_vars['errors'] ) ) {
 			$query = (object) array(
 				'posts'         => array(),
 				'found_posts'   => 0,
 				'max_num_pages' => 0,
 			);
 		} else {
-			$query = new WP_Query( $args );
+			$query = new WP_Query( $query_vars );
 		}
 
 		if ( isset( $query_vars['return'] ) && 'objects' === $query_vars['return'] && ! empty( $query->posts ) ) {
