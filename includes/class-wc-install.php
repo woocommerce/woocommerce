@@ -310,6 +310,7 @@ class WC_Install {
 		self::create_files();
 		self::maybe_create_pages();
 		self::maybe_set_activation_transients();
+		self::set_paypal_standard_load_eligibility();
 		self::update_wc_version();
 		self::maybe_update_db_version();
 
@@ -1633,6 +1634,18 @@ CREATE TABLE {$wpdb->prefix}wc_reserved_stock (
 
 			// Discard feedback.
 			ob_end_clean();
+		}
+	}
+
+	/**
+	 * Sets whether PayPal Standard will be loaded on install.
+	 *
+	 * @since 5.5.0
+	 */
+	private static function set_paypal_standard_load_eligibility() {
+		// Initiating the payment gateways sets the flag.
+		if ( class_exists( 'WC_Gateway_Paypal' ) ) {
+			( new WC_Gateway_Paypal() )->should_load();
 		}
 	}
 }
