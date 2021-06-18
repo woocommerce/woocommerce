@@ -1,7 +1,10 @@
 <?php
 register_woocommerce_admin_test_helper_rest_route(
 	'/tools/get-cron-list/v1',
-	'tools_get_cron_list'
+	'tools_get_cron_list',
+	array(
+		'methods' => 'GET',
+	)
 );
 register_woocommerce_admin_test_helper_rest_route(
 	'/tools/trigger-selected-cron/v1',

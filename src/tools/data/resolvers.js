@@ -15,7 +15,7 @@ export function* getCronJobs() {
 	try {
 		const response = yield apiFetch( {
 			path,
-			method: 'POST',
+			method: 'GET',
 		} );
 		yield setCronJobs( response );
 	} catch ( error ) {
