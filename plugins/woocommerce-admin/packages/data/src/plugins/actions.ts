@@ -1,7 +1,11 @@
 /**
  * External dependencies
  */
-import { apiFetch } from '@wordpress/data-controls';
+import {
+	apiFetch,
+	select,
+	dispatch as depreciatedDispatch,
+} from '@wordpress/data-controls';
 import { controls } from '@wordpress/data';
 import { _n, sprintf } from '@wordpress/i18n';
 
@@ -17,6 +21,12 @@ import {
 	PluginNames,
 	SelectorKeysWithActions,
 } from './types';
+
+// Can be removed in WP 5.9, wp.data is supported in >5.7.
+const dispatch =
+	controls && controls.dispatch ? controls.dispatch : depreciatedDispatch;
+const resolveSelect =
+	controls && controls.resolveSelect ? controls.resolveSelect : select;
 
 type PluginsResponse< PluginData > = {
 	data: PluginData;
@@ -235,8 +245,8 @@ export function* activatePlugins( plugins: string[] ) {
 
 export function* installAndActivatePlugins( plugins: string[] ) {
 	try {
-		yield controls.dispatch( STORE_NAME, 'installPlugins', plugins );
-		const activations: InstallPluginsResponse = yield controls.dispatch(
+		yield dispatch( STORE_NAME, 'installPlugins', plugins );
+		const activations: InstallPluginsResponse = yield dispatch(
 			STORE_NAME,
 			'activatePlugins',
 			plugins
@@ -248,25 +258,20 @@ export function* installAndActivatePlugins( plugins: string[] ) {
 }
 
 export const createErrorNotice = ( errorMessage: string ) => {
-	return controls.dispatch(
-		'core/notices',
-		'createNotice',
-		'error',
-		errorMessage
-	);
+	return dispatch( 'core/notices', 'createNotice', 'error', errorMessage );
 };
 
 export function* connectToJetpack(
 	getAdminLink: ( endpoint: string ) => string
 ) {
-	const url: string = yield controls.resolveSelect(
+	const url: string = yield resolveSelect(
 		STORE_NAME,
 		'getJetpackConnectUrl',
 		{
 			redirect_url: getAdminLink( 'admin.php?page=wc-admin' ),
 		}
 	);
-	const error: string = yield controls.resolveSelect(
+	const error: string = yield resolveSelect(
 		STORE_NAME,
 		'getPluginsError',
 		'getJetpackConnectUrl'
@@ -284,10 +289,10 @@ export function* installJetpackAndConnect(
 	getAdminLink: ( endpoint: string ) => string
 ) {
 	try {
-		yield controls.dispatch( STORE_NAME, 'installPlugins', [ 'jetpack' ] );
-		yield controls.dispatch( STORE_NAME, 'activatePlugins', [ 'jetpack' ] );
+		yield dispatch( STORE_NAME, 'installPlugins', [ 'jetpack' ] );
+		yield dispatch( STORE_NAME, 'activatePlugins', [ 'jetpack' ] );
 
-		const url: string = yield controls.dispatch(
+		const url: string = yield dispatch(
 			STORE_NAME,
 			'connectToJetpack',
 			getAdminLink
@@ -304,7 +309,7 @@ export function* connectToJetpackWithFailureRedirect(
 	getAdminLink: ( endpoint: string ) => string
 ) {
 	try {
-		const url: string = yield controls.dispatch(
+		const url: string = yield dispatch(
 			STORE_NAME,
 			'connectToJetpack',
 			getAdminLink

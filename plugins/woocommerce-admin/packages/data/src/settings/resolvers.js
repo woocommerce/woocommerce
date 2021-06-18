@@ -1,7 +1,10 @@
 /**
  * External dependencies
  */
-import { apiFetch } from '@wordpress/data-controls';
+import {
+	apiFetch,
+	dispatch as depreciatedDispatch,
+} from '@wordpress/data-controls';
 import { controls } from '@wordpress/data';
 
 /**
@@ -11,6 +14,10 @@ import { NAMESPACE } from '../constants';
 import { STORE_NAME } from './constants';
 import { updateSettingsForGroup, updateErrorForGroup } from './actions';
 
+// Can be removed in WP 5.9.
+const dispatch =
+	controls && controls.dispatch ? controls.dispatch : depreciatedDispatch;
+
 function settingsToSettingsResource( settings ) {
 	return settings.reduce( ( resource, setting ) => {
 		resource[ setting.id ] = setting.value;
@@ -19,7 +26,7 @@ function settingsToSettingsResource( settings ) {
 }
 
 export function* getSettings( group ) {
-	yield controls.dispatch( STORE_NAME, 'setIsRequesting', group, true );
+	yield dispatch( STORE_NAME, 'setIsRequesting', group, true );
 
 	try {
 		const url = NAMESPACE + '/settings/' + group;

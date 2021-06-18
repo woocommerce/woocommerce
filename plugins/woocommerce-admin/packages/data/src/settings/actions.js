@@ -3,7 +3,7 @@
  */
 
 import { __ } from '@wordpress/i18n';
-import { apiFetch } from '@wordpress/data-controls';
+import { apiFetch, select } from '@wordpress/data-controls';
 import { controls } from '@wordpress/data';
 import { concat } from 'lodash';
 
@@ -13,6 +13,10 @@ import { concat } from 'lodash';
 import { NAMESPACE } from '../constants';
 import { STORE_NAME } from './constants';
 import TYPES from './action-types';
+
+// Can be removed in WP 5.9, wp.data is supported in >5.7.
+const resolveSelect =
+	controls && controls.resolveSelect ? controls.resolveSelect : select;
 
 export function updateSettingsForGroup( group, data, time = new Date() ) {
 	return {
@@ -59,11 +63,7 @@ export function* persistSettingsForGroup( group ) {
 	// first dispatch the is persisting action
 	yield setIsRequesting( group, true );
 	// get all dirty keys with select control
-	const dirtyKeys = yield controls.resolveSelect(
-		STORE_NAME,
-		'getDirtyKeys',
-		group
-	);
+	const dirtyKeys = yield resolveSelect( STORE_NAME, 'getDirtyKeys', group );
 	// if there is nothing dirty, bail
 	if ( dirtyKeys.length === 0 ) {
 		yield setIsRequesting( group, false );
@@ -71,7 +71,7 @@ export function* persistSettingsForGroup( group ) {
 	}
 
 	// get data slice for keys
-	const dirtyData = yield controls.resolveSelect(
+	const dirtyData = yield resolveSelect(
 		STORE_NAME,
 		'getSettingsForGroup',
 		group,
