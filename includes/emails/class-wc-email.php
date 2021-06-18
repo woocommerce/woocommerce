@@ -658,15 +658,15 @@ class WC_Email extends WC_Settings_API {
 		remove_filter( 'wp_mail_from_name', array( $this, 'get_from_name' ) );
 		remove_filter( 'wp_mail_content_type', array( $this, 'get_content_type' ) );
 
-		$id = $this->id ? $this->id : 'default';
 		/**
 		 * Action hook fired when an email is sent.
 		 *
 		 * @since 5.5.0
-		 * @param bool $return Whether the email was sent successfully.
-		 * @param WC_Email $this WC_Email instance.
+		 * @param bool     $return Whether the email was sent successfully.
+		 * @param int      $id     Email ID.
+		 * @param WC_Email $this   WC_Email instance.
 		 */
-		do_action( 'woocommerce_email_' . $id . '_sent', $return, $this );
+		do_action( 'woocommerce_email_sent', $return, $this->id, $this );
 
 		return $return;
 	}
