@@ -1,11 +1,13 @@
 # Unreleased
 
+## Added
+
+- Factories for variable product, variation, and grouped product
 - Added `RUN_PLUGIN_INSTALL`
 - Added `getSlug()` helper to return the slug string for a provided string
 - Added `describeIf()` to conditionally run a test suite
 - Added `itIf()` to conditionally run a test case.
 - Added merchant workflows around plugins: `uploadAndActivatePlugin()`, `activatePlugin()`, `deactivatePlugin()`, `deletePlugin()`
-
 # 0.1.5
 
 ## Added

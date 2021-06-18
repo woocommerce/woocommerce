@@ -6,10 +6,6 @@
  * @package WooCommerce\Interface
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
 /**
  * WC Customer Download Data Store Interface.
  *
