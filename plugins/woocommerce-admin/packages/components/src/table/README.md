@@ -76,6 +76,7 @@ Name | Type | Default | Description
 `title` | String | `null` | (required) The title used in the card header, also used as the caption for the content in this table
 `totalRows` | Number | `null` | (required) The total number of rows (across all pages)
 `baseSearchQuery` | Object | `{}` | Pass in query parameters to be included in the path when onSearch creates a new url
+`rowKey` | Function(row, index): string | `null` | Function used for the row key.
 
 ### `labels` structure
 
@@ -213,6 +214,7 @@ const rows = [
 	caption="Revenue Last Week"
 	rows={ rows }
 	headers={ headers }
+	rowKey={ row => row.display }
 />
 ```
 
@@ -228,6 +230,7 @@ Name | Type | Default | Description
 `query` | Object | `{}` | The query string represented in object form
 `rows` | Array | `null` | (required) An array of arrays of display/value object pairs
 `rowHeader` | One of type: number, bool | `0` | Which column should be the row header, defaults to the first item (`0`) (but could be set to `1`, if the first col is checkboxes, for example). Set to false to disable row headers
+`rowKey` | Function(row, index): string | `null` | Function used to get the row key.
 
 ### `headers` structure
 

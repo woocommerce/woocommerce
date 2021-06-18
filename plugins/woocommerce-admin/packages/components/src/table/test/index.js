@@ -74,4 +74,24 @@ describe( 'TableCard', () => {
 		// We shouldn't get here if an error occurred.
 		expect( true ).toBe( true );
 	} );
+
+	it( 'should render rows correctly with custom rowKey prop', () => {
+		render(
+			<TableCard
+				title="Revenue"
+				headers={ mockHeaders }
+				isLoading={ false }
+				rows={ mockData }
+				rowsPerPage={ 1 }
+				totalRows={ 5 }
+				rowKey={ ( row ) => row[ 1 ].value }
+			/>
+		);
+
+		for ( const row of mockData ) {
+			expect(
+				screen.queryByText( row[ 0 ].display )
+			).toBeInTheDocument();
+		}
+	} );
 } );

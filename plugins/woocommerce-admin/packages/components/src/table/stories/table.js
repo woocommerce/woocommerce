@@ -11,7 +11,12 @@ import { rows, headers } from './index';
 
 export const Basic = () => (
 	<Card size={ null }>
-		<Table caption="Revenue Last Week" rows={ rows } headers={ headers } />
+		<Table
+			caption="Revenue Last Week"
+			rows={ rows }
+			headers={ headers }
+			rowKey={ ( row ) => row[ 0 ].value }
+		/>
 	</Card>
 );
 

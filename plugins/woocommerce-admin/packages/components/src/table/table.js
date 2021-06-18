@@ -60,6 +60,7 @@ class Table extends Component {
 		this.container = createRef();
 		this.sortBy = this.sortBy.bind( this );
 		this.updateTableShadow = this.updateTableShadow.bind( this );
+		this.getRowKey = this.getRowKey.bind( this );
 	}
 
 	componentDidMount() {
@@ -121,6 +122,13 @@ class Table extends Component {
 		} else if ( ! scrolledToStart && ! isScrollableLeft ) {
 			this.setState( { isScrollableLeft: true } );
 		}
+	}
+
+	getRowKey( row, index ) {
+		if ( this.props.rowKey && typeof this.props.rowKey === 'function' ) {
+			return this.props.rowKey( row, index );
+		}
+		return index;
 	}
 
 	render() {
@@ -245,7 +253,7 @@ class Table extends Component {
 									<th
 										role="columnheader"
 										scope="col"
-										key={ i }
+										key={ header.key || i }
 										{ ...thProps }
 									>
 										{ isSortable ? (
@@ -286,7 +294,7 @@ class Table extends Component {
 						</tr>
 						{ hasData ? (
 							rows.map( ( row, i ) => (
-								<tr key={ i }>
+								<tr key={ this.getRowKey( row, i ) }>
 									{ row.map( ( cell, j ) => {
 										const {
 											cellClassName,
@@ -306,12 +314,17 @@ class Table extends Component {
 													headers[ j ].key,
 											}
 										);
+										const cellKey =
+											this.getRowKey(
+												row,
+												i
+											).toString() + j;
 										return (
 											<Cell
 												scope={
 													isHeader ? 'row' : null
 												}
-												key={ j }
+												key={ cellKey }
 												className={ cellClasses }
 											>
 												{ getDisplay( cell ) }
@@ -431,6 +444,11 @@ Table.propTypes = {
 	 * is checkboxes, for example). Set to false to disable row headers.
 	 */
 	rowHeader: PropTypes.oneOfType( [ PropTypes.number, PropTypes.bool ] ),
+	/**
+	 * The rowKey used for the key value on each row, a function that returns the key.
+	 * Defaults to index.
+	 */
+	rowKey: PropTypes.func,
 };
 
 Table.defaultProps = {

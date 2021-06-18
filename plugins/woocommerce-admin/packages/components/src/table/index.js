@@ -152,6 +152,7 @@ class TableCard extends Component {
 			summary,
 			title,
 			totalRows,
+			rowKey,
 		} = this.props;
 		const { showCols } = this.state;
 		const allHeaders = this.props.headers;
@@ -238,6 +239,7 @@ class TableCard extends Component {
 							caption={ title }
 							query={ query }
 							onSort={ onSort || onQueryChange( 'sort' ) }
+							rowKey={ rowKey }
 						/>
 					) }
 				</CardBody>
@@ -350,6 +352,11 @@ TableCard.propTypes = {
 	 * The total number of rows (across all pages).
 	 */
 	totalRows: PropTypes.number.isRequired,
+	/**
+	 * The rowKey used for the key value on each row, this can be a string of the key or a function that returns the value.
+	 * This uses the index if not defined.
+	 */
+	rowKey: PropTypes.func,
 };
 
 TableCard.defaultProps = {
