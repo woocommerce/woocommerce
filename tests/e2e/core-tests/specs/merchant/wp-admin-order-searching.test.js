@@ -68,7 +68,7 @@ const updateCustomerBilling = async () => {
 };
 
 const runOrderSearchingTest = () => {
-	describe('WooCommerce Orders > Search orders', () => {
+	describe('[Trunk] WooCommerce Orders > Search orders', () => {
 		let orderId;
 		beforeAll( async () => {
 			await createSimpleProduct('Wanted Product');
