@@ -8,6 +8,7 @@
 
 use \Automattic\WooCommerce\Admin\API\Reports\Products\DataStore as ProductsDataStore;
 use \Automattic\WooCommerce\Admin\API\Reports\Products\Query as ProductsQuery;
+use \Automattic\WooCommerce\Admin\ReportCSVExporter;
 
 /**
  * Reports product stats tests class
@@ -413,5 +414,76 @@ class WC_Tests_Reports_Products extends WC_Unit_Test_Case {
 		// Test retrieving the stats through the query class.
 		$query = new ProductsQuery( $args );
 		$this->assertEquals( $expected_data, $query->get_data() );
+	}
+
+	/**
+	 * Test that filters get properly parsed for CSV exports.
+	 * See: https://github.com/woocommerce/woocommerce-admin/issues/5503.
+	 *
+	 * @since 3.5.0
+	 */
+	public function test_report_export_arguments() {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		// Populate all of the data.
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Test Product' );
+		$product->set_regular_price( 25 );
+		$product->save();
+
+		$order = WC_Helper_Order::create_order( 1, $product );
+		$order->set_status( 'completed' );
+		$order->set_shipping_total( 10 );
+		$order->set_discount_total( 20 );
+		$order->set_discount_tax( 0 );
+		$order->set_cart_tax( 5 );
+		$order->set_shipping_tax( 2 );
+		$order->set_total( 97 ); // $25x4 products + $10 shipping - $20 discount + $7 tax.
+		$order->save();
+
+		WC_Helper_Queue::run_all_pending();
+
+		$term = wp_insert_term( 'Unused Category', 'product_cat' );
+
+		$data_store = new ProductsDataStore();
+		$start_time = gmdate( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
+		$end_time   = gmdate( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() + HOUR_IN_SECONDS );
+		$args       = array(
+			'after'             => $start_time,
+			'before'            => $end_time,
+			'category_includes' => array( $term['term_id'] ),
+		);
+
+		// Test retrieving the stats through the data store.
+		$data = $data_store->get_data( $args );
+
+		$expected_data = (object) array(
+			'total'   => 0,
+			'pages'   => 0,
+			'page_no' => 1,
+			'data'    => array(),
+		);
+		$this->assertEquals( $expected_data, $data );
+
+		// Ensures the report params get mapped and sanitized for exports.
+		do_action( 'rest_api_init' );
+
+		$args = array(
+			'after'      => $start_time,
+			'before'     => $end_time,
+			'categories' => $term['term_id'],
+		);
+
+		$expected_csv  = chr( 239 ) . chr( 187 ) . chr( 191 );
+		$expected_csv .= '"Product Title",SKU,"Items Sold","N. Revenue",Orders,Category,Variations,Status,Stock';
+		$expected_csv .= PHP_EOL;
+
+		$export = new ReportCSVExporter( 'products', $args );
+		$export->generate_file();
+		$actual_csv = $export->get_file();
+
+		$this->assertEquals( 100, $export->get_percent_complete() );
+		$this->assertEquals( 0, $export->get_total_exported() );
+		$this->assertEquals( $expected_csv, $actual_csv );
 	}
 }

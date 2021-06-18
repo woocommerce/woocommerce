@@ -191,8 +191,10 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 			}
 		}
 
+		$request->set_attributes( array( 'args' => $params ) );
 		$request->set_default_params( $defaults );
 		$request->set_query_params( $this->report_args );
+		$request->sanitize_params();
 
 		// Does the controller have an export-specific item retrieval method?
 		// @todo - Potentially revisit. This is only for /revenue/stats/.
