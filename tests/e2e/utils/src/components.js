@@ -135,6 +135,9 @@ const completeOnboardingWizard = async () => {
 
 	// Business Details section
 
+	// Temporarily add delay to reduce test flakiness
+	await page.waitFor( 2000 );
+
 	// Query for the <SelectControl>s
 	const selectControls = await page.$$( '.woocommerce-select-control' );
 	expect( selectControls ).toHaveLength( 2 );
