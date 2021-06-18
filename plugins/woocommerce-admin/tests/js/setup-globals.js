@@ -3,6 +3,7 @@
  */
 import { setLocaleData } from '@wordpress/i18n';
 import { registerStore } from '@wordpress/data';
+import 'regenerator-runtime/runtime';
 
 // Set up `wp.*` aliases.  Doing this because any tests importing wp stuff will
 // likely run into this.

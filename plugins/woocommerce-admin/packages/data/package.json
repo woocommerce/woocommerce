@@ -23,7 +23,7 @@
 	"dependencies": {
 		"@woocommerce/date": "file:../date",
 		"@woocommerce/navigation": "file:../navigation",
-		"@wordpress/core-data": "2.25.0",
+		"@wordpress/core-data": "3.0.0",
 		"@wordpress/i18n": "3.17.0",
 		"md5": "^2.3.0",
 		"rememo": "^3.0.0"
@@ -32,6 +32,6 @@
 		"access": "public"
 	},
 	"peerDependencies": {
-		"@wordpress/core-data": "^2.24.2"
+		"@wordpress/core-data": "^3.0.0"
 	}
 }

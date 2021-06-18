@@ -23,7 +23,6 @@ const babelConfigs = {
 	main: Object.assign( {}, babelDefaultConfig, {
 		plugins,
 		presets: [
-			[ '@babel/preset-typescript' ],
 			...map( babelDefaultConfig.presets, ( preset ) =>
 				overrideOptions( preset, '@babel/preset-env', {
 					modules: 'commonjs',
@@ -40,7 +39,6 @@ const babelConfigs = {
 			} )
 		),
 		presets: [
-			[ '@babel/preset-typescript' ],
 			...map( babelDefaultConfig.presets, ( preset ) =>
 				overrideOptions( preset, '@babel/preset-env', {
 					modules: false,
