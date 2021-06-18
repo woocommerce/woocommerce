@@ -84,6 +84,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 			'Attribute 2 value(s)'    => 'attributes:value2',
 			'Attribute 1 default'     => 'attributes:default1',
 			'Attribute 2 default'     => 'attributes:default2',
+			'Download 1 ID'           => 'downloads:id1',
 			'Download 1 name'         => 'downloads:name1',
 			'Download 1 URL'          => 'downloads:url1',
 		);
@@ -238,6 +239,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'',
 				'',
 				'',
+				'',
 			),
 			array(
 				'simple, downloadable, virtual',
@@ -283,6 +285,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'180-Gram',
 				'',
 				'',
+				'4ff604c2-97bd-4869-938b-7798ba6648ab',
 				'Album flac',
 				'http://woo.dev/albums/album.flac',
 			),
@@ -393,8 +396,9 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				),
 				'downloads'             => array(
 					array(
-						'name' => 'Album flac',
-						'file' => 'http://woo.dev/albums/album.flac',
+						'name'        => 'Album flac',
+						'file'        => 'http://woo.dev/albums/album.flac',
+						'download_id' => '4ff604c2-97bd-4869-938b-7798ba6648ab',
 					),
 				),
 				'menu_order'            => 1,

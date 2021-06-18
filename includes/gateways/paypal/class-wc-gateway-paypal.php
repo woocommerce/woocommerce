@@ -473,4 +473,42 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		return $text;
 	}
+
+	/**
+	 * Determines whether PayPal Standard should be loaded or not.
+	 *
+	 * By default PayPal Standard isn't loaded on new installs or on existing sites which haven't set up the gateway.
+	 *
+	 * @since 5.5.0
+	 *
+	 * @return bool Whether PayPal Standard should be loaded.
+	 */
+	public function should_load() {
+		$option_key  = '_should_load';
+		$should_load = $this->get_option( $option_key );
+
+		if ( '' === $should_load ) {
+
+			// New installs without PayPal Standard enabled don't load it.
+			if ( 'no' === $this->enabled && WC_Install::is_new_install() ) {
+				$should_load = false;
+			} else {
+				$should_load = true;
+			}
+
+			$this->update_option( $option_key, wc_bool_to_string( $should_load ) );
+		} else {
+			$should_load = wc_string_to_bool( $should_load );
+		}
+
+		/**
+		 * Allow third-parties to filter whether PayPal Standard should be loaded or not.
+		 *
+		 * @since 5.5.0
+		 *
+		 * @param bool              $should_load Whether PayPal Standard should be loaded.
+		 * @param WC_Gateway_Paypal $this        The WC_Gateway_Paypal instance.
+		 */
+		return apply_filters( 'woocommerce_should_load_paypal_standard', $should_load, $this );
+	}
 }
