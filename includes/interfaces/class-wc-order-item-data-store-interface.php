@@ -6,10 +6,6 @@
  * @package WooCommerce\Interface
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
 /**
  * WC Order Item Data Store Interface
  *
