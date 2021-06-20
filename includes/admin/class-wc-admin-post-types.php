@@ -383,6 +383,14 @@ class WC_Admin_Post_Types {
 				$product->set_shipping_class_id( $shipping_class_id );
 			}
 		}
+		
+		if ( ! empty( $request_data['_tax_class'] ) ) {
+			$tax_class = sanitize_title( wp_unslash( $request_data['_tax_class'] ) );
+			if ( 'standard' === $tax_class ) {
+				$tax_class = '';
+			}
+			$product->set_tax_class( $tax_class );
+		}
 
 		$product->set_featured( isset( $request_data['_featured'] ) );
 
@@ -481,7 +489,7 @@ class WC_Admin_Post_Types {
 		}
 
 		if ( ! empty( $request_data['_tax_class'] ) ) {
-			$tax_class = wc_clean( wp_unslash( $request_data['_tax_class'] ) );
+			$tax_class = sanitize_title( wp_unslash( $request_data['_tax_class'] ) );
 			if ( 'standard' === $tax_class ) {
 				$tax_class = '';
 			}
