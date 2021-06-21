@@ -9,3 +9,11 @@ export function getMessages( state ) {
 export function getStatus( state ) {
 	return state.status;
 }
+
+export function getCommandParams( state ) {
+	return state.params;
+}
+
+export function getCronJobs( state ) {
+	return state.cronJobs;
+}

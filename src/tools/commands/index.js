@@ -1,3 +1,5 @@
+import { TriggerCronJob, TRIGGER_CRON_ACTION_NAME } from './trigger-cron';
+
 export default [
 	{
 		command: 'Trigger WCA Install',
@@ -38,5 +40,10 @@ export default [
 		command: 'Delete all products',
 		description: 'Delete all products',
 		action: 'deleteAllProducts',
+	},
+	{
+		command: 'Run a cron job',
+		description: <TriggerCronJob />,
+		action: TRIGGER_CRON_ACTION_NAME,
 	},
 ];

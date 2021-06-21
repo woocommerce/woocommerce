@@ -60,6 +60,13 @@
             &.command {
                 white-space: nowrap;
             }
+            .trigger-cron-job {
+                width: 40%;
+                padding-top: 4px;
+                .components-base-control__field {
+                    margin-bottom: 0;
+                }
+            }
         }
     }
     .components-notice {
