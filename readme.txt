@@ -159,136 +159,178 @@ If you encounter issues with the shop/category pages after an update, flush the 
 WooCommerce comes with some sample data you can use to see how products look; import sample_products.xml via the [WordPress importer](https://wordpress.org/plugins/wordpress-importer/). You can also use the core [CSV importer](https://docs.woocommerce.com/document/product-csv-importer-exporter/?utm_source=wp%20org%20repo%20listing&utm_content=3.6) or our [CSV Import Suite extension](https://woocommerce.com/products/product-csv-import-suite/?utm_source=wp%20org%20repo%20listing&utm_content=3.6) to import sample_products.csv
 
 == Changelog ==
-
-= 5.3.0 2021-05-11 =
+= 5.5.0 2021-07-13 =
 
 **WooCommerce**
 
-* Dev - Add support for "cities" and "postcodes" fields to the REST API endpoints to create/update tax rates. #29495
-* Dev - The taxes GET endpoint now supports sorting by priority. #29495
-* Enhancement - Add a new `woocommerce_cart_product_not_enough_stock_already_in_cart_message` filter to allow developers to filter an add-to-cart error when there isn't enough in stock taking into account what's already in the cart. #29304
-* Enhancement - Pass `$handler`, and prevent logging from `woocommerce_logger_log_message` filter when the message is null. #29572
-* Fix - Added parameter `$item` (instance of WC_Order_Item) to both the function `wc_downloadable_file_permission` and the filter hook `woocommerce_downloadable_file_permission`. #23188
-* Fix - Add array-typed "cities" and "postcodes" to the response of the "tax" endpoint in the REST API to overcome the limitation of "city" and "postcode" returning always one single value. #27751
-* Fix - Update tax rate for existing taxes when recalculating order totals. #27985
-* Fix - Replace page setup dropdowns with AJAX powered search selects. #29181
-* Fix - Return 0 if order isn't available in `WC_Payment_Gateway::get_order_total()`. #29314
-* Fix - Fix console error on IE11 when opening admin pages. #29322
-* Fix - Prevent crash when log file can't be opened for writing. #29396
-* Fix - Closes the section "Store management insights" in email settings. #29447
-* Fix - Fixed return type of `WC_Shortcode_Products::get_type()`. #29452
-* Fix - Fix syntax error in the admin (products/orders) list table. #29469
-* Fix - Cart duplicate debug shipping notices in certain situations. #29480
-* Fix - Trying to update the cities or postcodes (only) or a tax rate via REST API returned an error. #29495
-* Fix - Unneeded browser popup message of unsaved changes when adding a shipping zone with a shipping method. #29510
-* Fix - Update the persistent cart after it's loaded on customer login. Fixes an issue whereby unavailable products would be validated on every login. #29517
-* Fix - Updated `$customer->get_shipping()` and `$customer->get_billing()` to return the full address after updating individual fields. #29538
-* Fix - Prevent cart to reset all nonce in front-end. #29542
-* Fix - Bump the version of the "Grouped product add to cart" template to 4.8.0 (was still at 4.0.0 by mistake). #29601
-* Fix - If we have a non-empty shipping address then do not overwrite the state or country fields with billing address data. #29605
-* Tweak - Add the support to `optgroups` in single select on Settings API. #29145
-* Tweak - Improves performance by avoiding an unnecessary redirect if custom permalink structure does not contain trailing slashes. #29422
-* Tweak - Update SSR db version tooltip to more accurately state the db version. #29438
-* Tweak - Adjust Twenty Twenty One order items header alignment. #29485
-* Tweak - Lost password form alignment issues. #29496
-* Tweak - Improve accessibility by adding `aria-hidden="true"` on strikethrough prices. #29603
-* Tweak - Default store location to US California. #29654
-* Tweak - Default store currency to USD. #29752
+* Performance - Set Geolocation fallback transients to expire in one day instead of one week. #29987
+* Enhancement - [Transparency] CLI command for viewing tracking data for your store. #30010
+* Enhancement - All settings pages can now be extended consistently with new sections and settings. Also, unit tests have been added. #27684
+* Enhancement - Set checkout fields value with the default defined value where form is not presented to the user. #29820
+* Tweak - Show legacy widget instance in Rest API. #30012
+* Tweak - No longer load PayPal Standard by default on new installs. #29971
+* Tweak - Rename Products, Products by Rating, and Recent Viewed Products widgets to Products list, Products by Rating list, and Recently Viewed Products list. #29941
+* Tweak - By default the postcode field will no longer be used, and the state field will become optional, for Curaçao. #29848
+* Tweak - Handle WP_Error while creating placeholder image during install. #29783
+* Fix - Allow block templates for WooCommerce pages. #30013
+* Fix - Download IDs are included in export CSV and imported when updating existing products to maintain download permissions. #29970
+* Fix - Fees added to an order from wp-admin are now calculated correctly the first time. #29945
+* Fix - Prevent caching of cart/checkout page when using Chrome browser. #29912
+* Fix - Invoice emails now contain payment link if the order needs payment, not just when the order is "pending". #29833
+* Fix - Introduce meta to track stocks that refunded and restocked to properly handle stock recalculation. #29762
+* Fix - Resolved a console error that could occur when clicking Add Shipping Zone. #30015
+* Dev - Added an if condition block to check for new install before creating Zero and Reduced rate tax classes in class-wc-install.php. #29938
+* Dev - Product attributes lookup table usage when enabled. #29896
+* Dev - Set $woocommerce_loop name propriety to widget "Products". #29847
+* Dev - Reduce the potential for errors when plugins implement REST API endpoints based on WooCommerce's own products controller. #29835
+* Dev - Remove ABSPATH check in interfaces. #30124
+* Dev - Add ability to bulk update order status to cancelled. #30116
+* Dev - Register woocommerce.css in editor screens so it can be enqueued in the editor. #30093
+* Dev - Add Customize WooCommerce link for block-based themes. #30044
 
-** WooCommerce Blocks - 4.8.0 & 4.9.0 & 4.9.1 **
+**WooCommerce Admin - 2.4.0 **
 
-* Dev - Removed legacy handling for SSR blocks that rendered shortcodes. #4010
-* Fix - Customer address country saving to orders in certain circumstances. #4013
-* Fix - Prevent error messages returned by the API from displaying raw HTML. #4005
-* Fix - Proceed to checkout button click bug happening when the Coupon error is visible in the Cart block. #3996
-* Fix - Use font color in payment methods border. #4051
-* Fix - Load translation file for JS files that has translatable strings. #4050
-* Fix - Stop shipping package titles line-breaks occurring in the middle of a word. #4049
-* Fix - Fixed styling issues on the cart and checkout page in Twenty(X) themes. #4046
-* Fix - Fix headline alignment in the empty state of the cart block. #4044
-* Fix - Fix button alignment in Featured Product and Featured Category blocks. #4028
-* Fix - Check if Cart and Checkout are registered before removing payment methods. #4056
-* Enhancement - Registered payment methods now have access to the `shouldSavePayment` prop in their components (which indicates whether the shopper has checked the save payment method checkbox. #3990
-* Enhancement - Payment methods implementing the `savedTokenComponent` configuration property will now have the `onPaymentProcessing` event available to the registered component. #3982
+* Add - SlotFill to Abbreviated Notification panel #7091
+* Add - Consume remote payment methods on frontend #6867
+* Add - Extend payment gateways REST endpoint #6919
+* Add - Add remote payment gateway recommendations initial docs #6962
+* Add - Add loading placeholders for payment gateways task #7123
+* Add - Note date range logic for GivingFeedback, and InsightFirstSale note. #6969
+* Add - Add transient notices feature #6809
+* Add - Add transformers in remote inbox notifications #6948
+* Add - Add Mercado Pago as default fallback payment gateway #7043
+* Add - Add in Razorpay as default fallback payment gateway #7096
+* Add - Get post install scripts from gateway and enqueue in client #6967
+* Add - Add eWAY as default fallback gateway #7108
+* Add - Free extension list powered by remote config #6952
+* Add - Add PayPal to fallback payment gateways #7001
+* Add - Add a data store for WC Payments REST APIs #6918
+* Add - Progressive setup checklist copy and call to action buttons. #6956
+* Add - Add Paystack as fallback gateway #7025
+* Add - Add Square as default fallback gateway #7107
+* Add - Add COD method to default payment gateway recommendations #7057
+* Add - Add BACS as default fallback payment gateway #7073
+* Add - A/B test of progressive checklist features. #7089
+* Add - Add payment gateway return URL and action #7095
+* Add - Add Mollie to the default payment gateways. #7092
+* Add - Show task and activity notifications in the Inbox panel #7017
+* Add - Adding WCPay payment configuration defaults. #7097
+* Add - Create onboarding package to house refactored WCPay card and relevant components #7058
+* Dev - Add Jetpack Backup admin note #6738
+* Dev - Reduce the specificity and complexity of the ReportError component #6846
+* Dev - Converting <SettingsForm /> component to TypeScript. #6981
+* Dev - Update package-lock to fix versioning of local packages. #6843
+* Dev - Use rule processing for remote payment methods #6830
+* Dev - Update E2E jest config, so it correctly creates screenshots on failure. #6858
+* Dev - Fixed storybook build script #6875
+* Dev - Removed allowed keys list for adding woocommerce_meta data. #6889 🎉 @xristos3490
+* Dev - Delete all products when running product import tests, unskip previously skipped test. #6905
+* Dev - Add payment method selector to onboarding store #6921
+* Dev - Add disabled prop to SelectControl #6902
+* Dev - Add filter variation to tracks data in products analytics. #6913
+* Dev - Offload remote inbox notifications engine run using action-scheduler. #6995
+* Dev - Add source param support for notes query. #6979
+* Dev - Remove the use of Dashicons and replace with @wordpress/icons or gridicons. #7020
+* Dev - Refactor inbox panel components and moved to experimental package. #7006
+* Dev - Business features uncheck creative mail by default #7139
+* Dev - Remove support for IE11. #7112
+* Dev - Drop styling support for IE11. #7137
+* Dev - Remove react-docgen docs in favor of Storybook #7055
+* Enhancement - Add expand/collapse to extendable task list. #6910
+* Enhancement - Add task hierarchy support to extended task list. #6916
+* Enhancement - Add remind me later option to task list. #6923
+* Enhancement - Enable Remote Free Extensions List #7144
+* Enhancement - Adding Slotfills for remote payments and SettingsForm component. #6932
+* Fix - Update the wordpress/babel-preset to avoid crashes in WP5.8 beta2 #7202
+* Fix - Add fallback for the select/dispatch data-controls for older WP versions #7204
+* Fix - RemoteFreeExtension hide bundle when all of its plugins are not visible #7182
+* Fix - Issue where summary stats were not showing in Analytics > Stock. #7161
+* Fix - Rule Processing Transformer to handle dotNotation default value #7009
+* Fix - Remove Navigation's uneeded SlotFill context #6832
+* Fix - Report filters expecting specific ordering. #6847
+* Fix - Render bug with report comparison mode selections. #6862
+* Fix - Throw exception if the data store cannot be loaded when trying to use notes. #6771
+* Fix - Autocompleter for custom Search in FilterPicker #6880
+* Fix - Get currency from CurrencyContext #6723
+* Fix - Correct the left position of transient notices when the new nav is used. #6914
+* Fix - Exclude WC Shipping for store that are only offering downloadable products #6917
+* Fix - SelectControl focus and de-focus bug #6906
+* Fix - Multiple preload tag output bug. #6998
+* Fix - Call existing filters for leaderboards in analytics. #6626
+* Fix - Set target to blank for the external links #6999
+* Fix style regression with the Chart header. #7002
+* Fix styling of the advanced filter operator selection. #7005
+* Fix - Deprecated warnings from select control @wordpress/data-controls. #7007
+* Fix - Bug with Orders Report coupon exclusion filter. #7021
+* Fix - Show Google Listing and Ads in installed marketing extensions section. #7029
+* Fix - Notices not dissapearing. #7077
+* Fix - Keyboard accessibility on the free features tab. #7149
+* Fix - Fix error handling when remote free extension API returns empty array. #7147
+* Fix - Transformer casing is incorrect and creates an error on case-sensitive systems #7104
+* Fix - Preventing redundant notices when installing plugins via payments task list. #7026
+* Fix - Autocompleter for custom Search in CompareFilter #6911
+* Fix - Add target to the button to open it in a new tab  #7110
+* Fix - Make `Search` accept synchronous `autocompleter.options`. #6884
+* Fix - Set autoload to false for all remote inbox notifications options. #7060
+* Tweak - Setup checklist copy revert. #7015
+* Tweak - Revert Card component removal #7167
+* Update - Task list component with new Experimental Task list. #6849
+* Update - Optimize payment gateway resolution #7124
+* Update - Experimental task list import to the experimental package. #6950
+* Update - Redirect to WC Home after setting up a payment method #6891
+* Update - Hook up payments gateway data store #7038
+* Update - Update remote payment docs gateway methods #7079
+* Update - Remove original business step flow #7103
+* Update - WooCommerce Shipping copy on onboarding steps #7148
 
-** WooCommerce Admin - 2.2.0 & 2.2.1 & 2.2.2 & 2.2.3 & 2.2.4 & 2.2.5 & 2.2.6 **
-* Add - Next new novel navigation nudge note #6610
-* Add - Add legacy report items to new navigation #6507
-* Add - Add preview site button on the appearance task #6457
-* Add - Back button to go to home screen from tasks in the task list. #6397
-* Add - Add a "rather not say" option to revenue in the profile wizard. #6475
-* Add - Remove Mollie promo note on install #6510
-* Add - Remote Inbox Notifications rule to trigger when WooCommerce Admin is upgraded. #6040
-* Add - CES survey for search product, order, customer #6420
-* Add - CES survey for importing products #6419
-* Add - CES survey for adding product categories, tags, and attributes #6418
-* Add - Additional analytics tracking for the business details step. #6575
-* Add - Include tracking for mail poet installs in the selective bundle install #6603
-* Add - Paystack payment provider to several african countries. #6579
-* Dev - Close activity panel tabs by default and track #6566
-* Dev - Update undefined task name properties for help panel tracks #6565
-* Dev - Refactor profile wizard benefits step and add tests #6583
-* Dev - Add filter to profile wizard steps #6564
-* Dev - Add nav intro modal tests #6518
-* Dev - Use wc filter to get status tabs for tools category #6525
-* Dev - Add nav header component tests #6509
-* Dev - Add initial tests for navigation Menu class #6492
-* Dev - Remove active item from navigation store #6486
-* Dev - Add navigation container tests #6464
-* Dev - Add nav favorite button tests #6446
-* Dev - Add a changelog lint check to PRs. #6414
-* Dev - Add navigation favorites tests #6409
-* Dev - support use of Array.flat in client and packages. #6411
-* Dev - Deprecate Onboarding::has_woocommerce_support. #6401
-* Dev - Add Dependency Extraction Webpack Plugin #5762
-* Dev - Add client-side filter for Navigation rootBackUrl #6505
-* Dev - Remove `items_purchased` and `account_type` props from onboarding profile API. #6520
-* Dev - Added warning when WC-Admin is active but not being used #6453
-* Dev - Store profiler - Added MailPoet to Business Details step  #6503
-* Dev - Store profiler - Added MailPoet to new Business Details step  #6515
-* Dev - Add tilde (~) to represent client root directory for imports. #6517
-* Dev - Add script automation for gathering hooks and filters. #6454
-* Dev - Add TypeScript and page objects to the E2E test suite. #6582
-* Dev - Introduce Typescript to Navigation utils #6477
-* Dev - Payments task: include Mercado Pago #6572
-* Dev - Ensure script asset.php files are included in builds #6635
-* Dev - Ensure production script asset names don't include .min suffix #6681
-* Dev - Do a git clean before the core release. #6945
-* Dev - Fix a bug where trying to load an asset registry causes a crash. #6951
-* Fix - Add check for navigating being enabled. #6462
-* Fix - Move the shipping input and text 1px lower. #6408
-* Fix - Correct the Klarna slug #6440
-* Fix - Broken link anchors to online documentation. #6455
-* Fix - Update payment card style on mobile #6413
-* Fix - Missing i18n in Welcome modal. #6456
-* Fix - Restore visual styles back to Analytics tabs. #5913
-* Fix - Update contrast and hover / active colors for analytics dropdown buttons #6504
-* Fix - Associated Order Number for refunds was hidden #6428
-* Fix - Fix issue where Loader::is_admin_page() would error if WooCommerce admin is disabled. #6563
-* Fix - Correct a bug where the JP connection flow would not happen when installing JP in the OBW. #6521
-* Fix - Show management links when the task list is complete (even if its not hidden). #6657
-* Fix - Adding New Zealand and Ireland to selective bundle option, previously missed. #6649
-* Fix - Update the Mercado option used for enabling/disabling. #6677
-* Fix - Improve AddFirstProduct email note contents. #6617
-* Fix - Check if features are currently being enabled #6688
-* Fix - Fix the activity panel toggle not closing on click #6679
-* Fix - Fix use of feature checks and remove deprecated method calls #6687
-* Fix - Allow the manager role to query certain options #6577
-* Fix - Delete customer data on network user deletion #6574
-* Fix - Fix Themes step visibility in IE 11 #6578
-* Fix - Fix hidden menu title on smaller screens #6562
-* Fix - Add gross sales column to CSV export #6567
-* Fix - Disable the continue btn on OBW when requested are being made #6838
-* Fix - Calling of get_script_asset_filename with extra parameter #6955
-* Fix - Address an issue with OBW when installing only WooCommerce payments and Jetpack. #6957
-* Tweak - Add default value for contains op #6622
-* Tweak - Adjust targeting store age for the Add First Product note #6554
-* Tweak - Improve WC Shipping & Tax logic #6547
-* Tweak - Update Insight inbox note content #6555
-* Tweak - Remove mobile activity panel toggle #6539
-* Tweak - Refactor autoloader to remove global variable. #6412
-* Tweak - Revert WCPay international support for bundled package #6901
-* Tweak - Store profiler - Changed MailPoet's title and description #6886
-* Tweak - Update PayU logo #6829
+** WooCommerce Blocks Package - 5.2.0 & 5.3.0 & 5.3.1 **
+
+* Enhancement - Hide legacy widgets with a feature-complete block equivalent from the widget area block inserter. #4237
+* Enhancement - Provide block transforms for legacy widgets with a feature-complete block equivalent. #4292
+* Enhancement - Hide the All Products Block from the Customizer Widget Areas until full support is achieved. #4225
+* Enhancement - Improved accessibility and styling of the controls of several of ours blocks. #4100
+* Enhancement - Fix duplicate react keys in ProductDetails component. #4187
+* Fix - Fix a bug in which Cart Widget didn’t update when adding items from the All Products block. #4291
+* Fix - Fix an issue where an attempt to add an out-of-stock product to the cart was made when clicking the “Read more” button. #4265
+* Fix - Fix Product Categories List block display in Site Editor #4335.
+* Fix - Make links in the Product Categories List block unclickable in the editor #4339.
+* Fix - Fix rating stars not being shown in the Site Editor #4345.
+
+** WooCommerce Blocks Feature Plugin - 5.2.0 & 5.3.0 & 5.3.1 **
+
+* Enhancement - Added a key prop to each CartTotalItem within usePaymentMethodInterface. (4240)
+* Enhancement - Sync customer data during checkout with draft orders. (4197)
+* Enhancement - Update the display of the sidebar/order summary in the Cart and Checkout blocks. (4180)
+* Enhancement - Hide the Cart and Checkout blocks from the new block-based widget editor. (4303)
+* Fix - Hide tax breakdown if the total amount of tax to be paid is 0. (4262)
+* Fix - Prevent Coupon code panel from appearing in stores were coupons are disabled. (4202)
+* Fix - For payment methods, only use canMakePayment in the frontend (not the editor) context. (4188)
+* Fix - Fix sending of confirmation emails for orders when no payment is needed. (4186)
+* Fix - Stopped a warning being shown when using WooCommerce Force Sells and adding a product with a Synced Force Sell to the cart. (4182)
+* Fix - Fix some missing translations from the Cart and Checkout blocks. (4295)
+* Fix - Fix the flickering of the Proceed to Checkout button on quantity update in the Cart Block. (4293)
+* Fix - Fix a display issue when itemized taxes are enabled, but no products in the cart are taxable. (4284)
+* Compatibility - Add the ability for extensions to register callbacks to be executed by Blocks when the cart/extensions endpoint is hit. Extensions can now tell Blocks they need to do some server-side processing which will update the cart. (4298)
+* Tweak - Add couponName filter to allow extensions to modify how coupons are displayed in the Cart and Checkout summary. (4166)
+* Tweak - Move Button and Label components to @woocommerce/blocks-checkout package. (4222)
+* Tweak - Add Slot in the Discounts section of the cart sidebar to allow third party extensions to render their own components there. (4248)
+
+** ActionScheduler 3.2.0 **
+
+* Fix - Add "no ordering" option to as_next_scheduled_action().
+* Fix - Add secondary scheduled date checks when claiming actions (DBStore) | #634.
+* Fix - Add secondary scheduled date checks when claiming actions (wpPostStore) | #634.
+* Fix - Adds a new index to the action table, reducing the potential for deadlocks (props: @glagonikas).
+* Fix - Fix unit tests infrastructure and adapt tests to PHP 8.
+* Fix - Identify in-use data store.
+* Fix - Improve test_migration_is_scheduled.
+* Fix - PHP notice on list table.
+* Fix - Speed up clean up and batch selects.
+* Fix - Update pending dependencies.
+* Fix - [PHP 8.0] Only pass action arg values through to do_action_ref_array().
+* Fix - [PHP 8] Set the PHP version to 7.1 in composer.json for PHP 8 compatibility.
+* Fix - add is_initialized() to docs.
+* Fix - fix file permissions.
+* Fix - fixes #664 by replacing __ with esc_html__.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
