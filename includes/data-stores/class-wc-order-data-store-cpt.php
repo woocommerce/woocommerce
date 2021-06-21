@@ -767,7 +767,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		);
 
 		foreach ( $key_mapping as $query_key => $db_key ) {
-			if ( ! empty( $query_vars[ $query_key ] ) ) {
+			if ( isset( $query_vars[ $query_key ] ) ) {
 				$query_vars[ $db_key ] = $query_vars[ $query_key ];
 				unset( $query_vars[ $query_key ] );
 			}
