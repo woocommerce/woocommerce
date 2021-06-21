@@ -232,6 +232,9 @@ export const LocalPayments = ( { query } ) => {
 							'Try the new way to get paid. Securely accept credit and debit cards on your site. Manage transactions without leaving your WordPress dashboard. Only with WooCommerce Payments.',
 							'wc-admin'
 						),
+						enabled: wcPayMethod.isEnabled,
+						installed: wcPayMethod.isEnabled,
+						needsSetup: ! wcPayMethod.isConfigured,
 					} }
 				/>
 			) }

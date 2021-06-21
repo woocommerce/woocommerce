@@ -53,7 +53,7 @@ export const PaymentGatewaySuggestions = ( { query } ) => {
 						installed: !! installedPaymentGateways[ id ],
 						postInstallScripts:
 							installedGateway.post_install_scripts,
-						enabled: installedGateway.enabled,
+						enabled: installedGateway.enabled || false,
 						needsSetup: installedGateway.needs_setup,
 						settingsUrl: installedGateway.settings_url,
 						connectionUrl: installedGateway.connection_url,

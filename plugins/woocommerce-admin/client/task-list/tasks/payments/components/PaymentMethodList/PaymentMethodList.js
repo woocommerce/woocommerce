@@ -17,7 +17,7 @@ import { RecommendedRibbon, SetupRequired } from '@woocommerce/onboarding';
 /**
  * Internal dependencies
  */
-import { PaymentAction } from '../PaymentAction';
+import { PaymentAction } from '../PaymentActionLocal';
 
 import './PaymentMethodList.scss';
 

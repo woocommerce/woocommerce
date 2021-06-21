@@ -18,7 +18,7 @@ import {
  * Internal dependencies
  */
 
-import { PaymentAction } from './PaymentAction';
+import { PaymentAction } from '../PaymentGatewaySuggestions/components/PaymentAction';
 
 const TosPrompt = () =>
 	interpolateComponents( {
@@ -41,12 +41,19 @@ export const WCPaySuggestion = ( {
 	paymentGateway,
 	onSetupCallback = null,
 } ) => {
-	const { description, id, needsSetup, isEnabled } = paymentGateway;
+	const {
+		description,
+		id,
+		needsSetup,
+		installed,
+		enabled: isEnabled,
+		installed: isInstalled,
+	} = paymentGateway;
 
 	return (
 		<WCPayCard>
 			<WCPayCardHeader>
-				{ isEnabled ? (
+				{ installed && needsSetup ? (
 					<SetupRequired />
 				) : (
 					<Pill>{ __( 'Recommended', 'woocommerce-admin' ) }</Pill>
@@ -71,6 +78,8 @@ export const WCPaySuggestion = ( {
 						needsSetup={ needsSetup }
 						isEnabled={ isEnabled }
 						isRecommended={ true }
+						isInstalled={ isInstalled }
+						hasPlugins={ true }
 						setupButtonText={ __(
 							'Get started',
 							'woocommerce-admin'

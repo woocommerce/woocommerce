@@ -11,7 +11,7 @@ import { Text, useSlot } from '@woocommerce/experimental';
 /**
  * Internal dependencies
  */
-import { PaymentAction } from '../../../components/PaymentAction';
+import { PaymentAction } from '../PaymentAction';
 
 import './List.scss';
 
@@ -29,7 +29,8 @@ export const Item = ( {
 		title,
 		loading,
 		enabled: isEnabled = false,
-		needsSetup = false,
+		installed: isInstalled = false,
+		needsSetup = true,
 		requiredSettings,
 		settingsUrl: manageUrl,
 	} = paymentGateway;
@@ -67,7 +68,9 @@ export const Item = ( {
 					{ showRecommendedRibbon && <RecommendedRibbon /> }
 					<Text as="h3" className="woocommerce-task-payment__title">
 						{ title }
-						{ isEnabled && needsSetup && <SetupRequired /> }
+						{ isInstalled && needsSetup && !! plugins.length && (
+							<SetupRequired />
+						) }
 					</Text>
 					<div className="woocommerce-task-payment__content">
 						{ content }
@@ -80,6 +83,8 @@ export const Item = ( {
 						hasSetup={ hasSetup }
 						needsSetup={ needsSetup }
 						isEnabled={ isEnabled }
+						isInstalled={ isInstalled }
+						hasPlugins={ Boolean( plugins.length ) }
 						isRecommended={ isRecommended }
 						isLoading={ loading }
 						markConfigured={ markConfigured }

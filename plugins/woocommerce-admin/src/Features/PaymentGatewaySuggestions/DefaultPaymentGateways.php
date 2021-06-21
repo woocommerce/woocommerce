@@ -114,7 +114,7 @@ class DefaultPaymentGateways {
 					(object) array(
 						'type'      => 'base_location_country',
 						'value'     => 'IN',
-						'operation' => '=',
+						'operation' => '!=',
 					),
 					self::get_rules_for_cbd( false ),
 				),
@@ -162,7 +162,7 @@ class DefaultPaymentGateways {
 					(object) array(
 						'type'      => 'base_location_country',
 						'value'     => 'IN',
-						'operation' => '!=',
+						'operation' => '=',
 					),
 					self::get_rules_for_cbd( false ),
 				),
@@ -261,6 +261,7 @@ class DefaultPaymentGateways {
 				'option_name'  => 'woocommerce_onboarding_profile',
 				'operation'    => '=',
 				'value'        => $venue,
+				'default'      => array(),
 			);
 		}
 
