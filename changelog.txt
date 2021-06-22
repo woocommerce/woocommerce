@@ -156,7 +156,7 @@
 * Tweak - Move Button and Label components to @woocommerce/blocks-checkout package. (4222)
 * Tweak - Add Slot in the Discounts section of the cart sidebar to allow third party extensions to render their own components there. (4248)
 
-** ActionScheduler 3.2.0 **
+** ActionScheduler 3.2.0 & 3.2.1 **
 
 * Fix - Add "no ordering" option to as_next_scheduled_action().
 * Fix - Add secondary scheduled date checks when claiming actions (DBStore) | #634.
@@ -173,6 +173,8 @@
 * Fix - add is_initialized() to docs.
 * Fix - fix file permissions.
 * Fix - fixes #664 by replacing __ with esc_html__.
+* Fix - Add extra safety/account for different versions of AS and different loading patterns. #714
+* Fix - Handle hidden columns (Tools → Scheduled Actions) | #600.
 
 = 5.4.1 2021-06-10 =
 
