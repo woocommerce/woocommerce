@@ -11,7 +11,7 @@ function escapeCSVValue( value ) {
 	// See: http://www.contextis.com/resources/blog/comma-separated-vulnerabilities/
 	// See: WC_CSV_Exporter::escape_data()
 	if ( [ '=', '+', '-', '@' ].includes( stringValue.charAt( 0 ) ) ) {
-		stringValue = "'" + stringValue;
+		stringValue = '"\t' + stringValue + '"';
 	} else if ( stringValue.match( /[,"\s]/ ) ) {
 		stringValue = '"' + stringValue.replace( /"/g, '""' ) + '"';
 	}

@@ -1,3 +1,7 @@
+# 1.3.2
+
+- Use tab char for the CSV injection prevention.
+
 # 1.3.1
 
 -   Update dependencies.

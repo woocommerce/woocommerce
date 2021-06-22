@@ -85,8 +85,12 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Tweak: Revert Card component removal #7167
 - Fix: Currency display on Orders activity card on homescreen #7181
 - Fix: Report export filtering bug. #7165
+- Fix:  Use tab char for the CSV injection prevention. #7154
 
 == 2.4.0 6/10/2021 ==
+- Dev: Add Jetpack Backup admin note #6738
+- Add: Adding WCPay payment configuration defaults. #7097
+- Fix: Transformer casing is incorrect and creates an error on case-sensitive systems #7104
 - Dev: Reduce the specificity and complexity of the ReportError component #6846
 - Add: Create onboarding package to house refactored WCPay card and relevant components #7058
 - Fix: Preventing redundant notices when installing plugins via payments task list. #7026

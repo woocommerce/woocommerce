@@ -31,6 +31,29 @@ describe( 'generateCSVDataFromTable', () => {
 			mockCSVData
 		);
 	} );
+
+	it( 'should prefix tab character when the cell value starts with one of =, +, -, and @', () => {
+		[ '=', '+', '-', '@' ].forEach( ( val ) => {
+			const expected = 'value\n"\t' + val + 'test"';
+			const result = generateCSVDataFromTable(
+				[
+					{
+						label: 'value',
+						key: 'value',
+					},
+				],
+				[
+					[
+						{
+							display: 'value',
+							value: val + 'test',
+						},
+					],
+				]
+			);
+			expect( result ).toBe( expected );
+		} );
+	} );
 } );
 
 describe( 'generateCSVFileName', () => {
