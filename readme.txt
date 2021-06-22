@@ -332,5 +332,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - add is_initialized() to docs.
 * Fix - fix file permissions.
 * Fix - fixes #664 by replacing __ with esc_html__.
+* Fix - Add extra safety/account for different versions of AS and different loading patterns. #714
+* Fix - Handle hidden columns (Tools → Scheduled Actions) | #600.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
