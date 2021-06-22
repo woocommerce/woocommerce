@@ -1211,10 +1211,11 @@ class DataStore extends SqlQuery {
 	 * Returns product attribute subquery elements used in JOIN and WHERE clauses,
 	 * based on query arguments from the user.
 	 *
-	 * @param array $query_args Parameters supplied by the user.
+	 * @param array  $query_args Parameters supplied by the user.
+	 * @param string $table_name Database table name.
 	 * @return array
 	 */
-	protected function get_attribute_subqueries( $query_args ) {
+	protected function get_attribute_subqueries( $query_args, $table_name ) {
 		global $wpdb;
 
 		$sql_clauses           = array(
@@ -1222,7 +1223,6 @@ class DataStore extends SqlQuery {
 			'where' => array(),
 		);
 		$match_operator        = $this->get_match_operator( $query_args );
-		$join_table            = $wpdb->prefix . 'wc_order_product_lookup';
 		$post_meta_comparators = array(
 			'='  => 'attribute_is',
 			'!=' => 'attribute_is_not',
@@ -1248,7 +1248,7 @@ class DataStore extends SqlQuery {
 						continue;
 					}
 
-					// @todo: Use wc_get_attribute() instead ?
+					// @todo: Use wc_get_attribute () instead ?
 					$attr_taxonomy = wc_attribute_taxonomy_name_by_id( $attribute_id );
 					// Invalid attribute ID.
 					if ( empty( $attr_taxonomy ) ) {
@@ -1261,27 +1261,40 @@ class DataStore extends SqlQuery {
 						continue;
 					}
 
-					$meta_key   = wc_variation_attribute_name( $attr_taxonomy );
+					$meta_key   = sanitize_title( $attr_taxonomy );
 					$meta_value = $attr_term->slug;
 				} else {
 					// Assume these are a custom attribute slug/value pair.
-					$meta_key   = 'attribute_' . esc_sql( $attribute_term[0] );
+					$meta_key   = esc_sql( $attribute_term[0] );
 					$meta_value = esc_sql( $attribute_term[1] );
 				}
 
-				$join_alias = 'wpm1';
+				$join_alias = 'orderitemmeta1';
+
+				if ( empty( $sql_clauses['join'] ) ) {
+					$sql_clauses['join'][] = "JOIN {$wpdb->prefix}woocommerce_order_items orderitems ON orderitems.order_id = {$table_name}.order_id";
+				}
 
 				// If we're matching all filters (AND), we'll need multiple JOINs on postmeta.
 				// If not, just one.
-				if ( 'AND' === $match_operator || empty( $sql_clauses['join'] ) ) {
-					$join_idx              = count( $sql_clauses['join'] ) + 1;
-					$join_alias            = 'wpm' . $join_idx;
-					$sql_clauses['join'][] = "JOIN {$wpdb->postmeta} as {$join_alias} ON {$join_alias}.post_id = {$join_table}.variation_id";
+				if ( 'AND' === $match_operator || 1 === count( $sql_clauses['join'] ) ) {
+					$join_idx              = count( $sql_clauses['join'] );
+					$join_alias            = 'orderitemmeta' . $join_idx;
+					$sql_clauses['join'][] = "JOIN {$wpdb->prefix}woocommerce_order_itemmeta as {$join_alias} ON {$join_alias}.order_item_id = orderitems.order_item_id";
 				}
 
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				$sql_clauses['where'][] = $wpdb->prepare( "( {$join_alias}.meta_key = %s AND {$join_alias}.meta_value {$comparator} %s )", $meta_key, $meta_value );
 			}
+		}
+
+		// If we're matching multiple attributes and all filters (AND), make sure
+		// we're matching attributes on the same product.
+		$num_attribute_filters = count( $sql_clauses['join'] );
+
+		for ( $i = 2; $i < $num_attribute_filters; $i++ ) {
+			$join_alias            = 'orderitemmeta' . $i;
+			$sql_clauses['join'][] = "AND orderitemmeta1.order_item_id = {$join_alias}.order_item_id";
 		}
 
 		return $sql_clauses;

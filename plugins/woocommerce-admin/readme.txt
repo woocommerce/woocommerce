@@ -164,6 +164,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix: Deprecated warnings from select control @wordpress/data-controls. #7007
 - Fix: Bug with Orders Report coupon exclusion filter. #7021
 - Fix: Show Google Listing and Ads in installed marketing extensions section. #7029
+- Fix: Attribute filter bug with "any X" variations. #7046
 - Fix: Notices not dissapearing. #7077
 - Fix: Keyboard accessibility on the free features tab. #7149
 - Fix: Fix error handling when remote free extension API returns empty array. #7147

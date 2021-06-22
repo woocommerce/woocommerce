@@ -57,9 +57,8 @@ export class SelectControl extends Component {
 	reset( selected = this.getSelected() ) {
 		const { multiple, excludeSelectedOptions } = this.props;
 		const newState = { ...initialState };
-		// Reset to the option label and selectedIndex if single selection.
-		if ( ! multiple && selected.length && selected[ 0 ].label ) {
-			newState.query = selected[ 0 ].label;
+		// Reset selectedIndex if single selection.
+		if ( ! multiple && selected.length && selected[ 0 ].key ) {
 			newState.selectedIndex = ! excludeSelectedOptions
 				? this.props.options.findIndex(
 						( i ) => i.key === selected[ 0 ].key

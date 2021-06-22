@@ -157,4 +157,148 @@ class WC_Tests_Reports_Variations extends WC_Unit_Test_Case {
 		);
 		$this->assertEquals( $expected_data, $data );
 	}
+
+	/**
+	 * Test the attribute filter.
+	 */
+	public function test_attribute_filtering() {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$global_attribute_data = WC_Helper_Product::create_attribute( 'size', array( 'Small', 'Medium', 'Large' ) );
+
+		$local_attribute = new WC_Product_Attribute();
+		$local_attribute->set_id( 0 );
+		$local_attribute->set_name( 'Color' );
+		$local_attribute->set_options( array( 'red', 'green', 'blue' ) );
+		$local_attribute->set_visible( true );
+		$local_attribute->set_variation( true );
+
+		$global_attribute = new WC_Product_Attribute();
+		$global_attribute->set_id( $global_attribute_data['attribute_id'] );
+		$global_attribute->set_name( $global_attribute_data['attribute_taxonomy'] );
+		$global_attribute->set_options( $global_attribute_data['term_ids'] );
+		$global_attribute->set_visible( true );
+		$global_attribute->set_variation( true );
+
+		// Create a variable product with a variation that allows "any x".
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Shirt' );
+		$product->set_regular_price( 25 );
+		$product->set_attributes( array( $global_attribute, $local_attribute ) );
+		$product->save();
+
+		$green = new WC_Product_Variation();
+		$green->set_name( 'Green Shirt' );
+		$green->set_parent_id( $product->get_id() );
+		$green->set_attributes( array( 'color' => 'green' ) );
+		$green->save();
+
+		$red = new WC_Product_Variation();
+		$red->set_name( 'Red Shirt' );
+		$red->set_parent_id( $product->get_id() );
+		$red->set_attributes( array( 'color' => 'red' ) );
+		$red->save();
+
+		// Create separate orders for two green shirts of different sizes.
+		$line_item_1 = new WC_Order_Item_Product();
+		$line_item_1->set_product( $green );
+		$line_item_1->add_meta_data( 'pa_size', 'Small', true );
+
+		$order_1 = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order_1->add_item( $line_item_1 );
+		$order_1->set_status( 'completed' );
+		$order_1->save();
+
+		$line_item_2 = new WC_Order_Item_Product();
+		$line_item_2->set_product( $green );
+		$line_item_2->add_meta_data( 'pa_size', 'Large', true );
+
+		$order_2 = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order_2->add_item( $line_item_2 );
+		$order_2->set_status( 'completed' );
+		$order_2->save();
+
+		// Order a large red shirt.
+		$line_item_3 = new WC_Order_Item_Product();
+		$line_item_3->set_product( $red );
+		$line_item_3->add_meta_data( 'pa_size', 'Large', true );
+
+		$order_3 = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order_3->add_item( $line_item_3 );
+		$order_3->set_status( 'completed' );
+		$order_3->save();
+
+		WC_Helper_Queue::run_all_pending();
+
+		$data_store = new VariationsDataStore();
+
+		// Two orders of the green shirt.
+		$data = $data_store->get_data(
+			array(
+				'attribute_is' => array(
+					array( 'color', 'green' ),
+				),
+			)
+		);
+
+		$this->assertEquals( 1, $data->total );
+		$this->assertEquals( 2, $data->data[0]['items_sold'] );
+		$this->assertEquals( 2, $data->data[0]['orders_count'] );
+		$this->assertEquals( $green->get_id(), $data->data[0]['variation_id'] );
+
+		// One order of a Large green shirt.
+		$data = $data_store->get_data(
+			array(
+				'attribute_is' => array(
+					array( $global_attribute_data['attribute_id'], $global_attribute_data['term_ids'][2] ),
+					array( 'color', 'green' ),
+				),
+			)
+		);
+
+		$this->assertEquals( 1, $data->total );
+		$this->assertEquals( 1, $data->data[0]['items_sold'] );
+		$this->assertEquals( 1, $data->data[0]['orders_count'] );
+		$this->assertEquals( $green->get_id(), $data->data[0]['variation_id'] );
+
+		// Two large shirts sold.
+		$data = $data_store->get_data(
+			array(
+				'attribute_is' => array(
+					array( $global_attribute_data['attribute_id'], $global_attribute_data['term_ids'][2] ),
+				),
+				'orderby'      => 'sku',
+				'order'        => 'desc',
+			)
+		);
+
+		$this->assertEquals( 2, $data->total );
+		$this->assertEquals( 1, $data->data[0]['items_sold'] );
+		$this->assertEquals( 1, $data->data[0]['orders_count'] );
+		$this->assertEquals( $green->get_id(), $data->data[0]['variation_id'] );
+		$this->assertEquals( 1, $data->data[1]['items_sold'] );
+		$this->assertEquals( 1, $data->data[1]['orders_count'] );
+		$this->assertEquals( $red->get_id(), $data->data[1]['variation_id'] );
+
+		// All orders.
+		$data = $data_store->get_data(
+			array(
+				'match'        => 'any',
+				'attribute_is' => array(
+					array( $global_attribute_data['attribute_id'], $global_attribute_data['term_ids'][2] ),
+					array( 'color', 'green' ),
+				),
+				'orderby'      => 'items_sold',
+				'order'        => 'desc',
+			)
+		);
+
+		$this->assertEquals( 2, $data->total );
+		$this->assertEquals( 2, $data->data[0]['items_sold'] );
+		$this->assertEquals( 2, $data->data[0]['orders_count'] );
+		$this->assertEquals( $green->get_id(), $data->data[0]['variation_id'] );
+		$this->assertEquals( 1, $data->data[1]['items_sold'] );
+		$this->assertEquals( 1, $data->data[1]['orders_count'] );
+		$this->assertEquals( $red->get_id(), $data->data[1]['variation_id'] );
+	}
 }
