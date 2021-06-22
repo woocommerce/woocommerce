@@ -5,6 +5,8 @@
 
 namespace Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions;
 
+use Automattic\WooCommerce\Admin\Features\TransientNotices;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -18,6 +20,7 @@ class PaymentGatewaysController {
 	public static function init() {
 		add_filter( 'woocommerce_rest_prepare_payment_gateway', array( __CLASS__, 'extend_response' ), 10, 3 );
 		add_filter( 'admin_init', array( __CLASS__, 'possibly_do_connection_return_action' ) );
+		add_action( 'woocommerce_admin_payment_gateway_connection_return', array( __CLASS__, 'handle_successfull_connection' ) );
 	}
 
 	/**
@@ -96,5 +99,49 @@ class PaymentGatewaysController {
 		// phpcs:enable WordPress.Security.NonceVerification
 
 		do_action( 'woocommerce_admin_payment_gateway_connection_return', $gateway_id );
+	}
+
+	/**
+	 * Handle a successful gateway connection.
+	 *
+	 * @param string $gateway_id Gateway ID.
+	 */
+	public static function handle_successfull_connection( $gateway_id ) {
+		// phpcs:disable WordPress.Security.NonceVerification
+		if ( ! isset( $_GET['success'] ) || 1 !== intval( $_GET['success'] ) ) {
+			return;
+		}
+		// phpcs:enable WordPress.Security.NonceVerification
+
+		$payment_gateways = WC()->payment_gateways()->payment_gateways();
+		$payment_gateway  = isset( $payment_gateways[ $gateway_id ] ) ? $payment_gateways[ $gateway_id ] : null;
+
+		if ( ! $payment_gateway ) {
+			return;
+		}
+
+		$payment_gateway->update_option( 'enabled', 'yes' );
+
+		TransientNotices::add(
+			array(
+				'user_id' => get_current_user_id(),
+				'id'      => 'payment-gateway-connection-return-' . str_replace( ',', '-', $gateway_id ),
+				'status'  => 'success',
+				'content' => sprintf(
+					/* translators: the title of the payment gateway */
+					__( '%s connected successfully', 'woocommerce-admin' ),
+					$payment_gateway->method_title
+				),
+			)
+		);
+
+		wc_admin_record_tracks_event(
+			'tasklist_payment_connect_method',
+			array(
+				'payment_method' => $gateway_id,
+			)
+		);
+
+		wp_safe_redirect( wc_admin_url( '&task=payments' ) );
 	}
 }
