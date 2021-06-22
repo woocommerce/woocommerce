@@ -661,7 +661,7 @@ class WC_Email extends WC_Settings_API {
 		/**
 		 * Action hook fired when an email is sent.
 		 *
-		 * @since 5.5.0
+		 * @since 5.6.0
 		 * @param bool     $return Whether the email was sent successfully.
 		 * @param int      $id     Email ID.
 		 * @param WC_Email $this   WC_Email instance.
