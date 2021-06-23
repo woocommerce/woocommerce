@@ -1,11 +1,12 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-monetary-amount';
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
 import { createInterpolateElement } from 'wordpress-element';
+import { formatPrice } from '@woocommerce/price-format';
 
 /**
  * Internal dependencies
@@ -21,25 +22,38 @@ const PriceRange = ( {
 } ) => {
 	return (
 		<>
-			<FormattedMonetaryAmount
-				className={ classNames(
-					'wc-block-components-product-price__value',
-					priceClassName
+			<span className="screen-reader-text">
+				{ sprintf(
+					/* translators: %1$s min price, %2$s max price */
+					__(
+						'Price between %1$s and %2$s',
+						'woo-gutenberg-products-block'
+					),
+					formatPrice( minPrice ),
+					formatPrice( maxPrice )
 				) }
-				currency={ currency }
-				value={ minPrice }
-				style={ priceStyle }
-			/>
-			&nbsp;&mdash;&nbsp;
-			<FormattedMonetaryAmount
-				className={ classNames(
-					'wc-block-components-product-price__value',
-					priceClassName
-				) }
-				currency={ currency }
-				value={ maxPrice }
-				style={ priceStyle }
-			/>
+			</span>
+			<span aria-hidden={ true }>
+				<FormattedMonetaryAmount
+					className={ classNames(
+						'wc-block-components-product-price__value',
+						priceClassName
+					) }
+					currency={ currency }
+					value={ minPrice }
+					style={ priceStyle }
+				/>
+				&nbsp;&mdash;&nbsp;
+				<FormattedMonetaryAmount
+					className={ classNames(
+						'wc-block-components-product-price__value',
+						priceClassName
+					) }
+					currency={ currency }
+					value={ maxPrice }
+					style={ priceStyle }
+				/>
+			</span>
 		</>
 	);
 };
