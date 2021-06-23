@@ -23,6 +23,7 @@ use \Automattic\WooCommerce\Admin\Notes\MerchantEmailNotifications\MerchantEmail
 use \Automattic\WooCommerce\Admin\Notes\WelcomeToWooCommerceForStoreUsers;
 use \Automattic\WooCommerce\Admin\Notes\ManageStoreActivityFromHomeScreen;
 use \Automattic\WooCommerce\Admin\Notes\NavigationNudge;
+use Automattic\WooCommerce\Admin\Features\Features;
 
 /**
  * Feature plugin main class.
@@ -141,8 +142,8 @@ class FeaturePlugin {
 			return;
 		}
 
-		$this->includes();
 		$this->hooks();
+		$this->includes();
 	}
 
 	/**
@@ -170,19 +171,25 @@ class FeaturePlugin {
 	 * Include WC Admin classes.
 	 */
 	public function includes() {
-		// Initialize the WC API extensions.
-		ReportsSync::init();
+		// Initialize Database updates, option migrations, and Notes.
 		Install::init();
 		Events::instance()->init();
-		API\Init::instance();
-		ReportExporter::init();
-		PluginsInstaller::init();
-
-		// CRUD classes.
 		Notes::init();
 
-		// Initialize category lookup.
-		CategoryLookup::instance()->init();
+		// Initialize Plugins Installer.
+		PluginsInstaller::init();
+
+		// Initialize API.
+		API\Init::instance();
+
+		if ( Features::is_enabled( 'analytics' ) ) {
+			// Initialize Reports syncing.
+			ReportsSync::init();
+			CategoryLookup::instance()->init();
+
+			// Initialize Reports exporter.
+			ReportExporter::init();
+		}
 
 		// Admin note providers.
 		// @todo These should be bundled in the features/ folder, but loading them from there currently has a load order issue.
