@@ -142,9 +142,16 @@ export const Connect = ( {
 
 	return (
 		<>
-			{ helpText }
+			{ helpText || (
+				<p>
+					{ __(
+						"You can manage this payment gateway's settings by clicking the button below",
+						'woocommerce-admin'
+					) }
+				</p>
+			) }
 			<Button isPrimary href={ settingsUrl }>
-				{ __( 'Manage', 'woocommerce-admin' ) }
+				{ __( 'Set up', 'woocommerce-admin' ) }
 			</Button>
 		</>
 	);

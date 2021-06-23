@@ -68,7 +68,7 @@ describe( 'Connect', () => {
 		expect( inputs[ 1 ].placeholder ).toBe( 'API secret' );
 	} );
 
-	it( 'should render the manage button when no connection URL or fields exist', () => {
+	it( 'should render the set up button when no connection URL or fields exist', () => {
 		const props = {
 			...defaultProps,
 			paymentGateway: {
@@ -80,7 +80,7 @@ describe( 'Connect', () => {
 		const { container } = render( <Connect { ...props } /> );
 
 		const button = container.querySelector( 'a' );
-		expect( button.textContent ).toBe( 'Manage' );
+		expect( button.textContent ).toBe( 'Set up' );
 		expect( button.href ).toBe( mockGateway.settingsUrl );
 	} );
 } );
