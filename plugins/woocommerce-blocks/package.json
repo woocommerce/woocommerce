@@ -144,7 +144,7 @@
 		"eslint-plugin-woocommerce": "file:bin/eslint-plugin-woocommerce",
 		"eslint-plugin-you-dont-need-lodash-underscore": "6.10.0",
 		"fs-extra": "9.1.0",
-		"gh-pages": "^3.2.2",
+		"gh-pages": "3.2.2",
 		"glob": "7.1.7",
 		"glob-promise": "3.4.0",
 		"husky": "2.4.1",
