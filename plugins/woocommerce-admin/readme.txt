@@ -78,6 +78,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Add: SlotFill to Abbreviated Notification panel #7091
 - Add: Add unit tests around extended payment gateway controller #7133
 - Add: Add payment gateway suggestion unit tests #7142
+- Add: Feature toggle to disable Analytics UI #7168
 - Fix: WCPay not working in local payments task #7151
 - Fix: Include onboarding settings on the analytic pages #7109
 - Fix: RemoteFreeExtension hide bundle when all of its plugins are not visible #7182

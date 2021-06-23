@@ -8,11 +8,16 @@ namespace Automattic\WooCommerce\Admin\Features;
 
 use Automattic\WooCommerce\Admin\Loader;
 use Automattic\WooCommerce\Admin\API\Reports\Cache;
+use Automattic\WooCommerce\Admin\Features\Features;
 
 /**
  * Contains backend logic for the Analytics feature.
  */
 class Analytics {
+	/**
+	 * Option name used to toggle this feature.
+	 */
+	const TOGGLE_OPTION_NAME = 'woocommerce_analytics_enabled';
 	/**
 	 * Clear cache tool identifier.
 	 */
@@ -39,10 +44,71 @@ class Analytics {
 	 * Hook into WooCommerce.
 	 */
 	public function __construct() {
+		add_filter( 'woocommerce_settings_features', array( $this, 'add_feature_toggle' ) );
+		add_action( 'update_option_' . self::TOGGLE_OPTION_NAME, array( $this, 'reload_page_on_toggle' ), 10, 2 );
+		add_filter( 'woocommerce_admin_preload_options', array( $this, 'preload_options' ) );
+
+		if ( ! Features::is_enabled( 'analytics' ) ) {
+			return;
+		}
+
 		add_filter( 'woocommerce_component_settings_preload_endpoints', array( $this, 'add_preload_endpoints' ) );
 		add_filter( 'woocommerce_admin_get_user_data_fields', array( $this, 'add_user_data_fields' ) );
 		add_action( 'admin_menu', array( $this, 'register_pages' ) );
 		add_filter( 'woocommerce_debug_tools', array( $this, 'register_cache_clear_tool' ) );
+	}
+
+	/**
+	 * Add the feature toggle to the features settings.
+	 *
+	 * @param array $features Feature sections.
+	 * @return array
+	 */
+	public static function add_feature_toggle( $features ) {
+		$description = __(
+			'Enables WooCommerce Analytics',
+			'woocommerce-admin'
+		);
+
+		$features[] = array(
+			'title'   => __( 'Analytics', 'woocommerce-admin' ),
+			'desc'    => $description,
+			'id'      => self::TOGGLE_OPTION_NAME,
+			'type'    => 'checkbox',
+			'default' => 'yes',
+			'class'   => '',
+		);
+
+		return $features;
+	}
+
+	/**
+	 * Preload options to prime state of the application.
+	 *
+	 * @param array $options Array of options to preload.
+	 * @return array
+	 */
+	public function preload_options( $options ) {
+		$options[] = self::TOGGLE_OPTION_NAME;
+
+		return $options;
+	}
+
+	/**
+	 * Reloads the page when the option is toggled to make sure all Analytics features are loaded.
+	 *
+	 * @param string $old_value Old value.
+	 * @param string $value     New value.
+	 */
+	public static function reload_page_on_toggle( $old_value, $value ) {
+		if ( $old_value === $value ) {
+			return;
+		}
+
+		if ( isset( $_SERVER['REQUEST_URI'] ) ) {
+			wp_safe_redirect( wp_unslash( $_SERVER['REQUEST_URI'] ) );
+			exit();
+		}
 	}
 
 	/**
