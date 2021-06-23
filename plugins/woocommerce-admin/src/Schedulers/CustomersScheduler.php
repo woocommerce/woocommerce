@@ -172,7 +172,7 @@ class CustomersScheduler extends ImportScheduler {
 	 * @return void
 	 */
 	public static function schedule_user_delete( $user_id ) {
-		if ( (int) $user_id > 0 ) {
+		if ( (int) $user_id > 0 && ! doing_action( 'wp_uninitialize_site' ) ) {
 			// Postpone until any pending updates are completed.
 			self::schedule_action( 'delete_user', array( $user_id ) );
 		}

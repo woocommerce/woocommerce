@@ -82,6 +82,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix: Include onboarding settings on the analytic pages #7109
 - Fix: RemoteFreeExtension hide bundle when all of its plugins are not visible #7182
 - Fix: Fixing button state logic for remote payment gateways #7200
+- Fix: Skip schedule customer data deletion on site deletion #7214
 - Tweak: Revert Card component removal #7167
 - Fix: Currency display on Orders activity card on homescreen #7181
 - Fix: Report export filtering bug. #7165
