@@ -26,6 +26,113 @@ add_filter( 'woocommerce_admin_export_id', function ($export_id) {
 } );
 ```
 2. Repeat the same steps from above. The filename in the link now should be `different_export_id`.
+### Payment gateway suggestions feature
+
+1. Navigate to the homescreen via WooCommerce -> Home
+2. Click on "Set up payments"
+
+#### How to test
+
+Individual payment gateway plugins dictate the settings and connection flow.  For testing purposes, we'll test both the default behavior of the gateway and the enhanced configuration behavior.
+
+1. On the payments task, click "Set up" or "Enable" next to a gateway
+2. Note that the gateway is installed if it requires a plugin
+3. On the connection step, a button should be presented that links to the gateway's (legacy) settings screen
+4. Delete the plugin
+5. Install some of the payment gateways from the links below.  They don't need to be activated, but the folder names should match those in the zip.
+6. If setting fields are shown, make sure that validation works, input is saved, and is persisted on page refresh.  Make sure the gateway is marked as enabled and not labeled "Requires setup" if all fields are completed.
+7. If the "Connect" button is shown, follow the connection flow.  Make sure that you are returned to the payments task and that the gateway is enabled and marked as configured.
+8. Remove some settings manually under the payment gateway's legacy settings screen.  Make sure the gateway is no longer marked as configured.
+
+* Klarna - https://mc.a8c.com/includes/img-uploader/files/1624475036-klarna-checkout-for-woocommerce.zip
+* PayFast - https://mc.a8c.com/includes/img-uploader/files/1624475037-woocommerce-gateway-payfast.zip
+* PayPal - https://mc.a8c.com/includes/img-uploader/files/1624475037-woocommerce-paypal-payments.zip
+* RazorPay - https://mc.a8c.com/includes/img-uploader/files/1624475037-razorpay-woocommerce.zip
+* Stripe - https://mc.a8c.com/includes/img-uploader/files/1624475040-woocommerce-gateway-stripe.zip
+* MercaoPago - https://mc.a8c.com/includes/img-uploader/files/1624475616-woocommerce-mercadopago.zip
+* Square - https://mc.a8c.com/includes/img-uploader/files/1624475232-woocommerce-square.zip
+* eWAY - https://mc.a8c.com/includes/img-uploader/files/1624476063-woocommerce-gateway-eway.zip
+
+##### PayFast
+
+1. Set your country to South Africa in WooCommerce->Settings
+2. Don't select CBD as an industry during onboarding
+
+##### Paystack
+
+1. Set your country to South Africa in WooCommerce->Settings
+2. Don't select CBD as an industry during onboarding
+3. Complete the payment tasks
+4. Make sure that `ZAR` is the site currency after configuration of Paystack and that "test mode" is turned off in settings
+
+##### Stripe
+
+1. Set your store country to a Stripe supported country (e.g., US - https://stripe.com/global )
+2. Don't select CBD as an industry during onboarding
+3. Make sure you're using a site with https
+4. Attempt to use the oauth connection flow to enable the gateway, making sure you are returned to the site and connection is successful
+5. Remove the connection and use a non-https site
+6. Check that the manual settings configuration flow is shown
+
+##### PayPal
+
+1. Set your store country to any country except India
+2. Don't select CBD as an industry during onboarding
+3. Make sure the PayPal connection flow is shown and works as expected
+4. In Chrome, open the console "Network" tab and right-click on the `get-params` request and select "Block request URL"
+5. Refresh the page and note that the manual settings flow is shown
+
+
+##### Klarna
+
+1. Set your store country to one of the following: `SE, FI, NO`
+2. Don't select CBD as an industry during onboarding
+
+
+##### Mollie
+
+1. Set your store country to one of the following: `FR, DE, GB, AT, CH, ES, IT, PL, FI, NL, BE`
+2. Don't select CBD as an industry during onboarding
+
+##### Mercado Pago
+
+1. Set your store country to one of the following: `AR, BR, CL, CO, MX, PE, UY`
+2. Make sure the help text is shown when setting up the gateway with links to registration and the settings screen.
+
+### WooCommerce Payments
+
+1. Set your store country to one of the following: `US, PR`
+2. Don't select CBD as an industry during onboarding
+3. Make sure the WC Pay card is shown above the other payment gateways
+4. Attempt to install and configured the gateway
+
+##### Cash on Delivery
+
+1. Make sure "Enable" is shown and clicking this enables the gateway
+2. Make sure the "Manage" button is shown after enabling the gateway
+
+
+##### Direct bank transfer
+
+1. Make sure "Set up" is shown next to the gateway
+2. Enter some bank details
+3. Make sure the gateway is marked as enabled and configured with the entered settings when visiting the legacy settings screen
+
+##### RazorPay
+
+1. Set your store country to India
+2. Don't select CBD as an industry during onboarding
+
+##### eWAY
+
+1. Set your store country to one of the following: `AU, NZ`
+2. Don't select CBD as an industry during onboarding
+3. Make sure the API key and password fields are shown
+
+##### Square
+
+1. Set your store country to the `US` and select CBD as an industy during onboarding OR set your store country to one of `US, CA, JP, GB, AU, IE`, don't select CBD as an industry and select that you have a physical store in the business details step.
+2. Make sure the connection flow is shown.
 
 ## 2.4.0
 
