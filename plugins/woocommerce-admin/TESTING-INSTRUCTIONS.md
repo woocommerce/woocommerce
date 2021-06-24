@@ -9,6 +9,24 @@
 3. Select the tab "Business details" to go back
 4. Confirm that the previously selected values are shown. 
 
+### Change the emailed report file name #7178
+
+**Confirm the default behaviour remains the same**
+1. Create a new store and install the [WP Mail Logging by MailPoet plugin](https://wordpress.org/plugins/wp-mail-logging/)
+2. Go to Analytics -> Revenue and change the date range to last month
+3. Click the download button and make sure you see the "Your revenue report will be emailed to you" notification
+4. Go to Tools -> Scheduled Action and run the newly created `woocommerce_admin_report_export` action. After that is complete, run the `woocommerce_admin_email_report_download_link` action.
+5. Go to Tools -> WP Mail Log and check the latest email. The URL linked to the "Download your Revenue report" should work as usual. The URL will be something like `filename=wc-revenue-report-export-16236128226138`
+
+**Confirm the new filter is working**
+1. Add this code to the `woocommerce-admin.php` file
+```php
+add_filter( 'woocommerce_admin_export_id', function ($export_id) {
+	return 'different_export_id';
+} );
+```
+2. Repeat the same steps from above. The filename in the link now should be `different_export_id`.
+
 ## 2.4.0
 
 ### Add target to the button to open it in a new tab #7110
