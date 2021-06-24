@@ -4,8 +4,8 @@
 import { __ } from '@wordpress/i18n';
 import { TextControl } from '@wordpress/components';
 import { trash, Icon } from '@wordpress/icons';
-import arrowUp from 'gridicons/dist/chevron-up';
-import arrowDown from 'gridicons/dist/chevron-down';
+import ChevronUpIcon from 'gridicons/dist/chevron-up';
+import ChevronDownIcon from 'gridicons/dist/chevron-down';
 import { Component, Fragment } from '@wordpress/element';
 import { MenuItem } from '@woocommerce/components';
 
@@ -55,7 +55,7 @@ class SectionControls extends Component {
 					{ ! isFirst && (
 						<MenuItem isClickable onInvoke={ this.onMoveUp }>
 							<Icon
-								icon={ arrowUp }
+								icon={ <ChevronUpIcon /> }
 								label={ __( 'Move up' ) }
 								size={ 20 }
 								className="icon-control"
@@ -66,7 +66,7 @@ class SectionControls extends Component {
 					{ ! isLast && (
 						<MenuItem isClickable onInvoke={ this.onMoveDown }>
 							<Icon
-								icon={ arrowDown }
+								icon={ <ChevronDownIcon /> }
 								size={ 20 }
 								label={ __( 'Move Down' ) }
 								className="icon-control"
