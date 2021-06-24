@@ -89,6 +89,7 @@ add_filter( 'woocommerce_admin_export_id', function ($export_id) {
 
 1. Install and activate Jetpack
 2. Confirm Jetpack in not show in Free features list
+
 ### Include onboarding settings on the analytic pages #7109
 
 1. Finish the onboarding wizard as usual.
@@ -135,9 +136,9 @@ add_filter( 'woocommerce_admin_export_id', function ($export_id) {
 ### Business features uncheck creative mail by default #7139
 
 2. Complete the OBW until you get to the business details step.
-2. Continue setup until the Business Detail step.
-3. Open `Free Features` tab and toggle dropdown for `Add recommended business features to my site`.
-4. Observe that the list have `Creative Mail` unchecked by default.
+3. Continue setup until the Business Detail step.
+4. Open `Free Features` tab and toggle dropdown for `Add recommended business features to my site`.
+5. Observe that the list have `Creative Mail` unchecked by default.
 
 ### Fix an issue with OBW when wc-pay and Jetpack are both being installed. #6957
 
@@ -293,12 +294,10 @@ In case the report shows "no data", please reimport historical data by following
 
 -   Create a brand new site.
 -   Install a plugin to log every sent email (you can use [WP mail logging](https://wordpress.org/plugins/wp-mail-logging/)).
--   Install and active [this gist](https://gist.github.com/octaedro/864315edaf9c6a2a6de71d297be1ed88) to create an email note. Just download the file and install it as a plugin.
--   After activating the plugin, press `Add Email Notes` to create a note.
+-   Install and activate [WC Admin Test Helper](https://github.com/woocommerce/woocommerce-admin-test-helper/releases).
+-   Create a [new note type `email`](https://github.com/woocommerce/woocommerce-admin-test-helper/wiki/Admin-notifications#3---email).
 -   Now go to WooCommerce > Settings > Email (`/wp-admin/admin.php?page=wc-settings&tab=email`) and check the checkbox `Enable email insights` and save changes.
--   You will need to run the cron so you can install a plugin like [WP Crontol](https://wordpress.org/plugins/wp-crontrol/)
--   Go to Tools > Cron events (`/wp-admin/tools.php?page=crontrol_admin_manage_page`).
--   Call the hook `wc_admin_daily` by pressing its `Run Now` link. (https://user-images.githubusercontent.com/1314156/111530634-4929ce80-8742-11eb-8b53-de936ceea76e.png)
+-   Now run the [`wc_admin_daily` cron](https://github.com/woocommerce/woocommerce-admin-test-helper/wiki/Tools) manually.
 -   Go to Tools > WP Mail Logging Log (`/wp-admin/tools.php?page=wpml_plugin_log`) and verify the testing email note was sent.
 -   View the message and press `Test action` (a broken image will be visible under the button, but that's expected and only visible in a test environment).
 
@@ -337,8 +336,8 @@ Uruguay
 2. Open `notifications.json.php` from woocommerce.com repository and find a rule that uses the `contains` operator and remove the `default` key. Please make a note of the option name.
 3. Open `src/RemoteInboxNotifications/DataSourcepoller.php` from your WooCommerce Admin repository and change the datasource to your local woocommerce.com (woocommerce.test)
 4. Make sure your local WooCommerce Admin database does not have the option from step #2
-5. Install and activate [WP Crontrol](https://wordpress.org/plugins/wp-crontrol/)
-6. Navigate to Tools -> Cron Events and run `wc_admin_daily` job
+5. Install and activate [WC Admin Test Helper](https://github.com/woocommerce/woocommerce-admin-test-helper/wiki/Admin-notifications).
+6. Now run the [`wc_admin_daily` cron](https://github.com/woocommerce/woocommerce-admin-test-helper/wiki/Tools) manually.
 7. Check your debug log in `wp-content/debug.log`. You should see PHP error.
 
 ### Close activity panel tabs by default and track #6566
@@ -464,7 +463,8 @@ wp.hooks.addFilter( 'woocommerce_admin_profile_wizard_steps', 'woocommerce-admin
 UPDATE `wp_options` SET `option_value`=UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 5 day)) WHERE `option_name` = 'woocommerce_admin_install_timestamp';
 ```
 
--   Run the cron (this tool can help [WP Crontrol](https://wordpress.org/plugins/wp-crontrol/)).
+-   Install and activate [WC Admin Test Helper](https://github.com/woocommerce/woocommerce-admin-test-helper/releases).
+-   Now run the [`wc_admin_daily` cron](https://github.com/woocommerce/woocommerce-admin-test-helper/wiki/Tools) manually.
 -   You should have received an email like the image above.
 -   Verify the note's status is `sent`. You can use an SQL statement like this:
 
@@ -517,10 +517,9 @@ UPDATE `wp_options` SET `option_value`=UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 7
 2. Continue to the Business Details step.
 3. Expand "Add recommended business features to my site" by clicking the down arrow.
 4. Confirm that "WooCommerce Tax" is listed.
-5. Install & activate [WP Crontrol](https://wordpress.org/plugins/wp-crontrol/) plugin
-6. Navigate to Tools -> Cron Events
-7. Run `wc_admin_daily` job
-8. Navigate to WooCommerce -> Home and confirm the Insight note.
+5. Install and activate [WC Admin Test Helper](https://github.com/woocommerce/woocommerce-admin-test-helper/wiki/Admin-notifications).
+6. Run the [`wc_admin_daily` cron](https://github.com/woocommerce/woocommerce-admin-test-helper/wiki/Tools).
+7. Navigate to WooCommerce -> Home and confirm the Insight note.
 
 ### Use wc filter to get status tabs for tools category #6525
 
@@ -649,14 +648,14 @@ Creative Mail
 ### Remove Mollie promo note on install #6510
 
 -   If you do not currently have the Mollie note on your WooCommerce Admin home screen, you can add a test note with the correct name as follows:
-    1. install the WooCommerce Admin Test Helper plugin [here](https://github.com/woocommerce/woocommerce-admin-test-helper)
-    2. Go to the Admin notes tab
+    1. Install the WooCommerce Admin Test Helper plugin [here](https://github.com/woocommerce/woocommerce-admin-test-helper)
+    2. Go to the [Admin notes tab](https://github.com/woocommerce/woocommerce-admin-test-helper/wiki/Admin-notifications)
     3. Add an admin note with the name `wc-admin-effortless-payments-by-mollie`
     4. Go to the WCA home screen and verify that your test note is present
 -   The note is removed on a new version install, so either install an old version of WCA and upgrade to the current one, or trigger the install process manually:
-    1. install the WCA test helper
-    2. go to the Tools tab
-    3. click the `Trigger WCA install` button
+    1. Install the WCA test helper
+    2. Go to the Tools tab
+    3. Click the `Trigger WCA install` button
 
 ### Deprecate Onboarding::has_woocommerce_support #6401
 
@@ -822,13 +821,10 @@ Scenario #2
 UPDATE `wp_options` SET `option_value`=UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 4 day)) WHERE `option_name` = 'woocommerce_admin_install_timestamp';
 ```
 
--   Make sure the `woocommerce_merchant_email_notifications` option is set to `yes`:
+-   Install and activate [WC Admin Test Helper](https://github.com/woocommerce/woocommerce-admin-test-helper/wiki/Admin-notifications).
+-   Make sure the `woocommerce_merchant_email_notifications` option is set to `yes` by [using the update option tool](https://github.com/woocommerce/woocommerce-admin-test-helper/wiki/Update-option).
 
-```
-UPDATE `wp_options` SET `option_value` = 'yes' WHERE `wp_options`.`option_name` = 'woocommerce_merchant_email_notifications';
-```
-
--   Run the `wc_admin_daily ` cron job (this tool can help [WP Crontrol](https://wordpress.org/plugins/wp-crontrol/)).
+-   Run the [`wc_admin_daily` cron](https://github.com/woocommerce/woocommerce-admin-test-helper/wiki/Tools).
 -   You should have received an email like the image above.
 
 ## 2.1.2
@@ -899,22 +895,11 @@ INSERT INTO `wp_wc_admin_notes` (`name`, `type`, `locale`, `title`, `content`, `
 UPDATE `wp_options` SET `option_value`=UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 10 day)) WHERE `option_name` = 'woocommerce_admin_install_timestamp';
 ```
 
--   Confirm that `woocommerce_merchant_email_notifications` was not set before by `core` with a SQL statement like:
+-   Confirm that `woocommerce_merchant_email_notifications` was not set before by `core`.
+-   Install and activate [WC Admin Test Helper](https://github.com/woocommerce/woocommerce-admin-test-helper/wiki/Admin-notifications).
+-   Delete `woocommerce_merchant_email_notifications` if present [using the update option tool](https://github.com/woocommerce/woocommerce-admin-test-helper/wiki/Update-option).
 
-```
-DELETE FROM `wp_options` WHERE `wp_options`.`option_name` = 'woocommerce_merchant_email_notifications';
-```
-
-or with wp-cli:
-
-```
-wp option delete 'woocommerce_merchant_email_notifications';
-```
-
--   Run the cron job `wc_admin_daily` (this tool can help [WP Crontrol](https://wordpress.org/plugins/wp-crontrol/)).
-    -   Go to **Tools > Cron Events** and scroll down to the `wc_admin_daily`.
-    -   Hover over the item and click `Edit` change the **Next Run** to `Now` and click `Update Event`.
-    -   It will redirect you to the cron event list, and `wc_admin_daily` should be near the top, if you wait 10 seconds and refresh the page the `wc_admin_daily` should be near the bottom again, this means it has been run, and scheduled again to run tomorrow.
+-   Run the [`wc_admin_daily` cron](https://github.com/woocommerce/woocommerce-admin-test-helper/wiki/Tools).
 -   You should have not received an email note.
 -   Verify the note `wc-admin-add-first-product-note` was added in the DB and its `status` is `unactioned`. You can use a statement like this:
 
@@ -969,9 +954,9 @@ wp db query 'SELECT status FROM wp_wc_admin_notes WHERE name = "wc-admin-add-fir
 ### Add a new note with a link to the downloadable product doc #6277
 
 1. Make sure your store does not have any download products.
-2. Install WP Crontrol plugin.
+2. Install and activate [WC Admin Test Helper](https://github.com/woocommerce/woocommerce-admin-test-helper/wiki/Admin-notifications).
 3. Add a new download product.
-4. Navigate to Tools -> Cron Events and run `wc_admin_daily`
+4. Run the [`wc_admin_daily` cron](https://github.com/woocommerce/woocommerce-admin-test-helper/wiki/Tools) manually.
 5. Navigate to WooCommerce -> Home and confirm that the note has been added.
 
 ### Onboarding - Fixed "Business Details" error #6271
@@ -1071,7 +1056,8 @@ localStorage.setItem( 'debug', 'wc-admin:tracks' );
     2. revenue is between 0-2500
     3. do not check "setting up for client" in obw
     4. store should have no products
--   Next you need to install WP Crontrol, go to its list of cron events and click "run now" on "wc_admin_daily"
+-   Install and activate [WC Admin Test Helper](https://github.com/woocommerce/woocommerce-admin-test-helper/wiki/Admin-notifications)
+-   Run the [`wc_admin_daily` cron](https://github.com/woocommerce/woocommerce-admin-test-helper/wiki/Tools) manually
 -   Confirm the new note is displayed and that the content matches that specified below:
     -   Title: Getting Started in eCommerce - webinar
     -   Copy: We want to make eCommerce and this process of getting started as easy as possible for you. Watch this webinar to get tips on how to have our store up and running in a breeze.
