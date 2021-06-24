@@ -466,7 +466,8 @@ class BusinessDetails extends Component {
 					if ( this.state.currentTab !== tabName ) {
 						this.setState( {
 							currentTab: tabName,
-							savedValues: initialValues,
+							savedValues:
+								this.state.savedValues || initialValues,
 						} );
 					}
 				} }

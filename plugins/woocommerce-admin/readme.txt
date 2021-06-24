@@ -88,7 +88,8 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Tweak: Revert Card component removal #7167
 - Fix: Currency display on Orders activity card on homescreen #7181
 - Fix: Report export filtering bug. #7165
-- Fix:  Use tab char for the CSV injection prevention. #7154
+- Fix: Use tab char for the CSV injection prevention. #7154
+- Fix: Use saved form values if available when switching tabs #7226
 
 == 2.4.0 6/10/2021 ==
 - Dev: Add Jetpack Backup admin note #6738

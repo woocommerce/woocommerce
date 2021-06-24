@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Use saved values if available when switching tabs #7226
+
+1. Start onboarding wizard and continue to step 4.
+2. Enter selections for business details and choose "Continue"
+3. Select the tab "Business details" to go back
+4. Confirm that the previously selected values are shown. 
+
 ## 2.4.0
 
 ### Add target to the button to open it in a new tab #7110
