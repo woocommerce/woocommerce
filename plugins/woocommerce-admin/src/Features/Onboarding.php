@@ -404,7 +404,7 @@ class Onboarding {
 				'other'                           => array(
 					'label'             => __( 'Other', 'woocommerce-admin' ),
 					'use_description'   => true,
-					'description_label' => 'Description',
+					'description_label' => __( 'Description', 'woocommerce-admin' ),
 				),
 			)
 		);
