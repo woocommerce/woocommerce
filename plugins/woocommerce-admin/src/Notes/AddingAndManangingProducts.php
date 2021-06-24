@@ -35,7 +35,7 @@ class AddingAndManangingProducts {
 	 */
 	public static function get_note() {
 		// Store must have been at least 3 days.
-		if ( ! self::wc_admin_active_for( DAY_IN_SECONDS * 3 ) ) {
+		if ( ! self::is_wc_admin_active_in_date_range( 'week-1', DAY_IN_SECONDS * 3 ) ) {
 			return;
 		}
 

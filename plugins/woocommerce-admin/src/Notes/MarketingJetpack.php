@@ -84,7 +84,7 @@ class MarketingJetpack {
 		}
 
 		// Check requirements.
-		if ( ! self::wc_admin_active_for( WEEK_IN_SECONDS ) || ! self::can_be_added() || self::has_backups() ) {
+		if ( ! self::is_wc_admin_active_in_date_range( 'week-1-4' ) || ! self::can_be_added() || self::has_backups() ) {
 			return;
 		}
 

@@ -30,8 +30,7 @@ class RealTimeOrderAlerts {
 	 */
 	public static function get_note() {
 		// Only add this note if the store is 3 months old.
-		$ninety_days_in_seconds = 90 * DAY_IN_SECONDS;
-		if ( ! self::wc_admin_active_for( $ninety_days_in_seconds ) ) {
+		if ( ! self::is_wc_admin_active_in_date_range( 'month-3-6' ) ) {
 			return;
 		}
 

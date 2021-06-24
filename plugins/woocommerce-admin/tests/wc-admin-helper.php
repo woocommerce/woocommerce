@@ -36,13 +36,61 @@ class WC_Admin_Tests_Admin_Helper extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test wc_admin_active_in_date_range with invalid range
+	 * Test wc_admin_active_in_date_range with invalid range.
 	 */
 	public function test_is_wc_admin_active_in_date_range_with_invalid_range() {
 		$this->expectException( \InvalidArgumentException::class );
 		$this->expectExceptionMessage( '"random-range" range is not supported, use one of: week-1, week-1-4, month-1-3, month-3-6, month-6+' );
 
 		WCAdminHelper::is_wc_admin_active_in_date_range( 'random-range' );
+	}
+
+	/**
+	 * Test wc_admin_active_in_date_range with custom start date.
+	 */
+	public function test_is_wc_admin_active_in_date_range_with_custom_start_date() {
+		update_option( WCAdminHelper::WC_ADMIN_TIMESTAMP_OPTION, time() - DAY_IN_SECONDS );
+		$active_for = WCAdminHelper::is_wc_admin_active_in_date_range( 'week-1', 2 * DAY_IN_SECONDS );
+		$this->assertEquals( $active_for, false );
+
+		update_option( WCAdminHelper::WC_ADMIN_TIMESTAMP_OPTION, time() - ( 4 * DAY_IN_SECONDS ) );
+		$active_for = WCAdminHelper::is_wc_admin_active_in_date_range( 'week-1', 2 * DAY_IN_SECONDS );
+		$this->assertEquals( $active_for, true );
+	}
+
+	/**
+	 * Test wc_admin_active_in_date_range with times right around a date range.
+	 */
+	public function test_is_wc_admin_not_active_around_date_range() {
+		// one minute before 7 days.
+		update_option( WCAdminHelper::WC_ADMIN_TIMESTAMP_OPTION, ( time() - ( 7 * DAY_IN_SECONDS ) ) + MINUTE_IN_SECONDS );
+		$active_for = WCAdminHelper::is_wc_admin_active_in_date_range( 'week-1-4' );
+		$this->assertEquals( $active_for, false );
+
+		// one minute after 28 days.
+		update_option( WCAdminHelper::WC_ADMIN_TIMESTAMP_OPTION, ( time() - ( 28 * DAY_IN_SECONDS ) ) - MINUTE_IN_SECONDS );
+		$active_for = WCAdminHelper::is_wc_admin_active_in_date_range( 'week-1-4' );
+		$this->assertEquals( $active_for, false );
+	}
+
+	/**
+	 * Test wc_admin_active_in_date_range with times within a date range.
+	 */
+	public function test_is_wc_admin_active_within_date_range() {
+		// one minute after 7 days.
+		update_option( WCAdminHelper::WC_ADMIN_TIMESTAMP_OPTION, ( time() - ( 7 * DAY_IN_SECONDS ) ) - MINUTE_IN_SECONDS );
+		$active_for = WCAdminHelper::is_wc_admin_active_in_date_range( 'week-1-4' );
+		$this->assertEquals( $active_for, true );
+
+		// one minute before 28 days.
+		update_option( WCAdminHelper::WC_ADMIN_TIMESTAMP_OPTION, ( time() - ( 28 * DAY_IN_SECONDS ) ) + MINUTE_IN_SECONDS );
+		$active_for = WCAdminHelper::is_wc_admin_active_in_date_range( 'week-1-4' );
+		$this->assertEquals( $active_for, true );
+
+		// 10 days.
+		update_option( WCAdminHelper::WC_ADMIN_TIMESTAMP_OPTION, ( time() - ( 10 * DAY_IN_SECONDS ) ) );
+		$active_for = WCAdminHelper::is_wc_admin_active_in_date_range( 'week-1-4' );
+		$this->assertEquals( $active_for, true );
 	}
 
 	/**

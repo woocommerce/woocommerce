@@ -31,7 +31,7 @@ class MobileApp {
 	public static function get_note() {
 		// We want to show the mobile app note after day 2.
 		$two_days_in_seconds = 2 * DAY_IN_SECONDS;
-		if ( ! self::wc_admin_active_for( $two_days_in_seconds ) ) {
+		if ( ! self::is_wc_admin_active_in_date_range( 'week-1', $two_days_in_seconds ) ) {
 			return;
 		}
 

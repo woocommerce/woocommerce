@@ -40,7 +40,7 @@ class DrawAttention {
 	 */
 	public static function get_note() {
 		// We want to show the note after 3 days.
-		if ( ! self::wc_admin_active_for( 3 * DAY_IN_SECONDS ) ) {
+		if ( ! self::is_wc_admin_active_in_date_range( 'week-1', 3 * DAY_IN_SECONDS ) ) {
 			return;
 		}
 

@@ -32,7 +32,7 @@ class InsightFirstProductAndPayment {
 	 */
 	public static function get_note() {
 		// We want to show the note after 1 day.
-		if ( ! self::wc_admin_active_for( DAY_IN_SECONDS ) ) {
+		if ( ! self::is_wc_admin_active_in_date_range( 'week-1', DAY_IN_SECONDS ) ) {
 			return;
 		}
 

@@ -42,7 +42,7 @@ class TrackingOptIn {
 		}
 
 		// We want to show the note after one week.
-		if ( ! self::wc_admin_active_for( WEEK_IN_SECONDS ) ) {
+		if ( ! self::is_wc_admin_active_in_date_range( 'week-1-4' ) ) {
 			return;
 		}
 

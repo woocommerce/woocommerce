@@ -37,7 +37,7 @@ class WooCommerceSubscriptions {
 			return;
 		}
 
-		if ( ! self::wc_admin_active_for( DAY_IN_SECONDS ) ) {
+		if ( ! self::is_wc_admin_active_in_date_range( 'week-1', DAY_IN_SECONDS ) ) {
 			return;
 		}
 

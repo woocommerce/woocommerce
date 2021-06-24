@@ -41,7 +41,7 @@ class PersonalizeStore {
 		// We want to show the note after day 5.
 		$five_days_in_seconds = 5 * DAY_IN_SECONDS;
 
-		if ( ! self::wc_admin_active_for( $five_days_in_seconds ) && ! $is_task_list_complete ) {
+		if ( ! self::is_wc_admin_active_in_date_range( 'week-1-4', $five_days_in_seconds ) && ! $is_task_list_complete ) {
 			return;
 		}
 

@@ -30,7 +30,7 @@ class FirstProduct {
 	 */
 	public static function get_note() {
 		// We want to show the note after seven days.
-		if ( ! self::wc_admin_active_for( 7 * DAY_IN_SECONDS ) ) {
+		if ( ! self::is_wc_admin_active_in_date_range( 'week-1-4' ) ) {
 			return;
 		}
 

@@ -45,7 +45,7 @@ class WooCommercePayments {
 	 * Maybe add a note on WooCommerce Payments for US based sites older than a week without the plugin installed.
 	 */
 	public static function possibly_add_note() {
-		if ( ! self::wc_admin_active_for( WEEK_IN_SECONDS ) || 'US' !== WC()->countries->get_base_country() ) {
+		if ( ! self::is_wc_admin_active_in_date_range( 'week-1-4' ) || 'US' !== WC()->countries->get_base_country() ) {
 			return;
 		}
 

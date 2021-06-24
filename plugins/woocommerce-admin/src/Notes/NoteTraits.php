@@ -29,10 +29,11 @@ trait NoteTraits {
 	 * Test if WooCommerce Admin has been active within a pre-defined range.
 	 *
 	 * @param string $range range available in WC_ADMIN_STORE_AGE_RANGES.
+	 * @param int    $custom_start custom start in range.
 	 * @return bool Whether or not WooCommerce admin has been active within the range.
 	 */
-	private static function is_wc_admin_active_in_date_range( $range ) {
-		return WCAdminHelper::is_wc_admin_active_in_date_range( $range );
+	private static function is_wc_admin_active_in_date_range( $range, $custom_start = null ) {
+		return WCAdminHelper::is_wc_admin_active_in_date_range( $range, $custom_start );
 	}
 
 	/**

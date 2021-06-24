@@ -31,7 +31,7 @@ class Marketing {
 	 */
 	public static function get_note() {
 		// Don't show the note unless the store has been active at least 5 days.
-		if ( ! self::wc_admin_active_for( 5 * DAY_IN_SECONDS ) ) {
+		if ( ! self::is_wc_admin_active_in_date_range( 'week-1-4', 5 * DAY_IN_SECONDS ) ) {
 			return;
 		}
 

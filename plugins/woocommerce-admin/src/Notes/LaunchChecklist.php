@@ -36,7 +36,7 @@ class LaunchChecklist {
 			! get_option( 'woocommerce_task_list_complete' ) &&
 			(
 				count( $completed_tasks ) < 3 ||
-				self::wc_admin_active_for( $ten_days_in_seconds )
+				self::is_wc_admin_active_in_date_range( 'week-1-4', $ten_days_in_seconds )
 			)
 		) {
 			return;
