@@ -68,10 +68,10 @@ class SectionControls extends Component {
 							<Icon
 								icon={ <ChevronDownIcon /> }
 								size={ 20 }
-								label={ __( 'Move Down' ) }
+								label={ __( 'Move down' ) }
 								className="icon-control"
 							/>
-							{ __( 'Move Down', 'woocommerce-admin' ) }
+							{ __( 'Move down', 'woocommerce-admin' ) }
 						</MenuItem>
 					) }
 					<MenuItem isClickable onInvoke={ onRemove }>
