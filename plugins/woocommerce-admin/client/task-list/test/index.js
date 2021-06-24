@@ -50,14 +50,32 @@ const EXTENDED_TASK_LIST_HEADING = 'Things to do next';
 describe( 'TaskDashboard and TaskList', () => {
 	const updateOptions = jest.fn();
 	const createNotice = jest.fn();
+	const originalClientHeight = Object.getOwnPropertyDescriptor(
+		global.HTMLElement.prototype,
+		'clientHeight'
+	);
+
 	beforeEach( () => {
 		useDispatch.mockImplementation( () => ( {
 			updateOptions,
 			createNotice,
 			installAndActivatePlugins: jest.fn(),
 		} ) );
+		Object.defineProperty( global.HTMLElement.prototype, 'clientHeight', {
+			configurable: true,
+			value: 100,
+		} );
 	} );
-	afterEach( () => jest.clearAllMocks() );
+	afterEach( () => {
+		jest.clearAllMocks();
+		if ( originalClientHeight ) {
+			Object.defineProperty(
+				global.HTMLElement.prototype,
+				'offsetHeight',
+				originalClientHeight
+			);
+		}
+	} );
 	const MockTask = () => {
 		return <div>mock task</div>;
 	};
@@ -695,16 +713,19 @@ describe( 'TaskDashboard and TaskList', () => {
 
 			// Expect the first incomplete task to be expanded
 			expect(
-				await findByText(
-					container,
-					'This is the optional task content'
-				)
-			).toHaveClass( 'woocommerce-task-list__item-content-appear' );
+				(
+					await findByText(
+						container,
+						'This is the optional task content'
+					)
+				 ).parentElement.style.maxHeight
+			).not.toBe( '0' );
 
 			// Expect the second not to be.
 			expect(
-				queryByText( 'This is the required task content' )
-			).not.toHaveClass( 'woocommerce-task-list__item-content-appear' );
+				queryByText( 'This is the required task content' ).parentElement
+					.style.maxHeight
+			).toBe( '0' );
 		} );
 	} );
 

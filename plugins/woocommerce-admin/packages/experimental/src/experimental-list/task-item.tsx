@@ -8,12 +8,12 @@ import NoticeOutline from 'gridicons/dist/notice-outline';
 import { EllipsisMenu } from '@woocommerce/components';
 import classnames from 'classnames';
 import { sanitize } from 'dompurify';
-import { CSSTransition } from 'react-transition-group';
 
 /**
  * Internal dependencies
  */
 import { Text, ListItem } from '../';
+import { VerticalCSSTransition } from '../vertical-css-transition';
 
 const ALLOWED_TAGS = [ 'a', 'b', 'em', 'i', 'strong', 'p', 'br' ];
 const ALLOWED_ATTR = [ 'target', 'href', 'rel', 'name', 'download' ];
@@ -113,11 +113,13 @@ export const TaskItem: React.FC< TaskItemProps > = ( {
 					<span className="woocommerce-task-list__item-title">
 						{ title }
 					</span>
-					<CSSTransition
-						appear
+					<VerticalCSSTransition
 						timeout={ 500 }
 						in={ expanded }
 						classNames="woocommerce-task-list__item-content"
+						defaultStyle={ {
+							transitionProperty: 'max-height, opacity',
+						} }
 					>
 						<div className="woocommerce-task-list__item-content">
 							{ content }
@@ -146,7 +148,7 @@ export const TaskItem: React.FC< TaskItemProps > = ( {
 								</Button>
 							) }
 						</div>
-					</CSSTransition>
+					</VerticalCSSTransition>
 
 					{ ! expandable && ! completed && additionalInfo && (
 						<div

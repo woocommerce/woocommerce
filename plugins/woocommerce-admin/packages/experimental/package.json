@@ -45,6 +45,7 @@
 	"devDependencies": {
 		"@storybook/addon-console": "1.2.3",
 		"@storybook/react": "6.2.9",
-		"@types/dompurify": "2.2.2"
+		"@types/dompurify": "2.2.2",
+		"@types/react-transition-group": "4.4.1"
 	}
 }
