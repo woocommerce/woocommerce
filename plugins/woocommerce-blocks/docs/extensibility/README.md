@@ -14,3 +14,4 @@ These documents are all dealing with extensibility in the various WooCommerce Bl
 [Adding an endpoint to ExtendRestAPI.](./extend-rest-api-new-endpoint.md) | A step by step process for contributors to expose a new endpoint via ExtendRestApi.
 [Slots and Fills.](./slot-fills.md) | Explains Slot Fills and how to use them to render your own components in Cart and Checkout.
 [Available Slot Fills.](./available-slot-fills.md) | Available Slots that you can use and their positions in Cart and Checkout.
+[IntegrationInterface](./integration-interface.md) | The `IntegrationInterface` class and how to use it to register scripts, styles, and data with WooCommerce Blocks.
