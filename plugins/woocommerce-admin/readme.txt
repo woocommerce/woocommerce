@@ -84,6 +84,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix: RemoteFreeExtension hide bundle when all of its plugins are not visible #7182
 - Fix: Fixing button state logic for remote payment gateways #7200
 - Fix: Skip schedule customer data deletion on site deletion #7214
+- Fix: Fix obsolete key property in gateway defaults #7229
 - Fix: Load Analytics API only when feature is turned on #7193
 - Tweak: Revert Card component removal #7167
 - Fix: Currency display on Orders activity card on homescreen #7181
