@@ -108,4 +108,64 @@ class NumberUtilTest extends \WC_Unit_Test_Case {
 		$expected = 1;
 		$this->assertEquals( $expected, $actual );
 	}
+
+	/**
+	 * @testdox `divide` should return 0 if first number passed in is non numeric.
+	 */
+	public function test_divide_non_numeric_first_number() {
+		$first_num  = 'abc';
+		$second_num = 5;
+		$actual     = NumberUtil::divide( $first_num, $second_num );
+		$expected   = 0;
+
+		$this->assertEquals( $expected, $actual );
+	}
+
+	/**
+	 * @testdox `divide` should return 0 if second number passed in is non numeric.
+	 */
+	public function test_divide_non_numeric_second_number() {
+		$first_num  = 5;
+		$second_num = 'abc';
+		$actual     = NumberUtil::divide( $first_num, $second_num );
+		$expected   = 0;
+
+		$this->assertEquals( $expected, $actual );
+	}
+
+	/**
+	 * @testdox `divide` should return 0 if both numbers passed in are non numeric.
+	 */
+	public function test_divide_non_numeric_numbers() {
+		$first_num  = 'xyz';
+		$second_num = 'abc';
+		$actual     = NumberUtil::divide( $first_num, $second_num );
+		$expected   = 0;
+
+		$this->assertEquals( $expected, $actual );
+	}
+
+	/**
+	 * @testdox `divide` should return calculated division value.
+	 */
+	public function test_divide_numeric_numbers() {
+		$first_num  = 10;
+		$second_num = 5;
+		$actual     = NumberUtil::divide( $first_num, $second_num );
+		$expected   = 2;
+
+		$this->assertEquals( $expected, $actual );
+	}
+
+	/**
+	 * @testdox `divide` should return calculated division value.
+	 */
+	public function test_divide_first_number_smaller() {
+		$first_num  = 5;
+		$second_num = 10;
+		$actual     = NumberUtil::divide( $first_num, $second_num );
+		$expected   = 0.5;
+
+		$this->assertEquals( $expected, $actual );
+	}
 }
