@@ -283,7 +283,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Update - Remove original business step flow #7103
 * Update - WooCommerce Shipping copy on onboarding steps #7148
 
-** WooCommerce Blocks Package - 5.2.0 & 5.3.0 & 5.3.1 & & 5.3.2(dev only)**
+** WooCommerce Blocks Package - 5.2.0 & 5.3.0 & 5.3.1 & & 5.3.2(dev only) **
 
 * Enhancement - Hide legacy widgets with a feature-complete block equivalent from the widget area block inserter. #4237
 * Enhancement - Provide block transforms for legacy widgets with a feature-complete block equivalent. #4292
