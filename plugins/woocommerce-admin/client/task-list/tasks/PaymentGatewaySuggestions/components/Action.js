@@ -55,6 +55,7 @@ export const Action = ( {
 		<Button
 			className={ classes }
 			isSecondary
+			role="button"
 			href={ manageUrl }
 			onClick={ () => recordEvent( 'tasklist_payment_manage', { id } ) }
 		>

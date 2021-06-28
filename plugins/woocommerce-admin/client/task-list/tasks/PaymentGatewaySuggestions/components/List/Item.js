@@ -42,6 +42,7 @@ export const Item = ( {
 	const hasFills =
 		Boolean( connectSlot?.fills?.length ) ||
 		Boolean( setupSlot?.fills?.length );
+
 	const hasSetup = Boolean(
 		plugins.length || requiredSettings.length || hasFills
 	);
