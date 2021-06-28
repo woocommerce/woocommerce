@@ -185,7 +185,9 @@ AND table_name = %s;',
 		}
 
 		$action = $this->get_update_action( $changeset );
-		$this->maybe_schedule_update( $product->get_id(), $action );
+		if ( self::ACTION_NONE !== $action ) {
+			$this->maybe_schedule_update( $product->get_id(), $action );
+		}
 	}
 
 	/**
@@ -460,7 +462,7 @@ AND table_name = %s;',
 	 * @param \WC_Product_Variation $variation The variation to create entries for.
 	 */
 	private function create_data_for_variation( \WC_Product_Variation $variation ) {
-		$main_product = wc_get_product( $variation->get_parent_id() );
+		$main_product = WC()->call_function( 'wc_get_product', $variation->get_parent_id() );
 
 		$product_attributes_data   = $this->get_attribute_taxonomies( $main_product );
 		$variation_attributes_data = array_filter(
