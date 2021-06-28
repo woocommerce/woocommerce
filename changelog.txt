@@ -20,6 +20,7 @@
 * Fix - Invoice emails now contain payment link if the order needs payment, not just when the order is "pending". #29833
 * Fix - Introduce meta to track stocks that refunded and restocked to properly handle stock recalculation. #29762
 * Fix - Resolved a console error that could occur when clicking Add Shipping Zone. #30015
+* Fix - Issue with Product Add-ons where multiple choice (images) setting would show false when hovering over image. #30089
 * Dev - Added an if condition block to check for new install before creating Zero and Reduced rate tax classes in class-wc-install.php. #29938
 * Dev - Product attributes lookup table usage when enabled. #29896
 * Dev - Set $woocommerce_loop name propriety to widget "Products". #29847
