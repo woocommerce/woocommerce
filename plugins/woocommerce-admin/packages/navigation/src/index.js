@@ -3,7 +3,7 @@
  */
 import { addQueryArgs } from '@wordpress/url';
 import { parse } from 'qs';
-import { pick, uniq } from 'lodash';
+import { pick } from 'lodash';
 import { applyFilters } from '@wordpress/hooks';
 import { Slot, Fill } from '@wordpress/components';
 
@@ -86,16 +86,18 @@ export const getScreenFromPath = ( path = getPath() ) => {
 /**
  * Get an array of IDs from a comma-separated query parameter.
  *
- * @param {string} queryString string value extracted from URL.
- * @return {Array} List of IDs converted to numbers.
+ * @param {string} [queryString=''] string value extracted from URL.
+ * @return {Array<number>} List of IDs converted to an array of unique integers.
  */
 export function getIdsFromQuery( queryString = '' ) {
-	return uniq(
-		queryString
-			.split( ',' )
-			.map( ( id ) => parseInt( id, 10 ) )
-			.filter( Boolean )
-	);
+	return [
+		...new Set( // Return only unique ids.
+			queryString
+				.split( ',' )
+				.map( ( id ) => parseInt( id, 10 ) )
+				.filter( ( id ) => ! isNaN( id ) )
+		),
+	];
 }
 
 /**

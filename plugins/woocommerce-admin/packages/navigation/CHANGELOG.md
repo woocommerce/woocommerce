@@ -1,3 +1,7 @@
+## Unreleased
+
+- Fix `getIdsFromQuery` support for `0` as a valid id.
+
 # 6.0.1
 
 -   Update dependencies.

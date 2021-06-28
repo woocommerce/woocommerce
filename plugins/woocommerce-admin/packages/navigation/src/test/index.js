@@ -2,6 +2,7 @@
  * Internal dependencies
  */
 import {
+	getIdsFromQuery,
 	getHistory,
 	getPersistedQuery,
 	getSearchWords,
@@ -177,5 +178,44 @@ describe( 'addHistoryListener', () => {
 		removeListener();
 		window.history.replaceState( {}, 'Test replaceState 3' );
 		expect( mockCallback.mock.calls.length ).toBe( 2 );
+	} );
+} );
+
+describe( 'getIdsFromQuery', () => {
+	it( 'if the given query is empty, should return an empty array', () => {
+		expect( getIdsFromQuery( '' ) ).toEqual( [] );
+	} );
+
+	it( 'if the given query is undefined, should return an empty array', () => {
+		expect( getIdsFromQuery( undefined ) ).toEqual( [] );
+	} );
+
+	it( 'if the given query is does not contain any coma-separated numbers, should return an empty array', () => {
+		expect( getIdsFromQuery( 'foo123,bar,baz1.' ) ).toEqual( [] );
+	} );
+
+	describe( 'if the given query contains numbers', () => {
+		it( 'should return an array of them', () => {
+			expect( getIdsFromQuery( '77,8,-1' ) ).toEqual( [ 77, 8, -1 ] );
+		} );
+		it( 'should consider `0` a valid id', () => {
+			expect( getIdsFromQuery( '0' ) ).toEqual( [ 0 ] );
+			expect( getIdsFromQuery( '77,0,1' ) ).toEqual( [ 77, 0, 1 ] );
+		} );
+		it( 'should map floats to integers', () => {
+			expect( getIdsFromQuery( '77,8.54' ) ).toEqual( [ 77, 8 ] );
+		} );
+		it( 'should ignore duplicates', () => {
+			expect( getIdsFromQuery( '77,8,8' ) ).toEqual( [ 77, 8 ] );
+			// Consider two floats that maps to the same integer a duplicate.
+			expect( getIdsFromQuery( '77,8.5,8.4' ) ).toEqual( [ 77, 8 ] );
+		} );
+		it( 'should ignore non numbers entries in the coma-separated list', () => {
+			expect( getIdsFromQuery( '77,,8,foo,null,9' ) ).toEqual( [
+				77,
+				8,
+				9,
+			] );
+		} );
 	} );
 } );

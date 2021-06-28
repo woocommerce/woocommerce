@@ -45,7 +45,7 @@ Gets time related parameters from a query.
 ### getIdsFromQuery(queryString) ⇒ <code>Array</code>
 Get an array of IDs from a comma-separated query parameter.
 
-**Returns**: <code>Array</code> - List of IDs converted to numbers.
+**Returns**: <code>Array</code> - List of IDs converted to an array of unique integers.
 
 | Param | Type | Description |
 | --- | --- | --- |
