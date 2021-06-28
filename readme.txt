@@ -159,7 +159,16 @@ If you encounter issues with the shop/category pages after an update, flush the 
 WooCommerce comes with some sample data you can use to see how products look; import sample_products.xml via the [WordPress importer](https://wordpress.org/plugins/wordpress-importer/). You can also use the core [CSV importer](https://docs.woocommerce.com/document/product-csv-importer-exporter/?utm_source=wp%20org%20repo%20listing&utm_content=3.6) or our [CSV Import Suite extension](https://woocommerce.com/products/product-csv-import-suite/?utm_source=wp%20org%20repo%20listing&utm_content=3.6) to import sample_products.csv
 
 == Changelog ==
-= 5.5.0-rc.1 2021-06-29 =
+
+= 5.5.0-rc.1 2020-06-29 =
+
+* Fix - Issue with Product Add-ons where multiple choice (images) setting would show false when hovering over image. #30096
+
+** WooCommerce Blocks Feature Plugin - 5.3.2(dev only) **
+
+* Fix - Remove the ability to filter snackbar notices. #4398
+
+= 5.5.0-beta.1 2021-06-22 =
 
 **WooCommerce**
 
@@ -309,7 +318,6 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Stopped a warning being shown when using WooCommerce Force Sells and adding a product with a Synced Force Sell to the cart. (4182)
 * Fix - Fix some missing translations from the Cart and Checkout blocks. (4295)
 * Fix - Fix the flickering of the Proceed to Checkout button on quantity update in the Cart Block. (4293)
-* Fix - Remove the ability to filter snackbar notices. #4398
 * Fix - Fix a display issue when itemized taxes are enabled, but no products in the cart are taxable. (4284)
 * Compatibility - Add the ability for extensions to register callbacks to be executed by Blocks when the cart/extensions endpoint is hit. Extensions can now tell Blocks they need to do some server-side processing which will update the cart. (4298)
 * Tweak - Add couponName filter to allow extensions to modify how coupons are displayed in the Cart and Checkout summary. (4166)
