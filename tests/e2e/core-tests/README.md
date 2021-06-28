@@ -73,7 +73,6 @@ The functions to access the core tests are:
   - `runImportProductsTest` - Merchant can import products via CSV file
   - `runInitiateWccomConnectionTest` - Merchant can initiate connection to WooCommerce.com
   - `runPluginWorkflowTest` - Merchant can perform plugin actions such as active, deactivate, and delete
-  - `runUploadPluginTest` - Merchant can upload and activate a plugin
 
 ### Shopper
 

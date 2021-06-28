@@ -56,7 +56,6 @@ const runOrderApiTest = require( './api/order.test' );
 
 // Plugin workflow tests
 const runPluginWorkflowTest = require( './plugins/plugin-workflow.test' );
-const runUploadPluginTest = require( './plugins/upload-plugin.test' );
 
 const runSetupOnboardingTests = () => {
 	runActivationTest();
@@ -116,7 +115,6 @@ const runApiTests = () => {
 
 const runPluginWorkflowTests = () => {
 	runPluginWorkflowTest();
-	runUploadPluginTest();
 }
 
 module.exports = {
@@ -170,6 +168,5 @@ module.exports = {
 	runOrderEmailReceivingTest,
 	runInitiateWccomConnectionTest,
 	runPluginWorkflowTest,
-	runUploadPluginTest,
 	runPluginWorkflowTests,
 };
