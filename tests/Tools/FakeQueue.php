@@ -31,7 +31,7 @@ class FakeQueue implements \WC_Queue_Interface {
 	 *
 	 * @var array
 	 */
-	public $methods_called = array();
+	private $methods_called = array();
 
 	// phpcs:disable Squiz.Commenting.FunctionComment.Missing
 
@@ -100,4 +100,21 @@ class FakeQueue implements \WC_Queue_Interface {
 
 		$this->methods_called[] = array_merge( $value, $extra_args );
 	}
+
+	/**
+	 * Get the data about the methods called so far.
+	 *
+	 * @return array The current value of $methods_called.
+	 */
+	public function get_methods_called() {
+		return $this->methods_called;
+	}
+
+	/**
+	 * Clears the collection of the methods called so far.
+	 */
+	public function clear_methods_called() {
+		$this->methods_called = array();
+	}
+
 }

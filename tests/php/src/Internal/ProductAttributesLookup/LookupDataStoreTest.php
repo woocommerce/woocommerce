@@ -49,8 +49,8 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 		);
 		$this->get_instance_of( DataRegenerator::class )->initiate_regeneration();
 
-		$queue                 = WC()->get_instance_of( \WC_Queue::class );
-		$queue->methods_called = array();
+		$queue = WC()->get_instance_of( \WC_Queue::class );
+		$queue->clear_methods_called();
 
 		$this->reset_legacy_proxy_mocks();
 	}
@@ -75,7 +75,7 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 	 *
 	 * @param bool $in_stock 'true' if the product is supposed to be in stock.
 	 */
-	public function test_update_data_for_simple_product( $in_stock ) {
+	public function test_create_data_for_simple_product( $in_stock ) {
 		$product = new \WC_Product_Simple();
 		$product->set_id( 10 );
 		$this->set_product_attributes(
@@ -387,7 +387,7 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 
 		$this->delete_product( $product, $deletion_mechanism );
 
-		$queue_calls = WC()->get_instance_of( \WC_Queue::class )->methods_called;
+		$queue_calls = WC()->get_instance_of( \WC_Queue::class )->get_methods_called();
 
 		$this->assertEquals( 1, count( $queue_calls ) );
 
@@ -483,7 +483,7 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 
 		$this->delete_product( $product, $deletion_mechanism );
 
-		$queue_calls = WC()->get_instance_of( \WC_Queue::class )->methods_called;
+		$queue_calls = WC()->get_instance_of( \WC_Queue::class )->get_methods_called();
 
 		$this->assertEquals( 1, count( $queue_calls ) );
 
@@ -552,7 +552,7 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 
 		$this->delete_product( $product, $deletion_mechanism );
 
-		$queue_calls = WC()->get_instance_of( \WC_Queue::class )->methods_called;
+		$queue_calls = WC()->get_instance_of( \WC_Queue::class )->get_methods_called();
 
 		$this->assertEquals( 1, count( $queue_calls ) );
 
@@ -589,7 +589,7 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 		$this->sut->on_product_deleted( 1 );
 		$this->sut->on_product_deleted( 2 );
 
-		$queue_calls = WC()->get_instance_of( \WC_Queue::class )->methods_called;
+		$queue_calls = WC()->get_instance_of( \WC_Queue::class )->get_methods_called();
 
 		$this->assertEquals( 2, count( $queue_calls ) );
 
@@ -666,6 +666,425 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 		$rows = $wpdb->get_results( 'SELECT DISTINCT product_id FROM ' . $this->lookup_table_name, ARRAY_N );
 
 		$this->assertEquals( array( 3 ), $rows[0] );
+	}
+
+	/**
+	 * @testdox Changing the stock status of a simple product schedules update of lookup table entries when the "direct updates" option is off.
+	 *
+	 * @testWith ["instock", "outofstock"]
+	 *           ["outofstock", "instock"]
+	 *
+	 * @param string $old_status Original status of the product.
+	 * @param string $new_status New status of the product.
+	 */
+	public function test_changing_simple_product_stock_schedules_update( string $old_status, string $new_status ) {
+		$this->set_direct_update_option( false );
+
+		$product    = new \WC_Product_Simple();
+		$product_id = 10;
+		$product->set_id( $product_id );
+		$product->set_stock_status( $old_status );
+		$this->save( $product );
+
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'time' => function() {
+					return 100;
+				},
+			)
+		);
+
+		$product->set_stock_status( $new_status );
+		$product->save();
+
+		$queue_calls = WC()->get_instance_of( \WC_Queue::class )->get_methods_called();
+
+		$this->assertEquals( 1, count( $queue_calls ) );
+
+		$expected = array(
+			'method'    => 'schedule_single',
+			'args'      =>
+				array(
+					$product_id,
+					LookupDataStore::ACTION_UPDATE_STOCK,
+				),
+			'group'     => 'woocommerce-db-updates',
+			'timestamp' => 101,
+			'hook'      => 'woocommerce_run_product_attribute_lookup_update_callback',
+		);
+		$this->assertEquals( $expected, $queue_calls[0] );
+	}
+
+	/**
+	 * @testdox Changing the stock status of a variable product or a variation schedules update of lookup table entries when the "direct updates" option is off.
+	 *
+	 * @testWith ["instock", "outofstock", true]
+	 *           ["outofstock", "instock", true]
+	 *           ["instock", "outofstock", false]
+	 *           ["outofstock", "instock", false]
+	 *
+	 * @param string $old_status Original status of the product.
+	 * @param string $new_status New status of the product.
+	 * @param bool   $change_variation_stock True if the stock of the variation changes.
+	 */
+	public function test_changing_variable_product_or_variation_stock_schedules_update( string $old_status, string $new_status, bool $change_variation_stock ) {
+		$this->set_direct_update_option( false );
+
+		$product    = new \WC_Product_Variable();
+		$product_id = 1000;
+		$product->set_id( $product_id );
+
+		$variation    = new \WC_Product_Variation();
+		$variation_id = 1001;
+		$variation->set_id( $variation_id );
+		$variation->set_stock_status( $old_status );
+		$variation->save();
+
+		$product->set_children( array( 1001 ) );
+		$product->set_stock_status( $old_status );
+		$this->save( $product );
+
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'time' => function () {
+					return 100;
+				},
+			)
+		);
+
+		if ( $change_variation_stock ) {
+			$variation->set_stock_status( $new_status );
+			$variation->save();
+		} else {
+			$product->set_stock_status( $new_status );
+			$product->save();
+		}
+
+		$queue_calls = WC()->get_instance_of( \WC_Queue::class )->get_methods_called();
+
+		$this->assertEquals( 1, count( $queue_calls ) );
+
+		$expected = array(
+			'method'    => 'schedule_single',
+			'args'      =>
+				array(
+					$change_variation_stock ? $variation_id : $product_id,
+					LookupDataStore::ACTION_UPDATE_STOCK,
+				),
+			'group'     => 'woocommerce-db-updates',
+			'timestamp' => 101,
+			'hook'      => 'woocommerce_run_product_attribute_lookup_update_callback',
+		);
+
+		$this->assertEquals( $expected, $queue_calls[0] );
+	}
+
+	/**
+	 * Data provider for on_product_changed tests with direct update option set.
+	 *
+	 * @return array[]
+	 */
+	public function data_provider_for_test_on_product_changed_with_direct_updates() {
+		return array(
+			array(
+				null,
+				'creation',
+			),
+			array(
+				array( 'attributes' => array() ),
+				'creation',
+			),
+			array(
+				array( 'stock_quantity' => 1 ),
+				'update',
+			),
+			array(
+				array( 'stock_status' => 'instock' ),
+				'update',
+			),
+			array(
+				array( 'manage_stock' => true ),
+				'update',
+			),
+			array(
+				array( 'catalog_visibility' => 'visible' ),
+				'creation',
+			),
+			array(
+				array( 'catalog_visibility' => 'catalog' ),
+				'creation',
+			),
+			array(
+				array( 'catalog_visibility' => 'search' ),
+				'deletion',
+			),
+			array(
+				array( 'catalog_visibility' => 'hidden' ),
+				'deletion',
+			),
+			array(
+				array( 'foo' => 'bar' ),
+				'none',
+			),
+		);
+	}
+
+	/**
+	 * @testdox 'on_product_changed' creates, updates deletes the data for a simple product depending on the changeset when the "direct updates" option is on.
+	 *
+	 * @dataProvider data_provider_for_test_on_product_changed_with_direct_updates
+	 *
+	 * @param array  $changeset The changeset to test.
+	 * @param string $expected_action The expected performed action, one of 'none', 'creation', 'update' or 'deletion'.
+	 */
+	public function test_on_product_changed_for_simple_product_with_direct_updates( $changeset, $expected_action ) {
+		global $wpdb;
+
+		$this->set_direct_update_option( true );
+
+		$product = new \WC_Product_Simple();
+		$product->set_id( 2 );
+		$product->set_stock_status( 'instock' );
+		$this->set_product_attributes(
+			$product,
+			array(
+				'pa_bar' => array(
+					'id'      => 100,
+					'options' => array( 20 ),
+				),
+			)
+		);
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'wc_get_product' => function( $id ) use ( $product ) {
+					if ( $id === $product->get_id() || $id === $product ) {
+						return $product;
+					} else {
+						return wc_get_product( $id );
+					}
+				},
+			)
+		);
+
+		$this->insert_lookup_table_data( 1, 1, 'pa_foo', 10, false, true );
+		if ( 'creation' !== $expected_action ) {
+			$this->insert_lookup_table_data( 2, 2, 'pa_bar', 20, false, false );
+		}
+
+		$this->sut->on_product_changed( $product, $changeset );
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$rows = $wpdb->get_results( 'SELECT * FROM ' . $this->lookup_table_name, ARRAY_N );
+
+		$expected = array( array( '1', '1', 'pa_foo', '10', '0', '1' ) );
+
+		// Differences:
+		// Creation or update: the product is stored as having stock.
+		// None: the product remains stored as not having stock.
+		if ( 'creation' === $expected_action || 'update' === $expected_action ) {
+			$expected[] = array( '2', '2', 'pa_bar', '20', '0', '1' );
+		} elseif ( 'none' === $expected_action ) {
+			$expected[] = array( '2', '2', 'pa_bar', '20', '0', '0' );
+		}
+
+		$this->assertEquals( $expected, $rows );
+	}
+
+	/**
+	 * @testdox 'on_product_changed' creates, updates deletes the data for a variable product and if needed its variations depending on the changeset when the "direct updates" option is on.
+	 *
+	 * @dataProvider data_provider_for_test_on_product_changed_with_direct_updates
+	 *
+	 * @param array  $changeset The changeset to test.
+	 * @param string $expected_action The expected performed action, one of 'none', 'creation', 'update' or 'deletion'.
+	 */
+	public function test_on_variable_product_changed_for_variable_product_with_direct_updates( $changeset, $expected_action ) {
+		global $wpdb;
+
+		$this->set_direct_update_option( true );
+
+		$product = new \WC_Product_Variable();
+		$product->set_id( 2 );
+		$this->set_product_attributes(
+			$product,
+			array(
+				'non-variation-attribute' => array(
+					'id'      => 100,
+					'options' => array( 10 ),
+				),
+				'variation-attribute'     => array(
+					'id'        => 200,
+					'options'   => array( 20 ),
+					'variation' => true,
+				),
+			)
+		);
+		$product->set_stock_status( 'instock' );
+
+		$variation = new \WC_Product_Variation();
+		$variation->set_id( 3 );
+		$variation->set_attributes(
+			array(
+				'variation-attribute' => 'term_20',
+			)
+		);
+		$variation->set_stock_status( 'instock' );
+		$variation->set_parent_id( 2 );
+
+		$product->set_children( array( 3 ) );
+
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'get_terms'      => function( $args ) {
+					switch ( $args['taxonomy'] ) {
+						case 'non-variation-attribute':
+							return array(
+								10 => 'term_10',
+							);
+						case 'variation-attribute':
+							return array(
+								20 => 'term_20',
+							);
+						default:
+							throw new \Exception( "Unexpected call to 'get_terms'" );
+					}
+				},
+				'wc_get_product' => function( $id ) use ( $product, $variation ) {
+					if ( $id === $product->get_id() || $id === $product ) {
+						return $product;
+					} elseif ( $id === $variation->get_id() || $id === $variation ) {
+						return $variation;
+					} else {
+						return wc_get_product( $id );
+					}
+				},
+			)
+		);
+
+		$this->insert_lookup_table_data( 1, 1, 'pa_foo', 10, false, true );
+		if ( 'creation' !== $expected_action ) {
+			$this->insert_lookup_table_data( 2, 2, 'non-variation-attribute', 10, false, false );
+			$this->insert_lookup_table_data( 3, 2, 'variation-attribute', 20, true, false );
+		}
+
+		$this->sut->on_product_changed( $product, $changeset );
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$rows = $wpdb->get_results( 'SELECT * FROM ' . $this->lookup_table_name, ARRAY_N );
+
+		$expected = array( array( '1', '1', 'pa_foo', '10', '0', '1' ) );
+
+		// Differences:
+		// Creation: both main product and variation are stored as having stock.
+		// Update: main product only is updated as having stock (variation is supposed to get a separate update).
+		// None: both main product and variation are still stored as not having stock.
+		if ( 'creation' === $expected_action ) {
+			$expected[] = array( '2', '2', 'non-variation-attribute', '10', '0', '1' );
+			$expected[] = array( '3', '2', 'variation-attribute', '20', '1', '1' );
+		} elseif ( 'update' === $expected_action ) {
+			$expected[] = array( '2', '2', 'non-variation-attribute', '10', '0', '1' );
+			$expected[] = array( '3', '2', 'variation-attribute', '20', '1', '0' );
+		} elseif ( 'none' === $expected_action ) {
+			$expected[] = array( '2', '2', 'non-variation-attribute', '10', '0', '0' );
+			$expected[] = array( '3', '2', 'variation-attribute', '20', '1', '0' );
+		}
+
+		$this->assertEquals( $expected, $rows );
+	}
+
+	/**
+	 * @testdox 'on_product_changed' creates, updates deletes the data for a variation depending on the changeset when the "direct updates" option is on.
+	 *
+	 * @dataProvider data_provider_for_test_on_product_changed_with_direct_updates
+	 *
+	 * @param array  $changeset The changeset to test.
+	 * @param string $expected_action The expected performed action, one of 'none', 'creation', 'update' or 'deletion'.
+	 */
+	public function test_on_variation_changed_for_variable_product_with_direct_updates( $changeset, $expected_action ) {
+		global $wpdb;
+
+		$this->set_direct_update_option( true );
+
+		$product = new \WC_Product_Variable();
+		$product->set_id( 2 );
+		$this->set_product_attributes(
+			$product,
+			array(
+				'non-variation-attribute' => array(
+					'id'      => 100,
+					'options' => array( 10 ),
+				),
+				'variation-attribute'     => array(
+					'id'        => 200,
+					'options'   => array( 20 ),
+					'variation' => true,
+				),
+			)
+		);
+		$product->set_stock_status( 'instock' );
+
+		$variation = new \WC_Product_Variation();
+		$variation->set_id( 3 );
+		$variation->set_attributes(
+			array(
+				'variation-attribute' => 'term_20',
+			)
+		);
+		$variation->set_stock_status( 'instock' );
+		$variation->set_parent_id( 2 );
+
+		$product->set_children( array( 3 ) );
+
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'get_terms'      => function( $args ) {
+					switch ( $args['taxonomy'] ) {
+						case 'non-variation-attribute':
+							return array(
+								10 => 'term_10',
+							);
+						case 'variation-attribute':
+							return array(
+								20 => 'term_20',
+							);
+						default:
+							throw new \Exception( "Unexpected call to 'get_terms'" );
+					}
+				},
+				'wc_get_product' => function( $id ) use ( $product, $variation ) {
+					if ( $id === $product->get_id() || $id === $product ) {
+						return $product;
+					} elseif ( $id === $variation->get_id() || $id === $variation ) {
+						return $variation;
+					} else {
+						return wc_get_product( $id );
+					}
+				},
+			)
+		);
+
+		$this->insert_lookup_table_data( 1, 1, 'pa_foo', 10, false, true );
+		if ( 'creation' !== $expected_action ) {
+			$this->insert_lookup_table_data( 3, 2, 'variation-attribute', 20, true, false );
+		}
+
+		$this->sut->on_product_changed( $variation, $changeset );
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$rows = $wpdb->get_results( 'SELECT * FROM ' . $this->lookup_table_name, ARRAY_N );
+
+		$expected = array( array( '1', '1', 'pa_foo', '10', '0', '1' ) );
+
+		// Differences:
+		// Creation or update: the variation is stored as having stock.
+		// None: the variation is still stored as not having stock.
+		if ( 'creation' === $expected_action || 'update' === $expected_action ) {
+			$expected[] = array( '3', '2', 'variation-attribute', '20', '1', '1' );
+		} elseif ( 'none' === $expected_action ) {
+			$expected[] = array( '3', '2', 'variation-attribute', '20', '1', '0' );
+		}
+
+		$this->assertEquals( $expected, $rows );
 	}
 
 	/**
@@ -747,8 +1166,8 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 		);
 		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 
-		$queue                 = WC()->get_instance_of( \WC_Queue::class );
-		$queue->methods_called = array();
+		$queue = WC()->get_instance_of( \WC_Queue::class );
+		$queue->clear_methods_called();
 	}
 
 	/**
