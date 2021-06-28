@@ -88,7 +88,7 @@ jQuery( function( $ ) {
 							tolerance   : 'pointer',
 							stop: function() {
 								$( $list.find( '.select2-selection__choice' ).get().reverse() ).each( function() {
-									var id     = $( self ).data( 'data' ).id;
+									var id     = $( this ).data( 'data' ).id;
 									var option = $select.find( 'option[value="' + id + '"]' )[0];
 									$select.prepend( option );
 								} );
