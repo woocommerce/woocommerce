@@ -138,7 +138,7 @@
 * Fix - Make links in the Product Categories List block unclickable in the editor #4339.
 * Fix - Fix rating stars not being shown in the Site Editor #4345.
 
-** WooCommerce Blocks Feature Plugin - 5.2.0 & 5.3.0 & 5.3.1 **
+** WooCommerce Blocks Feature Plugin - 5.2.0 & 5.3.0 & 5.3.1 & 5.3.2(dev only) **
 
 * Enhancement - Added a key prop to each CartTotalItem within usePaymentMethodInterface. (4240)
 * Enhancement - Sync customer data during checkout with draft orders. (4197)

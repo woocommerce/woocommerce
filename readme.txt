@@ -283,7 +283,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Update - Remove original business step flow #7103
 * Update - WooCommerce Shipping copy on onboarding steps #7148
 
-** WooCommerce Blocks Package - 5.2.0 & 5.3.0 & 5.3.1 **
+** WooCommerce Blocks Package - 5.2.0 & 5.3.0 & 5.3.1 & & 5.3.2(dev only)**
 
 * Enhancement - Hide legacy widgets with a feature-complete block equivalent from the widget area block inserter. #4237
 * Enhancement - Provide block transforms for legacy widgets with a feature-complete block equivalent. #4292
@@ -296,7 +296,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Make links in the Product Categories List block unclickable in the editor #4339.
 * Fix - Fix rating stars not being shown in the Site Editor #4345.
 
-** WooCommerce Blocks Feature Plugin - 5.2.0 & 5.3.0 & 5.3.1 **
+** WooCommerce Blocks Feature Plugin - 5.2.0 & 5.3.0 & 5.3.1 & 5.3.2(dev only) **
 
 * Enhancement - Added a key prop to each CartTotalItem within usePaymentMethodInterface. (4240)
 * Enhancement - Sync customer data during checkout with draft orders. (4197)
@@ -309,10 +309,10 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Stopped a warning being shown when using WooCommerce Force Sells and adding a product with a Synced Force Sell to the cart. (4182)
 * Fix - Fix some missing translations from the Cart and Checkout blocks. (4295)
 * Fix - Fix the flickering of the Proceed to Checkout button on quantity update in the Cart Block. (4293)
+* Fix - Remove the ability to filter snackbar notices. #4398
 * Fix - Fix a display issue when itemized taxes are enabled, but no products in the cart are taxable. (4284)
 * Compatibility - Add the ability for extensions to register callbacks to be executed by Blocks when the cart/extensions endpoint is hit. Extensions can now tell Blocks they need to do some server-side processing which will update the cart. (4298)
 * Tweak - Add couponName filter to allow extensions to modify how coupons are displayed in the Cart and Checkout summary. (4166)
-* Tweak - Move Button and Label components to @woocommerce/blocks-checkout package. (4222)
 * Tweak - Add Slot in the Discounts section of the cart sidebar to allow third party extensions to render their own components there. (4248)
 
 ** ActionScheduler 3.2.0 **
