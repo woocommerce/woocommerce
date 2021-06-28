@@ -27,8 +27,15 @@ class ActivityHeader extends Component {
 		return (
 			<div className={ cardClassName }>
 				<div className="woocommerce-layout__inbox-title">
-					<Text variant="title.small">{ title }</Text>
-					<Text variant="button">
+					<Text variant="title.small" size="20" lineHeight="28px">
+						{ title }
+					</Text>
+					<Text
+						variant="button"
+						weight="600"
+						size="14"
+						lineHeight="20px"
+					>
 						{ countUnread > 0 && (
 							<span className="woocommerce-layout__inbox-badge">
 								{ unreadMessages }
@@ -38,7 +45,9 @@ class ActivityHeader extends Component {
 				</div>
 				<div className="woocommerce-layout__inbox-subtitle">
 					{ subtitle && (
-						<Text variant="body.small">{ subtitle }</Text>
+						<Text variant="body.small" size="14" lineHeight="20px">
+							{ subtitle }
+						</Text>
 					) }
 				</div>
 				{ menu && (

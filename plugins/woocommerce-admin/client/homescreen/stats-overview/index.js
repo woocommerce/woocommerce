@@ -71,7 +71,7 @@ export const StatsOverview = () => {
 	);
 
 	const HeaderText = (
-		<Text variant="title.small">
+		<Text variant="title.small" size="20" lineHeight="28px">
 			{ __( 'Stats overview', 'woocommerce-admin' ) }
 		</Text>
 	);

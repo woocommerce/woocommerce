@@ -167,7 +167,12 @@ class TableCard extends Component {
 		return (
 			<Card className={ classes }>
 				<CardHeader>
-					<Text variant="title.small" as="h2">
+					<Text
+						variant="title.small"
+						as="h2"
+						size="20"
+						lineHeight="28px"
+					>
 						{ title }
 					</Text>
 					<div className="woocommerce-table__actions">

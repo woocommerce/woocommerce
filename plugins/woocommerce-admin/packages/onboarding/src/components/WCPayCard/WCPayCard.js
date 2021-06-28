@@ -32,7 +32,11 @@ export const WCPayCardBody = ( {
 	<CardBody>
 		{ heading && <Text as="h2">{ heading }</Text> }
 
-		<Text className="woocommerce-task-payment-wcpay__description">
+		<Text
+			className="woocommerce-task-payment-wcpay__description"
+			as="p"
+			lineHeight="1.5em"
+		>
 			{ description }
 			<br />
 			<Link

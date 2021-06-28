@@ -10,6 +10,7 @@ exports[`ProductTypes should render product types 1`] = `
     >
       <h2
         class="css-1ahfdc3-Text e15wbhsk0"
+        size="20"
       >
         What type of products will be listed?
       </h2>
@@ -72,6 +73,7 @@ exports[`ProductTypes should render product types 1`] = `
               
               <span
                 class="woocommerce-pill css-1qmnemh-Text e15wbhsk0"
+                size="12"
               >
                 <span
                   class="screen-reader-text"
@@ -156,6 +158,7 @@ you can purchase and install it later.
       </div>
       <p
         class="css-1qmnemh-Text e15wbhsk0"
+        size="12"
       >
         Billing is annual. All purchases are covered by our 30 day money back guarantee and include access to support and updates. Extensions will be added to a cart for you to purchase later.
       </p>
@@ -174,6 +177,7 @@ exports[`ProductTypes should show annual prices on toggle 1`] = `
     >
       <h2
         class="css-1ahfdc3-Text e15wbhsk0"
+        size="20"
       >
         What type of products will be listed?
       </h2>
@@ -236,6 +240,7 @@ exports[`ProductTypes should show annual prices on toggle 1`] = `
               
               <span
                 class="woocommerce-pill css-1qmnemh-Text e15wbhsk0"
+                size="12"
               >
                 <span
                   class="screen-reader-text"
@@ -320,6 +325,7 @@ you can purchase and install it later.
       </div>
       <p
         class="css-1qmnemh-Text e15wbhsk0"
+        size="12"
       >
         Billing is annual. All purchases are covered by our 30 day money back guarantee and include access to support and updates. Extensions will be added to a cart for you to purchase later.
       </p>

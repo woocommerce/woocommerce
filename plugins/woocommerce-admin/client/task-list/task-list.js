@@ -331,7 +331,13 @@ export const TaskList = ( {
 				>
 					<CardHeader size="medium">
 						<div className="wooocommerce-task-card__header">
-							<Text variant="title.small">{ listTitle }</Text>
+							<Text
+								size="20"
+								lineHeight="28px"
+								variant="title.small"
+							>
+								{ listTitle }
+							</Text>
 							<Badge count={ incompleteTasks.length } />
 						</div>
 						{ renderMenu() }

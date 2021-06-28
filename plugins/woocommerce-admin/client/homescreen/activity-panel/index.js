@@ -92,7 +92,12 @@ export const ActivityPanel = () => {
 				return collapsible ? (
 					<PanelBody
 						title={ [
-							<Text key={ title } variant="title.small">
+							<Text
+								key={ title }
+								variant="title.small"
+								size="20"
+								lineHeight="28px"
+							>
 								{ title }
 							</Text>,
 							count !== null && (
@@ -127,7 +132,13 @@ export const ActivityPanel = () => {
 								aria-expanded={ false }
 								disabled={ true }
 							>
-								<Text variant="title.small">{ title }</Text>
+								<Text
+									variant="title.small"
+									size="20"
+									lineHeight="28px"
+								>
+									{ title }
+								</Text>
 								{ count !== null && <Badge count={ count } /> }
 							</Button>
 						</h2>

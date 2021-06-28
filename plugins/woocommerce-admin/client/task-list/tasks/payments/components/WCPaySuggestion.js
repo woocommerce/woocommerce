@@ -69,7 +69,7 @@ export const WCPaySuggestion = ( {
 
 			<WCPayCardFooter>
 				<>
-					<Text>
+					<Text lineHeight="1.5em">
 						<TosPrompt />
 					</Text>
 					<PaymentAction

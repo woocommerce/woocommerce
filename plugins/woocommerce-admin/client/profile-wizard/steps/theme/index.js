@@ -358,10 +358,15 @@ class Theme extends Component {
 		return (
 			<Fragment>
 				<div className="woocommerce-profile-wizard__step-header">
-					<Text variant="title.small" as="h2">
+					<Text
+						variant="title.small"
+						as="h2"
+						size="20"
+						lineHeight="28px"
+					>
 						{ __( 'Choose a theme', 'woocommerce-admin' ) }
 					</Text>
-					<Text variant="body">
+					<Text variant="body" as="p">
 						{ __(
 							"Choose how your store appears to customers. And don't worry, you can always switch themes and edit them later.",
 							'woocommerce-admin'

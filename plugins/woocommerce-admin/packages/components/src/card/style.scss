@@ -39,9 +39,11 @@
 	}
 }
 
+.woocommerce-card__menu.woocommerce-card__header-item, // Override wp.components
 .woocommerce-card__header-item {
 	@include set-grid-item-position( 3, 3 );
 	-ms-grid-row-align: center;
+	margin-left: initial;
 }
 
 .woocommerce-card__action,

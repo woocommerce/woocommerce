@@ -352,7 +352,13 @@ function getListItems( props ) {
 
 	return validatedItems.map( ( item ) => ( {
 		title: (
-			<Text as="div" variant="button">
+			<Text
+				as="div"
+				variant="button"
+				weight="600"
+				size="14"
+				lineHeight="20px"
+			>
 				{ item.title }
 			</Text>
 		),

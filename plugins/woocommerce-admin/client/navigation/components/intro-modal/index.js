@@ -76,10 +76,22 @@ export const IntroModal = () => {
 			content: (
 				<div className="woocommerce-navigation-intro-modal__page-wrapper">
 					<div className="woocommerce-navigation-intro-modal__page-text">
-						<Text variant="title.large" as="h2">
+						<Text
+							variant="title.large"
+							as="h2"
+							size="32"
+							lineHeight="40px"
+						>
 							{ title }
 						</Text>
-						<Text variant="body.large">{ description }</Text>
+						<Text
+							as="p"
+							variant="body.large"
+							size="16"
+							lineHeight="24px"
+						>
+							{ description }
+						</Text>
 					</div>
 					<div className="woocommerce-navigation-intro-modal__image-wrapper">
 						<img alt={ title } src={ imageUrl } />

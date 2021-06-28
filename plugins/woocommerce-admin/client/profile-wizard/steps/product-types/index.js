@@ -109,13 +109,18 @@ export class ProductTypes extends Component {
 		return (
 			<div className="woocommerce-profile-wizard__product-types">
 				<div className="woocommerce-profile-wizard__step-header">
-					<Text variant="title.small" as="h2">
+					<Text
+						variant="title.small"
+						as="h2"
+						size="20"
+						lineHeight="28px"
+					>
 						{ __(
 							'What type of products will be listed?',
 							'woocommerce-admin'
 						) }
 					</Text>
-					<Text variant="body">
+					<Text variant="body" as="p">
 						{ __( 'Choose any that apply', 'woocommerce-admin' ) }
 					</Text>
 				</div>
@@ -173,7 +178,7 @@ export class ProductTypes extends Component {
 				<div className="woocommerce-profile-wizard__card-help-footnote">
 					<div className="woocommerce-profile-wizard__product-types-pricing-toggle woocommerce-profile-wizard__checkbox">
 						<label htmlFor="woocommerce-product-types__pricing-toggle">
-							<Text variant="body">
+							<Text variant="body" as="p">
 								{ __(
 									'Display monthly prices',
 									'woocommerce-admin'
@@ -190,7 +195,7 @@ export class ProductTypes extends Component {
 							/>
 						</label>
 					</div>
-					<Text variant="caption">
+					<Text variant="caption" size="12" lineHeight="16px">
 						{ __(
 							'Billing is annual. All purchases are covered by our 30 day money back guarantee and include access to support and updates. Extensions will be added to a cart for you to purchase later.',
 							'woocommerce-admin'

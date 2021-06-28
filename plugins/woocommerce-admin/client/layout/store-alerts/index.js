@@ -208,7 +208,12 @@ export class StoreAlerts extends Component {
 		return (
 			<Card className={ className } size={ null }>
 				<CardHeader isBorderless>
-					<Text variant="title.medium" as="h2">
+					<Text
+						variant="title.medium"
+						as="h2"
+						size="24"
+						lineHeight="32px"
+					>
 						{ alert.title }
 					</Text>
 					{ numberOfAlerts > 1 && (

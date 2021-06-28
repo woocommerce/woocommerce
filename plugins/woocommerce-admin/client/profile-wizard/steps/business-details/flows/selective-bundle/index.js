@@ -278,13 +278,18 @@ class BusinessDetails extends Component {
 					return (
 						<>
 							<div className="woocommerce-profile-wizard__step-header">
-								<Text variant="title.small" as="h2">
+								<Text
+									variant="title.small"
+									as="h2"
+									size="20"
+									lineHeight="28px"
+								>
 									{ __(
 										'Tell us about your business',
 										'woocommerce-admin'
 									) }
 								</Text>
-								<Text variant="body">
+								<Text variant="body" as="p">
 									{ __(
 										"We'd love to know if you are just getting started or you already have a business in place.",
 										'woocommerce-admin'
@@ -420,19 +425,24 @@ class BusinessDetails extends Component {
 		return (
 			<>
 				<div className="woocommerce-profile-wizard__step-header">
-					<Text variant="title.small" as="h2">
+					<Text
+						variant="title.small"
+						as="h2"
+						size="20"
+						lineHeight="28px"
+					>
 						{ __(
 							'Included business features',
 							'woocommerce-admin'
 						) }
 					</Text>
-					<Text variant="body">
+					<Text variant="body" as="p">
 						{ __(
 							'We recommend enhancing your store with these free extensions',
 							'woocommerce-admin'
 						) }
 					</Text>
-					<Text variant="body">
+					<Text variant="body" as="p">
 						{ __(
 							'No commitment required - you can remove them at any time.',
 							'woocommerce-admin'

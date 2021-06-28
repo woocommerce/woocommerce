@@ -32,6 +32,7 @@ exports[`ProductType should render the product type 1`] = `
     
     <span
       class="woocommerce-pill css-1qmnemh-Text e15wbhsk0"
+      size="12"
     >
       <span
         class="screen-reader-text"
@@ -78,6 +79,7 @@ exports[`ProductType should render the product type with monthly prices 1`] = `
     
     <span
       class="woocommerce-pill css-1qmnemh-Text e15wbhsk0"
+      size="12"
     >
       <span
         class="screen-reader-text"

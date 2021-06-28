@@ -103,12 +103,14 @@ const SummaryNumber = ( {
 		<li className={ liClasses }>
 			<Container { ...containerProps }>
 				<div className="woocommerce-summary__item-label">
-					<Text variant="body.small">{ label }</Text>
+					<Text variant="body.small" size="14" lineHeight="20px">
+						{ label }
+					</Text>
 				</div>
 
 				<div className="woocommerce-summary__item-data">
 					<div className="woocommerce-summary__item-value">
-						<Text variant="title.small">
+						<Text variant="title.small" size="20" lineHeight="28px">
 							{ ! isNil( value )
 								? value
 								: __( 'N/A', 'woocommerce-admin' ) }
@@ -128,7 +130,7 @@ const SummaryNumber = ( {
 							role="presentation"
 							aria-label={ screenReaderLabel }
 						>
-							<Text variant="caption">
+							<Text variant="caption" size="12" lineHeight="16px">
 								{ ! isNil( delta )
 									? sprintf(
 											__( '%f%%', 'woocommerce-admin' ),

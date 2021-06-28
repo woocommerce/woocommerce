@@ -180,7 +180,12 @@ const PaymentRecommendations: React.FC = () => {
 		<Card size="large" className="woocommerce-recommended-payments-card">
 			<CardHeader size="medium">
 				<div className="woocommerce-recommended-payments-card__header">
-					<Text variant="title.small">
+					<Text
+						variant="title.small"
+						as="p"
+						size="20"
+						lineHeight="28px"
+					>
 						{ __(
 							'Recommended ways to get paid',
 							'woocommerce-admin'
@@ -191,6 +196,9 @@ const PaymentRecommendations: React.FC = () => {
 							'woocommerce-recommended-payments__header-heading'
 						}
 						variant="caption"
+						as="p"
+						size="12"
+						lineHeight="16px"
 					>
 						{ __(
 							'We recommend adding one of the following payment extensions to your store. The extension will be installed and activated for you when you click "Get started".',

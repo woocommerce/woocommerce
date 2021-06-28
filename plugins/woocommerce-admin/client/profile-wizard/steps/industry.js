@@ -202,13 +202,18 @@ class Industry extends Component {
 		return (
 			<Fragment>
 				<div className="woocommerce-profile-wizard__step-header">
-					<Text variant="title.small" as="h2">
+					<Text
+						variant="title.small"
+						as="h2"
+						size="20"
+						lineHeight="28px"
+					>
 						{ __(
 							'In which industry does the store operate?',
 							'woocommerce-admin'
 						) }
 					</Text>
-					<Text variant="body">
+					<Text variant="body" as="p">
 						{ __( 'Choose any that apply', 'woocommerce-admin' ) }
 					</Text>
 				</div>

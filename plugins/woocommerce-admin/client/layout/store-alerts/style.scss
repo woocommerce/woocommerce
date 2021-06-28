@@ -89,7 +89,7 @@
 	}
 }
 
-.woocommerce-store-alerts__message {
+.components-card__body .woocommerce-store-alerts__message {
 	margin-bottom: 16px;
 }
 
@@ -118,6 +118,7 @@
 		border-color: $button-border;
 		border-style: solid;
 		flex: 1 1;
+		@include font-size( 14 );
 	}
 
 	@include breakpoint( '<782px' ) {

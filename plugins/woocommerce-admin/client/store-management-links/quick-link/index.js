@@ -31,6 +31,9 @@ export const QuickLink = ( { icon, title, href, linkType, onClick } ) => {
 					className="woocommerce-quick-links__item-link__text"
 					as="div"
 					variant="button"
+					weight="600"
+					size="14"
+					lineHeight="20px"
 				>
 					{ title }
 				</Text>

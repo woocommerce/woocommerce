@@ -10,6 +10,7 @@ exports[`Leaderboard should render correct data in the table 1`] = `
     >
       <h2
         class="css-1ahfdc3-Text e15wbhsk0"
+        size="20"
       />
       <div
         class="woocommerce-table__actions"
@@ -274,6 +275,7 @@ exports[`Leaderboard should render empty message when there are no rows 1`] = `
     >
       <h3
         class="css-1ahfdc3-Text e15wbhsk0"
+        size="20"
       />
     </div>
     <div

@@ -90,7 +90,13 @@ function CustomerFeedbackModal( {
 			onRequestClose={ closeModal }
 			shouldCloseOnClickOutside={ false }
 		>
-			<Text variant="subtitle.small" as="p">
+			<Text
+				variant="subtitle.small"
+				as="p"
+				weight="600"
+				size="14"
+				lineHeight="20px"
+			>
 				{ label }
 			</Text>
 

@@ -96,7 +96,14 @@ export class CompareFilter extends Component {
 		return (
 			<Card className="woocommerce-filters__compare">
 				<CardHeader>
-					<Text variant="subtitle.small">{ labels.title }</Text>
+					<Text
+						variant="subtitle.small"
+						weight="600"
+						size="14"
+						lineHeight="20px"
+					>
+						{ labels.title }
+					</Text>
 				</CardHeader>
 				<CardBody>
 					<Search

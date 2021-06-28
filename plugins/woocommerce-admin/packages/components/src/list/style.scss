@@ -122,7 +122,8 @@ a.woocommerce-list__item {
 		}
 	}
 
-	.woocommerce-list__item-title {
+	.woocommerce-list__item-title,
+	.woocommerce-list__item-title > div {
 		color: $foreground-color;
 	}
 

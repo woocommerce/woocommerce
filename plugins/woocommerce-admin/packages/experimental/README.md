@@ -23,7 +23,7 @@ import { Text } from '@woocommerce/experimental';
 
 render() {
 	return (
-		<Text variant="title.small">
+		<Text>
 			…
 		</Text>
 	);

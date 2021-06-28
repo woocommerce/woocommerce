@@ -293,6 +293,8 @@ class Tax extends Component {
 							<Text
 								variant="caption"
 								className="woocommerce-task__caption"
+								size="12"
+								lineHeight="16px"
 							>
 								{ interpolateComponents( {
 									mixedString: agreementText,

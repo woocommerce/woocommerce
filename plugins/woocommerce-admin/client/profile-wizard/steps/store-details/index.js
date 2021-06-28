@@ -209,10 +209,15 @@ class StoreDetails extends Component {
 		return (
 			<div className="woocommerce-profile-wizard__store-details">
 				<div className="woocommerce-profile-wizard__step-header">
-					<Text variant="title.small" as="h2">
+					<Text
+						variant="title.small"
+						as="h2"
+						size="20"
+						lineHeight="28px"
+					>
 						{ __( 'Welcome to WooCommerce', 'woocommerce-admin' ) }
 					</Text>
-					<Text variant="body">
+					<Text variant="body" as="p">
 						{ __(
 							"Tell us about your store and we'll get you set up in no time",
 							'woocommerce-admin'

@@ -56,7 +56,12 @@ class ChartBlock extends Component {
 			>
 				<Card className="woocommerce-dashboard__chart-block">
 					<CardHeader>
-						<Text variant="title.small" as="h3">
+						<Text
+							variant="title.small"
+							as="h3"
+							size="20"
+							lineHeight="28px"
+						>
 							{ selectedChart.label }
 						</Text>
 					</CardHeader>

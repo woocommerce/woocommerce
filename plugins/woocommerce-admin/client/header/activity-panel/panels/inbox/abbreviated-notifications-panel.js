@@ -74,7 +74,7 @@ export const AbbreviatedNotificationsPanel = ( { thingsToDoNextCount } ) => {
 					<Text as="h3">
 						{ __( 'Things to do next', 'woocommerce-admin' ) }
 					</Text>
-					<Text>
+					<Text as="p">
 						{ sprintf(
 							/* translators: Things the user has to do */
 							_n(
