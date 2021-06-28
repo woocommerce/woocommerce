@@ -1783,6 +1783,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$key_mapping = array(
 			'status'         => 'post_status',
 			'page'           => 'paged',
+			'include'        => 'post__in',
 			'stock_quantity' => 'stock',
 			'average_rating' => 'wc_average_rating',
 			'review_count'   => 'wc_review_count',
