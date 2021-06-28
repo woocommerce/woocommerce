@@ -11,49 +11,52 @@ import { HelpPanel, SETUP_TASK_HELP_ITEMS_FILTER } from '../panels/help';
 
 describe( 'Activity Panels', () => {
 	describe( 'Help', () => {
-		it( 'only shows links for available payment methods', () => {
+		it( 'only shows links for suggested payment gateways', () => {
 			const fixtures = [
 				{
-					key: 'wcpay',
+					id: 'woocommerce_payments',
 					text: 'WooCommerce Payments',
 				},
 				{
-					key: 'stripe',
+					id: 'stripe',
 					text: 'Stripe',
 				},
 				{
-					key: 'klarna_checkout',
+					id: 'kco',
 					text: 'Klarna',
 				},
 				{
-					key: 'klarna_payments',
+					id: 'klarna_payments',
 					text: 'Klarna',
 				},
 				{
-					key: 'paypal',
+					id: 'ppcp-gateway',
 					text: 'PayPal Checkout',
 				},
 				{
-					key: 'square',
+					id: 'square_credit_card',
 					text: 'Square',
 				},
 				{
-					key: 'payfast',
+					id: 'payfast',
 					text: 'PayFast',
 				},
 				{
-					key: 'eway',
+					id: 'eway',
 					text: 'eWAY',
 				},
 			];
 
-			const noMethods = render(
-				<HelpPanel getPaymentMethods={ () => [] } taskName="payments" />
+			const noSuggestions = render(
+				<HelpPanel
+					paymentGatewaySuggestions={ () => [] }
+					taskName="payments"
+				/>
 			);
 
 			fixtures.forEach( ( method ) => {
 				expect(
-					noMethods.queryAllByText( ( text ) =>
+					noSuggestions.queryAllByText( ( text ) =>
 						text.includes( method.text )
 					)
 				).toHaveLength( 0 );
@@ -62,7 +65,7 @@ describe( 'Activity Panels', () => {
 			fixtures.forEach( ( method ) => {
 				const { queryAllByText } = render(
 					<HelpPanel
-						getPaymentMethods={ () => [ method ] }
+						paymentGatewaySuggestions={ { [ method.id ]: true } }
 						taskName="payments"
 					/>
 				);

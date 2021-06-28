@@ -18,7 +18,7 @@ import {
  * Internal dependencies
  */
 
-import { PaymentAction } from '../PaymentGatewaySuggestions/components/PaymentAction';
+import { Action } from '../Action';
 
 const TosPrompt = () =>
 	interpolateComponents( {
@@ -37,10 +37,7 @@ const TosPrompt = () =>
 		},
 	} );
 
-export const WCPaySuggestion = ( {
-	paymentGateway,
-	onSetupCallback = null,
-} ) => {
+export const Suggestion = ( { paymentGateway, onSetupCallback = null } ) => {
 	const {
 		description,
 		id,
@@ -72,7 +69,7 @@ export const WCPaySuggestion = ( {
 					<Text lineHeight="1.5em">
 						<TosPrompt />
 					</Text>
-					<PaymentAction
+					<Action
 						id={ id }
 						hasSetup={ true }
 						needsSetup={ needsSetup }

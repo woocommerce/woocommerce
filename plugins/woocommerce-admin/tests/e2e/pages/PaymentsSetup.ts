@@ -28,6 +28,7 @@ export class PaymentsSetup extends BasePage {
 
 	async goToPaymentMethodSetup( method: PaymentMethodWithSetupButton ) {
 		const selector = `.woocommerce-task-payment-${ method } button`;
+		await this.page.waitForSelector( selector );
 		const button = await this.page.$( selector );
 
 		if ( ! button ) {

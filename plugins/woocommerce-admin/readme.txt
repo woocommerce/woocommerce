@@ -75,26 +75,27 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 
 == Unreleased ==
 
-- Add: SlotFill to Abbreviated Notification panel #7091
 - Add: Add unit tests around extended payment gateway controller #7133
 - Add: Add payment gateway suggestion unit tests #7142
 - Add: Feature toggle to disable Analytics UI #7168
-- Fix: WCPay not working in local payments task #7151
-- Fix: Include onboarding settings on the analytic pages #7109
-- Fix: RemoteFreeExtension hide bundle when all of its plugins are not visible #7182
-- Fix: Fixing button state logic for remote payment gateways #7200
-- Fix: Skip schedule customer data deletion on site deletion #7214
-- Fix: Fix obsolete key property in gateway defaults #7229
-- Fix: Load Analytics API only when feature is turned on #7193
-- Tweak: Revert Card component removal #7167
+- Add: SlotFill to Abbreviated Notification panel #7091
+- Dev: Add `woocommerce_admin_export_id` filter for customizing the export file name #7178
+- Dev: Remove old payment gateway task components #7224
 - Fix: Currency display on Orders activity card on homescreen #7181
-- Fix: Report export filtering bug. #7165
+- Fix: Fix obsolete key property in gateway defaults #7229
+- Fix: Fixing button state logic for remote payment gateways #7200
+- Fix: Include onboarding settings on the analytic pages #7109
+- Fix: Load Analytics API only when feature is turned on #7193
 - Fix: Localize string for description #7219
+- Fix: RemoteFreeExtension hide bundle when all of its plugins are not visible #7182
+- Fix: Report export filtering bug. #7165
 - Fix: Use tab char for the CSV injection prevention. #7154
 - Fix: Use saved form values if available when switching tabs #7226
+- Fix: Skip schedule customer data deletion on site deletion #7214
 - Fix: The use of gridicons for Analytics section controls. #7237
+- Fix: WCPay not working in local payments task #7151
 - Fix: WordPress 5.8 compatibility UI fixes #7255
-- Dev: Add `woocommerce_admin_export_id` filter for customizing the export file name #7178
+- Tweak: Revert Card component removal #7167
 - Update: Notes to use a date range. #7222
 
 == 2.4.0 6/10/2021 ==

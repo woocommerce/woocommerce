@@ -23,7 +23,6 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import ActivityHeader from '../activity-header';
 import { getCountryCode } from '../../../dashboard/utils';
-import { getPaymentMethods } from '../../../task-list/tasks/payments/methods';
 
 export const SETUP_TASK_HELP_ITEMS_FILTER =
 	'woocommerce_admin_setup_task_help_items';
@@ -90,29 +89,8 @@ function getAppearanceItems() {
 	];
 }
 
-function getPaymentsItems( props ) {
-	const { countryCode, onboardingStatus, profileItems } = props;
-	const paymentMethods = props.getPaymentMethods( {
-		activePlugins: [],
-		countryCode,
-		onboardingStatus,
-		options: {},
-		profileItems,
-	} );
-
-	const methodIsVisible = ( methodKey ) =>
-		Boolean(
-			paymentMethods.find( ( method ) => method.key === methodKey )
-		);
-
-	const showWCPay = methodIsVisible( 'wcpay' );
-	const showStripe = methodIsVisible( 'stripe' );
-	const showKlarnaCheckout = methodIsVisible( 'klarna_checkout' );
-	const showKlarnaPayments = methodIsVisible( 'klarna_payments' );
-	const showPayPal = methodIsVisible( 'paypal' );
-	const showSquare = methodIsVisible( 'square' );
-	const showPayFast = methodIsVisible( 'payfast' );
-	const showEway = methodIsVisible( 'eway' );
+function getPaymentGatewaySuggestions( props ) {
+	const { paymentGatewaySuggestions } = props;
 
 	return [
 		{
@@ -123,7 +101,7 @@ function getPaymentsItems( props ) {
 			link:
 				'https://docs.woocommerce.com/document/premium-payment-gateway-extensions/?utm_source=help_panel',
 		},
-		showWCPay && {
+		paymentGatewaySuggestions.woocommerce_payments && {
 			title: __(
 				'WooCommerce Payments Start Up Guide',
 				'woocommerce-admin'
@@ -131,17 +109,17 @@ function getPaymentsItems( props ) {
 			link:
 				'https://docs.woocommerce.com/document/payments//?utm_source=help_panel',
 		},
-		showWCPay && {
+		paymentGatewaySuggestions.woocommerce_payments && {
 			title: __( 'WooCommerce Payments FAQs', 'woocommerce-admin' ),
 			link:
 				'https://docs.woocommerce.com/documentation/woocommerce-payments/woocommerce-payments-faqs/?utm_source=help_panel',
 		},
-		showStripe && {
+		paymentGatewaySuggestions.stripe && {
 			title: __( 'Stripe Setup and Configuration', 'woocommerce-admin' ),
 			link:
 				'https://docs.woocommerce.com/document/stripe/?utm_source=help_panel',
 		},
-		showPayPal && {
+		paymentGatewaySuggestions[ 'ppcp-gateway' ] && {
 			title: __(
 				'PayPal Checkout Setup and Configuration',
 				'woocommerce-admin'
@@ -149,27 +127,27 @@ function getPaymentsItems( props ) {
 			link:
 				'https://docs.woocommerce.com/document/2-0/woocommerce-paypal-payments/#section-3',
 		},
-		showSquare && {
+		paymentGatewaySuggestions.square_credit_card && {
 			title: __( 'Square - Get started', 'woocommerce-admin' ),
 			link:
 				'https://docs.woocommerce.com/document/woocommerce-square/?utm_source=help_panel',
 		},
-		showKlarnaCheckout && {
+		paymentGatewaySuggestions.kco && {
 			title: __( 'Klarna - Introduction', 'woocommerce-admin' ),
 			link:
 				'https://docs.woocommerce.com/document/klarna-checkout/?utm_source=help_panel',
 		},
-		showKlarnaPayments && {
+		paymentGatewaySuggestions.klarna_payments && {
 			title: __( 'Klarna - Introduction', 'woocommerce-admin' ),
 			link:
 				'https://docs.woocommerce.com/document/klarna-payments/?utm_source=help_panel',
 		},
-		showPayFast && {
+		paymentGatewaySuggestions.payfast && {
 			title: __( 'PayFast Setup and Configuration', 'woocommerce-admin' ),
 			link:
 				'https://docs.woocommerce.com/document/payfast-payment-gateway/?utm_source=help_panel',
 		},
-		showEway && {
+		paymentGatewaySuggestions.eway && {
 			title: __( 'eWAY Setup and Configuration', 'woocommerce-admin' ),
 			link:
 				'https://docs.woocommerce.com/document/eway/?utm_source=help_panel',
@@ -301,7 +279,7 @@ function getItems( props ) {
 		case 'tax':
 			return getTaxItems( props );
 		case 'payments':
-			return getPaymentsItems( props );
+			return getPaymentGatewaySuggestions( props );
 		default:
 			return getHomeItems();
 	}
@@ -397,22 +375,23 @@ export const HelpPanel = ( props ) => {
 };
 
 HelpPanel.defaultProps = {
-	getPaymentMethods,
 	getSetting,
 	recordEvent,
 };
 
 export default compose(
 	withSelect( ( select ) => {
-		const { getProfileItems, getTasksStatus } = select(
-			ONBOARDING_STORE_NAME
-		);
 		const { getSettings } = select( SETTINGS_STORE_NAME );
 		const { getActivePlugins } = select( PLUGINS_STORE_NAME );
 		const { general: generalSettings = {} } = getSettings( 'general' );
 		const activePlugins = getActivePlugins();
-		const onboardingStatus = getTasksStatus();
-		const profileItems = getProfileItems();
+		const paymentGatewaySuggestions = select( ONBOARDING_STORE_NAME )
+			.getPaymentGatewaySuggestions()
+			.reduce( ( suggestions, suggestion ) => {
+				const { id } = suggestion;
+				suggestions[ id ] = true;
+				return suggestions;
+			}, {} );
 
 		const countryCode = getCountryCode(
 			generalSettings.woocommerce_default_country
@@ -421,8 +400,7 @@ export default compose(
 		return {
 			activePlugins,
 			countryCode,
-			onboardingStatus,
-			profileItems,
+			paymentGatewaySuggestions,
 		};
 	} )
 )( HelpPanel );

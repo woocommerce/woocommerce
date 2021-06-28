@@ -10,9 +10,9 @@ import { Link } from '@woocommerce/components';
 /**
  * Internal dependencies
  */
-import UsageModal from '~/profile-wizard/steps/usage-modal';
+import Modal from '~/profile-wizard/steps/usage-modal';
 
-const WCPayUsageModal = () => {
+export const UsageModal = () => {
 	const query = getQuery();
 	const shouldDisplayModal = query[ 'wcpay-connection-success' ] === '1';
 	const [ isOpen, setIsOpen ] = useState( shouldDisplayModal );
@@ -47,7 +47,7 @@ const WCPayUsageModal = () => {
 	} );
 
 	return (
-		<UsageModal
+		<Modal
 			isDismissible={ false }
 			title={ title }
 			message={ trackingMessage }
@@ -59,4 +59,4 @@ const WCPayUsageModal = () => {
 	);
 };
 
-export default WCPayUsageModal;
+export default UsageModal;

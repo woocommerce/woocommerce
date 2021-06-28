@@ -19,7 +19,7 @@ import {
 import PaymentRecommendations, {
 	getPaymentRecommendationData,
 } from '../payment-recommendations';
-import { isWCPaySupported } from '../../task-list/tasks/payments/methods/wcpay';
+import { isWCPaySupported } from '~/task-list/tasks/PaymentGatewaySuggestions/components/WCPay';
 import { getAdminLink } from '../../wc-admin-settings';
 import { createNoticesFromResponse } from '~/lib/notices';
 
@@ -54,9 +54,12 @@ jest.mock( '@woocommerce/components', () => ( {
 		</div>
 	),
 } ) );
-jest.mock( '../../task-list/tasks/payments/methods/wcpay', () => ( {
-	isWCPaySupported: jest.fn(),
-} ) );
+jest.mock(
+	'../../task-list/tasks/PaymentGatewaySuggestions/components/WCPay',
+	() => ( {
+		isWCPaySupported: jest.fn(),
+	} )
+);
 
 jest.mock( '../../wc-admin-settings', () => ( {
 	getAdminLink: jest

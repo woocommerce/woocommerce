@@ -17,7 +17,7 @@ import { useMemo, useCallback } from '@wordpress/element';
  */
 import { List, Placeholder as ListPlaceholder } from './components/List';
 import { Setup, Placeholder as SetupPlaceholder } from './components/Setup';
-import { WCPaySuggestion } from '../components/WCPaySuggestion';
+import { WCPaySuggestion } from './components/WCPay';
 import './plugins/Bacs';
 
 const RECOMMENDED_GATEWAY_IDS = [
