@@ -33,5 +33,6 @@ Every release includes specific testing instructions for new features and bug fi
 -   [5.1.0](./510.md)
 -   [5.2.0](./520.md)
 -   [5.3.0](./530.md)
--   [5.3.1](./531.md)
+    -   [5.3.1](./531.md)
+    -   [5.3.2](./532.md)
 -   [5.4.0](./540.md)
