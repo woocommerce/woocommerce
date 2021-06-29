@@ -56,6 +56,6 @@ Name | Return | Default | Description
 
 Payment gateway tasks can be SlotFilled to provide custom experiences. This is useful if a gateway cannot follow the generic payment steps to be fully set up.
 
-The entire payment gateway card can be SlotFilled using [WooPaymentGatewaySetup](https://github.com/woocommerce/woocommerce-admin/tree/main/packages/tasks/src/WooPaymentGatewaySetup) or simply SlotFill [WooPaymentGatewayConnect](https://github.com/woocommerce/woocommerce-admin/tree/main/packages/tasks/src/WooPaymentGatewayConnect) to leave the default installation and stepper in place.
+The entire payment gateway card can be SlotFilled using [WooPaymentGatewaySetup](https://github.com/woocommerce/woocommerce-admin/tree/main/packages/tasks/src/WooPaymentGatewaySetup) or simply SlotFill [WooPaymentGatewayConfigure](https://github.com/woocommerce/woocommerce-admin/tree/main/packages/tasks/src/WooPaymentGatewayConfigure) to leave the default installation and stepper in place.
 
 Note that since plugin installation happens asynchronously, a full page reload will not occur between gateway installation and configuration.  This renders functions like `wp_enqueue_script` ineffective.  To solve this issue and allow `SlotFill` to work on a newly installed plugin, the gateway can provide a URL to be loaded immediately after installation using `get_post_install_script_handles()`.

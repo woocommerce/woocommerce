@@ -35,7 +35,7 @@ export const Item = ( {
 	} = paymentGateway;
 
 	const connectSlot = useSlot(
-		`woocommerce_payment_gateway_connect_${ id }`
+		`woocommerce_payment_gateway_configure_${ id }`
 	);
 	const setupSlot = useSlot( `woocommerce_payment_gateway_setup_${ id }` );
 

@@ -21,7 +21,7 @@ import { useSlot } from '@woocommerce/experimental';
  * Internal dependencies
  */
 import { createNoticesFromResponse } from '~/lib/notices';
-import { Connect } from './Connect';
+import { Configure } from './Configure';
 import './Setup.scss';
 
 export const Setup = ( {
@@ -125,17 +125,17 @@ export const Setup = ( {
 			: null;
 	}, [] );
 
-	const connectStep = useMemo(
+	const configureStep = useMemo(
 		() => ( {
-			key: 'connect',
+			key: 'configure',
 			label: sprintf(
-				__( 'Connect your %(title)s account', 'woocommerce-admin' ),
+				__( 'Configure your %(title)s account', 'woocommerce-admin' ),
 				{
 					title,
 				}
 			),
 			content: gatewayInstalled ? (
-				<Connect
+				<Configure
 					markConfigured={ markConfigured }
 					paymentGateway={ paymentGateway }
 					recordConnectStartEvent={ recordConnectStartEvent }
@@ -156,12 +156,12 @@ export const Setup = ( {
 			<Stepper
 				isVertical
 				isPending={ stepperPending }
-				currentStep={ needsPluginInstall ? 'install' : 'connect' }
-				steps={ [ installStep, connectStep ].filter( Boolean ) }
+				currentStep={ needsPluginInstall ? 'install' : 'configure' }
+				steps={ [ installStep, configureStep ].filter( Boolean ) }
 				{ ...props }
 			/>
 		),
-		[ stepperPending, installStep, connectStep ]
+		[ stepperPending, installStep, configureStep ]
 	);
 
 	return (
@@ -172,7 +172,7 @@ export const Setup = ( {
 						fillProps={ {
 							defaultStepper: DefaultStepper,
 							defaultInstallStep: installStep,
-							defaultConnectStep: connectStep,
+							defaultConfigureStep: configureStep,
 							markConfigured: () => markConfigured( id ),
 							paymentGateway,
 						} }

@@ -36,11 +36,11 @@ const defaultProps = {
 };
 
 describe( 'Setup', () => {
-	it( 'should show a connect step', () => {
+	it( 'should show a configure step', () => {
 		const { queryByText } = render( <Setup { ...defaultProps } /> );
 
 		expect(
-			queryByText( 'Connect your Mock Gateway account' )
+			queryByText( 'Configure your Mock Gateway account' )
 		).toBeInTheDocument();
 	} );
 

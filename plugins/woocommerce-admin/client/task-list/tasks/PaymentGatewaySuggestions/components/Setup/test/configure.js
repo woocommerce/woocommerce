@@ -6,7 +6,7 @@ import { render } from '@testing-library/react';
 /**
  * Internal dependencies
  */
-import { Connect, validateFields } from '../Connect';
+import { Configure, validateFields } from '../Configure';
 
 const mockGateway = {
 	id: 'mock-gateway',
@@ -37,15 +37,15 @@ const defaultProps = {
 	paymentGateway: mockGateway,
 };
 
-describe( 'Connect', () => {
+describe( 'Configure', () => {
 	it( 'should show help text', () => {
-		const { queryByText } = render( <Connect { ...defaultProps } /> );
+		const { queryByText } = render( <Configure { ...defaultProps } /> );
 
 		expect( queryByText( 'Help text' ) ).toBeInTheDocument();
 	} );
 
 	it( 'should render a button with the connection URL', () => {
-		const { container } = render( <Connect { ...defaultProps } /> );
+		const { container } = render( <Configure { ...defaultProps } /> );
 
 		const button = container.querySelector( 'a' );
 		expect( button.textContent ).toBe( 'Connect' );
@@ -60,7 +60,7 @@ describe( 'Connect', () => {
 				connectionUrl: null,
 			},
 		};
-		const { container } = render( <Connect { ...props } /> );
+		const { container } = render( <Configure { ...props } /> );
 
 		const inputs = container.querySelectorAll( 'input' );
 		expect( inputs.length ).toBe( 2 );
@@ -77,7 +77,7 @@ describe( 'Connect', () => {
 				requiredSettings: [],
 			},
 		};
-		const { container } = render( <Connect { ...props } /> );
+		const { container } = render( <Configure { ...props } /> );
 
 		const button = container.querySelector( 'a' );
 		expect( button.textContent ).toBe( 'Set up' );
