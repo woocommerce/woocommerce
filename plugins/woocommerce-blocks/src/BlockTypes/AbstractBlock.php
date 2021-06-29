@@ -348,6 +348,7 @@ abstract class AbstractBlock {
 					'restApiRoutes' => [
 						'/wc/store' => array_keys( Package::container()->get( RestApi::class )->get_routes_from_namespace( 'wc/store' ) ),
 					],
+					'defaultAvatar' => get_avatar_url( 0, [ 'force_default' => true ] ),
 
 					/*
 					 * translators: If your word count is based on single characters (e.g. East Asian characters),

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { WC_BLOCKS_ASSET_URL } from '@woocommerce/block-settings';
+import { blocksConfig } from '@woocommerce/block-settings';
 
 export const previewReviews = [
 	{
@@ -23,8 +23,8 @@ export const previewReviews = [
 			'woo-gutenberg-products-block'
 		) }</p>\n`,
 		reviewer_avatar_urls: {
-			'48': WC_BLOCKS_ASSET_URL + 'img/avatar.jpg',
-			'96': WC_BLOCKS_ASSET_URL + 'img/avatar.jpg',
+			'48': blocksConfig.defaultAvatar,
+			'96': blocksConfig.defaultAvatar,
 		},
 		rating: 5,
 		verified: true,
@@ -47,8 +47,8 @@ export const previewReviews = [
 			'woo-gutenberg-products-block'
 		) }</p>\n`,
 		reviewer_avatar_urls: {
-			'48': WC_BLOCKS_ASSET_URL + 'img/avatar.jpg',
-			'96': WC_BLOCKS_ASSET_URL + 'img/avatar.jpg',
+			'48': blocksConfig.defaultAvatar,
+			'96': blocksConfig.defaultAvatar,
 		},
 		rating: null,
 		verified: false,

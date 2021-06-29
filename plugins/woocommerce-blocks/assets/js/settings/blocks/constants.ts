@@ -12,6 +12,7 @@ interface WcBlocksConfig {
 	buildPhase: number;
 	pluginUrl: string;
 	productCount: number;
+	defaultAvatar: string;
 	restApiRoutes: Record< string, string[] >;
 	wordCountType: WordCountType;
 }
@@ -20,11 +21,12 @@ export const blocksConfig = getSetting( 'wcBlocksConfig', {
 	buildPhase: 1,
 	pluginUrl: '',
 	productCount: 0,
+	defaultAvatar: '',
 	restApiRoutes: {},
 	wordCountType: 'words',
 } ) as WcBlocksConfig;
 
-export const WC_BLOCKS_ASSET_URL = blocksConfig.pluginUrl + 'assets/';
+export const WC_BLOCKS_IMAGE_URL = blocksConfig.pluginUrl + 'images/';
 export const WC_BLOCKS_BUILD_URL = blocksConfig.pluginUrl + 'build/';
 export const WC_BLOCKS_PHASE = blocksConfig.buildPhase;
 export const SHOP_URL = STORE_PAGES.shop?.permalink;

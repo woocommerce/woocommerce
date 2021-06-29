@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { WC_BLOCKS_ASSET_URL } from '@woocommerce/block-settings';
+import { WC_BLOCKS_IMAGE_URL } from '@woocommerce/block-settings';
 import { CartResponse } from '@woocommerce/types';
 import { getSetting } from '@woocommerce/settings';
 
@@ -41,8 +41,8 @@ export const previewCart: CartResponse = {
 			images: [
 				{
 					id: 10,
-					src: WC_BLOCKS_ASSET_URL + 'img/beanie.jpg',
-					thumbnail: WC_BLOCKS_ASSET_URL + 'img/beanie.jpg',
+					src: WC_BLOCKS_IMAGE_URL + 'previews/beanie.jpg',
+					thumbnail: WC_BLOCKS_IMAGE_URL + 'previews/beanie.jpg',
 					srcset: '',
 					sizes: '',
 					name: '',
@@ -111,8 +111,8 @@ export const previewCart: CartResponse = {
 			images: [
 				{
 					id: 11,
-					src: WC_BLOCKS_ASSET_URL + 'img/cap.jpg',
-					thumbnail: WC_BLOCKS_ASSET_URL + 'img/cap.jpg',
+					src: WC_BLOCKS_IMAGE_URL + 'previews/cap.jpg',
+					thumbnail: WC_BLOCKS_IMAGE_URL + 'previews/cap.jpg',
 					srcset: '',
 					sizes: '',
 					name: '',

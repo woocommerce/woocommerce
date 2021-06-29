@@ -40,6 +40,7 @@ class BlockErrorBoundary extends Component {
 			text,
 			errorMessagePrefix,
 			renderError,
+			button,
 		} = this.props;
 		const { errorMessage, hasError } = this.state;
 
@@ -54,6 +55,7 @@ class BlockErrorBoundary extends Component {
 					imageUrl={ imageUrl }
 					text={ text }
 					errorMessagePrefix={ errorMessagePrefix }
+					button={ button }
 				/>
 			);
 		}

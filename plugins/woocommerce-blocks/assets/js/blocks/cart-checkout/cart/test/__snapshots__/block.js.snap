@@ -75,7 +75,7 @@ exports[`Testing cart Contains a Taxes section if Core options are set to show i
                   >
                     <img
                       alt=""
-                      src="assets/img/beanie.jpg"
+                      src="images/previews/beanie.jpg"
                     />
                   </a>
                 </td>
@@ -221,7 +221,7 @@ exports[`Testing cart Contains a Taxes section if Core options are set to show i
                   >
                     <img
                       alt=""
-                      src="assets/img/cap.jpg"
+                      src="images/previews/cap.jpg"
                     />
                   </a>
                 </td>
@@ -797,7 +797,7 @@ exports[`Testing cart Shows individual tax lines if the store is set to do so 1`
                   >
                     <img
                       alt=""
-                      src="assets/img/beanie.jpg"
+                      src="images/previews/beanie.jpg"
                     />
                   </a>
                 </td>
@@ -943,7 +943,7 @@ exports[`Testing cart Shows individual tax lines if the store is set to do so 1`
                   >
                     <img
                       alt=""
-                      src="assets/img/cap.jpg"
+                      src="images/previews/cap.jpg"
                     />
                   </a>
                 </td>
@@ -1524,7 +1524,7 @@ exports[`Testing cart Shows rate percentages after tax lines if the block is set
                   >
                     <img
                       alt=""
-                      src="assets/img/beanie.jpg"
+                      src="images/previews/beanie.jpg"
                     />
                   </a>
                 </td>
@@ -1670,7 +1670,7 @@ exports[`Testing cart Shows rate percentages after tax lines if the block is set
                   >
                     <img
                       alt=""
-                      src="assets/img/cap.jpg"
+                      src="images/previews/cap.jpg"
                     />
                   </a>
                 </td>
