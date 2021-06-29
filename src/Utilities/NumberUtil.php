@@ -31,26 +31,4 @@ final class NumberUtil {
 		}
 		return round( $val, $precision, $mode );
 	}
-
-	/**
-	 * Divides two numbers making sure to check for zeros and casting as floats.
-	 *
-	 * This is needed because in PHP 7 dividing a number by a non number results in a PHP warning.
-	 * But in PHP 8, it throws a fatal error.
-	 *
-	 * @param mixed $first The first number to be divided from.
-	 * @param mixed $second The second number to be divided by.
-	 * @return float The divided value.
-	 */
-	public static function divide( $first, $second ) : float {
-		$first  = (float) $first;
-		$second = (float) $second;
-
-		// Purposely using loose comparison.
-		if ( 0 == $second || 0 == $first ) { // phpcs:ignore
-			return 0;
-		}
-
-		return $first / $second;
-	}
 }
