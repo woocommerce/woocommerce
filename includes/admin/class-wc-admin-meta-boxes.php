@@ -233,7 +233,7 @@ class WC_Admin_Meta_Boxes {
 	 * @return string[] Templates array excluding block-based templates.
 	 */
 	public function remove_block_templates( $templates ) {
-		if ( count( $templates ) === 0 ) {
+		if ( count( $templates ) === 0 || ! function_exists( 'gutenberg_get_block_template' ) ) {
 			return $templates;
 		}
 
