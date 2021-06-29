@@ -102,7 +102,8 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 - Allow products to be added by SKU in the Hand-Picked Products block. ([4366](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4366))
 - Add Slot in the Discounts section of the Checkout sidebar to allow third party extensions to render their own components there. ([4310](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4310))
 
-
+= 5.3.2 - 2021-06-28 =
+- Remove the ability to filter snackbar notices ([#4398](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4398)).
 
 = 5.3.1 - 2021-06-15 =
 
