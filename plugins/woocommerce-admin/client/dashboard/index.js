@@ -17,15 +17,11 @@ class Dashboard extends Component {
 	render() {
 		const { path, query } = this.props;
 
-		if ( window.wcAdminFeatures[ 'analytics-dashboard/customizable' ] ) {
-			return (
-				<Suspense fallback={ <Spinner /> }>
-					<CustomizableDashboard query={ query } path={ path } />
-				</Suspense>
-			);
-		}
-
-		return null;
+		return (
+			<Suspense fallback={ <Spinner /> }>
+				<CustomizableDashboard query={ query } path={ path } />
+			</Suspense>
+		);
 	}
 }
 

@@ -163,20 +163,16 @@ const DashboardCharts = ( props ) => {
 						hiddenBlocks,
 						onToggleHiddenBlock,
 					} ) }
-					{ window.wcAdminFeatures[
-						'analytics-dashboard/customizable'
-					] && (
-						<Controls
-							onToggle={ onToggle }
-							onMove={ onMove }
-							onRemove={ onRemove }
-							isFirst={ isFirst }
-							isLast={ isLast }
-							onTitleBlur={ onTitleBlur }
-							onTitleChange={ onTitleChange }
-							titleInput={ titleInput }
-						/>
-					) }
+					<Controls
+						onToggle={ onToggle }
+						onMove={ onMove }
+						onRemove={ onRemove }
+						isFirst={ isFirst }
+						isLast={ isLast }
+						onTitleBlur={ onTitleBlur }
+						onTitleChange={ onTitleChange }
+						titleInput={ titleInput }
+					/>
 				</Fragment>
 			) }
 		/>

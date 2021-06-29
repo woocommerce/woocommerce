@@ -2,8 +2,6 @@
 	"features": {
 		"activity-panels": true,
 		"analytics": true,
-		"analytics-dashboard": true,
-		"analytics-dashboard/customizable": true,
 		"coupons": true,
 		"customer-effort-score-tracks": true,
 		"homescreen": true,
