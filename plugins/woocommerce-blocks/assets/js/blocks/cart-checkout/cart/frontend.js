@@ -8,7 +8,6 @@ import {
 import { __ } from '@wordpress/i18n';
 import { StoreNoticesProvider } from '@woocommerce/base-context';
 import { CURRENT_USER_IS_ADMIN } from '@woocommerce/settings';
-import { createInterpolateElement } from 'wordpress-element';
 import {
 	renderFrontend,
 	getValidBlockAttributes,
@@ -44,21 +43,16 @@ const getProps = ( el ) => {
 const getErrorBoundaryProps = () => {
 	return {
 		header: __( 'Something went wrong…', 'woo-gutenberg-products-block' ),
-		text: createInterpolateElement(
-			__(
-				'The cart has encountered an unexpected error. <button>Try reloading the page</button>. If the error persists, please get in touch with us so we can assist.',
-				'woo-gutenberg-products-block'
-			),
-			{
-				button: (
-					<button
-						className="wc-block-link-button"
-						onClick={ reloadPage }
-					/>
-				),
-			}
+		text: __(
+			'The cart has encountered an unexpected error. If the error persists, please get in touch with us for help.',
+			'woo-gutenberg-products-block'
 		),
 		showErrorMessage: CURRENT_USER_IS_ADMIN,
+		button: (
+			<button className="wc-block-button" onClick={ reloadPage }>
+				{ __( 'Reload the page', 'woo-gutenberg-products-block' ) }
+			</button>
+		),
 	};
 };
 
