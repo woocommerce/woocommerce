@@ -20,6 +20,7 @@ class RestApiUtil {
 	 * [
 	 *   "reason" => "",
 	 *   "api_refund" => "x",
+	 *   "api_restock" => "x",
 	 *   "line_items" => [
 	 *     "id" => "111",
 	 *     "quantity" => 222,
@@ -35,13 +36,14 @@ class RestApiUtil {
 	 * ...to the internally used format:
 	 *
 	 * [
-	 *   "reason" => null,     (if it's missing or any empty value, set as null)
-	 *   "api_refund" => true, (if it's missing or non-bool, set as "true")
-	 *   "line_items" => [     (convert sequential array to associative based on "id")
+	 *   "reason" => null,      (if it's missing or any empty value, set as null)
+	 *   "api_refund" => true,  (if it's missing or non-bool, set as "true")
+	 *   "api_restock" => true, (if it's missing or non-bool, set as "true")
+	 *   "line_items" => [      (convert sequential array to associative based on "id")
 	 *     "111" => [
-	 *       "qty" => 222,     (rename "quantity" to "qty")
+	 *       "qty" => 222,      (rename "quantity" to "qty")
 	 *       "refund_total" => 333,
-	 *       "refund_tax" => [ (convert sequential array to associative based on "id" and "refund_total)
+	 *       "refund_tax" => [  (convert sequential array to associative based on "id" and "refund_total)
 	 *         "444" => 555,...
 	 *       ],...
 	 *   ]
@@ -64,6 +66,10 @@ class RestApiUtil {
 
 		if ( ! is_bool( $request['api_refund'] ) ) {
 			$request['api_refund'] = true;
+		}
+
+		if ( ! is_bool( $request['api_restock'] ) ) {
+			$request['api_restock'] = true;
 		}
 
 		if ( empty( $request['line_items'] ) ) {
