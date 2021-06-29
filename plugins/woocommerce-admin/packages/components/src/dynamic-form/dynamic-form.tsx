@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { useMemo } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
@@ -38,6 +39,16 @@ const fieldTypeMap = {
 	default: TextField,
 };
 
+const getInitialConfigValues = ( fields: Field[] ) =>
+	fields.reduce(
+		( data, field ) => ( {
+			...data,
+			[ field.id ]:
+				field.type === 'checkbox' ? field.value === 'yes' : field.value,
+		} ),
+		{}
+	);
+
 export const DynamicForm: React.FC< DynamicFormProps > = ( {
 	fields: baseFields = [],
 	isBusy = false,
@@ -50,21 +61,13 @@ export const DynamicForm: React.FC< DynamicFormProps > = ( {
 	const fields =
 		baseFields instanceof Array ? baseFields : Object.values( baseFields );
 
-	const getInitialConfigValues = () =>
-		fields.reduce(
-			( data, field ) => ( {
-				...data,
-				[ field.id ]:
-					field.type === 'checkbox'
-						? field.value === 'yes'
-						: field.value,
-			} ),
-			{}
-		);
+	const initialValues = useMemo( () => getInitialConfigValues( fields ), [
+		fields,
+	] );
 
 	return (
 		<Form
-			initialValues={ getInitialConfigValues() }
+			initialValues={ initialValues }
 			onChange={ onChange }
 			onSubmit={ onSubmit }
 			validate={ validate }

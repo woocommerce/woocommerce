@@ -100,14 +100,13 @@ export const Configure = ( {
 	const helpText = setupHelpText && (
 		<p dangerouslySetInnerHTML={ sanitizeHTML( setupHelpText ) } />
 	);
-	const DefaultForm = ( props ) => (
+	const defaultForm = (
 		<DynamicForm
 			fields={ fields }
 			isBusy={ isUpdating }
 			onSubmit={ handleSubmit }
 			submitLabel={ __( 'Proceed', 'woocommerce-admin' ) }
 			validate={ ( values ) => validateFields( values, fields ) }
-			{ ...props }
 		/>
 	);
 
@@ -115,7 +114,7 @@ export const Configure = ( {
 		return (
 			<WooPaymentGatewayConfigure.Slot
 				fillProps={ {
-					defaultForm: DefaultForm,
+					defaultForm,
 					defaultSubmit: handleSubmit,
 					defaultFields: fields,
 					markConfigured: () => markConfigured( id ),
@@ -141,7 +140,7 @@ export const Configure = ( {
 		return (
 			<>
 				{ helpText }
-				<DefaultForm />
+				{ defaultForm }
 			</>
 		);
 	}

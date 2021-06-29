@@ -13,7 +13,7 @@ import {
 import { Plugins, Stepper } from '@woocommerce/components';
 import { WooPaymentGatewaySetup } from '@woocommerce/onboarding';
 import { recordEvent } from '@woocommerce/tracks';
-import { useEffect, useState, useMemo, useCallback } from '@wordpress/element';
+import { useEffect, useState, useMemo } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { useSlot } from '@woocommerce/experimental';
 
@@ -151,17 +151,13 @@ export const Setup = ( {
 		isPaymentGatewayResolving ||
 		! isPluginLoaded;
 
-	const DefaultStepper = useCallback(
-		( props ) => (
-			<Stepper
-				isVertical
-				isPending={ stepperPending }
-				currentStep={ needsPluginInstall ? 'install' : 'configure' }
-				steps={ [ installStep, configureStep ].filter( Boolean ) }
-				{ ...props }
-			/>
-		),
-		[ stepperPending, installStep, configureStep ]
+	const defaultStepper = (
+		<Stepper
+			isVertical
+			isPending={ stepperPending }
+			currentStep={ needsPluginInstall ? 'install' : 'configure' }
+			steps={ [ installStep, configureStep ].filter( Boolean ) }
+		/>
 	);
 
 	return (
@@ -170,7 +166,7 @@ export const Setup = ( {
 				{ hasFills ? (
 					<WooPaymentGatewaySetup.Slot
 						fillProps={ {
-							defaultStepper: DefaultStepper,
+							defaultStepper,
 							defaultInstallStep: installStep,
 							defaultConfigureStep: configureStep,
 							markConfigured: () => markConfigured( id ),
@@ -179,7 +175,7 @@ export const Setup = ( {
 						id={ id }
 					/>
 				) : (
-					<DefaultStepper />
+					defaultStepper
 				) }
 			</CardBody>
 		</Card>
