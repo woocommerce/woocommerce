@@ -161,6 +161,10 @@ class WC_Install {
 			'wc_update_500_fix_product_review_count',
 			'wc_update_500_db_version',
 		),
+		'5.6.0' => array(
+			'wc_update_560_create_refund_returns_page',
+			'wc_update_560_db_version',
+		),
 	);
 
 	/**
