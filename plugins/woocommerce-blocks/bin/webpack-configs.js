@@ -1,15 +1,14 @@
-/* eslint-disable no-console */
 /**
  * External dependencies
  */
 const path = require( 'path' );
+const { kebabCase } = require( 'lodash' );
 const RemoveFilesPlugin = require( './remove-files-webpack-plugin' );
 const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
 const ProgressBarPlugin = require( 'progress-bar-webpack-plugin' );
 const DependencyExtractionWebpackPlugin = require( '@wordpress/dependency-extraction-webpack-plugin' );
 const WebpackRTLPlugin = require( 'webpack-rtl-plugin' );
-const chalk = require( 'chalk' );
-const { kebabCase } = require( 'lodash' );
+const TerserPlugin = require( 'terser-webpack-plugin' );
 const CreateFileWebpack = require( 'create-file-webpack' );
 const CircularDependencyPlugin = require( 'circular-dependency-plugin' );
 
@@ -25,8 +24,14 @@ const {
 	requestToExternalInsideGB,
 	requestToHandleInsideGB,
 	findModuleMatch,
+	getProgressBarPluginConfig,
 } = require( './webpack-helpers' );
 
+const isProduction = NODE_ENV === 'production';
+
+/**
+ * Shared config for all script builds.
+ */
 const sharedPlugins = [
 	CHECK_CIRCULAR_DEPS === 'true'
 		? new CircularDependencyPlugin( {
@@ -42,40 +47,11 @@ const sharedPlugins = [
 	} ),
 ].filter( Boolean );
 
-const mainBlocksPlugins = [
-	CHECK_CIRCULAR_DEPS === 'true'
-		? new CircularDependencyPlugin( {
-				exclude: /node_modules/,
-				cwd: process.cwd(),
-				failOnError: 'warn',
-		  } )
-		: false,
-	new DependencyExtractionWebpackPlugin( {
-		injectPolyfill: true,
-		requestToExternal: requestToExternalInsideGB,
-		requestToHandle: requestToHandleInsideGB,
-	} ),
-].filter( Boolean );
-const getProgressBarPluginConfig = ( name, fileSuffix ) => {
-	const isLegacy = fileSuffix && fileSuffix === 'legacy';
-	const progressBarPrefix = isLegacy ? 'Legacy ' : '';
-	return {
-		format:
-			chalk.blue( `Building ${ progressBarPrefix }${ name }` ) +
-			' [:bar] ' +
-			chalk.green( ':percent' ) +
-			' :msg (:elapsed seconds)',
-		summary: false,
-		customSummary: ( time ) => {
-			console.log(
-				chalk.green.bold(
-					`${ progressBarPrefix }${ name } assets build completed (${ time })`
-				)
-			);
-		},
-	};
-};
-
+/**
+ * Build config for core packages.
+ *
+ * @param {Object} options Build options.
+ */
 const getCoreConfig = ( options = {} ) => {
 	const { alias, resolvePlugins = [] } = options;
 	const resolve = alias
@@ -99,11 +75,6 @@ const getCoreConfig = ( options = {} ) => {
 			// overwriting each other's chunk loader function.
 			// See https://webpack.js.org/configuration/output/#outputjsonpfunction
 			jsonpFunction: 'webpackWcBlocksJsonp',
-		},
-		optimization: {
-			splitChunks: {
-				automaticNameDelimiter: '--',
-			},
 		},
 		module: {
 			rules: [
@@ -146,15 +117,46 @@ woocommerce_blocks_env = ${ NODE_ENV }
 `.trim(),
 			} ),
 		],
+		optimization: {
+			splitChunks: {
+				automaticNameDelimiter: '--',
+			},
+			minimizer: [
+				new TerserPlugin( {
+					cache: true,
+					parallel: true,
+					sourceMap: ! isProduction,
+					terserOptions: {
+						output: {
+							comments: /translators:/i,
+						},
+						compress: {
+							passes: 2,
+						},
+						mangle: {
+							reserved: [ '__', '_n', '_nx', '_x' ],
+						},
+					},
+					extractComments: false,
+				} ),
+			],
+		},
 		resolve: {
 			...resolve,
 			extensions: [ '.js', '.ts', '.tsx' ],
 		},
 	};
 };
-// @todo delete getCoreEditorConfig when wordpress/gutenberg#27462 or rquivalent is merged.
-// This is meant to fix issue #3839 in which we have two instances of SlotFillProvider context. Should be deleted once wordpress/gutenberg#27462.
+
+/**
+ * Build config for core packages, in the editor context.
+ *
+ * This is meant to fix issue #3839 in which we have two instances of SlotFillProvider context. Should be deleted once wordpress/gutenberg#27462.
+ *
+ * @param {Object} options Build options.
+ */
 const getCoreEditorConfig = ( options = {} ) => {
+	// @todo delete getCoreEditorConfig when wordpress/gutenberg#27462 or equivalent is merged.
 	return {
 		...getCoreConfig( options ),
 		entry: {
@@ -173,7 +175,11 @@ const getCoreEditorConfig = ( options = {} ) => {
 			jsonpFunction: 'webpackWcBlocksJsonp',
 		},
 		plugins: [
-			...mainBlocksPlugins,
+			new DependencyExtractionWebpackPlugin( {
+				injectPolyfill: true,
+				requestToExternal: requestToExternalInsideGB,
+				requestToHandle: requestToHandleInsideGB,
+			} ),
 			new ProgressBarPlugin(
 				getProgressBarPluginConfig( 'Core', options.fileSuffix )
 			),
@@ -190,6 +196,12 @@ woocommerce_blocks_env = ${ NODE_ENV }
 		],
 	};
 };
+
+/**
+ * Build config for Blocks in the editor context.
+ *
+ * @param {Object} options Build options.
+ */
 const getMainConfig = ( options = {} ) => {
 	let { fileSuffix } = options;
 	const { alias, resolvePlugins = [] } = options;
@@ -215,20 +227,6 @@ const getMainConfig = ( options = {} ) => {
 			// See https://webpack.js.org/configuration/output/#outputjsonpfunction
 			jsonpFunction: 'webpackWcBlocksJsonp',
 		},
-		optimization: {
-			splitChunks: {
-				minSize: 0,
-				automaticNameDelimiter: '--',
-				cacheGroups: {
-					commons: {
-						test: /[\\/]node_modules[\\/]/,
-						name: 'wc-blocks-vendors',
-						chunks: 'all',
-						enforce: true,
-					},
-				},
-			},
-		},
 		module: {
 			rules: [
 				{
@@ -239,7 +237,7 @@ const getMainConfig = ( options = {} ) => {
 						options: {
 							presets: [ '@wordpress/babel-preset-default' ],
 							plugins: [
-								NODE_ENV === 'production'
+								isProduction
 									? require.resolve(
 											'babel-plugin-transform-react-remove-prop-types'
 									  )
@@ -259,6 +257,39 @@ const getMainConfig = ( options = {} ) => {
 				},
 			],
 		},
+		optimization: {
+			splitChunks: {
+				minSize: 0,
+				automaticNameDelimiter: '--',
+				cacheGroups: {
+					commons: {
+						test: /[\\/]node_modules[\\/]/,
+						name: 'wc-blocks-vendors',
+						chunks: 'all',
+						enforce: true,
+					},
+				},
+			},
+			minimizer: [
+				new TerserPlugin( {
+					cache: true,
+					parallel: true,
+					sourceMap: ! isProduction,
+					terserOptions: {
+						output: {
+							comments: /translators:/i,
+						},
+						compress: {
+							passes: 2,
+						},
+						mangle: {
+							reserved: [ '__', '_n', '_nx', '_x' ],
+						},
+					},
+					extractComments: false,
+				} ),
+			],
+		},
 		plugins: [
 			...sharedPlugins,
 			new ProgressBarPlugin(
@@ -272,6 +303,11 @@ const getMainConfig = ( options = {} ) => {
 	};
 };
 
+/**
+ * Build config for Blocks in the frontend context.
+ *
+ * @param {Object} options Build options.
+ */
 const getFrontConfig = ( options = {} ) => {
 	let { fileSuffix } = options;
 	const { alias, resolvePlugins = [] } = options;
@@ -295,11 +331,6 @@ const getFrontConfig = ( options = {} ) => {
 			// See https://webpack.js.org/configuration/output/#outputjsonpfunction
 			jsonpFunction: 'webpackWcBlocksJsonp',
 		},
-		optimization: {
-			splitChunks: {
-				automaticNameDelimiter: '--',
-			},
-		},
 		module: {
 			rules: [
 				{
@@ -337,7 +368,7 @@ const getFrontConfig = ( options = {} ) => {
 								require.resolve(
 									'@babel/plugin-proposal-class-properties'
 								),
-								NODE_ENV === 'production'
+								isProduction
 									? require.resolve(
 											'babel-plugin-transform-react-remove-prop-types'
 									  )
@@ -354,6 +385,30 @@ const getFrontConfig = ( options = {} ) => {
 				},
 			],
 		},
+		optimization: {
+			splitChunks: {
+				automaticNameDelimiter: '--',
+			},
+			minimizer: [
+				new TerserPlugin( {
+					cache: true,
+					parallel: true,
+					sourceMap: ! isProduction,
+					terserOptions: {
+						output: {
+							comments: /translators:/i,
+						},
+						compress: {
+							passes: 2,
+						},
+						mangle: {
+							reserved: [ '__', '_n', '_nx', '_x' ],
+						},
+					},
+					extractComments: false,
+				} ),
+			],
+		},
 		plugins: [
 			...sharedPlugins,
 			new ProgressBarPlugin(
@@ -367,6 +422,11 @@ const getFrontConfig = ( options = {} ) => {
 	};
 };
 
+/**
+ * Build config for built-in payment gateway integrations.
+ *
+ * @param {Object} options Build options.
+ */
 const getPaymentsConfig = ( options = {} ) => {
 	const { alias, resolvePlugins = [] } = options;
 	const resolve = alias
@@ -388,11 +448,6 @@ const getPaymentsConfig = ( options = {} ) => {
 			// See https://webpack.js.org/configuration/output/#outputjsonpfunction
 			jsonpFunction: 'webpackWcBlocksPaymentMethodExtensionJsonp',
 		},
-		optimization: {
-			splitChunks: {
-				automaticNameDelimiter: '--',
-			},
-		},
 		module: {
 			rules: [
 				{
@@ -430,7 +485,7 @@ const getPaymentsConfig = ( options = {} ) => {
 								require.resolve(
 									'@babel/plugin-proposal-class-properties'
 								),
-								NODE_ENV === 'production'
+								isProduction
 									? require.resolve(
 											'babel-plugin-transform-react-remove-prop-types'
 									  )
@@ -445,6 +500,30 @@ const getPaymentsConfig = ( options = {} ) => {
 						loader: 'ignore-loader',
 					},
 				},
+			],
+		},
+		optimization: {
+			splitChunks: {
+				automaticNameDelimiter: '--',
+			},
+			minimizer: [
+				new TerserPlugin( {
+					cache: true,
+					parallel: true,
+					sourceMap: ! isProduction,
+					terserOptions: {
+						output: {
+							comments: /translators:/i,
+						},
+						compress: {
+							passes: 2,
+						},
+						mangle: {
+							reserved: [ '__', '_n', '_nx', '_x' ],
+						},
+					},
+					extractComments: false,
+				} ),
 			],
 		},
 		plugins: [
@@ -463,6 +542,11 @@ const getPaymentsConfig = ( options = {} ) => {
 	};
 };
 
+/**
+ * Build config for extension integrations.
+ *
+ * @param {Object} options Build options.
+ */
 const getExtensionsConfig = ( options = {} ) => {
 	const { alias, resolvePlugins = [] } = options;
 	const resolve = alias
@@ -518,7 +602,7 @@ const getExtensionsConfig = ( options = {} ) => {
 								require.resolve(
 									'@babel/plugin-proposal-class-properties'
 								),
-								NODE_ENV === 'production'
+								isProduction
 									? require.resolve(
 											'babel-plugin-transform-react-remove-prop-types'
 									  )
@@ -527,6 +611,30 @@ const getExtensionsConfig = ( options = {} ) => {
 						},
 					},
 				},
+			],
+		},
+		optimization: {
+			splitChunks: {
+				automaticNameDelimiter: '--',
+			},
+			minimizer: [
+				new TerserPlugin( {
+					cache: true,
+					parallel: true,
+					sourceMap: ! isProduction,
+					terserOptions: {
+						output: {
+							comments: /translators:/i,
+						},
+						compress: {
+							passes: 2,
+						},
+						mangle: {
+							reserved: [ '__', '_n', '_nx', '_x' ],
+						},
+					},
+					extractComments: false,
+				} ),
 			],
 		},
 		plugins: [
@@ -540,11 +648,16 @@ const getExtensionsConfig = ( options = {} ) => {
 		],
 		resolve: {
 			...resolve,
-			extensions: [ '.js', '.ts' ],
+			extensions: [ '.js', '.ts', '.tsx' ],
 		},
 	};
 };
 
+/**
+ * Build config for CSS Styles.
+ *
+ * @param {Object} options Build options.
+ */
 const getStylingConfig = ( options = {} ) => {
 	let { fileSuffix } = options;
 	const { alias, resolvePlugins = [] } = options;

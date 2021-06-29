@@ -1,8 +1,9 @@
+/* eslint-disable no-console */
 /**
  * External dependencies
  */
 const path = require( 'path' );
-
+const chalk = require( 'chalk' );
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const FORCE_MAP = process.env.FORCE_MAP || false;
 const CHECK_CIRCULAR_DEPS = process.env.CHECK_CIRCULAR_DEPS || false;
@@ -130,6 +131,26 @@ const requestToHandleInsideGB = ( request ) => {
 	return requestToHandle( request );
 };
 
+const getProgressBarPluginConfig = ( name, fileSuffix ) => {
+	const isLegacy = fileSuffix && fileSuffix === 'legacy';
+	const progressBarPrefix = isLegacy ? 'Legacy ' : '';
+	return {
+		format:
+			chalk.blue( `Building ${ progressBarPrefix }${ name }` ) +
+			' [:bar] ' +
+			chalk.green( ':percent' ) +
+			' :msg (:elapsed seconds)',
+		summary: false,
+		customSummary: ( time ) => {
+			console.log(
+				chalk.green.bold(
+					`${ progressBarPrefix }${ name } assets build completed (${ time })`
+				)
+			);
+		},
+	};
+};
+
 module.exports = {
 	NODE_ENV,
 	FORCE_MAP,
@@ -140,4 +161,5 @@ module.exports = {
 	requestToExternal,
 	requestToHandleInsideGB,
 	requestToExternalInsideGB,
+	getProgressBarPluginConfig,
 };

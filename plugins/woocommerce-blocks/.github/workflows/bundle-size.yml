@@ -8,12 +8,10 @@ jobs:
 
         steps:
             - uses: actions/setup-node@v2-beta
-              with:
-                node-version: '12'
             - uses: actions/checkout@v2
               with:
                   fetch-depth: 1
             - uses: preactjs/compressed-size-action@v2
               with:
-                  repo-token: "${{ secrets.GITHUB_TOKEN }}"
-                  pattern: "{build/**/*.js,build/**/*.css}"
+                  repo-token: '${{ secrets.GITHUB_TOKEN }}'
+                  pattern: '{build/**/*.js,build/**/*.css}'
