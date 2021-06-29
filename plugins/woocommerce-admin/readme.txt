@@ -96,6 +96,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix: The use of gridicons for Analytics section controls. #7237
 - Fix: WCPay not working in local payments task #7151
 - Fix: WordPress 5.8 compatibility UI fixes #7255
+- Fix: CurrencyFactory constructor to use proper function #7261
 - Tweak: Revert Card component removal #7167
 - Update: Notes to use a date range. #7222
 

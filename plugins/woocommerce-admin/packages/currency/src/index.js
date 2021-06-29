@@ -6,7 +6,7 @@ import { sprintf } from '@wordpress/i18n';
 import { numberFormat } from '@woocommerce/number';
 import deprecated from '@wordpress/deprecated';
 
-const CurrencyFactory = ( currencySetting ) => {
+const CurrencyFactory = function ( currencySetting ) {
 	let currency;
 
 	setCurrency( currencySetting );
