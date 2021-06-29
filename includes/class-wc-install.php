@@ -584,15 +584,23 @@ class WC_Install {
 					'content' => '<!-- wp:shortcode -->[' . apply_filters( 'woocommerce_my_account_shortcode_tag', 'woocommerce_my_account' ) . ']<!-- /wp:shortcode -->',
 				),
 				'refund_return' => array(
-					'name'    => _x( 'refund_return', 'Page slug', 'woocommerce' ),
-					'title'   => _x( 'Refund and Returns Policy', 'Page title', 'woocommerce' ),
-					'content' => self::get_refunds_return_policy_page_content(),
+					'name'        => _x( 'refund_return', 'Page slug', 'woocommerce' ),
+					'title'       => _x( 'Refund and Returns Policy', 'Page title', 'woocommerce' ),
+					'content'     => self::get_refunds_return_policy_page_content(),
+					'post_status' => 'draft',
 				),
 			)
 		);
 
 		foreach ( $pages as $key => $page ) {
-			wc_create_page( esc_sql( $page['name'] ), 'woocommerce_' . $key . '_page_id', $page['title'], $page['content'], ! empty( $page['parent'] ) ? wc_get_page_id( $page['parent'] ) : '' );
+			wc_create_page(
+				esc_sql( $page['name'] ),
+				'woocommerce_' . $key . '_page_id',
+				$page['title'],
+				$page['content'],
+				! empty( $page['parent'] ) ? wc_get_page_id( $page['parent'] ) : '',
+				! empty( $page['post_status'] ) ? $page['post_status'] : 'publish'
+			);
 		}
 	}
 
