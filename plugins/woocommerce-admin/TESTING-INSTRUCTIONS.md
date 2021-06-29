@@ -39,16 +39,16 @@ Individual payment gateway plugins dictate the settings and connection flow.  Fo
 2. Note that the gateway is installed if it requires a plugin
 3. On the connection step, a button should be presented that links to the gateway's (legacy) settings screen
 4. Delete the plugin
-5. Install some of the payment gateways from the links below.  They don't need to be activated, but the folder names should match those in the zip.
+5. Install some of the payment gateways from the links below.  They don't need to be activated, but the folder names should match those on WordPress.org to avoid conflicts.
 6. If setting fields are shown, make sure that validation works, input is saved, and is persisted on page refresh.  Make sure the gateway is marked as enabled and not labeled "Requires setup" if all fields are completed.
 7. If the "Connect" button is shown, follow the connection flow.  Make sure that you are returned to the payments task and that the gateway is enabled and marked as configured.
 8. Remove some settings manually under the payment gateway's legacy settings screen.  Make sure the gateway is no longer marked as configured.
 
 * Klarna - https://mc.a8c.com/includes/img-uploader/files/1624475036-klarna-checkout-for-woocommerce.zip
-* PayFast - https://mc.a8c.com/includes/img-uploader/files/1624475037-woocommerce-gateway-payfast.zip
+* PayFast - https://mc.a8c.com/includes/img-uploader/files/1624660950-woocommerce-payfast-gateway.zip
 * PayPal - https://mc.a8c.com/includes/img-uploader/files/1624475037-woocommerce-paypal-payments.zip
-* RazorPay - https://mc.a8c.com/includes/img-uploader/files/1624475037-razorpay-woocommerce.zip
-* Stripe - https://mc.a8c.com/includes/img-uploader/files/1624475040-woocommerce-gateway-stripe.zip
+* RazorPay - https://mc.a8c.com/includes/img-uploader/files/1624660848-woo-razorpay.zip
+* Stripe - https://mc.a8c.com/includes/img-uploader/files/1624661118-woocommerce-gateway-stripe.zip
 * MercaoPago - https://mc.a8c.com/includes/img-uploader/files/1624475616-woocommerce-mercadopago.zip
 * Square - https://mc.a8c.com/includes/img-uploader/files/1624475232-woocommerce-square.zip
 * eWAY - https://mc.a8c.com/includes/img-uploader/files/1624476063-woocommerce-gateway-eway.zip
