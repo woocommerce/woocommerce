@@ -47,12 +47,20 @@ const LAYOUTS = [
 ];
 
 export const DisplayOptions = () => {
-	const { defaultHomescreenLayout } = useSelect( ( select ) => {
+	const {
+		defaultHomescreenLayout,
+		taskListComplete,
+		isTaskListHidden,
+	} = useSelect( ( select ) => {
 		const { getOption } = select( OPTIONS_STORE_NAME );
 		return {
 			defaultHomescreenLayout:
 				getOption( 'woocommerce_default_homepage_layout' ) ||
 				'single_column',
+			taskListComplete:
+				getOption( 'woocommerce_task_list_complete' ) === 'yes',
+			isTaskListHidden:
+				getOption( 'woocommerce_task_list_hidden' ) === 'yes',
 		};
 	} );
 	const {
@@ -60,51 +68,70 @@ export const DisplayOptions = () => {
 		homepage_layout: layout,
 	} = useUserPreferences();
 
+	const shouldShowStoreLinks = taskListComplete || isTaskListHidden;
+	const hasTwoColumnContent =
+		shouldShowStoreLinks || window.wcAdminFeatures.analytics;
+
 	return (
 		<Slot>
-			{ ( fills ) => (
-				<DropdownMenu
-					icon={ <DisplayIcon /> }
-					/* translators: button label text should, if possible, be under 16 characters. */
-					label={ __( 'Display options', 'woocommerce-admin' ) }
-					toggleProps={ {
-						className:
-							'woocommerce-layout__activity-panel-tab display-options',
-						onClick: () =>
-							recordEvent( 'homescreen_display_click' ),
-					} }
-					popoverProps={ {
-						className: 'woocommerce-layout__activity-panel-popover',
-					} }
-				>
-					{ ( { onClose } ) => (
-						<>
-							{ fills }
-							<MenuGroup
-								className="woocommerce-layout__homescreen-display-options"
-								label={ __( 'Layout', 'woocommerce-admin' ) }
-							>
-								<MenuItemsChoice
-									choices={ LAYOUTS }
-									onSelect={ ( newLayout ) => {
-										updateUserPreferences( {
-											homepage_layout: newLayout,
-										} );
-										onClose();
-										recordEvent(
-											'homescreen_display_option',
-											{
-												display_option: newLayout,
+			{ ( fills ) => {
+				// If there is no fill to render and only single column content, don't render the display.
+				if ( fills.length === 0 && ! hasTwoColumnContent ) {
+					return null;
+				}
+				return (
+					<DropdownMenu
+						icon={ <DisplayIcon /> }
+						/* translators: button label text should, if possible, be under 16 characters. */
+						label={ __( 'Display options', 'woocommerce-admin' ) }
+						toggleProps={ {
+							className:
+								'woocommerce-layout__activity-panel-tab display-options',
+							onClick: () =>
+								recordEvent( 'homescreen_display_click' ),
+						} }
+						popoverProps={ {
+							className:
+								'woocommerce-layout__activity-panel-popover',
+						} }
+					>
+						{ ( { onClose } ) => (
+							<>
+								{ fills }
+								{ hasTwoColumnContent ? (
+									<MenuGroup
+										className="woocommerce-layout__homescreen-display-options"
+										label={ __(
+											'Layout',
+											'woocommerce-admin'
+										) }
+									>
+										<MenuItemsChoice
+											choices={ LAYOUTS }
+											onSelect={ ( newLayout ) => {
+												updateUserPreferences( {
+													homepage_layout: newLayout,
+												} );
+												onClose();
+												recordEvent(
+													'homescreen_display_option',
+													{
+														display_option: newLayout,
+													}
+												);
+											} }
+											value={
+												layout ||
+												defaultHomescreenLayout
 											}
-										);
-									} }
-									value={ layout || defaultHomescreenLayout }
-								/>
-							</MenuGroup>
-						</>
-					) }
-				</DropdownMenu>
-			) }
+										/>
+									</MenuGroup>
+								) : null }
+							</>
+						) }
+					</DropdownMenu>
+				);
+			} }
 		</Slot>
 	);
 };

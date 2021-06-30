@@ -57,9 +57,12 @@ export const Layout = ( {
 	updateOptions,
 } ) => {
 	const userPrefs = useUserPreferences();
+	const shouldShowStoreLinks = taskListComplete || isTaskListHidden;
+	const hasTwoColumnContent =
+		shouldShowStoreLinks || window.wcAdminFeatures.analytics;
 	const twoColumns =
 		( userPrefs.homepage_layout || defaultHomescreenLayout ) ===
-		'two_columns';
+			'two_columns' && hasTwoColumnContent;
 	const [ showInbox, setShowInbox ] = useState( true );
 
 	const isTaskListEnabled = bothTaskListsHidden === false;
@@ -84,7 +87,6 @@ export const Layout = ( {
 	}, [ maybeToggleColumns ] );
 
 	const shouldStickColumns = isWideViewport.current && twoColumns;
-	const shouldShowStoreLinks = taskListComplete || isTaskListHidden;
 
 	const renderColumns = () => {
 		return (
@@ -103,7 +105,7 @@ export const Layout = ( {
 					<InboxPanel />
 				</Column>
 				<Column shouldStick={ shouldStickColumns }>
-					<StatsOverview />
+					{ window.wcAdminFeatures.analytics && <StatsOverview /> }
 					{ shouldShowStoreLinks && <StoreManagementLinks /> }
 				</Column>
 			</>
