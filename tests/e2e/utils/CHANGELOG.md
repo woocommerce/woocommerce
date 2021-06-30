@@ -3,6 +3,7 @@
 ## Added
 
 - Factories for variable product, variation, and grouped product
+- New function to create orders by batch using the orders API
 
 # 0.1.5
 
