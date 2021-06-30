@@ -126,6 +126,8 @@ function wc_create_page( $slug, $option = '', $page_title = '', $page_content = 
 			'comment_status' => 'closed',
 		);
 		$page_id   = wp_insert_post( $page_data );
+
+		do_action( 'woocommerce_page_created', $page_id, $page_data );
 	}
 
 	if ( $option ) {
