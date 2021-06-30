@@ -5,9 +5,6 @@ jQuery(
 			'click',
 			'#the-list .editinline',
 			function() {
-
-				inlineEditPost.revert();
-
 				var post_id = $( this ).closest( 'tr' ).attr( 'id' );
 
 				post_id = post_id.replace( 'post-', '' );
