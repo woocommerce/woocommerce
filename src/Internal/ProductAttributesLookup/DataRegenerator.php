@@ -6,6 +6,7 @@
 namespace Automattic\WooCommerce\Internal\ProductAttributesLookup;
 
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
+use Automattic\WooCommerce\Utilities\ArrayUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -65,6 +66,23 @@ class DataRegenerator {
 			function () {
 				$this->run_regeneration_step_callback();
 			}
+		);
+
+		add_action(
+			'add_meta_boxes',
+			function() {
+				$this->add_product_regeneration_metabox();
+			},
+			999
+		);
+
+		add_action(
+			'save_post_product',
+			function( $product_id ) {
+				$this->on_save_product( $product_id );
+			},
+			999,
+			1
 		);
 	}
 
@@ -394,5 +412,61 @@ CREATE TABLE ' . $this->lookup_table_name . '(
 		}
 
 		update_option( 'woocommerce_attribute_lookup__enabled', $enable ? 'yes' : 'no' );
+	}
+
+	/**
+	 * Add a metabox in the product page with a button to regenerate the product attributes lookup data for the product.
+	 */
+	private function add_product_regeneration_metabox() {
+		if ( ! $this->data_store->is_feature_visible() ) {
+			return;
+		}
+
+		add_meta_box(
+			'woocommerce-product-foobars',
+			__( 'Lookup data', 'woocommerce' ),
+			function() {
+				$this->metabox_output();
+			},
+			'product',
+			'side',
+			'low'
+		);
+	}
+
+	/**
+	 * HTML output for the lookup data regeneration metabox.
+	 */
+	private function metabox_output() {
+		// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
+		wp_nonce_field( 'regenerate-attributes-lookup-data', '_wc_regenerate_attributes_lookup_data_nonce' );
+		?>
+		<p><?php echo __( 'Click to regenerate the product attributes lookup data for this product:', 'woocommerce' ); ?></p>
+		<button class="button button-primary button-large" name="woocommerce-product-lookup-action" value="regenerate-attributes-lookup-data">
+		<?php echo __( 'Regenerate', 'woocommerce' ); ?>
+		</button>
+		<?php
+		// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+	}
+
+	/**
+	 * Hook on the 'save_post_product' filter to regenerate the product attributes lookup data when the regenerate metabox button was pressed.
+	 *
+	 * @param int $product_id The product id.
+	 */
+	private function on_save_product( int $product_id ) {
+		if ( ! wp_verify_nonce( ArrayUtil::get_value_or_default( $_POST, '_wc_regenerate_attributes_lookup_data_nonce' ), 'regenerate-attributes-lookup-data' ) ) {
+			return;
+		}
+
+		if ( ! $this->data_store->is_feature_visible() || 'regenerate-attributes-lookup-data' !== ArrayUtil::get_value_or_default( $_POST, 'woocommerce-product-lookup-action' ) ) {
+			return;
+		}
+
+		if ( ! wc_get_product( $product_id ) ) {
+			return;
+		}
+
+		$this->data_store->create_data_for_product( $product_id );
 	}
 }
