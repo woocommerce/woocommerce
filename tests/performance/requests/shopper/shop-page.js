@@ -15,7 +15,7 @@ import {
 } from '../../headers.js';
 
 /* add custom metrics for each step to the standard output */
-let shopPageTrend = new Trend('_step_02_shop_page_duration');
+let shopPageTrend = new Trend('wc_get_shop');
 
 export function ShopPage() {
 

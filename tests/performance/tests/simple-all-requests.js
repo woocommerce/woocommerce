@@ -1,7 +1,9 @@
 import { HomePage } from '../requests/shopper/home.js';
 import { ShopPage } from '../requests/shopper/shop-page.js';
 import { SingleProduct } from '../requests/shopper/single-product.js';
-import { CheckoutFlow } from '../requests/shopper/checkout.js';
+import { Cart } from '../requests/shopper/cart.js';
+import { CheckoutGuest } from '../requests/shopper/checkout-guest.js';
+import { CheckoutCustomerLogin } from '../requests/shopper/checkout-customer-login.js';
 
 export let options = {
     scenarios: {
@@ -49,5 +51,6 @@ export function single_product() {
 	SingleProduct();
 }
 export function checkout() {
-	CheckoutFlow();
+    Cart();
+	CheckoutGuest();
 }
