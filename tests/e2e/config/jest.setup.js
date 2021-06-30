@@ -8,7 +8,7 @@ const {
 
 const config = require('config');
 const { HTTPClientFactory } = require('@woocommerce/api');
-const { addConsoleSuppression } = require( '@woocommerce/e2e-environment' );
+const { addConsoleSuppression, updateReadyPageStatus } = require( '@woocommerce/e2e-environment' );
 
 // @todo: remove this once https://github.com/woocommerce/woocommerce-admin/issues/6992 has been addressed
 addConsoleSuppression( 'woocommerce_shared_settings' );
