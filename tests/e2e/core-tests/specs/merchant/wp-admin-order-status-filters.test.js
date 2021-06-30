@@ -4,7 +4,7 @@
  */
 const {
 	merchant,
-	createSimpleOrder,
+	batchCreateOrders,
 	clickFilter,
 	moveAllItemsToTrash,
 } = require( '@woocommerce/e2e-utils' );
@@ -46,18 +46,17 @@ const orderStatus = {
 const runOrderStatusFiltersTest = () => {
 	describe('WooCommerce Orders > Filter Orders by Status', () => {
 		beforeAll(async () => {
-			// First, let's login
-			await merchant.login();
+			// First, let's create some orders we can filter against
+			const statuses = Object.entries(orderStatus).map((entryPair) => {
+				const statusName = entryPair[1].name;
 
-			// Next, let's create some orders we can filter against
-			await createSimpleOrder(orderStatus.pending.description.text);
-			await createSimpleOrder(orderStatus.processing.description.text);
-			await createSimpleOrder(orderStatus.onHold.description.text);
-			await createSimpleOrder(orderStatus.completed.description.text);
-			await createSimpleOrder(orderStatus.cancelled.description.text);
-			await createSimpleOrder(orderStatus.refunded.description.text);
-			await createSimpleOrder(orderStatus.failed.description.text);
-		}, 60000);
+				return statusName.replace('wc-', '');
+			});
+			await batchCreateOrders(statuses);
+
+			// Next, let's login
+			await merchant.login();
+		});
 
 		afterAll( async () => {
 			// Make sure we're on the all orders view and cleanup the orders we created
