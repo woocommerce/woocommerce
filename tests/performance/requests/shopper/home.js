@@ -15,7 +15,7 @@ import {
 } from '../../headers.js';
 
 /* add custom metrics for each step to the standard output */
-let homePageTrend = new Trend('_step_01_home_page_duration');
+let homePageTrend = new Trend('wc_get_site_root');
 
 export function HomePage() {
 
