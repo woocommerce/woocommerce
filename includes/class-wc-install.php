@@ -176,6 +176,7 @@ class WC_Install {
 		add_action( 'admin_init', array( __CLASS__, 'wc_admin_db_update_notice' ) );
 		add_action( 'woocommerce_run_update_callback', array( __CLASS__, 'run_update_callback' ) );
 		add_action( 'admin_init', array( __CLASS__, 'install_actions' ) );
+		add_action( 'woocommerce_page_created', array( __CLASS__, 'add_admin_note_after_page_created' ), 10, 2 );
 		add_filter( 'plugin_action_links_' . WC_PLUGIN_BASENAME, array( __CLASS__, 'plugin_action_links' ) );
 		add_filter( 'plugin_row_meta', array( __CLASS__, 'plugin_row_meta' ), 10, 2 );
 		add_filter( 'wpmu_drop_tables', array( __CLASS__, 'wpmu_drop_tables' ) );
@@ -583,8 +584,8 @@ class WC_Install {
 					'title'   => _x( 'My account', 'Page title', 'woocommerce' ),
 					'content' => '<!-- wp:shortcode -->[' . apply_filters( 'woocommerce_my_account_shortcode_tag', 'woocommerce_my_account' ) . ']<!-- /wp:shortcode -->',
 				),
-				'refund_return' => array(
-					'name'        => _x( 'refund_return', 'Page slug', 'woocommerce' ),
+				'refund_returns' => array(
+					'name'        => _x( 'refund_returns', 'Page slug', 'woocommerce' ),
 					'title'       => _x( 'Refund and Returns Policy', 'Page title', 'woocommerce' ),
 					'content'     => self::get_refunds_return_policy_page_content(),
 					'post_status' => 'draft',
@@ -1815,6 +1816,26 @@ CREATE TABLE {$wpdb->prefix}wc_reserved_stock (
 <p>Contact us at {email} for questions related to refunds and returns.</p>
 <!-- /wp:paragraph -->
 EOT;
+	}
+
+	/**
+	 * Adds an admin inbox note after a page has been created to notify
+	 * user. For example to take action to edit the page such as the
+	 * Refund and returns page.
+	 *
+	 * @since 5.6.0
+	 * @param int   $page_id ID of the page.
+	 * @param array $page_data The data of the page created.
+	 * @return void
+	 */
+	public static function add_admin_note_after_page_created( $page_id, $page_data ) {
+		if ( ! WC()->is_wc_admin_active() ) {
+			return;
+		}
+
+		if ( 'refund_returns' === $page_data['post_name'] ) {
+			WC_Notes_Refund_Returns::possibly_add_note( $page_id );
+		}
 	}
 }
 
