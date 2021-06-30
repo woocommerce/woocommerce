@@ -566,6 +566,8 @@ class WC_Product_CSV_Importer_Controller {
 						/* translators: %d: Attribute number */
 						__( 'Attribute %d default', 'woocommerce' ) => 'attributes:default',
 						/* translators: %d: Download number */
+						__( 'Download %d ID', 'woocommerce' ) => 'downloads:id',
+						/* translators: %d: Download number */
 						__( 'Download %d name', 'woocommerce' ) => 'downloads:name',
 						/* translators: %d: Download number */
 						__( 'Download %d URL', 'woocommerce' ) => 'downloads:url',
@@ -721,6 +723,7 @@ class WC_Product_CSV_Importer_Controller {
 			'downloads'          => array(
 				'name'    => __( 'Downloads', 'woocommerce' ),
 				'options' => array(
+					'downloads:id' . $index   => __( 'Download ID', 'woocommerce' ),
 					'downloads:name' . $index => __( 'Download name', 'woocommerce' ),
 					'downloads:url' . $index  => __( 'Download URL', 'woocommerce' ),
 					'download_limit'          => __( 'Download limit', 'woocommerce' ),

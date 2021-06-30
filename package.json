@@ -1,7 +1,7 @@
 {
   "name": "woocommerce",
   "title": "WooCommerce",
-  "version": "5.5.0",
+  "version": "5.6.0",
   "homepage": "https://woocommerce.com/",
   "repository": {
     "type": "git",

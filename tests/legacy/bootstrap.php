@@ -58,6 +58,9 @@ class WC_Unit_Tests_Bootstrap {
 		// load test function so tests_add_filter() is available.
 		require_once $this->wp_tests_dir . '/includes/functions.php';
 
+		// Always load PayPal Standard for unit tests.
+		tests_add_filter( 'woocommerce_should_load_paypal_standard', '__return_true' );
+
 		// load WC.
 		tests_add_filter( 'muplugins_loaded', array( $this, 'load_wc' ) );
 
