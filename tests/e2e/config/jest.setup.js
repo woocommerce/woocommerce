@@ -7,7 +7,7 @@ import {
 
 const config = require('config');
 const { HTTPClientFactory } = require('@woocommerce/api');
-const { addConsoleSuppression } = require( '@woocommerce/e2e-environment' );
+const { addConsoleSuppression, updateReadyPageStatus } = require( '@woocommerce/e2e-environment' );
 
 // @todo: remove this once https://github.com/woocommerce/woocommerce-admin/issues/6992 has been addressed
 addConsoleSuppression( 'woocommerce_shared_settings' );
@@ -32,34 +32,6 @@ async function trashExistingPosts() {
 	for (const post of posts) {
 		await client.delete(`${wpPostsEndpoint}/${post.id}`);
 	}
-}
-
-/**
- * Uses the WordPress API to update the Ready page's status.
- *
- * @param {string} status | Status to update the page to. One of: publish, future, draft, pending, private
- */
-async function updateReadyPageStatus( status ) {
-	const apiUrl = config.get('url');
-	const wpPagesEndpoint = '/wp/v2/pages';
-	const adminUsername = config.get('users.admin.username');
-	const adminPassword = config.get('users.admin.password');
-	const client = HTTPClientFactory.build(apiUrl)
-		.withBasicAuth(adminUsername, adminPassword)
-		.create();
-
-	// As the default status filter in the API is `publish`, we need to
-	// filter based on the supplied status otherwise no results are returned.
-	let statusFilter = 'publish';
-	if ( 'publish' === status ) {
-		// The page will be in a draft state, so we need to filter on that status
-		statusFilter = 'draft';
-	}
-	const getPostsResponse = await client.get(`${wpPagesEndpoint}?search=ready&status=${statusFilter}`);
-	const pageId = getPostsResponse.data[0].id;
-
-	// Update the page to the new status
-	await client.post(`${wpPagesEndpoint}/${pageId}`, { 'status': status });
 }
 
 // Before every test suite run, delete all content created by the test. This ensures

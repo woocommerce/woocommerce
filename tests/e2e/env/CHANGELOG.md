@@ -1,5 +1,7 @@
 # Unreleased
 
+- `updateReadyPageStatus` utility to update the status of the ready page
+
 # 0.2.2
 
 ## Added
