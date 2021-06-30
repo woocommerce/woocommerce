@@ -223,41 +223,45 @@ const merchant = {
 		} );
 	},
 
-	installAllUpdates: async ( updateWordPress = true, updatePlugins = true, updateThemes = true ) => {
-		if ( updateWordPress ) {
-			await merchant.openWordPressUpdatesPage();
-			if ( null !== await page.$( 'form[action="update-core.php?action=do-core-upgrade"][name="upgrade"]' ) ) {
-				await Promise.all([
-					expect( page ).toClick( 'input.button-primary' ),
+	installAllUpdates: async () => {
+		await merchant.updateWordPress();
+		await merchant.updatePlugins();
+		await merchant.updateThemes();
+	},
 
-					// The WordPress update can take some time, so setting a longer timeout here
-					page.waitForNavigation( { waitUntil: 'networkidle0', timeout: 100000 } ),
-				]);
-			}
-		}
+	updateWordPress: async () => {
+		await merchant.openWordPressUpdatesPage();
+		if ( null !== await page.$( 'form[action="update-core.php?action=do-core-upgrade"][name="upgrade"]' ) ) {
+			await Promise.all([
+				expect( page ).toClick( 'input.button-primary' ),
 
-		if ( updatePlugins ) {
-			await merchant.openWordPressUpdatesPage();
-			if ( null !== await page.$( 'form[action="update-core.php?action=do-plugin-upgrade"][name="upgrade-plugins"]' ) ) {
-				await setCheckbox( '#plugins-select-all' );
-				await Promise.all([
-					expect( page ).toClick( '#upgrade-plugins' ),
-					page.waitForNavigation( { waitUntil: 'networkidle0' } ),
-				]);
-			}
-		}
-
-		if ( updateThemes ) {
-			await merchant.openWordPressUpdatesPage();
-			if (null !== await page.$( 'form[action="update-core.php?action=do-theme-upgrade"][name="upgrade-themes"]' )) {
-				await setCheckbox( '#themes-select-all' );
-				await Promise.all([
-					expect( page ).toClick( '#upgrade-themes' ),
-					page.waitForNavigation( { waitUntil: 'networkidle0' } ),
-				]);
-			}
+				// The WordPress update can take some time, so setting a longer timeout here
+				page.waitForNavigation( { waitUntil: 'networkidle0', timeout: 1000000 } ),
+			]);
 		}
 	},
+
+	updatePlugins: async () => {
+		await merchant.openWordPressUpdatesPage();
+		if ( null !== await page.$( 'form[action="update-core.php?action=do-plugin-upgrade"][name="upgrade-plugins"]' ) ) {
+			await setCheckbox( '#plugins-select-all' );
+			await Promise.all([
+				expect( page ).toClick( '#upgrade-plugins' ),
+				page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+			]);
+		}
+	},
+
+	updateThemes: async () => {
+		await merchant.openWordPressUpdatesPage();
+		if ( null !== await page.$( 'form[action="update-core.php?action=do-theme-upgrade"][name="upgrade-themes"]' )) {
+			await setCheckbox( '#themes-select-all' );
+			await Promise.all([
+				expect( page ).toClick( '#upgrade-themes' ),
+				page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+			]);
+		}
+	}
 };
 
 module.exports = merchant;
