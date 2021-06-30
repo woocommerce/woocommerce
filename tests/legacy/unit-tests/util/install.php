@@ -63,6 +63,7 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 		delete_option( 'woocommerce_cart_page_id' );
 		delete_option( 'woocommerce_checkout_page_id' );
 		delete_option( 'woocommerce_myaccount_page_id' );
+		delete_option( 'woocommerce_refund_returns_page_id' );
 
 		WC_Install::create_pages();
 
@@ -70,18 +71,21 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 		$this->assertGreaterThan( 0, get_option( 'woocommerce_cart_page_id' ) );
 		$this->assertGreaterThan( 0, get_option( 'woocommerce_checkout_page_id' ) );
 		$this->assertGreaterThan( 0, get_option( 'woocommerce_myaccount_page_id' ) );
+		$this->assertGreaterThan( 0, get_option( 'woocommerce_refund_returns_page_id' ) );
 
 		// Delete pages.
 		wp_delete_post( get_option( 'woocommerce_shop_page_id' ), true );
 		wp_delete_post( get_option( 'woocommerce_cart_page_id' ), true );
 		wp_delete_post( get_option( 'woocommerce_checkout_page_id' ), true );
 		wp_delete_post( get_option( 'woocommerce_myaccount_page_id' ), true );
+		wp_delete_post( get_option( 'woocommerce_refund_returns_page_id' ), true );
 
 		// Clear options.
 		delete_option( 'woocommerce_shop_page_id' );
 		delete_option( 'woocommerce_cart_page_id' );
 		delete_option( 'woocommerce_checkout_page_id' );
 		delete_option( 'woocommerce_myaccount_page_id' );
+		delete_option( 'woocommerce_refund_returns_page_id' );
 
 		WC_Install::create_pages();
 
@@ -89,6 +93,7 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 		$this->assertGreaterThan( 0, get_option( 'woocommerce_cart_page_id' ) );
 		$this->assertGreaterThan( 0, get_option( 'woocommerce_checkout_page_id' ) );
 		$this->assertGreaterThan( 0, get_option( 'woocommerce_myaccount_page_id' ) );
+		$this->assertGreaterThan( 0, get_option( 'woocommerce_refund_returns_page_id' ) );
 	}
 
 	/**
