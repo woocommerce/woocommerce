@@ -2,6 +2,7 @@ const getAppRoot = require( './app-root' );
 const { getAppName, getAppBase } = require( './app-name' );
 const { getTestConfig, getAdminConfig } = require( './test-config' );
 const takeScreenshotFor = require( './take-screenshot' );
+const updateReadyPageStatus = require('./update-ready-page');
 const consoleUtils = require( './filter-console' );
 
 module.exports = {
@@ -11,5 +12,6 @@ module.exports = {
 	getTestConfig,
 	getAdminConfig,
 	takeScreenshotFor,
+	updateReadyPageStatus,
 	...consoleUtils,
 };
