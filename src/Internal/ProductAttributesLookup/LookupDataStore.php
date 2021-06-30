@@ -76,7 +76,7 @@ class LookupDataStore {
 		add_filter(
 			'woocommerce_get_sections_products',
 			function ( $products ) {
-				if ( $this->is_feature_visible() ) {
+				if ( $this->is_feature_visible() && $this->check_lookup_table_exists() ) {
 					$products['advanced'] = __( 'Advanced', 'woocommerce' );
 				}
 				return $products;
@@ -88,21 +88,39 @@ class LookupDataStore {
 		add_filter(
 			'woocommerce_get_settings_products',
 			function ( $settings, $section_id ) {
-				if ( 'advanced' === $section_id && $this->is_feature_visible() ) {
-					$settings[] =
-						array(
-							'title' => __( 'Product attributes lookup table', 'woocommerce' ),
-							'type'  => 'title',
+				if ( 'advanced' === $section_id && $this->is_feature_visible() && $this->check_lookup_table_exists() ) {
+					$title_item = array(
+						'title' => __( 'Product attributes lookup table', 'woocommerce' ),
+						'type'  => 'title',
+					);
+
+					$regeneration_is_in_progress = $this->regeneration_is_in_progress();
+
+					if ( $regeneration_is_in_progress ) {
+						$title_item['desc'] = __( 'These settings are not available while the lookup table regeneration is in progress.', 'woocommerce' );
+					}
+
+					$settings[] = $title_item;
+
+					if ( ! $regeneration_is_in_progress ) {
+						$settings[] = array(
+							'title'         => __( 'Enable table usage', 'woocommerce' ),
+							'desc'          => __( 'Use the product attributes lookup table for catalog filtering.', 'woocommerce' ),
+							'id'            => 'woocommerce_attribute_lookup__enable',
+							'default'       => 'no',
+							'type'          => 'checkbox',
+							'checkboxgroup' => 'start',
 						);
 
-					$settings[] = array(
-						'title'         => __( 'Direct updates', 'woocommerce' ),
-						'desc'          => __( 'Update the table directly upon product changes, instead of scheduling a deferred update.', 'woocommerce' ),
-						'id'            => 'woocommerce_attribute_lookup__direct_updates',
-						'default'       => 'no',
-						'type'          => 'checkbox',
-						'checkboxgroup' => 'start',
-					);
+						$settings[] = array(
+							'title'         => __( 'Direct updates', 'woocommerce' ),
+							'desc'          => __( 'Update the table directly upon product changes, instead of scheduling a deferred update.', 'woocommerce' ),
+							'id'            => 'woocommerce_attribute_lookup__direct_updates',
+							'default'       => 'no',
+							'type'          => 'checkbox',
+							'checkboxgroup' => 'start',
+						);
+					}
 
 					$settings[] = array( 'type' => 'sectionend' );
 				}
@@ -132,7 +150,7 @@ AND table_name = %s;',
 		);
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		return 0 !== $wpdb->get_var( $query );
+		return (bool) $wpdb->get_var( $query );
 	}
 
 	/**
@@ -654,5 +672,28 @@ AND table_name = %s;',
 			)
 		);
 		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
+	}
+
+	/**
+	 * Tells if a lookup table regeneration is currently in progress.
+	 *
+	 * @return bool True if a lookup table regeneration is already in progress.
+	 */
+	public function regeneration_is_in_progress() {
+		return 'yes' === get_option( 'woocommerce_attribute_lookup__regeneration_in_progress', null );
+	}
+
+	/**
+	 * Set a permanent flag (via option) indicating that the lookup table regeneration is in process.
+	 */
+	public function set_regeneration_in_progress_flag() {
+		update_option( 'woocommerce_attribute_lookup__regeneration_in_progress', 'yes' );
+	}
+
+	/**
+	 * Remove the flag indicating that the lookup table regeneration is in process.
+	 */
+	public function unset_regeneration_in_progress_flag() {
+		delete_option( 'woocommerce_attribute_lookup__regeneration_in_progress' );
 	}
 }
