@@ -4,17 +4,19 @@ import {
 	IProductCrossSells,
 	IProductDelivery,
 	IProductInventory,
+	IProductPrice,
 	IProductSalesTax,
 	IProductShipping,
 	IProductUpSells,
 	ProductSearchParams,
 } from './abstract';
 import {
+	ProductCommonUpdateParams,
+	ProductCrossUpdateParams,
 	ProductDeliveryUpdateParams,
 	ProductInventoryUpdateParams,
-	ProductCommonUpdateParams,
+	ProductPriceUpdateParams,
 	ProductSalesTaxUpdateParams,
-	ProductCrossUpdateParams,
 	ProductShippingUpdateParams,
 	ProductUpSellUpdateParams,
 	ProductDownload,
@@ -40,6 +42,7 @@ type SimpleProductUpdateParams = ProductDeliveryUpdateParams
 	& ProductCommonUpdateParams
 	& ProductCrossUpdateParams
 	& ProductInventoryUpdateParams
+	& ProductPriceUpdateParams
 	& ProductSalesTaxUpdateParams
 	& ProductShippingUpdateParams
 	& ProductUpSellUpdateParams;
@@ -97,6 +100,7 @@ export class SimpleProduct extends AbstractProduct implements
 	IProductCrossSells,
 	IProductDelivery,
 	IProductInventory,
+	IProductPrice,
 	IProductSalesTax,
 	IProductShipping,
 	IProductUpSells {
@@ -130,6 +134,17 @@ export class SimpleProduct extends AbstractProduct implements
 	public readonly backorderStatus: BackorderStatus = BackorderStatus.Allowed;
 	public readonly canBackorder: boolean = false;
 	public readonly isOnBackorder: boolean = false;
+
+	/**
+	 * @see ./abstracts/price.ts
+	 */
+	public readonly price: string = '';
+	public readonly priceHtml: string = '';
+	public readonly regularPrice: string = '';
+	public readonly onSale: boolean = false;
+	public readonly salePrice: string = '';
+	public readonly saleStart: Date | null = null;
+	public readonly saleEnd: Date | null = null;
 
 	/**
 	 * @see ./abstracts/sales-tax.ts

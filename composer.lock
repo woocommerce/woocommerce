@@ -4,32 +4,39 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "95f29b23c1baa50f079597378d1673f1",
+    "content-hash": "6fb169d13104940f13185353a857a799",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
-            "version": "v2.9.1",
+            "version": "2.10.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Automattic/jetpack-autoloader.git",
-                "reference": "d6ca2cc26ad6963e1be19b3338a9e98f40d9bd88"
+                "reference": "20393c4677765c3e737dcb5aee7a3f7b90dce4b3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Automattic/jetpack-autoloader/zipball/d6ca2cc26ad6963e1be19b3338a9e98f40d9bd88",
-                "reference": "d6ca2cc26ad6963e1be19b3338a9e98f40d9bd88",
+                "url": "https://api.github.com/repos/Automattic/jetpack-autoloader/zipball/20393c4677765c3e737dcb5aee7a3f7b90dce4b3",
+                "reference": "20393c4677765c3e737dcb5aee7a3f7b90dce4b3",
                 "shasum": ""
             },
             "require": {
                 "composer-plugin-api": "^1.1 || ^2.0"
             },
             "require-dev": {
+                "automattic/jetpack-changelogger": "^1.1",
                 "yoast/phpunit-polyfills": "0.2.0"
             },
             "type": "composer-plugin",
             "extra": {
                 "class": "Automattic\\Jetpack\\Autoloader\\CustomAutoloaderPlugin",
-                "mirror-repo": "Automattic/jetpack-autoloader"
+                "mirror-repo": "Automattic/jetpack-autoloader",
+                "changelogger": {
+                    "link-template": "https://github.com/Automattic/jetpack-autoloader/compare/v${old}...v${new}"
+                },
+                "branch-alias": {
+                    "dev-master": "2.10.x-dev"
+                }
             },
             "autoload": {
                 "classmap": [
@@ -44,7 +51,10 @@
                 "GPL-2.0-or-later"
             ],
             "description": "Creates a custom autoloader for a plugin or theme.",
-            "time": "2021-02-05T19:07:06+00:00"
+            "support": {
+                "source": "https://github.com/Automattic/jetpack-autoloader/tree/2.10.1"
+            },
+            "time": "2021-03-30T15:15:59+00:00"
         },
         {
             "name": "automattic/jetpack-constants",
@@ -75,20 +85,23 @@
                 "GPL-2.0-or-later"
             ],
             "description": "A wrapper for defining constants in a more testable way.",
+            "support": {
+                "source": "https://github.com/Automattic/jetpack-constants/tree/v1.5.1"
+            },
             "time": "2020-10-28T19:00:31+00:00"
         },
         {
             "name": "composer/installers",
-            "version": "v1.10.0",
+            "version": "v1.11.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/composer/installers.git",
-                "reference": "1a0357fccad9d1cc1ea0c9a05b8847fbccccb78d"
+                "reference": "ae03311f45dfe194412081526be2e003960df74b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/composer/installers/zipball/1a0357fccad9d1cc1ea0c9a05b8847fbccccb78d",
-                "reference": "1a0357fccad9d1cc1ea0c9a05b8847fbccccb78d",
+                "url": "https://api.github.com/repos/composer/installers/zipball/ae03311f45dfe194412081526be2e003960df74b",
+                "reference": "ae03311f45dfe194412081526be2e003960df74b",
                 "shasum": ""
             },
             "require": {
@@ -182,6 +195,7 @@
                 "majima",
                 "mako",
                 "mediawiki",
+                "miaoxing",
                 "modulework",
                 "modx",
                 "moodle",
@@ -199,12 +213,17 @@
                 "sydes",
                 "sylius",
                 "symfony",
+                "tastyigniter",
                 "typo3",
                 "wordpress",
                 "yawik",
                 "zend",
                 "zikula"
             ],
+            "support": {
+                "issues": "https://github.com/composer/installers/issues",
+                "source": "https://github.com/composer/installers/tree/v1.11.0"
+            },
             "funding": [
                 {
                     "url": "https://packagist.com",
@@ -219,7 +238,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-01-14T11:07:16+00:00"
+            "time": "2021-04-28T06:42:17+00:00"
         },
         {
             "name": "maxmind-db/reader",
@@ -279,6 +298,10 @@
                 "geolocation",
                 "maxmind"
             ],
+            "support": {
+                "issues": "https://github.com/maxmind/MaxMind-DB-Reader-php/issues",
+                "source": "https://github.com/maxmind/MaxMind-DB-Reader-php/tree/v1.6.0"
+            },
             "time": "2019-12-19T22:59:03+00:00"
         },
         {
@@ -353,6 +376,10 @@
                 "email",
                 "pre-processing"
             ],
+            "support": {
+                "issues": "https://github.com/MyIntervals/emogrifier/issues",
+                "source": "https://github.com/MyIntervals/emogrifier"
+            },
             "time": "2019-12-26T19:37:31+00:00"
         },
         {
@@ -402,6 +429,10 @@
                 "container-interop",
                 "psr"
             ],
+            "support": {
+                "issues": "https://github.com/php-fig/container/issues",
+                "source": "https://github.com/php-fig/container/tree/master"
+            },
             "time": "2017-02-14T16:28:37+00:00"
         },
         {
@@ -462,22 +493,22 @@
         },
         {
             "name": "woocommerce/action-scheduler",
-            "version": "3.1.6",
+            "version": "3.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/action-scheduler.git",
-                "reference": "275d0ba54b1c263dfc62688de2fa9a25a373edf8"
+                "reference": "3c24064f115cd55e972d73d5d48f14133ac60b0d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/action-scheduler/zipball/275d0ba54b1c263dfc62688de2fa9a25a373edf8",
-                "reference": "275d0ba54b1c263dfc62688de2fa9a25a373edf8",
+                "url": "https://api.github.com/repos/woocommerce/action-scheduler/zipball/3c24064f115cd55e972d73d5d48f14133ac60b0d",
+                "reference": "3c24064f115cd55e972d73d5d48f14133ac60b0d",
                 "shasum": ""
             },
             "require-dev": {
-                "phpunit/phpunit": "^5.6",
-                "woocommerce/woocommerce-sniffs": "0.0.8",
-                "wp-cli/wp-cli": "~1.5.1"
+                "phpunit/phpunit": "^7.5",
+                "woocommerce/woocommerce-sniffs": "0.1.0",
+                "wp-cli/wp-cli": "~2.5.0"
             },
             "type": "wordpress-plugin",
             "extra": {
@@ -493,20 +524,24 @@
             ],
             "description": "Action Scheduler for WordPress and WooCommerce",
             "homepage": "https://actionscheduler.org/",
-            "time": "2020-05-12T16:22:33+00:00"
+            "support": {
+                "issues": "https://github.com/woocommerce/action-scheduler/issues",
+                "source": "https://github.com/woocommerce/action-scheduler/tree/3.2.1"
+            },
+            "time": "2021-06-21T20:21:35+00:00"
         },
         {
             "name": "woocommerce/woocommerce-admin",
-            "version": "2.0.1",
+            "version": "2.4.0-rc.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-admin.git",
-                "reference": "b7e89c48479348847fc97ae8be8c27d068106d04"
+                "reference": "ed72985cd459831c555dff2ff5f75111b6e210c1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/b7e89c48479348847fc97ae8be8c27d068106d04",
-                "reference": "b7e89c48479348847fc97ae8be8c27d068106d04",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/ed72985cd459831c555dff2ff5f75111b6e210c1",
+                "reference": "ed72985cd459831c555dff2ff5f75111b6e210c1",
                 "shasum": ""
             },
             "require": {
@@ -515,7 +550,7 @@
                 "php": ">=7.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "7.5.20",
+                "bamarni/composer-bin-plugin": "^1.4",
                 "suin/phpcs-psr4-sniff": "^2.2",
                 "woocommerce/woocommerce-sniffs": "0.1.0"
             },
@@ -525,6 +560,9 @@
                     "test": "Run unit tests",
                     "phpcs": "Analyze code against the WordPress coding standards with PHP_CodeSniffer",
                     "phpcbf": "Fix coding standards warnings/errors automatically with PHP Code Beautifier"
+                },
+                "bamarni-bin": {
+                    "target-directory": "bin/composer"
                 }
             },
             "autoload": {
@@ -538,20 +576,24 @@
             ],
             "description": "A modern, javascript-driven WooCommerce Admin experience.",
             "homepage": "https://github.com/woocommerce/woocommerce-admin",
-            "time": "2021-02-12T01:19:48+00:00"
+            "support": {
+                "issues": "https://github.com/woocommerce/woocommerce-admin/issues",
+                "source": "https://github.com/woocommerce/woocommerce-admin/tree/v2.4.0-rc.2"
+            },
+            "time": "2021-06-18T05:58:25+00:00"
         },
         {
             "name": "woocommerce/woocommerce-blocks",
-            "version": "v4.4.3",
+            "version": "v5.3.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-gutenberg-products-block.git",
-                "reference": "1eade21846e81d5aaf9bf40cdd1be60778849244"
+                "reference": "28c7c4f9b5cace9098fb2246ff93abe110a26bca"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/1eade21846e81d5aaf9bf40cdd1be60778849244",
-                "reference": "1eade21846e81d5aaf9bf40cdd1be60778849244",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/28c7c4f9b5cace9098fb2246ff93abe110a26bca",
+                "reference": "28c7c4f9b5cace9098fb2246ff93abe110a26bca",
                 "shasum": ""
             },
             "require": {
@@ -559,7 +601,7 @@
                 "composer/installers": "^1.7.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "6.5.14",
+                "phpunit/phpunit": "7.5.20",
                 "woocommerce/woocommerce-sniffs": "0.1.0"
             },
             "type": "wordpress-plugin",
@@ -585,7 +627,11 @@
                 "gutenberg",
                 "woocommerce"
             ],
-            "time": "2021-02-11T18:07:48+00:00"
+            "support": {
+                "issues": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues",
+                "source": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/v5.3.1"
+            },
+            "time": "2021-06-15T09:12:48+00:00"
         }
     ],
     "packages-dev": [
@@ -633,6 +679,10 @@
                 "isolation",
                 "tool"
             ],
+            "support": {
+                "issues": "https://github.com/bamarni/composer-bin-plugin/issues",
+                "source": "https://github.com/bamarni/composer-bin-plugin/tree/master"
+            },
             "time": "2020-05-03T08:27:20+00:00"
         }
     ],
@@ -648,5 +698,5 @@
     "platform-overrides": {
         "php": "7.0"
     },
-    "plugin-api-version": "1.1.0"
+    "plugin-api-version": "2.0.0"
 }

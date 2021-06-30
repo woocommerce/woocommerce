@@ -1,5 +1,5 @@
 /* eslint-disable jest/no-export, jest/no-disabled-tests, jest/no-standalone-expect */
-import {createSimpleProduct} from "@woocommerce/e2e-utils";
+const { createSimpleProduct } = require( '@woocommerce/e2e-utils' );
 
 /**
  * Internal dependencies
@@ -20,8 +20,9 @@ let orderId;
 const runMerchantOrdersCustomerPaymentPage = () => {
 	describe('WooCommerce Merchant Flow: Orders > Customer Payment Page', () => {
 		beforeAll(async () => {
-			await merchant.login();
 			await createSimpleProduct();
+			
+			await merchant.login();
 			orderId = await createSimpleOrder();
 			await addProductToOrder( orderId, simpleProductName );
 

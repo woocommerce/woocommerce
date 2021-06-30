@@ -86,15 +86,15 @@ class WC_Test_Privacy_Export extends WC_Unit_Test_Case {
 						),
 						array(
 							'name'  => 'Billing City',
-							'value' => 'Philadelphia',
+							'value' => 'San Francisco',
 						),
 						array(
 							'name'  => 'Billing Postal/Zip Code',
-							'value' => '19123',
+							'value' => '94110',
 						),
 						array(
 							'name'  => 'Billing State',
-							'value' => 'PA',
+							'value' => 'CA',
 						),
 						array(
 							'name'  => 'Billing Country / Region',
@@ -114,15 +114,15 @@ class WC_Test_Privacy_Export extends WC_Unit_Test_Case {
 						),
 						array(
 							'name'  => 'Shipping City',
-							'value' => 'Philadelphia',
+							'value' => 'San Francisco',
 						),
 						array(
 							'name'  => 'Shipping Postal/Zip Code',
-							'value' => '19123',
+							'value' => '94110',
 						),
 						array(
 							'name'  => 'Shipping State',
-							'value' => 'PA',
+							'value' => 'CA',
 						),
 						array(
 							'name'  => 'Shipping Country / Region',

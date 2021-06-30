@@ -750,8 +750,9 @@ final class WC_Cart_Totals {
 
 		$items_subtotal = $this->get_rounded_items_total( $this->get_values_for_total( 'subtotal' ) );
 
-		$this->set_total( 'items_subtotal', NumberUtil::round( $items_subtotal ) );
-		$this->set_total( 'items_subtotal_tax', wc_round_tax_total( array_sum( $merged_subtotal_taxes ), 0 ) );
+		// Prices are not rounded here because they should already be rounded based on settings in `get_rounded_items_total` and in `round_line_tax` method calls.
+		$this->set_total( 'items_subtotal', $items_subtotal );
+		$this->set_total( 'items_subtotal_tax', array_sum( $merged_subtotal_taxes ), 0 );
 
 		$this->cart->set_subtotal( $this->get_total( 'items_subtotal' ) );
 		$this->cart->set_subtotal_tax( $this->get_total( 'items_subtotal_tax' ) );
@@ -788,7 +789,7 @@ final class WC_Cart_Totals {
 
 					if ( $item->product->is_taxable() ) {
 						// Item subtotals were sent, so set 3rd param.
-						$item_tax = wc_round_tax_total( array_sum( WC_Tax::calc_tax( $coupon_discount, $item->tax_rates, $item->price_includes_tax ) ), 0 );
+						$item_tax = array_sum( WC_Tax::calc_tax( $coupon_discount, $item->tax_rates, $item->price_includes_tax ) );
 
 						// Sum total tax.
 						$coupon_discount_tax_amounts[ $coupon_code ] += $item_tax;
@@ -862,7 +863,10 @@ final class WC_Cart_Totals {
 	 */
 	protected function calculate_totals() {
 		$this->set_total( 'total', NumberUtil::round( $this->get_total( 'items_total', true ) + $this->get_total( 'fees_total', true ) + $this->get_total( 'shipping_total', true ) + array_sum( $this->get_merged_taxes( true ) ), 0 ) );
-		$this->cart->set_total_tax( array_sum( $this->get_merged_taxes( false ) ) );
+		$items_tax = array_sum( $this->get_merged_taxes( false, array( 'items' ) ) );
+		// Shipping and fee taxes are rounded seperately because they were entered excluding taxes (as opposed to item prices, which may or may not be including taxes depending upon settings).
+		$shipping_and_fee_taxes = NumberUtil::round( array_sum( $this->get_merged_taxes( false, array( 'fees', 'shipping' ) ) ), wc_get_price_decimals() );
+		$this->cart->set_total_tax( $items_tax + $shipping_and_fee_taxes );
 
 		// Allow plugins to hook and alter totals before final total is calculated.
 		if ( has_action( 'woocommerce_calculate_totals' ) ) {

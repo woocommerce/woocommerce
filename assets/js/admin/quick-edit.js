@@ -54,7 +54,7 @@ jQuery(
 					'select[name="_visibility"] option, ' +
 					'select[name="_stock_status"] option, ' +
 					'select[name="_backorders"] option'
-				).removeAttr( 'selected' );
+				).prop( 'selected', false );
 
 				var is_variable_product = 'variable' === product_type;
 				$( 'select[name="_stock_status"] ~ .wc-quick-edit-warning', '.inline-edit-row' ).toggle( is_variable_product );
@@ -69,7 +69,7 @@ jQuery(
 				if ( 'yes' === featured ) {
 					$( 'input[name="_featured"]', '.inline-edit-row' ).attr( 'checked', 'checked' );
 				} else {
-					$( 'input[name="_featured"]', '.inline-edit-row' ).removeAttr( 'checked' );
+					$( 'input[name="_featured"]', '.inline-edit-row' ).prop( 'checked', false );
 				}
 
 				// Conditional display.

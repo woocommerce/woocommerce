@@ -7,10 +7,8 @@ import {
 	enablePageDialogAccept,
 	isOfflineMode,
 	setBrowserViewport,
-	switchUserToAdmin,
-	switchUserToTest,
-	visitAdminPage,
 } from '@wordpress/e2e-test-utils';
+import { consoleShouldSuppress, addConsoleSuppression } from '../../utils';
 
 /**
  * Array of page event tuples of [ eventName, handler ].
@@ -18,21 +16,13 @@ import {
  * @type {Array}
  */
 const pageEvents = [];
+
 /**
  * Set of logged messages that will only be logged once.
- *
- * @type {Object<string,object>}
  */
-const loggedMessages = {
-	proxy: {
-		logged: false,
-		text: 'Failed to load resource: net::ERR_PROXY_CONNECTION_FAILED',
-	},
-	http404: {
-		logged: false,
-		text: 'the server responded with a status of 404',
-	},
-};
+addConsoleSuppression('Failed to load resource: net::ERR_PROXY_CONNECTION_FAILED');
+addConsoleSuppression('the server responded with a status of 404');
+
 /**
  * Set of console logging types observed to protect against unexpected yet
  * handled (i.e. not catastrophic) errors or warnings. Each key corresponds
@@ -49,37 +39,6 @@ const OBSERVED_CONSOLE_MESSAGE_TYPES = {
 async function setupBrowser() {
 	await clearLocalStorage();
 	await setBrowserViewport( 'large' );
-}
-
-/**
- * Navigates to woocommerce import page and imports sample products.
- *
- * @return {Promise} Promise resolving once products have been imported.
- */
-async function importSampleProducts() {
-	await switchUserToAdmin();
-	// Visit Import Products page.
-	await visitAdminPage(
-		'edit.php',
-		'post_type=product&page=product_importer'
-	);
-	await page.click( 'a.woocommerce-importer-toggle-advanced-options' );
-	await page.focus( '#woocommerce-importer-file-url' );
-	// local path for sample data that is included with woo.
-	await page.keyboard.type(
-		'wp-content/plugins/woocommerce/sample-data/sample_products.csv'
-	);
-	await page.click( '.wc-actions .button-next' );
-	await page.waitForSelector( '.wc-importer-mapping-table' );
-	await page.select(
-		'.wc-importer-mapping-table tr:nth-child(29) select',
-		''
-	);
-	await page.click( '.wc-actions .button-next' );
-	await page.waitForXPath(
-		"//*[@class='woocommerce-importer-done' and contains(., 'Import complete! ')]"
-	);
-	await switchUserToTest();
 }
 
 /**
@@ -100,6 +59,23 @@ function removePageEvents() {
 		page.removeListener( eventName, handler );
 	} );
 }
+
+/**
+ * Add an expect range matcher.
+ * @see https://jestjs.io/docs/expect#expectextendmatchers
+ */
+expect.extend({
+	toBeInRange: function (received, floor, ceiling) {
+		const pass = received >= floor && received <= ceiling;
+		const condition = pass ? 'not to be' : 'to be';
+
+		return {
+			message: () =>
+				`expected ${received} ${condition} within range ${floor} - ${ceiling}`,
+			pass,
+		};
+	},
+});
 
 /**
  * Adds a page event handler to emit uncaught exception to process if one of
@@ -157,19 +133,11 @@ function observeConsoleLogging() {
 
 		const logFunction = OBSERVED_CONSOLE_MESSAGE_TYPES[ type ];
 
-		// Limit warnings on missing resources.
-		let previouslyLogged = false;
-		Object.keys( loggedMessages ).forEach( function( key ) {
-			if ( text.includes( loggedMessages[ key ].text ) ) {
-				if ( loggedMessages[ key ].logged ) {
-					previouslyLogged = true;
-				}
-				loggedMessages[ key ].logged = true;
-			}
-		} );
-		if ( previouslyLogged ) {
+		// Limit repeated warnings.
+		if ( consoleShouldSuppress( text ) ) {
 			return;
 		}
+
 		// As of Puppeteer 1.6.1, `message.text()` wrongly returns an object of
 		// type JSHandle for error logging, instead of the expected string.
 		//

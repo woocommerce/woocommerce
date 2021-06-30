@@ -310,6 +310,7 @@ class WC_Install {
 		self::create_files();
 		self::maybe_create_pages();
 		self::maybe_set_activation_transients();
+		self::set_paypal_standard_load_eligibility();
 		self::update_wc_version();
 		self::maybe_update_db_version();
 
@@ -603,6 +604,11 @@ class WC_Install {
 			}
 			$subsections = array_unique( array_merge( array( '' ), array_keys( $section->get_sections() ) ) );
 
+			/**
+			 * We are using 'WC_Settings_Page::get_settings' on purpose even thought it's deprecated.
+			 * See the method documentation for an explanation.
+			 */
+
 			foreach ( $subsections as $subsection ) {
 				foreach ( $section->get_settings( $subsection ) as $value ) {
 					if ( isset( $value['default'] ) && isset( $value['id'] ) ) {
@@ -619,9 +625,11 @@ class WC_Install {
 		add_option( 'woocommerce_checkout_highlight_required_fields', 'yes', '', 'yes' );
 		add_option( 'woocommerce_demo_store', 'no', '', 'no' );
 
-		// Define initial tax classes.
-		WC_Tax::create_tax_class( __( 'Reduced rate', 'woocommerce' ) );
-		WC_Tax::create_tax_class( __( 'Zero rate', 'woocommerce' ) );
+		if ( self::is_new_install() ) {
+			// Define initial tax classes.
+			WC_Tax::create_tax_class( __( 'Reduced rate', 'woocommerce' ) );
+			WC_Tax::create_tax_class( __( 'Zero rate', 'woocommerce' ) );
+		}
 	}
 
 	/**
@@ -1332,7 +1340,12 @@ CREATE TABLE {$wpdb->prefix}wc_reserved_stock (
 			'post_content'   => '',
 			'post_status'    => 'inherit',
 		);
-		$attach_id  = wp_insert_attachment( $attachment, $filename );
+
+		$attach_id = wp_insert_attachment( $attachment, $filename );
+		if ( is_wp_error( $attach_id ) ) {
+			update_option( 'woocommerce_placeholder_image', 0 );
+			return;
+		}
 
 		update_option( 'woocommerce_placeholder_image', $attach_id );
 
@@ -1621,6 +1634,18 @@ CREATE TABLE {$wpdb->prefix}wc_reserved_stock (
 
 			// Discard feedback.
 			ob_end_clean();
+		}
+	}
+
+	/**
+	 * Sets whether PayPal Standard will be loaded on install.
+	 *
+	 * @since 5.5.0
+	 */
+	private static function set_paypal_standard_load_eligibility() {
+		// Initiating the payment gateways sets the flag.
+		if ( class_exists( 'WC_Gateway_Paypal' ) ) {
+			( new WC_Gateway_Paypal() )->should_load();
 		}
 	}
 }

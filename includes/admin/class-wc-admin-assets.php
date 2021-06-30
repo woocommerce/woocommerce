@@ -54,6 +54,11 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			wp_style_add_data( 'woocommerce_admin_marketplace_styles', 'rtl', 'replace' );
 			wp_style_add_data( 'woocommerce_admin_privacy_styles', 'rtl', 'replace' );
 
+			if ( $screen->is_block_editor() ) {
+				wp_register_style( 'woocommerce-general', WC()->plugin_url() . '/assets/css/woocommerce.css', array(), $version );
+				wp_style_add_data( 'woocommerce-general', 'rtl', 'replace' );
+			}
+
 			// Sitewide menu CSS.
 			wp_enqueue_style( 'woocommerce_admin_menu_styles' );
 
@@ -145,6 +150,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'search_products_nonce'     => wp_create_nonce( 'search-products' ),
 					'search_customers_nonce'    => wp_create_nonce( 'search-customers' ),
 					'search_categories_nonce'   => wp_create_nonce( 'search-categories' ),
+					'search_pages_nonce'        => wp_create_nonce( 'search-pages' ),
 				)
 			);
 

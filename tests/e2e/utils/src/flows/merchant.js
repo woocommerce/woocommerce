@@ -18,7 +18,14 @@ const {
 	WP_ADMIN_PERMALINK_SETTINGS,
 	WP_ADMIN_PLUGINS,
 	WP_ADMIN_SETUP_WIZARD,
-	WP_ADMIN_WC_SETTINGS
+	WP_ADMIN_WC_HOME,
+	WP_ADMIN_WC_SETTINGS,
+	WP_ADMIN_WC_EXTENSIONS,
+	WP_ADMIN_NEW_SHIPPING_ZONE,
+	WP_ADMIN_ANALYTICS_PAGES,
+	WP_ADMIN_ALL_USERS_VIEW,
+	WP_ADMIN_IMPORT_PRODUCTS,
+	IS_RETEST_MODE,
 } = require( './constants' );
 
 const baseUrl = config.get( 'url' );
@@ -50,9 +57,11 @@ const merchant = {
 			( am ) => am.filter( ( e ) => e.href ).map( ( e ) => e.href )
 		);
 
-		await page.goto( logoutLinks[ 0 ], {
-			waitUntil: 'networkidle0',
-		} );
+		if ( logoutLinks && logoutLinks[0] ) {
+			await page.goto(logoutLinks[0], {
+				waitUntil: 'networkidle0',
+			});
+		}
 	},
 
 	openAllOrdersView: async () => {
@@ -115,8 +124,15 @@ const merchant = {
 		} );
 	},
 
+	openExtensions: async () => {
+		await page.goto( WP_ADMIN_WC_EXTENSIONS, {
+			waitUntil: 'networkidle0',
+		} );
+	},
+
 	runSetupWizard: async () => {
-		await page.goto( WP_ADMIN_SETUP_WIZARD, {
+			const setupWizard = IS_RETEST_MODE ? WP_ADMIN_SETUP_WIZARD : WP_ADMIN_WC_HOME;
+			await page.goto( setupWizard, {
 			waitUntil: 'networkidle0',
 		} );
 	},
@@ -168,6 +184,36 @@ const merchant = {
 			// Verify customer profile link is present to verify order was placed by a registered customer, not a guest
 			await expect( page ).toMatchElement( 'label[for="customer_user"] a[href*=user-edit]', { text: 'Profile' } );
 		}
+	},
+
+	openNewShipping: async () => {
+		await page.goto( WP_ADMIN_NEW_SHIPPING_ZONE, {
+			waitUntil: 'networkidle0',
+		} );
+	},
+
+	openEmailLog: async () => {
+		await page.goto( `${baseUrl}wp-admin/tools.php?page=wpml_plugin_log`, {
+			waitUntil: 'networkidle0',
+		} );
+	},
+
+	openAnalyticsPage: async ( pageName ) => {
+		await page.goto( WP_ADMIN_ANALYTICS_PAGES + pageName, {
+			waitUntil: 'networkidle0',
+		} );
+	},
+
+	openAllUsersView: async () => {
+		await page.goto( WP_ADMIN_ALL_USERS_VIEW, {
+			waitUntil: 'networkidle0',
+		} );
+	},
+
+  openImportProducts: async () => {
+		await page.goto( WP_ADMIN_IMPORT_PRODUCTS , {
+			waitUntil: 'networkidle0',
+		} );
 	},
 };
 

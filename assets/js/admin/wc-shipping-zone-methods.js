@@ -62,6 +62,9 @@
 							shippingMethod.trigger( 'change:methods' );
 							shippingMethod.changes = {};
 							shippingMethod.trigger( 'saved:methods' );
+
+							// Overrides the onbeforeunload callback added by settings.js.
+							window.onbeforeunload = null;
 						} else {
 							window.alert( data.strings.save_failed );
 						}
@@ -218,7 +221,7 @@
 				},
 				setUnloadConfirmation: function() {
 					this.needsUnloadConfirm = true;
-					$save_button.removeAttr( 'disabled' );
+					$save_button.prop( 'disabled', false );
 				},
 				clearUnloadConfirmation: function() {
 					this.needsUnloadConfirm = false;

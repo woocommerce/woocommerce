@@ -1,10 +1,29 @@
 # Unreleased
 
+# 0.2.0
+
+## Added
+
+- Support for orders.
+
+## Changed
+
+- `delete()` now deletes products and coupons instead of moving to `trash`.
+
+# 0.1.2
+
+## Added
+
+- Support for the external product type.
+- Support for grouped product type.
+- Support for variable products and product variations.
+- Support for coupons.
+
 # 0.1.1
 
 ## Breaking Changes
 
-- The `HTTPClientFactory` API was changed to make it easier to configure instances with
+- The `HTTPClientFactory` API was changed to make it easier to configure instances
 
 ## Added
 
@@ -14,7 +33,7 @@
 
 ## Changes
 
-- Added a tranformation layer between API responses and internal models
+- Added a transformation layer between API responses and internal models
 
 ## Fixed
 
