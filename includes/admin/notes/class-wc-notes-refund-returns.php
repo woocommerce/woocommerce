@@ -63,7 +63,7 @@ class WC_Notes_Refund_Returns {
 		$note->add_action(
 			'notify-refund-returns-page',
 			__( 'Edit page', 'woocommerce' ),
-			admin_url( sprintf( 'post.php?post=%d&action=edit', (int) $page_id ) ),
+			admin_url( sprintf( 'post.php?post=%d&action=edit', (int) $page_id ) )
 		);
 
 		return $note;
