@@ -1,5 +1,9 @@
 # Unreleased
 
+## Added
+
+- Factories for variable product, variation, and grouped product
+
 # 0.1.5
 
 ## Added

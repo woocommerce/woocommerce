@@ -254,16 +254,16 @@
         },
         {
             "name": "rmccue/requests",
-            "version": "v1.8.0",
+            "version": "v1.8.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/WordPress/Requests.git",
-                "reference": "afbe4790e4def03581c4a0963a1e8aa01f6030f1"
+                "reference": "82e6936366eac3af4d836c18b9d8c31028fe4cd5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/WordPress/Requests/zipball/afbe4790e4def03581c4a0963a1e8aa01f6030f1",
-                "reference": "afbe4790e4def03581c4a0963a1e8aa01f6030f1",
+                "url": "https://api.github.com/repos/WordPress/Requests/zipball/82e6936366eac3af4d836c18b9d8c31028fe4cd5",
+                "reference": "82e6936366eac3af4d836c18b9d8c31028fe4cd5",
                 "shasum": ""
             },
             "require": {
@@ -306,11 +306,7 @@
                 "iri",
                 "sockets"
             ],
-            "support": {
-                "issues": "https://github.com/WordPress/Requests/issues",
-                "source": "https://github.com/WordPress/Requests/tree/v1.8.0"
-            },
-            "time": "2021-04-27T11:05:25+00:00"
+            "time": "2021-06-04T09:56:25+00:00"
         },
         {
             "name": "symfony/finder",
@@ -612,5 +608,5 @@
     "platform-overrides": {
         "php": "7.0"
     },
-    "plugin-api-version": "2.0.0"
+    "plugin-api-version": "1.1.0"
 }

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "21b06e63b5f65deec4b635463a10402b",
+    "content-hash": "6fb169d13104940f13185353a857a799",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -493,16 +493,16 @@
         },
         {
             "name": "woocommerce/action-scheduler",
-            "version": "3.2.0",
+            "version": "3.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/action-scheduler.git",
-                "reference": "12c91fd20af0cdfb6107b8db9df78d133f512b04"
+                "reference": "3c24064f115cd55e972d73d5d48f14133ac60b0d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/action-scheduler/zipball/12c91fd20af0cdfb6107b8db9df78d133f512b04",
-                "reference": "12c91fd20af0cdfb6107b8db9df78d133f512b04",
+                "url": "https://api.github.com/repos/woocommerce/action-scheduler/zipball/3c24064f115cd55e972d73d5d48f14133ac60b0d",
+                "reference": "3c24064f115cd55e972d73d5d48f14133ac60b0d",
                 "shasum": ""
             },
             "require-dev": {
@@ -526,22 +526,22 @@
             "homepage": "https://actionscheduler.org/",
             "support": {
                 "issues": "https://github.com/woocommerce/action-scheduler/issues",
-                "source": "https://github.com/woocommerce/action-scheduler/tree/3.2.0"
+                "source": "https://github.com/woocommerce/action-scheduler/tree/3.2.1"
             },
-            "time": "2021-06-03T16:41:18+00:00"
+            "time": "2021-06-21T20:21:35+00:00"
         },
         {
             "name": "woocommerce/woocommerce-admin",
-            "version": "2.3.1",
+            "version": "2.4.0-rc.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-admin.git",
-                "reference": "f28cf3f027e27a6679e4fa8173d8b6859ec84838"
+                "reference": "ed72985cd459831c555dff2ff5f75111b6e210c1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/f28cf3f027e27a6679e4fa8173d8b6859ec84838",
-                "reference": "f28cf3f027e27a6679e4fa8173d8b6859ec84838",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/ed72985cd459831c555dff2ff5f75111b6e210c1",
+                "reference": "ed72985cd459831c555dff2ff5f75111b6e210c1",
                 "shasum": ""
             },
             "require": {
@@ -578,9 +578,9 @@
             "homepage": "https://github.com/woocommerce/woocommerce-admin",
             "support": {
                 "issues": "https://github.com/woocommerce/woocommerce-admin/issues",
-                "source": "https://github.com/woocommerce/woocommerce-admin/tree/v2.3.1"
+                "source": "https://github.com/woocommerce/woocommerce-admin/tree/v2.4.0-rc.2"
             },
-            "time": "2021-05-24T09:48:40+00:00"
+            "time": "2021-06-18T05:58:25+00:00"
         },
         {
             "name": "woocommerce/woocommerce-blocks",
