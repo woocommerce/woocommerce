@@ -33,6 +33,7 @@ export const payment_method = 'cod';
 export const product_sku = __ENV.P_SKU || 'woo-beanie';
 export const product_url = __ENV.P_URL || 'beanie';
 export const product_id = __ENV.P_ID || '13';
+export const product_search_term = __ENV.P_TERM || 'beanie';
 
 export const think_time_min = '1';
 export const think_time_max = '4';
