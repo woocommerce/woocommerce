@@ -27,29 +27,28 @@ const couponsTable = [
 	['fixed product', { text: '$5.00' }, { text: '$4.99' }]
 ];
 
-let coupons;
+let couponFixedCart;
+let couponPercentage;
+let couponFixedProduct;
 
 const getCoupon = (couponType) => {
-	const coupon = coupons.find((pair) => pair.includes(couponType))[1];
-	return coupon;
+	switch (couponType) {
+		case 'fixed cart':
+			return couponFixedCart;
+		case 'percentage':
+			return couponPercentage;
+		case 'fixed product':
+			return couponFixedProduct;
+	}
 };
 
 const runCheckoutApplyCouponsTest = () => {
 	describe('Checkout coupons', () => {
-		let couponFixedCart;
-		let couponPercentage;
-		let couponFixedProduct;
-
 		beforeAll(async () => {
 			await createSimpleProduct();
 			couponFixedCart = await createCoupon();
 			couponPercentage = await createCoupon('50', 'Percentage discount');
 			couponFixedProduct = await createCoupon('5', 'Fixed product discount');
-			coupons = [
-				['fixed cart', couponFixedCart],
-				['percentage', couponPercentage],
-				['fixed product', couponFixedProduct]
-			];
 			await shopper.emptyCart();
 			await shopper.goToShop();
 			await waitForSelectorWithoutThrow( '.add_to_cart_button' );
