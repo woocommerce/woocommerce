@@ -1,5 +1,6 @@
 cd "$1" || exit
 rsync ./ "$2"/ --recursive --delete --delete-excluded \
+	--exclude=assets/ \
 	--exclude=".*/" \
 	--exclude="*.md" \
 	--exclude=".*" \
