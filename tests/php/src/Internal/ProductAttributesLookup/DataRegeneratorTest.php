@@ -131,7 +131,7 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 			'hook'      => 'woocommerce_run_product_attribute_lookup_regeneration_callback',
 			'group'     => 'woocommerce-db-updates',
 		);
-		$actual_enqueued   = current( $this->queue->methods_called );
+		$actual_enqueued   = current( $this->queue->get_methods_called() );
 
 		$this->assertEquals( sort( $expected_enqueued ), sort( $actual_enqueued ) );
 	}
@@ -158,7 +158,7 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 		$this->assertFalse( get_option( 'woocommerce_attribute_lookup__last_product_id_to_process' ) );
 		$this->assertFalse( get_option( 'woocommerce_attribute_lookup__last_products_page_processed' ) );
 		$this->assertEquals( 'no', get_option( 'woocommerce_attribute_lookup__enabled' ) );
-		$this->assertEmpty( $this->queue->methods_called );
+		$this->assertEmpty( $this->queue->get_methods_called() );
 	}
 
 	/**
@@ -184,7 +184,7 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->sut->initiate_regeneration();
-		$this->queue->methods_called = array();
+		$this->queue->clear_methods_called();
 
 		update_option( 'woocommerce_attribute_lookup__last_products_page_processed', 7 );
 
@@ -201,7 +201,7 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 			'hook'      => 'woocommerce_run_product_attribute_lookup_regeneration_callback',
 			'group'     => 'woocommerce-db-updates',
 		);
-		$actual_enqueued   = current( $this->queue->methods_called );
+		$actual_enqueued   = current( $this->queue->get_methods_called() );
 		$this->assertEquals( sort( $expected_enqueued ), sort( $actual_enqueued ) );
 	}
 
@@ -231,7 +231,7 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->sut->initiate_regeneration();
-		$this->queue->methods_called = array();
+		$this->queue->clear_methods_called();
 
 		do_action( 'woocommerce_run_product_attribute_lookup_regeneration_callback' );
 
@@ -239,6 +239,6 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 		$this->assertFalse( get_option( 'woocommerce_attribute_lookup__last_product_id_to_process' ) );
 		$this->assertFalse( get_option( 'woocommerce_attribute_lookup__last_products_page_processed' ) );
 		$this->assertEquals( 'no', get_option( 'woocommerce_attribute_lookup__enabled' ) );
-		$this->assertEmpty( $this->queue->methods_called );
+		$this->assertEmpty( $this->queue->get_methods_called() );
 	}
 }
