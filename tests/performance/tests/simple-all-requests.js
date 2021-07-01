@@ -5,6 +5,7 @@ import { SingleProduct } from '../requests/shopper/single-product.js';
 import { Cart } from '../requests/shopper/cart.js';
 import { CheckoutGuest } from '../requests/shopper/checkout-guest.js';
 import { CheckoutCustomerLogin } from '../requests/shopper/checkout-customer-login.js';
+import { MyAccount } from '../requests/shopper/my-account.js';
 
 export let options = {
     scenarios: {
@@ -55,6 +56,14 @@ export let options = {
             startTime: '32s',
             exec: 'checkout_customer_login',
         },
+        myAccount: {
+            executor: 'per-vu-iterations',
+            vus: 1,
+            iterations: 1,
+            maxDuration: '50s',
+            startTime: '48s',
+            exec: 'my_account',
+        },
     },
 };
 
@@ -77,4 +86,7 @@ export function checkout_guest() {
 export function checkout_customer_login() {
     Cart();
     CheckoutCustomerLogin();
+}
+export function my_account() {
+    MyAccount();
 }
