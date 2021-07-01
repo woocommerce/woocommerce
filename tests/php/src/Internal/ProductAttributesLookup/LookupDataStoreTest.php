@@ -32,6 +32,14 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 	private $lookup_table_name;
 
 	/**
+	 * Runs after all the tests in the class.
+	 */
+	public static function tearDownAfterClass() {
+		parent::tearDownAfterClass();
+		wc_get_container()->get( DataRegenerator::class )->delete_all_attributes_lookup_data();
+	}
+
+	/**
 	 * Runs before each test.
 	 */
 	public function setUp() {
@@ -40,19 +48,15 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 		$this->lookup_table_name = $wpdb->prefix . 'wc_product_attributes_lookup';
 		$this->sut               = new LookupDataStore();
 
-		// Initiating regeneration with a fake queue will just create the lookup table in the database.
-		add_filter(
-			'woocommerce_queue_class',
-			function() {
-				return FakeQueue::class;
-			}
-		);
-		$this->get_instance_of( DataRegenerator::class )->initiate_regeneration();
-
-		$queue = WC()->get_instance_of( \WC_Queue::class );
-		$queue->clear_methods_called();
-
 		$this->reset_legacy_proxy_mocks();
+		$this->register_legacy_proxy_class_mocks(
+			array(
+				\WC_Queue::class => new FakeQueue(),
+			)
+		);
+
+		// Initiating regeneration with a fake queue will just create the lookup table in the database.
+		$this->get_instance_of( DataRegenerator::class )->initiate_regeneration();
 	}
 
 	/**

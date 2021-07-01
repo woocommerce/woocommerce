@@ -38,15 +38,6 @@ class LookupDataStore {
 	private $is_feature_visible;
 
 	/**
-	 * Does the lookup table exist?
-	 *
-	 * TODO: Remove once the lookup table is created via data migration.
-	 *
-	 * @var bool
-	 */
-	private $lookup_table_exists;
-
-	/**
 	 * LookupDataStore constructor. Makes the feature hidden by default.
 	 */
 	public function __construct() {
@@ -54,8 +45,6 @@ class LookupDataStore {
 
 		$this->lookup_table_name  = $wpdb->prefix . 'wc_product_attributes_lookup';
 		$this->is_feature_visible = false;
-
-		$this->lookup_table_exists = $this->check_lookup_table_exists();
 
 		$this->init_hooks();
 	}
@@ -194,7 +183,7 @@ AND table_name = %s;',
 	 * @param null|array      $changeset Changes as provided by 'get_changes' method in the product object, null if it's being created.
 	 */
 	public function on_product_changed( $product, $changeset = null ) {
-		if ( ! $this->lookup_table_exists ) {
+		if ( ! $this->check_lookup_table_exists() ) {
 			return;
 		}
 
@@ -253,7 +242,7 @@ AND table_name = %s;',
 	 * @param int $action The action to perform, one of the ACTION_ constants.
 	 */
 	private function run_update_callback( int $product_id, int $action ) {
-		if ( ! $this->lookup_table_exists ) {
+		if ( ! $this->check_lookup_table_exists() ) {
 			return;
 		}
 
@@ -346,7 +335,7 @@ AND table_name = %s;',
 	 * @param int|\WC_Product $product Product object or product id.
 	 */
 	public function on_product_deleted( $product ) {
-		if ( ! $this->lookup_table_exists ) {
+		if ( ! $this->check_lookup_table_exists() ) {
 			return;
 		}
 
