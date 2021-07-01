@@ -14,6 +14,8 @@ import type {
 	CartResponseFeeItem,
 	CartResponseBillingAddress,
 	CartResponseShippingAddress,
+	CartResponseCouponItem,
+	CartResponseCouponItemWithLabel,
 } from '@woocommerce/types';
 import {
 	emptyHiddenAddressFields,
@@ -175,8 +177,18 @@ export const useStoreCart = (
 				decodeValues( fee )
 			);
 
+			// Add a text property to the coupon to allow extensions to modify
+			// the text used to display the coupon, without affecting the
+			// functionality when it comes to removing the coupon.
+			const cartCoupons: CartResponseCouponItemWithLabel[] = cartData.coupons.map(
+				( coupon: CartResponseCouponItem ) => ( {
+					...coupon,
+					label: coupon.code,
+				} )
+			);
+
 			return {
-				cartCoupons: cartData.coupons,
+				cartCoupons,
 				cartItems: cartData.items || [],
 				cartFees,
 				cartItemsCount: cartData.itemsCount,

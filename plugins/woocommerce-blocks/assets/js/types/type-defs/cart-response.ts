@@ -22,6 +22,11 @@ export interface CartResponseCouponItem {
 	totals: CartResponseTotalsItem;
 }
 
+export interface CartResponseCouponItemWithLabel
+	extends CartResponseCouponItem {
+	label: string;
+}
+
 export interface ResponseFirstNameLastName {
 	first_name: string;
 	last_name: string;

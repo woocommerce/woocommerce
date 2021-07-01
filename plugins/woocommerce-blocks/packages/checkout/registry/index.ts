@@ -4,6 +4,7 @@
 import { useMemo } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { CURRENT_USER_IS_ADMIN } from '@woocommerce/settings';
+import deprecated from '@wordpress/deprecated';
 
 /**
  * Internal dependencies
@@ -34,6 +35,20 @@ export const __experimentalRegisterCheckoutFilters = (
 	namespace: string,
 	filters: Record< string, CheckoutFilterFunction >
 ): void => {
+	/**
+	 * Let the user know couponName is no longer available as a filter.
+	 *
+	 * See https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4312
+	 */
+	if ( Object.keys( filters ).includes( 'couponName' ) ) {
+		deprecated( 'couponName', {
+			alternative: 'coupons',
+			plugin: 'WooCommerce Blocks',
+			link:
+				'https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/bb921d21f42e21f38df2b1c87b48e07aa4cb0538/docs/extensibility/available-filters.md#coupons',
+		} );
+	}
+
 	checkoutFilters = {
 		...checkoutFilters,
 		[ namespace ]: filters,
