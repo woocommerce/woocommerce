@@ -25,6 +25,7 @@ export interface CartTotalsItem extends CurrencyInfo {
 
 export interface CartCouponItem {
 	code: string;
+	label: string;
 	discount_type: string;
 	totals: CartTotalsItem;
 }

@@ -87,21 +87,26 @@ The word 'Total' that precedes the amount due, present in both the Cart _and_ Ch
 
 There are no additional arguments passed to this filter.
 
-### Coupon names
+### Coupons
 
 The current functionality is to display the coupon codes in the Cart and Checkout sidebars. This could be undesirable
-if you dynamically generate a coupon code that is not user friendly. It may, therefore, be desirable to change the way
-this code is displayed. To do this, the filter `couponName` exists. 
+if you dynamically generate a coupon code that is not user-friendly. It may, therefore, be desirable to change the way
+this code is displayed. To do this, the filter `coupons` exists.
+
+This filter could also be used to show or hide coupons.
+
+This filter must _not_ be used to alter the value/totals of a coupon. This will not carry through to the Cart totals.
 
 | Filter name  | Description | Return type  |
 |---|---|---|
-| `couponName`  | This is the coupon code of a coupon currently applied to the cart. Its value will be the same as the code the customer entered to apply the discount. | `string`
+| `coupons`  | This is an array of coupons currently applied to the cart. | `CartCoupon[]`
 
-The additional argument supplied to this filter is: `{ context: 'summary', coupon: CartCoupon }`. A `CartCoupon` has the following shape:
+The additional argument supplied to this filter is: `{ context: 'summary' }`. A `CartCoupon` has the following shape:
 
 ```typescript
-interface CartCoupon {
+CartCoupon {
   code: string
+  label: string
   discount_type: string
   totals: {
     currency_code: string
@@ -200,6 +205,44 @@ __experimentalRegisterCheckoutFilters( 'my-hypothetical-price-plugin', {
 | Before | After |
 |---|---|
 | <img src="https://user-images.githubusercontent.com/5656702/117035086-d5488300-acfb-11eb-9954-feb326916168.png" width=400 /> | <img src="https://user-images.githubusercontent.com/5656702/117035616-70415d00-acfc-11eb-98d3-6c8096817e5b.png" width=400 /> |
+
+### Change the name of a coupon
+Let's say we're the author of an extension that automatically creates coupons for users, and applies them to the cart
+when certain items are bought in combination.
+
+Due to the internal workings of our extension, our automatically generated coupons are named something like
+`autocoupon_2020_06_29` - this doesn't look fantastic, so we want to change this to look a bit nicer.
+
+Our filtering function may look like this:
+
+```typescript
+const filterCoupons = ( coupons ) => {
+  return coupons.map( ( coupon ) => {
+  	// Regex to match autocoupon then unlimited undersores and numbers
+    if ( ! coupon.label.match( /autocoupon(?:_\d+)+/ ) ) {
+      return coupon;
+    }
+    return {
+      ...coupon,
+      label: 'Automatic coupon'
+    };
+  } );
+};
+```
+
+We'd register our filter like this:
+```typescript
+import { __experimentalRegisterCheckoutFilters } from '@woocommerce/blocks-checkout';
+
+__experimentalRegisterCheckoutFilters( 'automatic-coupon-extension', {
+	coupons: filterCoupons,
+} );
+```
+
+| Before | After |
+|---|---|
+| <img src="https://user-images.githubusercontent.com/5656702/123768988-bc55eb80-d8c0-11eb-9262-5d629837706d.png" /> | ![image](https://user-images.githubusercontent.com/5656702/124126048-2c57a380-da72-11eb-9b45-b2cae0cffc37.png) |
+
 
 ## Troubleshooting
 If you are logged in to the store as an administrator, you should be shown an error like this if your filter is not
