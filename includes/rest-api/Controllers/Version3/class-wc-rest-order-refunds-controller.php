@@ -111,7 +111,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 		);
 
 		$schema['properties']['api_restock'] = array(
-			'description' => __( 'When true, items are restocked.', 'woocommerce' ),
+			'description' => __( 'When true, refunded items are restocked.', 'woocommerce' ),
 			'type'        => 'boolean',
 			'context'     => array( 'edit' ),
 			'default'     => true,
