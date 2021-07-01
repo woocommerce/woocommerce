@@ -65,16 +65,6 @@ class FeaturePlugin {
 		// Load the page controller functions file first to prevent fatal errors when disabling WooCommerce Admin.
 		$this->define_constants();
 		require_once WC_ADMIN_ABSPATH . '/includes/page-controller-functions.php';
-
-		/**
-		 * Filter allowing WooCommerce Admin to be disabled.
-		 *
-		 * @param bool $disabled False.
-		 */
-		if ( apply_filters( 'woocommerce_admin_disabled', false ) ) {
-			return;
-		}
-
 		require_once WC_ADMIN_ABSPATH . '/src/Notes/DeprecatedNotes.php';
 		require_once WC_ADMIN_ABSPATH . '/includes/core-functions.php';
 		require_once WC_ADMIN_ABSPATH . '/includes/feature-config.php';

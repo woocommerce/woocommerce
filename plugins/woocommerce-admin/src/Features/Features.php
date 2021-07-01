@@ -134,9 +134,19 @@ class Features {
 	 */
 	public static function get_available_features() {
 		$features                      = self::get_features();
+		$optional_feature_keys         = array_keys( self::$optional_features );
 		$optional_features_unavailable = [];
 
-		foreach ( array_keys( self::$optional_features ) as $optional_feature_key ) {
+		/**
+		 * Filter allowing WooCommerce Admin optional features to be disabled.
+		 *
+		 * @param bool $disabled False.
+		 */
+		if ( apply_filters( 'woocommerce_admin_disabled', false ) ) {
+			return array_values( array_diff( $features, $optional_feature_keys ) );
+		}
+
+		foreach ( $optional_feature_keys as $optional_feature_key ) {
 			$feature_class = self::get_feature_class( $optional_feature_key );
 
 			if ( $feature_class ) {
@@ -258,8 +268,17 @@ class Features {
 			array()
 		);
 
-		if ( empty( $features ) ) {
+		$features_disabled = apply_filters( 'woocommerce_admin_disabled', false );
+
+		if ( ! $features_disabled && empty( $features ) ) {
 			return $settings;
+		}
+
+		$desc          = __( 'Start using new features that are being progressively rolled out to improve the store management experience.', 'woocommerce-admin' );
+		$disabled_desc = __( 'WooCommerce features have been disabled.', 'woocommerce-admin' );
+
+		if ( $features_disabled ) {
+			$GLOBALS['hide_save_button'] = true;
 		}
 
 		return array_merge(
@@ -267,11 +286,11 @@ class Features {
 				array(
 					'title' => __( 'Features', 'woocommerce-admin' ),
 					'type'  => 'title',
-					'desc'  => __( 'Start using new features that are being progressively rolled out to improve the store management experience.', 'woocommerce-admin' ),
+					'desc'  => $features_disabled ? $disabled_desc : $desc,
 					'id'    => 'features_options',
 				),
 			),
-			$features,
+			$features_disabled ? array() : $features,
 			array(
 				array(
 					'type' => 'sectionend',
