@@ -3,14 +3,6 @@
  */
 import cookie from 'cookie';
 
-/**
- * setInterval, but it runs first callback immediately instead of after interval.
- */
-const immediateStartSetInterval = ( f: () => void, intervalMs: number ) => {
-	f();
-	return setInterval( f, intervalMs );
-};
-
 let initializeAnonIdPromise: null | Promise< string | null > = null;
 const anonIdPollingIntervalMilliseconds = 50;
 const anonIdPollingIntervalMaxAttempts = 100; // 50 * 100 = 5000 = 5 seconds
@@ -40,21 +32,21 @@ export const readAnonCookie = (): string | null => {
 export const initializeAnonId = async (): Promise< string | null > => {
 	let attempt = 0;
 	initializeAnonIdPromise = new Promise( ( res ) => {
-		const anonIdPollingInterval = immediateStartSetInterval( () => {
+		const poll = () => {
 			const anonId = readAnonCookie();
 			if ( typeof anonId === 'string' && anonId !== '' ) {
-				clearInterval( anonIdPollingInterval );
 				res( anonId );
 				return;
 			}
 
 			if ( anonIdPollingIntervalMaxAttempts - 1 <= attempt ) {
-				clearInterval( anonIdPollingInterval );
 				res( null );
 				return;
 			}
 			attempt = attempt + 1;
-		}, anonIdPollingIntervalMilliseconds );
+			setTimeout( poll, anonIdPollingIntervalMilliseconds );
+		};
+		poll();
 	} );
 
 	return initializeAnonIdPromise;

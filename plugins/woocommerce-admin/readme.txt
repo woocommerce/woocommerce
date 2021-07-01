@@ -100,6 +100,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix: Currency display on Orders activity card on homescreen #7181
 - Fix: Report export filtering bug. #7165
 - Fix:  Use tab char for the CSV injection prevention. #7154
+- Fix: Fix and refactor explat polling to use setTimeout #7274
 - Tweak: Remove performance indicators when Analytics Flag disabled #7234
 - Tweak: Revert Card component removal #7167
 - Tweak: Removed unused feature flags #7233
