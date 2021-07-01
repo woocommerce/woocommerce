@@ -370,7 +370,7 @@ CREATE TABLE ' . $this->lookup_table_name . '(
 	 * Add a metabox in the product page with a button to regenerate the product attributes lookup data for the product.
 	 */
 	private function add_product_regeneration_metabox() {
-		if ( ! $this->data_store->is_feature_visible() ) {
+		if ( ! $this->can_do_per_product_regeneration() ) {
 			return;
 		}
 
@@ -407,18 +407,24 @@ CREATE TABLE ' . $this->lookup_table_name . '(
 	 * @param int $product_id The product id.
 	 */
 	private function on_save_product( int $product_id ) {
-		if ( ! wp_verify_nonce( ArrayUtil::get_value_or_default( $_POST, '_wc_regenerate_attributes_lookup_data_nonce' ), 'regenerate-attributes-lookup-data' ) ) {
-			return;
-		}
-
-		if ( ! $this->data_store->is_feature_visible() || 'regenerate-attributes-lookup-data' !== ArrayUtil::get_value_or_default( $_POST, 'woocommerce-product-lookup-action' ) ) {
-			return;
-		}
-
-		if ( ! wc_get_product( $product_id ) ) {
+		if (
+			! wp_verify_nonce( ArrayUtil::get_value_or_default( $_POST, '_wc_regenerate_attributes_lookup_data_nonce' ), 'regenerate-attributes-lookup-data' ) ||
+			! $this->can_do_per_product_regeneration() ||
+			'regenerate-attributes-lookup-data' !== ArrayUtil::get_value_or_default( $_POST, 'woocommerce-product-lookup-action' ) ||
+			! wc_get_product( $product_id )
+		) {
 			return;
 		}
 
 		$this->data_store->create_data_for_product( $product_id );
+	}
+
+	/**
+	 * Check if everything is good to go to perform a per product lookup table data regeneration.
+	 *
+	 * @return bool True if per product lookup table data regeneration can be performed.
+	 */
+	private function can_do_per_product_regeneration() {
+		return $this->data_store->is_feature_visible() && $this->data_store->check_lookup_table_exists() && ! $this->data_store->regeneration_is_in_progress();
 	}
 }
