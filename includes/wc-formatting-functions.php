@@ -278,7 +278,7 @@ function wc_format_refund_total( $amount ) {
 /**
  * Format decimal numbers ready for DB storage.
  *
- * Sanitize, remove decimals, and optionally round + trim off zeros.
+ * Sanitize, optionally remove decimals, and optionally round + trim off zeros.
  *
  * This function does not remove thousands - this should be done before passing a value to the function.
  *
