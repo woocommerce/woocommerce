@@ -54,7 +54,7 @@ class WC_Notes_Refund_Returns {
 	 */
 	public static function get_note( $page_id ) {
 		$note = new Note();
-		$note->set_title( __( 'Setup a Refund and Returns Policy page to boost your store\'s creditibility.', 'woocommerce' ) );
+		$note->set_title( __( 'Setup a Refund and Returns Policy page to boost your store\'s credibility.', 'woocommerce' ) );
 		$note->set_content( __( 'We have created a sample draft Refund and Returns Policy page for you. Please have a look and update it to fit your store.', 'woocommerce' ) );
 		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 		$note->set_name( self::NOTE_NAME );
