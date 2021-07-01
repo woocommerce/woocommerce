@@ -38,15 +38,6 @@ class LookupDataStore {
 	private $is_feature_visible;
 
 	/**
-	 * Does the lookup table exist?
-	 *
-	 * TODO: Remove once the lookup table is created via data migration.
-	 *
-	 * @var bool
-	 */
-	private $lookup_table_exists;
-
-	/**
 	 * LookupDataStore constructor. Makes the feature hidden by default.
 	 */
 	public function __construct() {
@@ -54,8 +45,6 @@ class LookupDataStore {
 
 		$this->lookup_table_name  = $wpdb->prefix . 'wc_product_attributes_lookup';
 		$this->is_feature_visible = false;
-
-		$this->lookup_table_exists = $this->check_lookup_table_exists();
 
 		$this->init_hooks();
 	}
