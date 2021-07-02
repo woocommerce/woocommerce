@@ -2,6 +2,7 @@ export * from './totals';
 export * from './utils';
 export * from './slot';
 export * from './registry';
+export { default as TotalsWrapper } from './wrapper';
 export { default as ExperimentalOrderMeta } from './order-meta';
 export { default as ExperimentalDiscountsMeta } from './discounts-meta';
 export { default as ExperimentalOrderShippingPackages } from './order-shipping-packages';
