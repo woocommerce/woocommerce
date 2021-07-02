@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { useState, useEffect } from '@wordpress/element';
 import { PaymentMethodIcons } from '@woocommerce/base-components/cart-checkout';
-import { Button } from '@woocommerce/blocks-checkout';
+import Button from '@woocommerce/base-components/button';
 import { CHECKOUT_URL } from '@woocommerce/block-settings';
 import { useCheckoutContext } from '@woocommerce/base-context';
 import { usePaymentMethods } from '@woocommerce/base-context/hooks';

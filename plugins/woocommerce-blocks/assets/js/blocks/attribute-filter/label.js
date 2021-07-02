@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { _n, sprintf } from '@wordpress/i18n';
-import { Label } from '@woocommerce/blocks-checkout';
+import Label from '@woocommerce/base-components/label';
 
 /**
  * The label for an attribute term filter.

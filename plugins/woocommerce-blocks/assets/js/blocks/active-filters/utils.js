@@ -4,7 +4,7 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { formatPrice } from '@woocommerce/price-format';
 import { RemovableChip } from '@woocommerce/base-components/chip';
-import { Label } from '@woocommerce/blocks-checkout';
+import Label from '@woocommerce/base-components/label';
 
 /**
  * Format a min/max price range to display.
