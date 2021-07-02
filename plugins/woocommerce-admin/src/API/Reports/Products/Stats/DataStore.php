@@ -34,6 +34,13 @@ class DataStore extends ProductsDataStore implements DataStoreInterface {
 	);
 
 	/**
+	 * Cache identifier.
+	 *
+	 * @var string
+	 */
+	protected $cache_key = 'products_stats';
+
+	/**
 	 * Data store context used to pass to filters.
 	 *
 	 * @var string
@@ -215,7 +222,7 @@ class DataStore extends ProductsDataStore implements DataStoreInterface {
 			$segmenter->add_intervals_segments( $data, $intervals_query, $table_name );
 			$this->create_interval_subtotals( $data->intervals );
 
-			wp_cache_set( $cache_key, $data, $this->cache_group );
+			$this->set_cached_data( $cache_key, $data );
 		}
 
 		return $data;
