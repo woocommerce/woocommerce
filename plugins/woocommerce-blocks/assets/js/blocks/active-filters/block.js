@@ -6,7 +6,7 @@ import { useQueryStateByKey } from '@woocommerce/base-context/hooks';
 import { useMemo } from '@wordpress/element';
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
-import { Label } from '@woocommerce/blocks-checkout';
+import Label from '@woocommerce/base-components/label';
 
 /**
  * Internal dependencies

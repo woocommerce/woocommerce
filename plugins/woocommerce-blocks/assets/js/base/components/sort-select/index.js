@@ -3,7 +3,7 @@
  */
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { Label } from '@woocommerce/blocks-checkout';
+import Label from '@woocommerce/base-components/label';
 import { withInstanceId } from '@woocommerce/base-hocs/with-instance-id';
 
 /**
