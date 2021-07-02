@@ -51,6 +51,9 @@
                 "GPL-2.0-or-later"
             ],
             "description": "Creates a custom autoloader for a plugin or theme.",
+            "support": {
+                "source": "https://github.com/Automattic/jetpack-autoloader/tree/2.10.1"
+            },
             "time": "2021-03-30T15:15:59+00:00"
         },
         {
@@ -82,6 +85,9 @@
                 "GPL-2.0-or-later"
             ],
             "description": "A wrapper for defining constants in a more testable way.",
+            "support": {
+                "source": "https://github.com/Automattic/jetpack-constants/tree/v1.5.1"
+            },
             "time": "2020-10-28T19:00:31+00:00"
         },
         {
@@ -214,6 +220,10 @@
                 "zend",
                 "zikula"
             ],
+            "support": {
+                "issues": "https://github.com/composer/installers/issues",
+                "source": "https://github.com/composer/installers/tree/v1.11.0"
+            },
             "funding": [
                 {
                     "url": "https://packagist.com",
@@ -288,6 +298,10 @@
                 "geolocation",
                 "maxmind"
             ],
+            "support": {
+                "issues": "https://github.com/maxmind/MaxMind-DB-Reader-php/issues",
+                "source": "https://github.com/maxmind/MaxMind-DB-Reader-php/tree/v1.6.0"
+            },
             "time": "2019-12-19T22:59:03+00:00"
         },
         {
@@ -362,6 +376,10 @@
                 "email",
                 "pre-processing"
             ],
+            "support": {
+                "issues": "https://github.com/MyIntervals/emogrifier/issues",
+                "source": "https://github.com/MyIntervals/emogrifier"
+            },
             "time": "2019-12-26T19:37:31+00:00"
         },
         {
@@ -411,6 +429,10 @@
                 "container-interop",
                 "psr"
             ],
+            "support": {
+                "issues": "https://github.com/php-fig/container/issues",
+                "source": "https://github.com/php-fig/container/tree/master"
+            },
             "time": "2017-02-14T16:28:37+00:00"
         },
         {
@@ -464,6 +486,9 @@
             ],
             "description": "Symfony CssSelector Component",
             "homepage": "https://symfony.com",
+            "support": {
+                "source": "https://github.com/symfony/css-selector/tree/master"
+            },
             "time": "2017-05-01T15:01:29+00:00"
         },
         {
@@ -551,6 +576,10 @@
             ],
             "description": "A modern, javascript-driven WooCommerce Admin experience.",
             "homepage": "https://github.com/woocommerce/woocommerce-admin",
+            "support": {
+                "issues": "https://github.com/woocommerce/woocommerce-admin/issues",
+                "source": "https://github.com/woocommerce/woocommerce-admin/tree/v2.4.1"
+            },
             "time": "2021-07-01T06:10:01+00:00"
         },
         {
@@ -598,6 +627,10 @@
                 "gutenberg",
                 "woocommerce"
             ],
+            "support": {
+                "issues": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues",
+                "source": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/v5.3.1"
+            },
             "time": "2021-06-15T09:12:48+00:00"
         }
     ],
@@ -665,5 +698,5 @@
     "platform-overrides": {
         "php": "7.0"
     },
-    "plugin-api-version": "1.1.0"
+    "plugin-api-version": "2.0.0"
 }
