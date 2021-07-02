@@ -23,7 +23,7 @@ const OrderSummary = ( { cartItems = [] } ) => {
 		<Panel
 			className="wc-block-components-order-summary"
 			initialOpen={ isLarge }
-			hasBorder={ true }
+			hasBorder={ false }
 			title={
 				<span className="wc-block-components-order-summary__button-text">
 					{ __( 'Order summary', 'woo-gutenberg-products-block' ) }

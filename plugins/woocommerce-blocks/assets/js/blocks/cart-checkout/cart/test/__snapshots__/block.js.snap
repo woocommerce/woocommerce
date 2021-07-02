@@ -370,113 +370,7 @@ exports[`Testing cart Contains a Taxes section if Core options are set to show i
             Cart totals
           </h2>
           <div
-            class="wc-block-components-totals-item"
-          >
-            <span
-              class="wc-block-components-totals-item__label"
-            >
-              Subtotal
-            </span>
-            <span
-              class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-item__value"
-            >
-              $24.00
-            </span>
-            <div
-              class="wc-block-components-totals-item__description"
-            />
-          </div>
-          <div
-            class="wc-block-components-totals-coupon wc-block-components-panel has-border"
-          >
-            <div>
-              <button
-                aria-expanded="false"
-                class="wc-block-components-panel__button"
-              >
-                <svg
-                  aria-hidden="true"
-                  class="wc-block-components-panel__button-icon"
-                  focusable="false"
-                  height="24"
-                  role="img"
-                  viewBox="0 0 24 24"
-                  width="24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M17 9.4L12 14 7 9.4l-1 1.2 6 5.4 6-5.4z"
-                  />
-                </svg>
-                <span
-                  aria-hidden="true"
-                >
-                  Coupon code
-                </span>
-                <span
-                  class="screen-reader-text"
-                >
-                  Apply a coupon code
-                </span>
-              </button>
-            </div>
-            <div
-              class="wc-block-components-panel__content"
-              hidden=""
-            >
-              <div
-                class=""
-              >
-                <div
-                  aria-hidden="false"
-                  class=""
-                >
-                  <div
-                    class="wc-block-components-totals-coupon__content"
-                  >
-                    <form
-                      class="wc-block-components-totals-coupon__form"
-                    >
-                      <div
-                        class="wc-block-components-text-input wc-block-components-totals-coupon__input is-active"
-                      >
-                        <input
-                          aria-describedby=""
-                          aria-label="Enter code"
-                          autocapitalize="off"
-                          autocomplete="off"
-                          id="wc-block-components-totals-coupon__input-1"
-                          type="text"
-                          value=""
-                        />
-                        <label
-                          for="wc-block-components-totals-coupon__input-1"
-                        >
-                          Enter code
-                        </label>
-                      </div>
-                      <button
-                        class="components-button wc-block-components-button wc-block-components-totals-coupon__button"
-                        disabled=""
-                        type="submit"
-                      >
-                        <span
-                          class="wc-block-components-button__text"
-                        >
-                          Apply
-                        </span>
-                      </button>
-                    </form>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            class="wc-block-components-discounts-meta"
-          />
-          <div
-            class="wc-block-components-totals-shipping"
+            class="wc-block-components-totals-wrapper"
           >
             <div
               class="wc-block-components-totals-item"
@@ -484,208 +378,328 @@ exports[`Testing cart Contains a Taxes section if Core options are set to show i
               <span
                 class="wc-block-components-totals-item__label"
               >
-                Shipping
+                Subtotal
               </span>
               <span
                 class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-item__value"
               >
-                $0.00
+                $24.00
               </span>
               <div
                 class="wc-block-components-totals-item__description"
-              >
-                <div
-                  class="wc-block-components-totals-item__description wc-block-components-totals-shipping__via"
-                >
-                  via
-                   
-                  Free shipping
-                </div>
-              </div>
+              />
             </div>
-            <fieldset
-              class="wc-block-components-totals-shipping__fieldset"
+          </div>
+          <div
+            class="wc-block-components-totals-wrapper"
+          >
+            <div
+              class="wc-block-components-totals-coupon wc-block-components-panel"
             >
-              <legend
-                class="screen-reader-text"
-              >
-                Shipping options
-              </legend>
+              <div>
+                <button
+                  aria-expanded="false"
+                  class="wc-block-components-panel__button"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="wc-block-components-panel__button-icon"
+                    focusable="false"
+                    height="24"
+                    role="img"
+                    viewBox="0 0 24 24"
+                    width="24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M17 9.4L12 14 7 9.4l-1 1.2 6 5.4 6-5.4z"
+                    />
+                  </svg>
+                  <span
+                    aria-hidden="true"
+                  >
+                    Coupon code
+                  </span>
+                  <span
+                    class="screen-reader-text"
+                  >
+                    Apply a coupon code
+                  </span>
+                </button>
+              </div>
               <div
-                class=""
+                class="wc-block-components-panel__content"
+                hidden=""
               >
                 <div
-                  aria-hidden="false"
                   class=""
                 >
                   <div
-                    class="wc-block-components-shipping-rates-control wc-block-components-totals-shipping__options"
+                    aria-hidden="false"
+                    class=""
                   >
                     <div
-                      class="wc-block-components-shipping-rates-control__package wc-block-components-panel"
+                      class="wc-block-components-totals-coupon__content"
                     >
-                      <div>
-                        <button
-                          aria-expanded="true"
-                          class="wc-block-components-panel__button"
-                        >
-                          <svg
-                            aria-hidden="true"
-                            class="wc-block-components-panel__button-icon"
-                            focusable="false"
-                            height="24"
-                            role="img"
-                            viewBox="0 0 24 24"
-                            width="24"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path
-                              d="M12 8l-6 5.4 1 1.2 5-4.6 5 4.6 1-1.2z"
-                            />
-                          </svg>
-                          <div
-                            class="wc-block-components-shipping-rates-control__package-title"
-                          >
-                            Shipping
-                          </div>
-                        </button>
-                      </div>
-                      <div
-                        class="wc-block-components-panel__content"
+                      <form
+                        class="wc-block-components-totals-coupon__form"
                       >
                         <div
-                          class="wc-block-components-radio-control"
+                          class="wc-block-components-text-input wc-block-components-totals-coupon__input is-active"
                         >
+                          <input
+                            aria-describedby=""
+                            aria-label="Enter code"
+                            autocapitalize="off"
+                            autocomplete="off"
+                            id="wc-block-components-totals-coupon__input-1"
+                            type="text"
+                            value=""
+                          />
                           <label
-                            class="wc-block-components-radio-control__option wc-block-components-radio-control__option-checked"
-                            for="radio-control-1-free_shipping:1"
+                            for="wc-block-components-totals-coupon__input-1"
                           >
-                            <input
-                              aria-describedby="radio-control-1-free_shipping:1__label radio-control-1-free_shipping:1__description"
-                              checked=""
-                              class="wc-block-components-radio-control__input"
-                              id="radio-control-1-free_shipping:1"
-                              name="radio-control-1"
-                              type="radio"
-                              value="free_shipping:1"
-                            />
-                            <div
-                              class="wc-block-components-radio-control__option-layout"
+                            Enter code
+                          </label>
+                        </div>
+                        <button
+                          class="components-button wc-block-components-button wc-block-components-totals-coupon__button"
+                          disabled=""
+                          type="submit"
+                        >
+                          <span
+                            class="wc-block-components-button__text"
+                          >
+                            Apply
+                          </span>
+                        </button>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="wc-block-components-totals-wrapper"
+          >
+            <div
+              class="wc-block-components-totals-shipping"
+            >
+              <div
+                class="wc-block-components-totals-item"
+              >
+                <span
+                  class="wc-block-components-totals-item__label"
+                >
+                  Shipping
+                </span>
+                <span
+                  class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-item__value"
+                >
+                  $0.00
+                </span>
+                <div
+                  class="wc-block-components-totals-item__description"
+                >
+                  <div
+                    class="wc-block-components-totals-item__description wc-block-components-totals-shipping__via"
+                  >
+                    via
+                     
+                    Free shipping
+                  </div>
+                </div>
+              </div>
+              <fieldset
+                class="wc-block-components-totals-shipping__fieldset"
+              >
+                <legend
+                  class="screen-reader-text"
+                >
+                  Shipping options
+                </legend>
+                <div
+                  class=""
+                >
+                  <div
+                    aria-hidden="false"
+                    class=""
+                  >
+                    <div
+                      class="wc-block-components-shipping-rates-control wc-block-components-totals-shipping__options"
+                    >
+                      <div
+                        class="wc-block-components-shipping-rates-control__package wc-block-components-panel"
+                      >
+                        <div>
+                          <button
+                            aria-expanded="true"
+                            class="wc-block-components-panel__button"
+                          >
+                            <svg
+                              aria-hidden="true"
+                              class="wc-block-components-panel__button-icon"
+                              focusable="false"
+                              height="24"
+                              role="img"
+                              viewBox="0 0 24 24"
+                              width="24"
+                              xmlns="http://www.w3.org/2000/svg"
                             >
+                              <path
+                                d="M12 8l-6 5.4 1 1.2 5-4.6 5 4.6 1-1.2z"
+                              />
+                            </svg>
+                            <div
+                              class="wc-block-components-shipping-rates-control__package-title"
+                            >
+                              Shipping
+                            </div>
+                          </button>
+                        </div>
+                        <div
+                          class="wc-block-components-panel__content"
+                        >
+                          <div
+                            class="wc-block-components-radio-control"
+                          >
+                            <label
+                              class="wc-block-components-radio-control__option wc-block-components-radio-control__option-checked"
+                              for="radio-control-1-free_shipping:1"
+                            >
+                              <input
+                                aria-describedby="radio-control-1-free_shipping:1__label radio-control-1-free_shipping:1__description"
+                                checked=""
+                                class="wc-block-components-radio-control__input"
+                                id="radio-control-1-free_shipping:1"
+                                name="radio-control-1"
+                                type="radio"
+                                value="free_shipping:1"
+                              />
                               <div
-                                class="wc-block-components-radio-control__label-group"
+                                class="wc-block-components-radio-control__option-layout"
                               >
-                                <span
-                                  class="wc-block-components-radio-control__label"
-                                  id="radio-control-1-free_shipping:1__label"
-                                >
-                                  Free shipping
-                                </span>
-                              </div>
-                              <div
-                                class="wc-block-components-radio-control__description-group"
-                              >
-                                <span
-                                  class="wc-block-components-radio-control__description"
-                                  id="radio-control-1-free_shipping:1__description"
+                                <div
+                                  class="wc-block-components-radio-control__label-group"
                                 >
                                   <span
-                                    class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount"
+                                    class="wc-block-components-radio-control__label"
+                                    id="radio-control-1-free_shipping:1__label"
                                   >
-                                    $0.00
+                                    Free shipping
                                   </span>
-                                  
-                                </span>
-                              </div>
-                            </div>
-                          </label>
-                          <label
-                            class="wc-block-components-radio-control__option"
-                            for="radio-control-1-local_pickup:1"
-                          >
-                            <input
-                              aria-describedby="radio-control-1-local_pickup:1__label radio-control-1-local_pickup:1__description"
-                              class="wc-block-components-radio-control__input"
-                              id="radio-control-1-local_pickup:1"
-                              name="radio-control-1"
-                              type="radio"
-                              value="local_pickup:1"
-                            />
-                            <div
-                              class="wc-block-components-radio-control__option-layout"
-                            >
-                              <div
-                                class="wc-block-components-radio-control__label-group"
-                              >
-                                <span
-                                  class="wc-block-components-radio-control__label"
-                                  id="radio-control-1-local_pickup:1__label"
-                                >
-                                  Local pickup
-                                </span>
-                              </div>
-                              <div
-                                class="wc-block-components-radio-control__description-group"
-                              >
-                                <span
-                                  class="wc-block-components-radio-control__description"
-                                  id="radio-control-1-local_pickup:1__description"
+                                </div>
+                                <div
+                                  class="wc-block-components-radio-control__description-group"
                                 >
                                   <span
-                                    class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount"
+                                    class="wc-block-components-radio-control__description"
+                                    id="radio-control-1-free_shipping:1__description"
                                   >
-                                    $2.00
+                                    <span
+                                      class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount"
+                                    >
+                                      $0.00
+                                    </span>
+                                    
                                   </span>
-                                  
-                                </span>
+                                </div>
                               </div>
-                            </div>
-                          </label>
+                            </label>
+                            <label
+                              class="wc-block-components-radio-control__option"
+                              for="radio-control-1-local_pickup:1"
+                            >
+                              <input
+                                aria-describedby="radio-control-1-local_pickup:1__label radio-control-1-local_pickup:1__description"
+                                class="wc-block-components-radio-control__input"
+                                id="radio-control-1-local_pickup:1"
+                                name="radio-control-1"
+                                type="radio"
+                                value="local_pickup:1"
+                              />
+                              <div
+                                class="wc-block-components-radio-control__option-layout"
+                              >
+                                <div
+                                  class="wc-block-components-radio-control__label-group"
+                                >
+                                  <span
+                                    class="wc-block-components-radio-control__label"
+                                    id="radio-control-1-local_pickup:1__label"
+                                  >
+                                    Local pickup
+                                  </span>
+                                </div>
+                                <div
+                                  class="wc-block-components-radio-control__description-group"
+                                >
+                                  <span
+                                    class="wc-block-components-radio-control__description"
+                                    id="radio-control-1-local_pickup:1__description"
+                                  >
+                                    <span
+                                      class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount"
+                                    >
+                                      $2.00
+                                    </span>
+                                    
+                                  </span>
+                                </div>
+                              </div>
+                            </label>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </fieldset>
+              </fieldset>
+            </div>
           </div>
           <div
-            class="wc-block-components-totals-item wc-block-components-totals-taxes"
+            class="wc-block-components-totals-wrapper"
           >
-            <span
-              class="wc-block-components-totals-item__label"
-            >
-              Taxes
-            </span>
-            <span
-              class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-item__value"
-            >
-              $6.00
-            </span>
             <div
-              class="wc-block-components-totals-item__description"
-            />
+              class="wc-block-components-totals-item wc-block-components-totals-taxes"
+            >
+              <span
+                class="wc-block-components-totals-item__label"
+              >
+                Taxes
+              </span>
+              <span
+                class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-item__value"
+              >
+                $6.00
+              </span>
+              <div
+                class="wc-block-components-totals-item__description"
+              />
+            </div>
           </div>
           <div
-            class="wc-block-components-totals-item wc-block-components-totals-footer-item"
+            class="wc-block-components-totals-wrapper"
           >
-            <span
-              class="wc-block-components-totals-item__label"
-            >
-              Total
-            </span>
-            <span
-              class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-item__value"
-            >
-              $30.00
-            </span>
             <div
-              class="wc-block-components-totals-item__description"
-            />
+              class="wc-block-components-totals-item wc-block-components-totals-footer-item"
+            >
+              <span
+                class="wc-block-components-totals-item__label"
+              >
+                Total
+              </span>
+              <span
+                class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-item__value"
+              >
+                $30.00
+              </span>
+              <div
+                class="wc-block-components-totals-item__description"
+              />
+            </div>
           </div>
-          <div
-            class="wc-block-components-order-meta"
-          />
           <div
             class="wc-block-cart__payment-options"
           >
@@ -1092,113 +1106,7 @@ exports[`Testing cart Shows individual tax lines if the store is set to do so 1`
             Cart totals
           </h2>
           <div
-            class="wc-block-components-totals-item"
-          >
-            <span
-              class="wc-block-components-totals-item__label"
-            >
-              Subtotal
-            </span>
-            <span
-              class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-item__value"
-            >
-              $24.00
-            </span>
-            <div
-              class="wc-block-components-totals-item__description"
-            />
-          </div>
-          <div
-            class="wc-block-components-totals-coupon wc-block-components-panel has-border"
-          >
-            <div>
-              <button
-                aria-expanded="false"
-                class="wc-block-components-panel__button"
-              >
-                <svg
-                  aria-hidden="true"
-                  class="wc-block-components-panel__button-icon"
-                  focusable="false"
-                  height="24"
-                  role="img"
-                  viewBox="0 0 24 24"
-                  width="24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M17 9.4L12 14 7 9.4l-1 1.2 6 5.4 6-5.4z"
-                  />
-                </svg>
-                <span
-                  aria-hidden="true"
-                >
-                  Coupon code
-                </span>
-                <span
-                  class="screen-reader-text"
-                >
-                  Apply a coupon code
-                </span>
-              </button>
-            </div>
-            <div
-              class="wc-block-components-panel__content"
-              hidden=""
-            >
-              <div
-                class=""
-              >
-                <div
-                  aria-hidden="false"
-                  class=""
-                >
-                  <div
-                    class="wc-block-components-totals-coupon__content"
-                  >
-                    <form
-                      class="wc-block-components-totals-coupon__form"
-                    >
-                      <div
-                        class="wc-block-components-text-input wc-block-components-totals-coupon__input is-active"
-                      >
-                        <input
-                          aria-describedby=""
-                          aria-label="Enter code"
-                          autocapitalize="off"
-                          autocomplete="off"
-                          id="wc-block-components-totals-coupon__input-2"
-                          type="text"
-                          value=""
-                        />
-                        <label
-                          for="wc-block-components-totals-coupon__input-2"
-                        >
-                          Enter code
-                        </label>
-                      </div>
-                      <button
-                        class="components-button wc-block-components-button wc-block-components-totals-coupon__button"
-                        disabled=""
-                        type="submit"
-                      >
-                        <span
-                          class="wc-block-components-button__text"
-                        >
-                          Apply
-                        </span>
-                      </button>
-                    </form>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            class="wc-block-components-discounts-meta"
-          />
-          <div
-            class="wc-block-components-totals-shipping"
+            class="wc-block-components-totals-wrapper"
           >
             <div
               class="wc-block-components-totals-item"
@@ -1206,213 +1114,333 @@ exports[`Testing cart Shows individual tax lines if the store is set to do so 1`
               <span
                 class="wc-block-components-totals-item__label"
               >
-                Shipping
+                Subtotal
               </span>
               <span
                 class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-item__value"
               >
-                $0.00
-              </span>
-              <div
-                class="wc-block-components-totals-item__description"
-              >
-                <div
-                  class="wc-block-components-totals-item__description wc-block-components-totals-shipping__via"
-                >
-                  via
-                   
-                  Free shipping
-                </div>
-              </div>
-            </div>
-            <fieldset
-              class="wc-block-components-totals-shipping__fieldset"
-            >
-              <legend
-                class="screen-reader-text"
-              >
-                Shipping options
-              </legend>
-              <div
-                class=""
-              >
-                <div
-                  aria-hidden="false"
-                  class=""
-                >
-                  <div
-                    class="wc-block-components-shipping-rates-control wc-block-components-totals-shipping__options"
-                  >
-                    <div
-                      class="wc-block-components-shipping-rates-control__package wc-block-components-panel"
-                    >
-                      <div>
-                        <button
-                          aria-expanded="true"
-                          class="wc-block-components-panel__button"
-                        >
-                          <svg
-                            aria-hidden="true"
-                            class="wc-block-components-panel__button-icon"
-                            focusable="false"
-                            height="24"
-                            role="img"
-                            viewBox="0 0 24 24"
-                            width="24"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path
-                              d="M12 8l-6 5.4 1 1.2 5-4.6 5 4.6 1-1.2z"
-                            />
-                          </svg>
-                          <div
-                            class="wc-block-components-shipping-rates-control__package-title"
-                          >
-                            Shipping
-                          </div>
-                        </button>
-                      </div>
-                      <div
-                        class="wc-block-components-panel__content"
-                      >
-                        <div
-                          class="wc-block-components-radio-control"
-                        >
-                          <label
-                            class="wc-block-components-radio-control__option wc-block-components-radio-control__option-checked"
-                            for="radio-control-2-free_shipping:1"
-                          >
-                            <input
-                              aria-describedby="radio-control-2-free_shipping:1__label radio-control-2-free_shipping:1__description"
-                              checked=""
-                              class="wc-block-components-radio-control__input"
-                              id="radio-control-2-free_shipping:1"
-                              name="radio-control-2"
-                              type="radio"
-                              value="free_shipping:1"
-                            />
-                            <div
-                              class="wc-block-components-radio-control__option-layout"
-                            >
-                              <div
-                                class="wc-block-components-radio-control__label-group"
-                              >
-                                <span
-                                  class="wc-block-components-radio-control__label"
-                                  id="radio-control-2-free_shipping:1__label"
-                                >
-                                  Free shipping
-                                </span>
-                              </div>
-                              <div
-                                class="wc-block-components-radio-control__description-group"
-                              >
-                                <span
-                                  class="wc-block-components-radio-control__description"
-                                  id="radio-control-2-free_shipping:1__description"
-                                >
-                                  <span
-                                    class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount"
-                                  >
-                                    $0.00
-                                  </span>
-                                  
-                                </span>
-                              </div>
-                            </div>
-                          </label>
-                          <label
-                            class="wc-block-components-radio-control__option"
-                            for="radio-control-2-local_pickup:1"
-                          >
-                            <input
-                              aria-describedby="radio-control-2-local_pickup:1__label radio-control-2-local_pickup:1__description"
-                              class="wc-block-components-radio-control__input"
-                              id="radio-control-2-local_pickup:1"
-                              name="radio-control-2"
-                              type="radio"
-                              value="local_pickup:1"
-                            />
-                            <div
-                              class="wc-block-components-radio-control__option-layout"
-                            >
-                              <div
-                                class="wc-block-components-radio-control__label-group"
-                              >
-                                <span
-                                  class="wc-block-components-radio-control__label"
-                                  id="radio-control-2-local_pickup:1__label"
-                                >
-                                  Local pickup
-                                </span>
-                              </div>
-                              <div
-                                class="wc-block-components-radio-control__description-group"
-                              >
-                                <span
-                                  class="wc-block-components-radio-control__description"
-                                  id="radio-control-2-local_pickup:1__description"
-                                >
-                                  <span
-                                    class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount"
-                                  >
-                                    $2.00
-                                  </span>
-                                  
-                                </span>
-                              </div>
-                            </div>
-                          </label>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </fieldset>
-          </div>
-          <div
-            class="wc-block-components-totals-taxes"
-          >
-            <div
-              class="wc-block-components-totals-item wc-block-components-totals-taxes__grouped-rate"
-            >
-              <span
-                class="wc-block-components-totals-item__label"
-              >
-                Sales tax
-              </span>
-              <span
-                class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-item__value"
-              >
-                $6.00
+                $24.00
               </span>
               <div
                 class="wc-block-components-totals-item__description"
               />
             </div>
-             
           </div>
           <div
-            class="wc-block-components-totals-item wc-block-components-totals-footer-item"
+            class="wc-block-components-totals-wrapper"
           >
-            <span
-              class="wc-block-components-totals-item__label"
-            >
-              Total
-            </span>
-            <span
-              class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-item__value"
-            >
-              $30.00
-            </span>
             <div
-              class="wc-block-components-totals-item__description"
-            />
+              class="wc-block-components-totals-coupon wc-block-components-panel"
+            >
+              <div>
+                <button
+                  aria-expanded="false"
+                  class="wc-block-components-panel__button"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="wc-block-components-panel__button-icon"
+                    focusable="false"
+                    height="24"
+                    role="img"
+                    viewBox="0 0 24 24"
+                    width="24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M17 9.4L12 14 7 9.4l-1 1.2 6 5.4 6-5.4z"
+                    />
+                  </svg>
+                  <span
+                    aria-hidden="true"
+                  >
+                    Coupon code
+                  </span>
+                  <span
+                    class="screen-reader-text"
+                  >
+                    Apply a coupon code
+                  </span>
+                </button>
+              </div>
+              <div
+                class="wc-block-components-panel__content"
+                hidden=""
+              >
+                <div
+                  class=""
+                >
+                  <div
+                    aria-hidden="false"
+                    class=""
+                  >
+                    <div
+                      class="wc-block-components-totals-coupon__content"
+                    >
+                      <form
+                        class="wc-block-components-totals-coupon__form"
+                      >
+                        <div
+                          class="wc-block-components-text-input wc-block-components-totals-coupon__input is-active"
+                        >
+                          <input
+                            aria-describedby=""
+                            aria-label="Enter code"
+                            autocapitalize="off"
+                            autocomplete="off"
+                            id="wc-block-components-totals-coupon__input-2"
+                            type="text"
+                            value=""
+                          />
+                          <label
+                            for="wc-block-components-totals-coupon__input-2"
+                          >
+                            Enter code
+                          </label>
+                        </div>
+                        <button
+                          class="components-button wc-block-components-button wc-block-components-totals-coupon__button"
+                          disabled=""
+                          type="submit"
+                        >
+                          <span
+                            class="wc-block-components-button__text"
+                          >
+                            Apply
+                          </span>
+                        </button>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
           <div
-            class="wc-block-components-order-meta"
-          />
+            class="wc-block-components-totals-wrapper"
+          >
+            <div
+              class="wc-block-components-totals-shipping"
+            >
+              <div
+                class="wc-block-components-totals-item"
+              >
+                <span
+                  class="wc-block-components-totals-item__label"
+                >
+                  Shipping
+                </span>
+                <span
+                  class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-item__value"
+                >
+                  $0.00
+                </span>
+                <div
+                  class="wc-block-components-totals-item__description"
+                >
+                  <div
+                    class="wc-block-components-totals-item__description wc-block-components-totals-shipping__via"
+                  >
+                    via
+                     
+                    Free shipping
+                  </div>
+                </div>
+              </div>
+              <fieldset
+                class="wc-block-components-totals-shipping__fieldset"
+              >
+                <legend
+                  class="screen-reader-text"
+                >
+                  Shipping options
+                </legend>
+                <div
+                  class=""
+                >
+                  <div
+                    aria-hidden="false"
+                    class=""
+                  >
+                    <div
+                      class="wc-block-components-shipping-rates-control wc-block-components-totals-shipping__options"
+                    >
+                      <div
+                        class="wc-block-components-shipping-rates-control__package wc-block-components-panel"
+                      >
+                        <div>
+                          <button
+                            aria-expanded="true"
+                            class="wc-block-components-panel__button"
+                          >
+                            <svg
+                              aria-hidden="true"
+                              class="wc-block-components-panel__button-icon"
+                              focusable="false"
+                              height="24"
+                              role="img"
+                              viewBox="0 0 24 24"
+                              width="24"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M12 8l-6 5.4 1 1.2 5-4.6 5 4.6 1-1.2z"
+                              />
+                            </svg>
+                            <div
+                              class="wc-block-components-shipping-rates-control__package-title"
+                            >
+                              Shipping
+                            </div>
+                          </button>
+                        </div>
+                        <div
+                          class="wc-block-components-panel__content"
+                        >
+                          <div
+                            class="wc-block-components-radio-control"
+                          >
+                            <label
+                              class="wc-block-components-radio-control__option wc-block-components-radio-control__option-checked"
+                              for="radio-control-2-free_shipping:1"
+                            >
+                              <input
+                                aria-describedby="radio-control-2-free_shipping:1__label radio-control-2-free_shipping:1__description"
+                                checked=""
+                                class="wc-block-components-radio-control__input"
+                                id="radio-control-2-free_shipping:1"
+                                name="radio-control-2"
+                                type="radio"
+                                value="free_shipping:1"
+                              />
+                              <div
+                                class="wc-block-components-radio-control__option-layout"
+                              >
+                                <div
+                                  class="wc-block-components-radio-control__label-group"
+                                >
+                                  <span
+                                    class="wc-block-components-radio-control__label"
+                                    id="radio-control-2-free_shipping:1__label"
+                                  >
+                                    Free shipping
+                                  </span>
+                                </div>
+                                <div
+                                  class="wc-block-components-radio-control__description-group"
+                                >
+                                  <span
+                                    class="wc-block-components-radio-control__description"
+                                    id="radio-control-2-free_shipping:1__description"
+                                  >
+                                    <span
+                                      class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount"
+                                    >
+                                      $0.00
+                                    </span>
+                                    
+                                  </span>
+                                </div>
+                              </div>
+                            </label>
+                            <label
+                              class="wc-block-components-radio-control__option"
+                              for="radio-control-2-local_pickup:1"
+                            >
+                              <input
+                                aria-describedby="radio-control-2-local_pickup:1__label radio-control-2-local_pickup:1__description"
+                                class="wc-block-components-radio-control__input"
+                                id="radio-control-2-local_pickup:1"
+                                name="radio-control-2"
+                                type="radio"
+                                value="local_pickup:1"
+                              />
+                              <div
+                                class="wc-block-components-radio-control__option-layout"
+                              >
+                                <div
+                                  class="wc-block-components-radio-control__label-group"
+                                >
+                                  <span
+                                    class="wc-block-components-radio-control__label"
+                                    id="radio-control-2-local_pickup:1__label"
+                                  >
+                                    Local pickup
+                                  </span>
+                                </div>
+                                <div
+                                  class="wc-block-components-radio-control__description-group"
+                                >
+                                  <span
+                                    class="wc-block-components-radio-control__description"
+                                    id="radio-control-2-local_pickup:1__description"
+                                  >
+                                    <span
+                                      class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount"
+                                    >
+                                      $2.00
+                                    </span>
+                                    
+                                  </span>
+                                </div>
+                              </div>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </fieldset>
+            </div>
+          </div>
+          <div
+            class="wc-block-components-totals-wrapper"
+          >
+            <div
+              class="wc-block-components-totals-taxes"
+            >
+              <div
+                class="wc-block-components-totals-item wc-block-components-totals-taxes__grouped-rate"
+              >
+                <span
+                  class="wc-block-components-totals-item__label"
+                >
+                  Sales tax
+                </span>
+                <span
+                  class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-item__value"
+                >
+                  $6.00
+                </span>
+                <div
+                  class="wc-block-components-totals-item__description"
+                />
+              </div>
+               
+            </div>
+          </div>
+          <div
+            class="wc-block-components-totals-wrapper"
+          >
+            <div
+              class="wc-block-components-totals-item wc-block-components-totals-footer-item"
+            >
+              <span
+                class="wc-block-components-totals-item__label"
+              >
+                Total
+              </span>
+              <span
+                class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-item__value"
+              >
+                $30.00
+              </span>
+              <div
+                class="wc-block-components-totals-item__description"
+              />
+            </div>
+          </div>
           <div
             class="wc-block-cart__payment-options"
           >
@@ -1819,113 +1847,7 @@ exports[`Testing cart Shows rate percentages after tax lines if the block is set
             Cart totals
           </h2>
           <div
-            class="wc-block-components-totals-item"
-          >
-            <span
-              class="wc-block-components-totals-item__label"
-            >
-              Subtotal
-            </span>
-            <span
-              class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-item__value"
-            >
-              $24.00
-            </span>
-            <div
-              class="wc-block-components-totals-item__description"
-            />
-          </div>
-          <div
-            class="wc-block-components-totals-coupon wc-block-components-panel has-border"
-          >
-            <div>
-              <button
-                aria-expanded="false"
-                class="wc-block-components-panel__button"
-              >
-                <svg
-                  aria-hidden="true"
-                  class="wc-block-components-panel__button-icon"
-                  focusable="false"
-                  height="24"
-                  role="img"
-                  viewBox="0 0 24 24"
-                  width="24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M17 9.4L12 14 7 9.4l-1 1.2 6 5.4 6-5.4z"
-                  />
-                </svg>
-                <span
-                  aria-hidden="true"
-                >
-                  Coupon code
-                </span>
-                <span
-                  class="screen-reader-text"
-                >
-                  Apply a coupon code
-                </span>
-              </button>
-            </div>
-            <div
-              class="wc-block-components-panel__content"
-              hidden=""
-            >
-              <div
-                class=""
-              >
-                <div
-                  aria-hidden="false"
-                  class=""
-                >
-                  <div
-                    class="wc-block-components-totals-coupon__content"
-                  >
-                    <form
-                      class="wc-block-components-totals-coupon__form"
-                    >
-                      <div
-                        class="wc-block-components-text-input wc-block-components-totals-coupon__input is-active"
-                      >
-                        <input
-                          aria-describedby=""
-                          aria-label="Enter code"
-                          autocapitalize="off"
-                          autocomplete="off"
-                          id="wc-block-components-totals-coupon__input-3"
-                          type="text"
-                          value=""
-                        />
-                        <label
-                          for="wc-block-components-totals-coupon__input-3"
-                        >
-                          Enter code
-                        </label>
-                      </div>
-                      <button
-                        class="components-button wc-block-components-button wc-block-components-totals-coupon__button"
-                        disabled=""
-                        type="submit"
-                      >
-                        <span
-                          class="wc-block-components-button__text"
-                        >
-                          Apply
-                        </span>
-                      </button>
-                    </form>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            class="wc-block-components-discounts-meta"
-          />
-          <div
-            class="wc-block-components-totals-shipping"
+            class="wc-block-components-totals-wrapper"
           >
             <div
               class="wc-block-components-totals-item"
@@ -1933,213 +1855,333 @@ exports[`Testing cart Shows rate percentages after tax lines if the block is set
               <span
                 class="wc-block-components-totals-item__label"
               >
-                Shipping
+                Subtotal
               </span>
               <span
                 class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-item__value"
               >
-                $0.00
-              </span>
-              <div
-                class="wc-block-components-totals-item__description"
-              >
-                <div
-                  class="wc-block-components-totals-item__description wc-block-components-totals-shipping__via"
-                >
-                  via
-                   
-                  Free shipping
-                </div>
-              </div>
-            </div>
-            <fieldset
-              class="wc-block-components-totals-shipping__fieldset"
-            >
-              <legend
-                class="screen-reader-text"
-              >
-                Shipping options
-              </legend>
-              <div
-                class=""
-              >
-                <div
-                  aria-hidden="false"
-                  class=""
-                >
-                  <div
-                    class="wc-block-components-shipping-rates-control wc-block-components-totals-shipping__options"
-                  >
-                    <div
-                      class="wc-block-components-shipping-rates-control__package wc-block-components-panel"
-                    >
-                      <div>
-                        <button
-                          aria-expanded="true"
-                          class="wc-block-components-panel__button"
-                        >
-                          <svg
-                            aria-hidden="true"
-                            class="wc-block-components-panel__button-icon"
-                            focusable="false"
-                            height="24"
-                            role="img"
-                            viewBox="0 0 24 24"
-                            width="24"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path
-                              d="M12 8l-6 5.4 1 1.2 5-4.6 5 4.6 1-1.2z"
-                            />
-                          </svg>
-                          <div
-                            class="wc-block-components-shipping-rates-control__package-title"
-                          >
-                            Shipping
-                          </div>
-                        </button>
-                      </div>
-                      <div
-                        class="wc-block-components-panel__content"
-                      >
-                        <div
-                          class="wc-block-components-radio-control"
-                        >
-                          <label
-                            class="wc-block-components-radio-control__option wc-block-components-radio-control__option-checked"
-                            for="radio-control-3-free_shipping:1"
-                          >
-                            <input
-                              aria-describedby="radio-control-3-free_shipping:1__label radio-control-3-free_shipping:1__description"
-                              checked=""
-                              class="wc-block-components-radio-control__input"
-                              id="radio-control-3-free_shipping:1"
-                              name="radio-control-3"
-                              type="radio"
-                              value="free_shipping:1"
-                            />
-                            <div
-                              class="wc-block-components-radio-control__option-layout"
-                            >
-                              <div
-                                class="wc-block-components-radio-control__label-group"
-                              >
-                                <span
-                                  class="wc-block-components-radio-control__label"
-                                  id="radio-control-3-free_shipping:1__label"
-                                >
-                                  Free shipping
-                                </span>
-                              </div>
-                              <div
-                                class="wc-block-components-radio-control__description-group"
-                              >
-                                <span
-                                  class="wc-block-components-radio-control__description"
-                                  id="radio-control-3-free_shipping:1__description"
-                                >
-                                  <span
-                                    class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount"
-                                  >
-                                    $0.00
-                                  </span>
-                                  
-                                </span>
-                              </div>
-                            </div>
-                          </label>
-                          <label
-                            class="wc-block-components-radio-control__option"
-                            for="radio-control-3-local_pickup:1"
-                          >
-                            <input
-                              aria-describedby="radio-control-3-local_pickup:1__label radio-control-3-local_pickup:1__description"
-                              class="wc-block-components-radio-control__input"
-                              id="radio-control-3-local_pickup:1"
-                              name="radio-control-3"
-                              type="radio"
-                              value="local_pickup:1"
-                            />
-                            <div
-                              class="wc-block-components-radio-control__option-layout"
-                            >
-                              <div
-                                class="wc-block-components-radio-control__label-group"
-                              >
-                                <span
-                                  class="wc-block-components-radio-control__label"
-                                  id="radio-control-3-local_pickup:1__label"
-                                >
-                                  Local pickup
-                                </span>
-                              </div>
-                              <div
-                                class="wc-block-components-radio-control__description-group"
-                              >
-                                <span
-                                  class="wc-block-components-radio-control__description"
-                                  id="radio-control-3-local_pickup:1__description"
-                                >
-                                  <span
-                                    class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount"
-                                  >
-                                    $2.00
-                                  </span>
-                                  
-                                </span>
-                              </div>
-                            </div>
-                          </label>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </fieldset>
-          </div>
-          <div
-            class="wc-block-components-totals-taxes"
-          >
-            <div
-              class="wc-block-components-totals-item wc-block-components-totals-taxes__grouped-rate"
-            >
-              <span
-                class="wc-block-components-totals-item__label"
-              >
-                Sales tax 20%
-              </span>
-              <span
-                class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-item__value"
-              >
-                $6.00
+                $24.00
               </span>
               <div
                 class="wc-block-components-totals-item__description"
               />
             </div>
-             
           </div>
           <div
-            class="wc-block-components-totals-item wc-block-components-totals-footer-item"
+            class="wc-block-components-totals-wrapper"
           >
-            <span
-              class="wc-block-components-totals-item__label"
-            >
-              Total
-            </span>
-            <span
-              class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-item__value"
-            >
-              $30.00
-            </span>
             <div
-              class="wc-block-components-totals-item__description"
-            />
+              class="wc-block-components-totals-coupon wc-block-components-panel"
+            >
+              <div>
+                <button
+                  aria-expanded="false"
+                  class="wc-block-components-panel__button"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="wc-block-components-panel__button-icon"
+                    focusable="false"
+                    height="24"
+                    role="img"
+                    viewBox="0 0 24 24"
+                    width="24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M17 9.4L12 14 7 9.4l-1 1.2 6 5.4 6-5.4z"
+                    />
+                  </svg>
+                  <span
+                    aria-hidden="true"
+                  >
+                    Coupon code
+                  </span>
+                  <span
+                    class="screen-reader-text"
+                  >
+                    Apply a coupon code
+                  </span>
+                </button>
+              </div>
+              <div
+                class="wc-block-components-panel__content"
+                hidden=""
+              >
+                <div
+                  class=""
+                >
+                  <div
+                    aria-hidden="false"
+                    class=""
+                  >
+                    <div
+                      class="wc-block-components-totals-coupon__content"
+                    >
+                      <form
+                        class="wc-block-components-totals-coupon__form"
+                      >
+                        <div
+                          class="wc-block-components-text-input wc-block-components-totals-coupon__input is-active"
+                        >
+                          <input
+                            aria-describedby=""
+                            aria-label="Enter code"
+                            autocapitalize="off"
+                            autocomplete="off"
+                            id="wc-block-components-totals-coupon__input-3"
+                            type="text"
+                            value=""
+                          />
+                          <label
+                            for="wc-block-components-totals-coupon__input-3"
+                          >
+                            Enter code
+                          </label>
+                        </div>
+                        <button
+                          class="components-button wc-block-components-button wc-block-components-totals-coupon__button"
+                          disabled=""
+                          type="submit"
+                        >
+                          <span
+                            class="wc-block-components-button__text"
+                          >
+                            Apply
+                          </span>
+                        </button>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
           <div
-            class="wc-block-components-order-meta"
-          />
+            class="wc-block-components-totals-wrapper"
+          >
+            <div
+              class="wc-block-components-totals-shipping"
+            >
+              <div
+                class="wc-block-components-totals-item"
+              >
+                <span
+                  class="wc-block-components-totals-item__label"
+                >
+                  Shipping
+                </span>
+                <span
+                  class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-item__value"
+                >
+                  $0.00
+                </span>
+                <div
+                  class="wc-block-components-totals-item__description"
+                >
+                  <div
+                    class="wc-block-components-totals-item__description wc-block-components-totals-shipping__via"
+                  >
+                    via
+                     
+                    Free shipping
+                  </div>
+                </div>
+              </div>
+              <fieldset
+                class="wc-block-components-totals-shipping__fieldset"
+              >
+                <legend
+                  class="screen-reader-text"
+                >
+                  Shipping options
+                </legend>
+                <div
+                  class=""
+                >
+                  <div
+                    aria-hidden="false"
+                    class=""
+                  >
+                    <div
+                      class="wc-block-components-shipping-rates-control wc-block-components-totals-shipping__options"
+                    >
+                      <div
+                        class="wc-block-components-shipping-rates-control__package wc-block-components-panel"
+                      >
+                        <div>
+                          <button
+                            aria-expanded="true"
+                            class="wc-block-components-panel__button"
+                          >
+                            <svg
+                              aria-hidden="true"
+                              class="wc-block-components-panel__button-icon"
+                              focusable="false"
+                              height="24"
+                              role="img"
+                              viewBox="0 0 24 24"
+                              width="24"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M12 8l-6 5.4 1 1.2 5-4.6 5 4.6 1-1.2z"
+                              />
+                            </svg>
+                            <div
+                              class="wc-block-components-shipping-rates-control__package-title"
+                            >
+                              Shipping
+                            </div>
+                          </button>
+                        </div>
+                        <div
+                          class="wc-block-components-panel__content"
+                        >
+                          <div
+                            class="wc-block-components-radio-control"
+                          >
+                            <label
+                              class="wc-block-components-radio-control__option wc-block-components-radio-control__option-checked"
+                              for="radio-control-3-free_shipping:1"
+                            >
+                              <input
+                                aria-describedby="radio-control-3-free_shipping:1__label radio-control-3-free_shipping:1__description"
+                                checked=""
+                                class="wc-block-components-radio-control__input"
+                                id="radio-control-3-free_shipping:1"
+                                name="radio-control-3"
+                                type="radio"
+                                value="free_shipping:1"
+                              />
+                              <div
+                                class="wc-block-components-radio-control__option-layout"
+                              >
+                                <div
+                                  class="wc-block-components-radio-control__label-group"
+                                >
+                                  <span
+                                    class="wc-block-components-radio-control__label"
+                                    id="radio-control-3-free_shipping:1__label"
+                                  >
+                                    Free shipping
+                                  </span>
+                                </div>
+                                <div
+                                  class="wc-block-components-radio-control__description-group"
+                                >
+                                  <span
+                                    class="wc-block-components-radio-control__description"
+                                    id="radio-control-3-free_shipping:1__description"
+                                  >
+                                    <span
+                                      class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount"
+                                    >
+                                      $0.00
+                                    </span>
+                                    
+                                  </span>
+                                </div>
+                              </div>
+                            </label>
+                            <label
+                              class="wc-block-components-radio-control__option"
+                              for="radio-control-3-local_pickup:1"
+                            >
+                              <input
+                                aria-describedby="radio-control-3-local_pickup:1__label radio-control-3-local_pickup:1__description"
+                                class="wc-block-components-radio-control__input"
+                                id="radio-control-3-local_pickup:1"
+                                name="radio-control-3"
+                                type="radio"
+                                value="local_pickup:1"
+                              />
+                              <div
+                                class="wc-block-components-radio-control__option-layout"
+                              >
+                                <div
+                                  class="wc-block-components-radio-control__label-group"
+                                >
+                                  <span
+                                    class="wc-block-components-radio-control__label"
+                                    id="radio-control-3-local_pickup:1__label"
+                                  >
+                                    Local pickup
+                                  </span>
+                                </div>
+                                <div
+                                  class="wc-block-components-radio-control__description-group"
+                                >
+                                  <span
+                                    class="wc-block-components-radio-control__description"
+                                    id="radio-control-3-local_pickup:1__description"
+                                  >
+                                    <span
+                                      class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount"
+                                    >
+                                      $2.00
+                                    </span>
+                                    
+                                  </span>
+                                </div>
+                              </div>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </fieldset>
+            </div>
+          </div>
+          <div
+            class="wc-block-components-totals-wrapper"
+          >
+            <div
+              class="wc-block-components-totals-taxes"
+            >
+              <div
+                class="wc-block-components-totals-item wc-block-components-totals-taxes__grouped-rate"
+              >
+                <span
+                  class="wc-block-components-totals-item__label"
+                >
+                  Sales tax 20%
+                </span>
+                <span
+                  class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-item__value"
+                >
+                  $6.00
+                </span>
+                <div
+                  class="wc-block-components-totals-item__description"
+                />
+              </div>
+               
+            </div>
+          </div>
+          <div
+            class="wc-block-components-totals-wrapper"
+          >
+            <div
+              class="wc-block-components-totals-item wc-block-components-totals-footer-item"
+            >
+              <span
+                class="wc-block-components-totals-item__label"
+              >
+                Total
+              </span>
+              <span
+                class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-item__value"
+              >
+                $30.00
+              </span>
+              <div
+                class="wc-block-components-totals-item__description"
+              />
+            </div>
+          </div>
           <div
             class="wc-block-cart__payment-options"
           >

@@ -6,7 +6,8 @@ import classnames from 'classnames';
 /**
  * Internal dependencies
  */
-import { createSlotFill } from '../slot';
+import { createSlotFill, hasValidFills, useSlot } from '../slot';
+import TotalsWrapper from '../wrapper';
 
 const slotName = '__experimentalDiscountsMeta';
 
@@ -16,14 +17,19 @@ const {
 } = createSlotFill( slotName );
 
 const Slot = ( { className, extensions, cart } ) => {
+	const { fills } = useSlot( slotName );
 	return (
-		<DiscountsMetaSlot
-			className={ classnames(
-				className,
-				'wc-block-components-discounts-meta'
-			) }
-			fillProps={ { extensions, cart } }
-		/>
+		hasValidFills( fills ) && (
+			<TotalsWrapper slotWrapper={ true }>
+				<DiscountsMetaSlot
+					className={ classnames(
+						className,
+						'wc-block-components-discounts-meta'
+					) }
+					fillProps={ { extensions, cart } }
+				/>
+			</TotalsWrapper>
+		)
 	);
 };
 

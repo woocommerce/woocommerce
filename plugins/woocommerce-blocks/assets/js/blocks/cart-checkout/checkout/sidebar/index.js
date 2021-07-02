@@ -15,6 +15,7 @@ import {
 	TotalsTaxes,
 	ExperimentalOrderMeta,
 	ExperimentalDiscountsMeta,
+	TotalsWrapper,
 } from '@woocommerce/blocks-checkout';
 
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
@@ -58,43 +59,56 @@ const CheckoutSidebar = ( {
 
 	return (
 		<>
-			<OrderSummary cartItems={ cartItems } />
-			<Subtotal currency={ totalsCurrency } values={ cartTotals } />
-			<TotalsFees currency={ totalsCurrency } cartFees={ cartFees } />
-			<TotalsDiscount
-				cartCoupons={ cartCoupons }
-				currency={ totalsCurrency }
-				isRemovingCoupon={ isRemovingCoupon }
-				removeCoupon={ removeCoupon }
-				values={ cartTotals }
-			/>
-			{ getSetting( 'couponsEnabled', true ) && (
-				<TotalsCoupon
-					onSubmit={ applyCoupon }
-					initialOpen={ false }
-					isLoading={ isApplyingCoupon }
+			<TotalsWrapper>
+				<OrderSummary cartItems={ cartItems } />
+			</TotalsWrapper>
+			<TotalsWrapper>
+				<Subtotal currency={ totalsCurrency } values={ cartTotals } />
+				<TotalsFees currency={ totalsCurrency } cartFees={ cartFees } />
+				<TotalsDiscount
+					cartCoupons={ cartCoupons }
+					currency={ totalsCurrency }
+					isRemovingCoupon={ isRemovingCoupon }
+					removeCoupon={ removeCoupon }
+					values={ cartTotals }
 				/>
+			</TotalsWrapper>
+			{ getSetting( 'couponsEnabled', true ) && (
+				<TotalsWrapper>
+					<TotalsCoupon
+						onSubmit={ applyCoupon }
+						initialOpen={ false }
+						isLoading={ isApplyingCoupon }
+					/>
+				</TotalsWrapper>
 			) }
 			<ExperimentalDiscountsMeta.Slot { ...discountsSlotFillProps } />
 			{ needsShipping && (
-				<TotalsShipping
-					showCalculator={ false }
-					showRateSelector={ false }
-					values={ cartTotals }
-					currency={ totalsCurrency }
-				/>
+				<TotalsWrapper>
+					<TotalsShipping
+						showCalculator={ false }
+						showRateSelector={ false }
+						values={ cartTotals }
+						currency={ totalsCurrency }
+					/>
+				</TotalsWrapper>
 			) }
-			{ ! getSetting( 'displayCartPricesIncludingTax', false ) && (
-				<TotalsTaxes
+			{ ! getSetting( 'displayCartPricesIncludingTax', false ) &&
+				parseInt( cartTotals.total_tax, 10 ) > 0 && (
+					<TotalsWrapper>
+						<TotalsTaxes
+							currency={ totalsCurrency }
+							showRateAfterTaxName={ showRateAfterTaxName }
+							values={ cartTotals }
+						/>
+					</TotalsWrapper>
+				) }
+			<TotalsWrapper>
+				<TotalsFooterItem
 					currency={ totalsCurrency }
-					showRateAfterTaxName={ showRateAfterTaxName }
 					values={ cartTotals }
 				/>
-			) }
-			<TotalsFooterItem
-				currency={ totalsCurrency }
-				values={ cartTotals }
-			/>
+			</TotalsWrapper>
 			<ExperimentalOrderMeta.Slot { ...slotFillProps } />
 		</>
 	);

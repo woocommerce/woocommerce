@@ -81,13 +81,7 @@ table.wc-block-cart-items {
 .wc-block-cart {
 	.wc-block-components-totals-taxes,
 	.wc-block-components-totals-footer-item {
-		@include with-translucent-border(1px 0 0);
 		margin: 0;
-		padding: em($gap-small) 0;
-	}
-
-	.wc-block-components-totals-footer-item {
-		@include with-translucent-border(1px 0);
 	}
 }
 
@@ -261,7 +255,6 @@ table.wc-block-cart-items {
 	}
 
 	.wc-block-cart__totals-title {
-		@include with-translucent-border(0 0 1px);
 		@include text-heading();
 		@include font-size(smaller);
 		display: block;
