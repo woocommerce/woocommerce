@@ -41,6 +41,9 @@ class ProductQuery {
 			$args['post_type'] = [ 'product', 'product_variation' ];
 		}
 
+		// Taxonomy query to filter products by type, category, tag, shipping class, and attribute.
+		$tax_query = [];
+
 		// Filter product type by slug.
 		if ( ! empty( $request['type'] ) ) {
 			if ( 'variation' === $request['type'] ) {
@@ -87,9 +90,6 @@ class ProductQuery {
 				$args[ $key ] = $request[ $key ];
 			}
 		}
-
-		// Taxonomy query to filter products by type, category, tag, shipping class, and attribute.
-		$tax_query = [];
 
 		$operator_mapping = [
 			'in'     => 'IN',
