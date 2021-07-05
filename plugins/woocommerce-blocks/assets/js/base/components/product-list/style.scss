@@ -55,8 +55,8 @@
 	list-style: none;
 }
 
-// The block widgets editor's generic @reset overrides box sizing on all children
-.blocks-widgets-container .wc-block-grid__product {
+// Increased specificity necessary as Gutenberg's generic reset overrides box sizing
+.wc-block-grid__product.wc-block-grid__product {
 	box-sizing: border-box;
 }
 
