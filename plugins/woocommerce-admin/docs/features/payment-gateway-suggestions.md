@@ -39,18 +39,18 @@ Information concerning the configuration and status of the payment gateway is de
 
 Additional information is added to the existing payment gateway in the WooCommerce REST API response. The following public methods can be added to the payment gateway class to pass information to the recommended payment gateways task:
 
-Name | Return | Default | Description
---- | --- | --- | ---
-`needs_setup()` | boolean | `false` | Used to determine if the gateway still requires setup in order to be used.
-`get_required_settings_keys()` | array | `[]` | An array of keys for fields required to properly configure the gateway.  The keys must match those of already registered form fields in the payment gateway.
-`get_connection_url()` | string | `null` | The connection URL to be used to quickly connect a payment gateway provider. If provided, this will be used in place of required setting fields. 
-`get_post_install_script_handles()` | array | `[]` | An array of script handles previously registered with `wp_register_script` to enqueue after the payment gateway has been installed.  This is primarily used to `SlotFill` the payment connection step, but can allow any script to be added to assist in payment gateway setup.
-`get_setup_help_text()` | string | `null` | Help text to be shown above the connection step's submit button.
+| Name                                | Return  | Default | Description                                                                                                                                                                                                                                                                    |
+| ----------------------------------- | ------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `needs_setup()`                     | boolean | `false` | Used to determine if the gateway still requires setup in order to be used.                                                                                                                                                                                                     |
+| `get_required_settings_keys()`      | array   | `[]`    | An array of keys for fields required to properly configure the gateway. The keys must match those of already registered form fields in the payment gateway.                                                                                                                    |
+| `get_connection_url()`              | string  | `null`  | The connection URL to be used to quickly connect a payment gateway provider. If provided, this will be used in place of required setting fields.                                                                                                                               |
+| `get_post_install_script_handles()` | array   | `[]`    | An array of script handles previously registered with `wp_register_script` to enqueue after the payment gateway has been installed. This is primarily used to `SlotFill` the payment connection step, but can allow any script to be added to assist in payment gateway setup. |
+| `get_setup_help_text()`             | string  | `null`  | Help text to be shown above the connection step's submit button.                                                                                                                                                                                                               |
 
 ## SlotFill
 
 Payment gateway tasks can be SlotFilled to provide custom experiences. This is useful if a gateway cannot follow the generic payment steps to be fully set up.
 
-The entire payment gateway card can be SlotFilled using [WooPaymentGatewaySetup](https://github.com/woocommerce/woocommerce-admin/tree/main/packages/tasks/src/WooPaymentGatewaySetup) or simply SlotFill [WooPaymentGatewayConfigure](https://github.com/woocommerce/woocommerce-admin/tree/main/packages/tasks/src/WooPaymentGatewayConfigure) to leave the default installation and stepper in place.
+The entire payment gateway card can be SlotFilled using [WooPaymentGatewaySetup](https://github.com/woocommerce/woocommerce-admin/tree/main/packages/onboarding/src/components/WooPaymentGatewaySetup) or simply SlotFill [WooPaymentGatewayConfigure](https://github.com/woocommerce/woocommerce-admin/tree/main/packages/onboarding/src/components/WooPaymentGatewayConfigure) to leave the default installation and stepper in place.
 
-Note that since plugin installation happens asynchronously, a full page reload will not occur between gateway installation and configuration.  This renders functions like `wp_enqueue_script` ineffective.  To solve this issue and allow `SlotFill` to work on a newly installed plugin, the gateway can provide a URL to be loaded immediately after installation using `get_post_install_script_handles()`.
+Note that since plugin installation happens asynchronously, a full page reload will not occur between gateway installation and configuration. This renders functions like `wp_enqueue_script` ineffective. To solve this issue and allow `SlotFill` to work on a newly installed plugin, the gateway can provide a URL to be loaded immediately after installation using `get_post_install_script_handles()`.

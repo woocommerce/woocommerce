@@ -20,12 +20,6 @@ import { Setup, Placeholder as SetupPlaceholder } from './components/Setup';
 import { WCPaySuggestion } from './components/WCPay';
 import './plugins/Bacs';
 
-const RECOMMENDED_GATEWAY_IDS = [
-	'woocommerce_payments',
-	'mercadopago',
-	'stripe',
-];
-
 export const PaymentGatewaySuggestions = ( { query } ) => {
 	const { updatePaymentGateway } = useDispatch( PAYMENT_GATEWAYS_STORE_NAME );
 	const { getPaymentGateway, paymentGateways, isResolving } = useSelect(
@@ -129,15 +123,18 @@ export const PaymentGatewaySuggestions = ( { query } ) => {
 		} );
 	}, [] );
 
-	const recommendation = useMemo( () => {
-		for ( const id in RECOMMENDED_GATEWAY_IDS ) {
-			const gateway = paymentGateways.get( id );
-			if ( gateway ) {
-				return gateway;
-			}
-		}
-		return null;
-	}, [ paymentGateways ] );
+	const recommendation = useMemo(
+		() =>
+			Array.from( paymentGateways.values() )
+				.filter( ( gateway ) => gateway.recommendation_priority )
+				.sort(
+					( a, b ) =>
+						a.recommendation_priority - b.recommendation_priority
+				)
+				.map( ( gateway ) => gateway.id )
+				.shift(),
+		[ paymentGateways ]
+	);
 
 	const currentGateway = useMemo( () => {
 		if ( ! query.id || isResolving || ! paymentGateways.size ) {

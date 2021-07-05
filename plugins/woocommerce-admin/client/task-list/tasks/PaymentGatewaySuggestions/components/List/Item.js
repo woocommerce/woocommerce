@@ -32,6 +32,7 @@ export const Item = ( {
 		needsSetup = true,
 		requiredSettings,
 		settingsUrl: manageUrl,
+		is_local_partner: isLocalPartner,
 	} = paymentGateway;
 
 	const connectSlot = useSlot(
@@ -65,7 +66,9 @@ export const Item = ( {
 					<img src={ image } alt={ title } />
 				</CardMedia>
 				<div className="woocommerce-task-payment__description">
-					{ showRecommendedRibbon && <RecommendedRibbon /> }
+					{ showRecommendedRibbon && (
+						<RecommendedRibbon isLocalPartner={ isLocalPartner } />
+					) }
 					<Text as="h3" className="woocommerce-task-payment__title">
 						{ title }
 						{ isInstalled && needsSetup && !! plugins.length && (
