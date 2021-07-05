@@ -13,7 +13,6 @@ export const useStoreNotices = () => {
 		notices,
 		createNotice,
 		removeNotice,
-		createSnackbarNotice,
 		setIsSuppressed,
 	} = useStoreNoticesContext();
 	// Added to a ref so the surface for notices doesn't change frequently
@@ -66,11 +65,8 @@ export const useStoreNotices = () => {
 				void createNotice( 'success', text, {
 					...noticeProps,
 				} ),
-			addSnackbarNotice: ( text, noticeProps = {} ) => {
-				createSnackbarNotice( text, noticeProps );
-			},
 		} ),
-		[ createNotice, createSnackbarNotice ]
+		[ createNotice ]
 	);
 
 	return {

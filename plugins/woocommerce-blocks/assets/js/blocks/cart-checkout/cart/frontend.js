@@ -6,13 +6,15 @@ import {
 	withRestApiHydration,
 } from '@woocommerce/block-hocs';
 import { __ } from '@wordpress/i18n';
-import { StoreNoticesProvider } from '@woocommerce/base-context';
+import {
+	StoreNoticesProvider,
+	StoreSnackbarNoticesProvider,
+} from '@woocommerce/base-context/providers';
 import { CURRENT_USER_IS_ADMIN } from '@woocommerce/settings';
 import {
 	renderFrontend,
 	getValidBlockAttributes,
 } from '@woocommerce/base-utils';
-
 /**
  * Internal dependencies
  */
@@ -27,9 +29,11 @@ const reloadPage = () => void window.location.reload( true );
  */
 const CartFrontend = ( props ) => {
 	return (
-		<StoreNoticesProvider context="wc/cart">
-			<Block { ...props } />
-		</StoreNoticesProvider>
+		<StoreSnackbarNoticesProvider context="wc/cart">
+			<StoreNoticesProvider context="wc/cart">
+				<Block { ...props } />
+			</StoreNoticesProvider>
+		</StoreSnackbarNoticesProvider>
 	);
 };
 

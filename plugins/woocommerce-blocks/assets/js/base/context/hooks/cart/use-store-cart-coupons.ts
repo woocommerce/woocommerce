@@ -13,8 +13,9 @@ import type { StoreCartCoupon } from '@woocommerce/types';
  * Internal dependencies
  */
 import { useStoreCart } from './use-store-cart';
-import { useStoreNotices } from '../use-store-notices';
+import { useStoreSnackbarNotices } from '../use-store-snackbar-notices';
 import { useValidationContext } from '../../providers/validation';
+import { useStoreNotices } from '../use-store-notices';
 
 /**
  * This is a custom hook for loading the Store API /cart/coupons endpoint and an
@@ -26,7 +27,8 @@ import { useValidationContext } from '../../providers/validation';
  */
 export const useStoreCartCoupons = (): StoreCartCoupon => {
 	const { cartCoupons, cartIsLoading } = useStoreCart();
-	const { addErrorNotice, addSnackbarNotice } = useStoreNotices();
+	const { addErrorNotice } = useStoreNotices();
+	const { addSnackbarNotice } = useStoreSnackbarNotices();
 	const { setValidationErrors } = useValidationContext();
 
 	const results: Pick<

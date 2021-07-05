@@ -17,6 +17,7 @@ import {
 	renderFrontend,
 	getValidBlockAttributes,
 } from '@woocommerce/base-utils';
+import { StoreSnackbarNoticesProvider } from '@woocommerce/base-context/providers';
 
 /**
  * Internal dependencies
@@ -55,11 +56,13 @@ const CheckoutFrontend = ( props ) => {
 				<EmptyCart />
 			) : (
 				<BlockErrorBoundary { ...errorBoundaryProps }>
-					<StoreNoticesProvider context="wc/checkout">
-						<ValidationContextProvider>
-							<Block { ...props } />
-						</ValidationContextProvider>
-					</StoreNoticesProvider>
+					<StoreSnackbarNoticesProvider context="wc/checkout">
+						<StoreNoticesProvider context="wc/checkout">
+							<ValidationContextProvider>
+								<Block { ...props } />
+							</ValidationContextProvider>
+						</StoreNoticesProvider>
+					</StoreSnackbarNoticesProvider>
 				</BlockErrorBoundary>
 			) }
 		</>

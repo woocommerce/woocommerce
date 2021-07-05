@@ -22,24 +22,3 @@
 		margin-top: 1em;
 	}
 }
-
-.wc-block-components-notices__snackbar {
-	position: fixed;
-	bottom: 20px;
-	left: 16px;
-	width: auto;
-
-	@include breakpoint( "<782px" ) {
-		position: fixed;
-		top: 10px;
-		left: 0;
-		bottom: auto;
-	}
-
-	.components-snackbar-list__notice-container {
-		@include breakpoint( "<782px" ) {
-			margin-left: 10px;
-			margin-right: 10px;
-		}
-	}
-}
