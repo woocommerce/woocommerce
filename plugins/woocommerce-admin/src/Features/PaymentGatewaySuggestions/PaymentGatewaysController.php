@@ -36,7 +36,9 @@ class PaymentGatewaysController {
 
 		$data['needs_setup']          = $gateway->needs_setup();
 		$data['post_install_scripts'] = self::get_post_install_scripts( $gateway );
-		$data['settings_url']         = admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . strtolower( $gateway->id ) );
+		$data['settings_url']         = method_exists( $gateway, 'get_settings_url' )
+			? $gateway->get_settings_url()
+			: admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . strtolower( $gateway->id ) );
 
 		$return_url             = wc_admin_url( '&task=payments&connection-return=' . strtolower( $gateway->id ) );
 		$data['connection_url'] = method_exists( $gateway, 'get_connection_url' )
