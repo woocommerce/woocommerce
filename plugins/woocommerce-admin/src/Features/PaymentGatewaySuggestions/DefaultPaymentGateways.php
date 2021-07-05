@@ -7,7 +7,6 @@ namespace Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks;
 
 /**
@@ -224,10 +223,7 @@ class DefaultPaymentGateways {
 	 * @return array Array of countries.
 	 */
 	public static function get_wcpay_countries() {
-		$countries               = array( 'US', 'PR' );
-		$countries_international = array( 'AU', 'CA', 'DE', 'ES', 'FR', 'GB', 'IE', 'IT', 'NZ' );
-
-		return Features::is_enabled( 'wcpay/support-international-countries' ) ? array_merge( $countries, $countries_international ) : $countries;
+		return array( 'US', 'PR', 'AU', 'CA', 'DE', 'ES', 'FR', 'GB', 'IE', 'IT', 'NZ' );
 	}
 
 	/**

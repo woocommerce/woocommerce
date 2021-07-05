@@ -248,7 +248,6 @@ export function getAllTasks( {
 				} );
 			},
 			visible:
-				window.wcAdminFeatures.wcpay &&
 				woocommercePaymentsSelectedInProfiler &&
 				woocommercePaymentsInstalled &&
 				isWCPaySupported( countryCode ),

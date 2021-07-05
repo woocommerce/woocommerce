@@ -104,8 +104,8 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix: Cache product/variation revenue query results. #7067
 - Tweak: Remove performance indicators when Analytics Flag disabled #7234
 - Tweak: Revert Card component removal #7167
+- Tweak: Removed unused feature flags #7233 and #7273
 - Tweak: Repurpose disable wc-admin filter to remove optional features #7232
-- Tweak: Removed unused feature flags #7233
 - Update: Notes to use a date range. #7222
 
 == 2.4.0 6/10/2021 ==
