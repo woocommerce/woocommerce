@@ -160,6 +160,19 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
+= 5.5.0-rc.2 2020-07-05 =
+
+* Tweak - Exclude block templates from showing up in product edit page. #30138
+
+**WooCommerce Admin - 2.4.1 **
+
+* Fix - Fix and refactor explat polling to use setTimeout. #7274
+* Fix - Update the wordpress/babel-preset to avoid crashes in WP5.8 beta2 #7202
+* Fix - Add fallback for the select/dispatch data-controls for older WP versions #7204
+* Fix - The use of gridicons for Analytics section controls. #7237
+* Fix - WordPress 5.8 compatibility UI fixes #7255
+* Fix - CurrencyFactory constructor to use proper function #7261
+
 = 5.5.0-rc.1 2020-06-29 =
 
 * Fix - Issue with Product Add-ons where multiple choice (images) setting would show false when hovering over image. #30096
