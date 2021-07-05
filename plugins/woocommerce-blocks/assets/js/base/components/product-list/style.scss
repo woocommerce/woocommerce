@@ -55,6 +55,11 @@
 	list-style: none;
 }
 
+// The block widgets editor's generic @reset overrides box sizing on all children
+.blocks-widgets-container .wc-block-grid__product {
+	box-sizing: border-box;
+}
+
 .theme-twentytwenty .wc-block-grid,
 .wc-block-grid {
 	&.has-aligned-buttons {
