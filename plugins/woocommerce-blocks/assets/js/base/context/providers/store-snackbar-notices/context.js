@@ -9,23 +9,23 @@ import {
 	useState,
 } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
+import SnackbarNoticesContainer from '@woocommerce/base-context/providers/store-snackbar-notices/components/snackbar-notices-container';
 
 /**
  * Internal dependencies
  */
 import { useStoreEvents } from '../../hooks/use-store-events';
 import { useEditorContext } from '../editor-context';
-import StoreNoticesContainer from './components/store-notices-container';
 
 /**
  * @typedef {import('@woocommerce/type-defs/contexts').NoticeContext} NoticeContext
  * @typedef {import('react')} React
  */
 
-const StoreNoticesContext = createContext( {
+const StoreSnackbarNoticesContext = createContext( {
 	notices: [],
-	createNotice: ( status, text, props ) => void { status, text, props },
-	removeNotice: ( id, ctxt ) => void { id, ctxt },
+	createSnackbarNotice: ( content, options ) => void { content, options },
+	removeSnackbarNotice: ( id, ctxt ) => void { id, ctxt },
 	setIsSuppressed: ( val ) => void { val },
 	context: 'wc/core',
 } );
@@ -35,8 +35,8 @@ const StoreNoticesContext = createContext( {
  *
  * @return {NoticeContext} The notice context value from the notice context.
  */
-export const useStoreNoticesContext = () => {
-	return useContext( StoreNoticesContext );
+export const useStoreSnackbarNoticesContext = () => {
+	return useContext( StoreSnackbarNoticesContext );
 };
 
 /**
@@ -51,14 +51,10 @@ export const useStoreNoticesContext = () => {
  *
  * @param {Object} props Incoming props for the component.
  * @param {React.ReactChildren} props.children The Elements wrapped by this component.
- * @param {string} props.className CSS class used.
- * @param {boolean} props.createNoticeContainer Whether to create a notice container or not.
  * @param {string} props.context The notice context for notices being rendered.
  */
-export const StoreNoticesProvider = ( {
+export const StoreSnackbarNoticesProvider = ( {
 	children,
-	className = '',
-	createNoticeContainer = true,
 	context = 'wc/core',
 } ) => {
 	const { createNotice, removeNotice } = useDispatch( 'core/notices' );
@@ -66,14 +62,15 @@ export const StoreNoticesProvider = ( {
 	const { dispatchStoreEvent } = useStoreEvents();
 	const { isEditor } = useEditorContext();
 
-	const createNoticeWithContext = useCallback(
-		( status = 'default', content = '', options = {} ) => {
-			createNotice( status, content, {
+	const createSnackbarNotice = useCallback(
+		( content = '', options = {} ) => {
+			createNotice( 'default', content, {
 				...options,
+				type: 'snackbar',
 				context: options.context || context,
 			} );
 			dispatchStoreEvent( 'store-notice-create', {
-				status,
+				status: 'default',
 				content,
 				options,
 			} );
@@ -81,7 +78,7 @@ export const StoreNoticesProvider = ( {
 		[ createNotice, dispatchStoreEvent, context ]
 	);
 
-	const removeNoticeWithContext = useCallback(
+	const removeSnackbarNotice = useCallback(
 		( id, ctxt = context ) => {
 			removeNotice( id, ctxt );
 		},
@@ -99,32 +96,30 @@ export const StoreNoticesProvider = ( {
 
 	const contextValue = {
 		notices,
-		createNotice: createNoticeWithContext,
-		removeNotice: removeNoticeWithContext,
+		createSnackbarNotice,
+		removeSnackbarNotice,
 		context,
 		setIsSuppressed,
 	};
 
-	const noticeOutput = isSuppressed ? null : (
-		<StoreNoticesContainer
-			className={ className }
+	const snackbarNoticeOutput = isSuppressed ? null : (
+		<SnackbarNoticesContainer
 			notices={ contextValue.notices }
-			removeNotice={ contextValue.removeNotice }
+			removeNotice={ contextValue.removeSnackbarNotice }
 			isEditor={ isEditor }
 		/>
 	);
 
 	return (
-		<StoreNoticesContext.Provider value={ contextValue }>
-			{ createNoticeContainer && noticeOutput }
+		<StoreSnackbarNoticesContext.Provider value={ contextValue }>
 			{ children }
-		</StoreNoticesContext.Provider>
+			{ snackbarNoticeOutput }
+		</StoreSnackbarNoticesContext.Provider>
 	);
 };
 
-StoreNoticesProvider.propTypes = {
+StoreSnackbarNoticesProvider.propTypes = {
 	className: PropTypes.string,
-	createNoticeContainer: PropTypes.bool,
 	children: PropTypes.node,
 	context: PropTypes.string,
 };

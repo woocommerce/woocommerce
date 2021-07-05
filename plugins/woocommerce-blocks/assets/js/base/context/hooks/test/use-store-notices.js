@@ -34,7 +34,6 @@ describe( 'useStoreNotices', () => {
 		// Assert initial state.
 		expect( storeNoticesData.notices ).toEqual( [] );
 		expect( storeNoticesData.hasNoticesOfType( 'default' ) ).toBe( false );
-		expect( storeNoticesData.hasNoticesOfType( 'snackbar' ) ).toBe( false );
 
 		// Add error notice.
 		act( () => {
@@ -43,25 +42,17 @@ describe( 'useStoreNotices', () => {
 
 		expect( storeNoticesData.notices.length ).toBe( 1 );
 		expect( storeNoticesData.hasNoticesOfType( 'default' ) ).toBe( true );
-		expect( storeNoticesData.hasNoticesOfType( 'snackbar' ) ).toBe( false );
 
-		// Add snackbar notice.
-		act( () => {
-			storeNoticesData.addSnackbarNotice( 'Snackbar notice' );
-		} );
-
-		expect( storeNoticesData.notices.length ).toBe( 2 );
+		expect( storeNoticesData.notices.length ).toBe( 1 );
 		expect( storeNoticesData.hasNoticesOfType( 'default' ) ).toBe( true );
-		expect( storeNoticesData.hasNoticesOfType( 'snackbar' ) ).toBe( true );
 
 		// Remove error notice.
 		act( () => {
 			storeNoticesData.removeNotices( 'error' );
 		} );
 
-		expect( storeNoticesData.notices.length ).toBe( 1 );
+		expect( storeNoticesData.notices.length ).toBe( 0 );
 		expect( storeNoticesData.hasNoticesOfType( 'default' ) ).toBe( false );
-		expect( storeNoticesData.hasNoticesOfType( 'snackbar' ) ).toBe( true );
 
 		// Remove all remaining notices.
 		act( () => {
@@ -70,6 +61,5 @@ describe( 'useStoreNotices', () => {
 
 		expect( storeNoticesData.notices.length ).toBe( 0 );
 		expect( storeNoticesData.hasNoticesOfType( 'default' ) ).toBe( false );
-		expect( storeNoticesData.hasNoticesOfType( 'snackbar' ) ).toBe( false );
 	} );
 } );
