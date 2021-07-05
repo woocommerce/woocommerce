@@ -18,19 +18,14 @@ The data source schema defines the recommended payment gateways and required plu
 [
   {
     "key": "gateway-key",
-    "locales": [
-      {
-        "locale": "en_US",
-        "title": "Gateway Example",
-        "content": "Content to be displayed in the recommended payment gateway list."
-      }
-    ],
+    "title": "Gateway Example",
+    "content": "Content to be displayed in the recommended payment gateway list.",
     "image": "https://paymentgateway.com/path/to/image.png",
     "plugins": ["wp-org-plugin-slug"],
-	"is_visible": [
-		<Rule>,
-		...
-	]
+    "is_visible": [
+      <Rule>,
+      ...
+    ]
   }
   ...
 ]

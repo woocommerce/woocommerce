@@ -21,7 +21,7 @@ class DataSourcePoller {
 	 * Default data sources array.
 	 */
 	const DATA_SOURCES = array(
-		'https://woocommerce.com/wp-json/wccom/payment-methods/1.0/methods.json',
+		'https://woocommerce.com/wp-json/wccom/payment-gateway-suggestions/1.0/suggestions.json',
 	);
 
 	/**
@@ -73,7 +73,13 @@ class DataSourcePoller {
 	private static function read_data_source( $url ) {
 		$logger_context = array( 'source' => $url );
 		$logger         = self::get_logger();
-		$response       = wp_remote_get( $url );
+		$response       = wp_remote_get(
+			add_query_arg(
+				'_locale',
+				get_user_locale(),
+				$url
+			)
+		);
 
 		if ( is_wp_error( $response ) || ! isset( $response['body'] ) ) {
 			$logger->error(

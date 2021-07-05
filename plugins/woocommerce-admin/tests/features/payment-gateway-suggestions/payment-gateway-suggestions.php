@@ -154,31 +154,4 @@ class WC_Tests_PaymentGatewaySuggestions_Init extends WC_Unit_Test_Case {
 		$this->assertEquals( 'default-gateway', $suggestions[0]->id );
 	}
 
-	/**
-	 * Test that the locale is filter based on current store locale.
-	 */
-	public function test_localization() {
-		$wp_locale_switcher = new WP_Locale_switcher();
-		$wp_locale_switcher->switch_to_locale( 'en_US' );
-
-		$specs = array(
-			(object) array(
-				'id'      => 'mock-gateway',
-				'locales' => array(
-					(object) array(
-						'locale' => 'en_US',
-						'title'  => 'Mock Gateway',
-					),
-					(object) array(
-						'locale' => 'zh_TW',
-						'title'  => '測試付款方式',
-					),
-				),
-			),
-		);
-
-		$localized_specs = PaymentGatewaySuggestions::localize( $specs );
-		$this->assertEquals( 'Mock Gateway', $localized_specs[0]->title );
-		$this->assertCount( 1, $localized_specs );
-	}
 }

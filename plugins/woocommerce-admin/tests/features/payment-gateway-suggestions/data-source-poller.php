@@ -30,7 +30,9 @@ class WC_Tests_PaymentGatewaySuggestions_DataSourcePoller extends WC_Unit_Test_C
 		add_filter(
 			'pre_http_request',
 			function( $pre, $parsed_args, $url ) {
-				if ( 'payment-gateway-suggestions-data-source.json' === $url ) {
+				$locale = get_locale();
+
+				if ( 'payment-gateway-suggestions-data-source.json?_locale=' . $locale === $url ) {
 					return array(
 						'body' => wp_json_encode(
 							array(
@@ -48,7 +50,7 @@ class WC_Tests_PaymentGatewaySuggestions_DataSourcePoller extends WC_Unit_Test_C
 					);
 				}
 
-				if ( 'payment-gateway-suggestions-data-source2.json' === $url ) {
+				if ( 'payment-gateway-suggestions-data-source2.json?_locale=' . $locale === $url ) {
 					return array(
 						'body' => wp_json_encode(
 							array(

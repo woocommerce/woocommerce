@@ -75,40 +75,9 @@ class Init {
 				return DefaultPaymentGateways::get_all();
 			}
 
-			$specs = self::localize( $specs );
 			set_transient( self::SPECS_TRANSIENT_NAME, $specs, 7 * DAY_IN_SECONDS );
 		}
 
 		return $specs;
-	}
-
-	/**
-	 * Localize the provided suggestion.
-	 *
-	 * @param array $specs The specs to localize.
-	 * @return array Localized specs.
-	 */
-	public static function localize( $specs ) {
-		$localized_specs = array();
-
-		foreach ( $specs as $spec ) {
-			if ( ! isset( $spec->locales ) ) {
-				continue;
-			}
-
-			$locale = SpecRunner::get_locale( $spec->locales );
-
-			// Skip specs where no matching locale is found.
-			if ( ! $locale ) {
-				continue;
-			}
-
-			$data = (object) array_merge( (array) $locale, (array) $spec );
-			unset( $data->locales );
-
-			$localized_specs[] = $data;
-		}
-
-		return $localized_specs;
 	}
 }
