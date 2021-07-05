@@ -123,6 +123,11 @@ Individual payment gateway plugins dictate the settings and connection flow.  Fo
 1. Set your store country to India
 2. Don't select CBD as an industry during onboarding
 
+##### PayU
+
+1. Set your store country to India
+2. Don't select CBD as an industry during onboarding
+
 ##### eWAY
 
 1. Set your store country to one of the following: `AU, NZ`
