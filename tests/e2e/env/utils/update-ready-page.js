@@ -24,11 +24,15 @@ const updateReadyPageStatus = async ( status ) => {
 		// The page will be in a draft state, so we need to filter on that status
 		statusFilter = 'draft';
 	}
-	const getPostsResponse = await client.get(`${wpPagesEndpoint}?search=ready&status=${statusFilter}`);
-	const pageId = getPostsResponse.data[0].id;
 
-	// Update the page to the new status
-	await client.post(`${wpPagesEndpoint}/${pageId}`, { 'status': status });
+	const getPostsResponse = await client.get(`${wpPagesEndpoint}?search=ready&status=${statusFilter}`);
+	if ( getPostsResponse.data && getPostsResponse.data.length > 0) {
+		const pageId = getPostsResponse.data[0].id;
+		// Update the page to the new status
+		await client.post(`${wpPagesEndpoint}/${pageId}`, { 'status': status });
+	} else {
+		throw new Error('Ready page not found.');
+	}
 }
 
 module.exports = updateReadyPageStatus;
