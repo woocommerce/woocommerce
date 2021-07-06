@@ -44,6 +44,7 @@ class WC_Notes_Refund_Returns {
 		// Add note.
 		$note = self::get_note( $page_id );
 		$note->save();
+		delete_option( 'woocommerce_refund_returns_page_created' );
 	}
 
 	/**
