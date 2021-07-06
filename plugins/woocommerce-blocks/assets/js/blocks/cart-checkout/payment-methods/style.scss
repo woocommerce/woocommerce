@@ -209,8 +209,16 @@
 		.wc-block-components-radio-control__option::after {
 			border-width: 0;
 		}
+		.wc-block-components-radio-control__label {
+			display: flex;
+			align-items: center;
+			justify-content: flex-start;
+		}
 		.wc-block-components-radio-control__label img {
 			height: 24px;
+			max-height: 24px;
+			object-fit: contain;
+			object-position: left;
 		}
 	}
 
