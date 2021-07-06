@@ -17,6 +17,13 @@
 3. You might need to download the new language in Dashboard -> Updates
 4. Navigate to wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard&step=business-features and confirm the translation is working as expected.
 
+### Fix inbox note dismiss dropdown not closing on Safari #7278
+
+1. Checkout this branch and run npm start
+2. Navigate to WooCommerce -> Home
+3. Click "Dismiss" on a note. Confirm the position of the popover is correct.
+4. Click anywhere outside of the popover content and confirm the popover is closed.
+
 ### Use saved values if available when switching tabs #7226
 
 1. Start onboarding wizard and continue to step 4.

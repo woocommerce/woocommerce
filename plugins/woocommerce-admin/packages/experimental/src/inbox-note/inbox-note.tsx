@@ -140,7 +140,10 @@ const InboxNoteCard: React.FC< InboxNoteProps > = ( {
 				renderToggle={ ( { onClose, onToggle } ) => (
 					<Button
 						isTertiary
-						onClick={ onToggle }
+						onClick={ ( event: React.MouseEvent ) => {
+							( event.target as HTMLElement ).focus();
+							onToggle();
+						} }
 						ref={ toggleButtonRef }
 						onBlur={ ( event: React.FocusEvent ) =>
 							handleBlur( event, onClose )
