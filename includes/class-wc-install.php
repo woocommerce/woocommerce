@@ -174,9 +174,10 @@ class WC_Install {
 		add_action( 'init', array( __CLASS__, 'check_version' ), 5 );
 		add_action( 'init', array( __CLASS__, 'manual_database_update' ), 20 );
 		add_action( 'admin_init', array( __CLASS__, 'wc_admin_db_update_notice' ) );
+		add_action( 'admin_init', array( __CLASS__, 'add_admin_note_after_page_created' ) );
 		add_action( 'woocommerce_run_update_callback', array( __CLASS__, 'run_update_callback' ) );
 		add_action( 'admin_init', array( __CLASS__, 'install_actions' ) );
-		add_action( 'woocommerce_page_created', array( __CLASS__, 'add_admin_note_after_page_created' ), 10, 2 );
+		add_action( 'woocommerce_page_created', array( __CLASS__, 'page_created' ), 10, 2 );
 		add_filter( 'plugin_action_links_' . WC_PLUGIN_BASENAME, array( __CLASS__, 'plugin_action_links' ) );
 		add_filter( 'plugin_row_meta', array( __CLASS__, 'plugin_row_meta' ), 10, 2 );
 		add_filter( 'wpmu_drop_tables', array( __CLASS__, 'wpmu_drop_tables' ) );
@@ -1824,17 +1825,36 @@ EOT;
 	 * Refund and returns page.
 	 *
 	 * @since 5.6.0
-	 * @param int   $page_id ID of the page.
-	 * @param array $page_data The data of the page created.
 	 * @return void
 	 */
-	public static function add_admin_note_after_page_created( $page_id, $page_data ) {
+	public static function add_admin_note_after_page_created() {
 		if ( ! WC()->is_wc_admin_active() ) {
 			return;
 		}
 
+		$page_id = get_option( 'woocommerce_refund_returns_page_created', null );
+
+		if ( null === $page_id ) {
+			return;
+		}
+
+		WC_Notes_Refund_Returns::possibly_add_note( $page_id );
+	}
+
+	/**
+	 * When pages are created, we might want to take some action.
+	 * In this case we want to set an option when refund and returns
+	 * page is created.
+	 *
+	 * @since 5.6.0
+	 * @param int   $page_id ID of the page.
+	 * @param array $page_data The data of the page created.
+	 * @return void
+	 */
+	public static function page_created( $page_id, $page_data ) {
 		if ( 'refund_returns' === $page_data['post_name'] ) {
-			WC_Notes_Refund_Returns::possibly_add_note( $page_id );
+			delete_option( 'woocommerce_refund_returns_page_created' );
+			add_option( 'woocommerce_refund_returns_page_created', $page_id, '', false );
 		}
 	}
 }
