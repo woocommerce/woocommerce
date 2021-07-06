@@ -61,12 +61,37 @@ class DefaultPaymentGateways {
 			),
 			array(
 				'id'         => 'kco',
-				'title'      => __( 'Klarna', 'woocommerce-admin' ),
+				'title'      => __( 'Klarna Checkout', 'woocommerce-admin' ),
 				'content'    => __( 'Choose the payment that you want, pay now, pay later or slice it. No credit card numbers, no passwords, no worries.', 'woocommerce-admin' ),
 				'image'      => WC()->plugin_url() . '/assets/images/klarna-black.png',
 				'plugins'    => array( 'klarna-checkout-for-woocommerce' ),
 				'is_visible' => array(
 					self::get_rules_for_countries( array( 'SE', 'FI', 'NO' ) ),
+					self::get_rules_for_cbd( false ),
+				),
+			),
+			array(
+				'id'         => 'klarna_payments',
+				'title'      => __( 'Klarna Payments', 'woocommerce-admin' ),
+				'content'    => __( 'Choose the payment that you want, pay now, pay later or slice it. No credit card numbers, no passwords, no worries.', 'woocommerce-admin' ),
+				'image'      => WC()->plugin_url() . '/assets/images/klarna-black.png',
+				'plugins'    => array( 'klarna-payments-for-woocommerce' ),
+				'is_visible' => array(
+					self::get_rules_for_countries(
+						array(
+							'DK',
+							'DE',
+							'AT',
+							'NL',
+							'CH',
+							'BE',
+							'SP',
+							'PL',
+							'FR',
+							'IT',
+							'GB',
+						)
+					),
 					self::get_rules_for_cbd( false ),
 				),
 			),
