@@ -4,12 +4,18 @@
 
 ### Fix missing translation strings for CES #7270
 
-
 1. Navigate to Settings -> General and change the site language to a non-English (I've used Espanol for testing purposes).
 2. You might need to update the language file if it's your first time using the selected language. Update the language file from Dashboard -> Updates
 3. Go to WooCommerce -> Settings
 4. Click the [ Save Changes ] button to trigger the CES modal.
 5. Confirm the modal has correct translations (Refer to the screenshots)
+
+### Add missing translation strings in the business features section #7268
+
+1. Checkout this branch and run `npm start`
+2. Navigate to Settings -> General and change the site language to non-English (I've used Espanol for testing purposes)
+3. You might need to download the new language in Dashboard -> Updates
+4. Navigate to wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard&step=business-features and confirm the translation is working as expected.
 
 ### Use saved values if available when switching tabs #7226
 

@@ -105,6 +105,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix: Cache product/variation revenue query results. #7067
 - Tweak: Remove performance indicators when Analytics Flag disabled #7234
 - Fix: Fix missing translation strings for CES #7270
+- Fix: Add missing translation strings in the business features section #7268
 - Tweak: Revert Card component removal #7167
 - Tweak: Removed unused feature flags #7233 and #7273
 - Tweak: Repurpose disable wc-admin filter to remove optional features #7232

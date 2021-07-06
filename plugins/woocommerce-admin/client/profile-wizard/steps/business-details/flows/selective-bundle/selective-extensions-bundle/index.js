@@ -529,7 +529,8 @@ export const SelectiveExtensionsBundle = ( {
 						/>
 						<p className="woocommerce-admin__business-details__selective-extensions-bundle__description">
 							{ __(
-								'Add recommended business features to my site'
+								'Add recommended business features to my site',
+								'woocommerce-admin'
 							) }
 						</p>
 						<Button
@@ -588,7 +589,7 @@ export const SelectiveExtensionsBundle = ( {
 						disabled={ isInstallingActivating }
 						isPrimary
 					>
-						Continue
+						{ __( 'Continue', 'woocommerce-admin' ) }
 					</Button>
 				</div>
 			</Card>
