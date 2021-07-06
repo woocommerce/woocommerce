@@ -390,6 +390,7 @@ class Loader {
 			'wc-currency',
 			'wc-date',
 			'wc-components',
+			'wc-customer-effort-score',
 			WC_ADMIN_APP,
 		);
 
