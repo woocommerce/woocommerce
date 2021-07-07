@@ -94,7 +94,7 @@
 		"@types/dinero.js": "1.8.1",
 		"@types/gtag.js": "0.0.7",
 		"@types/jest": "26.0.24",
-		"@types/lodash": "4.14.170",
+		"@types/lodash": "4.14.171",
 		"@types/react": "16.14.10",
 		"@types/wordpress__data": "4.6.9",
 		"@types/wordpress__data-controls": "1.0.5",
