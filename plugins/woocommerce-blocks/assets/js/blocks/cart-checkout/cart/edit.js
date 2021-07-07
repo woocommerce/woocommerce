@@ -22,8 +22,7 @@ import {
 	useEditorContext,
 	CartProvider,
 } from '@woocommerce/base-context';
-import { createInterpolateElement } from 'wordpress-element';
-import { useRef } from '@wordpress/element';
+import { createInterpolateElement, useRef } from '@wordpress/element';
 import { getAdminLink, getSetting } from '@woocommerce/settings';
 import { previewCart } from '@woocommerce/resource-previews';
 

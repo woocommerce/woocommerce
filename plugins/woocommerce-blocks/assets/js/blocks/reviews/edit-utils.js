@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { createInterpolateElement } from 'wordpress-element';
+import { createInterpolateElement } from '@wordpress/element';
 import {
 	Notice,
 	ToggleControl,

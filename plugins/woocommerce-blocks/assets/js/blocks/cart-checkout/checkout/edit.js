@@ -18,8 +18,7 @@ import {
 	CHECKOUT_PAGE_ID,
 } from '@woocommerce/block-settings';
 import { isWcVersion, getAdminLink, getSetting } from '@woocommerce/settings';
-import { createInterpolateElement } from 'wordpress-element';
-import { useRef } from '@wordpress/element';
+import { createInterpolateElement, useRef } from '@wordpress/element';
 import {
 	EditorProvider,
 	useEditorContext,
