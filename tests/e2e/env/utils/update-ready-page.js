@@ -30,8 +30,6 @@ const updateReadyPageStatus = async ( status ) => {
 		const pageId = getPostsResponse.data[0].id;
 		// Update the page to the new status
 		await client.post(`${wpPagesEndpoint}/${pageId}`, { 'status': status });
-	} else {
-		throw new Error('Ready page not found.');
 	}
 }
 
