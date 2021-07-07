@@ -8,7 +8,6 @@ import {
 	OPTIONS_STORE_NAME,
 	PAYMENT_GATEWAYS_STORE_NAME,
 	PLUGINS_STORE_NAME,
-	pluginNames,
 } from '@woocommerce/data';
 import { Plugins, Stepper } from '@woocommerce/components';
 import { WooPaymentGatewaySetup } from '@woocommerce/onboarding';
@@ -87,18 +86,14 @@ export const Setup = ( {
 		setIsPluginLoaded( true );
 	}, [ postInstallScripts, needsPluginInstall ] );
 
-	const pluginNamesString = plugins
-		.map( ( pluginSlug ) => pluginNames[ pluginSlug ] )
-		.join( ' ' + __( 'and', 'woocommerce-admin' ) + ' ' );
-
 	const installStep = useMemo( () => {
 		return plugins && plugins.length
 			? {
 					key: 'install',
 					label: sprintf(
-						/* translators: %s = one or more plugin names joined by "and" */
+						/* translators: %s = title of the payment gateway to install */
 						__( 'Install %s', 'woocommerce-admin' ),
-						pluginNamesString
+						title
 					),
 					content: (
 						<Plugins

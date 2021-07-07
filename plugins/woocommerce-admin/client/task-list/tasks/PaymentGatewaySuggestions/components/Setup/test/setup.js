@@ -58,7 +58,7 @@ describe( 'Setup', () => {
 
 		const { queryByText } = render( <Setup { ...props } /> );
 
-		expect( queryByText( 'Install' ) ).toBeInTheDocument();
+		expect( queryByText( 'Install Mock Gateway' ) ).toBeInTheDocument();
 	} );
 
 	it( 'should enqueue post install scripts when plugin installation completes', async () => {

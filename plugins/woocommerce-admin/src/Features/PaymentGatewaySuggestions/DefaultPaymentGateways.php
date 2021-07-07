@@ -38,7 +38,7 @@ class DefaultPaymentGateways {
 			),
 			array(
 				'id'                      => 'stripe',
-				'title'                   => __( 'Credit cards - powered by Stripe', 'woocommerce-admin' ),
+				'title'                   => __( ' Stripe', 'woocommerce-admin' ),
 				'content'                 => __( 'Accept debit and credit cards in 135+ currencies, methods such as Alipay, and one-touch checkout with Apple Pay.', 'woocommerce-admin' ),
 				'image'                   => WC()->plugin_url() . '/assets/images/stripe.png',
 				'plugins'                 => array( 'woocommerce-gateway-stripe' ),
