@@ -100,4 +100,53 @@ describe( 'FilterPicker', () => {
 			);
 		} );
 	} );
+	describe( 'getAllFilterParams', () => {
+		const query = { product_filter: 'select_product' };
+		const config = {
+			label: 'Show',
+			staticParams: [],
+			param: 'product_filter',
+			showFilters: () => true,
+			filters: [
+				{
+					label: 'Single Product',
+					value: 'select_product',
+					chartMode: 'item-comparison',
+					subFilters: [
+						{
+							component: 'Search',
+							value: 'single_product',
+							chartMode: 'item-comparison',
+							path: [ 'select_product' ],
+							settings: {
+								type: 'products',
+								param: 'param_1',
+								getLabels: () => {},
+							},
+						},
+					],
+				},
+				{
+					label: 'Comparison',
+					value: 'compare-products',
+					chartMode: 'item-comparison',
+					settings: {
+						type: 'products',
+						param: 'param_2',
+						getLabels: () => {},
+						onClick: () => {},
+					},
+				},
+			],
+		};
+
+		it( 'should return an array', () => {
+			const filterPicker = new FilterPicker( { config, query } );
+			const allParams = filterPicker.getAllFilterParams();
+
+			expect( allParams ).toHaveLength( 2 );
+			expect( allParams.includes( 'param_1' ) ).toBeTruthy();
+			expect( allParams.includes( 'param_2' ) ).toBeTruthy();
+		} );
+	} );
 } );

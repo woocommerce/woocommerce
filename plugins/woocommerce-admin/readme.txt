@@ -89,6 +89,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix: Load Analytics API only when feature is turned on #7193
 - Fix: Localize string for description #7219
 - Fix: RemoteFreeExtension hide bundle when all of its plugins are not visible #7182
+- Fix: Filters: On update respect all other queries, not just persistedQueries #7155
 - Add: Adding tests for PaymentGatewaySuggestions > List component #7201
 - Fix: Report export filtering bug. #7165
 - Fix: Use tab char for the CSV injection prevention. #7154

@@ -11,8 +11,8 @@ import PropTypes from 'prop-types';
 import { Icon, chevronLeft } from '@wordpress/icons';
 import {
 	flattenFilters,
-	getPersistedQuery,
 	updateQueryString,
+	getQueryFromActiveFilters,
 } from '@woocommerce/navigation';
 
 /**
@@ -128,11 +128,35 @@ class FilterPicker extends Component {
 		} ) );
 	}
 
+	getAllFilterParams() {
+		const { config } = this.props;
+		const params = [];
+		const getParam = ( filters ) => {
+			filters.forEach( ( filter ) => {
+				if (
+					filter.settings &&
+					! params.includes( filter.settings.param )
+				) {
+					params.push( filter.settings.param );
+				}
+				if ( filter.subFilters ) {
+					getParam( filter.subFilters );
+				}
+			} );
+		};
+		getParam( config.filters );
+		return params;
+	}
+
 	update( value, additionalQueries = {} ) {
-		const { path, query, config, onFilterSelect } = this.props;
-		// Keep only time related queries when updating to a new filter
-		const persistedQuery = getPersistedQuery( query );
-		const update = {
+		const {
+			path,
+			query,
+			config,
+			onFilterSelect,
+			advancedFilters,
+		} = this.props;
+		let update = {
 			[ config.param ]:
 				( config.defaultValue || DEFAULT_FILTER ) === value
 					? undefined
@@ -143,7 +167,30 @@ class FilterPicker extends Component {
 		config.staticParams.forEach( ( param ) => {
 			update[ param ] = query[ param ];
 		} );
-		updateQueryString( update, path, persistedQuery );
+
+		// Remove all of this filter's params not associated witth the update while
+		// leaving any other params from any other filter an extension may have added.
+		this.getAllFilterParams().forEach( ( param ) => {
+			if ( ! update[ param ] ) {
+				// Explicitly give value of undefined so it can be removed from the query.
+				update[ param ] = undefined;
+			}
+		} );
+
+		// If the main filter is being set to anything but advanced, remove any advancedFilters.
+		if ( config.param === 'filter' && value !== 'advanced' ) {
+			const resetAdvancedFilters = getQueryFromActiveFilters(
+				[],
+				query,
+				advancedFilters.filters || {}
+			);
+
+			update = {
+				...update,
+				...resetAdvancedFilters,
+			};
+		}
+		updateQueryString( update, path, query );
 		onFilterSelect( update );
 	}
 
@@ -393,6 +440,10 @@ FilterPicker.propTypes = {
 	 * Function to be called after filter selection.
 	 */
 	onFilterSelect: PropTypes.func,
+	/**
+	 * Advanced Filters configuration object.
+	 */
+	advancedFilters: PropTypes.object,
 };
 
 FilterPicker.defaultProps = {

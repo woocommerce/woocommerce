@@ -116,6 +116,7 @@ class ReportFilters extends Component {
 			showDatePicker,
 			onFilterSelect,
 			isoDateFormat,
+			advancedFilters,
 		} = this.props;
 		return (
 			<Fragment>
@@ -140,6 +141,7 @@ class ReportFilters extends Component {
 									<FilterPicker
 										key={ config.param }
 										config={ config }
+										advancedFilters={ advancedFilters }
 										query={ query }
 										path={ path }
 										onFilterSelect={ onFilterSelect }
