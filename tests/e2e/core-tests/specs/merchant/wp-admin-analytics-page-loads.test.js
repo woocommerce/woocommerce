@@ -36,77 +36,35 @@ const checkHeadingAndElement = async (
 	}
  };
 
+ // Analytics pages that we'll test against
+const pages = [
+	['Overview'],
+	['Products'],
+	['Revenue'],
+	['Orders'],
+	['Variations'],
+	['Categories'],
+	['Coupons'],
+	['Taxes'],
+	['Downloads'],
+	['Stock', '.components-button > span', 'Product / Variation'],
+	['Settings', 'h2', 'Analytics Settings']
+];
+
 const runAnalyticsPageLoadsTest = () => {
 	describe('Analytics > Opening Top Level Pages', () => {
 		beforeAll(async () => {
 			await merchant.login();
 		});
 
-		it('can see Overview page properly', async () => {
-			// Go to "overview" page and verify it
-			await merchant.openAnalyticsPage('overview');
-			await checkHeadingAndElement('Overview');
-		});
-
-		it('can see Products page properly', async () => {
-			// Go to "products" page and verify it
-			await merchant.openAnalyticsPage('products');
-			await checkHeadingAndElement('Products');
-		});
-
-		it('can see Revenue page properly', async () => {
-			// Go to "revenue" page and verify it
-			await merchant.openAnalyticsPage('revenue');
-			await checkHeadingAndElement('Revenue');
-		});
-
-		it('can see Orders page properly', async () => {
-			// Go to "orders" page and verify it
-			await merchant.openAnalyticsPage('orders');
-			await checkHeadingAndElement('Orders');
-		});
-
-		it('can see Variations page properly', async () => {
-			// Go to "variations" page and verify it
-			await merchant.openAnalyticsPage('variations');
-			await checkHeadingAndElement('Variations');
-		});
-
-		it('can see Categories page properly', async () => {
-			// Go to "categories" page and verify it
-			await merchant.openAnalyticsPage('categories');
-			await checkHeadingAndElement('Categories');
-		});
-
-		it('can see Coupons page properly', async () => {
-			// Go to "coupons" page and verify it
-			await merchant.openAnalyticsPage('coupons');
-			await checkHeadingAndElement('Coupons');
-		});
-
-		it('can see Taxes page properly', async () => {
-			// Go to "taxes" page and verify it
-			await merchant.openAnalyticsPage('taxes');
-			await checkHeadingAndElement('Taxes');
-		});
-
-		it('can see Downloads page properly', async () => {
-			// Go to "downloads" page and verify it
-			await merchant.openAnalyticsPage('downloads');
-			await checkHeadingAndElement('Downloads');
-		});
-
-		it('can see Stock page properly', async () => {
-			// Go to "stock" page and verify it
-			await merchant.openAnalyticsPage('stock');
-			await checkHeadingAndElement('Stock', '.components-button > span', 'Product / Variation');
-		});
-
-		it('can see Settings page properly', async () => {
-			// Go to "settings" page and verify it
-			await merchant.openAnalyticsPage('settings');
-			await checkHeadingAndElement('Settings', 'h2', 'Analytics Settings');
-		});
+		it.each(pages)(
+			'can see %s page properly',
+			async (pageTitle, element, elementText) => {
+				// Go to the desired page and verify it
+				await merchant.openAnalyticsPage(pageTitle.toLowerCase());
+				await checkHeadingAndElement(pageTitle, element, elementText);
+			}
+		);
 	});
 }
 

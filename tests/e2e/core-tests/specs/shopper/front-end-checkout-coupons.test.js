@@ -21,12 +21,29 @@ const {
 	beforeAll,
 } = require( '@jest/globals' );
 
+const couponsTable = [
+	['fixed cart', { text: '$5.00' }, { text: '$4.99' }],
+	['percentage', { text: '$4.99' }, { text: '$5.00' }],
+	['fixed product', { text: '$5.00' }, { text: '$4.99' }]
+];
+
+let couponFixedCart;
+let couponPercentage;
+let couponFixedProduct;
+
+const getCoupon = (couponType) => {
+	switch (couponType) {
+		case 'fixed cart':
+			return couponFixedCart;
+		case 'percentage':
+			return couponPercentage;
+		case 'fixed product':
+			return couponFixedProduct;
+	}
+};
+
 const runCheckoutApplyCouponsTest = () => {
 	describe('Checkout coupons', () => {
-		let couponFixedCart;
-		let couponPercentage;
-		let couponFixedProduct;
-
 		beforeAll(async () => {
 			await createSimpleProduct();
 			couponFixedCart = await createCoupon();
@@ -40,38 +57,18 @@ const runCheckoutApplyCouponsTest = () => {
 			await shopper.goToCheckout();
 		});
 
-		it('allows checkout to apply fixed cart coupon', async () => {
-			await applyCoupon(couponFixedCart);
-			await expect(page).toMatchElement('.woocommerce-message', {text: 'Coupon code applied successfully.'});
+		it.each(couponsTable)('allows checkout to apply %s coupon', async (couponType, cartDiscount, orderTotal) => {
+			const coupon = getCoupon(couponType);
+			await applyCoupon(coupon);
+			await expect(page).toMatchElement('.woocommerce-message', { text: 'Coupon code applied successfully.' });
 
 			// Wait for page to expand total calculations to avoid flakyness
 			await page.waitForSelector('.order-total');
 
 			// Verify discount applied and order total
-			await expect(page).toMatchElement('.cart-discount .amount', {text: '$5.00'});
-			await expect(page).toMatchElement('.order-total .amount', {text: '$4.99'});
-			await removeCoupon(couponFixedCart);
-		});
-
-		it('allows checkout to apply percentage coupon', async () => {
-			await applyCoupon(couponPercentage);
-			await expect(page).toMatchElement('.woocommerce-message', {text: 'Coupon code applied successfully.'});
-
-			// Verify discount applied and order total
-			await expect(page).toMatchElement('.cart-discount .amount', {text: '$4.99'});
-			await expect(page).toMatchElement('.order-total .amount', {text: '$5.00'});
-			await removeCoupon(couponPercentage);
-		});
-
-		it('allows checkout to apply fixed product coupon', async () => {
-			await applyCoupon(couponFixedProduct);
-			await expect(page).toMatchElement('.woocommerce-message', {text: 'Coupon code applied successfully.'});
-
-			// Verify discount applied and order total
-			await page.waitForSelector('.order-total');
-			await expect(page).toMatchElement('.cart-discount .amount', {text: '$5.00'});
-			await expect(page).toMatchElement('.order-total .amount', {text: '$4.99'});
-			await removeCoupon(couponFixedProduct);
+			await expect(page).toMatchElement('.cart-discount .amount', cartDiscount);
+			await expect(page).toMatchElement('.order-total .amount', orderTotal);
+			await removeCoupon(coupon);
 		});
 
 		it('prevents checkout applying same coupon twice', async () => {
