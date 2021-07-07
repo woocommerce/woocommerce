@@ -49,6 +49,12 @@
 			padding-left: $gap;
 			padding-right: $gap;
 		}
+
+		.wc-block-components-panel {
+			.wc-block-components-totals-item {
+				padding: 0;
+			}
+		}
 	}
 }
 
