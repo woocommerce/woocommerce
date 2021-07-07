@@ -3,7 +3,7 @@
  */
 import { Guide } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { createInterpolateElement } from 'wordpress-element';
+import { createInterpolateElement } from '@wordpress/element';
 import { isWpVersion } from '@woocommerce/settings';
 import type { ReactElement } from 'react';
 
