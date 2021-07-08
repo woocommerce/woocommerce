@@ -46,7 +46,6 @@ class Analytics {
 	public function __construct() {
 		add_filter( 'woocommerce_settings_features', array( $this, 'add_feature_toggle' ) );
 		add_action( 'update_option_' . self::TOGGLE_OPTION_NAME, array( $this, 'reload_page_on_toggle' ), 10, 2 );
-		add_filter( 'woocommerce_admin_preload_options', array( $this, 'preload_options' ) );
 
 		if ( ! Features::is_enabled( 'analytics' ) ) {
 			return;
@@ -80,18 +79,6 @@ class Analytics {
 		);
 
 		return $features;
-	}
-
-	/**
-	 * Preload options to prime state of the application.
-	 *
-	 * @param array $options Array of options to preload.
-	 * @return array
-	 */
-	public function preload_options( $options ) {
-		$options[] = self::TOGGLE_OPTION_NAME;
-
-		return $options;
 	}
 
 	/**

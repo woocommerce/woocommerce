@@ -110,6 +110,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix: Cache product/variation revenue query results. #7067
 - Fix: Transient overlapping adjacent content. #7302
 - Sync the category lookup table when a new category gets created #7290
+- Fix: Unused feature preloaded options #7299
 - Tweak: Remove performance indicators when Analytics Flag disabled #7234
 - Fix: Fix missing translation strings for CES #7270
 - Fix: Add missing translation strings in the business features section #7268
