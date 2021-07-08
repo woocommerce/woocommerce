@@ -103,7 +103,7 @@ class BusinessDetails extends Component {
 				extensionInstallationOptions[ 'mailchimp-for-woocommerce' ],
 			install_mailpoet: extensionInstallationOptions.mailpoet,
 			install_jetpack: extensionInstallationOptions.jetpack,
-			install_google_ads:
+			install_google_listings_and_ads:
 				extensionInstallationOptions[ 'google-listings-and-ads' ],
 			install_facebook:
 				extensionInstallationOptions[ 'facebook-for-woocommerce' ],

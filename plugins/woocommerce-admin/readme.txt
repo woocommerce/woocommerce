@@ -111,6 +111,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Fix: Add missing translation strings in the business features section #7268
 - Fix: Fix inbox note dismiss dropdown not closing on Safari #7278
 - Tweak: Revert Card component removal #7167
+- Tweak: Change event name when installing Google Listings and Ads. #7276
 - Tweak: Removed unused feature flags #7233 and #7273
 - Tweak: Repurpose disable wc-admin filter to remove optional features #7232
 - Update: Notes to use a date range. #7222
