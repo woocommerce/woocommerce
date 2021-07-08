@@ -365,10 +365,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$set_props[ $prop ] = maybe_unserialize( $meta_value ); // get_post_meta only unserializes single values.
 		}
 
-		$set_props['category_ids']      = $this->get_term_ids( $product, 'product_cat' );
-		$set_props['tag_ids']           = $this->get_term_ids( $product, 'product_tag' );
-		$set_props['shipping_class_id'] = current( $this->get_term_ids( $product, 'product_shipping_class' ) );
-		$set_props['gallery_image_ids'] = array_filter( explode( ',', $set_props['gallery_image_ids'] ) );
+		$set_props['category_ids']       = $this->get_term_ids( $product, 'product_cat' );
+		$set_props['tag_ids']            = $this->get_term_ids( $product, 'product_tag' );
+		$set_props['shipping_class_id']  = current( $this->get_term_ids( $product, 'product_shipping_class' ) );
+		$set_props['shipping_class_ids'] = $this->get_term_ids( $product, 'product_shipping_class' );
+		$set_props['gallery_image_ids']  = array_filter( explode( ',', $set_props['gallery_image_ids'] ) );
 
 		$product->set_props( $set_props );
 	}
@@ -709,6 +710,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		}
 		if ( $force || array_key_exists( 'shipping_class_id', $changes ) ) {
 			wp_set_post_terms( $product->get_id(), array( $product->get_shipping_class_id( 'edit' ) ), 'product_shipping_class', false );
+		}
+		if ( $force || array_key_exists( 'shipping_class_ids', $changes ) ) {
+			wp_set_post_terms( $product->get_id(), $product->get_shipping_class_ids( 'edit' ), 'product_shipping_class', false );
 		}
 
 		_wc_recount_terms_by_product( $product->get_id() );

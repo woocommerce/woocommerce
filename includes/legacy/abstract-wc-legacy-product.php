@@ -33,7 +33,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 			'post',
 			'download_type',
 			'product_image_gallery',
-			'variation_shipping_class',
+			'variation_shipping_classes',
 			'shipping_class',
 			'total_stock',
 			'crosssell_ids',
@@ -44,7 +44,7 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 				'variation_id',
 				'variation_data',
 				'variation_has_stock',
-				'variation_shipping_class_id',
+				'variation_shipping_class_ids',
 				'variation_has_sku',
 				'variation_has_length',
 				'variation_has_width',
@@ -99,9 +99,9 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 			case 'product_image_gallery' :
 				$value = $this->get_gallery_image_ids();
 				break;
-			case 'variation_shipping_class' :
-			case 'shipping_class' :
-				$value = $this->get_shipping_class();
+			case 'variation_shipping_classes' :
+			case 'shipping_classes' :
+				$value = $this->get_shipping_classes();
 				break;
 			case 'total_stock' :
 				$value = $this->get_total_stock();
@@ -131,8 +131,8 @@ abstract class WC_Abstract_Legacy_Product extends WC_Data {
 			case 'variation_has_stock' :
 				$value = $this->is_type( 'variation' ) ? $this->managing_stock() : '';
 				break;
-			case 'variation_shipping_class_id' :
-				$value = $this->is_type( 'variation' ) ? $this->get_shipping_class_id() : '';
+			case 'variation_shipping_class_ids' :
+				$value = $this->is_type( 'variation' ) ? $this->get_shipping_class_ids() : '';
 				break;
 			case 'variation_has_sku' :
 			case 'variation_has_length' :

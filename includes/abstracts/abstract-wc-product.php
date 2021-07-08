@@ -94,6 +94,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		'category_ids'       => array(),
 		'tag_ids'            => array(),
 		'shipping_class_id'  => 0,
+		'shipping_class_ids' => array(),
 		'downloads'          => array(),
 		'image_id'           => '',
 		'gallery_image_ids'  => array(),
@@ -610,9 +611,29 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @since  3.0.0
 	 * @param  string $context What the value is for. Valid values are view and edit.
 	 * @return int
+	 * @deprecated 5.5.0 use get_shipping_class_ids() instead.
 	 */
 	public function get_shipping_class_id( $context = 'view' ) {
-		return $this->get_prop( 'shipping_class_id', $context );
+		wc_deprecated_function( 'WC_Product::get_shipping_class_id', '5.5', 'WC_Product::get_shipping_class_ids' );
+
+		$class_ids = $this->get_shipping_class_ids( $context );
+
+		if( count( $class_ids) ) {
+			return current( $class_ids );
+		}
+
+		return 0;
+	}
+
+	/**
+	 * Get shipping class IDs.
+	 *
+	 * @since  5.5.0
+	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @return array
+	 */
+	public function get_shipping_class_ids( $context = 'view' ) {
+		return $this->get_prop( 'shipping_class_ids', $context );
 	}
 
 	/**
@@ -1181,9 +1202,22 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 *
 	 * @since 3.0.0
 	 * @param int $id Product shipping class id.
+	 * @deprecated 5.5.0 use set_shipping_class_ids() instead.
 	 */
 	public function set_shipping_class_id( $id ) {
+		wc_deprecated_function( 'WC_Product::set_shipping_class_id', '5.5', 'WC_Product::set_shipping_class_ids' );
+
 		$this->set_prop( 'shipping_class_id', absint( $id ) );
+	}
+
+	/**
+	 * Set shipping class IDs.
+	 *
+	 * @since 5.5.0
+	 * @param array $ids List of product shipping class IDs.
+	 */
+	public function set_shipping_class_ids( $ids ) {
+		$this->set_prop( 'shipping_class_ids', array_unique( array_map( 'intval', $ids ) ) );
 	}
 
 	/**
@@ -1905,17 +1939,41 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Returns the product shipping class SLUG.
 	 *
 	 * @return string
+	 * @deprecated 5.5.0 use get_shipping_classes() instead.
 	 */
 	public function get_shipping_class() {
-		$class_id = $this->get_shipping_class_id();
-		if ( $class_id ) {
-			$term = get_term_by( 'id', $class_id, 'product_shipping_class' );
+		wc_deprecated_function( 'WC_Product::get_shipping_class', '5.5', 'WC_Product::get_shipping_classes' );
 
-			if ( $term && ! is_wp_error( $term ) ) {
-				return $term->slug;
+		$class = current( $this->get_shipping_classes() );
+
+		if ( $class ) {
+			return $class;
+		}
+
+		return '';
+	}
+
+	/**
+	 * Returns the product shipping class SLUGs.
+	 *
+	 * @since  5.5.0
+	 * @return array
+	 */
+	public function get_shipping_classes() {
+		$class_ids = $this->get_shipping_class_ids();
+
+		$classes = array();
+		if ( count( $class_ids ) ) {
+			foreach( $class_ids as $class_id ) {
+				$term = get_term_by( 'id', $class_id, 'product_shipping_class' );
+
+				if ( $term && ! is_wp_error( $term ) ) {
+					$classes[] = $term->slug;
+				}
 			}
 		}
-		return '';
+
+		return $classes;
 	}
 
 	/**
