@@ -53,7 +53,7 @@
 	}
 
 	#wpbody-content {
-		min-height: 100vh;
+		min-height: 100vh !important;
 	}
 
 	/* Hide wp-admin and WooCommerce elements when the dashboard body class is present */
