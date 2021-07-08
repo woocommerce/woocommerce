@@ -21,8 +21,6 @@ const {
 	CHECK_CIRCULAR_DEPS,
 	requestToExternal,
 	requestToHandle,
-	requestToExternalInsideGB,
-	requestToHandleInsideGB,
 	findModuleMatch,
 	getProgressBarPluginConfig,
 } = require( './webpack-helpers' );
@@ -145,55 +143,6 @@ woocommerce_blocks_env = ${ NODE_ENV }
 			...resolve,
 			extensions: [ '.js', '.ts', '.tsx' ],
 		},
-	};
-};
-
-/**
- * Build config for core packages, in the editor context.
- *
- * This is meant to fix issue #3839 in which we have two instances of SlotFillProvider context. Should be deleted once wordpress/gutenberg#27462.
- *
- * @param {Object} options Build options.
- */
-const getCoreEditorConfig = ( options = {} ) => {
-	// @todo delete getCoreEditorConfig when wordpress/gutenberg#27462 or equivalent is merged.
-	return {
-		...getCoreConfig( options ),
-		entry: {
-			blocksCheckout: './packages/checkout/index.js',
-		},
-		output: {
-			filename: ( chunkData ) => {
-				return `${ kebabCase( chunkData.chunk.name ) }-editor.js`;
-			},
-			path: path.resolve( __dirname, '../build/' ),
-			library: [ 'wc', '[name]' ],
-			libraryTarget: 'this',
-			// This fixes an issue with multiple webpack projects using chunking
-			// overwriting each other's chunk loader function.
-			// See https://webpack.js.org/configuration/output/#outputjsonpfunction
-			jsonpFunction: 'webpackWcBlocksJsonp',
-		},
-		plugins: [
-			new DependencyExtractionWebpackPlugin( {
-				injectPolyfill: true,
-				requestToExternal: requestToExternalInsideGB,
-				requestToHandle: requestToHandleInsideGB,
-			} ),
-			new ProgressBarPlugin(
-				getProgressBarPluginConfig( 'Core', options.fileSuffix )
-			),
-			new CreateFileWebpack( {
-				path: './',
-				// file name
-				fileName: 'blocks.ini',
-				// content of the file
-				content: `
-woocommerce_blocks_phase = ${ process.env.WOOCOMMERCE_BLOCKS_PHASE || 3 }
-woocommerce_blocks_env = ${ NODE_ENV }
-`.trim(),
-			} ),
-		],
 	};
 };
 
@@ -826,5 +775,4 @@ module.exports = {
 	getPaymentsConfig,
 	getExtensionsConfig,
 	getStylingConfig,
-	getCoreEditorConfig,
 };

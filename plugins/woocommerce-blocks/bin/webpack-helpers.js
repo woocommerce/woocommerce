@@ -108,13 +108,6 @@ const requestToExternal = ( request ) => {
 	}
 };
 
-const requestToExternalInsideGB = ( request ) => {
-	if ( request === 'wordpress-components' ) {
-		return [ 'wp', 'components' ];
-	}
-	return requestToExternal( request );
-};
-
 const requestToHandle = ( request ) => {
 	if ( requiredPackagesInWPLegacy.includes( request ) ) {
 		return false;
@@ -122,13 +115,6 @@ const requestToHandle = ( request ) => {
 	if ( wcHandleMap[ request ] ) {
 		return wcHandleMap[ request ];
 	}
-};
-
-const requestToHandleInsideGB = ( request ) => {
-	if ( request === 'wordpress-components' ) {
-		return 'wp-components';
-	}
-	return requestToHandle( request );
 };
 
 const getProgressBarPluginConfig = ( name, fileSuffix ) => {
@@ -159,7 +145,5 @@ module.exports = {
 	findModuleMatch,
 	requestToHandle,
 	requestToExternal,
-	requestToHandleInsideGB,
-	requestToExternalInsideGB,
 	getProgressBarPluginConfig,
 };
