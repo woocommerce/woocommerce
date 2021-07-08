@@ -1,14 +1,25 @@
 on: pull_request_review
-name: Add Labels to Approved Pull Requests
+name: Approved Pull Requests
 jobs:
-  labelWhenApproved:
-    name: Label when approved
-    runs-on: ubuntu-latest
-    steps:
-    - name: Label when approved
-      uses: pullreminders/label-when-approved-action@master
-      env:
-        APPROVALS: "1"
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        ADD_LABEL: "status: ready to merge"
-        REMOVE_LABEL: "status:%20needs%20review"
+    labelWhenApproved:
+        name: Add Labels
+        runs-on: ubuntu-latest
+        steps:
+            - name: Ready to merge label
+              uses: pullreminders/label-when-approved-action@master
+              env:
+                  APPROVALS: '1'
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  ADD_LABEL: 'status: ready to merge'
+                  REMOVE_LABEL: 'status:%20needs%20review'
+    milestoneWhenApproved:
+        name: Add Milestone
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+            - name: Latest milestone
+              uses: woocommerce/automations@v1
+              with:
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
+                  automations: assign-milestone
+                  milestone_bump_strategy: none
