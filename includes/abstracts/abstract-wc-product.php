@@ -1964,11 +1964,11 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 
 		$classes = array();
 		if ( count( $class_ids ) ) {
-			foreach( $class_ids as $class_id ) {
+			foreach ( $class_ids as $class_id ) {
 				$term = get_term_by( 'id', $class_id, 'product_shipping_class' );
 
 				if ( $term && ! is_wp_error( $term ) ) {
-					$classes[] = $term->slug;
+					$classes[ $class_id ] = $term->slug;
 				}
 			}
 		}
