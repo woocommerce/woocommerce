@@ -1,8 +1,16 @@
 [
     {
         "description": "List of homepage stats enabled by default",
-        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/ff1a3cb2f3857cfa759fb3c93cedfe630dbd5510/client/homescreen/stats-overview/defaults.js#L5-L16",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/6889e695d6bbeff1e0fb607339f83cce18ca6e59/client/homescreen/stats-overview/defaults.js#L5-L16",
         "name": "woocommerce_admin_homepage_default_stats",
-        "example": "addFilter( 'woocommerce_admin_homepage_default_stats', 'plugin-domain', ( defaultStats ) => defaultStats.filter( ( stat ) => stat !== 'jetpack/stats/views' ) );"
+        "example": "addFilter( 'woocommerce_admin_homepage_default_stats', 'plugin-domain', ( defaultStats ) => defaultStats.filter( ( stat ) => stat !== 'jetpack/stats/views' ) );",
+        "type": "filter"
+    },
+    {
+        "description": "Create a Fill for extensions to add client facing custom Navigation Items.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/6889e695d6bbeff1e0fb607339f83cce18ca6e59/packages/navigation/src/index.js#L254-L270",
+        "name": "WooNavigationItem",
+        "example": "const MyExtenstionNavItem = () => ( <WooNavigationItem item=\"my-extension\">My Extension</WooNavigationItem> ); registerPlugin( 'my-extension', { render: MyExtenstionNavItem, scope: 'woocommerce-admin', } );",
+        "type": "slotFill"
     }
 ]

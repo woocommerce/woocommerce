@@ -4,9 +4,11 @@ const { parse } = require( 'comment-parser/lib' );
 const { relative, resolve } = require( 'path' );
 const chalk = require( 'chalk' );
 
+const dataTypes = [ 'action', 'filter', 'slotFill' ];
+
 const getHooks = ( parsedData ) =>
 	parsedData.filter( ( docBlock ) =>
-		docBlock.tags.some( ( tag ) => tag.tag === 'hook' )
+		docBlock.tags.some( ( tag ) => dataTypes.includes( tag.tag ) )
 	);
 
 const getSourceFile = ( file, commit, { source } ) => {
@@ -17,9 +19,10 @@ const getSourceFile = ( file, commit, { source } ) => {
 };
 
 const logProgress = ( fileName, { tags } ) => {
-	const hook = tags.find( ( tag ) => tag.tag === 'hook' );
+	const hook = tags.find( ( tag ) => dataTypes.includes( tag.tag ) );
 	console.log(
-		chalk.cyan( `${ hook.name } ` ) +
+		chalk.green( `@${ hook.tag } ` ) +
+			chalk.cyan( `${ hook.name } ` ) +
 			chalk.yellow( 'generated in ' ) +
 			chalk.yellow.underline( fileName )
 	);
@@ -51,12 +54,14 @@ const makeDocObjects = async ( path ) => {
 	const hooks = await prepareHooks( path );
 	return hooks.map( ( { description, tags, sourceFile } ) => {
 		const example = tags.find( ( tag ) => tag.tag === 'example' );
-		const hook = tags.find( ( tag ) => tag.tag === 'hook' );
+		const tag = tags.find( ( tag ) => dataTypes.includes( tag.tag ) );
+
 		return {
 			description,
 			sourceFile,
-			name: hook ? hook.name : '',
+			name: tag ? tag.name : '',
 			example: example ? example.description : '',
+			type: tag.tag,
 		};
 	} );
 };

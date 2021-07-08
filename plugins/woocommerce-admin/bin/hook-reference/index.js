@@ -1,4 +1,3 @@
-const fs = require( 'fs' );
 const { stat, readdir, writeFile } = require( 'fs' ).promises;
 const { resolve } = require( 'path' );
 const createData = require( './data' );
@@ -9,12 +8,32 @@ async function getFilePaths( dir ) {
 	const files = await Promise.all(
 		subdirs.map( async ( subdir ) => {
 			const res = resolve( dir, subdir );
-			return ( await stat( res ) ).isDirectory()
-				? getFilePaths( res )
-				: res;
+			const _stat = await stat( res );
+			const isDir = _stat.isDirectory();
+			const isNotSourceDir =
+				isDir &&
+				/\/(build|build-module|build-style|node_modules)$/g.test( res );
+
+			if ( isNotSourceDir ) {
+				return;
+			}
+
+			return isDir ? getFilePaths( res ) : res;
 		} )
 	);
-	return files.reduce( ( a, f ) => a.concat( f ), [] );
+	return files
+		.filter( ( f ) => !! f )
+		.reduce( ( a, f ) => a.concat( f ), [] );
+}
+
+async function getAllFilePaths( paths ) {
+	const allFiles = await Promise.all(
+		paths.map( async ( path ) => {
+			return await getFilePaths( path );
+		} )
+	);
+
+	return allFiles.reduce( ( a, f ) => a.concat( f ), [] );
 }
 
 const writeJSONFile = async ( data ) => {
@@ -33,7 +52,7 @@ const writeJSONFile = async ( data ) => {
 console.log( chalk.green( 'Preparing Hook Reference data file' ) );
 console.log( '\n' );
 
-getFilePaths( 'client' )
+getAllFilePaths( [ 'client', 'packages' ] )
 	.then( ( paths ) => createData( paths ) )
 	.then( ( data ) => writeJSONFile( data ) )
 	.catch( ( e ) => console.error( e ) );

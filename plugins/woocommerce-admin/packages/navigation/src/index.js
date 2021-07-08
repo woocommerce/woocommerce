@@ -254,6 +254,16 @@ export const addHistoryListener = ( listener ) => {
 /**
  * Create a Fill for extensions to add client facing custom Navigation Items.
  *
+ * @slotFill WooNavigationItem
+ * @example
+ * const MyExtenstionNavItem = () => (
+ * 	<WooNavigationItem item="my-extension">My Extension</WooNavigationItem>
+ * );
+ *
+ * registerPlugin( 'my-extension', {
+ * 	render: MyExtenstionNavItem,
+ * 	scope: 'woocommerce-admin',
+ * } );
  * @param {Object} param0
  * @param {Array} param0.children - Node children.
  * @param {string} param0.item - Navigation item slug.

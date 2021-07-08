@@ -79,6 +79,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Add: Add payment gateway suggestion unit tests #7142
 - Add: Feature toggle to disable Analytics UI #7168
 - Add: SlotFill to Abbreviated Notification panel #7091
+- Add: Hook reference slotFill support #6833
 - Dev: Add `woocommerce_admin_export_id` filter for customizing the export file name #7178
 - Dev: Remove old payment gateway task components #7224
 - Fix: Currency display on Orders activity card on homescreen #7181
@@ -269,6 +270,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Update: UI updates to Payment Task screen #6766
 - Update: Update payment gateway suggestions semantics to be more consistent #7130
 - Update: Adding setup required icon for non-configured payment methods #6811
+- Update: Add SlotFill support in hook reference script #6833
 
 == 2.2.6 5/7/2021 ==
 

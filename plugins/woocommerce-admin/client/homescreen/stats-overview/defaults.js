@@ -5,7 +5,7 @@ import { applyFilters } from '@wordpress/hooks';
 /**
  * List of homepage stats enabled by default
  *
- * @hook woocommerce_admin_homepage_default_stats
+ * @filter woocommerce_admin_homepage_default_stats
  * @example
  * addFilter(
  *	'woocommerce_admin_homepage_default_stats',
