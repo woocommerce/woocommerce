@@ -10,6 +10,9 @@
 
 - Checkout create account test would fail if configuration value `addresses.customer.billing.email` was not `john.doe@example.com` 
 
+## Changed
+- The e2e test `order-status-filters.test.js` now uses the API to create orders
+
 # 0.1.3
 
 ## Added
