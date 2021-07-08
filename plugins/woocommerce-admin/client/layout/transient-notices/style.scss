@@ -5,6 +5,7 @@
 	bottom: $gap-small;
 	left: $admin-menu-width + $gap;
 	z-index: 99999;
+	width: auto;
 
 	@media ( max-width: 960px ) {
 		left: 50px;
