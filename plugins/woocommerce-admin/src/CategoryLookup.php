@@ -52,6 +52,8 @@ class CategoryLookup {
 		add_action( 'generate_category_lookup_table', array( $this, 'regenerate' ) );
 		add_action( 'edit_product_cat', array( $this, 'before_edit' ), 99 );
 		add_action( 'edited_product_cat', array( $this, 'on_edit' ), 99 );
+		add_action( 'created_product_cat', array( $this, 'on_create' ), 99 );
+
 	}
 
 	/**
@@ -127,6 +129,15 @@ class CategoryLookup {
 		}
 
 		$this->delete( $category_id, $prev_parent );
+		$this->update( $category_id );
+	}
+
+	/**
+	 * When a product category gets created, add a new lookup row.
+	 *
+	 * @param int $category_id Term ID being created.
+	 */
+	public function on_create( $category_id ) {
 		$this->update( $category_id );
 	}
 

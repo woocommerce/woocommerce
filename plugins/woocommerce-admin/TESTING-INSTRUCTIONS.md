@@ -24,6 +24,15 @@
 3. Click "Dismiss" on a note. Confirm the position of the popover is correct.
 4. Click anywhere outside of the popover content and confirm the popover is closed.
 
+### Sync the category lookup table when a new category gets created #7290
+
+1. Navigate to Products -> Add New
+2. Add a new category on the Add New page and assign the product to it.
+3. Place an order with the product
+4. Navigate to Analytics -> Categories
+5. You should see the category.
+>>>>>>> cdc813055 (Add changelog)
+
 ### Use saved values if available when switching tabs #7226
 
 1. Start onboarding wizard and continue to step 4.
