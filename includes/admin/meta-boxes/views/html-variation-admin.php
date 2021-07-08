@@ -334,6 +334,10 @@ defined( 'ABSPATH' ) || exit;
 				<p class="form-row hide_if_variation_virtual form-row-full">
 					<label><?php esc_html_e( 'Shipping class', 'woocommerce' ); ?></label>
 					<?php
+					if ( ! class_exists( 'WC_Product_Shipping_Classes_Dropdown_Walker', false ) ) {
+						include_once WC()->plugin_path() . '/includes/walkers/class-wc-product-shipping-classes-dropdown-walker.php';
+					}
+
 					wp_dropdown_categories(
 						array(
 							'taxonomy'         => 'product_shipping_class',
@@ -341,7 +345,9 @@ defined( 'ABSPATH' ) || exit;
 							'show_option_none' => __( 'Same as parent', 'woocommerce' ),
 							'name'             => 'variable_shipping_class[' . $loop . ']',
 							'id'               => '',
-							'selected'         => $variation_object->get_shipping_class_id( 'edit' ),
+							'selected'         => $variation_object->get_shipping_class_ids( 'edit' ),
+							'walker'           => new WC_Product_Shipping_Classes_Dropdown_Walker(),
+							'multiple'         => true,
 						)
 					);
 					?>

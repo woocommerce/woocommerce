@@ -602,11 +602,11 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$shipping_class_2 = wp_insert_term( 'Standard', 'product_shipping_class' );
 
 		$product_1 = new WC_Product_Simple();
-		$product_1->set_shipping_class_id( $shipping_class_1['term_id'] );
+		$product_1->set_shipping_class_ids( array( $shipping_class_1['term_id'] ) );
 		$product_1->save();
 
 		$product_2 = new WC_Product_Simple();
-		$product_2->set_shipping_class_id( $shipping_class_2['term_id'] );
+		$product_2->set_shipping_class_ids( array( $shipping_class_2['term_id'] ) );
 		$product_2->save();
 
 		$products = wc_get_products(

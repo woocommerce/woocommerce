@@ -42,15 +42,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<div class="options_group">
 		<?php
+		if ( ! class_exists( 'WC_Product_Shipping_Classes_Dropdown_Walker', false ) ) {
+			include_once WC()->plugin_path() . '/includes/walkers/class-wc-product-shipping-classes-dropdown-walker.php';
+		}
+
 		$args = array(
 			'taxonomy'         => 'product_shipping_class',
 			'hide_empty'       => 0,
 			'show_option_none' => __( 'No shipping class', 'woocommerce' ),
 			'name'             => 'product_shipping_class',
 			'id'               => 'product_shipping_class',
-			'selected'         => $product_object->get_shipping_class_id( 'edit' ),
+			'selected'         => $product_object->get_shipping_class_ids( 'edit' ),
 			'class'            => 'select short',
 			'orderby'          => 'name',
+			'walker'           => new WC_Product_Shipping_Classes_Dropdown_Walker(),
+			'multiple'         => true,
 		);
 		?>
 		<p class="form-field shipping_class_field">

@@ -786,7 +786,7 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 		$shipping_class_1 = wp_insert_term( 'Bulky', 'product_shipping_class' );
 
 		$product_1 = new WC_Product_Simple();
-		$product_1->set_shipping_class_id( $shipping_class_1['term_id'] );
+		$product_1->set_shipping_class_ids( array( $shipping_class_1['term_id'] ) );
 		$product_1->save();
 
 		$query_params = array(

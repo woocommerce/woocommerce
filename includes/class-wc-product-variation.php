@@ -28,19 +28,19 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * @var array
 	 */
 	protected $parent_data = array(
-		'title'             => '',
-		'sku'               => '',
-		'manage_stock'      => '',
-		'backorders'        => '',
-		'stock_quantity'    => '',
-		'weight'            => '',
-		'length'            => '',
-		'width'             => '',
-		'height'            => '',
-		'tax_class'         => '',
-		'shipping_class_id' => '',
-		'image_id'          => '',
-		'purchase_note'     => '',
+		'title'              => '',
+		'sku'                => '',
+		'manage_stock'       => '',
+		'backorders'         => '',
+		'stock_quantity'     => '',
+		'weight'             => '',
+		'length'             => '',
+		'width'              => '',
+		'height'             => '',
+		'tax_class'          => '',
+		'shipping_class_ids' => array(),
+		'image_id'           => '',
+		'purchase_note'      => '',
 	);
 
 	/**
@@ -398,15 +398,37 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * @since 3.0.0
 	 * @param  string $context What the value is for. Valid values are view and edit.
 	 * @return int
+	 * @deprecated 5.5.0 use get_shipping_class_ids() instead.
 	 */
 	public function get_shipping_class_id( $context = 'view' ) {
-		$shipping_class_id = $this->get_prop( 'shipping_class_id', $context );
+		wc_deprecated_function( 'WC_Product_Variation::get_shipping_class_id', '5.5', 'WC_Product_Variation::get_shipping_class_ids' );
 
-		if ( 'view' === $context && ! $shipping_class_id ) {
-			$shipping_class_id = apply_filters( $this->get_hook_prefix() . 'shipping_class_id', $this->parent_data['shipping_class_id'], $this );
+		$class_ids         = $this->get_shipping_class_ids( $context );
+		$shipping_class_id = count( $class_ids ) ? current( $class_ids ) : 0;
+
+		if ( 'view' === $context ) {
+			$parent_shipping_class_id = count( $this->parent_data['shipping_class_ids'] ) ? current( $this->parent_data['shipping_class_ids'] ) : 0;
+			$shipping_class_id        = apply_filters( $this->get_hook_prefix() . 'shipping_class_id', $parent_shipping_class_id, $this );
 		}
 
 		return $shipping_class_id;
+	}
+
+	/**
+	 * Get shipping class IDs.
+	 *
+	 * @since 5.5.0
+	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @return array
+	 */
+	public function get_shipping_class_ids( $context = 'view' ) {
+		$shipping_class_ids = $this->get_prop( 'shipping_class_ids', $context );
+
+		if ( 'view' === $context && count( $shipping_class_ids ) ) {
+			$shipping_class_ids = apply_filters( $this->get_hook_prefix() . 'shipping_class_ids', $this->parent_data['shipping_class_ids'], $this );
+		}
+
+		return $shipping_class_ids;
 	}
 
 	/**
@@ -473,7 +495,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 				'width'              => '',
 				'height'             => '',
 				'tax_class'          => '',
-				'shipping_class_id'  => 0,
+				'shipping_class_ids' => array(),
 				'image_id'           => 0,
 				'purchase_note'      => '',
 				'catalog_visibility' => 'visible',
