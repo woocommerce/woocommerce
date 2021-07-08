@@ -34,33 +34,29 @@ describe( 'VerticalCSSTransition', () => {
 		}
 	} );
 
-	it( 'should set maxHeight of children to container on render', () => {
+	it( 'should set maxHeight of children to container on entering and remove it when entered', ( done ) => {
 		const nodeRef = createRef< undefined | HTMLDivElement >();
-		render(
-			<VerticalCSSTransition
-				in={ true }
-				timeout={ 0 }
-				nodeRef={ nodeRef as React.RefObject< undefined > }
-				classNames="test"
-			>
-				<div ref={ nodeRef as React.RefObject< HTMLDivElement > }>
-					Test
-				</div>
-			</VerticalCSSTransition>
-		);
-
-		expect(
-			nodeRef.current && nodeRef.current.parentElement?.style.maxHeight
-		).toBe( '100px' );
-	} );
-
-	it( 'should update maxHeight when children are updated', () => {
-		const nodeRef = createRef< undefined | HTMLDivElement >();
+		let count = 0;
 		const props: VerticalCSSTransitionProps = {
-			in: true,
+			in: false,
 			timeout: 0,
 			nodeRef: nodeRef as React.RefObject< undefined >,
 			classNames: 'test',
+			onEntering: () => {
+				count++;
+				expect(
+					nodeRef.current &&
+						nodeRef.current.parentElement?.style.maxHeight
+				).toBe( '100px' );
+			},
+			onEntered: () => {
+				expect(
+					nodeRef.current &&
+						nodeRef.current.parentElement?.style.maxHeight
+				).toBe( '' );
+				expect( count ).toEqual( 1 );
+				done();
+			},
 		};
 		const { rerender } = render(
 			<VerticalCSSTransition { ...props }>
@@ -70,12 +66,49 @@ describe( 'VerticalCSSTransition', () => {
 			</VerticalCSSTransition>
 		);
 
-		expect(
-			nodeRef.current && nodeRef.current.parentElement?.style.maxHeight
-		).toBe( '100px' );
+		rerender(
+			<VerticalCSSTransition { ...props } in={ true }>
+				<div ref={ nodeRef as React.RefObject< HTMLDivElement > }>
+					Test
+				</div>
+			</VerticalCSSTransition>
+		);
+	} );
+
+	it( 'should update maxHeight when children are updated', ( done ) => {
+		const nodeRef = createRef< undefined | HTMLDivElement >();
+		let count = 0;
+		const props: VerticalCSSTransitionProps = {
+			in: false,
+			timeout: 0,
+			nodeRef: nodeRef as React.RefObject< undefined >,
+			classNames: 'test',
+			onEntering: () => {
+				count++;
+				expect(
+					nodeRef.current &&
+						nodeRef.current.parentElement?.style.maxHeight
+				).toBe( '200px' );
+			},
+			onEntered: () => {
+				expect(
+					nodeRef.current &&
+						nodeRef.current.parentElement?.style.maxHeight
+				).toBe( '' );
+				expect( count ).toEqual( 1 );
+				done();
+			},
+		};
+		const { rerender } = render(
+			<VerticalCSSTransition { ...props }>
+				<div ref={ nodeRef as React.RefObject< HTMLDivElement > }>
+					Test
+				</div>
+			</VerticalCSSTransition>
+		);
 
 		rerender(
-			<VerticalCSSTransition { ...props }>
+			<VerticalCSSTransition { ...props } in={ true }>
 				<div ref={ nodeRef as React.RefObject< HTMLDivElement > }>
 					Test
 				</div>

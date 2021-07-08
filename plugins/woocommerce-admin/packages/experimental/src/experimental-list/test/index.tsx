@@ -276,11 +276,6 @@ describe( 'Experimental List', () => {
 			if ( listItem ) {
 				userEvent.click( listItem );
 			}
-			await waitForElementToBeRemoved(
-				container.querySelector( '#test' )
-			);
-			expect( container ).not.toHaveTextContent( 'Test' );
-			expect( container ).not.toHaveTextContent( 'Test 2' );
 			expect( container ).toHaveTextContent( 'Show more items' );
 			expect( container ).not.toHaveTextContent( 'Show less' );
 			expect( onExpand ).toHaveBeenCalledTimes( 1 );

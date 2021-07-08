@@ -49,6 +49,10 @@ $task-alert-yellow: #f0b849;
 		font-size: 12px;
 	}
 
+	.woocommerce-task__estimated-time {
+		margin-top: $gap-smallest;
+	}
+
 	.woocommerce-task-list__item-before {
 		display: flex;
 		align-items: center;

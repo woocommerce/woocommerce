@@ -2,6 +2,8 @@
 
 -   Add new VerticalCSSTransition component for handling height transitions. #7203
 -   Update TaskItem to make use of the VerticalCSSTransition. #7203
+-   Make the action button optionable in TaskItem. #7263
+-   Update CollapsibleList to support nested transitional items. #7263
 
 # 1.3.0
 

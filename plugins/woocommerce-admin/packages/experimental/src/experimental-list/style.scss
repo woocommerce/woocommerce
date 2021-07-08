@@ -17,11 +17,11 @@ a.woocommerce-experimental-list__item {
 		padding: $gap $gap-large;
 	}
 
-	&.has-action {
+	&.has-action:not(.expanded) {
 		cursor: pointer;
 	}
 
-	&:focus {
+	&:focus:not(.expanded) {
 		box-shadow: inset 0 0 0 1px $studio-wordpress-blue,
 			inset 0 0 0 2px $studio-white;
 	}

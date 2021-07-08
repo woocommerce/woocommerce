@@ -29,7 +29,6 @@
 		"@woocommerce/currency": "file:../currency",
 		"@woocommerce/data": "file:../data",
 		"@woocommerce/date": "file:../date",
-		"@woocommerce/experimental": "file:../experimental",
 		"@woocommerce/navigation": "file:../navigation",
 		"@wordpress/api-fetch": "^3.21.5",
 		"@wordpress/components": "10.2.0",
