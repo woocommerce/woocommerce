@@ -1,5 +1,6 @@
-# Unreleased
+# 1.3.2
 
+-   Add fallback for the select/dispatch data-controls for older WP versions. #7204
 -   Fix error parsing of plugin data package. #7164
 -   Update dependencies
 
