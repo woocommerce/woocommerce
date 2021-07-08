@@ -8,6 +8,7 @@ import {
 } from '@woocommerce/block-hocs';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 import {
+	CheckoutProvider,
 	StoreNoticesProvider,
 	ValidationContextProvider,
 } from '@woocommerce/base-context';
@@ -18,6 +19,7 @@ import {
 	getValidBlockAttributes,
 } from '@woocommerce/base-utils';
 import { StoreSnackbarNoticesProvider } from '@woocommerce/base-context/providers';
+import { SlotFillProvider } from '@woocommerce/blocks-checkout';
 
 /**
  * Internal dependencies
@@ -59,7 +61,11 @@ const CheckoutFrontend = ( props ) => {
 					<StoreSnackbarNoticesProvider context="wc/checkout">
 						<StoreNoticesProvider context="wc/checkout">
 							<ValidationContextProvider>
-								<Block { ...props } />
+								<SlotFillProvider>
+									<CheckoutProvider>
+										<Block { ...props } />
+									</CheckoutProvider>
+								</SlotFillProvider>
 							</ValidationContextProvider>
 						</StoreNoticesProvider>
 					</StoreSnackbarNoticesProvider>

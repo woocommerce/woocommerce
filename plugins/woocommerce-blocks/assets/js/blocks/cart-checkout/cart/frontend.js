@@ -9,7 +9,9 @@ import { __ } from '@wordpress/i18n';
 import {
 	StoreNoticesProvider,
 	StoreSnackbarNoticesProvider,
+	CartProvider,
 } from '@woocommerce/base-context/providers';
+import { SlotFillProvider } from '@woocommerce/blocks-checkout';
 import { CURRENT_USER_IS_ADMIN } from '@woocommerce/settings';
 import {
 	renderFrontend,
@@ -31,7 +33,11 @@ const CartFrontend = ( props ) => {
 	return (
 		<StoreSnackbarNoticesProvider context="wc/cart">
 			<StoreNoticesProvider context="wc/cart">
-				<Block { ...props } />
+				<SlotFillProvider>
+					<CartProvider>
+						<Block { ...props } />
+					</CartProvider>
+				</SlotFillProvider>
 			</StoreNoticesProvider>
 		</StoreSnackbarNoticesProvider>
 	);

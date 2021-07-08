@@ -60,7 +60,7 @@ final class AssetsController {
 		$this->api->register_script( 'wc-price-format', 'build/price-format.js', [], false );
 
 		if ( Package::feature()->is_feature_plugin_build() ) {
-			$this->api->register_script( 'wc-blocks-checkout', is_admin() ? 'build/blocks-checkout-editor.js' : 'build/blocks-checkout.js', [] );
+			$this->api->register_script( 'wc-blocks-checkout', 'build/blocks-checkout.js', [] );
 		}
 
 		wp_add_inline_script(
