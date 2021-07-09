@@ -44,6 +44,7 @@ This package provides support for enabling retries in tests:
 
 - `WP_ADMIN_LOGIN` - WordPress login
 - `WP_ADMIN_DASHBOARD` - WordPress dashboard
+- `WP_ADMIN_WP_UPDATES` - WordPress updates
 - `WP_ADMIN_PLUGINS` - Plugin list
 - `WP_ADMIN_PERMALINK_SETTINGS` - Permalink settings  
 - `WP_ADMIN_ALL_USERS_VIEW` - WordPress user list
@@ -102,6 +103,11 @@ This package provides support for enabling retries in tests:
 | `openAllUsersView` | | Open the All Users page |
 | `openImportProducts` | | Open the Import Products page |
 | `openExtensions` | | Go to WooCommerce -> Extensions |
+| `openWordPressUpdatesPage` | | Go to Dashboard -> Updates |
+| `installAllUpdates` | | Install all pending updates on Dashboard -> Updates| 
+| `updateWordPress` | | Install pending WordPress updates on Dashboard -> Updates| 
+| `updatePlugins` | | Install all pending plugin updates on Dashboard -> Updates| 
+| `updateThemes` | | Install all pending theme updates on Dashboard -> Updates| 
 
 ### Shopper `shopper`
 
