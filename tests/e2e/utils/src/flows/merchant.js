@@ -217,18 +217,27 @@ const merchant = {
 		} );
 	},
 
+	/**
+	 * Opens the WordPress updates page at Dashboard > Updates.
+	 */
 	openWordPressUpdatesPage: async () => {
 		await page.goto( WP_ADMIN_WP_UPDATES, {
 			waitUntil: 'networkidle0',
 		} );
 	},
 
+	/**
+	 * Installs all pending updates on the Dashboard > Updates page, including WordPress, plugins, and themes.
+	 */
 	installAllUpdates: async () => {
 		await merchant.updateWordPress();
 		await merchant.updatePlugins();
 		await merchant.updateThemes();
 	},
 
+	/**
+	 * Updates WordPress if there are any updates available.
+	 */
 	updateWordPress: async () => {
 		await merchant.openWordPressUpdatesPage();
 		if ( null !== await page.$( 'form[action="update-core.php?action=do-core-upgrade"][name="upgrade"]' ) ) {
@@ -241,6 +250,9 @@ const merchant = {
 		}
 	},
 
+	/**
+	 * Updates all installed plugins if there are updates available.
+	 */
 	updatePlugins: async () => {
 		await merchant.openWordPressUpdatesPage();
 		if ( null !== await page.$( 'form[action="update-core.php?action=do-plugin-upgrade"][name="upgrade-plugins"]' ) ) {
@@ -252,6 +264,9 @@ const merchant = {
 		}
 	},
 
+	/**
+	 * Updates all installed themes if there are updates available.
+	 */
 	updateThemes: async () => {
 		await merchant.openWordPressUpdatesPage();
 		if ( null !== await page.$( 'form[action="update-core.php?action=do-theme-upgrade"][name="upgrade-themes"]' )) {
