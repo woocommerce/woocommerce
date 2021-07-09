@@ -315,3 +315,7 @@ class WC_Subscriptions_Extend_Store_Endpoint {
 	}
 }
 ```
+
+## Formatting your data
+You may wish to use our pre-existing formatters to ensure your data is passed through the Store API in the
+correct format. More information on the formatters can be found in the [StoreApi formatters documentation](./extend-rest-api-formatters.md).
