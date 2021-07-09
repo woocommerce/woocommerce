@@ -15,7 +15,8 @@
 	"require-dev": {
 		"woocommerce/woocommerce-sniffs": "0.1.0",
 		"suin/phpcs-psr4-sniff": "^2.2",
-		"bamarni/composer-bin-plugin": "^1.4"
+		"bamarni/composer-bin-plugin": "^1.4",
+		"automattic/jetpack-changelogger": "^1.1"
 	},
 	"config": {
 		"platform": {
@@ -24,8 +25,12 @@
 	},
 	"scripts": {
 		"bin": "echo 'bin not installed'",
-		"post-install-cmd": ["@composer bin all install --ansi"],
-		"post-update-cmd": ["@composer bin all update --ansi"],
+		"post-install-cmd": [
+			"@composer bin all install --ansi"
+		],
+		"post-update-cmd": [
+			"@composer bin all update --ansi"
+		],
 		"test": [
 			"phpunit"
 		],
@@ -44,6 +49,23 @@
 		},
 		"bamarni-bin": {
 			"target-directory": "bin/composer"
+		},
+		"changelogger": {
+			"changelog": "./changelog.txt",
+			"formatter": {
+				"filename": "bin/changelogger/WCAdminFormatter.php"
+			},
+			"versioning": "semver",
+			"changes-dir": "./changelogs",
+			"types": [
+				"Fix",
+				"Add",
+				"Update",
+				"Dev",
+				"Tweak",
+				"Performance",
+				"Enhancement"
+			]
 		}
 	},
 	"autoload": {

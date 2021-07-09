@@ -18,12 +18,10 @@ _Replace this with a good description of your changes & reasoning._
 -   Ex: Open page `url`
 -   Click XYZ…
 
-<!-- 
+<!--
 Please add your test instructions to `/TESTING-INSTRUCTIONS.md`.
 -->
 
 <!--- Please add a Changelog note
 
-Enter a changelog note following the WooCommerce core format using prefixes of Enhancement:, Tweak:, Dev:, Fix:, Performance: to readme.txt under the "unreleased" list at the top of the changelog. If none exists, please add it. Also include PR number.
-
-If changes pertain to a package, also update CHANGELOG.md in the package's folder in a similar manner.--->
+Enter a changelog note using the following CLI command `npm run changelogger -- add` and commit changes.
