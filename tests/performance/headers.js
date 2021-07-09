@@ -1,6 +1,5 @@
 import { base_host, base_url } from './config.js';
 
-/* set common headers */
 const htmlRequestHeader = {
     accept:
       'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
@@ -8,6 +7,10 @@ const htmlRequestHeader = {
 
 const jsonRequestHeader = {
     accept: 'application/json, text/javascript, */*; q=0.01'
+  };
+
+const jsonAPIRequestHeader = {
+    accept: 'application/json, */*;q=0.1'
   };
 
 const allRequestHeader = {
@@ -27,6 +30,14 @@ const commonGetRequestHeaders = {
     'sec-fetch-site': 'same-origin',
     'sec-fetch-user': '?1',
     'upgrade-insecure-requests': '1'
+  };
+
+const commonAPIGetRequestHeaders = {
+    connection: 'keep-alive',
+    host: `${base_host}`,
+    'sec-fetch-dest': 'empty',
+    'sec-fetch-mode': 'cors',
+    'sec-fetch-site': 'same-origin',
   };
   
 const commonPostRequestHeaders = {
@@ -48,9 +59,11 @@ const commonNonStandardHeaders = {
 export {
     htmlRequestHeader,
     jsonRequestHeader,
+    jsonAPIRequestHeader,
     allRequestHeader,
     commonRequestHeaders,
     commonGetRequestHeaders,
+    commonAPIGetRequestHeaders,
     commonPostRequestHeaders,
     commonNonStandardHeaders,
 };

@@ -1,4 +1,5 @@
 import { WPLogin } from '../requests/merchant/wp-login.js';
+import { Products } from '../requests/merchant/products.js';
 
 export let options = {
     scenarios: {
@@ -7,11 +8,12 @@ export let options = {
             vus: 1,
             iterations: 1,
             maxDuration: '60s',
-            exec: 'wp_login',
+            exec: 'products',
         },
     },
 };
 
-export function wp_login() {
+export function products() {
     WPLogin();
+    Products();
 }
