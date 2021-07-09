@@ -8,7 +8,6 @@ import type {
 } from '@woocommerce/types';
 
 interface ImpressionItem extends Gtag.Item {
-	// eslint-disable-next-line camelcase
 	list_name?: string;
 }
 

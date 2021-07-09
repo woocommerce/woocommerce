@@ -59,6 +59,13 @@ module.exports = {
 		'react-hooks/exhaustive-deps': 'error',
 		'react/jsx-fragments': [ 'error', 'syntax' ],
 		'@wordpress/no-global-active-element': 'warn',
+		camelcase: [
+			'error',
+			{
+				properties: 'never',
+				ignoreGlobals: true,
+			},
+		],
 	},
 	overrides: [
 		{
@@ -85,6 +92,27 @@ module.exports = {
 				'@typescript-eslint/no-unused-vars': [
 					'error',
 					{ ignoreRestSiblings: true },
+				],
+				camelcase: 'off',
+				'@typescript-eslint/naming-convention': [
+					'error',
+					{
+						selector: [ 'method', 'variableLike' ],
+						format: [ 'camelCase', 'PascalCase', 'UPPER_CASE' ],
+						leadingUnderscore: 'allowSingleOrDouble',
+						filter: {
+							regex: 'webpack_public_path__',
+							match: false,
+						},
+					},
+					{
+						selector: 'typeProperty',
+						format: [ 'camelCase', 'snake_case' ],
+						filter: {
+							regex: 'API_FETCH_WITH_HEADERS|Block',
+							match: false,
+						},
+					},
 				],
 			},
 		},

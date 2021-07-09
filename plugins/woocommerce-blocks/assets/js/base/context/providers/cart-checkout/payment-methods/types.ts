@@ -53,7 +53,6 @@ export type ExpressPaymentMethods =
 export interface CustomerPaymentMethod {
 	method: PaymentMethodConfig;
 	expires: string;
-	// eslint-disable-next-line camelcase
 	is_default: boolean;
 	tokenId: number;
 	actions: ObjectType;

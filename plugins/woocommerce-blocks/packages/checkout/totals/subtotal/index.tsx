@@ -12,9 +12,7 @@ import { getSetting } from '@woocommerce/settings';
 import TotalsItem from '../item';
 
 interface Values {
-	// eslint-disable-next-line camelcase
 	total_items: string;
-	// eslint-disable-next-line camelcase
 	total_items_tax: string;
 }
 

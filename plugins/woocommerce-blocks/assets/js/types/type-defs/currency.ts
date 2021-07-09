@@ -8,7 +8,6 @@ export interface Currency {
 	thousandSeparator: string;
 }
 
-/* eslint-disable camelcase -- API responses have camelcase properties */
 export interface CurrencyResponse {
 	currency_code: string;
 	currency_symbol: string;

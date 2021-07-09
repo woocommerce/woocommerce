@@ -78,8 +78,8 @@ const generateQuery = ( {
  */
 
 const extractPaginationAndSortAttributes = ( query ) => {
-	/* eslint-disable-next-line no-unused-vars, camelcase */
-	const { order, orderby, page, per_page, ...totalQuery } = query;
+	/* eslint-disable-next-line no-unused-vars */
+	const { order, orderby, page, per_page: perPage, ...totalQuery } = query;
 	return totalQuery || {};
 };
 

@@ -442,9 +442,7 @@ export function* selectShippingRate(
 }
 
 type BillingAddressShippingAddress = {
-	// eslint-disable-next-line camelcase
 	billing_address: CartBillingAddress;
-	// eslint-disable-next-line camelcase
 	shipping_address: CartShippingAddress;
 };
 
