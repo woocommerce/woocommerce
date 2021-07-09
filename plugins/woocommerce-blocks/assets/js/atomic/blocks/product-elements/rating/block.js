@@ -66,7 +66,6 @@ const Block = ( { className } ) => {
 };
 
 const getAverageRating = ( product ) => {
-	// eslint-disable-next-line camelcase
 	const rating = parseFloat( product.average_rating );
 
 	return Number.isFinite( rating ) && rating > 0 ? rating : 0;

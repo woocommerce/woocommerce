@@ -15,9 +15,7 @@ import TotalsItem from '../item';
 import './style.scss';
 
 interface Values {
-	// eslint-disable-next-line camelcase
 	tax_lines: CartTotalsTaxLineItem[];
-	// eslint-disable-next-line camelcase
 	total_tax: string;
 }
 

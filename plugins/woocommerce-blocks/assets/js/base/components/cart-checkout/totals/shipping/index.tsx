@@ -107,9 +107,7 @@ const NoShippingPlaceholder = ( {
 interface TotalShippingProps {
 	currency: Currency;
 	values: {
-		// eslint-disable-next-line camelcase
 		total_shipping: string;
-		// eslint-disable-next-line camelcase
 		total_shipping_tax: string;
 	}; // Values in use
 	showCalculator?: boolean; //Whether to display the rate selector below the shipping total.
