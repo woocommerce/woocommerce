@@ -2266,3 +2266,19 @@ function wc_update_500_fix_product_review_count() {
 function wc_update_500_db_version() {
 	WC_Install::update_db_version( '5.0.0' );
 }
+
+/**
+ * Creates the refund and returns policy page.
+ *
+ * See @link https://github.com/woocommerce/woocommerce/issues/29235.
+ */
+function wc_update_560_create_refund_returns_page() {
+	WC_Install::create_pages();
+}
+
+/**
+ * Update DB version to 5.6.0.
+ */
+function wc_update_560_db_version() {
+	WC_Install::update_db_version( '5.6.0' );
+}

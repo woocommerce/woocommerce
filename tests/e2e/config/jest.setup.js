@@ -7,7 +7,7 @@ import {
 
 const config = require('config');
 const { HTTPClientFactory } = require('@woocommerce/api');
-const { addConsoleSuppression } = require( '@woocommerce/e2e-environment' );
+const { addConsoleSuppression, updateReadyPageStatus } = require( '@woocommerce/e2e-environment' );
 
 // @todo: remove this once https://github.com/woocommerce/woocommerce-admin/issues/6992 has been addressed
 addConsoleSuppression( 'woocommerce_shared_settings' );
@@ -32,13 +32,15 @@ async function trashExistingPosts() {
 	for (const post of posts) {
 		await client.delete(`${wpPostsEndpoint}/${post.id}`);
 	}
-
 }
 
 // Before every test suite run, delete all content created by the test. This ensures
 // other posts/comments/etc. aren't dirtying tests and tests don't depend on
 // each other's side-effects.
 beforeAll(async () => {
+	// Update the ready page to prevent concurrent test runs
+	await updateReadyPageStatus('draft');
+
 	await trashExistingPosts();
 	await withRestApi.deleteAllProducts();
 	await withRestApi.deleteAllCoupons();
@@ -50,6 +52,9 @@ beforeAll(async () => {
 // Clear browser cookies and cache using DevTools.
 // This is to ensure that each test ends with no user logged in.
 afterAll(async () => {
+	// Reset the ready page to published to allow future test runs
+	await updateReadyPageStatus('publish');
+
 	const client = await page.target().createCDPSession();
 	await client.send('Network.clearBrowserCookies');
 	await client.send('Network.clearBrowserCache');
