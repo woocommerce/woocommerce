@@ -2,13 +2,13 @@
 /**
  * Locales information
  *
- * @package WooCommerce\Payments\i18n
- * @version 3.5.0
+ * @package WooCommerce\i18n
+ * @version 5.5.0
  */
 
 defined( 'ABSPATH' ) || exit;
 
-$locales = include 'currency-info.php';
+$locales = include WC()->plugin_path() . '/i18n/currency-info.php';
 
 return array(
 	'AD' => array(
