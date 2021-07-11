@@ -26,8 +26,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<?php foreach ( $logs as $log_key => $log_file ) : ?>
 						<?php
 							$timestamp = filemtime( WC_LOG_DIR . $log_file );
-							/* translators: 1: last access date 2: last access time */
-							$date = sprintf( __( '%1$s at %2$s', 'woocommerce' ), date_i18n( wc_date_format(), $timestamp ), date_i18n( wc_time_format(), $timestamp ) );
+							$date      = sprintf(
+								/* translators: 1: last access date 2: last access time 3: last access timezone abbreviation */
+								__( '%1$s at %2$s %3$s', 'woocommerce' ),
+								wp_date( wc_date_format(), $timestamp ),
+								wp_date( wc_time_format(), $timestamp ),
+								wp_date( 'T', $timestamp )
+							);
 						?>
 						<option value="<?php echo esc_attr( $log_key ); ?>" <?php selected( sanitize_title( $viewed_log ), $log_key ); ?>><?php echo esc_html( $log_file ); ?> (<?php echo esc_html( $date ); ?>)</option>
 					<?php endforeach; ?>
