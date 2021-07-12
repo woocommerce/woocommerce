@@ -196,7 +196,9 @@ class Filterer {
 
 		$query['select'] = 'SELECT COUNT(DISTINCT product_or_parent_id) as term_count, term_id as term_count_id';
 		$query['from']   = "FROM {$this->lookup_table_name}";
-		$query['join']   = "INNER JOIN {$wpdb->posts} ON {$wpdb->posts}.ID = {$this->lookup_table_name}.product_or_parent_id";
+		$query['join']   = "
+			{$tax_query_sql['join']} {$meta_query_sql['join']}
+			INNER JOIN {$wpdb->posts} ON {$wpdb->posts}.ID = {$this->lookup_table_name}.product_or_parent_id";
 
 		$term_ids_sql   = $this->get_term_ids_sql( $term_ids );
 		$query['where'] = "
