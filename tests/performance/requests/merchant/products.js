@@ -11,8 +11,10 @@ import {
 import {
     htmlRequestHeader,
     jsonAPIRequestHeader,
+    jsonRequestHeader,
     commonRequestHeaders,
     commonGetRequestHeaders,
+    commonPostRequestHeaders,
     commonAPIGetRequestHeaders,
     commonNonStandardHeaders
 } from '../../headers.js';
@@ -22,12 +24,14 @@ let postTypeProductTrend = new Trend('wc_get_post_type_product');
 let wcAdminNotesMainTrend = new Trend('wc_get_admin_notes_main');
 let wcAdminNotesOtherTrend = new Trend('wc_get_admin_notes_other');
 let wcAdminCESOptionsTrend = new Trend('wc_get_admin_options_ces');
+let wpAdminHeartbeatTrend = new Trend('wc_post_wp_admin_heartbeat');
 
 export function Products() {
 
     let response;
     let api_x_wp_nonce;
     let apiNonceHeader;
+    let heartbeat_nonce;
 
     group("Products Page", function () {
         var requestheaders = Object.assign(htmlRequestHeader, commonRequestHeaders, commonGetRequestHeaders, commonNonStandardHeaders)
@@ -42,6 +46,8 @@ export function Products() {
             "body conatins products header": response =>
                 response.body.includes('Products</h1>'),
         });
+
+        heartbeat_nonce = findBetween(response.body, 'heartbeatSettings = {"nonce":"', '"};');
 
         api_x_wp_nonce = findBetween(response.body, 'wp-json\\/","nonce":"', '",');
         apiNonceHeader = {
@@ -92,6 +98,21 @@ export function Products() {
         });
     });
 
+    group("WP Admin Heartbeat", function () {
+        var requestheaders = Object.assign(jsonRequestHeader, commonRequestHeaders, {"content-type": "application/x-www-form-urlencoded; charset=UTF-8",}, commonPostRequestHeaders, commonNonStandardHeaders)
+
+        response = http.post(
+            `${base_url}/wp-admin/admin-ajax.php`,
+            `_nonce=${heartbeat_nonce}&action=heartbeat&has_focus=true&interval=15&screen_id=edit-product`,
+            {
+                headers: requestheaders,
+            }
+        );
+        wpAdminHeartbeatTrend.add(response.timings.duration);
+        check(response, {
+            'is status 200': (r) => r.status === 200,
+        });
+    });
 }
 
 export default function () {

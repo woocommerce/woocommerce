@@ -1,5 +1,6 @@
 import { WPLogin } from '../requests/merchant/wp-login.js';
 import { Products } from '../requests/merchant/products.js';
+import { AddProduct } from '../requests/merchant/add-product.js';
 
 export let options = {
     scenarios: {
@@ -16,4 +17,5 @@ export let options = {
 export function products() {
     WPLogin();
     Products();
+    AddProduct();
 }
