@@ -58,7 +58,7 @@ const Pagination = ( {
 			/>
 			{ displayNextAndPreviousArrows && (
 				<button
-					className="wc-block-pagination-page wc-block-components-pagination__page"
+					className="wc-block-pagination-page wc-block-components-pagination__page wc-block-pagination-page--arrow"
 					onClick={ () => onPageChange( currentPage - 1 ) }
 					title={ __(
 						'Previous page',
@@ -67,7 +67,7 @@ const Pagination = ( {
 					disabled={ currentPage <= 1 }
 				>
 					<Label
-						label="<"
+						label="&larr;"
 						screenReaderLabel={ __(
 							'Previous page',
 							'woo-gutenberg-products-block'
@@ -175,13 +175,13 @@ const Pagination = ( {
 			) }
 			{ displayNextAndPreviousArrows && (
 				<button
-					className="wc-block-pagination-page wc-block-components-pagination__page"
+					className="wc-block-pagination-page wc-block-components-pagination__page wc-block-pagination-page--arrow"
 					onClick={ () => onPageChange( currentPage + 1 ) }
 					title={ __( 'Next page', 'woo-gutenberg-products-block' ) }
 					disabled={ currentPage >= totalPages }
 				>
 					<Label
-						label=">"
+						label="&rarr;"
 						screenReaderLabel={ __(
 							'Next page',
 							'woo-gutenberg-products-block'
