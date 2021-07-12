@@ -4,7 +4,7 @@ Tags: e-commerce, store, sales, sell, woo, shop, cart, checkout, downloadable, d
 Requires at least: 5.5
 Tested up to: 5.7
 Requires PHP: 7.0
-Stable tag: 5.4.1
+Stable tag: 5.5.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -160,28 +160,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 5.5.0-rc.2 2020-07-05 =
-
-* Tweak - Exclude block templates from showing up in product edit page. #30138
-
-**WooCommerce Admin - 2.4.1 **
-
-* Fix - Fix and refactor explat polling to use setTimeout. #7274
-* Fix - Update the wordpress/babel-preset to avoid crashes in WP5.8 beta2 #7202
-* Fix - Add fallback for the select/dispatch data-controls for older WP versions #7204
-* Fix - The use of gridicons for Analytics section controls. #7237
-* Fix - WordPress 5.8 compatibility UI fixes #7255
-* Fix - CurrencyFactory constructor to use proper function #7261
-
-= 5.5.0-rc.1 2020-06-29 =
-
-* Fix - Issue with Product Add-ons where multiple choice (images) setting would show false when hovering over image. #30096
-
-** WooCommerce Blocks Feature Plugin - 5.3.2(dev only) **
-
-* Fix - Remove the ability to filter snackbar notices. #4398
-
-= 5.5.0-beta.1 2021-06-22 =
+= 5.5.0 2021-07-13 =
 
 **WooCommerce**
 
@@ -194,6 +173,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Tweak - Rename Products, Products by Rating, and Recent Viewed Products widgets to Products list, Products by Rating list, and Recently Viewed Products list. #29941
 * Tweak - By default the postcode field will no longer be used, and the state field will become optional, for Curaçao. #29848
 * Tweak - Handle WP_Error while creating placeholder image during install. #29783
+* Tweak - Exclude block templates from showing up in product edit page. #30138
 * Fix - Allow block templates for WooCommerce pages. #30013
 * Fix - Download IDs are included in export CSV and imported when updating existing products to maintain download permissions. #29970
 * Fix - Fees added to an order from wp-admin are now calculated correctly the first time. #29945
@@ -201,6 +181,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Invoice emails now contain payment link if the order needs payment, not just when the order is "pending". #29833
 * Fix - Introduce meta to track stocks that refunded and restocked to properly handle stock recalculation. #29762
 * Fix - Resolved a console error that could occur when clicking Add Shipping Zone. #30015
+* Fix - Issue with Product Add-ons where multiple choice (images) setting would show false when hovering over image. #30096
 * Dev - Added an if condition block to check for new install before creating Zero and Reduced rate tax classes in class-wc-install.php. #29938
 * Dev - Product attributes lookup table usage when enabled. #29896
 * Dev - Set $woocommerce_loop name propriety to widget "Products". #29847
@@ -294,6 +275,12 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Add target to the button to open it in a new tab  #7110
 * Fix - Make `Search` accept synchronous `autocompleter.options`. #6884
 * Fix - Set autoload to false for all remote inbox notifications options. #7060
+* Fix - Fix and refactor explat polling to use setTimeout. #7274
+* Fix - Update the wordpress/babel-preset to avoid crashes in WP5.8 beta2 #7202
+* Fix - Add fallback for the select/dispatch data-controls for older WP versions #7204
+* Fix - The use of gridicons for Analytics section controls. #7237
+* Fix - WordPress 5.8 compatibility UI fixes #7255
+* Fix - CurrencyFactory constructor to use proper function #7261
 * Tweak - Setup checklist copy revert. #7015
 * Tweak - Revert Card component removal #7167
 * Update - Task list component with new Experimental Task list. #6849
@@ -305,7 +292,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Update - Remove original business step flow #7103
 * Update - WooCommerce Shipping copy on onboarding steps #7148
 
-** WooCommerce Blocks Package - 5.2.0 & 5.3.0 & 5.3.1 & & 5.3.2(dev only) **
+** WooCommerce Blocks Package - 5.2.0 & 5.3.0 & 5.3.1 & 5.3.2 **
 
 * Enhancement - Hide legacy widgets with a feature-complete block equivalent from the widget area block inserter. #4237
 * Enhancement - Provide block transforms for legacy widgets with a feature-complete block equivalent. #4292
@@ -318,7 +305,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Make links in the Product Categories List block unclickable in the editor #4339.
 * Fix - Fix rating stars not being shown in the Site Editor #4345.
 
-** WooCommerce Blocks Feature Plugin - 5.2.0 & 5.3.0 & 5.3.1 & 5.3.2(dev only) **
+** WooCommerce Blocks Feature Plugin - 5.2.0 & 5.3.0 & 5.3.1 & 5.3.2 **
 
 * Enhancement - Added a key prop to each CartTotalItem within usePaymentMethodInterface. (4240)
 * Enhancement - Sync customer data during checkout with draft orders. (4197)
@@ -331,6 +318,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Stopped a warning being shown when using WooCommerce Force Sells and adding a product with a Synced Force Sell to the cart. (4182)
 * Fix - Fix some missing translations from the Cart and Checkout blocks. (4295)
 * Fix - Fix the flickering of the Proceed to Checkout button on quantity update in the Cart Block. (4293)
+* Fix - Remove the ability to filter snackbar notices. #4398
 * Fix - Fix a display issue when itemized taxes are enabled, but no products in the cart are taxable. (4284)
 * Compatibility - Add the ability for extensions to register callbacks to be executed by Blocks when the cart/extensions endpoint is hit. Extensions can now tell Blocks they need to do some server-side processing which will update the cart. (4298)
 * Tweak - Add couponName filter to allow extensions to modify how coupons are displayed in the Cart and Checkout summary. (4166)
