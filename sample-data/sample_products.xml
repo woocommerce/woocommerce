@@ -108,20 +108,20 @@
     <wp:meta_value><![CDATA[no]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_weight</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_weight]]></wp:meta_key>
+    <wp:meta_value><![CDATA[0.5]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_length</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_length]]></wp:meta_key>
+    <wp:meta_value><![CDATA[24]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_width</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_width]]></wp:meta_key>
+    <wp:meta_value><![CDATA[1]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_height</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_height]]></wp:meta_key>
+    <wp:meta_value><![CDATA[2]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
     <wp:meta_key>_upsell_ids</wp:meta_key>
@@ -279,20 +279,20 @@
     <wp:meta_value><![CDATA[no]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_weight</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_weight]]></wp:meta_key>
+    <wp:meta_value><![CDATA[1.5]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_length</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_length]]></wp:meta_key>
+    <wp:meta_value><![CDATA[10]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_width</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_width]]></wp:meta_key>
+    <wp:meta_value><![CDATA[8]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_height</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_height]]></wp:meta_key>
+    <wp:meta_value><![CDATA[3]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
     <wp:meta_key>_upsell_ids</wp:meta_key>
@@ -456,20 +456,20 @@
     <wp:meta_value><![CDATA[no]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_weight</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_weight]]></wp:meta_key>
+    <wp:meta_value><![CDATA[2]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_length</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_length]]></wp:meta_key>
+    <wp:meta_value><![CDATA[10]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_width</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_width]]></wp:meta_key>
+    <wp:meta_value><![CDATA[6]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_height</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_height]]></wp:meta_key>
+    <wp:meta_value><![CDATA[3]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
     <wp:meta_key>_upsell_ids</wp:meta_key>
@@ -621,20 +621,20 @@
     <wp:meta_value><![CDATA[no]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_weight</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_weight]]></wp:meta_key>
+    <wp:meta_value><![CDATA[0.8]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_length</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_length]]></wp:meta_key>
+    <wp:meta_value><![CDATA[8]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_width</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_width]]></wp:meta_key>
+    <wp:meta_value><![CDATA[6]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_height</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_height]]></wp:meta_key>
+    <wp:meta_value><![CDATA[1]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
     <wp:meta_key>_upsell_ids</wp:meta_key>
@@ -786,20 +786,20 @@
     <wp:meta_value><![CDATA[no]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_weight</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_weight]]></wp:meta_key>
+    <wp:meta_value><![CDATA[0.2]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_length</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_length]]></wp:meta_key>
+    <wp:meta_value><![CDATA[4]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_width</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_width]]></wp:meta_key>
+    <wp:meta_value><![CDATA[5]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_height</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_height]]></wp:meta_key>
+    <wp:meta_value><![CDATA[0.5]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
     <wp:meta_key>_upsell_ids</wp:meta_key>
@@ -950,20 +950,20 @@
     <wp:meta_value><![CDATA[no]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_weight</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_weight]]></wp:meta_key>
+    <wp:meta_value><![CDATA[1.2]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_length</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_length]]></wp:meta_key>
+    <wp:meta_value><![CDATA[12]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_width</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_width]]></wp:meta_key>
+    <wp:meta_value><![CDATA[2]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_height</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_height]]></wp:meta_key>
+    <wp:meta_value><![CDATA[1.5]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
     <wp:meta_key>_upsell_ids</wp:meta_key>
@@ -1116,20 +1116,20 @@
     <wp:meta_value><![CDATA[no]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_weight</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_weight]]></wp:meta_key>
+    <wp:meta_value><![CDATA[0.6]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_length</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_length]]></wp:meta_key>
+    <wp:meta_value><![CDATA[8]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_width</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_width]]></wp:meta_key>
+    <wp:meta_value><![CDATA[6.5]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_height</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_height]]></wp:meta_key>
+    <wp:meta_value><![CDATA[4]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
     <wp:meta_key>_upsell_ids</wp:meta_key>
@@ -1281,20 +1281,20 @@
     <wp:meta_value><![CDATA[no]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_weight</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_weight]]></wp:meta_key>
+    <wp:meta_value><![CDATA[0.2]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_length</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_length]]></wp:meta_key>
+    <wp:meta_value><![CDATA[4]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_width</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_width]]></wp:meta_key>
+    <wp:meta_value><![CDATA[1.4]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_height</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_height]]></wp:meta_key>
+    <wp:meta_value><![CDATA[1]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
     <wp:meta_key>_upsell_ids</wp:meta_key>
@@ -1449,20 +1449,20 @@
     <wp:meta_value><![CDATA[no]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_weight</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_weight]]></wp:meta_key>
+    <wp:meta_value><![CDATA[3]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_length</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_length]]></wp:meta_key>
+    <wp:meta_value><![CDATA[10]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_width</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_width]]></wp:meta_key>
+    <wp:meta_value><![CDATA[8]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_height</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_height]]></wp:meta_key>
+    <wp:meta_value><![CDATA[2]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
     <wp:meta_key>_upsell_ids</wp:meta_key>
@@ -1614,20 +1614,20 @@
     <wp:meta_value><![CDATA[no]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_weight</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_weight]]></wp:meta_key>
+    <wp:meta_value><![CDATA[2]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_length</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_length]]></wp:meta_key>
+    <wp:meta_value><![CDATA[8]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_width</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_width]]></wp:meta_key>
+    <wp:meta_value><![CDATA[6]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_height</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_height]]></wp:meta_key>
+    <wp:meta_value><![CDATA[2]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
     <wp:meta_key>_upsell_ids</wp:meta_key>
@@ -1779,20 +1779,20 @@
     <wp:meta_value><![CDATA[no]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_weight</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_weight]]></wp:meta_key>
+    <wp:meta_value><![CDATA[1]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_length</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_length]]></wp:meta_key>
+    <wp:meta_value><![CDATA[7]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_width</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_width]]></wp:meta_key>
+    <wp:meta_value><![CDATA[5]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_height</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_height]]></wp:meta_key>
+    <wp:meta_value><![CDATA[1]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
     <wp:meta_key>_upsell_ids</wp:meta_key>
@@ -1944,20 +1944,20 @@
     <wp:meta_value><![CDATA[no]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_weight</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_weight]]></wp:meta_key>
+    <wp:meta_value><![CDATA[0.8]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_length</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_length]]></wp:meta_key>
+    <wp:meta_value><![CDATA[6]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_width</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_width]]></wp:meta_key>
+    <wp:meta_value><![CDATA[5]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_height</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_height]]></wp:meta_key>
+    <wp:meta_value><![CDATA[1]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
     <wp:meta_key>_upsell_ids</wp:meta_key>
@@ -3489,20 +3489,20 @@
     <wp:meta_value><![CDATA[no]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_weight</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_weight]]></wp:meta_key>
+    <wp:meta_value><![CDATA[0.5]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_length</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_length]]></wp:meta_key>
+    <wp:meta_value><![CDATA[10]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_width</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_width]]></wp:meta_key>
+    <wp:meta_value><![CDATA[12]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_height</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_height]]></wp:meta_key>
+    <wp:meta_value><![CDATA[0.5]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
     <wp:meta_key>_upsell_ids</wp:meta_key>
@@ -3654,20 +3654,20 @@
     <wp:meta_value><![CDATA[no]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_weight</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_weight]]></wp:meta_key>
+    <wp:meta_value><![CDATA[0.2]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_length</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_length]]></wp:meta_key>
+    <wp:meta_value><![CDATA[6]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_width</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_width]]></wp:meta_key>
+    <wp:meta_value><![CDATA[4]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
-    <wp:meta_key>_height</wp:meta_key>
-    <wp:meta_value><![CDATA[]]></wp:meta_value>
+    <wp:meta_key><![CDATA[_height]]></wp:meta_key>
+    <wp:meta_value><![CDATA[1]]></wp:meta_value>
   </wp:postmeta>
   <wp:postmeta>
     <wp:meta_key>_upsell_ids</wp:meta_key>
