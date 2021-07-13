@@ -1,7 +1,6 @@
 # Testing instructions
 
 ## Unreleased
-
 ### Fix missing translation strings for CES #7270
 
 1. Navigate to Settings -> General and change the site language to a non-English (I've used Espanol for testing purposes).
@@ -31,7 +30,11 @@
 3. Place an order with the product
 4. Navigate to Analytics -> Categories
 5. You should see the category.
->>>>>>> cdc813055 (Add changelog)
+
+### Remove facebook extension from onboarding extensions fallback list #7287
+
+1. Go to the OBW and look at the Free features tab
+1. Observe no Facebook extension in the list
 
 ### Use saved values if available when switching tabs #7226
 

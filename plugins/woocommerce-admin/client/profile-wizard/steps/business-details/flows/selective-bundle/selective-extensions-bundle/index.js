@@ -156,16 +156,6 @@ const installableExtensionsData = [
 				),
 			},
 			{
-				key: 'facebook-for-woocommerce',
-				description: generatePluginDescriptionWithLink(
-					__(
-						'Market on {{link}}Facebook{{/link}}',
-						'woocommerce-admin'
-					),
-					'facebook'
-				),
-			},
-			{
 				key: 'google-listings-and-ads',
 				description: generatePluginDescriptionWithLink(
 					__(
