@@ -1,4 +1,3 @@
-/* eslint-disable jest/expect-expect */
 /*
  * Internal dependencies
  */
@@ -53,9 +52,6 @@ const runCouponApiTest = require( './api/coupon.test' );
 const runGroupedProductAPITest = require( './api/grouped-product.test' );
 const runVariableProductAPITest = require( './api/variable-product.test' );
 const runOrderApiTest = require( './api/order.test' );
-
-// Plugin workflow tests
-const runPluginWorkflowTest = require( './plugins/plugin-workflow.test' );
 
 const runSetupOnboardingTests = () => {
 	runActivationTest();
@@ -167,6 +163,4 @@ module.exports = {
 	runMyAccountCreateAccountTest,
 	runOrderEmailReceivingTest,
 	runInitiateWccomConnectionTest,
-	runPluginWorkflowTest,
-	runPluginWorkflowTests,
 };

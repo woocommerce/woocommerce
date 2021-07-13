@@ -66,4 +66,3 @@ export const MY_ACCOUNT_ACCOUNT_DETAILS = SHOP_MY_ACCOUNT_PAGE + 'edit-account';
  * @type {boolean}
  */
 export const IS_RETEST_MODE = process.env.E2E_RETEST == '1';
-export const RUN_PLUGIN_INSTALL = process.env.INSTALL_WC_PLUGIN == '1';

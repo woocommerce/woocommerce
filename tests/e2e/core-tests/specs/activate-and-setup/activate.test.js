@@ -1,8 +1,7 @@
-/* eslint-disable jest/no-export, jest/no-disabled-tests */
 /**
  * Internal dependencies
  */
-const { utils, merchant, RUN_PLUGIN_INSTALL } = require( '@woocommerce/e2e-utils' );
+const { merchant } = require( '@woocommerce/e2e-utils' );
 
 /**
  * External dependencies
@@ -14,22 +13,12 @@ const {
 } = require( '@jest/globals' );
 
 const path = require( 'path' );
-const pluginFilePath = path.resolve( './deps/woocommerce.zip' );
-
-const pluginName = 'WooCommerce';
 
 const runActivationTest = () => {
 	describe('Store owner can login and make sure WooCommerce is activated', () => {
 		beforeAll(async () => {
 			await merchant.login();
 		});
-
-		utils.itIf( RUN_PLUGIN_INSTALL )(
-			'can upload and activate the WooCommerce plugin',
-			async () => {
-				await merchant.uploadAndActivatePlugin( pluginFilePath, pluginName );
-			}
-		);
 
 		it('can make sure WooCommerce is activated. If not, activate it', async () => {
 			const slug = 'woocommerce';

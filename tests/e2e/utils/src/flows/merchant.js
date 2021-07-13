@@ -1,4 +1,3 @@
-/* eslint-disable jest/no-standalone-expect */
 /**
  * External dependencies
  */
@@ -220,6 +219,12 @@ const merchant = {
 		} );
 	},
 
+	/**
+	 * Uploads and activates a plugin located at the provided file path. This will also deactivate and delete the plugin if it exists.
+	 *
+	 * @param {string} pluginFilePath The location of the plugin zip file to upload.
+	 * @param {string} pluginName The name of the plugin. For example, `WooCommerce`.
+	 */
 	uploadAndActivatePlugin: async ( pluginFilePath, pluginName ) => {
 		await merchant.openPlugins();
 
@@ -262,10 +267,13 @@ const merchant = {
 		await page.click( '.button-primary' );
 
 		await page.waitForNavigation( { waitUntil: 'networkidle0' } );
-
-		await expect( page ).toMatchElement( 'div.updated.notice.is-dismissible', { text: 'Plugin activated.' } );
 	},
 
+	/**
+	 * Activate a given plugin by the plugin's name.
+	 *
+	 * @param {string} pluginName The name of the plugin to activate. For example, `WooCommerce`.
+	 */
 	activatePlugin: async ( pluginName ) => {
 		let pluginSlug = getSlug( pluginName );
 
@@ -274,6 +282,12 @@ const merchant = {
 		await page.waitForNavigation( { waitUntil: 'networkidle0' } );
 	},
 
+	/**
+	 * Deactivate a plugin by the plugin's name with the option to delete the plugin as well.
+	 *
+	 * @param {string} pluginName The name of the plugin to deactivate. For example, `WooCommerce`.
+	 * @param {Boolean} deletePlugin Pass in `true` to delete the plugin. Defaults to `false`.
+	 */
 	deactivatePlugin: async ( pluginName, deletePlugin = false ) => {
 		let pluginSlug = getSlug( pluginName );
 
@@ -286,6 +300,11 @@ const merchant = {
 		}
 	},
 
+	/**
+	 * Delete a plugin by the plugin's name.
+	 *
+	 * @param {string} pluginName The name of the plugin to delete. For example, `WooCommerce`.
+	 */
 	deletePlugin: async ( pluginName ) => {
 		let pluginSlug = getSlug( pluginName );
 
@@ -295,7 +314,7 @@ const merchant = {
 		await page.waitForResponse( response => response.status() === 200 );
 	},
 
-  /**
+  	/**
 	 * Opens the WordPress updates page at Dashboard > Updates.
 	 */
 	openWordPressUpdatesPage: async () => {
