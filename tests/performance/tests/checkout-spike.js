@@ -1,4 +1,5 @@
-import { CheckoutFlow } from '../specs/shopper/checkout.js';
+import { cart } from '../requests/shopper/cart.js';
+import { checkoutGuest } from '../requests/shopper/checkout-guest.js';
 
 export let options = {
     scenarios: {
@@ -12,11 +13,12 @@ export let options = {
           { target: 3, duration: '30s' },
           { target: 0, duration: '30s' },
         ],
-        exec: 'checkout',
+        exec: 'checkoutGuestFlow',
       },
     },
   };
-  
-export function checkout() {
-	CheckoutFlow();
+
+export function checkoutGuestFlow() {
+    cart();
+    checkoutGuest();
 }
