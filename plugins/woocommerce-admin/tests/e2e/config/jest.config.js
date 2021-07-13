@@ -2,9 +2,9 @@ const path = require( 'path' );
 const { useE2EJestConfig } = require( '@woocommerce/e2e-environment' );
 
 const config = useE2EJestConfig( {
-	moduleFileExtensions: [ 'js', 'ts' ],
+	moduleFileExtensions: [ 'js', 'ts', 'tsx' ],
 	roots: [ path.resolve( __dirname, '../specs' ) ],
-	testMatch: [ '**/*.(test|spec).(j|t)s', '*.(test|spec).(j|t)s' ],
+	testMatch: [ '**/*.(test|spec).(js|ts|tsx)', '*.(test|spec).(js|ts|tsx)' ],
 	testTimeout: 30000,
 	transform: {
 		'\\.[jt]sx?$': [

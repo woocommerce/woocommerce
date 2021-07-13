@@ -23,8 +23,15 @@
 	"dependencies": {
 		"@woocommerce/date": "file:../date",
 		"@woocommerce/navigation": "file:../navigation",
+		"@wordpress/api-fetch": "2.2.8",
+		"@wordpress/compose": "3.23.1",
 		"@wordpress/core-data": "3.0.0",
+		"@wordpress/element": "2.19.0",
+		"@wordpress/hooks": "2.11.0",
+		"@wordpress/data": "5.0.0",
+		"@wordpress/data-controls": "2.0.0",
 		"@wordpress/i18n": "3.17.0",
+		"@wordpress/url": "2.21.0",
 		"md5": "^2.3.0",
 		"rememo": "^3.0.0"
 	},
