@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-changelog_entry=$(sed -n '/^== Unreleased ==/,/^==/p' readme.txt | grep -w "#$PR_NUMBER")
+changelog_entry=$(sed -n '/^Significance/,/^==/p' changelogs/* | grep -w "#$PR_NUMBER")
 
 if [ -z "$changelog_entry" ]
 then
