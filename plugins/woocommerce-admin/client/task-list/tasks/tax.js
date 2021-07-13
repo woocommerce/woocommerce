@@ -8,7 +8,7 @@ import { compose } from '@wordpress/compose';
 import { difference, filter } from 'lodash';
 import interpolateComponents from 'interpolate-components';
 import { withDispatch, withSelect } from '@wordpress/data';
-import { H, Link, Stepper, Plugins } from '@woocommerce/components';
+import { H, Link, Stepper, Plugins, Spinner } from '@woocommerce/components';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
 import { getAdminLink } from '@woocommerce/wc-admin-settings';
 import {
@@ -19,7 +19,6 @@ import {
 } from '@woocommerce/data';
 import { recordEvent, queueRecordEvent } from '@woocommerce/tracks';
 import { Text } from '@woocommerce/experimental';
-
 /**
  * Internal dependencies
  */
@@ -475,6 +474,10 @@ class Tax extends Component {
 	render() {
 		const { stepIndex } = this.state;
 		const { isPending, isResolving } = this.props;
+		if ( isResolving ) {
+			return <Spinner />;
+		}
+
 		const step = this.getSteps()[ stepIndex ];
 
 		return (
@@ -503,7 +506,10 @@ export default compose(
 		const { getSettings, isUpdateSettingsRequesting } = select(
 			SETTINGS_STORE_NAME
 		);
-		const { getOption } = select( OPTIONS_STORE_NAME );
+		const { getOption, isResolving: isOptionResolving } = select(
+			OPTIONS_STORE_NAME
+		);
+
 		const {
 			getActivePlugins,
 			isJetpackConnected,
@@ -531,16 +537,20 @@ export default compose(
 			activePlugins
 		);
 		const connectOptions = getOption( 'wc_connect_options' ) || {};
-		const tosAccepted =
-			connectOptions.tos_accepted ||
-			getOption( 'woocommerce_setup_jetpack_opted_in' );
+		const jetpackOptIn = getOption( 'woocommerce_setup_jetpack_opted_in' );
+		const tosAccepted = connectOptions.tos_accepted || jetpackOptIn === '1';
 
 		const tasksStatus = getTasksStatus();
 
 		const isPending =
 			isUpdateSettingsRequesting( 'tax' ) ||
 			isUpdateSettingsRequesting( 'general' );
-		const isResolving = isPluginsRequesting( 'getJetpackConnectUrl' );
+		const isResolving =
+			isPluginsRequesting( 'getJetpackConnectUrl' ) ||
+			isOptionResolving( 'getOption', [
+				'woocommerce_setup_jetpack_opted_in',
+			] ) ||
+			jetpackOptIn === undefined;
 
 		return {
 			countryCode,

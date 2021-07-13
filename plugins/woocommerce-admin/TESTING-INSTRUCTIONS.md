@@ -36,6 +36,15 @@
 1. Go to the OBW and look at the Free features tab
 1. Observe no Facebook extension in the list
 
+###  "Terms of service" link disappears from "Set up Tax" screen #7269
+
+1. Go to OBW setup wizard.
+2. Uncheck the "WooCommerce shipping" and "WooCommerce Tax" options at Free features step.
+3. Complete the OBW setup.
+4. Go to WooCommerce->Home.
+5. Click on "Set up Tax" option on Task list.
+6. TOS should not blink. 
+
 ### Use saved values if available when switching tabs #7226
 
 1. Start onboarding wizard and continue to step 4.
