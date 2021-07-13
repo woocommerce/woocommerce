@@ -2,7 +2,9 @@ import { base_host, base_url } from './config.js';
 
 const htmlRequestHeader = {
     accept:
-      'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
+      'text/html,application/xhtml+xml,application/xml;' +
+	  'q=0.9,image/avif,image/webp,image/apng,*/*;' +
+	  'q=0.8,application/signed-exchange;v=b3;q=0.9'
   };
 
 const jsonRequestHeader = {
@@ -18,10 +20,9 @@ const allRequestHeader = {
   };
 
 const commonRequestHeaders = {
-    //'accept-encoding': 'gzip, deflate, br',
     'accept-language': 'en-US,en;q=0.9'
   };
-  
+
 const commonGetRequestHeaders = {
     connection: 'keep-alive',
     host: `${base_host}`,
@@ -39,17 +40,19 @@ const commonAPIGetRequestHeaders = {
     'sec-fetch-mode': 'cors',
     'sec-fetch-site': 'same-origin',
   };
-  
+
+const contentTypeRequestHeader = {
+	'content-type': 'application/x-www-form-urlencoded'
+  };
+
 const commonPostRequestHeaders = {
-    //'content-type':
-    //          'application/x-www-form-urlencoded;type=content-type;mimeType=application/x-www-form-urlencoded',
     origin: `${base_url}`,
     'sec-fetch-dest': 'empty',
     'sec-fetch-mode': 'cors',
     'sec-fetch-site': 'same-origin',
     'x-requested-with': 'XMLHttpRequest'
   };
-  
+
 const commonNonStandardHeaders = {
     'sec-ch-ua':
       '" Not;A Brand";v="99", "Google Chrome";v="91", "Chromium";v="91"',
@@ -64,6 +67,7 @@ export {
     commonRequestHeaders,
     commonGetRequestHeaders,
     commonAPIGetRequestHeaders,
+	contentTypeRequestHeader,
     commonPostRequestHeaders,
     commonNonStandardHeaders,
 };

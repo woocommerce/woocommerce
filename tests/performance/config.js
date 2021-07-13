@@ -38,5 +38,8 @@ export const product_url = __ENV.P_URL || 'beanie';
 export const product_id = __ENV.P_ID || '13';
 export const product_search_term = __ENV.P_TERM || 'beanie';
 
+export const add_product_title = 'Test Product';
+export const add_product_regular_price = '12';
+
 export const think_time_min = '1';
 export const think_time_max = '4';

@@ -1,21 +1,21 @@
-import { WPLogin } from '../requests/merchant/wp-login.js';
-import { Products } from '../requests/merchant/products.js';
-import { AddProduct } from '../requests/merchant/add-product.js';
+import { wpLogin } from '../requests/merchant/wp-login.js';
+import { products } from '../requests/merchant/products.js';
+import { addProduct } from '../requests/merchant/add-product.js';
 
 export let options = {
     scenarios: {
-        homePage: {
+        addProductSmoke: {
             executor: 'per-vu-iterations',
             vus: 1,
             iterations: 1,
-            maxDuration: '60s',
-            exec: 'products',
+            maxDuration: '360s',
+            exec: 'addProductFlow',
         },
     },
 };
 
-export function products() {
-    WPLogin();
-    Products();
-    AddProduct();
+export function addProductFlow() {
+    wpLogin();
+    products();
+    addProduct();
 }
