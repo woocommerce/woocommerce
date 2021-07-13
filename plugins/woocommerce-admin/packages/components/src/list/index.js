@@ -21,6 +21,7 @@ function List( props ) {
 	const listClassName = classnames( 'woocommerce-list', className );
 
 	deprecated( 'List with items prop is deprecated', {
+		version: '9.0.0',
 		hint:
 			'See ExperimentalList / ExperimentalListItem for the new API that will replace this component in future versions.',
 	} );

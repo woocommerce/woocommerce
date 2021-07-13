@@ -4,7 +4,6 @@
 import { Button } from '@wordpress/components';
 import CustomizeIcon from 'gridicons/dist/customize';
 import moment from 'moment';
-import { Gravatar } from '@woocommerce/components';
 import { render } from '@testing-library/react';
 
 /**
@@ -45,18 +44,6 @@ describe( 'ActivityCard', () => {
 	test( 'should render a custom icon on a card', () => {
 		const { container } = render(
 			<ActivityCard title="Inbox message" icon={ <CustomizeIcon /> }>
-				This card has some content
-			</ActivityCard>
-		);
-		expect( container ).toMatchSnapshot();
-	} );
-
-	test( 'should render a gravatar on a card', () => {
-		const { container } = render(
-			<ActivityCard
-				title="Inbox message"
-				icon={ <Gravatar user="admin@local.test" /> }
-			>
 				This card has some content
 			</ActivityCard>
 		);

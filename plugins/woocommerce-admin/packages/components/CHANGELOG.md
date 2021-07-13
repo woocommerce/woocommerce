@@ -1,3 +1,7 @@
+# Unreleased
+
+-   Remove deprecated Card, Count and Gravatar components. #7293
+
 # 7.1.0
 
 -   Add rowKey prop to Table and TableCard component. #7196

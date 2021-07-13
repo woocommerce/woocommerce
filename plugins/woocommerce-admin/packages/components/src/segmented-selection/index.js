@@ -5,7 +5,6 @@ import { Component } from '@wordpress/element';
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
 import { partial, uniqueId } from 'lodash';
-import deprecated from '@wordpress/deprecated';
 
 /**
  * Create a panel of styled selectable options rendering stylized checkboxes and labels
@@ -20,13 +19,6 @@ class SegmentedSelection extends Component {
 			name,
 			legend,
 		} = this.props;
-
-		deprecated( 'SegmentedSelection', {
-			version: '8.0.0',
-			plugin: 'WooCommerce',
-			hint:
-				'The SegmentedSelection component will be removed in the next version of @woocommerce/components, please consider using another library to perform this function.',
-		} );
 
 		return (
 			<fieldset className="woocommerce-segmented-selection">

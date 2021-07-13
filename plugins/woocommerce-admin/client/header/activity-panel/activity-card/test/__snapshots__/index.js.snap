@@ -82,41 +82,6 @@ exports[`ActivityCard should render a custom icon on a card 1`] = `
 </div>
 `;
 
-exports[`ActivityCard should render a gravatar on a card 1`] = `
-<div>
-  <section
-    class="woocommerce-activity-card"
-  >
-    <span
-      aria-hidden="true"
-      class="woocommerce-activity-card__icon"
-    >
-      <img
-        alt=""
-        class="woocommerce-gravatar"
-        height="60"
-        src="https://www.gravatar.com/avatar/ad5dd285560221a7302608c74c690035?s=60&d=mp"
-        width="60"
-      />
-    </span>
-    <header
-      class="woocommerce-activity-card__header"
-    >
-      <h2
-        class="woocommerce-activity-card__title"
-      >
-        Inbox message
-      </h2>
-    </header>
-    <div
-      class="woocommerce-activity-card__body"
-    >
-      This card has some content
-    </div>
-  </section>
-</div>
-`;
-
 exports[`ActivityCard should render a timestamp on a card 1`] = `
 <div>
   <section
