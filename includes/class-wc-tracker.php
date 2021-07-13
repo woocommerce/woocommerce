@@ -113,7 +113,7 @@ class WC_Tracker {
 	 *
 	 * @return array
 	 */
-	private static function get_tracking_data() {
+	public static function get_tracking_data() {
 		$data = array();
 
 		// General site info.

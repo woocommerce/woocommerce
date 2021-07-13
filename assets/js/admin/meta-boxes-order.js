@@ -140,7 +140,7 @@ jQuery( function ( $ ) {
 				is_billing     = Boolean( $edit_address.find( 'input[name^="_billing_"]' ).length );
 
 			$address.hide();
-			$this.parent().find( 'a' ).trigger( 'toggle' );
+			$this.parent().find( 'a' ).toggle();
 
 			if ( ! $country_input.val() ) {
 				$country_input.val( woocommerce_admin_meta_boxes_order.default_country ).trigger( 'change' );

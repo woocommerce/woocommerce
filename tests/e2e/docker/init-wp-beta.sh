@@ -13,6 +13,7 @@ wp plugin install https://github.com/WP-API/Basic-Auth/archive/master.zip --acti
 wp plugin install wp-mail-logging --activate
 
 echo "Updating to WordPress Nightly Point Release"
+wp core update https://wordpress.org/nightly-builds/wordpress-latest.zip
 
-wp plugin install wordpress-beta-tester --activate
-wp core check-update
+echo "Updating the database"
+wp core update-db

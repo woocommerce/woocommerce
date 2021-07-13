@@ -4,18 +4,37 @@
  */
 const {
 	shopper,
-	merchant,
 	createSimpleProduct,
 	createVariableProduct,
 	createGroupedProduct,
 	uiUnblocked
 } = require( '@woocommerce/e2e-utils' );
 
-let simplePostIdValue;
-let variablePostIdValue;
-let groupedPostIdValue;
 const config = require( 'config' );
+
+// Variables for simple product
 const simpleProductName = config.get( 'products.simple.name' );
+let simplePostIdValue;
+
+// Variables for variable product
+const defaultVariableProduct = config.get( 'products.variable' );
+let variableProductId;
+
+// Variables for grouped product
+const simpleProductPrice = config.has('products.simple.price') ? config.get('products.simple.price') : '9.99';
+const simple1 = {
+	name: simpleProductName + ' 1',
+	regularPrice: simpleProductPrice
+};
+const simple2 = {
+	name: simpleProductName + ' 2',
+	regularPrice: simpleProductPrice
+};
+const groupedProduct = {
+	name: 'Grouped Product',
+	groupedProducts: [simple1, simple2]
+};
+let groupedPostIdValue;
 
 const runSingleProductPageTest = () => {
 	describe('Single Product Page', () => {
@@ -43,30 +62,34 @@ const runSingleProductPageTest = () => {
 		});
 	});
 
-	describe.skip('Variable Product Page', () => {
+	describe('Variable Product Page', () => {
 		beforeAll(async () => {
-			await merchant.login();
-			variablePostIdValue = await createVariableProduct();
-			await merchant.logout();
+			variableProductId = await createVariableProduct();
 		});
 
 		it('should be able to add variation products to the cart', async () => {
 			// Add a product with one set of variations to cart
-			await shopper.goToProduct(variablePostIdValue);
-			await expect(page).toSelect('#attr-1', 'val1');
-			await expect(page).toSelect('#attr-2', 'val1');
-			await expect(page).toSelect('#attr-3', 'val1');
+			await shopper.goToProduct(variableProductId);
+
+			for (const attr of defaultVariableProduct.attributes) {
+				const { name, options } = attr;
+				const selectElem = `#${name.toLowerCase()}`;
+				const value = options[0];
+
+				await expect(page).toSelect(selectElem, value);
+			}
+
 			await shopper.addToCart();
 			await expect(page).toMatchElement('.woocommerce-message', {text: 'has been added to your cart.'});
 
 			// Verify cart contents
 			await shopper.goToCart();
-			await shopper.productIsInCart('Variable Product with Three Variations');
+			await shopper.productIsInCart(defaultVariableProduct.name);
 		});
 
 		it('should be able to remove variation products from the cart', async () => {
 			// Remove items from cart
-			await shopper.removeFromCart('Variable Product with Three Variations');
+			await shopper.removeFromCart(defaultVariableProduct.name);
 			await uiUnblocked();
 			await expect(page).toMatchElement('.cart-empty', {text: 'Your cart is currently empty.'});
 		});
@@ -74,9 +97,7 @@ const runSingleProductPageTest = () => {
 
 	describe('Grouped Product Page', () => {
 		beforeAll(async () => {
-			await merchant.login();
-			groupedPostIdValue = await createGroupedProduct();
-			await merchant.logout();
+			groupedPostIdValue = await createGroupedProduct(groupedProduct);
 		});
 
 		it('should be able to add grouped products to the cart', async () => {
@@ -93,7 +114,7 @@ const runSingleProductPageTest = () => {
 			await quantityFields[1].type('5');
 			await shopper.addToCart();
 			await expect(page).toMatchElement('.woocommerce-message',
-			 {text: '“'+simpleProductName+' 1” and “'+simpleProductName+' 2” have been added to your cart.'});
+			{text: '“'+simpleProductName+' 1” and “'+simpleProductName+' 2” have been added to your cart.'});
 
 			// Verify cart contents
 			await shopper.goToCart();

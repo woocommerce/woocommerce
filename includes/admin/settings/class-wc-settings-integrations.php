@@ -2,8 +2,8 @@
 /**
  * WooCommerce Integration Settings
  *
- * @package  WooCommerce\Admin
- * @version  2.1.0
+ * @package     WooCommerce\Admin
+ * @version     2.1.0
  */
 
 use Automattic\Jetpack\Constants;
@@ -30,17 +30,17 @@ if ( ! class_exists( 'WC_Settings_Integrations', false ) ) :
 		}
 
 		/**
-		 * Get sections.
+		 * Get own sections.
 		 *
 		 * @return array
 		 */
-		public function get_sections() {
+		protected function get_own_sections() {
 			global $current_section;
 
 			$sections = array();
 
-			if ( ! Constants::is_defined( 'WC_INSTALLING' ) ) {
-				$integrations = WC()->integrations->get_integrations();
+			if ( ! $this->wc_is_installing() ) {
+				$integrations = $this->get_integrations();
 
 				if ( ! $current_section && ! empty( $integrations ) ) {
 					$current_section = current( $integrations )->id;
@@ -54,7 +54,27 @@ if ( ! class_exists( 'WC_Settings_Integrations', false ) ) :
 				}
 			}
 
-			return apply_filters( 'woocommerce_get_sections_' . $this->id, $sections );
+			return $sections;
+		}
+
+		/**
+		 * Is WC_INSTALLING constant defined?
+		 * This method exists to ease unit testing.
+		 *
+		 * @return bool True is the WC_INSTALLING constant is defined.
+		 */
+		protected function wc_is_installing() {
+			return Constants::is_defined( 'WC_INSTALLING' );
+		}
+
+		/**
+		 * Get the currently available integrations.
+		 * This method exists to ease unit testing.
+		 *
+		 * @return array Currently available integrations.
+		 */
+		protected function get_integrations() {
+			return WC()->integrations->get_integrations();
 		}
 
 		/**
@@ -63,7 +83,7 @@ if ( ! class_exists( 'WC_Settings_Integrations', false ) ) :
 		public function output() {
 			global $current_section;
 
-			$integrations = WC()->integrations->get_integrations();
+			$integrations = $this->get_integrations();
 
 			if ( isset( $integrations[ $current_section ] ) ) {
 				$integrations[ $current_section ]->admin_options();

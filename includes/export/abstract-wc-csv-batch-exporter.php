@@ -47,6 +47,32 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 	}
 
 	/**
+	 * Get CSV headers row file path to export to.
+	 *
+	 * @return string
+	 */
+	protected function get_headers_row_file_path() {
+		return $this->get_file_path() . '.headers';
+	}
+
+	/**
+	 * Get the contents of the CSV headers row file. Defaults to the original known headers.
+	 *
+	 * @since 3.1.0
+	 * @return string
+	 */
+	public function get_headers_row_file() {
+
+		$file = chr( 239 ) . chr( 187 ) . chr( 191 ) . $this->export_column_headers();
+
+		if ( @file_exists( $this->get_headers_row_file_path() ) ) { // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
+			$file = @file_get_contents( $this->get_headers_row_file_path() ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents, WordPress.WP.AlternativeFunctions.file_system_read_file_get_contents
+		}
+
+		return $file;
+	}
+
+	/**
 	 * Get the file contents.
 	 *
 	 * @since 3.1.0
@@ -70,8 +96,9 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 	 */
 	public function export() {
 		$this->send_headers();
-		$this->send_content( $this->get_file() );
+		$this->send_content( $this->get_headers_row_file() . $this->get_file() );
 		@unlink( $this->get_file_path() ); // phpcs:ignore WordPress.VIP.FileSystemWritesDisallow.file_ops_unlink, Generic.PHP.NoSilencedErrors.Discouraged
+		@unlink( $this->get_headers_row_file_path() ); // phpcs:ignore WordPress.VIP.FileSystemWritesDisallow.file_ops_unlink, Generic.PHP.NoSilencedErrors.Discouraged
 		die();
 	}
 
@@ -83,6 +110,9 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 	public function generate_file() {
 		if ( 1 === $this->get_page() ) {
 			@unlink( $this->get_file_path() ); // phpcs:ignore WordPress.VIP.FileSystemWritesDisallow.file_ops_unlink, Generic.PHP.NoSilencedErrors.Discouraged,
+
+			// We need to initialize the file here.
+			$this->get_file();
 		}
 		$this->prepare_data_to_export();
 		$this->write_csv_data( $this->get_csv_data() );
@@ -95,15 +125,26 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 	 * @param string $data Data.
 	 */
 	protected function write_csv_data( $data ) {
-		$file = $this->get_file();
 
-		// Add columns when finished.
-		if ( 100 === $this->get_percent_complete() ) {
-			$file = chr( 239 ) . chr( 187 ) . chr( 191 ) . $this->export_column_headers() . $file;
+		if ( ! file_exists( $this->get_file_path() ) || ! is_writeable( $this->get_file_path() ) ) {
+			return false;
 		}
 
-		$file .= $data;
-		@file_put_contents( $this->get_file_path(), $file ); // phpcs:ignore WordPress.VIP.FileSystemWritesDisallow.file_ops_file_put_contents, Generic.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents
+		$fp = fopen( $this->get_file_path(), 'a+' );
+
+		if ( $fp ) {
+			fwrite( $fp, $data );
+			fclose( $fp );
+		}
+
+		// Add all columns when finished.
+		if ( 100 === $this->get_percent_complete() ) {
+			$header = chr( 239 ) . chr( 187 ) . chr( 191 ) . $this->export_column_headers();
+
+			// We need to use a temporary file to store headers, this will make our life so much easier.
+			@file_put_contents( $this->get_headers_row_file_path(), $header ); //phpcs:ignore WordPress.VIP.FileSystemWritesDisallow.file_ops_file_put_contents, Generic.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents
+		}
+
 	}
 
 	/**

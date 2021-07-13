@@ -65,6 +65,9 @@ tests/cli/vendor
 contributors.md
 contributors.html
 
+# Yarn
+yarn.lock
+
 # Packages
 /packages/*
 !/packages/README.md

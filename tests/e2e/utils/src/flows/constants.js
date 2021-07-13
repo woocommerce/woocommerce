@@ -10,6 +10,7 @@ const baseUrl = config.get( 'url' );
  */
 export const WP_ADMIN_LOGIN = baseUrl + 'wp-login.php';
 export const WP_ADMIN_DASHBOARD = baseUrl + 'wp-admin/';
+export const WP_ADMIN_WP_UPDATES = WP_ADMIN_DASHBOARD + 'update-core.php';
 export const WP_ADMIN_PLUGINS = WP_ADMIN_DASHBOARD + 'plugins.php';
 export const WP_ADMIN_PERMALINK_SETTINGS = WP_ADMIN_DASHBOARD + 'options-permalink.php';
 export const WP_ADMIN_ALL_USERS_VIEW = WP_ADMIN_DASHBOARD + 'users.php';
