@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, _x } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
 import { dispatch } from '@wordpress/data';
 
@@ -169,12 +169,30 @@ const variationsConfig = {
 	],
 };
 
+export const advancedFilters = applyFilters(
+	PRODUCTS_REPORT_ADVANCED_FILTERS_FILTER,
+	{
+		filters: {},
+		title: _x(
+			'Products Match {{select /}} Filters',
+			'A sentence describing filters for Products. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ',
+			'woocommerce-admin'
+		),
+	}
+);
+
+if ( Object.keys( advancedFilters.filters ).length ) {
+	filterConfig.filters.push( {
+		label: __( 'Advanced Filters', 'woocommerce-admin' ),
+		value: 'advanced',
+	} );
+	variationsConfig.filters.push( {
+		label: __( 'Advanced Filters', 'woocommerce-admin' ),
+		value: 'advanced',
+	} );
+}
+
 export const filters = applyFilters( PRODUCTS_REPORT_FILTERS_FILTER, [
 	filterConfig,
 	variationsConfig,
 ] );
-
-export const advancedFilters = applyFilters(
-	PRODUCTS_REPORT_ADVANCED_FILTERS_FILTER,
-	{}
-);

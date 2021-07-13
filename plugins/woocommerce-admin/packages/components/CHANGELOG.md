@@ -1,6 +1,7 @@
 # 7.1.0
 
 -   Add rowKey prop to Table and TableCard component. #7196
+-   AdvancedFilters: Create workable defaults for Reports that don't have them #7186
 -   Filters: On update respect all other queries, not just persistedQueries #7155
 -   Fix non-string query prop warning in SelectControl component. #7046
 -   Fix WordPress 5.8 compatibility UI fixes #7255

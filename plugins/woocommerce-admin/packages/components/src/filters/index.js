@@ -224,7 +224,10 @@ ReportFilters.propTypes = {
 
 ReportFilters.defaultProps = {
 	siteLocale: 'en_US',
-	advancedFilters: {},
+	advancedFilters: {
+		title: '',
+		filters: {},
+	},
 	filters: [],
 	query: {},
 	showDatePicker: true,

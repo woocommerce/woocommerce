@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, _x } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
 import { dispatch } from '@wordpress/data';
 
@@ -44,73 +44,86 @@ export const charts = applyFilters( CATEGORY_REPORT_CHARTS_FILTER, [
 	},
 ] );
 
+export const advancedFilters = applyFilters(
+	CATEGORY_REPORT_ADVANCED_FILTERS_FILTER,
+	{
+		filters: {},
+		title: _x(
+			'Categories Match {{select /}} Filters',
+			'A sentence describing filters for Categories. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ',
+			'woocommerce-admin'
+		),
+	}
+);
+
+const filterValues = [
+	{
+		label: __( 'All Categories', 'woocommerce-admin' ),
+		value: 'all',
+	},
+	{
+		label: __( 'Single Category', 'woocommerce-admin' ),
+		value: 'select_category',
+		chartMode: 'item-comparison',
+		subFilters: [
+			{
+				component: 'Search',
+				value: 'single_category',
+				chartMode: 'item-comparison',
+				path: [ 'select_category' ],
+				settings: {
+					type: 'categories',
+					param: 'categories',
+					getLabels: getCategoryLabels,
+					labels: {
+						placeholder: __(
+							'Type to search for a category',
+							'woocommerce-admin'
+						),
+						button: __( 'Single Category', 'woocommerce-admin' ),
+					},
+				},
+			},
+		],
+	},
+	{
+		label: __( 'Comparison', 'woocommerce-admin' ),
+		value: 'compare-categories',
+		chartMode: 'item-comparison',
+		settings: {
+			type: 'categories',
+			param: 'categories',
+			getLabels: getCategoryLabels,
+			labels: {
+				helpText: __(
+					'Check at least two categories below to compare',
+					'woocommerce-admin'
+				),
+				placeholder: __(
+					'Search for categories to compare',
+					'woocommerce-admin'
+				),
+				title: __( 'Compare Categories', 'woocommerce-admin' ),
+				update: __( 'Compare', 'woocommerce-admin' ),
+			},
+			onClick: addCesSurveyForAnalytics,
+		},
+	},
+];
+
+if ( Object.keys( advancedFilters.filters ).length ) {
+	filterValues.push( {
+		label: __( 'Advanced Filters', 'woocommerce-admin' ),
+		value: 'advanced',
+	} );
+}
+
 export const filters = applyFilters( CATEGORY_REPORT_FILTERS_FILTER, [
 	{
 		label: __( 'Show', 'woocommerce-admin' ),
 		staticParams: [ 'chartType', 'paged', 'per_page' ],
 		param: 'filter',
 		showFilters: () => true,
-		filters: [
-			{
-				label: __( 'All Categories', 'woocommerce-admin' ),
-				value: 'all',
-			},
-			{
-				label: __( 'Single Category', 'woocommerce-admin' ),
-				value: 'select_category',
-				chartMode: 'item-comparison',
-				subFilters: [
-					{
-						component: 'Search',
-						value: 'single_category',
-						chartMode: 'item-comparison',
-						path: [ 'select_category' ],
-						settings: {
-							type: 'categories',
-							param: 'categories',
-							getLabels: getCategoryLabels,
-							labels: {
-								placeholder: __(
-									'Type to search for a category',
-									'woocommerce-admin'
-								),
-								button: __(
-									'Single Category',
-									'woocommerce-admin'
-								),
-							},
-						},
-					},
-				],
-			},
-			{
-				label: __( 'Comparison', 'woocommerce-admin' ),
-				value: 'compare-categories',
-				chartMode: 'item-comparison',
-				settings: {
-					type: 'categories',
-					param: 'categories',
-					getLabels: getCategoryLabels,
-					labels: {
-						helpText: __(
-							'Check at least two categories below to compare',
-							'woocommerce-admin'
-						),
-						placeholder: __(
-							'Search for categories to compare',
-							'woocommerce-admin'
-						),
-						title: __( 'Compare Categories', 'woocommerce-admin' ),
-						update: __( 'Compare', 'woocommerce-admin' ),
-					},
-					onClick: addCesSurveyForAnalytics,
-				},
-			},
-		],
+		filters: filterValues,
 	},
 ] );
-
-export const advancedFilters = applyFilters(
-	CATEGORY_REPORT_ADVANCED_FILTERS_FILTER,
-	{}
-);
