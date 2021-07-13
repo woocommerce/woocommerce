@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/onboarding",
-	"version": "1.0.0",
+	"version": "2.0.0",
 	"description": "Onboarding utilities.",
 	"author": "Automattic",
 	"license": "GPL-3.0-or-later",
