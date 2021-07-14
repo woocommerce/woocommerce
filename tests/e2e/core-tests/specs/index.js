@@ -109,10 +109,6 @@ const runApiTests = () => {
 	runOrderApiTest();
 }
 
-const runPluginWorkflowTests = () => {
-	runPluginWorkflowTest();
-}
-
 module.exports = {
 	runActivationTest,
 	runOnboardingFlowTest,
