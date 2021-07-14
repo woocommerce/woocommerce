@@ -144,6 +144,6 @@ class PaymentGatewaysController {
 			)
 		);
 
-		wp_safe_redirect( wc_admin_url( '&task=payments' ) );
+		wp_safe_redirect( wc_admin_url() );
 	}
 }

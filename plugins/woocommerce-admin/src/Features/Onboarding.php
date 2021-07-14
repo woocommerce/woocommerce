@@ -102,8 +102,6 @@ class Onboarding {
 		}
 
 		add_action( 'admin_init', array( $this, 'admin_redirects' ) );
-		add_action( 'current_screen', array( $this, 'finish_paypal_connect' ) );
-		add_action( 'current_screen', array( $this, 'finish_square_connect' ) );
 		add_action( 'current_screen', array( $this, 'add_help_tab' ), 60 );
 		add_action( 'current_screen', array( $this, 'reset_profiler' ) );
 		add_action( 'current_screen', array( $this, 'reset_task_list' ) );
@@ -772,82 +770,6 @@ class Onboarding {
 		}
 
 		return $is_loading;
-	}
-
-	/**
-	 * Instead of redirecting back to the payment settings page, we will redirect back to the payments task list with our status.
-	 *
-	 * @param string $location URL of redirect.
-	 * @param int    $status HTTP response status code.
-	 * @return string URL of redirect.
-	 */
-	public function overwrite_paypal_redirect( $location, $status ) {
-		$settings_page = 'tab=checkout&section=ppec_paypal';
-		if ( substr( $location, -strlen( $settings_page ) ) === $settings_page ) {
-			$settings_array = (array) get_option( 'woocommerce_ppec_paypal_settings', array() );
-			$connected      = isset( $settings_array['api_username'] ) && isset( $settings_array['api_password'] ) ? true : false;
-			return wc_admin_url( '&task=payments&method=paypal&paypal-connect=' . $connected );
-		}
-		return $location;
-	}
-
-	/**
-	 * Finishes the PayPal connection process by saving the correct settings.
-	 */
-	public function finish_paypal_connect() {
-		if (
-			! Loader::is_admin_page() ||
-			! isset( $_GET['paypal-connect-finish'] ) // phpcs:ignore CSRF ok.
-		) {
-			return;
-		}
-
-		if ( ! function_exists( 'wc_gateway_ppec' ) ) {
-			return false;
-		}
-
-		// @todo This is a bit hacky but works. Ideally, woocommerce-gateway-paypal-express-checkout would contain a filter for us.
-		add_filter( 'wp_redirect', array( $this, 'overwrite_paypal_redirect' ), 10, 2 );
-		wc_gateway_ppec()->ips->maybe_received_credentials();
-		remove_filter( 'wp_redirect', array( $this, 'overwrite_paypal_redirect' ) );
-	}
-
-	/**
-	 * Instead of redirecting back to the payment settings page, we will redirect back to the payments task list with our status.
-	 *
-	 * @param string $location URL of redirect.
-	 * @param int    $status HTTP response status code.
-	 * @return string URL of redirect.
-	 */
-	public function overwrite_square_redirect( $location, $status ) {
-		$settings_page = 'page=wc-settings&tab=square';
-		if ( substr( $location, -strlen( $settings_page ) ) === $settings_page ) {
-			return wc_admin_url( '&task=payments&method=square&square-connect=1' );
-		}
-		return $location;
-	}
-
-	/**
-	 * Finishes the Square connection process by saving the correct settings.
-	 */
-	public function finish_square_connect() {
-		if (
-			! Loader::is_admin_page() ||
-			! isset( $_GET['square-connect-finish'] ) // phpcs:ignore CSRF ok.
-		) {
-			return;
-		}
-
-		if ( ! class_exists( '\WooCommerce\Square\Plugin' ) ) {
-			return false;
-		}
-
-		$square = \WooCommerce\Square\Plugin::instance();
-
-		// @todo This is a bit hacky but works. Ideally, woocommerce-square would contain a filter for us.
-		add_filter( 'wp_redirect', array( $this, 'overwrite_square_redirect' ), 10, 2 );
-		$square->get_connection_handler()->handle_connected();
-		remove_filter( 'wp_redirect', array( $this, 'overwrite_square_redirect' ) );
 	}
 
 	/**
