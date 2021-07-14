@@ -15,6 +15,14 @@ Please make sure to test it on Safari as well.
 2. Click [ Dismiss ] button
 3. Confirm that the links are clickable
 
+### Fix undefined method error when setting up WC Tax #7344
+
+1. Set up your store with US address to make sure automated tax is supported.
+2. Install "WooCommerce Shipping & Tax" plugin.
+3. Go to WooCommerce > Home > Set up tax.
+4. Click on "Yes please"
+5. Confirm that no error has occurred and you're redirected to the home screen.
+
 ### Fix missing translation strings for CES #7270
 
 1. Navigate to Settings -> General and change the site language to a non-English (I've used Espanol for testing purposes).

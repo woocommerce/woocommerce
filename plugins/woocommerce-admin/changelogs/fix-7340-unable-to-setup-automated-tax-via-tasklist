@@ -1,0 +1,4 @@
+Significance: patch
+Type: Fix
+
+Fix undefined method error when setting up WC Tax #7344

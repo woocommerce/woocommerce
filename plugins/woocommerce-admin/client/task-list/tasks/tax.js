@@ -441,7 +441,7 @@ class Tax extends Component {
 					disabled={ isPending }
 					isPrimary
 					isBusy={ isPending }
-					onClick={ this.enableAutomatedTax }
+					onClick={ this.enableAutomatedTax.bind( this ) }
 				>
 					{ __( 'Yes please', 'woocommerce-admin' ) }
 				</Button>
