@@ -29,6 +29,12 @@
 3. Click "Dismiss" on a note. Confirm the position of the popover is correct.
 4. Click anywhere outside of the popover content and confirm the popover is closed.
 
+### Add TableSummaryPlaceholder to support skeleton loading #7294
+
+1. Visit any page using element Table to see this update.
+2. For example, Products, Orders, Revenue under Analytics; or Transactions, Deposits under Payments.
+3. While loading, scrolling down to the bottom of the table to see the placeholder of TableSummary.
+
 ### Sync the category lookup table when a new category gets created #7290
 
 1. Navigate to Products -> Add New

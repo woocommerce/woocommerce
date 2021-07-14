@@ -170,6 +170,16 @@ Name | Type | Default | Description
 --- | --- | --- | ---
 `data` | Array | `null` | An array of objects with `label` & `value` properties, which display on a single line
 
+TableSummaryPlaceholder
+===
+
+A component to display a placeholder box for `TableSummary`. There is no prop for this component.
+
+## Usage
+
+```jsx
+<TableSummaryPlaceholder />
+```
 
 Table
 ===

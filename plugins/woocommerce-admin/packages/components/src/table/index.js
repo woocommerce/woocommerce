@@ -23,7 +23,7 @@ import MenuTitle from '../ellipsis-menu/menu-title';
 import Pagination from '../pagination';
 import Table from './table';
 import TablePlaceholder from './placeholder';
-import TableSummary from './summary';
+import TableSummary, { TableSummaryPlaceholder } from './summary';
 
 /**
  * This is an accessible, sortable, and scrollable table for displaying tabular data (like revenue and other analytics data).
@@ -250,16 +250,22 @@ class TableCard extends Component {
 				</CardBody>
 
 				<CardFooter justify="center">
-					<Pagination
-						key={ parseInt( query.paged, 10 ) || 1 }
-						page={ parseInt( query.paged, 10 ) || 1 }
-						perPage={ rowsPerPage }
-						total={ totalRows }
-						onPageChange={ this.onPageChange }
-						onPerPageChange={ onQueryChange( 'per_page' ) }
-					/>
+					{ isLoading ? (
+						<TableSummaryPlaceholder />
+					) : (
+						<Fragment>
+							<Pagination
+								key={ parseInt( query.paged, 10 ) || 1 }
+								page={ parseInt( query.paged, 10 ) || 1 }
+								perPage={ rowsPerPage }
+								total={ totalRows }
+								onPageChange={ this.onPageChange }
+								onPerPageChange={ onQueryChange( 'per_page' ) }
+							/>
 
-					{ summary && <TableSummary data={ summary } /> }
+							{ summary && <TableSummary data={ summary } /> }
+						</Fragment>
+					) }
 				</CardFooter>
 			</Card>
 		);

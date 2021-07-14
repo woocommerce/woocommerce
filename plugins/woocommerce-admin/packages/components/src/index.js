@@ -46,7 +46,10 @@ export { default as Table } from './table/table';
 export { default as TableCard } from './table';
 export { default as EmptyTable } from './table/empty';
 export { default as TablePlaceholder } from './table/placeholder';
-export { default as TableSummary } from './table/summary';
+export {
+	default as TableSummary,
+	TableSummaryPlaceholder,
+} from './table/summary';
 export { default as Tag } from './tag';
 export { default as TextControl } from './text-control';
 export { default as TextControlWithAffixes } from './text-control-with-affixes';

@@ -292,6 +292,14 @@ th.woocommerce-table__item {
 	margin-left: $gap-smaller;
 	margin-right: $gap-smaller;
 
+	$place-holder-width: 200px;
+	.is-placeholder {
+		@include placeholder();
+		display: inline-block;
+		height: 16px;
+		width: $place-holder-width;
+	}
+
 	.woocommerce-table__summary-label,
 	.woocommerce-table__summary-value {
 		display: inline-block;

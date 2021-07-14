@@ -1,6 +1,7 @@
 # Unreleased
 
 -   Remove deprecated Card, Count and Gravatar components. #7293
+-   Add TableSummaryPlaceholder to support skeleton loading. #7294
 
 # 7.1.0
 
