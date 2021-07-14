@@ -1,0 +1,4 @@
+Significance: patch
+Type: Fix
+
+Set default value for performanceIndicators variable #7343

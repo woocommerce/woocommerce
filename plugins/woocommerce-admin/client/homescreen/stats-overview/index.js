@@ -33,9 +33,10 @@ import { DEFAULT_STATS, DEFAULT_HIDDEN_STATS } from './defaults';
 import StatsList from './stats-list';
 import { InstallJetpackCTA } from './install-jetpack-cta';
 
-const { performanceIndicators } = getSetting( 'dataEndpoints', {
+const { performanceIndicators = [] } = getSetting( 'dataEndpoints', {
 	performanceIndicators: [],
 } );
+
 const stats = performanceIndicators.filter( ( indicator ) => {
 	return DEFAULT_STATS.includes( indicator.stat );
 } );

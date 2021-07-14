@@ -1,6 +1,12 @@
 # Testing instructions
 
 ## Unreleased
+
+### Fix WC Home crash when the Analytics is disabled.
+
+1. Navigate to WooCommerce -> Settings -> Advanced -> Features. Uncheck Analytics and save the changes.
+2. Navigate to WooCommerce -> Home and confirm the page loads without an error.
+
 ### Fix missing translation strings for CES #7270
 
 1. Navigate to Settings -> General and change the site language to a non-English (I've used Espanol for testing purposes).
