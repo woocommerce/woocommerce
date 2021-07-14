@@ -67,23 +67,6 @@ class DataRegenerator {
 				$this->run_regeneration_step_callback();
 			}
 		);
-
-		add_action(
-			'add_meta_boxes',
-			function() {
-				$this->add_product_regeneration_metabox();
-			},
-			999
-		);
-
-		add_action(
-			'save_post_product',
-			function( $product_id ) {
-				$this->on_save_product( $product_id );
-			},
-			999,
-			1
-		);
 	}
 
 	/**
@@ -283,7 +266,7 @@ CREATE TABLE ' . $this->lookup_table_name . '(
 
 		if ( $lookup_table_exists ) {
 			$generate_item_name   = __( 'Regenerate the product attributes lookup table', 'woocommerce' );
-			$generate_item_desc   = __( 'This tool will regenerate the product attributes lookup table data from existing products data. This process may take a while.', 'woocommerce' );
+			$generate_item_desc   = __( 'This tool will regenerate the product attributes lookup table data from existing product(s) data. This process may take a while.', 'woocommerce' );
 			$generate_item_return = __( 'Product attributes lookup table data is regenerating', 'woocommerce' );
 			$generate_item_button = __( 'Regenerate', 'woocommerce' );
 		} else {
@@ -302,6 +285,16 @@ CREATE TABLE ' . $this->lookup_table_name . '(
 				return $generate_item_return;
 			},
 		);
+
+		if ( $lookup_table_exists ) {
+			$entry['selector'] = array(
+				'description'   => __( 'Select a product to regenerate the data for, or leave empty for a full table regeneration:', 'woocommerce' ),
+				'class'         => 'wc-product-search',
+				'search_action' => 'woocommerce_json_search_products',
+				'name'          => 'regenerate_product_attribute_lookup_data_product_id',
+				'placeholder'   => esc_attr__( 'Search for a product&hellip;', 'woocommerce' ),
+			);
+		}
 
 		if ( $generation_is_in_progress ) {
 			$entry['button'] = sprintf(
@@ -345,11 +338,19 @@ CREATE TABLE ' . $this->lookup_table_name . '(
 	 * @throws \Exception The regeneration is already in progress.
 	 */
 	private function initiate_regeneration_from_tools_page() {
-		if ( $this->data_store->regeneration_is_in_progress() ) {
-			throw new \Exception( 'Product attributes lookup table is already regenerating.' );
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+		if ( ! isset( $_REQUEST['_wpnonce'] ) || false === wp_verify_nonce( $_REQUEST['_wpnonce'], 'debug_action' ) ) {
+			throw new \Exception( 'Invalid nonce' );
 		}
 
-		$this->initiate_regeneration();
+		if ( isset( $_REQUEST['regenerate_product_attribute_lookup_data_product_id'] ) ) {
+			$product_id = (int) $_REQUEST['regenerate_product_attribute_lookup_data_product_id'];
+			$this->check_can_do_lookup_table_regeneration( $product_id );
+			$this->data_store->create_data_for_product( $product_id );
+		} else {
+			$this->check_can_do_lookup_table_regeneration();
+			$this->initiate_regeneration();
+		}
 	}
 
 	/**
@@ -367,64 +368,24 @@ CREATE TABLE ' . $this->lookup_table_name . '(
 	}
 
 	/**
-	 * Add a metabox in the product page with a button to regenerate the product attributes lookup data for the product.
-	 */
-	private function add_product_regeneration_metabox() {
-		if ( ! $this->can_do_per_product_regeneration() ) {
-			return;
-		}
-
-		add_meta_box(
-			'woocommerce-product-foobars',
-			__( 'Lookup data', 'woocommerce' ),
-			function() {
-				$this->metabox_output();
-			},
-			'product',
-			'side',
-			'low'
-		);
-	}
-
-	/**
-	 * HTML output for the lookup data regeneration metabox.
-	 */
-	private function metabox_output() {
-		// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
-		wp_nonce_field( 'regenerate-attributes-lookup-data', '_wc_regenerate_attributes_lookup_data_nonce' );
-		?>
-		<p><?php echo __( 'Click to regenerate the product attributes lookup data for this product:', 'woocommerce' ); ?></p>
-		<button class="button button-primary button-large" name="woocommerce-product-lookup-action" value="regenerate-attributes-lookup-data">
-		<?php echo __( 'Regenerate', 'woocommerce' ); ?>
-		</button>
-		<?php
-		// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
-	}
-
-	/**
-	 * Hook on the 'save_post_product' filter to regenerate the product attributes lookup data when the regenerate metabox button was pressed.
+	 * Check if everything is good to go to perform a per product lookup table data regeneration
+	 * and throw an exception if not.
 	 *
-	 * @param int $product_id The product id.
+	 * @param mixed $product_id The product id to check the regeneration viability for, or null to skip product check.
+	 * @throws \Exception Something prevents the regeneration from starting.
 	 */
-	private function on_save_product( int $product_id ) {
-		if (
-			! wp_verify_nonce( ArrayUtil::get_value_or_default( $_POST, '_wc_regenerate_attributes_lookup_data_nonce' ), 'regenerate-attributes-lookup-data' ) ||
-			! $this->can_do_per_product_regeneration() ||
-			'regenerate-attributes-lookup-data' !== ArrayUtil::get_value_or_default( $_POST, 'woocommerce-product-lookup-action' ) ||
-			! wc_get_product( $product_id )
-		) {
-			return;
+	private function check_can_do_lookup_table_regeneration( $product_id = null ) {
+		if ( ! $this->data_store->is_feature_visible() ) {
+			throw new \Exception( "Can't do product attribute lookup data regeneration: feature is not visible" );
 		}
-
-		$this->data_store->create_data_for_product( $product_id );
-	}
-
-	/**
-	 * Check if everything is good to go to perform a per product lookup table data regeneration.
-	 *
-	 * @return bool True if per product lookup table data regeneration can be performed.
-	 */
-	private function can_do_per_product_regeneration() {
-		return $this->data_store->is_feature_visible() && $this->data_store->check_lookup_table_exists() && ! $this->data_store->regeneration_is_in_progress();
+		if ( ! $this->data_store->check_lookup_table_exists() ) {
+			throw new \Exception( "Can't do product attribute lookup data regeneration: lookup table doesn't exist" );
+		}
+		if ( $this->data_store->regeneration_is_in_progress() ) {
+			throw new \Exception( "Can't do product attribute lookup data regeneration: regeneration is already in progress" );
+		}
+		if ( $product_id && ! wc_get_product( $product_id ) ) {
+			throw new \Exception( "Can't do product attribute lookup data regeneration: product doesn't exist" );
+		}
 	}
 }
