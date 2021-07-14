@@ -7,11 +7,6 @@ const path = require( 'path' );
 const chalk = require( 'chalk' );
 const watch = require( 'node-watch' );
 
-/**
- * Internal dependencies
- */
-const getPackages = require( './get-packages' );
-
 const BUILD_CMD = `node ${ path
 	.resolve( __dirname, './build.js' )
 	.replace( /(\s+)/g, '\\$1' ) }`;
@@ -27,61 +22,59 @@ const exists = ( filename ) => {
 
 // Exclude deceitful source-like files, such as editor swap files.
 const isSourceFile = ( filename ) => {
-	return /.\.(js|ts|tsx|scss)$/.test( filename );
+	return ! /\/node_modules\//.test( filename ) && /\.scss$/.test( filename );
 };
 
 const rebuild = ( filename ) => filesToBuild.set( filename, true );
 
-getPackages().forEach( ( p ) => {
-	const srcDir = path.resolve( p, 'src' );
-	try {
-		fs.accessSync( srcDir, fs.F_OK );
-		watch(
-			path.resolve( p, 'src' ),
-			{ recursive: true },
-			( event, filename ) => {
-				const filePath = path.resolve( srcDir, filename );
+const dir = process.argv.slice( 2 );
 
-				if ( ! isSourceFile( filename ) ) {
-					return;
-				}
+if ( ! dir.length ) {
+	// eslint-disable-next-line no-console
+	console.log(
+		chalk.inverse.bold.red( ' ERROR ' ) +
+			chalk.bold.red( ' no build path specified' )
+	);
+	process.exit( 1 );
+}
 
-				if (
-					[ 'update', 'change', 'rename' ].includes( event ) &&
-					exists( filePath )
-				) {
-					// eslint-disable-next-line no-console
-					console.log(
-						chalk.green( '->' ),
-						`${ event }: ${ filename }`
-					);
-					rebuild( filePath );
-				} else {
-					const buildFile = path.resolve(
-						srcDir,
-						'..',
-						'build',
-						filename
-					);
-					try {
-						fs.unlinkSync( buildFile );
-						process.stdout.write(
-							chalk.red( '  \u2022 ' ) +
-								path.relative(
-									path.resolve( srcDir, '..', '..' ),
-									buildFile
-								) +
-								' (deleted)' +
-								'\n'
-						);
-					} catch ( e ) {}
-				}
-			}
-		);
-	} catch ( e ) {
-		// doesn't exist
-	}
-} );
+const srcDir = path.resolve( dir[ 0 ] );
+
+try {
+	fs.accessSync( srcDir, fs.F_OK );
+	watch( srcDir, { recursive: true }, ( event, filename ) => {
+		const filePath = path.resolve( srcDir, filename );
+
+		if ( ! isSourceFile( filename ) ) {
+			return;
+		}
+
+		if (
+			[ 'update', 'change', 'rename' ].includes( event ) &&
+			exists( filePath )
+		) {
+			// eslint-disable-next-line no-console
+			console.log( chalk.green( '->' ), `${ event }: ${ filename }` );
+			rebuild( filePath );
+		} else {
+			const buildFile = path.resolve( srcDir, '..', 'build', filename );
+			try {
+				fs.unlinkSync( buildFile );
+				process.stdout.write(
+					chalk.red( '  \u2022 ' ) +
+						path.relative(
+							path.resolve( srcDir, '..', '..' ),
+							buildFile
+						) +
+						' (deleted)' +
+						'\n'
+				);
+			} catch ( e ) {}
+		}
+	} );
+} catch ( e ) {
+	// doesn't exist
+}
 
 setInterval( () => {
 	const files = Array.from( filesToBuild.keys() );

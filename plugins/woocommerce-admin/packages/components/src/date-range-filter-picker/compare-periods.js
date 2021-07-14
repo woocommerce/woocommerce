@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Component } from '@wordpress/element';
+import { createElement, Component } from '@wordpress/element';
 import PropTypes from 'prop-types';
 
 import { periods } from '@woocommerce/date';

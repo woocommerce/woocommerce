@@ -2,6 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import { createElement } from '@wordpress/element';
 
 /**
  * `MenuTitle` is another valid Menu child, but this does not have any accessibility attributes associated

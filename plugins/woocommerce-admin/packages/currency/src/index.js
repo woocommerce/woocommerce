@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { createElement } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
 import { sprintf } from '@wordpress/i18n';
 import { numberFormat } from '@woocommerce/number';

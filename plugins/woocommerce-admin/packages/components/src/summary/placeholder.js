@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Component } from '@wordpress/element';
+import { createElement, Component } from '@wordpress/element';
 import classnames from 'classnames';
 import { range } from 'lodash';
 import PropTypes from 'prop-types';

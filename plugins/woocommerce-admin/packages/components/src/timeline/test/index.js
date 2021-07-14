@@ -3,6 +3,7 @@
  * External dependencies
  */
 import { render } from '@testing-library/react';
+import { createElement } from '@wordpress/element';
 
 /**
  * Internal dependencies

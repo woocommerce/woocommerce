@@ -9,7 +9,7 @@ import { useUserPreferences } from '@woocommerce/data';
  */
 import { Layout } from '../layout';
 
-jest.mock( 'homescreen/stats-overview', () =>
+jest.mock( '../stats-overview', () =>
 	jest.fn().mockReturnValue( <div>[StatsOverview]</div> )
 );
 

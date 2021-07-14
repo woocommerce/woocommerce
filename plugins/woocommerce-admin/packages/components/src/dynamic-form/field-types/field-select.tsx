@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useMemo } from '@wordpress/element';
+import { createElement, useMemo } from '@wordpress/element';
 
 /**
  * Internal dependencies

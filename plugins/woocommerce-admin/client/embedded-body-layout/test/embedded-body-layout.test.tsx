@@ -8,7 +8,6 @@ import { addFilter } from '@wordpress/hooks';
  * Internal dependencies
  */
 import { EmbeddedBodyLayout } from '../embedded-body-layout';
-import { PaymentRecommendations } from '../../payments';
 
 jest.mock( '@woocommerce/data', () => ( {
 	useUser: () => ( {
@@ -44,7 +43,7 @@ const stubLocation = ( location: string ) => {
 describe( 'Embedded layout', () => {
 	it( 'should render a fill component with matching name, and provide query params', async () => {
 		stubLocation( '?page=settings&tab=test' );
-		const { queryByText, container } = render( <EmbeddedBodyLayout /> );
+		const { queryByText } = render( <EmbeddedBodyLayout /> );
 
 		expect( queryByText( 'payment_recommendations' ) ).toBeInTheDocument();
 		expect( queryByText( 'page:settings' ) ).toBeInTheDocument();
@@ -56,7 +55,7 @@ describe( 'Embedded layout', () => {
 		addFilter(
 			'woocommerce_admin_embedded_layout_components',
 			'namespace',
-			( components, query ) => {
+			( components ) => {
 				return [
 					...components,
 					() => {
@@ -66,7 +65,7 @@ describe( 'Embedded layout', () => {
 			}
 		);
 		stubLocation( '?page=settings&tab=test' );
-		const { queryByText, container } = render( <EmbeddedBodyLayout /> );
+		const { queryByText } = render( <EmbeddedBodyLayout /> );
 
 		expect( queryByText( 'new_component' ) ).toBeInTheDocument();
 	} );

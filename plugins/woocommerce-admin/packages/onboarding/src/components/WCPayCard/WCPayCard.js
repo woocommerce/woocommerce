@@ -3,7 +3,7 @@
  */
 import { Card, CardBody, CardHeader, CardFooter } from '@wordpress/components';
 import { Text } from '@woocommerce/experimental';
-
+import { createElement } from '@wordpress/element';
 import { Link } from '@woocommerce/components';
 import { __ } from '@wordpress/i18n';
 

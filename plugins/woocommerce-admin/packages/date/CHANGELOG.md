@@ -1,3 +1,7 @@
+# 3.1.0
+
+-   Fix commonjs module build, allow package to be built in isolation. #7286
+
 # 3.0.0
 
 -   Take into account leap year in calculating `getLastPeriod`.

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useState } from '@wordpress/element';
+import { createElement, useState } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import {
 	Button,

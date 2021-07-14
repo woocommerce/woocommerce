@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Component } from '@wordpress/element';
+import { createElement, Component } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Dropdown } from '@wordpress/components';
 import PropTypes from 'prop-types';

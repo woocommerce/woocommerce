@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { BaseControl, FormToggle } from '@wordpress/components';
-import { Component, createRef } from '@wordpress/element';
+import { createElement, Component, createRef } from '@wordpress/element';
 import { DOWN, ENTER, SPACE, UP } from '@wordpress/keycodes';
 import PropTypes from 'prop-types';
 

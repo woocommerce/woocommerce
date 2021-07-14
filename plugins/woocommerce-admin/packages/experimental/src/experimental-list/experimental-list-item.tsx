@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { CSSTransition } from 'react-transition-group';
+import { createElement } from '@wordpress/element';
 import { ENTER } from '@wordpress/keycodes';
 import classnames from 'classnames';
 

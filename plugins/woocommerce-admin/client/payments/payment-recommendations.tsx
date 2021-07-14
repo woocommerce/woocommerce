@@ -24,13 +24,13 @@ import {
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import ExternalIcon from 'gridicons/dist/external';
+import { getAdminLink } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
  */
 import './payment-recommendations.scss';
 import { getCountryCode } from '../dashboard/utils';
-import { getAdminLink } from '../wc-admin-settings';
 import { createNoticesFromResponse } from '../lib/notices';
 import { isWCPaySupported } from '~/task-list/tasks/PaymentGatewaySuggestions/components/WCPay';
 

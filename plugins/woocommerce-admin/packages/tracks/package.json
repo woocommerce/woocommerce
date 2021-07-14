@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/tracks",
-	"version": "1.0.1",
+	"version": "1.1.0",
 	"description": "WooCommerce user event tracking utilities for Automattic based projects.",
 	"author": "Automattic",
 	"license": "GPL-3.0-or-later",
@@ -25,5 +25,11 @@
 	},
 	"publishConfig": {
 		"access": "public"
+	},
+	"scripts": {
+		"clean": "npx rimraf build build-*",
+		"build": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
+		"start": "tsc --build --watch",
+		"prepack": "npm run clean && npm run build"
 	}
 }

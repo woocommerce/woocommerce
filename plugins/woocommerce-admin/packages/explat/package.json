@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/explat",
-	"version": "1.0.1",
+	"version": "1.1.0",
 	"description": "WooCommerce component and utils for A/B testing.",
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
@@ -32,5 +32,11 @@
 	},
 	"devDependencies": {
 		"@types/cookie": "0.4.1"
+	},
+	"scripts": {
+		"clean": "npx rimraf build build-*",
+		"build": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
+		"start": "tsc --build --watch",
+		"prepack": "npm run clean && npm run build"
 	}
 }

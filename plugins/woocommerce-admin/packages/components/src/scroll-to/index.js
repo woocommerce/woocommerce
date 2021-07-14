@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Component, createRef } from '@wordpress/element';
+import { createElement, Component, createRef } from '@wordpress/element';
 import PropTypes from 'prop-types';
 
 class ScrollTo extends Component {

@@ -14,6 +14,7 @@ jest.mock( '@woocommerce/wc-admin-settings', () => ( {
 import { recordEvent } from '@woocommerce/tracks';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { createElement } from '@wordpress/element';
 
 /**
  * Internal dependencies

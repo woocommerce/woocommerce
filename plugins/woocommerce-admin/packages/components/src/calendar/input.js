@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { Popover } from '@wordpress/components';
+import { createElement } from '@wordpress/element';
 import { Icon, calendar } from '@wordpress/icons';
 import classnames from 'classnames';
 import { uniqueId, noop } from 'lodash';

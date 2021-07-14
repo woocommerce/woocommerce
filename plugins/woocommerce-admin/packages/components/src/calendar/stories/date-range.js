@@ -4,6 +4,7 @@
 import moment from 'moment';
 import { withState } from '@wordpress/compose';
 import { DateRange, H, Section } from '@woocommerce/components';
+import { createElement, Fragment } from '@wordpress/element';
 
 const dateFormat = 'MM/DD/YYYY';
 

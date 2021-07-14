@@ -1,3 +1,8 @@
+/**
+ * External dependencies
+ */
+import { createElement } from '@wordpress/element';
+
 export default ( { width = 196, height = 41 } ) => (
 	<svg
 		width={ width }

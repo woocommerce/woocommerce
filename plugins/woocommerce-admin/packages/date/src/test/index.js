@@ -23,7 +23,7 @@ import {
 	getChartTypeForQuery,
 	getAllowedIntervalsForQuery,
 	getStoreTimeZoneMoment,
-} from '../src';
+} from '../';
 
 jest.mock( 'moment', () => {
 	const m = jest.requireActual( 'moment' );

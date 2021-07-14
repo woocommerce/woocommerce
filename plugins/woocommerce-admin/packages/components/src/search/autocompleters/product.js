@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
-import { Fragment } from '@wordpress/element';
+import { createElement, Fragment } from '@wordpress/element';
 import interpolateComponents from 'interpolate-components';
 
 /**

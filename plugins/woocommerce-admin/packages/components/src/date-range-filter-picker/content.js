@@ -2,7 +2,12 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Component, createRef, Fragment } from '@wordpress/element';
+import {
+	createElement,
+	Component,
+	createRef,
+	Fragment,
+} from '@wordpress/element';
 import { TabPanel, Button } from '@wordpress/components';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';

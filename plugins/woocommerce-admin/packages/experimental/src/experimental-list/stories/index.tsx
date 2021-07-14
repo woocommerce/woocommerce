@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { createElement } from '@wordpress/element';
 import { withConsole } from '@storybook/addon-console';
 import { Meta, Story } from '@storybook/react';
 /**

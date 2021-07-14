@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { createElement } from '@wordpress/element';
 import { Slot, Fill } from '@wordpress/components';
 
 export const WooPaymentGatewaySetup = ( { id, ...props } ) => (

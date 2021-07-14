@@ -2,7 +2,7 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import { Component, Fragment } from '@wordpress/element';
+import { createElement, Component, Fragment } from '@wordpress/element';
 import PropTypes from 'prop-types';
 
 /**

@@ -3,7 +3,12 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import classNames from 'classnames';
-import { Component, createRef, Fragment } from '@wordpress/element';
+import {
+	createElement,
+	Component,
+	createRef,
+	Fragment,
+} from '@wordpress/element';
 import { formatDefaultLocale as d3FormatDefaultLocale } from 'd3-format';
 import { isEqual, partial, without } from 'lodash';
 import LineGraphIcon from 'gridicons/dist/line-graph';

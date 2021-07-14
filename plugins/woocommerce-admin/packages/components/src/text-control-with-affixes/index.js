@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Component } from '@wordpress/element';
+import { createElement, Component } from '@wordpress/element';
 import { compose, withInstanceId } from '@wordpress/compose';
 import PropTypes from 'prop-types';
 import { BaseControl, withFocusOutside } from '@wordpress/components';

@@ -1,5 +1,7 @@
 <!-- Learn how to maintain this file at https://github.com/WordPress/gutenberg/tree/master/packages#maintaining-changelogs. -->
+## 3.1.0
 
+-   Fix commonjs module build, allow package to be built in isolation. #7286
 ## 3.0.0 (2021-06-03)
 
 ## Breaking changes

@@ -3,7 +3,7 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import classnames from 'classnames';
-import { Component } from '@wordpress/element';
+import { createElement, Component } from '@wordpress/element';
 import StarIcon from 'gridicons/dist/star';
 import PropTypes from 'prop-types';
 

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Component } from '@wordpress/element';
+import { createElement, Component } from '@wordpress/element';
 import { filter } from 'lodash';
 import PropTypes from 'prop-types';
 

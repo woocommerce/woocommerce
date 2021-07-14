@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { createElement } from '@wordpress/element';
 import { Card, CardBody, Icon } from '@wordpress/components';
 import classnames from 'classnames';
 import PropTypes from 'prop-types';

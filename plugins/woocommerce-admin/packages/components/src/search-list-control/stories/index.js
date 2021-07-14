@@ -4,6 +4,7 @@
 import { boolean } from '@storybook/addon-knobs';
 import { SearchListControl } from '@woocommerce/components';
 import { withState } from '@wordpress/compose';
+import { createElement } from '@wordpress/element';
 
 const SearchListControlExample = withState( {
 	selected: [],

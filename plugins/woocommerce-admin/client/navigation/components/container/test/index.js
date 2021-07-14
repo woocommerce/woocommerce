@@ -6,6 +6,7 @@ import { getAdminLink } from '@woocommerce/wc-admin-settings';
 import { getHistory } from '@woocommerce/navigation';
 import { useSelect } from '@wordpress/data';
 import userEvent from '@testing-library/user-event';
+import { createElement } from '@wordpress/element';
 
 /**
  * Internal dependencies

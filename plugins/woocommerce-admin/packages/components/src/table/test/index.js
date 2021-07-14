@@ -4,6 +4,7 @@
 import { render, screen } from '@testing-library/react';
 import { toHaveClass } from '@testing-library/jest-dom/matchers';
 import userEvent from '@testing-library/user-event';
+import { createElement } from '@wordpress/element';
 
 /**
  * Internal dependencies

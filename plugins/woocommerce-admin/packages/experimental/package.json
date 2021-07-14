@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/experimental",
-	"version": "1.4.0",
+	"version": "1.5.0",
 	"description": "WooCommerce experimental components.",
 	"author": "Automattic",
 	"license": "GPL-3.0-or-later",
@@ -45,7 +45,21 @@
 	"devDependencies": {
 		"@storybook/addon-console": "1.2.3",
 		"@storybook/react": "6.2.9",
+		"@testing-library/react": "11.2.7",
+		"@testing-library/user-event": "13.1.9",
 		"@types/dompurify": "2.2.2",
-		"@types/react-transition-group": "4.4.1"
+		"@types/react-transition-group": "4.4.1",
+		"concurrently": "5.3.0"
+	},
+	"scripts": {
+		"clean": "npx rimraf build build-*",
+		"build": "npm run build:js && npm run build:css",
+		"build:js": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
+		"build:css": "node ../../bin/packages/build.js src/style.scss",
+		"start": "concurrently \"tsc --build --watch\" \"node ../../bin/packages/watch.js ./src\"",
+		"prepack": "npm run clean && npm run build",
+		"test": "lerna run build && npm run test:nobuild",
+		"test:nobuild": "jest --config ./jest.config.json",
+		"test-staged": "jest --bail --config ./jest.config.json --findRelatedTests"
 	}
 }

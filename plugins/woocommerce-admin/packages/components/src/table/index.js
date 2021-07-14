@@ -10,7 +10,7 @@ import {
 	CardHeader,
 	__experimentalText as Text,
 } from '@wordpress/components';
-import { Component, Fragment } from '@wordpress/element';
+import { createElement, Component, Fragment } from '@wordpress/element';
 import { find, first, isEqual, without } from 'lodash';
 import PropTypes from 'prop-types';
 

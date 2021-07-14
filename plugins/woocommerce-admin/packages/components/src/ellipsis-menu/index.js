@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Component } from '@wordpress/element';
+import { createElement, Component } from '@wordpress/element';
 import classnames from 'classnames';
 import { Button, Dropdown, NavigableMenu } from '@wordpress/components';
 import { Icon } from '@wordpress/icons';

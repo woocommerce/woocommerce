@@ -4,6 +4,7 @@
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
+import { createElement } from '@wordpress/element';
 
 /**
  * Internal dependencies

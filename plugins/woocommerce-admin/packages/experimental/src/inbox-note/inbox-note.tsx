@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState, useRef } from '@wordpress/element';
+import { createElement, Fragment, useState, useRef } from '@wordpress/element';
 import { Button, Dropdown, Popover } from '@wordpress/components';
 import VisibilitySensor from 'react-visibility-sensor';
 import moment from 'moment';
@@ -201,7 +201,7 @@ const InboxNoteCard: React.FC< InboxNoteProps > = ( {
 	};
 
 	const renderActions = () => {
-		const { actions: noteActions, id: noteId } = note;
+		const { actions: noteActions } = note;
 
 		if ( !! clickedActionText ) {
 			return clickedActionText;

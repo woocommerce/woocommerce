@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Button, Modal } from '@wordpress/components';
-import { useState } from '@wordpress/element';
+import { createElement, useState } from '@wordpress/element';
 
 type ConfirmationModalProps = {
 	onClose: () => void;

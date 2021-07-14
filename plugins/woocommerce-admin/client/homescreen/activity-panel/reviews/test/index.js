@@ -2,12 +2,12 @@
  * External dependencies
  */
 import { render, screen, fireEvent } from '@testing-library/react';
+import { getByTextWithMarkup } from '@woocommerce/js-tests';
 
 /**
  * Internal dependencies
  */
 import { ReviewsPanel } from '../';
-import { getByTextWithMarkup } from '../../../../../tests/js/util';
 
 const REVIEW = {
 	id: 10,

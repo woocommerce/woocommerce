@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import Currency from '../src';
+import Currency from '../';
 
 describe( 'formatAmount', () => {
 	it( 'should use defaults (USD) when currency not passed in', () => {

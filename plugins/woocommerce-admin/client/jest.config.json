@@ -1,0 +1,7 @@
+{
+	"rootDir": "./",
+	"preset": "../packages/js-tests/jest.config.js",
+	"transform": {
+		"^.+\\.[jt]sx?$": "babel-jest"
+	}
+}

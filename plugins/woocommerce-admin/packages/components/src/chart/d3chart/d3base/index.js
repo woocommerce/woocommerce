@@ -3,7 +3,7 @@
  */
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
-import { Component, createRef } from '@wordpress/element';
+import { createElement, Component, createRef } from '@wordpress/element';
 import { isEqual, throttle } from 'lodash';
 import { select as d3Select } from 'd3-selection';
 

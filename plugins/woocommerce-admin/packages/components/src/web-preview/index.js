@@ -2,7 +2,7 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import { Component, createRef } from '@wordpress/element';
+import { createElement, Component, createRef } from '@wordpress/element';
 import { noop } from 'lodash';
 import PropTypes from 'prop-types';
 

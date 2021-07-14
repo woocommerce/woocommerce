@@ -4,7 +4,7 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { Icon, cancelCircleFilled } from '@wordpress/icons';
-import { Component, Fragment } from '@wordpress/element';
+import { createElement, Component, Fragment } from '@wordpress/element';
 import { findIndex } from 'lodash';
 import PropTypes from 'prop-types';
 

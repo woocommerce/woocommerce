@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-import { Children, cloneElement, isValidElement } from '@wordpress/element';
+import {
+	createElement,
+	Children,
+	cloneElement,
+	isValidElement,
+} from '@wordpress/element';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 
 /**

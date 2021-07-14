@@ -8,7 +8,7 @@ import {
 	TextControl,
 	withSpokenMessages,
 } from '@wordpress/components';
-import { Component, Fragment } from '@wordpress/element';
+import { createElement, Component, Fragment } from '@wordpress/element';
 import { compose, withInstanceId, withState } from '@wordpress/compose';
 import { escapeRegExp, findIndex } from 'lodash';
 import NoticeOutlineIcon from 'gridicons/dist/notice-outline';

@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/navigation",
-	"version": "6.0.1",
+	"version": "6.1.0",
 	"description": "WooCommerce navigation utilities.",
 	"author": "Automattic",
 	"license": "GPL-3.0-or-later",
@@ -21,7 +21,6 @@
 	"module": "build-module/index.js",
 	"react-native": "src/index",
 	"dependencies": {
-		"@woocommerce/experimental": "file:../experimental",
 		"@wordpress/api-fetch": "2.2.8",
 		"@wordpress/compose": "3.23.1",
 		"@wordpress/notices": "1.12.0",
@@ -36,5 +35,14 @@
 	},
 	"publishConfig": {
 		"access": "public"
+	},
+	"scripts": {
+		"clean": "npx rimraf build build-*",
+		"build": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
+		"start": "tsc --build --watch",
+		"prepack": "npm run clean && npm run build",
+		"test": "lerna run build && npm run test:nobuild",
+		"test:nobuild": "jest --config ./jest.config.json",
+		"test-staged": "jest --bail --config ./jest.config.json --findRelatedTests"
 	}
 }

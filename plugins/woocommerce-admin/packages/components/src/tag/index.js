@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { Fragment } from '@wordpress/element';
+import { createElement, Fragment } from '@wordpress/element';
 import classnames from 'classnames';
 import { Button, Popover } from '@wordpress/components';
 import { Icon, cancelCircleFilled } from '@wordpress/icons';

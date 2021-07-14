@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { createElement } from '@wordpress/element';
 import { ENTER } from '@wordpress/keycodes';
 import PropTypes from 'prop-types';
 

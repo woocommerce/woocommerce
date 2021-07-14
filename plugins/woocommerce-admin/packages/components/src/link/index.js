@@ -3,6 +3,7 @@
  */
 import PropTypes from 'prop-types';
 import { partial } from 'lodash';
+import { createElement } from '@wordpress/element';
 import { getHistory } from '@woocommerce/navigation';
 
 /**

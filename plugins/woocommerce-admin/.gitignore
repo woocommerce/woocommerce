@@ -33,3 +33,6 @@ wp-cli.local.yml
 
 # wp-env config
 .wp-env.override.json
+
+# Typescript
+*.tsbuildinfo

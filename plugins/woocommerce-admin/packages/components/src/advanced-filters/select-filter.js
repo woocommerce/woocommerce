@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Component, Fragment } from '@wordpress/element';
+import { createElement, Component, Fragment } from '@wordpress/element';
 import { SelectControl, Spinner } from '@wordpress/components';
 import { find, partial } from 'lodash';
 import PropTypes from 'prop-types';

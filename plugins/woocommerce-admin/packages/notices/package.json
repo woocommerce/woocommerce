@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/notices",
-	"version": "3.0.0",
+	"version": "3.1.0",
 	"description": "State management for notices.",
 	"author": "The WordPress Contributors",
 	"license": "GPL-2.0-or-later",
@@ -22,9 +22,9 @@
 	"module": "build-module/index.js",
 	"react-native": "src/index",
 	"dependencies": {
-		"@babel/runtime": "7.14.0",
 		"@wordpress/a11y": "2.15.2",
-		"@wordpress/data": "4.27.3"
+		"@wordpress/data": "4.27.3",
+		"@wordpress/notices": "1.12.0"
 	},
 	"peerDependencies": {
 		"lodash": "^4.17.0"
@@ -32,5 +32,11 @@
 	"publishConfig": {
 		"access": "public"
 	},
-	"private": true
+	"private": true,
+	"scripts": {
+		"clean": "npx rimraf build build-*",
+		"build": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
+		"start": "tsc --build --watch",
+		"prepack": "npm run clean && npm run build"
+	}
 }

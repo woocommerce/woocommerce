@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { Component } from '@wordpress/element';
+import { createElement, Component } from '@wordpress/element';
 import { Button, SelectControl } from '@wordpress/components';
 import classNames from 'classnames';
 import PropTypes from 'prop-types';

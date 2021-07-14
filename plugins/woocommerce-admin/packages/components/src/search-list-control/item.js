@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Fragment } from '@wordpress/element';
+import { createElement, Fragment } from '@wordpress/element';
 import { escapeRegExp, first, last, isNil } from 'lodash';
 import PropTypes from 'prop-types';
 

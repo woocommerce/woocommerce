@@ -4,6 +4,7 @@
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
 import { Button, Tooltip } from '@wordpress/components';
+import { createElement } from '@wordpress/element';
 
 /**
  * A button used when comparing items, if `count` is less than 2 a hoverable tooltip is added with `helpText`.

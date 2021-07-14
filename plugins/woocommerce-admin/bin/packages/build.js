@@ -11,19 +11,15 @@
 const fs = require( 'fs' );
 const path = require( 'path' );
 const glob = require( 'glob' );
-const babel = require( '@babel/core' );
 const chalk = require( 'chalk' );
 const mkdirp = require( 'mkdirp' );
 const sass = require( 'sass' );
 const postcss = require( 'postcss' );
-const rimraf = require( 'rimraf' );
 
 /**
  * Internal dependencies
  */
 const getPackages = require( './get-packages' );
-const getBabelConfig = require( './get-babel-config' );
-const { exit } = require( 'process' );
 
 /**
  * Module Constants
@@ -46,10 +42,6 @@ const DONE = chalk.reset.inverse.bold.green( ' DONE ' );
 function getPackageName( file ) {
 	return path.relative( PACKAGES_DIR, file ).split( path.sep )[ 0 ];
 }
-
-const isJsFile = ( filepath ) => {
-	return /.\.(js|ts|tsx)$/.test( filepath );
-};
 
 const isScssFile = ( filepath ) => {
 	return /.\.scss$/.test( filepath );
@@ -81,31 +73,17 @@ function buildFiles( files ) {
 	// Reduce files into a unique sets of javaScript files and scss packages.
 	const buildPaths = files.reduce(
 		( accumulator, filePath ) => {
-			if ( isJsFile( filePath ) ) {
-				accumulator.jsFiles.add( filePath );
-			} else if ( isScssFile( filePath ) ) {
+			if ( isScssFile( filePath ) ) {
 				const pkgName = getPackageName( filePath );
 				const pkgPath = path.resolve( PACKAGES_DIR, pkgName );
 				accumulator.scssPackagePaths.add( pkgPath );
 			}
 			return accumulator;
 		},
-		{ jsFiles: new Set(), scssPackagePaths: new Set() }
+		{ scssPackagePaths: new Set() }
 	);
 
-	buildPaths.jsFiles.forEach( buildJsFile );
 	buildPaths.scssPackagePaths.forEach( buildPackageScss );
-}
-
-/**
- * Build a javaScript file for the required environments (node and ES5)
- *
- * @param {string} file    File path to build
- * @param {boolean} silent Show logs
- */
-function buildJsFile( file, silent ) {
-	buildJsFileFor( file, silent, 'main' );
-	buildJsFileFor( file, silent, 'module' );
 }
 
 /**
@@ -161,66 +139,15 @@ async function buildScssFile( styleFile ) {
 }
 
 /**
- * Build a file for a specific environment
- *
- * @param {string}  file        File path to build
- * @param {boolean} silent      Show logs
- * @param {string}  environment Dist environment (node or es5)
- */
-function buildJsFileFor( file, silent, environment ) {
-	const buildDir = BUILD_DIR[ environment ];
-	const destPath = getBuildPath( file, buildDir );
-	const babelOptions = getBabelConfig( environment );
-	babelOptions.sourceMaps = true;
-	babelOptions.sourceFileName = file;
-
-	mkdirp.sync( path.dirname( destPath ) );
-	const transformed = babel.transformFileSync( file, babelOptions );
-	fs.writeFileSync( destPath + '.map', JSON.stringify( transformed.map ) );
-	fs.writeFileSync(
-		destPath,
-		transformed.code +
-			'\n//# sourceMappingURL=' +
-			path.basename( destPath ) +
-			'.map'
-	);
-
-	if ( ! silent ) {
-		process.stdout.write(
-			chalk.green( '  \u2022 ' ) +
-				path.relative( PACKAGES_DIR, file ) +
-				chalk.green( ' \u21D2 ' ) +
-				path.relative( PACKAGES_DIR, destPath ) +
-				'\n'
-		);
-	}
-}
-
-/**
  * Build the provided package path
  *
  * @param {string} packagePath absolute package path
  */
 async function buildPackage( packagePath ) {
-	const srcDir = path.resolve( packagePath, SRC_DIR );
-	const jsFiles = glob.sync( `${ srcDir }/**/*.{ts,tsx,js}`, {
-		ignore: [
-			`${ srcDir }/**/test/**/*.js`,
-			`${ srcDir }/**/__mocks__/**/*.js`,
-		],
-		nodir: true,
-	} );
-
 	// Build package CSS files
 	await buildPackageScss( packagePath );
 
 	process.stdout.write( `${ path.basename( packagePath ) }\n` );
-
-	// Build js files individually.
-	jsFiles.forEach( ( file ) => {
-		buildJsFile( file, true );
-	} );
-
 	process.stdout.write( `${ DONE }\n` );
 }
 

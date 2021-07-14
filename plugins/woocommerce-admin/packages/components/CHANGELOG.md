@@ -1,5 +1,6 @@
-# Unreleased
+# 8.0.0
 
+-   Fix commonjs module build, allow package to be built in isolation. #7286
 -   Remove deprecated Card, Count and Gravatar components. #7293
 -   Add TableSummaryPlaceholder to support skeleton loading. #7294
 

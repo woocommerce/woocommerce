@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Fragment } from '@wordpress/element';
+import { createElement, Fragment } from '@wordpress/element';
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 

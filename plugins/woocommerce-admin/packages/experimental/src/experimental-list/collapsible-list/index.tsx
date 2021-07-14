@@ -3,6 +3,7 @@
  */
 import { Icon, chevronUp, chevronDown } from '@wordpress/icons';
 import {
+	createElement,
 	useState,
 	useCallback,
 	useEffect,

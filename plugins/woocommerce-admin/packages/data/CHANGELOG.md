@@ -1,3 +1,7 @@
+# 1.4.0
+
+-   Fix commonjs module build, allow package to be built in isolation. #7286
+
 # 1.3.2
 
 -   Add fallback for the select/dispatch data-controls for older WP versions. #7204

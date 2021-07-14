@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { Button, Dropdown } from '@wordpress/components';
 import { focus } from '@wordpress/dom';
 import classnames from 'classnames';
-import { Component } from '@wordpress/element';
+import { createElement, Component } from '@wordpress/element';
 import { find, partial, last, get, includes } from 'lodash';
 import PropTypes from 'prop-types';
 import { Icon, chevronLeft } from '@wordpress/icons';

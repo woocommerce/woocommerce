@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/number",
-	"version": "2.1.1",
+	"version": "2.2.0",
 	"description": "Number formatting utilities for WooCommerce.",
 	"author": "Automattic",
 	"license": "GPL-3.0-or-later",
@@ -24,5 +24,14 @@
 	},
 	"publishConfig": {
 		"access": "public"
+	},
+	"scripts": {
+		"clean": "tsc --build ./tsconfig.json ./tsconfig-cjs.json --clean && npx rimraf dist",
+		"build": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
+		"start": "tsc --build --watch",
+		"prepack": "npm run clean && npm run build",
+		"test": "lerna run build && npm run test:nobuild",
+		"test:nobuild": "jest --config ./jest.config.json",
+		"test-staged": "jest --bail --config ./jest.config.json --findRelatedTests"
 	}
 }

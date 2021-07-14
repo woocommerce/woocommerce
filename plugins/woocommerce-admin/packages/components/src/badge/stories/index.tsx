@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { Card, CardBody } from '@wordpress/components';
+import { createElement } from '@wordpress/element';
 import { Story } from '@storybook/react';
 
 /**

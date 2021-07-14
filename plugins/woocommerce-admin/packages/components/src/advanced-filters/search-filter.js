@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Component, Fragment } from '@wordpress/element';
+import { createElement, Component, Fragment } from '@wordpress/element';
 import { SelectControl } from '@wordpress/components';
 import { getIdsFromQuery } from '@woocommerce/navigation';
 import { find, isEqual, partial } from 'lodash';

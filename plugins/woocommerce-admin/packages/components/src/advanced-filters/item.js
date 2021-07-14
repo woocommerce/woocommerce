@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { createElement } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import CrossSmallIcon from 'gridicons/dist/cross-small';
 import classnames from 'classnames';

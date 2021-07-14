@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { DynamicForm } from '@woocommerce/components';
-import { useState } from '@wordpress/element';
+import { createElement, useState } from '@wordpress/element';
 
 const fields = [
 	{

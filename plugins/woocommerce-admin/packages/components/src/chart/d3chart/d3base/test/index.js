@@ -3,6 +3,7 @@
  */
 import { render } from '@testing-library/react';
 import { noop } from 'lodash';
+import { createElement } from '@wordpress/element';
 
 /**
  * Internal dependencies

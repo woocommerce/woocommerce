@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { createElement, Fragment } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Icon, check } from '@wordpress/icons';
 import { Button, Tooltip } from '@wordpress/components';

@@ -1,9 +1,8 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
-import { useState } from '@wordpress/element';
+import { createElement, useState } from '@wordpress/element';
 
 type InboxNoteActionProps = {
 	onClick: () => void;

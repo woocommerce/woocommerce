@@ -13,6 +13,7 @@ import {
 	PRIMARY_STORY,
 } from '@storybook/addon-docs/blocks';
 import { withLinks } from '@storybook/addon-links';
+import { createElement } from '@wordpress/element';
 
 /**
  * Internal dependencies

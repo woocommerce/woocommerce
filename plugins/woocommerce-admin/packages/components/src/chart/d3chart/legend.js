@@ -3,7 +3,7 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import classNames from 'classnames';
-import { Component, createRef } from '@wordpress/element';
+import { createElement, Component, createRef } from '@wordpress/element';
 import { withInstanceId } from '@wordpress/compose';
 import PropTypes from 'prop-types';
 

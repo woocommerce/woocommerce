@@ -4,6 +4,7 @@
 import { render } from '@testing-library/react';
 import StarIcon from 'gridicons/dist/star';
 import StarOutlineIcon from 'gridicons/dist/star-outline';
+import { createElement } from '@wordpress/element';
 
 /**
  * Internal dependencies

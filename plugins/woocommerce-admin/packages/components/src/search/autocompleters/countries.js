@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { decodeEntities } from '@wordpress/html-entities';
-import { Fragment } from '@wordpress/element';
+import { createElement, Fragment } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 
 /**

@@ -4,7 +4,6 @@
 import { OnboardingWizard } from '../../pages/OnboardingWizard';
 import { WcHomescreen } from '../../pages/WcHomescreen';
 import { TaskTitles } from '../../constants/taskTitles';
-import { getElementByText } from '../../utils/actions';
 import { Login } from '../../pages/Login';
 
 /* eslint-disable @typescript-eslint/no-var-requires */

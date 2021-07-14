@@ -6,6 +6,7 @@ import { __ } from '@wordpress/i18n';
 import classnames from 'classnames';
 import { uniqueId } from 'lodash';
 import PropTypes from 'prop-types';
+import { createElement } from '@wordpress/element';
 
 /**
  * Internal dependencies

@@ -1,4 +1,7 @@
 module.exports = {
+	env: {
+		'jest/globals': true,
+	},
 	extends: [ 'plugin:@woocommerce/eslint-plugin/recommended' ],
 	settings: {
 		'import/resolver': 'typescript',
@@ -24,6 +27,12 @@ module.exports = {
 		'@wordpress/no-unsafe-wp-apis': 'warn',
 		'jest/valid-title': 'warn',
 		'@wordpress/no-global-active-element': 'warn',
+		'no-unused-vars': [
+			'error',
+			{
+				varsIgnorePattern: 'createElement',
+			},
+		],
 	},
 	overrides: [
 		{
@@ -45,6 +54,12 @@ module.exports = {
 				'no-shadow': 'off',
 				'@typescript-eslint/no-shadow': [ 'error' ],
 				'@typescript-eslint/no-empty-function': 'off',
+				'@typescript-eslint/no-unused-vars': [
+					'error',
+					{
+						varsIgnorePattern: 'createElement',
+					},
+				],
 			},
 		},
 	],

@@ -90,11 +90,7 @@ const webpackConfig = {
 			},
 			{
 				test: /\.(t|j)sx?$/,
-				exclude: [
-					/node_modules(\/|\\)(?!(debug))/,
-					/build/,
-					/build-module/,
-				],
+				exclude: [ /node_modules(\/|\\)(?!(debug))/ ],
 				use: {
 					loader: 'babel-loader',
 					options: {
@@ -161,10 +157,6 @@ const webpackConfig = {
 			'gutenberg-components': path.resolve(
 				__dirname,
 				'node_modules/@wordpress/components/src'
-			),
-			'@woocommerce/wc-admin-settings': path.resolve(
-				__dirname,
-				'client/wc-admin-settings/index.js'
 			),
 		},
 	},

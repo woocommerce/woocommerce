@@ -6,7 +6,12 @@ import { SelectControl as Select, Spinner } from '@wordpress/components';
 import { partial } from 'lodash';
 import interpolateComponents from 'interpolate-components';
 import classnames from 'classnames';
-import { Fragment, useEffect, useState } from '@wordpress/element';
+import {
+	createElement,
+	Fragment,
+	useEffect,
+	useState,
+} from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { __ } from '@wordpress/i18n';
 

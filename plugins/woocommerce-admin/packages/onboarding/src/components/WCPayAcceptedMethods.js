@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { createElement, Fragment } from '@wordpress/element';
 import { Text } from '@woocommerce/experimental';
 import { __ } from '@wordpress/i18n';
 

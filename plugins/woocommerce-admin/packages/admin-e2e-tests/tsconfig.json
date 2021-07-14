@@ -1,11 +1,7 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../tsconfig-cjs",
   "compilerOptions": {
-    "types": [ "node", "jest" ],
-    "rootDir": "src", 
-    "outDir": "build",
-	"noEmit": false,
-    "target": "es5"
-  },
-  "include": [ "src/" ]
+  "rootDir": "src",
+      "outDir": "build"
+  }
 }

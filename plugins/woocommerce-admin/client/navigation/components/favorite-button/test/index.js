@@ -4,6 +4,7 @@
 import { render } from '@testing-library/react';
 import { useDispatch, useSelect } from '@wordpress/data';
 import userEvent from '@testing-library/user-event';
+import { createElement } from '@wordpress/element';
 
 /**
  * Internal dependencies

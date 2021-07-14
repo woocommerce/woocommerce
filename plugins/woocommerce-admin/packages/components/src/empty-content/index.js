@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Button } from '@wordpress/components';
-import { Component } from '@wordpress/element';
+import { createElement, Component } from '@wordpress/element';
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
 

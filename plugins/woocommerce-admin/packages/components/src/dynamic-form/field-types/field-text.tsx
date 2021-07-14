@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { createElement } from '@wordpress/element';
+
+/**
  * Internal dependencies
  */
 import { TextControl } from '../../index';

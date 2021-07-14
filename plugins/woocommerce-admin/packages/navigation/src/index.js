@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { createElement } from '@wordpress/element';
 import { addQueryArgs } from '@wordpress/url';
 import { parse } from 'qs';
 import { pick } from 'lodash';

@@ -5,7 +5,7 @@ import 'core-js/features/object/assign';
 import 'core-js/features/array/from';
 import { __, sprintf } from '@wordpress/i18n';
 import classnames from 'classnames';
-import { Component, createRef } from '@wordpress/element';
+import { createElement, Component, createRef } from '@wordpress/element';
 import { DayPickerRangeController } from 'react-dates';
 import moment from 'moment';
 import { partial } from 'lodash';

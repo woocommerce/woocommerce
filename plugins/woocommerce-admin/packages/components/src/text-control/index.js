@@ -2,7 +2,7 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import { Component } from '@wordpress/element';
+import { createElement, Component } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import {
 	TextControl as BaseComponent,

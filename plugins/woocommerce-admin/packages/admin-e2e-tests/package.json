@@ -1,44 +1,49 @@
 {
- "name": "@woocommerce/admin-e2e-tests",
- "version": "0.1.0",
- "author": "Automattic",
- "description": "E2E tests for the new WooCommerce interface.",
- "homepage": "https://github.com/woocommerce/woocommerce-admin/tree/main/packages/admin-e2e-tests/README.md",
- "repository": {
-  "type": "git",
-  "url": "https://github.com/woocommerce/woocommerce-admin.git"
- },
- "keywords": [
-  "woocommerce",
-  "e2e"
- ],
- "license": "GPL-3.0+",
- "main": "build/index.js",
- "types": "build/index.d.ts",
- "files": [
-  "/build/",
-  "!*.ts.map",
-  "!*.tsbuildinfo"
- ],
- "sideEffects": false,
- "dependencies": {
-  "@jest/globals": "^26.4.2",
-  "@types/jest": "26.0.23",
-  "config": "3.3.6"
- },
- "peerDependencies": {
-  "@woocommerce/e2e-environment": "0.2.2",
-   "@woocommerce/e2e-utils": "0.1.5",
-   "puppeteer": "^2.0.0"
- },
- "devDependencies": {
-  "@types/expect-puppeteer": "4.4.6",
-  "@types/puppeteer": "5.4.3",
-  "@typescript-eslint/eslint-plugin": "4.22.1",
-  "jest-mock-extended": "^1.0.10",
-  "typescript": "4.2.4"
- },
- "publishConfig": {
-  "access": "public"
- }
+	"name": "@woocommerce/admin-e2e-tests",
+	"version": "0.1.0",
+	"author": "Automattic",
+	"description": "E2E tests for the new WooCommerce interface.",
+	"homepage": "https://github.com/woocommerce/woocommerce-admin/tree/main/packages/admin-e2e-tests/README.md",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/woocommerce/woocommerce-admin.git"
+	},
+	"keywords": [
+		"woocommerce",
+		"e2e"
+	],
+	"license": "GPL-3.0+",
+	"main": "build/index.js",
+	"types": "build/index.d.ts",
+	"files": [
+		"/build/",
+		"!*.ts.map",
+		"!*.tsbuildinfo"
+	],
+	"sideEffects": false,
+	"dependencies": {
+		"@jest/globals": "^26.4.2",
+		"@types/jest": "26.0.23",
+		"config": "3.3.6"
+	},
+	"peerDependencies": {
+		"@woocommerce/e2e-environment": "0.2.2",
+		"@woocommerce/e2e-utils": "0.1.5",
+		"puppeteer": "^2.0.0"
+	},
+	"devDependencies": {
+		"@types/expect-puppeteer": "4.4.6",
+		"@types/puppeteer": "5.4.3",
+		"@typescript-eslint/eslint-plugin": "4.22.1",
+		"jest-mock-extended": "^1.0.10",
+		"typescript": "4.2.4"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"scripts": {
+		"build": "tsc --build",
+		"clean": "npx rimraf build build-*",
+		"prepack": "npm run clean && npm run build"
+	}
 }

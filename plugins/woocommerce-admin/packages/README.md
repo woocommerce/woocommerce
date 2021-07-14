@@ -95,6 +95,6 @@ If you accept, Lerna will create git tags, publish those to github, then push yo
 Sometimes, its helpful to release a singular package. This can be done directly through npm. Be sure versions and builds are correct.
 
 -   Bump the version in the package's package.json as well as its CHANGELOG file.
--   `npm install && npm run build` to build packages.
+-   `npm install && npm run build:packages` to build packages.
 -   `cd packages/<package-name>`
 -   `npm publish`

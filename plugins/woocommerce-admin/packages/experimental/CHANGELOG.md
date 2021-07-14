@@ -1,3 +1,7 @@
+# 1.5.0
+
+-   Fix commonjs module build, allow package to be built in isolation. #7286
+
 # 1.4.0
 
 -   Add new VerticalCSSTransition component for handling height transitions. #7203

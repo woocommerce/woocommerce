@@ -23,10 +23,7 @@
 		"baseUrl": "./",
 		"paths": {
 			"@woocommerce/*": [ "packages/*/src" ],
-			"~/*": [ "client/*" ],
-			"@woocommerce/wc-admin-settings": [
-				"client/wc-admin-settings/index"
-			]
+			"~/*": [ "client/*" ]
 		}
 	},
 	"exclude": [ "node_modules", "build", "build-module", "dist", "vendor" ]

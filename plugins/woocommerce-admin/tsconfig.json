@@ -23,11 +23,27 @@
 		"baseUrl": "./",
 		"paths": {
 			"@woocommerce/*": [ "packages/*/src" ],
-			"~/*": [ "client/*" ],
-			"@woocommerce/wc-admin-settings": [
-				"client/wc-admin-settings/index"
-			]
+			"~/*": [ "client/*" ]
 		}
 	},
-	"exclude": [ "node_modules", "build", "build-module", "dist", "vendor" ]
+	"exclude": [ "node_modules", "build", "build-module", "dist", "vendor" ],
+	"files": [],
+	"references": [
+		{ "path": "packages/admin-e2e-tests" },
+        { "path": "packages/components" },
+		{ "path": "packages/csv-export" },
+		{ "path": "packages/currency" },
+		{ "path": "packages/customer-effort-score" },
+		{ "path": "packages/data" },
+		{ "path": "packages/date" },
+		{ "path": "packages/experimental" },
+		{ "path": "packages/explat" },
+		{ "path": "packages/js-tests" },
+		{ "path": "packages/navigation" },
+		{ "path": "packages/notices" },
+		{ "path": "packages/number" },
+		{ "path": "packages/onboarding" },
+		{ "path": "packages/tracks" },
+		{ "path": "packages/wc-admin-settings" }
+    ]
 }

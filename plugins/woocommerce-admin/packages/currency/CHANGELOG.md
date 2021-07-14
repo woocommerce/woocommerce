@@ -1,3 +1,7 @@
+# 3.2.0
+
+-   Fix commonjs module build, allow package to be built in isolation. #7286
+
 # 3.1.0
 
 -   Return countryInfo as an empty object if not in locale info #6188

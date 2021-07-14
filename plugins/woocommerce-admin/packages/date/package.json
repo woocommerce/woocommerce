@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/date",
-	"version": "3.0.0",
+	"version": "3.1.0",
 	"description": "WooCommerce date utilities.",
 	"author": "Automattic",
 	"license": "GPL-3.0-or-later",
@@ -23,12 +23,25 @@
 	"dependencies": {
 		"@wordpress/date": "3.13.0",
 		"@wordpress/i18n": "3.17.0",
-		"moment": "2.29.1"
+		"moment": "2.29.1",
+		"qs": "6.9.6"
+	},
+	"devDependencies": {
+		"@woocommerce/wc-admin-settings": "file:../wc-admin-settings"
 	},
 	"peerDependencies": {
 		"lodash": "^4.17.0"
 	},
 	"publishConfig": {
 		"access": "public"
+	},
+	"scripts": {
+		"clean": "npx rimraf build build-*",
+		"build": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
+		"start": "tsc --build --watch",
+		"prepack": "npm run clean && npm run build",
+		"test": "lerna run build && npm run test:nobuild",
+		"test:nobuild": "jest --config ./jest.config.json",
+		"test-staged": "jest --bail --config ./jest.config.json --findRelatedTests"
 	}
 }

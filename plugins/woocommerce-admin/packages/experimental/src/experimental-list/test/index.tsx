@@ -1,13 +1,9 @@
 /**
  * External dependencies
  */
-import {
-	act,
-	render,
-	screen,
-	waitForElementToBeRemoved,
-} from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { createElement } from '@wordpress/element';
 
 /**
  * Internal dependencies

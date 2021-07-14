@@ -4,7 +4,7 @@
 import 'core-js/features/object/assign';
 import 'core-js/features/array/from';
 import { __, sprintf } from '@wordpress/i18n';
-import { Component } from '@wordpress/element';
+import { createElement, Component } from '@wordpress/element';
 import { Dropdown, DatePicker as WpDatePicker } from '@wordpress/components';
 import { partial } from 'lodash';
 import { TAB } from '@wordpress/keycodes';

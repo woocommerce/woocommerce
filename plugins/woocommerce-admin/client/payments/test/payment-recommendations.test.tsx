@@ -9,9 +9,9 @@ import {
 	SETTINGS_STORE_NAME,
 	OPTIONS_STORE_NAME,
 	WCDataStoreName,
-	WPDataSelectors,
 	Plugin,
 } from '@woocommerce/data';
+import { getAdminLink } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
@@ -19,8 +19,7 @@ import {
 import PaymentRecommendations, {
 	getPaymentRecommendationData,
 } from '../payment-recommendations';
-import { isWCPaySupported } from '~/task-list/tasks/PaymentGatewaySuggestions/components/WCPay';
-import { getAdminLink } from '../../wc-admin-settings';
+import { isWCPaySupported } from '../../task-list/tasks/PaymentGatewaySuggestions/components/WCPay';
 import { createNoticesFromResponse } from '~/lib/notices';
 
 jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
@@ -61,7 +60,7 @@ jest.mock(
 	} )
 );
 
-jest.mock( '../../wc-admin-settings', () => ( {
+jest.mock( '@woocommerce/wc-admin-settings', () => ( {
 	getAdminLink: jest
 		.fn()
 		.mockImplementation( ( link: string ) => 'https://test.ca/' + link ),
@@ -71,12 +70,6 @@ jest.mock( '../../lib/notices', () => ( {
 		// do nothing
 	} ),
 } ) );
-
-const storeSelectors: WPDataSelectors = {
-	hasStartedResolution: () => true,
-	hasFinishedResolution: () => true,
-	isResolving: () => false,
-};
 
 describe( 'Payment recommendations', () => {
 	it( 'should render nothing with no recommendedPlugins and country not defined', () => {
@@ -375,7 +368,7 @@ describe( 'Payment recommendations', () => {
 			installAndActivateMock.mockClear();
 			installAndActivateMock.mockImplementation(
 				() =>
-					new Promise( ( resolve, reject ) => {
+					new Promise( () => {
 						throw {
 							code: 500,
 							message: 'failed to install plugin',

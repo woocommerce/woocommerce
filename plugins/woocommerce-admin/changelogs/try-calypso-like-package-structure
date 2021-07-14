@@ -1,0 +1,4 @@
+Significance: minor
+Type: Dev
+
+Allow packages to be build independently, fix commonjs module builds. #7286

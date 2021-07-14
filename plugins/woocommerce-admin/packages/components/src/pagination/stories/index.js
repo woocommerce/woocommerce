@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { number, boolean } from '@storybook/addon-knobs';
-import { useState } from '@wordpress/element';
+import { createElement, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
