@@ -32,7 +32,7 @@
    "puppeteer": "^2.0.0"
  },
  "devDependencies": {
-  "@types/expect-puppeteer": "4.4.5",
+  "@types/expect-puppeteer": "4.4.6",
   "@types/puppeteer": "5.4.3",
   "@typescript-eslint/eslint-plugin": "4.22.1",
   "jest-mock-extended": "^1.0.10",
