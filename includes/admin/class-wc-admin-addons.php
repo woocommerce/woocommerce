@@ -16,6 +16,23 @@ if ( ! defined( 'ABSPATH' ) ) {
  * WC_Admin_Addons Class.
  */
 class WC_Admin_Addons {
+	/**
+	 * Base path for API routes.
+	 *
+	 * @var $api_base
+	 */
+	public static $api_base;
+
+	/**
+	 * Load
+	 *
+	 * Allow devs to point the API base to a local API development or staging server.
+	 * Note that sslverify will be turned off for the woocommerce.dev + WP_DEBUG combination.
+	 * The URL can be changed on plugins_loaded before priority 10.
+	 */
+	public static function load() {
+		self::$api_base = apply_filters( 'woocommerce_addons_api_base', 'https://woocommerce.com/wp-json/wccom-extensions/1.0' );
+	}
 
 	/**
 	 * Get featured for the addons screen
@@ -33,7 +50,7 @@ class WC_Admin_Addons {
 			}
 
 			$raw_featured = wp_safe_remote_get(
-				'https://woocommerce.com/wp-json/wccom-extensions/1.0/featured',
+				self::url( 'featured' ),
 				array(
 					'headers'    => $headers,
 					'user-agent' => 'WooCommerce Addons Page',
@@ -94,7 +111,7 @@ class WC_Admin_Addons {
 		}
 
 		$raw_extensions = wp_safe_remote_get(
-			'https://woocommerce.com/wp-json/wccom-extensions/1.0/search' . $parameters,
+			self::url( 'search' . $parameters ),
 			array( 'headers' => $headers )
 		);
 
@@ -113,7 +130,7 @@ class WC_Admin_Addons {
 		$addon_sections = get_transient( 'wc_addons_sections' );
 		if ( false === ( $addon_sections ) ) {
 			$raw_sections = wp_safe_remote_get(
-				'https://woocommerce.com/wp-json/wccom-extensions/1.0/categories'
+				self::url( 'categories' )
 			);
 			if ( ! is_wp_error( $raw_sections ) ) {
 				$addon_sections = json_decode( wp_remote_retrieve_body( $raw_sections ) );
@@ -123,6 +140,20 @@ class WC_Admin_Addons {
 			}
 		}
 		return apply_filters( 'woocommerce_addons_sections', $addon_sections );
+	}
+
+	/**
+	 * Using the API base, form a request URL from a given endpoint.
+	 *
+	 * @param string $endpoint The endpoint to request.
+	 *
+	 * @return string The absolute endpoint URL.
+	 */
+	public static function url( $endpoint ) {
+		$endpoint = ltrim( $endpoint, '/' );
+		$endpoint = sprintf( '%s/%s', self::$api_base, $endpoint );
+		$endpoint = esc_url_raw( $endpoint );
+		return $endpoint;
 	}
 
 	/**
@@ -795,3 +826,5 @@ class WC_Admin_Addons {
 		return true;
 	}
 }
+
+WC_Admin_Addons::load();
