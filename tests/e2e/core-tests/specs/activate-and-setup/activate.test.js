@@ -12,8 +12,6 @@ const {
 	beforeAll,
 } = require( '@jest/globals' );
 
-const path = require( 'path' );
-
 const runActivationTest = () => {
 	describe('Store owner can login and make sure WooCommerce is activated', () => {
 		beforeAll(async () => {
