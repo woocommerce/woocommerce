@@ -83,7 +83,13 @@ class ProductQueryFilters {
 			$attributes = array_map( 'wc_attribute_taxonomy_name_by_id', wp_parse_id_list( $attributes ) );
 		}
 
-		$attributes_to_count     = array_map( 'wc_sanitize_taxonomy_name', $attributes );
+		$attributes_to_count     = array_map(
+			function( $attribute ) {
+				$attribute = wc_sanitize_taxonomy_name( $attribute );
+				return esc_sql( $attribute );
+			},
+			$attributes
+		);
 		$attributes_to_count_sql = 'AND term_taxonomy.taxonomy IN ("' . implode( '","', $attributes_to_count ) . '")';
 		$attribute_count_sql     = "
 			SELECT COUNT( DISTINCT posts.ID ) as term_count, terms.term_id as term_count_id
