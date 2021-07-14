@@ -21,6 +21,9 @@ import { WCPaySuggestion } from './components/WCPay';
 import './plugins/Bacs';
 
 export const PaymentGatewaySuggestions = ( { query } ) => {
+	const { invalidateResolutionForStoreSelector } = useDispatch(
+		ONBOARDING_STORE_NAME
+	);
 	const { updatePaymentGateway } = useDispatch( PAYMENT_GATEWAYS_STORE_NAME );
 	const { getPaymentGateway, paymentGateways, isResolving } = useSelect(
 		( select ) => {
@@ -95,6 +98,8 @@ export const PaymentGatewaySuggestions = ( { query } ) => {
 
 		updatePaymentGateway( id, {
 			enabled: true,
+		} ).then( () => {
+			invalidateResolutionForStoreSelector( 'getTasksStatus' );
 		} );
 	};
 
