@@ -7,6 +7,14 @@
 1. Navigate to WooCommerce -> Settings -> Advanced -> Features. Uncheck Analytics and save the changes.
 2. Navigate to WooCommerce -> Home and confirm the page loads without an error.
 
+### Fix Fix links on the dismiss dropdown are not clickable #7342
+
+Please make sure to test it on Safari as well.
+
+1. Navigate to WooCommerce -> Home
+2. Click [ Dismiss ] button
+3. Confirm that the links are clickable
+
 ### Fix missing translation strings for CES #7270
 
 1. Navigate to Settings -> General and change the site language to a non-English (I've used Espanol for testing purposes).

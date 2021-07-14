@@ -95,6 +95,7 @@ const InboxNoteCard: React.FC< InboxNoteProps > = ( {
 		const dropdownClasses = [
 			'woocommerce-admin-dismiss-notification',
 			'components-popover__content',
+			'components-dropdown__content',
 		];
 		// This line is for IE compatibility.
 		let relatedTarget: EventTarget | Element | null = null;
