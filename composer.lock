@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "68573c2e4eda327213ebd549e80eb235",
+    "content-hash": "329ecbfe0f5c0e8f7174a525187844e1",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -529,16 +529,16 @@
         },
         {
             "name": "woocommerce/woocommerce-blocks",
-            "version": "v3.4.0",
+            "version": "v3.4.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-gutenberg-products-block.git",
-                "reference": "d64a2616932f312ec4fd8f4e46195c3f9aca0000"
+                "reference": "fb8ec657132610adfb415b669b7bebc3e9ef7b4c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/d64a2616932f312ec4fd8f4e46195c3f9aca0000",
-                "reference": "d64a2616932f312ec4fd8f4e46195c3f9aca0000",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/fb8ec657132610adfb415b669b7bebc3e9ef7b4c",
+                "reference": "fb8ec657132610adfb415b669b7bebc3e9ef7b4c",
                 "shasum": ""
             },
             "require": {
@@ -572,7 +572,7 @@
                 "gutenberg",
                 "woocommerce"
             ],
-            "time": "2020-09-15T12:10:40+00:00"
+            "time": "2021-07-15T15:45:48+00:00"
         }
     ],
     "packages-dev": [
@@ -2640,12 +2640,12 @@
             "version": "1.9.1",
             "source": {
                 "type": "git",
-                "url": "https://github.com/webmozart/assert.git",
+                "url": "https://github.com/webmozarts/assert.git",
                 "reference": "bafc69caeb4d49c39fd0779086c03a3738cbb389"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webmozart/assert/zipball/bafc69caeb4d49c39fd0779086c03a3738cbb389",
+                "url": "https://api.github.com/repos/webmozarts/assert/zipball/bafc69caeb4d49c39fd0779086c03a3738cbb389",
                 "reference": "bafc69caeb4d49c39fd0779086c03a3738cbb389",
                 "shasum": ""
             },
