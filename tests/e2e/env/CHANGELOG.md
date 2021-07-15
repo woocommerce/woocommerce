@@ -1,6 +1,8 @@
 # Unreleased
 
 - `updateReadyPageStatus` utility to update the status of the ready page
+- Added plugin upload functionality util that provides a method to pull a plugin zip from a remote location
+  - `getRemotePluginZip( fileUrl )` to get the remote zip. Returns the filepath of the zip location.
 
 # 0.2.2
 
