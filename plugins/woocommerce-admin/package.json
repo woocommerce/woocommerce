@@ -23,7 +23,7 @@
 		"analyze": "cross-env NODE_ENV=production ANALYZE=true webpack",
 		"postbuild": "npm run -s i18n:pot && npm run -s i18n:build",
 		"build:feature-config": "php bin/generate-feature-config.php",
-		"build:packages": "tsc --build && node ./bin/packages/build.js",
+		"build:packages": "lerna run build",
 		"build:release": "./bin/build-plugin-zip.sh",
 		"clean": "rimraf ./dist ./packages/*/build ./packages/*/build-module ./packages/*/build-style",
 		"predev": "npm run -s install-if-deps-outdated && php ./bin/update-version.php",

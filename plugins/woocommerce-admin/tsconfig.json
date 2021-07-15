@@ -7,8 +7,6 @@
 		// Process & infer types from .js files.
 		"allowJs": true,
 		"jsx": "preserve",
-		// Don't emit; allow Babel to transform files.
-		"noEmit": true,
 		// Enable strictest settings like strictNullChecks & noImplicitAny.
 		"strict": true,
 		// Import non-ES modules as default imports.
