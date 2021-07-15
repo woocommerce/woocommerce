@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4184c817182d897b56a8b81dd6917862",
+    "content-hash": "72cf3ce59d36bda77d5eec5a8dd52825",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -466,16 +466,16 @@
         },
         {
             "name": "woocommerce/woocommerce-blocks",
-            "version": "v2.5.16",
+            "version": "v2.5.17",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-gutenberg-products-block.git",
-                "reference": "3bd91b669247000fd3f5277954701d0b148d3f1a"
+                "reference": "421502a820aa863c8954375aa6e3d0c2317f0328"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/3bd91b669247000fd3f5277954701d0b148d3f1a",
-                "reference": "3bd91b669247000fd3f5277954701d0b148d3f1a",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/421502a820aa863c8954375aa6e3d0c2317f0328",
+                "reference": "421502a820aa863c8954375aa6e3d0c2317f0328",
                 "shasum": ""
             },
             "require": {
@@ -509,7 +509,7 @@
                 "gutenberg",
                 "woocommerce"
             ],
-            "time": "2020-04-07T11:47:19+00:00"
+            "time": "2021-07-15T13:21:17+00:00"
         },
         {
             "name": "woocommerce/woocommerce-rest-api",
@@ -549,6 +549,7 @@
             ],
             "description": "The WooCommerce core REST API.",
             "homepage": "https://github.com/woocommerce/woocommerce-rest-api",
+            "abandoned": true,
             "time": "2020-05-11T14:54:30+00:00"
         }
     ],
@@ -1660,6 +1661,7 @@
             "keywords": [
                 "tokenizer"
             ],
+            "abandoned": true,
             "time": "2019-09-17T06:23:10+00:00"
         },
         {
@@ -2578,12 +2580,12 @@
             "version": "1.8.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/webmozart/assert.git",
+                "url": "https://github.com/webmozarts/assert.git",
                 "reference": "ab2cb0b3b559010b75981b1bdce728da3ee90ad6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webmozart/assert/zipball/ab2cb0b3b559010b75981b1bdce728da3ee90ad6",
+                "url": "https://api.github.com/repos/webmozarts/assert/zipball/ab2cb0b3b559010b75981b1bdce728da3ee90ad6",
                 "reference": "ab2cb0b3b559010b75981b1bdce728da3ee90ad6",
                 "shasum": ""
             },
