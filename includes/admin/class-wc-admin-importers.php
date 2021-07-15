@@ -151,7 +151,7 @@ class WC_Admin_Importers {
 			return;
 		}
 
-		$id          = absint( $_POST['import_id'] ); // PHPCS: input var ok.
+		$id          = absint( $_POST['import_id'] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 		$file        = get_attached_file( $id );
 		$parser      = new WXR_Parser();
 		$import_data = $parser->parse( $file );
@@ -282,9 +282,9 @@ class WC_Admin_Importers {
 					'position'   => 'done',
 					'percentage' => 100,
 					'url'        => add_query_arg( array( '_wpnonce' => wp_create_nonce( 'woocommerce-csv-importer' ) ), admin_url( 'edit.php?post_type=product&page=product_importer&step=done' ) ),
-					'imported'   => count( $results['imported'] ),
+					'imported'   => $results['imported_distinct_count'],
 					'failed'     => count( $results['failed'] ),
-					'updated'    => count( $results['updated'] ),
+					'updated'    => $results['updated_distinct_count'],
 					'skipped'    => count( $results['skipped'] ),
 				)
 			);
@@ -293,9 +293,9 @@ class WC_Admin_Importers {
 				array(
 					'position'   => $importer->get_file_position(),
 					'percentage' => $percent_complete,
-					'imported'   => count( $results['imported'] ),
+					'imported'   => $results['imported_distinct_count'],
 					'failed'     => count( $results['failed'] ),
-					'updated'    => count( $results['updated'] ),
+					'updated'    => $results['updated_distinct_count'],
 					'skipped'    => count( $results['skipped'] ),
 				)
 			);
