@@ -150,12 +150,23 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	}
 
 	/**
+	 * Get the size of the file to be imported
+	 * The import is complete when get_file_position() equals get_file_size()
+	 *
+	 * @return int
+	 */
+	public function get_file_size() {
+		return filesize( $this->file );
+	}
+
+	/**
 	 * Get file pointer position as a percentage of file size.
+	 * This function returns rounded results and is only suitable for UI use.
 	 *
 	 * @return int
 	 */
 	public function get_percent_complete() {
-		$size = filesize( $this->file );
+		$size = $this->get_file_size();
 		if ( ! $size ) {
 			return 0;
 		}
