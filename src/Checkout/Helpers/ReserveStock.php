@@ -161,22 +161,26 @@ final class ReserveStock {
 		$query_for_stock          = $product_data_store->get_query_for_stock( $product_id );
 		$query_for_reserved_stock = $this->get_query_for_reserved_stock( $product_id, $order->get_id() );
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
-		$result = $wpdb->query(
-			$wpdb->prepare(
-				"
-				INSERT INTO {$wpdb->wc_reserved_stock} ( `order_id`, `product_id`, `stock_quantity`, `timestamp`, `expires` )
-				SELECT %d, %d, %d, NOW(), ( NOW() + INTERVAL %d MINUTE ) FROM DUAL
-				WHERE ( $query_for_stock FOR UPDATE ) - ( $query_for_reserved_stock FOR UPDATE ) >= %d
-				ON DUPLICATE KEY UPDATE `expires` = VALUES( `expires` ), `stock_quantity` = VALUES( `stock_quantity` )
-				",
-				$order->get_id(),
-				$product_id,
-				$stock_quantity,
-				$minutes,
-				$stock_quantity
-			)
-		);
+		$do_query = apply_filters( 'woocommerce_query_reserve_stock_for_product', true, $product_id, $stock_quantity, $order, $minutes );
+
+		if ( $do_query ) {
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
+			$result = $wpdb->query(
+				$wpdb->prepare(
+					"
+					INSERT INTO {$wpdb->wc_reserved_stock} ( `order_id`, `product_id`, `stock_quantity`, `timestamp`, `expires` )
+					SELECT %d, %d, %d, NOW(), ( NOW() + INTERVAL %d MINUTE ) FROM DUAL
+					WHERE ( $query_for_stock FOR UPDATE ) - ( $query_for_reserved_stock FOR UPDATE ) >= %d
+					ON DUPLICATE KEY UPDATE `expires` = VALUES( `expires` ), `stock_quantity` = VALUES( `stock_quantity` )
+					",
+					$order->get_id(),
+					$product_id,
+					$stock_quantity,
+					$minutes,
+					$stock_quantity
+				)
+			);
+		}
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
 
 		if ( ! $result ) {
