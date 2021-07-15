@@ -1,13 +1,10 @@
 /*global inlineEditPost, woocommerce_admin, woocommerce_quick_edit */
 jQuery(
 	function( $ ) {
-		$( '#the-list' ).on(
+		$( '#wpbody' ).on(
 			'click',
-			'.editinline',
+			'#the-list .editinline',
 			function() {
-
-				inlineEditPost.revert();
-
 				var post_id = $( this ).closest( 'tr' ).attr( 'id' );
 
 				post_id = post_id.replace( 'post-', '' );
@@ -116,9 +113,9 @@ jQuery(
 			}
 		);
 
-		$( '#the-list' ).on(
+		$( '#wpbody' ).on(
 			'change',
-			'.inline-edit-row input[name="_manage_stock"]',
+			'#the-list .inline-edit-row input[name="_manage_stock"]',
 			function() {
 
 				if ( $( this ).is( ':checked' ) ) {
