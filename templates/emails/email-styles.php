@@ -50,7 +50,7 @@ body {
 #wrapper {
 	background-color: <?php echo esc_attr( $bg ); ?>;
 	margin: 0;
-	padding: 70px 0;
+	padding: 50px 0;
 	-webkit-text-size-adjust: none !important;
 	width: 100%;
 }
@@ -96,7 +96,7 @@ body {
 	font-size: 12px;
 	line-height: 150%;
 	text-align: center;
-	padding: 24px 0;
+	padding: 15px 0;
 }
 
 #template_footer #credit p {
@@ -108,7 +108,7 @@ body {
 }
 
 #body_content table td {
-	padding: 48px 48px 32px;
+	padding: 24px 24px 16px;
 }
 
 #body_content table td td {
@@ -169,7 +169,7 @@ body {
 }
 
 #header_wrapper {
-	padding: 36px 48px;
+	padding: 18px 24px;
 	display: block;
 }
 
