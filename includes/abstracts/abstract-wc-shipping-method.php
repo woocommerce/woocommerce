@@ -266,7 +266,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 		$args = apply_filters(
 			'woocommerce_shipping_method_add_rate_args',
 			wp_parse_args(
-				$args,
+				$this->set_zero_cost_if_negative( $args ),
 				array(
 					'id'             => $this->get_rate_id(), // ID for the rate. If not passed, this id:instance default will be used.
 					'label'          => '', // Label for the rate.
@@ -324,6 +324,22 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 		}
 
 		$this->rates[ $args['id'] ] = apply_filters( 'woocommerce_shipping_method_add_rate', $rate, $args, $this );
+	}
+
+	/**
+	 * Set zero cost if negative.
+	 *
+	 * @param array $args Arguments (default: array()).
+	 *
+	 * @return array
+	 */
+	private function set_zero_cost_if_negative( $args = array() ) {
+		if ( isset( $args['cost'] ) && 0.0 > (float) $args['cost'] ) {
+			$args['cost'] = 0.0;
+			$args['taxes'] = '';
+		}
+
+		return $args;
 	}
 
 	/**
