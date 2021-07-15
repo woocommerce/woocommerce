@@ -380,8 +380,55 @@ class WC_Privacy extends WC_Abstract_Privacy {
 				require_once ABSPATH . 'wp-admin/includes/user.php';
 			}
 
+			$builtin_post_types = get_post_types( array( '_builtin' => true ) );
+			unset( $builtin_post_types['user_request'] ); // Exclude user_request from data migration.
+
+			/**
+			 * Filter post types that should be assign to an admin user prior user exclusion.
+			 *
+			 * @since 5.3.0
+			 * @param array $post_types List of post types to assign to an admin. Defaults to WordPress builtin post types.
+			 */
+			$post_types_to_assign = apply_filters( 'woocommerce_delete_inactive_account_post_types_to_assign', array_values( $builtin_post_types ) );
+
 			foreach ( $user_ids as $user_id ) {
-				wp_delete_user( $user_id );
+				$posts_made_prior = get_posts(
+					array(
+						'post_type'   => $post_types_to_assign,
+						'author'      => $user_id,
+						'numberposts' => -1,
+					)
+				);
+
+				if ( empty( $posts_made_prior ) ) {
+					wp_delete_user( $user_id );
+				} else {
+					$admin_users  = get_users( array( 'role' => 'administrator' ) );
+					$deleted_user = get_user_by( 'ID', $user_id );
+					wp_delete_user( $user_id, $admin_users[0]->ID ); // Delete user and reassign content to admin.
+
+					$posts_made_prior_list = '<ul>';
+					foreach ( $posts_made_prior as $post ) {
+						$posts_made_prior_list .= '<li><a href="' . esc_attr( $post->guid ) . '">' . esc_html( $post->post_title ) . '</a></li>';
+					}
+					$posts_made_prior_list .= '</ul>';
+
+					$subject = __( 'Contents of a deleted inactive user transferred to admin', 'woocommerce' );
+					$message = '<h1>' . esc_html( $subject ) . '</h1><p>' . sprintf(
+						/* translators: 1: deleted user username 2: deleted user email 3: list of all post types 4: admin username 5: admin email */
+						__( 'An inactive user (%1$s - %2$s) who had published content (%3$s), before to be demoted to subscriber or customer role, was automatically deleted by WooCommerce data retention policy. All the contents of the deleted user were transferred to the administrator: %4$s - %5$s.', 'woocommerce' ),
+						esc_html( $deleted_user->user_login ),
+						esc_html( $deleted_user->user_email ),
+						esc_html( implode( ', ', $post_types_to_assign ) ),
+						esc_html( $admin_users[0]->user_login ),
+						esc_html( $admin_users[0]->user_email )
+					) . '</p><h2>' . esc_html__( 'Transferred contents list', 'woocommerce' ) . '</h2>' . $posts_made_prior_list;
+
+					foreach ( $admin_users as $admin ) {
+						wc_mail( $admin->user_email, $subject, $message );
+					}
+				}
+
 				$count ++;
 			}
 		}
