@@ -37,9 +37,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 					uasort( $methods, 'wc_shipping_zone_method_order_uasort_comparison' );
 
 					if ( ! empty( $methods ) ) {
-						foreach ( $methods as $method ) {
+						foreach ( $methods as $instance_id => $method ) {
 							$class_name = 'yes' === $method->enabled ? 'method_enabled' : 'method_disabled';
-							echo '<li class="wc-shipping-zone-method ' . esc_attr( $class_name ) . '">' . esc_html( $method->get_title() ) . '</li>';
+
+							$shipping_method_link_or_title = esc_html( $method->get_title() );
+							if ( $method->has_settings() ) {
+								$shipping_method_link_or_title = sprintf(
+							        '<a href="%1$s">%2$s</a>',
+									esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&instance_id=' . $instance_id ) ),
+									$shipping_method_link_or_title
+                                );
+							}
+							echo '<li class="wc-shipping-zone-method ' . esc_attr( $class_name ) . '">' . $shipping_method_link_or_title . '</li>';
 						}
 					} else {
 						echo '<li class="wc-shipping-zone-method">' . __( 'No shipping methods offered to this zone.', 'woocommerce' ) . '</li>';
