@@ -176,9 +176,11 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 		$this->row_data    = array();
 		$variable_products = array();
 
+		$fetch_variations = apply_filters( "woocommerce_product_export_{$this->export_type}_fetch_variations", ! empty( $args['category'] ), $args );
+
 		foreach ( $products->products as $product ) {
-			// Check if the category is set, this means we need to fetch variations seperately as they are not tied to a category.
-			if ( ! empty( $args['category'] ) && $product->is_type( 'variable' ) ) {
+			// Check if the category is set, this means we need to fetch variations separately as they are not tied to a category.
+			if ( $product->is_type( 'variable' ) && $fetch_variations ) {
 				$variable_products[] = $product->get_id();
 			}
 
