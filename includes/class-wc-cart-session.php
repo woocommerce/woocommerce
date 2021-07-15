@@ -51,11 +51,10 @@ final class WC_Cart_Session {
 		add_action( 'woocommerce_cart_loaded_from_session', array( $this, 'set_session' ) );
 		add_action( 'woocommerce_removed_coupon', array( $this, 'set_session' ) );
 
-		// Persistent cart stored to usermeta.
-		add_action( 'woocommerce_add_to_cart', array( $this, 'persistent_cart_update' ) );
-		add_action( 'woocommerce_cart_item_removed', array( $this, 'persistent_cart_update' ) );
-		add_action( 'woocommerce_cart_item_restored', array( $this, 'persistent_cart_update' ) );
-		add_action( 'woocommerce_cart_item_set_quantity', array( $this, 'persistent_cart_update' ) );
+		// After cart totals are recalculated, update the persistent cart.
+		// This gets triggered on add to/remove from cart, or other cart updates that affect totals,
+		// which is stored in the persistent cart.
+		add_action( 'woocommerce_after_calculate_totals', array( $this, 'persistent_cart_update' ) );
 
 		// Cookie events - cart cookies need to be set before headers are sent.
 		add_action( 'woocommerce_add_to_cart', array( $this, 'maybe_set_cart_cookies' ) );
