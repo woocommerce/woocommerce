@@ -30,10 +30,14 @@ function wc_webhook_execute_queue() {
 				'arg'        => $data['arg'],
 			);
 
-			$next_scheduled_date = WC()->queue()->get_next( 'woocommerce_deliver_webhook_async', $queue_args, 'woocommerce-webhooks' );
-
 			// Make webhooks unique - only schedule one webhook every 10 minutes to maintain backward compatibility with WP Cron behaviour seen in WC < 3.5.0.
-			if ( is_null( $next_scheduled_date ) || $next_scheduled_date->getTimestamp() >= ( 600 + gmdate( 'U' ) ) ) {
+			if ( apply_filters( 'woocommerce_webhook_unique_webhooks', false ) ) {
+				$next_scheduled_date = WC()->queue()->get_next( 'woocommerce_deliver_webhook_async', $queue_args, 'woocommerce-webhooks' );
+
+				if ( is_null( $next_scheduled_date ) || $next_scheduled_date->getTimestamp() >= ( 600 + gmdate( 'U' ) ) ) {
+					WC()->queue()->add( 'woocommerce_deliver_webhook_async', $queue_args, 'woocommerce-webhooks' );
+				}
+			} else {
 				WC()->queue()->add( 'woocommerce_deliver_webhook_async', $queue_args, 'woocommerce-webhooks' );
 			}
 		} else {
