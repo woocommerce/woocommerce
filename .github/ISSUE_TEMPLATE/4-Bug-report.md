@@ -18,7 +18,7 @@ Bug reports lacking detail, or for any other reason than to report a bug, may be
 <!-- Search tip: Make use of GitHub's search syntax to refine your search https://help.github.com/en/github/searching-for-information-on-github/searching-issues-and-pull-requests -->
 
 **Prerequisites (mark completed items with an [x]):**
-- [ ] I have have carried out troubleshooting steps and I believe I have found a bug.
+- [ ] I have carried out troubleshooting steps and I believe I have found a bug.
 - [ ] I have searched for similar bugs in both open and closed issues and cannot find a duplicate.
 
 **Describe the bug**
