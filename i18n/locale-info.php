@@ -271,6 +271,15 @@ return array(
 		'dimension_unit' => 'cm',
 		'tax_rates'      => array(),
 	),
+	'RU' =>	array(
+		'currency_code'  => 'RUB',
+		'currency_pos'   => 'right_space',
+		'thousand_sep'   => ' ',
+		'decimal_sep'    => ',',
+		'num_decimals'   => 2,
+		'weight_unit'    => 'kg',
+		'dimension_unit' => 'cm',
+	),
 	'TH' => array(
 		'currency_code'  => 'THB',
 		'currency_pos'   => 'left',
