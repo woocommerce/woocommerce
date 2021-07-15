@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e29cd1de8c95ccf71dbbde03e085aee4",
+    "content-hash": "69c931d4fb04c83ab15a63e4237eb7d7",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -529,16 +529,16 @@
         },
         {
             "name": "woocommerce/woocommerce-blocks",
-            "version": "v3.1.0",
+            "version": "v3.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-gutenberg-products-block.git",
-                "reference": "d8fdcb4fc90c392e672b0e75bb0b7fd81dac7436"
+                "reference": "67f72c7b53c21eddfc75edd378d3a630564a20e3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/d8fdcb4fc90c392e672b0e75bb0b7fd81dac7436",
-                "reference": "d8fdcb4fc90c392e672b0e75bb0b7fd81dac7436",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/67f72c7b53c21eddfc75edd378d3a630564a20e3",
+                "reference": "67f72c7b53c21eddfc75edd378d3a630564a20e3",
                 "shasum": ""
             },
             "require": {
@@ -572,7 +572,7 @@
                 "gutenberg",
                 "woocommerce"
             ],
-            "time": "2020-07-29T15:45:19+00:00"
+            "time": "2021-07-15T14:30:57+00:00"
         },
         {
             "name": "woocommerce/woocommerce-rest-api",
@@ -1744,6 +1744,7 @@
             "keywords": [
                 "tokenizer"
             ],
+            "abandoned": true,
             "time": "2019-09-17T06:23:10+00:00"
         },
         {
@@ -2619,6 +2620,20 @@
                 "polyfill",
                 "portable"
             ],
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
             "time": "2020-07-14T12:35:20+00:00"
         },
         {
@@ -2666,12 +2681,12 @@
             "version": "1.9.1",
             "source": {
                 "type": "git",
-                "url": "https://github.com/webmozart/assert.git",
+                "url": "https://github.com/webmozarts/assert.git",
                 "reference": "bafc69caeb4d49c39fd0779086c03a3738cbb389"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webmozart/assert/zipball/bafc69caeb4d49c39fd0779086c03a3738cbb389",
+                "url": "https://api.github.com/repos/webmozarts/assert/zipball/bafc69caeb4d49c39fd0779086c03a3738cbb389",
                 "reference": "bafc69caeb4d49c39fd0779086c03a3738cbb389",
                 "shasum": ""
             },
