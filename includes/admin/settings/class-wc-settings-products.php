@@ -242,10 +242,19 @@ class WC_Settings_Products extends WC_Settings_Page {
 						'options'  => array(
 							'force'     => __( 'Force downloads', 'woocommerce' ),
 							'xsendfile' => __( 'X-Accel-Redirect/X-Sendfile', 'woocommerce' ),
-							'inline'    => __( 'Inline Delivery', 'woocommerce' ),
 							'redirect'  => apply_filters( 'woocommerce_redirect_only_method_is_secure', false ) ? __( 'Redirect only', 'woocommerce' ) : __( 'Redirect only (Insecure)', 'woocommerce' ),
 						),
 						'autoload' => false,
+					),
+
+					array(
+						'title'         => __( 'Content-Disposition', 'woocommerce' ),
+						'desc'          => __( 'Deliver downloadable files inline', 'woocommerce' ),
+						'id'            => 'woocommerce_downloads_deliver_inline',
+						'type'          => 'checkbox',
+						'default'       => 'yes',
+						'desc_tip'      => __( 'Enable this option to have downloadable files open in browser', 'woocommerce' ),
+						'autoload'      => false,
 					),
 
 					array(
