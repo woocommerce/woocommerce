@@ -27,6 +27,7 @@ export const SHOP_PRODUCT_PAGE = baseUrl + '?p=';
 export const SHOP_CART_PAGE = baseUrl + 'cart';
 export const SHOP_CHECKOUT_PAGE = baseUrl + 'checkout/';
 export const SHOP_MY_ACCOUNT_PAGE = baseUrl + 'my-account/';
+
 /**
  * Customer account pages.
  * @type {string}

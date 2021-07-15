@@ -52,6 +52,7 @@ tests/cli/vendor
 /tests/e2e/env/build/
 /tests/e2e/env/build-module/
 /tests/e2e/screenshots
+/tests/e2e/plugins
 /tests/e2e/utils/build/
 /tests/e2e/utils/build-module/
 

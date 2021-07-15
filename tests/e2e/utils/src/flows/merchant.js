@@ -26,6 +26,8 @@ const {
 	IS_RETEST_MODE,
 } = require( './constants' );
 
+const { getSlug } = require('./utils');
+
 const baseUrl = config.get( 'url' );
 const WP_ADMIN_SINGLE_CPT_VIEW = ( postId ) => baseUrl + `wp-admin/post.php?post=${ postId }&action=edit`;
 
