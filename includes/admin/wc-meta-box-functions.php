@@ -55,6 +55,8 @@ function woocommerce_wp_text_input( $field ) {
 	// Custom attribute handling
 	$custom_attributes = array();
 
+	$field = apply_filters( 'woocommerce_input_text_filter', $field );
+
 	if ( ! empty( $field['custom_attributes'] ) && is_array( $field['custom_attributes'] ) ) {
 
 		foreach ( $field['custom_attributes'] as $attribute => $value ) {
@@ -63,7 +65,7 @@ function woocommerce_wp_text_input( $field ) {
 	}
 
 	echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field ' . esc_attr( $field['wrapper_class'] ) . '">
-		<label for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label>';
+	<label for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label>';
 
 	if ( ! empty( $field['description'] ) && false !== $field['desc_tip'] ) {
 		echo wc_help_tip( $field['description'] );
@@ -90,6 +92,8 @@ function woocommerce_wp_hidden_input( $field ) {
 	$field['value'] = isset( $field['value'] ) ? $field['value'] : get_post_meta( $thepostid, $field['id'], true );
 	$field['class'] = isset( $field['class'] ) ? $field['class'] : '';
 
+	$field = apply_filters( 'woocommerce_input_hidden_filter', $field );
+
 	echo '<input type="hidden" class="' . esc_attr( $field['class'] ) . '" name="' . esc_attr( $field['id'] ) . '" id="' . esc_attr( $field['id'] ) . '" value="' . esc_attr( $field['value'] ) . '" /> ';
 }
 
@@ -115,6 +119,8 @@ function woocommerce_wp_textarea_input( $field ) {
 	// Custom attribute handling
 	$custom_attributes = array();
 
+	$field = apply_filters( 'woocommerce_input_textarea_filter', $field );
+
 	if ( ! empty( $field['custom_attributes'] ) && is_array( $field['custom_attributes'] ) ) {
 
 		foreach ( $field['custom_attributes'] as $attribute => $value ) {
@@ -123,7 +129,7 @@ function woocommerce_wp_textarea_input( $field ) {
 	}
 
 	echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field ' . esc_attr( $field['wrapper_class'] ) . '">
-		<label for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label>';
+	<label for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label>';
 
 	if ( ! empty( $field['description'] ) && false !== $field['desc_tip'] ) {
 		echo wc_help_tip( $field['description'] );
@@ -158,6 +164,8 @@ function woocommerce_wp_checkbox( $field ) {
 	// Custom attribute handling
 	$custom_attributes = array();
 
+	$field = apply_filters( 'woocommerce_input_checkbox_filter', $field );
+
 	if ( ! empty( $field['custom_attributes'] ) && is_array( $field['custom_attributes'] ) ) {
 
 		foreach ( $field['custom_attributes'] as $attribute => $value ) {
@@ -166,7 +174,7 @@ function woocommerce_wp_checkbox( $field ) {
 	}
 
 	echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field ' . esc_attr( $field['wrapper_class'] ) . '">
-		<label for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label>';
+	<label for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label>';
 
 	if ( ! empty( $field['description'] ) && false !== $field['desc_tip'] ) {
 		echo wc_help_tip( $field['description'] );
@@ -202,6 +210,8 @@ function woocommerce_wp_select( $field ) {
 		)
 	);
 
+	$field = apply_filters( 'woocommerce_input_select_filter', $field );
+
 	$wrapper_attributes = array(
 		'class' => $field['wrapper_class'] . " form-field {$field['id']}_field",
 	);
@@ -226,9 +236,9 @@ function woocommerce_wp_select( $field ) {
 		<?php endif; ?>
 		<select <?php echo wc_implode_html_attributes( $field_attributes ); // WPCS: XSS ok. ?>>
 			<?php
-			foreach ( $field['options'] as $key => $value ) {
-				echo '<option value="' . esc_attr( $key ) . '"' . wc_selected( $key, $field['value'] ) . '>' . esc_html( $value ) . '</option>';
-			}
+				foreach ( $field['options'] as $key => $value ) {
+					echo '<option value="' . esc_attr( $key ) . '"' . wc_selected( $key, $field['value'] ) . '>' . esc_html( $value ) . '</option>';
+				}
 			?>
 		</select>
 		<?php if ( $description ) : ?>
@@ -265,14 +275,14 @@ function woocommerce_wp_radio( $field ) {
 	foreach ( $field['options'] as $key => $value ) {
 
 		echo '<li><label><input
-				name="' . esc_attr( $field['name'] ) . '"
-				value="' . esc_attr( $key ) . '"
-				type="radio"
-				class="' . esc_attr( $field['class'] ) . '"
-				style="' . esc_attr( $field['style'] ) . '"
-				' . checked( esc_attr( $field['value'] ), esc_attr( $key ), false ) . '
-				/> ' . esc_html( $value ) . '</label>
-		</li>';
+			name="' . esc_attr( $field['name'] ) . '"
+			value="' . esc_attr( $key ) . '"
+			type="radio"
+			class="' . esc_attr( $field['class'] ) . '"
+			style="' . esc_attr( $field['style'] ) . '"
+			' . checked( esc_attr( $field['value'] ), esc_attr( $key ), false ) . '
+			/> ' . esc_html( $value ) . '</label>
+	</li>';
 	}
 	echo '</ul>';
 
