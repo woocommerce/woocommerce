@@ -785,7 +785,7 @@ table.wc_status_table {
 		}
 
 		mark.yes {
-			color: $green;
+			color: var( --wc-green );
 		}
 
 		mark.no {
@@ -794,7 +794,7 @@ table.wc_status_table {
 
 		mark.error,
 		.red {
-			color: $red;
+			color: var( --wc-red );
 		}
 
 		ul {
@@ -1099,7 +1099,7 @@ ul.wc_coupon_list {
 				}
 
 				&:hover::before {
-					color: $red;
+					color: var( --wc-red );
 				}
 			}
 		}
@@ -1495,7 +1495,7 @@ ul.wc_coupon_list_block {
 		}
 
 		.refunded-total {
-			color: $red;
+			color: var( --wc-red );
 		}
 
 		.label-highlight {
@@ -1977,7 +1977,7 @@ ul.wc_coupon_list_block {
 					}
 
 					&:hover::before {
-						color: $red;
+						color: var( --wc-red );
 					}
 				}
 
@@ -1988,7 +1988,7 @@ ul.wc_coupon_list_block {
 
 			small.refunded {
 				display: block;
-				color: $red;
+				color: var( --wc-red );
 				white-space: nowrap;
 				margin-top: 0.5em;
 
@@ -2064,7 +2064,7 @@ ul.wc_coupon_list_block {
 			}
 
 			&:hover::before {
-				color: $red;
+				color: var( --wc-red );
 			}
 		}
 	}
@@ -2830,7 +2830,7 @@ ul.order_notes {
 		}
 
 		a.delete_note {
-			color: $red;
+			color: var( --wc-red );
 		}
 
 		.note_content::after {
@@ -3031,7 +3031,7 @@ table.wp-list-table {
 		}
 
 		&.instock {
-			color: $green;
+			color: var( --wc-green );
 		}
 
 		&.outofstock {
@@ -3094,7 +3094,7 @@ table.wp-list-table {
 
 mark.notice {
 	background: #fff;
-	color: $red;
+	color: var( --wc-red );
 	margin: 0 0 0 10px;
 }
 
@@ -3139,7 +3139,7 @@ table.wc_input_table {
 	}
 
 	span.tips {
-		color: $blue;
+		color: var( --wc-blue );
 	}
 
 	th {
@@ -3972,7 +3972,7 @@ img.help_tip {
 .status-enabled::before {
 
 	@include icon( "\e015" );
-	color: $woocommerce;
+	color: var( --woocommerce );
 }
 
 .status-disabled::before {
@@ -4115,7 +4115,7 @@ img.help_tip {
 
 		span.help_tip {
 			cursor: help;
-			color: $blue;
+			color: var( --wc-blue );
 		}
 
 		th {
@@ -4448,7 +4448,7 @@ img.help_tip {
 						}
 
 						&:hover::before {
-							color: $red;
+							color: var( --wc-red );
 						}
 					}
 				}
@@ -4832,7 +4832,7 @@ img.help_tip {
 				&:hover {
 
 					&::before {
-						color: $red;
+						color: var( --wc-red );
 					}
 				}
 			}
@@ -4953,7 +4953,7 @@ img.help_tip {
 		.req {
 			font-weight: 700;
 			font-style: normal;
-			color: $red;
+			color: var( --wc-red );
 		}
 	}
 
@@ -5850,12 +5850,12 @@ img.ui-datepicker-trigger {
 					border-right-width: 0;
 					padding: 10px;
 					margin: 0;
-					color: $blue;
+					color: var( --wc-blue );
 					border-top-width: 0;
 					background-image: linear-gradient(to top, #ececec, #f9f9f9);
 
 					&.section_title:hover {
-						color: $red;
+						color: var( --wc-red );
 					}
 				}
 

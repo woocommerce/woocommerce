@@ -171,7 +171,7 @@ ul.woocommerce_stats {
 
 			a::before {
 				content: "\e016";
-				color: $orange;
+				color: var( --wc-orange );
 			}
 		}
 
@@ -179,7 +179,7 @@ ul.woocommerce_stats {
 
 			a::before {
 				content: "\e013";
-				color: $red;
+				color: var( --wc-red );
 			}
 		}
 	}
