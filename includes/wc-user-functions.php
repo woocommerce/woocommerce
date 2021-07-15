@@ -63,7 +63,7 @@ if ( ! function_exists( 'wc_create_new_customer' ) ) {
 
 		// Handle password creation.
 		$password_generated = false;
-		if ( 'yes' === get_option( 'woocommerce_registration_generate_password' ) && empty( $password ) ) {
+		if ( 'yes' === get_option( 'woocommerce_registration_generate_password' ) && empty( $password ) && ( ! isset( $args[ 'user_creation' ] ) || 'no' === get_option('woocommerce_registration_generate_password_allow_overwrite')) ) {
 			$password           = wp_generate_password();
 			$password_generated = true;
 		}
