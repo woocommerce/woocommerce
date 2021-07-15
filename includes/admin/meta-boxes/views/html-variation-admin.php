@@ -86,15 +86,15 @@ defined( 'ABSPATH' ) || exit;
 			?>
 			<p class="form-row form-row-full options">
 				<label>
-					<?php esc_html_e( 'Enabled', 'woocommerce' ); ?>:
+					<?php esc_html_e( 'Enabled', 'woocommerce' ); ?>
 					<input type="checkbox" class="checkbox" name="variable_enabled[<?php echo esc_attr( $loop ); ?>]" <?php checked( in_array( $variation_object->get_status( 'edit' ), array( 'publish', false ), true ), true ); ?> />
 				</label>
 				<label class="tips" data-tip="<?php esc_attr_e( 'Enable this option if access is given to a downloadable file upon purchase of a product', 'woocommerce' ); ?>">
-					<?php esc_html_e( 'Downloadable', 'woocommerce' ); ?>:
+					<?php esc_html_e( 'Downloadable', 'woocommerce' ); ?>
 					<input type="checkbox" class="checkbox variable_is_downloadable" name="variable_is_downloadable[<?php echo esc_attr( $loop ); ?>]" <?php checked( $variation_object->get_downloadable( 'edit' ), true ); ?> />
 				</label>
 				<label class="tips" data-tip="<?php esc_attr_e( 'Enable this option if a product is not shipped or there is no shipping cost', 'woocommerce' ); ?>">
-					<?php esc_html_e( 'Virtual', 'woocommerce' ); ?>:
+					<?php esc_html_e( 'Virtual', 'woocommerce' ); ?>
 					<input type="checkbox" class="checkbox variable_is_virtual" name="variable_is_virtual[<?php echo esc_attr( $loop ); ?>]" <?php checked( $variation_object->get_virtual( 'edit' ), true ); ?> />
 				</label>
 
