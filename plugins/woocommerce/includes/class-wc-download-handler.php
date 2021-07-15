@@ -591,7 +591,7 @@ class WC_Download_Handler {
 		header( 'X-Robots-Tag: noindex, nofollow', true );
 		header( 'Content-Description: File Transfer' );
 		header( 'Content-Type: ' . self::get_download_content_type( $file_path ) );
-		header( 'Content-Disposition: inline' );
+		header( "Content-Disposition: inline; filename=$filename" );
 		header( 'Content-Transfer-Encoding: binary' );
 
 		$file_size = @filesize( $file_path ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
