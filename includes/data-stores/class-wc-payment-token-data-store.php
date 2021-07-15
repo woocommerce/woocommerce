@@ -257,7 +257,7 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 		}
 
 		if ( $args['gateway_id'] ) {
-			$gateway_ids = array( $args['gateway_id'] );
+			$gateway_ids = (array) $args['gateway_id'];
 		} else {
 			$gateways    = WC_Payment_Gateways::instance();
 			$gateway_ids = $gateways->get_payment_gateway_ids();
