@@ -658,6 +658,14 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 		}
 
+		// Syncing Prices of child product stored in Groupe Product.
+		if ( ! $product->is_type( 'grouped' ) ) {
+			$grouped_product_ids = wc_get_product_parent_groups( $product );
+			foreach ( $grouped_product_ids as $id ) {
+				WC_Product_Grouped::sync( $id );
+			}
+		}
+
 		if ( in_array( 'stock_quantity', $this->updated_props, true ) ) {
 			if ( $product->is_type( 'variation' ) ) {
 				do_action( 'woocommerce_variation_set_stock', $product );

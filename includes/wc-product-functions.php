@@ -202,6 +202,37 @@ function wc_get_featured_product_ids() {
 }
 
 /**
+ * Returns a list of product groups that a specific product belongs to.
+ *
+ * @since 4.4.0
+ * @param int $product Product Object.
+ * @return int[] a list of product groups that a specific product belongs to
+ */
+function wc_get_product_parent_groups( $product ) {
+
+	global $wpdb;
+
+	$group_ids  = array();
+	$product_id = $product->get_id();
+
+	$group_data = $wpdb->get_col(
+		$wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.QuotedDynamicPlaceholderGeneration
+			"SELECT post_id
+			FROM $wpdb->postmeta
+			WHERE meta_key = '_children' 
+			AND meta_value LIKE %s",
+			'%:' . $wpdb->esc_like( $product_id ) . ';%'
+		)
+	);
+
+	foreach ( $group_data as $group_data_key => $group_data_value ) {
+		$group_ids[] = $group_data_value;
+	}
+
+	return wp_parse_id_list( $group_ids );
+}
+
+/**
  * Filter to allow product_cat in the permalinks for products.
  *
  * @param  string  $permalink The existing permalink URL.
