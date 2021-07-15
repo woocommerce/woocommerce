@@ -362,7 +362,7 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 		global $wpdb;
 		$wpdb->update(
 			$wpdb->prefix . 'woocommerce_payment_tokens',
-			array( 'is_default' => $status ),
+			array( 'is_default' => (int) $status ),
 			array(
 				'token_id' => $token_id,
 			)
