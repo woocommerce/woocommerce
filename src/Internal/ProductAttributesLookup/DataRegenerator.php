@@ -6,6 +6,7 @@
 namespace Automattic\WooCommerce\Internal\ProductAttributesLookup;
 
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
+use Automattic\WooCommerce\Utilities\ArrayUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -61,7 +62,7 @@ class DataRegenerator {
 		);
 
 		add_action(
-			'woocommerce_run_product_attribute_lookup_update_callback',
+			'woocommerce_run_product_attribute_lookup_regeneration_callback',
 			function () {
 				$this->run_regeneration_step_callback();
 			}
@@ -93,6 +94,8 @@ class DataRegenerator {
 	 * (Note how we are returning "false" since the class handles the step scheduling by itself).
 	 */
 	public function initiate_regeneration() {
+		$this->enable_or_disable_lookup_table_usage( false );
+
 		$this->delete_all_attributes_lookup_data();
 		$products_exist = $this->initialize_table_and_data();
 		if ( $products_exist ) {
@@ -100,15 +103,6 @@ class DataRegenerator {
 		} else {
 			$this->finalize_regeneration();
 		}
-	}
-
-	/**
-	 * Tells if a regeneration is already in progress.
-	 *
-	 * @return bool True if a regeneration is already in progress.
-	 */
-	public function regeneration_is_in_progress() {
-		return ! is_null( get_option( 'woocommerce_attribute_lookup__last_products_page_processed', null ) );
 	}
 
 	/**
@@ -124,6 +118,7 @@ class DataRegenerator {
 		delete_option( 'woocommerce_attribute_lookup__enabled' );
 		delete_option( 'woocommerce_attribute_lookup__last_product_id_to_process' );
 		delete_option( 'woocommerce_attribute_lookup__last_products_page_processed' );
+		$this->data_store->unset_regeneration_in_progress_flag();
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$wpdb->query( 'DROP TABLE IF EXISTS ' . $this->lookup_table_name );
@@ -170,6 +165,7 @@ CREATE TABLE ' . $this->lookup_table_name . '(
 			return false;
 		}
 
+		$this->data_store->set_regeneration_in_progress_flag();
 		update_option( 'woocommerce_attribute_lookup__last_product_id_to_process', current( $last_existing_product_id ) );
 		update_option( 'woocommerce_attribute_lookup__last_products_page_processed', 0 );
 
@@ -181,7 +177,7 @@ CREATE TABLE ' . $this->lookup_table_name . '(
 	 * schedules the next step if necessary.
 	 */
 	private function run_regeneration_step_callback() {
-		if ( ! $this->regeneration_is_in_progress() ) {
+		if ( ! $this->data_store->regeneration_is_in_progress() ) {
 			return;
 		}
 
@@ -200,7 +196,7 @@ CREATE TABLE ' . $this->lookup_table_name . '(
 		$queue = WC()->get_instance_of( \WC_Queue::class );
 		$queue->schedule_single(
 			WC()->call_function( 'time' ) + 1,
-			'woocommerce_run_product_attribute_lookup_update_callback',
+			'woocommerce_run_product_attribute_lookup_regeneration_callback',
 			array(),
 			'woocommerce-db-updates'
 		);
@@ -233,7 +229,7 @@ CREATE TABLE ' . $this->lookup_table_name . '(
 		}
 
 		foreach ( $product_ids as $id ) {
-			$this->data_store->update_data_for_product( $id );
+			$this->data_store->create_data_for_product( $id );
 		}
 
 		update_option( 'woocommerce_attribute_lookup__last_products_page_processed', $current_products_page );
@@ -249,19 +245,7 @@ CREATE TABLE ' . $this->lookup_table_name . '(
 		delete_option( 'woocommerce_attribute_lookup__last_product_id_to_process' );
 		delete_option( 'woocommerce_attribute_lookup__last_products_page_processed' );
 		update_option( 'woocommerce_attribute_lookup__enabled', 'no' );
-	}
-
-	/**
-	 * Check if the lookup table exists in the database.
-	 *
-	 * @return bool True if the lookup table exists in the database.
-	 */
-	private function lookup_table_exists() {
-		global $wpdb;
-		$query = $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $this->lookup_table_name ) );
-
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		return $this->lookup_table_name === $wpdb->get_var( $query );
+		$this->data_store->unset_regeneration_in_progress_flag();
 	}
 
 	/**
@@ -275,14 +259,14 @@ CREATE TABLE ' . $this->lookup_table_name . '(
 			return $tools_array;
 		}
 
-		$lookup_table_exists       = $this->lookup_table_exists();
-		$generation_is_in_progress = $this->regeneration_is_in_progress();
+		$lookup_table_exists       = $this->data_store->check_lookup_table_exists();
+		$generation_is_in_progress = $this->data_store->regeneration_is_in_progress();
 
 		// Regenerate table.
 
 		if ( $lookup_table_exists ) {
 			$generate_item_name   = __( 'Regenerate the product attributes lookup table', 'woocommerce' );
-			$generate_item_desc   = __( 'This tool will regenerate the product attributes lookup table data from existing products data. This process may take a while.', 'woocommerce' );
+			$generate_item_desc   = __( 'This tool will regenerate the product attributes lookup table data from existing product(s) data. This process may take a while.', 'woocommerce' );
 			$generate_item_return = __( 'Product attributes lookup table data is regenerating', 'woocommerce' );
 			$generate_item_button = __( 'Regenerate', 'woocommerce' );
 		} else {
@@ -301,6 +285,16 @@ CREATE TABLE ' . $this->lookup_table_name . '(
 				return $generate_item_return;
 			},
 		);
+
+		if ( $lookup_table_exists ) {
+			$entry['selector'] = array(
+				'description'   => __( 'Select a product to regenerate the data for, or leave empty for a full table regeneration:', 'woocommerce' ),
+				'class'         => 'wc-product-search',
+				'search_action' => 'woocommerce_json_search_products',
+				'name'          => 'regenerate_product_attribute_lookup_data_product_id',
+				'placeholder'   => esc_attr__( 'Search for a product&hellip;', 'woocommerce' ),
+			);
+		}
 
 		if ( $generation_is_in_progress ) {
 			$entry['button'] = sprintf(
@@ -335,35 +329,6 @@ CREATE TABLE ' . $this->lookup_table_name . '(
 			);
 		}
 
-		if ( $lookup_table_exists && ! $generation_is_in_progress ) {
-
-			// Enable or disable table usage.
-
-			if ( 'yes' === get_option( 'woocommerce_attribute_lookup__enabled' ) ) {
-				$tools_array['disable_product_attributes_lookup_table_usage'] = array(
-					'name'             => __( 'Disable the product attributes lookup table usage', 'woocommerce' ),
-					'desc'             => __( 'The product attributes lookup table usage is currently enabled, use this tool to disable it.', 'woocommerce' ),
-					'button'           => __( 'Disable', 'woocommerce' ),
-					'requires_refresh' => true,
-					'callback'         => function () {
-						$this->enable_or_disable_lookup_table_usage( false );
-						return __( 'Product attributes lookup table usage has been disabled.', 'woocommerce' );
-					},
-				);
-			} else {
-				$tools_array['enable_product_attributes_lookup_table_usage'] = array(
-					'name'             => __( 'Enable the product attributes lookup table usage', 'woocommerce' ),
-					'desc'             => __( 'The product attributes lookup table usage is currently disabled, use this tool to enable it.', 'woocommerce' ),
-					'button'           => __( 'Enable', 'woocommerce' ),
-					'requires_refresh' => true,
-					'callback'         => function () {
-						$this->enable_or_disable_lookup_table_usage( true );
-						return __( 'Product attributes lookup table usage has been enabled.', 'woocommerce' );
-					},
-				);
-			}
-		}
-
 		return $tools_array;
 	}
 
@@ -373,11 +338,19 @@ CREATE TABLE ' . $this->lookup_table_name . '(
 	 * @throws \Exception The regeneration is already in progress.
 	 */
 	private function initiate_regeneration_from_tools_page() {
-		if ( $this->regeneration_is_in_progress() ) {
-			throw new \Exception( 'Product attributes lookup table is already regenerating.' );
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+		if ( ! isset( $_REQUEST['_wpnonce'] ) || false === wp_verify_nonce( $_REQUEST['_wpnonce'], 'debug_action' ) ) {
+			throw new \Exception( 'Invalid nonce' );
 		}
 
-		$this->initiate_regeneration();
+		if ( isset( $_REQUEST['regenerate_product_attribute_lookup_data_product_id'] ) ) {
+			$product_id = (int) $_REQUEST['regenerate_product_attribute_lookup_data_product_id'];
+			$this->check_can_do_lookup_table_regeneration( $product_id );
+			$this->data_store->create_data_for_product( $product_id );
+		} else {
+			$this->check_can_do_lookup_table_regeneration();
+			$this->initiate_regeneration();
+		}
 	}
 
 	/**
@@ -387,10 +360,32 @@ CREATE TABLE ' . $this->lookup_table_name . '(
 	 * @throws \Exception A lookup table regeneration is currently in progress.
 	 */
 	private function enable_or_disable_lookup_table_usage( $enable ) {
-		if ( $this->regeneration_is_in_progress() ) {
+		if ( $this->data_store->regeneration_is_in_progress() ) {
 			throw new \Exception( "Can't enable or disable the attributes lookup table usage while it's regenerating." );
 		}
 
 		update_option( 'woocommerce_attribute_lookup__enabled', $enable ? 'yes' : 'no' );
+	}
+
+	/**
+	 * Check if everything is good to go to perform a per product lookup table data regeneration
+	 * and throw an exception if not.
+	 *
+	 * @param mixed $product_id The product id to check the regeneration viability for, or null to skip product check.
+	 * @throws \Exception Something prevents the regeneration from starting.
+	 */
+	private function check_can_do_lookup_table_regeneration( $product_id = null ) {
+		if ( ! $this->data_store->is_feature_visible() ) {
+			throw new \Exception( "Can't do product attribute lookup data regeneration: feature is not visible" );
+		}
+		if ( ! $this->data_store->check_lookup_table_exists() ) {
+			throw new \Exception( "Can't do product attribute lookup data regeneration: lookup table doesn't exist" );
+		}
+		if ( $this->data_store->regeneration_is_in_progress() ) {
+			throw new \Exception( "Can't do product attribute lookup data regeneration: regeneration is already in progress" );
+		}
+		if ( $product_id && ! wc_get_product( $product_id ) ) {
+			throw new \Exception( "Can't do product attribute lookup data regeneration: product doesn't exist" );
+		}
 	}
 }

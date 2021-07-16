@@ -74,7 +74,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 					$child->delete( true );
 				} else {
 					$child->set_parent_id( 0 );
-					$child->save();
+					$this->save( $child );
 				}
 			}
 
@@ -84,6 +84,27 @@ class FiltererTest extends \WC_Unit_Test_Case {
 		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_product_attributes_lookup" );
 
 		\WC_Query::reset_chosen_attributes();
+	}
+
+	/**
+	 * Save a product and delete any lookup table data that may have been automatically inserted
+	 * (for the purposes of unit testing we want to insert this data manually)
+	 *
+	 * @param \WC_Product $product The product to save and delete lookup table data for.
+	 */
+	private function save( \WC_Product $product ) {
+		global $wpdb;
+
+		$product->save();
+
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->prefix}wc_product_attributes_lookup WHERE product_id = %d",
+				$product->get_id()
+			)
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 	}
 
 	/**
@@ -165,7 +186,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 
 		$product->set_stock_status( $in_stock ? 'instock' : 'outofstock' );
 
-		$product->save();
+		$this->save( $product );
 
 		if ( empty( $attribute_terms_by_name ) ) {
 			return $product;
@@ -234,7 +255,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 			)
 		);
 
-		$product->save();
+		$this->save( $product );
 
 		$product_id = $product->get_id();
 
@@ -259,7 +280,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 			}
 			$variation->set_attributes( $attributes );
 			$variation->set_stock_status( $variation_data['in_stock'] ? 'instock' : 'outofstock' );
-			$variation->save();
+			$this->save( $variation );
 
 			$variation_ids[] = $variation->get_id();
 		}
