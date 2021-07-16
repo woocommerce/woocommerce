@@ -132,8 +132,8 @@ jQuery( function( $ ) {
 
 				// Sort the fields.
 				rows.sort( function( a, b ) {
-					var asort = parseInt( $( a ).data( 'priority' ), 10 ),
-						bsort = parseInt( $( b ).data( 'priority' ), 10 );
+					var asort = parseInt( $( a ).attr( 'data-priority' ), 10 ),
+						bsort = parseInt( $( b ).attr( 'data-priority' ), 10 );
 
 					if ( asort > bsort ) {
 						return 1;
