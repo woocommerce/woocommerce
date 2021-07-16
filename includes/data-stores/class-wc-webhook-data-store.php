@@ -262,7 +262,7 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 		$limit         = -1 < $args['limit'] ? sprintf( 'LIMIT %d', $args['limit'] ) : '';
 		$offset        = 0 < $args['offset'] ? sprintf( 'OFFSET %d', $args['offset'] ) : '';
 		$status        = ! empty( $args['status'] ) ? "AND `status` = '" . sanitize_key( isset( $statuses[ $args['status'] ] ) ? $statuses[ $args['status'] ] : $args['status'] ) . "'" : '';
-		$search        = ! empty( $args['search'] ) ? "AND `name` LIKE '%" . $wpdb->esc_like( sanitize_text_field( $args['search'] ) ) . "%'" : '';
+		$search          = ! empty( $args['search'] ) ? $wpdb->prepare( "AND `name` LIKE %s", '%' . $wpdb->esc_like( sanitize_text_field( $args['search'] ) ) . '%' ) : '';
 		$include       = '';
 		$exclude       = '';
 		$date_created  = '';
