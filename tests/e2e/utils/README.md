@@ -64,6 +64,7 @@ This package provides support for enabling retries in tests:
 - `WP_ADMIN_WC_SETTINGS` - WooCommerce settings page root
 - `WP_ADMIN_NEW_SHIPPING_ZONE` - WooCommerce new shipping zone
 - `WP_ADMIN_WC_EXTENSIONS` - WooCommerce extensions page
+- `WP_ADMIN_PLUGIN_INSTALL` - WordPress plugin install page
 
 #### Front end
 
