@@ -174,42 +174,42 @@ class WC_Frontend_Scripts {
 			'flexslider'                 => array(
 				'src'     => self::get_asset_url( 'assets/js/flexslider/jquery.flexslider' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
-				'version' => '2.7.2',
+				'version' => $version, // 2.7.2
 			),
 			'js-cookie'                  => array(
 				'src'     => self::get_asset_url( 'assets/js/js-cookie/js.cookie' . $suffix . '.js' ),
 				'deps'    => array(),
-				'version' => '2.1.4',
+				'version' => $version, // 2.1.4
 			),
 			'jquery-blockui'             => array(
 				'src'     => self::get_asset_url( 'assets/js/jquery-blockui/jquery.blockUI' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
-				'version' => '2.70',
+				'version' => $version, // 2.7.0
 			),
 			'jquery-cookie'              => array( // deprecated.
 				'src'     => self::get_asset_url( 'assets/js/jquery-cookie/jquery.cookie' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
-				'version' => '1.4.1',
+				'version' => $version, // 1.4.1
 			),
 			'jquery-payment'             => array(
 				'src'     => self::get_asset_url( 'assets/js/jquery-payment/jquery.payment' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
-				'version' => '3.0.0',
+				'version' => $version, // 3.0.0
 			),
 			'photoswipe'                 => array(
 				'src'     => self::get_asset_url( 'assets/js/photoswipe/photoswipe' . $suffix . '.js' ),
 				'deps'    => array(),
-				'version' => '4.1.1',
+				'version' => $version, // 4.1.1
 			),
 			'photoswipe-ui-default'      => array(
 				'src'     => self::get_asset_url( 'assets/js/photoswipe/photoswipe-ui-default' . $suffix . '.js' ),
 				'deps'    => array( 'photoswipe' ),
-				'version' => '4.1.1',
+				'version' => $version, // 4.1.1
 			),
 			'prettyPhoto'                => array( // deprecated.
 				'src'     => self::get_asset_url( 'assets/js/prettyPhoto/jquery.prettyPhoto' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
-				'version' => '3.1.6',
+				'version' => $version, // 3.1.6
 			),
 			'prettyPhoto-init'           => array( // deprecated.
 				'src'     => self::get_asset_url( 'assets/js/prettyPhoto/jquery.prettyPhoto.init' . $suffix . '.js' ),
@@ -219,12 +219,12 @@ class WC_Frontend_Scripts {
 			'select2'                    => array(
 				'src'     => self::get_asset_url( 'assets/js/select2/select2.full' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
-				'version' => '4.0.3',
+				'version' => $version, // 4.0.3
 			),
 			'selectWoo'                  => array(
 				'src'     => self::get_asset_url( 'assets/js/selectWoo/selectWoo.full' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
-				'version' => '1.0.9',
+				'version' => $version, // 1.0.9
 			),
 			'wc-address-i18n'            => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/address-i18n' . $suffix . '.js' ),
@@ -299,7 +299,7 @@ class WC_Frontend_Scripts {
 			'zoom'                       => array(
 				'src'     => self::get_asset_url( 'assets/js/zoom/jquery.zoom' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
-				'version' => '1.7.21',
+				'version' => $version, // 1.7.21
 			),
 		);
 		foreach ( $register_scripts as $name => $props ) {
