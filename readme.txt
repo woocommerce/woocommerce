@@ -159,6 +159,12 @@ If you encounter issues with the shop/category pages after an update, flush the 
 WooCommerce comes with some sample data you can use to see how products look; import sample_products.xml via the [WordPress importer](https://wordpress.org/plugins/wordpress-importer/). You can also use the core [CSV importer](https://docs.woocommerce.com/document/product-csv-importer-exporter/?utm_source=wp%20org%20repo%20listing&utm_content=3.6) or our [CSV Import Suite extension](https://woocommerce.com/products/product-csv-import-suite/?utm_source=wp%20org%20repo%20listing&utm_content=3.6) to import sample_products.csv
 
 == Changelog ==
+= 5.5.1 2021-07-14 =
+
+**WooCommerce**
+
+* Fix - Patched security vulnerability. https://woocommerce.com/posts/critical-vulnerability-detected-july-2021/
+
 = 5.5.0 2021-07-13 =
 
 **WooCommerce**

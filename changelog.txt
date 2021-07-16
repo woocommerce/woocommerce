@@ -1,5 +1,11 @@
 == Changelog ==
 
+= 5.5.1 2021-07-14 =
+
+**WooCommerce**
+
+* Fix - Patched security vulnerability. https://woocommerce.com/posts/critical-vulnerability-detected-july-2021/
+
 = 5.5.0 2021-07-13 =
 
 **WooCommerce**
@@ -184,6 +190,12 @@
 * Fix - Add extra safety/account for different versions of AS and different loading patterns. #714
 * Fix - Handle hidden columns (Tools → Scheduled Actions) | #600.
 
+= 5.4.2 2021-07-14 =
+
+**WooCommerce**
+
+* Fix - Patched security vulnerability. https://woocommerce.com/posts/critical-vulnerability-detected-july-2021/
+
 = 5.4.1 2021-06-10 =
 
 **WooCommerce**
@@ -276,6 +288,12 @@
 * Tweak - Switched to `rest_preload_api_request` for API hydration in cart and checkout blocks. #4090
 * Fix - Prevent parts of old addresses being displayed in the shipping calculator when changing countries. #4038
 * Fix - issue in which email and phone fields are cleared when using a separate billing address. #4162
+
+= 5.3.1 2021-07-14 =
+
+**WooCommerce**
+
+* Fix - Patched security vulnerability. https://woocommerce.com/posts/critical-vulnerability-detected-july-2021/
 
 = 5.3.0 2021-05-11 =
 
@@ -407,6 +425,12 @@
 * Tweak - Revert WCPay international support for bundled package #6901
 * Tweak - Store profiler - Changed MailPoet's title and description #6886
 * Tweak - Update PayU logo #6829
+
+= 5.2.3 2021-07-14 =
+
+**WooCommerce**
+
+* Fix - Patched security vulnerability. https://woocommerce.com/posts/critical-vulnerability-detected-july-2021/
 
 = 5.2.2 2021-04-15 =
 
@@ -571,6 +595,12 @@
 * Fix - Ensure sale badges have a uniform height in the Cart block. ([3897](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3897))
 * Note - Internally, this release has modified how `AbstractBlock` (the base class for all of our blocks) functions, and how it loads assets. `AbstractBlock` is internal to this project and does not seem like something that would ever need to be extended by 3rd parties, but note if you are doing so for whatever reason, your implementation would need to be updated to match. ([3829](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3829))
 
+= 5.1.1 2021-07-14 =
+
+**WooCommerce**
+
+* Fix - Patched security vulnerability. https://woocommerce.com/posts/critical-vulnerability-detected-july-2021/
+
 = 5.1.0 2021-03-09 =
 
 **WooCommerce**
@@ -679,6 +709,12 @@
 * Dev - Added formatting classes to the Store API for extensions to consume.
 * Dev - Refactored and reordered Store API checkout processing to handle various edge cases and better support future extensibility. ([3454](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3454))
 
+= 5.0.1 2021-07-14 =
+
+**WooCommerce**
+
+* Fix - Patched security vulnerability. https://woocommerce.com/posts/critical-vulnerability-detected-july-2021/
+
 = 5.0.0 - 2021-02-09 =
 
 **WooCommerce**
@@ -745,6 +781,12 @@
 * Add - Note for users coming from Calypso. #6030
 * Enhancement - Add an "unread" indicator to inbox messages. #6047 
 * Add - Manage activity from home screen inbox message. #6072
+
+= 4.9.3 2021-07-14 =
+
+**WooCommerce**
+
+* Fix - Patched security vulnerability. https://woocommerce.com/posts/critical-vulnerability-detected-july-2021/
 
 = 4.9.2 2021-01-25 =
 
@@ -870,6 +912,12 @@
 * Dev - Expose store/cart via ExtendRestApi to extensions. ([3445](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3445))
 * Dev - Added formatting classes to the Store API for extensions to consume.
 
+= 4.8.1 2021-07-14 =
+
+**WooCommerce**
+
+* Fix - Patched security vulnerability. https://woocommerce.com/posts/critical-vulnerability-detected-july-2021/
+
 = 4.8.0 - 2020-12-08 =
 
 **WooCommerce**
@@ -983,6 +1031,12 @@
 * Fix - Twenty Twenty One Button and Placeholder Styling. #3443
 * Fix - checkbox and textarea styles in Twenty Twenty One when it has dark controls active. #3450
 
+= 4.7.2 2021-07-14 =
+
+**WooCommerce**
+
+* Fix - Patched security vulnerability. https://woocommerce.com/posts/critical-vulnerability-detected-july-2021/
+
 = 4.7.1 - 2020-11-24 =
 
 **WooCommerce**
@@ -1044,6 +1098,12 @@
 
 * Tweak: Add BR and IN to list of stripe countries [#5377](https://github.com/woocommerce/woocommerce-admin/pull/5377)
 * Fix: Redirect instead of stalling on WCPay Inbox note action [#5413](https://github.com/woocommerce/woocommerce-admin/pull/5413)
+
+= 4.6.3 2021-07-14 =
+
+**WooCommerce**
+
+* Fix - Patched security vulnerability. https://woocommerce.com/posts/critical-vulnerability-detected-july-2021/
 
 = 4.6.2 - 2020-11-05 =
 
@@ -1167,6 +1227,12 @@
 - Create DebouncedValidatedTextInput component. ([3108](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3108))
 - Merge ProductPrice atomic block and component. ([3065](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3065))
 
+= 4.5.3 2021-07-14 =
+
+**WooCommerce**
+
+* Fix - Patched security vulnerability. https://woocommerce.com/posts/critical-vulnerability-detected-july-2021/
+
 = 4.5.2 - 2020-09-14 =
 * Fix - Revert the changes in filtering by attribute that were introduced in WooCommerce 4.4. #27625
 * Fix - Adjusted validation to allow for variations with "0" as an attribute value. #27633
@@ -1214,6 +1280,12 @@
 * Dev - Display modal with more info about the new homescreen. #4890
 * Dev - Task list - add a shortcut back to store setup. #4853
 * Dev - Update the colors of the illustrations in the welcome modal. #4945
+
+= 4.4.2 2021-07-14 =
+
+**WooCommerce**
+
+* Fix - Patched security vulnerability. https://woocommerce.com/posts/critical-vulnerability-detected-july-2021/
 
 = 4.4.1 - 2020-08-19 =
 
@@ -1362,6 +1434,12 @@
 * Fix - Missing permissions_callback arg in StoreApi route definitions. #2926
 * Fix - 'Product Summary' in All Products block is not pulling in the short description of the product. #2913
 * Dev - Add query filter when searching for a table. #2886
+
+= 4.3.4 2021-07-14 =
+
+**WooCommerce**
+
+* Fix - Patched security vulnerability. https://woocommerce.com/posts/critical-vulnerability-detected-july-2021/
 
 = 4.3.3 - 2020-08-14 =
 
@@ -1544,6 +1622,12 @@
 * Dev - Table creation validation for install routine #2287
 * Dev - Update the icons used in the blocks. #1644
 
+= 4.2.3 2021-07-14 =
+
+**WooCommerce**
+
+* Fix - Patched security vulnerability. https://woocommerce.com/posts/critical-vulnerability-detected-july-2021/
+
 = 4.2.2 - 2020-06-23 =
 
 **WooCommerce**
@@ -1622,6 +1706,12 @@
 * Dev - Dynamic Currency with Context API #4027
 * Dev - Remove Duplicate array entry #4049
 
+= 4.1.2 2021-07-14 =
+
+**WooCommerce**
+
+* Fix - Patched security vulnerability. https://woocommerce.com/posts/critical-vulnerability-detected-july-2021/
+
 = 4.1.1 - 2020-05-19 =
 
 * Enhancement - Added notice about public uploads directory. #26207
@@ -1680,6 +1770,12 @@
 * Dev - Make WC_Product_Data_Store_CPT::update_product_stock operations atomic. #26039
 * Dev - Adds usage data for the of cart & checkout blocks (currently in development in WooCommmerce Blocks plugin) to the WC Tracker snapshot. #26084
 * Dev - Implement some additional tracks for coupons, orders, and products. #26085
+
+= 4.0.2 2021-07-14 =
+
+**WooCommerce**
+
+* Fix - Patched security vulnerability. https://woocommerce.com/posts/critical-vulnerability-detected-july-2021/
 
 = 4.0.1 - 2020-03-18 =
 
@@ -1799,6 +1895,12 @@
 * Dev - Applies woocommerce_maxmind_geolocation_database_path in MaxMind database migration. #25681
 * Dev - Support both .data() and .dataset for formdata in add to cart requests. #25726
 
+= 3.9.4 2021-07-14 =
+
+**WooCommerce**
+
+* Fix - Patched security vulnerability. https://woocommerce.com/posts/critical-vulnerability-detected-july-2021/
+
 = 3.9.3 - 2020-02-27 =
 * Fix - Replaced deprecated Jetpack::is_staging_site call. #25670
 * Fix - Corrected the cache invalidation behavior of order item CRUD actions. #25734
@@ -1907,6 +2009,12 @@
 * Localization - Fixed translatable string in WooCommerce's libraries. #24892 #24894
 * Localization - Fixed translatable string comments for translators. #24928
 * Localization - Add postcode validation for Slovenia. #25174
+
+= 3.8.2 2021-07-14 =
+
+**WooCommerce**
+
+* Fix - Patched security vulnerability. https://woocommerce.com/posts/critical-vulnerability-detected-july-2021/
 
 = 3.8.0 - 2019-11-05 =
 * Enhancement - Show error message in "My Account - view order" if order does not exist. #24435
@@ -2024,6 +2132,12 @@
 * Security - Add an exit after the redirect when checking author archive capabilities for customers.
 * Security - Ensure 404 pages with single product urls cannot be exploited using Open Redirect.
 
+= 3.7.2 2021-07-14 =
+
+**WooCommerce**
+
+* Fix - Patched security vulnerability. https://woocommerce.com/posts/critical-vulnerability-detected-july-2021/
+
 = 3.7.1 - 2019-10-09
 * Security - Add an exit after the redirect when checking author archive capabilities for customers.
 * Security - Ensure 404 pages with single product urls cannot be exploited using Open Redirect.
@@ -2129,6 +2243,12 @@
 * Localization - OBW: Make postal code optional based on locale data. #23915
 * Localization - Add new currency for São Tomé, Príncipe dobra and Mauritanian ouguiya. #23950
 * Localization - Change Canada poscode label to `Postal code`. #23740
+
+= 3.6.6 2021-07-14 =
+
+**WooCommerce**
+
+* Fix - Patched security vulnerability. https://woocommerce.com/posts/critical-vulnerability-detected-july-2021/
 
 = 3.6.5 - 2019-07-02 =
 * Security - Introduce file type check for tax rate importer.
@@ -2452,6 +2572,12 @@
 * Localization - Update Peruvian currency. #22602
 * Localization - Update CA address format. #22692
 * Localization - Updated JP field order. #22774
+
+= 3.5.9 2021-07-14 =
+
+**WooCommerce**
+
+* Fix - Patched security vulnerability. https://woocommerce.com/posts/critical-vulnerability-detected-july-2021/
 
 = 3.5.8 - 2019-04-16 =
 * Security - Added escaping for states on the user profile screen.
@@ -2788,6 +2914,12 @@
 * Localization - Make Romania state selection mandatory. #21180
 * Localization - Make city field optional and hidden for Singapore addresses. #21016
 
+= 3.4.8 2021-07-14 =
+
+**WooCommerce**
+
+* Fix - Patched security vulnerability. https://woocommerce.com/posts/critical-vulnerability-detected-july-2021/
+
 = 3.4.6 - 2018-10-11 =
 * Fix - Security issues
 * Fix - Allow percent coupons with sale restrictions to apply to carts with sale items in them. #21241
@@ -3091,6 +3223,12 @@
 * Localization - Update ZA tax rate. #19909
 * Localization - Various spelling, grammar fixes, and phrasing improvements.
 * Localization - Fix missing Bahrain country code. #20061
+
+= 3.3.6 2021-07-14 =
+
+**WooCommerce**
+
+* Fix - Patched security vulnerability. https://woocommerce.com/posts/critical-vulnerability-detected-july-2021/
 
 = 3.3.5 - 2018-04-10 =
 * Fix - Shop page notice should not appear when editing the "Hello World!" page.
