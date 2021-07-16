@@ -6,5 +6,25 @@ $vendorDir = dirname(__DIR__);
 $baseDir   = dirname($vendorDir);
 
 return array( 
+	'3937806105cc8e221b8fa8db5b70d2f2' => array(
+		'version' => '0.6.3.0',
+		'path'    => $vendorDir . '/wp-cli/mustangostang-spyc/includes/functions.php'
+	),
+	'be01b9b16925dcb22165c40b46681ac6' => array(
+		'version' => '0.11.11.0',
+		'path'    => $vendorDir . '/wp-cli/php-cli-tools/lib/cli/cli.php'
+	),
+	'320cde22f66dd4f5d3fd621d3e88b98f' => array(
+		'version' => '1.18.1.0',
+		'path'    => $vendorDir . '/symfony/polyfill-ctype/bootstrap.php'
+	),
+	'6124b4c8570aa390c21fafd04a26c69f' => array(
+		'version' => '1.10.1.0',
+		'path'    => $vendorDir . '/myclabs/deep-copy/src/DeepCopy/deep_copy.php'
+	),
+	'ffb465a494c3101218c4417180c2c9a2' => array(
+		'version' => '2.2.5.0',
+		'path'    => $vendorDir . '/wp-cli/i18n-command/i18n-command.php'
+	),
 );
 
