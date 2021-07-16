@@ -6,6 +6,654 @@ $vendorDir = dirname(__DIR__);
 $baseDir   = dirname($vendorDir);
 
 return array( 
+	'phpDocumentor\\Reflection\\Element' => array(
+		'version' => '2.0.0.0',
+		'path'    => $vendorDir . '/phpdocumentor/reflection-common/src/Element.php'
+	),
+	'phpDocumentor\\Reflection\\ProjectFactory' => array(
+		'version' => '2.0.0.0',
+		'path'    => $vendorDir . '/phpdocumentor/reflection-common/src/ProjectFactory.php'
+	),
+	'phpDocumentor\\Reflection\\File' => array(
+		'version' => '2.0.0.0',
+		'path'    => $vendorDir . '/phpdocumentor/reflection-common/src/File.php'
+	),
+	'phpDocumentor\\Reflection\\Project' => array(
+		'version' => '2.0.0.0',
+		'path'    => $vendorDir . '/phpdocumentor/reflection-common/src/Project.php'
+	),
+	'phpDocumentor\\Reflection\\Fqsen' => array(
+		'version' => '2.0.0.0',
+		'path'    => $vendorDir . '/phpdocumentor/reflection-common/src/Fqsen.php'
+	),
+	'phpDocumentor\\Reflection\\Location' => array(
+		'version' => '2.0.0.0',
+		'path'    => $vendorDir . '/phpdocumentor/reflection-common/src/Location.php'
+	),
+	'phpDocumentor\\Reflection\\DocBlockFactory' => array(
+		'version' => '4.3.4.0',
+		'path'    => $vendorDir . '/phpdocumentor/reflection-docblock/src/DocBlockFactory.php'
+	),
+	'phpDocumentor\\Reflection\\DocBlock\\Serializer' => array(
+		'version' => '4.3.4.0',
+		'path'    => $vendorDir . '/phpdocumentor/reflection-docblock/src/DocBlock/Serializer.php'
+	),
+	'phpDocumentor\\Reflection\\DocBlock\\ExampleFinder' => array(
+		'version' => '4.3.4.0',
+		'path'    => $vendorDir . '/phpdocumentor/reflection-docblock/src/DocBlock/ExampleFinder.php'
+	),
+	'phpDocumentor\\Reflection\\DocBlock\\Tag' => array(
+		'version' => '4.3.4.0',
+		'path'    => $vendorDir . '/phpdocumentor/reflection-docblock/src/DocBlock/Tag.php'
+	),
+	'phpDocumentor\\Reflection\\DocBlock\\TagFactory' => array(
+		'version' => '4.3.4.0',
+		'path'    => $vendorDir . '/phpdocumentor/reflection-docblock/src/DocBlock/TagFactory.php'
+	),
+	'phpDocumentor\\Reflection\\DocBlock\\DescriptionFactory' => array(
+		'version' => '4.3.4.0',
+		'path'    => $vendorDir . '/phpdocumentor/reflection-docblock/src/DocBlock/DescriptionFactory.php'
+	),
+	'phpDocumentor\\Reflection\\DocBlock\\Tags\\Since' => array(
+		'version' => '4.3.4.0',
+		'path'    => $vendorDir . '/phpdocumentor/reflection-docblock/src/DocBlock/Tags/Since.php'
+	),
+	'phpDocumentor\\Reflection\\DocBlock\\Tags\\PropertyWrite' => array(
+		'version' => '4.3.4.0',
+		'path'    => $vendorDir . '/phpdocumentor/reflection-docblock/src/DocBlock/Tags/PropertyWrite.php'
+	),
+	'phpDocumentor\\Reflection\\DocBlock\\Tags\\Link' => array(
+		'version' => '4.3.4.0',
+		'path'    => $vendorDir . '/phpdocumentor/reflection-docblock/src/DocBlock/Tags/Link.php'
+	),
+	'phpDocumentor\\Reflection\\DocBlock\\Tags\\BaseTag' => array(
+		'version' => '4.3.4.0',
+		'path'    => $vendorDir . '/phpdocumentor/reflection-docblock/src/DocBlock/Tags/BaseTag.php'
+	),
+	'phpDocumentor\\Reflection\\DocBlock\\Tags\\Var_' => array(
+		'version' => '4.3.4.0',
+		'path'    => $vendorDir . '/phpdocumentor/reflection-docblock/src/DocBlock/Tags/Var_.php'
+	),
+	'phpDocumentor\\Reflection\\DocBlock\\Tags\\Param' => array(
+		'version' => '4.3.4.0',
+		'path'    => $vendorDir . '/phpdocumentor/reflection-docblock/src/DocBlock/Tags/Param.php'
+	),
+	'phpDocumentor\\Reflection\\DocBlock\\Tags\\Method' => array(
+		'version' => '4.3.4.0',
+		'path'    => $vendorDir . '/phpdocumentor/reflection-docblock/src/DocBlock/Tags/Method.php'
+	),
+	'phpDocumentor\\Reflection\\DocBlock\\Tags\\Formatter' => array(
+		'version' => '4.3.4.0',
+		'path'    => $vendorDir . '/phpdocumentor/reflection-docblock/src/DocBlock/Tags/Formatter.php'
+	),
+	'phpDocumentor\\Reflection\\DocBlock\\Tags\\Uses' => array(
+		'version' => '4.3.4.0',
+		'path'    => $vendorDir . '/phpdocumentor/reflection-docblock/src/DocBlock/Tags/Uses.php'
+	),
+	'phpDocumentor\\Reflection\\DocBlock\\Tags\\Return_' => array(
+		'version' => '4.3.4.0',
+		'path'    => $vendorDir . '/phpdocumentor/reflection-docblock/src/DocBlock/Tags/Return_.php'
+	),
+	'phpDocumentor\\Reflection\\DocBlock\\Tags\\Formatter\\PassthroughFormatter' => array(
+		'version' => '4.3.4.0',
+		'path'    => $vendorDir . '/phpdocumentor/reflection-docblock/src/DocBlock/Tags/Formatter/PassthroughFormatter.php'
+	),
+	'phpDocumentor\\Reflection\\DocBlock\\Tags\\Formatter\\AlignFormatter' => array(
+		'version' => '4.3.4.0',
+		'path'    => $vendorDir . '/phpdocumentor/reflection-docblock/src/DocBlock/Tags/Formatter/AlignFormatter.php'
+	),
+	'phpDocumentor\\Reflection\\DocBlock\\Tags\\PropertyRead' => array(
+		'version' => '4.3.4.0',
+		'path'    => $vendorDir . '/phpdocumentor/reflection-docblock/src/DocBlock/Tags/PropertyRead.php'
+	),
+	'phpDocumentor\\Reflection\\DocBlock\\Tags\\Property' => array(
+		'version' => '4.3.4.0',
+		'path'    => $vendorDir . '/phpdocumentor/reflection-docblock/src/DocBlock/Tags/Property.php'
+	),
+	'phpDocumentor\\Reflection\\DocBlock\\Tags\\Version' => array(
+		'version' => '4.3.4.0',
+		'path'    => $vendorDir . '/phpdocumentor/reflection-docblock/src/DocBlock/Tags/Version.php'
+	),
+	'phpDocumentor\\Reflection\\DocBlock\\Tags\\See' => array(
+		'version' => '4.3.4.0',
+		'path'    => $vendorDir . '/phpdocumentor/reflection-docblock/src/DocBlock/Tags/See.php'
+	),
+	'phpDocumentor\\Reflection\\DocBlock\\Tags\\Generic' => array(
+		'version' => '4.3.4.0',
+		'path'    => $vendorDir . '/phpdocumentor/reflection-docblock/src/DocBlock/Tags/Generic.php'
+	),
+	'phpDocumentor\\Reflection\\DocBlock\\Tags\\TagWithType' => array(
+		'version' => '4.3.4.0',
+		'path'    => $vendorDir . '/phpdocumentor/reflection-docblock/src/DocBlock/Tags/TagWithType.php'
+	),
+	'phpDocumentor\\Reflection\\DocBlock\\Tags\\Source' => array(
+		'version' => '4.3.4.0',
+		'path'    => $vendorDir . '/phpdocumentor/reflection-docblock/src/DocBlock/Tags/Source.php'
+	),
+	'phpDocumentor\\Reflection\\DocBlock\\Tags\\Author' => array(
+		'version' => '4.3.4.0',
+		'path'    => $vendorDir . '/phpdocumentor/reflection-docblock/src/DocBlock/Tags/Author.php'
+	),
+	'phpDocumentor\\Reflection\\DocBlock\\Tags\\Throws' => array(
+		'version' => '4.3.4.0',
+		'path'    => $vendorDir . '/phpdocumentor/reflection-docblock/src/DocBlock/Tags/Throws.php'
+	),
+	'phpDocumentor\\Reflection\\DocBlock\\Tags\\Factory\\Strategy' => array(
+		'version' => '4.3.4.0',
+		'path'    => $vendorDir . '/phpdocumentor/reflection-docblock/src/DocBlock/Tags/Factory/Strategy.php'
+	),
+	'phpDocumentor\\Reflection\\DocBlock\\Tags\\Factory\\StaticMethod' => array(
+		'version' => '4.3.4.0',
+		'path'    => $vendorDir . '/phpdocumentor/reflection-docblock/src/DocBlock/Tags/Factory/StaticMethod.php'
+	),
+	'phpDocumentor\\Reflection\\DocBlock\\Tags\\Reference\\Reference' => array(
+		'version' => '4.3.4.0',
+		'path'    => $vendorDir . '/phpdocumentor/reflection-docblock/src/DocBlock/Tags/Reference/Reference.php'
+	),
+	'phpDocumentor\\Reflection\\DocBlock\\Tags\\Reference\\Url' => array(
+		'version' => '4.3.4.0',
+		'path'    => $vendorDir . '/phpdocumentor/reflection-docblock/src/DocBlock/Tags/Reference/Url.php'
+	),
+	'phpDocumentor\\Reflection\\DocBlock\\Tags\\Reference\\Fqsen' => array(
+		'version' => '4.3.4.0',
+		'path'    => $vendorDir . '/phpdocumentor/reflection-docblock/src/DocBlock/Tags/Reference/Fqsen.php'
+	),
+	'phpDocumentor\\Reflection\\DocBlock\\Tags\\Example' => array(
+		'version' => '4.3.4.0',
+		'path'    => $vendorDir . '/phpdocumentor/reflection-docblock/src/DocBlock/Tags/Example.php'
+	),
+	'phpDocumentor\\Reflection\\DocBlock\\Tags\\Deprecated' => array(
+		'version' => '4.3.4.0',
+		'path'    => $vendorDir . '/phpdocumentor/reflection-docblock/src/DocBlock/Tags/Deprecated.php'
+	),
+	'phpDocumentor\\Reflection\\DocBlock\\Tags\\Covers' => array(
+		'version' => '4.3.4.0',
+		'path'    => $vendorDir . '/phpdocumentor/reflection-docblock/src/DocBlock/Tags/Covers.php'
+	),
+	'phpDocumentor\\Reflection\\DocBlock\\StandardTagFactory' => array(
+		'version' => '4.3.4.0',
+		'path'    => $vendorDir . '/phpdocumentor/reflection-docblock/src/DocBlock/StandardTagFactory.php'
+	),
+	'phpDocumentor\\Reflection\\DocBlock\\Description' => array(
+		'version' => '4.3.4.0',
+		'path'    => $vendorDir . '/phpdocumentor/reflection-docblock/src/DocBlock/Description.php'
+	),
+	'phpDocumentor\\Reflection\\DocBlockFactoryInterface' => array(
+		'version' => '4.3.4.0',
+		'path'    => $vendorDir . '/phpdocumentor/reflection-docblock/src/DocBlockFactoryInterface.php'
+	),
+	'phpDocumentor\\Reflection\\DocBlock' => array(
+		'version' => '4.3.4.0',
+		'path'    => $vendorDir . '/phpdocumentor/reflection-docblock/src/DocBlock.php'
+	),
+	'phpDocumentor\\Reflection\\TypeResolver' => array(
+		'version' => '1.0.1.0',
+		'path'    => $vendorDir . '/phpdocumentor/type-resolver/src/TypeResolver.php'
+	),
+	'phpDocumentor\\Reflection\\Types\\Boolean' => array(
+		'version' => '1.0.1.0',
+		'path'    => $vendorDir . '/phpdocumentor/type-resolver/src/Types/Boolean.php'
+	),
+	'phpDocumentor\\Reflection\\Types\\Integer' => array(
+		'version' => '1.0.1.0',
+		'path'    => $vendorDir . '/phpdocumentor/type-resolver/src/Types/Integer.php'
+	),
+	'phpDocumentor\\Reflection\\Types\\Self_' => array(
+		'version' => '1.0.1.0',
+		'path'    => $vendorDir . '/phpdocumentor/type-resolver/src/Types/Self_.php'
+	),
+	'phpDocumentor\\Reflection\\Types\\Void_' => array(
+		'version' => '1.0.1.0',
+		'path'    => $vendorDir . '/phpdocumentor/type-resolver/src/Types/Void_.php'
+	),
+	'phpDocumentor\\Reflection\\Types\\Null_' => array(
+		'version' => '1.0.1.0',
+		'path'    => $vendorDir . '/phpdocumentor/type-resolver/src/Types/Null_.php'
+	),
+	'phpDocumentor\\Reflection\\Types\\Resource_' => array(
+		'version' => '1.0.1.0',
+		'path'    => $vendorDir . '/phpdocumentor/type-resolver/src/Types/Resource_.php'
+	),
+	'phpDocumentor\\Reflection\\Types\\Float_' => array(
+		'version' => '1.0.1.0',
+		'path'    => $vendorDir . '/phpdocumentor/type-resolver/src/Types/Float_.php'
+	),
+	'phpDocumentor\\Reflection\\Types\\Object_' => array(
+		'version' => '1.0.1.0',
+		'path'    => $vendorDir . '/phpdocumentor/type-resolver/src/Types/Object_.php'
+	),
+	'phpDocumentor\\Reflection\\Types\\String_' => array(
+		'version' => '1.0.1.0',
+		'path'    => $vendorDir . '/phpdocumentor/type-resolver/src/Types/String_.php'
+	),
+	'phpDocumentor\\Reflection\\Types\\Nullable' => array(
+		'version' => '1.0.1.0',
+		'path'    => $vendorDir . '/phpdocumentor/type-resolver/src/Types/Nullable.php'
+	),
+	'phpDocumentor\\Reflection\\Types\\Callable_' => array(
+		'version' => '1.0.1.0',
+		'path'    => $vendorDir . '/phpdocumentor/type-resolver/src/Types/Callable_.php'
+	),
+	'phpDocumentor\\Reflection\\Types\\Iterable_' => array(
+		'version' => '1.0.1.0',
+		'path'    => $vendorDir . '/phpdocumentor/type-resolver/src/Types/Iterable_.php'
+	),
+	'phpDocumentor\\Reflection\\Types\\Static_' => array(
+		'version' => '1.0.1.0',
+		'path'    => $vendorDir . '/phpdocumentor/type-resolver/src/Types/Static_.php'
+	),
+	'phpDocumentor\\Reflection\\Types\\Parent_' => array(
+		'version' => '1.0.1.0',
+		'path'    => $vendorDir . '/phpdocumentor/type-resolver/src/Types/Parent_.php'
+	),
+	'phpDocumentor\\Reflection\\Types\\Scalar' => array(
+		'version' => '1.0.1.0',
+		'path'    => $vendorDir . '/phpdocumentor/type-resolver/src/Types/Scalar.php'
+	),
+	'phpDocumentor\\Reflection\\Types\\Context' => array(
+		'version' => '1.0.1.0',
+		'path'    => $vendorDir . '/phpdocumentor/type-resolver/src/Types/Context.php'
+	),
+	'phpDocumentor\\Reflection\\Types\\AbstractList' => array(
+		'version' => '1.0.1.0',
+		'path'    => $vendorDir . '/phpdocumentor/type-resolver/src/Types/AbstractList.php'
+	),
+	'phpDocumentor\\Reflection\\Types\\Collection' => array(
+		'version' => '1.0.1.0',
+		'path'    => $vendorDir . '/phpdocumentor/type-resolver/src/Types/Collection.php'
+	),
+	'phpDocumentor\\Reflection\\Types\\ContextFactory' => array(
+		'version' => '1.0.1.0',
+		'path'    => $vendorDir . '/phpdocumentor/type-resolver/src/Types/ContextFactory.php'
+	),
+	'phpDocumentor\\Reflection\\Types\\Compound' => array(
+		'version' => '1.0.1.0',
+		'path'    => $vendorDir . '/phpdocumentor/type-resolver/src/Types/Compound.php'
+	),
+	'phpDocumentor\\Reflection\\Types\\This' => array(
+		'version' => '1.0.1.0',
+		'path'    => $vendorDir . '/phpdocumentor/type-resolver/src/Types/This.php'
+	),
+	'phpDocumentor\\Reflection\\Types\\Array_' => array(
+		'version' => '1.0.1.0',
+		'path'    => $vendorDir . '/phpdocumentor/type-resolver/src/Types/Array_.php'
+	),
+	'phpDocumentor\\Reflection\\Types\\Mixed_' => array(
+		'version' => '1.0.1.0',
+		'path'    => $vendorDir . '/phpdocumentor/type-resolver/src/Types/Mixed_.php'
+	),
+	'phpDocumentor\\Reflection\\Type' => array(
+		'version' => '1.0.1.0',
+		'path'    => $vendorDir . '/phpdocumentor/type-resolver/src/Type.php'
+	),
+	'phpDocumentor\\Reflection\\FqsenResolver' => array(
+		'version' => '1.0.1.0',
+		'path'    => $vendorDir . '/phpdocumentor/type-resolver/src/FqsenResolver.php'
+	),
+	'Webmozart\\Assert\\Assert' => array(
+		'version' => '1.7.0.0',
+		'path'    => $vendorDir . '/webmozart/assert/src/Assert.php'
+	),
+	'Symfony\\Polyfill\\Ctype\\Ctype' => array(
+		'version' => '1.14.0.0',
+		'path'    => $vendorDir . '/symfony/polyfill-ctype/Ctype.php'
+	),
+	'Prophecy\\Comparator\\Factory' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Comparator/Factory.php'
+	),
+	'Prophecy\\Comparator\\ClosureComparator' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Comparator/ClosureComparator.php'
+	),
+	'Prophecy\\Comparator\\ProphecyComparator' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Comparator/ProphecyComparator.php'
+	),
+	'Prophecy\\Argument' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Argument.php'
+	),
+	'Prophecy\\Doubler\\DoubleInterface' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Doubler/DoubleInterface.php'
+	),
+	'Prophecy\\Doubler\\LazyDouble' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Doubler/LazyDouble.php'
+	),
+	'Prophecy\\Doubler\\NameGenerator' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Doubler/NameGenerator.php'
+	),
+	'Prophecy\\Doubler\\Doubler' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Doubler/Doubler.php'
+	),
+	'Prophecy\\Doubler\\Generator\\ClassCreator' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Doubler/Generator/ClassCreator.php'
+	),
+	'Prophecy\\Doubler\\Generator\\ReflectionInterface' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Doubler/Generator/ReflectionInterface.php'
+	),
+	'Prophecy\\Doubler\\Generator\\ClassCodeGenerator' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Doubler/Generator/ClassCodeGenerator.php'
+	),
+	'Prophecy\\Doubler\\Generator\\TypeHintReference' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Doubler/Generator/TypeHintReference.php'
+	),
+	'Prophecy\\Doubler\\Generator\\ClassMirror' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Doubler/Generator/ClassMirror.php'
+	),
+	'Prophecy\\Doubler\\Generator\\Node\\ArgumentNode' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Doubler/Generator/Node/ArgumentNode.php'
+	),
+	'Prophecy\\Doubler\\Generator\\Node\\ClassNode' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Doubler/Generator/Node/ClassNode.php'
+	),
+	'Prophecy\\Doubler\\Generator\\Node\\MethodNode' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Doubler/Generator/Node/MethodNode.php'
+	),
+	'Prophecy\\Doubler\\CachedDoubler' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Doubler/CachedDoubler.php'
+	),
+	'Prophecy\\Doubler\\ClassPatch\\TraversablePatch' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Doubler/ClassPatch/TraversablePatch.php'
+	),
+	'Prophecy\\Doubler\\ClassPatch\\KeywordPatch' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Doubler/ClassPatch/KeywordPatch.php'
+	),
+	'Prophecy\\Doubler\\ClassPatch\\ClassPatchInterface' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Doubler/ClassPatch/ClassPatchInterface.php'
+	),
+	'Prophecy\\Doubler\\ClassPatch\\ReflectionClassNewInstancePatch' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Doubler/ClassPatch/ReflectionClassNewInstancePatch.php'
+	),
+	'Prophecy\\Doubler\\ClassPatch\\HhvmExceptionPatch' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Doubler/ClassPatch/HhvmExceptionPatch.php'
+	),
+	'Prophecy\\Doubler\\ClassPatch\\SplFileInfoPatch' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Doubler/ClassPatch/SplFileInfoPatch.php'
+	),
+	'Prophecy\\Doubler\\ClassPatch\\ThrowablePatch' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Doubler/ClassPatch/ThrowablePatch.php'
+	),
+	'Prophecy\\Doubler\\ClassPatch\\ProphecySubjectPatch' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Doubler/ClassPatch/ProphecySubjectPatch.php'
+	),
+	'Prophecy\\Doubler\\ClassPatch\\DisableConstructorPatch' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Doubler/ClassPatch/DisableConstructorPatch.php'
+	),
+	'Prophecy\\Doubler\\ClassPatch\\MagicCallPatch' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Doubler/ClassPatch/MagicCallPatch.php'
+	),
+	'Prophecy\\Util\\StringUtil' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Util/StringUtil.php'
+	),
+	'Prophecy\\Util\\ExportUtil' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Util/ExportUtil.php'
+	),
+	'Prophecy\\Argument\\Token\\ArrayEntryToken' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Argument/Token/ArrayEntryToken.php'
+	),
+	'Prophecy\\Argument\\Token\\ExactValueToken' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Argument/Token/ExactValueToken.php'
+	),
+	'Prophecy\\Argument\\Token\\LogicalAndToken' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Argument/Token/LogicalAndToken.php'
+	),
+	'Prophecy\\Argument\\Token\\AnyValuesToken' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Argument/Token/AnyValuesToken.php'
+	),
+	'Prophecy\\Argument\\Token\\CallbackToken' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Argument/Token/CallbackToken.php'
+	),
+	'Prophecy\\Argument\\Token\\IdenticalValueToken' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Argument/Token/IdenticalValueToken.php'
+	),
+	'Prophecy\\Argument\\Token\\TypeToken' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Argument/Token/TypeToken.php'
+	),
+	'Prophecy\\Argument\\Token\\ObjectStateToken' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Argument/Token/ObjectStateToken.php'
+	),
+	'Prophecy\\Argument\\Token\\AnyValueToken' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Argument/Token/AnyValueToken.php'
+	),
+	'Prophecy\\Argument\\Token\\TokenInterface' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Argument/Token/TokenInterface.php'
+	),
+	'Prophecy\\Argument\\Token\\LogicalNotToken' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Argument/Token/LogicalNotToken.php'
+	),
+	'Prophecy\\Argument\\Token\\ArrayEveryEntryToken' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Argument/Token/ArrayEveryEntryToken.php'
+	),
+	'Prophecy\\Argument\\Token\\StringContainsToken' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Argument/Token/StringContainsToken.php'
+	),
+	'Prophecy\\Argument\\Token\\ArrayCountToken' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Argument/Token/ArrayCountToken.php'
+	),
+	'Prophecy\\Argument\\Token\\ApproximateValueToken' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Argument/Token/ApproximateValueToken.php'
+	),
+	'Prophecy\\Argument\\ArgumentsWildcard' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Argument/ArgumentsWildcard.php'
+	),
+	'Prophecy\\Prophet' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Prophet.php'
+	),
+	'Prophecy\\PhpDocumentor\\MethodTagRetrieverInterface' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/PhpDocumentor/MethodTagRetrieverInterface.php'
+	),
+	'Prophecy\\PhpDocumentor\\ClassTagRetriever' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/PhpDocumentor/ClassTagRetriever.php'
+	),
+	'Prophecy\\PhpDocumentor\\ClassAndInterfaceTagRetriever' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/PhpDocumentor/ClassAndInterfaceTagRetriever.php'
+	),
+	'Prophecy\\PhpDocumentor\\LegacyClassTagRetriever' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/PhpDocumentor/LegacyClassTagRetriever.php'
+	),
+	'Prophecy\\Prediction\\NoCallsPrediction' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Prediction/NoCallsPrediction.php'
+	),
+	'Prophecy\\Prediction\\CallbackPrediction' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Prediction/CallbackPrediction.php'
+	),
+	'Prophecy\\Prediction\\CallPrediction' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Prediction/CallPrediction.php'
+	),
+	'Prophecy\\Prediction\\CallTimesPrediction' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Prediction/CallTimesPrediction.php'
+	),
+	'Prophecy\\Prediction\\PredictionInterface' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Prediction/PredictionInterface.php'
+	),
+	'Prophecy\\Call\\CallCenter' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Call/CallCenter.php'
+	),
+	'Prophecy\\Call\\Call' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Call/Call.php'
+	),
+	'Prophecy\\Prophecy\\RevealerInterface' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Prophecy/RevealerInterface.php'
+	),
+	'Prophecy\\Prophecy\\ObjectProphecy' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Prophecy/ObjectProphecy.php'
+	),
+	'Prophecy\\Prophecy\\ProphecySubjectInterface' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Prophecy/ProphecySubjectInterface.php'
+	),
+	'Prophecy\\Prophecy\\Revealer' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Prophecy/Revealer.php'
+	),
+	'Prophecy\\Prophecy\\MethodProphecy' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Prophecy/MethodProphecy.php'
+	),
+	'Prophecy\\Prophecy\\ProphecyInterface' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Prophecy/ProphecyInterface.php'
+	),
+	'Prophecy\\Promise\\PromiseInterface' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Promise/PromiseInterface.php'
+	),
+	'Prophecy\\Promise\\ReturnArgumentPromise' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Promise/ReturnArgumentPromise.php'
+	),
+	'Prophecy\\Promise\\CallbackPromise' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Promise/CallbackPromise.php'
+	),
+	'Prophecy\\Promise\\ReturnPromise' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Promise/ReturnPromise.php'
+	),
+	'Prophecy\\Promise\\ThrowPromise' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Promise/ThrowPromise.php'
+	),
+	'Prophecy\\Exception\\Doubler\\MethodNotFoundException' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Exception/Doubler/MethodNotFoundException.php'
+	),
+	'Prophecy\\Exception\\Doubler\\InterfaceNotFoundException' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Exception/Doubler/InterfaceNotFoundException.php'
+	),
+	'Prophecy\\Exception\\Doubler\\ReturnByReferenceException' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Exception/Doubler/ReturnByReferenceException.php'
+	),
+	'Prophecy\\Exception\\Doubler\\DoublerException' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Exception/Doubler/DoublerException.php'
+	),
+	'Prophecy\\Exception\\Doubler\\ClassCreatorException' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Exception/Doubler/ClassCreatorException.php'
+	),
+	'Prophecy\\Exception\\Doubler\\DoubleException' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Exception/Doubler/DoubleException.php'
+	),
+	'Prophecy\\Exception\\Doubler\\ClassNotFoundException' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Exception/Doubler/ClassNotFoundException.php'
+	),
+	'Prophecy\\Exception\\Doubler\\ClassMirrorException' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Exception/Doubler/ClassMirrorException.php'
+	),
+	'Prophecy\\Exception\\Doubler\\MethodNotExtendableException' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Exception/Doubler/MethodNotExtendableException.php'
+	),
+	'Prophecy\\Exception\\Prediction\\UnexpectedCallsException' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Exception/Prediction/UnexpectedCallsException.php'
+	),
+	'Prophecy\\Exception\\Prediction\\UnexpectedCallsCountException' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Exception/Prediction/UnexpectedCallsCountException.php'
+	),
+	'Prophecy\\Exception\\Prediction\\PredictionException' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Exception/Prediction/PredictionException.php'
+	),
+	'Prophecy\\Exception\\Prediction\\FailedPredictionException' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Exception/Prediction/FailedPredictionException.php'
+	),
+	'Prophecy\\Exception\\Prediction\\NoCallsException' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Exception/Prediction/NoCallsException.php'
+	),
+	'Prophecy\\Exception\\Prediction\\AggregateException' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Exception/Prediction/AggregateException.php'
+	),
+	'Prophecy\\Exception\\InvalidArgumentException' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Exception/InvalidArgumentException.php'
+	),
+	'Prophecy\\Exception\\Call\\UnexpectedCallException' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Exception/Call/UnexpectedCallException.php'
+	),
+	'Prophecy\\Exception\\Prophecy\\MethodProphecyException' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Exception/Prophecy/MethodProphecyException.php'
+	),
+	'Prophecy\\Exception\\Prophecy\\ProphecyException' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Exception/Prophecy/ProphecyException.php'
+	),
+	'Prophecy\\Exception\\Prophecy\\ObjectProphecyException' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Exception/Prophecy/ObjectProphecyException.php'
+	),
+	'Prophecy\\Exception\\Exception' => array(
+		'version' => '1.10.2.0',
+		'path'    => $vendorDir . '/phpspec/prophecy/src/Prophecy/Exception/Exception.php'
+	),
 	'MaxMind\\Db\\Reader\\Decoder' => array(
 		'version' => '1.6.0.0',
 		'path'    => $vendorDir . '/maxmind-db/reader/src/MaxMind/Db/Reader/Decoder.php'
@@ -25,6 +673,126 @@ return array(
 	'MaxMind\\Db\\Reader' => array(
 		'version' => '1.6.0.0',
 		'path'    => $vendorDir . '/maxmind-db/reader/src/MaxMind/Db/Reader.php'
+	),
+	'Doctrine\\Instantiator\\Instantiator' => array(
+		'version' => '1.3.0.0',
+		'path'    => $vendorDir . '/doctrine/instantiator/src/Doctrine/Instantiator/Instantiator.php'
+	),
+	'Doctrine\\Instantiator\\InstantiatorInterface' => array(
+		'version' => '1.3.0.0',
+		'path'    => $vendorDir . '/doctrine/instantiator/src/Doctrine/Instantiator/InstantiatorInterface.php'
+	),
+	'Doctrine\\Instantiator\\Exception\\ExceptionInterface' => array(
+		'version' => '1.3.0.0',
+		'path'    => $vendorDir . '/doctrine/instantiator/src/Doctrine/Instantiator/Exception/ExceptionInterface.php'
+	),
+	'Doctrine\\Instantiator\\Exception\\UnexpectedValueException' => array(
+		'version' => '1.3.0.0',
+		'path'    => $vendorDir . '/doctrine/instantiator/src/Doctrine/Instantiator/Exception/UnexpectedValueException.php'
+	),
+	'Doctrine\\Instantiator\\Exception\\InvalidArgumentException' => array(
+		'version' => '1.3.0.0',
+		'path'    => $vendorDir . '/doctrine/instantiator/src/Doctrine/Instantiator/Exception/InvalidArgumentException.php'
+	),
+	'DeepCopy\\Matcher\\PropertyMatcher' => array(
+		'version' => '1.9.5.0',
+		'path'    => $vendorDir . '/myclabs/deep-copy/src/DeepCopy/Matcher/PropertyMatcher.php'
+	),
+	'DeepCopy\\Matcher\\Doctrine\\DoctrineProxyMatcher' => array(
+		'version' => '1.9.5.0',
+		'path'    => $vendorDir . '/myclabs/deep-copy/src/DeepCopy/Matcher/Doctrine/DoctrineProxyMatcher.php'
+	),
+	'DeepCopy\\Matcher\\Matcher' => array(
+		'version' => '1.9.5.0',
+		'path'    => $vendorDir . '/myclabs/deep-copy/src/DeepCopy/Matcher/Matcher.php'
+	),
+	'DeepCopy\\Matcher\\PropertyNameMatcher' => array(
+		'version' => '1.9.5.0',
+		'path'    => $vendorDir . '/myclabs/deep-copy/src/DeepCopy/Matcher/PropertyNameMatcher.php'
+	),
+	'DeepCopy\\Matcher\\PropertyTypeMatcher' => array(
+		'version' => '1.9.5.0',
+		'path'    => $vendorDir . '/myclabs/deep-copy/src/DeepCopy/Matcher/PropertyTypeMatcher.php'
+	),
+	'DeepCopy\\DeepCopy' => array(
+		'version' => '1.9.5.0',
+		'path'    => $vendorDir . '/myclabs/deep-copy/src/DeepCopy/DeepCopy.php'
+	),
+	'DeepCopy\\Filter\\ReplaceFilter' => array(
+		'version' => '1.9.5.0',
+		'path'    => $vendorDir . '/myclabs/deep-copy/src/DeepCopy/Filter/ReplaceFilter.php'
+	),
+	'DeepCopy\\Filter\\KeepFilter' => array(
+		'version' => '1.9.5.0',
+		'path'    => $vendorDir . '/myclabs/deep-copy/src/DeepCopy/Filter/KeepFilter.php'
+	),
+	'DeepCopy\\Filter\\Doctrine\\DoctrineEmptyCollectionFilter' => array(
+		'version' => '1.9.5.0',
+		'path'    => $vendorDir . '/myclabs/deep-copy/src/DeepCopy/Filter/Doctrine/DoctrineEmptyCollectionFilter.php'
+	),
+	'DeepCopy\\Filter\\Doctrine\\DoctrineCollectionFilter' => array(
+		'version' => '1.9.5.0',
+		'path'    => $vendorDir . '/myclabs/deep-copy/src/DeepCopy/Filter/Doctrine/DoctrineCollectionFilter.php'
+	),
+	'DeepCopy\\Filter\\Doctrine\\DoctrineProxyFilter' => array(
+		'version' => '1.9.5.0',
+		'path'    => $vendorDir . '/myclabs/deep-copy/src/DeepCopy/Filter/Doctrine/DoctrineProxyFilter.php'
+	),
+	'DeepCopy\\Filter\\Filter' => array(
+		'version' => '1.9.5.0',
+		'path'    => $vendorDir . '/myclabs/deep-copy/src/DeepCopy/Filter/Filter.php'
+	),
+	'DeepCopy\\Filter\\SetNullFilter' => array(
+		'version' => '1.9.5.0',
+		'path'    => $vendorDir . '/myclabs/deep-copy/src/DeepCopy/Filter/SetNullFilter.php'
+	),
+	'DeepCopy\\TypeMatcher\\TypeMatcher' => array(
+		'version' => '1.9.5.0',
+		'path'    => $vendorDir . '/myclabs/deep-copy/src/DeepCopy/TypeMatcher/TypeMatcher.php'
+	),
+	'DeepCopy\\Exception\\CloneException' => array(
+		'version' => '1.9.5.0',
+		'path'    => $vendorDir . '/myclabs/deep-copy/src/DeepCopy/Exception/CloneException.php'
+	),
+	'DeepCopy\\Exception\\PropertyException' => array(
+		'version' => '1.9.5.0',
+		'path'    => $vendorDir . '/myclabs/deep-copy/src/DeepCopy/Exception/PropertyException.php'
+	),
+	'DeepCopy\\Reflection\\ReflectionHelper' => array(
+		'version' => '1.9.5.0',
+		'path'    => $vendorDir . '/myclabs/deep-copy/src/DeepCopy/Reflection/ReflectionHelper.php'
+	),
+	'DeepCopy\\TypeFilter\\ReplaceFilter' => array(
+		'version' => '1.9.5.0',
+		'path'    => $vendorDir . '/myclabs/deep-copy/src/DeepCopy/TypeFilter/ReplaceFilter.php'
+	),
+	'DeepCopy\\TypeFilter\\Spl\\SplDoublyLinkedListFilter' => array(
+		'version' => '1.9.5.0',
+		'path'    => $vendorDir . '/myclabs/deep-copy/src/DeepCopy/TypeFilter/Spl/SplDoublyLinkedListFilter.php'
+	),
+	'DeepCopy\\TypeFilter\\Spl\\SplDoublyLinkedList' => array(
+		'version' => '1.9.5.0',
+		'path'    => $vendorDir . '/myclabs/deep-copy/src/DeepCopy/TypeFilter/Spl/SplDoublyLinkedList.php'
+	),
+	'DeepCopy\\TypeFilter\\Spl\\ArrayObjectFilter' => array(
+		'version' => '1.9.5.0',
+		'path'    => $vendorDir . '/myclabs/deep-copy/src/DeepCopy/TypeFilter/Spl/ArrayObjectFilter.php'
+	),
+	'DeepCopy\\TypeFilter\\Date\\DateIntervalFilter' => array(
+		'version' => '1.9.5.0',
+		'path'    => $vendorDir . '/myclabs/deep-copy/src/DeepCopy/TypeFilter/Date/DateIntervalFilter.php'
+	),
+	'DeepCopy\\TypeFilter\\ShallowCopyFilter' => array(
+		'version' => '1.9.5.0',
+		'path'    => $vendorDir . '/myclabs/deep-copy/src/DeepCopy/TypeFilter/ShallowCopyFilter.php'
+	),
+	'DeepCopy\\TypeFilter\\TypeFilter' => array(
+		'version' => '1.9.5.0',
+		'path'    => $vendorDir . '/myclabs/deep-copy/src/DeepCopy/TypeFilter/TypeFilter.php'
+	),
+	'Dealerdirect\\Composer\\Plugin\\Installers\\PHPCodeSniffer\\Plugin' => array(
+		'version' => '0.5.0.0',
+		'path'    => $vendorDir . '/dealerdirect/phpcodesniffer-composer-installer/src/Plugin.php'
 	),
 	'Composer\\Installers\\GravInstaller' => array(
 		'version' => '1.7.0.0',
@@ -69,6 +837,18 @@ return array(
 	'Composer\\Installers\\DokuWikiInstaller' => array(
 		'version' => '1.7.0.0',
 		'path'    => $vendorDir . '/composer/installers/src/Composer/Installers/DokuWikiInstaller.php'
+	),
+	'Composer\\Installers\\StarbugInstaller' => array(
+		'version' => '1.7.0.0',
+		'path'    => $vendorDir . '/composer/installers/src/Composer/Installers/StarbugInstaller.php'
+	),
+	'Composer\\Installers\\ProcessWireInstaller' => array(
+		'version' => '1.7.0.0',
+		'path'    => $vendorDir . '/composer/installers/src/Composer/Installers/ProcessWireInstaller.php'
+	),
+	'Composer\\Installers\\SyliusInstaller' => array(
+		'version' => '1.7.0.0',
+		'path'    => $vendorDir . '/composer/installers/src/Composer/Installers/SyliusInstaller.php'
 	),
 	'Composer\\Installers\\PPIInstaller' => array(
 		'version' => '1.7.0.0',
@@ -226,6 +1006,10 @@ return array(
 		'version' => '1.7.0.0',
 		'path'    => $vendorDir . '/composer/installers/src/Composer/Installers/FuelInstaller.php'
 	),
+	'Composer\\Installers\\TastyIgniterInstaller' => array(
+		'version' => '1.7.0.0',
+		'path'    => $vendorDir . '/composer/installers/src/Composer/Installers/TastyIgniterInstaller.php'
+	),
 	'Composer\\Installers\\PrestashopInstaller' => array(
 		'version' => '1.7.0.0',
 		'path'    => $vendorDir . '/composer/installers/src/Composer/Installers/PrestashopInstaller.php'
@@ -297,6 +1081,10 @@ return array(
 	'Composer\\Installers\\PlentymarketsInstaller' => array(
 		'version' => '1.7.0.0',
 		'path'    => $vendorDir . '/composer/installers/src/Composer/Installers/PlentymarketsInstaller.php'
+	),
+	'Composer\\Installers\\MiaoxingInstaller' => array(
+		'version' => '1.7.0.0',
+		'path'    => $vendorDir . '/composer/installers/src/Composer/Installers/MiaoxingInstaller.php'
 	),
 	'Composer\\Installers\\EzPlatformInstaller' => array(
 		'version' => '1.7.0.0',
@@ -394,9 +1182,17 @@ return array(
 		'version' => '1.7.0.0',
 		'path'    => $vendorDir . '/composer/installers/src/Composer/Installers/ZikulaInstaller.php'
 	),
+	'Composer\\Installers\\MantisBTInstaller' => array(
+		'version' => '1.7.0.0',
+		'path'    => $vendorDir . '/composer/installers/src/Composer/Installers/MantisBTInstaller.php'
+	),
 	'Composer\\Installers\\SiteDirectInstaller' => array(
 		'version' => '1.7.0.0',
 		'path'    => $vendorDir . '/composer/installers/src/Composer/Installers/SiteDirectInstaller.php'
+	),
+	'Composer\\Installers\\WinterInstaller' => array(
+		'version' => '1.7.0.0',
+		'path'    => $vendorDir . '/composer/installers/src/Composer/Installers/WinterInstaller.php'
 	),
 	'Composer\\Installers\\MicroweberInstaller' => array(
 		'version' => '1.7.0.0',
@@ -419,268 +1215,280 @@ return array(
 		'path'    => $baseDir . '/packages/woocommerce-rest-api/src/Utilities/ImageAttachment.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\Package' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/Package.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\Library' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/Library.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\RestApi' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/RestApi.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\Utils\\BlocksWpQuery' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/Utils/BlocksWpQuery.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\RestApi\\Utilities\\ProductImages' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/RestApi/Utilities/ProductImages.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\RestApi\\StoreApi\\Schemas\\CartItemSchema' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/RestApi/StoreApi/Schemas/CartItemSchema.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\RestApi\\StoreApi\\Schemas\\CartSchema' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/RestApi/StoreApi/Schemas/CartSchema.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\RestApi\\StoreApi\\Schemas\\AbstractSchema' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/RestApi/StoreApi/Schemas/AbstractSchema.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\RestApi\\StoreApi\\Schemas\\ProductAttributeSchema' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/RestApi/StoreApi/Schemas/ProductAttributeSchema.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\RestApi\\StoreApi\\Schemas\\TermSchema' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/RestApi/StoreApi/Schemas/TermSchema.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\RestApi\\StoreApi\\Schemas\\ProductSchema' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/RestApi/StoreApi/Schemas/ProductSchema.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\RestApi\\StoreApi\\Utilities\\TermQuery' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/RestApi/StoreApi/Utilities/TermQuery.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\RestApi\\StoreApi\\Utilities\\Pagination' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/RestApi/StoreApi/Utilities/Pagination.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\RestApi\\StoreApi\\Utilities\\ProductQuery' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/RestApi/StoreApi/Utilities/ProductQuery.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\RestApi\\StoreApi\\Utilities\\ProductQueryFilters' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/RestApi/StoreApi/Utilities/ProductFiltering.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\RestApi\\StoreApi\\Utilities\\CartController' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/RestApi/StoreApi/Utilities/CartController.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\RestApi\\StoreApi\\Controllers\\Cart' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/RestApi/StoreApi/Controllers/Cart.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\RestApi\\StoreApi\\Controllers\\ProductCollectionData' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/RestApi/StoreApi/Controllers/ProductCollectionData.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\RestApi\\StoreApi\\Controllers\\ProductAttributes' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/RestApi/StoreApi/Controllers/ProductAttributes.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\RestApi\\StoreApi\\Controllers\\CartItems' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/RestApi/StoreApi/Controllers/CartItems.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\RestApi\\StoreApi\\Controllers\\Products' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/RestApi/StoreApi/Controllers/Products.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\RestApi\\StoreApi\\Controllers\\ProductAttributeTerms' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/RestApi/StoreApi/Controllers/ProductAttributeTerms.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\RestApi\\Controllers\\ProductReviews' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/RestApi/Controllers/ProductReviews.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\RestApi\\Controllers\\Variations' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/RestApi/Controllers/Variations.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\RestApi\\Controllers\\Cart' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/RestApi/Controllers/Cart.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\RestApi\\Controllers\\ProductCategories' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/RestApi/Controllers/ProductCategories.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\RestApi\\Controllers\\ProductAttributes' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/RestApi/Controllers/ProductAttributes.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\RestApi\\Controllers\\Products' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/RestApi/Controllers/Products.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\RestApi\\Controllers\\ProductTags' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/RestApi/Controllers/ProductTags.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\RestApi\\Controllers\\ProductAttributeTerms' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/RestApi/Controllers/ProductAttributeTerms.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\Registry\\Container' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/Registry/Container.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\Registry\\SharedType' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/Registry/SharedType.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\Registry\\FactoryType' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/Registry/FactoryType.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\Registry\\AbstractDependencyType' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/Registry/AbstractDependencyType.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\BlockTypes\\FeaturedProduct' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/BlockTypes/FeaturedProduct.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\BlockTypes\\ActiveFilters' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/BlockTypes/ActiveFilters.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\BlockTypes\\HandpickedProducts' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/BlockTypes/HandpickedProducts.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\BlockTypes\\ReviewsByProduct' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/BlockTypes/ReviewsByProduct.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductSearch' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/BlockTypes/ProductSearch.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductOnSale' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/BlockTypes/ProductOnSale.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductTopRated' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/BlockTypes/ProductTopRated.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductNew' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/BlockTypes/ProductNew.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCategories' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/BlockTypes/ProductCategories.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductTag' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/BlockTypes/ProductTag.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\BlockTypes\\AllReviews' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/BlockTypes/AllReviews.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\BlockTypes\\AbstractProductGrid' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/BlockTypes/AbstractProductGrid.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\BlockTypes\\AbstractBlock' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/BlockTypes/AbstractBlock.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\BlockTypes\\AttributeFilter' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/BlockTypes/AttributeFilter.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\BlockTypes\\AbstractDynamicBlock' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/BlockTypes/AbstractDynamicBlock.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\BlockTypes\\ReviewsByCategory' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/BlockTypes/ReviewsByCategory.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductsByAttribute' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/BlockTypes/ProductsByAttribute.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductBestSellers' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/BlockTypes/ProductBestSellers.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCategory' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/BlockTypes/ProductCategory.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\BlockTypes\\FeaturedCategory' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/BlockTypes/FeaturedCategory.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\BlockTypes\\PriceFilter' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/BlockTypes/PriceFilter.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\BlockTypes\\AllProducts' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/BlockTypes/AllProducts.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\Assets\\BackCompatAssetDataRegistry' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/Assets/BackCompatAssetDataRegistry.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\Assets\\AssetDataRegistry' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/Assets/AssetDataRegistry.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\Assets\\Api' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/Assets/Api.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\Domain\\Package' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/Domain/Package.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\Domain\\Bootstrap' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/Domain/Bootstrap.php'
 	),
 	'Automattic\\WooCommerce\\Blocks\\Assets' => array(
-		'version' => '2.5.14.0',
+		'version' => '2.5.14.1',
 		'path'    => $baseDir . '/packages/woocommerce-blocks/src/Assets.php'
 	),
 	'Automattic\\WooCommerce\\Packages' => array(
-		'version' => 'dev-release/3.9',
+		'version' => 'dev-sqli-fix/3.9.4',
 		'path'    => $baseDir . '/src/Packages.php'
 	),
 	'Automattic\\WooCommerce\\Autoloader' => array(
-		'version' => 'dev-release/3.9',
+		'version' => 'dev-sqli-fix/3.9.4',
 		'path'    => $baseDir . '/src/Autoloader.php'
 	),
 	'Automattic\\Jetpack\\Autoloader\\AutoloadGenerator' => array(
 		'version' => '1.3.2.0',
 		'path'    => $vendorDir . '/automattic/jetpack-autoloader/src/AutoloadGenerator.php'
 	),
+	'Automattic\\Jetpack\\Autoloader\\AutoloadProcessor' => array(
+		'version' => '1.3.2.0',
+		'path'    => $vendorDir . '/automattic/jetpack-autoloader/src/AutoloadProcessor.php'
+	),
+	'Automattic\\Jetpack\\Autoloader\\AutoloadFileWriter' => array(
+		'version' => '1.3.2.0',
+		'path'    => $vendorDir . '/automattic/jetpack-autoloader/src/AutoloadFileWriter.php'
+	),
 	'Automattic\\Jetpack\\Autoloader\\CustomAutoloaderPlugin' => array(
 		'version' => '1.3.2.0',
 		'path'    => $vendorDir . '/automattic/jetpack-autoloader/src/CustomAutoloaderPlugin.php'
+	),
+	'Automattic\\Jetpack\\Autoloader\\ManifestGenerator' => array(
+		'version' => '1.3.2.0',
+		'path'    => $vendorDir . '/automattic/jetpack-autoloader/src/ManifestGenerator.php'
 	),
 	'WC_REST_Tax_Classes_V1_Controller' => array(
 		'version' => '1.0.7.0',
@@ -1061,6 +1869,2198 @@ return array(
 	'WC_REST_Report_Customers_Totals_Controller' => array(
 		'version' => '1.0.7.0',
 		'path'    => $baseDir . '/packages/woocommerce-rest-api/src/Controllers/Version3/class-wc-rest-report-customers-totals-controller.php'
+	),
+	'SebastianBergmann\\ObjectEnumerator\\InvalidArgumentException' => array(
+		'version' => '3.0.3.0',
+		'path'    => $vendorDir . '/sebastian/object-enumerator/src/InvalidArgumentException.php'
+	),
+	'SebastianBergmann\\ObjectEnumerator\\Enumerator' => array(
+		'version' => '3.0.3.0',
+		'path'    => $vendorDir . '/sebastian/object-enumerator/src/Enumerator.php'
+	),
+	'SebastianBergmann\\ObjectEnumerator\\Exception' => array(
+		'version' => '3.0.3.0',
+		'path'    => $vendorDir . '/sebastian/object-enumerator/src/Exception.php'
+	),
+	'SebastianBergmann\\GlobalState\\Restorer' => array(
+		'version' => '2.0.0.0',
+		'path'    => $vendorDir . '/sebastian/global-state/src/Restorer.php'
+	),
+	'SebastianBergmann\\GlobalState\\CodeExporter' => array(
+		'version' => '2.0.0.0',
+		'path'    => $vendorDir . '/sebastian/global-state/src/CodeExporter.php'
+	),
+	'SebastianBergmann\\GlobalState\\Snapshot' => array(
+		'version' => '2.0.0.0',
+		'path'    => $vendorDir . '/sebastian/global-state/src/Snapshot.php'
+	),
+	'SebastianBergmann\\GlobalState\\Blacklist' => array(
+		'version' => '2.0.0.0',
+		'path'    => $vendorDir . '/sebastian/global-state/src/Blacklist.php'
+	),
+	'SebastianBergmann\\GlobalState\\RuntimeException' => array(
+		'version' => '2.0.0.0',
+		'path'    => $vendorDir . '/sebastian/global-state/src/exceptions/RuntimeException.php'
+	),
+	'SebastianBergmann\\GlobalState\\Exception' => array(
+		'version' => '2.0.0.0',
+		'path'    => $vendorDir . '/sebastian/global-state/src/exceptions/Exception.php'
+	),
+	'SebastianBergmann\\Timer\\RuntimeException' => array(
+		'version' => '2.1.2.0',
+		'path'    => $vendorDir . '/phpunit/php-timer/src/RuntimeException.php'
+	),
+	'SebastianBergmann\\Timer\\Timer' => array(
+		'version' => '2.1.2.0',
+		'path'    => $vendorDir . '/phpunit/php-timer/src/Timer.php'
+	),
+	'SebastianBergmann\\Timer\\Exception' => array(
+		'version' => '2.1.2.0',
+		'path'    => $vendorDir . '/phpunit/php-timer/src/Exception.php'
+	),
+	'SebastianBergmann\\CodeCoverage\\CodeCoverage' => array(
+		'version' => '6.1.4.0',
+		'path'    => $vendorDir . '/phpunit/php-code-coverage/src/CodeCoverage.php'
+	),
+	'SebastianBergmann\\CodeCoverage\\Driver\\Driver' => array(
+		'version' => '6.1.4.0',
+		'path'    => $vendorDir . '/phpunit/php-code-coverage/src/Driver/Driver.php'
+	),
+	'SebastianBergmann\\CodeCoverage\\Driver\\PHPDBG' => array(
+		'version' => '6.1.4.0',
+		'path'    => $vendorDir . '/phpunit/php-code-coverage/src/Driver/PHPDBG.php'
+	),
+	'SebastianBergmann\\CodeCoverage\\Driver\\Xdebug' => array(
+		'version' => '6.1.4.0',
+		'path'    => $vendorDir . '/phpunit/php-code-coverage/src/Driver/Xdebug.php'
+	),
+	'SebastianBergmann\\CodeCoverage\\Version' => array(
+		'version' => '6.1.4.0',
+		'path'    => $vendorDir . '/phpunit/php-code-coverage/src/Version.php'
+	),
+	'SebastianBergmann\\CodeCoverage\\Filter' => array(
+		'version' => '6.1.4.0',
+		'path'    => $vendorDir . '/phpunit/php-code-coverage/src/Filter.php'
+	),
+	'SebastianBergmann\\CodeCoverage\\Report\\Clover' => array(
+		'version' => '6.1.4.0',
+		'path'    => $vendorDir . '/phpunit/php-code-coverage/src/Report/Clover.php'
+	),
+	'SebastianBergmann\\CodeCoverage\\Report\\Html\\Dashboard' => array(
+		'version' => '6.1.4.0',
+		'path'    => $vendorDir . '/phpunit/php-code-coverage/src/Report/Html/Renderer/Dashboard.php'
+	),
+	'SebastianBergmann\\CodeCoverage\\Report\\Html\\File' => array(
+		'version' => '6.1.4.0',
+		'path'    => $vendorDir . '/phpunit/php-code-coverage/src/Report/Html/Renderer/File.php'
+	),
+	'SebastianBergmann\\CodeCoverage\\Report\\Html\\Directory' => array(
+		'version' => '6.1.4.0',
+		'path'    => $vendorDir . '/phpunit/php-code-coverage/src/Report/Html/Renderer/Directory.php'
+	),
+	'SebastianBergmann\\CodeCoverage\\Report\\Html\\Renderer' => array(
+		'version' => '6.1.4.0',
+		'path'    => $vendorDir . '/phpunit/php-code-coverage/src/Report/Html/Renderer.php'
+	),
+	'SebastianBergmann\\CodeCoverage\\Report\\Html\\Facade' => array(
+		'version' => '6.1.4.0',
+		'path'    => $vendorDir . '/phpunit/php-code-coverage/src/Report/Html/Facade.php'
+	),
+	'SebastianBergmann\\CodeCoverage\\Report\\Xml\\Totals' => array(
+		'version' => '6.1.4.0',
+		'path'    => $vendorDir . '/phpunit/php-code-coverage/src/Report/Xml/Totals.php'
+	),
+	'SebastianBergmann\\CodeCoverage\\Report\\Xml\\File' => array(
+		'version' => '6.1.4.0',
+		'path'    => $vendorDir . '/phpunit/php-code-coverage/src/Report/Xml/File.php'
+	),
+	'SebastianBergmann\\CodeCoverage\\Report\\Xml\\Method' => array(
+		'version' => '6.1.4.0',
+		'path'    => $vendorDir . '/phpunit/php-code-coverage/src/Report/Xml/Method.php'
+	),
+	'SebastianBergmann\\CodeCoverage\\Report\\Xml\\Unit' => array(
+		'version' => '6.1.4.0',
+		'path'    => $vendorDir . '/phpunit/php-code-coverage/src/Report/Xml/Unit.php'
+	),
+	'SebastianBergmann\\CodeCoverage\\Report\\Xml\\Tests' => array(
+		'version' => '6.1.4.0',
+		'path'    => $vendorDir . '/phpunit/php-code-coverage/src/Report/Xml/Tests.php'
+	),
+	'SebastianBergmann\\CodeCoverage\\Report\\Xml\\Project' => array(
+		'version' => '6.1.4.0',
+		'path'    => $vendorDir . '/phpunit/php-code-coverage/src/Report/Xml/Project.php'
+	),
+	'SebastianBergmann\\CodeCoverage\\Report\\Xml\\Node' => array(
+		'version' => '6.1.4.0',
+		'path'    => $vendorDir . '/phpunit/php-code-coverage/src/Report/Xml/Node.php'
+	),
+	'SebastianBergmann\\CodeCoverage\\Report\\Xml\\Directory' => array(
+		'version' => '6.1.4.0',
+		'path'    => $vendorDir . '/phpunit/php-code-coverage/src/Report/Xml/Directory.php'
+	),
+	'SebastianBergmann\\CodeCoverage\\Report\\Xml\\Coverage' => array(
+		'version' => '6.1.4.0',
+		'path'    => $vendorDir . '/phpunit/php-code-coverage/src/Report/Xml/Coverage.php'
+	),
+	'SebastianBergmann\\CodeCoverage\\Report\\Xml\\Source' => array(
+		'version' => '6.1.4.0',
+		'path'    => $vendorDir . '/phpunit/php-code-coverage/src/Report/Xml/Source.php'
+	),
+	'SebastianBergmann\\CodeCoverage\\Report\\Xml\\BuildInformation' => array(
+		'version' => '6.1.4.0',
+		'path'    => $vendorDir . '/phpunit/php-code-coverage/src/Report/Xml/BuildInformation.php'
+	),
+	'SebastianBergmann\\CodeCoverage\\Report\\Xml\\Report' => array(
+		'version' => '6.1.4.0',
+		'path'    => $vendorDir . '/phpunit/php-code-coverage/src/Report/Xml/Report.php'
+	),
+	'SebastianBergmann\\CodeCoverage\\Report\\Xml\\Facade' => array(
+		'version' => '6.1.4.0',
+		'path'    => $vendorDir . '/phpunit/php-code-coverage/src/Report/Xml/Facade.php'
+	),
+	'SebastianBergmann\\CodeCoverage\\Report\\PHP' => array(
+		'version' => '6.1.4.0',
+		'path'    => $vendorDir . '/phpunit/php-code-coverage/src/Report/PHP.php'
+	),
+	'SebastianBergmann\\CodeCoverage\\Report\\Text' => array(
+		'version' => '6.1.4.0',
+		'path'    => $vendorDir . '/phpunit/php-code-coverage/src/Report/Text.php'
+	),
+	'SebastianBergmann\\CodeCoverage\\Report\\Crap4j' => array(
+		'version' => '6.1.4.0',
+		'path'    => $vendorDir . '/phpunit/php-code-coverage/src/Report/Crap4j.php'
+	),
+	'SebastianBergmann\\CodeCoverage\\Util' => array(
+		'version' => '6.1.4.0',
+		'path'    => $vendorDir . '/phpunit/php-code-coverage/src/Util.php'
+	),
+	'SebastianBergmann\\CodeCoverage\\Node\\File' => array(
+		'version' => '6.1.4.0',
+		'path'    => $vendorDir . '/phpunit/php-code-coverage/src/Node/File.php'
+	),
+	'SebastianBergmann\\CodeCoverage\\Node\\Builder' => array(
+		'version' => '6.1.4.0',
+		'path'    => $vendorDir . '/phpunit/php-code-coverage/src/Node/Builder.php'
+	),
+	'SebastianBergmann\\CodeCoverage\\Node\\AbstractNode' => array(
+		'version' => '6.1.4.0',
+		'path'    => $vendorDir . '/phpunit/php-code-coverage/src/Node/AbstractNode.php'
+	),
+	'SebastianBergmann\\CodeCoverage\\Node\\Directory' => array(
+		'version' => '6.1.4.0',
+		'path'    => $vendorDir . '/phpunit/php-code-coverage/src/Node/Directory.php'
+	),
+	'SebastianBergmann\\CodeCoverage\\Node\\Iterator' => array(
+		'version' => '6.1.4.0',
+		'path'    => $vendorDir . '/phpunit/php-code-coverage/src/Node/Iterator.php'
+	),
+	'SebastianBergmann\\CodeCoverage\\UnintentionallyCoveredCodeException' => array(
+		'version' => '6.1.4.0',
+		'path'    => $vendorDir . '/phpunit/php-code-coverage/src/Exception/UnintentionallyCoveredCodeException.php'
+	),
+	'SebastianBergmann\\CodeCoverage\\RuntimeException' => array(
+		'version' => '6.1.4.0',
+		'path'    => $vendorDir . '/phpunit/php-code-coverage/src/Exception/RuntimeException.php'
+	),
+	'SebastianBergmann\\CodeCoverage\\CoveredCodeNotExecutedException' => array(
+		'version' => '6.1.4.0',
+		'path'    => $vendorDir . '/phpunit/php-code-coverage/src/Exception/CoveredCodeNotExecutedException.php'
+	),
+	'SebastianBergmann\\CodeCoverage\\InvalidArgumentException' => array(
+		'version' => '6.1.4.0',
+		'path'    => $vendorDir . '/phpunit/php-code-coverage/src/Exception/InvalidArgumentException.php'
+	),
+	'SebastianBergmann\\CodeCoverage\\MissingCoversAnnotationException' => array(
+		'version' => '6.1.4.0',
+		'path'    => $vendorDir . '/phpunit/php-code-coverage/src/Exception/MissingCoversAnnotationException.php'
+	),
+	'SebastianBergmann\\CodeCoverage\\Exception' => array(
+		'version' => '6.1.4.0',
+		'path'    => $vendorDir . '/phpunit/php-code-coverage/src/Exception/Exception.php'
+	),
+	'TheSeer\\Tokenizer\\Token' => array(
+		'version' => '1.1.3.0',
+		'path'    => $vendorDir . '/theseer/tokenizer/src/Token.php'
+	),
+	'TheSeer\\Tokenizer\\NamespaceUriException' => array(
+		'version' => '1.1.3.0',
+		'path'    => $vendorDir . '/theseer/tokenizer/src/NamespaceUriException.php'
+	),
+	'TheSeer\\Tokenizer\\TokenCollectionException' => array(
+		'version' => '1.1.3.0',
+		'path'    => $vendorDir . '/theseer/tokenizer/src/TokenCollectionException.php'
+	),
+	'TheSeer\\Tokenizer\\TokenCollection' => array(
+		'version' => '1.1.3.0',
+		'path'    => $vendorDir . '/theseer/tokenizer/src/TokenCollection.php'
+	),
+	'TheSeer\\Tokenizer\\Tokenizer' => array(
+		'version' => '1.1.3.0',
+		'path'    => $vendorDir . '/theseer/tokenizer/src/Tokenizer.php'
+	),
+	'TheSeer\\Tokenizer\\XMLSerializer' => array(
+		'version' => '1.1.3.0',
+		'path'    => $vendorDir . '/theseer/tokenizer/src/XMLSerializer.php'
+	),
+	'TheSeer\\Tokenizer\\NamespaceUri' => array(
+		'version' => '1.1.3.0',
+		'path'    => $vendorDir . '/theseer/tokenizer/src/NamespaceUri.php'
+	),
+	'TheSeer\\Tokenizer\\Exception' => array(
+		'version' => '1.1.3.0',
+		'path'    => $vendorDir . '/theseer/tokenizer/src/Exception.php'
+	),
+	'SebastianBergmann\\ObjectReflector\\ObjectReflector' => array(
+		'version' => '1.1.1.0',
+		'path'    => $vendorDir . '/sebastian/object-reflector/src/ObjectReflector.php'
+	),
+	'SebastianBergmann\\ObjectReflector\\InvalidArgumentException' => array(
+		'version' => '1.1.1.0',
+		'path'    => $vendorDir . '/sebastian/object-reflector/src/InvalidArgumentException.php'
+	),
+	'SebastianBergmann\\ObjectReflector\\Exception' => array(
+		'version' => '1.1.1.0',
+		'path'    => $vendorDir . '/sebastian/object-reflector/src/Exception.php'
+	),
+	'SebastianBergmann\\Comparator\\ArrayComparator' => array(
+		'version' => '3.0.2.0',
+		'path'    => $vendorDir . '/sebastian/comparator/src/ArrayComparator.php'
+	),
+	'SebastianBergmann\\Comparator\\TypeComparator' => array(
+		'version' => '3.0.2.0',
+		'path'    => $vendorDir . '/sebastian/comparator/src/TypeComparator.php'
+	),
+	'SebastianBergmann\\Comparator\\Factory' => array(
+		'version' => '3.0.2.0',
+		'path'    => $vendorDir . '/sebastian/comparator/src/Factory.php'
+	),
+	'SebastianBergmann\\Comparator\\ResourceComparator' => array(
+		'version' => '3.0.2.0',
+		'path'    => $vendorDir . '/sebastian/comparator/src/ResourceComparator.php'
+	),
+	'SebastianBergmann\\Comparator\\MockObjectComparator' => array(
+		'version' => '3.0.2.0',
+		'path'    => $vendorDir . '/sebastian/comparator/src/MockObjectComparator.php'
+	),
+	'SebastianBergmann\\Comparator\\ObjectComparator' => array(
+		'version' => '3.0.2.0',
+		'path'    => $vendorDir . '/sebastian/comparator/src/ObjectComparator.php'
+	),
+	'SebastianBergmann\\Comparator\\NumericComparator' => array(
+		'version' => '3.0.2.0',
+		'path'    => $vendorDir . '/sebastian/comparator/src/NumericComparator.php'
+	),
+	'SebastianBergmann\\Comparator\\DateTimeComparator' => array(
+		'version' => '3.0.2.0',
+		'path'    => $vendorDir . '/sebastian/comparator/src/DateTimeComparator.php'
+	),
+	'SebastianBergmann\\Comparator\\ScalarComparator' => array(
+		'version' => '3.0.2.0',
+		'path'    => $vendorDir . '/sebastian/comparator/src/ScalarComparator.php'
+	),
+	'SebastianBergmann\\Comparator\\ExceptionComparator' => array(
+		'version' => '3.0.2.0',
+		'path'    => $vendorDir . '/sebastian/comparator/src/ExceptionComparator.php'
+	),
+	'SebastianBergmann\\Comparator\\Comparator' => array(
+		'version' => '3.0.2.0',
+		'path'    => $vendorDir . '/sebastian/comparator/src/Comparator.php'
+	),
+	'SebastianBergmann\\Comparator\\DoubleComparator' => array(
+		'version' => '3.0.2.0',
+		'path'    => $vendorDir . '/sebastian/comparator/src/DoubleComparator.php'
+	),
+	'SebastianBergmann\\Comparator\\DOMNodeComparator' => array(
+		'version' => '3.0.2.0',
+		'path'    => $vendorDir . '/sebastian/comparator/src/DOMNodeComparator.php'
+	),
+	'SebastianBergmann\\Comparator\\ComparisonFailure' => array(
+		'version' => '3.0.2.0',
+		'path'    => $vendorDir . '/sebastian/comparator/src/ComparisonFailure.php'
+	),
+	'SebastianBergmann\\Comparator\\SplObjectStorageComparator' => array(
+		'version' => '3.0.2.0',
+		'path'    => $vendorDir . '/sebastian/comparator/src/SplObjectStorageComparator.php'
+	),
+	'SebastianBergmann\\CodeUnitReverseLookup\\Wizard' => array(
+		'version' => '1.0.1.0',
+		'path'    => $vendorDir . '/sebastian/code-unit-reverse-lookup/src/Wizard.php'
+	),
+	'PHP_Token_Stream_CachingFactory' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token/Stream/CachingFactory.php'
+	),
+	'PHP_Token_Stream' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token/Stream.php'
+	),
+	'PHP_Token_Util' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token/Util.php'
+	),
+	'PHP_Token' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_TokenWithScope' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_TokenWithScopeAndVisibility' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_Includes' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_FUNCTION' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_INTERFACE' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_ABSTRACT' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_AMPERSAND' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_AND_EQUAL' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_ARRAY' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_ARRAY_CAST' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_AS' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_AT' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_BACKTICK' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_BAD_CHARACTER' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_BOOLEAN_AND' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_BOOLEAN_OR' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_BOOL_CAST' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_BREAK' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_CARET' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_CASE' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_CATCH' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_CHARACTER' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_CLASS' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_CLASS_C' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_CLASS_NAME_CONSTANT' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_CLONE' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_CLOSE_BRACKET' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_CLOSE_CURLY' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_CLOSE_SQUARE' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_CLOSE_TAG' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_COLON' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_COMMA' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_COMMENT' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_CONCAT_EQUAL' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_CONST' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_CONSTANT_ENCAPSED_STRING' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_CONTINUE' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_CURLY_OPEN' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_DEC' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_DECLARE' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_DEFAULT' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_DIV' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_DIV_EQUAL' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_DNUMBER' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_DO' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_DOC_COMMENT' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_DOLLAR' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_DOLLAR_OPEN_CURLY_BRACES' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_DOT' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_DOUBLE_ARROW' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_DOUBLE_CAST' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_DOUBLE_COLON' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_DOUBLE_QUOTES' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_ECHO' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_ELSE' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_ELSEIF' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_EMPTY' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_ENCAPSED_AND_WHITESPACE' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_ENDDECLARE' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_ENDFOR' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_ENDFOREACH' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_ENDIF' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_ENDSWITCH' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_ENDWHILE' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_END_HEREDOC' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_EQUAL' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_EVAL' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_EXCLAMATION_MARK' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_EXIT' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_EXTENDS' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_FILE' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_FINAL' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_FOR' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_FOREACH' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_FUNC_C' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_GLOBAL' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_GT' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_IF' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_IMPLEMENTS' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_INC' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_INCLUDE' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_INCLUDE_ONCE' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_INLINE_HTML' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_INSTANCEOF' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_INT_CAST' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_ISSET' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_IS_EQUAL' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_IS_GREATER_OR_EQUAL' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_IS_IDENTICAL' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_IS_NOT_EQUAL' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_IS_NOT_IDENTICAL' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_IS_SMALLER_OR_EQUAL' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_LINE' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_LIST' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_LNUMBER' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_LOGICAL_AND' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_LOGICAL_OR' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_LOGICAL_XOR' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_LT' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_METHOD_C' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_MINUS' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_MINUS_EQUAL' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_MOD_EQUAL' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_MULT' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_MUL_EQUAL' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_NEW' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_NUM_STRING' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_OBJECT_CAST' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_OBJECT_OPERATOR' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_OPEN_BRACKET' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_OPEN_CURLY' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_OPEN_SQUARE' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_OPEN_TAG' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_OPEN_TAG_WITH_ECHO' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_OR_EQUAL' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_PAAMAYIM_NEKUDOTAYIM' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_PERCENT' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_PIPE' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_PLUS' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_PLUS_EQUAL' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_PRINT' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_PRIVATE' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_PROTECTED' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_PUBLIC' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_QUESTION_MARK' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_REQUIRE' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_REQUIRE_ONCE' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_RETURN' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_SEMICOLON' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_SL' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_SL_EQUAL' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_SR' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_SR_EQUAL' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_START_HEREDOC' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_STATIC' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_STRING' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_STRING_CAST' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_STRING_VARNAME' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_SWITCH' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_THROW' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_TILDE' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_TRY' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_UNSET' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_UNSET_CAST' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_USE' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_USE_FUNCTION' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_VAR' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_VARIABLE' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_WHILE' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_WHITESPACE' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_XOR_EQUAL' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_HALT_COMPILER' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_DIR' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_GOTO' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_NAMESPACE' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_NS_C' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_NS_SEPARATOR' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_CALLABLE' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_INSTEADOF' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_TRAIT' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_TRAIT_C' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_FINALLY' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_YIELD' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_ELLIPSIS' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_POW' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_POW_EQUAL' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_COALESCE' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_SPACESHIP' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_YIELD_FROM' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_COALESCE_EQUAL' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'PHP_Token_FN' => array(
+		'version' => '3.1.1.0',
+		'path'    => $vendorDir . '/phpunit/php-token-stream/src/Token.php'
+	),
+	'SebastianBergmann\\Environment\\Runtime' => array(
+		'version' => '4.2.3.0',
+		'path'    => $vendorDir . '/sebastian/environment/src/Runtime.php'
+	),
+	'SebastianBergmann\\Environment\\OperatingSystem' => array(
+		'version' => '4.2.3.0',
+		'path'    => $vendorDir . '/sebastian/environment/src/OperatingSystem.php'
+	),
+	'SebastianBergmann\\Environment\\Console' => array(
+		'version' => '4.2.3.0',
+		'path'    => $vendorDir . '/sebastian/environment/src/Console.php'
+	),
+	'SebastianBergmann\\FileIterator\\Factory' => array(
+		'version' => '2.0.2.0',
+		'path'    => $vendorDir . '/phpunit/php-file-iterator/src/Factory.php'
+	),
+	'SebastianBergmann\\FileIterator\\Iterator' => array(
+		'version' => '2.0.2.0',
+		'path'    => $vendorDir . '/phpunit/php-file-iterator/src/Iterator.php'
+	),
+	'SebastianBergmann\\FileIterator\\Facade' => array(
+		'version' => '2.0.2.0',
+		'path'    => $vendorDir . '/phpunit/php-file-iterator/src/Facade.php'
+	),
+	'SebastianBergmann\\Exporter\\Exporter' => array(
+		'version' => '3.1.2.0',
+		'path'    => $vendorDir . '/sebastian/exporter/src/Exporter.php'
+	),
+	'SebastianBergmann\\Diff\\Diff' => array(
+		'version' => '3.0.2.0',
+		'path'    => $vendorDir . '/sebastian/diff/src/Diff.php'
+	),
+	'SebastianBergmann\\Diff\\Parser' => array(
+		'version' => '3.0.2.0',
+		'path'    => $vendorDir . '/sebastian/diff/src/Parser.php'
+	),
+	'SebastianBergmann\\Diff\\TimeEfficientLongestCommonSubsequenceCalculator' => array(
+		'version' => '3.0.2.0',
+		'path'    => $vendorDir . '/sebastian/diff/src/TimeEfficientLongestCommonSubsequenceCalculator.php'
+	),
+	'SebastianBergmann\\Diff\\Output\\DiffOnlyOutputBuilder' => array(
+		'version' => '3.0.2.0',
+		'path'    => $vendorDir . '/sebastian/diff/src/Output/DiffOnlyOutputBuilder.php'
+	),
+	'SebastianBergmann\\Diff\\Output\\DiffOutputBuilderInterface' => array(
+		'version' => '3.0.2.0',
+		'path'    => $vendorDir . '/sebastian/diff/src/Output/DiffOutputBuilderInterface.php'
+	),
+	'SebastianBergmann\\Diff\\Output\\UnifiedDiffOutputBuilder' => array(
+		'version' => '3.0.2.0',
+		'path'    => $vendorDir . '/sebastian/diff/src/Output/UnifiedDiffOutputBuilder.php'
+	),
+	'SebastianBergmann\\Diff\\Output\\StrictUnifiedDiffOutputBuilder' => array(
+		'version' => '3.0.2.0',
+		'path'    => $vendorDir . '/sebastian/diff/src/Output/StrictUnifiedDiffOutputBuilder.php'
+	),
+	'SebastianBergmann\\Diff\\Output\\AbstractChunkOutputBuilder' => array(
+		'version' => '3.0.2.0',
+		'path'    => $vendorDir . '/sebastian/diff/src/Output/AbstractChunkOutputBuilder.php'
+	),
+	'SebastianBergmann\\Diff\\LongestCommonSubsequenceCalculator' => array(
+		'version' => '3.0.2.0',
+		'path'    => $vendorDir . '/sebastian/diff/src/LongestCommonSubsequenceCalculator.php'
+	),
+	'SebastianBergmann\\Diff\\Chunk' => array(
+		'version' => '3.0.2.0',
+		'path'    => $vendorDir . '/sebastian/diff/src/Chunk.php'
+	),
+	'SebastianBergmann\\Diff\\Differ' => array(
+		'version' => '3.0.2.0',
+		'path'    => $vendorDir . '/sebastian/diff/src/Differ.php'
+	),
+	'SebastianBergmann\\Diff\\Line' => array(
+		'version' => '3.0.2.0',
+		'path'    => $vendorDir . '/sebastian/diff/src/Line.php'
+	),
+	'SebastianBergmann\\Diff\\ConfigurationException' => array(
+		'version' => '3.0.2.0',
+		'path'    => $vendorDir . '/sebastian/diff/src/Exception/ConfigurationException.php'
+	),
+	'SebastianBergmann\\Diff\\InvalidArgumentException' => array(
+		'version' => '3.0.2.0',
+		'path'    => $vendorDir . '/sebastian/diff/src/Exception/InvalidArgumentException.php'
+	),
+	'SebastianBergmann\\Diff\\Exception' => array(
+		'version' => '3.0.2.0',
+		'path'    => $vendorDir . '/sebastian/diff/src/Exception/Exception.php'
+	),
+	'SebastianBergmann\\Diff\\MemoryEfficientLongestCommonSubsequenceCalculator' => array(
+		'version' => '3.0.2.0',
+		'path'    => $vendorDir . '/sebastian/diff/src/MemoryEfficientLongestCommonSubsequenceCalculator.php'
+	),
+	'SebastianBergmann\\RecursionContext\\InvalidArgumentException' => array(
+		'version' => '3.0.0.0',
+		'path'    => $vendorDir . '/sebastian/recursion-context/src/InvalidArgumentException.php'
+	),
+	'SebastianBergmann\\RecursionContext\\Context' => array(
+		'version' => '3.0.0.0',
+		'path'    => $vendorDir . '/sebastian/recursion-context/src/Context.php'
+	),
+	'SebastianBergmann\\RecursionContext\\Exception' => array(
+		'version' => '3.0.0.0',
+		'path'    => $vendorDir . '/sebastian/recursion-context/src/Exception.php'
+	),
+	'PHPUnit\\TextUI\\ResultPrinter' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/TextUI/ResultPrinter.php'
+	),
+	'PHPUnit\\TextUI\\TestRunner' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/TextUI/TestRunner.php'
+	),
+	'PHPUnit\\TextUI\\Command' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/TextUI/Command.php'
+	),
+	'PHPUnit\\Util\\RegularExpression' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Util/RegularExpression.php'
+	),
+	'PHPUnit\\Runner\\TestResultCache' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Util/TestResultCache.php'
+	),
+	'PHPUnit\\Util\\Type' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Util/Type.php'
+	),
+	'PHPUnit\\Util\\Json' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Util/Json.php'
+	),
+	'PHPUnit\\Util\\FileLoader' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Util/FileLoader.php'
+	),
+	'PHPUnit\\Util\\Filesystem' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Util/Filesystem.php'
+	),
+	'PHPUnit\\Util\\ConfigurationGenerator' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Util/ConfigurationGenerator.php'
+	),
+	'PHPUnit\\Util\\Blacklist' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Util/Blacklist.php'
+	),
+	'PHPUnit\\Util\\Getopt' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Util/Getopt.php'
+	),
+	'PHPUnit\\Util\\Xml' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Util/Xml.php'
+	),
+	'PHPUnit\\Util\\InvalidArgumentHelper' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Util/InvalidArgumentHelper.php'
+	),
+	'PHPUnit\\Runner\\TestResultCacheInterface' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Util/TestResultCacheInterface.php'
+	),
+	'PHPUnit\\Util\\Configuration' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Util/Configuration.php'
+	),
+	'PHPUnit\\Util\\PHP\\WindowsPhpProcess' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Util/PHP/WindowsPhpProcess.php'
+	),
+	'PHPUnit\\Util\\PHP\\AbstractPhpProcess' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Util/PHP/AbstractPhpProcess.php'
+	),
+	'PHPUnit\\Util\\PHP\\DefaultPhpProcess' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Util/PHP/DefaultPhpProcess.php'
+	),
+	'PHPUnit\\Util\\Test' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Util/Test.php'
+	),
+	'PHPUnit\\Util\\GlobalState' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Util/GlobalState.php'
+	),
+	'PHPUnit\\Util\\TestDox\\ResultPrinter' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Util/TestDox/ResultPrinter.php'
+	),
+	'PHPUnit\\Util\\TestDox\\HtmlResultPrinter' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Util/TestDox/HtmlResultPrinter.php'
+	),
+	'PHPUnit\\Util\\TestDox\\TestResult' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Util/TestDox/TestResult.php'
+	),
+	'PHPUnit\\Util\\TestDox\\TextResultPrinter' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Util/TestDox/TextResultPrinter.php'
+	),
+	'PHPUnit\\Util\\TestDox\\XmlResultPrinter' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Util/TestDox/XmlResultPrinter.php'
+	),
+	'PHPUnit\\Util\\TestDox\\CliTestDoxPrinter' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Util/TestDox/CliTestDoxPrinter.php'
+	),
+	'PHPUnit\\Util\\TestDox\\NamePrettifier' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Util/TestDox/NamePrettifier.php'
+	),
+	'PHPUnit\\Util\\Filter' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Util/Filter.php'
+	),
+	'PHPUnit\\Util\\XmlTestListRenderer' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Util/XmlTestListRenderer.php'
+	),
+	'PHPUnit\\Util\\Log\\TeamCity' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Util/Log/TeamCity.php'
+	),
+	'PHPUnit\\Util\\Log\\JUnit' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Util/Log/JUnit.php'
+	),
+	'PHPUnit\\Util\\ErrorHandler' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Util/ErrorHandler.php'
+	),
+	'PHPUnit\\Runner\\NullTestResultCache' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Util/NullTestResultCache.php'
+	),
+	'PHPUnit\\Util\\Printer' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Util/Printer.php'
+	),
+	'PHPUnit\\Util\\XdebugFilterScriptGenerator' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Util/XdebugFilterScriptGenerator.php'
+	),
+	'PHPUnit\\Util\\TextTestListRenderer' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Util/TextTestListRenderer.php'
+	),
+	'PHPUnit\\Framework\\TestListener' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/TestListener.php'
+	),
+	'PHPUnit\\Framework\\Warning' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Warning.php'
+	),
+	'PHPUnit\\Framework\\UnintentionallyCoveredCodeError' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/UnintentionallyCoveredCodeError.php'
+	),
+	'PHPUnit\\Framework\\ExpectationFailedException' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/ExpectationFailedException.php'
+	),
+	'PHPUnit\\Framework\\TestResult' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/TestResult.php'
+	),
+	'PHPUnit\\Framework\\TestListenerDefaultImplementation' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/TestListenerDefaultImplementation.php'
+	),
+	'PHPUnit\\Framework\\SkippedTestSuiteError' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/SkippedTestSuiteError.php'
+	),
+	'PHPUnit\\Framework\\TestSuiteIterator' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/TestSuiteIterator.php'
+	),
+	'PHPUnit\\Framework\\TestSuite' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/TestSuite.php'
+	),
+	'PHPUnit\\Framework\\OutputError' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/OutputError.php'
+	),
+	'PHPUnit\\Framework\\IncompleteTestError' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/IncompleteTestError.php'
+	),
+	'PHPUnit\\Framework\\SelfDescribing' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/SelfDescribing.php'
+	),
+	'PHPUnit\\Framework\\UnexpectedValueException' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/UnexpectedValueException.php'
+	),
+	'PHPUnit\\Framework\\RiskyTestError' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/RiskyTestError.php'
+	),
+	'PHPUnit\\Framework\\IncompleteTest' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/IncompleteTest.php'
+	),
+	'PHPUnit\\Framework\\SkippedTestError' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/SkippedTestError.php'
+	),
+	'PHPUnit\\Framework\\SyntheticError' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/SyntheticError.php'
+	),
+	'PHPUnit\\Framework\\CodeCoverageException' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/CodeCoverageException.php'
+	),
+	'PHPUnit\\Framework\\ExceptionWrapper' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/ExceptionWrapper.php'
+	),
+	'PHPUnit\\Framework\\CoveredCodeNotExecutedException' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/CoveredCodeNotExecutedException.php'
+	),
+	'PHPUnit\\Framework\\InvalidParameterGroupException' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/InvalidParameterGroupException.php'
+	),
+	'PHPUnit\\Framework\\DataProviderTestSuite' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/DataProviderTestSuite.php'
+	),
+	'PHPUnit\\Framework\\Assert' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Assert.php'
+	),
+	'PHPUnit\\Framework\\SkippedTest' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/SkippedTest.php'
+	),
+	'PHPUnit\\Framework\\Test' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Test.php'
+	),
+	'PHPUnit\\Framework\\RiskyTest' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/RiskyTest.php'
+	),
+	'PHPUnit\\Framework\\MockObject\\Invocation' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/MockObject/Invocation/Invocation.php'
+	),
+	'PHPUnit\\Framework\\MockObject\\Invocation\\StaticInvocation' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/MockObject/Invocation/StaticInvocation.php'
+	),
+	'PHPUnit\\Framework\\MockObject\\Invocation\\ObjectInvocation' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/MockObject/Invocation/ObjectInvocation.php'
+	),
+	'PHPUnit_Framework_MockObject_MockObject' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/MockObject/MockObject.php'
+	),
+	'PHPUnit\\Framework\\MockObject\\InvocationMocker' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/MockObject/InvocationMocker.php'
+	),
+	'PHPUnit\\Framework\\MockObject\\Invokable' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/MockObject/Invokable.php'
+	),
+	'PHPUnit\\Framework\\MockObject\\MockBuilder' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/MockObject/MockBuilder.php'
+	),
+	'PHPUnit\\Framework\\MockObject\\MockMethodSet' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/MockObject/MockMethodSet.php'
+	),
+	'PHPUnit\\Framework\\MockObject\\Matcher\\MethodName' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/MockObject/Matcher/MethodName.php'
+	),
+	'PHPUnit\\Framework\\MockObject\\Matcher\\ConsecutiveParameters' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/MockObject/Matcher/ConsecutiveParameters.php'
+	),
+	'PHPUnit\\Framework\\MockObject\\Matcher\\DeferredError' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/MockObject/Matcher/DeferredError.php'
+	),
+	'PHPUnit\\Framework\\MockObject\\Matcher\\InvokedRecorder' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/MockObject/Matcher/InvokedRecorder.php'
+	),
+	'PHPUnit\\Framework\\MockObject\\Matcher\\Invocation' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/MockObject/Matcher/Invocation.php'
+	),
+	'PHPUnit\\Framework\\MockObject\\Matcher\\AnyInvokedCount' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/MockObject/Matcher/AnyInvokedCount.php'
+	),
+	'PHPUnit\\Framework\\MockObject\\Matcher\\InvokedAtLeastOnce' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/MockObject/Matcher/InvokedAtLeastOnce.php'
+	),
+	'PHPUnit\\Framework\\MockObject\\Matcher\\StatelessInvocation' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/MockObject/Matcher/StatelessInvocation.php'
+	),
+	'PHPUnit\\Framework\\MockObject\\Matcher\\AnyParameters' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/MockObject/Matcher/AnyParameters.php'
+	),
+	'PHPUnit\\Framework\\MockObject\\Matcher\\InvokedAtMostCount' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/MockObject/Matcher/InvokedAtMostCount.php'
+	),
+	'PHPUnit\\Framework\\MockObject\\Matcher\\InvokedAtIndex' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/MockObject/Matcher/InvokedAtIndex.php'
+	),
+	'PHPUnit\\Framework\\MockObject\\Matcher\\InvokedAtLeastCount' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/MockObject/Matcher/InvokedAtLeastCount.php'
+	),
+	'PHPUnit\\Framework\\MockObject\\Matcher\\Parameters' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/MockObject/Matcher/Parameters.php'
+	),
+	'PHPUnit\\Framework\\MockObject\\Matcher\\InvokedCount' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/MockObject/Matcher/InvokedCount.php'
+	),
+	'PHPUnit\\Framework\\MockObject\\MockObject' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/MockObject/ForwardCompatibility/MockObject.php'
+	),
+	'PHPUnit\\Framework\\MockObject\\Matcher' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/MockObject/Matcher.php'
+	),
+	'PHPUnit\\Framework\\MockObject\\Stub\\ReturnStub' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/MockObject/Stub/ReturnStub.php'
+	),
+	'PHPUnit\\Framework\\MockObject\\Stub\\ConsecutiveCalls' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/MockObject/Stub/ConsecutiveCalls.php'
+	),
+	'PHPUnit\\Framework\\MockObject\\Stub\\ReturnArgument' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/MockObject/Stub/ReturnArgument.php'
+	),
+	'PHPUnit\\Framework\\MockObject\\Stub\\ReturnReference' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/MockObject/Stub/ReturnReference.php'
+	),
+	'PHPUnit\\Framework\\MockObject\\Stub\\MatcherCollection' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/MockObject/Stub/MatcherCollection.php'
+	),
+	'PHPUnit\\Framework\\MockObject\\Stub\\ReturnValueMap' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/MockObject/Stub/ReturnValueMap.php'
+	),
+	'PHPUnit\\Framework\\MockObject\\Stub\\ReturnCallback' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/MockObject/Stub/ReturnCallback.php'
+	),
+	'PHPUnit\\Framework\\MockObject\\Stub\\ReturnSelf' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/MockObject/Stub/ReturnSelf.php'
+	),
+	'PHPUnit\\Framework\\MockObject\\Stub\\Exception' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/MockObject/Stub/Exception.php'
+	),
+	'PHPUnit\\Framework\\MockObject\\Stub' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/MockObject/Stub.php'
+	),
+	'PHPUnit\\Framework\\MockObject\\MockMethod' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/MockObject/MockMethod.php'
+	),
+	'PHPUnit\\Framework\\MockObject\\Generator' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/MockObject/Generator.php'
+	),
+	'PHPUnit\\Framework\\MockObject\\Builder\\NamespaceMatch' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/MockObject/Builder/NamespaceMatch.php'
+	),
+	'PHPUnit\\Framework\\MockObject\\Builder\\InvocationMocker' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/MockObject/Builder/InvocationMocker.php'
+	),
+	'PHPUnit\\Framework\\MockObject\\Builder\\ParametersMatch' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/MockObject/Builder/ParametersMatch.php'
+	),
+	'PHPUnit\\Framework\\MockObject\\Builder\\Identity' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/MockObject/Builder/Identity.php'
+	),
+	'PHPUnit\\Framework\\MockObject\\Builder\\Match' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/MockObject/Builder/Match.php'
+	),
+	'PHPUnit\\Framework\\MockObject\\Builder\\Stub' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/MockObject/Builder/Stub.php'
+	),
+	'PHPUnit\\Framework\\MockObject\\Builder\\MethodNameMatch' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/MockObject/Builder/MethodNameMatch.php'
+	),
+	'PHPUnit\\Framework\\MockObject\\RuntimeException' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/MockObject/Exception/RuntimeException.php'
+	),
+	'PHPUnit\\Framework\\MockObject\\BadMethodCallException' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/MockObject/Exception/BadMethodCallException.php'
+	),
+	'PHPUnit\\Framework\\MockObject\\Exception' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/MockObject/Exception/Exception.php'
+	),
+	'PHPUnit\\Framework\\MockObject\\Verifiable' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/MockObject/Verifiable.php'
+	),
+	'PHPUnit\\Framework\\InvalidCoversTargetException' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/InvalidCoversTargetException.php'
+	),
+	'PHPUnit\\Framework\\MissingCoversAnnotationException' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/MissingCoversAnnotationException.php'
+	),
+	'PHPUnit\\Framework\\Exception' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Exception.php'
+	),
+	'PHPUnit\\Framework\\Error\\Warning' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Error/Warning.php'
+	),
+	'PHPUnit\\Framework\\Error\\Error' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Error/Error.php'
+	),
+	'PHPUnit\\Framework\\Error\\Notice' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Error/Notice.php'
+	),
+	'PHPUnit\\Framework\\Error\\Deprecated' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Error/Deprecated.php'
+	),
+	'PHPUnit\\Framework\\TestCase' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/TestCase.php'
+	),
+	'PHPUnit\\Framework\\WarningTestCase' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/WarningTestCase.php'
+	),
+	'PHPUnit\\Framework\\Constraint\\RegularExpression' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Constraint/RegularExpression.php'
+	),
+	'PHPUnit\\Framework\\Constraint\\IsInstanceOf' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Constraint/IsInstanceOf.php'
+	),
+	'PHPUnit\\Framework\\Constraint\\IsReadable' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Constraint/IsReadable.php'
+	),
+	'PHPUnit\\Framework\\Constraint\\IsFalse' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Constraint/IsFalse.php'
+	),
+	'PHPUnit\\Framework\\Constraint\\LessThan' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Constraint/LessThan.php'
+	),
+	'PHPUnit\\Framework\\Constraint\\ExceptionMessageRegularExpression' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Constraint/ExceptionMessageRegularExpression.php'
+	),
+	'PHPUnit\\Framework\\Constraint\\DirectoryExists' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Constraint/DirectoryExists.php'
+	),
+	'PHPUnit\\Framework\\Constraint\\LogicalOr' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Constraint/LogicalOr.php'
+	),
+	'PHPUnit\\Framework\\Constraint\\IsAnything' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Constraint/IsAnything.php'
+	),
+	'PHPUnit\\Framework\\Constraint\\ExceptionMessage' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Constraint/ExceptionMessage.php'
+	),
+	'PHPUnit\\Framework\\Constraint\\TraversableContainsOnly' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Constraint/TraversableContainsOnly.php'
+	),
+	'PHPUnit\\Framework\\Constraint\\ClassHasStaticAttribute' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Constraint/ClassHasStaticAttribute.php'
+	),
+	'PHPUnit\\Framework\\Constraint\\IsTrue' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Constraint/IsTrue.php'
+	),
+	'PHPUnit\\Framework\\Constraint\\LogicalAnd' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Constraint/LogicalAnd.php'
+	),
+	'PHPUnit\\Framework\\Constraint\\ArrayHasKey' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Constraint/ArrayHasKey.php'
+	),
+	'PHPUnit\\Framework\\Constraint\\Composite' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Constraint/Composite.php'
+	),
+	'PHPUnit\\Framework\\Constraint\\StringStartsWith' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Constraint/StringStartsWith.php'
+	),
+	'PHPUnit\\Framework\\Constraint\\IsJson' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Constraint/IsJson.php'
+	),
+	'PHPUnit\\Framework\\Constraint\\JsonMatches' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Constraint/JsonMatches.php'
+	),
+	'PHPUnit\\Framework\\Constraint\\Attribute' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Constraint/Attribute.php'
+	),
+	'PHPUnit\\Framework\\Constraint\\LogicalXor' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Constraint/LogicalXor.php'
+	),
+	'PHPUnit\\Framework\\Constraint\\IsType' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Constraint/IsType.php'
+	),
+	'PHPUnit\\Framework\\Constraint\\IsEmpty' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Constraint/IsEmpty.php'
+	),
+	'PHPUnit\\Framework\\Constraint\\TraversableContains' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Constraint/TraversableContains.php'
+	),
+	'PHPUnit\\Framework\\Constraint\\IsEqual' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Constraint/IsEqual.php'
+	),
+	'PHPUnit\\Framework\\Constraint\\StringMatchesFormatDescription' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Constraint/StringMatchesFormatDescription.php'
+	),
+	'PHPUnit\\Framework\\Constraint\\IsNan' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Constraint/IsNan.php'
+	),
+	'PHPUnit\\Framework\\Constraint\\ClassHasAttribute' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Constraint/ClassHasAttribute.php'
+	),
+	'PHPUnit\\Framework\\Constraint\\Constraint' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Constraint/Constraint.php'
+	),
+	'PHPUnit\\Framework\\Constraint\\Count' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Constraint/Count.php'
+	),
+	'PHPUnit\\Framework\\Constraint\\ObjectHasAttribute' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Constraint/ObjectHasAttribute.php'
+	),
+	'PHPUnit\\Framework\\Constraint\\IsInfinite' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Constraint/IsInfinite.php'
+	),
+	'PHPUnit\\Framework\\Constraint\\StringContains' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Constraint/StringContains.php'
+	),
+	'PHPUnit\\Framework\\Constraint\\IsIdentical' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Constraint/IsIdentical.php'
+	),
+	'PHPUnit\\Framework\\Constraint\\JsonMatchesErrorMessageProvider' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Constraint/JsonMatchesErrorMessageProvider.php'
+	),
+	'PHPUnit\\Framework\\Constraint\\IsNull' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Constraint/IsNull.php'
+	),
+	'PHPUnit\\Framework\\Constraint\\ArraySubset' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Constraint/ArraySubset.php'
+	),
+	'PHPUnit\\Framework\\Constraint\\SameSize' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Constraint/SameSize.php'
+	),
+	'PHPUnit\\Framework\\Constraint\\Exception' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Constraint/Exception.php'
+	),
+	'PHPUnit\\Framework\\Constraint\\IsWritable' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Constraint/IsWritable.php'
+	),
+	'PHPUnit\\Framework\\Constraint\\ExceptionCode' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Constraint/ExceptionCode.php'
+	),
+	'PHPUnit\\Framework\\Constraint\\Callback' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Constraint/Callback.php'
+	),
+	'PHPUnit\\Framework\\Constraint\\LogicalNot' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Constraint/LogicalNot.php'
+	),
+	'PHPUnit\\Framework\\Constraint\\GreaterThan' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Constraint/GreaterThan.php'
+	),
+	'PHPUnit\\Framework\\Constraint\\StringEndsWith' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Constraint/StringEndsWith.php'
+	),
+	'PHPUnit\\Framework\\Constraint\\IsFinite' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Constraint/IsFinite.php'
+	),
+	'PHPUnit\\Framework\\Constraint\\FileExists' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/Constraint/FileExists.php'
+	),
+	'PHPUnit\\Framework\\IncompleteTestCase' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/IncompleteTestCase.php'
+	),
+	'PHPUnit\\Framework\\TestFailure' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/TestFailure.php'
+	),
+	'PHPUnit\\Framework\\SkippedTestCase' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/SkippedTestCase.php'
+	),
+	'PHPUnit\\Framework\\AssertionFailedError' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Framework/AssertionFailedError.php'
+	),
+	'PHPUnit\\Runner\\BaseTestRunner' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Runner/BaseTestRunner.php'
+	),
+	'PHPUnit\\Runner\\ResultCacheExtension' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Runner/ResultCacheExtension.php'
+	),
+	'PHPUnit\\Runner\\PhptTestCase' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Runner/PhptTestCase.php'
+	),
+	'PHPUnit\\Runner\\StandardTestSuiteLoader' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Runner/StandardTestSuiteLoader.php'
+	),
+	'PHPUnit\\Runner\\Version' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Runner/Version.php'
+	),
+	'PHPUnit\\Runner\\TestSuiteLoader' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Runner/TestSuiteLoader.php'
+	),
+	'PHPUnit\\Runner\\TestSuiteSorter' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Runner/TestSuiteSorter.php'
+	),
+	'PHPUnit\\Runner\\Filter\\Factory' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Runner/Filter/Factory.php'
+	),
+	'PHPUnit\\Runner\\Filter\\IncludeGroupFilterIterator' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Runner/Filter/IncludeGroupFilterIterator.php'
+	),
+	'PHPUnit\\Runner\\Filter\\GroupFilterIterator' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Runner/Filter/GroupFilterIterator.php'
+	),
+	'PHPUnit\\Runner\\Filter\\NameFilterIterator' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Runner/Filter/NameFilterIterator.php'
+	),
+	'PHPUnit\\Runner\\Filter\\ExcludeGroupFilterIterator' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Runner/Filter/ExcludeGroupFilterIterator.php'
+	),
+	'PHPUnit\\Runner\\Exception' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Runner/Exception.php'
+	),
+	'PHPUnit\\Runner\\AfterRiskyTestHook' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Runner/Hook/AfterRiskyTestHook.php'
+	),
+	'PHPUnit\\Runner\\AfterSkippedTestHook' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Runner/Hook/AfterSkippedTestHook.php'
+	),
+	'PHPUnit\\Runner\\AfterTestErrorHook' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Runner/Hook/AfterTestErrorHook.php'
+	),
+	'PHPUnit\\Runner\\Hook' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Runner/Hook/Hook.php'
+	),
+	'PHPUnit\\Runner\\BeforeTestHook' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Runner/Hook/BeforeTestHook.php'
+	),
+	'PHPUnit\\Runner\\TestListenerAdapter' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Runner/Hook/TestListenerAdapter.php'
+	),
+	'PHPUnit\\Runner\\AfterTestWarningHook' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Runner/Hook/AfterTestWarningHook.php'
+	),
+	'PHPUnit\\Runner\\TestHook' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Runner/Hook/TestHook.php'
+	),
+	'PHPUnit\\Runner\\AfterTestHook' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Runner/Hook/AfterTestHook.php'
+	),
+	'PHPUnit\\Runner\\AfterLastTestHook' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Runner/Hook/AfterLastTestHook.php'
+	),
+	'PHPUnit\\Runner\\AfterTestFailureHook' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Runner/Hook/AfterTestFailureHook.php'
+	),
+	'PHPUnit\\Runner\\BeforeFirstTestHook' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Runner/Hook/BeforeFirstTestHook.php'
+	),
+	'PHPUnit\\Runner\\AfterIncompleteTestHook' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Runner/Hook/AfterIncompleteTestHook.php'
+	),
+	'PHPUnit\\Runner\\AfterSuccessfulTestHook' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Runner/Hook/AfterSuccessfulTestHook.php'
+	),
+	'PHPUnit\\Exception' => array(
+		'version' => '7.5.18.0',
+		'path'    => $vendorDir . '/phpunit/phpunit/src/Exception.php'
+	),
+	'SebastianBergmann\\ResourceOperations\\ResourceOperations' => array(
+		'version' => '2.0.1.0',
+		'path'    => $vendorDir . '/sebastian/resource-operations/src/ResourceOperations.php'
+	),
+	'PharIo\\Manifest\\Email' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/values/Email.php'
+	),
+	'PharIo\\Manifest\\PhpVersionRequirement' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/values/PhpVersionRequirement.php'
+	),
+	'PharIo\\Manifest\\Application' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/values/Application.php'
+	),
+	'PharIo\\Manifest\\RequirementCollectionIterator' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/values/RequirementCollectionIterator.php'
+	),
+	'PharIo\\Manifest\\AuthorCollectionIterator' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/values/AuthorCollectionIterator.php'
+	),
+	'PharIo\\Manifest\\Type' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/values/Type.php'
+	),
+	'PharIo\\Manifest\\Library' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/values/Library.php'
+	),
+	'PharIo\\Manifest\\ApplicationName' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/values/ApplicationName.php'
+	),
+	'PharIo\\Manifest\\PhpExtensionRequirement' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/values/PhpExtensionRequirement.php'
+	),
+	'PharIo\\Manifest\\Manifest' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/values/Manifest.php'
+	),
+	'PharIo\\Manifest\\Url' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/values/Url.php'
+	),
+	'PharIo\\Manifest\\RequirementCollection' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/values/RequirementCollection.php'
+	),
+	'PharIo\\Manifest\\License' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/values/License.php'
+	),
+	'PharIo\\Manifest\\AuthorCollection' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/values/AuthorCollection.php'
+	),
+	'PharIo\\Manifest\\BundledComponent' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/values/BundledComponent.php'
+	),
+	'PharIo\\Manifest\\Extension' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/values/Extension.php'
+	),
+	'PharIo\\Manifest\\BundledComponentCollectionIterator' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/values/BundledComponentCollectionIterator.php'
+	),
+	'PharIo\\Manifest\\CopyrightInformation' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/values/CopyrightInformation.php'
+	),
+	'PharIo\\Manifest\\Author' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/values/Author.php'
+	),
+	'PharIo\\Manifest\\Requirement' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/values/Requirement.php'
+	),
+	'PharIo\\Manifest\\BundledComponentCollection' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/values/BundledComponentCollection.php'
+	),
+	'PharIo\\Manifest\\ManifestLoaderException' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/exceptions/ManifestLoaderException.php'
+	),
+	'PharIo\\Manifest\\ManifestDocumentException' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/exceptions/ManifestDocumentException.php'
+	),
+	'PharIo\\Manifest\\InvalidApplicationNameException' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/exceptions/InvalidApplicationNameException.php'
+	),
+	'PharIo\\Manifest\\ManifestDocumentMapperException' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/exceptions/ManifestDocumentMapperException.php'
+	),
+	'PharIo\\Manifest\\ManifestElementException' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/exceptions/ManifestElementException.php'
+	),
+	'PharIo\\Manifest\\InvalidEmailException' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/exceptions/InvalidEmailException.php'
+	),
+	'PharIo\\Manifest\\InvalidUrlException' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/exceptions/InvalidUrlException.php'
+	),
+	'PharIo\\Manifest\\Exception' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/exceptions/Exception.php'
+	),
+	'PharIo\\Manifest\\ContainsElement' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/xml/ContainsElement.php'
+	),
+	'PharIo\\Manifest\\LicenseElement' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/xml/LicenseElement.php'
+	),
+	'PharIo\\Manifest\\ComponentElement' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/xml/ComponentElement.php'
+	),
+	'PharIo\\Manifest\\PhpElement' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/xml/PhpElement.php'
+	),
+	'PharIo\\Manifest\\ExtElementCollection' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/xml/ExtElementCollection.php'
+	),
+	'PharIo\\Manifest\\AuthorElement' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/xml/AuthorElement.php'
+	),
+	'PharIo\\Manifest\\ElementCollection' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/xml/ElementCollection.php'
+	),
+	'PharIo\\Manifest\\ManifestDocument' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/xml/ManifestDocument.php'
+	),
+	'PharIo\\Manifest\\BundlesElement' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/xml/BundlesElement.php'
+	),
+	'PharIo\\Manifest\\AuthorElementCollection' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/xml/AuthorElementCollection.php'
+	),
+	'PharIo\\Manifest\\ComponentElementCollection' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/xml/ComponentElementCollection.php'
+	),
+	'PharIo\\Manifest\\CopyrightElement' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/xml/CopyrightElement.php'
+	),
+	'PharIo\\Manifest\\ExtElement' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/xml/ExtElement.php'
+	),
+	'PharIo\\Manifest\\RequiresElement' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/xml/RequiresElement.php'
+	),
+	'PharIo\\Manifest\\ManifestDocumentLoadingException' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/xml/ManifestDocumentLoadingException.php'
+	),
+	'PharIo\\Manifest\\ExtensionElement' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/xml/ExtensionElement.php'
+	),
+	'PharIo\\Manifest\\ManifestElement' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/xml/ManifestElement.php'
+	),
+	'PharIo\\Manifest\\ManifestSerializer' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/ManifestSerializer.php'
+	),
+	'PharIo\\Manifest\\ManifestLoader' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/ManifestLoader.php'
+	),
+	'PharIo\\Manifest\\ManifestDocumentMapper' => array(
+		'version' => '1.0.3.0',
+		'path'    => $vendorDir . '/phar-io/manifest/src/ManifestDocumentMapper.php'
+	),
+	'SebastianBergmann\\Version' => array(
+		'version' => '2.0.1.0',
+		'path'    => $vendorDir . '/sebastian/version/src/Version.php'
+	),
+	'Text_Template' => array(
+		'version' => '1.2.1.0',
+		'path'    => $vendorDir . '/phpunit/php-text-template/src/Template.php'
+	),
+	'PharIo\\Version\\VersionConstraintParser' => array(
+		'version' => '2.0.1.0',
+		'path'    => $vendorDir . '/phar-io/version/src/VersionConstraintParser.php'
+	),
+	'PharIo\\Version\\AnyVersionConstraint' => array(
+		'version' => '2.0.1.0',
+		'path'    => $vendorDir . '/phar-io/version/src/constraints/AnyVersionConstraint.php'
+	),
+	'PharIo\\Version\\AbstractVersionConstraint' => array(
+		'version' => '2.0.1.0',
+		'path'    => $vendorDir . '/phar-io/version/src/constraints/AbstractVersionConstraint.php'
+	),
+	'PharIo\\Version\\VersionConstraint' => array(
+		'version' => '2.0.1.0',
+		'path'    => $vendorDir . '/phar-io/version/src/constraints/VersionConstraint.php'
+	),
+	'PharIo\\Version\\GreaterThanOrEqualToVersionConstraint' => array(
+		'version' => '2.0.1.0',
+		'path'    => $vendorDir . '/phar-io/version/src/constraints/GreaterThanOrEqualToVersionConstraint.php'
+	),
+	'PharIo\\Version\\OrVersionConstraintGroup' => array(
+		'version' => '2.0.1.0',
+		'path'    => $vendorDir . '/phar-io/version/src/constraints/OrVersionConstraintGroup.php'
+	),
+	'PharIo\\Version\\AndVersionConstraintGroup' => array(
+		'version' => '2.0.1.0',
+		'path'    => $vendorDir . '/phar-io/version/src/constraints/AndVersionConstraintGroup.php'
+	),
+	'PharIo\\Version\\ExactVersionConstraint' => array(
+		'version' => '2.0.1.0',
+		'path'    => $vendorDir . '/phar-io/version/src/constraints/ExactVersionConstraint.php'
+	),
+	'PharIo\\Version\\SpecificMajorVersionConstraint' => array(
+		'version' => '2.0.1.0',
+		'path'    => $vendorDir . '/phar-io/version/src/constraints/SpecificMajorVersionConstraint.php'
+	),
+	'PharIo\\Version\\SpecificMajorAndMinorVersionConstraint' => array(
+		'version' => '2.0.1.0',
+		'path'    => $vendorDir . '/phar-io/version/src/constraints/SpecificMajorAndMinorVersionConstraint.php'
+	),
+	'PharIo\\Version\\VersionConstraintValue' => array(
+		'version' => '2.0.1.0',
+		'path'    => $vendorDir . '/phar-io/version/src/VersionConstraintValue.php'
+	),
+	'PharIo\\Version\\InvalidVersionException' => array(
+		'version' => '2.0.1.0',
+		'path'    => $vendorDir . '/phar-io/version/src/exceptions/InvalidVersionException.php'
+	),
+	'PharIo\\Version\\InvalidPreReleaseSuffixException' => array(
+		'version' => '2.0.1.0',
+		'path'    => $vendorDir . '/phar-io/version/src/exceptions/InvalidPreReleaseSuffixException.php'
+	),
+	'PharIo\\Version\\UnsupportedVersionConstraintException' => array(
+		'version' => '2.0.1.0',
+		'path'    => $vendorDir . '/phar-io/version/src/exceptions/UnsupportedVersionConstraintException.php'
+	),
+	'PharIo\\Version\\Exception' => array(
+		'version' => '2.0.1.0',
+		'path'    => $vendorDir . '/phar-io/version/src/exceptions/Exception.php'
+	),
+	'PharIo\\Version\\PreReleaseSuffix' => array(
+		'version' => '2.0.1.0',
+		'path'    => $vendorDir . '/phar-io/version/src/PreReleaseSuffix.php'
+	),
+	'PharIo\\Version\\Version' => array(
+		'version' => '2.0.1.0',
+		'path'    => $vendorDir . '/phar-io/version/src/Version.php'
+	),
+	'PharIo\\Version\\VersionNumber' => array(
+		'version' => '2.0.1.0',
+		'path'    => $vendorDir . '/phar-io/version/src/VersionNumber.php'
 	),
 );
 
