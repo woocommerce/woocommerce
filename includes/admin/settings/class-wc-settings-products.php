@@ -387,6 +387,16 @@ class WC_Settings_Products extends WC_Settings_Page {
 				),
 
 				array(
+					'desc'          => __( 'Allow using redirect mode as a last resort', 'woocommerce' ),
+					'id'            => 'woocommerce_downloads_redirect_fallback_allowed',
+					'type'          => 'checkbox',
+					'default'       => 'no',
+					'desc_tip'      => __( 'If the "Force Downloads" or "X-Accel-Redirect/X-Sendfile" download method is selected but does not work, the system will use the "Redirect" method as a last resort.', 'woocommerce' ),
+					'checkboxgroup' => 'start',
+					'autoload'      => false,
+				),
+
+				array(
 					'title'         => __( 'Access restriction', 'woocommerce' ),
 					'desc'          => __( 'Downloads require login', 'woocommerce' ),
 					'id'            => 'woocommerce_downloads_require_login',

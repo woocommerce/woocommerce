@@ -442,7 +442,7 @@ class WC_Download_Handler {
 		$start  = isset( $download_range['start'] ) ? $download_range['start'] : 0;
 		$length = isset( $download_range['length'] ) ? $download_range['length'] : 0;
 		if ( ! self::readfile_chunked( $parsed_file_path['file_path'], $start, $length ) ) {
-			if ( $parsed_file_path['remote_file'] ) {
+			if ( $parsed_file_path['remote_file'] && 'yes' === get_option( 'woocommerce_downloads_redirect_fallback_allowed' ) ) {
 				wc_get_logger()->warning(
 					sprintf(
 						/* translators: %1$s contains the filepath of the digital asset. */
