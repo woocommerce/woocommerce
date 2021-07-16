@@ -12,16 +12,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 foreach ( $tools as $action_name => $tool ) {
-	// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
 	?>
-	<form id="<?php echo 'form_' . $action_name; ?>" method="GET" action="<?php echo esc_url( admin_url( 'admin.php?foo=bar' ) ); ?>">
+	<form id="<?php echo esc_attr( 'form_' . $action_name ); ?>" method="GET" action="<?php echo esc_attr( esc_url( admin_url( 'admin.php?foo=bar' ) ) ); ?>">
 		<?php wp_nonce_field( 'debug_action', '_wpnonce', false ); ?>
 		<input type="hidden" name="page" value="wc-status"/>
 		<input type="hidden" name="tab" value="tools"/>
-		<input type="hidden" name="action" value="<?php echo $action_name; ?>"/>
+		<input type="hidden" name="action" value="<?php echo esc_attr( $action_name ); ?>"/>
 	</form>
 	<?php
-	// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
 }
 ?>
 
@@ -48,7 +46,7 @@ foreach ( $tools as $action_name => $tool ) {
 				</th>
 				<td class="run-tool">
 					<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-					<input <?php echo ArrayUtil::is_truthy( $tool, 'disabled' ) ? 'disabled' : ''; ?> type="submit" form="<?php echo 'form_' . $action_name; ?>" class="button button-large" value="<?php echo esc_html( $tool['button'] ); ?>" />
+					<input <?php echo ArrayUtil::is_truthy( $tool, 'disabled' ) ? 'disabled' : ''; ?> type="submit" form="<?php echo 'form_' . $action_name; ?>" class="button button-large" value="<?php echo esc_attr( $tool['button'] ); ?>" />
 				</td>
 			</tr>
 		<?php endforeach; ?>
