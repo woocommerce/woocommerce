@@ -295,6 +295,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 					'state'      => 'CA',
 					'postcode'   => '94103',
 					'country'    => 'US',
+					'phone'      => '(555) 555-5555',
 				),
 				'line_items'           => array(
 					array(
@@ -352,6 +353,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( $order->get_shipping_state(), $data['shipping']['state'] );
 		$this->assertEquals( $order->get_shipping_postcode(), $data['shipping']['postcode'] );
 		$this->assertEquals( $order->get_shipping_country(), $data['shipping']['country'] );
+		$this->assertEquals( $order->get_shipping_phone(), $data['shipping']['phone'] );
 		$this->assertEquals( 1, count( $data['line_items'] ) );
 		$this->assertEquals( 1, count( $data['shipping_lines'] ) );
 
@@ -417,6 +419,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 					'state'      => 'CA',
 					'postcode'   => '94103',
 					'country'    => 'US',
+					'phone'      => '(555) 555-5555',
 				),
 				'line_items'           => array(
 					array(
@@ -493,6 +496,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 					'state'      => 'CA',
 					'postcode'   => '94103',
 					'country'    => 'US',
+					'phone'      => '(555) 555-5555',
 				),
 				'line_items'           => array(
 					array(

@@ -1232,6 +1232,16 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test: get_shipping_phone
+	 */
+	public function test_get_shipping_phone() {
+		$object = new WC_Order();
+		$set_to = '123456678';
+		$object->set_shipping_phone( $set_to );
+		$this->assertEquals( $set_to, $object->get_shipping_phone() );
+	}
+
+	/**
 	 * Test get_formatted_billing_address and has_billing_address.
 	 *
 	 * @since 3.3
@@ -1421,6 +1431,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 			'state'      => 'Boulder',
 			'postcode'   => '00001',
 			'country'    => 'US',
+			'phone'      => '',
 		);
 
 		$object->set_billing_first_name( 'Fred' );
