@@ -1266,6 +1266,16 @@ if ( ! function_exists( 'woocommerce_product_archive_description' ) ) {
 				$allowed_html = array_merge(
 					$allowed_html,
 					array(
+						'form'   => array(
+							'action'         => true,
+							'accept'         => true,
+							'accept-charset' => true,
+							'enctype'        => true,
+							'method'         => true,
+							'name'           => true,
+							'target'         => true,
+						),
+
 						'input'  => array(
 							'type'        => true,
 							'id'          => true,
