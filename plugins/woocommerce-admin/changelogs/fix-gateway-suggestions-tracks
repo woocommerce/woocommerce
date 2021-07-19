@@ -1,0 +1,4 @@
+Significance: patch
+Type: Fix
+
+Fix tracks events for payment gateway suggestions #7304

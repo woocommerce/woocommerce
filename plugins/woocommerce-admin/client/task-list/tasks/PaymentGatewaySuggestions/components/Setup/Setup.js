@@ -23,11 +23,7 @@ import { createNoticesFromResponse } from '~/lib/notices';
 import { Configure } from './Configure';
 import './Setup.scss';
 
-export const Setup = ( {
-	markConfigured,
-	paymentGateway,
-	recordConnectStartEvent,
-} ) => {
+export const Setup = ( { markConfigured, paymentGateway } ) => {
 	const {
 		id,
 		plugins = [],
@@ -133,7 +129,6 @@ export const Setup = ( {
 				<Configure
 					markConfigured={ markConfigured }
 					paymentGateway={ paymentGateway }
-					recordConnectStartEvent={ recordConnectStartEvent }
 				/>
 			) : null,
 		} ),

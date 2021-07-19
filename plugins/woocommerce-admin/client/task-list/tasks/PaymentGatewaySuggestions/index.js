@@ -10,7 +10,7 @@ import {
 	PAYMENT_GATEWAYS_STORE_NAME,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import { useMemo, useCallback } from '@wordpress/element';
+import { useMemo, useCallback, useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -25,65 +25,82 @@ export const PaymentGatewaySuggestions = ( { query } ) => {
 		ONBOARDING_STORE_NAME
 	);
 	const { updatePaymentGateway } = useDispatch( PAYMENT_GATEWAYS_STORE_NAME );
-	const { getPaymentGateway, paymentGateways, isResolving } = useSelect(
-		( select ) => {
-			const installedPaymentGateways = select(
+	const {
+		getPaymentGateway,
+		paymentGatewaySuggestions,
+		installedPaymentGateways,
+		isResolving,
+	} = useSelect( ( select ) => {
+		return {
+			getPaymentGateway: select( PAYMENT_GATEWAYS_STORE_NAME )
+				.getPaymentGateway,
+			getOption: select( OPTIONS_STORE_NAME ).getOption,
+			installedPaymentGateways: select(
 				PAYMENT_GATEWAYS_STORE_NAME
-			)
-				.getPaymentGateways()
-				.reduce( ( map, gateway ) => {
-					map[ gateway.id ] = gateway;
-					return map;
-				}, {} );
+			).getPaymentGateways(),
+			isResolving: select( ONBOARDING_STORE_NAME ).isResolving(
+				'getPaymentGatewaySuggestions'
+			),
+			paymentGatewaySuggestions: select(
+				ONBOARDING_STORE_NAME
+			).getPaymentGatewaySuggestions(),
+		};
+	}, [] );
 
-			const mappedSuggestions = select( ONBOARDING_STORE_NAME )
-				.getPaymentGatewaySuggestions()
-				.reduce( ( map, suggestion ) => {
-					const { id } = suggestion;
-					const installedGateway = installedPaymentGateways[
-						suggestion.id
-					]
-						? installedPaymentGateways[ id ]
-						: {};
+	const getEnrichedPaymentGateways = () => {
+		const mappedPaymentGateways = installedPaymentGateways.reduce(
+			( map, gateway ) => {
+				map[ gateway.id ] = gateway;
+				return map;
+			},
+			{}
+		);
 
-					const enrichedSuggestion = {
-						installed: !! installedPaymentGateways[ id ],
-						postInstallScripts:
-							installedGateway.post_install_scripts,
-						enabled: installedGateway.enabled || false,
-						needsSetup: installedGateway.needs_setup,
-						settingsUrl: installedGateway.settings_url,
-						connectionUrl: installedGateway.connection_url,
-						setupHelpText: installedGateway.setup_help_text,
-						title: installedGateway.title,
-						requiredSettings: installedGateway.required_settings_keys
-							? installedGateway.required_settings_keys
-									.map(
-										( settingKey ) =>
-											installedGateway.settings[
-												settingKey
-											]
-									)
-									.filter( Boolean )
-							: [],
-						...suggestion,
-					};
+		return paymentGatewaySuggestions.reduce( ( map, suggestion ) => {
+			const { id } = suggestion;
+			const installedGateway = mappedPaymentGateways[ suggestion.id ]
+				? mappedPaymentGateways[ id ]
+				: {};
 
-					map.set( id, enrichedSuggestion );
-					return map;
-				}, new Map() );
-
-			return {
-				getPaymentGateway: select( PAYMENT_GATEWAYS_STORE_NAME )
-					.getPaymentGateway,
-				getOption: select( OPTIONS_STORE_NAME ).getOption,
-				isResolving: select( ONBOARDING_STORE_NAME ).isResolving(
-					'getPaymentGatewaySuggestions'
-				),
-				paymentGateways: mappedSuggestions,
+			const enrichedSuggestion = {
+				installed: !! mappedPaymentGateways[ id ],
+				postInstallScripts: installedGateway.post_install_scripts,
+				enabled: installedGateway.enabled || false,
+				needsSetup: installedGateway.needs_setup,
+				settingsUrl: installedGateway.settings_url,
+				connectionUrl: installedGateway.connection_url,
+				setupHelpText: installedGateway.setup_help_text,
+				title: installedGateway.title,
+				requiredSettings: installedGateway.required_settings_keys
+					? installedGateway.required_settings_keys
+							.map(
+								( settingKey ) =>
+									installedGateway.settings[ settingKey ]
+							)
+							.filter( Boolean )
+					: [],
+				...suggestion,
 			};
+
+			map.set( id, enrichedSuggestion );
+			return map;
+		}, new Map() );
+	};
+
+	const paymentGateways = useMemo( getEnrichedPaymentGateways, [
+		installedPaymentGateways,
+		paymentGatewaySuggestions,
+	] );
+
+	useEffect( () => {
+		if ( paymentGateways.size ) {
+			recordEvent( 'tasklist_payments_options', {
+				options: Array.from( paymentGateways.values() ).map(
+					( gateway ) => gateway.id
+				),
+			} );
 		}
-	);
+	}, [ paymentGateways ] );
 
 	const enablePaymentGateway = ( id ) => {
 		if ( ! id ) {
@@ -119,12 +136,6 @@ export const PaymentGatewaySuggestions = ( { query } ) => {
 		},
 		[ paymentGateways ]
 	);
-
-	const recordConnectStartEvent = useCallback( ( gatewayId ) => {
-		recordEvent( 'tasklist_payment_connect_start', {
-			payment_method: gatewayId,
-		} );
-	}, [] );
 
 	const recommendation = useMemo(
 		() =>
@@ -187,7 +198,6 @@ export const PaymentGatewaySuggestions = ( { query } ) => {
 			<Setup
 				paymentGateway={ currentGateway }
 				markConfigured={ markConfigured }
-				recordConnectStartEvent={ recordConnectStartEvent }
 			/>
 		);
 	}

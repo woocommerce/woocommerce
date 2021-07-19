@@ -8,6 +8,7 @@ import { PAYMENT_GATEWAYS_STORE_NAME } from '@woocommerce/data';
 import { DynamicForm } from '@woocommerce/components';
 import { WooPaymentGatewayConfigure } from '@woocommerce/onboarding';
 import { useSlot } from '@woocommerce/experimental';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -34,11 +35,7 @@ export const validateFields = ( values, fields ) => {
 	return errors;
 };
 
-export const Configure = ( {
-	markConfigured,
-	paymentGateway,
-	recordConnectStartEvent,
-} ) => {
+export const Configure = ( { markConfigured, paymentGateway } ) => {
 	const {
 		id,
 		connectionUrl,
@@ -64,8 +61,6 @@ export const Configure = ( {
 	} );
 
 	const handleSubmit = ( values ) => {
-		recordConnectStartEvent( id );
-
 		updatePaymentGateway( id, {
 			enabled: true,
 			settings: values,
@@ -129,7 +124,15 @@ export const Configure = ( {
 		return (
 			<>
 				{ helpText }
-				<Button isPrimary href={ connectionUrl }>
+				<Button
+					isPrimary
+					onClick={ () =>
+						recordEvent( 'tasklist_payment_connect_start', {
+							payment_method: id,
+						} )
+					}
+					href={ connectionUrl }
+				>
 					{ __( 'Connect', 'woocommerce-admin' ) }
 				</Button>
 			</>

@@ -27,9 +27,6 @@ export const List = ( {
 						isRecommended={ recommendation === id }
 						markConfigured={ markConfigured }
 						paymentGateway={ paymentGateway }
-						gatewayIds={ paymentGateways.map(
-							( gateway ) => gateway.id
-						) }
 					/>
 				);
 			} ) }
