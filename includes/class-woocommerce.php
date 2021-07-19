@@ -209,15 +209,6 @@ final class WooCommerce {
 		add_action( 'woocommerce_installed', array( $this, 'add_woocommerce_inbox_variant' ) );
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_inbox_variant' ) );
 
-		add_filter(
-			'wp_kses_allowed_html',
-			function( $context, $context_type ) {
-				return $this->wp_kses_allowed_html_filter( $context, $context_type );
-			},
-			10,
-			2
-		);
-
 		// These classes set up hooks on instantiation.
 		wc_get_container()->get( DownloadPermissionsAdjuster::class );
 		wc_get_container()->get( AssignDefaultCategory::class );
@@ -1013,51 +1004,5 @@ final class WooCommerce {
 	 */
 	public function get_instance_of( string $class_name, ...$args ) {
 		return wc_get_container()->get( LegacyProxy::class )->get_instance_of( $class_name, ...$args );
-	}
-
-	/**
-	 * Handler for the wp_kses_allowed_html filter.
-	 *
-	 * @param string|array[] $context Context to judge allowed tags by (expected: array of allowed tags).
-	 * @param string         $context_type Context name.
-	 * @return array[] The updated list of allowed tags.
-	 */
-	private function wp_kses_allowed_html_filter( $context, $context_type ) {
-		if ( 'post' !== $context_type || ! is_shop() || ! is_array( $context ) ) {
-			return $context;
-		}
-
-		// This is needed for the "Search product" block to work on the shop page.
-
-		$context['input'] = array(
-			'type'        => true,
-			'id'          => true,
-			'class'       => true,
-			'placeholder' => true,
-			'name'        => true,
-			'value'       => true,
-		);
-
-		$context['button'] = array(
-			'type'  => true,
-			'class' => true,
-			'label' => true,
-		);
-
-		$context['svg'] = array(
-			'hidden'    => true,
-			'role'      => true,
-			'focusable' => true,
-			'xmlns'     => true,
-			'width'     => true,
-			'height'    => true,
-			'viewbox'   => true,
-		);
-
-		$context['path'] = array(
-			'd' => true,
-		);
-
-		return $context;
 	}
 }
