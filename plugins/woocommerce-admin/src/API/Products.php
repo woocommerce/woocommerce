@@ -121,7 +121,47 @@ class Products extends \WC_REST_Products_Controller {
 		remove_filter( 'posts_where', array( __CLASS__, 'add_wp_query_filter' ), 10 );
 		remove_filter( 'posts_join', array( __CLASS__, 'add_wp_query_join' ), 10 );
 		remove_filter( 'posts_groupby', array( __CLASS__, 'add_wp_query_group_by' ), 10 );
+
+		/**
+		 * The low stock query caused performance issues in WooCommerce 5.5.1
+		 * due to a) being slow, and b) multiple requests being made to this endpoint
+		 * from WC Admin.
+		 *
+		 * This is a temporary measure to trigger the user’s browser to cache the
+		 * endpoint response for 1 minute, limiting the amount of requests overall.
+		 *
+		 * https://github.com/woocommerce/woocommerce-admin/issues/7358
+		 */
+		if ( $this->is_low_in_stock_request( $request ) ) {
+			$response->header( 'Cache-Control', 'max-age=300' );
+		}
 		return $response;
+	}
+
+	/**
+	 * Check whether the request is for products low in stock.
+	 *
+	 * It matches requests with paramaters:
+	 *
+	 * low_in_stock = true
+	 * page = 1
+	 * fields[0] = id
+	 *
+	 * @param string $request WP REST API request.
+	 * @return boolean Whether the request matches.
+	 */
+	private function is_low_in_stock_request( $request ) {
+		if (
+			$request->get_param( 'low_in_stock' ) === true &&
+			$request->get_param( 'page' ) === 1 &&
+			is_array( $request->get_param( '_fields' ) ) &&
+			count( $request->get_param( '_fields' ) ) === 1 &&
+			in_array( 'id', $request->get_param( '_fields' ), true )
+		) {
+			return true;
+		}
+
+		return false;
 	}
 
 	/**

@@ -1,0 +1,4 @@
+Significance: patch
+Type: Performance
+
+Add cache-control header to low stock REST API response
