@@ -8,6 +8,7 @@
 * Enhancement - [Transparency] CLI command for viewing tracking data for your store. #30010
 * Enhancement - All settings pages can now be extended consistently with new sections and settings. Also, unit tests have been added. #27684
 * Enhancement - Set checkout fields value with the default defined value where form is not presented to the user. #29820
+* Enhancement - Update `locale-info.php` to contain all the countries, currency specs and locale information. #30216
 * Tweak - Show legacy widget instance in Rest API. #30012
 * Tweak - No longer load PayPal Standard by default on new installs. #29971
 * Tweak - Rename Products, Products by Rating, and Recent Viewed Products widgets to Products list, Products by Rating list, and Recently Viewed Products list. #29941
