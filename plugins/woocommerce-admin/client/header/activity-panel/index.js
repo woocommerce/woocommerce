@@ -99,15 +99,18 @@ export const ActivityPanel = ( { isEmbedded, query, userPreferencesData } ) => {
 	) {
 		const orderStatuses = getOrderStatuses( select );
 
-		const isOrdersCardVisible = setupTaskListHidden
-			? getUnreadOrders( select, orderStatuses ) > 0
-			: false;
-		const isReviewsCardVisible = setupTaskListHidden
-			? getUnapprovedReviews( select )
-			: false;
-		const isLowStockCardVisible = setupTaskListHidden
-			? getLowStockProducts( select )
-			: false;
+		const isOrdersCardVisible =
+			setupTaskListHidden && isPanelOpen
+				? getUnreadOrders( select, orderStatuses ) > 0
+				: false;
+		const isReviewsCardVisible =
+			setupTaskListHidden && isPanelOpen
+				? getUnapprovedReviews( select )
+				: false;
+		const isLowStockCardVisible =
+			setupTaskListHidden && isPanelOpen
+				? getLowStockProducts( select )
+				: false;
 
 		return (
 			thingsToDoNextCount > 0 ||
@@ -217,6 +220,14 @@ export const ActivityPanel = ( { isEmbedded, query, userPreferencesData } ) => {
 		);
 	};
 
+	const redirectToHomeScreen = () => {
+		if ( isWCAdmin( window.location.href ) ) {
+			getHistory().push( getNewPath( {}, '/', {} ) );
+		} else {
+			window.location.href = getAdminLink( 'admin.php?page=wc-admin' );
+		}
+	};
+
 	// @todo Pull in dynamic unread status/count
 	const getTabs = () => {
 		const inbox = {
@@ -313,14 +324,6 @@ export const ActivityPanel = ( { isEmbedded, query, userPreferencesData } ) => {
 				return <HelpPanel taskName={ task } />;
 			default:
 				return null;
-		}
-	};
-
-	const redirectToHomeScreen = () => {
-		if ( isWCAdmin( window.location.href ) ) {
-			getHistory().push( getNewPath( {}, '/', {} ) );
-		} else {
-			window.location.href = getAdminLink( 'admin.php?page=wc-admin' );
 		}
 	};
 
