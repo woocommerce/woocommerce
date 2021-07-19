@@ -51,14 +51,14 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 		$this->lookup_data_store = new class() extends LookupDataStore {
 			public $passed_products = array();
 
-			public function update_data_for_product( $product ) {
+			public function create_data_for_product( $product ) {
 				$this->passed_products[] = $product;
 			}
 		};
 		// phpcs:enable Squiz.Commenting
 
 		// This is needed to prevent the hook to act on the already registered LookupDataStore class.
-		remove_all_actions( 'woocommerce_run_product_attribute_lookup_update_callback' );
+		remove_all_actions( 'woocommerce_run_product_attribute_lookup_regeneration_callback' );
 
 		$container = wc_get_container();
 		$container->reset_all_resolved();
@@ -128,10 +128,10 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 			'method'    => 'schedule_single',
 			'args'      => array(),
 			'timestamp' => 1001,
-			'hook'      => 'woocommerce_run_product_attribute_lookup_update_callback',
+			'hook'      => 'woocommerce_run_product_attribute_lookup_regeneration_callback',
 			'group'     => 'woocommerce-db-updates',
 		);
-		$actual_enqueued   = current( $this->queue->methods_called );
+		$actual_enqueued   = current( $this->queue->get_methods_called() );
 
 		$this->assertEquals( sort( $expected_enqueued ), sort( $actual_enqueued ) );
 	}
@@ -158,7 +158,7 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 		$this->assertFalse( get_option( 'woocommerce_attribute_lookup__last_product_id_to_process' ) );
 		$this->assertFalse( get_option( 'woocommerce_attribute_lookup__last_products_page_processed' ) );
 		$this->assertEquals( 'no', get_option( 'woocommerce_attribute_lookup__enabled' ) );
-		$this->assertEmpty( $this->queue->methods_called );
+		$this->assertEmpty( $this->queue->get_methods_called() );
 	}
 
 	/**
@@ -184,11 +184,11 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->sut->initiate_regeneration();
-		$this->queue->methods_called = array();
+		$this->queue->clear_methods_called();
 
 		update_option( 'woocommerce_attribute_lookup__last_products_page_processed', 7 );
 
-		do_action( 'woocommerce_run_product_attribute_lookup_update_callback' );
+		do_action( 'woocommerce_run_product_attribute_lookup_regeneration_callback' );
 
 		$this->assertEquals( array( 1, 2, 3 ), $this->lookup_data_store->passed_products );
 		$this->assertEquals( array( 8 ), $requested_products_pages );
@@ -198,10 +198,10 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 			'method'    => 'schedule_single',
 			'args'      => array(),
 			'timestamp' => 1001,
-			'hook'      => 'woocommerce_run_product_attribute_lookup_update_callback',
+			'hook'      => 'woocommerce_run_product_attribute_lookup_regeneration_callback',
 			'group'     => 'woocommerce-db-updates',
 		);
-		$actual_enqueued   = current( $this->queue->methods_called );
+		$actual_enqueued   = current( $this->queue->get_methods_called() );
 		$this->assertEquals( sort( $expected_enqueued ), sort( $actual_enqueued ) );
 	}
 
@@ -231,14 +231,14 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->sut->initiate_regeneration();
-		$this->queue->methods_called = array();
+		$this->queue->clear_methods_called();
 
-		do_action( 'woocommerce_run_product_attribute_lookup_update_callback' );
+		do_action( 'woocommerce_run_product_attribute_lookup_regeneration_callback' );
 
 		$this->assertEquals( $product_ids, $this->lookup_data_store->passed_products );
 		$this->assertFalse( get_option( 'woocommerce_attribute_lookup__last_product_id_to_process' ) );
 		$this->assertFalse( get_option( 'woocommerce_attribute_lookup__last_products_page_processed' ) );
 		$this->assertEquals( 'no', get_option( 'woocommerce_attribute_lookup__enabled' ) );
-		$this->assertEmpty( $this->queue->methods_called );
+		$this->assertEmpty( $this->queue->get_methods_called() );
 	}
 }

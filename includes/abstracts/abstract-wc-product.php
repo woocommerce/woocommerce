@@ -9,6 +9,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore as ProductAttributesLookupDataStore;
+
 /**
  * Legacy product contains all deprecated methods for this class and can be
  * removed in the future.
@@ -1374,13 +1376,22 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		 */
 		do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
 
+		$state = $this->before_data_store_save_or_update();
+
 		if ( $this->get_id() ) {
+			$changeset = $this->get_changes();
 			$this->data_store->update( $this );
 		} else {
+			$changeset = null;
 			$this->data_store->create( $this );
 		}
 
-		$this->maybe_defer_product_sync();
+		$this->after_data_store_save_or_update( $state );
+
+		// Update attributes lookup table if the product is new OR it's not but there are actually any changes.
+		if ( is_null( $changeset ) || ! empty( $changeset ) ) {
+			wc_get_container()->get( ProductAttributesLookupDataStore::class )->on_product_changed( $this, $changeset );
+		}
 
 		/**
 		 * Trigger action after saving to the DB.
@@ -1394,16 +1405,37 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
+	 * Do any extra processing needed before the actual product save
+	 * (but after triggering the 'woocommerce_before_..._object_save' action)
+	 *
+	 * @return mixed A state value that will be passed to after_data_store_save_or_update.
+	 */
+	protected function before_data_store_save_or_update() {
+	}
+
+	/**
+	 * Do any extra processing needed after the actual product save
+	 * (but before triggering the 'woocommerce_after_..._object_save' action)
+	 *
+	 * @param mixed $state The state object that was returned by before_data_store_save_or_update.
+	 */
+	protected function after_data_store_save_or_update( $state ) {
+		$this->maybe_defer_product_sync();
+	}
+
+	/**
 	 * Delete the product, set its ID to 0, and return result.
 	 *
 	 * @param  bool $force_delete Should the product be deleted permanently.
 	 * @return bool result
 	 */
 	public function delete( $force_delete = false ) {
-		$deleted = parent::delete( $force_delete );
+		$product_id = $this->get_id();
+		$deleted    = parent::delete( $force_delete );
 
 		if ( $deleted ) {
 			$this->maybe_defer_product_sync();
+			wc_get_container()->get( ProductAttributesLookupDataStore::class )->on_product_deleted( $product_id );
 		}
 
 		return $deleted;
