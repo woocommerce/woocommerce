@@ -505,14 +505,7 @@ class WC_Query {
 		self::$product_query = $q;
 
 		// Additonal hooks to change WP Query.
-		add_filter(
-			'posts_clauses',
-			function( $args, $wp_query ) {
-				return $this->product_query_post_clauses( $args, $wp_query );
-			},
-			10,
-			2
-		);
+		add_filter( 'posts_clauses', array( $this, 'product_query_post_clauses' ), 10, 2 );
 		add_filter( 'the_posts', array( $this, 'handle_get_posts' ), 10, 2 );
 
 		do_action( 'woocommerce_product_query', $q, $this );
@@ -525,7 +518,7 @@ class WC_Query {
 	 * @param WP_Query $wp_query The current product query.
 	 * @return array The updated product query clauses array.
 	 */
-	private function product_query_post_clauses( $args, $wp_query ) {
+	public function product_query_post_clauses( $args, $wp_query ) {
 		$args = $this->price_filter_post_clauses( $args, $wp_query );
 		$args = $this->filterer->filter_by_attribute_post_clauses( $args, $wp_query, $this->get_layered_nav_chosen_attributes() );
 
