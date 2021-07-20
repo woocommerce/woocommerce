@@ -746,6 +746,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Get shipping phone.
 	 *
+	 * @since  5.6.0
 	 * @param  string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
@@ -1246,6 +1247,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Set shipping phone.
 	 *
+	 * @since 5.6.0
 	 * @param string $value Shipping phone.
 	 * @throws WC_Data_Exception Throws exception when invalid data is found.
 	 */
