@@ -44,7 +44,11 @@ class WC_Shortcode_Order_Tracking {
 			$order_id    = empty( $_REQUEST['orderid'] ) ? 0 : ltrim( wc_clean( wp_unslash( $_REQUEST['orderid'] ) ), '#' ); // WPCS: input var ok.
 			$order_email = empty( $_REQUEST['order_email'] ) ? '' : sanitize_email( wp_unslash( $_REQUEST['order_email'] ) ); // WPCS: input var ok.
 
-			if ( ! $order_id ) {
+			$errors = new WP_Error();
+			do_action( 'woocommerce_track_order_errors', $errors, $order_id );
+			if ( $errors->get_error_code() ) {
+				wc_print_notice( $errors->get_error_message(), 'error' );
+			} elseif ( ! $order_id ) {
 				wc_print_notice( __( 'Please enter a valid order ID', 'woocommerce' ), 'error' );
 			} elseif ( ! $order_email ) {
 				wc_print_notice( __( 'Please enter a valid email address', 'woocommerce' ), 'error' );
