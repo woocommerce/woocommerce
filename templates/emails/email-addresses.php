@@ -12,7 +12,7 @@
  *
  * @see https://docs.woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 3.9.0
+ * @version 5.6.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -45,7 +45,7 @@ $shipping   = $order->get_formatted_shipping_address();
 				<address class="address">
 					<?php echo wp_kses_post( $shipping ); ?>
 					<?php if ( $order->get_shipping_phone() ) : ?>
-						<br/><?php echo wc_make_phone_clickable( $order->get_shipping_phone() ); ?>
+						<br /><?php echo wc_make_phone_clickable( $order->get_shipping_phone() ); ?>
 					<?php endif; ?>
 				</address>
 			</td>
