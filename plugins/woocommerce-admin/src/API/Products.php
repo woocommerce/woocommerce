@@ -70,7 +70,7 @@ class Products extends \WC_REST_Products_Controller {
 	public function get_collection_params() {
 		$params                 = parent::get_collection_params();
 		$params['low_in_stock'] = array(
-			'description'       => __( 'Limit result set to products that are low or out of stock.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit result set to products that are low or out of stock. (Deprecated)', 'woocommerce-admin' ),
 			'type'              => 'boolean',
 			'default'           => false,
 			'sanitize_callback' => 'wc_string_to_bool',

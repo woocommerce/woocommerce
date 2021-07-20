@@ -19,7 +19,6 @@ import { getLowStockCountQuery } from '../orders/utils';
 const productsQuery = {
 	page: 1,
 	per_page: 5,
-	low_in_stock: true,
 	status: 'publish',
 	_fields: [
 		'attributes',
@@ -51,7 +50,10 @@ export class StockPanel extends Component {
 
 		if ( success ) {
 			// Request more low stock products.
-			invalidateResolution( 'getItems', [ 'products', productsQuery ] );
+			invalidateResolution( 'getItems', [
+				'products/low-in-stock',
+				productsQuery,
+			] );
 			if ( products.length < 2 ) {
 				invalidateResolution( 'getItemsTotalCount', [
 					'products',
@@ -147,11 +149,13 @@ export default compose(
 		);
 
 		const products = Array.from(
-			getItems( 'products', productsQuery ).values()
+			getItems( 'products/low-in-stock', productsQuery ).values()
 		);
-		const isError = Boolean( getItemsError( 'products', productsQuery ) );
+		const isError = Boolean(
+			getItemsError( 'products/low-in-stock', productsQuery )
+		);
 		const isRequesting = isResolving( 'getItems', [
-			'products',
+			'products/low-in-stock',
 			productsQuery,
 		] );
 

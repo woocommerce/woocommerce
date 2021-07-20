@@ -1,0 +1,4 @@
+Significance: patch
+Type: Performance
+
+Add a new low stock products endpoint to improve the performance. #7377

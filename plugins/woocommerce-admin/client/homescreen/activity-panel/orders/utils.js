@@ -75,16 +75,16 @@ export function getLowStockCount( select ) {
 	// depend on `getItemsTotalCount` to have been called.
 	// eslint-disable-next-line @wordpress/no-unused-vars-before-return
 	const totalLowStockProducts = getItemsTotalCount(
-		'products',
+		'products/low-in-stock',
 		getLowStockCountQuery,
 		defaultValue
 	);
 
 	const isError = Boolean(
-		getItemsError( 'products', getLowStockCountQuery )
+		getItemsError( 'products/low-in-stock', getLowStockCountQuery )
 	);
 	const isRequesting = isResolving( 'getItemsTotalCount', [
-		'products',
+		'products/low-in-stock',
 		getLowStockCountQuery,
 		defaultValue,
 	] );
