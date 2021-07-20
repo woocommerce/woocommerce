@@ -28,6 +28,7 @@ const runProductSettingsTest = () => {
 			await expect(page).toSelect('#woocommerce_file_download_method', 'Redirect only (Insecure)');
 			await setCheckbox('#woocommerce_downloads_require_login');
 			await setCheckbox('#woocommerce_downloads_grant_access_after_payment');
+			await setCheckbox('#woocommerce_downloads_redirect_fallback_allowed');
 			await settingsPageSaveChanges();
 
 			// Verify that settings have been saved
@@ -36,11 +37,14 @@ const runProductSettingsTest = () => {
 				expect(page).toMatchElement('#woocommerce_file_download_method', {text: 'Redirect only (Insecure)'}),
 				verifyCheckboxIsSet('#woocommerce_downloads_require_login'),
 				verifyCheckboxIsSet('#woocommerce_downloads_grant_access_after_payment'),
+				verifyCheckboxIsSet('#woocommerce_downloads_redirect_fallback_allowed'),
 			]);
 
+			await page.reload();
 			await expect(page).toSelect('#woocommerce_file_download_method', 'Force downloads');
 			await unsetCheckbox('#woocommerce_downloads_require_login');
 			await unsetCheckbox('#woocommerce_downloads_grant_access_after_payment');
+			await unsetCheckbox('#woocommerce_downloads_redirect_fallback_allowed');
 			await settingsPageSaveChanges();
 
 			// Verify that settings have been saved
@@ -49,6 +53,7 @@ const runProductSettingsTest = () => {
 				expect(page).toMatchElement('#woocommerce_file_download_method', {text: 'Force downloads'}),
 				verifyCheckboxIsUnset('#woocommerce_downloads_require_login'),
 				verifyCheckboxIsUnset('#woocommerce_downloads_grant_access_after_payment'),
+				verifyCheckboxIsUnset('#woocommerce_downloads_redirect_fallback_allowed'),
 			]);
 		});
 	});
