@@ -114,6 +114,24 @@ class Products extends TestCase {
 	}
 
 	/**
+	 * Test searching by SKU
+	 */
+	public function test_search_by_sku() {
+		ProductHelper::create_simple_product( true, [ 'sku' => 'search-for-this-value' ] );
+
+		$request = new WP_REST_Request( 'GET', '/wc/store/products' );
+		$request->set_param( 'search', 'search-for-this' );
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 1, count( $data ) );
+		$this->assertArrayHasKey( 'sku', $data[0] );
+		$this->assertEquals( 'search-for-this-value', $data[0]['sku'] );
+	}
+
+	/**
 	 * Test conversion of prdouct to rest response.
 	 */
 	public function test_prepare_item_for_response() {
