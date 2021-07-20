@@ -730,8 +730,9 @@ class WC_Customer extends WC_Legacy_Customer {
 	}
 
 	/**
-	 * Get shipping_phone.
+	 * Get shipping phone.
 	 *
+	 * @since 5.6.0
 	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
@@ -1129,8 +1130,9 @@ class WC_Customer extends WC_Legacy_Customer {
 	}
 
 	/**
-	 * Set shipping_phone.
+	 * Set shipping phone.
 	 *
+	 * @since 5.6.0
 	 * @param string $value Shipping phone.
 	 */
 	public function set_shipping_phone( $value ) {
