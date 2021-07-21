@@ -89,6 +89,37 @@ function getAppearanceItems() {
 	];
 }
 
+function getMarketingItems( props ) {
+	const { activePlugins } = props;
+
+	return [
+		activePlugins.includes( 'mailpoet' ) && {
+			title: __( 'Get started with Mailpoet', 'woocommerce-admin' ),
+			link: 'https://kb.mailpoet.com/category/114-getting-started',
+		},
+		activePlugins.includes( 'google-listings-and-ads' ) && {
+			title: __( 'Set up Google Listing & Ads', 'woocommerce-admin' ),
+			link:
+				'https://docs.woocommerce.com/document/google-listings-and-ads/#get-started',
+		},
+		activePlugins.includes( 'mailchimp-for-woocommerce' ) && {
+			title: __(
+				'Connect Mailchimp for WooCommerce',
+				'woocommerce-admin'
+			),
+			link:
+				'https://mailchimp.com/help/connect-or-disconnect-mailchimp-for-woocommerce/',
+		},
+		activePlugins.includes( 'creative-mail-by-constant-contact' ) && {
+			title: __(
+				'Set up Creative Mail for WooCommerce',
+				'woocommerce-admin'
+			),
+			link: 'https://app.creativemail.com/kb/help/WooCommerce',
+		},
+	].filter( Boolean );
+}
+
 function getPaymentGatewaySuggestions( props ) {
 	const { paymentGatewaySuggestions } = props;
 
@@ -280,6 +311,8 @@ function getItems( props ) {
 			return getTaxItems( props );
 		case 'payments':
 			return getPaymentGatewaySuggestions( props );
+		case 'marketing':
+			return getMarketingItems( props );
 		default:
 			return getHomeItems();
 	}
