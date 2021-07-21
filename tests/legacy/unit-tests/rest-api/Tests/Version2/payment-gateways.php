@@ -49,21 +49,27 @@ class Payment_Gateways_V2 extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertContains(
 			array(
-				'id'                 => 'cheque',
-				'title'              => 'Check payments',
-				'description'        => 'Please send a check to Store Name, Store Street, Store Town, Store State / County, Store Postcode.',
-				'order'              => '',
-				'enabled'            => false,
-				'method_title'       => 'Check payments',
-				'method_description' => 'Take payments in person via checks. This offline gateway can also be useful to test purchases.',
-				'settings'           => array_diff_key(
+				'id'                     => 'cheque',
+				'title'                  => 'Check payments',
+				'description'            => 'Please send a check to Store Name, Store Street, Store Town, Store State / County, Store Postcode.',
+				'order'                  => '',
+				'enabled'                => false,
+				'method_title'           => 'Check payments',
+				'method_description'     => 'Take payments in person via checks. This offline gateway can also be useful to test purchases.',
+				'settings'               => array_diff_key(
 					$this->get_settings( 'WC_Gateway_Cheque' ),
 					array(
 						'enabled'     => false,
 						'description' => false,
 					)
 				),
-				'_links'             => array(
+				'needs_setup'            => false,
+				'post_install_scripts'   => array(),
+				'settings_url'           => 'http://example.org/wp-admin/admin.php?page=wc-settings&tab=checkout&section=cheque',
+				'connection_url'         => '',
+				'setup_help_text'        => '',
+				'required_settings_keys' => array(),
+				'_links'                 => array(
 					'self'       => array(
 						array(
 							'href' => rest_url( '/wc/v2/payment_gateways/cheque' ),
@@ -105,20 +111,26 @@ class Payment_Gateways_V2 extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals(
 			array(
-				'id'                 => 'paypal',
-				'title'              => 'PayPal',
-				'description'        => "Pay via PayPal; you can pay with your credit card if you don't have a PayPal account.",
-				'order'              => '',
-				'enabled'            => false,
-				'method_title'       => 'PayPal Standard',
-				'method_description' => 'PayPal Standard redirects customers to PayPal to enter their payment information.',
-				'settings'           => array_diff_key(
+				'id'                     => 'paypal',
+				'title'                  => 'PayPal',
+				'description'            => "Pay via PayPal; you can pay with your credit card if you don't have a PayPal account.",
+				'order'                  => '',
+				'enabled'                => false,
+				'method_title'           => 'PayPal Standard',
+				'method_description'     => 'PayPal Standard redirects customers to PayPal to enter their payment information.',
+				'settings'               => array_diff_key(
 					$this->get_settings( 'WC_Gateway_Paypal' ),
 					array(
 						'enabled'     => false,
 						'description' => false,
 					)
 				),
+				'needs_setup'            => false,
+				'post_install_scripts'   => array(),
+				'settings_url'           => 'http://example.org/wp-admin/admin.php?page=wc-settings&tab=checkout&section=paypal',
+				'connection_url'         => null,
+				'setup_help_text'        => null,
+				'required_settings_keys' => array(),
 			),
 			$paypal
 		);
