@@ -133,6 +133,9 @@ class WC_Meta_Box_Order_Data {
 					'class' => 'js_field-state select short',
 					'show'  => false,
 				),
+				'phone'      => array(
+					'label' => __( 'Phone', 'woocommerce' ),
+				),
 			)
 		);
 	}
@@ -458,6 +461,10 @@ class WC_Meta_Box_Order_Data {
 										$field_value = $order->{"get_$field_name"}( 'edit' );
 									} else {
 										$field_value = $order->get_meta( '_' . $field_name );
+									}
+
+									if ( 'shipping_phone' === $field_name ) {
+										$field_value = wc_make_phone_clickable( $field_value );
 									}
 
 									if ( $field_value ) {
