@@ -326,7 +326,15 @@ jQuery( function( $ ) {
 				'change input',
 				'.woocommerce-cart-form .cart_item :input',
 				this.input_changed );
-
+			$( document ).on(
+				'change',
+				'.woocommerce-cart-form .cart_item input',
+				this.input_changed );
+			$( document ).on(
+				'click',
+				'.woocommerce-cart-form .quantity button',
+				this.input_changed );
+			
 			$( '.woocommerce-cart-form :input[name="update_cart"]' ).prop( 'disabled', true ).attr( 'aria-disabled', true );
 		},
 
