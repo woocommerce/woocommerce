@@ -11,6 +11,8 @@
  * Requires at least: 5.5
  * Requires PHP: 7.0
  *
+ * No functional changes.
+ *
  * @package WooCommerce
  */
 
