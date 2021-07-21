@@ -86,9 +86,8 @@ class WC_Tests_API_Products extends WC_REST_Unit_Test_Case {
 		// Sync analytics data (used for last order date).
 		WC_Helper_Queue::run_all_pending();
 
-		$request = new WP_REST_Request( 'GET', '/wc-analytics/products/low-in-stock' );
+		$request = new WP_REST_Request( 'GET', '/wc-analytics/products' );
 		$request->set_param( 'low_in_stock', true );
-		$request->set_param( 'status', 'publish' );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
