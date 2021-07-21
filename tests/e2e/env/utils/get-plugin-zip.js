@@ -24,7 +24,7 @@ const getRemotePluginZip = async ( fileUrl ) => {
 	await downloadZip( fileUrl, filePath );
 
 	// Check for a nested zip and update the filepath
-	filePath = await checkZip( filePath, savePath );
+	filePath = await checkNestedZip( filePath, savePath );
 
 	return filePath;
 };
@@ -36,7 +36,7 @@ const getRemotePluginZip = async ( fileUrl ) => {
  * @param {string} savePath The location where to save a nested zip if found.
  * @returns {string} The path where the zip file is located.
  */
-const checkZip = async ( zipFilePath, savePath ) => {
+const checkNestedZip = async ( zipFilePath, savePath ) => {
 	const zip = new StreamZip.async( { file: zipFilePath } );
 	const entries = await zip.entries();
 
@@ -80,4 +80,6 @@ const downloadZip = async ( fileUrl, downloadPath ) => {
 
 module.exports = {
 	getRemotePluginZip,
+	checkNestedZip,
+	downloadZip,
 };

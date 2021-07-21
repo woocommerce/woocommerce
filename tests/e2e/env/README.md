@@ -180,6 +180,22 @@ To implement the Slackbot in your CI:
 
 To test your setup, create a pull request that triggers an error in the E2E tests.
 
+## Plugin functions
+
+Depending on the testing scenario, you may wish to upload a plugin that can be used in the tests from a remote location.
+
+To download a zip file, you can use `getRemotePluginZip( fileUrl )` to get the remote zip. This returns the filepath of the location where the zip file was downloaded to. For example, you could use this method to download the latest nightly version of WooCommerce:
+
+```javascript
+const pluginZipUrl = 'https://github.com/woocommerce/woocommerce/releases/download/nightly/woocommerce-trunk-nightly.zip';
+await getRemotePluginZip( pluginZipUrl );
+```
+
+The above method also makes use of the following utility methods which can also be used:
+
+- `checkNestedZip( zipFilePath, savePath )` used to check a plugin zip file for any nested zip files. If one is found, it is extracted. Returns the path where the zip file is located.
+- `downloadZip( fileUrl, downloadPath )` can be used to directly download a plugin zip file from a remote location to the provided path.
+
 ## Additional information
 
 Refer to [`tests/e2e/core-tests`](https://github.com/woocommerce/woocommerce/tree/trunk/tests/e2e/core-tests) for some test examples, and [`tests/e2e`](https://github.com/woocommerce/woocommerce/tree/trunk/tests/e2e) for general information on e2e tests.
