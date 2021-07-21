@@ -12,7 +12,7 @@
  *
  * @see     https://docs.woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 3.4.4
+ * @version 5.6.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -50,6 +50,10 @@ $show_shipping = ! wc_ship_to_billing_address_only() && $order->needs_shipping_a
 			<h2 class="woocommerce-column__title"><?php esc_html_e( 'Shipping address', 'woocommerce' ); ?></h2>
 			<address>
 				<?php echo wp_kses_post( $order->get_formatted_shipping_address( esc_html__( 'N/A', 'woocommerce' ) ) ); ?>
+
+				<?php if ( $order->get_shipping_phone() ) : ?>
+					<p class="woocommerce-customer-details--phone"><?php echo esc_html( $order->get_shipping_phone() ); ?></p>
+				<?php endif; ?>
 			</address>
 		</div><!-- /.col-2 -->
 
