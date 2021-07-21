@@ -127,16 +127,6 @@ class WC_Customer extends WC_Legacy_Customer {
 	}
 
 	/**
-	 * Prefix for action and filter hooks on data.
-	 *
-	 * @since  3.0.0
-	 * @return string
-	 */
-	protected function get_hook_prefix() {
-		return 'woocommerce_customer_get_';
-	}
-
-	/**
 	 * Delete a customer and reassign posts..
 	 *
 	 * @param int $reassign Reassign posts and links to new User ID.
