@@ -167,6 +167,7 @@ const shopper = {
 	},
 
 	searchForProduct: async ( prouductName ) => {
+		await page.waitForSelector('.search-field');
 		await expect(page).toFill('.search-field', prouductName);
 		await expect(page).toClick('.search-submit');
 		await page.waitForSelector('h2.entry-title');
