@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "acab5cd3f2509342ed733e770638ab4c",
+    "content-hash": "4c8530b8fbe190ef3cd009b7be769677",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -532,16 +532,16 @@
         },
         {
             "name": "woocommerce/woocommerce-admin",
-            "version": "2.4.1",
+            "version": "2.5.0-beta.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-admin.git",
-                "reference": "dd446c2549c763a946bcd3a4deeeca1eb0f2b78f"
+                "reference": "12d7339e0d298e0a1fd21be5731a84fbf0141fca"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/dd446c2549c763a946bcd3a4deeeca1eb0f2b78f",
-                "reference": "dd446c2549c763a946bcd3a4deeeca1eb0f2b78f",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/12d7339e0d298e0a1fd21be5731a84fbf0141fca",
+                "reference": "12d7339e0d298e0a1fd21be5731a84fbf0141fca",
                 "shasum": ""
             },
             "require": {
@@ -550,6 +550,7 @@
                 "php": ">=7.0"
             },
             "require-dev": {
+                "automattic/jetpack-changelogger": "^1.1",
                 "bamarni/composer-bin-plugin": "^1.4",
                 "suin/phpcs-psr4-sniff": "^2.2",
                 "woocommerce/woocommerce-sniffs": "0.1.0"
@@ -563,6 +564,23 @@
                 },
                 "bamarni-bin": {
                     "target-directory": "bin/composer"
+                },
+                "changelogger": {
+                    "changelog": "./changelog.txt",
+                    "formatter": {
+                        "filename": "bin/changelogger/WCAdminFormatter.php"
+                    },
+                    "versioning": "semver",
+                    "changes-dir": "./changelogs",
+                    "types": [
+                        "Fix",
+                        "Add",
+                        "Update",
+                        "Dev",
+                        "Tweak",
+                        "Performance",
+                        "Enhancement"
+                    ]
                 }
             },
             "autoload": {
@@ -578,9 +596,9 @@
             "homepage": "https://github.com/woocommerce/woocommerce-admin",
             "support": {
                 "issues": "https://github.com/woocommerce/woocommerce-admin/issues",
-                "source": "https://github.com/woocommerce/woocommerce-admin/tree/v2.4.1"
+                "source": "https://github.com/woocommerce/woocommerce-admin/tree/v2.5.0-beta.2"
             },
-            "time": "2021-07-01T06:10:01+00:00"
+            "time": "2021-07-19T18:07:02+00:00"
         },
         {
             "name": "woocommerce/woocommerce-blocks",
