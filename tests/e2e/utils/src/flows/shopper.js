@@ -167,8 +167,9 @@ const shopper = {
 	},
 
 	searchForProduct: async ( prouductName ) => {
-		await page.waitForSelector('.search-field', { timeout: 100000 });
-		await expect(page).toFill('.search-field', prouductName);
+		const searchFieldSelector = 'input.search-field';
+		await page.waitForSelector(searchFieldSelector, { timeout: 100000 });
+		await expect(page).toFill(searchFieldSelector, prouductName);
 		await expect(page).toClick('.search-submit');
 		await page.waitForSelector('h2.entry-title');
 		await expect(page).toMatchElement('h2.entry-title', {text: prouductName});
