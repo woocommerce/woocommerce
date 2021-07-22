@@ -1,5 +1,23 @@
 == Changelog ==
 
+= 5.5.2 2021-07-22 =
+
+* Fix - Add a new option allowing product downloads to be served using redirects as a last resort. #30288
+* Fix - Remove unnecessary seacrh related 'where' clause added in the 'post_clauses' hook handling. #30335
+
+**WooCommerce Admin - 2.4.4 & 2.4.3 & 2.4.2 **
+
+* Fix - Fix homepage stock panel regression in 2.4.3. #7389
+* Fix - Add a new low stock products endpoint to improve the performance. #7377
+* Fix - Add lazy loading by checking panel open status. #7376
+* Fix - Add cache-control header to low stock REST API response. #7364
+
+= 5.5.1 2021-07-15 =
+
+**WooCommerce**
+
+* Fix - Patched security vulnerability. https://woocommerce.com/posts/critical-vulnerability-detected-july-2021/
+
 = 5.5.0 2021-07-13 =
 
 **WooCommerce**
