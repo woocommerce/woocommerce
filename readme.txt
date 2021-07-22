@@ -164,6 +164,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 * Fix - Add a new option allowing product downloads to be served using redirects as a last resort. #30288
 * Fix - Remove unnecessary seacrh related 'where' clause added in the 'post_clauses' hook handling. #30335
+* Fix - Check before calling $screen method to make sure its not null. #30277
 
 **WooCommerce Admin - 2.4.4 & 2.4.3 & 2.4.2 **
 
