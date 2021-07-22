@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { defaultAddressFields } from '@woocommerce/settings';
-import { useState, useEffect, useCallback, useRef } from '@wordpress/element';
+import { useEffect, useCallback, useRef } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -10,42 +10,21 @@ import { useState, useEffect, useCallback, useRef } from '@wordpress/element';
 import {
 	useShippingDataContext,
 	useCustomerDataContext,
-	useCheckoutContext,
 } from '../providers/cart-checkout';
-
-/**
- * Compare two addresses and see if they are the same.
- *
- * @param {Object} address1 First address.
- * @param {Object} address2 Second address.
- */
-const isSameAddress = ( address1, address2 ) => {
-	return Object.keys( defaultAddressFields ).every(
-		( field ) => address1[ field ] === address2[ field ]
-	);
-};
 
 /**
  * Custom hook for exposing address related functionality for the checkout address form.
  */
 export const useCheckoutAddress = () => {
-	const { customerId } = useCheckoutContext();
 	const { needsShipping } = useShippingDataContext();
 	const {
 		billingData,
 		setBillingData,
 		shippingAddress,
 		setShippingAddress,
+		shippingAsBilling,
+		setShippingAsBilling,
 	} = useCustomerDataContext();
-
-	// This tracks the state of the "shipping as billing" address checkbox. It's
-	// initial value is true (if shipping is needed), however, if the user is
-	// logged in and they have a different billing address, we can toggle this off.
-	const [ shippingAsBilling, setShippingAsBilling ] = useState(
-		() =>
-			needsShipping &&
-			( ! customerId || isSameAddress( shippingAddress, billingData ) )
-	);
 
 	const currentShippingAsBilling = useRef( shippingAsBilling );
 	const previousBillingData = useRef( billingData );
@@ -78,9 +57,8 @@ export const useCheckoutAddress = () => {
 		[ needsShipping, setShippingAddress, setBillingData ]
 	);
 
-	// When the "Use same address" checkbox is toggled we need to update the current billing address to reflect this;
-	// that is either setting the billing address to the shipping address, or restoring the billing address to it's
-	// previous state.
+	// When the "Use same address" checkbox is toggled we need to update the current billing address to reflect this.
+	// This either sets the billing address to the shipping address, or restores the billing address to it's previous state.
 	useEffect( () => {
 		if ( currentShippingAsBilling.current !== shippingAsBilling ) {
 			if ( shippingAsBilling ) {
@@ -88,13 +66,13 @@ export const useCheckoutAddress = () => {
 				setBillingData( shippingAddress );
 			} else {
 				const {
-					// We need to pluck out email and phone from previous billing data because they can be empty, causing the current email and phone to get emptied. See issue #4155
+					// We need to pluck out email from previous billing data because they can be empty, causing the current email to get emptied. See issue #4155
 					/* eslint-disable no-unused-vars */
 					email,
-					phone,
 					/* eslint-enable no-unused-vars */
 					...billingAddress
 				} = previousBillingData.current;
+
 				setBillingData( {
 					...billingAddress,
 				} );
@@ -103,14 +81,29 @@ export const useCheckoutAddress = () => {
 		}
 	}, [ shippingAsBilling, setBillingData, shippingAddress, billingData ] );
 
-	const setEmail = ( value ) =>
-		void setBillingData( {
-			email: value,
-		} );
-	const setPhone = ( value ) =>
-		void setBillingData( {
-			phone: value,
-		} );
+	const setEmail = useCallback(
+		( value ) =>
+			void setBillingData( {
+				email: value,
+			} ),
+		[ setBillingData ]
+	);
+
+	const setPhone = useCallback(
+		( value ) =>
+			void setBillingData( {
+				phone: value,
+			} ),
+		[ setBillingData ]
+	);
+
+	const setShippingPhone = useCallback(
+		( value ) =>
+			void setShippingFields( {
+				phone: value,
+			} ),
+		[ setShippingFields ]
+	);
 
 	// Note that currentShippingAsBilling is returned rather than the current state of shippingAsBilling--this is so that
 	// the billing fields are not rendered before sync (billing field values are debounced and would be outdated)
@@ -122,8 +115,10 @@ export const useCheckoutAddress = () => {
 		setBillingFields,
 		setEmail,
 		setPhone,
+		setShippingPhone,
 		shippingAsBilling,
 		setShippingAsBilling,
+		showShippingFields: needsShipping,
 		showBillingFields:
 			! needsShipping || ! currentShippingAsBilling.current,
 	};

@@ -50,10 +50,10 @@ export const useStoreNoticesContext = () => {
  *  - Success
  *
  * @param {Object} props Incoming props for the component.
- * @param {React.ReactChildren} props.children The Elements wrapped by this component.
- * @param {string} props.className CSS class used.
- * @param {boolean} props.createNoticeContainer Whether to create a notice container or not.
- * @param {string} props.context The notice context for notices being rendered.
+ * @param {JSX.Element} props.children The Elements wrapped by this component.
+ * @param {string} [props.className] CSS class used.
+ * @param {boolean} [props.createNoticeContainer] Whether to create a notice container or not.
+ * @param {string} [props.context] The notice context for notices being rendered.
  */
 export const StoreNoticesProvider = ( {
 	children,

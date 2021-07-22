@@ -41,7 +41,7 @@ export const useValidationContext = () => {
  * for tracking validation.
  *
  * @param {Object} props Incoming props for the component.
- * @param {React.ReactChildren} props.children What react elements are wrapped by this component.
+ * @param {JSX.Element} props.children What react elements are wrapped by this component.
  */
 export const ValidationContextProvider = ( { children } ) => {
 	const [ validationErrors, updateValidationErrors ] = useState( {} );

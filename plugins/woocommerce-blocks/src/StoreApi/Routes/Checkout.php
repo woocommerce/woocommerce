@@ -460,6 +460,8 @@ class Checkout extends AbstractCartRoute {
 			foreach ( $request['shipping_address'] as $key => $value ) {
 				if ( is_callable( [ $customer, "set_shipping_$key" ] ) ) {
 					$customer->{"set_shipping_$key"}( $value );
+				} elseif ( 'phone' === $key ) {
+					$customer->update_meta_data( 'shipping_phone', $value );
 				}
 			}
 		}

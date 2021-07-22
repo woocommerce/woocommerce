@@ -32,7 +32,11 @@
 	position: relative;
 }
 
-.wc-block-components-checkout-step__content {
+.wc-block-components-checkout-step__content > * {
+	margin-bottom: em($gap);
+}
+.wc-block-components-checkout-step--with-step-number .wc-block-components-checkout-step__content > :last-child {
+	margin-bottom: 0;
 	padding-bottom: em($gap-large);
 }
 

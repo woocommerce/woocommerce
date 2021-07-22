@@ -82,11 +82,11 @@ export interface CartResponseShippingAddress
 	extends ResponseBaseAddress,
 		ResponseFirstNameLastName {
 	company: string;
+	phone: string;
 }
 
 export interface CartResponseBillingAddress
 	extends CartResponseShippingAddress {
-	phone: string;
 	email: string;
 }
 

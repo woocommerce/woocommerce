@@ -4,7 +4,11 @@
 import { __ } from '@wordpress/i18n';
 import { Icon, card } from '@woocommerce/icons';
 import classnames from 'classnames';
-import { registerFeaturePluginBlockType } from '@woocommerce/block-settings';
+import {
+	registerFeaturePluginBlockType,
+	isExperimentalBuild,
+} from '@woocommerce/block-settings';
+import { createBlock } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -12,6 +16,36 @@ import { registerFeaturePluginBlockType } from '@woocommerce/block-settings';
 import edit from './edit';
 import blockAttributes from './attributes';
 import './editor.scss';
+
+const transforms = isExperimentalBuild()
+	? {
+			transforms: {
+				from: [
+					{
+						type: 'block',
+						blocks: [ 'woocommerce/checkout' ],
+						transform: ( attributes ) => {
+							return createBlock( 'woocommerce/checkout', {
+								attributes,
+							} );
+						},
+					},
+				],
+				to: [
+					{
+						type: 'block',
+						blocks: [ 'woocommerce/checkout-i2' ],
+						transform: ( attributes ) => {
+							return createBlock(
+								'woocommerce/checkout-i2',
+								attributes
+							);
+						},
+					},
+				],
+			},
+	  }
+	: {};
 
 const settings = {
 	title: __( 'Checkout', 'woo-gutenberg-products-block' ),
@@ -46,6 +80,7 @@ const settings = {
 			/>
 		);
 	},
+	...transforms,
 };
 
 registerFeaturePluginBlockType( 'woocommerce/checkout', settings );

@@ -90,9 +90,9 @@ class CartUpdateCustomer extends AbstractCartRoute {
 				'state'      => wc()->customer->get_billing_state(),
 				'postcode'   => wc()->customer->get_billing_postcode(),
 				'country'    => wc()->customer->get_billing_country(),
+				'phone'      => wc()->customer->get_billing_phone(),
 			];
 		}
-
 		wc()->customer->set_props(
 			array(
 				'billing_first_name'  => isset( $billing['first_name'] ) ? $billing['first_name'] : null,
@@ -104,8 +104,8 @@ class CartUpdateCustomer extends AbstractCartRoute {
 				'billing_state'       => isset( $billing['state'] ) ? $billing['state'] : null,
 				'billing_postcode'    => isset( $billing['postcode'] ) ? $billing['postcode'] : null,
 				'billing_country'     => isset( $billing['country'] ) ? $billing['country'] : null,
+				'billing_phone'       => isset( $billing['phone'] ) ? $billing['phone'] : null,
 				'billing_email'       => isset( $request['billing_address'], $request['billing_address']['email'] ) ? $request['billing_address']['email'] : null,
-				'billing_phone'       => isset( $request['billing_address'], $request['billing_address']['phone'] ) ? $request['billing_address']['phone'] : null,
 				'shipping_first_name' => isset( $shipping['first_name'] ) ? $shipping['first_name'] : null,
 				'shipping_last_name'  => isset( $shipping['last_name'] ) ? $shipping['last_name'] : null,
 				'shipping_company'    => isset( $shipping['company'] ) ? $shipping['company'] : null,
@@ -117,6 +117,16 @@ class CartUpdateCustomer extends AbstractCartRoute {
 				'shipping_country'    => isset( $shipping['country'] ) ? $shipping['country'] : null,
 			)
 		);
+
+		$shipping_phone_value = isset( $shipping['phone'] ) ? $shipping['phone'] : null;
+
+		// @todo Remove custom shipping_phone handling (requires WC 5.6+)
+		if ( is_callable( [ wc()->customer, 'set_shipping_phone' ] ) ) {
+			wc()->customer->set_shipping_phone( $shipping_phone_value );
+		} else {
+			wc()->customer->update_meta_data( 'shipping_phone', $shipping_phone_value );
+		}
+
 		wc()->customer->save();
 
 		$this->calculate_totals();
@@ -162,6 +172,14 @@ class CartUpdateCustomer extends AbstractCartRoute {
 				'shipping_country'    => wc()->customer->get_shipping_country(),
 			]
 		);
+
+		$shipping_phone_value = is_callable( [ wc()->customer, 'get_shipping_phone' ] ) ? wc()->customer->get_shipping_phone() : wc()->customer->get_meta( 'shipping_phone', true );
+
+		if ( is_callable( [ $draft_order, 'set_shipping_phone' ] ) ) {
+			$draft_order->set_shipping_phone( $shipping_phone_value );
+		} else {
+			$draft_order->update_meta_data( '_shipping_phone', $shipping_phone_value );
+		}
 
 		$draft_order->save();
 	}

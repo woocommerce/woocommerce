@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { withInstanceId } from '@woocommerce/base-hocs/with-instance-id';
-import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 /**
@@ -10,16 +9,17 @@ import classNames from 'classnames';
  */
 import './style.scss';
 
+type CheckboxControlProps = {
+	className?: string;
+	label?: string;
+	id?: string;
+	instanceId: string;
+	onChange: ( value: boolean ) => void;
+	children: React.ReactChildren;
+};
+
 /**
  * Component used to show a checkbox control with styles.
- *
- * @param {Object} props Incoming props for the component.
- * @param {string} props.className CSS class used.
- * @param {string} props.label Label for component.
- * @param {string} props.id Id for component.
- * @param {string} props.instanceId Unique id for instance of component.
- * @param {function():any} props.onChange Function called when input changes.
- * @param {Object} props.rest Rest of properties spread.
  */
 const CheckboxControl = ( {
 	className,
@@ -27,8 +27,9 @@ const CheckboxControl = ( {
 	id,
 	instanceId,
 	onChange,
+	children,
 	...rest
-} ) => {
+}: CheckboxControlProps ): JSX.Element => {
 	const checkboxId = id || `checkbox-control-${ instanceId }`;
 
 	return (
@@ -54,19 +55,14 @@ const CheckboxControl = ( {
 			>
 				<path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" />
 			</svg>
-
-			<span className="wc-block-components-checkbox__label">
-				{ label }
-			</span>
+			{ label && (
+				<span className="wc-block-components-checkbox__label">
+					{ label }
+				</span>
+			) }
+			{ children }
 		</label>
 	);
-};
-
-CheckboxControl.propTypes = {
-	className: PropTypes.string,
-	label: PropTypes.string,
-	id: PropTypes.string,
-	onChange: PropTypes.func,
 };
 
 export default withInstanceId( CheckboxControl );

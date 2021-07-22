@@ -16,7 +16,8 @@
 		"./assets/js/atomic/blocks/**",
 		"./assets/js/filters/**",
 		"./assets/js/settings/blocks/**",
-		"./assets/js/middleware/**"
+		"./assets/js/middleware/**",
+		"./assets/js/blocks/cart-checkout/checkout-i2/inner-blocks/**/index.tsx"
 	],
 	"repository": {
 		"type": "git",
@@ -97,6 +98,7 @@
 		"@types/lodash": "4.14.171",
 		"@types/react": "16.14.10",
 		"@types/wordpress__data": "4.6.10",
+		"@types/wordpress__block-editor": "^2.2.9",
 		"@types/wordpress__data-controls": "1.0.5",
 		"@types/wordpress__deprecated": "2.4.2",
 		"@types/wordpress__element": "2.4.1",
@@ -115,6 +117,7 @@
 		"@wordpress/components": "11.1.1",
 		"@wordpress/data-controls": "1.20.8",
 		"@wordpress/dependency-extraction-webpack-plugin": "2.8.0",
+		"@wordpress/dom": "^3.1.2",
 		"@wordpress/e2e-test-utils": "5.1.2",
 		"@wordpress/editor": "9.22.0",
 		"@wordpress/element": "2.17.1",

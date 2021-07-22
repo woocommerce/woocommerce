@@ -61,6 +61,7 @@ describe( 'useStoreCart', () => {
 			state: '',
 			postcode: '',
 			country: '',
+			phone: '',
 		},
 		shippingRates: previewCart.shipping_rates,
 		extensions: {},

@@ -1,8 +1,7 @@
 .wc-block-components-checkbox {
 	@include reset-typography();
-	align-items: center;
+	align-items: flex-start;
 	display: flex;
-	height: 1em;
 	position: relative;
 
 	.wc-block-components-checkbox__input[type="checkbox"] {
@@ -10,6 +9,7 @@
 		appearance: none;
 		border: 2px solid $input-border-gray;
 		border-radius: 2px;
+		box-sizing: border-box;
 		height: em(24px);
 		width: em(24px);
 		margin: 0;
@@ -48,8 +48,8 @@
 	.wc-block-components-checkbox__mark {
 		fill: #000;
 		position: absolute;
-		left: em(3px);
-		top: em(-2px);
+		margin-left: em(3px);
+		margin-top: em(1px);
 		width: em(18px);
 		height: em(18px);
 
@@ -58,9 +58,11 @@
 		}
 	}
 
+	> span,
 	.wc-block-components-checkbox__label {
 		padding-left: $gap;
 		vertical-align: middle;
+		line-height: em(24px);
 	}
 }
 
