@@ -5,6 +5,9 @@
  * @package WooCommerce\Admin\Tests
  */
 
+use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\Testing\Tools\DependencyManagement\MockableLegacyProxy;
+
 /**
  * Class WC_Admin_Unit_Tests_Bootstrap
  */
@@ -71,6 +74,9 @@ class WC_Admin_Unit_Tests_Bootstrap {
 
 		// load WC testing framework.
 		$this->includes();
+
+		// replace LegacyProxy class to MockableLegacyProxy from WC container.
+		$this->replace_legacy_proxy();
 	}
 
 	/**
@@ -179,6 +185,27 @@ class WC_Admin_Unit_Tests_Bootstrap {
 		}
 
 		return self::$instance;
+	}
+
+	/**
+	 * Replace LegacyProxy to MockableLegacyProxy from the WC container.
+	 *
+	 * @throws \Exception Thrown when reflection fails.
+	 */
+	private function replace_legacy_proxy() {
+		try {
+			$inner_container_property = new \ReflectionProperty( \Automattic\WooCommerce\Container::class, 'container' );
+		} catch ( ReflectionException $ex ) {
+			throw new \Exception( "Error when trying to get the private 'container' property from the " . \Automattic\WooCommerce\Container::class . ' class using reflection during unit testing bootstrap, has the property been removed or renamed?' );
+		}
+
+		$inner_container_property->setAccessible( true );
+		$inner_container = $inner_container_property->getValue( wc_get_container() );
+
+		$inner_container->replace( LegacyProxy::class, MockableLegacyProxy::class );
+		$inner_container->reset_all_resolved();
+
+		$GLOBALS['wc_container'] = $inner_container;
 	}
 }
 
