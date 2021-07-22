@@ -628,6 +628,7 @@ class WC_Tracker {
 			'calc_taxes'                            => get_option( 'woocommerce_calc_taxes' ),
 			'coupons_enabled'                       => get_option( 'woocommerce_enable_coupons' ),
 			'guest_checkout'                        => get_option( 'woocommerce_enable_guest_checkout' ),
+			'checkout_login_reminder'               => get_option( 'woocommerce_enable_checkout_login_reminder' ),
 			'secure_checkout'                       => get_option( 'woocommerce_force_ssl_checkout' ),
 			'enable_signup_and_login_from_checkout' => get_option( 'woocommerce_enable_signup_and_login_from_checkout' ),
 			'enable_myaccount_registration'         => get_option( 'woocommerce_enable_myaccount_registration' ),
