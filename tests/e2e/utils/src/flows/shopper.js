@@ -170,7 +170,7 @@ const shopper = {
 		const searchFieldSelector = 'input.wp-block-search__input';
 		await page.waitForSelector(searchFieldSelector, { timeout: 100000 });
 		await expect(page).toFill(searchFieldSelector, prouductName);
-		await expect(page).toClick('.search-submit');
+		await expect(page).toClick('.wp-block-search__button');
 		await page.waitForSelector('h2.entry-title');
 		await expect(page).toMatchElement('h2.entry-title', {text: prouductName});
 		await expect(page).toClick('h2.entry-title', {text: prouductName});
