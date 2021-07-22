@@ -175,4 +175,5 @@ const BacsPaymentGatewaySetup = () => {
 
 registerPlugin( 'wc-admin-payment-gateway-setup-bacs', {
 	render: BacsPaymentGatewaySetup,
+	scope: 'woocommerce-admin',
 } );
