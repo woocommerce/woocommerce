@@ -1,0 +1,11 @@
+// Adjust padding and margins in the editor to improve selected block outlines.
+.wp-block-woocommerce-checkout-express-payment-block {
+	margin-top: 14px;
+	margin-bottom: 14px;
+	padding-top: 14px;
+	padding-bottom: 14px;
+
+	.wc-block-components-express-payment-continue-rule--checkout {
+		margin-bottom: 0;
+	}
+}

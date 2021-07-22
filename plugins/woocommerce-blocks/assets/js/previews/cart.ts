@@ -176,6 +176,7 @@ export const previewCart: CartResponse = {
 		state: '',
 		postcode: '',
 		country: '',
+		phone: '',
 	},
 	billing_address: {
 		first_name: '',

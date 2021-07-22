@@ -112,7 +112,7 @@ export const useCustomerData = (): {
 	/**
 	 * Set billing data.
 	 *
-	 * Contains special handling for email and phone so those fields are not overwritten if simply updating address.
+	 * Contains special handling for email so those fields are not overwritten if simply updating address.
 	 */
 	const setBillingData = useCallback( ( newData ) => {
 		setCustomerData( ( prevState ) => {
@@ -130,10 +130,15 @@ export const useCustomerData = (): {
 	 * Set shipping data.
 	 */
 	const setShippingAddress = useCallback( ( newData ) => {
-		setCustomerData( ( prevState ) => ( {
-			...prevState,
-			shippingAddress: newData,
-		} ) );
+		setCustomerData( ( prevState ) => {
+			return {
+				...prevState,
+				shippingAddress: {
+					...prevState.shippingAddress,
+					...newData,
+				},
+			};
+		} );
 	}, [] );
 
 	/**

@@ -74,6 +74,12 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 				'context'     => [ 'view', 'edit' ],
 				'required'    => true,
 			],
+			'phone'      => [
+				'description' => __( 'Phone', 'woo-gutenberg-products-block' ),
+				'type'        => 'string',
+				'context'     => [ 'view', 'edit' ],
+				'required'    => true,
+			],
 		];
 	}
 
@@ -96,6 +102,7 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 		$address['city']       = wc_clean( wp_unslash( $address['city'] ) );
 		$address['state']      = $this->format_state( wc_clean( wp_unslash( $address['state'] ) ), $address['country'] );
 		$address['postcode']   = $address['postcode'] ? wc_format_postcode( wc_clean( wp_unslash( $address['postcode'] ) ), $address['country'] ) : '';
+		$address['phone']      = wc_clean( wp_unslash( $address['phone'] ) );
 		return $address;
 	}
 
@@ -173,6 +180,13 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 			$errors->add(
 				'invalid_postcode',
 				__( 'The provided postcode / ZIP is not valid', 'woo-gutenberg-products-block' )
+			);
+		}
+
+		if ( ! empty( $address['phone'] ) && ! \WC_Validation::is_phone( $address['phone'] ) ) {
+			$errors->add(
+				'invalid_phone',
+				__( 'The provided phone number is not valid', 'woo-gutenberg-products-block' )
 			);
 		}
 

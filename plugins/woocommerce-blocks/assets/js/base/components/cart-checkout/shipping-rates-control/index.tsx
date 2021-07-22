@@ -10,7 +10,7 @@ import {
 	getShippingRatesPackageCount,
 	getShippingRatesRateCount,
 } from '@woocommerce/base-utils';
-import { useStoreCart } from '@woocommerce/base-context/hooks';
+import { useStoreCart, useEditorContext } from '@woocommerce/base-context';
 import { CartResponseShippingRate } from '@woocommerce/type-defs/cart-response';
 import { ReactElement } from 'react';
 
@@ -162,6 +162,7 @@ const ShippingRatesControl = ( {
 			ShippingRatesControlPackage,
 		},
 	};
+	const { isEditor } = useEditorContext();
 
 	return (
 		<LoadingMask
@@ -172,14 +173,26 @@ const ShippingRatesControl = ( {
 			) }
 			showSpinner={ true }
 		>
-			<ExperimentalOrderShippingPackages.Slot { ...slotFillProps } />
-			<ExperimentalOrderShippingPackages>
+			{ isEditor ? (
 				<Packages
 					packages={ shippingRates }
 					noResultsMessage={ noResultsMessage }
 					renderOption={ renderOption }
 				/>
-			</ExperimentalOrderShippingPackages>
+			) : (
+				<>
+					<ExperimentalOrderShippingPackages.Slot
+						{ ...slotFillProps }
+					/>
+					<ExperimentalOrderShippingPackages>
+						<Packages
+							packages={ shippingRates }
+							noResultsMessage={ noResultsMessage }
+							renderOption={ renderOption }
+						/>
+					</ExperimentalOrderShippingPackages>
+				</>
+			) }
 		</LoadingMask>
 	);
 };

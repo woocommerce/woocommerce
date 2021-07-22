@@ -126,6 +126,7 @@ final class BlockTypesController {
 
 		if ( Package::feature()->is_experimental_build() ) {
 			$block_types[] = 'SingleProduct';
+			$block_types[] = 'CheckoutI2';
 		}
 
 		/**
@@ -167,6 +168,18 @@ final class BlockTypesController {
 			'product-tag-list',
 			'product-stock-indicator',
 			'product-add-to-cart',
+			'checkout-fields-block',
+			'checkout-totals-block',
+			'checkout-billing-address-block',
+			'checkout-actions-block',
+			'checkout-contact-information-block',
+			'checkout-order-note-block',
+			'checkout-order-summary-block',
+			'checkout-payment-block',
+			'checkout-shipping-address-block',
+			'checkout-shipping-methods-block',
+			'checkout-express-payment-block',
+			'checkout-terms-block',
 		];
 	}
 }

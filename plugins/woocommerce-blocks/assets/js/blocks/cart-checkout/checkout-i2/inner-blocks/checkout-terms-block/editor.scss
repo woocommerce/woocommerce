@@ -1,0 +1,22 @@
+// Adjust padding and margins in the editor to improve selected block outlines.
+.wc-block-checkout__terms {
+	margin: 20px 0 20px 9px;
+	padding-top: 4px;
+	padding-bottom: 4px;
+	display: flex;
+	align-items: flex-start;
+
+	.block-editor-rich-text__editable {
+		padding-left: $gap;
+		vertical-align: middle;
+		line-height: em(24px);
+	}
+}
+
+.wc-block-checkout__terms_notice {
+	margin-left: 9px;
+
+	.components-notice__action {
+		margin-left: 0;
+	}
+}

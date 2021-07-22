@@ -55,8 +55,7 @@ export const useCheckoutContext = (): CheckoutStateContextType => {
 
 /**
  * Checkout state provider
- * This provides provides an api interface exposing checkout state for use with
- * cart or checkout blocks.
+ * This provides an API interface exposing checkout state for use with cart or checkout blocks.
  *
  * @param {Object}  props                     Incoming props for the provider.
  * @param {Object}  props.children            The children being wrapped.

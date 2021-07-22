@@ -41,12 +41,12 @@ const defaultShippingAddress: CartResponseShippingAddress = {
 	state: '',
 	postcode: '',
 	country: '',
+	phone: '',
 };
 
 const defaultBillingAddress: CartResponseBillingAddress = {
 	...defaultShippingAddress,
 	email: '',
-	phone: '',
 };
 
 const defaultCartTotals: CartResponseTotals = {

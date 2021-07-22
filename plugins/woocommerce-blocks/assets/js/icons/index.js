@@ -1,7 +1,9 @@
 export { default as Icon } from './icon';
 
+export { default as address } from './library/address';
 export { default as arrowBack } from './library/arrow-back';
 export { default as arrowDownAlt2 } from './library/arrow-down-alt2';
+export { default as asterisk } from './library/asterisk';
 export { default as atom } from './library/atom';
 export { default as bank } from './library/bank';
 export { default as barcode } from './library/barcode';
@@ -13,13 +15,16 @@ export { default as cart } from './library/cart';
 export { default as checkPayment } from './library/check-payment';
 export { default as chevronDown } from './library/chevron-down';
 export { default as chevronUp } from './library/chevron-up';
+export { default as chevronRight } from './library/chevron-right';
 export { default as comment } from './library/comment';
+export { default as contact } from './library/contact';
 export { default as done } from './library/done';
 export { default as discussion } from './library/discussion';
 export { default as exclamation } from './library/exclamation';
 export { default as external } from './library/external';
 export { default as folderStarred } from './library/folder-starred';
 export { default as folder } from './library/folder';
+export { default as formStep } from './library/form-step';
 export { default as grid } from './library/grid';
 export { default as heading } from './library/heading';
 export { default as image } from './library/image';

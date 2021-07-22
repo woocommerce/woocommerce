@@ -42,12 +42,6 @@ class BillingAddressSchema extends AbstractAddressSchema {
 					'context'     => [ 'view', 'edit' ],
 					'required'    => true,
 				],
-				'phone' => [
-					'description' => __( 'Phone', 'woo-gutenberg-products-block' ),
-					'type'        => 'string',
-					'context'     => [ 'view', 'edit' ],
-					'required'    => true,
-				],
 			]
 		);
 	}
@@ -63,7 +57,6 @@ class BillingAddressSchema extends AbstractAddressSchema {
 	public function sanitize_callback( $address, $request, $param ) {
 		$address          = parent::sanitize_callback( $address, $request, $param );
 		$address['email'] = wc_clean( wp_unslash( $address['email'] ) );
-		$address['phone'] = wc_clean( wp_unslash( $address['phone'] ) );
 		return $address;
 	}
 
@@ -84,13 +77,6 @@ class BillingAddressSchema extends AbstractAddressSchema {
 			$errors->add(
 				'invalid_email',
 				__( 'The provided email address is not valid', 'woo-gutenberg-products-block' )
-			);
-		}
-
-		if ( ! empty( $address['phone'] ) && ! \WC_Validation::is_phone( $address['phone'] ) ) {
-			$errors->add(
-				'invalid_phone',
-				__( 'The provided phone number is not valid', 'woo-gutenberg-products-block' )
 			);
 		}
 

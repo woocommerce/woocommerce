@@ -32,6 +32,7 @@ export const defaultCartState: CartState = {
 			state: '',
 			postcode: '',
 			country: '',
+			phone: '',
 		},
 		billingAddress: {
 			first_name: '',

@@ -11,7 +11,8 @@
 		"../settings/shared/index.ts",
 		"../settings/blocks/index.ts",
 		"../type-defs",
-	  	"../assets/js/data"
+		"../assets/js/data",
+		"../assets/js/blocks-registry"
 	],
 	"exclude": [ "**/test/**" ]
 }
