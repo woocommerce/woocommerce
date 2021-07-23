@@ -1,0 +1,4 @@
+Significance: patch
+Type: Tweak
+
+Register wc-admin page for all users and handle authorization in client
