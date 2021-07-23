@@ -138,6 +138,11 @@ class CategoryLookup {
 	 * @param int $category_id Term ID being created.
 	 */
 	public function on_create( $category_id ) {
+		// If WooCommerce is being installed on a multisite, lookup tables haven't been created yet.
+		if ( 'yes' === get_transient( 'wc_installing' ) ) {
+			return;
+		}
+
 		$this->update( $category_id );
 	}
 
