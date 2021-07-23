@@ -58,20 +58,26 @@ The pull request template will remind you of some of the details you need to fil
 
 ### Changelog Entry
 
-For many pull requests a changelog entry is required. You'll need to add an entry under the `== Unreleased ==` heading in `readme.txt` with the format:
+For many pull requests a changelog entry is required. We make use of the [Jetpack Changelogger tool](https://packagist.org/packages/automattic/jetpack-changelogger) to handle our changelogs.
 
-`- <Type of change>: <Description of change>. #<PR Number>`
+To create a changelog entry run `npm run changelogger -- add` and answer the questions. This will create a changelog entry in the [./changelogs](./changelogs) directory with the data you provided. Upon our next release this will be added to our [changelog.txt](./changelog.txt).
+
+In most cases you'll have to provide a changelog entry (the last question), be sure to add your PR number at the end, in the format below:
+
+`<Description of change>. #<PR Number>`
 
 For example:
 
-`- Add: a cool new feature. #1234`
+`a cool new feature. #1234`
 
-The types we use currently are: "Dev", "Tweak", "Add", "Fix" and "Enhancement"
+The types we use currently are: "Fix", "Add", "Update", "Dev", "Tweak", "Performance" and "Enhancement"
 
+-   `Fix`. For bugfixes minor and major. e.g. "Fix a crash when the user selected 0 for revenue."
+-   `Add`. This is reserved for new features and functionality. e.g. "A new page for payment settings."
+-   `Update`. This is used interchangeably with `Add` at the moment. Use your best discretion to choose.
 -   `Dev` is for a code change that doesn't have an obvious user facing benefit. e.g. "Refactor a class to be single responsibility."
 -   `Tweak`. For minor changes to user facing functionality. e.g. "Styling updates to the site footer."
--   `Add`. This is reserved for new features and functionality. e.g. "A new page for payment settings."
--   `Fix`. For bugfixes minor and major. e.g. "Fix a crash when the user selected 0 for revenue."
+-   `Performance`. For changes that improve the performance of the application. e.g. "Optimized SQL query to run 5x faster.".
 -   `Enhancement`. This is used interchangeably with `Tweak` at the moment. Use your best discretion to choose.
 
 ### Testing Instructions
