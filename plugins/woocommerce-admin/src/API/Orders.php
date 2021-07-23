@@ -81,13 +81,76 @@ class Orders extends \WC_REST_Orders_Controller {
 	}
 
 	/**
+	 * Get product IDs, names, and quantity from order ID.
+	 *
+	 * @param array $order_id ID of order.
+	 * @return array
+	 */
+	protected function get_products_by_order_id( $order_id ) {
+		global $wpdb;
+		$order_items_table    = $wpdb->prefix . 'woocommerce_order_items';
+		$order_itemmeta_table = $wpdb->prefix . 'woocommerce_order_itemmeta';
+		$products             = $wpdb->get_results(
+			$wpdb->prepare(
+				// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT
+				order_id,
+				order_itemmeta.meta_value as product_id,
+				order_itemmeta_2.meta_value as product_quantity,
+				order_itemmeta_3.meta_value as variation_id,
+				{$wpdb->posts}.post_title as product_name
+			FROM {$order_items_table} order_items
+			    LEFT JOIN {$order_itemmeta_table} order_itemmeta on order_items.order_item_id = order_itemmeta.order_item_id
+			    LEFT JOIN {$order_itemmeta_table} order_itemmeta_2 on order_items.order_item_id = order_itemmeta_2.order_item_id
+			    LEFT JOIN {$order_itemmeta_table} order_itemmeta_3 on order_items.order_item_id = order_itemmeta_3.order_item_id
+			    LEFT JOIN {$wpdb->posts} on {$wpdb->posts}.ID = order_itemmeta.meta_value
+			WHERE
+				order_id = ( %d )
+			    AND order_itemmeta.meta_key = '_product_id'
+				AND order_itemmeta_2.meta_key = '_qty'
+			  	AND order_itemmeta_3.meta_key = '_variation_id'
+			GROUP BY product_id
+			", // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$order_id
+			),
+			ARRAY_A
+		);
+
+		return $products;
+	}
+
+	/**
+	 * Get customer data from customer_id.
+	 *
+	 * @param array $customer_id ID of customer.
+	 * @return array
+	 */
+	protected function get_customer_by_id( $customer_id ) {
+		global $wpdb;
+
+		$customer_lookup_table = $wpdb->prefix . 'wc_customer_lookup';
+
+		$customer = $wpdb->get_row(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT * FROM {$customer_lookup_table} WHERE customer_id = ( %d )",
+				$customer_id
+			),
+			ARRAY_A
+		);
+
+		return $customer;
+	}
+
+	/**
 	 * Get formatted item data.
 	 *
 	 * @param  WC_Data $object WC_Data instance.
 	 * @return array
 	 */
 	protected function get_formatted_item_data( $object ) {
-		$fields = false;
+		$extra_fields = array( 'customer', 'products' );
+		$fields       = false;
 		// Determine if the response fields were specified.
 		if ( ! empty( $this->request['_fields'] ) ) {
 			$fields = wp_parse_list( $this->request['_fields'] );
@@ -107,13 +170,31 @@ class Orders extends \WC_REST_Orders_Controller {
 			$data = $object->get_data();
 		}
 
+		$extra_fields      = false === $fields ? array() : array_intersect( $extra_fields, $fields );
 		$format_decimal    = array( 'discount_total', 'discount_tax', 'shipping_total', 'shipping_tax', 'shipping_total', 'shipping_tax', 'cart_tax', 'total', 'total_tax' );
 		$format_date       = array( 'date_created', 'date_modified', 'date_completed', 'date_paid' );
 		$format_line_items = array( 'line_items', 'tax_lines', 'shipping_lines', 'fee_lines', 'coupon_lines' );
 
+		// Add extra data as necessary.
+		$extra_data = array();
+		foreach ( $extra_fields as $field ) {
+			switch ( $field ) {
+				case 'customer':
+					$extra_data['customer'] = $this->get_customer_by_id( $data['customer_id'] );
+					break;
+				case 'products':
+					$extra_data['products'] = $this->get_products_by_order_id( $object->get_id() );
+					break;
+			}
+		}
 		// Format decimal values.
 		foreach ( $format_decimal as $key ) {
 			$data[ $key ] = wc_format_decimal( $data[ $key ], $this->request['dp'] );
+		}
+
+		// format total with order currency.
+		if ( $object instanceof \WC_Order ) {
+			$data['total_formatted'] = wp_strip_all_tags( html_entity_decode( $object->get_formatted_order_total() ), true );
 		}
 
 		// Format date values.
@@ -130,7 +211,7 @@ class Orders extends \WC_REST_Orders_Controller {
 		$formatted_line_items = array();
 
 		foreach ( $format_line_items as $key ) {
-			if ( false === $fields || in_array( $key, $fields ) ) {
+			if ( false === $fields || in_array( $key, $fields, true ) ) {
 				if ( $using_order_class_override ) {
 					$line_item_data = $object->get_line_item_data( $key );
 				} else {
@@ -170,6 +251,7 @@ class Orders extends \WC_REST_Orders_Controller {
 				'shipping_tax'         => $data['shipping_tax'],
 				'cart_tax'             => $data['cart_tax'],
 				'total'                => $data['total'],
+				'total_formatted'      => isset( $data['total_formatted'] ) ? $data['total_formatted'] : $data['total'],
 				'total_tax'            => $data['total_tax'],
 				'prices_include_tax'   => $data['prices_include_tax'],
 				'customer_id'          => $data['customer_id'],
@@ -189,7 +271,8 @@ class Orders extends \WC_REST_Orders_Controller {
 				'meta_data'            => $data['meta_data'],
 				'refunds'              => $data['refunds'],
 			),
-			$formatted_line_items
+			$formatted_line_items,
+			$extra_data
 		);
 	}
 }

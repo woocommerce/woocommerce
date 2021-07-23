@@ -1,0 +1,4 @@
+Significance: minor
+Type: Fix
+
+Fix orders panel not displaying any orders when analytics is disabled #7395
