@@ -15,6 +15,27 @@ class CheckoutI2 extends AbstractBlock {
 	protected $block_name = 'checkout-i2';
 
 	/**
+	 * Initialize this block type.
+	 *
+	 * - Hook into WP lifecycle.
+	 * - Register the block with WordPress.
+	 */
+	protected function initialize() {
+		if ( empty( $this->block_name ) ) {
+			_doing_it_wrong( __METHOD__, esc_html( __( 'Block name is required.', 'woo-gutenberg-products-block' ) ), '4.5.0' );
+			return false;
+		}
+
+		// Also init the main checkout block so i2 is compatible with existing integrations.
+		do_action( 'woocommerce_blocks_checkout_block_registration', $this->integration_registry );
+
+		$this->integration_registry->initialize( $this->block_name . '_block' );
+		$this->register_block_type_assets();
+		$this->register_block_type();
+		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
+	}
+
+	/**
 	 * Get the editor script handle for this block type.
 	 *
 	 * @param string $key Data to get, or default to everything.
