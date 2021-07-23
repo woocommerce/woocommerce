@@ -5,4 +5,8 @@
 		top: -5px;
 		position: relative;
 	}
+
+	&.wc-block-checkout__terms--disabled {
+		opacity: 0.6;
+	}
 }

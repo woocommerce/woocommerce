@@ -179,6 +179,7 @@ export const CheckoutStateProvider = ( {
 						);
 					}
 					dispatch( actions.setIdle() );
+					dispatch( actions.setHasError() );
 				} else {
 					dispatch( actions.setProcessing() );
 				}

@@ -190,9 +190,18 @@
  */
 
 /**
+ * @typedef {Object} ValidationContextError
+ *
+ * @property {number} id Error ID.
+ * @property {string} message Error message.
+ * @property {boolean} hidden Error visibility.
+ *
+ */
+
+/**
  * @typedef {Object} ValidationContext
  *
- * @property {function(string):Object}  getValidationError       Return validation error for the given property.
+ * @property {(id:string)=>ValidationContextError} getValidationError     Return validation error for the given property.
  * @property {function(Object)}         setValidationErrors      Receive an object of properties and  error messages as
  *                                                               strings and adds to the validation error state.
  * @property {function(string)}         clearValidationError     Clears a validation error for the given property name.
