@@ -120,7 +120,9 @@ const ScrollOnError = ( {
 	useEffect( () => {
 		if ( hasErrorsToDisplay ) {
 			showAllValidationErrors();
-			scrollToTop( { focusableSelector: 'input:invalid' } );
+			scrollToTop( {
+				focusableSelector: 'input:invalid, .has-error input',
+			} );
 		}
 	}, [ hasErrorsToDisplay, scrollToTop, showAllValidationErrors ] );
 

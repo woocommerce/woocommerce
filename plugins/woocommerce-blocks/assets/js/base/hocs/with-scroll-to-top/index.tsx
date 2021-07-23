@@ -21,7 +21,7 @@ const maybeScrollToTop = ( scrollPoint: HTMLElement ): void => {
 	}
 };
 
-const moveFocusToTop = (
+const moveFocusToElement = (
 	scrollPoint: HTMLElement,
 	focusableSelector: string
 ): void => {
@@ -29,7 +29,10 @@ const moveFocusToTop = (
 		scrollPoint.parentElement?.querySelectorAll( focusableSelector ) || [];
 
 	if ( focusableElements.length ) {
+		( focusableElements[ 0 ] as HTMLElement )?.scrollIntoView();
 		( focusableElements[ 0 ] as HTMLElement )?.focus();
+	} else {
+		maybeScrollToTop( scrollPoint );
 	}
 };
 
@@ -41,10 +44,13 @@ const scrollToHTMLElement = (
 		return;
 	}
 
-	maybeScrollToTop( scrollPoint );
-
 	if ( focusableSelector ) {
-		moveFocusToTop( scrollPoint, focusableSelector );
+		// Scroll after a short timeout to allow a re-render. This will allow focusableSelector to match updated components.
+		setTimeout( () => {
+			moveFocusToElement( scrollPoint, focusableSelector );
+		}, 50 );
+	} else {
+		maybeScrollToTop( scrollPoint );
 	}
 };
 

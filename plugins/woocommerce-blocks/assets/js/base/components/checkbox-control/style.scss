@@ -45,6 +45,26 @@
 		}
 	}
 
+	&.has-error {
+		color: $alert-red;
+
+		a {
+			color: $alert-red;
+		}
+		.wc-block-components-checkbox__input {
+			&,
+			&:hover,
+			&:focus,
+			&:active {
+				border-color: $alert-red;
+			}
+			&:focus {
+				outline: 1px dotted $alert-red;
+				outline-offset: 2px;
+			}
+		}
+	}
+
 	.wc-block-components-checkbox__mark {
 		fill: #000;
 		position: absolute;

@@ -111,12 +111,7 @@ const CheckoutProcessor = () => {
 
 	const checkValidation = useCallback( () => {
 		if ( hasValidationErrors ) {
-			return {
-				errorMessage: __(
-					'Some input fields are invalid.',
-					'woo-gutenberg-products-block'
-				),
-			};
+			return false;
 		}
 		if ( currentPaymentStatus.hasError ) {
 			return {
