@@ -3,7 +3,7 @@
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { useEffect, useRef, useState } from '@wordpress/element';
-import { Button, Card, CardBody, CardHeader } from '@wordpress/components';
+import { Button, Card, CardHeader } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { EllipsisMenu, Badge } from '@woocommerce/components';
 import { updateQueryString } from '@woocommerce/navigation';
@@ -342,43 +342,40 @@ export const TaskList = ( {
 						</div>
 						{ renderMenu() }
 					</CardHeader>
-					<CardBody>
-						<ListComp animation="custom" { ...listProps }>
-							{ listTasks.map( ( task ) => (
-								<TaskItem
-									key={ task.key }
-									title={ task.title }
-									completed={ task.completed }
-									content={ task.content }
-									onClick={
-										! expandingItems || task.completed
-											? task.onClick
-											: () => setCurrentTask( task.key )
-									}
-									expandable={ expandingItems }
-									expanded={
-										expandingItems &&
-										currentTask === task.key
-									}
-									onDismiss={
-										task.isDismissable
-											? () => dismissTask( task )
-											: undefined
-									}
-									remindMeLater={
-										task.allowRemindMeLater
-											? () => remindTaskLater( task )
-											: undefined
-									}
-									time={ task.time }
-									level={ task.level }
-									action={ task.onClick }
-									actionLabel={ task.action }
-									additionalInfo={ task.additionalInfo }
-								/>
-							) ) }
-						</ListComp>
-					</CardBody>
+					<ListComp animation="custom" { ...listProps }>
+						{ listTasks.map( ( task ) => (
+							<TaskItem
+								key={ task.key }
+								title={ task.title }
+								completed={ task.completed }
+								content={ task.content }
+								onClick={
+									! expandingItems || task.completed
+										? task.onClick
+										: () => setCurrentTask( task.key )
+								}
+								expandable={ expandingItems }
+								expanded={
+									expandingItems && currentTask === task.key
+								}
+								onDismiss={
+									task.isDismissable
+										? () => dismissTask( task )
+										: undefined
+								}
+								remindMeLater={
+									task.allowRemindMeLater
+										? () => remindTaskLater( task )
+										: undefined
+								}
+								time={ task.time }
+								level={ task.level }
+								action={ task.onClick }
+								actionLabel={ task.action }
+								additionalInfo={ task.additionalInfo }
+							/>
+						) ) }
+					</ListComp>
 				</Card>
 			</div>
 		</>
