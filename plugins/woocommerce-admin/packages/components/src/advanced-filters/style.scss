@@ -3,6 +3,7 @@
 
 	.components-card__body {
 		background-color: $gray-100;
+		overflow: initial;
 
 		&.is-size-small:hover,
 		ul li:hover {

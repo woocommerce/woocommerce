@@ -1,0 +1,4 @@
+Significance: patch
+Type: Fix
+
+Fix analytics filter Gutenberg CSS conflict #7410
