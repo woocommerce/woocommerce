@@ -1,0 +1,4 @@
+Significance: patch
+Type: Fix
+
+Add limit clause to coupons data store query

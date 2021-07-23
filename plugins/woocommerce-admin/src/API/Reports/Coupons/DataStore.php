@@ -280,6 +280,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				$coupons_query = $this->get_query_statement();
 			} else {
 				$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
+				$this->subquery->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
 				$coupons_query = $this->subquery->get_query_statement();
 
 				$this->subquery->clear_sql_clause( array( 'select', 'order_by' ) );
