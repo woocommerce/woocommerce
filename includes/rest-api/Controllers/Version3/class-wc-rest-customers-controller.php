@@ -259,6 +259,11 @@ class WC_REST_Customers_Controller extends WC_REST_Customers_V2_Controller {
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
+						'phone'      => array(
+							'description' => __( 'Phone number.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+						),
 					),
 				),
 				'is_paying_customer' => array(

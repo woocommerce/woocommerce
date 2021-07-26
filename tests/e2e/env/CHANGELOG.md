@@ -1,5 +1,12 @@
 # Unreleased
 
+- `updateReadyPageStatus` utility to update the status of the ready page
+- Added plugin upload functionality util that provides a method to pull a plugin zip from a remote location
+  - `getRemotePluginZip( fileUrl )` to get the remote zip. Returns the filepath of the zip location.
+- Added plugin zip utility functions:
+  - `checkNestedZip( zipFilePath, savePath )` checks a plugin zip file for any nested zip files. If one is found, it is extracted. Returns the path where the zip file is located.
+  - `downloadZip( fileUrl, downloadPath )` downloads a plugin zip file from a remote location to the provided path.
+
 # 0.2.2
 
 ## Added

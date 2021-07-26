@@ -6,7 +6,7 @@ const config = require( 'config' );
 /**
  * Internal dependencies
  */
-const { clearAndFillInput } = require( '../page-utils' );
+const { clearAndFillInput, setCheckbox } = require( '../page-utils' );
 const {
 	WP_ADMIN_ALL_ORDERS_VIEW,
 	WP_ADMIN_ALL_PRODUCTS_VIEW,
@@ -25,8 +25,12 @@ const {
 	WP_ADMIN_ANALYTICS_PAGES,
 	WP_ADMIN_ALL_USERS_VIEW,
 	WP_ADMIN_IMPORT_PRODUCTS,
+	WP_ADMIN_PLUGIN_INSTALL,
+	WP_ADMIN_WP_UPDATES,
 	IS_RETEST_MODE,
 } = require( './constants' );
+
+const { getSlug } = require('./utils');
 
 const baseUrl = config.get( 'url' );
 const WP_ADMIN_SINGLE_CPT_VIEW = ( postId ) => baseUrl + `wp-admin/post.php?post=${ postId }&action=edit`;
@@ -210,11 +214,166 @@ const merchant = {
 		} );
 	},
 
-  openImportProducts: async () => {
+  	openImportProducts: async () => {
 		await page.goto( WP_ADMIN_IMPORT_PRODUCTS , {
 			waitUntil: 'networkidle0',
 		} );
 	},
+
+	/**
+	 * Opens the WordPress updates page at Dashboard > Updates.
+	 */
+	openWordPressUpdatesPage: async () => {
+		await page.goto( WP_ADMIN_WP_UPDATES, {
+			waitUntil: 'networkidle0',
+		} );
+	},
+
+	/**
+	 * Installs all pending updates on the Dashboard > Updates page, including WordPress, plugins, and themes.
+	 */
+	installAllUpdates: async () => {
+		await merchant.updateWordPress();
+		await merchant.updatePlugins();
+		await merchant.updateThemes();
+	},
+
+	/**
+	 * Updates WordPress if there are any updates available.
+	 */
+	updateWordPress: async () => {
+		await merchant.openWordPressUpdatesPage();
+		if ( null !== await page.$( 'form[action="update-core.php?action=do-core-upgrade"][name="upgrade"]' ) ) {
+			await Promise.all([
+				expect( page ).toClick( 'input.button-primary' ),
+
+				// The WordPress update can take some time, so setting a longer timeout here
+				page.waitForNavigation( { waitUntil: 'networkidle0', timeout: 1000000 } ),
+			]);
+		}
+	},
+
+	/**
+	 * Updates all installed plugins if there are updates available.
+	 */
+	updatePlugins: async () => {
+		await merchant.openWordPressUpdatesPage();
+		if ( null !== await page.$( 'form[action="update-core.php?action=do-plugin-upgrade"][name="upgrade-plugins"]' ) ) {
+			await setCheckbox( '#plugins-select-all' );
+			await Promise.all([
+				expect( page ).toClick( '#upgrade-plugins' ),
+				page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+			]);
+		}
+	},
+
+	/**
+	 * Updates all installed themes if there are updates available.
+	 */
+	updateThemes: async () => {
+		await merchant.openWordPressUpdatesPage();
+		if ( null !== await page.$( 'form[action="update-core.php?action=do-theme-upgrade"][name="upgrade-themes"]' )) {
+			await setCheckbox( '#themes-select-all' );
+			await Promise.all([
+				expect( page ).toClick( '#upgrade-themes' ),
+				page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+			]);
+		}
+	},
+
+	/* Uploads and activates a plugin located at the provided file path. This will also deactivate and delete the plugin if it exists.
+	*
+	* @param {string} pluginFilePath The location of the plugin zip file to upload.
+	* @param {string} pluginName The name of the plugin. For example, `WooCommerce`.
+	*/
+   uploadAndActivatePlugin: async ( pluginFilePath, pluginName ) => {
+	   await merchant.openPlugins();
+
+	   // Deactivate and delete the plugin if it exists
+	   let pluginSlug = getSlug( pluginName );
+	   if ( await page.$( `a#deactivate-${pluginSlug}` ) !== null ) {
+		   await merchant.deactivatePlugin( pluginName, true );
+	   }
+
+	   // Open the plugin install page
+	   await page.goto( WP_ADMIN_PLUGIN_INSTALL, {
+		   waitUntil: 'networkidle0',
+	   } );
+
+	   // Upload the plugin zip
+	   await page.click( 'a.upload-view-toggle' );
+
+	   await expect( page ).toMatchElement(
+		   'p.install-help',
+		   {
+			   text: 'If you have a plugin in a .zip format, you may install or update it by uploading it here.'
+		   }
+	   );
+
+	   const uploader = await page.$( 'input[type=file]' );
+
+	   await uploader.uploadFile( pluginFilePath );
+
+	   // Manually update the button to `enabled` so we can submit the file
+	   await page.evaluate(() => {
+		   document.getElementById( 'install-plugin-submit' ).disabled = false;
+		});
+
+	   // Click to upload the file
+	   await page.click( '#install-plugin-submit' );
+
+	   await page.waitForNavigation( { waitUntil: 'networkidle0' } );
+
+	   // Click to activate the plugin
+	   await page.click( '.button-primary' );
+
+	   await page.waitForNavigation( { waitUntil: 'networkidle0' } );
+   },
+
+   /**
+	* Activate a given plugin by the plugin's name.
+	*
+	* @param {string} pluginName The name of the plugin to activate. For example, `WooCommerce`.
+	*/
+   activatePlugin: async ( pluginName ) => {
+	   let pluginSlug = getSlug( pluginName );
+
+	   await expect( page ).toClick( `a#activate-${pluginSlug}` );
+
+	   await page.waitForNavigation( { waitUntil: 'networkidle0' } );
+   },
+
+   /**
+	* Deactivate a plugin by the plugin's name with the option to delete the plugin as well.
+	*
+	* @param {string} pluginName The name of the plugin to deactivate. For example, `WooCommerce`.
+	* @param {Boolean} deletePlugin Pass in `true` to delete the plugin. Defaults to `false`.
+	*/
+   deactivatePlugin: async ( pluginName, deletePlugin = false ) => {
+	   let pluginSlug = getSlug( pluginName );
+
+	   await expect( page ).toClick( `a#deactivate-${pluginSlug}` );
+
+	   await page.waitForNavigation( { waitUntil: 'networkidle0' } );
+
+	   if ( deletePlugin ) {
+		   await merchant.deletePlugin( pluginName );
+	   }
+   },
+
+   /**
+	* Delete a plugin by the plugin's name.
+	*
+	* @param {string} pluginName The name of the plugin to delete. For example, `WooCommerce`.
+	*/
+   deletePlugin: async ( pluginName ) => {
+	   let pluginSlug = getSlug( pluginName );
+
+	   await expect( page ).toClick( `a#delete-${pluginSlug}` );
+
+	   // Wait for Ajax calls to finish
+	   await page.waitForResponse( response => response.status() === 200 );
+   },
 };
 
 module.exports = merchant;

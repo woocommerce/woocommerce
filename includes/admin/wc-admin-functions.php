@@ -63,9 +63,10 @@ function wc_get_screen_ids() {
  * @param string $page_title (default: '') Title for the new page.
  * @param string $page_content (default: '') Content for the new page.
  * @param int    $post_parent (default: 0) Parent for the new page.
+ * @param string $post_status (default: publish) The post status of the new page.
  * @return int page ID.
  */
-function wc_create_page( $slug, $option = '', $page_title = '', $page_content = '', $post_parent = 0 ) {
+function wc_create_page( $slug, $option = '', $page_title = '', $page_content = '', $post_parent = 0, $post_status = 'publish' ) {
 	global $wpdb;
 
 	$option_value = get_option( $option );
@@ -110,12 +111,12 @@ function wc_create_page( $slug, $option = '', $page_title = '', $page_content = 
 		$page_id   = $trashed_page_found;
 		$page_data = array(
 			'ID'          => $page_id,
-			'post_status' => 'publish',
+			'post_status' => $post_status,
 		);
 		wp_update_post( $page_data );
 	} else {
 		$page_data = array(
-			'post_status'    => 'publish',
+			'post_status'    => $post_status,
 			'post_type'      => 'page',
 			'post_author'    => 1,
 			'post_name'      => $slug,
@@ -125,6 +126,8 @@ function wc_create_page( $slug, $option = '', $page_title = '', $page_content = 
 			'comment_status' => 'closed',
 		);
 		$page_id   = wp_insert_post( $page_data );
+
+		do_action( 'woocommerce_page_created', $page_id, $page_data );
 	}
 
 	if ( $option ) {
