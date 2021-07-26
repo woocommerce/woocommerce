@@ -26,10 +26,6 @@
 		text-align: center;
 	}
 
-	.components-card__body {
-		padding: 0;
-	}
-
 	.woocommerce-pill {
 		margin-left: 4px;
 		padding: 2px 8px;
@@ -43,8 +39,6 @@
 	}
 
 	.components-card__footer {
-		padding: $gap $gap-large;
-
 		.gridicon {
 			margin-left: $gap-smallest;
 		}

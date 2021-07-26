@@ -4,13 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { decodeEntities } from '@wordpress/html-entities';
-import {
-	Card,
-	CardBody,
-	CardHeader,
-	CardFooter,
-	Button,
-} from '@wordpress/components';
+import { Card, CardHeader, CardFooter, Button } from '@wordpress/components';
 import { useEffect, useRef, useState } from '@wordpress/element';
 import { EllipsisMenu, List, Pill } from '@woocommerce/components';
 import { Text } from '@woocommerce/experimental';
@@ -177,8 +171,8 @@ const PaymentRecommendations: React.FC = () => {
 	);
 
 	return (
-		<Card size="large" className="woocommerce-recommended-payments-card">
-			<CardHeader size="medium">
+		<Card size="medium" className="woocommerce-recommended-payments-card">
+			<CardHeader>
 				<div className="woocommerce-recommended-payments-card__header">
 					<Text
 						variant="title.small"
@@ -221,9 +215,7 @@ const PaymentRecommendations: React.FC = () => {
 					/>
 				</div>
 			</CardHeader>
-			<CardBody>
-				<List items={ pluginsList } />
-			</CardBody>
+			<List items={ pluginsList } />
 			<CardFooter>
 				<Button href={ SEE_MORE_LINK } target="_blank" isTertiary>
 					{ __( 'See more options', 'woocommerce-admin' ) }
