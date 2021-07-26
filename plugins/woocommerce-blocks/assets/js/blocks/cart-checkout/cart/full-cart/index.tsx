@@ -59,7 +59,7 @@ interface CartProps {
  * @param {Object} props Incoming props for the component.
  * @param {Object} props.attributes Incoming attributes for block.
  */
-const Cart = ( { attributes }: CartProps ) => {
+const Cart = ( { attributes }: CartProps ): JSX.Element => {
 	const {
 		isShippingCalculatorEnabled,
 		hasDarkControls,

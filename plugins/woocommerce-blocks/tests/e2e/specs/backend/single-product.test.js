@@ -1,12 +1,8 @@
 /**
  * External dependencies
  */
-import {
-	insertBlock,
-	getAllBlocks,
-	switchUserToAdmin,
-} from '@wordpress/e2e-test-utils';
-
+import { getAllBlocks, switchUserToAdmin } from '@wordpress/e2e-test-utils';
+import { insertBlockDontWaitForInsertClose } from '../../utils.js';
 import { visitBlockPage } from '@woocommerce/blocks-test-utils';
 
 if ( process.env.WOOCOMMERCE_BLOCKS_PHASE < 3 )
@@ -26,7 +22,7 @@ describe( `${ block.name } Block`, () => {
 	} );
 
 	it( 'can be inserted more than once', async () => {
-		await insertBlock( block.name );
+		await insertBlockDontWaitForInsertClose( block.name );
 		expect( await getAllBlocks() ).toHaveLength( 2 );
 	} );
 
