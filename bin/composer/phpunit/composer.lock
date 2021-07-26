@@ -1461,6 +1461,7 @@
                 "issues": "https://github.com/sebastianbergmann/resource-operations/issues",
                 "source": "https://github.com/sebastianbergmann/resource-operations/tree/master"
             },
+            "abandoned": true,
             "time": "2015-07-28T20:34:47+00:00"
         },
         {
