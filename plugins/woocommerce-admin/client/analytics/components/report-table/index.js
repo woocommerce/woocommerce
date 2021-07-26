@@ -27,6 +27,7 @@ import {
 	getReportTableData,
 	EXPORT_STORE_NAME,
 	SETTINGS_STORE_NAME,
+	REPORTS_STORE_NAME,
 	useUserPreferences,
 	QUERY_DEFAULTS,
 } from '@woocommerce/data';
@@ -583,27 +584,32 @@ export default compose(
 			filters,
 			advancedFilters,
 			summaryFields,
+			extendedItemsStoreName,
 		} = props;
 
-		if (
-			isRequesting ||
-			( query.search &&
-				! ( query[ endpoint ] && query[ endpoint ].length ) )
-		) {
-			return EMPTY_OBJECT;
-		}
+		/* eslint @wordpress/no-unused-vars-before-return: "off" */
+		const reportStoreSelector = select( REPORTS_STORE_NAME );
+
+		const extendedStoreSelector = extendedItemsStoreName
+			? select( extendedItemsStoreName )
+			: null;
+
 		const { woocommerce_default_date_range: defaultDateRange } = select(
 			SETTINGS_STORE_NAME
 		).getSetting( 'wc_admin', 'wcAdminSettings' );
+
+		if ( isRequesting ) {
+			return EMPTY_OBJECT;
+		}
 
 		// Category charts are powered by the /reports/products/stats endpoint.
 		const chartEndpoint = endpoint === 'categories' ? 'products' : endpoint;
 		const primaryData = getSummary
 			? getReportChartData( {
 					endpoint: chartEndpoint,
+					selector: reportStoreSelector,
 					dataType: 'primary',
 					query,
-					select,
 					filters,
 					advancedFilters,
 					defaultDateRange,
@@ -615,17 +621,16 @@ export default compose(
 			getReportTableData( {
 				endpoint,
 				query,
-				select,
+				selector: reportStoreSelector,
 				tableQuery,
 				filters,
 				advancedFilters,
 				defaultDateRange,
 			} );
-		const extendedTableData = extendTableData(
-			select,
-			props,
-			queriedTableData
-		);
+
+		const extendedTableData = extendedStoreSelector
+			? extendTableData( extendedStoreSelector, props, queriedTableData )
+			: queriedTableData;
 
 		return {
 			primaryData,

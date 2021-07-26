@@ -142,6 +142,11 @@ export default compose(
 			! query.search &&
 			query.products &&
 			query.products.split( ',' ).length === 1;
+
+		const { getItems, isResolving, getItemsError } = select(
+			ITEMS_STORE_NAME
+		);
+
 		if ( isRequesting ) {
 			return {
 				query: {
@@ -152,9 +157,6 @@ export default compose(
 			};
 		}
 
-		const { getItems, isResolving, getItemsError } = select(
-			ITEMS_STORE_NAME
-		);
 		if ( isSingleProductView ) {
 			const productId = parseInt( query.products, 10 );
 			const includeArgs = { include: productId };

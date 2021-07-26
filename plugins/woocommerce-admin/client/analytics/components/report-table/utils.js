@@ -3,12 +3,12 @@
  */
 import { first } from 'lodash';
 
-export function extendTableData( select, props, queriedTableData ) {
-	const {
-		extendItemsMethodNames,
-		extendedItemsStoreName,
-		itemIdField,
-	} = props;
+export function extendTableData(
+	extendedStoreSelector,
+	props,
+	queriedTableData
+) {
+	const { extendItemsMethodNames, itemIdField } = props;
 	const itemsData = queriedTableData.items.data;
 	if (
 		! Array.isArray( itemsData ) ||
@@ -23,7 +23,7 @@ export function extendTableData( select, props, queriedTableData ) {
 		[ extendItemsMethodNames.getError ]: getErrorMethod,
 		[ extendItemsMethodNames.isRequesting ]: isRequestingMethod,
 		[ extendItemsMethodNames.load ]: loadMethod,
-	} = select( extendedItemsStoreName );
+	} = extendedStoreSelector;
 	const extendQuery = {
 		include: itemsData.map( ( item ) => item[ itemIdField ] ).join( ',' ),
 		per_page: itemsData.length,

@@ -342,16 +342,18 @@ const getReportChartDataResponse = memoize(
  * @param  {string} options.endpoint  Report API Endpoint
  * @param  {string} options.dataType  'primary' or 'secondary'
  * @param  {Object} options.query     Query parameters in the url
- * @param  {Object} options.select    Instance of @wordpress/select
+ * @param  {Object} options.selector    Instance of @wordpress/select response
  * @param  {Array}  options.limitBy   Properties used to limit the results. It will be used in the API call to send the IDs.
  * @param  {string}  options.defaultDateRange   User specified default date range.
  * @return {Object}  Object containing API request information (response, fetching, and error details)
  */
 export function getReportChartData( options ) {
-	const { endpoint, select } = options;
-	const { getReportStats, getReportStatsError, isResolving } = select(
-		STORE_NAME
-	);
+	const { endpoint } = options;
+	const {
+		getReportStats,
+		getReportStatsError,
+		isResolving,
+	} = options.selector;
 
 	const requestQuery = getRequestQuery( options );
 	// Disable eslint rule requiring `stats` to be defined below because the next two if statements
@@ -489,16 +491,18 @@ export function getReportTableQuery( options ) {
  * @param  {Object} options                arguments
  * @param  {string} options.endpoint       Report API Endpoint
  * @param  {Object} options.query          Query parameters in the url
- * @param  {Object} options.select         Instance of @wordpress/select
+ * @param  {Object} options.selector       Instance of @wordpress/select response
  * @param  {Object} options.tableQuery     Query parameters specific for that endpoint
  * @param  {string}  options.defaultDateRange   User specified default date range.
  * @return {Object} Object    Table data response
  */
 export function getReportTableData( options ) {
-	const { endpoint, select } = options;
-	const { getReportItems, getReportItemsError, isResolving } = select(
-		STORE_NAME
-	);
+	const { endpoint } = options;
+	const {
+		getReportItems,
+		getReportItemsError,
+		hasFinishedResolution,
+	} = options.selector;
 
 	const tableQuery = reportsUtils.getReportTableQuery( options );
 	const response = {
@@ -516,9 +520,16 @@ export function getReportTableData( options ) {
 	// eslint-disable-next-line @wordpress/no-unused-vars-before-return
 	const items = getReportItems( endpoint, tableQuery );
 
-	if ( isResolving( 'getReportItems', [ endpoint, tableQuery ] ) ) {
+	const queryResolved = hasFinishedResolution( 'getReportItems', [
+		endpoint,
+		tableQuery,
+	] );
+
+	if ( ! queryResolved ) {
 		return { ...response, isRequesting: true };
-	} else if ( getReportItemsError( endpoint, tableQuery ) ) {
+	}
+
+	if ( getReportItemsError( endpoint, tableQuery ) ) {
 		return { ...response, isError: true };
 	}
 
