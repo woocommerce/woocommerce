@@ -368,17 +368,17 @@ CREATE TABLE ' . $this->lookup_table_name . '(
 	}
 
 	/**
-	 * Check if everything is good to go to perform a per product lookup table data regeneration
+	 * Check if everything is good to go to perform a complete or per product lookup table data regeneration
 	 * and throw an exception if not.
 	 *
-	 * @param mixed $product_id The product id to check the regeneration viability for, or null to skip product check.
+	 * @param mixed $product_id The product id to check the regeneration viability for, or null to check if a complete regeneration is possible.
 	 * @throws \Exception Something prevents the regeneration from starting.
 	 */
 	private function check_can_do_lookup_table_regeneration( $product_id = null ) {
 		if ( ! $this->data_store->is_feature_visible() ) {
 			throw new \Exception( "Can't do product attribute lookup data regeneration: feature is not visible" );
 		}
-		if ( ! $this->data_store->check_lookup_table_exists() ) {
+		if ( $product_id && ! $this->data_store->check_lookup_table_exists() ) {
 			throw new \Exception( "Can't do product attribute lookup data regeneration: lookup table doesn't exist" );
 		}
 		if ( $this->data_store->regeneration_is_in_progress() ) {
