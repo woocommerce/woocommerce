@@ -34,9 +34,10 @@
 	.components-card__header {
 		@include font-size( 16 );
 		font-weight: 600;
-		height: 60px;
+		box-sizing: border-box;
 	}
 	.components-card__footer {
 		justify-content: flex-end;
+		box-sizing: border-box;
 	}
 }
