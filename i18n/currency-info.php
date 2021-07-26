@@ -3,7 +3,7 @@
  * Currency formatting information
  *
  * @package WooCommerce\i18n
- * @version 5.5.0
+ * @version 5.6.0
  */
 
 defined( 'ABSPATH' ) || exit;
