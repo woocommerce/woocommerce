@@ -104,25 +104,25 @@ add_filter( 'woocommerce_admin_export_id', function ($export_id) {
 
 #### How to test
 
-Individual payment gateway plugins dictate the settings and connection flow.  For testing purposes, we'll test both the default behavior of the gateway and the enhanced configuration behavior.
+Individual payment gateway plugins dictate the settings and connection flow. For testing purposes, we'll test both the default behavior of the gateway and the enhanced configuration behavior.
 
 1. On the payments task, click "Set up" or "Enable" next to a gateway
 2. Note that the gateway is installed if it requires a plugin
 3. On the connection step, a button should be presented that links to the gateway's (legacy) settings screen
 4. Delete the plugin
-5. Install some of the payment gateways from the links below.  They don't need to be activated, but the folder names should match those on WordPress.org to avoid conflicts.
-6. If setting fields are shown, make sure that validation works, input is saved, and is persisted on page refresh.  Make sure the gateway is marked as enabled and not labeled "Requires setup" if all fields are completed.
-7. If the "Connect" button is shown, follow the connection flow.  Make sure that you are returned to the payments task and that the gateway is enabled and marked as configured.
-8. Remove some settings manually under the payment gateway's legacy settings screen.  Make sure the gateway is no longer marked as configured.
+5. Install some of the payment gateways from the links below. They don't need to be activated, but the folder names should match those on WordPress.org to avoid conflicts.
+6. If setting fields are shown, make sure that validation works, input is saved, and is persisted on page refresh. Make sure the gateway is marked as enabled and not labeled "Requires setup" if all fields are completed.
+7. If the "Connect" button is shown, follow the connection flow. Make sure that you are returned to the payments task and that the gateway is enabled and marked as configured.
+8. Remove some settings manually under the payment gateway's legacy settings screen. Make sure the gateway is no longer marked as configured.
 
-* Klarna - https://mc.a8c.com/includes/img-uploader/files/1624475036-klarna-checkout-for-woocommerce.zip
-* PayFast - https://mc.a8c.com/includes/img-uploader/files/1624660950-woocommerce-payfast-gateway.zip
-* PayPal - https://mc.a8c.com/includes/img-uploader/files/1624475037-woocommerce-paypal-payments.zip
-* RazorPay - https://mc.a8c.com/includes/img-uploader/files/1624660848-woo-razorpay.zip
-* Stripe - https://mc.a8c.com/includes/img-uploader/files/1624661118-woocommerce-gateway-stripe.zip
-* MercaoPago - https://mc.a8c.com/includes/img-uploader/files/1624475616-woocommerce-mercadopago.zip
-* Square - https://mc.a8c.com/includes/img-uploader/files/1624475232-woocommerce-square.zip
-* eWAY - https://mc.a8c.com/includes/img-uploader/files/1624476063-woocommerce-gateway-eway.zip
+-   Klarna - https://github.com/woocommerce/woocommerce-admin/files/6880208/klarna-checkout-for-woocommerce.zip
+-   PayFast - https://github.com/woocommerce/woocommerce-admin/files/6880205/woocommerce-payfast-gateway.zip
+-   PayPal - https://github.com/woocommerce/woocommerce-admin/files/6880109/woocommerce-paypal-payments.zip
+-   RazorPay - https://github.com/woocommerce/woocommerce-admin/files/6880201/woo-razorpay.zip
+-   Stripe - https://github.com/woocommerce/woocommerce-admin/files/6880197/woocommerce-gateway-stripe.zip
+-   MercaoPago - https://github.com/woocommerce/woocommerce-admin/files/6880192/woocommerce-mercadopago.zip
+-   Square - https://github.com/woocommerce/woocommerce-admin/files/6880117/woocommerce-square.zip
+-   eWAY - https://github.com/woocommerce/woocommerce-admin/files/6880111/woocommerce-gateway-eway.zip
 
 ##### PayFast
 
