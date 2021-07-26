@@ -46,18 +46,20 @@ class Form extends Component {
 			} ),
 			() => {
 				this.validate( () => {
-					// onChange keeps track of validity, so needs to
-					// happen after setting the error state.
 					const { onChange, onChangeCallback } = this.props;
-					const callback = onChange ? onChange : onChangeCallback;
+
+					// Note that onChange is a no-op by default so this will never be null
+					const callback = onChangeCallback || onChange;
 
 					if ( onChangeCallback ) {
 						deprecated( 'onChangeCallback', {
-							version: '5.1.2',
+							version: '9.0.0',
 							alternative: 'onChange',
 							plugin: '@woocommerce/components',
 						} );
 					}
+					// onChange keeps track of validity, so needs to
+					// happen after setting the error state.
 					callback(
 						{ name, value },
 						this.state.values,
@@ -101,11 +103,12 @@ class Form extends Component {
 		this.setState( { touched } );
 
 		if ( await this.isValidForm() ) {
-			const callback = onSubmit ? onSubmit : onSubmitCallback;
+			// Note that onSubmit is a no-op by default so this will never be null
+			const callback = onSubmitCallback || onSubmit;
 
 			if ( onSubmitCallback ) {
 				deprecated( 'onSubmitCallback', {
-					version: '5.1.2',
+					version: '9.0.0',
 					alternative: 'onSubmit',
 					plugin: '@woocommerce/components',
 				} );
