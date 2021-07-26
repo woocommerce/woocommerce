@@ -1259,7 +1259,54 @@ if ( ! function_exists( 'woocommerce_product_archive_description' ) ) {
 		if ( is_post_type_archive( 'product' ) && in_array( absint( get_query_var( 'paged' ) ), array( 0, 1 ), true ) ) {
 			$shop_page = get_post( wc_get_page_id( 'shop' ) );
 			if ( $shop_page ) {
-				$description = wc_format_content( wp_kses_post( $shop_page->post_content ) );
+
+				$allowed_html = wp_kses_allowed_html( 'post' );
+
+				// This is needed for the search product block to work.
+				$allowed_html = array_merge(
+					$allowed_html,
+					array(
+						'form'   => array(
+							'action'         => true,
+							'accept'         => true,
+							'accept-charset' => true,
+							'enctype'        => true,
+							'method'         => true,
+							'name'           => true,
+							'target'         => true,
+						),
+
+						'input'  => array(
+							'type'        => true,
+							'id'          => true,
+							'class'       => true,
+							'placeholder' => true,
+							'name'        => true,
+							'value'       => true,
+						),
+
+						'button' => array(
+							'type'  => true,
+							'class' => true,
+							'label' => true,
+						),
+
+						'svg'    => array(
+							'hidden'    => true,
+							'role'      => true,
+							'focusable' => true,
+							'xmlns'     => true,
+							'width'     => true,
+							'height'    => true,
+							'viewbox'   => true,
+						),
+						'path'   => array(
+							'd' => true,
+						),
+					)
+				);
+
+				$description = wc_format_content( wp_kses( $shop_page->post_content, $allowed_html ) );
 				if ( $description ) {
 					echo '<div class="page-description">' . $description . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				}
