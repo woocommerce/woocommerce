@@ -19,20 +19,27 @@ const scrollIntoViewMock = jest.fn();
 
 const mockedButton = {
 	focus: focusedMock,
+	scrollIntoView: scrollIntoViewMock,
 };
 const render = ( { inView } ) => {
+	const getBoundingClientRect = () => ( {
+		bottom: inView ? 0 : -10,
+	} );
 	return TestRenderer.create( <TestComponent />, {
 		createNodeMock: ( element ) => {
 			if ( element.type === 'button' ) {
-				return mockedButton;
+				return {
+					...mockedButton,
+					getBoundingClientRect,
+				};
 			}
 			if ( element.type === 'div' ) {
 				return {
-					getBoundingClientRect: () => ( {
-						bottom: inView ? 0 : -10,
-					} ),
+					getBoundingClientRect,
 					parentElement: {
-						querySelectorAll: () => [ mockedButton ],
+						querySelectorAll: () => [
+							{ ...mockedButton, getBoundingClientRect },
+						],
 					},
 					scrollIntoView: scrollIntoViewMock,
 				};
@@ -74,6 +81,7 @@ describe( 'withScrollToTop Component', () => {
 		it( "doesn't scroll to top of the component when scrollToTop is called", () => {
 			expect( scrollIntoViewMock ).toHaveBeenCalledTimes( 0 );
 		} );
+
 		it( 'moves focus to top of the component when scrollToTop is called', () => {
 			expect( focusedMock ).toHaveBeenCalledTimes( 1 );
 		} );

@@ -215,19 +215,6 @@ const enableCheque = () =>
 	} );
 
 /**
- * Enable Paypal payments.
- *
- * This is not called directly but is called within enablePaymentGateways.
- *
- * @return {Promise} a promise that resolves to an server response data, or
- * rejects if the request failed.
- */
-const enablePaypal = () =>
-	WooCommerce.post( 'payment_gateways/paypal', {
-		enabled: true,
-	} );
-
-/**
  * Enable payment gateways.
  *
  * It calls other individual payment gateway functions.
@@ -235,8 +222,7 @@ const enablePaypal = () =>
  * @return {Promise} a promise that resolves to an array of server response
  * data, or rejects if the request failed.
  */
-const enablePaymentGateways = () =>
-	Promise.all( [ enableCheque(), enablePaypal() ] );
+const enablePaymentGateways = () => Promise.all( [ enableCheque() ] );
 
 /**
  * Create shipping zones.
