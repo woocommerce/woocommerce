@@ -19,10 +19,19 @@ const SnackbarNoticesContainer = ( {
 		( notice ) => notice.type === 'snackbar'
 	);
 
+	const noticeVisibility = snackbarNotices.reduce( ( acc, { content } ) => {
+		acc[ content ] = true;
+		return acc;
+	}, {} );
+
 	const filteredNotices = __experimentalApplyCheckoutFilter( {
-		filterName: 'snackbarNotices',
-		defaultValue: snackbarNotices,
+		filterName: 'snackbarNoticeVisibility',
+		defaultValue: noticeVisibility,
 	} );
+
+	const visibleNotices = snackbarNotices.filter(
+		( notice ) => filteredNotices[ notice.content ] === true
+	);
 
 	const wrapperClass = classnames(
 		className,
@@ -31,7 +40,7 @@ const SnackbarNoticesContainer = ( {
 
 	return (
 		<SnackbarList
-			notices={ filteredNotices }
+			notices={ visibleNotices }
 			className={ wrapperClass }
 			onRemove={ removeNotice }
 		/>
