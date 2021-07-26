@@ -36,7 +36,7 @@ To install dependencies, you will need the following tools installed on your mac
 -   [`npm` and `node.js`](https://nodejs.org)
 -   [`composer`](https://getcomposer.org)
 
-See [`package.json` `engines`](package.json) for details of required versions.
+See [`package.json` `engines`](../../package.json) for details of required versions.
 
 Once you have `node` and `composer` setup, install the dependencies from the command line:
 
