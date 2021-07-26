@@ -95,7 +95,7 @@ class LookupDataStore {
 						$settings[] = array(
 							'title'         => __( 'Enable table usage', 'woocommerce' ),
 							'desc'          => __( 'Use the product attributes lookup table for catalog filtering.', 'woocommerce' ),
-							'id'            => 'woocommerce_attribute_lookup__enable',
+							'id'            => 'woocommerce_attribute_lookup__enabled',
 							'default'       => 'no',
 							'type'          => 'checkbox',
 							'checkboxgroup' => 'start',
