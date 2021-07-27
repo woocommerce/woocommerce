@@ -1,0 +1,4 @@
+Significance: patch
+Type: Update
+
+Increase per_page value for search results on the Analytics pages. #7385
