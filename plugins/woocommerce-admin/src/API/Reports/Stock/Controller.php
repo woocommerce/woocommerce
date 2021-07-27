@@ -33,6 +33,20 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 	protected $rest_base = 'reports/stock';
 
 	/**
+	 * Registered stock status options.
+	 *
+	 * @var array
+	 */
+	protected $status_options;
+
+	/**
+	 * Constructor.
+	 */
+	public function __construct() {
+		$this->status_options = wc_get_product_stock_status_options();
+	}
+
+	/**
 	 * Maps query arguments from the REST request.
 	 *
 	 * @param  WP_REST_Request $request Request array.
@@ -62,7 +76,7 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 
 		if ( 'lowstock' === $request['type'] ) {
 			$args['low_in_stock'] = true;
-		} elseif ( in_array( $request['type'], array_keys( wc_get_product_stock_status_options() ), true ) ) {
+		} elseif ( in_array( $request['type'], array_keys( $this->status_options ), true ) ) {
 			$args['stock_status'] = $request['type'];
 		}
 
@@ -546,10 +560,15 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 	 * @return array Key value pair of Column ID => Row Value.
 	 */
 	public function prepare_item_for_export( $item ) {
+		$status = $item['stock_status'];
+		if ( array_key_exists( $item['stock_status'], $this->status_options ) ) {
+			$status = $this->status_options[ $item['stock_status'] ];
+		}
+
 		$export_item = array(
 			'title'          => $item['name'],
 			'sku'            => $item['sku'],
-			'stock_status'   => $item['stock_status'],
+			'stock_status'   => $status,
 			'stock_quantity' => $item['stock_quantity'],
 		);
 

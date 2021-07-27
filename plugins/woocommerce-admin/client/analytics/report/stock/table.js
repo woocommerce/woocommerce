@@ -119,7 +119,7 @@ class StockReportTable extends Component {
 				},
 				{
 					display: stockStatusLink,
-					value: stockStatus,
+					value: stockStatuses[ stockStatus ],
 				},
 				{
 					display: manageStock

@@ -73,6 +73,15 @@ Please make sure to test it on Safari as well.
 5. Click on "Set up Tax" option on Task list.
 6. TOS should not blink. 
 
+### Match stock status value in CSV download to the table #7284
+
+1. Clone this branch and run npm start
+2. Add some products and set stock value.
+3. Place an order and make it completed.
+4. Navigate to Analytics -> Stocks
+5. Click the Download button.
+6. Open the downloaded file and confirm the status values match the table.
+
 ### Use saved values if available when switching tabs #7226
 
 1. Start onboarding wizard and continue to step 4.
