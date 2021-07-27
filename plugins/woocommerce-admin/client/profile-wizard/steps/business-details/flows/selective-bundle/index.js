@@ -99,20 +99,9 @@ class BusinessDetails extends Component {
 				extensionInstallationOptions[
 					'woocommerce-services:shipping'
 				] || extensionInstallationOptions[ 'woocommerce-services:tax' ],
-			install_mailchimp:
-				extensionInstallationOptions[ 'mailchimp-for-woocommerce' ],
-			install_mailpoet: extensionInstallationOptions.mailpoet,
 			install_jetpack: extensionInstallationOptions.jetpack,
-			install_google_listings_and_ads:
-				extensionInstallationOptions[ 'google-listings-and-ads' ],
-			install_facebook:
-				extensionInstallationOptions[ 'facebook-for-woocommerce' ],
 			install_wcpay:
 				extensionInstallationOptions[ 'woocommerce-payments' ],
-			install_creative_mail:
-				extensionInstallationOptions[
-					'creative-mail-by-constant-contact'
-				],
 		} );
 
 		const updates = {

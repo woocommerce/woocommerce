@@ -22,6 +22,8 @@ import { setAllPropsToValue } from '~/lib/collections';
 import { getCountryCode } from '~/dashboard/utils';
 import { isWCPaySupported } from '~/task-list/tasks/PaymentGatewaySuggestions/components/WCPay';
 
+const ALLOWED_PLUGIN_LISTS = [ 'basics' ];
+
 const generatePluginDescriptionWithLink = (
 	description,
 	productName,
@@ -137,54 +139,6 @@ const installableExtensionsData = [
 					),
 					'jetpack'
 				),
-			},
-		],
-	},
-	{
-		title: __( 'Grow your store', 'woocommerce-admin' ),
-		key: 'grow',
-		plugins: [
-			{
-				key: 'mailpoet',
-				description: generatePluginDescriptionWithLink(
-					__(
-						'Level up your email marketing with {{link}}MailPoet{{/link}}',
-						'woocommerce-admin'
-					),
-					'mailpoet',
-					'https://wordpress.org/plugins/mailpoet/'
-				),
-			},
-			{
-				key: 'google-listings-and-ads',
-				description: generatePluginDescriptionWithLink(
-					__(
-						'Drive sales with {{link}}Google Listings and Ads{{/link}}',
-						'woocommerce-admin'
-					),
-					'google-listings-and-ads'
-				),
-			},
-			{
-				key: 'mailchimp-for-woocommerce',
-				description: generatePluginDescriptionWithLink(
-					__(
-						'Contact customers with {{link}}Mailchimp{{/link}}',
-						'woocommerce-admin'
-					),
-					'mailchimp-for-woocommerce'
-				),
-			},
-			{
-				key: 'creative-mail-by-constant-contact',
-				description: generatePluginDescriptionWithLink(
-					__(
-						'Emails made easy with {{link}}Creative Mail{{/link}}',
-						'woocommerce-admin'
-					),
-					'creative-mail-for-woocommerce'
-				),
-				selected: false,
 			},
 		],
 	},
@@ -444,8 +398,13 @@ export const SelectiveExtensionsBundle = ( {
 						setLocalInstallableExtensions();
 						return;
 					}
+
+					const extensions = results.filter( ( list ) =>
+						ALLOWED_PLUGIN_LISTS.includes( list.key )
+					);
+
 					const transformedExtensions = transformRemoteExtensions(
-						results
+						extensions
 					);
 					const initialValues = createInitialValues(
 						transformedExtensions,
@@ -545,11 +504,8 @@ export const SelectiveExtensionsBundle = ( {
 					</div>
 					{ showExtensions &&
 						installableExtensions.map(
-							( { plugins, title, key: sectionKey } ) => (
+							( { plugins, key: sectionKey } ) => (
 								<div key={ sectionKey }>
-									<div className="woocommerce-admin__business-details__selective-extensions-bundle__category">
-										{ title }
-									</div>
 									{ isFetching ? (
 										<Spinner />
 									) : (
