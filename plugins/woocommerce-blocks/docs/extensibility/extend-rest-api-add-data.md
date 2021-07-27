@@ -24,7 +24,8 @@ use Automattic\WooCommerce\Blocks\StoreApi\Schemas\CartSchema;
 
 add_action('woocommerce_blocks_loaded', function() {
  // ExtendRestApi is stored in the container as a shared instance between the API and consumers.
- // You shouldn't initiate your own ExtendRestApi instance using `new ExtendRestApi` but should always use the shared instance from the Package dependency injection container.
+ // You shouldn't initiate your own ExtendRestApi instance using `new ExtendRestApi` but should
+ // always use the shared instance from the Package dependency injection container.
  $extend = Package::container()->get( ExtendRestApi::class );
 
  $extend->register_endpoint_data(
@@ -115,7 +116,7 @@ To reduce the chances of breaking your client code or passing the wrong type, an
 
 This is a complete example that shows how you can register contextual WooCommerce Subscriptions data in each cart item (simplified).
 
-This example uses Formatters, another property documented here (TBD).
+This example uses [Formatters](./extend-rest-api-formatters.md), utility classes that allow you to format values so that they are compatible with the StoreAPI.
 
 ```php
 <?php
@@ -317,5 +318,5 @@ class WC_Subscriptions_Extend_Store_Endpoint {
 ```
 
 ## Formatting your data
-You may wish to use our pre-existing formatters to ensure your data is passed through the Store API in the
-correct format. More information on the formatters can be found in the [StoreApi formatters documentation](./extend-rest-api-formatters.md).
+You may wish to use our pre-existing Formatters to ensure your data is passed through the Store API in the
+correct format. More information on the Formatters can be found in the [StoreApi Formatters documentation](./extend-rest-api-formatters.md).
