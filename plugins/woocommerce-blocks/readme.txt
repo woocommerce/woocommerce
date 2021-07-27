@@ -20,7 +20,7 @@ Use this plugin if you want access to the bleeding edge of available blocks for 
 
 - **Featured Product Block**
 - **Featured Category Block**
-- **Hand-Picked products Block**
+- **Hand-picked Products Block**
 - **Best Selling Products Block**
 - **Top Rated Products Block**
 - **Newest Products Block**
@@ -79,7 +79,7 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 1. The Featured Product Block
 2. Selecting a product for the Featured Product Block
-3. Selecting Products for the Hand-Picked Products Block
+3. Selecting Products for the Hand-picked Products Block
 4. Selecting categories in the Products By Category block
 5. WooCommerce Product Blocks in the block inserter menu
 
@@ -123,7 +123,7 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 #### Various
 
-- Allow products to be added by SKU in the Hand-Picked Products block. ([4366](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4366))
+- Allow products to be added by SKU in the Hand-picked Products block. ([4366](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4366))
 - Add Slot in the Discounts section of the Checkout sidebar to allow third party extensions to render their own components there. ([4310](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4310))
 
 = 5.3.2 - 2021-06-28 =
@@ -727,7 +727,7 @@ You can read [more about the release here](https://woocommerce.wordpress.com/?p=
 - Add `getAdminLink()` utility method. #1244
 
 = 2.5.1 - 2019-11-26 =
-- Fix Products by Tag, Products by Attribute and Handpicked products blocks showing an invalid attributes error. #1254
+- Fix Products by Tag, Products by Attribute and Hand-picked Products blocks showing an invalid attributes error. #1254
 - Fix the price slider updating instantly even when filter button was enabled. #1228
 - Honor CSS classes in the editor for blocks added in 2.5. #1227
 - Fix variable products price format in All Products block. #1210
@@ -764,7 +764,7 @@ You can read [more about the release here](https://woocommerce.wordpress.com/?p=
 - Feature: Added Reviews by Category block.
 - Feature: Added a new product search block to insert a product search field on a page.
 - Enhancement: Add error handling for API requests to the featured product block.
-- Enhancement: Allow hidden products in handpicked products block.
+- Enhancement: Allow hidden products in Hand-picked Products block.
 - Fix: Prevented block settings being output on every route.  Now they are only needed when the route has blocks requiring them.
 - Dev: Introduced higher order components, global data handlers, and refactored some blocks.
 - Dev: Created new HOCs for retrieving data: `withProduct`, `withComponentId`, `withCategory`.
@@ -796,7 +796,7 @@ You can read [more about the release here](https://woocommerce.wordpress.com/?p=
 - Fix: Disable HTML editing on dynamic blocks which have no content.
 - Fix: Hide background opacity control in Featured Product settings if there is no background image.
 - Fix: Reduce CSS specificity to make styling easier.
-- Fix: Fix author access to API for handpicked products block.
+- Fix: Fix author access to API for Hand-picked Products block.
 
 = 2.2.1 - 2019-07-04 =
 
