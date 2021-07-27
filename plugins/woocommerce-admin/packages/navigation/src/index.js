@@ -91,14 +91,22 @@ export const getScreenFromPath = ( path = getPath() ) => {
  * @return {Array<number>} List of IDs converted to an array of unique integers.
  */
 export function getIdsFromQuery( queryString = '' ) {
-	return [
-		...new Set( // Return only unique ids.
-			queryString
-				.split( ',' )
-				.map( ( id ) => parseInt( id, 10 ) )
-				.filter( ( id ) => ! isNaN( id ) )
-		),
-	];
+	return [ ...getSetOfIdsFromQuery( queryString ) ];
+}
+
+/**
+ * Get an array of IDs from a comma-separated query parameter.
+ *
+ * @param {string} [queryString=''] string value extracted from URL.
+ * @return {Set<number>} List of IDs converted to a set of integers.
+ */
+export function getSetOfIdsFromQuery( queryString = '' ) {
+	return new Set( // Return only unique ids.
+		queryString
+			.split( ',' )
+			.map( ( id ) => parseInt( id, 10 ) )
+			.filter( ( id ) => ! isNaN( id ) )
+	);
 }
 
 /**

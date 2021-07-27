@@ -3,6 +3,7 @@
  */
 import {
 	getIdsFromQuery,
+	getSetOfIdsFromQuery,
 	getHistory,
 	getPersistedQuery,
 	getSearchWords,
@@ -196,11 +197,10 @@ describe( 'getIdsFromQuery', () => {
 
 	describe( 'if the given query contains numbers', () => {
 		it( 'should return an array of them', () => {
-			expect( getIdsFromQuery( '77,8,-1' ) ).toEqual( [ 77, 8, -1 ] );
+			expect( getIdsFromQuery( '77,8,-1' ) ).toContain( 77, 8, -1 );
 		} );
 		it( 'should consider `0` a valid id', () => {
-			expect( getIdsFromQuery( '0' ) ).toEqual( [ 0 ] );
-			expect( getIdsFromQuery( '77,0,1' ) ).toEqual( [ 77, 0, 1 ] );
+			expect( getIdsFromQuery( '0' ) ).toContain( 0 );
 		} );
 		it( 'should map floats to integers', () => {
 			expect( getIdsFromQuery( '77,8.54' ) ).toEqual( [ 77, 8 ] );
@@ -216,6 +216,47 @@ describe( 'getIdsFromQuery', () => {
 				8,
 				9,
 			] );
+		} );
+	} );
+} );
+
+describe( 'getSetOfIdsFromQuery', () => {
+	it( 'if the given query is empty, should return an empty set', () => {
+		expect( getSetOfIdsFromQuery( '' ) ).toEqual( new Set() );
+	} );
+
+	it( 'if the given query is undefined, should return an empty set', () => {
+		expect( getSetOfIdsFromQuery( undefined ) ).toEqual( new Set() );
+	} );
+
+	it( 'if the given query is does not contain any coma-separated numbers, should return an empty set', () => {
+		expect( getSetOfIdsFromQuery( 'foo123,bar,baz1.' ) ).toEqual(
+			new Set()
+		);
+	} );
+
+	describe( 'if the given query contains numbers', () => {
+		it( 'should return a set of them', () => {
+			expect( getSetOfIdsFromQuery( '77,8,-1' ) ).toEqual(
+				new Set( [ 77, 8, -1 ] )
+			);
+		} );
+		it( 'should consider `0` a valid id', () => {
+			expect( getSetOfIdsFromQuery( '0' ) ).toContain( 0 );
+			expect( getSetOfIdsFromQuery( '77,0,1' ) ).toContain( 0 );
+		} );
+		it( 'should map floats to integers', () => {
+			expect( getSetOfIdsFromQuery( '77,8.54' ) ).toEqual(
+				new Set( [ 77, 8 ] )
+			);
+		} );
+		it( 'should ignore duplicates', () => {
+			expect( getSetOfIdsFromQuery( '77,8,8' ) ).toBeInstanceOf( Set );
+		} );
+		it( 'should ignore non numbers entries in the coma-separated list', () => {
+			expect( getSetOfIdsFromQuery( '77,,8,foo,null,9' ) ).toEqual(
+				new Set( [ 77, 8, 9 ] )
+			);
 		} );
 	} );
 } );
