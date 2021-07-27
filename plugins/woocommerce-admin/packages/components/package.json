@@ -25,6 +25,7 @@
 		"src/**/*.scss"
 	],
 	"dependencies": {
+		"@storybook/addon-knobs": "^6.3.0",
 		"@woocommerce/csv-export": "file:../csv-export",
 		"@woocommerce/currency": "file:../currency",
 		"@woocommerce/data": "file:../data",

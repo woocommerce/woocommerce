@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-import { Chart } from '@woocommerce/components';
+import { select } from '@storybook/addon-knobs';
+
+/**
+ * Internal dependencies
+ */
+import Chart from '../';
 
 const data = [
 	{
@@ -66,8 +71,18 @@ const data = [
 	},
 ];
 
-export default () => (
-	<div>
-		<Chart data={ data } title="Example Chart" layout="item-comparison" />
-	</div>
+export default {
+	title: 'WooCommerce Admin/components/Chart',
+	component: Chart,
+};
+
+export const Default = () => (
+	<Chart
+		data={ data }
+		legendPosition={ select(
+			'Legend Position',
+			[ undefined, 'bottom', 'side', 'top', 'hidden' ],
+			undefined
+		) }
+	/>
 );

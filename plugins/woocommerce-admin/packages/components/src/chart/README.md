@@ -91,7 +91,7 @@ Name | Type | Default | Description
 `interval` | One of: 'hour', 'day', 'week', 'month', 'quarter', 'year' | `'day'` | Interval specification (hourly, daily, weekly etc)
 `intervalData` | Object | `null` | Information about the currently selected interval, and set of allowed intervals for the chart. See `getIntervalsForQuery`
 `isRequesting` | Boolean | `false` | Render a chart placeholder to signify an in-flight data request
-`legendPosition` | One of: 'bottom', 'side', 'top' | `null` | Position the legend must be displayed in. If it's not defined, it's calculated depending on the viewport width and the mode
+`legendPosition` | One of: 'bottom', 'side', 'top', 'hidden' | `null` | Position the legend must be displayed in. If it's not defined, it's calculated depending on the viewport width and the mode
 `legendTotals` | Object | `null` | Values to overwrite the legend totals. If not defined, the sum of all line values will be used
 `screenReaderFormat` | One of type: string, func | `'%B %-d, %Y'` | A datetime formatting string or overriding function to format the screen reader labels
 `showHeaderControls` | Boolean | `true` | Wether header UI controls must be displayed

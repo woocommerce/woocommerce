@@ -334,18 +334,19 @@ class Chart extends Component {
 		const chartDirection = legendPosition === 'side' ? 'row' : 'column';
 
 		const chartHeight = this.getChartHeight();
-		const legend = isRequesting ? null : (
-			<D3Legend
-				colorScheme={ d3InterpolateViridis }
-				data={ orderedKeys }
-				handleLegendHover={ this.handleLegendHover }
-				handleLegendToggle={ this.handleLegendToggle }
-				interactive={ interactiveLegend }
-				legendDirection={ legendDirection }
-				legendValueFormat={ tooltipValueFormat }
-				totalLabel={ sprintf( itemsLabel, orderedKeys.length ) }
-			/>
-		);
+		const legend =
+			legendPosition !== 'hidden' && isRequesting ? null : (
+				<D3Legend
+					colorScheme={ d3InterpolateViridis }
+					data={ orderedKeys }
+					handleLegendHover={ this.handleLegendHover }
+					handleLegendToggle={ this.handleLegendToggle }
+					interactive={ interactiveLegend }
+					legendDirection={ legendDirection }
+					legendValueFormat={ tooltipValueFormat }
+					totalLabel={ sprintf( itemsLabel, orderedKeys.length ) }
+				/>
+			);
 		const margin = {
 			bottom: 50,
 			left: 80,
@@ -566,7 +567,7 @@ Chart.propTypes = {
 	 * Position the legend must be displayed in. If it's not defined, it's calculated
 	 * depending on the viewport width and the mode.
 	 */
-	legendPosition: PropTypes.oneOf( [ 'bottom', 'side', 'top' ] ),
+	legendPosition: PropTypes.oneOf( [ 'bottom', 'side', 'top', 'hidden' ] ),
 	/**
 	 * Values to overwrite the legend totals. If not defined, the sum of all line values will be used.
 	 */
