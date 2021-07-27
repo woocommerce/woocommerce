@@ -5,6 +5,9 @@ module.exports = {
 	extends: [ 'plugin:@woocommerce/eslint-plugin/recommended' ],
 	settings: {
 		'import/resolver': 'typescript',
+		react: {
+			pragma: 'createElement',
+		},
 	},
 	rules: {
 		// temporary conversion to warnings until the below are all handled.
@@ -33,6 +36,7 @@ module.exports = {
 				varsIgnorePattern: 'createElement',
 			},
 		],
+		'react/react-in-jsx-scope': 'error',
 	},
 	overrides: [
 		{
@@ -54,12 +58,18 @@ module.exports = {
 				'no-shadow': 'off',
 				'@typescript-eslint/no-shadow': [ 'error' ],
 				'@typescript-eslint/no-empty-function': 'off',
-				'@typescript-eslint/no-unused-vars': [
-					'error',
-					{
-						varsIgnorePattern: 'createElement',
-					},
-				],
+			},
+		},
+		{
+			files: [
+				'client/**/*.js',
+				'client/**/*.jsx',
+				'**/stories/*.js',
+				'**/stories/*.jsx',
+				'**/docs/example.js',
+			],
+			rules: {
+				'react/react-in-jsx-scope': 'off',
 			},
 		},
 	],
