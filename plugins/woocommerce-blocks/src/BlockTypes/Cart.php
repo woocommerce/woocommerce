@@ -170,7 +170,7 @@ class Cart extends AbstractBlock {
 		return '
 			<div class="wc-block-skeleton wc-block-components-sidebar-layout wc-block-cart wc-block-cart--is-loading wc-block-cart--skeleton hidden" aria-hidden="true">
 				<div class="wc-block-components-main wc-block-cart__main">
-					<h2><span></span></h2>
+					<h2 class="wc-block-components-title"><span></span></h2>
 					<table class="wc-block-cart-items">
 						<thead>
 							<tr class="wc-block-cart-items__header">
