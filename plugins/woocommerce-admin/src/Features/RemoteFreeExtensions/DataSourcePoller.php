@@ -65,7 +65,13 @@ class DataSourcePoller {
 	private static function read_data_source( $url ) {
 		$logger_context = array( 'source' => $url );
 		$logger         = self::get_logger();
-		$response       = wp_remote_get( $url );
+		$response       = wp_remote_get(
+			add_query_arg(
+				'_locale',
+				get_user_locale(),
+				$url
+			)
+		);
 
 		if ( is_wp_error( $response ) || ! isset( $response['body'] ) ) {
 			$logger->error(
