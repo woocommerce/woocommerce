@@ -444,7 +444,7 @@ if ( wc_tax_enabled() ) {
 								</tr>
 							</thead>
 						<?php
-						$rates = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}woocommerce_tax_rates ORDER BY tax_rate_name LIMIT 100" );
+						$rates = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}woocommerce_tax_rates ORDER BY tax_rate_name LIMIT 2500" );
 						foreach ( $rates as $rate ) {
 							echo '
 									<tr>
