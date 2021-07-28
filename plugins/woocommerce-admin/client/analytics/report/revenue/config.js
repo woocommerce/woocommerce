@@ -17,6 +17,7 @@ export const charts = applyFilters( REVENUE_REPORT_CHARTS_FILTER, [
 		order: 'desc',
 		orderby: 'gross_sales',
 		type: 'currency',
+		isReverseTrend: false,
 	},
 	{
 		key: 'refunds',
@@ -24,6 +25,7 @@ export const charts = applyFilters( REVENUE_REPORT_CHARTS_FILTER, [
 		order: 'desc',
 		orderby: 'refunds',
 		type: 'currency',
+		isReverseTrend: true,
 	},
 	{
 		key: 'coupons',
@@ -31,12 +33,14 @@ export const charts = applyFilters( REVENUE_REPORT_CHARTS_FILTER, [
 		order: 'desc',
 		orderby: 'coupons',
 		type: 'currency',
+		isReverseTrend: false,
 	},
 	{
 		key: 'net_revenue',
 		label: __( 'Net Sales', 'woocommerce-admin' ),
 		orderby: 'net_revenue',
 		type: 'currency',
+		isReverseTrend: false,
 	},
 	{
 		key: 'taxes',
@@ -44,12 +48,14 @@ export const charts = applyFilters( REVENUE_REPORT_CHARTS_FILTER, [
 		order: 'desc',
 		orderby: 'taxes',
 		type: 'currency',
+		isReverseTrend: false,
 	},
 	{
 		key: 'shipping',
 		label: __( 'Shipping', 'woocommerce-admin' ),
 		orderby: 'shipping',
 		type: 'currency',
+		isReverseTrend: false,
 	},
 	{
 		key: 'total_sales',
@@ -57,6 +63,7 @@ export const charts = applyFilters( REVENUE_REPORT_CHARTS_FILTER, [
 		order: 'desc',
 		orderby: 'total_sales',
 		type: 'currency',
+		isReverseTrend: false,
 	},
 ] );
 

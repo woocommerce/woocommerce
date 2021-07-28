@@ -1,0 +1,4 @@
+Significance: minor
+Type: Add
+
+Add boolean isReverseTrend prop to SummaryNumber to show "positive" delta for negative numbers.

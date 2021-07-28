@@ -75,7 +75,14 @@ export class ReportSummary extends Component {
 
 		const renderSummaryNumbers = ( { onToggle } ) =>
 			charts.map( ( chart ) => {
-				const { key, order, orderby, label, type } = chart;
+				const {
+					key,
+					order,
+					orderby,
+					label,
+					type,
+					isReverseTrend,
+				} = chart;
 				const newPath = { chart: key };
 				if ( orderby ) {
 					newPath.orderby = orderby;
@@ -93,6 +100,7 @@ export class ReportSummary extends Component {
 						delta={ delta }
 						href={ href }
 						label={ label }
+						reverseTrend={ isReverseTrend }
 						prevLabel={
 							compare === 'previous_period'
 								? __( 'Previous Period:', 'woocommerce-admin' )
