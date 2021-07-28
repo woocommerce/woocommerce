@@ -147,11 +147,12 @@ class WC_Admin_Menus {
 	 * Addons menu item.
 	 */
 	public function addons_menu() {
-		add_menu_page( __( 'Marketplace', 'woocommerce' ), __( 'Marketplace', 'woocommerce' ), 'manage_woocommerce', 'wc-marketplace', null, null, '55.9' );
+		add_menu_page( __( 'Marketplace', 'woocommerce' ), __( 'Marketplace', 'woocommerce' ), 'manage_woocommerce', 'wc-addons', null, null, '55.9' );
 		$count_html = WC_Helper_Updater::get_updates_count_html();
 		/* translators: %s: extensions count */
 		$menu_title = sprintf( __( 'Extensions %s', 'woocommerce' ), $count_html );
-		add_submenu_page( 'wc-marketplace', __( 'WooCommerce extensions', 'woocommerce' ), $menu_title, 'manage_woocommerce', 'wc-marketplace', array( $this, 'addons_page' ) );
+		add_submenu_page( 'wc-addons', __( 'WooCommerce extensions', 'woocommerce' ), $menu_title, 'manage_woocommerce', 'wc-addons', array( $this, 'addons_page' ) );
+		add_submenu_page( 'wc-addons', __( 'WooCommerce.com Subscriptions', 'woocommerce' ), __( 'My Subscriptions', 'woocommerce' ), 'manage_woocommerce', 'wccom-subscriptions', array( $this, 'helper_page' ) );
 	}
 
 	/**
@@ -293,6 +294,13 @@ class WC_Admin_Menus {
 	 */
 	public function addons_page() {
 		WC_Admin_Addons::output();
+	}
+
+	/**
+	 * Init the helper page.
+	 */
+	public function helper_page() {
+		WC_Admin_Addons::helper_output();
 	}
 
 	/**

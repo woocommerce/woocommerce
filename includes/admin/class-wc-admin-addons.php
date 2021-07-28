@@ -731,6 +731,13 @@ class WC_Admin_Addons {
 	}
 
 	/**
+	 * Outputs the WooCommerce.com Subscriptions page separately
+	 */
+	public static function helper_output() {
+		do_action( 'woocommerce_helper_output' );
+	}
+
+	/**
 	 * Install WooCommerce Services from Extensions screens.
 	 */
 	public static function install_woocommerce_services_addon() {
