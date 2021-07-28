@@ -1,0 +1,4 @@
+Significance: patch
+Type: Fix
+
+Fixes action button mis-alignment within card footer. #7412

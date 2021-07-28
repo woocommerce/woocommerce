@@ -1,3 +1,7 @@
+# Unreleased
+
+-   Update WCPayCard CSS to handle @wordpress/card updates. #7412
+
 # 2.1.0
 
 -   Fix commonjs module build, allow package to be built in isolation. #7286
