@@ -6,7 +6,7 @@ const config = require( 'config' );
 /**
  * Internal dependencies
  */
-const { clearAndFillInput, setCheckbox } = require( '../page-utils' );
+const { setCheckbox } = require( '../page-utils' );
 const {
 	WP_ADMIN_ALL_ORDERS_VIEW,
 	WP_ADMIN_ALL_PRODUCTS_VIEW,
@@ -30,7 +30,7 @@ const {
 	IS_RETEST_MODE,
 } = require( './constants' );
 
-const { getSlug } = require('./utils');
+const { getSlug, userLogin } = require('./utils');
 
 const baseUrl = config.get( 'url' );
 const WP_ADMIN_SINGLE_CPT_VIEW = ( postId ) => baseUrl + `wp-admin/post.php?post=${ postId }&action=edit`;
@@ -41,17 +41,14 @@ const merchant = {
 			waitUntil: 'networkidle0',
 		} );
 
-		await expect( page.title() ).resolves.toMatch( 'Log In' );
-
-		await clearAndFillInput( '#user_login', ' ' );
-
-		await page.type( '#user_login', config.get( 'users.admin.username' ) );
-		await page.type( '#user_pass', config.get( 'users.admin.password' ) );
-
-		await Promise.all( [
-			page.click( 'input[type=submit]' ),
-			page.waitForNavigation( { waitUntil: 'networkidle0' } ),
-		] );
+		await userLogin(
+			'Log In',
+			'#user_login',
+			config.get( 'users.admin.username' ),
+			'#user_pass',
+			config.get( 'users.admin.password' ),
+			'input[type=submit]'
+		);
 	},
 
 	logout: async () => {

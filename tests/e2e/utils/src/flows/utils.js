@@ -1,3 +1,5 @@
+import {clearAndFillInput, waitForSelectorWithoutThrow} from "../page-utils";
+
 /**
  * Take a string name and generate the slug for it.
  * Example: 'My plugin' => 'my-plugin'
@@ -31,3 +33,32 @@ export const describeIf = ( condition ) =>
 // Conditionally determine whether or not to skip a test case
 export const itIf = ( condition ) =>
 	condition ? it : it.skip;
+
+/**
+ * Log in a user to either standalone WordPress or WordPress.com.
+ *
+ * @param pageTitle The expected page title for the login screen
+ * @param userField Username input selector
+ * @param username User's username
+ * @param passwordField Password input selector
+ * @param password User's password
+ * @param submitButton Login form submit button selector
+ * @returns {Promise<void>}
+ */
+export const userLogin = async ( pageTitle, userField, username, passwordField, password, submitButton ) => {
+	const isWPLogin = await waitForSelectorWithoutThrow( passwordField );
+	if ( isWPLogin ) {
+		await expect( page.title() ).resolves.toMatch( pageTitle );
+
+		await clearAndFillInput( userField, ' ' );
+		await page.type( userField, username );
+		await page.type( passwordField, password );
+
+		await Promise.all( [
+			page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+			page.click( submitButton ),
+		] );
+	} else {
+
+	}
+};

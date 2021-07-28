@@ -30,7 +30,7 @@ const runOrderEmailReceivingTest = () => {
 	describe('Shopper Order Email Receiving', () => {
 		beforeAll(async () => {
 			simplePostIdValue = await createSimpleProduct();
-			
+
 			await merchant.login();
 			await deleteAllEmailLogs();
 			await merchant.logout();
@@ -53,6 +53,7 @@ const runOrderEmailReceivingTest = () => {
 			await merchant.openEmailLog();
 			await expect( page ).toMatchElement( '.column-receiver', { text: customerEmail } );
 			await expect( page ).toMatchElement( '.column-subject', { text: `[${storeName}]: New order #${orderId}` } );
+			await merchant.logout();
 		});
 	});
 };

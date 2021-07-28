@@ -39,22 +39,15 @@ const runCheckoutLoginAccountTest = () => {
 			await shopper.goToShop();
 			await shopper.addToCartFromShopPage(simpleProductName);
 			await uiUnblocked();
-			await shopper.goToCheckout();
 		});
 
 		it('can login to an existing account during checkout', async () => {
+			await shopper.goToCheckout();
 			// Click to login during checkout
 			await page.waitForSelector('.woocommerce-form-login-toggle');
 			await expect(page).toClick('.woocommerce-info > a.showlogin');
 
-			// Fill shopper's login credentials and proceed further
-			await page.type( '#username', config.get('users.customer.username') );
-			await page.type( '#password', config.get('users.customer.password') );
-
-			await Promise.all([
-				page.waitForNavigation({waitUntil: 'networkidle0'}),
-				page.click('button[name="login"]'),
-			]);
+			await shopper.login( 'checkout' );
 
 			// Place an order
 			await shopper.placeOrder();

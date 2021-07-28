@@ -5,7 +5,7 @@
 /**
  * Internal dependencies
  */
-import { merchant, IS_RETEST_MODE } from './flows';
+import { IS_RETEST_MODE, merchant } from './flows';
 import {
 	uiUnblocked,
 	verifyCheckboxIsUnset,
@@ -295,7 +295,7 @@ const createVariableProduct = async (varProduct = defaultVariableProduct) => {
 
 /**
  * Create grouped product.
- * 
+ *
  * @param groupedProduct Defaults to the grouped product object in `default.json`
  * @returns ID of the grouped product
  */
@@ -501,12 +501,13 @@ const deleteAllShippingZones = async () => {
 				await evalAndClick( '.wc-shipping-zone-delete' );
 				await uiUnblocked();
 				zone = await page.$( '.wc-shipping-zone-delete' );
-			};
-		};
+			}
+		}
 	} catch (error) {
 		// Prevent an error here causing the test to fail.
-	};
+	}
 };
+
 
 export {
 	completeOnboardingWizard,

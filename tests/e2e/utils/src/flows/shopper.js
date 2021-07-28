@@ -25,6 +25,7 @@ const {
 } = require( './constants' );
 
 const { uiUnblocked } = require( '../page-utils' );
+const { userLogin } = require( './utils' );
 
 const gotoMyAccount = async () => {
 	await page.goto( SHOP_MY_ACCOUNT_PAGE, {
@@ -208,18 +209,30 @@ const shopper = {
 
 	gotoMyAccount: gotoMyAccount,
 
-	login: async () => {
-		await gotoMyAccount();
+	login: async ( loginLocation = 'my-account' ) => {
+		let pageTitle;
+		let submitButton = 'button[name="login"]';
 
-		await expect( page.title() ).resolves.toMatch( 'My account' );
+		switch ( loginLocation ) {
+			case 'my-account':
+				await gotoMyAccount();
+				pageTitle = 'My account';
+				break;
+			case 'checkout':
+				pageTitle = 'Checkout';
+				await page.waitForSelector('.woocommerce-form-login-toggle');
+				await expect(page).toClick('.woocommerce-info > a.showlogin');
+				break;
+		}
 
-		await page.type( '#username', config.get('users.customer.username') );
-		await page.type( '#password', config.get('users.customer.password') );
-
-		await Promise.all( [
-			page.waitForNavigation( { waitUntil: 'networkidle0' } ),
-			page.click( 'button[name="login"]' ),
-		] );
+		await userLogin(
+			pageTitle,
+			'#username',
+			config.get('users.customer.username'),
+			'#password',
+			config.get('users.customer.password'),
+			submitButton
+		);
 	},
 };
 

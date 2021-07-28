@@ -67,6 +67,7 @@ const runCheckoutCreateAccountTest = () => {
 			await merchant.login();
 			await merchant.openAllUsersView();
 			await expect(page).toMatchElement('td.email.column-email > a', { text: customerBilling.email });
+			await merchant.logout();
 		});
 	});
 };

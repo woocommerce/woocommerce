@@ -69,6 +69,7 @@ const runCartRedirectionTest = () => {
 			await merchant.openSettings('products');
 			await unsetCheckbox('#woocommerce_cart_redirect_after_add');
 			await settingsPageSaveChanges();
+			await merchant.logout();
 		});
 	});
 };
