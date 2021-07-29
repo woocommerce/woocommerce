@@ -85,6 +85,7 @@ foreach ( $milestones as $milestone ) {
 
 // If all the milestones have a release branch, just take the newest one.
 if ( is_null( $chosen_milestone ) ) {
+	echo "WARNING: No milestone without release branch found, the newest one will be assigned.\n";
 	$chosen_milestone = $milestones[0];
 }
 
