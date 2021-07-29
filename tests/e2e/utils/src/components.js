@@ -363,10 +363,10 @@ const batchCreateOrders = async (statuses) => {
 	const path = '/wc/v3/orders/batch';
 
 	// Create an order per status
-	const orders = statuses.map((s) => {
+	const orders = statuses.map((status) => {
 		return {
 			...defaultOrder,
-			status: s
+			status: status
 		};
 	});
 
