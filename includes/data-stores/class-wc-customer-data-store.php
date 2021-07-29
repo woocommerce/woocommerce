@@ -59,6 +59,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		'shipping_first_name',
 		'shipping_last_name',
 		'shipping_company',
+		'shipping_phone',
 		'wptests_capabilities',
 		'wptests_user_level',
 		'syntax_highlighting',
@@ -301,6 +302,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			'shipping_state'      => 'shipping_state',
 			'shipping_postcode'   => 'shipping_postcode',
 			'shipping_country'    => 'shipping_country',
+			'shipping_phone'      => 'shipping_phone',
 		);
 
 		foreach ( $shipping_address_props as $meta_key => $prop ) {

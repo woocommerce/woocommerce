@@ -9,7 +9,6 @@ use Automattic\WooCommerce\Internal\DependencyManagement\AbstractServiceProvider
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\Filterer;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
-use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 /**
  * Service provider for the ProductAttributesLookupServiceProvider namespace.
@@ -32,7 +31,7 @@ class ProductAttributesLookupServiceProvider extends AbstractServiceProvider {
 	 */
 	public function register() {
 		$this->share( DataRegenerator::class )->addArgument( LookupDataStore::class );
-		$this->share( Filterer::class )->addArgument( LookupDataStore::class )->addArgument( LegacyProxy::class );
+		$this->share( Filterer::class )->addArgument( LookupDataStore::class );
 		$this->share( LookupDataStore::class );
 	}
 }
