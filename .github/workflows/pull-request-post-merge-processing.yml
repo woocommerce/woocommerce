@@ -1,6 +1,6 @@
 name: "Pull request post-merge processing"
-on: 
-  pull_request:
+on:
+  pull_request_target:
     types: [closed]
 
 jobs:
