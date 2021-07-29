@@ -492,6 +492,19 @@ add_action( 'woocommerce_scheduled_sales', 'wc_scheduled_sales' );
  * @return array
  */
 function wc_get_attachment_image_attributes( $attr ) {
+	/*
+	 * If the user can manage woocommerce, allow them to
+	 * see the image content.
+	 */
+	if ( current_user_can( 'manage_woocommerce' ) ) {
+		return $attr;
+	}
+
+	/*
+	 * If the user does not have the right capabilities,
+	 * filter out the image source and replace with placeholder
+	 * image.
+	 */
 	if ( isset( $attr['src'] ) && strstr( $attr['src'], 'woocommerce_uploads/' ) ) {
 		$attr['src'] = wc_placeholder_img_src();
 
@@ -511,7 +524,19 @@ add_filter( 'wp_get_attachment_image_attributes', 'wc_get_attachment_image_attri
  * @return array
  */
 function wc_prepare_attachment_for_js( $response ) {
+	/*
+	 * If the user can manage woocommerce, allow them to
+	 * see the image content.
+	 */
+	if ( current_user_can( 'manage_woocommerce' ) ) {
+		return $response;
+	}
 
+	/*
+	 * If the user does not have the right capabilities,
+	 * filter out the image source and replace with placeholder
+	 * image.
+	 */
 	if ( isset( $response['url'] ) && strstr( $response['url'], 'woocommerce_uploads/' ) ) {
 		$response['full']['url'] = wc_placeholder_img_src();
 		if ( isset( $response['sizes'] ) ) {
