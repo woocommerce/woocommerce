@@ -4,7 +4,7 @@
  */
 const {
 	merchant,
-	batchCreateOrders,
+	withRestApi,
 	clickFilter,
 	moveAllItemsToTrash,
 } = require( '@woocommerce/e2e-utils' );
@@ -52,7 +52,7 @@ const runOrderStatusFiltersTest = () => {
 
 				return statusName.replace('wc-', '');
 			});
-			await batchCreateOrders(statuses);
+			await withRestApi.batchCreateOrders(statuses);
 
 			// Next, let's login
 			await merchant.login();
