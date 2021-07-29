@@ -5,6 +5,8 @@
 **WooCommerce**
 
 * Enhancement - Product attributes lookup table synchronization when the table exists. #30041
+* Enhancement - Add Refund and Returns Policy sample page. #30194
+* Enhancement - Added support for Shipping Phone, in addition to Billing Phone in email templates and in the Order's edit screen. #30097
 * Tweak - Copy changes on WCS extension banner to include DHL Express. #30081
 * Tweak - Remove Canada Post from WCS extensions banner. #30082
 * Tweak - For 2021 theme, use theme font, and allow font-family customization. #30111
@@ -21,7 +23,6 @@
 * Fix - Replaced wp.passwordStrength deprecated method. #30191
 * Dev - Apply `woocommerce_logout_default_redirect_url` filter to logout for custom endpoint. #29967
 * Dev - Added new `woocommerce_email_sent` hook. #30123
-* Dev - Add Refund and Returns Policy sample page. #30194
 
 **WooCommerce Admin - 2.5.0**
 
