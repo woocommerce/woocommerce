@@ -58,8 +58,8 @@ jobs:
         run: |
           composer install
 
-  JSE2ETestsWP57Gutenberg:
-    name: JavaScipt E2E Tests (WP 5.7 with Gutenberg plugin)
+  JSE2EWithGutenberg:
+    name: JavaScript E2E Tests (WP latest with Gutenberg plugin)
     needs: Setup
     runs-on: ubuntu-latest
     steps:
@@ -113,10 +113,9 @@ jobs:
         run: |
           composer install
 
-      - name: E2E Tests (WP 5.7 with Gutenberg plugin)
+      - name: E2E Tests (WP latest with Gutenberg plugin)
         env:
           WOOCOMMERCE_BLOCKS_PHASE: 3
-          WP_VERSION: 5.7-branch
         run: |
           chmod -R 767 ./ #needed for permissions issues
           JSON='{"plugins": ["https://downloads.wordpress.org/plugin/woocommerce.latest-stable.zip","https://github.com/WP-API/Basic-Auth/archive/master.zip","https://downloads.wordpress.org/plugin/gutenberg.latest-stable.zip", "."] }'
@@ -125,8 +124,8 @@ jobs:
           npm run wp-env clean all
           npm run test:e2e
 
-  JSE2ETestsWP57:
-    name: JavaScipt E2E Tests (WP 5.7)
+  JSE2ETests:
+    name: JavaScript E2E Tests (latest)
     needs: Setup
     runs-on: ubuntu-latest
     steps:
@@ -180,143 +179,10 @@ jobs:
         run: |
           composer install
 
-      - name: E2E Tests (WP 5.7)
+      - name: E2E Tests (WP latest)
         env:
           WOOCOMMERCE_BLOCKS_PHASE: 3
-          WP_VERSION: 5.7-branch
         run: |
-          npm run wp-env start
-          npm run wp-env clean all
-          npm run test:e2e
-
-  JSE2ETestsWP56:
-    name: JavaScipt E2E Tests (WP 5.6)
-    needs: Setup
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Cache node modules
-        uses: actions/cache@v2
-        env:
-          cache-name: cache-node-modules
-        with:
-          # npm cache files are stored in `~/.npm` on Linux/macOS
-          path: ~/.npm
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
-
-      - name: Use Node.js 14.x
-        uses: actions/setup-node@v1
-        with:
-          node-version: 14.x
-
-      - name: Npm install and build
-        run: |
-          npm ci
-          FORCE_REDUCED_MOTION=true npm run build:e2e-test
-
-      - name: blocks.ini setup
-        run: |
-          echo -e 'woocommerce_blocks_phase = 3\nwoocommerce_blocks_env = tests' > blocks.ini
-      - name: Get Composer Cache Directory
-        id: composer-cache
-        run: |
-          echo "::set-output name=dir::$(composer config cache-files-dir)"
-      - uses: actions/cache@v2
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-
-
-      - name: Set up PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: 7.4
-          coverage: none
-          tools: composer
-
-      - name: Composer install
-        run: |
-          composer install
-
-      - name: E2E Tests (WP 5.6)
-        env:
-          WOOCOMMERCE_BLOCKS_PHASE: 3
-          WP_VERSION: 5.6-branch
-        run: |
-          JSON='{"core": "WordPress/WordPress#'"$WP_VERSION"'"}'
-          echo $JSON > .wp-env.override.json
-          npm run wp-env start
-          npm run wp-env clean all
-          npm run test:e2e
-
-  JSE2ETestsWP55:
-    name: JavaScipt E2E Tests (WP 5.5)
-    needs: Setup
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Cache node modules
-        uses: actions/cache@v2
-        env:
-          cache-name: cache-node-modules
-        with:
-          # npm cache files are stored in `~/.npm` on Linux/macOS
-          path: ~/.npm
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
-
-      - name: Use Node.js 14.x
-        uses: actions/setup-node@v1
-        with:
-          node-version: 14.x
-
-      - name: Npm install and build
-        run: |
-          npm ci
-          FORCE_REDUCED_MOTION=true npm run build:e2e-test
-
-      - name: blocks.ini setup
-        run: |
-          echo -e 'woocommerce_blocks_phase = 3\nwoocommerce_blocks_env = tests' > blocks.ini
-      - name: Get Composer Cache Directory
-        id: composer-cache
-        run: |
-          echo "::set-output name=dir::$(composer config cache-files-dir)"
-      - uses: actions/cache@v2
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-
-
-      - name: Set up PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: 7.4
-          coverage: none
-          tools: composer
-
-      - name: Composer install
-        run: |
-          composer install
-
-      - name: E2E Tests (WP 5.5)
-        env:
-          WOOCOMMERCE_BLOCKS_PHASE: 3
-          WP_VERSION: 5.5-branch
-        run: |
-          JSON='{"core": "WordPress/WordPress#'"$WP_VERSION"'"}'
-          echo $JSON > .wp-env.override.json
           npm run wp-env start
           npm run wp-env clean all
           npm run test:e2e
