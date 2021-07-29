@@ -100,7 +100,31 @@ class Bootstrap {
 	 * @return boolean
 	 */
 	protected function has_core_dependencies() {
-		return class_exists( 'WooCommerce' ) && function_exists( 'register_block_type' );
+		$has_needed_dependencies = class_exists( 'WooCommerce' );
+		if ( $has_needed_dependencies ) {
+			$plugin_data = \get_file_data(
+				$this->package->get_path( 'woocommerce-gutenberg-products-block.php' ),
+				[
+					'RequiredWCVersion' => 'WC requires at least',
+				]
+			);
+			if ( isset( $plugin_data['RequiredWCVersion'] ) && version_compare( \WC()->version, $plugin_data['RequiredWCVersion'], '<' ) ) {
+				$has_needed_dependencies = false;
+				add_action(
+					'admin_notices',
+					function() {
+						if ( should_display_compatibility_notices() ) {
+							?>
+							<div class="notice notice-error">
+								<p><?php esc_html_e( 'The WooCommerce Blocks feature plugin requires a more recent version of WooCommerce and has been paused. Please update WooCommerce to the latest version to continue enjoying WooCommerce Blocks.', 'woo-gutenberg-products-block' ); ?></p>
+							</div>
+							<?php
+						}
+					}
+				);
+			}
+		}
+		return $has_needed_dependencies;
 	}
 
 	/**

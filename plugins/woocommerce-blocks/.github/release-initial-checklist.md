@@ -3,13 +3,14 @@ The release pull request has been created! This checklist is a guide to follow f
 * [ ] Checkout the release branch locally.
 
 ## Initial Preparation
-
 * [ ] Add the changelog to `readme.txt`
   * [ ] Add the version and date to the changelog section within `readme.txt`, e.g. `= {{version}} - YYYY-MM-DD =`
   * [ ] Copy the changelog from the pull request description above into this new section
 * [ ] Update compatibility sections (if applicable). __Note:__ Do not change the stable tag or plugin version; this is automated.
-  * [ ] Update _Requires at least_, _Tested up to_, and _Requires PHP_ sections at the top of `readme.txt`.
-  * [ ] Update _Requires at least_, _Requires PHP_, _WC requires at least_, and _WC tested up to_ at the top of `woocommerce-gutenberg-products-block.php`
+  * [ ] Update _Requires at least_, _Tested up to_, and _Requires PHP_ sections at the top of `readme.txt`. Note, this should also be the latest WordPress version available at time of release.
+  * [ ] Update _Requires at least_, _Requires PHP_, _WC requires at least_, and _WC tested up to_ at the top of `woocommerce-gutenberg-products-block.php`. Note, this should include requiring the latest WP and WC versions at the time of the plugin release.
+  * [ ] If necessary, update the value of `$minimum_wp_version` at the top of the `woocommerce-gutenberg-products-block.php` file to the latest available version of WordPress.
+  * [ ] If necessary, update the `phpcs.xml` file to reference the minimum WP version supported by **WooCommerce Core**. It would be this line: `<config name="minimum_supported_wp_version" value="5.6" />`.
 * [ ] Push above changes to the release branch.
 
 ## Write Testing Notes
@@ -21,7 +22,7 @@ Additionally, make sure to differentiate between things in the testing notes tha
 * [ ] Run `npm ci`
 * [ ] Run `npm run package-plugin:deploy`. This will create a zip of the current branch build locally.
   *  Note: The zip file is functionally equivalent to what gets released except the version bump.
-* [ ] Create testing notes for the release. You can usually go through the pull requests linked in the changelog and grab testing notes from each pull. 
+* [ ] Create testing notes for the release. You can usually go through the pull requests linked in the changelog and grab testing notes from each pull.
   * [ ] Add the notes to `docs/testing/releases`
   * [ ] Update the `docs/testing/releases/README.md` file index.
 * [ ] Copy a link to the release zip you created earlier into the testing notes. To generate the link you can upload the zip as an attachment in a GitHub comment and then just copy the path (without publishing the comment).
@@ -52,7 +53,7 @@ Additionally, make sure to differentiate between things in the testing notes tha
 * [ ] Execute `npm run deploy`
   * The script will ask you to enter the version number to tag. Please enter the version we're releasing right now. Do not publish any dev tags as a release.
   * Note: the script automatically updates version numbers on Github (commits on your behalf).
-  * **ALERT**: This script will ask you if this release will be deployed to WordPress.org. You should answer yes for this release even if it is a pre-release. 
+  * **ALERT**: This script will ask you if this release will be deployed to WordPress.org. You should answer yes for this release even if it is a pre-release.
   * A GitHub release will automatically be created and this will trigger a workflow that automatically deploys the plugin to WordPress.org.
 * [ ] Edit the [GitHub release](https://github.com/woocommerce/woocommerce-gutenberg-products-block/releases) and copy changelog into the release notes. Ensure there is a release with the correct version, the one you entered above.
 * [ ] The `#team-rubik` slack instance will be notified about the progress with the WordPress.org deploy. Watch for that. If anything goes wrong, an error will be reported and you can followup via the GitHub actions tab and the log for that workflow.

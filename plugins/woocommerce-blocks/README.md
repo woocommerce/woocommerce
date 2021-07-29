@@ -17,11 +17,10 @@ Use this plugin if you want access to the bleeding edge of available blocks for 
 
 - [Documentation](#documentation)
   - [Code Documentation](#code-documentation)
-  - [Contributing](#contributing)
 - [Installing the plugin version](#installing-the-plugin-version)
 - [Installing the development version](#installing-the-development-version)
 - [Getting started with block development](#getting-started-with-block-development)
-- [Vision for the Feature](#vision-for-the-feature)
+- [Long-term vision](#long-term-vision)
 
 ## Documentation
 
@@ -40,19 +39,16 @@ If you want to see what we're working on for future versions, or want to help ou
 
 We release a new version of WooCommerce Blocks onto WordPress.org every few weeks, which can be used as an easier way to preview the features.
 
-> Note: The plugin follows a policy of supporting the "L2" strategy for version support. What this means is that the plugin will support the most recent two minor versions of WordPress, and the most recent two minor versions of WooCommerce core at the time of a release.
+> Note: The plugin follows a policy of supporting the "L0" strategy for version support. What this means is that the plugin will require the most recent version of WordPress, and the most recent version of WooCommerce core at the time of a release. You can read more about [this policy here](https://developer.woocommerce.com/?p=9998).
 >
-> That means if the latest version of WooCommerce is 4.3 at the time of a release, then our minimum version requirements for WooCommerce core would be 4.1+.
->
-> We **recommend** you always keep WordPress and WooCommerce core up to date in order to ensure your store is running with the most recent fixes and enhancements to help your store be successful.
 
-1. Make sure you have WordPress 5.4+ and WooCommerce 4.3+
+1. Make sure you have the latest available versions of WordPress and WooCommerce on your site.
 2. The plugin version is available on WordPress.org. [Download the plugin version here.](https://wordpress.org/plugins/woo-gutenberg-products-block/)
 3. Activate the plugin.
 
 ## Installing the development version
 
-1. Make sure you have WordPress 5.4+ and WooCommerce 4.3+
+1. Make sure you have the latest versions of WordPress and WooCommerce on your site.
 2. Get a copy of this plugin using the green "Clone or download" button on the right.
 3. `npm install` to install the dependencies.
 4. `composer install` to install core dependencies.

@@ -8,8 +8,6 @@ The release pull request has been created! This checklist is a guide to follow f
   * [ ] Add the version and date to the changelog section within `readme.txt`, e.g. `= {{version}} - YYYY-MM-DD =`
   * [ ] Copy the changelog from the pull request description above into this new section
 * [ ] Update compatibility sections (if applicable). __Note:__ Do not change the stable tag or plugin version; this is automated.
-  * [ ] Update _Requires at least_, _Tested up to_, and _Requires PHP_ sections at the top of `readme.txt`.
-  * [ ] Update _Requires at least_, _Requires PHP_, _WC requires at least_, and _WC tested up to_ at the top of `woocommerce-gutenberg-products-block.php`
 * [ ] Push above changes to the release branch.
 
 ## Write Testing Notes
@@ -20,7 +18,7 @@ Additionally, make sure to differentiate between things in the testing notes tha
 
 * [ ] Run `npm ci`
 * [ ] Run `npm run package-plugin:deploy`. This will create a zip of the current branch build locally.
-* [ ] Create testing notes for the release. You can usually go through the pull requests linked in the changelog and grab testing notes from each pull. 
+* [ ] Create testing notes for the release. You can usually go through the pull requests linked in the changelog and grab testing notes from each pull.
   * [ ] Add the notes to `docs/testing/releases`
   * [ ] Update the `docs/testing/releases/README.md` file index.
 * [ ] Copy a link to the release zip you created earlier into the testing notes. To generate the link you can upload the zip as an attachment in a GitHub comment and then just copy the path (without publishing the comment).
