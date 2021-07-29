@@ -1,0 +1,15 @@
+.woocommerce-task-marketing {
+	.components-card__header {
+		flex-direction: column;
+		align-items: flex-start;
+
+		h2 {
+			color: $gray-900;
+			margin-bottom: $gap-smaller;
+		}
+
+		p {
+			color: $gray-700;
+		}
+	}
+}

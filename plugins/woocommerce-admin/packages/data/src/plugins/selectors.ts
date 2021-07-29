@@ -69,4 +69,5 @@ export type PluginSelectors = {
 	getInstalledPlugins: WPDataSelector< typeof getInstalledPlugins >;
 	getRecommendedPlugins: WPDataSelector< typeof getRecommendedPlugins >;
 	isJetpackConnected: WPDataSelector< typeof isJetpackConnected >;
+	isPluginsRequesting: WPDataSelector< typeof isPluginsRequesting >;
 } & WPDataSelectors;

@@ -1,0 +1,42 @@
+.woocommerce-plugin-list__plugin {
+	display: flex;
+	padding: $gap-large;
+	border-top: 1px solid #e5e5e5;
+
+	&:last-child {
+		border-bottom: 1px solid #e5e5e5;
+	}
+
+	h4 {
+		margin-bottom: $gap-small;
+		font-weight: 600;
+		color: $gray-900;
+	}
+
+	p {
+		color: $gray-700;
+		font-weight: 400;
+		color: #3c434a;
+	}
+}
+
+.woocommerce-plugin-list__plugin-logo {
+	margin-right: 45px;
+	display: flex;
+	align-items: center;
+
+	img {
+		width: 50px;
+	}
+}
+
+.woocommerce-plugin-list__plugin-text {
+	max-width: 370px;
+	margin-right: $gap;
+}
+
+.woocommerce-plugin-list__plugin-action {
+	display: flex;
+	align-items: center;
+	margin-left: auto;
+}

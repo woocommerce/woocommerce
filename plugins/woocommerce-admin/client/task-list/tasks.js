@@ -17,6 +17,7 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import Appearance from './tasks/appearance';
 import { getCategorizedOnboardingProducts } from '../dashboard/utils';
+import { Marketing } from './tasks/Marketing';
 import { Products } from './tasks/products';
 import Shipping from './tasks/shipping';
 import Tax from './tasks/tax';
@@ -325,6 +326,28 @@ export function getAllTasks( {
 			visible:
 				( productTypes && productTypes.includes( 'physical' ) ) ||
 				hasPhysicalProducts,
+			time: __( '1 minute', 'woocommerce-admin' ),
+			type: 'setup',
+		},
+		{
+			key: 'marketing',
+			title: __( 'Set up marketing tools', 'woocommerce-admin' ),
+			content: __(
+				'Add recommended marketing tools to reach new customers and grow your business',
+				'woocommerce-admin'
+			),
+			container: <Marketing />,
+			onClick: () => {
+				onTaskSelect( 'marketing' );
+				updateQueryString( { task: 'marketing' } );
+			},
+			// @todo This should use the free extensions data store.
+			completed:
+				[].filter( ( plugin ) => installedPlugins.includes( plugin ) )
+					.length > 0,
+			visible:
+				window.wcAdminFeatures &&
+				window.wcAdminFeatures[ 'remote-extensions-list' ],
 			time: __( '1 minute', 'woocommerce-admin' ),
 			type: 'setup',
 		},
