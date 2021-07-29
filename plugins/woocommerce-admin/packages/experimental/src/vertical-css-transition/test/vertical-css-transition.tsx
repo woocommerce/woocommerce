@@ -36,14 +36,14 @@ describe( 'VerticalCSSTransition', () => {
 
 	it( 'should set maxHeight of children to container on entering and remove it when entered', ( done ) => {
 		const nodeRef = createRef< undefined | HTMLDivElement >();
-		let count = 0;
+		let onEnteringCalledCount = 0;
 		const props: VerticalCSSTransitionProps = {
 			in: false,
 			timeout: 0,
 			nodeRef: nodeRef as React.RefObject< undefined >,
 			classNames: 'test',
 			onEntering: () => {
-				count++;
+				onEnteringCalledCount++;
 				expect(
 					nodeRef.current &&
 						nodeRef.current.parentElement?.style.maxHeight
@@ -54,7 +54,7 @@ describe( 'VerticalCSSTransition', () => {
 					nodeRef.current &&
 						nodeRef.current.parentElement?.style.maxHeight
 				).toBe( '' );
-				expect( count ).toEqual( 1 );
+				expect( onEnteringCalledCount ).toEqual( 1 );
 				done();
 			},
 		};
@@ -65,6 +65,7 @@ describe( 'VerticalCSSTransition', () => {
 				</div>
 			</VerticalCSSTransition>
 		);
+		jest.runOnlyPendingTimers();
 
 		rerender(
 			<VerticalCSSTransition { ...props } in={ true }>
@@ -73,18 +74,19 @@ describe( 'VerticalCSSTransition', () => {
 				</div>
 			</VerticalCSSTransition>
 		);
+		jest.runOnlyPendingTimers();
 	} );
 
 	it( 'should update maxHeight when children are updated', ( done ) => {
 		const nodeRef = createRef< undefined | HTMLDivElement >();
-		let count = 0;
+		let onEnteringCalledCount = 0;
 		const props: VerticalCSSTransitionProps = {
 			in: false,
 			timeout: 0,
 			nodeRef: nodeRef as React.RefObject< undefined >,
 			classNames: 'test',
 			onEntering: () => {
-				count++;
+				onEnteringCalledCount++;
 				expect(
 					nodeRef.current &&
 						nodeRef.current.parentElement?.style.maxHeight
@@ -95,7 +97,7 @@ describe( 'VerticalCSSTransition', () => {
 					nodeRef.current &&
 						nodeRef.current.parentElement?.style.maxHeight
 				).toBe( '' );
-				expect( count ).toEqual( 1 );
+				expect( onEnteringCalledCount ).toEqual( 1 );
 				done();
 			},
 		};
@@ -106,6 +108,7 @@ describe( 'VerticalCSSTransition', () => {
 				</div>
 			</VerticalCSSTransition>
 		);
+		jest.runOnlyPendingTimers();
 
 		rerender(
 			<VerticalCSSTransition { ...props } in={ true }>
@@ -118,6 +121,7 @@ describe( 'VerticalCSSTransition', () => {
 		expect(
 			nodeRef.current && nodeRef.current.parentElement?.style.maxHeight
 		).toBe( '200px' );
+		jest.runOnlyPendingTimers();
 	} );
 
 	it( 'should set maxHeight to zero if in is set to false', () => {

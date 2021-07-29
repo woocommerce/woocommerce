@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createElement } from '@wordpress/element';
 
@@ -9,14 +9,6 @@ import { createElement } from '@wordpress/element';
  * Internal dependencies
  */
 import Form from '../';
-
-// There is async code inside the callback handlers that we must flush
-// before asserting they were called.
-function flushPromises() {
-	return new Promise( function ( resolve ) {
-		setTimeout( resolve );
-	} );
-}
 
 describe( 'Form', () => {
 	it( 'should default to call the deprecated onSubmitCallback if it is provided.', async () => {
@@ -37,9 +29,10 @@ describe( 'Form', () => {
 
 		userEvent.click( queryByText( 'Submit' ) );
 
-		await flushPromises();
-		await expect( onSubmitCallback ).toHaveBeenCalledTimes( 1 );
-		await expect( onSubmit ).not.toHaveBeenCalled();
+		await waitFor( () =>
+			expect( onSubmitCallback ).toHaveBeenCalledTimes( 1 )
+		);
+		await waitFor( () => expect( onSubmit ).not.toHaveBeenCalled() );
 	} );
 
 	it( 'should default to call the deprecated onChangeCallback prop if it is provided.', async () => {
@@ -68,9 +61,10 @@ describe( 'Form', () => {
 
 		userEvent.click( queryByText( 'Change' ) );
 
-		await flushPromises();
-		await expect( mockOnChangeCallback ).toHaveBeenCalledTimes( 1 );
-		await expect( mockOnChange ).not.toHaveBeenCalled();
+		await waitFor( () =>
+			expect( mockOnChangeCallback ).toHaveBeenCalledTimes( 1 )
+		);
+		await waitFor( () => expect( mockOnChange ).not.toHaveBeenCalled() );
 	} );
 
 	it( 'should call onSubmit if it is the only prop provided', async () => {
@@ -86,8 +80,9 @@ describe( 'Form', () => {
 
 		userEvent.click( queryByText( 'Submit' ) );
 
-		await flushPromises();
-		await expect( mockOnSubmit ).toHaveBeenCalledTimes( 1 );
+		await waitFor( () =>
+			expect( mockOnSubmit ).toHaveBeenCalledTimes( 1 )
+		);
 	} );
 
 	it( 'should call onChange if it is the only prop provided', async () => {
@@ -111,7 +106,8 @@ describe( 'Form', () => {
 
 		userEvent.click( queryByText( 'Submit' ) );
 
-		await flushPromises();
-		await expect( mockOnChange ).toHaveBeenCalledTimes( 1 );
+		await waitFor( () =>
+			expect( mockOnChange ).toHaveBeenCalledTimes( 1 )
+		);
 	} );
 } );
