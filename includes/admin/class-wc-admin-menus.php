@@ -148,14 +148,11 @@ class WC_Admin_Menus {
 	 * Addons menu item.
 	 */
 	public function addons_menu() {
-		add_menu_page( __( 'Marketplace', 'woocommerce' ), __( 'Marketplace', 'woocommerce' ), 'manage_woocommerce', 'wc-addons', null, null, '58' );
-
 		$count_html = WC_Helper_Updater::get_updates_count_html();
 		/* translators: %s: extensions count */
 		$menu_title = sprintf( __( 'Extensions %s', 'woocommerce' ), $count_html );
-
-		add_submenu_page( 'wc-addons', __( 'WooCommerce extensions', 'woocommerce' ), $menu_title, 'manage_woocommerce', 'wc-addons', array( $this, 'addons_page' ) );
-		add_submenu_page( 'wc-addons', __( 'WooCommerce.com Subscriptions', 'woocommerce' ), __( 'My Subscriptions', 'woocommerce' ), 'manage_woocommerce', 'wc-addons&section=helper', array( $this, 'helper_page' ) );
+		add_submenu_page( 'woocommerce', __( 'WooCommerce extensions', 'woocommerce' ), $menu_title, 'manage_woocommerce', 'wc-addons', array( $this, 'addons_page' ) );
+		add_submenu_page( 'woocommerce', __( 'WooCommerce.com Subscriptions', 'woocommerce' ), __( 'My Subscriptions', 'woocommerce' ), 'manage_woocommerce', 'wc-addons&section=helper', array( $this, 'helper_page' ) );
 	}
 
 	/**
@@ -408,7 +405,7 @@ class WC_Admin_Menus {
 	 */
 	public function update_menu_highlight( $parent_file ) {
 		global $submenu_file;
-		if ( 'wc-addons' === $parent_file && isset( $_GET['section'] ) && 'helper' === $_GET['section'] ) {
+		if ( 'woocommerce' === $parent_file && isset( $_GET['section'] ) && 'helper' === $_GET['section'] ) {
 			$submenu_file = 'wc-addons&section=helper'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		}
 		return $parent_file;

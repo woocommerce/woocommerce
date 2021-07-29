@@ -24,7 +24,7 @@ function wc_get_screen_ids() {
 		$wc_screen_id . '_page_wc-shipping',
 		$wc_screen_id . '_page_wc-settings',
 		$wc_screen_id . '_page_wc-status',
-		'toplevel_page_wc-addons',
+		$wc_screen_id . '_page_wc-addons',
 		'marketplace_page_wccom-subscriptions',
 		'toplevel_page_wc-reports',
 		'product_page_product_attributes',
