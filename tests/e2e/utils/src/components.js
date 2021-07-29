@@ -353,31 +353,6 @@ const createSimpleOrder = async ( orderStatus = 'Pending payment' ) => {
 };
 
 /**
- * Creates a batch of orders from the given `statuses`
- * using the "Batch Create Order" API.
- * 
- * @param statuses Array of order statuses
- */
-const batchCreateOrders = async (statuses) => {
-	const defaultOrder = config.get('orders.basicPaidOrder');
-	const path = '/wc/v3/orders/batch';
-
-	// Create an order per status
-	const orders = statuses.map((status) => {
-		return {
-			...defaultOrder,
-			status: status
-		};
-	});
-
-	// Set the request payload from the created orders.
-	// Then send the API request.
-	const payload = { create: orders };
-	const { statusCode } = await client.post(path, payload);
-	expect(statusCode).toEqual(200);
-};
-
-/**
  * Adds a product to an order in the merchant.
  *
  * @param orderId ID of the order to add the product to.
@@ -546,6 +521,5 @@ export {
 	createSimpleProductWithCategory,
 	clickUpdateOrder,
 	deleteAllEmailLogs,
-	deleteAllShippingZones,
-	batchCreateOrders
+	deleteAllShippingZones
 };

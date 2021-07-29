@@ -1,5 +1,6 @@
 import factories from '../factories';
-import {Coupon, Setting, SimpleProduct} from '@woocommerce/api';
+import { Coupon, Setting, SimpleProduct } from '@woocommerce/api';
+import config from 'config';
 
 const client = factories.api.withDefaultPermalinks;
 const onboardingProfileEndpoint = '/wc-admin/onboarding/profile';
@@ -152,5 +153,31 @@ export const withRestApi = {
 				expect( response.value ).toBe( defaultSetting.value );
 			}
 		}
+	},
+	/**
+	 * Create a batch of orders with the given `statuses`
+	 * using the "Batch Create Order" API endpoint.
+	 * 
+	 * @param statuses Array of order statuses
+	 */
+	batchCreateOrders : async (statuses) => {
+		const defaultOrder = config.get('orders.basicPaidOrder');
+		const path = '/wc/v3/orders/batch';
+
+		// Create an order per status
+		const orders = statuses.map((status) => {
+			return {
+				...defaultOrder,
+				status: status
+			};
+		});
+
+		// Set the request payload from the created orders.
+		// Then send the API request.
+		const payload = { create: orders };
+		const { statusCode } = await client.post(path, payload);
+
+		/* eslint-disable jest/no-standalone-expect */
+		expect(statusCode).toEqual(200);
 	}
 };
