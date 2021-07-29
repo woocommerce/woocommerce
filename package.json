@@ -1,7 +1,7 @@
 {
   "name": "woocommerce",
   "title": "WooCommerce",
-  "version": "5.6.0",
+  "version": "5.7.0",
   "homepage": "https://woocommerce.com/",
   "repository": {
     "type": "git",
@@ -88,8 +88,8 @@
     "mocha": "7.2.0",
     "node-sass": "4.14.1",
     "prettier": "npm:wp-prettier@2.0.5",
-    "stylelint": "12.0.1",
-    "stylelint-config-wordpress": "16.0.0",
+    "stylelint": "^13.8.0",
+    "stylelint-config-wordpress": "17.0.0",
     "typescript": "3.9.7",
     "webpack": "4.44.2",
     "webpack-cli": "3.3.12",

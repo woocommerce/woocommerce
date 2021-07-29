@@ -1099,7 +1099,7 @@ class WC_Countries {
 					),
 					'IN' => array(
 						'postcode' => array(
-							'label' => __( 'Pin code', 'woocommerce' ),
+							'label' => __( 'PIN', 'woocommerce' ),
 						),
 						'state'    => array(
 							'label' => __( 'State', 'woocommerce' ),
@@ -1379,7 +1379,7 @@ class WC_Countries {
 					),
 					'US' => array(
 						'postcode' => array(
-							'label' => __( 'ZIP', 'woocommerce' ),
+							'label' => __( 'ZIP Code', 'woocommerce' ),
 						),
 						'state'    => array(
 							'label' => __( 'State', 'woocommerce' ),

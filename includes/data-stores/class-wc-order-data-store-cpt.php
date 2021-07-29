@@ -46,6 +46,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		'_shipping_state',
 		'_shipping_postcode',
 		'_shipping_country',
+		'_shipping_phone',
 		'_completed_date',
 		'_paid_date',
 		'_edit_lock',
@@ -133,6 +134,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 				'shipping_state'       => get_post_meta( $id, '_shipping_state', true ),
 				'shipping_postcode'    => get_post_meta( $id, '_shipping_postcode', true ),
 				'shipping_country'     => get_post_meta( $id, '_shipping_country', true ),
+				'shipping_phone'       => get_post_meta( $id, '_shipping_phone', true ),
 				'payment_method'       => get_post_meta( $id, '_payment_method', true ),
 				'payment_method_title' => get_post_meta( $id, '_payment_method_title', true ),
 				'transaction_id'       => get_post_meta( $id, '_transaction_id', true ),
@@ -240,6 +242,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 				'_shipping_state'      => 'shipping_state',
 				'_shipping_postcode'   => 'shipping_postcode',
 				'_shipping_country'    => 'shipping_country',
+				'_shipping_phone'      => 'shipping_phone',
 			),
 		);
 
