@@ -13,17 +13,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 ?>
 <div class="wrap woocommerce wc_addons_wrap">
-	<nav class="nav-tab-wrapper woo-nav-tab-wrapper">
-		<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-addons' ) ); ?>" class="nav-tab nav-tab-active"><?php esc_html_e( 'Browse Extensions', 'woocommerce' ); ?></a>
-
-		<?php
-			$count_html = WC_Helper_Updater::get_updates_count_html();
-			// translators: Count of updates for WooCommerce.com subscriptions.
-			$menu_title = sprintf( __( 'WooCommerce.com Subscriptions %s', 'woocommerce' ), $count_html );
-		?>
-		<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-addons&section=helper' ) ); ?>" class="nav-tab"><?php echo wp_kses_post( $menu_title ); ?></a>
-	</nav>
-
 	<h1 class="screen-reader-text"><?php esc_html_e( 'WooCommerce Extensions', 'woocommerce' ); ?></h1>
 
 	<?php if ( $sections ) : ?>

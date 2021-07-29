@@ -36,6 +36,7 @@ class WC_Admin_Menus {
 		add_filter( 'menu_order', array( $this, 'menu_order' ) );
 		add_filter( 'custom_menu_order', array( $this, 'custom_menu_order' ) );
 		add_filter( 'set-screen-option', array( $this, 'set_screen_option' ), 10, 3 );
+		add_filter( 'parent_file', array( $this, 'update_menu_highlight' ) );
 
 		// Add endpoints custom URLs in Appearance > Menus > Pages.
 		add_action( 'admin_head-nav-menus.php', array( $this, 'add_nav_menu_meta_boxes' ) );
@@ -151,6 +152,7 @@ class WC_Admin_Menus {
 		/* translators: %s: extensions count */
 		$menu_title = sprintf( __( 'Extensions %s', 'woocommerce' ), $count_html );
 		add_submenu_page( 'woocommerce', __( 'WooCommerce extensions', 'woocommerce' ), $menu_title, 'manage_woocommerce', 'wc-addons', array( $this, 'addons_page' ) );
+		add_submenu_page( 'woocommerce', __( 'WooCommerce.com Subscriptions', 'woocommerce' ), __( 'My Subscriptions', 'woocommerce' ), 'manage_woocommerce', 'wc-addons&section=helper', array( $this, 'helper_page' ) );
 	}
 
 	/**
@@ -295,6 +297,13 @@ class WC_Admin_Menus {
 	}
 
 	/**
+	 * Init the helper page.
+	 */
+	public function helper_page() {
+		WC_Admin_Addons::helper_output();
+	}
+
+	/**
 	 * Add custom nav meta box.
 	 *
 	 * Adapted from http://www.johnmorrisonline.com/how-to-add-a-fully-functional-custom-meta-box-to-wordpress-navigation-menus/.
@@ -386,6 +395,20 @@ class WC_Admin_Menus {
 				'href'   => wc_get_page_permalink( 'shop' ),
 			)
 		);
+	}
+
+	/**
+	 * Highlight the My Subscriptions menu item when on that page
+	 *
+	 * @param  string $parent_file currently opened page.
+	 * @return string
+	 */
+	public function update_menu_highlight( $parent_file ) {
+		global $submenu_file;
+		if ( 'woocommerce' === $parent_file && isset( $_GET['section'] ) && 'helper' === $_GET['section'] ) {
+			$submenu_file = 'wc-addons&section=helper'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		}
+		return $parent_file;
 	}
 }
 
