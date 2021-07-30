@@ -30,7 +30,7 @@ export function products() {
 	let heartbeat_nonce;
 
 	group("Products Page", function () {
-		var requestHeaders = Object.assign(
+		var requestHeaders = Object.assign({},
 			htmlRequestHeader,
 			commonRequestHeaders,
 			commonGetRequestHeaders,
@@ -43,7 +43,7 @@ export function products() {
 		postTypeProductTrend.add(response.timings.duration);
 		check(response, {
 			"is status 200": (r) => r.status === 200,
-			"body conatins: 'Products' header": (response) =>
+			"body contains: 'Products' header": (response) =>
 				response.body.includes("Products</h1>"),
 		});
 
@@ -68,7 +68,7 @@ export function products() {
 	sleep(randomIntBetween(`${think_time_min}`, `${think_time_max}`));
 
 	group("Inbox Notes", function () {
-		var requestHeaders = Object.assign(
+		var requestHeaders = Object.assign({},
 			jsonAPIRequestHeader,
 			commonRequestHeaders,
 			commonAPIGetRequestHeaders,
@@ -103,7 +103,7 @@ export function products() {
 	});
 
 	group("CES Options", function () {
-		var requestHeaders = Object.assign(
+		var requestHeaders = Object.assign({},
 			jsonAPIRequestHeader,
 			commonRequestHeaders,
 			commonAPIGetRequestHeaders,
@@ -124,7 +124,7 @@ export function products() {
 	});
 
 	group("WP Admin Heartbeat", function () {
-		var requestHeaders = Object.assign(
+		var requestHeaders = Object.assign({},
 			jsonRequestHeader,
 			commonRequestHeaders,
 			contentTypeRequestHeader,

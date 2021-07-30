@@ -28,7 +28,7 @@ export function myAccount() {
 	let woocommerce_login_nonce;
 
 	group("My Account", function () {
-		var requestHeaders = Object.assign(
+		var requestHeaders = Object.assign({},
 			htmlRequestHeader,
 			commonRequestHeaders,
 			commonGetRequestHeaders,
@@ -41,7 +41,7 @@ export function myAccount() {
 		myAccountTrend.add(response.timings.duration);
 		check(response, {
 			"is status 200": (r) => r.status === 200,
-			"body conatins: 'My account' title": (response) =>
+			"body contains: 'My account' title": (response) =>
 				response.body.includes(
 					'<h1 class="entry-title">My account</h1>'
 				),
@@ -58,7 +58,7 @@ export function myAccount() {
 	sleep(randomIntBetween(`${think_time_min}`, `${think_time_max}`));
 
 	group("My Account Login", function () {
-		var requestHeaders = Object.assign(
+		var requestHeaders = Object.assign({},
 			htmlRequestHeader,
 			commonRequestHeaders,
 			commonGetRequestHeaders,
@@ -83,13 +83,13 @@ export function myAccount() {
 		myAccountLoginTrend.add(response.timings.duration);
 		check(response, {
 			"is status 200": (r) => r.status === 200,
-			"body conatins: my account welcome message": (response) =>
+			"body contains: my account welcome message": (response) =>
 				response.body.includes(
 					"From your account dashboard you can view"
 				),
 		});
 
-		var requestHeaders = Object.assign(
+		var requestHeaders = Object.assign({},
 			allRequestHeader,
 			commonRequestHeaders,
 			commonPostRequestHeaders,

@@ -43,7 +43,7 @@ export function checkoutGuest() {
 	let update_order_review_nonce_guest;
 
 	group("Proceed to checkout", function () {
-		var requestHeaders = Object.assign(
+		var requestHeaders = Object.assign({},
 			htmlRequestHeader,
 			commonRequestHeaders,
 			commonGetRequestHeaders,
@@ -56,7 +56,7 @@ export function checkoutGuest() {
 		proceedCheckoutTrend1.add(response.timings.duration);
 		check(response, {
 			"is status 200": (r) => r.status === 200,
-			"body conatins: 'woocommerce-checkout' class": (response) =>
+			"body contains: 'woocommerce-checkout' class": (response) =>
 				response.body.includes('class="checkout woocommerce-checkout"'),
 		});
 
@@ -72,7 +72,7 @@ export function checkoutGuest() {
 			'","apply_coupon_nonce'
 		);
 
-		var requestHeaders = Object.assign(
+		var requestHeaders = Object.assign({},
 			allRequestHeader,
 			commonRequestHeaders,
 			commonPostRequestHeaders,
@@ -111,7 +111,7 @@ export function checkoutGuest() {
 	sleep(randomIntBetween(`${think_time_min}`, `${think_time_max}`));
 
 	group("Place Order", function () {
-		var requestHeaders = Object.assign(
+		var requestHeaders = Object.assign({},
 			jsonRequestHeader,
 			commonRequestHeaders,
 			commonPostRequestHeaders,
@@ -144,7 +144,7 @@ export function checkoutGuest() {
 		placeOrderTrend.add(response.timings.duration);
 		check(response, {
 			"is status 200": (r) => r.status === 200,
-			"body conatins: order-received": (response) =>
+			"body contains: order-received": (response) =>
 				response.body.includes("order-received"),
 		});
 	});
@@ -152,7 +152,7 @@ export function checkoutGuest() {
 	sleep(randomIntBetween(`${think_time_min}`, `${think_time_max}`));
 
 	group("Order received", function () {
-		var requestHeaders = Object.assign(
+		var requestHeaders = Object.assign({},
 			htmlRequestHeader,
 			commonRequestHeaders,
 			commonGetRequestHeaders,
@@ -172,7 +172,7 @@ export function checkoutGuest() {
 		});
 		orderReceivedTrend1.add(response.timings.duration);
 
-		var requestHeaders = Object.assign(
+		var requestHeaders = Object.assign({},
 			allRequestHeader,
 			commonRequestHeaders,
 			commonPostRequestHeaders,

@@ -17,7 +17,7 @@ export function shopPage() {
 	let response;
 
 	group("Shop Page", function () {
-		var requestHeaders = Object.assign(
+		var requestHeaders = Object.assign({},
 			htmlRequestHeader,
 			commonRequestHeaders,
 			commonGetRequestHeaders,
@@ -30,7 +30,7 @@ export function shopPage() {
 		shopPageTrend.add(response.timings.duration);
 		check(response, {
 			"is status 200": (r) => r.status === 200,
-			"body conatins: woocommerce-products-header": (response) =>
+			"body contains: woocommerce-products-header": (response) =>
 				response.body.includes(
 					'<header class="woocommerce-products-header">'
 				),

@@ -25,7 +25,7 @@ export function wpLogin() {
 	let testcookie;
 
 	group("Login Page", function () {
-		var requestHeaders = Object.assign(
+		var requestHeaders = Object.assign({},
 			htmlRequestHeader,
 			commonRequestHeaders,
 			commonGetRequestHeaders,
@@ -38,7 +38,7 @@ export function wpLogin() {
 		wpLoginTrend.add(response.timings.duration);
 		check(response, {
 			"is status 200": (r) => r.status === 200,
-			"body conatins: 'Log in' title": (response) =>
+			"body contains: 'Log in' title": (response) =>
 				response.body.includes("<title>Log In"),
 		});
 
@@ -53,7 +53,7 @@ export function wpLogin() {
 	sleep(randomIntBetween(`${think_time_min}`, `${think_time_max}`));
 
 	group("Login to WP Admin", function () {
-		var requestHeaders = Object.assign(
+		var requestHeaders = Object.assign({},
 			htmlRequestHeader,
 			commonRequestHeaders,
 			commonGetRequestHeaders,
@@ -70,15 +70,13 @@ export function wpLogin() {
 				testcookie: `${testcookie}`,
 			},
 			{
-				headers: {
-					headers: requestHeaders,
-				},
+				headers: requestHeaders,
 			}
 		);
 		wpLoginWPAdminTrend.add(response.timings.duration);
 		check(response, {
 			"is status 200": (r) => r.status === 200,
-			"body conatins: wp-admin 'Dashboard' header": (response) =>
+			"body contains: wp-admin 'Dashboard' header": (response) =>
 				response.body.includes("<h1>Dashboard</h1>"),
 		});
 	});

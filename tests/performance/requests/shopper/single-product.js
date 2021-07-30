@@ -23,7 +23,7 @@ export function singleProduct() {
 	let response;
 
 	group("Product Page", function () {
-		var requestHeaders = Object.assign(
+		var requestHeaders = Object.assign({},
 			htmlRequestHeader,
 			commonRequestHeaders,
 			commonGetRequestHeaders,
@@ -36,7 +36,7 @@ export function singleProduct() {
 		productPageTrend.add(response.timings.duration);
 		check(response, {
 			"is status 200": (r) => r.status === 200,
-			"body conatins: product ID": (response) =>
+			"body contains: product ID": (response) =>
 				response.body.includes(`id="product-${product_id}`),
 		});
 	});

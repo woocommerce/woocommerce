@@ -2,7 +2,7 @@
 
 echo "Initializing WooCommerce E2E"
 
-wp plugin install woocommerce --activate
+wp plugin activate woocommerce
 
 wp user create customer customer@woocommercecoree2etestsuite.com --user_pass=password --role=subscriber --path=/var/www/html
 
@@ -27,6 +27,7 @@ wp option set woocommerce_store_postcode "94110"
 wp option set woocommerce_currency "USD"
 wp option set woocommerce_product_type "both"
 wp option set woocommerce_allow_tracking "no"
+wp option set woocommerce_enable_checkout_login_reminder "yes"
 wp option set --format=json woocommerce_cod_settings '{"enabled":"yes"}'
 
 #  WooCommerce shop pages

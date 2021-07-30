@@ -26,7 +26,7 @@ export function cart() {
 	let response;
 
 	group("Product Page Add to cart", function () {
-		var requestheaders = Object.assign(
+		var requestheaders = Object.assign({},
 			jsonRequestHeader,
 			commonRequestHeaders,
 			commonPostRequestHeaders,
@@ -53,7 +53,7 @@ export function cart() {
 	sleep(randomIntBetween(`${think_time_min}`, `${think_time_max}`));
 
 	group("View Cart", function () {
-		var requestheaders = Object.assign(
+		var requestheaders = Object.assign({},
 			htmlRequestHeader,
 			commonRequestHeaders,
 			commonGetRequestHeaders,

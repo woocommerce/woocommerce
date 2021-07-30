@@ -54,7 +54,7 @@ export function checkoutCustomerLogin() {
 	let update_order_review_nonce_customer;
 
 	group("Proceed to checkout", function () {
-		var requestHeaders = Object.assign(
+		var requestHeaders = Object.assign({},
 			htmlRequestHeader,
 			commonRequestHeaders,
 			commonGetRequestHeaders,
@@ -67,7 +67,7 @@ export function checkoutCustomerLogin() {
 		proceedCheckoutTrend1.add(response.timings.duration);
 		check(response, {
 			"is status 200": (r) => r.status === 200,
-			"body conatins checkout class": (response) =>
+			"body contains checkout class": (response) =>
 				response.body.includes('class="checkout woocommerce-checkout"'),
 		});
 
@@ -83,7 +83,7 @@ export function checkoutCustomerLogin() {
 			'","apply_coupon_nonce'
 		);
 
-		var requestHeaders = Object.assign(
+		var requestHeaders = Object.assign({},
 			allRequestHeader,
 			commonRequestHeaders,
 			commonPostRequestHeaders,
@@ -122,7 +122,7 @@ export function checkoutCustomerLogin() {
 	sleep(randomIntBetween(`${think_time_min}`, `${think_time_max}`));
 
 	group("Login on checkout", function () {
-		var requestHeaders = Object.assign(
+		var requestHeaders = Object.assign({},
 			htmlRequestHeader,
 			commonRequestHeaders,
 			commonGetRequestHeaders,
@@ -162,7 +162,7 @@ export function checkoutCustomerLogin() {
 			'","apply_coupon_nonce'
 		);
 
-		var requestHeaders = Object.assign(
+		var requestHeaders = Object.assign({},
 			allRequestHeader,
 			commonRequestHeaders,
 			commonPostRequestHeaders,
@@ -201,7 +201,7 @@ export function checkoutCustomerLogin() {
 	sleep(randomIntBetween(`${think_time_min}`, `${think_time_max}`));
 
 	group("Place Order", function () {
-		var requestHeaders = Object.assign(
+		var requestHeaders = Object.assign({},
 			jsonRequestHeader,
 			commonRequestHeaders,
 			commonPostRequestHeaders,
@@ -234,7 +234,7 @@ export function checkoutCustomerLogin() {
 		placeOrderTrend.add(response.timings.duration);
 		check(response, {
 			"is status 200": (r) => r.status === 200,
-			"body conatins: order-received": (response) =>
+			"body contains: order-received": (response) =>
 				response.body.includes("order-received"),
 		});
 	});
@@ -242,7 +242,7 @@ export function checkoutCustomerLogin() {
 	sleep(randomIntBetween(`${think_time_min}`, `${think_time_max}`));
 
 	group("Order received", function () {
-		var requestHeaders = Object.assign(
+		var requestHeaders = Object.assign({},
 			htmlRequestHeader,
 			commonRequestHeaders,
 			commonGetRequestHeaders,
@@ -262,7 +262,7 @@ export function checkoutCustomerLogin() {
 		});
 		orderReceivedTrend1.add(response.timings.duration);
 
-		var requestheaders = Object.assign(
+		var requestheaders = Object.assign({},
 			allRequestHeader,
 			commonRequestHeaders,
 			commonPostRequestHeaders,
