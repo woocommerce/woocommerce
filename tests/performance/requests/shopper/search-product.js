@@ -22,7 +22,7 @@ export function searchProduct() {
 	let response;
 
 	group("Search Product", function () {
-		var requestHeaders = Object.assign(
+		var requestHeaders = Object.assign({},
 			htmlRequestHeader,
 			commonRequestHeaders,
 			commonGetRequestHeaders,
@@ -38,7 +38,7 @@ export function searchProduct() {
 		searchProductTrend.add(response.timings.duration);
 		check(response, {
 			"is status 200": (r) => r.status === 200,
-			"body conatins: 'Search results' title": (response) =>
+			"body contains: 'Search results' title": (response) =>
 				response.body.includes("Search results:"),
 		});
 	});

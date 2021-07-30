@@ -17,7 +17,7 @@ export function homePage() {
 	let response;
 
 	group("Home Page", function () {
-		var requestHeaders = Object.assign(
+		var requestHeaders = Object.assign({},
 			htmlRequestHeader,
 			commonRequestHeaders,
 			commonGetRequestHeaders,
