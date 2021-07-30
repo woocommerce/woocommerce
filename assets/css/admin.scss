@@ -23,35 +23,64 @@
 .wc_addons_wrap {
 	max-width: 1200px;
 
+	.marketplace-header {
+		background-image: url("../images/marketplace-header-bg@2x.png");
+		background-size: cover;
+		font-family: sans-serif;
+		padding-left: 84px;
+		min-height: 216px;
+
+		&__title {
+			color: #fff;
+			font-size: 32px;
+			font-style: normal;
+			font-weight: 400;
+			letter-spacing: -0.32px;
+			line-height: 24px;
+			margin-bottom: 8px;
+			padding: 0;
+			padding-top: 47px;
+		}
+
+		&__description {
+			color: #fff;
+			font-size: 16px;
+			line-height: 24px;
+			letter-spacing: -0.32px;
+			margin-bottom: 24px;
+			margin-top: 0;
+		}
+
+		&__search-form {
+			clear: both;
+			display: block;
+			position: relative;
+
+			input {
+				border: 1px solid #ddd;
+				box-shadow: none;
+				height: 53px;
+				padding-right: 50px;
+				width: 100%;
+				margin: 0;
+				max-width: 318px;
+			}
+
+			button {
+				background: none;
+				border: none;
+				cursor: pointer;
+				height: 53px;
+				left: -53px;
+				position: relative;
+				width: 53px;
+			}
+		}
+	}
+
 	h1.search-form-title {
 		clear: left;
 		padding: 0;
-	}
-
-	form.search-form {
-		clear: both;
-		display: block;
-		position: relative;
-		margin-top: 1em;
-		margin-bottom: 1em;
-
-		input {
-			border: 1px solid #ddd;
-			box-shadow: none;
-			height: 53px;
-			padding-left: 50px;
-			width: 100%;
-			margin: 0;
-		}
-
-		button {
-			background: none;
-			border: none;
-			cursor: pointer;
-			height: 53px;
-			position: absolute;
-			width: 53px;
-		}
 	}
 
 	.update-plugins .update-count {
@@ -3155,8 +3184,8 @@ table.wc_input_table {
 		background: #fff;
 		cursor: default;
 
-		input[type=text],
-		input[type=number] {
+		input[type="text"],
+		input[type="number"] {
 			width: 100% !important;
 			min-width: 100px;
 			padding: 8px 10px;
@@ -4692,8 +4721,8 @@ img.help_tip {
   */
 .woocommerce_page_wc-settings {
 
-	input[type=url],
-	input[type=email] {
+	input[type="url"],
+	input[type="email"] {
 		direction: ltr;
 	}
 
@@ -5450,7 +5479,7 @@ img.help_tip {
 			padding: 4px 1em 2px 0;
 		}
 
-		input[type=checkbox] {
+		input[type="checkbox"] {
 			margin: 0 5px 0 0.5em !important;
 			vertical-align: middle;
 		}

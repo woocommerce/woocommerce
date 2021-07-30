@@ -13,31 +13,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 ?>
 <div class="wrap woocommerce wc_addons_wrap">
-	<nav class="nav-tab-wrapper woo-nav-tab-wrapper">
-		<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-addons' ) ); ?>" class="nav-tab nav-tab-active"><?php esc_html_e( 'Browse Extensions', 'woocommerce' ); ?></a>
-
-		<?php
-			$count_html = WC_Helper_Updater::get_updates_count_html();
-			// translators: Count of updates for WooCommerce.com subscriptions.
-			$menu_title = sprintf( __( 'WooCommerce.com Subscriptions %s', 'woocommerce' ), $count_html );
-		?>
-		<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-addons&section=helper' ) ); ?>" class="nav-tab"><?php echo wp_kses_post( $menu_title ); ?></a>
-	</nav>
-
-	<h1 class="screen-reader-text"><?php esc_html_e( 'WooCommerce Extensions', 'woocommerce' ); ?></h1>
-
 	<?php if ( $sections ) : ?>
-		<ul class="subsubsub">
-			<?php foreach ( $sections as $section ) : ?>
-				<li>
-					<a
-						class="<?php echo $current_section === $section->slug ? 'current' : ''; ?>"
-						href="<?php echo esc_url( admin_url( 'admin.php?page=wc-addons&section=' . esc_attr( $section->slug ) ) ); ?>">
-						<?php echo esc_html( $section->label ); ?>
-					</a>
-				</li>
-			<?php endforeach; ?>
-		</ul>
+		<div class="marketplace-header">
+			<h1 class="marketplace-header__title"><?php esc_html_e( 'WooCommerce Marketplace', 'woocommerce' ); ?></h1>
+			<p class="marketplace-header__description"><?php esc_html_e( 'Grow your business with hundreds of free and paid WooCommerce extensions.', 'woocommerce' ); ?></p>
+			<form class="marketplace-header__search-form" method="GET">
+				<input
+					type="text"
+					name="search"
+					value="<?php echo esc_attr( isset( $_GET['search'] ) ? sanitize_text_field( wp_unslash( $_GET['search'] ) ) : '' ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>"
+					placeholder="<?php esc_attr_e( 'Search for extensions', 'woocommerce' ); ?>"
+				/>
+				<button type="submit">
+					<span class="dashicons dashicons-search"></span>
+				</button>
+				<input type="hidden" name="page" value="wc-addons">
+				<input type="hidden" name="section" value="_all">
+			</form>
+		</div>
 
 		<?php if ( isset( $_GET['search'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>
 			<h1 class="search-form-title" >
@@ -46,18 +39,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</h1>
 		<?php endif; ?>
 
-		<form class="search-form" method="GET">
-			<button type="submit">
-				<span class="dashicons dashicons-search"></span>
-			</button>
-			<input
-				type="text"
-				name="search"
-				value="<?php echo esc_attr( isset( $_GET['search'] ) ? sanitize_text_field( wp_unslash( $_GET['search'] ) ) : '' ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>"
-				placeholder="<?php esc_attr_e( 'Enter a search term and press enter', 'woocommerce' ); ?>">
-			<input type="hidden" name="page" value="wc-addons">
-			<input type="hidden" name="section" value="_all">
-		</form>
+
 		<?php if ( '_featured' === $current_section ) : ?>
 			<div class="addons-featured">
 				<?php
