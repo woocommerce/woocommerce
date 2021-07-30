@@ -25,9 +25,12 @@
 
 	.marketplace-header {
 		background-image: url("../images/marketplace-header-bg@2x.png");
+		background-position: right;
 		background-size: cover;
-		font-family: sans-serif;
-		padding-left: 84px;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		padding: 24px;
 		min-height: 216px;
 
 		&__title {
@@ -35,18 +38,15 @@
 			font-size: 32px;
 			font-style: normal;
 			font-weight: 400;
-			letter-spacing: -0.32px;
-			line-height: 24px;
+			line-height: 1.15;
 			margin-bottom: 8px;
 			padding: 0;
-			padding-top: 47px;
 		}
 
 		&__description {
 			color: #fff;
 			font-size: 16px;
 			line-height: 24px;
-			letter-spacing: -0.32px;
 			margin-bottom: 24px;
 			margin-top: 0;
 		}
@@ -54,25 +54,27 @@
 		&__search-form {
 			clear: both;
 			display: block;
+			max-width: 318px;
 			position: relative;
 
 			input {
 				border: 1px solid #ddd;
 				box-shadow: none;
-				height: 53px;
+				font-size: 13px;
+				height: 48px;
+				padding-left: 16px;
 				padding-right: 50px;
 				width: 100%;
 				margin: 0;
-				max-width: 318px;
 			}
 
 			button {
 				background: none;
 				border: none;
 				cursor: pointer;
-				height: 53px;
-				left: -53px;
-				position: relative;
+				height: 48px;
+				position: absolute;
+				right: 0;
 				width: 53px;
 			}
 		}
@@ -7451,4 +7453,12 @@ table.bar_chart {
 .wc-quick-edit-warning {
 	color: darkred;
 	font-weight: bold;
+}
+
+@media screen and (min-width: 600px) {
+	.wc_addons_wrap {
+		.marketplace-header {
+			padding-left: 84px;
+		}
+	}
 }
