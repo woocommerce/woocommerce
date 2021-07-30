@@ -21,6 +21,8 @@ import {
 	contentTypeRequestHeader,
 	commonAPIGetRequestHeaders,
 	commonNonStandardHeaders,
+	apiNonceHeader,
+	allRequestHeader,
 } from "../../headers.js";
 
 // Custom metrics to add to standard results output.
@@ -28,7 +30,8 @@ let postNewTypeProductTrend = new Trend("wc_get_new_post_type_product");
 let wcAdminNotesMainTrend = new Trend("wc_get_admin_notes_main");
 let wcAdminNotesOtherTrend = new Trend("wc_get_admin_notes_other");
 let wcAdminCESOptionsTrend = new Trend("wc_get_admin_options_ces");
-let wpAdminHeartbeatTrend = new Trend("wc_post_wp_admin_heartbeat");
+let wpAdminHeartbeatAutosaveTrend = new Trend("wc_post_wp_admin_ajax_heartbeat_autosave");
+let wpAdminSamplePermalinkTrend = new Trend("wc_post_wp_admin_ajax_sample_permalink");
 
 export function addProduct() {
 	let response;
@@ -45,7 +48,7 @@ export function addProduct() {
 	let apiNonceHeader;
 
 	group("Add New Product", function () {
-		var requestHeaders = Object.assign(
+		var requestHeaders = Object.assign({},
 			htmlRequestHeader,
 			commonRequestHeaders,
 			{ origin: `${base_url}` },
@@ -62,7 +65,7 @@ export function addProduct() {
 		postNewTypeProductTrend.add(response.timings.duration);
 		check(response, {
 			"is status 200": (r) => r.status === 200,
-			"body conatins: 'Add new product' header": (response) =>
+			"body contains: 'Add new product' header": (response) =>
 				response.body.includes("Add new product</h1>"),
 		});
 
@@ -127,7 +130,7 @@ export function addProduct() {
 	sleep(randomIntBetween(`${think_time_min}`, `${think_time_max}`));
 
 	group("Inbox Notes", function () {
-		var requestHeaders = Object.assign(
+		var requestHeaders = Object.assign({},
 			jsonAPIRequestHeader,
 			commonRequestHeaders,
 			commonAPIGetRequestHeaders,
@@ -162,7 +165,7 @@ export function addProduct() {
 	});
 
 	group("CES Options", function () {
-		var requestHeaders = Object.assign(
+		var requestHeaders = Object.assign({},
 			jsonAPIRequestHeader,
 			commonRequestHeaders,
 			commonAPIGetRequestHeaders,
@@ -184,8 +187,77 @@ export function addProduct() {
 
 	sleep(randomIntBetween(`${think_time_min}`, `${think_time_max}`));
 
+	group("Autosave heartbeat", function () {
+		var requestHeaders = Object.assign({},
+			commonNonStandardHeaders,
+			jsonAPIRequestHeader,
+			commonPostRequestHeaders,
+			commonRequestHeaders
+		);
+
+		response = http.post(
+			`${base_url}/wp-admin/admin-ajax.php`,
+			{
+				_nonce: `${heartbeat_nonce}`,
+				action: "heartbeat",
+				"data%5Bwp-refresh-post-lock%5D%5Bpost_id%5D": `${post_id}`,
+				"data%5Bwp_autosave%5D%5B_wpnonce%5D": `${wpnonce}`,
+				"data%5Bwp_autosave%5D%5Bauto_draft%5D": "1",
+				"data%5Bwp_autosave%5D%5Bcatslist%5D": "",
+				"data%5Bwp_autosave%5D%5Bcomment_status%5D": "open",
+				"data%5Bwp_autosave%5D%5Bcontent%5D": "",
+				"data%5Bwp_autosave%5D%5Bexcerpt%5D": "",
+				"data%5Bwp_autosave%5D%5Bpost_author%5D": "1",
+				"data%5Bwp_autosave%5D%5Bpost_id%5D": `${post_id}`,
+				"data%5Bwp_autosave%5D%5Bpost_title%5D": `${add_product_title}`,
+				"data%5Bwp_autosave%5D%5Bpost_type%5D": "product",
+				has_focus: "true",
+				interval: "15",
+				screen_id: "product",
+			},
+			{
+				headers: requestHeaders,
+			}
+		);
+		wpAdminHeartbeatAutosaveTrend.add(response.timings.duration);
+		check(response, {
+			"is status 200": (r) => r.status === 200,
+		});
+	});
+
+	group("Sample Permalink", function () {
+		var requestHeaders = Object.assign({},
+			commonNonStandardHeaders,
+			allRequestHeader,
+			contentTypeRequestHeader,
+			commonPostRequestHeaders
+		);
+
+		response = http.post(
+			`${base_url}/wp-admin/admin-ajax.php`,
+			{
+				action: "sample-permalink",
+				new_title: `${add_product_title}`,
+				post_id: `${post_id}`,
+				samplepermalinknonce: `${sample_permalink_nonce}`,
+			},
+			{
+				headers: requestHeaders,
+			}
+		);
+		wpAdminSamplePermalinkTrend.add(response.timings.duration);
+		check(response, {
+			"is status 200": (r) => r.status === 200,
+			"body contains: 'Permalink:'": (response) =>
+				response.body.includes("<strong>Permalink:</strong>"),
+		});
+	});
+
+	sleep(randomIntBetween(`${think_time_min}`, `${think_time_max}`));
+
 	group("Update New Product", function () {
-		var requestHeaders = Object.assign(
+
+		var requestHeaders = Object.assign({},
 			htmlRequestHeader,
 			commonRequestHeaders,
 			commonGetRequestHeaders,
@@ -217,12 +289,7 @@ export function addProduct() {
 			["_visibility", "visible"],
 			["_weight", ""],
 			["_width", ""],
-			[
-				"_wp_http_referer",
-				"%252Fwp-admin%252Fpost-new.php%253Fpost_type%253Dproduct%2C" +
-				"%252Fwp-admin%252Fpost-new.php%253Fpost_type%253Dproduct%2C" +
-				"%252Fwp-admin%252Fpost-new.php%253Fpost_type%253Dproduct",
-			],
+			["_wp_http_referer", ""],
 			["_wp_original_http_referer", ""],
 			["_wpnonce", `${wpnonce}`],
 			["aa", "2021"],
@@ -282,10 +349,7 @@ export function addProduct() {
 			["tax_input%255Bproduct_tag%255D", ""],
 			["user_ID", "1"],
 			["visibility", "public"],
-			[
-				"woocommerce_meta_nonce",
-				`${woocommerce_meta_nonce}9%2C${woocommerce_meta_nonce}9`,
-			],
+			["woocommerce_meta_nonce", `${woocommerce_meta_nonce}`],
 			["wp-preview", ""],
 		]);
 
@@ -299,9 +363,9 @@ export function addProduct() {
 		postNewTypeProductTrend.add(response.timings.duration);
 		check(response, {
 			"is status 200": (r) => r.status === 200,
-			"body conatins: 'Edit product' header": (response) =>
+			"body contains: 'Edit product' header": (response) =>
 				response.body.includes("Edit product</h1>"),
-			"body conatins: 'Product published' confirmation": (response) =>
+			"body contains: 'Product published' confirmation": (response) =>
 				response.body.includes("Product published."),
 		});
 	});
