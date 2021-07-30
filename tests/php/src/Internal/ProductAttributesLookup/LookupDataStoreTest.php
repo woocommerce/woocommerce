@@ -1147,7 +1147,7 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 	 * @param bool $value True to set the option to 'yes', false for 'no'.
 	 */
 	private function set_direct_update_option( bool $value ) {
-		update_option( 'woocommerce_attribute_lookup__direct_updates', $value ? 'yes' : 'no' );
+		update_option( 'woocommerce_attribute_lookup_direct_updates', $value ? 'yes' : 'no' );
 	}
 
 	/**

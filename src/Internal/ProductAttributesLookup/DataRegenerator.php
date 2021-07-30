@@ -20,7 +20,7 @@ defined( 'ABSPATH' ) || exit;
  * are supposed to be created/updated by the appropriate data store classes (or by the code that uses
  * the data store classes) whenever a product is created/updated.
  *
- * Additionally, after the regeneration is completed a 'woocommerce_attribute_lookup__enabled' option
+ * Additionally, after the regeneration is completed a 'woocommerce_attribute_lookup_enabled' option
  * with a value of 'no' will have been created.
  *
  * This class also adds two entries to the Status - Tools menu: one for manually regenerating the table contents,
@@ -115,9 +115,9 @@ class DataRegenerator {
 	public function delete_all_attributes_lookup_data() {
 		global $wpdb;
 
-		delete_option( 'woocommerce_attribute_lookup__enabled' );
-		delete_option( 'woocommerce_attribute_lookup__last_product_id_to_process' );
-		delete_option( 'woocommerce_attribute_lookup__last_products_page_processed' );
+		delete_option( 'woocommerce_attribute_lookup_enabled' );
+		delete_option( 'woocommerce_attribute_lookup_last_product_id_to_process' );
+		delete_option( 'woocommerce_attribute_lookup_last_products_page_processed' );
 		$this->data_store->unset_regeneration_in_progress_flag();
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
@@ -166,8 +166,8 @@ CREATE TABLE ' . $this->lookup_table_name . '(
 		}
 
 		$this->data_store->set_regeneration_in_progress_flag();
-		update_option( 'woocommerce_attribute_lookup__last_product_id_to_process', current( $last_existing_product_id ) );
-		update_option( 'woocommerce_attribute_lookup__last_products_page_processed', 0 );
+		update_option( 'woocommerce_attribute_lookup_last_product_id_to_process', current( $last_existing_product_id ) );
+		update_option( 'woocommerce_attribute_lookup_last_products_page_processed', 0 );
 
 		return true;
 	}
@@ -209,7 +209,7 @@ CREATE TABLE ' . $this->lookup_table_name . '(
 	 * @return bool True if more steps need to be run, false otherwise.
 	 */
 	private function do_regeneration_step() {
-		$last_products_page_processed = get_option( 'woocommerce_attribute_lookup__last_products_page_processed' );
+		$last_products_page_processed = get_option( 'woocommerce_attribute_lookup_last_products_page_processed' );
 		$current_products_page        = (int) $last_products_page_processed + 1;
 
 		$product_ids = WC()->call_function(
@@ -232,9 +232,9 @@ CREATE TABLE ' . $this->lookup_table_name . '(
 			$this->data_store->create_data_for_product( $id );
 		}
 
-		update_option( 'woocommerce_attribute_lookup__last_products_page_processed', $current_products_page );
+		update_option( 'woocommerce_attribute_lookup_last_products_page_processed', $current_products_page );
 
-		$last_product_id_to_process = get_option( 'woocommerce_attribute_lookup__last_product_id_to_process' );
+		$last_product_id_to_process = get_option( 'woocommerce_attribute_lookup_last_product_id_to_process' );
 		return end( $product_ids ) < $last_product_id_to_process;
 	}
 
@@ -242,9 +242,9 @@ CREATE TABLE ' . $this->lookup_table_name . '(
 	 * Cleanup/final option setup after the regeneration has been completed.
 	 */
 	private function finalize_regeneration() {
-		delete_option( 'woocommerce_attribute_lookup__last_product_id_to_process' );
-		delete_option( 'woocommerce_attribute_lookup__last_products_page_processed' );
-		update_option( 'woocommerce_attribute_lookup__enabled', 'no' );
+		delete_option( 'woocommerce_attribute_lookup_last_product_id_to_process' );
+		delete_option( 'woocommerce_attribute_lookup_last_products_page_processed' );
+		update_option( 'woocommerce_attribute_lookup_enabled', 'no' );
 		$this->data_store->unset_regeneration_in_progress_flag();
 	}
 
@@ -300,7 +300,7 @@ CREATE TABLE ' . $this->lookup_table_name . '(
 			$entry['button'] = sprintf(
 				/* translators: %d: How many products have been processed so far. */
 				__( 'Filling in progress (%d)', 'woocommerce' ),
-				get_option( 'woocommerce_attribute_lookup__last_products_page_processed', 0 ) * self::PRODUCTS_PER_GENERATION_STEP
+				get_option( 'woocommerce_attribute_lookup_last_products_page_processed', 0 ) * self::PRODUCTS_PER_GENERATION_STEP
 			);
 			$entry['disabled'] = true;
 		} else {
@@ -364,7 +364,7 @@ CREATE TABLE ' . $this->lookup_table_name . '(
 			throw new \Exception( "Can't enable or disable the attributes lookup table usage while it's regenerating." );
 		}
 
-		update_option( 'woocommerce_attribute_lookup__enabled', $enable ? 'yes' : 'no' );
+		update_option( 'woocommerce_attribute_lookup_enabled', $enable ? 'yes' : 'no' );
 	}
 
 	/**

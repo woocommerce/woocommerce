@@ -95,7 +95,7 @@ class LookupDataStore {
 						$settings[] = array(
 							'title'         => __( 'Enable table usage', 'woocommerce' ),
 							'desc'          => __( 'Use the product attributes lookup table for catalog filtering.', 'woocommerce' ),
-							'id'            => 'woocommerce_attribute_lookup__enabled',
+							'id'            => 'woocommerce_attribute_lookup_enabled',
 							'default'       => 'no',
 							'type'          => 'checkbox',
 							'checkboxgroup' => 'start',
@@ -104,7 +104,7 @@ class LookupDataStore {
 						$settings[] = array(
 							'title'         => __( 'Direct updates', 'woocommerce' ),
 							'desc'          => __( 'Update the table directly upon product changes, instead of scheduling a deferred update.', 'woocommerce' ),
-							'id'            => 'woocommerce_attribute_lookup__direct_updates',
+							'id'            => 'woocommerce_attribute_lookup_direct_updates',
 							'default'       => 'no',
 							'type'          => 'checkbox',
 							'checkboxgroup' => 'start',
@@ -495,20 +495,20 @@ AND table_name = %s;',
 	 * @return bool True if a lookup table regeneration is already in progress.
 	 */
 	public function regeneration_is_in_progress() {
-		return 'yes' === get_option( 'woocommerce_attribute_lookup__regeneration_in_progress', null );
+		return 'yes' === get_option( 'woocommerce_attribute_lookup_regeneration_in_progress', null );
 	}
 
 	/**
 	 * Set a permanent flag (via option) indicating that the lookup table regeneration is in process.
 	 */
 	public function set_regeneration_in_progress_flag() {
-		update_option( 'woocommerce_attribute_lookup__regeneration_in_progress', 'yes' );
+		update_option( 'woocommerce_attribute_lookup_regeneration_in_progress', 'yes' );
 	}
 
 	/**
 	 * Remove the flag indicating that the lookup table regeneration is in process.
 	 */
 	public function unset_regeneration_in_progress_flag() {
-		delete_option( 'woocommerce_attribute_lookup__regeneration_in_progress' );
+		delete_option( 'woocommerce_attribute_lookup_regeneration_in_progress' );
 	}
 }
