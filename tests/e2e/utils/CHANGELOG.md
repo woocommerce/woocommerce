@@ -12,6 +12,7 @@
 - Added `describeIf()` to conditionally run a test suite
 - Added `itIf()` to conditionally run a test case.
 - Added merchant workflows around plugins: `uploadAndActivatePlugin()`, `activatePlugin()`, `deactivatePlugin()`, `deletePlugin()`
+- Added `deleteAllOrders` that goes through and deletes all orders
 
 # 0.1.5
 
