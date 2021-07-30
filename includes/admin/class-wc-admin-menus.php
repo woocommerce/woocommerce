@@ -150,9 +150,9 @@ class WC_Admin_Menus {
 	public function addons_menu() {
 		$count_html = WC_Helper_Updater::get_updates_count_html();
 		/* translators: %s: extensions count */
-		$menu_title = sprintf( __( 'Extensions %s', 'woocommerce' ), $count_html );
-		add_submenu_page( 'woocommerce', __( 'WooCommerce extensions', 'woocommerce' ), $menu_title, 'manage_woocommerce', 'wc-addons', array( $this, 'addons_page' ) );
-		add_submenu_page( 'woocommerce', __( 'WooCommerce.com Subscriptions', 'woocommerce' ), __( 'My Subscriptions', 'woocommerce' ), 'manage_woocommerce', 'wc-addons&section=helper', array( $this, 'helper_page' ) );
+		$menu_title = sprintf( __( 'My Subscriptions %s', 'woocommerce' ), $count_html );
+		add_submenu_page( 'woocommerce', __( 'Marketplace', 'woocommerce' ), __( 'Marketplace', 'woocommerce' ), 'manage_woocommerce', 'wc-addons', array( $this, 'addons_page' ) );
+		add_submenu_page( 'woocommerce', __( 'WooCommerce.com Subscriptions', 'woocommerce' ), $menu_title, 'manage_woocommerce', 'wc-addons&section=helper', array( $this, 'helper_page' ) );
 	}
 
 	/**
