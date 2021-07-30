@@ -1,13 +1,12 @@
 <?php defined( 'ABSPATH' ) or exit(); ?>
 
 <div class="wrap woocommerce wc_addons_wrap wc-helper">
-	<?php require WC_Helper::get_view_filename( 'html-section-nav.php' ); ?>
 	<h1 class="screen-reader-text"><?php _e( 'WooCommerce Extensions', 'woocommerce' ); ?></h1>
 
 	<?php require WC_Helper::get_view_filename( 'html-section-notices.php' ); ?>
 
 	<div class="subscriptions-header">
-		<h2><?php _e( 'Subscriptions', 'woocommerce' ); ?></h2>
+		<h2><?php esc_html_e( 'WooCommerce.com Subscriptions', 'woocommerce' ); ?></h2>
 		<?php require WC_Helper::get_view_filename( 'html-section-account.php' ); ?>
 		<p><?php printf( __( 'Below is a list of extensions available on your WooCommerce.com account. To receive extension updates please make sure the extension is installed, and its subscription activated and connected to your WooCommerce.com account. Extensions can be activated from the <a href="%s">Plugins</a> screen.', 'woocommerce' ), admin_url( 'plugins.php' ) ); ?></p>
 	</div>
