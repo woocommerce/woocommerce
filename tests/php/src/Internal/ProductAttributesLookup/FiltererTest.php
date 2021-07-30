@@ -408,7 +408,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	 * @param bool $use The value to set the option to.
 	 */
 	private function set_use_lookup_table( $use ) {
-		update_option( 'woocommerce_attribute_lookup__enabled', $use ? 'yes' : 'no' );
+		update_option( 'woocommerce_attribute_lookup_enabled', $use ? 'yes' : 'no' );
 	}
 
 	/**
