@@ -57,7 +57,7 @@ jQuery(
 					'select[name="_visibility"] option, ' +
 					'select[name="_stock_status"] option, ' +
 					'select[name="_backorders"] option'
-				).prop( 'selected', false );
+				).prop( 'selected', false ).removeAttr( 'selected' );
 
 				var is_variable_product = 'variable' === product_type;
 				$( 'select[name="_stock_status"] ~ .wc-quick-edit-warning', '.inline-edit-row' ).toggle( is_variable_product );
