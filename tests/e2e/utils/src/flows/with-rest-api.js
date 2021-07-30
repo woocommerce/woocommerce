@@ -5,6 +5,7 @@ const client = factories.api.withDefaultPermalinks;
 const onboardingProfileEndpoint = '/wc-admin/onboarding/profile';
 const shippingZoneEndpoint = '/wc/v3/shipping/zones';
 const userEndpoint = '/wp/v2/users';
+const ordersEndpoint = '/wc/v3/orders';
 
 /**
  * Utility function to delete all merchant created data store objects.
@@ -80,6 +81,24 @@ export const withRestApi = {
 	deleteAllProducts: async () => {
 		const repository = SimpleProduct.restRepository( client );
 		await deleteAllRepositoryObjects( repository );
+	},
+	/**
+	 * Use api package to delete all orders.
+	 *
+	 * @return {Promise} Promise resolving once orders have been deleted.
+	 */
+	deleteAllOrders: async () => {
+		// We need to specfically filter on order status here to make sure we catch all orders to delete.
+		const orderStatuses = ['pending', 'processing', 'on-hold', 'completed', 'cancelled', 'refunded', 'failed', 'trash'];
+		for (let s = 0; s < orderStatuses.length; s++) {
+			const orders = await client.get( ordersEndpoint + `?status=${orderStatuses[s]}` );
+			if ( orders.data && orders.data.length ) {
+				for ( let o = 0; o < orders.data.length; o++ ) {
+					const response = await client.delete( ordersEndpoint + `/${orders.data[o].id}?force=true` );
+					expect( response.statusCode ).toBe( 200 );
+				}
+			}
+		}
 	},
 	/**
 	 * Use api package to delete shipping zones.
