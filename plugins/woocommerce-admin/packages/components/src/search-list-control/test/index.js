@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import renderer from 'react-test-renderer';
+import { render } from '@testing-library/react';
 import { noop } from 'lodash';
 import { createElement } from '@wordpress/element';
 
@@ -30,7 +30,7 @@ const hierarchicalList = [
 
 describe( 'SearchListControl', () => {
 	test( 'should render a search box and list of options', () => {
-		const component = renderer.create(
+		const component = render(
 			<SearchListControl
 				instanceId={ 1 }
 				list={ list }
@@ -38,11 +38,11 @@ describe( 'SearchListControl', () => {
 				onChange={ noop }
 			/>
 		);
-		expect( component.toJSON() ).toMatchSnapshot();
+		expect( component ).toMatchSnapshot();
 	} );
 
 	test( 'should render a search box and list of options with a custom className', () => {
-		const component = renderer.create(
+		const component = render(
 			<SearchListControl
 				instanceId={ 1 }
 				className="test-search"
@@ -51,11 +51,11 @@ describe( 'SearchListControl', () => {
 				onChange={ noop }
 			/>
 		);
-		expect( component.toJSON() ).toMatchSnapshot();
+		expect( component ).toMatchSnapshot();
 	} );
 
 	test( 'should render a search box, a list of options, and 1 selected item', () => {
-		const component = renderer.create(
+		const component = render(
 			<SearchListControl
 				instanceId={ 1 }
 				list={ list }
@@ -63,11 +63,11 @@ describe( 'SearchListControl', () => {
 				onChange={ noop }
 			/>
 		);
-		expect( component.toJSON() ).toMatchSnapshot();
+		expect( component ).toMatchSnapshot();
 	} );
 
 	test( 'should render a search box, a list of options, and 2 selected item', () => {
-		const component = renderer.create(
+		const component = render(
 			<SearchListControl
 				instanceId={ 1 }
 				list={ list }
@@ -75,11 +75,11 @@ describe( 'SearchListControl', () => {
 				onChange={ noop }
 			/>
 		);
-		expect( component.toJSON() ).toMatchSnapshot();
+		expect( component ).toMatchSnapshot();
 	} );
 
 	test( 'should render a search box and no options', () => {
-		const component = renderer.create(
+		const component = render(
 			<SearchListControl
 				instanceId={ 1 }
 				list={ [] }
@@ -87,11 +87,11 @@ describe( 'SearchListControl', () => {
 				onChange={ noop }
 			/>
 		);
-		expect( component.toJSON() ).toMatchSnapshot();
+		expect( component ).toMatchSnapshot();
 	} );
 
 	test( 'should render a search box with a search term, and only matching options', () => {
-		const component = renderer.create(
+		const component = render(
 			<SearchListControl
 				instanceId={ 1 }
 				list={ list }
@@ -101,11 +101,11 @@ describe( 'SearchListControl', () => {
 				debouncedSpeak={ noop }
 			/>
 		);
-		expect( component.toJSON() ).toMatchSnapshot();
+		expect( component ).toMatchSnapshot();
 	} );
 
 	test( 'should render a search box with a search term, and only matching options, regardless of case sensitivity', () => {
-		const component = renderer.create(
+		const component = render(
 			<SearchListControl
 				instanceId={ 1 }
 				list={ list }
@@ -115,11 +115,11 @@ describe( 'SearchListControl', () => {
 				debouncedSpeak={ noop }
 			/>
 		);
-		expect( component.toJSON() ).toMatchSnapshot();
+		expect( component ).toMatchSnapshot();
 	} );
 
 	test( 'should render a search box with a search term, and no matching options', () => {
-		const component = renderer.create(
+		const component = render(
 			<SearchListControl
 				instanceId={ 1 }
 				list={ list }
@@ -129,12 +129,12 @@ describe( 'SearchListControl', () => {
 				debouncedSpeak={ noop }
 			/>
 		);
-		expect( component.toJSON() ).toMatchSnapshot();
+		expect( component ).toMatchSnapshot();
 	} );
 
 	test( 'should render a search box and list of options, with a custom search input message', () => {
 		const messages = { search: 'Testing search label' };
-		const component = renderer.create(
+		const component = render(
 			<SearchListControl
 				instanceId={ 1 }
 				list={ list }
@@ -143,14 +143,14 @@ describe( 'SearchListControl', () => {
 				messages={ messages }
 			/>
 		);
-		expect( component.toJSON() ).toMatchSnapshot();
+		expect( component ).toMatchSnapshot();
 	} );
 
 	test( 'should render a search box and list of options, with a custom render callback for each item', () => {
 		const renderItem = ( { item } ) => (
 			<div key={ item.id }>{ item.name }!</div>
 		); // eslint-disable-line
-		const component = renderer.create(
+		const component = render(
 			<SearchListControl
 				instanceId={ 1 }
 				list={ list }
@@ -159,11 +159,11 @@ describe( 'SearchListControl', () => {
 				renderItem={ renderItem }
 			/>
 		);
-		expect( component.toJSON() ).toMatchSnapshot();
+		expect( component ).toMatchSnapshot();
 	} );
 
 	test( 'should render a search box and list of hierarchical options', () => {
-		const component = renderer.create(
+		const component = render(
 			<SearchListControl
 				instanceId={ 1 }
 				list={ hierarchicalList }
@@ -172,6 +172,6 @@ describe( 'SearchListControl', () => {
 				isHierarchical
 			/>
 		);
-		expect( component.toJSON() ).toMatchSnapshot();
+		expect( component ).toMatchSnapshot();
 	} );
 } );

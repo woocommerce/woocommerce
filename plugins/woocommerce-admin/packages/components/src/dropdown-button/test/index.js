@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import renderer from 'react-test-renderer';
+import { render } from '@testing-library/react';
 import { createElement } from '@wordpress/element';
 
 /**
@@ -11,9 +11,7 @@ import DropdownButton from '../';
 
 describe( 'DropdownButton', () => {
 	test( 'it renders correctly', () => {
-		const tree = renderer
-			.create( <DropdownButton labels={ [ 'foo' ] } /> )
-			.toJSON();
-		expect( tree ).toMatchSnapshot();
+		const component = render( <DropdownButton labels={ [ 'foo' ] } /> );
+		expect( component ).toMatchSnapshot();
 	} );
 } );

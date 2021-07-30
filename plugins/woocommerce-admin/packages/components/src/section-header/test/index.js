@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import renderer from 'react-test-renderer';
+import { render } from '@testing-library/react';
 import { createElement } from '@wordpress/element';
 
 /**
@@ -16,9 +16,9 @@ describe( 'SectionHeader', () => {
 	} );
 
 	test( 'it renders correctly', () => {
-		const tree = renderer
-			.create( <SectionHeader title="A SectionHeader Example" /> )
-			.toJSON();
-		expect( tree ).toMatchSnapshot();
+		const component = render(
+			<SectionHeader title="A SectionHeader Example" />
+		);
+		expect( component ).toMatchSnapshot();
 	} );
 } );
