@@ -5,6 +5,7 @@ import TYPES from './action-types';
 
 export const defaultState = {
 	errors: {},
+	freeExtensions: [],
 	profileItems: {
 		business_extensions: null,
 		completed: null,
@@ -28,6 +29,7 @@ export const defaultState = {
 const onboarding = (
 	state = defaultState,
 	{
+		freeExtensions,
 		type,
 		profileItems,
 		paymentMethods,
@@ -71,6 +73,19 @@ const onboarding = (
 			return {
 				...state,
 				paymentMethods,
+			};
+		case TYPES.GET_FREE_EXTENSIONS_ERROR:
+			return {
+				...state,
+				errors: {
+					...state.errors,
+					getFreeExtensions: error,
+				},
+			};
+		case TYPES.GET_FREE_EXTENSIONS_SUCCESS:
+			return {
+				...state,
+				freeExtensions,
 			};
 		default:
 			return state;

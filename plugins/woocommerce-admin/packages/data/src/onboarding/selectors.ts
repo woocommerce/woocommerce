@@ -3,6 +3,12 @@
  */
 import { WPDataSelectors, RuleProcessor } from '../types';
 
+export const getFreeExtensions = (
+	state: OnboardingState
+): ExtensionList[] => {
+	return state.freeExtensions || [];
+};
+
 export const getProfileItems = (
 	state: OnboardingState
 ): ProfileItemsState | Record< string, never > => {
@@ -47,6 +53,7 @@ export type OnboardingSelectors = {
 } & WPDataSelectors;
 
 export type OnboardingState = {
+	freeExtensions: ExtensionList[];
 	profileItems: ProfileItemsState;
 	tasksStatus: TasksStatusState;
 	paymentMethods: PaymentMethodsState[];
@@ -149,4 +156,19 @@ export type PaymentMethodsState = {
 	fields: MethodFields[];
 	api_details_url: string;
 	manage_url: string;
+};
+
+export type ExtensionList = {
+	key: string;
+	title: string;
+	plugins: Extension[];
+};
+
+export type Extension = {
+	description: string;
+	key: string;
+	image_url: string;
+	manage_url: string;
+	name: string;
+	slug: string;
 };

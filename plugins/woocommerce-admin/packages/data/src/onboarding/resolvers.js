@@ -8,6 +8,8 @@ import { apiFetch } from '@wordpress/data-controls';
  */
 import { WC_ADMIN_NAMESPACE } from '../constants';
 import {
+	getFreeExtensionsError,
+	getFreeExtensionsSuccess,
 	setProfileItems,
 	setError,
 	setTasksStatus,
@@ -50,5 +52,18 @@ export function* getPaymentGatewaySuggestions() {
 		yield setPaymentMethods( results );
 	} catch ( error ) {
 		yield setError( 'getPaymentGatewaySuggestions', error );
+	}
+}
+
+export function* getFreeExtensions() {
+	try {
+		const results = yield apiFetch( {
+			path: WC_ADMIN_NAMESPACE + '/onboarding/free-extensions',
+			method: 'GET',
+		} );
+
+		yield getFreeExtensionsSuccess( results );
+	} catch ( error ) {
+		yield getFreeExtensionsError( error );
 	}
 }

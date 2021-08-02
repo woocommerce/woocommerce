@@ -2,12 +2,15 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import apiFetch from '@wordpress/api-fetch';
 import { Card, CardHeader, Spinner } from '@wordpress/components';
-import { PLUGINS_STORE_NAME, WCDataSelector } from '@woocommerce/data';
+import {
+	ONBOARDING_STORE_NAME,
+	PLUGINS_STORE_NAME,
+	WCDataSelector,
+} from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { Text } from '@woocommerce/experimental';
-import { useEffect, useMemo, useState } from '@wordpress/element';
+import { useMemo, useState } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
 
 /**
@@ -18,44 +21,33 @@ import { createNoticesFromResponse } from '~/lib/notices';
 import { PluginList, PluginListProps } from './PluginList';
 import { PluginProps } from './Plugin';
 
-type ExtensionList = {
-	key: string;
-	title: string;
-	plugins: Extension[];
-};
-
-type Extension = {
-	description: string;
-	key: string;
-	image_url: string;
-	manage_url: string;
-	name: string;
-	slug: string;
-};
-
 const ALLOWED_PLUGIN_LISTS = [ 'reach', 'grow' ];
 
 export const Marketing: React.FC = () => {
-	const [ fetchedExtensions, setFetchedExtensions ] = useState<
-		ExtensionList[]
-	>( [] );
 	const [ currentPlugin, setCurrentPlugin ] = useState< string | null >(
 		null
 	);
-	const [ isFetching, setIsFetching ] = useState( true );
 	const { installAndActivatePlugins } = useDispatch( PLUGINS_STORE_NAME );
-	const { activePlugins, installedPlugins } = useSelect(
-		( select: WCDataSelector ) => {
-			const { getActivePlugins, getInstalledPlugins } = select(
-				PLUGINS_STORE_NAME
-			);
+	const {
+		activePlugins,
+		freeExtensions,
+		installedPlugins,
+		isResolving,
+	} = useSelect( ( select: WCDataSelector ) => {
+		const { getActivePlugins, getInstalledPlugins } = select(
+			PLUGINS_STORE_NAME
+		);
+		const { getFreeExtensions, hasFinishedResolution } = select(
+			ONBOARDING_STORE_NAME
+		);
 
-			return {
-				activePlugins: getActivePlugins(),
-				installedPlugins: getInstalledPlugins(),
-			};
-		}
-	);
+		return {
+			activePlugins: getActivePlugins(),
+			freeExtensions: getFreeExtensions(),
+			installedPlugins: getInstalledPlugins(),
+			isResolving: ! hasFinishedResolution( 'getFreeExtensions' ),
+		};
+	} );
 
 	const transformExtensionToPlugin = (
 		extension: Extension
@@ -73,26 +65,10 @@ export const Marketing: React.FC = () => {
 		};
 	};
 
-	useEffect( () => {
-		apiFetch( {
-			path: '/wc-admin/onboarding/free-extensions',
-		} )
-			.then( ( results: ExtensionList[] ) => {
-				if ( results?.length ) {
-					setFetchedExtensions( results );
-				}
-				setIsFetching( false );
-			} )
-			.catch( () => {
-				// @todo Handle error checking.
-				setIsFetching( false );
-			} );
-	}, [] );
-
 	const [ installedExtensions, pluginLists ] = useMemo( () => {
 		const installed: PluginProps[] = [];
 		const lists: PluginListProps[] = [];
-		fetchedExtensions.forEach( ( list ) => {
+		freeExtensions.forEach( ( list ) => {
 			if ( ! ALLOWED_PLUGIN_LISTS.includes( list.key ) ) {
 				return;
 			}
@@ -119,7 +95,7 @@ export const Marketing: React.FC = () => {
 		} );
 
 		return [ installed, lists ];
-	}, [ installedPlugins, activePlugins, fetchedExtensions ] );
+	}, [ installedPlugins, activePlugins, freeExtensions ] );
 
 	const installAndActivate = ( slug: string ) => {
 		setCurrentPlugin( slug );
@@ -140,7 +116,7 @@ export const Marketing: React.FC = () => {
 			} );
 	};
 
-	if ( isFetching ) {
+	if ( isResolving ) {
 		return <Spinner />;
 	}
 

@@ -9,6 +9,20 @@ import { apiFetch } from '@wordpress/data-controls';
 import TYPES from './action-types';
 import { WC_ADMIN_NAMESPACE } from '../constants';
 
+export function getFreeExtensionsError( error ) {
+	return {
+		type: TYPES.GET_FREE_EXTENSIONS_ERROR,
+		error,
+	};
+}
+
+export function getFreeExtensionsSuccess( freeExtensions ) {
+	return {
+		type: TYPES.GET_FREE_EXTENSIONS_SUCCESS,
+		freeExtensions,
+	};
+}
+
 export function setError( selector, error ) {
 	return {
 		type: TYPES.SET_ERROR,
