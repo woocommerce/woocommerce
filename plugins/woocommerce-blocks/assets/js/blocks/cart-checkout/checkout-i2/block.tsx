@@ -118,15 +118,19 @@ const ScrollOnError = ( {
 		( hasValidationErrors || hasNoticesOfType( 'default' ) );
 
 	useEffect( () => {
+		let scrollToTopTimeout: number;
 		if ( hasErrorsToDisplay ) {
 			showAllValidationErrors();
 			// Scroll after a short timeout to allow a re-render. This will allow focusableSelector to match updated components.
-			setTimeout( () => {
+			scrollToTopTimeout = window.setTimeout( () => {
 				scrollToTop( {
 					focusableSelector: 'input:invalid, .has-error input',
 				} );
 			}, 50 );
 		}
+		return () => {
+			clearTimeout( scrollToTopTimeout );
+		};
 	}, [ hasErrorsToDisplay, scrollToTop, showAllValidationErrors ] );
 
 	return null;
