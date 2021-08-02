@@ -31,8 +31,6 @@ import { isWCPaySupported } from '~/task-list/tasks/PaymentGatewaySuggestions/co
 const SEE_MORE_LINK =
 	'https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations';
 const DISMISS_OPTION = 'woocommerce_setting_payments_recommendations_hidden';
-const SHOW_MARKETPLACE_SUGGESTION_OPTION =
-	'woocommerce_show_marketplace_suggestions';
 type SettingsSelector = WPDataSelectors & {
 	getSettings: (
 		type: string
@@ -55,9 +53,6 @@ export function getPaymentRecommendationData(
 	const { getSettings } = select( SETTINGS_STORE_NAME ) as SettingsSelector;
 	const { getRecommendedPlugins } = select( PLUGINS_STORE_NAME );
 	const { general: settings = {} } = getSettings( 'general' );
-	const marketplaceSuggestions = getOption(
-		SHOW_MARKETPLACE_SUGGESTION_OPTION
-	);
 
 	const hidden = getOption( DISMISS_OPTION );
 	const countryCode = settings.woocommerce_default_country
@@ -66,17 +61,12 @@ export function getPaymentRecommendationData(
 	const countrySupported = countryCode
 		? isWCPaySupported( countryCode )
 		: false;
-	const isRequestingOptions =
-		isResolvingOption( 'getOption', [ DISMISS_OPTION ] ) ||
-		isResolvingOption( 'getOption', [
-			SHOW_MARKETPLACE_SUGGESTION_OPTION,
-		] );
+	const isRequestingOptions = isResolvingOption( 'getOption', [
+		DISMISS_OPTION,
+	] );
 
 	const displayable =
-		! isRequestingOptions &&
-		hidden !== 'yes' &&
-		marketplaceSuggestions === 'yes' &&
-		countrySupported;
+		! isRequestingOptions && hidden !== 'yes' && countrySupported;
 	let plugins;
 	if ( displayable ) {
 		// don't get recommended plugins until it is displayable.

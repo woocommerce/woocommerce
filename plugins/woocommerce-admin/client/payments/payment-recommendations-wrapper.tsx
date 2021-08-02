@@ -7,6 +7,7 @@ import { lazy, Suspense } from '@wordpress/element';
  * Internal dependencies
  */
 import { EmbeddedBodyProps } from '../embedded-body-layout/embedded-body-props';
+import RecommendationsEligibilityWrapper from '../settings-recommendations/recommendations-eligibility-wrapper';
 
 const PaymentRecommendationsChunk = lazy(
 	() =>
@@ -22,9 +23,11 @@ export const PaymentRecommendations: React.FC< EmbeddedBodyProps > = ( {
 } ) => {
 	if ( page === 'wc-settings' && tab === 'checkout' && ! section ) {
 		return (
-			<Suspense fallback={ null }>
-				<PaymentRecommendationsChunk />
-			</Suspense>
+			<RecommendationsEligibilityWrapper>
+				<Suspense fallback={ null }>
+					<PaymentRecommendationsChunk />
+				</Suspense>
+			</RecommendationsEligibilityWrapper>
 		);
 	}
 	return null;

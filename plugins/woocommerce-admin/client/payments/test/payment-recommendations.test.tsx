@@ -166,9 +166,7 @@ describe( 'Payment recommendations', () => {
 					...baseSelectValues,
 					country: 'US',
 					plugins: [ plugin ],
-					optionValues: {
-						woocommerce_show_marketplace_suggestions: 'yes',
-					},
+					optionValues: {},
 				} )
 			);
 
@@ -202,7 +200,6 @@ describe( 'Payment recommendations', () => {
 					optionValues: {
 						woocommerce_setting_payments_recommendations_hidden:
 							'no',
-						woocommerce_show_marketplace_suggestions: 'yes',
 					},
 				} )
 			);
@@ -218,22 +215,6 @@ describe( 'Payment recommendations', () => {
 					country: 'US',
 					plugins: [ plugin ],
 					optionsResolving: true,
-				} )
-			);
-
-			expect( selectData.displayable ).toBeFalsy();
-		} );
-
-		it( 'should not render if showMarketplaceSuggestion is set to "no"', () => {
-			( isWCPaySupported as jest.Mock ).mockReturnValue( true );
-			const selectData = getPaymentRecommendationData(
-				createFakeSelect( {
-					...baseSelectValues,
-					country: 'US',
-					plugins: [ plugin ],
-					optionValues: {
-						woocommerce_show_marketplace_suggestions: 'no',
-					},
 				} )
 			);
 
