@@ -89,31 +89,37 @@ export const Marketing: React.FC = () => {
 			} );
 	}, [] );
 
-	const pluginLists: PluginListProps[] = useMemo( () => {
-		return fetchedExtensions
-			.map( ( list ) => {
-				return {
-					...list,
-					plugins: list.plugins.map( ( extension ) =>
-						transformExtensionToPlugin( extension )
-					),
-				};
-			} )
-			.filter( ( list ) => ALLOWED_PLUGIN_LISTS.includes( list.key ) );
-	}, [ installedPlugins, activePlugins, fetchedExtensions ] );
+	const [ installedExtensions, pluginLists ] = useMemo( () => {
+		const installed: PluginProps[] = [];
+		const lists: PluginListProps[] = [];
+		fetchedExtensions.forEach( ( list ) => {
+			if ( ! ALLOWED_PLUGIN_LISTS.includes( list.key ) ) {
+				return;
+			}
 
-	const getInstalledMarketingPlugins = () => {
-		const installed: string[] = [];
-		pluginLists.forEach( ( list: PluginListProps ) => {
-			return list.plugins?.forEach( ( plugin ) => {
+			const listPlugins: PluginProps[] = [];
+			list.plugins.forEach( ( extension ) => {
+				const plugin = transformExtensionToPlugin( extension );
 				if ( plugin.isInstalled ) {
-					installed.push( plugin.slug );
+					installed.push( plugin );
+					return;
 				}
+				listPlugins.push( plugin );
 			} );
+
+			if ( ! listPlugins.length ) {
+				return;
+			}
+
+			const transformedList: PluginListProps = {
+				...list,
+				plugins: listPlugins,
+			};
+			lists.push( transformedList );
 		} );
 
-		return installed;
-	};
+		return [ installed, lists ];
+	}, [ installedPlugins, activePlugins, fetchedExtensions ] );
 
 	const installAndActivate = ( slug: string ) => {
 		setCurrentPlugin( slug );
@@ -121,7 +127,9 @@ export const Marketing: React.FC = () => {
 			.then( ( response: { errors: Record< string, string > } ) => {
 				recordEvent( 'tasklist_marketing_install', {
 					selected_extension: slug,
-					installed_extensions: getInstalledMarketingPlugins(),
+					installed_extensions: installedExtensions.map(
+						( extension ) => extension.slug
+					),
 				} );
 				createNoticesFromResponse( response );
 				setCurrentPlugin( null );
@@ -138,38 +146,60 @@ export const Marketing: React.FC = () => {
 
 	return (
 		<div className="woocommerce-task-marketing">
-			<Card className="woocommerce-task-card">
-				<CardHeader>
-					<Text
-						variant="title.small"
-						as="h2"
-						className="woocommerce-task-card__title"
-					>
-						{ __(
-							'Recommended marketing extensions',
-							'woocommerce-admin'
-						) }
-					</Text>
-					<Text>
-						{ __(
-							'We recommend adding one of the following marketing tools for your store. The extension will be installed and activated for you when you click "Get started".',
-							'woocommerce-admin'
-						) }
-					</Text>
-				</CardHeader>
-				{ pluginLists.map( ( list ) => {
-					const { key, title, plugins } = list;
-					return (
-						<PluginList
-							currentPlugin={ currentPlugin }
-							installAndActivate={ installAndActivate }
-							key={ key }
-							plugins={ plugins }
-							title={ title }
-						/>
-					);
-				} ) }
-			</Card>
+			{ !! installedExtensions.length && (
+				<Card className="woocommerce-task-card">
+					<CardHeader>
+						<Text
+							variant="title.small"
+							as="h2"
+							className="woocommerce-task-card__title"
+						>
+							{ __(
+								'Installed marketing extensions',
+								'woocommerce-admin'
+							) }
+						</Text>
+					</CardHeader>
+					<PluginList
+						currentPlugin={ currentPlugin }
+						plugins={ installedExtensions }
+					/>
+				</Card>
+			) }
+			{ !! pluginLists.length && (
+				<Card className="woocommerce-task-card">
+					<CardHeader>
+						<Text
+							variant="title.small"
+							as="h2"
+							className="woocommerce-task-card__title"
+						>
+							{ __(
+								'Recommended marketing extensions',
+								'woocommerce-admin'
+							) }
+						</Text>
+						<Text as="span">
+							{ __(
+								'We recommend adding one of the following marketing tools for your store. The extension will be installed and activated for you when you click "Get started".',
+								'woocommerce-admin'
+							) }
+						</Text>
+					</CardHeader>
+					{ pluginLists.map( ( list ) => {
+						const { key, title, plugins } = list;
+						return (
+							<PluginList
+								currentPlugin={ currentPlugin }
+								installAndActivate={ installAndActivate }
+								key={ key }
+								plugins={ plugins }
+								title={ title }
+							/>
+						);
+					} ) }
+				</Card>
+			) }
 		</div>
 	);
 };

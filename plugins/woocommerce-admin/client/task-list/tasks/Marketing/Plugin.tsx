@@ -84,7 +84,7 @@ export const Plugin: React.FC< PluginProps > = ( {
 						isSecondary
 						onClick={ () => installAndActivate( slug ) }
 					>
-						{ __( 'Install', 'woocommmerce-admin' ) }
+						{ __( 'Get started', 'woocommmerce-admin' ) }
 					</Button>
 				) }
 			</div>
