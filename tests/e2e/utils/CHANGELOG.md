@@ -12,6 +12,7 @@
 - Added `describeIf()` to conditionally run a test suite
 - Added `itIf()` to conditionally run a test case.
 - Added merchant workflows around plugins: `uploadAndActivatePlugin()`, `activatePlugin()`, `deactivatePlugin()`, `deletePlugin()`
+- Added merchant workflows checking for a database update and performing the update if needed: `runDatabaseUpdate()`
 
 # 0.1.5
 

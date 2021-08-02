@@ -34,4 +34,9 @@ utils.describeIf( UPDATE_WC )( 'WooCommerce plugin can be uploaded and activated
 		await merchant.uploadAndActivatePlugin( pluginPath, pluginName );
 	});
 
+	it( 'can run the database update', async () => {
+		// Check for, and run, the database upgrade if needed
+		await merchant.runDatabaseUpdate();
+	});
+
 });
