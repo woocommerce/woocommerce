@@ -62,6 +62,12 @@ export function isWCPaySupported( countryCode ) {
 		'IE',
 		'IT',
 		'NZ',
+		'AT',
+		'BE',
+		'NL',
+		'PL',
+		'PT',
+		'CH',
 	];
 
 	return supportedCountries.includes( countryCode );
