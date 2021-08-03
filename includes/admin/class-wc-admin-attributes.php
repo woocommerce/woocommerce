@@ -294,6 +294,19 @@ class WC_Admin_Attributes {
 	 * Shows the interface for adding new attributes.
 	 */
 	public static function add_attribute() {
+		$table_headers = array(
+			__( 'Name', 'woocommerce' ),
+			__( 'Slug', 'woocommerce' ),
+			__( 'Type', 'woocommerce' ),
+			__( 'Order by', 'woocommerce' ),
+			__( 'Terms', 'woocommerce' ),
+		);
+
+		if ( ! wc_has_custom_attribute_types() ) {
+			unset( $table_headers [2] );
+		}
+
+		$table_headers = apply_filters( 'wc_add_attribute_table_headers', $table_headers );
 		?>
 		<div class="wrap woocommerce">
 			<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
@@ -305,74 +318,123 @@ class WC_Admin_Attributes {
 						<table class="widefat attributes-table wp-list-table ui-sortable" style="width:100%">
 							<thead>
 								<tr>
-									<th scope="col"><?php esc_html_e( 'Name', 'woocommerce' ); ?></th>
-									<th scope="col"><?php esc_html_e( 'Slug', 'woocommerce' ); ?></th>
-									<?php if ( wc_has_custom_attribute_types() ) : ?>
-										<th scope="col"><?php esc_html_e( 'Type', 'woocommerce' ); ?></th>
-									<?php endif; ?>
-									<th scope="col"><?php esc_html_e( 'Order by', 'woocommerce' ); ?></th>
-									<th scope="col"><?php esc_html_e( 'Terms', 'woocommerce' ); ?></th>
+									<?php
+									foreach ( $table_headers as $header ) {
+										?><th scope="col"><?php echo esc_html( $header ) ?></th><?php
+									}
+									?>
 								</tr>
 							</thead>
 							<tbody>
 								<?php
+								$table_rows = array();
+
 								$attribute_taxonomies = wc_get_attribute_taxonomies();
 								if ( $attribute_taxonomies ) :
 									foreach ( $attribute_taxonomies as $tax ) :
+
+										$columns = array();
+
+										// column 'Name'
+										ob_start();
+										?>
+										<td>
+											<strong><a href="edit-tags.php?taxonomy=<?php echo esc_attr( wc_attribute_taxonomy_name( $tax->attribute_name ) ); ?>&amp;post_type=product"><?php echo esc_html( $tax->attribute_label ); ?></a></strong>
+
+											<div class="row-actions"><span class="edit"><a href="<?php echo esc_url( add_query_arg( 'edit', $tax->attribute_id, 'edit.php?post_type=product&amp;page=product_attributes' ) ); ?>"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a> | </span><span class="delete"><a class="delete" href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'delete', $tax->attribute_id, 'edit.php?post_type=product&amp;page=product_attributes' ), 'woocommerce-delete-attribute_' . $tax->attribute_id ) ); ?>"><?php esc_html_e( 'Delete', 'woocommerce' ); ?></a></span></div>
+										</td>
+										<?php
+										$columns[] = ob_get_clean();
+
+										// column 'Slug'
+										ob_start();
+										?>
+										<td><?php echo esc_html( $tax->attribute_name ); ?></td>
+										<?php
+										$columns[] = ob_get_clean();
+
+										// column 'Type'
+										if ( wc_has_custom_attribute_types() ) :
+											ob_start();
+											?>
+											<td><?php echo esc_html( wc_get_attribute_type_label( $tax->attribute_type ) ); ?> <?php echo $tax->attribute_public ? esc_html__( '(Public)', 'woocommerce' ) : ''; ?></td>
+											<?php
+											$columns[] = ob_get_clean();
+										endif;
+
+										// column 'Order by'
+										ob_start();
+										?>
+										<td>
+											<?php
+											switch ( $tax->attribute_orderby ) {
+												case 'name':
+													esc_html_e( 'Name', 'woocommerce' );
+													break;
+												case 'name_num':
+													esc_html_e( 'Name (numeric)', 'woocommerce' );
+													break;
+												case 'id':
+													esc_html_e( 'Term ID', 'woocommerce' );
+													break;
+												default:
+													esc_html_e( 'Custom ordering', 'woocommerce' );
+													break;
+											}
+											?>
+										</td>
+										<?php
+										$columns[] = ob_get_clean();
+
+										// column 'Terms'
+										ob_start();
+										?>
+										<td class="attribute-terms">
+											<?php
+											$taxonomy = wc_attribute_taxonomy_name( $tax->attribute_name );
+
+											if ( taxonomy_exists( $taxonomy ) ) {
+												$terms        = get_terms( $taxonomy, 'hide_empty=0' );
+												$terms_string = implode( ', ', wp_list_pluck( $terms, 'name' ) );
+												if ( $terms_string ) {
+													echo esc_html( $terms_string );
+												} else {
+													echo '<span class="na">&ndash;</span>';
+												}
+											} else {
+													echo '<span class="na">&ndash;</span>';
+											}
+											?>
+											<br /><a href="edit-tags.php?taxonomy=<?php echo esc_attr( wc_attribute_taxonomy_name( $tax->attribute_name ) ); ?>&amp;post_type=product" class="configure-terms"><?php esc_html_e( 'Configure terms', 'woocommerce' ); ?></a>
+										</td>
+										<?php
+										$columns[] = ob_get_clean();
+
+										$table_rows[] = array(
+											'attribute_id' => $tax->attribute_id,
+											'columns' => $columns
+										);
+									endforeach;
+								endif;
+
+								$table_rows = apply_filters( 'wc_add_attribute_table_rows', $table_rows );
+
+								if ( $table_rows ) :
+									foreach ( $table_rows as $row ) :
 										?>
 										<tr>
-												<td>
-													<strong><a href="edit-tags.php?taxonomy=<?php echo esc_attr( wc_attribute_taxonomy_name( $tax->attribute_name ) ); ?>&amp;post_type=product"><?php echo esc_html( $tax->attribute_label ); ?></a></strong>
-
-													<div class="row-actions"><span class="edit"><a href="<?php echo esc_url( add_query_arg( 'edit', $tax->attribute_id, 'edit.php?post_type=product&amp;page=product_attributes' ) ); ?>"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a> | </span><span class="delete"><a class="delete" href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'delete', $tax->attribute_id, 'edit.php?post_type=product&amp;page=product_attributes' ), 'woocommerce-delete-attribute_' . $tax->attribute_id ) ); ?>"><?php esc_html_e( 'Delete', 'woocommerce' ); ?></a></span></div>
-												</td>
-												<td><?php echo esc_html( $tax->attribute_name ); ?></td>
-												<?php if ( wc_has_custom_attribute_types() ) : ?>
-													<td><?php echo esc_html( wc_get_attribute_type_label( $tax->attribute_type ) ); ?> <?php echo $tax->attribute_public ? esc_html__( '(Public)', 'woocommerce' ) : ''; ?></td>
-												<?php endif; ?>
-												<td>
-													<?php
-													switch ( $tax->attribute_orderby ) {
-														case 'name':
-															esc_html_e( 'Name', 'woocommerce' );
-															break;
-														case 'name_num':
-															esc_html_e( 'Name (numeric)', 'woocommerce' );
-															break;
-														case 'id':
-															esc_html_e( 'Term ID', 'woocommerce' );
-															break;
-														default:
-															esc_html_e( 'Custom ordering', 'woocommerce' );
-															break;
-													}
-													?>
-												</td>
-												<td class="attribute-terms">
-													<?php
-													$taxonomy = wc_attribute_taxonomy_name( $tax->attribute_name );
-
-													if ( taxonomy_exists( $taxonomy ) ) {
-														$terms        = get_terms( $taxonomy, 'hide_empty=0' );
-														$terms_string = implode( ', ', wp_list_pluck( $terms, 'name' ) );
-														if ( $terms_string ) {
-															echo esc_html( $terms_string );
-														} else {
-															echo '<span class="na">&ndash;</span>';
-														}
-													} else {
-															echo '<span class="na">&ndash;</span>';
-													}
-													?>
-													<br /><a href="edit-tags.php?taxonomy=<?php echo esc_attr( wc_attribute_taxonomy_name( $tax->attribute_name ) ); ?>&amp;post_type=product" class="configure-terms"><?php esc_html_e( 'Configure terms', 'woocommerce' ); ?></a>
-												</td>
-											</tr>
-											<?php
+										<?php
+										foreach ( $row['columns'] as $column ) :
+											echo $column;
+										endforeach;
+										?>
+										</tr>
+										<?php
 										endforeach;
 									else :
 										?>
 										<tr>
-											<td colspan="6"><?php esc_html_e( 'No attributes currently exist.', 'woocommerce' ); ?></td>
+											<td colspan="<?php echo count( $table_headers); ?>"><?php esc_html_e( 'No attributes currently exist.', 'woocommerce' ); ?></td>
 										</tr>
 										<?php
 									endif;
