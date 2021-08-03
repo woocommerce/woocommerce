@@ -9,9 +9,9 @@ jobs:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
-      - name: "Get the milestone changer script"
+      - name: "Get the action scripts"
         run: |
-          scripts="assign-milestone-to-merged-pr.php add-post-merge-comment.php"
+          scripts="assign-milestone-to-merged-pr.php add-post-merge-comment.php post-request-shared.php"
           for script in $scripts
           do
             curl \
