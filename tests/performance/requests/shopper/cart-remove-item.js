@@ -78,7 +78,7 @@ export function cartRemoveItem() {
 		// Correlate cart item value for use in subsequent requests.
 		item_to_remove = findBetween(
 			response.body,
-			'/cart?remove_item=',
+			'?remove_item=',
 			'&'
 		);
 		wpnonce = findBetween(
