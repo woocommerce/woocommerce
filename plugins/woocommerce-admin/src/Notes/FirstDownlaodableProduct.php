@@ -60,7 +60,7 @@ class FirstDownlaodableProduct {
 		$note->add_action(
 			'first-downloadable-product-handling',
 			__( 'Learn more', 'woocommerce-admin' ),
-			'https://docs.woocommerce.com/document/digital-downloadable-product-handling/?utm_source=inbox'
+			'https://docs.woocommerce.com/document/digital-downloadable-product-handling/?utm_source=inbox&utm_medium=product'
 		);
 
 		return $note;

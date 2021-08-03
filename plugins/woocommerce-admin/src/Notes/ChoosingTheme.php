@@ -45,7 +45,7 @@ class ChoosingTheme {
 		$note->add_action(
 			'visit-the-theme-marketplace',
 			__( 'Visit the theme marketplace', 'woocommerce-admin' ),
-			'https://woocommerce.com/product-category/themes/?utm_source=inbox'
+			'https://woocommerce.com/product-category/themes/?utm_source=inbox&utm_medium=product'
 		);
 		return $note;
 	}

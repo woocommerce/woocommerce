@@ -60,8 +60,7 @@ class NeedSomeInspiration {
 		$note->add_action(
 			'need-some-inspiration',
 			__( 'See success stories', 'woocommerce-admin' ),
-			'https://woocommerce.com/success-stories/?utm_source=inbox',
-			Note::E_WC_ADMIN_NOTE_ACTIONED,
+			'https://woocommerce.com/success-stories/?utm_source=inbox&utm_medium=product
 			true
 		);
 		return $note;

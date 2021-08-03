@@ -75,7 +75,7 @@ class LearnMoreAboutVariableProducts {
 		$note->add_action(
 			'learn-more',
 			__( 'Learn more', 'woocommerce-admin' ),
-			'https://docs.woocommerce.com/document/variable-product/?utm_source=inbox'
+			'https://docs.woocommerce.com/document/variable-product/?utm_source=inbox&utm_medium=product'
 		);
 
 		return $note;

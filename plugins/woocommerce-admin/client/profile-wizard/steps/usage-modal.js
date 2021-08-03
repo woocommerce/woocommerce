@@ -115,7 +115,7 @@ class UsageModal extends Component {
 				components: {
 					link: (
 						<Link
-							href="https://woocommerce.com/usage-tracking"
+							href="https://woocommerce.com/usage-tracking?utm_medium=product"
 							target="_blank"
 							type="external"
 						/>

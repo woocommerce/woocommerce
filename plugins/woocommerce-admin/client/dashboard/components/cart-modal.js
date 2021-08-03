@@ -41,9 +41,12 @@ class CartModal extends Component {
 			purchase_install: true,
 		} );
 
-		const url = getInAppPurchaseUrl( 'https://woocommerce.com/cart', {
-			'wccom-replace-with': productIds.join( ',' ),
-		} );
+		const url = getInAppPurchaseUrl(
+			'https://woocommerce.com/cart?utm_medium=product',
+			{
+				'wccom-replace-with': productIds.join( ',' ),
+			}
+		);
 
 		if ( onClickPurchaseNow ) {
 			onClickPurchaseNow( url );

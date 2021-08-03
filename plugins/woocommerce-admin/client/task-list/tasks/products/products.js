@@ -83,7 +83,7 @@ const subTasks = [
 		onClick: () =>
 			recordEvent( 'tasklist_add_product', { method: 'migrate' } ),
 		// @todo This should be replaced with the in-app purchase iframe when ready.
-		href: 'https://woocommerce.com/products/cart2cart/',
+		href: 'https://woocommerce.com/products/cart2cart/?utm_medium=product',
 		target: '_blank',
 	},
 ];

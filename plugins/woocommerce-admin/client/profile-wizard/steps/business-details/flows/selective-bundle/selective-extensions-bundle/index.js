@@ -29,7 +29,9 @@ const generatePluginDescriptionWithLink = (
 	productName,
 	linkURL
 ) => {
-	const url = linkURL ?? `https://woocommerce.com/products/${ productName }`;
+	const url =
+		linkURL ??
+		`https://woocommerce.com/products/${ productName }?utm_medium=product`;
 	return interpolateComponents( {
 		mixedString: description,
 		components: {

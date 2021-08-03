@@ -241,7 +241,7 @@ export class Shipping extends Component {
 							components: {
 								link: (
 									<Link
-										href="https://woocommerce.com/products/shipstation-integration"
+										href="https://woocommerce.com/products/shipstation-integration?utm_medium=product"
 										target="_blank"
 										type="external"
 									/>

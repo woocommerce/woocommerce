@@ -237,13 +237,13 @@ class OrderMilestones {
 				return array(
 					'name'  => 'learn-more',
 					'label' => __( 'Learn more', 'woocommerce-admin' ),
-					'query' => 'https://docs.woocommerce.com/document/managing-orders/?utm_source=inbox',
+					'query' => 'https://docs.woocommerce.com/document/managing-orders/?utm_source=inbox&utm_medium=product',
 				);
 			case 10:
 				return array(
 					'name'  => 'browse',
 					'label' => __( 'Browse', 'woocommerce-admin' ),
-					'query' => 'https://woocommerce.com/success-stories/?utm_source=inbox',
+					'query' => 'https://woocommerce.com/success-stories/?utm_source=inbox&utm_medium=product',
 				);
 			case 100:
 			case 250:

@@ -69,7 +69,7 @@ class AddingAndManangingProducts {
 		$note->add_action(
 			'learn-more',
 			__( 'Learn more', 'woocommerce-admin' ),
-			'https://docs.woocommerce.com/document/managing-products/?utm_source=inbox'
+			'https://docs.woocommerce.com/document/managing-products/?utm_source=inbox&utm_medium=product'
 		);
 
 		return $note;

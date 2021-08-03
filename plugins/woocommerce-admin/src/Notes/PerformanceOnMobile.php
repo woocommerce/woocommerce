@@ -57,7 +57,7 @@ class PerformanceOnMobile {
 		$note->add_action(
 			'learn-more',
 			__( 'Learn more', 'woocommerce-admin' ),
-			'https://woocommerce.com/mobile/?utm_source=inbox'
+			'https://woocommerce.com/mobile/?utm_source=inbox&utm_medium=product'
 		);
 
 		return $note;

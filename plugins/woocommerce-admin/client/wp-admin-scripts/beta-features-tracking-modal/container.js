@@ -74,7 +74,7 @@ const BetaFeaturesTrackingModal = ( { updateOptions } ) => {
 					'Testing new features requires sharing non-sensitive data via ',
 					'woocommerce-admin'
 				) }
-				<a href="https://woocommerce.com/usage-tracking">
+				<a href="https://woocommerce.com/usage-tracking?utm_medium=product">
 					{ __( 'usage tracking', 'woocommerce-admin' ) }
 				</a>
 				{ __(

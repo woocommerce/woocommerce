@@ -178,7 +178,7 @@ class InstalledExtensions {
 				$data['settingsUrl'] = admin_url( 'admin.php?page=wc-admin&path=/google/start' );
 			}
 
-			$data['docsUrl'] = 'https://docs.woocommerce.com/document/google-listings-and-ads/';
+			$data['docsUrl'] = 'https://docs.woocommerce.com/document/google-listings-and-ads/?utm_medium=product';
 		}
 
 		return $data;
@@ -238,7 +238,7 @@ class InstalledExtensions {
 			}
 
 			$data['settingsUrl'] = admin_url( 'admin.php?page=codisto-settings' );
-			$data['docsUrl']     = 'https://docs.woocommerce.com/document/getting-started-with-woocommerce-amazon-ebay-integration/';
+			$data['docsUrl']     = 'https://docs.woocommerce.com/document/getting-started-with-woocommerce-amazon-ebay-integration/?utm_medium=product';
 		}
 
 		return $data;
@@ -265,7 +265,7 @@ class InstalledExtensions {
 			'status'      => $status,
 			'name'        => $plugin_data['Name'],
 			'description' => html_entity_decode( wp_trim_words( $plugin_data['Description'], 20 ) ),
-			'supportUrl'  => 'https://woocommerce.com/my-account/create-a-ticket/',
+			'supportUrl'  => 'https://woocommerce.com/my-account/create-a-ticket/?utm_medium=product',
 		];
 	}
 

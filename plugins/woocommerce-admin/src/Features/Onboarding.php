@@ -958,7 +958,7 @@ class Onboarding {
 		if (
 			! self::should_show_tasks() ||
 			! isset( $_SERVER['HTTP_REFERER'] ) ||
-			0 !== strpos( $_SERVER['HTTP_REFERER'], 'https://woocommerce.com/checkout' ) // phpcs:ignore sanitization ok.
+			0 !== strpos( $_SERVER['HTTP_REFERER'], 'https://woocommerce.com/checkout?utm_medium=product' ) // phpcs:ignore sanitization ok.
 		) {
 			return;
 		}

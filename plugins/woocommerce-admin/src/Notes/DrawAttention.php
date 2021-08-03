@@ -66,7 +66,7 @@ class DrawAttention {
 		$note->add_action(
 			'learn-more',
 			__( 'Learn more', 'woocommerce-admin' ),
-			'https://woocommerce.com/posts/how-to-make-your-online-store-stand-out/?utm_source=inbox',
+			'https://woocommerce.com/posts/how-to-make-your-online-store-stand-out/?utm_source=inbox&utm_medium=product',
 			Note::E_WC_ADMIN_NOTE_ACTIONED,
 			true
 		);

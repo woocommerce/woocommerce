@@ -43,7 +43,7 @@ export const WCPayCardBody = ( {
 				target="_blank"
 				type="external"
 				rel="noreferrer"
-				href="https://woocommerce.com/payments/"
+				href="https://woocommerce.com/payments/?utm_medium=product"
 				onClick={ onLinkClick }
 			>
 				{ __( 'Learn more', 'woocommerce-admin' ) }

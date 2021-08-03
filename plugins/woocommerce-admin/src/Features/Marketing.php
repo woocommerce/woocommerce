@@ -247,7 +247,7 @@ class Marketing {
 					'per_page'   => 8,
 					'_embed'     => 1,
 				),
-				'https://woocommerce.com/wp-json/wp/v2/posts'
+				'https://woocommerce.com/wp-json/wp/v2/posts?utm_medium=product'
 			);
 
 			$request = wp_remote_get( $request_url );

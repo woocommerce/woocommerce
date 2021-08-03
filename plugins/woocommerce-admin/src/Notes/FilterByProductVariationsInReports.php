@@ -48,7 +48,7 @@ class FilterByProductVariationsInReports {
 		$note->add_action(
 			'learn-more',
 			__( 'Learn more', 'woocommerce-admin' ),
-			'https://docs.woocommerce.com/document/woocommerce-analytics/#variations-report'
+			'https://docs.woocommerce.com/document/woocommerce-analytics/#variations-report?utm_medium=product'
 		);
 
 		return $note;

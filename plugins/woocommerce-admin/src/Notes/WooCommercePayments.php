@@ -114,7 +114,7 @@ class WooCommercePayments {
 		$note->set_type( Note::E_WC_ADMIN_NOTE_MARKETING );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_source( 'woocommerce-admin' );
-		$note->add_action( 'learn-more', __( 'Learn more', 'woocommerce-admin' ), 'https://woocommerce.com/payments/', Note::E_WC_ADMIN_NOTE_UNACTIONED );
+		$note->add_action( 'learn-more', __( 'Learn more', 'woocommerce-admin' ), 'https://woocommerce.com/payments/?utm_medium=product', Note::E_WC_ADMIN_NOTE_UNACTIONED );
 		$note->add_action( 'get-started', __( 'Get started', 'woocommerce-admin' ), wc_admin_url( '&action=setup-woocommerce-payments' ), Note::E_WC_ADMIN_NOTE_ACTIONED, true );
 
 		// Create the note as "actioned" if the plugin is already installed.

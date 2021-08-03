@@ -56,7 +56,7 @@ class ManageStoreActivityFromHomeScreen {
 		$note->add_action(
 			'learn-more',
 			__( 'Learn more', 'woocommerce-admin' ),
-			'https://docs.woocommerce.com/document/home-screen/?utm_source=inbox"',
+			'https://docs.woocommerce.com/document/home-screen/?utm_source=inbox&utm_medium=product',
 			Note::E_WC_ADMIN_NOTE_ACTIONED,
 			true
 		);

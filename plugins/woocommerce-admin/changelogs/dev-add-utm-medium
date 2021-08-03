@@ -1,0 +1,4 @@
+Significance: minor
+Type: Dev
+
+Added utm_medium=product to woocommerce.com links. #7408
