@@ -3,6 +3,8 @@ import { shopPage } from '../requests/shopper/shop-page.js';
 import { searchProduct } from '../requests/shopper/search-product.js';
 import { singleProduct } from '../requests/shopper/single-product.js';
 import { cart } from '../requests/shopper/cart.js';
+import { cartRemoveItem } from '../requests/shopper/cart-remove-item.js';
+import { cartApplyCoupon } from '../requests/shopper/cart-apply-coupon.js';
 import { checkoutGuest } from '../requests/shopper/checkout-guest.js';
 import { checkoutCustomerLogin } from '../requests/shopper/checkout-customer-login.js';
 import { myAccount } from '../requests/shopper/my-account.js';
@@ -14,7 +16,7 @@ export let options = {
             vus: 1,
             iterations: 1,
             maxDuration: '10s',
-            exec: 'homePageFlow',
+            exec: 'cartFlow',
         },
         shopPageSmoke: {
             executor: 'per-vu-iterations',
@@ -64,6 +66,14 @@ export let options = {
             startTime: '48s',
             exec: 'myAccountFlow',
         },
+        cartSmoke: {
+            executor: 'per-vu-iterations',
+            vus: 1,
+            iterations: 1,
+            maxDuration: '50s',
+            startTime: '58s',
+            exec: 'cartFlow',
+        },
     },
 };
 
@@ -89,4 +99,8 @@ export function checkoutCustomerLoginFlow() {
 }
 export function myAccountFlow() {
     myAccount();
+}
+export function cartFlow() {
+    cartRemoveItem();
+	cartApplyCoupon();
 }
