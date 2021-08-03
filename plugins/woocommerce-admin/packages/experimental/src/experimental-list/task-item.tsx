@@ -112,6 +112,7 @@ export const TaskItem: React.FC< TaskItemProps > = ( {
 	level = 3,
 	action,
 	actionLabel,
+	...listItemProps
 } ) => {
 	const className = classnames( 'woocommerce-task-list__item', {
 		complete: completed,
@@ -128,7 +129,12 @@ export const TaskItem: React.FC< TaskItemProps > = ( {
 		( onDelete && completed );
 
 	return (
-		<ListItem disableGutters className={ className } onClick={ onClick }>
+		<ListItem
+			disableGutters
+			className={ className }
+			onClick={ onClick }
+			{ ...listItemProps }
+		>
 			<OptionalTaskTooltip level={ level } completed={ completed }>
 				<div className="woocommerce-task-list__item-before">
 					{ level === 1 && ! completed ? (

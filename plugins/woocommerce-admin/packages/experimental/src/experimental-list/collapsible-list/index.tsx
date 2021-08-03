@@ -10,8 +10,13 @@ import {
 	Children,
 	useRef,
 	isValidElement,
+	cloneElement,
 } from '@wordpress/element';
-import { Transition } from 'react-transition-group';
+import {
+	Transition,
+	CSSTransition,
+	TransitionGroup,
+} from 'react-transition-group';
 import classnames from 'classnames';
 
 /**
@@ -242,7 +247,39 @@ export const ExperimentalCollapsibleList: React.FC< CollapsibleListProps > = ( {
 								ref={ collapseContainerRef }
 								style={ transitionStyles }
 							>
-								{ displayedChildren.hidden }
+								<TransitionGroup className="woocommerce-experimental-list">
+									{ Children.map(
+										displayedChildren.hidden,
+										( child ) => {
+											const {
+												onExited,
+												in: inTransition,
+												enter,
+												exit,
+												...remainingProps
+											} = child.props;
+											const animationProp =
+												remainingProps.animation ||
+												listProps.animation;
+											return (
+												<CSSTransition
+													key={ child.key }
+													timeout={ 500 }
+													onExited={ onExited }
+													in={ inTransition }
+													enter={ enter }
+													exit={ exit }
+													classNames="woocommerce-list__item"
+												>
+													{ cloneElement( child, {
+														animation: animationProp,
+														...remainingProps,
+													} ) }
+												</CSSTransition>
+											);
+										}
+									) }
+								</TransitionGroup>
 							</div>
 						);
 					} }
