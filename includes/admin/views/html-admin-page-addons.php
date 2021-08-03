@@ -83,15 +83,26 @@ if ( ! defined( 'ABSPATH' ) ) {
 				}
 				?>
 				<li class="product">
-					<a href="<?php echo esc_attr( WC_Admin_Addons::add_in_app_purchase_url_params( $addon->link ) ); ?>">
+					<div class="product-details">
 						<?php if ( ! empty( $addon->image ) ) : ?>
 							<span class="product-img-wrap"><img src="<?php echo esc_url( $addon->image ); ?>"/></span>
-						<?php else : ?>
-							<h2><?php echo esc_html( $addon->title ); ?></h2>
 						<?php endif; ?>
-						<span class="price"><?php echo wp_kses_post( $addon->price ); ?></span>
+						<a href="<?php echo esc_attr( WC_Admin_Addons::add_in_app_purchase_url_params( $addon->link ) ); ?>">
+							<h2><?php echo esc_html( $addon->title ); ?></h2>
+						</a>
 						<p><?php echo wp_kses_post( $addon->excerpt ); ?></p>
-					</a>
+					</div>
+					<div class="product-footer">
+						<?php if ( '&#36;0.00' === $addon->price ) : ?>
+							<span class="price"><?php echo esc_html_e( 'Free', 'woocommerce' ); ?></span>
+						<?php else : ?>
+							<span class="price"><?php echo wp_kses_post( $addon->price ); ?></span>
+							<span class="price_suffix"><?php echo esc_html_e( 'per year', 'woocommerce' ); ?></span>
+						<?php endif; ?>
+						<a class="button" href="<?php echo esc_attr( WC_Admin_Addons::add_in_app_purchase_url_params( $addon->link ) ); ?>">
+							<?php echo esc_html_e( 'View details', 'woocommerce' ); ?>
+						</a>
+					</div>
 				</li>
 			<?php endforeach; ?>
 			</ul>
