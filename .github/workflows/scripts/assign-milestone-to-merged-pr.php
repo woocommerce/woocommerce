@@ -9,7 +9,7 @@
 
 global $repo_owner, $repo_name, $github_token, $graphql_api_url;
 
-/**
+/*
  * Grab/process input.
  */
 
@@ -21,7 +21,7 @@ $pr_id           = getenv( 'PULL_REQUEST_ID' );
 $github_token    = getenv( 'GITHUB_TOKEN' );
 $graphql_api_url = getenv( 'GITHUB_GRAPHQL_URL' );
 
-/**
+/*
  * Select the milestone to be added:
  *
  * 1. Get the first 10 milestones sorted by creation date descending.
