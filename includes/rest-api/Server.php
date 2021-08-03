@@ -125,6 +125,7 @@ class Server {
 			'webhook-deliveries'       => 'WC_REST_Webhook_Deliveries_V2_Controller',
 			'system-status'            => 'WC_REST_System_Status_V2_Controller',
 			'system-status-tools'      => 'WC_REST_System_Status_Tools_V2_Controller',
+			'system-status-app'        => 'WC_REST_System_Status_App_V2_Controller',
 			'shipping-methods'         => 'WC_REST_Shipping_Methods_V2_Controller',
 			'payment-gateways'         => 'WC_REST_Payment_Gateways_V2_Controller',
 		);
@@ -170,6 +171,7 @@ class Server {
 			'webhooks'                 => 'WC_REST_Webhooks_Controller',
 			'system-status'            => 'WC_REST_System_Status_Controller',
 			'system-status-tools'      => 'WC_REST_System_Status_Tools_Controller',
+			'system-status-app'        => 'WC_REST_System_Status_App_Controller',
 			'shipping-methods'         => 'WC_REST_Shipping_Methods_Controller',
 			'payment-gateways'         => 'WC_REST_Payment_Gateways_Controller',
 			'data'                     => 'WC_REST_Data_Controller',
