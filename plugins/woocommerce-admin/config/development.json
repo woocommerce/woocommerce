@@ -12,7 +12,7 @@
 		"onboarding": true,
 		"payment-gateway-suggestions": true,
 		"remote-inbox-notifications": true,
-		"remote-extensions-list": true,
+		"remote-free-extensions": true,
 		"settings": false,
 		"shipping-label-banner": true,
 		"store-alerts": true,

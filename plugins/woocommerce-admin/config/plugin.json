@@ -11,7 +11,7 @@
 		"navigation": true,
 		"onboarding": true,
 		"remote-inbox-notifications": true,
-		"remote-extensions-list": true,
+		"remote-free-extensions": true,
 		"payment-gateway-suggestions": true,
 		"settings": false,
 		"shipping-label-banner": true,
