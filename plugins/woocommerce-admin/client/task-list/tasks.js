@@ -17,7 +17,7 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import Appearance from './tasks/appearance';
 import { getCategorizedOnboardingProducts } from '../dashboard/utils';
-import { Marketing } from './tasks/Marketing';
+import { Marketing, getMarketingExtensionLists } from './tasks/Marketing';
 import { Products } from './tasks/products';
 import Shipping from './tasks/shipping';
 import Tax from './tasks/tax';
@@ -49,6 +49,7 @@ export function getAllTasks( {
 	activePlugins,
 	countryCode,
 	createNotice,
+	freeExtensions,
 	installAndActivatePlugins,
 	installedPlugins,
 	isJetpackConnected,
@@ -157,6 +158,12 @@ export function getAllTasks( {
 			'woocommerce-admin'
 		);
 	}
+
+	const [ installedMarketingExtensions ] = getMarketingExtensionLists(
+		freeExtensions,
+		activePlugins,
+		installedPlugins
+	);
 
 	const tasks = [
 		{
@@ -341,10 +348,7 @@ export function getAllTasks( {
 				onTaskSelect( 'marketing' );
 				updateQueryString( { task: 'marketing' } );
 			},
-			// @todo This should use the free extensions data store.
-			completed:
-				[].filter( ( plugin ) => installedPlugins.includes( plugin ) )
-					.length > 0,
+			completed: !! installedMarketingExtensions.length,
 			visible:
 				window.wcAdminFeatures &&
 				window.wcAdminFeatures[ 'remote-free-extensions' ],

@@ -23,6 +23,78 @@ import { PluginProps } from './Plugin';
 
 const ALLOWED_PLUGIN_LISTS = [ 'reach', 'grow' ];
 
+export type ExtensionList = {
+	key: string;
+	title: string;
+	plugins: Extension[];
+};
+
+export type Extension = {
+	description: string;
+	key: string;
+	image_url: string;
+	manage_url: string;
+	name: string;
+};
+
+export const transformExtensionToPlugin = (
+	extension: Extension,
+	activePlugins: string[],
+	installedPlugins: string[]
+): PluginProps => {
+	const { description, image_url, key, manage_url, name } = extension;
+	const slug = key.split( ':' )[ 0 ];
+	return {
+		description,
+		slug,
+		imageUrl: image_url,
+		isActive: activePlugins.includes( slug ),
+		isInstalled: installedPlugins.includes( slug ),
+		manageUrl: manage_url,
+		name,
+	};
+};
+
+export const getMarketingExtensionLists = (
+	freeExtensions: ExtensionList[],
+	activePlugins: string[],
+	installedPlugins: string[]
+): [ PluginProps[], PluginListProps[] ] => {
+	const installed: PluginProps[] = [];
+	const lists: PluginListProps[] = [];
+	freeExtensions.forEach( ( list ) => {
+		if ( ! ALLOWED_PLUGIN_LISTS.includes( list.key ) ) {
+			return;
+		}
+
+		const listPlugins: PluginProps[] = [];
+		list.plugins.forEach( ( extension ) => {
+			const plugin = transformExtensionToPlugin(
+				extension,
+				activePlugins,
+				installedPlugins
+			);
+			if ( plugin.isInstalled ) {
+				installed.push( plugin );
+				return;
+			}
+			listPlugins.push( plugin );
+		} );
+
+		if ( ! listPlugins.length ) {
+			return;
+		}
+
+		const transformedList: PluginListProps = {
+			...list,
+			plugins: listPlugins,
+		};
+		lists.push( transformedList );
+	} );
+
+	return [ installed, lists ];
+};
+
 export const Marketing: React.FC = () => {
 	const [ currentPlugin, setCurrentPlugin ] = useState< string | null >(
 		null
@@ -49,53 +121,15 @@ export const Marketing: React.FC = () => {
 		};
 	} );
 
-	const transformExtensionToPlugin = (
-		extension: Extension
-	): PluginProps => {
-		const { description, image_url, key, manage_url, name } = extension;
-		const slug = key.split( ':' )[ 0 ];
-		return {
-			description,
-			slug,
-			imageUrl: image_url,
-			isActive: activePlugins.includes( slug ),
-			isInstalled: installedPlugins.includes( slug ),
-			manageUrl: manage_url,
-			name,
-		};
-	};
-
-	const [ installedExtensions, pluginLists ] = useMemo( () => {
-		const installed: PluginProps[] = [];
-		const lists: PluginListProps[] = [];
-		freeExtensions.forEach( ( list ) => {
-			if ( ! ALLOWED_PLUGIN_LISTS.includes( list.key ) ) {
-				return;
-			}
-
-			const listPlugins: PluginProps[] = [];
-			list.plugins.forEach( ( extension ) => {
-				const plugin = transformExtensionToPlugin( extension );
-				if ( plugin.isInstalled ) {
-					installed.push( plugin );
-					return;
-				}
-				listPlugins.push( plugin );
-			} );
-
-			if ( ! listPlugins.length ) {
-				return;
-			}
-
-			const transformedList: PluginListProps = {
-				...list,
-				plugins: listPlugins,
-			};
-			lists.push( transformedList );
-		} );
-
-		return [ installed, lists ];
-	}, [ installedPlugins, activePlugins, freeExtensions ] );
+	const [ installedExtensions, pluginLists ] = useMemo(
+		() =>
+			getMarketingExtensionLists(
+				freeExtensions,
+				activePlugins,
+				installedPlugins
+			),
+		[ installedPlugins, activePlugins, freeExtensions ]
+	);
 
 	const installAndActivate = ( slug: string ) => {
 		setCurrentPlugin( slug );

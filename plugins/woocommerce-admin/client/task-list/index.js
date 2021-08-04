@@ -29,7 +29,9 @@ import { TaskStep } from './task-step';
 import TaskListPlaceholder from './placeholder';
 
 const taskDashboardSelect = ( select ) => {
-	const { getProfileItems, getTasksStatus } = select( ONBOARDING_STORE_NAME );
+	const { getFreeExtensions, getProfileItems, getTasksStatus } = select(
+		ONBOARDING_STORE_NAME
+	);
 	const { getSettings } = select( SETTINGS_STORE_NAME );
 	const { getOption } = select( OPTIONS_STORE_NAME );
 	const {
@@ -63,6 +65,7 @@ const taskDashboardSelect = ( select ) => {
 		activePlugins,
 		countryCode,
 		dismissedTasks: getOption( 'woocommerce_task_list_dismissed_tasks' ),
+		freeExtensions: getFreeExtensions(),
 		remindMeLaterTasks: getOption(
 			'woocommerce_task_list_remind_me_later_tasks'
 		),
@@ -91,6 +94,7 @@ const TaskDashboard = ( { userPreferences, query } ) => {
 		trackedCompletedTasks,
 		activePlugins,
 		countryCode,
+		freeExtensions,
 		installedPlugins,
 		isJetpackConnected,
 		onboardingStatus,
@@ -202,6 +206,7 @@ const TaskDashboard = ( { userPreferences, query } ) => {
 		activePlugins,
 		countryCode,
 		createNotice,
+		freeExtensions,
 		installAndActivatePlugins,
 		installedPlugins,
 		isJetpackConnected,
