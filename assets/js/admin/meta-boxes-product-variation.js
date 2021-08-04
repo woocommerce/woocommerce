@@ -177,12 +177,22 @@ jQuery( function( $ ) {
 		 */
 		set_menu_order: function( event ) {
 			event.preventDefault();
-			var $menu_order  = $( this ).closest( '.woocommerce_variation' ).find('.variation_menu_order');
+			var $menu_order  = $( this ).closest( '.woocommerce_variation' ).find( '.variation_menu_order' );
+			var variation_id = $( this ).closest( '.woocommerce_variation' ).find( '.variable_post_id' ).val();
 			var value        = window.prompt( woocommerce_admin_meta_boxes_variations.i18n_enter_menu_order, $menu_order.val() );
 
 			if ( value != null ) {
 				// Set value, save changes and reload view
 				$menu_order.val( parseInt( value, 10 ) ).trigger( 'change' );
+
+				$( this ).closest( '.woocommerce_variation' )
+					.append( '<input type="hidden" name="new_variation_menu_order_id" value="'
+						+ encodeURIComponent( variation_id ) + '" />' );
+
+				$( this ).closest( '.woocommerce_variation' )
+					.append( '<input type="hidden" name="new_variation_menu_order_value" value="'
+						+ encodeURIComponent( parseInt( value, 10 ) ) + '" />' );
+
 				wc_meta_boxes_product_variations_ajax.save_variations();
 			}
 		},
