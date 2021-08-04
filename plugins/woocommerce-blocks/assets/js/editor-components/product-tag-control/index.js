@@ -150,11 +150,7 @@ class ProductTagControl extends Component {
 					isHierarchical
 				/>
 				{ !! onOperatorChange && (
-					<div
-						className={
-							selected.length < 2 ? 'screen-reader-text' : ''
-						}
-					>
+					<div hidden={ selected.length < 2 }>
 						<SelectControl
 							className="woocommerce-product-tags__operator"
 							label={ __(
