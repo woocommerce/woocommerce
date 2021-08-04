@@ -1,3 +1,21 @@
+== 2.6.0 08/04/2021 == 
+
+- Fix: Fixes action button mis-alignment within card footer. #7412
+- Fix: Fixing issues with ReportTable component data not populating correctly #7355
+- Fix: Fix tracks events for payment gateway suggestions #7304
+- Fix: Update status values in CSV download to match the table #7284
+- Add: Add boolean isReverseTrend prop to SummaryNumber to show "positive" delta for negative numbers. #7357
+- Add: Adding links to help panel for marketing task #7384
+- Add: Add installed marketing extensions card to extensions task #7419
+- Add: Add marketing extensions task to task list #7383
+- Update: Add locale param as part of free extensions request #7391
+- Update: Increase per_page value for search results on the Analytics pages. #7385
+- Update: Removing grow section from local free extensions in OBW #7386
+- Dev: Added utm_medium=product to woocommerce.com links. #7408
+- Dev: Update Jest to version 27. #7430
+- Tweak: Refactor on payment settings recommendations eligibility component for reuse. #7447
+- Tweak: Register wc-admin page for all users and handle authorization in client #7285
+
 == 2.5.0 07/8/2021 ==
 
 - Add: Add a delete option to completed tasks #7300
