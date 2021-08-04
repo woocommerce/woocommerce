@@ -10,28 +10,25 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Admin\RemoteInboxNotifications\RuleEvaluator;
 
 /**
- * Evaluates the spec and returns the evaluated method.
+ * Evaluates the extension and returns it.
  */
 class EvaluateExtension {
 	/**
-	 * Evaluates the spec and returns the extension.
+	 * Evaluates the extension and returns it.
 	 *
-	 * @param array $spec The extension section to evaluate.
-	 * @return array The evaluated extension section.
+	 * @param object $extension The extension to evaluate.
+	 * @return object The evaluated extension.
 	 */
-	public static function evaluate( $spec ) {
+	public static function evaluate( $extension ) {
 		$rule_evaluator = new RuleEvaluator();
 
-		foreach ( $spec->plugins as $plugin ) {
-
-			if ( isset( $plugin->is_visible ) ) {
-				$is_visible         = $rule_evaluator->evaluate( $plugin->is_visible );
-				$plugin->is_visible = $is_visible;
-			} else {
-				$plugin->is_visible = true;
-			}
+		if ( isset( $extension->is_visible ) ) {
+			$is_visible            = $rule_evaluator->evaluate( $extension->is_visible );
+			$extension->is_visible = $is_visible;
+		} else {
+			$extension->is_visible = true;
 		}
 
-		return $spec;
+		return $extension;
 	}
 }

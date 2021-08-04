@@ -1,16 +1,15 @@
 /**
  * External dependencies
  */
-import { useEffect, useState } from '@wordpress/element';
+import { useEffect, useMemo, useState } from '@wordpress/element';
 import { Button, Card, CheckboxControl, Spinner } from '@wordpress/components';
 import { Text } from '@woocommerce/experimental';
 import { Link } from '@woocommerce/components';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { Icon, chevronDown, chevronUp } from '@wordpress/icons';
 import interpolateComponents from 'interpolate-components';
-import { pluginNames, SETTINGS_STORE_NAME } from '@woocommerce/data';
+import { pluginNames, ONBOARDING_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import apiFetch from '@wordpress/api-fetch';
 import { useSelect } from '@wordpress/data';
 
 /**
@@ -18,133 +17,10 @@ import { useSelect } from '@wordpress/data';
  */
 import { AppIllustration } from '../app-illustration';
 import './style.scss';
+import sanitizeHTML from '~/lib/sanitize-html';
 import { setAllPropsToValue } from '~/lib/collections';
-import { getCountryCode } from '~/dashboard/utils';
-import { isWCPaySupported } from '~/task-list/tasks/PaymentGatewaySuggestions/components/WCPay';
 
 const ALLOWED_PLUGIN_LISTS = [ 'basics' ];
-
-const generatePluginDescriptionWithLink = (
-	description,
-	productName,
-	linkURL
-) => {
-	const url =
-		linkURL ??
-		`https://woocommerce.com/products/${ productName }?utm_medium=product`;
-	return interpolateComponents( {
-		mixedString: description,
-		components: {
-			link: (
-				<Link
-					type="external"
-					target="_blank"
-					className="woocommerce-admin__business-details__selective-extensions-bundle__link"
-					href={ url }
-					onClick={ () => {
-						recordEvent(
-							'storeprofiler_store_business_features_link_click',
-							{
-								extension_name: productName,
-							}
-						);
-					} }
-				/>
-			),
-		},
-	} );
-};
-
-const installableExtensionsData = [
-	{
-		title: __( 'Get the basics', 'woocommerce-admin' ),
-		key: 'basics',
-		plugins: [
-			{
-				key: 'woocommerce-payments',
-				description: generatePluginDescriptionWithLink(
-					__(
-						'Accept credit cards with {{link}}WooCommerce Payments{{/link}}',
-						'woocommerce-admin'
-					),
-					'woocommerce-payments'
-				),
-				isVisible: ( countryCode, industry ) => {
-					const hasCbdIndustry = ( industry || [] ).some(
-						( { industrySlug } ) => {
-							return (
-								industrySlug ===
-								'cbd-other-hemp-derived-products'
-							);
-						}
-					);
-					return isWCPaySupported( countryCode ) && ! hasCbdIndustry;
-				},
-			},
-			{
-				key: 'woocommerce-services:shipping',
-				description: generatePluginDescriptionWithLink(
-					__(
-						'Print shipping labels with {{link}}WooCommerce Shipping{{/link}}',
-						'woocommerce-admin'
-					),
-					'shipping'
-				),
-				isVisible: ( countryCode, industry, productTypes ) => {
-					// Exclude the WooCommerce Shipping mention if the user is not in the US.
-					// Exclude the WooCommerce Shipping mention if the user is in the US but
-					// only selected digital products in the Product Types step.
-					if (
-						countryCode !== 'US' ||
-						( countryCode === 'US' &&
-							productTypes.length === 1 &&
-							productTypes[ 0 ] === 'downloads' )
-					) {
-						return false;
-					}
-
-					return true;
-				},
-			},
-			{
-				key: 'woocommerce-services:tax',
-				description: generatePluginDescriptionWithLink(
-					__(
-						'Get automated sales tax with {{link}}WooCommerce Tax{{/link}}',
-						'woocommerce-admin'
-					),
-					'tax'
-				),
-				isVisible: ( countryCode ) => {
-					return [
-						'US',
-						'FR',
-						'GB',
-						'DE',
-						'CA',
-						'PL',
-						'AU',
-						'GR',
-						'BE',
-						'PT',
-						'DK',
-						'SE',
-					].includes( countryCode );
-				},
-			},
-			{
-				key: 'jetpack',
-				description: generatePluginDescriptionWithLink(
-					__(
-						'Enhance speed and security with {{link}}Jetpack{{/link}}',
-						'woocommerce-admin'
-					),
-					'jetpack'
-				),
-			},
-		],
-	},
-];
 
 const FreeBadge = () => {
 	return (
@@ -238,6 +114,23 @@ const renderBusinessExtensionHelpText = ( values, isInstallingActivating ) => {
 };
 
 const BundleExtensionCheckbox = ( { onChange, description, isChecked } ) => {
+	const recordProductLinkClick = ( event ) => {
+		const link = event.target.closest( 'a' );
+		if (
+			! link ||
+			! event.currentTarget.contains( link ) ||
+			! link.href.startsWith( 'https://woocommerce.com/products/' )
+		) {
+			return;
+		}
+
+		recordEvent( 'storeprofiler_store_business_features_link_click', {
+			extension_name: link.href.split(
+				'https://woocommerce.com/products/'
+			)[ 1 ],
+		} );
+	};
+
 	return (
 		<div className="woocommerce-admin__business-details__selective-extensions-bundle__extension">
 			<CheckboxControl
@@ -245,98 +138,31 @@ const BundleExtensionCheckbox = ( { onChange, description, isChecked } ) => {
 				checked={ isChecked }
 				onChange={ onChange }
 			/>
-			<p className="woocommerce-admin__business-details__selective-extensions-bundle__description">
-				{ description }
-			</p>
+			{
+				// Disable reason: This click handler checks for interaction with anchor tags on
+				// dynamically inserted HTML and records clicks only on interaction with those items.
+				/* eslint-disable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events */
+			 }
+			<p
+				className="woocommerce-admin__business-details__selective-extensions-bundle__description"
+				dangerouslySetInnerHTML={ sanitizeHTML( description ) }
+				onClick={ recordProductLinkClick }
+			/>
+			{ /* eslint-disable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events */ }
 			<FreeBadge />
 		</div>
 	);
 };
 
-/**
- * Returns plugins that either don't have the acceptedCountryCodes param or one defined
- * that includes the passed in country.
- *
- * @param {Array} plugins  list of plugins
- * @param {string} country  Woo store country
- * @param {Array} industry List of selected industries
- * @param {Array} productTypes List of selected product types
- *
- * @return {Array} Array of visible plugins
- */
-const getVisiblePlugins = ( plugins, country, industry, productTypes ) => {
-	const countryCode = getCountryCode( country );
-
-	return plugins.filter(
-		( plugin ) =>
-			! plugin.isVisible ||
-			plugin.isVisible( countryCode, industry, productTypes )
-	);
-};
-
-/**
- * Returns bundles that have at least 1 visible plugin.
- *
- * @param {Array} bundles  list of bundles
- * @param {string} country  Woo store country
- * @param {Array} industry List of selected industries
- * @param {Array} productTypes List of selected product types
- *
- * @return {Array} Array of visible bundles
- */
-const getVisibleBundles = ( bundles, country, industry, productTypes ) => {
-	return bundles
-		.map( ( bundle ) => {
-			return {
-				...bundle,
-				plugins: getVisiblePlugins(
-					bundle.plugins,
-					country,
-					industry,
-					productTypes
-				),
-			};
-		} )
-		.filter( ( bundle ) => {
-			return bundle.plugins.length;
-		} );
-};
-
-const transformRemoteExtensions = ( extensionData ) => {
-	return extensionData.map( ( section ) => {
-		const plugins = section.plugins.map( ( plugin ) => {
-			return {
-				...plugin,
-				description: generatePluginDescriptionWithLink(
-					plugin.description,
-					plugin.product
-				),
-				isVisible: () => plugin.is_visible,
-			};
-		} );
-		return {
-			...section,
-			plugins,
-		};
-	} );
-};
-
 const baseValues = { install_extensions: true };
-export const createInitialValues = (
-	extensions,
-	country,
-	industry,
-	productTypes
-) => {
+export const createInitialValues = ( extensions ) => {
 	return extensions.reduce( ( acc, curr ) => {
-		const plugins = getVisiblePlugins(
-			curr.plugins,
-			country,
-			industry,
-			productTypes
-		).reduce( ( pluginAcc, { key, selected } ) => {
-			return { ...pluginAcc, [ key ]: selected ?? true };
-		}, {} );
+		const plugins = curr.plugins.reduce(
+			( pluginAcc, { key, selected } ) => {
+				return { ...pluginAcc, [ key ]: selected ?? true };
+			},
+			{}
+		);
 
 		return {
 			...acc,
@@ -348,92 +174,31 @@ export const createInitialValues = (
 export const SelectiveExtensionsBundle = ( {
 	isInstallingActivating,
 	onSubmit,
-	country,
-	industry,
-	productTypes,
 } ) => {
 	const [ showExtensions, setShowExtensions ] = useState( false );
 	const [ values, setValues ] = useState( baseValues );
-	const [ installableExtensions, setInstallableExtensions ] = useState( [
-		{ key: 'spinner', plugins: [] },
-	] );
-	const [ isFetching, setIsFetching ] = useState( true );
 
-	const allowMarketplaceSuggestions = useSelect( ( select ) =>
-		select( SETTINGS_STORE_NAME ).getSetting(
-			'wc_admin',
-			'allowMarketplaceSuggestions'
-		)
-	);
+	const { freeExtensions, isResolving } = useSelect( ( select ) => {
+		const { getFreeExtensions, hasFinishedResolution } = select(
+			ONBOARDING_STORE_NAME
+		);
+
+		return {
+			freeExtensions: getFreeExtensions(),
+			isResolving: ! hasFinishedResolution( 'getFreeExtensions' ),
+		};
+	} );
 
 	useEffect( () => {
-		const setLocalInstallableExtensions = () => {
-			const initialValues = createInitialValues(
-				installableExtensionsData,
-				country,
-				industry,
-				productTypes
-			);
-			setInstallableExtensions(
-				getVisibleBundles(
-					installableExtensionsData,
-					country,
-					industry,
-					productTypes
-				)
-			);
-			setValues( initialValues );
-			setIsFetching( false );
-		};
+		const initialValues = createInitialValues( freeExtensions );
+		setValues( initialValues );
+	}, [ freeExtensions ] );
 
-		if (
-			window.wcAdminFeatures &&
-			window.wcAdminFeatures[ 'remote-extensions-list' ] === true &&
-			allowMarketplaceSuggestions
-		) {
-			apiFetch( {
-				path: '/wc-admin/onboarding/free-extensions',
-			} )
-				.then( ( results ) => {
-					if ( ! results?.length ) {
-						// Assuming empty array or null results is err.
-						setLocalInstallableExtensions();
-						return;
-					}
-
-					const extensions = results.filter( ( list ) =>
-						ALLOWED_PLUGIN_LISTS.includes( list.key )
-					);
-
-					const transformedExtensions = transformRemoteExtensions(
-						extensions
-					);
-					const initialValues = createInitialValues(
-						transformedExtensions,
-						country,
-						industry,
-						productTypes
-					);
-					setInstallableExtensions(
-						getVisibleBundles(
-							transformedExtensions,
-							country,
-							industry,
-							productTypes
-						)
-					);
-					setValues( initialValues );
-					setIsFetching( false );
-				} )
-				.catch( () => {
-					// An error has occurred, default to local config
-					setLocalInstallableExtensions();
-				} );
-		} else {
-			// Use local config
-			setLocalInstallableExtensions();
-		}
-	}, [ country, industry, productTypes, allowMarketplaceSuggestions ] );
+	const installableExtensions = useMemo( () => {
+		return freeExtensions.filter( ( list ) => {
+			return ALLOWED_PLUGIN_LISTS.includes( list.key );
+		} );
+	}, [ freeExtensions ] );
 
 	const getCheckboxChangeHandler = ( key ) => {
 		return ( checked ) => {
@@ -508,7 +273,7 @@ export const SelectiveExtensionsBundle = ( {
 						installableExtensions.map(
 							( { plugins, key: sectionKey } ) => (
 								<div key={ sectionKey }>
-									{ isFetching ? (
+									{ isResolving ? (
 										<Spinner />
 									) : (
 										plugins.map(

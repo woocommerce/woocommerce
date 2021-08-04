@@ -8,6 +8,7 @@ namespace Automattic\WooCommerce\Admin\Features\RemoteFreeExtensions;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\RemoteInboxNotifications\SpecRunner;
+use Automattic\WooCommerce\Admin\Features\RemoteFreeExtensions\DefaultFreeExtensions;
 
 /**
  * Remote Payment Methods engine.
@@ -28,15 +29,26 @@ class Init {
 	 * Go through the specs and run them.
 	 */
 	public static function get_extensions() {
-		$methods = array();
+		$bundles = array();
 		$specs   = self::get_specs();
 
 		foreach ( $specs as $spec ) {
-			$method    = EvaluateExtension::evaluate( $spec );
-			$methods[] = $method;
+			$spec              = (object) $spec;
+			$bundle            = (array) $spec;
+			$bundle['plugins'] = array();
+
+			foreach ( $spec->plugins as $plugin ) {
+				$extension = EvaluateExtension::evaluate( (object) $plugin );
+
+				if ( ! property_exists( $extension, 'is_visible' ) || $extension->is_visible ) {
+					$bundle['plugins'][] = $extension;
+				}
+			}
+
+			$bundles[] = $bundle;
 		}
 
-		return $methods;
+		return $bundles;
 	}
 
 	/**
@@ -54,8 +66,17 @@ class Init {
 
 		// Fetch specs if they don't yet exist.
 		if ( false === $specs || ! is_array( $specs ) || 0 === count( $specs ) ) {
-			// We are running too early, need to poll data sources first.
+			if ( 'no' === get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) ) {
+				return DefaultFreeExtensions::get_all();
+			}
+
 			$specs = DataSourcePoller::read_specs_from_data_sources();
+
+			// Fall back to default specs if polling failed.
+			if ( ! $specs || empty( $specs ) ) {
+				return DefaultFreeExtensions::get_all();
+			}
+
 			set_transient( self::SPECS_TRANSIENT_NAME, $specs, 7 * DAY_IN_SECONDS );
 		}
 
