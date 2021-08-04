@@ -1315,6 +1315,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				AND p.post_type = 'product'
 
 			",
+			'orderby' => '
+				ORDER BY RAND()',
 			'limits' => '
 				LIMIT ' . absint( $limit ) . '
 			',
