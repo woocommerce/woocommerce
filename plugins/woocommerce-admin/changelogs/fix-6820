@@ -1,4 +1,0 @@
-Significance: patch
-Type: Fix
-
-Fixing issues with ReportTable component data not populating correctly #7355

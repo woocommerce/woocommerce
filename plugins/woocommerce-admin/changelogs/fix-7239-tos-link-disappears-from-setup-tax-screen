@@ -1,4 +1,0 @@
-Significance: patch
-Type: Tweak
-
-Render a spinner while woocommerce_setup_jetpack_opted_in is being loaded

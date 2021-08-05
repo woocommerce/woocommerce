@@ -1,4 +1,0 @@
-Significance: patch
-Type: Performance
-
-Add lazy loading by checking panel open status
