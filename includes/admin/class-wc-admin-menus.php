@@ -147,10 +147,12 @@ class WC_Admin_Menus {
 	 * Addons menu item.
 	 */
 	public function addons_menu() {
+		add_submenu_page( 'woocommerce', __( 'WooCommerce extensions marketplace', 'woocommerce' ), __( 'Marketplace', 'woocommerce' ), 'manage_woocommerce', 'wc-addons', array( $this, 'marketplace_page' ) );
+
 		$count_html = WC_Helper_Updater::get_updates_count_html();
-		/* translators: %s: extensions count */
-		$menu_title = sprintf( __( 'Extensions %s', 'woocommerce' ), $count_html );
-		add_submenu_page( 'woocommerce', __( 'WooCommerce extensions', 'woocommerce' ), $menu_title, 'manage_woocommerce', 'wc-addons', array( $this, 'addons_page' ) );
+		/* translators: %s: number of extensions that have an update */
+		$my_subscriptions_menu_title = sprintf( __( 'My Subscriptons %s', 'woocommerce' ), $count_html );
+		add_submenu_page( 'woocommerce', __( 'My WooCommerce.com subscriptions', 'woocommerce' ), $my_subscriptions_menu_title, 'manage_woocommerce', 'wc-subscriptions', array( $this, 'my_subscriptions_page' ) );
 	}
 
 	/**
@@ -288,10 +290,17 @@ class WC_Admin_Menus {
 	}
 
 	/**
-	 * Init the addons page.
+	 * Init the extensions marketplace page.
 	 */
-	public function addons_page() {
+	public function marketplace_page() {
 		WC_Admin_Addons::output();
+	}
+
+	/**
+	 * Init the subscriptions page.
+	 */
+	public function my_subscriptions_page() {
+		WC_Admin_My_Subscriptions::output();
 	}
 
 	/**
