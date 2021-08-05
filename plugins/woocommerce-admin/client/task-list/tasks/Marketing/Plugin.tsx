@@ -4,6 +4,7 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { getAdminLink } from '@woocommerce/wc-admin-settings';
+import { recordEvent } from '@woocommerce/tracks';
 import { Text } from '@woocommerce/experimental';
 
 /**
@@ -63,6 +64,11 @@ export const Plugin: React.FC< PluginProps > = ( {
 						isBusy={ isBusy }
 						isSecondary
 						href={ getAdminLink( manageUrl ) }
+						onClick={ () =>
+							recordEvent( 'marketing_manage', {
+								extension_name: slug,
+							} )
+						}
 					>
 						{ __( 'Manage', 'woocommmerce-admin' ) }
 					</Button>
