@@ -32,6 +32,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</form>
 		</div>
 
+		<div class="marketplace-content-wrapper">
 		<?php if ( isset( $_GET['search'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>
 			<h1 class="search-form-title" >
 				<?php // translators: search keyword. ?>
@@ -107,6 +108,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<?php endforeach; ?>
 			</ul>
 		<?php endif; ?>
+		</div>
 	<?php else : ?>
 		<?php /* translators: a url */ ?>
 		<p><?php printf( wp_kses_post( __( 'Our catalog of WooCommerce Extensions can be found on WooCommerce.com here: <a href="%s">WooCommerce Extensions Catalog</a>', 'woocommerce' ) ), 'https://woocommerce.com/product-category/woocommerce-extensions/' ); ?></p>
