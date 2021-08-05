@@ -161,13 +161,6 @@ const AttributeFilterBlock = ( {
 		queryState.attributes,
 	] );
 
-	// Track checked STATE changes - if state changes, update the query.
-	useEffect( () => {
-		if ( ! blockAttributes.showFilterButton ) {
-			onSubmit( checked );
-		}
-	}, [ blockAttributes.showFilterButton, checked, onSubmit ] );
-
 	const checkedQuery = useMemo( () => {
 		return productAttributesQuery
 			.filter(
@@ -226,6 +219,13 @@ const AttributeFilterBlock = ( {
 			blockAttributes.queryType,
 		]
 	);
+
+	// Track checked STATE changes - if state changes, update the query.
+	useEffect( () => {
+		if ( ! blockAttributes.showFilterButton ) {
+			onSubmit( checked );
+		}
+	}, [ blockAttributes.showFilterButton, checked, onSubmit ] );
 
 	const multiple =
 		blockAttributes.displayStyle !== 'dropdown' ||

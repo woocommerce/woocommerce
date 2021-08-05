@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { withInstanceId } from '@woocommerce/base-hocs/with-instance-id';
+import { withInstanceId } from '@wordpress/compose';
 import classnames from 'classnames';
 import { __ } from '@wordpress/i18n';
 import { useTabState, Tab, TabList, TabPanel } from 'reakit/Tab';

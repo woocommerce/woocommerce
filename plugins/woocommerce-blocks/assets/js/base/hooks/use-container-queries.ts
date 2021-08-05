@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useResizeObserver } from 'wordpress-compose';
+import { useResizeObserver } from '@wordpress/compose';
 
 /**
  * Returns a resizeListener element and a class name based on its width.
