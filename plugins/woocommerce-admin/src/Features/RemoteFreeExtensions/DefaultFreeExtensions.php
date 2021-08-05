@@ -315,6 +315,46 @@ class DefaultFreeExtensions {
 					],
 				],
 			],
+			[
+				'key'     => 'reach',
+				'title'   => __( 'Reach out to customers', 'woocommerce-admin' ),
+				'plugins' => [
+					[
+						'key'         => 'mailpoet',
+						'name'        => __( 'MailPoet', 'woocommerce-admin' ),
+						'description' => __( 'Create and send purchase follow-up emails, newsletters, and promotional campaigns straight from your dashboard.', 'woocommerce-admin' ),
+						'image_url'   => plugins_url( 'images/onboarding/mailpoet.png', WC_ADMIN_PLUGIN_FILE ),
+						'manage_url'  => 'admin.php?page=mailpoet-newsletters',
+					],
+					[
+						'key'         => 'mailchimp-for-woocommerce',
+						'name'        => __( 'Mailchimp', 'woocommerce-admin' ),
+						'description' => __( 'Send targeted campaigns, recover abandoned carts and much more with Mailchimp.', 'woocommerce-admin' ),
+						'image_url'   => plugins_url( 'images/onboarding/mailchimp-for-woocommerce.png', WC_ADMIN_PLUGIN_FILE ),
+						'manage_url'  => 'admin.php?page=mailchimp-woocommerce',
+					],
+					[
+						'key'         => 'creative-mail-by-constant-contact',
+						'name'        => __( 'Creative Mail for WooCommerce', 'woocommerce-admin' ),
+						'description' => __( 'Create on-brand store campaigns, fast email promotions and customer retargeting with Creative Mail.', 'woocommerce-admin' ),
+						'image_url'   => plugins_url( 'images/onboarding/creative-mail-by-constant-contact.png', WC_ADMIN_PLUGIN_FILE ),
+						'manage_url'  => 'admin.php?page=creativemail',
+					],
+				],
+			],
+			[
+				'key'     => 'grow',
+				'title'   => __( 'Grow your store', 'woocommerce-admin' ),
+				'plugins' => [
+					[
+						'key'         => 'google-listings-and-ads',
+						'name'        => __( 'Google Ads & Marketing by Kliken', 'woocommerce-admin' ),
+						'description' => __( 'Get in front of shoppers and drive traffic so you can grow your business with Smart Shopping Campaigns and free listings.', 'woocommerce-admin' ),
+						'image_url'   => plugins_url( 'images/onboarding/google-listings-and-ads.png', WC_ADMIN_PLUGIN_FILE ),
+						'manage_url'  => 'admin.php?page=wc-admin&path=%2Fgoogle%2Fstart',
+					],
+				],
+			],
 		];
 
 		$bundles = wp_json_encode( $bundles );
