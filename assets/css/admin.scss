@@ -15,6 +15,7 @@
   * Styling begins
   */
 .blockUI.blockOverlay {
+
 	@include loader();
 }
 
@@ -515,6 +516,7 @@
 	}
 
 	@media only screen and (max-width: 400px) {
+
 		.addons-featured {
 			margin: -1% -5%;
 		}
@@ -536,13 +538,23 @@
 		}
 	}
 
+	.marketplace-content-wrapper {
+		margin: 0 auto;
+		max-width: 1056px;
+		width: 100%;
+	}
+
 	.products {
 		display: flex;
 		flex-flow: row;
 		flex-wrap: wrap;
-		margin: 0 auto;
+		margin: 0;
 		max-width: 1056px;
 		overflow: hidden;
+
+		@media only screen and ( max-width: 1280px ) {
+			margin: 0 -12px;	
+		}
 
 		li {
 			background: #fff;
@@ -553,12 +565,17 @@
 			flex-direction: column;
 			justify-content: space-between;
 			margin: 12px;
+			max-width: 502px;
 			min-width: 280px;
 			min-height: 220px;
 			overflow: hidden;
 			padding: 0;
 			vertical-align: top;
 			width: 45%;
+
+			@media only screen and ( max-width: 768px ) {
+				max-width: none;
+			}
 
 			a {
 				text-decoration: none;
@@ -645,13 +662,17 @@
 
 .woocommerce-message,
 .woocommerce-BlankState {
+
 	a.button-primary,
 	button.button-primary {
 		background: #bb77ae;
 		border-color: #a36597;
 		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
 		color: #fff;
-		text-shadow: 0 -1px 1px #a36597, 1px 0 1px #a36597, 0 1px 1px #a36597,
+		text-shadow:
+			0 -1px 1px #a36597,
+			1px 0 1px #a36597,
+			0 1px 1px #a36597,
 			-1px 0 1px #a36597;
 		display: inline-block;
 
@@ -708,11 +729,13 @@
 }
 
 #variable_product_options {
+
 	.form-row select {
 		max-width: 100%;
 	}
 
 	.toolbar-top {
+
 		.button {
 			margin: 1px;
 		}
@@ -720,7 +743,9 @@
 }
 
 #product_attributes {
+
 	.toolbar-top {
+
 		.button {
 			margin: 1px;
 		}
@@ -756,12 +781,14 @@ mark.amount {
 	width: 16px;
 
 	&::after {
+
 		@include icon_dashicons("\f223");
 		cursor: help;
 	}
 }
 
 .wc-wp-version-gte-53 {
+
 	.woocommerce-help-tip {
 		font-size: 1.2em;
 		cursor: help;
@@ -782,6 +809,7 @@ table.wc_status_table {
 	}
 
 	tr:nth-child(2n) {
+
 		th,
 		td {
 			background: #fcfcfc;
@@ -843,6 +871,7 @@ table.wc_status_table {
 }
 
 table.wc_status_table--tools {
+
 	td,
 	th {
 		padding: 2em;
@@ -850,6 +879,7 @@ table.wc_status_table--tools {
 }
 
 .taxonomy-product_cat {
+
 	.check-column .woocommerce-help-tip {
 		font-size: 1.5em;
 		margin: -3px 0 0 5px;
@@ -882,6 +912,7 @@ table.wc_status_table--tools {
   * DB log viewer
   */
 .wp-list-table.logs {
+
 	.log-level {
 		display: inline;
 		padding: 0.2em 0.6em 0.3em;
@@ -936,6 +967,7 @@ table.wc_status_table--tools {
 
 	// Adjust log table columns only when table is not collapsed
 	@media screen and (min-width: 783px) {
+
 		.column-timestamp {
 			width: 18%;
 		}
@@ -973,6 +1005,7 @@ table.wc_status_table--tools {
 }
 
 .inline-edit-product.quick-edit-row {
+
 	.inline-edit-col-center,
 	.inline-edit-col-right {
 		float: right !important;
@@ -1027,11 +1060,13 @@ table.wc_status_table--tools {
 }
 
 #woocommerce-fields-bulk.inline-edit-col {
+
 	label {
 		clear: left;
 	}
 
 	.inline-edit-group {
+
 		label {
 			clear: none;
 			width: 49%;
@@ -1121,6 +1156,7 @@ ul.wc_coupon_list {
 				 */
 
 				&::before {
+
 					@include icon_dashicons("\f158");
 				}
 
@@ -1156,6 +1192,7 @@ ul.wc_coupon_list_block {
 }
 
 .button.wc-reload {
+
 	@include ir();
 	padding: 0;
 	height: 28px;
@@ -1163,12 +1200,14 @@ ul.wc_coupon_list_block {
 	display: inline-block;
 
 	&::after {
+
 		@include icon_dashicons("\f345");
 		line-height: 28px;
 	}
 }
 
 #woocommerce-order-data {
+
 	.postbox-header,
 	.hndle,
 	.handlediv {
@@ -1185,8 +1224,11 @@ ul.wc_coupon_list_block {
 
 	h2 {
 		margin: 0;
-		font-family: "HelveticaNeue-Light", "Helvetica Neue Light",
-			"Helvetica Neue", sans-serif;
+		font-family:
+			"HelveticaNeue-Light",
+			"Helvetica Neue Light",
+			"Helvetica Neue",
+			sans-serif;
 		font-size: 21px;
 		font-weight: normal;
 		line-height: 1.2;
@@ -1210,8 +1252,11 @@ ul.wc_coupon_list_block {
 
 	p.order_number {
 		margin: 0;
-		font-family: "HelveticaNeue-Light", "Helvetica Neue Light",
-			"Helvetica Neue", sans-serif;
+		font-family:
+			"HelveticaNeue-Light",
+			"Helvetica Neue Light",
+			"Helvetica Neue",
+			sans-serif;
 		font-weight: normal;
 		line-height: 1.6em;
 		font-size: 16px;
@@ -1329,6 +1374,7 @@ ul.wc_coupon_list_block {
 			padding-right: 1px;
 
 			.select2-container {
+
 				.select2-selection--single {
 					height: 32px;
 
@@ -1341,6 +1387,7 @@ ul.wc_coupon_list_block {
 
 		.wc-customer-user,
 		.wc-order-status {
+
 			label a {
 				float: right;
 				margin-left: 8px;
@@ -1455,6 +1502,7 @@ ul.wc_coupon_list_block {
 }
 
 #woocommerce-order-items {
+
 	.inside {
 		margin: 0;
 		padding: 0;
@@ -1554,6 +1602,7 @@ ul.wc_coupon_list_block {
 	}
 
 	.add-items {
+
 		.description {
 			margin-right: 10px;
 		}
@@ -1571,6 +1620,7 @@ ul.wc_coupon_list_block {
 }
 
 #woocommerce-order-items {
+
 	.inside {
 		display: block !important;
 	}
@@ -1682,6 +1732,7 @@ ul.wc_coupon_list_block {
 					text-align: center;
 
 					&::before {
+
 						@include icon_dashicons("\f128");
 						width: 38px;
 						line-height: 38px;
@@ -1699,6 +1750,7 @@ ul.wc_coupon_list_block {
 			}
 
 			td.name {
+
 				.wc-order-item-sku,
 				.wc-order-item-variation {
 					display: block;
@@ -1871,6 +1923,7 @@ ul.wc_coupon_list_block {
 				color: #888;
 
 				tr {
+
 					th {
 						border: 0;
 						padding: 0 4px 0.5em 0;
@@ -1919,6 +1972,7 @@ ul.wc_coupon_list_block {
 			}
 
 			tr.fee .thumb div {
+
 				@include ir();
 				font-size: 1.5em;
 				line-height: 1em;
@@ -1926,12 +1980,14 @@ ul.wc_coupon_list_block {
 				margin: 0 auto;
 
 				&::before {
+
 					@include icon("\e007");
 					color: #ccc;
 				}
 			}
 
 			tr.refund .thumb div {
+
 				@include ir();
 				font-size: 1.5em;
 				line-height: 1em;
@@ -1939,13 +1995,16 @@ ul.wc_coupon_list_block {
 				margin: 0 auto;
 
 				&::before {
+
 					@include icon("\e014");
 					color: #ccc;
 				}
 			}
 
 			tr.shipping {
+
 				.thumb div {
+
 					@include ir();
 					font-size: 1.5em;
 					line-height: 1em;
@@ -1953,6 +2012,7 @@ ul.wc_coupon_list_block {
 					margin: 0 auto;
 
 					&::before {
+
 						@include icon("\e01a");
 						color: #ccc;
 					}
@@ -1971,7 +2031,9 @@ ul.wc_coupon_list_block {
 
 			th.line_tax,
 			td.line_tax {
+
 				.delete-order-tax {
+
 					@include ir();
 					float: right;
 					font-size: 14px;
@@ -1979,6 +2041,7 @@ ul.wc_coupon_list_block {
 					margin: 3px -18px 0 0;
 
 					&::before {
+
 						@include icon_dashicons("\f153");
 						color: #999;
 					}
@@ -2000,6 +2063,7 @@ ul.wc_coupon_list_block {
 				margin-top: 0.5em;
 
 				&::before {
+
 					@include icon_dashicons("\f171");
 					position: relative;
 					top: auto;
@@ -2043,6 +2107,7 @@ ul.wc_coupon_list_block {
 			}
 
 			&:hover {
+
 				&::before {
 					color: #999;
 				}
@@ -2054,13 +2119,16 @@ ul.wc_coupon_list_block {
 		}
 
 		.edit-order-item::before {
+
 			@include icon_dashicons("\f464");
 			position: relative;
 		}
 
 		.delete-order-item,
 		.delete_refund {
+
 			&::before {
+
 				@include icon_dashicons("\f158");
 				position: relative;
 			}
@@ -2090,6 +2158,7 @@ ul.wc_coupon_list_block {
 }
 
 #woocommerce-order-downloads {
+
 	.buttons {
 		float: left;
 		padding: 0;
@@ -2147,6 +2216,7 @@ ul.wc_coupon_list_block {
 }
 
 #woocommerce_customers {
+
 	p.search-box {
 		margin: 6px 0 4px;
 		float: left;
@@ -2159,6 +2229,7 @@ ul.wc_coupon_list_block {
 }
 
 .widefat {
+
 	&.customers td {
 		vertical-align: middle;
 		padding: 4px 7px;
@@ -2189,6 +2260,7 @@ ul.wc_coupon_list_block {
 		width: 110px;
 
 		a.button {
+
 			@include ir();
 			display: inline-block;
 			margin: 2px 4px 2px 0;
@@ -2259,9 +2331,13 @@ ul.wc_coupon_list_block {
 }
 
 .wc-wp-version-gte-53 {
+
 	.widefat {
+
 		.column-wc_actions {
+
 			a.button {
+
 				&::after {
 					margin-top: 2px;
 				}
@@ -2271,11 +2347,13 @@ ul.wc_coupon_list_block {
 }
 
 .post-type-shop_order {
+
 	.tablenav .one-page .displaying-num {
 		display: none;
 	}
 
 	.tablenav {
+
 		.select2-selection--single {
 			height: 32px;
 
@@ -2294,6 +2372,7 @@ ul.wc_coupon_list_block {
 
 		thead,
 		tfoot {
+
 			th {
 				padding: 0.75em 1em;
 			}
@@ -2313,6 +2392,7 @@ ul.wc_coupon_list_block {
 		}
 
 		tbody {
+
 			td,
 			th {
 				padding: 1em;
@@ -2416,6 +2496,7 @@ ul.wc_coupon_list_block {
 			border-radius: 4px;
 
 			&::before {
+
 				@include icon("\e010");
 				line-height: 16px;
 				font-size: 14px;
@@ -2429,6 +2510,7 @@ ul.wc_coupon_list_block {
 		}
 
 		.order-preview.disabled {
+
 			&::before {
 				content: "";
 				background: url("../images/wpspin-2x.gif") no-repeat center top;
@@ -2483,6 +2565,7 @@ ul.wc_coupon_list_block {
 }
 
 .wc-order-preview {
+
 	.order-status {
 		float: right;
 		margin-right: 54px;
@@ -2575,6 +2658,7 @@ ul.wc_coupon_list_block {
 	}
 
 	footer {
+
 		.wc-action-button-group {
 			display: inline-block;
 			float: left;
@@ -2650,7 +2734,9 @@ ul.wc_coupon_list_block {
 }
 
 @media screen and (max-width: 782px) {
+
 	.wc-order-preview footer {
+
 		.wc-action-button-group .wc-action-button-group__items {
 			display: flex;
 		}
@@ -2671,6 +2757,7 @@ ul.wc_coupon_list_block {
 	}
 
 	.post-type-shop_order .wp-list-table {
+
 		td.check-column {
 			width: 1em;
 		}
@@ -2700,6 +2787,7 @@ ul.wc_coupon_list_block {
 	}
 
 	.wc_addons_wrap {
+
 		.addons-promotion-block {
 			flex-direction: column;
 			padding: 24px;
@@ -2724,28 +2812,33 @@ ul.wc_coupon_list_block {
 }
 
 .column-customer_message .note-on {
+
 	@include ir();
 	margin: 0 auto;
 	color: #999;
 
 	&::after {
+
 		@include icon("\e026");
 		line-height: 16px;
 	}
 }
 
 .column-order_notes .note-on {
+
 	@include ir();
 	margin: 0 auto;
 	color: #999;
 
 	&::after {
+
 		@include icon("\e027");
 		line-height: 16px;
 	}
 }
 
 .attributes-table {
+
 	td,
 	th {
 		width: 15%;
@@ -2760,12 +2853,14 @@ ul.wc_coupon_list_block {
 		width: 2em;
 
 		.configure-terms {
+
 			@include ir();
 			padding: 0 !important;
 			height: 2em !important;
 			width: 2em;
 
 			&::after {
+
 				@include icon("\f111");
 				font-family: "Dashicons";
 				line-height: 1.85;
@@ -2779,6 +2874,7 @@ ul.order_notes {
 	padding: 2px 0 0;
 
 	li {
+
 		.note_content {
 			padding: 10px;
 			background: #efefef;
@@ -2821,6 +2917,7 @@ ul.order_notes {
 	}
 
 	li.system-note {
+
 		.note_content {
 			background: #d7cad2;
 		}
@@ -2831,6 +2928,7 @@ ul.order_notes {
 	}
 
 	li.customer-note {
+
 		.note_content {
 			background: #a7cedc;
 		}
@@ -2856,6 +2954,7 @@ ul.order_notes {
 }
 
 table.wp-list-table {
+
 	.column-thumb {
 		width: 52px;
 		text-align: center;
@@ -2868,6 +2967,7 @@ table.wp-list-table {
 	}
 
 	tbody {
+
 		td.column-handle {
 			cursor: move;
 			width: 17px;
@@ -2963,15 +3063,18 @@ table.wp-list-table {
 
 	span.wc-image,
 	span.wc-featured {
+
 		@include ir();
 		margin: 0 auto;
 
 		&::before {
+
 			@include icon_dashicons("\f128");
 		}
 	}
 
 	span.wc-featured {
+
 		&::before {
 			content: "\f155";
 		}
@@ -2987,6 +3090,7 @@ table.wp-list-table {
 	}
 
 	mark {
+
 		&.instock,
 		&.outofstock,
 		&.onbackorder {
@@ -3011,10 +3115,12 @@ table.wp-list-table {
 	.order-notes_head,
 	.notes_head,
 	.status_head {
+
 		@include ir();
 		margin: 0 auto;
 
 		&::after {
+
 			@include icon;
 		}
 	}
@@ -3231,6 +3337,7 @@ table.wc_input_table {
 }
 
 table.wc_tax_rates {
+
 	td.country {
 		position: relative;
 	}
@@ -3386,11 +3493,13 @@ table.wc_shipping {
 }
 
 .wc-shipping-zone-settings {
+
 	th {
 		padding: 24px 24px 24px 0;
 	}
 
 	td.forminp {
+
 		input,
 		textarea {
 			padding: 8px;
@@ -3430,6 +3539,7 @@ table.wc_shipping {
 	}
 
 	.wc-shipping-zone-postcodes {
+
 		textarea {
 			margin: 10px 0;
 		}
@@ -3450,9 +3560,12 @@ table.wc_shipping {
 }
 
 table {
+
 	tr,
 	tr:hover {
+
 		table.wc-shipping-zone-methods {
+
 			tr .row-actions {
 				position: relative;
 			}
@@ -3471,6 +3584,7 @@ table {
 table.wc-shipping-zones,
 table.wc-shipping-zone-methods,
 table.wc-shipping-classes {
+
 	td,
 	th {
 		vertical-align: top;
@@ -3491,6 +3605,7 @@ table.wc-shipping-classes {
 	}
 
 	thead {
+
 		th {
 			vertical-align: middle;
 		}
@@ -3554,12 +3669,16 @@ table.wc-shipping-classes {
 		.button-primary {
 			background-color: #804877;
 			border-color: #804877;
-			box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2),
+			box-shadow:
+				inset 0 1px 0 rgba(255, 255, 255, 0.2),
 				0 1px 0 rgba(0, 0, 0, 0.15);
 			margin: 0;
 			opacity: 1;
-			text-shadow: 0 -1px 1px #8a4f7f, 1px 0 1px #8a4f7f,
-				0 1px 1px #8a4f7f, -1px 0 1px #8a4f7f;
+			text-shadow:
+				0 -1px 1px #8a4f7f,
+				1px 0 1px #8a4f7f,
+				0 1px 1px #8a4f7f,
+				-1px 0 1px #8a4f7f;
 			font-size: 1.5em;
 			padding: 0.75em 1em;
 			height: auto;
@@ -3569,6 +3688,7 @@ table.wc-shipping-classes {
 	}
 
 	.wc-shipping-zone-method-rows {
+
 		tr:nth-child(even) td {
 			background: #f9f9f9;
 		}
@@ -3576,17 +3696,20 @@ table.wc-shipping-classes {
 
 	tr.odd,
 	.wc-shipping-class-rows tr:nth-child(odd) {
+
 		td {
 			background: #f9f9f9;
 		}
 	}
 
 	tbody.wc-shipping-zone-rows {
+
 		td {
 			border-top: 2px solid #f9f9f9;
 		}
 
 		tr:first-child {
+
 			td {
 				border-top: 0;
 			}
@@ -3594,6 +3717,7 @@ table.wc-shipping-classes {
 	}
 
 	tr.wc-shipping-zone-worldwide {
+
 		td {
 			background: #f9f9f9;
 			border-top: 2px solid #e1e1e1;
@@ -3656,6 +3780,7 @@ table.wc-shipping-classes {
 	.wc-shipping-class-slug,
 	.wc-shipping-zone-name,
 	.wc-shipping-zone-region {
+
 		input,
 		select,
 		textarea {
@@ -3712,6 +3837,7 @@ table.wc-shipping-classes {
 			cursor: pointer;
 
 			&::before {
+
 				@include icon;
 				font-family: "Dashicons";
 				content: "\f502";
@@ -3757,6 +3883,7 @@ table.wc-shipping-classes {
 	}
 
 	tfoot {
+
 		input,
 		select {
 			vertical-align: middle !important;
@@ -3768,6 +3895,7 @@ table.wc-shipping-classes {
 	}
 
 	.editing {
+
 		.wc-shipping-zone-view,
 		.wc-shipping-zone-edit {
 			display: none;
@@ -3824,6 +3952,7 @@ table.wc-shipping-classes {
 		margin: 0 0 1.5em;
 
 		tr {
+
 			th {
 				width: 30%;
 				position: relative;
@@ -3839,6 +3968,7 @@ table.wc-shipping-classes {
 			}
 
 			td {
+
 				input,
 				select,
 				textarea {
@@ -3869,6 +3999,7 @@ table.wc-shipping-classes {
 }
 
 .wc-backbone-modal .wc-shipping-zone-method-selector {
+
 	p {
 		margin-top: 0;
 	}
@@ -3908,21 +4039,25 @@ img.help_tip {
 }
 
 .status-manual::before {
+
 	@include icon("\e008");
 	color: #999;
 }
 
 .status-enabled::before {
+
 	@include icon("\e015");
 	color: $woocommerce;
 }
 
 .status-disabled::before {
+
 	@include icon("\e013");
 	color: #ccc;
 }
 
 .woocommerce {
+
 	h2.woo-nav-tab-wrapper {
 		margin-bottom: 1em;
 	}
@@ -4029,6 +4164,7 @@ img.help_tip {
 
 		// Ignore nested inputs.
 		table {
+
 			select,
 			textarea,
 			input[type="text"],
@@ -4170,7 +4306,9 @@ img.help_tip {
 	}
 
 	.wc-shipping-zone-settings {
+
 		td.forminp {
+
 			input,
 			textarea {
 				width: 448px;
@@ -4185,7 +4323,9 @@ img.help_tip {
 }
 
 .wc-wp-version-gte-53 {
+
 	.woocommerce {
+
 		h2.wc-table-list-header {
 			margin: 1em 0 0.35em 0;
 		}
@@ -4217,12 +4357,14 @@ img.help_tip {
 			}
 
 			select {
+
 				@media only screen and (max-width: 782px) {
 					width: 100%;
 				}
 			}
 
 			th label {
+
 				img.help_tip,
 				.woocommerce-help-tip {
 					margin: -7px -24px 0 0;
@@ -4296,6 +4438,7 @@ img.help_tip {
 		padding: 0 0 0 9px;
 
 		ul {
+
 			@include clearfix();
 			margin: 0;
 			padding: 0;
@@ -4326,6 +4469,7 @@ img.help_tip {
 				position: relative;
 
 				&::after {
+
 					@include icon_dashicons("\f161");
 					font-size: 2.618em;
 					line-height: 72px;
@@ -4362,10 +4506,12 @@ img.help_tip {
 					}
 
 					a.delete {
+
 						@include ir();
 						font-size: 1.4em;
 
 						&::before {
+
 							@include icon_dashicons("\f153");
 							color: #999;
 							background: #fff;
@@ -4390,6 +4536,7 @@ img.help_tip {
 }
 
 #woocommerce-product-data {
+
 	.hndle {
 		padding: 10px;
 
@@ -4472,6 +4619,7 @@ img.help_tip {
 
 #woocommerce-product-data,
 #woocommerce-coupon-data {
+
 	.panel-wrap {
 		background: #fff;
 	}
@@ -4501,6 +4649,7 @@ img.help_tip {
 #woocommerce-product-data,
 #woocommerce-coupon-data,
 .woocommerce {
+
 	.panel-wrap {
 		overflow: hidden;
 	}
@@ -4549,6 +4698,7 @@ img.help_tip {
 				}
 
 				&::before {
+
 					@include iconbeforedashicons("\f107");
 				}
 			}
@@ -4615,12 +4765,14 @@ img.help_tip {
   * Shipping
   */
 .woocommerce_page_wc-settings {
+
 	input[type="url"],
 	input[type="email"] {
 		direction: ltr;
 	}
 
 	.shippingrows {
+
 		th.check-column {
 			padding-top: 20px;
 		}
@@ -4630,6 +4782,7 @@ img.help_tip {
 		}
 
 		.add.button::before {
+
 			@include iconbefore("\e007");
 		}
 	}
@@ -4644,6 +4797,7 @@ img.help_tip {
 #woocommerce-order-data,
 #woocommerce-order-downloads,
 #woocommerce-coupon-data {
+
 	.inside {
 		margin: 0;
 		padding: 0;
@@ -4697,6 +4851,7 @@ img.help_tip {
 
 .woocommerce_variations,
 .woocommerce_options_panel {
+
 	.downloadable_files table {
 		width: 100%;
 		padding: 0 !important;
@@ -4738,15 +4893,18 @@ img.help_tip {
 			}
 
 			.delete {
+
 				@include ir();
 				font-size: 1.2em;
 
 				&::before {
+
 					@include icon_dashicons("\f153");
 					color: #999;
 				}
 
 				&:hover {
+
 					&::before {
 						color: $red;
 					}
@@ -4783,6 +4941,7 @@ img.help_tip {
 
 .woocommerce_attribute,
 .woocommerce_variation {
+
 	h3 .sort {
 		width: 17px;
 		height: 26px;
@@ -4814,6 +4973,7 @@ img.help_tip {
 
 	h3:hover,
 	&.ui-sortable-helper {
+
 		.sort {
 			visibility: visible;
 		}
@@ -4847,6 +5007,7 @@ img.help_tip {
 	}
 
 	.sale_price_dates_fields {
+
 		.short:first-of-type {
 			margin-bottom: 1em;
 		}
@@ -5011,6 +5172,7 @@ img.help_tip {
   * WooCommerce meta boxes
   */
 .wc-metaboxes-wrapper {
+
 	.toolbar {
 		margin: 0 !important;
 		border-top: 1px solid white;
@@ -5110,6 +5272,7 @@ img.help_tip {
 		}
 
 		&.closed {
+
 			@include border-radius(3px);
 
 			.handlediv::before {
@@ -5180,6 +5343,7 @@ img.help_tip {
 
 		h3:hover,
 		&.ui-sortable-helper {
+
 			a.delete,
 			.handlediv {
 				visibility: visible;
@@ -5298,6 +5462,7 @@ img.help_tip {
 	border-top: 1px solid #eee;
 
 	.data {
+
 		@include clearfix;
 		padding: 1em 2em;
 	}
@@ -5333,6 +5498,7 @@ img.help_tip {
 		}
 
 		&.remove {
+
 			img {
 				display: block;
 			}
@@ -5366,6 +5532,7 @@ img.help_tip {
 }
 
 .form-row {
+
 	label {
 		display: inline-block;
 	}
@@ -5401,6 +5568,7 @@ img.help_tip {
 	}
 
 	&.dimensions_field {
+
 		.wrap {
 			clear: left;
 			display: block;
@@ -5585,6 +5753,7 @@ img.ui-datepicker-trigger {
 
 .woocommerce-reports-wrap,
 .woocommerce-reports-wide {
+
 	&.woocommerce-reports-wrap {
 		margin-left: 300px;
 		padding-top: 18px;
@@ -5610,6 +5779,7 @@ img.ui-datepicker-trigger {
 	}
 
 	.postbox {
+
 		&::after {
 			content: ".";
 			display: block;
@@ -5642,6 +5812,7 @@ img.ui-datepicker-trigger {
 				text-decoration: none;
 
 				&::before {
+
 					@include iconbeforedashicons("\f346");
 					margin-right: 4px;
 				}
@@ -5768,6 +5939,7 @@ img.ui-datepicker-trigger {
 						display: block;
 
 						&::after {
+
 							@include iconafter("\e035");
 							float: right;
 							font-size: 0.9em;
@@ -5892,8 +6064,11 @@ img.ui-datepicker-trigger {
 					color: #464646;
 					font-weight: normal;
 					display: block;
-					font-family: "HelveticaNeue-Light", "Helvetica Neue Light",
-						"Helvetica Neue", sans-serif;
+					font-family:
+						"HelveticaNeue-Light",
+						"Helvetica Neue Light",
+						"Helvetica Neue",
+						sans-serif;
 
 					del {
 						color: #e74c3c;
@@ -5902,7 +6077,8 @@ img.ui-datepicker-trigger {
 				}
 
 				&:hover {
-					box-shadow: inset 0 -1px 0 0 #dfdfdf,
+					box-shadow:
+						inset 0 -1px 0 0 #dfdfdf,
 						inset 300px 0 0 rgba(156, 93, 144, 0.1);
 					border-right: 5px solid #9c5d90 !important;
 					padding-left: 1.5em;
@@ -6000,6 +6176,7 @@ img.ui-datepicker-trigger {
 	padding-bottom: 11px;
 
 	.widefat {
+
 		.export-data {
 			float: right;
 		}
@@ -6013,6 +6190,7 @@ img.ui-datepicker-trigger {
 }
 
 form.report_filters {
+
 	p {
 		vertical-align: middle;
 	}
@@ -6040,6 +6218,7 @@ table.bar_chart {
 	}
 
 	tbody {
+
 		th {
 			padding: 6px 0;
 			width: 25%;
@@ -6099,22 +6278,27 @@ table.bar_chart {
 }
 
 .post-type-shop_order .woocommerce-BlankState-message::before {
+
 	@include icon("\e01d");
 }
 
 .post-type-shop_coupon .woocommerce-BlankState-message::before {
+
 	@include icon("\e600");
 }
 
 .post-type-product .woocommerce-BlankState-message::before {
+
 	@include icon("\e006");
 }
 
 .woocommerce-BlankState--api .woocommerce-BlankState-message::before {
+
 	@include icon("\e01c");
 }
 
 .woocommerce-BlankState--webhooks .woocommerce-BlankState-message::before {
+
 	@include icon("\e01b");
 }
 
@@ -6131,7 +6315,8 @@ table.bar_chart {
 
 		&::before {
 			color: #ddd;
-			text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.2),
+			text-shadow:
+				0 -1px 1px rgba(0, 0, 0, 0.2),
 				0 1px 0 rgba(255, 255, 255, 0.8);
 			font-size: 8em;
 			display: block;
@@ -6174,6 +6359,7 @@ table.bar_chart {
 }
 
 .post-type-product {
+
 	#wp-pointer-2 .wp-pointer-arrow {
 		left: 240px;
 	}
@@ -6188,7 +6374,9 @@ table.bar_chart {
   * Small screen optimisation
   */
 @media only screen and (max-width: 1280px) {
+
 	#order_data {
+
 		.order_data_column {
 			width: 48%;
 
@@ -6199,6 +6387,7 @@ table.bar_chart {
 	}
 
 	.woocommerce_options_panel {
+
 		.description {
 			display: block;
 			clear: both;
@@ -6217,6 +6406,7 @@ table.bar_chart {
 
 	.woocommerce_variations,
 	.woocommerce_options_panel {
+
 		.downloadable_files {
 			padding: 0;
 			clear: both;
@@ -6246,6 +6436,7 @@ table.bar_chart {
   * Optimisation for screens 900px and smaller
   */
 @media only screen and (max-width: 900px) {
+
 	#woocommerce-coupon-data ul.coupon_data_tabs,
 	#woocommerce-product-data ul.product_data_tabs,
 	#woocommerce-product-data .wc-tabs-back {
@@ -6284,6 +6475,7 @@ table.bar_chart {
   * Optimisation for screens 782px and smaller
   */
 @media only screen and (max-width: 782px) {
+
 	#wp-excerpt-media-buttons a {
 		font-size: 16px;
 		line-height: 37px;
@@ -6328,7 +6520,9 @@ table.bar_chart {
 	}
 
 	.post-type-product {
+
 		.wp-list-table {
+
 			.column-thumb {
 				display: none;
 				text-align: left;
@@ -6354,7 +6548,9 @@ table.bar_chart {
 	}
 
 	.post-type-shop_order {
+
 		.wp-list-table {
+
 			.column-customer_message,
 			.column-order_notes {
 				text-align: inherit;
@@ -6377,6 +6573,7 @@ table.bar_chart {
 }
 
 @media only screen and (max-width: 500px) {
+
 	.woocommerce_options_panel label,
 	.woocommerce_options_panel legend {
 		float: none;
@@ -6395,6 +6592,7 @@ table.bar_chart {
 	}
 
 	.wc_addons_wrap {
+
 		.addons-wcs-banner-block {
 			padding: 40px;
 		}
@@ -6417,6 +6615,7 @@ table.bar_chart {
   * Backbone modal dialog
   */
 .wc-backbone-modal {
+
 	* {
 		box-sizing: border-box;
 	}
@@ -6447,6 +6646,7 @@ table.bar_chart {
 }
 
 @media screen and (max-width: 782px) {
+
 	.wc-backbone-modal .wc-backbone-modal-content {
 		width: 100%;
 		height: 100%;
@@ -6646,6 +6846,7 @@ table.bar_chart {
 }
 
 .select2-container {
+
 	.select2-selection__rendered.ui-sortable li {
 		cursor: move;
 	}
@@ -6709,9 +6910,12 @@ table.bar_chart {
 }
 
 .wc-wp-version-gte-53 {
+
 	.select2-results {
+
 		.select2-results__option,
 		.select2-results__group {
+
 			&:focus {
 				outline: none;
 			}
@@ -6748,6 +6952,7 @@ table.bar_chart {
 	}
 
 	.select2-container {
+
 		@media only screen and (max-width: 782px) {
 			font-size: 16px;
 		}
@@ -6784,7 +6989,8 @@ table.bar_chart {
 				right: 1px;
 				height: 28px;
 				width: 23px;
-				background: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M5%206l5%205%205-5%202%201-7%207-7-7%202-1z%22%20fill%3D%22%23555%22%2F%3E%3C%2Fsvg%3E")
+				background:
+					url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M5%206l5%205%205-5%202%201-7%207-7-7%202-1z%22%20fill%3D%22%23555%22%2F%3E%3C%2Fsvg%3E")
 					no-repeat right 5px top 55%;
 				background-size: 16px 16px;
 
@@ -6818,6 +7024,7 @@ table.bar_chart {
 	}
 
 	.woocommerce table.form-table .select2-container {
+
 		@media only screen and (max-width: 782px) {
 			min-width: 100% !important;
 		}
@@ -6825,7 +7032,9 @@ table.bar_chart {
 }
 
 .wc-wp-version-gte-55 {
+
 	#woocommerce-product-data {
+
 		.hndle {
 			display: block;
 			line-height: 24px;
@@ -6855,6 +7064,7 @@ table.bar_chart {
 
 	@each $name, $color in $wp_admin_colors {
 		&-#{$name}.wc-wp-version-gte-53 {
+
 			.select2-dropdown {
 				border-color: $color;
 			}
@@ -6872,19 +7082,19 @@ table.bar_chart {
 			}
 
 			.select2-container.select2-container--focus
-				.select2-selection--single,
+			.select2-selection--single,
 			.select2-container.select2-container--open
-				.select2-selection--single,
+			.select2-selection--single,
 			.select2-container.select2-container--open
-				.select2-selection--multiple {
+			.select2-selection--multiple {
 				border-color: $color;
 				box-shadow: 0 0 0 1px $color;
 			}
 
 			.select2-container--default
-				.select2-results__option--highlighted[aria-selected],
+			.select2-results__option--highlighted[aria-selected],
 			.select2-container--default
-				.select2-results__option--highlighted[data-selected] {
+			.select2-results__option--highlighted[data-selected] {
 				background-color: $color;
 			}
 		}
@@ -6893,6 +7103,7 @@ table.bar_chart {
 
 .post-type-product .tablenav,
 .post-type-shop_order .tablenav {
+
 	.actions {
 		overflow: visible;
 	}
@@ -6988,10 +7199,14 @@ table.bar_chart {
 		border-radius: 4px;
 		background-color: #bb77ae;
 		border-color: #a36597;
-		-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25),
+		-webkit-box-shadow:
+			inset 0 1px 0 rgba(255, 255, 255, 0.25),
 			0 1px 0 #a36597;
 		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
-		text-shadow: 0 -1px 1px #a36597, 1px 0 1px #a36597, 0 1px 1px #a36597,
+		text-shadow:
+			0 -1px 1px #a36597,
+			1px 0 1px #a36597,
+			0 1px 1px #a36597,
 			-1px 0 1px #a36597;
 		margin: 0;
 		opacity: 1;
@@ -7001,7 +7216,8 @@ table.bar_chart {
 		&:active {
 			background: #a36597;
 			border-color: #a36597;
-			-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25),
+			-webkit-box-shadow:
+				inset 0 1px 0 rgba(255, 255, 255, 0.25),
 				0 1px 0 #a36597;
 			box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
 		}
@@ -7184,6 +7400,7 @@ table.bar_chart {
 
 		&.woocommerce-exporter__exporting,
 		&.woocommerce-importer__importing {
+
 			.spinner {
 				display: block;
 			}
@@ -7268,6 +7485,7 @@ table.bar_chart {
 			line-height: 1.75em;
 
 			&::before {
+
 				@include icon("\e015");
 				color: #a16696;
 				position: static;
@@ -7281,7 +7499,9 @@ table.bar_chart {
 }
 
 .wc-pointer {
+
 	.wc-pointer-buttons {
+
 		.close {
 			float: left;
 			margin: 6px 0 0 15px;
@@ -7295,7 +7515,9 @@ table.bar_chart {
 }
 
 @media screen and (min-width: 600px) {
+
 	.wc_addons_wrap {
+
 		.marketplace-header {
 			padding-left: 84px;
 		}
