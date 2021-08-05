@@ -687,7 +687,6 @@ class WC_Admin_Addons {
 		$section = isset( $_GET['section'] ) ? sanitize_text_field( wp_unslash( $_GET['section'] ) ) : '_featured';
 		$search  = isset( $_GET['search'] ) ? sanitize_text_field( wp_unslash( $_GET['search'] ) ) : '';
 
-
 		if ( isset( $_GET['install-addon'] ) ) {
 			switch ( $_GET['install-addon'] ) {
 				case 'woocommerce-services':
