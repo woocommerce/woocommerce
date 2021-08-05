@@ -85,6 +85,7 @@ foreach ( $milestones as $milestone ) {
 
 // If all the milestones have a release branch, just take the newest one.
 if ( is_null( $chosen_milestone ) ) {
+	echo "WARNING: No milestone without release branch found, the newest one will be assigned.\n";
 	$chosen_milestone = $milestones[0];
 }
 
@@ -99,7 +100,7 @@ if ( getenv( 'DRY_RUN' ) ) {
  * Assign the milestone to the pull request.
  */
 
-echo "Assigning the milestone to the pull request...\n";
+echo 'Assigning the milestone to the pull request... ';
 
 $milestone_id = $chosen_milestone['id'];
 $mutation     = "
@@ -108,14 +109,25 @@ $mutation     = "
   }
 ";
 
-do_graphql_api_request( $mutation, true );
+$result = do_graphql_api_request( $mutation, true );
+if ( is_array( $result ) ) {
+	if ( empty( $result['errors'] ) ) {
+		echo "Ok!\n";
+	} else {
+		echo "\n*** Errors found while assigning the milestone:\n";
+		echo var_dump( $result['errors'] );
+	}
+} else {
+	echo "\n*** Error found while assigning the milestone: file_get_contents returned the following:\n";
+	echo var_dump( $result );
+}
 
 /**
  * Function to query the GitHub GraphQL API.
  *
  * @param string $body The GraphQL-formatted request body, without "query" or "mutation" wrapper.
  * @param bool   $is_mutation True if the request is a mutation, false if it's a query.
- * @return array The json-decoded response.
+ * @return mixed The json-decoded response if a response is received, 'false' (or whatever file_get_contents returns) otherwise.
  */
 function do_graphql_api_request( $body, $is_mutation = false ) {
 	global $github_token, $graphql_api_url;
@@ -138,7 +150,7 @@ function do_graphql_api_request( $body, $is_mutation = false ) {
 	);
 
 	$result = file_get_contents( $graphql_api_url, false, $context );
-	return json_decode( $result, true );
+	return is_string( $result ) ? json_decode( $result, true ) : $result;
 }
 
 // phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped, WordPress.WP.AlternativeFunctions

@@ -31,3 +31,7 @@ Closes # .
 ### Changelog entry
 
 > Enter a summary of all changes on this Pull Request. This will appear in the changelog if accepted.
+
+### FOR PR REVIEWER ONLY:
+
+* [ ] I have reviewed that everything is sanitized/escaped appropriately for any SQL or XSS injection possibilities. I made sure Linting is not ignored or disabled.
