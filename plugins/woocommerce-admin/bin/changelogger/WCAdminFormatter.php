@@ -100,7 +100,7 @@ class WCAdminFormatter extends KeepAChangelogParser implements FormatterPlugin {
 				$rows    = explode( "\n", $content );
 				foreach ( $rows as $row ) {
 					$row          = trim( $row );
-					$row          = str_replace( $this->bullet, '', $row );
+					$row = preg_replace( '/' . $this->bullet . '/', '', $row, 1 );
 					$row_segments = explode( ':', $row );
 
 					array_push(
