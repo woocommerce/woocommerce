@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useMemo, useEffect, Fragment } from '@wordpress/element';
-import { Disabled } from '@wordpress/components';
+import { Disabled } from 'wordpress-components';
 import {
 	useCheckoutAddress,
 	useStoreEvents,

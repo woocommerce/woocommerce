@@ -2,7 +2,7 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import { withInstanceId } from '@woocommerce/base-hocs/with-instance-id';
+import { withInstanceId } from '@wordpress/compose';
 
 /**
  * Internal dependencies

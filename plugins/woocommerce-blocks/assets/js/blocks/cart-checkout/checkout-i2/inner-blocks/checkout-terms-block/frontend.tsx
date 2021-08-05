@@ -7,7 +7,7 @@ import { useState, useEffect } from '@wordpress/element';
 import CheckboxControl from '@woocommerce/base-components/checkbox-control';
 import { useValidationContext } from '@woocommerce/base-context';
 import { useCheckoutSubmit } from '@woocommerce/base-context/hooks';
-import { withInstanceId } from '@woocommerce/base-hocs/with-instance-id';
+import { withInstanceId } from '@wordpress/compose';
 
 /**
  * Internal dependencies

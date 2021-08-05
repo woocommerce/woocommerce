@@ -4,7 +4,7 @@
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import { useInnerBlockLayoutContext } from '@woocommerce/shared-context';
-import { withInstanceId } from '@woocommerce/base-hocs/with-instance-id';
+import { withInstanceId } from '@wordpress/compose';
 
 /**
  * Internal dependencies

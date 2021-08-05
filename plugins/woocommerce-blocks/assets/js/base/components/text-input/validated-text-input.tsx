@@ -8,7 +8,7 @@ import {
 	ValidationInputError,
 	useValidationContext,
 } from '@woocommerce/base-context';
-import { withInstanceId } from '@woocommerce/base-hocs/with-instance-id';
+import { withInstanceId } from '@wordpress/compose';
 import { isString } from '@woocommerce/types';
 
 /**

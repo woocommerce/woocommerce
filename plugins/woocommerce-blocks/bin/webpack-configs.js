@@ -87,6 +87,9 @@ const getCoreConfig = ( options = {} ) => {
 								require.resolve(
 									'@babel/plugin-proposal-class-properties'
 								),
+								require.resolve(
+									'@babel/plugin-proposal-nullish-coalescing-operator'
+								),
 							].filter( Boolean ),
 						},
 					},
@@ -193,6 +196,9 @@ const getMainConfig = ( options = {} ) => {
 									: false,
 								require.resolve(
 									'@babel/plugin-proposal-class-properties'
+								),
+								require.resolve(
+									'@babel/plugin-proposal-nullish-coalescing-operator'
 								),
 							].filter( Boolean ),
 						},
@@ -317,6 +323,9 @@ const getFrontConfig = ( options = {} ) => {
 								require.resolve(
 									'@babel/plugin-proposal-class-properties'
 								),
+								require.resolve(
+									'@babel/plugin-proposal-nullish-coalescing-operator'
+								),
 								isProduction
 									? require.resolve(
 											'babel-plugin-transform-react-remove-prop-types'
@@ -434,6 +443,9 @@ const getPaymentsConfig = ( options = {} ) => {
 								require.resolve(
 									'@babel/plugin-proposal-class-properties'
 								),
+								require.resolve(
+									'@babel/plugin-proposal-nullish-coalescing-operator'
+								),
 								isProduction
 									? require.resolve(
 											'babel-plugin-transform-react-remove-prop-types'
@@ -550,6 +562,9 @@ const getExtensionsConfig = ( options = {} ) => {
 								),
 								require.resolve(
 									'@babel/plugin-proposal-class-properties'
+								),
+								require.resolve(
+									'@babel/plugin-proposal-nullish-coalescing-operator'
 								),
 								isProduction
 									? require.resolve(

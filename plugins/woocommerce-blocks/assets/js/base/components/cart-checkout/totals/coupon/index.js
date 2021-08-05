@@ -8,7 +8,7 @@ import { ValidatedTextInput } from '@woocommerce/base-components/text-input';
 import Label from '@woocommerce/base-components/label';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
 import PropTypes from 'prop-types';
-import { withInstanceId } from '@woocommerce/base-hocs/with-instance-id';
+import { withInstanceId } from '@wordpress/compose';
 import {
 	ValidationInputError,
 	useValidationContext,

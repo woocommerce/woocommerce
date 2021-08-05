@@ -4,7 +4,7 @@
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import Label from '@woocommerce/base-components/label';
-import { withInstanceId } from '@woocommerce/base-hocs/with-instance-id';
+import { withInstanceId } from '@wordpress/compose';
 
 /**
  * Internal dependencies
