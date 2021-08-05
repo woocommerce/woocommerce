@@ -38,5 +38,6 @@ zip -r "${ZIP_FILE}" \
 	$asset_files \
 	languages/woocommerce-admin.pot \
 	readme.txt \
+	changelog.txt \
 	src/ \
 	vendor/
