@@ -159,7 +159,10 @@ export function getAllTasks( {
 		);
 	}
 
-	const [ installedMarketingExtensions ] = getMarketingExtensionLists(
+	const [
+		installedMarketingExtensions,
+		marketingExtensionsLists,
+	] = getMarketingExtensionLists(
 		freeExtensions,
 		activePlugins,
 		installedPlugins
@@ -351,7 +354,8 @@ export function getAllTasks( {
 			completed: !! installedMarketingExtensions.length,
 			visible:
 				window.wcAdminFeatures &&
-				window.wcAdminFeatures[ 'remote-free-extensions' ],
+				window.wcAdminFeatures[ 'remote-free-extensions' ] &&
+				!! marketingExtensionsLists.length,
 			time: __( '1 minute', 'woocommerce-admin' ),
 			type: 'setup',
 		},
