@@ -1,16 +1,31 @@
 ---
 name: "\U0001F680 Feature request"
-about: "Suggest a new feature \U0001F389 We'll consider building it if it receives
+about:
+  "Suggest a new feature \U0001F389 We'll consider building it if it receives
   sufficient interest! \U0001F44D"
-title: ''
-labels: ''
-assignees: ''
-
+title: ""
+labels: ""
+assignees: ""
 ---
 
 <!--  Make sure to look through existing issues to see whether your idea is already being discussed. Feel free to contribute to any existing issues. -->
 
 <!-- Search tip: You can filter issues using our enhancement label https://github.com/woocommerce/woocommerce/issues?q=is%3Aissue+label%3Aenhancement -->
+
+**What part of WooCommerce does this feature request pertain to?**
+
+- [] Analytics
+- [] Customer facing pages
+- [] Checkout
+- [] Onboarding
+- [] Homescreen
+- [] Customers
+- [] Settings or Status
+- [] Coupons
+- [] Products
+- [] Orders
+- [] Payments
+- [] Rest API
 
 **Is your feature request related to a problem? Please describe.**
 A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
