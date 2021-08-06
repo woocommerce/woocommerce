@@ -375,9 +375,9 @@ const merchant = {
 	   await page.waitForResponse( response => response.status() === 200 );
    },
 
-   /**
-	* Runs the database update if needed. For example, after uploading the WooCommerce plugin or updating WooCommerce.
-	*/
+	/**
+	 * Runs the database update if needed. For example, after uploading the WooCommerce plugin or updating WooCommerce.
+	 */
    runDatabaseUpdate: async () => {
 	   if ( await page.$( '.updated.woocommerce-message.wc-connect' ) !== null ) {
 		   await expect( page ).toMatchElement( 'a.wc-update-now', { text: 'Update WooCommerce Database' } );
@@ -387,9 +387,9 @@ const merchant = {
 		}
    },
 
-   /**
-	* Checks if the database update is complete, if not, refresh the page until it is.
-	*/
+	/**
+	 * Checks if the database update is complete, if not, refresh the page until it is.
+	 */
    checkDatabaseUpdateComplete: async () => {
 	   await page.reload( { waitUntil: [ 'networkidle0', 'domcontentloaded'] } );
 
