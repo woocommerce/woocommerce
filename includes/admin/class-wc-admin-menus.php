@@ -36,6 +36,7 @@ class WC_Admin_Menus {
 		add_filter( 'menu_order', array( $this, 'menu_order' ) );
 		add_filter( 'custom_menu_order', array( $this, 'custom_menu_order' ) );
 		add_filter( 'set-screen-option', array( $this, 'set_screen_option' ), 10, 3 );
+		add_filter( 'parent_file', array( $this, 'update_menu_highlight' ) );
 
 		// Add endpoints custom URLs in Appearance > Menus > Pages.
 		add_action( 'admin_head-nav-menus.php', array( $this, 'add_nav_menu_meta_boxes' ) );
@@ -149,8 +150,9 @@ class WC_Admin_Menus {
 	public function addons_menu() {
 		$count_html = WC_Helper_Updater::get_updates_count_html();
 		/* translators: %s: extensions count */
-		$menu_title = sprintf( __( 'Extensions %s', 'woocommerce' ), $count_html );
-		add_submenu_page( 'woocommerce', __( 'WooCommerce extensions', 'woocommerce' ), $menu_title, 'manage_woocommerce', 'wc-addons', array( $this, 'addons_page' ) );
+		$menu_title = sprintf( __( 'My Subscriptions %s', 'woocommerce' ), $count_html );
+		add_submenu_page( 'woocommerce', __( 'WooCommerce Marketplace', 'woocommerce' ), __( 'Marketplace', 'woocommerce' ), 'manage_woocommerce', 'wc-addons', array( $this, 'addons_page' ) );
+		add_submenu_page( 'woocommerce', __( 'My WooCommerce.com Subscriptions', 'woocommerce' ), $menu_title, 'manage_woocommerce', 'wc-addons&section=helper', array( $this, 'addons_page' ) );
 	}
 
 	/**
@@ -386,6 +388,38 @@ class WC_Admin_Menus {
 				'href'   => wc_get_page_permalink( 'shop' ),
 			)
 		);
+	}
+
+	/**
+	 * Highlight the My Subscriptions menu item when on that page
+	 *
+	 * @param  string $parent_file currently opened page.
+	 * @return string
+	 */
+	public function update_menu_highlight( $parent_file ) {
+		global $submenu_file;
+		if ( 'woocommerce' === $parent_file && isset( $_GET['section'] ) && 'helper' === $_GET['section'] ) {
+			$submenu_file = 'wc-addons&section=helper'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		}
+		return $parent_file;
+	}
+
+	/**
+	 * Update the My Subscriptions document title when on that page.
+	 * We want to maintain existing page URL but add it as a separate page,
+	 * which requires updating it manually.
+	 *
+	 * @param  string $admin_title existing page title.
+	 * @return string
+	 */
+	public function update_my_subscriptions_title( $admin_title ) {
+		if (
+			isset( $_GET['page'] ) && 'wc-addons' === $_GET['page'] &&
+			isset( $_GET['section'] ) && 'helper' === $_GET['section']
+		) {
+			$admin_title = 'My WooCommerce.com Subscriptions';
+		}
+		return $admin_title;
 	}
 }
 

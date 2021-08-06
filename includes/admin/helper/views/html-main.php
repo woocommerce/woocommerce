@@ -9,8 +9,7 @@
 <?php defined( 'ABSPATH' ) || exit(); ?>
 
 <div class="wrap woocommerce wc_addons_wrap wc-helper">
-	<?php require WC_Helper::get_view_filename( 'html-section-nav.php' ); ?>
-	<h1 class="screen-reader-text"><?php esc_html_e( 'WooCommerce Extensions', 'woocommerce' ); ?></h1>
+	<h1 class="screen-reader-text"><?php esc_html_e( 'My Subscriptions', 'woocommerce' ); ?></h1>
 
 	<?php require WC_Helper::get_view_filename( 'html-section-notices.php' ); ?>
 
@@ -174,7 +173,7 @@
 				<tr class="wp-list-table__row wp-list-table__ext-updates">
 					<td class="wp-list-table__ext-status <?php echo sanitize_html_class( $subscription_action['status'] ); ?>">
 						<p><span class="dashicons <?php echo sanitize_html_class( $subscription_action['icon'] ); ?>"></span>
-							<?php echo esc_html( $subscription_action['message'] ); ?>
+							<?php echo wp_kses_post( $subscription_action['message'] ); ?>
 						</p>
 					</td>
 					<td class="wp-list-table__ext-actions">
