@@ -117,11 +117,12 @@ class AdvancedFilters extends Component {
 		onAdvancedFilterAction( 'match', { match } );
 	}
 
-	onFilterChange( index, property, value ) {
+	onFilterChange( index, property, value, shouldResetValue = false ) {
 		const newActiveFilters = [ ...this.state.activeFilters ];
 		newActiveFilters[ index ] = {
 			...newActiveFilters[ index ],
 			[ property ]: value,
+			...( shouldResetValue === true ? { value: null } : {} ),
 		};
 
 		this.setState( { activeFilters: newActiveFilters } );

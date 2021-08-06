@@ -1,8 +1,14 @@
 /**
+ * @jest-environment jsdom
+ */
+/**
  * External dependencies
  */
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { AdvancedFilters } from '@woocommerce/components';
 import { CURRENCY } from '@woocommerce/wc-admin-settings';
+import { createElement } from '@wordpress/element';
 
 const ORDER_STATUSES = {
 	cancelled: 'Cancelled',
@@ -14,14 +20,7 @@ const ORDER_STATUSES = {
 	refunded: 'Refunded',
 };
 
-const siteLocale = 'en_US';
-
-const path = new URL( document.location ).searchParams.get( 'path' );
-const query = {
-	component: 'advanced-filters',
-};
-
-const advancedFilters = {
+const advancedFiltersConfig = {
 	title: 'Orders Match {{select /}} Filters',
 	filters: {
 		status: {
@@ -174,18 +173,88 @@ const advancedFilters = {
 	},
 };
 
-export const Basic = () => (
+const AdvancedFiltersComponent = ( props = null ) => (
 	<AdvancedFilters
-		siteLocale={ siteLocale }
-		path={ path }
-		query={ query }
+		siteLocale="en_US"
+		path=""
+		query={ { component: 'advanced-filters' } }
 		filterTitle="Orders"
-		config={ advancedFilters }
+		config={ advancedFiltersConfig }
 		currency={ CURRENCY }
+		{ ...props }
 	/>
 );
 
-export default {
-	title: 'WooCommerce Admin/components/AdvancedFilters',
-	component: AdvancedFilters,
-};
+describe( 'AdvancedFilters', () => {
+	test( 'should render', () => {
+		const { getByRole } = render( <AdvancedFiltersComponent /> );
+		expect(
+			getByRole( 'button', { name: 'Add a Filter' } )
+		).toBeInTheDocument();
+	} );
+
+	test( 'should retain value/state when the rule is switched from "Before" to "After" in <DateFilter />', () => {
+		render( <AdvancedFiltersComponent /> );
+
+		// Add a new filter.
+		userEvent.click(
+			screen.getByRole( 'button', { name: 'Add a Filter' } )
+		);
+
+		// Add a "Before" date filter.
+		userEvent.click( screen.getByRole( 'button', { name: 'Date' } ) );
+
+		// Add a date in mm/dd/yyyy format.
+		userEvent.type(
+			screen.getByRole( 'textbox', { name: 'Choose a date' } ),
+			'01/01/2020'
+		);
+
+		// Switch the date filter from "Before" to "After".
+		userEvent.selectOptions(
+			screen.getByRole( 'combobox', {
+				name: 'Select a date filter match',
+			} ),
+			'after'
+		);
+
+		// The previous value should be retained when switching between the "Before" and "After" rules.
+		expect(
+			screen.getByRole( 'textbox', { name: 'Choose a date' } )
+		).toHaveValue( '01/01/2020' );
+	} );
+
+	test( 'should reset value/state when the rule is switched to/from "Between" in <DateFilter />', () => {
+		render( <AdvancedFiltersComponent /> );
+
+		// Add a new filter.
+		userEvent.click(
+			screen.getByRole( 'button', { name: 'Add a Filter' } )
+		);
+
+		// Add a "Before" date filter.
+		userEvent.click( screen.getByRole( 'button', { name: 'Date' } ) );
+
+		// Add a date in mm/dd/yyyy format.
+		userEvent.type(
+			screen.getByRole( 'textbox', { name: 'Choose a date' } ),
+			'01/01/2020'
+		);
+
+		// Switch the date filter from "Before" to "Between".
+		userEvent.selectOptions(
+			screen.getByRole( 'combobox', {
+				name: 'Select a date filter match',
+			} ),
+			'between'
+		);
+
+		const dateFields = screen.getAllByRole( 'textbox', {
+			name: 'Choose a date',
+		} );
+
+		// The previous value should be reset when switching to/from the "Between" rule.
+		expect( dateFields[ 0 ] ).not.toHaveValue();
+		expect( dateFields[ 1 ] ).not.toHaveValue();
+	} );
+} );

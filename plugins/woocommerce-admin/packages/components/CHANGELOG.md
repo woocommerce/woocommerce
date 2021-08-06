@@ -1,6 +1,7 @@
 # Unreleased
 
 -   Fix a bug in the deprecated callback handlers of Form component. #7356
+-   Fix a bug in the `<DateFilter>` component where values were retained when switching between rules #7423
 -   Add `hidden` legend position to `Chart`. #7378
 
 # 8.0.0

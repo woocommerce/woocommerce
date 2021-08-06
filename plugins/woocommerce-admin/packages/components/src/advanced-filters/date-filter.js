@@ -36,10 +36,12 @@ class DateFilter extends Component {
 			after,
 			afterText: after ? after.format( dateFormat ) : '',
 			afterError: null,
+			rule: filter.rule,
 		};
 
 		this.onSingleDateChange = this.onSingleDateChange.bind( this );
 		this.onRangeDateChange = this.onRangeDateChange.bind( this );
+		this.onRuleChange = this.onRuleChange.bind( this );
 	}
 
 	getBetweenString() {
@@ -50,8 +52,8 @@ class DateFilter extends Component {
 		);
 	}
 
-	getScreenReaderText( filter, config ) {
-		const rule = find( config.rules, { value: filter.rule } ) || {};
+	getScreenReaderText( filterRule, config ) {
+		const rule = find( config.rules, { value: filterRule } ) || {};
 
 		const { before, after } = this.state;
 
@@ -132,6 +134,34 @@ class DateFilter extends Component {
 		}
 	}
 
+	onRuleChange( newRule ) {
+		const { onFilterChange } = this.props;
+		const { rule } = this.state;
+
+		let newDateState = null;
+		let shouldResetValue = false;
+
+		if ( [ rule, newRule ].includes( 'between' ) ) {
+			newDateState = {
+				before: null,
+				beforeText: '',
+				beforeError: null,
+				after: null,
+				afterText: '',
+				afterError: null,
+			};
+
+			shouldResetValue = true;
+		}
+
+		this.setState( {
+			rule: newRule,
+			...newDateState,
+		} );
+
+		onFilterChange( 'rule', newRule, shouldResetValue );
+	}
+
 	isFutureDate( dateString ) {
 		return moment().isBefore( moment( dateString ), 'day' );
 	}
@@ -179,10 +209,9 @@ class DateFilter extends Component {
 	}
 
 	getFilterInputs() {
-		const { filter } = this.props;
-		const { before, beforeText, beforeError } = this.state;
+		const { before, beforeText, beforeError, rule } = this.state;
 
-		if ( filter.rule === 'between' ) {
+		if ( rule === 'between' ) {
 			return this.getRangeInput();
 		}
 
@@ -195,16 +224,10 @@ class DateFilter extends Component {
 	}
 
 	render() {
-		const {
-			className,
-			config,
-			filter,
-			isEnglish,
-			onFilterChange,
-		} = this.props;
-		const { rule } = filter;
+		const { className, config, isEnglish } = this.props;
+		const { rule } = this.state;
 		const { labels, rules } = config;
-		const screenReaderText = this.getScreenReaderText( filter, config );
+		const screenReaderText = this.getScreenReaderText( rule, config );
 		const children = interpolateComponents( {
 			mixedString: labels.title,
 			components: {
@@ -217,7 +240,7 @@ class DateFilter extends Component {
 						) }
 						options={ rules }
 						value={ rule }
-						onChange={ partial( onFilterChange, 'rule' ) }
+						onChange={ this.onRuleChange }
 						aria-label={ labels.rule }
 					/>
 				),
