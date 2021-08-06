@@ -1595,7 +1595,7 @@ return array(
 		'RSVO' => _x( 'Vojvodina', 'district', 'woocommerce' ),
 	),
 	'SE' => array(),
-	'UA' => array( // Ukraine. Ref: https://en.wikipedia.org/wiki/Oblasts_of_Ukraine
+	'UA' => array( // Ukraine. Ref: https://en.wikipedia.org/wiki/Oblasts_of_Ukraine.
 		'VN' => __( 'Vinnitska', 'woocommerce' ),
 		'VL' => __( 'Volynska', 'woocommerce' ),
 		'DP' => __( 'Dnipropetrovsk Oblast', 'woocommerce' ),
