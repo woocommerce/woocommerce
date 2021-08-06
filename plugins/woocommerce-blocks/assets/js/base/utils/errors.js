@@ -10,7 +10,7 @@ import { __ } from '@wordpress/i18n';
  * @param  {Function} [error.json]    If a json method is specified, it will try parsing the error first.
  * @param  {string}   [error.message] If a message is specified, it will be shown to the user.
  * @param  {string}   [error.type]    The context in which the error was triggered.
- * @return {Object}   Error object containing a message and type.
+ * @return {Promise<{message:string;type:string;}>}   Error object containing a message and type.
  */
 export const formatError = async ( error ) => {
 	if ( typeof error.json === 'function' ) {
