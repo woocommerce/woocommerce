@@ -12,14 +12,14 @@ import { blocksConfig } from '@woocommerce/block-settings';
  * Get product query requests for the Store API.
  *
  * @param {Object} request A query object with the list of selected products and search term.
- * @param {Array} request.selected Currently selected products.
- * @param {string} request.search Search string.
- * @param {Array} request.queryArgs Query args to pass in.
+ * @param {number[]} request.selected Currently selected products.
+ * @param {string=} request.search Search string.
+ * @param {(Record<string, unknown>)=} request.queryArgs Query args to pass in.
  */
 const getProductsRequests = ( {
 	selected = [],
 	search = '',
-	queryArgs = [],
+	queryArgs = {},
 } ) => {
 	const isLargeCatalog = blocksConfig.productCount > 100;
 	const defaultArgs = {
@@ -39,6 +39,7 @@ const getProductsRequests = ( {
 			addQueryArgs( '/wc/store/products', {
 				catalog_visibility: 'any',
 				include: selected,
+				per_page: 0,
 			} )
 		);
 	}
@@ -50,14 +51,16 @@ const getProductsRequests = ( {
  * Get a promise that resolves to a list of products from the Store API.
  *
  * @param {Object} request A query object with the list of selected products and search term.
- * @param {Array} request.selected Currently selected products.
- * @param {string} request.search Search string.
- * @param {Array} request.queryArgs Query args to pass in.
+ * @param {number[]} request.selected Currently selected products.
+ * @param {string=} request.search Search string.
+ * @param {(Record<string, unknown>)=} request.queryArgs Query args to pass in.
+ * @return {Promise<unknown>} Promise resolving to a Product list.
+ * @throws Exception if there is an error.
  */
 export const getProducts = ( {
 	selected = [],
 	search = '',
-	queryArgs = [],
+	queryArgs = {},
 } ) => {
 	const requests = getProductsRequests( { selected, search, queryArgs } );
 
