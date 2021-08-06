@@ -3,7 +3,8 @@
   "users": {
     "admin": {
       "username": "SMOKE_TEST_ADMIN_USER",
-      "password": "SMOKE_TEST_ADMIN_PASSWORD"
+      "password": "SMOKE_TEST_ADMIN_PASSWORD",
+      "email": "SMOKE_TEST_ADMIN_USER_EMAIL"
     },
     "customer": {
       "username": "SMOKE_TEST_CUSTOMER_USER",
