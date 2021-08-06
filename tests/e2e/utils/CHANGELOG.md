@@ -14,6 +14,7 @@
 - Added merchant workflows around plugins: `uploadAndActivatePlugin()`, `activatePlugin()`, `deactivatePlugin()`, `deletePlugin()`
 - Added `deleteAllOrders()` that goes through and deletes all orders
 - Added `deleteAllShippingClasses()` which permanently deletes all shipping classes using the API
+- Added `statuses` optional parameter to `deleteAllRepositoryObjects()` to delete on specific statuses
 
 # 0.1.5
 
