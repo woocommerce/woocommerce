@@ -268,14 +268,6 @@
 		text-transform: uppercase;
 	}
 
-	// These styles are not applied to the All Products atomic block, so it can be positioned normally.
-	.wc-block-grid__products .wc-block-grid__product-onsale {
-		position: absolute;
-		right: 4px;
-		top: 4px;
-		z-index: 1;
-	}
-
 	// Override style from WC Core that set its position to absolute.
 	// These rulesets can be removed once https://github.com/woocommerce/woocommerce/pull/26516 is released.
 	.wc-block-grid__products .wc-block-components-product-sale-badge {
