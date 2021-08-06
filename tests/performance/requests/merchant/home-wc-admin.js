@@ -153,8 +153,8 @@ export function homeWCAdmin() {
 		);
 
 		response = http.get(
-			`${base_url}/wp-json/wc-analytics/products?page=1&per_page=1&low_in_stock=true&` +
-			`status=publish&_fields%5B0%5D=id&_locale=user`,
+			`${base_url}/wp-json/wc-analytics/products/low-in-stock?page=1&per_page=1&` +
+			`low_in_stock=true&status=publish&_fields%5B0%5D=id&_locale=user`,
 			{
 				headers: requestHeaders,
 			}
