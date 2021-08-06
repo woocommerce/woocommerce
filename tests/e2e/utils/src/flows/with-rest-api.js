@@ -15,7 +15,7 @@ const userEndpoint = '/wp/v2/users';
  * @param statuses Status of the object to check
  * @returns {Promise<void>}
  */
- const deleteAllRepositoryObjects = async ( repository, defaultObjectId = null, statuses = [ 'draft', 'publish', 'trash' ] ) => {
+const deleteAllRepositoryObjects = async ( repository, defaultObjectId = null, statuses = [ 'draft', 'publish', 'trash' ] ) => {
 	let objects;
 	const minimum = defaultObjectId == null ? 0 : 1;
 
