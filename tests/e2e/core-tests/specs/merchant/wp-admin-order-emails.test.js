@@ -1,4 +1,3 @@
-/* eslint-disable jest/no-export, jest/no-disabled-tests, jest/no-standalone-expect */
 /**
  * Internal dependencies
  */
@@ -12,7 +11,7 @@ const {
 
 const config = require( 'config' );
 const customerEmail = config.get( 'addresses.customer.billing.email' );
-const adminEmail = 'admin@woocommercecoree2etestsuite.com';
+const adminEmail = config.has( 'users.admin.email' ) ? config.get( 'users.admin.email' )  : 'admin@woocommercecoree2etestsuite.com';
 const storeName = 'WooCommerce Core E2E Test Suite';
 
 let orderId;
