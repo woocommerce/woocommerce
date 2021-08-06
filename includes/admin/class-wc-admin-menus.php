@@ -151,7 +151,7 @@ class WC_Admin_Menus {
 		$count_html = WC_Helper_Updater::get_updates_count_html();
 		/* translators: %s: extensions count */
 		$menu_title = sprintf( __( 'My Subscriptions %s', 'woocommerce' ), $count_html );
-		add_submenu_page( 'woocommerce', __( 'WooCommerce extensions', 'woocommerce' ), __( 'Marketplace', 'woocommerce' ), 'manage_woocommerce', 'wc-addons', array( $this, 'addons_page' ) );
+		add_submenu_page( 'woocommerce', __( 'WooCommerce Marketplace', 'woocommerce' ), __( 'Marketplace', 'woocommerce' ), 'manage_woocommerce', 'wc-addons', array( $this, 'addons_page' ) );
 		add_submenu_page( 'woocommerce', __( 'My WooCommerce.com Subscriptions', 'woocommerce' ), $menu_title, 'manage_woocommerce', 'wc-addons&section=helper', array( $this, 'addons_page' ) );
 	}
 
@@ -402,6 +402,24 @@ class WC_Admin_Menus {
 			$submenu_file = 'wc-addons&section=helper'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		}
 		return $parent_file;
+	}
+
+	/**
+	 * Update the My Subscriptions document title when on that page.
+	 * We want to maintain existing page URL but add it as a separate page,
+	 * which requires updating it manually.
+	 *
+	 * @param  string $admin_title existing page title.
+	 * @return string
+	 */
+	public function update_my_subscriptions_title( $admin_title ) {
+		if (
+			isset( $_GET['page'] ) && 'wc-addons' === $_GET['page'] &&
+			isset( $_GET['section'] ) && 'helper' === $_GET['section']
+		) {
+			$admin_title = 'My WooCommerce.com Subscriptions';
+		}
+		return $admin_title;
 	}
 }
 
