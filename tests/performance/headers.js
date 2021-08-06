@@ -67,7 +67,7 @@ export {
     commonRequestHeaders,
     commonGetRequestHeaders,
     commonAPIGetRequestHeaders,
-	contentTypeRequestHeader,
+    contentTypeRequestHeader,
     commonPostRequestHeaders,
     commonNonStandardHeaders,
 };
