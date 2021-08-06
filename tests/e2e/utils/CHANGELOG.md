@@ -13,6 +13,7 @@
 - Added `itIf()` to conditionally run a test case.
 - Added merchant workflows around plugins: `uploadAndActivatePlugin()`, `activatePlugin()`, `deactivatePlugin()`, `deletePlugin()`
 - Added merchant workflows checking for a database update and performing the update if needed: `runDatabaseUpdate()`
+- Added `deleteAllShippingClasses()` which permanently deletes all shipping classes using the API
 
 # 0.1.5
 

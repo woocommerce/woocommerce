@@ -144,6 +144,7 @@ This package provides support for enabling retries in tests:
 | `deleteAllCoupons` | | Permanently delete all coupons |
 | `deleteAllProducts` | | Permanently delete all products |
 | `deleteAllShippingZones` | | Permanently delete all shipping zones except the default |
+| `deleteAllShippingClasses` | Permanently delete all shipping classes |
 | `deleteCustomerByEmail` | `emailAddress` | Delete customer user account. Posts are reassigned to user ID 1 |
 | `resetSettingsGroupToDefault` | `settingsGroup` | Reset settings in settings group to default except `select` fields |
 

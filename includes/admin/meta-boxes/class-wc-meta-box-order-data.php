@@ -607,6 +607,10 @@ class WC_Meta_Box_Order_Data {
 				$payment_method_title = $methods[ $payment_method ]->get_title();
 			}
 
+			if ( $payment_method == 'other') {
+				$payment_method_title = esc_html__( 'Other', 'woocommerce' );
+			}
+			
 			$props['payment_method']       = $payment_method;
 			$props['payment_method_title'] = $payment_method_title;
 		}
