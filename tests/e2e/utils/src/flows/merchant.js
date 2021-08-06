@@ -21,6 +21,7 @@ const {
 	WP_ADMIN_WC_HOME,
 	WP_ADMIN_WC_SETTINGS,
 	WP_ADMIN_WC_EXTENSIONS,
+	WP_ADMIN_WC_HELPER,
 	WP_ADMIN_NEW_SHIPPING_ZONE,
 	WP_ADMIN_ANALYTICS_PAGES,
 	WP_ADMIN_ALL_USERS_VIEW,
@@ -130,6 +131,12 @@ const merchant = {
 
 	openExtensions: async () => {
 		await page.goto( WP_ADMIN_WC_EXTENSIONS, {
+			waitUntil: 'networkidle0',
+		} );
+	},
+
+	openHelper: async () => {
+		await page.goto( WP_ADMIN_WC_HELPER, {
 			waitUntil: 'networkidle0',
 		} );
 	},
