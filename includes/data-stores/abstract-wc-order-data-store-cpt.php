@@ -197,7 +197,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		}
 
 		if ( $args['force_delete'] ) {
-			wp_delete_post( $id );
+			wp_delete_post( $id, true );
 			$order->set_id( 0 );
 			do_action( 'woocommerce_delete_order', $id );
 		} else {
