@@ -94,11 +94,11 @@ const completeOnboardingWizard = async () => {
 			'.components-modal__header-heading', {text: 'Build a better WooCommerce'}
 		);
 
-		// Query for "Continue" buttons
-		const continueButtons = await page.$$( 'button.is-primary' );
-		expect( continueButtons ).toHaveLength( 2 );
+		// Query for "No Thanks" buttons
+		const continueButtons = await page.$$( '.woocommerce-usage-modal__actions button.is-secondary' );
+		expect( continueButtons ).toHaveLength( 1 );
 
-		await continueButtons[1].click();
+		await continueButtons[0].click();
 	}
 	await page.waitForNavigation( { waitUntil: 'networkidle0' } );
 
@@ -295,7 +295,7 @@ const createVariableProduct = async (varProduct = defaultVariableProduct) => {
 
 /**
  * Create grouped product.
- * 
+ *
  * @param groupedProduct Defaults to the grouped product object in `default.json`
  * @returns ID of the grouped product
  */
