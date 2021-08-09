@@ -8,7 +8,7 @@
 ?>
 <?php defined( 'ABSPATH' ) || exit(); ?>
 
-<div class="wrap woocommerce wc_addons_wrap wc-helper">
+<div class="wrap woocommerce wc-subscriptions-wrap wc-helper">
 	<h1 class="screen-reader-text"><?php esc_html_e( 'My Subscriptions', 'woocommerce' ); ?></h1>
 
 	<?php require WC_Helper::get_view_filename( 'html-section-notices.php' ); ?>
