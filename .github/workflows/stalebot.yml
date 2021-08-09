@@ -5,6 +5,8 @@ on:
 
 jobs:
   stale:
+    if: |
+      ! contains(github.event.issue.labels.*.name, 'enhancement')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/stale@v3
