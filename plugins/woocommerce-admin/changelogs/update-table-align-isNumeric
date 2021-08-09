@@ -1,0 +1,4 @@
+Significance: patch
+Type: Enhancement
+
+Update: Align Table fields with the fallback on isNumeric. #7431

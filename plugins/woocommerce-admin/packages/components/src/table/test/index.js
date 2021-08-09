@@ -112,4 +112,63 @@ describe( 'TableCard', () => {
 			).toBeInTheDocument();
 		}
 	} );
+
+	it( 'should render headers having class is-left-aligned if isLeftAligned is set to true', () => {
+		mockHeaders[ 0 ].isLeftAligned = true;
+		mockHeaders[ 1 ].isLeftAligned = true;
+		mockHeaders[ 1 ].isNumeric = true;
+
+		render(
+			<TableCard
+				title="Revenue"
+				headers={ mockHeaders }
+				isLoading={ false }
+				rowsPerPage={ 5 }
+				totalRows={ 5 }
+			/>
+		);
+
+		expect( screen.getAllByRole( 'columnheader' )[ 0 ] ).toHaveClass(
+			'is-left-aligned'
+		);
+
+		expect( screen.getAllByRole( 'columnheader' )[ 1 ] ).toHaveClass(
+			'is-left-aligned'
+		);
+	} );
+
+	it( 'should render headers not having class is-left-aligned if isLeftAligned is not set and isNumeric is true', () => {
+		mockHeaders[ 2 ].isNumeric = true;
+
+		render(
+			<TableCard
+				title="Revenue"
+				headers={ mockHeaders }
+				isLoading={ false }
+				rowsPerPage={ 5 }
+				totalRows={ 5 }
+			/>
+		);
+
+		expect( screen.getAllByRole( 'columnheader' )[ 2 ] ).not.toHaveClass(
+			'is-left-aligned'
+		);
+	} );
+	it( 'should render headers having class is-left-aligned if isLeftAligned is not set and isNumeric is false', () => {
+		mockHeaders[ 3 ].isNumeric = false;
+
+		render(
+			<TableCard
+				title="Revenue"
+				headers={ mockHeaders }
+				isLoading={ false }
+				rowsPerPage={ 5 }
+				totalRows={ 5 }
+			/>
+		);
+
+		expect( screen.getAllByRole( 'columnheader' )[ 3 ] ).toHaveClass(
+			'is-left-aligned'
+		);
+	} );
 } );

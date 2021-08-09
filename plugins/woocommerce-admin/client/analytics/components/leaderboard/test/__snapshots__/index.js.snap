@@ -46,7 +46,7 @@ exports[`Leaderboard should render correct data in the table 1`] = `
                 </span>
               </th>
               <th
-                class="woocommerce-table__header"
+                class="woocommerce-table__header is-left-aligned"
                 role="columnheader"
                 scope="col"
               >
@@ -57,7 +57,7 @@ exports[`Leaderboard should render correct data in the table 1`] = `
                 </span>
               </th>
               <th
-                class="woocommerce-table__header"
+                class="woocommerce-table__header is-left-aligned"
                 role="columnheader"
                 scope="col"
               >
@@ -68,7 +68,7 @@ exports[`Leaderboard should render correct data in the table 1`] = `
                 </span>
               </th>
               <th
-                class="woocommerce-table__header"
+                class="woocommerce-table__header is-left-aligned"
                 role="columnheader"
                 scope="col"
               >
@@ -93,21 +93,21 @@ exports[`Leaderboard should render correct data in the table 1`] = `
                 </div>
               </th>
               <td
-                class="woocommerce-table__item"
+                class="woocommerce-table__item is-left-aligned"
               >
                 <div>
                   1,000.00
                 </div>
               </td>
               <td
-                class="woocommerce-table__item"
+                class="woocommerce-table__item is-left-aligned"
               >
                 <div>
                   54.00
                 </div>
               </td>
               <td
-                class="woocommerce-table__item"
+                class="woocommerce-table__item is-left-aligned"
               >
                 <div>
                   $999.99
@@ -128,21 +128,21 @@ exports[`Leaderboard should render correct data in the table 1`] = `
                 </div>
               </th>
               <td
-                class="woocommerce-table__item"
+                class="woocommerce-table__item is-left-aligned"
               >
                 <div>
                   90.00
                 </div>
               </td>
               <td
-                class="woocommerce-table__item"
+                class="woocommerce-table__item is-left-aligned"
               >
                 <div>
                   41.00
                 </div>
               </td>
               <td
-                class="woocommerce-table__item"
+                class="woocommerce-table__item is-left-aligned"
               >
                 <div>
                   $875.00
@@ -163,21 +163,21 @@ exports[`Leaderboard should render correct data in the table 1`] = `
                 </div>
               </th>
               <td
-                class="woocommerce-table__item"
+                class="woocommerce-table__item is-left-aligned"
               >
                 <div>
                   55.00
                 </div>
               </td>
               <td
-                class="woocommerce-table__item"
+                class="woocommerce-table__item is-left-aligned"
               >
                 <div>
                   28.00
                 </div>
               </td>
               <td
-                class="woocommerce-table__item"
+                class="woocommerce-table__item is-left-aligned"
               >
                 <div>
                   $75.75
@@ -198,21 +198,21 @@ exports[`Leaderboard should render correct data in the table 1`] = `
                 </div>
               </th>
               <td
-                class="woocommerce-table__item"
+                class="woocommerce-table__item is-left-aligned"
               >
                 <div>
                   10.00
                 </div>
               </td>
               <td
-                class="woocommerce-table__item"
+                class="woocommerce-table__item is-left-aligned"
               >
                 <div>
                   14.00
                 </div>
               </td>
               <td
-                class="woocommerce-table__item"
+                class="woocommerce-table__item is-left-aligned"
               >
                 <div>
                   $24.50
@@ -233,21 +233,21 @@ exports[`Leaderboard should render correct data in the table 1`] = `
                 </div>
               </th>
               <td
-                class="woocommerce-table__item"
+                class="woocommerce-table__item is-left-aligned"
               >
                 <div>
                   1.00
                 </div>
               </td>
               <td
-                class="woocommerce-table__item"
+                class="woocommerce-table__item is-left-aligned"
               >
                 <div>
                   1.00
                 </div>
               </td>
               <td
-                class="woocommerce-table__item"
+                class="woocommerce-table__item is-left-aligned"
               >
                 <div>
                   $0.99

@@ -203,7 +203,8 @@ class Table extends Component {
 										'woocommerce-table__header',
 										cellClassName,
 										{
-											'is-left-aligned': isLeftAligned,
+											'is-left-aligned':
+												isLeftAligned || ! isNumeric,
 											'is-sortable': isSortable,
 											'is-sorted': sortedBy === key,
 											'is-numeric': isNumeric,
@@ -312,7 +313,9 @@ class Table extends Component {
 											'woocommerce-table__item',
 											cellClassName,
 											{
-												'is-left-aligned': isLeftAligned,
+												'is-left-aligned':
+													isLeftAligned ||
+													! isNumeric,
 												'is-numeric': isNumeric,
 												'is-sorted':
 													sortedBy ===

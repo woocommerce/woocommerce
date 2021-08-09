@@ -248,7 +248,7 @@ Array of column header objects with properties:
 
 - `defaultSort`: Boolean - Boolean, true if this column is the default for sorting. Only one column should have this set.
 - `defaultOrder`: String - String, asc|desc if this column is the default for sorting. Only one column should have this set.
-- `isLeftAligned`: Boolean - Boolean, true if this column should be aligned to the left.
+- `isLeftAligned`: Boolean - Boolean, true if this column should be aligned to the left. If not set, it will fallback to this value `! isNumeric`, i.e. text fields are left-aligned and numeric fields are right-aligned.
 - `isNumeric`: Boolean - Boolean, true if this column is a number value.
 - `isSortable`: Boolean - Boolean, true if this column is sortable.
 - `key`: String - The API parameter name for this column, passed to `orderby` when sorting via API.
