@@ -69,7 +69,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							// Do not show USPS or Canada Post extensions for US and CA stores, respectively.
 							$country = WC()->countries->get_base_country();
 							if ( 'US' === $country
-								 && false !== strpos(
+								&& false !== strpos(
 									$addon->link,
 									'woocommerce.com/products/usps-shipping-method'
 								)
@@ -77,7 +77,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 								continue;
 							}
 							if ( 'CA' === $country
-								 && false !== strpos(
+								&& false !== strpos(
 									$addon->link,
 									'woocommerce.com/products/canada-post-shipping-method'
 								)
@@ -98,13 +98,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 							</div>
 							<div class="product-footer">
 								<?php if ( '&#36;0.00' === $addon->price ) : ?>
-									<span class="price"><?php echo esc_html_e( 'Free', 'woocommerce' ); ?></span>
+									<span class="price"><?php esc_html_e( 'Free', 'woocommerce' ); ?></span>
 								<?php else : ?>
 									<span class="price"><?php echo wp_kses_post( $addon->price ); ?></span>
-									<span class="price_suffix"><?php echo esc_html_e( 'per year', 'woocommerce' ); ?></span>
+									<span class="price_suffix"><?php esc_html_e( 'per year', 'woocommerce' ); ?></span>
 								<?php endif; ?>
 								<a class="button" href="<?php echo esc_attr( WC_Admin_Addons::add_in_app_purchase_url_params( $addon->link ) ); ?>">
-									<?php echo esc_html_e( 'View details', 'woocommerce' ); ?>
+									<?php esc_html_e( 'View details', 'woocommerce' ); ?>
 								</a>
 							</div>
 						</li>
