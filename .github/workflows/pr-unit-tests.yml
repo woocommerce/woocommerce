@@ -62,10 +62,14 @@ jobs:
              composer bin phpunit config --unset platform
              composer bin phpunit config repositories.0 '{"type": "path", "url": "/tmp/phpunit-7.5-fork/phpunit-add-compatibility-with-php8-to-phpunit-7", "options": {"symlink": false}}'
              composer bin phpunit require --dev -W phpunit/phpunit:@dev --ignore-platform-reqs    
-           fi 
+           fi
 
       - name: Init DB and WP
         run: ./tests/bin/install.sh woo_test root root 127.0.0.1 ${{ matrix.wp }}
+
+      - name: Composer update (WP nightly)
+        if: 'nightly' == matrix.wp
+        run: composer update
 
       - name: Run tests
         run: ./vendor/bin/phpunit -c ./phpunit.xml
