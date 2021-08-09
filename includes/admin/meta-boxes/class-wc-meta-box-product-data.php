@@ -459,23 +459,14 @@ class WC_Meta_Box_Product_Data {
 				 * increment them by one so that we can correctly insert the updated
 				 * variation menu order.
 				 */
-				$ids = $wpdb->get_col(
+				$wpdb->query(
 					$wpdb->prepare(
-						"SELECT ID FROM {$wpdb->posts} WHERE post_type = 'product_variation' AND post_parent = %d AND post_status = 'publish' AND menu_order >= %d AND ID != %d ORDER BY menu_order ASC",
+						"UPDATE {$wpdb->posts} SET menu_order = menu_order + 1 WHERE post_type = 'product_variation' AND post_parent = %d AND post_status = 'publish' AND menu_order >= %d AND ID != %d",
 						$post_id,
 						$new_variation_menu_order_value,
 						$new_variation_menu_order_id
 					)
 				);
-
-				foreach ( $ids as $id ) {
-					$wpdb->query(
-						$wpdb->prepare(
-							"UPDATE {$wpdb->posts} SET menu_order = menu_order + 1 WHERE ID = %d",
-							$id
-						)
-					);
-				}
 			}
 
 			for ( $i = 0; $i <= $max_loop; $i++ ) {
