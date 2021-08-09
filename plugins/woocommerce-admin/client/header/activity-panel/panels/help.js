@@ -42,22 +42,22 @@ function getHomeItems() {
 		{
 			title: __( 'Inbox', 'woocommerce-admin' ),
 			link:
-				'https://docs.woocommerce.com/document/home-screen/#section-2?utm_medium=product',
+				'https://docs.woocommerce.com/document/home-screen?utm_medium=product#section-2',
 		},
 		{
 			title: __( 'Stats Overview', 'woocommerce-admin' ),
 			link:
-				'https://docs.woocommerce.com/document/home-screen/#section-4?utm_medium=product',
+				'https://docs.woocommerce.com/document/home-screen?utm_medium=product#section-4',
 		},
 		{
 			title: __( 'Store Management', 'woocommerce-admin' ),
 			link:
-				'https://docs.woocommerce.com/document/home-screen/#section-5?utm_medium=product',
+				'https://docs.woocommerce.com/document/home-screen?utm_medium=product#section-5',
 		},
 		{
 			title: __( 'Store Setup Checklist', 'woocommerce-admin' ),
 			link:
-				'https://docs.woocommerce.com/document/woocommerce-setup-wizard/#store-setup-checklist?utm_medium=product',
+				'https://docs.woocommerce.com/document/woocommerce-setup-wizard?utm_medium=product#store-setup-checklist',
 		},
 	];
 }
@@ -102,7 +102,7 @@ function getMarketingItems( props ) {
 		activePlugins.includes( 'google-listings-and-ads' ) && {
 			title: __( 'Set up Google Listing & Ads', 'woocommerce-admin' ),
 			link:
-				'https://docs.woocommerce.com/document/google-listings-and-ads/#get-started?utm_medium=product',
+				'https://docs.woocommerce.com/document/google-listings-and-ads/?utm_medium=product#get-started',
 		},
 		activePlugins.includes( 'mailchimp-for-woocommerce' ) && {
 			title: __(
@@ -158,7 +158,7 @@ function getPaymentGatewaySuggestions( props ) {
 				'woocommerce-admin'
 			),
 			link:
-				'https://docs.woocommerce.com/document/2-0/woocommerce-paypal-payments/#section-3?utm_medium=product',
+				'https://docs.woocommerce.com/document/2-0/woocommerce-paypal-payments/?utm_medium=product#section-3',
 		},
 		paymentGatewaySuggestions.square_credit_card && {
 			title: __( 'Square - Get started', 'woocommerce-admin' ),
@@ -258,7 +258,7 @@ function getShippingItems( { activePlugins, countryCode } ) {
 				'woocommerce-admin'
 			),
 			link:
-				'https://docs.woocommerce.com/document/woocommerce-services/#section-3/?utm_source=help_panel&utm_medium=product',
+				'https://docs.woocommerce.com/document/woocommerce-shipping-and-tax/?utm_source=help_panel&utm_medium=product#section-3',
 		},
 		{
 			title: __(
@@ -294,7 +294,7 @@ function getTaxItems( props ) {
 				'woocommerce-admin'
 			),
 			link:
-				'https://docs.woocommerce.com/document/woocommerce-services/?utm_source=help_panel#section-10?utm_medium=product',
+				'https://docs.woocommerce.com/document/woocommerce-services/?utm_source=help_panel&utm_medium=product#section-10',
 		},
 	].filter( Boolean );
 }

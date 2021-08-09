@@ -386,7 +386,7 @@ class Tax extends Component {
 									components: {
 										link: (
 											<Link
-												href="https://docs.woocommerce.com/document/setting-up-taxes-in-woocommerce/#section-1?utm_medium=product"
+												href="https://docs.woocommerce.com/document/setting-up-taxes-in-woocommerce/?utm_medium=product#section-1"
 												target="_blank"
 												type="external"
 											/>
