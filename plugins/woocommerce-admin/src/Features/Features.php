@@ -31,6 +31,16 @@ class Features {
 	);
 
 	/**
+	 * Beta features
+	 *
+	 * @var array
+	 */
+	protected static $beta_features = array(
+		'navigation',
+		'settings',
+	);
+
+	/**
 	 * Get class instance.
 	 */
 	public static function get_instance() {
@@ -227,7 +237,7 @@ class Features {
 			return;
 		}
 
-		foreach ( self::get_features() as $feature ) {
+		foreach ( self::$beta_features as $feature ) {
 			self::disable( $feature );
 		}
 	}
@@ -315,6 +325,10 @@ class Features {
 			return;
 		}
 		$tracking_enabled = get_option( 'woocommerce_allow_tracking', 'no' );
+
+		if ( empty( self::$beta_features ) ) {
+			return;
+		}
 
 		if ( 'yes' === $tracking_enabled ) {
 			return;
