@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { Fragment } from '@wordpress/element';
+import { useMemo } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { partial } from 'lodash';
 import { Dropdown, Button } from '@wordpress/components';
@@ -36,7 +36,9 @@ const filters = applyFilters( DASHBOARD_FILTERS_FILTER, [] );
 
 const mergeSectionsWithDefaults = ( prefSections ) => {
 	if ( ! prefSections || prefSections.length === 0 ) {
-		return defaultSections;
+		return defaultSections.reduce( ( sections, section ) => {
+			return [ ...sections, { ...section } ];
+		}, [] );
 	}
 	const defaultKeys = defaultSections.map( ( section ) => section.key );
 	const prefKeys = prefSections.map( ( section ) => section.key );
@@ -70,7 +72,10 @@ const mergeSectionsWithDefaults = ( prefSections ) => {
 const CustomizableDashboard = ( { defaultDateRange, path, query } ) => {
 	const { updateUserPreferences, ...userPrefs } = useUserPreferences();
 
-	const sections = mergeSectionsWithDefaults( userPrefs.dashboard_sections );
+	const sections = useMemo(
+		() => mergeSectionsWithDefaults( userPrefs.dashboard_sections ),
+		[ userPrefs.dashboard_sections ]
+	);
 
 	const updateSections = ( newSections ) => {
 		updateUserPreferences( { dashboard_sections: newSections } );
@@ -181,7 +186,7 @@ const CustomizableDashboard = ( { defaultDateRange, path, query } ) => {
 					</Button>
 				) }
 				renderContent={ ( { onToggle } ) => (
-					<Fragment>
+					<>
 						<H>
 							{ __( 'Dashboard Sections', 'woocommerce-admin' ) }
 						</H>
@@ -215,7 +220,7 @@ const CustomizableDashboard = ( { defaultDateRange, path, query } ) => {
 								);
 							} ) }
 						</div>
-					</Fragment>
+					</>
 				) }
 			/>
 		);
@@ -243,7 +248,7 @@ const CustomizableDashboard = ( { defaultDateRange, path, query } ) => {
 			.map( ( section ) => section.key );
 
 		return (
-			<Fragment>
+			<>
 				<ReportFilters
 					report="dashboard"
 					query={ query }
@@ -286,7 +291,7 @@ const CustomizableDashboard = ( { defaultDateRange, path, query } ) => {
 					return null;
 				} ) }
 				{ renderAddMore() }
-			</Fragment>
+			</>
 		);
 	};
 
