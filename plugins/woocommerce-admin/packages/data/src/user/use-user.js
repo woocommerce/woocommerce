@@ -31,11 +31,11 @@ export const useUser = () => {
 	} );
 
 	const currentUserCan = ( capability ) => {
-		if (
-			userData.user &&
-			userData.user &&
-			userData.user.capabilities[ capability ]
-		) {
+		if ( userData.user && userData.user.is_super_admin ) {
+			return true;
+		}
+
+		if ( userData.user && userData.user.capabilities[ capability ] ) {
 			return true;
 		}
 

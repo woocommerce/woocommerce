@@ -1260,6 +1260,16 @@ class Loader {
 	public static function register_user_data() {
 		register_rest_field(
 			'user',
+			'is_super_admin',
+			array(
+				'get_callback' => function() {
+					return is_super_admin();
+				},
+				'schema'       => null,
+			)
+		);
+		register_rest_field(
+			'user',
 			'woocommerce_meta',
 			array(
 				'get_callback'    => array( __CLASS__, 'get_user_data_values' ),
