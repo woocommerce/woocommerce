@@ -19,17 +19,17 @@
 	@include loader();
 }
 
-.wc_addons_wrap {
-	max-width: 1200px;
+.wc-addons-wrap {
 
 	.marketplace-header {
-		background-image: url("../images/marketplace-header-bg@2x.png");
+		background-image: url(../images/marketplace-header-bg@2x.png);
 		background-position: right;
 		background-size: cover;
 		box-sizing: border-box;
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
+		margin-bottom: 32px;
 		min-height: 216px;
 		padding: 24px;
 		width: 100%;
@@ -115,6 +115,17 @@
 		content: "";
 	}
 
+	.addons-button {
+		border-radius: 3px;
+		cursor: pointer;
+		display: block;
+		height: 37px;
+		line-height: 37px;
+		text-align: center;
+		text-decoration: none;
+		width: 124px;
+	}
+
 	.addons-banner-block-item-icon,
 	.addons-column-block-item-icon {
 		align-items: center;
@@ -181,6 +192,16 @@
 		align-items: center;
 	}
 
+	.addons-promotion-block {
+		display: flex;
+		padding: 20px;
+
+		.addons-img {
+			height: auto;
+			width: 200px;
+		}
+	}
+
 	.addons-wcs-banner-block-image {
 		background: #f7f7f7;
 		border: 1px solid #e6e6e6;
@@ -202,16 +223,6 @@
 				max-height: 100%;
 				max-width: 100%;
 			}
-		}
-	}
-
-	.addons-promotion-block {
-		display: flex;
-		padding: 20px;
-
-		.addons-img {
-			height: auto;
-			width: 200px;
 		}
 	}
 
@@ -448,17 +459,6 @@
 		width: 48%;
 	}
 
-	.addons-button {
-		border-radius: 3px;
-		cursor: pointer;
-		display: block;
-		height: 37px;
-		line-height: 37px;
-		text-align: center;
-		text-decoration: none;
-		width: 124px;
-	}
-
 	.addons-button-solid {
 		background-color: #674399;
 		color: #fff;
@@ -539,8 +539,8 @@
 	}
 
 	.marketplace-content-wrapper {
-		margin: 0 auto;
-		max-width: 1056px;
+		margin: 0 auto 0 0;
+		max-width: 1032px;
 		width: 100%;
 	}
 
@@ -548,14 +548,12 @@
 		display: flex;
 		flex-flow: row;
 		flex-wrap: wrap;
+		justify-content: space-between;
 		margin: 0;
-		max-width: 1056px;
+		max-width: 1032px;
 		overflow: hidden;
 
-		@media only screen and ( max-width: 1280px ) {
-			margin: 0 -12px;	
-		}
-
+		/* stylelint-disable no-descending-specificity */
 		li {
 			background: #fff;
 			border: 1px solid #dcdcde;
@@ -564,14 +562,13 @@
 			flex: 1 0 auto;
 			flex-direction: column;
 			justify-content: space-between;
-			margin: 12px;
-			max-width: 502px;
+			margin: 12px 0;
+			max-width: calc(50% - 12px);
 			min-width: 280px;
 			min-height: 220px;
 			overflow: hidden;
 			padding: 0;
 			vertical-align: top;
-			width: 45%;
 
 			@media only screen and ( max-width: 768px ) {
 				max-width: none;
@@ -602,7 +599,7 @@
 				h3 {
 					color: #007cba;
 					font-family:
-						"HelveticaNeue-Light",
+						HelveticaNeue-Light,
 						"Helvetica Neue Light",
 						"Helvetica Neue",
 						sans-serif;
@@ -636,16 +633,18 @@
 				}
 			}
 		}
+		/* stylelint-enable no-descending-specificity */
 	}
 
 	.storefront {
-		background: url("../images/storefront-bg.jpg") bottom right #f6f6f6;
+		background: url(../images/storefront-bg.jpg) bottom right #f6f6f6;
 		border: 1px solid #ddd;
 		margin-top: 1em;
 		padding: 20px;
 		overflow: hidden;
 		zoom: 1;
 
+		/* stylelint-disable no-descending-specificity */
 		img {
 			width: 278px;
 			height: auto;
@@ -657,7 +656,12 @@
 		p {
 			max-width: 750px;
 		}
+		/* stylelint-enable no-descending-specificity */
 	}
+}
+
+.wc-subscriptions-wrap {
+	max-width: 1200px;
 }
 
 .woocommerce-message,
@@ -2786,7 +2790,7 @@ ul.wc_coupon_list_block {
 		}
 	}
 
-	.wc_addons_wrap {
+	.wc-addons-wrap {
 
 		.addons-promotion-block {
 			flex-direction: column;
@@ -6591,7 +6595,7 @@ table.bar_chart {
 		flex-direction: column;
 	}
 
-	.wc_addons_wrap {
+	.wc-addons-wrap {
 
 		.addons-wcs-banner-block {
 			padding: 40px;
@@ -7514,12 +7518,22 @@ table.bar_chart {
 	font-weight: bold;
 }
 
+/* stylelint-disable selector-class-pattern */
+.woocommerce-embed-page.woocommerce_page_wc-addons {
+
+	#screen-meta-links {
+		position: absolute;
+		right: 0;
+	}
+}
+
 @media screen and (min-width: 600px) {
 
-	.wc_addons_wrap {
+	.wc-addons-wrap {
 
 		.marketplace-header {
 			padding-left: 84px;
 		}
 	}
 }
+/* stylelint-enable selector-class-pattern */
