@@ -12,6 +12,7 @@
 - Added `describeIf()` to conditionally run a test suite
 - Added `itIf()` to conditionally run a test case.
 - Added merchant workflows around plugins: `uploadAndActivatePlugin()`, `activatePlugin()`, `deactivatePlugin()`, `deletePlugin()`
+- Added `deleteAllShippingClasses()` which permanently deletes all shipping classes using the API
 
 # 0.1.5
 

@@ -4,6 +4,7 @@ import {Coupon, Setting, SimpleProduct} from '@woocommerce/api';
 const client = factories.api.withDefaultPermalinks;
 const onboardingProfileEndpoint = '/wc-admin/onboarding/profile';
 const shippingZoneEndpoint = '/wc/v3/shipping/zones';
+const shippingClassesEndpoint = '/wc/v3/products/shipping_classes';
 const userEndpoint = '/wp/v2/users';
 
 /**
@@ -95,6 +96,20 @@ export const withRestApi = {
 					continue;
 				}
 				const response = await client.delete( shippingZoneEndpoint + `/${shippingZones.data[z].id}?force=true` );
+				expect( response.statusCode ).toBe( 200 );
+			}
+		}
+	},
+	/**
+	 * Use api package to delete shipping classes.
+	 *
+	 * @return {Promise} Promise resolving once shipping classes have been deleted.
+	 */
+	deleteAllShippingClasses: async () => {
+		const shippingClasses = await client.get( shippingClassesEndpoint );
+		if ( shippingClasses.data && shippingClasses.data.length ) {
+			for ( let c = 0; c < shippingClasses.data.length; c++ ) {
+				const response = await client.delete( shippingClassesEndpoint + `/${shippingClasses.data[c].id}?force=true` );
 				expect( response.statusCode ).toBe( 200 );
 			}
 		}

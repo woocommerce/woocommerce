@@ -21,6 +21,7 @@
 * Fix - Replace hardcoded frontend JS script versions with WC version to bust cached/staled JS scripts. #30301
 * Fix - Variable product showing HTML content while granting access for downloadable product in orders. #30305
 * Fix - Replaced wp.passwordStrength deprecated method. #30191
+* Fix - `woocommerce_email_settings` filter being triggered twice. #30404
 * Dev - Apply `woocommerce_logout_default_redirect_url` filter to logout for custom endpoint. #29967
 * Dev - Added new `woocommerce_email_sent` hook. #30123
 
