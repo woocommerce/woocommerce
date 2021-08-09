@@ -9,6 +9,7 @@ jobs:
     name: PHP ${{ matrix.php }} WP ${{ matrix.wp }}
     timeout-minutes: 15
     runs-on: ubuntu-latest
+    continue-on-error: ${{ matrix.wp == 'nightly' }}
     strategy:
       fail-fast: false
       matrix:
@@ -70,11 +71,5 @@ jobs:
       - name: Init DB and WP
         run: ./tests/bin/install.sh woo_test root root 127.0.0.1 ${{ matrix.wp }}
 
-      - name: Run WP nightly tests (failures allowed)
-        if: ${{ matrix.wp == 'nightly' }}
-        continue-on-error: true
-        run: ./vendor/bin/phpunit -c ./phpunit.xml
-
       - name: Run tests
-        if: ${{ matrix.wp != 'nightly' }}
         run: ./vendor/bin/phpunit -c ./phpunit.xml
