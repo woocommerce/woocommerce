@@ -68,7 +68,7 @@ jobs:
         run: ./tests/bin/install.sh woo_test root root 127.0.0.1 ${{ matrix.wp }}
 
       - name: Composer update (WP nightly)
-        if: 'nightly' == matrix.wp
+        if: ${{ matrix.wp == 'nightly' }}
         run: composer update
 
       - name: Run tests
