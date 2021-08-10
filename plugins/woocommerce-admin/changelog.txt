@@ -65,7 +65,7 @@
 - Fix: Invalidate task status when enabling a payment gateway #7330
 - Fix: Redirect to homescreen after payment gateway setup #7332
 - Fix: Create workable defaults for Reports that don’t have AdvancedFilters #7186
-- Sync the category lookup table when a new category gets created #7290
+- Fix: Sync the category lookup table when a new category gets created #7290
 - Fix: Set default value for performanceIndicators variable #7343
 - Fix: Add limit clause to coupons data store query #7399
 - Fix: Fix analytics filter Gutenberg CSS conflict #7410
@@ -169,8 +169,8 @@
 - Fix: Multiple preload tag output bug. #6998
 - Fix: Call existing filters for leaderboards in analytics. #6626
 - Fix: Set target to blank for the external links #6999
-- Fix style regression with the Chart header. #7002
-- Fix styling of the advanced filter operator selection. #7005
+- Fix: Fix style regression with the Chart header. #7002
+- Fix: Fix styling of the advanced filter operator selection. #7005
 - Fix: Deprecated warnings from select control @wordpress/data-controls. #7007
 - Fix: Bug with Orders Report coupon exclusion filter. #7021
 - Fix: Show Google Listing and Ads in installed marketing extensions section. #7029
