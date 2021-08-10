@@ -542,6 +542,10 @@
 		margin: 0 auto 0 0;
 		max-width: 1032px;
 		width: 100%;
+
+		@media only screen and ( min-width: 1300px ) {
+			margin-left: 64px;
+		}
 	}
 
 	.products {
