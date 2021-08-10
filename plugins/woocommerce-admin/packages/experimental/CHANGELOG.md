@@ -1,5 +1,7 @@
 # Unreleased
 
+# 1.5.1
+
 -   Fix animations for collapsible list. #7429
 
 # 1.5.0
