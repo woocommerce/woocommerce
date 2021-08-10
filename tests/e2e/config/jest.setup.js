@@ -44,6 +44,7 @@ beforeAll(async () => {
 	await trashExistingPosts();
 	await withRestApi.deleteAllProducts();
 	await withRestApi.deleteAllCoupons();
+	await withRestApi.deleteAllOrders();
 	await page.goto(WP_ADMIN_LOGIN);
 	await clearLocalStorage();
 	await setBrowserViewport('large');
