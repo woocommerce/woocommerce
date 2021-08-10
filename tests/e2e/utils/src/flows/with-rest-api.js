@@ -1,5 +1,5 @@
 import factories from '../factories';
-import {Coupon, Setting, SimpleProduct} from '@woocommerce/api';
+import {Coupon, Setting, SimpleProduct, Order} from '@woocommerce/api';
 
 const client = factories.api.withDefaultPermalinks;
 const onboardingProfileEndpoint = '/wc-admin/onboarding/profile';
@@ -12,12 +12,12 @@ const userEndpoint = '/wp/v2/users';
  *
  * @param repository
  * @param defaultObjectId
+ * @param statuses Status of the object to check
  * @returns {Promise<void>}
  */
-const deleteAllRepositoryObjects = async ( repository, defaultObjectId = null ) => {
+const deleteAllRepositoryObjects = async ( repository, defaultObjectId = null, statuses = [ 'draft', 'publish', 'trash' ] ) => {
 	let objects;
 	const minimum = defaultObjectId == null ? 0 : 1;
-	const statuses = ['draft','publish','trash'];
 
 	for ( let s = 0; s < statuses.length; s++ ) {
 		const status = statuses[ s ];
@@ -81,6 +81,17 @@ export const withRestApi = {
 	deleteAllProducts: async () => {
 		const repository = SimpleProduct.restRepository( client );
 		await deleteAllRepositoryObjects( repository );
+	},
+	/**
+	 * Use api package to delete all orders.
+	 *
+	 * @return {Promise} Promise resolving once orders have been deleted.
+	 */
+	deleteAllOrders: async () => {
+		// We need to specfically filter on order status here to make sure we catch all orders to delete.
+		const orderStatuses = ['pending', 'processing', 'on-hold', 'completed', 'cancelled', 'refunded', 'failed', 'trash'];
+		const repository = Order.restRepository( client );
+		await deleteAllRepositoryObjects( repository, null, orderStatuses );
 	},
 	/**
 	 * Use api package to delete shipping zones.
