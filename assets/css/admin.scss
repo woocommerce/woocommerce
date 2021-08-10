@@ -82,6 +82,7 @@
 
 	.top-bar {
 		background: #fff;
+		box-shadow: inset 0 -1px 0 #ccc;
 		display: block;
 		margin: 0 0 16px;
 
@@ -95,7 +96,7 @@
 			display: flex;
 			flex-wrap: wrap;
 			justify-content: left;
-			margin: 0 auto;
+			margin: 0;
 			max-width: 1056px;
 			overflow-x: scroll;
 
@@ -105,6 +106,10 @@
 
 			@media only screen and ( min-width: 1300px ) {
 				justify-content: center;
+			}
+
+			@media only screen and ( min-width: 1200px ) {
+				margin-left: 70px;
 			}
 
 			li {
@@ -127,7 +132,7 @@
 				white-space: nowrap;
 
 				&.current {
-					box-shadow: inset 0 -3px 0 #3171a6;
+					box-shadow: inset 0px -3px 0px #3171a6, inset 0px -1px 0px #ccc;
 				}
 			}
 		}
