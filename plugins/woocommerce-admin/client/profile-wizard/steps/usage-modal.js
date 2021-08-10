@@ -95,9 +95,14 @@ class UsageModal extends Component {
 	}
 
 	render() {
+		const { allowTracking, isResolving, onClose, onContinue } = this.props;
+
+		if ( isResolving ) {
+			return null;
+		}
+
 		// Bail if site has already opted in to tracking
-		if ( this.props.allowTracking ) {
-			const { onClose, onContinue } = this.props;
+		if ( allowTracking ) {
 			onClose();
 			onContinue();
 			return null;
@@ -172,17 +177,19 @@ export default compose(
 			getOption,
 			getOptionsUpdatingError,
 			isOptionsUpdating,
+			hasFinishedResolution,
 		} = select( OPTIONS_STORE_NAME );
 
-		const allowTracking =
-			getOption( 'woocommerce_allow_tracking' ) === 'yes';
-		const isRequesting = Boolean( isOptionsUpdating() );
-		const hasErrors = Boolean( getOptionsUpdatingError() );
-
 		return {
-			allowTracking,
-			isRequesting,
-			hasErrors,
+			allowTracking: getOption( 'woocommerce_allow_tracking' ) === 'yes',
+			isRequesting: Boolean( isOptionsUpdating() ),
+			isResolving:
+				! hasFinishedResolution( 'getOption', [
+					'woocommerce_allow_tracking',
+				] ) ||
+				typeof getOption( 'woocommerce_allow_tracking' ) ===
+					'undefined',
+			hasErrors: Boolean( getOptionsUpdatingError() ),
 		};
 	} ),
 	withDispatch( ( dispatch ) => {

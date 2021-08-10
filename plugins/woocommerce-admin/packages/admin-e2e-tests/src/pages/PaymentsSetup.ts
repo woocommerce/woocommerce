@@ -40,11 +40,11 @@ export class PaymentsSetup extends BasePage {
 	}
 
 	async methodHasBeenSetup( method: PaymentMethod ) {
-		await getElementByText(
-			'button',
-			'Manage',
-			`.woocommerce-task-payment-${ method }`
-		);
+		const selector = `.woocommerce-task-payment-${ method }`;
+		await this.page.waitForSelector( selector );
+		expect(
+			await getElementByText( '*', 'Manage', selector )
+		).toBeDefined();
 	}
 
 	async enableCashOnDelivery() {

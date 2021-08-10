@@ -33,7 +33,7 @@ const taskDashboardSelect = ( select ) => {
 		ONBOARDING_STORE_NAME
 	);
 	const { getSettings } = select( SETTINGS_STORE_NAME );
-	const { getOption } = select( OPTIONS_STORE_NAME );
+	const { getOption, hasFinishedResolution } = select( OPTIONS_STORE_NAME );
 	const {
 		getActivePlugins,
 		getInstalledPlugins,
@@ -83,6 +83,28 @@ const taskDashboardSelect = ( select ) => {
 		profileItems,
 		trackedCompletedTasks,
 		hasCompleteAddress,
+		isResolving:
+			! hasFinishedResolution( 'getOption', [
+				'woocommerce_task_list_complete',
+			] ) ||
+			! hasFinishedResolution( 'getOption', [
+				'woocommerce_task_list_hidden',
+			] ) ||
+			! hasFinishedResolution( 'getOption', [
+				'woocommerce_extended_task_list_complete',
+			] ) ||
+			! hasFinishedResolution( 'getOption', [
+				'woocommerce_extended_task_list_hidden',
+			] ) ||
+			! hasFinishedResolution( 'getOption', [
+				'woocommerce_task_list_remind_me_later_tasks',
+			] ) ||
+			! hasFinishedResolution( 'getOption', [
+				'woocommerce_task_list_tracked_completed_tasks',
+			] ) ||
+			! hasFinishedResolution( 'getOption', [
+				'woocommerce_task_list_dismissed_tasks',
+			] ),
 	};
 };
 
@@ -106,6 +128,7 @@ const TaskDashboard = ( { userPreferences, query } ) => {
 		isExtendedTaskListHidden,
 		isExtendedTaskListComplete,
 		hasCompleteAddress,
+		isResolving,
 	} = useSelect( taskDashboardSelect );
 
 	const [ isCartModalOpen, setIsCartModalOpen ] = useState( false );
@@ -238,6 +261,10 @@ const TaskDashboard = ( { userPreferences, query } ) => {
 		);
 	}
 
+	if ( isResolving ) {
+		return <TaskListPlaceholder />;
+	}
+
 	const scrollToExtendedList =
 		window.location.hash.substr( 1 ) === 'extended_task_list';
 
@@ -272,7 +299,6 @@ const TaskDashboard = ( { userPreferences, query } ) => {
 						}
 						onHide={ () =>
 							updateOptions( {
-								woocommerce_task_list_prompt_shown: true,
 								woocommerce_default_homepage_layout:
 									'two_columns',
 							} )

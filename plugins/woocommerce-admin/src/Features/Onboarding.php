@@ -214,7 +214,6 @@ class Onboarding {
 		add_filter( 'woocommerce_components_settings', array( $this, 'component_settings' ), 20 );
 		// New settings injection.
 		add_filter( 'woocommerce_shared_settings', array( $this, 'component_settings' ), 20 );
-		add_filter( 'woocommerce_admin_preload_options', array( $this, 'preload_options' ) );
 		add_filter( 'woocommerce_admin_preload_settings', array( $this, 'preload_settings' ) );
 		add_filter( 'woocommerce_admin_is_loading', array( $this, 'is_loading' ) );
 		add_filter( 'woocommerce_show_admin_notice', array( $this, 'remove_install_notice' ), 10, 2 );
@@ -687,53 +686,6 @@ class Onboarding {
 		$settings['onboarding']['themes']          = self::get_themes();
 
 		return $settings;
-	}
-
-	/**
-	 * Preload options to prime state of the application.
-	 *
-	 * @param array $options Array of options to preload.
-	 * @return array
-	 */
-	public function preload_options( $options ) {
-		$options[] = 'woocommerce_task_list_complete';
-		$options[] = 'woocommerce_task_list_do_this_later';
-		$options[] = 'woocommerce_task_list_hidden';
-		$options[] = 'woocommerce_extended_task_list_complete';
-		$options[] = 'woocommerce_extended_task_list_hidden';
-		$options[] = 'woocommerce_task_list_remind_me_later_tasks';
-
-		if ( ! self::should_show_tasks() && ! self::should_show_profiler() ) {
-			return $options;
-		}
-
-		$options[] = 'wc_connect_options';
-		$options[] = 'woocommerce_task_list_welcome_modal_dismissed';
-		$options[] = 'woocommerce_welcome_from_calypso_modal_dismissed';
-		$options[] = 'woocommerce_task_list_prompt_shown';
-		$options[] = 'woocommerce_task_list_tracked_completed_tasks';
-		$options[] = 'woocommerce_task_list_dismissed_tasks';
-		$options[] = 'woocommerce_allow_tracking';
-		$options[] = 'woocommerce_woo-mercado-pago-basic_settings';
-		$options[] = 'woocommerce_stripe_settings';
-		$options[] = 'woocommerce-ppcp-settings';
-		$options[] = 'woocommerce_ppcp-gateway_settings';
-		$options[] = 'wc_square_refresh_tokens';
-		$options[] = 'woocommerce_square_credit_card_settings';
-		$options[] = 'woocommerce_payfast_settings';
-		$options[] = 'woocommerce_paystack_settings';
-		$options[] = 'woocommerce_kco_settings';
-		$options[] = 'woocommerce_klarna_payments_settings';
-		$options[] = 'woocommerce_cod_settings';
-		$options[] = 'woocommerce_bacs_settings';
-		$options[] = 'woocommerce_bacs_accounts';
-		$options[] = 'woocommerce_woocommerce_payments_settings';
-		$options[] = 'woocommerce_eway_settings';
-		$options[] = 'woocommerce_razorpay_settings';
-		$options[] = 'woocommerce_payubiz_settings';
-		$options[] = 'woocommerce_mollie_payments_settings';
-
-		return $options;
 	}
 
 	/**

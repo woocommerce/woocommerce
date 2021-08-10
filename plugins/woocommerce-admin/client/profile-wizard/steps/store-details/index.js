@@ -16,7 +16,11 @@ import { compose } from '@wordpress/compose';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { Form } from '@woocommerce/components';
 import { getSetting } from '@woocommerce/wc-admin-settings';
-import { ONBOARDING_STORE_NAME, SETTINGS_STORE_NAME } from '@woocommerce/data';
+import {
+	ONBOARDING_STORE_NAME,
+	OPTIONS_STORE_NAME,
+	SETTINGS_STORE_NAME,
+} from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { Text } from '@woocommerce/experimental';
 import { Icon, info } from '@wordpress/icons';
@@ -192,7 +196,7 @@ class StoreDetails extends Component {
 			isStoreDetailsPopoverVisible,
 			isSkipSetupPopoverVisible,
 		} = this.state;
-		const { skipProfiler, isUpdatingProfileItems } = this.props;
+		const { skipProfiler, isBusy } = this.props;
 
 		/* eslint-disable @wordpress/i18n-no-collapsible-whitespace */
 		const skipSetupText = __(
@@ -308,10 +312,8 @@ class StoreDetails extends Component {
 								<Button
 									isPrimary
 									onClick={ handleSubmit }
-									isBusy={ isUpdatingProfileItems }
-									disabled={
-										! isValidForm || isUpdatingProfileItems
-									}
+									isBusy={ isBusy }
+									disabled={ ! isValidForm || isBusy }
 								>
 									{ __( 'Continue', 'woocommerce-admin' ) }
 								</Button>
@@ -378,6 +380,7 @@ export default compose(
 			getProfileItems,
 			isOnboardingRequesting,
 		} = select( ONBOARDING_STORE_NAME );
+		const { isResolving } = select( OPTIONS_STORE_NAME );
 
 		const profileItems = getProfileItems();
 		const isProfileItemsError = Boolean(
@@ -386,14 +389,16 @@ export default compose(
 
 		const { general: settings = {} } = getSettings( 'general' );
 		const isSettingsError = Boolean( getSettingsError( 'general' ) );
-		const isUpdatingProfileItems =
+		const isBusy =
 			isOnboardingRequesting( 'updateProfileItems' ) ||
-			isUpdateSettingsRequesting( 'general' );
+			isUpdateSettingsRequesting( 'general' ) ||
+			isResolving( 'getOption', [ 'woocommerce_allow_tracking' ] );
+
 		return {
 			isProfileItemsError,
 			isSettingsError,
 			profileItems,
-			isUpdatingProfileItems,
+			isBusy,
 			settings,
 		};
 	} ),

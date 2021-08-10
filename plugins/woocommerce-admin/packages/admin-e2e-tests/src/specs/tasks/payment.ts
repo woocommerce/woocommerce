@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { takeScreenshotFor } from '@woocommerce/e2e-environment';
+
+/**
  * Internal dependencies
  */
 import { Login } from '../../pages/Login';
@@ -30,6 +35,7 @@ const testAdminPaymentSetupTask = () => {
 			await profileWizard.skipStoreSetup();
 
 			await homeScreen.isDisplayed();
+			await takeScreenshotFor( 'Payment setup task home screen' );
 			await homeScreen.possiblyDismissWelcomeModal();
 		} );
 
@@ -54,12 +60,17 @@ const testAdminPaymentSetupTask = () => {
 				swiftCode: 'ABBA',
 			} );
 
+			await homeScreen.isDisplayed();
+			await homeScreen.clickOnTaskList( 'Set up payments' );
 			await paymentsSetup.isDisplayed();
 			await paymentsSetup.methodHasBeenSetup( 'bacs' );
 		} );
 
 		it( 'Enabling cash on delivery enables the payment method', async () => {
 			await paymentsSetup.enableCashOnDelivery();
+			await homeScreen.isDisplayed();
+			await homeScreen.clickOnTaskList( 'Set up payments' );
+			await paymentsSetup.isDisplayed();
 			await paymentsSetup.methodHasBeenSetup( 'cod' );
 		} );
 	} );

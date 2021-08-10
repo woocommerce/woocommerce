@@ -1,7 +1,10 @@
 /**
  * Internal dependencies
  */
-import { getElementByText, waitForElementByText } from '../utils/actions';
+import {
+	waitForElementByText,
+	waitForElementByTextWithoutThrow,
+} from '../utils/actions';
 import { BasePage } from './BasePage';
 
 export class WcHomescreen extends BasePage {
@@ -13,16 +16,20 @@ export class WcHomescreen extends BasePage {
 	}
 
 	async possiblyDismissWelcomeModal() {
-		// Wait for Benefits section to appear
-		const modal = await getElementByText(
+		const modalText = 'Welcome to your WooCommerce store’s online HQ!';
+		const modal = await waitForElementByTextWithoutThrow(
 			'h2',
-			'Welcome to your WooCommerce store’s online HQ!'
+			modalText,
+			10
 		);
 
 		if ( modal ) {
 			await this.clickButtonWithText( 'Next' );
+			await this.page.waitFor( 1000 );
 			await this.clickButtonWithText( 'Next' );
+			await this.page.waitFor( 1000 );
 			await this.click( '.components-guide__finish-button' );
+			await this.page.waitFor( 500 );
 		}
 	}
 
@@ -45,7 +52,7 @@ export class WcHomescreen extends BasePage {
 	}
 
 	async clickOnTaskList( taskTitle: string ) {
-		const item = await waitForElementByText( 'span', taskTitle );
+		const item = await waitForElementByText( '*', taskTitle );
 
 		if ( ! item ) {
 			throw new Error(
@@ -55,5 +62,12 @@ export class WcHomescreen extends BasePage {
 			await item.click();
 			await waitForElementByText( 'h1', taskTitle );
 		}
+	}
+
+	async waitForNotesRequestToBeLoaded() {
+		return await this.page.waitForResponse( ( response ) => {
+			const url = encodeURIComponent( response.url() );
+			return url.includes( '/wc-analytics/admin/notes' ) && response.ok();
+		} );
 	}
 }

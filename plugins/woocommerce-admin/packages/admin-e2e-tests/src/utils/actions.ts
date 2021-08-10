@@ -104,7 +104,7 @@ const getElementByText = async (
 		parent = await page.$( parentSelector );
 	}
 	const els = await ( parent || page ).$x(
-		`//${ element }[contains(text(), '${ text }')]`
+		`//${ element }[contains(text(), "${ text }")]`
 	);
 	return els[ 0 ];
 };
@@ -115,10 +115,26 @@ const waitForElementByText = async (
 	options?: { timeout?: number }
 ): Promise< ElementHandle | null > => {
 	const els = await page.waitForXPath(
-		`//${ element }[contains(text(), '${ text }')]`,
+		`//${ element }[contains(text(), "${ text }")]`,
 		options
 	);
 	return els;
+};
+
+export const waitForElementByTextWithoutThrow = async (
+	element: string,
+	text: string,
+	timeoutInSeconds = 5
+) => {
+	let selected = await getElementByText( element, text );
+	for ( let s = 0; s < timeoutInSeconds; s++ ) {
+		if ( selected ) {
+			break;
+		}
+		await page.waitFor( 1000 );
+		selected = await getElementByText( element, text );
+	}
+	return Boolean( selected );
 };
 
 export {

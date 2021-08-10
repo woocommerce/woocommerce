@@ -48,7 +48,6 @@ export const Layout = ( {
 	defaultHomescreenLayout,
 	isBatchUpdating,
 	query,
-	requestingTaskList,
 	taskListComplete,
 	bothTaskListsHidden,
 	shouldShowWelcomeModal,
@@ -115,10 +114,6 @@ export const Layout = ( {
 	const renderTaskList = () => {
 		const isSingleTask = Boolean( query.task );
 
-		if ( requestingTaskList && ! isSingleTask ) {
-			return <TaskListPlaceholder />;
-		}
-
 		return (
 			<Suspense
 				fallback={ isSingleTask ? null : <TaskListPlaceholder /> }
@@ -161,10 +156,6 @@ export const Layout = ( {
 
 Layout.propTypes = {
 	/**
-	 * If the task list option is being fetched.
-	 */
-	requestingTaskList: PropTypes.bool.isRequired,
-	/**
 	 * If the task list has been completed.
 	 */
 	taskListComplete: PropTypes.bool,
@@ -193,7 +184,7 @@ Layout.propTypes = {
 export default compose(
 	withSelect( ( select ) => {
 		const { isNotesRequesting } = select( NOTES_STORE_NAME );
-		const { getOption, isResolving, hasFinishedResolution } = select(
+		const { getOption, hasFinishedResolution } = select(
 			OPTIONS_STORE_NAME
 		);
 
@@ -242,20 +233,8 @@ export default compose(
 			bothTaskListsHidden:
 				isTaskListHidden &&
 				getOption( 'woocommerce_extended_task_list_hidden' ) === 'yes',
-			requestingTaskList:
-				isResolving( 'getOption', [
-					'woocommerce_task_list_complete',
-				] ) ||
-				isResolving( 'getOption', [
-					'woocommerce_task_list_hidden',
-				] ) ||
-				isResolving( 'getOption', [
-					'woocommerce_extended_task_list_hidden',
-				] ),
 			taskListComplete:
-				! isResolving( 'getOption', [
-					'woocommerce_task_list_complete',
-				] ) && getOption( 'woocommerce_task_list_complete' ) === 'yes',
+				getOption( 'woocommerce_task_list_complete' ) === 'yes',
 		};
 	} ),
 	withDispatch( ( dispatch ) => ( {

@@ -47,7 +47,6 @@ A few new WordPress options have been introduced to store information and settin
 
 * `woocommerce_task_list_hidden`. This option is used to conditionally show the entire task list. The task list can be hidden by the user after they have completed all tasks. Hiding the wizard stops it from showing in both full screen mode, and the collapsed inline version that shows above the dashboard analytics cards.
 * `woocommerce_task_list_welcome_modal_dismissed`. This option is used to show a congratulations modal during the transition between the profile wizard and task list.
-* `woocommerce_task_list_prompt_shown`. This option is used to conditionally show the "Is this card useful?" snackbar notice, shown once right after a user completes all the task list tasks.
 
 We also use existing options from WooCommerce Core or extensions like WooCommerce Shipping & Tax or Stripe. The list below may not be complete, as new tasks are introduced, but you can generally find usage of these by searching for the [getOptions selector](https://github.com/woocommerce/woocommerce-admin/search?q=getOptions&unscoped_q=getOptions).
 

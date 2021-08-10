@@ -72,7 +72,7 @@ export class OnboardingWizard extends BasePage {
 
 		await this.page.waitForNavigation( {
 			waitUntil: 'networkidle0',
-			timeout: 2000,
+			timeout: 4000,
 		} );
 	}
 }

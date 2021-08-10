@@ -42,22 +42,6 @@ jest.mock( '@wordpress/element', () => {
 } );
 
 describe( 'Homescreen Layout', () => {
-	it( 'should show TaskList placeholder when loading', () => {
-		const { container } = render(
-			<Layout
-				requestingTaskList
-				bothTaskListsHidden={ false }
-				query={ {} }
-				updateOptions={ () => {} }
-			/>
-		);
-
-		const placeholder = container.querySelector(
-			'.woocommerce-task-card.is-loading'
-		);
-		expect( placeholder ).toBeInTheDocument();
-	} );
-
 	it( 'should show TaskList inline', () => {
 		const { container } = render(
 			<Layout
