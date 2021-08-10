@@ -1,4 +1,3 @@
-/* eslint-disable jest/no-export, jest/no-disabled-tests */
 /**
  * Internal dependencies
  */
@@ -21,7 +20,7 @@ const runInitiateWccomConnectionTest = () => {
 			await merchant.login();
 		});
 
-		it('can initiate WCCOM connection', async () => {
+		it.skip('can initiate WCCOM connection', async () => {
 			await merchant.openExtensions();
 
 			// Click on a tab to choose WooCommerce Subscriptions extension
