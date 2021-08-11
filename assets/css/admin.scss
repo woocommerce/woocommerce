@@ -21,20 +21,6 @@
 
 .wc-addons-wrap {
 
-	&.wrap {
-
-		padding-top: 0 !important;
-
-		.woocommerce-message {
-			margin-left: 20px;
-			margin-right: 20px;
-
-			&:first-of-type {
-				margin-top: 32px;
-			}
-		}
-	}
-
 	.marketplace-header {
 		background-image: url(../images/marketplace-header-bg@2x.png);
 		background-position: right;
@@ -553,10 +539,6 @@
 	}
 
 	.marketplace-content-wrapper {
-		padding: 0 20px;
-	}
-
-	.marketplace-content {
 		margin: 0 auto;
 		max-width: 1032px;
 		width: 100%;
@@ -678,30 +660,22 @@
 	}
 }
 
-.woocommerce-embed-page {
-
-	.wc-addons-wrap.wrap {
-		padding: 0;
-	}
-}
-
 .wc-subscriptions-wrap {
 	max-width: 1200px;
 }
 
 .woocommerce-page-wc-marketplace {
 
-	.woocommerce-layout {
-		display: none;
-	}
-
 	.notice {
 		margin-left: 20px;
 		margin-right: 20px;
 	}
 
-	.wp-header-end {
-		margin-top: -16px;
+	&.woocommerce-page {
+
+		.wrap {
+			margin-top: 32px;
+		}
 	}
 }
 

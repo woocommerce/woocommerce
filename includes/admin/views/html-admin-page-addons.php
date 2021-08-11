@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 ?>
-<div class="wrap woocommerce wc-addons-wrap">
+<div class="woocommerce wc-addons-wrap">
 	<h1 class="screen-reader-text"><?php esc_html_e( 'Marketplace', 'woocommerce' ); ?></h1>
 
 	<?php if ( $sections ) : ?>
@@ -36,8 +36,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<div class="wp-header-end"></div>
 
-	<div class="marketplace-content-wrapper">
-		<div class="marketplace-content">
+	<div class="wrap">
+		<div class="marketplace-content-wrapper">
 			<?php if ( isset( $_GET['search'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>
 				<h1 class="search-form-title">
 					<?php // translators: search keyword. ?>
