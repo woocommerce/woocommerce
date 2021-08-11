@@ -1,9 +1,9 @@
-/* eslint-disable jest/no-export, jest/no-disabled-tests, jest/expect-expect */
 /**
  * Internal dependencies
  */
 const {
 	shopper,
+	withRestApi,
 	createSimpleProduct,
 	uiUnblocked
 } = require( '@woocommerce/e2e-utils' );
@@ -26,6 +26,9 @@ const runCartPageTest = () => {
 	describe('Cart page', () => {
 		beforeAll(async () => {
 			await createSimpleProduct();
+			await withRestApi.resetSettingsGroupToDefault('general');
+			await withRestApi.resetSettingsGroupToDefault('products');
+			await withRestApi.resetSettingsGroupToDefault('tax');
 		});
 
 		it('should display no item in the cart', async () => {
