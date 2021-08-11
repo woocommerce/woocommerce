@@ -412,78 +412,37 @@ const createCoupon = async ( couponAmount = '5', discountType = 'Fixed cart disc
 };
 
 /**
- * Adds a shipping zone along with a shipping method using the API.
+ * Adds a shipping zone along with a shipping method.
  *
  * @param zoneName Shipping zone name.
- * @param zoneLocation Shiping zone location. Defaults to country:US. For states use: state:US:CA.
- * @param zipCode Shipping zone zip code. Default is no zip code.
- * @param zoneMethod Shipping method type. Defaults to flat_rate (use also: free_shipping or local_pickup).
- * @param cost Shipping method cost. Default is no cost.
- * @param additionalZoneMethods Array of additional zone methods to add to the shipping zone.
+ * @param zoneLocation Shiping zone location. Defaults to country:US. For states use: state:US:CA
+ * @param zipCode Shipping zone zip code. Defaults to empty one space.
+ * @param zoneMethod Shipping method type. Defaults to flat_rate (use also: free_shipping or local_pickup)
  */
- const addShippingZoneAndMethod = async (
-	 zoneName,
-	 zoneLocation = 'country:US',
-	 zipCode = '',
-	 zoneMethod = 'flat_rate',
-	 cost = '',
-	 additionalZoneMethods = [] ) => {
+ const addShippingZoneAndMethod = async ( zoneName, zoneLocation = 'country:US', zipCode = ' ', zoneMethod = 'flat_rate' ) => {
+	await merchant.openNewShipping();
 
-	const path = 'wc/v3/shipping/zones';
-
-	const response = await client.post( path, { name: zoneName } );
-	expect(response.statusCode).toEqual(201);
-	let zoneId = response.data.id;
+	// Fill shipping zone name
+	await page.waitForSelector('input#zone_name');
+	await expect(page).toFill('input#zone_name', zoneName);
 
 	// Select shipping zone location
-	let zoneType = zoneLocation.split(/:(.)/)[0];
-	let zoneCode = zoneLocation.split(/:(.+)/)[1];
-	let zoneLocationPayload = [
-		{
-			code: zoneCode,
-			type: zoneType
-		}
-	];
+	await expect(page).toSelect('select[name="zone_locations"]', zoneLocation);
 
-	// Fill shipping zone postcode if provided
-	if ( zipCode ) {
-		zoneLocationPayload.push( {
-			code: zipCode,
-			type: "postcode",
-		} );
-	};
-
-	const locationResponse = await client.put( path + `/${zoneId}/locations`, zoneLocationPayload );
-	expect(locationResponse.statusCode).toEqual(200);
+	// Fill shipping zone postcode if needed otherwise just put empty space
+	await page.waitForSelector('a.wc-shipping-zone-postcodes-toggle');
+	await expect(page).toClick('a.wc-shipping-zone-postcodes-toggle');
+	await expect(page).toFill('#zone_postcodes', zipCode);
+	await expect(page).toMatchElement('#zone_postcodes', zipCode);
+	await expect(page).toClick('button#submit');
 
 	// Add shipping zone method
-	let methodPayload = {
-		method_id: zoneMethod
-	}
-
-	const methodsResponse = await client.post( path + `/${zoneId}/methods`, methodPayload );
-	expect(methodsResponse.statusCode).toEqual(200);
-	let methodId = methodsResponse.data.id;
-
-	// Add in cost, if provided
-	if ( cost ) {
-		let costPayload = {
-			settings: {
-				cost: cost
-			}
-		}
-
-		const costResponse = await client.put( path + `/${zoneId}/methods/${methodId}`, costPayload );
-		expect(costResponse.statusCode).toEqual(200);
-	}
-
-	// Add any additional zones, if provided
-	if (additionalZoneMethods.length > 0) {
-		for ( let z = 0; z < additionalZoneMethods.length; z++ ) {
-			let response = await client.post( path + `/${zoneId}/methods`, { method_id: additionalZoneMethods[z] } );
-			expect(response.statusCode).toEqual(200);
-		}
-	}
+	await page.waitFor(1000);
+	await expect(page).toClick('button.wc-shipping-zone-add-method', {text:'Add shipping method'});
+	await page.waitForSelector('.wc-shipping-zone-method-selector');
+	await expect(page).toSelect('select[name="add_method_id"]', zoneMethod);
+	await expect(page).toClick('button#btn-ok');
+	await page.waitForSelector('#zone_locations');
 };
 
 /**

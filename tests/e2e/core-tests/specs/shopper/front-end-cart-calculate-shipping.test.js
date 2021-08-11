@@ -4,10 +4,9 @@
 const {
 	shopper,
 	createSimpleProduct,
-	addShippingZoneAndMethod,
 	uiUnblocked,
 	selectOptionInSelect2,
-	merchant,
+	withRestApi,
 } = require( '@woocommerce/e2e-utils' );
 
 /**
@@ -41,12 +40,16 @@ const runCartCalculateShippingTest = () => {
 			await createSimpleProduct(secondProductName, secondProductPrice);
 
 			// Add a new shipping zone Germany with Free shipping
-			await addShippingZoneAndMethod(shippingZoneNameDE, shippingCountryDE, ' ', 'free_shipping');
+			await withRestApi.addShippingZoneAndMethod(shippingZoneNameDE, shippingCountryDE, ' ', 'free_shipping');
 
 			// Add a new shipping zone for France with Flat rate & Local pickup
-			await addShippingZoneAndMethod(shippingZoneNameFR, shippingCountryFR, ' ', 'flat_rate', '5', ['local_pickup']);
+			await withRestApi.addShippingZoneAndMethod(shippingZoneNameFR, shippingCountryFR, ' ', 'flat_rate', '5', ['local_pickup']);
 
 			await shopper.emptyCart();
+		});
+
+		afterAll(async () => {
+			await withRestApi.deleteAllShippingZones();
 		});
 
 		it('allows customer to calculate Free Shipping if in Germany', async () => {
