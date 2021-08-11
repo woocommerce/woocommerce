@@ -196,6 +196,14 @@ The above method also makes use of the following utility methods which can also 
 - `checkNestedZip( zipFilePath, savePath )` used to check a plugin zip file for any nested zip files. If one is found, it is extracted. Returns the path where the zip file is located.
 - `downloadZip( fileUrl, downloadPath )` can be used to directly download a plugin zip file from a remote location to the provided path.
 
+### Get the latest released zip URL
+
+If you would like to get the latest release zip URL, which can be used in the methods mentioned above, you can use the following helper function to do so:
+
+`getLatestReleaseZipUrl( owner, repository, getPrerelease, perPage )`
+
+This will return a string with the latest release URL. Optionally, you can use the `getPrerelease` boolean flag, which defaults to false, on whether or not to get a prerelease instead. The `perPage` flag can be used to return more results when getting the list of releases. The default value is 3.
+
 ## Additional information
 
 Refer to [`tests/e2e/core-tests`](https://github.com/woocommerce/woocommerce/tree/trunk/tests/e2e/core-tests) for some test examples, and [`tests/e2e`](https://github.com/woocommerce/woocommerce/tree/trunk/tests/e2e) for general information on e2e tests.
