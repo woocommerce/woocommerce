@@ -801,9 +801,9 @@ class WC_Admin_Addons {
 	 *
 	 * @param string $admin_body_class
 	 *
-	 * @return mixed|string
+	 * @return string
 	 */
-	public static function filter_admin_body_classes( string $admin_body_class = '' ) {
+	public static function filter_admin_body_classes( string $admin_body_class = '' ): string {
 		if ( isset( $_GET['section'] ) && 'helper' === $_GET['section'] ) {
 			return " $admin_body_class woocommerce-page-wc-subscriptions ";
 		}
