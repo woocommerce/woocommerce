@@ -33,7 +33,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<input type="hidden" name="section" value="_all">
 		</form>
 	</div>
-
+	<div class="top-bar">
+			<ul>
+				<?php foreach ( $sections as $section ) : ?>
+					<li>
+						<a
+							class="<?php echo $current_section === $section->slug ? 'current' : ''; ?>"
+							href="<?php echo esc_url( admin_url( 'admin.php?page=wc-addons&section=' . esc_attr( $section->slug ) ) ); ?>">
+							<?php echo esc_html( $section->label ); ?>
+						</a>
+					</li>
+				<?php endforeach; ?>
+			</ul>
+		</div>
 	<div class="wrap">
 		<div class="marketplace-content-wrapper">
 			<?php if ( isset( $_GET['search'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>
@@ -42,7 +54,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<?php printf( esc_html__( 'Showing search results for: %s', 'woocommerce' ), '<strong>' . esc_html( sanitize_text_field( wp_unslash( $_GET['search'] ) ) ) . '</strong>' ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>
 				</h1>
 			<?php endif; ?>
-
 
 			<?php if ( '_featured' === $current_section ) : ?>
 				<div class="addons-featured">
