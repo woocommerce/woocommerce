@@ -46,7 +46,6 @@ const runCartCalculateShippingTest = () => {
 			// Add a new shipping zone for France with Flat rate & Local pickup
 			await addShippingZoneAndMethod(shippingZoneNameFR, shippingCountryFR, ' ', 'flat_rate', '5', ['local_pickup']);
 
-			await merchant.logout();
 			await shopper.emptyCart();
 		});
 
