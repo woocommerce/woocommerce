@@ -805,9 +805,9 @@ class WC_Admin_Addons {
 	 */
 	public static function filter_admin_body_classes( string $admin_body_class = '' ) {
 		if ( isset( $_GET['section'] ) && 'helper' === $_GET['section'] ) {
-			return " $admin_body_class woocommerce_page_wc-subscriptions ";
+			return " $admin_body_class woocommerce-page-wc-subscriptions ";
 		}
 
-		return " $admin_body_class woocommerce_page_wc-marketplace ";
+		return " $admin_body_class woocommerce-page-wc-marketplace ";
 	}
 }
