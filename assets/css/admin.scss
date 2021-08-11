@@ -29,7 +29,6 @@
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
-		margin-bottom: 32px;
 		min-height: 216px;
 		padding: 24px;
 		width: 100%;
@@ -85,20 +84,34 @@
 		background: #fff;
 		box-shadow: inset 0 -1px 0 #ccc;
 		display: block;
-		height: 60px;
-		margin: 0 0 24px;
+		margin: 0 0 16px;
+
+		@media only screen and ( min-width: 768px ) {
+			margin-bottom: 24px;
+		}
 
 		ul {
+			background: #fff;
+			box-shadow: inset 0 -1px 0 #ccc;
 			display: flex;
 			justify-content: left;
 			margin: 0 auto;
 			max-width: 1056px;
+			overflow-x: scroll;
+
+			@media only screen and ( min-width: 768px ) {
+				flex-wrap: wrap;
+			}
+
+			@media only screen and ( min-width: 1300px ) {
+				justify-content: center;
+			}
 
 			li {
 				font-weight: 600;
 				font-size: 14px;
 				line-height: 20px;
-
+				margin: 0;
 			}
 
 			a,
@@ -109,6 +122,7 @@
 				display: inline-block;
 				text-decoration: none;
 				padding: 20px 16px;
+				white-space: nowrap;
 
 				&.current {
 					box-shadow: inset 0 -3px 0 #3171a6, inset 0 -1px 0 #ccc;
