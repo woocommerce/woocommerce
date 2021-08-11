@@ -1,10 +1,10 @@
-/* eslint-disable jest/no-export, jest/no-disabled-tests, jest/expect-expect, jest/no-standalone-expect */
 /**
  * Internal dependencies
  */
 const {
 	shopper,
 	merchant,
+	withRestApi,
 	createSimpleProduct,
 	setCheckbox,
 	settingsPageSaveChanges,
@@ -28,6 +28,9 @@ const runCheckoutPageTest = () => {
 	describe('Checkout page', () => {
 		beforeAll(async () => {
 			await createSimpleProduct();
+			await withRestApi.resetSettingsGroupToDefault('general');
+			await withRestApi.resetSettingsGroupToDefault('products');
+			await withRestApi.resetSettingsGroupToDefault('tax');
 
 			// Set free shipping within California
 			await merchant.login();
