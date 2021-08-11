@@ -81,6 +81,42 @@
 		}
 	}
 
+	.top-bar {
+		background: #fff;
+		box-shadow: inset 0 -1px 0 #ccc;
+		display: block;
+		height: 60px;
+		margin: 0 0 24px;
+
+		ul {
+			display: flex;
+			justify-content: left;
+			margin: 0 auto;
+			max-width: 1056px;
+
+			li {
+				font-weight: 600;
+				font-size: 14px;
+				line-height: 20px;
+
+			}
+
+			a,
+			a:visited,
+			a:hover,
+			a:focus {
+				color: #1e1e1e;
+				display: inline-block;
+				text-decoration: none;
+				padding: 20px 16px;
+
+				&.current {
+					box-shadow: inset 0 -3px 0 #3171a6, inset 0 -1px 0 #ccc;
+				}
+			}
+		}
+	}
+
 	h1.search-form-title {
 		clear: left;
 		padding: 0;
