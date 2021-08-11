@@ -695,15 +695,22 @@
 		display: none;
 	}
 
-	#wpbody {
+	.notice {
+		margin-left: 20px;
+		margin-right: 20px;
+	}
 
-		.notice {
-			margin-left: 20px;
-			margin-right: 20px;
-		}
+	.wp-header-end {
+		margin-top: -16px;
+	}
+}
 
-		.notice:first-of-type {
-			margin: 42px 20px 15px;
+.woocommerce-page-wc-subscriptions {
+
+	#wpbody-content {
+
+		.screen-reader-text + .notice {
+			margin-top: 32px;
 		}
 	}
 }
@@ -2863,16 +2870,6 @@ ul.wc_coupon_list_block {
 
 		.addons-promotion-block-title {
 			margin-top: 4px;
-		}
-	}
-
-	.woocommerce-page-wc-marketplace {
-
-		#wpbody {
-
-			.notice:first-of-type {
-				margin-top: 52px;
-			}
 		}
 	}
 }
@@ -7589,4 +7586,3 @@ table.bar_chart {
 		}
 	}
 }
-/* stylelint-enable selector-class-pattern */

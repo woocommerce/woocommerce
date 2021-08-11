@@ -34,6 +34,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</form>
 	</div>
 
+	<div class="wp-header-end"></div>
+
 	<div class="marketplace-content-wrapper">
 		<div class="marketplace-content">
 			<?php if ( isset( $_GET['search'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>
