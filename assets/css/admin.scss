@@ -721,17 +721,16 @@
 
 .woocommerce-page-wc-marketplace {
 
-	.woocommerce-layout {
-		display: none;
-	}
-
 	.notice {
 		margin-left: 20px;
 		margin-right: 20px;
 	}
 
-	.wp-header-end {
-		margin-top: -16px;
+	&.woocommerce-page {
+
+		.wrap {
+			margin-top: 32px;
+		}
 	}
 }
 
