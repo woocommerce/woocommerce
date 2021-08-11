@@ -167,6 +167,7 @@ class WC_Meta_Box_Order_Actions {
 		 * Filter: woocommerce_order_actions
 		 * Allows filtering of the available order actions for an order.
 		 *
+		 * @since 2.1.0 Filter was added.
 		 * @since x.x.x The $order param was added.
 		 *
 		 * @param array         $actions The available order actions for the order.
