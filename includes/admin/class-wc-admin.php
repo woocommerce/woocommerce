@@ -35,6 +35,11 @@ class WC_Admin {
 
 		// Add body class for WP 5.3+ compatibility.
 		add_filter( 'admin_body_class', array( $this, 'include_admin_body_class' ), 9999 );
+
+		// Add body class for Marketplace and My Subscriptions pages.
+		if ( isset( $_GET['page'] ) && 'wc-addons' === $_GET['page'] ) {
+			add_filter( 'admin_body_class', array( 'WC_Admin_Addons', 'filter_admin_body_classes' ) );
+		}
 	}
 
 	/**
