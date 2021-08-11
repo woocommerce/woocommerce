@@ -30,14 +30,8 @@ class WC_Meta_Box_Order_Actions {
 			$theorder = wc_get_order( $post->ID );
 		}
 
-		$order_actions = apply_filters(
-			'woocommerce_order_actions',
-			array(
-				'send_order_details'              => __( 'Email invoice / order details to customer', 'woocommerce' ),
-				'send_order_details_admin'        => __( 'Resend new order notification', 'woocommerce' ),
-				'regenerate_download_permissions' => __( 'Regenerate download permissions', 'woocommerce' ),
-			)
-		);
+		$theorder = $theorder instanceof WC_Order ? $theorder : null;
+		$order_actions = self::get_available_order_actions_for_order( $theorder );
 		?>
 		<ul class="order_actions submitbox">
 
@@ -150,5 +144,33 @@ class WC_Meta_Box_Order_Actions {
 	 */
 	public static function set_email_sent_message( $location ) {
 		return add_query_arg( 'message', 11, $location );
+	}
+
+	/**
+	 * Get the available order actions for a given order.
+	 *
+	 * @since x.x.x
+	 *
+	 * @param WC_Order|null $order The order object or null if no order is available.
+	 *
+	 * @return array
+	 */
+	public static function get_available_order_actions_for_order( $order ) {
+		$actions = array(
+			'send_order_details'              => __( 'Email invoice / order details to customer', 'woocommerce' ),
+			'send_order_details_admin'        => __( 'Resend new order notification', 'woocommerce' ),
+			'regenerate_download_permissions' => __( 'Regenerate download permissions', 'woocommerce' ),
+		);
+
+		/**
+		 * Filter: woocommerce_order_actions
+		 * Allows filtering of the available order actions for an order.
+		 *
+		 * @since x.x.x The $order param was added.
+		 *
+		 * @param array         $actions The available order actions for the order.
+		 * @param WC_Order|null $order   The order object or null if no order is available.
+		 */
+		return apply_filters( 'woocommerce_order_actions', $actions, $order );
 	}
 }
