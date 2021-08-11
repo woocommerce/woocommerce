@@ -309,7 +309,12 @@ class WC_Meta_Box_Order_Data {
 							}
 							?>
 							<select class="wc-customer-search" id="customer_user" name="customer_user" data-placeholder="<?php esc_attr_e( 'Guest', 'woocommerce' ); ?>" data-allow_clear="true">
-								<option value="<?php echo esc_attr( $user_id ); ?>" selected="selected"><?php /* htmlspecialchars to prevent XSS when rendered by selectWoo. */ echo esc_html( htmlspecialchars( wp_kses_post( $user_string ) ) ); ?></option>
+								<option value="<?php echo esc_attr( $user_id ); ?>" selected="selected">
+									<?php
+									// htmlspecialchars to prevent XSS when rendered by selectWoo.
+									echo esc_html( htmlspecialchars( wp_kses_post( $user_string ) ) );
+									?>
+								</option>
 							</select>
 							<!--/email_off-->
 						</p>
@@ -538,6 +543,8 @@ class WC_Meta_Box_Order_Data {
 	 * @throws Exception Required request data is missing.
 	 */
 	public static function save( $order_id ) {
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
+
 		if ( ! isset( $_POST['order_status'] ) ) {
 			throw new Exception( __( 'Order status is missing.', 'woocommerce' ), 400 );
 		}
@@ -549,8 +556,6 @@ class WC_Meta_Box_Order_Data {
 		if ( ! isset( $_POST['_wpnonce'] ) ) {
 			throw new Exception( __( 'Nonce is missing.', 'woocommerce' ), 400 );
 		}
-
-		wp_verify_nonce( wc_clean( wp_unslash( $_POST['_wpnonce'], 'woocommerce_save_data' ) ) );
 
 		self::init_address_fields();
 
@@ -655,5 +660,7 @@ class WC_Meta_Box_Order_Data {
 		$order->set_props( $props );
 		$order->set_status( wc_clean( wp_unslash( $_POST['order_status'] ) ), '', true );
 		$order->save();
+
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
 	}
 }
