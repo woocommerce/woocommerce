@@ -86,7 +86,7 @@ class WC_Privacy extends WC_Abstract_Privacy {
 			'<h2>' . __( 'What we collect and store', 'woocommerce' ) . '</h2>' .
 			'<p>' . __( 'While you visit our site, we’ll track:', 'woocommerce' ) . '</p>' .
 			'<ul>' .
-				'<li>' . __( 'Products you’ve viewed:  we’ll use this to, for example, show you products you’ve recently viewed', 'woocommerce' ) . '</li>' .
+				'<li>' . __( 'Products you’ve viewed: we’ll use this to, for example, show you products you’ve recently viewed', 'woocommerce' ) . '</li>' .
 				'<li>' . __( 'Location, IP address and browser type: we’ll use this for purposes like estimating taxes and shipping', 'woocommerce' ) . '</li>' .
 				'<li>' . __( 'Shipping address: we’ll ask you to enter this so we can, for instance, estimate shipping before you place an order, and send you the order!', 'woocommerce' ) . '</li>' .
 			'</ul>' .
