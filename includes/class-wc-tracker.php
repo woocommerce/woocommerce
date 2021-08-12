@@ -619,6 +619,8 @@ class WC_Tracker {
 			'version'                               => WC()->version,
 			'currency'                              => get_woocommerce_currency(),
 			'base_location'                         => WC()->countries->get_base_country(),
+			'base_state'                            => WC()->countries->get_base_state(),
+			'base_postcode'                         => WC()->countries->get_base_postcode(),
 			'selling_locations'                     => WC()->countries->get_allowed_countries(),
 			'api_enabled'                           => get_option( 'woocommerce_api_enabled' ),
 			'weight_unit'                           => get_option( 'woocommerce_weight_unit' ),
