@@ -57,6 +57,7 @@
             text-align: center;
         }
         tbody td {
+            vertical-align: middle;
             &.command {
                 white-space: nowrap;
             }

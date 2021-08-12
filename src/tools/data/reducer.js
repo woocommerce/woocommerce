@@ -7,6 +7,7 @@ const DEFAULT_STATE = {
 	currentlyRunning: {},
 	errorMessages: [],
 	cronJobs: false,
+	isEmailDisabled: '',
 	messages: {},
 	params: [],
 	status: '',
@@ -60,6 +61,11 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 			return {
 				...state,
 				cronJobs: action.cronJobs,
+			};
+		case TYPES.IS_EMAIL_DISABLED:
+			return {
+				...state,
+				isEmailDisabled: action.isEmailDisabled,
 			};
 		case TYPES.ADD_COMMAND_PARAMS:
 			return {

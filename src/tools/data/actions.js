@@ -62,6 +62,13 @@ export function setCronJobs(cronJobs) {
 	};
 }
 
+export function setIsEmailDisabled(isEmailDisabled) {
+	return {
+		type: TYPES.IS_EMAIL_DISABLED,
+		isEmailDisabled,
+	};
+}
+
 function* runCommand(commandName, func) {
 	try {
 		yield addCurrentlyRunning(commandName);
@@ -173,5 +180,15 @@ export function* runSelectedCronJob(params) {
 			method: 'POST',
 			data: params,
 		});
+	});
+}
+
+export function* runDisableEmail() {
+	yield runCommand('Disable/Enable WooCommerce emails', function* () {
+		const response = yield apiFetch({
+			path: `${API_NAMESPACE}/tools/toggle-emails/v1`,
+			method: 'POST',
+		});
+		yield setIsEmailDisabled( response );
 	});
 }

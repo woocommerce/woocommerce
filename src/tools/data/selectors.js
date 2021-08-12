@@ -17,3 +17,7 @@ export function getCommandParams( state ) {
 export function getCronJobs( state ) {
 	return state.cronJobs;
 }
+
+export function getIsEmailDisabled( state ) {
+	return state.isEmailDisabled;
+}
