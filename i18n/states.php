@@ -667,8 +667,8 @@ return array(
 		'PY' => __( 'Pondicherry (Puducherry)', 'woocommerce' ),
 	),
 	'IR' => array( // Iran States.
-		'KHZ' => __( 'Khuzestan  (خوزستان)', 'woocommerce' ),
-		'THR' => __( 'Tehran  (تهران)', 'woocommerce' ),
+		'KHZ' => __( 'Khuzestan (خوزستان)', 'woocommerce' ),
+		'THR' => __( 'Tehran (تهران)', 'woocommerce' ),
 		'ILM' => __( 'Ilaam (ایلام)', 'woocommerce' ),
 		'BHR' => __( 'Bushehr (بوشهر)', 'woocommerce' ),
 		'ADL' => __( 'Ardabil (اردبیل)', 'woocommerce' ),
