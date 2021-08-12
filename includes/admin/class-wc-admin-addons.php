@@ -801,7 +801,7 @@ class WC_Admin_Addons {
 	 *
 	 * @param string $admin_body_class
 	 *
-	 * @return string
+	 * @return string Body class with added class for Marketplace or My Subscriptions page.
 	 */
 	public static function filter_admin_body_classes( string $admin_body_class = '' ): string {
 		if ( isset( $_GET['section'] ) && 'helper' === $_GET['section'] ) {
