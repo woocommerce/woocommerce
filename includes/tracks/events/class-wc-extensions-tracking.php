@@ -29,10 +29,14 @@ class WC_Extensions_Tracking {
 	 */
 	public function track_extensions_page() {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
-		$event      = 'extensions_view';
 		$properties = array(
 			'section' => empty( $_REQUEST['section'] ) ? '_featured' : wc_clean( wp_unslash( $_REQUEST['section'] ) ),
 		);
+
+		$event      = 'extensions_view';
+		if ( 'helper' === $properties['section'] ) {
+			$event = 'subscriptions_view';
+		}
 
 		if ( ! empty( $_REQUEST['search'] ) ) {
 			$event                     = 'extensions_view_search';
