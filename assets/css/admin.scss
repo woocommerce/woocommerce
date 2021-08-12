@@ -116,11 +116,12 @@
 			a:hover,
 			a:focus {
 				border: none;
+				box-shadow: none;
 				color: #1e1e1e;
 				display: inline-block;
 				text-decoration: none;
 				outline: none;
-				padding: 20px 16px;
+				padding: 20px 12px;
 				white-space: nowrap;
 
 				&.current {
