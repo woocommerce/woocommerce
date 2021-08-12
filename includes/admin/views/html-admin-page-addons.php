@@ -33,6 +33,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<input type="hidden" name="section" value="_all">
 		</form>
 	</div>
+
 	<div class="top-bar">
 			<ul>
 				<?php foreach ( $sections as $section ) : ?>
@@ -46,6 +47,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<?php endforeach; ?>
 			</ul>
 		</div>
+
+	<div class="wp-header-end"></div>
+
 	<div class="wrap">
 		<div class="marketplace-content-wrapper">
 			<?php if ( isset( $_GET['search'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>
