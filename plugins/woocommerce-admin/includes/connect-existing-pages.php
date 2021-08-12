@@ -23,7 +23,7 @@ function wc_admin_get_core_pages_to_connect() {
 
 	return array(
 		'wc-addons'   => array(
-			'title' => __( 'Extensions', 'woocommerce-admin' ),
+			'title' => __( 'Marketplace', 'woocommerce-admin' ),
 			'tabs'  => array(),
 		),
 		'wc-reports'  => array(
@@ -292,5 +292,15 @@ wc_admin_connect_page(
 		'parent'    => 'woocommerce-products',
 		'screen_id' => 'product_page_product_attribute-edit',
 		'title'     => __( 'Edit attribute', 'woocommerce-admin' ),
+	)
+);
+
+// WooCommerce > My Subscriptions.
+wc_admin_connect_page(
+	array(
+		'id'        => 'wc-subscriptions',
+		'screen_id' => 'woocommerce_page_wc-addons-browse-extensions-helper',
+		'title'     => __( 'My Subscriptions', 'woocommerce-admin' ),
+		'path'      => 'admin.php?page=wc-addons&section=helper',
 	)
 );
