@@ -15,7 +15,7 @@ const getWooClassName = ( { status = 'default' } ) => {
 		case 'error':
 			return 'woocommerce-error';
 		case 'success':
-			return 'woocommerce-success';
+			return 'woocommerce-message';
 		case 'info':
 		case 'warning':
 			return 'woocommerce-info';
@@ -42,7 +42,6 @@ const StoreNoticesContainer = ( { className, notices, removeNotice } ) => {
 					{ ...props }
 					className={ classnames(
 						'wc-block-components-notices__notice',
-						'woocommerce-message',
 						getWooClassName( props )
 					) }
 					onRemove={ () => {
