@@ -579,6 +579,19 @@ describe( 'getLastPeriod', () => {
 				lastMonthkLastYearEnd.isSame( dateValue.secondaryEnd, 'day' )
 			).toBe( true );
 		} );
+
+		it( 'should return correct values on a leap year', () => {
+			// Mock the current time as a year and month after a leap year month, March 2021.
+			const dateNowSpy = jest
+				.spyOn( Date, 'now' )
+				.mockImplementation( () => 1615587095000 );
+
+			const dateValue = getLastPeriod( 'month', 'previous_year' );
+
+			expect( dateValue.secondaryEnd.date() ).toBe( 29 );
+
+			dateNowSpy.mockRestore();
+		} );
 	} );
 
 	describe( 'quarter', () => {

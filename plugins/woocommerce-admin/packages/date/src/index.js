@@ -173,9 +173,12 @@ export function getLastPeriod( period, compare ) {
 			secondaryEnd = primaryStart.clone().subtract( 1, 'days' );
 			secondaryStart = secondaryEnd.clone().subtract( daysDiff, 'days' );
 		}
-	} else {
+	} else if ( period === 'week' ) {
 		secondaryStart = primaryStart.clone().subtract( 1, 'years' );
 		secondaryEnd = primaryEnd.clone().subtract( 1, 'years' );
+	} else {
+		secondaryStart = primaryStart.clone().subtract( 1, 'years' );
+		secondaryEnd = secondaryStart.clone().endOf( period );
 	}
 
 	// When the period is month, be sure to force end of month to take into account leap year
