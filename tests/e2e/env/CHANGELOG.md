@@ -6,6 +6,7 @@
 - Added plugin zip utility functions:
   - `checkNestedZip( zipFilePath, savePath )` checks a plugin zip file for any nested zip files. If one is found, it is extracted. Returns the path where the zip file is located.
   - `downloadZip( fileUrl, downloadPath )` downloads a plugin zip file from a remote location to the provided path.
+- Added `getLatestReleaseZipUrl( owner, repository, getPrerelease, perPage )` util function to get the latest release zip from a GitHub repository
 
 # 0.2.2
 
