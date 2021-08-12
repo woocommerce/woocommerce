@@ -10,7 +10,7 @@ import classnames from 'classnames';
  * Internal dependencies
  */
 import { ValidatedTextInput } from '../text-input';
-import { ValidatedSelect } from '../select';
+import Combobox from '../combobox';
 import './style.scss';
 import type { StateInputWithStatesProps } from './StateInputProps';
 
@@ -30,8 +30,8 @@ const StateInput = ( {
 		() =>
 			countryStates
 				? Object.keys( countryStates ).map( ( key ) => ( {
-						key,
-						name: decodeEntities( countryStates[ key ] ),
+						value: key,
+						label: decodeEntities( countryStates[ key ] ),
 				  } ) )
 				: [],
 		[ countryStates ]
@@ -47,10 +47,12 @@ const StateInput = ( {
 			if ( options.length > 0 ) {
 				const foundOption = options.find(
 					( option ) =>
-						option.key === stateValue || option.name === stateValue
+						option.label.toLocaleUpperCase() ===
+							stateValue.toLocaleUpperCase() ||
+						option.value.toLocaleUpperCase() ===
+							stateValue.toLocaleUpperCase()
 				);
-
-				onChange( foundOption ? foundOption.key : '' );
+				onChange( foundOption ? foundOption.value : '' );
 				return;
 			}
 			onChange( stateValue );
@@ -61,7 +63,7 @@ const StateInput = ( {
 	if ( options.length > 0 ) {
 		return (
 			<>
-				<ValidatedSelect
+				<Combobox
 					className={ classnames(
 						className,
 						'wc-block-components-state-input'
@@ -70,12 +72,13 @@ const StateInput = ( {
 					label={ label }
 					onChange={ onChangeState }
 					options={ options }
-					value={ options.find( ( option ) => option.key === value ) }
+					value={ value }
 					errorMessage={ __(
 						'Please select a state.',
 						'woo-gutenberg-products-block'
 					) }
 					required={ required }
+					autoComplete={ autoComplete }
 				/>
 				{ autoComplete !== 'off' && (
 					<input

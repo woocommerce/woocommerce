@@ -112,6 +112,18 @@ const AddressForm = ( {
 		);
 	}, [ currentFields, fieldConfig, values.country ] );
 
+	// Clear values for hidden fields.
+	useEffect( () => {
+		addressFormFields.forEach( ( field ) => {
+			if ( field.hidden && values[ field.key ] ) {
+				onChange( {
+					...values,
+					[ field.key ]: '',
+				} );
+			}
+		} );
+	}, [ addressFormFields, onChange, values ] );
+
 	useEffect( () => {
 		if ( type === 'shipping' ) {
 			validateShippingCountry(
@@ -161,8 +173,6 @@ const AddressForm = ( {
 									...values,
 									country: newValue,
 									state: '',
-									city: '',
-									postcode: '',
 								} )
 							}
 							errorId={
