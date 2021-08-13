@@ -97,7 +97,7 @@
 
 			@media only screen and ( min-width: 600px ) {
 				margin-left: 70px;
-				width: 200px;
+				width: 288px;
 			}
 		}
 
@@ -163,6 +163,10 @@
 				padding: 14px 18px;
 				position: relative;
 				width: 100%;
+
+				@media only screen and ( min-width: 600px ) {
+					padding: 10px 18px;
+				}
 			}
 
 			a.current::after {
