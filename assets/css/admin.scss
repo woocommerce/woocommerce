@@ -94,15 +94,29 @@
 		.current-section-dropdown {
 			position: relative;
 			margin-left: 70px;
-			width: 250px;
+			width: 200px;
 		}
 
 		.current-section-name {
 			font-weight: 600;
 			font-size: 14px;
 			line-height: 20px;	
-			padding: 20px 12px;	
+			padding: 20px 12px;
+			position: relative;
 		}
+
+		.current-section-name:after {
+			background-image: url(../images/icons/gridicons-chevron-down.svg);
+			background-size: contain;
+			content: '';
+			display: block;
+			right: 20px;
+			top: 20px;
+			position: absolute;
+			width: 20px;
+			height: 20px;
+		}
+
 		ul {
 			background: #fff;
 			border: 1px solid #1E1E1E;
@@ -112,7 +126,6 @@
 			justify-content: left;
 			left: 0;
 			margin: 0;
-			min-width: 200px;
 			padding: 14px 0;
 			position: absolute;
 			top: 50px;
