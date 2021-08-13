@@ -5,7 +5,18 @@
  */
 import { isEqual } from 'lodash';
 import { useRef } from '@wordpress/element';
-import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
+import {
+	CART_STORE_KEY as storeKey,
+	EMPTY_CART_COUPONS,
+	EMPTY_CART_ITEMS,
+	EMPTY_CART_FEES,
+	EMPTY_CART_ITEM_ERRORS,
+	EMPTY_CART_ERRORS,
+	EMPTY_SHIPPING_RATES,
+	EMPTY_TAX_LINES,
+	EMPTY_PAYMENT_REQUIREMENTS,
+	EMPTY_EXTENSIONS,
+} from '@woocommerce/block-data';
 import { useSelect } from '@wordpress/data';
 import { decodeEntities } from '@wordpress/html-entities';
 import type {
@@ -60,7 +71,7 @@ const defaultCartTotals: CartResponseTotals = {
 	total_shipping_tax: '',
 	total_price: '',
 	total_tax: '',
-	tax_lines: [],
+	tax_lines: EMPTY_TAX_LINES,
 	currency_code: '',
 	currency_symbol: '',
 	currency_minor_unit: 2,
@@ -85,25 +96,25 @@ const decodeValues = (
  * @type  {StoreCart} Object containing cart data.
  */
 export const defaultCartData: StoreCart = {
-	cartCoupons: [],
-	cartItems: [],
-	cartFees: [],
+	cartCoupons: EMPTY_CART_COUPONS,
+	cartItems: EMPTY_CART_ITEMS,
+	cartFees: EMPTY_CART_FEES,
 	cartItemsCount: 0,
 	cartItemsWeight: 0,
 	cartNeedsPayment: true,
 	cartNeedsShipping: true,
-	cartItemErrors: [],
+	cartItemErrors: EMPTY_CART_ITEM_ERRORS,
 	cartTotals: defaultCartTotals,
 	cartIsLoading: true,
-	cartErrors: [],
+	cartErrors: EMPTY_CART_ERRORS,
 	billingAddress: defaultBillingAddress,
 	shippingAddress: defaultShippingAddress,
-	shippingRates: [],
+	shippingRates: EMPTY_SHIPPING_RATES,
 	shippingRatesLoading: false,
 	cartHasCalculatedShipping: false,
-	paymentRequirements: [],
+	paymentRequirements: EMPTY_PAYMENT_REQUIREMENTS,
 	receiveCart: () => undefined,
-	extensions: {},
+	extensions: EMPTY_EXTENSIONS,
 };
 
 /**
@@ -122,7 +133,7 @@ export const useStoreCart = (
 	options: { shouldSelect: boolean } = { shouldSelect: true }
 ): StoreCart => {
 	const { isEditor, previewData } = useEditorContext();
-	const previewCart = previewData?.previewCart || {};
+	const previewCart = previewData?.previewCart;
 	const { shouldSelect } = options;
 	const currentResults = useRef();
 
@@ -141,13 +152,13 @@ export const useStoreCart = (
 					cartItemsWeight: previewCart.items_weight,
 					cartNeedsPayment: previewCart.needs_payment,
 					cartNeedsShipping: previewCart.needs_shipping,
-					cartItemErrors: [],
+					cartItemErrors: EMPTY_CART_ITEM_ERRORS,
 					cartTotals: previewCart.totals,
 					cartIsLoading: false,
-					cartErrors: [],
+					cartErrors: EMPTY_CART_ERRORS,
 					billingAddress: defaultBillingAddress,
 					shippingAddress: defaultShippingAddress,
-					extensions: {},
+					extensions: EMPTY_EXTENSIONS,
 					shippingRates: previewCart.shipping_rates,
 					shippingRatesLoading: false,
 					cartHasCalculatedShipping:
@@ -173,39 +184,45 @@ export const useStoreCart = (
 			const shippingAddress = cartData.needsShipping
 				? decodeValues( cartData.shippingAddress )
 				: billingAddress;
-			const cartFees = cartData.fees.map( ( fee: CartResponseFeeItem ) =>
-				decodeValues( fee )
-			);
+			const cartFees =
+				cartData.fees.length > 0
+					? cartData.fees.map( ( fee: CartResponseFeeItem ) =>
+							decodeValues( fee )
+					  )
+					: EMPTY_CART_FEES;
 
 			// Add a text property to the coupon to allow extensions to modify
 			// the text used to display the coupon, without affecting the
 			// functionality when it comes to removing the coupon.
-			const cartCoupons: CartResponseCouponItemWithLabel[] = cartData.coupons.map(
-				( coupon: CartResponseCouponItem ) => ( {
-					...coupon,
-					label: coupon.code,
-				} )
-			);
+			const cartCoupons: CartResponseCouponItemWithLabel[] =
+				cartData.coupons.length > 0
+					? cartData.coupons.map(
+							( coupon: CartResponseCouponItem ) => ( {
+								...coupon,
+								label: coupon.code,
+							} )
+					  )
+					: EMPTY_CART_COUPONS;
 
 			return {
 				cartCoupons,
-				cartItems: cartData.items || [],
+				cartItems: cartData.items,
 				cartFees,
 				cartItemsCount: cartData.itemsCount,
 				cartItemsWeight: cartData.itemsWeight,
 				cartNeedsPayment: cartData.needsPayment,
 				cartNeedsShipping: cartData.needsShipping,
-				cartItemErrors: cartData.errors || [],
+				cartItemErrors: cartData.errors,
 				cartTotals,
 				cartIsLoading,
 				cartErrors,
 				billingAddress: emptyHiddenAddressFields( billingAddress ),
 				shippingAddress: emptyHiddenAddressFields( shippingAddress ),
-				extensions: cartData.extensions || {},
-				shippingRates: cartData.shippingRates || [],
+				extensions: cartData.extensions,
+				shippingRates: cartData.shippingRates,
 				shippingRatesLoading,
 				cartHasCalculatedShipping: cartData.hasCalculatedShipping,
-				paymentRequirements: cartData.paymentRequirements || [],
+				paymentRequirements: cartData.paymentRequirements,
 				receiveCart,
 			};
 		},

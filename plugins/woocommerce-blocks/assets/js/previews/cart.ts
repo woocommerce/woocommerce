@@ -14,7 +14,7 @@ import { previewShippingRates } from './shipping-rates';
 const displayWithTax = getSetting( 'displayCartPricesIncludingTax', false );
 // Sample data for cart block.
 // This closely resembles the data returned from the Store API /cart endpoint.
-// https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/trunk/src/RestApi/StoreApi#cart-api
+// https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/src/StoreApi/docs/cart.md#cart-response
 export const previewCart: CartResponse = {
 	coupons: [],
 	shipping_rates: getSetting( 'shippingMethodsExist', false )
@@ -165,7 +165,6 @@ export const previewCart: CartResponse = {
 	needs_payment: true,
 	needs_shipping: getSetting( 'shippingEnabled', true ),
 	has_calculated_shipping: true,
-	extensions: {},
 	shipping_address: {
 		first_name: '',
 		last_name: '',
@@ -217,4 +216,8 @@ export const previewCart: CartResponse = {
 			},
 		],
 	},
+	errors: [],
+	payment_requirements: [ 'products' ],
+	generated_timestamp: Date.now(),
+	extensions: {},
 };

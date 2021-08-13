@@ -9,6 +9,7 @@ import type { Reducer } from 'redux';
  */
 import { ACTION_TYPES as types } from './action-types';
 import { defaultCartState, CartState } from '../default-states';
+import { EMPTY_CART_ERRORS } from '../constants';
 import type { CartAction } from './actions';
 
 /**
@@ -67,7 +68,7 @@ const reducer: Reducer< CartState > = (
 			if ( action.response ) {
 				state = {
 					...state,
-					errors: [],
+					errors: EMPTY_CART_ERRORS,
 					cartData: action.response,
 				};
 			}
@@ -125,7 +126,7 @@ const reducer: Reducer< CartState > = (
 		case types.RECEIVE_CART_ITEM:
 			state = {
 				...state,
-				errors: [],
+				errors: EMPTY_CART_ERRORS,
 				cartData: {
 					...state.cartData,
 					items: cartItemsReducer( state.cartData.items, action ),
