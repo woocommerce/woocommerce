@@ -9,6 +9,7 @@ const {
 const config = require('config');
 const { HTTPClientFactory } = require('@woocommerce/api');
 const { addConsoleSuppression, updateReadyPageStatus } = require( '@woocommerce/e2e-environment' );
+const { DEFAULT_TIMEOUT_OVERRIDE } = process.env;
 
 // @todo: remove this once https://github.com/woocommerce/woocommerce-admin/issues/6992 has been addressed
 addConsoleSuppression( 'woocommerce_shared_settings' );
@@ -105,6 +106,12 @@ async function deleteAllCoupons() {
 // other posts/comments/etc. aren't dirtying tests and tests don't depend on
 // each other's side-effects.
 beforeAll(async () => {
+
+	if ( DEFAULT_TIMEOUT_OVERRIDE ) {
+		page.setDefaultNavigationTimeout( DEFAULT_TIMEOUT_OVERRIDE );
+		page.setDefaultTimeout( DEFAULT_TIMEOUT_OVERRIDE );
+	}
+
 	// Update the ready page to prevent concurrent test runs
 	await updateReadyPageStatus('draft');
 
