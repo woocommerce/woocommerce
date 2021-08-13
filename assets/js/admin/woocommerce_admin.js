@@ -406,6 +406,21 @@
 				return window.confirm( woocommerce_admin.i18n_remove_personal_data_notice );
 			}
 		});
+
+		var marketplaceSectionDropdown = $( '#marketplace-current-section-dropdown' );
+		var marketplaceSectionName = $( '#marketplace-current-section-name' );
+		if ( marketplaceSectionDropdown.length && isTouchDevice() ) {
+			marketplaceSectionName.on('click', function() {
+				marketplaceSectionDropdown.toggleClass( 'is-open' );
+			} );
+		}
+
+		function isTouchDevice() {
+			return ( ( 'ontouchstart' in window ) ||
+				( navigator.maxTouchPoints > 0 ) ||
+				( navigator.msMaxTouchPoints > 0 ) );
+		}
+
 	});
 
 })( jQuery, woocommerce_admin );
