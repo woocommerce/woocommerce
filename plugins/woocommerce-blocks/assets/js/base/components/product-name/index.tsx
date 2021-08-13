@@ -21,10 +21,10 @@ export default ( {
 	permalink = '',
 	...props
 }: {
-	className: string;
-	disabled: boolean;
+	className?: string;
+	disabled?: boolean;
 	name: string;
-	permalink: string;
+	permalink?: string;
 } ): JSX.Element => {
 	const classes = classnames( 'wc-block-components-product-name', className );
 	return disabled ? (

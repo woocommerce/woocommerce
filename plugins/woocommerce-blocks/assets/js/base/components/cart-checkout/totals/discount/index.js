@@ -16,6 +16,10 @@ import { getSetting } from '@woocommerce/settings';
  */
 import './style.scss';
 
+const filteredCartCouponsFilterArg = {
+	context: 'summary',
+};
+
 const TotalsDiscount = ( {
 	cartCoupons = [],
 	currency,
@@ -42,9 +46,7 @@ const TotalsDiscount = ( {
 		: discountValue;
 
 	const filteredCartCoupons = __experimentalApplyCheckoutFilter( {
-		arg: {
-			context: 'summary',
-		},
+		arg: filteredCartCouponsFilterArg,
 		filterName: 'coupons',
 		defaultValue: cartCoupons,
 	} );

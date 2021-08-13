@@ -12,7 +12,7 @@ import OrderSummary from '../index';
 jest.mock( '@woocommerce/base-context', () => ( {
 	...jest.requireActual( '@woocommerce/base-context' ),
 	useContainerWidthContext: () => ( {
-		isLarge: false,
+		isLarge: true,
 		hasContainerWidth: true,
 	} ),
 } ) );
