@@ -93,14 +93,16 @@
 
 		.current-section-dropdown {
 			position: relative;
-			width: 200px;
+			width: 100%;
 
 			@media only screen and ( min-width: 600px ) {
 				margin-left: 70px;
+				width: 288px;
 			}
 		}
 
 		.current-section-name {
+			cursor: pointer;
 			font-weight: 600;
 			font-size: 14px;
 			line-height: 20px;
@@ -108,10 +110,10 @@
 			position: relative;
 		}
 
-		.current-section-name:after {
+		.current-section-name::after {
 			background-image: url(../images/icons/gridicons-chevron-down.svg);
 			background-size: contain;
-			content: '';
+			content: "";
 			display: block;
 			height: 20px;
 			position: absolute;
@@ -122,7 +124,6 @@
 
 		ul {
 			background: #fff;
-			border: 1px solid #1E1E1E;
 			border-radius: 2px;
 			display: none;
 			flex-direction: column;
@@ -133,6 +134,10 @@
 			position: absolute;
 			top: 50px;
 			width: 100%;
+
+			@media only screen and ( min-width: 600px ) {
+				border: 1px solid #1e1e1e;
+			}
 
 			@media only screen and ( min-width: 1100px ) {
 				justify-content: center;
@@ -155,14 +160,18 @@
 				display: inline-block;
 				text-decoration: none;
 				outline: none;
-				padding: 10px 18px;
+				padding: 14px 18px;
 				position: relative;
 				width: 100%;
+
+				@media only screen and ( min-width: 600px ) {
+					padding: 10px 18px;
+				}
 			}
 
-			a.current:after {
+			a.current::after {
 				background-image: url(../images/icons/gridicons-checkmark.svg);
-				content: '';
+				content: "";
 				display: block;
 				height: 20px;
 				position: absolute;
@@ -172,8 +181,16 @@
 			}
 		}
 
-		.current-section-dropdown:hover ul {
-			display: flex;
+		.current-section-dropdown:hover,
+		.current-section-dropdown.is-open {
+
+			ul {
+				display: flex;
+			}
+
+			.current-section-name::after {
+				transform: rotate(0.5turn);
+			}
 		}
 	}
 
