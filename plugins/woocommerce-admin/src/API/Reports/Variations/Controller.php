@@ -183,7 +183,7 @@ class Controller extends ReportsController implements ExportableInterface {
 					'type'        => 'number',
 					'readonly'    => true,
 					'context'     => array( 'view', 'edit' ),
-					'description' => __( 'Total Net Sales of all items sold.', 'woocommerce-admin' ),
+					'description' => __( 'Total Net sales of all items sold.', 'woocommerce-admin' ),
 				),
 				'orders_count'  => array(
 					'type'        => 'integer',
@@ -409,9 +409,9 @@ class Controller extends ReportsController implements ExportableInterface {
 	 */
 	public function get_export_columns() {
 		$export_columns = array(
-			'product_name' => __( 'Product / Variation Title', 'woocommerce-admin' ),
+			'product_name' => __( 'Product / Variation title', 'woocommerce-admin' ),
 			'sku'          => __( 'SKU', 'woocommerce-admin' ),
-			'items_sold'   => __( 'Items Sold', 'woocommerce-admin' ),
+			'items_sold'   => __( 'Items sold', 'woocommerce-admin' ),
 			'net_revenue'  => __( 'N. Revenue', 'woocommerce-admin' ),
 			'orders_count' => __( 'Orders', 'woocommerce-admin' ),
 		);

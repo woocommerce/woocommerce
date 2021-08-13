@@ -23,21 +23,21 @@ const { addCesSurveyForAnalytics } = dispatch( CES_STORE_KEY );
 export const charts = applyFilters( TAXES_REPORT_CHARTS_FILTER, [
 	{
 		key: 'total_tax',
-		label: __( 'Total Tax', 'woocommerce-admin' ),
+		label: __( 'Total tax', 'woocommerce-admin' ),
 		order: 'desc',
 		orderby: 'total_tax',
 		type: 'currency',
 	},
 	{
 		key: 'order_tax',
-		label: __( 'Order Tax', 'woocommerce-admin' ),
+		label: __( 'Order tax', 'woocommerce-admin' ),
 		order: 'desc',
 		orderby: 'order_tax',
 		type: 'currency',
 	},
 	{
 		key: 'shipping_tax',
-		label: __( 'Shipping Tax', 'woocommerce-admin' ),
+		label: __( 'Shipping tax', 'woocommerce-admin' ),
 		order: 'desc',
 		orderby: 'shipping_tax',
 		type: 'currency',
@@ -56,7 +56,7 @@ export const advancedFilters = applyFilters(
 	{
 		filters: {},
 		title: _x(
-			'Taxes Match {{select /}} Filters',
+			'Taxes match {{select /}} filters',
 			'A sentence describing filters for Taxes. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ',
 			'woocommerce-admin'
 		),
@@ -64,7 +64,7 @@ export const advancedFilters = applyFilters(
 );
 
 const filterValues = [
-	{ label: __( 'All Taxes', 'woocommerce-admin' ), value: 'all' },
+	{ label: __( 'All taxes', 'woocommerce-admin' ), value: 'all' },
 	{
 		label: __( 'Comparison', 'woocommerce-admin' ),
 		value: 'compare-taxes',
@@ -99,7 +99,7 @@ const filterValues = [
 
 if ( Object.keys( advancedFilters.filters ).length ) {
 	filterValues.push( {
-		label: __( 'Advanced Filters', 'woocommerce-admin' ),
+		label: __( 'Advanced filters', 'woocommerce-admin' ),
 		value: 'advanced',
 	} );
 }

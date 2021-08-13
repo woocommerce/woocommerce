@@ -11,7 +11,7 @@ A button useful for a launcher of a dropdown component. The button is 100% width
 		<DropdownButton
 			onClick={ onToggle }
 			isOpen={ isOpen }
-			labels={ [ 'All Products Sold' ] }
+			labels={ [ 'All products Sold' ] }
 		/>
 	) }
 	renderContent={ () => (

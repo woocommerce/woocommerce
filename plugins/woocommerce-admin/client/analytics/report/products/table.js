@@ -37,7 +37,7 @@ class ProductsReportTable extends Component {
 	getHeadersContent() {
 		return [
 			{
-				label: __( 'Product Title', 'woocommerce-admin' ),
+				label: __( 'Product title', 'woocommerce-admin' ),
 				key: 'product_name',
 				required: true,
 				isLeftAligned: true,
@@ -50,7 +50,7 @@ class ProductsReportTable extends Component {
 				isSortable: true,
 			},
 			{
-				label: __( 'Items Sold', 'woocommerce-admin' ),
+				label: __( 'Items sold', 'woocommerce-admin' ),
 				key: 'items_sold',
 				required: true,
 				defaultSort: true,
@@ -58,8 +58,8 @@ class ProductsReportTable extends Component {
 				isNumeric: true,
 			},
 			{
-				label: __( 'Net Sales', 'woocommerce-admin' ),
-				screenReaderLabel: __( 'Net Sales', 'woocommerce-admin' ),
+				label: __( 'Net sales', 'woocommerce-admin' ),
+				screenReaderLabel: __( 'Net sales', 'woocommerce-admin' ),
 				key: 'net_revenue',
 				required: true,
 				isSortable: true,
@@ -284,8 +284,8 @@ class ProductsReportTable extends Component {
 		return [
 			{
 				label: _n(
-					'product',
-					'products',
+					'Product',
+					'Products',
 					productsCount,
 					'woocommerce-admin'
 				),
@@ -293,21 +293,21 @@ class ProductsReportTable extends Component {
 			},
 			{
 				label: _n(
-					'item sold',
-					'items sold',
+					'Item sold',
+					'Items sold',
 					itemsSold,
 					'woocommerce-admin'
 				),
 				value: formatValue( currency, 'number', itemsSold ),
 			},
 			{
-				label: __( 'net sales', 'woocommerce-admin' ),
+				label: __( 'Net sales', 'woocommerce-admin' ),
 				value: formatAmount( netRevenue ),
 			},
 			{
 				label: _n(
-					'orders',
-					'orders',
+					'Orders',
+					'Orders',
 					ordersCount,
 					'woocommerce-admin'
 				),

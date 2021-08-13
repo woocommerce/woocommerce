@@ -11,7 +11,7 @@ import { headers } from './index';
 
 export const Basic = () => (
 	<Card size={ null }>
-		<TablePlaceholder caption="Revenue Last Week" headers={ headers } />
+		<TablePlaceholder caption="Revenue last week" headers={ headers } />
 	</Card>
 );
 

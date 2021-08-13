@@ -26,14 +26,14 @@ const { addCesSurveyForAnalytics } = dispatch( CES_STORE_KEY );
 export const charts = applyFilters( PRODUCTS_REPORT_CHARTS_FILTER, [
 	{
 		key: 'items_sold',
-		label: __( 'Items Sold', 'woocommerce-admin' ),
+		label: __( 'Items sold', 'woocommerce-admin' ),
 		order: 'desc',
 		orderby: 'items_sold',
 		type: 'number',
 	},
 	{
 		key: 'net_revenue',
-		label: __( 'Net Sales', 'woocommerce-admin' ),
+		label: __( 'Net sales', 'woocommerce-admin' ),
 		order: 'desc',
 		orderby: 'net_revenue',
 		type: 'currency',
@@ -53,9 +53,9 @@ const filterConfig = {
 	param: 'filter',
 	showFilters: () => true,
 	filters: [
-		{ label: __( 'All Products', 'woocommerce-admin' ), value: 'all' },
+		{ label: __( 'All products', 'woocommerce-admin' ), value: 'all' },
 		{
-			label: __( 'Single Product', 'woocommerce-admin' ),
+			label: __( 'Single product', 'woocommerce-admin' ),
 			value: 'select_product',
 			chartMode: 'item-comparison',
 			subFilters: [
@@ -73,7 +73,7 @@ const filterConfig = {
 								'Type to search for a product',
 								'woocommerce-admin'
 							),
-							button: __( 'Single Product', 'woocommerce-admin' ),
+							button: __( 'Single product', 'woocommerce-admin' ),
 						},
 					},
 				},
@@ -114,12 +114,12 @@ const variationsConfig = {
 	param: 'filter-variations',
 	filters: [
 		{
-			label: __( 'All Variations', 'woocommerce-admin' ),
+			label: __( 'All variations', 'woocommerce-admin' ),
 			chartMode: 'item-comparison',
 			value: 'all',
 		},
 		{
-			label: __( 'Single Variation', 'woocommerce-admin' ),
+			label: __( 'Single variation', 'woocommerce-admin' ),
 			value: 'select_variation',
 			subFilters: [
 				{
@@ -136,7 +136,7 @@ const variationsConfig = {
 								'woocommerce-admin'
 							),
 							button: __(
-								'Single Variation',
+								'Single variation',
 								'woocommerce-admin'
 							),
 						},

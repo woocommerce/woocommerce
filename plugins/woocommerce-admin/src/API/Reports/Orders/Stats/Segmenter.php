@@ -59,7 +59,7 @@ class Segmenter extends ReportsSegmenter {
 
 	/**
 	 * Returns column => query mapping to be used for order-level segmenting query
-	 * (e.g. avg items per order or Net Sales when segmented by coupons).
+	 * (e.g. avg items per order or Net sales when segmented by coupons).
 	 *
 	 * @param string $order_stats_table Name of SQL table containing the order-level info.
 	 * @param array  $overrides Array of overrides for default column calculations.

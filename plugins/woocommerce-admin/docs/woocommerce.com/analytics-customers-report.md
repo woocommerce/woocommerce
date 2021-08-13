@@ -22,7 +22,7 @@ There are several filters available to the Customers Report:
 - Email
 - Orders (count)
 - Total Spend
-- AOV (Average Order Value)
+- AOV (Average order value)
 - Registered
 - Last Active
 

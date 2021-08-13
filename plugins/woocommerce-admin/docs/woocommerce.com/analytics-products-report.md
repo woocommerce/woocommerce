@@ -4,7 +4,7 @@ The Products Report provides insight into the sales performance of each product 
 
 ### All Products View
 
-By default, the Products Report displays the All Products view. All products that have had sales in the specified date range will be shown.
+By default, the Products Report displays the `All products` view. All products that have had sales in the specified date range will be shown.
 
 ![Products Report All Products View](images/analytics-products-report.png)
 
@@ -12,7 +12,7 @@ By default, the Products Report displays the All Products view. All products tha
 
 ![Products Report Single Product Search](images/analytics-products-report-single-product-search.png)
 
-By selecting "Single Product", you can search for a single product to display report data for.
+By selecting "Single product", you can search for a single product to display report data for.
 
 ![Products Report Single Product View](images/analytics-products-report-single-product.png)
 
@@ -40,10 +40,10 @@ It also allows partial string matching on product names.
 
 The report table contains the following columns:
 
-- Product Title - links to Single Product view
+- Product title - links to Single product view
 - SKU
-- Items Sold (count)
-- Net Sales
+- Items sold (count)
+- Net sales
 - Orders (count) - links to Orders Report filtered by product
 - Category - links to Categories Report
 - Variations (count)
@@ -54,10 +54,10 @@ The report table contains the following columns:
 
 The report table allows sorting by the following columns:
 
-- Product Title
+- Product title
 - SKU
-- Items Sold (count)
-- Net Sales
+- Items sold (count)
+- Net sales
 - Orders (count)
 - Variations (count)
 
@@ -65,7 +65,7 @@ By default, the report sorts products by most items sold.
 
 #### Clarifying Terms
 
-"Net Sales" is calculated by subtracting refunds and coupons from the sale price of the product(s).
+"Net sales" is calculated by subtracting refunds and coupons from the sale price of the product(s).
 
 As an equation, it might look like: `(product price * quantity) - refunds - coupons`.
 

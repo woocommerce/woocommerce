@@ -39,13 +39,13 @@ class DownloadsReportTable extends Component {
 				isSortable: true,
 			},
 			{
-				label: __( 'Product Title', 'woocommerce-admin' ),
+				label: __( 'Product title', 'woocommerce-admin' ),
 				key: 'product',
 				isSortable: true,
 				required: true,
 			},
 			{
-				label: __( 'File Name', 'woocommerce-admin' ),
+				label: __( 'File name', 'woocommerce-admin' ),
 				key: 'file_name',
 			},
 			{
@@ -170,8 +170,8 @@ class DownloadsReportTable extends Component {
 			},
 			{
 				label: _n(
-					'download',
-					'downloads',
+					'Download',
+					'Downloads',
 					downloadCount,
 					'woocommerce-admin'
 				),

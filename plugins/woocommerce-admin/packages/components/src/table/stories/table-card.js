@@ -19,7 +19,7 @@ const TableCardExample = withState( {
 	},
 } )( ( { query, setState } ) => (
 	<TableCard
-		title="Revenue Last Week"
+		title="Revenue last week"
 		rows={ rows }
 		headers={ headers }
 		onQueryChange={ ( param ) => ( value ) =>

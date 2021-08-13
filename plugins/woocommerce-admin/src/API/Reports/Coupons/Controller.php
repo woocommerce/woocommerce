@@ -296,9 +296,9 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 	 */
 	public function get_export_columns() {
 		$export_columns = array(
-			'code'         => __( 'Coupon Code', 'woocommerce-admin' ),
+			'code'         => __( 'Coupon code', 'woocommerce-admin' ),
 			'orders_count' => __( 'Orders', 'woocommerce-admin' ),
-			'amount'       => __( 'Amount Discounted', 'woocommerce-admin' ),
+			'amount'       => __( 'Amount discounted', 'woocommerce-admin' ),
 			'created'      => __( 'Created', 'woocommerce-admin' ),
 			'expires'      => __( 'Expires', 'woocommerce-admin' ),
 			'type'         => __( 'Type', 'woocommerce-admin' ),

@@ -389,8 +389,8 @@ class Controller extends ReportsController implements ExportableInterface {
 	public function get_export_columns() {
 		$export_columns = array(
 			'date'         => __( 'Date', 'woocommerce-admin' ),
-			'product'      => __( 'Product Title', 'woocommerce-admin' ),
-			'file_name'    => __( 'File Name', 'woocommerce-admin' ),
+			'product'      => __( 'Product title', 'woocommerce-admin' ),
+			'file_name'    => __( 'File name', 'woocommerce-admin' ),
 			'order_number' => __( 'Order #', 'woocommerce-admin' ),
 			'user_id'      => __( 'User Name', 'woocommerce-admin' ),
 			'ip_address'   => __( 'IP', 'woocommerce-admin' ),

@@ -12,7 +12,7 @@ import { StatsList } from '../stats-list';
 jest.mock( '@woocommerce/tracks' );
 
 const stats = [
-	{ stat: 'revenue/net_revenue', label: 'Net Sales' },
+	{ stat: 'revenue/net_revenue', label: 'Net sales' },
 	{ stat: 'orders/orders_count', label: 'Orders' },
 ];
 
@@ -21,7 +21,7 @@ const data = {
 		{
 			stat: 'revenue/net_revenue',
 			chart: 'net_revenue',
-			label: 'Net Sales',
+			label: 'Net sales',
 			format: 'currency',
 			value: 100,
 			_links: {
@@ -68,7 +68,7 @@ describe( 'StatsList', () => {
 		);
 
 		// Check that there should be two.
-		expect( screen.getByText( 'Net Sales' ) ).toBeDefined();
+		expect( screen.getByText( 'Net sales' ) ).toBeDefined();
 		expect( screen.getByText( 'Orders' ) ).toBeDefined();
 	} );
 
@@ -94,7 +94,7 @@ describe( 'StatsList', () => {
 			/>
 		);
 
-		fireEvent.click( screen.getByText( 'Net Sales' ) );
+		fireEvent.click( screen.getByText( 'Net sales' ) );
 
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'statsoverview_indicators_click',

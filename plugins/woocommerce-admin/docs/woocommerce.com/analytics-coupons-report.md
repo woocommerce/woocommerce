@@ -34,7 +34,7 @@ At the top of the report table is the search box. This allows you to filter the 
 
 The report table allows sorting by the following columns:
 
-- Coupon Code
+- Coupon code
 - Orders (Number of orders)
 - Amount Dsicounted
 
@@ -42,5 +42,5 @@ The report table allows sorting by the following columns:
 
 Two of the report columns contain clickable entries:
 
-- `Coupon Code` link opens the Coupons report for that coupon code
+- `Coupon code` link opens the Coupons report for that coupon code
 - `Orders` link opens the [Orders Report](analytics-orders-report.md) filtered to orders which used that coupon

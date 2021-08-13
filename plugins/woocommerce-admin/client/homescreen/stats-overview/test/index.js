@@ -62,7 +62,7 @@ describe( 'StatsOverview tracking', () => {
 		} );
 		fireEvent.click( ellipsisBtn );
 		const totalSalesBtn = screen.getByRole( 'menuitemcheckbox', {
-			name: 'Total Sales',
+			name: 'Total sales',
 		} );
 		fireEvent.click( totalSalesBtn );
 
@@ -111,7 +111,7 @@ describe( 'StatsOverview toggle and persist stat preference', () => {
 		} );
 		fireEvent.click( ellipsisBtn );
 		const totalSalesBtn = screen.getByRole( 'menuitemcheckbox', {
-			name: 'Total Sales',
+			name: 'Total sales',
 		} );
 		fireEvent.click( totalSalesBtn );
 
@@ -173,7 +173,7 @@ describe( 'StatsOverview period selection', () => {
 				stats: [
 					{
 						chart: 'total_sales',
-						label: 'Total Sales',
+						label: 'Total sales',
 						stat: 'revenue/total_sales',
 					},
 					{

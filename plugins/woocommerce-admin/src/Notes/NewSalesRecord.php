@@ -98,7 +98,7 @@ class NewSalesRecord {
 
 			$content = sprintf(
 				/* translators: 1 and 4: Date (e.g. October 16th), 2 and 3: Amount (e.g. $160.00) */
-				__( 'Woohoo, %1$s was your record day for sales! Net Sales was %2$s beating the previous record of %3$s set on %4$s.', 'woocommerce-admin' ),
+				__( 'Woohoo, %1$s was your record day for sales! Net sales was %2$s beating the previous record of %3$s set on %4$s.', 'woocommerce-admin' ),
 				$formatted_yesterday,
 				$formatted_total,
 				$formatted_record_amt,

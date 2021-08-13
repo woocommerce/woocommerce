@@ -78,7 +78,7 @@ const advancedFilters = {
 		},
 		customer: {
 			labels: {
-				add: 'Customer Type',
+				add: 'Customer type',
 				remove: 'Remove customer filter',
 				rule: 'Select a customer filter match',
 				title: '{{title}}Customer is{{/title}} {{filter /}}',

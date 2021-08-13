@@ -53,7 +53,7 @@ exports[`Leaderboard should render correct data in the table 1`] = `
                 <span
                   aria-hidden="false"
                 >
-                  Items Sold
+                  Items sold
                 </span>
               </th>
               <th
@@ -75,7 +75,7 @@ exports[`Leaderboard should render correct data in the table 1`] = `
                 <span
                   aria-hidden="false"
                 >
-                  Net Sales
+                  Net sales
                 </span>
               </th>
             </tr>

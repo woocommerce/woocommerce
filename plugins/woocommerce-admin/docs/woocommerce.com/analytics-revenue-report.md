@@ -10,13 +10,13 @@ The report table allows sorting by the all report columns:
 
 - Date
 - Orders (# of orders)
-- Gross Sales
+- Gross sales
 - Returns (Return amount)
 - Coupons (Coupon amount)
-- Net Sales
+- Net sales
 - Taxes
 - Shipping
-- Total Sales
+- Total sales
 
 By default, the report shows the most recent days.
 

@@ -27,7 +27,7 @@ class TaxesReportTable extends Component {
 	getHeadersContent() {
 		return [
 			{
-				label: __( 'Tax Code', 'woocommerce-admin' ),
+				label: __( 'Tax code', 'woocommerce-admin' ),
 				key: 'tax_code',
 				required: true,
 				isLeftAligned: true,
@@ -40,17 +40,17 @@ class TaxesReportTable extends Component {
 				isNumeric: true,
 			},
 			{
-				label: __( 'Total Tax', 'woocommerce-admin' ),
+				label: __( 'Total tax', 'woocommerce-admin' ),
 				key: 'total_tax',
 				isSortable: true,
 			},
 			{
-				label: __( 'Order Tax', 'woocommerce-admin' ),
+				label: __( 'Order tax', 'woocommerce-admin' ),
 				key: 'order_tax',
 				isSortable: true,
 			},
 			{
-				label: __( 'Shipping Tax', 'woocommerce-admin' ),
+				label: __( 'Shipping tax', 'woocommerce-admin' ),
 				key: 'shipping_tax',
 				isSortable: true,
 			},

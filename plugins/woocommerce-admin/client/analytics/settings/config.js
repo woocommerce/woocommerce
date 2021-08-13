@@ -74,7 +74,7 @@ const orderStatusOptions = [
 
 export const config = applyFilters( SETTINGS_FILTER, {
 	woocommerce_excluded_report_order_statuses: {
-		label: __( 'Excluded Statuses:', 'woocommerce-admin' ),
+		label: __( 'Excluded statuses:', 'woocommerce-admin' ),
 		inputType: 'checkboxGroup',
 		options: orderStatusOptions,
 		helpText: interpolateComponents( {
@@ -90,7 +90,7 @@ export const config = applyFilters( SETTINGS_FILTER, {
 		defaultValue: [ 'pending', 'cancelled', 'failed' ],
 	},
 	woocommerce_actionable_order_statuses: {
-		label: __( 'Actionable Statuses:', 'woocommerce-admin' ),
+		label: __( 'Actionable statuses:', 'woocommerce-admin' ),
 		inputType: 'checkboxGroup',
 		options: orderStatusOptions,
 		helpText: __(
@@ -102,7 +102,7 @@ export const config = applyFilters( SETTINGS_FILTER, {
 	},
 	woocommerce_default_date_range: {
 		name: 'woocommerce_default_date_range',
-		label: __( 'Default Date Range:', 'woocommerce-admin' ),
+		label: __( 'Default date range:', 'woocommerce-admin' ),
 		inputType: 'component',
 		component: DefaultDate,
 		helpText: __(

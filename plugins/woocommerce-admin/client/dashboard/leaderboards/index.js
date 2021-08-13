@@ -124,7 +124,7 @@ const Leaderboards = ( props ) => {
 					} ) }
 					<SelectControl
 						className="woocommerce-dashboard__dashboard-leaderboards__select"
-						label={ __( 'Rows Per Table', 'woocommerce-admin' ) }
+						label={ __( 'Rows per table', 'woocommerce-admin' ) }
 						value={ rowsPerTable }
 						options={ Array.from( { length: 20 }, ( v, key ) => ( {
 							v: key + 1,

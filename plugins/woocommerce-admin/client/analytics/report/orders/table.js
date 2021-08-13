@@ -58,7 +58,7 @@ class OrdersReportTable extends Component {
 				isSortable: false,
 			},
 			{
-				label: __( 'Customer Type', 'woocommerce-admin' ),
+				label: __( 'Customer type', 'woocommerce-admin' ),
 				key: 'customer_type',
 				required: false,
 				isSortable: false,
@@ -71,7 +71,7 @@ class OrdersReportTable extends Component {
 				isSortable: false,
 			},
 			{
-				label: __( 'Items Sold', 'woocommerce-admin' ),
+				label: __( 'Items sold', 'woocommerce-admin' ),
 				key: 'num_items_sold',
 				required: false,
 				isSortable: true,
@@ -85,8 +85,8 @@ class OrdersReportTable extends Component {
 				isSortable: false,
 			},
 			{
-				label: __( 'Net Sales', 'woocommerce-admin' ),
-				screenReaderLabel: __( 'Net Sales', 'woocommerce-admin' ),
+				label: __( 'Net sales', 'woocommerce-admin' ),
+				screenReaderLabel: __( 'Net sales', 'woocommerce-admin' ),
 				key: 'net_total',
 				required: true,
 				isSortable: true,
@@ -254,8 +254,8 @@ class OrdersReportTable extends Component {
 		return [
 			{
 				label: _n(
-					'order',
-					'orders',
+					'Order',
+					'Orders',
 					ordersCount,
 					'woocommerce-admin'
 				),
@@ -263,8 +263,8 @@ class OrdersReportTable extends Component {
 			},
 			{
 				label: _n(
-					' customer',
-					' customers',
+					' Customer',
+					' Customers',
 					totalCustomers,
 					'woocommerce-admin'
 				),
@@ -272,8 +272,8 @@ class OrdersReportTable extends Component {
 			},
 			{
 				label: _n(
-					'product',
-					'products',
+					'Product',
+					'Products',
 					products,
 					'woocommerce-admin'
 				),
@@ -281,8 +281,8 @@ class OrdersReportTable extends Component {
 			},
 			{
 				label: _n(
-					'item sold',
-					'items sold',
+					'Item sold',
+					'Items sold',
 					numItemsSold,
 					'woocommerce-admin'
 				),
@@ -290,8 +290,8 @@ class OrdersReportTable extends Component {
 			},
 			{
 				label: _n(
-					'coupon',
-					'coupons',
+					'Coupon',
+					'Coupons',
 					couponsCount,
 					'woocommerce-admin'
 				),

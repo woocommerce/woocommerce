@@ -12,7 +12,7 @@ A container element for a list of SummaryNumbers. This component handles detecti
 			<SummaryNumber
 				key="revenue"
 				value={ '$829.40' }
-				label="Total Sales"
+				label="Total sales"
 				delta={ 29 }
 				href="/analytics/report"
 			>
@@ -57,7 +57,7 @@ Name | Type | Default | Description
 `isOpen` | Boolean | `false` | Boolean describing whether the menu list is open. Only applies in mobile view, and only applies to the toggle-able item (first in the list)
 `label` | String | `null` | (required) A string description of this value, ex "Revenue", or "New Customers"
 `onToggle` | Function | `null` | A function used to switch the given SummaryNumber to a button, and called on click
-`prevLabel` | String | `__( 'Previous Period:', 'woocommerce-admin' )` | A string description of the previous value's timeframe, ex "Previous Year:"
+`prevLabel` | String | `__( 'Previous period:', 'woocommerce-admin' )` | A string description of the previous value's timeframe, ex "Previous year:"
 `prevValue` | One of type: number, string | `null` | A string or number value to display - a string is allowed so we can accept currency formatting. If omitted, this section won't display
 `reverseTrend` | Boolean | `false` | A boolean used to indicate that a negative delta is "good", and should be styled like a positive (and vice-versa)
 `selected` | Boolean | `false` | A boolean used to show a highlight style on this number

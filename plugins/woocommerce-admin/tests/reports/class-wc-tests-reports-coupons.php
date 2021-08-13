@@ -274,9 +274,9 @@ class WC_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 
 		// Test the CSV export.
 		$expected_csv_columns = array(
-			'"Coupon Code"',
+			'"Coupon code"',
 			'Orders',
-			'"Amount Discounted"',
+			'"Amount discounted"',
 			'Created',
 			'Expires',
 			'Type',

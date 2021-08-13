@@ -42,7 +42,7 @@ class HistoricalDataLayout extends Component {
 			<Fragment>
 				<SectionHeader
 					title={ __(
-						'Import Historical Data',
+						'Import historical data',
 						'woocommerce-admin'
 					) }
 				/>

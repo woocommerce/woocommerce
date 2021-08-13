@@ -8,7 +8,7 @@ Stores with existing Orders will be prompted to import their data:
 
 ### Starting the Import
 
-To start a historical data import, use the prompt above or go to Analytics > Settings, and scroll down to Import Historical Data.
+To start a historical data import, use the prompt above or go to Analytics > Settings, and scroll down to Import historical data.
 
 ![Analytics > Settings > Import historical data](images/analytics-historical-data-import-ready-to-import.png)
 

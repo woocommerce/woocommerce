@@ -21,7 +21,7 @@ const { addCesSurveyForAnalytics } = dispatch( CES_STORE_KEY );
 export const charts = applyFilters( COUPON_REPORT_CHARTS_FILTER, [
 	{
 		key: 'orders_count',
-		label: __( 'Discounted Orders', 'woocommerce-admin' ),
+		label: __( 'Discounted orders', 'woocommerce-admin' ),
 		order: 'desc',
 		orderby: 'orders_count',
 		type: 'number',
@@ -40,7 +40,7 @@ export const advancedFilters = applyFilters(
 	{
 		filters: {},
 		title: _x(
-			'Coupons Match {{select /}} Filters',
+			'Coupons match {{select /}} filters',
 			'A sentence describing filters for Coupons. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ',
 			'woocommerce-admin'
 		),
@@ -48,9 +48,9 @@ export const advancedFilters = applyFilters(
 );
 
 const filterValues = [
-	{ label: __( 'All Coupons', 'woocommerce-admin' ), value: 'all' },
+	{ label: __( 'All coupons', 'woocommerce-admin' ), value: 'all' },
 	{
-		label: __( 'Single Coupon', 'woocommerce-admin' ),
+		label: __( 'Single coupon', 'woocommerce-admin' ),
 		value: 'select_coupon',
 		chartMode: 'item-comparison',
 		subFilters: [
@@ -96,7 +96,7 @@ const filterValues = [
 
 if ( Object.keys( advancedFilters.filters ).length ) {
 	filterValues.push( {
-		label: __( 'Advanced Filters', 'woocommerce-admin' ),
+		label: __( 'Advanced filters', 'woocommerce-admin' ),
 		value: 'advanced',
 	} );
 }

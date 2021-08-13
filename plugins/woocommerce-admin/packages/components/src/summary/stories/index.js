@@ -10,7 +10,7 @@ export const Basic = () => (
 				<SummaryNumber
 					key="revenue"
 					value={ '$829.40' }
-					label="Total Sales"
+					label="Total sales"
 					delta={ 29 }
 					href="/analytics/report"
 				>

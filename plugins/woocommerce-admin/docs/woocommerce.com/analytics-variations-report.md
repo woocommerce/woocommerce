@@ -4,7 +4,7 @@ The Variations Report provides insight into the sales performance of each Produc
 
 ### All Variations View
 
-By default, the Variations Report displays the All Variations view. All Variations that have had sales in the specified date range will be shown.
+By default, the Variations Report displays the `All variations` view. All variations that have had sales in the specified date range will be shown.
 
 ![Variations Report All Variations View](images/analytics-variations-report.png)
 
@@ -12,9 +12,9 @@ By default, the Variations Report displays the All Variations view. All Variatio
 
 ![Variations Report Single Variation Search](images/analytics-variations-report-single-variation-search.png)
 
-By selecting "Single Variation", you can search for a single variation to display report data for.
+By selecting "Single variation", you can search for a single variation to display report data for.
 
-![Variations Report Single Variation View](images/analytics-variations-report-single-variation.png)
+![Variations Report Single variation View](images/analytics-variations-report-single-variation.png)
 
 ### Comparison Mode
 
@@ -41,16 +41,16 @@ The following fields can be used for filtering:
 - Product (parent product)
 - Category
 
-![Variations Report Advanced Filters](images/analytics-variations-report-advanced-filters.png)
+![Variations Report Advanced filters](images/analytics-variations-report-advanced-filters.png)
 
 ### Report Columns
 
 The report table contains the following columns:
 
-- Variation Title - links to Edit Product screen
+- Variation title - links to Edit Product screen
 - SKU
-- Items Sold (count)
-- Net Sales
+- Items sold (count)
+- Net sales
 - Orders (count) - links to Orders Report filtered by Variation
 - Status (in/out stock)
 - Stock (inventory quantity)
@@ -60,15 +60,15 @@ The report table contains the following columns:
 The report table allows sorting by the following columns:
 
 - SKU
-- Items Sold (count)
-- Net Sales
+- Items sold (count)
+- Net sales
 - Orders (count)
 
 By default, the report sorts Variations by most items sold.
 
 #### Clarifying Terms
 
-"Net Sales" is calculated by subtracting refunds and coupons from the sale price of the variation(s).
+"Net sales" is calculated by subtracting refunds and coupons from the sale price of the variation(s).
 
 As an equation, it might look like: `(variation price * quantity) - refunds - coupons`.
 

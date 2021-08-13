@@ -95,7 +95,7 @@ export default compose(
 
 		const report = getReportParam( props );
 		const searchWords = getSearchWords( query );
-		// Single Category view in Categories Report uses the products endpoint, so search must also.
+		// Single category view in Categories Report uses the products endpoint, so search must also.
 		const mappedReport =
 			report === 'categories' && query.filter === 'single_category'
 				? 'products'

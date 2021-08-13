@@ -36,7 +36,7 @@ class CategoriesReportTable extends Component {
 				isLeftAligned: true,
 			},
 			{
-				label: __( 'Items Sold', 'woocommerce-admin' ),
+				label: __( 'Items sold', 'woocommerce-admin' ),
 				key: 'items_sold',
 				required: true,
 				defaultSort: true,
@@ -44,7 +44,7 @@ class CategoriesReportTable extends Component {
 				isNumeric: true,
 			},
 			{
-				label: __( 'Net Sales', 'woocommerce-admin' ),
+				label: __( 'Net sales', 'woocommerce-admin' ),
 				key: 'net_revenue',
 				isSortable: true,
 				isNumeric: true,
@@ -140,8 +140,8 @@ class CategoriesReportTable extends Component {
 		return [
 			{
 				label: _n(
-					'category',
-					'categories',
+					'Category',
+					'Categories',
 					totalResults,
 					'woocommerce-admin'
 				),
@@ -149,21 +149,21 @@ class CategoriesReportTable extends Component {
 			},
 			{
 				label: _n(
-					'item sold',
-					'items sold',
+					'Item sold',
+					'Items sold',
 					itemsSold,
 					'woocommerce-admin'
 				),
 				value: formatValue( currency, 'number', itemsSold ),
 			},
 			{
-				label: __( 'net sales', 'woocommerce-admin' ),
+				label: __( 'Net sales', 'woocommerce-admin' ),
 				value: formatAmount( netRevenue ),
 			},
 			{
 				label: _n(
-					'order',
-					'orders',
+					'Order',
+					'Orders',
 					ordersCount,
 					'woocommerce-admin'
 				),

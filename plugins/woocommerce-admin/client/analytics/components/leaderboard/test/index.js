@@ -62,13 +62,13 @@ describe( 'Leaderboard', () => {
 				label: 'Name',
 			},
 			{
-				label: 'Items Sold',
+				label: 'Items sold',
 			},
 			{
 				label: 'Orders',
 			},
 			{
-				label: 'Net Sales',
+				label: 'Net sales',
 			},
 		];
 		const { container } = render(

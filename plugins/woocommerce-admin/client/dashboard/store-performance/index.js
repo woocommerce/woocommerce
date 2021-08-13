@@ -55,7 +55,7 @@ class StorePerformance extends Component {
 				renderContent={ ( { onToggle } ) => (
 					<Fragment>
 						<MenuTitle>
-							{ __( 'Display Stats:', 'woocommerce-admin' ) }
+							{ __( 'Display stats:', 'woocommerce-admin' ) }
 						</MenuTitle>
 						{ indicators.map( ( indicator, i ) => {
 							const checked = ! hiddenBlocks.includes(
@@ -124,8 +124,8 @@ class StorePerformance extends Component {
 		const { compare } = getDateParamsFromQuery( query, defaultDateRange );
 		const prevLabel =
 			compare === 'previous_period'
-				? __( 'Previous Period:', 'woocommerce-admin' )
-				: __( 'Previous Year:', 'woocommerce-admin' );
+				? __( 'Previous period:', 'woocommerce-admin' )
+				: __( 'Previous year:', 'woocommerce-admin' );
 		const { formatAmount, getCurrencyConfig } = this.context;
 		const currency = getCurrencyConfig();
 		return (

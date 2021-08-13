@@ -4,7 +4,7 @@ The Taxes Report provides insight into taxes collected on your store.
 
 ### All Taxes View
 
-By default, the Taxes Report displays the All Taxes view. All taxes that have been collected in the specified date range will be shown.
+By default, the Taxes Report displays the `All taxes` view. All taxes that have been collected in the specified date range will be shown.
 
 ![Taxes Report All Taxes View](images/analytics-taxes-report.png)
 
@@ -30,15 +30,15 @@ It also allows partial string matching on tax codes.
 
 The report table allows sorting by the following columns:
 
-- Tax Code
+- Tax code
 - Rate
-- Total Tax (Order Tax + Shipping Tax)
-- Order Tax
-- Shipping Tax
+- Total tax (Order tax + Shipping tax)
+- Order tax
+- Shipping tax
 - Orders (count)
 
 By default, the report is sorted by the creation date of the tax codes.
 
 ### Report Links
 
-The `Tax Code` column links to the Orders Report, filtered by the selected tax code.
+The `Tax code` column links to the Orders Report, filtered by the selected tax code.

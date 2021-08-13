@@ -43,7 +43,7 @@ class ReportFilters extends Component {
 		const { report, addCesSurveyForAnalytics } = this.props;
 
 		// This event gets triggered in the following cases.
-		// 1. Select "Single Product" and choose a product.
+		// 1. Select "Single product" and choose a product.
 		// 2. Select "Comparison" or any other filter types.
 		// The comparsion and other filter types require a user to click
 		// a button to execute a query, so this is not a good place to

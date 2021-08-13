@@ -10,7 +10,7 @@ This is a dropdown menu hidden behind a vertical ellipsis icon. When clicked, th
 	renderContent={ ( { onToggle } )=> {
 		return (
 			<div>
-				<MenuTitle>Display Stats</MenuTitle>
+				<MenuTitle>Display stats</MenuTitle>
 				<MenuItem onInvoke={ () => setState( { showCustomers: ! showCustomers } ) }>
 					<ToggleControl
 						label="Show Customers"
@@ -87,7 +87,7 @@ MenuTitle
 ## Usage
 
 ```jsx
-<MenuTitle>Display Stats</MenuTitle>
+<MenuTitle>Display stats</MenuTitle>
 ```
 
 ### Props

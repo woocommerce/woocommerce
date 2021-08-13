@@ -41,13 +41,13 @@ class CustomersReportTable extends Component {
 				hiddenByDefault: true,
 			},
 			{
-				label: __( 'Last Active', 'woocommerce-admin' ),
+				label: __( 'Last active', 'woocommerce-admin' ),
 				key: 'date_last_active',
 				defaultSort: true,
 				isSortable: true,
 			},
 			{
-				label: __( 'Date Registered', 'woocommerce-admin' ),
+				label: __( 'Date registered', 'woocommerce-admin' ),
 				key: 'date_registered',
 				isSortable: true,
 			},
@@ -62,7 +62,7 @@ class CustomersReportTable extends Component {
 				isNumeric: true,
 			},
 			{
-				label: __( 'Total Spend', 'woocommerce-admin' ),
+				label: __( 'Total spend', 'woocommerce-admin' ),
 				key: 'total_spend',
 				isSortable: true,
 				isNumeric: true,
@@ -70,7 +70,7 @@ class CustomersReportTable extends Component {
 			{
 				label: __( 'AOV', 'woocommerce-admin' ),
 				screenReaderLabel: __(
-					'Average Order Value',
+					'Average order value',
 					'woocommerce-admin'
 				),
 				key: 'avg_order_value',
@@ -94,7 +94,7 @@ class CustomersReportTable extends Component {
 				isSortable: true,
 			},
 			{
-				label: __( 'Postal Code', 'woocommerce-admin' ),
+				label: __( 'Postal code', 'woocommerce-admin' ),
 				key: 'postcode',
 				hiddenByDefault: true,
 				isSortable: true,
@@ -244,19 +244,19 @@ class CustomersReportTable extends Component {
 			},
 			{
 				label: _n(
-					'average order',
-					'average orders',
+					'Average order',
+					'Average orders',
 					avgOrdersCount,
 					'woocommerce-admin'
 				),
 				value: formatValue( currency, 'number', avgOrdersCount ),
 			},
 			{
-				label: __( 'average lifetime spend', 'woocommerce-admin' ),
+				label: __( 'Average lifetime spend', 'woocommerce-admin' ),
 				value: formatAmount( avgTotalSpend ),
 			},
 			{
-				label: __( 'average order value', 'woocommerce-admin' ),
+				label: __( 'Average order value', 'woocommerce-admin' ),
 				value: formatAmount( avgAvgOrderValue ),
 			},
 		];

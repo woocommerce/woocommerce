@@ -7,7 +7,7 @@ The Stock Report provides insight about the inventory of your store. This report
 
 ### Report Filter
 
-The Stock Report allow you to filter the report by stock status. **Note:** Products that do not have stock management enabled are shown as `Out of Stock`.
+The Stock Report allow you to filter the report by stock status. **Note:** Products that do not have stock management enabled are shown as `Out of stock`.
 
 ![Stock Report Filter](images/analytics-stock-status-filter.png)
 

@@ -12,7 +12,7 @@ export default [
 		key: 'description',
 	},
 	{
-		label: 'Total Sales',
+		label: 'Total sales',
 		key: 'total_sales',
 	},
 	{
@@ -32,11 +32,11 @@ export default [
 		key: 'shipping',
 	},
 	{
-		label: 'Net Sales',
+		label: 'Net sales',
 		key: 'net_revenue',
 	},
 	{
-		label: 'Negative Number',
+		label: 'Negative number',
 		key: 'neg_num',
 	},
 ];

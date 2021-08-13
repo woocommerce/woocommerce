@@ -14,43 +14,43 @@ If you removed a dashboard section, or you have an extension installed that adds
 ## Performance Indicator Section
 By default the Performance Indicators section is what appears at the top of your dashboard below the Date Picker. Each performance indicator will display a label informing you of the statistic that is being presented, the value of that statistic for the date range selected, a percentage change over the prior period along with a trend arrow of up/down/same, and the value for the previous period that is being compared.
 
-Beyond giving you a quick glimpse into the statistic, Peroformance Indicators also act as a quick shortcut to dive deeper into the data behind the stat. For example, clicking on the Total Sales indicator will open up the Revenue Report for the date range that has been selected on the Dashboard. From there you can view associated charts, and tabular data for deeper analysis.
+Beyond giving you a quick glimpse into the statistic, Peroformance Indicators also act as a quick shortcut to dive deeper into the data behind the stat. For example, clicking on the Total sales indicator will open up the Revenue Report for the date range that has been selected on the Dashboard. From there you can view associated charts, and tabular data for deeper analysis.
 
 Using the customization menu in the top right corner of the section, you can toggle the display of the following default performance indicators:
 
 | Indicator Name  | Description  | Links To ( Report Name > Chart Name ) |
 |---|---|---|
-| Total Sales | Gross Sales - Returns - Coupons + Taxes + Shipping | Revenue Report > Total Sales | 
-| Net Sales | Gross Sales - Returns - Coupons | Revenue Report > Net Sales |
+| Total sales | Gross sales - Returns - Coupons + Taxes + Shipping | Revenue Report > Total sales | 
+| Net sales | Gross sales - Returns - Coupons | Revenue Report > Net sales |
 | Orders | The number of new orders placed for a selected date range | Orders Report > Orders |
-| Average Order Value | Net Sales / Orders | Orders Report > Average Order Value | 
-| Items Sold | The discrete number of items sold. | Products Report > Items Sold | 
+| Average order value | Net sales / Orders | Orders Report > Average order value | 
+| Items sold | The discrete number of items sold. | Products Report > Items sold | 
 | Refunds | Money returned to the customer via a refund | Revenue Report > Refunds | 
-| Discounted Orders | The count of orders with a coupon applied. | Coupons Report > Orders Count | 
-| Net Discount Amount | Total sum of discounts from coupons. | Coupons Report > Amount | 
-| Total Tax | Order Tax + Shipping Tax | Taxes Report > Total Tax | 
-| Order Tax | The total of tax applied to items in an order | Taxes Report > Order Tax | 
-| Shipping Tax | The total of tax applied to shipping in an order | Taxes Report > Shipping Tax | 
+| Discounted orders | The count of orders with a coupon applied. | Coupons Report > Orders Count | 
+| Net discount amount | Total sum of discounts from coupons. | Coupons Report > Amount | 
+| Total tax | Order tax + Shipping tax | Taxes Report > Total tax | 
+| Order tax | The total of tax applied to items in an order | Taxes Report > Order tax | 
+| Shipping tax | The total of tax applied to shipping in an order | Taxes Report > Shipping tax | 
 | Shipping | The shipping charges associated with an order or refund. | Revenue Report > Shipping | 
 | Downloads | Total count of downloaded files | Downloads Report > Download Count | 
-| Gross Sales | Sale price of product(s) x quantity ordered. Does not include refunds, coupons, taxes or shipping | Revenue Report > Gross Sales | 
+| Gross sales | Sale price of product(s) x quantity ordered. Does not include refunds, coupons, taxes or shipping | Revenue Report > Gross sales | 
 
 ## Charts Section
 The next section displayed by default is Charts. The customization menu again allows you to toggle the display of charts that are most useful for your Store. The following charts are available to display in this section:
 
 | Chart Name  | Description  | Links To ( Report Name > Chart Name ) |
 |---|---|---|
-| Total Sales | Gross Sales - Returns - Coupons + Taxes + Shipping | Revenue Report > Total Sales | 
-| Net Sales | Gross Sales - Returns - Coupons | Revenue Report > Net Sales |
+| Total sales | Gross sales - Returns - Coupons + Taxes + Shipping | Revenue Report > Total sales | 
+| Net sales | Gross sales - Returns - Coupons | Revenue Report > Net sales |
 | Orders | The number of new orders placed for a selected date range | Orders Report > Orders |
-| Average Order Value | Net Sales / Orders | Orders Report > Average Order Value | 
-| Items Sold | The discrete number of items sold. | Products Report > Items Sold | 
+| Average order value | Net sales / Orders | Orders Report > Average order value | 
+| Items sold | The discrete number of items sold. | Products Report > Items sold | 
 | Refunds | Money returned to the customer via a refund | Revenue Report > Refunds | 
-| Discounted Orders | The count of orders with a coupon applied. | Coupons Report > Orders Count | 
+| Discounted orders | The count of orders with a coupon applied. | Coupons Report > Orders Count | 
 | Gross Discount Amount | Total sum of discounts from coupons. | Coupons Report > Amount | 
-| Total Tax | Order Tax + Shipping Tax | Taxes Report > Total Tax | 
-| Order Tax | The total of tax applied to items in an order | Taxes Report > Order Tax | 
-| Shipping Tax | The total of tax applied to shipping in an order | Taxes Report > Shipping Tax | 
+| Total tax | Order tax + Shipping tax | Taxes Report > Total tax | 
+| Order tax | The total of tax applied to items in an order | Taxes Report > Order tax | 
+| Shipping tax | The total of tax applied to shipping in an order | Taxes Report > Shipping tax | 
 | Shipping | The shipping charges associated with an order or refund. | Revenue Report > Shipping | 
 | Downloads | Total count of downloaded files | Downloads Report > Download Count | 
 
@@ -74,5 +74,5 @@ The final section on the Dashboard allows you to view four different "Leaderboar
 
 - Top Customers, Total Spend
 - Top Coupons, Number of Orders
-- Top Categories, Items Sold
-- Top Products, Items Sold
+- Top categories, Items sold
+- Top products, Items sold

@@ -294,7 +294,7 @@ describe( 'getDefaultOptionValue', () => {
 	it( 'should return the default option value', () => {
 		const options = [ { value: 'new' }, { value: 'returning' } ];
 		const currentFilter = {
-			labels: { add: 'Customer Type' },
+			labels: { add: 'Customer type' },
 			input: {
 				component: 'SelectControl',
 				options,
@@ -308,7 +308,7 @@ describe( 'getDefaultOptionValue', () => {
 	it( 'should return the first option value when no default option', () => {
 		const options = [ { value: 'new' }, { value: 'returning' } ];
 		const currentFilter = {
-			labels: { add: 'Customer Type' },
+			labels: { add: 'Customer type' },
 			input: {
 				component: 'SelectControl',
 				options,

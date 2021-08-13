@@ -72,12 +72,12 @@ global.wcSettings = {
 		performanceIndicators: [
 			{
 				chart: 'total_sales',
-				label: 'Total Sales',
+				label: 'Total sales',
 				stat: 'revenue/total_sales',
 			},
 			{
 				chart: 'net_revenue',
-				label: 'Net Sales',
+				label: 'Net sales',
 				stat: 'revenue/net_revenue',
 			},
 			{
@@ -87,7 +87,7 @@ global.wcSettings = {
 			},
 			{
 				chart: 'items_sold',
-				label: 'Items Sold',
+				label: 'Items sold',
 				stat: 'products/items_sold',
 			},
 		],

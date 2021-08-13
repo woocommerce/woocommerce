@@ -51,8 +51,8 @@ const filters = [
 		param: 'filter',
 		showFilters: () => true,
 		filters: [
-			{ label: 'All Orders', value: 'all' },
-			{ label: 'Advanced Filters', value: 'advanced' },
+			{ label: 'All orders', value: 'all' },
+			{ label: 'Advanced filters', value: 'advanced' },
 		],
 	},
 ];
@@ -113,7 +113,7 @@ const advancedFilters = {
 		},
 		customer: {
 			labels: {
-				add: 'Customer Type',
+				add: 'Customer type',
 				remove: 'Remove customer filter',
 				rule: 'Select a customer filter match',
 				title: 'Customer is {{filter /}}',
@@ -217,7 +217,7 @@ export const Examples = () => (
 			/>
 		</Section>
 
-		<H>Advanced Filters</H>
+		<H>Advanced filters</H>
 		<Section component={ false }>
 			<AdvancedFilters
 				siteLocale={ siteLocale }

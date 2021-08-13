@@ -29,5 +29,5 @@ Each report is quite unique with its own set of filtering options and chart type
 
 The Analytics section also has a menu item for _Settings_. On this page you can control items that affect how the WooCommerce Admin Analytics system works, and you can also import historical data into the reporting database tables.
 
-- [Analytics Settings](analytics-settings.md)
+- [Analytics settings](analytics-settings.md)
 - [Historical Data Import](analytics-historical-data-import.md)

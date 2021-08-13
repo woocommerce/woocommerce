@@ -73,7 +73,7 @@ export const StatsList = ( {
 						label={ item.label }
 						value={ primaryValue }
 						prevLabel={ __(
-							'Previous Period:',
+							'Previous period:',
 							'woocommerce-admin'
 						) }
 						prevValue={ secondaryValue }

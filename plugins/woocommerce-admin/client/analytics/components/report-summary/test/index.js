@@ -21,7 +21,7 @@ describe( 'ReportSummary', () => {
 	) {
 		const selectedChart = {
 			key: 'total_sales',
-			label: 'Total Sales',
+			label: 'Total sales',
 			type,
 		};
 		const charts = [ selectedChart ];
@@ -60,11 +60,11 @@ describe( 'ReportSummary', () => {
 		expect( delta ).toBeInTheDocument();
 
 		userEvent.hover( delta );
-		const tooltip = await screen.findByText( 'Previous Year: 500.25' );
+		const tooltip = await screen.findByText( 'Previous year: 500.25' );
 		expect( tooltip ).toBeInTheDocument();
 
 		userEvent.unhover( delta );
-		expect( screen.queryByText( 'Previous Year: 500.25' ) ).toBeNull();
+		expect( screen.queryByText( 'Previous year: 500.25' ) ).toBeNull();
 	} );
 
 	test( 'should format currency numbers properly', async () => {
@@ -76,11 +76,11 @@ describe( 'ReportSummary', () => {
 		expect( delta ).toBeInTheDocument();
 
 		userEvent.hover( delta );
-		const tooltip = await screen.findByText( 'Previous Year: $500.25' );
+		const tooltip = await screen.findByText( 'Previous year: $500.25' );
 		expect( tooltip ).toBeInTheDocument();
 
 		userEvent.unhover( delta );
-		expect( screen.queryByText( 'Previous Year: $500.25' ) ).toBeNull();
+		expect( screen.queryByText( 'Previous year: $500.25' ) ).toBeNull();
 	} );
 
 	test( 'should format average numbers properly', async () => {
@@ -92,11 +92,11 @@ describe( 'ReportSummary', () => {
 		expect( delta ).toBeInTheDocument();
 
 		userEvent.hover( delta );
-		const tooltip = await screen.findByText( 'Previous Year: 500' );
+		const tooltip = await screen.findByText( 'Previous year: 500' );
 		expect( tooltip ).toBeInTheDocument();
 
 		userEvent.unhover( delta );
-		expect( screen.queryByText( 'Previous Year: 500' ) ).toBeNull();
+		expect( screen.queryByText( 'Previous year: 500' ) ).toBeNull();
 	} );
 
 	test( 'should not break if secondary value is 0', async () => {
@@ -108,11 +108,11 @@ describe( 'ReportSummary', () => {
 		expect( delta ).toBeInTheDocument();
 
 		userEvent.hover( delta );
-		const tooltip = await screen.findByText( 'Previous Year: 0' );
+		const tooltip = await screen.findByText( 'Previous year: 0' );
 		expect( tooltip ).toBeInTheDocument();
 
 		userEvent.unhover( delta );
-		expect( screen.queryByText( 'Previous Year: 0' ) ).toBeNull();
+		expect( screen.queryByText( 'Previous year: 0' ) ).toBeNull();
 	} );
 
 	test( 'should show 0s when displaying an empty search', async () => {
@@ -120,7 +120,7 @@ describe( 'ReportSummary', () => {
 
 		expect( screen.getAllByText( 'N/A' ) ).not.toBeNull();
 
-		const delta = screen.getByLabelText( 'No change from Previous Year:' );
+		const delta = screen.getByLabelText( 'No change from Previous year:' );
 		expect( delta ).toBeInTheDocument();
 	} );
 

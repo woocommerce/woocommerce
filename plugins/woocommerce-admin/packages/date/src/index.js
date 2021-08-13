@@ -33,25 +33,25 @@ export const defaultDateTimeFormat = 'YYYY-MM-DDTHH:mm:ss';
 export const presetValues = [
 	{ value: 'today', label: __( 'Today', 'woocommerce-admin' ) },
 	{ value: 'yesterday', label: __( 'Yesterday', 'woocommerce-admin' ) },
-	{ value: 'week', label: __( 'Week to Date', 'woocommerce-admin' ) },
-	{ value: 'last_week', label: __( 'Last Week', 'woocommerce-admin' ) },
-	{ value: 'month', label: __( 'Month to Date', 'woocommerce-admin' ) },
-	{ value: 'last_month', label: __( 'Last Month', 'woocommerce-admin' ) },
-	{ value: 'quarter', label: __( 'Quarter to Date', 'woocommerce-admin' ) },
-	{ value: 'last_quarter', label: __( 'Last Quarter', 'woocommerce-admin' ) },
-	{ value: 'year', label: __( 'Year to Date', 'woocommerce-admin' ) },
-	{ value: 'last_year', label: __( 'Last Year', 'woocommerce-admin' ) },
+	{ value: 'week', label: __( 'Week to date', 'woocommerce-admin' ) },
+	{ value: 'last_week', label: __( 'Last week', 'woocommerce-admin' ) },
+	{ value: 'month', label: __( 'Month to date', 'woocommerce-admin' ) },
+	{ value: 'last_month', label: __( 'Last month', 'woocommerce-admin' ) },
+	{ value: 'quarter', label: __( 'Quarter to date', 'woocommerce-admin' ) },
+	{ value: 'last_quarter', label: __( 'Last quarter', 'woocommerce-admin' ) },
+	{ value: 'year', label: __( 'Year to date', 'woocommerce-admin' ) },
+	{ value: 'last_year', label: __( 'Last year', 'woocommerce-admin' ) },
 	{ value: 'custom', label: __( 'Custom', 'woocommerce-admin' ) },
 ];
 
 export const periods = [
 	{
 		value: 'previous_period',
-		label: __( 'Previous Period', 'woocommerce-admin' ),
+		label: __( 'Previous period', 'woocommerce-admin' ),
 	},
 	{
 		value: 'previous_year',
-		label: __( 'Previous Year', 'woocommerce-admin' ),
+		label: __( 'Previous year', 'woocommerce-admin' ),
 	},
 ];
 

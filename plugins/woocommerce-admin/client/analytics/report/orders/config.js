@@ -28,19 +28,19 @@ export const charts = applyFilters( ORDERS_REPORT_CHARTS_FILTER, [
 	},
 	{
 		key: 'net_revenue',
-		label: __( 'Net Sales', 'woocommerce-admin' ),
+		label: __( 'Net sales', 'woocommerce-admin' ),
 		order: 'desc',
 		orderby: 'net_total',
 		type: 'currency',
 	},
 	{
 		key: 'avg_order_value',
-		label: __( 'Average Order Value', 'woocommerce-admin' ),
+		label: __( 'Average order value', 'woocommerce-admin' ),
 		type: 'currency',
 	},
 	{
 		key: 'avg_items_per_order',
-		label: __( 'Average Items Per Order', 'woocommerce-admin' ),
+		label: __( 'Average items per order', 'woocommerce-admin' ),
 		order: 'desc',
 		orderby: 'num_items_sold',
 		type: 'average',
@@ -54,9 +54,9 @@ export const filters = applyFilters( ORDERS_REPORT_FILTERS_FILTER, [
 		param: 'filter',
 		showFilters: () => true,
 		filters: [
-			{ label: __( 'All Orders', 'woocommerce-admin' ), value: 'all' },
+			{ label: __( 'All orders', 'woocommerce-admin' ), value: 'all' },
 			{
-				label: __( 'Advanced Filters', 'woocommerce-admin' ),
+				label: __( 'Advanced filters', 'woocommerce-admin' ),
 				value: 'advanced',
 			},
 		],
@@ -68,7 +68,7 @@ export const advancedFilters = applyFilters(
 	ORDERS_REPORT_ADVANCED_FILTERS_FILTER,
 	{
 		title: _x(
-			'Orders Match {{select /}} Filters',
+			'Orders match {{select /}} filters',
 			'A sentence describing filters for Orders. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ',
 			'woocommerce-admin'
 		),
@@ -213,7 +213,7 @@ export const advancedFilters = applyFilters(
 					),
 					/* translators: A sentence describing a Coupon filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ */
 					title: __(
-						'{{title}}Coupon Code{{/title}} {{rule /}} {{filter /}}',
+						'{{title}}Coupon code{{/title}} {{rule /}} {{filter /}}',
 						'woocommerce-admin'
 					),
 					filter: __( 'Select coupon codes', 'woocommerce-admin' ),
@@ -246,7 +246,7 @@ export const advancedFilters = applyFilters(
 			},
 			customer_type: {
 				labels: {
-					add: __( 'Customer Type', 'woocommerce-admin' ),
+					add: __( 'Customer type', 'woocommerce-admin' ),
 					remove: __( 'Remove customer filter', 'woocommerce-admin' ),
 					rule: __(
 						'Select a customer filter match',

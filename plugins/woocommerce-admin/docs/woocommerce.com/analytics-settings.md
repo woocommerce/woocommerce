@@ -5,8 +5,8 @@ WooCommerce Admin is pre-configured with default settings for WooCommerce Analyt
 - Excluded Statuses
 - Actionable Statuses - See [Activity Panels](activity-panels.md) for details
 - Default Date Range
-- Import Historical Data - See [Importing Historical Data](analytics-historical-data-import.md) for details
-- Reset Defaults
+- Import historical data - See [Importing Historical Data](analytics-historical-data-import.md) for details
+- Reset defaults
 
 ### Excluded Statuses
 
@@ -18,8 +18,8 @@ In this section, statuses that are **unchecked** are **included** in anayltics r
 
 ![Default Date Range setting](images/settings-default-date-range.png)
 
-WooCommerce Admin is pre-configured with a default date range of `Month to Date`. This is the date range that will be used when loading the WooCommerce Dashboard or Analytics page from any non-WooCommerce Admin page. Any reports that support a date range will have a Date Range Picker to allow changing the date range for the report.
+WooCommerce Admin is pre-configured with a default date range of `Month to date`. This is the date range that will be used when loading the WooCommerce Dashboard or Analytics page from any non-WooCommerce Admin page. Any reports that support a date range will have a Date Range Picker to allow changing the date range for the report.
 
 ### Reset Defaults
 
-The `Reset Defaults` button resets the settings to default values for all of the settings above the button. It has no effect on the data imported via `Import Historical Data`.
+The `Reset defaults` button resets the settings to default values for all of the settings above the button. It has no effect on the data imported via `Import historical data`.

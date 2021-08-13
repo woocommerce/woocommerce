@@ -2,7 +2,7 @@
 
 The Categories Report provides insight about the product categories of your store.
 
-By default, the Categories report is sorted by number of `Items Sold` by category descending.
+By default, the Categories report is sorted by number of `Items sold` by category descending.
 
 ![Category Filter](images/analytics-categories-report.png)
 
@@ -48,8 +48,8 @@ At the top of the report table is the search box. This allows you to filter the 
 The report table allows sorting by all columns:
 
 - Category
-- Items Sold
-- Net Sales
+- Items sold
+- Net sales
 - Products (# of unique products sold)
 - Orders (# of orders containing a product in that category)
 
@@ -60,11 +60,11 @@ Two of the Categories report columns contain clickable entries:
 - `Category`
 - `Products`
 
-Both links opens the Single Category report listing the products sold within that category.
+Both links opens the Single category report listing the products sold within that category.
 
-Three of the Single Category report columns contain clickable entries:
+Three of the Single category report columns contain clickable entries:
 
 - `Product` link opens the Products report for that product
 - `Orders` link opens the Orders report for that product
-- `Category` link opens the Single Category report for that category
+- `Category` link opens the Single category report for that category
 

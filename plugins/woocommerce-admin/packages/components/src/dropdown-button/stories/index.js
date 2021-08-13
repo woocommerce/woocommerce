@@ -10,7 +10,7 @@ export const Basic = () => (
 			<DropdownButton
 				onClick={ onToggle }
 				isOpen={ isOpen }
-				labels={ [ 'All Products Sold' ] }
+				labels={ [ 'All products Sold' ] }
 			/>
 		) }
 		renderContent={ () => <p>Dropdown content here</p> }

@@ -29,18 +29,18 @@ export const filters = applyFilters( STOCK_REPORT_FILTERS_FILTER, [
 		param: 'type',
 		showFilters: () => true,
 		filters: [
-			{ label: __( 'All Products', 'woocommerce-admin' ), value: 'all' },
+			{ label: __( 'All products', 'woocommerce-admin' ), value: 'all' },
 			{
-				label: __( 'Out of Stock', 'woocommerce-admin' ),
+				label: __( 'Out of stock', 'woocommerce-admin' ),
 				value: 'outofstock',
 			},
 			{
-				label: __( 'Low Stock', 'woocommerce-admin' ),
+				label: __( 'Low stock', 'woocommerce-admin' ),
 				value: 'lowstock',
 			},
-			{ label: __( 'In Stock', 'woocommerce-admin' ), value: 'instock' },
+			{ label: __( 'In stock', 'woocommerce-admin' ), value: 'instock' },
 			{
-				label: __( 'On Backorder', 'woocommerce-admin' ),
+				label: __( 'On backorder', 'woocommerce-admin' ),
 				value: 'onbackorder',
 			},
 		],

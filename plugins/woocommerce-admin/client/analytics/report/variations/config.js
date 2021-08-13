@@ -27,14 +27,14 @@ const { addCesSurveyForAnalytics } = dispatch( CES_STORE_KEY );
 export const charts = applyFilters( VARIATIONS_REPORT_CHARTS_FILTER, [
 	{
 		key: 'items_sold',
-		label: __( 'Items Sold', 'woocommerce-admin' ),
+		label: __( 'Items sold', 'woocommerce-admin' ),
 		order: 'desc',
 		orderby: 'items_sold',
 		type: 'number',
 	},
 	{
 		key: 'net_revenue',
-		label: __( 'Net Sales', 'woocommerce-admin' ),
+		label: __( 'Net sales', 'woocommerce-admin' ),
 		order: 'desc',
 		orderby: 'net_revenue',
 		type: 'currency',
@@ -56,12 +56,12 @@ export const filters = applyFilters( VARIATIONS_REPORT_FILTERS_FILTER, [
 		showFilters: () => true,
 		filters: [
 			{
-				label: __( 'All Variations', 'woocommerce-admin' ),
+				label: __( 'All variations', 'woocommerce-admin' ),
 				chartMode: 'item-comparison',
 				value: 'all',
 			},
 			{
-				label: __( 'Single Variation', 'woocommerce-admin' ),
+				label: __( 'Single variation', 'woocommerce-admin' ),
 				value: 'select_variation',
 				subFilters: [
 					{
@@ -78,7 +78,7 @@ export const filters = applyFilters( VARIATIONS_REPORT_FILTERS_FILTER, [
 									'woocommerce-admin'
 								),
 								button: __(
-									'Single Variation',
+									'Single variation',
 									'woocommerce-admin'
 								),
 							},
@@ -110,7 +110,7 @@ export const filters = applyFilters( VARIATIONS_REPORT_FILTERS_FILTER, [
 				},
 			},
 			{
-				label: __( 'Advanced Filters', 'woocommerce-admin' ),
+				label: __( 'Advanced filters', 'woocommerce-admin' ),
 				value: 'advanced',
 			},
 		],
@@ -121,7 +121,7 @@ export const advancedFilters = applyFilters(
 	VARIATIONS_REPORT_ADVANCED_FILTERS_FILTER,
 	{
 		title: _x(
-			'Variations Match {{select /}} Filters',
+			'Variations match {{select /}} filters',
 			'A sentence describing filters for Variations. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ',
 			'woocommerce-admin'
 		),

@@ -22,7 +22,7 @@ The following fields can be used for filtering:
 - Order Status
 - Products
 - Coupon Codes
-- Customer Type
+- Customer type
 - Refunds
 - Tax Rates
 
@@ -33,7 +33,7 @@ The following fields can be used for filtering:
 The report table allows sorting by the following columns:
 
 - Date
-- Items Sold
-- Net Sales
+- Items sold
+- Net sales
 
 By default, the report shows the most recent orders.

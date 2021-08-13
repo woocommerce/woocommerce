@@ -40,7 +40,7 @@ const summary = [
 ];
 
 <TableCard
-	title="Revenue Last Week"
+	title="Revenue last week"
 	rows={ rows }
 	headers={ headers }
 	query={ { page: 2 } }
@@ -132,7 +132,7 @@ const headers = [
 ];
 
 <TablePlaceholder
-	caption="Revenue Last Week"
+	caption="Revenue last week"
 	headers={ headers }
 />
 ```
@@ -221,7 +221,7 @@ const rows = [
 
 ```jsx
 <Table
-	caption="Revenue Last Week"
+	caption="Revenue last week"
 	rows={ rows }
 	headers={ headers }
 	rowKey={ row => row.display }

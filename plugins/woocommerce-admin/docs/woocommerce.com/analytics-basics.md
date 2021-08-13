@@ -9,12 +9,12 @@ The Date Range picker allows you to specify which dates you want to include in t
 
 - Today
 - Yesterday
-- Week to Date
-- Last Week
-- Month to Date
-- Last Month
-- Quarter to Date
-- Last Year
+- Week to date
+- Last week
+- Month to date
+- Last month
+- Quarter to date
+- Last year
 
 You can also select which date range to compare against, either the same range from the _Prior Year_ or the _Prior Period_.
 
@@ -27,7 +27,7 @@ On the custom picker, you can either manually enter the start and end date using
 After either choosing a preset, or a custom date range, click the _Update_ button to modify the data in the report. Note by doing this, the date range selected is added to the address of the report URL - which allows you to bookmark, or share a report url with a specific date range to other Store admins. This date selection is persisted on the report view until you navigate away from the report.
 
 ## Advanced Filters
-Depending on the report you are viewing, their might also be other Quick Filters and/or Advanced Filters that allow you to further customize the data set being viewed.
+Depending on the report you are viewing, their might also be other Quick Filters and/or Advanced filters that allow you to further customize the data set being viewed.
 
 ![Analytics Filters](analytics-basics-advanced-filters.png)
 
@@ -74,7 +74,7 @@ Many columns in reports will allow you to click on the column header to sort the
 
 If a report contains a data column that you don't need to be displayed, you can adjust the visiblity of it by using the visibility menu on the right side of the table header. Click the column name in the menu to change the visibility of the column. Your visibility selections are persisted to your user preferences for each report, so on subsequent visits to that report, the columns you have previously toggled off will not be displayed.
 
-### csv Download
+### CSV Download
 ![Analytics Table csv Download](analytics-table-download-button.png)
 
 If you would like to download a copy of the data contained in the report table, you can do so by clicking the _Download_ button in the table header. If the amount of data shown in the report is limited to one page ( e.g. there is no pagination options shown in the table footer ), the csv file will download immediately.

@@ -44,7 +44,7 @@ class SectionControls extends Component {
 			<Fragment>
 				<div className="woocommerce-ellipsis-menu__item">
 					<TextControl
-						label={ __( 'Section Title', 'woocommerce-admin' ) }
+						label={ __( 'Section title', 'woocommerce-admin' ) }
 						onBlur={ onTitleBlur }
 						onChange={ onTitleChange }
 						required

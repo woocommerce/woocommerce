@@ -10,7 +10,7 @@ export default [
 		required: false,
 	},
 	{
-		label: 'Total Sales',
+		label: 'Total sales',
 		key: 'total_sales',
 		required: true,
 	},
@@ -31,7 +31,7 @@ export default [
 		key: 'shipping',
 	},
 	{
-		label: 'Net Sales',
+		label: 'Net sales',
 		key: 'net_revenue',
 	},
 ];

@@ -23,7 +23,7 @@ const DateRangeExample = withState( {
 
 	return (
 		<>
-			<H>Date Range Picker</H>
+			<H>Date range picker</H>
 			<Section component={ false }>
 				<DateRange
 					after={ after }

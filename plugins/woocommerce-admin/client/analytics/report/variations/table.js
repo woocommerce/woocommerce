@@ -35,7 +35,7 @@ class VariationsReportTable extends Component {
 	getHeadersContent() {
 		return [
 			{
-				label: __( 'Product / Variation Title', 'woocommerce-admin' ),
+				label: __( 'Product / Variation title', 'woocommerce-admin' ),
 				key: 'name',
 				required: true,
 				isLeftAligned: true,
@@ -47,7 +47,7 @@ class VariationsReportTable extends Component {
 				isSortable: true,
 			},
 			{
-				label: __( 'Items Sold', 'woocommerce-admin' ),
+				label: __( 'Items sold', 'woocommerce-admin' ),
 				key: 'items_sold',
 				required: true,
 				defaultSort: true,
@@ -55,8 +55,8 @@ class VariationsReportTable extends Component {
 				isNumeric: true,
 			},
 			{
-				label: __( 'Net Sales', 'woocommerce-admin' ),
-				screenReaderLabel: __( 'Net Sales', 'woocommerce-admin' ),
+				label: __( 'Net sales', 'woocommerce-admin' ),
+				screenReaderLabel: __( 'Net sales', 'woocommerce-admin' ),
 				key: 'net_revenue',
 				required: true,
 				isSortable: true,

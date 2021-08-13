@@ -4,7 +4,7 @@ Displays a configurable set of filters which can modify query parameters. Displa
 
 ## Usage
 
-Below is a config example complete with translation strings. Advanced Filters makes use of [interpolateComponents](https://github.com/Automattic/interpolate-components#readme) to organize sentence structure, resulting in a filter visually represented as a sentence fragment in any language.
+Below is a config example complete with translation strings. Advanced filters makes use of [interpolateComponents](https://github.com/Automattic/interpolate-components#readme) to organize sentence structure, resulting in a filter visually represented as a sentence fragment in any language.
 
 ```js
 const config = {

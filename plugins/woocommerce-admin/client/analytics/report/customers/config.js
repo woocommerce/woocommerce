@@ -59,7 +59,7 @@ export const filters = applyFilters( CUSTOMERS_REPORT_FILTERS_FILTER, [
 				],
 			},
 			{
-				label: __( 'Advanced Filters', 'woocommerce-admin' ),
+				label: __( 'Advanced filters', 'woocommerce-admin' ),
 				value: 'advanced',
 			},
 		],
@@ -71,7 +71,7 @@ export const advancedFilters = applyFilters(
 	CUSTOMERS_REPORT_ADVANCED_FILTERS_FILTER,
 	{
 		title: _x(
-			'Customers Match {{select /}} Filters',
+			'Customers match {{select /}} filters',
 			'A sentence describing filters for Customers. See screen shot for context: https://cloudup.com/cCsm3GeXJbE',
 			'woocommerce-admin'
 		),

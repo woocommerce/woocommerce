@@ -34,9 +34,9 @@ export const filters = applyFilters( DOWLOADS_REPORT_FILTERS_FILTER, [
 		param: 'filter',
 		showFilters: () => true,
 		filters: [
-			{ label: __( 'All Downloads', 'woocommerce-admin' ), value: 'all' },
+			{ label: __( 'All downloads', 'woocommerce-admin' ), value: 'all' },
 			{
-				label: __( 'Advanced Filters', 'woocommerce-admin' ),
+				label: __( 'Advanced filters', 'woocommerce-admin' ),
 				value: 'advanced',
 			},
 		],
@@ -48,7 +48,7 @@ export const advancedFilters = applyFilters(
 	DOWLOADS_REPORT_ADVANCED_FILTERS_FILTER,
 	{
 		title: _x(
-			'Downloads Match {{select /}} Filters',
+			'Downloads match {{select /}} filters',
 			'A sentence describing filters for Downloads. See screen shot for context: https://cloudup.com/ccxhyH2mEDg',
 			'woocommerce-admin'
 		),

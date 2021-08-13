@@ -299,11 +299,11 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 	 */
 	public function get_export_columns() {
 		return array(
-			'tax_code'     => __( 'Tax Code', 'woocommerce-admin' ),
+			'tax_code'     => __( 'Tax code', 'woocommerce-admin' ),
 			'rate'         => __( 'Rate', 'woocommerce-admin' ),
-			'total_tax'    => __( 'Total Tax', 'woocommerce-admin' ),
-			'order_tax'    => __( 'Order Tax', 'woocommerce-admin' ),
-			'shipping_tax' => __( 'Shipping Tax', 'woocommerce-admin' ),
+			'total_tax'    => __( 'Total tax', 'woocommerce-admin' ),
+			'order_tax'    => __( 'Order tax', 'woocommerce-admin' ),
+			'shipping_tax' => __( 'Shipping tax', 'woocommerce-admin' ),
 			'orders_count' => __( 'Orders', 'woocommerce-admin' ),
 		);
 	}

@@ -13,7 +13,7 @@ const REVENUE_REPORT_ADVANCED_FILTERS_FILTER =
 export const charts = applyFilters( REVENUE_REPORT_CHARTS_FILTER, [
 	{
 		key: 'gross_sales',
-		label: __( 'Gross Sales', 'woocommerce-admin' ),
+		label: __( 'Gross sales', 'woocommerce-admin' ),
 		order: 'desc',
 		orderby: 'gross_sales',
 		type: 'currency',
@@ -37,7 +37,7 @@ export const charts = applyFilters( REVENUE_REPORT_CHARTS_FILTER, [
 	},
 	{
 		key: 'net_revenue',
-		label: __( 'Net Sales', 'woocommerce-admin' ),
+		label: __( 'Net sales', 'woocommerce-admin' ),
 		orderby: 'net_revenue',
 		type: 'currency',
 		isReverseTrend: false,
@@ -59,7 +59,7 @@ export const charts = applyFilters( REVENUE_REPORT_CHARTS_FILTER, [
 	},
 	{
 		key: 'total_sales',
-		label: __( 'Total Sales', 'woocommerce-admin' ),
+		label: __( 'Total sales', 'woocommerce-admin' ),
 		order: 'desc',
 		orderby: 'total_sales',
 		type: 'currency',

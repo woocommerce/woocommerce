@@ -6,7 +6,7 @@ A header component. The header can contain a title, actions via children, and an
 ## Usage
 
 ```jsx
-<SectionHeader title="Section Title" />
+<SectionHeader title="Section title" />
 ```
 
 ### Props

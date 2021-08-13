@@ -155,7 +155,7 @@ class Controller extends \WC_REST_Reports_Controller {
 				'readonly'    => true,
 			),
 			'orders_count'  => array(
-				'title'       => __( 'Discounted Orders', 'woocommerce-admin' ),
+				'title'       => __( 'Discounted orders', 'woocommerce-admin' ),
 				'description' => __( 'Number of discounted orders.', 'woocommerce-admin' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),

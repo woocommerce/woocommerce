@@ -130,7 +130,7 @@ const Settings = ( { createNotice, query } ) => {
 	return (
 		<Fragment>
 			<SectionHeader
-				title={ __( 'Analytics Settings', 'woocommerce-admin' ) }
+				title={ __( 'Analytics settings', 'woocommerce-admin' ) }
 			/>
 			<div className="woocommerce-settings__wrapper">
 				{ Object.keys( config ).map( ( setting ) => (
@@ -144,14 +144,14 @@ const Settings = ( { createNotice, query } ) => {
 				) ) }
 				<div className="woocommerce-settings__actions">
 					<Button isSecondary onClick={ resetDefaults }>
-						{ __( 'Reset Defaults', 'woocommerce-admin' ) }
+						{ __( 'Reset defaults', 'woocommerce-admin' ) }
 					</Button>
 					<Button
 						isPrimary
 						isBusy={ isRequesting }
 						onClick={ saveChanges }
 					>
-						{ __( 'Save Settings', 'woocommerce-admin' ) }
+						{ __( 'Save settings', 'woocommerce-admin' ) }
 					</Button>
 				</div>
 			</div>

@@ -66,7 +66,7 @@ function HistoricalDataPeriodSelector( {
 			<div className="woocommerce-settings-historical-data__column">
 				<SelectControl
 					label={ __(
-						'Import Historical Data',
+						'Import historical data',
 						'woocommerce-admin'
 					) }
 					value={ value.label }

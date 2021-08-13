@@ -160,7 +160,7 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 	public function get_item_schema() {
 		$data_values = array(
 			'net_revenue'         => array(
-				'description' => __( 'Net Sales.', 'woocommerce-admin' ),
+				'description' => __( 'Net sales.', 'woocommerce-admin' ),
 				'type'        => 'number',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,

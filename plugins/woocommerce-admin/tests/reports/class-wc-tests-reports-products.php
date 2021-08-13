@@ -475,7 +475,7 @@ class WC_Tests_Reports_Products extends WC_Unit_Test_Case {
 		);
 
 		$expected_csv  = chr( 239 ) . chr( 187 ) . chr( 191 );
-		$expected_csv .= '"Product Title",SKU,"Items Sold","N. Revenue",Orders,Category,Variations,Status,Stock';
+		$expected_csv .= '"Product title",SKU,"Items sold","N. Revenue",Orders,Category,Variations,Status,Stock';
 		$expected_csv .= PHP_EOL;
 
 		$export = new ReportCSVExporter( 'products', $args );

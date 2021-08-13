@@ -23,14 +23,14 @@ const { addCesSurveyForAnalytics } = dispatch( CES_STORE_KEY );
 export const charts = applyFilters( CATEGORY_REPORT_CHARTS_FILTER, [
 	{
 		key: 'items_sold',
-		label: __( 'Items Sold', 'woocommerce-admin' ),
+		label: __( 'Items sold', 'woocommerce-admin' ),
 		order: 'desc',
 		orderby: 'items_sold',
 		type: 'number',
 	},
 	{
 		key: 'net_revenue',
-		label: __( 'Net Sales', 'woocommerce-admin' ),
+		label: __( 'Net sales', 'woocommerce-admin' ),
 		order: 'desc',
 		orderby: 'net_revenue',
 		type: 'currency',
@@ -49,7 +49,7 @@ export const advancedFilters = applyFilters(
 	{
 		filters: {},
 		title: _x(
-			'Categories Match {{select /}} Filters',
+			'Categories match {{select /}} filters',
 			'A sentence describing filters for Categories. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ',
 			'woocommerce-admin'
 		),
@@ -58,11 +58,11 @@ export const advancedFilters = applyFilters(
 
 const filterValues = [
 	{
-		label: __( 'All Categories', 'woocommerce-admin' ),
+		label: __( 'All categories', 'woocommerce-admin' ),
 		value: 'all',
 	},
 	{
-		label: __( 'Single Category', 'woocommerce-admin' ),
+		label: __( 'Single category', 'woocommerce-admin' ),
 		value: 'select_category',
 		chartMode: 'item-comparison',
 		subFilters: [
@@ -113,7 +113,7 @@ const filterValues = [
 
 if ( Object.keys( advancedFilters.filters ).length ) {
 	filterValues.push( {
-		label: __( 'Advanced Filters', 'woocommerce-admin' ),
+		label: __( 'Advanced filters', 'woocommerce-admin' ),
 		value: 'advanced',
 	} );
 }
