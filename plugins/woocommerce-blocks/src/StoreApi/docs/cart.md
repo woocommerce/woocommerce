@@ -228,6 +228,7 @@ All endpoints under `/cart` (listed in this doc) return responses in the same fo
   "items_weight": 0,
   "needs_payment": true,
   "needs_shipping": true,
+  "has_calculated_shipping": true,
   "totals": {
     "currency_code": "GBP",
     "currency_symbol": "£",
@@ -248,7 +249,10 @@ All endpoints under `/cart` (listed in this doc) return responses in the same fo
     "total_tax": "0",
     "tax_lines": []
   },
-  "errors": []
+  "errors": [],
+  "payment_requirements": [ "products" ],
+  "generated_timestamp": "1628668379361",
+  "extensions": {},
 }
 ```
 

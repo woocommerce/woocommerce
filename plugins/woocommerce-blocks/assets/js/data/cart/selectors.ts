@@ -7,7 +7,7 @@ import type { Cart, CartTotals, CartMeta, CartItem } from '@woocommerce/types';
  * Internal dependencies
  */
 import { CartState, defaultCartState } from '../default-states';
-import { ResponseError } from '../types';
+import type { ResponseError } from '../types';
 
 /**
  * Retrieves cart data from state.
@@ -46,7 +46,7 @@ export const getCartMeta = ( state: CartState ): CartMeta => {
  * @return {Array<ResponseError>} Array of errors.
  */
 export const getCartErrors = ( state: CartState ): Array< ResponseError > => {
-	return state.errors || [];
+	return state.errors;
 };
 
 /**
