@@ -40,15 +40,12 @@ $current_section_name = __( 'Browse Categories', woocommerce );
 		<div class="current-section-dropdown">
 			<ul>
 				<?php foreach ( $sections as $section ) : ?>
-					<?php if( $current_section === $section->slug ) {
+					<?php if( $current_section === $section->slug && '_featured' !== $section->slug ) {
 						$current_section_name = $section->label;
-						$add_current_class = true;
-					} else {
-						$add_current_class = false;
 					} ?>
 					<li>
 						<a
-							class="<?php echo $add_current_class ? 'current' : ''; ?>"
+							class="<?php echo $current_section === $section->slug ? 'current' : ''; ?>"
 							href="<?php echo esc_url( admin_url( 'admin.php?page=wc-addons&section=' . esc_attr( $section->slug ) ) ); ?>">
 							<?php echo esc_html( $section->label ); ?>
 						</a>

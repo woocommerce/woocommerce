@@ -93,15 +93,18 @@
 
 		.current-section-dropdown {
 			position: relative;
-			margin-left: 70px;
 			width: 200px;
+
+			@media only screen and ( min-width: 600px ) {
+				margin-left: 70px;
+			}
 		}
 
 		.current-section-name {
 			font-weight: 600;
 			font-size: 14px;
-			line-height: 20px;	
-			padding: 20px 12px;
+			line-height: 20px;
+			padding: 20px 16px;
 			position: relative;
 		}
 
@@ -110,11 +113,11 @@
 			background-size: contain;
 			content: '';
 			display: block;
+			height: 20px;
+			position: absolute;
 			right: 20px;
 			top: 20px;
-			position: absolute;
 			width: 20px;
-			height: 20px;
 		}
 
 		ul {
@@ -153,7 +156,19 @@
 				text-decoration: none;
 				outline: none;
 				padding: 10px 18px;
+				position: relative;
 				width: 100%;
+			}
+
+			a.current:after {
+				background-image: url(../images/icons/gridicons-checkmark.svg);
+				content: '';
+				display: block;
+				height: 20px;
+				position: absolute;
+				right: 20px;
+				top: 7px;
+				width: 20px;
 			}
 		}
 
