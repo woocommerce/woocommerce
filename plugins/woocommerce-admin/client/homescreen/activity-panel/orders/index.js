@@ -227,7 +227,7 @@ function OrdersPanel( { countUnreadOrders, orderStatuses } ) {
 		} ),
 		[ orderStatuses ]
 	);
-	const { orders, isRequesting, isError } = useSelect( ( select ) => {
+	const { orders = [], isRequesting, isError } = useSelect( ( select ) => {
 		const { getItems, getItemsError, isResolving } = select(
 			ITEMS_STORE_NAME
 		);
