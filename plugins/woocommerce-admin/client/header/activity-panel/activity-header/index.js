@@ -27,7 +27,7 @@ class ActivityHeader extends Component {
 		return (
 			<div className={ cardClassName }>
 				<div className="woocommerce-layout__inbox-title">
-					<Text variant="title.small" size="20" lineHeight="28px">
+					<Text size={ 16 } weight={ 600 } color="#23282d">
 						{ title }
 					</Text>
 					<Text

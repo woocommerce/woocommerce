@@ -68,10 +68,10 @@ export class Leaderboard extends Component {
 				<Card className={ classes }>
 					<CardHeader>
 						<Text
-							variant="title.small"
+							size={ 16 }
+							weight={ 600 }
 							as="h3"
-							size="20"
-							lineHeight="28px"
+							color="#23282d"
 						>
 							{ title }
 						</Text>

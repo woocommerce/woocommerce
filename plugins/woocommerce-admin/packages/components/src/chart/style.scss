@@ -23,12 +23,7 @@
 		width: 100%;
 
 		.woocommerce-chart__title {
-			height: 18px;
-			color: $wp-admin-sidebar;
-			font-size: 15px;
-			font-weight: 600;
-			line-height: 18px;
-			margin-left: $gap;
+			margin-left: $gap-large;
 			margin-right: $gap;
 		}
 	}
