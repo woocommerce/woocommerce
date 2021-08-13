@@ -90,6 +90,7 @@ const ReviewsByCategoryEditor = ( {
 						} }
 						renderItem={ renderCategoryControlItem }
 						isCompact={ true }
+						showReviewCount={ true }
 					/>
 				</PanelBody>
 				<PanelBody
