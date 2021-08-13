@@ -34,7 +34,7 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 		</form>
 	</div>
 	<div class="top-bar">
-		<div class="current-section-dropdown">
+		<div id="marketplace-current-section-dropdown" class="current-section-dropdown">
 			<ul>
 				<?php foreach ( $sections as $section ) : ?>
 					<?php
@@ -51,7 +51,7 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 					</li>
 				<?php endforeach; ?>
 			</ul>
-			<div class="current-section-name"><?php echo esc_html( $current_section_name ); ?></div>
+			<div id="marketplace-current-section-name" class="current-section-name"><?php echo esc_html( $current_section_name ); ?></div>
 		</div>
 		</div>
 	<div class="wrap">
