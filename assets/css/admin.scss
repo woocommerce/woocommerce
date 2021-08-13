@@ -30,7 +30,7 @@
 		flex-direction: column;
 		justify-content: center;
 		min-height: 216px;
-		padding: 24px;
+		padding: 24px 16px;
 		width: 100%;
 
 		&__title {
@@ -84,30 +84,63 @@
 		background: #fff;
 		box-shadow: inset 0 -1px 0 #ccc;
 		display: block;
+		height: 60px;
 		margin: 0 0 16px;
 
 		@media only screen and ( min-width: 768px ) {
 			margin-bottom: 24px;
 		}
 
+		.current-section-dropdown {
+			position: relative;
+			width: 200px;
+
+			@media only screen and ( min-width: 600px ) {
+				margin-left: 70px;
+			}
+		}
+
+		.current-section-name {
+			font-weight: 600;
+			font-size: 14px;
+			line-height: 20px;
+			padding: 20px 16px;
+			position: relative;
+		}
+
+		.current-section-name:after {
+			background-image: url(../images/icons/gridicons-chevron-down.svg);
+			background-size: contain;
+			content: '';
+			display: block;
+			height: 20px;
+			position: absolute;
+			right: 20px;
+			top: 20px;
+			width: 20px;
+		}
+
 		ul {
 			background: #fff;
-			box-shadow: inset 0 -1px 0 #ccc;
-			display: flex;
+			border: 1px solid #1E1E1E;
+			border-radius: 2px;
+			display: none;
+			flex-direction: column;
 			justify-content: left;
-			margin: 0 auto;
-			max-width: 1056px;
+			left: 0;
+			margin: 0;
+			padding: 14px 0;
+			position: absolute;
+			top: 50px;
 			width: 100%;
-			overflow-x: scroll;
 
 			@media only screen and ( min-width: 1100px ) {
 				justify-content: center;
 			}
 
 			li {
-				font-weight: 600;
-				font-size: 14px;
-				line-height: 20px;
+				font-size: 13px;
+				line-height: 16px;
 				margin: 0;
 			}
 
@@ -117,17 +150,30 @@
 			a:focus {
 				border: none;
 				box-shadow: none;
+				box-sizing: border-box;
 				color: #1e1e1e;
 				display: inline-block;
 				text-decoration: none;
 				outline: none;
-				padding: 20px 12px;
-				white-space: nowrap;
-
-				&.current {
-					box-shadow: inset 0 -3px 0 #3171a6, inset 0 -1px 0 #ccc;
-				}
+				padding: 10px 18px;
+				position: relative;
+				width: 100%;
 			}
+
+			a.current:after {
+				background-image: url(../images/icons/gridicons-checkmark.svg);
+				content: '';
+				display: block;
+				height: 20px;
+				position: absolute;
+				right: 20px;
+				top: 7px;
+				width: 20px;
+			}
+		}
+
+		.current-section-dropdown:hover ul {
+			display: flex;
 		}
 	}
 
@@ -626,6 +672,7 @@
 
 			@media only screen and ( max-width: 768px ) {
 				max-width: none;
+				width: 100%;
 			}
 
 			a {
