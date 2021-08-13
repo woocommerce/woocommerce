@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$current_section_name = __( 'Browse Categories', woocommerce );
+$current_section_name = __( 'Browse Categories', 'woocommerce' );
 
 ?>
 <div class="wrap woocommerce wc_addons_wrap">
@@ -37,9 +37,11 @@ $current_section_name = __( 'Browse Categories', woocommerce );
 		<div class="current-section-dropdown">
 			<ul>
 				<?php foreach ( $sections as $section ) : ?>
-					<?php if( $current_section === $section->slug && '_featured' !== $section->slug ) {
+					<?php
+					if ( $current_section === $section->slug && '_featured' !== $section->slug ) {
 						$current_section_name = $section->label;
-					} ?>
+					}
+					?>
 					<li>
 						<a
 							class="<?php echo $current_section === $section->slug ? 'current' : ''; ?>"
@@ -49,7 +51,7 @@ $current_section_name = __( 'Browse Categories', woocommerce );
 					</li>
 				<?php endforeach; ?>
 			</ul>
-			<div class="current-section-name"><?php echo esc_html( $current_section_name );?></div>
+			<div class="current-section-name"><?php echo esc_html( $current_section_name ); ?></div>
 		</div>
 		</div>
 	<div class="wrap">
