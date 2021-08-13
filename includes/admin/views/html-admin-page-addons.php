@@ -65,7 +65,7 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 			<?php if ( isset( $_GET['search'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>
 				<h1 class="search-form-title">
 					<?php // translators: search keyword. ?>
-					<?php printf( esc_html__( 'Showing search results for: %s', 'woocommerce' ), '<strong>' . esc_html( sanitize_text_field( wp_unslash( $_GET['search'] ) ) ) . '</strong>' ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>
+					<?php printf( esc_html__( 'Search results for "%s"', 'woocommerce' ), esc_html( sanitize_text_field( wp_unslash( $_GET['search'] ) ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>
 				</h1>
 			<?php endif; ?>
 
