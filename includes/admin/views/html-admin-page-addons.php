@@ -11,6 +11,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+$current_section_name = __( 'Browse Categories', woocommerce );
+
 ?>
 <div class="wrap woocommerce wc_addons_wrap">
 	<?php if ( $sections ) : ?>
@@ -32,17 +34,26 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</form>
 	</div>
 	<div class="top-bar">
+		<div class="current-section-dropdown">
 			<ul>
 				<?php foreach ( $sections as $section ) : ?>
+					<?php if( $current_section === $section->slug ) {
+						$current_section_name = $section->label;
+						$add_current_class = true;
+					} else {
+						$add_current_class = false;
+					} ?>
 					<li>
 						<a
-							class="<?php echo $current_section === $section->slug ? 'current' : ''; ?>"
+							class="<?php echo $add_current_class ? 'current' : ''; ?>"
 							href="<?php echo esc_url( admin_url( 'admin.php?page=wc-addons&section=' . esc_attr( $section->slug ) ) ); ?>">
 							<?php echo esc_html( $section->label ); ?>
 						</a>
 					</li>
 				<?php endforeach; ?>
 			</ul>
+			<div class="current-section-name"><?php echo esc_html( $current_section_name );?></div>
+		</div>
 		</div>
 	<div class="wrap">
 		<div class="marketplace-content-wrapper">
