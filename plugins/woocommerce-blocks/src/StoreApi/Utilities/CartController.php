@@ -268,7 +268,7 @@ class CartController {
 			'not_purchasable'      => [
 				/* translators: %s: product name. */
 				'singular' => __(
-					'%s cannot be purchased.  Please remove it from your cart.',
+					'%s cannot be purchased. Please remove it from your cart.',
 					'woo-gutenberg-products-block'
 				),
 				/* translators: %s: product names. */
