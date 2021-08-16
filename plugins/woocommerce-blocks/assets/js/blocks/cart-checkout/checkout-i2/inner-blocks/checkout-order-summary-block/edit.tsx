@@ -18,10 +18,14 @@ export const Edit = ( {
 }: {
 	attributes: {
 		showRateAfterTaxName: boolean;
+		lock: {
+			move: boolean;
+			remove: boolean;
+		};
 	};
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
 } ): JSX.Element => {
-	const blockProps = useBlockPropsWithLocking();
+	const blockProps = useBlockPropsWithLocking( { attributes } );
 	const taxesEnabled = getSetting( 'taxesEnabled' ) as boolean;
 	const displayItemizedTaxes = getSetting(
 		'displayItemizedTaxes',

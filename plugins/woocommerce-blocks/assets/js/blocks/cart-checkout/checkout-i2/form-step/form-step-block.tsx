@@ -16,21 +16,24 @@ export interface FormStepBlockProps {
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
 	className?: string;
 	children?: React.ReactNode;
+	lock?: { move: boolean; remove: boolean };
 }
 
 /**
  * Form Step Block for use in the editor.
  */
 export const FormStepBlock = ( {
-	attributes: { title = '', description = '', showStepNumber = true },
+	attributes,
 	setAttributes,
 	className = '',
 	children,
 }: FormStepBlockProps ): JSX.Element => {
+	const { title = '', description = '', showStepNumber = true } = attributes;
 	const blockProps = useBlockPropsWithLocking( {
 		className: classnames( 'wc-block-components-checkout-step', className, {
 			'wc-block-components-checkout-step--with-step-number': showStepNumber,
 		} ),
+		attributes,
 	} );
 
 	return (

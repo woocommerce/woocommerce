@@ -20,4 +20,11 @@ export default {
 		type: 'boolean',
 		default: false,
 	},
+	lock: {
+		type: 'object',
+		default: {
+			move: true,
+			remove: true,
+		},
+	},
 };

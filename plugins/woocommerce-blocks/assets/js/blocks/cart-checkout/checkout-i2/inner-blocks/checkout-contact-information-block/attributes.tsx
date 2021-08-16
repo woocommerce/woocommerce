@@ -19,4 +19,11 @@ export default {
 			'woo-gutenberg-products-block'
 		),
 	} ),
+	lock: {
+		type: 'object',
+		default: {
+			remove: true,
+			move: true,
+		},
+	},
 };

@@ -28,10 +28,6 @@ registerFeaturePluginBlockType( 'woocommerce/checkout-shipping-methods-block', {
 		multiple: false,
 		reusable: false,
 		inserter: false,
-		lock: {
-			remove: true,
-			move: true,
-		},
 	},
 	parent: [ 'woocommerce/checkout-fields-block' ],
 	attributes,

@@ -7,4 +7,11 @@ export default {
 		type: 'boolean',
 		default: true,
 	},
+	lock: {
+		type: 'object',
+		default: {
+			move: true,
+			remove: true,
+		},
+	},
 };

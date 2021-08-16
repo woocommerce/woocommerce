@@ -17,12 +17,11 @@ import {
 	store as blockEditorStore,
 } from '@wordpress/block-editor';
 import { isTextField } from '@wordpress/dom';
-import { store as blocksStore } from '@wordpress/blocks';
 import { useSelect, subscribe, select as _select } from '@wordpress/data';
 import { useEffect, useRef } from '@wordpress/element';
 import { MutableRefObject } from 'react';
 import { BACKSPACE, DELETE } from '@wordpress/keycodes';
-
+import { hasFilter } from '@wordpress/hooks';
 /**
  * Toggle class on body.
  *
@@ -47,35 +46,31 @@ const toggleBodyClass = ( className: string, add = true ) => {
  * We use a component so we can react to changes in the store.
  */
 export const addClassToBody = (): void => {
-	subscribe( () => {
-		const blockEditorSelect = _select( blockEditorStore );
+	if ( ! hasFilter( 'blocks.registerBlockType', 'core/lock/addAttribute' ) ) {
+		subscribe( () => {
+			const blockEditorSelect = _select( blockEditorStore );
 
-		if ( ! blockEditorSelect ) {
-			return;
-		}
+			if ( ! blockEditorSelect ) {
+				return;
+			}
 
-		const selectedBlock = blockEditorSelect.getSelectedBlock();
+			const selectedBlock = blockEditorSelect.getSelectedBlock();
 
-		if ( ! selectedBlock ) {
-			return;
-		}
+			if ( ! selectedBlock ) {
+				return;
+			}
 
-		const blockSelect = _select( blocksStore );
+			toggleBodyClass(
+				'wc-lock-selected-block--remove',
+				!! selectedBlock?.attributes?.lock?.remove
+			);
 
-		const selectedBlockType = blockSelect.getBlockType(
-			selectedBlock.name
-		);
-
-		toggleBodyClass(
-			'wc-lock-selected-block--remove',
-			!! selectedBlockType?.supports?.lock?.remove
-		);
-
-		toggleBodyClass(
-			'wc-lock-selected-block--move',
-			!! selectedBlockType?.supports?.lock?.move
-		);
-	} );
+			toggleBodyClass(
+				'wc-lock-selected-block--move',
+				!! selectedBlock?.attributes?.lock?.move
+			);
+		} );
+	}
 };
 
 /**
@@ -87,19 +82,22 @@ export const addClassToBody = (): void => {
 const useLockBlock = ( {
 	clientId,
 	ref,
-	type,
+	attributes,
 }: {
 	clientId: string;
-	ref: MutableRefObject< Element >;
-	type: string;
+	ref: MutableRefObject< Element | undefined >;
+	attributes: Record< string, unknown >;
 } ): void => {
-	const { isSelected, blockType } = useSelect(
+	const lockInCore = hasFilter(
+		'blocks.registerBlockType',
+		'core/lock/addAttribute'
+	);
+	const { isSelected } = useSelect(
 		( select ) => {
 			return {
 				isSelected: select( blockEditorStore ).isBlockSelected(
 					clientId
 				),
-				blockType: select( blocksStore ).getBlockType( type ),
 			};
 		},
 		[ clientId ]
@@ -108,7 +106,7 @@ const useLockBlock = ( {
 	const node = ref.current;
 
 	return useEffect( () => {
-		if ( ! isSelected || ! node ) {
+		if ( ! isSelected || ! node || lockInCore ) {
 			return;
 		}
 		function onKeyDown( event: KeyboardEvent ) {
@@ -120,9 +118,8 @@ const useLockBlock = ( {
 			if ( target !== node || isTextField( target ) ) {
 				return;
 			}
-
 			// Prevent the keyboard event from propogating if it supports locking.
-			if ( blockType?.supports?.lock?.remove ) {
+			if ( attributes?.lock?.remove ) {
 				event.preventDefault();
 				event.stopPropagation();
 			}
@@ -133,20 +130,21 @@ const useLockBlock = ( {
 		return () => {
 			node.removeEventListener( 'keydown', onKeyDown, true );
 		};
-	}, [ node, isSelected, blockType ] );
+	}, [ node, isSelected, lockInCore, attributes ] );
 };
 
 /**
  * This hook is a light wrapper to useBlockProps, it wraps that hook plus useLockBlock to pass data between them.
  */
 export const useBlockPropsWithLocking = (
-	props?: Record< string, unknown > = {}
+	props: Record< string, unknown > = {}
 ): Record< string, unknown > => {
 	const ref = useRef< Element >();
+	const { attributes } = props;
 	const blockProps = useBlockProps( { ref, ...props } );
 	useLockBlock( {
 		ref,
-		type: blockProps[ 'data-type' ],
+		attributes,
 		clientId: blockProps[ 'data-block' ],
 	} );
 	return blockProps;

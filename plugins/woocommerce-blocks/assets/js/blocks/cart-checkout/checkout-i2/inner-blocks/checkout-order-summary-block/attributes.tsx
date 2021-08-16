@@ -8,4 +8,11 @@ export default {
 		type: 'boolean',
 		default: getSetting( 'displayCartPricesIncludingTax', false ),
 	},
+	lock: {
+		type: 'object',
+		default: {
+			move: true,
+			remove: true,
+		},
+	},
 };

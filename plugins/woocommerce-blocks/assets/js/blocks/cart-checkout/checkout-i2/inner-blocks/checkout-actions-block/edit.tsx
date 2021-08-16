@@ -23,7 +23,7 @@ export const Edit = ( {
 	};
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
 } ): JSX.Element => {
-	const blockProps = useBlockPropsWithLocking();
+	const blockProps = useBlockPropsWithLocking( { attributes } );
 	const { cartPageId = 0, showReturnToCart = true } = attributes;
 	const { current: savedCartPageId } = useRef( cartPageId );
 	const currentPostId = useSelect(

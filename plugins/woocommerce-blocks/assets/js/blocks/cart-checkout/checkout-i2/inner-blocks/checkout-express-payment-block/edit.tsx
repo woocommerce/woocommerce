@@ -10,8 +10,17 @@ import Block from './block';
 import './editor.scss';
 import { useBlockPropsWithLocking } from '../../hacks';
 
-export const Edit = (): JSX.Element => {
-	const blockProps = useBlockPropsWithLocking();
+export const Edit = ( {
+	attributes,
+}: {
+	attributes: {
+		lock: {
+			move: boolean;
+			remove: boolean;
+		};
+	};
+} ): JSX.Element => {
+	const blockProps = useBlockPropsWithLocking( { attributes } );
 
 	return (
 		<div { ...blockProps }>
