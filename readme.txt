@@ -4,7 +4,7 @@ Tags: e-commerce, store, sales, sell, woo, shop, cart, checkout, downloadable, d
 Requires at least: 5.6
 Tested up to: 5.8
 Requires PHP: 7.0
-Stable tag: 5.5.2
+Stable tag: 5.6
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -185,7 +185,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Dev - Apply `woocommerce_logout_default_redirect_url` filter to logout for custom endpoint. #29967
 * Dev - Added new `woocommerce_email_sent` hook. #30123
 
-**WooCommerce Admin - 2.5.0**
+**WooCommerce Admin - 2.5.0 & 2.5.1**
 
 - Add - Add a delete option to completed tasks #7300
 - Add - Add unit tests around extended payment gateway controller #7133
@@ -239,6 +239,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 - Fix - Fix analytics overview re-arrangement on initial load. #7475
 - Fix - Fixes action button mis-alignment within card footer. #7412
 - Fix - Fix up onboarding profiler not working when opted out of tracking
+- Fix - Fix blank screen by setting a default value #7506
 - Tweak - Remove performance indicators when Analytics Flag disabled #7234
 - Tweak - Change event name when installing Google Listings and Ads. #7276
 - Tweak - Removed unused feature flags #7233 and #7273
