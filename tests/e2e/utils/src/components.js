@@ -419,7 +419,7 @@ const createCoupon = async ( couponAmount = '5', discountType = 'Fixed cart disc
  * @param zipCode Shipping zone zip code. Defaults to empty one space.
  * @param zoneMethod Shipping method type. Defaults to flat_rate (use also: free_shipping or local_pickup)
  */
- const addShippingZoneAndMethod = async ( zoneName, zoneLocation = 'country:US', zipCode = ' ', zoneMethod = 'flat_rate' ) => {
+const addShippingZoneAndMethod = async ( zoneName, zoneLocation = 'country:US', zipCode = ' ', zoneMethod = 'flat_rate' ) => {
 	await merchant.openNewShipping();
 
 	// Fill shipping zone name
