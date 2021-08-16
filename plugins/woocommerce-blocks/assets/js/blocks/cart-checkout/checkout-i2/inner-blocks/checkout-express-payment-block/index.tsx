@@ -27,13 +27,17 @@ registerFeaturePluginBlockType( 'woocommerce/checkout-express-payment-block', {
 		multiple: false,
 		reusable: false,
 		inserter: false,
-		lock: {
-			remove: true,
-			move: true,
-		},
 	},
 	parent: [ 'woocommerce/checkout-fields-block' ],
-	attributes: {},
+	attributes: {
+		lock: {
+			type: 'object',
+			default: {
+				remove: true,
+				move: true,
+			},
+		},
+	},
 	apiVersion: 2,
 	edit: Edit,
 	save: Save,

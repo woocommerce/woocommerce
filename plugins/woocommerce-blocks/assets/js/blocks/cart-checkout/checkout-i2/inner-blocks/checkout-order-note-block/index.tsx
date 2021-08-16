@@ -28,7 +28,15 @@ registerFeaturePluginBlockType( 'woocommerce/checkout-order-note-block', {
 		reusable: false,
 	},
 	parent: [ 'woocommerce/checkout-fields-block' ],
-	attributes: {},
+	attributes: {
+		lock: {
+			type: 'object',
+			default: {
+				move: true,
+				remove: true,
+			},
+		},
+	},
 	apiVersion: 2,
 	edit: Edit,
 	save: Save,
