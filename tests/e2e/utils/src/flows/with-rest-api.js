@@ -118,8 +118,7 @@ export const withRestApi = {
 	   let zoneId = response.data.id;
 
 	   // Select shipping zone location
-	   let zoneType = zoneLocation.split(/:(.)/)[0];
-	   let zoneCode = zoneLocation.split(/:(.+)/)[1];
+	   let [ zoneType, zoneCode ] = zoneLocation.split(/:(.+)/);
 	   let zoneLocationPayload = [
 		   {
 			   code: zoneCode,
@@ -131,7 +130,7 @@ export const withRestApi = {
 	   if ( zipCode ) {
 		   zoneLocationPayload.push( {
 			   code: zipCode,
-			   type: "postcode",
+			   type: "postcode"
 		   } );
 	   };
 
