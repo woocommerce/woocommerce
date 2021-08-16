@@ -39,6 +39,8 @@ const runCartCalculateShippingTest = () => {
 			await createSimpleProduct(firstProductName);
 			await createSimpleProduct(secondProductName, secondProductPrice);
 
+			await withRestApi.resetSettingsGroupToDefault( 'general' );
+
 			// Add a new shipping zone Germany with Free shipping
 			await withRestApi.addShippingZoneAndMethod(shippingZoneNameDE, shippingCountryDE, ' ', 'free_shipping');
 
@@ -71,7 +73,7 @@ const runCartCalculateShippingTest = () => {
 		});
 
 		it('allows customer to calculate Flat rate and Local pickup if in France', async () => {
-			await page.reload( { waitUntil: ['networkidle0', 'domcontentloaded'] });
+			await page.reload( { waitUntil: ['networkidle0', 'domcontentloaded'] } );
 
 			// Set shipping country to France
 			await expect(page).toClick('a.shipping-calculator-button');
