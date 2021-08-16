@@ -76,16 +76,7 @@ class BusinessDetails extends Component {
 			createNotice,
 			goToNextStep,
 			installAndActivatePlugins,
-			updateProfileItems,
 		} = this.props;
-
-		const {
-			other_platform: otherPlatform,
-			other_platform_name: otherPlatformName,
-			product_count: productCount,
-			revenue,
-			selling_venues: sellingVenues,
-		} = this.state.savedValues;
 
 		const businessExtensions = filterBusinessExtensions(
 			extensionInstallationOptions
@@ -104,24 +95,9 @@ class BusinessDetails extends Component {
 				extensionInstallationOptions[ 'woocommerce-payments' ],
 		} );
 
-		const updates = {
-			other_platform: otherPlatform,
-			other_platform_name:
-				otherPlatform === 'other' ? otherPlatformName : '',
-			product_count: productCount,
-			revenue,
-			selling_venues: sellingVenues,
-			business_extensions: businessExtensions,
-		};
-
-		// Remove possible empty values like `revenue` and `other_platform`.
-		Object.keys( updates ).forEach(
-			( key ) => updates[ key ] === '' && delete updates[ key ]
-		);
-
 		const promises = [
-			updateProfileItems( updates ).catch( () => {
-				throw new Error();
+			this.persistProfileItems( {
+				business_extensions: businessExtensions,
 			} ),
 		];
 
@@ -151,6 +127,53 @@ class BusinessDetails extends Component {
 					)
 				);
 			} );
+	}
+
+	async persistProfileItems( additions = {} ) {
+		const { updateProfileItems, createNotice } = this.props;
+
+		const {
+			other_platform: otherPlatform,
+			other_platform_name: otherPlatformName,
+			product_count: productCount,
+			revenue,
+			selling_venues: sellingVenues,
+		} = this.state.savedValues;
+
+		const updates = {
+			other_platform: otherPlatform,
+			other_platform_name:
+				otherPlatform === 'other' ? otherPlatformName : '',
+			product_count: productCount,
+			revenue,
+			selling_venues: sellingVenues,
+			...additions,
+		};
+
+		// Remove possible empty values like `revenue` and `other_platform`.
+		const finalUpdates = Object.entries( updates ).reduce(
+			( acc, [ key, val ] ) => {
+				if ( val !== '' ) {
+					return {
+						...acc,
+						[ key ]: val,
+					};
+				}
+
+				return acc;
+			},
+			{}
+		);
+
+		return updateProfileItems( finalUpdates ).catch( () => {
+			createNotice(
+				'error',
+				__(
+					'There was a problem updating your business details',
+					'woocommerce-admin'
+				)
+			);
+		} );
 	}
 
 	validate( values ) {
@@ -372,7 +395,10 @@ class BusinessDetails extends Component {
 								<CardFooter isBorderless justify="center">
 									<Button
 										isPrimary
-										onClick={ handleSubmit }
+										onClick={ async () => {
+											await handleSubmit();
+											this.persistProfileItems();
+										} }
 										disabled={ ! isValidForm }
 										isBusy={ isInstallingActivating }
 									>
@@ -388,7 +414,10 @@ class BusinessDetails extends Component {
 									</Button>
 									{ hasInstallActivateError && (
 										<Button
-											onClick={ () => goToNextStep() }
+											onClick={ () => {
+												this.persistProfileItems();
+												goToNextStep();
+											} }
 										>
 											{ __(
 												'Continue without installing',
