@@ -65,8 +65,8 @@ const updateCustomerBilling = async () => {
 /**
  * Use API to setup the order to search on
  *
- * @param {number} customerId
- * @param {string} productName
+ * @param {number} customerId ID of the customer to add to the order.
+ * @param {number} productId ID of the product to add to the order.
  *
  * @returns {Promise<number>}
  */
