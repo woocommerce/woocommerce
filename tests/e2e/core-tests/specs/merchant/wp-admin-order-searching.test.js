@@ -7,8 +7,6 @@ const {
 	merchant,
 	searchForOrder,
 	createSimpleProduct,
-	addProductToOrder,
-	clickUpdateOrder,
 	factories,
 } = require( '@woocommerce/e2e-utils' );
 
@@ -45,7 +43,7 @@ const customerShipping = {
 /**
  * Set the billing fields for the customer account for this test suite.
  *
- * @returns {Promise<void>}
+ * @returns {Promise<number>}
  */
 const updateCustomerBilling = async () => {
 	const client = factories.api.withDefaultPermalinks;
@@ -65,6 +63,7 @@ const updateCustomerBilling = async () => {
 		shipping: customerShipping,
 	};
 	await client.put( customerEndpoint + customerId, customerData );
+	return customerId;
 };
 
 /**
@@ -92,12 +91,23 @@ const queries = [
 
 const runOrderSearchingTest = () => {
 	describe('WooCommerce Orders > Search orders', () => {
+		let productId;
 		let orderId;
 		beforeAll( async () => {
 			await createSimpleProduct(itemName);
 			await updateCustomerBilling();
 
-			// Create new order for testing
+		beforeAll( async () => {
+			productId = await createSimpleProduct('Wanted Product');
+			customerId = await updateCustomerBilling();
+			orderId = await createOrder({
+				customerId: customerId,
+				productId: productId,
+				customerBilling: customerBilling,
+				customerShipping: customerShipping,
+			});
+
+			// Login and open All Orders view
 			await merchant.login();
 			await merchant.openNewOrder();
 			await page.waitForSelector('#order_status');
@@ -120,7 +130,8 @@ const runOrderSearchingTest = () => {
 		});
 
 		it('can search for order by order id', async () => {
-			await searchForOrder(orderId, orderId, searchString);
+			// Convert the order ID to string so we can search on it
+			await searchForOrder(orderId.toString(), orderId, searchString);
 		});
 
 		it.each(queries)(
