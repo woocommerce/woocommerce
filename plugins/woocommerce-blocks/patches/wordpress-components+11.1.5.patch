@@ -1,5 +1,5 @@
 diff --git a/node_modules/wordpress-components/build-module/combobox-control/index.js b/node_modules/wordpress-components/build-module/combobox-control/index.js
-index 51c59c1..61bda14 100644
+index 51c59c1..a4b58ab 100644
 --- a/node_modules/wordpress-components/build-module/combobox-control/index.js
 +++ b/node_modules/wordpress-components/build-module/combobox-control/index.js
 @@ -1,19 +1,10 @@
@@ -23,7 +23,7 @@ index 51c59c1..61bda14 100644
  /**
   * WordPress dependencies
   */
-@@ -34,77 +25,46 @@ import BaseControl from '../base-control';
+@@ -34,77 +25,47 @@ import BaseControl from '../base-control';
  import Button from '../button';
  import { Flex, FlexBlock, FlexItem } from '../flex';
  import withFocusOutside from '../higher-order/with-focus-outside';
@@ -125,6 +125,7 @@ index 51c59c1..61bda14 100644
 +  const instanceId = useInstanceId(ComboboxControl);
 +  const [selectedSuggestion, setSelectedSuggestion] = useState(currentOption || null);
 +  const [isExpanded, setIsExpanded] = useState(false);
++  const [inputHasFocus, setInputHasFocus] = useState(false);
 +  const [inputValue, setInputValue] = useState('');
 +  const inputContainer = useRef();
 +  const matchingSuggestions = useMemo(() => {
@@ -136,7 +137,7 @@ index 51c59c1..61bda14 100644
  
        if (index === 0) {
          startsWithMatch.push(option);
-@@ -115,7 +75,7 @@ function ComboboxControl(_ref) {
+@@ -115,7 +76,7 @@ function ComboboxControl(_ref) {
      return startsWithMatch.concat(containsMatch);
    }, [inputValue, options, value]);
  
@@ -145,7 +146,7 @@ index 51c59c1..61bda14 100644
      onChange(newSelectedSuggestion.value);
      speak(messages.selected, 'assertive');
      setSelectedSuggestion(newSelectedSuggestion);
-@@ -123,10 +83,9 @@ function ComboboxControl(_ref) {
+@@ -123,10 +84,9 @@ function ComboboxControl(_ref) {
      setIsExpanded(false);
    };
  
@@ -159,7 +160,7 @@ index 51c59c1..61bda14 100644
  
      if (nextIndex < 0) {
        nextIndex = matchingSuggestions.length - 1;
-@@ -138,8 +97,12 @@ function ComboboxControl(_ref) {
+@@ -138,8 +98,12 @@ function ComboboxControl(_ref) {
      setIsExpanded(true);
    };
  
@@ -174,7 +175,7 @@ index 51c59c1..61bda14 100644
  
      switch (event.keyCode) {
        case ENTER:
-@@ -164,7 +127,6 @@ function ComboboxControl(_ref) {
+@@ -164,7 +128,6 @@ function ComboboxControl(_ref) {
          setIsExpanded(false);
          setSelectedSuggestion(null);
          preventDefault = true;
@@ -182,12 +183,17 @@ index 51c59c1..61bda14 100644
          break;
  
        default:
-@@ -176,34 +138,44 @@ function ComboboxControl(_ref) {
+@@ -176,34 +139,52 @@ function ComboboxControl(_ref) {
      }
    };
  
 -  var onFocus = function onFocus() {
++  const onBlur = () => {
++    setInputHasFocus(false);
++  };
++
 +  const onFocus = () => {
++    setInputHasFocus(true);
      setIsExpanded(true);
      onFilterValueChange('');
      setInputValue('');
@@ -204,7 +210,11 @@ index 51c59c1..61bda14 100644
 +    const text = event.value;
      setInputValue(text);
      onFilterValueChange(text);
-     setIsExpanded(true);
+-    setIsExpanded(true);
++
++    if (inputHasFocus) {
++      setIsExpanded(true);
++    }
    };
  
 -  var handleOnReset = function handleOnReset() {
@@ -213,14 +223,14 @@ index 51c59c1..61bda14 100644
      inputContainer.current.input.focus();
 -  }; // Announcements
 +  }; // Update current selections when the filter input changes.
++
  
- 
--  useEffect(function () {
--    var hasMatchingSuggestions = matchingSuggestions.length > 0;
 +  useEffect(() => {
 +    const hasMatchingSuggestions = matchingSuggestions.length > 0;
 +    const hasSelectedMatchingSuggestions = matchingSuggestions.indexOf(selectedSuggestion) > 0;
-+
+ 
+-  useEffect(function () {
+-    var hasMatchingSuggestions = matchingSuggestions.length > 0;
 +    if (hasMatchingSuggestions && !hasSelectedMatchingSuggestions) {
 +      // If the current selection isn't present in the list of suggestions, then automatically select the first item from the list of suggestions.
 +      setSelectedSuggestion(matchingSuggestions[0]);
@@ -236,7 +246,7 @@ index 51c59c1..61bda14 100644
        /* translators: %d: number of results. */
        _n('%d result found, use up and down arrow keys to navigate.', '%d results found, use up and down arrow keys to navigate.', matchingSuggestions.length), matchingSuggestions.length) : __('No results.');
        speak(message, 'polite');
-@@ -220,7 +192,7 @@ function ComboboxControl(_ref) {
+@@ -220,7 +201,7 @@ function ComboboxControl(_ref) {
      className: classnames(className, 'components-combobox-control'),
      tabIndex: "-1",
      label: label,
@@ -245,16 +255,18 @@ index 51c59c1..61bda14 100644
      hideLabelFromVision: hideLabelFromVision,
      help: help
    }, createElement("div", {
-@@ -232,7 +204,7 @@ function ComboboxControl(_ref) {
+@@ -232,8 +213,9 @@ function ComboboxControl(_ref) {
      instanceId: instanceId,
      ref: inputContainer,
      value: isExpanded ? inputValue : currentLabel,
 -    "aria-label": currentLabel ? "".concat(currentLabel, ", ").concat(label) : null,
 +    "aria-label": currentLabel ? `${currentLabel}, ${label}` : null,
      onFocus: onFocus,
++    onBlur: onBlur,
      isExpanded: isExpanded,
      selectedSuggestionIndex: matchingSuggestions.indexOf(selectedSuggestion),
-@@ -248,9 +220,7 @@ function ComboboxControl(_ref) {
+     onChange: onInputChange
+@@ -248,9 +230,7 @@ function ComboboxControl(_ref) {
      match: {
        label: inputValue
      },
