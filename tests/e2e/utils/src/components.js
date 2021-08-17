@@ -323,6 +323,49 @@ const createGroupedProduct = async (groupedProduct = defaultGroupedProduct) => {
 };
 
 /**
+ * Use the API to create an order with the provided details.
+ *
+ * @param {object} orderOptions
+ * @returns {Promise<number>} ID of the created order.
+ */
+const createOrder = async ( orderOptions = {} ) => {
+	const client = factories.api.withDefaultPermalinks;
+	const ordersEndpoint = 'wc/v3/orders';
+	const newOrder = {};
+
+	if ( orderOptions.status ) {
+		newOrder.status = orderOptions.status;
+	}
+
+	if ( orderOptions.customerId ) {
+		newOrder.customer_id = orderOptions.customerId;
+	}
+
+	if ( orderOptions.customerBilling ) {
+		newOrder.billing = orderOptions.customerBilling;
+	}
+
+	if ( orderOptions.customerShipping ) {
+		newOrder.shipping = orderOptions.customerShipping;
+	}
+
+	if ( orderOptions.productId ) {
+		newOrder.line_items = [
+			{
+				product_id: orderOptions.productId
+			}
+		]
+	}
+
+	const order = await client.post( ordersEndpoint, newOrder );
+	if ( !order.data ) {
+		return;
+	}
+
+	return order.data.id;
+}
+
+/**
  * Create a basic order with the provided order status.
  *
  * @param orderStatus Status of the new order. Defaults to `Pending payment`.
@@ -522,4 +565,5 @@ export {
 	clickUpdateOrder,
 	deleteAllEmailLogs,
 	deleteAllShippingZones,
+	createOrder
 };
