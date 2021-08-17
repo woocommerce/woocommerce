@@ -1,138 +1,135 @@
 name: Unit tests
 
 on:
-  push:
-    branches: [trunk]
-  pull_request:
+    push:
+        branches: [trunk]
+    pull_request:
 
 jobs:
+    Setup:
+        runs-on: ubuntu-latest
+        name: Setup
+        steps:
+            - uses: actions/checkout@v2
 
-  Setup:
-    runs-on: ubuntu-latest
-    name: Setup
-    steps:
-      - uses: actions/checkout@v2
+            - name: Cache node modules
+              uses: actions/cache@v2
+              env:
+                  cache-name: cache-node-modules
+              with:
+                  # npm cache files are stored in `~/.npm` on Linux/macOS
+                  path: ~/.npm
+                  key: ${{ runner.OS }}-build-${{ secrets.CACHE_VERSION }}-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+                  restore-keys: |
+                      ${{ runner.OS }}-build-${{ secrets.CACHE_VERSION }}-${{ env.cache-name }}-
+                      ${{ runner.OS }}-build-${{ secrets.CACHE_VERSION }}-
 
-      - name: Cache node modules
-        uses: actions/cache@v2
-        env:
-          cache-name: cache-node-modules
-        with:
-          # npm cache files are stored in `~/.npm` on Linux/macOS
-          path: ~/.npm
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
+            - name: Use Node.js 14.x
+              uses: actions/setup-node@v1
+              with:
+                  node-version: 14.x
 
-      - name: Use Node.js 14.x
-        uses: actions/setup-node@v1
-        with:
-          node-version: 14.x
+            - name: Npm install and build
+              run: |
+                  npm ci
+                  FORCE_REDUCED_MOTION=true npm run build:e2e-test
 
-      - name: Npm install and build
-        run: |
-          npm ci
-          FORCE_REDUCED_MOTION=true npm run build:e2e-test
+            - name: Get Composer Cache Directory
+              id: composer-cache
+              run: |
+                  echo "::set-output name=dir::$(composer config cache-files-dir)"
+            - uses: actions/cache@v2
+              with:
+                  path: ${{ steps.composer-cache.outputs.dir }}
+                  key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+                  restore-keys: |
+                      ${{ runner.os }}-composer-
 
-      - name: Get Composer Cache Directory
-        id: composer-cache
-        run: |
-          echo "::set-output name=dir::$(composer config cache-files-dir)"
-      - uses: actions/cache@v2
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-
+            - name: Set up PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: 7.4
+                  coverage: none
+                  tools: composer
 
-      - name: Set up PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: 7.4
-          coverage: none
-          tools: composer
+            - name: Composer install
+              run: |
+                  composer install
 
-      - name: Composer install
-        run: |
-          composer install
+    PHPUnitTests:
+        name: PHP Unit Tests
+        needs: Setup
 
-  PHPUnitTests:
-    name: PHP Unit Tests
-    needs: Setup
+        runs-on: ubuntu-latest
 
-    runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
 
-    steps:
-      - uses: actions/checkout@v2
+            - name: Get Composer Cache Directory
+              id: composer-cache
+              run: |
+                  echo "::set-output name=dir::$(composer config cache-files-dir)"
+            - uses: actions/cache@v2
+              with:
+                  path: ${{ steps.composer-cache.outputs.dir }}
+                  key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+                  restore-keys: |
+                      ${{ runner.os }}-composer-
 
-      - name: Get Composer Cache Directory
-        id: composer-cache
-        run: |
-          echo "::set-output name=dir::$(composer config cache-files-dir)"
-      - uses: actions/cache@v2
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-
+            - name: Set up PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: 7.4
+                  coverage: none
+                  tools: composer
 
-      - name: Set up PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: 7.4
-          coverage: none
-          tools: composer
+            - name: Composer install
+              run: |
+                  composer install
 
-      - name: Composer install
-        run: |
-          composer install
+            - name: blocks.ini setup
+              run: |
+                  echo -e 'woocommerce_blocks_phase = 3\nwoocommerce_blocks_env = tests' > blocks.ini
 
-      - name: blocks.ini setup
-        run: |
-          echo -e 'woocommerce_blocks_phase = 3\nwoocommerce_blocks_env = tests' > blocks.ini
+            - name: Run PHP Unit tests
+              run: |
+                  npm run phpunit
 
-      - name: Run PHP Unit tests
-        run: |
-          npm run phpunit
+    JSUnitTests:
+        name: JS Unit Tests
+        needs: Setup
 
-  JSUnitTests:
-    name: JS Unit Tests
-    needs: Setup
+        runs-on: ubuntu-latest
 
-    runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
 
-    steps:
-      - uses: actions/checkout@v2
+            - name: Cache node modules
+              uses: actions/cache@v2
+              env:
+                  cache-name: cache-node-modules
+              with:
+                  # npm cache files are stored in `~/.npm` on Linux/macOS
+                  path: ~/.npm
+                  key: ${{ runner.OS }}-build-${{ secrets.CACHE_VERSION }}-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+                  restore-keys: |
+                      ${{ runner.OS }}-build-${{ secrets.CACHE_VERSION }}-${{ env.cache-name }}-
+                      ${{ runner.OS }}-build-${{ secrets.CACHE_VERSION }}-
 
-      - name: Cache node modules
-        uses: actions/cache@v2
-        env:
-          cache-name: cache-node-modules
-        with:
-          # npm cache files are stored in `~/.npm` on Linux/macOS
-          path: ~/.npm
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
+            - name: Use Node.js 14.x
+              uses: actions/setup-node@v1
+              with:
+                  node-version: 14.x
 
-      - name: Use Node.js 14.x
-        uses: actions/setup-node@v1
-        with:
-          node-version: 14.x
+            - name: Npm install and build
+              run: |
+                  npm ci
+                  FORCE_REDUCED_MOTION=true npm run build:e2e-test
 
-      - name: Npm install and build
-        run: |
-          npm ci
-          FORCE_REDUCED_MOTION=true npm run build:e2e-test
+            - name: blocks.ini setup
+              run: |
+                  echo -e 'woocommerce_blocks_phase = 3\nwoocommerce_blocks_env = tests' > blocks.ini
 
-      - name: blocks.ini setup
-        run: |
-          echo -e 'woocommerce_blocks_phase = 3\nwoocommerce_blocks_env = tests' > blocks.ini
-
-      - name: Run JavaScript Unit tests
-        run: |
-          npm run test
+            - name: Run JavaScript Unit tests
+              run: |
+                  npm run test

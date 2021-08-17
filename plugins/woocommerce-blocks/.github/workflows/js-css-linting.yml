@@ -1,79 +1,76 @@
 name: JavaScript and CSS Linting
 
 on:
-  pull_request:
-  push:
-    branches: [trunk]
+    pull_request:
+    push:
+        branches: [trunk]
 
 jobs:
-  Setup:
-    name: Setup for Jobs
-    runs-on: ubuntu-latest
+    Setup:
+        name: Setup for Jobs
+        runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v2
-      - name: Cache node modules
-        uses: actions/cache@v2
-        with:
-          path: node_modules
-          key: ${{ runner.OS }}-build-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.OS }}-build-${{ env.cache-name }}-
-            ${{ runner.OS }}-build-
-            ${{ runner.OS }}-
-      - name: Install Node Dependencies
-        run: npm install
+        steps:
+            - uses: actions/checkout@v2
+            - name: Cache node modules
+              uses: actions/cache@v2
+              with:
+                  path: node_modules
+                  key: ${{ runner.OS }}-build-${{ secrets.CACHE_VERSION }}-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+                  restore-keys: |
+                      ${{ runner.OS }}-build-${{ secrets.CACHE_VERSION }}-${{ env.cache-name }}-
+                      ${{ runner.OS }}-build-${{ secrets.CACHE_VERSION }}-
+            - name: Install Node Dependencies
+              run: npm install
 
-  JSLintingCheck:
-    name: Lint JavaScript
-    needs: Setup
-    runs-on: ubuntu-latest
+    JSLintingCheck:
+        name: Lint JavaScript
+        needs: Setup
+        runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v2
-      - name: Cache node modules
-        uses: actions/cache@v2
-        with:
-          path: node_modules
-          key: ${{ runner.OS }}-build-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.OS }}-build-${{ env.cache-name }}-
-            ${{ runner.OS }}-build-
-            ${{ runner.OS }}-
-      - name: Install Node Dependencies
-        run: npm install
-      - name: Save Code Linting Report JSON
-        run: npm run lint:js:report
-        # Continue to the next step even if this fails
-        continue-on-error: true
-      - name: Upload ESLint report
-        uses: actions/upload-artifact@v2
-        with:
-          name: eslint_report.json
-          path: eslint_report.json
-      - name: Annotate Code Linting Results
-        uses: ataylorme/eslint-annotate-action@1.2.0
-        with:
-          repo-token: "${{ secrets.GITHUB_TOKEN }}"
-          report-json: "eslint_report.json"
+        steps:
+            - uses: actions/checkout@v2
+            - name: Cache node modules
+              uses: actions/cache@v2
+              with:
+                  path: node_modules
+                  key: ${{ runner.OS }}-build-${{ secrets.CACHE_VERSION }}-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+                  restore-keys: |
+                      ${{ runner.OS }}-build-${{ secrets.CACHE_VERSION }}-${{ env.cache-name }}-
+                      ${{ runner.OS }}-build-${{ secrets.CACHE_VERSION }}-
+            - name: Install Node Dependencies
+              run: npm install
+            - name: Save Code Linting Report JSON
+              run: npm run lint:js:report
+              # Continue to the next step even if this fails
+              continue-on-error: true
+            - name: Upload ESLint report
+              uses: actions/upload-artifact@v2
+              with:
+                  name: eslint_report.json
+                  path: eslint_report.json
+            - name: Annotate Code Linting Results
+              uses: ataylorme/eslint-annotate-action@1.2.0
+              with:
+                  repo-token: '${{ secrets.GITHUB_TOKEN }}'
+                  report-json: 'eslint_report.json'
 
-  CSSLintingCheck:
-    name: Lint CSS
-    needs: Setup
-    runs-on: ubuntu-latest
+    CSSLintingCheck:
+        name: Lint CSS
+        needs: Setup
+        runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v2
-      - name: Cache node modules
-        uses: actions/cache@v2
-        with:
-          path: node_modules
-          key: ${{ runner.OS }}-build-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.OS }}-build-${{ env.cache-name }}-
-            ${{ runner.OS }}-build-
-            ${{ runner.OS }}-
-      - name: Install Node Dependencies
-        run: npm install
-      - name: Lint CSS
-        run: npm run lint:css
+        steps:
+            - uses: actions/checkout@v2
+            - name: Cache node modules
+              uses: actions/cache@v2
+              with:
+                  path: node_modules
+                  key: ${{ runner.OS }}-build-${{ secrets.CACHE_VERSION }}-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+                  restore-keys: |
+                      ${{ runner.OS }}-build-${{ secrets.CACHE_VERSION }}-${{ env.cache-name }}-
+                      ${{ runner.OS }}-build-${{ secrets.CACHE_VERSION }}-
+            - name: Install Node Dependencies
+              run: npm install
+            - name: Lint CSS
+              run: npm run lint:css
