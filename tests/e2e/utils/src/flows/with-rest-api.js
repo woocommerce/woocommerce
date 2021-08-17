@@ -122,7 +122,7 @@ export const withRestApi = {
 	   let zoneLocationPayload = [
 		   {
 			   code: zoneCode,
-			   type: zoneType
+			   type: zoneType,
 		   }
 	   ];
 
@@ -130,9 +130,9 @@ export const withRestApi = {
 	   if ( zipCode ) {
 		   zoneLocationPayload.push( {
 			   code: zipCode,
-			   type: "postcode"
+			   type: "postcode",
 		   } );
-	   };
+	   }
 
 	   const locationResponse = await client.put( path + `/${zoneId}/locations`, zoneLocationPayload );
 	   expect(locationResponse.statusCode).toEqual(200);
