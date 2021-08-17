@@ -22,3 +22,11 @@
 		margin-top: 1em;
 	}
 }
+
+// @todo Either move notice style fixes to Woo core, or take full control over notice component styling in blocks.
+.theme-twentytwentyone,
+.theme-twentytwenty {
+	.wc-block-components-notices__notice {
+		padding: 1.5rem 3rem;
+	}
+}
