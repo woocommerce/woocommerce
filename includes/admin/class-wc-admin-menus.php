@@ -394,7 +394,9 @@ class WC_Admin_Menus {
 	/**
 	 * Highlight the My Subscriptions menu item when on that page
 	 *
-	 * @param  string $parent_file currently opened page.
+	 * @param string $submenu_file The submenu file.
+	 * @param string $parent_file  currently opened page.
+	 *
 	 * @return string
 	 */
 	public function update_menu_highlight( $submenu_file, $parent_file ) {
