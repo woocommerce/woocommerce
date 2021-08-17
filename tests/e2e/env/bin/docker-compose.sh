@@ -14,12 +14,12 @@ if [[ $1 ]]; then
 	fi
 
 	if ! [[ $TRAVIS_PHP_VERSION =~ ^[0-9]+\.[0-9]+ ]]; then
-		TRAVIS_PHP_VERSION=$(./bin/get-latest-docker-tag.js php 7 2> /dev/null)
+		TRAVIS_PHP_VERSION=$(./bin/get-latest-docker-tag.js php 8 2> /dev/null)
 	fi
 	if [[ $TRAVIS_PHP_VERSION =~ ^[0-9]+\.[0-9]+ ]]; then
 		export DC_PHP_VERSION=$TRAVIS_PHP_VERSION
 	else
-		export DC_PHP_VERSION="7.4.9"
+		export DC_PHP_VERSION="8.0.9"
 	fi
 
 	if ! [[ $TRAVIS_MARIADB_VERSION =~ ^[0-9]+\.[0-9]+ ]]; then
