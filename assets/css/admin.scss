@@ -134,6 +134,7 @@
 			position: absolute;
 			top: 50px;
 			width: 100%;
+			z-index: 10;
 
 			@media only screen and ( min-width: 600px ) {
 				border: 1px solid #1e1e1e;
