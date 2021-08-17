@@ -4,7 +4,7 @@ Tags: gutenberg, woocommerce, woo commerce, products, blocks, woocommerce blocks
 Requires at least: 5.8
 Tested up to: 5.8
 Requires PHP: 7.0
-Stable tag: 5.7.0-dev
+Stable tag: 5.7.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -83,6 +83,28 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 5. WooCommerce Product Blocks in the block inserter menu
 
 == Changelog ==
+
+= 5.7.0 - 2021-08-16 =
+
+#### Enhancements
+
+- Featured Category Block:  Allow user to re-select categories using the edit icon. ([4559](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4559))
+- Checkout: Switch from select element to combobox for country and state inputs so contents are searchable. ([4369](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4369))
+
+#### Bug Fixes
+
+- Adjusted store notice class names so that error notices show the correct icons. ([4568](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4568))
+- Fix autofill triggering validation errors for valid values in Checkout block. ([4561](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4561))
+- Reviews by Category: Show review count instead of product count. ([4552](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4552))
+- Add server side rendering to search block so the block can be used by non-admins. ([4551](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4551))
+- Twenty Twenty: Fix broken sale badge left alignment. ([4549](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4549))
+- Twenty Twenty-One: Adjust removable chip background color. ([4547](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4547))
+- Fix handpicked product selections when a store has over 100 products. ([4534](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4534))
+- Replace .screen-reader-text with .hidden for elements that are not relevant to screen readers. ([4530](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4530))
+
+#### Various
+
+- Performance improvements in the Cart and Checkout block extensibility points. ([4570](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4570))
 
 = 5.6.0 - 2021-08-01 =
 
