@@ -36,7 +36,7 @@ class WC_Admin_Menus {
 		add_filter( 'menu_order', array( $this, 'menu_order' ) );
 		add_filter( 'custom_menu_order', array( $this, 'custom_menu_order' ) );
 		add_filter( 'set-screen-option', array( $this, 'set_screen_option' ), 10, 3 );
-		add_filter( 'parent_file', array( $this, 'update_menu_highlight' ) );
+		add_filter( 'submenu_file', array( $this, 'update_menu_highlight' ), 10, 2 );
 		add_filter( 'admin_title', array( $this, 'update_my_subscriptions_title' ) );
 
 		// Add endpoints custom URLs in Appearance > Menus > Pages.
@@ -397,12 +397,11 @@ class WC_Admin_Menus {
 	 * @param  string $parent_file currently opened page.
 	 * @return string
 	 */
-	public function update_menu_highlight( $parent_file ) {
-		global $submenu_file;
+	public function update_menu_highlight( $submenu_file, $parent_file ) {
 		if ( 'woocommerce' === $parent_file && isset( $_GET['section'] ) && 'helper' === $_GET['section'] ) {
-			$submenu_file = 'wc-addons&section=helper'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			$submenu_file = 'wc-addons&section=helper';
 		}
-		return $parent_file;
+		return $submenu_file;
 	}
 
 	/**

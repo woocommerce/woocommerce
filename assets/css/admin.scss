@@ -671,7 +671,6 @@
 		max-width: 1032px;
 		overflow: hidden;
 
-		/* stylelint-disable no-descending-specificity */
 		li {
 			background: #fff;
 			border: 1px solid #dcdcde;
@@ -752,7 +751,6 @@
 				}
 			}
 		}
-		/* stylelint-enable no-descending-specificity */
 	}
 
 	.storefront {
@@ -763,7 +761,6 @@
 		overflow: hidden;
 		zoom: 1;
 
-		/* stylelint-disable no-descending-specificity */
 		img {
 			width: 278px;
 			height: auto;
@@ -775,7 +772,6 @@
 		p {
 			max-width: 750px;
 		}
-		/* stylelint-enable no-descending-specificity */
 	}
 }
 
