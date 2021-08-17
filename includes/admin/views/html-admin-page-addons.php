@@ -25,7 +25,7 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 			<input
 				type="text"
 				name="search"
-				value="<?php echo esc_attr( isset( $_GET['search'] ) ? sanitize_text_field( wp_unslash( $_GET['search'] ) ) : '' ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>"
+				value="<?php echo esc_attr( ! empty ( $search ) ? sanitize_text_field( wp_unslash( $search ) ) : '' ); ?>"
 				placeholder="<?php esc_attr_e( 'Search for extensions', 'woocommerce' ); ?>"
 			/>
 			<button type="submit">
@@ -62,10 +62,10 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 
 	<div class="wrap">
 		<div class="marketplace-content-wrapper">
-			<?php if ( isset( $_GET['search'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>
+			<?php if ( ! empty ( $search ) ) : ?>
 				<h1 class="search-form-title">
 					<?php // translators: search keyword. ?>
-					<?php printf( esc_html__( 'Search results for "%s"', 'woocommerce' ), esc_html( sanitize_text_field( wp_unslash( $_GET['search'] ) ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>
+					<?php printf( esc_html__( 'Search results for "%s"', 'woocommerce' ), esc_html( sanitize_text_field( wp_unslash( $search ) ) ) ); ?>
 				</h1>
 			<?php endif; ?>
 
@@ -116,7 +116,7 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 								<?php if ( ! empty( $addon->image ) ) : ?>
 									<span class="product-img-wrap"><img src="<?php echo esc_url( $addon->image ); ?>" /></span>
 								<?php endif; ?>
-								<a href="<?php echo esc_attr( WC_Admin_Addons::add_in_app_purchase_url_params( $addon->link ) ); ?>">
+								<a href="<?php echo esc_url( WC_Admin_Addons::add_in_app_purchase_url_params( $addon->link ) ); ?>">
 									<h2><?php echo esc_html( $addon->title ); ?></h2>
 								</a>
 								<p><?php echo wp_kses_post( $addon->excerpt ); ?></p>
@@ -128,7 +128,7 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 									<span class="price"><?php echo wp_kses_post( $addon->price ); ?></span>
 									<span class="price_suffix"><?php esc_html_e( 'per year', 'woocommerce' ); ?></span>
 								<?php endif; ?>
-								<a class="button" href="<?php echo esc_attr( WC_Admin_Addons::add_in_app_purchase_url_params( $addon->link ) ); ?>">
+								<a class="button" href="<?php echo esc_url( WC_Admin_Addons::add_in_app_purchase_url_params( $addon->link ) ); ?>">
 									<?php esc_html_e( 'View details', 'woocommerce' ); ?>
 								</a>
 							</div>
