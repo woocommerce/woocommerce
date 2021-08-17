@@ -87,6 +87,21 @@ await takeScreenshotFor( 'name of current step' );
 
 Screenshots will be saved to `tests/e2e/screenshots`. This folder is cleared at the beginning of each test run.
 
+### Override default test timeout
+
+To override the default timeout for the tests, you can use the `DEFAULT_TIMEOUT_OVERRIDE` flag and pass in a maximum timeout in milliseconds. For example, you can pass it in when running the tests from the command line:
+
+```bash
+DEFAULT_TIMEOUT_OVERRIDE=35000 npx wc-e2e test:e2e
+```
+
+This value will override the default Jest timeout as well as pass the timeout to the following Puppeteer methods:
+
+* page.setDefaultTimeout();
+* page.setDefaultNavigationTimeout();
+
+For a list of the methods that the above timeout affects, please see the Puppeteer documentation for [`page.setDefaultTimeout()`](https://pptr.dev/#?product=Puppeteer&version=v10.2.0&show=api-pagesetdefaulttimeouttimeout) and [`page.setDefaultNavigationTimeout`](https://pptr.dev/#?product=Puppeteer&version=v10.2.0&show=api-pagesetdefaultnavigationtimeouttimeout) for more information.
+
 ### Jest Puppeteer Config
 
 The test sequencer uses the following default Puppeteer configuration:
@@ -195,6 +210,14 @@ The above method also makes use of the following utility methods which can also 
 
 - `checkNestedZip( zipFilePath, savePath )` used to check a plugin zip file for any nested zip files. If one is found, it is extracted. Returns the path where the zip file is located.
 - `downloadZip( fileUrl, downloadPath )` can be used to directly download a plugin zip file from a remote location to the provided path.
+
+### Get the latest released zip URL
+
+If you would like to get the latest release zip URL, which can be used in the methods mentioned above, you can use the following helper function to do so:
+
+`getLatestReleaseZipUrl( owner, repository, getPrerelease, perPage )`
+
+This will return a string with the latest release URL. Optionally, you can use the `getPrerelease` boolean flag, which defaults to false, on whether or not to get a prerelease instead. The `perPage` flag can be used to return more results when getting the list of releases. The default value is 3.
 
 ## Additional information
 

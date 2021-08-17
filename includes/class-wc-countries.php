@@ -809,6 +809,7 @@ class WC_Countries {
 					'AF' => array(
 						'state' => array(
 							'required' => false,
+							'hidden'   => true,
 						),
 					),
 					'AO' => array(
@@ -826,6 +827,7 @@ class WC_Countries {
 						),
 						'state'    => array(
 							'required' => false,
+							'hidden'   => true,
 						),
 					),
 					'AU' => array(
@@ -845,6 +847,7 @@ class WC_Countries {
 						),
 						'state'    => array(
 							'required' => false,
+							'hidden'   => true,
 						),
 					),
 					'BA' => array(
@@ -871,7 +874,7 @@ class WC_Countries {
 						),
 						'state'    => array(
 							'required' => false,
-							'label'    => __( 'Province', 'woocommerce' ),
+							'hidden'   => true,
 						),
 					),
 					'BH' => array(
@@ -880,11 +883,13 @@ class WC_Countries {
 						),
 						'state'    => array(
 							'required' => false,
+							'hidden'   => true,
 						),
 					),
 					'BI' => array(
 						'state' => array(
 							'required' => false,
+							'hidden'   => true,
 						),
 					),
 					'BO' => array(
@@ -949,6 +954,7 @@ class WC_Countries {
 					'CZ' => array(
 						'state' => array(
 							'required' => false,
+							'hidden'   => true,
 						),
 					),
 					'DE' => array(
@@ -975,6 +981,7 @@ class WC_Countries {
 						),
 						'state'    => array(
 							'required' => false,
+							'hidden'   => true,
 						),
 					),
 					'FI' => array(
@@ -983,6 +990,7 @@ class WC_Countries {
 						),
 						'state'    => array(
 							'required' => false,
+							'hidden'   => true,
 						),
 					),
 					'FR' => array(
@@ -991,6 +999,7 @@ class WC_Countries {
 						),
 						'state'    => array(
 							'required' => false,
+							'hidden'   => true,
 						),
 					),
 					'GH' => array(
@@ -1004,11 +1013,13 @@ class WC_Countries {
 					'GP' => array(
 						'state' => array(
 							'required' => false,
+							'hidden'   => true,
 						),
 					),
 					'GF' => array(
 						'state' => array(
 							'required' => false,
+							'hidden'   => true,
 						),
 					),
 					'GR' => array(
@@ -1082,6 +1093,7 @@ class WC_Countries {
 						),
 						'state'    => array(
 							'required' => false,
+							'hidden'   => true,
 						),
 					),
 					'IL' => array(
@@ -1090,11 +1102,13 @@ class WC_Countries {
 						),
 						'state'    => array(
 							'required' => false,
+							'hidden'   => true,
 						),
 					),
 					'IM' => array(
 						'state' => array(
 							'required' => false,
+							'hidden'   => true,
 						),
 					),
 					'IN' => array(
@@ -1158,11 +1172,13 @@ class WC_Countries {
 					'KR' => array(
 						'state' => array(
 							'required' => false,
+							'hidden'   => true,
 						),
 					),
 					'KW' => array(
 						'state' => array(
 							'required' => false,
+							'hidden'   => true,
 						),
 					),
 					'LV' => array(
@@ -1174,16 +1190,19 @@ class WC_Countries {
 					'LB' => array(
 						'state' => array(
 							'required' => false,
+							'hidden'   => true,
 						),
 					),
 					'MQ' => array(
 						'state' => array(
 							'required' => false,
+							'hidden'   => true,
 						),
 					),
 					'MT' => array(
 						'state' => array(
 							'required' => false,
+							'hidden'   => true,
 						),
 					),
 					'MZ' => array(
@@ -1201,7 +1220,7 @@ class WC_Countries {
 						),
 						'state'    => array(
 							'required' => false,
-							'label'    => __( 'Province', 'woocommerce' ),
+							'hidden'   => true,
 						),
 					),
 					'NG' => array(
@@ -1229,6 +1248,7 @@ class WC_Countries {
 						),
 						'state'    => array(
 							'required' => false,
+							'hidden'   => true,
 						),
 					),
 					'NP' => array(
@@ -1245,6 +1265,7 @@ class WC_Countries {
 						),
 						'state'    => array(
 							'required' => false,
+							'hidden'   => true,
 						),
 					),
 					'PR' => array(
@@ -1259,11 +1280,13 @@ class WC_Countries {
 					'PT' => array(
 						'state' => array(
 							'required' => false,
+							'hidden'   => true,
 						),
 					),
 					'RE' => array(
 						'state' => array(
 							'required' => false,
+							'hidden'   => true,
 						),
 					),
 					'RO' => array(
@@ -1287,6 +1310,7 @@ class WC_Countries {
 					'SG' => array(
 						'state' => array(
 							'required' => false,
+							'hidden'   => true,
 						),
 						'city'  => array(
 							'required' => false,
@@ -1298,6 +1322,7 @@ class WC_Countries {
 						),
 						'state'    => array(
 							'required' => false,
+							'hidden'   => true,
 						),
 					),
 					'SI' => array(
@@ -1306,6 +1331,7 @@ class WC_Countries {
 						),
 						'state'    => array(
 							'required' => false,
+							'hidden'   => true,
 						),
 					),
 					'SR' => array(
@@ -1334,11 +1360,13 @@ class WC_Countries {
 					'LK' => array(
 						'state' => array(
 							'required' => false,
+							'hidden'   => true,
 						),
 					),
 					'LU' => array(
 						'state' => array(
 							'required' => false,
+							'hidden'   => true,
 						),
 					),
 					'MD' => array(
@@ -1427,6 +1455,7 @@ class WC_Countries {
 					'YT' => array(
 						'state' => array(
 							'required' => false,
+							'hidden'   => true,
 						),
 					),
 					'ZA' => array(
