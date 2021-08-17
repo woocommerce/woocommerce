@@ -22,7 +22,10 @@ const BlockTitle = ( {
 	const TagName = `h${ headingLevel }`;
 	return (
 		<TagName>
-			<label className="screen-reader-text" htmlFor={ `block-title-${ instanceId }` }>
+			<label
+				className="screen-reader-text"
+				htmlFor={ `block-title-${ instanceId }` }
+			>
 				{ __( 'Block title', 'woo-gutenberg-products-block' ) }
 			</label>
 			<PlainText
