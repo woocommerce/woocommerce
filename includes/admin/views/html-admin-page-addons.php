@@ -25,7 +25,7 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 			<input
 				type="text"
 				name="search"
-				value="<?php echo esc_attr( ! empty ( $search ) ? sanitize_text_field( wp_unslash( $search ) ) : '' ); ?>"
+				value="<?php echo esc_attr( ! empty( $search ) ? sanitize_text_field( wp_unslash( $search ) ) : '' ); ?>"
 				placeholder="<?php esc_attr_e( 'Search for extensions', 'woocommerce' ); ?>"
 			/>
 			<button type="submit">
@@ -62,7 +62,7 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 
 	<div class="wrap">
 		<div class="marketplace-content-wrapper">
-			<?php if ( ! empty ( $search ) ) : ?>
+			<?php if ( ! empty( $search ) ) : ?>
 				<h1 class="search-form-title">
 					<?php // translators: search keyword. ?>
 					<?php printf( esc_html__( 'Search results for "%s"', 'woocommerce' ), esc_html( sanitize_text_field( wp_unslash( $search ) ) ) ); ?>
