@@ -10,11 +10,10 @@ import SortSelect from '@woocommerce/base-components/sort-select';
  */
 import './style.scss';
 
-const ProductSortSelect = ( { defaultValue, onChange, readOnly, value } ) => {
+const ProductSortSelect = ( { onChange, readOnly, value } ) => {
 	return (
 		<SortSelect
 			className="wc-block-product-sort-select wc-block-components-product-sort-select"
-			defaultValue={ defaultValue }
 			name="orderby"
 			onChange={ onChange }
 			options={ [
@@ -66,14 +65,6 @@ const ProductSortSelect = ( { defaultValue, onChange, readOnly, value } ) => {
 };
 
 ProductSortSelect.propTypes = {
-	defaultValue: PropTypes.oneOf( [
-		'menu_order',
-		'popularity',
-		'rating',
-		'date',
-		'price',
-		'price-desc',
-	] ),
 	onChange: PropTypes.func,
 	readOnly: PropTypes.bool,
 	value: PropTypes.oneOf( [

@@ -95,6 +95,7 @@ class FrontendContainerBlock extends Component {
 				orderby={ orderby }
 				productId={ productId }
 				reviewsToDisplay={ reviewsToDisplay }
+				sortSelectValue={ this.state.orderby }
 			/>
 		);
 	}
