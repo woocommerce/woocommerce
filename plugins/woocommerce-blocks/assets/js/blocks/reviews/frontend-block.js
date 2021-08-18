@@ -19,6 +19,7 @@ import withReviews from '@woocommerce/base-hocs/with-reviews';
  * @param {function(any):any} props.onAppendReviews Function called when appending review.
  * @param {function(any):any} props.onChangeOrderby
  * @param {Array} props.reviews
+ * @param {string} props.sortSelectValue
  * @param {number} props.totalReviews
  */
 const FrontendBlock = ( {
@@ -26,10 +27,9 @@ const FrontendBlock = ( {
 	onAppendReviews,
 	onChangeOrderby,
 	reviews,
+	sortSelectValue,
 	totalReviews,
 } ) => {
-	const { orderby } = attributes;
-
 	if ( reviews.length === 0 ) {
 		return null;
 	}
@@ -40,7 +40,7 @@ const FrontendBlock = ( {
 		<>
 			{ attributes.showOrderby !== 'false' && reviewRatingsEnabled && (
 				<ReviewSortSelect
-					defaultValue={ orderby }
+					value={ sortSelectValue }
 					onChange={ onChangeOrderby }
 				/>
 			) }
