@@ -1,5 +1,3 @@
-/* eslint-disable jest/no-export, jest/no-disabled-tests */
-
 /**
  * Internal dependencies
  */
@@ -10,7 +8,7 @@ const {
 	addShippingZoneAndMethod,
 	clearAndFillInput,
 	selectOptionInSelect2,
-	deleteAllShippingZones,
+	withRestApi,
 } = require( '@woocommerce/e2e-utils' );
 
 /**
@@ -35,8 +33,8 @@ const runAddNewShippingZoneTest = () => {
 	describe('WooCommerce Shipping Settings - Add new shipping zone', () => {
 		beforeAll(async () => {
 			await createSimpleProduct();
+			await withRestApi.deleteAllShippingZones();
 			await merchant.login();
-			await deleteAllShippingZones();
 		});
 
 		it('add shipping zone for San Francisco with free Local pickup', async () => {
@@ -86,7 +84,7 @@ const runAddNewShippingZoneTest = () => {
 
 		it('allows customer to benefit from a Free shipping if in CA', async () => {
 			await page.reload();
-			
+
 			// Set shipping state to California
 			await expect(page).toClick('a.shipping-calculator-button');
 			await expect(page).toClick('#select2-calc_shipping_state-container');
