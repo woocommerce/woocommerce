@@ -22,6 +22,10 @@
 - Tweak: Refactor on payment settings recommendations eligibility component for reuse. #7447
 - Tweak: Register wc-admin page for all users and handle authorization in client #7285
 
+== 2.5.1 08/16/2021 == 
+
+- Fix: Fix blank screen by setting a default value #7506
+
 == 2.5.0 08/09/2021 ==
 
 - Add: Add a delete option to completed tasks #7300

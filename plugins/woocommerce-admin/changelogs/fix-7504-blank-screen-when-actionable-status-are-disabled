@@ -1,4 +1,0 @@
-Significance: patch
-Type: Fix
-
-Fix blank screen by setting a default value #7506
