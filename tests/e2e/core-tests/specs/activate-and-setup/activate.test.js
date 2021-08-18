@@ -18,10 +18,6 @@ const runActivationTest = () => {
 			await merchant.login();
 		});
 
-		it('can install all updates', async () => {
-			merchant.installAllUpdates();
-		})
-
 		it('can make sure WooCommerce is activated. If not, activate it', async () => {
 			const slug = 'woocommerce';
 			await merchant.openPlugins();
