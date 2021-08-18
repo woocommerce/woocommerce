@@ -1,4 +1,3 @@
-/* eslint-disable jest/no-export, jest/no-disabled-tests */
 /**
  * Internal dependencies
  */
@@ -18,6 +17,10 @@ const runActivationTest = () => {
 		beforeAll(async () => {
 			await merchant.login();
 		});
+
+		it('can install all updates', async () => {
+			merchant.installAllUpdates();
+		})
 
 		it('can make sure WooCommerce is activated. If not, activate it', async () => {
 			const slug = 'woocommerce';
