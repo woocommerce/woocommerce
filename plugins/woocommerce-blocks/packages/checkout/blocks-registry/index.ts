@@ -175,18 +175,28 @@ export const registerCheckoutBlock = (
 	assertOption( options, 'areas', 'array' );
 	assertBlockComponent( options, 'component' );
 
+	/**
+	 * If provided with a configuration object, this registers the block with WordPress.
+	 */
 	if ( options?.configuration ) {
 		assertOption( options, 'configuration', 'object' );
 		registerExperimentalBlockType( blockName, {
 			...options.configuration,
 			category: 'woocommerce',
+			parent: [],
 		} );
 	}
 
+	/**
+	 * This enables the inner block within specific areas. See RegisteredBlocks.
+	 */
 	options.areas.forEach( ( area ) =>
 		registerBlockForArea( area, blockName )
 	);
 
+	/**
+	 * This ensures the frontend component for the checkout block is available.
+	 */
 	registerBlockComponent( {
 		blockName,
 		component: options.component,
