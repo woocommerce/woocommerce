@@ -10,7 +10,7 @@ if [[ $1 ]]; then
 	if [[ $WP_VERSION =~ ^[0-9]+\.[0-9]+ ]]; then
 		export WORDPRESS_VERSION=$WP_VERSION
 	else
-		export WORDPRESS_VERSION="5.5.1"
+		export WORDPRESS_VERSION="5.8.0"
 	fi
 
 	if ! [[ $TRAVIS_PHP_VERSION =~ ^[0-9]+\.[0-9]+ ]]; then
