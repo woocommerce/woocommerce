@@ -8,6 +8,7 @@
   - `downloadZip( fileUrl, downloadPath )` downloads a plugin zip file from a remote location to the provided path.
 - Added `getLatestReleaseZipUrl( owner, repository, getPrerelease, perPage )` util function to get the latest release zip from a GitHub repository.
 - Added `DEFAULT_TIMEOUT_OVERRIDE` that allows passing in a time in milliseconds to override the default Jest and Puppeteer timeouts.
+- Update fallback WordPress version to 5.8.0.
 
 # 0.2.2
 
