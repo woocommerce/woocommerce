@@ -521,5 +521,5 @@ export {
 	createSimpleProductWithCategory,
 	clickUpdateOrder,
 	deleteAllEmailLogs,
-	deleteAllShippingZones
+	deleteAllShippingZones,
 };
