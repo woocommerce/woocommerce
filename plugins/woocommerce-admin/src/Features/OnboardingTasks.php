@@ -395,6 +395,27 @@ class OnboardingTasks {
 	}
 
 	/**
+	 * Returns a list of WooCommerce Payments supported countries.
+	 *
+	 * @return array
+	 */
+	public static function get_woocommerce_payments_supported_countries() {
+		return array(
+			'US',
+			'PR',
+			'AU',
+			'CA',
+			'DE',
+			'ES',
+			'FR',
+			'GB',
+			'IE',
+			'IT',
+			'NZ',
+		);
+	}
+
+	/**
 	 * Records an event when all tasks are completed in the task list.
 	 *
 	 * @param mixed $old_value Old value.

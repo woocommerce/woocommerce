@@ -27,8 +27,11 @@ class Init {
 
 	/**
 	 * Go through the specs and run them.
+	 *
+	 * @param array $allowed_bundles Optional array of allowed bundles to be returned.
+	 * @return array
 	 */
-	public static function get_extensions() {
+	public static function get_extensions( $allowed_bundles = array() ) {
 		$bundles = array();
 		$specs   = self::get_specs();
 
@@ -36,6 +39,10 @@ class Init {
 			$spec              = (object) $spec;
 			$bundle            = (array) $spec;
 			$bundle['plugins'] = array();
+
+			if ( ! empty( $allowed_bundles ) && ! in_array( $spec->key, $allowed_bundles, true ) ) {
+				continue;
+			}
 
 			foreach ( $spec->plugins as $plugin ) {
 				$extension = EvaluateExtension::evaluate( (object) $plugin );

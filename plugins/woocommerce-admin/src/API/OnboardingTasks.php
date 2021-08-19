@@ -7,8 +7,12 @@
 
 namespace Automattic\WooCommerce\Admin\API;
 
+use Automattic\WooCommerce\Admin\API\Reports\Taxes\Stats\DataStore as TaxDataStore;
+use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\Onboarding;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks as OnboardingTasksFeature;
+use Automattic\WooCommerce\Admin\Features\RemoteFreeExtensions\Init as RemoteFreeExtensions;
+use Automattic\WooCommerce\Admin\PluginsHelper;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -97,6 +101,19 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 				'schema' => array( $this, 'get_public_item_schema' ),
 			)
 		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base,
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_tasks' ),
+					'permission_callback' => array( $this, 'get_tasks_permission_check' ),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
 	}
 
 	/**
@@ -136,6 +153,20 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	public function get_status_permission_check( $request ) {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return new \WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to retrieve onboarding status.', 'woocommerce-admin' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Check if a given request has access to manage woocommerce.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|boolean
+	 */
+	public function get_tasks_permission_check( $request ) {
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			return new \WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to retrieve onboarding tasks.', 'woocommerce-admin' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -609,5 +640,245 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		$status = OnboardingTasksFeature::get_settings();
 
 		return rest_ensure_response( $status );
+	}
+
+	/**
+	 * Get the onboarding tasks.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_tasks() {
+		$profiler_data         = get_option( Onboarding::PROFILE_DATA_OPTION, array() );
+		$installed_plugins     = PluginsHelper::get_installed_plugin_slugs();
+		$product_types         = isset( $profiler_data['product_types'] ) ? $profiler_data['product_types'] : array();
+		$allowed_product_types = Onboarding::get_allowed_product_types();
+		$purchaseable_products = array();
+		$remaining_products    = array();
+		foreach ( $product_types as $product_type ) {
+			if ( ! isset( $allowed_product_types[ $product_type ]['slug'] ) ) {
+				continue;
+			}
+
+			$purchaseable_products[] = $allowed_product_types[ $product_type ];
+
+			if ( ! in_array( $allowed_product_types[ $product_type ]['slug'], $installed_plugins, true ) ) {
+				$remaining_products[] = $allowed_product_types[ $product_type ]['label'];
+			}
+		}
+		$business_extensions = $profiler_data['business_extensions'];
+		$product_query       = new \WC_Product_Query(
+			array(
+				'limit'  => 1,
+				'return' => 'ids',
+				'status' => array( 'publish' ),
+			)
+		);
+		$products            = $product_query->get_products();
+		$wc_pay_is_connected = false;
+		if ( class_exists( '\WC_Payments' ) ) {
+			$wc_payments_gateway = \WC_Payments::get_gateway();
+			$wc_pay_is_connected = method_exists( $wc_payments_gateway, 'is_connected' )
+				? $wc_payments_gateway->is_connected()
+				: false;
+		}
+		$gateways                = WC()->payment_gateways->get_available_payment_gateways();
+		$enabled_gateways        = array_filter(
+			$gateways,
+			function( $gateway ) {
+				return 'yes' === $gateway->enabled;
+			}
+		);
+		$can_use_automated_taxes = ! class_exists( 'WC_Taxjar' ) &&
+			in_array( WC()->countries->get_base_country(), OnboardingTasksFeature::get_automated_tax_supported_countries(), true );
+
+		$marketing_extension_bundles        = RemoteFreeExtensions::get_extensions(
+			array(
+				'reach',
+				'grow',
+			)
+		);
+		$has_installed_marketing_extensions = array_reduce(
+			$marketing_extension_bundles,
+			function( $has_installed, $bundle ) {
+				if ( $has_installed ) {
+					return true;
+				}
+				foreach ( $bundle['plugins'] as $plugin ) {
+					if ( $plugin->is_installed ) {
+						return true;
+					}
+				}
+				return false;
+			},
+			false
+		);
+
+		$tasks = array(
+			array(
+				'id'         => 'setup',
+				'isComplete' => get_option( 'woocommerce_task_list_complete' ) === 'yes',
+				'isHidden'   => get_option( 'woocommerce_task_list_hidden' ) === 'yes',
+				'title'      => __( 'Get ready to start selling', 'woocommerce-admin' ),
+				'tasks'      => array(
+					array(
+						'id'          => 'store_details',
+						'title'       => __( 'Store details', 'woocommerce-admin' ),
+						'content'     => __(
+							'Your store address is required to set the origin country for shipping, currencies, and payment options.',
+							'woocommerce-admin'
+						),
+						'actionLabel' => __( "Let's go", 'woocommerce-admin' ),
+						'actionUrl'   => '/setup-wizard',
+						'isComplete'  => isset( $profiler_data['completed'] ) && true === $profiler_data['completed'],
+						'isVisible'   => true,
+						'time'        => __( '4 minutes', 'woocommerce-admin' ),
+					),
+					array(
+						'id'            => 'purchase',
+						'title'         => count( $remaining_products ) === 1
+							? sprintf(
+								/* translators: %1$s: list of product names comma separated, %2%s the last product name */
+								__(
+									'Add %s to my store',
+									'woocommerce-admin'
+								),
+								$remaining_products[0]
+							)
+							: __(
+								'Add paid extensions to my store',
+								'woocommerce-admin'
+							),
+						'content'       => count( $remaining_products ) === 1
+							? $purchaseable_products[0]['description']
+							: sprintf(
+								/* translators: %1$s: list of product names comma separated, %2%s the last product name */
+								__(
+									'Good choice! You chose to add %1$s and %2$s to your store.',
+									'woocommerce-admin'
+								),
+								implode( ', ', array_slice( $remaining_products, 0, -1 ) ) . ( count( $remaining_products ) > 2 ? ',' : '' ),
+								end( $remaining_products )
+							),
+						'actionLabel'   => __( 'Purchase & install now', 'woocommerce-admin' ),
+						'actionUrl'     => '/setup-wizard',
+						'isComplete'    => count( $remaining_products ) === 0,
+						'isVisible'     => count( $purchaseable_products ) > 0,
+						'time'          => __( '2 minutes', 'woocommerce-admin' ),
+						'isDismissable' => true,
+					),
+					array(
+						'id'         => 'products',
+						'title'      => __( 'Add my products', 'woocommerce-admin' ),
+						'content'    => __(
+							'Start by adding the first product to your store. You can add your products manually, via CSV, or import them from another service.',
+							'woocommerce-admin'
+						),
+						'isComplete' => 0 !== count( $products ),
+						'isVisible'  => true,
+						'time'       => __( '1 minute per product', 'woocommerce-admin' ),
+					),
+					array(
+						'id'          => 'woocommerce-payments',
+						'title'       => __( 'Get paid with WooCommerce Payments', 'woocommerce-admin' ),
+						'content'     => __(
+							"You're only one step away from getting paid. Verify your business details to start managing transactions with WooCommerce Payments.",
+							'woocommerce-admin'
+						),
+						'actionLabel' => __( 'Finish setup', 'woocommerce-admin' ),
+						'expanded'    => true,
+						'isComplete'  => $wc_pay_is_connected,
+						'isVisible'   => in_array( 'woocommerce-payments', $business_extensions, true ) &&
+							in_array( 'woocommerce-payments', $installed_plugins, true ) &&
+							in_array( WC()->countries->get_base_country(), OnboardingTasksFeature::get_woocommerce_payments_supported_countries(), true ),
+						'time'        => __( '2 minutes', 'woocommerce-admin' ),
+					),
+					array(
+						'id'         => 'payments',
+						'title'      => __( 'Set up payments', 'woocommerce-admin' ),
+						'content'    => __(
+							'Choose payment providers and enable payment methods at checkout.',
+							'woocommerce-admin'
+						),
+						'isComplete' => ! empty( $enabled_gateways ),
+						'isVisible'  => Features::is_enabled( 'payment-gateway-suggestions' ) &&
+							(
+								! in_array( 'woocommerce-payments', $business_extensions, true ) ||
+								! in_array( 'woocommerce-payments', $installed_plugins, true ) ||
+								! in_array( WC()->countries->get_base_country(), OnboardingTasksFeature::get_woocommerce_payments_supported_countries(), true )
+							),
+						'time'       => __( '2 minutes', 'woocommerce-admin' ),
+					),
+					array(
+						'id'          => 'tax',
+						'title'       => __( 'Set up tax', 'woocommerce-admin' ),
+						'content'     => $can_use_automated_taxes
+							? __(
+								'Good news! WooCommerce Services and Jetpack can automate your sales tax calculations for you.',
+								'woocommerce-admin'
+							)
+							: __(
+								'Set your store location and configure tax rate settings.',
+								'woocommerce-admin'
+							),
+						'actionLabel' => $can_use_automated_taxes
+							? __( 'Yes please', 'woocommerce-admin' )
+							: __( "Let's go", 'woocommerce-admin' ),
+						'isComplete'  => get_option( 'wc_connect_taxes_enabled' ) ||
+							count( TaxDataStore::get_taxes( array() ) ) > 0 ||
+							false !== get_option( 'woocommerce_no_sales_tax' ),
+						'isVisible'   => true,
+						'time'        => __( '1 minute', 'woocommerce-admin' ),
+					),
+					array(
+						'id'          => 'shipping',
+						'title'       => __( 'Set up shipping', 'woocommerce-admin' ),
+						'content'     => __(
+							"Set your store location and where you'll ship to.",
+							'woocommerce-admin'
+						),
+						'actionUrl'   => count( \WC_Shipping_Zones::get_zones() ) > 0
+							? admin_url( 'admin.php?page=wc-settings&tab=shipping' )
+							: null,
+						'actionLabel' => __( "Let's go", 'woocommerce-admin' ),
+						'isComplete'  => count( \WC_Shipping_Zones::get_zones() ) > 0,
+						'isVisible'   => in_array( 'physical', $product_types, true ) ||
+							count(
+								wc_get_products(
+									array(
+										'virtual' => false,
+										'limit'   => 1,
+									)
+								)
+							) > 0,
+						'time'        => __( '1 minute', 'woocommerce-admin' ),
+					),
+					array(
+						'id'         => 'marketing',
+						'title'      => __( 'Set up marketing tools', 'woocommerce-admin' ),
+						'content'    => __(
+							'Add recommended marketing tools to reach new customers and grow your business',
+							'woocommerce-admin'
+						),
+						'isComplete' => $has_installed_marketing_extensions,
+						'isVisible'  => Features::is_enabled( 'remote-free-extensions' ) && count( $marketing_extension_bundles ) > 0,
+						'time'       => __( '1 minute', 'woocommerce-admin' ),
+					),
+					array(
+						'id'          => 'appearance',
+						'title'       => __( 'Personalize my store', 'woocommerce-admin' ),
+						'content'     => __(
+							'Add your logo, create a homepage, and start designing your store.',
+							'woocommerce-admin'
+						),
+						'actionLabel' => __( "Let's go", 'woocommerce-admin' ),
+						'isComplete'  => get_option( 'woocommerce_task_list_appearance_complete' ),
+						'isVisible'   => true,
+						'time'        => __( '2 minutes', 'woocommerce-admin' ),
+					),
+				),
+			),
+		);
+
+		return rest_ensure_response( apply_filters( 'woocommerce_admin_onboarding_tasks', $tasks ) );
 	}
 }

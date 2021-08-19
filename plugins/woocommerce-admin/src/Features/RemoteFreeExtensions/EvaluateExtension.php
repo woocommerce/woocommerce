@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Admin\Features\RemoteFreeExtensions;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Admin\RemoteInboxNotifications\RuleEvaluator;
 
 /**
@@ -28,6 +29,9 @@ class EvaluateExtension {
 		} else {
 			$extension->is_visible = true;
 		}
+
+		$installed_plugins       = PluginsHelper::get_installed_plugin_slugs();
+		$extension->is_installed = in_array( explode( ':', $extension->key )[0], $installed_plugins, true );
 
 		return $extension;
 	}
