@@ -1,7 +1,8 @@
-/* eslint-disable jest/no-export, jest/no-disabled-tests */
 /**
  * Internal dependencies
  */
+import config from 'config';
+
 const {
 	merchant,
 	withRestApi,
@@ -42,17 +43,24 @@ const orderStatus = {
 		description: { text: 'Failed' },
 	}
 };
+const defaultOrder = config.get('orders.basicPaidOrder');
+
 
 const runOrderStatusFiltersTest = () => {
 	describe('WooCommerce Orders > Filter Orders by Status', () => {
 		beforeAll(async () => {
 			// First, let's create some orders we can filter against
-			const statuses = Object.entries(orderStatus).map((entryPair) => {
-				const statusName = entryPair[1].name;
+			const orders = Object.entries(orderStatus).map((entryPair) => {
+				const statusName = entryPair[1].name.replace('wc-', '');
 
-				return statusName.replace('wc-', '');
+				return {
+					...defaultOrder,
+					status: statusName,
+				};
 			});
-			await withRestApi.batchCreateOrders(statuses);
+
+			// Create the orders using the API
+			await withRestApi.batchCreateOrders(orders);
 
 			// Next, let's login
 			await merchant.login();
