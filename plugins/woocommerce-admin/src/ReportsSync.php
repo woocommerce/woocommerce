@@ -76,7 +76,7 @@ class ReportsSync {
 	 */
 	public static function regenerate_report_data( $days, $skip_existing ) {
 		if ( self::is_importing() ) {
-			return new \WP_Error( 'wc_admin_import_in_progress', __( 'An import is already in progress.  Please allow the previous import to complete before beginning a new one.', 'woocommerce-admin' ) );
+			return new \WP_Error( 'wc_admin_import_in_progress', __( 'An import is already in progress. Please allow the previous import to complete before beginning a new one.', 'woocommerce-admin' ) );
 		}
 
 		self::reset_import_stats( $days, $skip_existing );
@@ -92,7 +92,7 @@ class ReportsSync {
 		 */
 		do_action( 'woocommerce_analytics_regenerate_init', $days, $skip_existing );
 
-		return __( 'Report table data is being rebuilt.  Please allow some time for data to fully populate.', 'woocommerce-admin' );
+		return __( 'Report table data is being rebuilt. Please allow some time for data to fully populate.', 'woocommerce-admin' );
 	}
 
 	/**

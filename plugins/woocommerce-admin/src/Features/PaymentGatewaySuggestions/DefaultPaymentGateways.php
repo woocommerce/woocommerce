@@ -24,7 +24,7 @@ class DefaultPaymentGateways {
 			array(
 				'id'         => 'payfast',
 				'title'      => __( 'PayFast', 'woocommerce-admin' ),
-				'content'    => __( 'The PayFast extension for WooCommerce enables you to accept payments by Credit Card and EFT via one of South Africa’s most popular payment gateways. No setup fees or monthly subscription costs.  Selecting this extension will configure your store to use South African rands as the selected currency.', 'woocommerce-admin' ),
+				'content'    => __( 'The PayFast extension for WooCommerce enables you to accept payments by Credit Card and EFT via one of South Africa’s most popular payment gateways. No setup fees or monthly subscription costs. Selecting this extension will configure your store to use South African rands as the selected currency.', 'woocommerce-admin' ),
 				'image'      => WC()->plugin_url() . '/assets/images/payfast.png',
 				'plugins'    => array( 'woocommerce-payfast-gateway' ),
 				'is_visible' => array(

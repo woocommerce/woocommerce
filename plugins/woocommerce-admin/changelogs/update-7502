@@ -1,0 +1,4 @@
+Significance: patch
+Type: Tweak
+
+Delete unneeded double spaces in text strings. #7502
