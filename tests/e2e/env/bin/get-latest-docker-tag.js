@@ -84,21 +84,23 @@ function findLatestVersion( image, nameSearch ) {
 
 	// Repeat the requests until we've read as many pages as necessary.
 	const paginationFn = function ( result ) {
-		// We can save on unnecessarily loading every page by short-circuiting when
-		// the number of days between the first recorded version and the
-		// one from this page becomes excessive.
-		const lastUpdate = Date.parse( result.latestTag.last_updated );
-		if ( ! earliestUpdated ) {
-			earliestUpdated = lastUpdate;
-		} else {
-			const daysSinceEarliestUpdate = ( earliestUpdated - lastUpdate ) / ( 1000 * 3600 * 24 );
-			if ( daysSinceEarliestUpdate > 15 ) {
-				result.isLastPage = true;
+		if ( result.latestTag ) {
+			// We can save on unnecessarily loading every page by short-circuiting when
+			// the number of days between the first recorded version and the
+			// one from this page becomes excessive.
+			const lastUpdate = Date.parse( result.latestTag.last_updated );
+			if ( ! earliestUpdated ) {
+				earliestUpdated = lastUpdate;
+			} else {
+				const daysSinceEarliestUpdate = ( earliestUpdated - lastUpdate ) / ( 1000 * 3600 * 24 );
+				if ( daysSinceEarliestUpdate > 15 ) {
+					result.isLastPage = true;
+				}
 			}
-		}
 
-		if ( ! latestVersion || semver.gt( result.latestTag.semver, latestVersion ) ) {
-			latestVersion = result.latestTag.semver;
+			if ( ! latestVersion || semver.gt( result.latestTag.semver, latestVersion ) ) {
+				latestVersion = result.latestTag.semver;
+			}
 		}
 
 		if ( ! result.isLastPage ) {
