@@ -2273,6 +2273,11 @@ function wc_update_500_db_version() {
  * See @link https://github.com/woocommerce/woocommerce/issues/29235.
  */
 function wc_update_560_create_refund_returns_page() {
+	/**
+	 * Filter on the pages created to return what we expect.
+	 *
+	 * @param array $pages The default WC pages.
+	 */
 	function filter_created_pages( $pages ) {
 		$page_to_create = array( 'refund_returns' );
 
