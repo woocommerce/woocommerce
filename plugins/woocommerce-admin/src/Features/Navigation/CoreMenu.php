@@ -110,6 +110,12 @@ class CoreMenu {
 				'order' => 40,
 			),
 			array(
+				'title'  => __( 'Marketplace', 'woocommerce-admin' ),
+				'id'     => 'woocommerce-marketplace',
+				'menuId' => 'secondary',
+				'order'  => 10,
+			),
+			array(
 				'title'  => __( 'Settings', 'woocommerce-admin' ),
 				'id'     => 'woocommerce-settings',
 				'menuId' => 'secondary',
@@ -218,16 +224,9 @@ class CoreMenu {
 				),
 				array_merge( $product_items['new'], array( 'order' => 50 ) ),
 				$coupon_items['default'],
-				// Marketplace category.
-				array(
-					'title'      => __( 'Marketplace', 'woocommerce-admin' ),
-					'capability' => 'manage_woocommerce',
-					'id'         => 'woocommerce-marketplace',
-					'url'        => 'wc-addons',
-					'menuId'     => 'secondary',
-					'order'      => 10,
-				),
 			),
+			// Marketplace category.
+			self::get_marketplace_items(),
 			// Tools category.
 			self::get_tool_items(),
 			// WooCommerce Admin items.
@@ -240,9 +239,37 @@ class CoreMenu {
 	}
 
 	/**
+	 * Get marketplace menu items.
+	 *
+	 * @return array
+	 */
+	public static function get_marketplace_items() {
+		return array(
+			array(
+				'parent'     => 'woocommerce-marketplace',
+				'title'      => __( 'Browse', 'woocommerce-admin' ),
+				'capability' => 'manage_woocommerce',
+				'id'         => 'marketplace-browse',
+				'url'        => 'admin.php?page=wc-addons',
+				'migrate'    => false,
+				'order'      => 0,
+			),
+			array(
+				'parent'     => 'woocommerce-marketplace',
+				'title'      => __( 'My Subscriptions', 'woocommerce-admin' ),
+				'capability' => 'manage_woocommerce',
+				'id'         => 'marketplace-my-subscriptions',
+				'url'        => 'admin.php?page=wc-addons&section=helper',
+				'migrate'    => false,
+				'order'      => 1,
+			),
+		);
+	}
+
+	/**
 	 * Get items for tools category.
 	 *
-	 * @returna array
+	 * @return array
 	 */
 	public static function get_tool_items() {
 		$tabs = array(
@@ -391,6 +418,8 @@ class CoreMenu {
 			'wc-reports',
 			'wc-settings',
 			'wc-status',
+			'wc-addons',
+			'wc-addons&section=helper',
 		);
 
 		return apply_filters( 'woocommerce_navigation_core_excluded_items', $excluded_items );
