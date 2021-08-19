@@ -10,15 +10,6 @@
 4. Then, before hitting Continue again, click the "Business details" tab above to move back to that step
 5. Confirm that the previously selected values are still correct
 
-### Match stock status value in CSV download to the table #7284
-
-1. Clone this branch and run npm start
-2. Add some products and set stock value.
-3. Place an order and make it completed.
-4. Navigate to Analytics -> Stocks
-5. Click the Download button.
-6. Open the downloaded file and confirm the status values match the table.
-
 ### Fix end date for last periods #6584
 
 1. Update your system clock to March 2021
@@ -32,6 +23,17 @@
 9. Observe that the end date is the same as the selected quarter and subtract 1 year
 10. In the date range filter, select "Last Year" preset and compare to "Previous Year"
 11. Observe that the end date is the same as the selected year and subtract 1 year
+
+## 2.6.0
+
+### Match stock status value in CSV download to the table #7284
+
+1. Clone this branch and run npm start
+2. Add some products and set stock value.
+3. Place an order and make it completed.
+4. Navigate to Analytics -> Stocks
+5. Click the Download button.
+6. Open the downloaded file and confirm the status values match the table.
 
 ## 2.5.0
 

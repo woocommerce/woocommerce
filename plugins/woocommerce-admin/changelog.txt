@@ -1,9 +1,16 @@
-== 2.6.0 08/04/2021 == 
+== 2.6.0 08/31/2021 == 
 
 - Fix: Fixes action button mis-alignment within card footer. #7412
 - Fix: Fixing issues with ReportTable component data not populating correctly #7355
 - Fix: Fix tracks events for payment gateway suggestions #7304
 - Fix: Update status values in CSV download to match the table #7284
+- Fix: Allow super admins all capabilities within WooCommerce Admin #7489
+- Fix: Fix blank screen by setting a default value #7506
+- Fix: Fix analytics overview re-arrangement on initial load. #7475
+- Fix: Fix up onboarding profiler not working when opted out of tracking #7490
+- Fix: Fix blank screen on analytics screens when searching #7482
+- Fix: Fix all links with hash to behind query parameters #7483
+- Fix: Fix Stats module CSS issue introduced by Gutenberg #7488
 - Add: Add boolean isReverseTrend prop to SummaryNumber to show "positive" delta for negative numbers. #7357
 - Add: Adding links to help panel for marketing task #7384
 - Add: Add installed marketing extensions card to extensions task #7419
@@ -11,12 +18,14 @@
 - Add: Add tracks to marketing manage button click #7467
 - Add: Add default marketing extensions as fallbacks #7466
 - Add: Add marketing task completion check and tests #7451
+- Add: navigation items for the Marketplace menu. #7529
 - Update: Add locale param as part of free extensions request #7391
 - Update: Increase per_page value for search results on the Analytics pages. #7385
 - Update: Removing grow section from local free extensions in OBW #7386
 - Update: Don't show the marketing task if no marketing tasks exist #7460
 - Update: Delete free extensions transient on WCA update #7454
 - Update: Update business details to use extensions data store #7452
+- Update: Split Extensions page into Marketplace and My Subscriptions. #7471
 - Dev: Added utm_medium=product to woocommerce.com links. #7408
 - Dev: Update Jest to version 27. #7430
 - Tweak: Refactor on payment settings recommendations eligibility component for reuse. #7447
