@@ -1,5 +1,8 @@
 # Unreleased
 
+# 2.2.1
+
+-   Fix missing build-module folder
 # 2.2.0
 
 -   Update WCPayCard CSS to handle @wordpress/card updates. #7412

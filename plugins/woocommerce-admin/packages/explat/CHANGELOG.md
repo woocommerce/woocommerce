@@ -1,3 +1,6 @@
+# 1.1.2
+
+- Fix missing build-module folder
 # 1.1.1
 
 - Update add woo_country_code param when fetching an assignment #7533
