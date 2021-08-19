@@ -9,8 +9,9 @@
 - Added `getLatestReleaseZipUrl( owner, repository, getPrerelease, perPage )` util function to get the latest release zip from a GitHub repository.
 - Added `DEFAULT_TIMEOUT_OVERRIDE` that allows passing in a time in milliseconds to override the default Jest and Puppeteer timeouts.
 - Fix latest version tag search paging logic
-- Bump PHP fallback version to 7.4.22
-- Bump MariahDB fallback version to 10.6.4
+- Update fallback PHP version to 7.4.22
+- Update fallback MariahDB version to 10.6.4
+- Update fallback WordPress version to 5.8.0.
 
 # 0.2.2
 

@@ -1,16 +1,12 @@
-/* eslint-disable jest/no-export, jest/no-disabled-tests, jest/expect-expect */
-
 /**
  * Internal dependencies
  */
 const {
 	shopper,
-	merchant,
 	createSimpleProduct,
-	addShippingZoneAndMethod,
-	clearAndFillInput,
 	uiUnblocked,
 	selectOptionInSelect2,
+	withRestApi,
 } = require( '@woocommerce/e2e-utils' );
 
 /**
@@ -43,27 +39,19 @@ const runCartCalculateShippingTest = () => {
 			await createSimpleProduct(firstProductName);
 			await createSimpleProduct(secondProductName, secondProductPrice);
 
-			await merchant.login();
-			await merchant.openNewShipping();
+			await withRestApi.resetSettingsGroupToDefault( 'general' );
 
 			// Add a new shipping zone Germany with Free shipping
-			await addShippingZoneAndMethod(shippingZoneNameDE, shippingCountryDE, ' ', 'free_shipping');
+			await withRestApi.addShippingZoneAndMethod(shippingZoneNameDE, shippingCountryDE, ' ', 'free_shipping');
 
 			// Add a new shipping zone for France with Flat rate & Local pickup
-			await addShippingZoneAndMethod(shippingZoneNameFR, shippingCountryFR, ' ', 'flat_rate');
-			await page.waitFor(1000); // to avoid flakiness in headless
-			await page.click('a.wc-shipping-zone-method-settings', {text: 'Flat rate'});
-			await clearAndFillInput('#woocommerce_flat_rate_cost', '5');
-			await page.click('.wc-backbone-modal-main button#btn-ok');
-			// Add additional method Local pickup for the same location
-			await page.waitFor(1000); // to avoid flakiness in headless
-			await page.click('button.wc-shipping-zone-add-method', {text:'Add shipping method'});
-			await page.waitForSelector('.wc-shipping-zone-method-selector');
-			await page.select('select[name="add_method_id"]', 'local_pickup');
-			await page.click('button#btn-ok');
-			await page.waitForSelector('#zone_locations');
-			await merchant.logout();
+			await withRestApi.addShippingZoneAndMethod(shippingZoneNameFR, shippingCountryFR, ' ', 'flat_rate', '5', ['local_pickup']);
+
 			await shopper.emptyCart();
+		});
+
+		afterAll(async () => {
+			await withRestApi.deleteAllShippingZones();
 		});
 
 		it('allows customer to calculate Free Shipping if in Germany', async () => {
@@ -76,6 +64,7 @@ const runCartCalculateShippingTest = () => {
 			await expect(page).toClick('#select2-calc_shipping_country-container');
 			await selectOptionInSelect2('Germany');
 			await expect(page).toClick('button[name="calc_shipping"]');
+			await uiUnblocked();
 
 			// Verify shipping costs
 			await page.waitForSelector('.order-total');
@@ -84,13 +73,14 @@ const runCartCalculateShippingTest = () => {
 		});
 
 		it('allows customer to calculate Flat rate and Local pickup if in France', async () => {
-			await page.reload();
+			await page.reload( { waitUntil: ['networkidle0', 'domcontentloaded'] } );
 
 			// Set shipping country to France
 			await expect(page).toClick('a.shipping-calculator-button');
 			await expect(page).toClick('#select2-calc_shipping_country-container');
 			await selectOptionInSelect2('France');
 			await expect(page).toClick('button[name="calc_shipping"]');
+			await uiUnblocked();
 
 			// Verify shipping costs
 			await page.waitForSelector('.order-total');
@@ -119,13 +109,14 @@ const runCartCalculateShippingTest = () => {
 		});
 
 		it('should show correct total cart price with 2 products without flat rate', async () => {
-			await page.reload();
+			await page.reload( { waitUntil: ['networkidle0', 'domcontentloaded'] } );
 
 			// Set shipping country to Spain
 			await expect(page).toClick('a.shipping-calculator-button');
 			await expect(page).toClick('#select2-calc_shipping_country-container');
 			await selectOptionInSelect2('Spain');
 			await expect(page).toClick('button[name="calc_shipping"]');
+			await uiUnblocked();
 
 			// Verify shipping costs
 			await page.waitForSelector('.order-total');
