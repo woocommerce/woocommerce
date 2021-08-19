@@ -21,6 +21,9 @@ export const fetchExperimentAssignment = async ( {
 	const params = stringify( {
 		experiment_name: experimentName,
 		anon_id: anonId ?? undefined,
+		woo_country_code:
+			window.wcSettings.preloadSettings.general
+				.woocommerce_default_country,
 	} );
 
 	const response = await window.fetch(
