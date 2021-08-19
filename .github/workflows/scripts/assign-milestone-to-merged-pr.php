@@ -7,21 +7,9 @@
 
 // phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped, WordPress.WP.AlternativeFunctions
 
-global $repo_owner, $repo_name, $github_token, $graphql_api_url;
+require_once __DIR__ . '/post-request-shared.php';
 
-/**
- * Grab/process input.
- */
-
-$repo_parts = explode( '/', getenv( 'GITHUB_REPOSITORY' ) );
-$repo_owner = $repo_parts[0];
-$repo_name  = $repo_parts[1];
-
-$pr_id           = getenv( 'PULL_REQUEST_ID' );
-$github_token    = getenv( 'GITHUB_TOKEN' );
-$graphql_api_url = getenv( 'GITHUB_GRAPHQL_URL' );
-
-/**
+/*
  * Select the milestone to be added:
  *
  * 1. Get the first 10 milestones sorted by creation date descending.
@@ -85,6 +73,7 @@ foreach ( $milestones as $milestone ) {
 
 // If all the milestones have a release branch, just take the newest one.
 if ( is_null( $chosen_milestone ) ) {
+	echo "WARNING: No milestone without release branch found, the newest one will be assigned.\n";
 	$chosen_milestone = $milestones[0];
 }
 
@@ -119,37 +108,6 @@ if ( is_array( $result ) ) {
 } else {
 	echo "\n*** Error found while assigning the milestone: file_get_contents returned the following:\n";
 	echo var_dump( $result );
-}
-
-/**
- * Function to query the GitHub GraphQL API.
- *
- * @param string $body The GraphQL-formatted request body, without "query" or "mutation" wrapper.
- * @param bool   $is_mutation True if the request is a mutation, false if it's a query.
- * @return mixed The json-decoded response if a response is received, 'false' (or whatever file_get_contents returns) otherwise.
- */
-function do_graphql_api_request( $body, $is_mutation = false ) {
-	global $github_token, $graphql_api_url;
-
-	$keyword = $is_mutation ? 'mutation' : 'query';
-	$data    = array( 'query' => "$keyword { $body }" );
-	$context = stream_context_create(
-		array(
-			'http' => array(
-				'method'  => 'POST',
-				'header'  => array(
-					'Accept: application/json',
-					'Content-Type: application/json',
-					'User-Agent: GitHub action to set the milestone for a pull request',
-					'Authorization: bearer ' . $github_token,
-				),
-				'content' => json_encode( $data ),
-			),
-		)
-	);
-
-	$result = file_get_contents( $graphql_api_url, false, $context );
-	return is_string( $result ) ? json_decode( $result, true ) : $result;
 }
 
 // phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped, WordPress.WP.AlternativeFunctions

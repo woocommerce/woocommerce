@@ -79,6 +79,14 @@ class WC_Customer extends WC_Legacy_Customer {
 	protected $calculated_shipping = false;
 
 	/**
+	 * This is the name of this object type.
+	 *
+	 * @since 5.6.0
+	 * @var string
+	 */
+	protected $object_type = 'customer';
+
+	/**
 	 * Load customer data based on how WC_Customer is called.
 	 *
 	 * If $customer is 'new', you can build a new WC_Customer object. If it's empty, some
@@ -116,16 +124,6 @@ class WC_Customer extends WC_Legacy_Customer {
 			$this->data_store = WC_Data_Store::load( 'customer-session' );
 			$this->data_store->read( $this );
 		}
-	}
-
-	/**
-	 * Prefix for action and filter hooks on data.
-	 *
-	 * @since  3.0.0
-	 * @return string
-	 */
-	protected function get_hook_prefix() {
-		return 'woocommerce_customer_get_';
 	}
 
 	/**

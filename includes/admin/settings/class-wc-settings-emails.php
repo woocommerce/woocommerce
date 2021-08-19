@@ -51,8 +51,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 			'https://wordpress.org/plugins/wp-mail-logging/',
 			'https://docs.woocommerce.com/document/email-faq'
 		);
-		$settings = apply_filters(
-			'woocommerce_email_settings',
+		$settings =
 			array(
 				array(
 					'title' => __( 'Email notifications', 'woocommerce' ),
@@ -217,8 +216,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 					'type' => 'sectionend',
 					'id'   => 'email_merchant_notes',
 				),
-			)
-		);
+			);
 
 		return apply_filters( 'woocommerce_email_settings', $settings );
 	}
