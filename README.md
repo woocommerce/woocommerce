@@ -41,3 +41,5 @@ If you have a patch or have stumbled upon an issue with WooCommerce core, you ca
     Made with 💜 by <a href="https://woocommerce.com/">WooCommerce</a>.<br/>
     <a href="https://woocommerce.com/careers/">We're hiring</a>! Come work with us!
 </p>
+
+Testing e2e tests
