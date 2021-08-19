@@ -1,25 +1,23 @@
 /**
  * External dependencies
  */
-const MiniCssExtractPlugin = require( '@automattic/mini-css-extract-plugin-with-rtl' );
 const { get } = require( 'lodash' );
 const path = require( 'path' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
-const WebpackRTLPlugin = require( 'webpack-rtl-plugin' );
-const FixStyleOnlyEntriesPlugin = require( 'webpack-fix-style-only-entries' );
+const CustomTemplatedPathPlugin = require( '@wordpress/custom-templated-path-webpack-plugin' );
 const BundleAnalyzerPlugin = require( 'webpack-bundle-analyzer' )
 	.BundleAnalyzerPlugin;
 const MomentTimezoneDataPlugin = require( 'moment-timezone-data-webpack-plugin' );
 const TerserPlugin = require( 'terser-webpack-plugin' );
-const UnminifyWebpackPlugin = require( './unminify' );
-const AsyncChunkSrcVersionParameterPlugin = require( './chunk-src-version-param' );
 const ForkTsCheckerWebpackPlugin = require( 'fork-ts-checker-webpack-plugin' );
-const WooCommerceDependencyExtractionWebpackPlugin = require( './packages/dependency-extraction-webpack-plugin/src/index' );
 
 /**
- * External dependencies
+ * Internal dependencies
  */
-const CustomTemplatedPathPlugin = require( '@wordpress/custom-templated-path-webpack-plugin' );
+const AsyncChunkSrcVersionParameterPlugin = require( './chunk-src-version-param' );
+const UnminifyWebpackPlugin = require( './unminify' );
+const { webpackConfig: styleConfig } = require( '@woocommerce/style-build' );
+const WooCommerceDependencyExtractionWebpackPlugin = require( './packages/dependency-extraction-webpack-plugin/src/index' );
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const WC_ADMIN_PHASE = process.env.WC_ADMIN_PHASE || 'development';
@@ -58,8 +56,6 @@ const wpAdminScripts = [
 wpAdminScripts.forEach( ( name ) => {
 	entryPoints[ name ] = `./client/wp-admin-scripts/${ name }`;
 } );
-
-const postcssPlugins = require( '@wordpress/postcss-plugins-preset' );
 
 const suffix = WC_ADMIN_PHASE === 'core' ? '' : '.min';
 
@@ -113,41 +109,7 @@ const webpackConfig = {
 				test: /\.(png|jpe?g|gif|svg|eot|ttf|woff|woff2)$/,
 				loader: 'url-loader',
 			},
-			{
-				test: /\.s?css$/,
-				exclude: [ /storybook\/wordpress/, /build-style\/*\/*.css/ ],
-				use: [
-					MiniCssExtractPlugin.loader,
-					'css-loader',
-					{
-						loader: 'postcss-loader',
-						options: {
-							ident: 'postcss',
-							plugins: postcssPlugins,
-						},
-					},
-					{
-						loader: 'sass-loader',
-						options: {
-							sassOptions: {
-								includePaths: [
-									path.resolve(
-										__dirname,
-										'client/stylesheets/abstracts'
-									),
-								],
-							},
-							webpackImporter: true,
-							additionalData:
-								'@use "sass:math";' +
-								'@import "_colors"; ' +
-								'@import "_variables"; ' +
-								'@import "_breakpoints"; ' +
-								'@import "_mixins"; ',
-						},
-					},
-				],
-			},
+			...styleConfig.rules,
 		],
 	},
 	resolve: {
@@ -161,8 +123,8 @@ const webpackConfig = {
 		},
 	},
 	plugins: [
+		...styleConfig.plugins,
 		new ForkTsCheckerWebpackPlugin(),
-		new FixStyleOnlyEntriesPlugin(),
 		new CustomTemplatedPathPlugin( {
 			modulename( outputPath, data ) {
 				const entryName = get( data, [ 'chunk', 'name' ] );
@@ -173,16 +135,6 @@ const webpackConfig = {
 				}
 				return outputPath;
 			},
-		} ),
-		new WebpackRTLPlugin( {
-			minify: {
-				safe: true,
-			},
-		} ),
-		new MiniCssExtractPlugin( {
-			filename: './[name]/style.css',
-			chunkFilename: './chunks/[id].style.css',
-			rtlEnabled: true,
 		} ),
 		new CopyWebpackPlugin(
 			wcAdminPackages.map( ( packageName ) => ( {

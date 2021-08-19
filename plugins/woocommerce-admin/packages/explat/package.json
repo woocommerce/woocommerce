@@ -34,7 +34,7 @@
 		"@types/cookie": "0.4.1"
 	},
 	"scripts": {
-		"clean": "npx rimraf build build-*",
+		"clean": "npx rimraf tsconfig.tsbuildinfo build build-*",
 		"build": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
 		"start": "tsc --build --watch",
 		"prepack": "npm run clean && npm run build"

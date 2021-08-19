@@ -17,6 +17,7 @@
 		"**/build",
 		"**/build-module",
 		"**/test/*",
-		"**/jest.config.js"
+		"**/jest.config.js",
+		"**/webpack.*.js"
 	]
 }

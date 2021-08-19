@@ -13,9 +13,15 @@ module.exports = {
 
 		const filesByPackage = packageFiles.reduce(
 			( packages, packageFile ) => {
-				const packageName = packageFile.match(
+				const packageNameMatch = packageFile.match(
 					/\/packages\/([a-z0-9\-]+)\//
-				)[ 1 ];
+				);
+
+				if ( ! packageNameMatch ) {
+					return packages;
+				}
+
+				const packageName = packageNameMatch[ 1 ];
 
 				if ( Array.isArray( packages[ packageName ] ) ) {
 					packages[ packageName ].push( packageFile );
