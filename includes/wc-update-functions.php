@@ -2273,7 +2273,17 @@ function wc_update_500_db_version() {
  * See @link https://github.com/woocommerce/woocommerce/issues/29235.
  */
 function wc_update_560_create_refund_returns_page() {
+	function filter_created_pages( $pages ) {
+		$page_to_create = array( 'refund_returns' );
+
+		return array_intersect_key( $pages, array_flip( $page_to_create ) );
+	}
+
+	add_filter( 'woocommerce_create_pages', 'filter_created_pages' );
+
 	WC_Install::create_pages();
+
+	remove_filter( 'woocommerce_create_pages', 'filter_created_pages' );
 }
 
 /**
