@@ -145,7 +145,7 @@ This package provides support for enabling retries in tests:
 | `deleteAllShippingZones` | | Permanently delete all shipping zones except the default |
 | `deleteCustomerByEmail` | `emailAddress` | Delete customer user account. Posts are reassigned to user ID 1 |
 | `resetSettingsGroupToDefault` | `settingsGroup` | Reset settings in settings group to default except `select` fields |
-| `batchCreateOrders` | `statuses` | Create a batch of orders with the given `statuses` using the "Batch Create Order" API endpoint |
+| `batchCreateOrders` | `orders` | Create a batch of orders using the "Batch Create Order" API endpoint |
 
 ### Page Utilities
 
