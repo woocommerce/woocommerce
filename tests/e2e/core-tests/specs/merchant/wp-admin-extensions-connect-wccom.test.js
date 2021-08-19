@@ -20,14 +20,8 @@ const runInitiateWccomConnectionTest = () => {
 			await merchant.login();
 		});
 
-		it.skip('can initiate WCCOM connection', async () => {
-			await merchant.openExtensions();
-
-			// Click on a tab to choose WooCommerce Subscriptions extension
-			await Promise.all([
-				expect(page).toClick('a.nav-tab', {text: "WooCommerce.com Subscriptions"}),
-				page.waitForNavigation({waitUntil: 'networkidle0'}),
-			]);
+		it('can initiate WCCOM connection', async () => {
+			await merchant.openHelper();
 
 			// Click on Connect button to initiate a WCCOM connection
 			await Promise.all([
