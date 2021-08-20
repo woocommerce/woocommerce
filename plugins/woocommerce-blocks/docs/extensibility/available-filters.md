@@ -127,26 +127,24 @@ There is a snackbar at the bottom of the page used to display notices to the cus
 
 <img src="https://user-images.githubusercontent.com/5656702/120882329-d573c100-c5ce-11eb-901b-d7f206f74a66.png" width=300 />
 
-It may be desirable to hide this (by removing it from the array) or to change the text in the notice.
+It may be desirable to hide this if there's a notice you don't want the shopper to see.
 
 | Filter name  | Description | Return type  |
 |---|---|---|
-| `snackbarNotices`  | An array of notices waiting to be shown in the snackbar | `SnackbarNotice[]`
+| `snackbarNoticeVisibility`  | An object keyed by the content of the notices slated to be displayed. The value of each member of this object will initially be true. | `object`
 
-These are the relevant members of a `SnackbarNotice` object.
+The filter passes an object whose keys are the `content` of each notice.
 
-```typescript
-SnackbarNotice {
-  content: string;
-  explicitDismiss: boolean;
-  icon: string | null;
-  isDismissable: boolean;
-  onDismiss: Function;
-  spokenMessage: string;
-  status: string;
-  type: string
+If there are two notices slated to be displayed ('Coupon code "10off" has been applied to your basket.', and 'Coupon
+code "50off" has been removed from your basket.'), the value passed to the filter would look like so:
+
+```javascript
+{
+  'Coupon code "10off" has been applied to your basket.': true, 
+  'Coupon code "50off" has been removed from your basket.': true
 }
 ```
+To reiterate, the _value_ here will determine whether this notice gets displayed or not. It will display if true.
 
 ## Examples
 
@@ -243,6 +241,26 @@ __experimentalRegisterCheckoutFilters( 'automatic-coupon-extension', {
 |---|---|
 | <img src="https://user-images.githubusercontent.com/5656702/123768988-bc55eb80-d8c0-11eb-9262-5d629837706d.png" /> | ![image](https://user-images.githubusercontent.com/5656702/124126048-2c57a380-da72-11eb-9b45-b2cae0cffc37.png) |
 
+### Hide a snackbar notice containing a certain string
+Let's say we want to hide all notices that contain the string `auto-generated-coupon`.
+
+We would do this by setting the value of the `snackbarNoticeVisibility` to false for the notices we want to hide.
+
+```typescript
+import { __experimentalRegisterCheckoutFilters } from '@woocommerce/blocks-checkout';
+
+__experimentalRegisterCheckoutFilters( 'automatic-coupon-extension', {
+    snackbarNoticeVisibility: (value) => {
+      // Copy the value so we don't mutate what is being passed by the filter.
+      const valueCopy = Object.assign({}, value);
+      Object.keys(value).forEach((key) => {
+        valueCopy[key] = key.indexOf( 'auto-generated-coupon' ) === -1;
+      });
+      return valueCopy;
+    },
+  }
+);
+```
 
 ## Troubleshooting
 If you are logged in to the store as an administrator, you should be shown an error like this if your filter is not
