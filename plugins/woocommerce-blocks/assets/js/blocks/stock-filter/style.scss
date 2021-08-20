@@ -1,0 +1,29 @@
+.wc-block-stock-filter {
+	margin-bottom: $gap-large;
+
+	.wc-block-stock-filter-list {
+		margin: 0;
+
+		li {
+			text-decoration: underline;
+
+			label {
+				cursor: pointer;
+			}
+
+			input {
+				cursor: pointer;
+				display: inline-block;
+			}
+		}
+	}
+
+	.is-single,
+	.wc-block-dropdown-selector .wc-block-dropdown-selector__list {
+		opacity: 0.6;
+	}
+
+	.wc-block-stock-filter__button {
+		margin-top: $gap-smaller;
+	}
+}

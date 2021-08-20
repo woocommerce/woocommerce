@@ -47,10 +47,11 @@ class ProductCollectionData extends AbstractRoute {
 	 */
 	protected function get_route_response( \WP_REST_Request $request ) {
 		$data    = [
-			'min_price'        => null,
-			'max_price'        => null,
-			'attribute_counts' => null,
-			'rating_counts'    => null,
+			'min_price'           => null,
+			'max_price'           => null,
+			'attribute_counts'    => null,
+			'stock_status_counts' => null,
+			'rating_counts'       => null,
 		];
 		$filters = new ProductQueryFilters();
 
@@ -62,6 +63,20 @@ class ProductCollectionData extends AbstractRoute {
 			$price_results     = $filters->get_filtered_price( $filter_request );
 			$data['min_price'] = $price_results->min_price;
 			$data['max_price'] = $price_results->max_price;
+		}
+
+		if ( ! empty( $request['calculate_stock_status_counts'] ) ) {
+			$filter_request = clone $request;
+			$counts         = $filters->get_stock_status_counts( $filter_request );
+
+			$data['stock_status_counts'] = [];
+
+			foreach ( $counts as $key => $value ) {
+				$data['stock_status_counts'][] = (object) [
+					'status' => $key,
+					'count'  => $value,
+				];
+			}
 		}
 
 		if ( ! empty( $request['calculate_attribute_counts'] ) ) {
@@ -144,6 +159,12 @@ class ProductCollectionData extends AbstractRoute {
 
 		$params['calculate_price_range'] = [
 			'description' => __( 'If true, calculates the minimum and maximum product prices for the collection.', 'woo-gutenberg-products-block' ),
+			'type'        => 'boolean',
+			'default'     => false,
+		];
+
+		$params['calculate_stock_status_counts'] = [
+			'description' => __( 'If true, calculates stock counts for products in the collection.', 'woo-gutenberg-products-block' ),
 			'type'        => 'boolean',
 			'default'     => false,
 		];
