@@ -3,28 +3,16 @@
  * Controller Tests.
  */
 
-namespace Automattic\WooCommerce\Blocks\Tests\StoreApi\Controllers;
+namespace Automattic\WooCommerce\Blocks\Tests\StoreApi\Routes;
 
-use \WP_REST_Request;
-use \WC_REST_Unit_Test_Case as TestCase;
-use \WC_Helper_Product as ProductHelper;
+use Automattic\WooCommerce\Blocks\Tests\StoreApi\Routes\ControllerTestCase;
+use Automattic\WooCommerce\Blocks\Tests\Helpers\FixtureData;
 use Automattic\WooCommerce\Blocks\Tests\Helpers\ValidateSchema;
-use Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi;
-use Automattic\WooCommerce\Blocks\Package;
-use Automattic\WooCommerce\Blocks\Domain\Package as DomainPackage;
-use Automattic\WooCommerce\Blocks\StoreApi\Formatters;
-use Automattic\WooCommerce\Blocks\StoreApi\Formatters\MoneyFormatter;
-use Automattic\WooCommerce\Blocks\StoreApi\Formatters\HtmlFormatter;
-use Automattic\WooCommerce\Blocks\StoreApi\Formatters\CurrencyFormatter;
-use Automattic\WooCommerce\Blocks\Registry\Container;
-use Automattic\WooCommerce\Blocks\Domain\Services\FeatureGating;
 
 /**
  * Product Attributes Controller Tests.
  */
-class ProductAttributes extends TestCase {
-
-	private $mock_extend;
+class ProductAttributes extends ControllerTestCase {
 
 	/**
 	 * Setup test products data. Called before every test.
@@ -32,26 +20,19 @@ class ProductAttributes extends TestCase {
 	public function setUp() {
 		parent::setUp();
 
-		wp_set_current_user( 0 );
-		$formatters = new Formatters();
-		$formatters->register( 'money', MoneyFormatter::class );
-		$formatters->register( 'html', HtmlFormatter::class );
-		$formatters->register( 'currency', CurrencyFormatter::class );
-		$this->mock_extend = new ExtendRestApi( new DomainPackage( '', '', new FeatureGating( 2 ) ), $formatters );
+		$fixtures = new FixtureData();
 
-		$color_attribute = ProductHelper::create_attribute( 'color', [ 'red', 'green', 'blue' ] );
-		$size_attribute  = ProductHelper::create_attribute( 'size', [ 'small', 'medium', 'large' ] );
-
-		$this->attributes   = [];
-		$this->attributes[] = wc_get_attribute( $color_attribute['attribute_id'] );
-		$this->attributes[] = wc_get_attribute( $size_attribute['attribute_id'] );
+		$this->attributes = [
+			$fixtures->get_product_attribute( 'color', [ 'red', 'green', 'blue' ] ),
+			$fixtures->get_product_attribute( 'size', [ 'small', 'medium', 'large' ] )
+		];
 	}
 
 	/**
 	 * Test route registration.
 	 */
 	public function test_register_routes() {
-		$routes = $this->server->get_routes();
+		$routes = rest_get_server()->get_routes();
 		$this->assertArrayHasKey( '/wc/store/products/attributes', $routes );
 		$this->assertArrayHasKey( '/wc/store/products/attributes/(?P<id>[\d]+)', $routes );
 	}
@@ -60,23 +41,24 @@ class ProductAttributes extends TestCase {
 	 * Test getting item.
 	 */
 	public function test_get_item() {
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/store/products/attributes/' . $this->attributes[0]->id ) );
-		$data     = $response->get_data();
+		$attribute = wc_get_attribute( $this->attributes[0]['attribute_id'] );
+		$response  = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/products/attributes/' . $attribute->id ) );
+		$data      = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( $this->attributes[0]->id, $data['id'] );
-		$this->assertEquals( $this->attributes[0]->name, $data['name'] );
-		$this->assertEquals( $this->attributes[0]->slug, $data['taxonomy'] );
-		$this->assertEquals( $this->attributes[0]->type, $data['type'] );
-		$this->assertEquals( $this->attributes[0]->order_by, $data['order'] );
-		$this->assertEquals( $this->attributes[0]->has_archives, $data['has_archives'] );
+		$this->assertEquals( $attribute->id, $data['id'] );
+		$this->assertEquals( $attribute->name, $data['name'] );
+		$this->assertEquals( $attribute->slug, $data['taxonomy'] );
+		$this->assertEquals( $attribute->type, $data['type'] );
+		$this->assertEquals( $attribute->order_by, $data['order'] );
+		$this->assertEquals( $attribute->has_archives, $data['has_archives'] );
 	}
 
 	/**
 	 * Test getting items.
 	 */
 	public function test_get_items() {
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/store/products/attributes' ) );
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/products/attributes' ) );
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
@@ -92,10 +74,11 @@ class ProductAttributes extends TestCase {
 	/**
 	 * Test conversion of product to rest response.
 	 */
-	public function test_prepare_item_for_response() {
+	public function test_prepare_item() {
 		$routes     = new \Automattic\WooCommerce\Blocks\StoreApi\RoutesController( new \Automattic\WooCommerce\Blocks\StoreApi\SchemaController( $this->mock_extend ) );
 		$controller = $routes->get( 'product-attributes' );
-		$response   = $controller->prepare_item_for_response( $this->attributes[0], new \WP_REST_Request() );
+		$attribute  = wc_get_attribute( $this->attributes[0]['attribute_id'] );
+		$response   = $controller->prepare_item_for_response( $attribute, new \WP_REST_Request() );
 		$data       = $response->get_data();
 
 		$this->assertArrayHasKey( 'id', $data );
@@ -109,11 +92,12 @@ class ProductAttributes extends TestCase {
 	/**
 	 * Test schema matches responses.
 	 */
-	public function test_schema_matches_response() {
+	public function test_get_item_schema() {
 		$routes     = new \Automattic\WooCommerce\Blocks\StoreApi\RoutesController( new \Automattic\WooCommerce\Blocks\StoreApi\SchemaController( $this->mock_extend ) );
 		$controller = $routes->get( 'product-attributes' );
 		$schema     = $controller->get_item_schema();
-		$response   = $controller->prepare_item_for_response( $this->attributes[0], new \WP_REST_Request() );
+		$attribute  = wc_get_attribute( $this->attributes[0]['attribute_id'] );
+		$response   = $controller->prepare_item_for_response( $attribute, new \WP_REST_Request() );
 		$schema     = $controller->get_item_schema();
 		$validate   = new ValidateSchema( $schema );
 

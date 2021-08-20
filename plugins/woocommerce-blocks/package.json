@@ -50,7 +50,6 @@
 		"package-plugin:dev": "rimraf woocommerce-gutenberg-products-block.zip && ./bin/build-plugin-zip.sh -d",
 		"package-plugin:zip-only": "rimraf woocommerce-gutenberg-products-block.zip && ./bin/build-plugin-zip.sh -z",
 		"package-plugin:deploy": "npm run build:deploy && npm run package-plugin:zip-only",
-		"phpunit": "docker-compose up -d db && docker-compose up -d --build wordpress-unit-tests && docker exec --workdir /var/www/html/wp-content/plugins/woocommerce-gutenberg-products-block wordpress_test php ./vendor/bin/phpunit",
 		"postinstall": "patch-package",
 		"reformat-files": "prettier --ignore-path .eslintignore --write \"**/*.{js,jsx,json,ts,tsx}\"",
 		"release": "sh ./bin/wordpress-deploy.sh",
@@ -63,11 +62,13 @@
 		"test:e2e-dev": "npm run wp-env:config && cross-env NODE_CONFIG_DIR=tests/e2e/config wp-scripts test-e2e --config tests/e2e/config/jest.config.js --puppeteer-interactive",
 		"test:e2e:update": "npm run wp-env:config && cross-env NODE_CONFIG_DIR=tests/e2e/config wp-scripts test-e2e --config tests/e2e/config/jest.config.js --updateSnapshot",
 		"test:help": "wp-scripts test-unit-js --help",
+		"test:php": "npm run wp-env:phpunit-config",
 		"test:update": "wp-scripts test-unit-js --updateSnapshot --config tests/js/jest.config.json",
 		"test:watch": "npm run test -- --watch",
 		"ts:check": "tsc --build",
 		"wp-env": "wp-env",
-		"wp-env:config": "./bin/wp-env-pre-config.sh"
+		"wp-env:config": "./bin/wp-env-pre-config.sh",
+		"wp-env:phpunit-config": "./bin/wp-env-phpunit-pre-config.sh"
 	},
 	"devDependencies": {
 		"@automattic/color-studio": "2.5.0",
@@ -121,7 +122,7 @@
 		"@wordpress/dom": "3.2.1",
 		"@wordpress/e2e-test-utils": "5.4.1",
 		"@wordpress/element": "3.1.0",
-		"@wordpress/env": "4.0.3",
+		"@wordpress/env": "4.1.0",
 		"@wordpress/html-entities": "3.2.1",
 		"@wordpress/i18n": "4.2.1",
 		"@wordpress/is-shallow-equal": "4.2.0",

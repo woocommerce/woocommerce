@@ -5,27 +5,37 @@
 
 namespace Automattic\WooCommerce\Blocks\Tests\StoreApi\Utilities;
 
+use Automattic\WooCommerce\Blocks\Tests\Helpers\FixtureData;
 use Automattic\WooCommerce\Blocks\StoreApi\Utilities\CartController;
-use PHPUnit\Framework\TestCase;
-use \WC_Helper_Product as ProductHelper;
+use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
 class OrderControllerTests extends TestCase {
 
 	public function test_get_cart_item_errors()    {
-		$class = new CartController();
+		$class    = new CartController();
+		$fixtures = new FixtureData();
 
 		// This product will simply be in/out of stock.
-		$out_of_stock_product = ProductHelper::create_simple_product();
+		$out_of_stock_product = $fixtures->get_simple_product( [
+			'name' => 'Test Product 1',
+			'regular_price' => 10,
+		] );
 		$out_of_stock_product_key = wc()->cart->add_to_cart( $out_of_stock_product->get_id(), 2 );
 		$out_of_stock_in_cart = wc()->cart->get_cart_item( $out_of_stock_product_key )['data'];
 
 		// This product will have exact levels of stock known
-		$partially_out_of_stock_product = ProductHelper::create_simple_product();
+		$partially_out_of_stock_product = $fixtures->get_simple_product( [
+			'name' => 'Test Product 2',
+			'regular_price' => 10,
+		] );
 		$partially_out_of_stock_key = wc()->cart->add_to_cart( $partially_out_of_stock_product->get_id(), 4 );
 		$partially_out_of_stock_in_cart = wc()->cart->get_cart_item( $partially_out_of_stock_key )['data'];
 
 		// This product will have exact levels of stock known
-		$too_many_in_cart_product = ProductHelper::create_simple_product();
+		$too_many_in_cart_product = $fixtures->get_simple_product( [
+			'name' => 'Test Product 3',
+			'regular_price' => 10,
+		] );
 		$too_many_in_cart_product_key = wc()->cart->add_to_cart( $too_many_in_cart_product->get_id(), 4 );
 		$too_many_in_cart_in_cart = wc()->cart->get_cart_item( $too_many_in_cart_product_key )['data'];
 
@@ -35,7 +45,10 @@ class OrderControllerTests extends TestCase {
 		$too_many_in_cart_in_cart->set_sold_individually( true );
 
 		// This product will not be purchasable
-		$not_purchasable_product = ProductHelper::create_simple_product();
+		$not_purchasable_product = $fixtures->get_simple_product( [
+			'name' => 'Test Product 4',
+			'regular_price' => 10,
+		] );
 		wc()->cart->add_to_cart( $not_purchasable_product->get_id(), 2 );
 
 		// This function will force the $product->is_purchasable() function to return false for our $not_purchasable_product

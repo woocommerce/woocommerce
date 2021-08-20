@@ -3,63 +3,46 @@
  * Controller Tests.
  */
 
-namespace Automattic\WooCommerce\Blocks\Tests\StoreApi\Controllers;
+namespace Automattic\WooCommerce\Blocks\Tests\StoreApi\Routes;
 
-use \WP_REST_Request;
-use \WC_REST_Unit_Test_Case as TestCase;
-use \WC_Helper_Product as ProductHelper;
+use Automattic\WooCommerce\Blocks\Tests\StoreApi\Routes\ControllerTestCase;
+use Automattic\WooCommerce\Blocks\Tests\Helpers\FixtureData;
 use Automattic\WooCommerce\Blocks\Tests\Helpers\ValidateSchema;
-use Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi;
-use Automattic\WooCommerce\Blocks\Package;
-use Automattic\WooCommerce\Blocks\Domain\Package as DomainPackage;
-use Automattic\WooCommerce\Blocks\StoreApi\Formatters;
-use Automattic\WooCommerce\Blocks\StoreApi\Formatters\MoneyFormatter;
-use Automattic\WooCommerce\Blocks\StoreApi\Formatters\HtmlFormatter;
-use Automattic\WooCommerce\Blocks\StoreApi\Formatters\CurrencyFormatter;
-use Automattic\WooCommerce\Blocks\Registry\Container;
-use Automattic\WooCommerce\Blocks\Domain\Services\FeatureGating;
 
 /**
  * Products Controller Tests.
  */
-class Products extends TestCase {
+class Products extends ControllerTestCase {
 
-	private $mock_extend;
 	/**
 	 * Setup test products data. Called before every test.
 	 */
 	public function setUp() {
-		global $wpdb;
-
 		parent::setUp();
 
-		wp_set_current_user( 0 );
-		$formatters = new Formatters();
-		$formatters->register( 'money', MoneyFormatter::class );
-		$formatters->register( 'html', HtmlFormatter::class );
-		$formatters->register( 'currency', CurrencyFormatter::class );
-		$this->mock_extend = new ExtendRestApi( new DomainPackage( '', '', new FeatureGating( 2 ) ), $formatters );
+		$fixtures = new FixtureData();
 
-		$this->products    = [];
-		$this->products[0] = ProductHelper::create_simple_product( true );
-		$this->products[1] = ProductHelper::create_simple_product( true );
-
-		$image_url = media_sideload_image( 'http://cldup.com/Dr1Bczxq4q.png', $this->products[0]->get_id(), '', 'src' );
-		$image_id  = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE guid = %s", $image_url ) );
-		$this->products[0]->set_image_id( $image_id[0] );
-		$this->products[0]->save();
-
-		$image_url = media_sideload_image( 'http://cldup.com/Dr1Bczxq4q.png', $this->products[1]->get_id(), '', 'src' );
-		$image_id  = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE guid = %s", $image_url ) );
-		$this->products[1]->set_image_id( $image_id[0] );
-		$this->products[1]->save();
+		$this->products = [
+			$fixtures->get_simple_product( [
+				'name' => 'Test Product 1',
+				'stock_status' => 'instock',
+				'regular_price' => 10,
+				'image_id' => $fixtures->sideload_image(),
+			] ),
+			$fixtures->get_simple_product( [
+				'name' => 'Test Product 2',
+				'stock_status' => 'instock',
+				'regular_price' => 10,
+				'image_id' => $fixtures->sideload_image(),
+			] ),
+		];
 	}
 
 	/**
 	 * Test route registration.
 	 */
 	public function test_register_routes() {
-		$routes = $this->server->get_routes();
+		$routes = rest_get_server()->get_routes();
 		$this->assertArrayHasKey( '/wc/store/products', $routes );
 		$this->assertArrayHasKey( '/wc/store/products/(?P<id>[\d]+)', $routes );
 	}
@@ -68,7 +51,7 @@ class Products extends TestCase {
 	 * Test getting item.
 	 */
 	public function test_get_item() {
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/store/products/' . $this->products[0]->get_id() ) );
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/products/' . $this->products[0]->get_id() ) );
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
@@ -91,7 +74,7 @@ class Products extends TestCase {
 	 * Test getting items.
 	 */
 	public function test_get_items() {
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/store/products' ) );
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/products' ) );
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
@@ -117,12 +100,14 @@ class Products extends TestCase {
 	 * Test searching by SKU
 	 */
 	public function test_search_by_sku() {
-		ProductHelper::create_simple_product( true, [ 'sku' => 'search-for-this-value' ] );
+		$product = new \WC_Product_Simple();
+		$product->set_sku( 'search-for-this-value' );
+		$product->save();
 
-		$request = new WP_REST_Request( 'GET', '/wc/store/products' );
+		$request = new \WP_REST_Request( 'GET', '/wc/store/products' );
 		$request->set_param( 'search', 'search-for-this' );
 
-		$response = $this->server->dispatch( $request );
+		$response = rest_get_server()->dispatch( $request );
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
@@ -132,9 +117,9 @@ class Products extends TestCase {
 	}
 
 	/**
-	 * Test conversion of prdouct to rest response.
+	 * Test conversion of product to rest response.
 	 */
-	public function test_prepare_item_for_response() {
+	public function test_prepare_item() {
 		$schemas    = new \Automattic\WooCommerce\Blocks\StoreApi\SchemaController( $this->mock_extend );
 		$routes     = new \Automattic\WooCommerce\Blocks\StoreApi\RoutesController( $schemas );
 		$schema     = $schemas->get( 'product' );
@@ -200,7 +185,7 @@ class Products extends TestCase {
 	/**
 	 * Test schema matches responses.
 	 */
-	public function test_schema_matches_response() {
+	public function test_get_item_schema() {
 		$routes     = new \Automattic\WooCommerce\Blocks\StoreApi\RoutesController( new \Automattic\WooCommerce\Blocks\StoreApi\SchemaController($this->mock_extend) );
 		$controller = $routes->get( 'products' );
 		$schema     = $controller->get_item_schema();

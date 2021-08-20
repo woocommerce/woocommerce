@@ -5,13 +5,12 @@
 
 namespace Automattic\WooCommerce\Blocks\Tests\StoreApi\Formatters;
 
-use \WC_REST_Unit_Test_Case as TestCase;
 use Automattic\WooCommerce\Blocks\StoreApi\Formatters\HtmlFormatter;
 
 /**
  * TestHtmlFormatter tests.
  */
-class TestHtmlFormatter extends TestCase {
+class TestHtmlFormatter extends \WP_UnitTestCase {
 
 	private $mock_formatter;
 
