@@ -27,12 +27,7 @@ import ProductSortSelect from './product-sort-select';
 import ProductListItem from './product-list-item';
 import './style.scss';
 
-const generateQuery = ( {
-	sortValue,
-	currentPage,
-	attributes,
-	hideOutOfStockItems,
-} ) => {
+const generateQuery = ( { sortValue, currentPage, attributes } ) => {
 	const { columns, rows } = attributes;
 	const getSortArgs = ( orderName ) => {
 		switch ( orderName ) {
@@ -62,9 +57,6 @@ const generateQuery = ( {
 		catalog_visibility: 'catalog',
 		per_page: columns * rows,
 		page: currentPage,
-		...( hideOutOfStockItems && {
-			stock_status: [ 'instock', 'onbackorder' ],
-		} ),
 	};
 };
 
@@ -118,14 +110,24 @@ const ProductList = ( {
 	onSortChange,
 	sortValue,
 	scrollToTop,
-	hideOutOfStockItems = false,
 } ) => {
+	// These are possible filters.
+	const [ productAttributes, setProductAttributes ] = useQueryStateByKey(
+		'attributes',
+		[]
+	);
+	const [ productStockStatus, setProductStockStatus ] = useQueryStateByKey(
+		'stock_status',
+		[]
+	);
+	const [ minPrice, setMinPrice ] = useQueryStateByKey( 'min_price' );
+	const [ maxPrice, setMaxPrice ] = useQueryStateByKey( 'max_price' );
+
 	const [ queryState ] = useSynchronizedQueryState(
 		generateQuery( {
 			attributes,
 			sortValue,
 			currentPage,
-			hideOutOfStockItems,
 		} )
 	);
 	const { products, totalProducts, productsLoading } = useStoreProducts(
@@ -134,14 +136,6 @@ const ProductList = ( {
 	const { parentClassName, parentName } = useInnerBlockLayoutContext();
 	const totalQuery = extractPaginationAndSortAttributes( queryState );
 	const { dispatchStoreEvent } = useStoreEvents();
-
-	// These are possible filters.
-	const [ productAttributes, setProductAttributes ] = useQueryStateByKey(
-		'attributes',
-		[]
-	);
-	const [ minPrice, setMinPrice ] = useQueryStateByKey( 'min_price' );
-	const [ maxPrice, setMaxPrice ] = useQueryStateByKey( 'max_price' );
 
 	// Only update previous query totals if the query is different and the total number of products is a finite number.
 	const previousQueryTotals = usePrevious(
@@ -209,6 +203,7 @@ const ProductList = ( {
 	const hasProducts = products.length !== 0 || productsLoading;
 	const hasFilters =
 		productAttributes.length > 0 ||
+		productStockStatus.length > 0 ||
 		Number.isFinite( minPrice ) ||
 		Number.isFinite( maxPrice );
 
@@ -224,6 +219,7 @@ const ProductList = ( {
 				<NoMatchingProducts
 					resetCallback={ () => {
 						setProductAttributes( [] );
+						setProductStockStatus( [] );
 						setMinPrice( null );
 						setMaxPrice( null );
 					} }
@@ -254,7 +250,6 @@ const ProductList = ( {
 
 ProductList.propTypes = {
 	attributes: PropTypes.object.isRequired,
-	hideOutOfStockItems: PropTypes.bool,
 	// From withScrollToTop.
 	scrollToTop: PropTypes.func,
 };
