@@ -25,7 +25,7 @@ const runOrderApplyCouponTest = () => {
 		beforeAll(async () => {
 			productId = await createSimpleProduct();
 			couponCode = await createCoupon();
-			orderId = await createOrder( { productId: productId, status: 'pending' } );
+			orderId = await createOrder( { productId, status: 'pending' } );
 
 			// We need to remove any listeners on the `dialog` event otherwise we can't catch the dialog below
 			await page.removeAllListeners('dialog');

@@ -44,7 +44,7 @@ const runRefundOrderTest = () => {
 		beforeAll(async () => {
 			productId = await createSimpleProduct();
 			orderId = await createOrder( {
-				productId: productId,
+				productId,
 				status: 'completed'
 			} );
 
