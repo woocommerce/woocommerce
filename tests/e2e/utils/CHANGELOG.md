@@ -3,6 +3,7 @@
 ## Added
 
 - Factories for variable product, variation, and grouped product
+- New function to create orders by batch using the orders API
 - Added new constant for WordPress update page `WP_ADMIN_WP_UPDATES`
 - Added new merchant flow for `openWordPressUpdatesPage()`
 - Added new merchant flows:

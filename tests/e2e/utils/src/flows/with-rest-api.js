@@ -251,5 +251,19 @@ export const withRestApi = {
 				expect( response.value ).toBe( defaultSetting.value );
 			}
 		}
+	},
+	
+	/**
+	 * Create a batch of orders using the "Batch Create Order" API endpoint.
+	 * 
+	 * @param orders Array of orders to be created
+	 */
+	batchCreateOrders : async (orders) => {
+		const path = '/wc/v3/orders/batch';
+		const payload = { create: orders };
+		
+		const { statusCode } = await client.post(path, payload);
+
+		expect(statusCode).toEqual(200);
 	}
 };
