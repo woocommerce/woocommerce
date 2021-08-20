@@ -29,7 +29,7 @@ class ProductCollectionDataSchema extends AbstractSchema {
 	 */
 	public function get_properties() {
 		return [
-			'price_range'         => [
+			'price_range'      => [
 				'description' => __( 'Min and max prices found in collection of products, provided using the smallest unit of the currency.', 'woo-gutenberg-products-block' ),
 				'type'        => [ 'object', 'null' ],
 				'context'     => [ 'view', 'edit' ],
@@ -52,7 +52,7 @@ class ProductCollectionDataSchema extends AbstractSchema {
 					]
 				),
 			],
-			'attribute_counts'    => [
+			'attribute_counts' => [
 				'description' => __( 'Returns number of products within attribute terms.', 'woo-gutenberg-products-block' ),
 				'type'        => [ 'array', 'null' ],
 				'context'     => [ 'view', 'edit' ],
@@ -75,7 +75,7 @@ class ProductCollectionDataSchema extends AbstractSchema {
 					],
 				],
 			],
-			'rating_counts'       => [
+			'rating_counts'    => [
 				'description' => __( 'Returns number of products with each average rating.', 'woo-gutenberg-products-block' ),
 				'type'        => [ 'array', 'null' ],
 				'context'     => [ 'view', 'edit' ],
@@ -86,29 +86,6 @@ class ProductCollectionDataSchema extends AbstractSchema {
 						'rating' => [
 							'description' => __( 'Average rating', 'woo-gutenberg-products-block' ),
 							'type'        => 'integer',
-							'context'     => [ 'view', 'edit' ],
-							'readonly'    => true,
-						],
-						'count'  => [
-							'description' => __( 'Number of products.', 'woo-gutenberg-products-block' ),
-							'type'        => 'integer',
-							'context'     => [ 'view', 'edit' ],
-							'readonly'    => true,
-						],
-					],
-				],
-			],
-			'stock_status_counts' => [
-				'description' => __( 'Returns number of products with each stock status.', 'woo-gutenberg-products-block' ),
-				'type'        => [ 'array', 'null' ],
-				'context'     => [ 'view', 'edit' ],
-				'readonly'    => true,
-				'items'       => [
-					'type'       => 'object',
-					'properties' => [
-						'status' => [
-							'description' => __( 'Status', 'woo-gutenberg-products-block' ),
-							'type'        => 'string',
 							'context'     => [ 'view', 'edit' ],
 							'readonly'    => true,
 						],
@@ -132,15 +109,14 @@ class ProductCollectionDataSchema extends AbstractSchema {
 	 */
 	public function get_item_response( $data ) {
 		return [
-			'price_range'         => ! is_null( $data['min_price'] ) && ! is_null( $data['max_price'] ) ? (object) $this->prepare_currency_response(
+			'price_range'      => ! is_null( $data['min_price'] ) && ! is_null( $data['max_price'] ) ? (object) $this->prepare_currency_response(
 				[
 					'min_price' => $this->prepare_money_response( $data['min_price'], wc_get_price_decimals() ),
 					'max_price' => $this->prepare_money_response( $data['max_price'], wc_get_price_decimals() ),
 				]
 			) : null,
-			'attribute_counts'    => $data['attribute_counts'],
-			'rating_counts'       => $data['rating_counts'],
-			'stock_status_counts' => $data['stock_status_counts'],
+			'attribute_counts' => $data['attribute_counts'],
+			'rating_counts'    => $data['rating_counts'],
 		];
 	}
 }
