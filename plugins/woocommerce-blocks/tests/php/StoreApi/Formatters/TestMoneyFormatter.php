@@ -5,13 +5,12 @@
 
 namespace Automattic\WooCommerce\Blocks\Tests\StoreApi\Formatters;
 
-use \WC_REST_Unit_Test_Case as TestCase;
 use Automattic\WooCommerce\Blocks\StoreApi\Formatters\MoneyFormatter;
 
 /**
  * TestMoneyFormatter tests.
  */
-class TestMoneyFormatter extends TestCase {
+class TestMoneyFormatter extends \WP_UnitTestCase {
 
 	private $mock_formatter;
 

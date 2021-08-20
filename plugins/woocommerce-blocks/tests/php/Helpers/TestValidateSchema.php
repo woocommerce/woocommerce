@@ -7,12 +7,10 @@ namespace Automattic\WooCommerce\Blocks\Tests\Helpers;
 
 require_once 'ValidateSchema.php';
 
-use \WC_REST_Unit_Test_Case as TestCase;
-
 /**
  * Test Validate schema.
  */
-class TestValidateSchema extends TestCase {
+class TestValidateSchema extends \WP_UnitTestCase {
 	/**
 	 * ValidateSchema instance.
 	 *

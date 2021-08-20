@@ -3,27 +3,16 @@
  * Controller Tests.
  */
 
-namespace Automattic\WooCommerce\Blocks\Tests\StoreApi\Controllers;
+namespace Automattic\WooCommerce\Blocks\Tests\StoreApi\Routes;
 
-use \WP_REST_Request;
-use \WC_REST_Unit_Test_Case as TestCase;
-use \WC_Helper_Product as ProductHelper;
+use Automattic\WooCommerce\Blocks\Tests\StoreApi\Routes\ControllerTestCase;
+use Automattic\WooCommerce\Blocks\Tests\Helpers\FixtureData;
 use Automattic\WooCommerce\Blocks\Tests\Helpers\ValidateSchema;
-use Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi;
-use Automattic\WooCommerce\Blocks\Package;
-use Automattic\WooCommerce\Blocks\Domain\Package as DomainPackage;
-use Automattic\WooCommerce\Blocks\StoreApi\Formatters;
-use Automattic\WooCommerce\Blocks\StoreApi\Formatters\MoneyFormatter;
-use Automattic\WooCommerce\Blocks\StoreApi\Formatters\HtmlFormatter;
-use Automattic\WooCommerce\Blocks\StoreApi\Formatters\CurrencyFormatter;
-use Automattic\WooCommerce\Blocks\Registry\Container;
-use Automattic\WooCommerce\Blocks\Domain\Services\FeatureGating;
 
 /**
  * Controller Tests.
  */
-class ProductCollectionData extends TestCase {
-	private $mock_extend;
+class ProductCollectionData extends ControllerTestCase {
 
 	/**
 	 * Setup test products data. Called before every test.
@@ -31,62 +20,28 @@ class ProductCollectionData extends TestCase {
 	public function setUp() {
 		parent::setUp();
 
-		wp_set_current_user( 0 );
+		$fixtures = new FixtureData();
 
-		$formatters = new Formatters();
-		$formatters->register( 'money', MoneyFormatter::class );
-		$formatters->register( 'html', HtmlFormatter::class );
-		$formatters->register( 'currency', CurrencyFormatter::class );
-		$this->mock_extend = new ExtendRestApi( new DomainPackage( '', '', new FeatureGating( 2 ) ), $formatters );
+		$this->products = [
+			$fixtures->get_simple_product( [
+				'name' => 'Test Product 1',
+				'regular_price' => 10,
+			] ),
+			$fixtures->get_simple_product( [
+				'name' => 'Test Product 2',
+				'regular_price' => 100,
+			] ),
+		];
 
-		$this->products    = [];
-		$this->products[0] = ProductHelper::create_simple_product( false );
-		$this->products[0]->set_regular_price( 10 );
-		$this->products[0]->save();
-
-		$this->products[1] = ProductHelper::create_simple_product( false );
-		$this->products[1]->set_regular_price( 100 );
-		$this->products[1]->save();
-
-		wp_insert_comment(
-			[
-				'comment_post_ID'      => $this->products[0]->get_id(),
-				'comment_author'       => 'admin',
-				'comment_author_email' => 'woo@woo.local',
-				'comment_author_url'   => '',
-				'comment_content'      => 'Good product.',
-				'comment_approved'     => 1,
-				'comment_type'         => 'review',
-				'comment_meta'         => [
-					'rating' => 5,
-				],
-			]
-		);
-
-		wp_insert_comment(
-			[
-				'comment_post_ID'      => $this->products[1]->get_id(),
-				'comment_author'       => 'admin',
-				'comment_author_email' => 'woo@woo.local',
-				'comment_author_url'   => '',
-				'comment_content'      => 'Another very good product.',
-				'comment_approved'     => 1,
-				'comment_type'         => 'review',
-				'comment_meta'         => [
-					'rating' => 4,
-				],
-			]
-		);
-
-		\WC_Comments::clear_transients( $this->products[0]->get_id() );
-		\WC_Comments::clear_transients( $this->products[1]->get_id() );
+		$fixtures->add_product_review( $this->products[0]->get_id(), 5 );
+		$fixtures->add_product_review( $this->products[1]->get_id(), 4 );
 	}
 
 	/**
 	 * Test route registration.
 	 */
 	public function test_register_routes() {
-		$routes = $this->server->get_routes();
+		$routes = rest_get_server()->get_routes();
 		$this->assertArrayHasKey( '/wc/store/products/collection-data', $routes );
 	}
 
@@ -94,7 +49,7 @@ class ProductCollectionData extends TestCase {
 	 * Test getting items.
 	 */
 	public function test_get_items() {
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/store/products/collection-data' ) );
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/products/collection-data' ) );
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
@@ -107,9 +62,9 @@ class ProductCollectionData extends TestCase {
 	 * Test calculation method.
 	 */
 	public function test_calculate_price_range() {
-		$request = new WP_REST_Request( 'GET', '/wc/store/products/collection-data' );
+		$request = new \WP_REST_Request( 'GET', '/wc/store/products/collection-data' );
 		$request->set_param( 'calculate_price_range', true );
-		$response = $this->server->dispatch( $request );
+		$response = rest_get_server()->dispatch( $request );
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
@@ -124,9 +79,15 @@ class ProductCollectionData extends TestCase {
 	 * Test calculation method.
 	 */
 	public function test_calculate_attribute_counts() {
-		ProductHelper::create_variation_product();
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_variable_product(
+			[],
+			[
+				$fixtures->get_product_attribute( 'size', [ 'small', 'medium', 'large' ] )
+			]
+		);
 
-		$request = new WP_REST_Request( 'GET', '/wc/store/products/collection-data' );
+		$request = new \WP_REST_Request( 'GET', '/wc/store/products/collection-data' );
 		$request->set_param(
 			'calculate_attribute_counts',
 			[
@@ -136,7 +97,7 @@ class ProductCollectionData extends TestCase {
 				],
 			]
 		);
-		$response = $this->server->dispatch( $request );
+		$response = rest_get_server()->dispatch( $request );
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
@@ -151,9 +112,9 @@ class ProductCollectionData extends TestCase {
 	 * Test calculation method.
 	 */
 	public function test_calculate_rating_counts() {
-		$request = new WP_REST_Request( 'GET', '/wc/store/products/collection-data' );
+		$request = new \WP_REST_Request( 'GET', '/wc/store/products/collection-data' );
 		$request->set_param( 'calculate_rating_counts', true );
-		$response = $this->server->dispatch( $request );
+		$response = rest_get_server()->dispatch( $request );
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
@@ -190,14 +151,20 @@ class ProductCollectionData extends TestCase {
 	/**
 	 * Test schema matches responses.
 	 */
-	public function test_schema_matches_response() {
-		ProductHelper::create_variation_product();
+	public function test_get_item_schema() {
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_variable_product(
+			[],
+			[
+				$fixtures->get_product_attribute( 'size', [ 'small', 'medium', 'large' ] )
+			]
+		);
 
 		$routes     = new \Automattic\WooCommerce\Blocks\StoreApi\RoutesController( new \Automattic\WooCommerce\Blocks\StoreApi\SchemaController( $this->mock_extend ) );
 		$controller = $routes->get( 'product-collection-data' );
 		$schema     = $controller->get_item_schema();
 
-		$request    = new WP_REST_Request( 'GET', '/wc/store/products/collection-data' );
+		$request    = new \WP_REST_Request( 'GET', '/wc/store/products/collection-data' );
 		$request->set_param( 'calculate_price_range', true );
 		$request->set_param(
 			'calculate_attribute_counts',
@@ -209,7 +176,7 @@ class ProductCollectionData extends TestCase {
 			]
 		);
 		$request->set_param( 'calculate_rating_counts', true );
-		$response = $this->server->dispatch( $request );
+		$response = rest_get_server()->dispatch( $request );
 		$validate = new ValidateSchema( $schema );
 
 		$diff = $validate->get_diff_from_object( $response->get_data() );

@@ -2,7 +2,7 @@
 
 namespace Automattic\WooCommerce\Blocks\Tests\Assets;
 
-use \WP_UnitTestCase;
+use Yoast\PHPUnitPolyfills\Polyfills\ExpectException;
 use Automattic\WooCommerce\Blocks\Assets\Api;
 use Automattic\WooCommerce\Blocks\Tests\Mocks\AssetDataRegistryMock;
 use Automattic\WooCommerce\Blocks\Package;
@@ -13,7 +13,9 @@ use InvalidArgumentException;
  *
  * @since $VID:$
  */
-class AssetDataRegistry extends WP_UnitTestCase {
+class AssetDataRegistry extends \WP_UnitTestCase {
+	use ExpectException;
+
 	private $registry;
 
 	public function setUp() {

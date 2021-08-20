@@ -3,28 +3,16 @@
  * Controller Tests.
  */
 
-namespace Automattic\WooCommerce\Blocks\Tests\StoreApi\Controllers;
+namespace Automattic\WooCommerce\Blocks\Tests\StoreApi\Routes;
 
-use \WP_REST_Request;
-use \WC_REST_Unit_Test_Case as TestCase;
-use \WC_Helper_Product as ProductHelper;
+use Automattic\WooCommerce\Blocks\Tests\StoreApi\Routes\ControllerTestCase;
+use Automattic\WooCommerce\Blocks\Tests\Helpers\FixtureData;
 use Automattic\WooCommerce\Blocks\Tests\Helpers\ValidateSchema;
-use Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi;
-use Automattic\WooCommerce\Blocks\Package;
-use Automattic\WooCommerce\Blocks\Domain\Package as DomainPackage;
-use Automattic\WooCommerce\Blocks\StoreApi\Formatters;
-use Automattic\WooCommerce\Blocks\StoreApi\Formatters\MoneyFormatter;
-use Automattic\WooCommerce\Blocks\StoreApi\Formatters\HtmlFormatter;
-use Automattic\WooCommerce\Blocks\StoreApi\Formatters\CurrencyFormatter;
-use Automattic\WooCommerce\Blocks\Registry\Container;
-use Automattic\WooCommerce\Blocks\Domain\Services\FeatureGating;
 
 /**
  * Product Attributes Controller Tests.
  */
-class ProductAttributeTerms extends TestCase {
-
-	private $mock_extend;
+class ProductAttributeTerms extends ControllerTestCase {
 
 	/**
 	 * Setup test products data. Called before every test.
@@ -32,32 +20,19 @@ class ProductAttributeTerms extends TestCase {
 	public function setUp() {
 		parent::setUp();
 
-		wp_set_current_user( 0 );
-		$formatters = new Formatters();
-		$formatters->register( 'money', MoneyFormatter::class );
-		$formatters->register( 'html', HtmlFormatter::class );
-		$formatters->register( 'currency', CurrencyFormatter::class );
-		$this->mock_extend = new ExtendRestApi( new DomainPackage( '', '', new FeatureGating( 2 ) ), $formatters );
+		$fixtures = new FixtureData();
 
-		$this->attributes    = [];
-		$this->attributes[0] = ProductHelper::create_attribute( 'color', [ 'red', 'green', 'blue' ] );
-		$this->attributes[1] = ProductHelper::create_attribute( 'size', [ 'small', 'medium', 'large' ] );
-
-		wp_insert_term(
-			'test',
-			'pa_size',
-			[
-				'description' => 'This is a test description',
-				'slug'        => 'test-slug',
-			]
-		);
+		$this->attributes = [
+			$fixtures->get_product_attribute( 'color', [ 'red', 'green', 'blue' ] ),
+			$fixtures->get_product_attribute( 'size', [ 'small', 'medium', 'large' ] )
+		];
 	}
 
 	/**
 	 * Test route registration.
 	 */
 	public function test_register_routes() {
-		$routes = $this->server->get_routes();
+		$routes = rest_get_server()->get_routes();
 		$this->assertArrayHasKey( '/wc/store/products/attributes/(?P<attribute_id>[\d]+)/terms', $routes );
 	}
 
@@ -65,9 +40,9 @@ class ProductAttributeTerms extends TestCase {
 	 * Test getting items.
 	 */
 	public function test_get_items() {
-		$request = new WP_REST_Request( 'GET', '/wc/store/products/attributes/' . $this->attributes[0]['attribute_id'] . '/terms' );
+		$request = new \WP_REST_Request( 'GET', '/wc/store/products/attributes/' . $this->attributes[0]['attribute_id'] . '/terms' );
 		$request->set_param( 'hide_empty', false );
-		$response = $this->server->dispatch( $request );
+		$response = rest_get_server()->dispatch( $request );
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
@@ -82,16 +57,16 @@ class ProductAttributeTerms extends TestCase {
 	/**
 	 * Test conversion of product to rest response.
 	 */
-	public function test_prepare_item_for_response() {
+	public function test_prepare_item() {
 		$schema     = new \Automattic\WooCommerce\Blocks\StoreApi\Schemas\TermSchema( $this->mock_extend );
 		$controller = new \Automattic\WooCommerce\Blocks\StoreApi\Routes\ProductAttributeTerms( $schema );
-		$response   = $controller->prepare_item_for_response( get_term_by( 'name', 'test', 'pa_size' ), new \WP_REST_Request() );
+		$response   = $controller->prepare_item_for_response( get_term_by( 'name', 'small', 'pa_size' ), new \WP_REST_Request() );
 		$data       = $response->get_data();
 
 		$this->assertArrayHasKey( 'id', $data );
-		$this->assertEquals( 'test', $data['name'] );
-		$this->assertEquals( 'test-slug', $data['slug'] );
-		$this->assertEquals( 'This is a test description', $data['description'] );
+		$this->assertEquals( 'small', $data['name'] );
+		$this->assertEquals( 'small-slug', $data['slug'] );
+		$this->assertEquals( 'Description of small', $data['description'] );
 		$this->assertEquals( 0, $data['count'] );
 	}
 
@@ -111,11 +86,11 @@ class ProductAttributeTerms extends TestCase {
 	/**
 	 * Test schema matches responses.
 	 */
-	public function test_schema_matches_response() {
+	public function test_get_item_schema() {
 		$routes     = new \Automattic\WooCommerce\Blocks\StoreApi\RoutesController( new \Automattic\WooCommerce\Blocks\StoreApi\SchemaController( $this->mock_extend ) );
 		$controller = $routes->get( 'product-attribute-terms' );
 		$schema     = $controller->get_item_schema();
-		$response   = $controller->prepare_item_for_response( get_term_by( 'name', 'test', 'pa_size' ), new \WP_REST_Request() );
+		$response   = $controller->prepare_item_for_response( get_term_by( 'name', 'small', 'pa_size' ), new \WP_REST_Request() );
 		$validate   = new ValidateSchema( $schema );
 
 		$diff = $validate->get_diff_from_object( $response->get_data() );

@@ -5,7 +5,7 @@ namespace Automattic\WooCommerce\Blocks\Tests\Registry;
 use Automattic\WooCommerce\Blocks\Registry\Container as ContainerTest;
 use Automattic\WooCommerce\Blocks\Registry\FactoryType;
 use Automattic\WooCommerce\Blocks\Tests\Mocks\MockTestDependency;
-use PHPUnit\Framework\TestCase;
+use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
 /**
  * Tests the Container functionality

@@ -2,7 +2,7 @@
 
 namespace Automattic\WooCommerce\Blocks\Tests\Library;
 
-use \WP_UnitTestCase;
+use Yoast\PHPUnitPolyfills\Polyfills\ExpectException;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Package as NewPackage;
 use Automattic\WooCommerce\Blocks\Domain\Services\FeatureGating;
@@ -20,7 +20,9 @@ use Automattic\WooCommerce\Blocks\Domain\Services\CreateAccount as TestedCreateA
  *
  * @since $VID:$
  */
-class CreateAccount extends WP_UnitTestCase {
+class CreateAccount extends \WP_UnitTestCase {
+	use ExpectException;
+
 	private function get_test_instance() {
 		return new TestedCreateAccount( new NewPackage( 'test', './', new FeatureGating( 2 ) ) );
 	}

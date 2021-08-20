@@ -3,6 +3,7 @@
 
 namespace Automattic\WooCommerce\Blocks\Tests\Library;
 
+use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 use Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi;
 use Automattic\WooCommerce\Blocks\StoreApi\Formatters;
 use Automattic\WooCommerce\Blocks\StoreApi\Formatters\CurrencyFormatter;
@@ -10,7 +11,6 @@ use Automattic\WooCommerce\Blocks\StoreApi\Formatters\HtmlFormatter;
 use Automattic\WooCommerce\Blocks\StoreApi\Formatters\MoneyFormatter;
 use Automattic\WooCommerce\Blocks\StoreApi\Routes\RouteException;
 use Exception;
-use PHPUnit\Framework\TestCase;
 use Automattic\WooCommerce\Blocks\Domain\Services\FeatureGating;
 use Automattic\WooCommerce\Blocks\Domain\Package as DomainPackage;
 
