@@ -8,6 +8,9 @@ This documentation assumes knowledge of REST concepts.
 
 This API is used internally by Blocks--it is still in flux and may be subject to revisions. There is currently no versioning system, and this API should therefore be used at your own risk. Eventually, it will be moved to the main WooCommerce REST API at which point it will be versioned and safe to use in other projects.
 
+## Extensibility
+
+Store API offers the possibility to extend endpoints using `ExtendRestAPI`. You can read more about extending Store API in the [Extensibility in WooCommerce Blocks](https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/trunk/docs/extensibility) section.
 ## Basic usage
 
 Example of a valid API request using cURL:
