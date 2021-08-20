@@ -2,11 +2,12 @@
  * External dependencies
  */
 import { WC_BLOCKS_IMAGE_URL } from '@woocommerce/block-settings';
+import type { PaymentMethodIcon } from '@woocommerce/type-defs/payment-method-icon';
 
 /**
  * Array of common assets.
  */
-export const commonIcons = [
+export const commonIcons: PaymentMethodIcon[] = [
 	{
 		id: 'alipay',
 		alt: 'Alipay',
@@ -109,7 +110,9 @@ export const commonIcons = [
  *
  * @param {string} id Icon ID.
  */
-export const getCommonIconProps = ( id ) => {
+export const getCommonIconProps = (
+	id: string
+): PaymentMethodIcon | Record< string, unknown > => {
 	return (
 		commonIcons.find( ( icon ) => {
 			return icon.id === id;

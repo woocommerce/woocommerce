@@ -14,8 +14,11 @@ import { usePositionRelativeToViewport } from '@woocommerce/base-hooks';
  * Internal dependencies
  */
 import './style.scss';
+import type PaymentMethodConfig from '../../../../blocks-registry/payment-methods/payment-method-config';
 
-const getIconsFromPaymentMethods = ( paymentMethods ) => {
+const getIconsFromPaymentMethods = (
+	paymentMethods: PaymentMethodConfig[]
+) => {
 	return Object.values( paymentMethods ).reduce( ( acc, paymentMethod ) => {
 		if ( paymentMethod.icons !== null ) {
 			acc = acc.concat( paymentMethod.icons );
@@ -30,7 +33,7 @@ const getIconsFromPaymentMethods = ( paymentMethods ) => {
  * @param {Object} props Incoming props for the component.
  * @param {string} props.link What the button is linked to.
  */
-const CheckoutButton = ( { link } ) => {
+const CheckoutButton = ( { link }: { link: string } ): JSX.Element => {
 	const { isCalculating } = useCheckoutContext();
 	const [
 		positionReferenceElement,

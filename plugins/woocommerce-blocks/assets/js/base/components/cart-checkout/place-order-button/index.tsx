@@ -6,7 +6,7 @@ import { useCheckoutSubmit } from '@woocommerce/base-context/hooks';
 import { Icon, done } from '@woocommerce/icons';
 import Button from '@woocommerce/base-components/button';
 
-const PlaceOrderButton = () => {
+const PlaceOrderButton = (): JSX.Element => {
 	const {
 		submitButtonText,
 		onSubmit,
