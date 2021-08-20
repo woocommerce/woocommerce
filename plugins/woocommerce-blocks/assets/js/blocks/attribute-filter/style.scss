@@ -1,15 +1,6 @@
 .wc-block-attribute-filter {
 	margin-bottom: $gap-large;
 
-	.wc-block-attribute-filter-list-count {
-		&::before {
-			content: " (";
-		}
-		&::after {
-			content: ")";
-		}
-	}
-
 	.wc-block-attribute-filter-list {
 		margin: 0;
 
@@ -24,10 +15,6 @@
 				cursor: pointer;
 				display: inline-block;
 			}
-		}
-
-		.wc-block-attribute-filter-list-count {
-			float: right;
 		}
 	}
 

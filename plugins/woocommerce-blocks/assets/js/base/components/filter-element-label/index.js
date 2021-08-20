@@ -5,13 +5,18 @@ import { _n, sprintf } from '@wordpress/i18n';
 import Label from '@woocommerce/base-components/label';
 
 /**
- * The label for an attribute term filter.
+ * Internal dependencies
+ */
+import './style.scss';
+
+/**
+ * The label for an filter elements.
  *
  * @param {Object} props Incoming props for the component.
  * @param {string} props.name The name for the label.
- * @param {number} props.count The count of products this attribute is attached to.
+ * @param {number} props.count The count of products this status is attached to.
  */
-const AttributeFilterLabel = ( { name, count } ) => {
+const FilterElementLabel = ( { name, count } ) => {
 	return (
 		<>
 			{ name }
@@ -30,7 +35,7 @@ const AttributeFilterLabel = ( { name, count } ) => {
 					) }
 					wrapperElement="span"
 					wrapperProps={ {
-						className: 'wc-block-attribute-filter-list-count',
+						className: 'wc-filter-element-label-list-count',
 					} }
 				/>
 			) }
@@ -38,4 +43,4 @@ const AttributeFilterLabel = ( { name, count } ) => {
 	);
 };
 
-export default AttributeFilterLabel;
+export default FilterElementLabel;

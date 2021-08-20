@@ -9,10 +9,7 @@ import PropTypes from 'prop-types';
  */
 import ProductList from './product-list';
 
-const ProductListContainer = ( {
-	attributes,
-	hideOutOfStockItems = false,
-} ) => {
+const ProductListContainer = ( { attributes } ) => {
 	const [ currentPage, setPage ] = useState( 1 );
 	const [ currentSort, setSort ] = useState( attributes.orderby );
 	useEffect( () => {
@@ -31,7 +28,6 @@ const ProductListContainer = ( {
 	return (
 		<ProductList
 			attributes={ attributes }
-			hideOutOfStockItems={ hideOutOfStockItems }
 			currentPage={ currentPage }
 			onPageChange={ onPageChange }
 			onSortChange={ onSortChange }
