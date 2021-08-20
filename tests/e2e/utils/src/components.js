@@ -16,7 +16,7 @@ import {
 	waitForSelectorWithoutThrow,
 } from './page-utils';
 import factories from './factories';
-import { Coupon } from '@woocommerce/api';
+import { Coupon, Order } from '@woocommerce/api';
 
 const client = factories.api.withDefaultPermalinks;
 const config = require( 'config' );
@@ -329,40 +329,21 @@ const createGroupedProduct = async (groupedProduct = defaultGroupedProduct) => {
  * @returns {Promise<number>} ID of the created order.
  */
 const createOrder = async ( orderOptions = {} ) => {
-	const client = factories.api.withDefaultPermalinks;
-	const ordersEndpoint = 'wc/v3/orders';
-	const newOrder = {};
+	const newOrder = {
+		...( orderOptions.status ) && { status: orderOptions.status },
+		...( orderOptions.customerId ) && { customer_id: orderOptions.customerId },
+		...( orderOptions.customerBilling ) && { billing: orderOptions.customerBilling },
+		...( orderOptions.customerShipping ) && { shipping: orderOptions.customerShipping },
+		...( orderOptions.productId ) && { line_items: [
+				{ product_id: orderOptions.productId },
+			]
+		},
+	};
 
-	if ( orderOptions.status ) {
-		newOrder.status = orderOptions.status;
-	}
+	const repository = Order.restRepository( client );
+	const order = await repository.create( newOrder );
 
-	if ( orderOptions.customerId ) {
-		newOrder.customer_id = orderOptions.customerId;
-	}
-
-	if ( orderOptions.customerBilling ) {
-		newOrder.billing = orderOptions.customerBilling;
-	}
-
-	if ( orderOptions.customerShipping ) {
-		newOrder.shipping = orderOptions.customerShipping;
-	}
-
-	if ( orderOptions.productId ) {
-		newOrder.line_items = [
-			{
-				product_id: orderOptions.productId
-			}
-		]
-	}
-
-	const order = await client.post( ordersEndpoint, newOrder );
-	if ( !order.data ) {
-		return;
-	}
-
-	return order.data.id;
+	return order.id;
 }
 
 /**
@@ -565,5 +546,5 @@ export {
 	clickUpdateOrder,
 	deleteAllEmailLogs,
 	deleteAllShippingZones,
-	createOrder
+	createOrder,
 };

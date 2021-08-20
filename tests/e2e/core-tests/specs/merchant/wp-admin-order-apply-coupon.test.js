@@ -25,7 +25,7 @@ const runOrderApplyCouponTest = () => {
 		beforeAll(async () => {
 			productId = await createSimpleProduct();
 			couponCode = await createCoupon();
-			orderId = await createOrder( { productId: productId, status: 'pending' } );
+			orderId = await createOrder( { productId, status: 'pending' } );
 
 			await merchant.login();
 			await merchant.goToOrder( orderId );

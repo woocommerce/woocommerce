@@ -73,10 +73,10 @@ const runOrderSearchingTest = () => {
 			productId = await createSimpleProduct('Wanted Product');
 			customerId = await updateCustomerBilling();
 			orderId = await createOrder({
-				customerId: customerId,
-				productId: productId,
-				customerBilling: customerBilling,
-				customerShipping: customerShipping,
+				customerId,
+				productId,
+				customerBilling,
+				customerShipping,
 			});
 
 			// Login and open All Orders view
