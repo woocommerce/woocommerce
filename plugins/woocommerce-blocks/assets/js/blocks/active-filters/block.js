@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useQueryStateByKey } from '@woocommerce/base-context/hooks';
+import { getSetting } from '@woocommerce/settings';
 import { useMemo } from '@wordpress/element';
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
@@ -31,8 +32,38 @@ const ActiveFiltersBlock = ( {
 		'attributes',
 		[]
 	);
+	const [ productStockStatus, setProductStockStatus ] = useQueryStateByKey(
+		'stock_status',
+		[]
+	);
 	const [ minPrice, setMinPrice ] = useQueryStateByKey( 'min_price' );
 	const [ maxPrice, setMaxPrice ] = useQueryStateByKey( 'max_price' );
+
+	const STOCK_STATUS_OPTIONS = getSetting( 'stockStatusOptions', [] );
+	const activeStockStatusFilters = useMemo( () => {
+		if ( productStockStatus.length > 0 ) {
+			return productStockStatus.map( ( slug ) => {
+				return renderRemovableListItem( {
+					type: __( 'Stock Status', 'woo-gutenberg-products-block' ),
+					name: STOCK_STATUS_OPTIONS[ slug ],
+					removeCallback: () => {
+						const newStatuses = productStockStatus.filter(
+							( status ) => {
+								return status !== slug;
+							}
+						);
+						setProductStockStatus( newStatuses );
+					},
+					displayStyle: blockAttributes.displayStyle,
+				} );
+			} );
+		}
+	}, [
+		STOCK_STATUS_OPTIONS,
+		productStockStatus,
+		setProductStockStatus,
+		blockAttributes.displayStyle,
+	] );
 
 	const activePriceFilters = useMemo( () => {
 		if ( ! Number.isFinite( minPrice ) && ! Number.isFinite( maxPrice ) ) {
@@ -75,6 +106,7 @@ const ActiveFiltersBlock = ( {
 	const hasFilters = () => {
 		return (
 			productAttributes.length > 0 ||
+			productStockStatus.length > 0 ||
 			Number.isFinite( minPrice ) ||
 			Number.isFinite( maxPrice )
 		);
@@ -125,6 +157,7 @@ const ActiveFiltersBlock = ( {
 					) : (
 						<>
 							{ activePriceFilters }
+							{ activeStockStatusFilters }
 							{ activeAttributeFilters }
 						</>
 					) }
@@ -135,6 +168,7 @@ const ActiveFiltersBlock = ( {
 						setMinPrice( undefined );
 						setMaxPrice( undefined );
 						setProductAttributes( [] );
+						setProductStockStatus( [] );
 					} }
 				>
 					<Label
