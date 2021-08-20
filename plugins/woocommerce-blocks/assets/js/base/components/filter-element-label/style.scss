@@ -1,9 +1,0 @@
-.wc-filter-element-label-list-count {
-	&::before {
-		content: " (";
-	}
-	&::after {
-		content: ")";
-	}
-	opacity: 0.6;
-}
