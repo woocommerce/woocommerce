@@ -2,6 +2,7 @@
  * External dependencies
  */
 import classnames from 'classnames';
+import type { PaymentMethodIcon as PaymentMethodIconType } from '@woocommerce/type-defs/payment-method-icon';
 
 /**
  * Internal dependencies
@@ -11,6 +12,10 @@ import { getCommonIconProps } from './common-icons';
 import { normalizeIconConfig } from './utils';
 import './style.scss';
 
+interface PaymentMethodIconsProps {
+	icons: PaymentMethodIconType[];
+	align: string;
+}
 /**
  * For a given list of icons, render each as a list item, using common icons
  * where available.
@@ -19,7 +24,10 @@ import './style.scss';
  * @param {Array}  props.icons Array of icons object configs or ids as strings.
  * @param {string} props.align How to align the icon.
  */
-export const PaymentMethodIcons = ( { icons = [], align = 'center' } ) => {
+export const PaymentMethodIcons = ( {
+	icons = [],
+	align = 'center',
+}: PaymentMethodIconsProps ): JSX.Element | null => {
 	const iconConfigs = normalizeIconConfig( icons );
 
 	if ( iconConfigs.length === 0 ) {
