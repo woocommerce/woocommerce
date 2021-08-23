@@ -16,6 +16,7 @@
 		"settings": false,
 		"shipping-label-banner": true,
 		"store-alerts": true,
+		"tasks": false,
 		"transient-notices": true
 	}
 }
