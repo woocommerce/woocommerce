@@ -73,7 +73,7 @@ jest --group=api
 
 ### Test groups
 
-This package makes use of the `jest-runner-groups` package, which allows grouping tests together around semantic groups (such as `orders` API calls, or `coupon` API calls) to make running test suites more granular.
+This package makes use of the `jest-runner-groups` package, which allows grouping tests together around semantic groups (such as `orders` API calls, or `coupons` API calls) to make running test suites more granular.
 
 Before the `describe()` statement, add in a doc block containing the desired groups:
 
@@ -117,7 +117,7 @@ You can make use of the REST API log plugin to see how requests are being made, 
 
 ## Generate a Postman Collection
 
-This package also allows generating a `collection.json` file that can be imported into Postman and other REST clients that support the Postman v2 collection. To generate this file, run:
+This package also allows generating a `collection.json` file using the test data in this package. This file can be imported into Postman and other REST clients that support the Postman v2 collection. To generate this file, run:
 
 ```
 npm run make:collection

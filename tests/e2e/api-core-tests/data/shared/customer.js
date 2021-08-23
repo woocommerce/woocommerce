@@ -1,3 +1,11 @@
+/**
+ * Customer billing object.
+ *
+ * Used in the following APIs:
+ * https://woocommerce.github.io/woocommerce-rest-api-docs/#customers
+ * https://woocommerce.github.io/woocommerce-rest-api-docs/#orders
+ *
+ */
 const customerBilling = {
 	first_name: 'John',
 	last_name: 'Doe',
@@ -12,6 +20,13 @@ const customerBilling = {
 	email: 'john.doe@example.com',
 }
 
+/**
+ * Customer shipping object.
+ *
+ * Used in the following APIs:
+ * https://woocommerce.github.io/woocommerce-rest-api-docs/#customers
+ * https://woocommerce.github.io/woocommerce-rest-api-docs/#orders
+ */
 const customerShipping = {
 	first_name: 'Tim',
 	last_name: 'Clark',
