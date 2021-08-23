@@ -3,7 +3,7 @@
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
 import classnames from 'classnames';
-import { createElement, Component } from '@wordpress/element';
+import { Component, createElement } from '@wordpress/element';
 import { debounce, escapeRegExp, identity, noop } from 'lodash';
 import PropTypes from 'prop-types';
 import { withFocusOutside, withSpokenMessages } from '@wordpress/components';
@@ -539,6 +539,10 @@ SelectControl.propTypes = {
 	 * Render results list positioned statically instead of absolutely.
 	 */
 	staticList: PropTypes.bool,
+	/**
+	 * autocomplete prop for the Control input field.
+	 */
+	autoComplete: PropTypes.string,
 };
 
 SelectControl.defaultProps = {
@@ -559,6 +563,7 @@ SelectControl.defaultProps = {
 	showClearButton: false,
 	hideBeforeSearch: false,
 	staticList: false,
+	autoComplete: 'off',
 };
 
 export default compose( [

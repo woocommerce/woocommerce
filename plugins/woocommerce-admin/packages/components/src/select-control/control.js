@@ -124,12 +124,13 @@ class Control extends Component {
 			onSearch,
 			placeholder,
 			searchInputType,
+			autoComplete,
 		} = this.props;
 		const { isActive } = this.state;
 
 		return (
 			<input
-				autoComplete="off"
+				autoComplete={ autoComplete || 'off' }
 				className="woocommerce-select-control__control-input"
 				id={ `woocommerce-select-control-${ instanceId }__control-input` }
 				ref={ this.input }
@@ -329,6 +330,10 @@ Control.propTypes = {
 	 * Show all options on focusing, even if a query exists.
 	 */
 	showAllOnFocus: PropTypes.bool,
+	/**
+	 * Control input autocomplete field, defaults: off.
+	 */
+	autoComplete: PropTypes.string,
 };
 
 export default Control;

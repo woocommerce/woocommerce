@@ -1,4 +1,5 @@
 # Unreleased
+-   Add `autoComplete` prop to the `SelectControl` component. #7497
 
 # 8.1.0
 

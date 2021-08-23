@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
 import { escapeRegExp } from 'lodash';
-import { Fragment, useEffect, useMemo, useState } from '@wordpress/element';
+import { useEffect, useMemo, useState, useRef } from '@wordpress/element';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 import { SelectControl, TextControl } from '@woocommerce/components';
 
@@ -85,33 +85,63 @@ export function getCountryStateOptions() {
 export function useGetCountryStateAutofill( options, countryState, setValue ) {
 	const [ autofillCountry, setAutofillCountry ] = useState( '' );
 	const [ autofillState, setAutofillState ] = useState( '' );
+	const isAutofillChange = useRef();
 
 	useEffect( () => {
+		const option = options.find( ( opt ) => opt.key === countryState );
+		const labels = option ? option.label.split( /\u2013|\u2014|\-/ ) : [];
+		const newCountry = ( labels[ 0 ] || '' ).trim();
+		const newState = ( labels[ 1 ] || '' ).trim();
+
+		if (
+			! isAutofillChange.current &&
+			( newCountry !== autofillCountry || newState !== autofillState )
+		) {
+			setAutofillCountry( newCountry );
+			setAutofillState( newState );
+		}
+		isAutofillChange.current = false;
+	}, [ countryState ] );
+
+	useEffect( () => {
+		if ( ! autofillCountry && ! autofillState && countryState ) {
+			// Clear form.
+			isAutofillChange.current = true;
+			setValue( 'countryState', '' );
+		}
 		let filteredOptions = [];
 		const countrySearch = new RegExp(
 			escapeRegExp( autofillCountry ),
 			'i'
 		);
+		const stateSearch = new RegExp(
+			escapeRegExp( autofillState.replace( /\s/g, '' ) ) + '$', // Always match the end of string for region.
+			'i'
+		);
 		if ( autofillState.length || autofillCountry.length ) {
 			filteredOptions = options.filter( ( option ) =>
-				countrySearch.test( option.label )
+				( autofillCountry.length ? countrySearch : stateSearch ).test(
+					option.label
+				)
 			);
 		}
 		if ( autofillCountry.length && autofillState.length ) {
-			const stateSearch = new RegExp(
-				escapeRegExp( autofillState.replace( /\s/g, '' ) ),
-				'i'
-			);
+			const isStateAbbreviation = autofillState.length < 3;
 			filteredOptions = filteredOptions.filter( ( option ) =>
 				stateSearch.test(
-					option.label.replace( '-', '' ).replace( /\s/g, '' )
+					( isStateAbbreviation ? option.key : option.label )
+						.replace( '-', '' )
+						.replace( /\s/g, '' )
 				)
 			);
 
+			const isCountryAbbreviation = autofillCountry.length < 3;
 			if ( filteredOptions.length > 1 ) {
 				let countryKeyOptions = [];
 				countryKeyOptions = filteredOptions.filter( ( option ) =>
-					countrySearch.test( option.key )
+					countrySearch.test(
+						isCountryAbbreviation ? option.key : option.label
+					)
 				);
 
 				if ( countryKeyOptions.length > 0 ) {
@@ -122,7 +152,11 @@ export function useGetCountryStateAutofill( options, countryState, setValue ) {
 			if ( filteredOptions.length > 1 ) {
 				let stateKeyOptions = [];
 				stateKeyOptions = filteredOptions.filter( ( option ) =>
-					stateSearch.test( option.key )
+					stateSearch.test(
+						( isStateAbbreviation ? option.key : option.label )
+							.replace( '-', '' )
+							.replace( /\s/g, '' )
+					)
 				);
 
 				if ( stateKeyOptions.length === 1 ) {
@@ -135,12 +169,13 @@ export function useGetCountryStateAutofill( options, countryState, setValue ) {
 			filteredOptions.length === 1 &&
 			countryState !== filteredOptions[ 0 ].key
 		) {
+			isAutofillChange.current = true;
 			setValue( 'countryState', filteredOptions[ 0 ].key );
 		}
-	}, [ autofillCountry, autofillState, countryState, options, setValue ] );
+	}, [ autofillCountry, autofillState, options, setValue ] );
 
 	return (
-		<Fragment>
+		<>
 			<input
 				onChange={ ( event ) =>
 					setAutofillCountry( event.target.value )
@@ -162,7 +197,7 @@ export function useGetCountryStateAutofill( options, countryState, setValue ) {
 				tabIndex="-1"
 				autoComplete="address-level1"
 			/>
-		</Fragment>
+		</>
 	);
 }
 
@@ -200,6 +235,7 @@ export function StoreAddress( props ) {
 			<SelectControl
 				label={ __( 'Country / Region', 'woocommerce-admin' ) }
 				required
+				autoComplete="new-password" // disable autocomplete and autofill
 				options={ countryStateOptions }
 				excludeSelectedOptions={ false }
 				showAllOnFocus
