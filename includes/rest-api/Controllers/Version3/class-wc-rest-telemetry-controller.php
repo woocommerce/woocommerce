@@ -1,6 +1,6 @@
 <?php
 /**
- * REST API WC System Status App Controller
+ * REST API WC Telemetry Controller
  *
  * Handles requests to the /system_status/App/* endpoints.
  *
@@ -11,12 +11,12 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * System status App controller.
+ * Telemetry controller.
  *
  * @package WooCommerce\RestApi
- * @extends WC_REST_System_Status_App_V2_Controller
+ * @extends WC_REST_Telemetry_V2_Controller
  */
-class WC_REST_System_Status_App_Controller extends WC_REST_System_Status_App_V2_Controller {
+class WC_REST_Telemetry_Controller extends WC_REST_Telemetry_V2_Controller {
 
 	/**
 	 * Endpoint namespace.
