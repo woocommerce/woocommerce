@@ -41,7 +41,7 @@ class WC_REST_Telemetry_V2_Controller extends WC_REST_Controller {
 			'/' . $this->rest_base,
 			array(
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'record_usage_data' ),
 					'permission_callback' => array( $this, 'telemetry_permissions_check' ),
 					'args'                => $this->get_collection_params(),
@@ -67,10 +67,10 @@ class WC_REST_Telemetry_V2_Controller extends WC_REST_Controller {
 	/**
 	 * Record WCTracker Data
 	 *
-	 * @param Array $query_params List of query parameters for the current request.
+	 * @param  WP_REST_Request $request Full details about the request.
 	 */
 	public function record_usage_data( $request ) {
-		$new = $this->get_usage_data( $request->get_query_params() );
+		$new = $this->get_usage_data( $request );
 		if ( ! $new || ! $new['platform'] ) {
 			return;
 		}
@@ -91,11 +91,11 @@ class WC_REST_Telemetry_V2_Controller extends WC_REST_Controller {
 	/**
 	 * Get usage data from current request
 	 *
-	 * @param Array $query_params List of query parameters for the current request.
+	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return Array
 	 */
-	public function get_usage_data( $query_params ) {
-		$platform = strtolower( $query_params['platform'] );
+	public function get_usage_data( $request ) {
+		$platform = strtolower( $request->get_param( 'platform' ) );
 		switch ( $platform ) {
 			case 'ios':
 			case 'android':
@@ -104,7 +104,7 @@ class WC_REST_Telemetry_V2_Controller extends WC_REST_Controller {
 				return;
 		}
 
-		$version = $query_params['version'];
+		$version = $request->get_param( 'version' );
 		if ( ! $version ) {
 			return;
 		}
