@@ -553,10 +553,6 @@ class WC_Meta_Box_Order_Data {
 			throw new Exception( __( 'Payment method is missing.', 'woocommerce' ), 400 );
 		}
 
-		if ( ! isset( $_POST['_wpnonce'] ) ) {
-			throw new Exception( __( 'Nonce is missing.', 'woocommerce' ), 400 );
-		}
-
 		self::init_address_fields();
 
 		// Ensure gateways are loaded in case they need to insert data into the emails.
