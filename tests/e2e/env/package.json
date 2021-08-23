@@ -55,7 +55,6 @@
     "docker:down": "./bin/docker-compose.sh down",
     "docker:clear-all": "docker rmi --force $(docker images -q)",
     "docker:ssh": "docker exec -it $(node utils/get-app-name.js)_wordpress-www /bin/bash",
-    "install-wp-tests": "./bin/install-wp-tests.sh",
     "test:e2e": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js",
     "test:e2e-debug": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js --dev --debug",
     "test:e2e-dev": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js --dev"
