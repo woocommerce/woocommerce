@@ -112,7 +112,7 @@ class WC_REST_Telemetry_V2_Controller extends WC_REST_Controller {
 		return array(
 			'platform'  => sanitize_text_field( $platform ),
 			'version'   => sanitize_text_field( $version ),
-			'last_used' => date( 'c' ),
+			'last_used' => gmdate( 'c' ),
 		);
 	}
 
