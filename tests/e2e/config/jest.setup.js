@@ -113,7 +113,11 @@ beforeAll(async () => {
 	}
 
 	// Update the ready page to prevent concurrent test runs
-	await updateReadyPageStatus('draft');
+	try {
+		await updateReadyPageStatus('draft');
+	} catch ( error ) {
+		// Prevent an error here causing tests to fail.
+	}
 
 	await trashExistingPosts();
 	await withRestApi.deleteAllProducts();
