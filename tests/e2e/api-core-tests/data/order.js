@@ -9,39 +9,39 @@ const { customerBilling, customerShipping } = require('./shared');
  */
 
 const productLineItems = {
-	name: "",
-	product_id: "",
+	name: '',
+	product_id: '',
 	variation_id: 0,
 	quantity: 0,
-	tax_class: "",
-	subtotal: "",
-	total: "",
+	tax_class: '',
+	subtotal: '',
+	total: '',
 }
 
 const shippingLines = {
-	method_title: "",
-	method_id: "",
-	total: "",
+	method_title: '',
+	method_id: '',
+	total: '',
 }
 
 const feeLines = {
-	name: "",
-	tax_class: "",
-	tax_status: "",
-	total: "",
+	name: '',
+	tax_class: '',
+	tax_status: '',
+	total: '',
 }
 
 const couponLines = {
-	code: ""
+	code: ''
 }
 
 const order = {
-	payment_method: "",
-	payment_method_title: "",
-	status: "pending",
+	payment_method: '',
+	payment_method_title: '',
+	status: 'pending',
 	set_paid: false,
-	currency: "USD",
-	customer_note: "",
+	currency: 'USD',
+	customer_note: '',
 	customer_id: 0,
 	billing: customerBilling,
 	shipping: customerShipping,
