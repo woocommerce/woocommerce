@@ -24,7 +24,7 @@ utils.describeIf( UPDATE_WC )( 'WooCommerce plugin can be uploaded and activated
 	beforeAll( async () => {
 
 		if ( TEST_RELEASE ) {
-			zipUrl = await getLatestReleaseZipUrl('woocommerce', 'woocommerce');
+			zipUrl = await getLatestReleaseZipUrl( 'woocommerce', 'woocommerce' );
 		} else {
 			zipUrl = 'https://github.com/woocommerce/woocommerce/releases/download/nightly/woocommerce-trunk-nightly.zip';
 		}
