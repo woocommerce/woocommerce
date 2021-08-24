@@ -16,7 +16,7 @@ import {
 	waitForSelectorWithoutThrow,
 } from './page-utils';
 import factories from './factories';
-import { Coupon } from '@woocommerce/api';
+import { Coupon, Order } from '@woocommerce/api';
 
 const client = factories.api.withDefaultPermalinks;
 const config = require( 'config' );
@@ -323,6 +323,30 @@ const createGroupedProduct = async (groupedProduct = defaultGroupedProduct) => {
 };
 
 /**
+ * Use the API to create an order with the provided details.
+ *
+ * @param {object} orderOptions
+ * @returns {Promise<number>} ID of the created order.
+ */
+const createOrder = async ( orderOptions = {} ) => {
+	const newOrder = {
+		...( orderOptions.status ) && { status: orderOptions.status },
+		...( orderOptions.customerId ) && { customer_id: orderOptions.customerId },
+		...( orderOptions.customerBilling ) && { billing: orderOptions.customerBilling },
+		...( orderOptions.customerShipping ) && { shipping: orderOptions.customerShipping },
+		...( orderOptions.productId ) && { line_items: [
+				{ product_id: orderOptions.productId },
+			]
+		},
+	};
+
+	const repository = Order.restRepository( client );
+	const order = await repository.create( newOrder );
+
+	return order.id;
+}
+
+/**
  * Create a basic order with the provided order status.
  *
  * @param orderStatus Status of the new order. Defaults to `Pending payment`.
@@ -522,4 +546,5 @@ export {
 	clickUpdateOrder,
 	deleteAllEmailLogs,
 	deleteAllShippingZones,
+	createOrder,
 };

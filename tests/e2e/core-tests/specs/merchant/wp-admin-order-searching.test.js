@@ -1,17 +1,12 @@
-/* eslint-disable jest/no-export, jest/no-disabled-tests, jest/expect-expect */
-
 /**
  * Internal dependencies
  */
 const {
 	merchant,
-	clearAndFillInput,
 	searchForOrder,
 	createSimpleProduct,
-	addProductToOrder,
-	clickUpdateOrder,
 	factories,
-	selectOptionInSelect2,
+	createOrder,
 } = require( '@woocommerce/e2e-utils' );
 
 const searchString = 'John Doe';
@@ -45,7 +40,7 @@ const customerShipping = {
 /**
  * Set the billing fields for the customer account for this test suite.
  *
- * @returns {Promise<void>}
+ * @returns {Promise<number>}
  */
 const updateCustomerBilling = async () => {
 	const client = factories.api.withDefaultPermalinks;
@@ -65,39 +60,33 @@ const updateCustomerBilling = async () => {
 		shipping: customerShipping,
 	};
 	await client.put( customerEndpoint + customerId, customerData );
+	return customerId;
 };
 
 const runOrderSearchingTest = () => {
 	describe('WooCommerce Orders > Search orders', () => {
+		let productId;
 		let orderId;
+		let customerId;
+
 		beforeAll( async () => {
-			await createSimpleProduct('Wanted Product');
-			await updateCustomerBilling();
+			productId = await createSimpleProduct('Wanted Product');
+			customerId = await updateCustomerBilling();
+			orderId = await createOrder({
+				customerId,
+				productId,
+				customerBilling,
+				customerShipping,
+			});
 
-			// Create new order for testing
+			// Login and open All Orders view
 			await merchant.login();
-			await merchant.openNewOrder();
-			await page.waitForSelector('#order_status');
-			await page.click('#customer_user');
-			await page.click('span.select2-search > input.select2-search__field');
-			await page.type('span.select2-search > input.select2-search__field', 'Jane Smith');
-			await page.waitFor(2000); // to avoid flakyness
-			await page.keyboard.press('Enter');
-
-			// Get the post id
-			const variablePostId = await page.$('#post_ID');
-			orderId = (await(await variablePostId.getProperty('value')).jsonValue());
-
-			// Save new order and add desired product to order
-			await clickUpdateOrder('Order updated.', true);
-			await addProductToOrder(orderId, 'Wanted Product');
-
-			// Open All Orders view
 			await merchant.openAllOrdersView();
 		});
 
 		it('can search for order by order id', async () => {
-			await searchForOrder(orderId, orderId, searchString);
+			// Convert the order ID to string so we can search on it
+			await searchForOrder(orderId.toString(), orderId, searchString);
 		});
 
 		it('can search for order by billing first name', async () => {
