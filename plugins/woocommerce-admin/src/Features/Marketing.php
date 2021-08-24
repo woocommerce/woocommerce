@@ -61,7 +61,7 @@ class Marketing {
 		add_action( 'admin_menu', array( $this, 'add_parent_menu_item' ), 6 );
 
 		add_filter( 'woocommerce_admin_preload_options', array( $this, 'preload_options' ) );
-		add_filter( 'woocommerce_shared_settings', array( $this, 'component_settings' ), 30 );
+		add_filter( 'woocommerce_admin_shared_settings', array( $this, 'component_settings' ), 30 );
 	}
 
 	/**

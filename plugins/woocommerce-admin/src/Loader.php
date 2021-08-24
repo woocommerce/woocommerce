@@ -69,6 +69,7 @@ class Loader {
 	 */
 	public function __construct() {
 		Features::get_instance();
+		WCAdminSharedSettings::get_instance();
 		add_action( 'init', array( __CLASS__, 'define_tables' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'register_scripts' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'inject_wc_settings_dependencies' ), 14 );
@@ -76,7 +77,7 @@ class Loader {
 		// Old settings injection.
 		add_filter( 'woocommerce_components_settings', array( __CLASS__, 'add_component_settings' ) );
 		// New settings injection.
-		add_filter( 'woocommerce_shared_settings', array( __CLASS__, 'add_component_settings' ) );
+		add_filter( 'woocommerce_admin_shared_settings', array( __CLASS__, 'add_component_settings' ) );
 		add_filter( 'admin_body_class', array( __CLASS__, 'add_admin_body_classes' ) );
 		add_action( 'admin_menu', array( __CLASS__, 'register_page_handler' ) );
 		add_action( 'admin_menu', array( __CLASS__, 'register_store_details_page' ) );

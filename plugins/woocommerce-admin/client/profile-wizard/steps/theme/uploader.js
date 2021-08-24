@@ -17,6 +17,27 @@ import { noop } from 'lodash';
 import PropTypes from 'prop-types';
 import { withDispatch } from '@wordpress/data';
 import { H, Spinner } from '@woocommerce/components';
+import { isWpVersion } from '@woocommerce/settings';
+
+/**
+ * NOTE: This can be removed after WP version 6.0 and replaced with a div.
+ *
+ * @param {Object} props React props.
+ * @param {Node} [props.children] Children of react component.
+ * @param {string} [props.className] Additional class name to style the component.
+ */
+const DropZoneWrapper = ( { children, className } ) => {
+	const isDropzoneProviderDepreciated = isWpVersion( '5.8', '>=' );
+
+	if ( isDropzoneProviderDepreciated ) {
+		return <div className={ className }>{ children }</div>;
+	}
+	return (
+		<DropZoneProvider>
+			<div className={ className }>{ children }</div>
+		</DropZoneProvider>
+	);
+};
 
 class ThemeUploader extends Component {
 	constructor() {
@@ -71,7 +92,7 @@ class ThemeUploader extends Component {
 
 		return (
 			<Card className={ classes }>
-				<DropZoneProvider>
+				<DropZoneWrapper className="woocommerce-theme-uploader__dropzone-wrapper">
 					{ ! isUploading ? (
 						<Fragment>
 							<FormFileUpload
@@ -114,7 +135,7 @@ class ThemeUploader extends Component {
 							</p>
 						</Fragment>
 					) }
-				</DropZoneProvider>
+				</DropZoneWrapper>
 			</Card>
 		);
 	}

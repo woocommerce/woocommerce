@@ -50,7 +50,7 @@ class Settings {
 			return;
 		}
 
-		add_filter( 'woocommerce_shared_settings', array( __CLASS__, 'add_component_settings' ) );
+		add_filter( 'woocommerce_admin_shared_settings', array( __CLASS__, 'add_component_settings' ) );
 		// Run this after the original WooCommerce settings have been added.
 		add_action( 'admin_menu', array( $this, 'register_pages' ), 60 );
 		add_action( 'init', array( $this, 'redirect_core_settings_pages' ) );

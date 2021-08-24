@@ -1,4 +1,3 @@
-
 .woocommerce-profile-wizard__body .woocommerce-profile-wizard__container {
 	> .woocommerce-profile-wizard__themes-tab-panel {
 		margin-bottom: $gap-large;
@@ -33,7 +32,7 @@
 		background: transparent;
 		height: 48px;
 		width: 100%;
-		@include font-size(14);
+		@include font-size( 14 );
 		font-weight: 500;
 		outline: none;
 		padding: 0 $gap-large;
@@ -60,7 +59,7 @@ p.woocommerce-profile-wizard__themes-skip-this-step {
 	.woocommerce-profile-wizard__theme-name {
 		margin-top: auto;
 		margin-bottom: $gap-smaller;
-		@include font-size(24);
+		@include font-size( 24 );
 		font-weight: 400;
 
 		svg {
@@ -88,11 +87,11 @@ p.woocommerce-profile-wizard__themes-skip-this-step {
 	margin: 0;
 	position: relative;
 
-	&.is-uploading .components-drop-zone__provider {
+	&.is-uploading .woocommerce-theme-uploader__dropzone-wrapper {
 		min-height: 382px;
 	}
 
-	.components-drop-zone__provider {
+	.woocommerce-theme-uploader__dropzone-wrapper {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
@@ -133,12 +132,12 @@ p.woocommerce-profile-wizard__themes-skip-this-step {
 
 	.woocommerce-theme-uploader__title {
 		margin: $gap-smaller 0;
-		@include font-size(24);
+		@include font-size( 24 );
 		font-weight: 400;
 	}
 
 	p {
-		@include font-size(14);
+		@include font-size( 14 );
 		margin: 0;
 	}
 }

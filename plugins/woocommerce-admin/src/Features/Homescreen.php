@@ -50,7 +50,8 @@ class Homescreen {
 			add_action( 'admin_head', array( $this, 'update_link_structure' ), 20 );
 		}
 		add_filter( 'woocommerce_admin_preload_options', array( $this, 'preload_options' ) );
-		add_filter( 'woocommerce_shared_settings', array( $this, 'component_settings' ), 20 );
+
+		add_filter( 'woocommerce_admin_shared_settings', array( $this, 'component_settings' ), 20 );
 	}
 
 	/**

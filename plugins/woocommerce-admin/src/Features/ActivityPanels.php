@@ -37,7 +37,7 @@ class ActivityPanels {
 		// Run after Automattic\WooCommerce\Admin\Loader.
 		add_filter( 'woocommerce_components_settings', array( $this, 'component_settings' ), 20 );
 		// New settings injection.
-		add_filter( 'woocommerce_shared_settings', array( $this, 'component_settings' ), 20 );
+		add_filter( 'woocommerce_admin_shared_settings', array( $this, 'component_settings' ), 20 );
 	}
 
 	/**

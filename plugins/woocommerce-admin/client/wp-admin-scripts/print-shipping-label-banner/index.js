@@ -3,6 +3,7 @@
  */
 import { render } from '@wordpress/element';
 import { withPluginsHydration } from '@woocommerce/data';
+import { getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
@@ -15,7 +16,7 @@ const args =
 
 // Render the header.
 const HydratedShippingBanner = withPluginsHydration( {
-	...window.wcSettings.plugins,
-	jetpackStatus: window.wcSettings.dataEndpoints.jetpackStatus,
+	...getSetting( 'plugins' ),
+	jetpackStatus: getSetting( 'dataEndpoints', {} ).jetpackStatus,
 } )( ShippingBanner );
 render( <HydratedShippingBanner itemsCount={ args.items } />, metaBox );

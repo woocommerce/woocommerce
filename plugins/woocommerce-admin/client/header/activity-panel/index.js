@@ -11,7 +11,7 @@ import {
 	inbox as inboxIcon,
 	external,
 } from '@wordpress/icons';
-import { getAdminLink } from '@woocommerce/wc-admin-settings';
+import { getAdminLink, getSetting } from '@woocommerce/wc-admin-settings';
 import { H, Section } from '@woocommerce/components';
 import {
 	ONBOARDING_STORE_NAME,
@@ -292,7 +292,7 @@ export const ActivityPanel = ( { isEmbedded, query, userPreferencesData } ) => {
 			icon: <Icon icon={ external } />,
 			visible: query.page === 'wc-admin' && query.task === 'appearance',
 			onClick: () => {
-				window.open( window.wcSettings.siteUrl );
+				window.open( getSetting( 'siteUrl' ) );
 				recordEvent(
 					'wcadmin_tasklist_previewsite',
 					previewSiteBtnTrackData

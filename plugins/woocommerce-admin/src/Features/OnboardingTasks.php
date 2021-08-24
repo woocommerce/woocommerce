@@ -60,7 +60,7 @@ class OnboardingTasks {
 		// Run after Onboarding.
 		add_filter( 'woocommerce_components_settings', array( __CLASS__, 'component_settings' ), 30 );
 		// New settings injection.
-		add_filter( 'woocommerce_shared_settings', array( $this, 'component_settings' ), 30 );
+		add_filter( 'woocommerce_admin_shared_settings', array( $this, 'component_settings' ), 30 );
 
 		add_action( 'admin_init', array( $this, 'set_active_task' ), 5 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'add_onboarding_product_notice_admin_script' ) );

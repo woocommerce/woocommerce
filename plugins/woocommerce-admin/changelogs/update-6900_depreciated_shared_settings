@@ -1,0 +1,4 @@
+Significance: minor
+Type: Update
+
+Removes the use of the depreciated woocommerce_shared_settings hook. #7480
