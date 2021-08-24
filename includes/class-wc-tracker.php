@@ -765,7 +765,7 @@ class WC_Tracker {
 	 *
 	 * @return array
 	 */
-	public static function get_woocommerce_mobile_info() {
+	public static function get_woocommerce_mobile_usage() {
 		return get_option( 'woocommerce_mobile_app_usage' );
 	}
 }
