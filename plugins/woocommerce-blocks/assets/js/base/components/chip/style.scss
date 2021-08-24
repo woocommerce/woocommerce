@@ -3,7 +3,7 @@
 	align-items: center;
 	border: 0;
 	display: inline-flex;
-	padding: em($gap-smallest / 2) 0.5em em($gap-smallest);
+	padding: em($gap-smallest * 0.5) 0.5em em($gap-smallest);
 	margin: 0 0.365em 0.365em 0;
 	border-radius: 0;
 	line-height: 1;

@@ -18,7 +18,7 @@
 	.wc-block-grid {
 		.wc-block-grid__products {
 			list-style: none;
-			margin: 0 (-$gap/2) $gap;
+			margin: 0 (-$gap*0.5) $gap;
 			padding: 0;
 
 			.wc-block-grid__product {

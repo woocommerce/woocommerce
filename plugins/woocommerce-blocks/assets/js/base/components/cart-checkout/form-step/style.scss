@@ -18,7 +18,7 @@
 		border-left: 1px solid;
 		opacity: 0.3;
 		position: absolute;
-		left: -$gap-larger/2;
+		left: -$gap-larger*0.5;
 		top: 2.5em;
 		bottom: em($gap) * -1;
 	}
@@ -83,7 +83,7 @@
 		content: "\00a0" counter(checkout-step) "." / "";
 		position: absolute;
 		width: $gap-larger;
-		left: -$gap-larger/2;
+		left: -$gap-larger*0.5;
 		top: 0;
 		text-align: center;
 		transform: translateX(-50%);
@@ -95,7 +95,7 @@
 		border-left: 1px solid;
 		opacity: 0.3;
 		position: absolute;
-		left: -$gap-larger/2;
+		left: -$gap-larger*0.5;
 		top: 0;
 	}
 }

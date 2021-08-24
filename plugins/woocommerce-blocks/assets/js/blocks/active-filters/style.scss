@@ -91,8 +91,8 @@
 
 		.wc-block-components-chip {
 			@include font-size(small);
-			margin-top: em($gap-small/4);
-			margin-bottom: em($gap-small/4);
+			margin-top: em($gap-small*0.25);
+			margin-bottom: em($gap-small*0.25);
 		}
 	}
 }

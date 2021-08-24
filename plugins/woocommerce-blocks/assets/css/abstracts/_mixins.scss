@@ -179,7 +179,7 @@ $fontSizes: (
 
 // Converts a px unit to em.
 @function em($size, $base: 16px) {
-	@return $size / $base * 1em;
+	@return math.div($size, $base) * 1em;
 }
 
 // Encodes hex colors so they can be used in URL content.
