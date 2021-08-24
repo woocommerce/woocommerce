@@ -25,11 +25,11 @@ const updateReadyPageStatus = async ( status ) => {
 		statusFilter = 'draft';
 	}
 
-	const getPostsResponse = await client.get(`${wpPagesEndpoint}?search=ready&status=${statusFilter}`);
-	if ( getPostsResponse.data && getPostsResponse.data.length > 0) {
+	const getPostsResponse = await client.get(`${wpPagesEndpoint}?search=ready&status=${statusFilter}` );
+	if ( getPostsResponse.data && getPostsResponse.data.length > 0 ) {
 		const pageId = getPostsResponse.data[0].id;
 		// Update the page to the new status
-		await client.post(`${wpPagesEndpoint}/${pageId}`, { 'status': status });
+		await client.put(`${wpPagesEndpoint}/${pageId}`, { 'status': status } );
 	}
 }
 
