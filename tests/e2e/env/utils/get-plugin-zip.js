@@ -64,11 +64,11 @@ const getLatestReleaseZipUrl = async ( owner, repository, getPrerelease = false,
 					// Loop until we find the first pre-release, then return it.
 					body.forEach(release => {
 						if ( release.prerelease ) {
-							resolve( release.zipball_url );
+							resolve( release.assets[0].browser_download_url );
 						}
 					});
 				} else {
-					resolve( body.zipball_url );
+					resolve( body.assets[0].browser_download_url );
 				}
 			}
 		})
