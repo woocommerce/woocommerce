@@ -25,8 +25,8 @@
 	.wc-block-checkout__billing-fields,
 	.wc-block-checkout__shipping-fields {
 		.wc-block-components-address-form {
-			margin-left: #{-$gap-small / 2};
-			margin-right: #{-$gap-small / 2};
+			margin-left: #{-$gap-small * 0.5};
+			margin-right: #{-$gap-small * 0.5};
 
 			&::after {
 				content: "";
@@ -38,8 +38,8 @@
 			.wc-block-components-country-input,
 			.wc-block-components-state-input {
 				float: left;
-				margin-left: #{$gap-small / 2};
-				margin-right: #{$gap-small / 2};
+				margin-left: #{$gap-small * 0.5};
+				margin-right: #{$gap-small * 0.5};
 				position: relative;
 				width: calc(50% - #{$gap-small});
 

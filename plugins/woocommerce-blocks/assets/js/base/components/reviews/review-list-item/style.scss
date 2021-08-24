@@ -122,14 +122,14 @@
 	display: block;
 	font-weight: bold;
 	order: 1;
-	margin-right: $gap/2;
+	margin-right: $gap*0.5;
 }
 
 .wc-block-components-review-list-item__author {
 	display: block;
 	font-weight: bold;
 	order: 1;
-	margin-right: $gap/2;
+	margin-right: $gap*0.5;
 }
 
 .wc-block-components-review-list-item__product + .wc-block-components-review-list-item__author {
@@ -147,7 +147,7 @@
 	&::before {
 		content: "";
 		display: inline-block;
-		margin-right: $gap/2;
+		margin-right: $gap*0.5;
 		border-right: 1px solid #ddd;
 		height: 1em;
 		vertical-align: middle;

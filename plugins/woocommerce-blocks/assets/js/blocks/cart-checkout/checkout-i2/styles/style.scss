@@ -1,4 +1,5 @@
 // Loading skeleton.
+
 .is-loading.wp-block-woocommerce-checkout-i2 {
 	.wp-block-woocommerce-checkout-totals-block,
 	.wp-block-woocommerce-checkout-fields-block {
@@ -39,13 +40,13 @@
 		.wp-block-woocommerce-checkout-fields-block {
 			box-sizing: border-box;
 			margin: 0;
-			padding-right: percentage($gap-largest / 1060px); // ~1060px is the default width of the content area in Storefront.
+			padding-right: percentage(math.div($gap-largest, 1060px)); // ~1060px is the default width of the content area in Storefront.
 			width: 65%;
 		}
 		.wp-block-woocommerce-checkout-totals-block {
 			box-sizing: border-box;
 			margin: 0;
-			padding-left: percentage($gap-large / 1060px);
+			padding-left: percentage(math.div($gap-large, 1060px));
 			width: 35%;
 
 			.wc-block-components-panel > h2 {
