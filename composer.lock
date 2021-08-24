@@ -532,16 +532,16 @@
         },
         {
             "name": "woocommerce/woocommerce-admin",
-            "version": "2.5.1",
+            "version": "2.6.0-rc.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-admin.git",
-                "reference": "093d698d770f49d41df8abe89a716dc897bb9e96"
+                "reference": "a6dd63d2b90111637f7879a95e26acb16dff2ac4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/093d698d770f49d41df8abe89a716dc897bb9e96",
-                "reference": "093d698d770f49d41df8abe89a716dc897bb9e96",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/a6dd63d2b90111637f7879a95e26acb16dff2ac4",
+                "reference": "a6dd63d2b90111637f7879a95e26acb16dff2ac4",
                 "shasum": ""
             },
             "require": {
@@ -594,24 +594,20 @@
             ],
             "description": "A modern, javascript-driven WooCommerce Admin experience.",
             "homepage": "https://github.com/woocommerce/woocommerce-admin",
-            "support": {
-                "issues": "https://github.com/woocommerce/woocommerce-admin/issues",
-                "source": "https://github.com/woocommerce/woocommerce-admin/tree/v2.5.1"
-            },
-            "time": "2021-08-16T14:31:33+00:00"
+            "time": "2021-08-19T16:23:09+00:00"
         },
         {
             "name": "woocommerce/woocommerce-blocks",
-            "version": "v5.5.1",
+            "version": "v5.7.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-gutenberg-products-block.git",
-                "reference": "f3d8dbadb745cbb2544e86dfb3864e870146d197"
+                "reference": "6056eb0fd5ec74972237faa6ed0f08f774466324"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/f3d8dbadb745cbb2544e86dfb3864e870146d197",
-                "reference": "f3d8dbadb745cbb2544e86dfb3864e870146d197",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/6056eb0fd5ec74972237faa6ed0f08f774466324",
+                "reference": "6056eb0fd5ec74972237faa6ed0f08f774466324",
                 "shasum": ""
             },
             "require": {
@@ -645,11 +641,7 @@
                 "gutenberg",
                 "woocommerce"
             ],
-            "support": {
-                "issues": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues",
-                "source": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/v5.5.1"
-            },
-            "time": "2021-07-14T20:59:04+00:00"
+            "time": "2021-08-17T12:58:49+00:00"
         }
     ],
     "packages-dev": [
@@ -2458,5 +2450,5 @@
     "platform-overrides": {
         "php": "7.0"
     },
-    "plugin-api-version": "2.0.0"
+    "plugin-api-version": "1.1.0"
 }

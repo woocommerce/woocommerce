@@ -1,10 +1,11 @@
-/* eslint-disable jest/no-export, jest/no-disabled-tests */
 /**
  * Internal dependencies
  */
+import config from 'config';
+
 const {
 	merchant,
-	createSimpleOrder,
+	withRestApi,
 	clickFilter,
 	moveAllItemsToTrash,
 } = require( '@woocommerce/e2e-utils' );
@@ -42,22 +43,28 @@ const orderStatus = {
 		description: { text: 'Failed' },
 	}
 };
+const defaultOrder = config.get('orders.basicPaidOrder');
+
 
 const runOrderStatusFiltersTest = () => {
 	describe('WooCommerce Orders > Filter Orders by Status', () => {
 		beforeAll(async () => {
-			// First, let's login
-			await merchant.login();
+			// First, let's create some orders we can filter against
+			const orders = Object.entries(orderStatus).map((entryPair) => {
+				const statusName = entryPair[1].name.replace('wc-', '');
 
-			// Next, let's create some orders we can filter against
-			await createSimpleOrder(orderStatus.pending.description.text);
-			await createSimpleOrder(orderStatus.processing.description.text);
-			await createSimpleOrder(orderStatus.onHold.description.text);
-			await createSimpleOrder(orderStatus.completed.description.text);
-			await createSimpleOrder(orderStatus.cancelled.description.text);
-			await createSimpleOrder(orderStatus.refunded.description.text);
-			await createSimpleOrder(orderStatus.failed.description.text);
-		}, 60000);
+				return {
+					...defaultOrder,
+					status: statusName,
+				};
+			});
+
+			// Create the orders using the API
+			await withRestApi.batchCreateOrders(orders);
+
+			// Next, let's login
+			await merchant.login();
+		});
 
 		afterAll( async () => {
 			// Make sure we're on the all orders view and cleanup the orders we created

@@ -723,6 +723,7 @@ class WC_Admin_Addons {
 		 * Addon page view.
 		 *
 		 * @uses $addons
+		 * @uses $search
 		 * @uses $sections
 		 * @uses $theme
 		 * @uses $current_section
@@ -793,5 +794,21 @@ class WC_Admin_Addons {
 		}
 
 		return true;
+	}
+
+	/**
+	 * We're displaying page=wc-addons and page=wc-addons&section=helper as two separate pages.
+	 * When we're on those pages, add body classes to distinguishe them.
+	 *
+	 * @param string $admin_body_class Unfiltered body class.
+	 *
+	 * @return string Body class with added class for Marketplace or My Subscriptions page.
+	 */
+	public static function filter_admin_body_classes( string $admin_body_class = '' ): string {
+		if ( isset( $_GET['section'] ) && 'helper' === $_GET['section'] ) {
+			return " $admin_body_class woocommerce-page-wc-subscriptions ";
+		}
+
+		return " $admin_body_class woocommerce-page-wc-marketplace ";
 	}
 }

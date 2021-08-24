@@ -3,6 +3,7 @@
 ## Added
 
 - Factories for variable product, variation, and grouped product
+- New function to create orders by batch using the orders API
 - Added new constant for WordPress update page `WP_ADMIN_WP_UPDATES`
 - Added new merchant flow for `openWordPressUpdatesPage()`
 - Added new merchant flows:
@@ -16,6 +17,8 @@
 - Added `deleteAllOrders()` that goes through and deletes all orders
 - Added `deleteAllShippingClasses()` which permanently deletes all shipping classes using the API
 - Added `statuses` optional parameter to `deleteAllRepositoryObjects()` to delete on specific statuses
+- Added `createOrder()` component util that creates an order using the API with the passed in details
+- Updated `addShippingZoneAndMethod` to use the API instead of UI to create shipping zones
 
 # 0.1.5
 

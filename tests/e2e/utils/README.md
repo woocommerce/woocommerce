@@ -147,6 +147,7 @@ This package provides support for enabling retries in tests:
 | `deleteAllShippingClasses` | Permanently delete all shipping classes |
 | `deleteCustomerByEmail` | `emailAddress` | Delete customer user account. Posts are reassigned to user ID 1 |
 | `resetSettingsGroupToDefault` | `settingsGroup` | Reset settings in settings group to default except `select` fields |
+| `batchCreateOrders` | `orders` | Create a batch of orders using the "Batch Create Order" API endpoint |
 | `deleteAllOrders` | | Permanently delete all orders |
 
 ### Page Utilities
@@ -194,6 +195,7 @@ This package provides support for enabling retries in tests:
 | `clickUpdateOrder` | `noticeText`, `waitForSave` | Helper method to click the Update button on the order details page |
 | `deleteAllShippingZones` | | Delete all the existing shipping zones |
 | `waitForSelectorWithoutThrow` | `selector`, `timeoutInSeconds` | conditionally wait for a selector without throwing an error. Default timeout is 5 seconds |
+| `createOrder` | `orderOptions` | Creates an order using the API with the passed in details |
 
 ### Test Utilities
 
