@@ -52,7 +52,12 @@ beforeAll(async () => {
 		// Prevent an error here causing tests to fail.
 	}
 
-	await trashExistingPosts();
+	// This sometimes returns a 401 in CI
+	try {
+		await trashExistingPosts();
+	} catch ( error ) {
+		console.log( 'Error trashing posts' );
+	}
 	await withRestApi.deleteAllProducts();
 	await withRestApi.deleteAllCoupons();
 	await withRestApi.deleteAllOrders();
@@ -65,7 +70,11 @@ beforeAll(async () => {
 // This is to ensure that each test ends with no user logged in.
 afterAll(async () => {
 	// Reset the ready page to published to allow future test runs
-	await updateReadyPageStatus('publish');
+	try {
+		await updateReadyPageStatus('publish');
+	} catch ( error ) {
+		// Prevent an error here causing tests to fail.
+	}
 
 	const client = await page.target().createCDPSession();
 	await client.send('Network.clearBrowserCookies');
