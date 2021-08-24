@@ -4,8 +4,8 @@
  * https://woocommerce.github.io/woocommerce-rest-api-docs/#errors
  */
 const errorResponse = {
-	code: "",
-	message: "",
+	code: '',
+	message: '',
 	data: {
 	  status: 400
 	}
