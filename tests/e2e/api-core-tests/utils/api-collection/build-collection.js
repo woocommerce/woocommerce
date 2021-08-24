@@ -18,17 +18,17 @@ const {
 // Set up our empty collection
 const postmanCollection = new Collection( {
 	auth: {
-		type: "basic",
+		type: 'basic',
 		basic: [
 			{
-				key: "username",
+				key: 'username',
 				value: USERNAME,
-				type: "string"
+				type: 'string'
 			},
 			{
-				key: "password",
+				key: 'password',
 				value: PASSWORD,
-				type: "string"
+				type: 'string'
 			},
 		]
 	},
@@ -85,7 +85,7 @@ for ( const key in resources ) {
 				raw: JSON.stringify( api.payload ),
 				options: {
 					raw: {
-						language: "json"
+						language: 'json'
 					}
 				}
 			  },
