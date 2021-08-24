@@ -30,7 +30,7 @@ class WCAdminSharedSettings {
 	 */
 	protected function __construct() {
 		if ( did_action( 'woocommerce_blocks_loaded' ) ) {
-			$this->on_plugins_loaded();
+			$this->on_woocommerce_blocks_loaded();
 		} else {
 			add_action( 'woocommerce_blocks_loaded', array( $this, 'on_woocommerce_blocks_loaded' ), 10 );
 		}
