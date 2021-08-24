@@ -34,6 +34,17 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	protected $rest_base = 'onboarding/tasks';
 
 	/**
+	 * Duration to milisecond mapping.
+	 *
+	 * @var string
+	 */
+	protected $duration_to_ms = array(
+		'day'  => DAY_IN_SECONDS * 1000,
+		'hour' => HOUR_IN_SECONDS * 1000,
+		'week' => WEEK_IN_SECONDS * 1000,
+	);
+
+	/**
 	 * Register routes.
 	 */
 	public function register_routes() {
@@ -137,6 +148,32 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 				'schema' => array( $this, 'get_public_item_schema' ),
 			)
 		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[a-z0-9_-]+)/snooze',
+			array(
+				'args'   => array(
+					'duration'     => array(
+						'description'       => __( 'Time period to snooze the task.', 'woocommerce-admin' ),
+						'type'              => 'string',
+						'validate_callback' => function( $param, $request, $key ) {
+							return in_array( $param, array_keys( $this->duration_to_ms ), true );
+						},
+					),
+					'task_list_id' => array(
+						'description' => __( 'Optional parameter to query specific task list.', 'woocommerce-admin' ),
+						'type'        => 'string',
+					),
+				),
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'snooze_task' ),
+					'permission_callback' => array( $this, 'snooze_task_permissions_check' ),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
 	}
 
 	/**
@@ -190,6 +227,20 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	public function get_tasks_permission_check( $request ) {
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
 			return new \WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to retrieve onboarding tasks.', 'woocommerce-admin' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Check if a given request has access to manage woocommerce.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|boolean
+	 */
+	public function snooze_task_permissions_check( $request ) {
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			return new \WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to snooze onboarding tasks.', 'woocommerce-admin' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -686,14 +737,10 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 
 		$is_dismissable = false;
 
-		foreach ( OnboardingTasksFeature::get_task_lists() as $task_list ) {
-			foreach ( $task_list['tasks'] as $task ) {
-				// @todo Use the reusable methods to get the task introduced in https://github.com/woocommerce/woocommerce-admin/pull/7539
-				if ( $id === $task['id'] && isset( $task['isDismissable'] ) && $task['isDismissable'] ) {
-					$is_dismissable = true;
-					break;
-				}
-			}
+		$task = OnboardingTasksFeature::get_task_by_id( $id );
+
+		if ( $task && isset( $task['isDismissable'] ) && $task['isDismissable'] ) {
+			$is_dismissable = true;
 		}
 
 		if ( ! $is_dismissable ) {
@@ -736,4 +783,54 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 
 		return rest_ensure_response( $update );
 	}
+
+	/**
+	 * Snooze an onboarding task.
+	 *
+	 * @param WP_REST_Request $request Request data.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function snooze_task( $request ) {
+
+		$task_id         = $request->get_param( 'id' );
+		$task_list_id    = $request->get_param( 'task_list_id' );
+		$snooze_duration = $request->get_param( 'duration' );
+
+		$is_snoozeable = false;
+
+		$snooze_task = OnboardingTasksFeature::get_task_by_id( $task_id, $task_list_id );
+
+		if ( $snooze_task && isset( $snooze_task['isSnoozeable'] ) && $snooze_task['isSnoozeable'] ) {
+			$is_snoozeable = true;
+		}
+
+		if ( ! $is_snoozeable ) {
+			return new \WP_Error(
+				'woocommerce_tasks_invalid_task',
+				__( 'Sorry, no snoozeable task with that ID was found.', 'woocommerce-admin' ),
+				array(
+					'status' => 404,
+				)
+			);
+		}
+
+		$snooze_option = get_option( 'woocommerce_task_list_remind_me_later_tasks', array() );
+		$duration      = is_null( $snooze_duration ) ? 'day' : $snooze_duration;
+		$snoozed_until = $this->duration_to_ms[ $duration ] + ( time() * 1000 );
+
+		$snooze_option[ $task_id ] = $snoozed_until;
+		$update                    = update_option( 'woocommerce_task_list_remind_me_later_tasks', $snooze_option );
+
+		if ( $update ) {
+			wc_admin_record_tracks_event( 'tasklist_remindmelater_task', array( 'task_name' => $task_id ) );
+		}
+
+		$snooze_task['isSnoozed']    = true;
+		$snooze_task['snoozedUntil'] = $snoozed_until;
+
+		return rest_ensure_response( $snooze_task );
+	}
+
+
 }

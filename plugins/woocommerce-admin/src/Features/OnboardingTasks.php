@@ -50,6 +50,7 @@ class OnboardingTasks {
 		add_action( 'update_option_woocommerce_task_list_tracked_completed_tasks', array( $this, 'track_task_completion' ), 10, 2 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'update_option_extended_task_list' ), 15 );
 		add_action( 'woocommerce_admin_onboarding_tasks', array( $this, 'add_task_dismissal' ), 20 );
+		add_action( 'woocommerce_admin_onboarding_tasks', array( $this, 'add_task_snoozed' ), 20 );
 
 		if ( ! is_admin() ) {
 			return;
@@ -717,6 +718,56 @@ class OnboardingTasks {
 	}
 
 	/**
+	 * Retrieve a task list by ID.
+	 *
+	 * @param String $task_list_id Task list ID.
+	 *
+	 * @return Object
+	 */
+	public static function get_task_list_by_id( $task_list_id ) {
+		foreach ( self::get_task_lists() as $task_list ) {
+			if ( $task_list['id'] === $task_list_id ) {
+				return $task_list;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Retrieve single task.
+	 *
+	 * @param String $task_id Task ID.
+	 * @param String $task_list_id Task list ID.
+	 *
+	 * @return Object
+	 */
+	public static function get_task_by_id( $task_id, $task_list_id = null ) {
+
+		$task_list = $task_list_id ? self::get_task_list_by_id( $task_list_id ) : null;
+
+		if ( $task_list_id && ! $task_list ) {
+			return null;
+		}
+
+		$tasks_to_search = $task_list ? $task_list['tasks'] : array_reduce(
+			self::get_task_lists(),
+			function ( $all, $curr ) {
+				return array_merge( $all, $curr['tasks'] );
+			},
+			array()
+		);
+
+		foreach ( $tasks_to_search as $task ) {
+			if ( $task_id === $task['id'] ) {
+				return $task;
+			}
+		}
+
+		return null;
+	}
+
+	/**
 	 * Add the dismissal status to each task.
 	 *
 	 * @param array $task_lists Task lists.
@@ -734,5 +785,27 @@ class OnboardingTasks {
 		}
 
 		return $task_lists;
+	}
+
+	/**
+	 * Add the snoozed status to each task.
+	 *
+	 * @param array $task_lists Task lists.
+	 * @return array
+	 */
+	public function add_task_snoozed( $task_lists ) {
+		$snoozed_tasks = get_option( 'woocommerce_task_list_remind_me_later_tasks', array() );
+
+		foreach ( $task_lists as $task_list_key => $task_list ) {
+			foreach ( $task_list['tasks'] as $task_key => $task ) {
+				if ( isset( $task['isSnoozeable'] ) && in_array( $task['id'], array_keys( $snoozed_tasks ), true ) ) {
+					$task_lists[ $task_list_key ]['tasks'][ $task_key ]['isSnoozed']    = $snoozed_tasks[ $task['id'] ] > ( time() * 1000 );
+					$task_lists[ $task_list_key ]['tasks'][ $task_key ]['snoozedUntil'] = $snoozed_tasks[ $task['id'] ];
+				}
+			}
+		}
+
+		return $task_lists;
+
 	}
 }
