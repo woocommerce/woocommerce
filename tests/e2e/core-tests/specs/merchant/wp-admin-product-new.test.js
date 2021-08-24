@@ -1,4 +1,3 @@
-/* eslint-disable jest/no-export, jest/no-disabled-tests */
 /**
  * Internal dependencies
  */
@@ -8,7 +7,9 @@ const {
 	clickTab,
 	uiUnblocked,
 	evalAndClick,
+	setCheckbox,
 	verifyAndPublish,
+	waitForSelectorWithoutThrow
 } = require( '@woocommerce/e2e-utils' );
 const {
 	waitAndClick,
@@ -174,7 +175,7 @@ const runAddVariableProductTest = () => {
 			await uiUnblocked();
 		});
 
-		it('can create variation attributes', async () => {
+		it('can add variation attributes', async () => {
 			await waitAndClick( page, '.variations_tab a' );
 			await uiUnblocked();
 			await waitForSelector(
@@ -187,46 +188,24 @@ const runAddVariableProductTest = () => {
 			);
 
 			// Verify that variations were created
-			await Promise.all([
-				expect(page).toMatchElement('select[name="attribute_attr-1[0]"]', {text: 'val1'}),
-				expect(page).toMatchElement('select[name="attribute_attr-2[0]"]', {text: 'val1'}),
-				expect(page).toMatchElement('select[name="attribute_attr-3[0]"]', {text: 'val1'}),
+			for ( let index = 0; index < 8; index++ ) {
+				const val1 = { text: 'val1' };
+				const val2 = { text: 'val2' };
 
-				expect(page).toMatchElement('select[name="attribute_attr-1[1]"]', {text: 'val1'}),
-				expect(page).toMatchElement('select[name="attribute_attr-2[1]"]', {text: 'val1'}),
-				expect(page).toMatchElement('select[name="attribute_attr-3[1]"]', {text: 'val2'}),
+				// odd / even
+				let attr3 = !! ( index % 2 );
+				// 0-1,4-5 / 2-3,6-7
+				let attr2 = ( index % 4 ) > 1;
+				// 0-3 / 4-7
+				let attr1 = ( index > 3 );
 
-				expect(page).toMatchElement('select[name="attribute_attr-1[2]"]', {text: 'val1'}),
-				expect(page).toMatchElement('select[name="attribute_attr-2[2]"]', {text: 'val2'}),
-				expect(page).toMatchElement('select[name="attribute_attr-3[2]"]', {text: 'val1'}),
+				await expect( page ).toMatchElement( `select[name="attribute_attr-1[${index}]"]`, attr1 ? val2 : val1 );
+				await expect( page ).toMatchElement( `select[name="attribute_attr-2[${index}]"]`, attr2 ? val2 : val1 );
+				await expect( page ).toMatchElement( `select[name="attribute_attr-3[${index}]"]`, attr3 ? val2 : val1 );
+			}
 
-				expect(page).toMatchElement('select[name="attribute_attr-1[3]"]', {text: 'val1'}),
-				expect(page).toMatchElement('select[name="attribute_attr-2[3]"]', {text: 'val2'}),
-				expect(page).toMatchElement('select[name="attribute_attr-3[3]"]', {text: 'val2'}),
-
-				expect(page).toMatchElement('select[name="attribute_attr-1[4]"]', {text: 'val2'}),
-				expect(page).toMatchElement('select[name="attribute_attr-2[4]"]', {text: 'val1'}),
-				expect(page).toMatchElement('select[name="attribute_attr-3[4]"]', {text: 'val1'}),
-
-				expect(page).toMatchElement('select[name="attribute_attr-1[5]"]', {text: 'val2'}),
-				expect(page).toMatchElement('select[name="attribute_attr-2[5]"]', {text: 'val1'}),
-				expect(page).toMatchElement('select[name="attribute_attr-3[5]"]', {text: 'val2'}),
-
-				expect(page).toMatchElement('select[name="attribute_attr-1[6]"]', {text: 'val2'}),
-				expect(page).toMatchElement('select[name="attribute_attr-2[6]"]', {text: 'val2'}),
-				expect(page).toMatchElement('select[name="attribute_attr-3[6]"]', {text: 'val1'}),
-
-				expect(page).toMatchElement('select[name="attribute_attr-1[7]"]', {text: 'val2'}),
-				expect(page).toMatchElement('select[name="attribute_attr-2[7]"]', {text: 'val2'}),
-				expect(page).toMatchElement('select[name="attribute_attr-3[7]"]', {text: 'val2'}),
-			]);
-
-			/*
-			Puppeteer seems unable to find the individual variation fields in headless mode on MacOS
-			This section of the test runs fine in both Travis and non-headless mode on Mac
-			Disabling temporarily to allow the test to be re-enabled without local testing headache
 			await waitAndClick( page, '.variations-pagenav .expand_all');
-			await page.waitFor( 2000 );
+			await waitForSelectorWithoutThrow( 'input[name="variable_is_virtual[0]"]', 2 );
 			await setCheckbox('input[name="variable_is_virtual[0]"]');
 			await expect(page).toFill('input[name="variable_regular_price[0]"]', '9.99');
 
@@ -242,15 +221,7 @@ const runAddVariableProductTest = () => {
 
 			await page.focus('button.save-variation-changes');
 			await expect(page).toClick('button.save-variation-changes', {text: 'Save changes'});
-			/**/
-
-			// Publish product, verify that it was published. Trash product, verify that it was trashed.
-			await verifyPublishAndTrash(
-				'#publish',
-				'.notice',
-				'Product published.',
-				'1 product moved to the Trash.'
-			);
+			// @todo: add one or more tests to verify changes were saved
 		});
 	});
 };
