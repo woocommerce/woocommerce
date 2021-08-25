@@ -68,6 +68,8 @@ export function isWCPaySupported( countryCode ) {
 		'PL',
 		'PT',
 		'CH',
+		'HK',
+		'SG',
 	];
 
 	return supportedCountries.includes( countryCode );
