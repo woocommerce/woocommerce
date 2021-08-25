@@ -1,4 +1,5 @@
 import { TriggerCronJob, TRIGGER_CRON_ACTION_NAME } from './trigger-cron';
+import { DisableEmail } from './disable-email';
 
 export default [
 	{
@@ -45,5 +46,10 @@ export default [
 		command: 'Run a cron job',
 		description: <TriggerCronJob />,
 		action: TRIGGER_CRON_ACTION_NAME,
+	},
+	{
+		command: 'Disable WC emails',
+		description: <DisableEmail />,
+		action: 'runDisableEmail',
 	},
 ];
