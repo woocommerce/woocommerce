@@ -121,23 +121,31 @@ abstract class AbstractBlock {
 	 */
 	protected function register_block_type_assets() {
 		if ( null !== $this->get_block_type_editor_script() ) {
+			$data     = $this->asset_api->get_script_data( $this->get_block_type_editor_script( 'path' ) );
+			$has_i18n = in_array( 'wp-i18n', $data['dependencies'], true );
+
 			$this->asset_api->register_script(
 				$this->get_block_type_editor_script( 'handle' ),
 				$this->get_block_type_editor_script( 'path' ),
 				array_merge(
 					$this->get_block_type_editor_script( 'dependencies' ),
 					$this->integration_registry->get_all_registered_editor_script_handles()
-				)
+				),
+				$has_i18n
 			);
 		}
 		if ( null !== $this->get_block_type_script() ) {
+			$data     = $this->asset_api->get_script_data( $this->get_block_type_script( 'path' ) );
+			$has_i18n = in_array( 'wp-i18n', $data['dependencies'], true );
+
 			$this->asset_api->register_script(
 				$this->get_block_type_script( 'handle' ),
 				$this->get_block_type_script( 'path' ),
 				array_merge(
 					$this->get_block_type_script( 'dependencies' ),
 					$this->integration_registry->get_all_registered_script_handles()
-				)
+				),
+				$has_i18n
 			);
 		}
 	}

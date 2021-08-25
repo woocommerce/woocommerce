@@ -36,8 +36,8 @@ const isElementInsideWrappers = ( el, wrappers ) => {
 const renderBlockInContainers = ( {
 	Block,
 	containers,
-	getProps = () => {},
-	getErrorBoundaryProps = () => {},
+	getProps = () => ( {} ),
+	getErrorBoundaryProps = () => ( {} ),
 } ) => {
 	if ( containers.length === 0 ) {
 		return;
@@ -49,7 +49,7 @@ const renderBlockInContainers = ( {
 		const errorBoundaryProps = getErrorBoundaryProps( el, i );
 		const attributes = {
 			...el.dataset,
-			...props.attributes,
+			...( props.attributes || {} ),
 		};
 		el.classList.remove( 'is-loading' );
 

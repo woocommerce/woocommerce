@@ -61,23 +61,14 @@ class Api {
 	}
 
 	/**
-	 * Registers a script according to `wp_register_script`, adding the correct prefix, and additionally loading translations.
+	 * Get src, version and dependencies given a script relative src.
 	 *
-	 * When creating script assets, the following rules should be followed:
-	 *   1. All asset handles should have a `wc-` prefix.
-	 *   2. If the asset handle is for a Block (in editor context) use the `-block` suffix.
-	 *   3. If the asset handle is for a Block (in frontend context) use the `-block-frontend` suffix.
-	 *   4. If the asset is for any other script being consumed or enqueued by the blocks plugin, use the `wc-blocks-` prefix.
+	 * @param string $relative_src Relative src to the script.
+	 * @param array  $dependencies Optional. An array of registered script handles this script depends on. Default empty array.
 	 *
-	 * @since 2.5.0
-	 * @throws Exception If the registered script has a dependency on itself.
-	 *
-	 * @param string $handle        Unique name of the script.
-	 * @param string $relative_src  Relative url for the script to the path from plugin root.
-	 * @param array  $dependencies  Optional. An array of registered script handles this script depends on. Default empty array.
-	 * @param bool   $has_i18n      Optional. Whether to add a script translation call to this file. Default: true.
+	 * @return array src, version and dependencies of the script.
 	 */
-	public function register_script( $handle, $relative_src, $dependencies = [], $has_i18n = true ) {
+	public function get_script_data( $relative_src, $dependencies = [] ) {
 		$src     = '';
 		$version = '1';
 
@@ -96,9 +87,36 @@ class Api {
 			}
 		}
 
-		if ( in_array( $handle, $dependencies, true ) ) {
+		return array(
+			'src'          => $src,
+			'version'      => $version,
+			'dependencies' => $dependencies,
+		);
+	}
+
+	/**
+	 * Registers a script according to `wp_register_script`, adding the correct prefix, and additionally loading translations.
+	 *
+	 * When creating script assets, the following rules should be followed:
+	 *   1. All asset handles should have a `wc-` prefix.
+	 *   2. If the asset handle is for a Block (in editor context) use the `-block` suffix.
+	 *   3. If the asset handle is for a Block (in frontend context) use the `-block-frontend` suffix.
+	 *   4. If the asset is for any other script being consumed or enqueued by the blocks plugin, use the `wc-blocks-` prefix.
+	 *
+	 * @since 2.5.0
+	 * @throws Exception If the registered script has a dependency on itself.
+	 *
+	 * @param string $handle        Unique name of the script.
+	 * @param string $relative_src  Relative url for the script to the path from plugin root.
+	 * @param array  $dependencies  Optional. An array of registered script handles this script depends on. Default empty array.
+	 * @param bool   $has_i18n      Optional. Whether to add a script translation call to this file. Default: true.
+	 */
+	public function register_script( $handle, $relative_src, $dependencies = [], $has_i18n = true ) {
+		$script_data = $this->get_script_data( $relative_src, $dependencies );
+
+		if ( in_array( $handle, $script_data['dependencies'], true ) ) {
 			if ( $this->package->feature()->is_development_environment() ) {
-				$dependencies = array_diff( $dependencies, [ $handle ] );
+				$dependencies = array_diff( $script_data['dependencies'], [ $handle ] );
 					add_action(
 						'admin_notices',
 						function() use ( $handle ) {
@@ -113,7 +131,7 @@ class Api {
 			}
 		}
 
-		wp_register_script( $handle, $src, apply_filters( 'woocommerce_blocks_register_script_dependencies', $dependencies, $handle ), $version, true );
+		wp_register_script( $handle, $script_data['src'], apply_filters( 'woocommerce_blocks_register_script_dependencies', $script_data['dependencies'], $handle ), $script_data['version'], true );
 
 		if ( $has_i18n && function_exists( 'wp_set_script_translations' ) ) {
 			wp_set_script_translations( $handle, 'woo-gutenberg-products-block', $this->package->get_path( 'languages' ) );
