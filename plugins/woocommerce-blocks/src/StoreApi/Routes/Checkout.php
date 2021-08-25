@@ -2,12 +2,6 @@
 namespace Automattic\WooCommerce\Blocks\StoreApi\Routes;
 
 use Automattic\WooCommerce\Blocks\StoreApi\Utilities\InvalidStockLevelsInCartException;
-use \Exception;
-use \WP_Error;
-use \WP_REST_Server;
-use \WP_REST_Request;
-use \WP_REST_Response;
-use \WC_Order;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\CreateAccount;
 use Automattic\WooCommerce\Blocks\StoreApi\Schemas\AbstractSchema;
@@ -28,7 +22,7 @@ class Checkout extends AbstractCartRoute {
 	/**
 	 * Holds the current order being processed.
 	 *
-	 * @var WC_Order
+	 * @var \WC_Order
 	 */
 	private $order = null;
 
@@ -82,7 +76,7 @@ class Checkout extends AbstractCartRoute {
 	public function get_args() {
 		return [
 			[
-				'methods'             => WP_REST_Server::READABLE,
+				'methods'             => \WP_REST_Server::READABLE,
 				'callback'            => [ $this, 'get_response' ],
 				'permission_callback' => '__return_true',
 				'args'                => [
@@ -90,7 +84,7 @@ class Checkout extends AbstractCartRoute {
 				],
 			],
 			[
-				'methods'             => WP_REST_Server::CREATABLE,
+				'methods'             => \WP_REST_Server::CREATABLE,
 				'callback'            => [ $this, 'get_response' ],
 				'permission_callback' => '__return_true',
 				'args'                => array_merge(
@@ -111,14 +105,14 @@ class Checkout extends AbstractCartRoute {
 							],
 						],
 					],
-					$this->schema->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE )
+					$this->schema->get_endpoint_args_for_item_schema( \WP_REST_Server::CREATABLE )
 				),
 			],
 			[
-				'methods'             => WP_REST_Server::EDITABLE,
+				'methods'             => \WP_REST_Server::EDITABLE,
 				'callback'            => array( $this, 'get_response' ),
 				'permission_callback' => '__return_true',
-				'args'                => $this->schema->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+				'args'                => $this->schema->get_endpoint_args_for_item_schema( \WP_REST_Server::EDITABLE ),
 			],
 			'schema'      => [ $this->schema, 'get_public_item_schema' ],
 			'allow_batch' => [ 'v1' => true ],
@@ -128,28 +122,21 @@ class Checkout extends AbstractCartRoute {
 	/**
 	 * Prepare a single item for response. Handles setting the status based on the payment result.
 	 *
-	 * @param mixed           $item Item to format to schema.
-	 * @param WP_REST_Request $request Request object.
-	 * @return WP_REST_Response $response Response data.
+	 * @param mixed            $item Item to format to schema.
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response $response Response data.
 	 */
-	public function prepare_item_for_response( $item, WP_REST_Request $request ) {
-		$response = parent::prepare_item_for_response( $item, $request );
+	public function prepare_item_for_response( $item, \WP_REST_Request $request ) {
+		$response     = parent::prepare_item_for_response( $item, $request );
+		$status_codes = [
+			'success' => 200,
+			'pending' => 202,
+			'failure' => 400,
+			'error'   => 500,
+		];
 
 		if ( isset( $item->payment_result ) && $item->payment_result instanceof PaymentResult ) {
-			switch ( $item->payment_result->status ) {
-				case 'success':
-					$response->set_status( 200 );
-					break;
-				case 'pending':
-					$response->set_status( 202 );
-					break;
-				case 'failure':
-					$response->set_status( 400 );
-					break;
-				case 'error':
-					$response->set_status( 500 );
-					break;
-			}
+			$response->set_status( $status_codes[ $item->payment_result->status ] ?? 200 );
 		}
 
 		return $response;
@@ -159,10 +146,10 @@ class Checkout extends AbstractCartRoute {
 	 * Convert the cart into a new draft order, or update an existing draft order, and return an updated cart response.
 	 *
 	 * @throws RouteException On error.
-	 * @param WP_REST_Request $request Request object.
-	 * @return WP_REST_Response
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response
 	 */
-	protected function get_route_response( WP_REST_Request $request ) {
+	protected function get_route_response( \WP_REST_Request $request ) {
 		$this->create_or_update_draft_order();
 
 		return $this->prepare_item_for_response(
@@ -180,10 +167,10 @@ class Checkout extends AbstractCartRoute {
 	 * @internal Customer data is updated first so OrderController::update_addresses_from_cart uses up to date data.
 	 *
 	 * @throws RouteException On error.
-	 * @param WP_REST_Request $request Request object.
-	 * @return WP_REST_Response
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response
 	 */
-	protected function get_route_update_response( WP_REST_Request $request ) {
+	protected function get_route_update_response( \WP_REST_Request $request ) {
 		$this->update_customer_from_request( $request );
 		$this->create_or_update_draft_order();
 		$this->update_order_from_request( $request );
@@ -209,11 +196,11 @@ class Checkout extends AbstractCartRoute {
 	 * @throws RouteException On error.
 	 * @throws InvalidStockLevelsInCartException On error.
 	 *
-	 * @param WP_REST_Request $request Request object.
+	 * @param \WP_REST_Request $request Request object.
 	 *
-	 * @return WP_REST_Response
+	 * @return \WP_REST_Response
 	 */
-	protected function get_route_post_response( WP_REST_Request $request ) {
+	protected function get_route_post_response( \WP_REST_Request $request ) {
 		/**
 		 * Validate items etc are allowed in the order before the order is processed. This will fix violations and tell
 		 * the customer.
@@ -257,7 +244,7 @@ class Checkout extends AbstractCartRoute {
 		 * @see https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3238
 		 * @internal This Hook is experimental and may change or be removed.
 		 *
-		 * @param WC_Order $order Order object.
+		 * @param \WC_Order $order Order object.
 		 */
 		do_action( '__experimental_woocommerce_blocks_checkout_order_processed', $this->order );
 
@@ -288,17 +275,16 @@ class Checkout extends AbstractCartRoute {
 	 * @param string $error_message User facing error message.
 	 * @param int    $http_status_code HTTP status. Defaults to 500.
 	 * @param array  $additional_data  Extra data (key value pairs) to expose in the error response.
-	 * @return WP_Error WP Error object.
+	 * @return \WP_Error WP Error object.
 	 */
 	protected function get_route_error_response( $error_code, $error_message, $http_status_code = 500, $additional_data = [] ) {
-		$error_from_message = new WP_Error(
+		$error_from_message = new \WP_Error(
 			$error_code,
 			$error_message
 		);
-		switch ( $http_status_code ) {
-			case 409:
-				// 409 is when there was a conflict, so we return the cart so the client can resolve it.
-				return $this->add_data_to_error_object( $error_from_message, $additional_data, $http_status_code, true );
+		// 409 is when there was a conflict, so we return the cart so the client can resolve it.
+		if ( 409 === $http_status_code ) {
+			return $this->add_data_to_error_object( $error_from_message, $additional_data, $http_status_code, true );
 		}
 		return $this->add_data_to_error_object( $error_from_message, $additional_data, $http_status_code );
 	}
@@ -306,28 +292,27 @@ class Checkout extends AbstractCartRoute {
 	/**
 	 * Get route response when something went wrong.
 	 *
-	 * @param WP_Error $error_object User facing error message.
-	 * @param int      $http_status_code HTTP status. Defaults to 500.
-	 * @param array    $additional_data  Extra data (key value pairs) to expose in the error response.
-	 * @return WP_Error WP Error object.
+	 * @param \WP_Error $error_object User facing error message.
+	 * @param int       $http_status_code HTTP status. Defaults to 500.
+	 * @param array     $additional_data  Extra data (key value pairs) to expose in the error response.
+	 * @return \WP_Error WP Error object.
 	 */
 	protected function get_route_error_response_from_object( $error_object, $http_status_code = 500, $additional_data = [] ) {
-		switch ( $http_status_code ) {
-			case 409:
-				// 409 is when there was a conflict, so we return the cart so the client can resolve it.
-				return $this->add_data_to_error_object( $error_object, $additional_data, $http_status_code, true );
+		// 409 is when there was a conflict, so we return the cart so the client can resolve it.
+		if ( 409 === $http_status_code ) {
+			return $this->add_data_to_error_object( $error_object, $additional_data, $http_status_code, true );
 		}
 		return $this->add_data_to_error_object( $error_object, $additional_data, $http_status_code );
 	}
 
 	/**
-	 * Adds additional data to the WP_Error object.
+	 * Adds additional data to the \WP_Error object.
 	 *
-	 * @param WP_Error $error The error object to add the cart to.
-	 * @param array    $data The data to add to the error object.
-	 * @param int      $http_status_code The HTTP status code this error should return.
-	 * @param bool     $include_cart Whether the cart should be included in the error data.
-	 * @returns WP_Error The WP_Error with the cart added.
+	 * @param \WP_Error $error The error object to add the cart to.
+	 * @param array     $data The data to add to the error object.
+	 * @param int       $http_status_code The HTTP status code this error should return.
+	 * @param bool      $include_cart Whether the cart should be included in the error data.
+	 * @returns \WP_Error The \WP_Error with the cart added.
 	 */
 	private function add_data_to_error_object( $error, $data, $http_status_code, bool $include_cart = false ) {
 		$data = array_merge( $data, [ 'status' => $http_status_code ] );
@@ -408,12 +393,12 @@ class Checkout extends AbstractCartRoute {
 		 * @see https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3686
 		 * @internal This Hook is experimental and may change or be removed.
 		 *
-		 * @param WC_Order $order Order object.
+		 * @param \WC_Order $order Order object.
 		 */
 		do_action( '__experimental_woocommerce_blocks_checkout_update_order_meta', $this->order );
 
 		// Confirm order is valid before proceeding further.
-		if ( ! $this->order instanceof WC_Order ) {
+		if ( ! $this->order instanceof \WC_Order ) {
 			throw new RouteException(
 				'woocommerce_rest_checkout_missing_order',
 				__( 'Unable to create order', 'woo-gutenberg-products-block' ),
@@ -443,9 +428,9 @@ class Checkout extends AbstractCartRoute {
 	 *
 	 * Address session data is synced to the order itself later on by OrderController::update_order_from_cart()
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 */
-	private function update_customer_from_request( WP_REST_Request $request ) {
+	private function update_customer_from_request( \WP_REST_Request $request ) {
 		$customer = wc()->customer;
 
 		if ( isset( $request['billing_address'] ) ) {
@@ -472,23 +457,35 @@ class Checkout extends AbstractCartRoute {
 	/**
 	 * Update the current order using the posted values from the request.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 */
-	private function update_order_from_request( WP_REST_Request $request ) {
-		if ( isset( $request['customer_note'] ) ) {
-			$this->order->set_customer_note( $request['customer_note'] );
-		}
+	private function update_order_from_request( \WP_REST_Request $request ) {
+		$this->order->set_customer_note( $request['customer_note'] ?? '' );
 		$this->order->set_payment_method( $this->order->needs_payment() ? $this->get_request_payment_method( $request ) : '' );
+
+		/**
+		 * WooCommerce Blocks Checkout Update Order From Request (experimental).
+		 *
+		 * This hook gives extensions the chance to update orders based on the data in the request. This can be used in
+		 * conjunction with the ExtendRestAPI class to post custom data and then process it.
+		 *
+		 * @internal This Hook is experimental and may change or be removed.
+		 *
+		 * @param \WC_Order $order Order object.
+		 * @param \WP_REST_Request $request Full details about the request.
+		 */
+		do_action( '__experimental_woocommerce_blocks_checkout_update_order_from_request', $this->order, $request );
+
 		$this->order->save();
 	}
 
 	/**
 	 * For orders which do not require payment, just update status.
 	 *
-	 * @param WP_REST_Request $request Request object.
-	 * @param PaymentResult   $payment_result Payment result object.
+	 * @param \WP_REST_Request $request Request object.
+	 * @param PaymentResult    $payment_result Payment result object.
 	 */
-	private function process_without_payment( WP_REST_Request $request, PaymentResult $payment_result ) {
+	private function process_without_payment( \WP_REST_Request $request, PaymentResult $payment_result ) {
 		// Transition the order to pending, and then completed. This ensures transactional emails fire for pending_to_complete events.
 		$this->order->update_status( 'pending' );
 		$this->order->payment_complete();
@@ -503,10 +500,10 @@ class Checkout extends AbstractCartRoute {
 	 *
 	 * @throws RouteException On error.
 	 *
-	 * @param WP_REST_Request $request Request object.
-	 * @param PaymentResult   $payment_result Payment result object.
+	 * @param \WP_REST_Request $request Request object.
+	 * @param PaymentResult    $payment_result Payment result object.
 	 */
-	private function process_payment( WP_REST_Request $request, PaymentResult $payment_result ) {
+	private function process_payment( \WP_REST_Request $request, PaymentResult $payment_result ) {
 		try {
 			// Transition the order to pending before making payment.
 			$this->order->update_status( 'pending' );
@@ -522,7 +519,7 @@ class Checkout extends AbstractCartRoute {
 			 *
 			 * @hook woocommerce_rest_checkout_process_payment_with_context
 			 *
-			 * @throws Exception If there is an error taking payment, an Exception object can be thrown with an error message.
+			 * @throws \Exception If there is an error taking payment, an \Exception object can be thrown with an error message.
 			 *
 			 * @param PaymentContext $context        Holds context for the payment, including order ID and payment method.
 			 * @param PaymentResult  $payment_result Result object for the transaction.
@@ -532,7 +529,7 @@ class Checkout extends AbstractCartRoute {
 			if ( ! $payment_result instanceof PaymentResult ) {
 				throw new RouteException( 'woocommerce_rest_checkout_invalid_payment_result', __( 'Invalid payment result received from payment method.', 'woo-gutenberg-products-block' ), 500 );
 			}
-		} catch ( Exception $e ) {
+		} catch ( \Exception $e ) {
 			throw new RouteException( 'woocommerce_rest_checkout_process_payment_error', $e->getMessage(), 400 );
 		}
 	}
@@ -541,13 +538,11 @@ class Checkout extends AbstractCartRoute {
 	 * Gets the chosen payment method ID from the request.
 	 *
 	 * @throws RouteException On error.
-	 * @param WP_REST_Request $request Request object.
+	 * @param \WP_REST_Request $request Request object.
 	 * @return string
 	 */
-	private function get_request_payment_method_id( WP_REST_Request $request ) {
-		$payment_method_id = isset( $request['payment_method'] )
-			? wc_clean( wp_unslash( $request['payment_method'] ) )
-			: '';
+	private function get_request_payment_method_id( \WP_REST_Request $request ) {
+		$payment_method_id = wc_clean( wp_unslash( $request['payment_method'] ?? '' ) );
 
 		if ( empty( $payment_method_id ) ) {
 			throw new RouteException(
@@ -564,10 +559,10 @@ class Checkout extends AbstractCartRoute {
 	 * Gets the chosen payment method from the request.
 	 *
 	 * @throws RouteException On error.
-	 * @param WP_REST_Request $request Request object.
+	 * @param \WP_REST_Request $request Request object.
 	 * @return \WC_Payment_Gateway
 	 */
-	private function get_request_payment_method( WP_REST_Request $request ) {
+	private function get_request_payment_method( \WP_REST_Request $request ) {
 		$payment_method_id  = $this->get_request_payment_method_id( $request );
 		$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
 
@@ -585,10 +580,10 @@ class Checkout extends AbstractCartRoute {
 	/**
 	 * Gets and formats payment request data.
 	 *
-	 * @param WP_REST_Request $request Request object.
+	 * @param \WP_REST_Request $request Request object.
 	 * @return array
 	 */
-	private function get_request_payment_data( WP_REST_Request $request ) {
+	private function get_request_payment_data( \WP_REST_Request $request ) {
 		static $payment_data = [];
 		if ( ! empty( $payment_data ) ) {
 			return $payment_data;
@@ -608,39 +603,33 @@ class Checkout extends AbstractCartRoute {
 	 * Creates a customer account as needed (based on request & store settings) and  updates the order with the new customer ID.
 	 * Updates the order with user details (e.g. address).
 	 *
-	 * @internal CreateAccount class includes feature gating logic (i.e. this may not create an account depending on build).
-	 * @internal Checkout signup is feature gated to WooCommerce 4.7 and newer; Because it requires updated my-account/lost-password screen in 4.7+ for setting initial password.
-	 *
 	 * @throws RouteException API error object with error details.
-	 * @param WP_REST_Request $request Request object.
+	 * @param \WP_REST_Request $request Request object.
 	 */
-	private function process_customer( WP_REST_Request $request ) {
-		if ( defined( 'WC_VERSION' ) && version_compare( WC_VERSION, '4.7', '>=' ) ) {
-			try {
-				$create_account = Package::container()->get( CreateAccount::class );
-				$create_account->from_order_request( $request );
-				$this->order->set_customer_id( get_current_user_id() );
-				$this->order->save();
-			} catch ( Exception $error ) {
-				switch ( $error->getMessage() ) {
-					case 'registration-error-invalid-email':
-						throw new RouteException(
-							'registration-error-invalid-email',
-							__( 'Please provide a valid email address.', 'woo-gutenberg-products-block' ),
-							400
-						);
-					case 'registration-error-email-exists':
-						throw new RouteException(
-							'registration-error-email-exists',
-							__( 'An account is already registered with your email address. Please log in before proceeding.', 'woo-gutenberg-products-block' ),
-							400
-						);
-				}
+	private function process_customer( \WP_REST_Request $request ) {
+		try {
+			$create_account = Package::container()->get( CreateAccount::class );
+			$create_account->from_order_request( $request );
+			$this->order->set_customer_id( get_current_user_id() );
+			$this->order->save();
+		} catch ( \Exception $error ) {
+			switch ( $error->getMessage() ) {
+				case 'registration-error-invalid-email':
+					throw new RouteException(
+						'registration-error-invalid-email',
+						__( 'Please provide a valid email address.', 'woo-gutenberg-products-block' ),
+						400
+					);
+				case 'registration-error-email-exists':
+					throw new RouteException(
+						'registration-error-email-exists',
+						__( 'An account is already registered with your email address. Please log in before proceeding.', 'woo-gutenberg-products-block' ),
+						400
+					);
 			}
 		}
 
 		// Persist customer address data to account.
 		$this->order_controller->sync_customer_data_with_order( $this->order );
 	}
-
 }
