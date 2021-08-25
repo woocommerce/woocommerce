@@ -56,7 +56,7 @@ describe( 'Product Image Block', () => {
 		test( 'should render an anchor with the product image', () => {
 			const component = render(
 				<ProductDataContextProvider product={ productWithImages }>
-					<Block productLink />
+					<Block showProductLink={ true } />
 				</ProductDataContextProvider>
 			);
 
@@ -80,7 +80,7 @@ describe( 'Product Image Block', () => {
 		test( 'should render an anchor with the placeholder image', () => {
 			const component = render(
 				<ProductDataContextProvider product={ productWithoutImages }>
-					<Block productLink />
+					<Block showProductLink={ true } />
 				</ProductDataContextProvider>
 			);
 
@@ -103,7 +103,7 @@ describe( 'Product Image Block', () => {
 		test( 'should render the product image without an anchor wrapper', () => {
 			const component = render(
 				<ProductDataContextProvider product={ productWithImages }>
-					<Block productLink={ false } />
+					<Block showProductLink={ false } />
 				</ProductDataContextProvider>
 			);
 			const image = component.getByTestId( 'product-image' );
@@ -123,7 +123,7 @@ describe( 'Product Image Block', () => {
 		test( 'should render the placeholder image without an anchor wrapper', () => {
 			const component = render(
 				<ProductDataContextProvider product={ productWithoutImages }>
-					<Block productLink={ false } />
+					<Block showProductLink={ false } />
 				</ProductDataContextProvider>
 			);
 

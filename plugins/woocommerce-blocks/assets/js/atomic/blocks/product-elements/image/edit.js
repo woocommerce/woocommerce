@@ -17,7 +17,7 @@ import { BLOCK_TITLE, BLOCK_ICON } from './constants';
 
 const Edit = ( { attributes, setAttributes } ) => {
 	const {
-		productLink,
+		showProductLink,
 		imageSizing,
 		showSaleBadge,
 		saleBadgeAlign,
@@ -38,10 +38,10 @@ const Edit = ( { attributes, setAttributes } ) => {
 							'Links the image to the single product listing.',
 							'woo-gutenberg-products-block'
 						) }
-						checked={ productLink }
+						checked={ showProductLink }
 						onChange={ () =>
 							setAttributes( {
-								productLink: ! productLink,
+								showProductLink: ! showProductLink,
 							} )
 						}
 					/>
