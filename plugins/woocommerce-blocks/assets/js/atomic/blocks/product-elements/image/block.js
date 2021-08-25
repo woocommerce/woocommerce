@@ -25,7 +25,7 @@ import './style.scss';
  * @param {Object} props                  Incoming props.
  * @param {string} [props.className]      CSS Class name for the component.
  * @param {string} [props.imageSizing]    Size of image to use.
- * @param {boolean} [props.productLink]   Whether or not to display a link to the product page.
+ * @param {boolean} [props.showProductLink]   Whether or not to display a link to the product page.
  * @param {boolean} [props.showSaleBadge] Whether or not to display the on sale badge.
  * @param {string} [props.saleBadgeAlign] How should the sale badge be aligned if displayed.
  * @return {*} The component.
@@ -33,7 +33,7 @@ import './style.scss';
 export const Block = ( {
 	className,
 	imageSizing = 'full-size',
-	productLink: showProductLink = true,
+	showProductLink = true,
 	showSaleBadge,
 	saleBadgeAlign = 'right',
 } ) => {
@@ -136,7 +136,7 @@ const Image = ( { image, onLoad, loaded, showFullSize, fallbackAlt } ) => {
 Block.propTypes = {
 	className: PropTypes.string,
 	fallbackAlt: PropTypes.string,
-	productLink: PropTypes.bool,
+	showProductLink: PropTypes.bool,
 	showSaleBadge: PropTypes.bool,
 	saleBadgeAlign: PropTypes.string,
 };
