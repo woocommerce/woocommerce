@@ -9,6 +9,7 @@ const {
 	clearAndFillInput,
 	selectOptionInSelect2,
 	withRestApi,
+	uiUnblocked,
 } = require( '@woocommerce/e2e-utils' );
 
 /**
@@ -76,6 +77,8 @@ const runAddNewShippingZoneTest = () => {
 			await selectOptionInSelect2('New York');
 			await expect(page).toClick('button[name="calc_shipping"]');
 
+			await uiUnblocked();
+
 			// Verify shipping costs
 			await page.waitForSelector('.order-total');
 			await expect(page).toMatchElement('.shipping .amount', {text: '$10.00'});
@@ -94,6 +97,8 @@ const runAddNewShippingZoneTest = () => {
 			await clearAndFillInput('#calc_shipping_postcode', '94000');
 			await expect(page).toClick('button[name="calc_shipping"]');
 
+			await uiUnblocked();
+
 			// Verify shipping method and cost
 			await page.waitForSelector('.order-total');
 			await expect(page).toMatchElement('.shipping ul#shipping_method > li', {text: 'Free shipping'});
@@ -107,6 +112,8 @@ const runAddNewShippingZoneTest = () => {
 			await expect(page).toClick('a.shipping-calculator-button');
 			await clearAndFillInput('#calc_shipping_postcode', '94107');
 			await expect(page).toClick('button[name="calc_shipping"]');
+
+			await uiUnblocked();
 
 			// Verify shipping method and cost
 			await page.waitForSelector('.order-total');
