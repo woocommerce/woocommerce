@@ -344,7 +344,7 @@ class WC_Post_Types {
 						'item_link'             => __( 'Product Link', 'woocommerce' ),
 						'item_link_description' => __( 'A link to a product.', 'woocommerce' ),
 					),
-					'description'         => __( 'This is where you can add new products to your store.', 'woocommerce' ),
+					'description'         => __( 'This is where you can browse products in this store.', 'woocommerce' ),
 					'public'              => true,
 					'show_ui'             => true,
 					'menu_icon'           => 'dashicons-archive',
