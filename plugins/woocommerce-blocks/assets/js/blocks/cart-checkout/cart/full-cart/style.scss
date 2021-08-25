@@ -86,7 +86,8 @@ table.wc-block-cart-items {
 }
 
 // Loading placeholder state.
-.wc-block-cart--is-loading {
+.wc-block-cart--is-loading,
+.wc-block-mini-cart-items--is-loading {
 	th span,
 	h2 span {
 		@include placeholder();
@@ -97,47 +98,43 @@ table.wc-block-cart-items {
 	h2 span {
 		min-width: 33%;
 	}
-	.wc-block-cart-items {
-		.wc-block-cart-items__row {
-			.wc-block-cart-item__price,
-			.wc-block-cart-item__individual-price,
-			.wc-block-cart-item__product-metadata,
-			.wc-block-cart-item__image > *,
-			.wc-block-components-quantity-selector {
-				@include placeholder();
-			}
-			.wc-block-cart-item__product-name {
-				@include placeholder();
-				@include force-content();
-				min-width: 84px;
-				display: inline-block;
-			}
-			.wc-block-cart-item__product-metadata {
-				margin-top: 0.25em;
-				min-width: 8em;
-			}
-			.wc-block-cart-item__remove-link {
-				visibility: hidden;
-			}
-			.wc-block-cart-item__image a {
-				display: block;
-			}
-			.wc-block-cart-item__individual-price {
-				@include force-content();
-				max-width: 3em;
-				display: block;
-				margin-top: 0.25em;
-			}
-			.wc-block-cart-item__total {
-				> span,
-				> div {
-					display: none;
-				}
-				.wc-block-cart-item__price {
-					@include force-content();
-					display: block;
-				}
-			}
+	.wc-block-cart-item__price,
+	.wc-block-cart-item__individual-price,
+	.wc-block-cart-item__product-metadata,
+	.wc-block-cart-item__image > *,
+	.wc-block-components-quantity-selector {
+		@include placeholder();
+	}
+	.wc-block-cart-item__product-name {
+		@include placeholder();
+		@include force-content();
+		min-width: 84px;
+		display: inline-block;
+	}
+	.wc-block-cart-item__product-metadata {
+		margin-top: 0.25em;
+		min-width: 8em;
+	}
+	.wc-block-cart-item__remove-link {
+		visibility: hidden;
+	}
+	.wc-block-cart-item__image a {
+		display: block;
+	}
+	.wc-block-cart-item__individual-price {
+		@include force-content();
+		max-width: 3em;
+		display: block;
+		margin-top: 0.25em;
+	}
+	.wc-block-cart-item__total {
+		> span,
+		> div {
+			display: none;
+		}
+		.wc-block-cart-item__price {
+			@include force-content();
+			display: block;
 		}
 	}
 	.wc-block-cart__sidebar .components-card {
