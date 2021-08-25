@@ -45,22 +45,17 @@ beforeAll(async () => {
 		page.setDefaultTimeout( DEFAULT_TIMEOUT_OVERRIDE );
 	}
 
-	// Update the ready page to prevent concurrent test runs
 	try {
+		// Update the ready page to prevent concurrent test runs
 		await updateReadyPageStatus('draft');
+		await trashExistingPosts();
+		await withRestApi.deleteAllProducts();
+		await withRestApi.deleteAllCoupons();
+		await withRestApi.deleteAllOrders();
 	} catch ( error ) {
 		// Prevent an error here causing tests to fail.
 	}
 
-	// This sometimes returns a 401 in CI
-	try {
-		await trashExistingPosts();
-	} catch ( error ) {
-		console.log( 'Error trashing posts' );
-	}
-	await withRestApi.deleteAllProducts();
-	await withRestApi.deleteAllCoupons();
-	await withRestApi.deleteAllOrders();
 	await page.goto(WP_ADMIN_LOGIN);
 	await clearLocalStorage();
 	await setBrowserViewport('large');
