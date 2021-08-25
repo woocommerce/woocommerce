@@ -12,7 +12,7 @@
 - Update fallback PHP version to 7.4.22
 - Update fallback MariaDB version to 10.6.4
 - Update fallback WordPress version to 5.8.0.
-- Remove unused WP test install.
+- Remove unused WP unit test install script.
 
 # 0.2.2
 
