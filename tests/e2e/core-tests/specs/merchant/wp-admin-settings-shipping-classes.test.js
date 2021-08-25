@@ -1,5 +1,3 @@
-/* eslint-disable jest/no-export*/
-
 /**
  * Internal dependencies
  */
@@ -55,7 +53,7 @@ const runAddShippingClassesTest = () => {
 			for (const { name, slug, description } of shippingClasses) {
 				const row = await expect(
 					page
-				).toMatchElement('.wc-shipping-class-rows tr', { text: slug });
+				).toMatchElement('.wc-shipping-class-rows tr', slug);
 
 				await expect(row).toMatchElement(
 					'.wc-shipping-class-name',
