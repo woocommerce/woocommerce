@@ -174,6 +174,19 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 				'schema' => array( $this, 'get_public_item_schema' ),
 			)
 		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[a-z0-9_\-]+)/undo_snooze',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'undo_snooze_task' ),
+					'permission_callback' => array( $this, 'snooze_task_permissions_check' ),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
 	}
 
 	/**
@@ -792,7 +805,6 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function snooze_task( $request ) {
-
 		$task_id         = $request->get_param( 'id' );
 		$task_list_id    = $request->get_param( 'task_list_id' );
 		$snooze_duration = $request->get_param( 'duration' );
@@ -824,13 +836,43 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 
 		if ( $update ) {
 			wc_admin_record_tracks_event( 'tasklist_remindmelater_task', array( 'task_name' => $task_id ) );
+			$snooze_task['isSnoozed']    = true;
+			$snooze_task['snoozedUntil'] = $snoozed_until;
 		}
-
-		$snooze_task['isSnoozed']    = true;
-		$snooze_task['snoozedUntil'] = $snoozed_until;
 
 		return rest_ensure_response( $snooze_task );
 	}
 
+	/**
+	 * Undo snooze of a single task.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Request|WP_Error
+	 */
+	public function undo_snooze_task( $request ) {
+		$id = $request->get_param( 'id' );
+
+		$snoozed = get_option( 'woocommerce_task_list_remind_me_later_tasks', array() );
+
+		if ( ! isset( $snoozed[ $id ] ) ) {
+			return new \WP_Error(
+				'woocommerce_tasks_invalid_task',
+				__( 'Sorry, no snoozed task with that ID was found.', 'woocommerce-admin' ),
+				array(
+					'status' => 404,
+				)
+			);
+		}
+
+		unset( $snoozed[ $id ] );
+
+		$update = update_option( 'woocommerce_task_list_remind_me_later_tasks', $snoozed );
+
+		if ( $update ) {
+			wc_admin_record_tracks_event( 'tasklist_undo_remindmelater_task', array( 'task_name' => $id ) );
+		}
+
+		return rest_ensure_response( OnboardingTasksFeature::get_task_by_id( $id ) );
+	}
 
 }
