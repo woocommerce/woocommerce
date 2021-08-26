@@ -123,7 +123,20 @@ class WC_REST_Telemetry_V2_Controller extends WC_REST_Controller {
 	 */
 	public function get_collection_params() {
 		return array(
-			'context' => $this->get_context_param( array( 'default' => 'view' ) ),
+			'platform' => array(
+				'description'       => __( 'Platform to track.', 'woocommerce' ),
+				'required'          => true,
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+				'validate_callback' => 'rest_validate_request_arg',
+			),
+			'version'  => array(
+				'description'       => __( 'Platform version to track.', 'woocommerce' ),
+				'required'          => true,
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+				'validate_callback' => 'rest_validate_request_arg',
+			),
 		);
 	}
 }
