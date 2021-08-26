@@ -6,6 +6,9 @@
  * @since 3.5.0
  */
 
+// phpcs:ignore Squiz.Commenting.FileComment.Missing
+require __DIR__ . '/date-filtering.php';
+
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 
@@ -14,6 +17,7 @@ use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
  */
 class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	use WC_REST_API_Complex_Meta;
+	use DateFilteringForCrudControllers;
 
 	/**
 	 * Array of order to track
@@ -1159,5 +1163,23 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$meta_data_item_properties = $line_item_properties['meta_data']['items']['properties'];
 		$this->assertEquals( 5, count( $meta_data_item_properties ) );
 		$this->assertEquals( array( 'id', 'key', 'value', 'display_key', 'display_value' ), array_keys( $meta_data_item_properties ) );
+	}
+
+	/**
+	 * Create an object for the tests in DateFilteringForCrudControllers.
+	 *
+	 * @return object The created object.
+	 */
+	private function get_item_for_date_filtering_tests() {
+		return OrderHelper::create_order();
+	}
+
+	/**
+	 * Get the REST API endpoint for the tests in DateFilteringForCrudControllers.
+	 *
+	 * @return string REST API endpoint for querying items.
+	 */
+	private function get_endpoint_for_date_filtering_tests() {
+		return '/wc/v3/orders';
 	}
 }
