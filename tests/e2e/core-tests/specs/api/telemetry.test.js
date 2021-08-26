@@ -31,12 +31,19 @@ const runTelemetryAPITest = () => {
 				.create();
 		} );
 
-		it( 'errors for missing fields', async () => {
-			await client
-				.post( `/wc/v3/telemetry` )
+		it.each([
+			null,
+			{},
+			{ platform: 'ios' },
+			{ version: '1.1' },
+		])( 'errors for invalid request body - %p', async data => {
+			const response = await client
+				.post( `/wc/v3/telemetry`, data )
 				.catch( err => {
 					expect( err.statusCode ).toBe( 400 );
 				} );
+
+			expect( response ).toBeUndefined();
 		} );
 
 		it( 'returns 200 with correct fields', async () => {
