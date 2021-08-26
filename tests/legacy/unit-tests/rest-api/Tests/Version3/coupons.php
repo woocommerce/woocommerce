@@ -1,11 +1,24 @@
 <?php
 /**
+ * Tests for Coupons API.
+ *
+ * @package WooCommerce\Tests\API
+ */
+
+// phpcs:ignore Squiz.Commenting.FileComment.Missing
+require __DIR__ . '/date-filtering.php';
+
+/**
  * Coupon API Tests
  * @package WooCommerce\Tests\API
  * @since 3.5.0
  */
 class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
+	use DateFilteringForCrudControllers;
 
+	/**
+	 * @var WC_REST_Coupons_Controller
+	 */
 	protected $endpoint;
 
 	/**
@@ -467,5 +480,23 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'maximum_amount', $properties );
 		$this->assertArrayHasKey( 'email_restrictions', $properties );
 		$this->assertArrayHasKey( 'used_by', $properties );
+	}
+
+	/**
+	 * Create an object for the tests in DateFilteringForCrudControllers.
+	 *
+	 * @return object The created object.
+	 */
+	private function get_item_for_date_filtering_tests() {
+		return \Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper::create_coupon( 'dummycoupon-1' );
+	}
+
+	/**
+	 * Get the REST API endpoint for the tests in DateFilteringForCrudControllers.
+	 *
+	 * @return string REST API endpoint for querying items.
+	 */
+	private function get_endpoint_for_date_filtering_tests() {
+		return '/wc/v3/coupons';
 	}
 }
