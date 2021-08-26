@@ -99,6 +99,7 @@ const runApiTests = () => {
 	runVariableProductAPITest();
 	runCouponApiTest();
 	runOrderApiTest();
+	runTelemetryAPITest();
 }
 
 module.exports = {
