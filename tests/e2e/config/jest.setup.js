@@ -12,6 +12,8 @@ const { DEFAULT_TIMEOUT_OVERRIDE } = process.env;
 
 // @todo: remove this once https://github.com/woocommerce/woocommerce-admin/issues/6992 has been addressed
 addConsoleSuppression( 'woocommerce_shared_settings' );
+// @todo: remove this once https://github.com/woocommerce/woocommerce/issues/30577 has been addressed
+addConsoleSuppression( 'waitFor is deprecated', false );
 
 /**
  * Uses the WordPress API to delete all existing posts
