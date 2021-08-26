@@ -10,6 +10,25 @@
 4. Then, before hitting Continue again, click the "Business details" tab above to move back to that step
 5. Confirm that the previously selected values are still correct
 
+### Show Pinterest for WooCommerce in `Marketing > Installed` #7417
+
+_Prerequisite_: This requires the forthcoming native [__Pinterest for WooCommerce__ extension](https://github.com/saucal/pinterest-for-woocommerce) (private repo – may not be available).
+
+If __Pinterest for WooCommerce__ is installed, marketing screen should show status info.
+
+1. Install __Pinterest for WooCommerce__ extension. Don't activate it.
+1. Go to `WooCommerce > Marketing`.
+1. Confirm there is a row for Pinterest in `Installed marketing extensions` with `Activate` button.
+1. Activate the extension by clicking the button, or via normal `WordPress > Plugins` screen.
+1. Go to `WooCommerce > Marketing`.
+1. Confirm the Pinterest row guides merchant to set up the extension (if not yet set up) or links to settings and docs.
+
+Marketing screen should be unaffected if __Pinterest for WooCommerce__ is not installed.
+
+1. Ensure __Pinterest for WooCommerce__ is not installed.
+1. Go to `WooCommerce > Marketing`.
+1. Should look and work the same as in previous versions.
+
 ### Fix end date for last periods #6584
 
 1. Update your system clock to March 2021

@@ -12,6 +12,10 @@ export { default as automatewooAlt } from './library/automatewoo-alt';
 export { default as facebook } from './library/facebook';
 export { default as facebookForWoocommerce } from './library/facebook';
 
+// Pinterest
+export { default as pinterest } from './library/pinterest';
+export { default as pinterestForWoocommerce } from './library/pinterest';
+
 // Google Ads
 export { default as googleAds } from './library/google';
 export { default as googleListingsAndAds } from './library/google';
