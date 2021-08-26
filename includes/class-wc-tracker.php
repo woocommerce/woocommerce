@@ -166,7 +166,7 @@ class WC_Tracker {
 		// WooCommerce Admin info.
 		$data['wc_admin_disabled'] = apply_filters( 'woocommerce_admin_disabled', false ) ? 'yes' : 'no';
 
-		// Mobile info
+		// Mobile info.
 		$data['wc_mobile_usage'] = self::get_woocommerce_mobile_usage();
 
 		return apply_filters( 'woocommerce_tracker_data', $data );
