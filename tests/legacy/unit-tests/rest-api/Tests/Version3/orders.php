@@ -7,7 +7,7 @@
  */
 
 // phpcs:ignore Squiz.Commenting.FileComment.Missing
-require __DIR__ . '/date-filtering.php';
+require_once __DIR__ . '/date-filtering.php';
 
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;

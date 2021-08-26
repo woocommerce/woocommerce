@@ -7,7 +7,7 @@
  */
 
 // phpcs:ignore Squiz.Commenting.FileComment.Missing
-require __DIR__ . '/date-filtering.php';
+require_once __DIR__ . '/date-filtering.php';
 
 /**
  * WC_Tests_API_Product class.
