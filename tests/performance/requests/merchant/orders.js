@@ -149,5 +149,5 @@ export function orders() {
 }
 
 export default function () {
-	products();
+	orders();
 }
