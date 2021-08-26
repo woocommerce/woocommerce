@@ -21,6 +21,12 @@ export const getTasksStatus = (
 	return state.tasksStatus || {};
 };
 
+const initialTaskLists: TaskList[] = [];
+
+export const getTaskLists = ( state: OnboardingState ): TaskList[] => {
+	return state.taskLists || initialTaskLists;
+};
+
 export const getPaymentGatewaySuggestions = (
 	state: OnboardingState
 ): PaymentMethodsState[] => {
@@ -55,6 +61,7 @@ export type OnboardingSelectors = {
 export type OnboardingState = {
 	freeExtensions: ExtensionList[];
 	profileItems: ProfileItemsState;
+	taskLists: TaskList[];
 	tasksStatus: TasksStatusState;
 	paymentMethods: PaymentMethodsState[];
 	// TODO clarify what the error record's type is
@@ -171,4 +178,25 @@ export type Extension = {
 	manage_url: string;
 	name: string;
 	slug: string;
+};
+
+export type Task = {
+	id: string;
+	title: string;
+	content: string;
+	actionLabel: string;
+	actionUrl: string;
+	isComplete: boolean;
+	isVisibile: boolean;
+	isDismissable?: boolean;
+	isSnoozeable?: boolean;
+	time: string;
+};
+
+export type TaskList = {
+	id: string;
+	title: string;
+	isComplete: boolean;
+	isHidden: boolean;
+	tasks: Task[];
 };

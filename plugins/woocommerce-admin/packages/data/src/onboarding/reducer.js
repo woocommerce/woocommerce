@@ -23,7 +23,25 @@ export const defaultState = {
 	},
 	paymentMethods: [],
 	requesting: {},
+	taskLists: [],
 	tasksStatus: {},
+};
+
+const getUpdatedTaskLists = ( taskLists, args ) => {
+	return taskLists.map( ( taskList ) => {
+		return {
+			...taskList,
+			tasks: taskList.tasks.map( ( task ) => {
+				if ( args.id === task.id ) {
+					return {
+						...task,
+						...args,
+					};
+				}
+				return task;
+			} ),
+		};
+	} );
 };
 
 const onboarding = (
@@ -37,6 +55,9 @@ const onboarding = (
 		error,
 		isRequesting,
 		selector,
+		task,
+		taskId,
+		taskLists,
 		tasksStatus,
 	}
 ) => {
@@ -86,6 +107,151 @@ const onboarding = (
 			return {
 				...state,
 				freeExtensions,
+			};
+		case TYPES.GET_TASK_LISTS_ERROR:
+			return {
+				...state,
+				errors: {
+					...state.errors,
+					getTaskLists: error,
+				},
+			};
+		case TYPES.GET_TASK_LISTS_SUCCESS:
+			return {
+				...state,
+				taskLists,
+			};
+		case TYPES.DISMISS_TASK_ERROR:
+			return {
+				...state,
+				errors: {
+					...state.errors,
+					dismissTask: error,
+				},
+				taskLists: getUpdatedTaskLists( state.taskLists, {
+					id: taskId,
+					isDismissed: false,
+				} ),
+			};
+		case TYPES.DISMISS_TASK_REQUEST:
+			return {
+				...state,
+				requesting: {
+					...state.requesting,
+					dismissTask: true,
+				},
+				taskLists: getUpdatedTaskLists( state.taskLists, {
+					id: taskId,
+					isDismissed: true,
+				} ),
+			};
+		case TYPES.DISMISS_TASK_SUCCESS:
+			return {
+				...state,
+				requesting: {
+					...state.requesting,
+					dismissTask: false,
+				},
+				taskLists: getUpdatedTaskLists( state.taskLists, task ),
+			};
+		case TYPES.UNDO_DISMISS_TASK_ERROR:
+			return {
+				...state,
+				errors: {
+					...state.errors,
+					undoDismissTask: error,
+				},
+				taskLists: getUpdatedTaskLists( state.taskLists, {
+					id: taskId,
+					isDismissed: true,
+				} ),
+			};
+		case TYPES.UNDO_DISMISS_TASK_REQUEST:
+			return {
+				...state,
+				requesting: {
+					...state.requesting,
+					undoDismissTask: true,
+				},
+				taskLists: getUpdatedTaskLists( state.taskLists, {
+					id: taskId,
+					isDismissed: false,
+				} ),
+			};
+		case TYPES.UNDO_DISMISS_TASK_SUCCESS:
+			return {
+				...state,
+				requesting: {
+					...state.requesting,
+					undoDismissTask: false,
+				},
+				taskLists: getUpdatedTaskLists( state.taskLists, task ),
+			};
+		case TYPES.SNOOZE_TASK_ERROR:
+			return {
+				...state,
+				errors: {
+					...state.errors,
+					snoozeTask: error,
+				},
+				taskLists: getUpdatedTaskLists( state.taskLists, {
+					id: taskId,
+					isSnoozed: false,
+				} ),
+			};
+		case TYPES.SNOOZE_TASK_REQUEST:
+			return {
+				...state,
+				requesting: {
+					...state.requesting,
+					snoozeTask: true,
+				},
+				taskLists: getUpdatedTaskLists( state.taskLists, {
+					id: taskId,
+					isSnoozed: true,
+				} ),
+			};
+		case TYPES.SNOOZE_TASK_SUCCESS:
+			return {
+				...state,
+				requesting: {
+					...state.requesting,
+					snoozeTask: false,
+				},
+				taskLists: getUpdatedTaskLists( state.taskLists, task ),
+			};
+		case TYPES.UNDO_SNOOZE_TASK_ERROR:
+			return {
+				...state,
+				errors: {
+					...state.errors,
+					undoSnoozeTask: error,
+				},
+				taskLists: getUpdatedTaskLists( state.taskLists, {
+					id: taskId,
+					isSnoozed: true,
+				} ),
+			};
+		case TYPES.UNDO_SNOOZE_TASK_REQUEST:
+			return {
+				...state,
+				requesting: {
+					...state.requesting,
+					undoSnoozeTask: true,
+				},
+				taskLists: getUpdatedTaskLists( state.taskLists, {
+					id: taskId,
+					isSnoozed: false,
+				} ),
+			};
+		case TYPES.UNDO_SNOOZE_TASK_SUCCESS:
+			return {
+				...state,
+				requesting: {
+					...state.requesting,
+					undoSnoozeTask: false,
+				},
+				taskLists: getUpdatedTaskLists( state.taskLists, task ),
 			};
 		default:
 			return state;

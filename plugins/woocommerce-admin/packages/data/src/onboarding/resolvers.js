@@ -10,6 +10,8 @@ import { WC_ADMIN_NAMESPACE } from '../constants';
 import {
 	getFreeExtensionsError,
 	getFreeExtensionsSuccess,
+	getTaskListsError,
+	getTaskListsSuccess,
 	setProfileItems,
 	setError,
 	setTasksStatus,
@@ -39,6 +41,19 @@ export function* getTasksStatus() {
 		yield setTasksStatus( results, true );
 	} catch ( error ) {
 		yield setError( 'getTasksStatus', error );
+	}
+}
+
+export function* getTaskLists() {
+	try {
+		const results = yield apiFetch( {
+			path: WC_ADMIN_NAMESPACE + '/onboarding/tasks',
+			method: 'GET',
+		} );
+
+		yield getTaskListsSuccess( results );
+	} catch ( error ) {
+		yield getTaskListsError( error );
 	}
 }
 
