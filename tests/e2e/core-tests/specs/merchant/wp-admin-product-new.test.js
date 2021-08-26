@@ -55,7 +55,9 @@ const runAddSimpleProductTest = () => {
 			await verifyAndPublish();
 
 			await merchant.logout();
+		});
 
+		it('can have a shopper add the simple virtual product to the cart', async () => {
 			// See product in the shop and add it to the cart
 			await shopper.goToShop();
 			await shopper.addToCartFromShopPage(VirtualProductName);
@@ -80,9 +82,14 @@ const runAddSimpleProductTest = () => {
 			await verifyAndPublish();
 
 			await merchant.logout();
+		});
 
+		it('can have a shopper add the simple non-virtual product to the cart', async () => {
 			// See product in the shop and add it to the cart
 			await shopper.goToShop();
+
+			await page.reload({ waitUntil: ['networkidle0', 'domcontentloaded'] });
+
 			await shopper.addToCartFromShopPage(NonVirtualProductName);
 			await shopper.goToCart();
 			await shopper.productIsInCart(NonVirtualProductName);
