@@ -6,7 +6,7 @@
  */
 
 // phpcs:ignore Squiz.Commenting.FileComment.Missing
-require __DIR__ . '/date-filtering.php';
+require_once __DIR__ . '/date-filtering.php';
 
 /**
  * Coupon API Tests
