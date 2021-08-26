@@ -185,7 +185,7 @@ const runAddVariableProductTest = () => {
 			}
 
 			await waitAndClick( page, '.variations-pagenav .expand_all');
-			await waitForSelectorWithoutThrow( 'input[name="variable_is_virtual[0]"]', 2 );
+			await waitForSelectorWithoutThrow( 'input[name="variable_is_virtual[0]"]', 5 );
 			await setCheckbox('input[name="variable_is_virtual[0]"]');
 			await expect(page).toFill('input[name="variable_regular_price[0]"]', '9.99');
 
