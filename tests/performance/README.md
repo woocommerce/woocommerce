@@ -190,5 +190,4 @@ The tests name them after the requests which the metric represents.
 
 ## Other Resources
 
-[k6 documention](https://k6.io/docs/) is a very useful resource for 
-test creation and execution.
+[k6 documention](https://k6.io/docs/) is a very useful resource for test creation and execution.
