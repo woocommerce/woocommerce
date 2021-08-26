@@ -53,7 +53,7 @@ const runAddShippingClassesTest = () => {
 			for (const { name, slug, description } of shippingClasses) {
 				const row = await expect(
 					page
-				).toMatchElement('.wc-shipping-class-rows tr', slug);
+				).toMatchElement('.wc-shipping-class-rows tr', { text: slug, timeout: 50000 });
 
 				await expect(row).toMatchElement(
 					'.wc-shipping-class-name',
