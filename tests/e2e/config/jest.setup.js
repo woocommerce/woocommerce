@@ -45,17 +45,17 @@ beforeAll(async () => {
 		page.setDefaultTimeout( DEFAULT_TIMEOUT_OVERRIDE );
 	}
 
-	// Update the ready page to prevent concurrent test runs
 	try {
+		// Update the ready page to prevent concurrent test runs
 		await updateReadyPageStatus('draft');
+		await trashExistingPosts();
+		await withRestApi.deleteAllProducts();
+		await withRestApi.deleteAllCoupons();
+		await withRestApi.deleteAllOrders();
 	} catch ( error ) {
 		// Prevent an error here causing tests to fail.
 	}
 
-	await trashExistingPosts();
-	await withRestApi.deleteAllProducts();
-	await withRestApi.deleteAllCoupons();
-	await withRestApi.deleteAllOrders();
 	await page.goto(WP_ADMIN_LOGIN);
 	await clearLocalStorage();
 	await setBrowserViewport('large');
@@ -65,7 +65,11 @@ beforeAll(async () => {
 // This is to ensure that each test ends with no user logged in.
 afterAll(async () => {
 	// Reset the ready page to published to allow future test runs
-	await updateReadyPageStatus('publish');
+	try {
+		await updateReadyPageStatus('publish');
+	} catch ( error ) {
+		// Prevent an error here causing tests to fail.
+	}
 
 	const client = await page.target().createCDPSession();
 	await client.send('Network.clearBrowserCookies');
