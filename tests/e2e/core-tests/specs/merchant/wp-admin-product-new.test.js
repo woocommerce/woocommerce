@@ -30,26 +30,6 @@ const VirtualProductName = 'Virtual Product Name';
 const NonVirtualProductName = 'Non-Virtual Product Name';
 const simpleProductPrice = config.has('products.simple.price') ? config.get('products.simple.price') : '9.99';
 
-const verifyPublishAndTrash = async () => {
-	// Wait for auto save
-	await page.waitFor( 2000 );
-
-	// Publish product
-	await expect( page ).toClick( '#publish' );
-	await page.waitForSelector( '.updated.notice', { text: 'Product published.' } );
-
-	// Verify
-	await expect( page ).toMatchElement( '.updated.notice', { text: 'Product published.' } );
-	await page.waitForSelector( 'a', { text: 'Move to Trash' } );
-
-	// Trash product
-	await expect( page ).toClick( 'a', { text: 'Move to Trash' } );
-	await page.waitForSelector( '.updated.notice', { text: '1 product moved to the Trash.' } );
-
-	// Verify
-	await expect( page ).toMatchElement( '.updated.notice', { text: '1 product moved to the Trash.' } );
-};
-
 const openNewProductAndVerify = async () => {
 	// Go to "add product" page
 	await merchant.openNewProduct();
@@ -221,7 +201,7 @@ const runAddVariableProductTest = () => {
 
 			await page.focus('button.save-variation-changes');
 			await expect(page).toClick('button.save-variation-changes', {text: 'Save changes'});
-			// @todo: add one or more tests to verify changes were saved
+			// @todo: https://github.com/woocommerce/woocommerce/issues/30580
 		});
 	});
 };
