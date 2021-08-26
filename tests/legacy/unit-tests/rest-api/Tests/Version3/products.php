@@ -6,9 +6,9 @@
  * @since 3.5.0
  */
 
- /**
-  * WC_Tests_API_Product class.
-  */
+/**
+ * WC_Tests_API_Product class.
+ */
 class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 	use WC_REST_API_Complex_Meta;
 
@@ -64,7 +64,7 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_trashed_products() {
 		wp_set_current_user( $this->user );
-		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
+		$product    = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
 		$data_store = WC_Data_Store::load( 'product' );
 		$data_store->delete( $product );
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
@@ -83,7 +83,7 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_trashed_products_not_returned_by_default() {
 		wp_set_current_user( $this->user );
-		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
+		$product    = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
 		$data_store = WC_Data_Store::load( 'product' );
 		$data_store->delete( $product );
 
@@ -101,7 +101,7 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_trashed_products_returned_by_id() {
 		wp_set_current_user( $this->user );
-		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
+		$product    = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
 		$data_store = WC_Data_Store::load( 'product' );
 		$data_store->delete( $product );
 
@@ -907,5 +907,99 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 		foreach ( $response_products as $response_product ) {
 			$this->assertContains( $response_product['id'], $expected_product_ids );
 		}
+	}
+
+	/**
+	 * @testdox Products can be filtered by creation or modification date, and the specified dates can be GMT or not.
+	 *
+	 * @testWith ["after", false, true]
+	 *           ["after", true, false]
+	 *           ["before", true, true]
+	 *           ["before", false, false]
+	 *           ["modified_after", false, true]
+	 *           ["modified_after", true, false]
+	 *           ["modified_before", true, true]
+	 *           ["modified_before", false, false]
+	 *
+	 * @param string $param_name The name of the date parameter to filter by.
+	 * @param bool   $filter_by_gmt Whether the dates to filter by are GMT or not.
+	 * @param bool   $expected_to_be_returned True if the created product is expected to be included in the response, false otherwise.
+	 */
+	public function test_filter_by_creation_or_modification_date( $param_name, $filter_by_gmt, $expected_to_be_returned ) {
+		global $wpdb;
+
+		wp_set_current_user( $this->user );
+		$product_id = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product()->get_id();
+
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+		$wpdb->query(
+			'UPDATE ' . $wpdb->prefix . "posts SET
+			post_date = '2000-01-01T12:00:00',
+			post_date_gmt = '2000-01-01T10:00:00',
+			post_modified = '2000-02-01T12:00:00',
+			post_modified_gmt = '2000-02-01T10:00:00'
+			WHERE ID = " . $product_id
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_query_params(
+			array(
+				$param_name     => false === strpos( $param_name, 'modified' ) ? '2000-01-01T11:00:00' : '2000-02-01T11:00:00',
+				'dates_are_gmt' => $filter_by_gmt ? 'true' : 'false',
+			)
+		);
+		$response          = $this->server->dispatch( $request );
+		$response_products = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( $expected_to_be_returned ? 1 : 0, count( $response_products ) );
+	}
+
+	/**
+	 * @testdox Products can be filtered by any combination of more than one date (but all must either be GMT or not be it).
+	 *
+	 * @testWith ["after", "2000-01-01T11:59:59", "modified_before", "2000-02-01T12:00:01", false, true]
+	 *           ["after", "2000-01-01T11:59:59", "modified_before", "2000-02-01T11:59:59", false, false]
+	 *           ["before", "2000-01-01T10:00:01", "modified_after", "2000-02-01T09:59:59", true, true]
+	 *           ["before", "2000-01-01T09:59:59", "modified_after", "2000-02-01T09:59:59", true, false]
+	 *
+	 * @param string $first_param_name Name of the first parameter to filter by.
+	 * @param string $first_param_value Value of the first parameter to filter by.
+	 * @param string $second_param_name Name of the second parameter to filter by.
+	 * @param string $second_param_value Value of the second parameter to filter by.
+	 * @param bool   $filter_by_gmt Whether the dates to filter by are GMT or not.
+	 * @param bool   $expected_to_be_returned True if the created product is expected to be included in the response, false otherwise.
+	 */
+	public function test_can_filter_by_more_than_one_date( $first_param_name, $first_param_value, $second_param_name, $second_param_value, $filter_by_gmt, $expected_to_be_returned ) {
+		global $wpdb;
+
+		wp_set_current_user( $this->user );
+		$product_id = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product()->get_id();
+
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+		$wpdb->query(
+			'UPDATE ' . $wpdb->prefix . "posts SET
+			post_date = '2000-01-01T12:00:00',
+			post_date_gmt = '2000-01-01T10:00:00',
+			post_modified = '2000-02-01T12:00:00',
+			post_modified_gmt = '2000-02-01T10:00:00'
+			WHERE ID = " . $product_id
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_query_params(
+			array(
+				$first_param_name  => $first_param_value,
+				$second_param_name => $second_param_value,
+				'dates_are_gmt'    => $filter_by_gmt ? 'true' : 'false',
+			)
+		);
+		$response          = $this->server->dispatch( $request );
+		$response_products = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( $expected_to_be_returned ? 1 : 0, count( $response_products ) );
 	}
 }
