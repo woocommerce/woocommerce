@@ -214,7 +214,7 @@ class DefaultPaymentGateways {
 				'id'         => 'eway',
 				'title'      => __( 'eWAY', 'woocommerce-admin' ),
 				'content'    => __( 'The eWAY extension for WooCommerce allows you to take credit card payments directly on your store without redirecting your customers to a third party site to make payment.', 'woocommerce-admin' ),
-				'image'      => WC()->plugin_url() . '/assets/images/eway-logo.jpg',
+				'image'      => plugins_url( 'images/onboarding/eway.png', WC_ADMIN_PLUGIN_FILE ),
 				'plugins'    => array( 'woocommerce-gateway-eway' ),
 				'is_visible' => array(
 					self::get_rules_for_countries( array( 'AU', 'NZ' ) ),
