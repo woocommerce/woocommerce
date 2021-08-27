@@ -39,7 +39,7 @@ async function trashExistingPosts() {
  * Uses the WooCommerce API to get the envivonment context.
  */
 async function getEnvironmentContext() {
-	const environment  = await withRestApi.getSystemEnvironment();
+	const environment = await withRestApi.getSystemEnvironment();
 	process.env.WORDPRESS_VERSION = environment.wp_version;
 	process.env.WC_VERSION = environment.version;
 }
