@@ -171,9 +171,11 @@ const shopper = {
 		await page.waitForSelector(searchFieldSelector, { timeout: 100000 });
 		await expect(page).toFill(searchFieldSelector, prouductName);
 		await expect(page).toClick('.wp-block-search__button');
-		await page.waitForSelector('h2.entry-title');
-		await expect(page).toMatchElement('h2.entry-title', {text: prouductName});
-		await expect(page).toClick('h2.entry-title', {text: prouductName});
+		// Single search results may go directly to product page
+		if ( await page.waitForSelector('h2.entry-title') ) {
+			await expect(page).toMatchElement('h2.entry-title', {text: prouductName});
+			await expect(page).toClick('h2.entry-title', {text: prouductName});
+		}
 		await page.waitForSelector('h1.entry-title');
 		await expect(page.title()).resolves.toMatch(prouductName);
 		await expect(page).toMatchElement('h1.entry-title', prouductName);
