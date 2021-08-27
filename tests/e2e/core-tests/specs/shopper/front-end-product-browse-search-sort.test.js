@@ -1,10 +1,10 @@
-/* eslint-disable jest/no-export, jest/no-disabled-tests */
 /**
  * Internal dependencies
  */
 const {
 	shopper,
 	createSimpleProductWithCategory,
+	utils,
 } = require( '@woocommerce/e2e-utils' );
 
 /**
@@ -15,6 +15,7 @@ const {
 	describe,
 	beforeAll,
 } = require( '@jest/globals' );
+const { WORDPRESS_VERSION } = process.env;
 
 const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );
@@ -27,7 +28,7 @@ const hardware = 'Hardware';
 const productTitle = 'li.first > a > h2.woocommerce-loop-product__title';
 
 const runProductBrowseSearchSortTest = () => {
-	describe('Search, browse by categories and sort items in the shop', () => {
+	utils.describeIf( WORDPRESS_VERSION >= '5.8' )( 'Search, browse by categories and sort items in the shop', () => {
 		beforeAll(async () => {
 			// Create 1st product with Clothing category
 			await createSimpleProductWithCategory(simpleProductName + ' 1', singleProductPrice, clothing);
