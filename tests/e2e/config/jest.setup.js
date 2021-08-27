@@ -113,6 +113,8 @@ beforeAll(async () => {
 	}
 
 	try {
+		await getEnvironmentContext();
+
 		// Update the ready page to prevent concurrent test runs
 		await updateReadyPageStatus('draft');
 		await trashExistingPosts();
