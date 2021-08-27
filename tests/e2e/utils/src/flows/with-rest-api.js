@@ -269,7 +269,7 @@ export const withRestApi = {
 	},
 
 	/**
-	 * Get the current envrionment from the WooCommerce system status API.
+	 * Get the current environment from the WooCommerce system status API.
 	 *
 	 * @returns {Promise<object>} The environment object from the API response.
 	 */
