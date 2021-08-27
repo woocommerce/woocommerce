@@ -6,6 +6,7 @@ const onboardingProfileEndpoint = '/wc-admin/onboarding/profile';
 const shippingZoneEndpoint = '/wc/v3/shipping/zones';
 const shippingClassesEndpoint = '/wc/v3/products/shipping_classes';
 const userEndpoint = '/wp/v2/users';
+const systemStatusEndpoint = '/wc/v3/system_status';
 
 /**
  * Utility function to delete all merchant created data store objects.
@@ -252,18 +253,32 @@ export const withRestApi = {
 			}
 		}
 	},
-	
+
 	/**
 	 * Create a batch of orders using the "Batch Create Order" API endpoint.
-	 * 
+	 *
 	 * @param orders Array of orders to be created
 	 */
-	batchCreateOrders : async (orders) => {
+	batchCreateOrders: async (orders) => {
 		const path = '/wc/v3/orders/batch';
 		const payload = { create: orders };
-		
+
 		const { statusCode } = await client.post(path, payload);
 
 		expect(statusCode).toEqual(200);
+	},
+
+	/**
+	 * Get the current envrionment from the WooCommerce system status API.
+	 *
+	 * @returns {Promise<object>} The environment object from the API response.
+	 */
+	getSystemEnvironment: async () => {
+		const response = await client.get( systemStatusEndpoint );
+		if ( response.data.environment ) {
+			return response.data.environment
+		} else {
+			return;
+		}
 	}
 };
