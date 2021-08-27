@@ -150,7 +150,7 @@ class WC_Meta_Box_Order_Actions {
 	/**
 	 * Get the available order actions for a given order.
 	 *
-	 * @since x.x.x
+	 * @since 5.8.0
 	 *
 	 * @param WC_Order|null $order The order object or null if no order is available.
 	 *
@@ -168,7 +168,7 @@ class WC_Meta_Box_Order_Actions {
 		 * Allows filtering of the available order actions for an order.
 		 *
 		 * @since 2.1.0 Filter was added.
-		 * @since x.x.x The $order param was added.
+		 * @since 5.8.0 The $order param was added.
 		 *
 		 * @param array         $actions The available order actions for the order.
 		 * @param WC_Order|null $order   The order object or null if no order is available.
