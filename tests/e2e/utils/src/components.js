@@ -453,12 +453,16 @@ const addShippingZoneAndMethod = async ( zoneName, zoneLocation = 'country:US', 
 	// Select shipping zone location
 	await expect(page).toSelect('select[name="zone_locations"]', zoneLocation);
 
+	await uiUnblocked();
+
 	// Fill shipping zone postcode if needed otherwise just put empty space
 	await page.waitForSelector('a.wc-shipping-zone-postcodes-toggle');
 	await expect(page).toClick('a.wc-shipping-zone-postcodes-toggle');
 	await expect(page).toFill('#zone_postcodes', zipCode);
 	await expect(page).toMatchElement('#zone_postcodes', zipCode);
 	await expect(page).toClick('button#submit');
+
+	await uiUnblocked();
 
 	// Add shipping zone method
 	await page.waitFor(1000);
@@ -467,6 +471,8 @@ const addShippingZoneAndMethod = async ( zoneName, zoneLocation = 'country:US', 
 	await expect(page).toSelect('select[name="add_method_id"]', zoneMethod);
 	await expect(page).toClick('button#btn-ok');
 	await page.waitForSelector('#zone_locations');
+
+	await uiUnblocked();
 };
 
 /**

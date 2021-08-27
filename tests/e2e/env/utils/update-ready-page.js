@@ -13,8 +13,8 @@ const updateReadyPageStatus = async ( status ) => {
 	const wpPagesEndpoint = '/wp/v2/pages';
 	const adminUsername = testConfig.users.admin.username ? testConfig.users.admin.username : 'admin';
 	const adminPassword = testConfig.users.admin.password ? testConfig.users.admin.password : 'password';
-	const client = HTTPClientFactory.build(apiUrl)
-		.withBasicAuth(adminUsername, adminPassword)
+	const client = HTTPClientFactory.build( apiUrl )
+		.withBasicAuth( adminUsername, adminPassword )
 		.create();
 
 	// As the default status filter in the API is `publish`, we need to
@@ -25,11 +25,11 @@ const updateReadyPageStatus = async ( status ) => {
 		statusFilter = 'draft';
 	}
 
-	const getPostsResponse = await client.get(`${wpPagesEndpoint}?search=ready&status=${statusFilter}` );
+	const getPostsResponse = await client.get( `${wpPagesEndpoint}?search=ready&status=${statusFilter}` );
 	if ( getPostsResponse.data && getPostsResponse.data.length > 0 ) {
 		const pageId = getPostsResponse.data[0].id;
 		// Update the page to the new status
-		await client.put(`${wpPagesEndpoint}/${pageId}`, { 'status': status } );
+		await client.post( `${wpPagesEndpoint}/${pageId}`, { 'status': status } );
 	}
 }
 
