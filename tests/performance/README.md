@@ -34,7 +34,8 @@ Automated k6 performance tests for WooCommerce. To be used for benchmarking perf
 
 ### Install k6
 
-To install k6 on macOS using [Homebrew](https://brew.sh/) 
+To install k6 on macOS using [Homebrew](https://brew.sh/)
+
 `brew install k6`
 
 [For other platforms please see the k6 installation guide.](https://k6.io/docs/getting-started/installation/)
@@ -47,17 +48,17 @@ Alternatively you can use the k6 docker image to execute tests.
 
 ### Test Environment
 
-Before you try using the tests make sure you have an environment to run against.
+Before using the tests a test environment is needed to run against.
 
-In the WooCommerce e2e tests there is a Docker Initialization Script [`init-sample-products.sh`](https://github.com/woocommerce/woocommerce/tree/trunk/tests/e2e/docker/init-sample-products.sh) that will set up a shop with sample products imported and the shop settings (payment method, permalinks, address etc) we need already set. It is recommended using this if you just want to see the tests in action.
+In the WooCommerce e2e tests there is a Docker Initialization Script [`init-sample-products.sh`](https://github.com/woocommerce/woocommerce/tree/trunk/tests/e2e/docker/init-sample-products.sh) that will set up a shop with sample products imported and the shop settings (payment method, permalinks, address etc) needed for the tests already set. It is recommended using this if to just see the tests in action.
 
 `npx wc-e2e docker:up ./tests/e2e/docker/init-sample-products.sh`
 
-If you use a different environment you can change the details in `config.js.`
+If using a different environment the details can be changed in `config.js`.
 
 ### Config Variables
 
-`config.js` comes with some example values for using with the suggested local test environment. If you are using a different environment be sure to update the values.
+`config.js` comes with some example values for using with the suggested local test environment. If using a different environment be sure to update the values.
 
 #### Config Variables List
 
@@ -84,7 +85,7 @@ think_time_max | maximum sleep time (in seconds) between each request | no
 
 ## Running Tests
 
-When refering to running k6 tests usually this means executing the test scenario. The test scenario file in turn determines which requests we run and how much load will be applied to them. You can also execute individual test files containing requests and pass in scenario config as a CLI flag but scenario files allow for more configuration options.
+When refering to running k6 tests usually this means executing the test scenario. The test scenario file in turn determines which requests we run and how much load will be applied to them. It is also possible to execute individual test files containing requests and pass in scenario config as a CLI flag but scenario files allow for more configuration options.
 
 ### Running Indvidual Tests
 
@@ -98,15 +99,15 @@ This will run the individual test for 1 iteration.
 
 ### Running Scenarios
 
-Included in the `tests` folder are some sample scenarios that can be ran or used as a starting point to be modified to suit the context in which you are running the tets.
+Included in the `tests` folder are some sample scenarios that can be ran or used as a starting point to be modified to suit the context in which tests are being ran.
 
 `simple-all-shopper-requests.js` and `simple-all-merchant-requests.js` are included scenarios that use the `per-vu-iterations` scenario executor type to run each request sequentially for 1 iteration to make sure they are working.
 
 `example-all-requests-ramping-vus.js` and `example-all-requests-arrival-rate.js` are included example scenarios for load testing that use the `ramping-vus` and `ramping-arrival-rate` scenario executor types to run all the requests under load of multiple virtual users. These scenarios can be modified to suit the load profile for the context that the tests will be ran.
 
-Another aspect that affects the traffic pattern of the tests is the amount of “Think Time” in between requests. In real world usage of an application users will spend some amount of time before doing some action. For a lot of situations we will want to simulate this as part of our traffic and it is common to have this as part of load tests.
+Another aspect that affects the traffic pattern of the tests is the amount of “Think Time” in between requests. In real world usage of an application users will spend some amount of time before doing some action. For some situations there will be a need to simulate this as part of the test traffic and it is common to have this as part of load tests.
 
-To do this this sleep step is included between each request ``sleep(randomIntBetween(`${think_time_min}`, `${think_time_max}`))``.
+To do this a sleep step is included between each request ``sleep(randomIntBetween(`${think_time_min}`, `${think_time_max}`))``.
 The amount of think time can be controlled from `config.js`.
 
 >**_Note: It’s important to note to be very careful when adding load to a scenario. By accident a dangerous amount of load could be ran aginst the test environment that could effectively be like a denial-of-service attack on the test environment. Also important to consider any other consequences of running large load such as triggering of emails._**
@@ -135,9 +136,9 @@ By default when running the test using `k6 run`, there is an aggregated summary 
 
 [See this guide for more details](https://k6.io/docs/results-visualization/influxdb-+-grafana/)
 
-### Writing Tests
+## Writing Tests
 
-## Capturing Requests
+### Capturing Requests
 
 k6 tests rely on HTTP requests in order to test the backend. They can either be constructed from scratch, by using the k6 recorder, or by converting a HAR file.
 
@@ -147,7 +148,7 @@ Alternatively any application which captures HTTP requests can be used to figure
 
 Tests could also be created to simulate API requests.
 
-## Static Assets
+### Static Assets
 
 The tests only simulate the HTTP requests and do not include static assets requests (fonts, images, css, js etc).
 
@@ -157,14 +158,14 @@ Although static resources do affect the bandwidth and the overall response time 
 
 In additional any use of CDNs, cache settings, and themes used would also vary from site to site.
 
-## Request Headers
+### Request Headers
 
 Every HTTP requests tested includes the headers. 
 
 To make it easier to manage the headers they have been moved to a separate file so any changes can be made to all the requests at once. 
 In `headers.js` the common headers are grouped by type and then can be imported in for use in the requests. However if an individual request uniquely needs a specific header this can still be added in as an extra member of the headers object literal of that request.
 
-## Correlation
+### Correlation
 
 To make a test work so it can be ran reliably multiple times usually there is a need to correlate any dynamic data in the test. This means extracting one or more values from the response of one request and then reusing them in subsequent requests.
 
@@ -172,17 +173,17 @@ An example of this is the `woocommerce-process-checkout-nonce` . This is returne
 
 A value can be correlated by using k6 selector `.find` to extract the data from a response by matching an element. Alternatively for extracting data from a response unsuitable for using selectors k6 has a `findBetween` utility that makes its easier by just having to provide the left and right boundaries of the data.
 
-## Groups
+### Groups
 
 Groups are used to organize common logic in the test scripts and can help with the test result analysis. For example the `group` ``"Proceed to checkout"`` groups together multiple requests triggered by this action.
 
-## Checks
+### Checks
 
 Checks are like asserts but they don’t stop the tests if they record a failure (for example in a load test with 1000s of iterations of a request this allows for an isolated flakey iteration to not stop test execution).
 
 All requests have had checks for at least a `200` http status repsonse added and most also have an additional check for a string contained in the response body.
 
-## Custom Metrics
+### Custom Metrics
 
 By default the built-in metrics group the HTTP requests timings so it isn't possible drill down into individual HTTP request timings. To enable seeing these individual timing in the aggregated summary report it is possible to create a custom metric for each request.
 
