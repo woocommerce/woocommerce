@@ -5,13 +5,13 @@ import {
 	WP_ADMIN_LOGIN
 } from '@woocommerce/e2e-utils';
 
-const config = require('config');
-const { HTTPClientFactory } = require('@woocommerce/api');
+const config = require( 'config' );
+const { HTTPClientFactory } = require( '@woocommerce/api' );
 const { addConsoleSuppression, updateReadyPageStatus } = require( '@woocommerce/e2e-environment' );
 const { DEFAULT_TIMEOUT_OVERRIDE } = process.env;
 
 // @todo: remove this once https://github.com/woocommerce/woocommerce-admin/issues/6992 has been addressed
-addConsoleSuppression( 'woocommerce_shared_settings' );
+addConsoleSuppression( 'woocommerce_shared_settings', false );
 
 /**
  * Uses the WordPress API to delete all existing posts
