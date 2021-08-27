@@ -1,20 +1,12 @@
 # Cart and Checkout testing plan <!-- omit in toc -->
 
 - [Introduction](#introduction)
-  - [Known limitations:](#known-limitations)
+  - [Known limitations](#known-limitations)
 - [How to report issues](#how-to-report-issues)
 - [What are we testing?](#what-are-we-testing)
   - [Cart Block](#cart-block)
   - [Checkout Block](#checkout-block)
 - [Testing Checklist](#testing-checklist)
-  - [General Flow.](#general-flow)
-  - [Editor.](#editor)
-  - [Shipping.](#shipping)
-  - [Payments.](#payments)
-  - [Items.](#items)
-  - [Taxes.](#taxes)
-  - [Coupons.](#coupons)
-  - [Cross Browser and platform.](#cross-browser-and-platform)
 
 ## Introduction
 
@@ -24,7 +16,8 @@ the blocks, any requirements, and expectations and feature parity, some
 will require simple coding skills, and some are straightforward, we will
 separate them.
 
-### Known limitations:
+### Known limitations
+
 <!-- Debating on where to put this section -->
 This is a list of all known limitation for Cart and Checkout blocks, it means
 we're aware of them, and will probably not tackle them in this first release:
@@ -78,12 +71,12 @@ the Cart and Checkout shortcodes.
 
 ## Testing Checklist
 
-### [General Flow](general-flow.md).
-### [Editor](editor.md).
-### [Shipping](shipping.md).
-### [Payments](payment.md).
-### [Items](items.md).
-### [Taxes](taxes.md).
-### [Coupons](coupons.md).
-### [Cross Browser and platform](cross-browser.md).
+- [General Flow](general-flow.md)
+- [Editor](editor.md)
+- [Shipping](shipping.md)
+- [Payments](payment.md)
+- [Items](items.md)
+- [Taxes](taxes.md)
+- [Coupons](coupons.md)
+- [Cross Browser and platform](cross-browser.md)
 
