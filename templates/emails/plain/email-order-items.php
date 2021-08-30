@@ -31,7 +31,7 @@ foreach ( $items as $item_id => $item ) :
 		}
 
 		// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
-		echo wp_kses_post( apply_filters( 'woocommerce_order_item_name', $item->get_name(), $item, false ) );
+		echo wp_kses_post( apply_filters( 'woocommerce_order_item_name', apply_filters( 'woocommerce_order_item_name_plain', $item->get_name(), $item ), $item, false ) );
 		if ( $show_sku && $sku ) {
 			echo ' (#' . $sku . ')';
 		}

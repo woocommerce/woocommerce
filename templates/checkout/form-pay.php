@@ -40,7 +40,7 @@ $totals = $order->get_order_item_totals(); // phpcs:ignore WordPress.WP.GlobalVa
 					<tr class="<?php echo esc_attr( apply_filters( 'woocommerce_order_item_class', 'order_item', $item, $order ) ); ?>">
 						<td class="product-name">
 							<?php
-								echo wp_kses_post( apply_filters( 'woocommerce_order_item_name', $item->get_name(), $item, false ) );
+								echo wp_kses_post( apply_filters( 'woocommerce_order_item_name', apply_filters( 'woocommerce_order_item_name_plain', $item->get_name(), $item ), $item, false ) );
 
 								do_action( 'woocommerce_order_item_meta_start', $item_id, $item, $order, false );
 
