@@ -84,6 +84,12 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 == Changelog ==
 
+= 5.7.1 - 2021-08-30 =
+
+#### Bug Fixes
+
+- Disable Cart, Checkout, All Products & filters blocks from the widgets screen
+
 = 5.7.0 - 2021-08-16 =
 
 #### Enhancements
