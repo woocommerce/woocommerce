@@ -139,6 +139,8 @@ This package provides support for enabling retries in tests:
 | `deleteCustomerByEmail` | `emailAddress` | Delete customer user account. Posts are reassigned to user ID 1 |
 | `resetSettingsGroupToDefault` | `settingsGroup` | Reset settings in settings group to default except `select` fields |
 | `deleteAllOrders` | | Permanently delete all orders |
+| `updateSettingOption` | `settingsGroup`, `settingID`, `payload` | Update a settings group |
+| `updatePaymentGateway`| `paymentGatewayId`, `payload` | Update a payment gateway |
 
 ### Page Utilities
 
