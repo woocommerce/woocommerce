@@ -355,7 +355,8 @@ export function getAllTasks( {
 			visible:
 				window.wcAdminFeatures &&
 				window.wcAdminFeatures[ 'remote-free-extensions' ] &&
-				!! marketingExtensionsLists.length,
+				( !! marketingExtensionsLists.length ||
+					!! installedMarketingExtensions.length ),
 			time: __( '1 minute', 'woocommerce-admin' ),
 			type: 'setup',
 		},
