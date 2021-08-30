@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import type { PaymentResultDataType } from './types';
+import type { PaymentResultDataType, CheckoutStateContextState } from './types';
 
 export enum ACTION {
 	SET_IDLE = 'set_idle',
@@ -20,20 +20,15 @@ export enum ACTION {
 	INCREMENT_CALCULATING = 'increment_calculating',
 	DECREMENT_CALCULATING = 'decrement_calculating',
 	SET_SHOULD_CREATE_ACCOUNT = 'set_should_create_account',
+	SET_EXTENSION_DATA = 'set_extension_data',
 }
 
-export interface ActionType {
+export interface ActionType extends Partial< CheckoutStateContextState > {
 	type: ACTION;
 	data?:
 		| Record< string, unknown >
 		| Record< string, never >
 		| PaymentResultDataType;
-	url?: string;
-	customerId?: number;
-	orderId?: number;
-	shouldCreateAccount?: boolean;
-	hasError?: boolean;
-	orderNotes?: string;
 }
 
 /**
@@ -52,10 +47,10 @@ export const actions = {
 		( {
 			type: ACTION.SET_PROCESSING,
 		} as const ),
-	setRedirectUrl: ( url: string ) =>
+	setRedirectUrl: ( redirectUrl: string ) =>
 		( {
 			type: ACTION.SET_REDIRECT_URL,
-			url,
+			redirectUrl,
 		} as const ),
 	setProcessingResponse: ( data: PaymentResultDataType ) =>
 		( {
@@ -106,5 +101,12 @@ export const actions = {
 		( {
 			type: ACTION.SET_ORDER_NOTES,
 			orderNotes,
+		} as const ),
+	setExtensionData: (
+		extensionData: Record< string, Record< string, unknown > >
+	) =>
+		( {
+			type: ACTION.SET_EXTENSION_DATA,
+			extensionData,
 		} as const ),
 };

@@ -106,7 +106,7 @@ class Api {
 	 */
 	public function register_payment_method_integrations( PaymentMethodRegistry $payment_method_registry ) {
 		// This is temporarily registering Stripe until it's moved to the extension.
-		if ( class_exists( '\WC_Stripe' ) && ! $payment_method_registry->is_registered( 'stripe' ) ) {
+		if ( class_exists( '\WC_Stripe', false ) && ! $payment_method_registry->is_registered( 'stripe' ) ) {
 			$payment_method_registry->register(
 				Package::container()->get( Stripe::class )
 			);

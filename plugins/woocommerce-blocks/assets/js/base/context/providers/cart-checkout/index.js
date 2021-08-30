@@ -1,6 +1,7 @@
 export * from './payment-methods';
 export * from './shipping';
 export * from './customer';
-export * from './checkout';
+export * from './checkout-state';
 export * from './cart';
-export { useCheckoutContext } from './checkout-state';
+export * from './checkout-processor';
+export * from './checkout-provider';

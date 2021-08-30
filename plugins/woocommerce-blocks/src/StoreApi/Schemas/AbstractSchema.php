@@ -57,6 +57,26 @@ abstract class AbstractSchema {
 	}
 
 	/**
+	 * Recursive removal of arg_options.
+	 *
+	 * @param array $properties Schema properties.
+	 */
+	protected function remove_arg_options( $properties ) {
+		return array_map(
+			function( $property ) {
+				if ( isset( $property['properties'] ) ) {
+					$property['properties'] = $this->remove_arg_options( $property['properties'] );
+				} elseif ( isset( $property['items']['properties'] ) ) {
+					$property['items']['properties'] = $this->remove_arg_options( $property['items']['properties'] );
+				}
+				unset( $property['arg_options'] );
+				return $property;
+			},
+			(array) $properties
+		);
+	}
+
+	/**
 	 * Returns the public schema.
 	 *
 	 * @return array
@@ -64,8 +84,8 @@ abstract class AbstractSchema {
 	public function get_public_item_schema() {
 		$schema = $this->get_item_schema();
 
-		foreach ( $schema['properties'] as &$property ) {
-			unset( $property['arg_options'] );
+		if ( isset( $schema['properties'] ) ) {
+			$schema['properties'] = $this->remove_arg_options( $schema['properties'] );
 		}
 
 		return $schema;
@@ -83,6 +103,106 @@ abstract class AbstractSchema {
 	}
 
 	/**
+	 * Gets an array of schema defaults recursively.
+	 *
+	 * @param array $properties Schema property data.
+	 * @return array Array of defaults, pulled from arg_options
+	 */
+	protected function get_recursive_schema_property_defaults( $properties ) {
+		$defaults = [];
+
+		foreach ( $properties as $property_key => $property_value ) {
+			if ( isset( $property_value['arg_options']['default'] ) ) {
+				$defaults[ $property_key ] = $property_value['arg_options']['default'];
+			} elseif ( isset( $property_value['properties'] ) ) {
+				$defaults[ $property_key ] = $this->get_recursive_schema_property_defaults( $property_value['properties'] );
+			}
+		}
+
+		return $defaults;
+	}
+
+	/**
+	 * Gets a function that validates recursively.
+	 *
+	 * @param array $properties Schema property data.
+	 * @return function Anonymous validation callback.
+	 */
+	protected function get_recursive_validate_callback( $properties ) {
+		/**
+		 * Validate a request argument based on details registered to the route.
+		 *
+		 * @param mixed            $values
+		 * @param \WP_REST_Request $request
+		 * @param string           $param
+		 * @return true|\WP_Error
+		 */
+		return function ( $values, $request, $param ) use ( $properties ) {
+			foreach ( $properties as $property_key => $property_value ) {
+				$current_value = isset( $values[ $property_key ] ) ? $values[ $property_key ] : null;
+
+				if ( isset( $property_value['arg_options']['validate_callback'] ) ) {
+					$callback = $property_value['arg_options']['validate_callback'];
+					$result   = is_callable( $callback ) ? $callback( $current_value, $request, $param ) : false;
+				} else {
+					$result = rest_validate_value_from_schema( $current_value, $property_value, $param . ' > ' . $property_key );
+				}
+
+				if ( ! $result || is_wp_error( $result ) ) {
+					return $result;
+				}
+
+				if ( isset( $property_value['properties'] ) ) {
+					$validate_callback = $this->get_recursive_validate_callback( $property_value['properties'] );
+					return $validate_callback( $current_value, $request, $param . ' > ' . $property_key );
+				}
+			}
+
+			return true;
+		};
+	}
+
+	/**
+	 * Gets a function that sanitizes recursively.
+	 *
+	 * @param array $properties Schema property data.
+	 * @return function Anonymous validation callback.
+	 */
+	protected function get_recursive_sanitize_callback( $properties ) {
+		/**
+		 * Validate a request argument based on details registered to the route.
+		 *
+		 * @param mixed            $values
+		 * @param \WP_REST_Request $request
+		 * @param string           $param
+		 * @return true|\WP_Error
+		 */
+		return function ( $values, $request, $param ) use ( $properties ) {
+			foreach ( $properties as $property_key => $property_value ) {
+				$current_value = isset( $values[ $property_key ] ) ? $values[ $property_key ] : null;
+
+				if ( isset( $property_value['arg_options']['sanitize_callback'] ) ) {
+					$callback      = $property_value['arg_options']['sanitize_callback'];
+					$current_value = is_callable( $callback ) ? $callback( $current_value, $request, $param ) : $current_value;
+				} else {
+					$current_value = rest_sanitize_value_from_schema( $current_value, $property_value, $param . ' > ' . $property_key );
+				}
+
+				if ( is_wp_error( $current_value ) ) {
+					return $current_value;
+				}
+
+				if ( isset( $property_value['properties'] ) ) {
+					$sanitize_callback = $this->get_recursive_sanitize_callback( $property_value['properties'] );
+					return $sanitize_callback( $current_value, $request, $param . ' > ' . $property_key );
+				}
+			}
+
+			return true;
+		};
+	}
+
+	/**
 	 * Returns extended schema for a specific endpoint.
 	 *
 	 * @param string $endpoint The endpoint identifer.
@@ -90,12 +210,18 @@ abstract class AbstractSchema {
 	 * @return array the data that will get added.
 	 */
 	protected function get_extended_schema( $endpoint, ...$passed_args ) {
+		$extended_schema = $this->extend->get_endpoint_schema( $endpoint, $passed_args );
+		$defaults        = $this->get_recursive_schema_property_defaults( $extended_schema );
+
 		return [
-			'description' => __( 'Extensions data.', 'woo-gutenberg-products-block' ),
-			'type'        => [ 'object' ],
+			'type'        => 'object',
 			'context'     => [ 'view', 'edit' ],
-			'readonly'    => true,
-			'properties'  => $this->extend->get_endpoint_schema( $endpoint, $passed_args ),
+			'arg_options' => [
+				'default'           => $defaults,
+				'validate_callback' => $this->get_recursive_validate_callback( $extended_schema ),
+				'sanitize_callback' => $this->get_recursive_sanitize_callback( $extended_schema ),
+			],
+			'properties'  => $extended_schema,
 		];
 	}
 
@@ -119,64 +245,17 @@ abstract class AbstractSchema {
 	/**
 	 * Retrieves an array of endpoint arguments from the item schema for the controller.
 	 *
+	 * @uses rest_get_endpoint_args_for_schema()
 	 * @param string $method Optional. HTTP method of the request.
 	 * @return array Endpoint arguments.
 	 */
 	public function get_endpoint_args_for_item_schema( $method = \WP_REST_Server::CREATABLE ) {
-		$schema            = $this->get_item_schema();
-		$schema_properties = ! empty( $schema['properties'] ) ? $schema['properties'] : array();
-		$endpoint_args     = array();
-
-		foreach ( $schema_properties as $field_id => $params ) {
-
-			// Arguments specified as `readonly` are not allowed to be set.
-			if ( ! empty( $params['readonly'] ) ) {
-				continue;
-			}
-
-			$endpoint_args[ $field_id ] = array(
-				'validate_callback' => 'rest_validate_request_arg',
-				'sanitize_callback' => 'rest_sanitize_request_arg',
-			);
-
-			if ( isset( $params['description'] ) ) {
-				$endpoint_args[ $field_id ]['description'] = $params['description'];
-			}
-
-			if ( \WP_REST_Server::CREATABLE === $method && isset( $params['default'] ) ) {
-				$endpoint_args[ $field_id ]['default'] = $params['default'];
-			}
-
-			if ( \WP_REST_Server::CREATABLE === $method && ! empty( $params['required'] ) ) {
-				$endpoint_args[ $field_id ]['required'] = true;
-			}
-
-			foreach ( array( 'type', 'format', 'enum', 'items', 'properties', 'additionalProperties' ) as $schema_prop ) {
-				if ( isset( $params[ $schema_prop ] ) ) {
-					$endpoint_args[ $field_id ][ $schema_prop ] = $params[ $schema_prop ];
-				}
-			}
-
-			// Merge in any options provided by the schema property.
-			if ( isset( $params['arg_options'] ) ) {
-
-				// Only use required / default from arg_options on CREATABLE endpoints.
-				if ( \WP_REST_Server::CREATABLE !== $method ) {
-					$params['arg_options'] = array_diff_key(
-						$params['arg_options'],
-						array(
-							'required' => '',
-							'default'  => '',
-						)
-					);
-				}
-
-				$endpoint_args[ $field_id ] = array_merge( $endpoint_args[ $field_id ], $params['arg_options'] );
-			}
-		}
-
+		$schema        = $this->get_item_schema();
+		$endpoint_args = rest_get_endpoint_args_for_schema( $schema, $method );
+		$endpoint_args = $this->remove_arg_options( $endpoint_args );
 		return $endpoint_args;
 	}
+
 
 	/**
 	 * Force all schema properties to be readonly.
@@ -193,7 +272,7 @@ abstract class AbstractSchema {
 				}
 				return $property;
 			},
-			$properties
+			(array) $properties
 		);
 	}
 

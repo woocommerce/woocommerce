@@ -7,11 +7,11 @@ import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundar
 /**
  * Internal dependencies
  */
-import { PaymentMethodDataProvider } from '../payment-methods';
-import { ShippingDataProvider } from '../shipping';
-import { CustomerDataProvider } from '../customer';
-import { CheckoutStateProvider } from '../checkout-state';
-import CheckoutProcessor from './processor';
+import { PaymentMethodDataProvider } from './payment-methods';
+import { ShippingDataProvider } from './shipping';
+import { CustomerDataProvider } from './customer';
+import { CheckoutStateProvider } from './checkout-state';
+import CheckoutProcessor from './checkout-processor';
 
 /**
  * Checkout provider

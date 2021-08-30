@@ -100,7 +100,7 @@ class Bootstrap {
 	 * @return boolean
 	 */
 	protected function has_core_dependencies() {
-		$has_needed_dependencies = class_exists( 'WooCommerce' );
+		$has_needed_dependencies = class_exists( 'WooCommerce', false );
 		if ( $has_needed_dependencies ) {
 			$plugin_data = \get_file_data(
 				$this->package->get_path( 'woocommerce-gutenberg-products-block.php' ),
@@ -259,7 +259,7 @@ class Bootstrap {
 			GoogleAnalytics::class,
 			function( Container $container ) {
 				// Require Google Analytics Integration to be activated.
-				if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
+				if ( ! class_exists( 'WC_Google_Analytics_Integration', false ) ) {
 					return;
 				}
 				$asset_api = $container->get( AssetApi::class );
