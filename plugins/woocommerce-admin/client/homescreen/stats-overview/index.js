@@ -4,13 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
 import { Fragment } from '@wordpress/element';
-import {
-	TabPanel,
-	Card,
-	CardHeader,
-	CardBody,
-	CardFooter,
-} from '@wordpress/components';
+import { TabPanel, Card, CardHeader, CardFooter } from '@wordpress/components';
 import { get, xor } from 'lodash';
 import {
 	EllipsisMenu,
@@ -122,46 +116,44 @@ export const StatsOverview = () => {
 					) }
 				/>
 			</CardHeader>
-			<CardBody>
-				<TabPanel
-					className="woocommerce-stats-overview__tabs"
-					onSelect={ ( period ) => {
-						recordEvent( 'statsoverview_date_picker_update', {
-							period,
-						} );
-					} }
-					tabs={ [
-						{
-							title: __( 'Today', 'woocommerce-admin' ),
-							name: 'today',
-						},
-						{
-							title: __( 'Week to date', 'woocommerce-admin' ),
-							name: 'week',
-						},
-						{
-							title: __( 'Month to date', 'woocommerce-admin' ),
-							name: 'month',
-						},
-					] }
-				>
-					{ ( tab ) => (
-						<Fragment>
-							{ ! jetPackIsConnected &&
-								! userDismissedJetpackInstall && (
-									<InstallJetpackCTA />
-								) }
-							<StatsList
-								query={ {
-									period: tab.name,
-									compare: 'previous_period',
-								} }
-								stats={ activeStats }
-							/>
-						</Fragment>
-					) }
-				</TabPanel>
-			</CardBody>
+			<TabPanel
+				className="woocommerce-stats-overview__tabs"
+				onSelect={ ( period ) => {
+					recordEvent( 'statsoverview_date_picker_update', {
+						period,
+					} );
+				} }
+				tabs={ [
+					{
+						title: __( 'Today', 'woocommerce-admin' ),
+						name: 'today',
+					},
+					{
+						title: __( 'Week to date', 'woocommerce-admin' ),
+						name: 'week',
+					},
+					{
+						title: __( 'Month to date', 'woocommerce-admin' ),
+						name: 'month',
+					},
+				] }
+			>
+				{ ( tab ) => (
+					<Fragment>
+						{ ! jetPackIsConnected &&
+							! userDismissedJetpackInstall && (
+								<InstallJetpackCTA />
+							) }
+						<StatsList
+							query={ {
+								period: tab.name,
+								compare: 'previous_period',
+							} }
+							stats={ activeStats }
+						/>
+					</Fragment>
+				) }
+			</TabPanel>
 			<CardFooter>
 				<Link
 					className="woocommerce-stats-overview__more-btn"
