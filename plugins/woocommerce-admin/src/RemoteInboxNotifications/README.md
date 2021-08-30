@@ -497,3 +497,17 @@ WooCommerce Admin plugin.
 ```
 
 No other values are needed.
+
+## Debugging Specification
+
+You can see the evaluation of each specification by turning on an optional evaluation logger.
+
+1. Define `WC_ADMIN_DEBUG_RULE_EVALUATOR` constant in `wp-config.php`. `define('WC_ADMIN_DEBUG_RULE_EVALUATOR', true);`
+2. Run `wc_admin_daily`
+3. cd to `wp-content/uploads/wc-logs/` and check a log file in `remote-inbox-notifications-:date-hash.log` format.
+
+You can tail the log file with a slug name to see the evaluation of a rule that you are testing.
+
+Example: 
+
+`tail -f remote-inbox-notifications-2021-06-15-128.log | grep 'wcpay-promo-2021-6-incentive-2'`

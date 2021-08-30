@@ -21,6 +21,7 @@ class WC_Tests_RemoteInboxNotifications_EvaluateAndGetStatus extends WC_Unit_Tes
 	private function get_spec( $allow_redisplay ) {
 		return json_decode(
 			'{
+				"slug": "test",
 				"status": "unactioned",
 				"rules": [],
 				"allow_redisplay": ' . ( $allow_redisplay ? 'true' : 'false' ) . '
