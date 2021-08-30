@@ -149,6 +149,8 @@ This package provides support for enabling retries in tests:
 | `resetSettingsGroupToDefault` | `settingsGroup` | Reset settings in settings group to default except `select` fields |
 | `batchCreateOrders` | `orders` | Create a batch of orders using the "Batch Create Order" API endpoint |
 | `deleteAllOrders` | | Permanently delete all orders |
+| `updateSettingOption` | `settingsGroup`, `settingID`, `payload` | Update a settings group |
+| `updatePaymentGateway`| `paymentGatewayId`, `payload` | Update a payment gateway |
 
 ### Page Utilities
 

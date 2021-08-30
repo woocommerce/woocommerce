@@ -252,16 +252,36 @@ export const withRestApi = {
 			}
 		}
 	},
-	
+	/**
+	 * Update a setting to the supplied value.
+	 *
+	 * @param {string} settingsGroup The settings group to update.
+	 * @param {string} settingId The setting ID to update
+	 * @param {object} payload An object with a key/value pair to update.
+	 */
+	updateSettingOption: async ( settingsGroup, settingId, payload = {} ) => {
+		const settingsClient = Setting.restRepository( client );
+		await settingsClient.update( settingsGroup, settingId, payload );
+	},
+	/**
+	 * Update a payment gateway.
+	 *
+	 * @param {string} paymentGatewayId The ID of the payment gateway to update.
+	 * @param {object} payload An object with the key/value pair to update.
+	 */
+	updatePaymentGateway: async ( paymentGatewayId, payload = {} ) => {
+		const response = await client.put( `/wc/v3/payment_gateways/${paymentGatewayId}`, payload );
+		expect( response.statusCode ).toBe( 200 );
+	},
 	/**
 	 * Create a batch of orders using the "Batch Create Order" API endpoint.
-	 * 
+	 *
 	 * @param orders Array of orders to be created
 	 */
 	batchCreateOrders : async (orders) => {
 		const path = '/wc/v3/orders/batch';
 		const payload = { create: orders };
-		
+
 		const { statusCode } = await client.post(path, payload);
 
 		expect(statusCode).toEqual(200);
