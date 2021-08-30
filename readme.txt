@@ -228,7 +228,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 - Tweak: Refactor on payment settings recommendations eligibility component for reuse. #7447
 - Tweak: Register wc-admin page for all users and handle authorization in client #7285
 
-**WooCommerce Blocks - 5.6.0 & 5.7.0**
+**WooCommerce Blocks - 5.6.0 & 5.7.0 & 5.7.1**
 
 - Enhancement - Featured Category Block: Allow user to re-select categories using the edit icon. #4559
 - Enhancement - Update pagination arrows to match core. #4364
@@ -241,5 +241,6 @@ WooCommerce comes with some sample data you can use to see how products look; im
 - Fix - Replace .screen-reader-text with .hidden for elements that are not relevant to screen readers. #4530
 - Fix - Fixed the SKU search on the /wc/store/products endpoint. #4469
 - Fix - Fix memory leak when previewing transform options for the All reviews block. #4428
+- Fix - Disable Cart, Checkout, All Products & filters blocks from the widgets screen. #4646
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).

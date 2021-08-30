@@ -4,11 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-<<<<<<< HEAD
-    "content-hash": "664a0a088829d2b3331c208cbf80b597",
-=======
     "content-hash": "2070014a3af29379b73af5a16af9f8a7",
->>>>>>> 1fb5cc07da (update Woo Blocks to 5.7.1)
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
