@@ -20,7 +20,7 @@ const runInitiateWccomConnectionTest = () => {
 			await merchant.login();
 		});
 
-		it('can initiate WCCOM connection', async () => {
+		it.skip('can initiate WCCOM connection', async () => {
 			await merchant.openHelper();
 
 			// Click on Connect button to initiate a WCCOM connection
