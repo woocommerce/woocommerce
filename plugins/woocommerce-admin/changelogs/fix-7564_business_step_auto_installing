@@ -1,0 +1,4 @@
+Significance: patch
+Type: Fix
+
+Use installable extensions for local state versus free extensions. #7585

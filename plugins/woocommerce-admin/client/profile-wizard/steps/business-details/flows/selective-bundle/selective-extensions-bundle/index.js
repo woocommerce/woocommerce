@@ -189,16 +189,16 @@ export const SelectiveExtensionsBundle = ( {
 		};
 	} );
 
-	useEffect( () => {
-		const initialValues = createInitialValues( freeExtensions );
-		setValues( initialValues );
-	}, [ freeExtensions ] );
-
 	const installableExtensions = useMemo( () => {
 		return freeExtensions.filter( ( list ) => {
 			return ALLOWED_PLUGIN_LISTS.includes( list.key );
 		} );
 	}, [ freeExtensions ] );
+
+	useEffect( () => {
+		const initialValues = createInitialValues( installableExtensions );
+		setValues( initialValues );
+	}, [ installableExtensions ] );
 
 	const getCheckboxChangeHandler = ( key ) => {
 		return ( checked ) => {
