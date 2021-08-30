@@ -271,6 +271,8 @@ export const withRestApi = {
 	/**
 	 * Get the current environment from the WooCommerce system status API.
 	 *
+	 * For more details, see: https://woocommerce.github.io/woocommerce-rest-api-docs/#system-status-environment-properties
+	 *
 	 * @returns {Promise<object>} The environment object from the API response.
 	 */
 	getSystemEnvironment: async () => {

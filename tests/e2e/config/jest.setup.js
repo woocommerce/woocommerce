@@ -35,15 +35,6 @@ async function trashExistingPosts() {
 	}
 }
 
-/**
- * Uses the WooCommerce API to set the environment context.
- */
-async function setEnvironmentContext() {
-	const environment = await withRestApi.getSystemEnvironment();
-	process.env.WP_VERSION = environment.wp_version;
-	process.env.WC_VERSION = environment.version;
-}
-
 // Before every test suite run, delete all content created by the test. This ensures
 // other posts/comments/etc. aren't dirtying tests and tests don't depend on
 // each other's side-effects.
@@ -55,8 +46,6 @@ beforeAll(async () => {
 	}
 
 	try {
-		await setEnvironmentContext();
-
 		// Update the ready page to prevent concurrent test runs
 		await updateReadyPageStatus('draft');
 		await trashExistingPosts();
