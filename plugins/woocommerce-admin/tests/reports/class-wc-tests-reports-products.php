@@ -480,7 +480,11 @@ class WC_Tests_Reports_Products extends WC_Unit_Test_Case {
 
 		$export = new ReportCSVExporter( 'products', $args );
 		$export->generate_file();
-		$actual_csv = $export->get_file();
+		if ( method_exists( $export, 'get_headers_row_file' ) ) {
+			$actual_csv = $export->get_headers_row_file() . $export->get_file();
+		} else {
+			$actual_csv = $export->get_file();
+		}
 
 		$this->assertEquals( 100, $export->get_percent_complete() );
 		$this->assertEquals( 0, $export->get_total_exported() );

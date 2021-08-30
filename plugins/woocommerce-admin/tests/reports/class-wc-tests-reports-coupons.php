@@ -314,7 +314,11 @@ class WC_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 		// Run the export and compare values.
 		$export = new ReportCSVExporter( 'coupons', $args );
 		$export->generate_file();
-		$actual_csv = $export->get_file();
+		if ( method_exists( $export, 'get_headers_row_file' ) ) {
+			$actual_csv = $export->get_headers_row_file() . $export->get_file();
+		} else {
+			$actual_csv = $export->get_file();
+		}
 
 		$this->assertEquals( 100, $export->get_percent_complete() );
 		$this->assertEquals( 2, $export->get_total_exported() );
