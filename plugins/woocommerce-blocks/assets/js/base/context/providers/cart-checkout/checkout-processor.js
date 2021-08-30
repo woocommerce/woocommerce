@@ -18,19 +18,17 @@ import {
 /**
  * Internal dependencies
  */
-import { preparePaymentData } from './utils';
-import { useCheckoutContext } from '../../checkout-state';
-import { useShippingDataContext } from '../../shipping';
-import { useCustomerDataContext } from '../../customer';
-import { usePaymentMethodDataContext } from '../../payment-methods';
-import { useValidationContext } from '../../../validation';
-import { useStoreCart } from '../../../../hooks/cart/use-store-cart';
-import { useStoreNotices } from '../../../../hooks/use-store-notices';
+import { preparePaymentData, processCheckoutResponseHeaders } from './utils';
+import { useCheckoutContext } from './checkout-state';
+import { useShippingDataContext } from './shipping';
+import { useCustomerDataContext } from './customer';
+import { usePaymentMethodDataContext } from './payment-methods';
+import { useValidationContext } from '../validation';
+import { useStoreCart } from '../../hooks/cart/use-store-cart';
+import { useStoreNotices } from '../../hooks/use-store-notices';
 
 /**
  * CheckoutProcessor component.
- *
- * @todo Needs to consume all contexts.
  *
  * Subscribes to checkout context and triggers processing via the API.
  */
@@ -45,6 +43,7 @@ const CheckoutProcessor = () => {
 		isComplete: checkoutIsComplete,
 		orderNotes,
 		shouldCreateAccount,
+		extensionData,
 	} = useCheckoutContext();
 	const { hasValidationErrors } = useValidationContext();
 	const { shippingErrorStatus } = useShippingDataContext();
@@ -75,11 +74,18 @@ const CheckoutProcessor = () => {
 		currentPaymentStatus.hasError ||
 		shippingErrorStatus.hasError;
 
+	const paidAndWithoutErrors =
+		! checkoutHasError &&
+		! checkoutWillHaveError &&
+		( currentPaymentStatus.isSuccessful || ! cartNeedsPayment ) &&
+		checkoutIsProcessing;
+
 	// If express payment method is active, let's suppress notices
 	useEffect( () => {
 		setIsSuppressed( isExpressPaymentMethodActive );
 	}, [ isExpressPaymentMethodActive, setIsSuppressed ] );
 
+	// Determine if checkout has an error.
 	useEffect( () => {
 		if (
 			checkoutWillHaveError !== checkoutHasError &&
@@ -96,12 +102,6 @@ const CheckoutProcessor = () => {
 		isExpressPaymentMethodActive,
 		dispatchActions,
 	] );
-
-	const paidAndWithoutErrors =
-		! checkoutHasError &&
-		! checkoutWillHaveError &&
-		( currentPaymentStatus.isSuccessful || ! cartNeedsPayment ) &&
-		checkoutIsProcessing;
 
 	useEffect( () => {
 		currentBillingData.current = billingData;
@@ -156,10 +156,32 @@ const CheckoutProcessor = () => {
 		isExpressPaymentMethodActive,
 	] );
 
-	const processOrder = useCallback( () => {
+	// redirect when checkout is complete and there is a redirect url.
+	useEffect( () => {
+		if ( currentRedirectUrl.current ) {
+			window.location.href = currentRedirectUrl.current;
+		}
+	}, [ checkoutIsComplete ] );
+
+	const processOrder = useCallback( async () => {
+		if ( isProcessingOrder ) {
+			return;
+		}
 		setIsProcessingOrder( true );
 		removeNotice( 'checkout' );
-		let data = {
+
+		const paymentData = cartNeedsPayment
+			? {
+					payment_method: paymentMethodId,
+					payment_data: preparePaymentData(
+						paymentMethodData,
+						shouldSavePayment,
+						activePaymentMethod
+					),
+			  }
+			: {};
+
+		const data = {
 			billing_address: emptyHiddenAddressFields(
 				currentBillingData.current
 			),
@@ -168,18 +190,10 @@ const CheckoutProcessor = () => {
 			),
 			customer_note: orderNotes,
 			should_create_account: shouldCreateAccount,
+			...paymentData,
+			extensions: { ...extensionData },
 		};
-		if ( cartNeedsPayment ) {
-			data = {
-				...data,
-				payment_method: paymentMethodId,
-				payment_data: preparePaymentData(
-					paymentMethodData,
-					shouldSavePayment,
-					activePaymentMethod
-				),
-			};
-		}
+
 		triggerFetch( {
 			path: '/wc/store/checkout',
 			method: 'POST',
@@ -187,43 +201,26 @@ const CheckoutProcessor = () => {
 			cache: 'no-store',
 			parse: false,
 		} )
-			.then( ( fetchResponse ) => {
-				// Update nonce.
-				triggerFetch.setNonce( fetchResponse.headers );
-
-				// Update user using headers.
-				dispatchActions.setCustomerId(
-					fetchResponse.headers.get( 'X-WC-Store-API-User' )
+			.then( ( response ) => {
+				processCheckoutResponseHeaders(
+					response.headers,
+					dispatchActions
 				);
-
-				// Handle response.
-				fetchResponse.json().then( function ( response ) {
-					if ( ! fetchResponse.ok ) {
-						// We received an error response.
-						addErrorNotice(
-							formatStoreApiErrorMessage( response ),
-							{
-								id: 'checkout',
-							}
-						);
-						dispatchActions.setHasError();
-					}
-					dispatchActions.setAfterProcessing( response );
-					setIsProcessingOrder( false );
-				} );
-			} )
-			.catch( ( errorResponse ) => {
-				// Update nonce.
-				triggerFetch.setNonce( errorResponse.headers );
-
-				// If new customer ID returned, update the store.
-				if ( errorResponse.headers?.get( 'X-WC-Store-API-User' ) ) {
-					dispatchActions.setCustomerId(
-						errorResponse.headers.get( 'X-WC-Store-API-User' )
-					);
+				if ( ! response.ok ) {
+					throw new Error( response );
 				}
-
-				errorResponse.json().then( function ( response ) {
+				return response.json();
+			} )
+			.then( ( response ) => {
+				dispatchActions.setAfterProcessing( response );
+				setIsProcessingOrder( false );
+			} )
+			.catch( ( fetchResponse ) => {
+				processCheckoutResponseHeaders(
+					fetchResponse.headers,
+					dispatchActions
+				);
+				fetchResponse.json().then( ( response ) => {
 					// If updated cart state was returned, update the store.
 					if ( response.data?.cart ) {
 						receiveCart( response.data.cart );
@@ -231,7 +228,6 @@ const CheckoutProcessor = () => {
 					addErrorNotice( formatStoreApiErrorMessage( response ), {
 						id: 'checkout',
 					} );
-
 					response.additional_errors?.forEach?.(
 						( additionalError ) => {
 							addErrorNotice( additionalError.message, {
@@ -239,31 +235,26 @@ const CheckoutProcessor = () => {
 							} );
 						}
 					);
-
-					dispatchActions.setHasError();
+					dispatchActions.setHasError( true );
 					dispatchActions.setAfterProcessing( response );
 					setIsProcessingOrder( false );
 				} );
 			} );
 	}, [
-		addErrorNotice,
+		isProcessingOrder,
 		removeNotice,
-		paymentMethodId,
-		activePaymentMethod,
-		paymentMethodData,
-		shouldSavePayment,
-		cartNeedsPayment,
-		receiveCart,
-		dispatchActions,
 		orderNotes,
 		shouldCreateAccount,
+		cartNeedsPayment,
+		paymentMethodId,
+		paymentMethodData,
+		shouldSavePayment,
+		activePaymentMethod,
+		extensionData,
+		dispatchActions,
+		addErrorNotice,
+		receiveCart,
 	] );
-	// redirect when checkout is complete and there is a redirect url.
-	useEffect( () => {
-		if ( currentRedirectUrl.current ) {
-			window.location.href = currentRedirectUrl.current;
-		}
-	}, [ checkoutIsComplete ] );
 
 	// process order if conditions are good.
 	useEffect( () => {

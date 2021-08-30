@@ -1,15 +1,18 @@
 # Exposing your data in the Store API.
 
 ## The problem
+
 You want to extend the Cart and Checkout blocks, but you want to use some custom data not available on Store API or the context.
 You don't want to create your own endpoints or Ajax actions. You want to piggyback on the existing StoreAPI calls.
 
 ## Solution
+
 ExtendRestApi offers the possibility to add contextual custom data to Store API endpoints, like `wc/store/cart` and `wc/store/cart/items` endpoints.
 That data is namespaced to your plugin and protected from other plugins causing it to malfunction.
 The data is available on all frontend filters and slotFills for you to consume.
 
 ## Basic usage
+
 You can use ExtendRestApi by registering a couple of functions, `schema_callback` and `data_callback` on a specific endpoint namespace. ExtendRestApi will call them at execution time and will pass them relevant data as well.
 
 This example below uses the Cart endpoint, [see passed parameters.](./available-endpoints-to-extend.md#wcstorecart)
@@ -76,6 +79,7 @@ $product = $cart_item['data'];
 ## Things To Consider
 
 ### ExtendRestApi is a shared instance
+
 The ExtendRestApi is stored as a shared instance between the API and consumers (third-party developers). So you shouldn't initiate the class yourself with `new ExtendRestApi` because it would not work.
 Instead, you should always use the shared instance from the Package dependency injection container like this.
 
@@ -84,6 +88,7 @@ $extend = Package::container()->get( ExtendRestApi::class );
 ```
 
 ### Dependency injection container is not always available
+
 You can't call `Package::container()` and expect it to work. The Package class is only available after the `woocommerce_blocks_loaded` action has been fired, so you should hook your file that action
 
 ```php
@@ -94,23 +99,25 @@ add_action( 'woocommerce_blocks_loaded', function() {
 ```
 
 ### Errors and fatals are silence for non-admins
+
 If your callback functions `data_callback` and `schema_callback` throw an exception or an error, or you passed the incorrect type of parameter to `register_endpoint_data`; that error would be caught and logged into WooCommerce error logs.
 If the current user is a shop manager or an admin, and has WP_DEBUG enabled, the error would be surfaced to the frontend.
 
 ### Callbacks should always return an array
+
 To reduce the chances of breaking your client code or passing the wrong type, and also to keep a consistent REST API response, callbacks like `data_callback` and `schema_callback` should always return an array, even if it was empty.
 
 ## API Definition
 
-- `ExtendRestApi::register_endpoint_data`: Used to register data to a custom endpoint. It takes an array of arguments:
+-   `ExtendRestApi::register_endpoint_data`: Used to register data to a custom endpoint. It takes an array of arguments:
 
-| Attribute | Type | Required | Description |
-| :-------- | :----- | :------: | :------------------------------------ |
-| `endpoint` | string | Yes | The endpoint you're trying to extend. It is suggested that you use the `::IDENTIFIER` available on the route Schema class to avoid typos. |
-| `namespace` | string | Yes | Your plugin namespace, the data will be available under this namespace in the StoreAPI response. |
-| `data_callback` | callback | Yes | A callback that returns an array with your data. |
-| `schema_callback` | callback | Yes | A callback that returns the shape of your data. |
-| `data_type` | string | No (default: `ARRAY_A` ) | The type of your data. If you're adding an object (key => values), it should be `ARRAY_A`. If you're adding a list of items, it should be `ARRAY_N`. |
+| Attribute         | Type     |         Required         | Description                                                                                                                                          |
+| :---------------- | :------- | :----------------------: | :--------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `endpoint`        | string   |           Yes            | The endpoint you're trying to extend. It is suggested that you use the `::IDENTIFIER` available on the route Schema class to avoid typos.            |
+| `namespace`       | string   |           Yes            | Your plugin namespace, the data will be available under this namespace in the StoreAPI response.                                                     |
+| `data_callback`   | callback |           Yes            | A callback that returns an array with your data.                                                                                                     |
+| `schema_callback` | callback |           Yes            | A callback that returns the shape of your data.                                                                                                      |
+| `schema_type`     | string   | No (default: `ARRAY_A` ) | The type of your data. If you're adding an object (key => values), it should be `ARRAY_A`. If you're adding a list of items, it should be `ARRAY_N`. |
 
 ## Putting it all together
 
@@ -182,7 +189,7 @@ class WC_Subscriptions_Extend_Store_Endpoint {
 				'namespace'       => self::IDENTIFIER,
 				'data_callback'   => array( 'WC_Subscriptions_Extend_Store_Endpoint', 'extend_cart_item_data' ),
 				'schema_callback' => array( 'WC_Subscriptions_Extend_Store_Endpoint', 'extend_cart_item_schema' ),
-				'schema_type'     => ARRAY_A,
+				'schema_type'       => ARRAY_A,
 			)
 		);
 	}
@@ -318,5 +325,6 @@ class WC_Subscriptions_Extend_Store_Endpoint {
 ```
 
 ## Formatting your data
+
 You may wish to use our pre-existing Formatters to ensure your data is passed through the Store API in the
 correct format. More information on the Formatters can be found in the [StoreApi Formatters documentation](./extend-rest-api-formatters.md).

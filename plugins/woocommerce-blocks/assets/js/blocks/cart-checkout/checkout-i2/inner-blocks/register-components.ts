@@ -9,6 +9,11 @@ import { WC_BLOCKS_BUILD_URL } from '@woocommerce/block-settings';
 // eslint-disable-next-line no-undef,camelcase
 __webpack_public_path__ = WC_BLOCKS_BUILD_URL;
 
+/**
+ * Internal dependencies
+ */
+import './checkout-sample-block';
+
 registerBlockComponent( {
 	blockName: 'woocommerce/checkout-fields-block',
 	component: lazy( () =>

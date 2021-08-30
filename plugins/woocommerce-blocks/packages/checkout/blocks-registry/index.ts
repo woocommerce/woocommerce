@@ -157,7 +157,7 @@ export type CheckoutBlockOptions = {
 	// This is a component to render on the frontend in place of this block, when used.
 	component:
 		| LazyExoticComponent< React.ComponentType< unknown > >
-		| JSX.Element;
+		| ( () => JSX.Element );
 	// Area(s) to add the block to. This can be a single area (string) or an array of areas.
 	areas: Array< keyof RegisteredBlocks >;
 	// Standard block configuration object. If not passed, the block will not be registered with WordPress and must be done manually.
