@@ -29,7 +29,7 @@ const runCheckoutPageTest = () => {
 			await withRestApi.resetSettingsGroupToDefault('tax');
 
 			// Set free shipping within California
-			await withRestApi.addShippingZoneAndMethod('Free Shipping CA', 'state:US:CA', ' ', 'free_shipping');
+			await withRestApi.addShippingZoneAndMethod('Free Shipping CA', 'state:US:CA', '', 'free_shipping');
 
 			// Set base location with state CA.
 			await withRestApi.updateSettingOption( 'general', 'woocommerce_default_country', { value: 'US:CA' } );
@@ -46,6 +46,10 @@ const runCheckoutPageTest = () => {
 
 			// Enable COD payment method
 			await withRestApi.updatePaymentGateway( 'cod', { enabled: true } );
+		});
+
+		afterAll(async () => {
+			await withRestApi.deleteAllShippingZones();
 		});
 
 		it('should display cart items in order review', async () => {
