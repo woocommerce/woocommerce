@@ -276,7 +276,7 @@ export const withRestApi = {
 	getSystemEnvironment: async () => {
 		const response = await client.get( systemStatusEndpoint );
 		if ( response.data.environment ) {
-			return response.data.environment
+			return response.data.environment;
 		} else {
 			return;
 		}
