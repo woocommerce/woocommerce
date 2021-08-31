@@ -4,7 +4,6 @@
  * Used in the following APIs:
  * https://woocommerce.github.io/woocommerce-rest-api-docs/#customers
  * https://woocommerce.github.io/woocommerce-rest-api-docs/#orders
- *
  */
 const customerBilling = {
 	first_name: 'John',
