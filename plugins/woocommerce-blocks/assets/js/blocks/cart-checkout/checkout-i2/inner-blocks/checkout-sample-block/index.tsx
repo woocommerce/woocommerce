@@ -20,7 +20,12 @@ registerCheckoutBlock( 'woocommerce/checkout-sample-block', {
 	component: lazy( () =>
 		import( /* webpackChunkName: "checkout-blocks/sample" */ './frontend' )
 	),
-	areas: [ 'shippingAddress', 'billingAddress', 'contactInformation' ],
+	areas: [
+		'shippingAddress',
+		'billingAddress',
+		'contactInformation',
+		'fields',
+	],
 	configuration: {
 		title: __( 'Sample Block', 'woo-gutenberg-products-block' ),
 		category: 'woocommerce',
@@ -38,7 +43,14 @@ registerCheckoutBlock( 'woocommerce/checkout-sample-block', {
 			multiple: true,
 			reusable: false,
 		},
-		attributes: {},
+		attributes: {
+			lock: {
+				type: 'object',
+				default: {
+					remove: true,
+				},
+			},
+		},
 		edit: Edit,
 		save: Save,
 	},

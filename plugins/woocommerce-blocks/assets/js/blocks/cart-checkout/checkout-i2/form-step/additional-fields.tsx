@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { InnerBlocks } from '@wordpress/block-editor';
+import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
 import {
 	RegisteredBlocks,
 	getRegisteredBlocks,
@@ -11,15 +11,22 @@ import {
  * Internal dependencies
  */
 import './editor.scss';
+import { useForcedLayout } from '../use-forced-layout';
 
 export const AdditionalFields = ( {
 	area,
 }: {
 	area: keyof RegisteredBlocks;
 } ): JSX.Element => {
+	const registeredBlocks = getRegisteredBlocks( area );
+	const { 'data-block': clientId } = useBlockProps();
+	const template = useForcedLayout( {
+		clientId,
+		template: registeredBlocks,
+	} );
 	return (
 		<div className="wc-block-checkout__additional_fields">
-			<InnerBlocks allowedBlocks={ getRegisteredBlocks( area ) } />
+			<InnerBlocks allowedBlocks={ template } />
 		</div>
 	);
 };
