@@ -151,6 +151,7 @@ This package provides support for enabling retries in tests:
 | `deleteAllOrders` | | Permanently delete all orders |
 | `updateSettingOption` | `settingsGroup`, `settingID`, `payload` | Update a settings group |
 | `updatePaymentGateway`| `paymentGatewayId`, `payload` | Update a payment gateway |
+| `getSystemEnvironment` | | Get the current environment from the WooCommerce system status API.
 
 ### Page Utilities
 

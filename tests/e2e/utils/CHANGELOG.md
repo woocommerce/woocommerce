@@ -21,6 +21,7 @@
 - Updated `addShippingZoneAndMethod` to use the API instead of UI to create shipping zones
 - Added `updateSettingOption` to use the API to update a setting option
 - Added `updatePaymentGateway` to use the API to update a payment gateway
+- Added `getSystemEnvironment()` that gets the current environment from the WooCommerce API.
 
 # 0.1.5
 
