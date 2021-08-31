@@ -105,8 +105,9 @@ const queryString = {
   dates_are_gmt: true,
   after: '2021-05-13T19:00:00',
   before: '2021-05-13T22:00:00'
-}
-const response = await getRequest('/orders', queryString)
+};
+
+const response = await getRequest('/orders', queryString);
 ```
 
 ## Debugging tests
