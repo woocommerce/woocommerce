@@ -21,6 +21,7 @@ const {
 	WP_ADMIN_WC_HOME,
 	WP_ADMIN_WC_SETTINGS,
 	WP_ADMIN_WC_EXTENSIONS,
+	WP_ADMIN_WC_HELPER,
 	WP_ADMIN_NEW_SHIPPING_ZONE,
 	WP_ADMIN_ANALYTICS_PAGES,
 	WP_ADMIN_ALL_USERS_VIEW,
@@ -130,6 +131,12 @@ const merchant = {
 
 	openExtensions: async () => {
 		await page.goto( WP_ADMIN_WC_EXTENSIONS, {
+			waitUntil: 'networkidle0',
+		} );
+	},
+
+	openHelper: async () => {
+		await page.goto( WP_ADMIN_WC_HELPER, {
 			waitUntil: 'networkidle0',
 		} );
 	},
@@ -373,6 +380,34 @@ const merchant = {
 
 	   // Wait for Ajax calls to finish
 	   await page.waitForResponse( response => response.status() === 200 );
+   },
+
+	/**
+	 * Runs the database update if needed. For example, after uploading the WooCommerce plugin or updating WooCommerce.
+	 */
+   runDatabaseUpdate: async () => {
+	   if ( await page.$( '.updated.woocommerce-message.wc-connect' ) !== null ) {
+		   await expect( page ).toMatchElement( 'a.wc-update-now', { text: 'Update WooCommerce Database' } );
+		   await expect( page ).toClick( 'a.wc-update-now' );
+		   await page.waitForNavigation( { waitUntil: 'networkidle0' } );
+		   await merchant.checkDatabaseUpdateComplete();
+		}
+   },
+
+	/**
+	 * Checks if the database update is complete, if not, refresh the page until it is.
+	 */
+   checkDatabaseUpdateComplete: async () => {
+	   await page.reload( { waitUntil: [ 'networkidle0', 'domcontentloaded'] } );
+
+		const thanksButtonSelector = 'a.components-button.is-primary';
+
+		if ( await page.$( thanksButtonSelector ) !== null ) {
+			await expect( page ).toMatchElement( thanksButtonSelector, { text: 'Thanks!' } );
+			await expect( page ).toClick( thanksButtonSelector );
+		} else {
+			await merchant.checkDatabaseUpdateComplete();
+		}
    },
 };
 

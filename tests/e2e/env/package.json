@@ -25,7 +25,7 @@
     "@jest/test-sequencer": "^25.5.4",
     "@slack/web-api": "^6.1.0",
     "@woocommerce/api": "^0.2.0",
-    "@wordpress/e2e-test-utils": "^4.15.0",
+    "@wordpress/e2e-test-utils": "^4.16.1",
     "@wordpress/jest-preset-default": "^6.4.0",
     "app-root-path": "^3.0.0",
     "jest": "^25.1.0",
@@ -35,11 +35,11 @@
     "node-stream-zip": "^1.13.6"
   },
   "devDependencies": {
-    "@babel/cli": "7.12.0",
-    "@babel/core": "7.12.0",
-    "@babel/polyfill": "7.11.5",
-    "@babel/preset-env": "7.12.0",
-    "@wordpress/eslint-plugin": "7.1.0",
+    "@babel/cli": "7.12.8",
+    "@babel/core": "7.12.9",
+    "@babel/polyfill": "7.12.1",
+    "@babel/preset-env": "7.12.7",
+    "@wordpress/eslint-plugin": "7.3.0",
     "ndb": "^1.1.5",
     "semver": "^7.3.2"
   },
@@ -55,7 +55,6 @@
     "docker:down": "./bin/docker-compose.sh down",
     "docker:clear-all": "docker rmi --force $(docker images -q)",
     "docker:ssh": "docker exec -it $(node utils/get-app-name.js)_wordpress-www /bin/bash",
-    "install-wp-tests": "./bin/install-wp-tests.sh",
     "test:e2e": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js",
     "test:e2e-debug": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js --dev --debug",
     "test:e2e-dev": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js --dev"

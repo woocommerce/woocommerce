@@ -13,6 +13,12 @@
 - Added `describeIf()` to conditionally run a test suite
 - Added `itIf()` to conditionally run a test case.
 - Added merchant workflows around plugins: `uploadAndActivatePlugin()`, `activatePlugin()`, `deactivatePlugin()`, `deletePlugin()`
+- Added merchant workflows checking for a database update and performing the update if needed: `runDatabaseUpdate()`
+- Added `deleteAllOrders()` that goes through and deletes all orders
+- Added `deleteAllShippingClasses()` which permanently deletes all shipping classes using the API
+- Added `statuses` optional parameter to `deleteAllRepositoryObjects()` to delete on specific statuses
+- Added `createOrder()` component util that creates an order using the API with the passed in details
+- Updated `addShippingZoneAndMethod` to use the API instead of UI to create shipping zones
 
 # 0.1.5
 

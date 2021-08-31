@@ -1,5 +1,3 @@
-/* eslint-disable jest/no-export, jest/no-disabled-tests */
-
 /**
  * Internal dependencies
  */
@@ -45,6 +43,10 @@ const runOnboardingFlowTest = () => {
 					);
 				}
 			);
+
+      it('can reset shipping classes', async () => {
+				await withRestApi.deleteAllShippingClasses();
+			});
 		}
 
 		it('can start and complete onboarding when visiting the site for the first time.', async () => {
@@ -58,7 +60,7 @@ const runTaskListTest = () => {
 		beforeAll(async () => {
 			await merchant.login();
 		});
-		
+
 		it('can setup shipping', async () => {
 			await page.evaluate(() => {
 				document.querySelector('.woocommerce-list__item-title').scrollIntoView();

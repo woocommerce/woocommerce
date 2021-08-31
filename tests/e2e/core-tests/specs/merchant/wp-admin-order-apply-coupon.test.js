@@ -1,20 +1,16 @@
-/* eslint-disable jest/no-export, jest/no-standalone-expect */
-
 /**
  * Internal dependencies
  */
 const {
 	createSimpleProduct,
-	createSimpleOrder,
 	createCoupon,
 	uiUnblocked,
-	addProductToOrder,
 	evalAndClick,
-	merchant
+	merchant,
+	createOrder,
 } = require( '@woocommerce/e2e-utils' );
 
 const config = require( 'config' );
-const simpleProductName = config.get( 'products.simple.name' );
 const simpleProductPrice = config.has('products.simple.price') ? config.get('products.simple.price') : '9.99';
 const discountedPrice = simpleProductPrice - 5.00;
 
@@ -22,22 +18,18 @@ const couponDialogMessage = 'Enter a coupon code to apply. Discounts are applied
 
 let couponCode;
 let orderId;
+let productId;
 
 const runOrderApplyCouponTest = () => {
 	describe('WooCommerce Orders > Apply coupon', () => {
 		beforeAll(async () => {
-			await createSimpleProduct();
+			productId = await createSimpleProduct();
 			couponCode = await createCoupon();
-			
-			await merchant.login();
-			orderId = await createSimpleOrder('Pending payment', simpleProductName);
-			
-			await Promise.all([
-				addProductToOrder(orderId, simpleProductName),
+			orderId = await createOrder( { productId, status: 'pending' } );
 
-				// We need to remove any listeners on the `dialog` event otherwise we can't catch the dialog below
-				page.removeAllListeners('dialog'),
-			]);
+			await merchant.login();
+			await merchant.goToOrder( orderId );
+			await page.removeAllListeners('dialog');
 
 			// Make sure the simple product price is greater than the coupon amount
 			await expect(Number(simpleProductPrice)).toBeGreaterThan(5.00);
@@ -71,6 +63,8 @@ const runOrderApplyCouponTest = () => {
 			await evalAndClick( 'a.remove-coupon' );
 
 			await uiUnblocked();
+
+			await page.waitFor(2000); // to avoid flakyness
 
 			// Verify the coupon pricing has been removed
 			await expect(page).not.toMatchElement('.wc_coupon_list li.code.editable', { text: couponCode.toLowerCase() });

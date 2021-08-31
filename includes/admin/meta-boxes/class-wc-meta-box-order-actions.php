@@ -4,8 +4,6 @@
  *
  * Functions for displaying the order actions meta box.
  *
- * @author      WooThemes
- * @category    Admin
  * @package     WooCommerce\Admin\Meta Boxes
  * @version     2.1.0
  */
@@ -28,18 +26,13 @@ class WC_Meta_Box_Order_Actions {
 		global $theorder;
 
 		// This is used by some callbacks attached to hooks such as woocommerce_order_actions which rely on the global to determine if actions should be displayed for certain orders.
+		// Avoid using this global with the `woocommerce_order_actions` filter, instead use the $order filter arg.
 		if ( ! is_object( $theorder ) ) {
 			$theorder = wc_get_order( $post->ID );
 		}
 
-		$order_actions = apply_filters(
-			'woocommerce_order_actions',
-			array(
-				'send_order_details'              => __( 'Email invoice / order details to customer', 'woocommerce' ),
-				'send_order_details_admin'        => __( 'Resend new order notification', 'woocommerce' ),
-				'regenerate_download_permissions' => __( 'Regenerate download permissions', 'woocommerce' ),
-			)
-		);
+		$theorder = $theorder instanceof WC_Order ? $theorder : null;
+		$order_actions = self::get_available_order_actions_for_order( $theorder );
 		?>
 		<ul class="order_actions submitbox">
 
@@ -152,5 +145,34 @@ class WC_Meta_Box_Order_Actions {
 	 */
 	public static function set_email_sent_message( $location ) {
 		return add_query_arg( 'message', 11, $location );
+	}
+
+	/**
+	 * Get the available order actions for a given order.
+	 *
+	 * @since 5.8.0
+	 *
+	 * @param WC_Order|null $order The order object or null if no order is available.
+	 *
+	 * @return array
+	 */
+	private static function get_available_order_actions_for_order( $order ) {
+		$actions = array(
+			'send_order_details'              => __( 'Email invoice / order details to customer', 'woocommerce' ),
+			'send_order_details_admin'        => __( 'Resend new order notification', 'woocommerce' ),
+			'regenerate_download_permissions' => __( 'Regenerate download permissions', 'woocommerce' ),
+		);
+
+		/**
+		 * Filter: woocommerce_order_actions
+		 * Allows filtering of the available order actions for an order.
+		 *
+		 * @since 2.1.0 Filter was added.
+		 * @since 5.8.0 The $order param was added.
+		 *
+		 * @param array         $actions The available order actions for the order.
+		 * @param WC_Order|null $order   The order object or null if no order is available.
+		 */
+		return apply_filters( 'woocommerce_order_actions', $actions, $order );
 	}
 }

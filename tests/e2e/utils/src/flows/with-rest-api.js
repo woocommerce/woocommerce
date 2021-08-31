@@ -1,9 +1,10 @@
 import factories from '../factories';
-import {Coupon, Setting, SimpleProduct} from '@woocommerce/api';
+import {Coupon, Setting, SimpleProduct, Order} from '@woocommerce/api';
 
 const client = factories.api.withDefaultPermalinks;
 const onboardingProfileEndpoint = '/wc-admin/onboarding/profile';
 const shippingZoneEndpoint = '/wc/v3/shipping/zones';
+const shippingClassesEndpoint = '/wc/v3/products/shipping_classes';
 const userEndpoint = '/wp/v2/users';
 
 /**
@@ -11,12 +12,12 @@ const userEndpoint = '/wp/v2/users';
  *
  * @param repository
  * @param defaultObjectId
+ * @param statuses Status of the object to check
  * @returns {Promise<void>}
  */
-const deleteAllRepositoryObjects = async ( repository, defaultObjectId = null ) => {
+const deleteAllRepositoryObjects = async ( repository, defaultObjectId = null, statuses = [ 'draft', 'publish', 'trash' ] ) => {
 	let objects;
 	const minimum = defaultObjectId == null ? 0 : 1;
-	const statuses = ['draft','publish','trash'];
 
 	for ( let s = 0; s < statuses.length; s++ ) {
 		const status = statuses[ s ];
@@ -82,6 +83,90 @@ export const withRestApi = {
 		await deleteAllRepositoryObjects( repository );
 	},
 	/**
+	 * Use api package to delete all orders.
+	 *
+	 * @return {Promise} Promise resolving once orders have been deleted.
+	 */
+	deleteAllOrders: async () => {
+		// We need to specfically filter on order status here to make sure we catch all orders to delete.
+		const orderStatuses = ['pending', 'processing', 'on-hold', 'completed', 'cancelled', 'refunded', 'failed', 'trash'];
+		const repository = Order.restRepository( client );
+		await deleteAllRepositoryObjects( repository, null, orderStatuses );
+	},
+	/**
+	 * Adds a shipping zone along with a shipping method using the API.
+	 *
+	 * @param zoneName Shipping zone name.
+	 * @param zoneLocation Shiping zone location. Defaults to country:US. For states use: state:US:CA.
+	 * @param zipCode Shipping zone zip code. Default is no zip code.
+	 * @param zoneMethod Shipping method type. Defaults to flat_rate (use also: free_shipping or local_pickup).
+	 * @param cost Shipping method cost. Default is no cost.
+	 * @param additionalZoneMethods Array of additional zone methods to add to the shipping zone.
+	 */
+	addShippingZoneAndMethod: async (
+		zoneName,
+		zoneLocation = 'country:US',
+		zipCode = '',
+		zoneMethod = 'flat_rate',
+		cost = '',
+		additionalZoneMethods = [] ) => {
+
+	   const path = 'wc/v3/shipping/zones';
+
+	   const response = await client.post( path, { name: zoneName } );
+	   expect(response.statusCode).toEqual(201);
+	   let zoneId = response.data.id;
+
+	   // Select shipping zone location
+	   let [ zoneType, zoneCode ] = zoneLocation.split(/:(.+)/);
+	   let zoneLocationPayload = [
+		   {
+			   code: zoneCode,
+			   type: zoneType,
+		   }
+	   ];
+
+	   // Fill shipping zone postcode if provided
+	   if ( zipCode ) {
+		   zoneLocationPayload.push( {
+			   code: zipCode,
+			   type: "postcode",
+		   } );
+	   }
+
+	   const locationResponse = await client.put( path + `/${zoneId}/locations`, zoneLocationPayload );
+	   expect(locationResponse.statusCode).toEqual(200);
+
+	   // Add shipping zone method
+	   let methodPayload = {
+		   method_id: zoneMethod
+	   }
+
+	   const methodsResponse = await client.post( path + `/${zoneId}/methods`, methodPayload );
+	   expect(methodsResponse.statusCode).toEqual(200);
+	   let methodId = methodsResponse.data.id;
+
+	   // Add in cost, if provided
+	   if ( cost ) {
+		   let costPayload = {
+			   settings: {
+				   cost: cost
+			   }
+		   }
+
+		   const costResponse = await client.put( path + `/${zoneId}/methods/${methodId}`, costPayload );
+		   expect(costResponse.statusCode).toEqual(200);
+	   }
+
+	   // Add any additional zones, if provided
+	   if (additionalZoneMethods.length > 0) {
+		   for ( let z = 0; z < additionalZoneMethods.length; z++ ) {
+			   let response = await client.post( path + `/${zoneId}/methods`, { method_id: additionalZoneMethods[z] } );
+			   expect(response.statusCode).toEqual(200);
+		   }
+	   }
+    },
+	/**
 	 * Use api package to delete shipping zones.
 	 *
 	 * @return {Promise} Promise resolving once shipping zones have been deleted.
@@ -95,6 +180,20 @@ export const withRestApi = {
 					continue;
 				}
 				const response = await client.delete( shippingZoneEndpoint + `/${shippingZones.data[z].id}?force=true` );
+				expect( response.statusCode ).toBe( 200 );
+			}
+		}
+	},
+	/**
+	 * Use api package to delete shipping classes.
+	 *
+	 * @return {Promise} Promise resolving once shipping classes have been deleted.
+	 */
+	deleteAllShippingClasses: async () => {
+		const shippingClasses = await client.get( shippingClassesEndpoint );
+		if ( shippingClasses.data && shippingClasses.data.length ) {
+			for ( let c = 0; c < shippingClasses.data.length; c++ ) {
+				const response = await client.delete( shippingClassesEndpoint + `/${shippingClasses.data[c].id}?force=true` );
 				expect( response.statusCode ).toBe( 200 );
 			}
 		}
@@ -152,5 +251,19 @@ export const withRestApi = {
 				expect( response.value ).toBe( defaultSetting.value );
 			}
 		}
+	},
+	
+	/**
+	 * Create a batch of orders using the "Batch Create Order" API endpoint.
+	 * 
+	 * @param orders Array of orders to be created
+	 */
+	batchCreateOrders : async (orders) => {
+		const path = '/wc/v3/orders/batch';
+		const payload = { create: orders };
+		
+		const { statusCode } = await client.post(path, payload);
+
+		expect(statusCode).toEqual(200);
 	}
 };

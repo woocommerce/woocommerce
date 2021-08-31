@@ -1,0 +1,47 @@
+name: Smoke test release
+on:
+  release:
+    types: [published]
+jobs:
+  login-run:
+    name: Daily smoke test on release.
+    runs-on: ubuntu-18.04
+    steps:
+
+      - name: Create dirs.
+        run: |
+              mkdir -p code/woocommerce
+              mkdir -p package/woocommerce
+              mkdir -p tmp/woocommerce
+              mkdir -p node_modules
+
+      - name: Checkout code.
+        uses: actions/checkout@v2
+        with:
+          ref: trunk
+
+      - name: Install prerequisites.
+        run: |
+          npm install
+          composer install --no-dev
+          npm run build:assets
+          npm install jest
+          
+      - name: Run smoke test.
+        env:
+          SMOKE_TEST_URL: ${{ secrets.RELEASE_TEST_URL }}
+          SMOKE_TEST_ADMIN_USER: ${{ secrets.RELEASE_TEST_ADMIN_USER }}
+          SMOKE_TEST_ADMIN_PASSWORD: ${{ secrets.RELEASE_TEST_ADMIN_PASSWORD }}
+          SMOKE_TEST_ADMIN_USER_EMAIL: ${{ secrets.RELEASE_TEST_ADMIN_USER_EMAIL }}
+          SMOKE_TEST_CUSTOMER_USER: ${{ secrets.RELEASE_TEST_CUSTOMER_USER }}
+          SMOKE_TEST_CUSTOMER_PASSWORD: ${{ secrets.RELEASE_TEST_CUSTOMER_PASSWORD }}
+          WC_E2E_SCREENSHOTS: 1
+          E2E_RETEST: 1
+          E2E_SLACK_TOKEN: ${{ secrets.SMOKE_TEST_SLACK_TOKEN }}
+          E2E_SLACK_CHANNEL: ${{ secrets.SMOKE_TEST_SLACK_CHANNEL }}
+          TEST_RELEASE: 1
+          UPDATE_WC: 1
+          DEFAULT_TIMEOUT_OVERRIDE: 120000
+        run: |
+          npx wc-e2e test:e2e ./tests/e2e/specs/smoke-tests/update-woocommerce.js
+          npx wc-e2e test:e2e

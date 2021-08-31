@@ -1,5 +1,3 @@
-/* eslint-disable jest/no-export, jest/no-disabled-tests */
-
 /**
  * Internal dependencies
  */
@@ -10,7 +8,8 @@ const {
 	addShippingZoneAndMethod,
 	clearAndFillInput,
 	selectOptionInSelect2,
-	deleteAllShippingZones,
+	withRestApi,
+	uiUnblocked,
 } = require( '@woocommerce/e2e-utils' );
 
 /**
@@ -35,8 +34,8 @@ const runAddNewShippingZoneTest = () => {
 	describe('WooCommerce Shipping Settings - Add new shipping zone', () => {
 		beforeAll(async () => {
 			await createSimpleProduct();
+			await withRestApi.deleteAllShippingZones();
 			await merchant.login();
-			await deleteAllShippingZones();
 		});
 
 		it('add shipping zone for San Francisco with free Local pickup', async () => {
@@ -78,6 +77,8 @@ const runAddNewShippingZoneTest = () => {
 			await selectOptionInSelect2('New York');
 			await expect(page).toClick('button[name="calc_shipping"]');
 
+			await uiUnblocked();
+
 			// Verify shipping costs
 			await page.waitForSelector('.order-total');
 			await expect(page).toMatchElement('.shipping .amount', {text: '$10.00'});
@@ -86,7 +87,7 @@ const runAddNewShippingZoneTest = () => {
 
 		it('allows customer to benefit from a Free shipping if in CA', async () => {
 			await page.reload();
-			
+
 			// Set shipping state to California
 			await expect(page).toClick('a.shipping-calculator-button');
 			await expect(page).toClick('#select2-calc_shipping_state-container');
@@ -95,6 +96,8 @@ const runAddNewShippingZoneTest = () => {
 			// Set shipping postcode to 94000
 			await clearAndFillInput('#calc_shipping_postcode', '94000');
 			await expect(page).toClick('button[name="calc_shipping"]');
+
+			await uiUnblocked();
 
 			// Verify shipping method and cost
 			await page.waitForSelector('.order-total');
@@ -109,6 +112,8 @@ const runAddNewShippingZoneTest = () => {
 			await expect(page).toClick('a.shipping-calculator-button');
 			await clearAndFillInput('#calc_shipping_postcode', '94107');
 			await expect(page).toClick('button[name="calc_shipping"]');
+
+			await uiUnblocked();
 
 			// Verify shipping method and cost
 			await page.waitForSelector('.order-total');

@@ -1,27 +1,20 @@
-/* eslint-disable jest/no-export, jest/no-disabled-tests, */
-
 /**
  * Internal dependencies
  */
 const {
 	merchant,
 	createSimpleProduct,
-	createSimpleOrder,
 	verifyCheckboxIsSet,
 	verifyValueOfInputField,
 	uiUnblocked,
-	addProductToOrder,
 	evalAndClick,
+	createOrder,
 } = require( '@woocommerce/e2e-utils' );
 
 const { waitForSelector } = require( '@woocommerce/e2e-environment' );
 
 const config = require( 'config' );
-const simpleProductName = config.get( 'products.simple.name' );
 const simpleProductPrice = config.has('products.simple.price') ? config.get('products.simple.price') : '9.99';
-
-let orderId;
-let currencySymbol;
 
 /**
  * Evaluate and click a button selector then wait for a result selector.
@@ -44,20 +37,24 @@ const clickAndWaitForSelector = async ( buttonSelector, resultSelector ) => {
 
 const runRefundOrderTest = () => {
 	describe('WooCommerce Orders > Refund an order', () => {
+		let productId;
+		let orderId;
+		let currencySymbol;
+
 		beforeAll(async () => {
-			await createSimpleProduct();
+			productId = await createSimpleProduct();
+			orderId = await createOrder( {
+				productId,
+				status: 'completed'
+			} );
 
 			await merchant.login();
-			orderId = await createSimpleOrder();
-			await addProductToOrder(orderId, simpleProductName);
+			await merchant.goToOrder( orderId );
 
 			// Get the currency symbol for the store's selected currency
 			await page.waitForSelector('.woocommerce-Price-currencySymbol');
 			let currencyElement = await page.$('.woocommerce-Price-currencySymbol');
 			currencySymbol = await page.evaluate(el => el.textContent, currencyElement);
-
-			// Update order status to `Completed` so we can issue a refund
-			await merchant.updateOrderStatus(orderId, 'Completed');
 		});
 
 		it('can issue a refund by quantity', async () => {
@@ -93,7 +90,6 @@ const runRefundOrderTest = () => {
 				// Verify system note was added
 				expect(page).toMatchElement('.system-note', { text: 'Order status changed from Completed to Refunded.' }),
 			]);
-			page.waitForNavigation( { waitUntil: 'networkidle0' } );
 		});
 
 		it('can delete an issued refund', async () => {

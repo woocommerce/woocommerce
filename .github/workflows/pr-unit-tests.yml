@@ -6,6 +6,7 @@ jobs:
     name: PHP ${{ matrix.php }} WP ${{ matrix.wp }}
     timeout-minutes: 15
     runs-on: ubuntu-latest
+    continue-on-error: ${{ matrix.wp == 'nightly' }}
     strategy:
       fail-fast: false
       matrix:
@@ -14,9 +15,9 @@ jobs:
         include:
           - wp: nightly
             php: '7.4'
-          - wp: '5.5'
+          - wp: '5.7'
             php: 7.2
-          - wp: '5.4'
+          - wp: '5.6'
             php: 7.2
     services:
       database:
@@ -61,8 +62,10 @@ jobs:
              unzip -d /tmp/phpunit-7.5-fork /tmp/phpunit-7.5-fork.zip
              composer bin phpunit config --unset platform
              composer bin phpunit config repositories.0 '{"type": "path", "url": "/tmp/phpunit-7.5-fork/phpunit-add-compatibility-with-php8-to-phpunit-7", "options": {"symlink": false}}'
-             composer bin phpunit require --dev -W phpunit/phpunit:@dev --ignore-platform-reqs    
-           fi 
+             composer bin phpunit require --dev -W phpunit/phpunit:@dev --ignore-platform-reqs
+             rm -rf ./vendor/phpunit/
+             composer dump-autoload
+           fi
 
       - name: Init DB and WP
         run: ./tests/bin/install.sh woo_test root root 127.0.0.1 ${{ matrix.wp }}

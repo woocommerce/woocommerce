@@ -1,10 +1,11 @@
-/* eslint-disable jest/no-export, jest/no-disabled-tests */
 /**
  * Internal dependencies
  */
+import config from 'config';
+
 const {
 	merchant,
-	batchCreateOrders,
+	withRestApi,
 	clickFilter,
 	moveAllItemsToTrash,
 } = require( '@woocommerce/e2e-utils' );
@@ -19,17 +20,25 @@ const orderStatus = [
 	['Completed', 'wc-completed'],
 	['Cancelled', 'wc-cancelled'],
 	['Refunded', 'wc-refunded'],
-	['Failed', 'wc-failed']
+	['Failed', 'wc-failed'],
 ];
+const defaultOrder = config.get('orders.basicPaidOrder');
 
 const runOrderStatusFiltersTest = () => {
 	describe('WooCommerce Orders > Filter Orders by Status', () => {
-		beforeAll( async () => {
+		beforeAll(async () => {
 			// First, let's create some orders we can filter against
-			const statuses = orderStatus.map(
-				(pair) => pair[1].substring(3) // remove the 'wc-' part
-			);
-			await batchCreateOrders(statuses);
+			const orders = orderStatus.map((entryPair) => {
+				const statusName = entryPair[1].replace('wc-', '');
+
+				return {
+					...defaultOrder,
+					status: statusName,
+				};
+			});
+
+			// Create the orders using the API
+			await withRestApi.batchCreateOrders(orders);
 
 			// Next, let's login and navigate to the Orders page
 			await merchant.login();

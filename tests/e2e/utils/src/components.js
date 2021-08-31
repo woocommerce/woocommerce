@@ -16,7 +16,7 @@ import {
 	waitForSelectorWithoutThrow,
 } from './page-utils';
 import factories from './factories';
-import { Coupon } from '@woocommerce/api';
+import { Coupon, Order } from '@woocommerce/api';
 
 const client = factories.api.withDefaultPermalinks;
 const config = require( 'config' );
@@ -94,11 +94,11 @@ const completeOnboardingWizard = async () => {
 			'.components-modal__header-heading', {text: 'Build a better WooCommerce'}
 		);
 
-		// Query for "Continue" buttons
-		const continueButtons = await page.$$( 'button.is-primary' );
-		expect( continueButtons ).toHaveLength( 2 );
+		// Query for "No Thanks" buttons
+		const continueButtons = await page.$$( '.woocommerce-usage-modal__actions button.is-secondary' );
+		expect( continueButtons ).toHaveLength( 1 );
 
-		await continueButtons[1].click();
+		await continueButtons[0].click();
 	}
 	await page.waitForNavigation( { waitUntil: 'networkidle0' } );
 
@@ -295,7 +295,7 @@ const createVariableProduct = async (varProduct = defaultVariableProduct) => {
 
 /**
  * Create grouped product.
- * 
+ *
  * @param groupedProduct Defaults to the grouped product object in `default.json`
  * @returns ID of the grouped product
  */
@@ -321,6 +321,30 @@ const createGroupedProduct = async (groupedProduct = defaultGroupedProduct) => {
 
 	return id;
 };
+
+/**
+ * Use the API to create an order with the provided details.
+ *
+ * @param {object} orderOptions
+ * @returns {Promise<number>} ID of the created order.
+ */
+const createOrder = async ( orderOptions = {} ) => {
+	const newOrder = {
+		...( orderOptions.status ) && { status: orderOptions.status },
+		...( orderOptions.customerId ) && { customer_id: orderOptions.customerId },
+		...( orderOptions.customerBilling ) && { billing: orderOptions.customerBilling },
+		...( orderOptions.customerShipping ) && { shipping: orderOptions.customerShipping },
+		...( orderOptions.productId ) && { line_items: [
+				{ product_id: orderOptions.productId },
+			]
+		},
+	};
+
+	const repository = Order.restRepository( client );
+	const order = await repository.create( newOrder );
+
+	return order.id;
+}
 
 /**
  * Create a basic order with the provided order status.
@@ -454,12 +478,16 @@ const addShippingZoneAndMethod = async ( zoneName, zoneLocation = 'country:US', 
 	// Select shipping zone location
 	await expect(page).toSelect('select[name="zone_locations"]', zoneLocation);
 
+	await uiUnblocked();
+
 	// Fill shipping zone postcode if needed otherwise just put empty space
 	await page.waitForSelector('a.wc-shipping-zone-postcodes-toggle');
 	await expect(page).toClick('a.wc-shipping-zone-postcodes-toggle');
 	await expect(page).toFill('#zone_postcodes', zipCode);
 	await expect(page).toMatchElement('#zone_postcodes', zipCode);
 	await expect(page).toClick('button#submit');
+
+	await uiUnblocked();
 
 	// Add shipping zone method
 	await page.waitFor(1000);
@@ -468,6 +496,8 @@ const addShippingZoneAndMethod = async ( zoneName, zoneLocation = 'country:US', 
 	await expect(page).toSelect('select[name="add_method_id"]', zoneMethod);
 	await expect(page).toClick('button#btn-ok');
 	await page.waitForSelector('#zone_locations');
+
+	await uiUnblocked();
 };
 
 /**
@@ -547,5 +577,6 @@ export {
 	clickUpdateOrder,
 	deleteAllEmailLogs,
 	deleteAllShippingZones,
-	batchCreateOrders
+	batchCreateOrders,
+	createOrder,
 };
