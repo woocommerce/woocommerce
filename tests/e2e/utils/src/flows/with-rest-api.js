@@ -253,7 +253,27 @@ export const withRestApi = {
 			}
 		}
 	},
-
+	/**
+	 * Update a setting to the supplied value.
+	 *
+	 * @param {string} settingsGroup The settings group to update.
+	 * @param {string} settingId The setting ID to update
+	 * @param {object} payload An object with a key/value pair to update.
+	 */
+	updateSettingOption: async ( settingsGroup, settingId, payload = {} ) => {
+		const settingsClient = Setting.restRepository( client );
+		await settingsClient.update( settingsGroup, settingId, payload );
+	},
+	/**
+	 * Update a payment gateway.
+	 *
+	 * @param {string} paymentGatewayId The ID of the payment gateway to update.
+	 * @param {object} payload An object with the key/value pair to update.
+	 */
+	updatePaymentGateway: async ( paymentGatewayId, payload = {} ) => {
+		const response = await client.put( `/wc/v3/payment_gateways/${paymentGatewayId}`, payload );
+		expect( response.statusCode ).toBe( 200 );
+	},
 	/**
 	 * Create a batch of orders using the "Batch Create Order" API endpoint.
 	 *
@@ -267,7 +287,6 @@ export const withRestApi = {
 
 		expect(statusCode).toEqual(200);
 	},
-
 	/**
 	 * Get the current environment from the WooCommerce system status API.
 	 *

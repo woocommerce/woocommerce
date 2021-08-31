@@ -19,6 +19,8 @@
 - Added `statuses` optional parameter to `deleteAllRepositoryObjects()` to delete on specific statuses
 - Added `createOrder()` component util that creates an order using the API with the passed in details
 - Updated `addShippingZoneAndMethod` to use the API instead of UI to create shipping zones
+- Added `updateSettingOption` to use the API to update a setting option
+- Added `updatePaymentGateway` to use the API to update a payment gateway
 - Added `getSystemEnvironment()` that gets the current environment from the WooCommerce API.
 
 # 0.1.5
