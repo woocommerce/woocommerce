@@ -58,7 +58,6 @@ const putRequest = async ( requestPath, requestBody ) => {
  * @returns {Response}
  */
 const deleteRequest = async ( requestPath, deletePermanently = false ) => {
-	//const deleteUrl = deletePermanently ? requestPath + '?force=true' : requestPath
 	const requestBody = deletePermanently ? { force: true } : {}
 	const response = await request
 		.delete( requestPath )
