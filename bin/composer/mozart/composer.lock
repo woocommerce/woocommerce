@@ -33,7 +33,6 @@
                 "squizlabs/php_codesniffer": "^3.5",
                 "vimeo/psalm": "^4.4"
             },
-            "default-branch": true,
             "bin": [
                 "bin/mozart"
             ],
@@ -54,10 +53,6 @@
                 }
             ],
             "description": "Composes all dependencies as a package inside a WordPress plugin",
-            "support": {
-                "issues": "https://github.com/coenjacobs/mozart/issues",
-                "source": "https://github.com/coenjacobs/mozart/tree/master"
-            },
             "funding": [
                 {
                     "url": "https://github.com/coenjacobs",
@@ -148,10 +143,6 @@
                 "sftp",
                 "storage"
             ],
-            "support": {
-                "issues": "https://github.com/thephpleague/flysystem/issues",
-                "source": "https://github.com/thephpleague/flysystem/tree/1.1.5"
-            },
             "funding": [
                 {
                     "url": "https://offset.earth/frankdejonge",
@@ -344,9 +335,6 @@
                 "console",
                 "terminal"
             ],
-            "support": {
-                "source": "https://github.com/symfony/console/tree/v5.3.7"
-            },
             "funding": [
                 {
                     "url": "https://symfony.com/sponsor",
@@ -473,9 +461,6 @@
             ],
             "description": "Finds files and directories via an intuitive fluent interface",
             "homepage": "https://symfony.com",
-            "support": {
-                "source": "https://github.com/symfony/finder/tree/v5.3.7"
-            },
             "funding": [
                 {
                     "url": "https://symfony.com/sponsor",
@@ -633,9 +618,6 @@
                 "portable",
                 "shim"
             ],
-            "support": {
-                "source": "https://github.com/symfony/polyfill-intl-grapheme/tree/v1.23.1"
-            },
             "funding": [
                 {
                     "url": "https://symfony.com/sponsor",
@@ -797,9 +779,6 @@
                 "portable",
                 "shim"
             ],
-            "support": {
-                "source": "https://github.com/symfony/polyfill-mbstring/tree/v1.23.1"
-            },
             "funding": [
                 {
                     "url": "https://symfony.com/sponsor",
@@ -959,9 +938,6 @@
                 "portable",
                 "shim"
             ],
-            "support": {
-                "source": "https://github.com/symfony/polyfill-php80/tree/v1.23.1"
-            },
             "funding": [
                 {
                     "url": "https://symfony.com/sponsor",
@@ -1121,9 +1097,6 @@
                 "utf-8",
                 "utf8"
             ],
-            "support": {
-                "source": "https://github.com/symfony/string/tree/v5.3.7"
-            },
             "funding": [
                 {
                     "url": "https://symfony.com/sponsor",
@@ -1153,5 +1126,5 @@
     "platform-overrides": {
         "php": "7.3"
     },
-    "plugin-api-version": "2.1.0"
+    "plugin-api-version": "1.1.0"
 }
