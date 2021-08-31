@@ -707,7 +707,9 @@ describe( 'TaskDashboard and TaskList', () => {
 			const { queryByText } = render( <TaskDashboard query={ {} } /> );
 			expect(
 				queryByText( 'This is the optional task content' )
-			).not.toHaveClass( 'woocommerce-task-list__item-content-appear' );
+			).not.toHaveClass(
+				'woocommerce-task-list__item-expandable-content-appear'
+			);
 		} );
 	} );
 

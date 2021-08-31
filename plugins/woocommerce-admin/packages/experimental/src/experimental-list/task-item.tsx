@@ -86,7 +86,7 @@ const OptionalExpansionWrapper: React.FC< {
 		<VerticalCSSTransition
 			timeout={ 500 }
 			in={ expanded }
-			classNames="woocommerce-task-list__item-content"
+			classNames="woocommerce-task-list__item-expandable-content"
 			defaultStyle={ {
 				transitionProperty: 'max-height, opacity',
 			} }
@@ -161,7 +161,7 @@ export const TaskItem: React.FC< TaskItemProps > = ( {
 						expandable={ expandable }
 						expanded={ expanded }
 					>
-						<div className="woocommerce-task-list__item-content">
+						<div className="woocommerce-task-list__item-expandable-content">
 							{ content }
 							{ expandable && ! completed && additionalInfo && (
 								<div
