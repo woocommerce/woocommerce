@@ -184,6 +184,7 @@ final class BlockTypesController {
 			'checkout-express-payment-block',
 			'checkout-terms-block',
 			'checkout-newsletter-subscription-block',
+			'checkout-sample-block',
 		];
 	}
 }
