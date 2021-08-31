@@ -208,6 +208,9 @@ WooCommerce comes with some sample data you can use to see how products look; im
 - Fix: Fix blank screen on analytics screens when searching #7482
 - Fix: Fix all links with hash to behind query parameters #7483
 - Fix: Fix Stats module CSS issue introduced by Gutenberg #7488
+- Fix: Fix marketing task visibility #7580
+- Fix: Fix stats-overview card padding issue #7594
+- Fix: Fix layout issue on the marketing task #7598
 - Add: Add boolean isReverseTrend prop to SummaryNumber to show "positive" delta for negative numbers. #7357
 - Add: Adding links to help panel for marketing task #7384
 - Add: Add installed marketing extensions card to extensions task #7419
