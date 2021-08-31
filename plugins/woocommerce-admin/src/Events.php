@@ -49,6 +49,7 @@ use \Automattic\WooCommerce\Admin\Notes\AddFirstProduct;
 use \Automattic\WooCommerce\Admin\Notes\DrawAttention;
 use \Automattic\WooCommerce\Admin\Notes\GettingStartedInEcommerceWebinar;
 use \Automattic\WooCommerce\Admin\Notes\NavigationNudge;
+use Automattic\WooCommerce\Admin\Schedulers\MailchimpScheduler;
 
 /**
  * Events Class.
@@ -103,6 +104,10 @@ class Events {
 		if ( $this->is_merchant_email_notifications_enabled() ) {
 			MerchantEmailNotifications::run();
 		}
+
+		if ( Features::is_enabled( 'onboarding' ) ) {
+			( new MailchimpScheduler() )->run();
+		}
 	}
 
 	/**
@@ -112,7 +117,6 @@ class Events {
 		NewSalesRecord::possibly_add_note();
 		MobileApp::possibly_add_note();
 		TrackingOptIn::possibly_add_note();
-		OnboardingEmailMarketing::possibly_add_note();
 		OnboardingPayments::possibly_add_note();
 		PersonalizeStore::possibly_add_note();
 		WooCommercePayments::possibly_add_note();

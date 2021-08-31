@@ -31,7 +31,8 @@
         "countryandstate": "United States (US) -- California",
         "city": "San Francisco",
         "state": "CA",
-        "postcode": "94107"
+        "postcode": "94107",
+        "email": "john.doe@example.com"
       }
     },
     "customer": {

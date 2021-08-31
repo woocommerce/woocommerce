@@ -3,10 +3,10 @@
  */
 import { DropdownTypeaheadField } from '../../elements/DropdownTypeaheadField';
 import { BasePage } from '../../pages/BasePage';
+import { waitForElementByText } from '../../utils/actions';
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 const {
-	setCheckbox,
 	clearAndFillInput,
 	verifyCheckboxIsSet,
 	verifyCheckboxIsUnset,
@@ -22,11 +22,16 @@ interface StoreDetails {
 	countryRegion?: string;
 	city?: string;
 	postcode?: string;
+	storeEmail?: string;
 }
 
 export class StoreDetailsSection extends BasePage {
 	private get countryDropdown(): DropdownTypeaheadField {
 		return this.getDropdownTypeahead( '#woocommerce-select-control' );
+	}
+
+	async isDisplayed() {
+		await waitForElementByText( 'h2', 'Welcome to WooCommerce' );
 	}
 
 	async completeStoreDetailsSection( storeDetails: StoreDetails = {} ) {
@@ -66,8 +71,14 @@ export class StoreDetailsSection extends BasePage {
 				config.get( 'addresses.admin.store.postcode' )
 		);
 
-		// Verify that checkbox next to "I'm setting up a store for a client" is not selected
-		await this.checkClientSetupCheckbox( false );
+		// Fill store's email address
+		await this.fillEmailAddress(
+			storeDetails.storeEmail ||
+				config.get( 'addresses.admin.store.email' )
+		);
+
+		// Verify that checkbox next to "Get tips, product updates and inspiration straight to your mailbox" is selected
+		await this.checkMarketingCheckbox( true );
 	}
 
 	async fillAddress( address: string ) {
@@ -95,11 +106,11 @@ export class StoreDetailsSection extends BasePage {
 		await clearAndFillInput( '#inspector-text-control-3', postalCode );
 	}
 
-	async selectSetupForClient() {
-		await setCheckbox( '.components-checkbox-control__input' );
+	async fillEmailAddress( email: string ) {
+		await clearAndFillInput( '#inspector-text-control-4', email );
 	}
 
-	async checkClientSetupCheckbox( selected: boolean ) {
+	async checkMarketingCheckbox( selected: boolean ) {
 		if ( selected ) {
 			await verifyCheckboxIsSet( '.components-checkbox-control__input' );
 		} else {

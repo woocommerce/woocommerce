@@ -9,12 +9,13 @@ import {
 	CardFooter,
 	CheckboxControl,
 	FlexItem as MaybeFlexItem,
+	Spinner,
 	Popover,
 } from '@wordpress/components';
-import { Component } from '@wordpress/element';
+import { Component, useRef } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { withDispatch, withSelect } from '@wordpress/data';
-import { Form } from '@woocommerce/components';
+import { Form, TextControl } from '@woocommerce/components';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 import {
 	ONBOARDING_STORE_NAME,
@@ -48,32 +49,21 @@ const FlextItemSubstitute = ( { children, align } ) => {
 };
 const FlexItem = MaybeFlexItem || FlextItemSubstitute;
 
+const LoadingPlaceholder = () => (
+	<div className="woocommerce-admin__store-details__spinner">
+		<Spinner />
+	</div>
+);
+
 class StoreDetails extends Component {
 	constructor( props ) {
 		super( props );
-		const { profileItems, settings } = props;
 
 		this.state = {
 			showUsageModal: false,
 			skipping: false,
 			isStoreDetailsPopoverVisible: false,
 			isSkipSetupPopoverVisible: false,
-		};
-
-		// Check if a store address is set so that we don't default
-		// to WooCommerce's default country of the UK.
-		const countryState =
-			( settings.woocommerce_store_address &&
-				settings.woocommerce_default_country ) ||
-			'';
-
-		this.initialValues = {
-			addressLine1: settings.woocommerce_store_address || '',
-			addressLine2: settings.woocommerce_store_address_2 || '',
-			city: settings.woocommerce_store_city || '',
-			countryState,
-			postCode: settings.woocommerce_store_postcode || '',
-			isClient: profileItems.setup_client || false,
 		};
 
 		this.onContinue = this.onContinue.bind( this );
@@ -109,12 +99,11 @@ class StoreDetails extends Component {
 		const {
 			createNotice,
 			goToNextStep,
-			isSettingsError,
 			updateProfileItems,
-			isProfileItemsError,
 			updateAndPersistSettingsForGroup,
 			profileItems,
 			settings,
+			errorsRef,
 		} = this.props;
 
 		const currencySettings = this.deriveCurrencySettings(
@@ -126,7 +115,7 @@ class StoreDetails extends Component {
 		recordEvent( 'storeprofiler_store_details_continue', {
 			store_country: getCountryCode( values.countryState ),
 			derived_currency: currencySettings.currency_code,
-			setup_client: values.isClient,
+			email_signup: values.isAgreeMarketing,
 		} );
 
 		await updateAndPersistSettingsForGroup( 'general', {
@@ -147,7 +136,11 @@ class StoreDetails extends Component {
 			},
 		} );
 
-		const profileItemsToUpdate = { setup_client: values.isClient };
+		const profileItemsToUpdate = {
+			is_agree_marketing: values.isAgreeMarketing,
+			store_email: values.storeEmail,
+		};
+
 		const region = getCurrencyRegion( values.countryState );
 
 		/**
@@ -174,9 +167,20 @@ class StoreDetails extends Component {
 			profileItemsToUpdate.industry = trimmedIndustries;
 		}
 
-		await updateProfileItems( profileItemsToUpdate );
+		let errorMessages = [];
+		try {
+			await updateProfileItems( profileItemsToUpdate );
+		} catch ( error ) {
+			// Array of error messages obtained from API response.
+			if ( error?.data?.params ) {
+				errorMessages = Object.values( error.data.params );
+			}
+		}
 
-		if ( ! isSettingsError && ! isProfileItemsError ) {
+		if (
+			! Boolean( errorsRef.current.settings ) &&
+			! errorMessages.length
+		) {
 			goToNextStep();
 		} else {
 			createNotice(
@@ -186,7 +190,37 @@ class StoreDetails extends Component {
 					'woocommerce-admin'
 				)
 			);
+
+			errorMessages.forEach( ( message ) =>
+				createNotice( 'error', message )
+			);
 		}
+	}
+
+	validateStoreDetails( values ) {
+		const errors = validateStoreAddress( values );
+
+		if (
+			values.isAgreeMarketing &&
+			( ! values.storeEmail || ! values.storeEmail.trim().length )
+		) {
+			errors.storeEmail = __(
+				'Please add an email address',
+				'woocommerce-admin'
+			);
+		}
+		if (
+			values.storeEmail &&
+			values.storeEmail.trim().length &&
+			values.storeEmail.indexOf( '@' ) === -1
+		) {
+			errors.storeEmail = __(
+				'Invalid email address',
+				'woocommerce-admin'
+			);
+		}
+
+		return errors;
 	}
 
 	render() {
@@ -196,7 +230,7 @@ class StoreDetails extends Component {
 			isStoreDetailsPopoverVisible,
 			isSkipSetupPopoverVisible,
 		} = this.state;
-		const { skipProfiler, isBusy } = this.props;
+		const { skipProfiler, isLoading, isBusy, initialValues } = this.props;
 
 		/* eslint-disable @wordpress/i18n-no-collapsible-whitespace */
 		const skipSetupText = __(
@@ -209,6 +243,14 @@ class StoreDetails extends Component {
 			'woocommerce-admin'
 		);
 		/* eslint-enable @wordpress/i18n-no-collapsible-whitespace */
+
+		if ( isLoading ) {
+			return (
+				<div className="woocommerce-profile-wizard__store-details">
+					<LoadingPlaceholder />
+				</div>
+			);
+		}
 
 		return (
 			<div className="woocommerce-profile-wizard__store-details">
@@ -258,9 +300,9 @@ class StoreDetails extends Component {
 				</div>
 
 				<Form
-					initialValues={ this.initialValues }
+					initialValues={ initialValues }
 					onSubmit={ this.onSubmit }
-					validate={ validateStoreAddress }
+					validate={ this.validateStoreDetails }
 				>
 					{ ( {
 						getInputProps,
@@ -292,17 +334,29 @@ class StoreDetails extends Component {
 									getInputProps={ getInputProps }
 									setValue={ setValue }
 								/>
+
+								<TextControl
+									label={ __(
+										'Email address',
+										'woocommerce-admin'
+									) }
+									required
+									autoComplete="email"
+									{ ...getInputProps( 'storeEmail' ) }
+								/>
 							</CardBody>
 
 							<CardFooter>
 								<FlexItem>
-									<div className="woocommerce-profile-wizard__client">
+									<div>
 										<CheckboxControl
 											label={ __(
-												"I'm setting up a store for a client",
+												'Get tips, product updates and inspiration straight to your mailbox',
 												'woocommerce-admin'
 											) }
-											{ ...getInputProps( 'isClient' ) }
+											{ ...getInputProps(
+												'isAgreeMarketing'
+											) }
 										/>
 									</div>
 								</FlexItem>
@@ -376,30 +430,59 @@ export default compose(
 			isUpdateSettingsRequesting,
 		} = select( SETTINGS_STORE_NAME );
 		const {
-			getOnboardingError,
 			getProfileItems,
 			isOnboardingRequesting,
+			getEmailPrefill,
+			hasFinishedResolution: hasFinishedResolutionOnboarding,
 		} = select( ONBOARDING_STORE_NAME );
 		const { isResolving } = select( OPTIONS_STORE_NAME );
 
 		const profileItems = getProfileItems();
-		const isProfileItemsError = Boolean(
-			getOnboardingError( 'updateProfileItems' )
-		);
 
 		const { general: settings = {} } = getSettings( 'general' );
-		const isSettingsError = Boolean( getSettingsError( 'general' ) );
 		const isBusy =
 			isOnboardingRequesting( 'updateProfileItems' ) ||
 			isUpdateSettingsRequesting( 'general' ) ||
 			isResolving( 'getOption', [ 'woocommerce_allow_tracking' ] );
+		const isLoading =
+			! hasFinishedResolutionOnboarding( 'getProfileItems' ) ||
+			! hasFinishedResolutionOnboarding( 'getEmailPrefill' );
+		const errorsRef = useRef( {
+			settings: null,
+		} );
+		errorsRef.current = {
+			settings: getSettingsError( 'general' ),
+		};
+		// Check if a store address is set so that we don't default
+		// to WooCommerce's default country of the UK.
+		const countryState =
+			( settings.woocommerce_store_address &&
+				settings.woocommerce_default_country ) ||
+			'';
+
+		const initialValues = {
+			addressLine1: settings.woocommerce_store_address || '',
+			addressLine2: settings.woocommerce_store_address_2 || '',
+			city: settings.woocommerce_store_city || '',
+			countryState,
+			postCode: settings.woocommerce_store_postcode || '',
+			isAgreeMarketing:
+				typeof profileItems.is_agree_marketing === 'boolean'
+					? profileItems.is_agree_marketing
+					: true,
+			storeEmail:
+				typeof profileItems.store_email === 'string'
+					? profileItems.store_email
+					: getEmailPrefill(),
+		};
 
 		return {
-			isProfileItemsError,
-			isSettingsError,
+			initialValues,
+			isLoading,
 			profileItems,
 			isBusy,
 			settings,
+			errorsRef,
 		};
 	} ),
 	withDispatch( ( dispatch ) => {

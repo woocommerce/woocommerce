@@ -163,8 +163,16 @@ export function setPaymentMethods( paymentMethods ) {
 	};
 }
 
+export function setEmailPrefill( email ) {
+	return {
+		type: TYPES.SET_EMAIL_PREFILL,
+		emailPrefill: email,
+	};
+}
+
 export function* updateProfileItems( items ) {
 	yield setIsRequesting( 'updateProfileItems', true );
+	yield setError( 'updateProfileItems', null );
 
 	try {
 		const results = yield apiFetch( {
@@ -183,7 +191,7 @@ export function* updateProfileItems( items ) {
 	} catch ( error ) {
 		yield setError( 'updateProfileItems', error );
 		yield setIsRequesting( 'updateProfileItems', false );
-		throw new Error();
+		throw error;
 	}
 }
 

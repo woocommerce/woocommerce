@@ -5,7 +5,12 @@ import { BasePage } from '../../pages/BasePage';
 import { waitForElementByText } from '../../utils/actions';
 
 /* eslint-disable @typescript-eslint/no-var-requires */
-const { setCheckbox, unsetCheckbox } = require( '@woocommerce/e2e-utils' );
+const {
+	setCheckbox,
+	unsetCheckbox,
+	verifyCheckboxIsSet,
+	verifyCheckboxIsUnset,
+} = require( '@woocommerce/e2e-utils' );
 /* eslint-enable @typescript-eslint/no-var-requires */
 
 export class BusinessSection extends BasePage {
@@ -65,5 +70,19 @@ export class BusinessSection extends BasePage {
 		await this.unsetAllCheckboxes(
 			'.woocommerce-profile-wizard__benefit .components-form-toggle__input'
 		);
+	}
+
+	async selectSetupForClient() {
+		await setCheckbox( '.components-checkbox-control__input' );
+	}
+
+	async checkClientSetupCheckbox( selected: boolean ) {
+		if ( selected ) {
+			await verifyCheckboxIsSet( '.components-checkbox-control__input' );
+		} else {
+			await verifyCheckboxIsUnset(
+				'.components-checkbox-control__input'
+			);
+		}
 	}
 }

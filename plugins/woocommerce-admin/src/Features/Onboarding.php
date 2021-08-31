@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Admin\Features;
 use \Automattic\WooCommerce\Admin\Loader;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Admin\WCAdminHelper;
+use Automattic\WooCommerce\Admin\Schedulers\MailchimpScheduler;
 
 /**
  * Contains backend logic for the onboarding profile and checklist feature.
@@ -96,6 +97,8 @@ class Onboarding {
 
 		// Always hook into Jetpack connection even if outside of admin.
 		add_action( 'jetpack_site_registered', array( $this, 'set_woocommerce_setup_jetpack_opted_in' ) );
+
+		add_action( 'woocommerce_onboarding_profile_data_updated', array( $this, 'on_profile_data_updated' ), 10, 2 );
 
 		if ( ! is_admin() ) {
 			return;
@@ -976,5 +979,21 @@ class Onboarding {
 			$plugins = array_unique( $plugins );
 		}
 		return $plugins;
+	}
+
+	/**
+	 * Delete MailchimpScheduler::SUBSCRIBED_OPTION_NAME option if profile data is being updated with a new email.
+	 *
+	 * @param array $existing_data Existing option data.
+	 * @param array $updating_data Updating option data.
+	 */
+	public function on_profile_data_updated( $existing_data, $updating_data ) {
+		if (
+			isset( $existing_data['store_email'] ) &&
+			isset( $updating_data['store_email'] ) &&
+			$existing_data['store_email'] !== $updating_data['store_email']
+		) {
+			delete_option( MailchimpScheduler::SUBSCRIBED_OPTION_NAME );
+		}
 	}
 }

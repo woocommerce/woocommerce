@@ -16,6 +16,7 @@ import {
 	setError,
 	setTasksStatus,
 	setPaymentMethods,
+	setEmailPrefill,
 } from './actions';
 
 export function* getProfileItems() {
@@ -28,6 +29,19 @@ export function* getProfileItems() {
 		yield setProfileItems( results, true );
 	} catch ( error ) {
 		yield setError( 'getProfileItems', error );
+	}
+}
+
+export function* getEmailPrefill() {
+	try {
+		const results = yield apiFetch( {
+			path: WC_ADMIN_NAMESPACE + '/onboarding/profile/get_email_prefill',
+			method: 'GET',
+		} );
+
+		yield setEmailPrefill( results.email );
+	} catch ( error ) {
+		yield setError( 'getEmailPrefill', error );
 	}
 }
 

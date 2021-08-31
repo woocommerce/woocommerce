@@ -47,6 +47,10 @@ export const isOnboardingRequesting = (
 	return state.requesting[ selector ] || false;
 };
 
+export const getEmailPrefill = ( state: OnboardingState ): string => {
+	return state.emailPrefill || '';
+};
+
 // Types
 export type OnboardingSelectors = {
 	getProfileItems: () => ReturnType< typeof getProfileItems >;
@@ -64,6 +68,7 @@ export type OnboardingState = {
 	taskLists: TaskList[];
 	tasksStatus: TasksStatusState;
 	paymentMethods: PaymentMethodsState[];
+	emailPrefill: string;
 	// TODO clarify what the error record's type is
 	errors: Record< string, unknown >;
 	requesting: Record< string, boolean >;
@@ -135,6 +140,8 @@ export type ProfileItemsState = {
 	skipped: boolean | null;
 	theme: string | null;
 	wccom_connected: boolean | null;
+	is_agree_marketing: boolean | null;
+	store_email: string | null;
 };
 
 export type FieldLocale = {

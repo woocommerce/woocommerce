@@ -39,6 +39,7 @@ export const BusinessDetailsStep = ( props ) => {
 		product_count: profileItems.product_count || '',
 		selling_venues: profileItems.selling_venues || '',
 		revenue: profileItems.revenue || '',
+		setup_client: profileItems.setup_client || false,
 	};
 
 	return (

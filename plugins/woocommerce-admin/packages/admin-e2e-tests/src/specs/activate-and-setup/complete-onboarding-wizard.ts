@@ -37,6 +37,7 @@ const testAdminOnboardingWizard = () => {
 		} );
 
 		it( 'can complete the store details section', async () => {
+			await profileWizard.storeDetails.isDisplayed();
 			await profileWizard.storeDetails.completeStoreDetailsSection();
 			// Wait for "Continue" button to become active
 			await profileWizard.continue();
@@ -81,7 +82,7 @@ const testAdminOnboardingWizard = () => {
 			await profileWizard.business.selectCurrentlySelling(
 				config.get( 'onboardingwizard.sellingelsewhere' )
 			);
-
+			await profileWizard.business.checkClientSetupCheckbox( false );
 			await profileWizard.continue();
 		} );
 

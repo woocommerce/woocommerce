@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+### Add Newsletter Signup #7601
+
+- Start OBW and set up your browser console to monitor tracks. To do this, run `localStorage.setItem( 'debug', 'wc-admin:*' );`
+- Observe "Get tips, product updates and inspiration straight to your mailbox" checkbox and "Email address" field in the Store Details step.
+- Checking the checkbox should make the email field required, you should not be able to continue if it's not filled.
+- Fill in the email address field with a valid email and click on continue.
+- Observe in the track `wcadmin_storeprofiler_store_details_continue` with prop `email_signup` that appropriately flags if the user agreed to receive marketing emails.
+- Continue until Business Features step.
+- Observe the "I'm setting up a store for a client" checkbox in the step.
+- Click on continue.
+- Observe in the track `wcadmin_storeprofiler_store_business_details_continue_variant` with prop `setup_client` that appropriately flags if the user is setting up store for a client.
+
 ### Making business details sticky in OBW #7426
 
 1. Start out with a fresh store

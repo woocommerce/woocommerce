@@ -1,4 +1,9 @@
 .woocommerce-profile-wizard__store-details {
+	.woocommerce-admin__store-details__spinner {
+		display: flex;
+		justify-content: center;
+	}
+
 	.components-popover .components-popover__content {
 		min-width: 360px;
 	}

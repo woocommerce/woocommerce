@@ -11,6 +11,8 @@ import {
 	CardFooter,
 	TabPanel,
 	__experimentalText as Text,
+	FlexItem,
+	CheckboxControl,
 } from '@wordpress/components';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { SelectControl, Form, TextControl } from '@woocommerce/components';
@@ -138,6 +140,7 @@ class BusinessDetails extends Component {
 			product_count: productCount,
 			revenue,
 			selling_venues: sellingVenues,
+			setup_client: isSetupClient,
 		} = this.state.savedValues;
 
 		const updates = {
@@ -147,6 +150,7 @@ class BusinessDetails extends Component {
 			product_count: productCount,
 			revenue,
 			selling_venues: sellingVenues,
+			setup_client: isSetupClient,
 			...additions,
 		};
 
@@ -242,6 +246,7 @@ class BusinessDetails extends Component {
 		product_count: productCount,
 		selling_venues: sellingVenues,
 		revenue,
+		setup_client: isSetupClient,
 	} ) {
 		const { getCurrencyConfig } = this.context;
 
@@ -252,6 +257,7 @@ class BusinessDetails extends Component {
 			revenue,
 			used_platform: otherPlatform,
 			used_platform_name: otherPlatformName,
+			setup_client: isSetupClient,
 		} );
 	}
 
@@ -392,7 +398,22 @@ class BusinessDetails extends Component {
 										</>
 									) }
 								</CardBody>
-								<CardFooter isBorderless justify="center">
+								<CardFooter isBorderless>
+									<FlexItem>
+										<div className="woocommerce-profile-wizard__client">
+											<CheckboxControl
+												label={ __(
+													"I'm setting up a store for a client",
+													'woocommerce-admin'
+												) }
+												{ ...getInputProps(
+													'setup_client'
+												) }
+											/>
+										</div>
+									</FlexItem>
+								</CardFooter>
+								<CardFooter justify="center">
 									<Button
 										isPrimary
 										onClick={ async () => {
