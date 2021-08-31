@@ -35,7 +35,9 @@ export function* getProfileItems() {
 export function* getEmailPrefill() {
 	try {
 		const results = yield apiFetch( {
-			path: WC_ADMIN_NAMESPACE + '/onboarding/profile/get_email_prefill',
+			path:
+				WC_ADMIN_NAMESPACE +
+				'/onboarding/profile/experimental_get_email_prefill',
 			method: 'GET',
 		} );
 

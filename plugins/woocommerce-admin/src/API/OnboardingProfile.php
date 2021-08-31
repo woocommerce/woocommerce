@@ -61,9 +61,11 @@ class OnboardingProfile extends \WC_REST_Data_Controller {
 				'schema' => array( $this, 'get_public_item_schema' ),
 			)
 		);
+
+		// This endpoint is experimental. For internal use only.
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->rest_base . '/get_email_prefill',
+			'/' . $this->rest_base . '/experimental_get_email_prefill',
 			array(
 				array(
 					'methods'             => \WP_REST_Server::READABLE,
