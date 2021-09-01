@@ -122,7 +122,7 @@ export const Layout = ( {
 		if ( window.wcAdminFeatures && window.wcAdminFeatures.tasks ) {
 			return (
 				<Suspense fallback={ <TasksPlaceholder query={ query } /> }>
-					<Tasks />
+					<Tasks query={ query } />
 				</Suspense>
 			);
 		}

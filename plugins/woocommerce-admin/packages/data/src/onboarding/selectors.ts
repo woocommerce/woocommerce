@@ -1,6 +1,7 @@
 /**
  * Internal dependencies
  */
+import { TaskListType } from './types';
 import { WPDataSelectors, RuleProcessor } from '../types';
 
 export const getFreeExtensions = (
@@ -21,9 +22,9 @@ export const getTasksStatus = (
 	return state.tasksStatus || {};
 };
 
-const initialTaskLists: TaskList[] = [];
+const initialTaskLists: TaskListType[] = [];
 
-export const getTaskLists = ( state: OnboardingState ): TaskList[] => {
+export const getTaskLists = ( state: OnboardingState ): TaskListType[] => {
 	return state.taskLists || initialTaskLists;
 };
 
@@ -65,7 +66,7 @@ export type OnboardingSelectors = {
 export type OnboardingState = {
 	freeExtensions: ExtensionList[];
 	profileItems: ProfileItemsState;
-	taskLists: TaskList[];
+	taskLists: TaskListType[];
 	tasksStatus: TasksStatusState;
 	paymentMethods: PaymentMethodsState[];
 	emailPrefill: string;
@@ -185,25 +186,4 @@ export type Extension = {
 	manage_url: string;
 	name: string;
 	slug: string;
-};
-
-export type Task = {
-	id: string;
-	title: string;
-	content: string;
-	actionLabel: string;
-	actionUrl: string;
-	isComplete: boolean;
-	isVisibile: boolean;
-	isDismissable?: boolean;
-	isSnoozeable?: boolean;
-	time: string;
-};
-
-export type TaskList = {
-	id: string;
-	title: string;
-	isComplete: boolean;
-	isHidden: boolean;
-	tasks: Task[];
 };

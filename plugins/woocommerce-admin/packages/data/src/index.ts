@@ -32,6 +32,7 @@ export { withPluginsHydration } from './plugins/with-plugins-hydration';
 
 export { ONBOARDING_STORE_NAME } from './onboarding';
 export { withOnboardingHydration } from './onboarding/with-onboarding-hydration';
+export type { TaskType, TaskListType } from './onboarding/types';
 
 export { USER_STORE_NAME } from './user';
 export { withCurrentUserHydration } from './user/with-current-user-hydration';
