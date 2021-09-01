@@ -35,17 +35,14 @@ const runOnboardingFlowTest = () => {
 				await withRestApi.deleteAllShippingZones();
 			});
 
-			it.each(['general', 'products', 'tax'])(
-				'can reset to default settings',
-				async (settingsGroup) => {
-					await withRestApi.resetSettingsGroupToDefault(
-						settingsGroup
-					);
-				}
-			);
-
-      it('can reset shipping classes', async () => {
+			it('can reset shipping classes', async () => {
 				await withRestApi.deleteAllShippingClasses();
+			})
+
+			it('can reset to default settings', async () => {
+				await withRestApi.resetSettingsGroupToDefault('general');
+				await withRestApi.resetSettingsGroupToDefault('products');
+				await withRestApi.resetSettingsGroupToDefault('tax');
 			});
 		}
 
