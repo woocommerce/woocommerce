@@ -36,6 +36,7 @@ Use this plugin if you want access to the bleeding edge of available blocks for 
 - **All Products**
 - **Filter Products by Price**
 - **Filter Products by Attribute**
+- **Filter Products by Stock**
 - **Active Product Filters**
 - **Cart**
 - **Checkout**
