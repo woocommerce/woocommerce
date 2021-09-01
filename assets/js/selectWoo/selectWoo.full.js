@@ -1088,6 +1088,12 @@ S2.define('select2/results',[
 
       self.setClasses();
       self.ensureHighlightVisible();
+
+      // NOTE: DOM's version of the object and not jQuery.
+      var searchField = self.$results.parents( '.select2-container' ).find( 'input.select2-search__field' )[0];
+      if ( 'undefined' !== typeof searchField ) {
+           searchField.focus();
+      }
     });
 
     container.on('close', function () {
