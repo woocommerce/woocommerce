@@ -13,45 +13,23 @@ const {
 const statusColumnTextSelector = 'mark.order-status > span';
 
 // Define order statuses to filter against
-const orderStatus = {
-	pending: {
-		name: 'wc-pending',
-		description: { text: 'Pending payment' },
-	},
-	processing: {
-		name: 'wc-processing',
-		description: { text: 'Processing' },
-	},
-	onHold: {
-		name: 'wc-on-hold',
-		description: { text: 'On hold' },
-	},
-	completed: {
-		name: 'wc-completed',
-		description: { text: 'Completed' },
-	},
-	cancelled: {
-		name: 'wc-cancelled',
-		description: { text: 'Cancelled' },
-	},
-	refunded: {
-		name: 'wc-refunded',
-		description: { text: 'Refunded' },
-	},
-	failed: {
-		name: 'wc-failed',
-		description: { text: 'Failed' },
-	}
-};
+const orderStatus = [
+	['Pending payment', 'wc-pending'],
+	['Processing', 'wc-processing'],
+	['On hold', 'wc-on-hold'],
+	['Completed', 'wc-completed'],
+	['Cancelled', 'wc-cancelled'],
+	['Refunded', 'wc-refunded'],
+	['Failed', 'wc-failed'],
+];
 const defaultOrder = config.get('orders.basicPaidOrder');
-
 
 const runOrderStatusFiltersTest = () => {
 	describe('WooCommerce Orders > Filter Orders by Status', () => {
 		beforeAll(async () => {
 			// First, let's create some orders we can filter against
-			const orders = Object.entries(orderStatus).map((entryPair) => {
-				const statusName = entryPair[1].name.replace('wc-', '');
+			const orders = orderStatus.map((entryPair) => {
+				const statusName = entryPair[1].replace('wc-', '');
 
 				return {
 					...defaultOrder,
@@ -62,8 +40,9 @@ const runOrderStatusFiltersTest = () => {
 			// Create the orders using the API
 			await withRestApi.batchCreateOrders(orders);
 
-			// Next, let's login
+			// Next, let's login and navigate to the Orders page
 			await merchant.login();
+			await merchant.openAllOrdersView();
 		});
 
 		afterAll( async () => {
@@ -72,117 +51,33 @@ const runOrderStatusFiltersTest = () => {
 			await moveAllItemsToTrash();
 		});
 
-		it('should filter by Pending payment', async () => {
-			await merchant.openAllOrdersView();
-			await clickFilter('.' + orderStatus.pending.name);
-			await expect(page).toMatchElement(statusColumnTextSelector, orderStatus.pending.description);
+		it.each(orderStatus)('should filter by %s', async (statusText, statusClassName) => {
+			// Identify which statuses should be shown or hidden
+			const shownStatus = { text: statusText };
+			const hiddenStatuses = orderStatus
+				.filter((pair) => !pair.includes(statusText))
+				.map(([statusText]) => {
+					return { text: statusText };
+				});
+
+			// Click the status filter and verify that only the matching order is shown
+			await clickFilter('.' + statusClassName);
+			await expect(page).toMatchElement(statusColumnTextSelector, shownStatus);
 
 			// Verify other statuses don't show
-			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.processing.description);
-			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.completed.description);
-			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.cancelled.description);
-			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.refunded.description);
-			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.onHold.description);
-			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.failed.description);
-		});
-
-		it('should filter by Processing', async () => {
-			await merchant.openAllOrdersView();
-			await clickFilter('.' + orderStatus.processing.name);
-			await expect(page).toMatchElement(statusColumnTextSelector, orderStatus.processing.description);
-
-			// Verify other statuses don't show
-			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.pending.description);
-			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.completed.description);
-			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.cancelled.description);
-			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.refunded.description);
-			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.onHold.description);
-			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.failed.description);
-		});
-
-		it('should filter by On hold', async () => {
-			await merchant.openAllOrdersView();
-			await clickFilter('.' + orderStatus.onHold.name);
-			await expect(page).toMatchElement(statusColumnTextSelector, orderStatus.onHold.description);
-
-			// Verify other statuses don't show
-			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.pending.description);
-			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.processing.description);
-			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.completed.description);
-			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.cancelled.description);
-			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.refunded.description);
-			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.failed.description);
-		});
-
-		it('should filter by Completed', async () => {
-			await merchant.openAllOrdersView();
-			await clickFilter('.' + orderStatus.completed.name);
-			await expect(page).toMatchElement(statusColumnTextSelector, orderStatus.completed.description);
-
-			// Verify other statuses don't show
-			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.pending.description);
-			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.processing.description);
-			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.cancelled.description);
-			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.refunded.description);
-			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.onHold.description);
-			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.failed.description);
-		});
-
-		it('should filter by Cancelled', async () => {
-			await merchant.openAllOrdersView();
-			await clickFilter('.' + orderStatus.cancelled.name);
-			await expect(page).toMatchElement(statusColumnTextSelector, orderStatus.cancelled.description);
-
-			// Verify other statuses don't show
-			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.pending.description);
-			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.processing.description);
-			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.completed.description);
-			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.refunded.description);
-			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.onHold.description);
-			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.failed.description);
-		});
-
-		it('should filter by Refunded', async () => {
-			await merchant.openAllOrdersView();
-			await clickFilter('.' + orderStatus.refunded.name);
-			await expect(page).toMatchElement(statusColumnTextSelector, orderStatus.refunded.description);
-
-			// Verify other statuses don't show
-			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.pending.description);
-			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.processing.description);
-			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.completed.description);
-			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.cancelled.description);
-			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.onHold.description);
-			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.failed.description);
-		});
-
-		it('should filter by Failed', async () => {
-			await merchant.openAllOrdersView();
-			await clickFilter('.' + orderStatus.failed.name);
-			await expect(page).toMatchElement(statusColumnTextSelector, orderStatus.failed.description);
-
-			// Verify other statuses don't show
-			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.pending.description);
-			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.processing.description);
-			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.completed.description);
-			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.cancelled.description);
-			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.refunded.description);
-			await expect(page).not.toMatchElement(statusColumnTextSelector, orderStatus.onHold.description);
+			for (const hiddenStatus of hiddenStatuses) {
+				await expect(page).not.toMatchElement(statusColumnTextSelector, hiddenStatus);
+			}
 		});
 
 		it('should filter by All', async () => {
-			await merchant.openAllOrdersView();
 			// Make sure all the order statuses that were created show in this list
 			await clickFilter('.all');
-			await expect(page).toMatchElement(statusColumnTextSelector, orderStatus.pending.description);
-			await expect(page).toMatchElement(statusColumnTextSelector, orderStatus.processing.description);
-			await expect(page).toMatchElement(statusColumnTextSelector, orderStatus.completed.description);
-			await expect(page).toMatchElement(statusColumnTextSelector, orderStatus.cancelled.description);
-			await expect(page).toMatchElement(statusColumnTextSelector, orderStatus.refunded.description);
-			await expect(page).toMatchElement(statusColumnTextSelector, orderStatus.onHold.description);
-			await expect(page).toMatchElement(statusColumnTextSelector, orderStatus.failed.description);
-		});
 
+			for (const [statusText] of orderStatus) {
+				await expect(page).toMatchElement(statusColumnTextSelector, { text: statusText });
+			}
+		});
 	});
 };
 

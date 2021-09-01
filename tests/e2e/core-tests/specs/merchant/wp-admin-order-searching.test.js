@@ -10,6 +10,8 @@ const {
 } = require( '@woocommerce/e2e-utils' );
 
 const searchString = 'John Doe';
+const itemName = 'Wanted Product';
+
 const customerBilling = {
 	first_name: 'John',
 	last_name: 'Doe',
@@ -63,6 +65,29 @@ const updateCustomerBilling = async () => {
 	return customerId;
 };
 
+/**
+ * Data table to be fed into `it.each()`.
+ */
+const queries = [
+	[customerBilling.first_name, 'billing first name'],
+	[customerBilling.last_name, 'billing last name'],
+	[customerBilling.company, 'billing company name'],
+	[customerBilling.address_1, 'billing first address'],
+	[customerBilling.address_2, 'billing second address'],
+	[customerBilling.city, 'billing city name'],
+	[customerBilling.postcode, 'billing post code'],
+	[customerBilling.email, 'billing email'],
+	[customerBilling.phone, 'billing phone'],
+	[customerBilling.state, 'billing state'],
+	[customerShipping.first_name, 'shipping first name'],
+	[customerShipping.last_name, 'shipping last name'],
+	[customerShipping.address_1, 'shipping first address'],
+	[customerShipping.address_2, 'shipping second address'],
+	[customerShipping.city, 'shipping city name'],
+	[customerShipping.postcode, 'shipping post code'],
+	[itemName, 'shipping item name']
+];
+
 const runOrderSearchingTest = () => {
 	describe('WooCommerce Orders > Search orders', () => {
 		let productId;
@@ -89,79 +114,18 @@ const runOrderSearchingTest = () => {
 			await searchForOrder(orderId.toString(), orderId, searchString);
 		});
 
-		it('can search for order by billing first name', async () => {
-			await searchForOrder(customerBilling.first_name, orderId, searchString);
-		})
-
-		it('can search for order by billing last name', async () => {
-			await searchForOrder(customerBilling.last_name, orderId, searchString);
-		})
-
-		it('can search for order by billing company name', async () => {
-			await searchForOrder(customerBilling.company, orderId, searchString);
-		})
-
-		it('can search for order by billing first address', async () => {
-			await searchForOrder(customerBilling.address_1, orderId, searchString);
-		})
-
-		it('can search for order by billing second address', async () => {
-			await searchForOrder(customerBilling.address_2, orderId, searchString);
-		})
-
-		it('can search for order by billing city name', async () => {
-			await searchForOrder(customerBilling.city, orderId, searchString);
-		})
-
-		it('can search for order by billing post code', async () => {
-			await searchForOrder(customerBilling.postcode, orderId, searchString);
-		})
-
-		it('can search for order by billing email', async () => {
-			await searchForOrder(customerBilling.email, orderId, searchString);
-		})
-
-		it('can search for order by billing phone', async () => {
-			await searchForOrder(customerBilling.phone, orderId, searchString);
-		})
-
-		it('can search for order by billing state', async () => {
-			await searchForOrder(customerBilling.state, orderId, searchString);
-		})
-
-		it('can search for order by shipping first name', async () => {
-			await searchForOrder(customerShipping.first_name, orderId, searchString);
-		})
-
-		it('can search for order by shipping last name', async () => {
-			await searchForOrder(customerShipping.last_name, orderId, searchString);
-		})
-
-		it('can search for order by shipping first address', async () => {
-			await searchForOrder(customerShipping.address_1, orderId, searchString);
-		})
-
-		it('can search for order by shipping second address', async () => {
-			await searchForOrder(customerShipping.address_2, orderId, searchString);
-		})
-
-		it('can search for order by shipping city name', async () => {
-			await searchForOrder(customerShipping.city, orderId, searchString);
-		})
-
-		it('can search for order by shipping postcode name', async () => {
-			await searchForOrder(customerShipping.postcode, orderId, searchString);
-		})
+		it.each(queries)(
+			'can search for order containing "%s" as the %s',
+			async (value) => {
+				await searchForOrder(value, orderId, searchString);
+			}
+		);
 
 		/**
 		 * shipping state is abbreviated. This test passes if billing and shipping state are the same
 		 */
 		it.skip('can search for order by shipping state name', async () => {
 			await searchForOrder('New York', orderId, searchString);
-		})
-
-		it('can search for order by item name', async () => {
-			await searchForOrder('Wanted Product', orderId, searchString);
 		})
 	});
 };
