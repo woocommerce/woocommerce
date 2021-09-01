@@ -6,6 +6,7 @@ import { Card, CardHeader, Spinner } from '@wordpress/components';
 import {
 	ONBOARDING_STORE_NAME,
 	PLUGINS_STORE_NAME,
+	OPTIONS_STORE_NAME,
 	WCDataSelector,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -95,11 +96,18 @@ export const getMarketingExtensionLists = (
 	return [ installed, lists ];
 };
 
-export const Marketing: React.FC = () => {
+export type MarketingProps = {
+	trackedCompletedActions: string[];
+};
+
+export const Marketing: React.FC< MarketingProps > = ( {
+	trackedCompletedActions,
+} ) => {
 	const [ currentPlugin, setCurrentPlugin ] = useState< string | null >(
 		null
 	);
 	const { installAndActivatePlugins } = useDispatch( PLUGINS_STORE_NAME );
+	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const {
 		activePlugins,
 		freeExtensions,
@@ -141,6 +149,16 @@ export const Marketing: React.FC = () => {
 						( extension ) => extension.slug
 					),
 				} );
+
+				if ( ! trackedCompletedActions.includes( 'marketing' ) ) {
+					updateOptions( {
+						woocommerce_task_list_tracked_completed_actions: [
+							...trackedCompletedActions,
+							'marketing',
+						],
+					} );
+				}
+
 				createNoticesFromResponse( response );
 				setCurrentPlugin( null );
 			} )
