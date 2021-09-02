@@ -35,41 +35,45 @@ window.onload = () => {
 		} );
 	}
 
+	const loadScripts = async () => {
+		for ( const dependencyHandle in dependencies ) {
+			const dependency = dependencies[ dependencyHandle ];
+			await lazyLoadScript( {
+				handle: dependencyHandle,
+				...dependency,
+			} );
+		}
+	};
+
 	miniCartBlocks.forEach( ( miniCartBlock ) => {
+		if ( ! ( miniCartBlock instanceof HTMLElement ) ) {
+			return;
+		}
+
 		const miniCartButton = miniCartBlock.querySelector(
 			'.wc-block-mini-cart__button'
 		);
-		const miniCartContents = miniCartBlock.querySelector(
-			'.wc-block-mini-cart__contents'
+		const miniCartDrawerPlaceholderOverlay = miniCartBlock.querySelector(
+			'.wc-block-components-drawer__screen-overlay'
 		);
 
-		if ( ! miniCartButton || ! miniCartContents ) {
+		if ( ! miniCartButton || ! miniCartDrawerPlaceholderOverlay ) {
 			// Markup is not correct, abort.
 			return;
 		}
 
-		const showContents = async () => {
-			miniCartContents.removeAttribute( 'hidden' );
-
-			// Load scripts
-			for ( const dependencyHandle in dependencies ) {
-				const dependency = dependencies[ dependencyHandle ];
-				await lazyLoadScript( {
-					handle: dependencyHandle,
-					...dependency,
-				} );
-			}
+		const showContents = () => {
+			miniCartBlock.dataset.isPlaceholderOpen = 'true';
+			miniCartDrawerPlaceholderOverlay.classList.add(
+				'wc-block-components-drawer__screen-overlay--with-slide-in'
+			);
+			miniCartDrawerPlaceholderOverlay.classList.remove(
+				'wc-block-components-drawer__screen-overlay--is-hidden'
+			);
 		};
-		const hideContents = () =>
-			miniCartContents.setAttribute( 'hidden', 'true' );
 
-		miniCartButton.addEventListener( 'mouseover', showContents );
-		miniCartButton.addEventListener( 'mouseleave', hideContents );
-
-		miniCartContents.addEventListener( 'mouseover', showContents );
-		miniCartContents.addEventListener( 'mouseleave', hideContents );
-
-		miniCartButton.addEventListener( 'focus', showContents );
-		miniCartButton.addEventListener( 'blur', hideContents );
+		miniCartButton.addEventListener( 'mouseover', loadScripts );
+		miniCartButton.addEventListener( 'focus', loadScripts );
+		miniCartButton.addEventListener( 'click', showContents );
 	} );
 };

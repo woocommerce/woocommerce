@@ -185,20 +185,41 @@ class MiniCart extends AbstractBlock {
 		$cart_contents_count = $cart->get_cart_contents_count();
 		$cart_contents       = $cart->get_cart();
 
-		// Force mobile styles.
-		return '<div class="wc-block-mini-cart is-mobile">
-			<button class="wc-block-mini-cart__button">' .
-				sprintf(
-					/* translators: %d is the number of products in the cart. */
-					_n(
-						'%d product',
-						'%d products',
-						$cart_contents_count,
-						'woo-gutenberg-products-block'
-					),
-					$cart_contents_count
-				) . '</button>
-			<div class="wc-block-mini-cart__contents" hidden>' . $this->get_cart_contents_markup( $cart_contents ) . '</div>
+		$button_text = sprintf(
+			/* translators: %d is the number of products in the cart. */
+			_n(
+				'%d item',
+				'%d items',
+				$cart_contents_count,
+				'woo-gutenberg-products-block'
+			),
+			$cart_contents_count
+		);
+		$title = sprintf(
+			/* translators: %d is the count of items in the cart. */
+			_n(
+				'Your cart (%d item)',
+				'Your cart (%d items)',
+				$cart_contents_count,
+				'woo-gutenberg-products-block'
+			),
+			$cart_contents_count
+		);
+
+		return '<div class="wc-block-mini-cart is-loading">
+			<button class="wc-block-mini-cart__button">' . $button_text . '</button>
+			<div class="wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--is-hidden" aria-hidden="true">
+				<div class="components-modal__frame wc-block-components-drawer">
+					<div class="components-modal__content">
+						<div class="components-modal__header">
+							<div class="components-modal__header-heading-container">
+								<h1 id="components-modal-header-1" class="components-modal__header-heading">' . $title . '</h1>
+							</div>
+						</div>
+						' . $this->get_cart_contents_markup( $cart_contents ) . '
+					</div>
+				</div>
+			</div>
 		</div>';
 	}
 
@@ -210,7 +231,8 @@ class MiniCart extends AbstractBlock {
 	 * @return string The HTML markup.
 	 */
 	protected function get_cart_contents_markup( $cart_contents ) {
-		return '<table class="wc-block-cart-items wc-block-mini-cart-items--is-loading" aria-hidden="true">
+		// Force mobile styles.
+		return '<div class="is-mobile"><table class="wc-block-cart-items">
 			<thead>
 				<tr class="wc-block-cart-items__header">
 					<th class="wc-block-cart-items__header-image"><span /></th>
@@ -219,7 +241,7 @@ class MiniCart extends AbstractBlock {
 				</tr>
 			</thead>
 			<tbody>' . implode( array_map( array( $this, 'get_cart_item_markup' ), $cart_contents ) ) . '</tbody>
-		</table>';
+		</table></div>';
 	}
 
 	/**
