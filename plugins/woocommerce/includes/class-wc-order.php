@@ -219,6 +219,22 @@ class WC_Order extends WC_Abstract_Order {
 		return apply_filters( 'woocommerce_get_formatted_order_total', $formatted_total, $this, $tax_display, $display_refunded );
 	}
 
+	public function apply_coupon( $raw_coupon )
+	{
+		if( !is_wp_error( parent::apply_coupon( $raw_coupon ) ) ) {
+			$this->add_order_note( __( 'Coupon applied:', 'woocommerce' ) . ' ' . $raw_coupon );
+			return true;
+		}
+	}
+
+	public function remove_coupon( $coupon )
+	{
+		if( wc_get_coupon_id_by_code( $coupon ) ) {
+			parent::remove_coupon( $coupon );
+			$this->add_order_note( __( 'Coupon removed:', 'woocommerce' ) . ' ' . $coupon );
+		}
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| CRUD methods
