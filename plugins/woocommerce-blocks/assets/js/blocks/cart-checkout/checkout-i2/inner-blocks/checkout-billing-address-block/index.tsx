@@ -15,7 +15,7 @@ registerFeaturePluginBlockType( 'woocommerce/checkout-billing-address-block', {
 	title: __( 'Billing Address', 'woo-gutenberg-products-block' ),
 	category: 'woocommerce',
 	description: __(
-		'Manage your address requirements.',
+		"Collect your customer's billing address.",
 		'woo-gutenberg-products-block'
 	),
 	icon: {

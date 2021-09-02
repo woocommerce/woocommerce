@@ -15,7 +15,7 @@ registerFeaturePluginBlockType( 'woocommerce/checkout-payment-block', {
 	title: __( 'Payment Options', 'woo-gutenberg-products-block' ),
 	category: 'woocommerce',
 	description: __(
-		'Manage your payment options.',
+		'Payment options for your store.',
 		'woo-gutenberg-products-block'
 	),
 	icon: {
