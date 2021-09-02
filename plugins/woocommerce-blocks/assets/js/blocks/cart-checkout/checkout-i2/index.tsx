@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Icon, card } from '@woocommerce/icons';
+import { Icon, fields } from '@woocommerce/icons';
 import { registerFeaturePluginBlockType } from '@woocommerce/block-settings';
 import { createBlock } from '@wordpress/blocks';
 
@@ -16,7 +16,7 @@ import './inner-blocks';
 const settings = {
 	title: __( 'Checkout i2', 'woo-gutenberg-products-block' ),
 	icon: {
-		src: <Icon srcElement={ card } />,
+		src: <Icon srcElement={ fields } />,
 		foreground: '#874FB9',
 	},
 	category: 'woocommerce',

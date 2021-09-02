@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { Icon, column } from '@wordpress/icons';
 import { registerFeaturePluginBlockType } from '@woocommerce/block-settings';
 
 /**
@@ -13,9 +14,13 @@ registerFeaturePluginBlockType( 'woocommerce/checkout-fields-block', {
 	title: __( 'Checkout Fields Block', 'woo-gutenberg-products-block' ),
 	category: 'woocommerce',
 	description: __(
-		'Wrapper block for checkout fields',
+		'Column containing checkout address fields.',
 		'woo-gutenberg-products-block'
 	),
+	icon: {
+		src: <Icon icon={ column } />,
+		foreground: '#874FB9',
+	},
 	supports: {
 		align: false,
 		html: false,

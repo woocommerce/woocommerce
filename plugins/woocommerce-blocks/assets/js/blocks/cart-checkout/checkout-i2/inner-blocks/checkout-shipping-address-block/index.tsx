@@ -15,7 +15,7 @@ registerFeaturePluginBlockType( 'woocommerce/checkout-shipping-address-block', {
 	title: __( 'Shipping Address', 'woo-gutenberg-products-block' ),
 	category: 'woocommerce',
 	description: __(
-		'Manage your address requirements.',
+		"Collect your customer's shipping address.",
 		'woo-gutenberg-products-block'
 	),
 	icon: {

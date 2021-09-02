@@ -17,7 +17,7 @@ registerFeaturePluginBlockType(
 		title: __( 'Contact Information', 'woo-gutenberg-products-block' ),
 		category: 'woocommerce',
 		description: __(
-			"Get your customer's contact email.",
+			"Collect your customer's contact information.",
 			'woo-gutenberg-products-block'
 		),
 		icon: {
