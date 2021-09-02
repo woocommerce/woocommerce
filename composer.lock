@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "70d641b3be6d3d2c180fba83d6dac7d3",
+    "content-hash": "564854f0d3f2451ece6a90204c134cd0",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -51,9 +51,6 @@
                 "GPL-2.0-or-later"
             ],
             "description": "Creates a custom autoloader for a plugin or theme.",
-            "support": {
-                "source": "https://github.com/Automattic/jetpack-autoloader/tree/2.10.1"
-            },
             "time": "2021-03-30T15:15:59+00:00"
         },
         {
@@ -85,9 +82,6 @@
                 "GPL-2.0-or-later"
             ],
             "description": "A wrapper for defining constants in a more testable way.",
-            "support": {
-                "source": "https://github.com/Automattic/jetpack-constants/tree/v1.5.1"
-            },
             "time": "2020-10-28T19:00:31+00:00"
         },
         {
@@ -220,10 +214,6 @@
                 "zend",
                 "zikula"
             ],
-            "support": {
-                "issues": "https://github.com/composer/installers/issues",
-                "source": "https://github.com/composer/installers/tree/v1.11.0"
-            },
             "funding": [
                 {
                     "url": "https://packagist.com",
@@ -298,10 +288,6 @@
                 "geolocation",
                 "maxmind"
             ],
-            "support": {
-                "issues": "https://github.com/maxmind/MaxMind-DB-Reader-php/issues",
-                "source": "https://github.com/maxmind/MaxMind-DB-Reader-php/tree/v1.6.0"
-            },
             "time": "2019-12-19T22:59:03+00:00"
         },
         {
@@ -376,10 +362,6 @@
                 "email",
                 "pre-processing"
             ],
-            "support": {
-                "issues": "https://github.com/MyIntervals/emogrifier/issues",
-                "source": "https://github.com/MyIntervals/emogrifier"
-            },
             "time": "2019-12-26T19:37:31+00:00"
         },
         {
@@ -429,10 +411,6 @@
                 "container-interop",
                 "psr"
             ],
-            "support": {
-                "issues": "https://github.com/php-fig/container/issues",
-                "source": "https://github.com/php-fig/container/tree/master"
-            },
             "time": "2017-02-14T16:28:37+00:00"
         },
         {
@@ -486,9 +464,6 @@
             ],
             "description": "Symfony CssSelector Component",
             "homepage": "https://symfony.com",
-            "support": {
-                "source": "https://github.com/symfony/css-selector/tree/master"
-            },
             "time": "2017-05-01T15:01:29+00:00"
         },
         {
@@ -524,24 +499,20 @@
             ],
             "description": "Action Scheduler for WordPress and WooCommerce",
             "homepage": "https://actionscheduler.org/",
-            "support": {
-                "issues": "https://github.com/woocommerce/action-scheduler/issues",
-                "source": "https://github.com/woocommerce/action-scheduler/tree/3.2.1"
-            },
             "time": "2021-06-21T20:21:35+00:00"
         },
         {
             "name": "woocommerce/woocommerce-admin",
-            "version": "2.6.0",
+            "version": "2.6.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-admin.git",
-                "reference": "75cf5292f66bf69202f67356d143743a8796a7f6"
+                "reference": "d4cf43f89e6eee136e06ab598b815571f1de59d6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/75cf5292f66bf69202f67356d143743a8796a7f6",
-                "reference": "75cf5292f66bf69202f67356d143743a8796a7f6",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/d4cf43f89e6eee136e06ab598b815571f1de59d6",
+                "reference": "d4cf43f89e6eee136e06ab598b815571f1de59d6",
                 "shasum": ""
             },
             "require": {
@@ -594,7 +565,7 @@
             ],
             "description": "A modern, javascript-driven WooCommerce Admin experience.",
             "homepage": "https://github.com/woocommerce/woocommerce-admin",
-            "time": "2021-08-31T17:01:01+00:00"
+            "time": "2021-09-02T00:33:46+00:00"
         },
         {
             "name": "woocommerce/woocommerce-blocks",
@@ -689,10 +660,6 @@
                 "isolation",
                 "tool"
             ],
-            "support": {
-                "issues": "https://github.com/bamarni/composer-bin-plugin/issues",
-                "source": "https://github.com/bamarni/composer-bin-plugin/tree/master"
-            },
             "time": "2020-05-03T08:27:20+00:00"
         },
         {
