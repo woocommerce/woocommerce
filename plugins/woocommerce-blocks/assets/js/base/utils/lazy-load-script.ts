@@ -1,3 +1,8 @@
+/**
+ * External dependencies
+ */
+import { isString } from '@woocommerce/types';
+
 interface lazyLoadScriptParams {
 	handle: string;
 	src: string;
@@ -5,6 +10,14 @@ interface lazyLoadScriptParams {
 	after?: string;
 	before?: string;
 	translations?: string;
+}
+
+interface appendScriptAttributesParam {
+	id: string;
+	innerHTML?: string;
+	onerror?: OnErrorEventHandlerNonNull;
+	onload?: () => void;
+	src?: string;
 }
 
 /**
@@ -16,6 +29,49 @@ interface lazyLoadScriptParams {
 const isScriptTagInDOM = ( scriptId: string ): boolean => {
 	const scriptElements = document.querySelectorAll( `script#${ scriptId }` );
 	return scriptElements.length > 0;
+};
+
+/**
+ * Appends a script element to the document body if a script with the same id
+ * doesn't exist.
+ */
+const appendScript = ( attributes: appendScriptAttributesParam ): void => {
+	// Abort if id is not valid or a script with the same id exists.
+	if ( ! isString( attributes.id ) || isScriptTagInDOM( attributes.id ) ) {
+		return;
+	}
+	const scriptElement = document.createElement( 'script' );
+	for ( const attr in attributes ) {
+		// We could technically be iterating over inherited members here, so
+		// if this is the case we should skip it.
+		if ( ! attributes.hasOwnProperty( attr ) ) {
+			continue;
+		}
+		const key = attr as keyof appendScriptAttributesParam;
+
+		// Skip the keys that aren't strings, because TS can't be sure which
+		// key in the scriptElement object we're assigning to.
+		if ( key === 'onload' || key === 'onerror' ) {
+			continue;
+		}
+
+		// This assignment stops TS complaining about the value maybe being
+		// undefined following the isString check below.
+		const value = attributes[ key ];
+		if ( isString( value ) ) {
+			scriptElement[ key ] = value;
+		}
+	}
+
+	// Now that we've assigned all the strings, we can explicitly assign to the
+	// function keys.
+	if ( typeof attributes.onload === 'function' ) {
+		scriptElement.onload = attributes.onload;
+	}
+	if ( typeof attributes.onerror === 'function' ) {
+		scriptElement.onerror = attributes.onerror;
+	}
+	document.body.appendChild( scriptElement );
 };
 
 /**
@@ -36,46 +92,39 @@ const lazyLoadScript = ( {
 	translations,
 }: lazyLoadScriptParams ): Promise< void > => {
 	return new Promise( ( resolve, reject ) => {
-		// Append script translations if they doesn't exist yet in the page.
-		if (
-			translations &&
-			! isScriptTagInDOM( `${ handle }-js-translations` )
-		) {
-			const handleTranslations = document.createElement( 'script' );
-			handleTranslations.innerHTML = translations;
-			handleTranslations.id = `${ handle }-js-translations`;
-			document.body.appendChild( handleTranslations );
-		}
-		// Append before inline script if it doesn't exist yet in the page.
-		if ( before && ! isScriptTagInDOM( `${ handle }-js-before` ) ) {
-			const handleBeforeScript = document.createElement( 'script' );
-			handleBeforeScript.innerHTML = before;
-			handleBeforeScript.id = `${ handle }-js-before`;
-			document.body.appendChild( handleBeforeScript );
-		}
-
 		if ( isScriptTagInDOM( `${ handle }-js` ) ) {
 			resolve();
-		} else {
-			// Append script.
-			const handleScript = document.createElement( 'script' );
-			handleScript.src = version ? `${ src }?${ version }` : src;
-			handleScript.id = `${ handle }-js`;
-			handleScript.onerror = reject;
-			handleScript.onload = () => {
-				// Append after inline script if it doesn't exist yet in the page.
-				if ( after && ! isScriptTagInDOM( `${ handle }-js-after` ) ) {
-					const handleAfterScript = document.createElement(
-						'script'
-					);
-					handleAfterScript.innerHTML = after;
-					handleAfterScript.id = `${ handle }-js-after`;
-					document.body.appendChild( handleAfterScript );
-				}
-				resolve();
-			};
-			document.body.appendChild( handleScript );
 		}
+
+		if ( translations ) {
+			appendScript( {
+				id: `${ handle }-js-translations`,
+				innerHTML: translations,
+			} );
+		}
+		if ( before ) {
+			appendScript( {
+				id: `${ handle }-js-before`,
+				innerHTML: before,
+			} );
+		}
+
+		const onload = () => {
+			if ( after ) {
+				appendScript( {
+					id: `${ handle }-js-after`,
+					innerHTML: after,
+				} );
+			}
+			resolve();
+		};
+
+		appendScript( {
+			id: `${ handle }-js`,
+			onerror: reject,
+			onload,
+			src: version ? `${ src }?${ version }` : src,
+		} );
 	} );
 };
 
