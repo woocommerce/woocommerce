@@ -9,6 +9,8 @@ namespace Automattic\WooCommerce\Admin\Features;
 use \Automattic\WooCommerce\Admin\Loader;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Admin\WCAdminHelper;
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Init as OnboardingTasks;
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
 use Automattic\WooCommerce\Admin\Schedulers\MailchimpScheduler;
 
 /**
@@ -57,10 +59,7 @@ class Onboarding {
 	public function __construct() {
 		$this->add_toggle_actions();
 
-		// Include WC Admin Onboarding classes.
-		if ( self::should_show_tasks() ) {
-			OnboardingTasks::get_instance();
-		}
+		OnboardingTasks::get_instance();
 
 		// Add actions and filters.
 		$this->add_actions();
@@ -362,10 +361,16 @@ class Onboarding {
 	/**
 	 * Returns true if the task list should be displayed (not completed or hidden off the dashboard).
 	 *
+	 * @deprecated 2.7.0
 	 * @return bool
 	 */
 	public static function should_show_tasks() {
-		return 'no' === get_option( 'woocommerce_task_list_hidden', 'no' ) || 'no' === get_option( 'woocommerce_extended_task_list_hidden', 'no' );
+		wc_deprecated_function( 'should_show_tasks', '4.4', '\Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists::get_list( $list_id )->is_hidden()' );
+
+		$setup_list    = TaskLists::get_list( 'setup' );
+		$extended_list = TaskLists::get_list( 'extended' );
+
+		return ( $setup_list && ! $setup_list->is_hidden() ) || ( $extended_list && ! $extended_list->is_hidden() );
 	}
 
 	/**
@@ -667,7 +672,7 @@ class Onboarding {
 		// Only fetch if the onboarding wizard OR the task list is incomplete or currently shown
 		// or the current page is one of the WooCommerce Admin pages.
 		if (
-			( ! self::should_show_profiler() && ! self::should_show_tasks()
+			( ! self::should_show_profiler() && ! count( TaskLists::get_visible() )
 			||
 			! $this->is_wc_pages()
 		)
@@ -789,29 +794,32 @@ class Onboarding {
 			'id'    => 'woocommerce_onboard_tab',
 		);
 
-		$task_list_hidden = ( 'yes' === get_option( 'woocommerce_task_list_hidden', 'no' ) );
+		$setup_list    = TaskLists::get_list( 'setup' );
+		$extended_list = TaskLists::get_list( 'extended' );
 
-		$extended_task_list_hidden = ( 'yes' === get_option( 'woocommerce_extended_task_list_hidden', 'no' ) );
+		if ( $setup_list ) {
+			$help_tab['content'] = '<h2>' . __( 'WooCommerce Onboarding', 'woocommerce-admin' ) . '</h2>';
 
-		$help_tab['content'] = '<h2>' . __( 'WooCommerce Onboarding', 'woocommerce-admin' ) . '</h2>';
+			$help_tab['content'] .= '<h3>' . __( 'Profile Setup Wizard', 'woocommerce-admin' ) . '</h3>';
+			$help_tab['content'] .= '<p>' . __( 'If you need to access the setup wizard again, please click on the button below.', 'woocommerce-admin' ) . '</p>' .
+				'<p><a href="' . wc_admin_url( '&path=/setup-wizard' ) . '" class="button button-primary">' . __( 'Setup wizard', 'woocommerce-admin' ) . '</a></p>';
 
-		$help_tab['content'] .= '<h3>' . __( 'Profile Setup Wizard', 'woocommerce-admin' ) . '</h3>';
-		$help_tab['content'] .= '<p>' . __( 'If you need to access the setup wizard again, please click on the button below.', 'woocommerce-admin' ) . '</p>' .
-			'<p><a href="' . wc_admin_url( '&path=/setup-wizard' ) . '" class="button button-primary">' . __( 'Setup wizard', 'woocommerce-admin' ) . '</a></p>';
+			$help_tab['content'] .= '<h3>' . __( 'Task List', 'woocommerce-admin' ) . '</h3>';
+			$help_tab['content'] .= '<p>' . __( 'If you need to enable or disable the task lists, please click on the button below.', 'woocommerce-admin' ) . '</p>' .
+			( $setup_list->is_hidden()
+				? '<p><a href="' . wc_admin_url( '&reset_task_list=1' ) . '" class="button button-primary">' . __( 'Enable', 'woocommerce-admin' ) . '</a></p>'
+				: '<p><a href="' . wc_admin_url( '&reset_task_list=0' ) . '" class="button button-primary">' . __( 'Disable', 'woocommerce-admin' ) . '</a></p>'
+			);
+		}
 
-		$help_tab['content'] .= '<h3>' . __( 'Task List', 'woocommerce-admin' ) . '</h3>';
-		$help_tab['content'] .= '<p>' . __( 'If you need to enable or disable the task lists, please click on the button below.', 'woocommerce-admin' ) . '</p>' .
-		( $task_list_hidden
-			? '<p><a href="' . wc_admin_url( '&reset_task_list=1' ) . '" class="button button-primary">' . __( 'Enable', 'woocommerce-admin' ) . '</a></p>'
-			: '<p><a href="' . wc_admin_url( '&reset_task_list=0' ) . '" class="button button-primary">' . __( 'Disable', 'woocommerce-admin' ) . '</a></p>'
-		);
-
-		$help_tab['content'] .= '<h3>' . __( 'Extended task List', 'woocommerce-admin' ) . '</h3>';
-		$help_tab['content'] .= '<p>' . __( 'If you need to enable or disable the extended task lists, please click on the button below.', 'woocommerce-admin' ) . '</p>' .
-		( $extended_task_list_hidden
-			? '<p><a href="' . wc_admin_url( '&reset_extended_task_list=1' ) . '" class="button button-primary">' . __( 'Enable', 'woocommerce-admin' ) . '</a></p>'
-			: '<p><a href="' . wc_admin_url( '&reset_extended_task_list=0' ) . '" class="button button-primary">' . __( 'Disable', 'woocommerce-admin' ) . '</a></p>'
-		);
+		if ( $extended_list ) {
+			$help_tab['content'] .= '<h3>' . __( 'Extended task List', 'woocommerce-admin' ) . '</h3>';
+			$help_tab['content'] .= '<p>' . __( 'If you need to enable or disable the extended task lists, please click on the button below.', 'woocommerce-admin' ) . '</p>' .
+			( $extended_task->is_hidden()
+				? '<p><a href="' . wc_admin_url( '&reset_extended_task_list=1' ) . '" class="button button-primary">' . __( 'Enable', 'woocommerce-admin' ) . '</a></p>'
+				: '<p><a href="' . wc_admin_url( '&reset_extended_task_list=0' ) . '" class="button button-primary">' . __( 'Disable', 'woocommerce-admin' ) . '</a></p>'
+			);
+		}
 
 		$screen->add_help_tab( $help_tab );
 	}
@@ -864,15 +872,23 @@ class Onboarding {
 			return;
 		}
 
-		$task_list_hidden = 1 === absint( $_GET['reset_task_list'] ) ? 'no' : 'yes'; // phpcs:ignore CSRF ok.
-		update_option( 'woocommerce_task_list_hidden', $task_list_hidden );
+		$task_list = TaskLists::get_list( 'setup' );
 
-		wc_admin_record_tracks_event(
-			'tasklist_toggled',
-			array(
-				'status' => 'yes' === $task_list_hidden ? 'disabled' : 'enabled',
-			)
-		);
+		if ( ! $task_list ) {
+			return;
+		}
+		$show   = 1 === absint( $_GET['reset_task_list'] );
+		$update = $show ? $task_list->show() : $task_list->hide(); // phpcs:ignore CSRF ok.
+
+		if ( $update ) {
+			wc_admin_record_tracks_event(
+				'tasklist_toggled',
+				array(
+					'status' => $show ? 'disabled' : 'enabled',
+				)
+			);
+		}
+
 		wp_safe_redirect( wc_admin_url() );
 		exit;
 	}
@@ -888,15 +904,23 @@ class Onboarding {
 			return;
 		}
 
-		$extended_task_list_hidden = 1 === absint( $_GET['reset_extended_task_list'] ) ? 'no' : 'yes'; // phpcs:ignore CSRF ok.
-		update_option( 'woocommerce_extended_task_list_hidden', $extended_task_list_hidden );
+		$task_list = TaskLists::get_list( 'extended' );
 
-		wc_admin_record_tracks_event(
-			'extended_tasklist_toggled',
-			array(
-				'status' => 'yes' === $extended_task_list_hidden ? 'disabled' : 'enabled',
-			)
-		);
+		if ( ! $task_list ) {
+			return;
+		}
+		$show   = 1 === absint( $_GET['reset_extended_task_list'] );
+		$update = $show ? $task_list->show() : $task_list->hide(); // phpcs:ignore CSRF ok.
+
+		if ( $update ) {
+			wc_admin_record_tracks_event(
+				'extended_tasklist_toggled',
+				array(
+					'status' => $show ? 'disabled' : 'enabled',
+				)
+			);
+		}
+
 		wp_safe_redirect( wc_admin_url() );
 		exit;
 	}
@@ -922,8 +946,11 @@ class Onboarding {
 	 * @todo Once URL params are added to the redirect, we can check those instead of the referer.
 	 */
 	public static function redirect_wccom_install() {
+		$task_list = TaskLists::get_list( 'setup' );
+
 		if (
-			! self::should_show_tasks() ||
+			! $task_list ||
+			$task_list->is_hidden() ||
 			! isset( $_SERVER['HTTP_REFERER'] ) ||
 			0 !== strpos( $_SERVER['HTTP_REFERER'], 'https://woocommerce.com/checkout?utm_medium=product' ) // phpcs:ignore sanitization ok.
 		) {
@@ -958,7 +985,11 @@ class Onboarding {
 		update_option( self::PROFILE_DATA_OPTION, $onboarding_data );
 
 		if ( ! WCAdminHelper::is_wc_admin_active_for( DAY_IN_SECONDS ) ) {
-			update_option( 'woocommerce_task_list_hidden', 'yes' );
+			$task_list = TaskLists::get_list( 'setup' );
+			if ( ! $task_list ) {
+				return;
+			}
+			$task_list->hide();
 		}
 	}
 

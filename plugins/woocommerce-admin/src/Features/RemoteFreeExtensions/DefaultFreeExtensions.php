@@ -7,7 +7,7 @@ namespace Automattic\WooCommerce\Admin\Features\RemoteFreeExtensions;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\Features\OnboardingTasks;
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Init as OnboardingTasks;
 
 /**
  * Default Free Extensions

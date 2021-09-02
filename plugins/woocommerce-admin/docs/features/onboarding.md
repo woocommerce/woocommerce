@@ -45,7 +45,7 @@ To power the new onboarding flow client side, new REST API endpoints have been i
 A few new WordPress options have been introduced to store information and settings during setup. It may be necessary to manual delete these options from your `wp_options` database to test a certain task or feature.
 
 
-* `woocommerce_task_list_hidden`. This option is used to conditionally show the entire task list. The task list can be hidden by the user after they have completed all tasks. Hiding the wizard stops it from showing in both full screen mode, and the collapsed inline version that shows above the dashboard analytics cards.
+* `woocommerce_task_list_hidden_lists`. This option houses the task lists that have been hidden from view by the user.
 * `woocommerce_task_list_welcome_modal_dismissed`. This option is used to show a congratulations modal during the transition between the profile wizard and task list.
 
 We also use existing options from WooCommerce Core or extensions like WooCommerce Shipping & Tax or Stripe. The list below may not be complete, as new tasks are introduced, but you can generally find usage of these by searching for the [getOptions selector](https://github.com/woocommerce/woocommerce-admin/search?q=getOptions&unscoped_q=getOptions).

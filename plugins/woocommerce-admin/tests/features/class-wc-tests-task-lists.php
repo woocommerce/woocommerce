@@ -5,7 +5,8 @@
  * @package Automattic\WooCommerce\Admin\Features
  */
 
-use \Automattic\WooCommerce\Admin\Features\OnboardingTasks;
+use \Automattic\WooCommerce\Admin\Features\OnboardingTasks\Init as OnboardingTasks;
+use \Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
 use \Automattic\WooCommerce\Admin\PageController;
 
 /**
@@ -46,9 +47,17 @@ class WC_Tests_Extended_Task_List extends WC_Unit_Test_Case {
 	 * Verify that the extended task list items are added correctly.
 	 */
 	public function test_add_extended_task_list_item() {
+		$setup_list    = TaskLists::get_list( 'setup' );
+		$extended_list = TaskLists::get_list( 'extended' );
+
 		// At least one task list should be visible to add a task.
-		update_option( 'woocommerce_task_list_hidden', 'yes' );
-		update_option( 'woocommerce_extended_task_list_hidden', 'yes' );
+		if ( $setup_list ) {
+			$setup_list->hide();
+		}
+		if ( $extended_list ) {
+			$extended_list->hide();
+		}
+
 		add_filter( 'woocommerce_get_registered_extended_tasks', array( $this, 'add_tasks' ), 10, 1 );
 
 		OnboardingTasks::update_option_extended_task_list();
@@ -59,7 +68,9 @@ class WC_Tests_Extended_Task_List extends WC_Unit_Test_Case {
 		$this->assertEmpty( $task_list );
 		$this->assertFalse( $task_list_contains_expected_task );
 
-		update_option( 'woocommerce_task_list_hidden', 'no' );
+		if ( $setup_list ) {
+			$setup_list->show();
+		}
 
 		OnboardingTasks::update_option_extended_task_list();
 

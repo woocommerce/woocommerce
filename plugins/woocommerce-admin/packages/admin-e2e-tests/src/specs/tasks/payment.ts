@@ -61,6 +61,7 @@ const testAdminPaymentSetupTask = () => {
 			} );
 
 			await homeScreen.isDisplayed();
+			await page.waitFor( 1000 );
 			await homeScreen.clickOnTaskList( 'Set up payments' );
 			await paymentsSetup.isDisplayed();
 			await paymentsSetup.methodHasBeenSetup( 'bacs' );
@@ -69,6 +70,7 @@ const testAdminPaymentSetupTask = () => {
 		it( 'Enabling cash on delivery enables the payment method', async () => {
 			await paymentsSetup.enableCashOnDelivery();
 			await homeScreen.isDisplayed();
+			await page.waitFor( 1000 );
 			await homeScreen.clickOnTaskList( 'Set up payments' );
 			await paymentsSetup.isDisplayed();
 			await paymentsSetup.methodHasBeenSetup( 'cod' );
