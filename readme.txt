@@ -195,7 +195,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Tweak - Update the Marketplace/Addons header to match new designs. #30389
 * Tweak - Renamed "ZIP" to "ZIP Code" and "Pin code" to "PIN" for US & India, respectively. #30204
 
-**WooCommerce Admin - 2.6.0**
+**WooCommerce Admin - 2.6.0 & 2.6.1**
 
 - Fix: Fixes action button mis-alignment within card footer. #7412
 - Fix: Fixing issues with ReportTable component data not populating correctly #7355
@@ -226,6 +226,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 - Update: Delete free extensions transient on WCA update #7454
 - Update: Update business details to use extensions data store #7452
 - Update: Split Extensions page into Marketplace and My Subscriptions. #7471
+- Update: Update marketing task completion logic. #7586
 - Dev: Added utm_medium=product to woocommerce.com links. #7408
 - Dev: Update Jest to version 27. #7430
 - Tweak: Refactor on payment settings recommendations eligibility component for reuse. #7447
