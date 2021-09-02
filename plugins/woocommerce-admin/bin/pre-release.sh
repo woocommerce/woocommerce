@@ -80,10 +80,6 @@ status "Run scripts to propagate version numbers and update dependencies."
 
 npm run bump-version
 
-status "Run docs script to make sure docs are updated."
-
-npm run docs
-
 status "Here are the changes so far. Make sure the following changes are reflected."
 
 echo "- docs/: folder will have changes to documentation, if any."
