@@ -87,7 +87,7 @@ table.wc-block-cart-items {
 
 // Loading placeholder state.
 .wc-block-cart--is-loading,
-.wc-block-mini-cart-items--is-loading {
+.wc-block-mini-cart.is-loading {
 	th span,
 	h2 span {
 		@include placeholder();
