@@ -3,7 +3,7 @@ PHP_FILES_CHANGED=""
 
 for FILE in $(echo $CHANGED_FILES | tr ',' '\n')
 do
-	if [[ $FILE =~ ".php" ]]; then
+	if [[ $FILE =~ ".php" && -e $FILE ]]; then
 		PHP_FILES_CHANGED+="$FILE "
 	fi	
 done
@@ -15,4 +15,3 @@ if [ "$PHP_FILES_CHANGED" != "" ]; then
 else
 	echo "No changed files detected, sniffer not run."
 fi
-
