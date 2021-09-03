@@ -91,6 +91,7 @@
 	"dependencies": {
 		"@automattic/explat-client": "0.0.2",
 		"@automattic/explat-client-react-helpers": "0.0.2",
+		"@woocommerce/api": "0.2.0",
 		"@woocommerce/e2e-environment": "0.2.2",
 		"@woocommerce/e2e-utils": "0.1.5",
 		"@woocommerce/settings": "^1.0.0",
@@ -167,7 +168,6 @@
 		"@types/wordpress__data-controls": "1.0.4",
 		"@typescript-eslint/eslint-plugin": "4.22.1",
 		"@woocommerce/admin-e2e-tests": "file:packages/admin-e2e-tests",
-		"@woocommerce/api": "0.2.0",
 		"@woocommerce/components": "file:packages/components",
 		"@woocommerce/csv-export": "file:packages/csv-export",
 		"@woocommerce/currency": "file:packages/currency",

@@ -109,6 +109,22 @@ const getElementByText = async (
 	return els[ 0 ];
 };
 
+const getElementByAttributeAndValue = async (
+	element: string,
+	attribute: string,
+	value: string,
+	parentSelector?: string
+): Promise< ElementHandle | null > => {
+	let parent: ElementHandle | null = null;
+	if ( parentSelector ) {
+		parent = await page.$( parentSelector );
+	}
+	const els = await ( parent || page ).$x(
+		`//${ element }[@${ attribute }="${ value }"]`
+	);
+	return els[ 0 ];
+};
+
 const waitForElementByText = async (
 	element: string,
 	text: string,
@@ -143,6 +159,7 @@ export {
 	getInputValue,
 	getAttribute,
 	getElementByText,
+	getElementByAttributeAndValue,
 	waitForElementByText,
 	hasClass,
 };

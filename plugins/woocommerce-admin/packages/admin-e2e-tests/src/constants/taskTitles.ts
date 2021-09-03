@@ -3,8 +3,8 @@ export const TaskTitles = {
 	addPayments: 'Set up payments',
 	wooPayments:
 		'Set up WooCommerce PaymentsBy setting up, you are agreeing to the Terms of Service2 minutes',
-	addProducts: 'Add products',
-	addTaxRates: 'Add tax rates',
-	setUpShippingCosts: 'Set up shipping costs',
-	personalizeStore: 'Personalize your store',
+	addProducts: 'Add my products',
+	taxSetup: 'Set up tax',
+	setUpShippingCosts: 'Set up shipping',
+	personalizeStore: 'Personalize my store',
 };

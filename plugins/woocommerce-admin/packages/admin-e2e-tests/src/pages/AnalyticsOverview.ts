@@ -86,8 +86,12 @@ export class AnalyticsOverview extends Analytics {
 	async addSection( sectionTitle: string ) {
 		await this.page.waitForSelector( "button[title='Add more sections']" );
 		await this.page.click( "button[title='Add more sections']" );
-		const item = await waitForElementByText( 'span', sectionTitle );
-		await item?.click();
+		await this.page.waitForSelector(
+			`button[title='Add ${ sectionTitle } section']`
+		);
+		await this.page.click(
+			`button[title='Add ${ sectionTitle } section']`
+		);
 	}
 
 	async moveSectionDown( sectionTitle: string ) {
