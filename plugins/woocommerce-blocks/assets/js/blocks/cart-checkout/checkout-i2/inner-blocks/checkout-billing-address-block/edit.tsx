@@ -3,6 +3,7 @@
  */
 import { useBlockProps } from '@wordpress/block-editor';
 import { useCheckoutAddress } from '@woocommerce/base-context/hooks';
+import { innerBlockAreas } from '@woocommerce/blocks-checkout';
 
 /**
  * Internal dependencies
@@ -59,7 +60,7 @@ export const Edit = ( {
 				showPhoneField={ showPhoneField }
 				requirePhoneField={ requirePhoneField }
 			/>
-			<AdditionalFields area="billingAddress" />
+			<AdditionalFields area={ innerBlockAreas.BILLING_ADDRESS } />
 		</FormStepBlock>
 	);
 };

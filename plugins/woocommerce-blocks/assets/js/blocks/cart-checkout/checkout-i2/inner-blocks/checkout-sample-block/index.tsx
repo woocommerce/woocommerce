@@ -3,7 +3,10 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Icon, asterisk } from '@woocommerce/icons';
-import { registerCheckoutBlock } from '@woocommerce/blocks-checkout';
+import {
+	registerCheckoutBlock,
+	innerBlockAreas,
+} from '@woocommerce/blocks-checkout';
 import { lazy } from '@wordpress/element';
 import { WC_BLOCKS_BUILD_URL } from '@woocommerce/block-settings';
 
@@ -21,11 +24,13 @@ registerCheckoutBlock( 'woocommerce/checkout-sample-block', {
 		import( /* webpackChunkName: "checkout-blocks/sample" */ './frontend' )
 	),
 	areas: [
-		'shippingAddress',
-		'billingAddress',
-		'contactInformation',
-		'fields',
+		innerBlockAreas.SHIPPING_ADDRESS,
+		innerBlockAreas.BILLING_ADDRESS,
+		innerBlockAreas.CONTACT_INFORMATION,
+		innerBlockAreas.CHECKOUT_FIELDS,
+		innerBlockAreas.CHECKOUT_TOTALS,
 	],
+	force: true,
 	configuration: {
 		title: __( 'Sample Block', 'woo-gutenberg-products-block' ),
 		category: 'woocommerce',
@@ -43,14 +48,7 @@ registerCheckoutBlock( 'woocommerce/checkout-sample-block', {
 			multiple: true,
 			reusable: false,
 		},
-		attributes: {
-			lock: {
-				type: 'object',
-				default: {
-					remove: true,
-				},
-			},
-		},
+		attributes: {},
 		edit: Edit,
 		save: Save,
 	},

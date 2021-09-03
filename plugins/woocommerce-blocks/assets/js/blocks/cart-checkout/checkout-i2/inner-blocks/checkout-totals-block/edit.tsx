@@ -3,7 +3,10 @@
  */
 import { useBlockProps, InnerBlocks } from '@wordpress/block-editor';
 import { Sidebar } from '@woocommerce/base-components/sidebar-layout';
-import { getRegisteredBlocks } from '@woocommerce/blocks-checkout';
+import {
+	getRegisteredBlockTemplate,
+	innerBlockAreas,
+} from '@woocommerce/blocks-checkout';
 /**
  * Internal dependencies
  */
@@ -17,7 +20,9 @@ const TEMPLATE: InnerBlockTemplate[] = [
 
 export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 	const blockProps = useBlockProps();
-	const registeredBlocks = getRegisteredBlocks( 'totals' );
+	const registeredBlocks = getRegisteredBlockTemplate(
+		innerBlockAreas.CHECKOUT_TOTALS
+	);
 	const template = useForcedLayout( {
 		clientId,
 		template: [ ...ALLOWED_BLOCKS, ...registeredBlocks ],

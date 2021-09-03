@@ -6,6 +6,7 @@ import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import { PanelBody, Disabled, ExternalLink } from '@wordpress/components';
 import { ADMIN_URL, getSetting } from '@woocommerce/settings';
 import ExternalLinkCard from '@woocommerce/editor-components/external-link-card';
+import { innerBlockAreas } from '@woocommerce/blocks-checkout';
 
 /**
  * Internal dependencies
@@ -115,7 +116,7 @@ export const Edit = ( {
 			<Disabled>
 				<Block />
 			</Disabled>
-			<AdditionalFields area="shippingMethods" />
+			<AdditionalFields area={ innerBlockAreas.SHIPPING_METHODS } />
 		</FormStepBlock>
 	);
 };
