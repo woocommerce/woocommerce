@@ -227,13 +227,14 @@ class WC_Order extends WC_Abstract_Order {
 	 * @param string|WC_Coupon $raw_coupon Coupon code or object.
 	 * @return true|WP_Error True if applied, error if not.
 	 */
-	public function apply_coupon( $raw_coupon )
-	{
-		if( !is_wp_error( $result = parent::apply_coupon( $raw_coupon ) ) ) {
+	public function apply_coupon( $raw_coupon ) {
+		$couponResult = parent::apply_coupon( $raw_coupon );
+
+		if ( !is_wp_error( $couponResult ) ) {
 			$this->add_order_note( __( 'Coupon applied:', 'woocommerce' ) . ' ' . $raw_coupon );
 		}
 
-		return $result;
+		return $couponResult;
 	}
 
 	/**
@@ -244,9 +245,8 @@ class WC_Order extends WC_Abstract_Order {
 	 * @param string $code Coupon code.
 	 * @return void
 	 */
-	public function remove_coupon( $coupon )
-	{
-		if( wc_get_coupon_id_by_code( $coupon ) ) {
+	public function remove_coupon( $coupon ) {
+		if ( wc_get_coupon_id_by_code( $coupon ) ) {
 			parent::remove_coupon( $coupon );
 			$this->add_order_note( __( 'Coupon removed:', 'woocommerce' ) . ' ' . $coupon );
 		}
