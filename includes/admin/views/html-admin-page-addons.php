@@ -62,6 +62,12 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 
 	<div class="wrap">
 		<div class="marketplace-content-wrapper">
+			<?php if ( empty( $search ) ) : ?>
+				<h1 class="search-form-title">
+					<?php // translators: search keyword. ?>
+					<?php esc_html_e( 'Sorry, could not find anything. Try searching again using a different term.', 'woocommerce' ); ?></p>
+				</h1>
+			<?php endif; ?>
 			<?php if ( ! empty( $search ) ) : ?>
 				<h1 class="search-form-title">
 					<?php // translators: search keyword. ?>
