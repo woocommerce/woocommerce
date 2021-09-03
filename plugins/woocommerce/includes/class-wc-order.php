@@ -231,7 +231,7 @@ class WC_Order extends WC_Abstract_Order {
 		$couponResult = parent::apply_coupon( $raw_coupon );
 
 		if ( !is_wp_error( $couponResult ) ) {
-			$this->add_order_note( __( 'Coupon applied:', 'woocommerce' ) . ' ' . $raw_coupon );
+			$this->add_order_note( __( 'Coupon applied:', 'woocommerce' ) . ' ' . $raw_coupon, 0, true );
 		}
 
 		return $couponResult;
@@ -248,7 +248,7 @@ class WC_Order extends WC_Abstract_Order {
 	public function remove_coupon( $coupon ) {
 		if ( wc_get_coupon_id_by_code( $coupon ) ) {
 			parent::remove_coupon( $coupon );
-			$this->add_order_note( __( 'Coupon removed:', 'woocommerce' ) . ' ' . $coupon );
+			$this->add_order_note( __( 'Coupon removed:', 'woocommerce' ) . ' ' . $coupon, 0, true );
 		}
 	}
 
