@@ -8,3 +8,14 @@
 		min-width: 360px;
 	}
 }
+
+.woocommerce-profile-wizard__newsletter-signup {
+	.components-base-control__field {
+		display: flex;
+		align-items: center;
+	}
+
+	.woocommerce-profile-wizard__powered-by-mailchimp {
+		color: $studio-gray-20;
+	}
+}

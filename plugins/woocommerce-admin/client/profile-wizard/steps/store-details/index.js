@@ -348,12 +348,22 @@ class StoreDetails extends Component {
 
 							<CardFooter>
 								<FlexItem>
-									<div>
+									<div className="woocommerce-profile-wizard__newsletter-signup">
 										<CheckboxControl
-											label={ __(
-												'Get tips, product updates and inspiration straight to your mailbox',
-												'woocommerce-admin'
-											) }
+											label={
+												<>
+													{ __(
+														'Get tips, product updates and inspiration straight to your mailbox.',
+														'woocommerce-admin'
+													) }{ ' ' }
+													<span className="woocommerce-profile-wizard__powered-by-mailchimp">
+														{ __(
+															'Powered by Mailchimp',
+															'woocommerce-admin'
+														) }
+													</span>
+												</>
+											}
 											{ ...getInputProps(
 												'isAgreeMarketing'
 											) }
