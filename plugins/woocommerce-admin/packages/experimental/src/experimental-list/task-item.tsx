@@ -80,7 +80,7 @@ const OptionalExpansionWrapper: React.FC< {
 	expanded: boolean;
 } > = ( { children, expandable, expanded } ) => {
 	if ( ! expandable ) {
-		return <>{ children }</>;
+		return expanded ? <>{ children }</> : null;
 	}
 	return (
 		<VerticalCSSTransition

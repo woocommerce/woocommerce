@@ -1,0 +1,4 @@
+Significance: patch
+Type: Fix
+
+Update task-item logic to only display content when expanded is true. #7611
