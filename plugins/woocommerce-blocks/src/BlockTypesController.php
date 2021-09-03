@@ -46,6 +46,7 @@ final class BlockTypesController {
 	 */
 	protected function init() {
 		add_action( 'init', array( $this, 'register_blocks' ) );
+		add_filter( 'render_block', array( $this, 'add_data_attributes' ), 10, 2 );
 		add_action( 'woocommerce_login_form_end', array( $this, 'redirect_to_field' ) );
 		add_filter( 'widget_types_to_hide_from_legacy_widget_block', array( $this, 'hide_legacy_widgets_with_block_equivalent' ) );
 	}
@@ -64,6 +65,57 @@ final class BlockTypesController {
 		foreach ( self::get_atomic_blocks() as $block_type ) {
 			$block_type_instance = new AtomicBlock( $this->asset_api, $this->asset_data_registry, new IntegrationRegistry(), $block_type );
 		}
+	}
+
+	/**
+	 * Add data- attributes to blocks when rendered if the block is under the woocommerce/ namespace.
+	 *
+	 * @param string $content Block content.
+	 * @param array  $block Parsed block data.
+	 * @return string
+	 */
+	public function add_data_attributes( $content, $block ) {
+		$block_name      = $block['blockName'];
+		$block_namespace = strtok( $block_name, '/' );
+
+		/**
+		 * WooCommerce Blocks Namespaces
+		 *
+		 * This hook defines which block namespaces should have block name and attribute data- attributes appended on render.
+		 *
+		 * @param array $allowed_namespaces List of namespaces.
+		 */
+		$allowed_namespaces = array_merge( [ 'woocommerce', 'woocommerce-checkout' ], (array) apply_filters( '__experimental_woocommerce_blocks_add_data_attributes_to_namespace', [] ) );
+
+		/**
+		 * WooCommerce Blocks Block Names
+		 *
+		 * This hook defines which block names should have block name and attribute data- attributes appended on render.
+		 *
+		 * @param array $allowed_namespaces List of namespaces.
+		 */
+		$allowed_blocks = (array) apply_filters( '__experimental_woocommerce_blocks_add_data_attributes_to_block', [] );
+
+		if ( ! in_array( $block_namespace, $allowed_namespaces, true ) && ! in_array( $block_name, $allowed_blocks, true ) ) {
+			return $content;
+		}
+
+		$attributes              = (array) $block['attrs'];
+		$escaped_data_attributes = [
+			'data-block-name="' . esc_attr( $block['blockName'] ) . '"',
+		];
+
+		foreach ( $attributes as $key => $value ) {
+			if ( is_bool( $value ) ) {
+				$value = $value ? 'true' : 'false';
+			}
+			if ( ! is_scalar( $value ) ) {
+				$value = wp_json_encode( $value );
+			}
+			$escaped_data_attributes[] = 'data-' . esc_attr( strtolower( preg_replace( '/(?<!\ )[A-Z]/', '-$0', $key ) ) ) . '="' . esc_attr( $value ) . '"';
+		}
+
+		return preg_replace( '/^<div /', '<div ' . implode( ' ', $escaped_data_attributes ) . ' ', trim( $content ) );
 	}
 
 	/**
@@ -171,19 +223,6 @@ final class BlockTypesController {
 			'product-tag-list',
 			'product-stock-indicator',
 			'product-add-to-cart',
-			'checkout-fields-block',
-			'checkout-totals-block',
-			'checkout-billing-address-block',
-			'checkout-actions-block',
-			'checkout-contact-information-block',
-			'checkout-order-note-block',
-			'checkout-order-summary-block',
-			'checkout-payment-block',
-			'checkout-shipping-address-block',
-			'checkout-shipping-methods-block',
-			'checkout-express-payment-block',
-			'checkout-terms-block',
-			'checkout-sample-block',
 		];
 	}
 }

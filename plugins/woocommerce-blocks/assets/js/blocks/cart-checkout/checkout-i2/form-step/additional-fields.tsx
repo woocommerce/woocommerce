@@ -4,7 +4,7 @@
 import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
 import {
 	RegisteredBlocks,
-	getRegisteredBlocks,
+	getRegisteredBlockTemplate,
 } from '@woocommerce/blocks-checkout';
 
 /**
@@ -18,7 +18,7 @@ export const AdditionalFields = ( {
 }: {
 	area: keyof RegisteredBlocks;
 } ): JSX.Element => {
-	const registeredBlocks = getRegisteredBlocks( area );
+	const registeredBlocks = getRegisteredBlockTemplate( area );
 	const { 'data-block': clientId } = useBlockProps();
 	const template = useForcedLayout( {
 		clientId,

@@ -1,7 +1,11 @@
 /**
  * Internal dependencies
  */
-import { getRegisteredBlocks, registerCheckoutBlock } from '../index';
+import {
+	getRegisteredBlocks,
+	registerCheckoutBlock,
+	innerBlockAreas,
+} from '../index';
 
 describe( 'checkout blocks registry', () => {
 	const component = () => {
@@ -39,22 +43,27 @@ describe( 'checkout blocks registry', () => {
 	} );
 
 	describe( 'getRegisteredBlocks', () => {
-		const invokeTest = ( areas ) => () => {
-			return getRegisteredBlocks( areas );
-		};
 		it( 'gets an empty array when checkout area has no registered blocks', () => {
-			expect( getRegisteredBlocks( 'fields' ) ).toEqual( [] );
+			expect(
+				getRegisteredBlocks( innerBlockAreas.CHECKOUT_FIELDS )
+			).toEqual( [] );
 		} );
-		it( 'throws an error if the area is not defined', () => {
-			expect( invokeTest( 'non-existent-area' ) ).toThrowError( /area/ );
+		it( 'gets an empty array when the area is not defined', () => {
+			expect( getRegisteredBlocks( 'not-defined' ) ).toEqual( [] );
 		} );
 		it( 'gets a block that was successfully registered', () => {
 			registerCheckoutBlock( 'test/block-name', {
-				areas: [ 'fields' ],
+				areas: [ innerBlockAreas.CHECKOUT_FIELDS ],
 				component,
 			} );
-			expect( getRegisteredBlocks( 'fields' ) ).toEqual( [
-				'test/block-name',
+			expect(
+				getRegisteredBlocks( innerBlockAreas.CHECKOUT_FIELDS )
+			).toEqual( [
+				{
+					block: 'test/block-name',
+					component,
+					force: false,
+				},
 			] );
 		} );
 	} );
