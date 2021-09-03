@@ -121,7 +121,8 @@
 			var newTabContexts = [
 				'product-edit-meta-tab-header',
 				'product-edit-meta-tab-footer',
-				'product-edit-meta-tab-body'
+				'product-edit-meta-tab-body',
+				'products-list-empty-footer'
 			];
 			if ( _.includes( newTabContexts, context ) ) {
 				linkoutButton.setAttribute( 'target', 'blank' );
