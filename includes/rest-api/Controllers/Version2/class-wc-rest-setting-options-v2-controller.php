@@ -471,7 +471,7 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 	 * @return bool
 	 */
 	public function is_setting_type_valid( $type ) {
-		return in_array(
+		$is_valid_type = in_array(
 			$type, array(
 				'text',         // Validates with validate_setting_text_field.
 				'email',        // Validates with validate_setting_text_field.
@@ -487,6 +487,8 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 				'thumbnail_cropping', // Validates with validate_setting_text_field.
 			)
 		);
+
+		return apply_filters( 'woocommerce_valid_setting_type', $is_valid_type, $type );
 	}
 
 	/**
