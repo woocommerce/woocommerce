@@ -49,6 +49,10 @@ class MiniCart extends AbstractBlock {
 	 * @return array|string
 	 */
 	protected function get_block_type_script( $key = null ) {
+		if ( is_cart() || is_checkout() ) {
+			return;
+		}
+
 		$script = [
 			'handle'       => 'wc-' . $this->block_name . '-block-frontend',
 			'path'         => $this->asset_api->get_block_asset_build_path( $this->block_name . '-frontend' ),
@@ -65,6 +69,10 @@ class MiniCart extends AbstractBlock {
 	 *                           not in the post content on editor load.
 	 */
 	protected function enqueue_data( array $attributes = [] ) {
+		if ( is_cart() || is_checkout() ) {
+			return;
+		}
+
 		parent::enqueue_data( $attributes );
 
 		// Hydrate the following data depending on admin or frontend context.
@@ -206,6 +214,12 @@ class MiniCart extends AbstractBlock {
 			$cart_contents_count
 		);
 
+		if ( is_cart() || is_checkout() ) {
+			return '<div class="wc-block-mini-cart">
+				<button class="wc-block-mini-cart__button" disabled>' . $button_text . '</button>
+			</div>';
+		}
+
 		return '<div class="wc-block-mini-cart is-loading">
 			<button class="wc-block-mini-cart__button">' . $button_text . '</button>
 			<div class="wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--is-hidden" aria-hidden="true">
@@ -215,9 +229,9 @@ class MiniCart extends AbstractBlock {
 							<div class="components-modal__header-heading-container">
 								<h1 id="components-modal-header-1" class="components-modal__header-heading">' . $title . '</h1>
 							</div>
-						</div>
-						' . $this->get_cart_contents_markup( $cart_contents ) . '
-					</div>
+						</div>'
+						. $this->get_cart_contents_markup( $cart_contents ) .
+					'</div>
 				</div>
 			</div>
 		</div>';
