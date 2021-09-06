@@ -43,19 +43,20 @@ const CurrencyFactory = function ( currencySetting ) {
 	 * Formats money value.
 	 *
 	 * @param   {number|string} number number to format
+	 * @param   {boolean} [useCode=false] Set to `true` to use the currency code instead of the symbol.
 	 * @return {?string} A formatted string.
 	 */
-	function formatAmount( number ) {
+	function formatAmount( number, useCode = false ) {
 		const formattedNumber = numberFormat( currency, number );
 
 		if ( formattedNumber === '' ) {
 			return formattedNumber;
 		}
 
-		const { priceFormat, symbol } = currency;
+		const { priceFormat, symbol, code } = currency;
 
 		// eslint-disable-next-line @wordpress/valid-sprintf
-		return sprintf( priceFormat, symbol, formattedNumber );
+		return sprintf( priceFormat, useCode ? code : symbol, formattedNumber );
 	}
 
 	/**

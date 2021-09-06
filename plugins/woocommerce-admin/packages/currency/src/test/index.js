@@ -10,6 +10,16 @@ describe( 'formatAmount', () => {
 		expect( currency.formatAmount( 30 ) ).toBe( '$30.00' );
 	} );
 
+	it( 'should return country code instead of symbol, when `useCode` is set to `true`', () => {
+		const currency = Currency();
+		expect( currency.formatAmount( 9.99, true ) ).toBe( 'USD9.99' );
+		const currency2 = Currency( {
+			priceFormat: '%2$s %1$s',
+			symbol: 'EUR',
+		} );
+		expect( currency2.formatAmount( 30 ) ).toBe( '30.00 EUR' );
+	} );
+
 	it( 'should uses store currency settings, not locale-based', () => {
 		const currency = Currency( {
 			code: 'JPY',

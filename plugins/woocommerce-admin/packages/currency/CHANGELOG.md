@@ -1,3 +1,7 @@
+# Unreleased
+
+-   Tweak - Added `useCode` parameter to `formatAmount`, to render currency code instead of symbol. #7575
+
 # 3.2.0
 
 -   Fix commonjs module build, allow package to be built in isolation. #7286
