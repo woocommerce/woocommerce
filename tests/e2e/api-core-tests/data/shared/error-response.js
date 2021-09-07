@@ -8,5 +8,7 @@ const errorResponse = {
 	message: '',
 	data: {
 	  status: 400
-	}
-}
+	},
+};
+
+module.exports = { errorResponse };

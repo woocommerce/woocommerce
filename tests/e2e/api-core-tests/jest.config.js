@@ -4,9 +4,9 @@ const verboseOutput = VERBOSE === 'true';
 
 // Update the API path if the `USE_INDEX_PERMALINKS` flag is set
 const useIndexPermalinks = USE_INDEX_PERMALINKS === 'true';
-let apiPath = `${BASE_URL}/wp-json/wc/v3/`;
-if (useIndexPermalinks) {
-	apiPath = `${BASE_URL}/?rest_route=/wc/v3/`;
+let apiPath = `${BASE_URL}/?rest_route=/wc/v3/`;
+if ( useIndexPermalinks ) {
+	apiPath = `${BASE_URL}/wp-json/wc/v3/`;
 }
 
 module.exports = {

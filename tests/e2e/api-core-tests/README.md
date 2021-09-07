@@ -11,13 +11,19 @@ Before running the tests, the following environment variables need to be configu
 BASE_URL="https://mysite.com"
 
 # The admin user's username or generated consumer key
-USERNAME=""
+USER_KEY=""
 
 # The admin user's password or generated consumer secret
-PASSWORD=""
+USER_SECRET=""
 ```
 
 For local setup, create a `.env` file in this folder with the three required values described above.
+
+Alternatively, these values can be passed in via the command line. For example:
+
+```shell
+BASE_URL=http://localhost:8084 USER_KEY=admin USER_SECRET=password npm run test:api
+```
 
 When using a username and password combination instead of a consumer secret and consumer key, make sure to have the [JSON Basic Authentication plugin](https://github.com/WP-API/Basic-Auth) installed and activated on the test site.
 

@@ -3,5 +3,5 @@ const { couponsApi } = require('./coupons');
 
 module.exports = {
 	ordersApi,
-	couponsApi
-}
+	couponsApi,
+};

@@ -25,9 +25,9 @@ const coupon = {
 	exclude_sale_items: false,
 	minimum_amount: '100.00',
 	maximum_amount: '',
-	email_restrictions: []
-}
+	email_restrictions: [],
+};
 
 module.exports = {
-	coupon
-}
+	coupon,
+};
