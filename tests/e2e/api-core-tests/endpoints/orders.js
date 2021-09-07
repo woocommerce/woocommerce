@@ -61,8 +61,6 @@ const ordersApi = {
 	},
 };
 
-// TODO -- build example payload here? Remove ID etc from the example and just add here?
-
 module.exports = {
 	ordersApi,
 };
