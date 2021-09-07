@@ -653,7 +653,17 @@ jQuery( function ( $ ) {
 		},
 
 		delete_item: function() {
-			var answer = window.confirm( woocommerce_admin_meta_boxes.remove_item_notice );
+			var notice = woocommerce_admin_meta_boxes.remove_item_notice;
+
+			if ( $( this ).parents( 'tbody#order_fee_line_items' ).length ) {
+				notice = woocommerce_admin_meta_boxes.remove_fee_notice;
+			}
+
+			if ( $( this ).parents( 'tbody#order_shipping_line_items' ).length ) {
+				notice = woocommerce_admin_meta_boxes.remove_shipping_notice;
+			}
+
+			var answer = window.confirm( notice );
 
 			if ( answer ) {
 				var $item         = $( this ).closest( 'tr.item, tr.fee, tr.shipping' );
