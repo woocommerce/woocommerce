@@ -3,36 +3,28 @@
  */
 import { useBlockProps, InnerBlocks } from '@wordpress/block-editor';
 import { Sidebar } from '@woocommerce/base-components/sidebar-layout';
-import {
-	getRegisteredBlockTemplate,
-	innerBlockAreas,
-} from '@woocommerce/blocks-checkout';
+import { innerBlockAreas } from '@woocommerce/blocks-checkout';
+
 /**
  * Internal dependencies
  */
-import type { InnerBlockTemplate } from '../../types';
 import { useForcedLayout } from '../../use-forced-layout';
-
-const ALLOWED_BLOCKS: string[] = [ 'woocommerce/checkout-order-summary-block' ];
-const TEMPLATE: InnerBlockTemplate[] = [
-	[ 'woocommerce/checkout-order-summary-block', {}, [] ],
-];
+import { getAllowedBlocks } from '../../editor-utils';
 
 export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 	const blockProps = useBlockProps();
-	const registeredBlocks = getRegisteredBlockTemplate(
-		innerBlockAreas.CHECKOUT_TOTALS
-	);
-	const template = useForcedLayout( {
+	const allowedBlocks = getAllowedBlocks( innerBlockAreas.CHECKOUT_TOTALS );
+
+	useForcedLayout( {
 		clientId,
-		template: [ ...ALLOWED_BLOCKS, ...registeredBlocks ],
+		template: allowedBlocks,
 	} );
+
 	return (
 		<Sidebar className="wc-block-checkout__sidebar">
 			<div { ...blockProps }>
 				<InnerBlocks
-					allowedBlocks={ template }
-					template={ TEMPLATE }
+					allowedBlocks={ allowedBlocks }
 					templateLock={ false }
 				/>
 			</div>

@@ -3,43 +3,26 @@
  */
 import { useBlockProps, InnerBlocks } from '@wordpress/block-editor';
 import { Main } from '@woocommerce/base-components/sidebar-layout';
-import {
-	getRegisteredBlockTemplate,
-	innerBlockAreas,
-} from '@woocommerce/blocks-checkout';
+import { innerBlockAreas } from '@woocommerce/blocks-checkout';
+
 /**
  * Internal dependencies
  */
 import { useCheckoutBlockControlsContext } from '../../context';
 import { useForcedLayout } from '../../use-forced-layout';
-
-const ALLOWED_BLOCKS = [
-	'woocommerce/checkout-express-payment-block',
-	'woocommerce/checkout-shipping-address-block',
-	'woocommerce/checkout-shipping-methods-block',
-	'woocommerce/checkout-contact-information-block',
-	'woocommerce/checkout-billing-address-block',
-	'woocommerce/checkout-payment-block',
-	'woocommerce/checkout-order-note-block',
-	'woocommerce/checkout-actions-block',
-	'woocommerce/checkout-terms-block',
-	'core/paragraph',
-	'core/heading',
-	'core/separator',
-];
+import { getAllowedBlocks } from '../../editor-utils';
 
 export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 	const blockProps = useBlockProps();
+	const allowedBlocks = getAllowedBlocks( innerBlockAreas.CHECKOUT_FIELDS );
 
 	const {
 		addressFieldControls: Controls,
 	} = useCheckoutBlockControlsContext();
-	const registeredBlocks = getRegisteredBlockTemplate(
-		innerBlockAreas.CHECKOUT_FIELDS
-	);
-	const template = useForcedLayout( {
+
+	useForcedLayout( {
 		clientId,
-		template: [ ...ALLOWED_BLOCKS, ...registeredBlocks ],
+		template: allowedBlocks,
 	} );
 	return (
 		<Main className="wc-block-checkout__main">
@@ -47,7 +30,7 @@ export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 				<Controls />
 				<form className="wc-block-components-form wc-block-checkout__form">
 					<InnerBlocks
-						allowedBlocks={ template }
+						allowedBlocks={ allowedBlocks }
 						templateLock={ false }
 						renderAppender={ InnerBlocks.ButtonBlockAppender }
 					/>

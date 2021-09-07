@@ -41,7 +41,7 @@ export const Edit = ( {
 			<Disabled>
 				<Block allowCreateAccount={ allowCreateAccount } />
 			</Disabled>
-			<AdditionalFields area={ innerBlockAreas.CONTACT_INFORMATION } />
+			<AdditionalFields block={ innerBlockAreas.CONTACT_INFORMATION } />
 		</FormStepBlock>
 	);
 };

@@ -1,7 +1,11 @@
 /**
  * External dependencies
  */
-import { registerBlockType } from '@wordpress/blocks';
+import {
+	registerBlockType,
+	Block,
+	BlockConfiguration,
+} from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -14,11 +18,11 @@ import { WC_BLOCKS_PHASE } from './constants';
  * editor interface where blocks are implemented.
  */
 export const registerExperimentalBlockType = (
-	name: string,
+	blockNameOrMetadata: string | BlockConfiguration,
 	settings: Record< string, unknown >
-): Record< string, unknown > | undefined => {
+): Block | undefined => {
 	if ( WC_BLOCKS_PHASE > 2 ) {
-		return registerBlockType( name, settings );
+		return registerBlockType( blockNameOrMetadata, settings );
 	}
 };
 
@@ -28,11 +32,11 @@ export const registerExperimentalBlockType = (
  * option to any editor interface where blocks are implemented.
  */
 export const registerFeaturePluginBlockType = (
-	name: string,
+	blockNameOrMetadata: string | BlockConfiguration,
 	settings: Record< string, unknown >
-): Record< string, unknown > | undefined => {
+): Block | undefined => {
 	if ( WC_BLOCKS_PHASE > 1 ) {
-		return registerBlockType( name, settings );
+		return registerBlockType( blockNameOrMetadata, settings );
 	}
 };
 

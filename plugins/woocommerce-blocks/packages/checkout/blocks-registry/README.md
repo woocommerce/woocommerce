@@ -8,14 +8,31 @@ The Checkout Block has a function based interface for registering custom Blocks 
 
 ## Table of Contents <!-- omit in toc -->
 
-- [Registering a block - `registerCheckoutBlock( block, options )`](#registering-a-block---registercheckoutblock-block-options-)
+- [Registering a block](#registering-a-block)
+- [Registering a block component - `registerCheckoutBlock( options )`](#registering-a-block-component---registercheckoutblock-options-)
+  - [`metadata` (required)](#metadata-required)
   - [`component` (required)](#component-required)
-  - [`areas` (required)](#areas-required)
-  - [`configuration`](#configuration)
 
-## Registering a block - `registerCheckoutBlock( block, options )`
+## Registering a block
 
-To register a checkout block, you use the registerCheckoutBlock function from the checkout blocks registry. An example of importing this for use in your JavaScript file is:
+To register a checkout block, first, register your Block Type with WordPress using https://developer.wordpress.org/block-editor/reference-guides/block-api/block-registration/. We recommend using the blocks.json method to avoid
+repetition.
+
+When registering your block, you should:
+
+1. Define the `parent` property to include a list of areas where your block will be available. See the `innerBlockAreas` typedef for available areas. Valid values at time of writing include:
+
+-   `woocommerce/checkout-totals-block` - The right side of the checkout containing order totals.
+-   `woocommerce/checkout-fields-block` - The left side of the checkout containing checkout form steps.
+-   `woocommerce/checkout-contact-information-block` - Within the contact information form step.
+-   `woocommerce/checkout-shipping-address-block` - Within the shipping address form step.
+-   `woocommerce/checkout-billing-address-block` - Within the billing address form step.
+-   `woocommerce/checkout-shipping-methods-block` - Within the shipping methods form step.
+-   `woocommerce/checkout-payment-methods-block` - Within the payment methods form step.
+
+## Registering a block component - `registerCheckoutBlock( options )`
+
+After registering your block, you need to define which component will replace your block on the frontend. To do this, use the registerCheckoutBlock function from the checkout blocks registry. An example of importing this for use in your JavaScript file is:
 
 _Aliased import_
 
@@ -29,46 +46,32 @@ _wc global_
 const { registerCheckoutBlock } = wc.blocksCheckout;
 ```
 
-The register function expects a block name string, and a JavaScript object with options specific to the block you are registering:
+The register function expects a JavaScript object with options specific to the block you are registering:
 
 ```js
-registerCheckoutBlock( blockName, options );
+registerCheckoutBlock( options );
 ```
 
 The options you feed the configuration instance should be an object in this shape (see `CheckoutBlockOptions` typedef):
 
 ```js
 const options = {
+	metadata: {
+		name: 'namespace/block-name',
+		parent: [ 'woocommerce/checkout-totals-block' ],
+	},
 	component: () => <div>A Function Component</div>,
-	areas: [ 'areaName' ],
-	configuration: {},
 };
 ```
 
 Here's some more details on the _configuration_ options:
+
+### `metadata` (required)
+
+This is a your blocks metadata (from blocks.json). It needs to define at least a `name` (block name), and `parent` (the areas on checkout) to be valid.
 
 ### `component` (required)
 
 This is a React component that should replace the Block on the frontend. It will be fed any attributes from the Block and have access to any public context providers in the Checkout context.
 
 You should provide either a _React Component_ or a `React.lazy()` component if you wish to lazy load for performance reasons.
-
-### `areas` (required)
-
-This is an array of string based area names which define when the custom block can be inserted within the Checkout.
-
-See the `RegisteredBlocks` typedef for available areas. Valid values at time of writing include:
-
--   `totals` - The right side of the checkout containing order totals.
--   `fields` - The left side of the checkout containing checkout form steps.
--   `contactInformation` - Within the contact information form step.
--   `shippingAddress` - Within the shipping address form step.
--   `billingAddress` - Within the billing address form step.
--   `shippingMethods` - Within the shipping methods form step.
--   `paymentMethods` - Within the payment methods form step.
-
-### `configuration`
-
-This is where a standard `BlockConfiguration` should be provided. This matches the [Block Registration Configuration in Gutenberg](https://developer.wordpress.org/block-editor/reference-guides/block-api/block-registration/).
-
-If a `BlockConfiguration` is not provided, your Block Type will not be registered in WordPress unless you manually register the block using `registerBlockType` (this is what `registerCheckoutBlock` does for you behind the scenes).

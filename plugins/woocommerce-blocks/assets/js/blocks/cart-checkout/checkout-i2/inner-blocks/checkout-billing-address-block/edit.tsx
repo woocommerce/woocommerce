@@ -60,7 +60,7 @@ export const Edit = ( {
 				showPhoneField={ showPhoneField }
 				requirePhoneField={ requirePhoneField }
 			/>
-			<AdditionalFields area={ innerBlockAreas.BILLING_ADDRESS } />
+			<AdditionalFields block={ innerBlockAreas.BILLING_ADDRESS } />
 		</FormStepBlock>
 	);
 };

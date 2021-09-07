@@ -4,6 +4,7 @@
 import { lazy } from '@wordpress/element';
 import { registerBlockComponent } from '@woocommerce/blocks-registry';
 import { WC_BLOCKS_BUILD_URL } from '@woocommerce/block-settings';
+import { registerCheckoutBlock } from '@woocommerce/blocks-checkout';
 
 // Modify webpack publicPath at runtime based on location of WordPress Plugin.
 // eslint-disable-next-line no-undef,camelcase
@@ -12,7 +13,16 @@ __webpack_public_path__ = WC_BLOCKS_BUILD_URL;
 /**
  * Internal dependencies
  */
-import './checkout-sample-block';
+import sampleBlockMetaData from './checkout-sample-block/block.json';
+
+registerCheckoutBlock( {
+	metadata: sampleBlockMetaData,
+	component: lazy( () =>
+		import(
+			/* webpackChunkName: "checkout-blocks/sample" */ './checkout-sample-block/frontend'
+		)
+	),
+} );
 
 registerBlockComponent( {
 	blockName: 'woocommerce/checkout-fields-block',
