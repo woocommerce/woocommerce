@@ -6,11 +6,15 @@
  * @since 3.5.0
  */
 
- /**
-  * WC_Tests_API_Product class.
-  */
+// phpcs:ignore Squiz.Commenting.FileComment.Missing
+require_once __DIR__ . '/date-filtering.php';
+
+/**
+ * WC_Tests_API_Product class.
+ */
 class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 	use WC_REST_API_Complex_Meta;
+	use DateFilteringForCrudControllers;
 
 	/**
 	 * Setup our test server, endpoints, and user info.
@@ -64,7 +68,7 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_trashed_products() {
 		wp_set_current_user( $this->user );
-		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
+		$product    = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
 		$data_store = WC_Data_Store::load( 'product' );
 		$data_store->delete( $product );
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
@@ -83,7 +87,7 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_trashed_products_not_returned_by_default() {
 		wp_set_current_user( $this->user );
-		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
+		$product    = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
 		$data_store = WC_Data_Store::load( 'product' );
 		$data_store->delete( $product );
 
@@ -101,7 +105,7 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_trashed_products_returned_by_id() {
 		wp_set_current_user( $this->user );
-		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
+		$product    = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
 		$data_store = WC_Data_Store::load( 'product' );
 		$data_store->delete( $product );
 
@@ -907,5 +911,23 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 		foreach ( $response_products as $response_product ) {
 			$this->assertContains( $response_product['id'], $expected_product_ids );
 		}
+	}
+
+	/**
+	 * Create an object for the tests in DateFilteringForCrudControllers.
+	 *
+	 * @return object The created object.
+	 */
+	private function get_item_for_date_filtering_tests() {
+		return \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
+	}
+
+	/**
+	 * Get the REST API endpoint for the tests in DateFilteringForCrudControllers.
+	 *
+	 * @return string REST API endpoint for querying items.
+	 */
+	private function get_endpoint_for_date_filtering_tests() {
+		return '/wc/v3/products';
 	}
 }

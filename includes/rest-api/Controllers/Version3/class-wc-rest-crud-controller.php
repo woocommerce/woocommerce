@@ -289,22 +289,40 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 			$args['orderby'] = 'date ID';
 		}
 
-		$args['date_query'] = array();
-		// Set before into date query. Date query must be specified as an array of an array.
+		$date_query = array();
+		$use_gmt    = $request['dates_are_gmt'];
+
 		if ( isset( $request['before'] ) ) {
-			$args['date_query'][0]['before'] = $request['before'];
+			$date_query[] = array(
+				'column' => $use_gmt ? 'post_date_gmt' : 'post_date',
+				'before' => $request['before'],
+			);
 		}
 
-		// Set after into date query. Date query must be specified as an array of an array.
 		if ( isset( $request['after'] ) ) {
-			$args['date_query'][0]['after'] = $request['after'];
+			$date_query[] = array(
+				'column' => $use_gmt ? 'post_date_gmt' : 'post_date',
+				'after'  => $request['after'],
+			);
 		}
 
-		// Check flag to use post_date vs post_date_gmt.
-		if ( true === $request['dates_are_gmt'] ) {
-			if ( isset( $request['before'] ) || isset( $request['after'] ) ) {
-				$args['date_query'][0]['column'] = 'post_date_gmt';
-			}
+		if ( isset( $request['modified_before'] ) ) {
+			$date_query[] = array(
+				'column' => $use_gmt ? 'post_modified_gmt' : 'post_modified',
+				'before' => $request['modified_before'],
+			);
+		}
+
+		if ( isset( $request['modified_after'] ) ) {
+			$date_query[] = array(
+				'column' => $use_gmt ? 'post_modified_gmt' : 'post_modified',
+				'after'  => $request['modified_after'],
+			);
+		}
+
+		if ( ! empty( $date_query ) ) {
+			$date_query['relation'] = 'AND';
+			$args['date_query']     = $date_query;
 		}
 
 		// Force the post_type argument, since it's not a user input variable.
@@ -358,7 +376,10 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
-		$query_args    = $this->prepare_objects_query( $request );
+		$query_args = $this->prepare_objects_query( $request );
+		if ( is_wp_error( current( $query_args ) ) ) {
+			return current( $query_args );
+		}
 		$query_results = $this->get_objects( $query_args );
 
 		$objects = array();
@@ -367,7 +388,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 				continue;
 			}
 
-			$data = $this->prepare_object_for_response( $object, $request );
+			$data      = $this->prepare_object_for_response( $object, $request );
 			$objects[] = $this->prepare_response_for_collection( $data );
 		}
 
@@ -388,7 +409,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 				$attrib_name_end  = strpos( $attrib_name_match[0], '>', $attrib_name_match[1] );
 				$attrib_name      = substr( $attrib_name_match[0], $beginning_offset, $attrib_name_end - $beginning_offset );
 				if ( isset( $request[ $attrib_name ] ) ) {
-					$base  = str_replace( "(?P<$attrib_name>[\d]+)", $request[ $attrib_name ], $base );
+					$base = str_replace( "(?P<$attrib_name>[\d]+)", $request[ $attrib_name ], $base );
 				}
 			}
 		}
@@ -513,7 +534,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 	 */
 	protected function prepare_links( $object, $request ) {
 		$links = array(
-			'self' => array(
+			'self'       => array(
 				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $object->get_id() ) ),
 			),
 			'collection' => array(
@@ -534,83 +555,95 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 		$params['context']            = $this->get_context_param();
 		$params['context']['default'] = 'view';
 
-		$params['page'] = array(
-			'description'        => __( 'Current page of the collection.', 'woocommerce' ),
-			'type'               => 'integer',
-			'default'            => 1,
-			'sanitize_callback'  => 'absint',
-			'validate_callback'  => 'rest_validate_request_arg',
-			'minimum'            => 1,
+		$params['page']            = array(
+			'description'       => __( 'Current page of the collection.', 'woocommerce' ),
+			'type'              => 'integer',
+			'default'           => 1,
+			'sanitize_callback' => 'absint',
+			'validate_callback' => 'rest_validate_request_arg',
+			'minimum'           => 1,
 		);
-		$params['per_page'] = array(
-			'description'        => __( 'Maximum number of items to be returned in result set.', 'woocommerce' ),
-			'type'               => 'integer',
-			'default'            => 10,
-			'minimum'            => 1,
-			'maximum'            => 100,
-			'sanitize_callback'  => 'absint',
-			'validate_callback'  => 'rest_validate_request_arg',
+		$params['per_page']        = array(
+			'description'       => __( 'Maximum number of items to be returned in result set.', 'woocommerce' ),
+			'type'              => 'integer',
+			'default'           => 10,
+			'minimum'           => 1,
+			'maximum'           => 100,
+			'sanitize_callback' => 'absint',
+			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['search'] = array(
-			'description'        => __( 'Limit results to those matching a string.', 'woocommerce' ),
-			'type'               => 'string',
-			'sanitize_callback'  => 'sanitize_text_field',
-			'validate_callback'  => 'rest_validate_request_arg',
+		$params['search']          = array(
+			'description'       => __( 'Limit results to those matching a string.', 'woocommerce' ),
+			'type'              => 'string',
+			'sanitize_callback' => 'sanitize_text_field',
+			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['after'] = array(
-			'description'        => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce' ),
-			'type'               => 'string',
-			'format'             => 'date-time',
-			'validate_callback'  => 'rest_validate_request_arg',
+		$params['after']           = array(
+			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce' ),
+			'type'              => 'string',
+			'format'            => 'date-time',
+			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['before'] = array(
-			'description'        => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'woocommerce' ),
-			'type'               => 'string',
-			'format'             => 'date-time',
-			'validate_callback'  => 'rest_validate_request_arg',
+		$params['before']          = array(
+			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'woocommerce' ),
+			'type'              => 'string',
+			'format'            => 'date-time',
+			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['dates_are_gmt'] = array(
-			'description'       => __( 'Whether to use GMT post dates.', 'woocommerce' ),
+		$params['modified_after']  = array(
+			'description'       => __( 'Limit response to resources modified after a given ISO8601 compliant date.', 'woocommerce' ),
+			'type'              => 'string',
+			'format'            => 'date-time',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['modified_before'] = array(
+			'description'       => __( 'Limit response to resources modified before a given ISO8601 compliant date.', 'woocommerce' ),
+			'type'              => 'string',
+			'format'            => 'date-time',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['dates_are_gmt']   = array(
+			'description'       => __( 'Whether to consider GMT post dates when limiting response by published or modified date.', 'woocommerce' ),
 			'type'              => 'boolean',
 			'default'           => false,
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['exclude'] = array(
+		$params['exclude']         = array(
 			'description'       => __( 'Ensure result set excludes specific IDs.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
-				'type'          => 'integer',
+				'type' => 'integer',
 			),
 			'default'           => array(),
 			'sanitize_callback' => 'wp_parse_id_list',
 		);
-		$params['include'] = array(
+		$params['include']         = array(
 			'description'       => __( 'Limit result set to specific ids.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
-				'type'          => 'integer',
+				'type' => 'integer',
 			),
 			'default'           => array(),
 			'sanitize_callback' => 'wp_parse_id_list',
 		);
-		$params['offset'] = array(
-			'description'        => __( 'Offset the result set by a specific number of items.', 'woocommerce' ),
-			'type'               => 'integer',
-			'sanitize_callback'  => 'absint',
-			'validate_callback'  => 'rest_validate_request_arg',
+		$params['offset']          = array(
+			'description'       => __( 'Offset the result set by a specific number of items.', 'woocommerce' ),
+			'type'              => 'integer',
+			'sanitize_callback' => 'absint',
+			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['order'] = array(
-			'description'        => __( 'Order sort attribute ascending or descending.', 'woocommerce' ),
-			'type'               => 'string',
-			'default'            => 'desc',
-			'enum'               => array( 'asc', 'desc' ),
-			'validate_callback'  => 'rest_validate_request_arg',
+		$params['order']           = array(
+			'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce' ),
+			'type'              => 'string',
+			'default'           => 'desc',
+			'enum'              => array( 'asc', 'desc' ),
+			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['orderby'] = array(
-			'description'        => __( 'Sort collection by object attribute.', 'woocommerce' ),
-			'type'               => 'string',
-			'default'            => 'date',
-			'enum'               => array(
+		$params['orderby']         = array(
+			'description'       => __( 'Sort collection by object attribute.', 'woocommerce' ),
+			'type'              => 'string',
+			'default'           => 'date',
+			'enum'              => array(
 				'date',
 				'id',
 				'include',
@@ -618,15 +651,15 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 				'slug',
 				'modified',
 			),
-			'validate_callback'  => 'rest_validate_request_arg',
+			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		if ( $this->hierarchical ) {
-			$params['parent'] = array(
+			$params['parent']         = array(
 				'description'       => __( 'Limit result set to those of particular parent IDs.', 'woocommerce' ),
 				'type'              => 'array',
 				'items'             => array(
-					'type'          => 'integer',
+					'type' => 'integer',
 				),
 				'sanitize_callback' => 'wp_parse_id_list',
 				'default'           => array(),
@@ -635,7 +668,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 				'description'       => __( 'Limit result set to all items except those of a particular parent ID.', 'woocommerce' ),
 				'type'              => 'array',
 				'items'             => array(
-					'type'          => 'integer',
+					'type' => 'integer',
 				),
 				'sanitize_callback' => 'wp_parse_id_list',
 				'default'           => array(),

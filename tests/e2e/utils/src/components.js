@@ -16,7 +16,7 @@ import {
 	waitForSelectorWithoutThrow,
 } from './page-utils';
 import factories from './factories';
-import { Coupon } from '@woocommerce/api';
+import { Coupon, Order } from '@woocommerce/api';
 
 const client = factories.api.withDefaultPermalinks;
 const config = require( 'config' );
@@ -323,6 +323,30 @@ const createGroupedProduct = async (groupedProduct = defaultGroupedProduct) => {
 };
 
 /**
+ * Use the API to create an order with the provided details.
+ *
+ * @param {object} orderOptions
+ * @returns {Promise<number>} ID of the created order.
+ */
+const createOrder = async ( orderOptions = {} ) => {
+	const newOrder = {
+		...( orderOptions.status ) && { status: orderOptions.status },
+		...( orderOptions.customerId ) && { customer_id: orderOptions.customerId },
+		...( orderOptions.customerBilling ) && { billing: orderOptions.customerBilling },
+		...( orderOptions.customerShipping ) && { shipping: orderOptions.customerShipping },
+		...( orderOptions.productId ) && { line_items: [
+				{ product_id: orderOptions.productId },
+			]
+		},
+	};
+
+	const repository = Order.restRepository( client );
+	const order = await repository.create( newOrder );
+
+	return order.id;
+}
+
+/**
  * Create a basic order with the provided order status.
  *
  * @param orderStatus Status of the new order. Defaults to `Pending payment`.
@@ -350,6 +374,31 @@ const createSimpleOrder = async ( orderStatus = 'Pending payment' ) => {
 	const variablePostId = await page.$( '#post_ID' );
 	let variablePostIdValue = ( await ( await variablePostId.getProperty( 'value' ) ).jsonValue() );
 	return variablePostIdValue;
+};
+
+/**
+ * Creates a batch of orders from the given `statuses`
+ * using the "Batch Create Order" API.
+ * 
+ * @param statuses Array of order statuses
+ */
+const batchCreateOrders = async (statuses) => {
+	const defaultOrder = config.get('orders.basicPaidOrder');
+	const path = '/wc/v3/orders/batch';
+
+	// Create an order per status
+	const orders = statuses.map((s) => {
+		return {
+			...defaultOrder,
+			status: s
+		};
+	});
+
+	// Set the request payload from the created orders.
+	// Then send the API request.
+	const payload = { create: orders };
+	const { statusCode } = await client.post(path, payload);
+	expect(statusCode).toEqual(200);
 };
 
 /**
@@ -429,12 +478,16 @@ const addShippingZoneAndMethod = async ( zoneName, zoneLocation = 'country:US', 
 	// Select shipping zone location
 	await expect(page).toSelect('select[name="zone_locations"]', zoneLocation);
 
+	await uiUnblocked();
+
 	// Fill shipping zone postcode if needed otherwise just put empty space
 	await page.waitForSelector('a.wc-shipping-zone-postcodes-toggle');
 	await expect(page).toClick('a.wc-shipping-zone-postcodes-toggle');
 	await expect(page).toFill('#zone_postcodes', zipCode);
 	await expect(page).toMatchElement('#zone_postcodes', zipCode);
 	await expect(page).toClick('button#submit');
+
+	await uiUnblocked();
 
 	// Add shipping zone method
 	await page.waitFor(1000);
@@ -443,6 +496,8 @@ const addShippingZoneAndMethod = async ( zoneName, zoneLocation = 'country:US', 
 	await expect(page).toSelect('select[name="add_method_id"]', zoneMethod);
 	await expect(page).toClick('button#btn-ok');
 	await page.waitForSelector('#zone_locations');
+
+	await uiUnblocked();
 };
 
 /**
@@ -522,4 +577,6 @@ export {
 	clickUpdateOrder,
 	deleteAllEmailLogs,
 	deleteAllShippingZones,
+	batchCreateOrders,
+	createOrder,
 };

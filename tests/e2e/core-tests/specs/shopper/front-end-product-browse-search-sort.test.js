@@ -1,10 +1,11 @@
-/* eslint-disable jest/no-export, jest/no-disabled-tests */
 /**
  * Internal dependencies
  */
 const {
 	shopper,
 	createSimpleProductWithCategory,
+	utils,
+	getEnvironmentContext,
 } = require( '@woocommerce/e2e-utils' );
 
 /**
@@ -26,8 +27,13 @@ const audio = 'Audio';
 const hardware = 'Hardware';
 const productTitle = 'li.first > a > h2.woocommerce-loop-product__title';
 
+const getWordPressVersion = async () => {
+	const context = await getEnvironmentContext();
+	return context.wpVersion;
+}
+
 const runProductBrowseSearchSortTest = () => {
-	describe('Search, browse by categories and sort items in the shop', () => {
+	utils.describeIf( getWordPressVersion() >= 5.8 )( 'Search, browse by categories and sort items in the shop', () => {
 		beforeAll(async () => {
 			// Create 1st product with Clothing category
 			await createSimpleProductWithCategory(simpleProductName + ' 1', singleProductPrice, clothing);

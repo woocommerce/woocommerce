@@ -70,7 +70,7 @@ jQuery(
 				$( 'select[name="_backorders"] option[value="' + backorders + '"]', '.inline-edit-row' ).attr( 'selected', 'selected' );
 
 				if ( 'yes' === featured ) {
-					$( 'input[name="_featured"]', '.inline-edit-row' ).attr( 'checked', 'checked' );
+					$( 'input[name="_featured"]', '.inline-edit-row' ).prop( 'checked', true );
 				} else {
 					$( 'input[name="_featured"]', '.inline-edit-row' ).prop( 'checked', false );
 				}
