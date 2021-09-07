@@ -66,6 +66,15 @@ Marketing screen should be unaffected if __Pinterest for WooCommerce__ is not in
 5. Click the Download button.
 6. Open the downloaded file and confirm the status values match the table.
 
+### Add marketing extensions task to task list #7383
+
+1. Navigate to the task list and click on the "Set up marketing tools" task.
+2. Click on "Get started" next to any of the extensions.
+3. Make sure the extension is installed and moved to a separate card "Installed marketing extensions."
+4. Click on "Manage" next to an installed and activated extension.
+5. Make sure you're redirect to the respective extension settings page.
+6. Navigate back to the task list and make sure the marketing task is marked as complete.
+
 ## 2.5.0
 
 ### Fix WC Home crash when the Analytics is disabled #7339
