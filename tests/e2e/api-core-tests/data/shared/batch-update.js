@@ -1,87 +1,46 @@
 /**
  * Shared model for batch updates for a resource.
  *
- * Note that by default the update is limited to 100 objects to be created, updated, or deleted.
- */
-const batchUpdatePayload = {
-	create: [],
-	update: [],
-	delete: [],
-}
-
-/**
- * Batch create a resource.
+ * Note that by default the update endpoint is limited to 100 objects to be created, updated, or deleted.
  *
- * @param {Array} resourcesToCreate A list of resource objects to create.
- * @returns
+ * @param {string} action Batch action. Must be one of: create, update, or delete.
+ * @param {Array} resources A list of resource objects. For the delete action, this will be a list of IDs.
+ * @param {Object} payload The batch payload object. Defaults to an empty object.
+ * @returns {Object} The payload to send to the batch endpoint.
  */
-const batchCreate = ( resourcesToCreate = [] ) => {
-	if ( resourcesToCreate.length === 0 ) {
+ const batch = ( action, resources = [], payload = {} ) => {
+	if ( ! [ 'create', 'update', 'delete' ].includes( action ) ) {
 		return;
 	}
 
-	// Build array of resources to create
-	const createArray = [];
-	resourcesToCreate.forEach( ( resource ) => {
-		createArray.push( resource );
-	});
-
-	batchUpdatePayload.create = createArray
-
-	return createArray;
-}
-
-/**
- * Batch update resources.
- *
- * @param {Array} resourcesToUpdate A list of resource objects to update.
- * @returns
- */
-const batchUpdate = ( resourcesToUpdate = [] ) => {
-	if ( resourcesToUpdate.length === 0 ) {
-		return
-	}
-
-	// Build array of resources to update
-	const updateArray = [];
-	resourcesToUpdate.forEach( ( resource ) => {
-		updateArray.push( resource );
-	});
-
-	return updateArray;
-}
-
-/**
- * Batch delete resources.
- *
- * @param {Array} resourceIds A list of IDs of resource objects to delete.
- * @returns
- */
-const batchDelete = ( resourceIds = [] ) => {
-	if ( resourceIds.length === 0 ) {
+	if ( resources.length === 0 ) {
 		return;
 	}
 
-	// Build array of resources to delete
-	const deleteArray = [];
-	resourceIds.forEach( ( id ) => {
-		deleteArray.push( id );
-	});
+	if ( action === 'create' ) {
+		payload.create = [ ...resources ];
+	}
 
-	return deleteArray;
-}
+	if ( action === 'update' ) {
+		payload.update = [ ...resources ];
+	}
+
+	if ( action === 'delete' ) {
+		payload.delete = [ ...resources ];
+	}
+
+	return payload;
+};
 
 const getBatchPayloadExample = ( resource ) => {
-	batchUpdatePayload.create = batchCreate( [ resource ] );
-	batchUpdatePayload.update = batchUpdate( [ resource ] );
-	batchUpdatePayload.delete = batchDelete( [ 1, 2, 3 ] );
+	let batchUpdatePayload = {};
+	batchUpdatePayload = batch( 'create', [ resource ], batchUpdatePayload );
+	batchUpdatePayload = batch( 'update', [ resource ], batchUpdatePayload );
+	batchUpdatePayload = batch( 'delete', [ 1, 2, 3 ], batchUpdatePayload );
 	return batchUpdatePayload;
-}
+};
 
 module.exports = {
-	batchUpdatePayload,
-	batchCreate,
-	batchUpdate,
-	batchDelete,
-	getBatchPayloadExample
-}
+	batch,
+	getBatchPayloadExample,
+};

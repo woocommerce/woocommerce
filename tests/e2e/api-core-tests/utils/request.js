@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { USERNAME, PASSWORD } = process.env;
+const { USER_KEY, USER_SECRET } = process.env;
 const request = require('supertest')( API_PATH );
 
 /**
@@ -14,9 +14,9 @@ const getRequest = async ( requestPath, queryString = {} ) => {
 		.get( requestPath )
 		.set( 'Accept', 'application/json' )
 		.query( queryString )
-		.auth( USERNAME, PASSWORD );
+		.auth( USER_KEY, USER_SECRET );
 	return response;
-}
+};
 
 /**
  * Make a POST request.
@@ -30,9 +30,9 @@ const postRequest = async ( requestPath, requestBody ) => {
 		.post( requestPath )
 		.send( requestBody )
 		.set( 'Accept', 'application/json' )
-		.auth( USERNAME, PASSWORD );
+		.auth( USER_KEY, USER_SECRET );
 	return response;
-}
+};
 
 /**
  * Make a PUT request.
@@ -46,9 +46,9 @@ const putRequest = async ( requestPath, requestBody ) => {
 		.put( requestPath )
 		.send( requestBody )
 		.set( 'Accept', 'application/json' )
-		.auth( USERNAME, PASSWORD );
+		.auth( USER_KEY, USER_SECRET );
 	return response;
-}
+};
 
 /**
  * Make a DELETE request, optionally deleting the resource permanently.
@@ -63,8 +63,8 @@ const deleteRequest = async ( requestPath, deletePermanently = false ) => {
 		.delete( requestPath )
 		.set( 'Accept', 'application/json' )
 		.send( requestBody )
-		.auth( USERNAME, PASSWORD );
+		.auth( USER_KEY, USER_SECRET );
 	return response;
-}
+};
 
 module.exports = { getRequest, postRequest, putRequest, deleteRequest }

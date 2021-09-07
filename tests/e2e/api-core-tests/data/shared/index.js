@@ -1,20 +1,14 @@
 const { customerBilling, customerShipping } = require('./customer');
 const {
-	batchUpdatePayload,
-	batchCreate,
-	batchUpdate,
-	batchDelete,
+	batch,
 	getBatchPayloadExample
 } = require('./batch-update');
-const errorRessponse = require('./customer');
+const { errorResponse } = require('./error-response');
 
 module.exports = {
 	customerBilling,
 	customerShipping,
-	batchUpdatePayload,
-	batchCreate,
-	batchUpdate,
-	batchDelete,
+	batch,
 	getBatchPayloadExample,
-	errorRessponse
-}
+	errorResponse,
+};

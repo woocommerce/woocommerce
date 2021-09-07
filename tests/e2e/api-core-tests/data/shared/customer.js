@@ -17,7 +17,7 @@ const customerBilling = {
 	postcode: '94107',
 	phone: '123456789',
 	email: 'john.doe@example.com',
-}
+};
 
 /**
  * Customer shipping object.
@@ -37,9 +37,9 @@ const customerShipping = {
 	state: 'NY',
 	postcode: '14201',
 	phone: '123456789',
-}
+};
 
 module.exports = {
 	customerBilling,
-	customerShipping
-}
+	customerShipping,
+};

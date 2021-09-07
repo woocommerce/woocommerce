@@ -28,6 +28,7 @@
     "docker:down": "npx wc-e2e docker:down",
     "docker:ssh": "npx wc-e2e docker:ssh",
     "docker:up": "npx wc-e2e docker:up",
+    "test:api": "cd ./tests/e2e/api-core-tests && jest --group=api",
     "test:e2e": "npx wc-e2e test:e2e",
     "test:e2e-debug": "npx wc-e2e test:e2e-debug",
     "test:e2e-dev": "npx wc-e2e test:e2e-dev",
@@ -47,6 +48,7 @@
     "@typescript-eslint/experimental-utils": "3.10.1",
     "@typescript-eslint/parser": "3.10.1",
     "@woocommerce/api": "file:tests/e2e/api",
+    "@woocommerce/api-core-tests": "file:tests/e2e/api-core-tests",
     "@woocommerce/e2e-core-tests": "file:tests/e2e/core-tests",
     "@woocommerce/e2e-environment": "file:tests/e2e/env",
     "@woocommerce/e2e-utils": "file:tests/e2e/utils",
@@ -132,6 +134,7 @@
     "no-e2e": {
       "exclude": [
         "@woocommerce/api",
+        "@woocommerce/api-core-tests",
         "@woocommerce/e2e-core-tests",
         "@woocommerce/e2e-environment",
         "@woocommerce/e2e-utils",
