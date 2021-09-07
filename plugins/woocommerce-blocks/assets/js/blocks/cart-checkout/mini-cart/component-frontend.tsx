@@ -1,27 +1,32 @@
 /**
  * External dependencies
  */
+import classNames from 'classnames';
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { useState } from '@wordpress/element';
-import { renderFrontend } from '@woocommerce/base-utils';
+import { useState, useEffect } from '@wordpress/element';
+import { dispatch } from '@wordpress/data';
+import {
+	translateJQueryEventToNative,
+	renderFrontend,
+} from '@woocommerce/base-utils';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 import Drawer from '@woocommerce/base-components/drawer';
-import {
-	withStoreCartApiHydration,
-	withRestApiHydration,
-} from '@woocommerce/block-hocs';
+import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
  */
 import CartLineItemsTable from '../cart/full-cart/cart-line-items-table';
+import withMiniCartConditionalHydration from './with-mini-cart-conditional-hydration';
 import './style.scss';
 
-interface MiniCartBlock {
+interface MiniCartBlockProps {
 	isPlaceholderOpen?: boolean;
 }
 
-const MiniCartBlock = ( { isPlaceholderOpen = false } ): JSX.Element => {
+const MiniCartBlock = ( {
+	isPlaceholderOpen = false,
+}: MiniCartBlockProps ): JSX.Element => {
 	const { cartItems, cartItemsCount, cartIsLoading } = useStoreCart();
 	const [ isOpen, setIsOpen ] = useState< boolean >( isPlaceholderOpen );
 	// We already rendered the HTML drawer placeholder, so we want to skip the
@@ -30,16 +35,42 @@ const MiniCartBlock = ( { isPlaceholderOpen = false } ): JSX.Element => {
 		isPlaceholderOpen
 	);
 
+	useEffect( () => {
+		const openMiniCartAndRefreshData = () => {
+			dispatch( storeKey ).invalidateResolutionForStore();
+			setSkipSlideIn( false );
+			setIsOpen( true );
+		};
+
+		// Make it so we can read jQuery events triggered by WC Core elements.
+		const removeJQueryAddedToCartEvent = translateJQueryEventToNative(
+			'added_to_cart',
+			'wc-blocks_added_to_cart'
+		);
+
+		document.body.addEventListener(
+			'wc-blocks_added_to_cart',
+			openMiniCartAndRefreshData
+		);
+
+		return () => {
+			removeJQueryAddedToCartEvent();
+
+			document.body.removeEventListener(
+				'wc-blocks_added_to_cart',
+				openMiniCartAndRefreshData
+			);
+		};
+	}, [] );
+
 	const contents =
-		cartItems.length === 0 ? (
+		! cartIsLoading && cartItems.length === 0 ? (
 			<>{ __( 'Cart is empty', 'woo-gutenberg-products-block' ) }</>
 		) : (
-			<div className="is-mobile">
-				<CartLineItemsTable
-					lineItems={ cartItems }
-					isLoading={ cartIsLoading }
-				/>
-			</div>
+			<CartLineItemsTable
+				lineItems={ cartItems }
+				isLoading={ cartIsLoading }
+			/>
 		);
 
 	return (
@@ -65,6 +96,13 @@ const MiniCartBlock = ( { isPlaceholderOpen = false } ): JSX.Element => {
 				) }
 			</button>
 			<Drawer
+				className={ classNames(
+					'wc-block-mini-cart__drawer',
+					'is-mobile',
+					{
+						'is-loading': cartIsLoading,
+					}
+				) }
 				title={ sprintf(
 					/* translators: %d is the count of items in the cart. */
 					_n(
@@ -105,10 +143,9 @@ const renderMiniCartFrontend = () => {
 
 	renderFrontend( {
 		selector: '.wc-block-mini-cart',
-		Block: withStoreCartApiHydration(
-			withRestApiHydration( MiniCartBlock )
-		),
+		Block: withMiniCartConditionalHydration( MiniCartBlock ),
 		getProps: ( el: HTMLElement ) => ( {
+			isDataOutdated: el.dataset.isDataOutdated,
 			isPlaceholderOpen: el.dataset.isPlaceholderOpen,
 		} ),
 	} );
