@@ -1,6 +1,9 @@
 {
 	"extends": "./tsconfig.base.json",
-	"include": [ "./assets/js/**/*" ],
+	"include": [
+		"./assets/js/**/*",
+		"./assets/js/blocks/cart-checkout/checkout-i2/inner-blocks/checkout-sample-block/block.json"
+	],
 	"exclude": [ "./assets/js/data" ],
 	"references": [
 		{ "path": "./assets/js/data" },

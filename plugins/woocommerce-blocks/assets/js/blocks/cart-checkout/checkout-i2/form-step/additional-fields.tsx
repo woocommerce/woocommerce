@@ -2,31 +2,31 @@
  * External dependencies
  */
 import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
-import {
-	RegisteredBlocks,
-	getRegisteredBlockTemplate,
-} from '@woocommerce/blocks-checkout';
 
 /**
  * Internal dependencies
  */
 import './editor.scss';
 import { useForcedLayout } from '../use-forced-layout';
+import { getAllowedBlocks } from '../editor-utils';
 
 export const AdditionalFields = ( {
-	area,
+	block,
 }: {
-	area: keyof RegisteredBlocks;
+	// Name of the parent block.
+	block: string;
 } ): JSX.Element => {
-	const registeredBlocks = getRegisteredBlockTemplate( area );
 	const { 'data-block': clientId } = useBlockProps();
-	const template = useForcedLayout( {
+	const allowedBlocks = getAllowedBlocks( block );
+
+	useForcedLayout( {
 		clientId,
-		template: registeredBlocks,
+		template: allowedBlocks,
 	} );
+
 	return (
 		<div className="wc-block-checkout__additional_fields">
-			<InnerBlocks allowedBlocks={ template } />
+			<InnerBlocks allowedBlocks={ allowedBlocks } />
 		</div>
 	);
 };

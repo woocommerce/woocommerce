@@ -5,27 +5,23 @@ import { innerBlockAreas, RegisteredBlock } from './types';
 import { registeredBlocks } from './registered-blocks';
 
 /**
- * Get a list of blocks available within a specific area.
+ * Check area is valid.
  */
-export const getRegisteredBlocks = (
-	area: innerBlockAreas
-): Array< RegisteredBlock > => {
-	return [ ...( registeredBlocks[ area ] || [] ) ];
+export const hasInnerBlocks = ( block: string ): block is innerBlockAreas => {
+	return Object.values( innerBlockAreas ).includes(
+		block as innerBlockAreas
+	);
 };
 
 /**
- * Get a list of blocks names in inner block template format.
+ * Get a list of blocks available within a specific area.
  */
-export const getRegisteredBlockTemplate = (
-	area: innerBlockAreas
-): Array< string > =>
-	getRegisteredBlocks( area ).map(
-		( block: RegisteredBlock ) => block.block
-	);
-
-/**
- * Check area is valid.
- */
-export const isInnerBlockArea = ( area: string ): area is innerBlockAreas => {
-	return Object.values( innerBlockAreas ).includes( area as innerBlockAreas );
+export const getRegisteredBlocks = (
+	block: string
+): Array< RegisteredBlock > => {
+	return hasInnerBlocks( block )
+		? Object.values( registeredBlocks ).filter( ( { metadata } ) =>
+				( metadata?.parent || [] ).includes( block )
+		  )
+		: [];
 };

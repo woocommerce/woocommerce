@@ -73,7 +73,7 @@ export const Edit = ( props: FormStepBlockProps ): JSX.Element => {
 			<Disabled>
 				<Block />
 			</Disabled>
-			<AdditionalFields area={ innerBlockAreas.PAYMENT_METHODS } />
+			<AdditionalFields block={ innerBlockAreas.PAYMENT_METHODS } />
 		</FormStepBlock>
 	);
 };

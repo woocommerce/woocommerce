@@ -53,7 +53,7 @@ export const Edit = ( {
 				showPhoneField={ showPhoneField }
 				requirePhoneField={ requirePhoneField }
 			/>
-			<AdditionalFields area={ innerBlockAreas.SHIPPING_ADDRESS } />
+			<AdditionalFields block={ innerBlockAreas.SHIPPING_ADDRESS } />
 		</FormStepBlock>
 	);
 };

@@ -6,7 +6,7 @@ import { isObject } from '@woocommerce/types';
 /**
  * Internal dependencies
  */
-import { innerBlockAreas } from './types';
+import { hasInnerBlocks } from './get-registered-blocks';
 
 /**
  * Asserts that an option is of the given type. Otherwise, throws an error.
@@ -27,21 +27,6 @@ export const assertType = (
 };
 
 /**
- * Validation to ensure an area exists.
- */
-export const assertValidArea = ( area: string ): void => {
-	if (
-		! Object.values( innerBlockAreas ).includes( area as innerBlockAreas )
-	) {
-		throw new Error(
-			`Incorrect value for the "area" argument. It was a ${ area }, but must be one of ${ Object.values(
-				innerBlockAreas
-			).join( ', ' ) }.`
-		);
-	}
-};
-
-/**
  * Validate the block name.
  *
  * @throws Will throw an error if the block name is invalid.
@@ -57,26 +42,53 @@ export const assertBlockName = ( blockName: string ): void => {
 };
 
 /**
+ * Validate the block parent.
+ *
+ * @throws Will throw an error if the block name is invalid.
+ */
+export const assertBlockParent = ( blockParent: string | string[] ): void => {
+	if ( typeof blockParent !== 'string' && ! Array.isArray( blockParent ) ) {
+		throw new Error(
+			`Incorrect value for the parent argument when registering a checkout block. It was a ${ typeof blockParent }, but must be a string or array of strings.`
+		);
+	}
+
+	if ( typeof blockParent === 'string' && ! hasInnerBlocks( blockParent ) ) {
+		throw new Error(
+			`When registering a checkout block, the parent must be a valid inner block area.`
+		);
+	}
+
+	if (
+		Array.isArray( blockParent ) &&
+		! blockParent.some( ( parent ) => hasInnerBlocks( parent ) )
+	) {
+		throw new Error(
+			`When registering a checkout block, the parent must be a valid inner block area.`
+		);
+	}
+};
+
+/**
  * Asserts that an option is of the given type. Otherwise, throws an error.
  *
  * @throws Will throw an error if the type of the option doesn't match the expected type.
+ * @param {Object} options      Object containing the option to validate.
+ * @param {string} optionName   Name of the option to validate.
+ * @param {string} expectedType Type expected for the option.
  */
 export const assertOption = (
-	options: Record< string, unknown >,
+	options: unknown,
 	optionName: string,
-	expectedType: 'array' | 'object' | 'string' | 'boolean' | 'number'
+	expectedType: string
 ): void => {
+	if ( ! isObject( options ) ) {
+		return;
+	}
 	const actualType = typeof options[ optionName ];
-
-	if ( expectedType === 'array' ) {
-		if ( ! Array.isArray( options[ optionName ] ) ) {
-			throw new Error(
-				`Incorrect value for the ${ optionName } argument when registering a checkout block component. It was a ${ actualType }, but must be an array.`
-			);
-		}
-	} else if ( actualType !== expectedType ) {
+	if ( actualType !== expectedType ) {
 		throw new Error(
-			`Incorrect value for the ${ optionName } argument when registering a checkout block component. It was a ${ actualType }, but must be a ${ expectedType }.`
+			`Incorrect value for the ${ optionName } argument when registering a block component. It was a ${ actualType }, but must be a ${ expectedType }.`
 		);
 	}
 };

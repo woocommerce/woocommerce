@@ -116,7 +116,7 @@ export const Edit = ( {
 			<Disabled>
 				<Block />
 			</Disabled>
-			<AdditionalFields area={ innerBlockAreas.SHIPPING_METHODS } />
+			<AdditionalFields block={ innerBlockAreas.SHIPPING_METHODS } />
 		</FormStepBlock>
 	);
 };

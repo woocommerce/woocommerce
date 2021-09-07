@@ -1,55 +1,20 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { Icon, asterisk } from '@woocommerce/icons';
-import {
-	registerCheckoutBlock,
-	innerBlockAreas,
-} from '@woocommerce/blocks-checkout';
-import { lazy } from '@wordpress/element';
-import { WC_BLOCKS_BUILD_URL } from '@woocommerce/block-settings';
-
-// Modify webpack publicPath at runtime based on location of WordPress Plugin.
-// eslint-disable-next-line no-undef,camelcase
-__webpack_public_path__ = WC_BLOCKS_BUILD_URL;
+import { registerExperimentalBlockType } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
  */
 import { Edit, Save } from './edit';
+import metadata from './block.json';
 
-registerCheckoutBlock( 'woocommerce/checkout-sample-block', {
-	component: lazy( () =>
-		import( /* webpackChunkName: "checkout-blocks/sample" */ './frontend' )
-	),
-	areas: [
-		innerBlockAreas.SHIPPING_ADDRESS,
-		innerBlockAreas.BILLING_ADDRESS,
-		innerBlockAreas.CONTACT_INFORMATION,
-		innerBlockAreas.CHECKOUT_FIELDS,
-		innerBlockAreas.CHECKOUT_TOTALS,
-	],
-	force: true,
-	configuration: {
-		title: __( 'Sample Block', 'woo-gutenberg-products-block' ),
-		category: 'woocommerce',
-		description: __(
-			'A sample block showing how to integrate with Checkout i2.',
-			'woo-gutenberg-products-block'
-		),
-		icon: {
-			src: <Icon srcElement={ asterisk } />,
-			foreground: '#874FB9',
-		},
-		supports: {
-			align: false,
-			html: false,
-			multiple: true,
-			reusable: false,
-		},
-		attributes: {},
-		edit: Edit,
-		save: Save,
+registerExperimentalBlockType( metadata, {
+	icon: {
+		src: <Icon srcElement={ asterisk } />,
+		foreground: '#874FB9',
 	},
+	edit: Edit,
+	save: Save,
 } );

@@ -11,7 +11,7 @@ import {
 import parse from 'html-react-parser';
 import {
 	getRegisteredBlocks,
-	isInnerBlockArea,
+	hasInnerBlocks,
 } from '@woocommerce/blocks-checkout';
 
 /**
@@ -32,11 +32,11 @@ import {
  * Gets a component from the block map for a given block name, or returns null if a component is not registered.
  */
 const getBlockComponentFromMap = (
-	blockName: string,
+	block: string,
 	blockMap: Record< string, React.ReactNode >
 ): React.ElementType | null => {
-	return blockName && blockMap[ blockName ]
-		? ( blockMap[ blockName ] as React.ElementType )
+	return block && blockMap[ block ]
+		? ( blockMap[ block ] as React.ElementType )
 		: null;
 };
 
@@ -50,12 +50,12 @@ const getBlockComponentFromMap = (
  * @see registerCheckoutBlock
  */
 const renderForcedBlocks = (
-	blockName: string,
+	block: string,
 	blockMap: Record< string, React.ReactNode >,
 	// Current children from the parent (siblings of the forced block)
 	blockChildren: HTMLCollection | null
 ) => {
-	if ( ! isInnerBlockArea( blockName ) ) {
+	if ( ! hasInnerBlocks( block ) ) {
 		return null;
 	}
 
@@ -69,16 +69,16 @@ const renderForcedBlocks = (
 				.filter( Boolean ) as string[] )
 		: [];
 
-	const forcedBlocks = getRegisteredBlocks( blockName ).filter(
-		( { block, force } ) =>
-			force === true && ! currentBlocks.includes( block )
+	const forcedBlocks = getRegisteredBlocks( block ).filter(
+		( { blockName, force } ) =>
+			force === true && ! currentBlocks.includes( blockName )
 	);
 
 	return forcedBlocks.map(
-		( { block, component }, index: number ): JSX.Element | null => {
+		( { blockName, component }, index: number ): JSX.Element | null => {
 			const ForcedComponent = component
 				? component
-				: getBlockComponentFromMap( block, blockMap );
+				: getBlockComponentFromMap( blockName, blockMap );
 			return ForcedComponent ? (
 				<ForcedComponent key={ `${ blockName }_forced_${ index }` } />
 			) : null;
@@ -91,7 +91,7 @@ const renderForcedBlocks = (
  */
 const renderInnerBlocks = ( {
 	// This is the parent block we're working within (see renderParentBlock)
-	blockName: parentBlockName,
+	block,
 	// This is the map of blockNames->components
 	blockMap,
 	// Component which inner blocks are wrapped with.
@@ -101,8 +101,8 @@ const renderInnerBlocks = ( {
 	// Current depth of the children. Used to ensure keys are unique.
 	depth = 1,
 }: {
-	// Parent Block Name. Used for inner block component mapping.
-	blockName: string;
+	// Block (parent) being rendered. Used for inner block component mapping.
+	block: string;
 	// Map of block names to block components for children.
 	blockMap: Record< string, React.ReactNode >;
 	// Wrapper for inner components.
@@ -121,7 +121,7 @@ const renderInnerBlocks = ( {
 		 * convert the HTMLElement to a React component.
 		 */
 		const { blockName = '', ...componentProps } = {
-			key: `${ parentBlockName }_${ depth }_${ index }`,
+			key: `${ block }_${ depth }_${ index }`,
 			...( element instanceof HTMLElement ? element.dataset : {} ),
 		};
 
@@ -141,9 +141,9 @@ const renderInnerBlocks = ( {
 				const elementChildren =
 					element.children && element.children.length
 						? renderInnerBlocks( {
-								children: element.children,
-								blockName: parentBlockName,
+								block,
 								blockMap,
+								children: element.children,
 								depth: depth + 1,
 								blockWrapper,
 						  } )
@@ -166,7 +166,7 @@ const renderInnerBlocks = ( {
 
 		return (
 			<Suspense
-				key={ `${ parentBlockName }_${ depth }_${ index }_suspense` }
+				key={ `${ block }_${ depth }_${ index }_suspense` }
 				fallback={ <div className="wc-block-placeholder" /> }
 			>
 				<InnerBlockComponentWrapper>
@@ -178,9 +178,9 @@ const renderInnerBlocks = ( {
 							 * children from this element.
 							 */
 							renderInnerBlocks( {
-								children: element.children,
-								blockName: parentBlockName,
+								block,
 								blockMap,
+								children: element.children,
 								depth: depth + 1,
 								blockWrapper,
 							} )
@@ -246,7 +246,7 @@ export const renderParentBlock = ( {
 		const children =
 			element.children && element.children.length
 				? renderInnerBlocks( {
-						blockName,
+						block: blockName,
 						blockMap,
 						children: element.children,
 						blockWrapper,
