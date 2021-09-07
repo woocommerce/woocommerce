@@ -3,8 +3,8 @@ const { Collection, ItemGroup, Item } = require('postman-collection');
 require('dotenv').config();
 const {
 	BASE_URL,
-	USERNAME,
-	PASSWORD,
+	USER_KEY,
+	USER_SECRET,
 	USE_INDEX_PERMALINKS
 } = process.env;
 
@@ -16,18 +16,25 @@ const {
  */
 
 // Set up our empty collection
+if ( typeof USER_KEY === 'undefined' ) {
+	console.log('No USER_KEY was defined.');
+}
+if ( typeof USER_SECRET === 'undefined' ) {
+	console.log('No USER_SECRET was defined.');
+}
+
 const postmanCollection = new Collection( {
 	auth: {
 		type: 'basic',
 		basic: [
 			{
 				key: 'username',
-				value: USERNAME,
+				value: USER_KEY,
 				type: 'string'
 			},
 			{
 				key: 'password',
-				value: PASSWORD,
+				value: USER_SECRET,
 				type: 'string'
 			},
 		]
@@ -38,11 +45,15 @@ const postmanCollection = new Collection( {
 } );
 
 // Get the API url
+if ( typeof BASE_URL === 'undefined' ) {
+	console.log('No BASE_URL was defined.');
+}
+
 // Update the API path if the `USE_INDEX_PERMALINKS` flag is set
 const useIndexPermalinks = ( USE_INDEX_PERMALINKS === 'true' );
-let apiPath = `${BASE_URL}/wp-json/wc/v3`;
+let apiPath = `${BASE_URL}/?rest_route=/wc/v3/`;
 if ( useIndexPermalinks ) {
-	apiPath = `${BASE_URL}/?rest_route=/wc/v3`;
+	apiPath = `${BASE_URL}/wp-json/wc/v3/`;
 }
 // Set this here for use in `request.js`
 global.API_PATH = `${apiPath}/`;
@@ -84,9 +95,7 @@ for ( const key in resources ) {
 				mode: 'raw',
 				raw: JSON.stringify( api.payload ),
 				options: {
-					raw: {
-						language: 'json'
-					}
+					raw: { language: 'json' }
 				}
 			  },
 			},
@@ -94,7 +103,7 @@ for ( const key in resources ) {
 		folder.items.add( request );
 	}
 
-	postmanCollection.items.add( folder ) ;
+	postmanCollection.items.add( folder );
 }
 
 // We need to convert the collection to JSON so that it can be exported to a file
