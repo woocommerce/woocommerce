@@ -220,9 +220,9 @@ class MiniCart extends AbstractBlock {
 			</div>';
 		}
 
-		return '<div class="wc-block-mini-cart is-loading">
+		return '<div class="wc-block-mini-cart">
 			<button class="wc-block-mini-cart__button">' . $button_text . '</button>
-			<div class="wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--is-hidden" aria-hidden="true">
+			<div class="wc-block-mini-cart__drawer is-loading is-mobile wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--is-hidden" aria-hidden="true">
 				<div class="components-modal__frame wc-block-components-drawer">
 					<div class="components-modal__content">
 						<div class="components-modal__header">
@@ -246,7 +246,7 @@ class MiniCart extends AbstractBlock {
 	 */
 	protected function get_cart_contents_markup( $cart_contents ) {
 		// Force mobile styles.
-		return '<div class="is-mobile"><table class="wc-block-cart-items">
+		return '<table class="wc-block-cart-items">
 			<thead>
 				<tr class="wc-block-cart-items__header">
 					<th class="wc-block-cart-items__header-image"><span /></th>
@@ -255,7 +255,7 @@ class MiniCart extends AbstractBlock {
 				</tr>
 			</thead>
 			<tbody>' . implode( array_map( array( $this, 'get_cart_item_markup' ), $cart_contents ) ) . '</tbody>
-		</table></div>';
+		</table>';
 	}
 
 	/**
@@ -266,20 +266,25 @@ class MiniCart extends AbstractBlock {
 	protected function get_cart_item_markup() {
 		return '<tr class="wc-block-cart-items__row">
 			<td class="wc-block-cart-item__image">
-				<div><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=" width="1" height="1" /></div>
+				<a href=""><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=" width="1" height="1" /></a>
 			</td>
 			<td class="wc-block-cart-item__product">
-				<div class="wc-block-cart-item__product-name"></div>
-				<div class="wc-block-cart-item__individual-price"></div>
-				<div class="wc-block-cart-item__product-metadata"></div>
-				<div class="wc-block-components-quantity-selector">
-					<input class="wc-block-components-quantity-selector__input" type="number" step="1" min="0" value="1" />
-					<button class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">－</button>
-					<button class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">＋</button>
+				<div class="wc-block-components-product-name"></div>
+				<div class="wc-block-components-product-price"></div>
+				<div class="wc-block-components-product-metadata"></div>
+				<div class="wc-block-cart-item__quantity">
+					<div class="wc-block-components-quantity-selector">
+						<input class="wc-block-components-quantity-selector__input" type="number" step="1" min="0" value="1" />
+						<button class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">－</button>
+						<button class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">＋</button>
+					</div>
+					<button class="wc-block-cart-item__remove-link"></button>
 				</div>
 			</td>
 			<td class="wc-block-cart-item__total">
-				<div class="wc-block-cart-item__price"></div>
+				<div class="wc-block-cart-item__total-price-and-sale-badge-wrapper">
+					<div class="wc-block-components-product-price"></div>
+				</div>
 			</td>
 		</tr>';
 	}

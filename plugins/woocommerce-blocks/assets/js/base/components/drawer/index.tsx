@@ -12,6 +12,7 @@ import './style.scss';
 
 interface DrawerProps {
 	children: JSX.Element;
+	className?: string;
 	isOpen: boolean;
 	onClose: () => void;
 	slideIn?: boolean;
@@ -21,6 +22,7 @@ interface DrawerProps {
 
 const Drawer = ( {
 	children,
+	className,
 	isOpen,
 	onClose,
 	slideIn = true,
@@ -39,7 +41,7 @@ const Drawer = ( {
 			title={ title }
 			focusOnMount={ true }
 			onRequestClose={ onClose }
-			className="wc-block-components-drawer"
+			className={ classNames( className, 'wc-block-components-drawer' ) }
 			overlayClassName={ classNames(
 				'wc-block-components-drawer__screen-overlay',
 				{
