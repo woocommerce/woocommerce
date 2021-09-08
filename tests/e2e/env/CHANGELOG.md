@@ -1,6 +1,11 @@
 # Unreleased
 
-- `updateReadyPageStatus` utility to update the status of the ready page.
+# 0.2.3
+
+## Added
+
+- `addConsoleSuppression()`, `removeConsoleSuppression()` utilities to allow suppressing deprecation warnings.
+- `updateReadyPageStatus()` utility to update the status of the ready page.
 - Added plugin upload functionality util that provides a method to pull a plugin zip from a remote location:
   - `getRemotePluginZip( fileUrl )` to get the remote zip. Returns the filepath of the zip location.
 - Added plugin zip utility functions:
@@ -8,6 +13,9 @@
   - `downloadZip( fileUrl, downloadPath )` downloads a plugin zip file from a remote location to the provided path.
 - Added `getLatestReleaseZipUrl( owner, repository, getPrerelease, perPage )` util function to get the latest release zip from a GitHub repository.
 - Added `DEFAULT_TIMEOUT_OVERRIDE` that allows passing in a time in milliseconds to override the default Jest and Puppeteer timeouts.
+
+## Fixed
+
 - Fix latest version tag search paging logic
 - Update fallback PHP version to 7.4.22
 - Update fallback MariaDB version to 10.6.4

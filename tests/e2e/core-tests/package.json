@@ -1,6 +1,6 @@
 {
   "name": "@woocommerce/e2e-core-tests",
-  "version": "0.1.4",
+  "version": "0.1.6",
   "description": "End-To-End (E2E) tests for WooCommerce",
   "homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/tests/e2e/core-tests/README.md",
   "repository": {
@@ -16,7 +16,7 @@
   },
   "peerDependencies": {
     "@woocommerce/api": "^0.2.0",
-    "@woocommerce/e2e-utils": "^0.1.5"
+    "@woocommerce/e2e-utils": "^0.1.6"
   },
   "publishConfig": {
     "access": "public"
