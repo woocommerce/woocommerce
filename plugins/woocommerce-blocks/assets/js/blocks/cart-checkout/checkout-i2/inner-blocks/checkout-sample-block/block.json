@@ -10,14 +10,6 @@
 		"multiple": true,
 		"reusable": false
 	},
-	"attributes": {
-		"lock": {
-			"type": "object",
-			"default": {
-				"remove": true
-			}
-		}
-	},
 	"parent": [
 		"woocommerce/checkout-shipping-address-block",
 		"woocommerce/checkout-billing-address-block",
