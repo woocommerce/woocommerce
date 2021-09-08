@@ -1,5 +1,13 @@
 # Unreleased
 
+# 0.1.6
+
+## Fixed
+
+- Fatal error in order filter test
+
+# 0.1.5
+
 ## Added
 
 - api package test for variable products and product variations

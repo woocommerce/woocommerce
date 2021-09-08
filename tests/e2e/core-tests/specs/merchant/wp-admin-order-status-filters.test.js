@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import config from 'config';
+const config = require( 'config' );
 
 const {
 	merchant,
