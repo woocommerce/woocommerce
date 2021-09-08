@@ -17,6 +17,7 @@
 		"shipping-label-banner": true,
 		"store-alerts": true,
 		"tasks": true,
-		"transient-notices": true
+		"transient-notices": true,
+		"wc-pay-promotion": true
 	}
 }

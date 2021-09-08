@@ -52,6 +52,7 @@ const wpAdminScripts = [
 	'onboarding-tax-notice',
 	'print-shipping-label-banner',
 	'beta-features-tracking-modal',
+	'wc-pay-payments-promotion',
 ];
 wpAdminScripts.forEach( ( name ) => {
 	entryPoints[ name ] = `./client/wp-admin-scripts/${ name }`;

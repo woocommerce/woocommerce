@@ -11,6 +11,7 @@ import { OnboardingWizard } from '../../pages/OnboardingWizard';
 import { WcHomescreen } from '../../pages/WcHomescreen';
 import { createOrder, removeAllOrders, updateOption } from '../../fixtures';
 import { OrdersActivityPanel } from '../../elements/OrdersActivityPanel';
+import { waitForElementByText } from '../../utils/actions';
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 const { afterAll, beforeAll, describe, it } = require( '@jest/globals' );
@@ -99,6 +100,10 @@ const testAdminHomescreenActivityPanel = () => {
 		describe( 'Orders panel', () => {
 			it( 'should show: "you have fullfilled all your orders" when expanding Orders panel if no actionable orders', async () => {
 				await homeScreen.expandActivityPanel( 'Orders' );
+				await waitForElementByText(
+					'h4',
+					'You’ve fulfilled all your orders'
+				);
 				await expect( page ).toMatchElement( 'h4', {
 					text: 'You’ve fulfilled all your orders',
 				} );

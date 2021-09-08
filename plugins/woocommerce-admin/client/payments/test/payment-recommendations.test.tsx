@@ -253,14 +253,44 @@ describe( 'Payment recommendations', () => {
 		( isWCPaySupported as jest.Mock ).mockReturnValue( true );
 		( useSelect as jest.Mock ).mockReturnValue( {
 			displayable: true,
-			recommendedPlugins: [ { title: 'test', slug: 'test' } ],
+			recommendedPlugins: [
+				{ title: 'test', slug: 'test', product: 'test' },
+			],
 		} );
 		const { container } = render( <PaymentRecommendations /> );
 
 		expect( container.firstChild ).not.toBeNull();
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'settings_payments_recommendations_pageview',
-			{}
+			{
+				test_displayed: true,
+				woocommerce_payments_displayed: false,
+			}
+		);
+	} );
+
+	it( 'should set woocommerce-payments-displayed prop to true if pre install wc pay promotion gateway is displayed', () => {
+		( isWCPaySupported as jest.Mock ).mockReturnValue( true );
+		( useSelect as jest.Mock ).mockReturnValue( {
+			displayable: true,
+			recommendedPlugins: [
+				{ title: 'test', slug: 'test', product: 'test' },
+			],
+		} );
+		const { container } = render(
+			<div>
+				<div data-gateway_id="pre_install_woocommerce_payments_promotion"></div>
+				<PaymentRecommendations />
+			</div>
+		);
+
+		expect( container.firstChild ).not.toBeNull();
+		expect( recordEvent ).toHaveBeenCalledWith(
+			'settings_payments_recommendations_pageview',
+			{
+				test_displayed: true,
+				woocommerce_payments_displayed: false,
+			}
 		);
 	} );
 

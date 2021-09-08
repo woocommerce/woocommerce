@@ -46,18 +46,20 @@ export function getPaymentRecommendationData(
 ): {
 	displayable: boolean;
 	recommendedPlugins?: Plugin[];
+	isLoading: boolean;
 } {
 	const { getOption, isResolving: isResolvingOption } = select(
 		OPTIONS_STORE_NAME
 	) as OptionsSelector;
 	const { getSettings } = select( SETTINGS_STORE_NAME ) as SettingsSelector;
 	const { getRecommendedPlugins } = select( PLUGINS_STORE_NAME );
-	const { general: settings = {} } = getSettings( 'general' );
+	const { general: settings } = getSettings( 'general' );
 
 	const hidden = getOption( DISMISS_OPTION );
-	const countryCode = settings.woocommerce_default_country
-		? getCountryCode( settings.woocommerce_default_country )
-		: null;
+	const countryCode =
+		settings && settings.woocommerce_default_country
+			? getCountryCode( settings.woocommerce_default_country )
+			: null;
 	const countrySupported = countryCode
 		? isWCPaySupported( countryCode )
 		: false;
@@ -67,17 +69,27 @@ export function getPaymentRecommendationData(
 
 	const displayable =
 		! isRequestingOptions && hidden !== 'yes' && countrySupported;
-	let plugins;
+	let plugins = null;
 	if ( displayable ) {
 		// don't get recommended plugins until it is displayable.
 		plugins = getRecommendedPlugins( 'payments' );
 	}
+	const isLoading =
+		isRequestingOptions ||
+		hidden === undefined ||
+		settings === undefined ||
+		plugins === undefined;
 
 	return {
 		displayable,
 		recommendedPlugins: plugins,
+		isLoading,
 	};
 }
+
+const WcPayPromotionGateway = document.querySelector(
+	'[data-gateway_id="pre_install_woocommerce_payments_promotion"]'
+);
 
 const PaymentRecommendations: React.FC = () => {
 	const [ installingPlugin, setInstallingPlugin ] = useState< string | null >(
@@ -85,7 +97,7 @@ const PaymentRecommendations: React.FC = () => {
 	);
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const { installAndActivatePlugins } = useDispatch( PLUGINS_STORE_NAME );
-	const { displayable, recommendedPlugins } = useSelect(
+	const { displayable, recommendedPlugins, isLoading } = useSelect(
 		getPaymentRecommendationData
 	);
 	const triggeredPageViewRef = useRef( false );
@@ -93,11 +105,33 @@ const PaymentRecommendations: React.FC = () => {
 		displayable && recommendedPlugins && recommendedPlugins.length > 0;
 
 	useEffect( () => {
-		if ( shouldShowRecommendations && ! triggeredPageViewRef.current ) {
+		if (
+			( shouldShowRecommendations ||
+				( WcPayPromotionGateway && ! isLoading ) ) &&
+			! triggeredPageViewRef.current
+		) {
 			triggeredPageViewRef.current = true;
-			recordEvent( 'settings_payments_recommendations_pageview', {} );
+			const eventProps = ( recommendedPlugins || [] ).reduce(
+				( props, plugin ) => {
+					if ( plugin.product ) {
+						return {
+							...props,
+							[ plugin.product.replace( /\-/g, '_' ) +
+							'_displayed' ]: true,
+						};
+					}
+					return props;
+				},
+				{
+					woocommerce_payments_displayed: !! WcPayPromotionGateway,
+				}
+			);
+			recordEvent(
+				'settings_payments_recommendations_pageview',
+				eventProps
+			);
 		}
-	}, [ shouldShowRecommendations ] );
+	}, [ shouldShowRecommendations, WcPayPromotionGateway, isLoading ] );
 
 	if ( ! shouldShowRecommendations ) {
 		return null;
