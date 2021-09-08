@@ -1,6 +1,6 @@
 {
   "name": "@woocommerce/e2e-utils",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "End-To-End (E2E) test utils for WooCommerce",
   "homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/tests/e2e/utils/README.md",
   "repository": {
