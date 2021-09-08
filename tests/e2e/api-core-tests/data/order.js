@@ -25,18 +25,18 @@ const order = {
 
 const productLineItems = {
 	name: '',
-	product_id: '',
+	product_id: 93,
 	variation_id: 0,
-	quantity: 0,
+	quantity: 2,
 	tax_class: '',
 	subtotal: '',
 	total: '',
 };
 
 const shippingLines = {
-	method_title: '',
+	method_title: 'Flat rate',
 	method_id: 'flat_rate',
-	total: '',
+	total: '10.00',
 };
 
 const feeLines = {
@@ -50,10 +50,36 @@ const couponLines = {
 	code: '10off',
 };
 
+/**
+ * Builds an example order request.
+ *
+ * @returns {Object} Sample Order payload.
+ */
+const getOrderExample = () => {
+	let orderExample = {
+		id: 0,
+		payment_method: 'cod',
+		payment_method_title: 'Cash on Delivery',
+		status: 'processing',
+		set_paid: false,
+		currency: 'USD',
+		customer_note: 'A customer provided note.',
+		customer_id: 0,
+		billing: customerBilling,
+		shipping: customerShipping,
+		line_items: [ productLineItems ],
+		shipping_lines: [ shippingLines ],
+		fee_lines: [ feeLines ],
+		coupon_lines: [ couponLines ],
+	};
+	return orderExample;
+}
+
 module.exports = {
 	order,
 	productLineItems,
 	shippingLines,
 	feeLines,
 	couponLines,
+	getOrderExample,
 };
