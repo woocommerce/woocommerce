@@ -123,7 +123,7 @@ const lazyLoadScript = ( {
 			id: `${ handle }-js`,
 			onerror: reject,
 			onload,
-			src: version ? `${ src }?${ version }` : src,
+			src: version ? `${ src }?ver=${ version }` : src,
 		} );
 	} );
 };
