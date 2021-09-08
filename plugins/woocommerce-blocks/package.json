@@ -98,7 +98,7 @@
 		"@types/gtag.js": "0.0.7",
 		"@types/jest": "26.0.24",
 		"@types/lodash": "4.14.172",
-		"@types/react": "16.14.14",
+		"@types/react": "16.14.15",
 		"@types/wordpress__block-editor": "2.2.9",
 		"@types/wordpress__data": "4.6.10",
 		"@types/wordpress__data-controls": "1.0.5",
