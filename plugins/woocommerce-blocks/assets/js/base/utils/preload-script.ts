@@ -19,7 +19,7 @@ const preloadScript = ( {
 
 	if ( handleScriptElements.length === 0 ) {
 		const prefetchLink = document.createElement( 'link' );
-		prefetchLink.href = version ? `${ src }?${ version }` : src;
+		prefetchLink.href = version ? `${ src }?ver=${ version }` : src;
 		prefetchLink.rel = 'preload';
 		prefetchLink.as = 'script';
 		prefetchLink.id = `${ handle }-js-prefetch`;
