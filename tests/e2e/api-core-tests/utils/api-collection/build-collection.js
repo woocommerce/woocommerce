@@ -51,9 +51,9 @@ if ( typeof BASE_URL === 'undefined' ) {
 
 // Update the API path if the `USE_INDEX_PERMALINKS` flag is set
 const useIndexPermalinks = ( USE_INDEX_PERMALINKS === 'true' );
-let apiPath = `${BASE_URL}/?rest_route=/wc/v3/`;
+let apiPath = `${BASE_URL}/?rest_route=/wc/v3`;
 if ( useIndexPermalinks ) {
-	apiPath = `${BASE_URL}/wp-json/wc/v3/`;
+	apiPath = `${BASE_URL}/wp-json/wc/v3`;
 }
 // Set this here for use in `request.js`
 global.API_PATH = `${apiPath}/`;

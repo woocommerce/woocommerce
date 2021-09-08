@@ -63,8 +63,8 @@ describe('Orders API tests', () => {
 
 	it('can add shipping and billing contacts to an order', async () => {
 		// Update the billing and shipping fields on the order
-		order.billing = updatedCustomerBilling,
-		order.shipping = updatedCustomerShipping
+		order.billing = updatedCustomerBilling;
+		order.shipping = updatedCustomerShipping;
 
 		const response = await ordersApi.update.order( orderId, order );
 		expect( response.statusCode).toEqual( ordersApi.update.responseCode );
