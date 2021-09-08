@@ -1,3 +1,7 @@
+# Unreleased
+
+-   Fix the batch fetch logic for the options data store. #7587
+
 # 1.4.0
 
 -   Fix commonjs module build, allow package to be built in isolation. #7286

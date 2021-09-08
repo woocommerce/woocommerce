@@ -29,7 +29,7 @@ export const controls = {
 				const names = optionNames.join( ',' );
 				if ( fetches[ names ] ) {
 					return fetches[ names ].then( ( result ) => {
-						resolve( result[ optionName ] );
+						resolve( result );
 					} );
 				}
 

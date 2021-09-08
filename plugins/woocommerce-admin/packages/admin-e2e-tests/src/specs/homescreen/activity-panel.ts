@@ -99,7 +99,7 @@ const testAdminHomescreenActivityPanel = () => {
 		describe( 'Orders panel', () => {
 			it( 'should show: "you have fullfilled all your orders" when expanding Orders panel if no actionable orders', async () => {
 				await homeScreen.expandActivityPanel( 'Orders' );
-				expect( page ).toMatchElement( 'h4', {
+				await expect( page ).toMatchElement( 'h4', {
 					text: 'You’ve fulfilled all your orders',
 				} );
 			} );
