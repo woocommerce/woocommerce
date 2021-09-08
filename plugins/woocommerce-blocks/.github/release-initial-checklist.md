@@ -34,6 +34,7 @@ Additionally, make sure to differentiate between things in the testing notes tha
   * Test to confirm blocks are available and work correctly in oldest supported WordPress version (e.g. 5.3).
   * Confidence check - check blocks are available and function.
   * Test to confirm new features/fixes are working correctly.
+  * Test any UI changes in mobile and desktop views.
   * Smoke test – test a cross section of core functionality.
 
 ## Update Pull Request description and get approvals

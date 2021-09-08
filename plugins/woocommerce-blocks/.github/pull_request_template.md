@@ -20,13 +20,25 @@ Fixes #
 
 <!-- If your change has a visual component, add a screenshot here. A "before" screenshot would also be helpful. -->
 
-### How to test the changes in this Pull Request:
+### Testing
+
+#### Automated Tests
+* [ ] Changes in this PR are covered by Automated Tests.
+  * [ ] Unit tests
+  * [ ] E2E tests
+### Manual Testing
+
+How to test the changes in this Pull Request:
 
 1.
 2.
 3.
 
 <!-- If you can, add the appropriate labels -->
+
+### Performance Impact
+
+<!-- Please document any known performance impact (positive or negative) here. If negative, provide some rationale for why this is an okay tradeoff or how this will be addressed. -->
 
 ### Changelog
 
