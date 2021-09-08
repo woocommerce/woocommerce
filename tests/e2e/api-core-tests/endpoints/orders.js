@@ -2,7 +2,7 @@
  * Internal dependencies
  */
 const { getRequest, postRequest, putRequest, deleteRequest } = require('../utils/request');
-const { order, shared } = require('../data');
+const { getOrderExample, shared } = require('../data');
 
 /**
  * WooCommerce Orders endpoints.
@@ -16,7 +16,7 @@ const ordersApi = {
 		method: 'POST',
 		path: 'orders',
 		responseCode: 201,
-		payload: order,
+		payload: getOrderExample(),
 		order: async ( orderDetails ) => postRequest( 'orders', orderDetails ),
 	},
 	retrieve: {
@@ -38,7 +38,7 @@ const ordersApi = {
 		method: 'PUT',
 		path: 'orders/<id>',
 		responseCode: 200,
-		payload: order.order,
+		payload: getOrderExample(),
 		order: async ( orderId, orderDetails ) => putRequest( `orders/${orderId}`, orderDetails ),
 	},
 	delete: {
@@ -56,7 +56,7 @@ const ordersApi = {
 		method: 'POST',
 		path: 'orders/batch',
 		responseCode: 200,
-		payload: shared.getBatchPayloadExample( order.order ),
+		payload: shared.getBatchPayloadExample( getOrderExample() ),
 		orders: async ( batchUpdatePayload ) => postRequest( `orders/batch`, batchUpdatePayload ),
 	},
 };
