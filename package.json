@@ -28,7 +28,7 @@
     "docker:down": "npx wc-e2e docker:down",
     "docker:ssh": "npx wc-e2e docker:ssh",
     "docker:up": "npx wc-e2e docker:up",
-    "test:api": "npx wc-api-tests test",
+    "test:api": "npx wc-api-tests test api",
     "make:collection": "npx wc-api-tests make:collection",
     "test:e2e": "npx wc-e2e test:e2e",
     "test:e2e-debug": "npx wc-e2e test:e2e-debug",

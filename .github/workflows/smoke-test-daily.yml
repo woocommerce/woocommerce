@@ -47,4 +47,4 @@ jobs:
         run: |
           npx wc-e2e test:e2e ./tests/e2e/specs/smoke-tests/update-woocommerce.js
           npx wc-e2e test:e2e
-          npx wc-api-tests test:api
+          npx wc-api-tests test api
