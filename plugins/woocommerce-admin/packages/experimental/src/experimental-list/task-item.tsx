@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-import { createElement, Fragment } from '@wordpress/element';
+import {
+	createElement,
+	Fragment,
+	useEffect,
+	useState,
+} from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Icon, check } from '@wordpress/icons';
 import { Button, Tooltip } from '@wordpress/components';
@@ -35,8 +40,10 @@ type TaskItemProps = {
 	title: string;
 	completed: boolean;
 	onClick: () => void;
+	onCollapse?: () => void;
 	onDelete?: () => void;
 	onDismiss?: () => void;
+	onExpand?: () => void;
 	remindMeLater?: () => void;
 	additionalInfo?: string;
 	time?: string;
@@ -100,7 +107,9 @@ export const TaskItem: React.FC< TaskItemProps > = ( {
 	completed,
 	title,
 	onDelete,
+	onCollapse,
 	onDismiss,
+	onExpand,
 	remindMeLater,
 	onClick,
 	additionalInfo,
@@ -114,9 +123,14 @@ export const TaskItem: React.FC< TaskItemProps > = ( {
 	actionLabel,
 	...listItemProps
 } ) => {
+	const [ isTaskExpanded, setTaskExpanded ] = useState( expanded );
+	useEffect( () => {
+		setTaskExpanded( expanded );
+	}, [ expanded ] );
+
 	const className = classnames( 'woocommerce-task-list__item', {
 		complete: completed,
-		expanded,
+		expanded: isTaskExpanded,
 		'level-2': level === 2 && ! completed,
 		'level-1': level === 1 && ! completed,
 	} );
@@ -128,11 +142,25 @@ export const TaskItem: React.FC< TaskItemProps > = ( {
 		( ( onDismiss || remindMeLater ) && ! completed ) ||
 		( onDelete && completed );
 
+	const toggleActionVisibility = () => {
+		setTaskExpanded( ! isTaskExpanded );
+		if ( isTaskExpanded && onExpand ) {
+			onExpand();
+		}
+		if ( ! isTaskExpanded && onCollapse ) {
+			onCollapse();
+		}
+	};
+
 	return (
 		<ListItem
 			disableGutters
 			className={ className }
-			onClick={ onClick }
+			onClick={
+				expandable && showActionButton
+					? toggleActionVisibility
+					: onClick
+			}
 			{ ...listItemProps }
 		>
 			<OptionalTaskTooltip level={ level } completed={ completed }>
@@ -159,7 +187,7 @@ export const TaskItem: React.FC< TaskItemProps > = ( {
 					</span>
 					<OptionalExpansionWrapper
 						expandable={ expandable }
-						expanded={ expanded }
+						expanded={ isTaskExpanded }
 					>
 						<div className="woocommerce-task-list__item-expandable-content">
 							{ content }

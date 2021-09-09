@@ -2,6 +2,7 @@
 
 -   Adjust task-item css class to prevent css conflicts. #7593
 -   Update task-item logic to only display content when expanded is true. #7611
+-   Add expandable tasklist item. #7632
 
 # 1.5.1
 

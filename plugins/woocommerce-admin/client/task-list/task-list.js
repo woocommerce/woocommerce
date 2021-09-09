@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { useEffect, useRef, useState } from '@wordpress/element';
+import { useEffect, useRef } from '@wordpress/element';
 import { Button, Card, CardHeader } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { EllipsisMenu, Badge } from '@woocommerce/components';
@@ -84,10 +84,6 @@ export const TaskList = ( {
 			task.visible &&
 			! task.completed &&
 			! dismissedTasks.includes( task.key )
-	);
-
-	const [ currentTask, setCurrentTask ] = useState(
-		incompleteTasks[ 0 ]?.key
 	);
 
 	const possiblyCompleteTaskList = () => {
@@ -349,15 +345,9 @@ export const TaskList = ( {
 								title={ task.title }
 								completed={ task.completed }
 								content={ task.content }
-								onClick={
-									! expandingItems || task.completed
-										? task.onClick
-										: () => setCurrentTask( task.key )
-								}
-								expandable={ expandingItems }
-								expanded={
-									expandingItems && currentTask === task.key
-								}
+								expandable={ expandingItems && task.expandable }
+								expanded={ expandingItems && task.expanded }
+								onClick={ task.onClick }
 								onDismiss={
 									task.isDismissable
 										? () => dismissTask( task )
@@ -370,9 +360,12 @@ export const TaskList = ( {
 								}
 								time={ task.time }
 								level={ task.level }
-								action={ task.onClick }
-								actionLabel={ task.action }
+								action={ task.action }
+								actionLabel={ task.actionLabel }
 								additionalInfo={ task.additionalInfo }
+								showActionButton={ task.showActionButton }
+								onExpand={ task.onExpand }
+								onCollapse={ task.onCollapse }
 							/>
 						) ) }
 					</ListComp>
