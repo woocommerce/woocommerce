@@ -7,7 +7,7 @@
 usage() {
 	echo 'usage: npx wc-api-tests <script>'
 	echo 'scripts:'
-	echo '         test - run API tests'
+	echo '         test <group> - run API tests with the specified group'
 	echo '         make:collection - build a Postman API Collection'
 }
 
