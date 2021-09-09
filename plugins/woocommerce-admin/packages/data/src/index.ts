@@ -27,6 +27,7 @@ export { useSettings } from './settings/use-settings';
 
 export { PLUGINS_STORE_NAME } from './plugins';
 export type { Plugin } from './plugins/types';
+export { ActionDispatchers as PluginsStoreActions } from './plugins/actions';
 export { pluginNames } from './plugins/constants';
 export { withPluginsHydration } from './plugins/with-plugins-hydration';
 

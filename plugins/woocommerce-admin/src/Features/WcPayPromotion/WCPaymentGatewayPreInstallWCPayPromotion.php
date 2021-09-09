@@ -24,9 +24,13 @@ class WCPaymentGatewayPreInstallWCPayPromotion extends \WC_Payment_Gateway {
 	 * Constructor
 	 */
 	public function __construct() {
-		$this->id                 = static::GATEWAY_ID;
-		$this->title              = __( 'WooCommerce Payments', 'woocommerce-admin' );
-		$this->method_description = ''; // will be replaced by wc.com data.
+		$wc_pay_spec        = Init::get_wc_pay_promotion_spec();
+		$this->id           = static::GATEWAY_ID;
+		$this->method_title = $wc_pay_spec->title;
+		if ( property_exists( $wc_pay_spec, 'sub_title' ) ) {
+			$this->title = sprintf( '<span class="gateway-subtitle" >%s</span>', $wc_pay_spec->sub_title );
+		}
+		$this->method_description = $wc_pay_spec->content;
 		$this->has_fields         = false;
 
 		// Get setting values.

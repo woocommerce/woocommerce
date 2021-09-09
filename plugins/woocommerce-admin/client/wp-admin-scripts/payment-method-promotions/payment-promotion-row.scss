@@ -14,13 +14,26 @@
 			display: none;
 		}
 	}
+}
 
-	.pre-install-wcpay_name {
+.wc_gateways {
+	.name {
+		.wc-payment-gateway-method-name {
+			display: inline-flex;
+			img {
+				height: 24px;
+				width: auto;
+				margin-left: 4px;
+			}
+		}
+	}
+
+	.wc-payment-gateway-method_name {
 		display: flex;
 
-		.pre-install-wcpay_accepted {
+		.pre-install-payment-gateway_subtitle {
 			margin-left: $gap;
-			> svg {
+			> img {
 				height: 24px;
 				width: auto;
 				margin-left: 4px;

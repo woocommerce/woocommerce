@@ -357,3 +357,9 @@ export type Actions =
 	| ReturnType< typeof updateJetpackConnectUrl >
 	| ReturnType< typeof setPaypalOnboardingStatus >
 	| ReturnType< typeof setRecommendedPlugins >;
+
+// Types
+export type ActionDispatchers = {
+	installJetpackAndConnect: typeof installJetpackAndConnect;
+	installAndActivatePlugins: typeof installAndActivatePlugins;
+};
