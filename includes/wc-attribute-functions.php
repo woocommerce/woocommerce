@@ -636,6 +636,22 @@ function wc_update_attribute( $id, $args ) {
 	if ( $args['id'] && empty( $args['name'] ) ) {
 		$args['name'] = $attribute->name;
 	}
+    
+    if ( $args['id'] && empty( $args['slug'] ) ) {
+		$args['slug'] = $attribute->slug;
+	}
+    
+    if ( $args['id'] && empty( $args['type'] ) ) {
+		$args['type'] = $attribute->type;
+	}
+    
+    if ( $args['id'] && empty( $args['order_by'] ) ) {
+		$args['order_by'] = $attribute->order_by;
+	}
+    
+    if ( $args['id'] && empty( $args['has_archives'] ) ) {
+		$args['has_archives'] = $attribute->has_archives;
+	}
 
 	$args['old_slug'] = $wpdb->get_var(
 		$wpdb->prepare(
