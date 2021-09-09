@@ -7,8 +7,7 @@
 usage() {
 	echo 'usage: npx wc-api-tests <script>'
 	echo 'scripts:'
-	echo '         test:api - run API tests'
-	echo '         test:hello - run API connection tests'
+	echo '         test - run API tests'
 	echo '         make:collection - build a Postman API Collection'
 }
 
@@ -31,12 +30,8 @@ cd "$SCRIPTPATH/$(dirname "$REALPATH")/.."
 
 # Run scripts
 case $1 in
-	'test:api')
-		jest --group=api $2
-		TESTRESULT=$?
-		;;
-	'test:hello')
-		jest --group=hello --dev $2
+	'test')
+		jest --group=$2
 		TESTRESULT=$?
 		;;
 	'make:collection')
