@@ -47,7 +47,7 @@ function wc_implode_text_attributes( $attributes ) {
  * @return array of objects, @since 3.6.0 these are also indexed by ID.
  */
 function wc_get_attribute_taxonomies() {
-	$prefix      = WC_Cache_Helper::get_cache_prefix( 'woocommerce-attributes' );
+	$prefix	  = WC_Cache_Helper::get_cache_prefix( 'woocommerce-attributes' );
 	$cache_key   = $prefix . 'attributes';
 	$cache_value = wp_cache_get( $cache_key, 'woocommerce-attributes' );
 
@@ -91,7 +91,7 @@ function wc_get_attribute_taxonomies() {
  * @return array
  */
 function wc_get_attribute_taxonomy_ids() {
-	$prefix      = WC_Cache_Helper::get_cache_prefix( 'woocommerce-attributes' );
+	$prefix	  = WC_Cache_Helper::get_cache_prefix( 'woocommerce-attributes' );
 	$cache_key   = $prefix . 'ids';
 	$cache_value = wp_cache_get( $cache_key, 'woocommerce-attributes' );
 
@@ -113,7 +113,7 @@ function wc_get_attribute_taxonomy_ids() {
  * @return array
  */
 function wc_get_attribute_taxonomy_labels() {
-	$prefix      = WC_Cache_Helper::get_cache_prefix( 'woocommerce-attributes' );
+	$prefix	  = WC_Cache_Helper::get_cache_prefix( 'woocommerce-attributes' );
 	$cache_key   = $prefix . 'labels';
 	$cache_value = wp_cache_get( $cache_key, 'woocommerce-attributes' );
 
@@ -170,7 +170,7 @@ function wc_attribute_taxonomy_name_by_id( $attribute_id ) {
  * @return int
  */
 function wc_attribute_taxonomy_id_by_name( $name ) {
-	$name         = wc_attribute_taxonomy_slug( $name );
+	$name		 = wc_attribute_taxonomy_slug( $name );
 	$taxonomy_ids = wc_get_attribute_taxonomy_ids();
 
 	return isset( $taxonomy_ids[ $name ] ) ? $taxonomy_ids[ $name ] : 0;
@@ -179,15 +179,15 @@ function wc_attribute_taxonomy_id_by_name( $name ) {
 /**
  * Get a product attributes label.
  *
- * @param string     $name    Attribute name.
+ * @param string	 $name	Attribute name.
  * @param WC_Product $product Product data.
  * @return string
  */
 function wc_attribute_label( $name, $product = '' ) {
 	if ( taxonomy_is_product_attribute( $name ) ) {
-		$slug       = wc_attribute_taxonomy_slug( $name );
+		$slug	   = wc_attribute_taxonomy_slug( $name );
 		$all_labels = wc_get_attribute_taxonomy_labels();
-		$label      = isset( $all_labels[ $slug ] ) ? $all_labels[ $slug ] : $slug;
+		$label	  = isset( $all_labels[ $slug ] ) ? $all_labels[ $slug ] : $slug;
 	} elseif ( $product ) {
 		if ( $product->is_type( 'variation' ) ) {
 			$product = wc_get_product( $product->get_parent_id() );
@@ -218,8 +218,8 @@ function wc_attribute_label( $name, $product = '' ) {
  * @return string
  */
 function wc_attribute_orderby( $name ) {
-	$name       = wc_attribute_taxonomy_slug( $name );
-	$id         = wc_attribute_taxonomy_id_by_name( $name );
+	$name	   = wc_attribute_taxonomy_slug( $name );
+	$id		 = wc_attribute_taxonomy_id_by_name( $name );
 	$taxonomies = wc_get_attribute_taxonomies();
 
 	return apply_filters( 'woocommerce_attribute_orderby', isset( $taxonomies[ 'id:' . $id ] ) ? $taxonomies[ 'id:' . $id ]->attribute_orderby : 'menu_order', $name );
@@ -231,7 +231,7 @@ function wc_attribute_orderby( $name ) {
  * @return array
  */
 function wc_get_attribute_taxonomy_names() {
-	$taxonomy_names       = array();
+	$taxonomy_names	   = array();
 	$attribute_taxonomies = wc_get_attribute_taxonomies();
 	if ( ! empty( $attribute_taxonomies ) ) {
 		foreach ( $attribute_taxonomies as $tax ) {
@@ -398,7 +398,7 @@ function wc_attributes_array_filter_variation( $attribute ) {
  *
  * @since  3.0.2
  * @param  string $attribute Attribute value to check for.
- * @param  string $name      Product name to check in.
+ * @param  string $name	  Product name to check in.
  * @return bool
  */
 function wc_is_attribute_in_product_name( $attribute, $name ) {
@@ -432,13 +432,13 @@ function wc_get_attribute( $id ) {
 		return null;
 	}
 
-	$data                    = $attributes[ 'id:' . $id ];
-	$attribute               = new stdClass();
-	$attribute->id           = (int) $data->attribute_id;
-	$attribute->name         = $data->attribute_label;
-	$attribute->slug         = wc_attribute_taxonomy_name( $data->attribute_name );
-	$attribute->type         = $data->attribute_type;
-	$attribute->order_by     = $data->attribute_orderby;
+	$data					= $attributes[ 'id:' . $id ];
+	$attribute			   = new stdClass();
+	$attribute->id		   = (int) $data->attribute_id;
+	$attribute->name		 = $data->attribute_label;
+	$attribute->slug		 = wc_attribute_taxonomy_name( $data->attribute_name );
+	$attribute->type		 = $data->attribute_type;
+	$attribute->order_by	 = $data->attribute_orderby;
 	$attribute->has_archives = (bool) $data->attribute_public;
 	return $attribute;
 }
@@ -448,18 +448,18 @@ function wc_get_attribute( $id ) {
  *
  * @since  3.2.0
  * @param  array $args Attribute arguments {
- *     Array of attribute parameters.
+ *	 Array of attribute parameters.
  *
- *     @type int    $id           Unique identifier, used to update an attribute.
- *     @type string $name         Attribute name. Always required.
- *     @type string $slug         Attribute alphanumeric identifier.
- *     @type string $type         Type of attribute.
- *                                Core by default accepts: 'select' and 'text'.
- *                                Default to 'select'.
- *     @type string $order_by     Sort order.
- *                                Accepts: 'menu_order', 'name', 'name_num' and 'id'.
- *                                Default to 'menu_order'.
- *     @type bool   $has_archives Enable or disable attribute archives. False by default.
+ *	 @type int	$id		   Unique identifier, used to update an attribute.
+ *	 @type string $name		 Attribute name. Always required.
+ *	 @type string $slug		 Attribute alphanumeric identifier.
+ *	 @type string $type		 Type of attribute.
+ *								Core by default accepts: 'select' and 'text'.
+ *								Default to 'select'.
+ *	 @type string $order_by	 Sort order.
+ *								Accepts: 'menu_order', 'name', 'name_num' and 'id'.
+ *								Default to 'menu_order'.
+ *	 @type bool   $has_archives Enable or disable attribute archives. False by default.
  * }
  * @return int|WP_Error
  */
@@ -467,7 +467,7 @@ function wc_create_attribute( $args ) {
 	global $wpdb;
 
 	$args   = wp_unslash( $args );
-	$id     = ! empty( $args['id'] ) ? intval( $args['id'] ) : 0;
+	$id	 = ! empty( $args['id'] ) ? intval( $args['id'] ) : 0;
 	$format = array( '%s', '%s', '%s', '%s', '%d' );
 
 	// Name is required.
@@ -506,8 +506,8 @@ function wc_create_attribute( $args ) {
 
 	$data = array(
 		'attribute_label'   => $args['name'],
-		'attribute_name'    => $slug,
-		'attribute_type'    => $args['type'],
+		'attribute_name'	=> $slug,
+		'attribute_type'	=> $args['type'],
 		'attribute_orderby' => $args['order_by'],
 		'attribute_public'  => isset( $args['has_archives'] ) ? (int) $args['has_archives'] : 0,
 	);
@@ -552,8 +552,8 @@ function wc_create_attribute( $args ) {
 		/**
 		 * Attribute updated.
 		 *
-		 * @param int    $id       Added attribute ID.
-		 * @param array  $data     Attribute data.
+		 * @param int	$id	   Added attribute ID.
+		 * @param array  $data	 Attribute data.
 		 * @param string $old_slug Attribute old name.
 		 */
 		do_action( 'woocommerce_attribute_updated', $id, $data, $old_slug );
@@ -578,7 +578,7 @@ function wc_create_attribute( $args ) {
 			$new_taxonomy_name = 'pa_' . $data['attribute_name'];
 			$old_attribute_key = sanitize_title( $old_taxonomy_name ); // @see WC_Product::set_attributes().
 			$new_attribute_key = sanitize_title( $new_taxonomy_name ); // @see WC_Product::set_attributes().
-			$metadatas         = $wpdb->get_results(
+			$metadatas		 = $wpdb->get_results(
 				$wpdb->prepare(
 					"SELECT post_id, meta_value FROM {$wpdb->postmeta} WHERE meta_key = '_product_attributes' AND meta_value LIKE %s",
 					'%' . $wpdb->esc_like( $old_taxonomy_name ) . '%'
@@ -586,7 +586,7 @@ function wc_create_attribute( $args ) {
 				ARRAY_A
 			);
 			foreach ( $metadatas as $metadata ) {
-				$product_id        = $metadata['post_id'];
+				$product_id		= $metadata['post_id'];
 				$unserialized_data = maybe_unserialize( $metadata['meta_value'] );
 
 				if ( ! $unserialized_data || ! is_array( $unserialized_data ) || ! isset( $unserialized_data[ $old_attribute_key ] ) ) {
@@ -636,20 +636,20 @@ function wc_update_attribute( $id, $args ) {
 	if ( $args['id'] && empty( $args['name'] ) ) {
 		$args['name'] = $attribute->name;
 	}
-    
-    if ( $args['id'] && empty( $args['slug'] ) ) {
+	
+	if ( $args['id'] && empty( $args['slug'] ) ) {
 		$args['slug'] = $attribute->slug;
 	}
-    
-    if ( $args['id'] && empty( $args['type'] ) ) {
+	
+	if ( $args['id'] && empty( $args['type'] ) ) {
 		$args['type'] = $attribute->type;
 	}
-    
-    if ( $args['id'] && empty( $args['order_by'] ) ) {
+	
+	if ( $args['id'] && empty( $args['order_by'] ) ) {
 		$args['order_by'] = $attribute->order_by;
 	}
-    
-    if ( $args['id'] && empty( $args['has_archives'] ) ) {
+	
+	if ( $args['id'] && empty( $args['has_archives'] ) ) {
 		$args['has_archives'] = $attribute->has_archives;
 	}
 
@@ -693,8 +693,8 @@ function wc_delete_attribute( $id ) {
 	/**
 	 * Before deleting an attribute.
 	 *
-	 * @param int    $id       Attribute ID.
-	 * @param string $name     Attribute name.
+	 * @param int	$id	   Attribute ID.
+	 * @param string $name	 Attribute name.
 	 * @param string $taxonomy Attribute taxonomy name.
 	 */
 	do_action( 'woocommerce_before_attribute_delete', $id, $name, $taxonomy );
@@ -710,8 +710,8 @@ function wc_delete_attribute( $id ) {
 		/**
 		 * After deleting an attribute.
 		 *
-		 * @param int    $id       Attribute ID.
-		 * @param string $name     Attribute name.
+		 * @param int	$id	   Attribute ID.
+		 * @param string $name	 Attribute name.
 		 * @param string $taxonomy Attribute taxonomy name.
 		 */
 		do_action( 'woocommerce_attribute_deleted', $id, $name, $taxonomy );
@@ -734,7 +734,7 @@ function wc_delete_attribute( $id ) {
  * @return string
  */
 function wc_attribute_taxonomy_slug( $attribute_name ) {
-	$prefix      = WC_Cache_Helper::get_cache_prefix( 'woocommerce-attributes' );
+	$prefix	  = WC_Cache_Helper::get_cache_prefix( 'woocommerce-attributes' );
 	$cache_key   = $prefix . 'slug-' . $attribute_name;
 	$cache_value = wp_cache_get( $cache_key, 'woocommerce-attributes' );
 
