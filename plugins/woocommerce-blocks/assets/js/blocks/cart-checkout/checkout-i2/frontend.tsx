@@ -4,7 +4,10 @@
 import { Children, cloneElement, isValidElement } from '@wordpress/element';
 import { getValidBlockAttributes } from '@woocommerce/base-utils';
 import { useStoreCart } from '@woocommerce/base-context';
-import { useCheckoutExtensionData } from '@woocommerce/base-context/hooks';
+import {
+	useCheckoutExtensionData,
+	useValidation,
+} from '@woocommerce/base-context/hooks';
 import { getRegisteredBlockComponents } from '@woocommerce/blocks-registry';
 import {
 	withStoreCartApiHydration,
@@ -38,13 +41,14 @@ const Wrapper = ( {
 	// eslint-disable-next-line no-unused-vars
 	const { extensions, receiveCart, ...cart } = useStoreCart();
 	const checkoutExtensionData = useCheckoutExtensionData();
-
+	const validation = useValidation();
 	return Children.map( children, ( child ) => {
 		if ( isValidElement( child ) ) {
 			const componentProps = {
 				extensions,
 				cart,
 				checkoutExtensionData,
+				validation,
 			};
 			return cloneElement( child, componentProps );
 		}
