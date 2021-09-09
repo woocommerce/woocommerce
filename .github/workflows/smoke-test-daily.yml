@@ -41,6 +41,10 @@ jobs:
           E2E_SLACK_CHANNEL: ${{ secrets.SMOKE_TEST_SLACK_CHANNEL }}
           UPDATE_WC: 1
           DEFAULT_TIMEOUT_OVERRIDE: 120000
+          BASE_URL: ${{ secrets.SMOKE_TEST_URL }}
+          USER_KEY: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
+          USER_SECRET: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
         run: |
           npx wc-e2e test:e2e ./tests/e2e/specs/smoke-tests/update-woocommerce.js
           npx wc-e2e test:e2e
+          npx wc-api-tests test:api
