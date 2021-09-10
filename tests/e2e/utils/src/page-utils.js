@@ -123,9 +123,11 @@ export const waitForSelectorWithoutThrow = async ( selector, timeoutInSeconds = 
  */
 export const verifyPublishAndTrash = async ( button, publishNotice, publishVerification, trashVerification ) => {
 	if ( button === '.order_actions li .save_order' ) {
-		await OrderEdit.verifyPublish( button, publishNotice, publishVerification );
+		const orderEdit = new OrderEdit();
+		await orderEdit.verifyPublish( button, publishNotice, publishVerification );
 	} else {
-		await AdminEdit.verifyPublish( button, publishNotice, publishVerification );
+		const adminEdit = new AdminEdit();
+		await adminEdit.verifyPublish( button, publishNotice, publishVerification );
 	}
 
 	// Trash

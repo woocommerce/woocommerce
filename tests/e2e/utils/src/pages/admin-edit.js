@@ -1,4 +1,4 @@
-import { utils } from '../flows';
+import { waitForTimeout } from '../flows/utils';
 
 
 export class AdminEdit {
@@ -12,7 +12,7 @@ export class AdminEdit {
 	 */
 	async verifyPublish( button, publishNotice, publishVerification ) {
 		// Wait for auto save
-		await utils.waitForTimeout( 2000 );
+		await waitForTimeout( 2000 );
 
 		// Publish and verify
 		await expect( page ).toClick( button );
@@ -42,7 +42,7 @@ export class OrderEdit extends AdminEdit {
 	 * @returns {Promise<void>}
 	 */
 	async verifyPublish( button, publishNotice, publishVerification ) {
-		AdminEdit.verifyPublish( button, publishNotice, publishVerification );
+		super.verifyPublish( button, publishNotice, publishVerification );
 
 		await expect( page ).toMatchElement( '#select2-order_status-container', { text: 'Processing' } );
 		await expect( page ).toMatchElement(
