@@ -41,13 +41,14 @@ const runCreateCouponTest = () => {
 			await expect(page).toFill('#coupon_amount', '100');
 
 			// Publish coupon, verify that it was published.
-			await AdminEdit.verifyPublish(
+			const adminEdit = new AdminEdit();
+			await adminEdit.verifyPublish(
 				'#publish',
 				'.notice',
 				'Coupon updated.',
 			);
 			// Delete the coupon
-			const couponId = await AdminEdit.getId();
+			const couponId = await adminEdit.getId();
 			if ( couponId ) {
 				const repository = Coupon.restRepository( factories.api.withDefaultPermalinks );
 				await repository.delete( couponId );

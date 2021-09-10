@@ -40,4 +40,4 @@ export const itIf = ( condition ) =>
  */
 export const waitForTimeout = async ( timeout ) => {
 	await new Promise( ( resolve ) => setTimeout( resolve, timeout ) );
-}
+};
