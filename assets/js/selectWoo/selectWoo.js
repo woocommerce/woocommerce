@@ -1,5 +1,5 @@
 /*!
- * SelectWoo 1.0.9
+ * SelectWoo 1.0.10
  * https://github.com/woocommerce/selectWoo
  *
  * Released under the MIT license
@@ -4405,7 +4405,6 @@ S2.define('select2/dropdown/attachBody',[
 
     var parentOffset = $offsetParent.offset();
 
-    css.top -= parentOffset.top;
     css.left -= parentOffset.left;
 
     if (!isCurrentlyAbove && !isCurrentlyBelow) {
@@ -4420,7 +4419,7 @@ S2.define('select2/dropdown/attachBody',[
 
     if (newDirection == 'above' ||
       (isCurrentlyAbove && newDirection !== 'below')) {
-      css.top = container.top - parentOffset.top - dropdown.height;
+      css.top = container.top - dropdown.height;
     }
 
     if (newDirection != null) {
