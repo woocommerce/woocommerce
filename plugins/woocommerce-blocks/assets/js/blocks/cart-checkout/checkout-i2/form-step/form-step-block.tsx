@@ -35,7 +35,6 @@ export const FormStepBlock = ( {
 		} ),
 		attributes,
 	} );
-
 	return (
 		<div { ...blockProps }>
 			<InspectorControls>
@@ -69,10 +68,20 @@ export const FormStepBlock = ( {
 			<div className="wc-block-components-checkout-step__container">
 				<p className="wc-block-components-checkout-step__description">
 					<PlainText
-						className={ '' }
+						className={
+							! description
+								? 'wc-block-components-checkout-step__description-placeholder'
+								: ''
+						}
 						value={ description }
+						placeholder={ __(
+							'Optional text for this form step.',
+							'woo-gutenberg-products-block'
+						) }
 						onChange={ ( value ) =>
-							setAttributes( { description: value } )
+							setAttributes( {
+								description: value,
+							} )
 						}
 					/>
 				</p>

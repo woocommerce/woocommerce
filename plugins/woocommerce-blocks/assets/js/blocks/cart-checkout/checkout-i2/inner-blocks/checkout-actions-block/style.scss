@@ -2,7 +2,6 @@
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	margin-left: 9px;
 
 	.wc-block-components-checkout-place-order-button {
 		width: 50%;
@@ -35,7 +34,6 @@
 .is-large {
 	.wc-block-checkout__actions {
 		@include with-translucent-border(1px 0 0);
-		margin-right: $gap-large;
 		padding: em($gap-large) 0;
 	}
 }
