@@ -78,7 +78,7 @@ This package provides support for enabling retries in tests:
 - `MY_ACCOUNT_ADDRESSES` - Customer addresses
 - `MY_ACCOUNT_ACCOUNT_DETAILS` - Customer account details
 
-## Test Function
+## Test Functions
 
 ### Merchant `merchant`
 
@@ -152,6 +152,34 @@ This package provides support for enabling retries in tests:
 | `updateSettingOption` | `settingsGroup`, `settingID`, `payload` | Update a settings group |
 | `updatePaymentGateway`| `paymentGatewayId`, `payload` | Update a payment gateway |
 | `getSystemEnvironment` | | Get the current environment from the WooCommerce system status API.
+
+### Classes
+
+The package includes the following page specific utility classes
+
+#### AdminEdit
+
+The `AdminEdit` class is the base classic custom post type post editor class. It contains the following functions:
+
+| Function | Parameters | Description |
+|----------|------------|-------------|
+| `verifyPublish` | `button, publishNotice, publishVerification` | Publish the post object currently being edited and verify publish status |
+| `getId` | | Get the ID of the post object being edited |
+
+#### OrderEdit
+
+The `OrderEdit` is specific to the order edit screen and extends `AdminEdit`. It has the same functions. 
+
+### General Utilities
+
+There is a general utilities object `utils` with the following functions:
+
+| Function | Parameters | Description |
+|----------|------------|-------------|
+| `getSlug` | `text` | Take a string name and generate the slug for it |
+| `describeIf` | `condition` | Return the `describe` or `describe.skip` function when the condition is true / false |
+| `it` | `condition` | Return the `it` or `it.skip` function when the condition is true / false |
+| `waitForTimeout` | `timeout` | Wait for a timeout in milliseconds |
 
 ### Page Utilities
 
