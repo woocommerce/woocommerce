@@ -101,10 +101,25 @@ class Init {
 		}
 		$wc_pay_spec = self::get_wc_pay_promotion_spec();
 
-		if ( ! $wc_pay_spec ) {
+		if ( ! $wc_pay_spec || ! isset( $wc_pay_spec->additional_info ) || ! isset( $wc_pay_spec->additional_info->experiment_version ) ) {
 			return false;
 		}
-		return true;
+
+		$anon_id        = isset( $_COOKIE['tk_ai'] ) ? sanitize_text_field( wp_unslash( $_COOKIE['tk_ai'] ) ) : null;
+		$allow_tracking = 'yes' === get_option( 'woocommerce_allow_tracking' );
+		$abtest         = new \WooCommerce\Admin\Experimental_Abtest(
+			$anon_id,
+			'woocommerce',
+			$allow_tracking
+		);
+
+		$variation_name = $abtest->get_variation( 'woocommerce_wc_pay_promotion_payment_methods_table_' . $wc_pay_spec->additional_info->experiment_version );
+
+		if ( 'treatment' === $variation_name ) {
+			return true;
+		}
+
+		return false;
 	}
 
 	/**

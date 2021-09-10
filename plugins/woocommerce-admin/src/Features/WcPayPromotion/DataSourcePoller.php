@@ -124,7 +124,7 @@ class DataSourcePoller {
 	 */
 	private static function merge_specs( $specs_to_merge_in, &$specs ) {
 		foreach ( $specs_to_merge_in as $spec ) {
-			$id           = $spec->product;
+			$id           = $spec->id;
 			$specs[ $id ] = $spec;
 		}
 	}
