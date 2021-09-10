@@ -28,6 +28,8 @@ $border-radius: 5px;
 }
 
 .wc-block-components-express-payment--checkout {
+	margin-top: $border-radius;
+
 	.wc-block-components-express-payment__title-container {
 		display: flex;
 		flex-direction: row;
@@ -48,7 +50,7 @@ $border-radius: 5px;
 			margin-right: $gap-small;
 			opacity: 0.3;
 			pointer-events: none;
-			width: #{$gap-larger - $gap-small - $border-width * 2};
+			width: #{$gap-large - $gap-small - $border-width * 2};
 		}
 
 		&::after {
@@ -72,8 +74,7 @@ $border-radius: 5px;
 
 	.wc-block-components-express-payment__content {
 		@include with-translucent-border(0 $border-width $border-width);
-		margin-top: calc(0.75em + #{$border-radius});
-		padding: em($gap-large) #{$gap-larger - $border-width} em($gap) #{$gap-larger - $border-width};
+		padding: em($gap-large) #{$gap-large - $border-width};
 
 		&::after {
 			border-radius: 0 0 $border-radius $border-radius;
@@ -118,7 +119,7 @@ $border-radius: 5px;
 	display: flex;
 	align-items: center;
 	text-align: center;
-	padding: 0 $gap-larger;
+	padding: 0 $gap-large;
 	margin: $gap-large 0;
 
 	&::before {

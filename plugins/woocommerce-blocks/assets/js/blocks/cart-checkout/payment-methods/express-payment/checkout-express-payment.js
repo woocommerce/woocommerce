@@ -86,7 +86,7 @@ const CheckoutExpressPayment = () => {
 						>
 							<p>
 								{ __(
-									'In a hurry? Use one of our express checkout options below:',
+									'In a hurry? Use one of our express checkout options:',
 									'woo-gutenberg-products-block'
 								) }
 							</p>

@@ -12,7 +12,8 @@
 
 	&.wp-block-woocommerce-checkout-express-payment-block--has-express-payment-methods {
 		padding: 14px 0;
-		margin: 14px 0;
+		margin: -14px 0 14px 0 !important;
+		position: relative;
 	}
 }
 

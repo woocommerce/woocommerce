@@ -21,7 +21,6 @@
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	margin-left: 9px;
 
 	.wc-block-components-checkout-place-order-button {
 		width: 50%;
@@ -144,7 +143,7 @@
 	}
 
 	.wc-block-checkout__sidebar {
-		margin-bottom: $gap-largest;
+		margin-bottom: $gap-large;
 		order: 0;
 	}
 }
@@ -152,7 +151,6 @@
 .is-large {
 	.wc-block-checkout__actions {
 		@include with-translucent-border(1px 0 0);
-		margin-right: $gap-large;
 		padding-top: em($gap-large);
 	}
 }
