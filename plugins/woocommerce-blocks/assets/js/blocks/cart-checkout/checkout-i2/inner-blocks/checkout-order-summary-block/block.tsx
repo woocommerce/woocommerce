@@ -88,15 +88,16 @@ const Block = ( {
 					/>
 				</TotalsWrapper>
 			) }
-			{ ! getSetting( 'displayCartPricesIncludingTax', false ) && (
-				<TotalsWrapper>
-					<TotalsTaxes
-						currency={ totalsCurrency }
-						showRateAfterTaxName={ showRateAfterTaxName }
-						values={ cartTotals }
-					/>
-				</TotalsWrapper>
-			) }
+			{ ! getSetting( 'displayCartPricesIncludingTax', false ) &&
+				parseInt( cartTotals.total_tax, 10 ) > 0 && (
+					<TotalsWrapper>
+						<TotalsTaxes
+							currency={ totalsCurrency }
+							showRateAfterTaxName={ showRateAfterTaxName }
+							values={ cartTotals }
+						/>
+					</TotalsWrapper>
+				) }
 			<TotalsWrapper>
 				<TotalsFooterItem
 					currency={ totalsCurrency }
