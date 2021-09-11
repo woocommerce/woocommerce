@@ -242,16 +242,16 @@
               }
 
               item = $( '<a></a>' ).attr( 'href', '#' ).text( j );
-              if ( slider.vars.controlNav === "thumbnails" ) {
-				  item = $('<img/>', {
-					  load: function (el) {
-						  el.currentTarget.width = el.currentTarget.naturalWidth;
-						  el.currentTarget.height = el.currentTarget.naturalHeight;
-					  },
-					  src: slide.attr('data-thumb'),
-					  alt: slide.attr('alt')
-				  })
-			  }
+              if (slider.vars.controlNav === "thumbnails") {
+                item = $('<img/>', {
+                  load: function (el) {
+                    el.currentTarget.width = el.currentTarget.naturalWidth;
+                    el.currentTarget.height = el.currentTarget.naturalHeight;
+                  },
+                  src: slide.attr('data-thumb'),
+                  alt: slide.attr('alt')
+                })
+              }
 
               if ( '' !== slide.attr( 'data-thumb-alt' ) ) {
                 item.attr( 'alt', slide.attr( 'data-thumb-alt' ) );
