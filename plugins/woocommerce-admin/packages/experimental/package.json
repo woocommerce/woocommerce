@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/experimental",
-	"version": "2.0.1",
+	"version": "2.0.2",
 	"description": "WooCommerce experimental components.",
 	"author": "Automattic",
 	"license": "GPL-3.0-or-later",
