@@ -5,6 +5,7 @@ use Automattic\WooCommerce\Blocks\AssetsController as AssetsController;
 use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
 use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 use Automattic\WooCommerce\Blocks\BlockTypesController;
+use Automattic\WooCommerce\Blocks\InboxNotifications;
 use Automattic\WooCommerce\Blocks\Installer;
 use Automattic\WooCommerce\Blocks\Registry\Container;
 use Automattic\WooCommerce\Blocks\RestApi;
@@ -73,6 +74,15 @@ class Bootstrap {
 		}
 		$this->register_dependencies();
 		$this->register_payment_methods();
+
+		add_action(
+			'admin_init',
+			function() {
+				InboxNotifications::create_surface_cart_checkout_blocks_notification();
+			},
+			10,
+			0
+		);
 
 		$is_rest = wc()->is_rest_api_request();
 
