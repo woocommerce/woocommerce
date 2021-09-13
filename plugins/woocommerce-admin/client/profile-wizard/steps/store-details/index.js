@@ -448,6 +448,7 @@ export default compose(
 		const { isResolving } = select( OPTIONS_STORE_NAME );
 
 		const profileItems = getProfileItems();
+		const emailPrefill = getEmailPrefill();
 
 		const { general: settings = {} } = getSettings( 'general' );
 		const isBusy =
@@ -483,7 +484,7 @@ export default compose(
 			storeEmail:
 				typeof profileItems.store_email === 'string'
 					? profileItems.store_email
-					: getEmailPrefill(),
+					: emailPrefill,
 		};
 
 		return {
