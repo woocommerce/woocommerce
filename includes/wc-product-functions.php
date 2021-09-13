@@ -9,6 +9,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 
@@ -1083,7 +1084,7 @@ function wc_get_price_excluding_tax( $product, $args = array() ) {
 
 	if ( $product->is_taxable() && wc_prices_include_tax() ) {
 		$order          = ArrayUtil::get_value_or_default( $args, 'order' );
-		$customer       = $order ? new WC_Customer( $order->get_customer_id() ) : null;
+		$customer       = $order ? wc_get_container()->get( LegacyProxy::class )->get_instance_of( WC_Customer::class, $order->get_customer_id() ) : null;
 		$tax_rates      = WC_Tax::get_rates( $product->get_tax_class(), $customer );
 		$base_tax_rates = WC_Tax::get_base_tax_rates( $product->get_tax_class( 'unfiltered' ) );
 		$remove_taxes   = apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ? WC_Tax::calc_tax( $line_price, $base_tax_rates, true ) : WC_Tax::calc_tax( $line_price, $tax_rates, true );
