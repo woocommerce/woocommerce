@@ -151,6 +151,7 @@ const ValidatedTextInput = ( {
 			className={ classnames( className, {
 				'has-error': hasError,
 			} ) }
+			aria-invalid={ hasError === true }
 			id={ textInputId }
 			onBlur={ () => {
 				validateInput( false );

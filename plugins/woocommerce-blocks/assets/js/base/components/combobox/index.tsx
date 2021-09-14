@@ -142,6 +142,7 @@ const Combobox = ( {
 				value={ value || '' }
 				allowReset={ false }
 				autoComplete={ autoComplete }
+				aria-invalid={ error.message && ! error.hidden }
 			/>
 			<ValidationInputError propertyName={ errorId } />
 		</div>
