@@ -3,7 +3,7 @@
  */
 import classNames from 'classnames';
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { useState, useEffect } from '@wordpress/element';
+import { useState, useEffect, useRef } from '@wordpress/element';
 import { dispatch } from '@wordpress/data';
 import {
 	translateJQueryEventToNative,
@@ -29,6 +29,7 @@ const MiniCartBlock = ( {
 }: MiniCartBlockProps ): JSX.Element => {
 	const { cartItems, cartItemsCount, cartIsLoading } = useStoreCart();
 	const [ isOpen, setIsOpen ] = useState< boolean >( isPlaceholderOpen );
+	const emptyCartRef = useRef< HTMLDivElement | null >( null );
 	// We already rendered the HTML drawer placeholder, so we want to skip the
 	// slide in animation.
 	const [ skipSlideIn, setSkipSlideIn ] = useState< boolean >(
@@ -63,9 +64,25 @@ const MiniCartBlock = ( {
 		};
 	}, [] );
 
+	useEffect( () => {
+		// If the cart has been completely emptied, move focus to empty cart
+		// element.
+		if ( isOpen && ! cartIsLoading && cartItems.length === 0 ) {
+			if ( emptyCartRef.current instanceof HTMLElement ) {
+				emptyCartRef.current.focus();
+			}
+		}
+	}, [ isOpen, cartIsLoading, cartItems.length, emptyCartRef ] );
+
 	const contents =
 		! cartIsLoading && cartItems.length === 0 ? (
-			<>{ __( 'Cart is empty', 'woo-gutenberg-products-block' ) }</>
+			<div
+				className="wc-block-mini-cart__empty-cart"
+				tabIndex={ -1 }
+				ref={ emptyCartRef }
+			>
+				{ __( 'Cart is empty', 'woo-gutenberg-products-block' ) }
+			</div>
 		) : (
 			<CartLineItemsTable
 				lineItems={ cartItems }
@@ -103,16 +120,20 @@ const MiniCartBlock = ( {
 						'is-loading': cartIsLoading,
 					}
 				) }
-				title={ sprintf(
-					/* translators: %d is the count of items in the cart. */
-					_n(
-						'Your cart (%d item)',
-						'Your cart (%d items)',
-						cartItemsCount,
-						'woo-gutenberg-products-block'
-					),
-					cartItemsCount
-				) }
+				title={
+					cartIsLoading
+						? __( 'Your cart', 'woo-gutenberg-products-block' )
+						: sprintf(
+								/* translators: %d is the count of items in the cart. */
+								_n(
+									'Your cart (%d item)',
+									'Your cart (%d items)',
+									cartItemsCount,
+									'woo-gutenberg-products-block'
+								),
+								cartItemsCount
+						  )
+				}
 				isOpen={ isOpen }
 				onClose={ () => {
 					setIsOpen( false );
@@ -146,7 +167,7 @@ const renderMiniCartFrontend = () => {
 		Block: withMiniCartConditionalHydration( MiniCartBlock ),
 		getProps: ( el: HTMLElement ) => ( {
 			isDataOutdated: el.dataset.isDataOutdated,
-			isPlaceholderOpen: el.dataset.isPlaceholderOpen,
+			isPlaceholderOpen: el.dataset.isPlaceholderOpen === 'true',
 		} ),
 	} );
 
