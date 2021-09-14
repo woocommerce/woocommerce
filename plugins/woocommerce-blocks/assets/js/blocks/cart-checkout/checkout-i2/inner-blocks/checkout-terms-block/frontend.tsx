@@ -80,9 +80,7 @@ const FrontendBlock = ( {
 						id="terms-and-conditions"
 						checked={ checked }
 						onChange={ () => setChecked( ( value ) => ! value ) }
-						className={ classnames( {
-							'has-error': hasError,
-						} ) }
+						hasError={ hasError }
 						disabled={ isDisabled }
 					>
 						<span

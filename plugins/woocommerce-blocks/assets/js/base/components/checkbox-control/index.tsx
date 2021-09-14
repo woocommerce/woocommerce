@@ -16,6 +16,7 @@ type CheckboxControlProps = {
 	instanceId: string;
 	onChange: ( value: boolean ) => void;
 	children: React.ReactChildren;
+	hasError: boolean;
 };
 
 /**
@@ -28,6 +29,7 @@ const CheckboxControl = ( {
 	instanceId,
 	onChange,
 	children,
+	hasError = false,
 	...rest
 }: CheckboxControlProps ): JSX.Element => {
 	const checkboxId = id || `checkbox-control-${ instanceId }`;
@@ -36,6 +38,9 @@ const CheckboxControl = ( {
 		<label
 			className={ classNames(
 				'wc-block-components-checkbox',
+				{
+					'has-error': hasError,
+				},
 				className
 			) }
 			htmlFor={ checkboxId }
@@ -45,6 +50,7 @@ const CheckboxControl = ( {
 				className="wc-block-components-checkbox__input"
 				type="checkbox"
 				onChange={ ( event ) => onChange( event.target.checked ) }
+				aria-invalid={ hasError === true }
 				{ ...rest }
 			/>
 			<svg

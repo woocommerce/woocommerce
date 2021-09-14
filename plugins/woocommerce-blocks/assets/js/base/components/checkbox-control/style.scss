@@ -25,6 +25,11 @@
 			border-color: $input-border-gray;
 		}
 
+		&:focus {
+			outline: 2px solid $input-border-gray;
+			outline-offset: 2px;
+		}
+
 		&::before,
 		&::after {
 			content: "";
@@ -42,11 +47,18 @@
 				background: $input-background-dark;
 				border-color: $controls-border-dark;
 			}
+
+			&:focus {
+				outline: 2px solid $controls-border-dark;
+				outline-offset: 2px;
+			}
 		}
 	}
 
 	&.has-error {
 		color: $alert-red;
+		outline: 2px solid $alert-red;
+		outline-offset: 0.5em;
 
 		a {
 			color: $alert-red;
@@ -59,7 +71,7 @@
 				border-color: $alert-red;
 			}
 			&:focus {
-				outline: 1px dotted $alert-red;
+				outline: 2px solid $alert-red;
 				outline-offset: 2px;
 			}
 		}
