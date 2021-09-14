@@ -97,13 +97,13 @@ class ProductSearch extends AbstractBlock {
 		);
 
 		$input_markup  = sprintf(
-			'<input type="search" id="%s" className="wc-block-product-search__field" placeholder="%s" name="s" />',
+			'<input type="search" id="%s" class="wc-block-product-search__field" placeholder="%s" name="s" />',
 			esc_attr( $input_id ),
 			esc_attr( $attributes['placeholder'] )
 		);
 		$button_markup = sprintf(
-			'<button type="submit" className="wc-block-product-search__button" aria-label="%s">
-				<svg aria-hidden="true" role="img" focusable="false" className="dashicon dashicons-arrow-right-alt2" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">
+			'<button type="submit" class="wc-block-product-search__button" aria-label="%s">
+				<svg aria-hidden="true" role="img" focusable="false" class="dashicon dashicons-arrow-right-alt2" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">
 					<path d="M6 15l5-5-5-5 1-2 7 7-7 7z" />
 				</svg>
 			</button>',
@@ -111,7 +111,7 @@ class ProductSearch extends AbstractBlock {
 		);
 
 		$field_markup = '
-			<div className="wc-block-product-search__fields">
+			<div class="wc-block-product-search__fields">
 				' . $input_markup . $button_markup . '
 				<input type="hidden" name="post_type" value="product" />
 			</div>
