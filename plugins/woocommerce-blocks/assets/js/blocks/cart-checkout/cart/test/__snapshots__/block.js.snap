@@ -33,6 +33,7 @@ exports[`Testing cart Contains a Taxes section if Core options are set to show i
         >
           <table
             class="wc-block-cart-items"
+            tabindex="-1"
           >
             <thead>
               <tr
@@ -64,6 +65,7 @@ exports[`Testing cart Contains a Taxes section if Core options are set to show i
             <tbody>
               <tr
                 class="wc-block-cart-items__row"
+                tabindex="-1"
               >
                 <td
                   aria-hidden="true"
@@ -210,6 +212,7 @@ exports[`Testing cart Contains a Taxes section if Core options are set to show i
               </tr>
               <tr
                 class="wc-block-cart-items__row"
+                tabindex="-1"
               >
                 <td
                   aria-hidden="true"
@@ -715,6 +718,7 @@ exports[`Testing cart Shows individual tax lines if the store is set to do so 1`
         >
           <table
             class="wc-block-cart-items"
+            tabindex="-1"
           >
             <thead>
               <tr
@@ -746,6 +750,7 @@ exports[`Testing cart Shows individual tax lines if the store is set to do so 1`
             <tbody>
               <tr
                 class="wc-block-cart-items__row"
+                tabindex="-1"
               >
                 <td
                   aria-hidden="true"
@@ -892,6 +897,7 @@ exports[`Testing cart Shows individual tax lines if the store is set to do so 1`
               </tr>
               <tr
                 class="wc-block-cart-items__row"
+                tabindex="-1"
               >
                 <td
                   aria-hidden="true"
@@ -1402,6 +1408,7 @@ exports[`Testing cart Shows rate percentages after tax lines if the block is set
         >
           <table
             class="wc-block-cart-items"
+            tabindex="-1"
           >
             <thead>
               <tr
@@ -1433,6 +1440,7 @@ exports[`Testing cart Shows rate percentages after tax lines if the block is set
             <tbody>
               <tr
                 class="wc-block-cart-items__row"
+                tabindex="-1"
               >
                 <td
                   aria-hidden="true"
@@ -1579,6 +1587,7 @@ exports[`Testing cart Shows rate percentages after tax lines if the block is set
               </tr>
               <tr
                 class="wc-block-cart-items__row"
+                tabindex="-1"
               >
                 <td
                   aria-hidden="true"

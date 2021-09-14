@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { __ } from '@wordpress/i18n';
 import { Modal } from '@wordpress/components';
 import { useDebounce } from 'use-debounce';
 import classNames from 'classnames';
@@ -49,6 +50,10 @@ const Drawer = ( {
 					'wc-block-components-drawer__screen-overlay--with-slide-in': slideIn,
 					'wc-block-components-drawer__screen-overlay--with-slide-out': slideOut,
 				}
+			) }
+			closeButtonLabel={ __(
+				'Close mini cart',
+				'woo-gutenberg-products-block'
 			) }
 		>
 			{ children }
