@@ -2,15 +2,10 @@
 	@include font-size(smaller);
 	color: $alert-red;
 	max-width: 100%;
-	position: absolute;
 	white-space: normal;
 
 	> p {
-		align-items: center;
-		display: flex;
-		line-height: 12px; // This allows two lines in a 24px bottom margin.
 		margin: 0;
-		min-height: 24px;
 		padding: 0;
 	}
 }
