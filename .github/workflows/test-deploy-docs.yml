@@ -1,6 +1,6 @@
 name: Run code sniff on PR
 on:
-  pull_request
+  [pull_request, push]
 jobs:
   update-code-reference:
     name: Update Code Reference
@@ -13,5 +13,4 @@ jobs:
           repo: woocommerce/code-reference
           token: ${{ secrets.CUSTOM_GH_TOKEN }}
           ref: refs/heads/trunk
-          inputs: '{ "version": "5.4.0" }'
-
+          inputs: '{ "version": "5.6.0" }'
