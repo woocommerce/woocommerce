@@ -23,20 +23,6 @@ import { decodeEntities } from '@wordpress/html-entities';
 import { previewOptions } from './preview';
 import './style.scss';
 
-const hideOutOfStockItems = getSetting( 'hideOutOfStockItems', false );
-const { outofstock, ...otherStockStatusOptions } = getSetting(
-	'stockStatusOptions',
-	{}
-);
-const STOCK_STATUS_OPTIONS = hideOutOfStockItems
-	? otherStockStatusOptions
-	: { outofstock, ...otherStockStatusOptions };
-// Filter added to handle if there are slugs without a corresponding name defined.
-const initialOptions = Object.entries( STOCK_STATUS_OPTIONS )
-	.map( ( [ slug, name ] ) => ( { slug, name } ) )
-	.filter( ( status ) => !! status.name )
-	.sort( ( a, b ) => a.slug.localeCompare( b.slug ) );
-
 /**
  * Component displaying an stock status filter.
  *
@@ -48,9 +34,28 @@ const StockStatusFilterBlock = ( {
 	attributes: blockAttributes,
 	isEditor = false,
 } ) => {
+	const [ hideOutOfStockItems ] = useState(
+		getSetting( 'hideOutOfStockItems', false )
+	);
+	const [ { outofstock, ...otherStockStatusOptions } ] = useState(
+		getSetting( 'stockStatusOptions', {} )
+	);
+	const [ STOCK_STATUS_OPTIONS ] = useState(
+		hideOutOfStockItems
+			? otherStockStatusOptions
+			: { outofstock, ...otherStockStatusOptions }
+	);
+
 	const [ checked, setChecked ] = useState( [] );
 	const [ displayedOptions, setDisplayedOptions ] = useState(
 		blockAttributes.isPreview ? previewOptions : []
+	);
+	// Filter added to handle if there are slugs without a corresponding name defined.
+	const [ initialOptions ] = useState(
+		Object.entries( STOCK_STATUS_OPTIONS )
+			.map( ( [ slug, name ] ) => ( { slug, name } ) )
+			.filter( ( status ) => !! status.name )
+			.sort( ( a, b ) => a.slug.localeCompare( b.slug ) )
 	);
 
 	const [ queryState ] = useQueryStateByContext();
@@ -140,6 +145,7 @@ const StockStatusFilterBlock = ( {
 		getFilteredStock,
 		checked,
 		queryState.stock_status,
+		initialOptions,
 	] );
 
 	const onSubmit = useCallback(

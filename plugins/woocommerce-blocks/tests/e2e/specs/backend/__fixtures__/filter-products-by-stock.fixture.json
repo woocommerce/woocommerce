@@ -1,0 +1,1 @@
+{"title":"Filter Products by Stock Block","pageContent":"<!-- wp:woocommerce/stock-filter -->\n<div class=\"wp-block-woocommerce-stock-filter is-loading\" data-show-counts=\"true\" data-heading=\"Filter by stock status\" data-heading-level=\"3\"><span aria-hidden=\"true\" class=\"wc-block-product-stock-filter__placeholder\"></span></div>\n<!-- /wp:woocommerce/stock-filter -->"}
