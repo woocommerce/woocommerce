@@ -160,7 +160,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 5.7.0 2021-09-14 =
+= 5.7.0 2021-09-21 =
 
 **WooCommerce**
 
@@ -195,7 +195,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Tweak - Update the Marketplace/Addons header to match new designs. #30389
 * Tweak - Renamed "ZIP" to "ZIP Code" and "Pin code" to "PIN" for US & India, respectively. #30204
 
-**WooCommerce Admin - 2.6.0 & 2.6.1**
+**WooCommerce Admin - 2.6.0 & 2.6.1 & 2.6.2**
 
 - Fix: Fixes action button mis-alignment within card footer. #7412
 - Fix: Fixing issues with ReportTable component data not populating correctly #7355
@@ -211,6 +211,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 - Fix: Fix marketing task visibility #7580
 - Fix: Fix stats-overview card padding issue #7594
 - Fix: Fix layout issue on the marketing task #7598
+- Fix Update task-item logic to only display content when expanded is true. #7611
 - Add: Add boolean isReverseTrend prop to SummaryNumber to show "positive" delta for negative numbers. #7357
 - Add: Adding links to help panel for marketing task #7384
 - Add: Add installed marketing extensions card to extensions task #7419
