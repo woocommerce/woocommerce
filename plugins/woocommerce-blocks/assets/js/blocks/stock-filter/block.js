@@ -258,7 +258,9 @@ const StockStatusFilterBlock = ( {
 	return (
 		<>
 			{ ! isEditor && blockAttributes.heading && (
-				<TagName>{ blockAttributes.heading }</TagName>
+				<TagName className="wc-block-stock-filter__title">
+					{ blockAttributes.heading }
+				</TagName>
 			) }
 			<div className="wc-block-stock-filter">
 				<CheckboxList

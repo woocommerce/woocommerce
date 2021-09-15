@@ -118,6 +118,7 @@ const Edit = ( { attributes, setAttributes } ) => {
 					) }
 				>
 					<BlockTitle
+						className="wc-block-stock-filter__title"
 						headingLevel={ headingLevel }
 						heading={ heading }
 						onChange={ ( value ) =>
