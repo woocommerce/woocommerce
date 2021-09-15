@@ -1,12 +1,15 @@
 /**
- * @typedef {import('@woocommerce/type-defs/payments').PaymentMethodRegistrationOptions} PaymentMethodRegistrationOptions
- * @typedef {import('@woocommerce/type-defs/payments').ExpressPaymentMethodRegistrationOptions} ExpressPaymentMethodRegistrationOptions
- */
-
-/**
  * External dependencies
  */
 import deprecated from '@wordpress/deprecated';
+import type {
+	PaymentMethodConfiguration,
+	ExpressPaymentMethodConfiguration,
+	CanMakePaymentCallback,
+	PaymentMethodConfigInstance,
+	PaymentMethods,
+	ExpressPaymentMethods,
+} from '@woocommerce/type-defs/payments';
 
 /**
  * Internal dependencies
@@ -14,16 +17,20 @@ import deprecated from '@wordpress/deprecated';
 import { default as PaymentMethodConfig } from './payment-method-config';
 import { default as ExpressPaymentMethodConfig } from './express-payment-method-config';
 import { canMakePaymentExtensionsCallbacks } from './extensions-config';
-const paymentMethods = {};
-const expressPaymentMethods = {};
+
+type LegacyRegisterPaymentMethodFunction = ( config: unknown ) => unknown;
+type LegacyRegisterExpessPaymentMethodFunction = ( config: unknown ) => unknown;
+
+const paymentMethods: PaymentMethods = {};
+const expressPaymentMethods: ExpressPaymentMethods = {};
 
 /**
  * Register a regular payment method.
- *
- * @param {PaymentMethodRegistrationOptions} options Configuration options for the payment method.
  */
-export const registerPaymentMethod = ( options ) => {
-	let paymentMethodConfig;
+export const registerPaymentMethod = (
+	options: PaymentMethodConfiguration | LegacyRegisterPaymentMethodFunction
+): void => {
+	let paymentMethodConfig: PaymentMethodConfigInstance | unknown;
 	if ( typeof options === 'function' ) {
 		// Legacy fallback for previous API, where client passes a function:
 		// registerPaymentMethod( ( Config ) => new Config( options ) );
@@ -44,10 +51,12 @@ export const registerPaymentMethod = ( options ) => {
 
 /**
  * Register an express payment method.
- *
- * @param {ExpressPaymentMethodRegistrationOptions} options Configuration options for the payment method.
  */
-export const registerExpressPaymentMethod = ( options ) => {
+export const registerExpressPaymentMethod = (
+	options:
+		| ExpressPaymentMethodConfiguration
+		| LegacyRegisterExpessPaymentMethodFunction
+): void => {
 	let paymentMethodConfig;
 	if ( typeof options === 'function' ) {
 		// Legacy fallback for previous API, where client passes a function:
@@ -69,14 +78,11 @@ export const registerExpressPaymentMethod = ( options ) => {
 
 /**
  * Allows extension to register callbacks for specific payment methods to determine if they can make payments
- *
- * @param {string} namespace A unique string to identify the extension registering payment method callbacks.
- * @param {Record<string, function():any>} callbacks Example {stripe: () => {}, cheque: => {}}
  */
 export const registerPaymentMethodExtensionCallbacks = (
-	namespace,
-	callbacks
-) => {
+	namespace: string,
+	callbacks: Record< string, CanMakePaymentCallback >
+): void => {
 	if ( canMakePaymentExtensionsCallbacks[ namespace ] ) {
 		// eslint-disable-next-line no-console
 		console.error(
@@ -103,20 +109,22 @@ export const registerPaymentMethodExtensionCallbacks = (
 	}
 };
 
-export const __experimentalDeRegisterPaymentMethod = ( paymentMethodName ) => {
+export const __experimentalDeRegisterPaymentMethod = (
+	paymentMethodName: string
+): void => {
 	delete paymentMethods[ paymentMethodName ];
 };
 
 export const __experimentalDeRegisterExpressPaymentMethod = (
-	paymentMethodName
-) => {
+	paymentMethodName: string
+): void => {
 	delete expressPaymentMethods[ paymentMethodName ];
 };
 
-export const getPaymentMethods = () => {
+export const getPaymentMethods = (): PaymentMethods => {
 	return paymentMethods;
 };
 
-export const getExpressPaymentMethods = () => {
+export const getExpressPaymentMethods = (): ExpressPaymentMethods => {
 	return expressPaymentMethods;
 };

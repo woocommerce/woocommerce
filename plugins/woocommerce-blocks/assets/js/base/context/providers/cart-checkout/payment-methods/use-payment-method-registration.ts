@@ -9,6 +9,12 @@ import {
 import { useState, useEffect, useRef, useCallback } from '@wordpress/element';
 import { useShallowEqual } from '@woocommerce/base-hooks';
 import { CURRENT_USER_IS_ADMIN, getSetting } from '@woocommerce/settings';
+import type {
+	PaymentMethods,
+	ExpressPaymentMethods,
+	PaymentMethodConfigInstance,
+	ExpressPaymentMethodConfigInstance,
+} from '@woocommerce/type-defs/payments';
 
 /**
  * Internal dependencies
@@ -16,16 +22,10 @@ import { CURRENT_USER_IS_ADMIN, getSetting } from '@woocommerce/settings';
 import { useEditorContext } from '../../editor-context';
 import { useShippingDataContext } from '../shipping';
 import { useCustomerDataContext } from '../customer';
-import type {
-	PaymentMethodsDispatcherType,
-	PaymentMethods,
-	ExpressPaymentMethods,
-	PaymentMethodConfig,
-	ExpressPaymentMethodConfig,
-} from './types';
 import { useStoreCart } from '../../../hooks/cart/use-store-cart';
 import { useStoreNotices } from '../../../hooks/use-store-notices';
 import { useEmitResponse } from '../../../hooks/use-emit-response';
+import type { PaymentMethodsDispatcherType } from './types';
 
 /**
  * This hook handles initializing registered payment methods and exposing all
@@ -88,7 +88,9 @@ const usePaymentMethodRegistration = (
 		let availablePaymentMethods = {};
 
 		const addAvailablePaymentMethod = (
-			paymentMethod: PaymentMethodConfig | ExpressPaymentMethodConfig
+			paymentMethod:
+				| PaymentMethodConfigInstance
+				| ExpressPaymentMethodConfigInstance
 		) => {
 			availablePaymentMethods = {
 				...availablePaymentMethods,
@@ -113,7 +115,7 @@ const usePaymentMethodRegistration = (
 							)
 					  );
 
-				if ( !! canPay ) {
+				if ( canPay ) {
 					if (
 						typeof canPay === 'object' &&
 						canPay !== null &&

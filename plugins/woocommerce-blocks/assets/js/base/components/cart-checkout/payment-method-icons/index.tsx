@@ -2,7 +2,7 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import type { PaymentMethodIcon as PaymentMethodIconType } from '@woocommerce/type-defs/payment-method-icon';
+import type { PaymentMethodIcons as PaymentMethodIconsType } from '@woocommerce/type-defs/payments';
 
 /**
  * Internal dependencies
@@ -13,8 +13,8 @@ import { normalizeIconConfig } from './utils';
 import './style.scss';
 
 interface PaymentMethodIconsProps {
-	icons: PaymentMethodIconType[];
-	align: string;
+	icons: PaymentMethodIconsType;
+	align?: 'left' | 'right' | 'center';
 }
 /**
  * For a given list of icons, render each as a list item, using common icons

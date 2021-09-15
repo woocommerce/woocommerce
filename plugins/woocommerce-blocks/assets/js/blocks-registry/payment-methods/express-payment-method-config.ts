@@ -1,11 +1,30 @@
 /**
+ * External dependencies
+ */
+import type { ReactNode } from 'react';
+import type {
+	ExpressPaymentMethodConfiguration,
+	Supports,
+	CanMakePaymentCallback,
+	ExpressPaymentMethodConfigInstance,
+} from '@woocommerce/type-defs/payments';
+
+/**
  * Internal dependencies
  */
-import { assertConfigHasProperties, assertValidElement } from './assertions';
 import { canMakePaymentWithFeaturesCheck } from './payment-method-config-helper';
+import { assertConfigHasProperties, assertValidElement } from './assertions';
 
-export default class ExpressPaymentMethodConfig {
-	constructor( config ) {
+export default class ExpressPaymentMethodConfig
+	implements ExpressPaymentMethodConfigInstance {
+	public name: string;
+	public content: ReactNode;
+	public edit: ReactNode;
+	public paymentMethodId?: string;
+	public supports: Supports;
+	public canMakePayment: CanMakePaymentCallback;
+
+	constructor( config: ExpressPaymentMethodConfiguration ) {
 		// validate config
 		ExpressPaymentMethodConfig.assertValidConfig( config );
 		this.name = config.name;
@@ -21,7 +40,9 @@ export default class ExpressPaymentMethodConfig {
 		);
 	}
 
-	static assertValidConfig = ( config ) => {
+	static assertValidConfig = (
+		config: ExpressPaymentMethodConfiguration
+	): void => {
 		assertConfigHasProperties( config, [ 'name', 'content', 'edit' ] );
 		if ( typeof config.name !== 'string' ) {
 			throw new TypeError(

@@ -6,6 +6,7 @@ import {
 	ShippingRateItem,
 	ExtensionsData,
 } from './cart-response';
+
 export interface CurrencyInfo {
 	currency_code: string;
 	currency_symbol: string;

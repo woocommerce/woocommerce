@@ -1,14 +1,17 @@
 /**
  * External dependencies
  */
-import type { PaymentMethodIcon } from '@woocommerce/type-defs/payment-method-icon';
+import type {
+	PaymentMethodIcon,
+	PaymentMethodIcons,
+} from '@woocommerce/type-defs/payments';
 import { isString } from '@woocommerce/types';
 
 /**
  * For an array of icons, normalize into objects and remove duplicates.
  */
 export const normalizeIconConfig = (
-	icons: ( PaymentMethodIcon | string )[]
+	icons: PaymentMethodIcons
 ): PaymentMethodIcon[] => {
 	const normalizedIcons: Record< string, PaymentMethodIcon > = {};
 
