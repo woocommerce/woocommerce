@@ -3,7 +3,6 @@
  */
 import PropTypes from 'prop-types';
 import { PlainText } from '@wordpress/block-editor';
-import classnames from 'classnames';
 import { withInstanceId } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
 
@@ -21,7 +20,7 @@ const BlockTitle = ( {
 } ) => {
 	const TagName = `h${ headingLevel }`;
 	return (
-		<TagName>
+		<TagName className={ className }>
 			<label
 				className="screen-reader-text"
 				htmlFor={ `block-title-${ instanceId }` }
@@ -30,10 +29,7 @@ const BlockTitle = ( {
 			</label>
 			<PlainText
 				id={ `block-title-${ instanceId }` }
-				className={ classnames(
-					'wc-block-editor-components-title',
-					className
-				) }
+				className="wc-block-editor-components-title"
 				value={ heading }
 				onChange={ onChange }
 			/>

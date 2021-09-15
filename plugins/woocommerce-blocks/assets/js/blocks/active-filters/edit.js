@@ -78,6 +78,7 @@ const Edit = ( { attributes, setAttributes } ) => {
 		<div className={ className }>
 			{ getInspectorControls() }
 			<BlockTitle
+				className="wc-block-active-filters__title"
 				headingLevel={ headingLevel }
 				heading={ heading }
 				onChange={ ( value ) => setAttributes( { heading: value } ) }

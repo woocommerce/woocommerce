@@ -217,8 +217,8 @@
 	.wc-block-grid__product-title,
 	.wc-block-components-product-title {
 		font-family: $twentytwenty-headings;
-		color: #000;
-		font-size: 1.2em;
+		color: $twentytwenty-highlights-color;
+		@include font-size(regular);
 	}
 
 	.wp-block-columns .wc-block-components-product-title {
@@ -283,6 +283,22 @@
 		right: 4px;
 		top: 4px;
 		z-index: 1;
+	}
+
+	.wc-block-active-filters__title,
+	.wc-block-attribute-filter__title,
+	.wc-block-price-filter__title,
+	.wc-block-stock-filter__title {
+		@include font-size(regular);
+	}
+
+	.wc-block-active-filters .wc-block-active-filters__clear-all {
+		@include font-size(smaller);
+	}
+
+	.wc-block-grid__product-add-to-cart.wp-block-button .wp-block-button__link {
+		@include font-size(smaller);
+		padding: em($gap-smaller);
 	}
 
 	@media only screen and (min-width: 768px) {
