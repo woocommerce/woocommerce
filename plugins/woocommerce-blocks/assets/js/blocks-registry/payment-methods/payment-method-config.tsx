@@ -2,27 +2,48 @@
  * External dependencies
  */
 import deprecated from '@wordpress/deprecated';
+import type { ReactNode } from 'react';
+import type {
+	PaymentMethodConfiguration,
+	Supports,
+	CanMakePaymentCallback,
+	PaymentMethodConfigInstance,
+	PaymentMethodIcons,
+} from '@woocommerce/type-defs/payments';
 
 /**
  * Internal dependencies
  */
+import {
+	canMakePaymentWithFeaturesCheck,
+	canMakePaymentWithExtensions,
+} from './payment-method-config-helper';
+import { extensionsConfig, PaymentMethodName } from './extensions-config';
 import {
 	assertConfigHasProperties,
 	assertValidElement,
 	assertValidElementOrString,
 } from './assertions';
 
-import {
-	canMakePaymentWithFeaturesCheck,
-	canMakePaymentWithExtensions,
-} from './payment-method-config-helper';
-import { extensionsConfig } from './extensions-config';
 const NullComponent = () => {
 	return null;
 };
 
-export default class PaymentMethodConfig {
-	constructor( config ) {
+export default class PaymentMethodConfig
+	implements PaymentMethodConfigInstance {
+	public name: string;
+	public content: ReactNode;
+	public edit: ReactNode;
+	public paymentMethodId?: string;
+	public supports: Supports;
+	public icons: null | PaymentMethodIcons;
+	public label: ReactNode;
+	public ariaLabel: string;
+	public placeOrderButtonLabel?: string;
+	public savedTokenComponent?: ReactNode | null;
+	public canMakePaymentFromConfig: CanMakePaymentCallback;
+
+	constructor( config: PaymentMethodConfiguration ) {
 		// validate config
 		PaymentMethodConfig.assertValidConfig( config );
 		this.name = config.name;
@@ -31,7 +52,7 @@ export default class PaymentMethodConfig {
 		this.ariaLabel = config.ariaLabel;
 		this.content = config.content;
 		this.savedTokenComponent = config.savedTokenComponent;
-		this.icons = config.icons;
+		this.icons = config.icons || null;
 		this.edit = config.edit;
 		this.paymentMethodId = config.paymentMethodId || this.name;
 		this.supports = {
@@ -46,15 +67,17 @@ export default class PaymentMethodConfig {
 	}
 
 	// canMakePayment is calculated each time based on data that modifies outside of the class (eg: cart data).
-	get canMakePayment() {
+	get canMakePayment(): CanMakePaymentCallback {
 		const canPay = canMakePaymentWithFeaturesCheck(
 			this.canMakePaymentFromConfig,
 			this.supports.features
 		);
+
 		// Loop through all callbacks to check if there are any registered for this payment method.
-		return Object.values( extensionsConfig.canMakePayment ).some(
-			( callbacks ) => this.name in callbacks
-		)
+		return ( Object.values( extensionsConfig.canMakePayment ) as Record<
+			PaymentMethodName,
+			CanMakePaymentCallback
+		>[] ).some( ( callbacks ) => this.name in callbacks )
 			? canMakePaymentWithExtensions(
 					canPay,
 					extensionsConfig.canMakePayment,
@@ -63,7 +86,7 @@ export default class PaymentMethodConfig {
 			: canPay;
 	}
 
-	static assertValidConfig = ( config ) => {
+	static assertValidConfig = ( config: PaymentMethodConfiguration ): void => {
 		// set default for optional
 		config.savedTokenComponent = config.savedTokenComponent || (
 			<NullComponent />

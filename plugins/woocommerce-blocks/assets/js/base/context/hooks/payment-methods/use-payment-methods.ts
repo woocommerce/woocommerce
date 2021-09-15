@@ -2,13 +2,28 @@
  * External dependencies
  */
 import { useShallowEqual } from '@woocommerce/base-hooks';
+import type {
+	PaymentMethods,
+	ExpressPaymentMethods,
+} from '@woocommerce/type-defs/payments';
 
 /**
  * Internal dependencies
  */
 import { usePaymentMethodDataContext } from '../../providers/cart-checkout/payment-methods';
 
-const usePaymentMethodState = ( express = false ) => {
+interface PaymentMethodState {
+	paymentMethods: PaymentMethods;
+	isInitialized: boolean;
+}
+interface ExpressPaymentMethodState {
+	paymentMethods: ExpressPaymentMethods;
+	isInitialized: boolean;
+}
+
+const usePaymentMethodState = (
+	express = false
+): PaymentMethodState | ExpressPaymentMethodState => {
 	const {
 		paymentMethods,
 		expressPaymentMethods,
@@ -31,5 +46,8 @@ const usePaymentMethodState = ( express = false ) => {
 	};
 };
 
-export const usePaymentMethods = () => usePaymentMethodState();
-export const useExpressPaymentMethods = () => usePaymentMethodState( true );
+export const usePaymentMethods = ():
+	| PaymentMethodState
+	| ExpressPaymentMethodState => usePaymentMethodState( false );
+export const useExpressPaymentMethods = (): ExpressPaymentMethodState =>
+	usePaymentMethodState( true );

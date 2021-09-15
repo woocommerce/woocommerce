@@ -1,8 +1,15 @@
 /**
+ * External dependencies
+ */
+import {
+	PaymentMethods,
+	ExpressPaymentMethods,
+} from '@woocommerce/type-defs/payments';
+
+/**
  * Internal dependencies
  */
 import { ACTION, STATUS } from './constants';
-import type { PaymentMethods, ExpressPaymentMethods } from './types';
 
 export interface ActionType {
 	type: ACTION | STATUS;
