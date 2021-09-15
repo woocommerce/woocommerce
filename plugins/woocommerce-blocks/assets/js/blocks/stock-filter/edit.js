@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import classnames from 'classnames';
 import { InspectorControls } from '@wordpress/block-editor';
 import {
 	Disabled,
@@ -110,7 +111,12 @@ const Edit = ( { attributes, setAttributes } ) => {
 		<>
 			{ getInspectorControls() }
 			{
-				<div className={ className }>
+				<div
+					className={ classnames(
+						'wc-block-stock-filter',
+						className
+					) }
+				>
 					<BlockTitle
 						headingLevel={ headingLevel }
 						heading={ heading }
