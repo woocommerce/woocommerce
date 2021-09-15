@@ -1,22 +1,21 @@
 const Event = window.Event || null;
 
-/** @typedef {import('window').HTMLNode} HTMLNode */
+interface DispatchedEventProperties {
+	// Whether the event bubbles.
+	bubbles?: boolean;
+	// Whether the event is cancelable.
+	cancelable?: boolean;
+	// Element that dispatches the event. By default, the body.
+	element?: HTMLElement;
+}
 
 /**
  * Wrapper function to dispatch an event so it's compatible with IE11.
- *
- * @param {string}    name                 Name of the event to dispatch.
- * @param {Object}    [options]            Some additional options to modify
- *                                         the event.
- * @param {boolean}   [options.bubbles]    Whether the event bubbles.
- * @param {boolean}   [options.cancelable] Whether the event is cancelable.
- * @param {HTMLNode}  [options.element]    Element that dispatches the event. By
- *                                         default, the body.
  */
 export const dispatchEvent = (
-	name,
-	{ bubbles = false, cancelable = false, element }
-) => {
+	name: string,
+	{ bubbles = false, cancelable = false, element }: DispatchedEventProperties
+): void => {
 	if ( ! element ) {
 		element = document.body;
 	}
@@ -34,12 +33,12 @@ export const dispatchEvent = (
 	}
 };
 
-let fragmentRequestTimeoutId;
+let fragmentRequestTimeoutId: ReturnType< typeof setTimeout >;
 
 // This is a hack to trigger cart updates till we migrate to block based cart
 // that relies on the store, see
 // https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/1247
-export const triggerFragmentRefresh = () => {
+export const triggerFragmentRefresh = (): void => {
 	if ( fragmentRequestTimeoutId ) {
 		clearTimeout( fragmentRequestTimeoutId );
 	}
@@ -55,21 +54,19 @@ export const triggerFragmentRefresh = () => {
  * Function that listens to a jQuery event and dispatches a native JS event.
  * Useful to convert WC Core events into events that can be read by blocks.
  *
- * @param {string}  jQueryEventName Name of the jQuery event to listen to.
- * @param {string}  nativeEventName Name of the native event to dispatch.
- * @param {boolean} bubbles         Whether the event bubbles.
- * @param {boolean} cancelable      Whether the event is cancelable.
- *
- * @return {Function} Function to remove the jQuery event handler. Ideally it
- * should be used when the component is unmounted.
+ * Returns a function to remove the jQuery event handler. Ideally it should be
+ * used when the component is unmounted.
  */
 export const translateJQueryEventToNative = (
-	jQueryEventName,
-	nativeEventName,
+	// Name of the jQuery event to listen to.
+	jQueryEventName: string,
+	// Name of the native event to dispatch.
+	nativeEventName: string,
+	// Whether the event bubbles.
 	bubbles = false,
+	// Whether the event is cancelable.
 	cancelable = false
-) => {
-	// @ts-ignore -- jQuery is window global
+): ( () => void ) => {
 	if ( typeof jQuery !== 'function' ) {
 		return () => void null;
 	}
@@ -78,8 +75,6 @@ export const translateJQueryEventToNative = (
 		dispatchEvent( nativeEventName, { bubbles, cancelable } );
 	};
 
-	// @ts-ignore -- jQuery is window global
 	jQuery( document ).on( jQueryEventName, eventDispatcher );
-	// @ts-ignore -- jQuery is window global
 	return () => jQuery( document ).off( jQueryEventName, eventDispatcher );
 };
