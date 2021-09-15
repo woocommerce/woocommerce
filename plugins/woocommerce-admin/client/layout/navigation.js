@@ -93,4 +93,5 @@ const NavigationPlugin = () => {
 
 registerPlugin( 'wc-admin-navigation', {
 	render: NavigationPlugin,
+	scope: 'woocommerce-navigation',
 } );

@@ -174,6 +174,9 @@ class _Layout extends Component {
 					) }
 				</div>
 				<PluginArea scope="woocommerce-admin" />
+				{ window.wcAdminFeatures.navigation && (
+					<PluginArea scope="woocommerce-navigation" />
+				) }
 			</SlotFillProvider>
 		);
 	}

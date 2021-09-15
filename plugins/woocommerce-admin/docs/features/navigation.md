@@ -121,5 +121,5 @@ const MyPlugin = () => {
     );
 };
 
-registerPlugin('my-plugin', { render: MyPlugin });
+registerPlugin( 'my-plugin', { render: MyPlugin, scope: 'woocommerce-navigation' } );
 ```
