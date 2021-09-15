@@ -128,7 +128,7 @@
 		"@wordpress/is-shallow-equal": "4.2.0",
 		"@wordpress/scripts": "13.0.1",
 		"autoprefixer": "10.3.4",
-		"axios": "0.21.2",
+		"axios": "0.21.4",
 		"babel-plugin-transform-async-generator-functions": "6.24.1",
 		"babel-plugin-transform-object-rest-spread": "6.26.0",
 		"babel-plugin-transform-react-jsx": "6.24.1",
