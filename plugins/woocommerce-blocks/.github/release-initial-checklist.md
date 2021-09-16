@@ -68,7 +68,12 @@ Additionally, make sure to differentiate between things in the testing notes tha
   * [ ] Download zip and smoke test.
   * [ ] Test updating plugin from previous version.
 * [ ] Merge this pull request back into `trunk`. This may have merge conflicts needing resolved if there are any cherry-picked commits in the release branch.
-* [ ] Update version on the `trunk` branch to be for the next version of the plugin and include the `dev` suffix (e.g. something like [`2.6-dev`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/commit/e27f053e7be0bf7c1d376f5bdb9d9999190ce158)) for the next version.
+* [ ] Update version on the `trunk` branch to be for the next version of the plugin and include the `dev` suffix (e.g. something like [`2.6-dev`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/commit/e27f053e7be0bf7c1d376f5bdb9d9999190ce158)) for the next version. Be sure to update the version number in the following files:
+    * [ ] `package-lock.json`
+    * [ ] `package.json`
+    * [ ] `readme.txt`
+    * [ ] `src/Package.php`
+    * [ ] `woocommerce-gutenberg-products-block.php`.
 * [ ] Update the schedules p2 with the shipped date for the release (Pca54o-1N-p2).
 * [ ] Clean up the release milestone and Zenhub.
   * [ ] Edit the [GitHub milestone](https://github.com/woocommerce/woocommerce-gutenberg-products-block/milestones) and add the current date as the due date (this is used to track ship date as well).
