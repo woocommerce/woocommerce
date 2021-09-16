@@ -1,3 +1,8 @@
+/**
+ * Internal dependencies
+ */
+import { findLabelWithText } from '../../../utils';
+
 expect.extend( {
 	async toToggleElement( toggleLabel, selector ) {
 		if ( ! selector ) {
@@ -16,13 +21,19 @@ expect.extend( {
 			pass: false,
 		};
 
-		await toggleLabel.click();
+		await ( typeof toggleLabel === 'string'
+			? await findLabelWithText( toggleLabel )
+			: toggleLabel
+		).click();
 
 		if ( initiallyHadSelectorMatch === ( await hasSelectorMatch() ) ) {
 			return noChangeError;
 		}
 
-		await toggleLabel.click();
+		await ( typeof toggleLabel === 'string'
+			? await findLabelWithText( toggleLabel )
+			: toggleLabel
+		).click();
 
 		if ( initiallyHadSelectorMatch !== ( await hasSelectorMatch() ) ) {
 			return noChangeError;

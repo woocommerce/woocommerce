@@ -10,6 +10,7 @@ import { decodeEntities } from '@wordpress/html-entities';
 /**
  * Internal dependencies
  */
+import './style.scss';
 import {
 	PRODUCT_OUT_OF_STOCK,
 	PRODUCT_NOT_PURCHASABLE,

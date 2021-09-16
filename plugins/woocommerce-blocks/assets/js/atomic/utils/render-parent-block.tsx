@@ -138,16 +138,13 @@ const renderInnerBlocks = ( {
 			const parsedElement = parse( element.outerHTML );
 
 			if ( isValidElement( parsedElement ) ) {
-				const elementChildren =
-					element.children && element.children.length
-						? renderInnerBlocks( {
-								block,
-								blockMap,
-								children: element.children,
-								depth: depth + 1,
-								blockWrapper,
-						  } )
-						: null;
+				const elementChildren = renderInnerBlocks( {
+					block,
+					blockMap,
+					children: element.children || [],
+					depth: depth + 1,
+					blockWrapper,
+				} );
 				return elementChildren
 					? cloneElement(
 							parsedElement,
@@ -243,15 +240,12 @@ export const renderParentBlock = ( {
 	 * In addition to getProps, we need to render and return the children. This adds children to props.
 	 */
 	const getPropsWithChildren = ( element: Element, i: number ) => {
-		const children =
-			element.children && element.children.length
-				? renderInnerBlocks( {
-						block: blockName,
-						blockMap,
-						children: element.children,
-						blockWrapper,
-				  } )
-				: null;
+		const children = renderInnerBlocks( {
+			block: blockName,
+			blockMap,
+			children: element.children || [],
+			blockWrapper,
+		} );
 		return { ...getProps( element, i ), children };
 	};
 	/**

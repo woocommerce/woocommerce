@@ -5,6 +5,11 @@ import { __ } from '@wordpress/i18n';
 import { SHOP_URL } from '@woocommerce/block-settings';
 import { Icon, cart } from '@woocommerce/icons';
 
+/**
+ * Internal dependencies
+ */
+import './style.scss';
+
 const EmptyCart = () => {
 	return (
 		<div className="wc-block-checkout-empty">

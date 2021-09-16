@@ -46,10 +46,6 @@ const blocks = {
 	checkout: {
 		customDir: 'cart-checkout/checkout',
 	},
-	'checkout-i2': {
-		customDir: 'cart-checkout/checkout-i2',
-		isExperimental: true,
-	},
 	'mini-cart': {
 		customDir: 'cart-checkout/mini-cart',
 	},

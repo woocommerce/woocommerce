@@ -1,0 +1,25 @@
+{
+	"name": "woocommerce/checkout-express-payment-block",
+	"version": "1.0.0",
+	"title": "Express Checkout",
+	"description": "Provide an express payment option for your customers.",
+	"category": "woocommerce",
+	"supports": {
+		"align": false,
+		"html": false,
+		"multiple": false,
+		"reusable": false,
+		"inserter": false
+	},
+	"attributes": {
+		"lock": {
+			"default": {
+				"remove": true,
+				"move": true
+			}
+		}
+	},
+	"parent": [ "woocommerce/checkout-fields-block" ],
+	"textdomain": "woo-gutenberg-products-block",
+	"apiVersion": 2
+}

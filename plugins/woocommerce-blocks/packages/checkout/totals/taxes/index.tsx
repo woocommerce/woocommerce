@@ -34,7 +34,10 @@ const TotalsTaxes = ( {
 }: TotalsTaxesProps ): ReactElement | null => {
 	const { total_tax: totalTax, tax_lines: taxLines } = values;
 
-	if ( ! getSetting( 'taxesEnabled', true ) ) {
+	if (
+		! getSetting( 'taxesEnabled', true ) &&
+		parseInt( totalTax, 10 ) <= 0
+	) {
 		return null;
 	}
 
