@@ -42,7 +42,7 @@ export class OrderEdit extends AdminEdit {
 	 * @returns {Promise<void>}
 	 */
 	async verifyPublish( button, publishNotice, publishVerification ) {
-		super.verifyPublish( button, publishNotice, publishVerification );
+		await super.verifyPublish( button, publishNotice, publishVerification );
 
 		await expect( page ).toMatchElement( '#select2-order_status-container', { text: 'Processing' } );
 		await expect( page ).toMatchElement(
