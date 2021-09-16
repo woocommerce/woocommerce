@@ -17,6 +17,7 @@ import { example } from '../example';
  * Register and run the "Reviews by Product" block.
  */
 registerBlockType( 'woocommerce/reviews-by-product', {
+	apiVersion: 2,
 	title: __( 'Reviews by Product', 'woo-gutenberg-products-block' ),
 	icon: {
 		src: <Icon srcElement={ comment } />,
@@ -30,6 +31,12 @@ registerBlockType( 'woocommerce/reviews-by-product', {
 	),
 	supports: {
 		html: false,
+		color: {
+			background: false,
+		},
+		typography: {
+			fontSize: true,
+		},
 	},
 	example: {
 		...example,

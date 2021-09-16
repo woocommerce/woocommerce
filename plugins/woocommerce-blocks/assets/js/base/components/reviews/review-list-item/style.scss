@@ -59,7 +59,7 @@
 
 .has-image {
 	.wc-block-components-review-list-item__info {
-		grid-template-columns: #{48px + $gap} 1fr;
+		grid-template-columns: calc(3em + #{$gap}) 1fr;
 	}
 	.wc-block-components-review-list-item__meta {
 		grid-column: 2;
@@ -69,19 +69,17 @@
 .wc-block-components-review-list-item__image {
 	align-items: center;
 	display: flex;
-	height: 48px;
+	height: 3em;
 	grid-column: 1;
 	grid-row: 1 / 3;
 	justify-content: center;
 	position: relative;
-	width: 48px;
+	width: 3em;
 
 	> img {
 		display: block;
-		height: auto;
 		max-height: 100%;
-		max-width: 100%;
-		width: auto;
+		object-fit: contain;
 	}
 }
 
@@ -134,23 +132,28 @@
 
 .wc-block-components-review-list-item__product + .wc-block-components-review-list-item__author {
 	font-weight: normal;
-	color: #808080;
 	order: 4;
 }
 
 .wc-block-components-review-list-item__published-date {
-	color: #808080;
 	order: 5;
 }
 
-.wc-block-components-review-list-item__author + .wc-block-components-review-list-item__published-date {
+.wc-block-components-review-list-item__product + .wc-block-components-review-list-item__author + .wc-block-components-review-list-item__published-date {
+	padding-left: $gap/2;
+	position: relative;
+
 	&::before {
 		content: "";
 		display: inline-block;
-		margin-right: $gap*0.5;
-		border-right: 1px solid #ddd;
+		margin-left: -$gap*0.5;
+		border-right: 1px solid currentColor;
+		opacity: 0.5;
 		height: 1em;
 		vertical-align: middle;
+		position: absolute;
+		top: calc(50% + 0.1em);
+		transform: translateY(-50%);
 	}
 }
 
@@ -166,16 +169,15 @@
 
 	> .wc-block-components-review-list-item__rating__stars {
 		@include font-size(regular);
-		display: inline-block;
+		display: block;
 		top: 0;
 		overflow: hidden;
 		position: relative;
-		height: 1.618em;
-		line-height: 1.618;
+		height: 1em;
+		line-height: 1;
 		width: 5.3em;
 		font-family: star; /* stylelint-disable-line */
 		font-weight: 400;
-		vertical-align: top;
 	}
 
 	> .wc-block-components-review-list-item__rating__stars::before {
@@ -203,4 +205,8 @@
 		left: 0;
 		color: #e6a237;
 	}
+}
+
+.wc-block-components-review-list-item__text p {
+	font-size: inherit;
 }
