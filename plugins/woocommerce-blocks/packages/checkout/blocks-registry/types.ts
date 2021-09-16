@@ -5,6 +5,7 @@ import type { LazyExoticComponent } from 'react';
 import type { BlockConfiguration } from '@wordpress/blocks';
 
 export enum innerBlockAreas {
+	CHECKOUT = 'woocommerce/checkout',
 	CHECKOUT_FIELDS = 'woocommerce/checkout-fields-block',
 	CHECKOUT_TOTALS = 'woocommerce/checkout-totals-block',
 	CONTACT_INFORMATION = 'woocommerce/checkout-contact-information-block',

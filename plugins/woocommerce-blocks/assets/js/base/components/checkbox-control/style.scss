@@ -3,6 +3,7 @@
 	align-items: flex-start;
 	display: flex;
 	position: relative;
+	margin-top: em($gap-large);
 
 	.wc-block-components-checkbox__input[type="checkbox"] {
 		font-size: 1em;

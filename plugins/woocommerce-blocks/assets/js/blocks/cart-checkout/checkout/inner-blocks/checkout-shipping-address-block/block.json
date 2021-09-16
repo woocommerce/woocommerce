@@ -1,0 +1,25 @@
+{
+	"name": "woocommerce/checkout-shipping-address-block",
+	"version": "1.0.0",
+	"title": "Shipping Address",
+	"description": "Collect your customer's shipping address.",
+	"category": "woocommerce",
+	"supports": {
+		"align": false,
+		"html": false,
+		"multiple": false,
+		"reusable": false,
+		"inserter": false
+	},
+	"attributes": {
+		"lock": {
+			"default": {
+				"remove": true,
+				"move": true
+			}
+		}
+	},
+	"parent": [ "woocommerce/checkout-fields-block" ],
+	"textdomain": "woo-gutenberg-products-block",
+	"apiVersion": 2
+}
