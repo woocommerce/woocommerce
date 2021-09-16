@@ -1,6 +1,6 @@
 # JS build system
 
-WooCommerce Blocks uses Webpack to build the files that will be consumed by browsers. There are several different Webpack configs in order to build files for different contexts of the plugin. They can all be found in [`webpack.config.js`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/webpack.config.js#L148-L160), but this is a quick summary:
+WooCommerce Blocks uses Webpack to build the files that will be consumed by browsers. There are several different Webpack configs in order to build files for different contexts of the plugin. They can all be found in [`webpack.config.js`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/6da64165025e7a2afc1782e4b278d72536e7b754/webpack.config.js#L162-L169), but this is a quick summary:
 
 -   `CoreConfig`: config for shared libraries like settings, blocks data or some HOCs and context.
 -   `MainConfig`: config that builds the JS files used by blocks in the editor and is responsible for registering the blocks in Gutenberg.
@@ -16,7 +16,7 @@ Different builds are generated depending on the variable `NODE_ENV`. It can have
 
 ## Babel
 
-Almost all our code is transpiled by Babel, this allows us to use the latest JavaScript technologies without having to worry about browser support. However, it's always a good practice to test the plugin in old browsers like IE11 to ensure nothing is broken.
+Most of our code is transpiled by Babel. This allows us to use the latest JavaScript technologies without affecting browser support.
 
 Some of the Babel plugins we use can be found in [`webpack-configs.js`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/bin/webpack-configs.js).
 
@@ -35,7 +35,7 @@ There are several aliases for internal imports which make importing files across
 
 Aliases also ease refactors because imports no longer depend on the exact location of the file.
 
-All available aliases can be found in [`webpack-helpers.js`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/bin/webpack-helpers.js#L26-L84).
+All available aliases can be found in [`webpack-helpers.js`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/6da64165025e7a2afc1782e4b278d72536e7b754/bin/webpack-helpers.js#L36-L91).
 
 ## Styling
 
