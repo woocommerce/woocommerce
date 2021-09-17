@@ -9,9 +9,9 @@ when:
         - rubik-fp-squad
   - author:
       teamIs:
-        -rubik-fse-squad
+        - rubik-fse-squad
       ignore:
         nameIs:
     assign:
       teams:
-        -rubik-fse-squad
+        - rubik-fse-squad
