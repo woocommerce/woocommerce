@@ -5,7 +5,7 @@ import { BasePage } from '../../pages/BasePage';
 import { waitForElementByText } from '../../utils/actions';
 
 export class IndustrySection extends BasePage {
-	async isDisplayed( industryCount?: number ) {
+	async isDisplayed( industryCount?: number, industryCountMax?: number ) {
 		await waitForElementByText(
 			'h2',
 			'In which industry does the store operate?'
@@ -17,7 +17,13 @@ export class IndustrySection extends BasePage {
 				( items ) => items.length
 			);
 
-			expect( length === industryCount ).toBeTruthy();
+			if ( industryCountMax ) {
+				expect(
+					length >= industryCount && length <= industryCountMax
+				).toBeTruthy();
+			} else {
+				expect( length === industryCount ).toBeTruthy();
+			}
 		}
 	}
 

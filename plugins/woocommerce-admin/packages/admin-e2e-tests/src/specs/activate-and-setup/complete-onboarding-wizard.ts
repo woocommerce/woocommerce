@@ -48,7 +48,7 @@ const testAdminOnboardingWizard = () => {
 
 		it( 'can complete the industry section', async () => {
 			// Query for the industries checkboxes
-			await profileWizard.industry.isDisplayed( 8 );
+			await profileWizard.industry.isDisplayed( 7, 8 );
 			await profileWizard.industry.uncheckIndustries();
 
 			// Select just "fashion" and "health/beauty" to get the single checkbox business section when
