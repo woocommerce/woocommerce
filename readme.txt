@@ -160,6 +160,41 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 5.7.0 2021-09-xx =
+= 5.8.0 2021-10-12 =
+
+**WooCommerce**
+
+* Add - `modified_before` and `modified_after` filtering parameters to REST API for products, orders and coupons. #29461
+* Add - `woocommerce_quantity_input_min_admin` and `woocommerce_quantity_input_step_admin` filters. #29963
+* Dev - Action Scheduler updated to 3.3.0. #30718
+* Dev - Add order argument to `woocommerce_order_actions` filter.
+* Fix - During product quick edit, the featured setting is sometimes not shown correctly as checked. #30471
+* Fix - Offsets not calculated correctly sometimes on select2 dropdowns causing usability issues. #28996
+* Fix - Select2 dropdown search input not getting focus when select2 dropdown element gets focused. #30607
+* Tweak - Add individual item remove notices based on the context of the line item in the order. #29890
+* Tweak - Change the shop page summary which was not relevant to the public. #30553
+* Tweak - Deleted unneeded double spaces in text strings. #30486
+* Tweak - Open Browse all extensions link in a new tab. #30264
+
+**WooCommerce Blocks - 5.7.1 & 5.8.0 & 5.9.0**
+
+* Add - Extensibility point for extensions to filter payment methods. #4668
+* Add - "Filter Products by Stock" block. #4145
+* Add - Introduced the `__experimental_woocommerce_blocks_checkout_update_order_from_request` hook to the Checkout Store API. #4610.
+* Fix - Add label element to `<BlockTitle>` component. #4585
+* Fix - Disable Cart, Checkout, All Products & filters blocks from the widgets screen.
+* Fix - Prevent Product Category List from displaying incorrectly when used on the shop page. #4587
+* Fix - Product Search block displaying incorrectly. #4740
+* Tweak - Add Extensibility info to Store API readme. #4605
+* Tweak - Update documentation for the snackbarNoticeVisibility filter. #4508
+* Tweak - Add documentation for `extensionCartUpdate` method - this allows extensions to update the client-side cart after it has been modified on the server. #4377
+
+**Action Scheduler 3.3.0**
+
+* Enhancement - Adds as_has_scheduled_action() to provide a performant way to test for existing actions. #645
+* Dev - Now supports queries that use multiple statuses. #649
+* Dev - Minimum requirements for WordPress and PHP bumped (to 5.2 and 5.6 respectively). #723
+* Fix - Improves compatibility with environments where NO_ZERO_DATE is enabled. #519
+* Fix - Adds safety checks to guard against errors when our database tables cannot be created. #645
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
