@@ -158,6 +158,7 @@ const ReviewListItem = ( { attributes, review = {} } ) => {
 				'wc-block-components-review-list-item__item',
 				{
 					'is-loading': isLoading,
+					'wc-block-components-review-list-item__item--has-image': showReviewImage,
 				}
 			) }
 			aria-hidden={ isLoading }

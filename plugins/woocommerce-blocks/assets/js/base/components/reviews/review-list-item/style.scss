@@ -57,7 +57,7 @@
 	grid-row: 1;
 }
 
-.has-image {
+.wc-block-components-review-list-item__item--has-image {
 	.wc-block-components-review-list-item__info {
 		grid-template-columns: calc(3em + #{$gap}) 1fr;
 	}
