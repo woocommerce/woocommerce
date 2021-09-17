@@ -18,7 +18,9 @@
 		"./assets/js/settings/blocks/**",
 		"./assets/js/middleware/**",
 		"./assets/js/blocks/cart-checkout/checkout/inner-blocks/**/index.tsx",
-		"./assets/js/blocks/cart-checkout/checkout/inner-blocks/register-components.ts"
+		"./assets/js/blocks/cart-checkout/checkout/inner-blocks/register-components.ts",
+		"./assets/js/blocks/cart-checkout/cart-i2/inner-blocks/**/index.tsx",
+		"./assets/js/blocks/cart-checkout/cart-i2/inner-blocks/register-components.ts"
 	],
 	"repository": {
 		"type": "git",
