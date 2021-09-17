@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5eac31e7455cc69f5e7eaa1869d473c6",
+    "content-hash": "f4e4f1b246c0f4581566253aadf74143",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -595,16 +595,16 @@
         },
         {
             "name": "woocommerce/woocommerce-blocks",
-            "version": "v5.7.1",
+            "version": "v5.9.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-gutenberg-products-block.git",
-                "reference": "7dfe482d9b36f05f3d0ee78d74a26b49f3ebe6f1"
+                "reference": "d4f0040e6c41a2e02ce4dff1cd9fc8efe3113af1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/7dfe482d9b36f05f3d0ee78d74a26b49f3ebe6f1",
-                "reference": "7dfe482d9b36f05f3d0ee78d74a26b49f3ebe6f1",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/d4f0040e6c41a2e02ce4dff1cd9fc8efe3113af1",
+                "reference": "d4f0040e6c41a2e02ce4dff1cd9fc8efe3113af1",
                 "shasum": ""
             },
             "require": {
@@ -612,8 +612,9 @@
                 "composer/installers": "^1.7.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "7.5.20",
-                "woocommerce/woocommerce-sniffs": "0.1.0"
+                "woocommerce/woocommerce-sniffs": "0.1.0",
+                "wp-phpunit/wp-phpunit": "^5.4",
+                "yoast/phpunit-polyfills": "^1.0"
             },
             "type": "wordpress-plugin",
             "extra": {
@@ -638,7 +639,7 @@
                 "gutenberg",
                 "woocommerce"
             ],
-            "time": "2021-08-30T08:15:59+00:00"
+            "time": "2021-09-14T13:42:34+00:00"
         }
     ],
     "packages-dev": [
