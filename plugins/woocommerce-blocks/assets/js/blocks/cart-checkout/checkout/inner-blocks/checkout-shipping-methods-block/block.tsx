@@ -61,32 +61,44 @@ const Block = (): JSX.Element | null => {
 		return null;
 	}
 
+	const shippingRatesPackageCount = getShippingRatesPackageCount(
+		shippingRates
+	);
+
+	if (
+		! isEditor &&
+		! hasCalculatedShipping &&
+		! shippingRatesPackageCount
+	) {
+		return (
+			<p>
+				{ __(
+					'Shipping options will be displayed here after entering your full shipping address.',
+					'woo-gutenberg-products-block'
+				) }
+			</p>
+		);
+	}
+
 	return (
 		<>
-			{ isEditor && ! getShippingRatesPackageCount( shippingRates ) ? (
+			{ isEditor && ! shippingRatesPackageCount ? (
 				<NoShippingPlaceholder />
 			) : (
 				<ShippingRatesControl
 					noResultsMessage={
-						hasCalculatedShipping ? (
-							<Notice
-								isDismissible={ false }
-								className={ classnames(
-									'wc-block-components-shipping-rates-control__no-results-notice',
-									'woocommerce-error'
-								) }
-							>
-								{ __(
-									'There are no shipping options available. Please ensure that your address has been entered correctly, or contact us if you need any help.',
-									'woo-gutenberg-products-block'
-								) }
-							</Notice>
-						) : (
-							__(
-								'Shipping options will appear here after entering your full shipping address.',
+						<Notice
+							isDismissible={ false }
+							className={ classnames(
+								'wc-block-components-shipping-rates-control__no-results-notice',
+								'woocommerce-error'
+							) }
+						>
+							{ __(
+								'There are no shipping options available. Please check your shipping address.',
 								'woo-gutenberg-products-block'
-							)
-						)
+							) }
+						</Notice>
 					}
 					renderOption={ renderShippingRatesControlOption }
 					shippingRates={ shippingRates }
