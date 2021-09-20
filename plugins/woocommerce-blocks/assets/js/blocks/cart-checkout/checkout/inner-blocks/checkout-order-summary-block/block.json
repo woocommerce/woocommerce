@@ -13,6 +13,7 @@
 	},
 	"attributes": {
 		"lock": {
+			"type": "object",
 			"default": {
 				"remove": true
 			}
