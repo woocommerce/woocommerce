@@ -70,6 +70,10 @@ class CategoriesReportTable extends Component {
 			formatDecimal: getCurrencyFormatDecimal,
 			getCurrencyConfig,
 		} = this.context;
+		const { categories, query } = this.props;
+		if ( ! categories ) {
+			return [];
+		}
 		const currency = getCurrencyConfig();
 
 		return map( categoryStats, ( categoryStat ) => {
@@ -80,7 +84,6 @@ class CategoriesReportTable extends Component {
 				products_count: productsCount,
 				orders_count: ordersCount,
 			} = categoryStat;
-			const { categories, query } = this.props;
 			const category = categories.get( categoryId );
 			const persistedQuery = getPersistedQuery( query );
 
