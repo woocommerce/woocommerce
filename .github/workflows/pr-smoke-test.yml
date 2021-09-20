@@ -1,4 +1,4 @@
-name: prcheck
+name: Run smoke tests against pull request.
 on:
   pull_request:
     types:
@@ -45,7 +45,7 @@ jobs:
         run: |
           npx wc-e2e test:e2e ./tests/e2e/specs/smoke-tests/update-woocommerce.js
           npx wc-e2e test:e2e
-          
+
       - name: Remove label from pull request.
         uses: actions/github-script@v4
         with:
