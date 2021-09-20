@@ -1,5 +1,7 @@
 name: 'Automate assigning team for review.'
-on: pull_request
+on: 
+  pull_request:
+    types: [ opened ]
 jobs:
   add-reviews:
     runs-on: ubuntu-latest
