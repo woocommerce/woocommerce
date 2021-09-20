@@ -102,6 +102,15 @@ class TaskList {
 	}
 
 	/**
+	 * Add task to the task list.
+	 *
+	 * @param array $args Task properties.
+	 */
+	public function add_task( $args ) {
+		$this->tasks[] = $args;
+	}
+
+	/**
 	 * Get the list for use in JSON.
 	 *
 	 * @return array

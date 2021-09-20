@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Admin\API\Reports\Taxes\Stats\DataStore as TaxDataSto
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\Onboarding;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Init as OnboardingTasks;
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\StoreDetails;
 use Automattic\WooCommerce\Admin\Features\RemoteFreeExtensions\Init as RemoteFreeExtensions;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 
@@ -16,6 +17,79 @@ use Automattic\WooCommerce\Admin\PluginsHelper;
  * Task Lists class.
  */
 class TaskLists {
+	/**
+	 * Class instance.
+	 *
+	 * @var TaskLists instance
+	 */
+	protected static $instance = null;
+
+	/**
+	 * An array of all registered lists.
+	 *
+	 * @var array
+	 */
+	protected static $lists = array();
+
+	/**
+	 * Get class instance.
+	 */
+	final public static function instance() {
+		if ( ! static::$instance ) {
+			static::$instance = new static();
+		}
+		return static::$instance;
+	}
+
+	/**
+	 * Add a task list.
+	 *
+	 * @param array $args Task list properties.
+	 * @return WP_Error|Task
+	 */
+	public static function add_list( $args ) {
+		if ( isset( self::$lists[ $args['id'] ] ) ) {
+			return new \WP_Error(
+				'woocommerce_task_list_exists',
+				__( 'Task list ID already exists', 'woocommerce-admin' )
+			);
+		}
+
+		self::$lists[ $args['id'] ] = new TaskList( $args );
+	}
+
+	/**
+	 * Add task to a given task list.
+	 *
+	 * @param string $list_id List ID to add the task to.
+	 * @param array  $args Task properties.
+	 * @return WP_Error|Task
+	 */
+	public static function add_task( $list_id, $args ) {
+		if ( ! isset( self::$lists[ $list_id ] ) ) {
+			return new \WP_Error(
+				'woocommerce_task_list_invalid_list',
+				__( 'Task list ID does not exist', 'woocommerce-admin' )
+			);
+		}
+
+		self::$lists[ $list_id ]->add_task( $args );
+	}
+
+	/**
+	 * Add default task lists.
+	 */
+	public static function add_defaults() {
+		self::add_list(
+			array(
+				'id'    => 'setup',
+				'title' => __( 'Get ready to start selling', 'woocommerce-admin' ),
+			)
+		);
+
+		self::add_task( 'setup', StoreDetails::get_task() );
+	}
+
 	/**
 	 * Get all task lists.
 	 *
