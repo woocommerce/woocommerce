@@ -5,6 +5,8 @@
 
 namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks;
 
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
+
 /**
  * Task List class.
  */
@@ -107,7 +109,7 @@ class TaskList {
 	 * @param array $args Task properties.
 	 */
 	public function add_task( $args ) {
-		$this->tasks[] = $args;
+		$this->tasks[] = new Task( $args );
 	}
 
 	/**
@@ -121,7 +123,12 @@ class TaskList {
 			'title'      => $this->title,
 			'isHidden'   => $this->is_hidden(),
 			'isComplete' => $this->is_complete(),
-			'tasks'      => $this->tasks,
+			'tasks'      => array_map(
+				function( $task ) {
+					return $task->get_json();
+				},
+				$this->tasks
+			),
 		);
 	}
 
