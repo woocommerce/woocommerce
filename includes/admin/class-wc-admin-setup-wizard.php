@@ -1303,7 +1303,7 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Is eWAY Payments country supported
+	 * Is Eway Payments country supported
 	 *
 	 * @param string $country_code Country code.
 	 *
@@ -1491,8 +1491,8 @@ class WC_Admin_Setup_Wizard {
 				'repo-slug'   => 'woocommerce-square',
 			),
 			'eway'            => array(
-				'name'        => __( 'WooCommerce eWAY Gateway', 'woocommerce' ),
-				'description' => __( 'The eWAY extension for WooCommerce allows you to take credit card payments directly on your store without redirecting your customers to a third party site to make payment.', 'woocommerce' ),
+				'name'        => __( 'WooCommerce Eway Gateway', 'woocommerce' ),
+				'description' => __( 'The Eway extension for WooCommerce allows you to take credit card payments directly on your store without redirecting your customers to a third party site to make payment.', 'woocommerce' ),
 				'image'       => WC()->plugin_url() . '/assets/images/eway-logo.jpg',
 				'enabled'     => false,
 				'class'       => 'eway-logo',
