@@ -149,6 +149,28 @@ export function undoDismissTaskSuccess( task ) {
 	};
 }
 
+export function hideTaskListError( taskListId, error ) {
+	return {
+		type: TYPES.HIDE_TASK_LIST_ERROR,
+		taskListId,
+		error,
+	};
+}
+
+export function hideTaskListRequest( taskListId ) {
+	return {
+		type: TYPES.HIDE_TASK_LIST_REQUEST,
+		taskListId,
+	};
+}
+
+export function hideTaskListSuccess( taskList ) {
+	return {
+		type: TYPES.HIDE_TASK_LIST_SUCCESS,
+		taskList,
+	};
+}
+
 export function setTasksStatus( tasksStatus ) {
 	return {
 		type: TYPES.SET_TASKS_STATUS,
@@ -255,6 +277,22 @@ export function* undoDismissTask( id ) {
 		yield undoDismissTaskSuccess( task );
 	} catch ( error ) {
 		yield undoDismissTaskError( id, error );
+		throw new Error();
+	}
+}
+
+export function* hideTaskList( id ) {
+	yield hideTaskListRequest( id );
+
+	try {
+		const taskList = yield apiFetch( {
+			path: `${ WC_ADMIN_NAMESPACE }/onboarding/tasks/${ id }/hide`,
+			method: 'POST',
+		} );
+
+		yield hideTaskListSuccess( taskList );
+	} catch ( error ) {
+		yield hideTaskListError( id, error );
 		throw new Error();
 	}
 }

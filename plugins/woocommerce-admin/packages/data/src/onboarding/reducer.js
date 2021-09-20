@@ -61,6 +61,8 @@ const onboarding = (
 		selector,
 		task,
 		taskId,
+		taskListId,
+		taskList,
 		taskLists,
 		tasksStatus,
 	}
@@ -261,6 +263,51 @@ const onboarding = (
 					undoSnoozeTask: false,
 				},
 				taskLists: getUpdatedTaskLists( state.taskLists, task ),
+			};
+		case TYPES.HIDE_TASK_LIST_ERROR:
+			return {
+				...state,
+				errors: {
+					...state.errors,
+					hideTaskList: error,
+				},
+				taskLists: state.taskLists.map( ( list ) => {
+					if ( taskListId === list.id ) {
+						return {
+							...list,
+							isHidden: false,
+						};
+					}
+					return list;
+				} ),
+			};
+		case TYPES.HIDE_TASK_LIST_REQUEST:
+			return {
+				...state,
+				requesting: {
+					...state.requesting,
+					hideTaskList: true,
+				},
+				taskLists: state.taskLists.map( ( list ) => {
+					if ( taskListId === list.id ) {
+						return {
+							...list,
+							isHidden: true,
+						};
+					}
+					return list;
+				} ),
+			};
+		case TYPES.HIDE_TASK_LIST_SUCCESS:
+			return {
+				...state,
+				requesting: {
+					...state.requesting,
+					hideTaskList: false,
+				},
+				taskLists: state.taskLists.map( ( list ) => {
+					return taskListId === list.id ? taskList : list;
+				} ),
 			};
 		default:
 			return state;
