@@ -5,7 +5,7 @@ on:
       - labeled
 jobs:
   prcheck:
-    name: Smoke test on a PR.
+    name: Smoke test a pull request.
     if: "${{ contains(github.event.label.name, 'run: smoke tests') }}"
     runs-on: ubuntu-18.04
     steps:
