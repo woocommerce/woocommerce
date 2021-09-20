@@ -47,6 +47,7 @@ jobs:
           npx wc-e2e test:e2e
   notify:
     needs: prcheck
+    runs-on: ubuntu-18.04
     steps:
       - name: Remove label from pull request.
         uses: actions/github-script@v4
