@@ -196,7 +196,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Tweak - Renamed "ZIP" to "ZIP Code" and "Pin code" to "PIN" for US & India, respectively. #30204
 * Tweak - Download filepaths.
 
-**WooCommerce Admin - 2.6.0 & 2.6.1 & 2.6.2**
+**WooCommerce Admin - 2.6.0 & 2.6.1 & 2.6.2 & 2.6.3 & 2.6.4**
 
 - Fix: Fixes action button mis-alignment within card footer. #7412
 - Fix: Fixing issues with ReportTable component data not populating correctly #7355
@@ -213,6 +213,9 @@ WooCommerce comes with some sample data you can use to see how products look; im
 - Fix: Fix stats-overview card padding issue #7594
 - Fix: Fix layout issue on the marketing task #7598
 - Fix Update task-item logic to only display content when expanded is true. #7611
+- Fix: Use installable extensions for local state versus free extensions. #7585
+- Fix: Fix unsecured reports
+- Fix: Fix fatal error and unrelated results in analytics. #7682
 - Add: Add boolean isReverseTrend prop to SummaryNumber to show "positive" delta for negative numbers. #7357
 - Add: Adding links to help panel for marketing task #7384
 - Add: Add installed marketing extensions card to extensions task #7419
