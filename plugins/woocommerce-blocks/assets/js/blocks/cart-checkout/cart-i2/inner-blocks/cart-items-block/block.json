@@ -1,0 +1,25 @@
+{
+	"name": "woocommerce/cart-items-block",
+	"version": "1.0.0",
+	"title": "Cart Items block",
+	"description": "Column containing cart items.",
+	"category": "woocommerce",
+	"supports": {
+		"align": false,
+		"html": false,
+		"multiple": false,
+		"reusable": false,
+		"inserter": false
+	},
+	"attributes": {
+		"lock": {
+			"default": {
+				"remove": true,
+				"move": true
+			}
+		}
+	},
+	"parent": [ "woocommerce/cart-i2" ],
+	"textdomain": "woo-gutenberg-products-block",
+	"apiVersion": 2
+}

@@ -1,16 +1,12 @@
+/* tslint:disable */
 /**
  * External dependencies
  */
 import classnames from 'classnames';
 import { __ } from '@wordpress/i18n';
 import { CartCheckoutFeedbackPrompt } from '@woocommerce/editor-components/feedback-prompt';
-import { InspectorControls } from '@wordpress/block-editor';
-import {
-	Disabled,
-	PanelBody,
-	ToggleControl,
-	Notice,
-} from '@wordpress/components';
+import { InnerBlocks, InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, ToggleControl, Notice } from '@wordpress/components';
 import PropTypes from 'prop-types';
 import { CartCheckoutCompatibilityNotice } from '@woocommerce/editor-components/compatibility-notices';
 import ViewSwitcher from '@woocommerce/editor-components/view-switcher';
@@ -25,13 +21,13 @@ import {
 import { createInterpolateElement, useRef } from '@wordpress/element';
 import { getAdminLink, getSetting } from '@woocommerce/settings';
 import { previewCart } from '@woocommerce/resource-previews';
+import { SidebarLayout } from '@woocommerce/base-components/sidebar-layout';
 
 /**
  * Internal dependencies
  */
-import Block from './block.js';
-import EmptyCartEdit from './empty-cart-edit';
 import './editor.scss';
+import { Columns } from './columns';
 
 const BlockSettings = ( { attributes, setAttributes } ) => {
 	const {
@@ -162,6 +158,10 @@ const BlockSettings = ( { attributes, setAttributes } ) => {
 	);
 };
 
+const ALLOWED_BLOCKS: string[] = [
+	'woocommerce/cart-items-block',
+	'woocommerce/cart-totals-block',
+];
 /**
  * Component to handle edit mode of "Cart Block".
  *
@@ -176,6 +176,13 @@ const BlockSettings = ( { attributes, setAttributes } ) => {
  * @param {function(any):any} props.setAttributes Setter for attributes.
  */
 const CartEditor = ( { className, attributes, setAttributes } ) => {
+	const cartClassName = classnames( 'wc-block-cart', {
+		'has-dark-controls': attributes.hasDarkControls,
+	} );
+	const defaultInnerBlocksTemplate = [
+		[ 'woocommerce/cart-items-block', {}, [] ],
+		[ 'woocommerce/cart-totals-block', {}, [] ],
+	];
 	return (
 		<div
 			className={ classnames( className, 'wp-block-woocommerce-cart', {
@@ -221,16 +228,26 @@ const CartEditor = ( { className, attributes, setAttributes } ) => {
 										attributes={ attributes }
 										setAttributes={ setAttributes }
 									/>
-									<Disabled>
-										<CartProvider>
-											<Block attributes={ attributes } />
-										</CartProvider>
-									</Disabled>
+									<CartProvider>
+										<Columns>
+											<SidebarLayout
+												className={ cartClassName }
+											>
+												<InnerBlocks
+													allowedBlocks={
+														ALLOWED_BLOCKS
+													}
+													template={
+														defaultInnerBlocksTemplate
+													}
+													templateLock="insert"
+												/>
+											</SidebarLayout>
+										</Columns>
+									</CartProvider>
 								</EditorProvider>
-								<EmptyCartEdit hidden={ true } />
 							</>
 						) }
-						{ currentView === 'empty' && <EmptyCartEdit /> }
 					</BlockErrorBoundary>
 				) }
 			/>

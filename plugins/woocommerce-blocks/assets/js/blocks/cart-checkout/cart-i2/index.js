@@ -12,7 +12,7 @@ import { registerFeaturePluginBlockType } from '@woocommerce/block-settings';
 import edit from './edit';
 import './style.scss';
 import blockAttributes from './attributes';
-
+import './inner-blocks';
 /**
  * Register and run the Cart block.
  */
