@@ -13,6 +13,9 @@ export enum innerBlockAreas {
 	BILLING_ADDRESS = 'woocommerce/checkout-billing-address-block',
 	SHIPPING_METHODS = 'woocommerce/checkout-shipping-methods-block',
 	PAYMENT_METHODS = 'woocommerce/checkout-payment-methods-block',
+	CART = 'woocommerce/cart-i2',
+	CART_ITEMS = 'woocommerce/cart-items-block',
+	CART_TOTALS = 'woocommerce/cart-totals-block',
 }
 
 interface CheckoutBlockOptionsMetadata extends Partial< BlockConfiguration > {
