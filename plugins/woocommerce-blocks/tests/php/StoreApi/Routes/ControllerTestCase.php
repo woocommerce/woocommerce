@@ -1,6 +1,6 @@
 <?php
 /**
- * OrderController Tests.
+ * ControllerTestCase Tests.
  */
 
 namespace Automattic\WooCommerce\Blocks\Tests\StoreApi\Routes;

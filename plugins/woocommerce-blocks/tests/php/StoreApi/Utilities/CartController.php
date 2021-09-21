@@ -1,6 +1,6 @@
 <?php
 /**
- * OrderController Tests.
+ * CartController Tests.
  */
 
 namespace Automattic\WooCommerce\Blocks\Tests\StoreApi\Utilities;
@@ -9,7 +9,7 @@ use Automattic\WooCommerce\Blocks\Tests\Helpers\FixtureData;
 use Automattic\WooCommerce\Blocks\StoreApi\Utilities\CartController;
 use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
-class OrderControllerTests extends TestCase {
+class CartControllerTests extends TestCase {
 
 	public function test_get_cart_item_errors()    {
 		$class    = new CartController();
