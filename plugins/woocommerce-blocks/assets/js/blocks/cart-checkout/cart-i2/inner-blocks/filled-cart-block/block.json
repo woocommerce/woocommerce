@@ -1,8 +1,8 @@
 {
-	"name": "woocommerce/cart-totals-block",
+	"name": "woocommerce/filled-cart-block",
 	"version": "1.0.0",
-	"title": "Cart Totals",
-	"description": "Column containing the cart totals.",
+	"title": "Filled Cart",
+	"description": "Contains blocks that are displayed when the cart contains products.",
 	"category": "woocommerce",
 	"supports": {
 		"align": false,
@@ -12,22 +12,15 @@
 		"inserter": false
 	},
 	"attributes": {
-		"checkbox": {
-			"type": "boolean",
-			"default": false
-		},
-		"text": {
-			"type": "string",
-			"required": false
-		},
 		"lock": {
 			"type": "object",
 			"default": {
-				"remove": true
+				"remove": true,
+				"move": true
 			}
 		}
 	},
-	"parent": [ "woocommerce/filled-cart-block" ],
+	"parent": [ "woocommerce/cart-i2" ],
 	"textdomain": "woo-gutenberg-products-block",
 	"apiVersion": 2
 }
