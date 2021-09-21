@@ -194,6 +194,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Tweak - Update product cards on the WooCommerce > Extensions page in WP Admin to match current designs. #30410
 * Tweak - Update the Marketplace/Addons header to match new designs. #30389
 * Tweak - Renamed "ZIP" to "ZIP Code" and "Pin code" to "PIN" for US & India, respectively. #30204
+* Tweak - Download filepaths.
 
 **WooCommerce Admin - 2.6.0 & 2.6.1 & 2.6.2**
 
