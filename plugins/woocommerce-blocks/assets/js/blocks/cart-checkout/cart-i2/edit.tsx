@@ -180,7 +180,11 @@ const CartEditor = ( { className, attributes, setAttributes } ) => {
 		'has-dark-controls': attributes.hasDarkControls,
 	} );
 	const defaultInnerBlocksTemplate = [
-		[ 'woocommerce/cart-items-block', {}, [] ],
+		[
+			'woocommerce/cart-items-block',
+			{},
+			[ [ 'woocommerce/cart-line-items-block', {}, [] ] ],
+		],
 		[ 'woocommerce/cart-totals-block', {}, [] ],
 	];
 	return (
