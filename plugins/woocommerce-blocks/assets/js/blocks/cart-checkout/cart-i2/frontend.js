@@ -21,7 +21,7 @@ import {
  * Internal dependencies
  */
 import Block from './block.js';
-import blockAttributes from './attributes';
+import { blockAttributes } from './attributes';
 
 const reloadPage = () => void window.location.reload( true );
 /**

@@ -3,7 +3,8 @@
  */
 import { getSetting } from '@woocommerce/settings';
 
-const blockAttributes = {
+export const blockName = 'woocommerce/cart-i2';
+export const blockAttributes = {
 	isPreview: {
 		type: 'boolean',
 		default: false,
@@ -26,5 +27,3 @@ const blockAttributes = {
 		default: true,
 	},
 };
-
-export default blockAttributes;
