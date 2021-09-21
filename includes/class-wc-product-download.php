@@ -95,22 +95,16 @@ class WC_Product_Download implements ArrayAccess {
 	 * @return boolean
 	 */
 	public function is_allowed_filetype() {
-		$file_path = $this->get_file();
+		$file_path        = $this->get_file();
+		$parsed_file_path = WC_Download_Handler::parse_file_path( $file_path );
 
 		// File types for URL-based files located on the server should get validated.
-		$is_file_on_server = false;
-		if ( false !== stripos( $file_path, network_site_url( '/', 'https' ) ) ||
-			false !== stripos( $file_path, network_site_url( '/', 'http' ) ) ||
-			false !== stripos( $file_path, site_url( '/', 'https' ) ) ||
-			false !== stripos( $file_path, site_url( '/', 'http' ) )
-		) {
-			$is_file_on_server = true;
-		}
+		$is_file_on_server = ! $parsed_file_path['remote_file'];
 
 		if ( ! $is_file_on_server && 'relative' !== $this->get_type_of_file_path() ) {
 			return true;
 		}
-		return ! $this->get_file_extension() || in_array( $this->get_file_type(), $this->get_allowed_mime_types(), true );
+		return ( ! $is_file_on_server && ! $this->get_file_extension() ) || in_array( $this->get_file_type(), $this->get_allowed_mime_types(), true );
 	}
 
 	/**
@@ -177,6 +171,10 @@ class WC_Product_Download implements ArrayAccess {
 		if ( preg_match( '#^//+(/[^/].+)$#i', $value, $matches ) ) {
 			$value = $matches[1];
 		}
+
+		$parsed_file_path = WC_Download_Handler::parse_file_path( $value );
+		$value            = $parsed_file_path['file_path'];
+
 		switch ( $this->get_type_of_file_path( $value ) ) {
 			case 'absolute':
 				$this->data['file'] = esc_url_raw( $value );
