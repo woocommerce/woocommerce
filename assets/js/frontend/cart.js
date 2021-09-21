@@ -58,6 +58,28 @@ jQuery( function( $ ) {
 	};
 
 	/**
+	 * Removes duplicate notices.
+	 *
+	 * @param {JQuery Object} notices
+	 */
+	var remove_duplicate_notices = function( notices ) {
+		var seen = [];
+		var new_notices = notices;
+
+		notices.each( function( index ) {
+			var text = $( this ).text();
+
+			if ( 'undefined' === typeof seen[ text ] ) {
+				seen[ text ] = true;
+			} else {
+				new_notices.splice( index, 1 );
+			}
+		} );
+
+		return new_notices;
+	};
+
+	/**
 	 * Update the .woocommerce div with a string of html.
 	 *
 	 * @param {String} html_str The HTML string with which to replace the div.
@@ -67,7 +89,7 @@ jQuery( function( $ ) {
 		var $html       = $.parseHTML( html_str );
 		var $new_form   = $( '.woocommerce-cart-form', $html );
 		var $new_totals = $( '.cart_totals', $html );
-		var $notices    = $( '.woocommerce-error, .woocommerce-message, .woocommerce-info', $html );
+		var $notices    = remove_duplicate_notices( $( '.woocommerce-error, .woocommerce-message, .woocommerce-info', $html ) );
 
 		// No form, cannot do this.
 		if ( $( '.woocommerce-cart-form' ).length === 0 ) {
@@ -180,6 +202,7 @@ jQuery( function( $ ) {
 		 */
 		toggle_shipping: function() {
 			$( '.shipping-calculator-form' ).slideToggle( 'slow' );
+			$( 'select.country_to_state, input.country_to_state' ).trigger( 'change' );
 			$( document.body ).trigger( 'country_to_state_changed' ); // Trigger select2 to load.
 			return false;
 		},

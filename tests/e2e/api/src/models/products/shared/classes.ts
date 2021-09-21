@@ -70,9 +70,9 @@ export class ProductDownload {
 }
 
 /**
- * A product's attributes.
+ * Attribute base class.
  */
-export class ProductAttribute {
+export abstract class AbstractAttribute {
 	/**
 	 * The ID of the attribute.
 	 *
@@ -86,7 +86,12 @@ export class ProductAttribute {
 	 * @type {string}
 	 */
 	public readonly name: string = '';
+}
 
+/**
+ * A product's attributes.
+ */
+export class ProductAttribute extends AbstractAttribute {
 	/**
 	 * The sort order of the attribute.
 	 *
@@ -121,6 +126,29 @@ export class ProductAttribute {
 	 * @param {Partial.<ProductAttribute>} properties The properties to set.
 	 */
 	public constructor( properties?: Partial< ProductAttribute > ) {
+		super();
+		Object.assign( this, properties );
+	}
+}
+
+/**
+ * Default attributes for variable products.
+ */
+export class ProductDefaultAttribute extends AbstractAttribute {
+	/**
+	 * The option selected for the attribute.
+	 *
+	 * @type {string}
+	 */
+	public readonly option: string = '';
+
+	/**
+	 * Creates a new product default attribute.
+	 *
+	 * @param {Partial.<ProductDefaultAttribute>} properties The properties to set.
+	 */
+	public constructor( properties?: Partial< ProductDefaultAttribute > ) {
+		super();
 		Object.assign( this, properties );
 	}
 }
@@ -177,55 +205,6 @@ export class ProductImage {
 	 * @param {Partial.<ProductImage>} properties The properties to set.
 	 */
 	public constructor( properties?: Partial< ProductImage > ) {
-		Object.assign( this, properties );
-	}
-}
-
-/**
- * A product link item.
- */
-class ProductLinkItem {
-	/**
-	 * The options which are available for the attribute.
-	 *
-	 * @type {ReadonlyArray.<string>}
-	 */
-	public readonly href: string = '';
-
-	/**
-	 * Creates a new product link item.
-	 *
-	 * @param {Partial.<ProductLinkItem>} properties The properties to set.
-	 */
-	public constructor( properties?: Partial< ProductLinkItem > ) {
-		Object.assign( this, properties );
-	}
-}
-
-/**
- * A product's links.
- */
-export class ProductLinks {
-	/**
-	 * The collection containing the product.
-	 *
-	 * @type {ReadonlyArray.<ProductLinkItem>}
-	 */
-	public readonly collection: readonly ProductLinkItem[] = [];
-
-	/**
-	 * Self referential link to the product.
-	 *
-	 * @type {ReadonlyArray.<ProductLinkItem>}
-	 */
-	public readonly self: readonly ProductLinkItem[] = [];
-
-	/**
-	 * Creates a new product link list.
-	 *
-	 * @param {Partial.<ProductLinks>} properties The properties to set.
-	 */
-	public constructor( properties?: Partial< ProductLinks > ) {
 		Object.assign( this, properties );
 	}
 }

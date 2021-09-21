@@ -314,7 +314,7 @@ class WC_Download_Handler {
 		/**
 		 * Fallback on force download method for remote files. This is because:
 		 * 1. xsendfile needs proxy configuration to work for remote files, which cannot be assumed to be available on most hosts.
-		 * 2. Force download method is more secure than redirect method if `allow_url_fopen` is enabled in `php.ini`. We fallback to redirect method in force download method anyway in case `allow_url_fopen` is not enabled.
+		 * 2. Force download method is more secure than redirect method if `allow_url_fopen` is enabled in `php.ini`.
 		 */
 		if ( $parsed_file_path['remote_file'] && ! apply_filters( 'woocommerce_use_xsendfile_for_remote', false ) ) {
 			do_action( 'woocommerce_download_file_force', $file_path, $filename );
@@ -340,6 +340,13 @@ class WC_Download_Handler {
 		}
 
 		// Fallback.
+		wc_get_logger()->warning(
+			sprintf(
+				/* translators: %1$s contains the filepath of the digital asset. */
+				__( '%1$s could not be served using the X-Accel-Redirect/X-Sendfile method. A Force Download will be used instead.', 'woocommerce' ),
+				$file_path
+			)
+		);
 		self::download_file_force( $file_path, $filename );
 	}
 
@@ -435,7 +442,14 @@ class WC_Download_Handler {
 		$start  = isset( $download_range['start'] ) ? $download_range['start'] : 0;
 		$length = isset( $download_range['length'] ) ? $download_range['length'] : 0;
 		if ( ! self::readfile_chunked( $parsed_file_path['file_path'], $start, $length ) ) {
-			if ( $parsed_file_path['remote_file'] ) {
+			if ( $parsed_file_path['remote_file'] && 'yes' === get_option( 'woocommerce_downloads_redirect_fallback_allowed' ) ) {
+				wc_get_logger()->warning(
+					sprintf(
+						/* translators: %1$s contains the filepath of the digital asset. */
+						__( '%1$s could not be served using the Force Download method. A redirect will be used instead.', 'woocommerce' ),
+						$file_path
+					)
+				);
 				self::download_file_redirect( $file_path );
 			} else {
 				self::download_error( __( 'File not found', 'woocommerce' ) );
@@ -620,6 +634,15 @@ class WC_Download_Handler {
 	 * @param integer $status  Error status.
 	 */
 	private static function download_error( $message, $title = '', $status = 404 ) {
+		/*
+		 * Since we will now render a message instead of serving a download, we should unwind some of the previously set
+		 * headers.
+		 */
+		header( 'Content-Type: ' . get_option( 'html_type' ) . '; charset=' . get_option( 'blog_charset' ) );
+		header_remove( 'Content-Description;' );
+		header_remove( 'Content-Disposition' );
+		header_remove( 'Content-Transfer-Encoding' );
+
 		if ( ! strstr( $message, '<a ' ) ) {
 			$message .= ' <a href="' . esc_url( wc_get_page_permalink( 'shop' ) ) . '" class="wc-forward">' . esc_html__( 'Go to shop', 'woocommerce' ) . '</a>';
 		}

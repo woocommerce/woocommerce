@@ -96,23 +96,53 @@ class WC_Template_Loader {
 	}
 
 	/**
-	 * Get the default filename for a template.
+	 * Checks whether a block template with that name exists.
+	 *
+	 * @since  5.5.0
+	 * @param string $template_name Template to check.
+	 * @return boolean
+	 */
+	private static function has_block_template( $template_name ) {
+		if ( ! $template_name ) {
+			return false;
+		}
+
+		return is_readable(
+			get_stylesheet_directory() . '/block-templates/' . $template_name . '.html'
+		);
+	}
+
+	/**
+	 * Get the default filename for a template except if a block template with
+	 * the same name exists.
 	 *
 	 * @since  3.0.0
+	 * @since  5.5.0 If a block template with the same name exists, return an
+	 * empty string.
 	 * @return string
 	 */
 	private static function get_template_loader_default_file() {
-		if ( is_singular( 'product' ) ) {
+		if (
+			is_singular( 'product' ) &&
+			! self::has_block_template( 'single-product' )
+		) {
 			$default_file = 'single-product.php';
 		} elseif ( is_product_taxonomy() ) {
 			$object = get_queried_object();
 
 			if ( is_tax( 'product_cat' ) || is_tax( 'product_tag' ) ) {
-				$default_file = 'taxonomy-' . $object->taxonomy . '.php';
-			} else {
+				if ( self::has_block_template( 'taxonomy-' . $object->taxonomy ) ) {
+					$default_file = '';
+				} else {
+					$default_file = 'taxonomy-' . $object->taxonomy . '.php';
+				}
+			} elseif ( ! self::has_block_template( 'archive-product' ) ) {
 				$default_file = 'archive-product.php';
 			}
-		} elseif ( is_post_type_archive( 'product' ) || is_page( wc_get_page_id( 'shop' ) ) ) {
+		} elseif (
+			( is_post_type_archive( 'product' ) || is_page( wc_get_page_id( 'shop' ) ) ) &&
+			! self::has_block_template( 'archive-product' )
+		) {
 			$default_file = self::$theme_support ? 'archive-product.php' : '';
 		} else {
 			$default_file = '';
@@ -139,7 +169,7 @@ class WC_Template_Loader {
 				if ( 0 === $validated_file ) {
 					$templates[] = $page_template;
 				} else {
-					error_log( "WooCommerce: Unable to validate template path: \"$page_template\". Error Code: $validated_file." );
+					error_log( "WooCommerce: Unable to validate template path: \"$page_template\". Error Code: $validated_file." ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 				}
 			}
 		}
@@ -294,8 +324,8 @@ class WC_Template_Loader {
 		}
 
 		// Description handling.
-		if ( ! empty( $queried_object->description ) && ( empty( $_GET['product-page'] ) || 1 === absint( $_GET['product-page'] ) ) ) { // WPCS: input var ok, CSRF ok.
-			$prefix = '<div class="term-description">' . wc_format_content( $queried_object->description ) . '</div>'; // WPCS: XSS ok.
+		if ( ! empty( $queried_object->description ) && ( empty( $_GET['product-page'] ) || 1 === absint( $_GET['product-page'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$prefix = '<div class="term-description">' . wc_format_content( wp_kses_post( $queried_object->description ) ) . '</div>';
 		} else {
 			$prefix = '';
 		}

@@ -22,7 +22,7 @@ jQuery( function ( $ ) {
 				this.states = JSON.parse( woocommerce_admin_meta_boxes_order.countries.replace( /&quot;/g, '"' ) );
 			}
 
-			$( '.js_field-country' ).selectWoo().change( this.change_country );
+			$( '.js_field-country' ).selectWoo().on( 'change', this.change_country );
 			$( '.js_field-country' ).trigger( 'change', [ true ] );
 			$( document.body ).on( 'change', 'select.js_field-state', this.change_state );
 			$( '#woocommerce-order-actions input, #woocommerce-order-actions a' ).on( 'click', function() {
@@ -653,7 +653,17 @@ jQuery( function ( $ ) {
 		},
 
 		delete_item: function() {
-			var answer = window.confirm( woocommerce_admin_meta_boxes.remove_item_notice );
+			var notice = woocommerce_admin_meta_boxes.remove_item_notice;
+
+			if ( $( this ).parents( 'tbody#order_fee_line_items' ).length ) {
+				notice = woocommerce_admin_meta_boxes.remove_fee_notice;
+			}
+
+			if ( $( this ).parents( 'tbody#order_shipping_line_items' ).length ) {
+				notice = woocommerce_admin_meta_boxes.remove_shipping_notice;
+			}
+
+			var answer = window.confirm( notice );
 
 			if ( answer ) {
 				var $item         = $( this ).closest( 'tr.item, tr.fee, tr.shipping' );
@@ -1470,7 +1480,7 @@ jQuery( function ( $ ) {
 				'fadeIn':     50,
 				'fadeOut':    50,
 				'delay':      0
-			}).focus();
+			}).trigger( 'focus' );
 		},
 
 		/**
@@ -1483,7 +1493,7 @@ jQuery( function ( $ ) {
 				'fadeIn':     50,
 				'fadeOut':    50,
 				'delay':      0
-			}).focus();
+			}).trigger( 'focus' );
 		}
 	};
 

@@ -133,6 +133,9 @@ class WC_Meta_Box_Order_Data {
 					'class' => 'js_field-state select short',
 					'show'  => false,
 				),
+				'phone'      => array(
+					'label' => __( 'Phone', 'woocommerce' ),
+				),
 			)
 		);
 	}
@@ -460,6 +463,10 @@ class WC_Meta_Box_Order_Data {
 										$field_value = $order->get_meta( '_' . $field_name );
 									}
 
+									if ( 'shipping_phone' === $field_name ) {
+										$field_value = wc_make_phone_clickable( $field_value );
+									}
+
 									if ( $field_value ) {
 										echo '<p><strong>' . esc_html( $field['label'] ) . ':</strong> ' . wp_kses_post( $field_value ) . '</p>';
 									}
@@ -600,6 +607,10 @@ class WC_Meta_Box_Order_Data {
 				$payment_method_title = $methods[ $payment_method ]->get_title();
 			}
 
+			if ( $payment_method == 'other') {
+				$payment_method_title = esc_html__( 'Other', 'woocommerce' );
+			}
+			
 			$props['payment_method']       = $payment_method;
 			$props['payment_method_title'] = $payment_method_title;
 		}

@@ -7,20 +7,32 @@
 export type StockStatus = 'instock' | 'outofstock' | 'onbackorder' | string
 
 /**
+ * Base product properties.
+ */
+export type ProductDataUpdateParams = 'created' | 'postStatus'
+	| 'id' | 'permalink' | 'price' | 'priceHtml'
+	| 'description' | 'sku' | 'attributes' | 'images'
+	| 'regularPrice' | 'salePrice' | 'saleStart' | 'saleEnd'
+	| 'metaData' | 'menuOrder' | 'parentId' | 'links';
+
+/**
  * Properties common to all product types.
  */
-export type ProductCommonUpdateParams = 'name' | 'slug' | 'created' | 'postStatus' | 'shortDescription'
-	| 'id' | 'permalink' | 'price' | 'priceHtml' | 'type'
-	| 'description' | 'sku' | 'categories' | 'tags' | 'isFeatured'
-	| 'attributes' | 'images' | 'catalogVisibility' | 'allowReviews'
-	| 'regularPrice' | 'salePrice' | 'saleStart' | 'saleEnd'
-	| 'metaData' | 'menuOrder' | 'parentId' | 'relatedIds' | 'upsellIds'
-	| 'links' | 'relatedIds' | 'menuOrder' | 'parentId';
+export type ProductCommonUpdateParams = 'name' | 'slug' | 'shortDescription'
+	| 'categories' | 'tags' | 'isFeatured' | 'averageRating' | 'numRatings'
+	| 'catalogVisibility' | 'allowReviews' | 'upsellIds' | 'type'
+	& ProductDataUpdateParams;
 
 /**
  * Cross sells property.
  */
 export type ProductCrossUpdateParams = 'crossSellIds';
+
+/**
+ * Price properties.
+ */
+export type ProductPriceUpdateParams = 'price' | 'priceHtml' | 'regularPrice'
+	| 'salePrice' | 'saleStart' | 'saleEnd';
 
 /**
  * Upsells property.
@@ -30,12 +42,12 @@ export type ProductUpSellUpdateParams = 'upSellIds';
 /**
  * Properties exclusive to the External product type.
  */
-export type ProductExternalTypeUpdateParams = 'buttonText' | 'externalUrl';
+export type ProductExternalUpdateParams = 'buttonText' | 'externalUrl';
 
 /**
  * Properties exclusive to the Grouped product type.
  */
-export type ProductGroupedTypeUpdateParams = 'groupedProducts';
+export type ProductGroupedUpdateParams = 'groupedProducts';
 
 /**
  * Properties related to tracking inventory.
@@ -63,4 +75,4 @@ export type ProductDeliveryUpdateParams = 'daysToDownload' | 'downloadLimit' | '
 /**
  * Properties exclusive to the Variable product type.
  */
-export type ProductVariableTypeUpdateParams = 'defaultAttributes' | 'variations';
+export type ProductVariableUpdateParams = 'defaultAttributes' | 'variations';

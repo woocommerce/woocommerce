@@ -54,7 +54,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 		);
 		$response     = $this->server->dispatch( $request );
 		$customers    = $response->get_data();
-		$date_created = get_date_from_gmt( date( 'Y-m-d H:i:s', strtotime( $customer_1->get_date_created() ) ) );
+		$date_created = get_date_from_gmt( gmdate( 'Y-m-d H:i:s', strtotime( $customer_1->get_date_created() ) ) );
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 2, count( $customers ) );
@@ -77,9 +77,9 @@ class Customers extends WC_REST_Unit_Test_Case {
 					'company'    => '',
 					'address_1'  => '123 South Street',
 					'address_2'  => 'Apt 1',
-					'city'       => 'Philadelphia',
-					'state'      => 'PA',
-					'postcode'   => '19123',
+					'city'       => 'San Francisco',
+					'state'      => 'CA',
+					'postcode'   => '94110',
 					'country'    => 'US',
 					'email'      => '',
 					'phone'      => '',
@@ -90,10 +90,11 @@ class Customers extends WC_REST_Unit_Test_Case {
 					'company'    => '',
 					'address_1'  => '123 South Street',
 					'address_2'  => 'Apt 1',
-					'city'       => 'Philadelphia',
-					'state'      => 'PA',
-					'postcode'   => '19123',
+					'city'       => 'San Francisco',
+					'state'      => 'CA',
+					'postcode'   => '94110',
 					'country'    => 'US',
+					'phone'      => '',
 				),
 				'is_paying_customer' => false,
 				'avatar_url'         => $customer_1->get_avatar_url(),
@@ -125,7 +126,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 		);
 		$response     = $this->server->dispatch( $request );
 		$customers    = $response->get_data();
-		$date_created = get_date_from_gmt( date( 'Y-m-d H:i:s', strtotime( $customer_3->get_date_created() ) ) );
+		$date_created = get_date_from_gmt( gmdate( 'Y-m-d H:i:s', strtotime( $customer_3->get_date_created() ) ) );
 
 		$this->assertEquals( 200, $response->get_status() );
 
@@ -147,9 +148,9 @@ class Customers extends WC_REST_Unit_Test_Case {
 					'company'    => '',
 					'address_1'  => '123 South Street',
 					'address_2'  => 'Apt 1',
-					'city'       => 'Philadelphia',
-					'state'      => 'PA',
-					'postcode'   => '19123',
+					'city'       => 'San Francisco',
+					'state'      => 'CA',
+					'postcode'   => '94110',
 					'country'    => 'US',
 					'email'      => '',
 					'phone'      => '',
@@ -160,10 +161,11 @@ class Customers extends WC_REST_Unit_Test_Case {
 					'company'    => '',
 					'address_1'  => '123 South Street',
 					'address_2'  => 'Apt 1',
-					'city'       => 'Philadelphia',
-					'state'      => 'PA',
-					'postcode'   => '19123',
+					'city'       => 'San Francisco',
+					'state'      => 'CA',
+					'postcode'   => '94110',
 					'country'    => 'US',
+					'phone'      => '',
 				),
 				'is_paying_customer' => false,
 				'avatar_url'         => $customer_3->get_avatar_url(),
@@ -253,6 +255,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 					'state'      => '',
 					'postcode'   => '',
 					'country'    => '',
+					'phone'      => '',
 				),
 				'is_paying_customer' => false,
 				'meta_data'          => array(),
@@ -319,6 +322,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 					'state'      => 'CA',
 					'postcode'   => '',
 					'country'    => 'US',
+					'phone'      => '',
 				),
 				'is_paying_customer' => false,
 				'meta_data'          => array(),
@@ -387,9 +391,9 @@ class Customers extends WC_REST_Unit_Test_Case {
 					'company'    => '',
 					'address_1'  => '123 South Street',
 					'address_2'  => 'Apt 1',
-					'city'       => 'Philadelphia',
-					'state'      => 'PA',
-					'postcode'   => '19123',
+					'city'       => 'San Francisco',
+					'state'      => 'CA',
+					'postcode'   => '94110',
 					'country'    => 'US',
 					'email'      => '',
 					'phone'      => '',
@@ -400,10 +404,11 @@ class Customers extends WC_REST_Unit_Test_Case {
 					'company'    => '',
 					'address_1'  => '123 South Street',
 					'address_2'  => 'Apt 1',
-					'city'       => 'Philadelphia',
-					'state'      => 'PA',
-					'postcode'   => '19123',
+					'city'       => 'San Francisco',
+					'state'      => 'CA',
+					'postcode'   => '94110',
 					'country'    => 'US',
+					'phone'      => '',
 				),
 				'is_paying_customer' => false,
 				'meta_data'          => array(),
@@ -630,5 +635,6 @@ class Customers extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'state', $properties['shipping']['properties'] );
 		$this->assertArrayHasKey( 'postcode', $properties['shipping']['properties'] );
 		$this->assertArrayHasKey( 'country', $properties['shipping']['properties'] );
+		$this->assertArrayHasKey( 'phone', $properties['shipping']['properties'] );
 	}
 }

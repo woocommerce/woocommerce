@@ -232,7 +232,7 @@
 		});
 		// Focus on inputs within the table if clicked instead of trying to sort.
 		$( '.wc_input_table.sortable tbody input' ).on( 'click', function() {
-			$( this ).focus();
+			$( this ).trigger( 'focus' );
 		} );
 
 		$( '.wc_input_table .remove_rows' ).on( 'click', function() {
@@ -309,7 +309,7 @@
 		});
 
 		// Select availability
-		$( 'select.availability' ).change( function() {
+		$( 'select.availability' ).on( 'change', function() {
 			if ( $( this ).val() === 'all' ) {
 				$( this ).closest( 'tr' ).next( 'tr' ).hide();
 			} else {
@@ -319,7 +319,7 @@
 
 		// Hidden options
 		$( '.hide_options_if_checked' ).each( function() {
-			$( this ).find( 'input:eq(0)' ).change( function() {
+			$( this ).find( 'input:eq(0)' ).on( 'change', function() {
 				if ( $( this ).is( ':checked' ) ) {
 					$( this )
 						.closest( 'fieldset, tr' )
@@ -335,7 +335,7 @@
 		});
 
 		$( '.show_options_if_checked' ).each( function() {
-			$( this ).find( 'input:eq(0)' ).change( function() {
+			$( this ).find( 'input:eq(0)' ).on( 'change', function() {
 				if ( $( this ).is( ':checked' ) ) {
 					$( this )
 						.closest( 'fieldset, tr' )
@@ -351,7 +351,7 @@
 		});
 
 		// Reviews.
-		$( 'input#woocommerce_enable_reviews' ).change(function() {
+		$( 'input#woocommerce_enable_reviews' ).on( 'change', function() {
 			if ( $( this ).is( ':checked' ) ) {
 				$( '#woocommerce_enable_review_rating' ).closest( 'tr' ).show();
 			} else {
@@ -406,6 +406,47 @@
 				return window.confirm( woocommerce_admin.i18n_remove_personal_data_notice );
 			}
 		});
+
+		var marketplaceSectionDropdown = $( '#marketplace-current-section-dropdown' );
+		var marketplaceSectionName = $( '#marketplace-current-section-name' );
+		var marketplaceMenuIsOpen = false;
+
+		// Add event listener to toggle Marketplace menu on touch devices
+		if ( marketplaceSectionDropdown.length ) {
+			if ( isTouchDevice() ) {
+				marketplaceSectionName.on( 'click', function() {
+					marketplaceMenuIsOpen = ! marketplaceMenuIsOpen;
+					if ( marketplaceMenuIsOpen ) {
+						marketplaceSectionDropdown.addClass( 'is-open' );
+						$( document ).on( 'click', maybeToggleMarketplaceMenu );
+					} else {
+						marketplaceSectionDropdown.removeClass( 'is-open' );
+						$( document ).off( 'click', maybeToggleMarketplaceMenu );
+					}
+				} );
+			} else {
+				document.body.classList.add( 'no-touch' );
+			}
+		}
+
+		// Close menu if the user clicks outside it
+		function maybeToggleMarketplaceMenu( e ) {
+			if (
+				! marketplaceSectionDropdown.is( e.target )
+				&& marketplaceSectionDropdown.has( e.target ).length === 0
+			) {
+				marketplaceSectionDropdown.removeClass( 'is-open' );
+				marketplaceMenuIsOpen = false;
+				$( document ).off( 'click', maybeToggleMarketplaceMenu );
+			}
+		}
+
+		function isTouchDevice() {
+			return ( ( 'ontouchstart' in window ) ||
+				( navigator.maxTouchPoints > 0 ) ||
+				( navigator.msMaxTouchPoints > 0 ) );
+		}
+
 	});
 
 })( jQuery, woocommerce_admin );

@@ -278,7 +278,7 @@ function wc_format_refund_total( $amount ) {
 /**
  * Format decimal numbers ready for DB storage.
  *
- * Sanitize, remove decimals, and optionally round + trim off zeros.
+ * Sanitize, optionally remove decimals, and optionally round + trim off zeros.
  *
  * This function does not remove thousands - this should be done before passing a value to the function.
  *
@@ -1265,7 +1265,7 @@ function wc_format_stock_quantity_for_display( $stock_quantity, $product ) {
  * @return string
  */
 function wc_format_sale_price( $regular_price, $sale_price ) {
-	$price = '<del>' . ( is_numeric( $regular_price ) ? wc_price( $regular_price ) : $regular_price ) . '</del> <ins>' . ( is_numeric( $sale_price ) ? wc_price( $sale_price ) : $sale_price ) . '</ins>';
+	$price = '<del aria-hidden="true">' . ( is_numeric( $regular_price ) ? wc_price( $regular_price ) : $regular_price ) . '</del> <ins>' . ( is_numeric( $sale_price ) ? wc_price( $sale_price ) : $sale_price ) . '</ins>';
 	return apply_filters( 'woocommerce_format_sale_price', $price, $regular_price, $sale_price );
 }
 

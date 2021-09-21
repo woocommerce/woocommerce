@@ -26,6 +26,7 @@ class WC_Cache_Helper {
 		add_filter( 'nocache_headers', array( __CLASS__, 'additional_nocache_headers' ), 10 );
 		add_action( 'shutdown', array( __CLASS__, 'delete_transients_on_shutdown' ), 10 );
 		add_action( 'template_redirect', array( __CLASS__, 'geolocation_ajax_redirect' ) );
+		add_action( 'wc_ajax_update_order_review', array( __CLASS__, 'update_geolocation_hash' ), 5 );
 		add_action( 'admin_notices', array( __CLASS__, 'notices' ) );
 		add_action( 'delete_version_transients', array( __CLASS__, 'delete_version_transients' ), 10 );
 		add_action( 'wp', array( __CLASS__, 'prevent_caching' ) );
@@ -41,14 +42,33 @@ class WC_Cache_Helper {
 	 */
 	public static function additional_nocache_headers( $headers ) {
 		$agent = isset( $_SERVER['HTTP_USER_AGENT'] ) ? wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+		$set_cache = false;
+
 		/**
 		 * Allow plugins to enable nocache headers. Enabled for Google weblight.
 		 *
-		 * @see   https://support.google.com/webmasters/answer/1061943?hl=en
 		 * @param bool $enable_nocache_headers Flag indicating whether to add nocache headers. Default: false.
 		 */
-		if ( false !== strpos( $agent, 'googleweblight' ) || apply_filters( 'woocommerce_enable_nocache_headers', false ) ) {
+		if ( apply_filters( 'woocommerce_enable_nocache_headers', false ) ) {
+			$set_cache = true;
+		}
+
+		/**
+		 * Enabled for Google weblight.
+		 *
+		 * @see https://support.google.com/webmasters/answer/1061943?hl=en
+		 */
+		if ( false !== strpos( $agent, 'googleweblight' ) ) {
 			// no-transform: Opt-out of Google weblight. https://support.google.com/webmasters/answer/6211428?hl=en.
+			$set_cache = true;
+		}
+
+		if ( false !== strpos( $agent, 'Chrome' ) && is_cart() ) {
+			$set_cache = true;
+		}
+
+		if ( $set_cache ) {
 			$headers['Cache-Control'] = 'no-transform, no-cache, no-store, must-revalidate';
 		}
 		return $headers;
@@ -187,6 +207,24 @@ class WC_Cache_Helper {
 				wp_safe_redirect( esc_url_raw( $redirect_url ), 307 );
 				exit;
 			}
+		}
+	}
+
+	/**
+	 * Updates the `woocommerce_geo_hash` cookie, which is used to help ensure we display
+	 * the correct pricing etc to customers, according to their billing country.
+	 *
+	 * Note that:
+	 *
+	 * A) This only sets the cookie if the default customer address is set to "Geolocate (with
+	 *    Page Caching Support)".
+	 *
+	 * B) It is hooked into the `wc_ajax_update_order_review` action, which has the benefit of
+	 *    ensuring we update the cookie any time the billing country is changed.
+	 */
+	public static function update_geolocation_hash() {
+		if ( 'geolocation_ajax' === get_option( 'woocommerce_default_customer_address' ) ) {
+			wc_setcookie( 'woocommerce_geo_hash', static::geolocation_ajax_get_location_hash(), time() + HOUR_IN_SECONDS );
 		}
 	}
 

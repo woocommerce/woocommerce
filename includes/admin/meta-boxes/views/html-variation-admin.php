@@ -47,7 +47,7 @@ defined( 'ABSPATH' ) || exit;
 			<?php
 		}
 		?>
-		<input type="hidden" name="variable_post_id[<?php echo esc_attr( $loop ); ?>]" value="<?php echo esc_attr( $variation_id ); ?>" />
+		<input type="hidden" class="variable_post_id" name="variable_post_id[<?php echo esc_attr( $loop ); ?>]" value="<?php echo esc_attr( $variation_id ); ?>" />
 		<input type="hidden" class="variation_menu_order" name="variation_menu_order[<?php echo esc_attr( $loop ); ?>]" value="<?php echo esc_attr( $variation_object->get_menu_order( 'edit' ) ); ?>" />
 
 		<?php
@@ -86,15 +86,15 @@ defined( 'ABSPATH' ) || exit;
 			?>
 			<p class="form-row form-row-full options">
 				<label>
-					<?php esc_html_e( 'Enabled', 'woocommerce' ); ?>:
+					<?php esc_html_e( 'Enabled', 'woocommerce' ); ?>
 					<input type="checkbox" class="checkbox" name="variable_enabled[<?php echo esc_attr( $loop ); ?>]" <?php checked( in_array( $variation_object->get_status( 'edit' ), array( 'publish', false ), true ), true ); ?> />
 				</label>
 				<label class="tips" data-tip="<?php esc_attr_e( 'Enable this option if access is given to a downloadable file upon purchase of a product', 'woocommerce' ); ?>">
-					<?php esc_html_e( 'Downloadable', 'woocommerce' ); ?>:
+					<?php esc_html_e( 'Downloadable', 'woocommerce' ); ?>
 					<input type="checkbox" class="checkbox variable_is_downloadable" name="variable_is_downloadable[<?php echo esc_attr( $loop ); ?>]" <?php checked( $variation_object->get_downloadable( 'edit' ), true ); ?> />
 				</label>
 				<label class="tips" data-tip="<?php esc_attr_e( 'Enable this option if a product is not shipped or there is no shipping cost', 'woocommerce' ); ?>">
-					<?php esc_html_e( 'Virtual', 'woocommerce' ); ?>:
+					<?php esc_html_e( 'Virtual', 'woocommerce' ); ?>
 					<input type="checkbox" class="checkbox variable_is_virtual" name="variable_is_virtual[<?php echo esc_attr( $loop ); ?>]" <?php checked( $variation_object->get_virtual( 'edit' ), true ); ?> />
 				</label>
 
@@ -207,6 +207,35 @@ defined( 'ABSPATH' ) || exit;
 							'desc_tip'      => true,
 							'description'   => __( 'If managing stock, this controls whether or not backorders are allowed. If enabled, stock quantity can go below 0.', 'woocommerce' ),
 							'wrapper_class' => 'form-row form-row-last',
+						)
+					);
+
+					$low_stock_placeholder = ( $product_object->get_manage_stock() && '' !== $product_object->get_low_stock_amount() )
+						? sprintf(
+							/* translators: %d: Amount of stock left */
+							esc_attr__( 'Parent product\'s threshold (%d)', 'woocommerce' ),
+							esc_attr( $product_object->get_low_stock_amount() )
+						)
+						: sprintf(
+							/* translators: %d: Amount of stock left */
+							esc_attr__( 'Store-wide threshold (%d)', 'woocommerce' ),
+							esc_attr( get_option( 'woocommerce_notify_low_stock_amount' ) )
+						);
+
+					woocommerce_wp_text_input(
+						array(
+							'id'                => "variable_low_stock_amount{$loop}",
+							'name'              => "variable_low_stock_amount[{$loop}]",
+							'value'             => $variation_object->get_low_stock_amount( 'edit' ),
+							'placeholder'       => $low_stock_placeholder,
+							'label'             => __( 'Low stock threshold', 'woocommerce' ),
+							'desc_tip'          => true,
+							'description'       => __( 'When variation stock reaches this amount you will be notified by email. The default value for all variations can be set in the product Inventory tab. The shop default value can be set in Settings > Products > Inventory.', 'woocommerce' ),
+							'type'              => 'number',
+							'custom_attributes' => array(
+								'step' => 'any',
+							),
+							'wrapper_class' => 'form-row',
 						)
 					);
 

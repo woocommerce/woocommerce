@@ -1,13 +1,11 @@
-/* eslint-disable jest/no-export, jest/no-disabled-tests, jest/no-standalone-expect */
-import {createSimpleProduct} from "@woocommerce/e2e-utils";
+const { createSimpleProduct } = require( '@woocommerce/e2e-utils' );
 
 /**
  * Internal dependencies
  */
 const {
 	merchant,
-	createSimpleOrder,
-	addProductToOrder,
+	createOrder,
 } = require( '@woocommerce/e2e-utils' );
 
 // TODO create a function for the logic below getConfigSimpleProduct(), see: https://github.com/woocommerce/woocommerce/issues/29072
@@ -15,22 +13,15 @@ const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );
 const simpleProductPrice = config.has( 'products.simple.price' ) ? config.get( 'products.simple.price' ) : '9.99';
 
-let orderId;
-
 const runMerchantOrdersCustomerPaymentPage = () => {
+	let orderId;
+	let productId;
+
 	describe('WooCommerce Merchant Flow: Orders > Customer Payment Page', () => {
 		beforeAll(async () => {
+			productId = await createSimpleProduct();
+			orderId = await createOrder( { productId } );
 			await merchant.login();
-			await createSimpleProduct();
-			orderId = await createSimpleOrder();
-			await addProductToOrder( orderId, simpleProductName );
-
-			// We first need to click "Update" otherwise the link doesn't show
-			await Promise.all([
-				expect(page).toClick( 'button.save_order' ),
-				page.waitForNavigation( { waitUntil: 'networkidle0' } ),
-			]);
-
 		});
 
 		it('should show the customer payment page link on a pending payment order', async () => {

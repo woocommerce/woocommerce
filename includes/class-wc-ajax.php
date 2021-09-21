@@ -155,6 +155,7 @@ class WC_AJAX {
 			'json_search_downloadable_products_and_variations',
 			'json_search_customers',
 			'json_search_categories',
+			'json_search_pages',
 			'term_ordering',
 			'product_ordering',
 			'refund_line_items',
@@ -795,17 +796,42 @@ class WC_AJAX {
 		$file_counter = 0;
 		$order        = wc_get_order( $order_id );
 
+		if ( ! $order->get_billing_email() ) {
+			wp_die();
+		}
+
+		$data  = array();
+		$items = $order->get_items();
+
+		// Check against order items first.
+		foreach ( $items as $item ) {
+			$product = $item->get_product();
+
+			if ( $product && $product->exists() && in_array( $product->get_id(), $product_ids, true ) && $product->is_downloadable() ) {
+				$data[ $product->get_id() ] = array(
+					'files'      => $product->get_downloads(),
+					'quantity'   => $item->get_quantity(),
+					'order_item' => $item,
+				);
+			}
+		}
+
 		foreach ( $product_ids as $product_id ) {
 			$product = wc_get_product( $product_id );
-			$files   = $product->get_downloads();
 
-			if ( ! $order->get_billing_email() ) {
-				wp_die();
+			if ( isset( $data[ $product->get_id() ] ) ) {
+				$download_data = $data[ $product->get_id() ];
+			} else {
+				$download_data = array(
+					'files'      => $product->get_downloads(),
+					'quantity'   => 1,
+					'order_item' => null,
+				);
 			}
 
-			if ( ! empty( $files ) ) {
-				foreach ( $files as $download_id => $file ) {
-					$inserted_id = wc_downloadable_file_permission( $download_id, $product_id, $order );
+			if ( ! empty( $download_data['files'] ) ) {
+				foreach ( $download_data['files'] as $download_id => $file ) {
+					$inserted_id = wc_downloadable_file_permission( $download_id, $product->get_id(), $order, $download_data['quantity'], $download_data['order_item'] );
 					if ( $inserted_id ) {
 						$download = new WC_Customer_Download( $inserted_id );
 						$loop ++;
@@ -997,6 +1023,8 @@ class WC_AJAX {
 			);
 
 			if ( strstr( $amount, '%' ) ) {
+				// We need to calculate totals first, so that $order->get_total() is correct.
+				$order->calculate_totals( false );
 				$formatted_amount = $amount;
 				$percent          = floatval( trim( $amount, '%' ) );
 				$amount           = $order->get_total() * ( $percent / 100 );
@@ -1273,7 +1301,6 @@ class WC_AJAX {
 			}
 
 			if ( ! empty( $order_item_ids ) ) {
-				$order_notes = array();
 
 				foreach ( $order_item_ids as $item_id ) {
 					$item_id = absint( $item_id );
@@ -1299,6 +1326,18 @@ class WC_AJAX {
 			$order = wc_get_order( $order_id );
 			$order->calculate_taxes( $calculate_tax_args );
 			$order->calculate_totals( false );
+
+			/**
+			 * Fires after order items are removed.
+			 *
+			 * @since 5.2.0
+			 *
+			 * @param int $item_id WC item ID.
+			 * @param WC_Order_Item|false $item As returned by $order->get_item( $item_id ).
+			 * @param bool|array|WP_Error $changed_store Result of wc_maybe_adjust_line_item_product_stock().
+			 * @param bool|WC_Order|WC_Order_Refund $order As returned by wc_get_order().
+			 */
+			do_action( 'woocommerce_ajax_order_items_removed', $item_id, $item, $changed_stock, $order );
 
 			// Get HTML to return.
 			ob_start();
@@ -1634,7 +1673,7 @@ class WC_AJAX {
 		$products        = array();
 
 		foreach ( $product_objects as $product_object ) {
-			$products[ $product_object->get_id() ] = rawurldecode( $product_object->get_formatted_name() );
+			$products[ $product_object->get_id() ] = rawurldecode( wp_strip_all_tags( $product_object->get_formatted_name() ) );
 		}
 
 		wp_send_json( $products );
@@ -1753,6 +1792,47 @@ class WC_AJAX {
 		}
 
 		wp_send_json( apply_filters( 'woocommerce_json_search_found_categories', $found_categories ) );
+	}
+
+	/**
+	 * Ajax request handling for page searching.
+	 */
+	public static function json_search_pages() {
+		ob_start();
+
+		check_ajax_referer( 'search-pages', 'security' );
+
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			wp_die( -1 );
+		}
+
+		$search_text = isset( $_GET['term'] ) ? wc_clean( wp_unslash( $_GET['term'] ) ) : '';
+		$limit       = isset( $_GET['limit'] ) ? absint( wp_unslash( $_GET['limit'] ) ) : -1;
+		$exclude_ids = ! empty( $_GET['exclude'] ) ? array_map( 'absint', (array) wp_unslash( $_GET['exclude'] ) ) : array();
+
+		$args                 = array(
+			'no_found_rows'          => true,
+			'update_post_meta_cache' => false,
+			'update_post_term_cache' => false,
+			'posts_per_page'         => $limit,
+			'post_type'              => 'page',
+			'post_status'            => array( 'publish', 'private', 'draft' ),
+			's'                      => $search_text,
+			'post__not_in'           => $exclude_ids,
+		);
+		$search_results_query = new WP_Query( $args );
+
+		$pages_results = array();
+		foreach ( $search_results_query->get_posts() as $post ) {
+			$pages_results[ $post->ID ] = sprintf(
+				/* translators: 1: page name 2: page ID */
+				__( '%1$s (ID: %2$s)', 'woocommerce' ),
+				get_the_title( $post ),
+				$post->ID
+			);
+		}
+
+		wp_send_json( apply_filters( 'woocommerce_json_search_found_pages', $pages_results ) );
 	}
 
 	/**
@@ -2291,6 +2371,32 @@ class WC_AJAX {
 	}
 
 	/**
+	 * Bulk action - Set Low Stock Amount.
+	 *
+	 * @param array $variations List of variations.
+	 * @param array $data Data to set.
+	 *
+	 * @used-by bulk_edit_variations
+	 */
+	private static function variation_bulk_action_variable_low_stock_amount( $variations, $data ) {
+		if ( ! isset( $data['value'] ) ) {
+			return;
+		}
+
+		$low_stock_amount = wc_stock_amount( wc_clean( $data['value'] ) );
+
+		foreach ( $variations as $variation_id ) {
+			$variation = wc_get_product( $variation_id );
+			if ( $variation->managing_stock() ) {
+				$variation->set_low_stock_amount( $low_stock_amount );
+			} else {
+				$variation->set_low_stock_amount( '' );
+			}
+			$variation->save();
+		}
+	}
+
+	/**
 	 * Bulk action - Set Weight.
 	 *
 	 * @param array $variations List of variations.
@@ -2536,6 +2642,7 @@ class WC_AJAX {
 	 * @uses WC_AJAX::variation_bulk_action_toggle_virtual()
 	 * @uses WC_AJAX::variation_bulk_action_toggle_downloadable()
 	 * @uses WC_AJAX::variation_bulk_action_toggle_enabled
+	 * @uses WC_AJAX::variation_bulk_action_variable_low_stock_amount()
 	 */
 	public static function bulk_edit_variations() {
 		ob_start();

@@ -58,11 +58,20 @@ class WC_Unit_Tests_Bootstrap {
 		// load test function so tests_add_filter() is available.
 		require_once $this->wp_tests_dir . '/includes/functions.php';
 
+		// Always load PayPal Standard for unit tests.
+		tests_add_filter( 'woocommerce_should_load_paypal_standard', '__return_true' );
+
 		// load WC.
 		tests_add_filter( 'muplugins_loaded', array( $this, 'load_wc' ) );
 
 		// install WC.
 		tests_add_filter( 'setup_theme', array( $this, 'install_wc' ) );
+
+		/*
+		* Load PHPUnit Polyfills for the WP testing suite.
+		* @see https://github.com/WordPress/wordpress-develop/pull/1563/
+		*/
+		define( 'WP_TESTS_PHPUNIT_POLYFILLS_PATH', __DIR__ . '/../vendor/yoast/phpunit-polyfills/phpunitpolyfills-autoload.php' );
 
 		// load the WP testing environment.
 		require_once $this->wp_tests_dir . '/includes/bootstrap.php';
@@ -104,6 +113,7 @@ class WC_Unit_Tests_Bootstrap {
 	 */
 	private function initialize_code_hacker() {
 		CodeHacker::initialize( array( __DIR__ . '/../../includes/' ) );
+
 		$replaceable_functions = include_once __DIR__ . '/mockable-functions.php';
 		if ( ! empty( $replaceable_functions ) ) {
 			FunctionsMockerHack::initialize( $replaceable_functions );
@@ -173,11 +183,11 @@ class WC_Unit_Tests_Bootstrap {
 		define( 'WC_REMOVE_ALL_DATA', true );
 		include $this->plugin_dir . '/uninstall.php';
 
-		WC_Install::install();
-
 		// Initialize the WC API extensions.
 		\Automattic\WooCommerce\Admin\Install::create_tables();
 		\Automattic\WooCommerce\Admin\Install::create_events();
+
+		WC_Install::install();
 
 		// Reload capabilities after install, see https://core.trac.wordpress.org/ticket/28374.
 		if ( version_compare( $GLOBALS['wp_version'], '4.7', '<' ) ) {

@@ -18,7 +18,7 @@ class Dummy_Widget extends WC_Widget {
 	 * Output widget.
 	 *
 	 * @param mixed     $args Arguments.
-	 * @param WP_Widget $instance Intance of WP_Widget.
+	 * @param WP_Widget $instance Instance of WP_Widget.
 	 * @return void
 	 */
 	public function widget( $args, $instance ) {

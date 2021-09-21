@@ -1,4 +1,9 @@
 <?php
+/**
+ * WC_Tests_Register_WP_Admin_Settings class file.
+ *
+ * @package @package WooCommerce\Tests\Settings
+ */
 
 /**
  * Settings API: WP-Admin Helper Tests
@@ -21,7 +26,6 @@ class WC_Tests_Register_WP_Admin_Settings extends WC_Unit_Test_Case {
 	public function setUp() {
 		parent::setUp();
 
-		// $mock_page = $this->getMock( 'WC_Settings_General' );
 		$mock_page = $this->getMockBuilder( 'WC_Settings_General' )->getMock();
 
 		$mock_page
@@ -77,7 +81,7 @@ class WC_Tests_Register_WP_Admin_Settings extends WC_Unit_Test_Case {
 	 */
 	public function register_setting_provider() {
 		return array(
-			// No "id" case
+			// No "id" case.
 			array(
 				array(
 					'type'       => 'some-type-with-no-id',
@@ -85,7 +89,7 @@ class WC_Tests_Register_WP_Admin_Settings extends WC_Unit_Test_Case {
 				),
 				false,
 			),
-			// All optional properties except 'desc_tip'
+			// All optional properties except 'desc_tip'.
 			array(
 				array(
 					'id'         => 'setting-id',
@@ -106,7 +110,7 @@ class WC_Tests_Register_WP_Admin_Settings extends WC_Unit_Test_Case {
 					'option_key'  => '',
 				),
 			),
-			// Boolean 'desc_tip' defaulting to 'desc' value
+			// Boolean 'desc_tip' defaulting to 'desc' value.
 			array(
 				array(
 					'id'         => 'setting-id',
@@ -125,7 +129,7 @@ class WC_Tests_Register_WP_Admin_Settings extends WC_Unit_Test_Case {
 					'option_key'  => '',
 				),
 			),
-			// String 'desc_tip'
+			// String 'desc_tip'.
 			array(
 				array(
 					'id'         => 'setting-id',
@@ -144,7 +148,8 @@ class WC_Tests_Register_WP_Admin_Settings extends WC_Unit_Test_Case {
 					'option_key'  => '',
 				),
 			),
-			// Empty 'title' and 'desc'
+			// phpcs:ignore Squiz.PHP.CommentedOutCode.Found
+			// Empty 'title' and empty 'desc'.
 			array(
 				array(
 					'id'         => 'setting-id',
@@ -166,6 +171,8 @@ class WC_Tests_Register_WP_Admin_Settings extends WC_Unit_Test_Case {
 	 * @since 3.0.0
 	 * @dataProvider register_setting_provider
 	 * @covers WC_Register_WP_Admin_Settings::register_setting
+	 * @param array $input Array of settings.
+	 * @param bool  $expected Expected result of the setting registering operation.
 	 */
 	public function test_register_setting( $input, $expected ) {
 		$settings = new WC_Register_WP_Admin_Settings( $this->page, 'page' );
@@ -179,7 +186,7 @@ class WC_Tests_Register_WP_Admin_Settings extends WC_Unit_Test_Case {
 	 * @since 3.0.0
 	 * @covers WC_Register_WP_Admin_Settings::register_page_settings
 	 */
-	public function test_register_settings_one_section() {
+	public function test_register_settings_default_section_no_settings() {
 		$this->page
 			->expects( $this->any() )
 			->method( 'get_sections' )
@@ -188,7 +195,7 @@ class WC_Tests_Register_WP_Admin_Settings extends WC_Unit_Test_Case {
 		$this->page
 			->expects( $this->once() )
 			->method( 'get_settings' )
-			->with( $this->equalTo( 0 ) )
+			->with( $this->equalTo( '' ) )
 			->will( $this->returnValue( array() ) );
 
 		$settings = new WC_Register_WP_Admin_Settings( $this->page, 'page' );
@@ -203,7 +210,7 @@ class WC_Tests_Register_WP_Admin_Settings extends WC_Unit_Test_Case {
 	 * @since 3.0.0
 	 * @covers WC_Register_WP_Admin_Settings::register_page_settings
 	 */
-	public function test_register_settings() {
+	public function test_register_settings_default_section_with_settings() {
 		$this->page
 			->expects( $this->any() )
 			->method( 'get_sections' )

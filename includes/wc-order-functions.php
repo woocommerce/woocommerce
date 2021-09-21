@@ -366,9 +366,10 @@ function wc_orders_count( $status ) {
  * @param  int|WC_Product $product     Product instance or ID.
  * @param  WC_Order       $order       Order data.
  * @param  int            $qty         Quantity purchased.
+ * @param  WC_Order_Item  $item        Item of the order.
  * @return int|bool insert id or false on failure.
  */
-function wc_downloadable_file_permission( $download_id, $product, $order, $qty = 1 ) {
+function wc_downloadable_file_permission( $download_id, $product, $order, $qty = 1, $item = null ) {
 	if ( is_numeric( $product ) ) {
 		$product = wc_get_product( $product );
 	}
@@ -390,7 +391,7 @@ function wc_downloadable_file_permission( $download_id, $product, $order, $qty =
 		$download->set_access_expires( strtotime( $from_date . ' + ' . $expiry . ' DAY' ) );
 	}
 
-	$download = apply_filters( 'woocommerce_downloadable_file_permission', $download, $product, $order, $qty );
+	$download = apply_filters( 'woocommerce_downloadable_file_permission', $download, $product, $order, $qty, $item );
 
 	return $download->save();
 }
@@ -420,7 +421,7 @@ function wc_downloadable_product_permissions( $order_id, $force = false ) {
 				$downloads = $product->get_downloads();
 
 				foreach ( array_keys( $downloads ) as $download_id ) {
-					wc_downloadable_file_permission( $download_id, $product, $order, $item->get_quantity() );
+					wc_downloadable_file_permission( $download_id, $product, $order, $item->get_quantity(), $item );
 				}
 			}
 		}
@@ -699,9 +700,10 @@ function wc_restock_refunded_items( $order, $refunded_line_items ) {
 		if ( ! isset( $refunded_line_items[ $item_id ], $refunded_line_items[ $item_id ]['qty'] ) ) {
 			continue;
 		}
-		$product            = $item->get_product();
-		$item_stock_reduced = $item->get_meta( '_reduced_stock', true );
-		$qty_to_refund      = $refunded_line_items[ $item_id ]['qty'];
+		$product                = $item->get_product();
+		$item_stock_reduced     = $item->get_meta( '_reduced_stock', true );
+		$restock_refunded_items = (int) $item->get_meta( '_restock_refunded_items', true );
+		$qty_to_refund          = $refunded_line_items[ $item_id ]['qty'];
 
 		if ( ! $item_stock_reduced || ! $qty_to_refund || ! $product || ! $product->managing_stock() ) {
 			continue;
@@ -714,9 +716,14 @@ function wc_restock_refunded_items( $order, $refunded_line_items ) {
 		$item_stock_reduced = $item_stock_reduced - $qty_to_refund;
 
 		if ( 0 < $item_stock_reduced ) {
+			// Keeps track of total running tally of reduced stock.
 			$item->update_meta_data( '_reduced_stock', $item_stock_reduced );
+
+			// Keeps track of only refunded items that needs restock.
+			$item->update_meta_data( '_restock_refunded_items', $qty_to_refund + $restock_refunded_items );
 		} else {
 			$item->delete_meta_data( '_reduced_stock' );
+			$item->delete_meta_data( '_restock_refunded_items' );
 		}
 
 		/* translators: 1: product ID 2: old stock level 3: new stock level */

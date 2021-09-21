@@ -142,6 +142,10 @@ if ( ! class_exists( 'WC_Admin_Profile', false ) ) :
 								'description' => __( 'State / County or state code', 'woocommerce' ),
 								'class'       => 'js_field-state',
 							),
+							'shipping_phone'      => array(
+								'label'       => __( 'Phone', 'woocommerce' ),
+								'description' => '',
+							),
 						),
 					),
 				)

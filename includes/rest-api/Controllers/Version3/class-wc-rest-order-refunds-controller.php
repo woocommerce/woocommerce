@@ -56,7 +56,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 				'reason'         => $request['reason'],
 				'line_items'     => $request['line_items'],
 				'refund_payment' => $request['api_refund'],
-				'restock_items'  => true,
+				'restock_items'  => $request['api_restock'],
 			)
 		);
 
@@ -108,6 +108,13 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 			'type'        => 'number',
 			'context'     => array( 'edit' ),
 			'readonly'    => true,
+		);
+
+		$schema['properties']['api_restock'] = array(
+			'description' => __( 'When true, refunded items are restocked.', 'woocommerce' ),
+			'type'        => 'boolean',
+			'context'     => array( 'edit' ),
+			'default'     => true,
 		);
 
 		return $schema;

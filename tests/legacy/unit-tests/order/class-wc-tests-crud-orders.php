@@ -1232,6 +1232,16 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test: get_shipping_phone
+	 */
+	public function test_get_shipping_phone() {
+		$object = new WC_Order();
+		$set_to = '123456678';
+		$object->set_shipping_phone( $set_to );
+		$this->assertEquals( $set_to, $object->get_shipping_phone() );
+	}
+
+	/**
 	 * Test get_formatted_billing_address and has_billing_address.
 	 *
 	 * @since 3.3
@@ -1245,7 +1255,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$order->set_billing_country( 'US' );
 		$order->set_billing_city( 'Portland' );
 		$order->set_billing_postcode( '97266' );
-		$this->assertEquals( '123 Test St.<br/>Portland, 97266<br/>United States (US)', $order->get_formatted_billing_address( 'none' ) );
+		$this->assertEquals( '123 Test St.<br/>Portland, 97266', $order->get_formatted_billing_address( 'none' ) );
 
 		$this->assertTrue( $order->has_billing_address() );
 		$this->assertFalse( $order->has_shipping_address() );
@@ -1265,7 +1275,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$order->set_shipping_country( 'US' );
 		$order->set_shipping_city( 'Portland' );
 		$order->set_shipping_postcode( '97266' );
-		$this->assertEquals( '123 Test St.<br/>Portland, 97266<br/>United States (US)', $order->get_formatted_shipping_address( 'none' ) );
+		$this->assertEquals( '123 Test St.<br/>Portland, 97266', $order->get_formatted_shipping_address( 'none' ) );
 
 		$this->assertFalse( $order->has_billing_address() );
 		$this->assertTrue( $order->has_shipping_address() );
@@ -1421,6 +1431,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 			'state'      => 'Boulder',
 			'postcode'   => '00001',
 			'country'    => 'US',
+			'phone'      => '',
 		);
 
 		$object->set_billing_first_name( 'Fred' );
@@ -1498,7 +1509,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object->set_billing_state( 'Boulder' );
 		$object->set_billing_postcode( '00001' );
 		$object->set_billing_country( 'US' );
-		$this->assertEquals( 'Fred Flintstone<br/>Bedrock Ltd.<br/>34 Stonepants avenue<br/>Rockville<br/>Bedrock, BOULDER 00001<br/>United States (US)', $object->get_formatted_billing_address() );
+		$this->assertEquals( 'Fred Flintstone<br/>Bedrock Ltd.<br/>34 Stonepants avenue<br/>Rockville<br/>Bedrock, BOULDER 00001', $object->get_formatted_billing_address() );
 	}
 
 	/**
@@ -1515,7 +1526,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object->set_shipping_state( 'Boulder' );
 		$object->set_shipping_postcode( '00001' );
 		$object->set_shipping_country( 'US' );
-		$this->assertEquals( 'Barney Rubble<br/>Bedrock Ltd.<br/>34 Stonepants avenue<br/>Rockville<br/>Bedrock, BOULDER 00001<br/>United States (US)', $object->get_formatted_shipping_address() );
+		$this->assertEquals( 'Barney Rubble<br/>Bedrock Ltd.<br/>34 Stonepants avenue<br/>Rockville<br/>Bedrock, BOULDER 00001', $object->get_formatted_shipping_address() );
 	}
 
 	/**

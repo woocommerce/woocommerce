@@ -640,7 +640,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 		 *
 		 *  TODO: Refactor to fix this behavior when DI gets included to make it obvious and clean.
 		*/
-		$request = func_num_args() >= 2 ? func_get_arg( 2 ) : new WP_REST_Request( '', '', array( 'context' => $context ) );
+		$request = func_num_args() >= 3 ? func_get_arg( 2 ) : new WP_REST_Request( '', '', array( 'context' => $context ) );
 		$fields  = $this->get_fields_for_response( $request );
 
 		$base_data = array();
@@ -765,6 +765,9 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 					break;
 				case 'backordered':
 					$base_data['backordered'] = $product->is_on_backorder();
+					break;
+				case 'low_stock_amount':
+					$base_data['low_stock_amount'] = '' === $product->get_low_stock_amount() ? null : $product->get_low_stock_amount();
 					break;
 				case 'sold_individually':
 					$base_data['sold_individually'] = $product->is_sold_individually();

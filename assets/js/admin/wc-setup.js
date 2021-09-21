@@ -37,7 +37,7 @@ jQuery( function( $ ) {
 		} );
 
 		$( document.body ).on( 'wc_backbone_modal_response', function() {
-			form.unbind( 'submit' ).trigger( 'submit' );
+			form.off( 'submit' ).trigger( 'submit' );
 		} );
 
 		$( '#wc_tracker_checkbox_dialog' ).on( 'change', function( e ) {
@@ -46,7 +46,7 @@ jQuery( function( $ ) {
 		} );
 
 		$( '#wc_tracker_submit' ).on( 'click', function () {
-			form.unbind( 'submit' ).trigger( 'submit' );
+			form.off( 'submit' ).trigger( 'submit' );
 		} );
 
 		return true;
@@ -96,7 +96,7 @@ jQuery( function( $ ) {
 		if ( $.isEmptyObject( country_postcode_obj ) || country_postcode_obj.required  ) {
 			$store_postcode_input.attr( 'required', 'true' );
 		} else {
-			$store_postcode_input.removeAttr( 'required' );
+			$store_postcode_input.prop( 'required', false );
 		}
 	} );
 
@@ -139,7 +139,14 @@ jQuery( function( $ ) {
 	} );
 
 	$( '.wc-wizard-services-list-toggle' ).on( 'click', function() {
-		$( this ).closest( '.wc-wizard-services-list-toggle' ).toggleClass( 'closed' );
+		var listToggle = $( this ).closest( '.wc-wizard-services-list-toggle' );
+
+		if ( listToggle.hasClass( 'closed' ) ) {
+			listToggle.removeClass( 'closed' );
+		} else {
+			listToggle.addClass( 'closed' );
+		}
+
 		$( this ).closest( '.wc-wizard-services' ).find( '.wc-wizard-service-item' )
 			.slideToggle()
 			.css( 'display', 'flex' );

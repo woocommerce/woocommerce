@@ -1,0 +1,14 @@
+{
+  "url": "SMOKE_TEST_URL",
+  "users": {
+    "admin": {
+      "username": "SMOKE_TEST_ADMIN_USER",
+      "password": "SMOKE_TEST_ADMIN_PASSWORD",
+      "email": "SMOKE_TEST_ADMIN_USER_EMAIL"
+    },
+    "customer": {
+      "username": "SMOKE_TEST_CUSTOMER_USER",
+      "password": "SMOKE_TEST_CUSTOMER_PASSWORD"
+    }
+  }
+}

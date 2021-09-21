@@ -1,15 +1,31 @@
 import { HTTPClientFactory } from '@woocommerce/api';
 const config = require( 'config' );
+import { simpleProductFactory } from './factories/simple-product';
+import { variableProductFactory } from './factories/variable-product';
+import { variationFactory } from './factories/variation';
+import { groupedProductFactory } from './factories/grouped-product';
 
-const httpClient = HTTPClientFactory.build( config.get( 'url' ) )
-	.withBasicAuth( config.get( 'users.admin.username' ), config.get( 'users.admin.password' ) )
+const apiUrl = config.get( 'url' );
+const adminUsername = config.get( 'users.admin.username' );
+const adminPassword = config.get( 'users.admin.password' );
+const withDefaultPermalinks = HTTPClientFactory.build( apiUrl )
+	.withBasicAuth( adminUsername, adminPassword )
+	.create();
+const withIndexPermalinks = HTTPClientFactory.build( apiUrl )
+	.withBasicAuth( adminUsername, adminPassword )
+	.withIndexPermalinks()
 	.create();
 
-import { simpleProductFactory } from './factories/simple-product';
-
 const factories = {
+	api: {
+		withDefaultPermalinks,
+		withIndexPermalinks,
+	},
 	products: {
-		simple: simpleProductFactory( httpClient ),
+		simple: simpleProductFactory( withDefaultPermalinks ),
+		variable: variableProductFactory( withDefaultPermalinks ),
+		variation: variationFactory( withDefaultPermalinks ),
+		grouped: groupedProductFactory( withDefaultPermalinks )
 	},
 };
 

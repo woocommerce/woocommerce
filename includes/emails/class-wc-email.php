@@ -600,7 +600,8 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_content_plain() {
-		return ''; }
+		return '';
+	}
 
 	/**
 	 * Get the email content in HTML format.
@@ -608,7 +609,8 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_content_html() {
-		return ''; }
+		return '';
+	}
 
 	/**
 	 * Get the from name for outgoing emails.
@@ -655,6 +657,16 @@ class WC_Email extends WC_Settings_API {
 		remove_filter( 'wp_mail_from', array( $this, 'get_from_address' ) );
 		remove_filter( 'wp_mail_from_name', array( $this, 'get_from_name' ) );
 		remove_filter( 'wp_mail_content_type', array( $this, 'get_content_type' ) );
+
+		/**
+		 * Action hook fired when an email is sent.
+		 *
+		 * @since 5.6.0
+		 * @param bool     $return Whether the email was sent successfully.
+		 * @param int      $id     Email ID.
+		 * @param WC_Email $this   WC_Email instance.
+		 */
+		do_action( 'woocommerce_email_sent', $return, $this->id, $this );
 
 		return $return;
 	}
@@ -1029,7 +1041,7 @@ class WC_Email extends WC_Settings_API {
 
 			<?php
 			wc_enqueue_js(
-				"jQuery( 'select.email_type' ).change( function() {
+				"jQuery( 'select.email_type' ).on( 'change', function() {
 
 					var val = jQuery( this ).val();
 
@@ -1043,7 +1055,7 @@ class WC_Email extends WC_Settings_API {
 						jQuery('.template_plain').hide();
 					}
 
-				}).change();
+				}).trigger( 'change' );
 
 				var view = '" . esc_js( __( 'View template', 'woocommerce' ) ) . "';
 				var hide = '" . esc_js( __( 'Hide template', 'woocommerce' ) ) . "';
@@ -1067,7 +1079,7 @@ class WC_Email extends WC_Settings_API {
 					return false;
 				});
 
-				jQuery( '.editor textarea' ).change( function() {
+				jQuery( '.editor textarea' ).on( 'change', function() {
 					var name = jQuery( this ).attr( 'data-name' );
 
 					if ( name ) {

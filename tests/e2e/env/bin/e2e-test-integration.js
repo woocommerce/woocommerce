@@ -5,7 +5,7 @@ const program = require( 'commander' );
 const path = require( 'path' );
 const fs = require( 'fs' );
 const { getAppRoot } = require( '../utils' );
-const { JEST_PUPPETEER_CONFIG } = process.env;
+const { WC_E2E_SCREENSHOTS, JEST_PUPPETEER_CONFIG, DEFAULT_TIMEOUT_OVERRIDE } = process.env;
 
 program
 	.usage( '<file ...> [options]' )
@@ -14,6 +14,17 @@ program
 	.parse( process.argv );
 
 const appPath = getAppRoot();
+
+// clear the screenshots folder before running tests.
+if ( WC_E2E_SCREENSHOTS ) {
+	const screenshotPath = path.resolve(appPath, 'tests/e2e/screenshots');
+	if (fs.existsSync(screenshotPath)) {
+		fs.readdirSync(screenshotPath).forEach((file, index) => {
+			const filename = path.join(screenshotPath, file);
+			fs.unlinkSync(filename);
+		});
+	}
+}
 
 const nodeConfigDirs = [
 	path.resolve( __dirname, '../config' ),
@@ -31,6 +42,10 @@ let testEnvVars = {
 	node_config_dev: program.dev ? 'yes' : 'no',
 	jest_test_timeout: program.dev ? 120000 : 30000,
 };
+
+if ( DEFAULT_TIMEOUT_OVERRIDE ) {
+	testEnvVars.jest_test_timeout = DEFAULT_TIMEOUT_OVERRIDE;
+}
 
 if ( ! JEST_PUPPETEER_CONFIG ) {
 	// Use local Puppeteer config if there is one.

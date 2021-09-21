@@ -48,6 +48,7 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 		'shipping_first_name',
 		'shipping_last_name',
 		'shipping_company',
+		'shipping_phone',
 	);
 
 	/**
@@ -126,12 +127,13 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	protected function set_defaults( &$customer ) {
 		try {
 			$default = wc_get_customer_default_location();
+			$has_shipping_address = $customer->has_shipping_address();
 
 			if ( ! $customer->get_billing_country() ) {
 				$customer->set_billing_country( $default['country'] );
 			}
 
-			if ( ! $customer->get_shipping_country() ) {
+			if ( ! $customer->get_shipping_country() && ! $has_shipping_address ) {
 				$customer->set_shipping_country( $customer->get_billing_country() );
 			}
 
@@ -139,7 +141,7 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 				$customer->set_billing_state( $default['state'] );
 			}
 
-			if ( ! $customer->get_shipping_state() ) {
+			if ( ! $customer->get_shipping_state() && ! $has_shipping_address ) {
 				$customer->set_shipping_state( $customer->get_billing_state() );
 			}
 

@@ -2,7 +2,7 @@
 ( function( $, params, wp ) {
 	$( function() {
 		// Sell Countries
-		$( 'select#woocommerce_allowed_countries' ).change( function() {
+		$( 'select#woocommerce_allowed_countries' ).on( 'change', function() {
 			if ( 'specific' === $( this ).val() ) {
 				$( this ).closest('tr').next( 'tr' ).hide();
 				$( this ).closest('tr').next().next( 'tr' ).show();
@@ -16,7 +16,7 @@
 		}).trigger( 'change' );
 
 		// Ship Countries
-		$( 'select#woocommerce_ship_to_countries' ).change( function() {
+		$( 'select#woocommerce_ship_to_countries' ).on( 'change', function() {
 			if ( 'specific' === $( this ).val() ) {
 				$( this ).closest('tr').next( 'tr' ).show();
 			} else {
@@ -25,7 +25,7 @@
 		}).trigger( 'change' );
 
 		// Stock management
-		$( 'input#woocommerce_manage_stock' ).change( function() {
+		$( 'input#woocommerce_manage_stock' ).on( 'change', function() {
 			if ( $( this ).is(':checked') ) {
 				$( this ).closest('tbody').find( '.manage_stock_field' ).closest( 'tr' ).show();
 			} else {
@@ -48,15 +48,15 @@
 				event.stopPropagation();
 				$( '.iris-picker' ).hide();
 				$( this ).closest( 'td' ).find( '.iris-picker' ).show();
-				$( this ).data( 'original-value', $( this ).val() );
+				$( this ).data( 'originalValue', $( this ).val() );
 			})
 
 			.on( 'change', function() {
 				if ( $( this ).is( '.iris-error' ) ) {
-					var original_value = $( this ).data( 'original-value' );
+					var original_value = $( this ).data( 'originalValue' );
 
 					if ( original_value.match( /^\#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$/ ) ) {
-						$( this ).val( $( this ).data( 'original-value' ) ).trigger( 'change' );
+						$( this ).val( $( this ).data( 'originalValue' ) ).trigger( 'change' );
 					} else {
 						$( this ).val( '' ).trigger( 'change' );
 					}
@@ -71,7 +71,7 @@
 		$( function() {
 			var changed = false;
 
-			$( 'input, textarea, select, checkbox' ).change( function() {
+			$( 'input, textarea, select, checkbox' ).on( 'change', function() {
 				if ( ! changed ) {
 					window.onbeforeunload = function() {
 						return params.i18n_nav_warning;
@@ -110,13 +110,13 @@
 
 		// Select all/none
 		$( '.woocommerce' ).on( 'click', '.select_all', function() {
-			$( this ).closest( 'td' ).find( 'select option' ).attr( 'selected', 'selected' );
+			$( this ).closest( 'td' ).find( 'select option' ).prop( 'selected', true );
 			$( this ).closest( 'td' ).find( 'select' ).trigger( 'change' );
 			return false;
 		});
 
 		$( '.woocommerce' ).on( 'click', '.select_none', function() {
-			$( this ).closest( 'td' ).find( 'select option' ).removeAttr( 'selected' );
+			$( this ).closest( 'td' ).find( 'select option' ).prop( 'selected', false );
 			$( this ).closest( 'td' ).find( 'select' ).trigger( 'change' );
 			return false;
 		});
@@ -126,7 +126,7 @@
 			var moveBtn = $( this ),
 				$row    = moveBtn.closest( 'tr' );
 
-			moveBtn.focus();
+			moveBtn.trigger( 'focus' );
 
 			var isMoveUp = moveBtn.is( '.wc-move-up' ),
 				isMoveDown = moveBtn.is( '.wc-move-down' );
@@ -147,7 +147,7 @@
 				}
 			}
 
-			moveBtn.focus(); // Re-focus after the container was moved.
+			moveBtn.trigger( 'focus' ); // Re-focus after the container was moved.
 			moveBtn.closest( 'table' ).trigger( 'updateMoveButtons' );
 		} );
 

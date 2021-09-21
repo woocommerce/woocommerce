@@ -1,10 +1,9 @@
-/* eslint-disable jest/no-export, jest/no-disabled-tests, jest/expect-expect */
 /**
  * Internal dependencies
  */
 const {
 	shopper,
-	merchant,
+	withRestApi,
 	createSimpleProduct,
 	uiUnblocked
 } = require( '@woocommerce/e2e-utils' );
@@ -26,9 +25,10 @@ const twoProductPrice = singleProductPrice * 2;
 const runCartPageTest = () => {
 	describe('Cart page', () => {
 		beforeAll(async () => {
-			await merchant.login();
 			await createSimpleProduct();
-			await merchant.logout();
+			await withRestApi.resetSettingsGroupToDefault('general');
+			await withRestApi.resetSettingsGroupToDefault('products');
+			await withRestApi.resetSettingsGroupToDefault('tax');
 		});
 
 		it('should display no item in the cart', async () => {
@@ -36,7 +36,7 @@ const runCartPageTest = () => {
 			await expect(page).toMatchElement('.cart-empty', {text: 'Your cart is currently empty.'});
 		});
 
-		it('should add the product to the cart when "Add to cart" is clicked', async () => {
+		it('should add the product to the cart from the shop page', async () => {
 			await shopper.goToShop();
 			await shopper.addToCartFromShopPage(simpleProductName);
 

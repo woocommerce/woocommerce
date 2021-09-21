@@ -8,7 +8,11 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\AssignDefaultCategory;
 use Automattic\WooCommerce\Internal\DownloadPermissionsAdjuster;
+use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
+use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
+use Automattic\WooCommerce\Internal\RestockRefundedItemsAdjuster;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 /**
@@ -23,7 +27,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '5.1.0';
+	public $version = '5.8.0';
 
 	/**
 	 * WooCommerce Schema version.
@@ -203,12 +207,28 @@ final class WooCommerce {
 		add_action( 'switch_blog', array( $this, 'wpdb_table_fix' ), 0 );
 		add_action( 'activated_plugin', array( $this, 'activated_plugin' ) );
 		add_action( 'deactivated_plugin', array( $this, 'deactivated_plugin' ) );
-		add_filter( 'woocommerce_rest_prepare_note', array( 'WC_Admin_Notices', 'prepare_note_with_nonce' ) );
+		add_action( 'woocommerce_installed', array( $this, 'add_woocommerce_inbox_variant' ) );
+		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_inbox_variant' ) );
 
 		// These classes set up hooks on instantiation.
 		wc_get_container()->get( DownloadPermissionsAdjuster::class );
+		wc_get_container()->get( AssignDefaultCategory::class );
+		wc_get_container()->get( DataRegenerator::class );
+		wc_get_container()->get( LookupDataStore::class );
+		wc_get_container()->get( RestockRefundedItemsAdjuster::class );
 	}
 
+	/**
+	 * Add woocommerce_inbox_variant for the Remote Inbox Notification.
+	 *
+	 * P2 post can be found at https://wp.me/paJDYF-1uJ.
+	 */
+	public function add_woocommerce_inbox_variant() {
+		$config_name = 'woocommerce_inbox_variant_assignment';
+		if ( false === get_option( $config_name, false ) ) {
+			update_option( $config_name, wp_rand( 1, 12 ) );
+		}
+	}
 	/**
 	 * Ensures fatal errors are logged so they can be picked up in the status report.
 	 *
@@ -249,6 +269,18 @@ final class WooCommerce {
 		$this->define( 'WC_NOTICE_MIN_PHP_VERSION', '7.2' );
 		$this->define( 'WC_NOTICE_MIN_WP_VERSION', '5.2' );
 		$this->define( 'WC_PHP_MIN_REQUIREMENTS_NOTICE', 'wp_php_min_requirements_' . WC_NOTICE_MIN_PHP_VERSION . '_' . WC_NOTICE_MIN_WP_VERSION );
+		/** Define if we're checking against major, minor or no versions in the following places:
+		 *   - plugin screen in WP Admin (displaying extra warning when updating to new major versions)
+		 *   - System Status Report ('Installed version not tested with active version of WooCommerce' warning)
+		 *   - core update screen in WP Admin (displaying extra warning when updating to new major versions)
+		 *   - enable/disable automated updates in the plugin screen in WP Admin (if there are any plugins
+		 *      that don't declare compatibility, the auto-update is disabled)
+		 *
+		 * We dropped SemVer before WC 5.0, so all versions are backwards compatible now, thus no more check needed.
+		 * The SSR in the name is preserved for bw compatibility, as this was initially used in System Status Report.
+		 */
+		$this->define( 'WC_SSR_PLUGIN_UPDATE_RELEASE_VERSION_TYPE', 'none' );
+
 	}
 
 	/**

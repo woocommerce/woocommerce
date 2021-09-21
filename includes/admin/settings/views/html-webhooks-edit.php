@@ -63,7 +63,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 							$topic_data = WC_Admin_Webhooks::get_topic_data( $webhook );
 
 							$topics = apply_filters(
-								'woocommerce_webhook_topics', array(
+								'woocommerce_webhook_topics',
+								array(
 									''                 => __( 'Select an option&hellip;', 'woocommerce' ),
 									'coupon.created'   => __( 'Coupon created', 'woocommerce' ),
 									'coupon.updated'   => __( 'Coupon updated', 'woocommerce' ),
@@ -197,8 +198,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 								add_query_arg(
 									array(
 										'delete' => $webhook->get_id(),
-									), admin_url( 'admin.php?page=wc-settings&tab=advanced&section=webhooks' )
-								), 'delete-webhook'
+									),
+									admin_url( 'admin.php?page=wc-settings&tab=advanced&section=webhooks' )
+								),
+								'delete-webhook'
 							);
 							?>
 							<a style="color: #a00; text-decoration: none; margin-left: 10px;" href="<?php echo esc_url( $delete_url ); ?>"><?php esc_html_e( 'Delete permanently', 'woocommerce' ); ?></a>
@@ -221,6 +224,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 			if ( 'action' === current ) {
 				action_event_field.show();
 			}
-		}).change();
+		}).trigger( 'change' );
 	});
 </script>

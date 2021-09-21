@@ -157,7 +157,7 @@ class WC_Plugins_Screen_Updates extends WC_Plugin_Updates {
 					$update_link.removeClass( 'wc-thickbox open-plugin-details-modal' );
 					$update_link.addClass( 'update-link' );
 					$update_link.attr( 'href', update_url );
-					$update_link.click();
+					$update_link.trigger( 'click' );
 				});
 
 				$( '#wc_untested_extensions_modal .cancel' ).on( 'click', function( evt ) {

@@ -17,7 +17,7 @@ function wcSetClipboard( data, $el ) {
 	}
 	var $temp_input = jQuery( '<textarea style="opacity:0">' );
 	jQuery( 'body' ).append( $temp_input );
-	$temp_input.val( data ).select();
+	$temp_input.val( data ).trigger( 'select' );
 
 	$el.trigger( 'beforecopy' );
 	try {
