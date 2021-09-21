@@ -108,6 +108,7 @@ const BlockSettings = ( { attributes, setAttributes } ) => {
 						/>
 					</PanelBody>
 				) }
+			<CartCheckoutFeedbackPrompt />
 		</InspectorControls>
 	);
 };
