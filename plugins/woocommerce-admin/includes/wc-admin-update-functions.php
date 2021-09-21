@@ -9,7 +9,9 @@
 
 use \Automattic\WooCommerce\Admin\Install as Installer;
 use \Automattic\WooCommerce\Admin\Notes\Notes;
+use \Automattic\WooCommerce\Admin\Notes\UnsecuredReportFiles;
 use \Automattic\WooCommerce\Admin\Notes\DeactivatePlugin;
+use \Automattic\WooCommerce\Admin\ReportExporter;
 
 /**
  * Update order stats `status` index length.
@@ -170,6 +172,91 @@ function wc_admin_update_270_update_task_list_options() {
 	update_option( 'woocommerce_task_list_hidden_lists', array_unique( $hidden_lists ) );
 	delete_option( 'woocommerce_task_list_hidden' );
 	delete_option( 'woocommerce_extended_task_list_hidden' );
+}
+
+/**
+ * Delete the preexisting export files.
+ */
+function wc_admin_update_270_delete_report_downloads() {
+	$upload_dir = wp_upload_dir();
+	$base_dir   = trailingslashit( $upload_dir['basedir'] );
+
+	$failed_files   = array();
+	$exports_status = get_option( ReportExporter::EXPORT_STATUS_OPTION, array() );
+	$has_failure    = false;
+
+	if ( ! is_array( $exports_status ) ) {
+		// This is essentially the same path as files failing deletion. Handle as such.
+		return;
+	}
+
+	// Delete all export files based on the status option values.
+	foreach ( $exports_status as $key => $progress ) {
+		list( $report_type, $export_id ) = explode( ':', $key );
+
+		if ( ! $export_id ) {
+			continue;
+		}
+
+		$file   = "{$base_dir}wc-{$report_type}-report-export-{$export_id}.csv";
+		$header = $file . '.headers';
+
+		// phpcs:ignore
+		if ( @file_exists( $file ) && false === @unlink( $file ) ) {
+			array_push( $failed_files, $file );
+		}
+
+		// phpcs:ignore
+		if ( @file_exists( $header ) && false === @unlink( $header ) ) {
+			array_push( $failed_files, $header );
+		}
+	}
+
+	// If the status option was missing or corrupt, there will be files left over.
+	$potential_exports = glob( $base_dir . 'wc-*-report-export-*.csv' );
+	$reports_pattern   = '(revenue|products|variations|orders|categories|coupons|taxes|stock|customers|downloads)';
+
+	/**
+	 * Look for files we can be reasonably sure were created by the report export.
+	 *
+	 * Export files we created will match the 'wc-*-report-export-*.csv' glob, with
+	 * the first wildcard being one of the exportable report slugs, and the second
+	 * being an integer with 11-14 digits (from microtime()'s output) that represents
+	 * a time in the past.
+	 */
+	foreach ( $potential_exports as $potential_export ) {
+		$matches = array();
+		// See if the filename matches an unfiltered export pattern.
+		if ( ! preg_match( "/wc-{$reports_pattern}-report-export-(?P<export_id>\d{11,14})\.csv\$/", $potential_export, $matches ) ) {
+			$has_failure = true;
+			continue;
+		}
+
+		// Validate the timestamp (anything in the past).
+		$timestamp = (int) substr( $matches['export_id'], 0, 10 );
+
+		if ( ! $timestamp || $timestamp > time() ) {
+			$has_failure = true;
+			continue;
+		}
+
+		// phpcs:ignore
+		if ( false === @unlink( $potential_export ) ) {
+			array_push( $failed_files, $potential_export );
+		}
+	}
+
+	// Try deleting failed files once more.
+	foreach ( $failed_files as $failed_file ) {
+		// phpcs:ignore
+		if ( false === @unlink( $failed_file ) ) {
+			$has_failure = true;
+		}
+	}
+
+	if ( $has_failure ) {
+		UnsecuredReportFiles::possibly_add_note();
+	}
 }
 
 /**

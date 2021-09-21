@@ -1,0 +1,4 @@
+Significance: patch
+Type: Fix
+
+Harden the reports directory #7691
