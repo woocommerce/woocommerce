@@ -19,6 +19,12 @@
 		"text": {
 			"type": "string",
 			"required": false
+		},
+		"lock": {
+			"type": "object",
+			"default": {
+				"remove": true
+			}
 		}
 	},
 	"parent": [ "woocommerce/cart-i2" ],

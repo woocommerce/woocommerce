@@ -1,8 +1,8 @@
 {
-	"name": "woocommerce/cart-items-block",
+	"name": "woocommerce/cart-express-payment-block",
 	"version": "1.0.0",
-	"title": "Cart Items block",
-	"description": "Column containing cart items.",
+	"title": "Express Checkout",
+	"description": "Provide an express payment option for your customers.",
 	"category": "woocommerce",
 	"supports": {
 		"align": false,
@@ -20,7 +20,7 @@
 			}
 		}
 	},
-	"parent": [ "woocommerce/cart-i2" ],
+	"parent": [ "woocommerce/cart-totals-block" ],
 	"textdomain": "woo-gutenberg-products-block",
 	"apiVersion": 2
 }

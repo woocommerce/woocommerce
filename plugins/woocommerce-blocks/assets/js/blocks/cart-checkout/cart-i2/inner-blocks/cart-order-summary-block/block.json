@@ -13,8 +13,10 @@
 	},
 	"attributes": {
 		"lock": {
+			"type": "object",
 			"default": {
-				"remove": true
+				"remove": true,
+				"move": true
 			}
 		}
 	},
