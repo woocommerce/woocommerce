@@ -10,7 +10,6 @@ import { PanelBody, ToggleControl, Notice } from '@wordpress/components';
 import PropTypes from 'prop-types';
 import { CartCheckoutCompatibilityNotice } from '@woocommerce/editor-components/compatibility-notices';
 import ViewSwitcher from '@woocommerce/editor-components/view-switcher';
-import PageSelector from '@woocommerce/editor-components/page-selector';
 import { CART_PAGE_ID } from '@woocommerce/block-settings';
 import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundary';
 import {
@@ -18,8 +17,8 @@ import {
 	useEditorContext,
 	CartProvider,
 } from '@woocommerce/base-context';
-import { createInterpolateElement, useRef } from '@wordpress/element';
-import { getAdminLink } from '@woocommerce/settings';
+import { createInterpolateElement } from '@wordpress/element';
+import { getAdminLink, getSetting } from '@woocommerce/settings';
 import { previewCart } from '@woocommerce/resource-previews';
 import { SidebarLayout } from '@woocommerce/base-components/sidebar-layout';
 
@@ -30,9 +29,8 @@ import './editor.scss';
 import { Columns } from './columns';
 
 const BlockSettings = ( { attributes, setAttributes } ) => {
-	const { checkoutPageId, hasDarkControls } = attributes;
+	const { isShippingCalculatorEnabled, showRateAfterTaxName } = attributes;
 	const { currentPostId } = useEditorContext();
-	const { current: savedCheckoutPageId } = useRef( checkoutPageId );
 	return (
 		<InspectorControls>
 			{ currentPostId !== CART_PAGE_ID && (
@@ -61,45 +59,55 @@ const BlockSettings = ( { attributes, setAttributes } ) => {
 					) }
 				</Notice>
 			) }
-			{ ! (
-				currentPostId === CART_PAGE_ID && savedCheckoutPageId === 0
-			) && (
-				<PageSelector
-					pageId={ checkoutPageId }
-					setPageId={ ( id ) =>
-						setAttributes( { checkoutPageId: id } )
-					}
-					labels={ {
-						title: __(
-							'Proceed to Checkout button',
+			{ getSetting( 'shippingEnabled', true ) && (
+				<PanelBody
+					title={ __(
+						'Shipping rates',
+						'woo-gutenberg-products-block'
+					) }
+				>
+					<ToggleControl
+						label={ __(
+							'Shipping calculator',
 							'woo-gutenberg-products-block'
-						),
-						default: __(
-							'WooCommerce Checkout Page',
+						) }
+						help={ __(
+							'Allow customers to estimate shipping by entering their address.',
 							'woo-gutenberg-products-block'
-						),
-					} }
-				/>
+						) }
+						checked={ isShippingCalculatorEnabled }
+						onChange={ () =>
+							setAttributes( {
+								isShippingCalculatorEnabled: ! isShippingCalculatorEnabled,
+							} )
+						}
+					/>
+				</PanelBody>
 			) }
-			<PanelBody title={ __( 'Style', 'woo-gutenberg-products-block' ) }>
-				<ToggleControl
-					label={ __(
-						'Dark mode inputs',
-						'woo-gutenberg-products-block'
-					) }
-					help={ __(
-						'Inputs styled specifically for use on dark background colors.',
-						'woo-gutenberg-products-block'
-					) }
-					checked={ hasDarkControls }
-					onChange={ () =>
-						setAttributes( {
-							hasDarkControls: ! hasDarkControls,
-						} )
-					}
-				/>
-			</PanelBody>
-			<CartCheckoutFeedbackPrompt />
+			{ getSetting( 'taxesEnabled' ) &&
+				getSetting( 'displayItemizedTaxes', false ) &&
+				! getSetting( 'displayCartPricesIncludingTax', false ) && (
+					<PanelBody
+						title={ __( 'Taxes', 'woo-gutenberg-products-block' ) }
+					>
+						<ToggleControl
+							label={ __(
+								'Show rate after tax name',
+								'woo-gutenberg-products-block'
+							) }
+							help={ __(
+								'Show the percentage rate alongside each tax line in the summary.',
+								'woo-gutenberg-products-block'
+							) }
+							checked={ showRateAfterTaxName }
+							onChange={ () =>
+								setAttributes( {
+									showRateAfterTaxName: ! showRateAfterTaxName,
+								} )
+							}
+						/>
+					</PanelBody>
+				) }
 		</InspectorControls>
 	);
 };
@@ -134,7 +142,10 @@ const CartEditor = ( { className, attributes, setAttributes } ) => {
 		[
 			'woocommerce/cart-totals-block',
 			{},
-			[ [ 'woocommerce/cart-order-summary-block', {}, [] ] ],
+			[
+				[ 'woocommerce/cart-order-summary-block', {}, [] ],
+				[ 'woocommerce/proceed-to-checkout-block', {}, [] ],
+			],
 		],
 	];
 	return (
