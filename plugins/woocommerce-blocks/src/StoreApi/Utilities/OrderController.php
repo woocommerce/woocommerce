@@ -116,8 +116,12 @@ class OrderController {
 	 * @param \WC_Order $order Order object.
 	 */
 	public function validate_order_before_payment( \WC_Order $order ) {
+		$needs_shipping          = wc()->cart->needs_shipping();
+		$chosen_shipping_methods = wc()->session->get( 'chosen_shipping_methods' );
+
 		$this->validate_coupons( $order );
 		$this->validate_email( $order );
+		$this->validate_selected_shipping_methods( $needs_shipping, $chosen_shipping_methods );
 		$this->validate_addresses( $order );
 	}
 
@@ -402,6 +406,30 @@ class OrderController {
 
 			if ( $usage_count >= $coupon_usage_limit ) {
 				throw new Exception( $coupon->get_coupon_error( \WC_Coupon::E_WC_COUPON_USAGE_LIMIT_REACHED ) );
+			}
+		}
+	}
+
+	/**
+	 * Check there is a shipping method if it requires shipping.
+	 *
+	 * @throws RouteException Exception if invalid data is detected.
+	 * @param boolean $needs_shipping Current order needs shipping.
+	 * @param array   $chosen_shipping_methods Array of shipping methods.
+	 */
+	public function validate_selected_shipping_methods( $needs_shipping, $chosen_shipping_methods = array() ) {
+		if ( ! $needs_shipping || ! is_array( $chosen_shipping_methods ) ) {
+			return;
+		}
+
+		foreach ( $chosen_shipping_methods as $chosen_shipping_method ) {
+			if ( false === $chosen_shipping_method ) {
+				throw new RouteException(
+					'woocommerce_rest_invalid_shipping_option',
+					__( 'Sorry, this order requires a shipping option.', 'woo-gutenberg-products-block' ),
+					400,
+					[]
+				);
 			}
 		}
 	}
