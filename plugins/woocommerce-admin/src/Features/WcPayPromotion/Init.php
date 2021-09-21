@@ -105,7 +105,7 @@ class Init {
 			return false;
 		}
 
-		$anon_id        = isset( $_COOKIE['tk_ai'] ) ? sanitize_text_field( wp_unslash( $_COOKIE['tk_ai'] ) ) : null;
+		$anon_id        = isset( $_COOKIE['tk_ai'] ) ? sanitize_text_field( wp_unslash( $_COOKIE['tk_ai'] ) ) : '';
 		$allow_tracking = 'yes' === get_option( 'woocommerce_allow_tracking' );
 		$abtest         = new \WooCommerce\Admin\Experimental_Abtest(
 			$anon_id,
