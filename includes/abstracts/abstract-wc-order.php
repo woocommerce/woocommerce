@@ -10,6 +10,7 @@
  * @package     WooCommerce\Classes
  */
 
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 
@@ -1402,7 +1403,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			}
 		}
 
-		$item = new WC_Order_Item_Product();
+		$item = wc_get_container()->get( LegacyProxy::class )->get_instance_of( WC_Order_Item_Product::class );
 		$item->set_props( $args );
 		$item->set_backorder_meta();
 		$item->set_order_id( $this->get_id() );
