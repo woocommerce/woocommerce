@@ -176,6 +176,39 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Tweak - Deleted unneeded double spaces in text strings. #30486
 * Tweak - Open Browse all extensions link in a new tab. #30264
 
+**WooCommerce Admin - 2.7.0**
+
+* Fix - Allow super admins all capabilities within WooCommerce Admin
+* Fix - Fix end date for last periods
+* Fix - Fix up onboarding profiler not working when opted out of tracking
+* Fix - Making Business Details sticky in onboarding wizard
+* Fix - Missing RTL for onboarding styles. #7531
+* Fix - No changelog necessary as it is in the component package. #7423
+* Fix - Skip scheduling action if Action Scheduler tables have not been set up #7521
+* Fix - Update country region typeahead for better autofill support. #7497
+* Fix - Use installable extensions for local state versus free extensions. #7585
+* Fix - Fix fatal error and unrelated results in analytics.
+* Fix - Harden the reports directory #7691
+* Fix - Update task-item logic to only display content when expanded is true. #7611
+* Add - Show Pinterest in installed marketing extensions (if installed) #7417
+* Add - Added MailchimpScheduler that runs daily to subscribe store_email in the profile data #7579
+* Add - Added shipping plugin recommendations to settings page (#7446).
+* Add - Adding endpoint to snooze onboarding task
+* Add - Adding undo snooze task endpoint
+* Add - Add task dismissal endpoints #7538
+* Update - Add HK and SG countries to WC Pay intl support. #7558
+* Update - Create task list REST API endpoint #7512
+* Update - Deleted OnboardingEmailMarketing note class #7595
+* Update - Removes the use of the depreciated woocommerce_shared_settings hook. #7480
+* Update - Updating eway logo in payment suggestions defaults
+* Dev - Add email address field to OBW #7552
+* Tweak - Add navigation items for the Marketplace menu. #7529
+* Tweak - Change all analytics strings and labels to sentence case. #6501
+* Tweak - Delete unneeded double spaces in text strings. #7502
+* Tweak - Remove the preloaded onboarding options
+* Tweak - Update analytics card header text styles #6506
+* Enhancement - Align Table fields with the fallback on isNumeric. #7431
+
 **WooCommerce Blocks - 5.7.1 & 5.8.0 & 5.9.0**
 
 * Add - Extensibility point for extensions to filter payment methods. #4668
