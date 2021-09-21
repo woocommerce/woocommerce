@@ -50,6 +50,10 @@ class Install {
 			'wc_admin_update_140_change_deactivate_plugin_note_type',
 			'wc_admin_update_140_db_version',
 		),
+		'1.4.1'  => array(
+			'wc_admin_update_141_delete_report_downloads',
+			'wc_admin_update_141_db_version',
+		),
 	);
 
 	/**

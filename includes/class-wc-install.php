@@ -153,6 +153,11 @@ class WC_Install {
 			'wc_update_440_insert_attribute_terms_for_variable_products',
 			'wc_update_440_db_version',
 		),
+		'4.4.3' => array(
+			'Automattic\\WooCommerce\\Admin\\ReportCSVExporter::maybe_create_directory',
+			'wc_admin_update_141_delete_report_downloads',
+			'wc_update_443_db_version',
+		),
 	);
 
 	/**
