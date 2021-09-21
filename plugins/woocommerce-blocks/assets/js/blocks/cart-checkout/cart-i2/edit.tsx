@@ -19,7 +19,7 @@ import {
 	CartProvider,
 } from '@woocommerce/base-context';
 import { createInterpolateElement, useRef } from '@wordpress/element';
-import { getAdminLink, getSetting } from '@woocommerce/settings';
+import { getAdminLink } from '@woocommerce/settings';
 import { previewCart } from '@woocommerce/resource-previews';
 import { SidebarLayout } from '@woocommerce/base-components/sidebar-layout';
 
@@ -30,12 +30,7 @@ import './editor.scss';
 import { Columns } from './columns';
 
 const BlockSettings = ( { attributes, setAttributes } ) => {
-	const {
-		isShippingCalculatorEnabled,
-		checkoutPageId,
-		hasDarkControls,
-		showRateAfterTaxName,
-	} = attributes;
+	const { checkoutPageId, hasDarkControls } = attributes;
 	const { currentPostId } = useEditorContext();
 	const { current: savedCheckoutPageId } = useRef( checkoutPageId );
 	return (
@@ -66,55 +61,6 @@ const BlockSettings = ( { attributes, setAttributes } ) => {
 					) }
 				</Notice>
 			) }
-			{ getSetting( 'shippingEnabled', true ) && (
-				<PanelBody
-					title={ __(
-						'Shipping rates',
-						'woo-gutenberg-products-block'
-					) }
-				>
-					<ToggleControl
-						label={ __(
-							'Shipping calculator',
-							'woo-gutenberg-products-block'
-						) }
-						help={ __(
-							'Allow customers to estimate shipping by entering their address.',
-							'woo-gutenberg-products-block'
-						) }
-						checked={ isShippingCalculatorEnabled }
-						onChange={ () =>
-							setAttributes( {
-								isShippingCalculatorEnabled: ! isShippingCalculatorEnabled,
-							} )
-						}
-					/>
-				</PanelBody>
-			) }
-			{ getSetting( 'taxesEnabled' ) &&
-				getSetting( 'displayItemizedTaxes', false ) &&
-				! getSetting( 'displayCartPricesIncludingTax', false ) && (
-					<PanelBody
-						title={ __( 'Taxes', 'woo-gutenberg-products-block' ) }
-					>
-						<ToggleControl
-							label={ __(
-								'Show rate after tax name',
-								'woo-gutenberg-products-block'
-							) }
-							help={ __(
-								'Show the percentage rate alongside each tax line in the summary.',
-								'woo-gutenberg-products-block'
-							) }
-							checked={ showRateAfterTaxName }
-							onChange={ () =>
-								setAttributes( {
-									showRateAfterTaxName: ! showRateAfterTaxName,
-								} )
-							}
-						/>
-					</PanelBody>
-				) }
 			{ ! (
 				currentPostId === CART_PAGE_ID && savedCheckoutPageId === 0
 			) && (
@@ -185,7 +131,11 @@ const CartEditor = ( { className, attributes, setAttributes } ) => {
 			{},
 			[ [ 'woocommerce/cart-line-items-block', {}, [] ] ],
 		],
-		[ 'woocommerce/cart-totals-block', {}, [] ],
+		[
+			'woocommerce/cart-totals-block',
+			{},
+			[ [ 'woocommerce/cart-order-summary-block', {}, [] ] ],
+		],
 	];
 	return (
 		<div
