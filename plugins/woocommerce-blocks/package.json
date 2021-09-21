@@ -15,7 +15,6 @@
 		"*.scss",
 		"./assets/js/atomic/blocks/**",
 		"./assets/js/filters/**",
-		"./assets/js/settings/blocks/**",
 		"./assets/js/middleware/**",
 		"./assets/js/blocks/cart-checkout/checkout/inner-blocks/**/index.tsx",
 		"./assets/js/blocks/cart-checkout/checkout/inner-blocks/register-components.ts",
