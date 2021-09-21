@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Icon, chevronRight } from '@woocommerce/icons';
+import { Icon, external } from '@wordpress/icons';
 import { VisuallyHidden } from '@wordpress/components';
 
 /**
@@ -46,7 +46,7 @@ const ExternalLinkCard = ( {
 				}
 			</VisuallyHidden>
 			<Icon
-				srcElement={ chevronRight }
+				icon={ external }
 				className="wc-block-editor-components-external-link-card__icon"
 			/>
 		</a>
