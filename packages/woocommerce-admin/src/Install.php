@@ -48,6 +48,10 @@ class Install {
 			'wc_admin_update_130_remove_dismiss_action_from_tracking_opt_in_note',
 			'wc_admin_update_130_db_version',
 		),
+		'1.3.3'  => array(
+			'wc_admin_update_133_delete_report_downloads',
+			'wc_admin_update_133_db_version',
+		),
 	);
 
 	/**
