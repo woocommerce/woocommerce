@@ -33,8 +33,11 @@ const MiniCartBlock = ( {
 	);
 
 	useEffect( () => {
-		const openMiniCartAndRefreshData = () => {
-			dispatch( storeKey ).invalidateResolutionForStore();
+		const openMiniCartAndRefreshData = ( e ) => {
+			const eventDetail = e.detail;
+			if ( ! eventDetail || ! eventDetail.preserveCartData ) {
+				dispatch( storeKey ).invalidateResolutionForStore();
+			}
 			setSkipSlideIn( false );
 			setIsOpen( true );
 		};
