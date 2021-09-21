@@ -43,8 +43,8 @@ type TaskItemProps = {
 	onCollapse?: () => void;
 	onDelete?: () => void;
 	onDismiss?: () => void;
+	onSnooze?: () => void;
 	onExpand?: () => void;
-	remindMeLater?: () => void;
 	additionalInfo?: string;
 	time?: string;
 	content: string;
@@ -109,8 +109,8 @@ export const TaskItem: React.FC< TaskItemProps > = ( {
 	onDelete,
 	onCollapse,
 	onDismiss,
+	onSnooze,
 	onExpand,
-	remindMeLater,
 	onClick,
 	additionalInfo,
 	time,
@@ -139,7 +139,7 @@ export const TaskItem: React.FC< TaskItemProps > = ( {
 	}
 
 	const showEllipsisMenu =
-		( ( onDismiss || remindMeLater ) && ! completed ) ||
+		( ( onDismiss || onSnooze ) && ! completed ) ||
 		( onDelete && completed );
 
 	const toggleActionVisibility = () => {
@@ -256,11 +256,11 @@ export const TaskItem: React.FC< TaskItemProps > = ( {
 									{ __( 'Dismiss', 'woocommerce-admin' ) }
 								</Button>
 							) }
-							{ remindMeLater && ! completed && (
+							{ onSnooze && ! completed && (
 								<Button
 									onClick={ ( e: React.MouseEvent ) => {
 										e.stopPropagation();
-										remindMeLater();
+										onSnooze();
 									} }
 								>
 									{ __(

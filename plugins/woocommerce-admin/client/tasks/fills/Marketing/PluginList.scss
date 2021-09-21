@@ -1,0 +1,10 @@
+.woocommerce-plugin-list__title {
+	padding: $gap-small 30px;
+	background: $gray-200;
+	position: relative;
+
+	h3 {
+		font-weight: 500;
+		color: $black;
+	}
+}

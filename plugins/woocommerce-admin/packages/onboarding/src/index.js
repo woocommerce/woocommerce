@@ -10,3 +10,5 @@ export { default as GooglePay } from './images/cards/googlepay';
 export { default as WCPayLogo } from './images/wcpay-logo';
 export { WooPaymentGatewaySetup } from './components/WooPaymentGatewaySetup';
 export { WooPaymentGatewayConfigure } from './components/WooPaymentGatewayConfigure';
+export { WooOnboardingTask } from './components/WooOnboardingTask';
+export { WooOnboardingTaskListItem } from './components/WooOnboardingTaskListItem';

@@ -1,5 +1,7 @@
 # Unreleased
 
+-   Renaming remindMeLater() to onSnooze() for consistency. #7616
+
 # 2.0.3
 
 -   Adjust task-item css class to prevent css conflicts. #7593

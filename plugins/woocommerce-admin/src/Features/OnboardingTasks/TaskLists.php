@@ -102,7 +102,9 @@ class TaskLists {
 		$allowed_product_types = Onboarding::get_allowed_product_types();
 		$purchaseable_products = array();
 		$remaining_products    = array();
+
 		foreach ( $product_types as $product_type ) {
+
 			if ( ! isset( $allowed_product_types[ $product_type ]['slug'] ) ) {
 				continue;
 			}
@@ -113,6 +115,7 @@ class TaskLists {
 				$remaining_products[] = $allowed_product_types[ $product_type ]['label'];
 			}
 		}
+
 		$business_extensions = isset( $profiler_data['business_extensions'] ) ? $profiler_data['business_extensions'] : array();
 		$product_query       = new \WC_Product_Query(
 			array(
