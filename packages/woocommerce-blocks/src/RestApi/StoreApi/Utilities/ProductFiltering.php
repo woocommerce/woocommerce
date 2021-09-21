@@ -61,7 +61,7 @@ class ProductQueryFilters {
 	 * @param array            $attributes Attributes to count, either names or ids.
 	 * @return array termId=>count pairs.
 	 */
-	public function get_attribute_counts( $request, $attributes = array() ) {
+	public function get_attribute_counts( $request, $attributes = [] ) {
 		global $wpdb;
 
 		// Remove paging and sorting params from the request.
@@ -90,14 +90,13 @@ class ProductQueryFilters {
 			$attributes = array_map( 'wc_attribute_taxonomy_name_by_id', wp_parse_id_list( $attributes ) );
 		}
 
-		$attributes_to_count = array_map(
+		$attributes_to_count     = array_map(
 			function( $attribute ) {
 				$attribute = wc_sanitize_taxonomy_name( $attribute );
 				return esc_sql( $attribute );
 			},
 			$attributes
 		);
-
 		$attributes_to_count_sql = 'AND term_taxonomy.taxonomy IN ("' . implode( '","', $attributes_to_count ) . '")';
 		$attribute_count_sql     = "
 			SELECT COUNT( DISTINCT posts.ID ) as term_count, terms.term_id as term_count_id

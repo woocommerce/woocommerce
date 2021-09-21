@@ -2110,3 +2110,10 @@ function wc_reset_action_scheduler_migration_status() {
 function wc_update_400_db_version() {
 	WC_Install::update_db_version( '4.0.0' );
 }
+
+/**
+ * Update DB version to 4.0.3.
+ */
+function wc_update_403_db_version() {
+	WC_Install::update_db_version( '4.0.3' );
+}

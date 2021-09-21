@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the WooCommerce Admin package.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce Admin 1.0.3\n"
+"Project-Id-Version: WooCommerce Admin 1.0.4\n
 "Report-Msgid-Bugs-To: "
 "https://wordpress.org/support/plugin/woocommerce-admin\n"
 "POT-Creation-Date: 2020-03-19 17:16:52+00:00\n"

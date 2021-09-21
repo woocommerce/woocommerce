@@ -40,6 +40,10 @@ class Install {
 			'wc_admin_update_0251_remove_unsnooze_action',
 			'wc_admin_update_0251_db_version',
 		),
+		'1.0.4'  => array(
+			'wc_admin_update_104_delete_report_downloads',
+			'wc_admin_update_104_db_version',
+		),
 	);
 
 	/**
