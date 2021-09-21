@@ -12,6 +12,7 @@ import type {
 } from '@woocommerce/types';
 import { ReturnOrGeneratorYieldUnion } from '@automattic/data-stores';
 import { camelCase, mapKeys } from 'lodash';
+import type { AddToCartEventDetail } from '@woocommerce/type-defs/events';
 
 /**
  * Internal dependencies
@@ -169,6 +170,25 @@ export const updateCartFragments = () =>
 	} as const );
 
 /**
+ * Triggers an adding to cart event so other blocks can update accordingly.
+ */
+export const triggerAddingToCartEvent = () =>
+	( {
+		type: types.TRIGGER_ADDING_TO_CART_EVENT,
+	} as const );
+
+/**
+ * Triggers an added to cart event so other blocks can update accordingly.
+ */
+export const triggerAddedToCartEvent = ( {
+	preserveCartData,
+}: AddToCartEventDetail ) =>
+	( {
+		type: types.TRIGGER_ADDED_TO_CART_EVENT,
+		preserveCartData,
+	} as const );
+
+/**
  * POSTs to the /cart/extensions endpoint with the data supplied by the extension.
  *
  * @param {Object} args The data to be posted to the endpoint
@@ -295,6 +315,7 @@ export function* addItemToCart(
 	quantity = 1
 ): Generator< unknown, void, { response: CartResponse } > {
 	try {
+		yield triggerAddingToCartEvent();
 		const { response } = yield apiFetchWithHeaders( {
 			path: `/wc/store/cart/add-item`,
 			method: 'POST',
@@ -306,6 +327,7 @@ export function* addItemToCart(
 		} );
 
 		yield receiveCart( response );
+		yield triggerAddedToCartEvent( { preserveCartData: true } );
 		yield updateCartFragments();
 	} catch ( error ) {
 		yield receiveError( error );

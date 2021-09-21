@@ -1,36 +1,45 @@
-const Event = window.Event || null;
+/**
+ * External dependencies
+ */
+import type { AddToCartEventDetail } from '@woocommerce/type-defs/events';
+
+const CustomEvent = window.CustomEvent || null;
 
 interface DispatchedEventProperties {
 	// Whether the event bubbles.
 	bubbles?: boolean;
 	// Whether the event is cancelable.
 	cancelable?: boolean;
+	// See https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent/detail
+	detail?: unknown;
 	// Element that dispatches the event. By default, the body.
 	element?: HTMLElement;
 }
 
 /**
- * Wrapper function to dispatch an event so it's compatible with IE11.
+ * Wrapper function to dispatch an event.
  */
 export const dispatchEvent = (
 	name: string,
-	{ bubbles = false, cancelable = false, element }: DispatchedEventProperties
+	{
+		bubbles = false,
+		cancelable = false,
+		element,
+		detail = {},
+	}: DispatchedEventProperties
 ): void => {
+	if ( ! CustomEvent ) {
+		return;
+	}
 	if ( ! element ) {
 		element = document.body;
 	}
-	// In IE, Event is an object and can't be instantiated with `new Event()`.
-	if ( typeof Event === 'function' ) {
-		const event = new Event( name, {
-			bubbles,
-			cancelable,
-		} );
-		element.dispatchEvent( event );
-	} else {
-		const event = document.createEvent( 'Event' );
-		event.initEvent( name, bubbles, cancelable );
-		element.dispatchEvent( event );
-	}
+	const event = new CustomEvent( name, {
+		bubbles,
+		cancelable,
+		detail,
+	} );
+	element.dispatchEvent( event );
 };
 
 let fragmentRequestTimeoutId: ReturnType< typeof setTimeout >;
@@ -48,6 +57,23 @@ export const triggerFragmentRefresh = (): void => {
 			cancelable: true,
 		} );
 	}, 50 );
+};
+
+export const triggerAddingToCartEvent = (): void => {
+	dispatchEvent( 'wc-blocks_adding_to_cart', {
+		bubbles: true,
+		cancelable: true,
+	} );
+};
+
+export const triggerAddedToCartEvent = ( {
+	preserveCartData = false,
+}: AddToCartEventDetail ): void => {
+	dispatchEvent( 'wc-blocks_added_to_cart', {
+		bubbles: true,
+		cancelable: true,
+		detail: { preserveCartData },
+	} );
 };
 
 /**
