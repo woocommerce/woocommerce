@@ -148,6 +148,11 @@ class WC_Install {
 			'wc_update_400_reset_action_scheduler_migration_status',
 			'wc_update_400_db_version',
 		),
+		'4.2.4' => array(
+			'Automattic\\WooCommerce\\Admin\\ReportCSVExporter::maybe_create_directory',
+			'wc_admin_update_125_delete_report_downloads',
+			'wc_update_424_db_version',
+		),
 	);
 
 	/**

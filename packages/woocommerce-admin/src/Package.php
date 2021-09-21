@@ -26,7 +26,7 @@ class Package {
 	 *
 	 * @var string
 	 */
-	const VERSION = '1.2.4';
+	const VERSION = '1.2.5';
 
 	/**
 	 * Package active.

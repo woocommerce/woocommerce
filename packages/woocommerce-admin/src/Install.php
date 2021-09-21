@@ -44,6 +44,10 @@ class Install {
 			'wc_admin_update_110_remove_facebook_note',
 			'wc_admin_update_110_db_version',
 		),
+		'1.2.5'  => array(
+			'wc_admin_update_125_delete_report_downloads',
+			'wc_admin_update_125_db_version',
+		),
 	);
 
 	/**
