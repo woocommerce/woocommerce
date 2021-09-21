@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
-import { useCallback, useMemo } from '@wordpress/element';
+import { useCallback, useMemo, useEffect, useRef } from '@wordpress/element';
 import classnames from 'classnames';
 
 /**
@@ -13,6 +13,18 @@ import { ValidatedTextInput } from '../text-input';
 import Combobox from '../combobox';
 import './style.scss';
 import type { StateInputWithStatesProps } from './StateInputProps';
+
+const optionMatcher = (
+	value: string,
+	options: { label: string; value: string }[]
+): string => {
+	const foundOption = options.find(
+		( option ) =>
+			option.label.toLocaleUpperCase() === value.toLocaleUpperCase() ||
+			option.value.toLocaleUpperCase() === value.toLocaleUpperCase()
+	);
+	return foundOption ? foundOption.value : '';
+};
 
 const StateInput = ( {
 	className,
@@ -39,26 +51,40 @@ const StateInput = ( {
 
 	/**
 	 * Handles state selection onChange events. Finds a matching state by key or value.
-	 *
-	 * @param {Object} event event data.
 	 */
 	const onChangeState = useCallback(
-		( stateValue ) => {
-			if ( options.length > 0 ) {
-				const foundOption = options.find(
-					( option ) =>
-						option.label.toLocaleUpperCase() ===
-							stateValue.toLocaleUpperCase() ||
-						option.value.toLocaleUpperCase() ===
-							stateValue.toLocaleUpperCase()
-				);
-				onChange( foundOption ? foundOption.value : '' );
-				return;
-			}
-			onChange( stateValue );
+		( stateValue: string ) => {
+			onChange(
+				options.length > 0
+					? optionMatcher( stateValue, options )
+					: stateValue
+			);
 		},
 		[ onChange, options ]
 	);
+
+	/**
+	 * Track value changes.
+	 */
+	const valueRef = useRef< string >( value );
+
+	useEffect( () => {
+		if ( valueRef.current !== value ) {
+			valueRef.current = value;
+		}
+	}, [ value ] );
+
+	/**
+	 * If given a list of options, ensure the value matches those options or trigger change.
+	 */
+	useEffect( () => {
+		if ( options.length > 0 && valueRef.current ) {
+			const match = optionMatcher( valueRef.current, options );
+			if ( match !== valueRef.current ) {
+				onChangeState( match );
+			}
+		}
+	}, [ options, onChangeState ] );
 
 	if ( options.length > 0 ) {
 		return (
@@ -102,6 +128,7 @@ const StateInput = ( {
 			</>
 		);
 	}
+
 	return (
 		<ValidatedTextInput
 			className={ className }
