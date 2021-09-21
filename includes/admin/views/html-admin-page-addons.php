@@ -67,8 +67,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</div>
 		<?php endif; ?>
 		<?php if ( '_featured' !== $current_section && $addons ) : ?>
-			<?php if ( 'shipping_methods' === $current_section ) : ?>
-				<div class="addons-shipping-methods">
+			<?php if ( 'shipping-methods' === $current_section ) : ?>
+				<div class="addons-gateways">
 					<?php WC_Admin_Addons::output_wcs_banner_block(); ?>
 				</div>
 			<?php endif; ?>
@@ -80,7 +80,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<ul class="products">
 			<?php foreach ( $addons as $addon ) : ?>
 				<?php
-				if ( 'shipping_methods' === $current_section ) {
+				if ( 'shipping-methods' === $current_section ) {
 					// Do not show USPS or Canada Post extensions for US and CA stores, respectively.
 					$country = WC()->countries->get_base_country();
 					if ( 'US' === $country
