@@ -932,6 +932,7 @@ class WC_AJAX {
 
 			// Add items to order.
 			$order_notes = array();
+			$added_items = array();
 
 			foreach ( $items_to_add as $item ) {
 				if ( ! isset( $item['id'], $item['qty'] ) || empty( $item['id'] ) ) {
