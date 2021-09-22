@@ -16,3 +16,6 @@ wp plugin install https://github.com/WP-API/Basic-Auth/archive/master.zip --acti
 
 # install the WP Mail Logging plugin to test emails
 wp plugin install wp-mail-logging --activate
+
+# initialize pretty permalinks
+wp rewrite structure /%postname%/
