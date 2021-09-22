@@ -412,17 +412,21 @@
 		var marketplaceMenuIsOpen = false;
 
 		// Add event listener to toggle Marketplace menu on touch devices
-		if ( marketplaceSectionDropdown.length && isTouchDevice() ) {
-			marketplaceSectionName.on( 'click', function() {
-				marketplaceMenuIsOpen = ! marketplaceMenuIsOpen;
-				if ( marketplaceMenuIsOpen ) {
-					marketplaceSectionDropdown.addClass( 'is-open' );
-					$( document ).on( 'click', maybeToggleMarketplaceMenu );
-				} else {
-					marketplaceSectionDropdown.removeClass( 'is-open' );
-					$( document ).off( 'click', maybeToggleMarketplaceMenu );
-				}
-			} );
+		if ( marketplaceSectionDropdown.length ) {
+			if ( isTouchDevice() ) {
+				marketplaceSectionName.on( 'click', function() {
+					marketplaceMenuIsOpen = ! marketplaceMenuIsOpen;
+					if ( marketplaceMenuIsOpen ) {
+						marketplaceSectionDropdown.addClass( 'is-open' );
+						$( document ).on( 'click', maybeToggleMarketplaceMenu );
+					} else {
+						marketplaceSectionDropdown.removeClass( 'is-open' );
+						$( document ).off( 'click', maybeToggleMarketplaceMenu );
+					}
+				} );
+			} else {
+				document.body.classList.add( 'no-touch' );
+			}
 		}
 
 		// Close menu if the user clicks outside it

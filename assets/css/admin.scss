@@ -182,7 +182,6 @@
 			}
 		}
 
-		.current-section-dropdown:hover,
 		.current-section-dropdown.is-open {
 
 			ul {
@@ -771,6 +770,24 @@
 
 		p {
 			max-width: 750px;
+		}
+	}
+}
+
+.no-touch,
+.no-js {
+
+	.wc-addons-wrap {
+
+		.current-section-dropdown:hover {
+
+			ul {
+				display: flex;
+			}
+
+			.current-section-name::after {
+				transform: rotate(0.5turn);
+			}
 		}
 	}
 }
