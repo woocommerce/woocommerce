@@ -12,6 +12,8 @@ return array(
 	'get_bloginfo',
 	'get_woocommerce_currencies',
 	'get_woocommerce_currency_symbol',
+	'wc_get_price_excluding_tax',
 	'wc_get_shipping_method_count',
+	'wc_prices_include_tax',
 	'wc_site_is_https',
 );
