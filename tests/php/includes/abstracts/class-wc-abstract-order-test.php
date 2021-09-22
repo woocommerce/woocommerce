@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests\Abstracts
  */
 
+use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
+
 /**
  * Class WC_Abstract_Order.
  */
@@ -100,12 +102,12 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_default_country', 'IN:AP' );
 
 		$tax_rate = array(
-			'tax_rate_country'  => 'IN',
-			'tax_rate_state'    => '',
-			'tax_rate'          => '25.0000',
-			'tax_rate_name'     => 'tax',
-			'tax_rate_order'    => '1',
-			'tax_rate_class'    => '',
+			'tax_rate_country' => 'IN',
+			'tax_rate_state'   => '',
+			'tax_rate'         => '25.0000',
+			'tax_rate_name'    => 'tax',
+			'tax_rate_order'   => '1',
+			'tax_rate_class'   => '',
 		);
 		WC_Tax::_insert_tax_rate( $tax_rate );
 
@@ -137,4 +139,49 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$this->assertEquals( 2, $order->get_discount_tax() );
 	}
 
+	/**
+	 * @testdox 'add_product' passes the order supplied in '$args' to 'wc_get_price_excluding_tax', and uses the obtained price as total and subtotal for the line item.
+	 */
+	public function test_add_product_passes_order_to_wc_get_price_excluding_tax() {
+		$product_passed_to_get_price = false;
+		$args_passed_to_get_price    = false;
+
+		FunctionsMockerHack::add_function_mocks(
+			array(
+				'wc_get_price_excluding_tax' => function( $product, $args = array() ) use ( &$product_passed_to_get_price, &$args_passed_to_get_price ) {
+						$product_passed_to_get_price = $product;
+						$args_passed_to_get_price    = $args;
+
+						return 1234;
+				},
+			)
+		);
+
+		//phpcs:disable Squiz.Commenting
+		$order_item = new class() extends WC_Order_Item_Product {
+			public $passed_props;
+
+			public function set_props( $args, $context = 'set' ) {
+				$this->passed_props = $args;
+			}
+		};
+		//phpcs:enable Squiz.Commenting
+
+		$this->register_legacy_proxy_class_mocks(
+			array( 'WC_Order_Item_Product' => $order_item )
+		);
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->save();
+
+		$order = wc_create_order();
+
+		$order->add_product( $product, 1, array( 'order' => $order ) );
+
+		$this->assertSame( $product, $product_passed_to_get_price );
+		$this->assertSame( $order, $args_passed_to_get_price['order'] );
+		$this->assertEquals( 1234, $order_item->passed_props['total'] );
+		$this->assertEquals( 1234, $order_item->passed_props['subtotal'] );
+	}
 }
