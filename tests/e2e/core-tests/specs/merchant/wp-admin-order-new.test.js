@@ -4,7 +4,7 @@
 const {
 	merchant,
 	uiUnblocked,
-	OrderEdit,
+	AdminEdit,
 } = require('@woocommerce/e2e-utils');
 const config = require('config');
 const {
@@ -200,11 +200,19 @@ const runCreateOrderTest = () => {
 			await expect(page).toFill('input[name=order_date_minute]', '55');
 
 			// Create order, verify that it was created. Trash order, verify that it was trashed.
-			const orderEdit = new OrderEdit();
+			const orderEdit = new AdminEdit();
 			await orderEdit.verifyPublish(
 				'.order_actions li .save_order',
 				'#message',
 				'Order updated.',
+			);
+
+			await expect( page ).toMatchElement( '#select2-order_status-container', { text: 'Processing' } );
+			await expect( page ).toMatchElement(
+				'#woocommerce-order-notes .note_content',
+				{
+					text: 'Order status changed from Pending payment to Processing.',
+				}
 			);
 		});
 
