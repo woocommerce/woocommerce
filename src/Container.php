@@ -55,6 +55,7 @@ final class Container implements \Psr\Container\ContainerInterface {
 	 */
 	public function __construct() {
 		$this->container = new ExtendedContainer();
+		$this->container = new ExtendedContainer();
 
 		// Add ourselves as the shared instance of ContainerInterface,
 		// register everything else using service providers.
