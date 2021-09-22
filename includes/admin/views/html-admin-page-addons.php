@@ -83,7 +83,7 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 					</div>
 				<?php endif; ?>
 				<?php if ( 'payment-gateways' === $current_section ) : ?>
-					<div class="addons-gateways">
+					<div class="addons-payment">
 						<?php WC_Admin_Addons::output_wcpay_banner_block(); ?>
 					</div>
 				<?php endif; ?>
