@@ -955,7 +955,7 @@ class WC_AJAX {
 					/* translators: %s: error message */
 					throw new Exception( sprintf( __( 'Error: %s', 'woocommerce' ), $validation_error->get_error_message() ) );
 				}
-				$item_id                 = $order->add_product( $product, $qty );
+				$item_id                 = $order->add_product( $product, $qty, array( 'order' => $order ) );
 				$item                    = apply_filters( 'woocommerce_ajax_order_item', $order->get_item( $item_id ), $item_id, $order, $product );
 				$added_items[ $item_id ] = $item;
 				$order_notes[ $item_id ] = $product->get_formatted_name();
