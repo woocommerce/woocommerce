@@ -12,6 +12,7 @@ import { useForcedLayout } from '../../use-forced-layout';
 import { getAllowedBlocks } from '../../editor-utils';
 import { Columns } from './../../columns';
 import './editor.scss';
+import { useCartBlockControlsContext } from '../../context';
 
 export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 	const blockProps = useBlockProps();
@@ -21,8 +22,13 @@ export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 		clientId,
 		template: allowedBlocks,
 	} );
+
+	const {
+		viewSwitcher: { currentView, component: ViewSwitcherComponent },
+	} = useCartBlockControlsContext();
+
 	return (
-		<div { ...blockProps }>
+		<div { ...blockProps } hidden={ currentView !== 'filledCart' }>
 			<Columns>
 				<SidebarLayout className={ 'wc-block-cart' }>
 					<InnerBlocks
@@ -31,6 +37,7 @@ export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 					/>
 				</SidebarLayout>
 			</Columns>
+			<ViewSwitcherComponent />
 		</div>
 	);
 };

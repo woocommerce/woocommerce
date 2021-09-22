@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Icon, cart } from '@woocommerce/icons';
+import { Icon, filledCart } from '@woocommerce/icons';
 import { registerFeaturePluginBlockType } from '@woocommerce/block-settings';
 
 /**
@@ -12,7 +12,7 @@ import metadata from './block.json';
 
 registerFeaturePluginBlockType( metadata, {
 	icon: {
-		src: <Icon srcElement={ cart } />,
+		src: <Icon srcElement={ filledCart } />,
 		foreground: '#874FB9',
 	},
 	edit: Edit,
