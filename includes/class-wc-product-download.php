@@ -172,9 +172,6 @@ class WC_Product_Download implements ArrayAccess {
 			$value = $matches[1];
 		}
 
-		$parsed_file_path = WC_Download_Handler::parse_file_path( $value );
-		$value            = $parsed_file_path['file_path'];
-
 		switch ( $this->get_type_of_file_path( $value ) ) {
 			case 'absolute':
 				$this->data['file'] = esc_url_raw( $value );
