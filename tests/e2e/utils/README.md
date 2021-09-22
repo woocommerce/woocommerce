@@ -155,7 +155,7 @@ This package provides support for enabling retries in tests:
 
 ### Classes
 
-The package includes the following page specific utility classes
+The package includes the following page specific utility class:
 
 #### AdminEdit
 
@@ -165,10 +165,6 @@ The `AdminEdit` class is the base classic custom post type post editor class. It
 |----------|------------|-------------|
 | `verifyPublish` | `button, publishNotice, publishVerification` | Publish the post object currently being edited and verify publish status |
 | `getId` | | Get the ID of the post object being edited |
-
-#### OrderEdit
-
-The `OrderEdit` is specific to the order edit screen and extends `AdminEdit`. It has the same functions. 
 
 ### General Utilities
 

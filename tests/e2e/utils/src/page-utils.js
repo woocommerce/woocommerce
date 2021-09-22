@@ -6,7 +6,7 @@ import { pressKeyWithModifier } from '@wordpress/e2e-test-utils';
 /**
  * Internal dependencies
  */
-import { AdminEdit, OrderEdit } from './pages/admin-edit';
+import { AdminEdit } from './pages/admin-edit';
 
 /**
  * Perform a "select all" and then fill a input.
@@ -122,13 +122,8 @@ export const waitForSelectorWithoutThrow = async ( selector, timeoutInSeconds = 
  * @param {string} trashVerification
  */
 export const verifyPublishAndTrash = async ( button, publishNotice, publishVerification, trashVerification ) => {
-	if ( button === '.order_actions li .save_order' ) {
-		const orderEdit = new OrderEdit();
-		await orderEdit.verifyPublish( button, publishNotice, publishVerification );
-	} else {
-		const adminEdit = new AdminEdit();
-		await adminEdit.verifyPublish( button, publishNotice, publishVerification );
-	}
+	const adminEdit = new AdminEdit();
+	await adminEdit.verifyPublish( button, publishNotice, publishVerification );
 
 	// Trash
 	await page.focus( 'a.submitdelete' );

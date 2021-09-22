@@ -31,25 +31,3 @@ export class AdminEdit {
 		return objectID;
 	}
 }
-
-export class OrderEdit extends AdminEdit {
-	/**
-	 * Publish the object being edited and verify published status
-	 *
-	 * @param button Publish button selector
-	 * @param publishNotice Publish notice selector
-	 * @param publishVerification Expected notice on successful publish
-	 * @returns {Promise<void>}
-	 */
-	async verifyPublish( button, publishNotice, publishVerification ) {
-		await super.verifyPublish( button, publishNotice, publishVerification );
-
-		await expect( page ).toMatchElement( '#select2-order_status-container', { text: 'Processing' } );
-		await expect( page ).toMatchElement(
-			'#woocommerce-order-notes .note_content',
-			{
-				text: 'Order status changed from Pending payment to Processing.',
-			}
-		);
-	}
-}
