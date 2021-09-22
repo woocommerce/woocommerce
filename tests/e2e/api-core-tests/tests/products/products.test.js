@@ -67,6 +67,24 @@ const { productsApi } = require('../../endpoints/products');
 			expect( page6.body ).toHaveLength( 0 );
 		} );
 
+		it( 'search', async () => {
+			// Match in the short description.
+			const result1 = await productsApi.listAll.products( {
+				search: 'external'
+			} );
+			expect( result1.statusCode ).toEqual( 200 );
+			expect( result1.body ).toHaveLength( 1 );
+			expect( result1.body[0].name ).toBe( 'WordPress Pennant' );
+	
+			// Match in the product name.
+			const result2 = await productsApi.listAll.products( {
+				search: 'pocket'
+			} );
+			expect( result2.statusCode ).toEqual( 200 );
+			expect( result2.body ).toHaveLength( 1 );
+			expect( result2.body[0].name ).toBe( 'Hoodie with Pocket' );
+		} );
+
 	} );
 
 } );
