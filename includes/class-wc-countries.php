@@ -1539,7 +1539,7 @@ class WC_Countries {
 				'class'        => array( 'form-row-wide' ),
 				'validate'     => array( 'email' ),
 				'autocomplete' => 'no' === get_option( 'woocommerce_registration_generate_username' ) ? 'email' : 'email username',
-				'priority'     => 10,
+				'priority'     => 5,
 			);
 		}
 
