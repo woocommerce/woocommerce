@@ -53,6 +53,9 @@ See our [contributing guidelines here](https://github.com/woocommerce/woocommerc
 
 == Changelog ==
 
+= 2.0.3 2021-x-x =
+
+
 = 2.0.2 =
 
 * Fix notice for undefined `item`
