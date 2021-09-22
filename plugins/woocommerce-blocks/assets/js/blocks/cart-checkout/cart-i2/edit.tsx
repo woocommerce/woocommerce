@@ -22,13 +22,16 @@ import {
 import { createInterpolateElement } from '@wordpress/element';
 import { getAdminLink, getSetting } from '@woocommerce/settings';
 import { previewCart } from '@woocommerce/resource-previews';
+import { Icon, filledCart, removeCart } from '@woocommerce/icons';
 
 /**
  * Internal dependencies
  */
 import './editor.scss';
 import { addClassToBody } from './hacks';
+import { useViewSwitcher } from './use-view-switcher';
 import type { Attributes } from './types';
+import { CartBlockControlsContext } from './context';
 
 // This is adds a class to body to signal if the selected block is locked
 addClassToBody();
@@ -142,6 +145,19 @@ export const Edit = ( {
 	attributes: Attributes;
 	setAttributes: ( attributes: Record< string, unknown > ) => undefined;
 } ): JSX.Element => {
+	const { currentView, component: ViewSwitcherComponent } = useViewSwitcher( [
+		{
+			view: 'emptyCart',
+			label: __( 'Empty Cart', 'woo-gutenberg-products-block' ),
+			icon: <Icon srcElement={ removeCart } />,
+		},
+		{
+			view: 'filledCart',
+			label: __( 'Filled Cart', 'woo-gutenberg-products-block' ),
+			icon: <Icon srcElement={ filledCart } />,
+			default: true,
+		},
+	] );
 	const cartClassName = classnames( {
 		'has-dark-controls': attributes.hasDarkControls,
 	} );
@@ -194,15 +210,25 @@ export const Edit = ( {
 						attributes={ attributes }
 						setAttributes={ setAttributes }
 					/>
-					<CartProvider>
-						<div className={ cartClassName }>
-							<InnerBlocks
-								allowedBlocks={ ALLOWED_BLOCKS }
-								template={ defaultInnerBlocksTemplate }
-								templateLock="insert"
-							/>
-						</div>
-					</CartProvider>
+					<ViewSwitcherComponent />
+					<CartBlockControlsContext.Provider
+						value={ {
+							viewSwitcher: {
+								component: ViewSwitcherComponent,
+								currentView,
+							},
+						} }
+					>
+						<CartProvider>
+							<div className={ cartClassName }>
+								<InnerBlocks
+									allowedBlocks={ ALLOWED_BLOCKS }
+									template={ defaultInnerBlocksTemplate }
+									templateLock="insert"
+								/>
+							</div>
+						</CartProvider>
+					</CartBlockControlsContext.Provider>
 				</EditorProvider>
 			</BlockErrorBoundary>
 			<CartCheckoutCompatibilityNotice blockName="cart" />
