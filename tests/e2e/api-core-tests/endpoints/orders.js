@@ -31,7 +31,7 @@ const ordersApi = {
 		method: 'GET',
 		path: 'orders',
 		responseCode: 200,
-		orders: async () => { getRequest( 'orders' ) },
+		orders: async () => getRequest( 'orders' ),
 	},
 	update: {
 		name: 'Update an order',
