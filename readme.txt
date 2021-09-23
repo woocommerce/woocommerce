@@ -160,6 +160,12 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
+= 5.7.1 2021-09-23 =
+
+**WooCommerce**
+
+* Fix - Redirect (Insecure) download method to also support absolute file paths when allowed.
+
 = 5.7.0 2021-09-21 =
 
 **WooCommerce**
