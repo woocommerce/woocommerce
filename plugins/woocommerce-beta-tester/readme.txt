@@ -53,8 +53,10 @@ See our [contributing guidelines here](https://github.com/woocommerce/woocommerc
 
 == Changelog ==
 
-= 2.0.3 - 2021-09-22 =
+= 2.0.4 - 2021-xx-xx =
 
+= 2.0.3 - 2021-09-22 =
+* Fix: Bump version to release version including admin.css.
 
 = 2.0.2 =
 
