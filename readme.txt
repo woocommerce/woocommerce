@@ -162,9 +162,9 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 = 5.7.1 2021-09-23 =
 
-**WooCommerce**
+**WooCommerce - 5.7.1**
 
-* Fix - Redirect (Insecure) download method to also support absolute file paths when allowed.
+* Dev - Revert Download filepaths changes.
 
 **WooCommerce Blocks - 5.7.2**
 
