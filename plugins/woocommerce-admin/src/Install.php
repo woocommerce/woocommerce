@@ -62,6 +62,10 @@ class Install {
 			'wc_admin_update_270_delete_report_downloads',
 			'wc_admin_update_270_db_version',
 		),
+		'2.8.0'  => array(
+			'wc_admin_update_280_order_status',
+			'wc_admin_update_280_db_version',
+		),
 	);
 
 	/**

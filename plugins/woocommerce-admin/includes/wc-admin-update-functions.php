@@ -265,3 +265,25 @@ function wc_admin_update_270_delete_report_downloads() {
 function wc_admin_update_270_db_version() {
 	Installer::update_db_version( '2.7.0' );
 }
+
+ /**
+  * Update order stats `status`.
+  */
+function wc_admin_update_280_order_status() {
+	global $wpdb;
+
+	$wpdb->query(
+		"UPDATE {$wpdb->prefix}wc_order_stats refunds
+		INNER JOIN {$wpdb->prefix}wc_order_stats orders
+			ON orders.order_id = refunds.parent_id
+		SET refunds.status = orders.status
+		WHERE refunds.parent_id != 0"
+	);
+}
+
+/**
+ * Update DB Version.
+ */
+function wc_admin_update_280_db_version() {
+	Installer::update_db_version( '2.8.0' );
+}
