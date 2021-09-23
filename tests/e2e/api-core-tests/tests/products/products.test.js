@@ -295,4 +295,35 @@ const { productsApi } = require('../../endpoints/products');
 		expect( result2.statusCode ).toEqual( 200 );
 		expect( result2.body ).toEqual( expect.not.arrayContaining( onSale ) );
 	} );
+
+	it( 'price', async () => {
+		const result1 = await productsApi.listAll.products( {
+			min_price: 21,
+			max_price: 28,
+		} );
+		expect( result1.statusCode ).toEqual( 200 );
+		expect( result1.body ).toHaveLength( 1 );
+		expect( result1.body[0].name ).toBe( 'Long Sleeve Tee' );
+		expect( result1.body[0].price ).toBe( '25' );
+
+		const result2 = await productsApi.listAll.products( {
+			max_price: 5,
+		} );
+		expect( result2.statusCode ).toEqual( 200 );
+		expect( result2.body ).toHaveLength( 1 );
+		expect( result2.body[0].name ).toBe( 'Single' );
+		expect( result2.body[0].price ).toBe( '2' );
+
+		const result3 = await productsApi.listAll.products( {
+			min_price: 5,
+			order: 'asc',
+			orderby: 'price',
+		} );
+		expect( result3.statusCode ).toEqual( 200 );
+		expect( result3.body ).toEqual(
+			expect.not.arrayContaining( [
+				expect.objectContaining( { name: 'Single' } )
+			] )
+		);
+	} );
 } );
