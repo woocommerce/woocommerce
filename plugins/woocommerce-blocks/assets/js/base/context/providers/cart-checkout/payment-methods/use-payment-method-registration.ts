@@ -15,6 +15,7 @@ import type {
 	PaymentMethodConfigInstance,
 	ExpressPaymentMethodConfigInstance,
 } from '@woocommerce/type-defs/payments';
+import { useDebouncedCallback } from 'use-debounce';
 
 /**
  * Internal dependencies
@@ -51,12 +52,10 @@ const usePaymentMethodRegistration = (
 	const { billingData, shippingAddress } = useCustomerDataContext();
 	const selectedShippingMethods = useShallowEqual( selectedRates );
 	const paymentMethodsOrder = useShallowEqual( paymentMethodsSortOrder );
-	const {
-		cartTotals,
-		cartNeedsShipping,
-		paymentRequirements,
-	} = useStoreCart();
+	const cart = useStoreCart();
+	const { cartTotals, cartNeedsShipping, paymentRequirements } = cart;
 	const canPayArgument = useRef( {
+		cart,
 		cartTotals,
 		cartNeedsShipping,
 		billingData,
@@ -68,6 +67,7 @@ const usePaymentMethodRegistration = (
 
 	useEffect( () => {
 		canPayArgument.current = {
+			cart,
 			cartTotals,
 			cartNeedsShipping,
 			billingData,
@@ -76,6 +76,7 @@ const usePaymentMethodRegistration = (
 			paymentRequirements,
 		};
 	}, [
+		cart,
 		cartTotals,
 		cartNeedsShipping,
 		billingData,
@@ -160,16 +161,21 @@ const usePaymentMethodRegistration = (
 		registeredPaymentMethods,
 	] );
 
+	const [ debouncedRefreshCanMakePayments ] = useDebouncedCallback(
+		refreshCanMakePayments,
+		500
+	);
+
 	// Determine which payment methods are available initially and whenever
-	// shipping methods or cart totals change.
+	// shipping methods, cart or the billing data change.
 	// Some payment methods (e.g. COD) can be disabled for specific shipping methods.
 	useEffect( () => {
-		refreshCanMakePayments();
+		debouncedRefreshCanMakePayments();
 	}, [
-		refreshCanMakePayments,
-		cartTotals,
+		debouncedRefreshCanMakePayments,
+		cart,
 		selectedShippingMethods,
-		paymentRequirements,
+		billingData,
 	] );
 
 	return isInitialized;

@@ -11,6 +11,7 @@ import type {
 	CartResponseBillingAddress,
 	CartResponseShippingRate,
 	CartResponse,
+	CartResponseCoupons,
 } from './cart-response';
 import type { ResponseError } from '../../data/types';
 export interface StoreCartItemQuantity {
@@ -31,7 +32,7 @@ export interface StoreCartCoupon {
 }
 
 export interface StoreCart {
-	cartCoupons: Array< CartResponseCouponItem >;
+	cartCoupons: CartResponseCoupons;
 	cartItems: Array< CartResponseItem >;
 	cartFees: Array< CartResponseFeeItem >;
 	cartItemsCount: number;
