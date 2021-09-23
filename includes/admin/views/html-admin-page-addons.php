@@ -77,20 +77,20 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 				</div>
 			<?php endif; ?>
 			<?php if ( '_featured' !== $current_section && $addons ) : ?>
-				<?php if ( 'shipping_methods' === $current_section ) : ?>
+				<?php if ( 'shipping-methods' === $current_section ) : ?>
 					<div class="addons-shipping-methods">
 						<?php WC_Admin_Addons::output_wcs_banner_block(); ?>
 					</div>
 				<?php endif; ?>
 				<?php if ( 'payment-gateways' === $current_section ) : ?>
-					<div class="addons-shipping-methods">
+					<div class="addons-payment">
 						<?php WC_Admin_Addons::output_wcpay_banner_block(); ?>
 					</div>
 				<?php endif; ?>
 				<ul class="products">
 					<?php foreach ( $addons as $addon ) : ?>
 						<?php
-						if ( 'shipping_methods' === $current_section ) {
+						if ( 'shipping-methods' === $current_section ) {
 							// Do not show USPS or Canada Post extensions for US and CA stores, respectively.
 							$country = WC()->countries->get_base_country();
 							if ( 'US' === $country
