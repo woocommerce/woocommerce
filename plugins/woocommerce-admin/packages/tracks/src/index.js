@@ -14,7 +14,6 @@ const tracksDebug = debug( 'wc-admin:tracks' );
  * @param {string} eventName The name of the event to record, don't include the wcadmin_ prefix
  * @param {Object} eventProperties event properties to include in the event
  */
-
 export function recordEvent( eventName, eventProperties ) {
 	tracksDebug( 'recordevent %s %o', 'wcadmin_' + eventName, eventProperties, {
 		_tqk: window._tkq,

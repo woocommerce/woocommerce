@@ -14,6 +14,7 @@ import { getSetting } from '@woocommerce/wc-admin-settings';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { useEffect } from '@wordpress/element';
+import { snakeCase } from 'lodash';
 
 /**
  * Internal dependencies
@@ -56,14 +57,17 @@ export const ActivityPanel = () => {
 	const panels = getAllPanels( panelsData );
 
 	useEffect( () => {
-		const visiblePanels = panels.reduce(
-			( acc, panel ) => {
-				acc[ panel.id ] = true;
-				return acc;
-			},
-			{ taskList: panelsData.isTaskListHidden !== 'yes' }
-		);
-		recordEvent( 'activity_panel_visible_panels', visiblePanels );
+		if ( panelsData.isTaskListHidden !== undefined ) {
+			const visiblePanels = panels.reduce(
+				( acc, panel ) => {
+					const panelId = snakeCase( panel.id );
+					acc[ panelId ] = true;
+					return acc;
+				},
+				{ task_list: panelsData.isTaskListHidden !== 'yes' }
+			);
+			recordEvent( 'activity_panel_visible_panels', visiblePanels );
+		}
 	}, [ panelsData.isTaskListHidden ] );
 
 	if ( panels.length === 0 ) {

@@ -233,7 +233,7 @@ const ReportTable = ( props ) => {
 		recordEvent( 'analytics_table_download', {
 			report: endpoint,
 			rows: totalResults,
-			downloadType,
+			download_type: downloadType,
 		} );
 	};
 
