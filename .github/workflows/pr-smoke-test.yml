@@ -49,7 +49,7 @@ jobs:
       - name: Remove label from pull request.
         if: | 
           always() && 
-          "${{ contains(github.event.label.name, 'run: smoke tests') }}"
+          "${{ contains(github.event.issue.labels.*.name, 'run: smoke tests') }}"
         uses: actions/github-script@v4
         with:
           script: |
