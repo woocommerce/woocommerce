@@ -99,6 +99,47 @@ const { productsApi } = require('../../endpoints/products');
 			expect( result2.body[0].name ).toBe( 'Hoodie with Pocket' );
 		} );
 
+		it( 'inclusion / exclusion', async () => {
+			const allProducts = await productsApi.listAll.products( {
+				per_page: 20,
+			} );
+			expect( allProducts.statusCode ).toEqual( 200 );
+			const allProductIds = allProducts.body.map( product => product.id );
+			expect( allProductIds ).toHaveLength( 18 );
+
+			const productsToFilter = [
+				allProductIds[2],
+				allProductIds[4],
+				allProductIds[7],
+				allProductIds[13],
+			];
+
+			const included = await productsApi.listAll.products( {
+				per_page: 20,
+				include: productsToFilter.join( ',' ),
+			} );
+			expect( included.statusCode ).toEqual( 200 );
+			expect( included.body ).toHaveLength( productsToFilter.length );
+			expect( included.body ).toEqual(
+				expect.arrayContaining(
+					productsToFilter.map( id => expect.objectContaining( { id } ) )
+				)
+			);
+
+			const excluded = await productsApi.listAll.products( {
+				per_page: 20,
+				exclude: productsToFilter.join( ',' ),
+			} );
+			expect( excluded.statusCode ).toEqual( 200 );
+			expect( excluded.body ).toHaveLength( 18 - productsToFilter.length );
+			expect( excluded.body ).toEqual(
+				expect.not.arrayContaining(
+					productsToFilter.map( id => expect.objectContaining( { id } ) )
+				)
+			);
+
+		} );
+
 	} );
 
 } );
