@@ -6,10 +6,11 @@ import type { CanMakePaymentCallback } from '@woocommerce/type-defs/payments';
 /**
  * Internal dependencies
  */
-import type {
+import {
 	NamespacedCanMakePaymentExtensionsCallbacks,
 	PaymentMethodName,
 	ExtensionNamespace,
+	extensionsConfig,
 } from './extensions-config';
 
 // Filter out payment methods by supported features and cart requirement.
@@ -17,7 +18,7 @@ export const canMakePaymentWithFeaturesCheck = (
 	canMakePayment: CanMakePaymentCallback,
 	features: string[]
 ): CanMakePaymentCallback => ( canPayArgument ) => {
-	const requirements = canPayArgument.paymentRequirements || [];
+	const requirements = canPayArgument?.paymentRequirements || [];
 	const featuresSupportRequirements = requirements.every( ( requirement ) =>
 		features.includes( requirement )
 	);
@@ -64,4 +65,23 @@ export const canMakePaymentWithExtensions = (
 	}
 
 	return canPay;
+};
+
+export const getCanMakePayment = (
+	canMakePayment: CanMakePaymentCallback,
+	features: string[],
+	paymentMethodName: string
+): CanMakePaymentCallback => {
+	const canPay = canMakePaymentWithFeaturesCheck( canMakePayment, features );
+	// Loop through all callbacks to check if there are any registered for this payment method.
+	return ( Object.values( extensionsConfig.canMakePayment ) as Record<
+		PaymentMethodName,
+		CanMakePaymentCallback
+	>[] ).some( ( callbacks ) => paymentMethodName in callbacks )
+		? canMakePaymentWithExtensions(
+				canPay,
+				extensionsConfig.canMakePayment,
+				paymentMethodName
+		  )
+		: canPay;
 };

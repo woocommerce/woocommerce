@@ -14,11 +14,7 @@ import type {
 /**
  * Internal dependencies
  */
-import {
-	canMakePaymentWithFeaturesCheck,
-	canMakePaymentWithExtensions,
-} from './payment-method-config-helper';
-import { extensionsConfig, PaymentMethodName } from './extensions-config';
+import { getCanMakePayment } from './payment-method-config-helper';
 import {
 	assertConfigHasProperties,
 	assertValidElement,
@@ -68,22 +64,11 @@ export default class PaymentMethodConfig
 
 	// canMakePayment is calculated each time based on data that modifies outside of the class (eg: cart data).
 	get canMakePayment(): CanMakePaymentCallback {
-		const canPay = canMakePaymentWithFeaturesCheck(
+		return getCanMakePayment(
 			this.canMakePaymentFromConfig,
-			this.supports.features
+			this.supports.features,
+			this.name
 		);
-
-		// Loop through all callbacks to check if there are any registered for this payment method.
-		return ( Object.values( extensionsConfig.canMakePayment ) as Record<
-			PaymentMethodName,
-			CanMakePaymentCallback
-		>[] ).some( ( callbacks ) => this.name in callbacks )
-			? canMakePaymentWithExtensions(
-					canPay,
-					extensionsConfig.canMakePayment,
-					this.name
-			  )
-			: canPay;
 	}
 
 	static assertValidConfig = ( config: PaymentMethodConfiguration ): void => {

@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { registerPaymentMethodExtensionCallbacks } from '@woocommerce/blocks-registry';
+import type { PaymentMethodConfigInstance } from '@woocommerce/type-defs/payments';
 /**
  * Internal dependencies
  */
@@ -9,13 +10,12 @@ import PaymentMethodConfig from '../payment-method-config';
 import * as paymentMethodConfigHelpers from '../payment-method-config-helper';
 
 describe( 'PaymentMethodConfig', () => {
-	let paymentMethod;
-	const spies = {};
+	let paymentMethod: PaymentMethodConfigInstance;
+	const extensionsCallbackSpy = jest.spyOn(
+		paymentMethodConfigHelpers,
+		'canMakePaymentWithExtensions'
+	);
 	beforeEach( () => {
-		spies.canMakePaymentWithExtensions = jest.spyOn(
-			paymentMethodConfigHelpers,
-			'canMakePaymentWithExtensions'
-		);
 		paymentMethod = new PaymentMethodConfig( {
 			name: 'test-payment-method',
 			label: 'Test payment method',
@@ -23,6 +23,7 @@ describe( 'PaymentMethodConfig', () => {
 			content: <div>Test payment content</div>,
 			edit: <div>Test payment edit</div>,
 			canMakePayment: () => true,
+			supports: { features: [ 'products' ] },
 		} );
 	} );
 
@@ -40,7 +41,7 @@ describe( 'PaymentMethodConfig', () => {
 		// Disable no-unused-expressions because we just want to test the getter
 		// eslint-disable-next-line no-unused-expressions
 		paymentMethod.canMakePayment;
-		expect( spies.canMakePaymentWithExtensions ).toHaveBeenCalledTimes( 0 );
+		expect( extensionsCallbackSpy ).toHaveBeenCalledTimes( 0 );
 
 		registerPaymentMethodExtensionCallbacks(
 			'other-woocommerce-marketplace-extension',
@@ -55,6 +56,6 @@ describe( 'PaymentMethodConfig', () => {
 		// Disable no-unused-expressions because we just want to test the getter
 		// eslint-disable-next-line no-unused-expressions
 		paymentMethod.canMakePayment;
-		expect( spies.canMakePaymentWithExtensions ).toHaveBeenCalledTimes( 1 );
+		expect( extensionsCallbackSpy ).toHaveBeenCalledTimes( 1 );
 	} );
 } );

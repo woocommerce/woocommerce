@@ -12,7 +12,7 @@ import type {
 /**
  * Internal dependencies
  */
-import { canMakePaymentWithFeaturesCheck } from './payment-method-config-helper';
+import { getCanMakePayment } from './payment-method-config-helper';
 import { assertConfigHasProperties, assertValidElement } from './assertions';
 
 export default class ExpressPaymentMethodConfig
@@ -22,7 +22,7 @@ export default class ExpressPaymentMethodConfig
 	public edit: ReactNode;
 	public paymentMethodId?: string;
 	public supports: Supports;
-	public canMakePayment: CanMakePaymentCallback;
+	public canMakePaymentFromConfig: CanMakePaymentCallback;
 
 	constructor( config: ExpressPaymentMethodConfiguration ) {
 		// validate config
@@ -34,9 +34,15 @@ export default class ExpressPaymentMethodConfig
 		this.supports = {
 			features: config?.supports?.features || [ 'products' ],
 		};
-		this.canMakePayment = canMakePaymentWithFeaturesCheck(
-			config.canMakePayment,
-			this.supports.features
+		this.canMakePaymentFromConfig = config.canMakePayment;
+	}
+
+	// canMakePayment is calculated each time based on data that modifies outside of the class (eg: cart data).
+	get canMakePayment(): CanMakePaymentCallback {
+		return getCanMakePayment(
+			this.canMakePaymentFromConfig,
+			this.supports.features,
+			this.name
 		);
 	}
 
