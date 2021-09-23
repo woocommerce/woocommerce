@@ -162,10 +162,6 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 = 5.7.1 2021-09-23 =
 
-**WooCommerce**
-
-* Fix - Redirect (Insecure) download method to also support absolute file paths when allowed.
-
 **WooCommerce Blocks - 5.7.2**
 
 - Fix - Infinite recursion when removing an attribute filter from the Active filters block. #4816
@@ -205,7 +201,6 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Tweak - Update product cards on the WooCommerce > Extensions page in WP Admin to match current designs. #30410
 * Tweak - Update the Marketplace/Addons header to match new designs. #30389
 * Tweak - Renamed "ZIP" to "ZIP Code" and "Pin code" to "PIN" for US & India, respectively. #30204
-* Tweak - Download filepaths.
 
 **WooCommerce Admin - 2.6.0 & 2.6.1 & 2.6.2 & 2.6.3 & 2.6.4**
 
