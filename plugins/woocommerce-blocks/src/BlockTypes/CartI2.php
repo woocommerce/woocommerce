@@ -74,7 +74,7 @@ class CartI2 extends AbstractBlock {
 		wp_dequeue_script( 'selectWoo' );
 		wp_dequeue_style( 'select2' );
 
-		return $this->inject_html_data_attributes( $content . $this->get_skeleton(), $attributes );
+		return $this->inject_html_data_attributes( $content, $attributes );
 	}
 
 	/**
@@ -161,86 +161,5 @@ class CartI2 extends AbstractBlock {
 	 */
 	protected function hydrate_from_api() {
 		$this->asset_data_registry->hydrate_api_request( '/wc/store/cart' );
-	}
-
-	/**
-	 * Render skeleton markup for the cart block.
-	 */
-	protected function get_skeleton() {
-		return '
-			<div class="wc-block-skeleton wc-block-components-sidebar-layout wc-block-cart wc-block-cart--is-loading wc-block-cart--skeleton hidden" aria-hidden="true">
-				<div class="wc-block-components-main wc-block-cart__main">
-					<h2 class="wc-block-components-title"><span></span></h2>
-					<table class="wc-block-cart-items">
-						<thead>
-							<tr class="wc-block-cart-items__header">
-								<th class="wc-block-cart-items__header-image"><span /></th>
-								<th class="wc-block-cart-items__header-product"><span /></th>
-								<th class="wc-block-cart-items__header-total"><span /></th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr class="wc-block-cart-items__row">
-								<td class="wc-block-cart-item__image">
-									<a href=""><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=" width="1" height="1" /></a>
-								</td>
-								<td class="wc-block-cart-item__product">
-									<div class="wc-block-components-product-name"></div>
-									<div class="wc-block-components-product-price"></div>
-									<div class="wc-block-components-product-metadata"></div>
-									<div class="wc-block-components-quantity-selector">
-										<input class="wc-block-components-quantity-selector__input" type="number" step="1" min="0" value="1" />
-										<button class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">－</button>
-										<button class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">＋</button>
-									</div>
-								</td>
-								<td class="wc-block-cart-item__total">
-									<div class="wc-block-components-product-price"></div>
-								</td>
-							</tr>
-							<tr class="wc-block-cart-items__row">
-								<td class="wc-block-cart-item__image">
-									<a href=""><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=" width="1" height="1" /></a>
-								</td>
-								<td class="wc-block-cart-item__product">
-									<div class="wc-block-components-product-name"></div>
-									<div class="wc-block-components-product-price"></div>
-									<div class="wc-block-components-product-metadata"></div>
-									<div class="wc-block-components-quantity-selector">
-										<input class="wc-block-components-quantity-selector__input" type="number" step="1" min="0" value="1" />
-										<button class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">－</button>
-										<button class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">＋</button>
-									</div>
-								</td>
-								<td class="wc-block-cart-item__total">
-									<div class="wc-block-components-product-price"></div>
-								</td>
-							</tr>
-							<tr class="wc-block-cart-items__row">
-								<td class="wc-block-cart-item__image">
-									<a href=""><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=" width="1" height="1" /></a>
-								</td>
-								<td class="wc-block-cart-item__product">
-									<div class="wc-block-components-product-name"></div>
-									<div class="wc-block-components-product-price"></div>
-									<div class="wc-block-components-product-metadata"></div>
-									<div class="wc-block-components-quantity-selector">
-										<input class="wc-block-components-quantity-selector__input" type="number" step="1" min="0" value="1" />
-										<button class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">－</button>
-										<button class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">＋</button>
-									</div>
-								</td>
-								<td class="wc-block-cart-item__total">
-									<div class="wc-block-components-product-price"></div>
-								</td>
-							</tr>
-						</tbody>
-					</table>
-				</div>
-				<div class="wc-block-components-sidebar wc-block-cart__sidebar">
-					<div class="components-card"></div>
-				</div>
-			</div>
-		' . $this->get_skeleton_inline_script();
 	}
 }
