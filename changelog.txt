@@ -6,6 +6,10 @@
 
 * Dev - Revert Download filepaths changes.
 
+**WooCommerce Admin - 2.6.5**
+
+- Fix: Add filters to get new hidden options #7698
+
 **WooCommerce Blocks - 5.7.2**
 
 - Fix - Infinite recursion when removing an attribute filter from the Active filters block. #4816

@@ -4,7 +4,7 @@ Tags: e-commerce, store, sales, sell, woo, shop, cart, checkout, downloadable, d
 Requires at least: 5.6
 Tested up to: 5.8
 Requires PHP: 7.0
-Stable tag: 5.7.0
+Stable tag: 5.7.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -165,6 +165,10 @@ WooCommerce comes with some sample data you can use to see how products look; im
 **WooCommerce - 5.7.1**
 
 * Dev - Revert Download filepaths changes.
+
+**WooCommerce Admin - 2.6.5**
+
+- Fix: Add filters to get new hidden options #7698
 
 **WooCommerce Blocks - 5.7.2**
 
