@@ -141,6 +141,7 @@
   "addresses": {
     "admin": {
       "store": {
+        "email": "admin@woocommercecoree2etestsuite.com",
         "firstname": "John",
         "lastname": "Doe",
         "company": "Automattic",
