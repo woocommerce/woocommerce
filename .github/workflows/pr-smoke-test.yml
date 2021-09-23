@@ -47,9 +47,7 @@ jobs:
           npx wc-e2e test:e2e
 
       - name: Remove label from pull request.
-        if: | 
-          always() && 
-          "${{ contains(github.event.issue.labels.*.name, 'run: smoke tests') }}"
+        if: always()
         uses: actions/github-script@v4
         with:
           script: |
