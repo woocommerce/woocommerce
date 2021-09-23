@@ -50,6 +50,20 @@ const { productsApi } = require('../../endpoints/products');
 			}, {} );
 			expect( Object.keys( allProductIds ) ).toHaveLength( pageSize * 2 );
 
+			// Verify that offset takes precedent over page number.
+			const page2Offset = await productsApi.listAll.products( {
+				per_page: pageSize,
+				page: 2,
+				offset: 5,
+			} );
+			// The offset pushes the result set 1 product past the start of page 2.
+			expect( page2Offset.body ).toEqual(
+				expect.not.arrayContaining( [
+					expect.objectContaining( { id: page2.body[0].id } )
+				] )
+			);
+			expect( page2Offset.body[0].id ).toEqual( page2.body[1].id );
+
 			// Verify the last page only has 2 products as we expect.
 			const page5 = await productsApi.listAll.products( {
 				per_page: pageSize,
