@@ -221,6 +221,10 @@
                 "zend",
                 "zikula"
             ],
+            "support": {
+                "issues": "https://github.com/composer/installers/issues",
+                "source": "https://github.com/composer/installers/tree/v1.12.0"
+            },
             "funding": [
                 {
                     "url": "https://packagist.com",
@@ -529,16 +533,16 @@
         },
         {
             "name": "woocommerce/woocommerce-admin",
-            "version": "2.6.4",
+            "version": "2.6.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-admin.git",
-                "reference": "b7fcc71b972ea7af3579fd5ce5f66ed9bfab80f3"
+                "reference": "03d45390fb555d3a649f87c2b3385257c9d7ac02"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/b7fcc71b972ea7af3579fd5ce5f66ed9bfab80f3",
-                "reference": "b7fcc71b972ea7af3579fd5ce5f66ed9bfab80f3",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/03d45390fb555d3a649f87c2b3385257c9d7ac02",
+                "reference": "03d45390fb555d3a649f87c2b3385257c9d7ac02",
                 "shasum": ""
             },
             "require": {
@@ -593,9 +597,9 @@
             "homepage": "https://github.com/woocommerce/woocommerce-admin",
             "support": {
                 "issues": "https://github.com/woocommerce/woocommerce-admin/issues",
-                "source": "https://github.com/woocommerce/woocommerce-admin/tree/v2.6.4"
+                "source": "https://github.com/woocommerce/woocommerce-admin/tree/v2.6.5"
             },
-            "time": "2021-09-21T19:35:21+00:00"
+            "time": "2021-09-22T22:45:59+00:00"
         },
         {
             "name": "woocommerce/woocommerce-blocks",
