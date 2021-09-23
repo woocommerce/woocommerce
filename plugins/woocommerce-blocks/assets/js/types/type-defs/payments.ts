@@ -31,7 +31,7 @@ export interface CanMakePaymentArgument {
 	cartNeedsShipping: boolean;
 	billingData: CartResponseBillingAddress;
 	shippingAddress: CartResponseShippingAddress;
-	selectedShippingMethods: Array< unknown >;
+	selectedShippingMethods: Record< string, unknown >;
 	paymentRequirements: Array< string >;
 }
 
@@ -110,5 +110,6 @@ export interface ExpressPaymentMethodConfigInstance {
 	edit: ReactNode;
 	paymentMethodId?: string;
 	supports: Supports;
+	canMakePaymentFromConfig: CanMakePaymentCallback;
 	canMakePayment: CanMakePaymentCallback;
 }
