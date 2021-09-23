@@ -156,6 +156,23 @@ const { productsApi } = require('../../endpoints/products');
 			expect( result2.statusCode ).toEqual( 200 );
 			expect( result2.body ).toHaveLength( 0 );
 		} );
+
+		it( 'sku', async () => {
+			// Match by SKU.
+			const result1 = await productsApi.listAll.products( {
+				sku: 'woo-sunglasses'
+			} );
+			expect( result1.statusCode ).toEqual( 200 );
+			expect( result1.body ).toHaveLength( 1 );
+			expect( result1.body[0].sku ).toBe( 'woo-sunglasses' );
+	
+			// No matches
+			const result2 = await productsApi.listAll.products( {
+				sku: 'no-product-with-this-sku'
+			} );
+			expect( result2.statusCode ).toEqual( 200 );
+			expect( result2.body ).toHaveLength( 0 );
+		} );
 	} );
 
 } );
