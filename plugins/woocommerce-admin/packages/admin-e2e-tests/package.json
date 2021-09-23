@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/admin-e2e-tests",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"author": "Automattic",
 	"description": "E2E tests for the new WooCommerce interface.",
 	"homepage": "https://github.com/woocommerce/woocommerce-admin/tree/main/packages/admin-e2e-tests/README.md",
