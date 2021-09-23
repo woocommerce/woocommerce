@@ -140,6 +140,22 @@ const { productsApi } = require('../../endpoints/products');
 
 		} );
 
+		it( 'slug', async () => {
+			// Match by slug.
+			const result1 = await productsApi.listAll.products( {
+				slug: 't-shirt-with-logo'
+			} );
+			expect( result1.statusCode ).toEqual( 200 );
+			expect( result1.body ).toHaveLength( 1 );
+			expect( result1.body[0].slug ).toBe( 't-shirt-with-logo' );
+	
+			// No matches
+			const result2 = await productsApi.listAll.products( {
+				slug: 'no-product-with-this-slug'
+			} );
+			expect( result2.statusCode ).toEqual( 200 );
+			expect( result2.body ).toHaveLength( 0 );
+		} );
 	} );
 
 } );
