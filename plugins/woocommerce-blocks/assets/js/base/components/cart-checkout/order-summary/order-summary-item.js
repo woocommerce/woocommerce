@@ -1,11 +1,14 @@
 /**
  * External dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
+import { sprintf, _n } from '@wordpress/i18n';
 import Label from '@woocommerce/base-components/label';
 import ProductPrice from '@woocommerce/base-components/product-price';
 import ProductName from '@woocommerce/base-components/product-name';
-import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
+import {
+	getCurrencyFromPriceResponse,
+	formatPrice,
+} from '@woocommerce/price-format';
 import {
 	__experimentalApplyCheckoutFilter,
 	mustContain,
@@ -113,7 +116,12 @@ const OrderSummaryItem = ( { cartItem } ) => {
 						label={ quantity }
 						screenReaderLabel={ sprintf(
 							/* translators: %d number of products of the same type in the cart */
-							__( '%d items', 'woo-gutenberg-products-block' ),
+							_n(
+								'%d item',
+								'%d items',
+								quantity,
+								'woo-gutenberg-products-block'
+							),
 							quantity
 						) }
 					/>
@@ -151,7 +159,24 @@ const OrderSummaryItem = ( { cartItem } ) => {
 					variation={ variation }
 				/>
 			</div>
-			<div className="wc-block-components-order-summary-item__total-price">
+			<span className="screen-reader-text">
+				{ sprintf(
+					/* translators: %1$d is the number of items, %2$s is the item name and %3$s is the total price including the currency symbol. */
+					_n(
+						'Total price for %1$d %2$s item: %3$s',
+						'Total price for %1$d %2$s items: %3$s',
+						quantity,
+						'woo-gutenberg-products-block'
+					),
+					quantity,
+					name,
+					formatPrice( subtotalPrice, totalsCurrency )
+				) }
+			</span>
+			<div
+				className="wc-block-components-order-summary-item__total-price"
+				aria-hidden="true"
+			>
 				<ProductPrice
 					currency={ totalsCurrency }
 					format={ productPriceFormat }
