@@ -61,7 +61,7 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 	 * @param array $options a set of options.
 	 */
 	public function test_widget_does_not_get_rendered( array $options ) {
-		$this->markTestSkipped('Skipping this test for 5.7.1. See https://github.com/woocommerce/woocommerce/pull/30784 for details');		
+		$this->markTestSkipped( 'Skipping this test for 5.7.1. See https://github.com/woocommerce/woocommerce/pull/30784 for details' );
 		global $wp_meta_boxes;
 
 		foreach ( $options as $name => $value ) {
