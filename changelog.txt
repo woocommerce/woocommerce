@@ -2,7 +2,7 @@
 
 = 5.7.1 2021-09-23 =
 
-**WooCommerece**
+**WooCommerce**
 
 * Fix - Redirect (Insecure) download method to also support absolute file paths when allowed.
 
