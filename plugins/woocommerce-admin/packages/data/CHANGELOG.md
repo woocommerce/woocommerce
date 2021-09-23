@@ -1,6 +1,7 @@
 # Unreleased
 
 -   Fix the batch fetch logic for the options data store. #7587
+-   Add backwards compability for old function format. #7688
 
 # 1.4.0
 

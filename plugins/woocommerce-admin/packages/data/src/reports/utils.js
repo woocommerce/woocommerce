@@ -13,6 +13,7 @@ import {
 	getActiveFiltersFromQuery,
 	getQueryFromActiveFilters,
 } from '@woocommerce/navigation';
+import deprecated from '@wordpress/deprecated';
 
 /**
  * Internal dependencies
@@ -343,17 +344,27 @@ const getReportChartDataResponse = memoize(
  * @param  {string} options.dataType  'primary' or 'secondary'
  * @param  {Object} options.query     Query parameters in the url
  * @param  {Object} options.selector    Instance of @wordpress/select response
+ * @param  {Object} options.select    (Depreciated) Instance of @wordpress/select
  * @param  {Array}  options.limitBy   Properties used to limit the results. It will be used in the API call to send the IDs.
  * @param  {string}  options.defaultDateRange   User specified default date range.
  * @return {Object}  Object containing API request information (response, fetching, and error details)
  */
 export function getReportChartData( options ) {
 	const { endpoint } = options;
+	let reportSelectors = options.selector;
+	if ( options.select && ! options.selector ) {
+		deprecated( 'option.select', {
+			version: '1.7.0',
+			hint:
+				'You can pass the report selectors through option.selector now.',
+		} );
+		reportSelectors = options.select( STORE_NAME );
+	}
 	const {
 		getReportStats,
 		getReportStatsError,
 		isResolving,
-	} = options.selector;
+	} = reportSelectors;
 
 	const requestQuery = getRequestQuery( options );
 	// Disable eslint rule requiring `stats` to be defined below because the next two if statements
@@ -492,17 +503,27 @@ export function getReportTableQuery( options ) {
  * @param  {string} options.endpoint       Report API Endpoint
  * @param  {Object} options.query          Query parameters in the url
  * @param  {Object} options.selector       Instance of @wordpress/select response
+ * @param  {Object} options.select         (depreciated) Instance of @wordpress/select
  * @param  {Object} options.tableQuery     Query parameters specific for that endpoint
  * @param  {string}  options.defaultDateRange   User specified default date range.
  * @return {Object} Object    Table data response
  */
 export function getReportTableData( options ) {
 	const { endpoint } = options;
+	let reportSelectors = options.selector;
+	if ( options.select && ! options.selector ) {
+		deprecated( 'option.select', {
+			version: '1.7.0',
+			hint:
+				'You can pass the report selectors through option.selector now.',
+		} );
+		reportSelectors = options.select( STORE_NAME );
+	}
 	const {
 		getReportItems,
 		getReportItemsError,
 		hasFinishedResolution,
-	} = options.selector;
+	} = reportSelectors;
 
 	const tableQuery = reportsUtils.getReportTableQuery( options );
 	const response = {

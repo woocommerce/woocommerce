@@ -30,6 +30,7 @@
 		"@wordpress/hooks": "2.11.0",
 		"@wordpress/data": "5.0.0",
 		"@wordpress/data-controls": "2.0.0",
+		"@wordpress/deprecated": "^3.1.1",
 		"@wordpress/i18n": "3.17.0",
 		"@wordpress/url": "2.21.0",
 		"md5": "^2.3.0",
