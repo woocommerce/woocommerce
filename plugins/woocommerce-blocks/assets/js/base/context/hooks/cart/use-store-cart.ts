@@ -26,7 +26,7 @@ import type {
 	CartResponseBillingAddress,
 	CartResponseShippingAddress,
 	CartResponseCouponItem,
-	CartResponseCouponItemWithLabel,
+	CartResponseCoupons,
 } from '@woocommerce/types';
 import {
 	emptyHiddenAddressFields,
@@ -129,6 +129,7 @@ export const defaultCartData: StoreCart = {
  *
  * @return {StoreCart} Object containing cart data.
  */
+
 export const useStoreCart = (
 	options: { shouldSelect: boolean } = { shouldSelect: true }
 ): StoreCart => {
@@ -136,7 +137,6 @@ export const useStoreCart = (
 	const previewCart = previewData?.previewCart;
 	const { shouldSelect } = options;
 	const currentResults = useRef();
-
 	const results: StoreCart = useSelect(
 		( select, { dispatch } ) => {
 			if ( ! shouldSelect ) {
@@ -194,7 +194,7 @@ export const useStoreCart = (
 			// Add a text property to the coupon to allow extensions to modify
 			// the text used to display the coupon, without affecting the
 			// functionality when it comes to removing the coupon.
-			const cartCoupons: CartResponseCouponItemWithLabel[] =
+			const cartCoupons: CartResponseCoupons =
 				cartData.coupons.length > 0
 					? cartData.coupons.map(
 							( coupon: CartResponseCouponItem ) => ( {
