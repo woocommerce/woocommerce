@@ -271,4 +271,28 @@ const { productsApi } = require('../../endpoints/products');
 		} );
 	} );
 
+	it( 'on sale', async () => {
+		const onSale = [
+			expect.objectContaining( { name: 'Beanie with Logo' } ),
+			expect.objectContaining( { name: 'Hoodie with Pocket' } ),
+			expect.objectContaining( { name: 'Single' } ),
+			expect.objectContaining( { name: 'Cap' } ),
+			expect.objectContaining( { name: 'Belt' } ),
+			expect.objectContaining( { name: 'Beanie' } ),
+			expect.objectContaining( { name: 'Hoodie' } ),
+		];
+
+		const result1 = await productsApi.listAll.products( {
+			on_sale: true,
+		} );
+		expect( result1.statusCode ).toEqual( 200 );
+		expect( result1.body ).toHaveLength( onSale.length );
+		expect( result1.body ).toEqual( expect.arrayContaining( onSale ) );
+
+		const result2 = await productsApi.listAll.products( {
+			on_sale: false,
+		} );
+		expect( result2.statusCode ).toEqual( 200 );
+		expect( result2.body ).toEqual( expect.not.arrayContaining( onSale ) );
+	} );
 } );
