@@ -98,11 +98,11 @@ export const getTaxRateLabels = getRequestByIdString(
 export function getVariationName( { attributes, name } ) {
 	const separator = getSetting( 'variationTitleAttributesSeparator', ' - ' );
 
-	if ( name.indexOf( separator ) > -1 ) {
+	if ( name && name.indexOf( separator ) > -1 ) {
 		return name;
 	}
 
-	const attributeList = attributes
+	const attributeList = ( attributes || [] )
 		.map( ( { option } ) => option )
 		.join( ', ' );
 
