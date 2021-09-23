@@ -56,7 +56,7 @@ class WC_Tests_API_Reports_Performance_Indicators extends WC_REST_Unit_Test_Case
 
 		// Populate all of the data. We'll create an order and a download.
 		$prod_download = new WC_Product_Download();
-		$prod_download->set_file( plugin_dir_url( __FILE__ ) . 'assets/images/help.png' );
+		$prod_download->set_file( plugin_dir_url( $this->wc_core_dir ) . 'woocommerce/assets/images/help.png' );
 		$prod_download->set_id( '1' );
 
 		$product = new WC_Product_Simple();

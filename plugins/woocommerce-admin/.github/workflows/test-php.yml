@@ -60,7 +60,7 @@ jobs:
                   bash bin/ci/gh-install-wp-tests.sh wc_admin_test root 'root' localhost
                   cd "$WP_CORE_DIR/wp-content/plugins/woocommerce-admin/"
                   npm run build:feature-config	
-                  composer install --no-dev
+                  composer install
                   node --version
                   npm --version
                   timedatectl
@@ -74,6 +74,8 @@ jobs:
                     composer bin phpunit config --unset platform
                     composer bin phpunit config repositories.0 '{"type": "path", "url": "/tmp/phpunit-7.5-fork/phpunit-add-compatibility-with-php8-to-phpunit-7", "options": {"symlink": false}}'
                     composer bin phpunit require --dev -W phpunit/phpunit:@dev --ignore-platform-reqs    
+                    rm -rf ./vendor/phpunit/
+                    composer dump-autoload
                   fi
             - name: Run the PHP unit tests
               run: bin/phpunit.sh

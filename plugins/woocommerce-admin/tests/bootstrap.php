@@ -69,6 +69,12 @@ class WC_Admin_Unit_Tests_Bootstrap {
 		// Set up WC-Admin config.
 		tests_add_filter( 'woocommerce_admin_get_feature_config', array( $this, 'add_development_features' ) );
 
+		/*
+		* Load PHPUnit Polyfills for the WP testing suite.
+		* @see https://github.com/WordPress/wordpress-develop/pull/1563/
+		*/
+		define( 'WP_TESTS_PHPUNIT_POLYFILLS_PATH', __DIR__ . '/../vendor/yoast/phpunit-polyfills/phpunitpolyfills-autoload.php' );
+
 		// load the WP testing environment.
 		require_once $this->wp_tests_dir . '/includes/bootstrap.php';
 
