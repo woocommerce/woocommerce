@@ -173,6 +173,34 @@ const { productsApi } = require('../../endpoints/products');
 			expect( result2.statusCode ).toEqual( 200 );
 			expect( result2.body ).toHaveLength( 0 );
 		} );
+
+		it( 'type', async () => {
+			const result1 = await productsApi.listAll.products( {
+				type: 'simple'
+			} );
+			expect( result1.statusCode ).toEqual( 200 );
+			expect( result1.headers['x-wp-total'] ).toEqual( '14' );
+	
+			const result2 = await productsApi.listAll.products( {
+				type: 'external'
+			} );
+			expect( result2.statusCode ).toEqual( 200 );
+			expect( result2.body ).toHaveLength( 1 );
+			expect( result2.body[0].name ).toBe( 'WordPress Pennant' );
+
+			const result3 = await productsApi.listAll.products( {
+				type: 'variable'
+			} );
+			expect( result3.statusCode ).toEqual( 200 );
+			expect( result3.body ).toHaveLength( 2 );
+
+			const result4 = await productsApi.listAll.products( {
+				type: 'grouped'
+			} );
+			expect( result4.statusCode ).toEqual( 200 );
+			expect( result4.body ).toHaveLength( 1 );
+			expect( result4.body[0].name ).toBe( 'Logo Collection' );
+		} );
 	} );
 
 } );
