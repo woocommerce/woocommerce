@@ -4,17 +4,17 @@
 
 **WooCommerce**
 
-* Add - `modified_before` and `modified_after` filtering parameters to REST API for products, orders and coupons. #29461
-* Add - `woocommerce_quantity_input_min_admin` and `woocommerce_quantity_input_step_admin` filters. #29963
-* Dev - Action Scheduler updated to 3.3.0. #30718
-* Dev - Add order argument to `woocommerce_order_actions` filter.
-* Fix - During product quick edit, the featured setting is sometimes not shown correctly as checked. #30471
-* Fix - Offsets not calculated correctly sometimes on select2 dropdowns causing usability issues. #28996
-* Fix - Select2 dropdown search input not getting focus when select2 dropdown element gets focused. #30607
-* Tweak - Add individual item remove notices based on the context of the line item in the order. #29890
-* Tweak - Change the shop page summary which was not relevant to the public. #30553
-* Tweak - Deleted unneeded double spaces in text strings. #30486
-* Tweak - Open Browse all extensions link in a new tab. #30264
+* Add - `modified_before` and `modified_after` filtering parameters to REST API for products, orders and coupons. #30585
+* Add - `woocommerce_quantity_input_min_admin` and `woocommerce_quantity_input_step_admin` filters. #30705
+* Dev - Action Scheduler updated to 3.3.0. #30719
+* Dev - Add order argument to `woocommerce_order_actions` filter. #30475
+* Fix - During product quick edit, the featured setting is sometimes not shown correctly as checked. #30639
+* Fix - Offsets not calculated correctly sometimes on select2 dropdowns causing usability issues. #30690
+* Fix - Select2 dropdown search input not getting focus when select2 dropdown element gets focused. #30626
+* Tweak - Add individual item remove notices based on the context of the line item in the order. #30650
+* Tweak - Change the shop page summary which was not relevant to the public. #30573
+* Tweak - Deleted unneeded double spaces in text strings. #30487
+* Tweak - Open Browse all extensions link in a new tab. #30640
 
 **WooCommerce Admin - 2.7.0**
 
