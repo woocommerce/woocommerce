@@ -224,6 +224,51 @@ const { productsApi } = require('../../endpoints/products');
 			expect( result2.statusCode ).toEqual( 200 );
 			expect( result2.body ).toEqual( expect.not.arrayContaining( featured ) );
 		} );
+
+		it( 'categories', async () => {
+			const accessory = [
+				expect.objectContaining( { name: 'Beanie' } ),
+			]
+			const hoodies = [
+				expect.objectContaining( { name: 'Hoodie with Zipper' } ),
+				expect.objectContaining( { name: 'Hoodie with Pocket' } ),
+				expect.objectContaining( { name: 'Hoodie with Logo' } ),
+				expect.objectContaining( { name: 'Hoodie' } ),
+			];
+
+			// Get the Clothing category ID from the Logo Collection product.
+			const result1 = await productsApi.listAll.products( {
+				sku: 'logo-collection',
+			} );
+			expect( result1.statusCode ).toEqual( 200 );
+			expect( result1.body ).toHaveLength( 1 );
+			const clothingCatId = result1.body[0].categories[0].id;
+
+			// Verify that subcategories are included.
+			const result2 = await productsApi.listAll.products( {
+				per_page: 20,
+				category: clothingCatId,
+			} );
+			expect( result2.statusCode ).toEqual( 200 );
+			expect( result2.body ).toEqual( expect.arrayContaining( accessory ) );
+			expect( result2.body ).toEqual( expect.arrayContaining( hoodies ) );
+
+			// Get the Hoodie category ID.
+			const result3 = await productsApi.listAll.products( {
+				sku: 'woo-hoodie-with-zipper',
+			} );
+			expect( result3.statusCode ).toEqual( 200 );
+			expect( result3.body ).toHaveLength( 1 );
+			const hoodieCatId = result3.body[0].categories[0].id;
+
+			// Verify sibling categories are not.
+			const result4 = await productsApi.listAll.products( {
+				category: hoodieCatId,
+			} );
+			expect( result4.statusCode ).toEqual( 200 );
+			expect( result4.body ).toEqual( expect.not.arrayContaining( accessory ) );
+			expect( result4.body ).toEqual( expect.arrayContaining( hoodies ) );
+		} );
 	} );
 
 } );
