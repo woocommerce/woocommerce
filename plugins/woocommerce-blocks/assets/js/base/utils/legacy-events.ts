@@ -13,7 +13,7 @@ interface DispatchedEventProperties {
 	// See https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent/detail
 	detail?: unknown;
 	// Element that dispatches the event. By default, the body.
-	element?: HTMLElement;
+	element?: Element | null;
 }
 
 /**
