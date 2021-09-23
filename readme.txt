@@ -166,6 +166,11 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 * Fix - Redirect (Insecure) download method to also support absolute file paths when allowed.
 
+**WooCommerce Blocks - 5.7.2**
+
+- Fix - Infinite recursion when removing an attribute filter from the Active filters block. #4816
+- Fix - Fix Product Search block displaying incorrectly. #4740
+
 = 5.7.0 2021-09-21 =
 
 **WooCommerce**
