@@ -43,7 +43,7 @@ describe( 'Activity Panels', () => {
 				},
 				{
 					id: 'eway',
-					text: 'eWAY',
+					text: 'Eway',
 				},
 			];
 

@@ -202,7 +202,7 @@ Individual payment gateway plugins dictate the settings and connection flow. For
 -   Stripe - https://github.com/woocommerce/woocommerce-admin/files/6880197/woocommerce-gateway-stripe.zip
 -   MercaoPago - https://github.com/woocommerce/woocommerce-admin/files/6880192/woocommerce-mercadopago.zip
 -   Square - https://github.com/woocommerce/woocommerce-admin/files/6880117/woocommerce-square.zip
--   eWAY - https://github.com/woocommerce/woocommerce-admin/files/6880111/woocommerce-gateway-eway.zip
+-   Eway - https://github.com/woocommerce/woocommerce-admin/files/6880111/woocommerce-gateway-eway.zip
 
 ##### PayFast
 
@@ -276,7 +276,7 @@ Individual payment gateway plugins dictate the settings and connection flow. For
 1. Set your store country to India
 2. Don't select CBD as an industry during onboarding
 
-##### eWAY
+##### Eway
 
 1. Set your store country to one of the following: `AU, NZ`
 2. Don't select CBD as an industry during onboarding
@@ -477,7 +477,7 @@ Individual payment gateway plugins dictate the settings and connection flow. For
 -   Visit the Payments task and click to setup `Stripe` and `PayPal`.
 -   Verify the event `wcadmin_payments_task_stepper_view` with the right `payment_method was recorded correctly.
 -   Press `Proceed` and verify the event `wcadmin_tasklist_payment_connect_start` with the right `payment_method` was recorded.
--   Verify that the event `wcadmin_tasklist_payment_connect_start` also is recorded for the payment gateways: Square, eWAY (for AU and NZ) and generic gateways like PayFast (for ZA) and PayStack (for ZA, GH, and NG).
+-   Verify that the event `wcadmin_tasklist_payment_connect_start` also is recorded for the payment gateways: Square, Eway (for AU and NZ) and generic gateways like PayFast (for ZA) and PayStack (for ZA, GH, and NG).
 
 ### Add recommended payment methods in payment settings. #6760
 
