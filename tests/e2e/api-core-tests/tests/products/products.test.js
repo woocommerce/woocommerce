@@ -201,6 +201,29 @@ const { productsApi } = require('../../endpoints/products');
 			expect( result4.body ).toHaveLength( 1 );
 			expect( result4.body[0].name ).toBe( 'Logo Collection' );
 		} );
+
+		it( 'featured', async () => {
+			const featured = [
+				expect.objectContaining( { name: 'Hoodie with Zipper' } ),
+				expect.objectContaining( { name: 'Hoodie with Pocket' } ),
+				expect.objectContaining( { name: 'Sunglasses' } ),
+				expect.objectContaining( { name: 'Cap' } ),
+				expect.objectContaining( { name: 'V-Neck T-Shirt' } ),
+			];
+
+			const result1 = await productsApi.listAll.products( {
+				featured: true,
+			} );
+			expect( result1.statusCode ).toEqual( 200 );
+			expect( result1.body ).toHaveLength( featured.length );
+			expect( result1.body ).toEqual( expect.arrayContaining( featured ) );
+
+			const result2 = await productsApi.listAll.products( {
+				featured: false,
+			} );
+			expect( result2.statusCode ).toEqual( 200 );
+			expect( result2.body ).toEqual( expect.not.arrayContaining( featured ) );
+		} );
 	} );
 
 } );
