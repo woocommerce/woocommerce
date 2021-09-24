@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ab83245c9816437b7120b146014ff686",
+    "content-hash": "304dfc04a658b290cce749ee884db7a1",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -603,16 +603,16 @@
         },
         {
             "name": "woocommerce/woocommerce-blocks",
-            "version": "v5.9.0",
+            "version": "v5.9.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-gutenberg-products-block.git",
-                "reference": "d4f0040e6c41a2e02ce4dff1cd9fc8efe3113af1"
+                "reference": "edfe8e40307f6f48236a066aade02a580d1b74fd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/d4f0040e6c41a2e02ce4dff1cd9fc8efe3113af1",
-                "reference": "d4f0040e6c41a2e02ce4dff1cd9fc8efe3113af1",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/edfe8e40307f6f48236a066aade02a580d1b74fd",
+                "reference": "edfe8e40307f6f48236a066aade02a580d1b74fd",
                 "shasum": ""
             },
             "require": {
@@ -649,9 +649,9 @@
             ],
             "support": {
                 "issues": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues",
-                "source": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/v5.9.0"
+                "source": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/v5.9.1"
             },
-            "time": "2021-09-14T13:42:34+00:00"
+            "time": "2021-09-24T08:17:10+00:00"
         }
     ],
     "packages-dev": [
@@ -2460,5 +2460,5 @@
     "platform-overrides": {
         "php": "7.0"
     },
-    "plugin-api-version": "2.0.0"
+    "plugin-api-version": "2.1.0"
 }
