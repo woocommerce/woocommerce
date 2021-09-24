@@ -12,7 +12,6 @@ __webpack_public_path__ = WC_BLOCKS_BUILD_URL;
 /**
  * Internal dependencies
  */
-import sampleBlockMetadata from './checkout-sample-block/block.json';
 import checkoutActionsMetadata from './checkout-actions-block/block.json';
 import checkoutBillingAddressMetadata from './checkout-billing-address-block/block.json';
 import checkoutContactInformationMetadata from './checkout-contact-information-block/block.json';
@@ -131,15 +130,6 @@ registerCheckoutBlock( {
 	component: lazy( () =>
 		import(
 			/* webpackChunkName: "checkout-blocks/order-summary" */ './checkout-order-summary-block/block'
-		)
-	),
-} );
-
-registerCheckoutBlock( {
-	metadata: sampleBlockMetadata,
-	component: lazy( () =>
-		import(
-			/* webpackChunkName: "checkout-blocks/sample" */ './checkout-sample-block/frontend'
 		)
 	),
 } );
