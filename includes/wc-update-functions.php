@@ -2218,3 +2218,10 @@ function wc_update_450_sanitize_coupons_code() {
 	delete_option( 'woocommerce_update_450_last_coupon_id' );
 	return false;
 }
+
+/**
+ * Update DB version to 4.7.3.
+ */
+function wc_update_473_db_version() {
+	WC_Install::update_db_version( '4.7.3' );
+}

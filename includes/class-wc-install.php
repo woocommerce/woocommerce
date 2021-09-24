@@ -157,6 +157,11 @@ class WC_Install {
 			'wc_update_450_sanitize_coupons_code',
 			'wc_update_450_db_version',
 		),
+		'4.7.3' => array(
+			'Automattic\\WooCommerce\\Admin\\ReportCSVExporter::maybe_create_directory',
+			'wc_admin_update_164_delete_report_downloads',
+			'wc_update_473_db_version',
+		),
 	);
 
 	/**
