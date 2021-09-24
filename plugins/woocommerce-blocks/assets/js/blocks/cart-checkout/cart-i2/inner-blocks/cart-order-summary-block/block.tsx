@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { __ } from '@wordpress/i18n';
 import {
 	TotalsCoupon,
 	TotalsDiscount,
@@ -21,6 +22,7 @@ import {
 	useStoreCart,
 } from '@woocommerce/base-context/hooks';
 import { getSetting } from '@woocommerce/settings';
+import Title from '@woocommerce/base-components/title';
 
 /**
  * Internal dependencies
@@ -61,6 +63,9 @@ const Block = ( {
 
 	return (
 		<>
+			<Title headingLevel="2" className="wc-block-cart__totals-title">
+				{ __( 'Cart totals', 'woo-gutenberg-products-block' ) }
+			</Title>
 			<TotalsWrapper>
 				<Subtotal currency={ totalsCurrency } values={ cartTotals } />
 				<TotalsFees currency={ totalsCurrency } cartFees={ cartFees } />
