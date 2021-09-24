@@ -176,7 +176,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Tweak - Deleted unneeded double spaces in text strings. #30487
 * Tweak - Open Browse all extensions link in a new tab. #30640
 
-**WooCommerce Admin - 2.7.0**
+** WooCommerce Admin - 2.7.1 ** 
 
 * Fix - Allow super admins all capabilities within WooCommerce Admin
 * Fix - Fix end date for last periods
@@ -201,6 +201,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Update - Deleted OnboardingEmailMarketing note class #7595
 * Update - Removes the use of the depreciated woocommerce_shared_settings hook. #7480
 * Update - Updating eway logo in payment suggestions defaults
+* Update - Update marketing task completion logic. #7586
 * Dev - Add email address field to OBW #7552
 * Tweak - Add navigation items for the Marketplace menu. #7529
 * Tweak - Change all analytics strings and labels to sentence case. #6501
