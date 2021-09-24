@@ -58,9 +58,12 @@ class Install {
 			'wc_admin_update_170_db_version',
 		),
 		'2.7.0'  => array(
-			'wc_admin_update_270_update_task_list_options',
 			'wc_admin_update_270_delete_report_downloads',
 			'wc_admin_update_270_db_version',
+		),
+		'2.7.1'  => array(
+			'wc_admin_update_271_update_task_list_options',
+			'wc_admin_update_271_db_version',
 		),
 		'2.8.0'  => array(
 			'wc_admin_update_280_order_status',

@@ -156,25 +156,6 @@ function wc_admin_update_170_db_version() {
 }
 
 /**
- * Update the old task list options.
- */
-function wc_admin_update_270_update_task_list_options() {
-	$hidden_lists         = get_option( 'woocommerce_task_list_hidden_lists', array() );
-	$setup_list_hidden    = get_option( 'woocommerce_task_list_hidden', 'no' );
-	$extended_list_hidden = get_option( 'woocommerce_extended_task_list_hidden', 'no' );
-	if ( 'yes' === $setup_list_hidden ) {
-		$hidden_lists[] = 'setup';
-	}
-	if ( 'yes' === $extended_list_hidden ) {
-		$hidden_lists[] = 'extended';
-	}
-
-	update_option( 'woocommerce_task_list_hidden_lists', array_unique( $hidden_lists ) );
-	delete_option( 'woocommerce_task_list_hidden' );
-	delete_option( 'woocommerce_extended_task_list_hidden' );
-}
-
-/**
  * Delete the preexisting export files.
  */
 function wc_admin_update_270_delete_report_downloads() {
@@ -266,9 +247,35 @@ function wc_admin_update_270_db_version() {
 	Installer::update_db_version( '2.7.0' );
 }
 
- /**
-  * Update order stats `status`.
-  */
+/**
+ * Update the old task list options.
+ */
+function wc_admin_update_271_update_task_list_options() {
+	$hidden_lists         = get_option( 'woocommerce_task_list_hidden_lists', array() );
+	$setup_list_hidden    = get_option( 'woocommerce_task_list_hidden', 'no' );
+	$extended_list_hidden = get_option( 'woocommerce_extended_task_list_hidden', 'no' );
+	if ( 'yes' === $setup_list_hidden ) {
+		$hidden_lists[] = 'setup';
+	}
+	if ( 'yes' === $extended_list_hidden ) {
+		$hidden_lists[] = 'extended';
+	}
+
+	update_option( 'woocommerce_task_list_hidden_lists', array_unique( $hidden_lists ) );
+	delete_option( 'woocommerce_task_list_hidden' );
+	delete_option( 'woocommerce_extended_task_list_hidden' );
+}
+
+/**
+ * Update DB Version.
+ */
+function wc_admin_update_271_db_version() {
+	Installer::update_db_version( '2.7.1' );
+}
+
+/**
+ * Update order stats `status`.
+ */
 function wc_admin_update_280_order_status() {
 	global $wpdb;
 
