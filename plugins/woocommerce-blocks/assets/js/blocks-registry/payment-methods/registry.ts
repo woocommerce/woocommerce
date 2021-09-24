@@ -5,7 +5,7 @@ import deprecated from '@wordpress/deprecated';
 import type {
 	PaymentMethodConfiguration,
 	ExpressPaymentMethodConfiguration,
-	CanMakePaymentCallback,
+	CanMakePaymentExtensionCallback,
 	PaymentMethodConfigInstance,
 	PaymentMethods,
 	ExpressPaymentMethods,
@@ -81,7 +81,7 @@ export const registerExpressPaymentMethod = (
  */
 export const registerPaymentMethodExtensionCallbacks = (
 	namespace: string,
-	callbacks: Record< string, CanMakePaymentCallback >
+	callbacks: Record< string, CanMakePaymentExtensionCallback >
 ): void => {
 	if ( canMakePaymentExtensionsCallbacks[ namespace ] ) {
 		// eslint-disable-next-line no-console
