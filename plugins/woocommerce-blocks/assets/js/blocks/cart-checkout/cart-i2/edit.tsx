@@ -6,9 +6,10 @@ import classnames from 'classnames';
 import { __ } from '@wordpress/i18n';
 import { CartCheckoutFeedbackPrompt } from '@woocommerce/editor-components/feedback-prompt';
 import {
-	InnerBlocks,
 	useBlockProps,
+	InnerBlocks,
 	InspectorControls,
+	BlockControls,
 } from '@wordpress/block-editor';
 import { PanelBody, ToggleControl, Notice } from '@wordpress/components';
 import { CartCheckoutCompatibilityNotice } from '@woocommerce/editor-components/compatibility-notices';
@@ -31,7 +32,7 @@ import './editor.scss';
 import { addClassToBody, useBlockPropsWithLocking } from './hacks';
 import { useViewSwitcher } from './use-view-switcher';
 import type { Attributes } from './types';
-import { CartBlockControlsContext } from './context';
+import { CartBlockContext } from './context';
 
 // This is adds a class to body to signal if the selected block is locked
 addClassToBody();
@@ -140,24 +141,28 @@ export const Edit = ( {
 	className,
 	attributes,
 	setAttributes,
+	clientId,
 }: {
 	className: string;
 	attributes: Attributes;
 	setAttributes: ( attributes: Record< string, unknown > ) => undefined;
+	clientId: string;
 } ): JSX.Element => {
-	const { currentView, component: ViewSwitcherComponent } = useViewSwitcher( [
-		{
-			view: 'emptyCart',
-			label: __( 'Empty Cart', 'woo-gutenberg-products-block' ),
-			icon: <Icon srcElement={ removeCart } />,
-		},
-		{
-			view: 'filledCart',
-			label: __( 'Filled Cart', 'woo-gutenberg-products-block' ),
-			icon: <Icon srcElement={ filledCart } />,
-			default: true,
-		},
-	] );
+	const { currentView, component: ViewSwitcherComponent } = useViewSwitcher(
+		clientId,
+		[
+			{
+				view: 'woocommerce/filled-cart-block',
+				label: __( 'Filled Cart', 'woo-gutenberg-products-block' ),
+				icon: <Icon srcElement={ filledCart } />,
+			},
+			{
+				view: 'woocommerce/empty-cart-block',
+				label: __( 'Empty Cart', 'woo-gutenberg-products-block' ),
+				icon: <Icon srcElement={ removeCart } />,
+			},
+		]
+	);
 	const cartClassName = classnames( {
 		'has-dark-controls': attributes.hasDarkControls,
 	} );
@@ -212,13 +217,12 @@ export const Edit = ( {
 						attributes={ attributes }
 						setAttributes={ setAttributes }
 					/>
-					<ViewSwitcherComponent />
-					<CartBlockControlsContext.Provider
+					<BlockControls __experimentalShareWithChildBlocks>
+						<ViewSwitcherComponent />
+					</BlockControls>
+					<CartBlockContext.Provider
 						value={ {
-							viewSwitcher: {
-								component: ViewSwitcherComponent,
-								currentView,
-							},
+							currentView,
 						} }
 					>
 						<CartProvider>
@@ -230,7 +234,7 @@ export const Edit = ( {
 								/>
 							</div>
 						</CartProvider>
-					</CartBlockControlsContext.Provider>
+					</CartBlockContext.Provider>
 				</EditorProvider>
 			</BlockErrorBoundary>
 			<CartCheckoutCompatibilityNotice blockName="cart" />
