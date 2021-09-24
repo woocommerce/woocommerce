@@ -10,7 +10,6 @@ import { getSetting } from '@woocommerce/settings';
  * Internal dependencies
  */
 import Block from './block';
-import { useBlockPropsWithLocking } from '../../hacks';
 
 export const Edit = ( {
 	attributes,
@@ -27,7 +26,7 @@ export const Edit = ( {
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
 } ): JSX.Element => {
 	const { showRateAfterTaxName, isShippingCalculatorEnabled } = attributes;
-	const blockProps = useBlockPropsWithLocking( { attributes } );
+	const blockProps = useBlockProps();
 	const taxesEnabled = getSetting( 'taxesEnabled' ) as boolean;
 	const displayItemizedTaxes = getSetting(
 		'displayItemizedTaxes',

@@ -12,7 +12,7 @@ import { CHECKOUT_PAGE_ID } from '@woocommerce/block-settings';
  * Internal dependencies
  */
 import Block from './block';
-import { useBlockPropsWithLocking } from '../../hacks';
+
 export const Edit = ( {
 	attributes,
 	setAttributes,
@@ -23,7 +23,7 @@ export const Edit = ( {
 	};
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
 } ): JSX.Element => {
-	const blockProps = useBlockPropsWithLocking( { attributes } );
+	const blockProps = useBlockProps();
 	const { cartPageId = 0, showReturnToCart = true } = attributes;
 	const { current: savedCartPageId } = useRef( cartPageId );
 	const currentPostId = useSelect(
