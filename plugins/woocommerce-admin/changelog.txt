@@ -1,3 +1,20 @@
+== 2.6.5 09/22/2021 ==
+
+- Fix: Add filters to get new hidden options #7698
+
+== 2.6.4 09/21/2021 ==
+
+- Fix: Use installable extensions for local state versus free extensions. #7585
+
+== 2.6.3 09/21/2021 ==
+
+- Fix unsecured reports
+- Fix fatal error and unrelated results in analytics. #7682
+
+== 2.6.2 09/14/2021 ==
+
+- Fix Update task-item logic to only display content when expanded is true. #7611
+
 == 2.6.1 09/01/2021 ==
 
 - Update: Update marketing task completion logic. #7586
