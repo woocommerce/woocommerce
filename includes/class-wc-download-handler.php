@@ -241,11 +241,6 @@ class WC_Download_Handler {
 	 * @param string $filename  File name.
 	 */
 	public static function download_file_redirect( $file_path, $filename = '' ) {
-		$parsed_file_path = self::parse_file_path( $file_path );
-		$file_path = $parsed_file_path['file_path'];
-		if ( ! $parsed_file_path['remote_file'] ) {
-			$file_path = trim( preg_replace( '`^' . str_replace( '\\', '/', getcwd() ) . '`', '', $file_path ), '/' );
-		}
 		header( 'Location: ' . $file_path );
 		exit;
 	}
