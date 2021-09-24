@@ -1,5 +1,10 @@
 # Unreleased
 
+## Added
+
+- `utils.waitForTimeout( delay )` pause processing for `delay` milliseconds
+- `AdminEdit` class with utility functions for the respective edit screens
+
 # 0.1.6
 
 ## Added

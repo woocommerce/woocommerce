@@ -4,6 +4,11 @@
 import { pressKeyWithModifier } from '@wordpress/e2e-test-utils';
 
 /**
+ * Internal dependencies
+ */
+import { AdminEdit } from './pages/admin-edit';
+
+/**
  * Perform a "select all" and then fill a input.
  *
  * @param {string} selector
@@ -117,24 +122,8 @@ export const waitForSelectorWithoutThrow = async ( selector, timeoutInSeconds = 
  * @param {string} trashVerification
  */
 export const verifyPublishAndTrash = async ( button, publishNotice, publishVerification, trashVerification ) => {
-	// Wait for auto save
-	await page.waitFor( 2000 );
-
-	// Publish
-	await expect( page ).toClick( button );
-	await page.waitForSelector( publishNotice );
-
-	// Verify
-	await expect( page ).toMatchElement( publishNotice, { text: publishVerification } );
-	if ( button === '.order_actions li .save_order' ) {
-		await expect( page ).toMatchElement( '#select2-order_status-container', { text: 'Processing' } );
-		await expect( page ).toMatchElement(
-			'#woocommerce-order-notes .note_content',
-			{
-				text: 'Order status changed from Pending payment to Processing.',
-			}
-		);
-	}
+	const adminEdit = new AdminEdit();
+	await adminEdit.verifyPublish( button, publishNotice, publishVerification );
 
 	// Trash
 	await page.focus( 'a.submitdelete' );

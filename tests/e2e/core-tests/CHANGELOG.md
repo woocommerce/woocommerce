@@ -1,5 +1,9 @@
 # Unreleased
 
+## Changed
+
+- New coupon test deletes the coupon instead of trashing it.
+
 # 0.1.6
 
 ## Fixed
