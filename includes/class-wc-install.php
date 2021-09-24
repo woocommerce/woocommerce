@@ -161,6 +161,11 @@ class WC_Install {
 			'wc_update_500_fix_product_review_count',
 			'wc_update_500_db_version',
 		),
+		'5.3.2' => array(
+			'Automattic\\WooCommerce\\Admin\\ReportCSVExporter::maybe_create_directory',
+			'wc_admin_update_227_delete_report_downloads',
+			'wc_update_532_db_version',
+		),
 	);
 
 	/**
