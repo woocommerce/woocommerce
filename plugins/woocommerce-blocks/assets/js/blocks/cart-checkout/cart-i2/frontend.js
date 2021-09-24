@@ -5,12 +5,6 @@ import {
 	withStoreCartApiHydration,
 	withRestApiHydration,
 } from '@woocommerce/block-hocs';
-import {
-	StoreNoticesProvider,
-	StoreSnackbarNoticesProvider,
-	CartProvider,
-} from '@woocommerce/base-context/providers';
-import { SlotFillProvider } from '@woocommerce/blocks-checkout';
 import { getValidBlockAttributes } from '@woocommerce/base-utils';
 import { Children, cloneElement, isValidElement } from '@wordpress/element';
 import { useStoreCart } from '@woocommerce/base-context';
@@ -25,25 +19,6 @@ import { renderParentBlock } from '@woocommerce/atomic-utils';
 import './inner-blocks/register-components';
 import Block from './block';
 import { blockName, blockAttributes } from './attributes';
-
-/**
- * Wrapper component to supply API data and show empty cart view as needed.
- *
- * @param {*} props
- */
-const CartFrontend = ( props ) => {
-	return (
-		<StoreSnackbarNoticesProvider context="wc/cart">
-			<StoreNoticesProvider context="wc/cart">
-				<SlotFillProvider>
-					<CartProvider>
-						<Block { ...props } />
-					</CartProvider>
-				</SlotFillProvider>
-			</StoreNoticesProvider>
-		</StoreSnackbarNoticesProvider>
-	);
-};
 
 const getProps = ( el ) => {
 	return {
@@ -73,7 +48,7 @@ const Wrapper = ( { children } ) => {
 };
 
 renderParentBlock( {
-	Block: withStoreCartApiHydration( withRestApiHydration( CartFrontend ) ),
+	Block: withStoreCartApiHydration( withRestApiHydration( Block ) ),
 	blockName,
 	selector: '.wp-block-woocommerce-cart-i2',
 	getProps,
