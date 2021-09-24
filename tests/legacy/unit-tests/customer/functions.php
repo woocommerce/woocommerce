@@ -152,7 +152,7 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 
 		// Test download permissions.
 		$prod_download = new WC_Product_Download();
-		$prod_download->set_file( WC_ABSPATH . 'assets/images/help.png' );
+		$prod_download->set_file( plugin_dir_url( __FILE__ ) . '/assets/images/help.png' );
 		$prod_download->set_id( 'download' );
 
 		$product = new WC_Product_Simple();
@@ -382,7 +382,7 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 		$customer_id = wc_create_new_customer( 'test@example.com', 'testuser', 'testpassword' );
 
 		$prod_download = new WC_Product_Download();
-		$prod_download->set_file( WC_ABSPATH . 'assets/images/help.png' );
+		$prod_download->set_file( plugin_dir_url( __FILE__ ) . '/assets/images/help.png' );
 		$prod_download->set_id( 1 );
 
 		$product = new WC_Product_Simple();
