@@ -85,7 +85,13 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 == Changelog ==
 
-== 5.9.0 - 2021-09-14 =
+= 5.9.1 - 2021-09-23 =
+
+#### Bug fixes
+
+- Fix infinite recursion when removing an attribute filter from the Active filters block. ([4816](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4816))
+
+= 5.9.0 - 2021-09-14 =
 
 #### Enhancements
 
