@@ -1,7 +1,10 @@
 /**
  * External dependencies
  */
-import type { CanMakePaymentCallback } from '@woocommerce/type-defs/payments';
+import type {
+	CanMakePaymentCallback,
+	CanMakePaymentExtensionCallback,
+} from '@woocommerce/type-defs/payments';
 
 /**
  * Internal dependencies
@@ -38,7 +41,7 @@ export const canMakePaymentWithExtensions = (
 		// Gather all callbacks for paymentMethodName.
 		const namespacedCallbacks: Record<
 			ExtensionNamespace,
-			CanMakePaymentCallback
+			CanMakePaymentExtensionCallback
 		> = {};
 
 		Object.entries( extensionsCallbacks ).forEach(

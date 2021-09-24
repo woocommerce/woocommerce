@@ -1,11 +1,11 @@
 /**
  * External dependencies
  */
-import { CanMakePaymentCallback } from '@woocommerce/type-defs/payments';
+import { CanMakePaymentExtensionCallback } from '@woocommerce/type-defs/payments';
 
 type CanMakePaymentExtensionCallbacks = Record<
 	string,
-	CanMakePaymentCallback
+	CanMakePaymentExtensionCallback
 >;
 export type NamespacedCanMakePaymentExtensionsCallbacks = Record<
 	string,
