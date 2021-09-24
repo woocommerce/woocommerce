@@ -23,10 +23,11 @@ export const Edit = ( {
 	attributes: { text: string; checkbox: boolean };
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
 } ): JSX.Element => {
+	const blockProps = useBlockProps();
 	const currentText = text || termsCheckboxDefaultText;
 
 	return (
-		<>
+		<div { ...blockProps }>
 			<InspectorControls>
 				<PanelBody
 					title={ __(
@@ -100,7 +101,7 @@ export const Edit = ( {
 					</p>
 				</Notice>
 			) }
-		</>
+		</div>
 	);
 };
 
