@@ -35,7 +35,7 @@ import { CartCheckoutCompatibilityNotice } from '@woocommerce/editor-components/
  */
 import './styles/editor.scss';
 import { Columns } from './columns';
-import { addClassToBody } from './hacks';
+import { addClassToBody, useBlockPropsWithLocking } from './hacks';
 import { CheckoutBlockContext, CheckoutBlockControlsContext } from './context';
 import type { Attributes } from './types';
 
@@ -260,9 +260,9 @@ export const Edit = ( {
 			</PanelBody>
 		</InspectorControls>
 	);
-
+	const blockProps = useBlockPropsWithLocking();
 	return (
-		<>
+		<div { ...blockProps }>
 			<EditorProvider
 				previewData={ { previewCart, previewSavedPaymentMethods } }
 			>
@@ -305,7 +305,7 @@ export const Edit = ( {
 				</CheckoutProvider>
 			</EditorProvider>
 			<CartCheckoutCompatibilityNotice blockName="checkout" />
-		</>
+		</div>
 	);
 };
 

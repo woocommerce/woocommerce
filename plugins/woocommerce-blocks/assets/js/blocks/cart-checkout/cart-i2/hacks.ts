@@ -17,11 +17,12 @@ import {
 	store as blockEditorStore,
 } from '@wordpress/block-editor';
 import { isTextField } from '@wordpress/dom';
-import { useSelect, subscribe, select as _select } from '@wordpress/data';
+import { subscribe, select as _select } from '@wordpress/data';
 import { useEffect, useRef } from '@wordpress/element';
 import { MutableRefObject } from 'react';
 import { BACKSPACE, DELETE } from '@wordpress/keycodes';
 import { hasFilter } from '@wordpress/hooks';
+import { getBlockType } from '@wordpress/blocks';
 /**
  * Toggle class on body.
  *
@@ -73,64 +74,91 @@ export const addClassToBody = (): void => {
 	}
 };
 
+const isBlockLocked = ( clientId: string ): boolean => {
+	if ( ! clientId ) {
+		return false;
+	}
+	const { getBlock } = _select( blockEditorStore );
+	const block = getBlock( clientId );
+	// If lock.remove is defined at the block instance (not using the default value)
+	// Then we use it.
+	if ( typeof block?.attributes?.lock?.remove === 'boolean' ) {
+		return block.attributes.lock.remove;
+	}
+
+	// If we don't have lock on the block instance, we check the type
+	const blockType = getBlockType( block.name );
+	if ( typeof blockType?.attributes?.lock?.default?.remove === 'boolean' ) {
+		return blockType?.attributes?.lock?.default?.remove;
+	}
+	// If nothing is defined, return false
+	return false;
+};
+
 /**
- * This is a hook we use in conjunction with useBlockProps. Its goal is to check if a block is locked (move or remove)
- * and will stop the keydown event from propagating to stop it from being deleted via the keyboard.
+ * This is a hook we use in conjunction with useBlockProps. Its goal is to check if of the block's children is locked and being deleted.
+ * It will stop the keydown event from propagating to stop it from being deleted via the keyboard.
  *
- * @todo Disable custom locking support if native support is detected.
  */
-const useLockBlock = ( {
-	clientId,
+const useLockedChildren = ( {
 	ref,
-	attributes,
 }: {
-	clientId: string;
-	ref: MutableRefObject< Element | undefined >;
-	attributes: Record< string, unknown >;
+	ref: MutableRefObject< HTMLElement | undefined >;
 } ): void => {
 	const lockInCore = hasFilter(
 		'blocks.registerBlockType',
 		'core/lock/addAttribute'
 	);
-	const { isSelected } = useSelect(
-		( select ) => {
-			return {
-				isSelected: select( blockEditorStore ).isBlockSelected(
-					clientId
-				),
-			};
-		},
-		[ clientId ]
-	);
 
 	const node = ref.current;
-
 	return useEffect( () => {
-		if ( ! isSelected || ! node || lockInCore ) {
+		if ( ! node || lockInCore ) {
 			return;
 		}
 		function onKeyDown( event: KeyboardEvent ) {
 			const { keyCode, target } = event;
+
+			if ( ! ( target instanceof HTMLElement ) ) {
+				return;
+			}
+			// We're not trying to delete something here.
 			if ( keyCode !== BACKSPACE && keyCode !== DELETE ) {
 				return;
 			}
 
-			if ( target !== node || isTextField( target ) ) {
+			// We're in a field, so we should let text be deleted.
+			if ( isTextField( target ) ) {
 				return;
 			}
+
+			// Typecast to fix issue with isTextField.
+			const targetNode = target as HTMLElement;
+
+			// Our target isn't a block.
+			if ( targetNode.dataset.block === undefined ) {
+				return;
+			}
+
+			const clientId = targetNode.dataset.block;
+			const isLocked = isBlockLocked( clientId );
 			// Prevent the keyboard event from propogating if it supports locking.
-			if ( attributes?.lock?.remove ) {
+			if ( isLocked ) {
 				event.preventDefault();
 				event.stopPropagation();
+				event.stopImmediatePropagation();
 			}
 		}
-
-		node.addEventListener( 'keydown', onKeyDown, true );
+		node.addEventListener( 'keydown', onKeyDown, {
+			capture: true,
+			passive: false,
+		} );
 
 		return () => {
-			node.removeEventListener( 'keydown', onKeyDown, true );
+			node.removeEventListener( 'keydown', onKeyDown, {
+				capture: true,
+			} );
 		};
-	}, [ node, isSelected, lockInCore, attributes ] );
+	}, [ node, lockInCore ] );
 };
 
 /**
@@ -139,13 +167,10 @@ const useLockBlock = ( {
 export const useBlockPropsWithLocking = (
 	props: Record< string, unknown > = {}
 ): Record< string, unknown > => {
-	const ref = useRef< Element >();
-	const { attributes } = props;
+	const ref = useRef< HTMLElement >();
 	const blockProps = useBlockProps( { ref, ...props } );
-	useLockBlock( {
+	useLockedChildren( {
 		ref,
-		attributes,
-		clientId: blockProps[ 'data-block' ],
 	} );
 	return blockProps;
 };

@@ -28,7 +28,7 @@ import { Icon, filledCart, removeCart } from '@woocommerce/icons';
  * Internal dependencies
  */
 import './editor.scss';
-import { addClassToBody } from './hacks';
+import { addClassToBody, useBlockPropsWithLocking } from './hacks';
 import { useViewSwitcher } from './use-view-switcher';
 import type { Attributes } from './types';
 import { CartBlockControlsContext } from './context';
@@ -184,12 +184,14 @@ export const Edit = ( {
 		],
 		[ 'woocommerce/empty-cart-block', {}, [] ],
 	];
+	const blockProps = useBlockPropsWithLocking( {
+		className: classnames( className, 'wp-block-woocommerce-cart', {
+			'is-editor-preview': attributes.isPreview,
+		} ),
+	} );
+
 	return (
-		<div
-			className={ classnames( className, 'wp-block-woocommerce-cart', {
-				'is-editor-preview': attributes.isPreview,
-			} ) }
-		>
+		<div { ...blockProps }>
 			<BlockErrorBoundary
 				header={ __(
 					'Cart Block Error',

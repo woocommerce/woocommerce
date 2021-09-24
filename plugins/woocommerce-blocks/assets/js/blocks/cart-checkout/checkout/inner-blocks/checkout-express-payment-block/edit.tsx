@@ -14,7 +14,6 @@ import classnames from 'classnames';
  */
 import Block from './block';
 import './editor.scss';
-import { useBlockPropsWithLocking } from '../../hacks';
 
 /**
  * Renders a placeholder in the editor.
@@ -60,7 +59,7 @@ export const Edit = ( {
 } ): JSX.Element | null => {
 	const { paymentMethods, isInitialized } = useExpressPaymentMethods();
 	const hasExpressPaymentMethods = Object.keys( paymentMethods ).length > 0;
-	const blockProps = useBlockPropsWithLocking( {
+	const blockProps = useBlockProps( {
 		className: classnames( {
 			'wp-block-woocommerce-checkout-express-payment-block--has-express-payment-methods': hasExpressPaymentMethods,
 		} ),

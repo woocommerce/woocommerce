@@ -14,7 +14,6 @@ import classnames from 'classnames';
  */
 import Block from './block';
 import './editor.scss';
-import { useBlockPropsWithLocking } from '../../hacks';
 
 /**
  * Renders a placeholder in the editor.
@@ -48,23 +47,13 @@ const NoExpressPaymentMethodsPlaceholder = () => {
 	);
 };
 
-export const Edit = ( {
-	attributes,
-}: {
-	attributes: {
-		lock: {
-			move: boolean;
-			remove: boolean;
-		};
-	};
-} ): JSX.Element | null => {
+export const Edit = (): JSX.Element | null => {
 	const { paymentMethods, isInitialized } = useExpressPaymentMethods();
 	const hasExpressPaymentMethods = Object.keys( paymentMethods ).length > 0;
-	const blockProps = useBlockPropsWithLocking( {
+	const blockProps = useBlockProps( {
 		className: classnames( {
 			'wp-block-woocommerce-cart-express-payment-block--has-express-payment-methods': hasExpressPaymentMethods,
 		} ),
-		attributes,
 	} );
 
 	if ( ! isInitialized ) {

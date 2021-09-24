@@ -6,21 +6,10 @@ import { useBlockProps } from '@wordpress/block-editor';
 /**
  * Internal dependencies
  */
-import { useBlockPropsWithLocking } from '../../hacks';
-
 import Block from './block';
 
-export const Edit = ( {
-	attributes,
-}: {
-	attributes: {
-		lock: {
-			move: boolean;
-			remove: boolean;
-		};
-	};
-} ): JSX.Element => {
-	const blockProps = useBlockPropsWithLocking( { attributes } );
+export const Edit = (): JSX.Element => {
+	const blockProps = useBlockProps();
 
 	return (
 		<div { ...blockProps }>

@@ -9,19 +9,9 @@ import { Disabled } from '@wordpress/components';
  */
 import Block from './block';
 import './editor.scss';
-import { useBlockPropsWithLocking } from '../../hacks';
 
-export const Edit = ( {
-	attributes,
-}: {
-	attributes: {
-		lock: {
-			move: boolean;
-			remove: boolean;
-		};
-	};
-} ): JSX.Element => {
-	const blockProps = useBlockPropsWithLocking( { attributes } );
+export const Edit = (): JSX.Element => {
+	const blockProps = useBlockProps();
 	return (
 		<div { ...blockProps }>
 			<Disabled>

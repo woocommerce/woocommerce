@@ -12,7 +12,6 @@ import { CART_PAGE_ID } from '@woocommerce/block-settings';
  * Internal dependencies
  */
 import Block from './block';
-import { useBlockPropsWithLocking } from '../../hacks';
 export const Edit = ( {
 	attributes,
 	setAttributes,
@@ -22,7 +21,7 @@ export const Edit = ( {
 	};
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
 } ): JSX.Element => {
-	const blockProps = useBlockPropsWithLocking( { attributes } );
+	const blockProps = useBlockProps();
 	const { checkoutPageId = 0 } = attributes;
 	const { current: savedCheckoutPageId } = useRef( checkoutPageId );
 	const currentPostId = useSelect(
