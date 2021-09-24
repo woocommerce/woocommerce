@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ed5e46446f7de86c068d881aa43b4c70",
+    "content-hash": "a5f3e797cf714915d1ab2201cc0017e3",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -532,16 +532,16 @@
         },
         {
             "name": "woocommerce/woocommerce-admin",
-            "version": "2.4.4",
+            "version": "2.4.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-admin.git",
-                "reference": "fba09c51a08629b801a6667e6479794d8a919228"
+                "reference": "f8361c9b59c0a11e244b2e95b26bf7c5e5506a7d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/fba09c51a08629b801a6667e6479794d8a919228",
-                "reference": "fba09c51a08629b801a6667e6479794d8a919228",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/f8361c9b59c0a11e244b2e95b26bf7c5e5506a7d",
+                "reference": "f8361c9b59c0a11e244b2e95b26bf7c5e5506a7d",
                 "shasum": ""
             },
             "require": {
@@ -578,9 +578,9 @@
             "homepage": "https://github.com/woocommerce/woocommerce-admin",
             "support": {
                 "issues": "https://github.com/woocommerce/woocommerce-admin/issues",
-                "source": "https://github.com/woocommerce/woocommerce-admin/tree/v2.4.4"
+                "source": "https://github.com/woocommerce/woocommerce-admin/tree/v2.4.5"
             },
-            "time": "2021-07-21T03:52:24+00:00"
+            "time": "2021-09-22T04:47:04+00:00"
         },
         {
             "name": "woocommerce/woocommerce-blocks",

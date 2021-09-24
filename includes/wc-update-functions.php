@@ -2266,3 +2266,10 @@ function wc_update_500_fix_product_review_count() {
 function wc_update_500_db_version() {
 	WC_Install::update_db_version( '5.0.0' );
 }
+
+/**
+ * Update DB version to 5.5.3.
+ */
+function wc_update_553_db_version() {
+	WC_Install::update_db_version( '5.5.3' );
+}
