@@ -29,7 +29,7 @@ type WPNotice = {
 
 type NoticeOptions = {
 	id: string;
-	type: string;
+	type?: string;
 	isDismissible: boolean;
 };
 
