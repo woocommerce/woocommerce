@@ -28,6 +28,10 @@ class ComposerStaticInit08a6ad0ed5b58cf461fde712d9bcae99
         array (
             'Composer\\Installers\\' => 20,
         ),
+        'B' => 
+        array (
+            'Bamarni\\Composer\\Bin\\' => 21,
+        ),
         'A' => 
         array (
             'Automattic\\WooCommerce\\Vendor\\League\\Container\\' => 47,
@@ -64,6 +68,10 @@ class ComposerStaticInit08a6ad0ed5b58cf461fde712d9bcae99
         'Composer\\Installers\\' => 
         array (
             0 => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers',
+        ),
+        'Bamarni\\Composer\\Bin\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/bamarni/composer-bin-plugin/src',
         ),
         'Automattic\\WooCommerce\\Vendor\\League\\Container\\' => 
         array (

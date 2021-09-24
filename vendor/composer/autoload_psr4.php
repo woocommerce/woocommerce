@@ -12,6 +12,7 @@ return array(
     'MaxMind\\Db\\' => array($vendorDir . '/maxmind-db/reader/src/MaxMind/Db'),
     'League\\Container\\' => array($vendorDir . '/league/container/src'),
     'Composer\\Installers\\' => array($vendorDir . '/composer/installers/src/Composer/Installers'),
+    'Bamarni\\Composer\\Bin\\' => array($vendorDir . '/bamarni/composer-bin-plugin/src'),
     'Automattic\\WooCommerce\\Vendor\\League\\Container\\' => array($vendorDir . '/league/container'),
     'Automattic\\WooCommerce\\Tests\\' => array($baseDir . '/tests/php/src'),
     'Automattic\\WooCommerce\\Testing\\Tools\\' => array($baseDir . '/tests/Tools'),
