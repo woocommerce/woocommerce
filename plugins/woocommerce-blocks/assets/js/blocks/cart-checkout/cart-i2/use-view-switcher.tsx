@@ -3,50 +3,52 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
+import { useDispatch, select } from '@wordpress/data';
 import { Toolbar, ToolbarDropdownMenu } from '@wordpress/components';
-import { BlockControls } from '@wordpress/block-editor';
 import { Icon, eye } from '@woocommerce/icons';
+import { store as blockEditorStore } from '@wordpress/block-editor';
 
 interface View {
 	view: string;
 	label: string;
 	icon: string | JSX.Element;
-	default?: boolean;
 }
 
 export const useViewSwitcher = (
+	clientId: string,
 	views: View[]
 ): {
 	currentView: string;
 	component: () => JSX.Element;
 } => {
-	const initialView =
-		views?.find( ( view ) => view.default === true ) || views[ 0 ];
+	const initialView = views[ 0 ];
 	const [ currentView, setCurrentView ] = useState( initialView );
+	const { selectBlock } = useDispatch( 'core/block-editor' );
+	const { getBlock } = select( blockEditorStore );
 
 	const ViewSwitcherComponent = () => (
-		<BlockControls>
-			<Toolbar>
-				<ToolbarDropdownMenu
-					label={ __(
-						'Switch view',
-						'woo-gutenberg-products-block'
-					) }
-					text={ currentView.label }
-					icon={
-						<Icon
-							srcElement={ eye }
-							style={ { marginRight: '8px' } }
-						/>
-					}
-					controls={ views.map( ( view ) => ( {
-						...view,
-						title: view.label,
-						onClick: () => setCurrentView( view ),
-					} ) ) }
-				/>
-			</Toolbar>
-		</BlockControls>
+		<Toolbar>
+			<ToolbarDropdownMenu
+				label={ __( 'Switch view', 'woo-gutenberg-products-block' ) }
+				text={ currentView.label }
+				icon={
+					<Icon srcElement={ eye } style={ { marginRight: '8px' } } />
+				}
+				controls={ views.map( ( view ) => ( {
+					...view,
+					title: view.label,
+					onClick: () => {
+						setCurrentView( view );
+						selectBlock(
+							getBlock( clientId ).innerBlocks.find(
+								( block: { name: string } ) =>
+									block.name === view.view
+							)?.clientId || clientId
+						);
+					},
+				} ) ) }
+			/>
+		</Toolbar>
 	);
 
 	return {

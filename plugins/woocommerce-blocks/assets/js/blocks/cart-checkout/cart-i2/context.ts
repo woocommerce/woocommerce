@@ -6,22 +6,14 @@ import { createContext, useContext } from '@wordpress/element';
 /**
  * Context consumed by inner blocks.
  */
-export type CartBlockControlsContextProps = {
-	viewSwitcher: {
-		component: () => JSX.Element | null;
-		currentView: string;
-	};
+export type CartBlockContextProps = {
+	currentView: string;
 };
 
-export const CartBlockControlsContext = createContext<
-	CartBlockControlsContextProps
->( {
-	viewSwitcher: {
-		component: () => null,
-		currentView: 'filledCart',
-	},
+export const CartBlockContext = createContext< CartBlockContextProps >( {
+	currentView: '',
 } );
 
-export const useCartBlockControlsContext = (): CartBlockControlsContextProps => {
-	return useContext( CartBlockControlsContext );
+export const useCartBlockContext = (): CartBlockContextProps => {
+	return useContext( CartBlockContext );
 };

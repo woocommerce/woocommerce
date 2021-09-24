@@ -29,6 +29,7 @@ const settings = {
 		align: false,
 		html: false,
 		multiple: false,
+		__experimentalExposeControlsToChildren: true,
 	},
 	example: {
 		attributes: {
