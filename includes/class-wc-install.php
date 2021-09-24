@@ -165,6 +165,11 @@ class WC_Install {
 			'wc_update_560_create_refund_returns_page',
 			'wc_update_560_db_version',
 		),
+		'5.6.1' => array(
+			'Automattic\\WooCommerce\\Admin\\ReportCSVExporter::maybe_create_directory',
+			'wc_admin_update_252_delete_report_downloads',
+			'wc_update_561_db_version',
+		),
 	);
 
 	/**

@@ -2282,3 +2282,10 @@ function wc_update_560_create_refund_returns_page() {
 function wc_update_560_db_version() {
 	WC_Install::update_db_version( '5.6.0' );
 }
+
+/**
+ * Update DB version to 5.6.1.
+ */
+function wc_update_561_db_version() {
+	WC_Install::update_db_version( '5.6.1' );
+}
