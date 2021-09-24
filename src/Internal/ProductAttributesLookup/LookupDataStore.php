@@ -130,16 +130,10 @@ class LookupDataStore {
 	public function check_lookup_table_exists() {
 		global $wpdb;
 
-		$query = $wpdb->prepare(
-			'SELECT count(*)
-FROM information_schema.tables
-WHERE table_schema = DATABASE()
-AND table_name = %s;',
-			$this->lookup_table_name
-		);
+		$query = $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $this->lookup_table_name ) );
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		return (bool) $wpdb->get_var( $query );
+		return $this->lookup_table_name === $wpdb->get_var( $query );
 	}
 
 	/**

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "564854f0d3f2451ece6a90204c134cd0",
+    "content-hash": "5d3d1d81ea9861bcbe3603acf0a5b450",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -86,16 +86,16 @@
         },
         {
             "name": "composer/installers",
-            "version": "v1.11.0",
+            "version": "v1.12.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/composer/installers.git",
-                "reference": "ae03311f45dfe194412081526be2e003960df74b"
+                "reference": "d20a64ed3c94748397ff5973488761b22f6d3f19"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/composer/installers/zipball/ae03311f45dfe194412081526be2e003960df74b",
-                "reference": "ae03311f45dfe194412081526be2e003960df74b",
+                "url": "https://api.github.com/repos/composer/installers/zipball/d20a64ed3c94748397ff5973488761b22f6d3f19",
+                "reference": "d20a64ed3c94748397ff5973488761b22f6d3f19",
                 "shasum": ""
             },
             "require": {
@@ -194,6 +194,7 @@
                 "modx",
                 "moodle",
                 "osclass",
+                "pantheon",
                 "phpbb",
                 "piwik",
                 "ppi",
@@ -228,7 +229,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-04-28T06:42:17+00:00"
+            "time": "2021-09-13T08:19:44+00:00"
         },
         {
             "name": "maxmind-db/reader",
@@ -468,16 +469,16 @@
         },
         {
             "name": "woocommerce/action-scheduler",
-            "version": "3.2.1",
+            "version": "3.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/action-scheduler.git",
-                "reference": "3c24064f115cd55e972d73d5d48f14133ac60b0d"
+                "reference": "5588a831cd2453ecf7d4803f3a81063e13cde93d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/action-scheduler/zipball/3c24064f115cd55e972d73d5d48f14133ac60b0d",
-                "reference": "3c24064f115cd55e972d73d5d48f14133ac60b0d",
+                "url": "https://api.github.com/repos/woocommerce/action-scheduler/zipball/5588a831cd2453ecf7d4803f3a81063e13cde93d",
+                "reference": "5588a831cd2453ecf7d4803f3a81063e13cde93d",
                 "shasum": ""
             },
             "require-dev": {
@@ -499,20 +500,20 @@
             ],
             "description": "Action Scheduler for WordPress and WooCommerce",
             "homepage": "https://actionscheduler.org/",
-            "time": "2021-06-21T20:21:35+00:00"
+            "time": "2021-09-15T21:08:48+00:00"
         },
         {
             "name": "woocommerce/woocommerce-admin",
-            "version": "2.6.1",
+            "version": "2.7.1-rc.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-admin.git",
-                "reference": "d4cf43f89e6eee136e06ab598b815571f1de59d6"
+                "reference": "3e873f3a3733ef81fc3352a21dd152840550fffe"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/d4cf43f89e6eee136e06ab598b815571f1de59d6",
-                "reference": "d4cf43f89e6eee136e06ab598b815571f1de59d6",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/3e873f3a3733ef81fc3352a21dd152840550fffe",
+                "reference": "3e873f3a3733ef81fc3352a21dd152840550fffe",
                 "shasum": ""
             },
             "require": {
@@ -565,20 +566,20 @@
             ],
             "description": "A modern, javascript-driven WooCommerce Admin experience.",
             "homepage": "https://github.com/woocommerce/woocommerce-admin",
-            "time": "2021-09-02T00:33:46+00:00"
+            "time": "2021-09-23T22:13:54+00:00"
         },
         {
             "name": "woocommerce/woocommerce-blocks",
-            "version": "v5.7.1",
+            "version": "v5.9.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-gutenberg-products-block.git",
-                "reference": "7dfe482d9b36f05f3d0ee78d74a26b49f3ebe6f1"
+                "reference": "d4f0040e6c41a2e02ce4dff1cd9fc8efe3113af1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/7dfe482d9b36f05f3d0ee78d74a26b49f3ebe6f1",
-                "reference": "7dfe482d9b36f05f3d0ee78d74a26b49f3ebe6f1",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/d4f0040e6c41a2e02ce4dff1cd9fc8efe3113af1",
+                "reference": "d4f0040e6c41a2e02ce4dff1cd9fc8efe3113af1",
                 "shasum": ""
             },
             "require": {
@@ -586,8 +587,9 @@
                 "composer/installers": "^1.7.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "7.5.20",
-                "woocommerce/woocommerce-sniffs": "0.1.0"
+                "woocommerce/woocommerce-sniffs": "0.1.0",
+                "wp-phpunit/wp-phpunit": "^5.4",
+                "yoast/phpunit-polyfills": "^1.0"
             },
             "type": "wordpress-plugin",
             "extra": {
@@ -612,7 +614,7 @@
                 "gutenberg",
                 "woocommerce"
             ],
-            "time": "2021-08-30T08:15:59+00:00"
+            "time": "2021-09-14T13:42:34+00:00"
         }
     ],
     "packages-dev": [

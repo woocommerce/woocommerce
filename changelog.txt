@@ -1,5 +1,112 @@
 == Changelog ==
 
+= 5.7.1 2021-09-23 =
+
+**WooCommerce**
+
+* Dev - Revert Download filepaths changes.
+
+**WooCommerce Admin - 2.6.5**
+
+- Fix: Add filters to get new hidden options #7698
+
+**WooCommerce Blocks - 5.7.2**
+
+- Fix - Infinite recursion when removing an attribute filter from the Active filters block. #4816
+- Fix - Fix Product Search block displaying incorrectly. #4740
+
+= 5.7.0 2021-09-21 =
+
+**WooCommerce**
+
+* Fix - WC default pages are being re-created during db migration in some cases. #30540
+* Fix - Use type casts to reduce the risk of type errors in some unusual conditions. #30493
+* Fix - Restores Select2 4.0.3 for backwards compatibility reasons. #30473
+* Fix - product attribute permalinks not working for non-ASCII characters. #30443
+* Fix - Variations menu order not applying correctly when manually set in some cases. #30423
+* Fix - Users with capabilities such as the admin are not able to the see downloadable file images after uploading. #30385
+* Fix - Products quick edit was not showing the correct value for visibility setting. #30374
+* Fix - Fixed inability to set payment token as non-default. #30176
+* Dev - Add payment method title for the option "Other". #30256
+* Dev - Remove tracking of admin user agent. #30514
+* Dev - Added a new Tracks event when the user views the My Subscriptions page. #30488
+* Dev - Added new woocommerce_product_options_external hook. #30448
+* Dev - Update countries with no states to be consistent in codebase. #30435
+* Dev - Split the Extensions page in WP Admin and add respective menu items. #30380
+* Dev - Set 'WC_Customer::$object_type' to 'customer'. #30325
+* Dev - Added new woocommerce_product_options_external hook. #30229
+* Enhancement - Add mobile section menu to marketplace. #30499
+* Enhancement - Track the state and postcode of the store location. #30483
+* Enhancement - Split the "Extensions" page into two pages, "Marketplace" and "My Subscriptions". Apply new design to Marketplace. #30391
+* Enhancement - Added new Ukrainian states. #30230
+* Enhancement - Update locale-info.php to contain all the countries, currency specs and locale information. #30216
+* Tweak - Update product card on mobile devices so that content doesn't overflow. #30498
+* Tweak - Change top bar menu to a dropdown menu. #30498
+* Tweak - Add top margin above .addons-button in promos, to ensure there's a proper gap above it on smaller viewports. #30497
+* Tweak - Slightly change the wording and styling of the Search results for label at the top of extensions search results. #30497
+* Tweak - Display notices properly in Marketplace page. #30478
+* Tweak - Update the Marketplace page menu styles to match the current design. #30464
+* Tweak - Update product cards on the WooCommerce > Extensions page in WP Admin to match current designs. #30410
+* Tweak - Update the Marketplace/Addons header to match new designs. #30389
+* Tweak - Renamed "ZIP" to "ZIP Code" and "Pin code" to "PIN" for US & India, respectively. #30204
+* Tweak - Download filepaths.
+
+**WooCommerce Admin - 2.6.0 & 2.6.1 & 2.6.2 & 2.6.3 & 2.6.4**
+
+- Fix: Fixes action button mis-alignment within card footer. #7412
+- Fix: Fixing issues with ReportTable component data not populating correctly #7355
+- Fix: Fix tracks events for payment gateway suggestions #7304
+- Fix: Update status values in CSV download to match the table #7284
+- Fix: Allow super admins all capabilities within WooCommerce Admin #7489
+- Fix: Fix blank screen by setting a default value #7506
+- Fix: Fix analytics overview re-arrangement on initial load. #7475
+- Fix: Fix up onboarding profiler not working when opted out of tracking #7490
+- Fix: Fix blank screen on analytics screens when searching #7482
+- Fix: Fix all links with hash to behind query parameters #7483
+- Fix: Fix Stats module CSS issue introduced by Gutenberg #7488
+- Fix: Fix marketing task visibility #7580
+- Fix: Fix stats-overview card padding issue #7594
+- Fix: Fix layout issue on the marketing task #7598
+- Fix: Use installable extensions for local state versus free extensions. #7585
+- Fix: Fix unsecured reports
+- Fix: Fix fatal error and unrelated results in analytics. #7682
+- Fix Update task-item logic to only display content when expanded is true. #7611
+- Add: Add boolean isReverseTrend prop to SummaryNumber to show "positive" delta for negative numbers. #7357
+- Add: Adding links to help panel for marketing task #7384
+- Add: Add installed marketing extensions card to extensions task #7419
+- Add: Add marketing extensions task to task list #7383
+- Add: Add tracks to marketing manage button click #7467
+- Add: Add default marketing extensions as fallbacks #7466
+- Add: Add marketing task completion check and tests #7451
+- Add navigation items for the Marketplace menu. #7529
+- Update: Add locale param as part of free extensions request #7391
+- Update: Increase per_page value for search results on the Analytics pages. #7385
+- Update: Removing grow section from local free extensions in OBW #7386
+- Update: Don't show the marketing task if no marketing tasks exist #7460
+- Update: Delete free extensions transient on WCA update #7454
+- Update: Update business details to use extensions data store #7452
+- Update: Split Extensions page into Marketplace and My Subscriptions. #7471
+- Update: Update marketing task completion logic. #7586
+- Dev: Added utm_medium=product to woocommerce.com links. #7408
+- Dev: Update Jest to version 27. #7430
+- Tweak: Refactor on payment settings recommendations eligibility component for reuse. #7447
+- Tweak: Register wc-admin page for all users and handle authorization in client #7285
+
+**WooCommerce Blocks - 5.6.0 & 5.7.0 & 5.7.1**
+
+- Enhancement - Featured Category Block: Allow user to re-select categories using the edit icon. #4559
+- Enhancement - Update pagination arrows to match core. #4364
+- Fix - Adjusted store notice class names so that error notices show the correct icons. #4568
+- Fix - Reviews by Category: Show review count instead of product count. #4552
+- Fix - Add server side rendering to search block so the block can be used by non-admins. #4551
+- Fix - Twenty Twenty: Fix broken sale badge left alignment. #4549
+- Fix - Twenty Twenty-One: Adjust removable chip background color. #4547
+- Fix - Fix handpicked product selections when a store has over 100 products. #4534
+- Fix - Replace .screen-reader-text with .hidden for elements that are not relevant to screen readers. #4530
+- Fix - Fixed the SKU search on the /wc/store/products endpoint. #4469
+- Fix - Fix memory leak when previewing transform options for the All reviews block. #4428
+- Fix - Disable Cart, Checkout, All Products & filters blocks from the widgets screen. #4646
+
 = 5.6.0 2021-08-17 =
 
 **WooCommerce**

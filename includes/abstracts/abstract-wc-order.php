@@ -10,6 +10,8 @@
  * @package     WooCommerce\Classes
  */
 
+use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -1361,14 +1363,23 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function add_product( $product, $qty = 1, $args = array() ) {
 		if ( $product ) {
+			$order = ArrayUtil::get_value_or_default( $args, 'order' );
+			$total = wc_get_price_excluding_tax(
+				$product,
+				array(
+					'qty'   => $qty,
+					'order' => $order,
+				)
+			);
+
 			$default_args = array(
 				'name'         => $product->get_name(),
 				'tax_class'    => $product->get_tax_class(),
 				'product_id'   => $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id(),
 				'variation_id' => $product->is_type( 'variation' ) ? $product->get_id() : 0,
 				'variation'    => $product->is_type( 'variation' ) ? $product->get_attributes() : array(),
-				'subtotal'     => wc_get_price_excluding_tax( $product, array( 'qty' => $qty ) ),
-				'total'        => wc_get_price_excluding_tax( $product, array( 'qty' => $qty ) ),
+				'subtotal'     => $total,
+				'total'        => $total,
 				'quantity'     => $qty,
 			);
 		} else {
@@ -1392,7 +1403,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			}
 		}
 
-		$item = new WC_Order_Item_Product();
+		$item = wc_get_container()->get( LegacyProxy::class )->get_instance_of( WC_Order_Item_Product::class );
 		$item->set_props( $args );
 		$item->set_backorder_meta();
 		$item->set_order_id( $this->get_id() );
