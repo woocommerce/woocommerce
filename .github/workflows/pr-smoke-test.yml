@@ -47,13 +47,8 @@ jobs:
           npx wc-e2e test:e2e
 
       - name: Remove label from pull request.
-        if: always()
-        uses: actions/github-script@v4
+        if: "${{ contains(github.event.pull_request.labels.*.name, 'run: smoke tests') }}"
+        uses: actions-ecosystem/action-remove-labels@v1
         with:
-          script: |
-            github.issues.removeLabel({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              name: 'run: smoke tests'
-            })
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          labels: 'run: smoke tests'
