@@ -85,7 +85,6 @@ export type TasksStatusState = {
 	isAppearanceComplete: boolean;
 	isTaxComplete: boolean;
 	shippingZonesCount: number;
-	stripeSupportedCountries: string[];
 	stylesheet: string;
 	taxJarActivated: boolean;
 	// TODO - fill out this type

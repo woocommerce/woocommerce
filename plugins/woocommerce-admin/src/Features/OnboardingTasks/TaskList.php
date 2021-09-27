@@ -26,14 +26,14 @@ class TaskList {
 	 *
 	 * @var string
 	 */
-	protected $id = '';
+	public $id = '';
 
 	/**
 	 * Title.
 	 *
 	 * @var string
 	 */
-	protected $title = '';
+	public $title = '';
 
 	/**
 	 * Title.

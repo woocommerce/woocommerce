@@ -712,15 +712,6 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'stripeSupportedCountries'       => array(
-					'type'        => 'array',
-					'description' => __( 'Country codes that are supported by Stripe.', 'woocommerce-admin' ),
-					'context'     => array( 'view' ),
-					'readonly'    => true,
-					'items'       => array(
-						'type' => 'string',
-					),
-				),
 				'taxJarActivated'                => array(
 					'type'        => 'boolean',
 					'description' => __( 'If the store has the TaxJar extension active.', 'woocommerce-admin' ),
@@ -762,8 +753,14 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_tasks() {
-		$task_lists = TaskLists::get_all();
-		return rest_ensure_response( $task_lists );
+		$lists = TaskLists::get_lists();
+		$json  = array_map(
+			function( $list ) {
+				return $list->get_json();
+			},
+			$lists
+		);
+		return rest_ensure_response( array_values( apply_filters( 'woocommerce_admin_onboarding_tasks', $json ) ) );
 	}
 
 	/**

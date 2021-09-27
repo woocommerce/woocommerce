@@ -17,17 +17,17 @@ class StoreDetails {
 		$profiler_data = get_option( Onboarding::PROFILE_DATA_OPTION, array() );
 
 		return array(
-			'id'          => 'store_details',
-			'title'       => __( 'Store details', 'woocommerce-admin' ),
-			'content'     => __(
+			'id'           => 'store_details',
+			'title'        => __( 'Store details', 'woocommerce-admin' ),
+			'content'      => __(
 				'Your store address is required to set the origin country for shipping, currencies, and payment options.',
 				'woocommerce-admin'
 			),
-			'actionLabel' => __( "Let's go", 'woocommerce-admin' ),
-			'actionUrl'   => '/setup-wizard',
-			'isComplete'  => isset( $profiler_data['completed'] ) && true === $profiler_data['completed'],
-			'isVisible'   => true,
-			'time'        => __( '4 minutes', 'woocommerce-admin' ),
+			'action_label' => __( "Let's go", 'woocommerce-admin' ),
+			'action_url'   => '/setup-wizard',
+			'is_complete'  => isset( $profiler_data['completed'] ) && true === $profiler_data['completed'],
+			'can_view'     => true,
+			'time'         => __( '4 minutes', 'woocommerce-admin' ),
 		);
 	}
 }
