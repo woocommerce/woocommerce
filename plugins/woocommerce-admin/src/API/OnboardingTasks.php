@@ -777,7 +777,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 
 		$is_dismissable = false;
 
-		$task = OnboardingTasksFeature::get_task_by_id( $id );
+		$task = TaskLists::get_task( $id );
 
 		if ( $task && isset( $task['isDismissable'] ) && $task['isDismissable'] ) {
 			$is_dismissable = true;
@@ -801,7 +801,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 			wc_admin_record_tracks_event( 'tasklist_dismiss_task', array( 'task_name' => $id ) );
 		}
 
-		$task = OnboardingTasksFeature::get_task_by_id( $id );
+		$task = TaskLists::get_task( $id );
 
 		return rest_ensure_response( $task );
 	}
@@ -823,7 +823,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 			wc_admin_record_tracks_event( 'tasklist_undo_dismiss_task', array( 'task_name' => $id ) );
 		}
 
-		$task = OnboardingTasksFeature::get_task_by_id( $id );
+		$task = TaskLists::get_task( $id );
 
 		return rest_ensure_response( $task );
 	}
@@ -842,7 +842,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 
 		$is_snoozeable = false;
 
-		$snooze_task = OnboardingTasksFeature::get_task_by_id( $task_id, $task_list_id );
+		$snooze_task = TaskLists::get_task( $task_id, $task_list_id );
 
 		if ( $snooze_task && isset( $snooze_task['isSnoozeable'] ) && $snooze_task['isSnoozeable'] ) {
 			$is_snoozeable = true;
@@ -903,7 +903,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 			wc_admin_record_tracks_event( 'tasklist_undo_remindmelater_task', array( 'task_name' => $id ) );
 		}
 
-		return rest_ensure_response( OnboardingTasksFeature::get_task_by_id( $id ) );
+		return rest_ensure_response( TaskLists::get_task( $id ) );
 	}
 
 	/**
