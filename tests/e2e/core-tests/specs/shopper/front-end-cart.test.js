@@ -25,6 +25,7 @@ const twoProductPrice = singleProductPrice * 2;
 const runCartPageTest = () => {
 	describe('Cart page', () => {
 		let productId;
+
 		beforeAll(async () => {
 			productId = await createSimpleProduct();
 			await withRestApi.resetSettingsGroupToDefault('general');
@@ -47,7 +48,7 @@ const runCartPageTest = () => {
 
 		it('should increase item qty when "Add to cart" of the same product is clicked', async () => {
 			await shopper.goToShop();
-			await shopper.addToCartFromShopPage(simpleProductName);
+			await shopper.addToCartFromShopPage( productId );
 
 			await shopper.goToCart();
 			await shopper.productIsInCart(simpleProductName, 2);
@@ -72,7 +73,7 @@ const runCartPageTest = () => {
 
 		it('should update subtotal in cart totals when adding product to the cart', async () => {
 			await shopper.goToShop();
-			await shopper.addToCartFromShopPage(simpleProductName);
+			await shopper.addToCartFromShopPage( productId );
 
 			await shopper.goToCart();
 			await shopper.productIsInCart(simpleProductName, 1);

@@ -1,4 +1,3 @@
-/* eslint-disable jest/no-export, jest/no-disabled-tests, jest/expect-expect */
 /**
  * Internal dependencies
  */
@@ -43,15 +42,16 @@ const getCoupon = (couponType) => {
 
 const runCartApplyCouponsTest = () => {
 	describe('Cart applying coupons', () => {
+		let productId;
 
 		beforeAll(async () => {
-			await createSimpleProduct();
+			productId = await createSimpleProduct();
 			couponFixedCart = await createCoupon();
 			couponPercentage = await createCoupon('50', 'Percentage discount');
 			couponFixedProduct = await createCoupon('5', 'Fixed product discount');
 			await shopper.emptyCart();
 			await shopper.goToShop();
-			await shopper.addToCartFromShopPage('Simple product');
+			await shopper.addToCartFromShopPage( productId );
 			await uiUnblocked();
 			await shopper.goToCart();
 		});

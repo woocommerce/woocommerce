@@ -21,9 +21,11 @@ let guestOrderId;
 let customerOrderId;
 
 const runCheckoutPageTest = () => {
+	let productId;
+
 	describe('Checkout page', () => {
 		beforeAll(async () => {
-			await createSimpleProduct();
+			productId = await createSimpleProduct();
 			await withRestApi.resetSettingsGroupToDefault('general');
 			await withRestApi.resetSettingsGroupToDefault('products');
 			await withRestApi.resetSettingsGroupToDefault('tax');
@@ -54,14 +56,14 @@ const runCheckoutPageTest = () => {
 
 		it('should display cart items in order review', async () => {
 			await shopper.goToShop();
-			await shopper.addToCartFromShopPage(simpleProductName);
+			await shopper.addToCartFromShopPage( productId );
 			await shopper.goToCheckout();
 			await shopper.productIsInCheckout(simpleProductName, `1`, singleProductPrice, singleProductPrice);
 		});
 
 		it('allows customer to choose available payment methods', async () => {
 			await shopper.goToShop();
-			await shopper.addToCartFromShopPage(simpleProductName);
+			await shopper.addToCartFromShopPage( productId );
 			await shopper.goToCheckout();
 			await shopper.productIsInCheckout(simpleProductName, `2`, twoProductPrice, twoProductPrice);
 
@@ -71,7 +73,7 @@ const runCheckoutPageTest = () => {
 
 		it('allows customer to fill billing details', async () => {
 			await shopper.goToShop();
-			await shopper.addToCartFromShopPage(simpleProductName);
+			await shopper.addToCartFromShopPage( productId );
 			await shopper.goToCheckout();
 			await shopper.productIsInCheckout(simpleProductName, `3`, threeProductPrice, threeProductPrice);
 			await shopper.fillBillingDetails(config.get('addresses.customer.billing'));
@@ -79,7 +81,7 @@ const runCheckoutPageTest = () => {
 
 		it('allows customer to fill shipping details', async () => {
 			await shopper.goToShop();
-			await shopper.addToCartFromShopPage(simpleProductName);
+			await shopper.addToCartFromShopPage( productId );
 			await shopper.goToCheckout();
 			await shopper.productIsInCheckout(simpleProductName, `4`, fourProductPrice, fourProductPrice);
 
@@ -94,7 +96,7 @@ const runCheckoutPageTest = () => {
 
 		it('allows guest customer to place order', async () => {
 			await shopper.goToShop();
-			await shopper.addToCartFromShopPage(simpleProductName);
+			await shopper.addToCartFromShopPage( productId );
 			await shopper.goToCheckout();
 			await shopper.productIsInCheckout(simpleProductName, `5`, fiveProductPrice, fiveProductPrice);
 			await shopper.fillBillingDetails(config.get('addresses.customer.billing'));
@@ -117,7 +119,7 @@ const runCheckoutPageTest = () => {
 		it('allows existing customer to place order', async () => {
 			await shopper.login();
 			await shopper.goToShop();
-			await shopper.addToCartFromShopPage(simpleProductName);
+			await shopper.addToCartFromShopPage( productId );
 			await shopper.goToCheckout();
 			await shopper.productIsInCheckout(simpleProductName, `1`, singleProductPrice, singleProductPrice);
 			await shopper.fillBillingDetails(config.get('addresses.customer.billing'));
