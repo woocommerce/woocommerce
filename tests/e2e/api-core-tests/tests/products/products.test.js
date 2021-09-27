@@ -269,61 +269,61 @@ const { productsApi } = require('../../endpoints/products');
 			expect( result4.body ).toEqual( expect.not.arrayContaining( accessory ) );
 			expect( result4.body ).toEqual( expect.arrayContaining( hoodies ) );
 		} );
-	} );
 
-	it( 'on sale', async () => {
-		const onSale = [
-			expect.objectContaining( { name: 'Beanie with Logo' } ),
-			expect.objectContaining( { name: 'Hoodie with Pocket' } ),
-			expect.objectContaining( { name: 'Single' } ),
-			expect.objectContaining( { name: 'Cap' } ),
-			expect.objectContaining( { name: 'Belt' } ),
-			expect.objectContaining( { name: 'Beanie' } ),
-			expect.objectContaining( { name: 'Hoodie' } ),
-		];
+		it( 'on sale', async () => {
+			const onSale = [
+				expect.objectContaining( { name: 'Beanie with Logo' } ),
+				expect.objectContaining( { name: 'Hoodie with Pocket' } ),
+				expect.objectContaining( { name: 'Single' } ),
+				expect.objectContaining( { name: 'Cap' } ),
+				expect.objectContaining( { name: 'Belt' } ),
+				expect.objectContaining( { name: 'Beanie' } ),
+				expect.objectContaining( { name: 'Hoodie' } ),
+			];
 
-		const result1 = await productsApi.listAll.products( {
-			on_sale: true,
+			const result1 = await productsApi.listAll.products( {
+				on_sale: true,
+			} );
+			expect( result1.statusCode ).toEqual( 200 );
+			expect( result1.body ).toHaveLength( onSale.length );
+			expect( result1.body ).toEqual( expect.arrayContaining( onSale ) );
+
+			const result2 = await productsApi.listAll.products( {
+				on_sale: false,
+			} );
+			expect( result2.statusCode ).toEqual( 200 );
+			expect( result2.body ).toEqual( expect.not.arrayContaining( onSale ) );
 		} );
-		expect( result1.statusCode ).toEqual( 200 );
-		expect( result1.body ).toHaveLength( onSale.length );
-		expect( result1.body ).toEqual( expect.arrayContaining( onSale ) );
 
-		const result2 = await productsApi.listAll.products( {
-			on_sale: false,
-		} );
-		expect( result2.statusCode ).toEqual( 200 );
-		expect( result2.body ).toEqual( expect.not.arrayContaining( onSale ) );
-	} );
+		it( 'price', async () => {
+			const result1 = await productsApi.listAll.products( {
+				min_price: 21,
+				max_price: 28,
+			} );
+			expect( result1.statusCode ).toEqual( 200 );
+			expect( result1.body ).toHaveLength( 1 );
+			expect( result1.body[0].name ).toBe( 'Long Sleeve Tee' );
+			expect( result1.body[0].price ).toBe( '25' );
 
-	it( 'price', async () => {
-		const result1 = await productsApi.listAll.products( {
-			min_price: 21,
-			max_price: 28,
-		} );
-		expect( result1.statusCode ).toEqual( 200 );
-		expect( result1.body ).toHaveLength( 1 );
-		expect( result1.body[0].name ).toBe( 'Long Sleeve Tee' );
-		expect( result1.body[0].price ).toBe( '25' );
+			const result2 = await productsApi.listAll.products( {
+				max_price: 5,
+			} );
+			expect( result2.statusCode ).toEqual( 200 );
+			expect( result2.body ).toHaveLength( 1 );
+			expect( result2.body[0].name ).toBe( 'Single' );
+			expect( result2.body[0].price ).toBe( '2' );
 
-		const result2 = await productsApi.listAll.products( {
-			max_price: 5,
+			const result3 = await productsApi.listAll.products( {
+				min_price: 5,
+				order: 'asc',
+				orderby: 'price',
+			} );
+			expect( result3.statusCode ).toEqual( 200 );
+			expect( result3.body ).toEqual(
+				expect.not.arrayContaining( [
+					expect.objectContaining( { name: 'Single' } )
+				] )
+			);
 		} );
-		expect( result2.statusCode ).toEqual( 200 );
-		expect( result2.body ).toHaveLength( 1 );
-		expect( result2.body[0].name ).toBe( 'Single' );
-		expect( result2.body[0].price ).toBe( '2' );
-
-		const result3 = await productsApi.listAll.products( {
-			min_price: 5,
-			order: 'asc',
-			orderby: 'price',
-		} );
-		expect( result3.statusCode ).toEqual( 200 );
-		expect( result3.body ).toEqual(
-			expect.not.arrayContaining( [
-				expect.objectContaining( { name: 'Single' } )
-			] )
-		);
 	} );
 } );
