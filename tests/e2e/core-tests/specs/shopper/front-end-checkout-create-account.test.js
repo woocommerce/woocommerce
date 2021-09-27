@@ -1,4 +1,3 @@
-/* eslint-disable jest/no-export, jest/no-disabled-tests, jest/expect-expect */
 /**
  * Internal dependencies
  */
@@ -28,8 +27,10 @@ const customerBilling = config.get( 'addresses.customer.billing' );
 
 const runCheckoutCreateAccountTest = () => {
 	describe('Shopper Checkout Create Account', () => {
+		let productId;
+
 		beforeAll(async () => {
-			await createSimpleProduct();
+			productId = await createSimpleProduct();
 			await withRestApi.deleteCustomerByEmail( customerBilling.email );
 
 			// Set checkbox for creating an account during checkout
@@ -45,7 +46,7 @@ const runCheckoutCreateAccountTest = () => {
 
 			// Add simple product to cart and proceed to checkout
 			await shopper.goToShop();
-			await shopper.addToCartFromShopPage(simpleProductName);
+			await shopper.addToCartFromShopPage( productId );
 			await uiUnblocked();
 			await shopper.goToCheckout();
 		});

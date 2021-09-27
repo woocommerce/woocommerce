@@ -1,4 +1,3 @@
-/* eslint-disable jest/no-export, jest/no-disabled-tests */
 /**
  * Internal dependencies
  */
@@ -56,7 +55,7 @@ const runSingleProductPageTest = () => {
 
 		it('should be able to remove simple products from the cart', async () => {
 			// Remove items from cart
-			await shopper.removeFromCart(simpleProductName);
+			await shopper.removeFromCart( simplePostIdValue );
 			await uiUnblocked();
 			await expect(page).toMatchElement('.cart-empty', {text: 'Your cart is currently empty.'});
 		});
@@ -89,7 +88,7 @@ const runSingleProductPageTest = () => {
 
 		it('should be able to remove variation products from the cart', async () => {
 			// Remove items from cart
-			await shopper.removeFromCart(defaultVariableProduct.name);
+			await shopper.removeFromCart( variableProductId );
 			await uiUnblocked();
 			await expect(page).toMatchElement('.cart-empty', {text: 'Your cart is currently empty.'});
 		});
@@ -124,7 +123,7 @@ const runSingleProductPageTest = () => {
 
 		it('should be able to remove grouped products from the cart', async () => {
 			// Remove items from cart
-			await shopper.removeFromCart(simpleProductName+' 1');
+			await shopper.removeFromCart( simpleProductName+' 1' );
 			await uiUnblocked();
 			await expect(page).toMatchElement('.woocommerce-message', {text: '“'+simpleProductName+' 1” removed.'});
 			await Promise.all( [

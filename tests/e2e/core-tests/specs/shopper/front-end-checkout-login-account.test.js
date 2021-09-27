@@ -1,4 +1,3 @@
-/* eslint-disable jest/no-export, jest/no-disabled-tests, jest/expect-expect */
 /**
  * Internal dependencies
  */
@@ -25,8 +24,10 @@ const simpleProductName = config.get('products.simple.name');
 
 const runCheckoutLoginAccountTest = () => {
 	describe('Shopper Checkout Login Account', () => {
+		let productId;
+
 		beforeAll(async () => {
-			await createSimpleProduct();
+			productId = await createSimpleProduct();
 
 			// Set checkbox for logging to account during checkout
 			await merchant.login();
@@ -37,7 +38,7 @@ const runCheckoutLoginAccountTest = () => {
 
 			// Add simple product to cart and proceed to checkout
 			await shopper.goToShop();
-			await shopper.addToCartFromShopPage(simpleProductName);
+			await shopper.addToCartFromShopPage( productId );
 			await uiUnblocked();
 			await shopper.goToCheckout();
 		});
