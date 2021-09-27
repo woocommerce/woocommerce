@@ -19,7 +19,7 @@ const RecommendationsEligibilityWrapper: React.FC = ( { children } ) => {
 			SHOW_MARKETPLACE_SUGGESTION_OPTION,
 		] );
 		const canShowMarketplaceSuggestions =
-			getOption( SHOW_MARKETPLACE_SUGGESTION_OPTION ) === 'yes';
+			getOption( SHOW_MARKETPLACE_SUGGESTION_OPTION ) !== 'no';
 
 		return hasFinishedResolving && canShowMarketplaceSuggestions;
 	} );

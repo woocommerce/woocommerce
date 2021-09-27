@@ -31,7 +31,7 @@ class WC_Tests_PaymentGatewaySuggestions_EvaluateSuggestion extends WC_Unit_Test
 		$suggestion = array(
 			'id' => 'mock-gateway',
 		);
-		$evaluated  = EvaluateSuggestion::evaluate( $suggestion );
+		$evaluated  = EvaluateSuggestion::evaluate( (object) $suggestion );
 		$this->assertEquals( (object) $suggestion, $evaluated );
 	}
 
@@ -49,7 +49,7 @@ class WC_Tests_PaymentGatewaySuggestions_EvaluateSuggestion extends WC_Unit_Test
 				'operation'   => '=',
 			),
 		);
-		$evaluated  = EvaluateSuggestion::evaluate( $suggestion );
+		$evaluated  = EvaluateSuggestion::evaluate( (object) $suggestion );
 		$this->assertFalse( $evaluated->is_visible );
 	}
 
@@ -68,7 +68,7 @@ class WC_Tests_PaymentGatewaySuggestions_EvaluateSuggestion extends WC_Unit_Test
 			),
 		);
 		update_option( self::MOCK_OPTION, 'a' );
-		$evaluated = EvaluateSuggestion::evaluate( $suggestion );
+		$evaluated = EvaluateSuggestion::evaluate( (object) $suggestion );
 		$this->assertTrue( $evaluated->is_visible );
 	}
 }
