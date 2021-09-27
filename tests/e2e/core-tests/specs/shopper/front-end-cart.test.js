@@ -24,8 +24,9 @@ const twoProductPrice = singleProductPrice * 2;
 
 const runCartPageTest = () => {
 	describe('Cart page', () => {
+		let productId;
 		beforeAll(async () => {
-			await createSimpleProduct();
+			productId = await createSimpleProduct();
 			await withRestApi.resetSettingsGroupToDefault('general');
 			await withRestApi.resetSettingsGroupToDefault('products');
 			await withRestApi.resetSettingsGroupToDefault('tax');
@@ -38,7 +39,7 @@ const runCartPageTest = () => {
 
 		it('should add the product to the cart from the shop page', async () => {
 			await shopper.goToShop();
-			await shopper.addToCartFromShopPage(simpleProductName);
+			await shopper.addToCartFromShopPage( productId );
 
 			await shopper.goToCart();
 			await shopper.productIsInCart(simpleProductName);
@@ -63,7 +64,7 @@ const runCartPageTest = () => {
 
 		it('should remove the item from the cart when remove is clicked', async () => {
 			await shopper.goToCart();
-			await shopper.removeFromCart(simpleProductName);
+			await shopper.removeFromCart( productId );
 			await uiUnblocked();
 
 			await expect(page).toMatchElement('.cart-empty', {text: 'Your cart is currently empty.'});
