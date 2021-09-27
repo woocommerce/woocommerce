@@ -1,12 +1,13 @@
-/* eslint-disable jest/no-export, jest/no-disabled-tests */
 /**
  * Internal dependencies
  */
 const {
 	merchant,
 	clickTab,
-	verifyPublishAndTrash
+	AdminEdit,
+	factories,
 } = require( '@woocommerce/e2e-utils' );
+const { Coupon } = require( '@woocommerce/api' );
 
 /**
  * External dependencies
@@ -39,14 +40,19 @@ const runCreateCouponTest = () => {
 			await expect(page).toSelect('#discount_type', 'Fixed cart discount');
 			await expect(page).toFill('#coupon_amount', '100');
 
-			// Publish coupon, verify that it was published. Trash coupon, verify that it was trashed.
-			await verifyPublishAndTrash(
+			// Publish coupon, verify that it was published.
+			const adminEdit = new AdminEdit();
+			await adminEdit.verifyPublish(
 				'#publish',
 				'.notice',
 				'Coupon updated.',
-				'1 coupon moved to the Trash.'
 			);
-
+			// Delete the coupon
+			const couponId = await adminEdit.getId();
+			if ( couponId ) {
+				const repository = Coupon.restRepository( factories.api.withDefaultPermalinks );
+				await repository.delete( couponId );
+			}
 		});
 	});
 }
