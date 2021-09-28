@@ -1,48 +1,34 @@
 /**
- * External dependencies
- */
-require( 'dotenv' ).config();
-const { USER_KEY, USER_SECRET, API_PATH } = process.env;
-
-/**
  * Internal dependencies
  */
- const {
-	HTTPClientFactory,
-} = require( '@woocommerce/api' );
+const { getRequest, postRequest } = require('../utils/request');
 
-const httpClient = HTTPClientFactory
-	.build( API_PATH )
-	.withBasicAuth( USER_KEY, USER_SECRET )
-	.withIndexPermalinks()
-	.create();
+const getProducts = ( params = {} ) => getRequest( 'products', params );
 
-const getProducts = ( params = {} ) => httpClient.get( '/wc/v3/products', params );
-
-const createProduct = ( data ) => httpClient.post( '/wc/v3/products', data );
-const createProductVariations = ( parentId, variations ) => httpClient.post(
-	`/wc/v3/products/${ parentId }/variations/batch`,
+const createProduct = ( data ) => postRequest( 'products', data );
+const createProductVariations = ( parentId, variations ) => postRequest(
+	`products/${ parentId }/variations/batch`,
 	{
 		create: variations,
 	}
 )
-const createProducts = ( products ) => httpClient.post( '/wc/v3/products/batch', { create: products } );
-const createProductCategory = ( data ) => httpClient.post( '/wc/v3/products/categories', data );
-const createProductAttribute = ( name ) => httpClient.post( '/wc/v3/products/attributes', { name } );
-const createProductAttributeTerms = ( parentId, termNames ) => httpClient.post(
-	`/wc/v3/products/attributes/${ parentId }/terms/batch`,
+const createProducts = ( products ) => postRequest( 'products/batch', { create: products } );
+const createProductCategory = ( data ) => postRequest( 'products/categories', data );
+const createProductAttribute = ( name ) => postRequest( 'products/attributes', { name } );
+const createProductAttributeTerms = ( parentId, termNames ) => postRequest(
+	`products/attributes/${ parentId }/terms/batch`,
 	{
 		create: termNames.map( name => ( { name } ) )
 	}
 );
 
 const createSampleCategories = async () => {
-	const { data: clothing } = await createProductCategory( { name: 'Clothing' } );
-	const { data: accessories } = await createProductCategory( { name: 'Accessories', parent: clothing.id } );
-	const { data: hoodies } = await createProductCategory( { name: 'Hoodies', parent: clothing.id } );
-	const { data: tshirts } = await createProductCategory( { name: 'Tshirts', parent: clothing.id } );
-	const { data: decor } = await createProductCategory( { name: 'Decor' } );
-	const { data: music } = await createProductCategory( { name: 'Music' } );
+	const { body: clothing } = await createProductCategory( { name: 'Clothing' } );
+	const { body: accessories } = await createProductCategory( { name: 'Accessories', parent: clothing.id } );
+	const { body: hoodies } = await createProductCategory( { name: 'Hoodies', parent: clothing.id } );
+	const { body: tshirts } = await createProductCategory( { name: 'Tshirts', parent: clothing.id } );
+	const { body: decor } = await createProductCategory( { name: 'Decor' } );
+	const { body: music } = await createProductCategory( { name: 'Music' } );
 
 	return {
 		clothing,
@@ -55,8 +41,8 @@ const createSampleCategories = async () => {
 };
 
 const createSampleAttributes = async () => {
-	const { data: color } = await createProductAttribute( 'Color' );
-	const { data: size } = await createProductAttribute( 'Size' );
+	const { body: color } = await createProductAttribute( 'Color' );
+	const { body: size } = await createProductAttribute( 'Size' );
 	await createProductAttributeTerms( color.id, [ 'Blue', 'Gray', 'Green', 'Red', 'Yellow' ] );
 	await createProductAttributeTerms( size.id, [ 'Large', 'Medium', 'Small' ] );
 
@@ -1028,7 +1014,7 @@ const createSampleExternalProducts = async ( categories ) => {
 };
 
 const createSampleGroupedProduct = async ( categories ) => {
-	const { data: logoProducts } = await getProducts( {
+	const { body: logoProducts } = await getProducts( {
 		search: 'logo',
 		_fields: [ 'id' ],
 	} );
@@ -1101,7 +1087,7 @@ const createSampleVariableProducts = async ( categories, attributes ) => {
 	const description =	'<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. '
 		+ 'Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. '
 		+ 'Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>\n';
-	const { data: hoodie } = await createProduct( {
+	const { body: hoodie } = await createProduct( {
 		name: 'Hoodie',
 		date_created_gmt: '2021-09-28T15:50:19',
 		type: 'variable',
@@ -1328,7 +1314,7 @@ const createSampleVariableProducts = async ( categories, attributes ) => {
 		}
 	] );
 
-	const { data: vneck } = await createProduct( {
+	const { body: vneck } = await createProduct( {
 		name: 'V-Neck T-Shirt',
 		date_created_gmt: '2021-09-28T15:50:19',
 		type: 'variable',
@@ -1502,7 +1488,7 @@ const createSampleVariableProducts = async ( categories, attributes ) => {
 	] );
 };
 
-const createSampleData = async () => {
+const createSampleProducts = async () => {
 	const categories = await createSampleCategories();
 	const attributes = await createSampleAttributes();
 
@@ -1510,4 +1496,8 @@ const createSampleData = async () => {
 	await createSampleExternalProducts( categories );
 	await createSampleGroupedProduct( categories );
 	await createSampleVariableProducts( categories, attributes );
+};
+
+module.exports = {
+	createSampleProducts,
 };
