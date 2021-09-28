@@ -19,7 +19,6 @@
   },
   "homepage": "https://github.com/woocommerce/woocommerce#readme",
   "dependencies": {
-    "@woocommerce/api": "file:../api",
     "dotenv": "^10.0.0",
     "jest": "^25.1.0",
     "jest-runner-groups": "^2.1.0",
