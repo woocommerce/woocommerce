@@ -23,7 +23,6 @@ const {
 
 const config = require( 'config' );
 const simpleProductPrice = config.has( 'products.simple.price' ) ? config.get( 'products.simple.price' ) : '9.99';
-const simpleProductName = config.get( 'products.simple.name' );
 const california = 'state:US:CA';
 const sanFranciscoZIP = '94107';
 const shippingZoneNameUS = 'US with Flat rate';
