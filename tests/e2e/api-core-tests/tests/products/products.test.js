@@ -1,6 +1,7 @@
 /**
  * Internal dependencies
  */
+const { createSampleProducts } = require( '../../data/products' );
 const { productsApi } = require('../../endpoints/products');
 
 /**
@@ -11,6 +12,10 @@ const { productsApi } = require('../../endpoints/products');
  *
  */
  describe( 'Products API tests', () => {
+
+	beforeAll( async () => {
+		await createSampleProducts();
+	} );
 
 	describe( 'List all products', () => {
 
