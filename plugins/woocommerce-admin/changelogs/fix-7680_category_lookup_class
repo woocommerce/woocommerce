@@ -1,0 +1,4 @@
+Significance: patch
+Type: Fix
+
+Fix category lookup logic to update children correctly. #7709
