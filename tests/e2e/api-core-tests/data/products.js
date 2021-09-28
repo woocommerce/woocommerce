@@ -19,6 +19,13 @@ const httpClient = HTTPClientFactory
 
 const getProducts = ( params = {} ) => httpClient.get( '/wc/v3/products', params );
 
+const createProduct = ( data ) => httpClient.post( '/wc/v3/products', data );
+const createProductVariations = ( parentId, variations ) => httpClient.post(
+	`/wc/v3/products/${ parentId }/variations/batch`,
+	{
+		create: variations,
+	}
+)
 const createProducts = ( products ) => httpClient.post( '/wc/v3/products/batch', { create: products } );
 const createProductCategory = ( data ) => httpClient.post( '/wc/v3/products/categories', data );
 const createProductAttribute = ( name ) => httpClient.post( '/wc/v3/products/attributes', { name } );
@@ -1090,6 +1097,411 @@ const createSampleGroupedProduct = async ( categories ) => {
 	] );
 };
 
+const createSampleVariableProducts = async ( categories, attributes ) => {
+	const description =	'<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. '
+		+ 'Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. '
+		+ 'Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>\n';
+	const { data: hoodie } = await createProduct( {
+		name: 'Hoodie',
+		date_created_gmt: '2021-09-28T15:50:19',
+		type: 'variable',
+		status: 'publish',
+		featured: false,
+		catalog_visibility: 'visible',
+		description,
+		short_description: '<p>This is a variable product.</p>\n',
+		sku: 'woo-hoodie',
+		price: '42',
+		regular_price: '',
+		sale_price: '',
+		date_on_sale_from_gmt: null,
+		date_on_sale_to_gmt: null,
+		on_sale: true,
+		purchasable: true,
+		total_sales: 0,
+		virtual: false,
+		downloadable: false,
+		downloads: [],
+		download_limit: 0,
+		download_expiry: 0,
+		external_url: '',
+		button_text: '',
+		tax_status: 'taxable',
+		tax_class: '',
+		manage_stock: false,
+		stock_quantity: null,
+		backorders: 'no',
+		backorders_allowed: false,
+		backordered: false,
+		low_stock_amount: null,
+		sold_individually: false,
+		weight: '1.5',
+		dimensions: { length: '10', width: '8', height: '3' },
+		shipping_required: true,
+		shipping_taxable: true,
+		shipping_class: '',
+		shipping_class_id: 0,
+		reviews_allowed: true,
+		average_rating: '0.00',
+		rating_count: 0,
+		upsell_ids: [],
+		cross_sell_ids: [],
+		parent_id: 0,
+		purchase_note: '',
+		categories: [ { id: categories.hoodies.id } ],
+		tags: [],
+		attributes: [
+			{
+				id: attributes.color.id,
+				position: 0,
+				visible: true,
+				variation: true,
+				options: [ 'Blue', 'Green', 'Red' ]
+			},
+			{
+				id: 0,
+				name: 'Logo',
+				position: 1,
+				visible: true,
+				variation: true,
+				options: [ 'Yes', 'No' ]
+			}
+		],
+		default_attributes: [],
+		grouped_products: [],
+		menu_order: 0,
+		stock_status: 'instock'
+	} );
+
+	const variationDescription =
+		'<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum sagittis orci ac odio dictum tincidunt. '
+		+ 'Donec ut metus leo. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. '
+		+ 'Sed luctus, dui eu sagittis sodales, nulla nibh sagittis augue, vel porttitor diam enim non metus. '
+		+ 'Vestibulum aliquam augue neque. Phasellus tincidunt odio eget ullamcorper efficitur. '
+		+ 'Cras placerat ut turpis pellentesque vulputate. Nam sed consequat tortor. Curabitur finibus sapien dolor. '
+		+ 'Ut eleifend tellus nec erat pulvinar dignissim. Nam non arcu purus. Vivamus et massa massa.</p>\n';
+
+	await createProductVariations( hoodie.id, [
+		{
+			date_created_gmt: '2021-09-28T15:50:20',
+			description: variationDescription,
+			sku: 'woo-hoodie-blue-logo',
+			price: '45',
+			regular_price: '45',
+			sale_price: '',
+			date_on_sale_from_gmt: null,
+			date_on_sale_to_gmt: null,
+			on_sale: false,
+			status: 'publish',
+			purchasable: true,
+			virtual: false,
+			downloadable: false,
+			downloads: [],
+			download_limit: 0,
+			download_expiry: 0,
+			tax_status: 'taxable',
+			tax_class: '',
+			manage_stock: false,
+			stock_quantity: null,
+			stock_status: 'instock',
+			backorders: 'no',
+			backorders_allowed: false,
+			backordered: false,
+			low_stock_amount: null,
+			weight: '1.5',
+			dimensions: { length: '10', width: '8', height: '3' },
+			shipping_class: '',
+			shipping_class_id: 0,
+			attributes: [
+				{ id: attributes.color.id, option: 'Blue' },
+				{ id: 0, name: 'Logo', option: 'Yes' }
+			],
+			menu_order: 0
+		},
+		{
+			date_created_gmt: '2021-09-28T15:50:20',
+			description: variationDescription,
+			sku: 'woo-hoodie-blue',
+			price: '45',
+			regular_price: '45',
+			sale_price: '',
+			date_on_sale_from_gmt: null,
+			date_on_sale_to_gmt: null,
+			on_sale: false,
+			status: 'publish',
+			purchasable: true,
+			virtual: false,
+			downloadable: false,
+			downloads: [],
+			download_limit: 0,
+			download_expiry: 0,
+			tax_status: 'taxable',
+			tax_class: '',
+			manage_stock: false,
+			stock_quantity: null,
+			stock_status: 'instock',
+			backorders: 'no',
+			backorders_allowed: false,
+			backordered: false,
+			low_stock_amount: null,
+			weight: '1.5',
+			dimensions: { length: '10', width: '8', height: '3' },
+			shipping_class: '',
+			shipping_class_id: 0,
+			attributes: [
+				{ id: attributes.color.id, option: 'Blue' },
+				{ id: 0, name: 'Logo', option: 'No' }
+			],
+			menu_order: 3
+		},
+		{
+			date_created_gmt: '2021-09-28T15:50:20',
+			description: variationDescription,
+			sku: 'woo-hoodie-green',
+			price: '45',
+			regular_price: '45',
+			sale_price: '',
+			date_on_sale_from_gmt: null,
+			date_on_sale_to_gmt: null,
+			on_sale: false,
+			status: 'publish',
+			purchasable: true,
+			virtual: false,
+			downloadable: false,
+			downloads: [],
+			download_limit: 0,
+			download_expiry: 0,
+			tax_status: 'taxable',
+			tax_class: '',
+			manage_stock: false,
+			stock_quantity: null,
+			stock_status: 'instock',
+			backorders: 'no',
+			backorders_allowed: false,
+			backordered: false,
+			low_stock_amount: null,
+			weight: '1.5',
+			dimensions: { length: '10', width: '8', height: '3' },
+			shipping_class: '',
+			shipping_class_id: 0,
+			attributes: [
+				{ id: attributes.color.id, option: 'Green' },
+				{ id: 0, name: 'Logo', option: 'No' }
+			],
+			menu_order: 2
+		},
+		{
+			date_created_gmt: '2021-09-28T15:50:19',
+			description: variationDescription,
+			sku: 'woo-hoodie-red',
+			price: '42',
+			regular_price: '45',
+			sale_price: '42',
+			date_on_sale_from_gmt: null,
+			date_on_sale_to_gmt: null,
+			on_sale: true,
+			status: 'publish',
+			purchasable: true,
+			virtual: false,
+			downloadable: false,
+			downloads: [],
+			download_limit: 0,
+			download_expiry: 0,
+			tax_status: 'taxable',
+			tax_class: '',
+			manage_stock: false,
+			stock_quantity: null,
+			stock_status: 'instock',
+			backorders: 'no',
+			backorders_allowed: false,
+			backordered: false,
+			low_stock_amount: null,
+			weight: '1.5',
+			dimensions: { length: '10', width: '8', height: '3' },
+			shipping_class: '',
+			shipping_class_id: 0,
+			attributes: [
+				{ id: attributes.color.id, option: 'Red' },
+				{ id: 0, name: 'Logo', option: 'No' }
+			],
+			menu_order: 1
+		}
+	] );
+
+	const { data: vneck } = await createProduct( {
+		name: 'V-Neck T-Shirt',
+		date_created_gmt: '2021-09-28T15:50:19',
+		type: 'variable',
+		status: 'publish',
+		featured: true,
+		catalog_visibility: 'visible',
+		description,
+		short_description: '<p>This is a variable product.</p>\n',
+		sku: 'woo-vneck-tee',
+		price: '15',
+		regular_price: '',
+		sale_price: '',
+		date_on_sale_from_gmt: null,
+		date_on_sale_to_gmt: null,
+		on_sale: false,
+		purchasable: true,
+		total_sales: 0,
+		virtual: false,
+		downloadable: false,
+		downloads: [],
+		download_limit: 0,
+		download_expiry: 0,
+		external_url: '',
+		button_text: '',
+		tax_status: 'taxable',
+		tax_class: '',
+		manage_stock: false,
+		stock_quantity: null,
+		backorders: 'no',
+		backorders_allowed: false,
+		backordered: false,
+		low_stock_amount: null,
+		sold_individually: false,
+		weight: '0.5',
+		dimensions: { length: '24', width: '1', height: '2' },
+		shipping_required: true,
+		shipping_taxable: true,
+		shipping_class: '',
+		shipping_class_id: 0,
+		reviews_allowed: true,
+		average_rating: '0.00',
+		rating_count: 0,
+		upsell_ids: [],
+		cross_sell_ids: [],
+		parent_id: 0,
+		purchase_note: '',
+		categories: [ { id: categories.tshirts.id } ],
+		tags: [],
+		attributes: [
+			{
+				id: attributes.color.id,
+				position: 0,
+				visible: true,
+				variation: true,
+				options: [ 'Blue', 'Green', 'Red' ]
+			},
+			{
+				id: attributes.size.id,
+				position: 1,
+				visible: true,
+				variation: true,
+				options: [ 'Large', 'Medium', 'Small' ]
+			}
+		],
+		default_attributes: [],
+		grouped_products: [],
+		menu_order: 0,
+		stock_status: 'instock'
+	} );
+
+	await createProductVariations( vneck.id, [
+		{
+			date_created_gmt: '2021-09-28T15:50:19',
+			description: variationDescription,
+			sku: 'woo-vneck-tee-blue',
+			price: '15',
+			regular_price: '15',
+			sale_price: '',
+			date_on_sale_from_gmt: null,
+			date_on_sale_to_gmt: null,
+			on_sale: false,
+			status: 'publish',
+			purchasable: true,
+			virtual: false,
+			downloadable: false,
+			downloads: [],
+			download_limit: 0,
+			download_expiry: 0,
+			tax_status: 'taxable',
+			tax_class: '',
+			manage_stock: false,
+			stock_quantity: null,
+			stock_status: 'instock',
+			backorders: 'no',
+			backorders_allowed: false,
+			backordered: false,
+			low_stock_amount: null,
+			weight: '0.5',
+			dimensions: { length: '24', width: '1', height: '2' },
+			shipping_class: '',
+			shipping_class_id: 0,
+			attributes: [ { id: attributes.color.id, option: 'Blue' } ],
+			menu_order: 0
+		},
+		{
+			date_created_gmt: '2021-09-28T15:50:19',
+			description: variationDescription,
+			sku: 'woo-vneck-tee-green',
+			price: '20',
+			regular_price: '20',
+			sale_price: '',
+			date_on_sale_from_gmt: null,
+			date_on_sale_to_gmt: null,
+			on_sale: false,
+			status: 'publish',
+			purchasable: true,
+			virtual: false,
+			downloadable: false,
+			downloads: [],
+			download_limit: 0,
+			download_expiry: 0,
+			tax_status: 'taxable',
+			tax_class: '',
+			manage_stock: false,
+			stock_quantity: null,
+			stock_status: 'instock',
+			backorders: 'no',
+			backorders_allowed: false,
+			backordered: false,
+			low_stock_amount: null,
+			weight: '0.5',
+			dimensions: { length: '24', width: '1', height: '2' },
+			shipping_class: '',
+			shipping_class_id: 0,
+			attributes: [ { id: attributes.color.id, option: 'Green' } ],
+			menu_order: 0
+		},
+		{
+			date_created_gmt: '2021-09-28T15:50:19',
+			description: variationDescription,
+			sku: 'woo-vneck-tee-red',
+			price: '20',
+			regular_price: '20',
+			sale_price: '',
+			date_on_sale_from_gmt: null,
+			date_on_sale_to_gmt: null,
+			on_sale: false,
+			status: 'publish',
+			purchasable: true,
+			virtual: false,
+			downloadable: false,
+			downloads: [],
+			download_limit: 0,
+			download_expiry: 0,
+			tax_status: 'taxable',
+			tax_class: '',
+			manage_stock: false,
+			stock_quantity: null,
+			stock_status: 'instock',
+			backorders: 'no',
+			backorders_allowed: false,
+			backordered: false,
+			low_stock_amount: null,
+			weight: '0.5',
+			dimensions: { length: '24', width: '1', height: '2' },
+			shipping_class: '',
+			shipping_class_id: 0,
+			attributes: [ { id: attributes.color.id, option: 'Red' } ],
+			menu_order: 0
+		}
+	] );
+};
+
 const createSampleData = async () => {
 	const categories = await createSampleCategories();
 	const attributes = await createSampleAttributes();
@@ -1097,4 +1509,5 @@ const createSampleData = async () => {
 	await createSampleSimpleProducts( categories, attributes );
 	await createSampleExternalProducts( categories );
 	await createSampleGroupedProduct( categories );
+	await createSampleVariableProducts( categories, attributes );
 };
