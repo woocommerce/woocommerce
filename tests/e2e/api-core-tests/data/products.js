@@ -953,9 +953,75 @@ const createSampleSimpleProducts = async ( categories, attributes ) => {
 	] );
 };
 
+const createSampleExternalProducts = async ( categories ) => {
+	await createProducts( [
+		{
+			name: 'WordPress Pennant',
+			date_created_gmt: '2021-09-28T15:50:20',
+			type: 'external',
+			status: 'publish',
+			featured: false,
+			catalog_visibility: 'visible',
+			description:
+				'<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. '
+				+ 'Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. '
+				+ 'Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>\n',
+			short_description: '<p>This is an external product.</p>\n',
+			sku: 'wp-pennant',
+			price: '11.05',
+			regular_price: '11.05',
+			sale_price: '',
+			date_on_sale_from_gmt: null,
+			date_on_sale_to_gmt: null,
+			on_sale: false,
+			purchasable: false,
+			total_sales: 0,
+			virtual: false,
+			downloadable: false,
+			downloads: [],
+			download_limit: 0,
+			download_expiry: 0,
+			external_url: 'https://mercantile.wordpress.org/product/wordpress-pennant/',
+			button_text: 'Buy on the WordPress swag store!',
+			tax_status: 'taxable',
+			tax_class: '',
+			manage_stock: false,
+			stock_quantity: null,
+			backorders: 'no',
+			backorders_allowed: false,
+			backordered: false,
+			low_stock_amount: null,
+			sold_individually: false,
+			weight: '',
+			dimensions: { length: '', width: '', height: '' },
+			shipping_required: true,
+			shipping_taxable: true,
+			shipping_class: '',
+			shipping_class_id: 0,
+			reviews_allowed: true,
+			average_rating: '0.00',
+			rating_count: 0,
+			upsell_ids: [],
+			cross_sell_ids: [],
+			parent_id: 0,
+			purchase_note: '',
+			categories: [ { id: categories.decor.id } ],
+			tags: [],
+			attributes: [],
+			default_attributes: [],
+			variations: [],
+			grouped_products: [],
+			menu_order: 0,
+			related_ids: [],
+			stock_status: 'instock'
+		}
+	] );
+};
+
 const createSampleData = async () => {
 	const categories = await createSampleCategories();
 	const attributes = await createSampleAttributes();
 
 	await createSampleSimpleProducts( categories, attributes );
+	await createSampleExternalProducts( categories );
 };
