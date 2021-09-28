@@ -20,7 +20,6 @@ const {
 } = require( '@jest/globals' );
 
 const config = require('config');
-const simpleProductName = config.get('products.simple.name');
 
 const runCheckoutLoginAccountTest = () => {
 	describe('Shopper Checkout Login Account', () => {

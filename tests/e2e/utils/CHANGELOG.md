@@ -4,7 +4,7 @@
 
 - `utils.waitForTimeout( delay )` pause processing for `delay` milliseconds
 - `AdminEdit` class with utility functions for the respective edit screens
-- Update `shopper.addToCartFromShopPage()` to accept product Id or Title
+- Update `shopper.addToCartFromShopPage()` and `.removeFromCart()` to accept product Id or Title
 
 # 0.1.6
 

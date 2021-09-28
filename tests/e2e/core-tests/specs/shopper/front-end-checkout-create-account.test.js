@@ -22,7 +22,6 @@ const {
 } = require( '@jest/globals' );
 
 const config = require( 'config' );
-const simpleProductName = config.get( 'products.simple.name' );
 const customerBilling = config.get( 'addresses.customer.billing' );
 
 const runCheckoutCreateAccountTest = () => {
