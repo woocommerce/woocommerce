@@ -8,8 +8,7 @@
 		"align": false,
 		"html": false,
 		"multiple": false,
-		"reusable": false,
-		"inserter": false
+		"reusable": false
 	},
 	"attributes": {
 		"checkbox": {
