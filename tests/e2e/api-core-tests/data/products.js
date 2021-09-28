@@ -18,6 +18,13 @@ const httpClient = HTTPClientFactory
 	.create();
 
 const createProductCategory = ( data ) => httpClient.post( '/wc/v3/products/categories', data );
+const createProductAttribute = ( name ) => httpClient.post( '/wc/v3/products/attributes', { name } );
+const createProductAttributeTerms = ( parentId, termNames ) => httpClient.post(
+	`/wc/v3/products/attributes/${ parentId }/terms/batch`,
+	{
+		create: termNames.map( name => ( { name } ) )
+	}
+);
 
 const createSampleCategories = async () => {
 	const { data: clothing } = await createProductCategory( { name: 'Clothing' } );
@@ -34,5 +41,17 @@ const createSampleCategories = async () => {
 		tshirts,
 		decor,
 		music,
+	}
+};
+
+const createSampleAttributes = async () => {
+	const { data: color } = await createProductAttribute( 'Color' );
+	const { data: size } = await createProductAttribute( 'Size' );
+	await createProductAttributeTerms( color.id, [ 'Blue', 'Gray', 'Green', 'Red', 'Yellow' ] );
+	await createProductAttributeTerms( size.id, [ 'Large', 'Medium', 'Small' ] );
+
+	return {
+		color,
+		size,
 	}
 };
