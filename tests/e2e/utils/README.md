@@ -116,7 +116,7 @@ This package provides support for enabling retries in tests:
 | Function | Parameters | Description |
 |----------|------------|-------------|
 | `addToCart` | | Add an item to the cart from a single product page |
-| `addToCartFromShopPage` | `productTitle` | Add an item to the cart from a single product page |
+| `addToCartFromShopPage` | `productIdOrTitle` | Add an item to the cart from the shop page |
 | `fillBillingDetails` | `customerBillingDetails` | Fill billing fields in checkout form using configured address |
 | `fillShippingDetails` | `customerShippingDetails` | Fill shipping fields in checkout form using configured address |
 | `goToAddresses` |  | Go to My Account -> Address Details |
@@ -131,7 +131,7 @@ This package provides support for enabling retries in tests:
 | `login` |  | Log in as the shopper |
 | `placeOrder` |  | Place an order from the checkout page |
 | `productIsInCheckout` | `productTitle, quantity, total, cartSubtotal` | Verify product is in cart on checkout page |
-| `removeFromCart` | `productTitle` | Remove a product from the cart on the cart page |
+| `removeFromCart` | `productIdOrTitle` | Remove a product from the cart on the cart page |
 | `setCartQuantity` | `productTitle, quantityValue` | Change the quantity of a product on the cart page |
 | `searchForProduct` | | Searching for a product name and landing on its detail page |
 | `emptyCart` | | Removes any products and coupons that are in the cart |

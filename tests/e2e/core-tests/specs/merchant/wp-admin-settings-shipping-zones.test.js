@@ -23,7 +23,6 @@ const {
 
 const config = require( 'config' );
 const simpleProductPrice = config.has( 'products.simple.price' ) ? config.get( 'products.simple.price' ) : '9.99';
-const simpleProductName = config.get( 'products.simple.name' );
 const california = 'state:US:CA';
 const sanFranciscoZIP = '94107';
 const shippingZoneNameUS = 'US with Flat rate';
@@ -32,8 +31,10 @@ const shippingZoneNameSF = 'SF with Local pickup';
 
 const runAddNewShippingZoneTest = () => {
 	describe('WooCommerce Shipping Settings - Add new shipping zone', () => {
+		let productId;
+
 		beforeAll(async () => {
-			await createSimpleProduct();
+			productId = await createSimpleProduct();
 			await withRestApi.deleteAllShippingZones();
 			await merchant.login();
 		});
@@ -64,7 +65,7 @@ const runAddNewShippingZoneTest = () => {
 
 			// Add product to cart as a shopper
 			await shopper.goToShop();
-			await shopper.addToCartFromShopPage(simpleProductName);
+			await shopper.addToCartFromShopPage( productId );
 			await shopper.goToCart();
 
 			// Set shipping country to United States (US)
@@ -120,7 +121,7 @@ const runAddNewShippingZoneTest = () => {
 			await expect(page).toMatchElement('.shipping ul#shipping_method > li', {text: 'Local pickup'});
 			await expect(page).toMatchElement('.order-total .amount', {text: `$${simpleProductPrice}`});
 
-			await shopper.removeFromCart(simpleProductName);
+			await shopper.removeFromCart( productId );
 		});
 	});
 };
