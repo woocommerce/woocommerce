@@ -17,6 +17,8 @@ const httpClient = HTTPClientFactory
 	.withIndexPermalinks()
 	.create();
 
+const getProducts = ( params = {} ) => httpClient.get( '/wc/v3/products', params );
+
 const createProducts = ( products ) => httpClient.post( '/wc/v3/products/batch', { create: products } );
 const createProductCategory = ( data ) => httpClient.post( '/wc/v3/products/categories', data );
 const createProductAttribute = ( name ) => httpClient.post( '/wc/v3/products/attributes', { name } );
@@ -1014,7 +1016,77 @@ const createSampleExternalProducts = async ( categories ) => {
 			menu_order: 0,
 			related_ids: [],
 			stock_status: 'instock'
-		}
+		},
+	] );
+};
+
+const createSampleGroupedProduct = async ( categories ) => {
+	const { data: logoProducts } = await getProducts( {
+		search: 'logo',
+		_fields: [ 'id' ],
+	} );
+
+	await createProducts( [
+		{
+			name: 'Logo Collection',
+			date_created_gmt: '2021-09-28T15:50:20',
+			type: 'grouped',
+			status: 'publish',
+			featured: false,
+			catalog_visibility: 'visible',
+			description:
+				'<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. '
+				+ 'Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. '
+				+ 'Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>\n',
+			short_description: '<p>This is a grouped product.</p>\n',
+			sku: 'logo-collection',
+			price: '18',
+			regular_price: '',
+			sale_price: '',
+			date_on_sale_from_gmt: null,
+			date_on_sale_to_gmt: null,
+			on_sale: true,
+			purchasable: false,
+			total_sales: 0,
+			virtual: false,
+			downloadable: false,
+			downloads: [],
+			download_limit: 0,
+			download_expiry: 0,
+			external_url: '',
+			button_text: '',
+			tax_status: 'taxable',
+			tax_class: '',
+			manage_stock: false,
+			stock_quantity: null,
+			backorders: 'no',
+			backorders_allowed: false,
+			backordered: false,
+			low_stock_amount: null,
+			sold_individually: false,
+			weight: '',
+			dimensions: { length: '', width: '', height: '' },
+			shipping_required: true,
+			shipping_taxable: true,
+			shipping_class: '',
+			shipping_class_id: 0,
+			reviews_allowed: true,
+			average_rating: '0.00',
+			rating_count: 0,
+			upsell_ids: [],
+			cross_sell_ids: [],
+			parent_id: 0,
+			purchase_note: '',
+			categories: [ { id: categories.clothing.id } ],
+			tags: [],
+			attributes: [],
+			default_attributes: [],
+			variations: [],
+			grouped_products: logoProducts.map( p => p.id ),
+			menu_order: 0,
+			related_ids: [],
+			stock_status: 'instock'
+		},
 	] );
 };
 
@@ -1024,4 +1096,5 @@ const createSampleData = async () => {
 
 	await createSampleSimpleProducts( categories, attributes );
 	await createSampleExternalProducts( categories );
+	await createSampleGroupedProduct( categories );
 };
