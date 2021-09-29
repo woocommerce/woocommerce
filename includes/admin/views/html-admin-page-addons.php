@@ -125,12 +125,24 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 								<p><?php echo wp_kses_post( $addon->excerpt ); ?></p>
 							</div>
 							<div class="product-footer">
-								<?php if ( '&#36;0.00' === $addon->price ) : ?>
-									<span class="price"><?php esc_html_e( 'Free', 'woocommerce' ); ?></span>
-								<?php else : ?>
-									<span class="price"><?php echo wp_kses_post( $addon->price ); ?></span>
-									<span class="price_suffix"><?php esc_html_e( 'per year', 'woocommerce' ); ?></span>
-								<?php endif; ?>
+								<div class="product-price-and-reviews-container">
+									<div class="product-price-block">
+										<?php if ( '&#36;0.00' === $addon->price ) : ?>
+											<span class="price"><?php esc_html_e( 'Free', 'woocommerce' ); ?></span>
+										<?php else : ?>
+											<span class="price"><?php echo wp_kses_post( $addon->price ); ?></span>
+											<span class="price-suffix"><?php esc_html_e( 'per year', 'woocommerce' ); ?></span>
+										<?php endif; ?>
+									</div>
+									<?php if ( null !== $addon->reviews_count ) : ?>
+										<div class="product-reviews-block">
+											<?php for ( $i = 1; $i <= 5; ++$i ) : ?>
+												<div class="product-rating-star"></div>
+											<?php endfor; ?>
+											<span class="product-reviews-count">(<?php echo wp_kses_post( $addon->reviews_count ); ?>)</span>
+										</div>
+									<?php endif; ?>
+								</div>
 								<a class="button" href="<?php echo esc_url( WC_Admin_Addons::add_in_app_purchase_url_params( $addon->link ) ); ?>">
 									<?php esc_html_e( 'View details', 'woocommerce' ); ?>
 								</a>
