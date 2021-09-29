@@ -16,7 +16,7 @@ const { getRequest } = require( '../../utils/request' );
 
 	beforeAll( async () => {
 		await createSampleProducts();
-	} );
+	}, 7000 );
 
 	describe( 'List all products', () => {
 
