@@ -1,4 +1,3 @@
-/* eslint-disable jest/no-export, jest/no-disabled-tests */
 /**
  * Internal dependencies
  */
@@ -9,7 +8,7 @@ const {
 	settingsPageSaveChanges,
 	uiUnblocked,
 	verifyCheckboxIsSet,
-	verifyValueOfInputField
+	verifyValueOfInputField,
 } = require( '@woocommerce/e2e-utils' );
 
 /**
@@ -172,7 +171,6 @@ const runTaxSettingsTest = () => {
 				expect(page).toMatchElement('#message', {text: 'Your settings have been saved.'}),
 				expect(page).not.toMatchElement('ul.subsubsub > li > a', {text: 'Fancy rates'}),
 			]);
-			await page.waitFor(10000);
 		});
 	});
 };

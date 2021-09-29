@@ -1,11 +1,11 @@
-/* eslint-disable jest/no-export, jest/no-disabled-tests */
 /**
  * Internal dependencies
  */
 const {
 	merchant,
 	createSimpleOrder,
-	moveAllItemsToTrash
+	withRestApi,
+	utils,
 } = require( '@woocommerce/e2e-utils' );
 
 let orderId;
@@ -18,11 +18,9 @@ const runEditOrderTest = () => {
 		});
 
 		afterAll( async () => {
-			// Make sure we're on the all orders view and cleanup the orders we created
-			await merchant.openAllOrdersView();
-			await moveAllItemsToTrash();
+			await withRestApi.deleteAllOrders();
 		});
-		
+
 		it('can view single order', async () => {
 			// Go to "orders" page
 			await merchant.openAllOrdersView();
@@ -36,7 +34,7 @@ const runEditOrderTest = () => {
 			// Make sure we're on the order details page
 			await expect(page.title()).resolves.toMatch('Edit order');
         });
-        
+
         it('can update order status', async () => {
 			//Open order we created
 			await merchant.goToOrder(orderId);
@@ -44,7 +42,7 @@ const runEditOrderTest = () => {
 			// Make sure we're still on the order details page
 			await expect(page.title()).resolves.toMatch('Edit order');
 
-			// Update order status to `Completed` 
+			// Update order status to `Completed`
 			await merchant.updateOrderStatus(orderId, 'Completed');
 
 			// Verify order status changed note added
@@ -56,7 +54,7 @@ const runEditOrderTest = () => {
 				}
 			);
         });
-        
+
         it('can update order details', async () => {
 			//Open order we created
 			await merchant.goToOrder(orderId);
@@ -68,7 +66,7 @@ const runEditOrderTest = () => {
 			await expect(page).toFill('input[name=order_date]', '2018-12-14');
 
 			// Wait for auto save
-			await page.waitFor( 2000 );
+			await utils.waitForTimeout( 2000 );
 
 			// Save the order changes
 			await expect( page ).toClick( 'button.save_order' );
@@ -77,7 +75,6 @@ const runEditOrderTest = () => {
 			// Verify
 			await expect( page ).toMatchElement( '#message', { text: 'Order updated.' } );
 			await expect( page ).toMatchElement( 'input[name=order_date]', { value: '2018-12-14' } );
-
 		});
 	});
 }

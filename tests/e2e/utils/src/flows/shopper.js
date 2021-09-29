@@ -52,6 +52,7 @@ const shopper = {
 			const [ addToCartButton ] = await page.$x( addToCartXPath + ']' );
 			await addToCartButton.click();
 
+			// @todo: Update to waitForXPath when available in Puppeteer api.
 			await page.waitFor( addToCartXPath + ' and contains(@class, "added")]' );
 		}
 

@@ -14,6 +14,7 @@ import {
 	clearAndFillInput,
 } from './page-utils';
 import factories from './factories';
+import { waitForTimeout } from './flows/utils';
 import { Coupon, Order } from '@woocommerce/api';
 
 const client = factories.api.withDefaultPermalinks;
@@ -30,7 +31,7 @@ const defaultGroupedProduct = config.get('products.grouped');
  */
 const verifyAndPublish = async ( noticeText ) => {
 	// Wait for auto save
-	await page.waitFor( 2000 );
+	await waitForTimeout( 2000 );
 
 	// Publish product
 	await expect( page ).toClick( '#publish' );
@@ -377,7 +378,7 @@ const createSimpleOrder = async ( orderStatus = 'Pending payment' ) => {
 /**
  * Creates a batch of orders from the given `statuses`
  * using the "Batch Create Order" API.
- * 
+ *
  * @param statuses Array of order statuses
  */
 const batchCreateOrders = async (statuses) => {
