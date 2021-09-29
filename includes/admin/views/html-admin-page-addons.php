@@ -121,13 +121,27 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 								<?php if ( ! empty( $addon->image ) || ! empty( $addon->icon ) ) : ?>
 									<span class="product-img-wrap">
 										<?php /* Show an icon if it exists, and an image otherwise */ ?>
-										<img src="<?php echo esc_url( null === $addon->icon ? $addon->image : $addon->icon ); ?>" />
+										<img src="<?php echo esc_url( empty( $addon->icon ) ? $addon->image : $addon->icon ); ?>" />
 									</span>
 								<?php endif; ?>
 								<a href="<?php echo esc_url( WC_Admin_Addons::add_in_app_purchase_url_params( $addon->link ) ); ?>">
 									<h2><?php echo esc_html( $addon->title ); ?></h2>
 								</a>
-								<?php /* TODO: Show "Developed by" together with the link to vendor URL */ ?>
+								<?php if ( ! empty( $addon->vendor_name ) && ! empty( $addon->vendor_url ) ) : ?>
+									<div class="product-developed-by">
+										<?php
+											printf(
+												/* translators: %s vendor link */
+												esc_html__( 'Developed by %s', 'woocommerce' ),
+												sprintf(
+													'<a class="product-vendor-link" href="%1$s">%2$s</a>',
+													esc_url_raw( $addon->vendor_url ),
+													wp_kses_post( $addon->vendor_name )
+												)
+											);
+										?>
+									</div>
+								<?php endif; ?>
 								<p><?php echo wp_kses_post( $addon->excerpt ); ?></p>
 							</div>
 							<div class="product-footer">
