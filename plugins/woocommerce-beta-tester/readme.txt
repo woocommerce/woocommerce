@@ -3,7 +3,7 @@ Contributors: automattic, bor0, claudiosanches, claudiulodro, kloon, mikejolley,
 Tags: woocommerce, woo commerce, beta, beta tester, bleeding edge, testing
 Requires at least: 4.7
 Tested up to: 5.6
-Stable tag: 2.0.3
+Stable tag: 2.0.4
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -53,8 +53,12 @@ See our [contributing guidelines here](https://github.com/woocommerce/woocommerc
 
 == Changelog ==
 
-= 2.0.3 - 2021-09-22 =
+= 2.0.4 - 2021-09-29 =
+* Dev: Bump tested to version
+* Fix: enqueue logic for css/js assets
 
+= 2.0.3 - 2021-09-22 =
+* Fix: Bump version to release version including admin.css.
 
 = 2.0.2 =
 

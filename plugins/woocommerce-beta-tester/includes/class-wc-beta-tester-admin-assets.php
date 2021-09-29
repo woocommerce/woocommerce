@@ -54,7 +54,7 @@ class WC_Beta_Tester_Admin_Assets {
 			)
 		);
 
-		if ( in_array( $screen_id, array( 'woocommerce_page_wc-beta-tester', 'woocommerce_page_wc-beta-tester-version-picker' ) ) ) {
+		if ( in_array( $screen_id, array( 'plugins_page_wc-beta-tester', 'plugins_page_wc-beta-tester-version-picker' ) ) ) {
 			wp_enqueue_style( 'wc-beta-tester-admin' );
 			wp_enqueue_script( 'wc-beta-tester-version-info' );
 			wp_enqueue_script( 'wc-beta-tester-version-picker' );
