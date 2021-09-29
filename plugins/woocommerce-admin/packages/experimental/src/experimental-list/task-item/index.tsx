@@ -18,8 +18,8 @@ import { sanitize } from 'dompurify';
 /**
  * Internal dependencies
  */
-import { Text, ListItem } from '../';
-import { VerticalCSSTransition } from '../vertical-css-transition';
+import { Text, ListItem } from '../../';
+import { VerticalCSSTransition } from '../../vertical-css-transition';
 
 const ALLOWED_TAGS = [ 'a', 'b', 'em', 'i', 'strong', 'p', 'br' ];
 const ALLOWED_ATTR = [ 'target', 'href', 'rel', 'name', 'download' ];

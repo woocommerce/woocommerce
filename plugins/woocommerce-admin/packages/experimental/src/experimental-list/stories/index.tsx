@@ -8,6 +8,7 @@ import { Meta, Story } from '@storybook/react';
  * Internal dependencies
  */
 import { List, ListItem, CollapsibleList } from '../..';
+import { TaskItem } from '../task-item';
 import { ListProps } from '../experimental-list';
 import './style.scss';
 
@@ -82,3 +83,115 @@ export const CollapsibleListExample: Story = () => {
 };
 
 CollapsibleListExample.storyName = 'List with CollapsibleListItem.';
+
+export const TaskItemExample: Story = ( args ) => (
+	<List { ...args }>
+		<TaskItem
+			action={ () =>
+				// eslint-disable-next-line no-console
+				console.log( 'Primary action clicked' )
+			}
+			actionLabel="Primary action"
+			completed={ false }
+			content="Task content"
+			expandable={ true }
+			expanded={ true }
+			level={ 1 }
+			onClick={ () =>
+				// eslint-disable-next-line no-console
+				console.log( 'Task clicked' )
+			}
+			onCollapse={ () =>
+				// eslint-disable-next-line no-console
+				console.log( 'Task will be expanded' )
+			}
+			onExpand={ () =>
+				// eslint-disable-next-line no-console
+				console.log( 'Task will be collapsed' )
+			}
+			showActionButton={ true }
+			title="A high-priority task"
+		/>
+		<TaskItem
+			action={ () =>
+				// eslint-disable-next-line no-console
+				console.log( 'Primary action clicked' )
+			}
+			actionLabel="Primary action"
+			completed={ false }
+			content="Task content"
+			expandable={ false }
+			expanded={ true }
+			level={ 1 }
+			onClick={ () =>
+				// eslint-disable-next-line no-console
+				console.log( 'Task clicked' )
+			}
+			showActionButton={ false }
+			title="A high-priority task without `Primary action`"
+		/>
+		<TaskItem
+			action={ () => {} }
+			completed={ false }
+			content="Task content"
+			expandable={ false }
+			expanded={ true }
+			level={ 2 }
+			onClick={ () =>
+				// eslint-disable-next-line no-console
+				console.log( 'Task clicked' )
+			}
+			title="Setup task"
+			onDismiss={ () =>
+				// eslint-disable-next-line no-console
+				console.log( 'Task dismissed' )
+			}
+			onSnooze={ () =>
+				// eslint-disable-next-line no-console
+				console.log( 'Task snoozed' )
+			}
+			time="5 minutes"
+		/>
+		<TaskItem
+			action={ () => {} }
+			completed={ false }
+			content="Task content"
+			expandable={ false }
+			expanded={ true }
+			level={ 3 }
+			onClick={ () =>
+				// eslint-disable-next-line no-console
+				console.log( 'Task clicked' )
+			}
+			title="A low-priority task"
+			onDismiss={ () =>
+				// eslint-disable-next-line no-console
+				console.log( 'Task dismissed' )
+			}
+			onSnooze={ () =>
+				// eslint-disable-next-line no-console
+				console.log( 'Task snoozed' )
+			}
+			time="3 minutes"
+		/>
+		<TaskItem
+			action={ () => {} }
+			completed={ true }
+			content="Task content"
+			expandable={ false }
+			expanded={ true }
+			level={ 3 }
+			onClick={ () =>
+				// eslint-disable-next-line no-console
+				console.log( 'Task clicked' )
+			}
+			title="Another low-priority task"
+			onDelete={ () =>
+				// eslint-disable-next-line no-console
+				console.log( 'Task deleted' )
+			}
+		/>
+	</List>
+);
+
+TaskItemExample.storyName = 'TaskItems.';

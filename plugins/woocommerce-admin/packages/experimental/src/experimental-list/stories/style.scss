@@ -9,3 +9,15 @@
 		}
 	}
 }
+
+.woocommerce-experimental-list {
+	li {
+		padding-left: 25px;
+		.components-dropdown {
+			div {
+				position: absolute;
+				right: 0;
+			}
+		}
+	}
+}
