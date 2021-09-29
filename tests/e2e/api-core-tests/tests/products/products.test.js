@@ -330,5 +330,33 @@ const { productsApi } = require('../../endpoints/products');
 				] )
 			);
 		} );
+
+		it( 'before / after', async () => {
+			const before = [
+				expect.objectContaining( { name: 'Album' } ),
+				expect.objectContaining( { name: 'Single' } ),
+				expect.objectContaining( { name: 'T-Shirt with Logo' } ),
+				expect.objectContaining( { name: 'Beanie with Logo' } ),
+			];
+			const after = [
+				expect.objectContaining( { name: 'Hoodie' } ),
+				expect.objectContaining( { name: 'V-Neck T-Shirt' } ),
+			];
+
+			const result1 = await productsApi.listAll.products( {
+				before: '2021-09-05T15:50:19',
+			} );
+			expect( result1.statusCode ).toEqual( 200 );
+			expect( result1.body ).toHaveLength( before.length );
+			expect( result1.body ).toEqual( expect.arrayContaining( before ) );
+
+			const result2 = await productsApi.listAll.products( {
+				after: '2021-09-18T15:50:18',
+			} );
+			expect( result2.statusCode ).toEqual( 200 );
+			expect( result2.body ).toEqual( expect.not.arrayContaining( before ) );
+			expect( result2.body ).toHaveLength( after.length );
+			expect( result2.body ).toEqual( expect.arrayContaining( after ) );
+		} );
 	} );
 } );
