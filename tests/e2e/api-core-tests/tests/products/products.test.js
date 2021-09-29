@@ -3,6 +3,7 @@
  */
 const { createSampleProducts } = require( '../../data/products' );
 const { productsApi } = require('../../endpoints/products');
+const { getRequest } = require( '../../utils/request' );
 
 /**
  * Tests for the WooCommerce Products API.
@@ -357,6 +358,29 @@ const { productsApi } = require('../../endpoints/products');
 			expect( result2.body ).toEqual( expect.not.arrayContaining( before ) );
 			expect( result2.body ).toHaveLength( after.length );
 			expect( result2.body ).toEqual( expect.arrayContaining( after ) );
+		} );
+
+		it( 'attributes', async () => {
+			const { body: attributes } = await getRequest( 'products/attributes' );
+			const color = attributes.find( attr => attr.name === 'Color' );
+			const { body: colorTerms } = await getRequest( `products/attributes/${ color.id }/terms` );
+			const red = colorTerms.find( term => term.name === 'Red' );
+
+			const redProducts = [
+				expect.objectContaining( { name: 'V-Neck T-Shirt' } ),
+				expect.objectContaining( { name: 'Hoodie' } ),
+				expect.objectContaining( { name: 'Beanie' } ),
+				expect.objectContaining( { name: 'Beanie with Logo' } ),
+			];
+
+			const result = await productsApi.listAll.products( {
+				attribute: 'pa_color',
+				attribute_term: red.id,
+			} );
+
+			expect( result.statusCode ).toEqual( 200 );
+			expect( result.body ).toHaveLength( redProducts.length );
+			expect( result.body ).toEqual( expect.arrayContaining( redProducts ) );
 		} );
 	} );
 } );
