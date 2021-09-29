@@ -21,6 +21,7 @@ const createProductAttributeTerms = ( parentId, termNames ) => postRequest(
 		create: termNames.map( name => ( { name } ) )
 	}
 );
+const createShippingClass = ( name ) => postRequest( 'products/shipping_classes', { name } );
 
 const createSampleCategories = async () => {
 	const { body: clothing } = await createProductCategory( { name: 'Clothing' } );
@@ -51,6 +52,10 @@ const createSampleAttributes = async () => {
 		size,
 	}
 };
+
+const createSampleShippingClasses = async () => {
+	await createShippingClass( 'Freight' );
+}
 
 const createSampleSimpleProducts = async ( categories, attributes ) => {
 	const description = '<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. '
@@ -97,7 +102,6 @@ const createSampleSimpleProducts = async ( categories, attributes ) => {
 			shipping_required: true,
 			shipping_taxable: true,
 			shipping_class: '',
-			shipping_class_id: 0,
 			reviews_allowed: true,
 			average_rating: '0.00',
 			rating_count: 0,
@@ -162,7 +166,6 @@ const createSampleSimpleProducts = async ( categories, attributes ) => {
 			shipping_required: true,
 			shipping_taxable: true,
 			shipping_class: '',
-			shipping_class_id: 0,
 			reviews_allowed: true,
 			average_rating: '0.00',
 			rating_count: 0,
@@ -233,7 +236,6 @@ const createSampleSimpleProducts = async ( categories, attributes ) => {
 			shipping_required: false,
 			shipping_taxable: false,
 			shipping_class: '',
-			shipping_class_id: 0,
 			reviews_allowed: true,
 			average_rating: '0.00',
 			rating_count: 0,
@@ -301,7 +303,6 @@ const createSampleSimpleProducts = async ( categories, attributes ) => {
 			shipping_required: false,
 			shipping_taxable: false,
 			shipping_class: '',
-			shipping_class_id: 0,
 			reviews_allowed: true,
 			average_rating: '0.00',
 			rating_count: 0,
@@ -358,7 +359,6 @@ const createSampleSimpleProducts = async ( categories, attributes ) => {
 			shipping_required: true,
 			shipping_taxable: true,
 			shipping_class: '',
-			shipping_class_id: 0,
 			reviews_allowed: true,
 			average_rating: '0.00',
 			rating_count: 0,
@@ -422,8 +422,7 @@ const createSampleSimpleProducts = async ( categories, attributes ) => {
 			dimensions: { length: '7', width: '5', height: '1' },
 			shipping_required: true,
 			shipping_taxable: true,
-			shipping_class: '',
-			shipping_class_id: 0,
+			shipping_class: 'freight',
 			reviews_allowed: true,
 			average_rating: '0.00',
 			rating_count: 0,
@@ -488,7 +487,6 @@ const createSampleSimpleProducts = async ( categories, attributes ) => {
 			shipping_required: true,
 			shipping_taxable: true,
 			shipping_class: '',
-			shipping_class_id: 0,
 			reviews_allowed: true,
 			average_rating: '0.00',
 			rating_count: 0,
@@ -545,7 +543,6 @@ const createSampleSimpleProducts = async ( categories, attributes ) => {
 			shipping_required: true,
 			shipping_taxable: true,
 			shipping_class: '',
-			shipping_class_id: 0,
 			reviews_allowed: true,
 			average_rating: '0.00',
 			rating_count: 0,
@@ -610,7 +607,6 @@ const createSampleSimpleProducts = async ( categories, attributes ) => {
 			shipping_required: true,
 			shipping_taxable: true,
 			shipping_class: '',
-			shipping_class_id: 0,
 			reviews_allowed: true,
 			average_rating: '0.00',
 			rating_count: 0,
@@ -667,7 +663,6 @@ const createSampleSimpleProducts = async ( categories, attributes ) => {
 			shipping_required: true,
 			shipping_taxable: true,
 			shipping_class: '',
-			shipping_class_id: 0,
 			reviews_allowed: true,
 			average_rating: '0.00',
 			rating_count: 0,
@@ -732,7 +727,6 @@ const createSampleSimpleProducts = async ( categories, attributes ) => {
 			shipping_required: true,
 			shipping_taxable: true,
 			shipping_class: '',
-			shipping_class_id: 0,
 			reviews_allowed: true,
 			average_rating: '0.00',
 			rating_count: 0,
@@ -789,7 +783,6 @@ const createSampleSimpleProducts = async ( categories, attributes ) => {
 			shipping_required: true,
 			shipping_taxable: true,
 			shipping_class: '',
-			shipping_class_id: 0,
 			reviews_allowed: true,
 			average_rating: '0.00',
 			rating_count: 0,
@@ -854,7 +847,6 @@ const createSampleSimpleProducts = async ( categories, attributes ) => {
 			shipping_required: true,
 			shipping_taxable: true,
 			shipping_class: '',
-			shipping_class_id: 0,
 			reviews_allowed: true,
 			average_rating: '0.00',
 			rating_count: 0,
@@ -919,7 +911,6 @@ const createSampleSimpleProducts = async ( categories, attributes ) => {
 			shipping_required: true,
 			shipping_taxable: true,
 			shipping_class: '',
-			shipping_class_id: 0,
 			reviews_allowed: true,
 			average_rating: '0.00',
 			rating_count: 0,
@@ -992,7 +983,6 @@ const createSampleExternalProducts = async ( categories ) => {
 			shipping_required: true,
 			shipping_taxable: true,
 			shipping_class: '',
-			shipping_class_id: 0,
 			reviews_allowed: true,
 			average_rating: '0.00',
 			rating_count: 0,
@@ -1062,7 +1052,6 @@ const createSampleGroupedProduct = async ( categories ) => {
 			shipping_required: true,
 			shipping_taxable: true,
 			shipping_class: '',
-			shipping_class_id: 0,
 			reviews_allowed: true,
 			average_rating: '0.00',
 			rating_count: 0,
@@ -1126,7 +1115,6 @@ const createSampleVariableProducts = async ( categories, attributes ) => {
 		shipping_required: true,
 		shipping_taxable: true,
 		shipping_class: '',
-		shipping_class_id: 0,
 		reviews_allowed: true,
 		average_rating: '0.00',
 		rating_count: 0,
@@ -1197,7 +1185,6 @@ const createSampleVariableProducts = async ( categories, attributes ) => {
 			weight: '1.5',
 			dimensions: { length: '10', width: '8', height: '3' },
 			shipping_class: '',
-			shipping_class_id: 0,
 			attributes: [
 				{ id: attributes.color.id, option: 'Blue' },
 				{ id: 0, name: 'Logo', option: 'Yes' }
@@ -1233,7 +1220,6 @@ const createSampleVariableProducts = async ( categories, attributes ) => {
 			weight: '1.5',
 			dimensions: { length: '10', width: '8', height: '3' },
 			shipping_class: '',
-			shipping_class_id: 0,
 			attributes: [
 				{ id: attributes.color.id, option: 'Blue' },
 				{ id: 0, name: 'Logo', option: 'No' }
@@ -1269,7 +1255,6 @@ const createSampleVariableProducts = async ( categories, attributes ) => {
 			weight: '1.5',
 			dimensions: { length: '10', width: '8', height: '3' },
 			shipping_class: '',
-			shipping_class_id: 0,
 			attributes: [
 				{ id: attributes.color.id, option: 'Green' },
 				{ id: 0, name: 'Logo', option: 'No' }
@@ -1305,7 +1290,6 @@ const createSampleVariableProducts = async ( categories, attributes ) => {
 			weight: '1.5',
 			dimensions: { length: '10', width: '8', height: '3' },
 			shipping_class: '',
-			shipping_class_id: 0,
 			attributes: [
 				{ id: attributes.color.id, option: 'Red' },
 				{ id: 0, name: 'Logo', option: 'No' }
@@ -1353,7 +1337,6 @@ const createSampleVariableProducts = async ( categories, attributes ) => {
 		shipping_required: true,
 		shipping_taxable: true,
 		shipping_class: '',
-		shipping_class_id: 0,
 		reviews_allowed: true,
 		average_rating: '0.00',
 		rating_count: 0,
@@ -1415,7 +1398,6 @@ const createSampleVariableProducts = async ( categories, attributes ) => {
 			weight: '0.5',
 			dimensions: { length: '24', width: '1', height: '2' },
 			shipping_class: '',
-			shipping_class_id: 0,
 			attributes: [ { id: attributes.color.id, option: 'Blue' } ],
 			menu_order: 0
 		},
@@ -1448,7 +1430,6 @@ const createSampleVariableProducts = async ( categories, attributes ) => {
 			weight: '0.5',
 			dimensions: { length: '24', width: '1', height: '2' },
 			shipping_class: '',
-			shipping_class_id: 0,
 			attributes: [ { id: attributes.color.id, option: 'Green' } ],
 			menu_order: 0
 		},
@@ -1481,7 +1462,6 @@ const createSampleVariableProducts = async ( categories, attributes ) => {
 			weight: '0.5',
 			dimensions: { length: '24', width: '1', height: '2' },
 			shipping_class: '',
-			shipping_class_id: 0,
 			attributes: [ { id: attributes.color.id, option: 'Red' } ],
 			menu_order: 0
 		}
@@ -1491,6 +1471,8 @@ const createSampleVariableProducts = async ( categories, attributes ) => {
 const createSampleProducts = async () => {
 	const categories = await createSampleCategories();
 	const attributes = await createSampleAttributes();
+	
+	await createSampleShippingClasses();
 
 	await createSampleSimpleProducts( categories, attributes );
 	await createSampleExternalProducts( categories );

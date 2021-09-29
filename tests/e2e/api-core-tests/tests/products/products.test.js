@@ -397,5 +397,17 @@ const { getRequest } = require( '../../utils/request' );
 			expect( result2.statusCode ).toEqual( 200 );
 			expect( result2.body ).toHaveLength( 0 );
 		} );
+
+		it( 'shipping class', async () => {
+			const { body: shippingClasses } = await getRequest( 'products/shipping_classes' );
+			const freight = shippingClasses.find( c => c.name === 'Freight' );
+
+			const result = await productsApi.listAll.products( {
+				shipping_class: freight.id,
+			} );
+			expect( result.statusCode ).toEqual( 200 );
+			expect( result.body ).toHaveLength( 1 );
+			expect( result.body[0].name ).toBe( 'Long Sleeve Tee' );
+		} );
 	} );
 } );
