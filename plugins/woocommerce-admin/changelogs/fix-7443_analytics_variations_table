@@ -1,4 +1,0 @@
-Significance: patch
-Type: Fix
-
-Fix white screen for variation analytic data without a name. #7686

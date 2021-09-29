@@ -1,6 +1,6 @@
 # Testing instructions
 
-## Unreleased
+## 2.7.1
 
 ### Add Newsletter Signup #7601
 

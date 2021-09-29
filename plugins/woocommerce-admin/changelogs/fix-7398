@@ -1,4 +1,0 @@
-Significance: patch
-Type: Fix
-
-Skip scheduling action if Action Scheduler tables have not been set up #7521

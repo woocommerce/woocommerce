@@ -1,4 +1,0 @@
-Significance: patch
-Type: Fix
-
-Assign parent order status as children order status if refund order #7253

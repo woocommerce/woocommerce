@@ -1,4 +1,0 @@
-Significance: minor
-Type: Add
-
-Added MailchimpScheduler that runs daily to subscribe store_email in the profile data #7579

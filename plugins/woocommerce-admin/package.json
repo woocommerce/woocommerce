@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/admin-library",
-	"version": "2.7.0-dev",
+	"version": "2.9.0-dev",
 	"homepage": "https://woocommerce.github.io/woocommerce-admin/",
 	"repository": {
 		"type": "git",

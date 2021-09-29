@@ -1,4 +1,0 @@
-Significance: patch
-Type: Fix
-
-Fix up onboarding profiler not working when opted out of tracking
