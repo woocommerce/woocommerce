@@ -382,5 +382,20 @@ const { getRequest } = require( '../../utils/request' );
 			expect( result.body ).toHaveLength( redProducts.length );
 			expect( result.body ).toEqual( expect.arrayContaining( redProducts ) );
 		} );
+
+		it( 'status', async () => {
+			const result1 = await productsApi.listAll.products( {
+				status: 'pending'
+			} );
+			expect( result1.statusCode ).toEqual( 200 );
+			expect( result1.body ).toHaveLength( 1 );
+			expect( result1.body[0].name ).toBe( 'Polo' );
+
+			const result2 = await productsApi.listAll.products( {
+				status: 'draft'
+			} );
+			expect( result2.statusCode ).toEqual( 200 );
+			expect( result2.body ).toHaveLength( 0 );
+		} );
 	} );
 } );

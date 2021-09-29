@@ -323,7 +323,7 @@ const createSampleSimpleProducts = async ( categories, attributes ) => {
 			name: 'Polo', 
 			date_created_gmt: '2021-09-05T15:50:19', 
 			type: 'simple', 
-			status: 'publish', 
+			status: 'pending', 
 			featured: false, 
 			catalog_visibility: 'visible', 
 			description,
