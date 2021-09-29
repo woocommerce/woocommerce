@@ -162,22 +162,14 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 										<?php if ( '&#36;0.00' === $addon->price ) : ?>
 											<span class="price"><?php esc_html_e( 'Free', 'woocommerce' ); ?></span>
 										<?php else : ?>
-											<?php
-											$price_suffix = __( 'per year', 'woocommerce' );
-											if ( ! empty( $addon->price_suffix ) ) {
-												$price_suffix = $addon->price_suffix;
-											}
-											?>
 											<span class="price"><?php echo wp_kses_post( $addon->price ); ?></span>
-											<span class="price-suffix"><?php echo esc_html( $price_suffix ); ?></span>
+											<span class="price-suffix"><?php esc_html_e( 'per year', 'woocommerce' ); ?></span>
 										<?php endif; ?>
 									</div>
-									<?php if ( ! empty( $addon->reviews_count ) && ! empty( $addon->rating ) ) : ?>
-										<?php /* Show rating and the number of reviews */ ?>
+									<?php if ( null !== $addon->reviews_count ) : ?>
 										<div class="product-reviews-block">
-											<?php for ( $index = 1; $index <= 5; ++$index ) : ?>
-												<?php $rating_star_class = 'product-rating-star product-rating-star__' . WC_Admin_Addons::get_star_class( $addon->rating, $index ); ?>
-												<div class="<?php echo esc_attr( $rating_star_class ); ?>"></div>
+											<?php for ( $i = 1; $i <= 5; ++$i ) : ?>
+												<div class="product-rating-star"></div>
 											<?php endfor; ?>
 											<span class="product-reviews-count">(<?php echo wp_kses_post( $addon->reviews_count ); ?>)</span>
 										</div>
