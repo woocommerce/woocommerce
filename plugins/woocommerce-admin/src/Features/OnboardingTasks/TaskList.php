@@ -40,7 +40,7 @@ class TaskList {
 	 *
 	 * @var array
 	 */
-	protected $tasks = array();
+	public $tasks = array();
 
 	/**
 	 * Constructor
