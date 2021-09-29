@@ -116,12 +116,16 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 						?>
 						<li class="product">
 							<div class="product-details">
-								<?php if ( ! empty( $addon->image ) ) : ?>
-									<span class="product-img-wrap"><img src="<?php echo esc_url( $addon->image ); ?>" /></span>
+								<?php if ( ! empty( $addon->image ) || ! empty( $addon->icon ) ) : ?>
+									<span class="product-img-wrap">
+										<?php /* Show an icon if it exists, and an image otherwise */ ?>
+										<img src="<?php echo esc_url( null === $addon->icon ? $addon->image : $addon->icon ); ?>" />
+									</span>
 								<?php endif; ?>
 								<a href="<?php echo esc_url( WC_Admin_Addons::add_in_app_purchase_url_params( $addon->link ) ); ?>">
 									<h2><?php echo esc_html( $addon->title ); ?></h2>
 								</a>
+								<?php /* TODO: Show "Developed by" together with the link to vendor URL */ ?>
 								<p><?php echo wp_kses_post( $addon->excerpt ); ?></p>
 							</div>
 							<div class="product-footer">
@@ -136,6 +140,7 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 									</div>
 									<?php if ( null !== $addon->reviews_count ) : ?>
 										<div class="product-reviews-block">
+											<?php /* TODO: Show proper rating, including half stars */ ?>
 											<?php for ( $i = 1; $i <= 5; ++$i ) : ?>
 												<div class="product-rating-star"></div>
 											<?php endfor; ?>
