@@ -1,6 +1,6 @@
 == Changelog ==
 
-2021-xx-xx - version 2.0.4
+2021-09-29 - version 2.0.4
 
 2021-09-22 - version 2.0.3
 - Fix: Bump version to release version including admin.css.
