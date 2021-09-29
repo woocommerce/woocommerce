@@ -58,8 +58,6 @@
 
 	&.has-error {
 		color: $alert-red;
-		outline: 2px solid $alert-red;
-		outline-offset: 0.5em;
 
 		a {
 			color: $alert-red;
