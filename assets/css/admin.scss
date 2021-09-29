@@ -768,11 +768,23 @@
 					margin-top: 4px;
 
 					.product-rating-star {
-						background: url(../images/icons/star.svg) no-repeat;
+						background-repeat: no-repeat;
 						background-size: contain;
 						height: 16px;
 						margin: 4px 4px 4px 0;
 						width: 17px;
+
+						&__fill {
+							background-image: url(../images/icons/star-golden.svg);
+						}
+
+						&__half-fill {
+							background-image: url(../images/icons/star-half-filled.svg);
+						}
+
+						&__no-fill {
+							background-image: url(../images/icons/star-gray.svg);
+						}
 					}
 
 					.product-reviews-count {
