@@ -56,7 +56,7 @@ class Task {
 	 *
 	 * @var bool
 	 */
-	protected $can_view = true;
+	public $can_view = true;
 
 	/**
 	 * Time string.
@@ -262,15 +262,6 @@ class Task {
 	}
 
 	/**
-	 * Bool for task visibility.
-	 *
-	 * @return bool
-	 */
-	public function is_visible() {
-		return $this->can_view && ! $this->is_snoozed() && ! $this->is_dismissed();
-	}
-
-	/**
 	 * Get the task as JSON.
 	 *
 	 * @return array
@@ -284,7 +275,7 @@ class Task {
 			'actionLabel'   => $this->action_label,
 			'actionUrl'     => $this->action_url,
 			'isComplete'    => $this->is_complete,
-			'isVisible'     => $this->is_visible(),
+			'canView'       => $this->can_view,
 			'time'          => $this->time,
 			'isDismissed'   => $this->is_dismissed(),
 			'isDismissable' => $this->is_dismissable,

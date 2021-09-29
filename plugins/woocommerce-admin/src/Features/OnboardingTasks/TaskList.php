@@ -113,6 +113,22 @@ class TaskList {
 	}
 
 	/**
+	 * Get only visible tasks in list.
+	 *
+	 * @return array
+	 */
+	public function get_viewable_tasks() {
+		return array_values(
+			array_filter(
+				$this->tasks,
+				function( $task ) {
+					return $task->can_view;
+				}
+			)
+		);
+	}
+
+	/**
 	 * Get the list for use in JSON.
 	 *
 	 * @return array
@@ -127,8 +143,9 @@ class TaskList {
 				function( $task ) {
 					return $task->get_json();
 				},
-				$this->tasks
+				$this->get_viewable_tasks()
 			),
+
 		);
 	}
 

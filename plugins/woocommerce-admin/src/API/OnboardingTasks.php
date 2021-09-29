@@ -760,6 +760,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 			},
 			$lists
 		);
+
 		return rest_ensure_response( array_values( apply_filters( 'woocommerce_admin_onboarding_tasks', $json ) ) );
 	}
 

@@ -52,13 +52,12 @@ export const TaskList: React.FC< TaskListProps > = ( {
 	const nowTimestamp = Date.now();
 	const visibleTasks = tasks.filter(
 		( task ) =>
-			task.canView &&
 			! task.isDismissed &&
 			( ! task.isSnoozed || task.snoozedUntil < nowTimestamp )
 	);
 
 	const incompleteTasks = tasks.filter(
-		( task ) => task.canView && ! task.isComplete && ! task.isDismissed
+		( task ) => ! task.isComplete && ! task.isDismissed
 	);
 
 	const [ expandedTask, setExpandedTask ] = useState(
