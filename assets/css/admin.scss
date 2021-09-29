@@ -734,7 +734,11 @@
 			}
 
 			.product-footer {
+				align-items: center;
 				border-top: 1px solid #dcdcde;
+				display: flex;
+				flex-direction: row;
+				justify-content: space-between;
 				padding: 24px;
 
 				.price {
@@ -742,11 +746,39 @@
 					color: #1d2327;
 				}
 
+				.price-suffix {
+					color: #646970; /* Gray 50 */
+				}
+
+				.product-reviews-block {
+					display: flex;
+					flex-direction: row;
+					margin-top: 4px;
+
+					.product-rating-star {
+						background: url(../images/icons/star.svg) no-repeat;
+						background-size: contain;
+						height: 16px;
+						margin: 4px 4px 4px 0;
+						width: 17px;
+					}
+
+					.product-reviews-count {
+						color: #646970; /* Gray 50 */
+						font-size: 12px;
+						font-family: sans-serif;
+						line-height: 24px;
+						letter-spacing: -0.154px;
+						margin-left: 4px;
+					}
+				}
+
 				.button {
 					background-color: #fff;
 					border-color: #007cba;
 					color: #007cba;
 					float: right;
+					height: 22px;
 				}
 			}
 		}
