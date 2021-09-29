@@ -33,7 +33,7 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 	const { isResolving, taskLists } = useSelect( ( select ) => {
 		return {
 			isResolving: select( ONBOARDING_STORE_NAME ).isResolving(
-				'getTasks'
+				'getTaskLists'
 			),
 			taskLists: select( ONBOARDING_STORE_NAME ).getTaskLists(),
 		};
