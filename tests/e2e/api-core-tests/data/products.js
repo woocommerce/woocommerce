@@ -22,6 +22,7 @@ const createProductAttributeTerms = ( parentId, termNames ) => postRequest(
 	}
 );
 const createShippingClass = ( name ) => postRequest( 'products/shipping_classes', { name } );
+const createTaxClass = ( name ) => postRequest( 'taxes/classes', { name } );
 
 const createSampleCategories = async () => {
 	const { body: clothing } = await createProductCategory( { name: 'Clothing' } );
@@ -55,6 +56,10 @@ const createSampleAttributes = async () => {
 
 const createSampleShippingClasses = async () => {
 	await createShippingClass( 'Freight' );
+}
+
+const createSampleTaxClasses = async () => {
+	await createTaxClass( 'Reduced Rate' );
 }
 
 const createSampleSimpleProducts = async ( categories, attributes ) => {
@@ -594,7 +599,7 @@ const createSampleSimpleProducts = async ( categories, attributes ) => {
 			external_url: '',
 			button_text: '',
 			tax_status: 'taxable',
-			tax_class: '',
+			tax_class: 'reduced-rate',
 			manage_stock: false,
 			stock_quantity: null,
 			backorders: 'no',
@@ -1473,6 +1478,7 @@ const createSampleProducts = async () => {
 	const attributes = await createSampleAttributes();
 	
 	await createSampleShippingClasses();
+	await createSampleTaxClasses();
 
 	await createSampleSimpleProducts( categories, attributes );
 	await createSampleExternalProducts( categories );
