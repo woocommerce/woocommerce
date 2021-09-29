@@ -115,45 +115,16 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 						?>
 						<li class="product">
 							<div class="product-details">
-								<?php if ( ! empty( $addon->icon ) ) : ?>
+								<?php if ( ! empty( $addon->image ) || ! empty( $addon->icon ) ) : ?>
 									<span class="product-img-wrap">
-										<?php /* Show an icon if it exists */ ?>
-										<img src="<?php echo esc_url( $addon->icon ); ?>" />
+										<?php /* Show an icon if it exists, and an image otherwise */ ?>
+										<img src="<?php echo esc_url( null === $addon->icon ? $addon->image : $addon->icon ); ?>" />
 									</span>
 								<?php endif; ?>
 								<a href="<?php echo esc_url( WC_Admin_Addons::add_in_app_purchase_url_params( $addon->link ) ); ?>">
 									<h2><?php echo esc_html( $addon->title ); ?></h2>
 								</a>
-								<?php if ( ! empty( $addon->vendor_name ) && ! empty( $addon->vendor_url ) ) : ?>
-									<div class="product-developed-by">
-										<?php
-										$parsed_vendor_url = parse_url( $addon->vendor_url );
-										if ( null == $parsed_vendor_url['path'] ) {
-											$addon->vendor_url .= '/';
-										}
-										$separator         = ( null == $parsed_vendor_url['query'] ) ? '?' : '&';
-										$query             = http_build_query(
-											array(
-												'utm_source'   => 'extensionsscreen',
-												'utm_medium'   => 'product',
-												'utm_campaign' => 'wcaddons',
-												'utm_content'  => 'devpartner',
-											)
-										);
-										$addon->vendor_url .= $separator . $query;
-
-										printf(
-										/* translators: %s vendor link */
-											esc_html__( 'Developed by %s', 'woocommerce' ),
-											sprintf(
-												'<a class="product-vendor-link" href="%1$s" target="_blank">%2$s</a>',
-												esc_url_raw( $addon->vendor_url ),
-												wp_kses_post( $addon->vendor_name )
-											)
-										);
-										?>
-									</div>
-								<?php endif; ?>
+								<?php /* TODO: Show "Developed by" together with the link to vendor URL */ ?>
 								<p><?php echo wp_kses_post( $addon->excerpt ); ?></p>
 							</div>
 							<div class="product-footer">
@@ -168,6 +139,7 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 									</div>
 									<?php if ( null !== $addon->reviews_count ) : ?>
 										<div class="product-reviews-block">
+											<?php /* TODO: Show proper rating, including half stars */ ?>
 											<?php for ( $i = 1; $i <= 5; ++$i ) : ?>
 												<div class="product-rating-star"></div>
 											<?php endfor; ?>
