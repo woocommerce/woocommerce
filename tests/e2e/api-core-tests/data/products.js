@@ -60,7 +60,7 @@ const createSampleSimpleProducts = async ( categories, attributes ) => {
 	await createProducts( [ 
 		{ 
 			name: 'Beanie with Logo', 
-			date_created_gmt: '2021-09-28T15:50:20', 
+			date_created_gmt: '2021-09-01T15:50:20', 
 			type: 'simple', 
 			status: 'publish', 
 			featured: false, 
@@ -125,7 +125,7 @@ const createSampleSimpleProducts = async ( categories, attributes ) => {
 		}, 
 		{ 
 			name: 'T-Shirt with Logo', 
-			date_created_gmt: '2021-09-28T15:50:20', 
+			date_created_gmt: '2021-09-02T15:50:20', 
 			type: 'simple', 
 			status: 'publish', 
 			featured: false, 
@@ -190,7 +190,7 @@ const createSampleSimpleProducts = async ( categories, attributes ) => {
 		}, 
 		{ 
 			name: 'Single', 
-			date_created_gmt: '2021-09-28T15:50:19', 
+			date_created_gmt: '2021-09-03T15:50:19', 
 			type: 'simple', 
 			status: 'publish', 
 			featured: false, 
@@ -253,7 +253,7 @@ const createSampleSimpleProducts = async ( categories, attributes ) => {
 		}, 
 		{ 
 			name: 'Album', 
-			date_created_gmt: '2021-09-28T15:50:19', 
+			date_created_gmt: '2021-09-04T15:50:19', 
 			type: 'simple', 
 			status: 'publish', 
 			featured: false, 
@@ -321,7 +321,7 @@ const createSampleSimpleProducts = async ( categories, attributes ) => {
 		}, 
 		{ 
 			name: 'Polo', 
-			date_created_gmt: '2021-09-28T15:50:19', 
+			date_created_gmt: '2021-09-05T15:50:19', 
 			type: 'simple', 
 			status: 'publish', 
 			featured: false, 
@@ -386,7 +386,7 @@ const createSampleSimpleProducts = async ( categories, attributes ) => {
 		}, 
 		{ 
 			name: 'Long Sleeve Tee', 
-			date_created_gmt: '2021-09-28T15:50:19', 
+			date_created_gmt: '2021-09-06T15:50:19', 
 			type: 'simple', 
 			status: 'publish', 
 			featured: false, 
@@ -451,7 +451,7 @@ const createSampleSimpleProducts = async ( categories, attributes ) => {
 		}, 
 		{ 
 			name: 'Hoodie with Zipper', 
-			date_created_gmt: '2021-09-28T15:50:19', 
+			date_created_gmt: '2021-09-07T15:50:19', 
 			type: 'simple', 
 			status: 'publish', 
 			featured: true, 
@@ -508,7 +508,7 @@ const createSampleSimpleProducts = async ( categories, attributes ) => {
 		}, 
 		{ 
 			name: 'Hoodie with Pocket', 
-			date_created_gmt: '2021-09-28T15:50:19', 
+			date_created_gmt: '2021-09-08T15:50:19', 
 			type: 'simple', 
 			status: 'publish', 
 			featured: true, 
@@ -573,7 +573,7 @@ const createSampleSimpleProducts = async ( categories, attributes ) => {
 		}, 
 		{ 
 			name: 'Sunglasses', 
-			date_created_gmt: '2021-09-28T15:50:19', 
+			date_created_gmt: '2021-09-09T15:50:19', 
 			type: 'simple', 
 			status: 'publish', 
 			featured: true, 
@@ -630,7 +630,7 @@ const createSampleSimpleProducts = async ( categories, attributes ) => {
 		}, 
 		{ 
 			name: 'Cap', 
-			date_created_gmt: '2021-09-28T15:50:19', 
+			date_created_gmt: '2021-09-10T15:50:19', 
 			type: 'simple', 
 			status: 'publish', 
 			featured: true, 
@@ -695,7 +695,7 @@ const createSampleSimpleProducts = async ( categories, attributes ) => {
 		}, 
 		{ 
 			name: 'Belt', 
-			date_created_gmt: '2021-09-28T15:50:19', 
+			date_created_gmt: '2021-09-12T15:50:19', 
 			type: 'simple', 
 			status: 'publish', 
 			featured: false, 
@@ -752,7 +752,7 @@ const createSampleSimpleProducts = async ( categories, attributes ) => {
 		}, 
 		{ 
 			name: 'Beanie', 
-			date_created_gmt: '2021-09-28T15:50:19', 
+			date_created_gmt: '2021-09-13T15:50:19', 
 			type: 'simple', 
 			status: 'publish', 
 			featured: false, 
@@ -817,7 +817,7 @@ const createSampleSimpleProducts = async ( categories, attributes ) => {
 		}, 
 		{ 
 			name: 'T-Shirt', 
-			date_created_gmt: '2021-09-28T15:50:19', 
+			date_created_gmt: '2021-09-14T15:50:19', 
 			type: 'simple', 
 			status: 'publish', 
 			featured: false, 
@@ -882,7 +882,7 @@ const createSampleSimpleProducts = async ( categories, attributes ) => {
 		}, 
 		{ 
 			name: 'Hoodie with Logo', 
-			date_created_gmt: '2021-09-28T15:50:19', 
+			date_created_gmt: '2021-09-15T15:50:19', 
 			type: 'simple', 
 			status: 'publish', 
 			featured: false, 
@@ -952,7 +952,7 @@ const createSampleExternalProducts = async ( categories ) => {
 	await createProducts( [
 		{
 			name: 'WordPress Pennant',
-			date_created_gmt: '2021-09-28T15:50:20',
+			date_created_gmt: '2021-09-16T15:50:20',
 			type: 'external',
 			status: 'publish',
 			featured: false,
@@ -1022,7 +1022,7 @@ const createSampleGroupedProduct = async ( categories ) => {
 	await createProducts( [
 		{
 			name: 'Logo Collection',
-			date_created_gmt: '2021-09-28T15:50:20',
+			date_created_gmt: '2021-09-17T15:50:20',
 			type: 'grouped',
 			status: 'publish',
 			featured: false,
@@ -1089,7 +1089,7 @@ const createSampleVariableProducts = async ( categories, attributes ) => {
 		+ 'Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>\n';
 	const { body: hoodie } = await createProduct( {
 		name: 'Hoodie',
-		date_created_gmt: '2021-09-28T15:50:19',
+		date_created_gmt: '2021-09-18T15:50:19',
 		type: 'variable',
 		status: 'publish',
 		featured: false,
@@ -1169,7 +1169,7 @@ const createSampleVariableProducts = async ( categories, attributes ) => {
 
 	await createProductVariations( hoodie.id, [
 		{
-			date_created_gmt: '2021-09-28T15:50:20',
+			date_created_gmt: '2021-09-19T15:50:20',
 			description: variationDescription,
 			sku: 'woo-hoodie-blue-logo',
 			price: '45',
@@ -1205,7 +1205,7 @@ const createSampleVariableProducts = async ( categories, attributes ) => {
 			menu_order: 0
 		},
 		{
-			date_created_gmt: '2021-09-28T15:50:20',
+			date_created_gmt: '2021-09-20T15:50:20',
 			description: variationDescription,
 			sku: 'woo-hoodie-blue',
 			price: '45',
@@ -1241,7 +1241,7 @@ const createSampleVariableProducts = async ( categories, attributes ) => {
 			menu_order: 3
 		},
 		{
-			date_created_gmt: '2021-09-28T15:50:20',
+			date_created_gmt: '2021-09-21T15:50:20',
 			description: variationDescription,
 			sku: 'woo-hoodie-green',
 			price: '45',
@@ -1277,7 +1277,7 @@ const createSampleVariableProducts = async ( categories, attributes ) => {
 			menu_order: 2
 		},
 		{
-			date_created_gmt: '2021-09-28T15:50:19',
+			date_created_gmt: '2021-09-22T15:50:19',
 			description: variationDescription,
 			sku: 'woo-hoodie-red',
 			price: '42',
@@ -1316,7 +1316,7 @@ const createSampleVariableProducts = async ( categories, attributes ) => {
 
 	const { body: vneck } = await createProduct( {
 		name: 'V-Neck T-Shirt',
-		date_created_gmt: '2021-09-28T15:50:19',
+		date_created_gmt: '2021-09-23T15:50:19',
 		type: 'variable',
 		status: 'publish',
 		featured: true,
@@ -1387,7 +1387,7 @@ const createSampleVariableProducts = async ( categories, attributes ) => {
 
 	await createProductVariations( vneck.id, [
 		{
-			date_created_gmt: '2021-09-28T15:50:19',
+			date_created_gmt: '2021-09-24T15:50:19',
 			description: variationDescription,
 			sku: 'woo-vneck-tee-blue',
 			price: '15',
@@ -1420,7 +1420,7 @@ const createSampleVariableProducts = async ( categories, attributes ) => {
 			menu_order: 0
 		},
 		{
-			date_created_gmt: '2021-09-28T15:50:19',
+			date_created_gmt: '2021-09-25T15:50:19',
 			description: variationDescription,
 			sku: 'woo-vneck-tee-green',
 			price: '20',
@@ -1453,7 +1453,7 @@ const createSampleVariableProducts = async ( categories, attributes ) => {
 			menu_order: 0
 		},
 		{
-			date_created_gmt: '2021-09-28T15:50:19',
+			date_created_gmt: '2021-09-26T15:50:19',
 			description: variationDescription,
 			sku: 'woo-vneck-tee-red',
 			price: '20',
