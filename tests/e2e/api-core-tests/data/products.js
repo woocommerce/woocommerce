@@ -21,6 +21,7 @@ const createProductAttributeTerms = ( parentId, termNames ) => postRequest(
 		create: termNames.map( name => ( { name } ) )
 	}
 );
+const createProductTag = ( name ) => postRequest( 'products/tags', { name } );
 const createShippingClass = ( name ) => postRequest( 'products/shipping_classes', { name } );
 const createTaxClass = ( name ) => postRequest( 'taxes/classes', { name } );
 
@@ -54,6 +55,14 @@ const createSampleAttributes = async () => {
 	}
 };
 
+const createSampleTags = async () => {
+	const { body: cool } = await createProductTag( 'Cool' );
+
+	return {
+		cool,
+	};
+}
+
 const createSampleShippingClasses = async () => {
 	await createShippingClass( 'Freight' );
 }
@@ -62,7 +71,7 @@ const createSampleTaxClasses = async () => {
 	await createTaxClass( 'Reduced Rate' );
 }
 
-const createSampleSimpleProducts = async ( categories, attributes ) => {
+const createSampleSimpleProducts = async ( categories, attributes, tags ) => {
 	const description = '<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. '
 		+ 'Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. '
 		+ 'Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>\n';
@@ -556,7 +565,7 @@ const createSampleSimpleProducts = async ( categories, attributes ) => {
 			parent_id: 0,
 			purchase_note: '',
 			categories: [ { id: categories.hoodies.id } ],
-			tags: [],
+			tags: [ { id: tags.cool.id } ],
 			attributes: [ 
 				{ 
 					id: attributes.color.id,
@@ -620,7 +629,7 @@ const createSampleSimpleProducts = async ( categories, attributes ) => {
 			parent_id: 0,
 			purchase_note: '',
 			categories: [ { id: categories.accessories.id } ],
-			tags: [],
+			tags: [ { id: tags.cool.id } ],
 			attributes: [],
 			default_attributes: [],
 			variations: [],
@@ -796,7 +805,7 @@ const createSampleSimpleProducts = async ( categories, attributes ) => {
 			parent_id: 0,
 			purchase_note: '',
 			categories: [ { id: categories.accessories.id } ],
-			tags: [],
+			tags: [ { id: tags.cool.id } ],
 			attributes: [ 
 				{ 
 					id: attributes.color.id,
@@ -1476,11 +1485,12 @@ const createSampleVariableProducts = async ( categories, attributes ) => {
 const createSampleProducts = async () => {
 	const categories = await createSampleCategories();
 	const attributes = await createSampleAttributes();
+	const tags = await createSampleTags();
 	
 	await createSampleShippingClasses();
 	await createSampleTaxClasses();
 
-	await createSampleSimpleProducts( categories, attributes );
+	await createSampleSimpleProducts( categories, attributes, tags );
 	await createSampleExternalProducts( categories );
 	await createSampleGroupedProduct( categories );
 	await createSampleVariableProducts( categories, attributes );
