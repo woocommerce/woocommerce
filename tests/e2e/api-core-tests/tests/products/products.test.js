@@ -445,6 +445,30 @@ const { getRequest } = require( '../../utils/request' );
 		} );
 
 		describe( 'orderby', () => {
+			const productNamesAsc = [
+				'Album',
+				'Beanie',
+				'Beanie with Logo',
+				'Belt',
+				'Cap',
+				'Child Product',
+				'Hoodie',
+				'Hoodie with Logo',
+				'Hoodie with Pocket',
+				'Hoodie with Zipper',
+				'Logo Collection',
+				'Long Sleeve Tee',
+				'Parent Product',
+				'Polo',
+				'Single',
+				'Sunglasses',
+				'T-Shirt',
+				'T-Shirt with Logo',
+				'V-Neck T-Shirt',
+				'WordPress Pennant',
+			];
+			const productNamesDesc = [ ...productNamesAsc ].reverse();
+
 			it( 'default', async () => {
 				// Default = date desc.
 				const result = await productsApi.listAll.products();
@@ -482,7 +506,7 @@ const { getRequest } = require( '../../utils/request' );
 				} );
 				expect( result1.statusCode ).toEqual( 200 );
 
-				// Verify all IDs are in ascending order.
+				// Verify all results are in ascending order.
 				let lastId = 0;
 				result1.body.forEach( ( { id } ) => {
 					expect( id ).toBeGreaterThan( lastId );
@@ -495,7 +519,7 @@ const { getRequest } = require( '../../utils/request' );
 				} );
 				expect( result2.statusCode ).toEqual( 200 );
 
-				// Verify all IDs are in descending order.
+				// Verify all results are in descending order.
 				lastId = Number.MAX_SAFE_INTEGER;
 				result2.body.forEach( ( { id } ) => {
 					expect( lastId ).toBeGreaterThan( id );
@@ -504,30 +528,6 @@ const { getRequest } = require( '../../utils/request' );
 			} );
 
 			it( 'title', async () => {
-				const productNamesAsc = [
-					'Album',
-					'Beanie',
-					'Beanie with Logo',
-					'Belt',
-					'Cap',
-					'Child Product',
-					'Hoodie',
-					'Hoodie with Logo',
-					'Hoodie with Pocket',
-					'Hoodie with Zipper',
-					'Logo Collection',
-					'Long Sleeve Tee',
-					'Parent Product',
-					'Polo',
-					'Single',
-					'Sunglasses',
-					'T-Shirt',
-					'T-Shirt with Logo',
-					'V-Neck T-Shirt',
-					'WordPress Pennant',
-				];
-				const productNamesDesc = [ ...productNamesAsc ].reverse();
-
 				const result1 = await productsApi.listAll.products( {
 					order: 'asc',
 					orderby: 'title',
@@ -535,7 +535,7 @@ const { getRequest } = require( '../../utils/request' );
 				} );
 				expect( result1.statusCode ).toEqual( 200 );
 
-				// Verify all titles are in ascending order.
+				// Verify all results are in ascending order.
 				result1.body.forEach( ( { name }, idx ) => {
 					expect( name ).toBe( productNamesAsc[ idx ] );
 				} );
@@ -543,11 +543,39 @@ const { getRequest } = require( '../../utils/request' );
 				const result2 = await productsApi.listAll.products( {
 					order: 'desc',
 					orderby: 'title',
-					per_page: productNamesAsc.length,
+					per_page: productNamesDesc.length,
 				} );
 				expect( result2.statusCode ).toEqual( 200 );
 
-				// Verify all IDs are in descending order.
+				// Verify all results are in descending order.
+				result2.body.forEach( ( { name }, idx ) => {
+					expect( name ).toBe( productNamesDesc[ idx ] );
+				} );
+			} );
+
+			// This case will remain skipped until orderby slug is fixed.
+			// See: https://github.com/woocommerce/woocommerce/issues/30354#issuecomment-925955099.
+			it.skip( 'slug', async () => {
+				const result1 = await productsApi.listAll.products( {
+					order: 'asc',
+					orderby: 'slug',
+					per_page: productNamesAsc.length,
+				} );
+				expect( result1.statusCode ).toEqual( 200 );
+
+				// Verify all results are in ascending order.
+				result1.body.forEach( ( { name }, idx ) => {
+					expect( name ).toBe( productNamesAsc[ idx ] );
+				} );
+
+				const result2 = await productsApi.listAll.products( {
+					order: 'desc',
+					orderby: 'slug',
+					per_page: productNamesDesc.length,
+				} );
+				expect( result2.statusCode ).toEqual( 200 );
+
+				// Verify all results are in descending order.
 				result2.body.forEach( ( { name }, idx ) => {
 					expect( name ).toBe( productNamesDesc[ idx ] );
 				} );
