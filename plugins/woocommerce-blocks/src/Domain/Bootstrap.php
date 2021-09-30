@@ -58,20 +58,19 @@ class Bootstrap {
 	public function __construct( Container $container ) {
 		$this->container = $container;
 		$this->package   = $container->get( Package::class );
-		$this->init();
-		/**
-		 * Usable as a safe event hook for when the plugin has been loaded.
-		 */
-		do_action( 'woocommerce_blocks_loaded' );
+		if ( $this->has_core_dependencies() ) {
+			$this->init();
+			/**
+			 * Usable as a safe event hook for when the plugin has been loaded.
+			 */
+			do_action( 'woocommerce_blocks_loaded' );
+		}
 	}
 
 	/**
 	 * Init the package - load the blocks library and define constants.
 	 */
 	protected function init() {
-		if ( ! $this->has_core_dependencies() ) {
-			return;
-		}
 		$this->register_dependencies();
 		$this->register_payment_methods();
 
