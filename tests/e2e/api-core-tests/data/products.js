@@ -40,19 +40,21 @@ const createSampleCategories = async () => {
 		tshirts,
 		decor,
 		music,
-	}
+	};
 };
 
 const createSampleAttributes = async () => {
 	const { body: color } = await createProductAttribute( 'Color' );
 	const { body: size } = await createProductAttribute( 'Size' );
-	await createProductAttributeTerms( color.id, [ 'Blue', 'Gray', 'Green', 'Red', 'Yellow' ] );
-	await createProductAttributeTerms( size.id, [ 'Large', 'Medium', 'Small' ] );
+	const { body: colors } = await createProductAttributeTerms( color.id, [ 'Blue', 'Gray', 'Green', 'Red', 'Yellow' ] );
+	const { body: sizes } = await createProductAttributeTerms( size.id, [ 'Large', 'Medium', 'Small' ] );
 
 	return {
 		color,
+		colors: colors.create,
 		size,
-	}
+		sizes: sizes.create,
+	};
 };
 
 const createSampleTags = async () => {
@@ -64,11 +66,19 @@ const createSampleTags = async () => {
 }
 
 const createSampleShippingClasses = async () => {
-	await createShippingClass( 'Freight' );
+	const { body: freight } = await createShippingClass( 'Freight' );
+
+	return {
+		freight,
+	};
 }
 
 const createSampleTaxClasses = async () => {
-	await createTaxClass( 'Reduced Rate' );
+	const { body: reducedRate } = await createTaxClass( 'Reduced Rate' );
+
+	return {
+		reducedRate,
+	};
 }
 
 const createSampleSimpleProducts = async ( categories, attributes, tags ) => {
@@ -76,7 +86,7 @@ const createSampleSimpleProducts = async ( categories, attributes, tags ) => {
 		+ 'Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. '
 		+ 'Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>\n';
 
-	await createProducts( [ 
+	const { body: simpleProducts } = await createProducts( [ 
 		{ 
 			name: 'Beanie with Logo',
 			date_created_gmt: '2021-09-01T15:50:20',
@@ -951,10 +961,12 @@ const createSampleSimpleProducts = async ( categories, attributes, tags ) => {
 			stock_status: 'instock' 
 		} 
 	] );
+
+	return simpleProducts.create;
 };
 
 const createSampleExternalProducts = async ( categories ) => {
-	await createProducts( [
+	const { body: externalProducts } = await createProducts( [
 		{
 			name: 'WordPress Pennant',
 			date_created_gmt: '2021-09-16T15:50:20',
@@ -1015,6 +1027,8 @@ const createSampleExternalProducts = async ( categories ) => {
 			stock_status: 'instock'
 		},
 	] );
+
+	return externalProducts.create;
 };
 
 const createSampleGroupedProduct = async ( categories ) => {
@@ -1023,7 +1037,7 @@ const createSampleGroupedProduct = async ( categories ) => {
 		_fields: [ 'id' ],
 	} );
 
-	await createProducts( [
+	const { body: groupedProducts } = await createProducts( [
 		{
 			name: 'Logo Collection',
 			date_created_gmt: '2021-09-17T15:50:20',
@@ -1084,6 +1098,8 @@ const createSampleGroupedProduct = async ( categories ) => {
 			stock_status: 'instock'
 		},
 	] );
+
+	return groupedProducts.create;
 };
 
 const createSampleVariableProducts = async ( categories, attributes ) => {
@@ -1169,7 +1185,7 @@ const createSampleVariableProducts = async ( categories, attributes ) => {
 		+ 'Cras placerat ut turpis pellentesque vulputate. Nam sed consequat tortor. Curabitur finibus sapien dolor. '
 		+ 'Ut eleifend tellus nec erat pulvinar dignissim. Nam non arcu purus. Vivamus et massa massa.</p>\n';
 
-	await createProductVariations( hoodie.id, [
+	const { body: hoodieVariations } = await createProductVariations( hoodie.id, [
 		{
 			date_created_gmt: '2021-09-19T15:50:20',
 			description: variationDescription,
@@ -1382,7 +1398,7 @@ const createSampleVariableProducts = async ( categories, attributes ) => {
 		stock_status: 'instock'
 	} );
 
-	await createProductVariations( vneck.id, [
+	const { body: vneckVariations } = await createProductVariations( vneck.id, [
 		{
 			date_created_gmt: '2021-09-24T15:50:19',
 			description: variationDescription,
@@ -1480,6 +1496,13 @@ const createSampleVariableProducts = async ( categories, attributes ) => {
 			menu_order: 0
 		}
 	] );
+
+	return {
+		hoodie,
+		hoodieVariations: hoodieVariations.create,
+		vneck,
+		vneckVariations: vneckVariations.create,
+	};
 };
 
 const createSampleHierarchicalProducts = async () => {
@@ -1502,15 +1525,27 @@ const createSampleProducts = async () => {
 	const categories = await createSampleCategories();
 	const attributes = await createSampleAttributes();
 	const tags = await createSampleTags();
-	
-	await createSampleShippingClasses();
-	await createSampleTaxClasses();
+	const shippingClasses = await createSampleShippingClasses();
+	const taxClasses = await createSampleTaxClasses();
 
-	await createSampleSimpleProducts( categories, attributes, tags );
-	await createSampleExternalProducts( categories );
-	await createSampleGroupedProduct( categories );
-	await createSampleVariableProducts( categories, attributes );
-	await createSampleHierarchicalProducts();
+	const simpleProducts = await createSampleSimpleProducts( categories, attributes, tags );
+	const externalProducts = await createSampleExternalProducts( categories );
+	const groupedProducts = await createSampleGroupedProduct( categories );
+	const variableProducts = await createSampleVariableProducts( categories, attributes );
+	const hierarchicalProducts = await createSampleHierarchicalProducts();
+
+	return {
+		categories,
+		attributes,
+		tags,
+		shippingClasses,
+		taxClasses,
+		simpleProducts,
+		externalProducts,
+		groupedProducts,
+		variableProducts,
+		hierarchicalProducts,
+	};
 };
 
 module.exports = {
