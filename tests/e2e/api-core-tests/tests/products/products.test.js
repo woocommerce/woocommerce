@@ -502,6 +502,56 @@ const { getRequest } = require( '../../utils/request' );
 					lastId = id;
 				} );
 			} );
+
+			it( 'title', async () => {
+				const productNamesAsc = [
+					'Album',
+					'Beanie',
+					'Beanie with Logo',
+					'Belt',
+					'Cap',
+					'Child Product',
+					'Hoodie',
+					'Hoodie with Logo',
+					'Hoodie with Pocket',
+					'Hoodie with Zipper',
+					'Logo Collection',
+					'Long Sleeve Tee',
+					'Parent Product',
+					'Polo',
+					'Single',
+					'Sunglasses',
+					'T-Shirt',
+					'T-Shirt with Logo',
+					'V-Neck T-Shirt',
+					'WordPress Pennant',
+				];
+				const productNamesDesc = [ ...productNamesAsc ].reverse();
+
+				const result1 = await productsApi.listAll.products( {
+					order: 'asc',
+					orderby: 'title',
+					per_page: productNamesAsc.length,
+				} );
+				expect( result1.statusCode ).toEqual( 200 );
+
+				// Verify all titles are in ascending order.
+				result1.body.forEach( ( { name }, idx ) => {
+					expect( name ).toBe( productNamesAsc[ idx ] );
+				} );
+
+				const result2 = await productsApi.listAll.products( {
+					order: 'desc',
+					orderby: 'title',
+					per_page: productNamesAsc.length,
+				} );
+				expect( result2.statusCode ).toEqual( 200 );
+
+				// Verify all IDs are in descending order.
+				result2.body.forEach( ( { name }, idx ) => {
+					expect( name ).toBe( productNamesDesc[ idx ] );
+				} );
+			} );
 		} );
 	} );
 } );
