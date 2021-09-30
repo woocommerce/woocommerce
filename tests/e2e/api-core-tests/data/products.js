@@ -1508,11 +1508,13 @@ const createSampleVariableProducts = async ( categories, attributes ) => {
 const createSampleHierarchicalProducts = async () => {
 	const { body: parent } = await createProduct( {
 		name: 'Parent Product',
+		date_created_gmt: '2021-09-27T15:50:19',
 	} );
 
 	const { body: child } = await createProduct( {
 		name: 'Child Product',
 		parent_id: parent.id,
+		date_created_gmt: '2021-09-28T15:50:19',
 	} );
 
 	return {
