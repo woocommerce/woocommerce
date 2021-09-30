@@ -14,6 +14,8 @@ const { getRequest } = require( '../../utils/request' );
  */
  describe( 'Products API tests', () => {
 
+	const PRODUCTS_COUNT = 20;
+
 	beforeAll( async () => {
 		await createSampleProducts();
 	}, 7000 );
@@ -23,12 +25,12 @@ const { getRequest } = require( '../../utils/request' );
 		it( 'defaults', async () => {
 			const result = await productsApi.listAll.products();
 			expect( result.statusCode ).toEqual( 200 );
-			expect( result.headers['x-wp-total'] ).toEqual( '18' );
+			expect( result.headers['x-wp-total'] ).toEqual( PRODUCTS_COUNT.toString() );
 			expect( result.headers['x-wp-totalpages'] ).toEqual( '2' );
 		} );
 
 		it( 'pagination', async () => {
-			const pageSize = 4;
+			const pageSize = 6;
 			const page1 = await productsApi.listAll.products( {
 				per_page: pageSize,
 			} );
@@ -40,8 +42,8 @@ const { getRequest } = require( '../../utils/request' );
 			expect( page2.statusCode ).toEqual( 200 );
 
 			// Verify total page count.
-			expect( page1.headers['x-wp-total'] ).toEqual( '18' );
-			expect( page1.headers['x-wp-totalpages'] ).toEqual( '5' );
+			expect( page1.headers['x-wp-total'] ).toEqual( PRODUCTS_COUNT.toString() );
+			expect( page1.headers['x-wp-totalpages'] ).toEqual( '4' );
 			
 			// Verify we get pageSize'd arrays.
 			expect( Array.isArray( page1.body ) ).toBe( true );
@@ -60,7 +62,7 @@ const { getRequest } = require( '../../utils/request' );
 			const page2Offset = await productsApi.listAll.products( {
 				per_page: pageSize,
 				page: 2,
-				offset: 5,
+				offset: pageSize + 1,
 			} );
 			// The offset pushes the result set 1 product past the start of page 2.
 			expect( page2Offset.body ).toEqual(
@@ -71,12 +73,12 @@ const { getRequest } = require( '../../utils/request' );
 			expect( page2Offset.body[0].id ).toEqual( page2.body[1].id );
 
 			// Verify the last page only has 2 products as we expect.
-			const page5 = await productsApi.listAll.products( {
+			const lastPage = await productsApi.listAll.products( {
 				per_page: pageSize,
-				page: 5,
+				page: 4,
 			} );
-			expect( Array.isArray( page5.body ) ).toBe( true );
-			expect( page5.body ).toHaveLength( 2 );
+			expect( Array.isArray( lastPage.body ) ).toBe( true );
+			expect( lastPage.body ).toHaveLength( 2 );
 
 			// Verify a page outside the total page count is empty.
 			const page6 = await productsApi.listAll.products( {
@@ -111,7 +113,7 @@ const { getRequest } = require( '../../utils/request' );
 			} );
 			expect( allProducts.statusCode ).toEqual( 200 );
 			const allProductIds = allProducts.body.map( product => product.id );
-			expect( allProductIds ).toHaveLength( 18 );
+			expect( allProductIds ).toHaveLength( PRODUCTS_COUNT );
 
 			const productsToFilter = [
 				allProductIds[2],
@@ -137,7 +139,7 @@ const { getRequest } = require( '../../utils/request' );
 				exclude: productsToFilter.join( ',' ),
 			} );
 			expect( excluded.statusCode ).toEqual( 200 );
-			expect( excluded.body ).toHaveLength( 18 - productsToFilter.length );
+			expect( excluded.body ).toHaveLength( PRODUCTS_COUNT - productsToFilter.length );
 			expect( excluded.body ).toEqual(
 				expect.not.arrayContaining(
 					productsToFilter.map( id => expect.objectContaining( { id } ) )
@@ -185,7 +187,7 @@ const { getRequest } = require( '../../utils/request' );
 				type: 'simple'
 			} );
 			expect( result1.statusCode ).toEqual( 200 );
-			expect( result1.headers['x-wp-total'] ).toEqual( '14' );
+			expect( result1.headers['x-wp-total'] ).toEqual( '16' );
 	
 			const result2 = await productsApi.listAll.products( {
 				type: 'external'
@@ -342,6 +344,8 @@ const { getRequest } = require( '../../utils/request' );
 			const after = [
 				expect.objectContaining( { name: 'Hoodie' } ),
 				expect.objectContaining( { name: 'V-Neck T-Shirt' } ),
+				expect.objectContaining( { name: 'Parent Product' } ),
+				expect.objectContaining( { name: 'Child Product' } ),
 			];
 
 			const result1 = await productsApi.listAll.products( {
