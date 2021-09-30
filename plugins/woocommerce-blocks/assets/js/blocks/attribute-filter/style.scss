@@ -1,8 +1,14 @@
 .wc-block-attribute-filter {
 	margin-bottom: $gap-large;
 
+	&.style-dropdown {
+		display: flex;
+		gap: $gap;
+	}
+
 	.wc-block-attribute-filter-list {
 		margin: 0;
+		width: 100%;
 
 		li {
 			text-decoration: underline;
@@ -18,12 +24,18 @@
 		}
 	}
 
+	.wc-block-attribute-filter-dropdown {
+		flex-grow: 1;
+		max-width: unset;
+		width: 0;
+	}
+
 	.is-single .wc-block-attribute-filter-list-count,
 	.wc-block-dropdown-selector .wc-block-dropdown-selector__list .wc-block-attribute-filter-list-count {
 		opacity: 0.6;
 	}
 
-	.wc-block-attribute-filter__button {
-		margin-top: $gap-smaller;
+	.wc-block-components-dropdown-selector__input-wrapper {
+		height: 100%;
 	}
 }
