@@ -443,5 +443,37 @@ const { getRequest } = require( '../../utils/request' );
 				expect.objectContaining( { name: 'Child Product' } ),
 			] ) );
 		} );
+
+		describe( 'orderby', () => {
+			it( 'default', async () => {
+				// Default = date desc.
+				const result = await productsApi.listAll.products();
+				expect( result.statusCode ).toEqual( 200 );
+
+				// Verify all dates are in descending order.
+				let lastDate = Date.now();
+				result.body.forEach( ( { date_created_gmt } ) => {
+					const created = Date.parse( date_created_gmt + '.000Z' );
+					expect( lastDate ).toBeGreaterThan( created );
+					lastDate = created;
+				} );
+			} );
+
+			it( 'date', async () => {
+				const result = await productsApi.listAll.products( {
+					order: 'asc',
+					orderby: 'date',
+				} );
+				expect( result.statusCode ).toEqual( 200 );
+
+				// Verify all dates are in ascending order.
+				let lastDate = 0;
+				result.body.forEach( ( { date_created_gmt } ) => {
+					const created = Date.parse( date_created_gmt + '.000Z' );
+					expect( created ).toBeGreaterThan( lastDate );
+					lastDate = created;
+				} );
+			} );
+		} );
 	} );
 } );
