@@ -875,7 +875,7 @@ const createSampleSimpleProducts = async ( categories, attributes ) => {
 			grouped_products: [],
 			menu_order: 0,
 			related_ids: [ 67, 76, 56, 66 ],
-			stock_status: 'instock' 
+			stock_status: 'onbackorder' 
 		},
 		{ 
 			name: 'Hoodie with Logo',
