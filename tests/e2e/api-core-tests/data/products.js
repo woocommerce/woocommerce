@@ -1482,6 +1482,22 @@ const createSampleVariableProducts = async ( categories, attributes ) => {
 	] );
 };
 
+const createSampleHierarchicalProducts = async () => {
+	const { body: parent } = await createProduct( {
+		name: 'Parent Product',
+	} );
+
+	const { body: child } = await createProduct( {
+		name: 'Child Product',
+		parent_id: parent.id,
+	} );
+
+	return {
+		parent,
+		child,
+	}
+};
+
 const createSampleProducts = async () => {
 	const categories = await createSampleCategories();
 	const attributes = await createSampleAttributes();
@@ -1494,6 +1510,7 @@ const createSampleProducts = async () => {
 	await createSampleExternalProducts( categories );
 	await createSampleGroupedProduct( categories );
 	await createSampleVariableProducts( categories, attributes );
+	await createSampleHierarchicalProducts();
 };
 
 module.exports = {

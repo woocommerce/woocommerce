@@ -446,5 +446,27 @@ const { getRequest } = require( '../../utils/request' );
 			expect( result.body ).toHaveLength( coolProducts.length );
 			expect( result.body ).toEqual( expect.arrayContaining( coolProducts ) );
 		} );
+
+		it( 'parent', async () => {
+			const result1 = await productsApi.listAll.products( {
+				search: 'Parent Product'
+			} );
+			expect( result1.body ).toHaveLength( 1 );
+	
+			const result2 = await productsApi.listAll.products( {
+				parent: result1.body[0].id,
+			} );
+			expect( result2.statusCode ).toEqual( 200 );
+			expect( result2.body ).toHaveLength( 1 );
+			expect( result2.body[0].name ).toBe( 'Child Product' );
+
+			const result3 = await productsApi.listAll.products( {
+				parent_exclude: result1.body[0].id,
+			} );
+			expect( result3.statusCode ).toEqual( 200 );
+			expect( result3.body ).toEqual( expect.not.arrayContaining( [
+				expect.objectContaining( { name: 'Child Product' } ),
+			] ) );
+		} );
 	} );
 } );
