@@ -474,6 +474,34 @@ const { getRequest } = require( '../../utils/request' );
 					lastDate = created;
 				} );
 			} );
+
+			it( 'id', async () => {
+				const result1 = await productsApi.listAll.products( {
+					order: 'asc',
+					orderby: 'id',
+				} );
+				expect( result1.statusCode ).toEqual( 200 );
+
+				// Verify all IDs are in ascending order.
+				let lastId = 0;
+				result1.body.forEach( ( { id } ) => {
+					expect( id ).toBeGreaterThan( lastId );
+					lastId = id;
+				} );
+
+				const result2 = await productsApi.listAll.products( {
+					order: 'desc',
+					orderby: 'id',
+				} );
+				expect( result2.statusCode ).toEqual( 200 );
+
+				// Verify all IDs are in descending order.
+				lastId = Number.MAX_SAFE_INTEGER;
+				result2.body.forEach( ( { id } ) => {
+					expect( lastId ).toBeGreaterThan( id );
+					lastId = id;
+				} );
+			} );
 		} );
 	} );
 } );
