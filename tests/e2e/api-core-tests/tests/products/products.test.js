@@ -15,9 +15,10 @@ const { getRequest } = require( '../../utils/request' );
  describe( 'Products API tests', () => {
 
 	const PRODUCTS_COUNT = 20;
+	let sampleData;
 
 	beforeAll( async () => {
-		await createSampleProducts();
+		sampleData = await createSampleProducts();
 	}, 7000 );
 
 	describe( 'List all products', () => {
@@ -244,38 +245,22 @@ const { getRequest } = require( '../../utils/request' );
 				expect.objectContaining( { name: 'Hoodie' } ),
 			];
 
-			// Get the Clothing category ID from the Logo Collection product.
+			// Verify that subcategories are included.
 			const result1 = await productsApi.listAll.products( {
-				sku: 'logo-collection',
+				per_page: 20,
+				category: sampleData.categories.clothing.id,
 			} );
 			expect( result1.statusCode ).toEqual( 200 );
-			expect( result1.body ).toHaveLength( 1 );
-			const clothingCatId = result1.body[0].categories[0].id;
-
-			// Verify that subcategories are included.
-			const result2 = await productsApi.listAll.products( {
-				per_page: 20,
-				category: clothingCatId,
-			} );
-			expect( result2.statusCode ).toEqual( 200 );
-			expect( result2.body ).toEqual( expect.arrayContaining( accessory ) );
-			expect( result2.body ).toEqual( expect.arrayContaining( hoodies ) );
-
-			// Get the Hoodie category ID.
-			const result3 = await productsApi.listAll.products( {
-				sku: 'woo-hoodie-with-zipper',
-			} );
-			expect( result3.statusCode ).toEqual( 200 );
-			expect( result3.body ).toHaveLength( 1 );
-			const hoodieCatId = result3.body[0].categories[0].id;
+			expect( result1.body ).toEqual( expect.arrayContaining( accessory ) );
+			expect( result1.body ).toEqual( expect.arrayContaining( hoodies ) );
 
 			// Verify sibling categories are not.
-			const result4 = await productsApi.listAll.products( {
-				category: hoodieCatId,
+			const result2 = await productsApi.listAll.products( {
+				category: sampleData.categories.hoodies.id,
 			} );
-			expect( result4.statusCode ).toEqual( 200 );
-			expect( result4.body ).toEqual( expect.not.arrayContaining( accessory ) );
-			expect( result4.body ).toEqual( expect.arrayContaining( hoodies ) );
+			expect( result2.statusCode ).toEqual( 200 );
+			expect( result2.body ).toEqual( expect.not.arrayContaining( accessory ) );
+			expect( result2.body ).toEqual( expect.arrayContaining( hoodies ) );
 		} );
 
 		it( 'on sale', async () => {
@@ -365,10 +350,7 @@ const { getRequest } = require( '../../utils/request' );
 		} );
 
 		it( 'attributes', async () => {
-			const { body: attributes } = await getRequest( 'products/attributes' );
-			const color = attributes.find( attr => attr.name === 'Color' );
-			const { body: colorTerms } = await getRequest( `products/attributes/${ color.id }/terms` );
-			const red = colorTerms.find( term => term.name === 'Red' );
+			const red = sampleData.attributes.colors.find( term => term.name === 'Red' );
 
 			const redProducts = [
 				expect.objectContaining( { name: 'V-Neck T-Shirt' } ),
@@ -403,11 +385,8 @@ const { getRequest } = require( '../../utils/request' );
 		} );
 
 		it( 'shipping class', async () => {
-			const { body: shippingClasses } = await getRequest( 'products/shipping_classes' );
-			const freight = shippingClasses.find( c => c.name === 'Freight' );
-
 			const result = await productsApi.listAll.products( {
-				shipping_class: freight.id,
+				shipping_class: sampleData.shippingClasses.freight.id,
 			} );
 			expect( result.statusCode ).toEqual( 200 );
 			expect( result.body ).toHaveLength( 1 );
@@ -433,9 +412,6 @@ const { getRequest } = require( '../../utils/request' );
 		} );
 
 		it( 'tags', async () => {
-			const { body: tags } = await getRequest( 'products/tags' );
-			const cool = tags.find( attr => attr.name === 'Cool' );
-
 			const coolProducts = [
 				expect.objectContaining( { name: 'Sunglasses' } ),
 				expect.objectContaining( { name: 'Hoodie with Pocket' } ),
@@ -443,7 +419,7 @@ const { getRequest } = require( '../../utils/request' );
 			];
 
 			const result = await productsApi.listAll.products( {
-				tag: cool.id,
+				tag: sampleData.tags.cool.id,
 			} );
 
 			expect( result.statusCode ).toEqual( 200 );
@@ -453,22 +429,17 @@ const { getRequest } = require( '../../utils/request' );
 
 		it( 'parent', async () => {
 			const result1 = await productsApi.listAll.products( {
-				search: 'Parent Product'
+				parent: sampleData.hierarchicalProducts.parent.id,
 			} );
+			expect( result1.statusCode ).toEqual( 200 );
 			expect( result1.body ).toHaveLength( 1 );
-	
+			expect( result1.body[0].name ).toBe( 'Child Product' );
+
 			const result2 = await productsApi.listAll.products( {
-				parent: result1.body[0].id,
+				parent_exclude: sampleData.hierarchicalProducts.parent.id,
 			} );
 			expect( result2.statusCode ).toEqual( 200 );
-			expect( result2.body ).toHaveLength( 1 );
-			expect( result2.body[0].name ).toBe( 'Child Product' );
-
-			const result3 = await productsApi.listAll.products( {
-				parent_exclude: result1.body[0].id,
-			} );
-			expect( result3.statusCode ).toEqual( 200 );
-			expect( result3.body ).toEqual( expect.not.arrayContaining( [
+			expect( result2.body ).toEqual( expect.not.arrayContaining( [
 				expect.objectContaining( { name: 'Child Product' } ),
 			] ) );
 		} );
