@@ -427,5 +427,24 @@ const { getRequest } = require( '../../utils/request' );
 			expect( result.body ).toHaveLength( 1 );
 			expect( result.body[0].name ).toBe( 'T-Shirt' );
 		} );
+
+		it( 'tags', async () => {
+			const { body: tags } = await getRequest( 'products/tags' );
+			const cool = tags.find( attr => attr.name === 'Cool' );
+
+			const coolProducts = [
+				expect.objectContaining( { name: 'Sunglasses' } ),
+				expect.objectContaining( { name: 'Hoodie with Pocket' } ),
+				expect.objectContaining( { name: 'Beanie' } ),
+			];
+
+			const result = await productsApi.listAll.products( {
+				tag: cool.id,
+			} );
+
+			expect( result.statusCode ).toEqual( 200 );
+			expect( result.body ).toHaveLength( coolProducts.length );
+			expect( result.body ).toEqual( expect.arrayContaining( coolProducts ) );
+		} );
 	} );
 } );
