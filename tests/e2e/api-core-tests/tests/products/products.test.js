@@ -418,5 +418,14 @@ const { getRequest } = require( '../../utils/request' );
 			expect( result.body ).toHaveLength( 1 );
 			expect( result.body[0].name ).toBe( 'Sunglasses' );
 		} );
+
+		it( 'stock status', async () => {
+			const result = await productsApi.listAll.products( {
+				stock_status: 'onbackorder',
+			} );
+			expect( result.statusCode ).toEqual( 200 );
+			expect( result.body ).toHaveLength( 1 );
+			expect( result.body[0].name ).toBe( 'T-Shirt' );
+		} );
 	} );
 } );
