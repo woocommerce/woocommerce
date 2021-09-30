@@ -1140,7 +1140,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 						),
 						'email'      => array(
 							'description' => __( 'Email address.', 'woocommerce' ),
-							'type'        => 'string',
+							'type'        => array( 'string', 'null' ),
 							'format'      => 'email',
 							'context'     => array( 'view', 'edit' ),
 						),
