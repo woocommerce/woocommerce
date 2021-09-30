@@ -40,14 +40,21 @@ const shopper = {
 		] );
 	},
 
-	addToCartFromShopPage: async ( productTitle ) => {
-		const addToCartXPath = `//li[contains(@class, "type-product") and a/h2[contains(text(), "${ productTitle }")]]` +
-			'//a[contains(@class, "add_to_cart_button") and contains(@class, "ajax_add_to_cart")';
+	addToCartFromShopPage: async ( productIdOrTitle ) => {
+		if ( Number.isInteger( productIdOrTitle ) ) {
+			const addToCart = `a[data-product_id="${ productIdOrTitle }"]`;
+			await page.click( addToCart );
+			await expect( page ).toMatchElement( addToCart + '.added' );
+		} else {
+			const addToCartXPath = `//li[contains(@class, "type-product") and a/h2[contains(text(), "${ productIdOrTitle }")]]` +
+				'//a[contains(@class, "add_to_cart_button") and contains(@class, "ajax_add_to_cart")';
 
-		const [ addToCartButton ] = await page.$x( addToCartXPath + ']' );
-		addToCartButton.click();
+			const [ addToCartButton ] = await page.$x( addToCartXPath + ']' );
+			await addToCartButton.click();
 
-		await page.waitFor( addToCartXPath + ' and contains(@class, "added")]' );
+			await page.waitFor( addToCartXPath + ' and contains(@class, "added")]' );
+		}
+
 	},
 
 	goToCheckout: async () => {
@@ -121,12 +128,16 @@ const shopper = {
 		await expect( page ).toFill( '#shipping_postcode', customerShippingDetails.postcode );
 	},
 
-	removeFromCart: async ( productTitle ) => {
-		const cartItemXPath = getCartItemExpression(productTitle);
-		const removeItemXPath = cartItemXPath + '//' + getRemoveExpression();
+	removeFromCart: async ( productIdOrTitle ) => {
+		if ( Number.isInteger( productIdOrTitle ) ) {
+			await page.click( `a[data-product_id="${ productIdOrTitle }"]` );
+		} else {
+			const cartItemXPath = getCartItemExpression( productIdOrTitle );
+			const removeItemXPath = cartItemXPath + '//' + getRemoveExpression();
 
-		const [removeButton] = await page.$x(removeItemXPath);
-		await removeButton.click();
+			const [ removeButton ] = await page.$x( removeItemXPath );
+			await removeButton.click();
+		}
 	},
 
 	emptyCart: async () => {

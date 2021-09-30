@@ -1,6 +1,7 @@
 /**
  * Take a string name and generate the slug for it.
  * Example: 'My plugin' => 'my-plugin'
+ * @param text string to convert to a slug
  *
  * Sourced from: https://gist.github.com/spyesx/561b1d65d4afb595f295
  **/
@@ -31,3 +32,12 @@ export const describeIf = ( condition ) =>
 // Conditionally determine whether or not to skip a test case
 export const itIf = ( condition ) =>
 	condition ? it : it.skip;
+
+/**
+ * Wait for a timeout in milliseconds
+ * @param timeout delay time in milliseconds
+ * @returns {Promise<void>}
+ */
+export const waitForTimeout = async ( timeout ) => {
+	await new Promise( ( resolve ) => setTimeout( resolve, timeout ) );
+};

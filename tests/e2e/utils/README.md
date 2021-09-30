@@ -78,7 +78,7 @@ This package provides support for enabling retries in tests:
 - `MY_ACCOUNT_ADDRESSES` - Customer addresses
 - `MY_ACCOUNT_ACCOUNT_DETAILS` - Customer account details
 
-## Test Function
+## Test Functions
 
 ### Merchant `merchant`
 
@@ -116,7 +116,7 @@ This package provides support for enabling retries in tests:
 | Function | Parameters | Description |
 |----------|------------|-------------|
 | `addToCart` | | Add an item to the cart from a single product page |
-| `addToCartFromShopPage` | `productTitle` | Add an item to the cart from a single product page |
+| `addToCartFromShopPage` | `productIdOrTitle` | Add an item to the cart from the shop page |
 | `fillBillingDetails` | `customerBillingDetails` | Fill billing fields in checkout form using configured address |
 | `fillShippingDetails` | `customerShippingDetails` | Fill shipping fields in checkout form using configured address |
 | `goToAddresses` |  | Go to My Account -> Address Details |
@@ -131,7 +131,7 @@ This package provides support for enabling retries in tests:
 | `login` |  | Log in as the shopper |
 | `placeOrder` |  | Place an order from the checkout page |
 | `productIsInCheckout` | `productTitle, quantity, total, cartSubtotal` | Verify product is in cart on checkout page |
-| `removeFromCart` | `productTitle` | Remove a product from the cart on the cart page |
+| `removeFromCart` | `productIdOrTitle` | Remove a product from the cart on the cart page |
 | `setCartQuantity` | `productTitle, quantityValue` | Change the quantity of a product on the cart page |
 | `searchForProduct` | | Searching for a product name and landing on its detail page |
 | `emptyCart` | | Removes any products and coupons that are in the cart |
@@ -152,6 +152,30 @@ This package provides support for enabling retries in tests:
 | `updateSettingOption` | `settingsGroup`, `settingID`, `payload` | Update a settings group |
 | `updatePaymentGateway`| `paymentGatewayId`, `payload` | Update a payment gateway |
 | `getSystemEnvironment` | | Get the current environment from the WooCommerce system status API.
+
+### Classes
+
+The package includes the following page specific utility class:
+
+#### AdminEdit
+
+The `AdminEdit` class is the base classic custom post type post editor class. It contains the following functions:
+
+| Function | Parameters | Description |
+|----------|------------|-------------|
+| `verifyPublish` | `button, publishNotice, publishVerification` | Publish the post object currently being edited and verify publish status |
+| `getId` | | Get the ID of the post object being edited |
+
+### General Utilities
+
+There is a general utilities object `utils` with the following functions:
+
+| Function | Parameters | Description |
+|----------|------------|-------------|
+| `getSlug` | `text` | Take a string name and generate the slug for it |
+| `describeIf` | `condition` | Return the `describe` or `describe.skip` function when the condition is true / false |
+| `it` | `condition` | Return the `it` or `it.skip` function when the condition is true / false |
+| `waitForTimeout` | `timeout` | Wait for a timeout in milliseconds |
 
 ### Page Utilities
 

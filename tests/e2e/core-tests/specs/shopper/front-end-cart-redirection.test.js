@@ -1,4 +1,3 @@
-/* eslint-disable jest/no-export, jest/no-disabled-tests, jest/expect-expect */
 /**
  * Internal dependencies
  */
@@ -50,7 +49,7 @@ const runCartRedirectionTest = () => {
 			await page.waitFor(1000); // to avoid flakiness
 
 			await shopper.productIsInCart(simpleProductName);
-			await shopper.removeFromCart(simpleProductName);
+			await shopper.removeFromCart( simplePostIdValue );
 		});
 
 		it('can redirect user to cart from detail page', async () => {
@@ -61,7 +60,7 @@ const runCartRedirectionTest = () => {
 			await page.waitFor(1000); // to avoid flakiness
 
 			await shopper.productIsInCart(simpleProductName);
-			await shopper.removeFromCart(simpleProductName);
+			await shopper.removeFromCart( simplePostIdValue );
 		});
 
 		afterAll(async () => {

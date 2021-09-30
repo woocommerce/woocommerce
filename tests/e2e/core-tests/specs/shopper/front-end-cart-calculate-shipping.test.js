@@ -35,9 +35,12 @@ const shippingCountryFR = 'country:FR';
 
 const runCartCalculateShippingTest = () => {
 	describe('Cart Calculate Shipping', () => {
+		let firstProductId;
+		let secondProductId;
+
 		beforeAll(async () => {
-			await createSimpleProduct(firstProductName);
-			await createSimpleProduct(secondProductName, secondProductPrice);
+			firstProductId = await createSimpleProduct(firstProductName);
+			secondProductId = await createSimpleProduct(secondProductName, secondProductPrice);
 
 			await withRestApi.resetSettingsGroupToDefault( 'general' );
 
@@ -56,7 +59,7 @@ const runCartCalculateShippingTest = () => {
 
 		it('allows customer to calculate Free Shipping if in Germany', async () => {
 			await shopper.goToShop();
-			await shopper.addToCartFromShopPage(firstProductName);
+			await shopper.addToCartFromShopPage( firstProductId );
 			await shopper.goToCart();
 
 			// Set shipping country to Germany
@@ -97,7 +100,7 @@ const runCartCalculateShippingTest = () => {
 
 		it('should show correct total cart price with 2 products and flat rate', async () => {
 			await shopper.goToShop();
-			await shopper.addToCartFromShopPage(secondProductName);
+			await shopper.addToCartFromShopPage( secondProductId );
 			await shopper.goToCart();
 
 			await shopper.setCartQuantity(firstProductName, 1);
