@@ -657,6 +657,42 @@ const { getRequest } = require( '../../utils/request' );
 					expect( name ).toBe( productNamesMaxPriceDesc[ idx ] );
 				} );
 			} );
+
+			// This case will remain skipped until orderby include is fixed.
+			// See: https://github.com/woocommerce/woocommerce/issues/30354#issuecomment-925955099.
+			it.skip( 'include', async () => {
+				const includeIds = [
+					sampleData.groupedProducts[ 0 ].id,
+					sampleData.simpleProducts[ 3 ].id,
+					sampleData.hierarchicalProducts.parent.id,
+				];
+
+				const result1 = await productsApi.listAll.products( {
+					order: 'asc',
+					orderby: 'include',
+					include: includeIds.join( ',' ),
+				} );
+				expect( result1.statusCode ).toEqual( 200 );
+				expect( result1.body ).toHaveLength( includeIds.length );
+
+				// Verify all results are in proper order.
+				result1.body.forEach( ( { id }, idx ) => {
+					expect( id ).toBe( includeIds[ idx ] );
+				} );
+
+				const result2 = await productsApi.listAll.products( {
+					order: 'desc',
+					orderby: 'include',
+					include: includeIds.join( ',' ),
+				} );
+				expect( result2.statusCode ).toEqual( 200 );
+				expect( result2.body ).toHaveLength( includeIds.length );
+
+				// Verify all results are in proper order.
+				result2.body.forEach( ( { id }, idx ) => {
+					expect( id ).toBe( includeIds[ idx ] );
+				} );
+			} );
 		} );
 	} );
 } );
