@@ -1,3 +1,4 @@
+const { getOrderExample, createOrderInDb, deleteOrderFromDb } = require('../../data');
 const { ordersApi } = require('../../endpoints/orders');
 const { order } = require('../../data');
 
@@ -56,9 +57,20 @@ describe('Orders API tests', () => {
 	});
 
 	it('can retrieve an order', async () => {
+		const order = getOrderExample();
+		order.customer_id = 1;
+		order.status = 'pending';
+		const orderId = await createOrderInDb( order );
+
 		const response = await ordersApi.retrieve.order( orderId );
-		expect( response.status ).toEqual( ordersApi.retrieve.responseCode );
-		expect( response.body.id ).toEqual( orderId );
+		await deleteOrderFromDb( orderId );
+
+		const orderData = response.body;
+		expect( response.statusCode ).toEqual( ordersApi.retrieve.responseCode );
+		expect( orderData.id ).toEqual( orderId );
+		expect( orderData.customer_id ).toEqual( order.customer_id );
+		expect( orderData.status ).toEqual( order.status );
+		//TODO: Test the rest of the order data.
 	});
 
 	it('can add shipping and billing contacts to an order', async () => {
