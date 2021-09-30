@@ -580,6 +580,83 @@ const { getRequest } = require( '../../utils/request' );
 					expect( name ).toBe( productNamesDesc[ idx ] );
 				} );
 			} );
+
+			it( 'price', async () => {
+				const productNamesMinPriceAsc = [
+					'Parent Product',
+					'Child Product',
+					'Single',
+					'WordPress Pennant',
+					'V-Neck T-Shirt',
+					'Album',
+					'Cap',
+					'T-Shirt',
+					'Beanie',
+					'T-Shirt with Logo',
+					'Beanie with Logo',
+					'Logo Collection',
+					'Polo',
+					'Long Sleeve Tee',
+					'Hoodie with Pocket',
+					'Hoodie',
+					'Hoodie with Logo',
+					'Hoodie with Zipper',
+					'Belt',
+					'Sunglasses',
+				];
+				const result1 = await productsApi.listAll.products( {
+					order: 'asc',
+					orderby: 'price',
+					per_page: productNamesMinPriceAsc.length
+				} );
+				expect( result1.statusCode ).toEqual( 200 );
+				expect( result1.body ).toHaveLength( productNamesMinPriceAsc.length );
+
+				// Verify all results are in ascending order.
+				// The query uses the min price calculated in the product meta lookup table,
+				// so we can't just check the price property of the response.
+				result1.body.forEach( ( { name }, idx ) => {
+					expect( name ).toBe( productNamesMinPriceAsc[ idx ] );
+				} );
+
+				const productNamesMaxPriceDesc = [
+					'Sunglasses',
+					'Belt',
+					'Logo Collection',
+					'Hoodie with Zipper',
+					'Hoodie with Logo',
+					'Hoodie',
+					'Hoodie with Pocket',
+					'Long Sleeve Tee',
+					'Polo',
+					'V-Neck T-Shirt',
+					'Beanie with Logo',
+					'T-Shirt with Logo',
+					'Beanie',
+					'T-Shirt',
+					'Cap',
+					'Album',
+					'WordPress Pennant',
+					'Single',
+					'Child Product',
+					'Parent Product',
+				];
+
+				const result2 = await productsApi.listAll.products( {
+					order: 'desc',
+					orderby: 'price',
+					per_page: productNamesMaxPriceDesc.length
+				} );
+				expect( result2.statusCode ).toEqual( 200 );
+				expect( result2.body ).toHaveLength( productNamesMaxPriceDesc.length );
+
+				// Verify all results are in descending order.
+				// The query uses the max price calculated in the product meta lookup table,
+				// so we can't just check the price property of the response.
+				result2.body.forEach( ( { name }, idx ) => {
+					expect( name ).toBe( productNamesMaxPriceDesc[ idx ] );
+				} );
+			} );
 		} );
 	} );
 } );
