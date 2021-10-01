@@ -31,7 +31,7 @@ const {
 	IS_RETEST_MODE,
 } = require( './constants' );
 
-const { getSlug } = require('./utils');
+const { getSlug, waitForTimeout } = require('./utils');
 
 const baseUrl = config.get( 'url' );
 const WP_ADMIN_SINGLE_CPT_VIEW = ( postId ) => baseUrl + `wp-admin/post.php?post=${ postId }&action=edit`;
@@ -166,7 +166,7 @@ const merchant = {
 			waitUntil: 'networkidle0',
 		} );
 		await expect( page ).toSelect( '#order_status', status );
-		await page.waitFor( 2000 );
+		await waitForTimeout( 2000 );
 		await expect( page ).toClick( 'button.save_order' );
 		await page.waitForSelector( '#message' );
 		await expect( page ).toMatchElement( '#message', { text: 'Order updated.' } );

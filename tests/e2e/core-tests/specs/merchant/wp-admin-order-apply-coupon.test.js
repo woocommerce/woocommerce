@@ -8,6 +8,7 @@ const {
 	evalAndClick,
 	merchant,
 	createOrder,
+	utils,
 } = require( '@woocommerce/e2e-utils' );
 
 const config = require( 'config' );
@@ -64,7 +65,7 @@ const runOrderApplyCouponTest = () => {
 
 			await uiUnblocked();
 
-			await page.waitFor(2000); // to avoid flakyness
+			await utils.waitForTimeout( 2000 ); // to avoid flakyness
 
 			// Verify the coupon pricing has been removed
 			await expect(page).not.toMatchElement('.wc_coupon_list li.code.editable', { text: couponCode.toLowerCase() });

@@ -7,6 +7,7 @@ import { pressKeyWithModifier } from '@wordpress/e2e-test-utils';
  * Internal dependencies
  */
 import { AdminEdit } from './pages/admin-edit';
+import { waitForTimeout } from './flows/utils';
 
 /**
  * Perform a "select all" and then fill a input.
@@ -107,7 +108,7 @@ export const waitForSelectorWithoutThrow = async ( selector, timeoutInSeconds = 
 		if ( selected ) {
 			break;
 		}
-		await page.waitFor( 1000 );
+		await waitForTimeout( 1000 );
 		selected = await page.$( selector );
 	}
 	return Boolean( selected );
@@ -222,7 +223,7 @@ export const selectOptionInSelect2 = async ( value, selector = 'input.select2-se
 	await page.waitForSelector(selector);
 	await page.click(selector);
 	await page.type(selector, value);
-	await page.waitFor(2000); // to avoid flakyness, must wait before pressing Enter
+	await waitForTimeout( 2000 ); // to avoid flakyness, must wait before pressing Enter
 	await page.keyboard.press('Enter');
 };
 
