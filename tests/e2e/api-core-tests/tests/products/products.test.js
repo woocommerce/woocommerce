@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-const { createSampleProducts } = require( '../../data/products' );
+const { createSampleData, deleteSampleData } = require( '../../data/products' );
 const { productsApi } = require('../../endpoints/products');
 
 /**
@@ -17,7 +17,11 @@ const { productsApi } = require('../../endpoints/products');
 	let sampleData;
 
 	beforeAll( async () => {
-		sampleData = await createSampleProducts();
+		sampleData = await createSampleData();
+	}, 10000 );
+
+	afterAll( async () => {
+		await deleteSampleData( sampleData );
 	}, 10000 );
 
 	describe( 'List all products', () => {
