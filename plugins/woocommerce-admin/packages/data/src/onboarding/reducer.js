@@ -309,6 +309,14 @@ const onboarding = (
 					return taskListId === list.id ? taskList : list;
 				} ),
 			};
+		case TYPES.OPTIMISTICALLY_COMPLETE_TASK_REQUEST:
+			return {
+				...state,
+				taskLists: getUpdatedTaskLists( state.taskLists, {
+					id: taskId,
+					isComplete: true,
+				} ),
+			};
 		default:
 			return state;
 	}

@@ -171,6 +171,13 @@ export function hideTaskListSuccess( taskList ) {
 	};
 }
 
+export function optimisticallyCompleteTaskRequest( taskId ) {
+	return {
+		type: TYPES.OPTIMISTICALLY_COMPLETE_TASK_REQUEST,
+		taskId,
+	};
+}
+
 export function setTasksStatus( tasksStatus ) {
 	return {
 		type: TYPES.SET_TASKS_STATUS,
@@ -335,4 +342,8 @@ export function* hideTaskList( id ) {
 		yield hideTaskListError( id, error );
 		throw new Error();
 	}
+}
+
+export function* optimisticallyCompleteTask( id ) {
+	yield optimisticallyCompleteTaskRequest( id );
 }

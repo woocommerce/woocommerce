@@ -10,7 +10,6 @@ import { filter } from 'lodash';
 import { withDispatch, withSelect } from '@wordpress/data';
 
 import { Stepper, TextControl, ImageUpload } from '@woocommerce/components';
-import { getHistory, getNewPath } from '@woocommerce/navigation';
 import {
 	OPTIONS_STORE_NAME,
 	ONBOARDING_STORE_NAME,
@@ -94,12 +93,13 @@ class Appearance extends Component {
 
 	completeStep() {
 		const { stepIndex } = this.state;
+		const { onComplete } = this.props;
 		const nextStep = this.getSteps()[ stepIndex + 1 ];
 
 		if ( nextStep ) {
 			this.setState( { stepIndex: stepIndex + 1 } );
 		} else {
-			getHistory().push( getNewPath( {}, '/', {} ) );
+			onComplete();
 		}
 	}
 
@@ -449,7 +449,9 @@ registerPlugin( 'wc-admin-onboarding-task-appearance', {
 	scope: 'woocommerce-tasks',
 	render: () => (
 		<WooOnboardingTask id="appearance">
-			<AppearanceWrapper />
+			{ ( { onComplete } ) => (
+				<AppearanceWrapper onComplete={ onComplete } />
+			) }
 		</WooOnboardingTask>
 	),
 } );

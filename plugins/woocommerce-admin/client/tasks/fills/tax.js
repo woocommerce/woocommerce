@@ -9,7 +9,6 @@ import { difference, filter } from 'lodash';
 import interpolateComponents from 'interpolate-components';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { H, Link, Stepper, Plugins, Spinner } from '@woocommerce/components';
-import { getHistory, getNewPath } from '@woocommerce/navigation';
 import { getAdminLink } from '@woocommerce/wc-admin-settings';
 import {
 	ONBOARDING_STORE_NAME,
@@ -124,6 +123,7 @@ class Tax extends Component {
 		const {
 			clearTaskStatusCache,
 			createNotice,
+			onComplete,
 			updateAndPersistSettingsForGroup,
 			generalSettings,
 			taxSettings,
@@ -154,7 +154,7 @@ class Tax extends Component {
 							'woocommerce-admin'
 						)
 					);
-					getHistory().push( getNewPath( {}, '/', {} ) );
+					onComplete();
 				} else {
 					this.redirectToTaxSettings();
 				}
@@ -593,7 +593,9 @@ registerPlugin( 'wc-admin-onboarding-task-tax', {
 	scope: 'woocommerce-tasks',
 	render: () => (
 		<WooOnboardingTask id="tax">
-			{ ( { query } ) => <TaxWrapper query={ query } /> }
+			{ ( { onComplete, query } ) => (
+				<TaxWrapper onComplete={ onComplete } query={ query } />
+			) }
 		</WooOnboardingTask>
 	),
 } );

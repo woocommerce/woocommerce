@@ -100,10 +100,10 @@ export const getMarketingExtensionLists = (
 };
 
 export type MarketingProps = {
-	trackedCompletedActions: string[];
+	onComplete: ( bool: boolean ) => void;
 };
 
-const Marketing: React.FC = () => {
+const Marketing: React.FC< MarketingProps > = ( { onComplete } ) => {
 	const [ currentPlugin, setCurrentPlugin ] = useState< string | null >(
 		null
 	);
@@ -174,6 +174,7 @@ const Marketing: React.FC = () => {
 							'marketing',
 						],
 					} );
+					onComplete();
 				}
 
 				createNoticesFromResponse( response );
@@ -253,7 +254,9 @@ registerPlugin( 'wc-admin-onboarding-task-marketing', {
 	scope: 'woocommerce-tasks',
 	render: () => (
 		<WooOnboardingTask id="marketing">
-			<Marketing />
+			{ ( { onComplete } ) => {
+				return <Marketing onComplete={ onComplete } />;
+			} }
 		</WooOnboardingTask>
 	),
 } );

@@ -73,7 +73,7 @@ class Connect extends Component {
 	}
 
 	async finish() {
-		const { query } = this.props;
+		const { onComplete, query } = this.props;
 		try {
 			const connectResponse = await apiFetch( {
 				path: `${ WC_ADMIN_NAMESPACE }/plugins/finish-wccom-connect`,
@@ -100,7 +100,7 @@ class Connect extends Component {
 					document.body.classList.remove(
 						'woocommerce-admin-is-loading'
 					);
-					getHistory().push( this.baseQuery() );
+					onComplete();
 				} else {
 					this.errorMessage();
 				}
@@ -142,7 +142,9 @@ registerPlugin( 'wc-admin-onboarding-task-connect', {
 	scope: 'woocommerce-tasks',
 	render: () => (
 		<WooOnboardingTask id="connect">
-			<ConnectWrapper />
+			{ ( { onComplete, query } ) => (
+				<ConnectWrapper onComplete={ onComplete } query={ query } />
+			) }
 		</WooOnboardingTask>
 	),
 } );

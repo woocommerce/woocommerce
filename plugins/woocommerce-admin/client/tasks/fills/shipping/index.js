@@ -137,7 +137,7 @@ export class Shipping extends Component {
 	}
 
 	completeStep() {
-		const { createNotice } = this.props;
+		const { createNotice, onComplete } = this.props;
 		const { step } = this.state;
 		const steps = this.getSteps();
 		const currentStepIndex = steps.findIndex( ( s ) => s.key === step );
@@ -153,7 +153,7 @@ export class Shipping extends Component {
 					'woocommerce-admin'
 				)
 			);
-			getHistory().push( getNewPath( {}, '/', {} ) );
+			onComplete();
 		}
 	}
 
@@ -377,7 +377,9 @@ registerPlugin( 'wc-admin-onboarding-task-shipping', {
 	scope: 'woocommerce-tasks',
 	render: () => (
 		<WooOnboardingTask id="shipping">
-			<ShippingWrapper />
+			{ ( { onComplete } ) => {
+				return <ShippingWrapper onComplete={ onComplete } />;
+			} }
 		</WooOnboardingTask>
 	),
 } );
