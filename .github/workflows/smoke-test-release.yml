@@ -75,6 +75,8 @@ jobs:
 
       - name: Load docker images and start containers.
         working-directory: package/woocommerce
+        env:
+          LATEST_WP_VERSION_MINUS: ${{ matrix.wp }}
         run: npx wc-e2e docker:up
 
       - name: Move current directory to code. We will install zip file in this dir later.
@@ -96,5 +98,4 @@ jobs:
           WC_E2E_SCREENSHOTS: 1
           E2E_SLACK_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
           E2E_SLACK_CHANNEL: ${{ secrets.E2E_SLACK_CHANNEL }}
-          LATEST_WP_VERSION_MINUS: ${{ matrix.wp }}
         run: npx wc-e2e test:e2e
