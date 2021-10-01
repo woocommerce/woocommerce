@@ -107,6 +107,10 @@ function findLatestVersion( image, nameSearch ) {
 			return fetchLatestTagFromPage( image, nameSearch, ++page ).then( paginationFn );
 		}
 
+		if ( image === 'wordpress' && process.env.LATEST_WP_VERSION_MINUS ) {
+			return getLatestMinusVersion( latestVersion.toString(), process.env.LATEST_WP_VERSION_MINUS );
+		}
+
 		return latestVersion.toString();
 	};
 
@@ -130,3 +134,13 @@ findLatestVersion( image, nameSearch ).then(
 		process.exit( 1 );
 	}
 )
+
+function getLatestMinusVersion( latestVersion, minusVersion ) {
+	// Convert the 1 or 2 to a decimal we can use for the logic below.
+	let minusAmount = minusVersion / 10;
+
+	const baseVersion = latestVersion.replace( /.[^\.]$/, '' );
+
+	// Calculate the version we need, add a patch version back in, and return.
+	return String( baseVersion - minusAmount ).concat( '.0' );
+}
