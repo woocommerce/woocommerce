@@ -3,7 +3,6 @@
  */
 const { createSampleProducts } = require( '../../data/products' );
 const { productsApi } = require('../../endpoints/products');
-const { getRequest } = require( '../../utils/request' );
 
 /**
  * Tests for the WooCommerce Products API.
@@ -19,7 +18,7 @@ const { getRequest } = require( '../../utils/request' );
 
 	beforeAll( async () => {
 		sampleData = await createSampleProducts();
-	}, 7000 );
+	}, 10000 );
 
 	describe( 'List all products', () => {
 
@@ -468,6 +467,12 @@ const { getRequest } = require( '../../utils/request' );
 				'WordPress Pennant',
 			];
 			const productNamesDesc = [ ...productNamesAsc ].reverse();
+			const productNamesByRatingAsc = [
+				'Sunglasses',
+				'Cap',
+				'T-Shirt',
+			];
+			const productNamesByRatingDesc = [ ...productNamesByRatingAsc ].reverse();
 
 			it( 'default', async () => {
 				// Default = date desc.
@@ -691,6 +696,36 @@ const { getRequest } = require( '../../utils/request' );
 				// Verify all results are in proper order.
 				result2.body.forEach( ( { id }, idx ) => {
 					expect( id ).toBe( includeIds[ idx ] );
+				} );
+			} );
+
+			it( 'rating (desc)', async () => {
+				const result2 = await productsApi.listAll.products( {
+					order: 'desc',
+					orderby: 'rating',
+					per_page: productNamesByRatingDesc.length,
+				} );
+				expect( result2.statusCode ).toEqual( 200 );
+
+				// Verify all results are in descending order.
+				result2.body.forEach( ( { name }, idx ) => {
+					expect( name ).toBe( productNamesByRatingDesc[ idx ] );
+				} );
+			} );
+
+			// This case will remain skipped until ratings can be sorted ascending.
+			// See: https://github.com/woocommerce/woocommerce/issues/30354#issuecomment-925955099.
+			it.skip( 'rating (asc)', async () => {
+				const result1 = await productsApi.listAll.products( {
+					order: 'asc',
+					orderby: 'rating',
+					per_page: productNamesByRatingAsc.length,
+				} );
+				expect( result1.statusCode ).toEqual( 200 );
+
+				// Verify all results are in ascending order.
+				result1.body.forEach( ( { name }, idx ) => {
+					expect( name ).toBe( productNamesByRatingAsc[ idx ] );
 				} );
 			} );
 		} );
