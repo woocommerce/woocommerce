@@ -102,6 +102,18 @@ This value will override the default Jest timeout as well as pass the timeout to
 
 For a list of the methods that the above timeout affects, please see the Puppeteer documentation for [`page.setDefaultTimeout()`](https://pptr.dev/#?product=Puppeteer&version=v10.2.0&show=api-pagesetdefaulttimeouttimeout) and [`page.setDefaultNavigationTimeout`](https://pptr.dev/#?product=Puppeteer&version=v10.2.0&show=api-pagesetdefaultnavigationtimeouttimeout) for more information.
 
+### Test Against Previous WordPress Versions
+
+You can use the `LATEST_WP_VERSION_MINUS` flag to determine how many versions back from the current WordPress version to use in the Docker environment. This is calculated from the current WordPress version minus the set value. For example, if `LATEST_WP_VERSION_MINUS` is set to 1, it will calculate the current WordPress version minus one, and use that for the WordPress Docker container. 
+
+For example, you could run the following command:
+
+```bash
+LATEST_WP_VERSION_MINUS=2 npx wc-e2e docker:up
+```
+
+In this example, if the current WordPress version is 6.0, this will go two versions back and use the WordPress 5.8 Docker image for the tests.
+
 ### Jest Puppeteer Config
 
 The test sequencer uses the following default Puppeteer configuration:

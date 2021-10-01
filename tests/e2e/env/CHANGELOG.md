@@ -1,5 +1,9 @@
 # Unreleased
 
+## Added
+
+- Added `LATEST_WP_VERSION_MINUS` that allows setting a number to subtract from the current WordPress version for the WordPress Docker image.
+
 # 0.2.3
 
 ## Added
