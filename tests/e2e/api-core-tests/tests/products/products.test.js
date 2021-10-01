@@ -477,6 +477,12 @@ const { productsApi } = require('../../endpoints/products');
 				'T-Shirt',
 			];
 			const productNamesByRatingDesc = [ ...productNamesByRatingAsc ].reverse();
+			const productNamesByPopularityDesc = [
+				'Beanie with Logo',
+				'Single',
+				'T-Shirt',
+			];
+			const productNamesByPopularityAsc = [ ...productNamesByPopularityDesc ].reverse();
 
 			it( 'default', async () => {
 				// Default = date desc.
@@ -730,6 +736,36 @@ const { productsApi } = require('../../endpoints/products');
 				// Verify all results are in ascending order.
 				result1.body.forEach( ( { name }, idx ) => {
 					expect( name ).toBe( productNamesByRatingAsc[ idx ] );
+				} );
+			} );
+
+			it( 'popularity (desc)', async () => {
+				const result2 = await productsApi.listAll.products( {
+					order: 'desc',
+					orderby: 'popularity',
+					per_page: productNamesByPopularityDesc.length,
+				} );
+				expect( result2.statusCode ).toEqual( 200 );
+
+				// Verify all results are in descending order.
+				result2.body.forEach( ( { name }, idx ) => {
+					expect( name ).toBe( productNamesByPopularityDesc[ idx ] );
+				} );
+			} );
+
+			// This case will remain skipped until popularity can be sorted ascending.
+			// See: https://github.com/woocommerce/woocommerce/issues/30354#issuecomment-925955099.
+			it.skip( 'popularity (asc)', async () => {
+				const result1 = await productsApi.listAll.products( {
+					order: 'asc',
+					orderby: 'popularity',
+					per_page: productNamesByPopularityAsc.length,
+				} );
+				expect( result1.statusCode ).toEqual( 200 );
+
+				// Verify all results are in ascending order.
+				result1.body.forEach( ( { name }, idx ) => {
+					expect( name ).toBe( productNamesByPopularityAsc[ idx ] );
 				} );
 			} );
 		} );

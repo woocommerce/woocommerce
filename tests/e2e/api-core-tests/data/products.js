@@ -1568,6 +1568,33 @@ const createSampleProductReviews = async ( simpleProducts ) => {
 	return [ review1.id, review2.id, review3.id ];
 };
 
+const createSampleProductOrders = async ( simpleProducts ) => {
+	const single = simpleProducts.find( p => p.name === 'Single' );
+	const beanie = simpleProducts.find( p => p.name === 'Beanie with Logo' );
+	const shirt = simpleProducts.find( p => p.name === 'T-Shirt' );
+
+	const { body: order } = await postRequest( 'orders', {
+		set_paid: true,
+		status: 'completed',
+		line_items: [
+			{
+				product_id: single.id,
+				quantity: 2,
+			},
+			{
+				product_id: beanie.id,
+				quantity: 3,
+			},
+			{
+				product_id: shirt.id,
+				quantity: 1,
+			},
+		],
+	} );
+
+	return [ order ];
+};
+
 const createSampleData = async () => {
 	const categories = await createSampleCategories();
 	const attributes = await createSampleAttributes();
@@ -1582,6 +1609,7 @@ const createSampleData = async () => {
 	const hierarchicalProducts = await createSampleHierarchicalProducts();
 
 	const reviewIds = await createSampleProductReviews( simpleProducts );
+	const orders = await createSampleProductOrders( simpleProducts );
 
 	return {
 		categories,
@@ -1595,6 +1623,7 @@ const createSampleData = async () => {
 		variableProducts,
 		hierarchicalProducts,
 		reviewIds,
+		orders,
 	};
 };
 
@@ -1610,7 +1639,7 @@ const deleteSampleData = async ( sampleData ) => {
 		groupedProducts,
 		variableProducts,
 		hierarchicalProducts,
-		// reviewIds,
+		orders,
 	} = sampleData;
 
 	const productIds = [].concat(
@@ -1626,6 +1655,10 @@ const deleteSampleData = async ( sampleData ) => {
 		hierarchicalProducts.parent.id,
 		hierarchicalProducts.child.id,
 	] );
+
+	orders.forEach( async ( { id } ) => {
+		await deleteRequest( `orders/${ id }`, true );
+	} );
 
 	productIds.forEach( async ( id ) => {
 		await deleteRequest( `products/${ id }`, true );
