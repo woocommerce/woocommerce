@@ -1,7 +1,12 @@
 /**
  * Internal dependencies
  */
-const { getRequest, postRequest, putRequest } = require('../utils/request');
+const {
+	getRequest,
+	postRequest,
+	putRequest,
+	deleteRequest,
+} = require('../utils/request');
 
 const getProducts = ( params = {} ) => getRequest( 'products', params );
 
@@ -1563,7 +1568,7 @@ const createSampleProductReviews = async ( simpleProducts ) => {
 	return [ review1.id, review2.id, review3.id ];
 };
 
-const createSampleProducts = async () => {
+const createSampleData = async () => {
 	const categories = await createSampleCategories();
 	const attributes = await createSampleAttributes();
 	const tags = await createSampleTags();
@@ -1593,6 +1598,60 @@ const createSampleProducts = async () => {
 	};
 };
 
+const deleteSampleData = async ( sampleData ) => {
+	const {
+		categories,
+		attributes,
+		tags,
+		shippingClasses,
+		taxClasses,
+		simpleProducts,
+		externalProducts,
+		groupedProducts,
+		variableProducts,
+		hierarchicalProducts,
+		// reviewIds,
+	} = sampleData;
+
+	const productIds = [].concat(
+		simpleProducts.map( p => p.id )
+	).concat(
+		externalProducts.map( p => p.id )
+	).concat(
+		groupedProducts.map( p => p.id )
+	).concat( [
+		variableProducts.hoodie.id,
+		variableProducts.vneck.id,
+	] ).concat( [
+		hierarchicalProducts.parent.id,
+		hierarchicalProducts.child.id,
+	] );
+
+	productIds.forEach( async ( id ) => {
+		await deleteRequest( `products/${ id }`, true );
+	} );
+
+	await deleteRequest( `products/attributes/${ attributes.color.id }`, true );
+	await deleteRequest( `products/attributes/${ attributes.size.id }`, true );
+
+	Object.values( categories ).forEach( async ( { id } ) => {
+		await deleteRequest( `products/categories/${ id }`, true );
+	} );
+
+	Object.values( tags ).forEach( async ( { id } ) => {
+		await deleteRequest( `products/tags/${ id }`, true );
+	} );
+
+	Object.values( shippingClasses ).forEach( async ( { id } ) => {
+		await deleteRequest( `products/shipping_classes/${ id }`, true );
+	} );
+
+	Object.values( taxClasses ).forEach( async ( { slug } ) => {
+		await deleteRequest( `taxes/classes/${ slug }`, true );
+	} );
+};
+
 module.exports = {
-	createSampleProducts,
+	createSampleData,
+	deleteSampleData,
 };
