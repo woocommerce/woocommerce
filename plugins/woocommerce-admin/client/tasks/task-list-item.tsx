@@ -56,6 +56,8 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 		isSnoozeable,
 		time,
 		title,
+		level,
+		additionalInfo,
 	} = task;
 
 	const slot = useSlot( `woocommerce_onboarding_task_list_item_${ id }` );
@@ -160,8 +162,10 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 					key={ id }
 					title={ title }
 					content={ content }
+					additionalInfo={ additionalInfo }
 					time={ time }
 					action={ onClickActions }
+					level={ level }
 					actionLabel={ actionLabel }
 					{ ...taskItemProps }
 					{ ...props }

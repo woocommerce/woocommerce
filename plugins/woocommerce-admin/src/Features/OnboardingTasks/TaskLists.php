@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\Shipping;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\StoreDetails;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\Tax;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\WooCommercePayments;
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 use Automattic\WooCommerce\Admin\Loader;
 
 /**
@@ -96,6 +97,13 @@ class TaskLists {
 			)
 		);
 
+		self::add_list(
+			array(
+				'id'    => 'extended',
+				'title' => __( 'Things to do next', 'woocommerce-admin' ),
+			)
+		);
+
 		self::add_task( 'setup', StoreDetails::get_task() );
 		self::add_task( 'setup', Purchase::get_task() );
 		self::add_task( 'setup', Products::get_task() );
@@ -108,12 +116,25 @@ class TaskLists {
 	}
 
 	/**
+	 * Add default extended task lists.
+	 *
+	 * @param array $extended_tasks list of extended tasks.
+	 */
+	public static function maybe_add_extended_tasks( $extended_tasks = array() ) {
+		foreach ( $extended_tasks as $extended_task ) {
+			self::add_task( $extended_task['list_id'], $extended_task );
+		}
+	}
+
+	/**
 	 * Get all task lists.
 	 *
+	 * @param array $extended_tasks array of optional extended tasks.
 	 * @return array
 	 */
-	public static function get_lists() {
+	public static function get_lists( $extended_tasks = array() ) {
 		self::maybe_add_default_tasks();
+		self::maybe_add_extended_tasks( $extended_tasks );
 		return self::$lists;
 	}
 

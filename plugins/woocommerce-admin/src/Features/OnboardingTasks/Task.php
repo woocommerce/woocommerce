@@ -24,11 +24,18 @@ class Task {
 	public $title = '';
 
 	/**
-	 * Title.
+	 * Content.
 	 *
 	 * @var string
 	 */
 	public $content = '';
+
+	/**
+	 * Additional info.
+	 *
+	 * @var string
+	 */
+	public $additional_info = '';
 
 	/**
 	 * Action label.
@@ -64,6 +71,13 @@ class Task {
 	 * @var string|null
 	 */
 	public $time = null;
+
+	/**
+	 * Level of task importance.
+	 *
+	 * @var int|null
+	 */
+	public $level = null;
 
 	/**
 	 * Dismissability.
@@ -118,31 +132,35 @@ class Task {
 	 */
 	public function __construct( $data = array() ) {
 		$defaults = array(
-			'id'             => null,
-			'title'          => '',
-			'content'        => '',
-			'action_label'   => __( "Let's go", 'woocommerce-admin' ),
-			'action_url'     => null,
-			'is_complete'    => false,
-			'can_view'       => true,
-			'time'           => null,
-			'is_dismissable' => false,
-			'is_snoozeable'  => false,
-			'snoozed_until'  => null,
+			'id'              => null,
+			'title'           => '',
+			'content'         => '',
+			'action_label'    => __( "Let's go", 'woocommerce-admin' ),
+			'action_url'      => null,
+			'is_complete'     => false,
+			'can_view'        => true,
+			'level'           => null,
+			'time'            => null,
+			'is_dismissable'  => false,
+			'is_snoozeable'   => false,
+			'snoozed_until'   => null,
+			'additional_info' => '',
 		);
 
 		$data = wp_parse_args( $data, $defaults );
 
-		$this->id             = (string) $data['id'];
-		$this->title          = (string) $data['title'];
-		$this->content        = (string) $data['content'];
-		$this->action_label   = (string) $data['action_label'];
-		$this->action_url     = (string) $data['action_url'];
-		$this->is_complete    = (bool) $data['is_complete'];
-		$this->can_view       = (bool) $data['can_view'];
-		$this->time           = (string) $data['time'];
-		$this->is_dismissable = (bool) $data['is_dismissable'];
-		$this->is_snoozeable  = (bool) $data['is_snoozeable'];
+		$this->id              = (string) $data['id'];
+		$this->title           = (string) $data['title'];
+		$this->content         = (string) $data['content'];
+		$this->action_label    = (string) $data['action_label'];
+		$this->action_url      = (string) $data['action_url'];
+		$this->is_complete     = (bool) $data['is_complete'];
+		$this->can_view        = (bool) $data['can_view'];
+		$this->level           = (int) $data['level'];
+		$this->additional_info = (string) $data['additional_info'];
+		$this->time            = (string) $data['time'];
+		$this->is_dismissable  = (bool) $data['is_dismissable'];
+		$this->is_snoozeable   = (bool) $data['is_snoozeable'];
 
 		$snoozed_tasks = get_option( self::SNOOZED_OPTION, array() );
 		if ( isset( $snoozed_tasks[ $this->id ] ) ) {
@@ -268,20 +286,22 @@ class Task {
 	 */
 	public function get_json() {
 		return array(
-			'id'            => $this->id,
-			'title'         => $this->title,
-			'canView'       => $this->can_view,
-			'content'       => $this->content,
-			'actionLabel'   => $this->action_label,
-			'actionUrl'     => $this->action_url,
-			'isComplete'    => $this->is_complete,
-			'canView'       => $this->can_view,
-			'time'          => $this->time,
-			'isDismissed'   => $this->is_dismissed(),
-			'isDismissable' => $this->is_dismissable,
-			'isSnoozed'     => $this->is_snoozed(),
-			'isSnoozeable'  => $this->is_snoozeable,
-			'snoozedUntil'  => $this->snoozed_until,
+			'id'             => $this->id,
+			'title'          => $this->title,
+			'canView'        => $this->can_view,
+			'content'        => $this->content,
+			'additionalInfo' => $this->additional_info,
+			'actionLabel'    => $this->action_label,
+			'actionUrl'      => $this->action_url,
+			'isComplete'     => $this->is_complete,
+			'canView'        => $this->can_view,
+			'time'           => $this->time,
+			'level'          => $this->level,
+			'isDismissed'    => $this->is_dismissed(),
+			'isDismissable'  => $this->is_dismissable,
+			'isSnoozed'      => $this->is_snoozed(),
+			'isSnoozeable'   => $this->is_snoozeable,
+			'snoozedUntil'   => $this->snoozed_until,
 		);
 	}
 

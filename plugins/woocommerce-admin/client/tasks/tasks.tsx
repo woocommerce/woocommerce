@@ -116,6 +116,10 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 			tasks,
 		} = taskList;
 
+		if ( isHidden ) {
+			return null;
+		}
+
 		return (
 			<Fragment key={ id }>
 				<TaskList
