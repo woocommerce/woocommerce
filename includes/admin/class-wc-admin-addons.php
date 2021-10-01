@@ -33,7 +33,7 @@ class WC_Admin_Addons {
 			}
 
 			$raw_featured = wp_safe_remote_get(
-				'https://woocommerce.com/wp-json/wccom-extensions/1.0/featured',
+				'https://woocommerce.test/wp-json/wccom-extensions/1.0/featured',
 				array(
 					'headers'    => $headers,
 					'user-agent' => 'WooCommerce Addons Page',
@@ -302,6 +302,42 @@ class WC_Admin_Addons {
 			<?php endforeach; ?>
 		</div>
 
+		<?php
+	}
+
+	/**
+	 * Handles the outputting of a promoted card.
+	 *
+	 * @param object $block Block data.
+	 */
+	public static function output_promoted_card( $block ) {
+		?>
+		<ul class="products">
+			<?php
+			foreach ( $block->items as $card ) {
+				?>
+				<li class="product">
+					<div class="product-details promoted" style="border-top: 5px  solid <?php echo esc_html( $card->color ); ?>;">
+						<span class="label"><?php _e( 'Promoted', 'woocommerce' ); ?></span>
+						<h2><?php echo esc_html( $card->title ); ?></h2>
+						<p><?php echo wp_kses_post( $card->description ); ?></p>
+					</div>
+					<div class="product-footer-promoted">
+						<span class="icon"><img src="<?php echo esc_url( $card->icon ); ?>" /></span>
+						<?php
+						if ( 'yes' === $card->darken_text ) {
+							$button_classes = ' darken-text';
+						}
+						?>
+						<a class="addons-button addons-button-promoted <?php echo esc_attr( $button_classes ); ?>" style="background: <?php echo esc_html( $card->color ); ?>;" href="<?php echo esc_url( WC_Admin_Addons::add_in_app_purchase_url_params( $card->href ) ); ?>">
+							<?php echo esc_html( $card->button ); ?>
+						</a>
+					</div>
+				</li>
+				<?php
+			}
+			?>
+		</ul>
 		<?php
 	}
 
@@ -608,6 +644,9 @@ class WC_Admin_Addons {
 					break;
 				case 'column_block':
 					self::output_column_block( $section );
+					break;
+				case 'promoted_card':
+						self::output_promoted_card( $section );
 					break;
 				case 'small_light_block':
 					self::output_small_light_block( $section );
