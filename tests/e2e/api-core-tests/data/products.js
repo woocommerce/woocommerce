@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-const { getRequest, postRequest } = require('../utils/request');
+const { getRequest, postRequest, putRequest } = require('../utils/request');
 
 const getProducts = ( params = {} ) => getRequest( 'products', params );
 
@@ -21,6 +21,11 @@ const createProductAttributeTerms = ( parentId, termNames ) => postRequest(
 		create: termNames.map( name => ( { name } ) )
 	}
 );
+const createProductReview = ( productId, review ) => postRequest( 'products/reviews', {
+	product_id: productId,
+	...review,
+} );
+const updateProductReview = ( reviewId, data = {} ) => putRequest( `products/reviews/${ reviewId }`, data );
 const createProductTag = ( name ) => postRequest( 'products/tags', { name } );
 const createShippingClass = ( name ) => postRequest( 'products/shipping_classes', { name } );
 const createTaxClass = ( name ) => postRequest( 'taxes/classes', { name } );
@@ -1523,6 +1528,41 @@ const createSampleHierarchicalProducts = async () => {
 	}
 };
 
+const createSampleProductReviews = async ( simpleProducts ) => {
+	const cap = simpleProducts.find( p => p.name === 'Cap' );
+	const shirt = simpleProducts.find( p => p.name === 'T-Shirt' );
+	const sunglasses = simpleProducts.find( p => p.name === 'Sunglasses' );
+
+	let { body: review1 } = await createProductReview( cap.id, {
+		rating: 3,
+		review: 'Decent cap.',
+		reviewer: 'John Doe',
+		reviewer_email: 'john.doe@example.com',
+	} );
+	// We need to update the review in order for the product's
+	// average_rating to be recalculated.
+	// See: https://github.com/woocommerce/woocommerce/issues/29906.
+	await updateProductReview( review1.id );
+
+	let { body: review2 } = await createProductReview( shirt.id, {
+		rating: 5,
+		review: 'The BEST shirt ever!!',
+		reviewer: 'Shannon Smith',
+		reviewer_email: 'shannon.smith@example.com',
+	} );
+	await updateProductReview( review2.id );
+
+	let { body: review3 } = await createProductReview( sunglasses.id, {
+		rating: 1,
+		review: 'These are way too expensive.',
+		reviewer: 'Tim Frugalman',
+		reviewer_email: 'timmyfrufru@example.com',
+	} );
+	await updateProductReview( review3.id );
+
+	return [ review1.id, review2.id, review3.id ];
+};
+
 const createSampleProducts = async () => {
 	const categories = await createSampleCategories();
 	const attributes = await createSampleAttributes();
@@ -1536,6 +1576,8 @@ const createSampleProducts = async () => {
 	const variableProducts = await createSampleVariableProducts( categories, attributes );
 	const hierarchicalProducts = await createSampleHierarchicalProducts();
 
+	const reviewIds = await createSampleProductReviews( simpleProducts );
+
 	return {
 		categories,
 		attributes,
@@ -1547,6 +1589,7 @@ const createSampleProducts = async () => {
 		groupedProducts,
 		variableProducts,
 		hierarchicalProducts,
+		reviewIds,
 	};
 };
 
