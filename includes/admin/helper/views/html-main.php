@@ -226,7 +226,20 @@
 					<tr class="wp-list-table__row wp-list-table__ext-updates">
 						<td class="wp-list-table__ext-status <?php echo sanitize_html_class( $subscription_action['status'] ); ?>">
 							<p><span class="dashicons <?php echo sanitize_html_class( $subscription_action['icon'] ); ?>"></span>
-								<?php echo esc_html( $subscription_action['message'] ); ?>
+								<?php
+									echo wp_kses(
+										$subscription_action['message'],
+										array(
+											'a'      => array(
+												'href'  => array(),
+												'title' => array(),
+											),
+											'br'     => array(),
+											'em'     => array(),
+											'strong' => array(),
+										)
+									);
+								?>
 							</p>
 						</td>
 						<td class="wp-list-table__ext-actions">
