@@ -208,6 +208,7 @@ const Marketing: React.FC< MarketingProps > = ( { onComplete } ) => {
 					</CardHeader>
 					<PluginList
 						currentPlugin={ currentPlugin }
+						installAndActivate={ installAndActivate }
 						plugins={ installedExtensions }
 					/>
 				</Card>

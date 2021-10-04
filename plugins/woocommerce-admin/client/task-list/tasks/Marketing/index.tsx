@@ -190,6 +190,7 @@ export const Marketing: React.FC< MarketingProps > = ( {
 					</CardHeader>
 					<PluginList
 						currentPlugin={ currentPlugin }
+						installAndActivate={ installAndActivate }
 						plugins={ installedExtensions }
 					/>
 				</Card>
