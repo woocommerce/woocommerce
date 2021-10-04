@@ -33,7 +33,7 @@ class WC_REST_Telemetry_V2_Controller extends WC_REST_Controller {
 	protected $rest_base = 'telemetry';
 
 	/**
-	 * Register the route for /system_status
+	 * Register the route for /telemetry
 	 */
 	public function register_routes() {
 		register_rest_route(
