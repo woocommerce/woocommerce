@@ -10,37 +10,36 @@
 - Update: Enable Square in France. #7679
 - Enhancement: Add experiment for promoting WooCommerce Payments in payment methods table. #7666
 
-== 2.7.1 09/23/2021 ==
+== 2.7.1 10/01/2021 == 
 
-- Fix: Allow super admins all capabilities within WooCommerce Admin
-- Fix: Fix end date for last periods
-- Fix: Fix up onboarding profiler not working when opted out of tracking
-- Fix: Making Business Details sticky in onboarding wizard
+- Fix: Allow super admins all capabilities within WooCommerce Admin #7489
+- Fix: Fix end date for last periods #6584
+- Fix: Fix up onboarding profiler not working when opted out of tracking #7490
+- Fix: Making Business Details sticky in onboarding wizard #7426
 - Fix: Missing RTL for onboarding styles. #7531
-- Fix: No changelog necessary as it is in the component package. #7423
 - Fix: Skip scheduling action if Action Scheduler tables have not been set up #7521
 - Fix: Update country region typeahead for better autofill support. #7497
 - Fix: Use installable extensions for local state versus free extensions. #7585
-- Fix: Fix fatal error and unrelated results in analytics.
+- Fix: Fix fatal error and unrelated results in analytics. #7682
 - Fix: Harden the reports directory #7691
 - Fix: Update task-item logic to only display content when expanded is true. #7611
 - Add: Show Pinterest in installed marketing extensions (if installed) #7417
 - Add: Added MailchimpScheduler that runs daily to subscribe store_email in the profile data #7579
 - Add: Added shipping plugin recommendations to settings page (#7446).
-- Add: Adding endpoint to snooze onboarding task
-- Add: Adding undo snooze task endpoint
+- Add: Adding endpoint to snooze onboarding task #7539
+- Add: Adding undo snooze task endpoint #7560
 - Add: Add task dismissal endpoints #7538
 - Update: Add HK and SG countries to WC Pay intl support. #7558
 - Update: Create task list REST API endpoint #7512
 - Update: Deleted OnboardingEmailMarketing note class #7595
 - Update: Removes the use of the depreciated woocommerce_shared_settings hook. #7480
-- Update: Updating eway logo in payment suggestions defaults
+- Update: Updating eway logo in payment suggestions defaults #7562
 - Update: Update marketing task completion logic. #7586
 - Dev: Add email address field to OBW #7552
 - Tweak: Add navigation items for the Marketplace menu. #7529
 - Tweak: Change all analytics strings and labels to sentence case. #6501
 - Tweak: Delete unneeded double spaces in text strings. #7502
-- Tweak: Remove the preloaded onboarding options
+- Tweak: Remove the preloaded onboarding options #7338
 - Tweak: Update analytics card header text styles #6506
 - Enhancement: Align Table fields with the fallback on isNumeric. #7431
 
