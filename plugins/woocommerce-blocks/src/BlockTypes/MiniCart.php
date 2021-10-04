@@ -107,6 +107,12 @@ class MiniCart extends AbstractBlock {
 			true
 		);
 
+		$this->asset_data_registry->add(
+			'displayCartPricesIncludingTax',
+			'incl' === get_option( 'woocommerce_tax_display_cart' ),
+			true
+		);
+
 		do_action( 'woocommerce_blocks_cart_enqueue_data' );
 	}
 
@@ -192,6 +198,11 @@ class MiniCart extends AbstractBlock {
 		$cart                = $cart_controller->get_cart_instance();
 		$cart_contents_count = $cart->get_cart_contents_count();
 		$cart_contents       = $cart->get_cart();
+		$cart_contents_total = $cart->get_subtotal();
+
+		if ( $cart->display_prices_including_tax() ) {
+			$cart_contents_total += $cart->get_subtotal_tax();
+		}
 
 		$button_text = sprintf(
 			/* translators: %d is the number of products in the cart. */
@@ -202,6 +213,17 @@ class MiniCart extends AbstractBlock {
 				'woo-gutenberg-products-block'
 			),
 			$cart_contents_count
+		);
+		$aria_label = sprintf(
+			/* translators: %1$d is the number of products in the cart. %2$s is the cart total */
+			_n(
+				'%1$d item in cart, total price of %2$s',
+				'%1$d items in cart, total price of %2$s',
+				$cart_contents_count,
+				'woo-gutenberg-products-block'
+			),
+			$cart_contents_count,
+			wp_strip_all_tags( wc_price( $cart_contents_total ) )
 		);
 		$title = sprintf(
 			/* translators: %d is the count of items in the cart. */
@@ -216,12 +238,12 @@ class MiniCart extends AbstractBlock {
 
 		if ( is_cart() || is_checkout() ) {
 			return '<div class="wc-block-mini-cart">
-				<button class="wc-block-mini-cart__button" disabled>' . $button_text . '</button>
+				<button class="wc-block-mini-cart__button" aria-label="' . $aria_label . '" disabled>' . $button_text . '</button>
 			</div>';
 		}
 
 		return '<div class="wc-block-mini-cart">
-			<button class="wc-block-mini-cart__button">' . $button_text . '</button>
+			<button class="wc-block-mini-cart__button" aria-label="' . $aria_label . '">' . $button_text . '</button>
 			<div class="wc-block-mini-cart__drawer is-loading is-mobile wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--is-hidden" aria-hidden="true">
 				<div class="components-modal__frame wc-block-components-drawer">
 					<div class="components-modal__content">
