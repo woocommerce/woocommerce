@@ -319,7 +319,7 @@ class WC_Admin_Addons {
 					$classes = ' addons-full-width';
 				}
 				?>
-				<li class="product<?php esc_attr_e( $classes ); ?>">
+				<li class="product<?php echo esc_attr( $classes ); ?>">
 					<div class="product-details promoted" style="border-top: 5px  solid <?php echo esc_html( $card->primary_color ); ?>;">
 						<span class="label"><?php esc_attr_e( 'Promoted', 'woocommerce' ); ?></span>
 						<h2><?php echo esc_html( $card->title ); ?></h2>
