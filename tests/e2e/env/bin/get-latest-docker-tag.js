@@ -141,6 +141,6 @@ function getLatestMinusVersion( latestVersion, minusVersion ) {
 
 	const baseVersion = latestVersion.replace( /.[^\.]$/, '' );
 
-	// Calculate the version we need, add a patch version back in, and return.
-	return String( baseVersion - minusAmount ).concat( '.0' );
+	// Calculate the version we need and return.
+	return String( baseVersion - minusAmount );
 }
