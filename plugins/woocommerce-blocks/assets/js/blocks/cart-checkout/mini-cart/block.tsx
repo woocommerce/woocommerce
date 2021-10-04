@@ -9,6 +9,11 @@ import { translateJQueryEventToNative } from '@woocommerce/base-utils';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 import Drawer from '@woocommerce/base-components/drawer';
 import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
+import {
+	formatPrice,
+	getCurrencyFromPriceResponse,
+} from '@woocommerce/price-format';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -23,7 +28,12 @@ interface MiniCartBlockProps {
 const MiniCartBlock = ( {
 	isPlaceholderOpen = false,
 }: MiniCartBlockProps ): JSX.Element => {
-	const { cartItems, cartItemsCount, cartIsLoading } = useStoreCart();
+	const {
+		cartItems,
+		cartItemsCount,
+		cartIsLoading,
+		cartTotals,
+	} = useStoreCart();
 	const [ isOpen, setIsOpen ] = useState< boolean >( isPlaceholderOpen );
 	const emptyCartRef = useRef< HTMLDivElement | null >( null );
 	// We already rendered the HTML drawer placeholder, so we want to skip the
@@ -73,6 +83,23 @@ const MiniCartBlock = ( {
 		}
 	}, [ isOpen, cartIsLoading, cartItems.length, emptyCartRef ] );
 
+	const subTotal = getSetting( 'displayCartPricesIncludingTax', false )
+		? parseInt( cartTotals.total_items, 10 ) +
+		  parseInt( cartTotals.total_items_tax, 10 )
+		: cartTotals.total_items;
+
+	const ariaLabel = sprintf(
+		/* translators: %1$d is the number of products in the cart. %2$s is the cart total */
+		_n(
+			'%1$d item in cart, total price of %2$s',
+			'%1$d items in cart, total price of %2$s',
+			cartItemsCount,
+			'woo-gutenberg-products-block'
+		),
+		cartItemsCount,
+		formatPrice( subTotal, getCurrencyFromPriceResponse( cartTotals ) )
+	);
+
 	const contents =
 		! cartIsLoading && cartItems.length === 0 ? (
 			<div
@@ -99,6 +126,7 @@ const MiniCartBlock = ( {
 						setSkipSlideIn( false );
 					}
 				} }
+				aria-label={ ariaLabel }
 			>
 				{ sprintf(
 					/* translators: %d is the count of items in the cart. */

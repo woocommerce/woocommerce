@@ -120,7 +120,7 @@ export const getCurrency = (
 export const formatPrice = (
 	// Price in minor unit, e.g. cents.
 	price: number | string,
-	currencyData: Currency
+	currencyData?: Currency
 ): string => {
 	if ( price === '' || price === undefined ) {
 		return '';
