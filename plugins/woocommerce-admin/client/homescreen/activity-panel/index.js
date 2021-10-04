@@ -11,7 +11,7 @@ import {
 	__experimentalText as Text,
 } from '@wordpress/components';
 import { getSetting } from '@woocommerce/wc-admin-settings';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { ONBOARDING_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { useEffect } from '@wordpress/element';
 import { snakeCase } from 'lodash';
@@ -39,14 +39,16 @@ export const ActivityPanel = () => {
 		const countLowStockProducts = getLowStockCount( select );
 		const countUnapprovedReviews = getUnapprovedReviews( select );
 		const publishedProductCount = getSetting( 'publishedProductCount', 0 );
-		const { getOption } = select( OPTIONS_STORE_NAME );
-		const isTaskListHidden = getOption( 'woocommerce_task_list_hidden' );
+		const taskLists = select( ONBOARDING_STORE_NAME ).getTaskLists();
+
 		return {
 			countLowStockProducts,
 			countUnapprovedReviews,
 			countUnreadOrders,
-			isTaskListHidden,
 			manageStock,
+			isTaskListHidden: Boolean( taskLists.length )
+				? ! taskLists.find( ( list ) => list.id === 'setup' ).isVisible
+				: null,
 			publishedProductCount,
 			reviewsEnabled,
 			totalOrderCount,
@@ -64,7 +66,7 @@ export const ActivityPanel = () => {
 					acc[ panelId ] = true;
 					return acc;
 				},
-				{ task_list: panelsData.isTaskListHidden !== 'yes' }
+				{ task_list: ! panelsData.isTaskListHidden }
 			);
 			recordEvent( 'activity_panel_visible_panels', visiblePanels );
 		}

@@ -275,7 +275,7 @@ const onboarding = (
 					if ( taskListId === list.id ) {
 						return {
 							...list,
-							isHidden: false,
+							isVisible: true,
 						};
 					}
 					return list;
@@ -292,7 +292,7 @@ const onboarding = (
 					if ( taskListId === list.id ) {
 						return {
 							...list,
-							isHidden: true,
+							isVisible: false,
 						};
 					}
 					return list;

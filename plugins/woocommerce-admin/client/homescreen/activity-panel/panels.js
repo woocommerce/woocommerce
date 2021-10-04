@@ -14,14 +14,14 @@ export function getAllPanels( {
 	countLowStockProducts,
 	countUnapprovedReviews,
 	countUnreadOrders,
-	isTaskListHidden,
 	manageStock,
+	isTaskListHidden,
 	orderStatuses,
 	publishedProductCount,
 	reviewsEnabled,
 	totalOrderCount,
 } ) {
-	if ( isTaskListHidden !== 'yes' ) {
+	if ( ! isTaskListHidden ) {
 		return [];
 	}
 

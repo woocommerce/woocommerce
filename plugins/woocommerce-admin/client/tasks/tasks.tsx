@@ -110,13 +110,13 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 		const {
 			id,
 			isComplete,
-			isHidden,
+			isVisible,
 			isToggleable,
 			title,
 			tasks,
 		} = taskList;
 
-		if ( isHidden ) {
+		if ( ! isVisible ) {
 			return null;
 		}
 

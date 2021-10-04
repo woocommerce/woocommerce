@@ -57,7 +57,7 @@ describe( 'ActivityPanel', () => {
 			publishedProductCount: 0,
 			manageStock: 'yes',
 			reviewsEnabled: 'yes',
-			isTaskListHidden: 'no',
+			isTaskListHidden: false,
 		} );
 
 		expect( panels ).toEqual(

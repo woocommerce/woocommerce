@@ -56,7 +56,7 @@ class Task {
 	 *
 	 * @var bool
 	 */
-	protected $is_complete = false;
+	public $is_complete = false;
 
 	/**
 	 * Viewing capability.

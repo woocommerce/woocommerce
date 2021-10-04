@@ -948,25 +948,6 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		$update = $task_list->hide();
 		$json   = $task_list->get_json();
 
-		if ( $update ) {
-			$completed_task_count = array_reduce(
-				$json['tasks'],
-				function( $total, $task ) {
-					return $task['isComplete'] ? $total + 1 : $total;
-				},
-				0
-			);
-
-			wc_admin_record_tracks_event(
-				$id . '_completed',
-				array(
-					'action'                => 'remove_card',
-					'completed_task_count'  => $completed_task_count,
-					'incomplete_task_count' => count( $json['tasks'] ) - $completed_task_count,
-				)
-			);
-		}
-
 		return rest_ensure_response( $json );
 	}
 
