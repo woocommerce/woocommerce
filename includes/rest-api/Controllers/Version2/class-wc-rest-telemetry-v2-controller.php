@@ -52,14 +52,14 @@ class WC_REST_Telemetry_V2_Controller extends WC_REST_Controller {
 	}
 
 	/**
-	 * Check whether a given request has permission to view system status.
+	 * Check whether a given request has permission to post telemetry data
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
 	public function telemetry_permissions_check( $request ) {
-		if ( ! wc_rest_check_manager_permissions( 'system_status', 'read' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		if ( ! is_user_logged_in() ) {
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you post telemetry data.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 		return true;
 	}
