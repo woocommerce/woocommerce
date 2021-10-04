@@ -63,4 +63,5 @@ if ( ! defined( 'ABSPATH' ) ) {
 		do_action( 'woocommerce_product_options_shipping' );
 		?>
 	</div>
+	<?php do_action( 'woocommerce_product_options_shipping_product_data' ); ?>
 </div>
