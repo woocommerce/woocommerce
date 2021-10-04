@@ -586,7 +586,10 @@
 		width: auto;
 		padding: 0 20px;
 		margin-top: 0;
-		color: #fff;
+	}
+
+	.addons-button-promoted:hover {
+		opacity: 0.8;
 	}
 
 	.addons-button-expandable {
