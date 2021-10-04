@@ -583,12 +583,10 @@
 
 	.addons-button-promoted {
 		float: right;
+		width: auto;
+		padding: 0 20px;
 		margin-top: 0;
 		color: #fff;
-
-		&.darken-text {
-			color: #3c434a;
-		}
 	}
 
 	.addons-button-expandable {
@@ -696,6 +694,10 @@
 			padding: 0;
 			vertical-align: top;
 
+			&.addons-full-width {
+				max-width: 100%;
+			}
+
 			@media only screen and ( max-width: 768px ) {
 				max-width: none;
 				width: 100%;
@@ -748,9 +750,6 @@
 						right: 24px;
 						top: 28px;
 						text-align: center;
-
-						/* Gray / Gray 5 */
-
 						background: #DCDCDE;
 						border-radius: 2px;
 					}
@@ -788,7 +787,7 @@
 				padding: 24px;
 
 				.icon img {
-					height: 32px;
+					width: 82px;
 				}
 			}
 		}

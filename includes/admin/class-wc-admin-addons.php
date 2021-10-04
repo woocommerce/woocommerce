@@ -315,21 +315,19 @@ class WC_Admin_Addons {
 		<ul class="products">
 			<?php
 			foreach ( $block->items as $card ) {
+				if ( true === $card->full_width ) {
+					$classes = ' addons-full-width';
+				}
 				?>
-				<li class="product">
-					<div class="product-details promoted" style="border-top: 5px  solid <?php echo esc_html( $card->color ); ?>;">
+				<li class="product<?php echo esc_attr( $classes ); ?>">
+					<div class="product-details promoted" style="border-top: 5px  solid <?php echo esc_html( $card->primary_color ); ?>;">
 						<span class="label"><?php _e( 'Promoted', 'woocommerce' ); ?></span>
 						<h2><?php echo esc_html( $card->title ); ?></h2>
 						<p><?php echo wp_kses_post( $card->description ); ?></p>
 					</div>
 					<div class="product-footer-promoted">
 						<span class="icon"><img src="<?php echo esc_url( $card->icon ); ?>" /></span>
-						<?php
-						if ( 'yes' === $card->darken_text ) {
-							$button_classes = ' darken-text';
-						}
-						?>
-						<a class="addons-button addons-button-promoted <?php echo esc_attr( $button_classes ); ?>" style="background: <?php echo esc_html( $card->color ); ?>;" href="<?php echo esc_url( WC_Admin_Addons::add_in_app_purchase_url_params( $card->href ) ); ?>">
+						<a class="addons-button addons-button-promoted" style="background: <?php echo esc_html( $card->primary_color ); ?>; color: <?php echo esc_html( $card->text_color ); ?>;" href="<?php echo esc_url( WC_Admin_Addons::add_in_app_purchase_url_params( $card->href ) ); ?>">
 							<?php echo esc_html( $card->button ); ?>
 						</a>
 					</div>
