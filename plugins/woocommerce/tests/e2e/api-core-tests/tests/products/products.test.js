@@ -569,31 +569,35 @@ const { productsApi } = require('../../endpoints/products');
 				} );
 			} );
 
-			// This case will remain skipped until orderby slug is fixed.
-			// See: https://github.com/woocommerce/woocommerce/issues/30354#issuecomment-925955099.
-			it.skip( 'slug', async () => {
+			it( 'slug', async () => {
+				const productNamesBySlugAsc = [
+					'Polo', // The Polo isn't published so it has an empty slug.
+					...productNamesAsc.filter( p => p !== 'Polo' ),
+				];
+				const productNamesBySlugDesc = [ ...productNamesBySlugAsc ].reverse();
+
 				const result1 = await productsApi.listAll.products( {
 					order: 'asc',
 					orderby: 'slug',
-					per_page: productNamesAsc.length,
+					per_page: productNamesBySlugAsc.length,
 				} );
 				expect( result1.statusCode ).toEqual( 200 );
 
 				// Verify all results are in ascending order.
 				result1.body.forEach( ( { name }, idx ) => {
-					expect( name ).toBe( productNamesAsc[ idx ] );
+					expect( name ).toBe( productNamesBySlugAsc[ idx ] );
 				} );
 
 				const result2 = await productsApi.listAll.products( {
 					order: 'desc',
 					orderby: 'slug',
-					per_page: productNamesDesc.length,
+					per_page: productNamesBySlugDesc.length,
 				} );
 				expect( result2.statusCode ).toEqual( 200 );
 
 				// Verify all results are in descending order.
 				result2.body.forEach( ( { name }, idx ) => {
-					expect( name ).toBe( productNamesDesc[ idx ] );
+					expect( name ).toBe( productNamesBySlugDesc[ idx ] );
 				} );
 			} );
 
@@ -676,7 +680,7 @@ const { productsApi } = require('../../endpoints/products');
 
 			// This case will remain skipped until orderby include is fixed.
 			// See: https://github.com/woocommerce/woocommerce/issues/30354#issuecomment-925955099.
-			it.skip( 'include', async () => {
+			it( 'include', async () => {
 				const includeIds = [
 					sampleData.groupedProducts[ 0 ].id,
 					sampleData.simpleProducts[ 3 ].id,
