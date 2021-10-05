@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { createElement } from '@wordpress/element';
 import { render } from '@testing-library/react';
 import { useSelect } from '@wordpress/data';
 import userEvent from '@testing-library/user-event';
@@ -84,11 +83,14 @@ const freeExtensions = [
 	},
 ];
 
+const profileItems = { product_types: [] };
+
 describe( 'Selective extensions bundle', () => {
 	it( 'should list installable free extensions in footer only basics', () => {
 		useSelect.mockReturnValue( {
 			freeExtensions,
 			isResolving: false,
+			profileItems,
 		} );
 		const { getByText, queryByText } = render(
 			<SelectiveExtensionsBundle isInstallingActivating={ false } />
@@ -113,6 +115,7 @@ describe( 'Selective extensions bundle', () => {
 		useSelect.mockReturnValue( {
 			freeExtensions,
 			isResolving: false,
+			profileItems,
 		} );
 		const { getAllByRole, getByText, queryByText } = render(
 			<SelectiveExtensionsBundle isInstallingActivating={ false } />

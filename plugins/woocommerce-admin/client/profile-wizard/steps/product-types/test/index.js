@@ -32,6 +32,7 @@ describe( 'ProductTypes', () => {
 
 	afterEach( () => {
 		setSetting( 'onboarding', {} );
+		window.wcAdminFeatures.subscriptions = false;
 	} );
 
 	test( 'should render product types', () => {
@@ -85,5 +86,28 @@ describe( 'ProductTypes', () => {
 			expect( mockUpdateProfileItems ).toHaveBeenCalled();
 			expect( mockGoToNextStep ).toHaveBeenCalled();
 		} );
+	} );
+	test( 'should show a warning message at the bottom of the step', () => {
+		setSetting( 'onboarding', {
+			productTypes: {
+				subscriptions: {
+					label: 'Subscriptions',
+				},
+			},
+		} );
+		window.wcAdminFeatures.subscriptions = true;
+
+		render( <ProductTypes /> );
+
+		const subscription = screen.getByText( 'Subscriptions', {
+			selector: 'label',
+		} );
+		userEvent.click( subscription );
+
+		expect(
+			screen.queryByText(
+				'The following extensions will be added to your site for free: WooCommerce Payments. An account is required to use this feature.'
+			)
+		).toBeInTheDocument();
 	} );
 } );

@@ -4,9 +4,13 @@
 import { __ } from '@wordpress/i18n';
 import { Button, Modal, RadioControl } from '@wordpress/components';
 import { useState } from '@wordpress/element';
-import { useDispatch } from '@wordpress/data';
-import { applyFilters } from '@wordpress/hooks';
-import { ITEMS_STORE_NAME } from '@woocommerce/data';
+import { useDispatch, useSelect } from '@wordpress/data';
+import { addFilter, applyFilters } from '@wordpress/hooks';
+import {
+	ITEMS_STORE_NAME,
+	ONBOARDING_STORE_NAME,
+	PLUGINS_STORE_NAME,
+} from '@woocommerce/data';
 import { getAdminLink } from '@woocommerce/wc-admin-settings';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -44,18 +48,46 @@ const PRODUCT_TEMPLATES = [
 			'woocommerce-admin'
 		),
 	},
+	{
+		key: 'subscription',
+		title: __( 'Subscription product', 'woocommerce-admin' ),
+		subtitle: __(
+			'Products that customers receive or gain access to regularly by paying in advance',
+			'woocommerce-admin'
+		),
+	},
 ];
 
 export default function ProductTemplateModal( { onClose } ) {
 	const [ selectedTemplate, setSelectedTemplate ] = useState( null );
 	const [ isRedirecting, setIsRedirecting ] = useState( false );
 	const { createProductFromTemplate } = useDispatch( ITEMS_STORE_NAME );
+	const { profileItems } = useSelect( ( select ) => {
+		const { getProfileItems } = select( ONBOARDING_STORE_NAME );
+
+		return {
+			profileItems: getProfileItems(),
+		};
+	} );
+	const { installedPlugins } = useSelect( ( select ) => {
+		const { getInstalledPlugins } = select( PLUGINS_STORE_NAME );
+
+		return {
+			installedPlugins: getInstalledPlugins(),
+		};
+	} );
 
 	const createTemplate = () => {
 		setIsRedirecting( true );
 		recordEvent( 'tasklist_product_template_selection', {
 			product_type: selectedTemplate,
 		} );
+		if ( selectedTemplate === 'subscription' ) {
+			window.location = getAdminLink(
+				'post-new.php?post_type=product&subscription_pointers=true'
+			);
+			return;
+		}
 		if ( selectedTemplate ) {
 			createProductFromTemplate(
 				{
@@ -83,6 +115,22 @@ export default function ProductTemplateModal( { onClose } ) {
 			onClose();
 		}
 	};
+
+	if (
+		( window.wcAdminFeatures && ! window.wcAdminFeatures.subscriptions ) ||
+		! profileItems.product_types.includes( 'subscriptions' ) ||
+		! installedPlugins.includes( 'woocommerce-payments' )
+	) {
+		addFilter(
+			ONBOARDING_PRODUCT_TEMPLATES_FILTER,
+			'woocommerce-admin',
+			( productTemplates ) => {
+				return productTemplates.filter(
+					( template ) => template.key !== 'subscription'
+				);
+			}
+		);
+	}
 
 	const templates = applyFilters(
 		ONBOARDING_PRODUCT_TEMPLATES_FILTER,

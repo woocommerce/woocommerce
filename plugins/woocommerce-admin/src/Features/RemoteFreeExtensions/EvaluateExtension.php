@@ -31,7 +31,9 @@ class EvaluateExtension {
 		}
 
 		$installed_plugins       = PluginsHelper::get_installed_plugin_slugs();
+		$activated_plugins       = PluginsHelper::get_active_plugin_slugs();
 		$extension->is_installed = in_array( explode( ':', $extension->key )[0], $installed_plugins, true );
+		$extension->is_activated = in_array( explode( ':', $extension->key )[0], $activated_plugins, true );
 
 		return $extension;
 	}

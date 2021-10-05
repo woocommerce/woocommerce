@@ -353,7 +353,7 @@ export const TaskList = ( {
 										? () => dismissTask( task )
 										: undefined
 								}
-								remindMeLater={
+								onSnooze={
 									task.allowRemindMeLater
 										? () => remindTaskLater( task )
 										: undefined

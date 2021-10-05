@@ -178,22 +178,41 @@ export const SelectiveExtensionsBundle = ( {
 	const [ showExtensions, setShowExtensions ] = useState( false );
 	const [ values, setValues ] = useState( baseValues );
 
-	const { freeExtensions, isResolving } = useSelect( ( select ) => {
-		const { getFreeExtensions, hasFinishedResolution } = select(
-			ONBOARDING_STORE_NAME
-		);
+	const { freeExtensions, isResolving, profileItems } = useSelect(
+		( select ) => {
+			const {
+				getFreeExtensions,
+				getProfileItems,
+				hasFinishedResolution,
+			} = select( ONBOARDING_STORE_NAME );
 
-		return {
-			freeExtensions: getFreeExtensions(),
-			isResolving: ! hasFinishedResolution( 'getFreeExtensions' ),
-		};
-	} );
+			return {
+				freeExtensions: getFreeExtensions(),
+				isResolving: ! hasFinishedResolution( 'getFreeExtensions' ),
+				profileItems: getProfileItems(),
+			};
+		}
+	);
 
 	const installableExtensions = useMemo( () => {
+		const { product_types: productTypes } = profileItems;
 		return freeExtensions.filter( ( list ) => {
+			if (
+				window.wcAdminFeatures &&
+				window.wcAdminFeatures.subscriptions
+			) {
+				if ( productTypes.includes( 'subscriptions' ) ) {
+					list.plugins = list.plugins.filter(
+						( extension ) =>
+							extension.key !== 'woocommerce-payments' ||
+							( extension.key === 'woocommerce-payments' &&
+								! extension.is_activated )
+					);
+				}
+			}
 			return ALLOWED_PLUGIN_LISTS.includes( list.key );
 		} );
-	}, [ freeExtensions ] );
+	}, [ freeExtensions, profileItems ] );
 
 	useEffect( () => {
 		const initialValues = createInitialValues( installableExtensions );

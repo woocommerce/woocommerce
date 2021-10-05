@@ -15,6 +15,7 @@
 		"remote-free-extensions": true,
 		"settings": false,
 		"shipping-label-banner": true,
+		"subscriptions": true,
 		"store-alerts": true,
 		"tasks": true,
 		"transient-notices": true,

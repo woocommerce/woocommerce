@@ -433,37 +433,38 @@ class Onboarding {
 	 * @return array
 	 */
 	public static function get_allowed_product_types() {
-		$product_types = self::append_product_data(
-			array(
-				'physical'        => array(
-					'label'   => __( 'Physical products', 'woocommerce-admin' ),
-					'default' => true,
-				),
-				'downloads'       => array(
-					'label' => __( 'Downloads', 'woocommerce-admin' ),
-				),
-				'subscriptions'   => array(
-					'label'   => __( 'Subscriptions', 'woocommerce-admin' ),
-					'product' => 27147,
-				),
-				'memberships'     => array(
-					'label'   => __( 'Memberships', 'woocommerce-admin' ),
-					'product' => 958589,
-				),
-				'bookings'        => array(
-					'label'   => __( 'Bookings', 'woocommerce-admin' ),
-					'product' => 390890,
-				),
-				'product-bundles' => array(
-					'label'   => __( 'Bundles', 'woocommerce-admin' ),
-					'product' => 18716,
-				),
-				'product-add-ons' => array(
-					'label'   => __( 'Customizable products', 'woocommerce-admin' ),
-					'product' => 18618,
-				),
-			)
+		$products = array(
+			'physical'        => array(
+				'label'   => __( 'Physical products', 'woocommerce-admin' ),
+				'default' => true,
+			),
+			'downloads'       => array(
+				'label' => __( 'Downloads', 'woocommerce-admin' ),
+			),
+			'subscriptions'   => array(
+				'label' => __( 'Subscriptions', 'woocommerce-admin' ),
+			),
+			'memberships'     => array(
+				'label'   => __( 'Memberships', 'woocommerce-admin' ),
+				'product' => 958589,
+			),
+			'bookings'        => array(
+				'label'   => __( 'Bookings', 'woocommerce-admin' ),
+				'product' => 390890,
+			),
+			'product-bundles' => array(
+				'label'   => __( 'Bundles', 'woocommerce-admin' ),
+				'product' => 18716,
+			),
+			'product-add-ons' => array(
+				'label'   => __( 'Customizable products', 'woocommerce-admin' ),
+				'product' => 18618,
+			),
 		);
+		if ( ! Features::is_enabled( 'subscriptions' ) ) {
+			$products['subscriptions']['product'] = 27147;
+		}
+		$product_types = self::append_product_data( $products );
 
 		return apply_filters( 'woocommerce_admin_onboarding_product_types', $product_types );
 	}

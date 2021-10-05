@@ -12,6 +12,8 @@ import {
 	archive,
 	download,
 } from '@wordpress/icons';
+import { ONBOARDING_STORE_NAME, PLUGINS_STORE_NAME } from '@woocommerce/data';
+import { useSelect } from '@wordpress/data';
 import { List, Pill } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/wc-admin-settings';
 import { recordEvent } from '@woocommerce/tracks';
@@ -92,6 +94,35 @@ const subTasks = [
 
 const Products = () => {
 	const [ selectTemplate, setSelectTemplate ] = useState( null );
+	const { profileItems } = useSelect( ( select ) => {
+		const { getProfileItems } = select( ONBOARDING_STORE_NAME );
+
+		return {
+			profileItems: getProfileItems(),
+		};
+	} );
+	const { installedPlugins } = useSelect( ( select ) => {
+		const { getInstalledPlugins } = select( PLUGINS_STORE_NAME );
+
+		return {
+			installedPlugins: getInstalledPlugins(),
+		};
+	} );
+
+	if (
+		window.wcAdminFeatures &&
+		window.wcAdminFeatures.subscriptions &&
+		profileItems.product_types.includes( 'subscriptions' ) &&
+		installedPlugins.includes( 'woocommerce-payments' )
+	) {
+		const task = subTasks.find(
+			( { key } ) => key === 'addProductTemplate'
+		);
+		task.content = __(
+			'Use a template to add physical, digital, variable, and subscription products',
+			'woocommerce-admin'
+		);
+	}
 
 	const onTaskClick = ( task ) => {
 		task.onClick();
