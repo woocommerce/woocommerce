@@ -753,9 +753,10 @@
 	}
 
 	.storefront {
+		max-width: 992px;
 		background: url(../images/storefront-bg.jpg) bottom right #f6f6f6;
 		border: 1px solid #ddd;
-		margin-top: 1em;
+		margin: 1em auto;
 		padding: 20px;
 		overflow: hidden;
 		zoom: 1;
