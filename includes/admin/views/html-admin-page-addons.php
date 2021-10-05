@@ -150,10 +150,10 @@ function wccom_get_star_class( $rating, $index ) {
 						?>
 						<li class="product">
 							<div class="product-details">
-								<?php if ( ! empty( $addon->image ) || ! empty( $addon->icon ) ) : ?>
+								<?php if ( ! empty( $addon->icon ) ) : ?>
 									<span class="product-img-wrap">
-										<?php /* Show an icon if it exists, and an image otherwise */ ?>
-										<img src="<?php echo esc_url( empty( $addon->icon ) ? $addon->image : $addon->icon ); ?>" />
+										<?php /* Show an icon if it exists */ ?>
+										<img src="<?php echo esc_url( $addon->icon ); ?>" />
 									</span>
 								<?php endif; ?>
 								<a href="<?php echo esc_url( WC_Admin_Addons::add_in_app_purchase_url_params( $addon->link ) ); ?>">
@@ -166,7 +166,7 @@ function wccom_get_star_class( $rating, $index ) {
 												/* translators: %s vendor link */
 												esc_html__( 'Developed by %s', 'woocommerce' ),
 												sprintf(
-													'<a class="product-vendor-link" href="%1$s">%2$s</a>',
+													'<a class="product-vendor-link" href="%1$s" target="_blank">%2$s</a>',
 													esc_url_raw( $addon->vendor_url ),
 													wp_kses_post( $addon->vendor_name )
 												)
