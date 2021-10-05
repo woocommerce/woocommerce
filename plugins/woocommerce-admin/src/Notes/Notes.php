@@ -160,26 +160,27 @@ class Notes {
 	/**
 	 * Soft delete of all the admin notes. Returns the deleted items.
 	 *
+	 * @param array $args Arguments to pass to the query (ex: status).
 	 * @return array Array of notes.
 	 */
-	public static function delete_all_notes() {
+	public static function delete_all_notes( $args = array() ) {
 		$data_store = self::load_data_store();
-		// Here we filter for the same params we are using to show the note list in client side.
-		$raw_notes = $data_store->get_notes(
-			array(
-				'order'      => 'desc',
-				'orderby'    => 'date_created',
-				'per_page'   => 25,
-				'page'       => 1,
-				'type'       => array(
-					Note::E_WC_ADMIN_NOTE_INFORMATIONAL,
-					Note::E_WC_ADMIN_NOTE_MARKETING,
-					Note::E_WC_ADMIN_NOTE_WARNING,
-					Note::E_WC_ADMIN_NOTE_SURVEY,
-				),
-				'is_deleted' => 0,
-			)
+		$defaults   = array(
+			'order'      => 'desc',
+			'orderby'    => 'date_created',
+			'per_page'   => 25,
+			'page'       => 1,
+			'type'       => array(
+				Note::E_WC_ADMIN_NOTE_INFORMATIONAL,
+				Note::E_WC_ADMIN_NOTE_MARKETING,
+				Note::E_WC_ADMIN_NOTE_WARNING,
+				Note::E_WC_ADMIN_NOTE_SURVEY,
+			),
+			'is_deleted' => 0,
 		);
+		$args       = wp_parse_args( $args, $defaults );
+		// Here we filter for the same params we are using to show the note list in client side.
+		$raw_notes = $data_store->get_notes( $args );
 
 		$notes = array();
 		foreach ( (array) $raw_notes as $raw_note ) {

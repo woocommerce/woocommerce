@@ -1,0 +1,4 @@
+Significance: patch
+Type: Fix
+
+Add status param to notes/delete/all REST endpoint, to correctly delete all notes. #7743

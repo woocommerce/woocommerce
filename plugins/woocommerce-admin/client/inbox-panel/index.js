@@ -192,7 +192,9 @@ const InboxPanel = () => {
 			try {
 				let notesRemoved = [];
 				if ( removeAll ) {
-					notesRemoved = await removeAllNotes();
+					notesRemoved = await removeAllNotes( {
+						status: INBOX_QUERY.status,
+					} );
 				} else {
 					const noteRemoved = await removeNote( noteId );
 					notesRemoved = [ noteRemoved ];

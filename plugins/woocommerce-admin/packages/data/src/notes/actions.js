@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { apiFetch } from '@wordpress/data-controls';
+import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -42,11 +43,14 @@ export function* removeNote( noteId ) {
 	}
 }
 
-export function* removeAllNotes() {
+export function* removeAllNotes( query = {} ) {
 	yield setIsRequesting( 'removeAllNotes', true );
 
 	try {
-		const url = `${ NAMESPACE }/admin/notes/delete/all`;
+		const url = addQueryArgs(
+			`${ NAMESPACE }/admin/notes/delete/all`,
+			query
+		);
 		const notes = yield apiFetch( { path: url, method: 'DELETE' } );
 		yield setNotes( notes );
 		yield setIsRequesting( 'removeAllNotes', false );

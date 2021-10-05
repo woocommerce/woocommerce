@@ -492,6 +492,26 @@ class WC_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test deleting all the notes with a specific status.
+	 */
+	public function test_delete_all_notes_with_status() {
+		wp_set_current_user( $this->user );
+
+		// It deletes only unactioned notes.
+		$request = new WP_REST_Request( 'DELETE', $this->endpoint . '/delete/all' );
+		$request->set_query_params(
+			array(
+				'status' => 'unactioned',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$notes    = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 2, count( $notes ) );
+	}
+
+	/**
 	 * Test deleting all the notes without permission. It should fail.
 	 */
 	public function test_delete_all_notes_without_permission() {

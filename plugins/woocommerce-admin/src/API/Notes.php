@@ -96,6 +96,18 @@ class Notes extends \WC_REST_CRUD_Controller {
 					'methods'             => \WP_REST_Server::DELETABLE,
 					'callback'            => array( $this, 'delete_all_items' ),
 					'permission_callback' => array( $this, 'update_items_permissions_check' ),
+					'args'                => array(
+						'status' => array(
+							'description'       => __( 'Status of note.', 'woocommerce-admin' ),
+							'type'              => 'array',
+							'sanitize_callback' => 'wp_parse_slug_list',
+							'validate_callback' => 'rest_validate_request_arg',
+							'items'             => array(
+								'enum' => Note::get_allowed_statuses(),
+								'type' => 'string',
+							),
+						),
+					),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
 			)
@@ -291,7 +303,11 @@ class Notes extends \WC_REST_CRUD_Controller {
 	 * @return WP_REST_Request|WP_Error
 	 */
 	public function delete_all_items( $request ) {
-		$notes = NotesRepository::delete_all_notes();
+		$args = array();
+		if ( isset( $request['status'] ) ) {
+			$args['status'] = $request['status'];
+		}
+		$notes = NotesRepository::delete_all_notes( $args );
 		$data  = array();
 		foreach ( (array) $notes as $note_obj ) {
 			$data[] = $this->prepare_note_data_for_response( $note_obj, $request );
