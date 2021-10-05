@@ -115,6 +115,13 @@ class Task {
 	const SNOOZED_OPTION = 'woocommerce_task_list_remind_me_later_tasks';
 
 	/**
+	 * Name of the actioned option.
+	 *
+	 * @var string
+	 */
+	const ACTIONED_OPTION = 'woocommerce_task_list_tracked_completed_actions';
+
+	/**
 	 * Duration to milisecond mapping.
 	 *
 	 * @var string
@@ -297,12 +304,41 @@ class Task {
 			'canView'        => $this->can_view,
 			'time'           => $this->time,
 			'level'          => $this->level,
+			'isActioned'     => $this->is_actioned(),
 			'isDismissed'    => $this->is_dismissed(),
 			'isDismissable'  => $this->is_dismissable,
 			'isSnoozed'      => $this->is_snoozed(),
 			'isSnoozeable'   => $this->is_snoozeable,
 			'snoozedUntil'   => $this->snoozed_until,
 		);
+	}
+
+	/**
+	 * Mark a task as actioned.  Used to verify an action has taken place in some tasks.
+	 *
+	 * @return bool
+	 */
+	public function mark_actioned() {
+		$actioned = get_option( self::ACTIONED_OPTION, array() );
+
+		$actioned[] = $this->id;
+		$update     = update_option( self::ACTIONED_OPTION, array_unique( $actioned ) );
+
+		if ( $update ) {
+			wc_admin_record_tracks_event( 'tasklist_actioned_task', array( 'task_name' => $this->id ) );
+		}
+
+		return $update;
+	}
+
+	/**
+	 * Check if a task has been actioned.
+	 *
+	 * @return bool
+	 */
+	public function is_actioned() {
+		$actioned = get_option( self::ACTIONED_OPTION, array() );
+		return in_array( $this->id, $actioned, true );
 	}
 
 }

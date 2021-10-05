@@ -213,5 +213,21 @@ class WC_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'snoozedUntil', $json );
 	}
 
+	/**
+	 * Tests that a task can be actioned.
+	 */
+	public function test_action_task() {
+		$task = new Task(
+			array(
+				'id' => 'wc-unit-test-task',
+			)
+		);
+
+		$update   = $task->mark_actioned();
+		$actioned = get_option( Task::ACTIONED_OPTION, array() );
+		$this->assertEquals( true, $update );
+		$this->assertContains( $task->id, $actioned );
+	}
+
 }
 

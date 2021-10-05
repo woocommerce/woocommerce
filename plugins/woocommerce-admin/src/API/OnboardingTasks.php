@@ -211,6 +211,19 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 
 		register_rest_route(
 			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[a-z0-9_\-]+)/action',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'action_task' ),
+					'permission_callback' => array( $this, 'get_tasks_permission_check' ),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
 			'/' . $this->rest_base . '/(?P<id>[a-z0-9_\-]+)/undo_snooze',
 			array(
 				array(
@@ -949,6 +962,38 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		$json   = $task_list->get_json();
 
 		return rest_ensure_response( $json );
+	}
+
+	/**
+	 * Action a single task.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Request|WP_Error
+	 */
+	public function action_task( $request ) {
+		$id   = $request->get_param( 'id' );
+		$task = TaskLists::get_task( $id );
+
+		if ( ! $task && $id ) {
+			$task = new Task(
+				array(
+					'id' => $id,
+				)
+			);
+		}
+
+		if ( ! $task ) {
+			return new \WP_Error(
+				'woocommerce_rest_invalid_task',
+				__( 'Sorry, no task with that ID was found.', 'woocommerce-admin' ),
+				array(
+					'status' => 404,
+				)
+			);
+		}
+
+		$task->mark_actioned();
+		return rest_ensure_response( $task->get_json() );
 	}
 
 }

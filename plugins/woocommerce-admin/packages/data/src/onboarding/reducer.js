@@ -317,6 +317,39 @@ const onboarding = (
 					isComplete: true,
 				} ),
 			};
+		case TYPES.ACTION_TASK_ERROR:
+			return {
+				...state,
+				errors: {
+					...state.errors,
+					actionTask: error,
+				},
+				taskLists: getUpdatedTaskLists( state.taskLists, {
+					id: taskId,
+					isActioned: false,
+				} ),
+			};
+		case TYPES.ACTION_TASK_REQUEST:
+			return {
+				...state,
+				requesting: {
+					...state.requesting,
+					actionTask: true,
+				},
+				taskLists: getUpdatedTaskLists( state.taskLists, {
+					id: taskId,
+					isActioned: true,
+				} ),
+			};
+		case TYPES.ACTION_TASK_SUCCESS:
+			return {
+				...state,
+				requesting: {
+					...state.requesting,
+					actionTask: false,
+				},
+				taskLists: getUpdatedTaskLists( state.taskLists, task ),
+			};
 		default:
 			return state;
 	}

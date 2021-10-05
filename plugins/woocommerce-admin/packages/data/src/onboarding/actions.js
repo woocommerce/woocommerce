@@ -199,6 +199,28 @@ export function setEmailPrefill( email ) {
 	};
 }
 
+export function actionTaskError( taskId, error ) {
+	return {
+		type: TYPES.ACTION_TASK_ERROR,
+		taskId,
+		error,
+	};
+}
+
+export function actionTaskRequest( taskId ) {
+	return {
+		type: TYPES.ACTION_TASK_REQUEST,
+		taskId,
+	};
+}
+
+export function actionTaskSuccess( task ) {
+	return {
+		type: TYPES.ACTION_TASK_SUCCESS,
+		task,
+	};
+}
+
 export function* updateProfileItems( items ) {
 	yield setIsRequesting( 'updateProfileItems', true );
 	yield setError( 'updateProfileItems', null );
@@ -346,4 +368,22 @@ export function* hideTaskList( id ) {
 
 export function* optimisticallyCompleteTask( id ) {
 	yield optimisticallyCompleteTaskRequest( id );
+}
+
+export function* actionTask( id ) {
+	yield actionTaskRequest( id );
+
+	try {
+		const task = yield apiFetch( {
+			path: `${ WC_ADMIN_NAMESPACE }/onboarding/tasks/${ id }/action`,
+			method: 'POST',
+		} );
+
+		yield actionTaskSuccess(
+			possiblyPruneTaskData( task, [ 'isActioned' ] )
+		);
+	} catch ( error ) {
+		yield actionTaskError( id, error );
+		throw new Error();
+	}
 }
