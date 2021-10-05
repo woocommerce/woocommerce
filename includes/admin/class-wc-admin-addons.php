@@ -20,10 +20,10 @@ class WC_Admin_Addons {
 	/**
 	 * Get featured for the addons screen
 	 *
-	 * @return array of objects
+	 * @return void
 	 */
-	public static function get_featured() {
-		$featured = get_transient( 'wc_addons_featured' );
+	public static function render_featured() {
+		$featured = false; // get_transient( 'wc_addons_featured' ); // TODO: revert.
 		if ( false === $featured ) {
 			$headers = array();
 			$auth    = WC_Helper_Options::get( 'auth' );
@@ -32,8 +32,9 @@ class WC_Admin_Addons {
 				$headers['Authorization'] = 'Bearer ' . $auth['access_token'];
 			}
 
+			// TODO: replace with WC.com, leave 2.0.
 			$raw_featured = wp_safe_remote_get(
-				'https://woocommerce.com/wp-json/wccom-extensions/1.0/featured',
+				'https://woocommerce.test/wp-json/wccom-extensions/2.0/featured',
 				array(
 					'headers'    => $headers,
 					'user-agent' => 'WooCommerce Addons Page',
@@ -49,8 +50,7 @@ class WC_Admin_Addons {
 		}
 
 		if ( is_object( $featured ) ) {
-			self::output_featured_sections( $featured->sections );
-			return $featured;
+			self::output_featured( $featured );
 		}
 	}
 
@@ -206,423 +206,18 @@ class WC_Admin_Addons {
 	}
 
 	/**
-	 * Handles the outputting of a banner block.
+	 * Handles the outputting of featured page
 	 *
-	 * @param object $block Banner data.
+	 * @param array $blocks Featured page's blocks.
 	 */
-	public static function output_banner_block( $block ) {
-		?>
-		<div class="addons-banner-block">
-			<h1><?php echo esc_html( $block->title ); ?></h1>
-			<p><?php echo esc_html( $block->description ); ?></p>
-			<div class="addons-banner-block-items">
-				<?php foreach ( $block->items as $item ) : ?>
-					<?php if ( self::show_extension( $item ) ) : ?>
-						<div class="addons-banner-block-item">
-							<div class="addons-banner-block-item-icon">
-								<img class="addons-img" src="<?php echo esc_url( $item->image ); ?>" />
-							</div>
-							<div class="addons-banner-block-item-content">
-								<h3><?php echo esc_html( $item->title ); ?></h3>
-								<p><?php echo esc_html( $item->description ); ?></p>
-								<?php
-									self::output_button(
-										$item->href,
-										$item->button,
-										'addons-button-solid',
-										$item->plugin
-									);
-								?>
-							</div>
-						</div>
-					<?php endif; ?>
-				<?php endforeach; ?>
-			</div>
-		</div>
-		<?php
-	}
-
-	/**
-	 * Handles the outputting of a column.
-	 *
-	 * @param object $block Column data.
-	 */
-	public static function output_column( $block ) {
-		if ( isset( $block->container ) && 'column_container_start' === $block->container ) {
-			?>
-			<div class="addons-column-section">
-			<?php
-		}
-		if ( 'column_start' === $block->module ) {
-			?>
-			<div class="addons-column">
-			<?php
-		} else {
-			?>
-			</div>
-			<?php
-		}
-		if ( isset( $block->container ) && 'column_container_end' === $block->container ) {
-			?>
-			</div>
-			<?php
-		}
-	}
-
-	/**
-	 * Handles the outputting of a column block.
-	 *
-	 * @param object $block Column block data.
-	 */
-	public static function output_column_block( $block ) {
-		?>
-		<div class="addons-column-block">
-			<h1><?php echo esc_html( $block->title ); ?></h1>
-			<p><?php echo esc_html( $block->description ); ?></p>
-			<?php foreach ( $block->items as $item ) : ?>
-				<?php if ( self::show_extension( $item ) ) : ?>
-					<div class="addons-column-block-item">
-						<div class="addons-column-block-item-icon">
-							<img class="addons-img" src="<?php echo esc_url( $item->image ); ?>" />
-						</div>
-						<div class="addons-column-block-item-content">
-							<h2><?php echo esc_html( $item->title ); ?></h2>
-							<?php
-								self::output_button(
-									$item->href,
-									$item->button,
-									'addons-button-solid',
-									$item->plugin
-								);
-							?>
-							<p><?php echo esc_html( $item->description ); ?></p>
-						</div>
-					</div>
-				<?php endif; ?>
-			<?php endforeach; ?>
-		</div>
-
-		<?php
-	}
-
-	/**
-	 * Handles the outputting of a small light block.
-	 *
-	 * @param object $block Block data.
-	 */
-	public static function output_small_light_block( $block ) {
-		?>
-		<div class="addons-small-light-block">
-			<img class="addons-img" src="<?php echo esc_url( $block->image ); ?>" />
-			<div class="addons-small-light-block-content">
-				<h1><?php echo esc_html( $block->title ); ?></h1>
-				<p><?php echo esc_html( $block->description ); ?></p>
-				<div class="addons-small-light-block-buttons">
-					<?php foreach ( $block->buttons as $button ) : ?>
-						<?php
-							self::output_button(
-								$button->href,
-								$button->text,
-								'addons-button-solid'
-							);
-						?>
-					<?php endforeach; ?>
-				</div>
-			</div>
-		</div>
-		<?php
-	}
-
-	/**
-	 * Handles the outputting of a small dark block.
-	 *
-	 * @param object $block Block data.
-	 */
-	public static function output_small_dark_block( $block ) {
-		?>
-		<div class="addons-small-dark-block">
-			<h1><?php echo esc_html( $block->title ); ?></h1>
-			<p><?php echo esc_html( $block->description ); ?></p>
-			<div class="addons-small-dark-items">
-				<?php foreach ( $block->items as $item ) : ?>
-					<div class="addons-small-dark-item">
-						<?php if ( ! empty( $item->image ) ) : ?>
-							<div class="addons-small-dark-item-icon">
-								<img class="addons-img" src="<?php echo esc_url( $item->image ); ?>" />
-							</div>
-						<?php endif; ?>
-						<?php
-							self::output_button(
-								$item->href,
-								$item->button,
-								'addons-button-outline-white'
-							);
-						?>
-					</div>
-				<?php endforeach; ?>
-			</div>
-		</div>
-		<?php
-	}
-
-	/**
-	 * Handles the outputting of the WooCommerce Services banner block.
-	 *
-	 * @param object $block Block data.
-	 */
-	public static function output_wcs_banner_block( $block = array() ) {
-		$is_active = is_plugin_active( 'woocommerce-services/woocommerce-services.php' );
-		$location  = wc_get_base_location();
-
-		if (
-			! in_array( $location['country'], array( 'US' ), true ) ||
-			$is_active ||
-			! current_user_can( 'install_plugins' ) ||
-			! current_user_can( 'activate_plugins' )
-		) {
-			return;
-		}
-
-		$button_url = wp_nonce_url(
-			add_query_arg(
-				array(
-					'install-addon' => 'woocommerce-services',
-				)
-			),
-			'install-addon_woocommerce-services'
-		);
-
-		$defaults = array(
-			'image'       => WC()->plugin_url() . '/assets/images/wcs-extensions-banner-3x.jpg',
-			'image_alt'   => __( 'WooCommerce Shipping', 'woocommerce' ),
-			'title'       => __( 'Save time and money with WooCommerce Shipping', 'woocommerce' ),
-			'description' => __( 'Print discounted USPS and DHL labels straight from your WooCommerce dashboard and save on shipping.', 'woocommerce' ),
-			'button'      => __( 'Free - Install now', 'woocommerce' ),
-			'href'        => $button_url,
-			'logos'       => array(),
-		);
-
-		switch ( $location['country'] ) {
-			case 'US':
-				$local_defaults = array(
-					'logos' => array_merge(
-						$defaults['logos'],
-						array(
-							array(
-								'link' => WC()->plugin_url() . '/assets/images/wcs-usps-logo.png',
-								'alt'  => 'USPS logo',
-							),
-							array(
-								'link' => WC()->plugin_url() . '/assets/images/wcs-dhlexpress-logo.png',
-								'alt'  => 'DHL Express logo',
-							),
-						)
-					),
-				);
-				break;
-			default:
-				$local_defaults = array();
-		}
-
-		$block_data = array_merge( $defaults, $local_defaults, $block );
-		?>
-		<div class="addons-wcs-banner-block">
-			<div class="addons-wcs-banner-block-image is-full-image">
-				<img
-					class="addons-img"
-					src="<?php echo esc_url( $block_data['image'] ); ?>"
-					alt="<?php echo esc_attr( $block_data['image_alt'] ); ?>"
-				/>
-			</div>
-			<div class="addons-wcs-banner-block-content">
-				<h1><?php echo esc_html( $block_data['title'] ); ?></h1>
-				<p><?php echo esc_html( $block_data['description'] ); ?></p>
-				<ul class="wcs-logos-container">
-					<?php foreach ( $block_data['logos'] as $logo ) : ?>
-						<li>
-							<img
-								alt="<?php echo esc_attr( $logo['alt'] ); ?>"
-								class="wcs-service-logo"
-								src="<?php echo esc_url( $logo['link'] ); ?>"
-							>
-						</li>
-					<?php endforeach; ?>
-				</ul>
-				<?php
-					self::output_button(
-						$block_data['href'],
-						$block_data['button'],
-						'addons-button-outline-purple'
-					);
-				?>
-			</div>
-		</div>
-		<?php
-	}
-
-	/**
-	 * Handles the outputting of the WooCommerce Pay banner block.
-	 *
-	 * @param object $block Block data.
-	 */
-	public static function output_wcpay_banner_block( $block = array() ) {
-		$is_active = is_plugin_active( 'woocommerce-payments/woocommerce-payments.php' );
-		$location  = wc_get_base_location();
-
-		if (
-			! in_array( $location['country'], array( 'US' ), true ) ||
-			$is_active ||
-			! current_user_can( 'install_plugins' ) ||
-			! current_user_can( 'activate_plugins' )
-		) {
-			return;
-		}
-
-		$button_url = wp_nonce_url(
-			add_query_arg(
-				array(
-					'install-addon' => 'woocommerce-payments',
-				)
-			),
-			'install-addon_woocommerce-payments'
-		);
-
-		$defaults = array(
-			'image'       => WC()->plugin_url() . '/assets/images/wcpayments-icon-secure.png',
-			'image_alt'   => __( 'WooCommerce Payments', 'woocommerce' ),
-			'title'       => __( 'Payments made simple, with no monthly fees &mdash; exclusively for WooCommerce stores.', 'woocommerce' ),
-			'description' => __( 'Securely accept cards in your store. See payments, track cash flow into your bank account, and stay on top of disputes – right from your dashboard.', 'woocommerce' ),
-			'button'      => __( 'Free - Install now', 'woocommerce' ),
-			'href'        => $button_url,
-			'logos'       => array(),
-		);
-
-		$block_data = array_merge( $defaults, $block );
-		?>
-		<div class="addons-wcs-banner-block">
-			<div class="addons-wcs-banner-block-image">
-				<img
-					class="addons-img"
-					src="<?php echo esc_url( $block_data['image'] ); ?>"
-					alt="<?php echo esc_attr( $block_data['image_alt'] ); ?>"
-				/>
-			</div>
-			<div class="addons-wcs-banner-block-content">
-				<h1><?php echo esc_html( $block_data['title'] ); ?></h1>
-				<p><?php echo esc_html( $block_data['description'] ); ?></p>
-				<?php
-					self::output_button(
-						$block_data['href'],
-						$block_data['button'],
-						'addons-button-outline-purple'
-					);
-				?>
-			</div>
-		</div>
-		<?php
-	}
-
-	/**
-	 * Handles the output of a full-width block.
-	 *
-	 * @param array $section Section data.
-	 */
-	public static function output_promotion_block( $section ) {
-		if (
-			! current_user_can( 'install_plugins' ) ||
-			! current_user_can( 'activate_plugins' )
-		) {
-			return;
-		}
-
-		$section_object = (object) $section;
-
-		if ( ! empty( $section_object->geowhitelist ) ) {
-			$section_object->geowhitelist = explode( ',', $section_object->geowhitelist );
-		}
-
-		if ( ! empty( $section_object->geoblacklist ) ) {
-			$section_object->geoblacklist = explode( ',', $section_object->geoblacklist );
-		}
-
-		if ( ! self::show_extension( $section_object ) ) {
-			return;
-		}
-
-		?>
-		<div class="addons-banner-block addons-promotion-block">
-			<img
-				class="addons-img"
-				src="<?php echo esc_url( $section['image'] ); ?>"
-				alt="<?php echo esc_attr( $section['image_alt'] ); ?>"
-			/>
-			<div class="addons-promotion-block-content">
-				<h1 class="addons-promotion-block-title"><?php echo esc_html( $section['title'] ); ?></h1>
-				<div class="addons-promotion-block-description">
-					<?php echo wp_kses_post( $section['description'] ); ?>
-				</div>
-				<div class="addons-promotion-block-buttons">
-					<?php
-
-					if ( $section['button_1'] ) {
-						self::output_button(
-							$section['button_1_href'],
-							$section['button_1'],
-							'addons-button-expandable addons-button-solid',
-							$section['plugin']
-						);
-					}
-
-					if ( $section['button_2'] ) {
-						self::output_button(
-							$section['button_2_href'],
-							$section['button_2'],
-							'addons-button-expandable addons-button-outline-purple',
-							$section['plugin']
-						);
-					}
-
-					?>
-				</div>
-			</div>
-		</div>
-		<?php
-	}
-
-	/**
-	 * Handles the outputting of featured sections
-	 *
-	 * @param array $sections Section data.
-	 */
-	public static function output_featured_sections( $sections ) {
-		foreach ( $sections as $section ) {
-			switch ( $section->module ) {
-				case 'banner_block':
-					self::output_banner_block( $section );
+	private static function output_featured( $blocks ) {
+		foreach ( $blocks as $block ) {
+			switch ( $block->type ) {
+				case 'group':
+					// TODO:
 					break;
-				case 'column_start':
-					self::output_column( $section );
-					break;
-				case 'column_end':
-					self::output_column( $section );
-					break;
-				case 'column_block':
-					self::output_column_block( $section );
-					break;
-				case 'small_light_block':
-					self::output_small_light_block( $section );
-					break;
-				case 'small_dark_block':
-					self::output_small_dark_block( $section );
-					break;
-				case 'wcs_banner_block':
-					self::output_wcs_banner_block( (array) $section );
-					break;
-				case 'wcpay_banner_block':
-					self::output_wcpay_banner_block( (array) $section );
-					break;
-				case 'promotion_block':
-					self::output_promotion_block( (array) $section );
+				case 'banner':
+					// TODO:
 					break;
 			}
 		}

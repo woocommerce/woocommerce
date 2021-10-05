@@ -76,9 +76,7 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 
 			<?php if ( '_featured' === $current_section ) : ?>
 				<div class="addons-featured">
-					<?php
-					$featured = WC_Admin_Addons::get_featured();
-					?>
+					<?php WC_Admin_Addons::render_featured(); ?>
 				</div>
 			<?php endif; ?>
 			<?php if ( '_featured' !== $current_section && $addons ) : ?>

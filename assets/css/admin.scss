@@ -243,185 +243,6 @@
 		width: 124px;
 	}
 
-	.addons-banner-block-item-icon,
-	.addons-column-block-item-icon {
-		align-items: center;
-		display: flex;
-		justify-content: center;
-	}
-
-	.addons-banner-block,
-	.addons-wcs-banner-block {
-		background: #fff;
-		border: 1px solid #ddd;
-		margin: 0 0 1em 0;
-		padding: 2em 2em 1em;
-	}
-
-	.addons-banner-block img {
-		height: 62px;
-	}
-
-	.addons-banner-block p {
-		margin: 0 0 20px;
-	}
-
-	.addons-banner-block-items {
-		display: flex;
-		flex-direction: row;
-		flex-wrap: wrap;
-		justify-content: space-around;
-		margin: 0 -10px 0 -10px;
-	}
-
-	.addons-banner-block-item {
-		border: 1px solid #e6e6e6;
-		border-radius: 3px;
-		flex: 1;
-		margin: 1em;
-		min-width: 200px;
-		width: 30%;
-	}
-
-	.addons-banner-block-item-icon {
-		background: #f7f7f7;
-		height: 143px;
-	}
-
-	.addons-banner-block-item-content {
-		display: flex;
-		flex-direction: column;
-		height: 184px;
-		justify-content: space-between;
-		padding: 24px;
-	}
-
-	.addons-banner-block-item-content h3 {
-		margin-top: 0;
-	}
-
-	.addons-banner-block-item-content p {
-		margin: 0 0 auto;
-	}
-
-	.addons-wcs-banner-block {
-		display: flex;
-		align-items: center;
-	}
-
-	.addons-promotion-block {
-		display: flex;
-		padding: 20px;
-
-		.addons-img {
-			height: auto;
-			width: 200px;
-		}
-	}
-
-	.addons-wcs-banner-block-image {
-		background: #f7f7f7;
-		border: 1px solid #e6e6e6;
-		margin-right: 2em;
-		padding: 4em;
-		max-width: 200px;
-
-		.addons-img {
-			max-height: 86px;
-			max-width: 97px;
-		}
-
-		&.is-full-image {
-			padding: 0;
-			background: none;
-			border: none;
-
-			.addons-img {
-				max-height: 100%;
-				max-width: 100%;
-			}
-		}
-	}
-
-	.addons-promotion-block-content {
-		display: flex;
-		flex-direction: column;
-		margin-left: 24px;
-	}
-
-	.addons-promotion-block-description {
-		margin-bottom: 20px;
-	}
-
-	.addons-promotion-block-title {
-		margin: 0 0 16px;
-		padding: 0;
-	}
-
-	.addons-promotion-block-buttons {
-		margin-top: auto;
-
-		.addons-button {
-			margin-right: 8px;
-
-			&:last-child {
-				margin-right: 0;
-			}
-		}
-	}
-
-	.addons-shipping-methods .addons-wcs-banner-block {
-		margin-left: 0;
-		margin-right: 0;
-		margin-top: 1em;
-	}
-
-	.addons-wcs-banner-block-content {
-		display: flex;
-		flex-direction: column;
-		justify-content: space-around;
-		align-self: stretch;
-		padding: 1em 0;
-
-		h1 {
-			padding-bottom: 0;
-		}
-
-		p {
-			margin-bottom: 0;
-		}
-
-		.wcs-logos-container {
-			display: flex;
-			align-items: center;
-			flex-direction: row;
-			justify-content: center;
-
-			@media screen and (min-width: 500px) {
-				justify-content: left;
-			}
-
-			li {
-				margin-right: 8px;
-
-				&:last-child {
-					margin-right: 0;
-				}
-			}
-		}
-
-		.wcs-service-logo {
-			max-width: 45px;
-		}
-	}
-
-	.addons-column-section {
-		display: flex;
-		flex-direction: row;
-		flex-wrap: wrap;
-		justify-content: space-around;
-	}
-
 	.addons-column {
 		flex: 1;
 		width: 50%;
@@ -430,90 +251,6 @@
 
 	.addons-column:nth-child(2) {
 		margin-right: 0;
-	}
-
-	.addons-small-light-block,
-	.addons-small-dark-block,
-	.addons-column-block {
-		box-sizing: border-box;
-		border: 1px solid #ddd;
-		margin: 0 0 1em;
-		padding: 20px;
-	}
-
-	.addons-column-block img {
-		max-height: 50px;
-		max-width: 50px;
-	}
-
-	.addons-small-light-block,
-	.addons-column-block {
-		background: #fff;
-	}
-
-	.addons-column-block-left {
-		float: left;
-	}
-
-	.addons-column-block-right {
-		float: right;
-	}
-
-	.addons-column-block-item {
-		border-top: 2px solid #f9f9f9;
-		flex-direction: row;
-		flex-wrap: wrap;
-		justify-content: space-between;
-		margin: 0 -20px;
-		padding: 20px;
-	}
-
-	.addons-column-block-item-icon {
-		background: #f7f7f7;
-		border: 1px solid #e6e6e6;
-		height: 100px;
-		margin: 0 10px 10px 0;
-		width: 100px;
-	}
-
-	.addons-column-block-item-content {
-		display: flex;
-		flex: 1;
-		flex-wrap: wrap;
-		height: 20%;
-		justify-content: space-between;
-		min-width: 200px;
-	}
-
-	.addons-column-block-item-content h2 {
-		float: left;
-		margin-top: 8px;
-	}
-
-	.addons-column-block-item-content a {
-		float: right;
-	}
-
-	.addons-column-block-item-content p {
-		float: left;
-	}
-
-	.addons-banner-block-item,
-	.addons-column-block-item {
-		display: none;
-	}
-
-	.addons-banner-block-item:nth-child(-n + 3) {
-		display: block;
-	}
-
-	.addons-column-block-item:nth-of-type(-n + 3) {
-		display: flex;
-	}
-
-	.addons-small-dark-block {
-		background-color: #54687d;
-		text-align: center;
 	}
 
 	.addons-small-dark-items {
@@ -526,54 +263,12 @@
 		margin: 0 0 20px;
 	}
 
-	.addons-small-dark-block h1 {
-		color: #fff;
-	}
-
-	.addons-small-dark-block p {
-		color: #fafafa;
-	}
-
 	.addons-small-dark-item-icon img {
 		height: 30px;
 	}
 
 	.addons-small-dark-item a {
 		margin: 28px auto 0;
-	}
-
-	.addons-small-light-block {
-		display: flex;
-		flex-wrap: wrap;
-	}
-
-	.addons-small-light-block h1 {
-		margin-top: -12px;
-	}
-
-	.addons-small-light-block p {
-		margin-top: 0;
-	}
-
-	.addons-small-light-block img {
-		height: 225px;
-		margin: 0 0 0 -20px;
-	}
-
-	.addons-small-light-block-content {
-		display: flex;
-		flex: 1 1 100px;
-		flex-direction: column;
-		justify-content: space-around;
-	}
-
-	.addons-small-light-block-buttons {
-		display: flex;
-		justify-content: space-between;
-	}
-
-	.addons-small-light-block-content a {
-		width: 48%;
 	}
 
 	.addons-button-solid {
@@ -644,14 +339,6 @@
 
 		.addons-small-dark-item {
 			width: 100%;
-		}
-
-		.addons-column-block-item-icon {
-			background: none;
-			border: none;
-			height: 75px;
-			margin: 0 10px 10px 0;
-			width: 75px;
 		}
 	}
 
@@ -2952,30 +2639,6 @@ ul.wc_coupon_list_block {
 
 		td.column-order_status {
 			float: right;
-		}
-	}
-
-	.wc-addons-wrap {
-
-		.addons-promotion-block {
-			flex-direction: column;
-			padding: 24px;
-
-			.addons-img {
-				height: auto;
-				width: 100%;
-				max-width: 240px;
-				margin: 0 auto 20px;
-			}
-		}
-
-		.addons-promotion-block-content {
-			display: block;
-			margin-left: 0;
-		}
-
-		.addons-promotion-block-title {
-			margin-top: 4px;
 		}
 	}
 }
@@ -6754,29 +6417,6 @@ table.bar_chart {
 	.woocommerce_options_panel fieldset.form-field,
 	.woocommerce_options_panel p.form-field {
 		padding: 5px 20px !important;
-	}
-
-	.addons-wcs-banner-block {
-		flex-direction: column;
-	}
-
-	.wc-addons-wrap {
-
-		.addons-wcs-banner-block {
-			padding: 40px;
-		}
-
-		.addons-wcs-banner-block-image {
-			padding: 1em;
-			text-align: center;
-			width: 100%;
-			padding: 2em 0;
-			margin: 0;
-
-			.addons-img {
-				margin: 0;
-			}
-		}
 	}
 }
 
