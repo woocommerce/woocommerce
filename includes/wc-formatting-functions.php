@@ -536,6 +536,16 @@ function wc_get_price_decimals() {
 }
 
 /**
+ * Return if the total prices should be shown in explicit formatting or not.
+ *
+ * @since   5.7.1
+ * @return  bool
+ */
+function wc_supports_explicit_format() {
+	return boolval( apply_filters( '__experimental_woocommerce_supports_explicit_format', false ) );
+}
+
+/**
  * Format the price with a currency symbol.
  *
  * @param  float $price Raw price.
