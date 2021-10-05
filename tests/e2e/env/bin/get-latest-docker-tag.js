@@ -2,6 +2,7 @@
 
 const https = require( 'https' );
 const semver = require( 'semver' );
+const getLatestMinusVersion = require( './get-previous-version' );
 
 /**
  * Fetches the latest tag from a page using the Docker HTTP api.
@@ -134,13 +135,3 @@ findLatestVersion( image, nameSearch ).then(
 		process.exit( 1 );
 	}
 )
-
-function getLatestMinusVersion( latestVersion, minusVersion ) {
-	// Convert the 1 or 2 to a decimal we can use for the logic below.
-	let minusAmount = minusVersion / 10;
-
-	const baseVersion = latestVersion.replace( /.[^\.]$/, '' );
-
-	// Calculate the version we need and return.
-	return String( baseVersion - minusAmount );
-}
