@@ -32,4 +32,13 @@ jQuery( function( $ ) {
 
 	$( document.body ).trigger( 'init_add_payment_method' );
 
+	// Prevent firing multiple requests upon double clicking the buttons in payment methods table
+	$(' .woocommerce .payment-method-actions .button.delete' ).on( 'click' , function( event ) {
+		if ( $( this ).hasClass( 'disabled' ) ) {
+			event.preventDefault();
+		}
+
+		$( this ).addClass( 'disabled' );
+	});
+
 });
