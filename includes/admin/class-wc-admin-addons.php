@@ -21,10 +21,10 @@ class WC_Admin_Addons {
 	/**
 	 * Get featured for the addons screen
 	 *
-	 * @return array of objects
+	 * @return void
 	 */
-	public static function get_featured() {
-		$featured = get_transient( 'wc_addons_featured' );
+	public static function render_featured() {
+		$featured = false; // get_transient( 'wc_addons_featured' ); // TODO: revert.
 		if ( false === $featured ) {
 			$headers = array();
 			$auth    = WC_Helper_Options::get( 'auth' );
@@ -33,8 +33,9 @@ class WC_Admin_Addons {
 				$headers['Authorization'] = 'Bearer ' . $auth['access_token'];
 			}
 
+			// TODO: replace with WC.com, leave 2.0.
 			$raw_featured = wp_safe_remote_get(
-				'https://woocommerce.com/wp-json/wccom-extensions/1.0/featured',
+				'https://woocommerce.test/wp-json/wccom-extensions/2.0/featured',
 				array(
 					'headers'    => $headers,
 					'user-agent' => 'WooCommerce Addons Page',
@@ -50,8 +51,7 @@ class WC_Admin_Addons {
 		}
 
 		if ( is_object( $featured ) ) {
-			self::output_featured_sections( $featured->sections );
-			return $featured;
+			self::output_featured( $featured );
 		}
 	}
 
@@ -207,46 +207,9 @@ class WC_Admin_Addons {
 	}
 
 	/**
-	 * Handles the outputting of a banner block.
+	 * Handles the outputting of featured page
 	 *
-	 * @param object $block Banner data.
-	 */
-	public static function output_banner_block( $block ) {
-		?>
-		<div class="addons-banner-block">
-			<h1><?php echo esc_html( $block->title ); ?></h1>
-			<p><?php echo esc_html( $block->description ); ?></p>
-			<div class="addons-banner-block-items">
-				<?php foreach ( $block->items as $item ) : ?>
-					<?php if ( self::show_extension( $item ) ) : ?>
-						<div class="addons-banner-block-item">
-							<div class="addons-banner-block-item-icon">
-								<img class="addons-img" src="<?php echo esc_url( $item->image ); ?>" />
-							</div>
-							<div class="addons-banner-block-item-content">
-								<h3><?php echo esc_html( $item->title ); ?></h3>
-								<p><?php echo esc_html( $item->description ); ?></p>
-								<?php
-									self::output_button(
-										$item->href,
-										$item->button,
-										'addons-button-solid',
-										$item->plugin
-									);
-								?>
-							</div>
-						</div>
-					<?php endif; ?>
-				<?php endforeach; ?>
-			</div>
-		</div>
-		<?php
-	}
-
-	/**
-	 * Handles the outputting of a column.
-	 *
-	 * @param object $block Column data.
+	 * @param array $blocks Featured page's blocks.
 	 */
 	public static function output_column( $block ) {
 		if ( isset( $block->container ) && 'column_container_start' === $block->container ) {
@@ -651,8 +614,8 @@ class WC_Admin_Addons {
 				case 'wcpay_banner_block':
 					self::output_wcpay_banner_block( (array) $section );
 					break;
-				case 'promotion_block':
-					self::output_promotion_block( (array) $section );
+				case 'banner':
+					// TODO:
 					break;
 			}
 		}
