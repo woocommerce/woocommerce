@@ -25,6 +25,7 @@ import { getCountryCode } from '../../../dashboard/utils';
 import StoreLocation from '../steps/location';
 import ShippingRates from './rates';
 import { createNoticesFromResponse } from '../../../lib/notices';
+import './shipping.scss';
 
 export class Shipping extends Component {
 	constructor( props ) {

@@ -30,7 +30,6 @@ import InboxPanel from '../inbox-panel';
 import { IntroModal as NavigationIntroModal } from '../navigation/components/intro-modal';
 import StatsOverview from './stats-overview';
 import { StoreManagementLinks } from '../store-management-links';
-import TaskListPlaceholder from '../task-list/placeholder';
 import { TasksPlaceholder } from '../tasks';
 import {
 	WELCOME_MODAL_DISMISSED_OPTION_NAME,
@@ -40,10 +39,6 @@ import { WelcomeFromCalypsoModal } from './welcome-from-calypso-modal';
 import { WelcomeModal } from './welcome-modal';
 import './style.scss';
 import '../dashboard/style.scss';
-
-const TaskList = lazy( () =>
-	import( /* webpackChunkName: "task-list" */ '../task-list' )
-);
 
 const Tasks = lazy( () =>
 	import( /* webpackChunkName: "tasks" */ '../tasks' )
@@ -117,21 +112,9 @@ export const Layout = ( {
 	};
 
 	const renderTaskList = () => {
-		const isSingleTask = Boolean( query.task );
-
-		if ( window.wcAdminFeatures && window.wcAdminFeatures.tasks ) {
-			return (
-				<Suspense fallback={ <TasksPlaceholder query={ query } /> }>
-					<Tasks query={ query } />
-				</Suspense>
-			);
-		}
-
 		return (
-			<Suspense
-				fallback={ isSingleTask ? null : <TaskListPlaceholder /> }
-			>
-				<TaskList query={ query } userPreferences={ userPrefs } />
+			<Suspense fallback={ <TasksPlaceholder query={ query } /> }>
+				<Tasks query={ query } />
 			</Suspense>
 		);
 	};

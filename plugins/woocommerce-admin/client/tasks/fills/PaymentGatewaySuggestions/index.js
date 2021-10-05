@@ -20,6 +20,7 @@ import { List, Placeholder as ListPlaceholder } from './components/List';
 import { Setup, Placeholder as SetupPlaceholder } from './components/Setup';
 import { WCPaySuggestion } from './components/WCPay';
 import './plugins/Bacs';
+import './payment-gateway-suggestions.scss';
 
 export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 	const { updatePaymentGateway } = useDispatch( PAYMENT_GATEWAYS_STORE_NAME );

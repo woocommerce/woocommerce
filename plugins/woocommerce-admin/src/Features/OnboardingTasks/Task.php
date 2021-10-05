@@ -122,6 +122,13 @@ class Task {
 	const ACTIONED_OPTION = 'woocommerce_task_list_tracked_completed_actions';
 
 	/**
+	 * Option name of completed tasks.
+	 *
+	 * @var string
+	 */
+	const COMPLETED_OPTION = 'woocommerce_task_list_tracked_completed_tasks';
+
+	/**
 	 * Duration to milisecond mapping.
 	 *
 	 * @var string
@@ -287,11 +294,46 @@ class Task {
 	}
 
 	/**
+	 * Check if a task list has previously been marked as complete.
+	 *
+	 * @return bool
+	 */
+	public function has_previously_completed() {
+		$complete = get_option( self::COMPLETED_OPTION, array() );
+		return in_array( $this->id, $complete, true );
+	}
+
+	/**
+	 * Track task completion if task is viewable.
+	 */
+	public function possibly_track_completion() {
+		if ( ! $this->can_view ) {
+			return;
+		}
+
+		if ( ! $this->is_complete ) {
+			return;
+		}
+
+		if ( $this->has_previously_completed() ) {
+			return;
+		}
+
+		$completed_tasks   = get_option( self::COMPLETED_OPTION, array() );
+		$completed_tasks[] = $this->id;
+		update_option( self::COMPLETED_OPTION, $completed_tasks );
+		wc_admin_record_tracks_event( 'tasklist_task_completed', array( 'task_name' => $this->id ) );
+	}
+
+
+	/**
 	 * Get the task as JSON.
 	 *
 	 * @return array
 	 */
 	public function get_json() {
+		$this->possibly_track_completion();
+
 		return array(
 			'id'             => $this->id,
 			'title'          => $this->title,

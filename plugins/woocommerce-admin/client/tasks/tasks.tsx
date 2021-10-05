@@ -17,6 +17,7 @@ import { DisplayOption } from '../header/activity-panel/display-options';
 import { Task } from './task';
 import { TaskList } from './task-list';
 import { TasksPlaceholder } from './placeholder';
+import './tasks.scss';
 
 export type TasksProps = {
 	query: { task: string };

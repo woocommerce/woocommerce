@@ -12,12 +12,12 @@ use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
  */
 class TaskList {
 	/**
-	 * Option name hidden task lists.
+	 * Option name of hidden task lists.
 	 */
 	const HIDDEN_OPTION = 'woocommerce_task_list_hidden_lists';
 
 	/**
-	 * Option name completed task lists.
+	 * Option name of completed task lists.
 	 */
 	const COMPLETED_OPTION = 'woocommerce_task_list_completed_lists';
 
@@ -130,11 +130,28 @@ class TaskList {
 	}
 
 	/**
-	 * Check if the task list is complete.
+	 * Check if all viewable tasks are complete.
 	 *
 	 * @return bool
 	 */
 	public function is_complete() {
+		$viewable_tasks = $this->get_viewable_tasks();
+
+		return array_reduce(
+			$viewable_tasks,
+			function( $is_complete, $task ) {
+				return ! $task->is_complete ? false : $is_complete;
+			},
+			true
+		);
+	}
+
+	/**
+	 * Check if a task list has previously been marked as complete.
+	 *
+	 * @return bool
+	 */
+	public function has_previously_completed() {
 		$complete = get_option( self::COMPLETED_OPTION, array() );
 		return in_array( $this->id, $complete, true );
 	}
@@ -165,11 +182,31 @@ class TaskList {
 	}
 
 	/**
+	 * Track list completion of viewable tasks.
+	 */
+	public function possibly_track_completion() {
+		if ( ! $this->is_complete() ) {
+			return;
+		}
+
+		if ( $this->has_previously_completed() ) {
+			return;
+		}
+
+		$completed_lists   = get_option( self::COMPLETED_OPTION, array() );
+		$completed_lists[] = $this->id;
+		update_option( self::COMPLETED_OPTION, $completed_lists );
+		wc_admin_record_tracks_event( $this->prefix_event( 'tasklist_tasks_completed' ) );
+	}
+
+	/**
 	 * Get the list for use in JSON.
 	 *
 	 * @return array
 	 */
 	public function get_json() {
+		$this->possibly_track_completion();
+
 		return array(
 			'id'         => $this->id,
 			'title'      => $this->title,

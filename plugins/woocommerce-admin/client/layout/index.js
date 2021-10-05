@@ -38,7 +38,7 @@ const StoreAlerts = lazy( () =>
 
 const WCPayUsageModal = lazy( () =>
 	import(
-		/* webpackChunkName: "wcpay-usage-modal" */ '../task-list/tasks/PaymentGatewaySuggestions/components/WCPay/UsageModal'
+		/* webpackChunkName: "wcpay-usage-modal" */ '../tasks/fills/PaymentGatewaySuggestions/components/WCPay/UsageModal'
 	)
 );
 
@@ -177,9 +177,7 @@ class _Layout extends Component {
 				{ window.wcAdminFeatures.navigation && (
 					<PluginArea scope="woocommerce-navigation" />
 				) }
-				{ window.wcAdminFeatures.tasks && (
-					<PluginArea scope="woocommerce-tasks" />
-				) }
+				<PluginArea scope="woocommerce-tasks" />
 			</SlotFillProvider>
 		);
 	}

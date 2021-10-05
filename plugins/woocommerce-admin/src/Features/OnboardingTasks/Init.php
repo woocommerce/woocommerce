@@ -43,10 +43,6 @@ class Init {
 	 */
 	public function __construct() {
 		// This hook needs to run when options are updated via REST.
-		add_action( 'add_option_woocommerce_task_list_complete', array( $this, 'track_completion' ), 10, 2 );
-		add_action( 'add_option_woocommerce_extended_task_list_complete', array( $this, 'track_extended_completion' ), 10, 2 );
-		add_action( 'add_option_woocommerce_task_list_tracked_completed_tasks', array( $this, 'track_task_completion' ), 10, 2 );
-		add_action( 'update_option_woocommerce_task_list_tracked_completed_tasks', array( $this, 'track_task_completion' ), 10, 2 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'update_option_extended_task_list' ), 15 );
 		add_filter( 'pre_option_woocommerce_task_list_hidden', array( $this, 'get_deprecated_options' ), 10, 2 );
 		add_filter( 'pre_option_woocommerce_extended_task_list_hidden', array( $this, 'get_deprecated_options' ), 10, 2 );
@@ -93,36 +89,14 @@ class Init {
 				: false;
 		}
 
-		$gateways         = WC()->payment_gateways->get_available_payment_gateways();
-		$enabled_gateways = array_filter(
-			$gateways,
-			function( $gateway ) {
-				return 'yes' === $gateway->enabled;
-			}
-		);
-
 		// @todo We may want to consider caching some of these and use to check against
 		// task completion along with cache busting for active tasks.
 		$settings['automatedTaxSupportedCountries'] = Tax::get_automated_tax_supported_countries();
 		$settings['hasHomepage']                    = self::check_task_completion( 'homepage' ) || 'classic' === get_option( 'classic-editor-replace' );
-		$settings['hasPaymentGateway']              = ! empty( $enabled_gateways );
-		$settings['enabledPaymentGateways']         = array_keys( $enabled_gateways );
-		$settings['hasPhysicalProducts']            = count(
-			wc_get_products(
-				array(
-					'virtual' => false,
-					'limit'   => 1,
-				)
-			)
-		) > 0;
 		$settings['hasProducts']                    = self::check_task_completion( 'products' );
-		$settings['isAppearanceComplete']           = get_option( 'woocommerce_task_list_appearance_complete' );
-		$settings['isTaxComplete']                  = self::check_task_completion( 'tax' );
-		$settings['shippingZonesCount']             = count( \WC_Shipping_Zones::get_zones() );
 		$settings['stylesheet']                     = get_option( 'stylesheet' );
 		$settings['taxJarActivated']                = class_exists( 'WC_Taxjar' );
 		$settings['themeMods']                      = get_theme_mods();
-		$settings['wcPayIsConnected']               = $wc_pay_is_connected;
 
 		return $settings;
 	}
@@ -327,46 +301,6 @@ class Init {
 				WC_ADMIN_VERSION_NUMBER,
 				true
 			);
-		}
-	}
-
-	/**
-	 * Records an event when all tasks are completed in the task list.
-	 *
-	 * @param mixed $old_value Old value.
-	 * @param mixed $new_value New value.
-	 */
-	public static function track_completion( $old_value, $new_value ) {
-		if ( $new_value ) {
-			wc_admin_record_tracks_event( 'tasklist_tasks_completed' );
-		}
-	}
-
-	/**
-	 * Records an event when all tasks are completed in the extended task list.
-	 *
-	 * @param mixed $old_value Old value.
-	 * @param mixed $new_value New value.
-	 */
-	public static function track_extended_completion( $old_value, $new_value ) {
-		if ( $new_value ) {
-			wc_admin_record_tracks_event( 'extended_tasklist_tasks_completed' );
-		}
-	}
-
-	/**
-	 * Records an event for individual task completion.
-	 *
-	 * @param mixed $old_value Old value.
-	 * @param mixed $new_value New value.
-	 */
-	public static function track_task_completion( $old_value, $new_value ) {
-		$old_value       = is_array( $old_value ) ? $old_value : array();
-		$new_value       = is_array( $new_value ) ? $new_value : array();
-		$untracked_tasks = array_diff( $new_value, $old_value );
-
-		foreach ( $untracked_tasks as $task ) {
-			wc_admin_record_tracks_event( 'tasklist_task_completed', array( 'task_name' => $task ) );
 		}
 	}
 

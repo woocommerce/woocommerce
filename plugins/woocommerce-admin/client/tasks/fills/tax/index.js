@@ -9,7 +9,6 @@ import { difference, filter } from 'lodash';
 import interpolateComponents from 'interpolate-components';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { H, Link, Stepper, Plugins, Spinner } from '@woocommerce/components';
-import { getHistory, getNewPath } from '@woocommerce/navigation';
 import { getAdminLink } from '@woocommerce/wc-admin-settings';
 import {
 	ONBOARDING_STORE_NAME,
@@ -19,13 +18,17 @@ import {
 } from '@woocommerce/data';
 import { recordEvent, queueRecordEvent } from '@woocommerce/tracks';
 import { Text } from '@woocommerce/experimental';
+import { registerPlugin } from '@wordpress/plugins';
+import { WooOnboardingTask } from '@woocommerce/onboarding';
+
 /**
  * Internal dependencies
  */
-import Connect from '../../dashboard/components/connect';
-import { createNoticesFromResponse } from '../../lib/notices';
-import { getCountryCode } from '../../dashboard/utils';
-import StoreLocation from './steps/location';
+import Connect from '../../../dashboard/components/connect';
+import { createNoticesFromResponse } from '../../../lib/notices';
+import { getCountryCode } from '../../../dashboard/utils';
+import StoreLocation from '../steps/location';
+import './tax.scss';
 
 class Tax extends Component {
 	constructor( props ) {
@@ -121,6 +124,7 @@ class Tax extends Component {
 		const {
 			clearTaskStatusCache,
 			createNotice,
+			onComplete,
 			updateAndPersistSettingsForGroup,
 			generalSettings,
 			taxSettings,
@@ -151,7 +155,7 @@ class Tax extends Component {
 							'woocommerce-admin'
 						)
 					);
-					getHistory().push( getNewPath( {}, '/', {} ) );
+					onComplete();
 				} else {
 					this.redirectToTaxSettings();
 				}
@@ -501,7 +505,7 @@ class Tax extends Component {
 	}
 }
 
-export default compose(
+const TaxWrapper = compose(
 	withSelect( ( select ) => {
 		const { getSettings, isUpdateSettingsRequesting } = select(
 			SETTINGS_STORE_NAME
@@ -585,3 +589,14 @@ export default compose(
 		};
 	} )
 )( Tax );
+
+registerPlugin( 'wc-admin-onboarding-task-tax', {
+	scope: 'woocommerce-tasks',
+	render: () => (
+		<WooOnboardingTask id="tax">
+			{ ( { onComplete, query } ) => (
+				<TaxWrapper onComplete={ onComplete } query={ query } />
+			) }
+		</WooOnboardingTask>
+	),
+} );

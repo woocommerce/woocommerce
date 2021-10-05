@@ -96,13 +96,13 @@ describe( 'plugins reducer', () => {
 			},
 			{
 				type: TYPES.SET_TASKS_STATUS,
-				tasksStatus: { isTaxComplete: false },
+				tasksStatus: { hasHomepage: false },
 			}
 		);
 
 		expect( state.tasksStatus ).toHaveProperty( 'hasProducts' );
-		expect( state.tasksStatus ).toHaveProperty( 'isTaxComplete' );
+		expect( state.tasksStatus ).toHaveProperty( 'hasHomepage' );
 		expect( state.tasksStatus.hasProducts ).toBe( true );
-		expect( state.tasksStatus.isTaxComplete ).toBe( false );
+		expect( state.tasksStatus.hasHomepage ).toBe( false );
 	} );
 } );

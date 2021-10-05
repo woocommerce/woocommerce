@@ -716,33 +716,9 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'hasPaymentGateway'              => array(
-					'type'        => 'boolean',
-					'description' => __( 'If the store has an enabled payment gateway.', 'woocommerce-admin' ),
-					'context'     => array( 'view' ),
-					'readonly'    => true,
-				),
-				'hasPhysicalProducts'            => array(
-					'type'        => 'boolean',
-					'description' => __( 'If the store has any physical (non-virtual) products.', 'woocommerce-admin' ),
-					'context'     => array( 'view' ),
-					'readonly'    => true,
-				),
 				'hasProducts'                    => array(
 					'type'        => 'boolean',
 					'description' => __( 'If the store has any products.', 'woocommerce-admin' ),
-					'context'     => array( 'view' ),
-					'readonly'    => true,
-				),
-				'isTaxComplete'                  => array(
-					'type'        => 'boolean',
-					'description' => __( 'If the tax step has been completed.', 'woocommerce-admin' ),
-					'context'     => array( 'view' ),
-					'readonly'    => true,
-				),
-				'shippingZonesCount'             => array(
-					'type'        => 'number',
-					'description' => __( 'The number of shipping zones configured for the store.', 'woocommerce-admin' ),
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
@@ -755,12 +731,6 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 				'themeMods'                      => array(
 					'type'        => 'object',
 					'description' => __( 'Active theme modifications.', 'woocommerce-admin' ),
-					'context'     => array( 'view' ),
-					'readonly'    => true,
-				),
-				'wcPayIsConnected'               => array(
-					'type'        => 'boolean',
-					'description' => __( 'If the store is using WooCommerce Payments.', 'woocommerce-admin' ),
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),

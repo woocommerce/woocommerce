@@ -26,7 +26,7 @@ import { getAdminLink } from '@woocommerce/wc-admin-settings';
 import './payment-recommendations.scss';
 import { getCountryCode } from '../dashboard/utils';
 import { createNoticesFromResponse } from '../lib/notices';
-import { isWCPaySupported } from '~/task-list/tasks/PaymentGatewaySuggestions/components/WCPay';
+import { isWCPaySupported } from '~/tasks/fills/PaymentGatewaySuggestions/components/WCPay';
 
 const SEE_MORE_LINK =
 	'https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations';
