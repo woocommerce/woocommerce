@@ -49,3 +49,53 @@ jobs:
           npx wc-e2e test:e2e ./tests/e2e/specs/smoke-tests/update-woocommerce.js
           npx wc-e2e test:e2e
           npx wc-api-tests test api
+  test-wp-version:
+    name: Smoke test on L-${{ matrix.wp }} WordPress version
+    runs-on: ubuntu-18.04
+    strategy:
+      matrix: 
+        wp: [ '1', '2' ]
+    steps:
+
+      - name: Create dirs.
+        run: |
+              mkdir -p code/woocommerce
+              mkdir -p package/woocommerce
+              mkdir -p tmp/woocommerce
+              mkdir -p node_modules
+
+      - name: Checkout code.
+        uses: actions/checkout@v2
+        with:
+          path: package/woocommerce
+
+      - name: Run npm install.
+        working-directory: package/woocommerce
+        run: npm install
+
+      - name: Load docker images and start containers.
+        working-directory: package/woocommerce
+        env:
+          LATEST_WP_VERSION_MINUS: ${{ matrix.wp }}
+        run: npx wc-e2e docker:up
+
+      - name: Move current directory to code. We will install zip file in this dir later.
+        run: mv ./package/woocommerce/* ./code/woocommerce
+
+      - name: Download WooCommerce release zip
+        working-directory: tmp
+        run: |
+          ASSET_ID=$(jq ".release.assets[0].id" $GITHUB_EVENT_PATH)
+
+          curl https://api.github.com/repos/woocommerce/woocommerce/releases/assets/${ASSET_ID} -LJOH 'Accept: application/octet-stream'
+
+          unzip woocommerce.zip -d woocommerce
+          mv woocommerce/* ../package/woocommerce/
+
+      - name: Run tests command.
+        working-directory: code/woocommerce
+        env:
+          WC_E2E_SCREENSHOTS: 1
+          E2E_SLACK_TOKEN: ${{ secrets.SMOKE_TEST_SLACK_TOKEN }}
+          E2E_SLACK_CHANNEL: ${{ secrets.RELEASE_TEST_SLACK_CHANNEL }}
+        run: npx wc-e2e test:e2e

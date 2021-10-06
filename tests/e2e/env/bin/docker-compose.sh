@@ -13,6 +13,10 @@ if [[ $1 ]]; then
 		export WORDPRESS_VERSION="5.8.0"
 	fi
 
+	if [[ $LATEST_WP_VERSION_MINUS ]]; then
+		export WORDPRESS_VERSION=$(./bin/get-previous-version.js $WORDPRESS_VERSION $LATEST_WP_VERSION_MINUS 2> /dev/null)
+	fi
+
 	if ! [[ $TRAVIS_PHP_VERSION =~ ^[0-9]+\.[0-9]+ ]]; then
 		TRAVIS_PHP_VERSION=$(./bin/get-latest-docker-tag.js php 7 2> /dev/null)
 	fi
