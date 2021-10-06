@@ -357,6 +357,11 @@
 		max-width: 1032px;
 		overflow: hidden;
 
+		// TODO: check on different screen sizes
+		.product.addons-product-banner {
+			max-width: calc(100% - 2px);
+		}
+
 		li {
 			background: #fff;
 			border: 1px solid #dcdcde;
