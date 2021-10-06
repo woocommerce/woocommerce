@@ -3,6 +3,11 @@
  */
 import { ElementHandle } from 'puppeteer';
 
+/**
+ * Internal dependencies
+ */
+import { NewOrder } from '../pages/NewOrder';
+
 /* eslint-disable @typescript-eslint/no-var-requires */
 const { expect } = require( '@jest/globals' );
 /* eslint-enable @typescript-eslint/no-var-requires */
@@ -14,6 +19,15 @@ const uiUnblocked = async () => {
 	await page.waitForFunction(
 		() => ! Boolean( document.querySelector( '.blockUI' ) )
 	);
+};
+
+/**
+ * Suspend processing for the specified time
+ *
+ * @param {number} timeout in milliseconds
+ */
+const waitForTimeout = async ( timeout: number ) => {
+	await new Promise( ( resolve ) => setTimeout( resolve, timeout ) );
 };
 
 /**
@@ -30,7 +44,7 @@ const verifyPublishAndTrash = async (
 	trashVerification: string
 ) => {
 	// Wait for auto save
-	await page.waitFor( 2000 );
+	await waitForTimeout( 2000 );
 	// Publish
 	await page.click( button );
 
@@ -147,7 +161,7 @@ export const waitForElementByTextWithoutThrow = async (
 		if ( selected ) {
 			break;
 		}
-		await page.waitFor( 1000 );
+		await waitForTimeout( 1000 );
 		selected = await getElementByText( element, text );
 	}
 	return Boolean( selected );
@@ -162,4 +176,5 @@ export {
 	getElementByAttributeAndValue,
 	waitForElementByText,
 	hasClass,
+	waitForTimeout,
 };

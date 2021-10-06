@@ -1,6 +1,7 @@
 # Unreleased
 
 -   Add Customers to analytics pages tested #7573
+-   Add `waitForTimeout` utility function #7572
 
 # 0.1.1
 

@@ -11,6 +11,7 @@ import { OnboardingWizard } from '../../pages/OnboardingWizard';
 import { PaymentsSetup } from '../../pages/PaymentsSetup';
 import { WcHomescreen } from '../../pages/WcHomescreen';
 import { BankAccountTransferSetup } from '../../sections/payment-setup/BankAccountTransferSetup';
+import { waitForTimeout } from '../../utils/actions';
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 const { afterAll, beforeAll, describe, it } = require( '@jest/globals' );
@@ -61,7 +62,7 @@ const testAdminPaymentSetupTask = () => {
 			} );
 
 			await homeScreen.isDisplayed();
-			await page.waitFor( 1000 );
+			await waitForTimeout( 1000 );
 			await homeScreen.clickOnTaskList( 'Set up payments' );
 			await paymentsSetup.isDisplayed();
 			await paymentsSetup.methodHasBeenSetup( 'bacs' );
@@ -70,7 +71,7 @@ const testAdminPaymentSetupTask = () => {
 		it( 'Enabling cash on delivery enables the payment method', async () => {
 			await paymentsSetup.enableCashOnDelivery();
 			await homeScreen.isDisplayed();
-			await page.waitFor( 1000 );
+			await waitForTimeout( 1000 );
 			await homeScreen.clickOnTaskList( 'Set up payments' );
 			await paymentsSetup.isDisplayed();
 			await paymentsSetup.methodHasBeenSetup( 'cod' );
