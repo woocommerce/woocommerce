@@ -69,6 +69,10 @@ contributors.html
 # Yarn
 yarn.lock
 
+# Packages
+/packages/*
+!/packages/README.md
+
 # Screenshots for e2e tests failures
 /screenshots/
 

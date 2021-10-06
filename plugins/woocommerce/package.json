@@ -13,7 +13,6 @@
     "wp_org_slug": "woocommerce"
   },
   "scripts": {
-    "install": " if [ -z \"$SKIP_LERNA_BOOTSTRAP\" ]; then npx lerna bootstrap --hoist; fi",
     "check:subset-installed": "npm list --depth 1 install-subset > /dev/null 2>&1",
     "install:subset-only": "npm install --no-package-lock --no-save install-subset",
     "install:no-e2e": "npm run check:subset-installed --silent || npm run install:subset-only && SKIP_LERNA_BOOTSTRAP=true npx install-subset i no-e2e",
