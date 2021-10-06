@@ -5,15 +5,6 @@
 
 namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks;
 
-use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\Appearance;
-use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\Marketing;
-use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\Payments;
-use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\Products;
-use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\Purchase;
-use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\Shipping;
-use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\StoreDetails;
-use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\Tax;
-use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\WooCommercePayments;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 use Automattic\WooCommerce\Admin\Loader;
 
@@ -36,6 +27,23 @@ class TaskLists {
 	protected static $lists = array();
 
 	/**
+	 * Array of default tasks.
+	 *
+	 * @var array
+	 */
+	const DEFAULT_TASKS = array(
+		'StoreDetails',
+		'Purchase',
+		'Products',
+		'WooCommercePayments',
+		'Payments',
+		'Tax',
+		'Shipping',
+		'Marketing',
+		'Appearance',
+	);
+
+	/**
 	 * Get class instance.
 	 */
 	final public static function instance() {
@@ -43,6 +51,47 @@ class TaskLists {
 			static::$instance = new static();
 		}
 		return static::$instance;
+	}
+
+	/**
+	 * Initialize the task lists.
+	 */
+	public static function init() {
+		add_action( 'admin_init', array( __CLASS__, 'set_active_task' ), 5 );
+		add_action( 'admin_init', array( __CLASS__, 'init_tasks' ) );
+	}
+
+	/**
+	 * Initialize tasks.
+	 */
+	public static function init_tasks() {
+		foreach ( self::DEFAULT_TASKS as $task ) {
+			$class = 'Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\\' . $task;
+			if ( ! method_exists( $class, 'init' ) ) {
+				continue;
+			}
+			$class::init();
+		}
+	}
+
+	/**
+	 * Temporarily store the active task to persist across page loads when neccessary.
+	 * Most tasks do not need this.
+	 */
+	public static function set_active_task() {
+		if ( ! isset( $_GET[ Task::ACTIVE_TASK_TRANSIENT ] ) ) { // phpcs:ignore csrf ok.
+			return;
+		}
+
+		$task_id = sanitize_title_with_dashes( wp_unslash( $_GET[ Task::ACTIVE_TASK_TRANSIENT ] ) ); // phpcs:ignore csrf ok.
+
+		$task = self::get_task( $task_id );
+
+		if ( ! $task ) {
+			return;
+		}
+
+		$task->set_active();
 	}
 
 	/**
@@ -114,15 +163,10 @@ class TaskLists {
 			)
 		);
 
-		self::add_task( 'setup', StoreDetails::get_task() );
-		self::add_task( 'setup', Purchase::get_task() );
-		self::add_task( 'setup', Products::get_task() );
-		self::add_task( 'setup', WooCommercePayments::get_task() );
-		self::add_task( 'setup', Payments::get_task() );
-		self::add_task( 'setup', Tax::get_task() );
-		self::add_task( 'setup', Shipping::get_task() );
-		self::add_task( 'setup', Marketing::get_task() );
-		self::add_task( 'setup', Appearance::get_task() );
+		foreach ( self::DEFAULT_TASKS as $task ) {
+			$class = 'Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\\' . $task;
+			self::add_task( 'setup', $class::get_task() );
+		}
 	}
 
 	/**

@@ -2,13 +2,50 @@
 
 namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks;
 
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\API\Reports\Taxes\Stats\DataStore as TaxDataStore;
+use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
+use Automattic\WooCommerce\Admin\Loader;
 
 /**
  * Tax Task
  */
 class Tax {
+	/**
+	 * Initialize.
+	 */
+	public static function init() {
+		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'possibly_add_return_notice_script' ) );
+	}
+
+	/**
+	 * Adds a return to task list notice when completing the task.
+	 */
+	public static function possibly_add_return_notice_script() {
+		$task = new Task( self::get_task() );
+		$page = isset( $_GET['page'] ) ? $_GET['page'] : ''; // phpcs:ignore csrf ok, sanitization ok.
+		$tab  = isset( $_GET['tab'] ) ? $_GET['tab'] : ''; // phpcs:ignore csrf ok, sanitization ok.
+
+		if ( $task->is_complete || ! $task->is_active() ) {
+			return;
+		}
+
+		if ( 'wc-settings' !== $page || 'tax' !== $tab ) {
+			return;
+		}
+
+		$script_assets_filename = Loader::get_script_asset_filename( 'wp-admin-scripts', 'onboarding-tax-notice' );
+		$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . 'wp-admin-scripts/' . $script_assets_filename;
+
+		wp_enqueue_script(
+			'onboarding-tax-notice',
+			Loader::get_url( 'wp-admin-scripts/onboarding-tax-notice', 'js' ),
+			array_merge( array( WC_ADMIN_APP ), $script_assets ['dependencies'] ),
+			WC_ADMIN_VERSION_NUMBER,
+			true
+		);
+	}
+
 	/**
 	 * Get the task arguments.
 	 *

@@ -129,6 +129,13 @@ class Task {
 	const COMPLETED_OPTION = 'woocommerce_task_list_tracked_completed_tasks';
 
 	/**
+	 * Name of the active task transient.
+	 *
+	 * @var string
+	 */
+	const ACTIVE_TASK_TRANSIENT = 'wc_onboarding_active_task';
+
+	/**
 	 * Duration to milisecond mapping.
 	 *
 	 * @var string
@@ -323,6 +330,28 @@ class Task {
 		$completed_tasks[] = $this->id;
 		update_option( self::COMPLETED_OPTION, $completed_tasks );
 		wc_admin_record_tracks_event( 'tasklist_task_completed', array( 'task_name' => $this->id ) );
+	}
+
+	/**
+	 * Set this as the active task across page loads.
+	 */
+	public function set_active() {
+		if ( $this->is_complete ) {
+			return;
+		}
+
+		set_transient(
+			self::ACTIVE_TASK_TRANSIENT,
+			$this->id,
+			DAY_IN_SECONDS
+		);
+	}
+
+	/**
+	 * Check if this is the active task.
+	 */
+	public function is_active() {
+		return get_transient( self::ACTIVE_TASK_TRANSIENT ) === $this->id;
 	}
 
 

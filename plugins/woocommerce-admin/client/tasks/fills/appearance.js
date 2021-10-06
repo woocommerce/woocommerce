@@ -169,7 +169,7 @@ class Appearance extends Component {
 											'tasklist_appearance_customize_homepage',
 											{}
 										);
-										window.location = `${ response.edit_post_link }&wc_onboarding_active_task=homepage`;
+										window.location = `${ response.edit_post_link }&wc_onboarding_active_task=appearance`;
 									},
 								},
 						  ]
