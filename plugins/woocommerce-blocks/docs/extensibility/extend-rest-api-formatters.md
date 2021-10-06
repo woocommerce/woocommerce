@@ -1,4 +1,5 @@
 # Formatters
+
 As part of ExtendRestAPI, we introduced `Formatters`, these are utility classes that allow you to format values to
 so that they are compatible with the StoreAPI, values such as money, currency, or HTML.
 
