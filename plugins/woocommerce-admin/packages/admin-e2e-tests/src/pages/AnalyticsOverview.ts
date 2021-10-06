@@ -44,6 +44,13 @@ export class AnalyticsOverview extends Analytics {
 		return sections.filter( isSection );
 	}
 
+	async getSectionTitles() {
+		const sections = ( await this.getSections() ).map(
+			( section ) => section.title
+		);
+		return sections;
+	}
+
 	async openSectionEllipsis( sectionTitle: string ) {
 		const section = ( await this.getSections() ).find(
 			( thisSection ) => thisSection.title === sectionTitle

@@ -11,44 +11,45 @@ const testAdminAnalyticsOverview = () => {
 	describe( 'Analytics pages', () => {
 		const analyticsPage = new AnalyticsOverview( page );
 		const login = new Login( page );
+		const sectionTitles = [ 'Performance', 'Charts', 'Leaderboards' ];
+		const titlesString = sectionTitles.join( ', ' );
 
 		beforeAll( async () => {
 			await login.login();
 			await analyticsPage.navigate();
 			await analyticsPage.isDisplayed();
+			// Restore original order to sections
+			for ( let t = 0; t < sectionTitles.length; t++ ) {
+				const visibleSections = await analyticsPage.getSectionTitles();
+				if ( visibleSections.indexOf( sectionTitles[ t ] ) < 0 ) {
+					await analyticsPage.addSection( sectionTitles[ t ] );
+				}
+			}
 		} );
 		afterAll( async () => {
 			await login.logout();
 		} );
 
-		it( 'a user should see 3 sections by default - Performance, Charts, and Leaderboards', async () => {
-			const sections = ( await analyticsPage.getSections() ).map(
-				( section ) => section.title
-			);
-			expect( sections ).toContain( 'Performance' );
-			expect( sections ).toContain( 'Charts' );
-			expect( sections ).toContain( 'Leaderboards' );
+		it( `a user should see ${ sectionTitles.length } sections by default - ${ titlesString }`, async () => {
+			const sections = await analyticsPage.getSectionTitles();
+			for ( let t = 0; t < sectionTitles.length; t++ ) {
+				expect( sections ).toContain( sectionTitles[ t ] );
+			}
 		} );
 
 		it( 'should allow a user to remove a section', async () => {
-			await analyticsPage.removeSection( 'Performance' );
-			const sections = ( await analyticsPage.getSections() ).map(
-				( section ) => section.title
-			);
-			expect( sections ).not.toContain( 'Performance' );
+			await analyticsPage.removeSection( sectionTitles[ 0 ] );
+			const sections = await analyticsPage.getSectionTitles();
+			expect( sections ).not.toContain( sectionTitles[ 0 ] );
 		} );
 
 		it( 'should allow a user to add a section back in', async () => {
-			let sections = ( await analyticsPage.getSections() ).map(
-				( section ) => section.title
-			);
-			expect( sections ).not.toContain( 'Performance' );
-			await analyticsPage.addSection( 'Performance' );
+			let sections = await analyticsPage.getSectionTitles();
+			expect( sections ).not.toContain( sectionTitles[ 0 ] );
+			await analyticsPage.addSection( sectionTitles[ 0 ] );
 
-			sections = ( await analyticsPage.getSections() ).map(
-				( section ) => section.title
-			);
-			expect( sections ).toContain( 'Performance' );
+			sections = await analyticsPage.getSectionTitles();
+			expect( sections ).toContain( sectionTitles[ 0 ] );
 		} );
 
 		describe( 'moving sections', () => {
@@ -76,19 +77,19 @@ const testAdminAnalyticsOverview = () => {
 			} );
 
 			it( 'should allow a user to move a section down', async () => {
-				const sections = await analyticsPage.getSections();
-				await analyticsPage.moveSectionDown( sections[ 0 ].title );
-				const newSections = await analyticsPage.getSections();
-				expect( sections[ 0 ].title ).toEqual( newSections[ 1 ].title );
-				expect( sections[ 1 ].title ).toEqual( newSections[ 0 ].title );
+				const sections = await analyticsPage.getSectionTitles();
+				await analyticsPage.moveSectionDown( sections[ 0 ] );
+				const newSections = await analyticsPage.getSectionTitles();
+				expect( sections[ 0 ] ).toEqual( newSections[ 1 ] );
+				expect( sections[ 1 ] ).toEqual( newSections[ 0 ] );
 			} );
 
 			it( 'should allow a user to move a section up', async () => {
-				const sections = await analyticsPage.getSections();
-				await analyticsPage.moveSectionUp( sections[ 1 ].title );
-				const newSections = await analyticsPage.getSections();
-				expect( sections[ 0 ].title ).toEqual( newSections[ 1 ].title );
-				expect( sections[ 1 ].title ).toEqual( newSections[ 0 ].title );
+				const sections = await analyticsPage.getSectionTitles();
+				await analyticsPage.moveSectionUp( sections[ 1 ] );
+				const newSections = await analyticsPage.getSectionTitles();
+				expect( sections[ 0 ] ).toEqual( newSections[ 1 ] );
+				expect( sections[ 1 ] ).toEqual( newSections[ 0 ] );
 			} );
 		} );
 	} );
