@@ -20,10 +20,10 @@ import './task-list.scss';
 export const getEventPrefix = ( id: string ): string => {
 	// This helps retain backwards compatibility with the old event naming.
 	if ( id === 'setup' ) {
-		return 'tasklist_';
+		return 'tasklist';
 	}
 
-	return `${ id }_tasklist_`;
+	return `${ id }_tasklist`;
 };
 
 export type TaskListProps = TaskListType & {

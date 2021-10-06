@@ -785,6 +785,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 				array(
 					'id'             => $id,
 					'is_dismissable' => true,
+					'parent_id'      => 'extended',
 				)
 			);
 		}
@@ -818,6 +819,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 				array(
 					'id'             => $id,
 					'is_dismissable' => true,
+					'parent_id'      => 'extended',
 				)
 			);
 		}
@@ -856,6 +858,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 				array(
 					'id'            => $task_id,
 					'is_snoozeable' => true,
+					'parent_id'     => 'extended',
 				)
 			);
 		}
@@ -889,6 +892,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 				array(
 					'id'            => $id,
 					'is_snoozeable' => true,
+					'parent_id'     => 'extended',
 				)
 			);
 		}
@@ -947,7 +951,8 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		if ( ! $task && $id ) {
 			$task = new Task(
 				array(
-					'id' => $id,
+					'id'        => $id,
+					'parent_id' => 'extended',
 				)
 			);
 		}

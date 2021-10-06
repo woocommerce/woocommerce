@@ -1,16 +1,48 @@
 /**
  * External dependencies
  */
-import { createElement } from '@wordpress/element';
+import { createElement, useEffect } from '@wordpress/element';
+import { recordEvent } from '@woocommerce/tracks';
 import { Slot, Fill } from '@wordpress/components';
 
-export const WooOnboardingTask = ( { id, ...props } ) => (
-	<Fill name={ 'woocommerce_onboarding_task_' + id } { ...props } />
-);
+export const trackView = ( taskId ) => {
+	const activePlugins = wp.data
+		.select( 'wc/admin/plugins' )
+		.getActivePlugins();
 
-WooOnboardingTask.Slot = ( { id, fillProps } ) => (
-	<Slot
-		name={ 'woocommerce_onboarding_task_' + id }
-		fillProps={ fillProps }
-	/>
-);
+	const installedPlugins = wp.data
+		.select( 'wc/admin/plugins' )
+		.getInstalledPlugins();
+
+	const isJetpackConnected = wp.data
+		.select( 'wc/admin/plugins' )
+		.isJetpackConnected();
+
+	recordEvent( 'task_view', {
+		task_name: taskId,
+		wcs_installed: installedPlugins.includes( 'woocommerce-services' ),
+		wcs_active: activePlugins.includes( 'woocommerce-services' ),
+		jetpack_installed: installedPlugins.includes( 'jetpack' ),
+		jetpack_active: activePlugins.includes( 'jetpack' ),
+		jetpack_connected: isJetpackConnected,
+	} );
+};
+
+export const WooOnboardingTask = ( { id, ...props } ) => {
+	return <Fill name={ 'woocommerce_onboarding_task_' + id } { ...props } />;
+};
+
+WooOnboardingTask.Slot = ( { id, fillProps } ) => {
+	// The Slot is a React component and this hook works as expected.
+	// eslint-disable-next-line react-hooks/rules-of-hooks
+	useEffect( () => {
+		trackView( id );
+	}, [ id ] );
+
+	return (
+		<Slot
+			name={ 'woocommerce_onboarding_task_' + id }
+			fillProps={ fillProps }
+		/>
+	);
+};

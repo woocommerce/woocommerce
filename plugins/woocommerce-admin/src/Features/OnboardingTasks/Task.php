@@ -10,11 +10,23 @@ namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks;
  */
 class Task {
 	/**
+	 * Task traits.
+	 */
+	use TaskTraits;
+
+	/**
 	 * ID.
 	 *
 	 * @var string
 	 */
 	public $id = '';
+
+	/**
+	 * Parent task list ID.
+	 *
+	 * @var string
+	 */
+	public $parent_id = '';
 
 	/**
 	 * Title.
@@ -154,6 +166,7 @@ class Task {
 	public function __construct( $data = array() ) {
 		$defaults = array(
 			'id'              => null,
+			'parent_id'       => null,
 			'title'           => '',
 			'content'         => '',
 			'action_label'    => __( "Let's go", 'woocommerce-admin' ),
@@ -171,6 +184,7 @@ class Task {
 		$data = wp_parse_args( $data, $defaults );
 
 		$this->id              = (string) $data['id'];
+		$this->parent_id       = (string) $data['parent_id'];
 		$this->title           = (string) $data['title'];
 		$this->content         = (string) $data['content'];
 		$this->action_label    = (string) $data['action_label'];
@@ -219,7 +233,7 @@ class Task {
 		$update      = update_option( self::DISMISSED_OPTION, array_unique( $dismissed ) );
 
 		if ( $update ) {
-			wc_admin_record_tracks_event( 'tasklist_dismiss_task', array( 'task_name' => $this->id ) );
+			$this->record_tracks_event( 'dismiss_task', array( 'task_name' => $this->id ) );
 		}
 
 		return $update;
@@ -236,7 +250,7 @@ class Task {
 		$update    = update_option( self::DISMISSED_OPTION, $dismissed );
 
 		if ( $update ) {
-			wc_admin_record_tracks_event( 'tasklist_undo_dismiss_task', array( 'task_name' => $this->id ) );
+			$this->record_tracks_event( 'undo_dismiss_task', array( 'task_name' => $this->id ) );
 		}
 
 		return $update;
@@ -275,7 +289,7 @@ class Task {
 
 		if ( $update ) {
 			if ( $update ) {
-				wc_admin_record_tracks_event( 'tasklist_remindmelater_task', array( 'task_name' => $this->id ) );
+				$this->record_tracks_event( 'remindmelater_task', array( 'task_name' => $this->id ) );
 				$this->snoozed_until = $snoozed_until;
 			}
 		}
@@ -294,7 +308,7 @@ class Task {
 		$update = update_option( self::SNOOZED_OPTION, $snoozed );
 
 		if ( $update ) {
-			wc_admin_record_tracks_event( 'tasklist_undo_remindmelater_task', array( 'task_name' => $this->id ) );
+			$this->record_tracks_event( 'undo_remindmelater_task', array( 'task_name' => $this->id ) );
 		}
 
 		return $update;
@@ -329,7 +343,7 @@ class Task {
 		$completed_tasks   = get_option( self::COMPLETED_OPTION, array() );
 		$completed_tasks[] = $this->id;
 		update_option( self::COMPLETED_OPTION, $completed_tasks );
-		wc_admin_record_tracks_event( 'tasklist_task_completed', array( 'task_name' => $this->id ) );
+		$this->record_tracks_event( 'task_completed', array( 'task_name' => $this->id ) );
 	}
 
 	/**
@@ -365,6 +379,7 @@ class Task {
 
 		return array(
 			'id'             => $this->id,
+			'parentId'       => $this->parent_id,
 			'title'          => $this->title,
 			'canView'        => $this->can_view,
 			'content'        => $this->content,
@@ -396,7 +411,7 @@ class Task {
 		$update     = update_option( self::ACTIONED_OPTION, array_unique( $actioned ) );
 
 		if ( $update ) {
-			wc_admin_record_tracks_event( 'tasklist_actioned_task', array( 'task_name' => $this->id ) );
+			$this->record_tracks_event( 'actioned_task', array( 'task_name' => $this->id ) );
 		}
 
 		return $update;

@@ -885,7 +885,7 @@ class Onboarding {
 			wc_admin_record_tracks_event(
 				'tasklist_toggled',
 				array(
-					'status' => $show ? 'disabled' : 'enabled',
+					'status' => $show ? 'enabled' : 'disabled',
 				)
 			);
 		}
