@@ -1,5 +1,7 @@
 # Unreleased
 
+-   Add Customers to analytics pages tested #7573
+
 # 0.1.1
 
 -   Allow packages to be built in isolation. #7286

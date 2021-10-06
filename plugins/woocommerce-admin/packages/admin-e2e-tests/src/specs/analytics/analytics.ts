@@ -2,6 +2,7 @@
  * Internal dependencies
  */
 import { Analytics } from '../../pages/Analytics';
+import { Customers } from '../../pages/Customers';
 import { Login } from '../../pages/Login';
 
 /* eslint-disable @typescript-eslint/no-var-requires */
@@ -10,6 +11,7 @@ const { afterAll, beforeAll, describe, it } = require( '@jest/globals' );
 const testAdminAnalyticsPages = () => {
 	describe( 'Analytics pages', () => {
 		const analyticsPage = new Analytics( page );
+		const customersPage = new Customers( page );
 		const login = new Login( page );
 
 		beforeAll( async () => {
@@ -72,6 +74,11 @@ const testAdminAnalyticsPages = () => {
 		it( 'A user can view the analytics for settings without it crashing', async () => {
 			await analyticsPage.navigateToSection( 'settings' );
 			await analyticsPage.isDisplayed();
+		} );
+
+		it( 'A user can view the customers page without it crashing', async () => {
+			await customersPage.navigate();
+			await customersPage.isDisplayed();
 		} );
 	} );
 };
