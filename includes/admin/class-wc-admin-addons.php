@@ -132,7 +132,8 @@ class WC_Admin_Addons {
 	 */
 	private static function output_featured( $blocks ) {
 		foreach ( $blocks as $block ) {
-			switch ( $block->type ) {
+			$block_type = $block->type ?? null;
+			switch ( $block_type ) {
 				case 'group':
 					self::output_group( $block );
 					break;
@@ -188,7 +189,7 @@ class WC_Admin_Addons {
 	private static function output_banner( $block ) {
 		?>
 			<ul class="products">
-			<?php self::render_product_card( $block ); ?>
+			<?php self::render_product_card( $block, $block->type ); ?>
 			</ul>
 		<?php
 	}
@@ -345,8 +346,14 @@ class WC_Admin_Addons {
 		}
 		// Rating.
 		$mapped->rating = $data->rating ?? null;
+		if ( null === $mapped->rating ) {
+			$mapped->rating = $data->averageRating ?? null; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+		}
 		// Reviews Count.
 		$mapped->reviews_count = $data->reviews_count ?? null;
+		if ( null === $mapped->reviews_count ) {
+			$mapped->reviewsCount = $data->reviewsCount ?? null; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+		}
 
 		return $mapped;
 	}
@@ -357,13 +364,21 @@ class WC_Admin_Addons {
 	 * There's difference in data structure (e.g. field names) between endpoints such as search and
 	 * featured. Inner mapping helps to use universal field names for further work.
 	 *
-	 * @param mixed $data Product data.
+	 * @param mixed  $data       Product data.
+	 * @param string $block_type Block type that's different from the default product card, e.g. a banner.
+	 *
+	 * @return void
 	 */
-	public static function render_product_card( $data ) {
+	public static function render_product_card( $data, $block_type = null ) {
 		$mapped      = self::map_product_card_data( $data );
 		$product_url = self::add_in_app_purchase_url_params( $mapped->url );
+		$class_names = array( 'product' );
+		// Specify a class name according to $block_type (if it's specified).
+		if ( null !== $block_type ) {
+			$class_names[] = 'addons-product-' . $block_type;
+		}
 		?>
-			<li class="product">
+			<li class="<?php echo esc_attr( implode( ' ', $class_names ) ); ?>">
 				<div class="product-details">
 					<?php if ( ! empty( $mapped->icon ) ) : ?>
 						<span class="product-img-wrap">
