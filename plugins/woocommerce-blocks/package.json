@@ -182,8 +182,8 @@
 		"zenhub-api": "0.2.0"
 	},
 	"engines": {
-		"node": "12.22.6",
-		"npm": "6.14.14"
+		"node": ">=12.0.0",
+		"npm": ">=6.14.0 <7"
 	},
 	"dependencies": {
 		"@stripe/react-stripe-js": "1.4.1",
