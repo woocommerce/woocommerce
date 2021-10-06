@@ -15,7 +15,6 @@ import { getAttributes, getVariationAttributes } from './utils';
 const VariationAttributes = ( { product, dispatchers } ) => {
 	const attributes = getAttributes( product.attributes );
 	const variationAttributes = getVariationAttributes( product.variations );
-
 	if (
 		Object.keys( attributes ).length === 0 ||
 		variationAttributes.length === 0
