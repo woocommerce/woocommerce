@@ -3,6 +3,7 @@
  */
 import { keyBy } from 'lodash';
 import { decodeEntities } from '@wordpress/html-entities';
+import { isObject } from '@woocommerce/types';
 
 /**
  * Key an array of attributes by name,
@@ -205,4 +206,35 @@ export const getActiveSelectControlOptions = (
 	} );
 
 	return options;
+};
+
+/**
+ * Return the default values of the given attributes in a format ready to be set in state.
+ *
+ * @param {Object} attributes List of attribute names and terms.
+ * @return {Object} Default attributes.
+ */
+export const getDefaultAttributes = ( attributes = {} ) => {
+	if ( ! isObject( attributes ) ) {
+		return {};
+	}
+
+	const attributeNames = Object.keys( attributes );
+	const defaultsToSet = {};
+
+	if ( attributeNames.length === 0 ) {
+		return defaultsToSet;
+	}
+
+	attributeNames.forEach( ( attributeName ) => {
+		const currentAttribute = attributes[ attributeName ];
+		const defaultValue = currentAttribute.terms.filter(
+			( term ) => term.default
+		);
+		if ( defaultValue.length > 0 ) {
+			defaultsToSet[ currentAttribute.name ] = defaultValue[ 0 ]?.slug;
+		}
+	} );
+
+	return defaultsToSet;
 };
