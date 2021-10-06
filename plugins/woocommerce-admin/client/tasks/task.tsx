@@ -3,16 +3,16 @@
  */
 import { WooOnboardingTask } from '@woocommerce/onboarding';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
-import { ONBOARDING_STORE_NAME } from '@woocommerce/data';
-import { recordEvent } from '@woocommerce/tracks';
+import { ONBOARDING_STORE_NAME, TaskType } from '@woocommerce/data';
 import { useCallback } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 
 export type TaskProps = {
 	query: { task: string };
+	task?: TaskType;
 };
 
-export const Task: React.FC< TaskProps > = ( { query } ) => {
+export const Task: React.FC< TaskProps > = ( { query, task } ) => {
 	const id = query.task;
 	const {
 		invalidateResolutionForStoreSelector,
@@ -24,6 +24,10 @@ export const Task: React.FC< TaskProps > = ( { query } ) => {
 		getHistory().push( getNewPath( {}, '/', {} ) );
 		invalidateResolutionForStoreSelector( 'getTaskLists' );
 	}, [ id ] );
+
+	if ( task && task.container ) {
+		return task.container;
+	}
 
 	return (
 		<WooOnboardingTask.Slot id={ id } fillProps={ { onComplete, query } } />

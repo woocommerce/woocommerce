@@ -43,22 +43,31 @@ class TaskList {
 	public $tasks = array();
 
 	/**
+	 * Sort keys.
+	 *
+	 * @var array
+	 */
+	public $sort_by = array();
+
+	/**
 	 * Constructor
 	 *
 	 * @param array $data Task list data.
 	 */
 	public function __construct( $data = array() ) {
 		$defaults = array(
-			'id'    => null,
-			'title' => '',
-			'tasks' => array(),
+			'id'      => null,
+			'title'   => '',
+			'tasks'   => array(),
+			'sort_by' => array(),
 		);
 
 		$data = wp_parse_args( $data, $defaults );
 
-		$this->id    = $data['id'];
-		$this->title = $data['title'];
-		$this->tasks = $data['tasks'];
+		$this->id      = $data['id'];
+		$this->title   = $data['title'];
+		$this->tasks   = $data['tasks'];
+		$this->sort_by = $data['sort_by'];
 	}
 
 	/**
@@ -197,6 +206,44 @@ class TaskList {
 		$completed_lists[] = $this->id;
 		update_option( self::COMPLETED_OPTION, $completed_lists );
 		wc_admin_record_tracks_event( $this->prefix_event( 'tasklist_tasks_completed' ) );
+	}
+
+	/**
+	 * Sorts the attached tasks array.
+	 *
+	 * @return TaskList returns $this, for chaining.
+	 */
+	public function sort_tasks() {
+		if ( 0 !== count( $this->sort_by ) ) {
+			usort( $this->tasks, array( $this, 'sort' ) );
+		}
+		return $this;
+	}
+
+	/**
+	 * Sorting function for tasks.
+	 *
+	 * @param Task $a Task a.
+	 * @param Task $b Task b.
+	 * @return int
+	 */
+	private function sort( $a, $b ) {
+		$result = 0;
+		foreach ( $this->sort_by as $data ) {
+			$key   = $data['key'];
+			$a_val = $a->$key ?? false;
+			$b_val = $b->$key ?? false;
+			if ( 'asc' === $data['order'] ) {
+				$result = $a_val <=> $b_val;
+			} else {
+				$result = $b_val <=> $a_val;
+			}
+
+			if ( 0 !== $result ) {
+				break;
+			}
+		}
+		return $result;
 	}
 
 	/**

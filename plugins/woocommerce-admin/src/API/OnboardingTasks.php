@@ -762,7 +762,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		$lists          = TaskLists::get_lists( $extended_tasks );
 		$json           = array_map(
 			function( $list ) {
-				return $list->get_json();
+				return $list->sort_tasks()->get_json();
 			},
 			$lists
 		);

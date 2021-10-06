@@ -127,3 +127,4 @@ export interface WCDataSelector {
 	< T extends WCDataStoreName >( storeName: T ): WCSelectorType< T >;
 }
 export * from './onboarding/selectors';
+export * from './onboarding/types';

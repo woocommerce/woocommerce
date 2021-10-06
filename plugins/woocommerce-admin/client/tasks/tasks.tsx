@@ -98,7 +98,7 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 	if ( currentTask ) {
 		return (
 			<div className="woocommerce-task-dashboard__container">
-				<Task query={ query } />
+				<Task query={ query } task={ currentTask } />
 			</div>
 		);
 	}

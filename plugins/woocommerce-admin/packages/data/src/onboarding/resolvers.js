@@ -89,20 +89,29 @@ function getTasksFromDeprecatedFilter() {
 			alternative: 'TaskLists::add_task()',
 			plugin: '@woocommerce/data',
 		} );
-		return filteredTasks.map( ( task ) => ( {
-			title: task.title,
-			content: task.content,
-			additional_info: task.additionalInfo,
-			time: task.time,
-			level: task.level ? parseInt( task.level, 10 ) : 3,
-			list_id: task.type || 'extended',
-			is_visible: task.visible,
-			id: task.key,
-			is_snoozeable: task.allowRemindMeLater,
-			is_dismissable: task.isDismissable,
-		} ) );
+		return {
+			original: filteredTasks.reduce( ( org, task ) => {
+				return {
+					...org,
+					[ task.key ]: task,
+				};
+			}, {} ),
+			parsed: filteredTasks.map( ( task ) => ( {
+				title: task.title,
+				content: task.content,
+				additional_info: task.additionalInfo,
+				time: task.time,
+				level: task.level ? parseInt( task.level, 10 ) : 3,
+				list_id: task.type || 'extended',
+				is_visible: task.visible,
+				id: task.key,
+				is_snoozeable: task.allowRemindMeLater,
+				is_dismissable: task.isDismissable,
+				is_complete: task.completed,
+			} ) ),
+		};
 	}
-	return [];
+	return { original: {}, parsed: [] };
 }
 
 export function* getTaskLists() {
@@ -110,12 +119,30 @@ export function* getTaskLists() {
 	try {
 		const results = yield apiFetch( {
 			path: WC_ADMIN_NAMESPACE + '/onboarding/tasks',
-			method: tasksFromDeprecatedFilter.length > 0 ? 'POST' : 'GET',
-			data: tasksFromDeprecatedFilter.length && {
-				extended_tasks: tasksFromDeprecatedFilter,
+			method:
+				tasksFromDeprecatedFilter.parsed.length > 0 ? 'POST' : 'GET',
+			data: tasksFromDeprecatedFilter.parsed.length && {
+				extended_tasks: tasksFromDeprecatedFilter.parsed,
 			},
 		} );
 
+		if ( tasksFromDeprecatedFilter.parsed.length > 0 ) {
+			for ( const taskList of results ) {
+				// Merge any extended task list items, to keep the callback functions around.
+				taskList.tasks = taskList.tasks.map( ( task ) => {
+					if (
+						tasksFromDeprecatedFilter.original &&
+						tasksFromDeprecatedFilter.original[ task.id ]
+					) {
+						return {
+							...tasksFromDeprecatedFilter.original[ task.id ],
+							...task,
+						};
+					}
+					return task;
+				} );
+			}
+		}
 		yield getTaskListsSuccess( results );
 	} catch ( error ) {
 		yield getTaskListsError( error );

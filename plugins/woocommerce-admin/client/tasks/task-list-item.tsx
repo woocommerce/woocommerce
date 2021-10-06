@@ -190,6 +190,6 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 			} }
 		/>
 	) : (
-		<DefaultTaskItem />
+		<DefaultTaskItem onClick={ task.onClick } />
 	);
 };
