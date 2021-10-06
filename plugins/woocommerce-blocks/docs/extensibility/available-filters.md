@@ -1,4 +1,5 @@
 # Filters
+
 Like traditional WordPress filters (you register a callback with a specific filter, your callback accepts a number of
 arguments, then it returns a value), we are introducing filters to the WooCommerce Blocks extension. These will function
 very similarly to the traditional filters. 
