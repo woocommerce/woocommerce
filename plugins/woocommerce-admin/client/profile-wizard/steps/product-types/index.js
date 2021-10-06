@@ -40,10 +40,24 @@ export class ProductTypes extends Component {
 			error: null,
 			isMonthlyPricing: true,
 			selected: profileItems.product_types || defaultProductTypes,
+			isWCPayInstalled: null,
 		};
 
 		this.onContinue = this.onContinue.bind( this );
 		this.onChange = this.onChange.bind( this );
+	}
+
+	componentDidMount() {
+		const { installedPlugins } = this.props;
+		const { isWCPayInstalled } = this.state;
+
+		if ( isWCPayInstalled === null && installedPlugins ) {
+			this.setState( {
+				isWCPayInstalled: installedPlugins.includes(
+					'woocommerce-payments'
+				),
+			} );
+		}
 	}
 
 	validateField() {
@@ -132,12 +146,13 @@ export class ProductTypes extends Component {
 
 	render() {
 		const { productTypes = {} } = getSetting( 'onboarding', {} );
-		const { error, isMonthlyPricing, selected } = this.state;
 		const {
-			installedPlugins = [],
-			isInstallingActivating,
-			isProfileItemsRequesting,
-		} = this.props;
+			error,
+			isMonthlyPricing,
+			isWCPayInstalled,
+			selected,
+		} = this.state;
+		const { isInstallingActivating, isProfileItemsRequesting } = this.props;
 
 		return (
 			<div className="woocommerce-profile-wizard__product-types">
@@ -241,7 +256,7 @@ export class ProductTypes extends Component {
 					</Text>
 					{ window.wcAdminFeatures &&
 						window.wcAdminFeatures.subscriptions &&
-						! installedPlugins.includes( 'woocommerce-payments' ) &&
+						! isWCPayInstalled &&
 						selected.includes( 'subscriptions' ) && (
 							<Text
 								variant="body"
