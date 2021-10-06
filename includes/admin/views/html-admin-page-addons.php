@@ -115,14 +115,14 @@ function wccom_get_star_class( $rating, $index ) {
 			<?php endif; ?>
 			<?php if ( '_featured' !== $current_section && $addons ) : ?>
 				<?php if ( 'shipping_methods' === $current_section ) : ?>
-					<div class="addons-shipping-methods">
-						<?php WC_Admin_Addons::output_wcs_banner_block(); ?>
-					</div>
+					<!-- <div class="addons-shipping-methods"> -->
+						<?php // WC_Admin_Addons::output_wcs_banner_block(); // TODO: do something with it. ?>
+					<!-- </div> -->
 				<?php endif; ?>
 				<?php if ( 'payment-gateways' === $current_section ) : ?>
-					<div class="addons-shipping-methods">
-						<?php WC_Admin_Addons::output_wcpay_banner_block(); ?>
-					</div>
+					<!-- <div class="addons-shipping-methods"> -->
+						<?php // WC_Admin_Addons::output_wcpay_banner_block(); // TODO: do something with it. ?>
+					<!-- </div> -->
 				<?php endif; ?>
 				<ul class="products">
 					<?php foreach ( $addons as $addon ) : ?>
@@ -148,60 +148,7 @@ function wccom_get_star_class( $rating, $index ) {
 							}
 						}
 						?>
-						<li class="product">
-							<div class="product-details">
-								<?php if ( ! empty( $addon->icon ) ) : ?>
-									<span class="product-img-wrap">
-										<?php /* Show an icon if it exists */ ?>
-										<img src="<?php echo esc_url( $addon->icon ); ?>" />
-									</span>
-								<?php endif; ?>
-								<a href="<?php echo esc_url( WC_Admin_Addons::add_in_app_purchase_url_params( $addon->link ) ); ?>">
-									<h2><?php echo esc_html( $addon->title ); ?></h2>
-								</a>
-								<?php if ( ! empty( $addon->vendor_name ) && ! empty( $addon->vendor_url ) ) : ?>
-									<div class="product-developed-by">
-										<?php
-											printf(
-												/* translators: %s vendor link */
-												esc_html__( 'Developed by %s', 'woocommerce' ),
-												sprintf(
-													'<a class="product-vendor-link" href="%1$s" target="_blank">%2$s</a>',
-													esc_url_raw( $addon->vendor_url ),
-													wp_kses_post( $addon->vendor_name )
-												)
-											);
-										?>
-									</div>
-								<?php endif; ?>
-								<p><?php echo wp_kses_post( $addon->excerpt ); ?></p>
-							</div>
-							<div class="product-footer">
-								<div class="product-price-and-reviews-container">
-									<div class="product-price-block">
-										<?php if ( '&#36;0.00' === $addon->price ) : ?>
-											<span class="price"><?php esc_html_e( 'Free', 'woocommerce' ); ?></span>
-										<?php else : ?>
-											<span class="price"><?php echo wp_kses_post( $addon->price ); ?></span>
-											<span class="price-suffix"><?php esc_html_e( 'per year', 'woocommerce' ); ?></span>
-										<?php endif; ?>
-									</div>
-									<?php if ( ! empty( $addon->reviews_count ) && ! empty( $addon->rating ) ) : ?>
-										<?php /* Show rating and the number of reviews */ ?>
-										<div class="product-reviews-block">
-											<?php for ( $index = 1; $index <= 5; ++$index ) : ?>
-												<?php $rating_star_class = 'product-rating-star product-rating-star__' . wccom_get_star_class( $addon->rating, $index ); ?>
-												<div class="<?php echo esc_attr( $rating_star_class ); ?>"></div>
-											<?php endfor; ?>
-											<span class="product-reviews-count">(<?php echo wp_kses_post( $addon->reviews_count ); ?>)</span>
-										</div>
-									<?php endif; ?>
-								</div>
-								<a class="button" href="<?php echo esc_url( WC_Admin_Addons::add_in_app_purchase_url_params( $addon->link ) ); ?>">
-									<?php esc_html_e( 'View details', 'woocommerce' ); ?>
-								</a>
-							</div>
-						</li>
+						<?php WC_Admin_Addons::render_product_card( $addon ); ?>
 					<?php endforeach; ?>
 				</ul>
 			<?php endif; ?>

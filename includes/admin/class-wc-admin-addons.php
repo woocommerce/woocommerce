@@ -49,7 +49,7 @@ class WC_Admin_Addons {
 			}
 		}
 
-		if ( is_object( $featured ) ) {
+		if ( ! empty( $featured ) ) {
 			self::output_featured( $featured );
 		}
 	}
@@ -126,86 +126,6 @@ class WC_Admin_Addons {
 	}
 
 	/**
-	 * Get section for the addons screen.
-	 *
-	 * @param  string $section_id Required section ID.
-	 *
-	 * @return object|bool
-	 */
-	public static function get_section( $section_id ) {
-		$sections = self::get_sections();
-		if ( isset( $sections[ $section_id ] ) ) {
-			return $sections[ $section_id ];
-		}
-		return false;
-	}
-
-	/**
-	 * Get section content for the addons screen.
-	 *
-	 * @param  string $section_id Required section ID.
-	 *
-	 * @return array
-	 */
-	public static function get_section_data( $section_id ) {
-		$section      = self::get_section( $section_id );
-		$section_data = '';
-
-		if ( ! empty( $section->endpoint ) ) {
-			$section_data = get_transient( 'wc_addons_section_' . $section_id );
-			if ( false === $section_data ) {
-				$raw_section = wp_safe_remote_get( esc_url_raw( $section->endpoint ), array( 'user-agent' => 'WooCommerce Addons Page' ) );
-
-				if ( ! is_wp_error( $raw_section ) ) {
-					$section_data = json_decode( wp_remote_retrieve_body( $raw_section ) );
-
-					if ( ! empty( $section_data->products ) ) {
-						set_transient( 'wc_addons_section_' . $section_id, $section_data, WEEK_IN_SECONDS );
-					}
-				}
-			}
-		}
-
-		return apply_filters( 'woocommerce_addons_section_data', $section_data->products, $section_id );
-	}
-
-	/**
-	 * Handles the outputting of a contextually aware Storefront link (points to child themes if Storefront is already active).
-	 */
-	public static function output_storefront_button() {
-		$template   = get_option( 'template' );
-		$stylesheet = get_option( 'stylesheet' );
-
-		if ( 'storefront' === $template ) {
-			if ( 'storefront' === $stylesheet ) {
-				$url         = 'https://woocommerce.com/product-category/themes/storefront-child-theme-themes/';
-				$text        = __( 'Need a fresh look? Try Storefront child themes', 'woocommerce' );
-				$utm_content = 'nostorefrontchildtheme';
-			} else {
-				$url         = 'https://woocommerce.com/product-category/themes/storefront-child-theme-themes/';
-				$text        = __( 'View more Storefront child themes', 'woocommerce' );
-				$utm_content = 'hasstorefrontchildtheme';
-			}
-		} else {
-			$url         = 'https://woocommerce.com/storefront/';
-			$text        = __( 'Need a theme? Try Storefront', 'woocommerce' );
-			$utm_content = 'nostorefront';
-		}
-
-		$url = add_query_arg(
-			array(
-				'utm_source'   => 'addons',
-				'utm_medium'   => 'product',
-				'utm_campaign' => 'woocommerceplugin',
-				'utm_content'  => $utm_content,
-			),
-			$url
-		);
-
-		echo '<a href="' . esc_url( $url ) . '" class="add-new-h2">' . esc_html( $text ) . '</a>' . "\n";
-	}
-
-	/**
 	 * Handles the outputting of featured page
 	 *
 	 * @param array $blocks Featured page's blocks.
@@ -214,13 +134,63 @@ class WC_Admin_Addons {
 		foreach ( $blocks as $block ) {
 			switch ( $block->type ) {
 				case 'group':
-					// TODO:
+					self::output_group( $block );
 					break;
 				case 'banner':
-					// TODO:
+					self::output_banner( $block );
 					break;
 			}
 		}
+	}
+
+	/**
+	 * Render a group block including products
+	 *
+	 * @param mixed $block Block of the page for rendering.
+	 *
+	 * @return void
+	 */
+	private static function output_group( $block ) {
+		// TODO: Output products according to the group's capacity.
+		?>
+			<section class="addon-product-group">
+				<h1 class="addon-product-group__title"><?php echo esc_html( $block->title ); ?></h1>
+				<?php if ( ! empty( $block->description ) ) : ?>
+					<div class="addon-product-group__description">
+						<?php echo esc_html( $block->description ); ?>
+					</div>
+				<?php endif; ?>
+				<?php if ( null !== $block->url ) : ?>
+					<a class="addon-product-group__see-more" href="<?php echo esc_url( $block->url ); ?>">
+						<?php esc_html_e( 'See more', 'woocommerce' ); ?>
+					</a>
+				<?php endif; ?>
+				<div class="addon-product-group__items">
+					<ul class="products">
+					<?php
+					foreach ( $block->items as $item ) {
+						self::render_product_card( $item );
+					}
+					?>
+					</ul>
+				<div>
+			</section>
+		<?php
+	}
+
+	/**
+	 * Render a banner contains a product
+	 *
+	 * @param mixed $block Block of the page for rendering.
+	 *
+	 * @return void
+	 */
+	private static function output_banner( $block ) {
+		?>
+			<ul class="products">
+			<?php self::render_product_card( $block ); ?>
+			</ul>
+		<?php
 	}
 
 	/**
@@ -252,29 +222,6 @@ class WC_Admin_Addons {
 			$url
 		);
 	}
-
-	/**
-	 * Outputs a button.
-	 *
-	 * @param string $url    Destination URL.
-	 * @param string $text   Button label text.
-	 * @param string $style  Button style class.
-	 * @param string $plugin The plugin the button is promoting.
-	 */
-	public static function output_button( $url, $text, $style, $plugin = '' ) {
-		$style = __( 'Free', 'woocommerce' ) === $text ? 'addons-button-outline-purple' : $style;
-		$style = is_plugin_active( $plugin ) ? 'addons-button-installed' : $style;
-		$text  = is_plugin_active( $plugin ) ? __( 'Installed', 'woocommerce' ) : $text;
-		$url   = self::add_in_app_purchase_url_params( $url );
-		?>
-		<a
-			class="addons-button <?php echo esc_attr( $style ); ?>"
-			href="<?php echo esc_url( $url ); ?>">
-			<?php echo esc_html( $text ); ?>
-		</a>
-		<?php
-	}
-
 
 	/**
 	 * Handles output of the addons page in admin.
@@ -327,71 +274,6 @@ class WC_Admin_Addons {
 	}
 
 	/**
-	 * Install WooCommerce Services from Extensions screens.
-	 */
-	public static function install_woocommerce_services_addon() {
-		check_admin_referer( 'install-addon_woocommerce-services' );
-
-		$services_plugin_id = 'woocommerce-services';
-		$services_plugin    = array(
-			'name'      => __( 'WooCommerce Services', 'woocommerce' ),
-			'repo-slug' => 'woocommerce-services',
-		);
-
-		WC_Install::background_installer( $services_plugin_id, $services_plugin );
-
-		wp_safe_redirect( remove_query_arg( array( 'install-addon', '_wpnonce' ) ) );
-		exit;
-	}
-
-	/**
-	 * Install WooCommerce Payments from the Extensions screens.
-	 *
-	 * @param string $section Optional. Extenstions tab.
-	 *
-	 * @return void
-	 */
-	public static function install_woocommerce_payments_addon( $section = '_featured' ) {
-		check_admin_referer( 'install-addon_woocommerce-payments' );
-
-		$wcpay_plugin_id = 'woocommerce-payments';
-		$wcpay_plugin    = array(
-			'name'      => __( 'WooCommerce Payments', 'woocommerce' ),
-			'repo-slug' => 'woocommerce-payments',
-		);
-
-		WC_Install::background_installer( $wcpay_plugin_id, $wcpay_plugin );
-
-		do_action( 'woocommerce_addon_installed', $wcpay_plugin_id, $section );
-
-		wp_safe_redirect( remove_query_arg( array( 'install-addon', '_wpnonce' ) ) );
-		exit;
-	}
-
-	/**
-	 * Should an extension be shown on the featured page.
-	 *
-	 * @param object $item Item data.
-	 * @return boolean
-	 */
-	public static function show_extension( $item ) {
-		$location = WC()->countries->get_base_country();
-		if ( isset( $item->geowhitelist ) && ! in_array( $location, $item->geowhitelist, true ) ) {
-			return false;
-		}
-
-		if ( isset( $item->geoblacklist ) && in_array( $location, $item->geoblacklist, true ) ) {
-			return false;
-		}
-
-		if ( is_plugin_active( $item->plugin ) ) {
-			return false;
-		}
-
-		return true;
-	}
-
-	/**
 	 * We're displaying page=wc-addons and page=wc-addons&section=helper as two separate pages.
 	 * When we're on those pages, add body classes to distinguishe them.
 	 *
@@ -405,5 +287,136 @@ class WC_Admin_Addons {
 		}
 
 		return " $admin_body_class woocommerce-page-wc-marketplace ";
+	}
+
+	/**
+	 * Map data from different endpoints to a universal format
+	 *
+	 * Search and featured products has a slightly different products' field names.
+	 * Mapping converts different data structures into a universal one for further processing.
+	 *
+	 * @param mixed $data Product Card Data.
+	 *
+	 * @return object Converted data.
+	 */
+	public static function map_product_card_data( $data ) {
+		$mapped = (object) null;
+
+		$type = $data->type ?? null;
+
+		// Icon.
+		$mapped->icon = $data->icon ?? null;
+		// URL.
+		$mapped->url = $data->link ?? null;
+		if ( empty( $mapped->url ) ) {
+			$mapped->url = $data->url ?? null;
+		}
+		// Title.
+		$mapped->title = $data->title ?? null;
+		// Vendor Name.
+		$mapped->vendor_name = $data->vendor_name ?? null;
+		if ( empty( $mapped->vendor_name ) ) {
+			$mapped->vendor_name = $data->vendorName ?? null; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+		}
+		// Vendor URL.
+		$mapped->vendor_url = $data->vendor_url ?? null;
+		if ( empty( $mapped->vendor_url ) ) {
+			$mapped->vendor_url = $data->vendorUrl ?? null; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+		}
+		// Description.
+		$mapped->description = $data->excerpt ?? null;
+		if ( empty( $mapped->description ) ) {
+			$mapped->description = $data->description ?? null;
+		}
+		$has_currency_symbol = ! empty( $data->currencySymbol ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+
+		// Is Free.
+		if ( $has_currency_symbol ) {
+			$mapped->is_free = 0 === $data->price;
+		} else {
+			$mapped->is_free = '&#36;0.00' === $data->price;
+		}
+		// Price.
+		if ( $has_currency_symbol ) {
+			// TODO: Ensure that this currency trick is good enough.
+			$mapped->price = wc_price( $data->price, array( 'currency' => 'USD' ) );
+		} else {
+			$mapped->price = $data->price;
+		}
+		// Rating.
+		$mapped->rating = $data->rating ?? null;
+		// Reviews Count.
+		$mapped->reviews_count = $data->reviews_count ?? null;
+
+		return $mapped;
+	}
+
+	/**
+	 * Render a product card
+	 *
+	 * There's difference in data structure (e.g. field names) between endpoints such as search and
+	 * featured. Inner mapping helps to use universal field names for further work.
+	 *
+	 * @param mixed $data Product data.
+	 */
+	public static function render_product_card( $data ) {
+		$mapped      = self::map_product_card_data( $data );
+		$product_url = self::add_in_app_purchase_url_params( $mapped->url );
+		?>
+			<li class="product">
+				<div class="product-details">
+					<?php if ( ! empty( $mapped->icon ) ) : ?>
+						<span class="product-img-wrap">
+							<?php /* Show an icon if it exists */ ?>
+							<img src="<?php echo esc_url( $mapped->icon ); ?>" />
+						</span>
+					<?php endif; ?>
+					<a href="<?php echo esc_url( $product_url ); ?>">
+						<h2><?php echo esc_html( $mapped->title ); ?></h2>
+					</a>
+					<?php if ( ! empty( $mapped->vendor_name ) && ! empty( $mapped->vendor_url ) ) : ?>
+						<div class="product-developed-by">
+							<?php
+								printf(
+									/* translators: %s vendor link */
+									esc_html__( 'Developed by %s', 'woocommerce' ),
+									sprintf(
+										'<a class="product-vendor-link" href="%1$s" target="_blank">%2$s</a>',
+										esc_url_raw( $mapped->vendor_url ),
+										wp_kses_post( $mapped->vendor_name )
+									)
+								);
+							?>
+						</div>
+					<?php endif; ?>
+					<p><?php echo wp_kses_post( $mapped->description ); ?></p>
+				</div>
+				<div class="product-footer">
+					<div class="product-price-and-reviews-container">
+						<div class="product-price-block">
+							<?php if ( $mapped->is_free ) : ?>
+								<span class="price"><?php esc_html_e( 'Free', 'woocommerce' ); ?></span>
+							<?php else : ?>
+								<span class="price"><?php echo wp_kses_post( $mapped->price ); ?></span>
+								<span class="price-suffix"><?php esc_html_e( 'per year', 'woocommerce' ); ?></span>
+							<?php endif; ?>
+						</div>
+						<?php if ( ! empty( $mapped->reviews_count ) && ! empty( $mapped->rating ) ) : ?>
+							<?php /* Show rating and the number of reviews */ ?>
+							<div class="product-reviews-block">
+								<?php for ( $index = 1; $index <= 5; ++$index ) : ?>
+									<?php $rating_star_class = 'product-rating-star product-rating-star__' . wccom_get_star_class( $mapped->rating, $index ); ?>
+									<div class="<?php echo esc_attr( $rating_star_class ); ?>"></div>
+								<?php endfor; ?>
+								<span class="product-reviews-count">(<?php echo wp_kses_post( $mapped->reviews_count ); ?>)</span>
+							</div>
+						<?php endif; ?>
+					</div>
+					<a class="button" href="<?php echo esc_url( $product_url ); ?>">
+						<?php esc_html_e( 'View details', 'woocommerce' ); ?>
+					</a>
+				</div>
+			</li>
+		<?php
 	}
 }
