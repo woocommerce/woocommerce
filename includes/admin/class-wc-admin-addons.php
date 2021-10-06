@@ -187,11 +187,46 @@ class WC_Admin_Addons {
 	 * @return void
 	 */
 	private static function output_banner( $block ) {
-		?>
+		if ( empty( $block->buttons ) ) {
+			// Render a product-like banner.
+			?>
 			<ul class="products">
-			<?php self::render_product_card( $block, $block->type ); ?>
+				<?php self::render_product_card( $block, $block->type ); ?>
 			</ul>
-		<?php
+			<?php
+		} else {
+			// Render a banner with buttons.
+			?>
+			<ul class="products">
+				<li class="product addons-product-banner addons-buttons-banner">
+					<div class="addons-buttons-banner-image"
+						style="background-image:url(<?php echo esc_url( $block->image ); ?>)"
+						title="<?php echo esc_attr( $block->image_alt ); ?>"></div>
+					<div class="product-details addons-buttons-banner-details-container">
+						<div class="addons-buttons-banner-details">
+							<h2><?php echo esc_html( $block->title ); ?></h2>
+							<p><?php echo wp_kses( $block->description, array() ); ?></p>
+						</div>
+						<div class="addons-buttons-banner-button-container">
+						<?php
+						foreach ( $block->buttons as $button ) {
+							$button_classes = array( 'button', 'addons-buttons-banner-button' );
+							$type = $button->type ?? null;
+							if ( 'primary' === $type ) {
+								$button_classes[] = 'addons-buttons-banner-button-primary';
+							}
+							?>
+							<a class="<?php echo esc_attr( implode( ' ', $button_classes ) ); ?>"
+								href="<?php echo esc_url( $button->href ); ?>">
+								<?php echo esc_html( $button->title ); ?>
+							</a>
+						<?php } ?>
+						</div>
+					</div>
+				</li>
+			</ul>
+			<?php
+		}
 	}
 
 	/**

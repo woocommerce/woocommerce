@@ -418,10 +418,19 @@
 					margin: 0 !important;
 				}
 
+				.addons-buttons-banner-details h2 {
+					color: #1d2327; // Gray / Gray 90
+				}
+
 				p {
 					color: #2c3338;
 					margin: 14px 64px 0 0;
 					max-width: 389px;
+				}
+
+				.addons-buttons-banner-details p {
+					font-size: 14px;
+					max-width: none;
 				}
 
 				.product-developed-by {
@@ -495,6 +504,44 @@
 					color: #007cba;
 					float: right;
 					height: 22px;
+				}
+			}
+		}
+
+		.addons-buttons-banner {
+			display: flex;
+			flex-direction: row;
+
+			.addons-buttons-banner-image {
+				background-repeat: no-repeat;
+				background-size: cover;
+				height: 190px;
+				margin: 24px;
+				width: 200px;
+			}
+
+			.addons-buttons-banner-details-container {
+				padding-left: 0;
+				width: calc(100% - 198px - 24px - 24px);
+			}
+
+			.addons-buttons-banner-details-container {
+				display: flex;
+				flex-direction: column;
+				justify-content: space-between;
+			}
+
+			.button.addons-buttons-banner-button,
+			.button.addons-buttons-banner-button:hover {
+				background: #fff;
+				border: 1.5px solid #624594;
+				color: #624594;
+				padding: 4px 12px;
+				margin-right: 16px;
+
+				&.addons-buttons-banner-button-primary {
+					background-color: #624594;
+					color: #fff;
 				}
 			}
 		}
