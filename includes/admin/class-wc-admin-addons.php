@@ -389,7 +389,7 @@ class WC_Admin_Addons {
 		// Reviews Count.
 		$mapped->reviews_count = $data->reviews_count ?? null;
 		if ( null === $mapped->reviews_count ) {
-			$mapped->reviewsCount = $data->reviewsCount ?? null; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+			$mapped->reviews_count = $data->reviewsCount ?? null; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 		}
 
 		return $mapped;
