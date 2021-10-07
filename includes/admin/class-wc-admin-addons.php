@@ -373,18 +373,17 @@ class WC_Admin_Addons {
 		if ( empty( $mapped->description ) ) {
 			$mapped->description = $data->description ?? null;
 		}
-		$has_currency_symbol = ! empty( $data->currencySymbol ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+		$has_currency = ! empty( $data->currency ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 
 		// Is Free.
-		if ( $has_currency_symbol ) {
+		if ( $has_currency ) {
 			$mapped->is_free = 0 === $data->price;
 		} else {
 			$mapped->is_free = '&#36;0.00' === $data->price;
 		}
 		// Price.
-		if ( $has_currency_symbol ) {
-			// TODO: Ensure that this currency trick is good enough.
-			$mapped->price = wc_price( $data->price, array( 'currency' => 'USD' ) );
+		if ( $has_currency ) {
+			$mapped->price = wc_price( $data->price, array( 'currency' => $data->currency ) );
 		} else {
 			$mapped->price = $data->price;
 		}
