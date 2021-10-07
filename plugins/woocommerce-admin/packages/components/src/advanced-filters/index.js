@@ -277,7 +277,7 @@ class AdvancedFilters extends Component {
 				<CardHeader justify="flex-start">
 					<Text
 						variant="subtitle.small"
-						as="p"
+						as="div"
 						weight="600"
 						size="14"
 						lineHeight="20px"

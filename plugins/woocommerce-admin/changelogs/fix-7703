@@ -1,0 +1,4 @@
+Significance: patch
+Type: Fix
+
+fixed warnings when using AdvancedFilters component. #7704
