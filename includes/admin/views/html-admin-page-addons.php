@@ -81,6 +81,7 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 			<?php endif; ?>
 			<?php if ( '_featured' !== $current_section && $addons ) : ?>
 				<?php
+				print_r( $promotions, true );
 				if ( ! empty( $promotions ) && WC()->is_wc_admin_active() ) {
 
 				}
