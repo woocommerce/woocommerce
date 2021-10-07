@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Icon, grid } from '@woocommerce/icons';
 import { isExperimentalBuild } from '@woocommerce/block-settings';
+import type { BlockConfiguration } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
@@ -11,8 +12,9 @@ import save from '../save';
 
 /**
  * Holds default config for this collection of blocks.
+ * attributes and title are omitted here as these are added on an individual block level.
  */
-export default {
+const sharedConfig: Omit< BlockConfiguration, 'attributes' | 'title' > = {
 	category: 'woocommerce-product-elements',
 	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],
 	icon: {
@@ -23,12 +25,17 @@ export default {
 		html: false,
 	},
 	parent: isExperimentalBuild()
-		? null
+		? undefined
 		: [ '@woocommerce/all-products', '@woocommerce/single-product' ],
 	save,
 	deprecated: [
 		{
-			save() {},
+			attributes: {},
+			save(): null {
+				return null;
+			},
 		},
 	],
 };
+
+export default sharedConfig;
