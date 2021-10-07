@@ -393,19 +393,20 @@
 		max-width: 1032px;
 		overflow: hidden;
 
-		// TODO: check on different screen sizes
 		.product.addons-product-banner,
 		.product.addons-buttons-banner {
 			max-width: calc(100% - 2px);
 		}
 
-		// Adjust heading titles font for three-column product groups
-		&.addons-products-three-column li.product {
-			max-width: calc(33.33% - 12px);
+		@media screen and (min-width: 960px) {
+			// Adjust heading titles font for three-column product groups
+			&.addons-products-three-column li.product {
+				max-width: calc(33.33% - 12px);
 
-			h2,
-			h3 {
-				font-size: 16px;
+				h2,
+				h3 {
+					font-size: 16px;
+				}
 			}
 		}
 
