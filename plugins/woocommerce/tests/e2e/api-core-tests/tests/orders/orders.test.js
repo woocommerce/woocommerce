@@ -1,6 +1,9 @@
 const { getOrderExample, createOrderInDb, deleteOrderFromDb } = require('../../data');
 const { ordersApi } = require('../../endpoints/orders');
 const { order } = require('../../data');
+const { itIf } = require( '../../utils/exec' );
+
+const { RUN_TESTS_THAT_USE_WP_CLI } = process.env;
 
 /**
  * Billing properties to update.
@@ -56,7 +59,7 @@ describe('Orders API tests', () => {
 		expect( response.body.status ).toEqual('pending');
 	});
 
-	it('can retrieve an order', async () => {
+	itIf( RUN_TESTS_THAT_USE_WP_CLI )( 'can retrieve an order', async () => {
 		const order = getOrderExample();
 		order.customer_id = 1;
 		order.status = 'pending';

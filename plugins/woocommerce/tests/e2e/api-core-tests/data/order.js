@@ -1,7 +1,5 @@
 const { customerBilling, customerShipping } = require('./shared');
-const { USER_KEY, USER_ID } = process.env;
-const util = require('util');
-const exec = util.promisify(require('child_process').exec);
+const { exec_wp_cli } = require('../utils/exec');
 
 /**
  * A basic order.
@@ -80,7 +78,7 @@ const getOrderExample = () => {
 
 const createOrderInDb = async( order ) => {
 	const create_order_command =
-		'wp wc shop_order create ' +
+		'wc shop_order create ' +
 		`--status=${order.status} ` +
 		`--currency=${order.currency} ` +
 		`--customer_id=${order.customer_id} ` +
@@ -94,20 +92,18 @@ const createOrderInDb = async( order ) => {
 		`--fee_lines='${JSON.stringify(order.fee_lines)}' `+
 		`--coupon_lines='${JSON.stringify(order.coupon_lines)}' `+
 		`--set_paid=${order.set_paid} ` +
-		`--user=${JSON.stringify(USER_ID ? USER_ID : USER_KEY)} ` +
 		`--porcelain`;
 
-	const { stdout } = await exec( create_order_command );
+	const stdout = await exec_wp_cli( create_order_command );
 	return parseInt( stdout.replace( "\n", "" ) );
 }
 
 const deleteOrderFromDb = async( orderId ) => {
 	const delete_order_command =
-		`wp wc shop_order delete ${orderId} `+
-		`--user=${JSON.stringify(USER_ID ? USER_ID : USER_KEY)} ` +
+		`wc shop_order delete ${orderId} `+
 		'--force=true --porcelain';
 
-	const { stdout } = await exec( delete_order_command );
+	const stdout = await exec_wp_cli( delete_order_command );
 	return parseInt( stdout.replace( "\n", "" ) );
 }
 

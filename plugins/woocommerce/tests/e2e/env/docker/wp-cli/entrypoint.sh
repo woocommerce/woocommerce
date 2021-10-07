@@ -4,10 +4,13 @@ set -eu
 declare -p WORDPRESS_HOST
 wait-for-it ${WORDPRESS_HOST} -t 120
 
+declare -p RUN_WP_CLI_ON_DOCKER
+
 ## if file exists then exit early because initialization already happened.
 if [ -f /var/www/html/.initialized ];
 then
    echo "The environment has already been initialized."
+   [[ "${RUN_WP_CLI_ON_DOCKER}" == "true" ]] && sleep infinity
    exit 0
 fi
 
@@ -75,3 +78,5 @@ fi
 
 echo "Visit $(wp option get siteurl)"
 touch /var/www/html/.initialized
+
+[[ "${RUN_WP_CLI_ON_DOCKER}" == "true" ]] && sleep infinity
