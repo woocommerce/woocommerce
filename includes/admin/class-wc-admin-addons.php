@@ -894,8 +894,8 @@ class WC_Admin_Addons {
 			$formatted_promotions[] = array(
 				'title'       => $locale->title,
 				'description' => $locale->description,
-				'image'       => $locale->image,
-				'image_alt'   => $locale->img_alt,
+				'image'       => ( 'http' === substr( $locale->image, 0, 4 ) ) ? $locale->image : WC()->plugin_url() . $locale->image,
+				'image_alt'   => $locale->image_alt,
 				'actions'     => $promotion_actions,
 			);
 		}
