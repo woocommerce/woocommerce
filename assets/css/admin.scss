@@ -393,15 +393,16 @@
 			}
 
 			.product-details {
-				align-items: start;
-				display: flex;
-				flex-direction: row;
-				justify-content: space-between;
 				padding: 24px;
+				position: relative;
 
+				/* Display an image (product's icon) top right */
 				.product-img-wrap {
 					display: block;
 					margin-left: 24px;
+					position: absolute;
+					right: 24px;
+					top: 24px;
 
 					img {
 						border-radius: 3px;
@@ -412,12 +413,20 @@
 					}
 				}
 
+				/* Align aproduct-related banner image vertically centered */
 				&.addon-product-banner-details {
 					align-items: center;
+					display: flex;
+					flex-direction: row;
+					justify-content: space-between;
 
-					.product-img-wrap img {
-						max-width: 150px;
-						max-height: 150px;
+					.product-img-wrap {
+						position: unset;
+
+						img {
+							max-width: 150px;
+							max-height: 150px;
+						}
 					}
 				}
 
@@ -433,6 +442,8 @@
 					font-weight: 400;
 					line-height: 28px;
 					margin: 0 !important;
+					// Don't cover a product icon
+					max-width: calc(100% - 48px - 24px);
 				}
 
 				.addons-buttons-banner-details h2 {
@@ -442,7 +453,7 @@
 				p {
 					color: #2c3338;
 					margin: 14px 64px 0 0;
-					max-width: 389px;
+					width: 100%;
 				}
 
 				.addons-buttons-banner-details p {
