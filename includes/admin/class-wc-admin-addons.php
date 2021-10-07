@@ -171,7 +171,8 @@ class WC_Admin_Addons {
 				<div class="addon-product-group__items">
 					<ul class="<?php echo esc_attr( $product_list_classes ); ?>">
 					<?php
-					foreach ( $block->items as $item ) {
+					$products = array_slice( $block->items, 0, $capacity );
+					foreach ( $products as $item ) {
 						self::render_product_card( $item );
 					}
 					?>
