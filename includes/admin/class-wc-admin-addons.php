@@ -23,7 +23,7 @@ class WC_Admin_Addons {
 	 * @return void
 	 */
 	public static function render_featured() {
-		$featured = false; // get_transient( 'wc_addons_featured' ); // TODO: revert.
+		$featured = get_transient( 'wc_addons_featured' );
 		if ( false === $featured ) {
 			$headers = array();
 			$auth    = WC_Helper_Options::get( 'auth' );
@@ -32,9 +32,9 @@ class WC_Admin_Addons {
 				$headers['Authorization'] = 'Bearer ' . $auth['access_token'];
 			}
 
-			// TODO: replace with WC.com, leave 2.0.
+			// Important: WCCOM Extensions API v2.0 is used.
 			$raw_featured = wp_safe_remote_get(
-				'https://woocommerce.test/wp-json/wccom-extensions/2.0/featured',
+				'https://woocommerce.com/wp-json/wccom-extensions/2.0/featured',
 				array(
 					'headers'    => $headers,
 					'user-agent' => 'WooCommerce Addons Page',
