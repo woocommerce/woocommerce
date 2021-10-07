@@ -76,12 +76,15 @@ if ( ! process.env.WORDPRESS_PORT ) {
 if ( ! process.env.WORDPRESS_URL ) {
 	process.env.WORDPRESS_URL = testConfig.url;
 }
+if ( ! process.env.DOCKER_COMPOSER_BIN ) {
+	process.env.DOCKER_COMPOSER_BIN = 'docker-compose';
+}
 
 // Ensure that the first Docker compose file loaded is from our local env.
 dockerArgs.unshift( '-f', path.resolve( __dirname, '../docker-compose.yaml' ) );
 
 const dockerProcess = spawnSync(
-	'docker-compose',
+	process.env.DOCKER_COMPOSER_BIN,
 	dockerArgs,
 	{
 		stdio: 'inherit',
