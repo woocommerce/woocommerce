@@ -552,7 +552,7 @@ return array(
 		'SO' => __( 'Sololá', 'woocommerce' ),
 		'SU' => __( 'Suchitepéquez', 'woocommerce' ),
 		'TO' => __( 'Totonicapán', 'woocommerce' ),
-		'ZA' => __( 'Zacapa', 'woocommerce' )
+		'ZA' => __( 'Zacapa', 'woocommerce' ),
 	),
 	'HK' => array( // Hong Kong states.
 		'HONG KONG'       => __( 'Hong Kong Island', 'woocommerce' ),
@@ -1836,7 +1836,7 @@ return array(
 		'AE' => __( 'Armed Forces (AE)', 'woocommerce' ),
 		'AP' => __( 'Armed Forces (AP)', 'woocommerce' ),
 	),
-	'VE' => array( // Venezuela States. Ref: https://github.com/unicode-org/cldr/blob/release-38-1/common/subdivisions/en.xml#L5426-L5451
+	'VE' => array( // Venezuela States.
 		'A' => __( 'Capital', 'woocommerce' ),
 		'B' => __( 'Anzoátegui', 'woocommerce' ),
 		'C' => __( 'Apure', 'woocommerce' ),
@@ -1861,7 +1861,7 @@ return array(
 		'W' => __( 'Federal Dependencies', 'woocommerce' ),
 		'X' => __( 'Vargas', 'woocommerce' ),
 		'Y' => __( 'Delta Amacuro', 'woocommerce' ),
-		'Z' => __( 'Amazonas', 'woocommerce' )
+		'Z' => __( 'Amazonas', 'woocommerce' ),
 	),
 	'VN' => array(),
 	'YT' => array(),
