@@ -1,5 +1,7 @@
 # Unreleased
 
+# 0.1.2
+
 -   Add Customers to analytics pages tested #7573
 -   Add `waitForTimeout` utility function #7572
 -   Update analytics overview tests to allow re-running the tests.
