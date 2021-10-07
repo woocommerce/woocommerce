@@ -200,7 +200,7 @@ class WC_Admin_Addons {
 			// Render a banner with buttons.
 			?>
 			<ul class="products">
-				<li class="product addons-product-banner addons-buttons-banner">
+				<li class="product addons-buttons-banner">
 					<div class="addons-buttons-banner-image"
 						style="background-image:url(<?php echo esc_url( $block->image ); ?>)"
 						title="<?php echo esc_attr( $block->image_alt ); ?>"></div>
@@ -344,6 +344,10 @@ class WC_Admin_Addons {
 
 		// Icon.
 		$mapped->icon = $data->icon ?? null;
+		if ( null === $mapped->icon && 'banner' === $type ) {
+			// For product-related banners icon is a product's image.
+			$mapped->icon = $data->image ?? null;
+		}
 		// URL.
 		$mapped->url = $data->link ?? null;
 		if ( empty( $mapped->url ) ) {
@@ -414,34 +418,41 @@ class WC_Admin_Addons {
 		if ( null !== $block_type ) {
 			$class_names[] = 'addons-product-' . $block_type;
 		}
+
+		$product_details_classes = 'product-details';
+		if ( 'banner' === $block_type ) {
+			$product_details_classes .= ' addon-product-banner-details';
+		}
 		?>
 			<li class="<?php echo esc_attr( implode( ' ', $class_names ) ); ?>">
-				<div class="product-details">
+				<div class="<?php echo esc_attr( $product_details_classes ); ?>">
+					<div class="product-text-container">
+						<a href="<?php echo esc_url( $product_url ); ?>">
+							<h2><?php echo esc_html( $mapped->title ); ?></h2>
+						</a>
+						<?php if ( ! empty( $mapped->vendor_name ) && ! empty( $mapped->vendor_url ) ) : ?>
+							<div class="product-developed-by">
+								<?php
+									printf(
+										/* translators: %s vendor link */
+										esc_html__( 'Developed by %s', 'woocommerce' ),
+										sprintf(
+											'<a class="product-vendor-link" href="%1$s" target="_blank">%2$s</a>',
+											esc_url_raw( $mapped->vendor_url ),
+											wp_kses_post( $mapped->vendor_name )
+										)
+									);
+								?>
+							</div>
+						<?php endif; ?>
+						<p><?php echo wp_kses_post( $mapped->description ); ?></p>
+					</div>
 					<?php if ( ! empty( $mapped->icon ) ) : ?>
 						<span class="product-img-wrap">
 							<?php /* Show an icon if it exists */ ?>
 							<img src="<?php echo esc_url( $mapped->icon ); ?>" />
 						</span>
 					<?php endif; ?>
-					<a href="<?php echo esc_url( $product_url ); ?>">
-						<h2><?php echo esc_html( $mapped->title ); ?></h2>
-					</a>
-					<?php if ( ! empty( $mapped->vendor_name ) && ! empty( $mapped->vendor_url ) ) : ?>
-						<div class="product-developed-by">
-							<?php
-								printf(
-									/* translators: %s vendor link */
-									esc_html__( 'Developed by %s', 'woocommerce' ),
-									sprintf(
-										'<a class="product-vendor-link" href="%1$s" target="_blank">%2$s</a>',
-										esc_url_raw( $mapped->vendor_url ),
-										wp_kses_post( $mapped->vendor_name )
-									)
-								);
-							?>
-						</div>
-					<?php endif; ?>
-					<p><?php echo wp_kses_post( $mapped->description ); ?></p>
 				</div>
 				<div class="product-footer">
 					<div class="product-price-and-reviews-container">

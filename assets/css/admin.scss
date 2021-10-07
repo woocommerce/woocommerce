@@ -358,7 +358,8 @@
 		overflow: hidden;
 
 		// TODO: check on different screen sizes
-		.product.addons-product-banner {
+		.product.addons-product-banner,
+		.product.addons-buttons-banner {
 			max-width: calc(100% - 2px);
 		}
 
@@ -392,11 +393,14 @@
 			}
 
 			.product-details {
+				align-items: start;
+				display: flex;
+				flex-direction: row;
+				justify-content: space-between;
 				padding: 24px;
 
 				.product-img-wrap {
 					display: block;
-					float: right;
 					margin-left: 24px;
 
 					img {
@@ -405,6 +409,15 @@
 						margin: 0;
 						max-width: 48px;
 						max-height: 48px;
+					}
+				}
+
+				&.addon-product-banner-details {
+					align-items: center;
+
+					.product-img-wrap img {
+						max-width: 150px;
+						max-height: 150px;
 					}
 				}
 
