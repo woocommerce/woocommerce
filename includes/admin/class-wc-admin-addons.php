@@ -157,17 +157,19 @@ class WC_Admin_Addons {
 		$product_list_classes = 'products addons-products-' . $product_list_classes;
 		?>
 			<section class="addon-product-group">
-				<h1 class="addon-product-group__title"><?php echo esc_html( $block->title ); ?></h1>
-				<?php if ( ! empty( $block->description ) ) : ?>
-					<div class="addon-product-group__description">
+				<h1 class="addon-product-group-title"><?php echo esc_html( $block->title ); ?></h1>
+				<div class="addon-product-group-description-container">
+					<?php if ( ! empty( $block->description ) ) : ?>
+					<div class="addon-product-group-description">
 						<?php echo esc_html( $block->description ); ?>
 					</div>
-				<?php endif; ?>
-				<?php if ( null !== $block->url ) : ?>
-					<a class="addon-product-group__see-more" href="<?php echo esc_url( $block->url ); ?>">
+					<?php endif; ?>
+					<?php if ( null !== $block->url ) : ?>
+					<a class="addon-product-group-see-more" href="<?php echo esc_url( $block->url ); ?>">
 						<?php esc_html_e( 'See more', 'woocommerce' ); ?>
 					</a>
-				<?php endif; ?>
+					<?php endif; ?>
+				</div>
 				<div class="addon-product-group__items">
 					<ul class="<?php echo esc_attr( $product_list_classes ); ?>">
 					<?php

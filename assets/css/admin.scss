@@ -194,14 +194,6 @@
 		}
 	}
 
-	h1.search-form-title {
-		clear: left;
-		font-size: 20px;
-		line-height: 1.2;
-		margin: 48px 0 16px;
-		padding: 0;
-	}
-
 	.update-plugins .update-count {
 		background-color: #d54e21;
 		border-radius: 10px;
@@ -213,6 +205,26 @@
 		margin: 1px 0 0 2px;
 		padding: 0 6px;
 		vertical-align: text-top;
+	}
+
+	/**
+	 * Marketplace related variables
+ 	 */
+	$font-sf-pro-text:
+		helveticaneue-light,
+		"Helvetica Neue Light",
+		"Helvetica Neue",
+		sans-serif;
+
+	$font-sf-pro-display: sans-serif;
+
+	h1.search-form-title {
+		clear: left;
+		font-size: 20px;
+		font-family: $font-sf-pro-display;
+		line-height: 1.2;
+		margin: 48px 0 16px;
+		padding: 0;
 	}
 
 	.addons-featured {
@@ -343,15 +355,39 @@
 	}
 
 	.marketplace-content-wrapper {
+		font-family: $font-sf-pro-text;
 		margin: 0 auto;
 		max-width: 1032px;
 		width: 100%;
+	}
+
+	.addon-product-group-title {
+		font-family: $font-sf-pro-display;
+		letter-spacing: 0.38px;
+	}
+
+	.addon-product-group-description-container {
+		align-items: center;
+		display: flex;
+		flex-direction: row;
+		font-size: 14px;
+		justify-content: space-between;
+		line-height: 20px;
+
+		.addon-product-group-see-more,
+		.addon-product-group-see-more:visited {
+			color: #007cba; /* Primary / Blue */
+			display: block;
+			font-size: 13px;
+			text-decoration: none;
+		}
 	}
 
 	.products {
 		display: flex;
 		flex-flow: row;
 		flex-wrap: wrap;
+		font-weight: normal;
 		justify-content: space-between;
 		margin: 0;
 		max-width: 1032px;
@@ -363,8 +399,14 @@
 			max-width: calc(100% - 2px);
 		}
 
+		// Adjust heading titles font for three-column product groups
 		&.addons-products-three-column li.product {
 			max-width: calc(33.33% - 12px);
+
+			h2,
+			h3 {
+				font-size: 16px;
+			}
 		}
 
 		li {
@@ -433,17 +475,13 @@
 				h2,
 				h3 {
 					color: #007cba;
-					font-family:
-						HelveticaNeue-Light,
-						"Helvetica Neue Light",
-						"Helvetica Neue",
-						sans-serif;
 					font-size: 20px;
 					font-weight: 400;
+					letter-spacing: -0.32px;
 					line-height: 28px;
 					margin: 0 !important;
 					// Don't cover a product icon
-					max-width: calc(100% - 48px - 24px);
+					max-width: calc(100% - 48px);
 				}
 
 				.addons-buttons-banner-details h2 {
@@ -452,6 +490,8 @@
 
 				p {
 					color: #2c3338;
+					font-size: 14px;
+					line-height: 20px;
 					margin: 14px 64px 0 0;
 					width: 100%;
 				}
@@ -464,7 +504,6 @@
 				.product-developed-by {
 					color: #50575e; /* Gray 60 */
 					font-size: 12px;
-					font-family: sans-serif;
 					line-height: 20px;
 					margin-top: 4px;
 
@@ -519,7 +558,6 @@
 					.product-reviews-count {
 						color: #646970; /* Gray 50 */
 						font-size: 12px;
-						font-family: sans-serif;
 						line-height: 24px;
 						letter-spacing: -0.154px;
 						margin-left: 4px;
@@ -531,7 +569,10 @@
 					border-color: #007cba;
 					color: #007cba;
 					float: right;
-					height: 22px;
+					font-size: 13px;
+					height: 36px;
+					line-height: 30px;
+					padding: 2px 14px;
 				}
 			}
 		}
