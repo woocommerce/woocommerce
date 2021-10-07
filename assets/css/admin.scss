@@ -362,6 +362,10 @@
 			max-width: calc(100% - 2px);
 		}
 
+		&.addons-products-three-column li.product {
+			max-width: calc(33.33% - 12px);
+		}
+
 		li {
 			background: #fff;
 			border: 1px solid #dcdcde;

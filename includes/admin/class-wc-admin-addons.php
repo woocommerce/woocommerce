@@ -152,7 +152,9 @@ class WC_Admin_Addons {
 	 * @return void
 	 */
 	private static function output_group( $block ) {
-		// TODO: Output products according to the group's capacity.
+		$capacity           = $block->capacity ?? 3;
+		$product_list_classes = 3 === $capacity ? 'three-column' : 'two-column';
+		$product_list_classes = 'products addons-products-' . $product_list_classes;
 		?>
 			<section class="addon-product-group">
 				<h1 class="addon-product-group__title"><?php echo esc_html( $block->title ); ?></h1>
@@ -167,7 +169,7 @@ class WC_Admin_Addons {
 					</a>
 				<?php endif; ?>
 				<div class="addon-product-group__items">
-					<ul class="products">
+					<ul class="<?php echo esc_attr( $product_list_classes ); ?>">
 					<?php
 					foreach ( $block->items as $item ) {
 						self::render_product_card( $item );
