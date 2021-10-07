@@ -1,0 +1,23 @@
+{
+	"name": "woocommerce-monorepo",
+	"title": "WooCommerce Monorepo",
+    "description": "Monorepo for the WooCommerce ecosystem",
+	"homepage": "https://woocommerce.com/",
+	"private": true,
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/woocommerce/woocommerce.git"
+	},
+	"author": "Automattic",
+	"license": "GPL-3.0-or-later",
+	"bugs": {
+		"url": "https://github.com/woocommerce/woocommerce/issues"
+	},
+	"devDependencies": {
+		"@woocommerce/eslint-plugin": "^1.2.0",
+		"@wordpress/prettier-config": "^1.0.5",
+		"jest": "^27.0.6",
+		"prettier": "npm:wp-prettier@2.2.1-beta-1",
+		"typescript": "4.2.4"
+	}
+}
