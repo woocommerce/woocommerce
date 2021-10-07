@@ -816,7 +816,7 @@ jQuery( function ( $ ) {
 
 						window.wcTracks.recordEvent( 'order_edit_recalc_totals', {
 							order_id: data.post_id,
-							OK_cancel: 'OK',
+							ok_cancel: 'OK',
 							status: $( '#order_status' ).val()
 						} );
 					}
@@ -824,7 +824,7 @@ jQuery( function ( $ ) {
 			} else {
 				window.wcTracks.recordEvent( 'order_edit_recalc_totals', {
 					order_id: woocommerce_admin_meta_boxes.post_id,
-					OK_cancel: 'cancel',
+					ok_cancel: 'cancel',
 					status: $( '#order_status' ).val()
 				} );
 			}
