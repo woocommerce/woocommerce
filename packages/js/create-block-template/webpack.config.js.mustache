@@ -66,10 +66,9 @@ module.exports = {
 									return content;
 								}
 
+								// Add code here to prepend to all .scss/.sass files.
 								return (
 									'@import "_colors"; ' +
-									'@import "_mixins"; ' +
-									'@import "_sizes"; ' +
 									content
 								);
 							},
