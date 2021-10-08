@@ -1,0 +1,10 @@
+{
+	"command": {
+		"publish": {
+			"message": "chore(release): publish"
+		}
+	},
+	"ignoreChanges": [ "**/CHANGELOG.md", "**/test/**" ],
+	"packages": [ "tests/e2e/*" ],
+	"version": "independent"
+}
