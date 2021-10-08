@@ -21,6 +21,7 @@
 use Automattic\WooCommerce\Blocks\Integrations\IntegrationInterface;
 
 define ( '{{slug}}_VERSION', '0.1.0' );
+
 /**
  * Class for integrating with WooCommerce Blocks
  */
@@ -124,3 +125,18 @@ class {{slugPascalCase}}_Blocks_Integration implements IntegrationInterface {
 		return {{slug}}_VERSION;
 	}
 }
+
+add_action('woocommerce_blocks_loaded', function() {
+	add_action(
+		'woocommerce_blocks_cart_block_registration',
+		function( $integration_registry ) {
+			$integration_registry->register( new {{slugPascalCase}}_Blocks_Integration() );
+		}
+	);
+	add_action(
+		'woocommerce_blocks_checkout_block_registration',
+		function( $integration_registry ) {
+			$integration_registry->register( new {{slugPascalCase}}_Blocks_Integration() );
+		}
+	);
+});
