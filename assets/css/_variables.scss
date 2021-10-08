@@ -8,6 +8,8 @@ $red:           	#a00 !default;
 $orange:        	#ffba00 !default;
 $blue:          	#2ea2cc !default;
 
+$fontpath:         	'../fonts/' !default;
+
 $primary:           #a46497 !default;                                  // Primary color for buttons (alt)
 $primarytext:       desaturate(lighten($primary, 50%), 18%) !default;    // Text on primary color bg
 
