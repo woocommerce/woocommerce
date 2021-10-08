@@ -71,7 +71,7 @@ class ProductSearch extends AbstractBlock {
 			'after'
 		);
 
-		$input_id           = 'wp-block-search__input-' . ( ++$instance_id );
+		$input_id           = 'wc-block-search__input-' . ( ++$instance_id );
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
 				'class' => implode(
