@@ -1,5 +1,8 @@
 name: Build zip for PR
 on: pull_request
+defaults:
+  run:
+    working-directory: plugins/woocommerce
 jobs:
   build:
     name: Build zip for PR
@@ -11,8 +14,6 @@ jobs:
       - name: Build
         id: build
         uses: woocommerce/action-build@v2
-        with:
-          working-directory: plugins/woocommerce
 
       - name: Upload PR zip
         uses: actions/upload-artifact@v2
