@@ -11,7 +11,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Build
+      - name: please Build
         id: build
         uses: woocommerce/action-build@monorepo-patch
 
