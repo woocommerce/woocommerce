@@ -11,7 +11,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: please Build
+      - name: Build
         id: build
         uses: woocommerce/action-build@monorepo-patch
 
@@ -42,15 +42,15 @@ jobs:
           path: package/woocommerce
 
       - name: Run npm install.
-        working-directory: package/woocommerce/plugins/woocommerce/
+        working-directory: package/woocommerce/
         run: npm install
 
       - name: Load docker images and start containers.
-        working-directory: package/woocommerce/plugins/woocommerce/
+        working-directory: package/woocommerce/
         run: npx wc-e2e docker:up
 
       - name: Move current directory to code. We will install zip file in this dir later.
-        run: mv ./package/woocommerce/plugins/woocommerce/* ./code/woocommerce
+        run: mv ./package/woocommerce/* ./code/woocommerce
 
       - name: Download WooCommerce ZIP.
         uses: actions/download-artifact@v2
