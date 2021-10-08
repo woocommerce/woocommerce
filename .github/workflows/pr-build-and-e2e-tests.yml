@@ -4,10 +4,6 @@ jobs:
   build:
     name: Build zip for PR
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
-        working-directory: plugins/woocommerce
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
