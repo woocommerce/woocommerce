@@ -1,4 +1,4 @@
-name: Build zip for PR
+name: Build zip for PR 
 on: pull_request
 jobs:
   build:
