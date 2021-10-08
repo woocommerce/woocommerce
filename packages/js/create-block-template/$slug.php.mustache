@@ -102,7 +102,8 @@ class {{slugPascalCase}}_Blocks_Integration implements IntegrationInterface {
 	 */
 	public function get_script_data() {
 		$data = array(
-			'{{slug}}-active' => true
+			'{{slug}}-active' => true,
+			'example-data' => 'This is some example data from the server',
 		);
 
 		return $data;
