@@ -11,12 +11,6 @@ use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
  * class WC_Tests_OnboardingTasks_Task
  */
 class WC_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
-	/**
-	 * Task.
-	 *
-	 * @var Task|null
-	 */
-	protected $task = null;
 
 	/**
 	 * Tests that a task is visible by default.
