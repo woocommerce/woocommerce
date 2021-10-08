@@ -49,13 +49,14 @@
 * Tweak - Update analytics card header text styles. #6506
 * Enhancement - Align Table fields with the fallback on isNumeric. #7431
 
-**WooCommerce Blocks - 5.7.1 & 5.8.0 & 5.9.0**
+**WooCommerce Blocks - 5.7.1 & 5.8.0 & 5.9.0 & 5.9.1**
 
 * Add - Extensibility point for extensions to filter payment methods. #4668
 * Add - "Filter Products by Stock" block. #4145
 * Add - Introduced the `__experimental_woocommerce_blocks_checkout_update_order_from_request` hook to the Checkout Store API. #4610.
 * Fix - Add label element to `<BlockTitle>` component. #4585
 * Fix - Disable Cart, Checkout, All Products & filters blocks from the widgets screen.
+* Fix - Infinite recursion when removing an attribute filter from the Active filters block. #4816
 * Fix - Prevent Product Category List from displaying incorrectly when used on the shop page. #4587
 * Fix - Product Search block displaying incorrectly. #4740
 * Tweak - Add Extensibility info to Store API readme. #4605
