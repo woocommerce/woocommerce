@@ -15,6 +15,7 @@ jobs:
       - name: Build
         id: build
         uses: woocommerce/action-build@v2
+        working-directory: plugins/woocommerce
 
       - name: Upload PR zip
         uses: actions/upload-artifact@v2
