@@ -48,7 +48,7 @@ module.exports = {
 						loader: 'sass-loader',
 						options: {
 							sassOptions: {
-								includePaths: [ 'assets/css' ],
+								includePaths: [ 'src/css' ],
 							},
 							additionalData: ( content, loaderContext ) => {
 								const {
@@ -61,7 +61,7 @@ module.exports = {
 								);
 
 								if (
-									relativePath.startsWith( 'assets/css/' )
+									relativePath.startsWith( 'src/css/' )
 								) {
 									return content;
 								}
