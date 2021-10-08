@@ -15,7 +15,7 @@ jobs:
         id: build
         uses: woocommerce/action-build@v2
         with:
-          entryPoint: plugins/woocommerce
+          entryPoint: cd plugins/woocommerce
 
       - name: Upload PR zip
         uses: actions/upload-artifact@v2
