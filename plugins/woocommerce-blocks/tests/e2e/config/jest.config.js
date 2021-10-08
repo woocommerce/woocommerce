@@ -11,6 +11,16 @@ module.exports = {
 		'@woocommerce/blocks-test-utils': '<rootDir>/tests/utils',
 	},
 
+	reporters: [
+		'default',
+		[
+			'jest-html-reporters',
+			{ publicPath: './reports/e2e', filename: 'index.html' },
+		],
+	],
+
+	testEnvironment: '<rootDir>/tests/e2e/config/environment.js',
+	testRunner: 'jest-circus/runner',
 	// Where to look for test files
 	roots: [ '<rootDir>/tests/e2e/specs' ],
 	globalSetup: '<rootDir>/tests/e2e/config/setup.js',
