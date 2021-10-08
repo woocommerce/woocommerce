@@ -4,9 +4,6 @@ jobs:
   build:
     name: Build zip for PR
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: plugins/woocommerce
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -27,14 +24,14 @@ jobs:
   e2e-tests-run:
     name: Runs E2E tests.
     runs-on: ubuntu-18.04
-    defaults:
-      run:
-        working-directory: plugins/woocommerce
     needs: [build]
     steps:
       - name: Create dirs.
         run: |
-          mkdir -p code/woocommerce
+          mkdir -p plugins/woocommerce/code/woocommerce
+          mkdir -p plugins/woocommerce/package/woocommerce
+          mkdir -p plugins/woocommerce/tmp/woocommerce
+          mkdir -p plugins/woocommerce/node_modules
 
       - name: Checkout code.
         uses: actions/checkout@v2
