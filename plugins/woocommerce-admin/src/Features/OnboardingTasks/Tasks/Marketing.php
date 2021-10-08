@@ -81,8 +81,7 @@ class Marketing {
 		}
 
 		// Make sure the task has been actioned and at least one extension is installed.
-		$task = new Task( array( 'id' => 'marketing' ) );
-		if ( count( $installed ) > 0 && $task->is_actioned() ) {
+		if ( count( $installed ) > 0 && Task::is_task_actioned( 'marketing' ) ) {
 			return true;
 		}
 

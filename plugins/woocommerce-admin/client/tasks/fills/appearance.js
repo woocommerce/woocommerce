@@ -91,14 +91,16 @@ class Appearance extends Component {
 		}
 	}
 
-	completeStep() {
+	async completeStep() {
 		const { stepIndex } = this.state;
-		const { onComplete } = this.props;
+		const { actionTask, onComplete } = this.props;
 		const nextStep = this.getSteps()[ stepIndex + 1 ];
 
 		if ( nextStep ) {
 			this.setState( { stepIndex: stepIndex + 1 } );
 		} else {
+			this.setState( { isPending: true } );
+			await actionTask( 'appearance' );
 			onComplete();
 		}
 	}
@@ -234,7 +236,6 @@ class Appearance extends Component {
 
 		this.setState( { isUpdatingNotice: true } );
 		const update = await updateOptions( {
-			woocommerce_task_list_appearance_complete: true,
 			woocommerce_demo_store: storeNoticeText.length ? 'yes' : 'no',
 			woocommerce_demo_store_notice: storeNoticeText,
 		} );
@@ -432,11 +433,12 @@ const AppearanceWrapper = compose(
 	withDispatch( ( dispatch ) => {
 		const { createNotice } = dispatch( 'core/notices' );
 		const { updateOptions } = dispatch( OPTIONS_STORE_NAME );
-		const { invalidateResolutionForStoreSelector } = dispatch(
+		const { actionTask, invalidateResolutionForStoreSelector } = dispatch(
 			ONBOARDING_STORE_NAME
 		);
 
 		return {
+			actionTask,
 			clearTaskStatusCache: () =>
 				invalidateResolutionForStoreSelector( 'getTasksStatus' ),
 			createNotice,

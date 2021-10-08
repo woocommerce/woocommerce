@@ -8,6 +8,7 @@
  */
 
 use \Automattic\WooCommerce\Admin\Install as Installer;
+use \Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
 use \Automattic\WooCommerce\Admin\Notes\Notes;
 use \Automattic\WooCommerce\Admin\Notes\UnsecuredReportFiles;
 use \Automattic\WooCommerce\Admin\Notes\DeactivatePlugin;
@@ -293,4 +294,25 @@ function wc_admin_update_280_order_status() {
  */
 function wc_admin_update_280_db_version() {
 	Installer::update_db_version( '2.8.0' );
+}
+
+/**
+ * Update the old task list options.
+ */
+function wc_admin_update_290_update_apperance_task_option() {
+	$is_actioned = get_option( 'woocommerce_task_list_appearance_complete', false );
+
+	$task = TaskLists::get_task( 'appearance' );
+	if ( $task && $is_actioned ) {
+		$task->mark_actioned();
+	}
+
+	delete_option( 'woocommerce_task_list_appearance_complete' );
+}
+
+/**
+ * Update DB Version.
+ */
+function wc_admin_update_290_db_version() {
+	Installer::update_db_version( '2.9.0' );
 }

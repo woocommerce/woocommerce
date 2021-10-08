@@ -69,6 +69,10 @@ class Install {
 			'wc_admin_update_280_order_status',
 			'wc_admin_update_280_db_version',
 		),
+		'2.9.0'  => array(
+			'wc_admin_update_290_update_apperance_task_option',
+			'wc_admin_update_290_db_version',
+		),
 	);
 
 	/**
