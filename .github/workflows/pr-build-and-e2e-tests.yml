@@ -46,8 +46,11 @@ jobs:
               working-directory: package/woocommerce/plugins/woocommerce
               run: npx wc-e2e docker:up
 
-            - name: Move current directory to code. We will install zip file in this dir later.
-              run: mv ./package/woocommerce/plugins/woocommerce/* ./code/woocommerce
+      - name: Load docker images and start containers.
+        working-directory: package/woocommerce
+        env:
+          RUN_WP_CLI_ON_DOCKER: true
+        run: npx wc-e2e docker:up
 
             - name: Download WooCommerce ZIP.
               uses: actions/download-artifact@v2
@@ -61,10 +64,27 @@ jobs:
                   unzip woocommerce.zip -d woocommerce
                   mv woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
 
-            - name: Run tests command.
-              working-directory: code/woocommerce
-              env:
-                  WC_E2E_SCREENSHOTS: 1
-                  E2E_SLACK_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
-                  E2E_SLACK_CHANNEL: ${{ secrets.E2E_SLACK_CHANNEL }}
-              run: npx wc-e2e test:e2e
+      - name: Extract and replace WooCommerce zip.
+        working-directory: tmp
+        run: |
+              unzip woocommerce.zip -d woocommerce
+              mv woocommerce/woocommerce/* ../package/woocommerce/
+
+      - name: Run REST API tests command.
+        working-directory: code/woocommerce
+        env:
+          RUN_WP_CLI_ON_DOCKER: true
+          RUN_TESTS_THAT_USE_WP_CLI: true
+          BASE_URL: http://localhost:8084
+          USER_KEY: admin
+          USER_SECRET: password
+          USE_INDEX_PERMALINKS: true
+        run: npm run test:api 
+
+      - name: Run tests command.
+        working-directory: package/woocommerce
+        env:
+          WC_E2E_SCREENSHOTS: 1
+          E2E_SLACK_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
+          E2E_SLACK_CHANNEL: ${{ secrets.E2E_SLACK_CHANNEL }}
+        run: npx wc-e2e test:e2e
