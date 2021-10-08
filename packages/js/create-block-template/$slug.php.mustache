@@ -57,7 +57,6 @@ class {{slugPascalCase}}_Blocks_Integration implements IntegrationInterface {
 
 		wp_enqueue_style(
 			'{{slug}}-blocks-integration',
-			'{{slug}}-blocks-integration',
 			$style_url,
 			[],
 			$this->get_file_version( $style_path )
@@ -65,14 +64,12 @@ class {{slugPascalCase}}_Blocks_Integration implements IntegrationInterface {
 
 		wp_register_script(
 			'{{slug}}-blocks-integration',
-			'{{slug}}-blocks-integration',
 			$script_url,
 			$script_asset['dependencies'],
 			$script_asset['version'],
 			true
 		);
 		wp_set_script_translations(
-			'{{slug}}-blocks-integration',
 			'{{slug}}-blocks-integration',
 			'{{slug}}',
 			'{{slug}}',
