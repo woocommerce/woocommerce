@@ -20,7 +20,7 @@
  */
 use Automattic\WooCommerce\Blocks\Integrations\IntegrationInterface;
 
-define ( '{{slug}}_VERSION', '0.1.0' );
+define ( '{{slugPascalCase}}_VERSION', '0.1.0' );
 
 /**
  * Class for integrating with WooCommerce Blocks
@@ -76,7 +76,7 @@ class {{slugPascalCase}}_Blocks_Integration implements IntegrationInterface {
 			'{{slug}}-blocks-integration',
 			'{{slug}}',
 			'{{slug}}',
-			dirname( _FILE__ ) . '/languages'
+			dirname( __FILE__ ) . '/languages'
 		);
 	}
 
@@ -122,7 +122,7 @@ class {{slugPascalCase}}_Blocks_Integration implements IntegrationInterface {
 		if ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG && file_exists( $file ) ) {
 			return filemtime( $file );
 		}
-		return {{slug}}_VERSION;
+		return {{slugPascalCase}}_VERSION;
 	}
 }
 
