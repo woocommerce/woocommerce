@@ -1,12 +1,12 @@
 name: Build zip for PR
 on: pull_request
-defaults:
-  run:
-    working-directory: plugins/woocommerce
 jobs:
   build:
     name: Build zip for PR
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: plugins/woocommerce
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -27,6 +27,9 @@ jobs:
   e2e-tests-run:
     name: Runs E2E tests.
     runs-on: ubuntu-18.04
+    defaults:
+      run:
+        working-directory: plugins/woocommerce
     needs: [build]
     steps:
       - name: Create dirs.
@@ -42,11 +45,11 @@ jobs:
           path: package/woocommerce
 
       - name: Run npm install.
-        working-directory: package/woocommerce/
+        working-directory: package/woocommerce
         run: npm install
 
       - name: Load docker images and start containers.
-        working-directory: package/woocommerce/
+        working-directory: package/woocommerce
         run: npx wc-e2e docker:up
 
       - name: Move current directory to code. We will install zip file in this dir later.
@@ -62,7 +65,7 @@ jobs:
         working-directory: tmp
         run: |
           unzip woocommerce.zip -d woocommerce
-          mv woocommerce/woocommerce/* ../package/woocommerce/
+          mv woocommerce/woocommerce/* ../package/woocommerce
 
       - name: Run tests command.
         working-directory: code/woocommerce
