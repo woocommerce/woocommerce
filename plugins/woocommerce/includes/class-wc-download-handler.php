@@ -306,7 +306,7 @@ class WC_Download_Handler {
 			$remote_file = false;
 			$file_path   = ABSPATH . $file_path;
 
-		} elseif ( '/wp-content' === substr( $file_path, 0, 11 ) ) {
+		} elseif ( '/' . str_replace( ABSPATH, '', WP_CONTENT_DIR ) === substr( $file_path, 0, strlen( str_replace( ABSPATH, '', WP_CONTENT_DIR ) ) + 1 ) ) {
 			$remote_file = false;
 			$file_path   = realpath( WP_CONTENT_DIR . substr( $file_path, 11 ) );
 
