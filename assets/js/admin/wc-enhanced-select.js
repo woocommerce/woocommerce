@@ -264,6 +264,9 @@ jQuery( function( $ ) {
 
 				// Ajax category search boxes
 				$( ':input.wc-category-search' ).filter( ':not(.enhanced)' ).each( function() {
+
+					var return_ids = $( this ).data( 'return_ids' ) ? true : false;
+
 					var select2_args = $.extend( {
 						allowClear        : $( this ).data( 'allow_clear' ) ? true : false,
 						placeholder       : $( this ).data( 'placeholder' ),
@@ -287,7 +290,7 @@ jQuery( function( $ ) {
 								if ( data ) {
 									$.each( data, function( id, term ) {
 										terms.push({
-											id:   term.slug,
+											id:   return_ids ? term.term_id : term.slug,
 											text: term.formatted_name
 										});
 									});
