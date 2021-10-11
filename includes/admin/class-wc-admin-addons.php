@@ -33,7 +33,7 @@ class WC_Admin_Addons {
 			}
 
 			$raw_featured = wp_safe_remote_get(
-				'https://woocommerce.test/wp-json/wccom-extensions/1.0/featured',
+				'https://woocommerce.com/wp-json/wccom-extensions/1.0/featured',
 				array(
 					'headers'    => $headers,
 					'user-agent' => 'WooCommerce Addons Page',
@@ -315,7 +315,8 @@ class WC_Admin_Addons {
 		<ul class="products">
 			<?php
 			foreach ( $block->items as $card ) {
-				if ( true === $card->full_width ) {
+				$full_width = $card->full_width ?? false;
+				if ( true === $full_width ) {
 					$classes = ' addons-full-width';
 				}
 				?>

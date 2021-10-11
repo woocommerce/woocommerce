@@ -743,18 +743,18 @@
 
 				&.promoted {
 					.label {
+						align-items: center;
+						border-radius: 2px;
+						background: #DCDCDE;
 						display: flex;
 						flex-direction: row;
-						justify-content: flex-end;
-						align-items: center;
-						padding: 3px 12px;
 						float: right;
 						height: 20px;
-						right: 24px;
+						justify-content: flex-end;
+						padding: 3px 12px;
 						top: 28px;
+						right: 24px;
 						text-align: center;
-						background: #DCDCDE;
-						border-radius: 2px;
 					}
 					h2 {
 						color: #2C3338;
