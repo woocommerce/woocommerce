@@ -15,7 +15,7 @@
 	padding: 0.3em 0.6em;
 	min-width: 2.2em;
 
-	@include breakpoint( "<782px" ) {
+	@include breakpoint("<782px") {
 		padding: 0.1em 0.2em;
 		min-width: 1.6em;
 	}
@@ -32,7 +32,7 @@
 .wc-block-components-pagination__ellipsis {
 	padding: 0.3em;
 
-	@include breakpoint( "<782px" ) {
+	@include breakpoint("<782px") {
 		padding: 0.1em;
 	}
 }

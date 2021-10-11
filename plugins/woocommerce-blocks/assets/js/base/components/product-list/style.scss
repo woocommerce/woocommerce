@@ -100,7 +100,7 @@
 	}
 }
 
-@include breakpoint( "<480px" ) {
+@include breakpoint("<480px") {
 	.wc-block-grid {
 		@for $i from 2 to 9 {
 			&.has-#{$i}-columns {
@@ -119,7 +119,7 @@
 	}
 }
 
-@include breakpoint( "480px-600px" ) {
+@include breakpoint("480px-600px") {
 	.wc-block-grid {
 		@for $i from 2 to 9 {
 			&.has-#{$i}-columns {

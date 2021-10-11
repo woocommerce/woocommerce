@@ -31,7 +31,7 @@
 		// Notice the min width ems value is smaller than flex-basis. That's because
 		// by default we want it to have the same width as `expiry-element`, but
 		// if available space is scarce, `cvc-element` should get smaller faster.
-		min-width: unquote("min( 5em, calc(16% - #{$gap-small}))");
+		min-width: unquote("min(5em, calc(16% - #{$gap-small}))");
 	}
 
 	.wc-block-gateway-input {

@@ -10,9 +10,9 @@ $breakpoints: 480px, 600px, 782px, 960px, 1280px, 1440px;
 
 // @todo refactor breakpoints so they use the mixins from Gutenberg
 // https://github.com/WordPress/gutenberg/blob/master/packages/base-styles/_mixins.scss
-@mixin breakpoint( $sizes... ) {
+@mixin breakpoint($sizes...) {
 	@each $size in $sizes {
-		@if type-of( $size ) == string {
+		@if type-of($size) == string {
 			$approved-value: 0;
 			@each $breakpoint in $breakpoints {
 				$and-larger: ">" + $breakpoint;
@@ -49,7 +49,7 @@ $breakpoints: 480px, 600px, 782px, 960px, 1280px, 1440px;
 				@each $breakpoint in $breakpoints {
 					$sizes: $sizes + " " + $breakpoint;
 				}
-				@warn "ERROR in breakpoint( #{ $size } ) : You can only use these sizes[ #{$sizes} ] using the following syntax [ <#{ nth( $breakpoints, 1 ) } >#{ nth( $breakpoints, 1 ) } #{ nth( $breakpoints, 1 ) }-#{ nth( $breakpoints, 2 ) } ]";
+				@warn "ERROR in breakpoint(#{ $size }) : You can only use these sizes[ #{$sizes} ] using the following syntax [ <#{ nth($breakpoints, 1) } >#{ nth($breakpoints, 1) } #{ nth($breakpoints, 1) }-#{ nth($breakpoints, 2) } ]";
 			}
 		}
 		@else {
@@ -57,7 +57,7 @@ $breakpoints: 480px, 600px, 782px, 960px, 1280px, 1440px;
 			@each $breakpoint in $breakpoints {
 				$sizes: $sizes + " " + $breakpoint;
 			}
-			@error "ERROR in breakpoint( #{ $size } ) : Please wrap the breakpoint $size in parenthesis. You can use these sizes[ #{$sizes} ] using the following syntax [ <#{ nth( $breakpoints, 1 ) } >#{ nth( $breakpoints, 1 ) } #{ nth( $breakpoints, 1 ) }-#{ nth( $breakpoints, 2 ) } ]";
+			@error "ERROR in breakpoint(#{ $size }) : Please wrap the breakpoint $size in parenthesis. You can use these sizes[ #{$sizes} ] using the following syntax [ <#{ nth($breakpoints, 1) } >#{ nth($breakpoints, 1) } #{ nth($breakpoints, 1) }-#{ nth($breakpoints, 2) } ]";
 		}
 	}
 }

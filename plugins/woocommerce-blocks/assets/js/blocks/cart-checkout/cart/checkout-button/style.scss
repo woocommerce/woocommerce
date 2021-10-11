@@ -25,13 +25,13 @@
 	}
 }
 
-@include breakpoint( ">782px" ) {
+@include breakpoint(">782px") {
 	.wc-block-cart__submit-container--sticky {
 		display: none;
 	}
 }
 
-@include breakpoint( "<782px" ) {
+@include breakpoint("<782px") {
 	.wc-block-cart__submit-container--sticky {
 		background: $white;
 		bottom: 0;
