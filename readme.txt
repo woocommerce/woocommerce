@@ -176,8 +176,9 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Tweak - Deleted unneeded double spaces in text strings. #30487
 * Tweak - Open Browse all extensions link in a new tab. #30640
 
-** WooCommerce Admin - 2.7.1 ** 
+** WooCommerce Admin - 2.7.1 & 2.7.2**
 
+* Fix - Fix analytics crashing on daylight saving. #7763
 * Fix - Allow super admins all capabilities within WooCommerce Admin. #7489
 * Fix - Fix end date for last periods. #6584
 * Fix - Fix up onboarding profiler not working when opted out of tracking. #7490
