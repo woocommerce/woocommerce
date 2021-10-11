@@ -164,8 +164,9 @@ class Api {
 		// Restore $_POST data.
 		$_POST = $post_data;
 
-		// Display the notices added by `process_payment` and abort.
-		NoticeHandler::convert_notices_to_exceptions( 'woocommerce_rest_payment_error' );
+		// If `process_payment` added notices, clear them. Notices are not displayed from the API -- payment should fail,
+		// and a generic notice will be shown instead if payment failed.
+		wc_clear_notices();
 
 		// Handle result.
 		$result->set_status( isset( $gateway_result['result'] ) && 'success' === $gateway_result['result'] ? 'success' : 'failure' );
