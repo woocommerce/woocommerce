@@ -14,7 +14,7 @@ class InboxNotifications {
 
 	const SURFACE_CART_CHECKOUT_NOTE_NAME          = 'surface_cart_checkout';
 	const SURFACE_CART_CHECKOUT_PROBABILITY_OPTION = 'wc_blocks_surface_cart_checkout_probability';
-	const PERCENT_USERS_TO_TARGET                  = 10;
+	const PERCENT_USERS_TO_TARGET                  = 50;
 	const INELIGIBLE_EXTENSIONS                    = [
 		'automatewoo',
 		'mailchimp-for-woocommerce',
