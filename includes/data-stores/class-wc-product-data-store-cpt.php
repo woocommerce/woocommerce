@@ -1864,6 +1864,13 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				'field'    => 'slug',
 				'terms'    => $query_vars['category'],
 			);
+		} elseif ( ! empty( $query_vars['category_id'] ) ) {
+			$wp_query_args['tax_query'][] = array(
+				'taxonomy' => 'product_cat',
+				'field'    => 'term_id',
+				'terms'    => $query_vars['category_id'],
+			);
+			unset( $wp_query_args[ 'category_id' ] ) ;
 		}
 
 		// Handle product tags.
@@ -1874,6 +1881,13 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				'field'    => 'slug',
 				'terms'    => $query_vars['tag'],
 			);
+		} elseif ( ! empty( $query_vars['tag_id'] ) ) {
+			$wp_query_args['tax_query'][] = array(
+				'taxonomy' => 'product_tag',
+				'field'    => 'term_id',
+				'terms'    => $query_vars['tag_id'],
+			);
+			unset( $wp_query_args[ 'tag_id' ] ) ;
 		}
 
 		// Handle shipping classes.
