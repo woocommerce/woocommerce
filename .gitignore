@@ -1,0 +1,34 @@
+# Operating System files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.idea
+.vscode/
+
+# Environment files
+wp-cli.local.yml
+.wp-env.override.json
+yarn-error.log
+npm-debug.log
+.pnpm-debug.log
+
+# Build files
+*.sql
+*.swp
+*.zip
+
+# Built packages
+build/
+build-module/
+build-style/
+
+# Project files
+node_modules/
+vendor/
+
+# TypeScript files
+tsconfig.tsbuildinfo
+
+# wp-env config
+.wp-env.override.json
