@@ -671,6 +671,40 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test function that returns beginning of next day with daylight saving. Auckland's 2021 daylight saving
+	 * starts on 26th September 2021 at 02:00:00 and ends on 3rd April 2022 at 03:00:00.
+	 */
+	public function test_next_day_start_daylight_saving() {
+		update_option( 'timezone_string', 'Pacific/Auckland' );
+		$settings = array(
+			'2021-09-26T00:00:00' => array( // Before daylight saving starts.
+				0 => '2021-09-27T00:00:00',
+				1 => '2021-09-25T23:59:59',
+			),
+			'2021-09-26T03:00:00' => array( // After daylight saving starts.
+				0 => '2021-09-27T00:00:00',
+				1 => '2021-09-25T23:59:59',
+			),
+			'2022-04-03T00:00:00' => array( // Before daylight saving ends.
+				0 => '2022-04-04T00:00:00',
+				1 => '2022-04-02T23:59:59',
+			),
+			'2022-04-03T23:59:00' => array( // After daylight saving ends.
+				0 => '2022-04-04T00:00:00',
+				1 => '2022-04-02T23:59:59',
+			),
+		);
+
+		foreach ( $settings as $datetime_s => $setting ) {
+			$datetime = new DateTime( $datetime_s, new DateTimeZone( 'Pacific/Auckland' ) );
+			foreach ( $setting as $reversed => $exp_value ) {
+				$result_dt = TimeInterval::next_day_start( $datetime, $reversed );
+				$this->assertEquals( $exp_value, $result_dt->format( TimeInterval::$iso_datetime_format ), __FUNCTION__ . ": DT: $datetime_s; R: $reversed" );
+			}
+		}
+	}
+
+	/**
 	 * Test function that returns beginning of next week, for weeks starting on Monday.
 	 */
 	public function test_next_week_start_ISO_week() {
