@@ -16,21 +16,21 @@ defined( 'ABSPATH' ) || exit;
  * @package WooCommerce\RestApi
  * @extends WC_REST_Controller
  */
-class WC_REST_Telemetry_V2_Controller extends WC_REST_Controller {
+class WC_REST_Telemetry_Controller extends WC_REST_Controller {
 
 	/**
 	 * Endpoint namespace.
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v2';
+	protected $namespace = 'wc-telemetry';
 
 	/**
 	 * Route base.
 	 *
 	 * @var string
 	 */
-	protected $rest_base = 'telemetry';
+	protected $rest_base = 'tracker';
 
 	/**
 	 * Register the route for /telemetry
