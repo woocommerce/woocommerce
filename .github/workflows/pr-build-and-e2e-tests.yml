@@ -36,18 +36,18 @@ jobs:
       - name: Checkout code.
         uses: actions/checkout@v2
         with:
-          path: package/woocommerce
+          path: plugins/woocommerce/package/woocommerce
 
       - name: Run npm install.
-        working-directory: package/woocommerce
+        working-directory: plugins/woocommerce/package/woocommerce
         run: npm install
 
       - name: Load docker images and start containers.
-        working-directory: package/woocommerce
+        working-directory: plugins/woocommerce/package/woocommerce
         run: npx wc-e2e docker:up
 
       - name: Move current directory to code. We will install zip file in this dir later.
-        run: mv ./package/woocommerce/* ./code/woocommerce
+        run: mv ./plugins/woocommerce/package/woocommerce/* ./code/woocommerce
 
       - name: Download WooCommerce ZIP.
         uses: actions/download-artifact@v2
@@ -59,7 +59,7 @@ jobs:
         working-directory: tmp
         run: |
           unzip woocommerce.zip -d woocommerce
-          mv woocommerce/woocommerce/* ../package/woocommerce
+          mv woocommerce/woocommerce/* ../plugins/woocommerce/package/woocommerce
 
       - name: Run tests command.
         working-directory: code/woocommerce
