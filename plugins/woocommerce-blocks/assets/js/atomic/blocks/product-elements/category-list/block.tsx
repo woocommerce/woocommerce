@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import {
 	useInnerBlockLayoutContext,
@@ -10,11 +9,15 @@ import {
 } from '@woocommerce/shared-context';
 import { isEmpty } from 'lodash';
 import { withProductDataContext } from '@woocommerce/shared-hocs';
+import { HTMLAttributes } from 'react';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
+import { Attributes } from './types';
+
+type Props = Attributes & HTMLAttributes< HTMLDivElement >;
 
 /**
  * Product Category Block Component.
@@ -23,7 +26,7 @@ import './style.scss';
  * @param {string} [props.className] CSS Class name for the component.
  * @return {*} The component.
  */
-const Block = ( { className } ) => {
+const Block = ( { className }: Props ): JSX.Element | null => {
 	const { parentClassName } = useInnerBlockLayoutContext();
 	const { product } = useProductDataContext();
 
@@ -55,10 +58,6 @@ const Block = ( { className } ) => {
 			</ul>
 		</div>
 	);
-};
-
-Block.propTypes = {
-	className: PropTypes.string,
 };
 
 export default withProductDataContext( Block );
