@@ -124,21 +124,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'get_tasks' ),
 					'permission_callback' => array( $this, 'get_tasks_permission_check' ),
-					'args'                => array(
-						'extended_tasks' => array(
-							'description'       => __( 'List of extended deprecated tasks from the client side filter.', 'woocommerce-admin' ),
-							'type'              => 'array',
-							'validate_callback' => function( $param, $request, $key ) {
-								$has_valid_keys = true;
-								foreach ( $param as $task ) {
-									if ( $has_valid_keys ) {
-										$has_valid_keys = array_key_exists( 'list_id', $task ) && array_key_exists( 'id', $task );
-									}
-								}
-								return $has_valid_keys;
-							},
-						),
-					),
+					'args'                => $this->get_task_list_params(),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
 			)
@@ -738,6 +724,29 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		);
 
 		return $this->add_additional_fields_schema( $schema );
+	}
+
+	/**
+	 * Get the query params for task lists.
+	 *
+	 * @return array
+	 */
+	public function get_task_list_params() {
+		$params                   = array();
+		$params['extended_tasks'] = array(
+			'description'       => __( 'List of extended deprecated tasks from the client side filter.', 'woocommerce-admin' ),
+			'type'              => 'array',
+			'validate_callback' => function( $param, $request, $key ) {
+				$has_valid_keys = true;
+				foreach ( $param as $task ) {
+					if ( $has_valid_keys ) {
+						$has_valid_keys = array_key_exists( 'list_id', $task ) && array_key_exists( 'id', $task );
+					}
+				}
+				return $has_valid_keys;
+			},
+		);
+		return $params;
 	}
 
 	/**

@@ -173,7 +173,7 @@ class Task {
 			'action_url'      => null,
 			'is_complete'     => false,
 			'can_view'        => true,
-			'level'           => null,
+			'level'           => 3,
 			'time'            => null,
 			'is_dismissable'  => false,
 			'is_snoozeable'   => false,
@@ -435,6 +435,33 @@ class Task {
 	public static function is_task_actioned( $id ) {
 		$actioned = get_option( self::ACTIONED_OPTION, array() );
 		return in_array( $id, $actioned, true );
+	}
+
+	/**
+	 * Sorting function for tasks.
+	 *
+	 * @param Task  $a Task a.
+	 * @param Task  $b Task b.
+	 * @param array $sort_by list of columns with sort order.
+	 * @return int
+	 */
+	public static function sort( $a, $b, $sort_by = array() ) {
+		$result = 0;
+		foreach ( $sort_by as $data ) {
+			$key   = $data['key'];
+			$a_val = $a->$key ?? false;
+			$b_val = $b->$key ?? false;
+			if ( 'asc' === $data['order'] ) {
+				$result = $a_val <=> $b_val;
+			} else {
+				$result = $b_val <=> $a_val;
+			}
+
+			if ( 0 !== $result ) {
+				break;
+			}
+		}
+		return $result;
 	}
 
 }

@@ -206,39 +206,20 @@ class TaskList {
 	/**
 	 * Sorts the attached tasks array.
 	 *
+	 * @param array $sort_by list of columns with sort order.
 	 * @return TaskList returns $this, for chaining.
 	 */
-	public function sort_tasks() {
-		if ( 0 !== count( $this->sort_by ) ) {
-			usort( $this->tasks, array( $this, 'sort' ) );
+	public function sort_tasks( $sort_by = array() ) {
+		$sort_by = count( $sort_by ) > 0 ? $sort_by : $this->sort_by;
+		if ( 0 !== count( $sort_by ) ) {
+			usort(
+				$this->tasks,
+				function( $a, $b ) use ( $sort_by ) {
+					return Task::sort( $a, $b, $sort_by );
+				}
+			);
 		}
 		return $this;
-	}
-
-	/**
-	 * Sorting function for tasks.
-	 *
-	 * @param Task $a Task a.
-	 * @param Task $b Task b.
-	 * @return int
-	 */
-	private function sort( $a, $b ) {
-		$result = 0;
-		foreach ( $this->sort_by as $data ) {
-			$key   = $data['key'];
-			$a_val = $a->$key ?? false;
-			$b_val = $b->$key ?? false;
-			if ( 'asc' === $data['order'] ) {
-				$result = $a_val <=> $b_val;
-			} else {
-				$result = $b_val <=> $a_val;
-			}
-
-			if ( 0 !== $result ) {
-				break;
-			}
-		}
-		return $result;
 	}
 
 	/**

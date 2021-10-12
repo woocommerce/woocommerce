@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskList;
  * class WC_Tests_OnboardingTasks_TaskList
  */
 class WC_Tests_OnboardingTasks_TaskList extends WC_Unit_Test_Case {
+
 	/**
 	 * Task list.
 	 *
@@ -190,4 +191,130 @@ class WC_Tests_OnboardingTasks_TaskList extends WC_Unit_Test_Case {
 		$this->assertContains( 'isComplete', $json['tasks'][0] );
 	}
 
+	/**
+	 * Adds a couple tasks to the provided list.
+	 *
+	 * @param TaskList $list list to add tasks to.
+	 */
+	public function add_test_tasks( $list ) {
+		$list->add_task(
+			array(
+				'id'          => 'task-1',
+				'can_view'    => true,
+				'level'       => 1,
+				'is_complete' => true,
+			)
+		);
+		$list->add_task(
+			array(
+				'id'          => 'task-2',
+				'can_view'    => true,
+				'is_complete' => false,
+			)
+		);
+		$list->add_task(
+			array(
+				'id'          => 'task-3',
+				'can_view'    => true,
+				'level'       => 2,
+				'is_complete' => false,
+			)
+		);
+		$list->add_task(
+			array(
+				'id'          => 'task-4',
+				'can_view'    => true,
+				'level'       => 1,
+				'is_complete' => false,
+			)
+		);
+	}
+
+	/**
+	 * Test task list sort_tasks without sort_by config.
+	 */
+	public function test_sort_tasks_without_sort_by() {
+		$this->add_test_tasks( $this->list );
+		$this->list->sort_tasks();
+		$json = $this->list->get_json();
+		$this->assertEquals( array_column( $json['tasks'], 'id' ), array( 'task-1', 'task-2', 'task-3', 'task-4' ) );
+	}
+
+	/**
+	 * Test task list sort_tasks with sort_by config for is_complete.
+	 */
+	public function test_sort_tasks_with_sort_by() {
+		$list = new TaskList(
+			array(
+				'id'      => 'setup',
+				'sort_by' => array(
+					array(
+						'key'   => 'is_complete',
+						'order' => 'asc',
+					),
+				),
+			)
+		);
+		$this->add_test_tasks( $list );
+		$list->sort_tasks();
+		$json = $list->get_json();
+		$this->assertEquals( $json['tasks'][3]['id'], 'task-1' );
+	}
+
+	/**
+	 * Test task list sort_tasks with sort_by config for is_complete and level.
+	 */
+	public function test_sort_tasks_with_sort_by_multiple_items() {
+		$list = new TaskList(
+			array(
+				'id'      => 'setup',
+				'sort_by' => array(
+					array(
+						'key'   => 'is_complete',
+						'order' => 'asc',
+					),
+					array(
+						'key'   => 'level',
+						'order' => 'asc',
+					),
+				),
+			)
+		);
+		$this->add_test_tasks( $list );
+		$list->sort_tasks();
+		$json = $list->get_json();
+		$this->assertEquals( array_column( $json['tasks'], 'id' ), array( 'task-4', 'task-3', 'task-2', 'task-1' ) );
+	}
+
+	/**
+	 * Test task list sort_tasks with custom config.
+	 */
+	public function test_sort_tasks_with_passed_in_sort_by_config() {
+		$list = new TaskList(
+			array(
+				'id'      => 'setup',
+				'sort_by' => array(
+					array(
+						'key'   => 'is_complete',
+						'order' => 'asc',
+					),
+					array(
+						'key'   => 'level',
+						'order' => 'asc',
+					),
+				),
+			)
+		);
+		$this->add_test_tasks( $list );
+		$list->sort_tasks(
+			array(
+				array(
+					'key'   => 'level',
+					'order' => 'desc',
+				),
+			)
+		);
+		$json = $list->get_json();
+		$this->assertEquals( array_column( $json['tasks'], 'id' ), array( 'task-2', 'task-3', 'task-1', 'task-4' ) );
+	}
 }

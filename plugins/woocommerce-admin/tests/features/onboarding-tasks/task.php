@@ -223,5 +223,145 @@ class WC_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 		$this->assertContains( $task->id, $actioned );
 	}
 
+	/**
+	 * Test task sort with empty config.
+	 */
+	public function test_sort_with_empty_sort_by_config() {
+		$task_a = new Task(
+			array(
+				'id' => 'a',
+			)
+		);
+		$task_b = new Task(
+			array(
+				'id' => 'b',
+			)
+		);
+		$result = Task::sort( $task_a, $task_b );
+		$this->assertEquals( 0, $result );
+	}
+
+	/**
+	 * Test task sort with config with invalid key.
+	 */
+	public function test_sort_with_sort_by_config_with_invalid_key() {
+		$task_a = new Task(
+			array(
+				'id' => 'a',
+			)
+		);
+		$task_b = new Task(
+			array(
+				'id' => 'b',
+			)
+		);
+		$result = Task::sort(
+			$task_a,
+			$task_b,
+			array(
+				array(
+					'key'   => 'invalid',
+					'order' => 'asc',
+				),
+			)
+		);
+		$this->assertEquals( 0, $result );
+	}
+
+	/**
+	 * Test task sort with config with valid key asc.
+	 */
+	public function test_sort_with_sort_by_config_with_valid_key_asc() {
+		$task_a = new Task(
+			array(
+				'id'    => 'a',
+				'level' => 1,
+			)
+		);
+		$task_b = new Task(
+			array(
+				'id'    => 'b',
+				'level' => 2,
+			)
+		);
+		$result = Task::sort(
+			$task_a,
+			$task_b,
+			array(
+				array(
+					'key'   => 'level',
+					'order' => 'asc',
+				),
+			)
+		);
+		$this->assertEquals( -1, $result );
+	}
+
+	/**
+	 * Test task sort with config with valid key desc.
+	 */
+	public function test_sort_with_sort_by_config_with_valid_key_desc() {
+		$task_a = new Task(
+			array(
+				'id'    => 'a',
+				'level' => 1,
+			)
+		);
+		$task_b = new Task(
+			array(
+				'id'    => 'b',
+				'level' => 2,
+			)
+		);
+		$result = Task::sort(
+			$task_a,
+			$task_b,
+			array(
+				array(
+					'key'   => 'level',
+					'order' => 'desc',
+				),
+			)
+		);
+		$this->assertEquals( 1, $result );
+	}
+
+	/**
+	 * Test task sort with config with multiple keys.
+	 */
+	public function test_sort_with_sort_by_config_with_multiple_keys() {
+		$task_a  = new Task(
+			array(
+				'id'          => 'a',
+				'level'       => 2,
+				'is_complete' => false,
+			)
+		);
+		$task_b  = new Task(
+			array(
+				'id'          => 'b',
+				'level'       => 2,
+				'is_complete' => true,
+			)
+		);
+		$sort_by = array(
+			array(
+				'key'   => 'level',
+				'order' => 'asc',
+			),
+			array(
+				'key'   => 'is_complete',
+				'order' => 'asc',
+			),
+		);
+		$result  = Task::sort( $task_a, $task_b, $sort_by );
+		// Given levels are the same it should return the comparison of is_complete.
+		$this->assertEquals( -1, $result );
+
+		$task_a->is_complete = true;
+		$result              = Task::sort( $task_a, $task_b, $sort_by );
+		// Given levels are the same it should return the comparison of is_complete.
+		$this->assertEquals( 0, $result );
+	}
 }
 
