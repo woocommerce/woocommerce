@@ -4,10 +4,13 @@
 import { __, sprintf } from '@wordpress/i18n';
 
 /**
- * Checks if value passed contain passed label.
+ * Ensures that a given value contains a string, or throws an error.
  */
-export const mustContain = ( value: string, label: string ): true | Error => {
-	if ( ! value.includes( label ) ) {
+export const mustContain = (
+	value: string,
+	requiredValue: string
+): true | Error => {
+	if ( ! value.includes( requiredValue ) ) {
 		throw Error(
 			sprintf(
 				/* translators: %1$s value passed to filter, %2$s : value that must be included. */
@@ -16,16 +19,9 @@ export const mustContain = ( value: string, label: string ): true | Error => {
 					'woo-gutenberg-products-block'
 				),
 				value,
-				label
+				requiredValue
 			)
 		);
 	}
 	return true;
 };
-
-/**
- * A function that always return true.
- * We need to have a single instance of this function so it doesn't
- * invalidate our memo comparison.
- */
-export const returnTrue = (): true => true;

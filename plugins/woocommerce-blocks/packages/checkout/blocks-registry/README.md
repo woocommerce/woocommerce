@@ -1,60 +1,111 @@
-# WooCommerce Blocks - Blocks Registry <!-- omit in toc -->
+# Checkout - Blocks Registry <!-- omit in toc -->
 
-This directory contains the Checkout Blocks Registry - functions to register custom blocks that can be inserted into various areas within the Checkout.
+This directory contains the Checkout Blocks Registry. This provides functions to **register new Inner Blocks** that can be inserted automatically, or optionally, within the cart and checkout blocks in certain areas.
 
-**-- These docs will be moved to the main docs directory once finalized --**
-
-The Checkout Block has a function based interface for registering custom Blocks so that merchants can insert them into specific Inner Block areas within the Checkout page layout. Custom Blocks registered in this way can also define a component to render on the frontend in place of the Block.
+Registered Inner Blocks can either be forced within the layout of the Cart/Checkout Block, or they can just be made available to merchants so they can be inserted manually. Inner Blocks registered in this way can also define a component to render on the frontend in place of the Block.
 
 ## Table of Contents <!-- omit in toc -->
 
-- [Registering a block](#registering-a-block)
-- [Registering a block component - `registerCheckoutBlock( options )`](#registering-a-block-component---registercheckoutblock-options-)
-  - [`metadata` (required)](#metadata-required)
-  - [`component` (required)](#component-required)
+- [How Inner Blocks Work](#how-inner-blocks-work)
+- [Inner Block Areas](#inner-block-areas)
+- [Registering a Block](#registering-a-block)
+  - [Registering a Forced Block](#registering-a-forced-block)
+  - [Registering a Block Component](#registering-a-block-component)
+- [`registerCheckoutBlock( options )`](#registercheckoutblock-options-)
+  - [Usage](#usage)
+  - [Options](#options)
+    - [`metadata` (object, required)](#metadata-object-required)
+    - [`component` (function, required)](#component-function-required)
+- [`getRegisteredBlocks( blockName )`](#getregisteredblocks-blockname-)
+  - [Usage](#usage-1)
+- [`hasInnerBlocks( blockName )`](#hasinnerblocks-blockname-)
+  - [Usage](#usage-2)
 
-## Registering a block
+## How Inner Blocks Work
 
-To register a checkout block, first, register your Block Type with WordPress using https://developer.wordpress.org/block-editor/reference-guides/block-api/block-registration/. We recommend using the blocks.json method to avoid
+The Checkout Block has several areas in which inner blocks can be registered and added. Once registered, blocks can be inserted by merchants:
+
+![Inner Block Inserter](inserter.png)
+
+If a block is **forced**, merchants won't see the option to insert the block, they will just see the block inserted by default, and they won't be able to remove it from the layout.
+
+## Inner Block Areas
+
+Blocks can be registered within several different areas or parent blocks. Valid values at time of writing include:
+
+| Parent Block/Area                                | Description                                                   |
+| :----------------------------------------------- | :------------------------------------------------------------ |
+| `woocommerce/checkout-totals-block`              | The right side of the checkout containing order totals.       |
+| `woocommerce/checkout-fields-block`              | The left side of the checkout containing checkout form steps. |
+| `woocommerce/checkout-contact-information-block` | Within the contact information form step.                     |
+| `woocommerce/checkout-shipping-address-block`    | Within the shipping address form step.                        |
+| `woocommerce/checkout-billing-address-block`     | Within the billing address form step.                         |
+| `woocommerce/checkout-shipping-methods-block`    | Within the shipping methods form step.                        |
+| `woocommerce/checkout-payment-methods-block`     | Within the payment methods form step.                         |
+
+See the `innerBlockAreas` typedef for the most up to date list of available areas.
+
+## Registering a Block
+
+To register a checkout block, first, register your Block Type with WordPress using https://developer.wordpress.org/block-editor/reference-guides/block-api/block-registration/. We recommend using the `blocks.json` method to avoid
 repetition.
 
-When registering your block, you should:
+When registering your block, you should also define the `parent` property to include a list of areas where your block will be available. For example:
 
-1. Define the `parent` property to include a list of areas where your block will be available. See the `innerBlockAreas` typedef for available areas. Valid values at time of writing include:
+```json
+{
+	"name": "woocommerce/checkout-actions-block",
+	"title": "Actions",
+	"description": "Allow customers to place their order.",
+	"category": "woocommerce",
+	"parent": [ "woocommerce/checkout-fields-block" ]
+	// ...snip
+}
+```
 
--   `woocommerce/checkout-totals-block` - The right side of the checkout containing order totals.
--   `woocommerce/checkout-fields-block` - The left side of the checkout containing checkout form steps.
--   `woocommerce/checkout-contact-information-block` - Within the contact information form step.
--   `woocommerce/checkout-shipping-address-block` - Within the shipping address form step.
--   `woocommerce/checkout-billing-address-block` - Within the billing address form step.
--   `woocommerce/checkout-shipping-methods-block` - Within the shipping methods form step.
--   `woocommerce/checkout-payment-methods-block` - Within the payment methods form step.
+### Registering a Forced Block
 
-## Registering a block component - `registerCheckoutBlock( options )`
+If you want your block to appear within the layout of the Checkout without merchant intervention, you can implement locking as follows:
 
-After registering your block, you need to define which component will replace your block on the frontend. To do this, use the registerCheckoutBlock function from the checkout blocks registry. An example of importing this for use in your JavaScript file is:
+```json
+{
+	"name": "woocommerce/checkout-actions-block",
+	"title": "Actions",
+	"description": "Allow customers to place their order.",
+	"category": "woocommerce",
+	"parent": [ "woocommerce/checkout-fields-block" ],
+	"attributes": {
+		"lock": {
+			"type": "object",
+			"default": {
+				"remove": true,
+				"move": true
+			}
+		}
+	}
+	// ...snip
+}
+```
 
-_Aliased import_
+In the above example, the inner block would be inserted automatically, and would not be movable or removable by the merchant.
+
+### Registering a Block Component
+
+After registering your block, you need to define which component will replace your block on the frontend of the store. To do this, use the `registerCheckoutBlock` function from the checkout blocks registry.
+
+## `registerCheckoutBlock( options )`
+
+This function registers a block and it's corresponding component with WooCommerce. The register function expects a JavaScript object with options specific to the block you are registering.
+
+### Usage
 
 ```js
+// Aliased import
 import { registerCheckoutBlock } from '@woocommerce/blocks-checkout';
-```
 
-_wc global_
+// Global import
+// const { registerCheckoutBlock } = wc.blocksCheckout;
 
-```js
-const { registerCheckoutBlock } = wc.blocksCheckout;
-```
-
-The register function expects a JavaScript object with options specific to the block you are registering:
-
-```js
-registerCheckoutBlock( options );
-```
-
-The options you feed the configuration instance should be an object in this shape (see `CheckoutBlockOptions` typedef):
-
-```js
 const options = {
 	metadata: {
 		name: 'namespace/block-name',
@@ -62,16 +113,60 @@ const options = {
 	},
 	component: () => <div>A Function Component</div>,
 };
+
+registerCheckoutBlock( options );
 ```
 
-Here's some more details on the _configuration_ options:
+### Options
 
-### `metadata` (required)
+The following options are available:
 
-This is a your blocks metadata (from blocks.json). It needs to define at least a `name` (block name), and `parent` (the areas on checkout) to be valid.
+#### `metadata` (object, required)
 
-### `component` (required)
+This is a your blocks metadata (from `blocks.json`). It needs to define at least a `name` (block name), and `parent` (the areas on checkout) to be valid.
 
-This is a React component that should replace the Block on the frontend. It will be fed any attributes from the Block and have access to any public context providers in the Checkout context.
+#### `component` (function, required)
+
+This is a React component that should replace the Block on the frontend. It will be fed any attributes from the Block and have access to any public context providers under the Checkout context.
 
 You should provide either a _React Component_ or a `React.lazy()` component if you wish to lazy load for performance reasons.
+
+## `getRegisteredBlocks( blockName )`
+
+Returns an array of registered block objects available within a specific parent block/area.
+
+### Usage
+
+```js
+// Aliased import
+import { getRegisteredBlocks } from '@woocommerce/blocks-checkout';
+
+// Global import
+// const { getRegisteredBlocks } = wc.blocksCheckout;
+
+const registeredBlocks = getRegisteredBlocks(
+	'woocommerce/checkout-totals-block'
+);
+```
+
+## `hasInnerBlocks( blockName )`
+
+Check if a block/area supports inner block registration.
+
+### Usage
+
+```js
+// Aliased import
+import { hasInnerBlocks } from '@woocommerce/blocks-checkout';
+
+// Global import
+// const { hasInnerBlocks } = wc.blocksCheckout;
+
+const isValid = hasInnerBlocks( 'woocommerce/checkout-totals-block' ); // true
+```
+
+<br/><br/><p align="center">
+<a href="https://woocommerce.com/">
+<img src="https://woocommerce.com/wp-content/themes/woo/images/logo-woocommerce@2x.png" alt="WooCommerce" height="28px" style="filter: grayscale(100%);
+	opacity: 0.2;" />
+</a><br/><a href="https://woocommerce.com/careers/">We're hiring</a>! Come work with us!</p>

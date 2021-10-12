@@ -7,9 +7,11 @@ import { CURRENT_USER_IS_ADMIN } from '@woocommerce/settings';
 import deprecated from '@wordpress/deprecated';
 
 /**
- * Internal dependencies
+ * A function that always return true.
+ * We need to have a single instance of this function so it doesn't
+ * invalidate our memo comparison.
  */
-import { returnTrue } from '../utils';
+const returnTrue = (): true => true;
 
 type CheckoutFilterFunction = < T >(
 	value: T,

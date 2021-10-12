@@ -6,7 +6,7 @@ import classnames from 'classnames';
 /**
  * Internal dependencies
  */
-import { createSlotFill, useSlot } from '../slot';
+import { createSlotFill, useSlot } from '../../slot';
 
 const slotName = '__experimentalOrderShippingPackages';
 const {
