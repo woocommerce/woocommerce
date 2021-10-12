@@ -256,7 +256,7 @@ class ProductCategories extends AbstractDynamicBlock {
 		foreach ( $categories as $category ) {
 			$output .= '
 				<option value="' . esc_attr( get_term_link( $category->term_id, 'product_cat' ) ) . '">
-					' . str_repeat( '-', $depth ) . '
+					' . str_repeat( '&minus;', $depth ) . '
 					' . esc_html( $category->name ) . '
 					' . $this->getCount( $category, $attributes ) . '
 				</option>
