@@ -180,6 +180,11 @@ class Server {
 		);
 	}
 
+	/**
+	 * List of controllers in the telemetry namespace.
+	 *
+	 * @return array
+	 */
 	protected function get_telemetry_controllers() {
 		return array(
 			'tracker' => 'WC_REST_Telemetry_Controller',
