@@ -42,6 +42,7 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('./composer.lock') }}
 
       - name: Setup and install composer
+        working-directory: plugins/woocommerce
         run: composer install
 
       - name: Init DB and WP
