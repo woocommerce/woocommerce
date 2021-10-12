@@ -49,6 +49,12 @@
 * Tweak - Update analytics card header text styles. #6506
 * Enhancement - Align Table fields with the fallback on isNumeric. #7431
 
+** Breaking Changes **
+
+* Removed non WooCommerce Admin specific settings from the `wc_admin`
+namespace in the `wc/data` settings store (ex: countries), use
+`window.wcSettings` instead. #7480
+
 **WooCommerce Blocks - 5.7.1 & 5.8.0 & 5.9.0**
 
 * Add - Extensibility point for extensions to filter payment methods. #4668
