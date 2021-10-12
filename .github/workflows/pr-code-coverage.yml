@@ -1,6 +1,10 @@
 name: Run code coverage on PR
 on:
   pull_request
+defaults:
+  run:
+    shell: bash
+    working-directory: plugins/woocommerce
 jobs:
   test:
     name: Code coverage (PHP 7.4, WP Latest)
@@ -35,7 +39,6 @@ jobs:
 
       - name: Get cached composer directories
         uses: actions/cache@v2
-        working-directory: plugins/woocommerce
         with:
           path: |
             ./packages
@@ -43,15 +46,12 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('./composer.lock') }}
 
       - name: Setup and install composer
-        working-directory: plugins/woocommerce
         run: composer install
 
       - name: Init DB and WP
-        working-directory: plugins/woocommerce
         run: ./tests/bin/install.sh woo_test root root 127.0.0.1 latest
 
       - name: Run unit tests with code coverage. Allow to fail.
-        working-directory: plugins/woocommerce
         run: |
           RUN_CODE_COVERAGE=1 bash ./tests/bin/phpunit.sh
           exit 0
