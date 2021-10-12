@@ -25,10 +25,6 @@ export const Task: React.FC< TaskProps > = ( { query, task } ) => {
 		invalidateResolutionForStoreSelector( 'getTaskLists' );
 	}, [ id ] );
 
-	if ( task && task.container ) {
-		return task.container;
-	}
-
 	return (
 		<WooOnboardingTask.Slot id={ id } fillProps={ { onComplete, query } } />
 	);

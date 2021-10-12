@@ -8,6 +8,7 @@ import { apiFetch } from '@wordpress/data-controls';
  */
 import TYPES from './action-types';
 import { WC_ADMIN_NAMESPACE } from '../constants';
+import { DeprecatedTasks } from './deprecated-tasks';
 
 export function getFreeExtensionsError( error ) {
 	return {
@@ -246,30 +247,6 @@ export function* updateProfileItems( items ) {
 	}
 }
 
-/**
- * Used to keep backwards compatibility with the extended task list filter on the client.
- * This can be removed after version WC Admin 2.10 (see deprecated notice in resolvers.js).
- *
- * @param {Object} task the returned task object.
- * @param {Array}  keys to keep in the task object.
- * @return {Object} task with the keys specified.
- */
-function possiblyPruneTaskData( task, keys ) {
-	if ( ! task.time && ! task.title ) {
-		// client side task
-		return keys.reduce(
-			( simplifiedTask, key ) => {
-				return {
-					...simplifiedTask,
-					[ key ]: task[ key ],
-				};
-			},
-			{ id: task.id }
-		);
-	}
-	return task;
-}
-
 export function* snoozeTask( id ) {
 	yield snoozeTaskRequest( id );
 
@@ -280,7 +257,7 @@ export function* snoozeTask( id ) {
 		} );
 
 		yield snoozeTaskSuccess(
-			possiblyPruneTaskData( task, [
+			DeprecatedTasks.possiblyPruneTaskData( task, [
 				'isSnoozed',
 				'isDismissed',
 				'snoozedUntil',
@@ -302,7 +279,7 @@ export function* undoSnoozeTask( id ) {
 		} );
 
 		yield undoSnoozeTaskSuccess(
-			possiblyPruneTaskData( task, [
+			DeprecatedTasks.possiblyPruneTaskData( task, [
 				'isSnoozed',
 				'isDismissed',
 				'snoozedUntil',
@@ -324,7 +301,10 @@ export function* dismissTask( id ) {
 		} );
 
 		yield dismissTaskSuccess(
-			possiblyPruneTaskData( task, [ 'isDismissed', 'isSnoozed' ] )
+			DeprecatedTasks.possiblyPruneTaskData( task, [
+				'isDismissed',
+				'isSnoozed',
+			] )
 		);
 	} catch ( error ) {
 		yield dismissTaskError( id, error );
@@ -342,7 +322,10 @@ export function* undoDismissTask( id ) {
 		} );
 
 		yield undoDismissTaskSuccess(
-			possiblyPruneTaskData( task, [ 'isDismissed', 'isSnoozed' ] )
+			DeprecatedTasks.possiblyPruneTaskData( task, [
+				'isDismissed',
+				'isSnoozed',
+			] )
 		);
 	} catch ( error ) {
 		yield undoDismissTaskError( id, error );
@@ -380,7 +363,7 @@ export function* actionTask( id ) {
 		} );
 
 		yield actionTaskSuccess(
-			possiblyPruneTaskData( task, [ 'isActioned' ] )
+			DeprecatedTasks.possiblyPruneTaskData( task, [ 'isActioned' ] )
 		);
 	} catch ( error ) {
 		yield actionTaskError( id, error );
