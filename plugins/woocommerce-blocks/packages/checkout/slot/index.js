@@ -13,7 +13,7 @@ import { Children, cloneElement } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import BlockErrorBoundary from '../error-boundary';
+import BlockErrorBoundary from '../components/error-boundary';
 
 /**
  * This function is used in case __experimentalUseSlot is removed and useSlot is not released, it tries to mock

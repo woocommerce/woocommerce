@@ -6,25 +6,24 @@ import classnames from 'classnames';
 /**
  * Internal dependencies
  */
-import { createSlotFill, hasValidFills, useSlot } from '../slot';
-import TotalsWrapper from '../wrapper';
+import { createSlotFill, hasValidFills, useSlot } from '../../slot';
+import TotalsWrapper from '../totals-wrapper';
 
-const slotName = '__experimentalDiscountsMeta';
+const slotName = '__experimentalOrderMeta';
 
-const {
-	Fill: ExperimentalDiscountsMeta,
-	Slot: DiscountsMetaSlot,
-} = createSlotFill( slotName );
+const { Fill: ExperimentalOrderMeta, Slot: OrderMetaSlot } = createSlotFill(
+	slotName
+);
 
 const Slot = ( { className, extensions, cart } ) => {
 	const { fills } = useSlot( slotName );
 	return (
 		hasValidFills( fills ) && (
 			<TotalsWrapper slotWrapper={ true }>
-				<DiscountsMetaSlot
+				<OrderMetaSlot
 					className={ classnames(
 						className,
-						'wc-block-components-discounts-meta'
+						'wc-block-components-order-meta'
 					) }
 					fillProps={ { extensions, cart } }
 				/>
@@ -33,6 +32,6 @@ const Slot = ( { className, extensions, cart } ) => {
 	);
 };
 
-ExperimentalDiscountsMeta.Slot = Slot;
+ExperimentalOrderMeta.Slot = Slot;
 
-export default ExperimentalDiscountsMeta;
+export default ExperimentalOrderMeta;

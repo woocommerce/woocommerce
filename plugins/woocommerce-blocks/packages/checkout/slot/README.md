@@ -1,138 +1,190 @@
-# Slot Fill
+# Checkout - Slot Fill <!-- omit in toc -->
 
 Slot and Fill are a pair of components which enable developers to render elsewhere in a React element tree, a pattern often referred to as "portal" rendering. It is a pattern for component extensibility, where a single Slot may be occupied by an indeterminate number of Fills elsewhere in the application.
 
-Read more about Slot Fill in [@wordpress/components documentation](https://github.com/WordPress/gutenberg/tree/c53d26ea79bdcb1a3007a994078e1fc9e0195466/packages/components/src/slot-fill).
+This module is an abstraction on top of the Slot/Fill implementation in WordPress and is meant to be used internally, therefore the documentation only touches the abstraction part. You can read more about Slot Fill in [@wordpress/components documentation](https://github.com/WordPress/gutenberg/tree/c53d26ea79bdcb1a3007a994078e1fc9e0195466/packages/components/src/slot-fill).
 
-This file is an abstraction above Gutenberg's implementation and is meant to be used internally, therefor, the documentation only touches the abstraction part.
+## Table of Contents <!-- omit in toc -->
 
-## Usage
+- [`createSlotFill( slotName )`](#createslotfill-slotname-)
+  - [Usage](#usage)
+  - [Options](#options)
+    - [`slotName (string, required)`](#slotname-string-required)
+    - [`onError (Function)`](#onerror-function)
+  - [`Slot` Component](#slot-component)
+    - [Usage](#usage-1)
+    - [Options](#options-1)
+      - [`as (string|element)`](#as-stringelement)
+      - [`className (string)`](#classname-string)
+      - [`fillProps (object)`](#fillprops-object)
+    - [`Fill` Component](#fill-component)
+- [Extending Checkout via Slot Fills](#extending-checkout-via-slot-fills)
+- [Available Slot Fills](#available-slot-fills)
 
-Calling `createSlotFill` with a `slotName` would give you a couple of components: `Slot` and `Fill`. 3PD would use Fill, and you will use `Slot` inside your code. A Slot must be called in a tree that has `SlotFillProvider` in it.
+## `createSlotFill( slotName )`
 
-**Always** prefix your `slotName` with `__experimental` and your `Fill` with `Experimental` until you decide to publicly announce them.
+Calling `createSlotFill` with a `slotName` returns two components: `Slot` and `Fill`. Slots are implemented in WooCommerce Blocks, while Fills can be used by extensions to add content within the Slot. A Slot must be called in a tree that has `SlotFillProvider` in it.
 
-Assign your Slot to your Fill `ExperimentalOrderMeta.Slot = Slot`.
-
-If you need to pass extra data from the Slot to the Fill, use `fillProps`.
+### Usage
 
 ```jsx
+// Aliased import
 import { createSlotFill } from '@woocommerce/blocks-checkout';
 
-const slotName = '__experimentalOrderMeta';
+// Global import
+// const { createSlotFill } = wc.blocksCheckout;
 
-const { Fill: ExperimentalOrderMeta, Slot: OrderMetaSlot } = createSlotFill(
-	slotName
-);
+const slotName = '__experimentalSlotName';
 
-const Slot = ( { className } ) => {
-	const { extensions, cartData } = useStoreCart();
-	return (
-		<OrderMetaSlot
-			className={ classnames(
-				className,
-				'wc-block-components-order-meta'
-			) }
-			fillProps={ { extensions, cartData } }
-		/>
-	);
-};
-
-ExperimentalOrderMeta.Slot = Slot;
-
-export default ExperimentalOrderMeta;
+const { Fill, Slot } = createSlotFill( slotName );
 ```
 
-`Fill` renders an [errorBoundary](https://reactjs.org/docs/error-boundaries.html) inside of it, this is meant to catch broken fills and preventing them from breaking code or other fills.
-If the current user is an admin, the error would be shown instead of the components.
-Otherwise, nothing would be shown and the fill would be removed.
-You can customize the error shown to admins by passing `onError` to `createSlotFill`.
+### Options
+
+`createSlotFill` accepts the following options:
+
+#### `slotName (string, required)`
+
+The name of slot to be created.
+
+#### `onError (Function)`
+
+If a `Fill` causes an error, and the current user is an admin user, this function will be called. You can customize the error shown to admins by passing `onError` to `createSlotFill`.
 
 ```jsx
+// Aliased import
 import { createSlotFill } from '@woocommerce/blocks-checkout';
 
-const slotName = '__experimentalOrderMeta';
+// Global import
+// const { createSlotFill } = wc.blocksCheckout;
+
+const slotName = '__experimentalSlotName';
 
 const onError = ( errorMessage ) => {
 	return (
 		<div className="my-custom-error">
-		You got an error! <br />
-		{errorMessage}
-		Contact support at <a href="mailto:help@example.com">help@example.com</a>
+			You got an error! <br />
+			{ errorMessage }
+			Contact support at{ ' ' }
+			<a href="mailto:help@example.com">help@example.com</a>
 		</div>
-	)
-}
-const { Fill: ExperimentalOrderMeta, Slot: OrderMetaSlot } = createSlotFill(
-	slotName, onError
-);
+	);
+};
+
+const { Fill, Slot } = createSlotFill( slotName, onError );
 ```
 
-You can pass props to the fills to be used.
+### `Slot` Component
+
+`createSlotFill` returns a `Slot` component. This is rendered in the app and will render any Fills within it.
+
+#### Usage
 
 ```jsx
+// Aliased import
 import { createSlotFill } from '@woocommerce/blocks-checkout';
 
-const slotName = '__experimentalOrderMeta';
+// Global import
+// const { createSlotFill } = wc.blocksCheckout;
 
-const { Fill: ExperimentalOrderMeta, Slot: OrderMetaSlot } = createSlotFill( slotName );
+const slotName = '__experimentalSlotName';
 
-const Slot = () => {
-	const { extensions, cartData } = useStoreCart();
-	return <OrderMetaSlot fillProps={ { extensions, cartData } } />
-}
+const { Fill: FillComponent, Slot: SlotComponent } = createSlotFill( slotName );
 
-ExperimentalOrderMeta.Slot = Slot;
+const Slot = ( { className } ) => {
+	return <SlotComponent className={ 'my-slot-component' } />;
+};
 
-export default ExperimentalOrderMeta;
+// Assign your Slot to your Fill.
+FillComponent.Slot = Slot;
+
+export default FillComponent;
 ```
 
+#### Options
+
+`Slot` accepts the following options:
+
+##### `as (string|element)`
+
+Element used to render the slot. By default, `Slot` would render a `div`, but you can customize what gets rendered instead.
+
+##### `className (string)`
+
+A class name applied to the rendered element.
+
+##### `fillProps (object)`
+
+Props passed to each fill implementation.
+
 ```jsx
-import { ExperimentalOrderMeta } from '@woocommerce/blocks-checkout';
+// Aliased import
+import { createSlotFill } from '@woocommerce/blocks-checkout';
+
+// Global import
+// const { createSlotFill } = wc.blocksCheckout;
+
+const slotName = '__experimentalSlotName';
+
+const { Fill: FillComponent, Slot: SlotComponent } = createSlotFill(
+	slotName
+);
+
+const Slot = ( { className } ) => {
+	return (
+		<SlotComponent
+			className={ 'my-slot-component' }
+			fillProps={ { // ...custom data goes here and is passed to all fills } }
+		/>
+	);
+};
+
+// Assign your Slot to your Fill.
+FillComponent.Slot = Slot;
+
+export default FillComponent;
+```
+
+#### `Fill` Component
+
+Each `Fill` receives any `fillProps` from the `Slot`, and also renders an [errorBoundary](https://reactjs.org/docs/error-boundaries.html) inside of it. This catches broken fills and prevents them from breaking other fills.
+
+## Extending Checkout via Slot Fills
+
+Slot/Fills are exported and available for use by extensions. One such Slot Fill is `ExperimentalOrderMeta` [exported from here](../components/order-meta/index.js). This provides the Slot, and within it, you can define your fill:
+
+```jsx
 import { registerPlugin } from '@wordpress/plugins';
 
+// Aliased import
+import { ExperimentalOrderMeta } from '@woocommerce/blocks-checkout';
+
+// Global import
+// const { ExperimentalOrderMeta } = wc.blocksCheckout;
+
+// extensions and cartData are both fillProps.
 const MyComponent = ( { extensions, cartData } ) => {
 	const { myPlugin } = extensions;
-	return <Meta data={myPlugin} />
-}
+	return <Meta data={ myPlugin } />;
+};
 
 const render = () => {
-	return <ExperimentalOrderMeta><MyComponent /></ExperimentalOrderMeta>
-}
+	return (
+		<ExperimentalOrderMeta>
+			<MyComponent />
+		</ExperimentalOrderMeta>
+	);
+};
 
 registerPlugin( 'my-plugin', { render } );
 ```
-## Props
 
-`Slot` accepts several props to customize it.
+## Available Slot Fills
 
-### as
+Slot Fills are implemented throughout the Cart and Checkout Blocks, as well as some components. For a list of available Slot Fills, [see this document](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/docs/extensibility/available-slot-fills.md).
 
-By default, `Slot` would render a div inside your DOM, you can customize what gets rendered instead.
-- Type: `String|Element`
-- Required: No
-
-### className
-
-The rendered element can accept a className.
-- Type: `String`
-- Required: No
-
-### fillProps
-
-Props passed to each fill implementation.
-- Type: `Object`
-- Required: No
-
-`createSlotFill` accepts a couple of props.
-
-### slotName
-
-The name of slot to be created.
-- Type: `String`
-- Required: Yes
-
-### onError
-
-A function returns an element to be rendered if the current is an admin and an error is caught, accepts `errorMessage` as a param that is the formatted error.
-- Type: `Function`
-- Required: No
+<br/><br/><p align="center">
+<a href="https://woocommerce.com/">
+<img src="https://woocommerce.com/wp-content/themes/woo/images/logo-woocommerce@2x.png" alt="WooCommerce" height="28px" style="filter: grayscale(100%);
+	opacity: 0.2;" />
+</a><br/><a href="https://woocommerce.com/careers/">We're hiring</a>! Come work with us!</p>

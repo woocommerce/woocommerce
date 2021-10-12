@@ -5,7 +5,7 @@ import { innerBlockAreas, RegisteredBlock } from './types';
 import { registeredBlocks } from './registered-blocks';
 
 /**
- * Check area is valid.
+ * Check if a block/area supports inner block registration.
  */
 export const hasInnerBlocks = ( block: string ): block is innerBlockAreas => {
 	return Object.values( innerBlockAreas ).includes(
@@ -14,7 +14,7 @@ export const hasInnerBlocks = ( block: string ): block is innerBlockAreas => {
 };
 
 /**
- * Get a list of blocks available within a specific area.
+ * Returns an array of registered block objects available within a specific parent block/area.
  */
 export const getRegisteredBlocks = (
 	block: string
