@@ -524,6 +524,37 @@ class WC_Admin_Addons {
 	}
 
 	/**
+	 * Output the HTML for the promotion block
+	 *
+	 * @param array $promotion Array of promotion block data.
+	 * @return void
+	 */
+	public static function output_search_promotion_block( array $promotion ) {
+		?>
+		<div class="addons-wcs-banner-block">
+			<div class="addons-wcs-banner-block-image">
+				<img
+					class="addons-img"
+					src="<?php echo esc_url( $promotion['image'] ); ?>"
+					alt="<?php echo esc_attr( $promotion['image_alt'] ); ?>"
+				/>
+			</div>
+			<div class="addons-wcs-banner-block-content">
+				<h1><?php echo esc_html( $promotion['title'] ); ?></h1>
+				<p><?php echo esc_html( $promotion['description'] ); ?></p>
+				<?php
+				if ( ! empty( $promotion['actions'] ) ) {
+					foreach ( $promotion['actions'] as $action ) {
+						self::output_promotion_action( $action );
+					}
+				}
+				?>
+			</div>
+		</div>
+		<?php
+	}
+
+	/**
 	 * Handles the output of a full-width block.
 	 *
 	 * @param array $section Section data.
@@ -564,7 +595,6 @@ class WC_Admin_Addons {
 				</div>
 				<div class="addons-promotion-block-buttons">
 					<?php
-
 					if ( $section['button_1'] ) {
 						self::output_button(
 							$section['button_1_href'],
@@ -582,7 +612,6 @@ class WC_Admin_Addons {
 							$section['plugin']
 						);
 					}
-
 					?>
 				</div>
 			</div>
@@ -677,6 +706,26 @@ class WC_Admin_Addons {
 			class="addons-button <?php echo esc_attr( $style ); ?>"
 			href="<?php echo esc_url( $url ); ?>">
 			<?php echo esc_html( $text ); ?>
+		</a>
+		<?php
+	}
+
+	/**
+	 * Output HTML for a promotion action.
+	 *
+	 * @param array $action Array of action properties.
+	 * @return void
+	 */
+	public static function output_promotion_action( array $action ) {
+		if ( empty( $action ) ) {
+			return;
+		}
+		$style = ( ! empty( $action['primary'] ) && $action['primary'] ) ? 'addons-button-solid' : 'addons-button-outline-purple';
+		?>
+		<a
+			class="addons-button <?php echo esc_attr( $style ); ?>"
+			href="<?php echo esc_url( $action['url'] ); ?>">
+			<?php echo esc_html( $action['label'] ); ?>
 		</a>
 		<?php
 	}
@@ -853,7 +902,7 @@ class WC_Admin_Addons {
 				return '';
 			}
 			return wp_nonce_url(
-				wc_admin_url( $action->url ),
+				admin_url( $action->url ),
 				$action->nonce
 			);
 		}
