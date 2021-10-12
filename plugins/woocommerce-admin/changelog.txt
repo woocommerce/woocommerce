@@ -10,6 +10,10 @@
 - Update: Enable Square in France. #7679
 - Enhancement: Add experiment for promoting WooCommerce Payments in payment methods table. #7666
 
+== 2.7.2 10/11/2021 == 
+
+- Fix: Fix analytics crashing on daylight saving #7763
+
 == 2.7.1 10/01/2021 == 
 
 - Fix: Allow super admins all capabilities within WooCommerce Admin #7489
