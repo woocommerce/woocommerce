@@ -2,7 +2,9 @@
 	display: grid;
 	grid-template-rows: min-content 1fr;
 	height: 100%;
+}
 
+.woocommerce-navigation .woocommerce-navigation__wrapper {
 	h2 > span {
 		width: 100%;
 	}
@@ -19,6 +21,26 @@
 
 	.components-navigation__item {
 		margin-bottom: 0;
+
+		.components-button {
+			opacity: 1;
+		}
+
+		&:not(:hover) {
+			.components-button {
+				color: #949494;
+			}
+		}
+		&:hover {
+			.components-button {
+				color: #ddd;
+			}
+		}
+		&.is-active {
+			.components-button {
+				color: #fff;
+			}
+		}
 
 		/*
 		* <-------- Start Temporary Code -------->
@@ -69,6 +91,28 @@
 			border-top: 1px solid $studio-gray-80;
 			margin: 0 -#{$gap-smaller};
 			padding: $gap $gap-smaller $gap-small $gap-smaller;
+		}
+	}
+
+	.components-navigation__menu-title,
+	.components-navigation__group-title {
+		color: #f0f0f0;
+		opacity: 1;
+	}
+
+	.components-navigation__back-button {
+		color: #949494;
+		opacity: 1;
+
+		&,
+		span {
+			font-size: 13px;
+			line-height: normal;
+		}
+
+		&:hover,
+		&:hover:not(:disabled) {
+			color: #ddd;
 		}
 	}
 }

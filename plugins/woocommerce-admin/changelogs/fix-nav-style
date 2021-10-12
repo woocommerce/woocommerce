@@ -1,0 +1,4 @@
+Significance: patch
+Type: Fix
+
+Fixed navigation menu text color after Gutenberg 11.6.0 #7771
