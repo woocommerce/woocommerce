@@ -932,9 +932,9 @@ class WC_Admin_Addons {
 					$url = self::get_action_url( $action );
 
 					$promotion_actions[] = array(
-						'name' => $action->name,
-						'label' => $action_locale->label,
-						'url' => $url,
+						'name'    => $action->name,
+						'label'   => $action_locale->label,
+						'url'     => $url,
 						'primary' => isset( $action->is_primary ) ? $action->is_primary : false,
 					);
 				}
