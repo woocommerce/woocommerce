@@ -358,6 +358,106 @@ class WC_Admin_Addons {
 	}
 
 	/**
+	 * Take an action object and return the URL based on properties of the action.
+	 *
+	 * @param object $action Action object.
+	 * @return string URL.
+	 */
+	public static function get_action_url( $action ): string {
+		if ( ! isset( $action->url ) ) {
+			return '';
+		}
+
+		if ( isset( $action->url_is_admin_query ) && $action->url_is_admin_query ) {
+			return wc_admin_url( $action->url );
+		}
+
+		if ( isset( $action->url_is_admin_nonce_query ) && $action->url_is_admin_nonce_query ) {
+			if ( empty( $action->nonce ) ) {
+				return '';
+			}
+			return wp_nonce_url(
+				admin_url( $action->url ),
+				$action->nonce
+			);
+		}
+
+		return $action->url;
+	}
+
+	/**
+	 * Format the promotion data ready for display, ie fetch locales and actions.
+	 *
+	 * @param array $promotions Array of promotoin objects.
+	 * @return array Array of formatted promotions ready for output.
+	 */
+	public static function format_promotions( array $promotions ): array {
+		$formatted_promotions = array();
+		foreach ( $promotions as $promotion ) {
+			// Get the matching locale or fall back to en-US.
+			$locale = PromotionRuleEngine\SpecRunner::get_locale( $promotion->locales );
+			if ( null === $locale ) {
+				continue;
+			}
+
+			$promotion_actions = array();
+			if ( ! empty( $promotion->actions ) ) {
+				foreach ( $promotion->actions as $action ) {
+					$action_locale = PromotionRuleEngine\SpecRunner::get_action_locale( $action->locales );
+					$url           = self::get_action_url( $action );
+
+					$promotion_actions[] = array(
+						'name'    => $action->name,
+						'label'   => $action_locale->label,
+						'url'     => $url,
+						'primary' => isset( $action->is_primary ) ? $action->is_primary : false,
+					);
+				}
+			}
+
+			$formatted_promotions[] = array(
+				'title'       => $locale->title,
+				'description' => $locale->description,
+				'image'       => ( 'http' === substr( $locale->image, 0, 4 ) ) ? $locale->image : WC()->plugin_url() . $locale->image,
+				'image_alt'   => $locale->image_alt,
+				'actions'     => $promotion_actions,
+			);
+		}
+		return $formatted_promotions;
+	}
+
+	/**
+	 * Output the HTML for the promotion block.
+	 *
+	 * @param array $promotion Array of promotion block data.
+	 * @return void
+	 */
+	public static function output_search_promotion_block( array $promotion ) {
+		?>
+		<div class="addons-wcs-banner-block">
+			<div class="addons-wcs-banner-block-image">
+				<img
+					class="addons-img"
+					src="<?php echo esc_url( $promotion['image'] ); ?>"
+					alt="<?php echo esc_attr( $promotion['image_alt'] ); ?>"
+				/>
+			</div>
+			<div class="addons-wcs-banner-block-content">
+				<h1><?php echo esc_html( $promotion['title'] ); ?></h1>
+				<p><?php echo esc_html( $promotion['description'] ); ?></p>
+				<?php
+				if ( ! empty( $promotion['actions'] ) ) {
+					foreach ( $promotion['actions'] as $action ) {
+						self::output_promotion_action( $action );
+					}
+				}
+				?>
+			</div>
+		</div>
+		<?php
+	}
+
+	/**
 	 * Map data from different endpoints to a universal format
 	 *
 	 * Search and featured products has a slightly different products' field names.
