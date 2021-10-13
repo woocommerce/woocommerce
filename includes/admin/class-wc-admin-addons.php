@@ -811,4 +811,38 @@ class WC_Admin_Addons {
 
 		return " $admin_body_class woocommerce-page-wc-marketplace ";
 	}
+
+	/**
+	 * Determine which class should be used for a rating star:
+	 * - golden
+	 * - half-filled (50/50 golden and gray)
+	 * - gray
+	 *
+	 * Consider ratings from 3.0 to 4.0 as an example
+	 * 3.0 will produce 3 stars
+	 * 3.1 to 3.5 will produce 3 stars and a half star
+	 * 3.6 to 4.0 will product 4 stars
+	 *
+	 * @param float $rating Rating of a product.
+	 * @param int   $index  Index of a star in a row.
+	 *
+	 * @return string CSS class to use.
+	 */
+	public static function get_star_class( $rating, $index ) {
+		if ( $rating >= $index ) {
+			// Rating more that current star to show.
+			return 'fill';
+		} else if (
+			abs( $index - 1 - floor( $rating ) ) < 0.0000001 &&
+			0 < ( $rating - floor( $rating ) )
+		) {
+			// For rating more than x.0 and less than x.5 or equal it will show a half star.
+			return 50 >= floor( ( $rating - floor( $rating ) ) * 100 )
+				? 'half-fill'
+				: 'fill';
+		}
+
+		// Don't show a golden star otherwise.
+		return 'no-fill';
+	}
 }
