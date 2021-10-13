@@ -255,6 +255,13 @@
 		width: 124px;
 	}
 
+	.addons-wcs-banner-block {
+		background: #fff;
+		border: 1px solid #ddd;
+		margin: 0 0 1em 0;
+		padding: 2em 2em 1em;
+	}
+
 	.addons-column {
 		flex: 1;
 		width: 50%;
@@ -6595,6 +6602,29 @@ table.bar_chart {
 	.woocommerce_options_panel fieldset.form-field,
 	.woocommerce_options_panel p.form-field {
 		padding: 5px 20px !important;
+	}
+
+	.addons-wcs-banner-block {
+		flex-direction: column;
+	}
+
+	.wc-addons-wrap {
+
+		.addons-wcs-banner-block {
+			padding: 40px;
+		}
+
+		.addons-wcs-banner-block-image {
+			padding: 1em;
+			text-align: center;
+			width: 100%;
+			padding: 2em 0;
+			margin: 0;
+
+			.addons-img {
+				margin: 0;
+			}
+		}
 	}
 }
 

@@ -470,6 +470,37 @@ class WC_Admin_Addons {
 	}
 
 	/**
+	 * Output the HTML for the promotion block.
+	 *
+	 * @param array $promotion Array of promotion block data.
+	 * @return void
+	 */
+	public static function output_search_promotion_block( array $promotion ) {
+		?>
+		<div class="addons-wcs-banner-block">
+			<div class="addons-wcs-banner-block-image">
+				<img
+					class="addons-img"
+					src="<?php echo esc_url( $promotion['image'] ); ?>"
+					alt="<?php echo esc_attr( $promotion['image_alt'] ); ?>"
+				/>
+			</div>
+			<div class="addons-wcs-banner-block-content">
+				<h1><?php echo esc_html( $promotion['title'] ); ?></h1>
+				<p><?php echo esc_html( $promotion['description'] ); ?></p>
+				<?php
+				if ( ! empty( $promotion['actions'] ) ) {
+					foreach ( $promotion['actions'] as $action ) {
+						self::output_promotion_action( $action );
+					}
+				}
+				?>
+			</div>
+		</div>
+		<?php
+	}
+
+	/**
 	 * Map data from different endpoints to a universal format
 	 *
 	 * Search and featured products has a slightly different products' field names.
