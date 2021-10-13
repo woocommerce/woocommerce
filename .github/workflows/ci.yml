@@ -50,9 +50,8 @@ jobs:
       - name: Get cached composer directories
         uses: actions/cache@v2
         with:
-          path: |
+          path: | # try removing ./vendor from cache
             ./packages
-            ./vendor
           key: ${{ runner.os }}-${{ hashFiles('./composer.lock') }}
 
       - name: Setup and install composer
