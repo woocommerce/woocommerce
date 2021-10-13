@@ -1,6 +1,8 @@
 # Unreleased
 -   Add E2E tests for checking store currency if it matches the onboarded country. #7712
 
+-   Make unchecking free features more robust. #7761
+
 # 0.1.2
 
 -   Add Customers to analytics pages tested #7573

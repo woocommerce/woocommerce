@@ -87,6 +87,7 @@ export class WcHomescreen extends BasePage {
 		);
 		await taskListOptions?.click();
 		await waitForElementByText( 'button', 'Hide this' );
+		await waitForTimeout( 200 ); // Transition of popup.
 		const hideThisButton = await getElementByText( 'button', 'Hide this' );
 		await hideThisButton?.click();
 		await waitForTimeout( 500 );

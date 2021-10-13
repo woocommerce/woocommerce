@@ -9,7 +9,7 @@ import { ElementHandle, Page } from 'puppeteer';
 import { DropdownField } from '../elements/DropdownField';
 import { DropdownTypeaheadField } from '../elements/DropdownTypeaheadField';
 import { FormToggle } from '../elements/FormToggle';
-import { getElementByText } from '../utils/actions';
+import { getElementByText, waitForTimeout } from '../utils/actions';
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 const config = require( 'config' );
@@ -99,6 +99,7 @@ export abstract class BasePage {
 		// Uncheck all checkboxes, to avoid installing plugins
 		for ( const checkbox of checkboxes ) {
 			await this.toggleCheckbox( checkbox, false );
+			await waitForTimeout( 200 );
 		}
 	}
 
@@ -107,6 +108,7 @@ export abstract class BasePage {
 		// Uncheck all checkboxes, to avoid installing plugins
 		for ( const checkbox of checkboxes ) {
 			await this.toggleCheckbox( checkbox, true );
+			await waitForTimeout( 200 );
 		}
 	}
 
