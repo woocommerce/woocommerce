@@ -4,9 +4,17 @@ These documents are all dealing with extensibility in the various WooCommerce Bl
 
 ## Table of Contents <!-- omit in toc -->
 
+- [Hooks (actions and filters)](#hooks-actions-and-filters)
 - [REST API](#rest-api)
 - [Checkout Payment Methods](#checkout-payment-methods)
 - [Checkout Block](#checkout-block)
+
+## Hooks (actions and filters)
+
+| Document                | Description                                             |
+| ----------------------- | ------------------------------------------------------- |
+| [Actions](./actions.md) | Documentation covering action hooks on the server side. |
+| [Filters](./filters.md) | Documentation covering filter hooks on the server side. |
 
 ## REST API
 

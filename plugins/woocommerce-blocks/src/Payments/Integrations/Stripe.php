@@ -117,10 +117,17 @@ final class Stripe extends AbstractPaymentMethodType {
 	 */
 	private function get_show_save_option() {
 		$saved_cards = $this->get_show_saved_cards();
-		// This assumes that Stripe supports `tokenization` - currently this is true, based on
-		// https://github.com/woocommerce/woocommerce-gateway-stripe/blob/master/includes/class-wc-gateway-stripe.php#L95 .
-		// See https://github.com/woocommerce/woocommerce-gateway-stripe/blob/ad19168b63df86176cbe35c3e95203a245687640/includes/class-wc-gateway-stripe.php#L271 and
-		// https://github.com/woocommerce/woocommerce/wiki/Payment-Token-API .
+		/**
+		 * Filters if the save payment method checkbox is shown for Stripe.
+		 *
+		 * This assumes that Stripe supports `tokenization` - currently this is true, based on https://github.com/woocommerce/woocommerce-gateway-stripe/blob/master/includes/class-wc-gateway-stripe.php#L95
+		 *
+		 * @see https://github.com/woocommerce/woocommerce-gateway-stripe/blob/ad19168b63df86176cbe35c3e95203a245687640/includes/class-wc-gateway-stripe.php#L271
+		 * @see https://github.com/woocommerce/woocommerce/wiki/Payment-Token-API
+		 *
+		 * @param boolean $saved_cards True if saved cards functionality is enabled.
+		 * @return boolean
+		 */
 		return apply_filters( 'wc_stripe_display_save_payment_method_checkbox', filter_var( $saved_cards, FILTER_VALIDATE_BOOLEAN ) );
 	}
 
@@ -150,6 +157,12 @@ final class Stripe extends AbstractPaymentMethodType {
 	 * @return bool True means to allow prepaid card (default).
 	 */
 	private function get_allow_prepaid_card() {
+		/**
+		 * Filters if prepaid cards are supported by Stripe.
+		 *
+		 * @param boolean $allow_prepaid_card True if prepaid cards are allowed.
+		 * @return boolean
+		 */
 		return apply_filters( 'wc_stripe_allow_prepaid_card', true );
 	}
 
@@ -214,6 +227,12 @@ final class Stripe extends AbstractPaymentMethodType {
 	 * @return string Defaults to en_US.
 	 */
 	private function get_button_locale() {
+		/**
+		 * Filters the payment request button locale.
+		 *
+		 * @param string $locale Current locale. Defaults to en_US.
+		 * @return string
+		 */
 		return apply_filters( 'wc_stripe_payment_request_button_locale', substr( get_locale(), 0, 2 ) );
 	}
 

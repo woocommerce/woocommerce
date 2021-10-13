@@ -80,6 +80,13 @@ class CartController {
 			return $existing_cart_id;
 		}
 
+		/**
+		 * Filters the item being added to the cart.
+		 *
+		 * @param array $cart_item_data Array of cart item data being added to the cart.
+		 * @param string $cart_id Id of the item in the cart.
+		 * @return array Updated cart item data.
+		 */
 		$cart->cart_contents[ $cart_id ] = apply_filters(
 			'woocommerce_add_cart_item',
 			array_merge(
@@ -97,8 +104,27 @@ class CartController {
 			$cart_id
 		);
 
+		/**
+		 * Filters the entire cart contents when the cart changes.
+		 *
+		 * @param array $cart_contents Array of all cart items.
+		 * @return array Updated array of all cart items.
+		 */
 		$cart->cart_contents = apply_filters( 'woocommerce_cart_contents_changed', $cart->cart_contents );
 
+		/**
+		 * Fires when an item is added to the cart.
+		 *
+		 * This hook fires when an item is added to the cart. This is triggered from the Store API in this context, but
+		 * WooCommerce core add to cart events trigger the same hook.
+		 *
+		 * @param string $cart_id ID of the item in the cart.
+		 * @param integer $product_id ID of the product added to the cart.
+		 * @param integer $quantity Quantity of the item added to the cart.
+		 * @param integer $variation_id Variation ID of the product added to the cart.
+		 * @param array $variation Array of variation data.
+		 * @param array $cart_item_data Array of other cart item data.
+		 */
 		do_action(
 			'woocommerce_add_to_cart',
 			$cart_id,
@@ -192,11 +218,19 @@ class CartController {
 		}
 
 		/**
-		 * Hook: woocommerce_add_to_cart_validation (legacy).
+		 * Filters if an item being added to the cart passed validation checks.
 		 *
 		 * Allow 3rd parties to validate if an item can be added to the cart. This is a legacy hook from Woo core.
 		 * This filter will be deprecated because it encourages usage of wc_add_notice. For the API we need to capture
 		 * notices and convert to exceptions instead.
+		 *
+		 * @deprecated
+		 * @param boolean $passed_validation True if the item passed validation.
+		 * @param integer $product_id Product ID being validated.
+		 * @param integer $quantity Quantity added to the cart.
+		 * @param integer $variation_id Variation ID being added to the cart.
+		 * @param array $variation Variation data.
+		 * @return boolean
 		 */
 		$passed_validation = apply_filters(
 			'woocommerce_add_to_cart_validation',
@@ -216,8 +250,10 @@ class CartController {
 		}
 
 		/**
+		 * Fires during validation when adding an item to the cart via the Store API.
+		 *
 		 * Fire action to validate add to cart. Functions hooking into this should throw an \Exception to prevent
-		 * add to cart from occuring.
+		 * add to cart from happening.
 		 *
 		 * @param \WC_Product $product Product object being added to the cart.
 		 * @param array       $request Add to cart request params including id, quantity, and variation attributes.
@@ -395,7 +431,7 @@ class CartController {
 		remove_action( 'woocommerce_check_cart_items', array( $cart, 'check_cart_coupons' ), 1 );
 
 		/**
-		 * Hook: woocommerce_check_cart_items
+		 * Fires when cart items are being validated.
 		 *
 		 * Allow 3rd parties to validate cart items. This is a legacy hook from Woo core.
 		 * This filter will be deprecated because it encourages usage of wc_add_notice. For the API we need to capture
@@ -734,6 +770,14 @@ class CartController {
 	 * @return string
 	 */
 	protected function get_package_name( $package, $index ) {
+		/**
+		 * Filters the shipping package name.
+		 *
+		 * @param string $shipping_package_name Shipping package name.
+		 * @param string $package_id Shipping package ID.
+		 * @param array $package Shipping package from WooCommerce.
+		 * @return string Shipping package name.
+		 */
 		return apply_filters(
 			'woocommerce_shipping_package_name',
 			$index > 1 ?
@@ -821,6 +865,15 @@ class CartController {
 		foreach ( $individual_use_coupons as $code ) {
 			$individual_use_coupon = new \WC_Coupon( $code );
 
+			/**
+			 * Filters if a coupon can be applied alongside other individual use coupons.
+			 *
+			 * @param boolean $apply_with_individual_use_coupon Defaults to false.
+			 * @param \WC_Coupon $coupon Coupon object applied to the cart.
+			 * @param \WC_Coupon $individual_use_coupon Individual use coupon already applied to the cart.
+			 * @param array $applied_coupons Array of applied coupons already applied to the cart.
+			 * @return boolean
+			 */
 			if ( false === apply_filters( 'woocommerce_apply_with_individual_use_coupon', false, $coupon, $individual_use_coupon, $applied_coupons ) ) {
 				throw new RouteException(
 					'woocommerce_rest_cart_coupon_error',
@@ -835,6 +888,14 @@ class CartController {
 		}
 
 		if ( $coupon->get_individual_use() ) {
+			/**
+			 * Filter coupons to remove when applying an individual use coupon.
+			 *
+			 * @param array $coupons Array of coupons to remove from the cart.
+			 * @param \WC_Coupon $coupon Coupon object applied to the cart.
+			 * @param array $applied_coupons Array of applied coupons already applied to the cart.
+			 * @return array
+			 */
 			$coupons_to_remove = array_diff( $applied_coupons, apply_filters( 'woocommerce_apply_individual_use_coupon', array(), $coupon, $applied_coupons ) );
 
 			foreach ( $coupons_to_remove as $code ) {
@@ -847,6 +908,11 @@ class CartController {
 		$applied_coupons[] = $coupon_code;
 		$cart->set_applied_coupons( $applied_coupons );
 
+		/**
+		 * Fires after a coupon has been applied to the cart.
+		 *
+		 * @param string $coupon_code The coupon code that was applied.
+		 */
 		do_action( 'woocommerce_applied_coupon', $coupon_code );
 	}
 
@@ -980,6 +1046,15 @@ class CartController {
 			$variation_id = $product->get_id();
 		}
 
+		/**
+		 * Filter cart item data for add to cart requests.
+		 *
+		 * @param array $cart_item_data Array of other cart item data.
+		 * @param integer $product_id ID of the product added to the cart.
+		 * @param integer $variation_id Variation ID of the product added to the cart.
+		 * @param integer $quantity Quantity of the item added to the cart.
+		 * @return array
+		 */
 		$request['cart_item_data'] = (array) apply_filters(
 			'woocommerce_add_cart_item_data',
 			$request['cart_item_data'],
@@ -989,6 +1064,16 @@ class CartController {
 		);
 
 		if ( $product->is_sold_individually() ) {
+			/**
+			 * Filter sold individually quantity for add to cart requests.
+			 *
+			 * @param integer $sold_individually_quantity Defaults to 1.
+			 * @param integer $quantity Quantity of the item added to the cart.
+			 * @param integer $product_id ID of the product added to the cart.
+			 * @param integer $variation_id Variation ID of the product added to the cart.
+			 * @param array $cart_item_data Array of other cart item data.
+			 * @return integer
+			 */
 			$request['quantity'] = apply_filters( 'woocommerce_add_to_cart_sold_individually_quantity', 1, $request['quantity'], $product_id, $variation_id, $request['cart_item_data'] );
 		}
 

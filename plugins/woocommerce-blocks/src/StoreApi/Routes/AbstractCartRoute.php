@@ -139,6 +139,14 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	protected function check_nonce( \WP_REST_Request $request ) {
 		$nonce = $request->get_header( 'X-WC-Store-API-Nonce' );
 
+		/**
+		 * Filters the Store API nonce check.
+		 *
+		 * This can be used to disable the nonce check when testing API endpoints via a REST API client.
+		 *
+		 * @param boolean $disable_nonce_check If true, nonce checks will be disabled.
+		 * @return boolean
+		 */
 		if ( apply_filters( 'woocommerce_store_api_disable_nonce_check', false ) ) {
 			return true;
 		}

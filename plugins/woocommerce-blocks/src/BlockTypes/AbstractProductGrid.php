@@ -290,6 +290,13 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 	 * @return array List of product IDs
 	 */
 	protected function get_products() {
+		/**
+		 * Filters whether or not the product grid is cacheable.
+		 *
+		 * @param boolean $is_cacheable The list of script dependencies.
+		 * @param array $query_args Query args for the products query passed to BlocksWpQuery.
+		 * @return array True to enable cache, false to disable cache.
+		 */
 		$is_cacheable      = (bool) apply_filters( 'woocommerce_blocks_product_grid_is_cacheable', true, $this->query_args );
 		$transient_version = \WC_Cache_Helper::get_transient_version( 'product_query' );
 
@@ -356,6 +363,14 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 			'button'    => $this->get_button_html( $product ),
 		);
 
+		/**
+		 * Filters the HTML for products in the grid.
+		 *
+		 * @param string $html Product grid item HTML.
+		 * @param array $data Product data passed to the template.
+		 * @param \WC_Product $product Product object.
+		 * @return string Updated product grid item HTML.
+		 */
 		return apply_filters(
 			'woocommerce_blocks_product_grid_item_html',
 			"<li class=\"wc-block-grid__product\">
