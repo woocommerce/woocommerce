@@ -38,7 +38,7 @@ const runTelemetryAPITest = () => {
 			{ version: '1.1' },
 		])( 'errors for invalid request body - %p', async data => {
 			const response = await client
-				.post( `/wc/v3/telemetry`, data )
+				.post( `/wc-telemetry/tracker`, data )
 				.catch( err => {
 					expect( err.statusCode ).toBe( 400 );
 				} );
@@ -48,7 +48,7 @@ const runTelemetryAPITest = () => {
 
 		it( 'returns 200 with correct fields', async () => {
 			const response = await client
-				.post( `/wc/v3/telemetry`, {
+				.post( `/wc-telemetry/tracker`, {
 					platform: 'ios',
 					version: '1.0',
 				})
