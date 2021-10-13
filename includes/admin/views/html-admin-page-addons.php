@@ -62,7 +62,12 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 
 	<div class="wrap">
 		<div class="marketplace-content-wrapper">
-			<?php if ( ! empty( $search ) ) : ?>
+			<?php if ( count( $addons ) == 0 ) : ?>
+				<h1 class="search-form-title">
+					<?php esc_html_e( 'Sorry, could not find anything. Try searching again using a different term.', 'woocommerce' ); ?></p>
+				</h1>
+			<?php endif; ?>
+			<?php if ( ! empty( $search ) && count( $addons ) > 0 ) : ?>
 				<h1 class="search-form-title">
 					<?php // translators: search keyword. ?>
 					<?php printf( esc_html__( 'Search results for "%s"', 'woocommerce' ), esc_html( sanitize_text_field( wp_unslash( $search ) ) ) ); ?>
