@@ -164,15 +164,30 @@ function wccom_get_star_class( $rating, $index ) {
 								<?php if ( ! empty( $addon->vendor_name ) && ! empty( $addon->vendor_url ) ) : ?>
 									<div class="product-developed-by">
 										<?php
-											printf(
-												/* translators: %s vendor link */
-												esc_html__( 'Developed by %s', 'woocommerce' ),
-												sprintf(
-													'<a class="product-vendor-link" href="%1$s" target="_blank">%2$s</a>',
-													esc_url_raw( $addon->vendor_url ),
-													wp_kses_post( $addon->vendor_name )
-												)
-											);
+										$parsed_vendor_url = parse_url( $addon->vendor_url );
+										if ( $parsed_vendor_url['path'] == null ) {
+											$addon->vendor_url .= '/';
+										}
+										$separator         = ( $parsed_vendor_url['query'] == null ) ? '?' : '&';
+										$query             = http_build_query(
+											array(
+												'utm_source'   => 'extensionsscreen',
+												'utm_medium'   => 'product',
+												'utm_campaign' => 'wcaddons',
+												'utm_content'  => 'devpartner',
+											)
+										);
+										$addon->vendor_url .= $separator . $query;
+
+										printf(
+										/* translators: %s vendor link */
+											esc_html__( 'Developed by %s', 'woocommerce' ),
+											sprintf(
+												'<a class="product-vendor-link" href="%1$s" target="_blank">%2$s</a>',
+												esc_url_raw( $addon->vendor_url ),
+												wp_kses_post( $addon->vendor_name )
+											)
+										);
 										?>
 									</div>
 								<?php endif; ?>
