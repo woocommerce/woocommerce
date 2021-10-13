@@ -1,0 +1,4 @@
+Significance: patch
+Type: Fix
+
+Fix calendar not being dismissed when clicking outside. #7714

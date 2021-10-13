@@ -17,6 +17,7 @@ const DateInput = ( {
 	describedBy,
 	error,
 	onFocus,
+	onBlur,
 	onKeyDown,
 	errorPosition,
 } ) => {
@@ -37,6 +38,7 @@ const DateInput = ( {
 				aria-describedby={ `${ id }-message` }
 				placeholder={ dateFormat.toLowerCase() }
 				onFocus={ onFocus }
+				onBlur={ onBlur }
 				onKeyDown={ onKeyDown }
 				disabled={ disabled }
 			/>
@@ -67,12 +69,14 @@ DateInput.propTypes = {
 	error: PropTypes.string,
 	errorPosition: PropTypes.string,
 	onFocus: PropTypes.func,
+	onBlur: PropTypes.func,
 	onKeyDown: PropTypes.func,
 };
 
 DateInput.defaultProps = {
 	disabled: false,
 	onFocus: () => {},
+	onBlur: () => {},
 	errorPosition: 'bottom center',
 	onKeyDown: noop,
 };

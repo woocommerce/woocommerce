@@ -1,5 +1,6 @@
 # Unreleased
 -   Add `autoComplete` prop to the `SelectControl` component. #7497
+-   Fix calendar not being dismissed when clicking outside. #7714
 
 # 8.1.0
 
