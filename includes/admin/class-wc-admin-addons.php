@@ -7,6 +7,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Admin\RemoteInboxNotifications as PromotionRuleEngine;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -81,10 +82,10 @@ class WC_Admin_Addons {
 	 * @param  string $term     Search terms.
 	 * @param  string $country  Store country.
 	 *
-	 * @return array of extensions
+	 * @return object of extensions and promotions.
 	 */
 	public static function get_extension_data( $category, $term, $country ) {
-		$parameters     = self::build_parameter_string( $category, $term, $country );
+		$parameters = self::build_parameter_string( $category, $term, $country );
 
 		$headers = array();
 		$auth    = WC_Helper_Options::get( 'auth' );
@@ -99,7 +100,7 @@ class WC_Admin_Addons {
 		);
 
 		if ( ! is_wp_error( $raw_extensions ) ) {
-			$addons = json_decode( wp_remote_retrieve_body( $raw_extensions ) )->products;
+			$addons = json_decode( wp_remote_retrieve_body( $raw_extensions ) );
 		}
 		return $addons;
 	}
@@ -523,6 +524,37 @@ class WC_Admin_Addons {
 	}
 
 	/**
+	 * Output the HTML for the promotion block.
+	 *
+	 * @param array $promotion Array of promotion block data.
+	 * @return void
+	 */
+	public static function output_search_promotion_block( array $promotion ) {
+		?>
+		<div class="addons-wcs-banner-block">
+			<div class="addons-wcs-banner-block-image">
+				<img
+					class="addons-img"
+					src="<?php echo esc_url( $promotion['image'] ); ?>"
+					alt="<?php echo esc_attr( $promotion['image_alt'] ); ?>"
+				/>
+			</div>
+			<div class="addons-wcs-banner-block-content">
+				<h1><?php echo esc_html( $promotion['title'] ); ?></h1>
+				<p><?php echo esc_html( $promotion['description'] ); ?></p>
+				<?php
+				if ( ! empty( $promotion['actions'] ) ) {
+					foreach ( $promotion['actions'] as $action ) {
+						self::output_promotion_action( $action );
+					}
+				}
+				?>
+			</div>
+		</div>
+		<?php
+	}
+
+	/**
 	 * Handles the output of a full-width block.
 	 *
 	 * @param array $section Section data.
@@ -563,7 +595,6 @@ class WC_Admin_Addons {
 				</div>
 				<div class="addons-promotion-block-buttons">
 					<?php
-
 					if ( $section['button_1'] ) {
 						self::output_button(
 							$section['button_1_href'],
@@ -581,7 +612,6 @@ class WC_Admin_Addons {
 							$section['plugin']
 						);
 					}
-
 					?>
 				</div>
 			</div>
@@ -680,6 +710,26 @@ class WC_Admin_Addons {
 		<?php
 	}
 
+	/**
+	 * Output HTML for a promotion action.
+	 *
+	 * @param array $action Array of action properties.
+	 * @return void
+	 */
+	public static function output_promotion_action( array $action ) {
+		if ( empty( $action ) ) {
+			return;
+		}
+		$style = ( ! empty( $action['primary'] ) && $action['primary'] ) ? 'addons-button-solid' : 'addons-button-outline-purple';
+		?>
+		<a
+			class="addons-button <?php echo esc_attr( $style ); ?>"
+			href="<?php echo esc_url( $action['url'] ); ?>">
+			<?php echo esc_html( $action['label'] ); ?>
+		</a>
+		<?php
+	}
+
 
 	/**
 	 * Handles output of the addons page in admin.
@@ -710,13 +760,33 @@ class WC_Admin_Addons {
 		$sections        = self::get_sections();
 		$theme           = wp_get_theme();
 		$current_section = isset( $_GET['section'] ) ? $section : '_featured';
+		$promotions      = array();
 		$addons          = array();
 
 		if ( '_featured' !== $current_section ) {
-			$category = $section ? $section : null;
-			$term     = $search ? $search : null;
-			$country  = WC()->countries->get_base_country();
-			$addons   = self::get_extension_data( $category, $term, $country );
+			$category       = $section ? $section : null;
+			$term           = $search ? $search : null;
+			$country        = WC()->countries->get_base_country();
+			$extension_data = self::get_extension_data( $category, $term, $country );
+			$addons         = $extension_data->products;
+			$promotions     = ! empty( $extension_data->promotions ) ? $extension_data->promotions : array();
+		}
+
+		// We need Automattic\WooCommerce\Admin\RemoteInboxNotifications for the next part, if not remove all promotions.
+		if ( ! WC()->is_wc_admin_active() ) {
+			$promotions = array();
+		}
+		// Check for existence of promotions and evaluate out if we should show them.
+		if ( ! empty( $promotions ) ) {
+			foreach ( $promotions as $promo_id => $promotion ) {
+				$evaluator = new PromotionRuleEngine\RuleEvaluator();
+				$passed    = $evaluator->evaluate( $promotion->rules );
+				if ( ! $passed ) {
+					unset( $promotions[ $promo_id ] );
+				}
+			}
+			// Transform promotions to the correct format ready for output.
+			$promotions = self::format_promotions( $promotions );
 		}
 
 		/**
@@ -810,5 +880,74 @@ class WC_Admin_Addons {
 		}
 
 		return " $admin_body_class woocommerce-page-wc-marketplace ";
+	}
+
+	/**
+	 * Take an action object and return the URL based on properties of the action.
+	 *
+	 * @param object $action Action object.
+	 * @return string URL.
+	 */
+	public static function get_action_url( $action ): string {
+		if ( ! isset( $action->url ) ) {
+			return '';
+		}
+
+		if ( isset( $action->url_is_admin_query ) && $action->url_is_admin_query ) {
+			return wc_admin_url( $action->url );
+		}
+
+		if ( isset( $action->url_is_admin_nonce_query ) && $action->url_is_admin_nonce_query ) {
+			if ( empty( $action->nonce ) ) {
+				return '';
+			}
+			return wp_nonce_url(
+				admin_url( $action->url ),
+				$action->nonce
+			);
+		}
+
+		return $action->url;
+	}
+
+	/**
+	 * Format the promotion data ready for display, ie fetch locales and actions.
+	 *
+	 * @param array $promotions Array of promotoin objects.
+	 * @return array Array of formatted promotions ready for output.
+	 */
+	public static function format_promotions( array $promotions ): array {
+		$formatted_promotions = array();
+		foreach ( $promotions as $promotion ) {
+			// Get the matching locale or fall back to en-US.
+			$locale = PromotionRuleEngine\SpecRunner::get_locale( $promotion->locales );
+			if ( null === $locale ) {
+				continue;
+			}
+
+			$promotion_actions = array();
+			if ( ! empty( $promotion->actions ) ) {
+				foreach ( $promotion->actions as $action ) {
+					$action_locale = PromotionRuleEngine\SpecRunner::get_action_locale( $action->locales );
+					$url           = self::get_action_url( $action );
+
+					$promotion_actions[] = array(
+						'name'    => $action->name,
+						'label'   => $action_locale->label,
+						'url'     => $url,
+						'primary' => isset( $action->is_primary ) ? $action->is_primary : false,
+					);
+				}
+			}
+
+			$formatted_promotions[] = array(
+				'title'       => $locale->title,
+				'description' => $locale->description,
+				'image'       => ( 'http' === substr( $locale->image, 0, 4 ) ) ? $locale->image : WC()->plugin_url() . $locale->image,
+				'image_alt'   => $locale->image_alt,
+				'actions'     => $promotion_actions,
+			);
+		}
+		return $formatted_promotions;
 	}
 }

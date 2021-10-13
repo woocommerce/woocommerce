@@ -5,7 +5,10 @@
  * @package WooCommerce\Admin
  * @var string $view
  * @var object $addons
+ * @var object $promotions
  */
+
+use Automattic\WooCommerce\Admin\RemoteInboxNotifications as PromotionRuleEngine;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -62,7 +65,12 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 
 	<div class="wrap">
 		<div class="marketplace-content-wrapper">
-			<?php if ( ! empty( $search ) ) : ?>
+			<?php if ( count( $addons ) == 0 ) : ?>
+				<h1 class="search-form-title">
+					<?php esc_html_e( 'Sorry, could not find anything. Try searching again using a different term.', 'woocommerce' ); ?></p>
+				</h1>
+			<?php endif; ?>
+			<?php if ( ! empty( $search ) && count( $addons ) > 0 ) : ?>
 				<h1 class="search-form-title">
 					<?php // translators: search keyword. ?>
 					<?php printf( esc_html__( 'Search results for "%s"', 'woocommerce' ), esc_html( sanitize_text_field( wp_unslash( $search ) ) ) ); ?>
@@ -77,16 +85,13 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 				</div>
 			<?php endif; ?>
 			<?php if ( '_featured' !== $current_section && $addons ) : ?>
-				<?php if ( 'shipping_methods' === $current_section ) : ?>
-					<div class="addons-shipping-methods">
-						<?php WC_Admin_Addons::output_wcs_banner_block(); ?>
-					</div>
-				<?php endif; ?>
-				<?php if ( 'payment-gateways' === $current_section ) : ?>
-					<div class="addons-shipping-methods">
-						<?php WC_Admin_Addons::output_wcpay_banner_block(); ?>
-					</div>
-				<?php endif; ?>
+				<?php
+				if ( ! empty( $promotions ) && WC()->is_wc_admin_active() ) {
+					foreach ( $promotions as $promotion ) {
+						WC_Admin_Addons::output_search_promotion_block( $promotion );
+					}
+				}
+				?>
 				<ul class="products">
 					<?php foreach ( $addons as $addon ) : ?>
 						<?php
