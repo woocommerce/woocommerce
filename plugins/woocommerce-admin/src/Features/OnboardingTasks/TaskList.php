@@ -86,6 +86,15 @@ class TaskList {
 	}
 
 	/**
+	 * Check if the task list is visible.
+	 *
+	 * @return bool
+	 */
+	public function is_visible() {
+		return ! $this->is_hidden();
+	}
+
+	/**
 	 * Hide the task list.
 	 *
 	 * @return bool
@@ -234,7 +243,7 @@ class TaskList {
 			'id'         => $this->id,
 			'title'      => $this->title,
 			'isHidden'   => $this->is_hidden(),
-			'isVisible'  => ! $this->is_hidden(),
+			'isVisible'  => $this->is_visible(),
 			'isComplete' => $this->is_complete(),
 			'tasks'      => array_map(
 				function( $task ) {

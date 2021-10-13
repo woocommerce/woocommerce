@@ -387,7 +387,6 @@ class Task {
 			'actionLabel'    => $this->action_label,
 			'actionUrl'      => $this->action_url,
 			'isComplete'     => $this->is_complete,
-			'canView'        => $this->can_view,
 			'time'           => $this->time,
 			'level'          => $this->level,
 			'isActioned'     => $this->is_actioned(),
