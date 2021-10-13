@@ -227,8 +227,10 @@ export const SelectiveExtensionsBundle = ( {
 	}, [ freeExtensions, profileItems ] );
 
 	useEffect( () => {
-		const initialValues = createInitialValues( installableExtensions );
-		setValues( initialValues );
+		if ( ! isInstallingActivating ) {
+			const initialValues = createInitialValues( installableExtensions );
+			setValues( initialValues );
+		}
 	}, [ installableExtensions ] );
 
 	const getCheckboxChangeHandler = ( key ) => {
