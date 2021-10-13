@@ -26,6 +26,7 @@
   },
   "require-dev": {
     "bamarni/composer-bin-plugin": "^1.4",
+    "phpunit/phpunit": "^6.5",
     "yoast/phpunit-polyfills": "^1.0"
   },
   "config": {
