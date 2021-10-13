@@ -883,71 +883,36 @@ class WC_Admin_Addons {
 	}
 
 	/**
-	 * Take an action object and return the URL based on properties of the action.
+	 * Determine which class should be used for a rating star:
+	 * - golden
+	 * - half-filled (50/50 golden and gray)
+	 * - gray
 	 *
-	 * @param object $action Action object.
-	 * @return string URL.
-	 */
-	public static function get_action_url( $action ): string {
-		if ( ! isset( $action->url ) ) {
-			return '';
-		}
-
-		if ( isset( $action->url_is_admin_query ) && $action->url_is_admin_query ) {
-			return wc_admin_url( $action->url );
-		}
-
-		if ( isset( $action->url_is_admin_nonce_query ) && $action->url_is_admin_nonce_query ) {
-			if ( empty( $action->nonce ) ) {
-				return '';
-			}
-			return wp_nonce_url(
-				admin_url( $action->url ),
-				$action->nonce
-			);
-		}
-
-		return $action->url;
-	}
-
-	/**
-	 * Format the promotion data ready for display, ie fetch locales and actions.
+	 * Consider ratings from 3.0 to 4.0 as an example
+	 * 3.0 will produce 3 stars
+	 * 3.1 to 3.5 will produce 3 stars and a half star
+	 * 3.6 to 4.0 will product 4 stars
 	 *
-	 * @param array $promotions Array of promotoin objects.
-	 * @return array Array of formatted promotions ready for output.
+	 * @param float $rating Rating of a product.
+	 * @param int   $index  Index of a star in a row.
+	 *
+	 * @return string CSS class to use.
 	 */
-	public static function format_promotions( array $promotions ): array {
-		$formatted_promotions = array();
-		foreach ( $promotions as $promotion ) {
-			// Get the matching locale or fall back to en-US.
-			$locale = PromotionRuleEngine\SpecRunner::get_locale( $promotion->locales );
-			if ( null === $locale ) {
-				continue;
-			}
-
-			$promotion_actions = array();
-			if ( ! empty( $promotion->actions ) ) {
-				foreach ( $promotion->actions as $action ) {
-					$action_locale = PromotionRuleEngine\SpecRunner::get_action_locale( $action->locales );
-					$url           = self::get_action_url( $action );
-
-					$promotion_actions[] = array(
-						'name'    => $action->name,
-						'label'   => $action_locale->label,
-						'url'     => $url,
-						'primary' => isset( $action->is_primary ) ? $action->is_primary : false,
-					);
-				}
-			}
-
-			$formatted_promotions[] = array(
-				'title'       => $locale->title,
-				'description' => $locale->description,
-				'image'       => ( 'http' === substr( $locale->image, 0, 4 ) ) ? $locale->image : WC()->plugin_url() . $locale->image,
-				'image_alt'   => $locale->image_alt,
-				'actions'     => $promotion_actions,
-			);
+	public static function get_star_class( $rating, $index ) {
+		if ( $rating >= $index ) {
+			// Rating more that current star to show.
+			return 'fill';
+		} else if (
+			abs( $index - 1 - floor( $rating ) ) < 0.0000001 &&
+			0 < ( $rating - floor( $rating ) )
+		) {
+			// For rating more than x.0 and less than x.5 or equal it will show a half star.
+			return 50 >= floor( ( $rating - floor( $rating ) ) * 100 )
+				? 'half-fill'
+				: 'fill';
 		}
-		return $formatted_promotions;
+
+		// Don't show a golden star otherwise.
+		return 'no-fill';
 	}
 }
