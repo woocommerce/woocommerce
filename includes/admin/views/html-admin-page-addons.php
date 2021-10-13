@@ -165,10 +165,10 @@ function wccom_get_star_class( $rating, $index ) {
 									<div class="product-developed-by">
 										<?php
 										$parsed_vendor_url = parse_url( $addon->vendor_url );
-										if ( $parsed_vendor_url['path'] == null ) {
+										if ( null == $parsed_vendor_url['path'] ) {
 											$addon->vendor_url .= '/';
 										}
-										$separator         = ( $parsed_vendor_url['query'] == null ) ? '?' : '&';
+										$separator         = ( null == $parsed_vendor_url['query'] ) ? '?' : '&';
 										$query             = http_build_query(
 											array(
 												'utm_source'   => 'extensionsscreen',
