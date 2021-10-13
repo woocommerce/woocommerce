@@ -40,7 +40,7 @@ class WC_Admin_Addons {
 
 			// Important: WCCOM Extensions API v2.0 is used.
 			$raw_featured = wp_safe_remote_get(
-				'https://woocommerce.com/wp-json/wccom-extensions/2.0/featured',
+				'https://woocommerce.com/wp-json/wccom-extensions/2.0/featured' . $parameter_string,
 				array(
 					'headers'    => $headers,
 					'user-agent' => 'WooCommerce Addons Page',
