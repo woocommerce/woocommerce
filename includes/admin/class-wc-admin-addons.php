@@ -82,7 +82,7 @@ class WC_Admin_Addons {
 	 * @param  string $term     Search terms.
 	 * @param  string $country  Store country.
 	 *
-	 * @return object of extensions and promotions
+	 * @return object of extensions and promotions.
 	 */
 	public static function get_extension_data( $category, $term, $country ) {
 		$parameters     = self::build_parameter_string( $category, $term, $country );
@@ -524,7 +524,7 @@ class WC_Admin_Addons {
 	}
 
 	/**
-	 * Output the HTML for the promotion block
+	 * Output the HTML for the promotion block.
 	 *
 	 * @param array $promotion Array of promotion block data.
 	 * @return void
