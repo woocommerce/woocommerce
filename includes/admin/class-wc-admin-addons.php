@@ -32,6 +32,12 @@ class WC_Admin_Addons {
 				$headers['Authorization'] = 'Bearer ' . $auth['access_token'];
 			}
 
+			$parameter_string = '';
+			$country  = WC()->countries->get_base_country();
+			if ( ! empty( $country ) ) {
+				$parameter_string = '?' . http_build_query( array( 'country' => $country ) );
+			}
+
 			// Important: WCCOM Extensions API v2.0 is used.
 			$raw_featured = wp_safe_remote_get(
 				'https://woocommerce.com/wp-json/wccom-extensions/2.0/featured',
