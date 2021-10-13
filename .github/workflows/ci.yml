@@ -70,6 +70,9 @@ jobs:
              composer dump-autoload
            fi
 
+      - name: Clean up
+        run: rm -rf /tmp/wordpress-tests-lib
+
       - name: Init DB and WP
         run: ./tests/bin/install.sh woo_test root root 127.0.0.1 ${{ matrix.wp }}
 
