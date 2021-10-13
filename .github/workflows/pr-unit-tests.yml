@@ -1,6 +1,10 @@
 name: Run unit tests on PR
 on: 
   pull_request
+defaults:
+  run:
+    shell: bash
+    working-directory: plugins/woocommerce
 jobs:
   test:
     name: PHP ${{ matrix.php }} WP ${{ matrix.wp }}
