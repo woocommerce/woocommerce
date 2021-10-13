@@ -85,7 +85,7 @@ class WC_Admin_Addons {
 	 * @return object of extensions and promotions.
 	 */
 	public static function get_extension_data( $category, $term, $country ) {
-		$parameters     = self::build_parameter_string( $category, $term, $country );
+		$parameters = self::build_parameter_string( $category, $term, $country );
 
 		$headers = array();
 		$auth    = WC_Helper_Options::get( 'auth' );
@@ -764,12 +764,12 @@ class WC_Admin_Addons {
 		$addons          = array();
 
 		if ( '_featured' !== $current_section ) {
-			$category         = $section ? $section : null;
-			$term             = $search ? $search : null;
-			$country          = WC()->countries->get_base_country();
-			$extension_data   = self::get_extension_data( $category, $term, $country );
-			$addons           = $extension_data->products;
-			$promotions       = ! empty( $extension_data->promotions ) ? $extension_data->promotions : array();
+			$category       = $section ? $section : null;
+			$term           = $search ? $search : null;
+			$country        = WC()->countries->get_base_country();
+			$extension_data = self::get_extension_data( $category, $term, $country );
+			$addons         = $extension_data->products;
+			$promotions     = ! empty( $extension_data->promotions ) ? $extension_data->promotions : array();
 		}
 
 		// We need Automattic\WooCommerce\Admin\RemoteInboxNotifications for the next part, if not remove all promotions.
@@ -780,7 +780,7 @@ class WC_Admin_Addons {
 		if ( ! empty( $promotions ) ) {
 			foreach ( $promotions as $promo_id => $promotion ) {
 				$evaluator = new PromotionRuleEngine\RuleEvaluator();
-				$passed = $evaluator->evaluate( $promotion->rules );
+				$passed    = $evaluator->evaluate( $promotion->rules );
 				if ( ! $passed ) {
 					unset( $promotions[ $promo_id ] );
 				}
@@ -929,7 +929,7 @@ class WC_Admin_Addons {
 			if ( ! empty( $promotion->actions ) ) {
 				foreach ( $promotion->actions as $action ) {
 					$action_locale = PromotionRuleEngine\SpecRunner::get_action_locale( $action->locales );
-					$url = self::get_action_url( $action );
+					$url           = self::get_action_url( $action );
 
 					$promotion_actions[] = array(
 						'name'    => $action->name,
