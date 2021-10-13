@@ -776,7 +776,7 @@ class WC_Admin_Addons {
 		if ( ! WC()->is_wc_admin_active() ) {
 			$promotions = array();
 		}
-		// Check for existance of promotions and evaluate out if we should show them.
+		// Check for existence of promotions and evaluate out if we should show them.
 		if ( ! empty( $promotions ) ) {
 			foreach ( $promotions as $promo_id => $promotion ) {
 				$evaluator = new PromotionRuleEngine\RuleEvaluator();
@@ -785,7 +785,7 @@ class WC_Admin_Addons {
 					unset( $promotions[ $promo_id ] );
 				}
 			}
-			// Tranform promotions to correct format ready for output.
+			// Transform promotions to the correct format ready for output.
 			$promotions = self::format_promotions( $promotions );
 		}
 
