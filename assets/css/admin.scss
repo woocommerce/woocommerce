@@ -757,16 +757,21 @@
 		background: url(../images/storefront-bg.jpg) bottom right #f6f6f6;
 		border: 1px solid #ddd;
 		margin: 1em auto;
-		padding: 20px;
+		padding: 24px;
 		overflow: hidden;
 		zoom: 1;
 
 		img {
-			width: 278px;
+			display: block;
+			width: 100%;
+			max-width: 400px;
 			height: auto;
-			float: left;
-			margin: 0 20px 0 0;
+			margin: 0 auto 16px;
 			box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1);
+		}
+
+		p:last-of-type {
+			margin-bottom: 0;
 		}
 
 		p {
@@ -7690,6 +7695,19 @@ table.bar_chart {
 
 		.marketplace-header {
 			padding-left: 84px;
+		}
+
+		.storefront {
+
+			h2 {
+				margin-top: 0;
+			}
+
+			img {
+				float: left;
+				margin: 0 16px 0 auto;
+				width: 278px;
+			}
 		}
 	}
 }
