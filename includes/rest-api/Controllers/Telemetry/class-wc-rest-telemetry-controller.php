@@ -2,7 +2,7 @@
 /**
  * REST API WC Telemetry controller
  *
- * Handles requests to the /telemetry endpoint.
+ * Handles requests to the /wc-telemetry endpoint.
  *
  * @package WooCommerce\RestApi
  * @since   3.0.0
@@ -33,7 +33,7 @@ class WC_REST_Telemetry_Controller extends WC_REST_Controller {
 	protected $rest_base = 'tracker';
 
 	/**
-	 * Register the route for /telemetry
+	 * Register the route for /tracker
 	 */
 	public function register_routes() {
 		register_rest_route(
