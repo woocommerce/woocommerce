@@ -256,10 +256,81 @@
 	}
 
 	.addons-wcs-banner-block {
+		align-items: center;
 		background: #fff;
 		border: 1px solid #ddd;
+		display: flex;
 		margin: 0 0 1em 0;
 		padding: 2em 2em 1em;
+	}
+
+	.addons-wcs-banner-block-image {
+		background: #f7f7f7;
+		border: 1px solid #e6e6e6;
+		margin-right: 2em;
+		padding: 4em;
+		max-width: 200px;
+
+		.addons-img {
+			max-height: 86px;
+			max-width: 97px;
+		}
+
+		&.is-full-image {
+			padding: 0;
+			background: none;
+			border: none;
+
+			.addons-img {
+				max-height: 100%;
+				max-width: 100%;
+			}
+		}
+	}
+
+	.addons-shipping-methods .addons-wcs-banner-block {
+		margin-left: 0;
+		margin-right: 0;
+		margin-top: 1em;
+	}
+
+	.addons-wcs-banner-block-content {
+		display: flex;
+		flex-direction: column;
+		justify-content: space-around;
+		align-self: stretch;
+		padding: 1em 0;
+
+		h1 {
+			padding-bottom: 0;
+		}
+
+		p {
+			margin-bottom: 0;
+		}
+
+		.wcs-logos-container {
+			display: flex;
+			align-items: center;
+			flex-direction: row;
+			justify-content: center;
+
+			@media screen and (min-width: 500px) {
+				justify-content: left;
+			}
+
+			li {
+				margin-right: 8px;
+
+				&:last-child {
+					margin-right: 0;
+				}
+			}
+		}
+
+		.wcs-service-logo {
+			max-width: 45px;
+		}
 	}
 
 	.addons-column {

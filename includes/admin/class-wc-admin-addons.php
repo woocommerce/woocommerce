@@ -385,6 +385,48 @@ class WC_Admin_Addons {
 	}
 
 	/**
+	 * Install WooCommerce Services from Extensions screens.
+	 */
+	public static function install_woocommerce_services_addon() {
+		check_admin_referer( 'install-addon_woocommerce-services' );
+
+		$services_plugin_id = 'woocommerce-services';
+		$services_plugin    = array(
+			'name'      => __( 'WooCommerce Services', 'woocommerce' ),
+			'repo-slug' => 'woocommerce-services',
+		);
+
+		WC_Install::background_installer( $services_plugin_id, $services_plugin );
+
+		wp_safe_redirect( remove_query_arg( array( 'install-addon', '_wpnonce' ) ) );
+		exit;
+	}
+
+	/**
+	 * Install WooCommerce Payments from the Extensions screens.
+	 *
+	 * @param string $section Optional. Extenstions tab.
+	 *
+	 * @return void
+	 */
+	public static function install_woocommerce_payments_addon( $section = '_featured' ) {
+		check_admin_referer( 'install-addon_woocommerce-payments' );
+
+		$wcpay_plugin_id = 'woocommerce-payments';
+		$wcpay_plugin    = array(
+			'name'      => __( 'WooCommerce Payments', 'woocommerce' ),
+			'repo-slug' => 'woocommerce-payments',
+		);
+
+		WC_Install::background_installer( $wcpay_plugin_id, $wcpay_plugin );
+
+		do_action( 'woocommerce_addon_installed', $wcpay_plugin_id, $section );
+
+		wp_safe_redirect( remove_query_arg( array( 'install-addon', '_wpnonce' ) ) );
+		exit;
+	}
+
+	/**
 	 * We're displaying page=wc-addons and page=wc-addons&section=helper as two separate pages.
 	 * When we're on those pages, add body classes to distinguishe them.
 	 *
