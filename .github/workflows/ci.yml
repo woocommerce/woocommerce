@@ -47,14 +47,13 @@ jobs:
           php --version
           composer --version
 
-      # Try removing using of cache
-      # - name: Get cached composer directories
-      #   uses: actions/cache@v2
-      #   with:
-      #     path: |
-      #       ./packages
-      #       ./vendor
-      #     key: ${{ runner.os }}-${{ hashFiles('./composer.lock') }}
+      - name: Get cached composer directories
+        uses: actions/cache@v2
+        with:
+          path: |
+            ./packages
+            ./vendor
+          key: ${{ runner.os }}-${{ hashFiles('./composer.lock') }}
 
       - name: Setup and install composer
         run: composer install
