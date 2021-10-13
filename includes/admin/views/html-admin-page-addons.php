@@ -58,7 +58,7 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 		</div>
 	<div class="wrap">
 		<div class="marketplace-content-wrapper">
-			<?php if ( count( $addons ) == 0 ) : ?>
+			<?php if ( ! empty( $search ) && count( $addons ) == 0 ) : ?>
 				<h1 class="search-form-title">
 					<?php esc_html_e( 'Sorry, could not find anything. Try searching again using a different term.', 'woocommerce' ); ?></p>
 				</h1>
