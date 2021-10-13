@@ -60,10 +60,13 @@
 				margin-left: $gap;
 			}
 		}
+		&__spinner {
+			text-align: center;
+		}
 	}
 }
 
-@media screen and (max-width: 438px) {
+@media screen and ( max-width: 438px ) {
 	.woocommerce-profile-wizard__body {
 		.woocommerce-profile-wizard__product-types {
 			.woocommerce-product-wizard__product-types-label {
@@ -73,7 +76,7 @@
 	}
 }
 
-@media screen and (max-width: 375px) {
+@media screen and ( max-width: 375px ) {
 	.woocommerce-profile-wizard__body {
 		.woocommerce-profile-wizard__product-types {
 			.woocommerce-pill {

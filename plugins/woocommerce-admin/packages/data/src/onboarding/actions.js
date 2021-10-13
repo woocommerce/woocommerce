@@ -222,6 +222,20 @@ export function actionTaskSuccess( task ) {
 	};
 }
 
+export function getProductTypesSuccess( productTypes ) {
+	return {
+		type: TYPES.GET_PRODUCT_TYPES_SUCCESS,
+		productTypes,
+	};
+}
+
+export function getProductTypesError( error ) {
+	return {
+		type: TYPES.GET_PRODUCT_TYPES_ERROR,
+		error,
+	};
+}
+
 export function* updateProfileItems( items ) {
 	yield setIsRequesting( 'updateProfileItems', true );
 	yield setError( 'updateProfileItems', null );

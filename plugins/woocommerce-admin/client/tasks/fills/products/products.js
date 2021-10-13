@@ -12,7 +12,11 @@ import {
 	archive,
 	download,
 } from '@wordpress/icons';
-import { ONBOARDING_STORE_NAME, PLUGINS_STORE_NAME } from '@woocommerce/data';
+import {
+	ONBOARDING_STORE_NAME,
+	PLUGINS_STORE_NAME,
+	SETTINGS_STORE_NAME,
+} from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
 import { List, Pill } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/wc-admin-settings';
@@ -24,8 +28,9 @@ import { WooOnboardingTask } from '@woocommerce/onboarding';
  * Internal dependencies
  */
 import ProductTemplateModal from './product-template-modal';
+import { getCountryCode } from '../../../dashboard/utils';
 
-const subTasks = [
+const getSubTasks = () => [
 	{
 		key: 'addProductTemplate',
 		title: (
@@ -94,10 +99,13 @@ const subTasks = [
 
 const Products = () => {
 	const [ selectTemplate, setSelectTemplate ] = useState( null );
-	const { profileItems } = useSelect( ( select ) => {
+	const { countryCode, profileItems } = useSelect( ( select ) => {
 		const { getProfileItems } = select( ONBOARDING_STORE_NAME );
+		const { getSettings } = select( SETTINGS_STORE_NAME );
+		const { general: settings = {} } = getSettings( 'general' );
 
 		return {
+			countryCode: getCountryCode( settings.woocommerce_default_country ),
 			profileItems: getProfileItems(),
 		};
 	} );
@@ -109,9 +117,12 @@ const Products = () => {
 		};
 	} );
 
+	const subTasks = getSubTasks();
+
 	if (
 		window.wcAdminFeatures &&
 		window.wcAdminFeatures.subscriptions &&
+		countryCode === 'US' &&
 		profileItems.product_types.includes( 'subscriptions' ) &&
 		installedPlugins.includes( 'woocommerce-payments' )
 	) {

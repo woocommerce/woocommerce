@@ -18,15 +18,20 @@ import { getCategorizedOnboardingProducts } from '../../dashboard/utils';
 const PurchaseTaskItem = () => {
 	const [ cartModalOpen, setCartModalOpen ] = useState( false );
 
-	const { installedPlugins, profileItems } = useSelect( ( select ) => {
-		const { getProfileItems } = select( ONBOARDING_STORE_NAME );
-		const { getInstalledPlugins } = select( PLUGINS_STORE_NAME );
+	const { installedPlugins, productTypes, profileItems } = useSelect(
+		( select ) => {
+			const { getProductTypes, getProfileItems } = select(
+				ONBOARDING_STORE_NAME
+			);
+			const { getInstalledPlugins } = select( PLUGINS_STORE_NAME );
 
-		return {
-			installedPlugins: getInstalledPlugins(),
-			profileItems: getProfileItems(),
-		};
-	} );
+			return {
+				installedPlugins: getInstalledPlugins(),
+				productTypes: getProductTypes(),
+				profileItems: getProfileItems(),
+			};
+		}
+	);
 
 	const toggleCartModal = useCallback( () => {
 		if ( ! cartModalOpen ) {
@@ -37,6 +42,7 @@ const PurchaseTaskItem = () => {
 	}, [ cartModalOpen ] );
 
 	const groupedProducts = getCategorizedOnboardingProducts(
+		productTypes,
 		profileItems,
 		installedPlugins
 	);

@@ -25,6 +25,7 @@ export const defaultState = {
 	},
 	emailPrefill: '',
 	paymentMethods: [],
+	productTypes: [],
 	requesting: {},
 	taskLists: [],
 	tasksStatus: {},
@@ -55,6 +56,7 @@ const onboarding = (
 		profileItems,
 		emailPrefill,
 		paymentMethods,
+		productTypes,
 		replace,
 		error,
 		isRequesting,
@@ -105,6 +107,19 @@ const onboarding = (
 			return {
 				...state,
 				paymentMethods,
+			};
+		case TYPES.GET_PRODUCT_TYPES_SUCCESS:
+			return {
+				...state,
+				productTypes,
+			};
+		case TYPES.GET_PRODUCT_TYPES_ERROR:
+			return {
+				...state,
+				errors: {
+					...state.errors,
+					productTypes: error,
+				},
 			};
 		case TYPES.GET_FREE_EXTENSIONS_ERROR:
 			return {

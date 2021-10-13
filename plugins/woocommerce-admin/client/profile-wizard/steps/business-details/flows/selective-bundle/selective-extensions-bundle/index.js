@@ -8,7 +8,11 @@ import { Link } from '@woocommerce/components';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { Icon, chevronDown, chevronUp } from '@wordpress/icons';
 import interpolateComponents from 'interpolate-components';
-import { pluginNames, ONBOARDING_STORE_NAME } from '@woocommerce/data';
+import {
+	pluginNames,
+	ONBOARDING_STORE_NAME,
+	SETTINGS_STORE_NAME,
+} from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { useSelect } from '@wordpress/data';
 
@@ -19,6 +23,7 @@ import { AppIllustration } from '../app-illustration';
 import './style.scss';
 import sanitizeHTML from '~/lib/sanitize-html';
 import { setAllPropsToValue } from '~/lib/collections';
+import { getCountryCode } from '../../../../../../dashboard/utils';
 
 const ALLOWED_PLUGIN_LISTS = [ 'basics' ];
 
@@ -178,28 +183,35 @@ export const SelectiveExtensionsBundle = ( {
 	const [ showExtensions, setShowExtensions ] = useState( false );
 	const [ values, setValues ] = useState( baseValues );
 
-	const { freeExtensions, isResolving, profileItems } = useSelect(
-		( select ) => {
-			const {
-				getFreeExtensions,
-				getProfileItems,
-				hasFinishedResolution,
-			} = select( ONBOARDING_STORE_NAME );
+	const {
+		countryCode,
+		freeExtensions,
+		isResolving,
+		profileItems,
+	} = useSelect( ( select ) => {
+		const {
+			getFreeExtensions,
+			getProfileItems,
+			hasFinishedResolution,
+		} = select( ONBOARDING_STORE_NAME );
+		const { getSettings } = select( SETTINGS_STORE_NAME );
+		const { general: settings = {} } = getSettings( 'general' );
 
-			return {
-				freeExtensions: getFreeExtensions(),
-				isResolving: ! hasFinishedResolution( 'getFreeExtensions' ),
-				profileItems: getProfileItems(),
-			};
-		}
-	);
+		return {
+			countryCode: getCountryCode( settings.woocommerce_default_country ),
+			freeExtensions: getFreeExtensions(),
+			isResolving: ! hasFinishedResolution( 'getFreeExtensions' ),
+			profileItems: getProfileItems(),
+		};
+	} );
 
 	const installableExtensions = useMemo( () => {
 		const { product_types: productTypes } = profileItems;
 		return freeExtensions.filter( ( list ) => {
 			if (
 				window.wcAdminFeatures &&
-				window.wcAdminFeatures.subscriptions
+				window.wcAdminFeatures.subscriptions &&
+				countryCode === 'US'
 			) {
 				if ( productTypes.includes( 'subscriptions' ) ) {
 					list.plugins = list.plugins.filter(

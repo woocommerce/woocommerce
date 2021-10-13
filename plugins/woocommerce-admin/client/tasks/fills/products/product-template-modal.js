@@ -5,11 +5,12 @@ import { __ } from '@wordpress/i18n';
 import { Button, Modal, RadioControl } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { addFilter, applyFilters } from '@wordpress/hooks';
+import { applyFilters } from '@wordpress/hooks';
 import {
 	ITEMS_STORE_NAME,
 	ONBOARDING_STORE_NAME,
 	PLUGINS_STORE_NAME,
+	SETTINGS_STORE_NAME,
 } from '@woocommerce/data';
 import { getAdminLink } from '@woocommerce/wc-admin-settings';
 import { recordEvent } from '@woocommerce/tracks';
@@ -19,11 +20,12 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import './product-template-modal.scss';
 import { createNoticesFromResponse } from '../../../lib/notices';
+import { getCountryCode } from '../../../dashboard/utils';
 
 export const ONBOARDING_PRODUCT_TEMPLATES_FILTER =
 	'woocommerce_admin_onboarding_product_templates';
 
-const PRODUCT_TEMPLATES = [
+const getProductTemplates = () => [
 	{
 		key: 'physical',
 		title: __( 'Physical product', 'woocommerce-admin' ),
@@ -62,10 +64,13 @@ export default function ProductTemplateModal( { onClose } ) {
 	const [ selectedTemplate, setSelectedTemplate ] = useState( null );
 	const [ isRedirecting, setIsRedirecting ] = useState( false );
 	const { createProductFromTemplate } = useDispatch( ITEMS_STORE_NAME );
-	const { profileItems } = useSelect( ( select ) => {
+	const { countryCode, profileItems } = useSelect( ( select ) => {
 		const { getProfileItems } = select( ONBOARDING_STORE_NAME );
+		const { getSettings } = select( SETTINGS_STORE_NAME );
+		const { general: settings = {} } = getSettings( 'general' );
 
 		return {
+			countryCode: getCountryCode( settings.woocommerce_default_country ),
 			profileItems: getProfileItems(),
 		};
 	} );
@@ -116,25 +121,21 @@ export default function ProductTemplateModal( { onClose } ) {
 		}
 	};
 
-	if (
+	const removeSubscriptions =
 		( window.wcAdminFeatures && ! window.wcAdminFeatures.subscriptions ) ||
+		countryCode !== 'US' ||
 		! profileItems.product_types.includes( 'subscriptions' ) ||
-		! installedPlugins.includes( 'woocommerce-payments' )
-	) {
-		addFilter(
-			ONBOARDING_PRODUCT_TEMPLATES_FILTER,
-			'woocommerce-admin',
-			( productTemplates ) => {
-				return productTemplates.filter(
-					( template ) => template.key !== 'subscription'
-				);
-			}
-		);
-	}
+		! installedPlugins.includes( 'woocommerce-payments' );
+
+	const productTemplates = removeSubscriptions
+		? getProductTemplates().filter(
+				( template ) => template.key !== 'subscription'
+		  )
+		: getProductTemplates();
 
 	const templates = applyFilters(
 		ONBOARDING_PRODUCT_TEMPLATES_FILTER,
-		PRODUCT_TEMPLATES
+		productTemplates
 	);
 
 	return (

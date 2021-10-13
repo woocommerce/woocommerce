@@ -433,7 +433,7 @@ class Onboarding {
 	 * @return array
 	 */
 	public static function get_allowed_product_types() {
-		$products = array(
+		$products      = array(
 			'physical'        => array(
 				'label'   => __( 'Physical products', 'woocommerce-admin' ),
 				'default' => true,
@@ -461,7 +461,8 @@ class Onboarding {
 				'product' => 18618,
 			),
 		);
-		if ( ! Features::is_enabled( 'subscriptions' ) ) {
+		$base_location = wc_get_base_location();
+		if ( ! Features::is_enabled( 'subscriptions' ) || 'US' !== $base_location['country'] ) {
 			$products['subscriptions']['product'] = 27147;
 		}
 		$product_types = self::append_product_data( $products );
@@ -690,7 +691,6 @@ class Onboarding {
 		$settings['onboarding']['euCountries']     = WC()->countries->get_european_union_countries();
 		$settings['onboarding']['industries']      = self::get_allowed_industries();
 		$settings['onboarding']['localeInfo']      = include WC()->plugin_path() . '/i18n/locale-info.php';
-		$settings['onboarding']['productTypes']    = self::get_allowed_product_types();
 		$settings['onboarding']['profile']         = $profile;
 		$settings['onboarding']['themes']          = self::get_themes();
 

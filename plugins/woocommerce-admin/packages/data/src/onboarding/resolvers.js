@@ -17,6 +17,8 @@ import {
 	setTasksStatus,
 	setPaymentMethods,
 	setEmailPrefill,
+	getProductTypesSuccess,
+	getProductTypesError,
 } from './actions';
 import { DeprecatedTasks } from './deprecated-tasks';
 
@@ -101,5 +103,18 @@ export function* getFreeExtensions() {
 		yield getFreeExtensionsSuccess( results );
 	} catch ( error ) {
 		yield getFreeExtensionsError( error );
+	}
+}
+
+export function* getProductTypes() {
+	try {
+		const results = yield apiFetch( {
+			path: WC_ADMIN_NAMESPACE + '/onboarding/product-types',
+			method: 'GET',
+		} );
+
+		yield getProductTypesSuccess( results );
+	} catch ( error ) {
+		yield getProductTypesError( error );
 	}
 }

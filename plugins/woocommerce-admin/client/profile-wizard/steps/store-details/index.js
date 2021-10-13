@@ -230,7 +230,13 @@ class StoreDetails extends Component {
 			isStoreDetailsPopoverVisible,
 			isSkipSetupPopoverVisible,
 		} = this.state;
-		const { skipProfiler, isLoading, isBusy, initialValues } = this.props;
+		const {
+			skipProfiler,
+			isLoading,
+			isBusy,
+			initialValues,
+			invalidateResolutionForStoreSelector,
+		} = this.props;
 
 		/* eslint-disable @wordpress/i18n-no-collapsible-whitespace */
 		const skipSetupText = __(
@@ -390,6 +396,9 @@ class StoreDetails extends Component {
 						isLink
 						className="woocommerce-profile-wizard__footer-link"
 						onClick={ () => {
+							invalidateResolutionForStoreSelector(
+								'getTaskLists'
+							);
 							this.setState( {
 								showUsageModal: true,
 								skipping: true,
@@ -498,13 +507,17 @@ export default compose(
 	} ),
 	withDispatch( ( dispatch ) => {
 		const { createNotice } = dispatch( 'core/notices' );
-		const { updateProfileItems } = dispatch( ONBOARDING_STORE_NAME );
+		const {
+			invalidateResolutionForStoreSelector,
+			updateProfileItems,
+		} = dispatch( ONBOARDING_STORE_NAME );
 		const { updateAndPersistSettingsForGroup } = dispatch(
 			SETTINGS_STORE_NAME
 		);
 
 		return {
 			createNotice,
+			invalidateResolutionForStoreSelector,
 			updateProfileItems,
 			updateAndPersistSettingsForGroup,
 		};

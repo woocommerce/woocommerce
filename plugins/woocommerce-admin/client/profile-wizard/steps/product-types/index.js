@@ -11,35 +11,34 @@ import {
 	CardFooter,
 	CheckboxControl,
 	FormToggle,
+	Spinner,
 } from '@wordpress/components';
-import { includes, filter, get } from 'lodash';
-import { getSetting } from '@woocommerce/wc-admin-settings';
+import { includes, filter } from 'lodash';
 import { recordEvent } from '@woocommerce/tracks';
 import { withDispatch, withSelect } from '@wordpress/data';
-import { ONBOARDING_STORE_NAME, PLUGINS_STORE_NAME } from '@woocommerce/data';
+import {
+	ONBOARDING_STORE_NAME,
+	PLUGINS_STORE_NAME,
+	SETTINGS_STORE_NAME,
+} from '@woocommerce/data';
 import { Text } from '@woocommerce/experimental';
 
 /**
  * Internal dependencies
  */
 import { createNoticesFromResponse } from '~/lib/notices';
+import { getCountryCode } from '../../../dashboard/utils';
 import ProductTypeLabel from './label';
 import './style.scss';
 
 export class ProductTypes extends Component {
-	constructor( props ) {
+	constructor() {
 		super();
-		const profileItems = get( props, 'profileItems', {} );
-
-		const { productTypes = {} } = getSetting( 'onboarding', {} );
-		const defaultProductTypes = Object.keys( productTypes ).filter(
-			( key ) => !! productTypes[ key ].default
-		);
 
 		this.state = {
 			error: null,
 			isMonthlyPricing: true,
-			selected: profileItems.product_types || defaultProductTypes,
+			selected: [],
 			isWCPayInstalled: null,
 		};
 
@@ -48,14 +47,29 @@ export class ProductTypes extends Component {
 	}
 
 	componentDidMount() {
-		const { installedPlugins } = this.props;
+		const { installedPlugins, invalidateResolution } = this.props;
 		const { isWCPayInstalled } = this.state;
+
+		invalidateResolution( 'getProductTypes', [] );
 
 		if ( isWCPayInstalled === null && installedPlugins ) {
 			this.setState( {
 				isWCPayInstalled: installedPlugins.includes(
 					'woocommerce-payments'
 				),
+			} );
+		}
+	}
+
+	componentDidUpdate( prevProps ) {
+		const { profileItems, productTypes } = this.props;
+
+		if ( prevProps.productTypes !== productTypes ) {
+			const defaultProductTypes = Object.keys( productTypes ).filter(
+				( key ) => !! productTypes[ key ].default
+			);
+			this.setState( {
+				selected: profileItems.product_types || defaultProductTypes,
 			} );
 		}
 	}
@@ -80,6 +94,7 @@ export class ProductTypes extends Component {
 		}
 
 		const {
+			countryCode,
 			createNotice,
 			goToNextStep,
 			installAndActivatePlugins,
@@ -95,6 +110,7 @@ export class ProductTypes extends Component {
 		if (
 			window.wcAdminFeatures &&
 			window.wcAdminFeatures.subscriptions &&
+			countryCode === 'US' &&
 			! installedPlugins.includes( 'woocommerce-payments' ) &&
 			selected.includes( 'subscriptions' )
 		) {
@@ -145,14 +161,27 @@ export class ProductTypes extends Component {
 	}
 
 	render() {
-		const { productTypes = {} } = getSetting( 'onboarding', {} );
+		const { productTypes = [] } = this.props;
 		const {
 			error,
 			isMonthlyPricing,
 			isWCPayInstalled,
 			selected,
 		} = this.state;
-		const { isInstallingActivating, isProfileItemsRequesting } = this.props;
+		const {
+			countryCode,
+			isInstallingActivating,
+			isProductTypesRequesting,
+			isProfileItemsRequesting,
+		} = this.props;
+
+		if ( isProductTypesRequesting ) {
+			return (
+				<div className="woocommerce-profile-wizard__product-types__spinner">
+					<Spinner />
+				</div>
+			);
+		}
 
 		return (
 			<div className="woocommerce-profile-wizard__product-types">
@@ -256,6 +285,7 @@ export class ProductTypes extends Component {
 					</Text>
 					{ window.wcAdminFeatures &&
 						window.wcAdminFeatures.subscriptions &&
+						countryCode === 'US' &&
 						! isWCPayInstalled &&
 						selected.includes( 'subscriptions' ) && (
 							<Text
@@ -280,12 +310,16 @@ export default compose(
 	withSelect( ( select ) => {
 		const {
 			getProfileItems,
+			getProductTypes,
 			getOnboardingError,
+			hasFinishedResolution,
 			isOnboardingRequesting,
 		} = select( ONBOARDING_STORE_NAME );
+		const { getSettings } = select( SETTINGS_STORE_NAME );
 		const { getInstalledPlugins, isPluginsRequesting } = select(
 			PLUGINS_STORE_NAME
 		);
+		const { general: settings = {} } = getSettings( 'general' );
 
 		return {
 			isError: Boolean( getOnboardingError( 'updateProfileItems' ) ),
@@ -297,16 +331,23 @@ export default compose(
 			isInstallingActivating:
 				isPluginsRequesting( 'installPlugins' ) ||
 				isPluginsRequesting( 'activatePlugins' ),
+			countryCode: getCountryCode( settings.woocommerce_default_country ),
+			productTypes: getProductTypes(),
+			isProductTypesRequesting: ! hasFinishedResolution(
+				'getProductTypes'
+			),
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
 		const { updateProfileItems } = dispatch( ONBOARDING_STORE_NAME );
 		const { createNotice } = dispatch( 'core/notices' );
 		const { installAndActivatePlugins } = dispatch( PLUGINS_STORE_NAME );
+		const { invalidateResolution } = dispatch( ONBOARDING_STORE_NAME );
 
 		return {
 			createNotice,
 			installAndActivatePlugins,
+			invalidateResolution,
 			updateProfileItems,
 		};
 	} )

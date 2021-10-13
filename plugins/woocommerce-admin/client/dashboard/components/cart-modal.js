@@ -80,11 +80,8 @@ class CartModal extends Component {
 	}
 
 	renderProducts() {
-		const { productIds } = this.props;
-		const { productTypes = {}, themes = [] } = getSetting(
-			'onboarding',
-			{}
-		);
+		const { productIds, productTypes } = this.props;
+		const { themes = [] } = getSetting( 'onboarding', {} );
 		const listItems = [];
 
 		productIds.forEach( ( productId ) => {
@@ -169,15 +166,19 @@ class CartModal extends Component {
 export default compose(
 	withSelect( ( select ) => {
 		const { getInstalledPlugins } = select( PLUGINS_STORE_NAME );
-		const { getProfileItems } = select( ONBOARDING_STORE_NAME );
+		const { getProductTypes, getProfileItems } = select(
+			ONBOARDING_STORE_NAME
+		);
 		const profileItems = getProfileItems();
 		const installedPlugins = getInstalledPlugins();
+		const productTypes = getProductTypes();
 		const productIds = getProductIdsForCart(
+			productTypes,
 			profileItems,
 			false,
 			installedPlugins
 		);
 
-		return { profileItems, productIds };
+		return { profileItems, productIds, productTypes };
 	} )
 )( CartModal );

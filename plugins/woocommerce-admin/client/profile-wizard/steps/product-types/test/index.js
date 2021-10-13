@@ -2,46 +2,44 @@
  * External dependencies
  */
 import { render, screen, waitFor } from '@testing-library/react';
-import { setSetting } from '@woocommerce/wc-admin-settings';
 import userEvent from '@testing-library/user-event';
-import { createElement } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { ProductTypes } from '../';
 
-describe( 'ProductTypes', () => {
-	beforeEach( () => {
-		setSetting( 'onboarding', {
-			productTypes: {
-				paidProduct: {
-					description: 'Paid product type',
-					label: 'Paid product',
-					more_url: 'https://woocommerce.com/paid-product',
-					product: 100,
-					slug: 'paid-product',
-					yearly_price: 120,
-				},
-				freeProduct: {
-					label: 'Free product',
-				},
-			},
-		} );
-	} );
+const testProps = {
+	countryCode: 'US',
+	invalidateResolution: jest.fn(),
+	isProductTypesRequesting: false,
+	productTypes: {
+		paidProduct: {
+			description: 'Paid product type',
+			label: 'Paid product',
+			more_url: 'https://woocommerce.com/paid-product',
+			product: 100,
+			slug: 'paid-product',
+			yearly_price: 120,
+		},
+		freeProduct: {
+			label: 'Free product',
+		},
+	},
+};
 
+describe( 'ProductTypes', () => {
 	afterEach( () => {
-		setSetting( 'onboarding', {} );
 		window.wcAdminFeatures.subscriptions = false;
 	} );
 
 	test( 'should render product types', () => {
-		const { container } = render( <ProductTypes /> );
+		const { container } = render( <ProductTypes { ...testProps } /> );
 		expect( container ).toMatchSnapshot();
 	} );
 
 	test( 'should show annual prices on toggle', () => {
-		const { container } = render( <ProductTypes /> );
+		const { container } = render( <ProductTypes { ...testProps } /> );
 
 		const toggle = screen.getByLabelText( 'Display monthly prices', {
 			selector: 'input',
@@ -62,6 +60,7 @@ describe( 'ProductTypes', () => {
 				createNotice={ mockCreateNotice }
 				goToNextStep={ mockGoToNextStep }
 				updateProfileItems={ mockUpdateProfileItems }
+				{ ...testProps }
 			/>
 		);
 
@@ -88,16 +87,16 @@ describe( 'ProductTypes', () => {
 		} );
 	} );
 	test( 'should show a warning message at the bottom of the step', () => {
-		setSetting( 'onboarding', {
-			productTypes: {
-				subscriptions: {
-					label: 'Subscriptions',
-				},
+		const productTypes = {
+			subscriptions: {
+				label: 'Subscriptions',
 			},
-		} );
+		};
 		window.wcAdminFeatures.subscriptions = true;
 
-		render( <ProductTypes /> );
+		render(
+			<ProductTypes { ...testProps } productTypes={ productTypes } />
+		);
 
 		const subscription = screen.getByText( 'Subscriptions', {
 			selector: 'label',
@@ -109,5 +108,33 @@ describe( 'ProductTypes', () => {
 				'The following extensions will be added to your site for free: WooCommerce Payments. An account is required to use this feature.'
 			)
 		).toBeInTheDocument();
+	} );
+	test( 'should show the warning message only for US stores', () => {
+		const productTypes = {
+			subscriptions: {
+				label: 'Subscriptions',
+			},
+		};
+		const countryCode = 'FR';
+		window.wcAdminFeatures.subscriptions = true;
+
+		render(
+			<ProductTypes
+				{ ...testProps }
+				productTypes={ productTypes }
+				countryCode={ countryCode }
+			/>
+		);
+
+		const subscription = screen.getByText( 'Subscriptions', {
+			selector: 'label',
+		} );
+		userEvent.click( subscription );
+
+		expect(
+			screen.queryByText(
+				'The following extensions will be added to your site for free: WooCommerce Payments. An account is required to use this feature.'
+			)
+		).not.toBeInTheDocument();
 	} );
 } );

@@ -24,6 +24,7 @@ export const getTasksStatus = (
 
 const initialTaskLists: TaskListType[] = [];
 
+const EMPTY_ARRAY: Product[] = [];
 export const getTaskLists = ( state: OnboardingState ): TaskListType[] => {
 	return state.taskLists || initialTaskLists;
 };
@@ -52,6 +53,10 @@ export const getEmailPrefill = ( state: OnboardingState ): string => {
 	return state.emailPrefill || '';
 };
 
+export const getProductTypes = ( state: OnboardingState ): Product[] => {
+	return state.productTypes || EMPTY_ARRAY;
+};
+
 // Types
 export type OnboardingSelectors = {
 	getProfileItems: () => ReturnType< typeof getProfileItems >;
@@ -69,6 +74,7 @@ export type OnboardingState = {
 	taskLists: TaskListType[];
 	tasksStatus: TasksStatusState;
 	paymentMethods: PaymentMethodsState[];
+	productTypes: Product[];
 	emailPrefill: string;
 	// TODO clarify what the error record's type is
 	errors: Record< string, unknown >;
@@ -149,6 +155,12 @@ export type MethodFields = {
 	locales?: FieldLocale[];
 	type?: string;
 	value?: string;
+};
+
+export type Product = {
+	default?: boolean;
+	label: string;
+	product?: number;
 };
 
 export type PaymentMethodsState = {
