@@ -131,7 +131,16 @@ class Api {
 			}
 		}
 
-		wp_register_script( $handle, $script_data['src'], apply_filters( 'woocommerce_blocks_register_script_dependencies', $script_data['dependencies'], $handle ), $script_data['version'], true );
+		/**
+		 * Filters the list of script dependencies.
+		 *
+		 * @param array $dependencies The list of script dependencies.
+		 * @param string $handle The script's handle.
+		 * @return array
+		 */
+		$script_dependencies = apply_filters( 'woocommerce_blocks_register_script_dependencies', $script_data['dependencies'], $handle );
+
+		wp_register_script( $handle, $script_data['src'], $script_dependencies, $script_data['version'], true );
 
 		if ( $has_i18n && function_exists( 'wp_set_script_translations' ) ) {
 			wp_set_script_translations( $handle, 'woo-gutenberg-products-block', $this->package->get_path( 'languages' ) );

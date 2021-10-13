@@ -48,6 +48,15 @@ class GoogleAnalytics {
 		$settings = $this->get_google_analytics_settings();
 
 		// Require tracking to be enabled with a valid GA ID.
+		if ( ! stristr( $settings['ga_id'], 'G-' ) ) {
+			return;
+		}
+
+		/**
+		 * Filter to disable Google Analytics tracking.
+		 *
+		 * @param boolean $disable_tracking If true, tracking will be disabled.
+		 */
 		if ( ! stristr( $settings['ga_id'], 'G-' ) || apply_filters( 'woocommerce_ga_disable_tracking', ! wc_string_to_bool( $settings['ga_event_tracking_enabled'] ) ) ) {
 			return;
 		}

@@ -191,11 +191,18 @@ class AssetDataRegistry {
 	 */
 	protected function initialize_core_data() {
 		/**
+		 * Filters the array of shared settings.
+		 *
 		 * Low level hook for registration of new data late in the cycle. This is deprecated.
 		 * Instead, use the data api:
-		 * Automattic\WooCommerce\Blocks\Package::container()
-		 *     ->get( Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry::class )
-		 *     ->add( $key, $value )
+		 *
+		 * ```php
+		 * Automattic\WooCommerce\Blocks\Package::container()->get( Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry::class )->add( $key, $value )
+		 * ```
+		 *
+		 * @deprecated
+		 * @param array $data Settings data.
+		 * @return array
 		 */
 		$settings = apply_filters( 'woocommerce_shared_settings', $this->data );
 

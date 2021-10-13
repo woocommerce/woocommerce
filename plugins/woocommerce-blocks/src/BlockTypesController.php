@@ -79,16 +79,16 @@ final class BlockTypesController {
 		$block_namespace = strtok( $block_name, '/' );
 
 		/**
-		 * WooCommerce Blocks Namespaces
+		 * Filters the list of allowed block namespaces.
 		 *
-		 * This hook defines which block namespaces should have block name and attribute data- attributes appended on render.
+		 * This hook defines which block namespaces should have block name and attribute `data-` attributes appended on render.
 		 *
 		 * @param array $allowed_namespaces List of namespaces.
 		 */
 		$allowed_namespaces = array_merge( [ 'woocommerce', 'woocommerce-checkout' ], (array) apply_filters( '__experimental_woocommerce_blocks_add_data_attributes_to_namespace', [] ) );
 
 		/**
-		 * WooCommerce Blocks Block Names
+		 * Filters the list of allowed Block Names
 		 *
 		 * This hook defines which block names should have block name and attribute data- attributes appended on render.
 		 *

@@ -226,14 +226,46 @@ class CreateAccount {
 		// Use WP_Error to handle registration errors.
 		$errors = new \WP_Error();
 
+		/**
+		 * Fires before a customer account is registered.
+		 *
+		 * This hook fires before customer accounts are created and passes the form data (username, email) and an array
+		 * of errors.
+		 *
+		 * This could be used to add extra validation logic and append errors to the array.
+		 *
+		 * @param string $username Customer username.
+		 * @param string $user_email Customer email address.
+		 * @param \WP_Error $errors Error object.
+		 */
 		do_action( 'woocommerce_register_post', $username, $user_email, $errors );
 
+		/**
+		 * Filters registration errors before a customer account is registered.
+		 *
+		 * This hook filters registration errors. This can be used to manipulate the array of errors before
+		 * they are displayed.
+		 *
+		 * @param \WP_Error $errors Error object.
+		 * @param string $username Customer username.
+		 * @param string $user_email Customer email address.
+		 * @return \WP_Error
+		 */
 		$errors = apply_filters( 'woocommerce_registration_errors', $errors, $username, $user_email );
 
 		if ( $errors->get_error_code() ) {
 			throw new \Exception( $errors->get_error_code() );
 		}
 
+		/**
+		 * Filters customer data before a customer account is registered.
+		 *
+		 * This hook filters customer data. It allows user data to be changed, for example, username, password, email,
+		 * first name, last name, and role.
+		 *
+		 * @param array $customer_data An array of customer (user) data.
+		 * @return array
+		 */
 		$new_customer_data = apply_filters(
 			'woocommerce_new_customer_data',
 			array(
@@ -256,6 +288,15 @@ class CreateAccount {
 		// Set account flag to remind customer to update generated password.
 		update_user_option( $customer_id, 'default_password_nag', true, true );
 
+		/**
+		 * Fires after a customer account has been registered.
+		 *
+		 * This hook fires after customer accounts are created and passes the customer data.
+		 *
+		 * @param integer $customer_id New customer (user) ID.
+		 * @param array $new_customer_data Array of customer (user) data.
+		 * @param string $password_generated The generated password for the account.
+		 */
 		do_action( 'woocommerce_created_customer', $customer_id, $new_customer_data, $password_generated );
 
 		return $customer_id;

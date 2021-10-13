@@ -233,7 +233,7 @@ class Checkout extends AbstractCartRoute {
 		$this->order_controller->validate_order_before_payment( $this->order );
 
 		/**
-		 * WooCommerce Blocks Checkout Order Processed (experimental).
+		 * Fires before an order is processed by the Checkout Block/Store API.
 		 *
 		 * This hook informs extensions that $order has completed processing and is ready for payment.
 		 *
@@ -242,8 +242,9 @@ class Checkout extends AbstractCartRoute {
 		 * - This also explicitly indicates these orders are from checkout block/StoreAPI.
 		 *
 		 * @see https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3238
+		 * @example See docs/examples/checkout-order-processed.md
 		 * @internal This Hook is experimental and may change or be removed.
-		 *
+
 		 * @param \WC_Order $order Order object.
 		 */
 		do_action( '__experimental_woocommerce_blocks_checkout_order_processed', $this->order );
@@ -381,7 +382,7 @@ class Checkout extends AbstractCartRoute {
 		}
 
 		/**
-		 * WooCommerce Blocks Checkout Update Order Meta (experimental).
+		 * Fires when the Checkout Block/Store API updates an order's meta data.
 		 *
 		 * This hook gives extensions the chance to add or update meta data on the $order.
 		 *
@@ -464,7 +465,7 @@ class Checkout extends AbstractCartRoute {
 		$this->order->set_payment_method( $this->get_request_payment_method( $request ) );
 
 		/**
-		 * WooCommerce Blocks Checkout Update Order From Request (experimental).
+		 * Fires when the Checkout Block/Store API updates an order's from the API request data.
 		 *
 		 * This hook gives extensions the chance to update orders based on the data in the request. This can be used in
 		 * conjunction with the ExtendRestAPI class to post custom data and then process it.

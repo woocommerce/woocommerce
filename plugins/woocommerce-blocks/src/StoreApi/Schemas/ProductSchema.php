@@ -527,6 +527,15 @@ class ProductSchema extends AbstractSchema {
 			$limits[] = $this->get_remaining_stock( $product );
 		}
 
+		/**
+		 * Filters the quantity limit for a product being added to the cart via the Store API.
+		 *
+		 * Filters the variation option name for custom option slugs.
+		 *
+		 * @param integer $quantity_limit Quantity limit which defaults to 99 unless sold individually.
+		 * @param \WC_Product $product Product instance.
+		 * @return integer
+		 */
 		return apply_filters( 'woocommerce_store_api_product_quantity_limit', max( min( array_filter( $limits ) ), 1 ), $product );
 	}
 

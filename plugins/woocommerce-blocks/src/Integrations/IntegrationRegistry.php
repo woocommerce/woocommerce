@@ -37,7 +37,7 @@ class IntegrationRegistry {
 		}
 
 		/**
-		 * Hook: integration_registration.
+		 * Fires when the IntegrationRegistry is initialized.
 		 *
 		 * Runs before integrations are initialized allowing new integration to be registered for use. This should be
 		 * used as the primary hook for integrations to include their scripts, styles, and other code extending the

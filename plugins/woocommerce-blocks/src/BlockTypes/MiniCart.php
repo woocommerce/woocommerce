@@ -113,6 +113,9 @@ class MiniCart extends AbstractBlock {
 			true
 		);
 
+		/**
+		 * Fires after cart block data is registered.
+		 */
 		do_action( 'woocommerce_blocks_cart_enqueue_data' );
 	}
 

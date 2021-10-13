@@ -61,7 +61,10 @@ class Bootstrap {
 		if ( $this->has_core_dependencies() ) {
 			$this->init();
 			/**
-			 * Usable as a safe event hook for when the plugin has been loaded.
+			 * Fires after WooCommerce Blocks plugin has loaded.
+			 *
+			 * This hook is intended to be used as a safe event hook for when the plugin has been loaded, and all
+			 * dependency requirements have been met.
 			 */
 			do_action( 'woocommerce_blocks_loaded' );
 		}

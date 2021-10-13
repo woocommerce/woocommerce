@@ -449,6 +449,16 @@ class ProductQuery {
 
 		// If prices are shown incl. tax, we want to remove the taxes from the filter amount to match prices stored excl. tax.
 		if ( 'incl' === $tax_display ) {
+			/**
+			 * Filters if taxes should be removed from locations outside the store base location.
+			 *
+			 * The woocommerce_adjust_non_base_location_prices filter can stop base taxes being taken off when dealing
+			 * with out of base locations. e.g. If a product costs 10 including tax, all users will pay 10
+			 * regardless of location and taxes.
+			 *
+			 * @param boolean $adjust_non_base_location_prices True by default.
+			 * @return boolean
+			 */
 			$taxes = apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ? WC_Tax::calc_tax( $price_filter, $base_tax_rates, true ) : WC_Tax::calc_tax( $price_filter, $tax_rates, true );
 			return $price_filter - array_sum( $taxes );
 		}
