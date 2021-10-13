@@ -5,6 +5,7 @@ import { OnboardingWizard } from '../../pages/OnboardingWizard';
 import { WcHomescreen } from '../../pages/WcHomescreen';
 import { TaskTitles } from '../../constants/taskTitles';
 import { Login } from '../../pages/Login';
+import { WcSettings } from '../../pages/WcSettings';
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 const {
@@ -15,6 +16,8 @@ const {
 	expect,
 } = require( '@jest/globals' );
 const config = require( 'config' );
+
+const { verifyValueOfInputField } = require( '@woocommerce/e2e-utils' );
 /* eslint-enable @typescript-eslint/no-var-requires */
 
 /**
@@ -102,6 +105,12 @@ const testAdminOnboardingWizard = () => {
 		it( 'can complete the theme selection section', async () => {
 			await profileWizard.themes.isDisplayed();
 			await profileWizard.themes.continueWithActiveTheme();
+		} );
+
+		it( 'can select the right currency on settings page related to the onboarding country', async () => {
+			const settingsScreen = new WcSettings( page );
+			await settingsScreen.navigate();
+			verifyValueOfInputField( '#woocommerce_currency', 'USD' );
 		} );
 	} );
 };
@@ -200,10 +209,148 @@ const testSelectiveBundleWCPay = () => {
 			expect( tasks ).toContain( TaskTitles.addPayments );
 			expect( tasks ).not.toContain( TaskTitles.wooPayments );
 		} );
+
+		it( 'can select the right currency on settings page related to the onboarding country', async () => {
+			const settingsScreen = new WcSettings( page );
+			await settingsScreen.navigate();
+			verifyValueOfInputField( '#woocommerce_currency', 'JPY' );
+		} );
+	} );
+};
+
+const testDifferentStoreCurrenciesWCPay = () => {
+	const testCountryCurrencyPairs = [
+		{
+			countryRegionSubstring: 'australia',
+			countryRegionSelector: 'AU\\:QLD',
+			countryRegion: 'Australia — Queensland',
+			expectedCurrency: 'AUD',
+			isWCPaySupported: true,
+		},
+		{
+			countryRegionSubstring: 'canada',
+			countryRegionSelector: 'CA\\:QC',
+			countryRegion: 'Canada — Quebec',
+			expectedCurrency: 'CAD',
+			isWCPaySupported: true,
+		},
+		{
+			countryRegionSubstring: 'china',
+			countryRegionSelector: 'CN\\:CN2',
+			countryRegion: 'China — Beijing',
+			expectedCurrency: 'CNY',
+			isWCPaySupported: false,
+		},
+		{
+			countryRegionSubstring: 'spain',
+			countryRegionSelector: 'ES\\:CO',
+			countryRegion: 'Spain — Córdoba',
+			expectedCurrency: 'EUR',
+			isWCPaySupported: true,
+		},
+		{
+			countryRegionSubstring: 'india',
+			countryRegionSelector: 'IN\\:DL',
+			countryRegion: 'India — Delhi',
+			expectedCurrency: 'INR',
+			isWCPaySupported: false,
+		},
+		{
+			countryRegionSubstring: 'kingd',
+			countryRegionSelector: 'GB',
+			countryRegion: 'United Kingdom (UK)',
+			expectedCurrency: 'GBP',
+			isWCPaySupported: true,
+		},
+	];
+
+	testCountryCurrencyPairs.forEach( ( spec ) => {
+		describe( 'A store can onboard with any country and have the correct currency selected after onboarding.', () => {
+			const profileWizard = new OnboardingWizard( page );
+			const login = new Login( page );
+
+			beforeAll( async () => {
+				await login.login();
+			} );
+			afterAll( async () => {
+				await login.logout();
+			} );
+
+			it( `can complete the profile wizard with selecting ${ spec.countryRegion } as the country`, async () => {
+				await profileWizard.navigate();
+				await profileWizard.storeDetails.completeStoreDetailsSection( {
+					countryRegionSubstring: spec.countryRegionSubstring,
+					countryRegionSelector: spec.countryRegionSelector,
+					countryRegion: spec.countryRegion,
+				} );
+
+				// Wait for "Continue" button to become active
+				await profileWizard.continue();
+
+				// Wait for usage tracking pop-up window to appear
+				await profileWizard.optionallySelectUsageTracking();
+				// Query for the industries checkboxes
+				await profileWizard.industry.isDisplayed();
+				await profileWizard.industry.uncheckIndustries();
+				await profileWizard.industry.selectIndustry( 'Other' );
+				await profileWizard.continue();
+				await profileWizard.productTypes.isDisplayed( 7 );
+				await profileWizard.productTypes.uncheckProducts();
+				await profileWizard.productTypes.selectProduct(
+					'Physical products'
+				);
+				await profileWizard.productTypes.selectProduct( 'Downloads' );
+
+				await profileWizard.continue();
+				await page.waitForNavigation( {
+					waitUntil: 'networkidle0',
+				} );
+				await profileWizard.business.isDisplayed();
+
+				await profileWizard.business.selectProductNumber(
+					config.get( 'onboardingwizard.numberofproducts' )
+				);
+				await profileWizard.business.selectCurrentlySelling(
+					config.get( 'onboardingwizard.sellingelsewhere' )
+				);
+
+				await profileWizard.continue();
+				await profileWizard.business.freeFeaturesIsDisplayed();
+				// Add WC Pay check
+				await profileWizard.business.expandRecommendedBusinessFeatures();
+
+				if ( spec.isWCPaySupported ) {
+					expect( page ).toMatchElement( 'a', {
+						text: 'WooCommerce Payments',
+					} );
+				} else {
+					expect( page ).not.toMatchElement( 'a', {
+						text: 'WooCommerce Payments',
+					} );
+				}
+
+				await profileWizard.business.uncheckAllRecommendedBusinessFeatures();
+				await profileWizard.continue();
+				await profileWizard.themes.isDisplayed();
+
+				//  This navigates to the home screen
+				await profileWizard.themes.continueWithActiveTheme();
+			} );
+
+			it( `can select ${ spec.expectedCurrency } as the currency for ${ spec.countryRegion }`, async () => {
+				const settingsScreen = new WcSettings( page );
+				await settingsScreen.navigate();
+				verifyValueOfInputField(
+					'#woocommerce_currency',
+					spec.expectedCurrency
+				);
+			} );
+		} );
 	} );
 };
 
 module.exports = {
 	testAdminOnboardingWizard,
 	testSelectiveBundleWCPay,
+	testDifferentStoreCurrenciesWCPay,
 };

@@ -1,4 +1,5 @@
 # Unreleased
+-   Add E2E tests for checking store currency if it matches the onboarded country. #7712
 
 # 0.1.2
 
