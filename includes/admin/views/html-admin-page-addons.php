@@ -199,8 +199,14 @@ function wccom_get_star_class( $rating, $index ) {
 										<?php if ( '&#36;0.00' === $addon->price ) : ?>
 											<span class="price"><?php esc_html_e( 'Free', 'woocommerce' ); ?></span>
 										<?php else : ?>
+											<?php
+											$price_suffix = __( 'per year', 'woocommerce' );
+											if ( $addon->price_suffix ) {
+												$price_suffix = $addon->price_suffix;
+											}
+											?>
 											<span class="price"><?php echo wp_kses_post( $addon->price ); ?></span>
-											<span class="price-suffix"><?php esc_html_e( 'per year', 'woocommerce' ); ?></span>
+											<span class="price-suffix"><?php echo esc_html( $price_suffix ); ?></span>
 										<?php endif; ?>
 									</div>
 									<?php if ( ! empty( $addon->reviews_count ) && ! empty( $addon->rating ) ) : ?>
