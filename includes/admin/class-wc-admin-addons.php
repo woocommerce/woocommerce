@@ -34,7 +34,7 @@ class WC_Admin_Addons {
 			}
 
 			$parameter_string = '';
-			$country  = WC()->countries->get_base_country();
+			$country          = WC()->countries->get_base_country();
 			if ( ! empty( $country ) ) {
 				$parameter_string = '?' . http_build_query( array( 'country' => $country ) );
 			}
@@ -159,7 +159,7 @@ class WC_Admin_Addons {
 	 * @return void
 	 */
 	private static function output_group( $block ) {
-		$capacity           = $block->capacity ?? 3;
+		$capacity             = $block->capacity ?? 3;
 		$product_list_classes = 3 === $capacity ? 'three-column' : 'two-column';
 		$product_list_classes = 'products addons-products-' . $product_list_classes;
 		?>
