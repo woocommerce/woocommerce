@@ -1218,7 +1218,7 @@ class WC_Admin_Addons {
 			<li class="<?php echo esc_attr( implode( ' ', $class_names ) ); ?>">
 				<div class="<?php echo esc_attr( $product_details_classes ); ?>">
 					<div class="product-text-container">
-						<?php if ( isset( $mapped->label ) &&  'featured' === $mapped->label ) { ?>
+						<?php if ( isset( $mapped->label ) && 'featured' === $mapped->label ) { ?>
 							<span class="label featured"><?php esc_attr_e( 'Featured', 'woocommerce' ); ?></span>
 						<?php } ?>
 						<a href="<?php echo esc_url( $product_url ); ?>">
