@@ -80,7 +80,7 @@ class CartI2 extends AbstractBlock {
 		wp_dequeue_script( 'selectWoo' );
 		wp_dequeue_style( 'select2' );
 
-		return $this->inject_html_data_attributes( $content, $attributes );
+		return $content;
 	}
 
 	/**

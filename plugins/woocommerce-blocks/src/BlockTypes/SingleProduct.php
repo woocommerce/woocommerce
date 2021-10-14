@@ -26,15 +26,4 @@ class SingleProduct extends AbstractBlock {
 		];
 		return $key ? $script[ $key ] : $script;
 	}
-
-	/**
-	 * Render the block on the frontend.
-	 *
-	 * @param array  $attributes Block attributes.
-	 * @param string $content    Block content.
-	 * @return string Rendered block type output.
-	 */
-	protected function render( $attributes, $content ) {
-		return $this->inject_html_data_attributes( $content, $attributes );
-	}
 }
