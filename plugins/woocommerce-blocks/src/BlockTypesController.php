@@ -101,11 +101,15 @@ final class BlockTypesController {
 		}
 
 		$attributes              = (array) $block['attrs'];
+		$exclude_attributes      = [ 'className', 'align' ];
 		$escaped_data_attributes = [
 			'data-block-name="' . esc_attr( $block['blockName'] ) . '"',
 		];
 
 		foreach ( $attributes as $key => $value ) {
+			if ( in_array( $key, $exclude_attributes, true ) ) {
+				continue;
+			}
 			if ( is_bool( $value ) ) {
 				$value = $value ? 'true' : 'false';
 			}

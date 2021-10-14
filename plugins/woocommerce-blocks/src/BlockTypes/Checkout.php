@@ -93,7 +93,7 @@ class Checkout extends AbstractBlock {
 			$content = str_replace( '</div>', $inner_blocks_html . '</div>', $content );
 		}
 
-		return $this->inject_html_data_attributes( $content, $attributes );
+		return $content;
 	}
 
 	/**
