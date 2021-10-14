@@ -397,7 +397,16 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	protected function get_price_hash( &$product, $for_display = false ) {
 		global $wp_filter;
 
-		$price_hash   = $for_display && wc_tax_enabled() ? array( get_option( 'woocommerce_tax_display_shop', 'excl' ), WC_Tax::get_rates() ) : array( false );
+		$price_hash = array( false );
+
+		if ( $for_display && wc_tax_enabled() ) {
+			$price_hash = array(
+				get_option( 'woocommerce_tax_display_shop', 'excl' ),
+				WC_Tax::get_rates(),
+				empty( WC()->customer ) ? false : WC()->customer->is_vat_exempt(),
+			);
+		}
+
 		$filter_names = array( 'woocommerce_variation_prices_price', 'woocommerce_variation_prices_regular_price', 'woocommerce_variation_prices_sale_price' );
 
 		foreach ( $filter_names as $filter_name ) {

@@ -533,16 +533,16 @@
         },
         {
             "name": "woocommerce/woocommerce-admin",
-            "version": "2.7.1-rc.1",
+            "version": "2.7.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-admin.git",
-                "reference": "3e873f3a3733ef81fc3352a21dd152840550fffe"
+                "reference": "9ce54862556815e74cfe2476fae0eb30fcfd65d6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/3e873f3a3733ef81fc3352a21dd152840550fffe",
-                "reference": "3e873f3a3733ef81fc3352a21dd152840550fffe",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/9ce54862556815e74cfe2476fae0eb30fcfd65d6",
+                "reference": "9ce54862556815e74cfe2476fae0eb30fcfd65d6",
                 "shasum": ""
             },
             "require": {
@@ -597,9 +597,9 @@
             "homepage": "https://github.com/woocommerce/woocommerce-admin",
             "support": {
                 "issues": "https://github.com/woocommerce/woocommerce-admin/issues",
-                "source": "https://github.com/woocommerce/woocommerce-admin/tree/v2.7.1-rc.1"
+                "source": "https://github.com/woocommerce/woocommerce-admin/tree/v2.7.2"
             },
-            "time": "2021-09-23T22:13:54+00:00"
+            "time": "2021-10-11T21:11:02+00:00"
         },
         {
             "name": "woocommerce/woocommerce-blocks",
@@ -2386,16 +2386,16 @@
         },
         {
             "name": "yoast/phpunit-polyfills",
-            "version": "1.0.1",
+            "version": "1.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Yoast/PHPUnit-Polyfills.git",
-                "reference": "f014fb21c2b0038fd329515d59025af42fb98715"
+                "reference": "1a582ab1d91e86aa450340c4d35631a85314ff9f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Yoast/PHPUnit-Polyfills/zipball/f014fb21c2b0038fd329515d59025af42fb98715",
-                "reference": "f014fb21c2b0038fd329515d59025af42fb98715",
+                "url": "https://api.github.com/repos/Yoast/PHPUnit-Polyfills/zipball/1a582ab1d91e86aa450340c4d35631a85314ff9f",
+                "reference": "1a582ab1d91e86aa450340c4d35631a85314ff9f",
                 "shasum": ""
             },
             "require": {
@@ -2403,9 +2403,7 @@
                 "phpunit/phpunit": "^4.8.36 || ^5.7.21 || ^6.0 || ^7.0 || ^8.0 || ^9.0"
             },
             "require-dev": {
-                "php-parallel-lint/php-console-highlighter": "^0.5",
-                "php-parallel-lint/php-parallel-lint": "^1.3.0",
-                "yoast/yoastcs": "^2.1.0"
+                "yoast/yoastcs": "^2.2.0"
             },
             "type": "library",
             "extra": {
@@ -2445,7 +2443,7 @@
                 "issues": "https://github.com/Yoast/PHPUnit-Polyfills/issues",
                 "source": "https://github.com/Yoast/PHPUnit-Polyfills"
             },
-            "time": "2021-08-09T16:28:08+00:00"
+            "time": "2021-10-03T08:40:26+00:00"
         }
     ],
     "aliases": [],
