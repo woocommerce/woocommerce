@@ -1,4 +1,12 @@
 <?php
+/**
+ * Shows an order item meta
+ *
+ * @package WooCommerce\Admin
+ * @var object $item The item being displayed
+ * @var int $item_id The id of the item being displayed
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
