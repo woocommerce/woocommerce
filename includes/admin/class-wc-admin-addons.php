@@ -1114,7 +1114,7 @@ class WC_Admin_Addons {
 
 		// Is Free.
 		if ( $has_currency ) {
-			$mapped->is_free = 0 === $data->price;
+			$mapped->is_free = 0 === (int) $data->price;
 		} else {
 			$mapped->is_free = '&#36;0.00' === $data->price;
 		}
@@ -1178,7 +1178,7 @@ class WC_Admin_Addons {
 										sprintf(
 											'<a class="product-vendor-link" href="%1$s" target="_blank">%2$s</a>',
 											esc_url_raw( $mapped->vendor_url ),
-											wp_kses_post( $mapped->vendor_name )
+											esc_html( $mapped->vendor_name )
 										)
 									);
 								?>
@@ -1199,7 +1199,7 @@ class WC_Admin_Addons {
 							<?php if ( $mapped->is_free ) : ?>
 								<span class="price"><?php esc_html_e( 'Free', 'woocommerce' ); ?></span>
 							<?php else : ?>
-								<span class="price"><?php echo wp_kses_post( $mapped->price ); ?></span>
+								<span class="price"><?php echo esc_html( $mapped->price ); ?></span>
 								<span class="price-suffix"><?php esc_html_e( 'per year', 'woocommerce' ); ?></span>
 							<?php endif; ?>
 						</div>
@@ -1210,7 +1210,7 @@ class WC_Admin_Addons {
 									<?php $rating_star_class = 'product-rating-star product-rating-star__' . wccom_get_star_class( $mapped->rating, $index ); ?>
 									<div class="<?php echo esc_attr( $rating_star_class ); ?>"></div>
 								<?php endfor; ?>
-								<span class="product-reviews-count">(<?php echo wp_kses_post( $mapped->reviews_count ); ?>)</span>
+								<span class="product-reviews-count">(<?php echo (int) $mapped->reviews_count; ?>)</span>
 							</div>
 						<?php endif; ?>
 					</div>
