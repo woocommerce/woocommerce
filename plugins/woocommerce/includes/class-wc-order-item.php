@@ -279,8 +279,19 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 				}
 			}
 
+			$show_metadata_line = ! $include_all &&
+									$product && $product->is_type( 'variation' ) &&
+									wc_is_attribute_in_product_name( $display_value, $order_item_name );
+			$show_metadata_line = apply_filters(
+				'woocommerce_show_product_variant_metadata_line',
+				$attribute_key,
+				$display_value,
+				$product,
+				$show_metadata_line
+			);
+
 			// Skip items with values already in the product details area of the product name.
-			if ( ! $include_all && $product && $product->is_type( 'variation' ) && wc_is_attribute_in_product_name( $display_value, $order_item_name ) ) {
+			if ( ! $show_metadata_line ) {
 				continue;
 			}
 
