@@ -1,5 +1,22 @@
 == Changelog ==
 
+= 5.9.0 beta 2021-10-19 =
+
+**WooCommerce**
+
+* Fix - Variable product price caching bug with VAT exemption. #30889
+* Fix - Allow to pass null as the email for billing addresses in REST API. #30850
+* Fix - Ensure woocommerce_cancel_unpaid_orders event is always re-scheduled. #30830
+* Fix - Use a more standard way to check if the product attributes lookup table exists. #30745
+* Fix - Undefined variable notice when trying to add product in orders without specifying a product. #30739
+* Fix - Use proper location for taxes when adding products via admin. #30692
+* Dev - Add mobile data to WCTracker. #30415
+* Tweak - Remove hardcode category banners in Settings > Marketplace and use the WooCommerce.com API instead. #30938
+* Tweak - Show a search again message when marketplace results are empty. #30642
+* Enhancement - Add ratings, reviews and icons into Marketplace's Product Cards. #30840
+* Enhancement - Update Storefront banner width and track links in the marketplace page. #30882
+* Enhancement - Revamp the WooCommerce Marketplace page. #30900
+
 = 5.8.0 2021-10-12 =
 
 **WooCommerce**
