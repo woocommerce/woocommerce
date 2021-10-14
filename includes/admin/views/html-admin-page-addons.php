@@ -148,9 +148,9 @@ function wccom_get_star_class( $rating, $index ) {
 							}
 						}
 
-						if ( 'promoted' === $addon->label ) {
+						if ( isset( $addon->label ) && 'promoted' === $addon->label ) {
 							$classes = ' promoted';
-						} elseif ( 'featured' === $addon->label ) {
+						} elseif ( isset( $addon->label ) && 'featured' === $addon->label ) {
 							$classes = ' featured';
 						} else {
 							$classes = '';
