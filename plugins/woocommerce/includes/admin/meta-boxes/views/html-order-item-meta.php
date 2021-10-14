@@ -21,7 +21,12 @@ $hidden_order_itemmeta = apply_filters(
 	)
 );
 ?><div class="view">
-	<?php if ( $meta_data = $item->get_formatted_meta_data( '' ) ) : ?>
+	<?php
+		$include_all = false;
+		$include_all = apply_filters( 'woocommerce_get_formatted_meta_data_include_all_meta_lines', $include_all, $item );
+		$meta_data = $item->get_formatted_meta_data( '', $include_all );
+	?>
+	<?php if ( $meta_data ) : ?>
 		<table cellspacing="0" class="display_meta">
 			<?php
 			foreach ( $meta_data as $meta_id => $meta ) :
@@ -40,7 +45,7 @@ $hidden_order_itemmeta = apply_filters(
 <div class="edit" style="display: none;">
 	<table class="meta" cellspacing="0">
 		<tbody class="meta_items">
-			<?php if ( $meta_data = $item->get_formatted_meta_data( '' ) ) : ?>
+			<?php if ( $meta_data ) : ?>
 				<?php
 				foreach ( $meta_data as $meta_id => $meta ) :
 					if ( in_array( $meta->key, $hidden_order_itemmeta, true ) ) {
