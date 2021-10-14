@@ -593,6 +593,7 @@
 						flex-direction: row;
 						height: 20px;
 						justify-content: flex-end;
+						margin-bottom: 8px;
 						max-width: 52px;
 						padding: 3px 12px;
 						top: 28px;
@@ -701,6 +702,9 @@
 		}
 
 		.product-footer-promoted {
+			align-items: flex-end;
+			display: flex;
+			justify-content: space-between;
 			padding: 24px;
 
 			.icon img {

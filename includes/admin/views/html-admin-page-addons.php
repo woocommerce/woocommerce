@@ -93,7 +93,7 @@ function wccom_get_star_class( $rating, $index ) {
 			</ul>
 			<div id="marketplace-current-section-name" class="current-section-name"><?php echo esc_html( $current_section_name ); ?></div>
 		</div>
-		</div>
+	</div>
 
 	<div class="wp-header-end"></div>
 
@@ -131,7 +131,7 @@ function wccom_get_star_class( $rating, $index ) {
 							// Do not show USPS or Canada Post extensions for US and CA stores, respectively.
 							$country = WC()->countries->get_base_country();
 							if ( 'US' === $country
-								&& false !== strpos(
+								 && false !== strpos(
 									$addon->link,
 									'woocommerce.com/products/usps-shipping-method'
 								)
@@ -139,7 +139,7 @@ function wccom_get_star_class( $rating, $index ) {
 								continue;
 							}
 							if ( 'CA' === $country
-								&& false !== strpos(
+								 && false !== strpos(
 									$addon->link,
 									'woocommerce.com/products/canada-post-shipping-method'
 								)
@@ -148,37 +148,7 @@ function wccom_get_star_class( $rating, $index ) {
 							}
 						}
 
-						if ( isset( $addon->label ) && 'promoted' === $addon->label ) {
-							$classes = ' promoted';
-						} elseif ( isset( $addon->label ) && 'featured' === $addon->label ) {
-							$classes = ' featured';
-						} else {
-							$classes = '';
-						}
-
-						if ( 'promoted' === $addon->label
-						&& ! empty( $addon->primary_color )
-						&& ! empty( $addon->text_color )
-						&& ! empty( $addon->button ) ) {
-							?>
-							<li class="product">
-								<div class="product-details<?php echo esc_attr( $classes ); ?>" style="border-top: 5px  solid <?php echo esc_html( $addon->primary_color ); ?>;">
-									<span class="label<?php echo esc_attr( $classes ); ?>"><?php esc_attr_e( 'Promoted', 'woocommerce' ); ?></span>
-									<h2><?php echo esc_html( $addon->title ); ?></h2>
-									<p><?php echo wp_kses_post( $addon->excerpt ); ?></p>
-								</div>
-								<div class="product-footer-promoted">
-									<span class="icon"><img src="<?php echo esc_url( $addon->image ); ?>" /></span>
-									<a class="addons-button addons-button-promoted" style="background: <?php echo esc_html( $addon->primary_color ); ?>; color: <?php echo esc_html( $addon->text_color ); ?>;" href="<?php echo esc_url( WC_Admin_Addons::add_in_app_purchase_url_params( $addon->link ) ); ?>">
-										<?php echo esc_html( $addon->button ); ?>
-									</a>
-								</div>
-							</li>
-							<?php
-						} else {
-							?>
-							<?php WC_Admin_Addons::render_product_card( $addon ); ?>
-						<?php } ?>
+						WC_Admin_Addons::render_product_card( $addon ); ?>
 					<?php endforeach; ?>
 				</ul>
 			<?php endif; ?>
@@ -190,7 +160,7 @@ function wccom_get_star_class( $rating, $index ) {
 
 		<?php if ( 'Storefront' !== $theme['Name'] && '_featured' !== $current_section ) : ?>
 			<?php
-				$storefront_url = WC_Admin_Addons::add_in_app_purchase_url_params( 'https://woocommerce.com/storefront/?utm_source=extensionsscreen&utm_medium=product&utm_campaign=wcaddon' );
+			$storefront_url = WC_Admin_Addons::add_in_app_purchase_url_params( 'https://woocommerce.com/storefront/?utm_source=extensionsscreen&utm_medium=product&utm_campaign=wcaddon' );
 			?>
 			<div class="storefront">
 				<a href="<?php echo esc_url( $storefront_url ); ?>" target="_blank"><img src="<?php echo esc_url( WC()->plugin_url() ); ?>/assets/images/storefront.png" alt="<?php esc_attr_e( 'Storefront', 'woocommerce' ); ?>" /></a>
