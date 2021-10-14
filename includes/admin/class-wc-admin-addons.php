@@ -158,7 +158,6 @@ class WC_Admin_Addons {
 	 *
 	 * @return array
 	 * @deprecated 5.9.0 No longer used in In-App Marketplace
-	 *
 	 */
 	public static function get_section_data( $section_id ) {
 		$section      = self::get_section( $section_id );
@@ -226,7 +225,6 @@ class WC_Admin_Addons {
 	 * @param object $block Banner data.
 	 *
 	 * @deprecated 5.9.0 No longer used in In-App Marketplace
-	 *
 	 */
 	public static function output_banner_block( $block ) {
 		?>
@@ -266,7 +264,6 @@ class WC_Admin_Addons {
 	 * @param object $block Column data.
 	 *
 	 * @deprecated 5.9.0 No longer used in In-App Marketplace
-	 *
 	 */
 	public static function output_column( $block ) {
 		if ( isset( $block->container ) && 'column_container_start' === $block->container ) {
@@ -296,7 +293,6 @@ class WC_Admin_Addons {
 	 * @param object $block Column block data.
 	 *
 	 * @deprecated 5.9.0 No longer used in In-App Marketplace
-	 *
 	 */
 	public static function output_column_block( $block ) {
 		?>
@@ -370,7 +366,6 @@ class WC_Admin_Addons {
 	 * @param object $block Block data.
 	 *
 	 * @deprecated 5.9.0 No longer used in In-App Marketplace
-	 *
 	 */
 	public static function output_small_light_block( $block ) {
 		?>
@@ -401,7 +396,6 @@ class WC_Admin_Addons {
 	 * @param object $block Block data.
 	 *
 	 * @deprecated 5.9.0 No longer used in In-App Marketplace
-	 *
 	 */
 	public static function output_small_dark_block( $block ) {
 		?>
@@ -436,7 +430,6 @@ class WC_Admin_Addons {
 	 * @param object $block Block data.
 	 *
 	 * @deprecated 5.9.0 No longer used in In-App Marketplace
-	 *
 	 */
 	public static function output_wcs_banner_block( $block = array() ) {
 		$is_active = is_plugin_active( 'woocommerce-services/woocommerce-services.php' );
@@ -534,7 +527,6 @@ class WC_Admin_Addons {
 	 * @param object $block Block data.
 	 *
 	 * @deprecated 5.9.0 No longer used in In-App Marketplace
-	 *
 	 */
 	public static function output_wcpay_banner_block( $block = array() ) {
 		$is_active = is_plugin_active( 'woocommerce-payments/woocommerce-payments.php' );
@@ -633,7 +625,6 @@ class WC_Admin_Addons {
 	 * @param array $section Section data.
 	 *
 	 * @deprecated 5.9.0 No longer used in In-App Marketplace
-	 *
 	 */
 	public static function output_promotion_block( $section ) {
 		if (
@@ -1235,9 +1226,9 @@ class WC_Admin_Addons {
 		}
 
 		if ( 'promoted' === $mapped->label
-			 && ! empty( $mapped->primary_color )
-			 && ! empty( $mapped->text_color )
-			 && ! empty( $mapped->button ) ) {
+			&& ! empty( $mapped->primary_color )
+			&& ! empty( $mapped->text_color )
+			&& ! empty( $mapped->button ) ) {
 			?>
 			<li class="product">
 				<div class="<?php echo esc_attr( $product_details_classes ); ?>" style="border-top: 5px  solid <?php echo esc_html( $mapped->primary_color ); ?>;">

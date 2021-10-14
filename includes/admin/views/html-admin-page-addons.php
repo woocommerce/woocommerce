@@ -131,7 +131,7 @@ function wccom_get_star_class( $rating, $index ) {
 							// Do not show USPS or Canada Post extensions for US and CA stores, respectively.
 							$country = WC()->countries->get_base_country();
 							if ( 'US' === $country
-								 && false !== strpos(
+								&& false !== strpos(
 									$addon->link,
 									'woocommerce.com/products/usps-shipping-method'
 								)
@@ -139,7 +139,7 @@ function wccom_get_star_class( $rating, $index ) {
 								continue;
 							}
 							if ( 'CA' === $country
-								 && false !== strpos(
+								&& false !== strpos(
 									$addon->link,
 									'woocommerce.com/products/canada-post-shipping-method'
 								)
@@ -148,7 +148,8 @@ function wccom_get_star_class( $rating, $index ) {
 							}
 						}
 
-						WC_Admin_Addons::render_product_card( $addon ); ?>
+						WC_Admin_Addons::render_product_card( $addon );
+						?>
 					<?php endforeach; ?>
 				</ul>
 			<?php endif; ?>
