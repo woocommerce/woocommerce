@@ -3,6 +3,17 @@
 	padding: 0;
 }
 
+.woocommerce-layout__no-match {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
+	.components-card {
+		max-width: 680px;
+		width: 100%;
+	}
+}
+
 .woocommerce-layout__primary {
 	margin: $gutter-large 0 0 $fallback-gutter-large;
 	margin: $gutter-large 0 0 $gutter-large;

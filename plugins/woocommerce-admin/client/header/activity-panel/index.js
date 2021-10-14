@@ -277,13 +277,18 @@ export const ActivityPanel = ( { isEmbedded, query, userPreferencesData } ) => {
 			title: __( 'Help', 'woocommerce-admin' ),
 			icon: <Icon icon={ helpIcon } />,
 			visible:
-				( isHomescreen() && ! isEmbedded ) || isPerformingSetupTask(),
+				currentUserCan( 'manage_woocommerce' ) &&
+				( ( isHomescreen() && ! isEmbedded ) ||
+					isPerformingSetupTask() ),
 		};
 
 		const displayOptions = {
 			component: DisplayOptions,
 			visible:
-				! isEmbedded && isHomescreen() && ! isPerformingSetupTask(),
+				currentUserCan( 'manage_woocommerce' ) &&
+				! isEmbedded &&
+				isHomescreen() &&
+				! isPerformingSetupTask(),
 		};
 
 		const previewSite = {

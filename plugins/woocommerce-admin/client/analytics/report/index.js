@@ -13,6 +13,7 @@ import { searchItemsByString, ITEMS_STORE_NAME } from '@woocommerce/data';
  * Internal dependencies
  */
 import './style.scss';
+import { NoMatch } from '~/layout/NoMatch';
 import ReportError from '../components/report-error';
 import {
 	CurrencyContext,
@@ -67,7 +68,7 @@ class Report extends Component {
 
 		const report = find( getReports(), { report: reportParam } );
 		if ( ! report ) {
-			return null;
+			return <NoMatch />;
 		}
 		const Container = report.component;
 		return (

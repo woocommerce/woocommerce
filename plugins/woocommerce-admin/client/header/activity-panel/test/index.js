@@ -62,6 +62,9 @@ describe( 'Activity Panel', () => {
 			trackedCompletedTasks: [],
 		} ) );
 		Panel.mockImplementation( jest.requireActual( '../panel' ).Panel );
+		useUser.mockImplementation( () => ( {
+			currentUserCan: () => true,
+		} ) );
 	} );
 
 	it( 'should render inbox tab on embedded pages', () => {

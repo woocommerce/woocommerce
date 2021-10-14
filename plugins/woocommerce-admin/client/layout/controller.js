@@ -21,6 +21,7 @@ import { Spinner } from '@woocommerce/components';
  */
 import getReports from '../analytics/report/get-reports';
 import { isWCAdmin } from '../dashboard/utils';
+import { NoMatch } from './NoMatch';
 
 const AnalyticsReport = lazy( () =>
 	import( /* webpackChunkName: "analytics-report" */ '../analytics/report' )
@@ -201,7 +202,19 @@ export const getPages = () => {
 		} );
 	}
 
-	return applyFilters( PAGES_FILTER, pages );
+	const filteredPages = applyFilters( PAGES_FILTER, pages );
+
+	filteredPages.push( {
+		container: NoMatch,
+		path: '*',
+		breadcrumbs: [
+			...initialBreadcrumbs,
+			__( 'Not allowed', 'woocommerce-admin' ),
+		],
+		wpOpenMenu: 'toplevel_page_woocommerce',
+	} );
+
+	return filteredPages;
 };
 
 export class Controller extends Component {

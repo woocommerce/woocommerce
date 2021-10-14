@@ -798,8 +798,9 @@ class Loader {
 	 * Returns true if we are on a JS powered admin page.
 	 */
 	public static function is_admin_page() {
-		// Check the function exists before calling in case WC Admin is disabled. See PR #6563.
-		return function_exists( 'wc_admin_is_registered_page' ) && wc_admin_is_registered_page();
+		// phpcs:disable WordPress.Security.NonceVerification
+		return isset( $_GET['page'] ) && 'wc-admin' === $_GET['page'];
+		// phpcs:enable WordPress.Security.NonceVerification
 	}
 
 	/**
