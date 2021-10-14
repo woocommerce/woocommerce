@@ -147,8 +147,38 @@ function wccom_get_star_class( $rating, $index ) {
 								continue;
 							}
 						}
-						?>
-						<?php WC_Admin_Addons::render_product_card( $addon ); ?>
+
+						if ( 'promoted' === $addon->label ) {
+							$classes = ' promoted';
+						} elseif ( 'featured' === $addon->label ) {
+							$classes = ' featured';
+						} else {
+							$classes = '';
+						}
+
+						if ( 'promoted' === $addon->label
+						&& ! empty( $addon->primary_color )
+						&& ! empty( $addon->text_color )
+						&& ! empty( $addon->button ) ) {
+							?>
+							<li class="product">
+								<div class="product-details<?php echo esc_attr( $classes ); ?>" style="border-top: 5px  solid <?php echo esc_html( $addon->primary_color ); ?>;">
+									<span class="label<?php echo esc_attr( $classes ); ?>"><?php esc_attr_e( 'Promoted', 'woocommerce' ); ?></span>
+									<h2><?php echo esc_html( $addon->title ); ?></h2>
+									<p><?php echo wp_kses_post( $addon->excerpt ); ?></p>
+								</div>
+								<div class="product-footer-promoted">
+									<span class="icon"><img src="<?php echo esc_url( $addon->image ); ?>" /></span>
+									<a class="addons-button addons-button-promoted" style="background: <?php echo esc_html( $addon->primary_color ); ?>; color: <?php echo esc_html( $addon->text_color ); ?>;" href="<?php echo esc_url( WC_Admin_Addons::add_in_app_purchase_url_params( $addon->link ) ); ?>">
+										<?php echo esc_html( $addon->button ); ?>
+									</a>
+								</div>
+							</li>
+							<?php
+						} else {
+							?>
+							<?php WC_Admin_Addons::render_product_card( $addon ); ?>
+						<?php } ?>
 					<?php endforeach; ?>
 				</ul>
 			<?php endif; ?>
