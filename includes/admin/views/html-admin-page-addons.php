@@ -139,7 +139,7 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 							</li>
 							<?php
 						} else {
-						?>
+							?>
 							<li class="product">
 								<div class="product-details<?php echo esc_attr( $classes ); ?>">
 									<?php if ( ! empty( $addon->image ) ) : ?>
