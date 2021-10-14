@@ -398,8 +398,8 @@ const batchCreateOrders = async (statuses) => {
 	// Set the request payload from the created orders.
 	// Then send the API request.
 	const payload = { create: orders };
-	const { statusCode } = await client.post(path, payload);
-	expect(statusCode).toEqual(200);
+	const response = await client.post(path, payload);
+	expect( response.status ).toEqual(200);
 };
 
 /**
