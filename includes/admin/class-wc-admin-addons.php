@@ -1252,7 +1252,7 @@ class WC_Admin_Addons {
 							<?php /* Show rating and the number of reviews */ ?>
 							<div class="product-reviews-block">
 								<?php for ( $index = 1; $index <= 5; ++$index ) : ?>
-									<?php $rating_star_class = 'product-rating-star product-rating-star__' . wccom_get_star_class( $mapped->rating, $index ); ?>
+									<?php $rating_star_class = 'product-rating-star product-rating-star__' . self::get_star_class( $mapped->rating, $index ); ?>
 									<div class="<?php echo esc_attr( $rating_star_class ); ?>"></div>
 								<?php endfor; ?>
 								<span class="product-reviews-count">(<?php echo (int) $mapped->reviews_count; ?>)</span>
