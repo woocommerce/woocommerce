@@ -1,4 +1,3 @@
-/* eslint-disable jest/no-export, jest/no-disabled-tests */
 /**
  * Internal dependencies
  */
@@ -67,7 +66,7 @@ const runGroupedProductAPITest = () => {
 
 			// Read product directly from api.
 			const response = await client.get( `/wc/v3/products/${product.id}` );
-			expect( response.statusCode ).toBe( 200 );
+			expect( response.status ).toBe( 200 );
 			expect( response.data ).toEqual( expect.objectContaining( rawProperties ) );
 		});
 

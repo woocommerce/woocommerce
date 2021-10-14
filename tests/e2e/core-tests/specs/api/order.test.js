@@ -1,4 +1,3 @@
-/* eslint-disable jest/no-export, jest/no-disabled-tests */
 /**
  * Internal dependencies
  */
@@ -51,7 +50,7 @@ const runOrderApiTest = () => {
 
 			// Read order directly from API to compare.
 			const response = await client.get( `/wc/v3/orders/${order.id}` );
-			expect( response.statusCode ).toBe( 200 );
+			expect( response.status ).toBe( 200 );
 			expect( response.data ).toEqual( expect.objectContaining( orderProperties ) );
 		});
 
@@ -65,7 +64,7 @@ const runOrderApiTest = () => {
 
 			// Check the order response for the updated values.
 			const response = await client.get( `/wc/v3/orders/${order.id}` );
-			expect( response.statusCode ).toBe( 200 );
+			expect( response.status ).toBe( 200 );
 			expect( response.data ).toEqual( expect.objectContaining( updatedOrderProperties ) );
 		});
 

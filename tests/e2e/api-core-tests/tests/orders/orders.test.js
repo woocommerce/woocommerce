@@ -46,7 +46,7 @@ describe('Orders API tests', () => {
 
 	it('can create an order', async () => {
 		const response = await ordersApi.create.order( order );
-		expect( response.statusCode ).toEqual( ordersApi.create.responseCode );
+		expect( response.status ).toEqual( ordersApi.create.responseCode );
 		expect( response.body.id ).toBeDefined();
 		orderId = response.body.id;
 
@@ -57,7 +57,7 @@ describe('Orders API tests', () => {
 
 	it('can retrieve an order', async () => {
 		const response = await ordersApi.retrieve.order( orderId );
-		expect( response.statusCode ).toEqual( ordersApi.retrieve.responseCode );
+		expect( response.status ).toEqual( ordersApi.retrieve.responseCode );
 		expect( response.body.id ).toEqual( orderId );
 	});
 
@@ -67,7 +67,7 @@ describe('Orders API tests', () => {
 		order.shipping = updatedCustomerShipping;
 
 		const response = await ordersApi.update.order( orderId, order );
-		expect( response.statusCode).toEqual( ordersApi.update.responseCode );
+		expect( response.status).toEqual( ordersApi.update.responseCode );
 
 		expect( response.body.billing ).toEqual( updatedCustomerBilling );
 		expect( response.body.shipping ).toEqual( updatedCustomerShipping );
@@ -75,9 +75,9 @@ describe('Orders API tests', () => {
 
 	it('can permanently delete an order', async () => {
 		const response = await ordersApi.delete.order( orderId, true );
-		expect( response.statusCode ).toEqual( ordersApi.delete.responseCode );
+		expect( response.status ).toEqual( ordersApi.delete.responseCode );
 
 		const getOrderResponse = await ordersApi.retrieve.order( orderId );
-		expect( getOrderResponse.statusCode ).toEqual( 404 );
+		expect( getOrderResponse.status ).toEqual( 404 );
 	});
 });
