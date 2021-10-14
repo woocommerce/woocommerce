@@ -731,10 +731,26 @@
 					margin: 14px 64px 0 0;
 					max-width: 389px;
 				}
+
+				.product-developed-by {
+					color: #50575e; // Gray 60
+					font-size: 12px;
+					font-family: sans-serif;
+					line-height: 20px;
+					margin-top: 4px;
+
+					.product-vendor-link {
+						color: #50575e; // Gray 60
+					}
+				}
 			}
 
 			.product-footer {
+				align-items: center;
 				border-top: 1px solid #dcdcde;
+				display: flex;
+				flex-direction: row;
+				justify-content: space-between;
 				padding: 24px;
 
 				.price {
@@ -742,30 +758,76 @@
 					color: #1d2327;
 				}
 
+				.price-suffix {
+					color: #646970; // Gray 50
+				}
+
+				.product-reviews-block {
+					display: flex;
+					flex-direction: row;
+					margin-top: 4px;
+
+					.product-rating-star {
+						background-repeat: no-repeat;
+						background-size: contain;
+						height: 16px;
+						margin: 4px 4px 4px 0;
+						width: 17px;
+
+						&__fill {
+							background-image: url(../images/icons/star-golden.svg);
+						}
+
+						&__half-fill {
+							background-image: url(../images/icons/star-half-filled.svg);
+						}
+
+						&__no-fill {
+							background-image: url(../images/icons/star-gray.svg);
+						}
+					}
+
+					.product-reviews-count {
+						color: #646970; // Gray 50
+						font-size: 12px;
+						font-family: sans-serif;
+						line-height: 24px;
+						letter-spacing: -0.154px;
+						margin-left: 4px;
+					}
+				}
+
 				.button {
 					background-color: #fff;
 					border-color: #007cba;
 					color: #007cba;
 					float: right;
+					height: 22px;
 				}
 			}
 		}
 	}
 
 	.storefront {
+		max-width: 990px;
 		background: url(../images/storefront-bg.jpg) bottom right #f6f6f6;
 		border: 1px solid #ddd;
-		margin-top: 1em;
-		padding: 20px;
+		margin: 1em auto;
+		padding: 24px;
 		overflow: hidden;
 		zoom: 1;
 
 		img {
-			width: 278px;
+			display: block;
+			width: 100%;
+			max-width: 400px;
 			height: auto;
-			float: left;
-			margin: 0 20px 0 0;
+			margin: 0 auto 16px;
 			box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1);
+		}
+
+		p:last-of-type {
+			margin-bottom: 0;
 		}
 
 		p {
@@ -7689,6 +7751,19 @@ table.bar_chart {
 
 		.marketplace-header {
 			padding-left: 84px;
+		}
+
+		.storefront {
+
+			h2 {
+				margin-top: 0;
+			}
+
+			img {
+				float: left;
+				margin: 0 16px 0 auto;
+				width: 278px;
+			}
 		}
 	}
 }

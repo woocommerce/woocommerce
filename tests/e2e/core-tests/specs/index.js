@@ -53,6 +53,7 @@ const runCouponApiTest = require( './api/coupon.test' );
 const runGroupedProductAPITest = require( './api/grouped-product.test' );
 const runVariableProductAPITest = require( './api/variable-product.test' );
 const runOrderApiTest = require( './api/order.test' );
+const runTelemetryAPITest = require( './api/telemetry.test' );
 
 const runSetupOnboardingTests = () => {
 	runActivationTest();
@@ -108,6 +109,7 @@ const runApiTests = () => {
 	runVariableProductAPITest();
 	runCouponApiTest();
 	runOrderApiTest();
+	runTelemetryAPITest();
 }
 
 module.exports = {
@@ -160,4 +162,5 @@ module.exports = {
 	runMyAccountCreateAccountTest,
 	runOrderEmailReceivingTest,
 	runInitiateWccomConnectionTest,
+	runTelemetryAPITest,
 };
