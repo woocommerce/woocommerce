@@ -584,10 +584,11 @@
 
 				&.featured,
 				&.promoted {
+
 					.label {
 						align-items: center;
 						border-radius: 2px;
-						background: #DCDCDE;
+						background: #dcdcde;
 						display: flex;
 						flex-direction: row;
 						height: 20px;
@@ -602,8 +603,9 @@
 							float: right;
 						}
 					}
+
 					h2 {
-						color: #2C3338;
+						color: #2c3338;
 					}
 				}
 
