@@ -110,29 +110,62 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 								continue;
 							}
 						}
-						?>
-						<li class="product">
-							<div class="product-details">
-								<?php if ( ! empty( $addon->image ) ) : ?>
-									<span class="product-img-wrap"><img src="<?php echo esc_url( $addon->image ); ?>" /></span>
-								<?php endif; ?>
-								<a href="<?php echo esc_url( WC_Admin_Addons::add_in_app_purchase_url_params( $addon->link ) ); ?>">
+
+						if ( 'promoted' === $addon->label ) {
+							$classes = ' promoted';
+						} elseif ( 'featured' === $addon->label ) {
+							$classes = ' featured';
+						} else {
+							$classes = '';
+						}
+
+						if ( 'promoted' === $addon->label
+						&& ! empty( $addon->primary_color )
+						&& ! empty( $addon->text_color )
+						&& ! empty( $addon->button ) ) {
+							?>
+							<li class="product">
+								<div class="product-details<?php echo esc_attr( $classes ); ?>" style="border-top: 5px  solid <?php echo esc_html( $addon->primary_color ); ?>;">
+									<span class="label<?php echo esc_attr( $classes ); ?>"><?php esc_attr_e( 'Promoted', 'woocommerce' ); ?></span>
 									<h2><?php echo esc_html( $addon->title ); ?></h2>
-								</a>
-								<p><?php echo wp_kses_post( $addon->excerpt ); ?></p>
-							</div>
-							<div class="product-footer">
-								<?php if ( '&#36;0.00' === $addon->price ) : ?>
-									<span class="price"><?php esc_html_e( 'Free', 'woocommerce' ); ?></span>
-								<?php else : ?>
-									<span class="price"><?php echo wp_kses_post( $addon->price ); ?></span>
-									<span class="price_suffix"><?php esc_html_e( 'per year', 'woocommerce' ); ?></span>
-								<?php endif; ?>
-								<a class="button" href="<?php echo esc_url( WC_Admin_Addons::add_in_app_purchase_url_params( $addon->link ) ); ?>">
-									<?php esc_html_e( 'View details', 'woocommerce' ); ?>
-								</a>
-							</div>
-						</li>
+									<p><?php echo wp_kses_post( $addon->excerpt ); ?></p>
+								</div>
+								<div class="product-footer-promoted">
+									<span class="icon"><img src="<?php echo esc_url( $addon->image ); ?>" /></span>
+									<a class="addons-button addons-button-promoted" style="background: <?php echo esc_html( $addon->primary_color ); ?>; color: <?php echo esc_html( $addon->text_color ); ?>;" href="<?php echo esc_url( WC_Admin_Addons::add_in_app_purchase_url_params( $addon->link ) ); ?>">
+										<?php echo esc_html( $addon->button ); ?>
+									</a>
+								</div>
+							</li>
+							<?php
+						} else {
+						?>
+							<li class="product">
+								<div class="product-details<?php echo esc_attr( $classes ); ?>">
+									<?php if ( ! empty( $addon->image ) ) : ?>
+										<span class="product-img-wrap"><img src="<?php echo esc_url( $addon->image ); ?>" /></span>
+									<?php endif; ?>
+									<?php if ( 'featured' === $addon->label ) { ?>
+										<span class="label"><?php esc_attr_e( 'Featured', 'woocommerce' ); ?></span>
+									<?php } ?>
+									<a href="<?php echo esc_url( WC_Admin_Addons::add_in_app_purchase_url_params( $addon->link ) ); ?>">
+										<h2><?php echo esc_html( $addon->title ); ?></h2>
+									</a>
+									<p><?php echo wp_kses_post( $addon->excerpt ); ?></p>
+								</div>
+								<div class="product-footer">
+									<?php if ( '&#36;0.00' === $addon->price ) : ?>
+										<span class="price"><?php esc_html_e( 'Free', 'woocommerce' ); ?></span>
+									<?php else : ?>
+										<span class="price"><?php echo wp_kses_post( $addon->price ); ?></span>
+										<span class="price_suffix"><?php esc_html_e( 'per year', 'woocommerce' ); ?></span>
+									<?php endif; ?>
+									<a class="button" href="<?php echo esc_url( WC_Admin_Addons::add_in_app_purchase_url_params( $addon->link ) ); ?>">
+										<?php esc_html_e( 'View details', 'woocommerce' ); ?>
+									</a>
+								</div>
+							</li>
+						<?php } ?>
 					<?php endforeach; ?>
 				</ul>
 			<?php endif; ?>
