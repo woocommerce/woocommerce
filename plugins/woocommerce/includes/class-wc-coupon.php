@@ -136,7 +136,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	/**
 	 * Checks the coupon type.
 	 *
-	 * @param  string $type Array or string of types.
+	 * @param  string|array $type Array or string of types.
 	 * @return bool
 	 */
 	public function is_type( $type ) {
