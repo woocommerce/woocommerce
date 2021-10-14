@@ -591,6 +591,18 @@
 						color: #50575e; /* Gray 60 */
 					}
 				}
+
+				.product-developed-by {
+					color: #50575e; // Gray 60
+					font-size: 12px;
+					font-family: sans-serif;
+					line-height: 20px;
+					margin-top: 4px;
+
+					.product-vendor-link {
+						color: #50575e; // Gray 60
+					}
+				}
 			}
 
 			.product-footer {
@@ -607,7 +619,7 @@
 				}
 
 				.price-suffix {
-					color: #646970; /* Gray 50 */
+					color: #646970; // Gray 50
 				}
 
 				.product-reviews-block {
@@ -636,8 +648,9 @@
 					}
 
 					.product-reviews-count {
-						color: #646970; /* Gray 50 */
+						color: #646970; // Gray 50
 						font-size: 12px;
+						font-family: sans-serif;
 						line-height: 24px;
 						letter-spacing: -0.154px;
 						margin-left: 4px;
