@@ -348,8 +348,8 @@ class DefaultFreeExtensions {
 				'plugins' => [
 					[
 						'key'         => 'google-listings-and-ads',
-						'name'        => __( 'Google Ads & Marketing by Kliken', 'woocommerce-admin' ),
-						'description' => __( 'Get in front of shoppers and drive traffic so you can grow your business with Smart Shopping Campaigns and free listings.', 'woocommerce-admin' ),
+						'name'        => __( 'Google Listings & Ads', 'woocommerce-admin' ),
+						'description' => __( 'Reach more shoppers and drive sales for your store. Integrate with Google to list your products for free and launch paid ad campaigns.', 'woocommerce-admin' ),
 						'image_url'   => plugins_url( 'images/onboarding/google-listings-and-ads.png', WC_ADMIN_PLUGIN_FILE ),
 						'manage_url'  => 'admin.php?page=wc-admin&path=%2Fgoogle%2Fstart',
 					],
