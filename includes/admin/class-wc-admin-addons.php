@@ -183,7 +183,6 @@ class WC_Admin_Addons {
 	 * Handles the outputting of a contextually aware Storefront link (points to child themes if Storefront is already active).
 	 *
 	 * @deprecated 5.9.0 No longer used in In-App Marketplace
-	 *
 	 */
 	public static function output_storefront_button() {
 		$template   = get_option( 'template' );
@@ -1199,7 +1198,19 @@ class WC_Admin_Addons {
 							<?php if ( $mapped->is_free ) : ?>
 								<span class="price"><?php esc_html_e( 'Free', 'woocommerce' ); ?></span>
 							<?php else : ?>
-								<span class="price"><?php echo esc_html( $mapped->price ); ?></span>
+								<span class="price">
+									<?php
+									echo wp_kses(
+										$mapped->price,
+										array(
+											'span' => array(
+												'class' => array(),
+											),
+											'bdi'  => array(),
+										)
+									);
+									?>
+								</span>
 								<span class="price-suffix"><?php esc_html_e( 'per year', 'woocommerce' ); ?></span>
 							<?php endif; ?>
 						</div>
