@@ -39,7 +39,7 @@ const runTelemetryAPITest = () => {
 			const response = await client
 				.post( `/wc-telemetry/tracker`, data )
 				.catch( err => {
-					expect( err.statusCode ).toBe( 400 );
+					expect( err.response.status ).toBe( 400 );
 				} );
 
 			expect( response ).toBeUndefined();
@@ -52,7 +52,7 @@ const runTelemetryAPITest = () => {
 					version: '1.0',
 				})
 
-			expect( response.statusCode ).toBe( 200 );
+			expect( response.status ).toBe( 200 );
 		} );
 	} );
 };
