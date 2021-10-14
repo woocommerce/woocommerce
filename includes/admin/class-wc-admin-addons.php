@@ -1233,7 +1233,9 @@ class WC_Admin_Addons {
 			<li class="product">
 				<div class="<?php echo esc_attr( $product_details_classes ); ?>" style="border-top: 5px  solid <?php echo esc_html( $mapped->primary_color ); ?>;">
 					<span class="label promoted"><?php esc_attr_e( 'Promoted', 'woocommerce' ); ?></span>
-					<h2><?php echo esc_html( $mapped->title ); ?></h2>
+					<a href="<?php echo esc_url( $product_url ); ?>">
+						<h2><?php echo esc_html( $mapped->title ); ?></h2>
+					</a>
 					<p><?php echo wp_kses_post( $mapped->description ); ?></p>
 				</div>
 				<div class="product-footer-promoted">
