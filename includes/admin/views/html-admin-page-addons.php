@@ -5,13 +5,50 @@
  * @package WooCommerce\Admin
  * @var string $view
  * @var object $addons
+ * @var object $promotions
  */
+
+use Automattic\WooCommerce\Admin\RemoteInboxNotifications as PromotionRuleEngine;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 $current_section_name = __( 'Browse Categories', 'woocommerce' );
+
+/**
+ * Determine which class should be used for a rating star:
+ * - golden
+ * - half-filled (50/50 golden and gray)
+ * - gray
+ *
+ * Consider ratings from 3.0 to 4.0 as an example
+ * 3.0 will produce 3 stars
+ * 3.1 to 3.5 will produce 3 stars and a half star
+ * 3.6 to 4.0 will product 4 stars
+ *
+ * @param float $rating Rating of a product.
+ * @param int   $index  Index of a star in a row.
+ *
+ * @return string CSS class to use.
+ */
+function wccom_get_star_class( $rating, $index ) {
+	if ( $rating >= $index ) {
+		// Rating more that current star to show.
+		return 'fill';
+	} elseif (
+		abs( $index - 1 - floor( $rating ) ) < 0.0000001 &&
+		0 < ( $rating - floor( $rating ) )
+	) {
+		// For rating more than x.0 and less than x.5 or equal it will show a half star.
+		return 50 >= floor( ( $rating - floor( $rating ) ) * 100 )
+			? 'half-fill'
+			: 'fill';
+	}
+
+	// Don't show a golden star otherwise.
+	return 'no-fill';
+}
 
 ?>
 <div class="woocommerce wc-addons-wrap">
@@ -62,7 +99,12 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 
 	<div class="wrap">
 		<div class="marketplace-content-wrapper">
-			<?php if ( ! empty( $search ) ) : ?>
+			<?php if ( ! empty( $search ) && 0 === count( $addons ) ) : ?>
+				<h1 class="search-form-title">
+					<?php esc_html_e( 'Sorry, could not find anything. Try searching again using a different term.', 'woocommerce' ); ?></p>
+				</h1>
+			<?php endif; ?>
+			<?php if ( ! empty( $search ) && count( $addons ) > 0 ) : ?>
 				<h1 class="search-form-title">
 					<?php // translators: search keyword. ?>
 					<?php printf( esc_html__( 'Search results for "%s"', 'woocommerce' ), esc_html( sanitize_text_field( wp_unslash( $search ) ) ) ); ?>
@@ -71,22 +113,17 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 
 			<?php if ( '_featured' === $current_section ) : ?>
 				<div class="addons-featured">
-					<?php
-					$featured = WC_Admin_Addons::get_featured();
-					?>
+					<?php WC_Admin_Addons::render_featured(); ?>
 				</div>
 			<?php endif; ?>
 			<?php if ( '_featured' !== $current_section && $addons ) : ?>
-				<?php if ( 'shipping_methods' === $current_section ) : ?>
-					<div class="addons-shipping-methods">
-						<?php WC_Admin_Addons::output_wcs_banner_block(); ?>
-					</div>
-				<?php endif; ?>
-				<?php if ( 'payment-gateways' === $current_section ) : ?>
-					<div class="addons-shipping-methods">
-						<?php WC_Admin_Addons::output_wcpay_banner_block(); ?>
-					</div>
-				<?php endif; ?>
+				<?php
+				if ( ! empty( $promotions ) && WC()->is_wc_admin_active() ) {
+					foreach ( $promotions as $promotion ) {
+						WC_Admin_Addons::output_search_promotion_block( $promotion );
+					}
+				}
+				?>
 				<ul class="products">
 					<?php foreach ( $addons as $addon ) : ?>
 						<?php
@@ -110,62 +147,8 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 								continue;
 							}
 						}
-
-						if ( 'promoted' === $addon->label ) {
-							$classes = ' promoted';
-						} elseif ( 'featured' === $addon->label ) {
-							$classes = ' featured';
-						} else {
-							$classes = '';
-						}
-
-						if ( 'promoted' === $addon->label
-						&& ! empty( $addon->primary_color )
-						&& ! empty( $addon->text_color )
-						&& ! empty( $addon->button ) ) {
-							?>
-							<li class="product">
-								<div class="product-details<?php echo esc_attr( $classes ); ?>" style="border-top: 5px  solid <?php echo esc_html( $addon->primary_color ); ?>;">
-									<span class="label<?php echo esc_attr( $classes ); ?>"><?php esc_attr_e( 'Promoted', 'woocommerce' ); ?></span>
-									<h2><?php echo esc_html( $addon->title ); ?></h2>
-									<p><?php echo wp_kses_post( $addon->excerpt ); ?></p>
-								</div>
-								<div class="product-footer-promoted">
-									<span class="icon"><img src="<?php echo esc_url( $addon->image ); ?>" /></span>
-									<a class="addons-button addons-button-promoted" style="background: <?php echo esc_html( $addon->primary_color ); ?>; color: <?php echo esc_html( $addon->text_color ); ?>;" href="<?php echo esc_url( WC_Admin_Addons::add_in_app_purchase_url_params( $addon->link ) ); ?>">
-										<?php echo esc_html( $addon->button ); ?>
-									</a>
-								</div>
-							</li>
-							<?php
-						} else {
-							?>
-							<li class="product">
-								<div class="product-details<?php echo esc_attr( $classes ); ?>">
-									<?php if ( ! empty( $addon->image ) ) : ?>
-										<span class="product-img-wrap"><img src="<?php echo esc_url( $addon->image ); ?>" /></span>
-									<?php endif; ?>
-									<?php if ( 'featured' === $addon->label ) { ?>
-										<span class="label"><?php esc_attr_e( 'Featured', 'woocommerce' ); ?></span>
-									<?php } ?>
-									<a href="<?php echo esc_url( WC_Admin_Addons::add_in_app_purchase_url_params( $addon->link ) ); ?>">
-										<h2><?php echo esc_html( $addon->title ); ?></h2>
-									</a>
-									<p><?php echo wp_kses_post( $addon->excerpt ); ?></p>
-								</div>
-								<div class="product-footer">
-									<?php if ( '&#36;0.00' === $addon->price ) : ?>
-										<span class="price"><?php esc_html_e( 'Free', 'woocommerce' ); ?></span>
-									<?php else : ?>
-										<span class="price"><?php echo wp_kses_post( $addon->price ); ?></span>
-										<span class="price_suffix"><?php esc_html_e( 'per year', 'woocommerce' ); ?></span>
-									<?php endif; ?>
-									<a class="button" href="<?php echo esc_url( WC_Admin_Addons::add_in_app_purchase_url_params( $addon->link ) ); ?>">
-										<?php esc_html_e( 'View details', 'woocommerce' ); ?>
-									</a>
-								</div>
-							</li>
-						<?php } ?>
+						?>
+						<?php WC_Admin_Addons::render_product_card( $addon ); ?>
 					<?php endforeach; ?>
 				</ul>
 			<?php endif; ?>
@@ -176,13 +159,16 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 		<?php endif; ?>
 
 		<?php if ( 'Storefront' !== $theme['Name'] && '_featured' !== $current_section ) : ?>
+			<?php
+				$storefront_url = WC_Admin_Addons::add_in_app_purchase_url_params( 'https://woocommerce.com/storefront/?utm_source=extensionsscreen&utm_medium=product&utm_campaign=wcaddon' );
+			?>
 			<div class="storefront">
-				<a href="<?php echo esc_url( 'https://woocommerce.com/storefront/' ); ?>" target="_blank"><img src="<?php echo esc_url( WC()->plugin_url() ); ?>/assets/images/storefront.png" alt="<?php esc_attr_e( 'Storefront', 'woocommerce' ); ?>" /></a>
+				<a href="<?php echo esc_url( $storefront_url ); ?>" target="_blank"><img src="<?php echo esc_url( WC()->plugin_url() ); ?>/assets/images/storefront.png" alt="<?php esc_attr_e( 'Storefront', 'woocommerce' ); ?>" /></a>
 				<h2><?php esc_html_e( 'Looking for a WooCommerce theme?', 'woocommerce' ); ?></h2>
 				<p><?php echo wp_kses_post( __( 'We recommend Storefront, the <em>official</em> WooCommerce theme.', 'woocommerce' ) ); ?></p>
 				<p><?php echo wp_kses_post( __( 'Storefront is an intuitive, flexible and <strong>free</strong> WordPress theme offering deep integration with WooCommerce and many of the most popular customer-facing extensions.', 'woocommerce' ) ); ?></p>
 				<p>
-					<a href="https://woocommerce.com/storefront/" target="_blank" class="button"><?php esc_html_e( 'Read all about it', 'woocommerce' ); ?></a>
+					<a href="<?php echo esc_url( $storefront_url ); ?>" target="_blank" class="button"><?php esc_html_e( 'Read all about it', 'woocommerce' ); ?></a>
 					<a href="<?php echo esc_url( wp_nonce_url( self_admin_url( 'update.php?action=install-theme&theme=storefront' ), 'install-theme_storefront' ) ); ?>" class="button button-primary"><?php esc_html_e( 'Download &amp; install', 'woocommerce' ); ?></a>
 				</p>
 			</div>

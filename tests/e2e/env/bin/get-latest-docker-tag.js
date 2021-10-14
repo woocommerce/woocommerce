@@ -2,6 +2,7 @@
 
 const https = require( 'https' );
 const semver = require( 'semver' );
+const getLatestMinusVersion = require( './get-previous-version' );
 
 /**
  * Fetches the latest tag from a page using the Docker HTTP api.
@@ -105,6 +106,10 @@ function findLatestVersion( image, nameSearch ) {
 
 		if ( ! result.isLastPage ) {
 			return fetchLatestTagFromPage( image, nameSearch, ++page ).then( paginationFn );
+		}
+
+		if ( image === 'wordpress' && process.env.LATEST_WP_VERSION_MINUS ) {
+			return getLatestMinusVersion( latestVersion.toString(), process.env.LATEST_WP_VERSION_MINUS );
 		}
 
 		return latestVersion.toString();
