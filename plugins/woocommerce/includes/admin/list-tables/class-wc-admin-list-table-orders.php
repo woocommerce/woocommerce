@@ -507,7 +507,10 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 							$html .= '<div class="wc-order-item-sku">' . esc_html( $product_object->get_sku() ) . '</div>';
 						}
 
-						$meta_data = $item->get_formatted_meta_data( '' );
+
+						$include_all = false;
+						$include_all = apply_filters( 'woocommerce_get_formatted_meta_data_include_all_meta_lines', $include_all, $item );
+						$meta_data   = $item->get_formatted_meta_data( '', $include_all );
 
 						if ( $meta_data ) {
 							$html .= '<table cellspacing="0" class="wc-order-item-meta">';

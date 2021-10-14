@@ -3336,7 +3336,9 @@ if ( ! function_exists( 'wc_display_item_meta' ) ) {
 			)
 		);
 
-		foreach ( $item->get_formatted_meta_data() as $meta_id => $meta ) {
+		$include_all = false;
+		$include_all = apply_filters( 'woocommerce_get_formatted_meta_data_include_all_meta_lines', $include_all, $item );
+		foreach ( $item->get_formatted_meta_data( '_', $include_all ) as $meta_id => $meta ) {
 			$value     = $args['autop'] ? wp_kses_post( $meta->display_value ) : wp_kses_post( make_clickable( trim( $meta->display_value ) ) );
 			$strings[] = $args['label_before'] . wp_kses_post( $meta->display_key ) . $args['label_after'] . $value;
 		}
