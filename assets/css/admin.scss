@@ -593,7 +593,7 @@
 						flex-direction: row;
 						height: 20px;
 						justify-content: flex-end;
-						max-width: 58px;
+						max-width: 52px;
 						padding: 3px 12px;
 						top: 28px;
 						right: 24px;
@@ -601,6 +601,7 @@
 
 						&.promoted {
 							float: right;
+							max-width: 58px;
 						}
 					}
 
@@ -699,6 +700,14 @@
 			}
 		}
 
+		.product-footer-promoted {
+			padding: 24px;
+
+			.icon img {
+				width: 82px;
+			}
+		}
+
 		.addons-buttons-banner {
 			display: flex;
 			flex-direction: row;
@@ -733,14 +742,6 @@
 				&.addons-buttons-banner-button-primary {
 					background-color: #624594;
 					color: #fff;
-				}
-			}
-
-			.product-footer-promoted {
-				padding: 24px;
-
-				.icon img {
-					width: 82px;
 				}
 			}
 		}
