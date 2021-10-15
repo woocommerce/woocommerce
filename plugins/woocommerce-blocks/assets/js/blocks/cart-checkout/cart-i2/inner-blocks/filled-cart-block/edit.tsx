@@ -4,6 +4,7 @@
 import { useBlockProps, InnerBlocks } from '@wordpress/block-editor';
 import { innerBlockAreas } from '@woocommerce/blocks-checkout';
 import { SidebarLayout } from '@woocommerce/base-components/sidebar-layout';
+import type { TemplateArray } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -18,10 +19,15 @@ export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 	const blockProps = useBlockProps();
 	const { currentView } = useCartBlockContext();
 	const allowedBlocks = getAllowedBlocks( innerBlockAreas.FILLED_CART );
+	const defaultTemplate = [
+		[ 'woocommerce/cart-items-block', {}, [] ],
+		[ 'woocommerce/cart-totals-block', {}, [] ],
+	] as TemplateArray;
 
 	useForcedLayout( {
 		clientId,
-		template: allowedBlocks,
+		registeredBlocks: allowedBlocks,
+		defaultTemplate,
 	} );
 	return (
 		<div
@@ -32,6 +38,7 @@ export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 				<SidebarLayout className={ 'wc-block-cart' }>
 					<InnerBlocks
 						allowedBlocks={ allowedBlocks }
+						template={ defaultTemplate }
 						templateLock={ false }
 					/>
 				</SidebarLayout>

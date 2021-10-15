@@ -166,27 +166,8 @@ export const Edit = ( {
 	const cartClassName = classnames( {
 		'has-dark-controls': attributes.hasDarkControls,
 	} );
-	const defaultInnerBlocksTemplate = [
-		[
-			'woocommerce/filled-cart-block',
-			{},
-			[
-				[
-					'woocommerce/cart-items-block',
-					{},
-					[ [ 'woocommerce/cart-line-items-block', {}, [] ] ],
-				],
-				[
-					'woocommerce/cart-totals-block',
-					{},
-					[
-						[ 'woocommerce/cart-order-summary-block', {}, [] ],
-						[ 'woocommerce/cart-express-payment-block', {}, [] ],
-						[ 'woocommerce/proceed-to-checkout-block', {}, [] ],
-					],
-				],
-			],
-		],
+	const defaultTemplate = [
+		[ 'woocommerce/filled-cart-block', {}, [] ],
 		[ 'woocommerce/empty-cart-block', {}, [] ],
 	];
 	const blockProps = useBlockPropsWithLocking( {
@@ -229,7 +210,7 @@ export const Edit = ( {
 							<div className={ cartClassName }>
 								<InnerBlocks
 									allowedBlocks={ ALLOWED_BLOCKS }
-									template={ defaultInnerBlocksTemplate }
+									template={ defaultTemplate }
 									templateLock="insert"
 								/>
 							</div>
