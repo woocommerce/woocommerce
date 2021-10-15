@@ -165,6 +165,10 @@ class WC_Install {
 			'wc_update_560_create_refund_returns_page',
 			'wc_update_560_db_version',
 		),
+		'6.0.0' => array(
+			'wc_update_600_migrate_rate_limit_options',
+			'wc_update_600_db_version',
+		),
 	);
 
 	/**
