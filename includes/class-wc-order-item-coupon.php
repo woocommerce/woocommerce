@@ -141,11 +141,13 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
 	 * @return mixed
 	 */
 	public function offsetGet( $offset ) {
-		wc_deprecated_function( 'WC_Order_Item_Coupon::offsetGet', '4.4.0', '' );
 		if ( 'discount_amount' === $offset ) {
 			$offset = 'discount';
 		} elseif ( 'discount_amount_tax' === $offset ) {
 			$offset = 'discount_tax';
+		}
+		if ( 'discount' === $offset || 'discount_tax' === $offset ) {
+			wc_deprecated_function( 'WC_Order_Item_Coupon::offsetGet', '4.4.0', '' );
 		}
 		return parent::offsetGet( $offset );
 	}
@@ -158,11 +160,13 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
 	 * @param mixed  $value  Value.
 	 */
 	public function offsetSet( $offset, $value ) {
-		wc_deprecated_function( 'WC_Order_Item_Coupon::offsetSet', '4.4.0', '' );
 		if ( 'discount_amount' === $offset ) {
 			$offset = 'discount';
 		} elseif ( 'discount_amount_tax' === $offset ) {
 			$offset = 'discount_tax';
+		}
+		if ( 'discount' === $offset || 'discount_tax' === $offset ) {
+			wc_deprecated_function( 'WC_Order_Item_Coupon::offsetSet', '4.4.0', '' );
 		}
 		parent::offsetSet( $offset, $value );
 	}
