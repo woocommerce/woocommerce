@@ -3,6 +3,7 @@
  */
 import { useBlockProps, InnerBlocks } from '@wordpress/block-editor';
 import { innerBlockAreas } from '@woocommerce/blocks-checkout';
+import type { TemplateArray } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -15,10 +16,12 @@ export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 	const blockProps = useBlockProps();
 	const { currentView } = useCartBlockContext();
 	const allowedBlocks = getAllowedBlocks( innerBlockAreas.EMPTY_CART );
+	const defaultTemplate = [] as TemplateArray;
 
 	useForcedLayout( {
 		clientId,
-		template: allowedBlocks,
+		registeredBlocks: allowedBlocks,
+		defaultTemplate,
 	} );
 
 	return (
@@ -29,6 +32,7 @@ export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 			This is the empty cart block.
 			<InnerBlocks
 				allowedBlocks={ allowedBlocks }
+				template={ defaultTemplate }
 				templateLock={ false }
 			/>
 		</div>

@@ -4,27 +4,62 @@
 import { useBlockProps, InnerBlocks } from '@wordpress/block-editor';
 import { Main } from '@woocommerce/base-components/sidebar-layout';
 import { innerBlockAreas } from '@woocommerce/blocks-checkout';
+import type { TemplateArray } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
-import { useCheckoutBlockControlsContext } from '../../context';
+import {
+	useCheckoutBlockControlsContext,
+	useCheckoutBlockContext,
+} from '../../context';
 import { useForcedLayout } from '../../use-forced-layout';
 import { getAllowedBlocks } from '../../editor-utils';
 import './style.scss';
 
 export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 	const blockProps = useBlockProps();
+	const {
+		showOrderNotes,
+		showPolicyLinks,
+		showReturnToCart,
+		cartPageId,
+	} = useCheckoutBlockContext();
 	const allowedBlocks = getAllowedBlocks( innerBlockAreas.CHECKOUT_FIELDS );
 
 	const {
 		addressFieldControls: Controls,
 	} = useCheckoutBlockControlsContext();
 
+	const defaultTemplate = ( [
+		[ 'woocommerce/checkout-express-payment-block', {}, [] ],
+		[ 'woocommerce/checkout-contact-information-block', {}, [] ],
+		[ 'woocommerce/checkout-shipping-address-block', {}, [] ],
+		[ 'woocommerce/checkout-billing-address-block', {}, [] ],
+		[ 'woocommerce/checkout-shipping-methods-block', {}, [] ],
+		[ 'woocommerce/checkout-payment-block', {}, [] ],
+		showOrderNotes
+			? [ 'woocommerce/checkout-order-note-block', {}, [] ]
+			: false,
+		showPolicyLinks
+			? [ 'woocommerce/checkout-terms-block', {}, [] ]
+			: false,
+		[
+			'woocommerce/checkout-actions-block',
+			{
+				showReturnToCart,
+				cartPageId,
+			},
+			[],
+		],
+	].filter( Boolean ) as unknown ) as TemplateArray;
+
 	useForcedLayout( {
 		clientId,
-		template: allowedBlocks,
+		registeredBlocks: allowedBlocks,
+		defaultTemplate,
 	} );
+
 	return (
 		<Main className="wc-block-checkout__main">
 			<div { ...blockProps }>
@@ -33,6 +68,7 @@ export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 					<InnerBlocks
 						allowedBlocks={ allowedBlocks }
 						templateLock={ false }
+						template={ defaultTemplate }
 						renderAppender={ InnerBlocks.ButtonBlockAppender }
 					/>
 				</form>

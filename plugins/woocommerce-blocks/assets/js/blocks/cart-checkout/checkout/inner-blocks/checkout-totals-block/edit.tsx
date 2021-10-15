@@ -4,6 +4,7 @@
 import { useBlockProps, InnerBlocks } from '@wordpress/block-editor';
 import { Sidebar } from '@woocommerce/base-components/sidebar-layout';
 import { innerBlockAreas } from '@woocommerce/blocks-checkout';
+import type { TemplateArray } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -11,14 +12,27 @@ import { innerBlockAreas } from '@woocommerce/blocks-checkout';
 import './style.scss';
 import { useForcedLayout } from '../../use-forced-layout';
 import { getAllowedBlocks } from '../../editor-utils';
+import { useCheckoutBlockContext } from '../../context';
 
 export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 	const blockProps = useBlockProps();
+	const { showRateAfterTaxName } = useCheckoutBlockContext();
 	const allowedBlocks = getAllowedBlocks( innerBlockAreas.CHECKOUT_TOTALS );
+
+	const defaultTemplate = [
+		[
+			'woocommerce/checkout-order-summary-block',
+			{
+				showRateAfterTaxName,
+			},
+			[],
+		],
+	] as TemplateArray;
 
 	useForcedLayout( {
 		clientId,
-		template: allowedBlocks,
+		registeredBlocks: allowedBlocks,
+		defaultTemplate,
 	} );
 
 	return (
@@ -27,6 +41,7 @@ export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 				<InnerBlocks
 					allowedBlocks={ allowedBlocks }
 					templateLock={ false }
+					template={ defaultTemplate }
 				/>
 			</div>
 		</Sidebar>

@@ -21,7 +21,7 @@ export const AdditionalFields = ( {
 
 	useForcedLayout( {
 		clientId,
-		template: allowedBlocks,
+		registeredBlocks: allowedBlocks,
 	} );
 
 	return (

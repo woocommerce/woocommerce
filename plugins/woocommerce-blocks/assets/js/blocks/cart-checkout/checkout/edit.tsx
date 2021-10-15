@@ -29,6 +29,7 @@ import { CHECKOUT_PAGE_ID } from '@woocommerce/block-settings';
 import { createInterpolateElement } from '@wordpress/element';
 import { getAdminLink } from '@woocommerce/settings';
 import { CartCheckoutCompatibilityNotice } from '@woocommerce/editor-components/compatibility-notices';
+import type { TemplateArray } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -130,47 +131,10 @@ export const Edit = ( {
 		cartPageId,
 	} = attributes;
 
-	const defaultInnerBlocksTemplate = [
-		[
-			'woocommerce/checkout-fields-block',
-			{},
-			[
-				[ 'woocommerce/checkout-express-payment-block', {}, [] ],
-				[ 'woocommerce/checkout-contact-information-block', {}, [] ],
-				[ 'woocommerce/checkout-shipping-address-block', {}, [] ],
-				[ 'woocommerce/checkout-billing-address-block', {}, [] ],
-				[ 'woocommerce/checkout-shipping-methods-block', {}, [] ],
-				[ 'woocommerce/checkout-payment-block', {}, [] ],
-				showOrderNotes
-					? [ 'woocommerce/checkout-order-note-block', {}, [] ]
-					: false,
-				showPolicyLinks
-					? [ 'woocommerce/checkout-terms-block', {}, [] ]
-					: false,
-				[
-					'woocommerce/checkout-actions-block',
-					{
-						showReturnToCart,
-						cartPageId,
-					},
-					[],
-				],
-			].filter( Boolean ),
-		],
-		[
-			'woocommerce/checkout-totals-block',
-			{},
-			[
-				[
-					'woocommerce/checkout-order-summary-block',
-					{
-						showRateAfterTaxName,
-					},
-					[],
-				],
-			],
-		],
-	];
+	const defaultTemplate = [
+		[ 'woocommerce/checkout-fields-block', {}, [] ],
+		[ 'woocommerce/checkout-totals-block', {}, [] ],
+	] as TemplateArray;
 
 	const toggleAttribute = ( key: keyof Attributes ): void => {
 		const newAttributes = {} as Partial< Attributes >;
@@ -291,11 +255,16 @@ export const Edit = ( {
 										showApartmentField,
 										showPhoneField,
 										requirePhoneField,
+										showOrderNotes,
+										showPolicyLinks,
+										showReturnToCart,
+										cartPageId,
+										showRateAfterTaxName,
 									} }
 								>
 									<InnerBlocks
 										allowedBlocks={ ALLOWED_BLOCKS }
-										template={ defaultInnerBlocksTemplate }
+										template={ defaultTemplate }
 										templateLock="insert"
 									/>
 								</CheckoutBlockContext.Provider>
