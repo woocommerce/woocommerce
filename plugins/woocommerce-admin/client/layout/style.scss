@@ -109,49 +109,6 @@
 	}
 }
 
-.woocommerce-onboarding {
-	/* Muriel style overrides */
-	.muriel-component {
-		margin-top: $gap;
-		margin-bottom: $gap;
-	}
-
-	.components-base-control.has-error {
-		margin-bottom: $gap * 2 !important;
-		border-color: $studio-red-50;
-
-		@include breakpoint( '<782px' ) {
-			margin-bottom: $gap-small + $gap * 2 !important;
-		}
-
-		.components-base-control__help {
-			top: 100%;
-			left: $gap-small;
-			position: absolute;
-			margin-top: $gap-smallest;
-			font-size: 12px;
-			font-style: normal;
-			color: $studio-red-50;
-		}
-	}
-
-	.components-form-toggle {
-		display: inline-block;
-
-		label {
-			font-size: 14px;
-		}
-
-		.components-base-control {
-			display: inline-block;
-		}
-
-		.components-base-control__field {
-			margin-bottom: 0;
-		}
-	}
-}
-
 .woocommerce-task-dashboard__container .components-button.is-button,
 .woocommerce-profile-wizard__body .components-button.is-button,
 .woocommerce-page .components-modal__frame .components-button.is-button {

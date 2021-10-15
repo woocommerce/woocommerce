@@ -17,13 +17,13 @@ import { TaskListItem } from './task-list-item';
 import { TaskListMenu } from './task-list-menu';
 import './task-list.scss';
 
-export const getEventPrefix = ( id: string ): string => {
+export const prefixEvent = ( id: string, eventName: string ): string => {
 	// This helps retain backwards compatibility with the old event naming.
 	if ( id === 'setup' ) {
-		return 'tasklist';
+		return `tasklist_${ eventName }`;
 	}
 
-	return `${ id }_tasklist`;
+	return `${ id }_tasklist_${ eventName }`;
 };
 
 export type TaskListProps = TaskListType & {
@@ -47,7 +47,6 @@ export const TaskList: React.FC< TaskListProps > = ( {
 			profileItems: getProfileItems(),
 		};
 	} );
-	const eventPrefix = getEventPrefix( id );
 	const prevQueryRef = useRef( query );
 	const nowTimestamp = Date.now();
 	const visibleTasks = tasks.filter(
@@ -65,7 +64,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 	);
 
 	const recordTaskListView = () => {
-		recordEvent( `${ eventPrefix }_view`, {
+		recordEvent( prefixEvent( id, 'view' ), {
 			number_tasks: visibleTasks.length,
 			store_connected: profileItems.wccom_connected,
 		} );
@@ -108,8 +107,8 @@ export const TaskList: React.FC< TaskListProps > = ( {
 				expandLabel,
 				show: 2,
 				onCollapse: () =>
-					recordEvent( `${ eventPrefix }_collapse`, {} ),
-				onExpand: () => recordEvent( `${ eventPrefix }_expand`, {} ),
+					recordEvent( prefixEvent( id, 'collapse' ), {} ),
+				onExpand: () => recordEvent( prefixEvent( id, 'expand' ), {} ),
 		  }
 		: {};
 

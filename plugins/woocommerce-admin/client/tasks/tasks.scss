@@ -1,69 +1,74 @@
-.woocommerce-task-dashboard__body {
-	.woocommerce-card__description {
-		color: $studio-gray-50;
-	}
+.woocommerce-task-dashboard__container {
+	.woocommerce-task-card {
+		max-width: 680px;
+		margin-left: auto;
+		margin-right: auto;
+		margin-bottom: $gap-large;
 
-	.woocommerce-task-dashboard__container {
-		.woocommerce-task-payments {
-			width: 680px;
-			margin: auto;
-			max-width: 100%;
-		}
+		.components-card__header.is-size-large {
+			padding-bottom: 12px;
 
-		.woocommerce-task-card {
-			.wooocommerce-task-card__header {
-				display: flex;
-
-				.woocommerce-badge {
-					margin-left: 16px;
-				}
-			}
-
-			.woocommerce-list__item-text {
-				.woocommerce-pill {
-					padding: 1px $gap-smaller;
-					margin-left: $gap-smaller;
-				}
-			}
-
-			.components-popover__content {
-				min-width: unset;
+			.woocommerce-card__menu {
+				margin-top: 8px;
 			}
 		}
 	}
 
-	.woocommerce-task__additional-info,
-	.woocommerce-task__estimated-time,
-	.woocommerce-task-list__item-expandable-content {
-		color: $gray-700;
-		font-weight: 400;
-		font-size: 12px;
+	.woocommerce-task-payments {
+		width: 680px;
+		margin: auto;
+		max-width: 100%;
 	}
 
-	.woocommerce-task-list__item-expandable-content {
-		font-size: 13px;
-	}
-
-	#wpbody-content {
-		position: relative;
-	}
-
-	.components-modal__screen-overlay {
-		background: rgba(43, 45, 47, 0.4);
-	}
-
-	.components-modal__frame {
-		.components-modal__header {
-			border-bottom: 0;
-			margin-bottom: 0;
-		}
-
-		.woocommerce-task-payments__stripe-error-wrapper {
-			align-items: flex-end;
-			flex-grow: 1;
+	.woocommerce-task-card {
+		.wooocommerce-task-card__header {
 			display: flex;
-			flex-direction: column;
+
+			.woocommerce-badge {
+				margin-left: 16px;
+			}
 		}
+
+		.woocommerce-list__item-text {
+			.woocommerce-pill {
+				padding: 1px $gap-smaller;
+				margin-left: $gap-smaller;
+			}
+		}
+
+		.components-popover__content {
+			min-width: unset;
+		}
+	}
+}
+
+.woocommerce-task__additional-info,
+.woocommerce-task__estimated-time,
+.woocommerce-task-list__item-expandable-content {
+	color: $gray-700;
+	font-weight: 400;
+	font-size: 12px;
+}
+
+.woocommerce-task-list__item-expandable-content {
+	font-size: 13px;
+}
+
+.components-modal__screen-overlay {
+	background: rgba(43, 45, 47, 0.4);
+}
+
+.components-modal__frame {
+	.components-modal__header {
+		border-bottom: 0;
+		margin-bottom: 0;
+	}
+
+	.woocommerce-task-payments__stripe-error-wrapper {
+		align-items: flex-end;
+		flex-grow: 1;
+		display: flex;
+		flex-direction: column;
 	}
 }
 
@@ -190,6 +195,47 @@
 				height: 18px;
 				width: 60px;
 			}
+		}
+	}
+
+	/* Muriel style overrides */
+	.muriel-component {
+		margin-top: $gap;
+		margin-bottom: $gap;
+	}
+
+	.components-base-control.has-error {
+		margin-bottom: $gap * 2 !important;
+		border-color: $studio-red-50;
+
+		@include breakpoint( '<782px' ) {
+			margin-bottom: $gap-small + $gap * 2 !important;
+		}
+
+		.components-base-control__help {
+			top: 100%;
+			left: $gap-small;
+			position: absolute;
+			margin-top: $gap-smallest;
+			font-size: 12px;
+			font-style: normal;
+			color: $studio-red-50;
+		}
+	}
+
+	.components-form-toggle {
+		display: inline-block;
+
+		label {
+			font-size: 14px;
+		}
+
+		.components-base-control {
+			display: inline-block;
+		}
+
+		.components-base-control__field {
+			margin-bottom: 0;
 		}
 	}
 }

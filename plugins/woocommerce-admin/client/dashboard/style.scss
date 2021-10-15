@@ -90,22 +90,3 @@
 .components-card .woocommerce-ellipsis-menu__toggle {
 	padding: 0;
 }
-
-.woocommerce-task-dashboard__body {
-	.woocommerce-task-dashboard__container {
-		.woocommerce-task-card {
-			max-width: 680px;
-			margin-left: auto;
-			margin-right: auto;
-			margin-bottom: $gap-large;
-
-			.components-card__header.is-size-large {
-				padding-bottom: 12px;
-
-				.woocommerce-card__menu {
-					margin-top: 8px;
-				}
-			}
-		}
-	}
-}

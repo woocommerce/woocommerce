@@ -20,7 +20,7 @@ import { TasksPlaceholder } from './placeholder';
 import './tasks.scss';
 
 export type TasksProps = {
-	query: { task: string };
+	query: { task?: string };
 };
 
 export const Tasks: React.FC< TasksProps > = ( { query } ) => {
@@ -68,13 +68,8 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 			{}
 		);
 
-		hideTaskList();
+		hideTaskList( id );
 	};
-
-	useEffect( () => {
-		document.body.classList.add( 'woocommerce-onboarding' );
-		document.body.classList.add( 'woocommerce-task-dashboard__body' );
-	}, [] );
 
 	useEffect( () => {
 		// @todo Update this when all task lists have been hidden or completed.
@@ -111,6 +106,7 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 		const {
 			id,
 			isComplete,
+			isHidden,
 			isVisible,
 			isToggleable,
 			title,
