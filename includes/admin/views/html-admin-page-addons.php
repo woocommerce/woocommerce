@@ -5,14 +5,16 @@
  * @package WooCommerce\Admin
  * @var string $view
  * @var object $addons
+ * @var object $promotions
  */
+
+use Automattic\WooCommerce\Admin\RemoteInboxNotifications as PromotionRuleEngine;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 $current_section_name = __( 'Browse Categories', 'woocommerce' );
-
 ?>
 <div class="woocommerce wc-addons-wrap">
 	<h1 class="screen-reader-text"><?php esc_html_e( 'Marketplace', 'woocommerce' ); ?></h1>
@@ -62,7 +64,12 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 
 	<div class="wrap">
 		<div class="marketplace-content-wrapper">
-			<?php if ( ! empty( $search ) ) : ?>
+			<?php if ( ! empty( $search ) && 0 === count( $addons ) ) : ?>
+				<h1 class="search-form-title">
+					<?php esc_html_e( 'Sorry, could not find anything. Try searching again using a different term.', 'woocommerce' ); ?></p>
+				</h1>
+			<?php endif; ?>
+			<?php if ( ! empty( $search ) && count( $addons ) > 0 ) : ?>
 				<h1 class="search-form-title">
 					<?php // translators: search keyword. ?>
 					<?php printf( esc_html__( 'Search results for "%s"', 'woocommerce' ), esc_html( sanitize_text_field( wp_unslash( $search ) ) ) ); ?>
@@ -71,22 +78,17 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 
 			<?php if ( '_featured' === $current_section ) : ?>
 				<div class="addons-featured">
-					<?php
-					$featured = WC_Admin_Addons::get_featured();
-					?>
+					<?php WC_Admin_Addons::render_featured(); ?>
 				</div>
 			<?php endif; ?>
 			<?php if ( '_featured' !== $current_section && $addons ) : ?>
-				<?php if ( 'shipping_methods' === $current_section ) : ?>
-					<div class="addons-shipping-methods">
-						<?php WC_Admin_Addons::output_wcs_banner_block(); ?>
-					</div>
-				<?php endif; ?>
-				<?php if ( 'payment-gateways' === $current_section ) : ?>
-					<div class="addons-shipping-methods">
-						<?php WC_Admin_Addons::output_wcpay_banner_block(); ?>
-					</div>
-				<?php endif; ?>
+				<?php
+				if ( ! empty( $promotions ) && WC()->is_wc_admin_active() ) {
+					foreach ( $promotions as $promotion ) {
+						WC_Admin_Addons::output_search_promotion_block( $promotion );
+					}
+				}
+				?>
 				<ul class="products">
 					<?php foreach ( $addons as $addon ) : ?>
 						<?php
@@ -111,28 +113,7 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 							}
 						}
 						?>
-						<li class="product">
-							<div class="product-details">
-								<?php if ( ! empty( $addon->image ) ) : ?>
-									<span class="product-img-wrap"><img src="<?php echo esc_url( $addon->image ); ?>" /></span>
-								<?php endif; ?>
-								<a href="<?php echo esc_url( WC_Admin_Addons::add_in_app_purchase_url_params( $addon->link ) ); ?>">
-									<h2><?php echo esc_html( $addon->title ); ?></h2>
-								</a>
-								<p><?php echo wp_kses_post( $addon->excerpt ); ?></p>
-							</div>
-							<div class="product-footer">
-								<?php if ( '&#36;0.00' === $addon->price ) : ?>
-									<span class="price"><?php esc_html_e( 'Free', 'woocommerce' ); ?></span>
-								<?php else : ?>
-									<span class="price"><?php echo wp_kses_post( $addon->price ); ?></span>
-									<span class="price_suffix"><?php esc_html_e( 'per year', 'woocommerce' ); ?></span>
-								<?php endif; ?>
-								<a class="button" href="<?php echo esc_url( WC_Admin_Addons::add_in_app_purchase_url_params( $addon->link ) ); ?>">
-									<?php esc_html_e( 'View details', 'woocommerce' ); ?>
-								</a>
-							</div>
-						</li>
+						<?php WC_Admin_Addons::render_product_card( $addon ); ?>
 					<?php endforeach; ?>
 				</ul>
 			<?php endif; ?>
@@ -143,13 +124,16 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 		<?php endif; ?>
 
 		<?php if ( 'Storefront' !== $theme['Name'] && '_featured' !== $current_section ) : ?>
+			<?php
+				$storefront_url = WC_Admin_Addons::add_in_app_purchase_url_params( 'https://woocommerce.com/storefront/?utm_source=extensionsscreen&utm_medium=product&utm_campaign=wcaddon' );
+			?>
 			<div class="storefront">
-				<a href="<?php echo esc_url( 'https://woocommerce.com/storefront/' ); ?>" target="_blank"><img src="<?php echo esc_url( WC()->plugin_url() ); ?>/assets/images/storefront.png" alt="<?php esc_attr_e( 'Storefront', 'woocommerce' ); ?>" /></a>
+				<a href="<?php echo esc_url( $storefront_url ); ?>" target="_blank"><img src="<?php echo esc_url( WC()->plugin_url() ); ?>/assets/images/storefront.png" alt="<?php esc_attr_e( 'Storefront', 'woocommerce' ); ?>" /></a>
 				<h2><?php esc_html_e( 'Looking for a WooCommerce theme?', 'woocommerce' ); ?></h2>
 				<p><?php echo wp_kses_post( __( 'We recommend Storefront, the <em>official</em> WooCommerce theme.', 'woocommerce' ) ); ?></p>
 				<p><?php echo wp_kses_post( __( 'Storefront is an intuitive, flexible and <strong>free</strong> WordPress theme offering deep integration with WooCommerce and many of the most popular customer-facing extensions.', 'woocommerce' ) ); ?></p>
 				<p>
-					<a href="https://woocommerce.com/storefront/" target="_blank" class="button"><?php esc_html_e( 'Read all about it', 'woocommerce' ); ?></a>
+					<a href="<?php echo esc_url( $storefront_url ); ?>" target="_blank" class="button"><?php esc_html_e( 'Read all about it', 'woocommerce' ); ?></a>
 					<a href="<?php echo esc_url( wp_nonce_url( self_admin_url( 'update.php?action=install-theme&theme=storefront' ), 'install-theme_storefront' ) ); ?>" class="button button-primary"><?php esc_html_e( 'Download &amp; install', 'woocommerce' ); ?></a>
 				</p>
 			</div>
