@@ -2548,3 +2548,10 @@ function wc_cache_get_multiple( $keys, $group = '', $force = false ) {
 	}
 	return $values;
 }
+
+/**
+ * Cleans up rate limit data - cron callback.
+ *
+ * @since 6.0.0
+ */
+add_action( 'woocommerce_cleanup_rate_limits', array( 'WC_Rate_Limiter', 'cleanup' ) );

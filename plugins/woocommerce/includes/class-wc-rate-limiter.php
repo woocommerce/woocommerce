@@ -32,6 +32,11 @@ defined( 'ABSPATH' ) || exit;
 class WC_Rate_Limiter {
 
 	/**
+	 * Cache group.
+	 */
+	const CACHE_GROUP = 'wc_rate_limit';
+
+	/**
 	 * Constructs key name from action identifier.
 	 * Left in for backwards compatibility.
 	 *
@@ -59,7 +64,7 @@ class WC_Rate_Limiter {
 	 * @return bool|int
 	 */
 	protected static function get_cached( $action_id ) {
-		return wp_cache_get( self::get_cache_key( $action_id ), 'wc_rate_limit' );
+		return wp_cache_get( self::get_cache_key( $action_id ), self::CACHE_GROUP );
 	}
 
 	/**
@@ -70,7 +75,7 @@ class WC_Rate_Limiter {
 	 * @return bool
 	 */
 	protected static function set_cache( $action_id, $expiry ) {
-		return wp_cache_set( self::get_cache_key( $action_id ), $expiry, 'wc_rate_limit' );
+		return wp_cache_set( self::get_cache_key( $action_id ), $expiry, self::CACHE_GROUP );
 	}
 
 	/**
@@ -137,5 +142,23 @@ class WC_Rate_Limiter {
 		self::set_cache( $action_id, $next_try_allowed_at );
 
 		return false !== $result;
+	}
+
+	/**
+	 * Cleanup expired rate limits from the database and clear caches.
+	 */
+	public static function cleanup() {
+		global $wpdb;
+
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->prefix}woocommerce_rate_limits WHERE rate_limit_expiry < %d",
+				time()
+			)
+		);
+
+		if ( class_exists( 'WC_Cache_Helper' ) ) {
+			WC_Cache_Helper::invalidate_cache_group( self::CACHE_GROUP );
+		}
 	}
 }
