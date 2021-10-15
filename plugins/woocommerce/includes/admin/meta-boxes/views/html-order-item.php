@@ -59,10 +59,10 @@ $row_class    = apply_filters( 'woocommerce_admin_html_order_item_class', ! empt
 			<?php
 			echo '<small class="times">&times;</small> ' . esc_html( $item->get_quantity() );
 
-			$refunded_qty = $order->get_qty_refunded_for_item( $item_id );
+			$refunded_qty = -1 * $order->get_qty_refunded_for_item( $item_id );
 
 			if ( $refunded_qty ) {
-				echo '<small class="refunded">-' . esc_html( $refunded_qty * -1 ) . '</small>';
+				echo '<small class="refunded">' . esc_html( $refunded_qty * -1 ) . '</small>';
 			}
 			?>
 		</div>
@@ -108,10 +108,10 @@ $row_class    = apply_filters( 'woocommerce_admin_html_order_item_class', ! empt
 				echo '<span class="wc-order-item-discount">' . sprintf( esc_html__( '%s discount', 'woocommerce' ), wc_price( wc_format_decimal( $item->get_subtotal() - $item->get_total(), '' ), array( 'currency' => $order->get_currency() ) ) ) . '</span>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			}
 
-			$refunded = $order->get_total_refunded_for_item( $item_id );
+			$refunded = -1 * $order->get_total_refunded_for_item( $item_id );
 
 			if ( $refunded ) {
-				echo '<small class="refunded">-' . wc_price( $refunded, array( 'currency' => $order->get_currency() ) ) . '</small>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				echo '<small class="refunded">' . wc_price( $refunded, array( 'currency' => $order->get_currency() ) ) . '</small>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			}
 			?>
 		</div>
@@ -156,10 +156,10 @@ $row_class    = apply_filters( 'woocommerce_admin_html_order_item_class', ! empt
 						echo '&ndash;';
 					}
 
-					$refunded = $order->get_tax_refunded_for_item( $item_id, $tax_item_id );
+					$refunded = -1 * $order->get_tax_refunded_for_item( $item_id, $tax_item_id );
 
 					if ( $refunded ) {
-						echo '<small class="refunded">-' . wc_price( $refunded, array( 'currency' => $order->get_currency() ) ) . '</small>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						echo '<small class="refunded">' . wc_price( $refunded, array( 'currency' => $order->get_currency() ) ) . '</small>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 					}
 					?>
 				</div>
