@@ -43,6 +43,37 @@ class WC_Rate_Limiter {
 	}
 
 	/**
+	 * Gets a cache prefix.
+	 *
+	 * @param string $action_id Identifier of the action.
+	 * @return string
+	 */
+	protected static function get_cache_key( $action_id ) {
+		return WC_Cache_Helper::get_cache_prefix( 'rate_limit' . $action_id );
+	}
+
+	/**
+	 * Retrieve a cached rate limit.
+	 *
+	 * @param string $action_id Identifier of the action.
+	 * @return bool|int
+	 */
+	protected static function get_cached( $action_id ) {
+		return wp_cache_get( self::get_cache_key( $action_id ), 'wc_rate_limit' );
+	}
+
+	/**
+	 * Cache a rate limit.
+	 *
+	 * @param string $action_id Identifier of the action.
+	 * @param int    $expiry Timestamp when the limit expires.
+	 * @return bool
+	 */
+	protected static function set_cache( $action_id, $expiry ) {
+		return wp_cache_set( self::get_cache_key( $action_id ), $expiry, 'wc_rate_limit' );
+	}
+
+	/**
 	 * Returns true if the action is not allowed to be run by the rate limiter yet, false otherwise.
 	 *
 	 * @param string $action_id Identifier of the action.
@@ -51,16 +82,22 @@ class WC_Rate_Limiter {
 	public static function retried_too_soon( $action_id ) {
 		global $wpdb;
 
-		$next_try_allowed_at = $wpdb->get_var(
-			$wpdb->prepare(
-				"
-					SELECT rate_limit_expiry
-					FROM {$wpdb->prefix}woocommerce_rate_limits
-					WHERE rate_limit_key = %s
-				",
-				$action_id
-			)
-		);
+		$next_try_allowed_at = self::get_cached( $action_id );
+
+		if ( false === $next_try_allowed_at ) {
+			$next_try_allowed_at = $wpdb->get_var(
+				$wpdb->prepare(
+					"
+						SELECT rate_limit_expiry
+						FROM {$wpdb->prefix}woocommerce_rate_limits
+						WHERE rate_limit_key = %s
+					",
+					$action_id
+				)
+			);
+
+			self::set_cache( $action_id, $next_try_allowed_at );
+		}
 
 		// No record of action running, so action is allowed to run.
 		if ( null === $next_try_allowed_at ) {
@@ -96,6 +133,8 @@ class WC_Rate_Limiter {
 			),
 			array( '%s', '%d' )
 		);
+
+		self::set_cache( $action_id, $next_try_allowed_at );
 
 		return false !== $result;
 	}
