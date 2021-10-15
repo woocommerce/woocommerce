@@ -32,13 +32,14 @@ defined( 'ABSPATH' ) || exit;
 class WC_Rate_Limiter {
 
 	/**
-	 * Constructs Option name from action identifier.
+	 * Constructs key name from action identifier.
+	 * Left in for backwards compatibility.
 	 *
 	 * @param string $action_id Identifier of the action.
 	 * @return string
 	 */
 	public static function storage_id( $action_id ) {
-		return 'woocommerce_rate_limit_' . $action_id;
+		return $action_id;
 	}
 
 	/**
@@ -48,10 +49,21 @@ class WC_Rate_Limiter {
 	 * @return bool
 	 */
 	public static function retried_too_soon( $action_id ) {
-		$next_try_allowed_at = get_option( self::storage_id( $action_id ) );
+		global $wpdb;
+
+		$next_try_allowed_at = $wpdb->get_var(
+			$wpdb->prepare(
+				"
+					SELECT rate_limit_expiry
+					FROM {$wpdb->prefix}woocommerce_rate_limits
+					WHERE rate_limit_key = %s
+				",
+				$action_id
+			)
+		);
 
 		// No record of action running, so action is allowed to run.
-		if ( false === $next_try_allowed_at ) {
+		if ( null === $next_try_allowed_at ) {
 			return false;
 		}
 
@@ -72,8 +84,19 @@ class WC_Rate_Limiter {
 	 * @return bool True if the option setting was successful, false otherwise.
 	 */
 	public static function set_rate_limit( $action_id, $delay ) {
-		$option_name         = self::storage_id( $action_id );
+		global $wpdb;
+
 		$next_try_allowed_at = time() + $delay;
-		return update_option( $option_name, $next_try_allowed_at );
+
+		$result = $wpdb->replace(
+			$wpdb->prefix . 'woocommerce_rate_limits',
+			array(
+				'rate_limit_key'    => $action_id,
+				'rate_limit_expiry' => $next_try_allowed_at,
+			),
+			array( '%s', '%d' )
+		);
+
+		return false !== $result;
 	}
 }
