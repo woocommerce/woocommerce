@@ -365,41 +365,6 @@ class WC_Admin_Addons {
 	}
 
 	/**
-	 * Handles the outputting of a promoted card.
-	 *
-	 * @param object $block Block data.
-	 */
-	public static function output_promoted_card( $block ) {
-		?>
-		<ul class="products">
-			<?php
-			foreach ( $block->items as $card ) {
-				$full_width = $card->full_width ?? false;
-				if ( true === $full_width ) {
-					$classes = ' addons-full-width';
-				}
-				?>
-				<li class="product<?php echo esc_attr( $classes ); ?>">
-					<div class="product-details promoted" style="border-top: 5px  solid <?php echo esc_html( $card->primary_color ); ?>;">
-						<span class="label"><?php esc_attr_e( 'Promoted', 'woocommerce' ); ?></span>
-						<h2><?php echo esc_html( $card->title ); ?></h2>
-						<p><?php echo wp_kses_post( $card->description ); ?></p>
-					</div>
-					<div class="product-footer-promoted">
-						<span class="icon"><img src="<?php echo esc_url( $card->icon ); ?>" /></span>
-						<a class="addons-button addons-button-promoted" style="background: <?php echo esc_html( $card->primary_color ); ?>; color: <?php echo esc_html( $card->text_color ); ?>;" href="<?php echo esc_url( self::add_in_app_purchase_url_params( $card->href ) ); ?>">
-							<?php echo esc_html( $card->button ); ?>
-						</a>
-					</div>
-				</li>
-				<?php
-			}
-			?>
-		</ul>
-		<?php
-	}
-
-	/**
 	 * Handles the outputting of a small light block.
 	 *
 	 * @param object $block Block data.
@@ -744,9 +709,6 @@ class WC_Admin_Addons {
 					break;
 				case 'column_block':
 					self::output_column_block( $section );
-					break;
-				case 'promoted_card':
-					self::output_promoted_card( $section );
 					break;
 				case 'small_light_block':
 					self::output_small_light_block( $section );
@@ -1302,6 +1264,7 @@ class WC_Admin_Addons {
 			&& ! empty( $mapped->primary_color )
 			&& ! empty( $mapped->text_color )
 			&& ! empty( $mapped->button ) ) {
+			// Promoted product card
 			?>
 			<li class="product">
 				<div class="<?php echo esc_attr( $product_details_classes ); ?>" style="border-top: 5px  solid <?php echo esc_html( $mapped->primary_color ); ?>;">
@@ -1320,6 +1283,7 @@ class WC_Admin_Addons {
 			</li>
 			<?php
 		} else {
+			// Normal or "featured" product card
 			?>
 			<li class="<?php echo esc_attr( implode( ' ', $class_names ) ); ?>">
 				<div class="<?php echo esc_attr( $product_details_classes ); ?>">
