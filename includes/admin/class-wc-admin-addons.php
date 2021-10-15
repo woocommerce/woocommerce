@@ -1264,7 +1264,7 @@ class WC_Admin_Addons {
 			&& ! empty( $mapped->primary_color )
 			&& ! empty( $mapped->text_color )
 			&& ! empty( $mapped->button ) ) {
-			// Promoted product card
+			// Promoted product card.
 			?>
 			<li class="product">
 				<div class="<?php echo esc_attr( $product_details_classes ); ?>" style="border-top: 5px  solid <?php echo esc_html( $mapped->primary_color ); ?>;">
@@ -1283,7 +1283,7 @@ class WC_Admin_Addons {
 			</li>
 			<?php
 		} else {
-			// Normal or "featured" product card
+			// Normal or "featured" product card.
 			?>
 			<li class="<?php echo esc_attr( implode( ' ', $class_names ) ); ?>">
 				<div class="<?php echo esc_attr( $product_details_classes ); ?>">
