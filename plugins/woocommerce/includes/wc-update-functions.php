@@ -2314,13 +2314,14 @@ function wc_update_600_migrate_rate_limit_options() {
 		",
 		ARRAY_A
 	);
+	$prefix_length = strlen( 'woocommerce_rate_limit_' );
 
 	foreach ( $rate_limits as $rate_limit ) {
 		$new_delay = (int) $rate_limit['option_value'] - time();
 
 		// Migrate the limit if it hasn't expired yet.
 		if ( 0 < $new_delay ) {
-			$action_id = str_replace( 'woocommerce_rate_limit_', '', $rate_limit['option_name'] );
+			$action_id = substr( $rate_limit['option_name'], $prefix_length );
 			WC_Rate_Limiter::set_rate_limit( $action_id, $new_delay );
 		}
 
