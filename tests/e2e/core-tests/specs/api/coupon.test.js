@@ -1,4 +1,3 @@
-/* eslint-disable jest/no-export, jest/no-disabled-tests */
 /**
  * Internal dependencies
  */
@@ -53,7 +52,7 @@ const runCouponApiTest = () => {
 
 			// Read coupon directly from API to compare.
 			const response = await client.get( `/wc/v3/coupons/${coupon.id}` );
-			expect( response.statusCode ).toBe( 200 );
+			expect( response.status ).toBe( 200 );
 			expect( response.data ).toEqual( expect.objectContaining( couponProperties ) );
 		});
 
@@ -68,7 +67,7 @@ const runCouponApiTest = () => {
 
 			// Check the coupon response for the updated values.
 			const response = await client.get( `/wc/v3/coupons/${coupon.id}` );
-			expect( response.statusCode ).toBe( 200 );
+			expect( response.status ).toBe( 200 );
 			expect( response.data ).toEqual( expect.objectContaining( updatedCouponProperties ) );
 		});
 

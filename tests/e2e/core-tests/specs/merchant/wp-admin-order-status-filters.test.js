@@ -22,7 +22,14 @@ const orderStatus = [
 	['Refunded', 'wc-refunded'],
 	['Failed', 'wc-failed'],
 ];
-const defaultOrder = config.get('orders.basicPaidOrder');
+const defaultOrder = {
+	payment_method: 'cod',
+	billing: {
+		first_name: 'John',
+		last_name: 'Doe',
+		email: 'john.doe@example.com',
+	}
+};
 
 const runOrderStatusFiltersTest = () => {
 	describe('WooCommerce Orders > Filter Orders by Status', () => {
