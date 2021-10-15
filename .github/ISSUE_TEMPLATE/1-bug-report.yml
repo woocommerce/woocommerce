@@ -1,5 +1,5 @@
 name: 🐞 Bug Report
-description: Report a bug if something isn't working as expected in WooCommerce E2E Tests Boilerplate.
+description: Report a bug if something isn't working as expected in WooCommerce Core.
 body:
   - type: markdown
     attributes:
@@ -19,7 +19,7 @@ body:
 
         Make sure to look through the existing issues to see whether your bug has already been submitted.
         Feel free to contribute to any existing issues.
-        Search tip: You can filter our issues using [our labels](https://github.com/woocommerce/woocommerce-e2e-boilerplate/labels).
+        Search tip: You can filter our issues using [our labels](https://github.com/woocommerce/woocommerce/labels).
         Search tip: Make use of [GitHub's search syntax to refine your search](https://help.github.com/en/github/searching-for-information-on-github/searching-issues-and-pull-requests).
   - type: checkboxes
     id: prerequisites
