@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6bde2905c076cec3f12338f9464e83e1",
+    "content-hash": "fb2d2b34aa7845cd6d39a187b7c53753",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -533,16 +533,16 @@
         },
         {
             "name": "woocommerce/woocommerce-admin",
-            "version": "2.7.2",
+            "version": "2.8.0-rc.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-admin.git",
-                "reference": "9ce54862556815e74cfe2476fae0eb30fcfd65d6"
+                "reference": "f3974919906d4d2168531025340b4f139ae65f1d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/9ce54862556815e74cfe2476fae0eb30fcfd65d6",
-                "reference": "9ce54862556815e74cfe2476fae0eb30fcfd65d6",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/f3974919906d4d2168531025340b4f139ae65f1d",
+                "reference": "f3974919906d4d2168531025340b4f139ae65f1d",
                 "shasum": ""
             },
             "require": {
@@ -554,7 +554,8 @@
                 "automattic/jetpack-changelogger": "^1.1",
                 "bamarni/composer-bin-plugin": "^1.4",
                 "suin/phpcs-psr4-sniff": "^2.2",
-                "woocommerce/woocommerce-sniffs": "0.1.0"
+                "woocommerce/woocommerce-sniffs": "0.1.0",
+                "yoast/phpunit-polyfills": "^1.0"
             },
             "type": "wordpress-plugin",
             "extra": {
@@ -597,9 +598,9 @@
             "homepage": "https://github.com/woocommerce/woocommerce-admin",
             "support": {
                 "issues": "https://github.com/woocommerce/woocommerce-admin/issues",
-                "source": "https://github.com/woocommerce/woocommerce-admin/tree/v2.7.2"
+                "source": "https://github.com/woocommerce/woocommerce-admin/tree/v2.8.0-rc.2"
             },
-            "time": "2021-10-11T21:11:02+00:00"
+            "time": "2021-10-15T00:51:46+00:00"
         },
         {
             "name": "woocommerce/woocommerce-blocks",
