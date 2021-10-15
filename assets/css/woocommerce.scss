@@ -27,13 +27,13 @@ p.demo_store,
 	padding: 1em 0;
 	text-align: center;
 	background-color: var( --wc-primary );
-	color: var( --wc-primary )text;
+	color: var( --wc-primary-text );
 	z-index: 99998;
 	box-shadow: 0 1px 1em rgba(0, 0, 0, 0.2);
 	display: none;
 
 	a {
-		color: var( --wc-primary )text;
+		color: var( --wc-primary-text );
 		text-decoration: underline;
 	}
 }
@@ -741,12 +741,12 @@ p.demo_store,
 
 		&.alt {
 			background-color: var( --wc-primary );
-			color: var( --wc-primary )text;
+			color: var( --wc-primary-text );
 			-webkit-font-smoothing: antialiased;
 
 			&:hover {
 				background-color: darken(var( --wc-primary ), 5%);
-				color: var( --wc-primary )text;
+				color: var( --wc-primary-text );
 			}
 
 			&.disabled,
@@ -756,7 +756,7 @@ p.demo_store,
 			&:disabled:hover,
 			&:disabled[disabled]:hover {
 				background-color: var( --wc-primary );
-				color: var( --wc-primary )text;
+				color: var( --wc-primary-text );
 			}
 		}
 
