@@ -579,7 +579,7 @@ jQuery( function( $ ) {
 			var scrollElement           = $( '.woocommerce-NoticeGroup-updateOrderReview, .woocommerce-NoticeGroup-checkout' );
 
 			if ( ! scrollElement.length ) {
-				scrollElement = $( '.form.checkout' );
+				scrollElement = $( 'form.checkout' );
 			}
 			$.scroll_to_notices( scrollElement );
 		}
