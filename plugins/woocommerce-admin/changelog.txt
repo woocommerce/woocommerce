@@ -37,6 +37,7 @@
 - Update: Create task list REST API endpoint #7512
 - Update: Deleted OnboardingEmailMarketing note class #7595
 - Update: Removes the use of the depreciated woocommerce_shared_settings hook. #7480
+- Update: Removes non WooCommerce Admin specific settings from the `wc_admin` namespace in the `wc/data` settings store (ex: countries). #7480
 - Update: Updating eway logo in payment suggestions defaults #7562
 - Update: Update marketing task completion logic. #7586
 - Dev: Add email address field to OBW #7552
