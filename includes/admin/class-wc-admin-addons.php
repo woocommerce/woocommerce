@@ -21,6 +21,45 @@ class WC_Admin_Addons {
 	/**
 	 * Get featured for the addons screen
 	 *
+	 * @deprecated 5.9.0 No longer used in In-App Marketplace
+	 *
+	 * @return array of objects
+	 */
+	public static function get_featured() {
+		$featured = get_transient( 'wc_addons_featured' );
+		if ( false === $featured ) {
+			$headers = array();
+			$auth    = WC_Helper_Options::get( 'auth' );
+
+			if ( ! empty( $auth['access_token'] ) ) {
+				$headers['Authorization'] = 'Bearer ' . $auth['access_token'];
+			}
+
+			$raw_featured = wp_safe_remote_get(
+				'https://woocommerce.com/wp-json/wccom-extensions/1.0/featured',
+				array(
+					'headers'    => $headers,
+					'user-agent' => 'WooCommerce Addons Page',
+				)
+			);
+
+			if ( ! is_wp_error( $raw_featured ) ) {
+				$featured = json_decode( wp_remote_retrieve_body( $raw_featured ) );
+				if ( $featured ) {
+					set_transient( 'wc_addons_featured', $featured, DAY_IN_SECONDS );
+				}
+			}
+		}
+
+		if ( is_object( $featured ) ) {
+			self::output_featured_sections( $featured->sections );
+			return $featured;
+		}
+	}
+
+	/**
+	 * Render featured products and banners using WCCOM's the Featured 2.0 Endpoint
+	 *
 	 * @return void
 	 */
 	public static function render_featured() {
@@ -1042,6 +1081,40 @@ class WC_Admin_Addons {
 	}
 
 	/**
+	 * Determine which class should be used for a rating star:
+	 * - golden
+	 * - half-filled (50/50 golden and gray)
+	 * - gray
+	 *
+	 * Consider ratings from 3.0 to 4.0 as an example
+	 * 3.0 will produce 3 stars
+	 * 3.1 to 3.5 will produce 3 stars and a half star
+	 * 3.6 to 4.0 will product 4 stars
+	 *
+	 * @param float $rating Rating of a product.
+	 * @param int   $index  Index of a star in a row.
+	 *
+	 * @return string CSS class to use.
+	 */
+	public static function get_star_class( $rating, $index ) {
+		if ( $rating >= $index ) {
+			// Rating more that current star to show.
+			return 'fill';
+		} else if (
+			abs( $index - 1 - floor( $rating ) ) < 0.0000001 &&
+			0 < ( $rating - floor( $rating ) )
+		) {
+			// For rating more than x.0 and less than x.5 or equal it will show a half star.
+			return 50 >= floor( ( $rating - floor( $rating ) ) * 100 )
+				? 'half-fill'
+				: 'fill';
+		}
+
+		// Don't show a golden star otherwise.
+		return 'no-fill';
+	}
+
+	/**
 	 * Take an action object and return the URL based on properties of the action.
 	 *
 	 * @param object $action Action object.
@@ -1306,8 +1379,8 @@ class WC_Admin_Addons {
 						<?php if ( ! empty( $mapped->reviews_count ) && ! empty( $mapped->rating ) ) : ?>
 							<?php /* Show rating and the number of reviews */ ?>
 							<div class="product-reviews-block">
-								<?php for ( $index = 1; $index <= 5; ++ $index ) : ?>
-									<?php $rating_star_class = 'product-rating-star product-rating-star__' . wccom_get_star_class( $mapped->rating, $index ); ?>
+								<?php for ( $index = 1; $index <= 5; ++$index ) : ?>
+									<?php $rating_star_class = 'product-rating-star product-rating-star__' . self::get_star_class( $mapped->rating, $index ); ?>
 									<div class="<?php echo esc_attr( $rating_star_class ); ?>"></div>
 								<?php endfor; ?>
 								<span class="product-reviews-count">(<?php echo (int) $mapped->reviews_count; ?>)</span>
