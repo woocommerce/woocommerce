@@ -78,4 +78,28 @@ class WC_Tests_Rate_Limiter extends WC_Unit_Test_Case {
 		$this->assertEquals( false, WC_Rate_Limiter::retried_too_soon( $rate_limit_id_2 ), 'retried_too_soon did not allow action to run for another user after the designated delay.' );
 	}
 
+	/**
+	 * Test that rate limit option migration only processes unexpired limits.
+	 */
+	public function test_rate_limit_option_migration() {
+		global $wpdb;
+
+		// Add some options to be migrated.
+		add_option( 'woocommerce_rate_limit_add_payment_method_123', time() + 1000 );
+		add_option( 'woocommerce_rate_limit_add_payment_method_234', time() - 1 );
+
+		// Run the migration function.
+		include_once WC_Unit_Tests_Bootstrap::instance()->plugin_dir . '/includes/wc-update-functions.php';
+		wc_update_600_migrate_rate_limit_options();
+
+		// Ensure that only the _123 limit was migrated.
+		$migrated = $wpdb->get_col( "SELECT rate_limit_key FROM {$wpdb->prefix}woocommerce_rate_limits" );
+
+		$this->assertCount( 1, $migrated );
+		$this->assertEquals( 'add_payment_method_123', $migrated[0] );
+
+		// Verify that all rate limit options were deleted.
+		$this->assertFalse( get_option( 'woocommerce_rate_limit_add_payment_method_123' ) );
+		$this->assertFalse( get_option( 'woocommerce_rate_limit_add_payment_method_234' ) );
+	}
 }
