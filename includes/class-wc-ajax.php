@@ -802,6 +802,22 @@ class WC_AJAX {
 		$data  = array();
 		$items = $order->get_items();
 
+		// Check against existing order downloads first.
+		$data_store           = WC_Data_Store::load( 'customer-download' );
+		$download_permissions = $data_store->get_downloads(
+			array(
+				'order_id' => $order_id,
+				'orderby'  => 'product_id',
+			)
+		);
+
+		$existing_file_downloads = array();
+		if ( $download_permissions && sizeof( $download_permissions ) > 0 ) {
+			foreach ( $download_permissions as $download ) {
+				$existing_file_downloads[] = $download->get_download_id();
+			}
+		}
+
 		// Check against order items first.
 		foreach ( $items as $item ) {
 			$product = $item->get_product();
@@ -830,19 +846,21 @@ class WC_AJAX {
 
 			if ( ! empty( $download_data['files'] ) ) {
 				foreach ( $download_data['files'] as $download_id => $file ) {
-					$inserted_id = wc_downloadable_file_permission( $download_id, $product->get_id(), $order, $download_data['quantity'], $download_data['order_item'] );
-					if ( $inserted_id ) {
-						$download = new WC_Customer_Download( $inserted_id );
-						$loop ++;
-						$file_counter ++;
+					if( ! in_array( $download_id, $existing_file_downloads ) ){
+						$inserted_id = wc_downloadable_file_permission( $download_id, $product->get_id(), $order, $download_data['quantity'], $download_data['order_item'] );
+						if ( $inserted_id ) {
+							$download = new WC_Customer_Download( $inserted_id );
+							$loop ++;
+							$file_counter ++;
 
-						if ( $file->get_name() ) {
-							$file_count = $file->get_name();
-						} else {
-							/* translators: %d file count */
-							$file_count = sprintf( __( 'File %d', 'woocommerce' ), $file_counter );
+							if ( $file->get_name() ) {
+								$file_count = $file->get_name();
+							} else {
+								/* translators: %d file count */
+								$file_count = sprintf( __( 'File %d', 'woocommerce' ), $file_counter );
+							}
+							include __DIR__ . '/admin/meta-boxes/views/html-order-download-permission.php';
 						}
-						include __DIR__ . '/admin/meta-boxes/views/html-order-download-permission.php';
 					}
 				}
 			}
