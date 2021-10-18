@@ -7,12 +7,18 @@ import { useStoreCart, useStoreNotices } from '@woocommerce/base-context/hooks';
 import { useEffect } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
 
+/**
+ * Internal dependencies
+ */
+import { useCartBlockContext } from '../../context';
+
 const FrontendBlock = ( {
 	children,
 }: {
 	children: JSX.Element;
 } ): JSX.Element | null => {
 	const { cartItems, cartIsLoading, cartItemErrors } = useStoreCart();
+	const { hasDarkControls } = useCartBlockContext();
 	const { addErrorNotice } = useStoreNotices();
 
 	// Ensures any cart errors listed in the API response get shown.
@@ -24,8 +30,7 @@ const FrontendBlock = ( {
 			} );
 		} );
 	}, [ addErrorNotice, cartItemErrors ] );
-	// @todo pass attributes to inner most blocks.
-	const hasDarkControls = false;
+
 	if ( cartIsLoading || cartItems.length >= 1 ) {
 		return (
 			<SidebarLayout

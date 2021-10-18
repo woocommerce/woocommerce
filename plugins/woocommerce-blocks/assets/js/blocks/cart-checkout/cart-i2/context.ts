@@ -7,11 +7,11 @@ import { createContext, useContext } from '@wordpress/element';
  * Context consumed by inner blocks.
  */
 export type CartBlockContextProps = {
-	currentView: string;
+	hasDarkControls: boolean;
 };
 
 export const CartBlockContext = createContext< CartBlockContextProps >( {
-	currentView: '',
+	hasDarkControls: false,
 } );
 
 export const useCartBlockContext = (): CartBlockContextProps => {
