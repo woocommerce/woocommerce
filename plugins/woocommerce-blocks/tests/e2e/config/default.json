@@ -16,7 +16,8 @@
 		},
 		"variable": {
 			"name": "Variable Product with Three Variations"
-		}
+		},
+		"grouped": {}
 	},
 	"addresses": {
 		"admin": {
