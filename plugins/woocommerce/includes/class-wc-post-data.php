@@ -273,6 +273,10 @@ class WC_Post_Data {
 		} elseif ( 'shop_coupon' === $data['post_type'] ) {
 			// Coupons should never allow unfiltered HTML.
 			$data['post_title'] = wp_filter_kses( $data['post_title'] );
+
+			if ( empty($data['post_title']) ) {
+				$data['post_status'] = 'draft';
+			}
 		}
 
 		return $data;
