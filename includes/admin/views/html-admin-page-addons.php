@@ -15,7 +15,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 $current_section_name = __( 'Browse Categories', 'woocommerce' );
-
 ?>
 <div class="woocommerce wc-addons-wrap">
 	<h1 class="screen-reader-text"><?php esc_html_e( 'Marketplace', 'woocommerce' ); ?></h1>
@@ -65,7 +64,7 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 
 	<div class="wrap">
 		<div class="marketplace-content-wrapper">
-			<?php if ( count( $addons ) == 0 ) : ?>
+			<?php if ( ! empty( $search ) && 0 === count( $addons ) ) : ?>
 				<h1 class="search-form-title">
 					<?php esc_html_e( 'Sorry, could not find anything. Try searching again using a different term.', 'woocommerce' ); ?></p>
 				</h1>
@@ -79,9 +78,7 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 
 			<?php if ( '_featured' === $current_section ) : ?>
 				<div class="addons-featured">
-					<?php
-					$featured = WC_Admin_Addons::get_featured();
-					?>
+					<?php WC_Admin_Addons::render_featured(); ?>
 				</div>
 			<?php endif; ?>
 			<?php if ( '_featured' !== $current_section && $addons ) : ?>
@@ -116,28 +113,7 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 							}
 						}
 						?>
-						<li class="product">
-							<div class="product-details">
-								<?php if ( ! empty( $addon->image ) ) : ?>
-									<span class="product-img-wrap"><img src="<?php echo esc_url( $addon->image ); ?>" /></span>
-								<?php endif; ?>
-								<a href="<?php echo esc_url( WC_Admin_Addons::add_in_app_purchase_url_params( $addon->link ) ); ?>">
-									<h2><?php echo esc_html( $addon->title ); ?></h2>
-								</a>
-								<p><?php echo wp_kses_post( $addon->excerpt ); ?></p>
-							</div>
-							<div class="product-footer">
-								<?php if ( '&#36;0.00' === $addon->price ) : ?>
-									<span class="price"><?php esc_html_e( 'Free', 'woocommerce' ); ?></span>
-								<?php else : ?>
-									<span class="price"><?php echo wp_kses_post( $addon->price ); ?></span>
-									<span class="price_suffix"><?php esc_html_e( 'per year', 'woocommerce' ); ?></span>
-								<?php endif; ?>
-								<a class="button" href="<?php echo esc_url( WC_Admin_Addons::add_in_app_purchase_url_params( $addon->link ) ); ?>">
-									<?php esc_html_e( 'View details', 'woocommerce' ); ?>
-								</a>
-							</div>
-						</li>
+						<?php WC_Admin_Addons::render_product_card( $addon ); ?>
 					<?php endforeach; ?>
 				</ul>
 			<?php endif; ?>

@@ -1,4 +1,3 @@
-/* eslint-disable jest/no-export, jest/no-disabled-tests */
 /**
  * External dependencies
  */
@@ -82,7 +81,7 @@ const runInitialStoreSettingsTest = () => {
 				.create();
 
 			const response = await client.get( '/wc/v3/products' );
-			expect( response.statusCode ).toBe( 200 );
+			expect( response.status ).toBe( 200 );
 		});
 	});
 };

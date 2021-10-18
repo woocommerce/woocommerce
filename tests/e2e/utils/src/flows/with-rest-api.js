@@ -63,7 +63,7 @@ export const withRestApi = {
 		};
 
 		const response = await client.put( onboardingProfileEndpoint, onboardingReset );
-		expect( response.statusCode ).toEqual( 200 );
+		expect( response.status ).toEqual( 200 );
 	},
 	/**
 	 * Use api package to delete coupons.
@@ -115,7 +115,7 @@ export const withRestApi = {
 	   const path = 'wc/v3/shipping/zones';
 
 	   const response = await client.post( path, { name: zoneName } );
-	   expect(response.statusCode).toEqual(201);
+	   expect(response.status).toEqual(201);
 	   let zoneId = response.data.id;
 
 	   // Select shipping zone location
@@ -136,7 +136,7 @@ export const withRestApi = {
 	   }
 
 	   const locationResponse = await client.put( path + `/${zoneId}/locations`, zoneLocationPayload );
-	   expect(locationResponse.statusCode).toEqual(200);
+	   expect(locationResponse.status).toEqual(200);
 
 	   // Add shipping zone method
 	   let methodPayload = {
@@ -144,7 +144,7 @@ export const withRestApi = {
 	   }
 
 	   const methodsResponse = await client.post( path + `/${zoneId}/methods`, methodPayload );
-	   expect(methodsResponse.statusCode).toEqual(200);
+	   expect(methodsResponse.status).toEqual(200);
 	   let methodId = methodsResponse.data.id;
 
 	   // Add in cost, if provided
@@ -156,14 +156,14 @@ export const withRestApi = {
 		   }
 
 		   const costResponse = await client.put( path + `/${zoneId}/methods/${methodId}`, costPayload );
-		   expect(costResponse.statusCode).toEqual(200);
+		   expect(costResponse.status).toEqual(200);
 	   }
 
 	   // Add any additional zones, if provided
 	   if (additionalZoneMethods.length > 0) {
 		   for ( let z = 0; z < additionalZoneMethods.length; z++ ) {
 			   let response = await client.post( path + `/${zoneId}/methods`, { method_id: additionalZoneMethods[z] } );
-			   expect(response.statusCode).toEqual(200);
+			   expect(response.status).toEqual(200);
 		   }
 	   }
     },
@@ -181,7 +181,7 @@ export const withRestApi = {
 					continue;
 				}
 				const response = await client.delete( shippingZoneEndpoint + `/${shippingZones.data[z].id}?force=true` );
-				expect( response.statusCode ).toBe( 200 );
+				expect( response.status ).toBe( 200 );
 			}
 		}
 	},
@@ -195,7 +195,7 @@ export const withRestApi = {
 		if ( shippingClasses.data && shippingClasses.data.length ) {
 			for ( let c = 0; c < shippingClasses.data.length; c++ ) {
 				const response = await client.delete( shippingClassesEndpoint + `/${shippingClasses.data[c].id}?force=true` );
-				expect( response.statusCode ).toBe( 200 );
+				expect( response.status ).toBe( 200 );
 			}
 		}
 	},
@@ -272,7 +272,7 @@ export const withRestApi = {
 	 */
 	updatePaymentGateway: async ( paymentGatewayId, payload = {} ) => {
 		const response = await client.put( `/wc/v3/payment_gateways/${paymentGatewayId}`, payload );
-		expect( response.statusCode ).toBe( 200 );
+		expect( response.status ).toBe( 200 );
 	},
 	/**
 	 * Create a batch of orders using the "Batch Create Order" API endpoint.
@@ -283,9 +283,8 @@ export const withRestApi = {
 		const path = '/wc/v3/orders/batch';
 		const payload = { create: orders };
 
-		const { statusCode } = await client.post(path, payload);
-
-		expect(statusCode).toEqual(200);
+		const response = await client.post(path, payload);
+		expect( response.status ).toEqual(200);
 	},
 	/**
 	 * Get the current environment from the WooCommerce system status API.
