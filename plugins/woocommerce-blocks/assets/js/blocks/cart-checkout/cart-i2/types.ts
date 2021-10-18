@@ -6,8 +6,5 @@ export type InnerBlockTemplate = [
 
 export interface Attributes {
 	isPreview: boolean;
-	isShippingCalculatorEnabled: boolean;
 	hasDarkControls: boolean;
-	showRateAfterTaxName: boolean;
-	checkoutPageId: number;
 }

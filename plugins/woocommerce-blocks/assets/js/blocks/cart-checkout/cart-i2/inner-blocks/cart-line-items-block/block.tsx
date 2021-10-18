@@ -5,7 +5,7 @@ import { useStoreCart } from '@woocommerce/base-context/hooks';
 /**
  * Internal dependencies
  */
-import CartLineItemsTable from '../../full-cart/cart-line-items-table';
+import CartLineItemsTable from '../../cart-line-items-table';
 
 const Block = (): JSX.Element => {
 	const { cartItems, cartIsLoading } = useStoreCart();
