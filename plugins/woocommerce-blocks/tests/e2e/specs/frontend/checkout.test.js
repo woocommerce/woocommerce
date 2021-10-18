@@ -3,11 +3,9 @@
  */
 import {
 	merchant,
-	createSimpleProduct,
 	setCheckbox,
 	settingsPageSaveChanges,
 	verifyCheckboxIsSet,
-	switchUserToAdmin,
 } from '@woocommerce/e2e-utils';
 
 /**

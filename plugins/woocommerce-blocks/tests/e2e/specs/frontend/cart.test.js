@@ -1,13 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	switchUserToAdmin,
-	ensureSidebarOpened,
-	openPublishPanel,
-	findSidebarPanelWithTitle,
-	findSidebarPanelToggleButtonWithTitle,
-} from '@wordpress/e2e-test-utils';
+import { switchUserToAdmin } from '@wordpress/e2e-test-utils';
 import { shopper } from '@woocommerce/e2e-utils';
 
 /**
