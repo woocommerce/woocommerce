@@ -87,7 +87,7 @@ class ProductBestSellersBlock extends Component {
 		}
 
 		return (
-			<>
+			<div className="wc-block-product-best-sellers">
 				{ this.getInspectorControls() }
 				<Disabled>
 					<ServerSideRender
@@ -95,7 +95,7 @@ class ProductBestSellersBlock extends Component {
 						attributes={ attributes }
 					/>
 				</Disabled>
-			</>
+			</div>
 		);
 	}
 }
