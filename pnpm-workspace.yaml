@@ -1,6 +1,2 @@
 packages:
-    - 'packages/js/api'
-	- 'packages/js/api-core-tests'
-	- 'packages/js/core-tests'
-	- 'packages/js/env'
-	- 'packages/js/utils'
+    - 'packages/js/**'
