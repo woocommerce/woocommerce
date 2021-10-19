@@ -29,8 +29,11 @@ import { Icon, filledCart, removeCart } from '@woocommerce/icons';
  * Internal dependencies
  */
 import './editor.scss';
-import { addClassToBody, useBlockPropsWithLocking } from './hacks';
-import { useViewSwitcher } from './use-view-switcher';
+import {
+	addClassToBody,
+	useViewSwitcher,
+	useBlockPropsWithLocking,
+} from '../shared';
 import type { Attributes } from './types';
 import { CartBlockContext } from './context';
 
