@@ -150,12 +150,6 @@ describe( `${ block.name } Block (frontend)`, () => {
 		await expect( page ).toClick(
 			'.wc-block-components-payment-method-label',
 			{
-				alt: 'PayPal',
-			}
-		);
-		await expect( page ).toClick(
-			'.wc-block-components-payment-method-label',
-			{
 				text: 'Direct bank transfer',
 			}
 		);

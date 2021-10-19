@@ -93,6 +93,14 @@ class BillingAddressSchema extends AbstractAddressSchema {
 	 */
 	public function get_item_response( $address ) {
 		if ( ( $address instanceof \WC_Customer || $address instanceof \WC_Order ) ) {
+			$billing_country = $address->get_billing_country();
+			$billing_state   = $address->get_billing_state();
+			$valid_states    = wc()->countries->get_states( $billing_country );
+
+			if ( ! empty( $billing_state ) && count( $valid_states ) && ! in_array( $billing_state, $valid_states, true ) ) {
+				$billing_state = '';
+			}
+
 			return (object) $this->prepare_html_response(
 				[
 					'first_name' => $address->get_billing_first_name(),
@@ -101,9 +109,9 @@ class BillingAddressSchema extends AbstractAddressSchema {
 					'address_1'  => $address->get_billing_address_1(),
 					'address_2'  => $address->get_billing_address_2(),
 					'city'       => $address->get_billing_city(),
-					'state'      => $address->get_billing_state(),
+					'state'      => $billing_state,
 					'postcode'   => $address->get_billing_postcode(),
-					'country'    => $address->get_billing_country(),
+					'country'    => $billing_country,
 					'email'      => $address->get_billing_email(),
 					'phone'      => $address->get_billing_phone(),
 				]
