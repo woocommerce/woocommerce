@@ -17,10 +17,12 @@ importers:
       prettier: npm:wp-prettier@2.2.1-beta-1
       request: ^2.88.2
       typescript: 4.2.4
+      wp-textdomain: 1.0.1
     dependencies:
       '@babel/core': 7.12.9
       '@wordpress/babel-plugin-import-jsx-pragma': 3.1.0_@babel+core@7.12.9
       '@wordpress/babel-preset-default': 6.3.3
+      wp-textdomain: 1.0.1
     devDependencies:
       '@woocommerce/eslint-plugin': 1.3.0
       '@wordpress/prettier-config': 1.1.1
@@ -11782,7 +11784,6 @@ packages:
 
   /moment/2.29.1:
     resolution: {integrity: sha512-kHmoybcPV8Sqy59DwNDY3Jefr64lK/by/da0ViFcuA4DH0vQg5Q6Ze5VimxkfQNSC+Mls/Kx53s7TjP1RhFEDQ==}
-    dev: true
 
   /moo/0.5.1:
     resolution: {integrity: sha512-I1mnb5xn4fO80BH9BLcF0yLypy2UKl+Cb01Fu0hJRkJjlCRtxZMWkTdAtDd5ZqCOxtCkhmRwyI57vWT+1iZ67w==}
@@ -12621,7 +12622,6 @@ packages:
 
   /php-parser/3.0.3:
     resolution: {integrity: sha512-WjbrtYrwmLY9hpoKoq1+mVqJhT0dEVDZRWSpNIw2MpTw3VM/K4C6e0WR4KlU6G/XROkV7tpH4NesV2dDiPxqaw==}
-    dev: true
 
   /picocolors/0.2.1:
     resolution: {integrity: sha512-cMlDqaLEqfSaW8Z7N5Jw+lyIW869EzT73/F5lhtY9cLGoVxSXznfgfXMO0Z5K0o0Q2TkTXq+0KFsdnSe3jDViA==}
@@ -15426,7 +15426,6 @@ packages:
       moment: 2.29.1
       php-parser: 3.0.3
       text-table: 0.2.0
-    dev: true
 
   /wrap-ansi/3.0.1:
     resolution: {integrity: sha1-KIoE2H7aXChuBg3+jxNc6NAH+Lo=}
