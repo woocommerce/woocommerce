@@ -64,9 +64,9 @@ jobs:
                   mv woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
 
             - name: Run tests command.
-              working-directory: code/woocommerce
+              working-directory: package/woocommerce/plugins/woocommerce
               env:
                   WC_E2E_SCREENSHOTS: 1
                   E2E_SLACK_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
                   E2E_SLACK_CHANNEL: ${{ secrets.E2E_SLACK_CHANNEL }}
-              run: npx wc-e2e test:e2e
+              run: pnpx wc-e2e test:e2e
