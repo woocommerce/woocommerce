@@ -1,0 +1,1 @@
+{"version":3,"file":"cross-sell.d.ts","sourceRoot":"","sources":["../../../../src/models/products/abstract/cross-sell.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,KAAK,EAAE,MAAM,aAAa,CAAC;AAEpC;;GAEG;AACH,uBAAe,yBAA0B,SAAQ,KAAK;IACrD;;;;OAIG;IACH,SAAgB,YAAY,EAAE,KAAK,CAAC,MAAM,CAAC,CAAM;CACjD;AAED,MAAM,WAAW,kBAAmB,SAAQ,yBAAyB;CAAG"}

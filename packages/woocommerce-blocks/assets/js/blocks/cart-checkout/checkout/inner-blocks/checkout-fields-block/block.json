@@ -1,0 +1,26 @@
+{
+	"name": "woocommerce/checkout-fields-block",
+	"version": "1.0.0",
+	"title": "Checkout Fields",
+	"description": "Column containing checkout address fields.",
+	"category": "woocommerce",
+	"supports": {
+		"align": false,
+		"html": false,
+		"multiple": false,
+		"reusable": false,
+		"inserter": false
+	},
+	"attributes": {
+		"lock": {
+			"type": "object",
+			"default": {
+				"remove": true,
+				"move": true
+			}
+		}
+	},
+	"parent": [ "woocommerce/checkout" ],
+	"textdomain": "woo-gutenberg-products-block",
+	"apiVersion": 2
+}

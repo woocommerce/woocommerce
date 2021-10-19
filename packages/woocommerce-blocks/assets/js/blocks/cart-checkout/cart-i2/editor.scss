@@ -1,0 +1,22 @@
+.wc-block-cart__page-notice {
+	margin: 0;
+}
+
+body.wc-lock-selected-block--move {
+	.block-editor-block-mover__move-button-container,
+	.block-editor-block-mover {
+		display: none;
+	}
+}
+
+body.wc-lock-selected-block--remove {
+	.block-editor-block-settings-menu__popover {
+		.components-menu-group:last-child {
+			display: none;
+		}
+		.components-menu-group:nth-last-child(2) {
+			margin-bottom: -12px;
+		}
+	}
+}
+

@@ -1,0 +1,12 @@
+{
+	"extends": "../../../tsconfig.base.json",
+	"compilerOptions": {},
+	"include": [
+		".",
+		"../types/type-defs/**.ts",
+		"../mapped-types.ts",
+		"../settings/shared/index.js",
+		"../settings/blocks/index.js"
+	],
+	"exclude": [ "**/test/**" ]
+}

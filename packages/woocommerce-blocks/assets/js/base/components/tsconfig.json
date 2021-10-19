@@ -1,0 +1,14 @@
+{
+	"extends": "../../../../tsconfig.base.json",
+	"compilerOptions": {},
+	"include": [
+	  ".",
+	  "../../types",
+	  "../../../../packages/prices",
+	  "../../../../packages/checkout",
+	  "../context",
+	  "../../type-defs",
+	  "../hocs"
+	],
+	"exclude": [ "**/test/**" ]
+}

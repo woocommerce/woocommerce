@@ -1,0 +1,10 @@
+.wc-block-components-totals-item.wc-block-components-totals-taxes__grouped-rate {
+	margin: $gap-smallest 0;
+	&:first-child {
+		margin-top: 0;
+	}
+
+	&:last-child {
+		margin-bottom: 0;
+	}
+}

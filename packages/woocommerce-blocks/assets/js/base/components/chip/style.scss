@@ -1,0 +1,77 @@
+.wc-block-components-chip {
+	@include reset-typography();
+	align-items: center;
+	border: 0;
+	display: inline-flex;
+	padding: em($gap-smallest * 0.5) 0.5em em($gap-smallest);
+	margin: 0 0.365em 0.365em 0;
+	border-radius: 0;
+	line-height: 1;
+	max-width: 100%;
+
+	// Chip might be a button, so we need to override theme styles.
+	&,
+	&:hover,
+	&:focus,
+	&:active {
+		background: $gray-200;
+		color: $gray-900;
+	}
+
+	&.wc-block-components-chip--radius-small {
+		border-radius: 3px;
+	}
+	&.wc-block-components-chip--radius-medium {
+		border-radius: 0.433em;
+	}
+	&.wc-block-components-chip--radius-large {
+		border-radius: 2em;
+		padding-left: 0.75em;
+		padding-right: 0.75em;
+	}
+	.wc-block-components-chip__text {
+		flex-grow: 1;
+	}
+	&.is-removable {
+		padding-right: 0.5em;
+	}
+	&.is-removable .wc-block-components-chip__text {
+		padding-right: 0.25em;
+	}
+	.wc-block-components-chip__remove {
+		@include font-size(smaller);
+		background: transparent;
+		border: 0;
+		appearance: none;
+		padding: 0;
+	}
+
+	.wc-block-components-chip__remove-icon {
+		vertical-align: middle;
+	}
+}
+
+.theme-twentytwentyone {
+	.wc-block-components-chip,
+	.wc-block-components-chip:active,
+	.wc-block-components-chip:focus,
+	.wc-block-components-chip:hover {
+		background: #fff;
+		button.wc-block-components-chip__remove:not(:hover):not(:active):not(.has-background) {
+			background: transparent;
+		}
+	}
+}
+
+button.wc-block-components-chip:hover > .wc-block-components-chip__remove,
+button.wc-block-components-chip:focus > .wc-block-components-chip__remove,
+.wc-block-components-chip__remove:hover,
+.wc-block-components-chip__remove:focus {
+	fill: $alert-red;
+}
+
+button.wc-block-components-chip:disabled > .wc-block-components-chip__remove,
+.wc-block-components-chip__remove:disabled {
+	fill: $gray-600;
+	cursor: not-allowed;
+}

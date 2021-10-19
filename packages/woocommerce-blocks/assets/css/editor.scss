@@ -1,0 +1,74 @@
+// Import the woocommerce components stylesheet
+@import "~@woocommerce/components/build-style/style.css";
+
+// Hack to hide preview overflow.
+.editor-block-preview__content {
+	overflow: hidden;
+}
+
+// Align the block icons in edit mode
+.components-placeholder__label .gridicon,
+.components-placeholder__label .material-icon {
+	margin-right: 1ch;
+	fill: currentColor;
+}
+
+// Remove the list styling, which is added back by core GB styles.
+.editor-styles-wrapper {
+	.wc-block-grid {
+		.wc-block-grid__products {
+			list-style: none;
+			margin: 0 (-$gap*0.5) $gap;
+			padding: 0;
+
+			.wc-block-grid__product {
+				margin: 0 0 $gap-large 0;
+			}
+		}
+
+		&.components-placeholder {
+			padding: 2em 1em;
+		}
+
+		&.is-loading,
+		&.is-not-found {
+			display: block;
+		}
+	}
+}
+
+// Style inline notices in the inspector.
+.components-base-control {
+	+ .wc-block-base-control-notice {
+		margin: -$gap 0 $gap;
+	}
+
+	& + .wc-block-base-control-notice:last-child {
+		margin: -$gap 0 $gap-small;
+	}
+}
+
+// Selectors with extra specificity to override some editor styles.
+.woocommerce-search-list__list.woocommerce-search-list__list {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+
+.woocommerce-search-list__selected.woocommerce-search-list__selected > ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.theme-twentytwenty {
+	.wp-block {
+		.wc-block-grid__product-title,
+		.wc-block-active-filters__title,
+		.wc-block-attribute-filter__title,
+		.wc-block-price-filter__title,
+		.wc-block-stock-filter__title {
+			@include font-size(regular);
+		}
+	}
+}

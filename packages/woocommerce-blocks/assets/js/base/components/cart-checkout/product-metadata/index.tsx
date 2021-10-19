@@ -1,0 +1,45 @@
+/**
+ * External dependencies
+ */
+import { ProductResponseItemData } from '@woocommerce/type-defs/product-response';
+import { CartVariationItem } from '@woocommerce/type-defs/cart';
+
+/**
+ * Internal dependencies
+ */
+import ProductDetails from '../product-details';
+import ProductSummary from '../product-summary';
+import './style.scss';
+
+interface ProductMetadataProps {
+	shortDescription?: string;
+	fullDescription?: string;
+	itemData: ProductResponseItemData[];
+	variation?: CartVariationItem[];
+}
+
+const ProductMetadata = ( {
+	shortDescription = '',
+	fullDescription = '',
+	itemData = [],
+	variation = [],
+}: ProductMetadataProps ): JSX.Element => {
+	return (
+		<div className="wc-block-components-product-metadata">
+			<ProductSummary
+				className="wc-block-components-product-metadata__description"
+				shortDescription={ shortDescription }
+				fullDescription={ fullDescription }
+			/>
+			<ProductDetails details={ itemData } />
+			<ProductDetails
+				details={ variation.map( ( { attribute = '', value } ) => ( {
+					name: attribute,
+					value,
+				} ) ) }
+			/>
+		</div>
+	);
+};
+
+export default ProductMetadata;

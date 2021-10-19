@@ -1,0 +1,24 @@
+.wc-block-components-totals-item {
+	display: flex;
+	flex-wrap: wrap;
+	margin: em($gap-small) 0 0;
+	width: 100%;
+
+	&:first-child {
+		margin-top: 0;
+	}
+}
+
+.wc-block-components-totals-item__label {
+	flex-grow: 1;
+}
+
+.wc-block-components-totals-item__value {
+	font-weight: bold;
+	white-space: nowrap;
+}
+
+.wc-block-components-totals-item__description {
+	@include font-size(small);
+	width: 100%;
+}

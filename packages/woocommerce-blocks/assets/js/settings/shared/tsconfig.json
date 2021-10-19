@@ -1,0 +1,10 @@
+{
+	"extends": "../../../../tsconfig.base.json",
+	"include": [
+		".",
+		"../../type-defs",
+		"../../types/",
+		"../../mapped-types.ts",
+		"../../filters/exclude-draft-status-from-analytics.js"
+	]
+}

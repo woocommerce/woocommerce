@@ -1,0 +1,360 @@
+/* stylelint-disable */
+@mixin thumb {
+	background-color: transparent;
+	background-position: 0 0;
+	width: 28px;
+	height: 23px;
+	border: 0;
+	padding: 0;
+	margin: 0;
+	vertical-align: top;
+	cursor: pointer;
+	z-index: 20;
+	pointer-events: auto;
+	background-image: url("data:image/svg+xml,%3Csvg width='56' height='46' viewBox='0 0 56 46' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg clip-path='url(%23clip0)'%3E%3Cpath d='M25.3176 9.9423L16.9013 3.7991C15.1953 2.5706 13.2618 1.9003 11.2146 2.0121H11.1009C6.21029 2.3471 2.11589 6.3681 2.00219 11.2827C1.88849 16.644 6.21019 21 11.6696 21H11.7833C13.603 21 15.4228 20.3298 16.9013 19.213L25.3176 12.958C26.2275 12.0645 26.2275 10.7242 25.3176 9.9423V9.9423Z' fill='white' stroke='%23757575'/%3E%3Cpath d='M13 7V16M10 7V16V7Z' stroke='%23B8B8B8'/%3E%3Cpath d='M25.3176 9.94227L16.9013 3.79907C15.1953 2.57057 13.2618 1.90027 11.2146 2.01207H11.1009C6.21029 2.34707 2.11589 6.36807 2.00219 11.2827C1.88849 16.644 6.21019 21 11.6696 21H11.7833C13.603 21 15.4228 20.3298 16.9013 19.213L25.3176 12.958C26.2275 12.0645 26.2275 10.7242 25.3176 9.94227V9.94227Z' fill='white' stroke='%23757575'/%3E%3Cpath d='M13 7V16M10 7V16V7Z' stroke='%23B8B8B8'/%3E%3Cpath d='M25.3176 32.9423L16.9013 26.7991C15.1953 25.5706 13.2618 24.9003 11.2146 25.0121H11.1009C6.21029 25.347 2.11589 29.368 2.00219 34.2827C1.88849 39.644 6.21019 44 11.6696 44H11.7833C13.603 44 15.4228 43.3298 16.9013 42.213L25.3176 35.958C26.2275 35.0645 26.2275 33.7242 25.3176 32.9423V32.9423Z' fill='%23F8F3F7' stroke='white' stroke-opacity='0.75' stroke-width='3'/%3E%3Cpath d='M25.3176 32.9423L16.9013 26.7991C15.1953 25.5706 13.2618 24.9003 11.2146 25.0121H11.1009C6.21029 25.347 2.11589 29.368 2.00219 34.2827C1.88849 39.644 6.21019 44 11.6696 44H11.7833C13.603 44 15.4228 43.3298 16.9013 42.213L25.3176 35.958C26.2275 35.0645 26.2275 33.7242 25.3176 32.9423V32.9423Z' stroke='%23757575'/%3E%3Cpath d='M13 30V39M10 30V39V30Z' stroke='%23757575'/%3E%3Cpath d='M30.6824 9.94227L39.0987 3.79907C40.8047 2.57057 42.7382 1.90027 44.7854 2.01207H44.8991C49.7897 2.34707 53.8841 6.36807 53.9978 11.2827C54.1115 16.644 49.7898 21 44.3304 21H44.2167C42.397 21 40.5772 20.3298 39.0987 19.213L30.6824 12.958C29.7725 12.0645 29.7725 10.7242 30.6824 9.94227V9.94227Z' fill='white' stroke='%23757575'/%3E%3Cpath d='M43 6.99997V16M46 6.99997V16V6.99997Z' stroke='%23B8B8B8'/%3E%3Cpath d='M30.6824 32.9423L39.0987 26.7991C40.8047 25.5706 42.7382 24.9003 44.7854 25.0121H44.8991C49.7897 25.347 53.8841 29.368 53.9978 34.2827C54.1115 39.644 49.7898 44 44.3304 44H44.2167C42.397 44 40.5772 43.3298 39.0987 42.213L30.6824 35.958C29.7725 35.0645 29.7725 33.7242 30.6824 32.9423V32.9423Z' fill='%23F8F3F7' stroke='white' stroke-opacity='0.75' stroke-width='3'/%3E%3Cpath d='M30.6824 32.9423L39.0987 26.7991C40.8047 25.5706 42.7382 24.9003 44.7854 25.0121H44.8991C49.7897 25.347 53.8841 29.368 53.9978 34.2827C54.1115 39.644 49.7898 44 44.3304 44H44.2167C42.397 44 40.5772 43.3298 39.0987 42.213L30.6824 35.958C29.7725 35.0645 29.7725 33.7242 30.6824 32.9423V32.9423Z' stroke='%23757575'/%3E%3Cpath d='M43 30V39M46 30V39V30Z' stroke='%23757575'/%3E%3C/g%3E%3Cdefs%3E%3CclipPath id='clip0'%3E%3Crect width='56' height='46' fill='white'/%3E%3C/clipPath%3E%3C/defs%3E%3C/svg%3E%0A");
+
+	transition: transform .2s ease-in-out;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+
+	&:hover {
+		@include thumbFocus;
+	}
+}
+@mixin thumbFocus {
+	background-position-y: -23px;
+	transform: scale(1.1);
+}
+/* stylelint-enable */
+@mixin track {
+	cursor: default;
+	height: 1px; /* Required for Samsung internet based browsers */
+	outline: 0;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+}
+@mixin reset {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	outline: none;
+	background: transparent;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+}
+
+.wc-block-components-price-slider {
+	margin-bottom: $gap-large;
+
+	&.wc-block-components-price-slider--has-filter-button {
+		.wc-block-components-price-slider__controls {
+			justify-content: flex-end;
+
+			.wc-block-components-price-slider__amount.wc-block-components-price-slider__amount--max {
+				margin-left: 0;
+				margin-right: 10px;
+			}
+		}
+	}
+
+	&.is-loading,
+	&.is-disabled {
+		.wc-block-components-price-slider__range-input-wrapper,
+		.wc-block-components-price-slider__amount,
+		.wc-block-components-price-slider__button {
+			@include placeholder();
+			box-shadow: none;
+		}
+	}
+
+	&.is-disabled:not(.is-loading) {
+		.wc-block-components-price-slider__range-input-wrapper,
+		.wc-block-components-price-slider__amount,
+		.wc-block-components-price-slider__button {
+			animation: none;
+		}
+	}
+}
+
+.wc-block-components-price-slider__range-input-wrapper {
+	@include reset;
+	height: 9px;
+	clear: both;
+	position: relative;
+	box-shadow: 0 0 0 1px inset rgba(0, 0, 0, 0.1);
+	background: #e1e1e1;
+	margin: 15px 0;
+}
+
+.wc-block-components-price-slider__range-input-progress {
+	height: 9px;
+	width: 100%;
+	position: absolute;
+	left: 0;
+	top: 0;
+	--track-background: linear-gradient(to right, transparent var(--low), var(--range-color) 0, var(--range-color) var(--high), transparent 0) no-repeat 0 100% / 100% 100%;
+	--range-color: #{$studio-woocommerce-purple-30};
+	/*rtl:ignore*/
+	background: var(--track-background);
+}
+
+.wc-block-components-price-slider__controls {
+	display: flex;
+
+	.wc-block-components-price-slider__amount {
+		margin: 0;
+		border-radius: 4px;
+		width: auto;
+		max-width: 100px;
+		min-width: 0;
+
+		&.wc-block-components-price-slider__amount--min {
+			margin-right: 10px;
+		}
+		&.wc-block-components-price-slider__amount--max {
+			margin-left: auto;
+		}
+	}
+}
+.wc-block-components-price-slider__range-input {
+	@include reset;
+	width: 100%;
+	height: 0;
+	display: block;
+	position: relative;
+	pointer-events: none;
+	outline: none !important;
+	position: absolute;
+	left: 0;
+	top: 0;
+
+	&::-webkit-slider-runnable-track {
+		@include track;
+	}
+	&::-webkit-slider-thumb {
+		@include thumb;
+		margin: -6px 0 0 0;
+	}
+	&::-webkit-slider-progress {
+		@include reset;
+	}
+
+	&::-moz-focus-outer {
+		border: 0;
+	}
+	&::-moz-range-track {
+		@include track;
+	}
+	&::-moz-range-progress {
+		@include reset;
+	}
+	&::-moz-range-thumb {
+		@include thumb;
+	}
+
+	&::-ms-thumb {
+		@include thumb;
+	}
+
+	&:focus {
+		&::-webkit-slider-thumb {
+			@include thumbFocus;
+		}
+		&::-moz-range-thumb {
+			@include thumbFocus;
+		}
+		&::-ms-thumb {
+			@include thumbFocus;
+		}
+	}
+
+	&.wc-block-components-price-slider__range-input--min {
+		z-index: 21;
+
+		&::-webkit-slider-thumb {
+			margin-left: -2px;
+			background-position-x: left;
+		}
+		&::-moz-range-thumb {
+			background-position-x: left;
+			transform: translate(-2px, 4px);
+		}
+		&::-ms-thumb {
+			background-position-x: left;
+		}
+	}
+
+	&.wc-block-components-price-slider__range-input--max {
+		z-index: 20;
+
+		&::-webkit-slider-thumb {
+			background-position-x: right;
+			margin-left: 2px;
+		}
+		&::-moz-range-thumb {
+			background-position-x: right;
+			transform: translate(2px, 4px);
+		}
+		&::-ms-thumb {
+			background-position-x: right;
+		}
+	}
+}
+
+.rtl {
+	.wc-block-components-price-slider__range-input-progress {
+		--track-background: linear-gradient(to left, transparent var(--low), var(--range-color) 0, var(--range-color) var(--high), transparent 0) no-repeat 0 100% / 100% 100%;
+		--range-color: #{$studio-woocommerce-purple-30};
+		background: var(--track-background);
+	}
+}
+
+@mixin ie-fixes() {
+	.wc-block-components-price-slider__range-input-wrapper {
+		background: transparent;
+		box-shadow: none;
+		height: 24px;
+	}
+	.wc-block-components-price-slider__range-input-progress {
+		background: #{$studio-woocommerce-purple-30};
+		width: 100%;
+		top: 7px;
+	}
+	.wc-block-components-price-slider__range-input {
+		height: 24px;
+		pointer-events: auto;
+
+		&::-ms-track {
+			/*remove bg colour from the track, we'll use ms-fill-lower and ms-fill-upper instead */
+			background: transparent;
+
+			/*leave room for the larger thumb to overflow with a transparent border */
+			border-color: transparent;
+			border-width: 7px 0;
+
+			/*remove default tick marks*/
+			color: transparent;
+		}
+		&::-ms-fill-lower {
+			background: #e1e1e1;
+			box-shadow: 0 0 0 1px inset #b8b8b8;
+		}
+		&::-ms-fill-upper {
+			background: transparent;
+		}
+		&::-ms-tooltip {
+			display: none;
+		}
+		&::-ms-thumb {
+			transform: translate(1px, 0);
+			pointer-events: auto;
+		}
+	}
+	.wc-block-components-price-slider__range-input--max {
+		&::-ms-fill-upper {
+			background: #e1e1e1;
+			box-shadow: 0 0 0 1px inset #b8b8b8;
+		}
+		&::-ms-fill-lower {
+			background: transparent;
+		}
+	}
+
+	.wc-block-components-price-slider {
+		&.is-loading,
+		&.is-disabled {
+			.wc-block-components-price-slider__range-input-wrapper {
+				@include placeholder();
+				box-shadow: none;
+			}
+		}
+
+		&.is-disabled:not(.is-loading) {
+			.wc-block-components-price-slider__range-input-wrapper {
+				animation: none;
+			}
+		}
+	}
+}
+
+/* IE 11 will not support multi-range slider due to poor pointer-events support on the thumb. Reverts to 2 sliders. */
+@include ie11() {
+	@include ie-fixes();
+}
+
+// Targets Edge <= 18.
+@supports (-ms-ime-align:auto) {
+	@include ie-fixes();
+}
+
+.theme-twentytwentyone {
+	$border-width: 3px;
+
+	.wc-block-components-price-slider__range-input-wrapper {
+		background: transparent;
+		border: $border-width solid currentColor;
+		box-sizing: border-box;
+	}
+
+	.wc-block-components-price-slider__range-input-progress {
+		--range-color: currentColor;
+		margin: -$border-width;
+	}
+
+	.wc-block-price-filter__range-input {
+		background: transparent;
+		margin: -$border-width;
+		width: calc(100% + #{$border-width * 2});
+
+		&:hover,
+		&:focus {
+			&::-webkit-slider-thumb {
+				filter: none;
+			}
+			&::-moz-range-thumb {
+				filter: none;
+			}
+			&::-ms-thumb {
+				filter: none;
+			}
+		}
+
+		&::-webkit-slider-thumb {
+			margin-top: -9px;
+		}
+
+		&.wc-block-components-price-slider__range-input--max::-moz-range-thumb {
+			transform: translate(2px, 1px);
+		}
+
+		&.wc-block-components-price-slider__range-input--min::-moz-range-thumb {
+			transform: translate(-2px, 1px);
+		}
+
+		&::-ms-track {
+			border-color: transparent !important;
+		}
+	}
+
+	@include ie11() {
+		.wc-block-components-price-slider__range-input-wrapper {
+			border: 0;
+			height: auto;
+			position: relative;
+			height: 50px;
+		}
+
+		.wc-block-components-price-slider__range-input-progress {
+			display: none;
+		}
+
+		.wc-block-price-filter__range-input {
+			height: 100%;
+			margin: 0;
+			width: 100%;
+		}
+	}
+}

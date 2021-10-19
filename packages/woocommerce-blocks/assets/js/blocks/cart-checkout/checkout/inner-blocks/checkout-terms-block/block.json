@@ -1,0 +1,26 @@
+{
+	"name": "woocommerce/checkout-terms-block",
+	"version": "1.0.0",
+	"title": "Terms and Conditions",
+	"description": "Ensure customers agree to your terms and conditions and privacy policy.",
+	"category": "woocommerce",
+	"supports": {
+		"align": false,
+		"html": false,
+		"multiple": false,
+		"reusable": false
+	},
+	"attributes": {
+		"checkbox": {
+			"type": "boolean",
+			"default": false
+		},
+		"text": {
+			"type": "string",
+			"required": false
+		}
+	},
+	"parent": [ "woocommerce/checkout-fields-block" ],
+	"textdomain": "woo-gutenberg-products-block",
+	"apiVersion": 2
+}

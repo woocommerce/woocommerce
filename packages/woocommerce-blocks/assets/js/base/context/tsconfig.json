@@ -1,0 +1,16 @@
+{
+	"extends": "../../../../tsconfig.base.json",
+	"compilerOptions": {},
+	"include": [
+		".",
+		"../../blocks-registry/index.js",
+		"../../settings/shared/index.ts",
+		"../../settings/blocks/index.ts",
+		"../../base/hooks/index.js",
+		"../../base/utils/",
+		"../../data/",
+		"../../types/",
+		"../components"
+	],
+	"exclude": [ "**/test/**" ]
+}

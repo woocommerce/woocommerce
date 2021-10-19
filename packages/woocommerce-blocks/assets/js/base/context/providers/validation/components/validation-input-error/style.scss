@@ -1,0 +1,15 @@
+.wc-block-components-validation-error {
+	@include font-size(smaller);
+	color: $alert-red;
+	max-width: 100%;
+	white-space: normal;
+
+	> p {
+		margin: 0;
+		padding: 0;
+	}
+}
+
+.wc-block-components-select + .wc-block-components-validation-error {
+	margin-bottom: $gap-large;
+}

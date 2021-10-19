@@ -1,0 +1,205 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Testing stock filter renders the stock filter block 1`] = `
+<div>
+  <div
+    class="wc-block-stock-filter"
+  >
+    <ul
+      class="wc-block-checkbox-list wc-block-components-checkbox-list wc-block-stock-filter-list"
+    >
+      <li>
+        <input
+          id="instock"
+          type="checkbox"
+          value="instock"
+        />
+        <label
+          for="instock"
+        >
+          In stock
+        </label>
+      </li>
+      <li>
+        <input
+          id="onbackorder"
+          type="checkbox"
+          value="onbackorder"
+        />
+        <label
+          for="onbackorder"
+        >
+          On backorder
+        </label>
+      </li>
+      <li>
+        <input
+          id="outofstock"
+          type="checkbox"
+          value="outofstock"
+        />
+        <label
+          for="outofstock"
+        >
+          Out of stock
+        </label>
+      </li>
+    </ul>
+  </div>
+</div>
+`;
+
+exports[`Testing stock filter renders the stock filter block with the filter button 1`] = `
+<div>
+  <div
+    class="wc-block-stock-filter"
+  >
+    <ul
+      class="wc-block-checkbox-list wc-block-components-checkbox-list wc-block-stock-filter-list"
+    >
+      <li>
+        <input
+          id="instock"
+          type="checkbox"
+          value="instock"
+        />
+        <label
+          for="instock"
+        >
+          In stock
+        </label>
+      </li>
+      <li>
+        <input
+          id="onbackorder"
+          type="checkbox"
+          value="onbackorder"
+        />
+        <label
+          for="onbackorder"
+        >
+          On backorder
+        </label>
+      </li>
+      <li>
+        <input
+          id="outofstock"
+          type="checkbox"
+          value="outofstock"
+        />
+        <label
+          for="outofstock"
+        >
+          Out of stock
+        </label>
+      </li>
+    </ul>
+    <button
+      class="wc-block-filter-submit-button wc-block-components-filter-submit-button wc-block-stock-filter__button"
+      type="submit"
+    >
+      <span
+        aria-hidden="true"
+      >
+        Go
+      </span>
+      <span
+        class="screen-reader-text"
+      >
+        Apply filter
+      </span>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`Testing stock filter renders the stock filter block with the product counts 1`] = `
+<div>
+  <div
+    class="wc-block-stock-filter"
+  >
+    <ul
+      class="wc-block-checkbox-list wc-block-components-checkbox-list wc-block-stock-filter-list"
+    >
+      <li>
+        <input
+          id="instock"
+          type="checkbox"
+          value="instock"
+        />
+        <label
+          for="instock"
+        >
+          In stock
+          <span
+            class="wc-filter-element-label-list-count"
+          >
+            <span
+              aria-hidden="true"
+            >
+              18
+            </span>
+            <span
+              class="screen-reader-text"
+            >
+              18 products
+            </span>
+          </span>
+        </label>
+      </li>
+      <li>
+        <input
+          id="onbackorder"
+          type="checkbox"
+          value="onbackorder"
+        />
+        <label
+          for="onbackorder"
+        >
+          On backorder
+          <span
+            class="wc-filter-element-label-list-count"
+          >
+            <span
+              aria-hidden="true"
+            >
+              5
+            </span>
+            <span
+              class="screen-reader-text"
+            >
+              5 products
+            </span>
+          </span>
+        </label>
+      </li>
+      <li>
+        <input
+          id="outofstock"
+          type="checkbox"
+          value="outofstock"
+        />
+        <label
+          for="outofstock"
+        >
+          Out of stock
+          <span
+            class="wc-filter-element-label-list-count"
+          >
+            <span
+              aria-hidden="true"
+            >
+              1
+            </span>
+            <span
+              class="screen-reader-text"
+            >
+              1 product
+            </span>
+          </span>
+        </label>
+      </li>
+    </ul>
+  </div>
+</div>
+`;

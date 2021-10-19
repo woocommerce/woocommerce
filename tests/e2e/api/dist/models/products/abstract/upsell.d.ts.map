@@ -1,0 +1,1 @@
+{"version":3,"file":"upsell.d.ts","sourceRoot":"","sources":["../../../../src/models/products/abstract/upsell.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,KAAK,EAAE,MAAM,aAAa,CAAC;AAEpC;;GAEG;AACH,uBAAe,sBAAuB,SAAQ,KAAK;IAClD;;;;OAIG;IACH,SAAgB,SAAS,EAAE,KAAK,CAAC,MAAM,CAAC,CAAM;CAC9C;AAED,MAAM,WAAW,eAAgB,SAAQ,sBAAsB;CAAG"}

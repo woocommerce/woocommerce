@@ -1,0 +1,31 @@
+.wc-block-components-totals-wrapper {
+	@include with-translucent-border(1px 0 0);
+	padding: $gap 0;
+
+	&.has-bottom-border {
+		&::after {
+			border-bottom-width: 1px;
+		}
+	}
+
+	&.slot-wrapper {
+		padding: 0;
+
+		> * > * {
+			@include with-translucent-border(0 0 1px);
+			padding: $gap 0;
+
+			&:last-child::after {
+				border-bottom-width: 0;
+			}
+		}
+	}
+}
+
+.wc-block-components-discounts-meta {
+	.wc-block-components-totals-wrapper {
+		&:first-child {
+			@include with-translucent-border(1px 0 0);
+		}
+	}
+}

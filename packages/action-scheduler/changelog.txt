@@ -1,0 +1,32 @@
+*** Changelog ***
+
+= 3.3.0 - 2021-09-15 =
+* Enhancement - Adds as_has_scheduled_action() to provide a performant way to test for existing actions. #645
+* Fix - Improves compatibility with environments where NO_ZERO_DATE is enabled. #519
+* Fix - Adds safety checks to guard against errors when our database tables cannot be created. #645
+* Dev - Now supports queries that use multiple statuses. #649
+* Dev - Minimum requirements for WordPress and PHP bumped (to 5.2 and 5.6 respectively). #723
+
+= 3.2.1 - 2021-06-21 =
+* Fix - Add extra safety/account for different versions of AS and different loading patterns. #714
+* Fix - Handle hidden columns (Tools → Scheduled Actions) | #600.
+
+= 3.2.0 - 2021-06-03 =
+* Fix - Add "no ordering" option to as_next_scheduled_action().
+* Fix - Add secondary scheduled date checks when claiming actions (DBStore) | #634.
+* Fix - Add secondary scheduled date checks when claiming actions (wpPostStore) | #634.
+* Fix - Adds a new index to the action table, reducing the potential for deadlocks (props: @glagonikas).
+* Fix - Fix unit tests infrastructure and adapt tests to PHP 8.
+* Fix - Identify in-use data store.
+* Fix - Improve test_migration_is_scheduled.
+* Fix - PHP notice on list table.
+* Fix - Speed up clean up and batch selects.
+* Fix - Update pending dependencies.
+* Fix - [PHP 8.0] Only pass action arg values through to do_action_ref_array().
+* Fix - [PHP 8] Set the PHP version to 7.1 in composer.json for PHP 8 compatibility.
+* Fix - add is_initialized() to docs.
+* Fix - fix file permissions.
+* Fix - fixes #664 by replacing __ with esc_html__.
+
+= 3.1.6 - 2020-05-12 =
+* Change log starts.

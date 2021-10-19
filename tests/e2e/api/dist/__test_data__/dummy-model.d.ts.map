@@ -1,0 +1,1 @@
+{"version":3,"file":"dummy-model.d.ts","sourceRoot":"","sources":["../../src/__test_data__/dummy-model.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,KAAK,EAAE,MAAM,WAAW,CAAC;AAElC;;GAEG;AACH,qBAAa,UAAW,SAAQ,KAAK;IAC7B,IAAI,EAAE,MAAM,CAAM;gBAEL,OAAO,CAAC,EAAE,OAAO,CAAE,UAAU,CAAE;CAInD"}

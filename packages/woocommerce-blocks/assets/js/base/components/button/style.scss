@@ -1,0 +1,35 @@
+.wc-block-components-button:not(.is-link) {
+	@include reset-typography();
+	align-items: center;
+	background-color: $gray-900;
+	color: $white;
+	display: inline-flex;
+	font-weight: bold;
+	min-height: 3em;
+	justify-content: center;
+	line-height: 1;
+	padding: 0 em($gap);
+	text-align: center;
+	text-decoration: none;
+	text-transform: none;
+	position: relative;
+
+	&:disabled,
+	&:hover,
+	&:focus,
+	&:active {
+		background-color: $gray-900;
+		color: $white;
+	}
+
+	.wc-block-components-button__text {
+		display: block;
+
+		> svg {
+			fill: currentColor;
+		}
+	}
+	.wc-block-components-spinner + .wc-block-components-button__text {
+		visibility: hidden;
+	}
+}

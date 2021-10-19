@@ -1,0 +1,8 @@
+.modal-open .wc-block-mini-cart__button {
+	pointer-events: none;
+}
+
+// Reset font size so it doesn't depend on drawer's ancestors.
+.wc-block-mini-cart__drawer {
+	font-size: 1rem;
+}

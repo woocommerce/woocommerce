@@ -1,0 +1,32 @@
+// Adjust padding and margins in the editor to improve selected block outlines.
+.wc-block-checkout__terms {
+	margin: 20px 0;
+	padding-top: 4px;
+	padding-bottom: 4px;
+	display: flex;
+	align-items: flex-start;
+
+	.block-editor-rich-text__editable {
+		vertical-align: middle;
+		line-height: em(24px);
+	}
+}
+
+.wc-block-components-checkbox {
+	margin-right: $gap;
+}
+
+.wc-block-checkout__terms_notice .components-notice__action {
+	margin-left: 0;
+}
+
+.wc-block-checkout__terms_notice-button {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+
+	.wc-block-checkout__terms_notice-button__icon {
+		margin-left: $gap-smallest;
+	}
+}
+

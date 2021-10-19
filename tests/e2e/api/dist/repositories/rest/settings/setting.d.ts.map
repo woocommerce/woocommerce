@@ -1,0 +1,1 @@
+{"version":3,"file":"setting.d.ts","sourceRoot":"","sources":["../../../../src/repositories/rest/settings/setting.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,UAAU,EAAE,MAAM,eAAe,CAAC;AAM3C,OAAO,EAGN,aAAa,EACb,aAAa,EAEb,eAAe,EACf,MAAM,iBAAiB,CAAC;AAOzB;;;;;GAKG;AACH,MAAM,CAAC,OAAO,UAAU,qBAAqB,CAAE,UAAU,EAAE,UAAU,GAAI,aAAa,GAAG,aAAa,GAAG,eAAe,CAWvH"}

@@ -1,0 +1,15 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.productVariationRESTRepository = exports.variableProductRESTRepository = exports.simpleProductRESTRepository = exports.groupedProductRESTRepository = exports.externalProductRESTRepository = exports.createProductTransformer = void 0;
+var shared_1 = require("./shared");
+Object.defineProperty(exports, "createProductTransformer", { enumerable: true, get: function () { return shared_1.createProductTransformer; } });
+var grouped_product_1 = require("./grouped-product");
+Object.defineProperty(exports, "groupedProductRESTRepository", { enumerable: true, get: function () { return grouped_product_1.groupedProductRESTRepository; } });
+var simple_product_1 = require("./simple-product");
+Object.defineProperty(exports, "simpleProductRESTRepository", { enumerable: true, get: function () { return simple_product_1.simpleProductRESTRepository; } });
+var external_product_1 = require("./external-product");
+Object.defineProperty(exports, "externalProductRESTRepository", { enumerable: true, get: function () { return external_product_1.externalProductRESTRepository; } });
+var variable_product_1 = require("./variable-product");
+Object.defineProperty(exports, "variableProductRESTRepository", { enumerable: true, get: function () { return variable_product_1.variableProductRESTRepository; } });
+var variation_1 = require("./variation");
+Object.defineProperty(exports, "productVariationRESTRepository", { enumerable: true, get: function () { return variation_1.productVariationRESTRepository; } });
