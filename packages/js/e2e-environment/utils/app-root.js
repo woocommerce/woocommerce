@@ -4,19 +4,21 @@
 const path = require( 'path' );
 
 const getAppRoot = () => {
-    // Figure out where we're installed.
-    // Typically will be in node_modules/, but WooCommerce
-    // uses a local file path (tests/e2e/env).
-    let appPath = false;
-    const moduleDir = path.dirname( require.resolve( '@woocommerce/e2e-environment' ) );
+	// Figure out where we're installed.
+	// Typically will be in node_modules/, but WooCommerce
+	// uses a local file path (packages/js/e2e-environment).
+	let appPath = false;
+	const moduleDir = path.dirname(
+		require.resolve( '@woocommerce/e2e-environment' )
+	);
 
-    if ( -1 < moduleDir.indexOf( 'node_modules' ) ) {
-        appPath = moduleDir.split( 'node_modules' )[ 0 ];
-    } else if ( -1 < moduleDir.indexOf( 'tests/e2e/env' ) ) {
-        appPath = moduleDir.split( 'tests/e2e/env' )[ 0 ];
-    }
+	if ( moduleDir.indexOf( 'node_modules' ) > -1 ) {
+		appPath = moduleDir.split( 'node_modules' )[ 0 ];
+	} else if ( moduleDir.indexOf( 'packages/js/e2e-environment' ) > -1 ) {
+		appPath = moduleDir.split( 'packages/js/e2e-environment' )[ 0 ];
+	}
 
-    return appPath;
+	return appPath;
 };
 
 module.exports = getAppRoot;
