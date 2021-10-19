@@ -66,6 +66,22 @@ A text code coverage summary can be displayed using the `--coverage-text` option
 
     $ vendor/bin/phpunit --coverage-text
 
+### Troubleshooting
+
+In case you're unable to run the unit tests, you might see an error message similar to:
+
+```
+Fatal error: require_once(): Failed opening required '/var/folders/qr/3cnz_5_j3j1cljph_246ty1h0000gn/T/wordpress-tests-lib/includes/functions.php' (include_path='.:/usr/local/Cellar/php@7.4/7.4.23/share/php@7.4/pear') in /Users/nielslange/Plugins/woocommerce/tests/legacy/bootstrap.php on line 59
+```
+
+If you run into this problem, simply delete the WordPress test directory and run the installer again. In this particular case, you'd run the following command:
+
+```
+$ rm -rf /var/folders/qr/3cnz_5_j3j1cljph_246ty1h0000gn/T/wordpress-tests-lib
+$ tests/bin/install.sh woocommerce_tests_1 root root
+# Note that woocommerce_tests changed to woocommerce_tests_1 as the database woocommerce_tests already exists due to the prior command.
+```
+
 ### Running tests in PHP 8
 
 WooCommerce currently supports PHP versions from 7.0 up to 8.0, and this poses an issue with PHPUnit:
