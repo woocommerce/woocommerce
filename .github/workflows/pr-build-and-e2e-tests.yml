@@ -10,7 +10,7 @@ jobs:
 
             - name: Build
               id: build
-              uses: woocommerce/action-build@test-cd-after-npm-install
+              uses: woocommerce/action-build@update-to-pnpm
 
             - name: Upload PR zip
               uses: actions/upload-artifact@v2
