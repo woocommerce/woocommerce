@@ -39,7 +39,7 @@ jobs:
                   path: package/woocommerce
 
             - name: Install PNPM and install dependencies
-              working-directory: package/woocommerce/plugins/woocommerce
+              working-directory: package/woocommerce
               run: |
                 npm install -g pnpm
                 pnpm install
