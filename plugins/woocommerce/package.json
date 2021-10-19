@@ -13,15 +13,13 @@
     "wp_org_slug": "woocommerce"
   },
   "scripts": {
-    "install": " if [ -z \"$SKIP_LERNA_BOOTSTRAP\" ]; then pnpx lerna bootstrap --hoist; fi",
     "check:subset-installed": "pnpm list --depth 1 install-subset > /dev/null 2>&1",
     "install:subset-only": "pnpm install --no-package-lock --no-save install-subset",
-    "install:no-e2e": "pnpm run check:subset-installed --silent || pnpm run install:subset-only && SKIP_LERNA_BOOTSTRAP=true pnpx install-subset i no-e2e",
+    "install:no-e2e": "pnpm run check:subset-installed --silent || pnpm run install:subset-only && pnpx install-subset i no-e2e",
     "build": "./bin/build-zip.sh",
     "build:core": "grunt && pnpm run makepot",
     "build:dev": "pnpm run build:core && pnpm run build:packages",
     "build-watch": "grunt watch",
-    "build:packages": "lerna run build",
     "build:zip": "pnpm run build",
     "build:assets": "grunt assets",
     "lint:js": "eslint assets/js --ext=js",
@@ -36,7 +34,6 @@
     "test:unit": "./vendor/bin/phpunit -c ./phpunit.xml",
     "makepot": "composer run-script makepot",
     "packages:fix:textdomain": "node ./bin/package-update-textdomain.js",
-    "publish-packages": "lerna publish from-package",
     "git:update-hooks": "rm -r .git/hooks && mkdir -p .git/hooks && node ./node_modules/husky/husky.js install"
   },
   "devDependencies": {
@@ -86,7 +83,6 @@
     "husky": "4.3.0",
     "istanbul": "1.0.0-alpha.2",
     "jest": "^25.1.0",
-    "lerna": "3.22.1",
     "lint-staged": "9.5.0",
     "mocha": "7.2.0",
     "node-sass": "4.14.1",
