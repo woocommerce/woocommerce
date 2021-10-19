@@ -37,6 +37,13 @@ class WC_Rate_Limiter {
 	const CACHE_GROUP = 'wc_rate_limit';
 
 	/**
+	 * Hook in methods.
+	 */
+	public static function init() {
+		add_action( 'woocommerce_cleanup_rate_limits', array( __CLASS__, 'cleanup' ) );
+	}
+
+	/**
 	 * Constructs key name from action identifier.
 	 * Left in for backwards compatibility.
 	 *
@@ -162,3 +169,5 @@ class WC_Rate_Limiter {
 		}
 	}
 }
+
+WC_Rate_Limiter::init();
