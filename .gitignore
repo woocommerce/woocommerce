@@ -1,84 +1,34 @@
-# Editors
-project.xml
-project.properties
-/nbproject/private/
-.buildpath
-.project
-.settings*
-.idea
-.vscode
-.eslintcache
-*.sublime-project
-*.sublime-workspace
-.sublimelinterrc
-*.swp
-
-# Grunt
-node_modules/
-none
-
-# Sass
-.sass-cache/
-
-# Compiled CSS
-/assets/css/*.css
-/assets/css/photoswipe/**/*.min.css
-
-# Minified JS
-/assets/js/**/*.min.js
-
-# OS X metadata
+# Operating System files
 .DS_Store
-
-# Windows junk
 Thumbs.db
 
-# Behat/CLI Tests
-tests/cli/installer
-tests/cli/composer.phar
-tests/cli/composer.lock
-tests/cli/composer.json
-tests/cli/vendor
+# IDE files
+.idea
+.vscode/
 
-# Unit tests
-/tmp
-/tests/bin/tmp
-/tests/e2e/config/local-*.json
-/tests/e2e/config/local.json
-/tests/e2e/config/default.json
-/tests/e2e/env/config/default.json
-/tests/e2e/docker
-/tests/e2e/env/docker/wp-cli/initialize.sh
-/tests/e2e/env/build/
-/tests/e2e/env/build-module/
-/tests/e2e/screenshots
-/tests/e2e/plugins
-/tests/e2e/utils/build/
-/tests/e2e/utils/build-module/
+# Environment files
+wp-cli.local.yml
+.wp-env.override.json
+yarn-error.log
+npm-debug.log
+.pnpm-debug.log
 
-# Logs
-/logs
+# Build files
+*.sql
+*.swp
+*.zip
 
-# Composer
-/vendor/
-/bin/composer/**/vendor/
-/lib/vendor/
-contributors.md
-contributors.html
-
-# Yarn
-yarn.lock
-
-# Packages
-/packages/*
-!/packages/README.md
-
-# Screenshots for e2e tests failures
-/screenshots/
-
-# Language files
-i18n/languages/woocommerce.pot
-
-# Build
+# Built packages
 build/
-woocommerce.zip
+build-module/
+build-style/
+
+# Project files
+node_modules/
+vendor/
+
+# TypeScript files
+tsconfig.tsbuildinfo
+
+# wp-env config
+.wp-env.override.json
