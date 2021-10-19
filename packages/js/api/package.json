@@ -28,8 +28,8 @@
   "scripts": {
     "clean": "rm -rf ./dist ./tsconfig.tsbuildinfo",
     "compile": "tsc -b",
-    "build": "npm run clean && npm run compile",
-    "prepare": "npm run build",
+    "build": "pnpm run clean && npm run compile",
+    "prepare": "pnpm run build",
     "lint": "eslint src",
     "test": "jest"
   },
