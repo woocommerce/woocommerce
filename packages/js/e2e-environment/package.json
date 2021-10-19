@@ -49,8 +49,8 @@
   "scripts": {
     "clean": "rm -rf ./build ./build-module",
     "compile": "node ./../bin/build.js",
-    "build": "npm run clean && npm run compile",
-    "prepare": "npm run build",
+    "build": "pnpm run clean && pnpm run compile",
+    "prepare": "pnpm run build",
     "docker:up": "./bin/docker-compose.sh up",
     "docker:down": "./bin/docker-compose.sh down",
     "docker:clear-all": "docker rmi --force $(docker images -q)",

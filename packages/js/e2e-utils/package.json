@@ -26,7 +26,7 @@
   "scripts": {
     "clean": "rm -rf ./build ./build-module",
     "compile": "node ./../bin/build.js",
-    "build": "npm run clean && npm run compile",
-    "prepare": "npm run build"
+    "build": "pnpm run clean && pnpm run compile",
+    "prepare": "pnpm run build"
   }
 }
