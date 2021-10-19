@@ -33,7 +33,7 @@ const getWordPressVersion = async () => {
 }
 
 const runProductBrowseSearchSortTest = () => {
-	utils.describeIf( getWordPressVersion() >= 5.8 )( 'Search, browse by categories and sort items in the shop', () => {
+	utils.describeIf( getWordPressVersion() >= '5.8' )( 'Search, browse by categories and sort items in the shop', () => {
 		beforeAll(async () => {
 			// Create 1st product with Clothing category
 			await createSimpleProductWithCategory(simpleProductName + ' 1', singleProductPrice, clothing);
