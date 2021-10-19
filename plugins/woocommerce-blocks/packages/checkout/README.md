@@ -6,7 +6,7 @@ Components and utilities making it possible to integrate with the WooCommerce Ca
 
 - [Installation](#installation)
 - [Usage](#usage)
-  - [Aliased imports](#aliased-imports)
+	- [Aliased imports](#aliased-imports)
 - [Folder Structure Overview](#folder-structure-overview)
 
 ## Installation
@@ -33,6 +33,10 @@ const dependencyMap = {
 	'@woocommerce/blocks-checkout': [ 'wc', 'blocksCheckout' ],
 };
 
+const handleMap = {
+	'@woocommerce/blocks-checkout': 'wc-blocks-checkout',
+};
+
 module.exports = {
 	// …snip
 	plugins: [
@@ -41,6 +45,11 @@ module.exports = {
 			requestToExternal( request ) {
 				if ( dependencyMap[ request ] ) {
 					return dependencyMap[ request ];
+				}
+			},
+			requestToHandle( request ) {
+				if ( handleMap[ request ] ) {
+					return handleMap[ request ];
 				}
 			},
 		} ),
