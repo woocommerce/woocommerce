@@ -144,9 +144,12 @@ export function getProductList(
 	} );
 
 	const onboarding = getSetting( 'onboarding', {} );
-	const theme = onboarding.themes.find(
-		( themeData ) => themeData.slug === profileItems.theme
-	);
+	let theme = null;
+	if ( onboarding && onboarding.themes ) {
+		theme = onboarding.themes.find(
+			( themeData ) => themeData.slug === profileItems.theme
+		);
+	}
 
 	if (
 		theme &&
