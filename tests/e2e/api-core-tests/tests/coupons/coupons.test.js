@@ -1,5 +1,6 @@
 const { couponsApi } = require('../../endpoints/coupons');
-const { coupon } = require('../../data');
+const { ordersApi } = require('../../endpoints/orders');
+const { coupon, order } = require('../../data');
 
 /**
  * Tests for the WooCommerce Coupons API.
@@ -263,6 +264,44 @@ describe('Coupons API tests', () => {
 			expect(status).toEqual(couponsApi.listAll.responseCode);
 			expect(body).toHaveLength(1);
 			expect(body[0].id).toEqual(matchingCoupon.id);
+		});
+	});
+
+	describe('Add coupon to order', () => {
+		let testCoupon = {
+			code: `coupon-${Date.now()}`,
+			discount_type: 'percent',
+			amount: '10',
+		};
+		let orderId;
+
+		beforeAll(async () => {
+			// Create a coupon
+			const createCouponResponse = await couponsApi.create.coupon(
+				testCoupon
+			);
+			testCoupon.id = createCouponResponse.body.id;
+		});
+
+		// Clean up created coupon and order
+		afterAll(async () => {
+			await couponsApi.delete.coupon(testCoupon.id, true);
+			await ordersApi.delete.order(orderId, true);
+		});
+
+		it('can add coupon to an order', async () => {
+			const orderWithCoupon = {
+				...order,
+				coupon_lines: [{ code: testCoupon.code }],
+			};
+			const { status, body } = await ordersApi.create.order(
+				orderWithCoupon
+			);
+			orderId = body.id;
+
+			expect(status).toEqual(ordersApi.create.responseCode);
+			expect(body.coupon_lines).toHaveLength(1);
+			expect(body.coupon_lines[0].code).toEqual(testCoupon.code);
 		});
 	});
 });
