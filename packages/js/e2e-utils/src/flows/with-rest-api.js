@@ -300,5 +300,35 @@ export const withRestApi = {
 		} else {
 			return;
 		}
-	}
+	},
+	/**
+	 * Create a product category and return the ID. If the category already exists, the ID of the existing category is returned.
+	 *
+	 * @param {String} categoryName The name of the category to create
+	 * @returns {Promise<Number>} The ID of the category.
+	 */
+	createProductCategory: async ( categoryName ) => {
+		const payload = { name: categoryName };
+		let categoryId;
+
+		try {
+			const response = await client.post( productCategoriesEndpoint, payload );
+			expect( response.status ).toEqual( 201 );
+			categoryId = response.data.id;
+		} catch ( err ) {
+			if ( err.response.status === 400 && err.response.data.code === 'term_exists' ) {
+				// Get the list of categories and pull ID to return
+				const categoryList = await client.get( productCategoriesEndpoint );
+				expect( categoryList.status ).toEqual( 200 );
+				if ( categoryList.data && categoryList.data.length ) {
+					for ( let c = 0; c < categoryList.data.length; c++ ) {
+						if ( categoryList.data[c].name === categoryName ) {
+							categoryId = categoryList.data[c].id;
+						}
+					}
+				}
+			}
+		}
+		return categoryId;
+	},
 };
