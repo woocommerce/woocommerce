@@ -192,13 +192,12 @@ class Install {
 		}
 
 		// Check if we are not already running this routine.
-		if ( 'yes' === get_transient( 'wc_admin_installing' ) ) {
+		if ( self::is_installing() ) {
 			return;
 		}
 
 		// If we made it till here nothing is running yet, lets set the transient now.
 		set_transient( 'wc_admin_installing', 'yes', MINUTE_IN_SECONDS * 10 );
-		wc_maybe_define_constant( 'WC_ADMIN_INSTALLING', true );
 
 		self::migrate_options();
 		self::create_tables();
@@ -212,6 +211,15 @@ class Install {
 		// plugin version update. We base plugin age off of this value.
 		add_option( 'woocommerce_admin_install_timestamp', time() );
 		do_action( 'woocommerce_admin_installed' );
+	}
+
+	/**
+	 * Check if the installer is installing.
+	 *
+	 * @return bool
+	 */
+	public static function is_installing() {
+		return 'yes' === get_transient( 'wc_admin_installing' );
 	}
 
 	/**

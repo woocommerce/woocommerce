@@ -6,6 +6,7 @@
 namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks;
 
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\TaskList;
+use Automattic\WooCommerce\Admin\Install;
 
 /**
  * DeprecatedOptions class.
@@ -29,7 +30,7 @@ class DeprecatedOptions {
 	 * @return string
 	 */
 	public static function get_deprecated_options( $pre_option, $option ) {
-		if ( defined( 'WC_ADMIN_INSTALLING' ) && WC_ADMIN_INSTALLING ) {
+		if ( Install::is_installing() ) {
 			return $pre_option;
 		};
 
