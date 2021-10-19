@@ -12,7 +12,11 @@ describe('Coupons API tests', () => {
 	let couponId;
 
 	it('can create a coupon', async () => {
-		const response = await couponsApi.create.coupon(coupon);
+		const testCoupon = {
+			...coupon,
+			code: `${coupon.code}-${Date.now()}`,
+		};
+		const response = await couponsApi.create.coupon(testCoupon);
 
 		expect(response.statusCode).toEqual(couponsApi.create.responseCode);
 		expect(response.body.id).toBeDefined();
@@ -21,7 +25,7 @@ describe('Coupons API tests', () => {
 		// Validate the created coupon object has the correct code, amount, and discount type
 		expect(response.body).toEqual(
 			expect.objectContaining({
-				code: coupon.code,
+				code: testCoupon.code,
 				amount: Number(coupon.amount).toFixed(2),
 				discount_type: coupon.discount_type,
 			})
@@ -61,15 +65,18 @@ describe('Coupons API tests', () => {
 	});
 
 	describe('Batch update coupons', () => {
+		/**
+		 * Coupons to be created, updated, and deleted.
+		 */
 		const expectedCoupons = [
 			{
-				code: `coupon${Date.now()}`,
+				code: `batchcoupon-${Date.now()}`,
 				discount_type: 'percent',
 				amount: '10',
 				free_shipping: false,
 			},
 			{
-				code: `coupon${Date.now() + 1}`,
+				code: `batchcoupon-${Date.now() + 1}`,
 				discount_type: 'percent',
 				amount: '20',
 			},
@@ -162,6 +169,100 @@ describe('Coupons API tests', () => {
 
 				expect(status).toEqual(404);
 			}
+		});
+	});
+
+	describe('List coupons', () => {
+		const allCoupons = [
+			{
+				...coupon,
+				code: `listcoupons-01-${Date.now()}`,
+				description: `description-01-${Date.now()}`,
+			},
+			{
+				...coupon,
+				code: `listcoupons-02-${Date.now()}`,
+				description: `description-02-${Date.now()}`,
+			},
+			{
+				...coupon,
+				code: `listcoupons-03-${Date.now()}`,
+				description: `description-03-${Date.now()}`,
+			},
+		];
+
+		beforeAll(async () => {
+			// Create list of coupons for testing.
+			const response = await couponsApi.batch.coupons({
+				create: allCoupons,
+			});
+			const actualCreatedCoupons = response.body.create;
+
+			// Save their coupon ID's
+			for (const coupon of allCoupons) {
+				const { id } = actualCreatedCoupons.find(
+					({ code }) => coupon.code === code
+				);
+
+				coupon.id = id;
+			}
+		});
+
+		afterAll(async () => {
+			// Clean up created coupons
+			const batchDeletePayload = {
+				delete: allCoupons.map(({ id }) => id),
+			};
+			await couponsApi.batch.coupons(batchDeletePayload);
+		});
+
+		it('can list all coupons by default', async () => {
+			const response = await couponsApi.listAll.coupons();
+			const listedCoupons = response.body;
+			const actualCouponIdsList = listedCoupons.map(({ id }) => id);
+			const expectedCouponIdsList = allCoupons.map(({ id }) => id);
+
+			expect(response.status).toEqual(couponsApi.listAll.responseCode);
+			expect(actualCouponIdsList).toEqual(
+				expect.arrayContaining(expectedCouponIdsList)
+			);
+		});
+
+		it('can limit result set to matching code', async () => {
+			const matchingCoupon = allCoupons[1];
+			const payload = { code: matchingCoupon.code };
+			const { status, body } = await couponsApi.listAll.coupons(payload);
+
+			expect(status).toEqual(couponsApi.listAll.responseCode);
+			expect(body).toHaveLength(1);
+			expect(body[0].id).toEqual(matchingCoupon.id);
+		});
+
+		it('can paginate results', async () => {
+			const pageSize = 2;
+			const payload = {
+				page: 1,
+				per_page: pageSize,
+			};
+			const { status, body } = await couponsApi.listAll.coupons(payload);
+
+			expect(status).toEqual(couponsApi.listAll.responseCode);
+			expect(body).toHaveLength(pageSize);
+		});
+
+		it('can limit results to matching string', async () => {
+			// Search by description
+			const matchingCoupon = allCoupons[2];
+			const matchingString = matchingCoupon.description;
+			const payload = {
+				search: matchingString,
+			};
+
+			const { status, body } = await couponsApi.listAll.coupons(payload);
+
+			expect(status).toEqual(couponsApi.listAll.responseCode);
+			expect(body).toHaveLength(1);
+			expect(body[0].id).toEqual(matchingCoupon.id);
 		});
 	});
 });
