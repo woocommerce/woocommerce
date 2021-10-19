@@ -31,7 +31,7 @@ const couponsApi = {
 		method: 'GET',
 		path: 'coupons',
 		responseCode: 200,
-		coupons: async () => getRequest( 'coupons' ),
+		coupons: async ( queryString ) => getRequest( 'coupons', queryString ),
 	},
 	update: {
 		name: 'Update a coupon',
