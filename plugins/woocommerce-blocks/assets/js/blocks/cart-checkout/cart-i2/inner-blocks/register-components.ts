@@ -20,6 +20,7 @@ import cartLineItemsMetadata from './cart-line-items-block/block.json';
 import cartOrderSummaryMetadata from './cart-order-summary-block/block.json';
 import cartTotalsMetadata from './cart-totals-block/block.json';
 import cartProceedToCheckoutMetadata from './proceed-to-checkout-block/block.json';
+import cartAcceptedPaymentMethodsMetadata from './cart-accepted-payment-methods-block/block.json';
 
 registerCheckoutBlock( {
 	metadata: filledCartMetadata,
@@ -29,6 +30,7 @@ registerCheckoutBlock( {
 		)
 	),
 } );
+
 registerCheckoutBlock( {
 	metadata: emptyCartMetadata,
 	component: lazy( () =>
@@ -37,6 +39,7 @@ registerCheckoutBlock( {
 		)
 	),
 } );
+
 registerCheckoutBlock( {
 	metadata: filledCartMetadata,
 	component: lazy( () =>
@@ -45,6 +48,7 @@ registerCheckoutBlock( {
 		)
 	),
 } );
+
 registerCheckoutBlock( {
 	metadata: emptyCartMetadata,
 	component: lazy( () =>
@@ -53,6 +57,7 @@ registerCheckoutBlock( {
 		)
 	),
 } );
+
 registerCheckoutBlock( {
 	metadata: cartItemsMetadata,
 	component: lazy( () =>
@@ -103,6 +108,15 @@ registerCheckoutBlock( {
 	component: lazy( () =>
 		import(
 			/* webpackChunkName: "cart-blocks/checkout-button" */ './proceed-to-checkout-block/frontend'
+		)
+	),
+} );
+
+registerCheckoutBlock( {
+	metadata: cartAcceptedPaymentMethodsMetadata,
+	component: lazy( () =>
+		import(
+			/* webpackChunkName: "cart-blocks/accepted-payment-methods" */ './cart-accepted-payment-methods-block/frontend'
 		)
 	),
 } );

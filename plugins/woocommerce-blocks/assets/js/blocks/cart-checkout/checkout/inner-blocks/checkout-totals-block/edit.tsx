@@ -42,6 +42,7 @@ export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 					allowedBlocks={ allowedBlocks }
 					templateLock={ false }
 					template={ defaultTemplate }
+					renderAppender={ InnerBlocks.ButtonBlockAppender }
 				/>
 			</div>
 		</Sidebar>
