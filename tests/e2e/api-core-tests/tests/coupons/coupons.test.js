@@ -268,7 +268,7 @@ describe('Coupons API tests', () => {
 	});
 
 	describe('Add coupon to order', () => {
-		let testCoupon = {
+		const testCoupon = {
 			code: `coupon-${Date.now()}`,
 			discount_type: 'percent',
 			amount: '10',
