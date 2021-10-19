@@ -14,7 +14,6 @@ const glob = require( 'glob' );
 const babel = require( '@babel/core' );
 const chalk = require( 'chalk' );
 const mkdirp = require( 'mkdirp' );
-const deasync = require( 'deasync' );
 
 /**
  * Internal dependencies
@@ -127,11 +126,14 @@ function buildPackage( packagePath ) {
 
 	let packageName;
 	try {
-		packageName = require( path.resolve( PACKAGE_DIR, 'package.json' ) ).name;
+		packageName = require( path.resolve( PACKAGE_DIR, 'package.json' ) )
+			.name;
 	} catch ( e ) {
 		packageName = PACKAGE_DIR.split( path.sep ).pop();
 	}
-	process.stdout.write( chalk.inverse( `>> Building package: ${ packageName }\n` ) );
+	process.stdout.write(
+		chalk.inverse( `>> Building package: ${ packageName }\n` )
+	);
 
 	const jsFiles = glob.sync( `${ srcDir }/**/*.js`, {
 		ignore: [
