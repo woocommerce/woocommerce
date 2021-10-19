@@ -19,6 +19,7 @@ wp_clear_scheduled_hook( 'woocommerce_cleanup_personal_data' );
 wp_clear_scheduled_hook( 'woocommerce_cleanup_logs' );
 wp_clear_scheduled_hook( 'woocommerce_geoip_updater' );
 wp_clear_scheduled_hook( 'woocommerce_tracker_send_event' );
+wp_clear_scheduled_hook( 'woocommerce_cleanup_rate_limits' );
 
 /*
  * Only remove ALL product and page data if WC_REMOVE_ALL_DATA constant is set to true in user's
