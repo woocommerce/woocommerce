@@ -8,9 +8,6 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v2
 
-            - name: Install pnpm
-              run: curl -f https://get.pnpm.io/v6.16.js | node - add --global pnpm@6
-
             - name: Build
               id: build
               uses: woocommerce/action-build@update-to-pnpm
@@ -41,9 +38,11 @@ jobs:
               with:
                   path: package/woocommerce
 
-            - name: Run pnpm install.
+            - name: Install PNPM and install dependencies
               working-directory: package/woocommerce/plugins/woocommerce
-              run: pnpm install
+              run: |
+                npm install -g pnpm
+                pnpm install
 
             - name: Load docker images and start containers.
               working-directory: package/woocommerce/plugins/woocommerce
