@@ -56,5 +56,3 @@ export const useViewSwitcher = (
 		component: ViewSwitcherComponent,
 	};
 };
-
-export default useViewSwitcher;

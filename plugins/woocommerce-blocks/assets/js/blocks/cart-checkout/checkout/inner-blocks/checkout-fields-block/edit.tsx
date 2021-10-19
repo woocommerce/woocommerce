@@ -13,8 +13,7 @@ import {
 	useCheckoutBlockControlsContext,
 	useCheckoutBlockContext,
 } from '../../context';
-import { useForcedLayout } from '../../use-forced-layout';
-import { getAllowedBlocks } from '../../editor-utils';
+import { useForcedLayout, getAllowedBlocks } from '../../../shared';
 import './style.scss';
 
 export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {

@@ -9,8 +9,7 @@ import { useEditorContext } from '@woocommerce/base-context';
 /**
  * Internal dependencies
  */
-import { useForcedLayout } from '../../use-forced-layout';
-import { getAllowedBlocks } from '../../editor-utils';
+import { useForcedLayout, getAllowedBlocks } from '../../../shared';
 
 export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 	const blockProps = useBlockProps();

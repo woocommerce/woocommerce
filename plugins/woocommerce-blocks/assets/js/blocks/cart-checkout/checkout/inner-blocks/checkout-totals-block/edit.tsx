@@ -10,8 +10,7 @@ import type { TemplateArray } from '@wordpress/blocks';
  * Internal dependencies
  */
 import './style.scss';
-import { useForcedLayout } from '../../use-forced-layout';
-import { getAllowedBlocks } from '../../editor-utils';
+import { useForcedLayout, getAllowedBlocks } from '../../../shared';
 import { useCheckoutBlockContext } from '../../context';
 
 export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
