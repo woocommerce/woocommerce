@@ -76,7 +76,7 @@ module.exports = jestConfig;
 The test sequencer provides a screenshot function for test failures. To enable screenshots on test failure use
 
 ```shell script
-WC_E2E_SCREENSHOTS=1 npx wc-e2e test:e2e
+WC_E2E_SCREENSHOTS=1 pnpx wc-e2e test:e2e
 ```
 
 To take adhoc in test screenshots use
@@ -92,7 +92,7 @@ Screenshots will be saved to `tests/e2e/screenshots`. This folder is cleared at 
 To override the default timeout for the tests, you can use the `DEFAULT_TIMEOUT_OVERRIDE` flag and pass in a maximum timeout in milliseconds. For example, you can pass it in when running the tests from the command line:
 
 ```bash
-DEFAULT_TIMEOUT_OVERRIDE=35000 npx wc-e2e test:e2e
+DEFAULT_TIMEOUT_OVERRIDE=35000 pnpx wc-e2e test:e2e
 ```
 
 This value will override the default Jest timeout as well as pass the timeout to the following Puppeteer methods:
@@ -109,7 +109,7 @@ You can use the `LATEST_WP_VERSION_MINUS` flag to determine how many versions ba
 For example, you could run the following command:
 
 ```bash
-LATEST_WP_VERSION_MINUS=2 npx wc-e2e docker:up
+LATEST_WP_VERSION_MINUS=2 pnpx wc-e2e docker:up
 ```
 
 In this example, if the current WordPress version is 6.0, this will go two versions back and use the WordPress 5.8 Docker image for the tests.

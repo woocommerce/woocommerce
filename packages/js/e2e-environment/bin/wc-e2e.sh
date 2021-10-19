@@ -5,7 +5,7 @@
 
 # Script help
 usage() {
-	echo 'usage: npx wc-e2e <script>'
+	echo 'usage: pnpx wc-e2e <script>'
 	echo 'scripts:'
 	echo '         docker:up [initialization-script] - boot docker container'
 	echo '         docker:down - shut down docker container'

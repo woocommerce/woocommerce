@@ -115,7 +115,7 @@ Run the following in a terminal/command line window
 
 - `npm install jest --global` (this only needs to be done once)
 
-- `npx wc-e2e docker:up` (this will build the test site using Docker)
+- `pnpx wc-e2e docker:up` (this will build the test site using Docker)
 
 - Use `docker ps` to confirm that the Docker containers are running. You should see a log similar to one below indicating that everything had been built as expected:
 
@@ -141,16 +141,16 @@ Username: admin
 PW: password
 ```
 
-- Run `npx wc-e2e docker:down` when you are done with running e2e tests and before making any changes to test site configuration.
+- Run `pnpx wc-e2e docker:down` when you are done with running e2e tests and before making any changes to test site configuration.
 
-Note that running `npx wc-e2e docker:down` and then `npx wc-e2e docker:up` re-initializes the test container.
+Note that running `pnpx wc-e2e docker:down` and then `pnpx wc-e2e docker:up` re-initializes the test container.
 
 ### How to run tests in headless mode
 
 To run e2e tests in headless mode use the following command:
 
 ```bash
-npx wc-e2e test:e2e
+pnpx wc-e2e test:e2e
 ```
 
 ### How to run tests in non-headless mode
@@ -158,7 +158,7 @@ npx wc-e2e test:e2e
 Tests run in headless mode by default. However, sometimes it's useful to observe the browser while running or developing tests. To do so, you can run tests in a non-headless (dev) mode:
 
 ```bash
-npx wc-e2e test:e2e-dev
+pnpx wc-e2e test:e2e-dev
 ```
 
 The dev mode also enables SlowMo mode. SlowMo slows down Puppeteer’s operations. This makes it easier to see what is happening in the browser.
@@ -166,7 +166,7 @@ The dev mode also enables SlowMo mode. SlowMo slows down Puppeteer’s operation
 By default, SlowMo mode adds a 50 millisecond delay between test steps. If you'd like to override the length of the delay and have the tests run faster or slower in the `-dev` mode, pass `PUPPETEER_SLOWMO` variable when running tests as shown below:
 
 ```
-PUPPETEER_SLOWMO=10 npx wc-e2e test:e2e-dev
+PUPPETEER_SLOWMO=10 pnpx wc-e2e test:e2e-dev
 ```
 
 The faster you want the tests to run, the lower the value should be of `PUPPETEER_SLOWMO` should be. 
@@ -181,7 +181,7 @@ For example:
 Tests run in headless mode by default. While writing tests it may be useful to have the debugger loaded while running a test in non-headless mode. To run tests in debug mode:
             
 ```bash
-npx wc-e2e test:e2e-debug
+pnpx wc-e2e test:e2e-debug
 ```
 
 When all tests have been completed the debugger remains active. Control doesn't return to the command line until the debugger is closed. Otherwise, debug mode functions the same as non-headless mode.
@@ -191,7 +191,7 @@ When all tests have been completed the debugger remains active. Control doesn't 
 To run an individual test, use the direct path to the spec. For example:
 
 ```bash
-npx wc-e2e test:e2e ./tests/e2e/specs/wp-admin/test-create-order.js
+pnpx wc-e2e test:e2e ./tests/e2e/specs/wp-admin/test-create-order.js
 ``` 
 
 ### How to skip tests
@@ -353,6 +353,6 @@ In the example above, you can see that `allows customer to see downloads` part o
 
 ## Debugging tests 
 
-The test sequencer (`npx wc-e2e test:e2e`) includes support for saving [screenshots on test errors](https://github.com/woocommerce/woocommerce/tree/trunk/tests/e2e/env#test-screenshots) which can be sent to a Slack channel via a [Slackbot](https://github.com/woocommerce/woocommerce/tree/trunk/tests/e2e/env#slackbot-setup).
+The test sequencer (`pnpx wc-e2e test:e2e`) includes support for saving [screenshots on test errors](https://github.com/woocommerce/woocommerce/tree/trunk/tests/e2e/env#test-screenshots) which can be sent to a Slack channel via a [Slackbot](https://github.com/woocommerce/woocommerce/tree/trunk/tests/e2e/env#slackbot-setup).
 
 For Puppeteer debugging, follow [Google's documentation](https://developers.google.com/web/tools/puppeteer/debugging).   

@@ -148,11 +148,11 @@ version: ~> 1.0
 
 script:
   - npm install jest --global
-  - npx wc-e2e docker:up
-  - npx wc-e2e test:e2e
+  - pnpx wc-e2e docker:up
+  - pnpx wc-e2e test:e2e
 
 ....
 
 after_script:
-  - npx wc-e2e docker:down
+  - pnpx wc-e2e docker:down
 ```

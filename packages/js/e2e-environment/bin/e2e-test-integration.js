@@ -77,7 +77,7 @@ const jestArgs = [
 ];
 
 if ( program.debug ) {
-	jestCommand = 'npx';
+	jestCommand = 'pnpx';
 	jestArgs.unshift( 'ndb', 'jest' );
 }
 

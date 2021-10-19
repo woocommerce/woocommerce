@@ -58,7 +58,7 @@
 
 ## Fixed
 
-- Return jest exit code from `npx wc-e2e test:e2e*`
+- Return jest exit code from `pnpx wc-e2e test:e2e*`
 - Remove redundant `puppeteer` dependency
 - Support for admin user configuration from `default.json`
 

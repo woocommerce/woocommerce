@@ -70,7 +70,7 @@ version: ~> 1.0
 script:
   - npm install jest --global
 # add your initialization script here
-  - npx wc-e2e test:e2e
+  - pnpx wc-e2e test:e2e
 
 ....
 
