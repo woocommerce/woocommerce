@@ -1,16 +1,5 @@
 const { couponsApi } = require('../../endpoints/coupons');
 const { coupon } = require('../../data');
-const { batch } = require('../../data/shared');
-
-/**
- * New coupon details
- */
-const updatedCouponDetails = {
-	description: '10% off storewide',
-	maximum_amount: '500.00',
-	usage_limit_per_user: 1,
-	free_shipping: true,
-};
 
 /**
  * Tests for the WooCommerce Coupons API.
@@ -46,6 +35,12 @@ describe('Coupons API tests', () => {
 	});
 
 	it('can update a coupon', async () => {
+		const updatedCouponDetails = {
+			description: '10% off storewide',
+			maximum_amount: '500.00',
+			usage_limit_per_user: 1,
+			free_shipping: true,
+		};
 		const response = await couponsApi.update.coupon(
 			couponId,
 			updatedCouponDetails
@@ -54,83 +49,6 @@ describe('Coupons API tests', () => {
 		expect(response.body).toEqual(
 			expect.objectContaining(updatedCouponDetails)
 		);
-	});
-
-	it('can batch update coupons', async () => {
-		const couponToBeDeleted = {
-			code: 'BATCH10OFF',
-			discount_type: 'percent',
-			amount: '10.00',
-		};
-		const batchUpdatePayload = {
-			create: [
-				{
-					code: 'BATCH20OFF',
-					discount_type: 'percent',
-					amount: '20',
-					individual_use: true,
-					exclude_sale_items: true,
-					minimum_amount: '100.00',
-				},
-				{
-					code: 'BATCH30OFF',
-					discount_type: 'percent',
-					amount: '30',
-					individual_use: true,
-					exclude_sale_items: true,
-					minimum_amount: '100.00',
-				},
-			],
-			update: [{ id: couponId, free_shipping: true }],
-			delete: [],
-		};
-
-		// Create a coupon that will be deleted later through the batch update endpoint
-		const singleCreateResponse = await couponsApi.create.coupon(
-			couponToBeDeleted
-		);
-		const couponIdToBeDeleted = singleCreateResponse.body.id;
-		batchUpdatePayload.delete.push(couponIdToBeDeleted);
-
-		// Use the Batch Update endpoint to create 2 new coupons, update 1 coupon to free shipping, and delete 1 coupon.
-		const batchUpdateResponse = await couponsApi.batch.coupons(
-			batchUpdatePayload
-		);
-		expect(batchUpdateResponse.status).toEqual(
-			couponsApi.batch.responseCode
-		);
-
-		// Verify that the 2 new coupons were created
-		const createdCoupons = batchUpdateResponse.create;
-		expect(batchUpdateResponse.body.create).toHaveLength(
-			batchUpdatePayload.create.length
-		);
-		for (let i = 0; i < createdCoupons.length; i++) {
-			const { id, code } = createdCoupons[i];
-			const expectedCode = batchUpdatePayload.create[i].code;
-
-			expect(id).toBeDefined();
-			expect(code).toEqual(expectedCode);
-		}
-
-		// Verify that 1 coupon was updated to free shipping
-		const updatedCoupons = batchUpdateResponse.body.update;
-		expect(updatedCoupons).toHaveLength(batchUpdatePayload.update.length);
-		expect(updatedCoupons[0].id).toEqual(couponId);
-		expect(updatedCoupons[0].free_shipping).toEqual(true);
-
-		// Verify that the expected coupon was deleted
-		const deletedCoupons = batchUpdateResponse.body.delete;
-		const getDeletedCouponResponse = await couponsApi.retrieve.coupon(
-			couponIdToBeDeleted
-		);
-		expect(deletedCoupons).toHaveLength(batchUpdatePayload.delete.length);
-		expect(updatedCoupons[0].id).toEqual(couponIdToBeDeleted);
-		expect(getDeletedCouponResponse.status).toEqual(404);
-
-		// Cleanup the 2 created coupons by the Batch Update Endpoint
-		const cleanupPayload = { delete: createdCoupons.map(({ id }) => id) };
-		await couponsApi.batch.coupons(cleanupPayload);
 	});
 
 	it('can permanently delete a coupon', async () => {
@@ -142,15 +60,108 @@ describe('Coupons API tests', () => {
 		expect(getCouponResponse.statusCode).toEqual(404);
 	});
 
-	describe('List all coupons', () => {
-		// mytodo test all list parameters
+	describe('Batch update coupons', () => {
+		const expectedCoupons = [
+			{
+				code: `coupon${Date.now()}`,
+				discount_type: 'percent',
+				amount: '10',
+				free_shipping: false,
+			},
+			{
+				code: `coupon${Date.now() + 1}`,
+				discount_type: 'percent',
+				amount: '20',
+			},
+		];
 
-		it('can list all coupons', async () => {
-			const response = await couponsApi.listAll.coupons();
-			expect(response.statusCode).toEqual(
-				couponsApi.listAll.responseCode
+		it('can batch create coupons', async () => {
+			// Batch create 2 new coupons.
+			const batchCreatePayload = {
+				create: expectedCoupons,
+			};
+			const batchCreateResponse = await couponsApi.batch.coupons(
+				batchCreatePayload
 			);
-			expect(response.body).toHaveLength(1);
+			expect(batchCreateResponse.status).toEqual(
+				couponsApi.batch.responseCode
+			);
+
+			// Verify that the 2 new coupons were created
+			const actualCoupons = batchCreateResponse.body.create;
+			expect(actualCoupons).toHaveLength(expectedCoupons.length);
+			for (let i = 0; i < actualCoupons.length; i++) {
+				const { id, code } = actualCoupons[i];
+				const expectedCouponCode = expectedCoupons[i].code;
+
+				expect(id).toBeDefined();
+				expect(code).toEqual(expectedCouponCode);
+
+				// Save the coupon id
+				expectedCoupons[i].id = id;
+			}
+		});
+
+		it('can batch update coupons', async () => {
+			// Update the 1st coupon to free shipping.
+			// Update the amount of the 2nd coupon to 25.
+			const batchUpdatePayload = {
+				update: [
+					{
+						id: expectedCoupons[0].id,
+						free_shipping: true,
+					},
+					{
+						id: expectedCoupons[1].id,
+						amount: '25.00',
+					},
+				],
+			};
+			const batchUpdateResponse = await couponsApi.batch.coupons(
+				batchUpdatePayload
+			);
+
+			// Verify the response code and the number of coupons that were updated.
+			const updatedCoupons = batchUpdateResponse.body.update;
+			expect(batchUpdateResponse.status).toEqual(
+				couponsApi.batch.responseCode
+			);
+			expect(updatedCoupons).toHaveLength(expectedCoupons.length);
+
+			// Verify that the 1st coupon was updated to free shipping.
+			expect(updatedCoupons[0].id).toEqual(expectedCoupons[0].id);
+			expect(updatedCoupons[0].free_shipping).toEqual(true);
+
+			// Verify that the amount of the 2nd coupon was updated to 25.
+			expect(updatedCoupons[1].id).toEqual(expectedCoupons[1].id);
+			expect(updatedCoupons[1].amount).toEqual('25.00');
+		});
+
+		it('can batch delete coupons', async () => {
+			// Batch delete the 2 coupons.
+			const couponIdsToDelete = expectedCoupons.map(({ id }) => id);
+			const batchDeletePayload = {
+				delete: couponIdsToDelete,
+			};
+			const batchDeleteResponse = await couponsApi.batch.coupons(
+				batchDeletePayload
+			);
+
+			// Verify that the response shows the 2 coupons.
+			const deletedCouponIds = batchDeleteResponse.body.delete.map(
+				({ id }) => id
+			);
+			expect(batchDeleteResponse.status).toEqual(
+				couponsApi.batch.responseCode
+			);
+			expect(deletedCouponIds).toEqual(couponIdsToDelete);
+
+			// Verify that the 2 deleted coupons cannot be retrieved.
+			for (const couponId of couponIdsToDelete) {
+				const { status } = await couponsApi.retrieve.coupon(couponId);
+
+				expect(status).toEqual(404);
+			}
 		});
 	});
 });
