@@ -1,5 +1,6 @@
 const { ordersApi } = require('../../endpoints/orders');
 const { order } = require('../../data');
+const { createSampleData, deleteSampleData } = require( '../../data/orders' );
 
 /**
  * Billing properties to update.
@@ -42,7 +43,15 @@ const updatedCustomerShipping = {
  *
  */
 describe('Orders API tests', () => {
-	let orderId;
+	let orderId, sampleData;
+
+	beforeAll( async () => {
+		sampleData = await createSampleData();
+	}, 100000 );
+
+	afterAll( async () => {
+		await deleteSampleData( sampleData );
+	}, 10000 );
 
 	it('can create an order', async () => {
 		const response = await ordersApi.create.order( order );
