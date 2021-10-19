@@ -3,29 +3,15 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useState, useEffect } from '@wordpress/element';
-import { PaymentMethodIcons } from '@woocommerce/base-components/cart-checkout';
 import Button from '@woocommerce/base-components/button';
 import { CHECKOUT_URL } from '@woocommerce/block-settings';
 import { useCheckoutContext } from '@woocommerce/base-context';
-import { usePaymentMethods } from '@woocommerce/base-context/hooks';
 import { usePositionRelativeToViewport } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import type PaymentMethodConfig from '../../../../blocks-registry/payment-methods/payment-method-config';
-
-const getIconsFromPaymentMethods = (
-	paymentMethods: PaymentMethodConfig[]
-) => {
-	return Object.values( paymentMethods ).reduce( ( acc, paymentMethod ) => {
-		if ( paymentMethod.icons !== null ) {
-			acc = acc.concat( paymentMethod.icons );
-		}
-		return acc;
-	}, [] );
-};
 
 /**
  * Checkout button rendered in the full cart page.
@@ -40,7 +26,6 @@ const CheckoutButton = ( { link }: { link: string } ): JSX.Element => {
 		positionRelativeToViewport,
 	] = usePositionRelativeToViewport();
 	const [ showSpinner, setShowSpinner ] = useState( false );
-	const { paymentMethods } = usePaymentMethods();
 
 	useEffect( () => {
 		// Add a listener to remove the spinner on the checkout button, so the saved page snapshot does not
@@ -65,20 +50,15 @@ const CheckoutButton = ( { link }: { link: string } ): JSX.Element => {
 	}, [] );
 
 	const submitContainerContents = (
-		<>
-			<Button
-				className="wc-block-cart__submit-button"
-				href={ link || CHECKOUT_URL }
-				disabled={ isCalculating }
-				onClick={ () => setShowSpinner( true ) }
-				showSpinner={ showSpinner }
-			>
-				{ __( 'Proceed to Checkout', 'woo-gutenberg-products-block' ) }
-			</Button>
-			<PaymentMethodIcons
-				icons={ getIconsFromPaymentMethods( paymentMethods ) }
-			/>
-		</>
+		<Button
+			className="wc-block-cart__submit-button"
+			href={ link || CHECKOUT_URL }
+			disabled={ isCalculating }
+			onClick={ () => setShowSpinner( true ) }
+			showSpinner={ showSpinner }
+		>
+			{ __( 'Proceed to Checkout', 'woo-gutenberg-products-block' ) }
+		</Button>
 	);
 
 	return (
