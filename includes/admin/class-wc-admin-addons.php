@@ -193,7 +193,9 @@ class WC_Admin_Addons {
 	/**
 	 * Get section content for the addons screen.
 	 *
-	 * @param string $section_id Required section ID.
+	 * @deprecated 5.9.0 No longer used in In-App Marketplace
+	 *
+	 * @param  string $section_id Required section ID.
 	 *
 	 * @return array
 	 * @deprecated 5.9.0 No longer used in In-App Marketplace
@@ -261,6 +263,8 @@ class WC_Admin_Addons {
 	/**
 	 * Handles the outputting of a banner block.
 	 *
+	 * @deprecated 5.9.0 No longer used in In-App Marketplace
+	 *
 	 * @param object $block Banner data.
 	 *
 	 * @deprecated 5.9.0 No longer used in In-App Marketplace
@@ -300,6 +304,8 @@ class WC_Admin_Addons {
 	/**
 	 * Handles the outputting of a column.
 	 *
+	 * @deprecated 5.9.0 No longer used in In-App Marketplace
+	 *
 	 * @param object $block Column data.
 	 *
 	 * @deprecated 5.9.0 No longer used in In-App Marketplace
@@ -328,6 +334,8 @@ class WC_Admin_Addons {
 
 	/**
 	 * Handles the outputting of a column block.
+	 *
+	 * @deprecated 5.9.0 No longer used in In-App Marketplace
 	 *
 	 * @param object $block Column block data.
 	 *
@@ -367,6 +375,8 @@ class WC_Admin_Addons {
 	/**
 	 * Handles the outputting of a small light block.
 	 *
+	 * @deprecated 5.9.0 No longer used in In-App Marketplace
+	 *
 	 * @param object $block Block data.
 	 *
 	 * @deprecated 5.9.0 No longer used in In-App Marketplace
@@ -396,6 +406,8 @@ class WC_Admin_Addons {
 
 	/**
 	 * Handles the outputting of a small dark block.
+	 *
+	 * @deprecated 5.9.0 No longer used in In-App Marketplace
 	 *
 	 * @param object $block Block data.
 	 *
@@ -430,6 +442,8 @@ class WC_Admin_Addons {
 
 	/**
 	 * Handles the outputting of the WooCommerce Services banner block.
+	 *
+	 * @deprecated 5.9.0 No longer used in In-App Marketplace
 	 *
 	 * @param object $block Block data.
 	 *
@@ -528,6 +542,8 @@ class WC_Admin_Addons {
 	/**
 	 * Handles the outputting of the WooCommerce Pay banner block.
 	 *
+	 * @deprecated 5.9.0 No longer used in In-App Marketplace
+	 *
 	 * @param object $block Block data.
 	 *
 	 * @deprecated 5.9.0 No longer used in In-App Marketplace
@@ -625,6 +641,8 @@ class WC_Admin_Addons {
 
 	/**
 	 * Handles the output of a full-width block.
+	 *
+	 * @deprecated 5.9.0 No longer used in In-App Marketplace
 	 *
 	 * @param array $section Section data.
 	 *
@@ -914,6 +932,7 @@ class WC_Admin_Addons {
 
 
 	/**
+
 	 * Handles output of the addons page in admin.
 	 */
 	public static function output() {
@@ -1058,7 +1077,10 @@ class WC_Admin_Addons {
 	 *
 	 * @return string CSS class to use.
 	 */
-	public static function get_star_class( $rating, $index ) {
+	public static function 
+    
+    
+    ( $rating, $index ) {
 		if ( $rating >= $index ) {
 			// Rating more that current star to show.
 			return 'fill';

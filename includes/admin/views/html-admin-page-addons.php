@@ -82,13 +82,16 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 				</div>
 			<?php endif; ?>
 			<?php if ( '_featured' !== $current_section && $addons ) : ?>
-				<?php
-				if ( ! empty( $promotions ) && WC()->is_wc_admin_active() ) {
-					foreach ( $promotions as $promotion ) {
-						WC_Admin_Addons::output_search_promotion_block( $promotion );
-					}
-				}
-				?>
+				<?php if ( 'shipping_methods' === $current_section ) : ?>
+					<!-- <div class="addons-shipping-methods"> -->
+						<?php // WC_Admin_Addons::output_wcs_banner_block(); // TODO: do something with it. ?>
+					<!-- </div> -->
+				<?php endif; ?>
+				<?php if ( 'payment-gateways' === $current_section ) : ?>
+					<!-- <div class="addons-shipping-methods"> -->
+						<?php // WC_Admin_Addons::output_wcpay_banner_block(); // TODO: do something with it. ?>
+					<!-- </div> -->
+				<?php endif; ?>
 				<ul class="products">
 					<?php foreach ( $addons as $addon ) : ?>
 						<?php
