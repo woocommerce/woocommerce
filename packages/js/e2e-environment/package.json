@@ -28,6 +28,7 @@
     "@wordpress/e2e-test-utils": "^4.16.1",
     "@wordpress/jest-preset-default": "^6.4.0",
     "app-root-path": "^3.0.0",
+    "commander": "4.1.1",
     "jest": "^25.1.0",
     "jest-each": "25.5.0",
     "jest-puppeteer": "^4.4.0",
