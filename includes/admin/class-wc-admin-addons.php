@@ -1254,15 +1254,25 @@ class WC_Admin_Addons {
 						<?php if ( ! empty( $mapped->vendor_name ) && ! empty( $mapped->vendor_url ) ) : ?>
 							<div class="product-developed-by">
 								<?php
-									printf(
-										/* translators: %s vendor link */
-										esc_html__( 'Developed by %s', 'woocommerce' ),
-										sprintf(
-											'<a class="product-vendor-link" href="%1$s" target="_blank">%2$s</a>',
-											esc_url_raw( $mapped->vendor_url ),
-											esc_html( $mapped->vendor_name )
-										)
-									);
+								$vendor_url = add_query_arg(
+									array(
+										'utm_source'   => 'extensionsscreen',
+										'utm_medium'   => 'product',
+										'utm_campaign' => 'wcaddons',
+										'utm_content'  => 'devpartner',
+									),
+									$mapped->vendor_url
+								);
+
+								printf(
+								/* translators: %s vendor link */
+									esc_html__( 'Developed by %s', 'woocommerce' ),
+									sprintf(
+										'<a class="product-vendor-link" href="%1$s" target="_blank">%2$s</a>',
+										esc_url_raw( $vendor_url ),
+										esc_html( $mapped->vendor_name )
+									)
+								);
 								?>
 							</div>
 						<?php endif; ?>
