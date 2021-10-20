@@ -21,9 +21,9 @@ class WC_Admin_Addons {
 	/**
 	 * Get featured for the addons screen
 	 *
-	 * @return array of objects
-	 *
 	 * @deprecated 5.9.0 No longer used in In-App Marketplace
+	 *
+	 * @return array of objects
 	 */
 	public static function get_featured() {
 		$featured = get_transient( 'wc_addons_featured' );
@@ -103,9 +103,9 @@ class WC_Admin_Addons {
 	/**
 	 * Build url parameter string
 	 *
-	 * @param string $category Addon (sub) category.
-	 * @param string $term     Search terms.
-	 * @param string $country  Store country.
+	 * @param  string $category Addon (sub) category.
+	 * @param  string $term     Search terms.
+	 * @param  string $country  Store country.
 	 *
 	 * @return string url parameter string
 	 */
@@ -123,9 +123,9 @@ class WC_Admin_Addons {
 	/**
 	 * Call API to get extensions
 	 *
-	 * @param string $category Addon (sub) category.
-	 * @param string $term     Search terms.
-	 * @param string $country  Store country.
+	 * @param  string $category Addon (sub) category.
+	 * @param  string $term     Search terms.
+	 * @param  string $country  Store country.
 	 *
 	 * @return object of extensions and promotions.
 	 */
@@ -190,11 +190,11 @@ class WC_Admin_Addons {
 	/**
 	 * Get section content for the addons screen.
 	 *
-	 * @param string $section_id Required section ID.
+	 * @deprecated 5.9.0 No longer used in In-App Marketplace
+	 *
+	 * @param  string $section_id Required section ID.
 	 *
 	 * @return array
-	 *
-	 * @deprecated 5.9.0 No longer used in In-App Marketplace
 	 */
 	public static function get_section_data( $section_id ) {
 		$section      = self::get_section( $section_id );
@@ -259,9 +259,9 @@ class WC_Admin_Addons {
 	/**
 	 * Handles the outputting of a banner block.
 	 *
-	 * @param object $block Banner data.
-	 *
 	 * @deprecated 5.9.0 No longer used in In-App Marketplace
+	 *
+	 * @param object $block Banner data.
 	 */
 	public static function output_banner_block( $block ) {
 		?>
@@ -298,9 +298,9 @@ class WC_Admin_Addons {
 	/**
 	 * Handles the outputting of a column.
 	 *
-	 * @param object $block Column data.
-	 *
 	 * @deprecated 5.9.0 No longer used in In-App Marketplace
+	 *
+	 * @param object $block Column data.
 	 */
 	public static function output_column( $block ) {
 		if ( isset( $block->container ) && 'column_container_start' === $block->container ) {
@@ -327,9 +327,9 @@ class WC_Admin_Addons {
 	/**
 	 * Handles the outputting of a column block.
 	 *
-	 * @param object $block Column block data.
-	 *
 	 * @deprecated 5.9.0 No longer used in In-App Marketplace
+	 *
+	 * @param object $block Column block data.
 	 */
 	public static function output_column_block( $block ) {
 		?>
@@ -365,9 +365,9 @@ class WC_Admin_Addons {
 	/**
 	 * Handles the outputting of a small light block.
 	 *
-	 * @param object $block Block data.
-	 *
 	 * @deprecated 5.9.0 No longer used in In-App Marketplace
+	 *
+	 * @param object $block Block data.
 	 */
 	public static function output_small_light_block( $block ) {
 		?>
@@ -395,9 +395,9 @@ class WC_Admin_Addons {
 	/**
 	 * Handles the outputting of a small dark block.
 	 *
-	 * @param object $block Block data.
-	 *
 	 * @deprecated 5.9.0 No longer used in In-App Marketplace
+	 *
+	 * @param object $block Block data.
 	 */
 	public static function output_small_dark_block( $block ) {
 		?>
@@ -429,9 +429,9 @@ class WC_Admin_Addons {
 	/**
 	 * Handles the outputting of the WooCommerce Services banner block.
 	 *
-	 * @param object $block Block data.
-	 *
 	 * @deprecated 5.9.0 No longer used in In-App Marketplace
+	 *
+	 * @param object $block Block data.
 	 */
 	public static function output_wcs_banner_block( $block = array() ) {
 		$is_active = is_plugin_active( 'woocommerce-services/woocommerce-services.php' );
@@ -526,9 +526,9 @@ class WC_Admin_Addons {
 	/**
 	 * Handles the outputting of the WooCommerce Pay banner block.
 	 *
-	 * @param object $block Block data.
-	 *
 	 * @deprecated 5.9.0 No longer used in In-App Marketplace
+	 *
+	 * @param object $block Block data.
 	 */
 	public static function output_wcpay_banner_block( $block = array() ) {
 		$is_active = is_plugin_active( 'woocommerce-payments/woocommerce-payments.php' );
@@ -592,7 +592,6 @@ class WC_Admin_Addons {
 	 * Output the HTML for the promotion block.
 	 *
 	 * @param array $promotion Array of promotion block data.
-	 *
 	 * @return void
 	 */
 	public static function output_search_promotion_block( array $promotion ) {
@@ -624,9 +623,9 @@ class WC_Admin_Addons {
 	/**
 	 * Handles the output of a full-width block.
 	 *
-	 * @param array $section Section data.
-	 *
 	 * @deprecated 5.9.0 No longer used in In-App Marketplace
+	 *
+	 * @param array $section Section data.
 	 */
 	public static function output_promotion_block( $section ) {
 		if (
@@ -1039,40 +1038,6 @@ class WC_Admin_Addons {
 	}
 
 	/**
-	 * Determine which class should be used for a rating star:
-	 * - golden
-	 * - half-filled (50/50 golden and gray)
-	 * - gray
-	 *
-	 * Consider ratings from 3.0 to 4.0 as an example
-	 * 3.0 will produce 3 stars
-	 * 3.1 to 3.5 will produce 3 stars and a half star
-	 * 3.6 to 4.0 will product 4 stars
-	 *
-	 * @param float $rating Rating of a product.
-	 * @param int   $index  Index of a star in a row.
-	 *
-	 * @return string CSS class to use.
-	 */
-	public static function get_star_class( $rating, $index ) {
-		if ( $rating >= $index ) {
-			// Rating more that current star to show.
-			return 'fill';
-		} elseif (
-			abs( $index - 1 - floor( $rating ) ) < 0.0000001 &&
-			0 < ( $rating - floor( $rating ) )
-		) {
-			// For rating more than x.0 and less than x.5 or equal it will show a half star.
-			return 50 >= floor( ( $rating - floor( $rating ) ) * 100 )
-				? 'half-fill'
-				: 'fill';
-		}
-
-		// Don't show a golden star otherwise.
-		return 'no-fill';
-	}
-
-	/**
 	 * Take an action object and return the URL based on properties of the action.
 	 *
 	 * @param object $action Action object.
@@ -1335,7 +1300,7 @@ class WC_Admin_Addons {
 						<?php if ( ! empty( $mapped->reviews_count ) && ! empty( $mapped->rating ) ) : ?>
 							<?php /* Show rating and the number of reviews */ ?>
 							<div class="product-reviews-block">
-								<?php for ( $index = 1; $index <= 5; ++ $index ) : ?>
+								<?php for ( $index = 1; $index <= 5; ++$index ) : ?>
 									<?php $rating_star_class = 'product-rating-star product-rating-star__' . self::get_star_class( $mapped->rating, $index ); ?>
 									<div class="<?php echo esc_attr( $rating_star_class ); ?>"></div>
 								<?php endfor; ?>
@@ -1350,5 +1315,39 @@ class WC_Admin_Addons {
 			</li>
 			<?php
 		}
+	}
+
+	/**
+	 * Determine which class should be used for a rating star:
+	 * - golden
+	 * - half-filled (50/50 golden and gray)
+	 * - gray
+	 *
+	 * Consider ratings from 3.0 to 4.0 as an example
+	 * 3.0 will produce 3 stars
+	 * 3.1 to 3.5 will produce 3 stars and a half star
+	 * 3.6 to 4.0 will product 4 stars
+	 *
+	 * @param float $rating Rating of a product.
+	 * @param int   $index  Index of a star in a row.
+	 *
+	 * @return string CSS class to use.
+	 */
+	public static function get_star_class( $rating, $index ) {
+		if ( $rating >= $index ) {
+			// Rating more that current star to show.
+			return 'fill';
+		} else if (
+			abs( $index - 1 - floor( $rating ) ) < 0.0000001 &&
+			0 < ( $rating - floor( $rating ) )
+		) {
+			// For rating more than x.0 and less than x.5 or equal it will show a half star.
+			return 50 >= floor( ( $rating - floor( $rating ) ) * 100 )
+				? 'half-fill'
+				: 'fill';
+		}
+
+		// Don't show a golden star otherwise.
+		return 'no-fill';
 	}
 }
