@@ -182,6 +182,10 @@ const createSampleData = async () => {
 	return {
 		customers: { john, tina },
 		orders,
+		hierarchicalOrders: {
+			parent: order2,
+			child: order3,
+		},
 		guestOrder,
 		testProductData,
 	};

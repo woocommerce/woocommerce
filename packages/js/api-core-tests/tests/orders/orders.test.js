@@ -202,5 +202,28 @@ describe( 'Orders API tests', () => {
 				)
 			);
 		} );
+
+		it( 'parent', async () => {
+			const result1 = await ordersApi.listAll.orders( {
+				parent: sampleData.hierarchicalOrders.parent.id,
+			} );
+			expect( result1.statusCode ).toEqual( 200 );
+			expect( result1.body ).toHaveLength( 1 );
+			expect( result1.body[ 0 ].id ).toBe(
+				sampleData.hierarchicalOrders.child.id
+			);
+
+			const result2 = await ordersApi.listAll.orders( {
+				parent_exclude: sampleData.hierarchicalOrders.parent.id,
+			} );
+			expect( result2.statusCode ).toEqual( 200 );
+			expect( result2.body ).toEqual(
+				expect.not.arrayContaining( [
+					expect.objectContaining( {
+						id: sampleData.hierarchicalOrders.child.id,
+					} ),
+				] )
+			);
+		} );
 	} );
 } );
