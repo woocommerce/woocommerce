@@ -156,5 +156,51 @@ describe( 'Orders API tests', () => {
 			expect( Array.isArray( page6.body ) ).toBe( true );
 			expect( page6.body ).toHaveLength( 0 );
 		} );
+
+		it( 'inclusion / exclusion', async () => {
+			const allOrders = await ordersApi.listAll.orders( {
+				per_page: 10,
+			} );
+			expect( allOrders.statusCode ).toEqual( 200 );
+			const allOrdersIds = allOrders.body.map( ( order ) => order.id );
+			expect( allOrdersIds ).toHaveLength( ORDERS_COUNT );
+
+			const ordersToFilter = [
+				allOrdersIds[ 0 ],
+				allOrdersIds[ 2 ],
+				allOrdersIds[ 4 ],
+				allOrdersIds[ 7 ],
+			];
+
+			const included = await ordersApi.listAll.orders( {
+				per_page: 20,
+				include: ordersToFilter.join( ',' ),
+			} );
+			expect( included.statusCode ).toEqual( 200 );
+			expect( included.body ).toHaveLength( ordersToFilter.length );
+			expect( included.body ).toEqual(
+				expect.arrayContaining(
+					ordersToFilter.map( ( id ) =>
+						expect.objectContaining( { id } )
+					)
+				)
+			);
+
+			const excluded = await ordersApi.listAll.orders( {
+				per_page: 20,
+				exclude: ordersToFilter.join( ',' ),
+			} );
+			expect( excluded.statusCode ).toEqual( 200 );
+			expect( excluded.body ).toHaveLength(
+				ORDERS_COUNT - ordersToFilter.length
+			);
+			expect( excluded.body ).toEqual(
+				expect.not.arrayContaining(
+					ordersToFilter.map( ( id ) =>
+						expect.objectContaining( { id } )
+					)
+				)
+			);
+		} );
 	} );
 } );
