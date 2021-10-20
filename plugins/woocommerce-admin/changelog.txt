@@ -1,20 +1,25 @@
-== 2.8.0 09/29/2021 ==
+== 2.8.0 10/14/2021 ==
 
+- Add: Store Profiler and Product task - include Subscriptions #7734
+- Fix: Fixed navigation menu text color after Gutenberg 11.6.0 #7771
+- Fix: Add status param to notes/delete/all REST endpoint, to correctly delete all notes. #7743
+- Fix: Allow already installed marketing extensions to be activated #7740
 - Fix: Add missing title text for marketing task. #7640
 - Fix: Assign parent order status as children order status if refund order #7253
 - Fix: Fix category lookup logic to update children correctly. #7709
 - Fix: Fixing an unwanted page refresh when using Woo Navigation. #7615
 - Fix: Fix naming of event names and properties. #7677
 - Fix: Fix white screen for variation analytic data without a name. #7686
+- Update: Update back up copy of free extension for Google Listing & Ads plugin. #7798
 - Update: Update Eway payment gateway capitalization (was eWAY). #7678
 - Update: Enable Square in France. #7679
 - Enhancement: Add experiment for promoting WooCommerce Payments in payment methods table. #7666
 
-== 2.7.2 10/11/2021 == 
+== 2.7.2 10/11/2021 ==
 
 - Fix: Fix analytics crashing on daylight saving #7763
 
-== 2.7.1 10/01/2021 == 
+== 2.7.1 10/01/2021 ==
 
 - Fix: Allow super admins all capabilities within WooCommerce Admin #7489
 - Fix: Fix end date for last periods #6584
