@@ -1,0 +1,65 @@
+{
+  "name": "@woocommerce/e2e-environment",
+  "version": "0.2.3",
+  "description": "WooCommerce End to End Testing Environment Configuration.",
+  "author": "Automattic",
+  "license": "GPL-3.0-or-later",
+  "keywords": [
+    "wordpress",
+    "woocommerce",
+    "e2e",
+    "puppeteer"
+  ],
+  "homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/tests/e2e/env/README.md",
+  "bugs": {
+    "url": "https://github.com/woocommerce/woocommerce/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/woocommerce/woocommerce.git"
+  },
+  "main": "index.js",
+  "module": "build-module/index.js",
+  "dependencies": {
+    "@automattic/puppeteer-utils": "github:Automattic/puppeteer-utils#0f3ec50",
+    "@jest/test-sequencer": "^25.5.4",
+    "@slack/web-api": "^6.1.0",
+    "@woocommerce/api": "^0.2.0",
+    "@wordpress/e2e-test-utils": "^4.16.1",
+    "@wordpress/jest-preset-default": "^6.4.0",
+    "app-root-path": "^3.0.0",
+    "jest": "^25.1.0",
+    "jest-each": "25.5.0",
+    "jest-puppeteer": "^4.4.0",
+    "request": "^2.88.2",
+    "node-stream-zip": "^1.13.6"
+  },
+  "devDependencies": {
+    "@babel/cli": "7.12.8",
+    "@babel/core": "7.12.9",
+    "@babel/polyfill": "7.12.1",
+    "@babel/preset-env": "7.12.7",
+    "@wordpress/eslint-plugin": "7.3.0",
+    "ndb": "^1.1.5",
+    "semver": "^7.3.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "clean": "rm -rf ./build ./build-module",
+    "compile": "node ./../bin/build.js",
+    "build": "npm run clean && npm run compile",
+    "prepare": "npm run build",
+    "docker:up": "./bin/docker-compose.sh up",
+    "docker:down": "./bin/docker-compose.sh down",
+    "docker:clear-all": "docker rmi --force $(docker images -q)",
+    "docker:ssh": "docker exec -it $(node utils/get-app-name.js)_wordpress-www /bin/bash",
+    "test:e2e": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js",
+    "test:e2e-debug": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js --dev --debug",
+    "test:e2e-dev": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js --dev"
+  },
+  "bin": {
+    "wc-e2e": "bin/wc-e2e.sh"
+  }
+}

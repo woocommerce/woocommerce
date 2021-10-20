@@ -1,6 +1,10 @@
 name: Run code coverage on PR
 on:
   pull_request
+defaults:
+  run:
+    shell: bash
+    working-directory: plugins/woocommerce
 jobs:
   test:
     name: Code coverage (PHP 7.4, WP Latest)
@@ -17,6 +21,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 100
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -49,3 +55,7 @@ jobs:
         run: |
           RUN_CODE_COVERAGE=1 bash ./tests/bin/phpunit.sh
           exit 0
+      
+      - name: Send code coverage to Codecov.
+        run: |
+          bash <(curl -s https://codecov.io/bash)

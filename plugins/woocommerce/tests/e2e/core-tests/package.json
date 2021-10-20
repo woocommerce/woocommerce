@@ -1,0 +1,24 @@
+{
+  "name": "@woocommerce/e2e-core-tests",
+  "version": "0.1.6",
+  "description": "End-To-End (E2E) tests for WooCommerce",
+  "homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/tests/e2e/core-tests/README.md",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/woocommerce/woocommerce.git"
+  },
+  "license": "GPL-3.0+",
+  "main": "index.js",
+  "dependencies": {
+    "@jest/globals": "^26.4.2",
+    "config": "3.3.3",
+    "faker": "^5.1.0"
+  },
+  "peerDependencies": {
+    "@woocommerce/api": "^0.2.0",
+    "@woocommerce/e2e-utils": "^0.1.6"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

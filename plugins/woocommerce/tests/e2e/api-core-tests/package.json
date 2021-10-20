@@ -1,0 +1,31 @@
+{
+  "name": "@woocommerce/api-core-tests",
+  "version": "0.1.0",
+  "description": "API tests for WooCommerce",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "test:api": "jest --group=api",
+    "test:hello": "jest --group=hello",
+    "make:collection": "node utils/api-collection/build-collection.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/woocommerce/woocommerce.git"
+  },
+  "license": "GPL-3.0+",
+  "bugs": {
+    "url": "https://github.com/woocommerce/woocommerce/issues"
+  },
+  "homepage": "https://github.com/woocommerce/woocommerce#readme",
+  "dependencies": {
+    "dotenv": "^10.0.0",
+    "jest": "^25.1.0",
+    "jest-runner-groups": "^2.1.0",
+    "postman-collection": "^4.1.0",
+    "supertest": "^6.1.4"
+  },
+  "bin": {
+    "wc-api-tests": "bin/wc-api-tests.sh"
+  }
+}
