@@ -1337,7 +1337,7 @@ class WC_Admin_Addons {
 		if ( $rating >= $index ) {
 			// Rating more that current star to show.
 			return 'fill';
-		} else if (
+		} elseif (
 			abs( $index - 1 - floor( $rating ) ) < 0.0000001 &&
 			0 < ( $rating - floor( $rating ) )
 		) {
