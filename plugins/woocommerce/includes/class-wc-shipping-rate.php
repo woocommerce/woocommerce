@@ -65,6 +65,9 @@ class WC_Shipping_Rate {
 	 * @return bool
 	 */
 	public function __isset( $key ) {
+		if ( 'meta_data' === $key ) {
+			wc_doing_it_wrong( __FUNCTION__, __( 'Use `array_key_exists` to check for meta_data on WC_Shipping_Rate to get the correct result.', 'woocommerce' ), '6.0' );
+		}
 		return isset( $this->data[ $key ] );
 	}
 
