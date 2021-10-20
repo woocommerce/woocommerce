@@ -21,9 +21,9 @@ class WC_Admin_Addons {
 	/**
 	 * Get featured for the addons screen
 	 *
-	 * @deprecated 5.9.0 No longer used in In-App Marketplace
-	 *
 	 * @return array of objects
+	 *
+	 * @deprecated 5.9.0 No longer used in In-App Marketplace
 	 */
 	public static function get_featured() {
 		$featured = get_transient( 'wc_addons_featured' );
@@ -147,7 +147,6 @@ class WC_Admin_Addons {
 		if ( ! is_wp_error( $raw_extensions ) ) {
 			$addons = json_decode( wp_remote_retrieve_body( $raw_extensions ) );
 		}
-
 		return $addons;
 	}
 
@@ -169,14 +168,13 @@ class WC_Admin_Addons {
 				}
 			}
 		}
-
 		return apply_filters( 'woocommerce_addons_sections', $addon_sections );
 	}
 
 	/**
 	 * Get section for the addons screen.
 	 *
-	 * @param string $section_id Required section ID.
+	 * @param  string $section_id Required section ID.
 	 *
 	 * @return object|bool
 	 */
@@ -185,7 +183,6 @@ class WC_Admin_Addons {
 		if ( isset( $sections[ $section_id ] ) ) {
 			return $sections[ $section_id ];
 		}
-
 		return false;
 	}
 
@@ -193,11 +190,10 @@ class WC_Admin_Addons {
 	/**
 	 * Get section content for the addons screen.
 	 *
-	 * @deprecated 5.9.0 No longer used in In-App Marketplace
-	 *
-	 * @param  string $section_id Required section ID.
+	 * @param string $section_id Required section ID.
 	 *
 	 * @return array
+	 *
 	 * @deprecated 5.9.0 No longer used in In-App Marketplace
 	 */
 	public static function get_section_data( $section_id ) {
@@ -263,8 +259,6 @@ class WC_Admin_Addons {
 	/**
 	 * Handles the outputting of a banner block.
 	 *
-	 * @deprecated 5.9.0 No longer used in In-App Marketplace
-	 *
 	 * @param object $block Banner data.
 	 *
 	 * @deprecated 5.9.0 No longer used in In-App Marketplace
@@ -285,12 +279,12 @@ class WC_Admin_Addons {
 								<h3><?php echo esc_html( $item->title ); ?></h3>
 								<p><?php echo esc_html( $item->description ); ?></p>
 								<?php
-								self::output_button(
-									$item->href,
-									$item->button,
-									'addons-button-solid',
-									$item->plugin
-								);
+									self::output_button(
+										$item->href,
+										$item->button,
+										'addons-button-solid',
+										$item->plugin
+									);
 								?>
 							</div>
 						</div>
@@ -303,8 +297,6 @@ class WC_Admin_Addons {
 
 	/**
 	 * Handles the outputting of a column.
-	 *
-	 * @deprecated 5.9.0 No longer used in In-App Marketplace
 	 *
 	 * @param object $block Column data.
 	 *
@@ -335,8 +327,6 @@ class WC_Admin_Addons {
 	/**
 	 * Handles the outputting of a column block.
 	 *
-	 * @deprecated 5.9.0 No longer used in In-App Marketplace
-	 *
 	 * @param object $block Column block data.
 	 *
 	 * @deprecated 5.9.0 No longer used in In-App Marketplace
@@ -355,12 +345,12 @@ class WC_Admin_Addons {
 						<div class="addons-column-block-item-content">
 							<h2><?php echo esc_html( $item->title ); ?></h2>
 							<?php
-							self::output_button(
-								$item->href,
-								$item->button,
-								'addons-button-solid',
-								$item->plugin
-							);
+								self::output_button(
+									$item->href,
+									$item->button,
+									'addons-button-solid',
+									$item->plugin
+								);
 							?>
 							<p><?php echo esc_html( $item->description ); ?></p>
 						</div>
@@ -374,8 +364,6 @@ class WC_Admin_Addons {
 
 	/**
 	 * Handles the outputting of a small light block.
-	 *
-	 * @deprecated 5.9.0 No longer used in In-App Marketplace
 	 *
 	 * @param object $block Block data.
 	 *
@@ -391,11 +379,11 @@ class WC_Admin_Addons {
 				<div class="addons-small-light-block-buttons">
 					<?php foreach ( $block->buttons as $button ) : ?>
 						<?php
-						self::output_button(
-							$button->href,
-							$button->text,
-							'addons-button-solid'
-						);
+							self::output_button(
+								$button->href,
+								$button->text,
+								'addons-button-solid'
+							);
 						?>
 					<?php endforeach; ?>
 				</div>
@@ -406,8 +394,6 @@ class WC_Admin_Addons {
 
 	/**
 	 * Handles the outputting of a small dark block.
-	 *
-	 * @deprecated 5.9.0 No longer used in In-App Marketplace
 	 *
 	 * @param object $block Block data.
 	 *
@@ -427,11 +413,11 @@ class WC_Admin_Addons {
 							</div>
 						<?php endif; ?>
 						<?php
-						self::output_button(
-							$item->href,
-							$item->button,
-							'addons-button-outline-white'
-						);
+							self::output_button(
+								$item->href,
+								$item->button,
+								'addons-button-outline-white'
+							);
 						?>
 					</div>
 				<?php endforeach; ?>
@@ -442,8 +428,6 @@ class WC_Admin_Addons {
 
 	/**
 	 * Handles the outputting of the WooCommerce Services banner block.
-	 *
-	 * @deprecated 5.9.0 No longer used in In-App Marketplace
 	 *
 	 * @param object $block Block data.
 	 *
@@ -528,11 +512,11 @@ class WC_Admin_Addons {
 					<?php endforeach; ?>
 				</ul>
 				<?php
-				self::output_button(
-					$block_data['href'],
-					$block_data['button'],
-					'addons-button-outline-purple'
-				);
+					self::output_button(
+						$block_data['href'],
+						$block_data['button'],
+						'addons-button-outline-purple'
+					);
 				?>
 			</div>
 		</div>
@@ -541,8 +525,6 @@ class WC_Admin_Addons {
 
 	/**
 	 * Handles the outputting of the WooCommerce Pay banner block.
-	 *
-	 * @deprecated 5.9.0 No longer used in In-App Marketplace
 	 *
 	 * @param object $block Block data.
 	 *
@@ -594,11 +576,11 @@ class WC_Admin_Addons {
 				<h1><?php echo esc_html( $block_data['title'] ); ?></h1>
 				<p><?php echo esc_html( $block_data['description'] ); ?></p>
 				<?php
-				self::output_button(
-					$block_data['href'],
-					$block_data['button'],
-					'addons-button-outline-purple'
-				);
+					self::output_button(
+						$block_data['href'],
+						$block_data['button'],
+						'addons-button-outline-purple'
+					);
 				?>
 			</div>
 		</div>
@@ -641,8 +623,6 @@ class WC_Admin_Addons {
 
 	/**
 	 * Handles the output of a full-width block.
-	 *
-	 * @deprecated 5.9.0 No longer used in In-App Marketplace
 	 *
 	 * @param array $section Section data.
 	 *
@@ -778,31 +758,31 @@ class WC_Admin_Addons {
 		$product_list_classes = 3 === $capacity ? 'three-column' : 'two-column';
 		$product_list_classes = 'products addons-products-' . $product_list_classes;
 		?>
-		<section class="addon-product-group">
-			<h1 class="addon-product-group-title"><?php echo esc_html( $block->title ); ?></h1>
-			<div class="addon-product-group-description-container">
-				<?php if ( ! empty( $block->description ) ) : ?>
+			<section class="addon-product-group">
+				<h1 class="addon-product-group-title"><?php echo esc_html( $block->title ); ?></h1>
+				<div class="addon-product-group-description-container">
+					<?php if ( ! empty( $block->description ) ) : ?>
 					<div class="addon-product-group-description">
 						<?php echo esc_html( $block->description ); ?>
 					</div>
-				<?php endif; ?>
-				<?php if ( null !== $block->url ) : ?>
+					<?php endif; ?>
+					<?php if ( null !== $block->url ) : ?>
 					<a class="addon-product-group-see-more" href="<?php echo esc_url( $block->url ); ?>">
 						<?php esc_html_e( 'See more', 'woocommerce' ); ?>
 					</a>
-				<?php endif; ?>
-			</div>
-			<div class="addon-product-group__items">
-				<ul class="<?php echo esc_attr( $product_list_classes ); ?>">
+					<?php endif; ?>
+				</div>
+				<div class="addon-product-group__items">
+					<ul class="<?php echo esc_attr( $product_list_classes ); ?>">
 					<?php
 					$products = array_slice( $block->items, 0, $capacity );
 					foreach ( $products as $item ) {
 						self::render_product_card( $item );
 					}
 					?>
-				</ul>
+					</ul>
 				<div>
-		</section>
+			</section>
 		<?php
 	}
 
@@ -835,19 +815,19 @@ class WC_Admin_Addons {
 							<p><?php echo wp_kses( $block->description, array() ); ?></p>
 						</div>
 						<div class="addons-buttons-banner-button-container">
-							<?php
-							foreach ( $block->buttons as $button ) {
-								$button_classes = array( 'button', 'addons-buttons-banner-button' );
-								$type           = $button->type ?? null;
-								if ( 'primary' === $type ) {
-									$button_classes[] = 'addons-buttons-banner-button-primary';
-								}
-								?>
-								<a class="<?php echo esc_attr( implode( ' ', $button_classes ) ); ?>"
-									href="<?php echo esc_url( $button->href ); ?>">
-									<?php echo esc_html( $button->title ); ?>
-								</a>
-							<?php } ?>
+						<?php
+						foreach ( $block->buttons as $button ) {
+							$button_classes = array( 'button', 'addons-buttons-banner-button' );
+							$type           = $button->type ?? null;
+							if ( 'primary' === $type ) {
+								$button_classes[] = 'addons-buttons-banner-button-primary';
+							}
+							?>
+							<a class="<?php echo esc_attr( implode( ' ', $button_classes ) ); ?>"
+								href="<?php echo esc_url( $button->href ); ?>">
+								<?php echo esc_html( $button->title ); ?>
+							</a>
+						<?php } ?>
 						</div>
 					</div>
 				</li>
@@ -863,7 +843,6 @@ class WC_Admin_Addons {
 		// Get url (from path onward) for the current page,
 		// so WCCOM "back" link returns user to where they were.
 		$back_admin_path = add_query_arg( array() );
-
 		return array(
 			'wccom-site'          => site_url(),
 			'wccom-back'          => rawurlencode( $back_admin_path ),
@@ -878,7 +857,7 @@ class WC_Admin_Addons {
 	 * Adds various url parameters to a url to support a streamlined
 	 * flow for obtaining and setting up WooCommerce extensons.
 	 *
-	 * @param string $url Destination URL.
+	 * @param string $url    Destination URL.
 	 */
 	public static function add_in_app_purchase_url_params( $url ) {
 		return add_query_arg(
@@ -932,7 +911,6 @@ class WC_Admin_Addons {
 
 
 	/**
-
 	 * Handles output of the addons page in admin.
 	 */
 	public static function output() {
@@ -941,7 +919,6 @@ class WC_Admin_Addons {
 
 		if ( isset( $_GET['section'] ) && 'helper' === $_GET['section'] ) {
 			do_action( 'woocommerce_helper_output' );
-
 			return;
 		}
 
@@ -1099,7 +1076,6 @@ class WC_Admin_Addons {
 	 * Take an action object and return the URL based on properties of the action.
 	 *
 	 * @param object $action Action object.
-	 *
 	 * @return string URL.
 	 */
 	public static function get_action_url( $action ): string {
@@ -1115,7 +1091,6 @@ class WC_Admin_Addons {
 			if ( empty( $action->nonce ) ) {
 				return '';
 			}
-
 			return wp_nonce_url(
 				admin_url( $action->url ),
 				$action->nonce
@@ -1129,7 +1104,6 @@ class WC_Admin_Addons {
 	 * Format the promotion data ready for display, ie fetch locales and actions.
 	 *
 	 * @param array $promotions Array of promotoin objects.
-	 *
 	 * @return array Array of formatted promotions ready for output.
 	 */
 	public static function format_promotions( array $promotions ): array {
@@ -1164,7 +1138,6 @@ class WC_Admin_Addons {
 				'actions'     => $promotion_actions,
 			);
 		}
-
 		return $formatted_promotions;
 	}
 
@@ -1280,9 +1253,9 @@ class WC_Admin_Addons {
 		}
 
 		if ( 'promoted' === $mapped->label
-			&& ! empty( $mapped->primary_color )
-			&& ! empty( $mapped->text_color )
-			&& ! empty( $mapped->button ) ) {
+			 && ! empty( $mapped->primary_color )
+			 && ! empty( $mapped->text_color )
+			 && ! empty( $mapped->button ) ) {
 			// Promoted product card.
 			?>
 			<li class="product">
@@ -1316,15 +1289,15 @@ class WC_Admin_Addons {
 						<?php if ( ! empty( $mapped->vendor_name ) && ! empty( $mapped->vendor_url ) ) : ?>
 							<div class="product-developed-by">
 								<?php
-								printf(
-								/* translators: %s vendor link */
-									esc_html__( 'Developed by %s', 'woocommerce' ),
-									sprintf(
-										'<a class="product-vendor-link" href="%1$s" target="_blank">%2$s</a>',
-										esc_url_raw( $mapped->vendor_url ),
-										esc_html( $mapped->vendor_name )
-									)
-								);
+									printf(
+										/* translators: %s vendor link */
+										esc_html__( 'Developed by %s', 'woocommerce' ),
+										sprintf(
+											'<a class="product-vendor-link" href="%1$s" target="_blank">%2$s</a>',
+											esc_url_raw( $mapped->vendor_url ),
+											esc_html( $mapped->vendor_name )
+										)
+									);
 								?>
 							</div>
 						<?php endif; ?>
@@ -1362,7 +1335,7 @@ class WC_Admin_Addons {
 						<?php if ( ! empty( $mapped->reviews_count ) && ! empty( $mapped->rating ) ) : ?>
 							<?php /* Show rating and the number of reviews */ ?>
 							<div class="product-reviews-block">
-								<?php for ( $index = 1; $index <= 5; ++$index ) : ?>
+								<?php for ( $index = 1; $index <= 5; ++ $index ) : ?>
 									<?php $rating_star_class = 'product-rating-star product-rating-star__' . self::get_star_class( $mapped->rating, $index ); ?>
 									<div class="<?php echo esc_attr( $rating_star_class ); ?>"></div>
 								<?php endfor; ?>
