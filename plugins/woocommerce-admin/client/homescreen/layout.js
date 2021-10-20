@@ -19,6 +19,8 @@ import {
 	OPTIONS_STORE_NAME,
 } from '@woocommerce/data';
 import { __ } from '@wordpress/i18n';
+import moment from 'moment';
+import { useExperiment } from '@woocommerce/explat';
 
 /**
  * Internal dependencies
@@ -44,6 +46,10 @@ const Tasks = lazy( () =>
 	import( /* webpackChunkName: "tasks" */ '../tasks' )
 );
 
+const TwoColumnTasks = lazy( () =>
+	import( /* webpackChunkName: "two-column-tasks" */ '../two-column-tasks' )
+);
+
 export const Layout = ( {
 	defaultHomescreenLayout,
 	isBatchUpdating,
@@ -66,6 +72,16 @@ export const Layout = ( {
 
 	const isTaskListEnabled = bothTaskListsHidden === false;
 	const isDashboardShown = ! query.task;
+
+	const [
+		isLoadingExperimentAssignment,
+		experimentAssignment,
+	] = useExperiment(
+		'woocommerce_tasklist_progression_headercard_' + moment().format( 'MM' )
+	);
+
+	const isRunningTwoColumnExperiment =
+		experimentAssignment?.variationName === 'treatment';
 
 	if ( isBatchUpdating && ! showInbox ) {
 		setShowInbox( true );
@@ -91,15 +107,20 @@ export const Layout = ( {
 		return (
 			<>
 				<Column shouldStick={ shouldStickColumns }>
-					<ActivityHeader
-						className="your-store-today"
-						title={ __( 'Your store today', 'woocommerce-admin' ) }
-						subtitle={ __(
-							"To do's, tips, and insights for your business",
-							'woocommerce-admin'
-						) }
-					/>
-					<ActivityPanel />
+					{ ! isRunningTwoColumnExperiment && (
+						<ActivityHeader
+							className="your-store-today"
+							title={ __(
+								'Your store today',
+								'woocommerce-admin'
+							) }
+							subtitle={ __(
+								"To do's, tips, and insights for your business",
+								'woocommerce-admin'
+							) }
+						/>
+					) }
+					{ ! isRunningTwoColumnExperiment && <ActivityPanel /> }
 					{ isTaskListEnabled && renderTaskList() }
 					<InboxPanel />
 				</Column>
@@ -112,6 +133,22 @@ export const Layout = ( {
 	};
 
 	const renderTaskList = () => {
+		if ( twoColumns && isRunningTwoColumnExperiment ) {
+			return '';
+		} else if (
+			! twoColumns &&
+			isRunningTwoColumnExperiment &&
+			! isLoadingExperimentAssignment
+		) {
+			return (
+				<TwoColumnTasks
+					query={ query }
+					userPreferences={ userPrefs }
+					twoColumns={ twoColumns }
+				/>
+			);
+		}
+
 		return (
 			<Suspense fallback={ <TasksPlaceholder query={ query } /> }>
 				<Tasks query={ query } />
@@ -120,33 +157,40 @@ export const Layout = ( {
 	};
 
 	return (
-		<div
-			className={ classnames( 'woocommerce-homescreen', {
-				'two-columns': twoColumns,
-			} ) }
-		>
-			{ isDashboardShown ? renderColumns() : renderTaskList() }
-			{ shouldShowWelcomeModal && (
-				<WelcomeModal
-					onClose={ () => {
-						updateOptions( {
-							[ WELCOME_MODAL_DISMISSED_OPTION_NAME ]: 'yes',
-						} );
-					} }
-				/>
+		<>
+			{ twoColumns && isRunningTwoColumnExperiment && (
+				<TwoColumnTasks query={ query } userPreferences={ userPrefs } />
 			) }
-			{ shouldShowWelcomeFromCalypsoModal && (
-				<WelcomeFromCalypsoModal
-					onClose={ () => {
-						updateOptions( {
-							[ WELCOME_FROM_CALYPSO_MODAL_DISMISSED_OPTION_NAME ]:
-								'yes',
-						} );
-					} }
-				/>
-			) }
-			{ window.wcAdminFeatures.navigation && <NavigationIntroModal /> }
-		</div>
+			<div
+				className={ classnames( 'woocommerce-homescreen', {
+					'two-columns': twoColumns,
+				} ) }
+			>
+				{ isDashboardShown ? renderColumns() : renderTaskList() }
+				{ shouldShowWelcomeModal && (
+					<WelcomeModal
+						onClose={ () => {
+							updateOptions( {
+								[ WELCOME_MODAL_DISMISSED_OPTION_NAME ]: 'yes',
+							} );
+						} }
+					/>
+				) }
+				{ shouldShowWelcomeFromCalypsoModal && (
+					<WelcomeFromCalypsoModal
+						onClose={ () => {
+							updateOptions( {
+								[ WELCOME_FROM_CALYPSO_MODAL_DISMISSED_OPTION_NAME ]:
+									'yes',
+							} );
+						} }
+					/>
+				) }
+				{ window.wcAdminFeatures.navigation && (
+					<NavigationIntroModal />
+				) }
+			</div>
+		</>
 	);
 };
 
