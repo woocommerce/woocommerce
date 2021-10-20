@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-const { postRequest, deleteRequest } = require('../utils/request');
+const { postRequest, deleteRequest } = require( '../utils/request' );
 const productsTestSetup = require( './products' );
 const { ordersApi } = require( '../endpoints/orders' );
 
@@ -12,11 +12,19 @@ const createSampleData = async () => {
 	const testProductData = await productsTestSetup.createSampleData();
 
 	const orderedProducts = {
-		pocketHoodie: testProductData.simpleProducts.find( p => p.name === 'Hoodie with Pocket' ),
-		sunglasses: testProductData.simpleProducts.find( p => p.name === 'Sunglasses' ),
-		beanie: testProductData.simpleProducts.find( p => p.name === 'Beanie' ),
-		blueVneck: testProductData.variableProducts.vneckVariations.find( p => p.sku === 'woo-vneck-tee-blue' ),
-		pennant: testProductData.externalProducts[0],
+		pocketHoodie: testProductData.simpleProducts.find(
+			( p ) => p.name === 'Hoodie with Pocket'
+		),
+		sunglasses: testProductData.simpleProducts.find(
+			( p ) => p.name === 'Sunglasses'
+		),
+		beanie: testProductData.simpleProducts.find(
+			( p ) => p.name === 'Beanie'
+		),
+		blueVneck: testProductData.variableProducts.vneckVariations.find(
+			( p ) => p.sku === 'woo-vneck-tee-blue'
+		),
+		pennant: testProductData.externalProducts[ 0 ],
 	};
 
 	const johnAddress = {
@@ -176,15 +184,17 @@ const createSampleData = async () => {
 		orders,
 		guestOrder,
 		testProductData,
-	}
+	};
 };
 
 const deleteSampleData = async ( sampleData ) => {
 	await productsTestSetup.deleteSampleData( sampleData.testProductData );
 
-	sampleData.orders.concat( [ sampleData.guestOrder ] ).forEach( async ( { id } ) => {
-		await ordersApi.delete.order( id, true );
-	} );
+	sampleData.orders
+		.concat( [ sampleData.guestOrder ] )
+		.forEach( async ( { id } ) => {
+			await ordersApi.delete.order( id, true );
+		} );
 
 	Object.values( sampleData.customers ).forEach( async ( { id } ) => {
 		await deleteCustomer( id );
