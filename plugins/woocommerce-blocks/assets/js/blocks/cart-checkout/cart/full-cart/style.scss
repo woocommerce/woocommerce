@@ -215,7 +215,7 @@ table.wc-block-cart-items {
 	}
 }
 
-.is-large.wc-block-cart {
+.is-large.wp-block-woocommerce-cart {
 	.wc-block-cart-items {
 		@include with-translucent-border(0 0 1px);
 

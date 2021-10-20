@@ -23,6 +23,7 @@ import { SlotFillProvider } from '@woocommerce/blocks-checkout';
  * Internal dependencies
  */
 import { CartBlockContext } from './context';
+import './style.scss';
 
 const reloadPage = () => void window.location.reload( true );
 
