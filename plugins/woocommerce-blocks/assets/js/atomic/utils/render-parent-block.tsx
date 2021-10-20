@@ -123,6 +123,7 @@ const renderInnerBlocks = ( {
 		const { blockName = '', ...componentProps } = {
 			key: `${ block }_${ depth }_${ index }`,
 			...( element instanceof HTMLElement ? element.dataset : {} ),
+			className: element.className || '',
 		};
 
 		const InnerBlockComponent = getBlockComponentFromMap(

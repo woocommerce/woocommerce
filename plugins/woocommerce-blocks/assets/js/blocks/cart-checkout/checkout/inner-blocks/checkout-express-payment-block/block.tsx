@@ -8,14 +8,18 @@ import { useStoreCart } from '@woocommerce/base-context/hooks';
  */
 import { CheckoutExpressPayment } from '../../../payment-methods';
 
-const Block = (): JSX.Element | null => {
+const Block = ( { className }: { className?: string } ): JSX.Element | null => {
 	const { cartNeedsPayment } = useStoreCart();
 
 	if ( ! cartNeedsPayment ) {
 		return null;
 	}
 
-	return <CheckoutExpressPayment />;
+	return (
+		<div className={ className }>
+			<CheckoutExpressPayment />
+		</div>
+	);
 };
 
 export default Block;

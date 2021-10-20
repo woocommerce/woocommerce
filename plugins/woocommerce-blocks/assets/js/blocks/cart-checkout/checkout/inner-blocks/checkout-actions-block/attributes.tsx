@@ -7,6 +7,10 @@ export default {
 		type: 'boolean',
 		default: true,
 	},
+	className: {
+		type: 'string',
+		default: '',
+	},
 	lock: {
 		type: 'object',
 		default: {

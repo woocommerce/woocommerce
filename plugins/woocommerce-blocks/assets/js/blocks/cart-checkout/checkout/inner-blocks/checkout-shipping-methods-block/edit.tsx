@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import classnames from 'classnames';
 import { __ } from '@wordpress/i18n';
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import { PanelBody, Disabled, ExternalLink } from '@wordpress/components';
@@ -33,6 +34,7 @@ export const Edit = ( {
 		description: string;
 		showStepNumber: boolean;
 		allowCreateAccount: boolean;
+		className: string;
 	};
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
 } ): JSX.Element => {
@@ -47,6 +49,10 @@ export const Edit = ( {
 		<FormStepBlock
 			attributes={ attributes }
 			setAttributes={ setAttributes }
+			className={ classnames(
+				'wc-block-checkout__shipping-option',
+				attributes?.className
+			) }
 		>
 			<InspectorControls>
 				{ globalShippingMethods.length > 0 && (

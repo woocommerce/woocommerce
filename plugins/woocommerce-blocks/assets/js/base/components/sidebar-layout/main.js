@@ -1,19 +1,18 @@
 /**
  * External dependencies
  */
+import { forwardRef } from 'react';
 import classNames from 'classnames';
-import PropTypes from 'prop-types';
 
-const Main = ( { children, className } ) => {
+const Main = forwardRef( ( { children, className = '' }, ref ) => {
 	return (
-		<div className={ classNames( 'wc-block-components-main', className ) }>
+		<div
+			ref={ ref }
+			className={ classNames( 'wc-block-components-main', className ) }
+		>
 			{ children }
 		</div>
 	);
-};
-
-Main.propTypes = {
-	className: PropTypes.string,
-};
+} );
 
 export default Main;

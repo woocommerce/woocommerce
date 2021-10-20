@@ -13,6 +13,10 @@ export default {
 		defaultTitle: __( 'Payment options', 'woo-gutenberg-products-block' ),
 		defaultDescription: '',
 	} ),
+	className: {
+		type: 'string',
+		default: '',
+	},
 	lock: {
 		type: 'object',
 		default: {

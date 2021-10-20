@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import classnames from 'classnames';
 import { Sidebar } from '@woocommerce/base-components/sidebar-layout';
 
 /**
@@ -10,11 +11,17 @@ import './style.scss';
 
 const FrontendBlock = ( {
 	children,
+	className,
 }: {
 	children: JSX.Element;
+	className?: string;
 } ): JSX.Element => {
 	return (
-		<Sidebar className="wc-block-checkout__sidebar">{ children }</Sidebar>
+		<Sidebar
+			className={ classnames( 'wc-block-checkout__sidebar', className ) }
+		>
+			{ children }
+		</Sidebar>
 	);
 };
 

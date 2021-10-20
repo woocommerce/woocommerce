@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import classnames from 'classnames';
 import { __ } from '@wordpress/i18n';
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import { PanelBody, Disabled, ExternalLink } from '@wordpress/components';
@@ -13,7 +14,6 @@ import { innerBlockAreas } from '@woocommerce/blocks-checkout';
  */
 import {
 	FormStepBlock,
-	FormStepBlockProps,
 	AdditionalFields,
 	AdditionalFieldsContent,
 } from '../../form-step';
@@ -25,15 +25,30 @@ type paymentAdminLink = {
 	description: string;
 };
 
-export const Edit = ( props: FormStepBlockProps ): JSX.Element => {
+export const Edit = ( {
+	attributes,
+	setAttributes,
+}: {
+	attributes: {
+		title: string;
+		description: string;
+		showStepNumber: boolean;
+		className: string;
+	};
+	setAttributes: ( attributes: Record< string, unknown > ) => void;
+} ): JSX.Element => {
 	const globalPaymentMethods = getSetting(
 		'globalPaymentMethods'
 	) as paymentAdminLink[];
 
 	return (
 		<FormStepBlock
-			{ ...props }
-			className="wc-block-checkout__payment-method"
+			attributes={ attributes }
+			setAttributes={ setAttributes }
+			className={ classnames(
+				'wc-block-checkout__payment-method',
+				attributes?.className
+			) }
 		>
 			<InspectorControls>
 				{ globalPaymentMethods.length > 0 && (

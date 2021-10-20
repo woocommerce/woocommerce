@@ -19,11 +19,13 @@ const FrontendBlock = ( {
 	checkbox,
 	instanceId,
 	validation,
+	className,
 }: {
 	text: string;
 	checkbox: boolean;
 	instanceId: string;
 	validation: ValidationData;
+	className?: string;
 } ): JSX.Element => {
 	const [ checked, setChecked ] = useState( false );
 
@@ -70,9 +72,13 @@ const FrontendBlock = ( {
 
 	return (
 		<div
-			className={ classnames( 'wc-block-checkout__terms', {
-				'wc-block-checkout__terms--disabled': isDisabled,
-			} ) }
+			className={ classnames(
+				'wc-block-checkout__terms',
+				{
+					'wc-block-checkout__terms--disabled': isDisabled,
+				},
+				className
+			) }
 		>
 			{ checkbox ? (
 				<>
