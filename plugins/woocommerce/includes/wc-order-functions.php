@@ -727,7 +727,10 @@ function wc_restock_refunded_items( $order, $refunded_line_items ) {
 		}
 
 		/* translators: 1: product ID 2: old stock level 3: new stock level */
-		$order->add_order_note( sprintf( __( 'Item #%1$s stock increased from %2$s to %3$s.', 'woocommerce' ), $product->get_id(), $old_stock, $new_stock ) );
+		$restock_note = sprintf( __( 'Item #%1$s stock increased from %2$s to %3$s.', 'woocommerce' ), $product->get_id(), $old_stock, $new_stock );
+		$restock_note = apply_filters( 'woocommerce_refund_restock_note', $restock_note, $old_stock, $new_stock, $order, $product );
+
+		$order->add_order_note( $restock_note );
 
 		$item->save();
 
