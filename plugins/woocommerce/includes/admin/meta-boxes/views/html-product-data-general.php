@@ -32,7 +32,7 @@ defined( 'ABSPATH' ) || exit;
 			)
 		);
 
-		do_action( 'woocommerce_product_options_external' );
+		do_action( 'woocommerce_product_options_external', $product_object );
 		?>
 	</div>
 
