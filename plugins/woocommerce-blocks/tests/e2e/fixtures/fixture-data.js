@@ -209,11 +209,11 @@ const PageSettings = ( pages = [] ) => {
 	return [
 		{
 			id: 'woocommerce_cart_page_id',
-			value: cartPage.id.toString(),
+			value: cartPage?.id.toString() || '',
 		},
 		{
 			id: 'woocommerce_checkout_page_id',
-			value: checkoutPage.id.toString(),
+			value: checkoutPage?.id.toString() || '',
 		},
 	];
 };
