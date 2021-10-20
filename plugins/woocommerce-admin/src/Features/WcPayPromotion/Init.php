@@ -15,7 +15,6 @@ use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\EvaluateSugg
  * WC Pay Promotion engine.
  */
 class Init {
-	const SPECS_TRANSIENT_NAME    = 'woocommerce_admin_payment_method_promotion_specs';
 	const EXPLAT_VARIATION_PREFIX = 'woocommerce_wc_pay_promotion_payment_methods_table_';
 
 	/**
@@ -186,32 +185,17 @@ class Init {
 	 * Delete the specs transient.
 	 */
 	public static function delete_specs_transient() {
-		delete_transient( self::SPECS_TRANSIENT_NAME );
+		WcPayPromotionDataSourcePoller::get_instance()->delete_specs_transient();
 	}
 
 	/**
 	 * Get specs or fetch remotely if they don't exist.
 	 */
 	public static function get_specs() {
-		$specs = get_transient( self::SPECS_TRANSIENT_NAME );
-
-		// Fetch specs if they don't yet exist.
-		if ( false === $specs || ! is_array( $specs ) || 0 === count( $specs ) ) {
-			if ( 'no' === get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) ) {
-				return array();
-			}
-
-			$specs = DataSourcePoller::read_specs_from_data_sources();
-
-			// Fall back to default specs if polling failed.
-			if ( ! $specs ) {
-				return array();
-			}
-
-			set_transient( self::SPECS_TRANSIENT_NAME, $specs, 7 * DAY_IN_SECONDS );
+		if ( 'no' === get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) ) {
+			return array();
 		}
-
-		return $specs;
+		return WcPayPromotionDataSourcePoller::get_instance()->get_specs_from_data_sources();
 	}
 }
 

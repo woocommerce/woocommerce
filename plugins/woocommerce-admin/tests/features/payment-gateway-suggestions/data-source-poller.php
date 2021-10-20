@@ -6,7 +6,8 @@
  */
 
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\Init as PaymentGatewaySuggestions;
-use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\DataSourcePoller;
+use Automattic\WooCommerce\Admin\DataSourcePoller;
+use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\PaymentGatewaySuggestionsDataSourcePoller;
 
 /**
  * class WC_Tests_PaymentGatewaySuggestions_DataSourcePoller
@@ -81,7 +82,8 @@ class WC_Tests_PaymentGatewaySuggestions_DataSourcePoller extends WC_Unit_Test_C
 	 * Test that a data source can be read.
 	 */
 	public function test_read_data_source() {
-		$data = DataSourcePoller::read_specs_from_data_sources();
+		$data_source_poller = PaymentGatewaySuggestionsDataSourcePoller::get_instance();
+		$data               = $data_source_poller->get_specs_from_data_sources();
 		$this->assertArrayHasKey( 'mock-gateway1', $data );
 		$this->assertArrayHasKey( 'mock-gateway2', $data );
 		$this->assertArrayNotHasKey( 'mock-gateway3', $data );
@@ -101,7 +103,8 @@ class WC_Tests_PaymentGatewaySuggestions_DataSourcePoller extends WC_Unit_Test_C
 			20
 		);
 
-		$data = DataSourcePoller::read_specs_from_data_sources();
+		$data_source_poller = PaymentGatewaySuggestionsDataSourcePoller::get_instance();
+		$data               = $data_source_poller->get_specs_from_data_sources();
 		$this->assertEmpty( $data );
 	}
 
@@ -120,7 +123,8 @@ class WC_Tests_PaymentGatewaySuggestions_DataSourcePoller extends WC_Unit_Test_C
 			20
 		);
 
-		$data = DataSourcePoller::read_specs_from_data_sources();
+		$data_source_poller = PaymentGatewaySuggestionsDataSourcePoller::get_instance();
+		$data               = $data_source_poller->get_specs_from_data_sources();
 		$this->assertArrayHasKey( 'mock-gateway1', $data );
 		$this->assertArrayHasKey( 'mock-gateway2', $data );
 		$this->assertArrayHasKey( 'mock-gateway3', $data );
@@ -130,9 +134,34 @@ class WC_Tests_PaymentGatewaySuggestions_DataSourcePoller extends WC_Unit_Test_C
 	 * Test that invalid specs aren't merged.
 	 */
 	public function test_merge_invalid_specs() {
-		$data = DataSourcePoller::read_specs_from_data_sources();
+		$data_source_poller = PaymentGatewaySuggestionsDataSourcePoller::get_instance();
+		$data               = $data_source_poller->get_specs_from_data_sources();
 		$this->assertCount( 2, $data );
 		$this->assertArrayNotHasKey( 'mock-gateway-invalid', $data );
 	}
 
+	/**
+	 * Test that data source specs are persisted if successful.
+	 */
+	public function test_persist_data_source_specs() {
+		$data_source_poller = PaymentGatewaySuggestionsDataSourcePoller::get_instance();
+		$data               = $data_source_poller->get_specs_from_data_sources();
+		$this->assertCount( 2, $data );
+		add_filter(
+			DataSourcePoller::FILTER_NAME,
+			function() {
+				return array(
+					'bad-data-source.json',
+				);
+			},
+			20
+		);
+
+		$data_source_poller = PaymentGatewaySuggestionsDataSourcePoller::get_instance();
+		$data               = $data_source_poller->get_specs_from_data_sources();
+		$this->assertCount( 2, $data );
+
+		$data = get_transient( 'woocommerce_admin_' . PaymentGatewaySuggestionsDataSourcePoller::ID . '_specs' );
+		$this->assertCount( 2, $data );
+	}
 }

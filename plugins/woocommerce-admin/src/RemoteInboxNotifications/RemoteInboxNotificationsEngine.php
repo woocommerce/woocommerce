@@ -16,7 +16,6 @@ use \Automattic\WooCommerce\Admin\Features\Onboarding;
  * specs that are able to be triggered.
  */
 class RemoteInboxNotificationsEngine {
-	const SPECS_OPTION_NAME        = 'wc_remote_inbox_notifications_specs';
 	const STORED_STATE_OPTION_NAME = 'wc_remote_inbox_notifications_stored_state';
 	const WCA_UPDATED_OPTION_NAME  = 'wc_remote_inbox_notifications_wca_updated';
 
@@ -90,14 +89,9 @@ class RemoteInboxNotificationsEngine {
 	 * Go through the specs and run them.
 	 */
 	public static function run() {
-		$specs = get_option( self::SPECS_OPTION_NAME );
+		$specs = DataSourcePoller::get_instance()->get_specs_from_data_sources();
 
 		if ( false === $specs || 0 === count( $specs ) ) {
-			// We are running too early, need to poll data sources first.
-			if ( DataSourcePoller::read_specs_from_data_sources() ) {
-				self::run();
-			}
-
 			return;
 		}
 

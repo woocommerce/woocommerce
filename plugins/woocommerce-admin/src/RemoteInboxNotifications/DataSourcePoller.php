@@ -12,120 +12,29 @@ defined( 'ABSPATH' ) || exit;
  * This handles polling specs from JSON endpoints, and
  * stores the specs in to the database as an option.
  */
-class DataSourcePoller {
+class DataSourcePoller extends \Automattic\WooCommerce\Admin\DataSourcePoller {
+	const ID           = 'remote_inbox_notifications';
 	const DATA_SOURCES = array(
 		'https://woocommerce.com/wp-json/wccom/inbox-notifications/1.0/notifications.json',
 	);
+	/**
+	 * Class instance.
+	 *
+	 * @var Analytics instance
+	 */
+	protected static $instance = null;
 
 	/**
-	 * The logger instance.
-	 *
-	 * @var WC_Logger|null
+	 * Get class instance.
 	 */
-	protected static $logger = null;
-
-	/**
-	 * Get the logger instance.
-	 *
-	 * @return WC_Logger
-	 */
-	private static function get_logger() {
-		if ( is_null( self::$logger ) ) {
-			self::$logger = wc_get_logger();
-		}
-
-		return self::$logger;
-	}
-
-	/**
-	 * Reads the data sources for specs and persists those specs.
-	 *
-	 * @return bool Whether any specs were read.
-	 */
-	public static function read_specs_from_data_sources() {
-		$specs        = array();
-		$data_sources = apply_filters( 'woocommerce_admin_remote_inbox_data_sources', self::DATA_SOURCES );
-
-		// Note that this merges the specs from the data sources based on the
-		// slug - last one wins.
-		foreach ( $data_sources as $url ) {
-			$specs_from_data_source = self::read_data_source( $url, $specs );
-			self::merge_specs( $specs_from_data_source, $specs, $url );
-		}
-
-		// Persist the specs as an option.
-		update_option(
-			RemoteInboxNotificationsEngine::SPECS_OPTION_NAME,
-			$specs,
-			false
-		);
-
-		return 0 !== count( $specs );
-	}
-
-	/**
-	 * Read a single data source and return the read specs
-	 *
-	 * @param string $url The URL to read the specs from.
-	 *
-	 * @return array The specs that have been read from the data source.
-	 */
-	private static function read_data_source( $url ) {
-		$logger_context = array( 'source' => $url );
-		$logger         = self::get_logger();
-		$response       = wp_remote_get( $url );
-
-		if ( is_wp_error( $response ) || ! isset( $response['body'] ) ) {
-			$logger->error(
-				'Error getting remote inbox notification data feed',
-				$logger_context
+	public static function get_instance() {
+		if ( ! self::$instance ) {
+			self::$instance = new self(
+				self::ID,
+				self::DATA_SOURCES
 			);
-			// phpcs:ignore
-			$logger->error( print_r( $response, true ), $logger_context );
-
-			return [];
 		}
-
-		$body  = $response['body'];
-		$specs = json_decode( $body );
-
-		if ( null === $specs ) {
-			$logger->error(
-				'Empty response in remote inbox notification data feed',
-				$logger_context
-			);
-
-			return [];
-		}
-
-		if ( ! is_array( $specs ) ) {
-			$logger->error(
-				'Remote inbox notification data feed is not an array',
-				$logger_context
-			);
-
-			return [];
-		}
-
-		return $specs;
-	}
-
-	/**
-	 * Merge the specs.
-	 *
-	 * @param Array  $specs_to_merge_in The specs to merge in to $specs.
-	 * @param Array  $specs             The list of specs being merged into.
-	 * @param string $url               The url of the feed being merged in (for error reporting).
-	 */
-	private static function merge_specs( $specs_to_merge_in, &$specs, $url ) {
-		foreach ( $specs_to_merge_in as $spec ) {
-			if ( ! self::validate_spec( $spec, $url ) ) {
-				continue;
-			}
-
-			$slug           = $spec->slug;
-			$specs[ $slug ] = $spec;
-		}
+		return self::$instance;
 	}
 
 	/**
@@ -136,7 +45,7 @@ class DataSourcePoller {
 	 *
 	 * @return bool The result of the validation.
 	 */
-	private static function validate_spec( $spec, $url ) {
+	protected function validate_spec( $spec, $url ) {
 		$logger         = self::get_logger();
 		$logger_context = array( 'source' => $url );
 
@@ -197,7 +106,7 @@ class DataSourcePoller {
 
 		if ( isset( $spec->actions ) && is_array( $spec->actions ) ) {
 			foreach ( $spec->actions as $action ) {
-				if ( ! self::validate_action( $action, $url ) ) {
+				if ( ! $this->validate_action( $action, $url ) ) {
 					$logger->error(
 						'Spec is invalid because an action is invalid in feed',
 						$logger_context
@@ -253,7 +162,7 @@ class DataSourcePoller {
 	 *
 	 * @return bool The result of the validation.
 	 */
-	private static function validate_action( $action, $url ) {
+	private function validate_action( $action, $url ) {
 		$logger         = self::get_logger();
 		$logger_context = array( 'source' => $url );
 

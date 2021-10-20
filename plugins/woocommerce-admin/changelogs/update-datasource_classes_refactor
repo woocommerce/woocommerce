@@ -1,0 +1,4 @@
+Significance: minor
+Type: Update
+
+Refactor data source poller for re-usability. #7671

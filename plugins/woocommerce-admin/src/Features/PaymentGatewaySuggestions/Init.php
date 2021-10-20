@@ -16,8 +16,6 @@ use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\PaymentGatew
  * This goes through the specs and gets eligible payment gateways.
  */
 class Init {
-	const SPECS_TRANSIENT_NAME = 'woocommerce_admin_payment_gateway_suggestions_specs';
-
 	/**
 	 * Constructor.
 	 */
@@ -53,29 +51,21 @@ class Init {
 	 * Delete the specs transient.
 	 */
 	public static function delete_specs_transient() {
-		delete_transient( self::SPECS_TRANSIENT_NAME );
+		PaymentGatewaySuggestionsDataSourcePoller::get_instance()->delete_specs_transient();
 	}
 
 	/**
 	 * Get specs or fetch remotely if they don't exist.
 	 */
 	public static function get_specs() {
-		$specs = get_transient( self::SPECS_TRANSIENT_NAME );
+		if ( 'no' === get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) ) {
+			return DefaultPaymentGateways::get_all();
+		}
+		$specs = PaymentGatewaySuggestionsDataSourcePoller::get_instance()->get_specs_from_data_sources();
 
 		// Fetch specs if they don't yet exist.
 		if ( false === $specs || ! is_array( $specs ) || 0 === count( $specs ) ) {
-			if ( 'no' === get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) ) {
-				return DefaultPaymentGateways::get_all();
-			}
-
-			$specs = DataSourcePoller::read_specs_from_data_sources();
-
-			// Fall back to default specs if polling failed.
-			if ( ! $specs ) {
-				return DefaultPaymentGateways::get_all();
-			}
-
-			set_transient( self::SPECS_TRANSIENT_NAME, $specs, 7 * DAY_IN_SECONDS );
+			return DefaultPaymentGateways::get_all();
 		}
 
 		return $specs;
