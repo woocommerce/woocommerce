@@ -12,7 +12,7 @@ import metadata from './block.json';
 registerFeaturePluginBlockType( metadata, {
 	icon: {
 		src: <Icon srcElement={ asterisk } />,
-		foreground: '#874FB9',
+		foreground: '#7f54b3',
 	},
 	edit: Edit,
 	save: Save,

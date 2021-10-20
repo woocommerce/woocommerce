@@ -14,7 +14,7 @@ import metadata from './block.json';
 registerExperimentalBlockType( metadata, {
 	icon: {
 		src: <Icon icon={ button } />,
-		foreground: '#874FB9',
+		foreground: '#7f54b3',
 	},
 	attributes,
 	edit: Edit,
