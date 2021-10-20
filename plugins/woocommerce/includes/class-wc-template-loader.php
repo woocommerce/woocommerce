@@ -107,9 +107,7 @@ class WC_Template_Loader {
 			return false;
 		}
 
-		return is_readable(
-			get_stylesheet_directory() . '/block-templates/' . $template_name . '.html'
-		);
+		return apply_filters( 'wc_has_block_template', is_readable( get_stylesheet_directory() . '/block-templates/' . $template_name . '.html' ) );
 	}
 
 	/**
