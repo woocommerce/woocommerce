@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import classnames from 'classnames';
 import { __ } from '@wordpress/i18n';
 import { FormStep } from '@woocommerce/base-components/cart-checkout';
 import {
@@ -13,7 +14,7 @@ import {
  */
 import CheckoutOrderNotes from '../../order-notes';
 
-const Block = (): JSX.Element => {
+const Block = ( { className }: { className?: string } ): JSX.Element => {
 	const { needsShipping } = useShippingDataContext();
 	const {
 		isProcessing: checkoutIsProcessing,
@@ -26,7 +27,10 @@ const Block = (): JSX.Element => {
 		<FormStep
 			id="order-notes"
 			showStepNumber={ false }
-			className="wc-block-checkout__order-notes"
+			className={ classnames(
+				'wc-block-checkout__order-notes',
+				className
+			) }
 			disabled={ checkoutIsProcessing }
 		>
 			<CheckoutOrderNotes

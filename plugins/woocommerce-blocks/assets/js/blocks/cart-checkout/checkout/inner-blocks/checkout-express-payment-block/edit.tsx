@@ -51,6 +51,7 @@ export const Edit = ( {
 	attributes,
 }: {
 	attributes: {
+		className?: string;
 		lock: {
 			move: boolean;
 			remove: boolean;
@@ -60,9 +61,12 @@ export const Edit = ( {
 	const { paymentMethods, isInitialized } = useExpressPaymentMethods();
 	const hasExpressPaymentMethods = Object.keys( paymentMethods ).length > 0;
 	const blockProps = useBlockProps( {
-		className: classnames( {
-			'wp-block-woocommerce-checkout-express-payment-block--has-express-payment-methods': hasExpressPaymentMethods,
-		} ),
+		className: classnames(
+			{
+				'wp-block-woocommerce-checkout-express-payment-block--has-express-payment-methods': hasExpressPaymentMethods,
+			},
+			attributes?.className
+		),
 		attributes,
 	} );
 

@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import classnames from 'classnames';
 import { useBlockProps, InnerBlocks } from '@wordpress/block-editor';
 import { Main } from '@woocommerce/base-components/sidebar-layout';
 import { innerBlockAreas } from '@woocommerce/blocks-checkout';
@@ -16,8 +17,21 @@ import {
 import { useForcedLayout, getAllowedBlocks } from '../../../shared';
 import './style.scss';
 
-export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
-	const blockProps = useBlockProps();
+export const Edit = ( {
+	clientId,
+	attributes,
+}: {
+	clientId: string;
+	attributes: {
+		className?: string;
+	};
+} ): JSX.Element => {
+	const blockProps = useBlockProps( {
+		className: classnames(
+			'wc-block-checkout__main',
+			attributes?.className
+		),
+	} );
 	const {
 		showOrderNotes,
 		showPolicyLinks,
@@ -60,18 +74,16 @@ export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 	} );
 
 	return (
-		<Main className="wc-block-checkout__main">
-			<div { ...blockProps }>
-				<Controls />
-				<form className="wc-block-components-form wc-block-checkout__form">
-					<InnerBlocks
-						allowedBlocks={ allowedBlocks }
-						templateLock={ false }
-						template={ defaultTemplate }
-						renderAppender={ InnerBlocks.ButtonBlockAppender }
-					/>
-				</form>
-			</div>
+		<Main { ...blockProps }>
+			<Controls />
+			<form className="wc-block-components-form wc-block-checkout__form">
+				<InnerBlocks
+					allowedBlocks={ allowedBlocks }
+					templateLock={ false }
+					template={ defaultTemplate }
+					renderAppender={ InnerBlocks.ButtonBlockAppender }
+				/>
+			</form>
 		</Main>
 	);
 };

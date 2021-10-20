@@ -30,8 +30,10 @@ import { getSetting } from '@woocommerce/settings';
 
 const Block = ( {
 	showRateAfterTaxName = false,
+	className,
 }: {
 	showRateAfterTaxName: boolean;
+	className?: string;
 } ): JSX.Element => {
 	const { cartItems, cartTotals, cartCoupons, cartFees } = useStoreCart();
 	const {
@@ -54,7 +56,7 @@ const Block = ( {
 	};
 
 	return (
-		<>
+		<div className={ className }>
 			<TotalsWrapper>
 				<OrderSummary cartItems={ cartItems } />
 			</TotalsWrapper>
@@ -105,7 +107,7 @@ const Block = ( {
 				/>
 			</TotalsWrapper>
 			<ExperimentalOrderMeta.Slot { ...slotFillProps } />
-		</>
+		</div>
 	);
 };
 

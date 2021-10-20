@@ -17,6 +17,10 @@ export default {
 		type: 'boolean',
 		default: false,
 	},
+	className: {
+		type: 'string',
+		default: '',
+	},
 	lock: {
 		type: 'object',
 		default: {

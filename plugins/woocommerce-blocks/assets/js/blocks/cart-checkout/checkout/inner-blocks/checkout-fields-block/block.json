@@ -12,6 +12,10 @@
 		"inserter": false
 	},
 	"attributes": {
+		"className": {
+			"type": "string",
+			"default": ""
+		},
 		"lock": {
 			"type": "object",
 			"default": {
