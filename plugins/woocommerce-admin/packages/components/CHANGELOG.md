@@ -1,4 +1,8 @@
 # Unreleased
+
+# 8.1.1
+
+-   Fixed warnings when using AdvancedFilters component. #7704
 -   Add `autoComplete` prop to the `SelectControl` component. #7497
 -   Fix calendar not being dismissed when clicking outside. #7714
 
