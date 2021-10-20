@@ -1077,10 +1077,7 @@ class WC_Admin_Addons {
 	 *
 	 * @return string CSS class to use.
 	 */
-	public static function 
-    
-    
-    ( $rating, $index ) {
+	public static function get_star_class( $rating, $index ) {
 		if ( $rating >= $index ) {
 			// Rating more that current star to show.
 			return 'fill';
