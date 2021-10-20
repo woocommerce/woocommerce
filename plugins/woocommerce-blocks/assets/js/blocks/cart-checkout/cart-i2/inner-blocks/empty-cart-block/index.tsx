@@ -13,7 +13,7 @@ import metadata from './block.json';
 registerExperimentalBlockType( metadata, {
 	icon: {
 		src: <Icon srcElement={ removeCart } />,
-		foreground: '#874FB9',
+		foreground: '#7f54b3',
 	},
 	edit: Edit,
 	save: Save,
