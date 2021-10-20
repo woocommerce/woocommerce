@@ -15,6 +15,7 @@ const { productsApi } = require('../../endpoints/products');
 
 	const PRODUCTS_COUNT = 20;
 	let sampleData;
+	let productId;
 
 	beforeAll( async () => {
 		sampleData = await createSampleData();
@@ -769,5 +770,57 @@ const { productsApi } = require('../../endpoints/products');
 				} );
 			} );
 		} );
+	} );
+
+	it( 'can add a simple product', async () => {
+		const product = {
+			name: 'A Simple Product',
+			regular_price: '25',
+			description: 'Description for this simple product.',
+			short_description: 'Shorter description.',
+		};
+		const { status, body } = await productsApi.create.product( product );
+		productId = body.id;
+
+		expect( status ).toEqual( productsApi.create.responseCode );
+		expect( productId ).toBeDefined();
+		expect( body.type ).toEqual( 'simple' );
+		expect( body.status ).toEqual( 'publish' );
+		expect( body.virtual ).toEqual( false );
+		expect( body.downloadable ).toEqual( false );
+	} );
+
+	it( 'can view a single product', async () => {
+		const { status, body } = await productsApi.retrieve.product( productId );
+
+		expect( status ).toEqual( productsApi.retrieve.responseCode );
+		expect( body.id ).toEqual( productId );
+	} );
+
+	it( 'can update a single product', async () => {
+		const updatePayload = {
+			regular_price: '25.99',
+		};
+		const { status, body } = await productsApi.update.product(
+			productId,
+			updatePayload
+		);
+
+		expect( status ).toEqual( productsApi.update.responseCode );
+		expect( body.id ).toEqual( productId );
+		expect( body.regular_price ).toEqual( updatePayload.regular_price );
+	} );
+
+	it( 'can delete a product', async () => {
+		const { status, body } = await productsApi.delete.product( productId, true );
+
+		expect( status ).toEqual( productsApi.delete.responseCode );
+		expect( body.id ).toEqual( productId );
+		
+		// Verify that the product can no longer be retrieved.
+		const {
+			status: retrieveDeletedProductStatus,
+		} = await productsApi.retrieve.product( productId );
+		expect( retrieveDeletedProductStatus ).toEqual( 404 );
 	} );
 } );
