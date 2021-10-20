@@ -2,6 +2,10 @@
 	@include with-translucent-border(1px 0 0);
 	padding: $gap 0;
 
+	&:last-child {
+		padding-bottom: 0;
+	}
+
 	&.has-bottom-border {
 		&::after {
 			border-bottom-width: 1px;
