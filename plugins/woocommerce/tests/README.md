@@ -79,8 +79,9 @@ If you run into this problem, simply delete the WordPress test directory and run
 ```
 $ rm -rf /var/folders/qr/3cnz_5_j3j1cljph_246ty1h0000gn/T/wordpress-tests-lib
 $ tests/bin/install.sh woocommerce_tests_1 root root
-# Note that woocommerce_tests changed to woocommerce_tests_1 as the database woocommerce_tests already exists due to the prior command.
 ```
+
+Note that `woocommerce_tests` changed to `woocommerce_tests_1` as the `database woocommerce_tests` already exists due to the prior command.
 
 ### Running tests in PHP 8
 
