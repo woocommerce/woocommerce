@@ -5,3 +5,4 @@
 ## Added
 - Coupons API Tests
 - Refunds API Tests
+- Products API Tests
