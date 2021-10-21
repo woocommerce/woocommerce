@@ -2,7 +2,12 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Disabled, PanelBody, ToggleControl } from '@wordpress/components';
+import {
+	ColorPalette,
+	Disabled,
+	PanelBody,
+	ToggleControl,
+} from '@wordpress/components';
 import { compose } from '@wordpress/compose';
 import {
 	InspectorControls,
@@ -22,6 +27,18 @@ import HeadingToolbar from '@woocommerce/editor-components/heading-toolbar';
 import Block from './block';
 import withProductSelector from '../shared/with-product-selector';
 import { BLOCK_TITLE, BLOCK_ICON } from './constants';
+import { Attributes } from './types';
+
+interface Props {
+	color: ColorPalette.Color;
+	fontSize: {
+		size: number | undefined;
+	};
+	setFontSize: ( size: number ) => void;
+	setColor: ( color: ColorPalette.Color ) => void;
+	attributes: Attributes;
+	setAttributes: ( attributes: Record< string, unknown > ) => void;
+}
 
 const TitleEdit = ( {
 	color,
@@ -30,7 +47,7 @@ const TitleEdit = ( {
 	setColor,
 	attributes,
 	setAttributes,
-} ) => {
+}: Props ): JSX.Element => {
 	const { headingLevel, showProductLink, align } = attributes;
 	return (
 		<>
@@ -40,7 +57,7 @@ const TitleEdit = ( {
 					minLevel={ 1 }
 					maxLevel={ 7 }
 					selectedLevel={ headingLevel }
-					onChange={ ( newLevel ) =>
+					onChange={ ( newLevel: number ) =>
 						setAttributes( { headingLevel: newLevel } )
 					}
 				/>
@@ -94,7 +111,7 @@ const TitleEdit = ( {
 							) }
 							colorSettings={ [
 								{
-									value: color.color,
+									value: color,
 									onChange: setColor,
 									label: __(
 										'Text color',

@@ -104,6 +104,7 @@
 		"@types/lodash": "4.14.175",
 		"@types/react": "16.14.17",
 		"@types/wordpress__block-editor": "2.2.9",
+		"@types/wordpress__compose": "^4.0.0",
 		"@types/wordpress__data": "4.6.10",
 		"@types/wordpress__data-controls": "1.0.5",
 		"@types/wordpress__deprecated": "2.4.3",

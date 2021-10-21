@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { registerBlockType } from '@wordpress/blocks';
+import { registerBlockType, BlockConfiguration } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -15,7 +15,8 @@ import {
 	BLOCK_DESCRIPTION as description,
 } from './constants';
 
-const blockConfig = {
+const blockConfig: BlockConfiguration = {
+	...sharedConfig,
 	title,
 	description,
 	icon: {
@@ -26,7 +27,4 @@ const blockConfig = {
 	edit,
 };
 
-registerBlockType( 'woocommerce/product-title', {
-	...sharedConfig,
-	...blockConfig,
-} );
+registerBlockType( 'woocommerce/product-title', blockConfig );
