@@ -30,7 +30,7 @@ export function categoryPage() {
 		categoryPageTrend.add(response.timings.duration);
 		check(response, {
 			"is status 200": (r) => r.status === 200,
-			"body contains: 'Accessories' title": (response) =>
+			"body contains: Category's title": (response) =>
 				response.body.includes(
 					`<h1 class="woocommerce-products-header__title page-title">${product_category}</h1>`
 				),
