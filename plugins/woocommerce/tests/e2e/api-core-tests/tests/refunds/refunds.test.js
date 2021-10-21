@@ -2,7 +2,6 @@ const { refundsApi } = require( '../../endpoints/refunds' );
 const { ordersApi } = require( '../../endpoints/orders' );
 const { productsApi } = require( '../../endpoints/products' );
 const { refund } = require( '../../data' );
-const { expect } = require( '@jest/globals' );
 
 /**
  * Tests for the WooCommerce Refunds API.
