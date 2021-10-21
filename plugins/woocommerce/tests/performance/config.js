@@ -37,6 +37,7 @@ export const product_sku = __ENV.P_SKU || 'woo-beanie';
 export const product_url = __ENV.P_URL || 'beanie';
 export const product_id = __ENV.P_ID || '13';
 export const product_search_term = __ENV.P_TERM || 'beanie';
+export const product_category = __ENV.P_CAT || 'Accessories';
 
 export const coupon_code = __ENV.P_COUPON || 'testing';
 
