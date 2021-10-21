@@ -102,7 +102,7 @@ let configPath = path.resolve( __dirname, '../config/jest.config.js' );
 if ( appPath ) {
 	const appConfig = path.resolve(
 		appPath,
-		'tests/e2e/config/jest.config.js'
+		'plugins/woocommerce/tests/e2e/config/jest.config.js'
 	);
 
 	if ( fs.existsSync( appConfig ) ) {
