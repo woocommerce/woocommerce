@@ -814,6 +814,45 @@ const { productsApi } = require('../../endpoints/products');
 		await productsApi.delete.product( virtualProductId, true );
 	} );
 
+	it( 'can add a variable product', async () => {
+		const variableProduct = {
+			name: 'A Variable Product',
+			type: 'variable',
+			attributes: [
+				{
+					name: 'Colour',
+					visible: true,
+					variation: true,
+					options: [ 'Red', 'Green', 'Blue' ],
+				},
+				{
+					name: 'Size',
+					visible: true,
+					variation: true,
+					options: [ 'Small', 'Medium', 'Large' ],
+				},
+				{
+					name: 'Logo',
+					visible: true,
+					variation: true,
+					options: [ 'Woo', 'WordPress' ],
+				},
+			],
+		};
+		const { status, body } = await productsApi.create.product(
+			variableProduct
+		);
+		const variableProductId = body.id;
+
+		expect( status ).toEqual( productsApi.create.responseCode );
+		expect( variableProductId ).toBeDefined();
+		expect( body ).toMatchObject( variableProduct );
+		expect( body.status ).toEqual( 'publish' );
+
+		// Cleanup: Delete the variable product
+		await productsApi.delete.product( variableProductId, true );
+	} );
+
 	it( 'can view a single product', async () => {
 		const { status, body } = await productsApi.retrieve.product( productId );
 
