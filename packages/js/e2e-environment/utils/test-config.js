@@ -4,24 +4,26 @@ const getAppRoot = require( './app-root' );
 
 // Copy local test configuration file if it exists.
 const appPath = getAppRoot();
-const localTestConfigFile = path.resolve( appPath, 'tests/e2e/config/default.json' );
-const defaultConfigFile = path.resolve( __dirname, '../config/default/default.json' );
+const localTestConfigFile = path.resolve(
+	appPath,
+	'plugins/woocommerce/tests/e2e/config/default.json'
+);
+const defaultConfigFile = path.resolve(
+	__dirname,
+	'../config/default/default.json'
+);
 const testConfigFile = path.resolve( __dirname, '../config/default.json' );
+
 if ( fs.existsSync( localTestConfigFile ) ) {
-	fs.copyFileSync(
-		localTestConfigFile,
-		testConfigFile
-	);
+	fs.copyFileSync( localTestConfigFile, testConfigFile );
 } else {
-	fs.copyFileSync(
-		defaultConfigFile,
-		testConfigFile
-	);
+	fs.copyFileSync( defaultConfigFile, testConfigFile );
 }
 
 /**
  * Get test container configuration.
- * @returns {any}
+ *
+ * @return {any}
  */
 const getTestConfig = () => {
 	const rawTestConfig = fs.readFileSync( testConfigFile );
@@ -30,7 +32,7 @@ const getTestConfig = () => {
 	const users = config.get( 'users' );
 
 	// Support for environment variable overrides.
-	let testConfig = JSON.parse( rawTestConfig );
+	const testConfig = JSON.parse( rawTestConfig );
 	if ( url ) {
 		testConfig.url = url;
 	}
@@ -43,10 +45,10 @@ const getTestConfig = () => {
 		}
 	}
 
-	let testPort = testConfig.url.match( /[0-9]+/ );
+	const testPort = testConfig.url.match( /[0-9]+/ );
 	testConfig.baseUrl = testConfig.url.substr( 0, testConfig.url.length - 1 );
 	if ( Array.isArray( testPort ) ) {
-		testConfig.port = testPort[0] ? testPort[0] : '8084';
+		testConfig.port = testPort[ 0 ] ? testPort[ 0 ] : '8084';
 	} else {
 		testConfig.port = '';
 	}
@@ -59,9 +61,15 @@ const getTestConfig = () => {
 const getAdminConfig = () => {
 	const testConfig = getTestConfig();
 	const adminConfig = {
-		'WORDPRESS_LOGIN': testConfig.users.admin.username ? testConfig.users.admin.username : 'admin',
-		'WORDPRESS_PASSWORD': testConfig.users.admin.password ? testConfig.users.admin.password : 'password',
-		'WORDPRESS_EMAIL': testConfig.users.admin.email ? testConfig.users.admin.email : 'admin@woocommercecoree2etestsuite.com',
+		WORDPRESS_LOGIN: testConfig.users.admin.username
+			? testConfig.users.admin.username
+			: 'admin',
+		WORDPRESS_PASSWORD: testConfig.users.admin.password
+			? testConfig.users.admin.password
+			: 'password',
+		WORDPRESS_EMAIL: testConfig.users.admin.email
+			? testConfig.users.admin.email
+			: 'admin@woocommercecoree2etestsuite.com',
 	};
 
 	return adminConfig;

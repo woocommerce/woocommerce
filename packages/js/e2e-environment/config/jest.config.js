@@ -11,27 +11,31 @@ const fs = require( 'fs' );
  */
 const { getAppRoot } = require( '../utils' );
 
-let failureSetup = [];
+const failureSetup = [];
 if ( WC_E2E_SCREENSHOTS ) {
-	failureSetup.push( path.resolve( __dirname, '../build/setup/jest.failure.js' ) );
+	failureSetup.push(
+		path.resolve( __dirname, '../build/setup/jest.failure.js' )
+	);
 }
-let setupFilesAfterEnv = [
+const setupFilesAfterEnv = [
 	path.resolve( __dirname, '../build/setup/jest.setup.js' ),
 	...failureSetup,
 	'expect-puppeteer',
 ];
 
 const appPath = getAppRoot();
-const localJestSetupFile = path.resolve( appPath, 'tests/e2e/config/jest.setup.js' );
-if (fs.existsSync( localJestSetupFile ) ) {
+const localJestSetupFile = path.resolve(
+	appPath,
+	'plugins/woocommerce/tests/e2e/config/jest.setup.js'
+);
+if ( fs.existsSync( localJestSetupFile ) ) {
 	setupFilesAfterEnv.push( localJestSetupFile );
 }
 
-let combinedConfig = {
+const combinedConfig = {
 	...jestConfig,
 	moduleNameMapper: {
-		'@woocommerce/e2e/tests/(.*)':
-			'<rootDir>/tests/e2e/$1',
+		'@woocommerce/e2e/tests/(.*)': '<rootDir>/tests/e2e/$1',
 	},
 
 	setupFiles: [ '<rootDir>/config/env.setup.js' ],
@@ -46,14 +50,12 @@ let combinedConfig = {
 
 	transformIgnorePatterns: [
 		...jestConfig.transformIgnorePatterns,
-		'node_modules/(?!(woocommerce)/)'
+		'node_modules/(?!(woocommerce)/)',
 	],
 };
 
 if ( process.env.jest_test_spec ) {
-	combinedConfig.testMatch = [
-		process.env.jest_test_spec
-	];
+	combinedConfig.testMatch = [ process.env.jest_test_spec ];
 }
 
 module.exports = combinedConfig;
