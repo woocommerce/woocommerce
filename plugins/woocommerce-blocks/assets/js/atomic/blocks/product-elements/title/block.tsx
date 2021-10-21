@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
-import PropTypes from 'prop-types';
 import classnames from 'classnames';
+import { HTMLAttributes } from 'react';
 import {
 	useInnerBlockLayoutContext,
 	useProductDataContext,
@@ -18,6 +18,23 @@ import { useStoreEvents } from '@woocommerce/base-context/hooks';
  * Internal dependencies
  */
 import './style.scss';
+import { Attributes } from './types';
+
+type Props = Attributes & HTMLAttributes< HTMLDivElement >;
+
+interface TagNameProps extends HTMLAttributes< HTMLOrSVGElement > {
+	headingLevel: number;
+	elementType?: keyof JSX.IntrinsicElements;
+}
+
+const TagName = ( {
+	children,
+	headingLevel,
+	elementType: ElementType = `h${ headingLevel }` as keyof JSX.IntrinsicElements,
+	...props
+}: TagNameProps ): JSX.Element => {
+	return <ElementType { ...props }>{ children }</ElementType>;
+};
 
 /**
  * Product Title Block Component.
@@ -43,11 +60,10 @@ export const Block = ( {
 	customColor,
 	fontSize,
 	customFontSize,
-} ) => {
+}: Props ): JSX.Element => {
 	const { parentClassName } = useInnerBlockLayoutContext();
 	const { product } = useProductDataContext();
 	const { dispatchStoreEvent } = useStoreEvents();
-	const TagName = `h${ headingLevel }`;
 
 	const colorClass = getColorClassName( 'color', color );
 	const fontSizeClass = getFontSizeClass( fontSize );
@@ -62,7 +78,7 @@ export const Block = ( {
 	if ( ! product.id ) {
 		return (
 			<TagName
-				// @ts-ignore
+				headingLevel={ headingLevel }
 				className={ classnames(
 					className,
 					'wc-block-components-product-title',
@@ -82,8 +98,8 @@ export const Block = ( {
 	}
 
 	return (
-		// @ts-ignore
 		<TagName
+			headingLevel={ headingLevel }
 			className={ classnames(
 				className,
 				'wc-block-components-product-title',
@@ -101,7 +117,7 @@ export const Block = ( {
 				disabled={ ! showProductLink }
 				name={ product.name }
 				permalink={ product.permalink }
-				rel={ showProductLink ? 'nofollow' : null }
+				rel={ showProductLink ? 'nofollow' : '' }
 				style={ gatedStyledText( {
 					color: customColor,
 					fontSize: customFontSize,
@@ -114,17 +130,6 @@ export const Block = ( {
 			/>
 		</TagName>
 	);
-};
-
-Block.propTypes = {
-	className: PropTypes.string,
-	headingLevel: PropTypes.number,
-	showProductLink: PropTypes.bool,
-	align: PropTypes.string,
-	color: PropTypes.string,
-	customColor: PropTypes.string,
-	fontSize: PropTypes.string,
-	customFontSize: PropTypes.number,
 };
 
 export default withProductDataContext( Block );
