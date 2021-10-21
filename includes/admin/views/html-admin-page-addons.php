@@ -126,7 +126,7 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 
 		<?php if ( 'Storefront' !== $theme['Name'] && '_featured' !== $current_section ) : ?>
 			<?php
-			$storefront_url = WC_Admin_Addons::add_in_app_purchase_url_params( 'https://woocommerce.com/storefront/?utm_source=extensionsscreen&utm_medium=product&utm_campaign=wcaddon' );
+				$storefront_url = WC_Admin_Addons::add_in_app_purchase_url_params( 'https://woocommerce.com/storefront/?utm_source=extensionsscreen&utm_medium=product&utm_campaign=wcaddon' );
 			?>
 			<div class="storefront">
 				<a href="<?php echo esc_url( $storefront_url ); ?>" target="_blank"><img src="<?php echo esc_url( WC()->plugin_url() ); ?>/assets/images/storefront.png" alt="<?php esc_attr_e( 'Storefront', 'woocommerce' ); ?>" /></a>
