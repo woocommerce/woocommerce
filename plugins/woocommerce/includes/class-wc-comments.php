@@ -46,6 +46,9 @@ class WC_Comments {
 		// Support avatars for `review` comment type.
 		add_filter( 'get_avatar_comment_types', array( __CLASS__, 'add_avatar_for_review_comment_type' ) );
 
+		// Add Product Reviews filter for `review` comment type.
+		add_filter( 'admin_comment_types_dropdown', array( __CLASS__, 'add_review_comment_fitler' ) );
+
 		// Review of verified purchase.
 		add_action( 'comment_post', array( __CLASS__, 'add_comment_purchase_verification' ) );
 
@@ -291,6 +294,18 @@ class WC_Comments {
 	 */
 	public static function add_avatar_for_review_comment_type( $comment_types ) {
 		return array_merge( $comment_types, array( 'review' ) );
+	}
+
+	/**
+	 * Add Product Reviews filter for `review` comment type.
+	 *
+	 * @since  5.9
+	 * @param  array $comment_types Array of comment type labels keyed by their name.
+	 * @return array
+	 */
+	public static function add_review_comment_fitler( $comment_types ) {
+		$comment_types['review'] = __( 'Product Reviews', 'woocommerce' );
+		return $comment_types;
 	}
 
 	/**
