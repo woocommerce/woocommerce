@@ -14,7 +14,7 @@ import { useCompatibilityNotice } from './use-compatibility-notice';
 import WooImage from './woo-image';
 
 interface CartCheckoutCompatibilityNoticeProps {
-	blockName: 'cart' | 'checkout';
+	blockName: 'cart' | 'checkout' | 'mini-cart';
 }
 
 export function CartCheckoutCompatibilityNotice( {
