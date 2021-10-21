@@ -6,6 +6,8 @@
  */
 
 use \Automattic\WooCommerce\Admin\API\OnboardingTasks;
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 
 /**
  * WC Tests API Onboarding Tasks
@@ -37,6 +39,12 @@ class WC_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 		foreach ( $products as $product ) {
 			$product->delete( true );
 		}
+
+		// Resetting task list options and lists.
+		update_option( Task::DISMISSED_OPTION, array() );
+		update_option( Task::SNOOZED_OPTION, array() );
+		TaskLists::clear_lists();
+
 	}
 
 	/**
@@ -166,5 +174,349 @@ class WC_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 'Custom post content', get_the_content( null, null, $data['post_id'] ) );
 	}
 
+
+	/**
+	 * Test that a task can be snoozed.
+	 * @group tasklist
+	 */
+	public function test_task_can_be_snoozed() {
+		wp_set_current_user( $this->user );
+
+		TaskLists::add_list(
+			array(
+				'id' => 'test-list',
+			)
+		);
+
+		TaskLists::add_task(
+			'test-list',
+			array(
+				'id'            => 'test-task',
+				'title'         => 'Test Task',
+				'is_snoozeable' => true,
+			)
+		);
+
+		$request = new WP_REST_Request( 'POST', $this->endpoint . '/test-task/snooze' );
+		$request->set_headers( array( 'content-type' => 'application/json' ) );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$task = TaskLists::get_task( 'test-task' );
+
+		$this->assertEquals( $data['isSnoozed'], true );
+		$this->assertEquals( isset( $data['snoozedUntil'] ), true );
+		$this->assertEquals( $task->is_snoozed(), true );
+		$this->assertEquals( isset( $task->snoozed_until ), true );
+
+	}
+
+	/**
+	 * Test that a task can be snoozed with determined list ID.
+	 * @group tasklist
+	 */
+	public function test_task_can_be_snoozed_with_list_id() {
+		wp_set_current_user( $this->user );
+
+		TaskLists::add_list(
+			array(
+				'id' => 'test-list',
+			)
+		);
+
+		TaskLists::add_task(
+			'test-list',
+			array(
+				'id'            => 'test-task',
+				'title'         => 'Test Task',
+				'is_snoozeable' => true,
+			)
+		);
+
+		$request = new WP_REST_Request( 'POST', $this->endpoint . '/test-task/snooze' );
+		$request->set_headers( array( 'content-type' => 'application/json' ) );
+		$request->set_body( wp_json_encode( array( 'task_list_id' => 'test-list' ) ) );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$task = TaskLists::get_task( 'test-task' );
+
+		$this->assertEquals( $data['isSnoozed'], true );
+		$this->assertEquals( isset( $data['snoozedUntil'] ), true );
+		$this->assertEquals( $task->is_snoozed(), true );
+		$this->assertEquals( isset( $task->snoozed_until ), true );
+
+	}
+
+	/**
+	 * Test that a task can be snoozed with determined duration.
+	 * @group tasklist
+	 */
+	public function test_task_can_be_snoozed_with_duration() {
+		wp_set_current_user( $this->user );
+
+		TaskLists::add_list(
+			array(
+				'id' => 'test-list',
+			)
+		);
+
+		TaskLists::add_task(
+			'test-list',
+			array(
+				'id'            => 'test-task',
+				'title'         => 'Test Task',
+				'is_snoozeable' => true,
+			)
+		);
+
+		$request = new WP_REST_Request( 'POST', $this->endpoint . '/test-task/snooze' );
+		$request->set_headers( array( 'content-type' => 'application/json' ) );
+		$request->set_body( wp_json_encode( array( 'duration' => 'week' ) ) );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$task = TaskLists::get_task( 'test-task' );
+
+		$week_in_ms = WEEK_IN_SECONDS * 1000;
+
+		$this->assertEquals( $data['snoozedUntil'] >= ( ( time() * 1000 ) + $week_in_ms ), true );
+
+	}
+
+	/**
+	 * Test that a snoozed task can be undone.
+	 * @group tasklist
+	 */
+	public function test_snoozed_task_can_be_undone() {
+		wp_set_current_user( $this->user );
+
+		TaskLists::add_list(
+			array(
+				'id' => 'test-list',
+			)
+		);
+
+		TaskLists::add_task(
+			'test-list',
+			array(
+				'id'            => 'test-task',
+				'title'         => 'Test Task',
+				'is_snoozeable' => true,
+			)
+		);
+
+		$task = TaskLists::get_task( 'test-task' );
+
+		$task->snooze();
+
+		$this->assertEquals( $task->is_snoozed(), true );
+
+		$request = new WP_REST_Request( 'POST', $this->endpoint . '/test-task/undo_snooze' );
+		$request->set_headers( array( 'content-type' => 'application/json' ) );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$task_after_request = TaskLists::get_task( 'test-task' );
+
+		$this->assertEquals( $task_after_request->is_snoozed(), false );
+
+	}
+
+	/**
+	 * Test that snooze endpoint returns error for invalid task.
+	 * @group tasklist
+	 */
+	public function test_snoozed_task_invalid() {
+		$this->markTestSkipped( 'Skipped temporarily due to change in endpoint behavior.' );
+		wp_set_current_user( $this->user );
+
+		$request = new WP_REST_Request( 'POST', $this->endpoint . '/test-task/snooze' );
+		$request->set_headers( array( 'content-type' => 'application/json' ) );
+		$response      = $this->server->dispatch( $request );
+		$response_data = $response->get_data();
+
+		$this->assertEquals( $response_data['data']['status'], 404 );
+		$this->assertEquals( $response_data['code'], 'woocommerce_rest_invalid_task' );
+	}
+
+	/**
+	 * Test that a task can be dismissed.
+	 * @group tasklist
+	 */
+	public function test_task_can_be_dismissed() {
+		wp_set_current_user( $this->user );
+
+		TaskLists::add_list(
+			array(
+				'id' => 'test-list',
+			)
+		);
+
+		TaskLists::add_task(
+			'test-list',
+			array(
+				'id'             => 'test-task',
+				'title'          => 'Test Task',
+				'is_dismissable' => true,
+			)
+		);
+
+		$request = new WP_REST_Request( 'POST', $this->endpoint . '/test-task/dismiss' );
+		$request->set_headers( array( 'content-type' => 'application/json' ) );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$task = TaskLists::get_task( 'test-task' );
+
+		$this->assertEquals( $data['isDismissed'], true );
+		$this->assertEquals( $task->is_dismissed(), true );
+	}
+
+	/**
+	 * Test that a dismissed task can be undone.
+	 * @group tasklist
+	 */
+	public function test_dismissed_task_can_be_undone() {
+		wp_set_current_user( $this->user );
+
+		TaskLists::add_list(
+			array(
+				'id' => 'test-list',
+			)
+		);
+
+		TaskLists::add_task(
+			'test-list',
+			array(
+				'id'             => 'test-task',
+				'title'          => 'Test Task',
+				'is_dismissable' => true,
+			)
+		);
+
+		$task = TaskLists::get_task( 'test-task' );
+
+		$task->dismiss();
+
+		$this->assertEquals( $task->is_dismissed(), true );
+
+		$request = new WP_REST_Request( 'POST', $this->endpoint . '/test-task/undo_dismiss' );
+		$request->set_headers( array( 'content-type' => 'application/json' ) );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$task_after_request = TaskLists::get_task( 'test-task' );
+
+		$this->assertEquals( $task_after_request->is_dismissed(), false );
+	}
+
+	/**
+	 * Test that dismiss endpoint returns error for invalid task.
+	 * @group tasklist
+	 */
+	public function test_dismissed_task_invalid() {
+		$this->markTestSkipped( 'Skipped temporarily due to change in endpoint behavior.' );
+		wp_set_current_user( $this->user );
+
+		$request = new WP_REST_Request( 'POST', $this->endpoint . '/test-task/dismiss' );
+		$request->set_headers( array( 'content-type' => 'application/json' ) );
+		$response      = $this->server->dispatch( $request );
+		$response_data = $response->get_data();
+
+		$this->assertEquals( $response_data['data']['status'], 404 );
+		$this->assertEquals( $response_data['code'], 'woocommerce_rest_invalid_task' );
+	}
+
+	/**
+	 * Test that a task list can be hidden.
+	 * @group tasklist
+	 */
+	public function test_task_list_can_be_hidden() {
+		wp_set_current_user( $this->user );
+
+		TaskLists::add_list(
+			array(
+				'id' => 'test-list',
+			)
+		);
+
+		TaskLists::add_task(
+			'test-list',
+			array(
+				'id'             => 'test-task',
+				'title'          => 'Test Task',
+				'is_dismissable' => true,
+			)
+		);
+
+		$request = new WP_REST_Request( 'POST', $this->endpoint . '/test-list/hide' );
+		$request->set_headers( array( 'content-type' => 'application/json' ) );
+		$response      = $this->server->dispatch( $request );
+		$response_data = $response->get_data();
+
+		$list = TaskLists::get_list( 'test-list' );
+
+		$this->assertEquals( $list->is_hidden(), true );
+		$this->assertEquals( $response_data['isHidden'], true );
+	}
+
+	/**
+	 * Test that hide endpoint returns error for invalid task.
+	 * @group tasklist
+	 */
+	public function test_task_list_hidden_invalid_list() {
+		wp_set_current_user( $this->user );
+
+		$request = new WP_REST_Request( 'POST', $this->endpoint . '/test-list/hide' );
+		$request->set_headers( array( 'content-type' => 'application/json' ) );
+		$response      = $this->server->dispatch( $request );
+		$response_data = $response->get_data();
+
+		$this->assertEquals( $response_data['data']['status'], 404 );
+		$this->assertEquals( $response_data['code'], 'woocommerce_rest_invalid_task_list' );
+	}
+
+
+	/**
+	 * Test that task lists can be fetched.
+	 * @group tasklist
+	 */
+	public function test_task_list_can_be_fetched() {
+		wp_set_current_user( $this->user );
+
+		TaskLists::add_list(
+			array(
+				'id' => 'test-list',
+			)
+		);
+
+		TaskLists::add_task(
+			'test-list',
+			array(
+				'id'             => 'test-task',
+				'title'          => 'Test Task',
+				'is_dismissable' => true,
+			)
+		);
+
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_headers( array( 'content-type' => 'application/json' ) );
+		$response      = $this->server->dispatch( $request );
+		$response_data = $response->get_data();
+
+		$test_list = null;
+
+		foreach ( $response_data as $task_list ) {
+			if ( 'test-list' === $task_list['id'] ) {
+				$test_list = $task_list;
+			}
+		}
+
+		$test_task = $test_list['tasks'][0];
+
+		$this->assertEquals( $test_task['id'], 'test-task' );
+		$this->assertEquals( $test_task['isDismissable'], true );
+	}
 
 }
