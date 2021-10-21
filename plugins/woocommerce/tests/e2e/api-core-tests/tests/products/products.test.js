@@ -784,10 +784,34 @@ const { productsApi } = require('../../endpoints/products');
 
 		expect( status ).toEqual( productsApi.create.responseCode );
 		expect( productId ).toBeDefined();
+		expect( body ).toMatchObject( product );
 		expect( body.type ).toEqual( 'simple' );
 		expect( body.status ).toEqual( 'publish' );
 		expect( body.virtual ).toEqual( false );
 		expect( body.downloadable ).toEqual( false );
+		expect( body.shipping_required ).toEqual( true );
+	} );
+
+	it( 'can add a virtual product', async () => {
+		const virtualProduct = {
+			name: 'A Virtual Product',
+			regular_price: '10',
+			virtual: true,
+		};
+		const { status, body } = await productsApi.create.product(
+			virtualProduct
+		);
+		const virtualProductId = body.id;
+
+		expect( status ).toEqual( productsApi.create.responseCode );
+		expect( virtualProductId ).toBeDefined();
+		expect( body ).toMatchObject( virtualProduct );
+		expect( body.type ).toEqual( 'simple' );
+		expect( body.status ).toEqual( 'publish' );
+		expect( body.shipping_required ).toEqual( false );
+
+		// Cleanup: Delete the virtual product
+		await productsApi.delete.product( virtualProductId, true );
 	} );
 
 	it( 'can view a single product', async () => {
