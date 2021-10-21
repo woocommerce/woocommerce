@@ -866,6 +866,50 @@ class WC_Admin_Addons {
 	}
 
 	/**
+	 * Outputs a button.
+	 *
+	 * @param string $url    Destination URL.
+	 * @param string $text   Button label text.
+	 * @param string $style  Button style class.
+	 * @param string $plugin The plugin the button is promoting.
+	 */
+	public static function output_button( $url, $text, $style, $plugin = '' ) {
+		$style = __( 'Free', 'woocommerce' ) === $text ? 'addons-button-outline-purple' : $style;
+		$style = is_plugin_active( $plugin ) ? 'addons-button-installed' : $style;
+		$text  = is_plugin_active( $plugin ) ? __( 'Installed', 'woocommerce' ) : $text;
+		$url   = self::add_in_app_purchase_url_params( $url );
+		?>
+		<a
+			class="addons-button <?php echo esc_attr( $style ); ?>"
+			href="<?php echo esc_url( $url ); ?>">
+			<?php echo esc_html( $text ); ?>
+		</a>
+		<?php
+	}
+
+	/**
+	 * Output HTML for a promotion action.
+	 *
+	 * @param array $action Array of action properties.
+	 *
+	 * @return void
+	 */
+	public static function output_promotion_action( array $action ) {
+		if ( empty( $action ) ) {
+			return;
+		}
+		$style = ( ! empty( $action['primary'] ) && $action['primary'] ) ? 'addons-button-solid' : 'addons-button-outline-purple';
+		?>
+		<a
+			class="addons-button <?php echo esc_attr( $style ); ?>"
+			href="<?php echo esc_url( $action['url'] ); ?>">
+			<?php echo esc_html( $action['label'] ); ?>
+		</a>
+		<?php
+	}
+
+
+	/**
 	 * Handles output of the addons page in admin.
 	 */
 	public static function output() {
@@ -1129,6 +1173,15 @@ class WC_Admin_Addons {
 		if ( null === $mapped->reviews_count ) {
 			$mapped->reviews_count = $data->reviewsCount ?? null; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 		}
+		// Featured & Promoted product card.
+		// Label.
+		$mapped->label = $data->label ?? null;
+		// Primary color.
+		$mapped->primary_color = $data->primary_color ?? null;
+		// Text color.
+		$mapped->text_color = $data->text_color ?? null;
+		// Button text.
+		$mapped->button = $data->button ?? null;
 
 		return $mapped;
 	}
@@ -1157,25 +1210,69 @@ class WC_Admin_Addons {
 		if ( 'banner' === $block_type ) {
 			$product_details_classes .= ' addon-product-banner-details';
 		}
-		?>
+
+		if ( isset( $mapped->label ) && 'promoted' === $mapped->label ) {
+			$product_details_classes .= ' promoted';
+		} elseif ( isset( $mapped->label ) && 'featured' === $mapped->label ) {
+			$product_details_classes .= ' featured';
+		}
+
+		if ( 'promoted' === $mapped->label
+			 && ! empty( $mapped->primary_color )
+			 && ! empty( $mapped->text_color )
+			 && ! empty( $mapped->button ) ) {
+			// Promoted product card.
+			?>
+			<li class="product">
+				<div class="<?php echo esc_attr( $product_details_classes ); ?>" style="border-top: 5px  solid <?php echo esc_html( $mapped->primary_color ); ?>;">
+					<span class="label promoted"><?php esc_attr_e( 'Promoted', 'woocommerce' ); ?></span>
+					<a href="<?php echo esc_url( $product_url ); ?>">
+						<h2><?php echo esc_html( $mapped->title ); ?></h2>
+					</a>
+					<p><?php echo wp_kses_post( $mapped->description ); ?></p>
+				</div>
+				<div class="product-footer-promoted">
+					<span class="icon"><img src="<?php echo esc_url( $mapped->icon ); ?>" /></span>
+					<a class="addons-button addons-button-promoted" style="background: <?php echo esc_html( $mapped->primary_color ); ?>; color: <?php echo esc_html( $mapped->text_color ); ?>;" href="<?php echo esc_url( $product_url ); ?>">
+						<?php echo esc_html( $mapped->button ); ?>
+					</a>
+				</div>
+			</li>
+			<?php
+		} else {
+			// Normal or "featured" product card.
+			?>
 			<li class="<?php echo esc_attr( implode( ' ', $class_names ) ); ?>">
 				<div class="<?php echo esc_attr( $product_details_classes ); ?>">
 					<div class="product-text-container">
+						<?php if ( isset( $mapped->label ) && 'featured' === $mapped->label ) { ?>
+							<span class="label featured"><?php esc_attr_e( 'Featured', 'woocommerce' ); ?></span>
+						<?php } ?>
 						<a href="<?php echo esc_url( $product_url ); ?>">
 							<h2><?php echo esc_html( $mapped->title ); ?></h2>
 						</a>
 						<?php if ( ! empty( $mapped->vendor_name ) && ! empty( $mapped->vendor_url ) ) : ?>
 							<div class="product-developed-by">
 								<?php
-									printf(
-										/* translators: %s vendor link */
-										esc_html__( 'Developed by %s', 'woocommerce' ),
-										sprintf(
-											'<a class="product-vendor-link" href="%1$s" target="_blank">%2$s</a>',
-											esc_url_raw( $mapped->vendor_url ),
-											esc_html( $mapped->vendor_name )
-										)
-									);
+								$vendor_url = add_query_arg(
+									array(
+										'utm_source'   => 'extensionsscreen',
+										'utm_medium'   => 'product',
+										'utm_campaign' => 'wcaddons',
+										'utm_content'  => 'devpartner',
+									),
+									$mapped->vendor_url
+								);
+
+								printf(
+								/* translators: %s vendor link */
+									esc_html__( 'Developed by %s', 'woocommerce' ),
+									sprintf(
+										'<a class="product-vendor-link" href="%1$s" target="_blank">%2$s</a>',
+										esc_url_raw( $vendor_url ),
+										esc_html( $mapped->vendor_name )
+									)
+								);
 								?>
 							</div>
 						<?php endif; ?>
@@ -1226,7 +1323,8 @@ class WC_Admin_Addons {
 					</a>
 				</div>
 			</li>
-		<?php
+			<?php
+		}
 	}
 
 	/**
@@ -1249,7 +1347,7 @@ class WC_Admin_Addons {
 		if ( $rating >= $index ) {
 			// Rating more that current star to show.
 			return 'fill';
-		} else if (
+		} elseif (
 			abs( $index - 1 - floor( $rating ) ) < 0.0000001 &&
 			0 < ( $rating - floor( $rating ) )
 		) {
