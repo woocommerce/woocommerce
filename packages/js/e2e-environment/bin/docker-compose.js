@@ -82,8 +82,7 @@ const testConfig = getTestConfig();
 if ( ! process.env.WC_E2E_FOLDER_MAPPING ) {
 	envVars.WC_E2E_FOLDER_MAPPING =
 		'/var/www/html/wp-content/plugins/' +
-		getAppBase() +
-		'/plugins/woocommerce';
+		getAppBase();
 }
 
 if ( ! process.env.WORDPRESS_PORT ) {
