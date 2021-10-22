@@ -63,6 +63,11 @@ jobs:
                   unzip woocommerce.zip -d woocommerce
                   mv woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
 
+            - name: Install dependencies again
+              working-directory: package/woocommerce
+              run: |
+                pnpm install
+
             - name: Run tests command.
               working-directory: package/woocommerce/plugins/woocommerce
               env:
