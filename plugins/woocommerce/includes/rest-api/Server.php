@@ -177,6 +177,7 @@ class Server {
 			'data-continents'          => 'WC_REST_Data_Continents_Controller',
 			'data-countries'           => 'WC_REST_Data_Countries_Controller',
 			'data-currencies'          => 'WC_REST_Data_Currencies_Controller',
+			'tombstones'               => 'WC_REST_Tombstones_Controller',
 		);
 	}
 

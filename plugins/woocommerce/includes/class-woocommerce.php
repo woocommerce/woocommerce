@@ -497,6 +497,7 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/class-wc-rest-exception.php';
 		include_once WC_ABSPATH . 'includes/class-wc-auth.php';
 		include_once WC_ABSPATH . 'includes/class-wc-register-wp-admin-settings.php';
+		include_once WC_ABSPATH . 'includes/class-wc-tombstones.php';
 
 		/**
 		 * WCCOM Site.
