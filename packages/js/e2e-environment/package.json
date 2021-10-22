@@ -25,6 +25,7 @@
     "@jest/test-sequencer": "^25.5.4",
     "@slack/web-api": "^6.1.0",
     "@woocommerce/api": "^0.2.0",
+	"@woocommerce/e2e-environment": "^0.2.3",
     "@wordpress/e2e-test-utils": "^4.16.1",
     "@wordpress/jest-preset-default": "^6.4.0",
     "app-root-path": "^3.0.0",

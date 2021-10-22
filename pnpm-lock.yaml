@@ -108,6 +108,7 @@ importers:
       '@jest/test-sequencer': ^25.5.4
       '@slack/web-api': ^6.1.0
       '@woocommerce/api': ^0.2.0
+      '@woocommerce/e2e-environment': ^0.2.3
       '@wordpress/e2e-test-utils': ^4.16.1
       '@wordpress/eslint-plugin': 7.3.0
       '@wordpress/jest-preset-default': ^6.4.0
@@ -125,6 +126,7 @@ importers:
       '@jest/test-sequencer': 25.5.4
       '@slack/web-api': 6.4.0
       '@woocommerce/api': link:../api
+      '@woocommerce/e2e-environment': 'link:'
       '@wordpress/e2e-test-utils': 4.16.1_jest@25.5.4
       '@wordpress/jest-preset-default': 6.6.0_@babel+core@7.12.9+jest@25.5.4
       app-root-path: 3.0.0
