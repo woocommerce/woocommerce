@@ -1083,13 +1083,16 @@ function wc_get_price_excluding_tax( $product, $args = array() ) {
 	$line_price = $price * $qty;
 
 	if ( $product->is_taxable() && wc_prices_include_tax() ) {
-		$order          = ArrayUtil::get_value_or_default( $args, 'order' );
-		$customer_id    = $order ? $order->get_customer_id() : 0;
-		$customer       = $customer_id ? wc_get_container()->get( LegacyProxy::class )->get_instance_of( WC_Customer::class, $customer_id ) : null;
-		$tax_rates      = WC_Tax::get_rates( $product->get_tax_class(), $customer );
-		$base_tax_rates = WC_Tax::get_base_tax_rates( $product->get_tax_class( 'unfiltered' ) );
-		$remove_taxes   = apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ? WC_Tax::calc_tax( $line_price, $base_tax_rates, true ) : WC_Tax::calc_tax( $line_price, $tax_rates, true );
-		$return_price   = $line_price - array_sum( $remove_taxes ); // Unrounded since we're dealing with tax inclusive prices. Matches logic in cart-totals class. @see adjust_non_base_location_price.
+		$order       = ArrayUtil::get_value_or_default( $args, 'order' );
+		$customer_id = $order ? $order->get_customer_id() : 0;
+		if ( apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) || ! $customer_id ) {
+			$tax_rates = WC_Tax::get_base_tax_rates( $product->get_tax_class( 'unfiltered' ) );
+		} else {
+			$customer  = wc_get_container()->get( LegacyProxy::class )->get_instance_of( WC_Customer::class, $customer_id );
+			$tax_rates = WC_Tax::get_rates( $product->get_tax_class(), $customer );
+		}
+		$remove_taxes = WC_Tax::calc_tax( $line_price, $tax_rates, true );
+		$return_price = $line_price - array_sum( $remove_taxes ); // Unrounded since we're dealing with tax inclusive prices. Matches logic in cart-totals class. @see adjust_non_base_location_price.
 	} else {
 		$return_price = $line_price;
 	}
