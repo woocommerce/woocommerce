@@ -1,7 +1,12 @@
 /**
  * Internal dependencies
  */
-const { postRequest, deleteRequest } = require( '../utils/request' );
+const {
+	postRequest,
+	deleteRequest,
+	getRequest,
+	putRequest,
+} = require( '../utils/request' );
 const productsTestSetup = require( './products' );
 const { ordersApi } = require( '../endpoints/orders' );
 
@@ -179,9 +184,75 @@ const createSampleData = async () => {
 		],
 	} );
 
+	// Create an order with all possible numerical fields (taxes, fees, refunds, etc).
+	const { body: taxSetting } = await getRequest(
+		'settings/general/woocommerce_calc_taxes'
+	);
+	await putRequest( 'settings/general/woocommerce_calc_taxes', {
+		value: 'yes',
+	} );
+
+	const { body: taxRate } = await postRequest( 'taxes', {
+		country: '*',
+		state: '*',
+		postcode: '*',
+		city: '*',
+		rate: '5.5000',
+		name: 'Tax',
+		rate: '5.5',
+		shipping: true,
+	} );
+
+	const { body: coupon } = await postRequest( 'coupons', {
+		code: 'save5',
+		amount: '5',
+	} );
+
+	const { body: order4 } = await ordersApi.create.order( {
+		...orderBaseData,
+		line_items: [
+			{
+				product_id: orderedProducts.blueVneck.id,
+				quantity: 1,
+			},
+		],
+		coupon_lines: [ { code: 'save5' } ],
+		shipping_lines: [
+			{
+				method_id: 'flat_rate',
+				total: '5.00',
+			},
+		],
+		fee_lines: [
+			{
+				total: '1.00',
+				name: 'Test Fee',
+			},
+		],
+	} );
+
+	await postRequest( `orders/${ order4.id }/refunds`, {
+		api_refund: false, // Prevent an actual refund request (fails with CoD),
+		line_items: [
+			{
+				id: order4.line_items[ 0 ].id,
+				quantity: 1,
+				refund_total: order4.line_items[ 0 ].total,
+				refund_tax: [
+					{
+						id: order4.line_items[ 0 ].taxes[ 0 ].id,
+						refund_total: order4.line_items[ 0 ].total_tax,
+					},
+				],
+			},
+		],
+	} );
+	orders.push( order4 );
+
 	return {
 		customers: { john, tina },
 		orders,
+		precisionOrder: order4,
 		hierarchicalOrders: {
 			parent: order2,
 			child: order3,

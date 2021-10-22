@@ -91,7 +91,7 @@ describe( 'Orders API tests', () => {
 	} );
 
 	describe( 'List all orders', () => {
-		const ORDERS_COUNT = 9;
+		const ORDERS_COUNT = 10;
 
 		it( 'pagination', async () => {
 			const pageSize = 4;
@@ -146,7 +146,7 @@ describe( 'Orders API tests', () => {
 				page: 3,
 			} );
 			expect( Array.isArray( lastPage.body ) ).toBe( true );
-			expect( lastPage.body ).toHaveLength( 1 );
+			expect( lastPage.body ).toHaveLength( 2 );
 
 			// Verify a page outside the total page count is empty.
 			const page6 = await ordersApi.listAll.orders( {
@@ -270,7 +270,7 @@ describe( 'Orders API tests', () => {
 				status: 'processing',
 			} );
 			expect( result2.statusCode ).toEqual( 200 );
-			expect( result2.body ).toHaveLength( 7 );
+			expect( result2.body ).toHaveLength( 8 );
 			expect( result2.body ).toEqual(
 				expect.not.arrayContaining(
 					result1.body.map( ( { id } ) =>
@@ -298,7 +298,7 @@ describe( 'Orders API tests', () => {
 				customer: 0,
 			} );
 			expect( result2.statusCode ).toEqual( 200 );
-			expect( result2.body ).toHaveLength( 2 );
+			expect( result2.body ).toHaveLength( 3 );
 			result2.body.forEach( ( order ) =>
 				expect( order ).toEqual(
 					expect.objectContaining( {
