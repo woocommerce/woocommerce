@@ -25,6 +25,7 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	 */
 	public function test_wc_get_price_excluding_tax_passes_order_customer_to_get_rates_if_order_is_available( $pass_order, $customer_id ) {
 		$customer_passed_to_get_rates                  = false;
+		$get_base_rates_invoked                        = false;
 		$customer_id_passed_to_wc_customer_constructor = false;
 
 		FunctionsMockerHack::add_function_mocks(
@@ -40,7 +41,8 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 					'get_rates'          => function( $tax_class, $customer ) use ( &$customer_passed_to_get_rates ) {
 						$customer_passed_to_get_rates = $customer;
 					},
-					'get_base_tax_rates' => function( $tax_class ) {
+					'get_base_tax_rates' => function( $tax_class ) use ( &$get_base_rates_invoked ) {
+						$get_base_rates_invoked = true;
 						return 0;
 					},
 					'calc_tax'           => function( $price, $rates, $price_includes_tax = false, $deprecated = false ) {
@@ -93,15 +95,17 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 
 			$this->assertEquals( $order->get_customer_id(), $customer_id_passed_to_wc_customer_constructor );
 			if ( $customer_id ) {
+				$this->assertFalse( $get_base_rates_invoked );
 				$this->assertSame( $customer, $customer_passed_to_get_rates );
 			} else {
-				$this->assertNull( $customer_passed_to_get_rates );
+				$this->assertFalse( $customer_passed_to_get_rates );
+				$this->assertTrue( $get_base_rates_invoked );
 			}
 		} else {
 			wc_get_price_excluding_tax( $product );
 
-			$this->assertFalse( $customer_id_passed_to_wc_customer_constructor );
-			$this->assertNull( $customer_passed_to_get_rates );
+			$this->assertFalse( $customer_passed_to_get_rates );
+			$this->assertTrue( $get_base_rates_invoked );
 		}
 
 		// phpcs:enable Squiz.Commenting
