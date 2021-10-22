@@ -1,4 +1,4 @@
-.woocommerce-activity-card {
+.woocommerce-activity-panel .woocommerce-activity-card {
 	position: relative;
 	padding: $fallback-gutter;
 	padding: $gutter;
@@ -209,7 +209,7 @@
 }
 
 // Needs the double-class for specificity
-.woocommerce-activity-card.woocommerce-order-activity-card {
+.woocommerce-activity-panel .woocommerce-activity-card.woocommerce-order-activity-card {
 	grid-template-columns: 1fr;
 	grid-template-areas:
 		'header'
@@ -232,7 +232,7 @@
 }
 
 // Needs the double-class for specificity
-.woocommerce-activity-card.woocommerce-inbox-activity-card {
+.woocommerce-activity-panel .woocommerce-activity-card.woocommerce-inbox-activity-card {
 	grid-template-columns: 72px 1fr;
 	height: 100%;
 	opacity: 1;
