@@ -279,5 +279,33 @@ describe( 'Orders API tests', () => {
 				)
 			);
 		} );
+
+		it( 'customer', async () => {
+			const result1 = await ordersApi.listAll.orders( {
+				customer: sampleData.customers.john.id,
+			} );
+			expect( result1.statusCode ).toEqual( 200 );
+			expect( result1.body ).toHaveLength( 5 );
+			result1.body.forEach( ( order ) =>
+				expect( order ).toEqual(
+					expect.objectContaining( {
+						customer_id: sampleData.customers.john.id,
+					} )
+				)
+			);
+
+			const result2 = await ordersApi.listAll.orders( {
+				customer: 0,
+			} );
+			expect( result2.statusCode ).toEqual( 200 );
+			expect( result2.body ).toHaveLength( 2 );
+			result2.body.forEach( ( order ) =>
+				expect( order ).toEqual(
+					expect.objectContaining( {
+						customer_id: 0,
+					} )
+				)
+			);
+		} );
 	} );
 } );
