@@ -307,5 +307,27 @@ describe( 'Orders API tests', () => {
 				)
 			);
 		} );
+
+		it( 'product', async () => {
+			const beanie = sampleData.testProductData.simpleProducts.find(
+				( p ) => p.name === 'Beanie'
+			);
+			const result1 = await ordersApi.listAll.orders( {
+				product: beanie.id,
+			} );
+			expect( result1.statusCode ).toEqual( 200 );
+			expect( result1.body ).toHaveLength( 2 );
+			result1.body.forEach( ( order ) =>
+				expect( order ).toEqual(
+					expect.objectContaining( {
+						line_items: expect.arrayContaining( [
+							expect.objectContaining( {
+								name: 'Beanie',
+							} ),
+						] ),
+					} )
+				)
+			);
+		} );
 	} );
 } );
