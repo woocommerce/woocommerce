@@ -225,5 +225,59 @@ describe( 'Orders API tests', () => {
 				] )
 			);
 		} );
+
+		it( 'status', async () => {
+			const result1 = await ordersApi.listAll.orders( {
+				status: 'completed',
+			} );
+
+			expect( result1.statusCode ).toEqual( 200 );
+			expect( result1.body ).toHaveLength( 2 );
+			expect( result1.body ).toEqual(
+				expect.arrayContaining( [
+					expect.objectContaining( {
+						status: 'completed',
+						customer_id: 0,
+						line_items: expect.arrayContaining( [
+							expect.objectContaining( {
+								name: 'Single',
+								quantity: 2,
+							} ),
+							expect.objectContaining( {
+								name: 'Beanie with Logo',
+								quantity: 3,
+							} ),
+							expect.objectContaining( {
+								name: 'T-Shirt',
+								quantity: 1,
+							} ),
+						] ),
+					} ),
+					expect.objectContaining( {
+						status: 'completed',
+						customer_id: sampleData.customers.tina.id,
+						line_items: expect.arrayContaining( [
+							expect.objectContaining( {
+								name: 'Sunglasses',
+								quantity: 1,
+							} ),
+						] ),
+					} ),
+				] )
+			);
+
+			const result2 = await ordersApi.listAll.orders( {
+				status: 'processing',
+			} );
+			expect( result2.statusCode ).toEqual( 200 );
+			expect( result2.body ).toHaveLength( 7 );
+			expect( result2.body ).toEqual(
+				expect.not.arrayContaining(
+					result1.body.map( ( { id } ) =>
+						expect.objectContaining( { id } )
+					)
+				)
+			);
+		} );
 	} );
 } );
