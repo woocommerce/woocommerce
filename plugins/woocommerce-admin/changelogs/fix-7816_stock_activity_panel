@@ -1,0 +1,4 @@
+Significance: minor
+Type: Fix
+
+Fix issue where stock activity panel was not rendering correctly. #7817

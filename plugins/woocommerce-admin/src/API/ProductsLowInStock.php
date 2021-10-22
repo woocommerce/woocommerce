@@ -105,10 +105,10 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 
 		$product_lookup_table = $wpdb->prefix . 'wc_order_product_lookup';
 		$query_string         = "
-			select 
-				product_id, 
-				variation_id, 
-				MAX( wc_order_product_lookup.date_created ) AS last_order_date 
+			select
+				product_id,
+				variation_id,
+				MAX( wc_order_product_lookup.date_created ) AS last_order_date
 			from {$product_lookup_table} wc_order_product_lookup
 			where {$where_clause}
 			group by product_id
@@ -189,8 +189,9 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 	 * @return array
 	 */
 	protected function transform_post_to_api_response( $query_result ) {
-		if ( ! isset( $query_result->low_stock_amount ) ) {
-			$query_result->low_stock_amount = null;
+		$low_stock_amount = null;
+		if ( isset( $query_result->low_stock_amount ) ) {
+			$low_stock_amount = (int) $query_result->low_stock_amount;
 		}
 
 		if ( ! isset( $query_result->last_order_date ) ) {
@@ -201,7 +202,7 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 			'id'               => (int) $query_result->ID,
 			'images'           => $query_result->images,
 			'attributes'       => $query_result->attributes,
-			'low_stock_amount' => $query_result->low_stock_amount,
+			'low_stock_amount' => $low_stock_amount,
 			'last_order_date'  => wc_rest_prepare_date_response( $query_result->last_order_date ),
 			'name'             => $query_result->post_title,
 			'parent_id'        => (int) $query_result->post_parent,
@@ -221,20 +222,20 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 		global $wpdb;
 		$query = "
 			SELECT
-				SQL_CALC_FOUND_ROWS wp_posts.*, 
+				SQL_CALC_FOUND_ROWS wp_posts.*,
 				:postmeta_select
 				wc_product_meta_lookup.stock_quantity
-			FROM  
+			FROM
 			  {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup
-			  LEFT JOIN {$wpdb->posts} wp_posts ON wp_posts.ID = wc_product_meta_lookup.product_id 
+			  LEFT JOIN {$wpdb->posts} wp_posts ON wp_posts.ID = wc_product_meta_lookup.product_id
 			  :postmeta_join
-			WHERE 
-			  wp_posts.post_type IN ('product', 'product_variation') 
+			WHERE
+			  wp_posts.post_type IN ('product', 'product_variation')
 			  AND wp_posts.post_status = %s
-			  AND wc_product_meta_lookup.stock_quantity IS NOT NULL 
-			  AND wc_product_meta_lookup.stock_status IN('instock', 'outofstock') 
+			  AND wc_product_meta_lookup.stock_quantity IS NOT NULL
+			  AND wc_product_meta_lookup.stock_status IN('instock', 'outofstock')
 			  :postmeta_wheres
-			order by wc_product_meta_lookup.product_id DESC   
+			order by wc_product_meta_lookup.product_id DESC
 			limit %d, %d
 		";
 
@@ -246,20 +247,20 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 
 		if ( ! $siteside_only ) {
 			$postmeta['select'] = 'meta.meta_value AS low_stock_amount,';
-			$postmeta['join']   = "LEFT JOIN {$wpdb->postmeta} AS meta ON wp_posts.ID = meta.post_id 
+			$postmeta['join']   = "LEFT JOIN {$wpdb->postmeta} AS meta ON wp_posts.ID = meta.post_id
 			  AND meta.meta_key = '_low_stock_amount'";
 			$postmeta['wheres'] = "AND (
 			    (
-			      meta.meta_value > '' 
+			      meta.meta_value > ''
 			      AND wc_product_meta_lookup.stock_quantity <= CAST(
 			        meta.meta_value AS SIGNED
 			      )
-			    ) 
+			    )
 			    OR (
 			      (
-			        meta.meta_value IS NULL 
+			        meta.meta_value IS NULL
 			        OR meta.meta_value <= ''
-			      ) 
+			      )
 			      AND wc_product_meta_lookup.stock_quantity <= %d
 			    )
 		    )";
