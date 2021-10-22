@@ -1,5 +1,8 @@
 #!/bin/bash
 
+echo "Creating symlink to plugins/woocommerce"
+ln -s /var/www/html/wp-content/plugins/woocommerce/plugins/woocommerce /var/www/html/wp-content/plugins/woocommerce
+
 echo "Initializing WooCommerce E2E"
 
 wp plugin activate woocommerce
