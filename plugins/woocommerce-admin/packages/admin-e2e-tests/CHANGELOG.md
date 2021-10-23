@@ -3,6 +3,8 @@
 
 -   Make unchecking free features more robust. #7761
 
+-   Fix typescript type error in admin-e2e-tests package #7765
+
 # 0.1.2
 
 -   Add Customers to analytics pages tested #7573

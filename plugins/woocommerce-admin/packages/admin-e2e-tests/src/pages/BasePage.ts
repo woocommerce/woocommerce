@@ -142,9 +142,11 @@ export abstract class BasePage {
 				timeout: 10000,
 			} );
 		} catch ( e ) {
-			throw new Error(
-				`Could not navigate to url: ${ fullUrl } with error: ${ e.message }`
-			);
+			if ( e instanceof Error ) {
+				throw new Error(
+					`Could not navigate to url: ${ fullUrl } with error: ${ e.message }`
+				);
+			}
 		}
 	}
 }
