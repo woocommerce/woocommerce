@@ -313,14 +313,15 @@ window.wpNavMenuUrlUpdate = function ( query ) {
 
 // When the route changes, we need to update wp-admin's menu with the correct section & current link
 window.wpNavMenuClassChange = function ( page, url ) {
-	Array.from( document.getElementsByClassName( 'current' ) ).forEach(
+	const wpNavMenu = document.querySelector( '#adminmenu' );
+	Array.from( wpNavMenu.getElementsByClassName( 'current' ) ).forEach(
 		function ( item ) {
 			item.classList.remove( 'current' );
 		}
 	);
 
 	const submenu = Array.from(
-		document.querySelectorAll( '.wp-has-current-submenu' )
+		wpNavMenu.querySelectorAll( '.wp-has-current-submenu' )
 	);
 	submenu.forEach( function ( element ) {
 		element.classList.remove( 'wp-has-current-submenu' );
@@ -338,14 +339,14 @@ window.wpNavMenuClassChange = function ( page, url ) {
 		url === '/'
 			? `li > a[href$="${ pageUrl }"], li > a[href*="${ pageUrl }?"]`
 			: `li > a[href*="${ pageUrl }"]`;
-	const currentItems = document.querySelectorAll( currentItemsSelector );
+	const currentItems = wpNavMenu.querySelectorAll( currentItemsSelector );
 
 	Array.from( currentItems ).forEach( function ( item ) {
 		item.parentElement.classList.add( 'current' );
 	} );
 
 	if ( page.wpOpenMenu ) {
-		const currentMenu = document.querySelector( '#' + page.wpOpenMenu );
+		const currentMenu = wpNavMenu.querySelector( '#' + page.wpOpenMenu );
 		if ( currentMenu ) {
 			currentMenu.classList.remove( 'wp-not-current-submenu' );
 			currentMenu.classList.add( 'wp-has-current-submenu' );

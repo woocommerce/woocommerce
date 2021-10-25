@@ -1,0 +1,4 @@
+Significance: patch
+Type: Fix
+
+Do not clear `current` class from the entire page when updating wp-admin's menu. #7773
