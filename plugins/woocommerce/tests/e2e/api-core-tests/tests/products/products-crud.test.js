@@ -11,7 +11,7 @@
   * @group products
   *
   */
-  describe( 'Products CRUD API tests', () => {
+  describe( 'Products API tests: CRUD', () => {
  
 	 let productId;
  
