@@ -18,7 +18,7 @@ _Example usage in WC Blocks:_ Mini Cart block listens to this event to append it
 
 This event is the equivalent to the jQuery event `added_to_cart` triggered by WooCommerce core. It indicates that the process of adding a product to the cart has finished with success.
 
-_Example usage in WC Blocks:_ Cart and Mini Cart blocks listen to this event to know if they need to update their contents.
+_Example usage in WC Blocks:_ Cart and Mini Cart blocks (via the `useStoreCart()` hook) listen to this event to know if they need to update their contents.
 
 #### `detail` parameters:
 
@@ -30,5 +30,5 @@ _Example usage in WC Blocks:_ Cart and Mini Cart blocks listen to this event to 
 
 This event is the equivalent to the jQuery event `removed_from_cart` triggered by WooCommerce core. It indicates that a product has been removed from the cart.
 
-_Example usage in WC Blocks:_ Cart and Mini Cart blocks listen to this event to know if they need to update their contents.
+_Example usage in WC Blocks:_ Cart and Mini Cart blocks (via the `useStoreCart()` hook) listen to this event to know if they need to update their contents.
 

@@ -1,7 +1,14 @@
 /**
  * External dependencies
  */
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import {
+	act,
+	render,
+	screen,
+	fireEvent,
+	waitFor,
+	waitForElementToBeRemoved,
+} from '@testing-library/react';
 import { previewCart } from '@woocommerce/resource-previews';
 import { dispatch } from '@wordpress/data';
 import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
@@ -19,14 +26,30 @@ const MiniCartBlock = ( props ) => (
 		<Block { ...props } />
 	</SlotFillProvider>
 );
+
+const mockEmptyCart = () => {
+	fetchMock.mockResponse( ( req ) => {
+		if ( req.url.match( /wc\/store\/cart/ ) ) {
+			return Promise.resolve(
+				JSON.stringify( defaultCartState.cartData )
+			);
+		}
+		return Promise.resolve( '' );
+	} );
+};
+
+const mockFullCart = () => {
+	fetchMock.mockResponse( ( req ) => {
+		if ( req.url.match( /wc\/store\/cart/ ) ) {
+			return Promise.resolve( JSON.stringify( previewCart ) );
+		}
+		return Promise.resolve( '' );
+	} );
+};
+
 describe( 'Testing cart', () => {
 	beforeEach( async () => {
-		fetchMock.mockResponse( ( req ) => {
-			if ( req.url.match( /wc\/store\/cart/ ) ) {
-				return Promise.resolve( JSON.stringify( previewCart ) );
-			}
-			return Promise.resolve( '' );
-		} );
+		mockFullCart();
 		// need to clear the store resolution state between tests.
 		await dispatch( storeKey ).invalidateResolutionForStore();
 		await dispatch( storeKey ).receiveCart( defaultCartState.cartData );
@@ -48,14 +71,7 @@ describe( 'Testing cart', () => {
 	} );
 
 	it( 'renders empty cart if there are no items in the cart', async () => {
-		fetchMock.mockResponse( ( req ) => {
-			if ( req.url.match( /wc\/store\/cart/ ) ) {
-				return Promise.resolve(
-					JSON.stringify( defaultCartState.cartData )
-				);
-			}
-			return Promise.resolve( '' );
-		} );
+		mockEmptyCart();
 		render( <MiniCartBlock /> );
 
 		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
@@ -63,5 +79,44 @@ describe( 'Testing cart', () => {
 
 		expect( screen.getByText( /Cart is empty/i ) ).toBeInTheDocument();
 		expect( fetchMock ).toHaveBeenCalledTimes( 1 );
+	} );
+
+	it( 'updates contents when removed from cart event is triggered', async () => {
+		render( <MiniCartBlock /> );
+		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
+
+		mockEmptyCart();
+		// eslint-disable-next-line no-undef
+		const removedFromCartEvent = new Event( 'wc-blocks_removed_from_cart' );
+		act( () => {
+			document.body.dispatchEvent( removedFromCartEvent );
+		} );
+
+		await waitForElementToBeRemoved( () =>
+			screen.queryByText( /3 items/i )
+		);
+		await waitFor( () =>
+			expect( screen.getByText( /0 items/i ) ).toBeInTheDocument()
+		);
+	} );
+
+	it( 'updates contents when added to cart event is triggered', async () => {
+		mockEmptyCart();
+		render( <MiniCartBlock /> );
+		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
+
+		mockFullCart();
+		// eslint-disable-next-line no-undef
+		const removedFromCartEvent = new Event( 'wc-blocks_added_to_cart' );
+		act( () => {
+			document.body.dispatchEvent( removedFromCartEvent );
+		} );
+
+		await waitForElementToBeRemoved( () =>
+			screen.queryByText( /0 items/i )
+		);
+		await waitFor( () =>
+			expect( screen.getAllByText( /3 items/i ).length > 0 )
+		);
 	} );
 } );

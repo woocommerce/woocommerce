@@ -10,9 +10,10 @@ interface MiniCartBlockInterface {
 	// Signals whether the cart data is outdated. That happens when
 	// opening the mini cart after adding a product to the cart.
 	isDataOutdated?: boolean;
-	// Signals that the HTML placeholder drawer has been opened. Needed
-	// to know whether we have to skip the slide in animation.
-	isPlaceholderOpen?: boolean;
+	// Signals whether it should be open when the React component is loaded. For
+	// example, when adding a product to the cart, the Mini Cart should open
+	// when loaded, but when removing a product from the cart, it shouldn't.
+	isInitiallyOpen?: boolean;
 }
 
 // Custom HOC to conditionally hydrate API data depending on the isDataOutdated
