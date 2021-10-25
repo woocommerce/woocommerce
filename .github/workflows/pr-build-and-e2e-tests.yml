@@ -43,6 +43,12 @@ jobs:
               run: |
                 npm install -g pnpm
                 pnpm install
+            
+            - name: Install WooCommerce dependencies and build
+              working-directory: package/woocommerce/plugins/woocommerce
+              run: |
+                composer install --no-dev
+                pnpm run build:core
 
             - name: Load docker images and start containers.
               working-directory: package/woocommerce/plugins/woocommerce
