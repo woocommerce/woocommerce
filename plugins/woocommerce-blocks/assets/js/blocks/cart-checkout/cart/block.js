@@ -2,8 +2,6 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
-import { dispatch } from '@wordpress/data';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 import { useEffect } from '@wordpress/element';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
@@ -48,44 +46,23 @@ const Cart = ( { children, attributes } ) => {
 
 const ScrollOnError = ( { scrollToTop } ) => {
 	useEffect( () => {
-		const invalidateCartData = ( e ) => {
-			const eventDetail = e.detail;
-			if ( ! eventDetail || ! eventDetail.preserveCartData ) {
-				dispatch( storeKey ).invalidateResolutionForStore();
-			}
-			scrollToTop();
-		};
-
 		// Make it so we can read jQuery events triggered by WC Core elements.
 		const removeJQueryAddedToCartEvent = translateJQueryEventToNative(
 			'added_to_cart',
 			'wc-blocks_added_to_cart'
 		);
-		const removeJQueryRemovedFromCartEvent = translateJQueryEventToNative(
-			'removed_from_cart',
-			'wc-blocks_removed_from_cart'
-		);
 
 		document.body.addEventListener(
 			'wc-blocks_added_to_cart',
-			invalidateCartData
-		);
-		document.body.addEventListener(
-			'wc-blocks_removed_from_cart',
-			invalidateCartData
+			scrollToTop
 		);
 
 		return () => {
 			removeJQueryAddedToCartEvent();
-			removeJQueryRemovedFromCartEvent();
 
 			document.body.removeEventListener(
 				'wc-blocks_added_to_cart',
-				invalidateCartData
-			);
-			document.body.removeEventListener(
-				'wc-blocks_removed_from_cart',
-				invalidateCartData
+				scrollToTop
 			);
 		};
 	}, [ scrollToTop ] );
