@@ -329,5 +329,77 @@ describe( 'Orders API tests', () => {
 				)
 			);
 		} );
+
+		// NOTE: This does not verify the `taxes` array nested in line items.
+		// While the precision parameter doesn't affect those values, after some
+		// discussion it seems `dp` may not be supported in v4 of the API.
+		it( 'dp (precision)', async () => {
+			const expectPrecisionToMatch = ( value, dp ) => {
+				expect( value ).toEqual(
+					Number.parseFloat( value ).toFixed( dp )
+				);
+			};
+
+			const verifyOrderPrecision = ( order, dp ) => {
+				expectPrecisionToMatch( order[ 'discount_total' ], dp );
+				expectPrecisionToMatch( order[ 'discount_tax' ], dp );
+				expectPrecisionToMatch( order[ 'shipping_total' ], dp );
+				expectPrecisionToMatch( order[ 'shipping_tax' ], dp );
+				expectPrecisionToMatch( order[ 'cart_tax' ], dp );
+				expectPrecisionToMatch( order[ 'total' ], dp );
+				expectPrecisionToMatch( order[ 'total_tax' ], dp );
+
+				order[ 'line_items' ].forEach( ( lineItem ) => {
+					expectPrecisionToMatch( lineItem[ 'total' ], dp );
+					expectPrecisionToMatch( lineItem[ 'total_tax' ], dp );
+				} );
+
+				order[ 'tax_lines' ].forEach( ( taxLine ) => {
+					expectPrecisionToMatch( taxLine[ 'tax_total' ], dp );
+					expectPrecisionToMatch(
+						taxLine[ 'shipping_tax_total' ],
+						dp
+					);
+				} );
+
+				order[ 'shipping_lines' ].forEach( ( shippingLine ) => {
+					expectPrecisionToMatch( shippingLine[ 'total' ], dp );
+					expectPrecisionToMatch( shippingLine[ 'total_tax' ], dp );
+				} );
+
+				order[ 'fee_lines' ].forEach( ( feeLine ) => {
+					expectPrecisionToMatch( feeLine[ 'total' ], dp );
+					expectPrecisionToMatch( feeLine[ 'total_tax' ], dp );
+				} );
+
+				order[ 'refunds' ].forEach( ( refund ) => {
+					expectPrecisionToMatch( refund[ 'total' ], dp );
+				} );
+			};
+
+			const result1 = await ordersApi.retrieve.order(
+				sampleData.precisionOrder.id,
+				{
+					dp: 1,
+				}
+			);
+			expect( result1.statusCode ).toEqual( 200 );
+			verifyOrderPrecision( result1.body, 1 );
+
+			const result2 = await ordersApi.retrieve.order(
+				sampleData.precisionOrder.id,
+				{
+					dp: 3,
+				}
+			);
+			expect( result2.statusCode ).toEqual( 200 );
+			verifyOrderPrecision( result2.body, 3 );
+
+			const result3 = await ordersApi.retrieve.order(
+				sampleData.precisionOrder.id
+			);
+			expect( result3.statusCode ).toEqual( 200 );
+			verifyOrderPrecision( result3.body, 2 ); // The default value for 'dp' is 2.
+		} );
 	} );
 } );
