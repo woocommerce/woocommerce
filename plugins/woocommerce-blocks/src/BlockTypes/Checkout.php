@@ -82,7 +82,7 @@ class Checkout extends AbstractBlock {
 		wp_dequeue_script( 'selectWoo' );
 		wp_dequeue_style( 'select2' );
 
-		// If the content is empty, we may have transformed from an older checkout block. Insert the default list of blocks.
+		// If the content is empty, we may still be in the older checkout block. Insert the default list of blocks.
 		$regex_for_empty_block = '/<div class="[a-zA-Z0-9_\- ]*wp-block-woocommerce-checkout[a-zA-Z0-9_\- ]*"><\/div>/mi';
 
 		$is_empty = preg_match( $regex_for_empty_block, $content );

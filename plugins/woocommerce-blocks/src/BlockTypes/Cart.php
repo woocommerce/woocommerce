@@ -80,7 +80,32 @@ class Cart extends AbstractBlock {
 		wp_dequeue_script( 'selectWoo' );
 		wp_dequeue_style( 'select2' );
 
-		return $content . $this->get_skeleton();
+		// If the content contains new inner blocks, it means we're in the newer version of Cart.
+		$regex_for_new_block = '/<div[\n\r\s\ta-zA-Z0-9_\-=\'"]*data-block-name="woocommerce\/filled-cart-block"[\n\r\s\ta-zA-Z0-9_\-=\'"]*>/mi';
+
+		$is_new = preg_match( $regex_for_new_block, $content );
+
+		if ( ! $is_new ) {
+			// This fallback needs to match the default templates defined in our Blocks.
+			$inner_blocks_html = '$0
+			<div data-block-name="woocommerce/filled-cart-block" class="wp-block-woocommerce-filled-cart-block">
+				<div data-block-name="woocommerce/cart-items-block" class="wp-block-woocommerce-cart-items-block">
+					<div data-block-name="woocommerce/cart-line-items-block" class="wp-block-woocommerce-cart-line-items-block"></div>
+				</div>
+				<div data-block-name="woocommerce/cart-totals-block" class="wp-block-woocommerce-cart-totals-block">
+					<div data-block-name="woocommerce/cart-order-summary-block" class="wp-block-woocommerce-cart-order-summary-block"></div>
+					<div data-block-name="woocommerce/cart-express-payment-block" class="wp-block-woocommerce-cart-express-payment-block"></div>
+					<div data-block-name="woocommerce/proceed-to-checkout-block" class="wp-block-woocommerce-proceed-to-checkout-block"></div>
+					<div data-block-name="woocommerce/cart-accepted-payment-methods-block" class="wp-block-woocommerce-cart-accepted-payment-methods-block"></div>
+				</div>
+			</div>
+			<div data-block-name="woocommerce/empty-cart-block" class="wp-block-woocommerce-empty-cart-block">
+			';
+
+			$content = preg_replace( '/<div class="[a-zA-Z0-9_\- ]*wp-block-woocommerce-cart[a-zA-Z0-9_\- ]*">/mi', $inner_blocks_html, $content );
+			$content = $content . '</div>';
+		}
+		return $content;
 	}
 
 	/**
@@ -170,86 +195,5 @@ class Cart extends AbstractBlock {
 	 */
 	protected function hydrate_from_api() {
 		$this->asset_data_registry->hydrate_api_request( '/wc/store/cart' );
-	}
-
-	/**
-	 * Render skeleton markup for the cart block.
-	 */
-	protected function get_skeleton() {
-		return '
-			<div class="wc-block-skeleton wc-block-components-sidebar-layout wc-block-cart wc-block-cart--is-loading wc-block-cart--skeleton hidden" aria-hidden="true">
-				<div class="wc-block-components-main wc-block-cart__main">
-					<h2 class="wc-block-components-title"><span></span></h2>
-					<table class="wc-block-cart-items">
-						<thead>
-							<tr class="wc-block-cart-items__header">
-								<th class="wc-block-cart-items__header-image"><span /></th>
-								<th class="wc-block-cart-items__header-product"><span /></th>
-								<th class="wc-block-cart-items__header-total"><span /></th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr class="wc-block-cart-items__row">
-								<td class="wc-block-cart-item__image">
-									<a href=""><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=" width="1" height="1" /></a>
-								</td>
-								<td class="wc-block-cart-item__product">
-									<div class="wc-block-components-product-name"></div>
-									<div class="wc-block-components-product-price"></div>
-									<div class="wc-block-components-product-metadata"></div>
-									<div class="wc-block-components-quantity-selector">
-										<input class="wc-block-components-quantity-selector__input" type="number" step="1" min="0" value="1" />
-										<button class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">－</button>
-										<button class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">＋</button>
-									</div>
-								</td>
-								<td class="wc-block-cart-item__total">
-									<div class="wc-block-components-product-price"></div>
-								</td>
-							</tr>
-							<tr class="wc-block-cart-items__row">
-								<td class="wc-block-cart-item__image">
-									<a href=""><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=" width="1" height="1" /></a>
-								</td>
-								<td class="wc-block-cart-item__product">
-									<div class="wc-block-components-product-name"></div>
-									<div class="wc-block-components-product-price"></div>
-									<div class="wc-block-components-product-metadata"></div>
-									<div class="wc-block-components-quantity-selector">
-										<input class="wc-block-components-quantity-selector__input" type="number" step="1" min="0" value="1" />
-										<button class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">－</button>
-										<button class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">＋</button>
-									</div>
-								</td>
-								<td class="wc-block-cart-item__total">
-									<div class="wc-block-components-product-price"></div>
-								</td>
-							</tr>
-							<tr class="wc-block-cart-items__row">
-								<td class="wc-block-cart-item__image">
-									<a href=""><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=" width="1" height="1" /></a>
-								</td>
-								<td class="wc-block-cart-item__product">
-									<div class="wc-block-components-product-name"></div>
-									<div class="wc-block-components-product-price"></div>
-									<div class="wc-block-components-product-metadata"></div>
-									<div class="wc-block-components-quantity-selector">
-										<input class="wc-block-components-quantity-selector__input" type="number" step="1" min="0" value="1" />
-										<button class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">－</button>
-										<button class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">＋</button>
-									</div>
-								</td>
-								<td class="wc-block-cart-item__total">
-									<div class="wc-block-components-product-price"></div>
-								</td>
-							</tr>
-						</tbody>
-					</table>
-				</div>
-				<div class="wc-block-components-sidebar wc-block-cart__sidebar">
-					<div class="components-card"></div>
-				</div>
-			</div>
-		' . $this->get_skeleton_inline_script();
 	}
 }

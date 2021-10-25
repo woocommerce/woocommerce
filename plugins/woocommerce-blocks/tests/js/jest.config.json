@@ -50,5 +50,6 @@
 	"transform": {
 		"^.+\\.(js|ts|tsx)$": "<rootDir>/tests/js/jestPreprocess.js"
 	},
-	"verbose": true
+	"verbose": true,
+	"moduleFileExtensions": ["js", "jsx", "ts", "tsx", "json", "node"]
 }
