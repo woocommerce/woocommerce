@@ -1,6 +1,5 @@
 name: Build zip for PR
-on:
-  pull_request
+on: pull_request
 jobs:
   build:
     name: Build zip for PR
@@ -11,7 +10,7 @@ jobs:
 
       - name: Build
         id: build
-        uses: woocommerce/action-build@v2
+        uses: woocommerce/action-build@test-cd-after-npm-install
 
       - name: Upload PR zip
         uses: actions/upload-artifact@v2
@@ -25,9 +24,8 @@ jobs:
   e2e-tests-run:
     name: Runs E2E tests.
     runs-on: ubuntu-18.04
-    needs: [ build ]
+    needs: [build]
     steps:
-
       - name: Create dirs.
         run: |
           mkdir -p code/woocommerce
@@ -49,7 +47,7 @@ jobs:
         run: npx wc-e2e docker:up
 
       - name: Move current directory to code. We will install zip file in this dir later.
-        run: mv ./package/woocommerce/* ./code/woocommerce
+        run: mv ./package/woocommerce/plugins/woocommerce/* ./code/woocommerce
 
       - name: Download WooCommerce ZIP.
         uses: actions/download-artifact@v2
@@ -61,7 +59,7 @@ jobs:
         working-directory: tmp
         run: |
           unzip woocommerce.zip -d woocommerce
-          mv woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce
+          mv woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
 
       - name: Run REST API tests command.
         working-directory: code/woocommerce
@@ -75,7 +73,7 @@ jobs:
         run: npm run test:api
 
       - name: Run tests command.
-        working-directory: package/woocommerce
+        working-directory: code/woocommerce
         env:
           WC_E2E_SCREENSHOTS: 1
           E2E_SLACK_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
