@@ -28,12 +28,12 @@
 
 		&:not(:hover) {
 			.components-button {
-				color: #949494;
+				color: $gray-400;
 			}
 		}
 		&:hover {
 			.components-button {
-				color: #ddd;
+				color: $white;
 			}
 		}
 		&.is-active {
@@ -62,7 +62,7 @@
 		&:not(:hover) {
 			a.components-button {
 				// ${ G2.lightGray.ui };
-				color: #949494;
+				color: $gray-400;
 			}
 		}
 		&.is-active {
@@ -101,7 +101,7 @@
 	}
 
 	.components-navigation__back-button {
-		color: #949494;
+		color: $gray-400;
 		opacity: 1;
 
 		&,
