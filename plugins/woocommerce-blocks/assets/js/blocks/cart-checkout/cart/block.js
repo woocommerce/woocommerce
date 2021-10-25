@@ -1,37 +1,52 @@
 /**
  * External dependencies
  */
+import { __ } from '@wordpress/i18n';
 import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
 import { dispatch } from '@wordpress/data';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
-import { useEffect, RawHTML } from '@wordpress/element';
+import { useEffect } from '@wordpress/element';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
 import { ValidationContextProvider } from '@woocommerce/base-context';
-import {
-	dispatchEvent,
-	translateJQueryEventToNative,
-} from '@woocommerce/base-utils';
+import { CURRENT_USER_IS_ADMIN } from '@woocommerce/settings';
+import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundary';
+import { translateJQueryEventToNative } from '@woocommerce/base-utils';
 import withScrollToTop from '@woocommerce/base-hocs/with-scroll-to-top';
+import {
+	StoreNoticesProvider,
+	StoreSnackbarNoticesProvider,
+	CartProvider,
+} from '@woocommerce/base-context/providers';
+import { SlotFillProvider } from '@woocommerce/blocks-checkout';
 
 /**
  * Internal dependencies
  */
-import FullCart from './full-cart';
+import { CartBlockContext } from './context';
+import './style.scss';
 
-const EmptyCart = ( { content } ) => {
-	useEffect( () => {
-		dispatchEvent( 'wc-blocks_render_blocks_frontend', {
-			element: document.body.querySelector(
-				'.wp-block-woocommerce-cart'
-			),
-		} );
-	}, [] );
-	return <RawHTML>{ content }</RawHTML>;
+const reloadPage = () => void window.location.reload( true );
+
+const Cart = ( { children, attributes } ) => {
+	const { cartIsLoading } = useStoreCart();
+	const { hasDarkControls } = attributes;
+
+	return (
+		<LoadingMask showSpinner={ true } isLoading={ cartIsLoading }>
+			<CartBlockContext.Provider
+				value={ {
+					hasDarkControls,
+				} }
+			>
+				<ValidationContextProvider>
+					{ children }
+				</ValidationContextProvider>
+			</CartBlockContext.Provider>
+		</LoadingMask>
+	);
 };
 
-const Block = ( { emptyCart, attributes, scrollToTop } ) => {
-	const { cartItems, cartIsLoading } = useStoreCart();
-
+const ScrollOnError = ( { scrollToTop } ) => {
 	useEffect( () => {
 		const invalidateCartData = ( e ) => {
 			const eventDetail = e.detail;
@@ -75,19 +90,32 @@ const Block = ( { emptyCart, attributes, scrollToTop } ) => {
 		};
 	}, [ scrollToTop ] );
 
-	return (
-		<>
-			{ ! cartIsLoading && cartItems.length === 0 ? (
-				<EmptyCart content={ emptyCart } />
-			) : (
-				<LoadingMask showSpinner={ true } isLoading={ cartIsLoading }>
-					<ValidationContextProvider>
-						<FullCart attributes={ attributes } />
-					</ValidationContextProvider>
-				</LoadingMask>
-			) }
-		</>
-	);
+	return null;
 };
-
+const Block = ( { attributes, children, scrollToTop } ) => (
+	<BlockErrorBoundary
+		header={ __( 'Something went wrong…', 'woo-gutenberg-products-block' ) }
+		text={ __(
+			'The cart has encountered an unexpected error. If the error persists, please get in touch with us for help.',
+			'woo-gutenberg-products-block'
+		) }
+		button={
+			<button className="wc-block-button" onClick={ reloadPage }>
+				{ __( 'Reload the page', 'woo-gutenberg-products-block' ) }
+			</button>
+		}
+		showErrorMessage={ CURRENT_USER_IS_ADMIN }
+	>
+		<StoreSnackbarNoticesProvider context="wc/cart">
+			<StoreNoticesProvider context="wc/cart">
+				<SlotFillProvider>
+					<CartProvider>
+						<Cart attributes={ attributes }>{ children }</Cart>
+						<ScrollOnError scrollToTop={ scrollToTop } />
+					</CartProvider>
+				</SlotFillProvider>
+			</StoreNoticesProvider>
+		</StoreSnackbarNoticesProvider>
+	</BlockErrorBoundary>
+);
 export default withScrollToTop( Block );

@@ -183,7 +183,6 @@ final class BlockTypesController {
 
 		if ( Package::feature()->is_experimental_build() ) {
 			$block_types[] = 'SingleProduct';
-			$block_types[] = 'CartI2';
 			$block_types[] = 'MiniCart';
 		}
 

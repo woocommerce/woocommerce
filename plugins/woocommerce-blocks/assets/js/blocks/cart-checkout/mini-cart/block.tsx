@@ -18,7 +18,7 @@ import { getSetting } from '@woocommerce/settings';
 /**
  * Internal dependencies
  */
-import CartLineItemsTable from '../cart/full-cart/cart-line-items-table';
+import CartLineItemsTable from '../cart/cart-line-items-table';
 import './style.scss';
 
 interface MiniCartBlockProps {

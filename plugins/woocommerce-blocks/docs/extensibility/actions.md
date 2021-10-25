@@ -14,12 +14,9 @@
  - [woocommerce_applied_coupon](#woocommerce_applied_coupon)
  - [woocommerce_blocks_cart_enqueue_data](#woocommerce_blocks_cart_enqueue_data)
  - [woocommerce_blocks_cart_enqueue_data](#woocommerce_blocks_cart_enqueue_data-1)
- - [woocommerce_blocks_cart_enqueue_data](#woocommerce_blocks_cart_enqueue_data-2)
  - [woocommerce_blocks_checkout_enqueue_data](#woocommerce_blocks_checkout_enqueue_data)
  - [woocommerce_blocks_enqueue_cart_block_scripts_after](#woocommerce_blocks_enqueue_cart_block_scripts_after)
- - [woocommerce_blocks_enqueue_cart_block_scripts_after](#woocommerce_blocks_enqueue_cart_block_scripts_after-1)
  - [woocommerce_blocks_enqueue_cart_block_scripts_before](#woocommerce_blocks_enqueue_cart_block_scripts_before)
- - [woocommerce_blocks_enqueue_cart_block_scripts_before](#woocommerce_blocks_enqueue_cart_block_scripts_before-1)
  - [woocommerce_blocks_enqueue_checkout_block_scripts_after](#woocommerce_blocks_enqueue_checkout_block_scripts_after)
  - [woocommerce_blocks_enqueue_checkout_block_scripts_before](#woocommerce_blocks_enqueue_checkout_block_scripts_before)
  - [woocommerce_blocks_loaded](#woocommerce_blocks_loaded)
@@ -209,22 +206,6 @@ do_action( 'woocommerce_blocks_cart_enqueue_data' )
 ### Source
 
 
-File: [BlockTypes/MiniCart.php](../src/BlockTypes/MiniCart.php)
-
----
-
-## woocommerce_blocks_cart_enqueue_data
-
-
-Fires after cart block data is registered.
-
-```php
-do_action( 'woocommerce_blocks_cart_enqueue_data' )
-```
-
-### Source
-
-
 File: [BlockTypes/Cart.php](../src/BlockTypes/Cart.php)
 
 ---
@@ -241,7 +222,7 @@ do_action( 'woocommerce_blocks_cart_enqueue_data' )
 ### Source
 
 
-File: [BlockTypes/CartI2.php](../src/BlockTypes/CartI2.php)
+File: [BlockTypes/MiniCart.php](../src/BlockTypes/MiniCart.php)
 
 ---
 
@@ -277,22 +258,6 @@ File: [BlockTypes/Cart.php](../src/BlockTypes/Cart.php)
 
 ---
 
-## woocommerce_blocks_enqueue_cart_block_scripts_after
-
-
-Fires after cart block scripts are enqueued.
-
-```php
-do_action( 'woocommerce_blocks_enqueue_cart_block_scripts_after' )
-```
-
-### Source
-
-
-File: [BlockTypes/CartI2.php](../src/BlockTypes/CartI2.php)
-
----
-
 ## woocommerce_blocks_enqueue_cart_block_scripts_before
 
 
@@ -306,22 +271,6 @@ do_action( 'woocommerce_blocks_enqueue_cart_block_scripts_before' )
 
 
 File: [BlockTypes/Cart.php](../src/BlockTypes/Cart.php)
-
----
-
-## woocommerce_blocks_enqueue_cart_block_scripts_before
-
-
-Fires before cart block scripts are enqueued.
-
-```php
-do_action( 'woocommerce_blocks_enqueue_cart_block_scripts_before' )
-```
-
-### Source
-
-
-File: [BlockTypes/CartI2.php](../src/BlockTypes/CartI2.php)
 
 ---
 
@@ -380,7 +329,7 @@ File: [Domain/Bootstrap.php](../src/Domain/Bootstrap.php)
 ## woocommerce_blocks_{$this->registry_identifier}_registration
 
 
-Fires when and IntegrationRegistry is initialized.
+Fires when the IntegrationRegistry is initialized.
 
 ```php
 do_action( 'woocommerce_blocks_{$this->registry_identifier}_registration', \Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry $this )

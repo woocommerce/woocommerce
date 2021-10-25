@@ -177,17 +177,6 @@
         },
         {
             "name": "woocommerce_blocks_cart_enqueue_data",
-            "file": "BlockTypes/MiniCart.php",
-            "type": "action",
-            "doc": {
-                "description": "Fires after cart block data is registered.",
-                "long_description": "",
-                "tags": [],
-                "long_description_html": ""
-            }
-        },
-        {
-            "name": "woocommerce_blocks_cart_enqueue_data",
             "file": "BlockTypes/Cart.php",
             "type": "action",
             "doc": {
@@ -199,7 +188,7 @@
         },
         {
             "name": "woocommerce_blocks_cart_enqueue_data",
-            "file": "BlockTypes/CartI2.php",
+            "file": "BlockTypes/MiniCart.php",
             "type": "action",
             "doc": {
                 "description": "Fires after cart block data is registered.",
@@ -231,30 +220,8 @@
             }
         },
         {
-            "name": "woocommerce_blocks_enqueue_cart_block_scripts_after",
-            "file": "BlockTypes/CartI2.php",
-            "type": "action",
-            "doc": {
-                "description": "Fires after cart block scripts are enqueued.",
-                "long_description": "",
-                "tags": [],
-                "long_description_html": ""
-            }
-        },
-        {
             "name": "woocommerce_blocks_enqueue_cart_block_scripts_before",
             "file": "BlockTypes/Cart.php",
-            "type": "action",
-            "doc": {
-                "description": "Fires before cart block scripts are enqueued.",
-                "long_description": "",
-                "tags": [],
-                "long_description_html": ""
-            }
-        },
-        {
-            "name": "woocommerce_blocks_enqueue_cart_block_scripts_before",
-            "file": "BlockTypes/CartI2.php",
             "type": "action",
             "doc": {
                 "description": "Fires before cart block scripts are enqueued.",
@@ -301,7 +268,7 @@
             "file": "Integrations/IntegrationRegistry.php",
             "type": "action",
             "doc": {
-                "description": "Fires when and IntegrationRegistry is initialized.",
+                "description": "Fires when the IntegrationRegistry is initialized.",
                 "long_description": "Runs before integrations are initialized allowing new integration to be registered for use. This should be used as the primary hook for integrations to include their scripts, styles, and other code extending the blocks.",
                 "tags": [
                     {
