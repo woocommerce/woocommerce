@@ -11,7 +11,7 @@ import type { TemplateArray } from '@wordpress/blocks';
 import { useForcedLayout, getAllowedBlocks } from '../../../shared';
 
 export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
-	const blockProps = useBlockProps();
+	const blockProps = useBlockProps( { className: 'wc-block-cart__main' } );
 	const allowedBlocks = getAllowedBlocks( innerBlockAreas.CART_ITEMS );
 	const defaultTemplate = [
 		[ 'woocommerce/cart-line-items-block', {}, [] ],
@@ -23,15 +23,13 @@ export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 		defaultTemplate,
 	} );
 	return (
-		<Main className="wc-block-cart__main">
-			<div { ...blockProps }>
-				<InnerBlocks
-					allowedBlocks={ allowedBlocks }
-					template={ defaultTemplate }
-					templateLock={ false }
-					renderAppender={ InnerBlocks.ButtonBlockAppender }
-				/>
-			</div>
+		<Main { ...blockProps }>
+			<InnerBlocks
+				allowedBlocks={ allowedBlocks }
+				template={ defaultTemplate }
+				templateLock={ false }
+				renderAppender={ InnerBlocks.ButtonBlockAppender }
+			/>
 		</Main>
 	);
 };

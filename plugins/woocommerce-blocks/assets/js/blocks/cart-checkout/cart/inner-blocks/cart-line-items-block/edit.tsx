@@ -9,13 +9,18 @@ import { Disabled } from '@wordpress/components';
  */
 import Block from './block';
 
-export const Edit = (): JSX.Element => {
+export const Edit = ( {
+	attributes,
+}: {
+	attributes: { className: string };
+} ): JSX.Element => {
+	const { className } = attributes;
 	const blockProps = useBlockProps();
 
 	return (
 		<div { ...blockProps }>
 			<Disabled>
-				<Block />
+				<Block className={ className } />
 			</Disabled>
 		</div>
 	);

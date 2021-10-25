@@ -18,11 +18,12 @@ export const Edit = ( {
 }: {
 	attributes: {
 		checkoutPageId: number;
+		className: string;
 	};
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
 } ): JSX.Element => {
 	const blockProps = useBlockProps();
-	const { checkoutPageId = 0 } = attributes;
+	const { checkoutPageId = 0, className } = attributes;
 	const { current: savedCheckoutPageId } = useRef( checkoutPageId );
 	const currentPostId = useSelect(
 		( select ) => {
@@ -60,7 +61,10 @@ export const Edit = ( {
 				) }
 			</InspectorControls>
 			<Disabled>
-				<Block checkoutPageId={ checkoutPageId } />
+				<Block
+					checkoutPageId={ checkoutPageId }
+					className={ className }
+				/>
 			</Disabled>
 		</div>
 	);

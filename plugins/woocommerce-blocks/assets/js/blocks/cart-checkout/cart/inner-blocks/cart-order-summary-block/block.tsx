@@ -29,9 +29,11 @@ import Title from '@woocommerce/base-components/title';
  */
 
 const Block = ( {
+	className,
 	showRateAfterTaxName = false,
 	isShippingCalculatorEnabled = true,
 }: {
+	className: string;
 	showRateAfterTaxName: boolean;
 	isShippingCalculatorEnabled: boolean;
 } ): JSX.Element => {
@@ -62,7 +64,7 @@ const Block = ( {
 	};
 
 	return (
-		<>
+		<div className={ className }>
 			<Title headingLevel="2" className="wc-block-cart__totals-title">
 				{ __( 'Cart totals', 'woo-gutenberg-products-block' ) }
 			</Title>
@@ -114,7 +116,7 @@ const Block = ( {
 			</TotalsWrapper>
 
 			<ExperimentalOrderMeta.Slot { ...slotFillProps } />
-		</>
+		</div>
 	);
 };
 

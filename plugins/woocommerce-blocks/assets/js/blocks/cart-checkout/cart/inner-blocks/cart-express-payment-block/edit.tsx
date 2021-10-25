@@ -47,7 +47,11 @@ const NoExpressPaymentMethodsPlaceholder = () => {
 	);
 };
 
-export const Edit = (): JSX.Element | null => {
+export const Edit = ( {
+	attributes,
+}: {
+	attributes: { className: string };
+} ): JSX.Element | null => {
 	const { paymentMethods, isInitialized } = useExpressPaymentMethods();
 	const hasExpressPaymentMethods = Object.keys( paymentMethods ).length > 0;
 	const blockProps = useBlockProps( {
@@ -55,6 +59,7 @@ export const Edit = (): JSX.Element | null => {
 			'wp-block-woocommerce-cart-express-payment-block--has-express-payment-methods': hasExpressPaymentMethods,
 		} ),
 	} );
+	const { className } = attributes;
 
 	if ( ! isInitialized ) {
 		return null;
@@ -63,7 +68,7 @@ export const Edit = (): JSX.Element | null => {
 	return (
 		<div { ...blockProps }>
 			{ hasExpressPaymentMethods ? (
-				<Block />
+				<Block className={ className } />
 			) : (
 				<NoExpressPaymentMethodsPlaceholder />
 			) }

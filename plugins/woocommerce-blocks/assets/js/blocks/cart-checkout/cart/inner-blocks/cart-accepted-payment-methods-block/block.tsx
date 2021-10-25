@@ -19,11 +19,12 @@ const getIconsFromPaymentMethods = (
 	}, [] as PaymentMethodIconsType );
 };
 
-const Block = (): JSX.Element => {
+const Block = ( { className }: { className: string } ): JSX.Element => {
 	const { paymentMethods } = usePaymentMethods();
 
 	return (
 		<PaymentMethodIcons
+			className={ className }
 			icons={ getIconsFromPaymentMethods( paymentMethods ) }
 		/>
 	);

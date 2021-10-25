@@ -14,8 +14,10 @@ import { useCartBlockContext } from '../../context';
 
 const FrontendBlock = ( {
 	children,
+	className,
 }: {
 	children: JSX.Element | JSX.Element[];
+	className: string;
 } ): JSX.Element | null => {
 	const { cartItems, cartIsLoading, cartItemErrors } = useStoreCart();
 	const { hasDarkControls } = useCartBlockContext();
@@ -34,7 +36,7 @@ const FrontendBlock = ( {
 	if ( cartIsLoading || cartItems.length >= 1 ) {
 		return (
 			<SidebarLayout
-				className={ classnames( 'wc-block-cart', {
+				className={ classnames( 'wc-block-cart', className, {
 					'has-dark-controls': hasDarkControls,
 				} ) }
 			>
