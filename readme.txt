@@ -160,6 +160,20 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
+= 5.9.0 RC 2021-10-26 =
+
+**WooCommerce**
+
+* Fix - wc_get_price_excluding_tax when an order with no customer is passed. #31015
+* Fix - Rename transient used to cache data for Featured page of In-App Marketplace. #31002
+* Tweak - Add promoted cards styling to marketplace section. #30861
+
+**WooCommerce Admin - 2.8.0 RC 3**
+
+* Fix - Issue where stock activity panel was not rendering correctly. #7817
+* Fix - Increase CSS specificity to avoid conflicts and broken panel styling. #7813
+* Fix - Updated link to WooCommerce Developers Blog in readme.txt. #7824
+
 = 5.9.0 beta 2021-10-19 =
 
 **WooCommerce**
