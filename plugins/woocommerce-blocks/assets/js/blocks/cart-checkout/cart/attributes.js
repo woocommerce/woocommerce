@@ -27,4 +27,7 @@ export const blockAttributes = {
 		type: 'boolean',
 		default: true,
 	},
+	align: {
+		type: 'string',
+	},
 };
