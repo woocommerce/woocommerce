@@ -64,9 +64,8 @@ jobs:
                   mv woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
 
             - name: Install PNPM and install dependencies
-              working-directory: package/woocommerce
+              working-directory: package/woocommerce/plugins/woocommerce
               run: |
-                npm install -g pnpm
                 pnpm install
 
             - name: Run tests command.
