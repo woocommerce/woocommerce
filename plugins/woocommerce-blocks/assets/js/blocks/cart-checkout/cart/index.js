@@ -62,35 +62,44 @@ const settings = {
 					isShippingCalculatorEnabled,
 					showRateAfterTaxName,
 					checkoutPageId,
+					align,
 				} = attributes;
 				return [
 					attributes,
 					[
-						createBlock( 'woocommerce/filled-cart-block', {}, [
-							createBlock( 'woocommerce/cart-items-block' ),
-							createBlock( 'woocommerce/cart-totals-block', {}, [
+						createBlock(
+							'woocommerce/filled-cart-block',
+							{ align },
+							[
+								createBlock( 'woocommerce/cart-items-block' ),
 								createBlock(
-									'woocommerce/cart-order-summary-block',
-									{
-										isShippingCalculatorEnabled,
-										showRateAfterTaxName,
-									}
+									'woocommerce/cart-totals-block',
+									{},
+									[
+										createBlock(
+											'woocommerce/cart-order-summary-block',
+											{
+												isShippingCalculatorEnabled,
+												showRateAfterTaxName,
+											}
+										),
+										createBlock(
+											'woocommerce/cart-express-payment-block'
+										),
+										createBlock(
+											'woocommerce/proceed-to-checkout-block',
+											{ checkoutPageId }
+										),
+										createBlock(
+											'woocommerce/cart-accepted-payment-methods-block'
+										),
+									]
 								),
-								createBlock(
-									'woocommerce/cart-express-payment-block'
-								),
-								createBlock(
-									'woocommerce/proceed-to-checkout-block',
-									{ checkoutPageId }
-								),
-								createBlock(
-									'woocommerce/cart-accepted-payment-methods-block'
-								),
-							] ),
-						] ),
+							]
+						),
 						createBlock(
 							'woocommerce/empty-cart-block',
-							{},
+							{ align },
 							innerBlocks
 						),
 					],
