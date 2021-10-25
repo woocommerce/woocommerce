@@ -12,8 +12,10 @@ import './style.scss';
 
 const FrontendBlock = ( {
 	children,
+	className,
 }: {
 	children: JSX.Element;
+	className: string;
 } ): JSX.Element | null => {
 	const { cartItems, cartIsLoading } = useStoreCart();
 	useEffect( () => {
@@ -24,7 +26,7 @@ const FrontendBlock = ( {
 		} );
 	}, [] );
 	if ( ! cartIsLoading && cartItems.length === 0 ) {
-		return <>{ children }</>;
+		return <div className={ className }>{ children }</div>;
 	}
 	return null;
 };

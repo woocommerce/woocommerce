@@ -13,7 +13,7 @@ import './style.scss';
 import { useForcedLayout, getAllowedBlocks } from '../../../shared';
 
 export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
-	const blockProps = useBlockProps();
+	const blockProps = useBlockProps( { className: 'wc-block-cart__sidebar' } );
 	const allowedBlocks = getAllowedBlocks( innerBlockAreas.CART_TOTALS );
 	const defaultTemplate = [
 		[ 'woocommerce/cart-order-summary-block', {}, [] ],
@@ -29,15 +29,13 @@ export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 	} );
 
 	return (
-		<Sidebar className="wc-block-cart__sidebar">
-			<div { ...blockProps }>
-				<InnerBlocks
-					allowedBlocks={ allowedBlocks }
-					template={ defaultTemplate }
-					templateLock={ false }
-					renderAppender={ InnerBlocks.ButtonBlockAppender }
-				/>
-			</div>
+		<Sidebar { ...blockProps }>
+			<InnerBlocks
+				allowedBlocks={ allowedBlocks }
+				template={ defaultTemplate }
+				templateLock={ false }
+				renderAppender={ InnerBlocks.ButtonBlockAppender }
+			/>
 		</Sidebar>
 	);
 };

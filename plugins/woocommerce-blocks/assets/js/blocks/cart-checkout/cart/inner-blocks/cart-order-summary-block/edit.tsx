@@ -18,6 +18,7 @@ export const Edit = ( {
 	attributes: {
 		showRateAfterTaxName: boolean;
 		isShippingCalculatorEnabled: boolean;
+		className: string;
 		lock: {
 			move: boolean;
 			remove: boolean;
@@ -25,7 +26,11 @@ export const Edit = ( {
 	};
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
 } ): JSX.Element => {
-	const { showRateAfterTaxName, isShippingCalculatorEnabled } = attributes;
+	const {
+		showRateAfterTaxName,
+		isShippingCalculatorEnabled,
+		className,
+	} = attributes;
 	const blockProps = useBlockProps();
 	const taxesEnabled = getSetting( 'taxesEnabled' ) as boolean;
 	const displayItemizedTaxes = getSetting(
@@ -94,10 +99,9 @@ export const Edit = ( {
 			</InspectorControls>
 			<Disabled>
 				<Block
-					showRateAfterTaxName={ attributes.showRateAfterTaxName }
-					isShippingCalculatorEnabled={
-						attributes.isShippingCalculatorEnabled
-					}
+					className={ className }
+					showRateAfterTaxName={ showRateAfterTaxName }
+					isShippingCalculatorEnabled={ isShippingCalculatorEnabled }
 				/>
 			</Disabled>
 		</div>

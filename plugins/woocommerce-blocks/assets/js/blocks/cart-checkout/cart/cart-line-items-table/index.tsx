@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import classnames from 'classnames';
 import { __ } from '@wordpress/i18n';
 import { CartResponseItem } from '@woocommerce/type-defs/cart-response';
 import { createRef, useEffect, useRef } from '@wordpress/element';
@@ -18,6 +19,7 @@ const placeholderRows = [ ...Array( 3 ) ].map( ( _x, i ) => (
 interface CartLineItemsTableProps {
 	lineItems: CartResponseItem[];
 	isLoading: boolean;
+	className: string;
 }
 
 const setRefs = ( lineItems: CartResponseItem[] ) => {
@@ -31,6 +33,7 @@ const setRefs = ( lineItems: CartResponseItem[] ) => {
 const CartLineItemsTable = ( {
 	lineItems = [],
 	isLoading = false,
+	className,
 }: CartLineItemsTableProps ): JSX.Element => {
 	const tableRef = useRef< HTMLTableElement | null >( null );
 	const rowRefs = useRef( setRefs( lineItems ) );
@@ -67,7 +70,11 @@ const CartLineItemsTable = ( {
 		  } );
 
 	return (
-		<table className="wc-block-cart-items" ref={ tableRef } tabIndex={ -1 }>
+		<table
+			className={ classnames( 'wc-block-cart-items', className ) }
+			ref={ tableRef }
+			tabIndex={ -1 }
+		>
 			<thead>
 				<tr className="wc-block-cart-items__header">
 					<th className="wc-block-cart-items__header-image">

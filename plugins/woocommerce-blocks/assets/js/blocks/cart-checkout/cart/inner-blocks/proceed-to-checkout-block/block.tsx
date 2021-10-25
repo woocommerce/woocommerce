@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import classnames from 'classnames';
 import { useState, useEffect } from '@wordpress/element';
 import Button from '@woocommerce/base-components/button';
 import { CHECKOUT_URL } from '@woocommerce/block-settings';
@@ -19,8 +20,10 @@ import './style.scss';
  */
 const Block = ( {
 	checkoutPageId,
+	className,
 }: {
 	checkoutPageId: number;
+	className: string;
 } ): JSX.Element => {
 	const link = getSetting( 'page-' + checkoutPageId, false );
 	const { isCalculating } = useCheckoutContext();
@@ -65,7 +68,7 @@ const Block = ( {
 	);
 
 	return (
-		<div className="wc-block-cart__submit">
+		<div className={ classnames( 'wc-block-cart__submit', className ) }>
 			{ positionReferenceElement }
 			{ /* The non-sticky container must always be visible because it gives height to its parent, which is required to calculate when it becomes visible in the viewport. */ }
 			<div className="wc-block-cart__submit-container">
