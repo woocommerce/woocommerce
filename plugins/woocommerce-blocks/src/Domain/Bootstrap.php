@@ -5,6 +5,7 @@ use Automattic\WooCommerce\Blocks\AssetsController as AssetsController;
 use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
 use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 use Automattic\WooCommerce\Blocks\BlockTypesController;
+use Automattic\WooCommerce\Blocks\BlockTemplatesController;
 use Automattic\WooCommerce\Blocks\InboxNotifications;
 use Automattic\WooCommerce\Blocks\Installer;
 use Automattic\WooCommerce\Blocks\Registry\Container;
@@ -101,6 +102,9 @@ class Bootstrap {
 		$this->container->get( RestApi::class );
 		$this->container->get( GoogleAnalytics::class );
 		$this->container->get( BlockTypesController::class );
+		if ( $this->package->feature()->is_experimental_build() ) {
+			$this->container->get( BlockTemplatesController::class );
+		}
 		if ( $this->package->feature()->is_feature_plugin_build() ) {
 			$this->container->get( PaymentsApi::class );
 		}
@@ -227,6 +231,14 @@ class Bootstrap {
 				return new BlockTypesController( $asset_api, $asset_data_registry );
 			}
 		);
+		if ( $this->package->feature()->is_experimental_build() ) {
+			$this->container->register(
+				BlockTemplatesController::class,
+				function ( Container $container ) {
+					return new BlockTemplatesController();
+				}
+			);
+		}
 		$this->container->register(
 			DraftOrders::class,
 			function( Container $container ) {
