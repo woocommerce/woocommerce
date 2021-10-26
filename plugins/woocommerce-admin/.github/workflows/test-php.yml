@@ -18,7 +18,7 @@ jobs:
                 composer: ['2.0.6']
                 include:
                     - php: '7.0'
-                      wordpress: '5.5'
+                      wordpress: '5.6'
                       woocommerce: 'latest'
                       phpunit: '6.5.9'
                       composer: '1.10.19'
