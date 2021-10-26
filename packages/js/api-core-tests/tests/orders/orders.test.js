@@ -401,5 +401,68 @@ describe( 'Orders API tests', () => {
 			expect( result3.statusCode ).toEqual( 200 );
 			verifyOrderPrecision( result3.body, 2 ); // The default value for 'dp' is 2.
 		} );
+
+		it( 'search', async () => {
+			// By default, 'search' looks in:
+			// - _billing_address_index
+			// - _shipping_address_index
+			// - _billing_last_name
+			// - _billing_email
+			// - order_item_name
+
+			// Test billing email.
+			const result1 = await ordersApi.listAll.orders( {
+				search: 'example.com',
+			} );
+			expect( result1.statusCode ).toEqual( 200 );
+			expect( result1.body ).toHaveLength( 7 );
+			result1.body.forEach( ( order ) =>
+				expect( order.billing.email ).toContain( 'example.com' )
+			);
+
+			// Test billing address.
+			const result2 = await ordersApi.listAll.orders( {
+				search: 'gainesville', // Intentionally lowercase.
+			} );
+			expect( result2.statusCode ).toEqual( 200 );
+			expect( result2.body ).toHaveLength( 1 );
+			expect( result2.body[ 0 ].id ).toEqual( sampleData.guestOrder.id );
+
+			// Test shipping address.
+			const result3 = await ordersApi.listAll.orders( {
+				search: 'Incognito',
+			} );
+			expect( result3.statusCode ).toEqual( 200 );
+			expect( result3.body ).toHaveLength( 1 );
+			expect( result3.body[ 0 ].id ).toEqual( sampleData.guestOrder.id );
+
+			// Test billing last name.
+			const result4 = await ordersApi.listAll.orders( {
+				search: 'Doe',
+			} );
+			expect( result4.statusCode ).toEqual( 200 );
+			expect( result4.body ).toHaveLength( 5 );
+			result4.body.forEach( ( order ) =>
+				expect( order.billing.last_name ).toEqual( 'Doe' )
+			);
+
+			// Test order item name.
+			const result5 = await ordersApi.listAll.orders( {
+				search: 'Pennant',
+			} );
+			expect( result5.statusCode ).toEqual( 200 );
+			expect( result5.body ).toHaveLength( 2 );
+			result5.body.forEach( ( order ) =>
+				expect( order ).toEqual(
+					expect.objectContaining( {
+						line_items: expect.arrayContaining( [
+							expect.objectContaining( {
+								name: 'WordPress Pennant',
+							} ),
+						] ),
+					} )
+				)
+			);
+		} );
 	} );
 } );

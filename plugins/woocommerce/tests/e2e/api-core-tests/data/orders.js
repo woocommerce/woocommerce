@@ -56,7 +56,7 @@ const createSampleData = async () => {
 		postcode: '14201',
 		phone: '123456789',
 	};
-	const guestAddress = {
+	const guestShippingAddress = {
 		first_name: 'Ano',
 		last_name: 'Nymous',
 		company: '',
@@ -67,6 +67,19 @@ const createSampleData = async () => {
 		state: 'PA',
 		postcode: '16515',
 		phone: '123456789',
+	};
+	const guestBillingAddress = {
+		first_name: 'Ben',
+		last_name: 'Efactor',
+		company: '',
+		country: 'US',
+		address_1: '200 W University Avenue',
+		address_2: '',
+		city: 'Gainesville',
+		state: 'FL',
+		postcode: '32601',
+		phone: '123456789',
+		email: 'ben.efactor@email.net',
 	};
 
 	const { body: john } = await createCustomer( {
@@ -167,11 +180,8 @@ const createSampleData = async () => {
 	// Guest order.
 	const { body: guestOrder } = await ordersApi.create.order( {
 		...orderBaseData,
-		billing: {
-			...guestAddress,
-			email: 'ano.nymous@example.com',
-		},
-		shipping: guestAddress,
+		billing: guestBillingAddress,
+		shipping: guestShippingAddress,
 		line_items: [
 			{
 				product_id: orderedProducts.pennant.id,
