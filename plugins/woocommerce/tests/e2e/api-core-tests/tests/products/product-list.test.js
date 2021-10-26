@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
- const { createSampleData, deleteSampleData } = require( '../../data/products' );
+ const { createSampleData, deleteSampleData } = require( '../../data/product-list' );
  const { productsApi } = require('../../endpoints/products');
  
  /**
