@@ -8,7 +8,7 @@
  */
 
 /**
- * A simple product.
+ * A simple, physical product.
  */
 const simpleProduct = {
 	name: 'A Simple Product',
