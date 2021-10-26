@@ -464,5 +464,101 @@ describe( 'Orders API tests', () => {
 				)
 			);
 		} );
+
+		describe( 'orderby', () => {
+			// The orders endpoint `orderby` parameter uses WP_Query, so our tests won't
+			// include slug and title, since they are programmatically generated.
+			it( 'default', async () => {
+				// Default = date desc.
+				const result = await ordersApi.listAll.orders();
+				expect( result.statusCode ).toEqual( 200 );
+
+				// Verify all dates are in descending order.
+				let lastDate = Date.now();
+				result.body.forEach( ( { date_created } ) => {
+					const created = Date.parse( date_created + '.000Z' );
+					expect( lastDate ).toBeGreaterThanOrEqual( created );
+					lastDate = created;
+				} );
+			} );
+
+			it( 'date', async () => {
+				const result = await ordersApi.listAll.orders( {
+					order: 'asc',
+					orderby: 'date',
+				} );
+				expect( result.statusCode ).toEqual( 200 );
+
+				// Verify all dates are in ascending order.
+				let lastDate = 0;
+				result.body.forEach( ( { date_created } ) => {
+					const created = Date.parse( date_created + '.000Z' );
+					expect( created ).toBeGreaterThanOrEqual( lastDate );
+					lastDate = created;
+				} );
+			} );
+
+			it( 'id', async () => {
+				const result1 = await ordersApi.listAll.orders( {
+					order: 'asc',
+					orderby: 'id',
+				} );
+				expect( result1.statusCode ).toEqual( 200 );
+
+				// Verify all results are in ascending order.
+				let lastId = 0;
+				result1.body.forEach( ( { id } ) => {
+					expect( id ).toBeGreaterThan( lastId );
+					lastId = id;
+				} );
+
+				const result2 = await ordersApi.listAll.orders( {
+					order: 'desc',
+					orderby: 'id',
+				} );
+				expect( result2.statusCode ).toEqual( 200 );
+
+				// Verify all results are in descending order.
+				lastId = Number.MAX_SAFE_INTEGER;
+				result2.body.forEach( ( { id } ) => {
+					expect( lastId ).toBeGreaterThan( id );
+					lastId = id;
+				} );
+			} );
+
+			it( 'include', async () => {
+				const includeIds = [
+					sampleData.precisionOrder.id,
+					sampleData.hierarchicalOrders.parent.id,
+					sampleData.guestOrder.id,
+				];
+
+				const result1 = await ordersApi.listAll.orders( {
+					order: 'asc',
+					orderby: 'include',
+					include: includeIds.join( ',' ),
+				} );
+				expect( result1.statusCode ).toEqual( 200 );
+				expect( result1.body ).toHaveLength( includeIds.length );
+
+				// Verify all results are in proper order.
+				result1.body.forEach( ( { id }, idx ) => {
+					expect( id ).toBe( includeIds[ idx ] );
+				} );
+
+				const result2 = await ordersApi.listAll.orders( {
+					order: 'desc',
+					orderby: 'include',
+					include: includeIds.join( ',' ),
+				} );
+				expect( result2.statusCode ).toEqual( 200 );
+				expect( result2.body ).toHaveLength( includeIds.length );
+
+				// Verify all results are in proper order.
+				result2.body.forEach( ( { id }, idx ) => {
+					expect( id ).toBe( includeIds[ idx ] );
+				} );
+			} );
+		} );
 	} );
 } );
