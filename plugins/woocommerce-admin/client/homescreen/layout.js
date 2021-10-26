@@ -50,6 +50,12 @@ const TwoColumnTasks = lazy( () =>
 	import( /* webpackChunkName: "two-column-tasks" */ '../two-column-tasks' )
 );
 
+const TwoColumnTasksExtended = lazy( () =>
+	import(
+		/* webpackChunkName: "two-column-tasks-extended" */ '../two-column-tasks/extended-task'
+	)
+);
+
 export const Layout = ( {
 	defaultHomescreenLayout,
 	isBatchUpdating,
@@ -134,18 +140,25 @@ export const Layout = ( {
 
 	const renderTaskList = () => {
 		if ( twoColumns && isRunningTwoColumnExperiment ) {
-			return '';
+			return (
+				// When running the two-column experiment, we still need to render
+				// the component in the left column for the extended task list.
+				<TwoColumnTasksExtended query={ query } />
+			);
 		} else if (
 			! twoColumns &&
 			isRunningTwoColumnExperiment &&
 			! isLoadingExperimentAssignment
 		) {
 			return (
-				<TwoColumnTasks
-					query={ query }
-					userPreferences={ userPrefs }
-					twoColumns={ twoColumns }
-				/>
+				<>
+					<TwoColumnTasks
+						query={ query }
+						userPreferences={ userPrefs }
+						twoColumns={ twoColumns }
+					/>
+					<TwoColumnTasksExtended query={ query } />
+				</>
 			);
 		}
 

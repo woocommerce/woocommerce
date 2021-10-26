@@ -1,3 +1,7 @@
+.woocommerce-homescreen .woocommerce-task-dashboard__container:empty {
+	margin-bottom: 0;
+}
+
 .woocommerce-task-dashboard__container {
 	.woocommerce-homescreen-card {
 		max-width: none;
