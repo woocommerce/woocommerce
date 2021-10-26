@@ -27,7 +27,8 @@ class WooCommercePayments {
 			'is_complete'     => self::is_connected(),
 			'can_view'        => self::is_requested() &&
 				self::is_installed() &&
-				self::is_supported(),
+				self::is_supported() &&
+				! self::is_connected(),
 			'time'            => __( '2 minutes', 'woocommerce-admin' ),
 			'additional_info' => __(
 				'By setting up, you are agreeing to the <a href="https://wordpress.com/tos/" target="_blank">Terms of Service</a>',

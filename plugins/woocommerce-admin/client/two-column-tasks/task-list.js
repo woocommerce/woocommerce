@@ -2,8 +2,8 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useEffect, useRef, useState } from '@wordpress/element';
-import { Button, Card, CardHeader } from '@wordpress/components';
+import { useEffect, useRef, useState, createElement } from '@wordpress/element';
+import { Button, Card } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { EllipsisMenu } from '@woocommerce/components';
 import { updateQueryString } from '@woocommerce/navigation';
@@ -19,6 +19,12 @@ import '../tasks/task-list.scss';
 import taskHeaders from './task-headers';
 import DismissModal from './dissmiss-modal';
 import TaskListCompleted from './completed';
+
+// Temporary experiment titles which differs from current task titles.
+const experimentTaskTitles = {
+	marketing: __( 'Get more sales', 'woocommerce-admin' ),
+	'woocommerce-payments': __( 'Set up payments', 'woocommerce-admin' ),
+};
 
 export const TaskList = ( {
 	query,
@@ -40,7 +46,7 @@ export const TaskList = ( {
 		};
 	} );
 	const { hideTaskList } = useDispatch( ONBOARDING_STORE_NAME );
-	const [ headerContent, setHeaderContent ] = useState( '' );
+	const [ headerData, setHeaderData ] = useState( {} );
 	const [ activeTaskId, setActiveTaskId ] = useState( '' );
 	const [ showDismissModal, setShowDismissModal ] = useState( false );
 
@@ -115,6 +121,7 @@ export const TaskList = ( {
 		return (
 			<div className="woocommerce-card__menu woocommerce-card__header-item">
 				<EllipsisMenu
+					className={ taskListId }
 					label={ __( 'Task List Options', 'woocommerce-admin' ) }
 					renderContent={ ( { onToggle } ) => (
 						<div className="woocommerce-task-card__section-controls">
@@ -141,27 +148,45 @@ export const TaskList = ( {
 		( listTask ) => listTask.isComplete === false
 	);
 
+	// If nothing is selected, default to the last task since everything is completed.
 	if ( ! selectedHeaderCard ) {
-		selectedHeaderCard = visibleTasks[ 0 ];
+		selectedHeaderCard = visibleTasks[ visibleTasks.length - 1 ];
 	}
 
-	const onTaskSelected = ( task ) => {
-		if ( task !== selectedHeaderCard ) {
-			recordEvent( `${ eventName }_click`, {
-				task_name: task.id,
-			} );
+	const goToTask = ( task ) => {
+		trackClick( task );
+		updateQueryString( { task: task.id } );
+	};
 
-			updateQueryString( { task: task.id } );
-		}
+	const showTaskHeader = ( task ) => {
 		if ( taskHeaders[ task.id ] ) {
-			setHeaderContent( taskHeaders[ task.id ]( task ) );
+			setHeaderData( {
+				task,
+				goToTask: () => goToTask( task ),
+				trackClick: () => trackClick( task ),
+			} );
 			setActiveTaskId( task.id );
+		}
+	};
+
+	const trackClick = ( task ) => {
+		recordEvent( `${ eventName }_click`, {
+			task_name: task.id,
+		} );
+	};
+
+	const onTaskSelected = ( task ) => {
+		if ( task.id === 'woocommerce-payments' ) {
+			// With WCPay, we have to show the header content for user to read t&c first.
+			showTaskHeader( task );
+		} else {
+			goToTask( task );
 		}
 	};
 
 	useEffect( () => {
 		if ( selectedHeaderCard ) {
-			onTaskSelected( selectedHeaderCard );
+			showTaskHeader( selectedHeaderCard );
 		}
 	}, [ selectedHeaderCard ] );
 
@@ -199,12 +224,16 @@ export const TaskList = ( {
 					size="large"
 					className="woocommerce-task-card woocommerce-homescreen-card"
 				>
-					<CardHeader size="medium">
+					<div className="wooocommerce-task-card__header-container">
 						<div className="wooocommerce-task-card__header">
-							{ headerContent }
+							{ headerData?.task &&
+								createElement(
+									taskHeaders[ headerData.task.id ],
+									headerData
+								) }
 						</div>
 						{ renderMenu() }
-					</CardHeader>
+					</div>
 					<List animation="custom">
 						{ visibleTasks.map( ( task, index ) => {
 							++index;
@@ -219,7 +248,10 @@ export const TaskList = ( {
 								<TaskItem
 									key={ task.id }
 									className={ className }
-									title={ task.title }
+									title={
+										experimentTaskTitles[ task.id ] ??
+										task.title
+									}
 									completed={ task.isComplete }
 									content={ task.content }
 									onClick={ () => {
@@ -232,7 +264,6 @@ export const TaskList = ( {
 									}
 									action={ task.action }
 									actionLabel={ task.actionLabel }
-									additionalInfo={ task.additionalInfo }
 									showActionButton={ task.showActionButton }
 								/>
 							);

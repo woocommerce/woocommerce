@@ -27,7 +27,8 @@ class Payments {
 				(
 					! WooCommercePayments::is_requested() ||
 					! WooCommercePayments::is_installed() ||
-					! WooCommercePayments::is_supported()
+					! WooCommercePayments::is_supported() ||
+					WooCommercePayments::is_connected()
 				),
 			'time'        => __( '2 minutes', 'woocommerce-admin' ),
 		);

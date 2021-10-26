@@ -7,6 +7,24 @@
 		max-width: none;
 		width: 100%;
 	}
+
+	.wooocommerce-task-card__header-container {
+		display: flex;
+		position: relative;
+		border-bottom: 1px solid $studio-gray-5;
+	}
+
+	.wooocommerce-task-card__header {
+		width: 100%;
+		flex: 1;
+	}
+
+	.woocommerce-ellipsis-menu.setup {
+		position: absolute;
+		top: 20px;
+		right: 16px;
+	}
+
 	.woocommerce-task-card.is-loading {
 		.woocommerce-card__body {
 			border-top: 1px solid $studio-gray-5;
@@ -86,7 +104,8 @@
 	justify-content: space-between;
 
 	ul li.complete .woocommerce-task-list__item-title {
-		font-weight: normal;
+		font-weight: 600;
+		color: $gray-600;
 	}
 
 	// Single column mode
@@ -179,7 +198,55 @@
 		@include single-column;
 	}
 
+	.woocommerce-task-header__contents-container {
+		padding: 20px 24px;
+		position: relative;
+		flex: 1;
+		overflow: hidden;
+		width: 100%;
+	}
 
+	.svg-background {
+		position: absolute;
+		z-index: 0;
+
+		@include breakpoint( '<1280px' ) {
+			display: none;
+		}
+
+		.admin-theme-color {
+			fill: var(--wp-admin-theme-color);
+		}
+
+		.admin-theme-color-darker-10 {
+			fill: var(--wp-admin-theme-color-darker-10);
+		}
+
+		.admin-theme-color-darker-20 {
+			fill: var(--wp-admin-theme-color-darker-20);
+		}
+	}
+
+	.woocommerce-task-header__contents {
+		max-width: 500px;
+		p,
+		span {
+			color: $gray-600;
+		}
+
+		// This is required in order to have svg image as background.
+		position: relative;
+		z-index: 1;
+	}
+
+	.woocommerce-task-header__timer {
+		display: flex;
+		align-items: center;
+		line-height: 22px;
+		img {
+			margin-right: 6px;
+		}
+	}
 }
 
 .woocommerce-task-dashboard__body .woocommerce-task-dismiss-modal {

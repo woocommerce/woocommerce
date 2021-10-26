@@ -7,6 +7,7 @@ import AppearanceHeader from './headers/appearance';
 import ShippingHeader from './headers/shipping';
 import ProductsHeader from './headers/products';
 import PaymentsHeader from './headers/payments';
+import WoocommercePaymentsHeader from './headers/woocommerce-payments';
 
 export default {
 	tax: TaxHeader,
@@ -15,4 +16,5 @@ export default {
 	appearance: AppearanceHeader,
 	payments: PaymentsHeader,
 	products: ProductsHeader,
+	'woocommerce-payments': WoocommercePaymentsHeader,
 };
