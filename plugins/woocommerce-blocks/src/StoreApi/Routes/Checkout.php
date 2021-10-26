@@ -462,7 +462,7 @@ class Checkout extends AbstractCartRoute {
 	 */
 	private function update_order_from_request( \WP_REST_Request $request ) {
 		$this->order->set_customer_note( $request['customer_note'] ?? '' );
-		$this->order->set_payment_method( $this->get_request_payment_method( $request ) );
+		$this->order->set_payment_method( $request['payment_method'] ?? '' );
 
 		/**
 		 * Fires when the Checkout Block/Store API updates an order's from the API request data.
