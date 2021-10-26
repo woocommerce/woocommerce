@@ -10,7 +10,7 @@ jobs:
 
             - name: Build
               id: build
-              uses: woocommerce/action-build@update-to-pnpm
+              uses: woocommerce/action-build@try-cp-package-json
 
             - name: Upload PR zip
               uses: actions/upload-artifact@v2
@@ -62,6 +62,12 @@ jobs:
               run: |
                   unzip woocommerce.zip -d woocommerce
                   mv woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
+
+            - name: Install dependencies again
+              working-directory: package/woocommerce
+              run: |
+                npm install -g pnpm
+                pnpm install
 
             - name: Run tests command.
               working-directory: package/woocommerce/plugins/woocommerce
