@@ -35,7 +35,7 @@ if ( fs.existsSync( localJestSetupFile ) ) {
 const combinedConfig = {
 	...jestConfig,
 	moduleNameMapper: {
-		'@woocommerce/e2e/tests/(.*)': '<rootDir>/tests/e2e/$1',
+		'@woocommerce/e2e/tests/(.*)': appPath + 'tests/e2e/$1',
 	},
 
 	setupFiles: [ '<rootDir>/config/env.setup.js' ],
@@ -52,6 +52,7 @@ const combinedConfig = {
 		...jestConfig.transformIgnorePatterns,
 		'node_modules/(?!(woocommerce)/)',
 	],
+	roots: [ appPath + 'tests/e2e/specs' ],
 };
 
 if ( process.env.jest_test_spec ) {
