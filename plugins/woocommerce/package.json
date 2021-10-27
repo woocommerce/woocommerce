@@ -18,7 +18,6 @@
     "install:no-e2e": "pnpm run check:subset-installed --silent || pnpm run install:subset-only && pnpx install-subset i no-e2e",
     "build": "./bin/build-zip.sh",
     "build:core": "grunt && pnpm run makepot",
-    "build:dev": "pnpm run build:core && pnpm run build:packages",
     "build-watch": "grunt watch",
     "build:zip": "pnpm run build",
     "build:assets": "grunt assets",
