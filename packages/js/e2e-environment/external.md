@@ -32,7 +32,7 @@ wp user create customer customer@woocommercecoree2etestsuite.com \
 
 ### Test Sequencer Setup
 
-The test sequencer needs to know the particulars of your test install to run the tests. The sequencer reads these settings from `/tests/e2e/config/default.json`.
+The test sequencer needs to know the particulars of your test install to run the tests. The sequencer reads these settings from `/plugins/woocommerce/tests/e2e/config/default.json`.
 
 - The `customer` entry is not required by the sequencer but is required for the core test suite.
 - The `url` value must match the URL of your testing container.

@@ -23,7 +23,7 @@ Each project will have its own begin test state and initialization script. For e
 wp core install --url=http://localhost:8084 --admin_user=admin --admin_password=password --admin_email=wooadmin@example.org
 ```
 
-Project specific initialization can be added through an executable file at ```tests/e2e/docker/initialize.sh```. WooCommerce core's script is:
+Project specific initialization can be added through an executable file at ```pluigns/woocommerce/tests/e2e/docker/initialize.sh```. WooCommerce core's script is:
 
 
 ```
@@ -52,7 +52,7 @@ wp plugin install wp-mail-logging --activate
 The container build script supports an initialization script parameter
 
 ```shell script
-npx wc-e2e docker:up tests/e2e/docker/init-wp-beta.sh
+pnpx wc-e2e docker:up plugins/woocommerce/tests/e2e/docker/init-wp-beta.sh
 ```
 
 This script updates WordPress to the latest nightly point release
@@ -123,6 +123,8 @@ The built in container defaults to mapping the root folder of the repository to 
 
 - Storefront Theme - ```WC_E2E_FOLDER_MAPPING=/var/www/html/wp-content/themes/storefront npx wc-e2e docker:up```
 - Site Project - ```WC_E2E_FOLDER_MAPPING=/var/www/html/wp-content npx wc-e2e docker:up```
+
+Since the introduction of the WooCommerce Monorepo, a `WC_CORE_PATH` environment variable maps to Core WooCommerce at `plugins/woocommerce`. It can also be overriden in a similar fashion.
 
 ### Travis CI Supported Versions
 
