@@ -59,6 +59,4 @@ if ( process.env.jest_test_spec ) {
 	combinedConfig.testMatch = [ process.env.jest_test_spec ];
 }
 
-console.log( combinedConfig );
-
 module.exports = combinedConfig;
