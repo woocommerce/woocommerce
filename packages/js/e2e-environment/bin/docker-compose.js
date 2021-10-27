@@ -81,8 +81,12 @@ const testConfig = getTestConfig();
 // Set some environment variables
 if ( ! process.env.WC_E2E_FOLDER_MAPPING ) {
 	envVars.WC_E2E_FOLDER_MAPPING =
-		'/var/www/html/wp-content/plugins/' +
-		getAppBase();
+		'/var/www/html/wp-content/plugins/' + getAppBase();
+}
+
+// Set some environment variables
+if ( ! process.env.WC_CORE_PATH ) {
+	envVars.WC_CORE_PATH = 'plugins/woocommerce';
 }
 
 if ( ! process.env.WORDPRESS_PORT ) {
