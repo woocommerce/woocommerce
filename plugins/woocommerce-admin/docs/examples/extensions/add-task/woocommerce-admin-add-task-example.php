@@ -6,12 +6,38 @@
  */
 
 use Automattic\WooCommerce\Admin\Features\Onboarding;
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
 
 /**
- * Register the task list item and the JS.
+ * Register the task.
+ */
+function add_task_my_task() {
+	TaskLists::add_task(
+		'extended',
+		array(
+			'id'             => 'my-task',
+			'title'          => __( 'My task', 'woocommerce-admin' ),
+			'content'        => __(
+				'Add your task description here for display in the task list.',
+				'woocommerce-admin'
+			),
+			'action_label'   => __( 'Do action', 'woocommerce-admin' ),
+			'is_complete'    => Task::is_task_actioned( 'my-task' ),
+			'can_view'       => 'US' === WC()->countries->get_base_country(),
+			'time'           => __( '2 minutes', 'woocommerce-admin' ),
+			'is_dismissable' => true,
+			'is_snoozeable'  => true,
+		)
+	);
+}
+
+add_action( 'init', 'add_task_my_task' );
+
+/**
+ * Register the scripts to fill the task content on the frontend.
  */
 function add_task_register_script() {
-
 	if (
 		! class_exists( 'Automattic\WooCommerce\Admin\Loader' ) ||
 		! \Automattic\WooCommerce\Admin\Loader::is_admin_or_embed_page()
@@ -28,25 +54,7 @@ function add_task_register_script() {
 		true
 	);
 
-	$client_data = array(
-		'isComplete' => get_option( 'woocommerce_admin_add_task_example_complete', false ),
-	);
-	wp_localize_script( 'add-task', 'addTaskData', $client_data );
 	wp_enqueue_script( 'add-task' );
-	add_filter( 'woocommerce_get_registered_extended_tasks', 'pluginprefix_register_extended_task', 10, 1 );
-}
-
-/**
- * Register task.
- *
- * @param array $registered_tasks_list_items List of registered extended task list items.
- */
-function pluginprefix_register_extended_task( $registered_tasks_list_items ) {
-	$new_task_name = 'woocommerce_admin_add_task_example_name';
-	if ( ! in_array( $new_task_name, $registered_tasks_list_items, true ) ) {
-		array_push( $registered_tasks_list_items, $new_task_name );
-	}
-	return $registered_tasks_list_items;
 }
 
 add_action( 'admin_enqueue_scripts', 'add_task_register_script' );

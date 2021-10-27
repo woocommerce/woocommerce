@@ -26,6 +26,9 @@ export const Task: React.FC< TaskProps > = ( { query, task } ) => {
 	}, [ id ] );
 
 	return (
-		<WooOnboardingTask.Slot id={ id } fillProps={ { onComplete, query } } />
+		<WooOnboardingTask.Slot
+			id={ id }
+			fillProps={ { onComplete, query, task } }
+		/>
 	);
 };

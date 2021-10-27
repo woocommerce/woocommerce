@@ -3,99 +3,53 @@
  */
 
 import { __ } from '@wordpress/i18n';
-import { addFilter } from '@wordpress/hooks';
-import apiFetch from '@wordpress/api-fetch';
-
-/**
- * WooCommerce dependencies
- */
 import { Card, CardBody } from '@wordpress/components';
-import { getHistory, getNewPath } from '@woocommerce/navigation';
+import { ONBOARDING_STORE_NAME } from '@woocommerce/data';
+import { registerPlugin } from '@wordpress/plugins';
+import { useDispatch } from '@wordpress/data';
+import { WooOnboardingTask } from '@woocommerce/onboarding';
 
-/* global addTaskData */
-const markTaskComplete = () => {
-	apiFetch( {
-		path: '/wc-admin/options',
-		method: 'POST',
-		data: { woocommerce_admin_add_task_example_complete: true },
-	} )
-		.then( () => {
-			// Set the local `isComplete` to `true` so that task appears complete on the list.
-			addTaskData.isComplete = true;
-			// Redirect back to the root WooCommerce Admin page.
-			getHistory().push( getNewPath( {}, '/', {} ) );
-		} )
-		.catch( ( error ) => {
-			// Something went wrong with our update.
-			console.log( error );
-		} );
-};
+const Task = ( { onComplete, task } ) => {
+	const { actionTask } = useDispatch( ONBOARDING_STORE_NAME );
+	const { isActioned } = task;
 
-const markTaskIncomplete = () => {
-	apiFetch( {
-		path: '/wc-admin/options',
-		method: 'POST',
-		data: { woocommerce_admin_add_task_example_complete: false },
-	} )
-		.then( () => {
-			addTaskData.isComplete = false;
-			getHistory().push( getNewPath( {}, '/', {} ) );
-		} )
-		.catch( ( error ) => {
-			console.log( error );
-		} );
-};
-
-const Task = () => {
 	return (
 		<Card className="woocommerce-task-card">
 			<CardBody>
-				{ __( 'Example task card content.', 'plugin-domain' ) }
+				{ __(
+					"This task's completion status is dependent on being actioned. The action button below will action this task, while the complete button will optimistically complete the task in the task list and redirect back to the task list. Note that in this example, the task must be actioned for completion to persist.",
+					'plugin-domain'
+				) }{ ' ' }
+				<br />
+				<br />
+				{ __( 'Task actioned status: ', 'plugin-domain' ) }{ ' ' }
+				{ isActioned ? 'actioned' : 'not actioned' }
 				<br />
 				<br />
 				<div>
-					{ addTaskData.isComplete ? (
-						<button onClick={ markTaskIncomplete }>
-							{ __( 'Mark task incomplete', 'plugin-domain' ) }
-						</button>
-					) : (
-						<button onClick={ markTaskComplete }>
-							{ __( 'Mark task complete', 'plugin-domain' ) }
-						</button>
-					) }
+					<button
+						onClick={ () => {
+							actionTask( 'my-task' );
+						} }
+					>
+						{ __( 'Action task', 'plugin-domain' ) }
+					</button>
+					<button onClick={ onComplete }>
+						{ __( 'Complete', 'plugin-domain' ) }
+					</button>
 				</div>
 			</CardBody>
 		</Card>
 	);
 };
 
-/**
- * Use the 'woocommerce_admin_onboarding_task_list' filter to add a task page.
- */
-addFilter(
-	'woocommerce_admin_onboarding_task_list',
-	'plugin-domain',
-	( tasks ) => {
-		return [
-			...tasks,
-			{
-				key: 'example',
-				title: __( 'Example', 'plugin-domain' ),
-				content: __( 'This is an example task.', 'plugin-domain' ),
-				container: <Task />,
-				completed: addTaskData.isComplete,
-				visible: true,
-				additionalInfo: __(
-					'Additional info here',
-					'woocommerce-admin'
-				),
-				time: __( '2 minutes', 'woocommerce-admin' ),
-				isDismissable: true,
-				onDelete: () => console.log( 'The task was deleted' ),
-				onDismiss: () => console.log( 'The task was dismissed' ),
-				allowRemindMeLater: true,
-				remindMeLater: () => console.log( 'Remind me later' ),
-			},
-		];
-	}
-);
+registerPlugin( 'add-task-content', {
+	render: () => (
+		<WooOnboardingTask id="my-task">
+			{ ( { onComplete, query, task } ) => (
+				<Task onComplete={ onComplete } task={ task } />
+			) }
+		</WooOnboardingTask>
+	),
+	scope: 'woocommerce-tasks',
+} );
