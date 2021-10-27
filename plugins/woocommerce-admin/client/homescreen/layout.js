@@ -79,11 +79,16 @@ export const Layout = ( {
 	const isTaskListEnabled = bothTaskListsHidden === false;
 	const isDashboardShown = ! query.task;
 
+	const momentDate = moment().utc();
+
 	const [
 		isLoadingExperimentAssignment,
 		experimentAssignment,
 	] = useExperiment(
-		'woocommerce_tasklist_progression_headercard_' + moment().format( 'MM' )
+		'woocommerce_tasklist_progression_headercard_' +
+			momentDate.format( 'YYYY' ) +
+			'_' +
+			momentDate.format( 'MM' )
 	);
 
 	const isRunningTwoColumnExperiment =
