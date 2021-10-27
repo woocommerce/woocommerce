@@ -157,7 +157,7 @@ export const Edit = ( { className, attributes, setAttributes, clientId } ) => {
 						setAttributes={ setAttributes }
 					/>
 					<BlockControls __experimentalShareWithChildBlocks>
-						<ViewSwitcherComponent />
+						{ ViewSwitcherComponent }
 					</BlockControls>
 					<CartBlockContext.Provider
 						value={ {
