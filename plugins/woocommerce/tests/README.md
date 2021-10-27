@@ -10,6 +10,7 @@ This document discusses unit tests. See [the e2e README](https://github.com/wooc
     - [MySQL database](#mysql-database)
     - [Setup instructions](#setup-instructions)
   - [Running Tests](#running-tests)
+    - [Troubleshooting](#troubleshooting)
     - [Running tests in PHP 8](#running-tests-in-php-8)
   - [Writing Tests](#writing-tests)
   - [Automated Tests](#automated-tests)
@@ -81,7 +82,7 @@ $ rm -rf /var/folders/qr/3cnz_5_j3j1cljph_246ty1h0000gn/T/wordpress-tests-lib
 $ tests/bin/install.sh woocommerce_tests_1 root root
 ```
 
-Note that `woocommerce_tests` changed to `woocommerce_tests_1` as the `database woocommerce_tests` already exists due to the prior command.
+Note that `woocommerce_tests` changed to `woocommerce_tests_1` as the `woocommerce_tests` database already exists due to the prior command.
 
 ### Running tests in PHP 8
 
