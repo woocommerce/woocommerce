@@ -62,7 +62,7 @@ jobs:
           mv woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
 
       - name: Run REST API tests command.
-        working-directory: code/woocommerce
+        working-directory: code/woocommerce/tests/e2e/api-core-tests
         env:
           RUN_WP_CLI_ON_DOCKER: true
           RUN_TESTS_THAT_USE_WP_CLI: true
