@@ -164,6 +164,7 @@
 	}
 	.woocommerce-task-list__item:not(.complete) .woocommerce-task__icon {
 		border: 1px solid var(--wp-admin-theme-color);
+		background: transparent;
 	}
 
 	.woocommerce-task-list__item-before {
