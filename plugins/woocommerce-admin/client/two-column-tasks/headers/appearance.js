@@ -33,7 +33,9 @@ const AppearanceHeader = ( { task, goToTask } ) => {
 					isPrimary={ ! task.isComplete }
 					onClick={ goToTask }
 				>
-					{ __( 'Personalize', 'woocommerce-admin' ) }
+					{ task.isComplete
+						? __( 'Modify choices', 'woocommerce-admin' )
+						: __( 'Personalize', 'woocommerce-admin' ) }
 				</Button>
 				<p className="woocommerce-task-header__timer">
 					<img src={ TimerImage } alt="Timer" />{ ' ' }
