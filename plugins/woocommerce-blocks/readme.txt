@@ -4,7 +4,7 @@ Tags: gutenberg, woocommerce, woo commerce, products, blocks, woocommerce blocks
 Requires at least: 5.8
 Tested up to: 5.8
 Requires PHP: 7.0
-Stable tag: 6.2.0-dev
+Stable tag: 6.2.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -84,6 +84,22 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 5. WooCommerce Product Blocks in the block inserter menu
 
 == Changelog ==
+
+= 6.2.0 - 2021-10-26 =
+
+#### Enhancements
+
+- Cart v2: The cart block, like checkout block, now supports inner blocks that allow for greater customizability. ([4973](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4973))
+- BlockTemplateController: Adds the ability to load and manage block template files. ([4981](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4981))
+- Improve accessibility for the editor view of the Product search block. ([4905](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4905))
+
+#### Bug Fixes
+
+- Fix custom classname support for inner checkout blocks. ([4978](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4978))
+- Fix a bug in free orders and trial subscription products. ([4955](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4955))
+- Remove duplicate attributes in saved block HTML. ([4941](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4941))
+- Fix render error of Filter by Attribute block when no attribute is selected. ([4847](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4847))
+- Store API - Ensure returned customer address state is valid. ([4844](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4844))
 
 = 6.1.0 - 2021-10-12 =
 
