@@ -5,4 +5,77 @@
 // Reset font size so it doesn't depend on drawer's ancestors.
 .wc-block-mini-cart__drawer {
 	font-size: 1rem;
+
+	.components-modal__content {
+		display: flex;
+		flex-direction: column;
+		height: 100%;
+	}
+
+	.components-modal__header {
+		margin: $gap 0;
+	}
+
+	.wc-block-mini-cart__items {
+		flex-grow: 1;
+		margin-right: -$gap;
+		overflow-y: auto;
+		padding-right: $gap;
+
+		.wc-block-cart-items__row:last-child::after {
+			content: none;
+		}
+	}
+}
+
+.wc-block-mini-cart__footer {
+	border-top: 1px solid $gray-300;
+	margin-bottom: -$gap-largest;
+	margin-left: -$gap;
+	margin-right: -$gap;
+	padding: $gap-large;
+
+}
+
+.wc-block-components-totals-item.wc-block-mini-cart__footer-subtotal {
+	font-weight: 600;
+	margin-bottom: $gap;
+
+	.wc-block-components-totals-item__description {
+		display: none;
+		font-size: 0.75em;
+		font-weight: 400;
+
+		@media only screen and (min-width: 480px) {
+			display: unset;
+		}
+	}
+}
+
+.wc-block-mini-cart__footer-actions {
+	display: flex;
+	gap: $gap;
+
+	.wc-block-mini-cart__footer-cart.wc-block-components-button {
+		background-color: transparent;
+		border: 1px solid $gray-900;
+		color: $gray-900;
+		display: none;
+		flex-grow: 1;
+		font-weight: 600;
+
+		@media only screen and (min-width: 480px) {
+			display: inline-flex;
+		}
+	}
+
+	.wc-block-mini-cart__footer-checkout {
+		border: 1px solid $gray-900;
+		flex-grow: 1;
+		font-weight: 600;
+	}
+}
+
+.wc-block-mini-cart__footer .wc-block-components-payment-method-icons {
+	margin-top: $gap;
 }

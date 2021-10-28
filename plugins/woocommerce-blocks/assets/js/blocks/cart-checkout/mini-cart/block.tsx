@@ -4,14 +4,25 @@
 import classNames from 'classnames';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { useState, useEffect, useRef } from '@wordpress/element';
-import { translateJQueryEventToNative } from '@woocommerce/base-utils';
-import { useStoreCart } from '@woocommerce/base-context/hooks';
+import {
+	translateJQueryEventToNative,
+	getIconsFromPaymentMethods,
+} from '@woocommerce/base-utils';
+import {
+	useStoreCart,
+	usePaymentMethods,
+} from '@woocommerce/base-context/hooks';
 import Drawer from '@woocommerce/base-components/drawer';
 import {
 	formatPrice,
 	getCurrencyFromPriceResponse,
 } from '@woocommerce/price-format';
 import { getSetting } from '@woocommerce/settings';
+import { TotalsItem } from '@woocommerce/blocks-checkout';
+import PaymentMethodIcons from '@woocommerce/base-components/cart-checkout/payment-method-icons';
+import { CART_URL, CHECKOUT_URL } from '@woocommerce/block-settings';
+import Button from '@woocommerce/base-components/button';
+import { PaymentMethodDataProvider } from '@woocommerce/base-context';
 
 /**
  * Internal dependencies
@@ -22,6 +33,15 @@ import './style.scss';
 interface MiniCartBlockProps {
 	isInitiallyOpen?: boolean;
 }
+
+const PaymentMethodIconsElement = (): JSX.Element => {
+	const { paymentMethods } = usePaymentMethods();
+	return (
+		<PaymentMethodIcons
+			icons={ getIconsFromPaymentMethods( paymentMethods ) }
+		/>
+	);
+};
 
 const MiniCartBlock = ( {
 	isInitiallyOpen = false,
@@ -80,7 +100,7 @@ const MiniCartBlock = ( {
 	const subTotal = getSetting( 'displayCartPricesIncludingTax', false )
 		? parseInt( cartTotals.total_items, 10 ) +
 		  parseInt( cartTotals.total_items_tax, 10 )
-		: cartTotals.total_items;
+		: parseInt( cartTotals.total_items, 10 );
 
 	const ariaLabel = sprintf(
 		/* translators: %1$d is the number of products in the cart. %2$s is the cart total */
@@ -104,10 +124,52 @@ const MiniCartBlock = ( {
 				{ __( 'Cart is empty', 'woo-gutenberg-products-block' ) }
 			</div>
 		) : (
-			<CartLineItemsTable
-				lineItems={ cartItems }
-				isLoading={ cartIsLoading }
-			/>
+			<>
+				<div className="wc-block-mini-cart__items">
+					<CartLineItemsTable
+						lineItems={ cartItems }
+						isLoading={ cartIsLoading }
+					/>
+				</div>
+				<div className="wc-block-mini-cart__footer">
+					<TotalsItem
+						className="wc-block-mini-cart__footer-subtotal"
+						currency={ getCurrencyFromPriceResponse( cartTotals ) }
+						label={ __(
+							'Subtotal',
+							'woo-gutenberg-products-block'
+						) }
+						value={ subTotal }
+						description={ __(
+							'Shipping, taxes, and discounts calculated at checkout.',
+							'woo-gutenberg-products-block'
+						) }
+					/>
+					<div className="wc-block-mini-cart__footer-actions">
+						<Button
+							className="wc-block-mini-cart__footer-cart"
+							href={ CART_URL }
+						>
+							{ __(
+								'View my cart',
+								'woo-gutenberg-products-block'
+							) }
+						</Button>
+						<Button
+							className="wc-block-mini-cart__footer-checkout"
+							href={ CHECKOUT_URL }
+						>
+							{ __(
+								'Go to checkout',
+								'woo-gutenberg-products-block'
+							) }
+						</Button>
+					</div>
+					<PaymentMethodDataProvider>
+						<PaymentMethodIconsElement />
+					</PaymentMethodDataProvider>
+				</div>
+			</>
 		);
 
 	return (
