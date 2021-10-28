@@ -55,6 +55,7 @@ export default ( {
 			dangerouslySetInnerHTML={ {
 				__html: decodeEntities( name ),
 			} }
+			style={ style }
 		/>
 	);
 };
