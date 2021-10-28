@@ -10,7 +10,7 @@ jobs:
 
             - name: Build
               id: build
-              uses: woocommerce/action-build@try-cp-package-json
+              uses: woocommerce/action-build@trunk
 
             - name: Upload PR zip
               uses: actions/upload-artifact@v2
