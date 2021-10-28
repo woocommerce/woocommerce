@@ -63,6 +63,13 @@ jobs:
           unzip woocommerce.zip -d woocommerce
           mv woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
 
+      - name: Install WP CLI.
+        working-directory: tmp
+        run: |
+          curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+          chmod +x wp-cli.phar
+          sudo mv wp-cli.phar /usr/local/bin/wp
+
       - name: Run REST API tests command.
         working-directory: code/woocommerce/tests/e2e/api-core-tests
         env:
