@@ -27,6 +27,10 @@
 		&[hidden] {
 			display: none;
 		}
+
+		&[alt=""] {
+			border: 1px solid $image-placeholder-border-color;
+		}
 	}
 }
 .edit-post-visual-editor .editor-block-list__block .wc-block-grid__product-title,

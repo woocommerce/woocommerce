@@ -126,7 +126,10 @@ const OrderSummaryItem = ( { cartItem } ) => {
 						) }
 					/>
 				</div>
-				<ProductImage image={ images.length ? images[ 0 ] : {} } />
+				<ProductImage
+					image={ images.length ? images[ 0 ] : {} }
+					fallbackAlt={ name }
+				/>
 			</div>
 			<div className="wc-block-components-order-summary-item__description">
 				<ProductName
