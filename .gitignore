@@ -32,3 +32,10 @@ tsconfig.tsbuildinfo
 
 # wp-env config
 .wp-env.override.json
+
+# Unit tests
+/tmp
+packages/js/e2e-environment/config/default.json
+packages/js/e2e-environment/docker/wp-cli/initialize.sh
+packages/js/e2e-environment/build/
+packages/js/e2e-environment/build-module/
