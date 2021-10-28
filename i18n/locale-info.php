@@ -8,7 +8,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$locales = 'currency-info.php';
+$locales = include 'currency-info.php';
 
 return array(
 	'AD' => array(
