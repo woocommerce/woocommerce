@@ -43,10 +43,12 @@ class BlockTemplatesController {
 	 * Add the block template objects to be used.
 	 *
 	 * @param array $query_result Array of template objects.
+	 * @param array $query Optional. Arguments to retrieve templates.
+	 * @param array $template_type wp_template or wp_template_part.
 	 * @return array
 	 */
-	public function add_block_templates( $query_result ) {
-		if ( ! gutenberg_supports_block_templates() ) {
+	public function add_block_templates( $query_result, $query, $template_type ) {
+		if ( ! gutenberg_supports_block_templates() || 'wp_template' !== $template_type ) {
 			return $query_result;
 		}
 
