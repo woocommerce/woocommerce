@@ -13,6 +13,7 @@ import { products } from '../requests/merchant/products.js';
 import { addProduct } from '../requests/merchant/add-product.js';
 import { orders } from '../requests/merchant/orders.js';
 import { ordersHeartbeat } from '../requests/merchant/orders-heartbeat.js';
+import { ordersSearch } from '../requests/merchant/orders-search.js';
 import { homeWCAdmin } from '../requests/merchant/home-wc-admin.js';
 import { myAccountMerchantLogin } from '../requests/merchant/my-account-merchant.js';
 import { categoryPage } from '../requests/shopper/category-page.js';
@@ -107,6 +108,7 @@ export function merchantAllFlows() {
     myAccountMerchantLogin();
     homeWCAdmin();
     orders();
+	ordersSearch();
     products();
     addProduct();
 }
