@@ -13,13 +13,7 @@ import GetPaid from './illustrations/get-paid';
 const PaymentsHeader = ( { task, goToTask } ) => {
 	return (
 		<div className="woocommerce-task-header__contents-container">
-			<GetPaid
-				class="svg-background"
-				style={ {
-					right: '6%',
-					bottom: '-20px',
-				} }
-			/>
+			<GetPaid class="svg-background" />
 			<div className="woocommerce-task-header__contents">
 				<h1>{ __( 'Choose payment methods', 'woocommerce-admin' ) }</h1>
 				<p>

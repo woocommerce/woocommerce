@@ -45,13 +45,7 @@ const WoocommercePaymentsHeader = ( { task, trackClick } ) => {
 
 	return (
 		<div className="woocommerce-task-header__contents-container">
-			<GetPaid
-				class="svg-background"
-				style={ {
-					right: '6%',
-					bottom: '-27px',
-				} }
-			/>
+			<GetPaid class="svg-background" />
 			<div className="woocommerce-task-header__contents">
 				<h1>{ __( "It's time to get paid", 'woocommerce-admin' ) }</h1>
 				<p>

@@ -13,13 +13,7 @@ import AddProducts from './illustrations/add-products.js';
 const ProductsHeader = ( { task, goToTask } ) => {
 	return (
 		<div className="woocommerce-task-header__contents-container">
-			<AddProducts
-				class="svg-background"
-				style={ {
-					right: '6%',
-					bottom: '-27px',
-				} }
-			/>
+			<AddProducts class="svg-background" />
 			<div className="woocommerce-task-header__contents">
 				<h1>{ __( 'Add products to start selling' ) }</h1>
 				<p>

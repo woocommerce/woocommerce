@@ -128,6 +128,15 @@
 			padding: 0;
 			margin-top: 0;
 		}
+
+		.woocommerce-task-header__contents {
+			max-width: 380px;
+		}
+
+		.svg-background {
+			right: 0.5%;
+			width: 40%;
+		}
 	}
 
 	&:not(.two-columns) {
@@ -208,12 +217,22 @@
 	}
 
 	.svg-background {
-		position: absolute;
-		z-index: 0;
-
-		@include breakpoint( '<1280px' ) {
+		@include breakpoint('<600px') {
 			display: none;
 		}
+
+		@include breakpoint( '<782px') {
+			right: 0.5%;
+			width: 40%;
+		}
+
+		position: absolute;
+		z-index: 0;
+		right: 6%;
+		top: 50%;
+		bottom: 50%;
+		margin-top: auto;
+		margin-bottom: auto;
 
 		.admin-theme-color {
 			fill: var(--wp-admin-theme-color);
@@ -229,6 +248,10 @@
 	}
 
 	.woocommerce-task-header__contents {
+		@include breakpoint( '<782px') {
+			max-width: 380px;
+		}
+
 		max-width: 500px;
 		p,
 		span {
