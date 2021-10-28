@@ -160,6 +160,13 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
+= 5.9.0 RC 2 2021-11-02 =
+
+**WooCommerce**
+
+* Fix - Bug in the handling of remote file names.
+* Fix - Remove the absolute path to the currency-info.php from within locale-info.php. #31036
+
 = 5.9.0 RC 2021-10-26 =
 
 **WooCommerce**
