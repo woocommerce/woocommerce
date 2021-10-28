@@ -5,6 +5,7 @@ use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Assets;
 use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 use Automattic\WooCommerce\Blocks\StoreApi\Utilities\CartController;
+use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
 
 /**
  * Mini Cart class.
@@ -96,6 +97,14 @@ class MiniCart extends AbstractBlock {
 			}
 		}
 
+		$payment_method_registry = Package::container()->get( PaymentMethodRegistry::class );
+		$payment_methods         = $payment_method_registry->get_all_active_payment_method_script_dependencies();
+
+		foreach ( $payment_methods as $payment_method ) {
+			$payment_method_script = $this->get_script_from_handle( $payment_method );
+			$this->append_script_and_deps_src( $payment_method_script );
+		}
+
 		$this->scripts_to_lazy_load['wc-block-mini-cart-component-frontend'] = array(
 			'src'     => $script_data['src'],
 			'version' => $script_data['version'],
@@ -164,6 +173,9 @@ class MiniCart extends AbstractBlock {
 					$this->append_script_and_deps_src( $dep_script );
 				}
 			}
+		}
+		if ( ! $script->src ) {
+			return;
 		}
 		$this->scripts_to_lazy_load[ $script->handle ] = array(
 			'src'          => $script->src,
