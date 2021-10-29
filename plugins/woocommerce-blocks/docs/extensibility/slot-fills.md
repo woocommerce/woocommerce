@@ -1,17 +1,17 @@
-# Slots and Fills
+# Slot and Fill
 
 ## The problem
 You added custom data to the [Store API](./extend-rest-api-add-data.md). You changed several strings using [Checkout filters](./available-filters.md). Now you want to render your own components in specific places in the Cart and Checkout.
 
 ## Solution
 
-Slots and Fills add the possibility to render your own HTML in pre-defined places in the Cart and Checkout. Your component will get access to contextual data and will get re-rendered when needed.
+Slot and Fill are a pair of components that add the possibility to render your own HTML in pre-defined places in the Cart and Checkout. Your component will get access to contextual data and will get re-rendered when needed.
 
-A Slot is a place in the Cart and Checkout that can render an indefinite number of external components.
+A _Slot_ is a place in the Cart and Checkout that can render an indefinite number of external components.
 
-A Fill is the component provided by third-party developers to render inside a Slot.
+A _Fill_ is the component provided by third-party developers to render inside a _Slot_.
 
-Slot and Fill use WordPress' API, and you can learn more about how they work in [the Slot Fill documentation.](https://github.com/WordPress/gutenberg/tree/trunk/packages/components/src/slot-fill).
+Slot and Fill use WordPress' API, and you can learn more about how they work in [the Slot and Fill documentation.](https://github.com/WordPress/gutenberg/tree/trunk/packages/components/src/slot-fill).
 
 ## Basic Usage
 
