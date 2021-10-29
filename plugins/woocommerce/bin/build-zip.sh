@@ -10,10 +10,10 @@ rm -rf "$BUILD_PATH"
 mkdir -p "$DEST_PATH"
 
 echo "Installing PHP and JS dependencies..."
-npm run install:no-e2e
+pnpm run install:no-e2e
 composer install || exit "$?"
 echo "Running JS Build..."
-npm run build:core || exit "$?"
+pnpm run build:core || exit "$?"
 echo "Cleaning up PHP dependencies..."
 composer install --no-dev || exit "$?"
 

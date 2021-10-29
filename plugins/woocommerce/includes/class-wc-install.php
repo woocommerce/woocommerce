@@ -165,6 +165,10 @@ class WC_Install {
 			'wc_update_560_create_refund_returns_page',
 			'wc_update_560_db_version',
 		),
+		'6.0.0' => array(
+			'wc_update_600_migrate_rate_limit_options',
+			'wc_update_600_db_version',
+		),
 	);
 
 	/**
@@ -524,6 +528,7 @@ class WC_Install {
 		wp_clear_scheduled_hook( 'woocommerce_cleanup_logs' );
 		wp_clear_scheduled_hook( 'woocommerce_geoip_updater' );
 		wp_clear_scheduled_hook( 'woocommerce_tracker_send_event' );
+		wp_clear_scheduled_hook( 'woocommerce_cleanup_rate_limits' );
 
 		$ve = get_option( 'gmt_offset' ) > 0 ? '-' : '+';
 
@@ -545,6 +550,7 @@ class WC_Install {
 		wp_schedule_event( time() + ( 6 * HOUR_IN_SECONDS ), 'twicedaily', 'woocommerce_cleanup_sessions' );
 		wp_schedule_event( time() + MINUTE_IN_SECONDS, 'fifteendays', 'woocommerce_geoip_updater' );
 		wp_schedule_event( time() + 10, apply_filters( 'woocommerce_tracker_event_recurrence', 'daily' ), 'woocommerce_tracker_send_event' );
+		wp_schedule_event( time() + ( 3 * HOUR_IN_SECONDS ), 'daily', 'woocommerce_cleanup_rate_limits' );
 	}
 
 	/**
@@ -1040,6 +1046,13 @@ CREATE TABLE {$wpdb->prefix}wc_reserved_stock (
 	`expires` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
 	PRIMARY KEY  (`order_id`, `product_id`)
 ) $collate;
+CREATE TABLE {$wpdb->prefix}woocommerce_rate_limits (
+  rate_limit_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  rate_limit_key varchar(200) NOT NULL,
+  rate_limit_expiry BIGINT UNSIGNED NOT NULL,
+  PRIMARY KEY  (rate_limit_id),
+  UNIQUE KEY rate_limit_key (rate_limit_key($max_index_length))
+) $collate;
 		";
 
 		return $tables;
@@ -1074,6 +1087,7 @@ CREATE TABLE {$wpdb->prefix}wc_reserved_stock (
 			"{$wpdb->prefix}woocommerce_tax_rate_locations",
 			"{$wpdb->prefix}woocommerce_tax_rates",
 			"{$wpdb->prefix}wc_reserved_stock",
+			"{$wpdb->prefix}woocommerce_rate_limits",
 		);
 
 		/**
