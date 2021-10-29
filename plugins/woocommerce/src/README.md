@@ -28,7 +28,7 @@ This directory is home to new WooCommerce class files under the `Automattic\WooC
 
 Ideally, all the new code for WooCommerce should consist of classes following the PSR-4 naming and living in this directory, and the code in [the `includes` directory](https://github.com/woocommerce/woocommerce/tree/trunk/includes/README.md) should receive the minimum amount of changes required for bug fixing. This will not always be possible but that should be the rule of thumb.
 
-A [PSR-11](https://www.php-fig.org/psr/psr-11/) container is in place for registering and resolving the classes in this directory by using the [dependency injection](https://en.wikipedia.org/wiki/Dependency_injection) pattern. There are tools in place to interact with legacy code (and code outside the `src`directory in general) in a way that makes it easy to write unit tests. 
+A [PSR-11](https://www.php-fig.org/psr/psr-11/) container is in place for registering and resolving the classes in this directory by using the [dependency injection](https://en.wikipedia.org/wiki/Dependency_injection) pattern. There are tools in place to interact with legacy code (and code outside the `src` directory in general) in a way that makes it easy to write unit tests. 
 
 
 ## Installing Composer
@@ -147,7 +147,7 @@ For a class to be resolvable using the container, it needs to have been previous
 
 The `Container` class is "read-only", in that it has a `get` method to resolve classes but it doesn't have any method to register classes. Instead, class registration is done by using [service providers](https://container.thephpleague.com/3.x/service-providers/). That's how the whole process would go when creating a new class:  
 
-First, create the class in the appropriate namespace (and thus in the matching folder), remember that the base namespace for the classes in the `src` directory is `Atuomattic\WooCommerce`. If the class depends on other classes from `src`, specify these dependencies as `init` arguments in detailed above. 
+First, create the class in the appropriate namespace (and thus in the matching folder), remember that the base namespace for the classes in the `src` directory is `Automattic\WooCommerce`. If the class depends on other classes from `src`, specify these dependencies as `init` arguments in detailed above. 
 
 Example of such a class:
 
@@ -235,7 +235,7 @@ $this->add( TheInterface::class, TheClassImplementingTheInterface::class );
 
 * An object
 
-The supplied object will be returned then the registerd class name is resolved. Example:
+The supplied object will be returned then the registered class name is resolved. Example:
 
 ```php
 $instance = new TheClass();
@@ -244,7 +244,7 @@ $this->add( TheClass::class, $instance );
 
 * A closure
 
-The closure will be executed and the result value will be returned when the registerd class name is resolved. Example:
+The closure will be executed and the result value will be returned when the registered class name is resolved. Example:
 
 ```php
 $factory = function( TheDependencyClass $dependency ) {
@@ -271,7 +271,7 @@ Classes in `Automattic\WooCommerce\Internal` are meant to be WooCommerce infrast
 
 What this implies for you as developer depends on what type of contribution are you making:
 
-* **If you are woking on WooCommerce core:** When you need to add a new class please think carefully if the class could be useful for plugins. If you really think so, add it to the appropriate namespace rooted at `Automattic\WooCommerce`. If not, add it to the appropriate namespace but rooted at `Automattic\WooCommerce\Internal`.
+* **If you are working on WooCommerce core:** When you need to add a new class please think carefully if the class could be useful for plugins. If you really think so, add it to the appropriate namespace rooted at `Automattic\WooCommerce`. If not, add it to the appropriate namespace but rooted at `Automattic\WooCommerce\Internal`.
   * When in doubt, always make the code internal. If an internal class is later deemed to be worth being made public, the change can be made easily (by just changing the class namespace) and nothing will break. Turning a public class into an internal class, on the other hand, is impossible since it could break existing plugins.
 
 * **If you are a plugin developer:** You should **never** use code from the `Automattic\WooCommerce\Internal` namespace in your plugins. Doing so might cause your plugin to break in future versions of WooCommerce.

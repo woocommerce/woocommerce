@@ -10,6 +10,10 @@ The following command installs WP-ENV globally.
 
 `npm -g i @wordpress/env`
 
+If you don't already have [pnpm](https://pnpm.io/installation) installed, you can quickly add it using NPM.
+
+`npm install -g pnpm`
+
 ## Starting WP-ENV
 
 1. Navigate to the root of WooCommerce source code.
@@ -29,15 +33,16 @@ The port # might be different depending on your `.wp-env.override.json` configur
 
 Once you have WP-ENV container up, we need to run a few commands to start developing.
 
-1. Run `npm install` to install npm modules.
-2. Run `npm run dev`
-3. Run `composer install` to install PHP dependencies.
+1. Run `pnpm install` to install npm modules.
+2. Navigate to Core WooCommerce `cd plugins/woocommerce`.
+3. Run `pnpm run build:core`
+4. Run `composer install` to install PHP dependencies.
 
 If you don't have Composer available locally, run the following command. It runs the command in WP-ENV container.
 
 `wp-env run composer composer install`
 
-You might also want to run `npm start` to watch your CSS and JS changes if you are working on the frontend.
+You might also want to run `pnpm start` to watch your CSS and JS changes if you are working on the frontend.
 
 You're now ready to develop!
 

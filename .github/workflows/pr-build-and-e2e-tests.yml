@@ -10,7 +10,7 @@ jobs:
 
             - name: Build
               id: build
-              uses: woocommerce/action-build@test-cd-after-npm-install
+              uses: woocommerce/action-build@trunk
 
             - name: Upload PR zip
               uses: actions/upload-artifact@v2
@@ -38,13 +38,15 @@ jobs:
               with:
                   path: package/woocommerce
 
-            - name: Run npm install.
-              working-directory: package/woocommerce/plugins/woocommerce
-              run: npm install
+            - name: Install PNPM and install dependencies
+              working-directory: package/woocommerce
+              run: |
+                npm install -g pnpm
+                pnpm install
 
             - name: Load docker images and start containers.
               working-directory: package/woocommerce/plugins/woocommerce
-              run: npx wc-e2e docker:up
+              run: pnpx wc-e2e docker:up
 
             - name: Move current directory to code. We will install zip file in this dir later.
               run: mv ./package/woocommerce/plugins/woocommerce/* ./code/woocommerce
@@ -61,8 +63,14 @@ jobs:
                   unzip woocommerce.zip -d woocommerce
                   mv woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
 
+            - name: Install dependencies again
+              working-directory: package/woocommerce
+              run: |
+                npm install -g pnpm
+                pnpm install
+
             - name: Run tests command.
-              working-directory: code/woocommerce
+              working-directory: package/woocommerce/plugins/woocommerce
               env:
                   WC_E2E_SCREENSHOTS: 1
                   E2E_SLACK_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
@@ -71,5 +79,5 @@ jobs:
                   USER_KEY: ${{ secrets.PR_E2E_TEST_ADMIN_USER }}
                   USER_SECRET: ${{ secrets.PR_E2E_TEST_ADMIN_PASSWORD }}
               run: |
-                npx wc-e2e test:e2e
-                npx wc-api-tests test api
+                pnpx wc-e2e test:e2e
+                pnpx wc-api-tests test api

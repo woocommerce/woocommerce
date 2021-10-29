@@ -129,7 +129,8 @@ class WC_Auth {
 				'return_url'   => rawurlencode( $this->get_formatted_url( $data['return_url'] ) ),
 				'callback_url' => rawurlencode( $this->get_formatted_url( $data['callback_url'] ) ),
 				'scope'        => wc_clean( $data['scope'] ),
-			), $url
+			),
+			$url
 		);
 	}
 
@@ -210,14 +211,11 @@ class WC_Auth {
 		global $wpdb;
 
 		$description = sprintf(
-			/* translators: 1: app name 2: scope 3: date 4: time */
-			__( '%1$s - API %2$s (created on %3$s at %4$s).', 'woocommerce' ),
-			wc_clean( $app_name ),
-			$this->get_i18n_scope( $scope ),
-			date_i18n( wc_date_format() ),
-			date_i18n( wc_time_format() )
+			'%s - API (%s)',
+			wc_trim_string( wc_clean( $app_name ), 170 ),
+			gmdate( 'Y-m-d H:i:s' )
 		);
-		$user = wp_get_current_user();
+		$user        = wp_get_current_user();
 
 		// Created API keys.
 		$permissions     = in_array( $scope, array( 'read', 'write', 'read_write' ), true ) ? sanitize_text_field( $scope ) : 'read';
@@ -327,13 +325,15 @@ class WC_Auth {
 			// Login endpoint.
 			if ( 'login' === $route && ! is_user_logged_in() ) {
 				wc_get_template(
-					'auth/form-login.php', array(
+					'auth/form-login.php',
+					array(
 						'app_name'     => wc_clean( $data['app_name'] ),
 						'return_url'   => add_query_arg(
 							array(
 								'success' => 0,
 								'user_id' => wc_clean( $data['user_id'] ),
-							), $this->get_formatted_url( $data['return_url'] )
+							),
+							$this->get_formatted_url( $data['return_url'] )
 						),
 						'redirect_url' => $this->build_url( $data, 'authorize' ),
 					)
@@ -353,13 +353,15 @@ class WC_Auth {
 			} elseif ( 'authorize' === $route && current_user_can( 'manage_woocommerce' ) ) {
 				// Authorize endpoint.
 				wc_get_template(
-					'auth/form-grant-access.php', array(
+					'auth/form-grant-access.php',
+					array(
 						'app_name'    => wc_clean( $data['app_name'] ),
 						'return_url'  => add_query_arg(
 							array(
 								'success' => 0,
 								'user_id' => wc_clean( $data['user_id'] ),
-							), $this->get_formatted_url( $data['return_url'] )
+							),
+							$this->get_formatted_url( $data['return_url'] )
 						),
 						'scope'       => $this->get_i18n_scope( wc_clean( $data['scope'] ) ),
 						'permissions' => $this->get_permissions_in_scope( wc_clean( $data['scope'] ) ),
@@ -386,7 +388,8 @@ class WC_Auth {
 								array(
 									'success' => 1,
 									'user_id' => wc_clean( $data['user_id'] ),
-								), $this->get_formatted_url( $data['return_url'] )
+								),
+								$this->get_formatted_url( $data['return_url'] )
 							)
 						)
 					);
