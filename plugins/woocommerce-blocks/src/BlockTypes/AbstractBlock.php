@@ -176,16 +176,22 @@ abstract class AbstractBlock {
 	 * Registers the block type with WordPress.
 	 */
 	protected function register_block_type() {
+		$block_settings = [
+			'render_callback' => $this->get_block_type_render_callback(),
+			'editor_script'   => $this->get_block_type_editor_script( 'handle' ),
+			'editor_style'    => $this->get_block_type_editor_style(),
+			'style'           => $this->get_block_type_style(),
+			'attributes'      => $this->get_block_type_attributes(),
+			'supports'        => $this->get_block_type_supports(),
+		];
+
+		if ( isset( $this->api_version ) && '2' === $this->api_version ) {
+			$block_settings['api_version'] = 2;
+		}
+
 		register_block_type(
 			$this->get_block_type(),
-			array(
-				'render_callback' => $this->get_block_type_render_callback(),
-				'editor_script'   => $this->get_block_type_editor_script( 'handle' ),
-				'editor_style'    => $this->get_block_type_editor_style(),
-				'style'           => $this->get_block_type_style(),
-				'attributes'      => $this->get_block_type_attributes(),
-				'supports'        => $this->get_block_type_supports(),
-			)
+			$block_settings
 		);
 	}
 
