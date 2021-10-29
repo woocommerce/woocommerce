@@ -28,6 +28,7 @@ import { PaymentMethodDataProvider } from '@woocommerce/base-context';
  * Internal dependencies
  */
 import CartLineItemsTable from '../cart/cart-line-items-table';
+import QuantityBadge from './quantity-badge';
 import './style.scss';
 
 interface MiniCartBlockProps {
@@ -184,16 +185,13 @@ const MiniCartBlock = ( {
 				} }
 				aria-label={ ariaLabel }
 			>
-				{ sprintf(
-					/* translators: %d is the count of items in the cart. */
-					_n(
-						'%d item',
-						'%d items',
-						cartItemsCount,
-						'woo-gutenberg-products-block'
-					),
-					cartItemsCount
-				) }
+				<span className="wc-block-mini-cart__amount">
+					{ formatPrice(
+						subTotal,
+						getCurrencyFromPriceResponse( cartTotals )
+					) }
+				</span>
+				<QuantityBadge count={ cartItemsCount } />
 			</button>
 			<Drawer
 				className={ classNames(
