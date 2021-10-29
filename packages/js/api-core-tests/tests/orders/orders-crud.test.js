@@ -1,7 +1,7 @@
 const { ordersApi } = require( '../../endpoints/orders' );
 const { productsApi } = require( '../../endpoints/products' );
 const { order } = require( '../../data' );
-const { simpleProduct } = require( '../../data/products-crud' );
+const { simpleProduct } = require( '../../../../../plugins/woocommerce/tests/e2e/api-core-tests/data/products-crud' );
 
 /**
  * Billing properties to update.
