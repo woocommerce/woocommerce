@@ -54,7 +54,6 @@ const statusesDataTable = [
  *
  * @group api
  * @group orders
- * @group wip
  *
  */
 describe( 'Orders API tests: CRUD', () => {
