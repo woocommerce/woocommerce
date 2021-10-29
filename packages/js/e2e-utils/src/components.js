@@ -208,12 +208,15 @@ const createSimpleProduct = async ( productTitle = simpleProductName, productPri
  * @param categoryName Product's category which can be changed when writing a test
  */
 const createSimpleProductWithCategory = async ( productName, productPrice, categoryName ) => {
+	// Get the category ID so we can add it to the product below
+	const categoryId = await withRestApi.createProductCategory( categoryName );
+
 	const product = await factories.products.simple.create( {
 		name: productName,
 		regularPrice: productPrice,
 		categories: [
 			{
-				name: categoryName,
+				id: categoryId,
 			}
 		],
 		isVirtual: true,
