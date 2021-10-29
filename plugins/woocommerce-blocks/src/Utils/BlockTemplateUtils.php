@@ -83,7 +83,7 @@ class BlockTemplateUtils {
 	 * @return WP_Block_Template Template.
 	 */
 	public static function gutenberg_build_template_result_from_file( $template_file, $template_type ) {
-		$default_template_types = gutenberg_get_default_template_types();
+		$default_template_types = function_exists( 'gutenberg_get_default_template_types' ) ? gutenberg_get_default_template_types() : array();
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		$template_content = file_get_contents( $template_file['path'] );
 		$theme            = wp_get_theme()->get_stylesheet();

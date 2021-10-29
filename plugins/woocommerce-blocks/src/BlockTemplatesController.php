@@ -37,6 +37,7 @@ class BlockTemplatesController {
 	 */
 	protected function init() {
 		add_filter( 'get_block_templates', array( $this, 'add_block_templates' ), 10, 3 );
+		add_action( 'template_redirect', array( $this, 'render_block_template' ) );
 	}
 
 	/**
@@ -104,5 +105,38 @@ class BlockTemplatesController {
 	public function theme_has_template( $template_name ) {
 		return is_readable( get_template_directory() . '/block-templates/' . $template_name . '.html' ) ||
 			is_readable( get_stylesheet_directory() . '/block-templates/' . $template_name . '.html' );
+	}
+
+	/**
+	 * Checks whether a block template with that name exists in Woo Blocks
+	 *
+	 * @param string $template_name Template to check.
+	 * @return boolean
+	 */
+	public function default_block_template_is_available( $template_name ) {
+		if ( ! $template_name ) {
+			return false;
+		}
+
+		return is_readable(
+			$this->templates_directory . '/' . $template_name . '.html'
+		);
+	}
+
+	/**
+	 * Renders the default block template from Woo Blocks if no theme templates exist.
+	 */
+	public function render_block_template() {
+		if ( is_embed() || ! function_exists( 'gutenberg_supports_block_templates' ) || ! gutenberg_supports_block_templates() ) {
+			return;
+		}
+
+		if (
+			is_singular( 'product' ) &&
+			! $this->theme_has_template( 'single-product' ) &&
+			$this->default_block_template_is_available( 'single-product' )
+		) {
+			add_filter( 'wc_has_block_template', '__return_true', 10, 0 );
+		}
 	}
 }
