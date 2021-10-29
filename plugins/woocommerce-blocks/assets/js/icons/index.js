@@ -54,3 +54,4 @@ export { default as totals } from './library/totals';
 export { default as truck } from './library/truck';
 export { default as widgets } from './library/widgets';
 export { default as woo } from './library/woo';
+export { default as miniCart } from './library/mini-cart';

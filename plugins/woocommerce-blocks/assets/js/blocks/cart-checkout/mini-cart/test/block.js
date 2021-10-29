@@ -62,7 +62,7 @@ describe( 'Testing cart', () => {
 	it( 'opens Mini Cart drawer when clicking on button', async () => {
 		render( <MiniCartBlock /> );
 		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
-		fireEvent.click( screen.getByText( /items/i ) );
+		fireEvent.click( screen.getByLabelText( /items/i ) );
 
 		expect( screen.getByText( /Your cart/i ) ).toBeInTheDocument();
 		expect( fetchMock ).toHaveBeenCalledTimes( 1 );
@@ -75,7 +75,7 @@ describe( 'Testing cart', () => {
 		render( <MiniCartBlock /> );
 
 		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
-		fireEvent.click( screen.getByText( /items/i ) );
+		fireEvent.click( screen.getByLabelText( /items/i ) );
 
 		expect( screen.getByText( /Cart is empty/i ) ).toBeInTheDocument();
 		expect( fetchMock ).toHaveBeenCalledTimes( 1 );
@@ -93,10 +93,10 @@ describe( 'Testing cart', () => {
 		} );
 
 		await waitForElementToBeRemoved( () =>
-			screen.queryByText( /3 items/i )
+			screen.queryByLabelText( /3 items/i )
 		);
 		await waitFor( () =>
-			expect( screen.getByText( /0 items/i ) ).toBeInTheDocument()
+			expect( screen.getByLabelText( /0 items/i ) ).toBeInTheDocument()
 		);
 	} );
 
@@ -113,10 +113,10 @@ describe( 'Testing cart', () => {
 		} );
 
 		await waitForElementToBeRemoved( () =>
-			screen.queryByText( /0 items/i )
+			screen.queryByLabelText( /0 items/i )
 		);
 		await waitFor( () =>
-			expect( screen.getAllByText( /3 items/i ).length > 0 )
+			expect( screen.getAllByLabelText( /3 items/i ).length > 0 )
 		);
 	} );
 } );
