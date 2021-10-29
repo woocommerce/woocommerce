@@ -14,7 +14,11 @@ Fixes #
 - [ ] I've tested using a screen reader
 - [ ] All animations respect [`prefers-reduced-motion`](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion)
 - [ ] All text has [at least a 4.5 color contrast with its background](https://webaim.org/resources/contrastchecker/)
+
+#### Other Checks
+
 - [ ] I've updated [this doc](../docs/blocks/feature-flags-and-experimental-interfaces.md) for any feature flags or experimental interfaces implemented in this pull request.
+- [ ] I tagged two reviewers because this PR makes queries to the database or I think it might have some security impact.
 
 ### Screenshots
 
@@ -29,6 +33,14 @@ Fixes #
 ### Manual Testing
 
 How to test the changes in this Pull Request:
+
+1.
+2.
+3.
+### User Facing Testing
+These are steps for user testing (where "user" is someone interacting with this change that is not editing any code).
+* [ ] Same as above, or
+* [ ] See steps below.
 
 1.
 2.
