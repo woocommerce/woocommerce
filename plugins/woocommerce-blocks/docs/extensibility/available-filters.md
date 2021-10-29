@@ -1,7 +1,16 @@
 # Available filters
 
-This section of the document will list the filters that are currently available to extensions, where exactly
-the filter is applied, and what data might be passed to the `CheckoutFilterFunction` (documentation on registering filters [can be found here](../../packages/checkout/filter-registry/README.md)).
+This document lists the filters that are currently available to extensions and offers usage information for each one of them.
+
+Information on registering filters can be found on the [Checkout - Filter Registry](../../packages/checkout/filter-registry/README.md) page.
+
+***
+
+- [Cart Line Items](#cart-line-items)
+- [Order Summary Items](#order-summary-items)
+- [Totals footer item](#totals-footer-item-in-cart-and-checkout)
+- [Coupons](#coupons)
+- [Snackbar notices](#snackbar-notices)
 
 ### Cart Line Items
 
