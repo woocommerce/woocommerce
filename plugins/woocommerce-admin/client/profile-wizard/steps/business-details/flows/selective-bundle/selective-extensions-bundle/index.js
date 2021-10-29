@@ -25,7 +25,7 @@ import sanitizeHTML from '~/lib/sanitize-html';
 import { setAllPropsToValue } from '~/lib/collections';
 import { getCountryCode } from '../../../../../../dashboard/utils';
 
-const ALLOWED_PLUGIN_LISTS = [ 'basics' ];
+const ALLOWED_PLUGIN_LISTS = [ 'obw/basics', 'obw/grow' ];
 
 const FreeBadge = () => {
 	return (
@@ -304,23 +304,32 @@ export const SelectiveExtensionsBundle = ( {
 					</div>
 					{ showExtensions &&
 						installableExtensions.map(
-							( { plugins, key: sectionKey } ) => (
+							( { plugins, key: sectionKey, title } ) => (
 								<div key={ sectionKey }>
 									{ isResolving ? (
 										<Spinner />
 									) : (
-										plugins.map(
-											( { description, key } ) => (
-												<BundleExtensionCheckbox
-													key={ key }
-													description={ description }
-													isChecked={ values[ key ] }
-													onChange={ getCheckboxChangeHandler(
-														key
-													) }
-												/>
-											)
-										)
+										<>
+											<div className="woocommerce-admin__business-details__selective-extensions-bundle__category">
+												{ title }
+											</div>
+											{ plugins.map(
+												( { description, key } ) => (
+													<BundleExtensionCheckbox
+														key={ key }
+														description={
+															description
+														}
+														isChecked={
+															values[ key ]
+														}
+														onChange={ getCheckboxChangeHandler(
+															key
+														) }
+													/>
+												)
+											) }
+										</>
 									) }
 								</div>
 							)

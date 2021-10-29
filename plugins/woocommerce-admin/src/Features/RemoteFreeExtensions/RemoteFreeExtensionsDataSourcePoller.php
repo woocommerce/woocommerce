@@ -10,7 +10,7 @@ class RemoteFreeExtensionsDataSourcePoller extends \Automattic\WooCommerce\Admin
 	const ID = 'remote_free_extensions';
 
 	const DATA_SOURCES = array(
-		'https://woocommerce.com/wp-json/wccom/obw-free-extensions/2.0/extensions.json',
+		'https://woocommerce.com/wp-json/wccom/obw-free-extensions/3.0/extensions.json',
 	);
 
 	/**

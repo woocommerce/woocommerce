@@ -37,8 +37,8 @@ class Marketing {
 	public static function get_plugins() {
 		$bundles = RemoteFreeExtensions::get_extensions(
 			array(
-				'reach',
-				'grow',
+				'task-list/reach',
+				'task-list/grow',
 			)
 		);
 

@@ -35,7 +35,7 @@ jest.mock( '@woocommerce/data', () => ( {
 
 const freeExtensions = [
 	{
-		key: 'basics',
+		key: 'obw/basics',
 		title: 'Get the basics',
 		plugins: [
 			{
@@ -54,7 +54,7 @@ const freeExtensions = [
 		],
 	},
 	{
-		key: 'reach',
+		key: 'task-list/reach',
 		title: 'Reach out to customers',
 		plugins: [
 			{
@@ -68,7 +68,7 @@ const freeExtensions = [
 		],
 	},
 	{
-		key: 'grow',
+		key: 'obw/grow',
 		title: 'Grow your store',
 		plugins: [
 			{
@@ -86,7 +86,7 @@ const freeExtensions = [
 const profileItems = { product_types: [] };
 
 describe( 'Selective extensions bundle', () => {
-	it( 'should list installable free extensions in footer only basics', () => {
+	it( 'should list installable free extensions from obw/basics and obw/grow', () => {
 		useSelect.mockReturnValue( {
 			freeExtensions,
 			isResolving: false,
@@ -105,7 +105,7 @@ describe( 'Selective extensions bundle', () => {
 			queryByText(
 				new RegExp( pluginNames[ 'google-listings-and-ads' ] )
 			)
-		).not.toBeInTheDocument();
+		).toBeInTheDocument();
 		expect(
 			queryByText( new RegExp( pluginNames.random ) )
 		).not.toBeInTheDocument();
@@ -126,7 +126,7 @@ describe( 'Selective extensions bundle', () => {
 		userEvent.click( collapseButton );
 		expect( getByText( 'WC Pay Description' ) ).toBeInTheDocument();
 		expect( getByText( 'Mailpoet Description' ) ).toBeInTheDocument();
-		expect( queryByText( 'Google Description' ) ).not.toBeInTheDocument();
+		expect( queryByText( 'Google Description' ) ).toBeInTheDocument();
 		expect( queryByText( 'Random Description' ) ).not.toBeInTheDocument();
 	} );
 } );
