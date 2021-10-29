@@ -16,6 +16,7 @@ const {
 	it,
 	describe,
 	beforeAll,
+	afterAll,
 } = require( '@jest/globals' );
 
 const path = require( 'path' );
@@ -42,6 +43,15 @@ const runImportProductsTest = () => {
 			await merchant.openAllProductsView();
 			await merchant.openImportProducts();
 		});
+
+		afterAll(async () => {
+			// Delete imported products
+			await withRestApi.deleteAllProducts();
+			await withRestApi.deleteAllProductAttributes();
+			await withRestApi.deleteAllProductCategories();
+			await withRestApi.deleteAllProductTags();
+		});
+
 		it('should show error message if you go without providing CSV file', async () => {
 			// Verify the error message if you go without providing CSV file
 			await Promise.all( [
@@ -123,9 +133,6 @@ const runImportProductsTest = () => {
 
 			// Compare overridden product prices
 			expect(productPrices.sort()).toEqual(productPricesOverride.sort());
-
-			// Delete imported products
-			await withRestApi.deleteAllProducts();
 		});
 	});
 };
