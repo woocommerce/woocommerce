@@ -47,4 +47,4 @@ In the above example, we're using `registerPlugin`. This plugin will take our co
 You use `registerPlugin` to feed in your plugin namespace, your component `render`, and the scope of your `registerPlugin`. The value of scope should always be `woocommerce-checkout`.
 
 ## Requirements
-For this to work, your script must be enqueued after Cart and Checkout. You can follow the `IntegrationInterface` documentation to enqueue your script (TBD).
+For this to work, your script must be enqueued after Cart and Checkout. You can follow the [IntegrationInterface](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/50f9b3e8d012f425d318908cc13d9c601d97bd68/docs/extensibility/integration-interface.md)documentation for enqueueing your script.
