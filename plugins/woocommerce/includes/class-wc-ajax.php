@@ -2126,6 +2126,10 @@ class WC_AJAX {
 					)
 				);
 
+				if ( 0 === $wpdb->insert_id ) {
+					throw new Exception( __( 'There was an error generating your API Key.', 'woocommerce' ) );
+				}
+
 				$key_id                      = $wpdb->insert_id;
 				$response                    = $data;
 				$response['consumer_key']    = $consumer_key;
