@@ -136,7 +136,7 @@ class BlockTemplatesController {
 			! $this->theme_has_template( 'single-product' ) &&
 			$this->default_block_template_is_available( 'single-product' )
 		) {
-			add_filter( 'wc_has_block_template', '__return_true', 10, 0 );
+			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
 		}
 	}
 }
