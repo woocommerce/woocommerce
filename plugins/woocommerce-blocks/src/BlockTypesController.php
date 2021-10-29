@@ -174,6 +174,7 @@ final class BlockTypesController {
 			'AttributeFilter',
 			'StockFilter',
 			'ActiveFilters',
+			'LegacyTemplate',
 		];
 
 		if ( Package::feature()->is_feature_plugin_build() ) {
