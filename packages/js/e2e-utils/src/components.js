@@ -17,6 +17,7 @@ import {
 } from './page-utils';
 import factories from './factories';
 import { waitForTimeout } from './flows/utils';
+import { withRestApi } from './flows/with-rest-api';
 import { Coupon, Order } from '@woocommerce/api';
 
 const client = factories.api.withDefaultPermalinks;

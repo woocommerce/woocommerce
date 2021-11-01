@@ -1,5 +1,5 @@
 import factories from '../factories';
-import getSlug from '/utils';
+import { getSlug } from './utils';
 import {Coupon, Setting, SimpleProduct, Order} from '@woocommerce/api';
 
 const client = factories.api.withDefaultPermalinks;
