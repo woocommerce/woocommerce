@@ -1,4 +1,5 @@
 import factories from '../factories';
+import getSlug from '/utils';
 import {Coupon, Setting, SimpleProduct, Order} from '@woocommerce/api';
 
 const client = factories.api.withDefaultPermalinks;
@@ -7,6 +8,7 @@ const shippingZoneEndpoint = '/wc/v3/shipping/zones';
 const shippingClassesEndpoint = '/wc/v3/products/shipping_classes';
 const userEndpoint = '/wp/v2/users';
 const systemStatusEndpoint = '/wc/v3/system_status';
+const productCategoriesEndpoint = '/wc/v3/products/categories';
 
 /**
  * Utility function to delete all merchant created data store objects.
@@ -304,29 +306,30 @@ export const withRestApi = {
 	/**
 	 * Create a product category and return the ID. If the category already exists, the ID of the existing category is returned.
 	 *
-	 * @param {String} categoryName The name of the category to create
-	 * @returns {Promise<Number>} The ID of the category.
+	 * @param {string} categoryName The name of the category to create
+	 * @return {Promise<number>} The ID of the category.
 	 */
 	createProductCategory: async ( categoryName ) => {
 		const payload = { name: categoryName };
 		let categoryId;
 
-		try {
-			const response = await client.post( productCategoriesEndpoint, payload );
-			expect( response.status ).toEqual( 201 );
-			categoryId = response.data.id;
-		} catch ( err ) {
-			if ( err.response.status === 400 && err.response.data.code === 'term_exists' ) {
-				// Get the list of categories and pull ID to return
-				const categoryList = await client.get( productCategoriesEndpoint );
-				expect( categoryList.status ).toEqual( 200 );
-				if ( categoryList.data && categoryList.data.length ) {
-					for ( let c = 0; c < categoryList.data.length; c++ ) {
-						if ( categoryList.data[c].name === categoryName ) {
-							categoryId = categoryList.data[c].id;
-						}
-					}
-				}
+		// First, convert the name to slug for easier searching
+		const categorySlug = getSlug( categoryName );
+		const category = await client.get(
+			`${ productCategoriesEndpoint }?slug=${ categorySlug }`
+		);
+
+		// If the length is 0, nothing was found, so create the category
+		if ( category.data ) {
+			// If the length is 0, no existing category was found, so create the category
+			if ( category.data.length === 0 ) {
+				const response = await client.post(
+					productCategoriesEndpoint,
+					payload
+				);
+				categoryId = response.data.id;
+			} else {
+				categoryId = category.data[ 0 ].id;
 			}
 		}
 		return categoryId;
