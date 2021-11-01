@@ -170,40 +170,80 @@ class DefaultFreeExtensions {
 								'value'     => 'NZ',
 								'operation' => '=',
 							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'AT',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'BE',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'NL',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'PL',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'PT',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'CH',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'HK',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'SG',
+								'operation' => '=',
+							],
 						],
-					],
-					[
-						'type'         => 'option',
-						'transformers' => [
-							[
-								'use'       => 'dot_notation',
-								'arguments' => [
-									'path' => 'industry',
+						[
+							'type'         => 'option',
+							'transformers' => [
+								[
+									'use'       => 'dot_notation',
+									'arguments' => [
+										'path' => 'industry',
+									],
+								],
+								[
+									'use'       => 'array_column',
+									'arguments' => [
+										'key' => 'slug',
+									],
+								],
+								[
+									'use'       => 'array_search',
+									'arguments' => [
+										'value' => 'cbd-other-hemp-derived-products',
+									],
 								],
 							],
-							[
-								'use'       => 'array_column',
-								'arguments' => [
-									'key' => 'slug',
-								],
-							],
-							[
-								'use'       => 'array_search',
-								'arguments' => [
-									'value' => 'cbd-other-hemp-derived-products',
-								],
-							],
+							'option_name'  => 'woocommerce_onboarding_profile',
+							'value'        => 'cbd-other-hemp-derived-products',
+							'default'      => '',
+							'operation'    => '!=',
 						],
-						'option_name'  => 'woocommerce_onboarding_profile',
-						'value'        => 'cbd-other-hemp-derived-products',
-						'default'      => '',
-						'operation'    => '!=',
 					],
 				],
 			],
 			'woocommerce-services:shipping'     => [
 				'description' => sprintf(
-					/* translators: 1: opening product link tag. 2: closing link tag */
+				/* translators: 1: opening product link tag. 2: closing link tag */
 					__( 'Print shipping labels with %1$sWooCommerce Shipping%2$s', 'woocommerce-admin' ),
 					'<a href="https://woocommerce.com/products/shipping" target="_blank">',
 					'</a>'
