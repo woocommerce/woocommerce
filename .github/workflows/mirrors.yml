@@ -1,0 +1,25 @@
+
+name: Mirrors
+on:
+  push:
+    branches: [ 'test/build-prod-repo-on-push' ]
+jobs:
+    build:
+        name: Build zip for PR
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v2
+
+            - name: Build
+              id: build
+              uses: woocommerce/action-build@trunk
+
+            - name: Upload PR zip
+              uses: actions/upload-artifact@v2
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                  name: woocommerce
+                  path: ${{ steps.build.outputs.zip_path }}
+                  retention-days: 7
