@@ -499,8 +499,30 @@ class Checkout extends AbstractCartRoute {
 		 *
 		 * @param \WC_Order $order Order object.
 		 * @param \WP_REST_Request $request Full details about the request.
+		 *
+		 * @deprecated 6.3.0 Use woocommerce_blocks_checkout_update_order_from_request instead.
 		 */
-		do_action( '__experimental_woocommerce_blocks_checkout_update_order_from_request', $this->order, $request );
+		do_action_deprecated(
+			'__experimental_woocommerce_blocks_checkout_update_order_from_request',
+			array(
+				$this->order,
+				$request,
+			),
+			'6.3.0',
+			'woocommerce_blocks_checkout_update_order_from_request',
+			'This action was deprecated in WooCommerce Blocks version 6.3.0. Please use woocommerce_blocks_checkout_update_order_from_request instead.'
+		);
+
+		/**
+		 * Fires when the Checkout Block/Store API updates an order's from the API request data.
+		 *
+		 * This hook gives extensions the chance to update orders based on the data in the request. This can be used in
+		 * conjunction with the ExtendRestAPI class to post custom data and then process it.
+		 *
+		 * @param \WC_Order $order Order object.
+		 * @param \WP_REST_Request $request Full details about the request.
+		 */
+		do_action( 'woocommerce_blocks_checkout_update_order_from_request', $this->order, $request );
 
 		$this->order->save();
 	}
