@@ -37,6 +37,7 @@ jobs:
           pnpm install jest
           
       - name: Run smoke test.
+        working-directory: package/woocommerce/plugins/woocommerce
         env:
           SMOKE_TEST_URL: ${{ secrets.SMOKE_TEST_URL }}
           SMOKE_TEST_ADMIN_USER: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
@@ -54,6 +55,5 @@ jobs:
           USER_KEY: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
           USER_SECRET: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
         run: |
-          pnpx wc-e2e test:e2e ../package/woocommerce/plugins/woocommerce/tests/e2e/specs/smoke-tests/update-woocommerce.js
           pnpx wc-e2e test:e2e
           pnpx wc-api-tests test api
