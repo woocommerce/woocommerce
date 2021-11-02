@@ -1,0 +1,4 @@
+Significance: minor
+Type: Tweak
+
+Avoid caching extended info #7819

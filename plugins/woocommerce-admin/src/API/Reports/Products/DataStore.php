@@ -360,8 +360,6 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				return $data;
 			}
 
-			$this->include_extended_info( $product_data, $query_args );
-
 			$product_data = array_map( array( $this, 'cast_numbers' ), $product_data );
 			$data         = (object) array(
 				'data'    => $product_data,
@@ -372,6 +370,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 			$this->set_cached_data( $cache_key, $data );
 		}
+
+		$this->include_extended_info( $data->data, $query_args );
 
 		return $data;
 	}
