@@ -1,5 +1,11 @@
 name: Smoke test daily
 on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Added just to test the action manually. Should be removed once everything is working.'
+        required: false
+        default: ''
   schedule:
     - cron: '25 3 * * *'
 jobs:
