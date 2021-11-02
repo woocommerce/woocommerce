@@ -1,6 +1,9 @@
-== 2.8.0 10/14/2021 ==
+== 2.8.0 11/02/2021 ==
 
 - Add: Store Profiler and Product task - include Subscriptions #7734
+- Fix: Fix issue where stock activity panel was not rendering correctly. #7817
+- Fix: Increase CSS specificity to avoid conflicts and broken panel styling. #7813
+- Fix: Updated link to WooCommerce Developers Blog in readme.txt #7824
 - Fix: Fixed navigation menu text color after Gutenberg 11.6.0 #7771
 - Fix: Add status param to notes/delete/all REST endpoint, to correctly delete all notes. #7743
 - Fix: Allow already installed marketing extensions to be activated #7740
@@ -13,7 +16,9 @@
 - Update: Update back up copy of free extension for Google Listing & Ads plugin. #7798
 - Update: Update Eway payment gateway capitalization (was eWAY). #7678
 - Update: Enable Square in France. #7679
+- Update: Update WC pay supported country list for the default free extensions. #7873
 - Enhancement: Add experiment for promoting WooCommerce Payments in payment methods table. #7666
+- Performance: Only load tasks during rest api requests #7856
 
 == 2.7.2 10/11/2021 ==
 

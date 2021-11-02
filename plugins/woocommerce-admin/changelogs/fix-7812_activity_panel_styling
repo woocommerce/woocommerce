@@ -1,4 +1,0 @@
-Significance: patch
-Type: Fix
-
-Increase CSS specificity to avoid conflicts and broken panel styling. #7813
