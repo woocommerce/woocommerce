@@ -53,10 +53,37 @@ class BlockTemplatesController {
 			return $query_result;
 		}
 
+		$post_type      = isset( $query['post_type'] ) ? $query['post_type'] : '';
 		$template_files = $this->get_block_templates();
 
+		// @todo: Add apply_filters to _gutenberg_get_template_files() in Gutenberg to prevent duplication of logic.
 		foreach ( $template_files as $template_file ) {
-			$query_result[] = BlockTemplateUtils::gutenberg_build_template_result_from_file( $template_file, 'wp_template' );
+			$template = BlockTemplateUtils::gutenberg_build_template_result_from_file( $template_file, 'wp_template' );
+
+			if ( $post_type && ! $template->is_custom ) {
+				continue;
+			}
+
+			if ( $post_type &&
+				isset( $template->post_types ) &&
+				! in_array( $post_type, $template->post_types, true )
+			) {
+				continue;
+			}
+
+			$is_not_custom   = false === array_search(
+				wp_get_theme()->get_stylesheet() . '//' . $template_file['slug'],
+				array_column( $query_result, 'id' ),
+				true
+			);
+			$fits_slug_query =
+				! isset( $query['slug__in'] ) || in_array( $template_file['slug'], $query['slug__in'], true );
+			$fits_area_query =
+				! isset( $query['area'] ) || $template_file['area'] === $query['area'];
+			$should_include  = $is_not_custom && $fits_slug_query && $fits_area_query;
+			if ( $should_include ) {
+				$query_result[] = $template;
+			}
 		}
 
 		return $query_result;
@@ -84,7 +111,7 @@ class BlockTemplatesController {
 			}
 
 			$new_template_item = array(
-				'title' => ucwords( str_replace( '-', ' ', $template_slug ) ),
+				'title' => BlockTemplateUtils::convert_slug_to_title( $template_slug ),
 				'slug'  => $template_slug,
 				'path'  => $template_file,
 				'theme' => get_template_directory(),
@@ -92,7 +119,6 @@ class BlockTemplatesController {
 			);
 			$templates[]       = $new_template_item;
 		}
-
 		return $templates;
 	}
 
@@ -135,6 +161,18 @@ class BlockTemplatesController {
 			is_singular( 'product' ) &&
 			! $this->theme_has_template( 'single-product' ) &&
 			$this->default_block_template_is_available( 'single-product' )
+		) {
+			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
+		} elseif (
+			is_tax() &&
+			! $this->theme_has_template( 'taxonomy-product_cat' ) &&
+			$this->default_block_template_is_available( 'taxonomy-product_cat' )
+		) {
+			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
+		} elseif (
+			( is_post_type_archive( 'product' ) || is_page( wc_get_page_id( 'shop' ) ) ) &&
+			! $this->theme_has_template( 'archive-product' ) &&
+			$this->default_block_template_is_available( 'archive-product' )
 		) {
 			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
 		}

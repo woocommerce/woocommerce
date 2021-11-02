@@ -93,7 +93,7 @@ class BlockTemplateUtils {
 		$template->theme          = $theme;
 		$template->content        = self::gutenberg_inject_theme_attribute_in_content( $template_content );
 		$template->slug           = $template_file['slug'];
-		$template->source         = 'theme';
+		$template->source         = 'woocommerce';
 		$template->type           = $template_type;
 		$template->title          = ! empty( $template_file['title'] ) ? $template_file['title'] : $template_file['slug'];
 		$template->status         = 'publish';
@@ -127,5 +127,25 @@ class BlockTemplateUtils {
 			}
 		}
 		return $path_list;
+	}
+
+	/**
+	 * Converts template slugs into readable titles.
+	 *
+	 * @param string $template_slug The templates slug (e.g. single-product).
+	 * @return string Human friendly title converted from the slug.
+	 */
+	public static function convert_slug_to_title( $template_slug ) {
+		switch ( $template_slug ) {
+			case 'single-product':
+				return __( 'Single Product Page', 'woo-gutenberg-products-block' );
+			case 'archive-product':
+				return __( 'Product Archive Page', 'woo-gutenberg-products-block' );
+			case 'taxonomy-product_cat':
+				return __( 'Product Taxonomy Page', 'woo-gutenberg-products-block' );
+			default:
+				// Replace all hyphens and underscores with spaces.
+				return ucwords( preg_replace( '/[\-_]/', ' ', $template_slug ) );
+		}
 	}
 }
