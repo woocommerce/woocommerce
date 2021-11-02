@@ -1,11 +1,5 @@
 name: Smoke test daily
 on:
-  workflow_dispatch:
-    inputs:
-      ref:
-        description: 'Added just to test the action manually. Should be removed once everything is working.'
-        required: false
-        default: ''
   schedule:
     - cron: '25 3 * * *'
 jobs:
@@ -55,6 +49,6 @@ jobs:
           USER_KEY: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
           USER_SECRET: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
         run: |
-          pnpx wc-e2e test:e2e ./tests/e2e/specs/smoke-tests/update-woocommerce.js
+          pnpx wc-e2e test:e2e plugins/woocommerce/tests/e2e/specs/smoke-tests/update-woocommerce.js
           pnpx wc-e2e test:e2e
           pnpx wc-api-tests test api
