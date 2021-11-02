@@ -28,7 +28,7 @@ jobs:
           ref: trunk
 
       - name: Install prerequisites.
-        working-directory: package/woocommerce
+        working-directory: package/woocommerce/plugins/woocommerce
         run: |
           npm install -g pnpm
           pnpm install
