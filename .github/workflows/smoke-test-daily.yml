@@ -1,5 +1,11 @@
 name: Smoke test daily
 on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Added just to test the action manually. Should be removed once everything is working.'
+        required: false
+        default: ''
   schedule:
     - cron: '25 3 * * *'
 jobs:
@@ -18,16 +24,20 @@ jobs:
       - name: Checkout code.
         uses: actions/checkout@v2
         with:
+          path: package/woocommerce
           ref: trunk
 
       - name: Install prerequisites.
+        working-directory: package/woocommerce
         run: |
-          npm install
+          npm install -g pnpm
+          pnpm install
           composer install --no-dev
-          npm run build:assets
-          npm install jest
+          pnpm run build:assets
+          pnpm install jest
           
       - name: Run smoke test.
+        working-directory: package/woocommerce/plugins/woocommerce
         env:
           SMOKE_TEST_URL: ${{ secrets.SMOKE_TEST_URL }}
           SMOKE_TEST_ADMIN_USER: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
@@ -45,6 +55,6 @@ jobs:
           USER_KEY: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
           USER_SECRET: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
         run: |
-          npx wc-e2e test:e2e ./tests/e2e/specs/smoke-tests/update-woocommerce.js
-          npx wc-e2e test:e2e
-          npx wc-api-tests test api
+          pnpx wc-e2e test:e2e ./tests/e2e/specs/smoke-tests/update-woocommerce.js
+          pnpx wc-e2e test:e2e
+          pnpx wc-api-tests test api
