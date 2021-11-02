@@ -28,6 +28,11 @@ jobs:
         runs-on: ubuntu-latest
         needs: [build]
         steps:
+            - name: Checkout monorepo
+              uses: actions/checkout@v2
+              with:
+                  path: monorepo
+
             - name: Download WooCommerce ZIP
               uses: actions/download-artifact@v2
               with:
@@ -39,8 +44,8 @@ jobs:
               run: |
                   unzip woocommerce.zip -d woocommerce
                   
-            - name: Extract WooCommerce ZIP
+            - name: Push to mirror
               id: build
               env:
                 PATH: tmp
-              run: .github/scripts/mirrors.sh
+              run: monorepo/.github/scripts/mirrors.sh
