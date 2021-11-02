@@ -35,6 +35,7 @@ const Item = ( { item } ) => {
 			key={ item.id }
 			item={ item.id }
 			title={ item.title }
+			badge={ item.badge ? item.badge : null }
 			href={ item.url }
 			navigateToMenu={ ! item.url && item.id }
 			onClick={ () => trackClick( item.id ) }
