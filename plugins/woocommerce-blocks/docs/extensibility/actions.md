@@ -7,7 +7,6 @@
 ## Table of Contents
 
 
- - [__experimental_woocommerce_blocks_checkout_order_processed](#__experimental_woocommerce_blocks_checkout_order_processed)
  - [__experimental_woocommerce_blocks_checkout_update_order_from_request](#__experimental_woocommerce_blocks_checkout_update_order_from_request)
  - [__experimental_woocommerce_blocks_checkout_update_order_meta](#__experimental_woocommerce_blocks_checkout_update_order_meta)
  - [woocommerce_add_to_cart](#woocommerce_add_to_cart)
@@ -15,6 +14,7 @@
  - [woocommerce_blocks_cart_enqueue_data](#woocommerce_blocks_cart_enqueue_data)
  - [woocommerce_blocks_cart_enqueue_data](#woocommerce_blocks_cart_enqueue_data-1)
  - [woocommerce_blocks_checkout_enqueue_data](#woocommerce_blocks_checkout_enqueue_data)
+ - [woocommerce_blocks_checkout_order_processed](#woocommerce_blocks_checkout_order_processed)
  - [woocommerce_blocks_enqueue_cart_block_scripts_after](#woocommerce_blocks_enqueue_cart_block_scripts_after)
  - [woocommerce_blocks_enqueue_cart_block_scripts_before](#woocommerce_blocks_enqueue_cart_block_scripts_before)
  - [woocommerce_blocks_enqueue_checkout_block_scripts_after](#woocommerce_blocks_enqueue_checkout_block_scripts_after)
@@ -27,53 +27,6 @@
  - [woocommerce_rest_checkout_process_payment_with_context](#woocommerce_rest_checkout_process_payment_with_context)
  - [wooocommerce_store_api_validate_add_to_cart](#wooocommerce_store_api_validate_add_to_cart)
  - [wooocommerce_store_api_validate_cart_item](#wooocommerce_store_api_validate_cart_item)
-
----
-
-## __experimental_woocommerce_blocks_checkout_order_processed
-
-
-Fires before an order is processed by the Checkout Block/Store API.
-
-```php
-do_action( '__experimental_woocommerce_blocks_checkout_order_processed', \WC_Order $order )
-```
-
-
-**Note: This Hook is experimental and may change or be removed.**
-
-### Description
-
-<p>This hook informs extensions that $order has completed processing and is ready for payment.</p> <p>This is similar to existing core hook woocommerce_checkout_order_processed. We're using a new action:</p> <ul> <li>To keep the interface focused (only pass $order, not passing request data).</li> <li>This also explicitly indicates these orders are from checkout block/StoreAPI.</li> </ul>
-
-### Parameters
-
-| Argument | Type | Description |
-| -------- | ---- | ----------- |
-| $order | \WC_Order | Order object. |
-
-### Example
-
-```php
-// The action callback function.
-function my_function_callback( $order ) {
-  // Do something with the $order object.
-  $order->save();
-}
-
-add_action( '__experimental_woocommerce_blocks_checkout_order_processed', 'my_function_callback', 10 );
-```
-
-
-### Related
-
-
- - https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3238
-
-### Source
-
-
-File: [StoreApi/Routes/Checkout.php](../src/StoreApi/Routes/Checkout.php)
 
 ---
 
@@ -239,6 +192,50 @@ do_action( 'woocommerce_blocks_checkout_enqueue_data' )
 
 
 File: [BlockTypes/Checkout.php](../src/BlockTypes/Checkout.php)
+
+---
+
+## woocommerce_blocks_checkout_order_processed
+
+
+Fires before an order is processed by the Checkout Block/Store API.
+
+```php
+do_action( 'woocommerce_blocks_checkout_order_processed', \WC_Order $order )
+```
+
+### Description
+
+<p>This hook informs extensions that $order has completed processing and is ready for payment.</p> <p>This is similar to existing core hook woocommerce_checkout_order_processed. We're using a new action:</p> <ul> <li>To keep the interface focused (only pass $order, not passing request data).</li> <li>This also explicitly indicates these orders are from checkout block/StoreAPI.</li> </ul>
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $order | \WC_Order | Order object. |
+
+### Example
+
+```php
+// The action callback function.
+function my_function_callback( $order ) {
+  // Do something with the $order object.
+  $order->save();
+}
+
+add_action( 'woocommerce_blocks_checkout_order_processed', 'my_function_callback', 10 );
+```
+
+
+### Related
+
+
+ - https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3238
+
+### Source
+
+
+File: [StoreApi/Routes/Checkout.php](../src/StoreApi/Routes/Checkout.php)
 
 ---
 
