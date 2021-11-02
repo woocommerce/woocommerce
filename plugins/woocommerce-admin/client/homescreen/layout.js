@@ -71,9 +71,6 @@ export const Layout = ( {
 	const shouldShowStoreLinks = taskListComplete || isTaskListHidden;
 	const hasTwoColumnContent =
 		shouldShowStoreLinks || window.wcAdminFeatures.analytics;
-	const twoColumns =
-		( userPrefs.homepage_layout || defaultHomescreenLayout ) ===
-			'two_columns' && hasTwoColumnContent;
 	const [ showInbox, setShowInbox ] = useState( true );
 
 	const isTaskListEnabled = bothTaskListsHidden === false;
@@ -91,8 +88,41 @@ export const Layout = ( {
 			momentDate.format( 'MM' )
 	);
 
-	const isRunningTwoColumnExperiment =
+	const isRunningTaskListExperiment =
 		experimentAssignment?.variationName === 'treatment';
+
+	const [
+		isLoadingTwoColExperimentAssignment,
+		twoColExperimentAssignment,
+	] = useExperiment(
+		'woocommerce_tasklist_progression_headercard_2col_' +
+			momentDate.format( 'YYYY' ) +
+			'_' +
+			momentDate.format( 'MM' )
+	);
+
+	const isRunningTwoColumnExperiment =
+		twoColExperimentAssignment?.variationName === 'treatment';
+
+	// Override defaultHomescreenLayout if store is in the experiment.
+	const defaultHomescreenLayoutOverride = () => {
+		if (
+			isLoadingExperimentAssignment ||
+			isLoadingTwoColExperimentAssignment
+		) {
+			return defaultHomescreenLayout; // Experiments are still loading, don't override.;
+		}
+
+		if ( ! isRunningTaskListExperiment ) {
+			return defaultHomescreenLayout; // Not in the experiment, don't override.
+		}
+
+		return isRunningTwoColumnExperiment ? 'two_columns' : 'single_column';
+	};
+
+	const twoColumns =
+		( userPrefs.homepage_layout || defaultHomescreenLayoutOverride() ) ===
+			'two_columns' && hasTwoColumnContent;
 
 	if ( isBatchUpdating && ! showInbox ) {
 		setShowInbox( true );
@@ -118,7 +148,7 @@ export const Layout = ( {
 		return (
 			<>
 				<Column shouldStick={ shouldStickColumns }>
-					{ ! isRunningTwoColumnExperiment && (
+					{ ! isRunningTaskListExperiment && (
 						<ActivityHeader
 							className="your-store-today"
 							title={ __(
@@ -131,7 +161,7 @@ export const Layout = ( {
 							) }
 						/>
 					) }
-					{ ! isRunningTwoColumnExperiment && <ActivityPanel /> }
+					{ ! isRunningTaskListExperiment && <ActivityPanel /> }
 					{ isTaskListEnabled && renderTaskList() }
 					<InboxPanel />
 				</Column>
@@ -144,7 +174,7 @@ export const Layout = ( {
 	};
 
 	const renderTaskList = () => {
-		if ( twoColumns && isRunningTwoColumnExperiment ) {
+		if ( twoColumns && isRunningTaskListExperiment ) {
 			return (
 				// When running the two-column experiment, we still need to render
 				// the component in the left column for the extended task list.
@@ -152,7 +182,7 @@ export const Layout = ( {
 			);
 		} else if (
 			! twoColumns &&
-			isRunningTwoColumnExperiment &&
+			isRunningTaskListExperiment &&
 			! isLoadingExperimentAssignment
 		) {
 			return (
@@ -176,7 +206,7 @@ export const Layout = ( {
 
 	return (
 		<>
-			{ twoColumns && isRunningTwoColumnExperiment && (
+			{ twoColumns && isRunningTaskListExperiment && (
 				<TwoColumnTasks
 					query={ query }
 					userPreferences={ userPrefs }
