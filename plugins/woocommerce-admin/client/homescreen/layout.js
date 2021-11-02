@@ -177,7 +177,11 @@ export const Layout = ( {
 	return (
 		<>
 			{ twoColumns && isRunningTwoColumnExperiment && (
-				<TwoColumnTasks query={ query } userPreferences={ userPrefs } />
+				<TwoColumnTasks
+					query={ query }
+					userPreferences={ userPrefs }
+					twoColumns={ twoColumns }
+				/>
 			) }
 			<div
 				className={ classnames( 'woocommerce-homescreen', {

@@ -1,12 +1,23 @@
 /**
+ * External dependencies
+ */
+import classnames from 'classnames';
+
+/**
  * Internal dependencies
  */
 import './style.scss';
 
 const TaskListPlaceholder = ( props ) => {
-	const { numTasks = 5 } = props;
+	const { numTasks = 5, twoColumns = false } = props;
+
 	return (
-		<div className="woocommerce-task-dashboard__container two-column-experiment two-columns">
+		<div
+			className={ classnames( 'woocommerce-task-dashboard__container', {
+				'two-columns': twoColumns,
+				'two-column-experiment': true,
+			} ) }
+		>
 			<div className="components-card is-size-large woocommerce-task-card woocommerce-homescreen-card is-loading">
 				<div className="components-card__header is-size-medium">
 					<div className="wooocommerce-task-card__header">
