@@ -2,39 +2,6 @@
     "$schema": "https://raw.githubusercontent.com/johnbillion/wp-hooks-generator/0.6.1/schema.json",
     "hooks": [
         {
-            "name": "__experimental_woocommerce_blocks_checkout_order_processed",
-            "file": "StoreApi/Routes/Checkout.php",
-            "type": "action",
-            "doc": {
-                "description": "Fires before an order is processed by the Checkout Block/Store API.",
-                "long_description": "This hook informs extensions that $order has completed processing and is ready for payment.\n This is similar to existing core hook woocommerce_checkout_order_processed. We're using a new action: - To keep the interface focused (only pass $order, not passing request data). - This also explicitly indicates these orders are from checkout block/StoreAPI.",
-                "tags": [
-                    {
-                        "name": "see",
-                        "content": "",
-                        "refers": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3238"
-                    },
-                    {
-                        "name": "example",
-                        "content": "docs/examples/checkout-order-processed.md"
-                    },
-                    {
-                        "name": "internal",
-                        "content": "This Hook is experimental and may change or be removed."
-                    },
-                    {
-                        "name": "param",
-                        "content": "Order object.",
-                        "types": [
-                            "\\WC_Order"
-                        ],
-                        "variable": "$order"
-                    }
-                ],
-                "long_description_html": "<p>This hook informs extensions that $order has completed processing and is ready for payment.</p> <p>This is similar to existing core hook woocommerce_checkout_order_processed. We're using a new action:</p> <ul> <li>To keep the interface focused (only pass $order, not passing request data).</li> <li>This also explicitly indicates these orders are from checkout block/StoreAPI.</li> </ul>"
-            }
-        },
-        {
             "name": "__experimental_woocommerce_blocks_checkout_update_order_from_request",
             "file": "StoreApi/Routes/Checkout.php",
             "type": "action",
@@ -206,6 +173,35 @@
                 "long_description": "",
                 "tags": [],
                 "long_description_html": ""
+            }
+        },
+        {
+            "name": "woocommerce_blocks_checkout_order_processed",
+            "file": "StoreApi/Routes/Checkout.php",
+            "type": "action",
+            "doc": {
+                "description": "Fires before an order is processed by the Checkout Block/Store API.",
+                "long_description": "This hook informs extensions that $order has completed processing and is ready for payment.\n This is similar to existing core hook woocommerce_checkout_order_processed. We're using a new action: - To keep the interface focused (only pass $order, not passing request data). - This also explicitly indicates these orders are from checkout block/StoreAPI.",
+                "tags": [
+                    {
+                        "name": "see",
+                        "content": "",
+                        "refers": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3238"
+                    },
+                    {
+                        "name": "example",
+                        "content": "docs/examples/checkout-order-processed.md"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Order object.",
+                        "types": [
+                            "\\WC_Order"
+                        ],
+                        "variable": "$order"
+                    }
+                ],
+                "long_description_html": "<p>This hook informs extensions that $order has completed processing and is ready for payment.</p> <p>This is similar to existing core hook woocommerce_checkout_order_processed. We're using a new action:</p> <ul> <li>To keep the interface focused (only pass $order, not passing request data).</li> <li>This also explicitly indicates these orders are from checkout block/StoreAPI.</li> </ul>"
             }
         },
         {
