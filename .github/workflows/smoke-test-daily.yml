@@ -55,6 +55,6 @@ jobs:
           USER_KEY: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
           USER_SECRET: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
         run: |
-          pnpx wc-e2e test:e2e tests/e2e/specs/smoke-tests/update-woocommerce.js
+          pnpx wc-e2e test:e2e ./tests/e2e/specs/smoke-tests/update-woocommerce.js
           pnpx wc-e2e test:e2e
           pnpx wc-api-tests test api
