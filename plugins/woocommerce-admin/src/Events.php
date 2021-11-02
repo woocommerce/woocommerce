@@ -50,6 +50,8 @@ use \Automattic\WooCommerce\Admin\Notes\DrawAttention;
 use \Automattic\WooCommerce\Admin\Notes\GettingStartedInEcommerceWebinar;
 use \Automattic\WooCommerce\Admin\Notes\NavigationNudge;
 use Automattic\WooCommerce\Admin\Schedulers\MailchimpScheduler;
+use \Automattic\WooCommerce\Admin\Notes\CompleteStoreDetails;
+use \Automattic\WooCommerce\Admin\Notes\UpdateStoreDetails;
 
 /**
  * Events Class.
@@ -151,6 +153,8 @@ class Events {
 		GettingStartedInEcommerceWebinar::possibly_add_note();
 		FirstDownlaodableProduct::possibly_add_note();
 		NavigationNudge::possibly_add_note();
+		CompleteStoreDetails::possibly_add_note();
+		UpdateStoreDetails::possibly_add_note();
 	}
 
 	/**
