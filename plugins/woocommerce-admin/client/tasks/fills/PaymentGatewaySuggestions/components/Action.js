@@ -107,18 +107,16 @@ export const Action = ( {
 
 	if ( isInstalled && hasPlugins ) {
 		return (
-			<div>
-				<Button
-					className={ classes }
-					isPrimary={ isRecommended }
-					isSecondary={ ! isRecommended }
-					isBusy={ isBusy }
-					disabled={ isBusy }
-					onClick={ () => handleClick() }
-				>
-					{ __( 'Finish setup', 'woocommerce-admin' ) }
-				</Button>
-			</div>
+			<Button
+				className={ classes }
+				isPrimary={ isRecommended }
+				isSecondary={ ! isRecommended }
+				isBusy={ isBusy }
+				disabled={ isBusy }
+				onClick={ () => handleClick() }
+			>
+				{ __( 'Finish setup', 'woocommerce-admin' ) }
+			</Button>
 		);
 	}
 

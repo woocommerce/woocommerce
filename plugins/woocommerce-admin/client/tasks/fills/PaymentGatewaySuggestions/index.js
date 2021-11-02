@@ -169,7 +169,8 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 
 					// WCPay is handled separately when not installed and configured
 					if (
-						gateway.id === 'woocommerce_payments' &&
+						gateway.plugins?.length === 1 &&
+						gateway.plugins[ 0 ] === 'woocommerce-payments' &&
 						! ( gateway.installed && ! gateway.needsSetup )
 					) {
 						wcPay.push( gateway );
