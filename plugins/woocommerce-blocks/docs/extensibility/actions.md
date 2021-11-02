@@ -7,7 +7,6 @@
 ## Table of Contents
 
 
- - [__experimental_woocommerce_blocks_checkout_update_order_meta](#__experimental_woocommerce_blocks_checkout_update_order_meta)
  - [woocommerce_add_to_cart](#woocommerce_add_to_cart)
  - [woocommerce_applied_coupon](#woocommerce_applied_coupon)
  - [woocommerce_blocks_cart_enqueue_data](#woocommerce_blocks_cart_enqueue_data)
@@ -15,6 +14,7 @@
  - [woocommerce_blocks_checkout_enqueue_data](#woocommerce_blocks_checkout_enqueue_data)
  - [woocommerce_blocks_checkout_order_processed](#woocommerce_blocks_checkout_order_processed)
  - [woocommerce_blocks_checkout_update_order_from_request](#woocommerce_blocks_checkout_update_order_from_request)
+ - [woocommerce_blocks_checkout_update_order_meta](#woocommerce_blocks_checkout_update_order_meta)
  - [woocommerce_blocks_enqueue_cart_block_scripts_after](#woocommerce_blocks_enqueue_cart_block_scripts_after)
  - [woocommerce_blocks_enqueue_cart_block_scripts_before](#woocommerce_blocks_enqueue_cart_block_scripts_before)
  - [woocommerce_blocks_enqueue_checkout_block_scripts_after](#woocommerce_blocks_enqueue_checkout_block_scripts_after)
@@ -27,40 +27,6 @@
  - [woocommerce_rest_checkout_process_payment_with_context](#woocommerce_rest_checkout_process_payment_with_context)
  - [wooocommerce_store_api_validate_add_to_cart](#wooocommerce_store_api_validate_add_to_cart)
  - [wooocommerce_store_api_validate_cart_item](#wooocommerce_store_api_validate_cart_item)
-
----
-
-## __experimental_woocommerce_blocks_checkout_update_order_meta
-
-
-Fires when the Checkout Block/Store API updates an order's meta data.
-
-```php
-do_action( '__experimental_woocommerce_blocks_checkout_update_order_meta', \WC_Order $order )
-```
-
-
-**Note: This Hook is experimental and may change or be removed.**
-
-### Description
-
-<p>This hook gives extensions the chance to add or update meta data on the $order.</p> <p>This is similar to existing core hook woocommerce_checkout_update_order_meta. We're using a new action:</p> <ul> <li>To keep the interface focused (only pass $order, not passing request data).</li> <li>This also explicitly indicates these orders are from checkout block/StoreAPI.</li> </ul>
-
-### Parameters
-
-| Argument | Type | Description |
-| -------- | ---- | ----------- |
-| $order | \WC_Order | Order object. |
-
-### Related
-
-
- - https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3686
-
-### Source
-
-
-File: [StoreApi/Routes/Checkout.php](../src/StoreApi/Routes/Checkout.php)
 
 ---
 
@@ -129,7 +95,7 @@ do_action( 'woocommerce_blocks_cart_enqueue_data' )
 ### Source
 
 
-File: [BlockTypes/MiniCart.php](../src/BlockTypes/MiniCart.php)
+File: [BlockTypes/Cart.php](../src/BlockTypes/Cart.php)
 
 ---
 
@@ -145,7 +111,7 @@ do_action( 'woocommerce_blocks_cart_enqueue_data' )
 ### Source
 
 
-File: [BlockTypes/Cart.php](../src/BlockTypes/Cart.php)
+File: [BlockTypes/MiniCart.php](../src/BlockTypes/MiniCart.php)
 
 ---
 
@@ -228,6 +194,37 @@ do_action( 'woocommerce_blocks_checkout_update_order_from_request', \WC_Order $o
 | -------- | ---- | ----------- |
 | $order | \WC_Order | Order object. |
 | $request | \WP_REST_Request | Full details about the request. |
+
+### Source
+
+
+File: [StoreApi/Routes/Checkout.php](../src/StoreApi/Routes/Checkout.php)
+
+---
+
+## woocommerce_blocks_checkout_update_order_meta
+
+
+Fires when the Checkout Block/Store API updates an order's meta data.
+
+```php
+do_action( 'woocommerce_blocks_checkout_update_order_meta', \WC_Order $order )
+```
+
+### Description
+
+<p>This hook gives extensions the chance to add or update meta data on the $order.</p> <p>This is similar to existing core hook woocommerce_checkout_update_order_meta. We're using a new action:</p> <ul> <li>To keep the interface focused (only pass $order, not passing request data).</li> <li>This also explicitly indicates these orders are from checkout block/StoreAPI.</li> </ul>
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $order | \WC_Order | Order object. |
+
+### Related
+
+
+ - https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3686
 
 ### Source
 
