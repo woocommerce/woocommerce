@@ -1,2 +1,2 @@
-echo "$BUILD_BASE is folder where the magic happens"
+echo "$PATH is folder where the magic happens"
 ls tmp/
