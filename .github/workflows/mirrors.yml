@@ -33,8 +33,6 @@ jobs:
 
             - name: Checkout monorepo
               uses: actions/checkout@v2
-              with:
-                  path: monorepo
 
             - name: Download WooCommerce ZIP
               uses: actions/download-artifact@v2
@@ -48,7 +46,6 @@ jobs:
                   unzip woocommerce.zip -d woocommerce
                   
             - name: Push to mirror
-              working-directory: monorepo
               env:
                 BUILD_BASE: tmp
               run: |
