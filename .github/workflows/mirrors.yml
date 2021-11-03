@@ -51,6 +51,7 @@ jobs:
                   touch $BUILD_BASE/mirrors.txt
                   echo "woocommerce/woocommerce-production" >> $BUILD_BASE/mirrors.txt
                   mv $BUILD_BASE/woocommerce $BUILD_BASE/woocommerce-production
+                  GIT_SLUG=woocommerce-production
                   
             - name: Push to mirror
               uses: Automattic/action-push-to-mirrors@v1
@@ -59,5 +60,4 @@ jobs:
                   token: ${{ secrets.API_TOKEN_GITHUB }}
                   username: matticbot
                   working-directory: ${{ github.workspace }}/tmp/woocommerce-build
-                  GIT_SLUG: woocommerce-production
               timeout-minutes: 5  # 2021-01-18: Successful runs seem to take about half a minute.
