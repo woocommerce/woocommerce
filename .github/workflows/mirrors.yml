@@ -8,6 +8,9 @@ jobs:
         name: Push to Mirror
         runs-on: ubuntu-latest
         steps:
+            - name: Create build directory
+              run: mkdir -p tmp/woocommerce-build
+
             - name: Extract and replace WooCommerce zip.
               working-directory: tmp/woocommerce-build
               run: |
