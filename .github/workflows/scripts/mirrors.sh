@@ -19,7 +19,7 @@ git config --local user.name "${GITHUB_ACTOR}"
 git config --local user.email "${GITHUB_ACTOR}@users.noreply.github.com"
 
 echo "Adding origin: https://github.com/woocommerce/woocommerce-production"
-git remote add origin git@github.com:woocommerce/woocommerce-production.git
+git remote add origin https://github.com/woocommerce/woocommerce-production
 
 FORCE_COMMIT=
 if git -c protocol.version=2 fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 origin trunk; then
