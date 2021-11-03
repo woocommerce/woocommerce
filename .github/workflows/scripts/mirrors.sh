@@ -14,10 +14,11 @@ cd "${CLONE_DIR}"
 # Initialize the directory as a git repo, and set the remote
 echo "Initializing git"
 git init -b trunk .
-git remote -v 
 echo "Adding origin: https://github.com/woocommerce/woocommerce-production"
 git remote add origin "https://github.com/woocommerce/woocommerce-production"
 git config --local http.https://github.com/.extraheader "AUTHORIZATION: basic $(printf "x-access-token:%s" "$TOKEN" | base64)"
+git config --local user.name "${GITHUB_ACTOR}"
+git config --local user.email "${GITHUB_ACTOR}@users.noreply.github.com"
 
 FORCE_COMMIT=
 if git -c protocol.version=2 fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 origin trunk; then
@@ -31,7 +32,7 @@ git add -Af
 if [[ -n "$FORCE_COMMIT" || -n "$(git status --porcelain)" ]]; then
     echo "Committing to woocommerce/woocommerce-production"
     if git commit --quiet $FORCE_COMMIT --author="${COMMIT_ORIGINAL_AUTHOR}" -m "${COMMIT_MESSAGE}" &&
-        { [[ -z "$CI" ]] || git push origin "$BRANCH"; } # Only do the actual push from the GitHub Action
+        { [[ -z "$CI" ]] || git push origin trunk; } # Only do the actual push from the GitHub Action
     then
         git show --pretty= --src-prefix="a/woocommerce/woocommerce-production/" --dst-prefix="b/woocommerce/woocommerce-production/" >> "$BUILD_BASE/changes.diff"
         echo "https://github.com/woocommerce/woocommerce-production/commit/$(git rev-parse HEAD)"
