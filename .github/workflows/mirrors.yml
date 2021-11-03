@@ -49,4 +49,4 @@ jobs:
               env:
                 BUILD_BASE: tmp
               run: |
-                .github/scripts/mirrors.sh
+                .github/workflows/scripts/mirrors.sh
