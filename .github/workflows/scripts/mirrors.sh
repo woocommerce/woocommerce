@@ -7,13 +7,14 @@ echo "$MONOREPO_COMMIT_MESSAGE"
 COMMIT_MESSAGE=$( printf "%s\n\nCommitted via a GitHub action: https://github.com/%s/actions/runs/%s\n" "$MONOREPO_COMMIT_MESSAGE" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID" )
 echo "$COMMIT_MESSAGE"
 
-CLONE_DIR="${BUILD_BASE}/woocommerce}"
+CLONE_DIR="${BUILD_BASE}/woocommerce"
 echo "navigation to ${CLONE_DIR}"
 cd "${CLONE_DIR}"
 
 # Initialize the directory as a git repo, and set the remote
 echo "Initializing git"
 git init -b trunk .
+git remote -v 
 echo "Adding origin: https://github.com/woocommerce/woocommerce-production"
 git remote add origin "https://github.com/woocommerce/woocommerce-production"
 git config --local http.https://github.com/.extraheader "AUTHORIZATION: basic $(printf "x-access-token:%s" "$TOKEN" | base64)"
