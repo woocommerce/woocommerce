@@ -7,7 +7,7 @@ const {
 	getRequest,
 	putRequest,
 } = require( '../utils/request' );
-const productsTestSetup = require( './products' );
+const productsTestSetup = require( './product-list' );
 const { ordersApi } = require( '../endpoints/orders' );
 
 const createCustomer = ( data ) => postRequest( 'customers', data );
