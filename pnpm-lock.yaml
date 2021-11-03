@@ -4,6 +4,7 @@ importers:
 
   .:
     specifiers:
+      '@automattic/nx-composer': ^0.1.0
       '@babel/core': 7.12.9
       '@nrwl/cli': 12.10.0
       '@nrwl/tao': 12.10.0
@@ -30,6 +31,7 @@ importers:
       lodash: 4.17.21
       wp-textdomain: 1.0.1
     devDependencies:
+      '@automattic/nx-composer': 0.1.0
       '@nrwl/cli': 12.10.0
       '@nrwl/tao': 12.10.0
       '@nrwl/workspace': 12.10.0_wp-prettier@2.2.1-beta-1
@@ -272,6 +274,12 @@ importers:
       wp-textdomain: 1.0.1
 
 packages:
+
+  /@automattic/nx-composer/0.1.0:
+    resolution: {integrity: sha512-nUyHUmIRFUv1co5gYikk1ZrYnSL1CyK0Jp+tiT1RGhtxsRlFgQHy8HagP1SJz7OiH7qOJCY9gIUrPAhzu60LUA==}
+    dependencies:
+      '@nrwl/devkit': 12.10.0
+    dev: true
 
   /@babel/cli/7.12.8_@babel+core@7.12.9:
     resolution: {integrity: sha512-/6nQj11oaGhLmZiuRUfxsujiPDc9BBReemiXgIbxc+M5W+MIiFKYwvNDJvBfnGKNsJTKbUfEheKc9cwoPHAVQA==}

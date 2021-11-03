@@ -14,8 +14,9 @@
 		"url": "https://github.com/woocommerce/woocommerce/issues"
 	},
 	"devDependencies": {
-		"@nrwl/tao": "12.10.0",
+		"@automattic/nx-composer": "^0.1.0",
 		"@nrwl/cli": "12.10.0",
+		"@nrwl/tao": "12.10.0",
 		"@nrwl/workspace": "12.10.0",
 		"@types/node": "14.14.33",
 		"@woocommerce/eslint-plugin": "^1.2.0",
