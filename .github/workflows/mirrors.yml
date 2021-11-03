@@ -50,6 +50,6 @@ jobs:
             - name: Push to mirror
               working-directory: monorepo
               env:
-                PATH: tmp
+                BUILD_BASE: tmp
               run: |
                 .github/scripts/mirrors.sh

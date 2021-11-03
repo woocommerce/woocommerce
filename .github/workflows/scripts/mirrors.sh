@@ -1,4 +1,4 @@
-echo "$PATH is folder where the magic happens"
+echo "$BUILD_BASE is folder where the magic happens"
 ls tmp/
 
 if [[ "$GITHUB_REF" =~ ^refs/heads/ ]]; then
