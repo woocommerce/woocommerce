@@ -28,6 +28,10 @@ jobs:
         runs-on: ubuntu-latest
         needs: [build]
         steps:
+             - name: Create dirs.
+              run: |
+                  mkdir -p monorepo
+
             - name: Checkout monorepo
               uses: actions/checkout@v2
               with:
@@ -45,10 +49,9 @@ jobs:
                   unzip woocommerce.zip -d woocommerce
                   
             - name: Push to mirror
-              id: build
+              working-directory: monorepo
               env:
                 PATH: tmp
               run: |
-                pwd
-                ls monorepo
-                monorepo/.github/scripts/mirrors.sh
+                ls
+                .github/scripts/mirrors.sh
