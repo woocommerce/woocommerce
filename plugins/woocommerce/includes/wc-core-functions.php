@@ -730,7 +730,7 @@ function get_woocommerce_currency_symbols() {
 			'ILS' => '&#8362;',
 			'IMP' => '&pound;',
 			'INR' => '&#8377;',
-			'IQD' => '&#x639;.&#x62f;',
+			'IQD' => '&#x62f;.&#x639;',
 			'IRR' => '&#xfdfc;',
 			'IRT' => '&#x062A;&#x0648;&#x0645;&#x0627;&#x0646;',
 			'ISK' => 'kr.',
