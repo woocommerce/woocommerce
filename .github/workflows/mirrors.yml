@@ -21,17 +21,15 @@ jobs:
             - name: Extract and replace WooCommerce zip.
               working-directory: tmp/woocommerce-build
               run: |
-                  mkdir woocommerce
-                  touch woocommerce/README.md
-                  echo "# WooCommerce Production (TEST)" >> woocommerce/README.md
+                  mkdir -p woocommerce/woocommerce-production
+                  touch woocommerce/woocommerce-production/README.md
+                  echo "# WooCommerce Production (TEST)" >> woocommerce/woocommerce-production/README.md
 
             - name: Set up for mirror
-              env:
-                BUILD_BASE: tmp/woocommerce-build
+              working-directory: tmp/woocommerce-build
               run: |
-                  touch $BUILD_BASE/mirrors.txt
-                  echo "woocommerce/woocommerce-production" >> $BUILD_BASE/mirrors.txt
-                  mv $BUILD_BASE/woocommerce $BUILD_BASE/woocommerce-production
+                  touch mirrors.txt
+                  echo "woocommerce/woocommerce-production" >> mirrors.txt
                   GIT_SLUG=woocommerce-production
                   
             - name: Push to mirror
