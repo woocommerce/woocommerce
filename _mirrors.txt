@@ -4,16 +4,45 @@ on:
   push:
     branches: [ 'test/build-prod-repo-on-push' ]
 jobs:
+    build:
+        name: Build WooCommerce zip
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v2
+
+            - name: Build
+              id: build
+              uses: woocommerce/action-build@trunk
+
+            - name: Upload PR zip
+              uses: actions/upload-artifact@v2
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                  name: woocommerce
+                  path: ${{ steps.build.outputs.zip_path }}
+                  retention-days: 7
     mirror:
         name: Push to Mirror
         runs-on: ubuntu-latest
+        needs: [build]
         steps:
+            - name: Checkout monorepo
+              uses: actions/checkout@v2
+              with:
+                  path: monorepo
+
+            - name: Download WooCommerce ZIP
+              uses: actions/download-artifact@v2
+              with:
+                  name: woocommerce
+                  path: tmp/woocommerce-build
+
             - name: Extract and replace WooCommerce zip.
               working-directory: tmp/woocommerce-build
               run: |
-                  mkdir woocommerce
-                  touch woocommerce/README.md
-                  echo "# WooCommerce Production (TEST)" >> woocommerce/README.md
+                  unzip woocommerce.zip -d woocommerce
 
             - name: Set up for mirror
               env:
