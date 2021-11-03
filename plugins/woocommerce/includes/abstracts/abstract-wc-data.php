@@ -590,7 +590,7 @@ abstract class WC_Data {
 		if ( ! $force_read ) {
 			if ( ! empty( $this->cache_group ) ) {
 				$cached_meta  = wp_cache_get( $cache_key, $this->cache_group );
-				$cache_loaded = ! empty( $cached_meta );
+				$cache_loaded = is_array( $cached_meta );
 			}
 		}
 
