@@ -8,8 +8,15 @@ jobs:
         name: Push to Mirror
         runs-on: ubuntu-latest
         steps:
-            - name: Create build directory
-              run: mkdir -p tmp/woocommerce-build
+            - name: Create directories
+              run: |
+                  mkdir -p tmp/woocommerce-build
+                  mkdir -p monorepo
+
+            - name: Checkout monorepo
+              uses: actions/checkout@v2
+              with:
+                  path: monorepo
 
             - name: Extract and replace WooCommerce zip.
               working-directory: tmp/woocommerce-build
