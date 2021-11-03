@@ -52,5 +52,4 @@ jobs:
               env:
                 PATH: tmp
               run: |
-                ls
                 .github/scripts/mirrors.sh
