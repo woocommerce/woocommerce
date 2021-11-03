@@ -1,4 +1,5 @@
 import factories from '../factories';
+import { getSlug } from './utils';
 import {Coupon, Setting, SimpleProduct, Order} from '@woocommerce/api';
 
 const client = factories.api.withDefaultPermalinks;
@@ -8,6 +9,7 @@ const shippingClassesEndpoint = '/wc/v3/products/shipping_classes';
 const userEndpoint = '/wp/v2/users';
 const systemStatusEndpoint = '/wc/v3/system_status';
 const productsEndpoint = '/wc/v3/products';
+const productCategoriesEndpoint = '/wc/v3/products/categories';
 
 /**
  * Utility function to delete all merchant created data store objects.
@@ -350,5 +352,36 @@ export const withRestApi = {
 		} else {
 			return;
 		}
-	}
+	},
+	/**
+	 * Create a product category and return the ID. If the category already exists, the ID of the existing category is returned.
+	 *
+	 * @param {string} categoryName The name of the category to create
+	 * @return {Promise<number>} The ID of the category.
+	 */
+	createProductCategory: async ( categoryName ) => {
+		const payload = { name: categoryName };
+		let categoryId;
+
+		// First, convert the name to slug for easier searching
+		const categorySlug = getSlug( categoryName );
+		const category = await client.get(
+			`${ productCategoriesEndpoint }?slug=${ categorySlug }`
+		);
+
+		// If the length is 0, nothing was found, so create the category
+		if ( category.data ) {
+			// If the length is 0, no existing category was found, so create the category
+			if ( category.data.length === 0 ) {
+				const response = await client.post(
+					productCategoriesEndpoint,
+					payload
+				);
+				categoryId = response.data.id;
+			} else {
+				categoryId = category.data[ 0 ].id;
+			}
+		}
+		return categoryId;
+	},
 };

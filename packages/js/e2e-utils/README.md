@@ -155,6 +155,7 @@ This package provides support for enabling retries in tests:
 | `deleteAllProductAttributes` | | Permanently delete all product attributes. |
 | `deleteAllProductCategories` | | Permanently delete all product categories. |
 | `deleteAllProductTags` | | Permanently delete all product tags. |
+| `createProductCategory` | `categoryName` | Create a product category with the provided name. |
 
 ### Classes
 

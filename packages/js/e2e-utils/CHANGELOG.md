@@ -6,6 +6,7 @@
 - `AdminEdit` class with utility functions for the respective edit screens
 - Update `shopper.addToCartFromShopPage()` and `.removeFromCart()` to accept product Id or Title
 - Added `deleteAllProductAttributes()`, `deleteAllProductCategories()`, and `deleteAllProductTags()` to clean up meta data added when products are imported
+- Added `withRestApi.createProductCategory()` that creates a product category and returns the ID
 
 # 0.1.6
 
