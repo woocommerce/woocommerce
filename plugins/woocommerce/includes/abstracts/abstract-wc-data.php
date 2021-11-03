@@ -597,7 +597,7 @@ abstract class WC_Data {
 		// We filter the raw meta data again when loading from cache, in case we cached in an earlier version where filter conditions were different.
 		$raw_meta_data = $cache_loaded ? $this->data_store->filter_raw_meta_data( $this, $cached_meta ) : $this->data_store->read_meta( $this );
 
-		if ( $raw_meta_data ) {
+		if ( is_array( $raw_meta_data ) ) {
 			foreach ( $raw_meta_data as $meta ) {
 				$this->meta_data[] = new WC_Meta_Data(
 					array(

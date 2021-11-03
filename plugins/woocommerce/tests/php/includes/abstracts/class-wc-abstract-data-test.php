@@ -49,17 +49,17 @@ class WC_Data_Test extends WC_Unit_Test_Case {
 		$raw_meta_data = [];
 		$data_store = $this->getMockBuilder( WC_Data_Store_WP::class )->getMock();
 		$data_store->expects( $this->once() )
-		           ->method( 'filter_raw_meta_data' )
-		           ->with(
-			           $this->isInstanceOf( WC_Data::class ),
-			           $raw_meta_data
-		           );
+			->method( 'filter_raw_meta_data' )
+			->with(
+			   $this->isInstanceOf( WC_Data::class ),
+			   $raw_meta_data
+			);
 		$data_store->expects( $this->once() )
-		           ->method( 'read_meta' )
-		           ->with(
-			           $this->isInstanceOf( WC_Data::class )
-		           )
-		->willReturn( $raw_meta_data );
+			->method( 'read_meta' )
+			->with(
+			   $this->isInstanceOf( WC_Data::class )
+			)
+			->willReturn( $raw_meta_data );
 
 		$data_object = new class( $data_store ) extends WC_Data {
 			protected $cache_group = 'object_name';
