@@ -22,7 +22,6 @@ jobs:
         uses: actions/checkout@v2
         with:
           path: package/woocommerce
-          ref: trunk
 
       - name: Install prerequisites.
         working-directory: package/woocommerce/plugins/woocommerce
@@ -34,6 +33,7 @@ jobs:
           pnpm install jest
           
       - name: Run smoke test.
+        working-directory: package/woocommerce/plugins/woocommerce
         env:
           SMOKE_TEST_URL: ${{ secrets.SMOKE_TEST_URL }}
           SMOKE_TEST_ADMIN_USER: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
