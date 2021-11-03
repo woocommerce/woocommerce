@@ -48,5 +48,6 @@ jobs:
             - name: Push to mirror
               env:
                 BUILD_BASE: tmp
+                TOKEN: ${{ secrets.API_TOKEN_GITHUB }}
               run: |
                 .github/workflows/scripts/mirrors.sh
