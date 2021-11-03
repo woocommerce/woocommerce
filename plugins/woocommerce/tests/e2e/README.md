@@ -356,3 +356,58 @@ In the example above, you can see that `allows customer to see downloads` part o
 The test sequencer (`npx wc-e2e test:e2e`) includes support for saving [screenshots on test errors](https://github.com/woocommerce/woocommerce/tree/trunk/tests/e2e/env#test-screenshots) which can be sent to a Slack channel via a [Slackbot](https://github.com/woocommerce/woocommerce/tree/trunk/tests/e2e/env#slackbot-setup).
 
 For Puppeteer debugging, follow [Google's documentation](https://developers.google.com/web/tools/puppeteer/debugging).   
+
+## Running E2E Tests in the Windows Subsystem for Linux (WSL)
+
+The best way to setup your local development environment if you're on Windows is through the [Windows Subsystem for Linux (WSL)](https://docs.microsoft.com/en-us/windows/wsl/). The following steps are for the Ubuntu 20.04 Linux distribution.
+
+### Pre-requisites
+
+You should have the following already set up on your Windows computer:
+- **Docker Desktop for Windows** - https://docs.docker.com/docker-for-windows/install/
+- **WSL 2** - https://docs.microsoft.com/en-us/windows/wsl/install
+- **Ubuntu 20.04 set as default Linux distribution** - https://docs.microsoft.com/en-us/windows/wsl/wsl-config#list-installed-distributions
+
+### Setup Steps
+
+In Ubuntu 20.04, update and upgrade packages.
+```bash
+sudo apt update -y && sudo apt upgrade -y
+```
+
+In order for Composer commands to work later on, install PHP, Composer, `php-xml` and `php-mbstring`.
+```bash
+sudo apt install php-cli unzip -y
+
+cd ~
+
+curl -sS https://getcomposer.org/installer -o composer-setup.php
+
+HASH=`curl -sS https://composer.github.io/installer.sig`
+
+echo $HASH
+
+php -r "if (hash_file('SHA384', 'composer-setup.php') === '$HASH') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
+
+sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+
+composer --version --no-interaction # Verify that Composer installation was successful
+
+sudo apt install php-xml -y
+
+sudo apt install php-mbstring -y
+```
+
+For Puppeteer to run in headless mode, install these packages:
+```bash
+sudo apt install -y ca-certificates fonts-liberation gconf-service libappindicator1 libasound2 libatk-bridge2.0-0 libatk1.0-0 libc6 libcairo2 libcups2 libdbus-1-3 libexpat1 libfontconfig1 libgbm1 libgcc1 libgconf-2-4 libgdk-pixbuf2.0-0 libglib2.0-0 libgtk-3-0 libnspr4 libnss3 libpango-1.0-0 libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 libxtst6 lsb-release wget xdg-utils
+```
+
+Add your username to the `docker` group to avoid having to type `sudo` when you run Docker commands
+```bash
+sudo usermod -aG docker ${YOUR_USERNAME}
+
+su - ${YOUR_USERNAME}
+```
+
+At this point, you're now ready to proceed with the steps in [Running tests](#running-tests).
