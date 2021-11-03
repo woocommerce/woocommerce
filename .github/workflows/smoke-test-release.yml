@@ -18,16 +18,20 @@ jobs:
       - name: Checkout code.
         uses: actions/checkout@v2
         with:
+          path: package/woocommerce
           ref: trunk
 
       - name: Install prerequisites.
+        working-directory: package/woocommerce/plugins/woocommerce
         run: |
-          npm install
+          npm install -g pnpm
+          pnpm install
           composer install --no-dev
-          npm run build:assets
-          npm install jest
+          pnpm run build:assets
+          pnpm install jest
           
       - name: Run smoke test.
+        working-directory: package/woocommerce/plugins/woocommerce
         env:
           SMOKE_TEST_URL: ${{ secrets.RELEASE_TEST_URL }}
           SMOKE_TEST_ADMIN_USER: ${{ secrets.RELEASE_TEST_ADMIN_USER }}
@@ -46,9 +50,9 @@ jobs:
           USER_KEY: ${{ secrets.RELEASE_TEST_ADMIN_USER }}
           USER_SECRET: ${{ secrets.RELEASE_TEST_ADMIN_PASSWORD }}
         run: |
-          npx wc-e2e test:e2e ./tests/e2e/specs/smoke-tests/update-woocommerce.js
-          npx wc-e2e test:e2e
-          npx wc-api-tests test api
+          pnpx wc-e2e test:e2e plugins/woocommerce/tests/e2e/specs/smoke-tests/update-woocommerce.js
+          pnpx wc-e2e test:e2e
+          pnpx wc-api-tests test api
   test-wp-version:
     name: Smoke test on L-${{ matrix.wp }} WordPress version
     runs-on: ubuntu-18.04
@@ -70,17 +74,18 @@ jobs:
           path: package/woocommerce
 
       - name: Run npm install.
-        working-directory: package/woocommerce
-        run: npm install
+        working-directory: package/woocommerce/plugins/woocommerce
+          npm install -g pnpm
+          pnpm install
 
       - name: Load docker images and start containers.
-        working-directory: package/woocommerce
+        working-directory: package/woocommerce/plugins/woocommerce
         env:
           LATEST_WP_VERSION_MINUS: ${{ matrix.wp }}
-        run: npx wc-e2e docker:up
+        run: pnpx wc-e2e docker:up
 
       - name: Move current directory to code. We will install zip file in this dir later.
-        run: mv ./package/woocommerce/* ./code/woocommerce
+        run: mv ./package/woocommerce/plugins/woocommerce/* ./code/woocommerce
 
       - name: Download WooCommerce release zip
         working-directory: tmp
@@ -90,12 +95,12 @@ jobs:
           curl https://api.github.com/repos/woocommerce/woocommerce/releases/assets/${ASSET_ID} -LJOH 'Accept: application/octet-stream'
 
           unzip woocommerce.zip -d woocommerce
-          mv woocommerce/* ../package/woocommerce/
+          mv woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
 
       - name: Run tests command.
-        working-directory: code/woocommerce
+        working-directory: package/woocommerce/plugins/woocommerce
         env:
           WC_E2E_SCREENSHOTS: 1
           E2E_SLACK_TOKEN: ${{ secrets.SMOKE_TEST_SLACK_TOKEN }}
           E2E_SLACK_CHANNEL: ${{ secrets.RELEASE_TEST_SLACK_CHANNEL }}
-        run: npx wc-e2e test:e2e
+        run: pnpx wc-e2e test:e2e
