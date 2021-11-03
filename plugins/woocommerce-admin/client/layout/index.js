@@ -9,7 +9,6 @@ import { Router, Route, Switch } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { get, isFunction, identity } from 'lodash';
 import { parse } from 'qs';
-import { Spinner } from '@woocommerce/components';
 import { getHistory, getQuery } from '@woocommerce/navigation';
 import { getSetting } from '@woocommerce/wc-admin-settings';
 import {
@@ -51,7 +50,7 @@ export class PrimaryLayout extends Component {
 				id="woocommerce-layout__primary"
 			>
 				{ window.wcAdminFeatures[ 'store-alerts' ] && (
-					<Suspense fallback={ <Spinner /> }>
+					<Suspense fallback={ null }>
 						<StoreAlerts />
 					</Suspense>
 				) }
