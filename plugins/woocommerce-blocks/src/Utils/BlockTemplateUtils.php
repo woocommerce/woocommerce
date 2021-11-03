@@ -80,10 +80,9 @@ class BlockTemplateUtils {
 	 * @param array $template_file Theme file.
 	 * @param array $template_type wp_template or wp_template_part.
 	 *
-	 * @return WP_Block_Template Template.
+	 * @return \WP_Block_Template Template.
 	 */
 	public static function gutenberg_build_template_result_from_file( $template_file, $template_type ) {
-		$default_template_types = function_exists( 'gutenberg_get_default_template_types' ) ? gutenberg_get_default_template_types() : array();
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		$template_content = file_get_contents( $template_file['path'] );
 		$theme            = wp_get_theme()->get_stylesheet();
@@ -98,15 +97,8 @@ class BlockTemplateUtils {
 		$template->title          = ! empty( $template_file['title'] ) ? $template_file['title'] : $template_file['slug'];
 		$template->status         = 'publish';
 		$template->has_theme_file = true;
-
-		if ( 'wp_template' === $template_type && isset( $default_template_types[ $template_file['slug'] ] ) ) {
-			$template->description = $default_template_types[ $template_file['slug'] ]['description'];
-			$template->title       = $default_template_types[ $template_file['slug'] ]['title'];
-		}
-
-		if ( 'wp_template_part' === $template_type && isset( $template_file['area'] ) ) {
-			$template->area = $template_file['area'];
-		}
+		$template->is_custom      = false; // Templates loaded from the filesystem aren't custom, ones that have been edited and loaded from the DB are.
+		$template->title          = self::convert_slug_to_title( $template_file['slug'] );
 
 		return $template;
 	}

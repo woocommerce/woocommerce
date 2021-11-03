@@ -111,7 +111,6 @@ class BlockTemplatesController {
 			}
 
 			$new_template_item = array(
-				'title' => BlockTemplateUtils::convert_slug_to_title( $template_slug ),
 				'slug'  => $template_slug,
 				'path'  => $template_file,
 				'theme' => get_template_directory(),
