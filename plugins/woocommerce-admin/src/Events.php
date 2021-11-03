@@ -99,8 +99,7 @@ class Events {
 		$this->possibly_add_notes();
 
 		if ( $this->is_remote_inbox_notifications_enabled() ) {
-			$data_source_poller = RemoteInboxNotificationsEngine::get_data_source_poller_instance();
-			$data_source_poller->read_specs_from_data_sources();
+			DataSourcePoller::get_instance()->read_specs_from_data_sources();
 			RemoteInboxNotificationsEngine::run();
 		}
 

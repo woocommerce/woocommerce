@@ -31,7 +31,10 @@ class DataSourcePoller extends \Automattic\WooCommerce\Admin\DataSourcePoller {
 		if ( ! self::$instance ) {
 			self::$instance = new self(
 				self::ID,
-				self::DATA_SOURCES
+				self::DATA_SOURCES,
+				array(
+					'spec_key' => 'slug',
+				)
 			);
 		}
 		return self::$instance;
