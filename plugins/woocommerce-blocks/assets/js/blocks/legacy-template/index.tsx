@@ -14,7 +14,7 @@ import { page } from '@wordpress/icons';
  * Internal dependencies
  */
 import './editor.scss';
-import { TEMPLATE_TITLES } from './constants';
+import { TEMPLATES } from './constants';
 
 interface Props {
 	attributes: {
@@ -25,7 +25,9 @@ interface Props {
 const Edit = ( { attributes }: Props ) => {
 	const blockProps = useBlockProps();
 	const templateTitle =
-		TEMPLATE_TITLES[ attributes.template ] ?? attributes.template;
+		TEMPLATES[ attributes.template ]?.title ?? attributes.template;
+	const templatePlaceholder =
+		TEMPLATES[ attributes.template ]?.placeholder ?? 'fallback';
 	return (
 		<div { ...blockProps }>
 			<Placeholder
@@ -46,7 +48,7 @@ const Edit = ( { attributes }: Props ) => {
 				<div className="wp-block-woocommerce-legacy-template__placeholder-wireframe">
 					<img
 						className="wp-block-woocommerce-legacy-template__placeholder-image"
-						src={ `${ WC_BLOCKS_IMAGE_URL }template-placeholders/${ attributes.template }.svg` }
+						src={ `${ WC_BLOCKS_IMAGE_URL }template-placeholders/${ templatePlaceholder }.svg` }
 						alt={ templateTitle }
 					/>
 				</div>
