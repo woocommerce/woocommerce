@@ -31,7 +31,7 @@ jobs:
               run: |
                   touch $BUILD_BASE/mirrors.txt
                   echo "woocommerce/woocommerce-production" >> $BUILD_BASE/mirrors.txt
-                  mv $BUILD_BASE/woocommerce $BUILD_BASE/woocommerce-production
+                  mv $BUILD_BASE/woocommerce $BUILD_BASE/woocommerce/woocommerce-production
                   GIT_SLUG=woocommerce-production
                   
             - name: Push to mirror
