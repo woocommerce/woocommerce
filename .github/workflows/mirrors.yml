@@ -43,4 +43,6 @@ jobs:
 
             - name: Set up for mirror
               working-directory: tmp/woocommerce-build/woocommerce/woocommerce-production
-              run: git ls-remote -h origin
+              run: |
+                  git status
+                  git ls-remote -h origin
