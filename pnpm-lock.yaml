@@ -167,7 +167,7 @@ importers:
       '@typescript-eslint/eslint-plugin': 3.10.1
       '@typescript-eslint/experimental-utils': 3.10.1
       '@typescript-eslint/parser': 3.10.1
-      '@woocommerce/admin-e2e-tests': 0.1.1
+      '@woocommerce/admin-e2e-tests': 0.1.2
       '@woocommerce/api': workspace:*
       '@woocommerce/api-core-tests': workspace:*
       '@woocommerce/e2e-core-tests': workspace:*
@@ -223,7 +223,7 @@ importers:
       '@typescript-eslint/eslint-plugin': 3.10.1_aab05197bc2ab2306ca58e96baf5381b
       '@typescript-eslint/experimental-utils': 3.10.1_eslint@6.8.0+typescript@3.9.7
       '@typescript-eslint/parser': 3.10.1_eslint@6.8.0+typescript@3.9.7
-      '@woocommerce/admin-e2e-tests': 0.1.1
+      '@woocommerce/admin-e2e-tests': 0.1.2
       '@woocommerce/api': link:../../packages/js/api
       '@woocommerce/api-core-tests': link:../../packages/js/api-core-tests
       '@woocommerce/e2e-core-tests': link:../../packages/js/e2e-core-tests
@@ -3860,8 +3860,8 @@ packages:
       '@xtuc/long': 4.2.2
     dev: true
 
-  /@woocommerce/admin-e2e-tests/0.1.1:
-    resolution: {integrity: sha512-4exEPINL1yqLvTsVW1ECQfpM79TKQAuA1+y7dyIuCmwDIbvkFxK13CX8gJyZcHroNbiM9fbpyJ6LqDmRVttxwQ==}
+  /@woocommerce/admin-e2e-tests/0.1.2:
+    resolution: {integrity: sha512-lIUmIaODaQVHhzGYz9q3ljanVV7w3DAXoPlqvU12diOazdaq982q4GlW9RCkpNFXY2jP/cnQDmEbsqaL6FWoPA==}
     peerDependencies:
       '@woocommerce/e2e-environment': 0.2.2
       '@woocommerce/e2e-utils': 0.1.5
