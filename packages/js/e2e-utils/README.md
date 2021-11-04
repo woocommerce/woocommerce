@@ -138,9 +138,7 @@ This package provides support for enabling retries in tests:
 
 ### REST API `withRestApi`
 
-To use this API you need to install [the Basic Auth plugin](https://github.com/WP-API/Basic-Auth),
-as the docker container is non-SSL and the REST API only supports basic authentication.
-You can achieve that by adding `wp plugin install https://github.com/WP-API/Basic-Auth/archive/master.zip --activate` to your `initialize.sh`.
+Please note: if you're using a non-SSL environment (such as a Docker container from [`wc-e2e`](https://www.npmjs.com/package/@woocommerce/e2e-environment)) you will need to use Basic Auth in order to authenticate with the API and use the `withRestApi` methods listed below. To do so, you will need to install the [the Basic Auth plugin](https://github.com/WP-API/Basic-Auth). One way this can be accomplished is by adding `wp plugin install https://github.com/WP-API/Basic-Auth/archive/master.zip --activate` to your `initialize.sh` script.
 
 | Function | Parameters | Description |
 |----------|------------|-------------|
