@@ -807,6 +807,10 @@ jQuery( function( $ ) {
 				default :
 					$( 'select.variation_actions' ).trigger( do_variation_action );
 					data = $( 'select.variation_actions' ).triggerHandler( do_variation_action + '_ajax_data', data );
+					
+					if ( true === data.cancel ) {
+						return;
+					}
 					break;
 			}
 
