@@ -231,6 +231,5 @@ export const previewCart: CartResponse = {
 	},
 	errors: [],
 	payment_requirements: [ 'products' ],
-	generated_timestamp: Date.now(),
 	extensions: {},
 };

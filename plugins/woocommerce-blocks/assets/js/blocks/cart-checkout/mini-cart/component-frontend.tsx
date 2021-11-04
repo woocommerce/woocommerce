@@ -6,7 +6,6 @@ import { renderFrontend } from '@woocommerce/base-utils';
 /**
  * Internal dependencies
  */
-import withMiniCartConditionalHydration from './with-mini-cart-conditional-hydration';
 import MiniCartBlock from './block';
 import './style.scss';
 
@@ -28,7 +27,7 @@ const renderMiniCartFrontend = () => {
 
 	renderFrontend( {
 		selector: '.wc-block-mini-cart',
-		Block: withMiniCartConditionalHydration( MiniCartBlock ),
+		Block: MiniCartBlock,
 		getProps: ( el: HTMLElement ) => ( {
 			isDataOutdated: el.dataset.isDataOutdated,
 			isInitiallyOpen: el.dataset.isInitiallyOpen === 'true',
