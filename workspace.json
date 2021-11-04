@@ -1,11 +1,23 @@
 {
-	"version": 2,
-	"projects": {
-		"@woocommerce/api": "packages/js/api",
-		"@woocommerce/api-core-tests": "packages/js/api-core-tests",
-		"@woocommerce/e2e-core-tests": "packages/js/core-tests",
-		"@woocommerce/e2e-environment": "packages/js/e2e-environment",
-		"@woocommerce/e2e-utils": "packages/js/utils",
-		"woocommerce": "plugins/woocommerce"
-	}
+  "version": 2,
+  "projects": {
+    "@woocommerce/api": {
+      "root": "packages/js/api"
+    },
+    "@woocommerce/api-core-tests": {
+      "root": "packages/js/api-core-tests"
+    },
+    "@woocommerce/e2e-core-tests": {
+      "root": "packages/js/e2e-core-tests"
+    },
+    "@woocommerce/e2e-environment": {
+      "root": "packages/js/e2e-environment"
+    },
+    "@woocommerce/e2e-utils": {
+      "root": "packages/js/e2e-utils"
+    },
+    "woocommerce": {
+      "root": "plugins/woocommerce"
+    }
+  }
 }
