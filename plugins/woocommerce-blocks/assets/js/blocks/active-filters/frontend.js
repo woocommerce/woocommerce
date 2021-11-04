@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { withRestApiHydration } from '@woocommerce/block-hocs';
 import { renderFrontend } from '@woocommerce/base-utils';
 
 /**
@@ -21,6 +20,6 @@ const getProps = ( el ) => {
 
 renderFrontend( {
 	selector: '.wp-block-woocommerce-active-filters',
-	Block: withRestApiHydration( Block ),
+	Block,
 	getProps,
 } );

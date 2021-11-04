@@ -14,4 +14,3 @@ export const CART_API_ERROR = {
 		status: 500,
 	},
 };
-export const LAST_CART_UPDATE_TIMESTAMP_KEY = 'wc-blocks_cart_update_timestamp';

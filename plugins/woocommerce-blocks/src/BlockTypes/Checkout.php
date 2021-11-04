@@ -332,13 +332,16 @@ class Checkout extends AbstractBlock {
 	 * Hydrate the checkout block with data from the API.
 	 */
 	protected function hydrate_from_api() {
+		$this->asset_data_registry->hydrate_api_request( '/wc/store/cart' );
+
 		// Print existing notices now, otherwise they are caught by the Cart
 		// Controller and converted to exceptions.
 		wc_print_notices();
-
 		add_filter( 'woocommerce_store_api_disable_nonce_check', '__return_true' );
-		$this->asset_data_registry->hydrate_api_request( '/wc/store/cart' );
-		$this->asset_data_registry->hydrate_api_request( '/wc/store/checkout' );
+
+		$rest_preload_api_requests = rest_preload_api_request( [], '/wc/store/checkout' );
+		$this->asset_data_registry->add( 'checkoutData', $rest_preload_api_requests['/wc/store/checkout']['body'] ?? [] );
+
 		remove_filter( 'woocommerce_store_api_disable_nonce_check', '__return_true' );
 	}
 
