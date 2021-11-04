@@ -13,6 +13,9 @@
   "bugs": {
     "url": "https://github.com/woocommerce/woocommerce/issues"
   },
+  "scripts": {
+    "preinstall": "npx only-allow pnpm"
+  },
   "devDependencies": {
     "@automattic/nx-composer": "^0.1.0",
     "@nrwl/cli": "latest",
