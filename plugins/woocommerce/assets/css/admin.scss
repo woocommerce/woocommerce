@@ -93,11 +93,13 @@
 	}
 
 	.current-section-dropdown {
+		background: #fff;
+		border: 1px solid #a7aaad;
+		margin-bottom: 16px;
 		position: relative;
 		width: 100%;
 
 		@media only screen and (min-width: 600px) {
-			margin-left: 70px;
 			width: 288px;
 		}
 
@@ -117,6 +119,8 @@
 
 			@media only screen and (min-width: 600px) {
 				border: 1px solid #1e1e1e;
+				left: -1px;
+				top: 48px;
 			}
 
 			@media only screen and (min-width: 1100px) {
@@ -164,10 +168,9 @@
 
 	.current-section-name {
 		cursor: pointer;
-		font-weight: 600;
 		font-size: 14px;
-		line-height: 20px;
-		padding: 20px 16px;
+		line-height: 24px;
+		padding: 12px 16px;
 		position: relative;
 	}
 
@@ -179,7 +182,7 @@
 		height: 20px;
 		position: absolute;
 		right: 20px;
-		top: 20px;
+		top: 16px;
 		width: 20px;
 	}
 
@@ -7681,4 +7684,9 @@ table.bar_chart {
 	.marketplace-header__tabs {
 		margin-left: 84px;
 	}
+}
+
+@media screen and (min-width: 1280px) {
+
+
 }

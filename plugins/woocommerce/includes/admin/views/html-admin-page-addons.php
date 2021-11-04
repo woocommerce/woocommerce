@@ -65,6 +65,7 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 
 	<div class="wrap">
 		<div class="marketplace-content-wrapper">
+			<?php require 'html-admin-page-addons-category-nav.php'; ?>
 			<?php if ( ! empty( $search ) && 0 === count( $addons ) ) : ?>
 				<h1 class="search-form-title">
 					<?php esc_html_e( 'Sorry, could not find anything. Try searching again using a different term.', 'woocommerce' ); ?></p>
