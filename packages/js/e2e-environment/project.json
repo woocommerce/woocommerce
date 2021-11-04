@@ -1,0 +1,5 @@
+{
+  "root": "packages/js/e2e-environment/",
+  "sourceRoot": "packages/js/e2e-environment/src",
+  "projectType": "library"
+}

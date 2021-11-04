@@ -1,0 +1,5 @@
+{
+  "root": "plugins/woocommerce/",
+  "sourceRoot": "plugins/woocommerce",
+  "projectType": "application"
+}

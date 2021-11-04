@@ -1,0 +1,5 @@
+{
+  "root": "packages/js/e2e-core-tests/",
+  "sourceRoot": "packages/js/e2e-core-tests",
+  "projectType": "library"
+}
