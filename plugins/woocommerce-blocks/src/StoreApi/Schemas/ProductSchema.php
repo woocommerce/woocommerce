@@ -566,17 +566,15 @@ class ProductSchema extends AbstractSchema {
 	 * @returns array
 	 */
 	protected function get_variations( \WC_Product $product ) {
-		if ( ! $product->is_type( 'variable' ) ) {
-			return [];
-		}
-		global $wpdb;
-
-		$variation_ids = $product->get_visible_children();
+		$variation_ids = $product->is_type( 'variable' ) ? $product->get_visible_children() : [];
 
 		if ( ! count( $variation_ids ) ) {
 			return [];
 		}
 
+		/**
+		 * Gets default variation data which applies to all of this products variations.
+		 */
 		$attributes                  = array_filter( $product->get_attributes(), [ $this, 'filter_variation_attribute' ] );
 		$default_variation_meta_data = array_reduce(
 			$attributes,
@@ -590,22 +588,53 @@ class ProductSchema extends AbstractSchema {
 			},
 			[]
 		);
+		$default_variation_meta_keys = array_keys( $default_variation_meta_data );
 
-		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
-		$variation_meta_data = $wpdb->get_results(
+		/**
+		 * Gets individual variation data from the database, using cache where possible.
+		 */
+		$cache_group   = 'product_variation_meta_data';
+		$cache_value   = wp_cache_get( $product->get_id(), $cache_group );
+		$last_modified = get_the_modified_date( 'U', $product->get_id() );
+
+		if ( false === $cache_value || $last_modified !== $cache_value['last_modified'] ) {
+			global $wpdb;
+			// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+			$variation_meta_data = $wpdb->get_results(
+				"
+				SELECT post_id as variation_id, meta_key as attribute_key, meta_value as attribute_value
+				FROM {$wpdb->postmeta}
+				WHERE post_id IN (" . implode( ',', array_map( 'esc_sql', $variation_ids ) ) . ")
+				AND meta_key IN ('" . implode( "','", array_map( 'esc_sql', $default_variation_meta_keys ) ) . "')
 			"
-			SELECT post_id as variation_id, meta_key as attribute_key, meta_value as attribute_value
-			FROM {$wpdb->postmeta}
-			WHERE post_id IN (" . implode( ',', array_map( 'esc_sql', $variation_ids ) ) . ")
-			AND meta_key IN ('" . implode( "','", array_map( 'esc_sql', array_keys( $default_variation_meta_data ) ) ) . "')
-		"
-		);
-		// phpcs:enable
+			);
+			// phpcs:enable
 
+			wp_cache_set(
+				$product->get_id(),
+				[
+					'last_modified' => $last_modified,
+					'data'          => $variation_meta_data,
+				],
+				$cache_group
+			);
+		} else {
+			$variation_meta_data = $cache_value['data'];
+		}
+
+		/**
+		 * Merges and formats default variation data with individual variation data.
+		 */
 		$attributes_by_variation = array_reduce(
 			$variation_meta_data,
-			function( $values, $data ) {
-				$values[ $data->variation_id ][ $data->attribute_key ] = $data->attribute_value;
+			function( $values, $data ) use ( $default_variation_meta_keys ) {
+				// The query above only includes the keys of $default_variation_meta_data so we know all of the attributes
+				// being processed here apply to this product. However, we need an additional check here because the
+				// cache may have been primed elsewhere and include keys from other products.
+				// @see AbstractProductGrid::prime_product_variations.
+				if ( in_array( $data->attribute_key, $default_variation_meta_keys, true ) ) {
+					$values[ $data->variation_id ][ $data->attribute_key ] = $data->attribute_value;
+				}
 				return $values;
 			},
 			array_fill_keys( $variation_ids, [] )
