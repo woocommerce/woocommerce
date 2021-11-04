@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { decodeEntities } from '@wordpress/html-entities';
 
 export const ShippingVia = ( {
 	selectedShippingRates,
@@ -11,7 +12,7 @@ export const ShippingVia = ( {
 	return (
 		<div className="wc-block-components-totals-item__description wc-block-components-totals-shipping__via">
 			{ __( 'via', 'woo-gutenberg-products-block' ) }{ ' ' }
-			{ selectedShippingRates.join( ', ' ) }
+			{ decodeEntities( selectedShippingRates.join( ', ' ) ) }
 		</div>
 	);
 };
