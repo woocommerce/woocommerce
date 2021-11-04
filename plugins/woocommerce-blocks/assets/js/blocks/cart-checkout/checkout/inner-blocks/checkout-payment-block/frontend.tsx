@@ -3,7 +3,7 @@
  */
 import classnames from 'classnames';
 import { useStoreCart, useEmitResponse } from '@woocommerce/base-context/hooks';
-import withFilteredAttributes from '@woocommerce/base-hocs/with-filtered-attributes';
+import { withFilteredAttributes } from '@woocommerce/shared-hocs';
 import { FormStep } from '@woocommerce/base-components/cart-checkout';
 import {
 	useCheckoutContext,
