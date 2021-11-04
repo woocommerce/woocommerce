@@ -40,3 +40,7 @@ jobs:
                   username: matticbot
                   working-directory: ${{ github.workspace }}/tmp/woocommerce-build
               timeout-minutes: 5  # 2021-01-18: Successful runs seem to take about half a minute.
+
+            - name: Set up for mirror
+              working-directory: tmp/woocommerce-build/woocommerce/woocommerce-production
+              run: git ls-remote -h origin
