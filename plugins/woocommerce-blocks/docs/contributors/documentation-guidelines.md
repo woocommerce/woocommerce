@@ -21,7 +21,7 @@
 
 ## Use Automattic Writing Style Guide
 
-The [Automattic Writing Style Guide](https://fieldguide.automattic.com/the-automattic-style-guide/) serves as the foundation of these documentation guidelines.
+The _Automattic Writing Style Guide_ serves as the foundation of these documentation guidelines.
 
 ## Use active instead of passive voice
 
