@@ -12,6 +12,7 @@ import { PaymentsSetup } from '../../pages/PaymentsSetup';
 import { WcHomescreen } from '../../pages/WcHomescreen';
 import { BankAccountTransferSetup } from '../../sections/payment-setup/BankAccountTransferSetup';
 import { waitForTimeout } from '../../utils/actions';
+import { WcSettings } from '../../pages/WcSettings';
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 const { afterAll, beforeAll, describe, it } = require( '@jest/globals' );
@@ -24,6 +25,7 @@ const testAdminPaymentSetupTask = () => {
 		const paymentsSetup = new PaymentsSetup( page );
 		const bankTransferSetup = new BankAccountTransferSetup( page );
 		const login = new Login( page );
+		const settings = new WcSettings( page );
 
 		beforeAll( async () => {
 			await login.login();
@@ -69,7 +71,13 @@ const testAdminPaymentSetupTask = () => {
 		} );
 
 		it( 'Enabling cash on delivery enables the payment method', async () => {
+			await settings.cleanPaymentMethods();
+			await homeScreen.navigate();
+			await homeScreen.isDisplayed();
+			await waitForTimeout( 1000 );
+			await homeScreen.clickOnTaskList( 'Set up payments' );
 			await paymentsSetup.enableCashOnDelivery();
+			await homeScreen.navigate();
 			await homeScreen.isDisplayed();
 			await waitForTimeout( 1000 );
 			await homeScreen.clickOnTaskList( 'Set up payments' );

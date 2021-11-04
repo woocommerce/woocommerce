@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { getAttribute, waitForElementByText } from '../utils/actions';
+import { getAttribute, hasClass, waitForElementByText } from '../utils/actions';
 import { BasePage } from './BasePage';
 
 /* eslint-disable @typescript-eslint/no-var-requires */
@@ -40,5 +40,23 @@ export class WcSettings extends BasePage {
 			'strong',
 			'Your settings have been saved.'
 		);
+	}
+
+	async cleanPaymentMethods() {
+		this.navigate( 'checkout' );
+		await waitForElementByText( 'h2', 'Payment methods' );
+		const paymentMethods = await page.$$( 'span.woocommerce-input-toggle' );
+		for ( const method of paymentMethods ) {
+			if (
+				method &&
+				( await hasClass(
+					method,
+					'woocommerce-input-toggle--enabled'
+				) )
+			) {
+				await method?.click();
+			}
+		}
+		await this.saveSettings();
 	}
 }

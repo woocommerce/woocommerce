@@ -1,9 +1,14 @@
 # Unreleased
+
 -   Add E2E tests for checking store currency if it matches the onboarded country. #7712
 
 -   Make unchecking free features more robust. #7761
 
 -   Fix typescript type error in admin-e2e-tests package #7765
+
+-   Add extension deactivation util function addition. #7804
+
+-   Add tests to Subscriptions inclusion. #7804
 
 # 0.1.2
 

@@ -32,6 +32,6 @@ export class IndustrySection extends BasePage {
 	}
 
 	async selectIndustry( industryLabel: string ) {
-		await this.setCheckboxWithLabel( industryLabel );
+		await this.setCheckboxWithText( industryLabel );
 	}
 }

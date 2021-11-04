@@ -75,4 +75,8 @@ export class OnboardingWizard extends BasePage {
 			timeout: 4000,
 		} );
 	}
+
+	async goToOBWStep( step: string ) {
+		await this.clickElementWithText( 'span', step );
+	}
 }

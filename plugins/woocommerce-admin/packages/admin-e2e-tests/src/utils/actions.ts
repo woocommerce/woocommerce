@@ -10,6 +10,7 @@ import { NewOrder } from '../pages/NewOrder';
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 const { expect } = require( '@jest/globals' );
+const config = require( 'config' );
 /* eslint-enable @typescript-eslint/no-var-requires */
 
 /**
@@ -167,6 +168,23 @@ export const waitForElementByTextWithoutThrow = async (
 	return Boolean( selected );
 };
 
+const deactivateAndDeleteExtension = async ( extension: string ) => {
+	const baseUrl = config.get( 'url' );
+	const pluginsAdmin = 'wp-admin/plugins.php?plugin_status=all&paged=1&s';
+	await page.goto( baseUrl + pluginsAdmin, {
+		waitUntil: 'networkidle0',
+		timeout: 10000,
+	} );
+	await waitForElementByText( 'h1', 'Plugins' );
+	// deactivate extension
+	const deactivateExtension = await page.$( `#deactivate-${ extension }` );
+	await deactivateExtension?.click();
+	await waitForElementByText( 'p', 'Plugin deactivated.' );
+	// delete extension
+	const deleteExtension = await page.$( `#delete-${ extension }` );
+	await deleteExtension?.click();
+};
+
 export {
 	uiUnblocked,
 	verifyPublishAndTrash,
@@ -177,4 +195,5 @@ export {
 	waitForElementByText,
 	hasClass,
 	waitForTimeout,
+	deactivateAndDeleteExtension,
 };

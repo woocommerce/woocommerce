@@ -22,6 +22,6 @@ export class ProductTypeSection extends BasePage {
 	}
 
 	async selectProduct( productLabel: string ) {
-		await this.setCheckboxWithLabel( productLabel );
+		await this.setCheckboxWithText( productLabel );
 	}
 }

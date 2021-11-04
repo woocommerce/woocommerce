@@ -76,8 +76,17 @@ export abstract class BasePage {
 		await el?.click();
 	}
 
-	async setCheckboxWithLabel( labelText: string ) {
-		const checkbox = await getElementByText( 'label', labelText );
+	async clickElementWithText( element: string, text: string ) {
+		const el = await getElementByText( element, text );
+		await el?.click();
+	}
+
+	async setCheckboxWithText( text: string ) {
+		let checkbox = await getElementByText( 'label', text );
+
+		if ( ! checkbox ) {
+			checkbox = await getElementByText( 'span', text );
+		}
 
 		if ( checkbox ) {
 			const checkboxStatus = await (
@@ -88,9 +97,7 @@ export abstract class BasePage {
 				await checkbox.click();
 			}
 		} else {
-			throw new Error(
-				`Could not find checkbox with label "${ labelText }"`
-			);
+			throw new Error( `Could not find checkbox with text "${ text }"` );
 		}
 	}
 
