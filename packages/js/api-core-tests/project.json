@@ -1,0 +1,5 @@
+{
+  "root": "packages/js/api-core-tests/",
+  "sourceRoot": "packages/js/api-core-tests",
+  "projectType": "library"
+}

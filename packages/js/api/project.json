@@ -1,0 +1,5 @@
+{
+  "root": "packages/js/api/",
+  "sourceRoot": "packages/js/api/src",
+  "projectType": "library"
+}
