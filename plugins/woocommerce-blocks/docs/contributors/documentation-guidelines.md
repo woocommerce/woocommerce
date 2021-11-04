@@ -1,7 +1,6 @@
 # Documentation Guidelines
 
 - [Documentation Guidelines](#documentation-guidelines)
-  - [Use Automattic Writing Style Guide](#use-automattic-writing-style-guide)
   - [Use active instead of passive voice](#use-active-instead-of-passive-voice)
   - [Use the personal pronoun “you”](#use-the-personal-pronoun-you)
   - [Don’t use gendered pronouns](#dont-use-gendered-pronouns)
@@ -18,10 +17,6 @@
   - [Sort releases descending](#sort-releases-descending)
   - [Structure “How to” instructions](#structure-how-to-instructions)
   - [Link references](#link-references)
-
-## Use Automattic Writing Style Guide
-
-The _Automattic Writing Style Guide_ serves as the foundation of these documentation guidelines.
 
 ## Use active instead of passive voice
 
