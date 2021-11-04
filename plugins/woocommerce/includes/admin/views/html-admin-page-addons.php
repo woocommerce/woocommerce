@@ -41,6 +41,24 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 	</div>
 
 	<div class="top-bar">
+		<ul class="marketplace-header__tabs">
+			<li class="marketplace-header__tab">
+				<a
+					class="marketplace-header__tab-link is-current"
+					href="<?php echo esc_url( admin_url( 'admin.php?page=wc-addons' ) ); ?>"
+				>
+					<?php esc_html_e( 'Browse Extensions', 'woocommerce' ); ?>
+				</a>
+			</li>
+			<li class="marketplace-header__tab">
+				<a
+					class="marketplace-header__tab-link"
+					href="<?php echo esc_url( admin_url( 'admin.php?page=wc-addons&section=helper' ) ); ?>"
+				>
+					<?php esc_html_e( 'My Subscriptions', 'woocommerce' ); ?>
+				</a>
+			</li>
+		</ul>
 	</div>
 
 	<div class="wp-header-end"></div>

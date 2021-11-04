@@ -90,36 +90,15 @@
 		@media only screen and ( min-width: 768px ) {
 			margin-bottom: 24px;
 		}
+	}
 
-		.current-section-dropdown {
-			position: relative;
-			width: 100%;
+	.current-section-dropdown {
+		position: relative;
+		width: 100%;
 
-			@media only screen and ( min-width: 600px ) {
-				margin-left: 70px;
-				width: 288px;
-			}
-		}
-
-		.current-section-name {
-			cursor: pointer;
-			font-weight: 600;
-			font-size: 14px;
-			line-height: 20px;
-			padding: 20px 16px;
-			position: relative;
-		}
-
-		.current-section-name::after {
-			background-image: url(../images/icons/gridicons-chevron-down.svg);
-			background-size: contain;
-			content: "";
-			display: block;
-			height: 20px;
-			position: absolute;
-			right: 20px;
-			top: 20px;
-			width: 20px;
+		@media only screen and (min-width: 600px) {
+			margin-left: 70px;
+			width: 288px;
 		}
 
 		ul {
@@ -136,11 +115,11 @@
 			width: 100%;
 			z-index: 10;
 
-			@media only screen and ( min-width: 600px ) {
+			@media only screen and (min-width: 600px) {
 				border: 1px solid #1e1e1e;
 			}
 
-			@media only screen and ( min-width: 1100px ) {
+			@media only screen and (min-width: 1100px) {
 				justify-content: center;
 			}
 
@@ -165,7 +144,7 @@
 				position: relative;
 				width: 100%;
 
-				@media only screen and ( min-width: 600px ) {
+				@media only screen and (min-width: 600px) {
 					padding: 10px 18px;
 				}
 			}
@@ -181,16 +160,37 @@
 				width: 20px;
 			}
 		}
+	}
 
-		.current-section-dropdown.is-open {
+	.current-section-name {
+		cursor: pointer;
+		font-weight: 600;
+		font-size: 14px;
+		line-height: 20px;
+		padding: 20px 16px;
+		position: relative;
+	}
 
-			ul {
-				display: flex;
-			}
+	.current-section-name::after {
+		background-image: url(../images/icons/gridicons-chevron-down.svg);
+		background-size: contain;
+		content: "";
+		display: block;
+		height: 20px;
+		position: absolute;
+		right: 20px;
+		top: 20px;
+		width: 20px;
+	}
 
-			.current-section-name::after {
-				transform: rotate(0.5turn);
-			}
+	.current-section-dropdown.is-open {
+
+		ul {
+			display: flex;
+		}
+
+		.current-section-name::after {
+			transform: rotate(0.5turn);
 		}
 	}
 
@@ -418,10 +418,6 @@
 	}
 
 	@media only screen and (max-width: 400px) {
-
-		.addons-featured {
-			margin: -1% -5%;
-		}
 
 		.addons-button {
 			width: 100%;
@@ -734,6 +730,37 @@
 		p {
 			max-width: 750px;
 		}
+	}
+}
+
+.marketplace-header__tabs {
+	display: flex;
+	margin: 0;
+}
+
+.marketplace-header__tab {
+	display: flex;
+	flex: 1;
+	margin: 0;
+}
+
+.marketplace-header__tab-link {
+	align-items: center;
+	border-bottom: 2px solid transparent;
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+	font-size: 14px;
+	height: 60px;
+	justify-content: center;
+	line-height: 20px;
+	padding: 0 24px;
+	text-decoration: none;
+	width: 100%;
+
+	&.is-current {
+		border-bottom: 2px solid #1e1e1e;
+		color: #1e1e1e;
 	}
 }
 
@@ -7642,5 +7669,16 @@ table.bar_chart {
 				width: 278px;
 			}
 		}
+	}
+
+	.marketplace-header__tab {
+		flex: none;
+	}
+}
+
+@media screen and (min-width: 961px) {
+
+	.marketplace-header__tabs {
+		margin-left: 84px;
 	}
 }
