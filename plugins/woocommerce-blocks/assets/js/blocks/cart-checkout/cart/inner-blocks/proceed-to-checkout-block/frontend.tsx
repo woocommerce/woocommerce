@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import withFilteredAttributes from '@woocommerce/base-hocs/with-filtered-attributes';
+import { withFilteredAttributes } from '@woocommerce/shared-hocs';
 
 /**
  * Internal dependencies
