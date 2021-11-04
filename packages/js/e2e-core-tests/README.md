@@ -16,7 +16,7 @@ This package contains the automated end-to-end tests for WooCommerce.
 
 ### Setting up the test environment
 
-Follow [E2E setup instructions](https://github.com/woocommerce/woocommerce/blob/trunk/tests/e2e/README.md).
+Follow [E2E setup instructions](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/e2e/README.md).
 
 ### Setting up core tests
 

@@ -104,7 +104,7 @@ For a list of the methods that the above timeout affects, please see the Puppete
 
 ### Test Against Previous WordPress Versions
 
-You can use the `LATEST_WP_VERSION_MINUS` flag to determine how many versions back from the current WordPress version to use in the Docker environment. This is calculated from the current WordPress version minus the set value. For example, if `LATEST_WP_VERSION_MINUS` is set to 1, it will calculate the current WordPress version minus one, and use that for the WordPress Docker container. 
+You can use the `LATEST_WP_VERSION_MINUS` flag to determine how many versions back from the current WordPress version to use in the Docker environment. This is calculated from the current WordPress version minus the set value. For example, if `LATEST_WP_VERSION_MINUS` is set to 1, it will calculate the current WordPress version minus one, and use that for the WordPress Docker container.
 
 For example, you could run the following command:
 
@@ -163,7 +163,7 @@ Jest provides [setup and teardown functions](https://jestjs.io/docs/setup-teardo
 #### Console filtering
 
 **Added version 0.2.3**
-By default, messages logged to the console are included in the test results. The test runner suppresses 404 not found and proxy connection messages. 
+By default, messages logged to the console are included in the test results. The test runner suppresses 404 not found and proxy connection messages.
 
 Pages that you are testing may contain repetitive console output that you expect. Use `addConsoleSuppression` in your jest setup script to filter these repetitive messages:
 
@@ -182,8 +182,8 @@ removeConsoleSuppression( 'suppress this after the first instance' );
 
 Depending on the project and testing scenario, the built in testing environment container might not be the best solution for testing. This could be local testing where there is already a testing container, a repository that isn't a plugin or theme and there are multiple folders mapped into the container, or similar. The `e2e-environment` test runner supports using either the built in container or an external container. See the appropriate readme for  details:
 
-- [Built In Container](https://github.com/woocommerce/woocommerce/tree/trunk/tests/e2e/env/builtin.md)
-- [External Container](https://github.com/woocommerce/woocommerce/tree/trunk/tests/e2e/env/external.md)
+- [Built In Container](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/e2e-environment/builtin.md)
+- [External Container](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/e2e-environment/external.md)
 
 ### Slackbot Setup
 
@@ -233,4 +233,4 @@ This will return a string with the latest release URL. Optionally, you can use t
 
 ## Additional information
 
-Refer to [`tests/e2e/core-tests`](https://github.com/woocommerce/woocommerce/tree/trunk/tests/e2e/core-tests) for some test examples, and [`tests/e2e`](https://github.com/woocommerce/woocommerce/tree/trunk/tests/e2e) for general information on e2e tests.
+Refer to [`@woocommerce/e2e-core-tests`](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/e2e-core-tests) for some test examples, and [`plugins/woocommerce/tests/e2e`](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e) for general information on e2e tests.
