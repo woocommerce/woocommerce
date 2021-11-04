@@ -197,9 +197,11 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Fix naming of event names and properties. #7677
 * Fix - Fix white screen for variation analytic data without a name. #7686
 * Add - Store Profiler and Product task - include Subscriptions. #7734
+* Update - Update WC pay supported country list for the default free extensions. #7873
 * Update - Update back up copy of free extension for Google Listing & Ads plugin. #7798
 * Update - Update Eway payment gateway capitalization (was eWAY). #7678
 * Update - Enable Square in France. #7679
+* Enhancement - Only load tasks during rest api requests. #7856
 * Enhancement - Add experiment for promoting WooCommerce Payments in payment methods table. #7666
 
 **WooCommerce Blocks - 6.0.0 & 6.0.1 & 6.0.2 & 6.1.0**
