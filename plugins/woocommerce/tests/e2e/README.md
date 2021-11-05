@@ -351,8 +351,8 @@ FAIL ../specs/front-end/front-end-my-account.test.js (9.219s)
 
 In the example above, you can see that `allows customer to see downloads` part of the test failed and can start looking at it right away. Without steps the test goes through being detailed, it is more difficult to debug it. 
 
-## Debugging tests 
+## Debugging tests
 
-The test sequencer (`npx wc-e2e test:e2e`) includes support for saving [screenshots on test errors](https://github.com/woocommerce/woocommerce/tree/trunk/tests/e2e/env#test-screenshots) which can be sent to a Slack channel via a [Slackbot](https://github.com/woocommerce/woocommerce/tree/trunk/tests/e2e/env#slackbot-setup).
+The test sequencer (`npx wc-e2e test:e2e`) includes support for saving [screenshots on test errors](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/e2e-environment#test-screenshots) which can be sent to a Slack channel via a [Slackbot](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/e2e-environment#slackbot-setup).
 
-For Puppeteer debugging, follow [Google's documentation](https://developers.google.com/web/tools/puppeteer/debugging).   
+For Puppeteer debugging, follow [Google's documentation](https://developers.google.com/web/tools/puppeteer/debugging).
