@@ -178,6 +178,8 @@ abstract class AbstractSchema {
 		 * @return true|\WP_Error
 		 */
 		return function ( $values, $request, $param ) use ( $properties ) {
+			$sanitized_values = [];
+
 			foreach ( $properties as $property_key => $property_value ) {
 				$current_value = isset( $values[ $property_key ] ) ? $values[ $property_key ] : null;
 
@@ -188,17 +190,20 @@ abstract class AbstractSchema {
 					$current_value = rest_sanitize_value_from_schema( $current_value, $property_value, $param . ' > ' . $property_key );
 				}
 
+				// If sanitization failed, return the WP_Error object straight away.
 				if ( is_wp_error( $current_value ) ) {
 					return $current_value;
 				}
 
 				if ( isset( $property_value['properties'] ) ) {
-					$sanitize_callback = $this->get_recursive_sanitize_callback( $property_value['properties'] );
-					return $sanitize_callback( $current_value, $request, $param . ' > ' . $property_key );
+					$sanitize_callback                 = $this->get_recursive_sanitize_callback( $property_value['properties'] );
+					$sanitized_values[ $property_key ] = $sanitize_callback( $current_value, $request, $param . ' > ' . $property_key );
+				} else {
+					$sanitized_values[ $property_key ] = $current_value;
 				}
 			}
 
-			return true;
+			return $sanitized_values;
 		};
 	}
 
