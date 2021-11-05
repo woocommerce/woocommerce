@@ -15,7 +15,19 @@
         "script": "lint:js"
 	  }
 	},
-    "test": {
+    "docker-up": {
+      "executor": "@nrwl/workspace:run-script",
+      "options": {
+        "script": "docker:up"
+	  }
+	},
+    "docker-down": {
+      "executor": "@nrwl/workspace:run-script",
+      "options": {
+        "script": "docker:down"
+	  }
+	},
+    "test-e2e": {
       "executor": "@nrwl/workspace:run-script",
       "options": {
         "script": "test:e2e"
