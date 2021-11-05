@@ -6,6 +6,7 @@ use Automattic\WooCommerce\Admin\API\Reports\Taxes\Stats\DataStore as TaxDataSto
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 use Automattic\WooCommerce\Admin\Loader;
+use Automattic\WooCommerce\Admin\PluginsHelper;
 
 /**
  * Tax Task
@@ -69,7 +70,8 @@ class Tax {
 				: __( "Let's go", 'woocommerce-admin' ),
 			'is_complete'  => get_option( 'wc_connect_taxes_enabled' ) ||
 				count( TaxDataStore::get_taxes( array() ) ) > 0 ||
-				false !== get_option( 'woocommerce_no_sales_tax' ),
+				false !== get_option( 'woocommerce_no_sales_tax' ) ||
+				PluginsHelper::is_plugin_active( 'woocommerce-avatax' ),
 			'is_visible'   => true,
 			'time'         => __( '1 minute', 'woocommerce-admin' ),
 		);

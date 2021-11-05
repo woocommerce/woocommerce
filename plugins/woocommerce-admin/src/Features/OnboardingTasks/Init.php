@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Admin\Features\OnboardingTasks\DeprecatedOptions;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\Appearance;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\Products;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\Tax;
+use Automattic\WooCommerce\Admin\PluginsHelper;
 
 /**
  * Contains the logic for completing onboarding tasks.
@@ -72,6 +73,7 @@ class Init {
 		$settings['hasProducts']                    = Products::has_products();
 		$settings['stylesheet']                     = get_option( 'stylesheet' );
 		$settings['taxJarActivated']                = class_exists( 'WC_Taxjar' );
+		$settings['avalaraActivated']               = PluginsHelper::is_plugin_active( 'woocommerce-avatax' );
 		$settings['themeMods']                      = get_theme_mods();
 
 		return $settings;

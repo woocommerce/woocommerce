@@ -12,10 +12,9 @@ import { useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { ConfigurationStepProps } from '.';
-import { SettingsSelector } from '../utils';
+import { SettingsSelector, TaxChildProps } from '../utils';
 
-export const ManualConfiguration: React.FC< ConfigurationStepProps > = ( {
+export const Configure: React.FC< TaxChildProps > = ( {
 	isPending,
 	onManual,
 } ) => {

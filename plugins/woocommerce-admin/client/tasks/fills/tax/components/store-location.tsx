@@ -10,25 +10,26 @@ import { useSelect, useDispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { ConfigurationStepProps } from '.';
-import { getCountryCode } from '../../../../dashboard/utils';
-import { hasCompleteAddress, SettingsSelector } from '../utils';
-import { default as StoreLocationForm } from '../../steps/location';
+import { getCountryCode } from '~/dashboard/utils';
+import { hasCompleteAddress, SettingsSelector, TaxChildProps } from '../utils';
+import { default as StoreLocationForm } from '~/tasks/fills/steps/location';
 
-export const StoreLocation: React.FC< ConfigurationStepProps > = ( {
-	isResolving,
-	nextStep,
-} ) => {
+export const StoreLocation: React.FC< {
+	nextStep: () => void;
+} > = ( { nextStep } ) => {
 	const { updateAndPersistSettingsForGroup } = useDispatch(
 		SETTINGS_STORE_NAME
 	);
-	const { generalSettings } = useSelect( ( select ) => {
-		const { getSettings } = select(
+	const { generalSettings, isResolving } = useSelect( ( select ) => {
+		const { getSettings, hasFinishedResolution } = select(
 			SETTINGS_STORE_NAME
 		) as SettingsSelector;
 
 		return {
 			generalSettings: getSettings( 'general' )?.general,
+			isResolving: ! hasFinishedResolution( 'getSettings', [
+				'general',
+			] ),
 		};
 	} );
 

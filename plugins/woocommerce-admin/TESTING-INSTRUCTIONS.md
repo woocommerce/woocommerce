@@ -1,5 +1,46 @@
 # Testing instructions
 
+## 2.9.0
+
+### Add Avalara to tax task #7874
+
+**Avalara supported, WooCommerce Tax supported**
+
+1. Select an Avalara and WC Tax supported country (e.g., `US`) for your store's country
+2. Visit the tax task.
+3. Make sure your shown the "WooCommerce Tax" and "Avalara" options in the task list
+
+**Avalara supported, WooCommerce Tax not supported**
+
+1. Install the TaxJar plugin so that WC Tax is not supported and set your country to an Avalara supported country
+2. Visit the task tax.
+3. Make sure you are shown only the partner card of Avalara
+
+**Avalara not supported, WooCommerce Tax not supported**
+
+1. Set your store country to one not supported by Avalara or WC Tax (e.g., New Caledonia)
+2. Visit the task tax.
+3. Make sure you are immediately shown the manual set up flow with the "Configure" button
+
+**Partner actions**
+1. Visit the task tax with an Avalara supported country
+2. Click Avalara and check that a new tab opens with the WCCOM plugin page
+3. Back on the task tax, click on WooCommerce Tax
+4. Make sure you are dropped into the old configuration flow (which should be identical to the old flow)
+
+**Events**
+1. Enter `localStorage.setItem( 'debug', 'wc-admin:*' );` in your browser's console
+2. Set your store's country to an Avalara supported country
+3. Note the `wcadmin_tasklist_tax_view_options` event occurs
+4. Click on each of the partner action buttons
+5. Make sure that `wcadmin_tasklist_tax_select_option` is recorded with the respective `selected_option` partner key.
+
+**Completion**
+1. Create a fresh site without ever having set any taxes
+2. Note the task is incomplete
+3. Install the WC Avalara plugin
+4. Check that the task is now marked complete
+
 ## 2.8.0
 
 ### Store Profiler and Product task - include Subscriptions #7734

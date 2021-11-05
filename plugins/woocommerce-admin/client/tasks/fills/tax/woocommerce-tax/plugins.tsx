@@ -8,32 +8,48 @@ import { OPTIONS_STORE_NAME, PLUGINS_STORE_NAME } from '@woocommerce/data';
 import { recordEvent, queueRecordEvent } from '@woocommerce/tracks';
 import { Text } from '@woocommerce/experimental';
 import { useDispatch, useSelect } from '@wordpress/data';
+import { useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
-import { createNoticesFromResponse } from '../../../../lib/notices';
-import { ConfigurationStepProps } from '.';
+import { createNoticesFromResponse } from '~/lib/notices';
+import { SetupStepProps } from './setup';
 import { SettingsSelector } from '../utils';
 
-export const Plugins: React.FC< ConfigurationStepProps > = ( {
+export const Plugins: React.FC< SetupStepProps > = ( {
 	nextStep,
 	onDisable,
 	onManual,
 	pluginsToActivate,
 } ) => {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
-	const { tosAccepted } = useSelect( ( select ) => {
-		const { getOption } = select( OPTIONS_STORE_NAME ) as SettingsSelector;
-		const { getActivePlugins } = select( PLUGINS_STORE_NAME );
+	const { isResolving, tosAccepted } = useSelect( ( select ) => {
+		const { getOption, hasFinishedResolution } = select(
+			OPTIONS_STORE_NAME
+		) as SettingsSelector;
 
 		return {
-			activePlugins: getActivePlugins(),
+			isResolving:
+				! hasFinishedResolution( 'getOption', [
+					'woocommerce_setup_jetpack_opted_in',
+				] ) ||
+				! hasFinishedResolution( 'getOption', [
+					'wc_connect_options',
+				] ),
 			tosAccepted:
 				getOption( 'wc_connect_options' )?.tos_accepted ||
 				getOption( 'woocommerce_setup_jetpack_opted_in' ) === '1',
 		};
 	} );
+
+	useEffect( () => {
+		if ( ! tosAccepted || pluginsToActivate.length ) {
+			return;
+		}
+
+		nextStep();
+	}, [ isResolving ] );
 
 	const agreementText = pluginsToActivate.includes( 'woocommerce-services' )
 		? __(
@@ -44,6 +60,10 @@ export const Plugins: React.FC< ConfigurationStepProps > = ( {
 				'By installing Jetpack you agree to the {{link}}Terms of Service{{/link}}.',
 				'woocommerce-admin'
 		  );
+
+	if ( isResolving ) {
+		return null;
+	}
 
 	return (
 		<>

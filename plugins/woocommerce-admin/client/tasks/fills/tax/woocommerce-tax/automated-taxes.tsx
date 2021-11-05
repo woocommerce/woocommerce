@@ -7,7 +7,12 @@ import interpolateComponents from 'interpolate-components';
 import { H } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 
-export const AutomatedTaxes = ( {
+/**
+ * Internal dependencies
+ */
+import { SetupStepProps } from './setup';
+
+export const AutomatedTaxes: React.FC< SetupStepProps > = ( {
 	isPending,
 	onAutomate,
 	onManual,

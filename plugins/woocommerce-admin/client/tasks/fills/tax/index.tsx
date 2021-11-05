@@ -2,36 +2,48 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Card, CardBody } from '@wordpress/components';
-import { difference } from 'lodash';
+import { Card, CardBody, Spinner } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { Spinner } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/wc-admin-settings';
 import {
 	ONBOARDING_STORE_NAME,
 	OPTIONS_STORE_NAME,
-	PLUGINS_STORE_NAME,
 	SETTINGS_STORE_NAME,
 } from '@woocommerce/data';
-import { queueRecordEvent } from '@woocommerce/tracks';
+import { queueRecordEvent, recordEvent } from '@woocommerce/tracks';
 import { registerPlugin } from '@wordpress/plugins';
-import { useEffect, useState } from '@wordpress/element';
+import { updateQueryString } from '@woocommerce/navigation';
+import {
+	useCallback,
+	useEffect,
+	useState,
+	createElement,
+} from '@wordpress/element';
 import { WooOnboardingTask } from '@woocommerce/onboarding';
 
 /**
  * Internal dependencies
  */
 import {
-	AUTOMATION_PLUGINS,
-	hasCompleteAddress,
 	redirectToTaxSettings,
 	SettingsSelector,
+	supportsAvalara,
 } from './utils';
-import { AutomatedTaxes } from './automated-taxes';
-import { ConfigurationStepper } from './configuration-stepper';
+import { Card as AvalaraCard } from './avalara/card';
+import { Card as WooCommerceTaxCard } from './woocommerce-tax/card';
 import { createNoticesFromResponse } from '../../../lib/notices';
-import { getCountryCode } from '../../../dashboard/utils';
-import './tax.scss';
+import { getCountryCode } from '~/dashboard/utils';
+import { ManualConfiguration } from './manual-configuration';
+import { Partners } from './components/partners';
+import { WooCommerceTax } from './woocommerce-tax';
+
+const TaskCard = ( { children } ) => {
+	return (
+		<Card className="woocommerce-task-card">
+			<CardBody>{ children }</CardBody>
+		</Card>
+	);
+};
 
 const Tax = ( { onComplete, query } ) => {
 	const [ isPending, setIsPending ] = useState( false );
@@ -42,64 +54,28 @@ const Tax = ( { onComplete, query } ) => {
 	);
 	const {
 		generalSettings,
-		isJetpackConnected,
 		isResolving,
-		pluginsToActivate,
 		tasksStatus,
 		taxSettings,
 	} = useSelect( ( select ) => {
-		const { getSettings } = select(
+		const { getSettings, hasFinishedResolution } = select(
 			SETTINGS_STORE_NAME
 		) as SettingsSelector;
-		const { getActivePlugins } = select( PLUGINS_STORE_NAME );
-		const activePlugins = getActivePlugins();
 
 		return {
 			generalSettings: getSettings( 'general' ).general,
-			isJetpackConnected: select(
-				PLUGINS_STORE_NAME
-			).isJetpackConnected(),
 			isResolving:
-				! select( PLUGINS_STORE_NAME ).hasFinishedResolution(
-					'isJetpackConnected'
-				) ||
-				! select(
-					SETTINGS_STORE_NAME
-				).hasFinishedResolution( 'getSettings', [ 'general' ] ) ||
+				! hasFinishedResolution( 'getSettings', [ 'general' ] ) ||
 				! select( ONBOARDING_STORE_NAME ).hasFinishedResolution(
 					'getTasksStatus'
 				),
-			pluginsToActivate: difference( AUTOMATION_PLUGINS, activePlugins ),
 			// @Todo this should be removed as soon as https://github.com/woocommerce/woocommerce-admin/pull/7841 is merged.
 			tasksStatus: select( ONBOARDING_STORE_NAME ).getTasksStatus(),
 			taxSettings: getSettings( 'tax' ).tax || {},
 		};
 	} );
 
-	const supportsAutomatedTaxes = () => {
-		const {
-			automatedTaxSupportedCountries = [],
-			taxJarActivated,
-		} = tasksStatus;
-
-		return (
-			! taxJarActivated && // WCS integration doesn't work with the official TaxJar plugin.
-			automatedTaxSupportedCountries.includes(
-				getCountryCode( generalSettings?.woocommerce_default_country )
-			)
-		);
-	};
-
-	const canAutomateTaxes = () => {
-		return (
-			hasCompleteAddress( generalSettings ) &&
-			! pluginsToActivate.length &&
-			isJetpackConnected &&
-			supportsAutomatedTaxes()
-		);
-	};
-
-	const onManual = async () => {
+	const onManual = useCallback( async () => {
 		setIsPending( true );
 		if ( generalSettings.woocommerce_calc_taxes !== 'yes' ) {
 			updateAndPersistSettingsForGroup( 'tax', {
@@ -122,9 +98,9 @@ const Tax = ( { onComplete, query } ) => {
 		} else {
 			redirectToTaxSettings();
 		}
-	};
+	}, [] );
 
-	const onAutomate = () => {
+	const onAutomate = useCallback( () => {
 		setIsPending( true );
 		updateAndPersistSettingsForGroup( 'tax', {
 			tax: {
@@ -147,9 +123,9 @@ const Tax = ( { onComplete, query } ) => {
 			)
 		);
 		onComplete();
-	};
+	}, [] );
 
-	const onDisable = () => {
+	const onDisable = useCallback( () => {
 		setIsPending( true );
 		queueRecordEvent( 'tasklist_tax_connect_store', {
 			connect: false,
@@ -162,40 +138,121 @@ const Tax = ( { onComplete, query } ) => {
 		} ).then( () => {
 			window.location.href = getAdminLink( 'admin.php?page=wc-admin' );
 		} );
+	}, [] );
+
+	const getVisiblePartners = () => {
+		const countryCode = getCountryCode(
+			generalSettings?.woocommerce_default_country
+		);
+		const {
+			automatedTaxSupportedCountries = [],
+			taxJarActivated,
+		} = tasksStatus;
+
+		const partners = [
+			{
+				id: 'woocommerce-tax',
+				card: WooCommerceTaxCard,
+				component: WooCommerceTax,
+				isVisible:
+					! taxJarActivated && // WCS integration doesn't work with the official TaxJar plugin.
+					automatedTaxSupportedCountries.includes(
+						getCountryCode(
+							generalSettings?.woocommerce_default_country
+						)
+					),
+			},
+			{
+				id: 'avalara',
+				card: AvalaraCard,
+				component: null,
+				isVisible: supportsAvalara( countryCode ),
+			},
+		];
+
+		return partners.filter( ( partner ) => partner.isVisible );
 	};
+
+	const partners = getVisiblePartners();
 
 	useEffect( () => {
 		const { auto } = query;
 
 		if ( auto === 'true' ) {
 			onAutomate();
+			return;
 		}
+
+		if ( query.partner ) {
+			return;
+		}
+
+		recordEvent( 'tasklist_tax_view_options', {
+			options: partners.map( ( partner ) => partner.id ),
+		} );
 	}, [] );
 
-	if ( isResolving ) {
-		return <Spinner />;
-	}
+	const getCurrentPartner = () => {
+		if ( ! query.partner ) {
+			return null;
+		}
+
+		return (
+			partners.find( ( partner ) => partner.id === query.partner ) || null
+		);
+	};
+
+	useEffect( () => {
+		if ( partners.length > 1 || query.partner ) {
+			return;
+		}
+
+		if ( partners.length === 1 && partners[ 0 ].component ) {
+			updateQueryString( {
+				partner: partners[ 0 ].id,
+			} );
+		}
+	}, [ partners ] );
 
 	const childProps = {
 		isPending,
 		onAutomate,
 		onManual,
 		onDisable,
-		supportsAutomatedTaxes: supportsAutomatedTaxes(),
+		tasksStatus,
 	};
 
+	if ( isResolving ) {
+		return <Spinner />;
+	}
+
+	const currentPartner = getCurrentPartner();
+
+	if ( ! partners.length ) {
+		return (
+			<TaskCard>
+				<ManualConfiguration { ...childProps } />
+			</TaskCard>
+		);
+	}
+
+	if ( currentPartner ) {
+		return (
+			<TaskCard>
+				{ createElement( currentPartner.component, childProps ) }
+			</TaskCard>
+		);
+	}
+
 	return (
-		<div className="woocommerce-task-tax">
-			<Card className="woocommerce-task-card">
-				<CardBody>
-					{ canAutomateTaxes() ? (
-						<AutomatedTaxes { ...childProps } />
-					) : (
-						<ConfigurationStepper { ...childProps } />
-					) }
-				</CardBody>
-			</Card>
-		</div>
+		<Partners>
+			{ partners.map( ( partner ) =>
+				createElement( partner.card, {
+					key: partner.id,
+					...childProps,
+				} )
+			) }
+		</Partners>
 	);
 };
 
