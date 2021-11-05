@@ -1,18 +1,15 @@
 # Setup Instructions for Windows Subsystem for Linux (WSL)
 
-You can set up a local development environment on Windows with [Windows Subsystem for Linux (WSL)](https://docs.microsoft.com/en-us/windows/wsl/).
+You can set up a local development environment on Windows with [Windows Subsystem for Linux (WSL)](https://docs.microsoft.com/en-us/windows/wsl/). The following instructions are for Ubuntu 20.04.
 
-## Ubuntu 20.04
-The following instructions are for Ubuntu 20.04.
-
-### Pre-requisites
+## Pre-requisites
 
 You should have the following already set up on your Windows computer:
 - **Docker Desktop for Windows** - https://docs.docker.com/docker-for-windows/install/
 - **WSL 2** - https://docs.microsoft.com/en-us/windows/wsl/install
 - **Ubuntu 20.04 set as default Linux distribution** - https://docs.microsoft.com/en-us/windows/wsl/wsl-config#list-installed-distributions
 
-### Setup Steps
+## Setup Steps
 
 Update and upgrade packages.
 ```bash
