@@ -75,6 +75,44 @@ class BlockTemplateUtils {
 	}
 
 	/**
+	 * Build a unified template object based a post Object.
+	 *
+	 * @param \WP_Post $post Template post.
+	 *
+	 * @return \WP_Block_Template|\WP_Error Template.
+	 */
+	public static function gutenberg_build_template_result_from_post( $post ) {
+		$terms = get_the_terms( $post, 'wp_theme' );
+
+		if ( is_wp_error( $terms ) ) {
+			return $terms;
+		}
+
+		if ( ! $terms ) {
+			return new \WP_Error( 'template_missing_theme', __( 'No theme is defined for this template.', 'woo-gutenberg-products-block' ) );
+		}
+
+		$theme          = $terms[0]->name;
+		$has_theme_file = true;
+
+		$template                 = new \WP_Block_Template();
+		$template->wp_id          = $post->ID;
+		$template->id             = $theme . '//' . $post->post_name;
+		$template->theme          = $theme;
+		$template->content        = $post->post_content;
+		$template->slug           = $post->post_name;
+		$template->source         = 'custom';
+		$template->type           = $post->post_type;
+		$template->description    = $post->post_excerpt;
+		$template->title          = $post->post_title;
+		$template->status         = $post->post_status;
+		$template->has_theme_file = $has_theme_file;
+		$template->is_custom      = true;
+
+		return $template;
+	}
+
+	/**
 	 * Build a unified template object based on a theme file.
 	 *
 	 * @param array $template_file Theme file.
@@ -83,23 +121,20 @@ class BlockTemplateUtils {
 	 * @return \WP_Block_Template Template.
 	 */
 	public static function gutenberg_build_template_result_from_file( $template_file, $template_type ) {
+		$template_file = (object) $template_file;
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-		$template_content = file_get_contents( $template_file['path'] );
-		$theme            = wp_get_theme()->get_stylesheet();
-
+		$template_content         = file_get_contents( $template_file->path );
 		$template                 = new \WP_Block_Template();
-		$template->id             = $theme . '//' . $template_file['slug'];
-		$template->theme          = $theme;
+		$template->id             = 'woocommerce//' . $template_file->slug;
+		$template->theme          = 'woocommerce';
 		$template->content        = self::gutenberg_inject_theme_attribute_in_content( $template_content );
-		$template->slug           = $template_file['slug'];
 		$template->source         = 'woocommerce';
+		$template->slug           = $template_file->slug;
 		$template->type           = $template_type;
-		$template->title          = ! empty( $template_file['title'] ) ? $template_file['title'] : $template_file['slug'];
+		$template->title          = ! empty( $template_file->title ) ? $template_file->title : self::convert_slug_to_title( $template_file->slug );
 		$template->status         = 'publish';
 		$template->has_theme_file = true;
 		$template->is_custom      = false; // Templates loaded from the filesystem aren't custom, ones that have been edited and loaded from the DB are.
-		$template->title          = self::convert_slug_to_title( $template_file['slug'] );
-
 		return $template;
 	}
 
