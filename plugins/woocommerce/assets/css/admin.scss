@@ -7688,5 +7688,68 @@ table.bar_chart {
 
 @media screen and (min-width: 1280px) {
 
+	.current-section-name {
+		display: none;
+	}
 
+	.wc-addons-wrap {
+		.current-section-dropdown {
+			background: none;
+			border: none;
+			width: 100%;
+
+			ul {
+				background: none;
+				border: none;
+				display: flex;
+				flex-direction: row;
+				flex-wrap: wrap;
+				justify-content: flex-start;
+				padding: 0;
+				position: static;
+
+				a {
+					color: #2271b1;
+					padding: 10px 0 10px 14px;
+
+					&::after {
+						color: #ccc;
+						content: '|';
+						display: inline-block;
+						margin-left: 14px;
+					}
+				}
+
+				a:visited {
+					color: #2271b1;
+				}
+
+				a:hover,
+				a:active {
+					color: #135e96;
+				}
+
+				a.current {
+					color: #1e1e1e;
+
+					&::after {
+						background: none;
+						color: #ccc;
+						content: '|';
+						display: inline-block;
+						height: auto;
+						margin-left: 14px;
+						position: static;
+						width: auto;
+					}
+				}
+			}
+
+			li:last-child {
+				a::after {
+					display: none;
+				}
+			}
+		}
+	}
 }
