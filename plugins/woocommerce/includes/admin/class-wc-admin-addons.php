@@ -26,7 +26,7 @@ class WC_Admin_Addons {
 	 * @return array of objects
 	 */
 	public static function get_featured() {
-		$featured = get_transient( 'wc_addons_featured' );
+		$featured = get_transient( 'wc_addons_featured_2' );
 		if ( false === $featured ) {
 			$headers = array();
 			$auth    = WC_Helper_Options::get( 'auth' );
@@ -46,7 +46,7 @@ class WC_Admin_Addons {
 			if ( ! is_wp_error( $raw_featured ) ) {
 				$featured = json_decode( wp_remote_retrieve_body( $raw_featured ) );
 				if ( $featured ) {
-					set_transient( 'wc_addons_featured', $featured, DAY_IN_SECONDS );
+					set_transient( 'wc_addons_featured_2', $featured, DAY_IN_SECONDS );
 				}
 			}
 		}
