@@ -38,6 +38,8 @@ final class AssetsController {
 		add_action( 'body_class', array( $this, 'add_theme_body_class' ), 1 );
 		add_action( 'admin_body_class', array( $this, 'add_theme_body_class' ), 1 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'update_block_style_dependencies' ), 20 );
+		add_action( 'wp_enqueue_scripts', array( $this, 'update_block_settings_dependencies' ), 100 );
+		add_action( 'admin_enqueue_scripts', array( $this, 'update_block_settings_dependencies' ), 100 );
 	}
 
 	/**
@@ -147,6 +149,44 @@ final class AssetsController {
 			! in_array( 'woocommerce-general', $style->deps, true )
 		) {
 			$style->deps[] = 'woocommerce-general';
+		}
+	}
+
+	/**
+	 * Fix scripts with wc-settings dependency.
+	 *
+	 * The wc-settings script only works correctly when enqueued in the footer. This is to give blocks etc time to
+	 * register their settings data before it's printed.
+	 *
+	 * This code will look at registered scripts, and if they have a wc-settings dependency, force them to print in the
+	 * footer instead of the header.
+	 *
+	 * This only supports packages known to require wc-settings!
+	 *
+	 * @see https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/5052
+	 */
+	public function update_block_settings_dependencies() {
+		$wp_scripts     = wp_scripts();
+		$known_packages = [ 'wc-settings', 'wc-blocks-checkout', 'wc-price-format' ];
+
+		foreach ( $wp_scripts->registered as $handle => $script ) {
+			// scripts that are loaded in the footer has extra->group = 1.
+			if ( array_intersect( $known_packages, $script->deps ) && ! isset( $script->extra['group'] ) ) {
+				// Append the script to footer.
+				$wp_scripts->add_data( $handle, 'group', 1 );
+				// Show a warning.
+				$error_handle  = 'wc-settings-dep-in-header';
+				$used_deps     = implode( ', ', array_intersect( $known_packages, $script->deps ) );
+				$error_message = "Scripts that have a dependency on [$used_deps] must be loaded in the footer, {$handle} was registered to load in the header, but has been switched to load in the footer instead. See https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5059";
+				// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.NotInFooter,WordPress.WP.EnqueuedResourceParameters.MissingVersion
+				wp_register_script( $error_handle, '' );
+				wp_enqueue_script( $error_handle );
+				wp_add_inline_script(
+					$error_handle,
+					sprintf( 'console.warn( "%s" );', $error_message )
+				);
+
+			}
 		}
 	}
 }
