@@ -26,6 +26,9 @@ export { default as hubspotForWoocommerce } from './library/hubspot';
 // Mailchimp
 export { default as mailchimpForWoocommerce } from './library/mailchimp';
 
+// MailPoet
+export { default as mailpoet } from './library/mailpoet';
+
 // Coupons
 export { default as woocommerceStoreCredit } from './library/currency-dollar';
 export { default as woocommerceFreeGiftCoupons } from './library/gift';
