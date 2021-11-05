@@ -6,6 +6,9 @@ Thumbs.db
 .idea
 .vscode/
 
+# Eslint Cache
+.eslintcache
+
 # Environment files
 wp-cli.local.yml
 .wp-env.override.json
