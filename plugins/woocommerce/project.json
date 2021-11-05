@@ -1,5 +1,25 @@
 {
   "root": "plugins/woocommerce/",
   "sourceRoot": "plugins/woocommerce",
-  "projectType": "application"
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/workspace:run-script",
+      "options": {
+        "script": "build"
+	  }
+	},
+    "lint": {
+      "executor": "@nrwl/workspace:run-script",
+      "options": {
+        "script": "lint:js"
+	  }
+	},
+    "test": {
+      "executor": "@nrwl/workspace:run-script",
+      "options": {
+        "script": "test:e2e"
+	  }
+	}
+  }
 }
