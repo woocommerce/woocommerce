@@ -160,10 +160,14 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 5.9.0 beta 2021-10-19 =
+= 5.9.0 2021-11-09 =
 
 **WooCommerce**
 
+* Fix - Bug in the handling of remote file names for downloadable files.
+* Fix - Remove the absolute path to the currency-info.php from within locale-info.php. #31036
+* Fix - wc_get_price_excluding_tax when an order with no customer is passed. #31015
+* Fix - Rename transient used to cache data for Featured page of In-App Marketplace. #31002
 * Fix - Variable product price caching bug with VAT exemption. #30889
 * Fix - Allow to pass null as the email for billing addresses in REST API. #30850
 * Fix - Ensure woocommerce_cancel_unpaid_orders event is always re-scheduled. #30830
@@ -173,13 +177,16 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Dev - Add mobile data to WCTracker. #30415
 * Tweak - Remove hardcode category banners in Settings > Marketplace and use the WooCommerce.com API instead. #30938
 * Tweak - Show a search again message when marketplace results are empty. #30642
+* Tweak - Add promoted cards styling to marketplace section. #30861
 * Enhancement - Add ratings, reviews and icons into Marketplace's Product Cards. #30840
 * Enhancement - Update Storefront banner width and track links in the marketplace page. #30882
 * Enhancement - Revamp the WooCommerce Marketplace page. #30900
 
-**WooCommerce Admin - 2.8.0 RC 2**
+**WooCommerce Admin - 2.8.0 **
 
-* Add - Store Profiler and Product task - include Subscriptions. #7734
+* Fix - Issue where stock activity panel was not rendering correctly. #7817
+* Fix - Increase CSS specificity to avoid conflicts and broken panel styling. #7813
+* Fix - Updated link to WooCommerce Developers Blog in readme.txt. #7824
 * Fix - Fixed navigation menu text color after Gutenberg 11.6.0. #7771
 * Fix - Add status param to notes/delete/all REST endpoint, to correctly delete all notes. #7743
 * Fix - Allow already installed marketing extensions to be activated. #7740
@@ -189,9 +196,12 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Fixing an unwanted page refresh when using Woo Navigation. #7615
 * Fix - Fix naming of event names and properties. #7677
 * Fix - Fix white screen for variation analytic data without a name. #7686
+* Add - Store Profiler and Product task - include Subscriptions. #7734
+* Update - Update WC pay supported country list for the default free extensions. #7873
 * Update - Update back up copy of free extension for Google Listing & Ads plugin. #7798
 * Update - Update Eway payment gateway capitalization (was eWAY). #7678
 * Update - Enable Square in France. #7679
+* Enhancement - Only load tasks during rest api requests. #7856
 * Enhancement - Add experiment for promoting WooCommerce Payments in payment methods table. #7666
 
 **WooCommerce Blocks - 6.0.0 & 6.0.1 & 6.0.2 & 6.1.0**
