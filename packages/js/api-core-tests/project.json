@@ -1,5 +1,13 @@
 {
   "root": "packages/js/api-core-tests/",
   "sourceRoot": "packages/js/api-core-tests",
-  "projectType": "library"
+  "projectType": "library",
+  "targets": {
+    "test": {
+      "executor": "@nrwl/workspace:run-script",
+      "options": {
+        "script": "test"
+	  }
+	}
+  }
 }
