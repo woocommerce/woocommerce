@@ -21,7 +21,6 @@ Automated end-to-end tests for WooCommerce.
   - [How to run an individual test](#how-to-run-an-individual-test)
   - [How to skip tests](#how-to-skip-tests)
   - [How to run tests using custom WordPress, PHP and MariaDB versions](#how-to-run-tests-using-custom-wordpress,-php-and-mariadb-versions)
-  - [How to run tests in Windows Subsystem for Linux (WSL)](#how-to-run-tests-in-windows-subsystem-for-linux-wsl)
 - [Guide for writing e2e tests](#guide-for-writing-e2e-tests) 
   - [Tools for writing tests](#tools-for-writing-tests)
   - [Creating test structure](#creating-test-structure)
@@ -97,6 +96,8 @@ export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 Puppeteer will still automatically download Chromium when needed.
 
 ## Running tests
+
+If you're using [Windows Subsystem for Linux (WSL)](https://docs.microsoft.com/en-us/windows/wsl/), follow the instructions in [./WSL_SETUP_INSTRUCTIONS.md] first before proceeding with the steps below.
 
 ### Prep work for running tests
 
