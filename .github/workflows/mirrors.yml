@@ -30,10 +30,11 @@ jobs:
               run: |
                   touch mirrors.txt
                   echo "woocommerce/woocommerce-production" >> mirrors.txt
-                  GIT_SLUG=woocommerce-production
                   
             - name: Push to mirror
               uses: Automattic/action-push-to-mirrors@v1
+              env:
+                GIT_SLUG: woocommerce-production
               with:
                   source-directory: ${{ github.workspace }}/monorepo
                   token: ${{ secrets.API_TOKEN_GITHUB }}
