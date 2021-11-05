@@ -155,7 +155,7 @@ describe( 'InboxNoteCard', () => {
 	} );
 
 	describe( 'callbacks', () => {
-		it( 'should call onDismiss with note type when "Dismiss this message" is clicked', () => {
+		it( 'should call onDismiss with note when "Dismiss this message" is clicked', () => {
 			const onDismiss = jest.fn();
 			const { getByText } = render(
 				<InboxNoteCard
@@ -166,23 +166,7 @@ describe( 'InboxNoteCard', () => {
 				/>
 			);
 			userEvent.click( getByText( 'Dismiss' ) );
-			userEvent.click( getByText( 'Dismiss this message' ) );
-			expect( onDismiss ).toHaveBeenCalledWith( note, 'note' );
-		} );
-
-		it( 'should call onDismiss with all type when "Dismiss all messages" is clicked', () => {
-			const onDismiss = jest.fn();
-			const { getByText } = render(
-				<InboxNoteCard
-					key={ note.id }
-					note={ note }
-					lastRead={ lastRead }
-					onDismiss={ onDismiss }
-				/>
-			);
-			userEvent.click( getByText( 'Dismiss' ) );
-			userEvent.click( getByText( 'Dismiss all messages' ) );
-			expect( onDismiss ).toHaveBeenCalledWith( note, 'all' );
+			expect( onDismiss ).toHaveBeenCalledWith( note );
 		} );
 
 		it( 'should call onNoteActionClick with specific action when action is clicked', () => {

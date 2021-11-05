@@ -4,7 +4,7 @@
 	background: $studio-white;
 	border-radius: 2px;
 	@include font-size( 13 );
-	margin: 0 0 $gap-large;
+	margin: 0 0;
 	-ms-box-orient: horizontal;
 	&.banner {
 		-webkit-flex-direction: column;
@@ -22,13 +22,21 @@
 			height: 100%;
 		}
 	}
+	&:hover {
+		background: $gray-100;
+		cursor: pointer;
+		.woocommerce-inbox-message__actions button.woocommerce-admin-dismiss-notification {
+			visibility: visible;
+		}
+	}
 
 	.woocommerce-homepage-column & {
 		margin: 20px 0;
 	}
 
 	&:not(.is-placeholder) {
-		border: 1px solid $gray-200;
+		border: 0;
+		border-bottom: 1px solid $gray-200;
 	}
 
 	.line {
@@ -91,6 +99,10 @@
 	}
 }
 
+.woocommerce-inbox-message__wrapper .woocommerce-inbox-message__content {
+	padding-bottom: 0;
+}
+
 .woocommerce-inbox-message__text {
 	color: $gray-700;
 	font-style: normal;
@@ -114,9 +126,6 @@
 }
 
 .woocommerce-inbox-message__actions {
-	padding-top: $gap;
-	border-top: 1px solid $gray-200;
-
 	// Ensures any immediate child with a sibling has space between the items
 	& > * + * {
 		margin-left: 0.5em;
@@ -125,7 +134,21 @@
 	a,
 	button {
 		cursor: pointer;
+		&.is-link {
+			text-decoration: none;
+		}
 	}
+
+	border-top: 0;
+
+	button.woocommerce-admin-dismiss-notification {
+		color: $gray-700;
+		&:hover {
+			box-shadow: none !important;
+		}
+		visibility: hidden;
+	}
+
 	.components-dropdown {
 		display: inline;
 
@@ -150,6 +173,10 @@
 		}
 	}
 }
+.woocommerce-inbox-message__wrapper .woocommerce-inbox-message__actions {
+	padding-top: 0;
+}
+
 .woocommerce-inbox-dismiss-confirmation_modal {
 	text-align: left;
 }

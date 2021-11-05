@@ -34,3 +34,9 @@
 	transform: translateX(50%);
 	transition: opacity 500ms, transform 500ms, max-height 500ms;
 }
+
+.wooocommerce-inbox-card__header {
+	.woocommerce-badge {
+		margin-left: 16px;
+	}
+}

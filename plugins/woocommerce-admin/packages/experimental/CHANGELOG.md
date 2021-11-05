@@ -1,6 +1,7 @@
 # Unreleased
 
 -   Renaming remindMeLater() to onSnooze() for consistency. #7616
+-   Applied new Inbox 2.0 design to the inbox-note component. #7864
 
 # 2.0.3
 

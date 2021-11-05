@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { createElement, Fragment, useState, useRef } from '@wordpress/element';
-import { Button, Dropdown, Popover } from '@wordpress/components';
+import { Button } from '@wordpress/components';
 import VisibilitySensor from 'react-visibility-sensor';
 import moment from 'moment';
 import classnames from 'classnames';
@@ -51,16 +51,12 @@ type InboxNote = {
 type InboxNoteProps = {
 	note: InboxNote;
 	lastRead: number;
-	onDismiss?: ( note: InboxNote, type: 'all' | 'note' ) => void;
+	onDismiss?: ( note: InboxNote ) => void;
 	onNoteActionClick?: ( note: InboxNote, action: InboxNoteAction ) => void;
 	onBodyLinkClick?: ( note: InboxNote, link: string ) => void;
 	onNoteVisible?: ( note: InboxNote ) => void;
 	className?: string;
 };
-
-const DropdownWithPopoverProps = Dropdown as React.ComponentType<
-	Dropdown.Props & { popoverProps: Omit< Popover.Props, 'children' > }
->;
 
 const InboxNoteCard: React.FC< InboxNoteProps > = ( {
 	note,
@@ -73,7 +69,6 @@ const InboxNoteCard: React.FC< InboxNoteProps > = ( {
 } ) => {
 	const [ clickedActionText, setClickedActionText ] = useState( false );
 	const hasBeenSeen = useRef( false );
-	const toggleButtonRef = useRef< HTMLButtonElement >( null );
 	const linkCallbackRef = useCallbackOnLinkClick( ( innerLink ) => {
 		if ( onBodyLinkClick ) {
 			onBodyLinkClick( note, innerLink );
@@ -91,101 +86,18 @@ const InboxNoteCard: React.FC< InboxNoteProps > = ( {
 		}
 	};
 
-	const handleBlur = ( event: React.FocusEvent, onClose: () => void ) => {
-		const dropdownClasses = [
-			'woocommerce-admin-dismiss-notification',
-			'components-popover__content',
-			'components-dropdown__content',
-		];
-		// This line is for IE compatibility.
-		let relatedTarget: EventTarget | Element | null = null;
-		if ( event.relatedTarget ) {
-			relatedTarget = event.relatedTarget;
-		} else if ( toggleButtonRef.current ) {
-			const ownerDoc = toggleButtonRef.current.ownerDocument;
-			relatedTarget = ownerDoc ? ownerDoc.activeElement : null;
-		}
-		let isClickOutsideDropdown = false;
-		if ( relatedTarget && 'className' in relatedTarget ) {
-			const classNames = relatedTarget.className;
-			isClickOutsideDropdown = dropdownClasses.some( ( cName ) =>
-				classNames.includes( cName )
-			);
-		}
-		if ( isClickOutsideDropdown ) {
-			event.preventDefault();
-		} else {
-			onClose();
-		}
-	};
-
-	const onDropdownDismiss = (
-		type: 'note' | 'all',
-		onToggle: () => void
-	) => {
-		if ( onDismiss ) {
-			onDismiss( note, type );
-		}
-		onToggle();
-	};
-
 	const renderDismissButton = () => {
 		if ( clickedActionText ) {
 			return null;
 		}
 
 		return (
-			<DropdownWithPopoverProps
-				contentClassName="woocommerce-admin-dismiss-dropdown"
-				position="bottom right"
-				renderToggle={ ( { onClose, onToggle } ) => (
-					<Button
-						isTertiary
-						onClick={ ( event: React.MouseEvent ) => {
-							( event.target as HTMLElement ).focus();
-							onToggle();
-						} }
-						ref={ toggleButtonRef }
-						onBlur={ ( event: React.FocusEvent ) =>
-							handleBlur( event, onClose )
-						}
-					>
-						{ __( 'Dismiss', 'woocommerce-admin' ) }
-					</Button>
-				) }
-				focusOnMount={ false }
-				popoverProps={ { noArrow: true } }
-				renderContent={ ( { onToggle } ) => (
-					<ul>
-						<li>
-							<Button
-								className="woocommerce-admin-dismiss-notification"
-								onClick={ () =>
-									onDropdownDismiss( 'note', onToggle )
-								}
-							>
-								{ __(
-									'Dismiss this message',
-									'woocommerce-admin'
-								) }
-							</Button>
-						</li>
-						<li>
-							<Button
-								className="woocommerce-admin-dismiss-notification"
-								onClick={ () =>
-									onDropdownDismiss( 'all', onToggle )
-								}
-							>
-								{ __(
-									'Dismiss all messages',
-									'woocommerce-admin'
-								) }
-							</Button>
-						</li>
-					</ul>
-				) }
-			/>
+			<Button
+				className="woocommerce-admin-dismiss-notification"
+				onClick={ () => onDismiss && onDismiss( note ) }
+			>
+				{ __( 'Dismiss', 'woocommerce-admin' ) }
+			</Button>
 		);
 	};
 
@@ -249,7 +161,7 @@ const InboxNoteCard: React.FC< InboxNoteProps > = ( {
 		! dateCreatedGmt ||
 		new Date( dateCreatedGmt + 'Z' ).getTime() > lastRead;
 	const date = dateCreated;
-	const hasImage = layout !== 'plain' && layout !== '';
+	const hasImage = layout === 'thumbnail';
 	const cardClassName = classnames(
 		'woocommerce-inbox-message',
 		className,

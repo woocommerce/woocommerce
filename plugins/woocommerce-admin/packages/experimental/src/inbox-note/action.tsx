@@ -47,7 +47,7 @@ export const InboxNoteActionButton: React.FC< InboxNoteActionProps > = ( {
 
 	return (
 		<Button
-			isSecondary
+			isLink={ true }
 			isBusy={ inAction }
 			disabled={ inAction }
 			href={ href }
