@@ -37,7 +37,7 @@ class WC_Template_Loader {
 	 * Hook in methods.
 	 */
 	public static function init() {
-		self::$theme_support = current_theme_supports( 'woocommerce' );
+		self::$theme_support = wc_current_theme_supports_woocommerce_or_fse();
 		self::$shop_page_id  = wc_get_page_id( 'shop' );
 
 		// Supported themes.
