@@ -8,6 +8,7 @@ const shippingZoneEndpoint = '/wc/v3/shipping/zones';
 const shippingClassesEndpoint = '/wc/v3/products/shipping_classes';
 const userEndpoint = '/wp/v2/users';
 const systemStatusEndpoint = '/wc/v3/system_status';
+const productsEndpoint = '/wc/v3/products';
 const productCategoriesEndpoint = '/wc/v3/products/categories';
 
 /**
@@ -84,6 +85,55 @@ export const withRestApi = {
 	deleteAllProducts: async () => {
 		const repository = SimpleProduct.restRepository( client );
 		await deleteAllRepositoryObjects( repository );
+	},
+	/**
+	 * Use the API to delete all product attributes.
+	 *
+	 * @return {Promise} Promise resolving once attributes have been deleted.
+	 */
+	deleteAllProductAttributes: async () => {
+		const productAttributesPath = productsEndpoint + '/attributes';
+		const productAttributes = await client.get( productAttributesPath );
+		if ( productAttributes.data && productAttributes.data.length ) {
+			for ( let a = 0; a < productAttributes.data.length; a++ ) {
+				const response = await client.delete( productAttributesPath + `/${productAttributes.data[a].id}?force=true` );
+				expect( response.status ).toBe( 200 );
+			}
+		}
+	},
+	/**
+	 * Use the API to delete all product categories.
+	 *
+	 * @return {Promise} Promise resolving once categories have been deleted.
+	 */
+	deleteAllProductCategories: async () => {
+		const productCategoriesPath = productsEndpoint + '/categories';
+		const productCategories = await client.get( productCategoriesPath );
+		if ( productCategories.data && productCategories.data.length ) {
+			for ( let c = 0; c < productCategories.data.length; c++ ) {
+				// The default `uncategorized` category can't be deleted
+				if ( productCategories.data[c].id == 0 ) {
+					continue;
+				}
+				const response = await client.delete( productCategoriesPath + `/${productCategories.data[c].id}?force=true` );
+				expect( response.status ).toBe( 200 );
+			}
+		}
+	},
+	/**
+	 * Use the API to delete all product tags.
+	 *
+	 * @return {Promise} Promise resolving once tags have been deleted.
+	 */
+	deleteAllProductTags: async () => {
+		const productTagsPath = productsEndpoint + '/tags';
+		const productTags = await client.get( productTagsPath );
+		if ( productTags.data && productTags.data.length ) {
+			for ( let t = 0; t < productTags.data.length; t++ ) {
+				const response = await client.delete( productTagsPath + `/${productTags.data[t].id}?force=true` );
+				expect( response.status ).toBe( 200 );
+			}
+		}
 	},
 	/**
 	 * Use api package to delete all orders.

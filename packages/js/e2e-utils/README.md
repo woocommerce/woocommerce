@@ -154,6 +154,9 @@ Please note: if you're using a non-SSL environment (such as a Docker container f
 | `updateSettingOption` | `settingsGroup`, `settingID`, `payload` | Update a settings group |
 | `updatePaymentGateway`| `paymentGatewayId`, `payload` | Update a payment gateway |
 | `getSystemEnvironment` | | Get the current environment from the WooCommerce system status API. |
+| `deleteAllProductAttributes` | | Permanently delete all product attributes. |
+| `deleteAllProductCategories` | | Permanently delete all product categories. |
+| `deleteAllProductTags` | | Permanently delete all product tags. |
 | `createProductCategory` | `categoryName` | Create a product category with the provided name. |
 
 ### Classes
