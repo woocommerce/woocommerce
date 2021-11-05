@@ -256,10 +256,6 @@ The full command to build the site will look as follows:
 TRAVIS_MARIADB_VERSION=10.5.3 TRAVIS_PHP_VERSION=7.4.5 WP_VERSION=5.4.1 npx wc-e2e docker:up
 ```
 
-### How to run tests in Windows Subsystem for Linux (WSL)
-
-Please see the instructions in [WSL_SETUP_INSTRUCTIONS.md](./WSL_SETUP_INSTRUCTIONS.md).
-
 ## Guide for writing e2e tests
 
 ### Tools for writing tests
