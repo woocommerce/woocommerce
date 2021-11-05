@@ -1,5 +1,25 @@
 {
   "root": "packages/js/api/",
   "sourceRoot": "packages/js/api/src",
-  "projectType": "library"
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/workspace:run-script",
+      "options": {
+        "script": "build"
+	  }
+	},
+    "lint": {
+      "executor": "@nrwl/workspace:run-script",
+      "options": {
+        "script": "lint"
+	  }
+	},
+    "test": {
+      "executor": "@nrwl/workspace:run-script",
+      "options": {
+        "script": "test"
+	  }
+	}
+  }
 }
