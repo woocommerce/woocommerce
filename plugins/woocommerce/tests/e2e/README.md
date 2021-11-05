@@ -97,7 +97,7 @@ Puppeteer will still automatically download Chromium when needed.
 
 ## Running tests
 
-If you're using [Windows Subsystem for Linux (WSL)](https://docs.microsoft.com/en-us/windows/wsl/), follow the instructions in [./WSL_SETUP_INSTRUCTIONS.md] first before proceeding with the steps below.
+If you're using [Windows Subsystem for Linux (WSL)](https://docs.microsoft.com/en-us/windows/wsl/), follow the [WSL Setup Instructions](./WSL_SETUP_INSTRUCTIONS.md) first before proceeding with the steps below.
 
 ### Prep work for running tests
 
