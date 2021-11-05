@@ -19,7 +19,8 @@
 		"wp-phpunit/wp-phpunit": "^5.4",
 		"woocommerce/woocommerce-sniffs": "0.1.0",
 		"yoast/phpunit-polyfills": "^1.0",
-		"johnbillion/wp-hooks-generator": "0.6.1"
+		"johnbillion/wp-hooks-generator": "0.6.1",
+		"mockery/mockery": "^1.4"
 	},
 	"autoload": {
 		"psr-4": {
