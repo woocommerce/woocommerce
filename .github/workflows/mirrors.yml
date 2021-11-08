@@ -48,6 +48,7 @@ jobs:
             - name: Extract and replace WooCommerce zip.
               working-directory: tmp/woocommerce-build
               run: |
+                  mkdir -p woocommerce/woocommerce-production
                   unzip woocommerce.zip -d woocommerce/woocommerce-production
                   pwd
                   ls
