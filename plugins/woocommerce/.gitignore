@@ -1,20 +1,7 @@
 # Editors
-project.xml
-project.properties
 /nbproject/private/
-.buildpath
-.project
-.settings*
-.idea
-.vscode
-.eslintcache
-*.sublime-project
-*.sublime-workspace
-.sublimelinterrc
-*.swp
 
 # Grunt
-node_modules/
 none
 
 # Sass
@@ -26,12 +13,6 @@ none
 
 # Minified JS
 /assets/js/**/*.min.js
-
-# OS X metadata
-.DS_Store
-
-# Windows junk
-Thumbs.db
 
 # Behat/CLI Tests
 tests/cli/installer
@@ -46,15 +27,9 @@ tests/cli/vendor
 /tests/e2e/config/local-*.json
 /tests/e2e/config/local.json
 /tests/e2e/config/default.json
-/tests/e2e/env/config/default.json
 /tests/e2e/docker
-/tests/e2e/env/docker/wp-cli/initialize.sh
-/tests/e2e/env/build/
-/tests/e2e/env/build-module/
 /tests/e2e/screenshots
 /tests/e2e/plugins
-/tests/e2e/utils/build/
-/tests/e2e/utils/build-module/
 
 # Logs
 /logs
@@ -73,12 +48,5 @@ yarn.lock
 /packages/*
 !/packages/README.md
 
-# Screenshots for e2e tests failures
-/screenshots/
-
 # Language files
 i18n/languages/woocommerce.pot
-
-# Build
-build/
-woocommerce.zip
