@@ -50,7 +50,8 @@ jobs:
               run: |
                   mkdir -p woocommerce/woocommerce-production
                   unzip woocommerce.zip -d woocommerce/woocommerce-production
-                  mv woocommerce/woocommerce-production/woocommerce woocommerce/woocommerce-production/
+                  mv woocommerce/woocommerce-production/woocommerce/* woocommerce/woocommerce-production
+                  rm -rf woocommerce/woocommerce-production/woocommerce
 
             - name: Set up mirror
               working-directory: tmp/woocommerce-build
