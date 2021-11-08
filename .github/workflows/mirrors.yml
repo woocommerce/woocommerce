@@ -33,8 +33,6 @@ jobs:
                   
             - name: Push to mirror
               uses: Automattic/action-push-to-mirrors@v1
-              env:
-                GIT_SLUG: woocommerce-production
               with:
                   source-directory: ${{ github.workspace }}/monorepo
                   token: ${{ secrets.API_TOKEN_GITHUB }}
