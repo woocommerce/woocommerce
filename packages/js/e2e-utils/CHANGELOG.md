@@ -7,6 +7,7 @@
 - Update `shopper.addToCartFromShopPage()` and `.removeFromCart()` to accept product Id or Title
 - Added `deleteAllProductAttributes()`, `deleteAllProductCategories()`, and `deleteAllProductTags()` to clean up meta data added when products are imported
 - Added `withRestApi.createProductCategory()` that creates a product category and returns the ID
+- `clickAndWaitForSelector( buttonSelector, resultSelector, timeout )` to click a button and wait for response
 
 # 0.1.6
 
