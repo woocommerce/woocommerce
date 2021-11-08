@@ -8,6 +8,10 @@ if ( 'no' == global.process.env.node_config_dev ) {
 		launch: {
 			// Required for the logged out and logged in tests so they don't share app state/token.
 			browserContext: 'incognito',
+			defaultViewport: {
+				width: 1280,
+				height: 800,
+			},
 		},
 	};
 } else {
