@@ -59,6 +59,12 @@ module.exports = {
 		'react-hooks/exhaustive-deps': 'error',
 		'react/jsx-fragments': [ 'error', 'syntax' ],
 		'@wordpress/no-global-active-element': 'warn',
+		'@wordpress/i18n-text-domain': [
+			'error',
+			{
+				allowedTextDomain: [ 'woo-gutenberg-products-block' ],
+			},
+		],
 		camelcase: [
 			'error',
 			{
