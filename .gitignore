@@ -5,10 +5,16 @@ Thumbs.db
 # IDE files
 .idea
 .vscode/
+project.xml
+project.properties
+.project
+.settings*
+*.sublime-project
+*.sublime-workspace
+.sublimelinterrc
 
 # Environment files
 wp-cli.local.yml
-.wp-env.override.json
 yarn-error.log
 npm-debug.log
 .pnpm-debug.log
@@ -22,6 +28,7 @@ npm-debug.log
 build/
 build-module/
 build-style/
+dist/
 
 # Project files
 node_modules/
@@ -37,5 +44,3 @@ tsconfig.tsbuildinfo
 /tmp
 packages/js/e2e-environment/config/default.json
 packages/js/e2e-environment/docker/wp-cli/initialize.sh
-packages/js/e2e-environment/build/
-packages/js/e2e-environment/build-module/
