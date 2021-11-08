@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { pressKeyWithModifier } from '@wordpress/e2e-test-utils';
+import { waitForSelector } from '@automattic/puppeteer-utils';
 
 /**
  * Internal dependencies
@@ -222,11 +223,11 @@ export const evalAndClick = async ( selector ) => {
  * @param {string} selector Selector of the select2 search field
  */
 export const selectOptionInSelect2 = async ( value, selector = 'input.select2-search__field' ) => {
-	await page.waitForSelector(selector);
-	await page.click(selector);
-	await page.type(selector, value);
+	await page.waitForSelector( selector );
+	await page.click( selector );
+	await page.type( selector, value );
 	await waitForTimeout( 2000 ); // to avoid flakyness, must wait before pressing Enter
-	await page.keyboard.press('Enter');
+	await page.keyboard.press( 'Enter' );
 };
 
 /**
@@ -242,16 +243,16 @@ export const applyCoupon = async ( couponCode ) => {
 			page.reload(),
 			page.waitForNavigation( { waitUntil: 'networkidle0' } ),
 		]);
-		await expect(page).toClick('a', {text: 'Click here to enter your code'});
+		await expect( page ).toClick( 'a', { text: 'Click here to enter your code' } );
 		await uiUnblocked();
-		await clearAndFillInput('#coupon_code', couponCode);
-		await expect(page).toClick('button', {text: 'Apply coupon'});
+		await clearAndFillInput( '#coupon_code', couponCode );
+		await expect( page ).toClick( 'button', {text: 'Apply coupon' } );
 		await uiUnblocked();
-	} catch (error) {
-		await clearAndFillInput('#coupon_code', couponCode);
-		await expect(page).toClick('button', {text: 'Apply coupon'});
+	} catch ( error ) {
+		await clearAndFillInput( '#coupon_code', couponCode );
+		await expect( page ).toClick( 'button', { text: 'Apply coupon' } );
 		await uiUnblocked();
-	};
+	}
 };
 
 /**
@@ -265,9 +266,9 @@ export const removeCoupon = async ( couponCode ) => {
 		page.reload(),
 		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
 	]);
-	await expect(page).toClick('[data-coupon="'+couponCode.toLowerCase()+'"]', {text: '[Remove]'});
+	await expect( page ).toClick( '[data-coupon="'+couponCode.toLowerCase()+'"]', {text: '[Remove]' } );
 	await uiUnblocked();
-	await expect(page).toMatchElement('.woocommerce-message', {text: 'Coupon has been removed.'});
+	await expect( page ).toMatchElement( '.woocommerce-message', {text: 'Coupon has been removed.' } );
 };
 
 export {

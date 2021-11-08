@@ -11,6 +11,7 @@
   "main": "build/index.js",
   "module": "build-module/index.js",
   "dependencies": {
+    "@automattic/puppeteer-utils": "github:Automattic/puppeteer-utils#0f3ec50",
     "@wordpress/deprecated": "^2.10.0",
     "@wordpress/e2e-test-utils": "^4.16.1",
     "config": "3.3.3",
