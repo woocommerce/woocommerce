@@ -80,13 +80,6 @@ class LegacyTemplate extends AbstractDynamicBlock {
 		 */
 		do_action( 'woocommerce_after_main_content' );
 
-		/**
-		 * Woocommerce_sidebar hook.
-		 *
-		 * @hooked woocommerce_get_sidebar - 10
-		 */
-		do_action( 'woocommerce_sidebar' );
-
 		wp_reset_postdata();
 
 		return ob_get_clean();
@@ -175,13 +168,6 @@ class LegacyTemplate extends AbstractDynamicBlock {
 		 * @hooked woocommerce_output_content_wrapper_end - 10 (outputs closing divs for the content)
 		 */
 		do_action( 'woocommerce_after_main_content' );
-
-		/**
-		 * Hook: woocommerce_sidebar.
-		 *
-		 * @hooked woocommerce_get_sidebar - 10
-		 */
-		do_action( 'woocommerce_sidebar' );
 
 		wp_reset_postdata();
 		return ob_get_clean();
