@@ -13,7 +13,7 @@ jobs:
 
             - name: Build
               id: build
-              uses: woocommerce/action-build@trunk
+              uses: woocommerce/action-build@cp-composer-json
 
             - name: Upload PR zip
               uses: actions/upload-artifact@v2
