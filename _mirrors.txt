@@ -61,3 +61,9 @@ jobs:
                   username: matticbot
                   working-directory: ${{ github.workspace }}/tmp/woocommerce-build
               timeout-minutes: 5  # 2021-01-18: Successful runs seem to take about half a minute.
+
+
+              run: |
+                  mkdir -p woocommerce/woocommerce-production
+                  touch woocommerce/woocommerce-production/README.md
+                  echo "# WooCommerce Production (TEST)" >> woocommerce/woocommerce-production/README.md
