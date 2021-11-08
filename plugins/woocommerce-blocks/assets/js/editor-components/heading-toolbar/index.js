@@ -21,8 +21,11 @@ class HeadingToolbar extends Component {
 		const isActive = targetLevel === selectedLevel;
 		return {
 			icon: <HeadingLevelIcon level={ targetLevel } />,
-			/* translators: %s: heading level e.g: "2", "3", "4" */
-			title: sprintf( __( 'Heading %d' ), targetLevel ),
+			title: sprintf(
+				/* translators: %s: heading level e.g: "2", "3", "4" */
+				__( 'Heading %d', 'woo-gutenberg-products-block' ),
+				targetLevel
+			),
 			isActive,
 			onClick: () => onChange( targetLevel ),
 		};
