@@ -277,7 +277,7 @@ return array(
 		'CL-AT' => __( 'Atacama', 'woocommerce' ),
 		'CL-BI' => __( 'Biobío', 'woocommerce' ),
 		'CL-CO' => __( 'Coquimbo', 'woocommerce' ),
-		'CL-LI' => __( 'Libertador General Bernardo O Higgins', 'woocommerce' ),
+		'CL-LI' => __( 'Libertador General Bernardo O\'Higgins', 'woocommerce' ),
 		'CL-LL' => __( 'Los Lagos', 'woocommerce' ),
 		'CL-LR' => __( 'Los Ríos', 'woocommerce' ),
 		'CL-MA' => __( 'Magallanes', 'woocommerce' ),
