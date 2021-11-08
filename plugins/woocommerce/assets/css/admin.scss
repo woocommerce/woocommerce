@@ -95,7 +95,7 @@
 	.current-section-dropdown {
 		background: #fff;
 		border: 1px solid #a7aaad;
-		margin-bottom: 16px;
+		margin-bottom: 24px;
 		position: relative;
 		width: 100%;
 
@@ -131,6 +131,17 @@
 				font-size: 13px;
 				line-height: 16px;
 				margin: 0;
+
+				&.current a::after {
+					background-image: url(../images/icons/gridicons-checkmark.svg);
+					content: "";
+					display: block;
+					height: 20px;
+					position: absolute;
+					right: 20px;
+					top: 7px;
+					width: 20px;
+				}
 			}
 
 			a,
@@ -151,17 +162,6 @@
 				@media only screen and (min-width: 600px) {
 					padding: 10px 18px;
 				}
-			}
-
-			a.current::after {
-				background-image: url(../images/icons/gridicons-checkmark.svg);
-				content: "";
-				display: block;
-				height: 20px;
-				position: absolute;
-				right: 20px;
-				top: 7px;
-				width: 20px;
 			}
 		}
 	}
@@ -7686,7 +7686,7 @@ table.bar_chart {
 	}
 }
 
-@media screen and (min-width: 1280px) {
+@media screen and (min-width: 1024px) {
 
 	.current-section-name {
 		display: none;
@@ -7696,6 +7696,7 @@ table.bar_chart {
 		.current-section-dropdown {
 			background: none;
 			border: none;
+			margin-bottom: 32px;
 			width: 100%;
 
 			ul {
@@ -7708,40 +7709,30 @@ table.bar_chart {
 				padding: 0;
 				position: static;
 
-				a {
-					color: #2271b1;
-					padding: 10px 0 10px 14px;
+				li {
+					border: 1px solid #ccc;
+					font-size: 14px;
+					line-height: 20px;
+					margin: 0 12px 12px 0;
 
-					&::after {
-						color: #ccc;
-						content: '|';
-						display: inline-block;
-						margin-left: 14px;
+					&.current {
+						a {
+							background: #fff;
+							color: #1e1e1e;
+						}
+
+						a::after {
+							background: none;
+						}
 					}
 				}
 
-				a:visited {
-					color: #2271b1;
-				}
-
+				a,
+				a:visited,
 				a:hover,
 				a:active {
-					color: #135e96;
-				}
-
-				a.current {
-					color: #1e1e1e;
-
-					&::after {
-						background: none;
-						color: #ccc;
-						content: '|';
-						display: inline-block;
-						height: auto;
-						margin-left: 14px;
-						position: static;
-						width: auto;
-					}
+					color: #50575e;
+					padding: 10px 14px;
 				}
 			}
 

@@ -3,7 +3,7 @@
  * Admin View: Page - Addons - category navigation
  *
  * @package WooCommerce\Admin
- * @var array $sections
+ * @var array  $sections
  * @var string $current_section
  * @var string $current_section_name
  */
@@ -20,12 +20,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 				$current_section_name = $section->label;
 			}
 			?>
-			<li>
-				<a
-					class="<?php echo $current_section === $section->slug ? 'current' : ''; ?>"
-					href="<?php echo esc_url( admin_url( 'admin.php?page=wc-addons&section=' . esc_attr( $section->slug ) ) ); ?>">
-					<?php echo esc_html( $section->label ); ?>
-				</a>
+			<?php if ( $current_section === $section->slug ) : ?>
+				<li class="current">
+			<?php else: ?>
+				<li>
+			<?php endif; ?>
+			<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-addons&section=' . esc_attr( $section->slug ) ) ); ?>">
+				<?php echo esc_html( $section->label ); ?>
+			</a>
 			</li>
 		<?php endforeach; ?>
 	</ul>
