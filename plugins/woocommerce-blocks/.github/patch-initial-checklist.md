@@ -24,7 +24,7 @@ Additionally, make sure to differentiate between things in the testing notes tha
 * [ ] Copy a link to the release zip you created earlier into the testing notes. To generate the link you can upload the zip as an attachment in a GitHub comment and then just copy the path (without publishing the comment).
 * [ ] Commit and push the testing docs to the release branch.
 * [ ] Smoke test built release zip using the testing instructions you created:
-  * At least one other person should test the built zip - ask a teammate to help out.
+  * At least one other person should test the built zip - ping the current Rubik porter to be this person.
   * Test in a clean environment, e.g. Jurassic.Ninja site.
   * Test existing WooCommerce Blocks content works correctly after update (no block validation errors).
   * Test to confirm blocks are available and work correctly in oldest supported WordPress version (e.g. 5.3).
