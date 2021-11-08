@@ -496,15 +496,26 @@ function wc_is_file_valid_csv( $file, $check_path = true ) {
 }
 
 /**
+ * Check if the current theme is an FSE theme.
+ *
+ * @since x.x.x
+ * @return bool
+ */
+function wc_current_theme_is_fse_theme() {
+	if ( function_exists( 'gutenberg_is_fse_theme' ) ) {
+		return (bool) gutenberg_is_fse_theme();
+	}
+
+	return false;
+}
+
+/**
  * Check if the current theme has WooCommerce support or is a FSE theme.
  *
  * @since x.x.x
  * @return bool
  */
 function wc_current_theme_supports_woocommerce_or_fse() {
-	if ( function_exists( 'gutenberg_is_fse_theme' ) ) {
-		return (bool) current_theme_supports( 'woocommerce' ) || gutenberg_is_fse_theme();
-	}
-
-	return (bool) current_theme_supports( 'woocommerce' );
+	return (bool) current_theme_supports( 'woocommerce' ) || wc_current_theme_is_fse_theme();
 }
+
