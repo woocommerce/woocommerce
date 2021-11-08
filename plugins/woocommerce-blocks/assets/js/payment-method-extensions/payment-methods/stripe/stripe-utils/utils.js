@@ -233,12 +233,12 @@ const getErrorMessageForTypeAndCode = ( type, code = '' ) => {
 		case errorTypes.INVALID_EMAIL:
 			return __(
 				'Invalid email address, please correct and try again.',
-				'woo-gutenberg-product-blocks'
+				'woo-gutenberg-products-block'
 			);
 		case isNonFriendlyError( type ):
 			return __(
 				'Unable to process this payment, please try again or use alternative method.',
-				'woo-gutenberg-product-blocks'
+				'woo-gutenberg-products-block'
 			);
 		case errorTypes.CARD_ERROR:
 			return getErrorMessageForCode( code );

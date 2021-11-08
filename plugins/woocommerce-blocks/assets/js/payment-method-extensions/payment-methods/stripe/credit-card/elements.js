@@ -121,7 +121,7 @@ export const CardElements = ( {
 					onBlur={ () => cardNumOnActive( isEmpty.cardNumber ) }
 				/>
 				<label htmlFor="wc-stripe-card-number-element">
-					{ __( 'Card Number', 'woo-gutenberg-product-blocks' ) }
+					{ __( 'Card Number', 'woo-gutenberg-products-block' ) }
 				</label>
 				<ValidationInputError errorMessage={ cardNumError } />
 			</div>
@@ -138,7 +138,7 @@ export const CardElements = ( {
 					id="wc-stripe-card-expiry-element"
 				/>
 				<label htmlFor="wc-stripe-card-expiry-element">
-					{ __( 'Expiry Date', 'woo-gutenberg-product-blocks' ) }
+					{ __( 'Expiry Date', 'woo-gutenberg-products-block' ) }
 				</label>
 				<ValidationInputError errorMessage={ cardExpiryError } />
 			</div>
@@ -152,7 +152,7 @@ export const CardElements = ( {
 					id="wc-stripe-card-code-element"
 				/>
 				<label htmlFor="wc-stripe-card-code-element">
-					{ __( 'CVV/CVC', 'woo-gutenberg-product-blocks' ) }
+					{ __( 'CVV/CVC', 'woo-gutenberg-products-block' ) }
 				</label>
 				<ValidationInputError errorMessage={ cardCvcError } />
 			</div>

@@ -40,7 +40,7 @@ const getCcOrEcheckPaymentMethodOption = (
 			/* translators: %1$s is referring to the payment method brand, %2$s is referring to the last 4 digits of the payment card, %3$s is referring to the expiry date.  */
 			__(
 				'%1$s ending in %2$s (expires %3$s)',
-				'woo-gutenberg-product-blocks'
+				'woo-gutenberg-products-block'
 			),
 			method.brand,
 			method.last4,
