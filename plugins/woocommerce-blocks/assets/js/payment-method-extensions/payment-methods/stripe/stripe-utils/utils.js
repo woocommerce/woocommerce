@@ -164,6 +164,7 @@ const isNonFriendlyError = ( type ) =>
 
 const getErrorMessageForCode = ( code ) => {
 	const messages = {
+		/* eslint-disable @wordpress/i18n-text-domain */
 		[ errorCodes.INVALID_NUMBER ]: __(
 			'The card number is not a valid credit card number.',
 			'woocommerce-gateway-stripe'
@@ -224,6 +225,7 @@ const getErrorMessageForCode = ( code ) => {
 			'An error occurred while processing the card.',
 			'woocommerce-gateway-stripe'
 		),
+		/* eslint-enable @wordpress/i18n-text-domain */
 	};
 	return messages[ code ] || null;
 };

@@ -161,7 +161,7 @@ const FeaturedProduct = ( {
 					controls={ [
 						{
 							icon: 'edit',
-							title: __( 'Edit' ),
+							title: __( 'Edit', 'woo-gutenberg-products-block' ),
 							onClick: () =>
 								setAttributes( { editMode: ! editMode } ),
 							isActive: editMode,
@@ -237,7 +237,10 @@ const FeaturedProduct = ( {
 							/>
 							{ focalPointPickerExists && (
 								<FocalPointPicker
-									label={ __( 'Focal Point Picker' ) }
+									label={ __(
+										'Focal Point Picker',
+										'woo-gutenberg-products-block'
+									) }
 									url={ url }
 									value={ focalPoint }
 									onChange={ ( value ) =>
