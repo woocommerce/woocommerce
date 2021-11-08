@@ -1,4 +1,4 @@
-# WooCommerce End to End Test Utilities 
+# WooCommerce End to End Test Utilities
 
 This package contains utilities to simplify writing e2e tests specific to WooCommmerce.
 
@@ -46,7 +46,7 @@ This package provides support for enabling retries in tests:
 - `WP_ADMIN_DASHBOARD` - WordPress dashboard
 - `WP_ADMIN_WP_UPDATES` - WordPress updates
 - `WP_ADMIN_PLUGINS` - Plugin list
-- `WP_ADMIN_PERMALINK_SETTINGS` - Permalink settings  
+- `WP_ADMIN_PERMALINK_SETTINGS` - Permalink settings
 - `WP_ADMIN_ALL_USERS_VIEW` - WordPress user list
 - `WP_ADMIN_POST_TYPE` - Post listing
 - `WP_ADMIN_NEW_POST_TYPE` - New post
@@ -69,7 +69,7 @@ This package provides support for enabling retries in tests:
 #### Front end
 
 - `SHOP_PAGE` - Shop page
-- `SHOP_PRODUCT_PAGE` - Single product page 
+- `SHOP_PRODUCT_PAGE` - Single product page
 - `SHOP_CART_PAGE` - Cart page
 - `SHOP_CHECKOUT_PAGE` - Checkout page
 - `SHOP_MY_ACCOUNT_PAGE` - Customer account page
@@ -105,10 +105,10 @@ This package provides support for enabling retries in tests:
 | `openImportProducts` | | Open the Import Products page |
 | `openExtensions` | | Go to WooCommerce -> Extensions |
 | `openWordPressUpdatesPage` | | Go to Dashboard -> Updates |
-| `installAllUpdates` | | Install all pending updates on Dashboard -> Updates| 
-| `updateWordPress` | | Install pending WordPress updates on Dashboard -> Updates| 
-| `updatePlugins` | | Install all pending plugin updates on Dashboard -> Updates| 
-| `updateThemes` | | Install all pending theme updates on Dashboard -> Updates| 
+| `installAllUpdates` | | Install all pending updates on Dashboard -> Updates|
+| `updateWordPress` | | Install pending WordPress updates on Dashboard -> Updates|
+| `updatePlugins` | | Install all pending plugin updates on Dashboard -> Updates|
+| `updateThemes` | | Install all pending theme updates on Dashboard -> Updates|
 | `runDatabaseUpdate` || Runs the database update if needed |
 
 ### Shopper `shopper`
@@ -138,6 +138,8 @@ This package provides support for enabling retries in tests:
 
 ### REST API `withRestApi`
 
+Please note: if you're using a non-SSL environment (such as a Docker container from [`wc-e2e`](https://www.npmjs.com/package/@woocommerce/e2e-environment)) you will need to use Basic Auth in order to authenticate with the API and use the `withRestApi` methods listed below. To do so, you will need to install the [the Basic Auth plugin](https://github.com/WP-API/Basic-Auth). One way this can be accomplished is by adding `wp plugin install https://github.com/WP-API/Basic-Auth/archive/master.zip --activate` to your `initialize.sh` script.
+
 | Function | Parameters | Description |
 |----------|------------|-------------|
 | `resetOnboarding` | | Reset onboarding settings |
@@ -151,7 +153,11 @@ This package provides support for enabling retries in tests:
 | `deleteAllOrders` | | Permanently delete all orders |
 | `updateSettingOption` | `settingsGroup`, `settingID`, `payload` | Update a settings group |
 | `updatePaymentGateway`| `paymentGatewayId`, `payload` | Update a payment gateway |
-| `getSystemEnvironment` | | Get the current environment from the WooCommerce system status API.
+| `getSystemEnvironment` | | Get the current environment from the WooCommerce system status API. |
+| `deleteAllProductAttributes` | | Permanently delete all product attributes. |
+| `deleteAllProductCategories` | | Permanently delete all product categories. |
+| `deleteAllProductTags` | | Permanently delete all product tags. |
+| `createProductCategory` | `categoryName` | Create a product category with the provided name. |
 
 ### Classes
 
