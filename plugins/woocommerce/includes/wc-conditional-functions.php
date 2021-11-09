@@ -256,18 +256,6 @@ if ( ! function_exists( 'is_lost_password_page' ) ) {
 	}
 }
 
-if ( ! function_exists( 'is_ajax' ) ) {
-
-	/**
-	 * Is_ajax - Returns true when the page is loaded via ajax.
-	 *
-	 * @return bool
-	 */
-	function is_ajax() {
-		return function_exists( 'wp_doing_ajax' ) ? wp_doing_ajax() : Constants::is_defined( 'DOING_AJAX' );
-	}
-}
-
 if ( ! function_exists( 'is_store_notice_showing' ) ) {
 
 	/**
