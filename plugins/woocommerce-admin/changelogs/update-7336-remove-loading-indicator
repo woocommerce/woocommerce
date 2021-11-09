@@ -1,4 +1,0 @@
-Significance: minor
-Type: Tweak
-
-Remove the Spinner component to prevent undesired page flickering. #7886

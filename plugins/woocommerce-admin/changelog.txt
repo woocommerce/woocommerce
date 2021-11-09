@@ -1,3 +1,34 @@
+== 2.9.0 11/08/2021 ==
+
+- Fix: Do not clear `current` class from the entire page when updating wp-admin's menu. #7773
+- Fix: Fix calendar not being dismissed when clicking outside. #7714
+- Fix: fixed warnings when using AdvancedFilters component. #7704
+- Fix: Fix Tasklist UI illustrations styling #7858
+- Fix: Revert experiment task titles back to original #7853
+- Add: Add 2col expirement. #7872
+- Add: Add Avalara to tax task #7874
+- Add: Added two column experimental task list #7669
+- Add: Add header cards for all tasks in Tasklist UI experiment #7838
+- Add: Add onboarding task docs #7762
+- Update: Add marketing extensions back to onboarding wizard #7831
+- Update: Add profile notes. #7861
+- Update: Change CTA text for personalize store task after completion #7852
+- Update: Increased number of possible items in Recommended Extensions list from 6 to 9 #7887
+- Update: Refactor data source poller for re-usability. #7671
+- Update: Reverts addition of Marketplace and My Subscriptions pages to the Marketplace menu. #7902
+- Update: Update the inbox panel with the new design #7864
+- Update: Update WC Pay card to include in-person information #7830
+- Update: Updating navigation link colors
+- Dev: Add method to check for install status #7808
+- Dev: Refactor tax task into separate components
+- Dev: Update the task list to use the new task list REST API #7736
+- Tweak: Add route and layout for unmatched path #7503
+- Tweak: Avoid caching extended info #7819
+- Tweak: Minor design update for Marketing task. #7732
+- Tweak: Remove the Spinner component to prevent undesired page flickering. #7886
+- Tweak: Use page title Extensions for Marketplace and My Subscriptions pages. #7901
+- Performance: Only load default tasks during REST requests #7904
+
 == 2.8.0 11/02/2021 ==
 
 - Add: Store Profiler and Product task - include Subscriptions #7734
