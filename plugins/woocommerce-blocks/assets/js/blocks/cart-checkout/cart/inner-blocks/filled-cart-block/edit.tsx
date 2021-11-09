@@ -11,7 +11,7 @@ import { useEditorContext } from '@woocommerce/base-context';
 /**
  * Internal dependencies
  */
-import { useForcedLayout, getAllowedBlocks, Columns } from '../../../shared';
+import { useForcedLayout, getAllowedBlocks } from '../../../shared';
 import './editor.scss';
 import { useCartBlockContext } from '../../context';
 
@@ -35,19 +35,17 @@ export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 			{ ...blockProps }
 			hidden={ currentView !== 'woocommerce/filled-cart-block' }
 		>
-			<Columns>
-				<SidebarLayout
-					className={ classnames( 'wc-block-cart', {
-						'has-dark-controls': hasDarkControls,
-					} ) }
-				>
-					<InnerBlocks
-						allowedBlocks={ allowedBlocks }
-						template={ defaultTemplate }
-						templateLock="insert"
-					/>
-				</SidebarLayout>
-			</Columns>
+			<SidebarLayout
+				className={ classnames( 'wc-block-cart', {
+					'has-dark-controls': hasDarkControls,
+				} ) }
+			>
+				<InnerBlocks
+					allowedBlocks={ allowedBlocks }
+					template={ defaultTemplate }
+					templateLock="insert"
+				/>
+			</SidebarLayout>
 		</div>
 	);
 };

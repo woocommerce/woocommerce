@@ -2,7 +2,6 @@
  * External dependencies
  */
 import {
-	clickButton,
 	clickBlockToolbarButton,
 	openDocumentSettingsSidebar,
 	switchUserToAdmin,
@@ -22,12 +21,23 @@ import {
 	closeModalIfExists,
 	openWidgetsEditorBlockInserter,
 } from '../../utils.js';
-import { scrollTo } from '../../../utils';
 
 const block = {
 	name: 'Cart',
 	slug: 'woocommerce/cart',
-	class: '.wc-block-cart',
+	class: '.wp-block-woocommerce-cart',
+};
+
+const filledCartBlock = {
+	name: 'Filled Cart',
+	slug: 'woocommerce/filled-cart-block',
+	class: '.wp-block-woocommerce-filled-cart-block',
+};
+
+const emptyCartBlock = {
+	name: 'Empty Cart',
+	slug: 'woocommerce/empty-cart-block',
+	class: '.wp-block-woocommerce-empty-cart-block',
 };
 
 if ( process.env.WOOCOMMERCE_BLOCKS_PHASE < 2 ) {
@@ -83,6 +93,8 @@ describe( `${ block.name } Block`, () => {
 
 			it( 'renders without crashing', async () => {
 				await expect( page ).toRenderBlock( block );
+				await expect( page ).toRenderBlock( filledCartBlock );
+				await expect( page ).toRenderBlock( emptyCartBlock );
 			} );
 
 			it( 'shows empty cart when changing the view', async () => {
@@ -91,28 +103,35 @@ describe( `${ block.name } Block`, () => {
 						`Could not find an element with class ${ block.class } - the block probably did not load correctly.`
 					);
 				} );
-
-				await expect( page ).toMatchElement(
-					'[hidden] .wc-block-cart__empty-cart__title'
-				);
-
 				await selectBlockByName( block.slug );
 				await clickBlockToolbarButton( 'Switch view', 'ariaLabel' );
-				await page.waitForSelector( '.components-popover__content' );
-				await clickButton( 'Empty Cart' );
+				const emptyCartButton = await page.waitForXPath(
+					`//button[contains(@class,'components-dropdown-menu__menu-item')]//span[contains(text(), 'Empty Cart')]`
+				);
+				// Clicks the element by running the JavaScript HTMLElement.click() method on the given element in the
+				// browser context, which fires a click event. It doesn't scroll the page or move the mouse and works
+				// even if the element is off-screen.
+				await emptyCartButton.evaluate( ( b ) => b.click() );
 
 				await expect( page ).not.toMatchElement(
-					'[hidden] .wc-block-cart__empty-cart__title'
+					`${ emptyCartBlock.class }[hidden]`
+				);
+				await expect( page ).toMatchElement(
+					`${ filledCartBlock.class }[hidden]`
 				);
 
 				await selectBlockByName( block.slug );
 				await clickBlockToolbarButton( 'Switch view', 'ariaLabel' );
-				await page.waitForSelector( '.components-popover__content' );
-				await scrollTo( '.components-popover__content' );
-				await clickButton( 'Filled Cart' );
+				const filledCartButton = await page.waitForXPath(
+					`//button[contains(@class,'components-dropdown-menu__menu-item')]//span[contains(text(), 'Filled Cart')]`
+				);
+				await filledCartButton.evaluate( ( b ) => b.click() );
 
 				await expect( page ).toMatchElement(
-					'[hidden] .wc-block-cart__empty-cart__title'
+					`${ emptyCartBlock.class }[hidden]`
+				);
+				await expect( page ).not.toMatchElement(
+					`${ filledCartBlock.class }[hidden]`
 				);
 			} );
 
