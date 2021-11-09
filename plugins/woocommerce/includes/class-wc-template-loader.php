@@ -107,9 +107,17 @@ class WC_Template_Loader {
 			return false;
 		}
 
-		return is_readable(
-			get_stylesheet_directory() . '/block-templates/' . $template_name . '.html'
-		);
+		$has_template = is_readable( get_stylesheet_directory() . '/block-templates/' . $template_name . '.html' );
+
+		/**
+		 * Filters the value of the result of the block template check.
+		 *
+		 * @since x.x.x
+		 *
+		 * @param boolean $has_template value to be filtered.
+		 * @param string $template_name The name of the template.
+		 */
+		return (bool) apply_filters( 'woocommerce_has_block_template', $has_template, $template_name );
 	}
 
 	/**

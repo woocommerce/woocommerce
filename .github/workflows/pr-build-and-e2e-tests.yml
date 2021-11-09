@@ -75,4 +75,9 @@ jobs:
                   WC_E2E_SCREENSHOTS: 1
                   E2E_SLACK_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
                   E2E_SLACK_CHANNEL: ${{ secrets.E2E_SLACK_CHANNEL }}
-              run: pnpx wc-e2e test:e2e
+                  BASE_URL: ${{ secrets.PR_E2E_TEST_URL }}
+                  USER_KEY: ${{ secrets.PR_E2E_TEST_ADMIN_USER }}
+                  USER_SECRET: ${{ secrets.PR_E2E_TEST_ADMIN_PASSWORD }}
+              run: |
+                pnpx wc-e2e test:e2e
+                pnpx wc-api-tests test api

@@ -6,7 +6,7 @@
  * https://woocommerce.github.io/woocommerce-rest-api-docs/#order-refund-properties
  *
  */
-const refund = {
+ const refund = {
 	api_refund: false,
 	amount: '1.00',
 	reason: 'Late delivery refund.',

@@ -262,16 +262,17 @@ class WC_Download_Handler {
 		 * via filters we can still do the string replacement on a HTTP file.
 		 */
 		$replacements = array(
-			$wp_uploads_url                  => $wp_uploads_dir,
-			network_site_url( '/', 'https' ) => ABSPATH,
+			$wp_uploads_url                                                   => $wp_uploads_dir,
+			network_site_url( '/', 'https' )                                  => ABSPATH,
 			str_replace( 'https:', 'http:', network_site_url( '/', 'http' ) ) => ABSPATH,
-			site_url( '/', 'https' )         => ABSPATH,
-			str_replace( 'https:', 'http:', site_url( '/', 'http' ) ) => ABSPATH,
+			site_url( '/', 'https' )                                          => ABSPATH,
+			str_replace( 'https:', 'http:', site_url( '/', 'http' ) )         => ABSPATH,
 		);
 
+		$count            = 0;
 		$file_path        = str_replace( array_keys( $replacements ), array_values( $replacements ), $file_path );
 		$parsed_file_path = wp_parse_url( $file_path );
-		$remote_file      = true;
+		$remote_file      = null === $count || 0 === $count; // Remote file only if there were no replacements.
 
 		// Paths that begin with '//' are always remote URLs.
 		if ( '//' === substr( $file_path, 0, 2 ) ) {
@@ -291,7 +292,7 @@ class WC_Download_Handler {
 			$file_path   = realpath( WP_CONTENT_DIR . substr( $file_path, 11 ) );
 
 			// Check if we have an absolute path.
-		} elseif ( ( ! isset( $parsed_file_path['scheme'] ) || ! in_array( $parsed_file_path['scheme'], array( 'http', 'https', 'ftp' ), true ) ) && isset( $parsed_file_path['path'] ) && file_exists( $parsed_file_path['path'] ) ) {
+		} elseif ( ( ! isset( $parsed_file_path['scheme'] ) || ! in_array( $parsed_file_path['scheme'], array( 'http', 'https', 'ftp' ), true ) ) && isset( $parsed_file_path['path'] ) ) {
 			$remote_file = false;
 			$file_path   = $parsed_file_path['path'];
 		}
