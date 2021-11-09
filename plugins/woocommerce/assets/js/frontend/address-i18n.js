@@ -96,7 +96,15 @@ jQuery( function( $ ) {
 				// Hidden fields.
 				if ( 'state' !== key ) {
 					if ( typeof fieldLocale.hidden !== 'undefined' && true === fieldLocale.hidden ) {
-						field.hide().find( ':input' ).val( '' );
+
+                        // Support for checkboxes
+                        if( field.find( ':input' ).attr( 'type' ) == 'checkbox' ) {
+                            field.hide().find( ':input' ).prop( 'checked', false );
+                        }
+                        else {
+                            field.hide().find( ':input' ).val( '' );
+                        }
+                        
 					} else {
 						field.show();
 					}
