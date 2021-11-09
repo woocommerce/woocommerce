@@ -584,6 +584,12 @@ class WC_Download_Handler {
 		}
 	}
 
+	/**
+	 *
+	 * Get selected content disposition
+	 *
+	 * Defaults to attachment if `woocommerce_downloads_deliver_inline` setting is not selected.
+	 */
 	private static function get_content_disposition() {
 		$disposition = 'attachment';
 		if ( 'yes' === get_option( 'woocommerce_downloads_deliver_inline' ) ) {
