@@ -43,10 +43,9 @@ const withSelectHandler = ( select: WCDataSelector ) => {
 };
 
 export default compose(
-	onboardingData.profile || onboardingData.tasksStatus
+	onboardingData.profile
 		? withOnboardingHydration( {
 				profileItems: onboardingData.profile,
-				tasksStatus: onboardingData.tasksStatus,
 		  } )
 		: identity,
 	withSelect( withSelectHandler )

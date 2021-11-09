@@ -14,7 +14,6 @@ import {
 	getTaskListsSuccess,
 	setProfileItems,
 	setError,
-	setTasksStatus,
 	setPaymentMethods,
 	setEmailPrefill,
 	getProductTypesSuccess,
@@ -47,19 +46,6 @@ export function* getEmailPrefill() {
 		yield setEmailPrefill( results.email );
 	} catch ( error ) {
 		yield setError( 'getEmailPrefill', error );
-	}
-}
-
-export function* getTasksStatus() {
-	try {
-		const results = yield apiFetch( {
-			path: WC_ADMIN_NAMESPACE + '/onboarding/tasks/status',
-			method: 'GET',
-		} );
-
-		yield setTasksStatus( results, true );
-	} catch ( error ) {
-		yield setError( 'getTasksStatus', error );
 	}
 }
 

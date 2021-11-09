@@ -179,13 +179,6 @@ export function optimisticallyCompleteTaskRequest( taskId ) {
 	};
 }
 
-export function setTasksStatus( tasksStatus ) {
-	return {
-		type: TYPES.SET_TASKS_STATUS,
-		tasksStatus,
-	};
-}
-
 export function setPaymentMethods( paymentMethods ) {
 	return {
 		type: TYPES.GET_PAYMENT_METHODS_SUCCESS,

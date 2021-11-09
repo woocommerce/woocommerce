@@ -81,10 +81,20 @@ describe( 'Activity Panels', () => {
 			const taxjarPluginEnabled = render(
 				<HelpPanel
 					countryCode="US"
-					getSetting={ () => ( {
-						automatedTaxSupportedCountries: [ 'US' ],
-						taxJarActivated: true,
-					} ) }
+					taskLists={ [
+						{
+							id: 'setup',
+							tasks: [
+								{
+									id: 'tax',
+									additionalData: {
+										woocommerceTaxCountries: [ 'US' ],
+										taxJarActivated: true,
+									},
+								},
+							],
+						},
+					] }
 					taskName="tax"
 				/>
 			);
@@ -96,10 +106,20 @@ describe( 'Activity Panels', () => {
 			const unSupportedCountry = render(
 				<HelpPanel
 					countryCode="NZ"
-					getSetting={ () => ( {
-						automatedTaxSupportedCountries: [ 'US' ],
-						taxJarActivated: false,
-					} ) }
+					taskLists={ [
+						{
+							id: 'setup',
+							tasks: [
+								{
+									id: 'tax',
+									additionalData: {
+										woocommerceTaxCountries: [ 'US' ],
+										taxJarActivated: false,
+									},
+								},
+							],
+						},
+					] }
 					taskName="tax"
 				/>
 			);
@@ -111,10 +131,20 @@ describe( 'Activity Panels', () => {
 			const supportedCountry = render(
 				<HelpPanel
 					countryCode="US"
-					getSetting={ () => ( {
-						automatedTaxSupportedCountries: [ 'US' ],
-						taxJarActivated: false,
-					} ) }
+					taskLists={ [
+						{
+							id: 'setup',
+							tasks: [
+								{
+									id: 'tax',
+									additionalData: {
+										woocommerceTaxCountries: [ 'US' ],
+										taxJarActivated: false,
+									},
+								},
+							],
+						},
+					] }
 					taskName="tax"
 				/>
 			);

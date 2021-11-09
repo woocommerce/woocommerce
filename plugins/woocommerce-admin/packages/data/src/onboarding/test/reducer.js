@@ -88,21 +88,4 @@ describe( 'plugins reducer', () => {
 		expect( state.requesting[ 'updateProfileItems' ] ).toBeTruthy();
 		/* eslint-enable dot-notation */
 	} );
-
-	it( 'should handle SET_TASKS_STATUS', () => {
-		const state = reducer(
-			{
-				tasksStatus: { hasProducts: true },
-			},
-			{
-				type: TYPES.SET_TASKS_STATUS,
-				tasksStatus: { hasHomepage: false },
-			}
-		);
-
-		expect( state.tasksStatus ).toHaveProperty( 'hasProducts' );
-		expect( state.tasksStatus ).toHaveProperty( 'hasHomepage' );
-		expect( state.tasksStatus.hasProducts ).toBe( true );
-		expect( state.tasksStatus.hasHomepage ).toBe( false );
-	} );
 } );

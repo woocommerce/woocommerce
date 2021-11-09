@@ -45,35 +45,28 @@ const TaskCard = ( { children } ) => {
 	);
 };
 
-const Tax = ( { onComplete, query } ) => {
+const Tax = ( { onComplete, query, task } ) => {
 	const [ isPending, setIsPending ] = useState( false );
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const { createNotice } = useDispatch( 'core/notices' );
 	const { updateAndPersistSettingsForGroup } = useDispatch(
 		SETTINGS_STORE_NAME
 	);
-	const {
-		generalSettings,
-		isResolving,
-		tasksStatus,
-		taxSettings,
-	} = useSelect( ( select ) => {
-		const { getSettings, hasFinishedResolution } = select(
-			SETTINGS_STORE_NAME
-		) as SettingsSelector;
+	const { generalSettings, isResolving, taxSettings } = useSelect(
+		( select ) => {
+			const { getSettings, hasFinishedResolution } = select(
+				SETTINGS_STORE_NAME
+			) as SettingsSelector;
 
-		return {
-			generalSettings: getSettings( 'general' ).general,
-			isResolving:
-				! hasFinishedResolution( 'getSettings', [ 'general' ] ) ||
-				! select( ONBOARDING_STORE_NAME ).hasFinishedResolution(
-					'getTasksStatus'
-				),
-			// @Todo this should be removed as soon as https://github.com/woocommerce/woocommerce-admin/pull/7841 is merged.
-			tasksStatus: select( ONBOARDING_STORE_NAME ).getTasksStatus(),
-			taxSettings: getSettings( 'tax' ).tax || {},
-		};
-	} );
+			return {
+				generalSettings: getSettings( 'general' ).general,
+				isResolving: ! hasFinishedResolution( 'getSettings', [
+					'general',
+				] ),
+				taxSettings: getSettings( 'tax' ).tax || {},
+			};
+		}
+	);
 
 	const onManual = useCallback( async () => {
 		setIsPending( true );
@@ -145,9 +138,9 @@ const Tax = ( { onComplete, query } ) => {
 			generalSettings?.woocommerce_default_country
 		);
 		const {
-			automatedTaxSupportedCountries = [],
+			woocommerceTaxCountries = [],
 			taxJarActivated,
-		} = tasksStatus;
+		} = task.additionalData;
 
 		const partners = [
 			{
@@ -156,7 +149,7 @@ const Tax = ( { onComplete, query } ) => {
 				component: WooCommerceTax,
 				isVisible:
 					! taxJarActivated && // WCS integration doesn't work with the official TaxJar plugin.
-					automatedTaxSupportedCountries.includes(
+					woocommerceTaxCountries.includes(
 						getCountryCode(
 							generalSettings?.woocommerce_default_country
 						)
@@ -219,7 +212,7 @@ const Tax = ( { onComplete, query } ) => {
 		onAutomate,
 		onManual,
 		onDisable,
-		tasksStatus,
+		task,
 	};
 
 	if ( isResolving ) {
@@ -260,8 +253,8 @@ registerPlugin( 'wc-admin-onboarding-task-tax', {
 	scope: 'woocommerce-tasks',
 	render: () => (
 		<WooOnboardingTask id="tax">
-			{ ( { onComplete, query } ) => (
-				<Tax onComplete={ onComplete } query={ query } />
+			{ ( { onComplete, query, task } ) => (
+				<Tax onComplete={ onComplete } query={ query } task={ task } />
 			) }
 		</WooOnboardingTask>
 	),

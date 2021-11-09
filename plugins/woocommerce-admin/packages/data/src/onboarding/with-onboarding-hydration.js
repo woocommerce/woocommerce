@@ -12,7 +12,6 @@ import { STORE_NAME } from './constants';
 
 export const withOnboardingHydration = ( data ) => {
 	let hydratedProfileItems = false;
-	let hydratedTasksStatus = false;
 
 	return createHigherOrderComponent(
 		( OriginalComponent ) => ( props ) => {
@@ -30,10 +29,9 @@ export const withOnboardingHydration = ( data ) => {
 					startResolution,
 					finishResolution,
 					setProfileItems,
-					setTasksStatus,
 				} = registry.dispatch( STORE_NAME );
 
-				const { profileItems, tasksStatus } = onboardingRef.current;
+				const { profileItems } = onboardingRef.current;
 
 				if (
 					profileItems &&
@@ -46,19 +44,6 @@ export const withOnboardingHydration = ( data ) => {
 					finishResolution( 'getProfileItems', [] );
 
 					hydratedProfileItems = true;
-				}
-
-				if (
-					tasksStatus &&
-					! hydratedTasksStatus &&
-					! isResolving( 'getTasksStatus', [] ) &&
-					! hasFinishedResolution( 'getTasksStatus', [] )
-				) {
-					startResolution( 'getTasksStatus', [] );
-					setTasksStatus( tasksStatus, true );
-					finishResolution( 'getTasksStatus', [] );
-
-					hydratedTasksStatus = true;
 				}
 			}, [] );
 

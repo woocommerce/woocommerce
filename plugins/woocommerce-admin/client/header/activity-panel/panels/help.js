@@ -8,7 +8,6 @@ import { Fragment, useEffect } from '@wordpress/element';
 import { applyFilters } from '@wordpress/hooks';
 import { Icon, chevronRight, page } from '@wordpress/icons';
 import { partial } from 'lodash';
-import { getSetting } from '@woocommerce/wc-admin-settings';
 import { List, Section } from '@woocommerce/components';
 import {
 	ONBOARDING_STORE_NAME,
@@ -272,15 +271,24 @@ function getShippingItems( { activePlugins, countryCode } ) {
 }
 
 function getTaxItems( props ) {
-	const { countryCode } = props;
-	const {
-		automatedTaxSupportedCountries = [],
-		taxJarActivated,
-	} = props.getSetting( 'onboarding', {} );
+	const { countryCode, taskLists } = props;
+	const tasks = taskLists.reduce(
+		( acc, taskList ) => [ ...acc, ...taskList.tasks ],
+		[]
+	);
+
+	const task = tasks.find( ( t ) => t.id === 'tax' );
+
+	if ( ! task ) {
+		return;
+	}
+
+	const { additionalData } = task;
+	const { woocommerceTaxCountries = [], taxJarActivated } = additionalData;
 
 	const showWCS =
 		! taxJarActivated && // WCS integration doesn't work with the official TaxJar plugin.
-		automatedTaxSupportedCountries.includes( countryCode );
+		woocommerceTaxCountries.includes( countryCode );
 
 	return [
 		{
@@ -411,7 +419,6 @@ export const HelpPanel = ( props ) => {
 };
 
 HelpPanel.defaultProps = {
-	getSetting,
 	recordEvent,
 };
 
@@ -428,6 +435,7 @@ export default compose(
 				suggestions[ id ] = true;
 				return suggestions;
 			}, {} );
+		const taskLists = select( ONBOARDING_STORE_NAME ).getTaskLists();
 
 		const countryCode = getCountryCode(
 			generalSettings.woocommerce_default_country
@@ -437,6 +445,7 @@ export default compose(
 			activePlugins,
 			countryCode,
 			paymentGatewaySuggestions,
+			taskLists,
 		};
 	} )
 )( HelpPanel );

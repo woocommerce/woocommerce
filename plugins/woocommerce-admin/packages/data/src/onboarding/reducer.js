@@ -28,7 +28,6 @@ export const defaultState = {
 	productTypes: [],
 	requesting: {},
 	taskLists: [],
-	tasksStatus: {},
 };
 
 const getUpdatedTaskLists = ( taskLists, args ) => {
@@ -66,7 +65,6 @@ const onboarding = (
 		taskListId,
 		taskList,
 		taskLists,
-		tasksStatus,
 	}
 ) => {
 	switch ( type ) {
@@ -81,11 +79,6 @@ const onboarding = (
 			return {
 				...state,
 				emailPrefill,
-			};
-		case TYPES.SET_TASKS_STATUS:
-			return {
-				...state,
-				tasksStatus: { ...state.tasksStatus, ...tasksStatus },
 			};
 		case TYPES.SET_ERROR:
 			return {

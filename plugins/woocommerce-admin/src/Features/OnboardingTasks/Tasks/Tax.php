@@ -54,9 +54,9 @@ class Tax {
 	 */
 	public static function get_task() {
 		return array(
-			'id'           => 'tax',
-			'title'        => __( 'Set up tax', 'woocommerce-admin' ),
-			'content'      => self::can_use_automated_taxes()
+			'id'              => 'tax',
+			'title'           => __( 'Set up tax', 'woocommerce-admin' ),
+			'content'         => self::can_use_automated_taxes()
 				? __(
 					'Good news! WooCommerce Services and Jetpack can automate your sales tax calculations for you.',
 					'woocommerce-admin'
@@ -65,15 +65,20 @@ class Tax {
 					'Set your store location and configure tax rate settings.',
 					'woocommerce-admin'
 				),
-			'action_label' => self::can_use_automated_taxes()
+			'action_label'    => self::can_use_automated_taxes()
 				? __( 'Yes please', 'woocommerce-admin' )
 				: __( "Let's go", 'woocommerce-admin' ),
-			'is_complete'  => get_option( 'wc_connect_taxes_enabled' ) ||
+			'is_complete'     => get_option( 'wc_connect_taxes_enabled' ) ||
 				count( TaxDataStore::get_taxes( array() ) ) > 0 ||
 				false !== get_option( 'woocommerce_no_sales_tax' ) ||
 				PluginsHelper::is_plugin_active( 'woocommerce-avatax' ),
-			'is_visible'   => true,
-			'time'         => __( '1 minute', 'woocommerce-admin' ),
+			'is_visible'      => true,
+			'time'            => __( '1 minute', 'woocommerce-admin' ),
+			'additional_data' => array(
+				'avalara_activated'         => PluginsHelper::is_plugin_active( 'woocommerce-avatax' ),
+				'tax_jar_activated'         => class_exists( 'WC_Taxjar' ),
+				'woocommerce_tax_countries' => self::get_automated_support_countries(),
+			),
 		);
 	}
 
@@ -87,7 +92,7 @@ class Tax {
 			return false;
 		}
 
-		return in_array( WC()->countries->get_base_country(), self::get_automated_tax_supported_countries(), true );
+		return in_array( WC()->countries->get_base_country(), self::get_automated_support_countries(), true );
 	}
 
 	/**
@@ -95,7 +100,7 @@ class Tax {
 	 *
 	 * @return array
 	 */
-	public static function get_automated_tax_supported_countries() {
+	public static function get_automated_support_countries() {
 		// https://developers.taxjar.com/api/reference/#countries .
 		$tax_supported_countries = array_merge(
 			array( 'US', 'CA', 'AU' ),

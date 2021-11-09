@@ -12,8 +12,8 @@ import { recordEvent } from '@woocommerce/tracks';
 import { PartnerCard } from '../components/partner-card';
 import logo from './logo.png';
 
-export const Card = ( { isPending, tasksStatus } ) => {
-	const { avalaraActivated } = tasksStatus;
+export const Card = ( { isPending, task } ) => {
+	const { avalaraActivated } = task.additionalData;
 
 	return (
 		<PartnerCard

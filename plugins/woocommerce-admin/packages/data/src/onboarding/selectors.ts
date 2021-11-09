@@ -16,12 +16,6 @@ export const getProfileItems = (
 	return state.profileItems || {};
 };
 
-export const getTasksStatus = (
-	state: OnboardingState
-): TasksStatusState | Record< string, never > => {
-	return state.tasksStatus || {};
-};
-
 const initialTaskLists: TaskListType[] = [];
 
 const EMPTY_ARRAY: Product[] = [];
@@ -60,7 +54,6 @@ export const getProductTypes = ( state: OnboardingState ): Product[] => {
 // Types
 export type OnboardingSelectors = {
 	getProfileItems: () => ReturnType< typeof getProfileItems >;
-	getTasksStatus: () => ReturnType< typeof getTasksStatus >;
 	getPaymentGatewaySuggestions: () => ReturnType<
 		typeof getPaymentGatewaySuggestions
 	>;
@@ -72,23 +65,12 @@ export type OnboardingState = {
 	freeExtensions: ExtensionList[];
 	profileItems: ProfileItemsState;
 	taskLists: TaskListType[];
-	tasksStatus: TasksStatusState;
 	paymentMethods: PaymentMethodsState[];
 	productTypes: Product[];
 	emailPrefill: string;
 	// TODO clarify what the error record's type is
 	errors: Record< string, unknown >;
 	requesting: Record< string, boolean >;
-};
-
-export type TasksStatusState = {
-	automatedTaxSupportedCountries: string[];
-	hasHomepage: boolean;
-	hasProducts: boolean;
-	stylesheet: string;
-	taxJarActivated: boolean;
-	// TODO - fill out this type
-	themeMods: unknown;
 };
 
 export type Industry = {

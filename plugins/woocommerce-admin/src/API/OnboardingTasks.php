@@ -77,19 +77,6 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->rest_base . '/status',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_status' ),
-					'permission_callback' => array( $this, 'get_status_permission_check' ),
-				),
-				'schema' => array( $this, 'get_status_item_schema' ),
-			)
-		);
-
-		register_rest_route(
-			$this->namespace,
 			'/' . $this->rest_base . '/create_product_from_template',
 			array(
 				array(
@@ -245,20 +232,6 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	public function create_pages_permission_check( $request ) {
 		if ( ! wc_rest_check_post_permissions( 'page', 'create' ) || ! current_user_can( 'manage_options' ) ) {
 			return new \WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create new pages.', 'woocommerce-admin' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-
-		return true;
-	}
-
-	/**
-	 * Check if a given request has access to get onboarding tasks status.
-	 *
-	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
-	 */
-	public function get_status_permission_check( $request ) {
-		if ( ! current_user_can( 'manage_options' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to retrieve onboarding status.', 'woocommerce-admin' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -677,56 +650,6 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	}
 
 	/**
-	 * Get the status endpoint schema, conforming to JSON Schema.
-	 *
-	 * @return array
-	 */
-	public function get_status_item_schema() {
-		$schema = array(
-			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'Onboarding Task Status',
-			'type'       => 'object',
-			'properties' => array(
-				'automatedTaxSupportedCountries' => array(
-					'type'        => 'array',
-					'description' => __( 'Country codes that support Automated Taxes.', 'woocommerce-admin' ),
-					'context'     => array( 'view' ),
-					'readonly'    => true,
-					'items'       => array(
-						'type' => 'string',
-					),
-				),
-				'hasHomepage'                    => array(
-					'type'        => 'boolean',
-					'description' => __( 'If the store has a homepage created.', 'woocommerce-admin' ),
-					'context'     => array( 'view' ),
-					'readonly'    => true,
-				),
-				'hasProducts'                    => array(
-					'type'        => 'boolean',
-					'description' => __( 'If the store has any products.', 'woocommerce-admin' ),
-					'context'     => array( 'view' ),
-					'readonly'    => true,
-				),
-				'taxJarActivated'                => array(
-					'type'        => 'boolean',
-					'description' => __( 'If the store has the TaxJar extension active.', 'woocommerce-admin' ),
-					'context'     => array( 'view' ),
-					'readonly'    => true,
-				),
-				'themeMods'                      => array(
-					'type'        => 'object',
-					'description' => __( 'Active theme modifications.', 'woocommerce-admin' ),
-					'context'     => array( 'view' ),
-					'readonly'    => true,
-				),
-			),
-		);
-
-		return $this->add_additional_fields_schema( $schema );
-	}
-
-	/**
 	 * Get the query params for task lists.
 	 *
 	 * @return array
@@ -747,17 +670,6 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 			},
 		);
 		return $params;
-	}
-
-	/**
-	 * Get various onboarding task statuses.
-	 *
-	 * @return WP_Error|array
-	 */
-	public function get_status() {
-		$status = OnboardingTasksFeature::get_settings();
-
-		return rest_ensure_response( $status );
 	}
 
 	/**
