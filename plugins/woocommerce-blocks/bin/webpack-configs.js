@@ -171,12 +171,22 @@ const getMainConfig = ( options = {} ) => {
 		output: {
 			devtoolNamespace: 'wc',
 			path: path.resolve( __dirname, '../build/' ),
+			// This is a cache busting mechanism which ensures that the script is loaded via the browser with a ?ver=hash
+			// string. The hash is based on the built file contents.
+			// @see https://github.com/webpack/webpack/issues/2329
+			// Using the ?ver string is needed here so the filename does not change between builds. The WordPress
+			// i18n system relies on the hash of the filename, so changing that frequently would result in broken
+			// translations which we must avoid.
+			// @see https://github.com/Automattic/jetpack/pull/20926
+			chunkFilename: `[name]${ fileSuffix }.js?ver=[contenthash]`,
 			filename: `[name]${ fileSuffix }.js`,
 			library: [ 'wc', 'blocks', '[name]' ],
 			libraryTarget: 'this',
 			// This fixes an issue with multiple webpack projects using chunking
 			// overwriting each other's chunk loader function.
 			// See https://webpack.js.org/configuration/output/#outputjsonpfunction
+			// This can be removed when moving to webpack 5:
+			// https://webpack.js.org/blog/2020-10-10-webpack-5-release/#automatic-unique-naming
 			jsonpFunction: 'webpackWcBlocksJsonp',
 		},
 		module: {
@@ -280,10 +290,20 @@ const getFrontConfig = ( options = {} ) => {
 		output: {
 			devtoolNamespace: 'wc',
 			path: path.resolve( __dirname, '../build/' ),
+			// This is a cache busting mechanism which ensures that the script is loaded via the browser with a ?ver=hash
+			// string. The hash is based on the built file contents.
+			// @see https://github.com/webpack/webpack/issues/2329
+			// Using the ?ver string is needed here so the filename does not change between builds. The WordPress
+			// i18n system relies on the hash of the filename, so changing that frequently would result in broken
+			// translations which we must avoid.
+			// @see https://github.com/Automattic/jetpack/pull/20926
+			chunkFilename: `[name]-frontend${ fileSuffix }.js?ver=[contenthash]`,
 			filename: `[name]-frontend${ fileSuffix }.js`,
 			// This fixes an issue with multiple webpack projects using chunking
 			// overwriting each other's chunk loader function.
 			// See https://webpack.js.org/configuration/output/#outputjsonpfunction
+			// This can be removed when moving to webpack 5:
+			// https://webpack.js.org/blog/2020-10-10-webpack-5-release/#automatic-unique-naming
 			jsonpFunction: 'webpackWcBlocksJsonp',
 		},
 		module: {
