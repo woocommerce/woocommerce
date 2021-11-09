@@ -21,8 +21,8 @@ import {
 import {
 	PanelBody,
 	ToggleControl,
-	CheckboxControl,
 	Notice,
+	CheckboxControl,
 } from '@wordpress/components';
 import { CartCheckoutFeedbackPrompt } from '@woocommerce/editor-components/feedback-prompt';
 import { CHECKOUT_PAGE_ID } from '@woocommerce/block-settings';
