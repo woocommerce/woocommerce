@@ -34,7 +34,9 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 	 */
 	protected function get_objects( $query_args ) {
 		$query_args['paginate'] = true;
-		$results                = wc_get_orders( $query_args );
+
+		$query   = new WC_Order_Query( $query_args );
+		$results = $query->get_orders();
 
 		return array(
 			'objects' => $results->orders,
@@ -282,39 +284,70 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 			$args['customer'] = $request['customer'];
 		}
 
-		// See if the meta_query was modified via filter.
-		if ( $query_has_filter && ! empty( $args['meta_query'] ) ) {
-			$meta_query = $args['meta_query'];
-
-			// Eliminate the customer meta query created by WC_REST_Orders_V2_Controller::prepare_objects_query.
-			if ( isset( $request['customer'] ) ) {
-				$customer   = $request['customer'] ;
-				$meta_query = array_filter(
-					$meta_query,
-					function( $meta_clause ) use ( $customer ) {
-						return (
-							'_customer_user' !== $meta_clause['key'] &&
-							'NUMERIC' !== 'type' &&
-							$customer !== $meta_clause['value']
-						);
-					}
-				);
-			}
-
-			// If there's still a meta query, we need to preserve it by adding it back in after
-			// WC_Data_Store_WP::get_wp_query_args() has been called, since it will strip it out.
-			if ( ! empty( $meta_query ) ) {
-				add_filter( 'woocommerce_order_data_store_cpt_get_orders_query', function( $query ) use ( $meta_query ) {
-					$query['meta_query'] = $query['meta_query'] + $meta_query;
-					return $query;
-				} );
-			}
+		// See if we need to migrate a meta_query added via filter.
+		if ( $query_has_filter ) {
+			$args = $this->maybe_preserve_filtered_meta_query( $args );
 		}
 
 		// Put the statuses back for further processing (next/prev links, etc).
 		$request['status'] = $statuses;
 
 		return $args;
+	}
+
+	/**
+	 * Determine if a meta query was added, setting up a filter to restore it if necessary.
+	 *
+	 * @param array $args The prepared objects query.
+	 * @return array Potentially modified objects query (for meta query preservation).
+	 */
+	protected function maybe_preserve_filtered_meta_query( $args ) {
+		if ( empty( $args['meta_query'] ) ) {
+			return $args;
+		}
+
+		$meta_query = $args['meta_query'];
+
+		// Eliminate the customer meta query created by WC_REST_Orders_V2_Controller::prepare_objects_query.
+		if ( isset( $args['customer'] ) ) {
+			$customer   = $args['customer'] ;
+			$meta_query = array_filter(
+				$meta_query,
+				function( $meta_clause ) use ( $customer ) {
+					return (
+						'_customer_user' !== $meta_clause['key'] &&
+						'NUMERIC' !== 'type' &&
+						$customer !== $meta_clause['value']
+					);
+				}
+			);
+		}
+
+		// If there's still a meta query, we need to preserve it by adding it back in after
+		// WC_Data_Store_WP::get_wp_query_args() has been called, since it will strip it out.
+		if ( ! empty( $meta_query ) ) {
+			$args['_meta_query'] = $meta_query;
+			add_filter( 'woocommerce_order_data_store_cpt_get_orders_query', array( $this, 'preserve_meta_query' ) );
+		}
+
+		return $args;
+	}
+
+	/**
+	 * Filter to restore the meta query for this request.
+	 * 
+	 * Expected to be hooked to the `woocommerce_order_data_store_cpt_get_orders_query` filter.
+	 * 
+	 * @param array $query Orders query parameters.
+	 * @return array Filtered orders query parameters.
+	 */
+	public function preserve_meta_query( $query ) {
+		if ( ! empty( $query['_meta_query'] ) ) {
+			$query['meta_query'] = $query['meta_query'] + $query['_meta_query'];
+			unset( $query['_meta_query'] );
+			remove_filter( 'woocommerce_order_data_store_cpt_get_orders_query', array( $this, __FUNCTION__ ) );
+		}
+		return $query;
 	}
 
 	/**
