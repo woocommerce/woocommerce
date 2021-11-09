@@ -7,13 +7,31 @@
       "executor": "@nrwl/workspace:run-script",
       "options": {
         "script": "build"
-	  }
-	},
+      }
+    },
+    "clean": {
+      "executor": "@nrwl/workspace:run-script",
+      "options": {
+        "script": "clean"
+      }
+    },
+    "compile": {
+      "executor": "@nrwl/workspace:run-script",
+      "options": {
+        "script": "compile"
+      }
+    },
+    "prepare": {
+      "executor": "@nrwl/workspace:run-script",
+      "options": {
+        "script": "prepare"
+      }
+    },
     "lint": {
       "executor": "@nrwl/workspace:run-script",
       "options": {
         "script": "lint"
-	  }
-	}
+      }
+    }
   }
 }
