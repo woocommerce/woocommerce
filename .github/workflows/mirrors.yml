@@ -1,8 +1,7 @@
-
 name: Mirrors
 on:
-  push:
-    branches: [ 'test/build-prod-repo-on-push' ]
+    push:
+        branches: ['test/build-prod-repo-on-push']
 jobs:
     build:
         name: Build WooCommerce zip
@@ -13,7 +12,7 @@ jobs:
 
             - name: Build
               id: build
-              uses: woocommerce/action-build@cp-composer-json
+              uses: woocommerce/action-build@trunk
 
             - name: Upload PR zip
               uses: actions/upload-artifact@v2
@@ -38,7 +37,7 @@ jobs:
               uses: actions/checkout@v2
               with:
                   path: monorepo
-            
+
             - name: Download WooCommerce ZIP
               uses: actions/download-artifact@v2
               with:
@@ -58,7 +57,7 @@ jobs:
               run: |
                   touch mirrors.txt
                   echo "woocommerce/woocommerce-production" >> mirrors.txt
-                  
+
             - name: Push to mirror
               uses: Automattic/action-push-to-mirrors@v1
               with:
@@ -66,4 +65,4 @@ jobs:
                   token: ${{ secrets.API_TOKEN_GITHUB }}
                   username: matticbot
                   working-directory: ${{ github.workspace }}/tmp/woocommerce-build
-              timeout-minutes: 5  # 2021-01-18: Successful runs seem to take about half a minute.
+              timeout-minutes: 5 # 2021-01-18: Successful runs seem to take about half a minute.
