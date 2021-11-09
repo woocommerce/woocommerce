@@ -95,7 +95,7 @@
 	.current-section-dropdown {
 		background: #fff;
 		border: 1px solid #a7aaad;
-		margin-bottom: 24px;
+		margin-bottom: 12px;
 		position: relative;
 		width: 100%;
 
@@ -491,6 +491,7 @@
 			background: #fff;
 			border: 1px solid #dcdcde;
 			border-radius: 2px;
+			box-sizing: border-box;
 			display: flex;
 			flex: 1 0 auto;
 			flex-direction: column;
@@ -7696,7 +7697,7 @@ table.bar_chart {
 		.current-section-dropdown {
 			background: none;
 			border: none;
-			margin-bottom: 32px;
+			margin-bottom: 20px;
 			width: 100%;
 
 			ul {
@@ -7706,6 +7707,7 @@ table.bar_chart {
 				flex-direction: row;
 				flex-wrap: wrap;
 				justify-content: flex-start;
+				margin-top: -12px;
 				padding: 0;
 				position: static;
 
@@ -7713,7 +7715,7 @@ table.bar_chart {
 					border: 1px solid #ccc;
 					font-size: 14px;
 					line-height: 20px;
-					margin: 0 12px 12px 0;
+					margin: 12px 12px 0 0;
 
 					&.current {
 						a {
@@ -7732,7 +7734,7 @@ table.bar_chart {
 				a:hover,
 				a:active {
 					color: #50575e;
-					padding: 10px 14px;
+					padding: 10px 14px !important;
 				}
 			}
 
