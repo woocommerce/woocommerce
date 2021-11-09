@@ -24,7 +24,7 @@ const order = {
 };
 
 const productLineItems = {
-	name: '',
+	name: 'Handmade Wooden Gloves',
 	product_id: 93,
 	variation_id: 0,
 	quantity: 2,
