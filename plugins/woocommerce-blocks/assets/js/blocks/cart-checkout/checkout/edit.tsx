@@ -35,7 +35,7 @@ import type { TemplateArray } from '@wordpress/blocks';
  * Internal dependencies
  */
 import './styles/editor.scss';
-import { addClassToBody, useBlockPropsWithLocking, Columns } from '../shared';
+import { addClassToBody, useBlockPropsWithLocking } from '../shared';
 import { CheckoutBlockContext, CheckoutBlockControlsContext } from './context';
 import type { Attributes } from './types';
 
@@ -234,42 +234,40 @@ export const Edit = ( {
 					setAttributes={ setAttributes }
 				/>
 				<CheckoutProvider>
-					<Columns>
-						<SidebarLayout
-							className={ classnames( 'wc-block-checkout', {
-								'has-dark-controls': attributes.hasDarkControls,
-							} ) }
+					<SidebarLayout
+						className={ classnames( 'wc-block-checkout', {
+							'has-dark-controls': attributes.hasDarkControls,
+						} ) }
+					>
+						<CheckoutBlockControlsContext.Provider
+							value={ {
+								addressFieldControls,
+								accountControls,
+							} }
 						>
-							<CheckoutBlockControlsContext.Provider
+							<CheckoutBlockContext.Provider
 								value={ {
-									addressFieldControls,
-									accountControls,
+									allowCreateAccount,
+									showCompanyField,
+									requireCompanyField,
+									showApartmentField,
+									showPhoneField,
+									requirePhoneField,
+									showOrderNotes,
+									showPolicyLinks,
+									showReturnToCart,
+									cartPageId,
+									showRateAfterTaxName,
 								} }
 							>
-								<CheckoutBlockContext.Provider
-									value={ {
-										allowCreateAccount,
-										showCompanyField,
-										requireCompanyField,
-										showApartmentField,
-										showPhoneField,
-										requirePhoneField,
-										showOrderNotes,
-										showPolicyLinks,
-										showReturnToCart,
-										cartPageId,
-										showRateAfterTaxName,
-									} }
-								>
-									<InnerBlocks
-										allowedBlocks={ ALLOWED_BLOCKS }
-										template={ defaultTemplate }
-										templateLock="insert"
-									/>
-								</CheckoutBlockContext.Provider>
-							</CheckoutBlockControlsContext.Provider>
-						</SidebarLayout>
-					</Columns>
+								<InnerBlocks
+									allowedBlocks={ ALLOWED_BLOCKS }
+									template={ defaultTemplate }
+									templateLock="insert"
+								/>
+							</CheckoutBlockContext.Provider>
+						</CheckoutBlockControlsContext.Provider>
+					</SidebarLayout>
 				</CheckoutProvider>
 			</EditorProvider>
 			<CartCheckoutCompatibilityNotice blockName="checkout" />

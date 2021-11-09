@@ -36,7 +36,7 @@ export const useViewSwitcher = (
 				}
 				controls={ views.map( ( view ) => ( {
 					...view,
-					title: view.label,
+					title: <span>{ view.label }</span>,
 					isActive: view.view === currentView.view,
 					onClick: () => {
 						setCurrentView( view );
