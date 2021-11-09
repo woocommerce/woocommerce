@@ -106,6 +106,8 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 								continue;
 							}
 						}
+
+						WC_Admin_Addons::render_product_card( $addon );
 						?>
 						<li class="product">
 							<div class="product-details">
