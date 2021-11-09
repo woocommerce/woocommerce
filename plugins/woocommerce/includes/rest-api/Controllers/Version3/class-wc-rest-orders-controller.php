@@ -26,6 +26,24 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 	protected $namespace = 'wc/v3';
 
 	/**
+	 * Get Orders.
+	 *
+	 * @param  array $query_args Query args.
+	 *
+	 * @return array Orders.
+	 */
+	protected function get_objects( $query_args ) {
+		$query_args['paginate'] = true;
+		$results                = wc_get_orders( $query_args );
+
+		return array(
+			'objects' => $results->orders,
+			'total'   => $results->total,
+			'pages'   => $results->max_num_pages,
+		);
+	}
+
+	/**
 	 * Calculate coupons.
 	 *
 	 * @throws WC_REST_Exception When fails to set any item.
@@ -255,6 +273,11 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 			} else {
 				$args['post_status'][] = $status;
 			}
+		}
+
+		// // Add customer back since WC_Data_Store_WP::get_wp_query_args() will ignore the meta_query.
+		if ( isset( $request['customer'] ) ) {
+			$args['customer'] = $request['customer'];
 		}
 
 		// Put the statuses back for further processing (next/prev links, etc).
