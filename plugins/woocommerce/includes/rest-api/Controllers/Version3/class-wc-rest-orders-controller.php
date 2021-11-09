@@ -257,6 +257,8 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 	 * @return array
 	 */
 	protected function prepare_objects_query( $request ) {
+		// Track if the query is being filtered.
+		$query_has_filter = has_filter( 'woocommerce_rest_orders_prepare_object_query' );
 		// This is needed to get around an array to string notice in WC_REST_Orders_V2_Controller::prepare_objects_query.
 		$statuses = $request['status'];
 		unset( $request['status'] );
@@ -278,6 +280,35 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 		// // Add customer back since WC_Data_Store_WP::get_wp_query_args() will ignore the meta_query.
 		if ( isset( $request['customer'] ) ) {
 			$args['customer'] = $request['customer'];
+		}
+
+		// See if the meta_query was modified via filter.
+		if ( $query_has_filter && ! empty( $args['meta_query'] ) ) {
+			$meta_query = $args['meta_query'];
+
+			// Eliminate the customer meta query created by WC_REST_Orders_V2_Controller::prepare_objects_query.
+			if ( isset( $request['customer'] ) ) {
+				$customer   = $request['customer'] ;
+				$meta_query = array_filter(
+					$meta_query,
+					function( $meta_clause ) use ( $customer ) {
+						return (
+							'_customer_user' !== $meta_clause['key'] &&
+							'NUMERIC' !== 'type' &&
+							$customer !== $meta_clause['value']
+						);
+					}
+				);
+			}
+
+			// If there's still a meta query, we need to preserve it by adding it back in after
+			// WC_Data_Store_WP::get_wp_query_args() has been called, since it will strip it out.
+			if ( ! empty( $meta_query ) ) {
+				add_filter( 'woocommerce_order_data_store_cpt_get_orders_query', function( $query ) use ( $meta_query ) {
+					$query['meta_query'] = $query['meta_query'] + $meta_query;
+					return $query;
+				} );
+			}
 		}
 
 		// Put the statuses back for further processing (next/prev links, etc).
