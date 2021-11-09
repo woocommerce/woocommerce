@@ -5,9 +5,8 @@ const {
 	merchant,
 	clickTab,
 	AdminEdit,
-	factories,
+	withRestApi,
 } = require( '@woocommerce/e2e-utils' );
-const { Coupon } = require( '@woocommerce/api' );
 
 /**
  * External dependencies
@@ -50,8 +49,7 @@ const runCreateCouponTest = () => {
 			// Delete the coupon
 			const couponId = await adminEdit.getId();
 			if ( couponId ) {
-				const repository = Coupon.restRepository( factories.api.withDefaultPermalinks );
-				await repository.delete( couponId );
+				await withRestApi.deleteCoupon( couponId );
 			}
 		});
 	});

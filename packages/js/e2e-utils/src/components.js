@@ -190,13 +190,13 @@ const completeOnboardingWizard = async () => {
 /**
  * Create simple product.
  *
- * @param productTitle - Defaults to Simple Product. Customizable title.
- * @param productPrice - Defaults to $9.99. Customizable pricing.
+ * @param productTitle Defaults to Simple Product. Customizable title.
+ * @param productPrice Defaults to $9.99. Customizable pricing.
  */
 const createSimpleProduct = async ( productTitle = simpleProductName, productPrice = simpleProductPrice ) => {
 	const product = await factories.products.simple.create( {
 		name: productTitle,
-		regularPrice: productPrice
+		regularPrice: productPrice,
 	} );
 	return product.id;
 } ;
