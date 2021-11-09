@@ -252,7 +252,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 						'desc'          => __( 'Deliver downloadable files inline', 'woocommerce' ),
 						'id'            => 'woocommerce_downloads_deliver_inline',
 						'type'          => 'checkbox',
-						'default'       => 'yes',
+						'default'       => false,
 						'desc_tip'      => __( 'Enable this option to have downloadable files open in browser', 'woocommerce' ),
 						'autoload'      => false,
 					),
