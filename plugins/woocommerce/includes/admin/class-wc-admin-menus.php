@@ -36,7 +36,6 @@ class WC_Admin_Menus {
 		add_filter( 'menu_order', array( $this, 'menu_order' ) );
 		add_filter( 'custom_menu_order', array( $this, 'custom_menu_order' ) );
 		add_filter( 'set-screen-option', array( $this, 'set_screen_option' ), 10, 3 );
-		add_filter( 'submenu_file', array( $this, 'update_menu_highlight' ), 10, 2 );
 		add_filter( 'admin_title', array( $this, 'update_my_subscriptions_title' ) );
 
 		// Add endpoints custom URLs in Appearance > Menus > Pages.
