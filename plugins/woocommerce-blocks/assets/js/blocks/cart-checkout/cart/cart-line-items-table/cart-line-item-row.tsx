@@ -162,8 +162,14 @@ const CartLineItemRow = forwardRef< HTMLTableRowElement, CartLineItemRowProps >(
 		const isProductHiddenFromCatalog =
 			catalogVisibility === 'hidden' || catalogVisibility === 'search';
 
-		// Allow extensions to filter how the price is displayed. Ie: prepending or appending some values.
+		const cartItemClassNameFilter = __experimentalApplyCheckoutFilter( {
+			filterName: 'cartItemClass',
+			defaultValue: '',
+			extensions,
+			arg,
+		} );
 
+		// Allow extensions to filter how the price is displayed. Ie: prepending or appending some values.
 		const productPriceFormat = __experimentalApplyCheckoutFilter( {
 			filterName: 'cartItemPrice',
 			defaultValue: '<price/>',
@@ -190,9 +196,13 @@ const CartLineItemRow = forwardRef< HTMLTableRowElement, CartLineItemRowProps >(
 
 		return (
 			<tr
-				className={ classnames( 'wc-block-cart-items__row', {
-					'is-disabled': isPendingDelete,
-				} ) }
+				className={ classnames(
+					'wc-block-cart-items__row',
+					cartItemClassNameFilter,
+					{
+						'is-disabled': isPendingDelete,
+					}
+				) }
 				ref={ ref }
 				tabIndex={ tabIndex }
 			>
