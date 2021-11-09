@@ -6,3 +6,4 @@
 - Coupons API Tests
 - Refunds API Tests
 - Products API Tests
+- Order Search API Tests

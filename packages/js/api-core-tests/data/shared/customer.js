@@ -29,7 +29,7 @@ const customerBilling = {
 const customerShipping = {
 	first_name: 'Tim',
 	last_name: 'Clark',
-	company: 'Automattic',
+	company: 'Murphy LLC',
 	country: 'US',
 	address_1: 'Oxford Ave',
 	address_2: 'Linwood Ave',
