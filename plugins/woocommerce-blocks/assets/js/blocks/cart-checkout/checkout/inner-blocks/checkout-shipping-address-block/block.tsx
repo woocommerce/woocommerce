@@ -10,7 +10,7 @@ import {
 	useStoreEvents,
 	useEditorContext,
 } from '@woocommerce/base-context';
-import CheckboxControl from '@woocommerce/base-components/checkbox-control';
+import { CheckboxControl } from '@woocommerce/blocks-checkout';
 
 /**
  * Internal dependencies

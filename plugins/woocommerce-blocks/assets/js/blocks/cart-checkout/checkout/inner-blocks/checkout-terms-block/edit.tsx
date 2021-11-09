@@ -7,7 +7,7 @@ import {
 	RichText,
 	InspectorControls,
 } from '@wordpress/block-editor';
-import CheckboxControl from '@woocommerce/base-components/checkbox-control';
+import { CheckboxControl } from '@woocommerce/blocks-checkout';
 import { PanelBody, ToggleControl, Notice } from '@wordpress/components';
 import { PRIVACY_URL, TERMS_URL } from '@woocommerce/block-settings';
 import { ADMIN_URL } from '@woocommerce/settings';

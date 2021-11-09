@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
-import CheckboxControl from '@woocommerce/base-components/checkbox-control';
+import { CheckboxControl } from '@woocommerce/blocks-checkout';
 import Textarea from '@woocommerce/base-components/textarea';
 import PropTypes from 'prop-types';
 
