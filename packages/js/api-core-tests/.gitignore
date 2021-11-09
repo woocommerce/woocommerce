@@ -1,8 +1,2 @@
-# Node modules
-node_modules/
-
-# Environment
-.env
-
 # Collection output
 collection.json
