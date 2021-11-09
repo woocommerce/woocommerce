@@ -13,6 +13,17 @@ class SingleProduct extends AbstractBlock {
 	protected $block_name = 'single-product';
 
 	/**
+	 * Enqueue frontend assets for this block, just in time for rendering.
+	 *
+	 * @param array $attributes  Any attributes that currently are available from the block.
+	 */
+	protected function enqueue_assets( array $attributes ) {
+		parent::enqueue_assets( $attributes );
+		$product_id = intval( $attributes['productId'] );
+		$this->hydrate_from_api( $product_id );
+	}
+
+	/**
 	 * Get the editor script handle for this block type.
 	 *
 	 * @param string $key Data to get, or default to everything.
@@ -25,5 +36,14 @@ class SingleProduct extends AbstractBlock {
 			'dependencies' => [ 'wc-blocks' ],
 		];
 		return $key ? $script[ $key ] : $script;
+	}
+
+	/**
+	 * Hydrate the cart block with data from the API.
+	 *
+	 * @param int $product_id ID of the product.
+	 */
+	protected function hydrate_from_api( int $product_id ) {
+		$this->asset_data_registry->hydrate_api_request( "/wc/store/products/$product_id" );
 	}
 }
