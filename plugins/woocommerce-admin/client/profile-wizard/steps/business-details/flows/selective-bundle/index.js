@@ -92,7 +92,10 @@ class BusinessDetails extends Component {
 				extensionInstallationOptions[
 					'woocommerce-services:shipping'
 				] || extensionInstallationOptions[ 'woocommerce-services:tax' ],
+			install_google_listings_and_ads:
+				extensionInstallationOptions[ 'google-listings-and-ads' ],
 			install_jetpack: extensionInstallationOptions.jetpack,
+			install_mailpoet: extensionInstallationOptions.mailpoet,
 			install_wcpay:
 				extensionInstallationOptions[ 'woocommerce-payments' ],
 		} );
