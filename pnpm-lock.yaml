@@ -168,6 +168,7 @@ importers:
       faker: ^5.1.0
       fishery: ^1.2.0
     dependencies:
+      '@automattic/puppeteer-utils': github.com/Automattic/puppeteer-utils/0f3ec50
       '@wordpress/deprecated': 2.12.3
       '@wordpress/e2e-test-utils': 4.16.1_jest@27.2.4
       config: 3.3.3
