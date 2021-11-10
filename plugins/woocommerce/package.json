@@ -13,6 +13,8 @@
     "wp_org_slug": "woocommerce"
   },
   "scripts": {
+    "composer:install": "composer install",
+    "composer:dump-autoload": "composer dump-autoload",
     "check:subset-installed": "pnpm list --depth 1 install-subset > /dev/null 2>&1",
     "preinstall": "npx only-allow pnpm",
     "install:subset-only": "pnpm install --no-package-lock --no-save install-subset",
