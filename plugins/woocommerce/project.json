@@ -3,6 +3,18 @@
   "sourceRoot": "plugins/woocommerce",
   "projectType": "application",
   "targets": {
+    "composer-install": {
+      "executor": "@nrwl/workspace:run-script",
+      "options": {
+        "script": "composer:install"
+      }
+	},
+    "composer-dump-autoload": {
+      "executor": "@nrwl/workspace:run-script",
+      "options": {
+        "script": "composer:dump-autoload"
+      }
+	},
     "build": {
       "executor": "@nrwl/workspace:run-script",
       "options": {
