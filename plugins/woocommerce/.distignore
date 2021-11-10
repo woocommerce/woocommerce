@@ -16,6 +16,7 @@ docker-compose.yaml
 Dockerfile
 Gruntfile.js
 none
+project.json
 package-lock.json
 package.json
 packages/woocommerce-admin/docs
