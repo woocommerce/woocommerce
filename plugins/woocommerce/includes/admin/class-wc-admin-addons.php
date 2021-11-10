@@ -94,8 +94,14 @@ class WC_Admin_Addons {
 			}
 
 			$response_code = intval( wp_remote_retrieve_response_code( $raw_featured ) );
+			if ( 200 !== $response_code ) {
+				self::output_empty();
+
+				return;
+			}
+
 			$featured      = json_decode( wp_remote_retrieve_body( $raw_featured ) );
-			if ( empty( $featured ) || ! is_array( $featured ) || 200 !== $response_code ) {
+			if ( empty( $featured ) || ! is_array( $featured ) ) {
 				self::output_empty();
 
 				return;
