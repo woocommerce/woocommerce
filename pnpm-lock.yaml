@@ -159,8 +159,12 @@ importers:
 
   packages/js/e2e-utils:
     specifiers:
+<<<<<<< HEAD
+      '@automattic/puppeteer-utils': github:Automattic/puppeteer-utils#0f3ec50
+=======
       '@typescript-eslint/eslint-plugin': ^5.3.0
       '@typescript-eslint/parser': ^5.3.0
+>>>>>>> trunk
       '@wordpress/deprecated': ^2.10.0
       '@wordpress/e2e-test-utils': ^4.16.1
       config: 3.3.3
@@ -168,6 +172,7 @@ importers:
       faker: ^5.1.0
       fishery: ^1.2.0
     dependencies:
+      '@automattic/puppeteer-utils': github.com/Automattic/puppeteer-utils/0f3ec50
       '@wordpress/deprecated': 2.12.3
       '@wordpress/e2e-test-utils': 4.16.1_jest@27.2.4
       config: 3.3.3
