@@ -1,7 +1,7 @@
 name: Mirrors
 on:
     push:
-        branches: ['test/build-prod-repo-on-push']
+        branches: ['trunk', 'release/**']
 jobs:
     build:
         name: Build WooCommerce zip
