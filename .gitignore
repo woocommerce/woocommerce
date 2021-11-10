@@ -13,6 +13,9 @@ project.properties
 *.sublime-workspace
 .sublimelinterrc
 
+# Eslint Cache
+.eslintcache
+
 # Environment files
 wp-cli.local.yml
 yarn-error.log

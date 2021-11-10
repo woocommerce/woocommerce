@@ -1,20 +1,17 @@
 {
-  "npmScope": "woocommerce",
-  "affected": {
-    "defaultBase": "trunk"
-  },
-  "implicitDependencies": {
-    "package.json": {
-      "dependencies": "*",
-      "devDependencies": "*"
-    },
-    ".eslintrc.json": "*"
-  },
+  "extends": "@nrwl/workspace/presets/npm.json",
+  "npmScope": "woocommerce-monorepo",
   "tasksRunnerOptions": {
     "default": {
       "runner": "@nrwl/workspace/tasks-runners/default",
       "options": {
-        "cacheableOperations": ["build", "lint", "test", "e2e"]
+        "cacheableOperations": [
+          "build",
+          "test",
+          "lint",
+          "package",
+          "prepare"
+        ]
       }
     }
   },
@@ -24,7 +21,21 @@
         "target": "build",
         "projects": "dependencies"
       }
+    ],
+    "prepare": [
+      {
+        "target": "prepare",
+        "projects": "dependencies"
+      }
+    ],
+    "package": [
+      {
+        "target": "package",
+        "projects": "dependencies"
+      }
     ]
   },
-  "projects": {}
+  "affected": {
+    "defaultBase": "trunk"
+  }
 }
