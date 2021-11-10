@@ -148,7 +148,10 @@ class Editor extends Component {
 					controls={ [
 						{
 							icon: 'edit',
-							title: __( 'Edit', 'woo-gutenberg-products-block' ),
+							title: __(
+								'Edit inner product layout',
+								'woo-gutenberg-products-block'
+							),
 							onClick: () => this.togglePreview(),
 							isActive: isEditing,
 						},

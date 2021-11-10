@@ -170,7 +170,7 @@ class ProductsBlock extends Component {
 							{
 								icon: 'edit',
 								title: __(
-									'Edit',
+									'Edit selected products',
 									'woo-gutenberg-products-block'
 								),
 								onClick: () =>

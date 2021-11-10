@@ -162,9 +162,14 @@ const ReviewsByProductEditor = ( {
 		return renderEditMode();
 	}
 
+	const buttonTitle = __(
+		'Edit selected product',
+		'woo-gutenberg-products-block'
+	);
+
 	return (
 		<>
-			{ getBlockControls( editMode, setAttributes ) }
+			{ getBlockControls( editMode, setAttributes, buttonTitle ) }
 			{ getInspectorControls() }
 			<EditorContainerBlock
 				attributes={ attributes }

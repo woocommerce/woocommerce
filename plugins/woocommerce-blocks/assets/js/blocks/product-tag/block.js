@@ -273,7 +273,7 @@ class ProductsByTagBlock extends Component {
 							{
 								icon: 'edit',
 								title: __(
-									'Edit',
+									'Edit selected tags',
 									'woo-gutenberg-products-block'
 								),
 								onClick: () =>

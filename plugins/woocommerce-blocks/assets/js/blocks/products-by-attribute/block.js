@@ -171,7 +171,7 @@ class ProductsByAttributeBlock extends Component {
 							{
 								icon: 'edit',
 								title: __(
-									'Edit',
+									'Edit selected attribute',
 									'woo-gutenberg-products-block'
 								),
 								onClick: () =>
