@@ -301,7 +301,7 @@ class WC_Comments {
 	 *
 	 * @since 6.0.0
 	 *
-	 * @param  array $comment_types Array of comment type labels keyed by their name.
+	 * @param array $comment_types Array of comment type labels keyed by their name.
 	 *
 	 * @return array
 	 */
