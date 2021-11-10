@@ -87,17 +87,26 @@ class WC_Admin_Addons {
 				)
 			);
 
-			if ( ! is_wp_error( $raw_featured ) ) {
-				$featured = json_decode( wp_remote_retrieve_body( $raw_featured ) );
-				if ( $featured ) {
-					set_transient( 'wc_addons_featured', $featured, DAY_IN_SECONDS );
-				}
+			if ( is_wp_error( $raw_featured ) ) {
+				self::output_empty();
+
+				return;
+			}
+
+			$response_code = intval( wp_remote_retrieve_response_code( $raw_featured ) );
+			$featured      = json_decode( wp_remote_retrieve_body( $raw_featured ) );
+			if ( empty( $featured ) || ! is_array( $featured ) || 200 !== $response_code ) {
+				self::output_empty();
+
+				return;
+			}
+
+			if ( $featured ) {
+				set_transient( 'wc_addons_featured', $featured, DAY_IN_SECONDS );
 			}
 		}
 
-		if ( ! empty( $featured ) ) {
-			self::output_featured( $featured );
-		}
+		self::output_featured( $featured );
 	}
 
 	/**
@@ -127,7 +136,7 @@ class WC_Admin_Addons {
 	 * @param  string $term     Search terms.
 	 * @param  string $country  Store country.
 	 *
-	 * @return object of extensions and promotions.
+	 * @return object|WP_Error  Object with products and promotions properties, or WP_Error
 	 */
 	public static function get_extension_data( $category, $term, $country ) {
 		$parameters = self::build_parameter_string( $category, $term, $country );
@@ -144,9 +153,21 @@ class WC_Admin_Addons {
 			array( 'headers' => $headers )
 		);
 
-		if ( ! is_wp_error( $raw_extensions ) ) {
-			$addons = json_decode( wp_remote_retrieve_body( $raw_extensions ) );
+		if ( is_wp_error( $raw_extensions ) ) {
+			return $raw_extensions;
 		}
+
+		$response_code = intval( wp_remote_retrieve_response_code( $raw_extensions ) );
+		if ( 200 !== $response_code ) {
+			return new WP_Error( 'error', __( 'API error', 'woocommerce' ) );
+		}
+
+		$addons = json_decode( wp_remote_retrieve_body( $raw_extensions ) );
+
+		if ( ! is_object( $addons ) || ! isset( $addons->products ) ) {
+			return new WP_Error( 'error', __( 'API error', 'woocommerce' ) );
+		}
+
 		return $addons;
 	}
 
@@ -908,6 +929,28 @@ class WC_Admin_Addons {
 		<?php
 	}
 
+	public static function output_empty() {
+		?>
+			<div class="wc-addons__empty">
+				<h2><?php echo wp_kses_post( __( 'Sorry, we\'re having trouble connecting to the extensions catalog.', 'woocommerce' ) ); ?></h2>
+				<p>
+					<?php
+					/* translators: a url */
+					printf(
+						wp_kses_post(
+							__(
+								'Head over to <a href="%s">WooCommerce.com</a> to start growing your business with the most popular WooCommerce extensions.',
+								'woocommerce'
+							)
+						),
+						'https://woocommerce.com/products/?utm_source=extensionsscreen&utm_medium=product&utm_campaign=connectionerror'
+					);
+					?>
+				</p>
+ 				</div>
+		<?php
+	}
+
 
 	/**
 	 * Handles output of the addons page in admin.
@@ -946,8 +989,12 @@ class WC_Admin_Addons {
 			$term           = $search ? $search : null;
 			$country        = WC()->countries->get_base_country();
 			$extension_data = self::get_extension_data( $category, $term, $country );
-			$addons         = $extension_data->products;
-			$promotions     = ! empty( $extension_data->promotions ) ? $extension_data->promotions : array();
+			if ( is_wp_error( $extension_data ) ) {
+				$addons = $extension_data;
+			} else {
+				$addons = $extension_data->products;
+			}
+			$promotions = ! empty( $extension_data->promotions ) ? $extension_data->promotions : array();
 		}
 
 		// We need Automattic\WooCommerce\Admin\RemoteInboxNotifications for the next part, if not remove all promotions.

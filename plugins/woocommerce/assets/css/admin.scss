@@ -7733,6 +7733,22 @@ table.bar_chart {
 	font-weight: bold;
 }
 
+.wc-addons__empty {
+	margin: 48px auto;
+	max-width: 640px;
+
+	h2 {
+		font-size: 20px;
+		font-weight: 400;
+		line-height: 1.2;
+	}
+
+	p {
+		font-size: 16px;
+		line-height: 1.5;
+	}
+}
+
 @media screen and (min-width: 600px) {
 
 	.wc-addons-wrap {

@@ -75,7 +75,7 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 					<?php esc_html_e( 'Sorry, could not find anything. Try searching again using a different term.', 'woocommerce' ); ?></p>
 				</h1>
 			<?php endif; ?>
-			<?php if ( ! empty( $search ) && count( $addons ) > 0 ) : ?>
+			<?php if ( ! empty( $search ) && ! is_wp_error( $addons ) && count( $addons ) > 0 ) : ?>
 				<h1 class="search-form-title">
 					<?php // translators: search keyword. ?>
 					<?php printf( esc_html__( 'Search results for "%s"', 'woocommerce' ), esc_html( sanitize_text_field( wp_unslash( $search ) ) ) ); ?>
@@ -87,42 +87,46 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 					<?php WC_Admin_Addons::render_featured(); ?>
 				</div>
 			<?php endif; ?>
-			<?php if ( '_featured' !== $current_section && $addons ) : ?>
-				<?php
-				if ( ! empty( $promotions ) && WC()->is_wc_admin_active() ) {
-					foreach ( $promotions as $promotion ) {
-						WC_Admin_Addons::output_search_promotion_block( $promotion );
-					}
-				}
-				?>
-				<ul class="products">
-					<?php foreach ( $addons as $addon ) : ?>
-						<?php
-						if ( 'shipping_methods' === $current_section ) {
-							// Do not show USPS or Canada Post extensions for US and CA stores, respectively.
-							$country = WC()->countries->get_base_country();
-							if ( 'US' === $country
-								&& false !== strpos(
-									$addon->link,
-									'woocommerce.com/products/usps-shipping-method'
-								)
-							) {
-								continue;
-							}
-							if ( 'CA' === $country
-								&& false !== strpos(
-									$addon->link,
-									'woocommerce.com/products/canada-post-shipping-method'
-								)
-							) {
-								continue;
-							}
+			<?php if ( '_featured' !== $current_section ) : ?>
+				<?php if ( is_wp_error( $addons ) ) : ?>
+					<?php WC_Admin_Addons::output_empty(); ?>
+				<?php else: ?>
+					<?php
+					if ( ! empty( $promotions ) && WC()->is_wc_admin_active() ) {
+						foreach ( $promotions as $promotion ) {
+							WC_Admin_Addons::output_search_promotion_block( $promotion );
 						}
+					}
+					?>
+					<ul class="products">
+						<?php foreach ( $addons as $addon ) : ?>
+							<?php
+							if ( 'shipping_methods' === $current_section ) {
+								// Do not show USPS or Canada Post extensions for US and CA stores, respectively.
+								$country = WC()->countries->get_base_country();
+								if ( 'US' === $country
+									 && false !== strpos(
+										$addon->link,
+										'woocommerce.com/products/usps-shipping-method'
+									)
+								) {
+									continue;
+								}
+								if ( 'CA' === $country
+									 && false !== strpos(
+										$addon->link,
+										'woocommerce.com/products/canada-post-shipping-method'
+									)
+								) {
+									continue;
+								}
+							}
 
-						WC_Admin_Addons::render_product_card( $addon );
-						?>
-					<?php endforeach; ?>
-				</ul>
+							WC_Admin_Addons::render_product_card( $addon );
+							?>
+						<?php endforeach; ?>
+					</ul>
+				<?php endif; ?>
 			<?php endif; ?>
 		</div>
 		<?php else : ?>
