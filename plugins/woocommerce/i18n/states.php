@@ -269,6 +269,24 @@ return array(
 		'ZG' => __( 'Zug', 'woocommerce' ),
 		'ZH' => __( 'Zürich', 'woocommerce' ),
 	),
+	'CL' => array( // Chile states.
+		'CL-AI' => __( 'Aisén del General Carlos Ibañez del Campo', 'woocommerce' ),
+		'CL-AN' => __( 'Antofagasta', 'woocommerce' ),
+		'CL-AP' => __( 'Arica y Parinacota', 'woocommerce' ),
+		'CL-AR' => __( 'La Araucanía', 'woocommerce' ),
+		'CL-AT' => __( 'Atacama', 'woocommerce' ),
+		'CL-BI' => __( 'Biobío', 'woocommerce' ),
+		'CL-CO' => __( 'Coquimbo', 'woocommerce' ),
+		'CL-LI' => __( 'Libertador General Bernardo O\'Higgins', 'woocommerce' ),
+		'CL-LL' => __( 'Los Lagos', 'woocommerce' ),
+		'CL-LR' => __( 'Los Ríos', 'woocommerce' ),
+		'CL-MA' => __( 'Magallanes', 'woocommerce' ),
+		'CL-ML' => __( 'Maule', 'woocommerce' ),
+		'CL-NB' => __( 'Ñuble', 'woocommerce' ),
+		'CL-RM' => __( 'Región Metropolitana de Santiago', 'woocommerce' ),
+		'CL-TA' => __( 'Tarapacá', 'woocommerce' ),
+		'CL-VS' => __( 'Valparaíso', 'woocommerce' ),
+	),
 	'CN' => array( // Chinese states.
 		'CN1'  => __( 'Yunnan / 云南', 'woocommerce' ),
 		'CN2'  => __( 'Beijing / 北京', 'woocommerce' ),
@@ -534,7 +552,7 @@ return array(
 		'SO' => __( 'Sololá', 'woocommerce' ),
 		'SU' => __( 'Suchitepéquez', 'woocommerce' ),
 		'TO' => __( 'Totonicapán', 'woocommerce' ),
-		'ZA' => __( 'Zacapa', 'woocommerce' )
+		'ZA' => __( 'Zacapa', 'woocommerce' ),
 	),
 	'HK' => array( // Hong Kong states.
 		'HONG KONG'       => __( 'Hong Kong Island', 'woocommerce' ),
@@ -1818,7 +1836,7 @@ return array(
 		'AE' => __( 'Armed Forces (AE)', 'woocommerce' ),
 		'AP' => __( 'Armed Forces (AP)', 'woocommerce' ),
 	),
-	'VE' => array( // Venezuela States. Ref: https://github.com/unicode-org/cldr/blob/release-38-1/common/subdivisions/en.xml#L5426-L5451
+	'VE' => array( // Venezuela States.
 		'A' => __( 'Capital', 'woocommerce' ),
 		'B' => __( 'Anzoátegui', 'woocommerce' ),
 		'C' => __( 'Apure', 'woocommerce' ),
@@ -1843,7 +1861,7 @@ return array(
 		'W' => __( 'Federal Dependencies', 'woocommerce' ),
 		'X' => __( 'Vargas', 'woocommerce' ),
 		'Y' => __( 'Delta Amacuro', 'woocommerce' ),
-		'Z' => __( 'Amazonas', 'woocommerce' )
+		'Z' => __( 'Amazonas', 'woocommerce' ),
 	),
 	'VN' => array(),
 	'YT' => array(),

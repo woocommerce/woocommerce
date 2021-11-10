@@ -5,6 +5,10 @@
 - Added quotes around `WORDPRESS_TITLE` value in .env file to address issue with docker compose 2 "key cannot contain a space" error.
 - Added `LATEST_WP_VERSION_MINUS` that allows setting a number to subtract from the current WordPress version for the WordPress Docker image.
 
+## Fixed
+
+- Use consistent `defaultViewport` in both headless and non-headless context
+
 # 0.2.3
 
 ## Added
