@@ -139,9 +139,14 @@ const ReviewsByCategoryEditor = ( {
 		return renderEditMode();
 	}
 
+	const buttonTitle = __(
+		'Edit selected categories',
+		'woo-gutenberg-products-block'
+	);
+
 	return (
 		<>
-			{ getBlockControls( editMode, setAttributes ) }
+			{ getBlockControls( editMode, setAttributes, buttonTitle ) }
 			{ getInspectorControls() }
 			<EditorContainerBlock
 				attributes={ attributes }

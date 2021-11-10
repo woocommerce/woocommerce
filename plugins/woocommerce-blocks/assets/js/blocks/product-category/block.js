@@ -291,7 +291,7 @@ class ProductByCategoryBlock extends Component {
 							{
 								icon: 'edit',
 								title: __(
-									'Edit',
+									'Edit selected categories',
 									'woo-gutenberg-products-block'
 								),
 								onClick: () =>
