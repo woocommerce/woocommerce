@@ -95,7 +95,7 @@
 	.current-section-dropdown {
 		background: #fff;
 		border: 1px solid #a7aaad;
-		margin-bottom: 12px;
+		margin-bottom: 20px;
 		position: relative;
 		width: 100%;
 
@@ -226,7 +226,7 @@
 		font-size: 20px;
 		font-family: $font-sf-pro-display;
 		line-height: 1.2;
-		margin: 48px 0 16px;
+		margin: 48px 0 12px;
 		padding: 0;
 	}
 
@@ -438,9 +438,21 @@
 		width: 100%;
 	}
 
+	.addon-product-group {
+		margin-bottom: 24px;
+	}
+
 	.addon-product-group-title {
 		font-family: $font-sf-pro-display;
-		letter-spacing: 0.38px;
+		font-size: 20px;
+		font-weight: 400;
+		line-height: 24px;
+		margin: 0 0 4px;
+	}
+
+	.current-section-dropdown__title {
+		display: none;
+		font-family: $font-sf-pro-display;
 	}
 
 	.addon-product-group-description-container {
@@ -7706,10 +7718,18 @@ table.bar_chart {
 	}
 
 	.wc-addons-wrap {
+		.current-section-dropdown__title {
+			display: block;
+			font-size: 20px;
+			font-weight: 400;
+			line-height: 24px;
+			margin: 0 0 16px;
+		}
+
 		.current-section-dropdown {
 			background: none;
 			border: none;
-			margin-bottom: 20px;
+			margin-bottom: 32px;
 			width: 100%;
 
 			ul {
@@ -7724,15 +7744,19 @@ table.bar_chart {
 				position: static;
 
 				li {
+					background: #fff;
 					border: 1px solid #ccc;
+					border-radius: 32px;
 					font-size: 14px;
 					line-height: 20px;
 					margin: 12px 12px 0 0;
 
 					&.current {
+						background: #007cba;
+						border: 1px solid #007cba;
+
 						a {
-							background: #fff;
-							color: #1e1e1e;
+							color: #fff;
 						}
 
 						a::after {
@@ -7745,8 +7769,8 @@ table.bar_chart {
 				a:visited,
 				a:hover,
 				a:active {
-					color: #50575e;
-					padding: 10px 14px !important;
+					color: #2c3338;
+					padding: 10px 16px !important;
 				}
 			}
 

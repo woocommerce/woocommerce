@@ -13,6 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 ?>
 <div id="marketplace-current-section-dropdown" class="current-section-dropdown">
+	<h2 class="current-section-dropdown__title"><?php esc_html_e( 'Browse categories', 'woocommerce' ); ?></h2>
 	<ul>
 		<?php foreach ( $sections as $section ) : ?>
 			<?php
