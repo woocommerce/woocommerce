@@ -52,7 +52,7 @@ const deleteAllRepositoryObjects = async ( repository, defaultObjectId = null, s
  */
 const flattenTaxRate = ( taxRate ) => {
 	return taxRate.rate + '/' + taxRate.class + '/' + taxRate.name;
-}
+};
 
 /**
  * Utility functions that use the REST API to process the requested function.
