@@ -55,7 +55,11 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 					class="marketplace-header__tab-link"
 					href="<?php echo esc_url( admin_url( 'admin.php?page=wc-addons&section=helper' ) ); ?>"
 				>
-					<?php esc_html_e( 'My Subscriptions', 'woocommerce' ); ?>
+					<?php
+					$count_html = WC_Helper_Updater::get_updates_count_html();
+					/* translators: %s: WooCommerce.com Subscriptions tab count HTML. */
+					echo ( sprintf( __( 'My Subscriptions %s', 'woocommerce' ), $count_html ) );
+					?>
 				</a>
 			</li>
 		</ul>
