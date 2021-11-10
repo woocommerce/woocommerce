@@ -4,9 +4,10 @@
 const {
 	merchant,
 	uiUnblocked,
+	withRestApi,
 	AdminEdit,
-} = require('@woocommerce/e2e-utils');
-const config = require('config');
+} = require( '@woocommerce/e2e-utils' );
+const config = require( 'config' );
 const {
 	HTTPClientFactory,
 	VariableProduct,
@@ -14,22 +15,34 @@ const {
 	SimpleProduct,
 	ProductVariation,
 	ExternalProduct
-} = require('@woocommerce/api');
+} = require( '@woocommerce/api' );
+
+const taxClasses = [
+	{
+		name: 'Tax Class Simple',
+	},
+	{
+		name: 'Tax Class Variable',
+	},
+	{
+		name: 'Tax Class External',
+	},
+];
 
 const taxRates = [
 	{
 		name: 'Tax Rate Simple',
-		rate: '10',
+		rate: '10.0000',
 		class: 'tax-class-simple'
 	},
 	{
 		name: 'Tax Rate Variable',
-		rate: '20',
+		rate: '20.0000',
 		class: 'tax-class-variable'
 	},
 	{
 		name: 'Tax Rate External',
-		rate: '30',
+		rate: '30.0000',
 		class: 'tax-class-external'
 	}
 ];
@@ -43,60 +56,22 @@ const initProducts = async () => {
 	const httpClient = HTTPClientFactory.build(apiUrl)
 		.withBasicAuth(adminUsername, adminPassword)
 		.create();
-	const taxClassesPath = '/wc/v3/taxes/classes';
-	const taxClasses = [
-		{
-			name: 'Tax Class Simple',
-			slug: 'tax-class-simple-698962'
-		},
-		{
-			name: 'Tax Class Variable',
-			slug: 'tax-class-variable-790238'
-		},
-		{
-			name: 'Tax Class External',
-			slug: 'tax-class-external-991321'
-		}
-	];
 
-	// Enable taxes in settings
-	const enableTaxes = async () => {
-		const path = '/wc/v3/settings/general/woocommerce_calc_taxes';
-		const data = {
-			value: 'yes'
-		};
-		await httpClient.put(path, data);
-	};
-	await enableTaxes();
-
-	// Initialize tax classes
-	const initTaxClasses = async () => {
-		for (const classToBeAdded of taxClasses) {
-			await httpClient.post(taxClassesPath, classToBeAdded);
-		}
-	};
-	await initTaxClasses();
-
-	// Initialize tax rates
-	const initTaxRates = async () => {
-		const path = '/wc/v3/taxes';
-
-		for (const rateToBeAdded of taxRates) {
-			await httpClient.post(path, rateToBeAdded);
-		}
-	};
-	await initTaxRates();
+	await withRestApi.updateSettingOption( 'general', 'woocommerce_calc_taxes', { value: 'yes' } );
+	await withRestApi.addTaxClasses( taxClasses );
+	await withRestApi.addTaxRates( taxRates );
 
 	// Initialization functions per product type
 	const initSimpleProduct = async () => {
-		const repo = SimpleProduct.restRepository(httpClient);
+		const repo = SimpleProduct.restRepository( httpClient );
 		const simpleProduct = {
 			name: 'Simple Product 273722',
 			regularPrice: '100',
 			taxClass: 'Tax Class Simple'
 		};
-		return await repo.create(simpleProduct);
+		return await repo.create( simpleProduct );
 	};
+
 	const initVariableProduct = async () => {
 		const variations = [
 			{
@@ -264,12 +239,12 @@ const runCreateOrderTest = () => {
 			}
 
 			// Verify that the names of each tax class were shown
-			for (const { name } of taxRates) {
+			for (const taxRate of taxRates) {
 				await expect(page).toMatchElement('th.line_tax', {
-					text: name
+					text: taxRate.name
 				});
 				await expect(page).toMatchElement('.wc-order-totals td.label', {
-					text: name
+					text: taxRate.name
 				});
 			}
 
