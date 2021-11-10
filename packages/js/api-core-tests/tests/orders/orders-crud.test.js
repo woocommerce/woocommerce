@@ -129,9 +129,9 @@ describe( 'Orders API tests: CRUD', () => {
 
 		it.each( statusesDataTable )(
 			"can update status of an order to '%s'",
-			async ( expectedStatus ) => {
+			async ( expectedOrderStatus ) => {
 				const requestPayload = {
-					status: expectedStatus,
+					status: expectedOrderStatus,
 				};
 				const { status, body } = await ordersApi.update.order(
 					orderId,
@@ -140,7 +140,7 @@ describe( 'Orders API tests: CRUD', () => {
 
 				expect( status ).toEqual( ordersApi.update.responseCode );
 				expect( body.id ).toEqual( orderId );
-				expect( body.status ).toEqual( expectedStatus );
+				expect( body.status ).toEqual( expectedOrderStatus );
 			}
 		);
 
@@ -169,7 +169,10 @@ describe( 'Orders API tests: CRUD', () => {
 			// Verify that the added product has the correct values
 			expect( status ).toEqual( ordersApi.update.responseCode );
 			expect( body.line_items ).toHaveLength( 1 );
-			expect( body.line_items[ 0 ] ).toMatchObject( simpleProduct );
+			expect( body.line_items[ 0 ].product_id ).toEqual(
+				simpleProduct.id
+			);
+			expect( body.line_items[ 0 ].name ).toEqual( simpleProduct.name );
 		} );
 
 		it( 'can pay for an order', async () => {
