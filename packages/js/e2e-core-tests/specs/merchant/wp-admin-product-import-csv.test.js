@@ -107,9 +107,9 @@ const runImportProductsTest = () => {
 		afterAll(async () => {
 			// Delete imported products
 			await withRestApi.deleteAllProducts();
-			await withRestApi.deleteAllProductAttributes();
-			await withRestApi.deleteAllProductCategories();
-			await withRestApi.deleteAllProductTags();
+			await withRestApi.deleteAllProductAttributes( false );
+			await withRestApi.deleteAllProductCategories( false );
+			await withRestApi.deleteAllProductTags( false );
 		});
 
 		it( 'should show error message if you go without providing CSV file', async () => {
