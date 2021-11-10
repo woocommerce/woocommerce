@@ -152,7 +152,7 @@ Please note: if you're using a non-SSL environment (such as a Docker container f
 | `deleteAllProductCategories` | | Permanently delete all product categories |
 | `deleteAllProducts` | | Permanently delete all products |
 | `deleteAllProductTags` | | Permanently delete all product tags |
-| `deleteAllShippingClasses` | Permanently delete all shipping classes |
+| `deleteAllShippingClasses` | | Permanently delete all shipping classes |
 | `deleteAllShippingZones` | | Permanently delete all shipping zones except the default |
 | `deleteCoupon` | `couponId` | Permanently delete a coupon |
 | `deleteCustomerByEmail` | `emailAddress` | Delete customer user account. Posts are reassigned to user ID 1 |
