@@ -65,4 +65,12 @@ describe( 'Order Search API tests', () => {
 		expect( body ).toHaveLength( 1 );
 		expect( body[ 0 ].id ).toEqual( order.id );
 	} );
+
+	it( 'can return an empty result set when no matches were found', async () => {
+		const { body } = await ordersApi.listAll.orders( {
+			search: 'Chauncey Smith Kunde',
+		} );
+
+		expect( body ).toEqual( [] );
+	} );
 } );
