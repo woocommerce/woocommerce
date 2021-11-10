@@ -41,6 +41,7 @@
     "@babel/polyfill": "7.12.1",
     "@babel/preset-env": "7.12.7",
     "@wordpress/eslint-plugin": "7.3.0",
+    "eslint": "^8.1.0",
     "ndb": "^1.1.5",
     "semver": "^7.3.2"
   },
@@ -58,7 +59,8 @@
     "docker:ssh": "docker exec -it $(node utils/get-app-name.js)_wordpress-www /bin/bash",
     "test:e2e": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js",
     "test:e2e-debug": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js --dev --debug",
-    "test:e2e-dev": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js --dev"
+    "test:e2e-dev": "bash ./bin/wait-for-build.sh && ./bin/e2e-test-integration.js --dev",
+    "lint": "eslint src"
   },
   "bin": {
     "wc-e2e": "bin/wc-e2e.sh"
