@@ -14,7 +14,7 @@ const runAddShippingClassesTest = () => {
 		});
 
 		afterAll(async () => {
-			await withRestApi.deleteAllShippingClasses();
+			await withRestApi.deleteAllShippingClasses( false );
 		});
 
 		it('can add shipping classes', async () => {

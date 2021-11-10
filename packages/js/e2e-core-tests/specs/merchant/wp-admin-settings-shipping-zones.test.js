@@ -35,7 +35,7 @@ const runAddNewShippingZoneTest = () => {
 
 		beforeAll(async () => {
 			productId = await createSimpleProduct();
-			await withRestApi.deleteAllShippingZones();
+			await withRestApi.deleteAllShippingZones( false );
 			await merchant.login();
 		});
 

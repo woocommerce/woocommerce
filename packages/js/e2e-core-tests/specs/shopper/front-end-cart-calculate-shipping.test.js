@@ -42,19 +42,19 @@ const runCartCalculateShippingTest = () => {
 			firstProductId = await createSimpleProduct(firstProductName);
 			secondProductId = await createSimpleProduct(secondProductName, secondProductPrice);
 
-			await withRestApi.resetSettingsGroupToDefault( 'general' );
+			await withRestApi.resetSettingsGroupToDefault( 'general', false );
 
 			// Add a new shipping zone Germany with Free shipping
-			await withRestApi.addShippingZoneAndMethod(shippingZoneNameDE, shippingCountryDE, ' ', 'free_shipping');
+			await withRestApi.addShippingZoneAndMethod(shippingZoneNameDE, shippingCountryDE, ' ', 'free_shipping', '', [], false );
 
 			// Add a new shipping zone for France with Flat rate & Local pickup
-			await withRestApi.addShippingZoneAndMethod(shippingZoneNameFR, shippingCountryFR, ' ', 'flat_rate', '5', ['local_pickup']);
+			await withRestApi.addShippingZoneAndMethod(shippingZoneNameFR, shippingCountryFR, ' ', 'flat_rate', '5', ['local_pickup'], false );
 
 			await shopper.emptyCart();
 		});
 
 		afterAll(async () => {
-			await withRestApi.deleteAllShippingZones();
+			await withRestApi.deleteAllShippingZones( false );
 		});
 
 		it('allows customer to calculate Free Shipping if in Germany', async () => {
