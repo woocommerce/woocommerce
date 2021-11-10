@@ -36,7 +36,7 @@ const customerShipping = {
 	city: 'Buffalo',
 	state: 'NY',
 	postcode: '14201',
-	phone: '123456789',
+	phone: '6146524353',
 };
 
 module.exports = {
