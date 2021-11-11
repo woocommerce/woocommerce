@@ -10,7 +10,7 @@ const shippingZone = getShippingZoneExample();
  * Tests for the WooCommerce Shipping zones API.
  *
  * @group api
- * @group shipping-zone
+ * @group shipping-zones
  *
  */
 describe( 'Shipping zones API tests', () => {
