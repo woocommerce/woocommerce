@@ -88,6 +88,7 @@ class WC_Admin_Addons {
 			);
 
 			if ( is_wp_error( $raw_featured ) ) {
+				do_action( 'woocommerce_page_wc-addons_connection_error', $raw_featured->get_error_message() );
 				self::output_empty();
 
 				return;
@@ -95,6 +96,7 @@ class WC_Admin_Addons {
 
 			$response_code = intval( wp_remote_retrieve_response_code( $raw_featured ) );
 			if ( 200 !== $response_code ) {
+				do_action( 'woocommerce_page_wc-addons_connection_error', $response_code );
 				self::output_empty();
 
 				return;
@@ -102,6 +104,7 @@ class WC_Admin_Addons {
 
 			$featured      = json_decode( wp_remote_retrieve_body( $raw_featured ) );
 			if ( empty( $featured ) || ! is_array( $featured ) ) {
+				do_action( 'woocommerce_page_wc-addons_connection_error', 'Empty or malformed response' );
 				self::output_empty();
 
 				return;
@@ -160,17 +163,20 @@ class WC_Admin_Addons {
 		);
 
 		if ( is_wp_error( $raw_extensions ) ) {
+			do_action( 'woocommerce_page_wc-addons_connection_error', $raw_extensions->get_error_message() );
 			return $raw_extensions;
 		}
 
 		$response_code = intval( wp_remote_retrieve_response_code( $raw_extensions ) );
 		if ( 200 !== $response_code ) {
+			do_action( 'woocommerce_page_wc-addons_connection_error', $response_code );
 			return new WP_Error( 'error', __( 'API error', 'woocommerce' ) );
 		}
 
 		$addons = json_decode( wp_remote_retrieve_body( $raw_extensions ) );
 
 		if ( ! is_object( $addons ) || ! isset( $addons->products ) ) {
+			do_action( 'woocommerce_page_wc-addons_connection_error', 'Empty or malformed response' );
 			return new WP_Error( 'error', __( 'API error', 'woocommerce' ) );
 		}
 
