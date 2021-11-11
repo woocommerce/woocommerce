@@ -1,13 +1,5 @@
 {
-	"root": "packages/js/e2e-core-tests/",
-	"sourceRoot": "packages/js/e2e-core-tests",
-	"projectType": "library",
-	"targets": {
-		"composer-install": {
-			"executor": "@nrwl/workspace:run-script",
-			"options": {
-				"script": "composer:install"
-			}
-		}
-	}
+  "root": "packages/js/e2e-core-tests/",
+  "sourceRoot": "packages/js/e2e-core-tests",
+  "projectType": "library"
 }
