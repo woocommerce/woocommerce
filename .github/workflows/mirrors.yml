@@ -13,6 +13,8 @@ jobs:
             - name: Build
               id: build
               uses: woocommerce/action-build@trunk
+              env:
+                  BUILD_ENV: mirrors
 
             - name: Upload PR zip
               uses: actions/upload-artifact@v2

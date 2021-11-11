@@ -11,6 +11,8 @@ jobs:
             - name: Build
               id: build
               uses: woocommerce/action-build@trunk
+              env:
+                  BUILD_ENV: e2e
 
             - name: Upload PR zip
               uses: actions/upload-artifact@v2
@@ -41,8 +43,8 @@ jobs:
             - name: Install PNPM and install dependencies
               working-directory: package/woocommerce
               run: |
-                npm install -g pnpm
-                pnpm install
+                  npm install -g pnpm
+                  pnpm install
 
             - name: Load docker images and start containers.
               working-directory: package/woocommerce/plugins/woocommerce
@@ -66,8 +68,8 @@ jobs:
             - name: Install dependencies again
               working-directory: package/woocommerce
               run: |
-                npm install -g pnpm
-                pnpm install
+                  npm install -g pnpm
+                  pnpm install
 
             - name: Run tests command.
               working-directory: package/woocommerce/plugins/woocommerce
