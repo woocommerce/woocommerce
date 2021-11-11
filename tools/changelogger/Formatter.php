@@ -72,8 +72,8 @@ class Formatter extends KeepAChangelogParser implements FormatterPlugin {
 			'plugins/woocommerce'    => 'https://github.com/woocommerce/woocommerce/releases/tag/',
 		);
 
-		// Catpure anything past /woocommerce-monorepo in the current working directory.
-		preg_match( '/\/woocommerce-monorepo\/(.+)/', getcwd(), $path );
+		// Catpure anything past /woocommerce in the current working directory.
+		preg_match( '/\/woocommerce\/(.+)/', getcwd(), $path );
 
 		if ( ! count( $path ) ) {
 			throw new InvalidArgumentException( 'Invalid directory.' );
@@ -234,6 +234,7 @@ class Formatter extends KeepAChangelogParser implements FormatterPlugin {
 			$version      = $entry->getVersion();
 			$is_subentry  = preg_match( $this->subentry_pattern, $version, $subentry );
 			$timestamp    = $entry->getTimestamp();
+			error_log(print_r($version, true));
 			$release_link = $this->getReleaseLink( $version );
 
 			if ( $is_subentry ) {
