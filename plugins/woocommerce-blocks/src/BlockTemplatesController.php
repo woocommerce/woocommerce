@@ -118,7 +118,9 @@ class BlockTemplatesController {
 		}
 
 		$available_templates = $this->get_block_templates( array( $slug ) );
-		return ( is_array( $available_templates ) && count( $available_templates ) > 0 ) ? (object) $available_templates[0] : $template;
+		return ( is_array( $available_templates ) && count( $available_templates ) > 0 )
+			? BlockTemplateUtils::gutenberg_build_template_result_from_file( $available_templates[0], $available_templates[0]->type )
+			: $template;
 	}
 
 	/**
