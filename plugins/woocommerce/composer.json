@@ -134,7 +134,8 @@
 				"Performance",
 				"Enhancement"
 			],
-			"versioning": "wordpress"
+			"versioning": "wordpress",
+			"changelog": "NEXT_CHANGELOG.md"
 		}
 	}
 }
