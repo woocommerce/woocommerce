@@ -36,7 +36,8 @@ const shippingZonesApi = {
 		method: 'GET',
 		path: 'shipping/zones',
 		responseCode: 200,
-		shippingZone: async () => getRequest( `shipping/zones` ),
+		shippingZones: async ( params = {} ) =>
+			getRequest( `shipping/zones`, params ),
 	},
 	update: {
 		name: 'Update a shipping zone',
