@@ -20,7 +20,8 @@
 				"Tweak",
 				"Performance",
 				"Enhancement"
-			]
+			],
+			"changelog": "NEXT_CHANGELOG.md"
 		}
 	},
 	"autoload": {
