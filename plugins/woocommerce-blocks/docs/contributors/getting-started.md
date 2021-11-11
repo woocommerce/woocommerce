@@ -72,7 +72,7 @@ Run `$ npm run package-plugin` to trigger install and build, and then create a z
 You can also do different variations of this command. By default it builds a production version of the plugin. You can also:
 
 -   Build a development version of the plugin: `$ npm run package-plugin:dev`
--   Just do a zip build of the current environment (useful when you already have built files for zipping): `$ npm run package-plugin:zip_only`
+-   Just do a zip build of the current environment (useful when you already have built files for zipping): `$ npm run package-plugin:zip-only`
 
 ## Linting
 

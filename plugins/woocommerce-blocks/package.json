@@ -131,7 +131,7 @@
 		"@wordpress/html-entities": "3.2.1",
 		"@wordpress/i18n": "4.2.1",
 		"@wordpress/is-shallow-equal": "4.2.0",
-		"@wordpress/scripts": "19.1.0",
+		"@wordpress/scripts": "17.1.0",
 		"autoprefixer": "10.3.7",
 		"axios": "0.21.4",
 		"babel-plugin-transform-async-generator-functions": "6.24.1",
