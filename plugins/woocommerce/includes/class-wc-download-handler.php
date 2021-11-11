@@ -487,12 +487,6 @@ class WC_Download_Handler {
 	}
 
 	/**
-	 * Inline download - For deliverying the file without downloading
-	 *
-	 * @param string $file_path File path.
-	 * @param string $filename  File name.
-	 */
-	/**
 	 * Get content type of a download.
 	 *
 	 * @param  string $file_path File path.
