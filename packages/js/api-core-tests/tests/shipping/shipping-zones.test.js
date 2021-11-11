@@ -36,6 +36,21 @@ describe( 'Shipping zones API tests', () => {
 		expect( body.id ).toEqual( shippingZone.id );
 	} );
 
+	it( 'can list all shipping zones', async () => {
+		const param = {
+			_fields: 'id',
+		};
+		const { status, body } = await shippingZonesApi.listAll.shippingZones(
+			param
+		);
+
+		expect( status ).toEqual( shippingZonesApi.listAll.responseCode );
+		expect( body ).toHaveLength( 2 ); // the test shipping zone, and the default 'Locations not covered by your other zones'
+		expect( body ).toEqual(
+			expect.arrayContaining( [ { id: shippingZone.id } ] )
+		);
+	} );
+
 	it( 'can update a shipping zone', async () => {
 		const updatedShippingZone = {
 			name: 'United States (Domestic)',
