@@ -30,6 +30,14 @@ Automated end-to-end tests for WooCommerce.
 
 ## Pre-requisites
 
+### Install Nx
+
+Follow [instructions on nx.dev site](https://nx.dev/l/r/getting-started/nx-setup) to install Nx.
+
+### Install pnpm
+
+Follow [instructions on pnpm.io site](https://pnpm.io/installation) to install pnpm.
+
 ### Install Node.js
 
 Follow [instructions on the node.js site](https://nodejs.org/en/download/) to install Node.js. 
@@ -83,11 +91,11 @@ If you need to modify the port for your local test environment (eg. port is alre
 
 [Jest](https://jestjs.io/) is being used to run e2e tests. Jest sequencer introduces tools that can be used to specify the order in which the tests are being run. In our case, they are being run in alphabetical order of the directories where tests are located. This way, tests in the directory `activate-and-setup` will run first. By default, jest runs tests ordered by the time it takes to run the test (the test that takes longer to run will be run first, the test that takes less time to run will run last).
 
-The Setup Wizard e2e test runs first to ensure that WooCommerce is active and that the setup wizard has been completed. This is necessary because `docker:up` creates a brand new install of WordPress and WooCommerce.
+The Setup Wizard e2e test runs first to ensure that WooCommerce is active and that the setup wizard has been completed. This is necessary because `docke-up` creates a brand new install of WordPress and WooCommerce.
 
 ### Chromium Download
 
-By default, `Puppeteer` downloads the `Chromium` package every time you run `npm install` or `npm update`. To disable that download add the following to your `.bash_profile` or `.zshrc` (whichever you use):
+By default, `Puppeteer` downloads the `Chromium` package every time you run `pnpm install` or `pnpm update`. To disable that download add the following to your `.bash_profile` or `.zshrc` (whichever you use):
 
 ```shell script
 export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
@@ -103,21 +111,21 @@ If you are using Windows, we recommend using [Windows Subsystem for Linux (WSL)]
 
 Run the following in a terminal/command line window
 
-- `cd` to the WooCommerce plugin folder
+- `cd` to the WooCommerce monorepo folder
 
 - `git checkout trunk` (or the branch where you need to run tests) 
 
 - `nvm use`
 
-- `npm install`
+- `pnpm install`
 
-- `composer install --no-dev`
+- `pnpm nx composer-install woocommerce`
 
-- `npm run build:assets`
+- `pnpm nx build-assets woocommerce`
 
 - `npm install jest --global` (this only needs to be done once)
 
-- `npx wc-e2e docker:up` (this will build the test site using Docker)
+- `pnpm nx docker-up woocommerce` (this will build the test site using Docker)
 
 - Use `docker ps` to confirm that the Docker containers are running. You should see a log similar to one below indicating that everything had been built as expected:
 
@@ -143,16 +151,16 @@ Username: admin
 PW: password
 ```
 
-- Run `npx wc-e2e docker:down` when you are done with running e2e tests and before making any changes to test site configuration.
+- Run `pnpm nx docker-down woocommerce` when you are done with running e2e tests and before making any changes to test site configuration.
 
-Note that running `npx wc-e2e docker:down` and then `npx wc-e2e docker:up` re-initializes the test container.
+Note that running `pnpm nx docker-down woocommerce` and then `pnpm nx docker-up woocommerce` re-initializes the test container.
 
 ### How to run tests in headless mode
 
 To run e2e tests in headless mode use the following command:
 
 ```bash
-npx wc-e2e test:e2e
+pnpm nx test-e2e woocommerce
 ```
 
 ### How to run tests in non-headless mode
@@ -160,7 +168,7 @@ npx wc-e2e test:e2e
 Tests run in headless mode by default. However, sometimes it's useful to observe the browser while running or developing tests. To do so, you can run tests in a non-headless (dev) mode:
 
 ```bash
-npx wc-e2e test:e2e-dev
+pnpm nx test-e2e-dev woocommerce
 ```
 
 The dev mode also enables SlowMo mode. SlowMo slows down Puppeteer’s operations. This makes it easier to see what is happening in the browser.
@@ -168,7 +176,7 @@ The dev mode also enables SlowMo mode. SlowMo slows down Puppeteer’s operation
 By default, SlowMo mode adds a 50 millisecond delay between test steps. If you'd like to override the length of the delay and have the tests run faster or slower in the `-dev` mode, pass `PUPPETEER_SLOWMO` variable when running tests as shown below:
 
 ```
-PUPPETEER_SLOWMO=10 npx wc-e2e test:e2e-dev
+PUPPETEER_SLOWMO=10 pnpm nx test-e2e-dev woocommerce
 ```
 
 The faster you want the tests to run, the lower the value should be of `PUPPETEER_SLOWMO` should be. 
@@ -183,7 +191,7 @@ For example:
 Tests run in headless mode by default. While writing tests it may be useful to have the debugger loaded while running a test in non-headless mode. To run tests in debug mode:
             
 ```bash
-npx wc-e2e test:e2e-debug
+pnpm nx test-e2e-debug woocommerce
 ```
 
 When all tests have been completed the debugger remains active. Control doesn't return to the command line until the debugger is closed. Otherwise, debug mode functions the same as non-headless mode.
@@ -193,7 +201,8 @@ When all tests have been completed the debugger remains active. Control doesn't 
 To run an individual test, use the direct path to the spec. For example:
 
 ```bash
-npx wc-e2e test:e2e ./tests/e2e/specs/wp-admin/test-create-order.js
+cd plugins/woocommerce
+pnpx wc-e2e test:e2e ./tests/e2e/specs/wp-admin/create-order.test.js
 ``` 
 
 ### How to skip tests
@@ -253,7 +262,7 @@ The following variables can be used to specify the versions of WordPress, PHP an
 The full command to build the site will look as follows:
 
 ```
-TRAVIS_MARIADB_VERSION=10.5.3 TRAVIS_PHP_VERSION=7.4.5 WP_VERSION=5.4.1 npx wc-e2e docker:up
+TRAVIS_MARIADB_VERSION=10.5.3 TRAVIS_PHP_VERSION=7.4.5 WP_VERSION=5.4.1 pnpm nx docker-up woocommerce
 ```
 
 ## Guide for writing e2e tests
@@ -355,6 +364,6 @@ In the example above, you can see that `allows customer to see downloads` part o
 
 ## Debugging tests
 
-The test sequencer (`npx wc-e2e test:e2e`) includes support for saving [screenshots on test errors](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/e2e-environment#test-screenshots) which can be sent to a Slack channel via a [Slackbot](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/e2e-environment#slackbot-setup).
+The test sequencer (`pnpm nx test-e2e woocommerce`) includes support for saving [screenshots on test errors](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/e2e-environment#test-screenshots) which can be sent to a Slack channel via a [Slackbot](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/e2e-environment#slackbot-setup).
 
 For Puppeteer debugging, follow [Google's documentation](https://developers.google.com/web/tools/puppeteer/debugging).
