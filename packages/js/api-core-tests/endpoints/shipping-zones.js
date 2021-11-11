@@ -4,6 +4,7 @@
 const {
 	getRequest,
 	postRequest,
+	putRequest,
 	deleteRequest,
 } = require( '../utils/request' );
 
@@ -36,6 +37,17 @@ const shippingZonesApi = {
 		path: 'shipping/zones',
 		responseCode: 200,
 		shippingZone: async () => getRequest( `shipping/zones` ),
+	},
+	update: {
+		name: 'Update a shipping zone',
+		method: 'PUT',
+		path: 'shipping/zones/<id>',
+		responseCode: 200,
+		shippingZone: async ( shippingZoneId, updatedShippingZone ) =>
+			putRequest(
+				`shipping/zones/${ shippingZoneId }`,
+				updatedShippingZone
+			),
 	},
 	delete: {
 		name: 'Delete a shipping zone',

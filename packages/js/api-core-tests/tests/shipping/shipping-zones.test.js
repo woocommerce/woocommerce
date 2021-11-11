@@ -2,7 +2,7 @@ const { shippingZonesApi } = require( '../../endpoints' );
 const { getShippingZoneExample } = require( '../../data' );
 
 /**
- * Shipping zone to be created.
+ * Shipping zone to be created, retrieved, updated, and deleted by the tests.
  */
 const shippingZone = getShippingZoneExample();
 
@@ -23,8 +23,32 @@ describe( 'Shipping zones API tests', () => {
 		expect( typeof body.id ).toEqual( 'number' );
 		expect( body.name ).toEqual( shippingZone.name );
 
-		// Save the shipping zone ID
+		// Save the shipping zone ID. It will be used by other tests.
 		shippingZone.id = body.id;
+	} );
+
+	it( 'can retrieve a shipping zone', async () => {
+		const { status, body } = await shippingZonesApi.retrieve.shippingZone(
+			shippingZone.id
+		);
+
+		expect( status ).toEqual( shippingZonesApi.retrieve.responseCode );
+		expect( body.id ).toEqual( shippingZone.id );
+	} );
+
+	it( 'can update a shipping zone', async () => {
+		const updatedShippingZone = {
+			name: 'United States (Domestic)',
+		};
+
+		const { status, body } = await shippingZonesApi.update.shippingZone(
+			shippingZone.id,
+			updatedShippingZone
+		);
+
+		expect( status ).toEqual( shippingZonesApi.retrieve.responseCode );
+		expect( body.id ).toEqual( shippingZone.id );
+		expect( body.name ).toEqual( updatedShippingZone.name );
 	} );
 
 	it( 'can delete a shipping zone', async () => {
