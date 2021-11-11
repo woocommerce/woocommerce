@@ -9,7 +9,7 @@ const {
 } = require( '../utils/request' );
 
 /**
- * WooCommerce Refunds endpoints.
+ * WooCommerce Shipping zone endpoints.
  *
  * https://woocommerce.github.io/woocommerce-rest-api-docs/#shipping-zones
  */
