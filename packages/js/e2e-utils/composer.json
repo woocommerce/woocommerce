@@ -1,0 +1,31 @@
+{
+	"name": "woocommerce/e2e-utiles",
+	"description": "WooCommerce end to end testing utilities",
+	"type": "library",
+	"license": "GPL-3.0-or-later",
+	"minimum-stability": "dev",
+	"require-dev": {
+		"automattic/jetpack-changelogger": "^1.2"
+	},
+	"extra": {
+		"changelogger": {
+			"formatter": {
+				"class": "PackageFormatter"
+			},
+			"types": [
+				"Fix",
+				"Add",
+				"Update",
+				"Dev",
+				"Tweak",
+				"Performance",
+				"Enhancement"
+			]
+		}
+	},
+	"autoload": {
+		"files": [
+			"../../../tools/changelogger/PackageFormatter.php"
+		]
+	}
+}
