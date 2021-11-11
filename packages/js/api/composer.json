@@ -1,0 +1,32 @@
+{
+	"name": "woocommerce/api",
+	"description": "WooCommerce API",
+	"type": "library",
+	"license": "GPL-3.0-or-later",
+	"minimum-stability": "dev",
+	"require-dev": {
+		"automattic/jetpack-changelogger": "3.0.2"
+	},
+	"extra": {
+		"changelogger": {
+			"formatter": {
+				"class": "PackageFormatter"
+			},
+			"types": [
+				"Fix",
+				"Add",
+				"Update",
+				"Dev",
+				"Tweak",
+				"Performance",
+				"Enhancement"
+			],
+			"changelog": "NEXT_CHANGELOG.md"
+		}
+	},
+	"autoload": {
+		"files": [
+			"../../../tools/changelogger/PackageFormatter.php"
+		]
+	}
+}
