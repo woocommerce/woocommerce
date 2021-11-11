@@ -12,28 +12,31 @@ const order = {
 };
 
 /**
- * Search parameters to be used
+ * Search parameters to be used.
+ * The following scenarios are not covered in this test suite because they're already covered in the `List all orders > search` test in `orders.test.js`
+ * ```
+ * can search by billing address 1
+ * can search by shipping address 1
+ * can search by billing last name
+ * can search by billing email
+ * can search by item name
+ * ```
  */
 const searchParams = [
 	[ 'orderId', 'orderId' ],
 	[ 'billing first name', order.billing.first_name ],
-	[ 'billing last name', order.billing.last_name ],
 	[ 'billing company name', order.billing.company ],
-	[ 'billing address 1', order.billing.address_1 ],
 	[ 'billing address 2', order.billing.address_2 ],
 	[ 'billing city name', order.billing.city ],
 	[ 'billing post code', order.billing.postcode ],
-	[ 'billing email', order.billing.email ],
 	[ 'billing phone', order.billing.phone ],
 	[ 'billing state', order.billing.state ],
 	[ 'shipping first name', order.shipping.first_name ],
 	[ 'shipping last name', order.shipping.last_name ],
-	[ 'shipping address 1', order.shipping.address_1 ],
 	[ 'shipping address 2', order.shipping.address_2 ],
 	[ 'shipping city', order.shipping.city ],
 	[ 'shipping post code', order.shipping.postcode ],
 	[ 'shipping state', order.shipping.state ],
-	[ 'item name', order.line_items[ 0 ].name ],
 ];
 
 /**
@@ -58,19 +61,21 @@ describe( 'Order Search API tests', () => {
 	it.each( searchParams )( 'can search by %s', async ( title, param ) => {
 		const searchValue = param === 'orderId' ? order.id : param;
 
-		const { body } = await ordersApi.listAll.orders( {
+		const { status, body } = await ordersApi.listAll.orders( {
 			search: searchValue,
 		} );
 
+		expect( status ).toEqual( ordersApi.listAll.responseCode );
 		expect( body ).toHaveLength( 1 );
 		expect( body[ 0 ].id ).toEqual( order.id );
 	} );
 
 	it( 'can return an empty result set when no matches were found', async () => {
-		const { body } = await ordersApi.listAll.orders( {
+		const { status, body } = await ordersApi.listAll.orders( {
 			search: 'Chauncey Smith Kunde',
 		} );
 
+		expect( status ).toEqual( ordersApi.listAll.responseCode );
 		expect( body ).toEqual( [] );
 	} );
 } );
