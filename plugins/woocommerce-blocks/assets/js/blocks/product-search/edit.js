@@ -104,6 +104,10 @@ const Edit = ( {
 					<TextControl
 						className="wc-block-product-search__field input-control"
 						value={ placeholder }
+						placeholder={ __(
+							'Enter search placeholder text',
+							'woo-gutenberg-products-block'
+						) }
 						onChange={ ( value ) =>
 							setAttributes( { placeholder: value } )
 						}
