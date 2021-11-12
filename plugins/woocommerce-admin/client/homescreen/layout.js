@@ -88,9 +88,6 @@ export const Layout = ( {
 			momentDate.format( 'MM' )
 	);
 
-	const isRunningTaskListExperiment =
-		experimentAssignment?.variationName === 'treatment';
-
 	const [
 		isLoadingTwoColExperimentAssignment,
 		twoColExperimentAssignment,
@@ -104,13 +101,18 @@ export const Layout = ( {
 	const isRunningTwoColumnExperiment =
 		twoColExperimentAssignment?.variationName === 'treatment';
 
+	// New TaskList UI is enabled when either experiment is treatment.
+	const isRunningTaskListExperiment =
+		experimentAssignment?.variationName === 'treatment' ||
+		isRunningTwoColumnExperiment;
+
 	// Override defaultHomescreenLayout if store is in the experiment.
 	const defaultHomescreenLayoutOverride = () => {
 		if (
 			isLoadingExperimentAssignment ||
 			isLoadingTwoColExperimentAssignment
 		) {
-			return defaultHomescreenLayout; // Experiments are still loading, don't override.;
+			return defaultHomescreenLayout; // Experiments are still loading, don't override.
 		}
 
 		if ( ! isRunningTaskListExperiment ) {
