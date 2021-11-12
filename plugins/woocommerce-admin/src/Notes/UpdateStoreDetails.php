@@ -35,7 +35,7 @@ class UpdateStoreDetails {
 		}
 
 		// Bail when profile is not yet completed.
-		if ( isset( $onboarding_profile['completed'] ) && ! $onboarding_profile['completed'] ) {
+		if ( ! isset( $onboarding_profile['completed'] ) || ! $onboarding_profile['completed'] ) {
 			return;
 		}
 
@@ -47,7 +47,7 @@ class UpdateStoreDetails {
 		$note->set_content_data( (object) array() );
 		$note->set_source( 'woocommerce-admin' );
 		$note->add_action(
-			'add-store-details',
+			'update-store-details',
 			__( 'Update store details', 'woocommerce-admin' ),
 			wc_admin_url( '&path=/setup-wizard' )
 		);

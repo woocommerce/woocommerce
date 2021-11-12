@@ -39,6 +39,11 @@ class CompleteStoreDetails {
 			return;
 		}
 
+		// Bail when profile is already completed.
+		if ( isset( $onboarding_profile['completed'] ) && $onboarding_profile['completed'] ) {
+			return;
+		}
+
 		$note = new Note();
 		$note->set_title( __( 'Add your store details to complete store setup', 'woocommerce-admin' ) );
 		$note->set_content( __( 'Complete your store details with important information for setup such as your store’s base address', 'woocommerce-admin' ) );
