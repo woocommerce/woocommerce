@@ -15,6 +15,20 @@ defined( 'ABSPATH' ) || exit;
 
 return array(
 	'AF' => array(),
+	'AL' => array( // Albania states.
+		'AL-01' => __( 'Berat', 'woocommerce' ),
+		'AL-02' => __( 'Durrës', 'woocommerce' ),
+		'AL-03' => __( 'Elbasan', 'woocommerce' ),
+		'AL-04' => __( 'Fier', 'woocommerce' ),
+		'AL-05' => __( 'Gjirokastra', 'woocommerce' ),
+		'AL-06' => __( 'Korça', 'woocommerce' ),
+		'AL-07' => __( 'Kukës', 'woocommerce' ),
+		'AL-08' => __( 'Lezha', 'woocommerce' ),
+		'AL-09' => __( 'Dibra', 'woocommerce' ),
+		'AL-10' => __( 'Shkodra', 'woocommerce' ),
+		'AL-11' => __( 'Tirana', 'woocommerce' ),
+		'AL-12' => __( 'Vlora', 'woocommerce' ),
+	),
 	'AO' => array( // Angola states.
 		'BGO' => __( 'Bengo', 'woocommerce' ),
 		'BLU' => __( 'Benguela', 'woocommerce' ),
