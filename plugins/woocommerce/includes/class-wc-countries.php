@@ -1033,7 +1033,7 @@ class WC_Countries {
 							'hidden'   => true,
 						),
 						'state'    => array(
-							'label' => __( 'Department', 'woocommerce' ),
+							'label' => __( 'Departamento', 'woocommerce' ),
 						),
 					),
 					'HK' => array(
