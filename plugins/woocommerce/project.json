@@ -1,0 +1,127 @@
+{
+  "root": "plugins/woocommerce/",
+  "sourceRoot": "plugins/woocommerce",
+  "projectType": "application",
+  "targets": {
+    "composer-install": {
+      "executor": "@nrwl/workspace:run-script",
+      "options": {
+        "script": "composer:install"
+      }
+	},
+    "composer-dump-autoload": {
+      "executor": "@nrwl/workspace:run-script",
+      "options": {
+        "script": "composer:dump-autoload"
+      }
+	},
+    "build": {
+      "executor": "@nrwl/workspace:run-script",
+      "options": {
+        "script": "build"
+      }
+    },
+    "build-core": {
+      "executor": "@nrwl/workspace:run-script",
+      "options": {
+        "script": "build:core"
+      }
+    },
+    "build-zip": {
+      "executor": "@nrwl/workspace:run-script",
+      "options": {
+        "script": "build:zip"
+      }
+    },
+    "build-watch": {
+      "executor": "@nrwl/workspace:run-script",
+      "options": {
+        "script": "build-watch"
+      }
+    },
+    "build-assets": {
+      "executor": "@nrwl/workspace:run-script",
+      "options": {
+        "script": "build:assets"
+      }
+    },
+    "lint-js": {
+      "executor": "@nrwl/workspace:run-script",
+      "options": {
+        "script": "lint:js"
+      }
+    },
+    "docker-up": {
+      "executor": "@nrwl/workspace:run-script",
+      "options": {
+        "script": "docker:up"
+      }
+    },
+    "docker-down": {
+      "executor": "@nrwl/workspace:run-script",
+      "options": {
+        "script": "docker:down"
+      }
+    },
+    "docker-ssh": {
+      "executor": "@nrwl/workspace:run-script",
+      "options": {
+        "script": "docker:ssh"
+      }
+    },
+    "test-api": {
+      "executor": "@nrwl/workspace:run-script",
+      "options": {
+        "script": "test:api"
+      }
+    },
+    "test-e2e": {
+      "executor": "@nrwl/workspace:run-script",
+      "options": {
+        "script": "test:e2e"
+      }
+    },
+    "test-e2e-debug": {
+      "executor": "@nrwl/workspace:run-script",
+      "options": {
+        "script": "test:e2e-debug"
+      }
+    },
+    "test-e2e-dev": {
+      "executor": "@nrwl/workspace:run-script",
+      "options": {
+        "script": "test:e2e-dev"
+      }
+    },
+    "test-unit": {
+      "executor": "@nrwl/workspace:run-script",
+      "options": {
+        "script": "test:unit"
+      }
+    },
+    "makepot": {
+      "executor": "@nrwl/workspace:run-script",
+      "options": {
+        "script": "makepot"
+      }
+    },
+    "packages-fix-text-domain": {
+      "executor": "@nrwl/workspace:run-script",
+      "options": {
+        "script": "packages:fix:textdomain"
+      }
+    },
+    "git-update-hooks": {
+      "executor": "@nrwl/workspace:run-script",
+      "options": {
+        "script": "git:update-hooks"
+      }
+    },
+    "make-collection": {
+      "executor": "@nrwl/workspace:run-script",
+      "options": {
+        "script": "make:collection"
+      }
+    }
+  }
+}

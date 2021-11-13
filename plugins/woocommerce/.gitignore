@@ -1,0 +1,52 @@
+# Editors
+/nbproject/private/
+
+# Grunt
+none
+
+# Sass
+.sass-cache/
+
+# Compiled CSS
+/assets/css/*.css
+/assets/css/photoswipe/**/*.min.css
+
+# Minified JS
+/assets/js/**/*.min.js
+
+# Behat/CLI Tests
+tests/cli/installer
+tests/cli/composer.phar
+tests/cli/composer.lock
+tests/cli/composer.json
+tests/cli/vendor
+
+# Unit tests
+/tmp
+/tests/bin/tmp
+/tests/e2e/config/local-*.json
+/tests/e2e/config/local.json
+/tests/e2e/config/default.json
+/tests/e2e/docker
+/tests/e2e/screenshots
+/tests/e2e/plugins
+
+# Logs
+/logs
+
+# Composer
+/vendor/
+/bin/composer/**/vendor/
+/lib/vendor/
+contributors.md
+contributors.html
+
+# Yarn
+yarn.lock
+
+# Packages
+/packages/*
+!/packages/README.md
+
+# Language files
+i18n/languages/woocommerce.pot

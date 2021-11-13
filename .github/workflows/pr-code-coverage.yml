@@ -1,6 +1,10 @@
 name: Run code coverage on PR
 on:
   pull_request
+defaults:
+  run:
+    shell: bash
+    working-directory: plugins/woocommerce
 jobs:
   test:
     name: Code coverage (PHP 7.4, WP Latest)
