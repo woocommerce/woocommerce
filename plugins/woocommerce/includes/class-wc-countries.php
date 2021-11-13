@@ -1283,6 +1283,11 @@ class WC_Countries {
 							'hidden'   => true,
 						),
 					),
+					'PY' => array(
+						'state' => array(
+							'label'    => __( 'Departamento', 'woocommerce' ),
+						),
+					),
 					'RE' => array(
 						'state' => array(
 							'required' => false,
