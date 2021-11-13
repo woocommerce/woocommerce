@@ -941,6 +941,9 @@ class WC_Countries {
 						'postcode' => array(
 							'required' => false,
 						),
+						'state' => array(
+							'label' => __( 'Departamento', 'woocommerce' ),
+						),
 					),
 					'CW' => array(
 						'postcode' => array(
