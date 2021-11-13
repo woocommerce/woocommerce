@@ -975,6 +975,11 @@ class WC_Countries {
 							'hidden'   => true,
 						),
 					),
+					'EC' => array(
+						'state'    => array(
+							'label' => __( 'Provincia', 'woocommerce' ),
+						),
+					),
 					'EE' => array(
 						'postcode' => array(
 							'priority' => 65,
