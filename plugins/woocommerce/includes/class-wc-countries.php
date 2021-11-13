@@ -1047,6 +1047,11 @@ class WC_Countries {
 							'label' => __( 'Region', 'woocommerce' ),
 						),
 					),
+					'HN' => array(
+						'state'    => array(
+							'label' => __( 'Provincia', 'woocommerce' ),
+						),
+					),
 					'HU' => array(
 						'last_name'  => array(
 							'class'    => array( 'form-row-first' ),
