@@ -1431,6 +1431,11 @@ class WC_Countries {
 							'label' => __( 'District', 'woocommerce' ),
 						),
 					),
+					'VE' => array(
+						'state'    => array(
+							'label' => __( 'Estado', 'woocommerce' ),
+						),
+					),
 					'VN' => array(
 						'state'     => array(
 							'required' => false,
