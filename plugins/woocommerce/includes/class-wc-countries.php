@@ -1418,7 +1418,7 @@ class WC_Countries {
 							'label' => __( 'Postcode', 'woocommerce' ),
 						),
 						'state'    => array(
-							'label'    => __( 'County', 'woocommerce' ),
+							'label'    => __( 'State / County', 'woocommerce' ),
 							'required' => false,
 						),
 					),
