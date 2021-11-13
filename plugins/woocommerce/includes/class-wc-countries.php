@@ -1214,6 +1214,11 @@ class WC_Countries {
 							'label' => __( 'Province', 'woocommerce' ),
 						),
 					),
+					'NI' => array(
+						'state'    => array(
+							'label' => __( 'Departamento', 'woocommerce' ),
+						),
+					),
 					'NL' => array(
 						'postcode' => array(
 							'priority' => 65,
