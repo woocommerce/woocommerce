@@ -812,6 +812,11 @@ class WC_Countries {
 							'hidden'   => true,
 						),
 					),
+					'AL' => array(
+						'state'    => array(
+							'label' => __( 'Qarks', 'woocommerce' ),
+						),
+					),
 					'AO' => array(
 						'postcode' => array(
 							'required' => false,
