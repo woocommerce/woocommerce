@@ -225,7 +225,7 @@ return array(
 	'SD' => __( 'Sudan', 'woocommerce' ),
 	'SR' => __( 'Suriname', 'woocommerce' ),
 	'SJ' => __( 'Svalbard and Jan Mayen', 'woocommerce' ),
-	'SZ' => __( 'Swaziland', 'woocommerce' ),
+	'SZ' => __( 'Eswatini', 'woocommerce' ),
 	'SE' => __( 'Sweden', 'woocommerce' ),
 	'CH' => __( 'Switzerland', 'woocommerce' ),
 	'SY' => __( 'Syria', 'woocommerce' ),
