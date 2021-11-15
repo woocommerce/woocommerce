@@ -36,7 +36,10 @@
 			"woocommerce/woocommerce-rest-api": "dist",
 			"woocommerce/woocommerce-blocks": "dist"
 		},
-		"sort-packages": true
+		"sort-packages": true,
+		"platform": {
+			"php": "7.0.33"
+	  	}
 	},
 	"autoload": {
 		"exclude-from-classmap": [
