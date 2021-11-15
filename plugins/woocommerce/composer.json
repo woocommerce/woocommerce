@@ -120,7 +120,7 @@
 		},
 		"changelogger": {
 			"formatter": {
-				"class": "PluginFormatter"
+				"filename": "../../tools/changelogger/PluginFormatter.php"
 			},
 			"types": [
 				"Fix",
