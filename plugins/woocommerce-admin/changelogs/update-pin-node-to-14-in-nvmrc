@@ -1,0 +1,4 @@
+Significance: patch
+Type: Dev
+
+Explicitly sets the Node version to 14 in .nvmrc to prevent incompatible versions of Node from being used with nvm. #7932
