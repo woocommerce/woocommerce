@@ -256,10 +256,11 @@ class Formatter extends KeepAChangelogParser {
 
 			foreach ( $entry->getChangesBySubheading() as $heading => $changes ) {
 				foreach ( $changes as $change ) {
-					$breaking_change = 'major' === $change->getSignificance() ? ' [ **BREAKING CHANGE** ]' : '';
+					$significance    = $change->getSignificance();
+					$breaking_change = 'major' === $significance ? ' [ **BREAKING CHANGE** ]' : '';
 					$text            = trim( $change->getContent() );
 					if ( '' !== $text ) {
-						$preamble = $is_subentry ? '' : $bullet . $heading . $breaking_change . ' - ';
+						$preamble = $is_subentry ? '' : $bullet . ucfirst( $significance ) . $breaking_change . ' - ';
 						$ret     .= $preamble . str_replace( "\n", "\n$indent", $text ) . "\n";
 					}
 				}
