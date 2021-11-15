@@ -5,7 +5,7 @@
  * @package WooCommerce\Tests\Functions.
  */
 
-use PHPUnit\Framework\MockObject\MockObject;
+use \PHPUnit\Framework\MockObject\Matcher\InvokedRecorder;
 
 /**
  * Class WC_Formatting_Functions_Test
@@ -15,31 +15,28 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 	/**
 	 * Mock object to spy on filter.
 	 *
-	 * @var MockObject
+	 * @var InvokedRecorder
 	 */
-	protected $attribute_taxonomies_spy;
-
-	/**
-	 * Mock object to spy on filter.
-	 *
-	 * @var MockObject
-	 */
-	protected $sanitize_taxonomy_spy;
+	protected $filter_recorder;
 
 	/**
 	 * Set up.
 	 */
 	public function setUp() {
 		parent::setUp();
-		$this->attribute_taxonomies_spy = $this->getMockBuilder( stdClass::class )
-			->setMethods( [ '__invoke' ] )
-			->getMock();
-		$this->sanitize_taxonomy_spy = $this->getMockBuilder( stdClass::class )
-			->setMethods( [ '__invoke' ] )
-			->getMock();
 
-		add_filter( 'woocommerce_attribute_taxonomies', $this->attribute_taxonomies_spy );
-		add_filter( 'sanitize_taxonomy_name', $this->sanitize_taxonomy_spy );
+		// Tests will use this to verify the correct call count.
+		$this->filter_recorder = $this->any();
+
+		$filter_mock = $this->getMockBuilder( stdClass::class )
+			->setMethods( [ '__invoke' ] )
+			->getMock();
+		$filter_mock->expects( $this->filter_recorder )
+			->method( '__invoke' )
+			->will( $this->returnArgument( 0 ) );
+
+		add_filter( 'woocommerce_attribute_taxonomies', $filter_mock );
+		add_filter( 'sanitize_taxonomy_name', $filter_mock );
 	}
 
 	/**
@@ -47,6 +44,7 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown() {
 		remove_all_filters( 'woocommerce_attribute_taxonomies' );
+		remove_all_filters( 'sanitize_taxonomy_name' );
 
 		parent::tearDown();
 	}
@@ -56,14 +54,20 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 	 * Even empty arrays should be cached.
 	 */
 	public function test_wc_get_attribute_taxonomy_ids() {
-		$this->attribute_taxonomies_spy->expects( $this->once() )
-			->method( '__invoke' )
-			->will( $this->returnArgument( 0 ) );
-
 		$ids = wc_get_attribute_taxonomy_ids();
 		$this->assertEquals( [], $ids );
+		$this->assertEquals(
+			1,
+			$this->filter_recorder->getInvocationCount(),
+			'Filter `woocommerce_attribute_taxonomies` should have been triggered once after fetching all attribute taxonomies.'
+		);
 		$ids = wc_get_attribute_taxonomy_ids();
 		$this->assertEquals( [], $ids );
+		$this->assertEquals(
+			1,
+			$this->filter_recorder->getInvocationCount(),
+			'Filter `woocommerce_attribute_taxonomies` should not be triggered a second time because the results should be loaded from the cache.'
+		);
 	}
 
 	/**
@@ -71,15 +75,19 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 	 * Even empty arrays should be cached.
 	 */
 	public function test_wc_get_attribute_taxonomy_labels() {
-		$this->attribute_taxonomies_spy->expects( $this->once() )
-			->method( '__invoke' )
-			->will( $this->returnArgument( 0 ) );
-
 		$labels = wc_get_attribute_taxonomy_labels();
 		$this->assertEquals( [], $labels );
-		$labels = wc_get_attribute_taxonomy_labels();
+		$this->assertEquals(
+			1,
+			$this->filter_recorder->getInvocationCount(),
+			'Filter `woocommerce_attribute_taxonomies` should have been triggered once after fetching all attribute taxonomies.'
+		);		$labels = wc_get_attribute_taxonomy_labels();
 		$this->assertEquals( [], $labels );
-	}
+		$this->assertEquals(
+			1,
+			$this->filter_recorder->getInvocationCount(),
+			'Filter `woocommerce_attribute_taxonomies` should not be triggered a second time because the results should be loaded from the cache.'
+		);	}
 
 	/**
 	 * Test wc_attribute_taxonomy_slug() function.
@@ -88,14 +96,20 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 	 * @dataProvider get_attribute_names_and_slugs
 	 */
 	public function test_wc_get_attribute_taxonomy_slug( $name, $expected_slug ) {
-		$this->sanitize_taxonomy_spy->expects( $this->once() )
-			->method( '__invoke' )
-			->will( $this->returnArgument( 0 ) );
-
 		$slug = wc_attribute_taxonomy_slug( $name );
 		$this->assertEquals( $expected_slug, $slug );
+		$this->assertEquals(
+			1,
+			$this->filter_recorder->getInvocationCount(),
+			'Filter `sanitize_taxonomy_name` should have been triggered once.'
+		);
 		$slug = wc_attribute_taxonomy_slug( $name );
 		$this->assertEquals( $expected_slug, $slug );
+		$this->assertEquals(
+			1,
+			$this->filter_recorder->getInvocationCount(),
+			'Filter `sanitize_taxonomy_name` should not be triggered a second time because the slug should be loaded from the cache.'
+		);
 	}
 
 	public function get_attribute_names_and_slugs() {
