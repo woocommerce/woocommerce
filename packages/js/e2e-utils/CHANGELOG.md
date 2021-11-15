@@ -10,6 +10,7 @@
 - `withRestApi.deleteCoupon()` that deletes a single coupon
 - `withRestApi.addTaxClasses()` that adds an array of tax classes if they do not exist
 - `withRestApi.addTaxRates()` that adds an array of tax rates if they do not exist
+- Optional parameter `testResponse` to `withRestApi` functions that contain an `expect()`
 
 # 0.1.6
 
