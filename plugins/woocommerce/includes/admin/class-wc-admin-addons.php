@@ -1296,13 +1296,15 @@ class WC_Admin_Addons {
 									);
 									?>
 								</span>
-								<span class="price-suffix"><?php
+								<span class="price-suffix">
+									<?php
 									$price_suffix = __( 'per year', 'woocommerce' );
 									if ( ! empty( $mapped->price_suffix ) ) {
 										$price_suffix = $mapped->price_suffix;
 									}
-									echo esc_html( $price_suffix );;
-									?></span>
+									echo esc_html( $price_suffix );
+									?>
+								</span>
 							<?php endif; ?>
 						</div>
 						<?php if ( ! empty( $mapped->reviews_count ) && ! empty( $mapped->rating ) ) : ?>
