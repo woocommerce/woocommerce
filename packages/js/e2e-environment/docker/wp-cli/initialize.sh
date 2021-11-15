@@ -2,7 +2,11 @@
 
 echo "Initializing WooCommerce E2E"
 
-wp plugin activate woocommerce
+# This is a workaround to accommodate different directory names.
+wp plugin activate --all
+wp plugin deactivate akismet
+wp plugin deactivate hello
+
 wp theme install twentynineteen --activate
 wp user create customer customer@woocommercecoree2etestsuite.com \
 	--user_pass=password \

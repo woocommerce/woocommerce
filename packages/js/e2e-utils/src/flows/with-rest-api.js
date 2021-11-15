@@ -4,12 +4,14 @@ import {Coupon, Setting, SimpleProduct, Order} from '@woocommerce/api';
 
 const client = factories.api.withDefaultPermalinks;
 const onboardingProfileEndpoint = '/wc-admin/onboarding/profile';
-const shippingZoneEndpoint = '/wc/v3/shipping/zones';
-const shippingClassesEndpoint = '/wc/v3/products/shipping_classes';
-const userEndpoint = '/wp/v2/users';
-const systemStatusEndpoint = '/wc/v3/system_status';
 const productsEndpoint = '/wc/v3/products';
 const productCategoriesEndpoint = '/wc/v3/products/categories';
+const shippingClassesEndpoint = '/wc/v3/products/shipping_classes';
+const shippingZoneEndpoint = '/wc/v3/shipping/zones';
+const systemStatusEndpoint = '/wc/v3/system_status';
+const taxClassesEndpoint = '/wc/v3/taxes/classes';
+const taxRatesEndpoint = '/wc/v3/taxes';
+const userEndpoint = '/wp/v2/users';
 
 /**
  * Utility function to delete all merchant created data store objects.
@@ -40,6 +42,16 @@ const deleteAllRepositoryObjects = async ( repository, defaultObjectId = null, s
 			objects = await repository.list( { status } );
 		}
 	}
+};
+
+/**
+ * Utility to flatten a tax rate.
+ *
+ * @param {object} taxRate Tax rate to be flattened.
+ * @return {string}
+ */
+const flattenTaxRate = ( taxRate ) => {
+	return taxRate.rate + '/' + taxRate.class + '/' + taxRate.name;
 };
 
 /**
@@ -76,6 +88,16 @@ export const withRestApi = {
 	deleteAllCoupons: async () => {
 		const repository = Coupon.restRepository( client );
 		await deleteAllRepositoryObjects( repository );
+	},
+	/**
+	 * Use api package to delete a coupon.
+	 *
+	 * @param {number} couponId Coupon ID.
+	 * @return {Promise} Promise resolving once coupon has been deleted.
+	 */
+	deleteCoupon: async ( couponId ) => {
+		const repository = Coupon.restRepository( client );
+		await repository.delete( couponId );
 	},
 	/**
 	 * Use api package to delete products.
@@ -331,12 +353,45 @@ export const withRestApi = {
 	 *
 	 * @param orders Array of orders to be created
 	 */
-	batchCreateOrders: async (orders) => {
+	batchCreateOrders: async ( orders ) => {
 		const path = '/wc/v3/orders/batch';
 		const payload = { create: orders };
 
 		const response = await client.post(path, payload);
 		expect( response.status ).toEqual(200);
+	},
+	/**
+	 * Add tax classes.
+	 *
+	 * @param {<Array<Object>>} taxClasses Array of tax class objects.
+	 * @returns {Promise<void>}
+	 */
+	addTaxClasses: async ( taxClasses ) => {
+		// Only add tax classes which don't already exist.
+		const existingTaxClasses = await client.get( taxClassesEndpoint );
+		const existingTaxNames = existingTaxClasses.data.map( taxClass => taxClass.name );
+		const newTaxClasses = taxClasses.filter( taxClass => ! existingTaxNames.includes( taxClass.name ) );
+
+		for ( const taxClass of newTaxClasses ) {
+			await client.post( taxClassesEndpoint, taxClass );
+		}
+	},
+	/**
+	 * Add tax rates.
+	 *
+	 * @param {<Array<Object>>} taxRates Array of tax rate objects.
+	 * @returns {Promise<void>}
+	 */
+	addTaxRates: async ( taxRates ) => {
+		// Only add rates which don't already exist
+		const existingTaxRates = await client.get( taxRatesEndpoint );
+		const existingRates = existingTaxRates.data.map( taxRate => flattenTaxRate( taxRate ) );
+
+		for ( const taxRate of taxRates ) {
+			if ( ! existingRates.includes( flattenTaxRate( taxRate ) ) ) {
+				await client.post( taxRatesEndpoint, taxRate );
+			}
+		}
 	},
 	/**
 	 * Get the current environment from the WooCommerce system status API.
