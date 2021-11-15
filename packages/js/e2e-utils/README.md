@@ -233,6 +233,7 @@ There is a general utilities object `utils` with the following functions:
 | `deleteAllShippingZones` | | Delete all the existing shipping zones |
 | `waitForSelectorWithoutThrow` | `selector`, `timeoutInSeconds` | conditionally wait for a selector without throwing an error. Default timeout is 5 seconds |
 | `createOrder` | `orderOptions` | Creates an order using the API with the passed in details |
+| `clickAndWaitForSelector` | `buttonSelector`, `resultSelector`, `timeout` | Click a button and wait for response |
 
 ### Test Utilities
 

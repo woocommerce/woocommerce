@@ -5,11 +5,14 @@
 - `utils.waitForTimeout( delay )` pause processing for `delay` milliseconds
 - `AdminEdit` class with utility functions for the respective edit screens
 - Update `shopper.addToCartFromShopPage()` and `.removeFromCart()` to accept product Id or Title
+- Added `deleteAllProductAttributes()`, `deleteAllProductCategories()`, and `deleteAllProductTags()` to clean up meta data added when products are imported
+- Added `withRestApi.createProductCategory()` that creates a product category and returns the ID
 - `deleteAllProductAttributes()`, `deleteAllProductCategories()`, and `deleteAllProductTags()` to clean up meta data added when products are imported
 - `withRestApi.createProductCategory()` that creates a product category and returns the ID
 - `withRestApi.deleteCoupon()` that deletes a single coupon
 - `withRestApi.addTaxClasses()` that adds an array of tax classes if they do not exist
 - `withRestApi.addTaxRates()` that adds an array of tax rates if they do not exist
+- `clickAndWaitForSelector( buttonSelector, resultSelector, timeout )` to click a button and wait for response
 - Optional parameter `testResponse` to `withRestApi` functions that contain an `expect()`
 
 # 0.1.6
