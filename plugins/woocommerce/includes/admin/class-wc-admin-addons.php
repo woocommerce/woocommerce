@@ -89,7 +89,13 @@ class WC_Admin_Addons {
 
 			if ( is_wp_error( $raw_featured ) ) {
 				do_action( 'woocommerce_page_wc-addons_connection_error', $raw_featured->get_error_message() );
-				self::output_empty();
+
+				$message = null;
+				if ( self::is_ssl_error( $raw_featured->get_error_message() ) ) {
+					$message = __( 'We encountered an SSL error. Please check if your site supports TLS version 1.2 or above.', 'woocommerce' );
+				}
+
+				self::output_empty( $message );
 
 				return;
 			}
@@ -97,7 +103,19 @@ class WC_Admin_Addons {
 			$response_code = intval( wp_remote_retrieve_response_code( $raw_featured ) );
 			if ( 200 !== $response_code ) {
 				do_action( 'woocommerce_page_wc-addons_connection_error', $response_code );
-				self::output_empty();
+
+				/* translators: %d: HTTP error code. */
+				$message = sprintf(
+					esc_html(
+						__(
+							'Error code %d.',
+							'woocommerce'
+						)
+					),
+					$response_code
+				);
+
+				self::output_empty( $message );
 
 				return;
 			}
@@ -105,7 +123,8 @@ class WC_Admin_Addons {
 			$featured      = json_decode( wp_remote_retrieve_body( $raw_featured ) );
 			if ( empty( $featured ) || ! is_array( $featured ) ) {
 				do_action( 'woocommerce_page_wc-addons_connection_error', 'Empty or malformed response' );
-				self::output_empty();
+				$message = __( 'We received an empty or malformed response', 'woocommerce' );
+				self::output_empty( $message );
 
 				return;
 			}
@@ -116,6 +135,10 @@ class WC_Admin_Addons {
 		}
 
 		self::output_featured( $featured );
+	}
+
+	public static function is_ssl_error( $error_message ) {
+		return ( false !== stripos( $error_message, 'cURL error 35' ) );
 	}
 
 	/**
@@ -941,25 +964,28 @@ class WC_Admin_Addons {
 		<?php
 	}
 
-	public static function output_empty() {
+	public static function output_empty( $message = '' ) {
 		?>
-			<div class="wc-addons__empty">
-				<h2><?php echo wp_kses_post( __( 'Sorry, we\'re having trouble connecting to the extensions catalog.', 'woocommerce' ) ); ?></h2>
-				<p>
-					<?php
-					/* translators: a url */
-					printf(
-						wp_kses_post(
-							__(
-								'Head over to <a href="%s">WooCommerce.com</a> to start growing your business with the most popular WooCommerce extensions.',
-								'woocommerce'
-							)
-						),
-						'https://woocommerce.com/products/?utm_source=extensionsscreen&utm_medium=product&utm_campaign=connectionerror'
-					);
-					?>
-				</p>
- 				</div>
+		<div class="wc-addons__empty">
+			<h2><?php echo wp_kses_post( __( 'Sorry, we\'re having trouble connecting to the extensions catalog.', 'woocommerce' ) ); ?></h2>
+			<p>
+				<?php
+				/* translators: a url */
+				printf(
+					wp_kses_post(
+						__(
+							'Head over to <a href="%s">WooCommerce.com</a> to start growing your business with the most popular WooCommerce extensions.',
+							'woocommerce'
+						)
+					),
+					'https://woocommerce.com/products/?utm_source=extensionsscreen&utm_medium=product&utm_campaign=connectionerror'
+				);
+				?>
+			</p>
+			<?php if ( ! empty( $message ) ) : ?>
+				<p><?php echo esc_html( $message ); ?></p>
+			<?php endif; ?>
+		</div>
 		<?php
 	}
 
