@@ -133,14 +133,15 @@ Please note: if you're using a non-SSL environment (such as a Docker container f
 
 | Function | Parameters | Description |
 |----------|------------|-------------|
-| `batchCreateOrders` | `orders` | Create a batch of orders using the "Batch Create Order" API endpoint |
+| `addShippingZoneAndMethod` | `zoneName`, `zoneLocation`, `zipCode`, `zoneMethod`, `cost`, `additionalZoneMethods`, `testResponse` | Adds a shipping zone along with a shipping method |
+| `batchCreateOrders` | `orders`, `testResponse` | Create a batch of orders using the "Batch Create Order" API endpoint |
 | `addTaxClasses` | `taxClasses` | Add an array of tax classes if they do not exist |
 | `addTaxRates` | `taxRates` | Add an array of tax rates if they do not exist |
 | `createProductCategory` | `categoryName` | Create a product category with the provided name |
 | `deleteAllCoupons` | | Permanently delete all coupons |
 | `deleteAllOrders` | | Permanently delete all orders |
-| `deleteAllProductAttributes` | | Permanently delete all product attributes |
-| `deleteAllProductCategories` | | Permanently delete all product categories |
+| `deleteAllProductAttributes` | `testResponse` | Permanently delete all product attributes |
+| `deleteAllProductCategories` | `testResponse` | Permanently delete all product categories |
 | `deleteAllProducts` | | Permanently delete all products |
 | `deleteAllProductTags` | | Permanently delete all product tags |
 | `deleteAllShippingClasses` | | Permanently delete all shipping classes |
@@ -152,7 +153,7 @@ Please note: if you're using a non-SSL environment (such as a Docker container f
 | `resetSettingsGroupToDefault` | `settingsGroup` | Reset settings in settings group to default except `select` fields |
 | `deleteAllOrders` | | Permanently delete all orders |
 | `updateSettingOption` | `settingsGroup`, `settingID`, `payload` | Update a settings group |
-| `updatePaymentGateway`| `paymentGatewayId`, `payload` | Update a payment gateway |
+| `updatePaymentGateway`| `paymentGatewayId`, `payload`, `testResponse` | Update a payment gateway |
 
 ### Classes
 
