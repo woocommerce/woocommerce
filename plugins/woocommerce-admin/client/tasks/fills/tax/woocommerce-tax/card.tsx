@@ -14,11 +14,10 @@ import { PartnerCard } from '../components/partner-card';
 import logo from './logo.png';
 import { TaxChildProps } from '../utils';
 
-export const Card: React.FC< TaxChildProps > = ( { isPending } ) => {
+export const Card: React.FC< TaxChildProps > = () => {
 	return (
 		<PartnerCard
 			name={ __( 'WooCommerce Tax', 'woocommerce-admin' ) }
-			isPending={ isPending }
 			logo={ logo }
 			description={ __( 'Best for new stores', 'woocommerce-admin' ) }
 			benefits={ [

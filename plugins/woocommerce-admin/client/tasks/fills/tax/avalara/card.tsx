@@ -12,13 +12,12 @@ import { recordEvent } from '@woocommerce/tracks';
 import { PartnerCard } from '../components/partner-card';
 import logo from './logo.png';
 
-export const Card = ( { isPending, task } ) => {
+export const Card = ( { task } ) => {
 	const { avalaraActivated } = task.additionalData;
 
 	return (
 		<PartnerCard
 			name={ __( 'Avalara', 'woocommerce-admin' ) }
-			isPending={ isPending }
 			logo={ logo }
 			description={ __(
 				'Powerful all-in-one tax tool',
