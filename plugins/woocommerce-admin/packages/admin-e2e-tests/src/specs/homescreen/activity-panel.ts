@@ -9,7 +9,7 @@ import { createSimpleProduct, withRestApi } from '@woocommerce/e2e-utils';
 import { Login } from '../../pages/Login';
 import { OnboardingWizard } from '../../pages/OnboardingWizard';
 import { WcHomescreen } from '../../pages/WcHomescreen';
-import { createOrder, removeAllOrders, updateOption } from '../../fixtures';
+import { createOrder, removeAllOrders, unhideTaskList } from '../../fixtures';
 import { OrdersActivityPanel } from '../../elements/OrdersActivityPanel';
 import { waitForElementByText } from '../../utils/actions';
 
@@ -30,7 +30,7 @@ const testAdminHomescreenActivityPanel = () => {
 
 			await withRestApi.deleteAllProducts();
 			await removeAllOrders();
-			await updateOption( 'woocommerce_task_list_hidden', 'no' );
+			await unhideTaskList( 'setup' );
 			await profileWizard.navigate();
 			await profileWizard.skipStoreSetup();
 
@@ -41,7 +41,7 @@ const testAdminHomescreenActivityPanel = () => {
 		afterAll( async () => {
 			await withRestApi.deleteAllProducts();
 			await removeAllOrders();
-			await updateOption( 'woocommerce_task_list_hidden', 'no' );
+			await unhideTaskList( 'setup' );
 			await login.logout();
 		} );
 

@@ -1,11 +1,13 @@
 /**
  * External dependencies
  */
-import { apiFetch } from '@wordpress/data-controls';
+import { apiFetch, select } from '@wordpress/data-controls';
+import { controls } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
+import { STORE_NAME } from './constants';
 import { WC_ADMIN_NAMESPACE } from '../constants';
 import {
 	getFreeExtensionsError,
@@ -20,6 +22,9 @@ import {
 	getProductTypesError,
 } from './actions';
 import { DeprecatedTasks } from './deprecated-tasks';
+
+const resolveSelect =
+	controls && controls.resolveSelect ? controls.resolveSelect : select;
 
 export function* getProfileItems() {
 	try {
@@ -64,6 +69,14 @@ export function* getTaskLists() {
 	} catch ( error ) {
 		yield getTaskListsError( error );
 	}
+}
+
+export function* getTaskList() {
+	yield resolveSelect( STORE_NAME, 'getTaskLists' );
+}
+
+export function* getTask() {
+	yield resolveSelect( STORE_NAME, 'getTaskLists' );
 }
 
 export function* getPaymentGatewaySuggestions() {

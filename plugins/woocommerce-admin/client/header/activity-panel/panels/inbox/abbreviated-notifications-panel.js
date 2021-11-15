@@ -6,7 +6,7 @@ import { Text } from '@woocommerce/experimental';
 import { recordEvent } from '@woocommerce/tracks';
 import { AbbreviatedCard } from '@woocommerce/components';
 import { useSelect } from '@wordpress/data';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { ONBOARDING_STORE_NAME } from '@woocommerce/data';
 import { box, comment, page } from '@wordpress/icons';
 import { createSlotFill } from '@wordpress/components';
 
@@ -37,16 +37,15 @@ export const AbbreviatedNotificationsPanel = ( { thingsToDoNextCount } ) => {
 		isSetupTaskListHidden,
 		isExtendedTaskListHidden,
 	} = useSelect( ( select ) => {
-		const { getOption } = select( OPTIONS_STORE_NAME );
+		const { getTaskList } = select( ONBOARDING_STORE_NAME );
 		const orderStatuses = getOrderStatuses( select );
+
 		return {
 			ordersToProcessCount: getUnreadOrders( select, orderStatuses ),
 			reviewsToModerateCount: getUnapprovedReviews( select ),
 			stockNoticesCount: getLowStockCount( select ),
-			isSetupTaskListHidden:
-				getOption( 'woocommerce_task_list_hidden' ) === 'yes',
-			isExtendedTaskListHidden:
-				getOption( 'woocommerce_extended_task_list_hidden' ) === 'yes',
+			isSetupTaskListHidden: getTaskList( 'setup' )?.isHidden,
+			isExtendedTaskListHidden: getTaskList( 'extended' )?.isHidden,
 		};
 	} );
 

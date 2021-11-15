@@ -172,6 +172,28 @@ export function hideTaskListSuccess( taskList ) {
 	};
 }
 
+export function unhideTaskListError( taskListId, error ) {
+	return {
+		type: TYPES.UNHIDE_TASK_LIST_ERROR,
+		taskListId,
+		error,
+	};
+}
+
+export function unhideTaskListRequest( taskListId ) {
+	return {
+		type: TYPES.UNHIDE_TASK_LIST_REQUEST,
+		taskListId,
+	};
+}
+
+export function unhideTaskListSuccess( taskList ) {
+	return {
+		type: TYPES.UNHIDE_TASK_LIST_SUCCESS,
+		taskList,
+	};
+}
+
 export function optimisticallyCompleteTaskRequest( taskId ) {
 	return {
 		type: TYPES.OPTIMISTICALLY_COMPLETE_TASK_REQUEST,
@@ -352,6 +374,22 @@ export function* hideTaskList( id ) {
 		yield hideTaskListSuccess( taskList );
 	} catch ( error ) {
 		yield hideTaskListError( id, error );
+		throw new Error();
+	}
+}
+
+export function* unhideTaskList( id ) {
+	yield unhideTaskListRequest( id );
+
+	try {
+		const taskList = yield apiFetch( {
+			path: `${ WC_ADMIN_NAMESPACE }/onboarding/tasks/${ id }/unhide`,
+			method: 'POST',
+		} );
+
+		yield unhideTaskListSuccess( taskList );
+	} catch ( error ) {
+		yield unhideTaskListError( id, error );
 		throw new Error();
 	}
 }

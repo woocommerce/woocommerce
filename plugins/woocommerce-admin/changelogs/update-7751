@@ -1,0 +1,4 @@
+Significance: patch
+Type: Fix
+
+Replace old task list option calls with data store selectors #7820

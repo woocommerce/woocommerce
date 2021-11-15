@@ -47,7 +47,7 @@ describe( 'Homescreen Layout', () => {
 			<Layout
 				requestingTaskList={ false }
 				taskListComplete
-				bothTaskListsHidden={ false }
+				hasTaskList={ true }
 				query={ {} }
 				updateOptions={ () => {} }
 			/>
@@ -68,7 +68,7 @@ describe( 'Homescreen Layout', () => {
 		const { container } = render(
 			<Layout
 				requestingTaskList={ false }
-				bothTaskListsHidden={ false }
+				hasTaskList={ true }
 				query={ {
 					task: 'products',
 				} }
@@ -91,7 +91,7 @@ describe( 'Homescreen Layout', () => {
 		render(
 			<Layout
 				requestingTaskList={ false }
-				bothTaskListsHidden
+				hasTaskList={ false }
 				query={ {} }
 				updateOptions={ () => {} }
 			/>
@@ -105,7 +105,7 @@ describe( 'Homescreen Layout', () => {
 		render(
 			<Layout
 				requestingTaskList={ false }
-				bothTaskListsHidden={ false }
+				hasTaskList={ true }
 				taskListComplete
 				query={ {} }
 				updateOptions={ () => {} }
@@ -126,7 +126,7 @@ describe( 'Homescreen Layout', () => {
 			<Layout
 				defaultHomescreenLayout="two_columns"
 				requestingTaskList={ false }
-				bothTaskListsHidden={ false }
+				hasTaskList={ true }
 				query={ {} }
 				updateOptions={ () => {} }
 			/>
@@ -149,7 +149,7 @@ describe( 'Homescreen Layout', () => {
 		const { container } = render(
 			<Layout
 				requestingTaskList={ false }
-				bothTaskListsHidden={ false }
+				hasTaskList={ true }
 				query={ {} }
 				updateOptions={ () => {} }
 			/>
@@ -172,7 +172,7 @@ describe( 'Homescreen Layout', () => {
 		const { container } = render(
 			<Layout
 				requestingTaskList={ false }
-				bothTaskListsHidden={ false }
+				hasTaskList={ true }
 				query={ {} }
 				updateOptions={ () => {} }
 			/>
@@ -194,7 +194,7 @@ describe( 'Homescreen Layout', () => {
 			<Layout
 				requestingTaskList={ false }
 				taskListComplete
-				bothTaskListsHidden={ false }
+				hasTaskList={ true }
 				query={ {} }
 				updateOptions={ () => {} }
 			/>
@@ -236,7 +236,7 @@ describe( 'Homescreen Layout', () => {
 			<Layout
 				requestingTaskList={ false }
 				taskListComplete
-				bothTaskListsHidden={ false }
+				hasTaskList={ true }
 				isTaskListHidden={ true }
 				query={ {} }
 				updateOptions={ () => {} }

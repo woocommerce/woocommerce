@@ -9,7 +9,11 @@ import {
 } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
-import { useUserPreferences, OPTIONS_STORE_NAME } from '@woocommerce/data';
+import {
+	useUserPreferences,
+	ONBOARDING_STORE_NAME,
+	OPTIONS_STORE_NAME,
+} from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -53,14 +57,15 @@ export const DisplayOptions = () => {
 		isTaskListHidden,
 	} = useSelect( ( select ) => {
 		const { getOption } = select( OPTIONS_STORE_NAME );
+		const { getTaskList } = select( ONBOARDING_STORE_NAME );
+		const taskList = getTaskList( 'setup' );
+
 		return {
 			defaultHomescreenLayout:
 				getOption( 'woocommerce_default_homepage_layout' ) ||
 				'single_column',
-			taskListComplete:
-				getOption( 'woocommerce_task_list_complete' ) === 'yes',
-			isTaskListHidden:
-				getOption( 'woocommerce_task_list_hidden' ) === 'yes',
+			taskListComplete: taskList?.isComplete,
+			isTaskListHidden: taskList?.isHidden,
 		};
 	} );
 	const {

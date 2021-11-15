@@ -16,6 +16,7 @@ import PropTypes from 'prop-types';
 import {
 	useUserPreferences,
 	NOTES_STORE_NAME,
+	ONBOARDING_STORE_NAME,
 	OPTIONS_STORE_NAME,
 } from '@woocommerce/data';
 import { __ } from '@wordpress/i18n';
@@ -61,7 +62,7 @@ export const Layout = ( {
 	isBatchUpdating,
 	query,
 	taskListComplete,
-	bothTaskListsHidden,
+	hasTaskList,
 	shouldShowWelcomeModal,
 	shouldShowWelcomeFromCalypsoModal,
 	isTaskListHidden,
@@ -72,8 +73,6 @@ export const Layout = ( {
 	const hasTwoColumnContent =
 		shouldShowStoreLinks || window.wcAdminFeatures.analytics;
 	const [ showInbox, setShowInbox ] = useState( true );
-
-	const isTaskListEnabled = bothTaskListsHidden === false;
 	const isDashboardShown = ! query.task;
 
 	const momentDate = moment().utc();
@@ -164,7 +163,7 @@ export const Layout = ( {
 						/>
 					) }
 					{ ! isRunningTaskListExperiment && <ActivityPanel /> }
-					{ isTaskListEnabled && renderTaskList() }
+					{ hasTaskList && renderTaskList() }
 					<InboxPanel />
 				</Column>
 				<Column shouldStick={ shouldStickColumns }>
@@ -254,9 +253,9 @@ Layout.propTypes = {
 	 */
 	taskListComplete: PropTypes.bool,
 	/**
-	 * If the task list is hidden.
+	 * If any task list is visible.
 	 */
-	bothTaskListsHidden: PropTypes.bool,
+	hasTaskList: PropTypes.bool,
 	/**
 	 * Page query, used to determine the current task if any.
 	 */
@@ -281,6 +280,8 @@ export default compose(
 		const { getOption, hasFinishedResolution } = select(
 			OPTIONS_STORE_NAME
 		);
+		const { getTaskList, getTaskLists } = select( ONBOARDING_STORE_NAME );
+		const taskLists = getTaskLists();
 
 		const welcomeFromCalypsoModalDismissed =
 			getOption( WELCOME_FROM_CALYPSO_MODAL_DISMISSED_OPTION_NAME ) ===
@@ -315,20 +316,15 @@ export default compose(
 		const defaultHomescreenLayout =
 			getOption( 'woocommerce_default_homepage_layout' ) ||
 			'single_column';
-		const isTaskListHidden =
-			getOption( 'woocommerce_task_list_hidden' ) === 'yes';
 
 		return {
 			defaultHomescreenLayout,
 			isBatchUpdating: isNotesRequesting( 'batchUpdateNotes' ),
 			shouldShowWelcomeModal,
 			shouldShowWelcomeFromCalypsoModal,
-			isTaskListHidden,
-			bothTaskListsHidden:
-				isTaskListHidden &&
-				getOption( 'woocommerce_extended_task_list_hidden' ) === 'yes',
-			taskListComplete:
-				getOption( 'woocommerce_task_list_complete' ) === 'yes',
+			isTaskListHidden: getTaskList( 'setup' )?.isHidden,
+			hasTaskList: taskLists.find( ( list ) => list.isVisible ),
+			taskListComplete: getTaskList( 'setup' )?.isComplete,
 		};
 	} ),
 	withDispatch( ( dispatch ) => ( {

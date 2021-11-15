@@ -12,7 +12,7 @@ import { WcHomescreen } from '../../pages/WcHomescreen';
 import { TaskTitles } from '../../constants/taskTitles';
 import { HelpMenu } from '../../elements/HelpMenu';
 import { WcSettings } from '../../pages/WcSettings';
-import { updateOption } from '../../fixtures';
+import { unhideTaskList } from '../../fixtures';
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 const { afterAll, beforeAll, describe, it } = require( '@jest/globals' );
@@ -42,7 +42,7 @@ const testAdminHomescreenTasklist = () => {
 		} );
 
 		afterAll( async () => {
-			await updateOption( 'woocommerce_task_list_hidden', 'no' );
+			await unhideTaskList( 'setup' );
 			await login.logout();
 		} );
 

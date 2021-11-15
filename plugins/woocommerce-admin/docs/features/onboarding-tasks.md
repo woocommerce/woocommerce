@@ -94,7 +94,7 @@ $list = new TaskList( $args );
 *   `$task_list->is_hidden()` - Check if a task list is hidden
 *   `$task_list->is_visible()` - Check if a task list is visible (opposite value of `is_hidden()`)
 *   `$task_list->hide()` - Hide a task list
-*   `$task_list->show()` - Undo hiding of a task list
+*   `$task_list->unhide()` - Undo hiding of a task list
 *   `$task_list->is_complete()` - Check if a task list is complete
 *   `$task_list->add_task( $args )` - Add a task to a task list
 *   `$task_list->get_viewable_tasks()` - Get tasks that are marked as `can_view` for the store

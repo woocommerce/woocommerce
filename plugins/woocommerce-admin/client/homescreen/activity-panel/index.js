@@ -39,16 +39,14 @@ export const ActivityPanel = () => {
 		const countLowStockProducts = getLowStockCount( select );
 		const countUnapprovedReviews = getUnapprovedReviews( select );
 		const publishedProductCount = getSetting( 'publishedProductCount', 0 );
-		const taskLists = select( ONBOARDING_STORE_NAME ).getTaskLists();
+		const taskList = select( ONBOARDING_STORE_NAME ).getTaskList( 'setup' );
 
 		return {
 			countLowStockProducts,
 			countUnapprovedReviews,
 			countUnreadOrders,
 			manageStock,
-			isTaskListHidden: Boolean( taskLists.length )
-				? ! taskLists.find( ( list ) => list.id === 'setup' ).isVisible
-				: null,
+			isTaskListHidden: taskList?.isHidden,
 			publishedProductCount,
 			reviewsEnabled,
 			totalOrderCount,
@@ -66,7 +64,7 @@ export const ActivityPanel = () => {
 					acc[ panelId ] = true;
 					return acc;
 				},
-				{ task_list: ! panelsData.isTaskListHidden }
+				{ task_list: panelsData.isTaskListHidden }
 			);
 			recordEvent( 'activity_panel_visible_panels', visiblePanels );
 		}

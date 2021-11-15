@@ -17,6 +17,19 @@ jest.mock( '@woocommerce/data', () => ( {
 		.fn()
 		.mockReturnValue( { updateUserPreferences: jest.fn() } ),
 } ) );
+jest.mock( '@wordpress/data', () => {
+	const originalModule = jest.requireActual( '@wordpress/data' );
+
+	return {
+		__esModule: true,
+		...originalModule,
+		useSelect: jest.fn().mockReturnValue( {
+			defaultHomescreenLayout: 'single_column',
+			taskListComplete: false,
+			isTaskListHidde: false,
+		} ),
+	};
+} );
 
 describe( 'Activity Panel - Homescreen Display Options', () => {
 	it( 'correctly tracks opening the options', () => {

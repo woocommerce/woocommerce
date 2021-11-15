@@ -132,7 +132,7 @@ class TaskList {
 	 *
 	 * @return bool
 	 */
-	public function show() {
+	public function unhide() {
 		$hidden = get_option( self::HIDDEN_OPTION, array() );
 		$hidden = array_diff( $hidden, array( $this->id ) );
 		return update_option( self::HIDDEN_OPTION, $hidden );

@@ -132,6 +132,19 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 
 		register_rest_route(
 			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[a-z0-9_\-]+)/unhide',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'unhide_task_list' ),
+					'permission_callback' => array( $this, 'hide_task_list_permission_check' ),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
 			'/' . $this->rest_base . '/(?P<id>[a-z0-9_\-]+)/dismiss',
 			array(
 				array(
@@ -864,6 +877,33 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		}
 
 		$update = $task_list->hide();
+		$json   = $task_list->get_json();
+
+		return rest_ensure_response( $json );
+	}
+
+	/**
+	 * Unhide a task list.
+	 *
+	 * @param WP_REST_Request $request Request data.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function unhide_task_list( $request ) {
+		$id        = $request->get_param( 'id' );
+		$task_list = TaskLists::get_list( $id );
+
+		if ( ! $task_list ) {
+			return new \WP_Error(
+				'woocommerce_tasks_invalid_task_list',
+				__( 'Sorry, that task list was not found', 'woocommerce-admin' ),
+				array(
+					'status' => 404,
+				)
+			);
+		}
+
+		$update = $task_list->unhide();
 		$json   = $task_list->get_json();
 
 		return rest_ensure_response( $json );

@@ -283,6 +283,7 @@ const onboarding = (
 					if ( taskListId === list.id ) {
 						return {
 							...list,
+							isHidden: false,
 							isVisible: true,
 						};
 					}
@@ -300,6 +301,7 @@ const onboarding = (
 					if ( taskListId === list.id ) {
 						return {
 							...list,
+							isHidden: true,
 							isVisible: false,
 						};
 					}
@@ -312,6 +314,53 @@ const onboarding = (
 				requesting: {
 					...state.requesting,
 					hideTaskList: false,
+				},
+				taskLists: state.taskLists.map( ( list ) => {
+					return taskListId === list.id ? taskList : list;
+				} ),
+			};
+		case TYPES.UNHIDE_TASK_LIST_ERROR:
+			return {
+				...state,
+				errors: {
+					...state.errors,
+					unhideTaskList: error,
+				},
+				taskLists: state.taskLists.map( ( list ) => {
+					if ( taskListId === list.id ) {
+						return {
+							...list,
+							isHidden: true,
+							isVisible: false,
+						};
+					}
+					return list;
+				} ),
+			};
+		case TYPES.UNHIDE_TASK_LIST_REQUEST:
+			return {
+				...state,
+				requesting: {
+					...state.requesting,
+					unhideTaskList: true,
+				},
+				taskLists: state.taskLists.map( ( list ) => {
+					if ( taskListId === list.id ) {
+						return {
+							...list,
+							isHidden: false,
+							isVisible: true,
+						};
+					}
+					return list;
+				} ),
+			};
+		case TYPES.UNHIDE_TASK_LIST_SUCCESS:
+			return {
+				...state,
+				requesting: {
+					...state.requesting,
+					unhideTaskList: false,
 				},
 				taskLists: state.taskLists.map( ( list ) => {
 					return taskListId === list.id ? taskList : list;

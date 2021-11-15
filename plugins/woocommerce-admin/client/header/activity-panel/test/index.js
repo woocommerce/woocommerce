@@ -264,7 +264,7 @@ describe( 'Activity Panel', () => {
 				requestingTaskListOptions: false,
 				setupTaskListComplete: false,
 				setupTaskListHidden: false,
-				trackedCompletedTasks: [ 'payment' ],
+				isCompletedTask: true,
 			} ) );
 
 			const { queryByText } = render(

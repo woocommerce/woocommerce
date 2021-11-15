@@ -20,7 +20,6 @@ import {
 } from '@woocommerce/data';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
-import { applyFilters } from '@wordpress/hooks';
 import { useSlot } from '@woocommerce/experimental';
 
 /**
@@ -85,19 +84,16 @@ export const ActivityPanel = ( { isEmbedded, query, userPreferencesData } ) => {
 		return trackData;
 	};
 
-	function getThingsToDoNextCount(
-		tasks,
-		dismissedTasks,
-		isExtendedTaskListHidden
-	) {
-		if ( ! tasks || isExtendedTaskListHidden ) {
+	function getThingsToDoNextCount( extendedTaskList ) {
+		if (
+			! extendedTaskList ||
+			! extendedTaskList.tasks.length ||
+			extendedTaskList.isHidden
+		) {
 			return 0;
 		}
-		return tasks.filter(
-			( task ) =>
-				task.visible &&
-				! task.completed &&
-				! dismissedTasks.includes( task.key )
+		return extendedTaskList.tasks.filter(
+			( task ) => task.canView && ! task.isComplete && ! task.isDismissed
 		).length;
 	}
 
@@ -133,30 +129,22 @@ export const ActivityPanel = ( { isEmbedded, query, userPreferencesData } ) => {
 	const {
 		hasUnreadNotes,
 		hasAbbreviatedNotifications,
+		isCompletedTask,
 		thingsToDoNextCount,
 		requestingTaskListOptions,
 		setupTaskListComplete,
 		setupTaskListHidden,
-		trackedCompletedTasks,
 		previewSiteBtnTrackData,
 	} = useSelect( ( select ) => {
-		const { getOption, isResolving } = select( OPTIONS_STORE_NAME );
-		const isSetupTaskListHidden =
-			getOption( 'woocommerce_task_list_hidden' ) === 'yes';
-		const isExtendedTaskListHidden =
-			getOption( 'woocommerce_extended_task_list_hidden' ) === 'yes';
-		const extendedTaskList = applyFilters(
-			'woocommerce_admin_onboarding_task_list',
-			[],
-			query
+		const { getOption } = select( OPTIONS_STORE_NAME );
+		const { getTask, getTaskList, hasFinishedResolution } = select(
+			ONBOARDING_STORE_NAME
 		);
-		const dismissedTasks =
-			getOption( 'woocommerce_task_list_dismissed_tasks' ) || [];
-		const thingsToDoCount = getThingsToDoNextCount(
-			extendedTaskList,
-			dismissedTasks,
-			isExtendedTaskListHidden
-		);
+
+		const isSetupTaskListHidden = getTaskList( 'setup' )?.isHidden;
+		const extendedTaskList = getTaskList( 'extended' );
+
+		const thingsToDoCount = getThingsToDoNextCount( extendedTaskList );
 
 		return {
 			hasUnreadNotes: isNotesPanelVisible( select ),
@@ -166,24 +154,21 @@ export const ActivityPanel = ( { isEmbedded, query, userPreferencesData } ) => {
 				thingsToDoCount
 			),
 			thingsToDoNextCount: thingsToDoCount,
-			requestingTaskListOptions:
-				isResolving( 'getOption', [
-					'woocommerce_task_list_complete',
-				] ) ||
-				isResolving( 'getOption', [ 'woocommerce_task_list_hidden' ] ),
-			setupTaskListComplete:
-				getOption( 'woocommerce_task_list_complete' ) === 'yes',
+			requestingTaskListOptions: ! hasFinishedResolution(
+				'getTaskLists'
+			),
+			setupTaskListComplete: getTaskList( 'setup' )?.isComplete,
 			setupTaskListHidden: isSetupTaskListHidden,
-			trackedCompletedTasks:
-				getOption( 'woocommerce_task_list_tracked_completed_tasks' ) ||
-				[],
+			isCompletedTask: Boolean(
+				query.task && getTask( query.task )?.isComplete
+			),
 			previewSiteBtnTrackData: getPreviewSiteBtnTrackData(
 				select,
 				getOption
 			),
 		};
 	} );
-	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
+	const { unhideTaskList } = useDispatch( ONBOARDING_STORE_NAME );
 	const { currentUserCan } = useUser();
 
 	const togglePanel = ( { name: tabName }, isTabOpen ) => {
@@ -265,9 +250,7 @@ export const ActivityPanel = ( { isEmbedded, query, userPreferencesData } ) => {
 					if ( setupTaskListHidden === 'no' ) {
 						redirectToHomeScreen();
 					} else {
-						updateOptions( {
-							woocommerce_task_list_hidden: 'no',
-						} ).then( redirectToHomeScreen );
+						unhideTaskList( 'setup' ).then( redirectToHomeScreen );
 					}
 				}
 
@@ -275,6 +258,7 @@ export const ActivityPanel = ( { isEmbedded, query, userPreferencesData } ) => {
 			},
 			visible:
 				currentUserCan( 'manage_woocommerce' ) &&
+				! requestingTaskListOptions &&
 				! setupTaskListComplete &&
 				! setupTaskListHidden &&
 				! isPerformingSetupTask() &&
@@ -365,7 +349,7 @@ export const ActivityPanel = ( { isEmbedded, query, userPreferencesData } ) => {
 			task &&
 			highlightShown !== 'yes' &&
 			( startedTasks || {} )[ task ] > 1 &&
-			! trackedCompletedTasks.includes( task )
+			! isCompletedTask
 		) {
 			return true;
 		}

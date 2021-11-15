@@ -8,6 +8,18 @@ import { render, screen } from '@testing-library/react';
  */
 import { ActivityPanel } from '../';
 
+jest.mock( '@wordpress/data', () => {
+	const originalModule = jest.requireActual( '@wordpress/data' );
+
+	return {
+		__esModule: true,
+		...originalModule,
+		useSelect: jest.fn().mockReturnValue( {
+			isTaskListHidden: false,
+		} ),
+	};
+} );
+
 // Mock the panels.
 jest.mock( '../panels', () => {
 	return {

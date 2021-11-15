@@ -76,9 +76,9 @@ class WC_Tests_OnboardingTasks_TaskList extends WC_Unit_Test_Case {
 	/**
 	 * Tests that lists can be shown after hiding.
 	 */
-	public function test_show() {
+	public function test_unhide() {
 		$this->list->hide();
-		$this->list->show();
+		$this->list->unhide();
 		$this->assertFalse( $this->list->is_hidden() );
 	}
 
