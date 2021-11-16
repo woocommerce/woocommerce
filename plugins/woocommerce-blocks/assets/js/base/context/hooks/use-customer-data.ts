@@ -11,9 +11,12 @@ import {
 	pluckAddress,
 	pluckEmail,
 } from '@woocommerce/base-utils';
-import type {
+import {
 	CartResponseBillingAddress,
 	CartResponseShippingAddress,
+	BillingAddressShippingAddress,
+	CartBillingAddress,
+	CartShippingAddress,
 } from '@woocommerce/types';
 
 declare type CustomerData = {
@@ -92,6 +95,26 @@ export const useCustomerData = (): {
 		shippingAddress: initialShippingAddress,
 	} );
 
+	// We only want to update the local state once, otherwise the data on the checkout page gets overwritten
+	// with the initial state of the addresses here
+	const [ hasCustomerDataSynced, setHasCustomerDataSynced ] = useState<
+		boolean
+	>( false );
+
+	if (
+		! hasCustomerDataSynced &&
+		shouldUpdateAddressStore(
+			customerData.shippingAddress,
+			initialShippingAddress
+		)
+	) {
+		setCustomerData( {
+			billingData: initialBillingAddress,
+			shippingAddress: initialShippingAddress,
+		} );
+		setHasCustomerDataSynced( true );
+	}
+
 	// Store values last sent to the server in a ref to avoid requests unless important fields are changed.
 	const previousCustomerData = useRef< CustomerData >( customerData );
 
@@ -146,23 +169,40 @@ export const useCustomerData = (): {
 	 */
 	useEffect( () => {
 		// Only push updates when enough fields are populated.
-		if (
-			! shouldUpdateAddressStore(
-				previousCustomerData.current.billingData,
-				debouncedCustomerData.billingData
-			) &&
-			! shouldUpdateAddressStore(
-				previousCustomerData.current.shippingAddress,
-				debouncedCustomerData.shippingAddress
-			)
-		) {
+		const shouldUpdateBillingAddress = shouldUpdateAddressStore(
+			previousCustomerData.current.billingData,
+			debouncedCustomerData.billingData
+		);
+
+		const shouldUpdateShippingAddress = shouldUpdateAddressStore(
+			previousCustomerData.current.shippingAddress,
+			debouncedCustomerData.shippingAddress
+		);
+
+		if ( ! shouldUpdateBillingAddress && ! shouldUpdateShippingAddress ) {
 			return;
 		}
+
+		const customerDataToUpdate:
+			| Partial< BillingAddressShippingAddress >
+			| Record<
+					keyof BillingAddressShippingAddress,
+					CartBillingAddress | CartShippingAddress
+			  > = {};
+
+		if ( shouldUpdateBillingAddress ) {
+			customerDataToUpdate.billing_address =
+				debouncedCustomerData.billingData;
+		}
+		if ( shouldUpdateShippingAddress ) {
+			customerDataToUpdate.shipping_address =
+				debouncedCustomerData.shippingAddress;
+		}
+
 		previousCustomerData.current = debouncedCustomerData;
-		updateCustomerData( {
-			billing_address: debouncedCustomerData.billingData,
-			shipping_address: debouncedCustomerData.shippingAddress,
-		} )
+		updateCustomerData(
+			customerDataToUpdate as Partial< BillingAddressShippingAddress >
+		)
 			.then( () => {
 				removeNotice( 'checkout' );
 			} )
