@@ -1,8 +1,7 @@
-
 /**
  * Internal dependencies
  */
- const {
+const {
 	getRequest,
 	postRequest,
 	deleteRequest,
