@@ -1216,7 +1216,7 @@ class WC_Countries {
 					),
 					'NI' => array(
 						'state'    => array(
-							'label' => __( 'Departamento', 'woocommerce' ),
+							'label' => __( 'Department', 'woocommerce' ),
 						),
 					),
 					'NL' => array(
