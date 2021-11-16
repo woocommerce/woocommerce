@@ -1049,7 +1049,7 @@ class WC_Countries {
 					),
 					'HN' => array(
 						'state'    => array(
-							'label' => __( 'Provincia', 'woocommerce' ),
+							'label' => __( 'Province', 'woocommerce' ),
 						),
 					),
 					'HU' => array(
