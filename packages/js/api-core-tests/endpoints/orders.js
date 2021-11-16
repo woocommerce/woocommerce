@@ -1,8 +1,13 @@
 /**
  * Internal dependencies
  */
-const { getRequest, postRequest, putRequest, deleteRequest } = require('../utils/request');
-const { getOrderExample, shared } = require('../data');
+const {
+	getRequest,
+	postRequest,
+	putRequest,
+	deleteRequest,
+} = require( '../utils/request' );
+const { getOrderExample, shared } = require( '../data' );
 
 /**
  * WooCommerce Orders endpoints.
