@@ -122,6 +122,18 @@
       "options": {
         "script": "make:collection"
       }
+    },
+    "install-unit-test-db": {
+      "executor": "@nrwl/workspace:run-commands",
+      "options": {
+        "command": "bash ./tests/bin/install.sh woo_test root root 127.0.0.1 latest"
+      }
+    },
+    "test-code-coverage": {
+      "executor": "@nrwl/workspace:run-commands",
+      "options": {
+        "command": "RUN_CODE_COVERAGE=1 bash ./tests/bin/phpunit.sh"
+      }
     }
   }
 }
