@@ -7,9 +7,10 @@ namespace Automattic\WooCommerce\Admin\Features\WcPayPromotion;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Admin\DataSourcePoller;
 use Automattic\WooCommerce\Admin\Loader;
-use Automattic\WooCommerce\Admin\PaymentPlugins;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\EvaluateSuggestion;
+use Automattic\WooCommerce\Admin\PaymentMethodSuggestionsDataSourcePoller;
 
 /**
  * WC Pay Promotion engine.
@@ -24,7 +25,7 @@ class Init {
 		include_once __DIR__ . '/WCPaymentGatewayPreInstallWCPayPromotion.php';
 
 		add_action( 'change_locale', array( __CLASS__, 'delete_specs_transient' ) );
-		add_filter( PaymentPlugins::FILTER_NAME, array( __CLASS__, 'possibly_filter_recommended_payment_gateways' ) );
+		add_filter( DataSourcePoller::FILTER_NAME_SPECS, array( __CLASS__, 'possibly_filter_recommended_payment_gateways' ), 10, 2 );
 
 		if ( ! isset( $_GET['page'] ) || 'wc-settings' !== $_GET['page'] || ! isset( $_GET['tab'] ) || 'checkout' !== $_GET['tab'] ) { // phpcs:ignore WordPress.Security.NonceVerification
 			return;
@@ -71,19 +72,20 @@ class Init {
 	/**
 	 * Possibly filters out woocommerce-payments from recommended payment methods.
 	 *
-	 * @param array $payment_methods list of payment methods.
+	 * @param array  $specs list of payment methods.
+	 * @param string $datasource_poller_id id of data source poller.
 	 * @return array list of payment method.
 	 */
-	public static function possibly_filter_recommended_payment_gateways( $payment_methods ) {
-		if ( self::should_register_pre_install_wc_pay_promoted_gateway() ) {
+	public static function possibly_filter_recommended_payment_gateways( $specs, $datasource_poller_id ) {
+		if ( PaymentMethodSuggestionsDataSourcePoller::ID === $datasource_poller_id && self::should_register_pre_install_wc_pay_promoted_gateway() ) {
 			return array_filter(
-				$payment_methods,
-				function( $payment_method ) {
-					return 'woocommerce-payments' !== $payment_method['product'];
+				$specs,
+				function( $spec ) {
+					return 'woocommerce-payments' !== $spec->plugins[0];
 				}
 			);
 		}
-		return $payment_methods;
+		return $specs;
 	}
 
 	/**

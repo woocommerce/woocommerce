@@ -10,11 +10,9 @@ import { EllipsisMenu, List, Pill } from '@woocommerce/components';
 import { Text } from '@woocommerce/experimental';
 import {
 	PLUGINS_STORE_NAME,
-	SETTINGS_STORE_NAME,
 	WCDataSelector,
 	Plugin,
-	WPDataSelectors,
-	OPTIONS_STORE_NAME,
+	PluginsStoreActions,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import ExternalIcon from 'gridicons/dist/external';
@@ -24,64 +22,23 @@ import { getAdminLink } from '@woocommerce/wc-admin-settings';
  * Internal dependencies
  */
 import './payment-recommendations.scss';
-import { getCountryCode } from '../dashboard/utils';
 import { createNoticesFromResponse } from '../lib/notices';
-import { isWCPaySupported } from '~/tasks/fills/PaymentGatewaySuggestions/components/WCPay';
 
 const SEE_MORE_LINK =
 	'https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations';
-const DISMISS_OPTION = 'woocommerce_setting_payments_recommendations_hidden';
-type SettingsSelector = WPDataSelectors & {
-	getSettings: (
-		type: string
-	) => { general: { woocommerce_default_country?: string } };
-};
-
-type OptionsSelector = WPDataSelectors & {
-	getOption: ( option: string ) => boolean | string;
-};
 
 export function getPaymentRecommendationData(
 	select: WCDataSelector
 ): {
-	displayable: boolean;
 	recommendedPlugins?: Plugin[];
 	isLoading: boolean;
 } {
-	const { getOption, isResolving: isResolvingOption } = select(
-		OPTIONS_STORE_NAME
-	) as OptionsSelector;
-	const { getSettings } = select( SETTINGS_STORE_NAME ) as SettingsSelector;
 	const { getRecommendedPlugins } = select( PLUGINS_STORE_NAME );
-	const { general: settings } = getSettings( 'general' );
 
-	const hidden = getOption( DISMISS_OPTION );
-	const countryCode =
-		settings && settings.woocommerce_default_country
-			? getCountryCode( settings.woocommerce_default_country )
-			: null;
-	const countrySupported = countryCode
-		? isWCPaySupported( countryCode )
-		: false;
-	const isRequestingOptions = isResolvingOption( 'getOption', [
-		DISMISS_OPTION,
-	] );
-
-	const displayable =
-		! isRequestingOptions && hidden !== 'yes' && countrySupported;
-	let plugins = null;
-	if ( displayable ) {
-		// don't get recommended plugins until it is displayable.
-		plugins = getRecommendedPlugins( 'payments' );
-	}
-	const isLoading =
-		isRequestingOptions ||
-		hidden === undefined ||
-		settings === undefined ||
-		plugins === undefined;
+	const plugins = getRecommendedPlugins( 'payments' );
+	const isLoading = plugins === undefined;
 
 	return {
-		displayable,
 		recommendedPlugins: plugins,
 		isLoading,
 	};
@@ -95,14 +52,18 @@ const PaymentRecommendations: React.FC = () => {
 	const [ installingPlugin, setInstallingPlugin ] = useState< string | null >(
 		null
 	);
-	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
-	const { installAndActivatePlugins } = useDispatch( PLUGINS_STORE_NAME );
-	const { displayable, recommendedPlugins, isLoading } = useSelect(
+	const {
+		installAndActivatePlugins,
+		dismissRecommendedPlugins,
+		invalidateResolution,
+	}: PluginsStoreActions = useDispatch( PLUGINS_STORE_NAME );
+	const { createNotice } = useDispatch( 'core/notices' );
+	const { recommendedPlugins, isLoading } = useSelect(
 		getPaymentRecommendationData
 	);
 	const triggeredPageViewRef = useRef( false );
 	const shouldShowRecommendations =
-		displayable && recommendedPlugins && recommendedPlugins.length > 0;
+		recommendedPlugins && recommendedPlugins.length > 0;
 
 	useEffect( () => {
 		if (
@@ -113,10 +74,10 @@ const PaymentRecommendations: React.FC = () => {
 			triggeredPageViewRef.current = true;
 			const eventProps = ( recommendedPlugins || [] ).reduce(
 				( props, plugin ) => {
-					if ( plugin.product ) {
+					if ( plugin.plugins && plugin.plugins.length > 0 ) {
 						return {
 							...props,
-							[ plugin.product.replace( /\-/g, '_' ) +
+							[ plugin.plugins[ 0 ].replace( /\-/g, '_' ) +
 							'_displayed' ]: true,
 						};
 					}
@@ -136,23 +97,31 @@ const PaymentRecommendations: React.FC = () => {
 	if ( ! shouldShowRecommendations ) {
 		return null;
 	}
-
-	const dismissPaymentRecommendations = () => {
+	const dismissPaymentRecommendations = async () => {
 		recordEvent( 'settings_payments_recommendations_dismiss', {} );
-		updateOptions( {
-			[ DISMISS_OPTION ]: 'yes',
-		} );
+		const success = await dismissRecommendedPlugins( 'payments' );
+		if ( success ) {
+			invalidateResolution( 'getRecommendedPlugins', [ 'payments' ] );
+		} else {
+			createNotice(
+				'error',
+				__(
+					'There was a problem hiding the "Recommended ways to get paid" card.',
+					'woocommerce-admin'
+				)
+			);
+		}
 	};
 
 	const setupPlugin = ( plugin: Plugin ) => {
 		if ( installingPlugin ) {
 			return;
 		}
-		setInstallingPlugin( plugin.product );
+		setInstallingPlugin( plugin.id );
 		recordEvent( 'settings_payments_recommendations_setup', {
-			extension_selected: plugin.product,
+			extension_selected: plugin.plugins[ 0 ],
 		} );
-		installAndActivatePlugins( [ plugin.product ] )
+		installAndActivatePlugins( [ plugin.plugins[ 0 ] ] )
 			.then( () => {
 				window.location.href = getAdminLink(
 					plugin[ 'setup-link' ].replace( '/wp-admin/', '' )
@@ -167,7 +136,7 @@ const PaymentRecommendations: React.FC = () => {
 	const pluginsList = ( recommendedPlugins || [] ).map(
 		( plugin: Plugin ) => {
 			return {
-				key: plugin.slug,
+				key: plugin.id,
 				title: (
 					<>
 						{ plugin.title }
@@ -178,18 +147,18 @@ const PaymentRecommendations: React.FC = () => {
 						) }
 					</>
 				),
-				content: decodeEntities( plugin.copy ),
+				content: decodeEntities( plugin.content ),
 				after: (
 					<Button
 						isSecondary
 						onClick={ () => setupPlugin( plugin ) }
-						isBusy={ installingPlugin === plugin.product }
+						isBusy={ installingPlugin === plugin.id }
 						disabled={ !! installingPlugin }
 					>
 						{ plugin[ 'button-text' ] }
 					</Button>
 				),
-				before: <img src={ plugin.icon } alt="" />,
+				before: <img src={ plugin.image } alt="" />,
 			};
 		}
 	);

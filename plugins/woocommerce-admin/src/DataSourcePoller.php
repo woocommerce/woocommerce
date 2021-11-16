@@ -20,6 +20,11 @@ abstract class DataSourcePoller {
 	const FILTER_NAME = 'data_source_poller_data_sources';
 
 	/**
+	 * Name of data source specs filter.
+	 */
+	const FILTER_NAME_SPECS = 'data_source_poller_specs';
+
+	/**
 	 * Id of DataSourcePoller.
 	 *
 	 * @var string
@@ -105,6 +110,7 @@ abstract class DataSourcePoller {
 			$this->read_specs_from_data_sources();
 			$specs = get_transient( $this->args['transient_name'] );
 		}
+		$specs = apply_filters( self::FILTER_NAME_SPECS, $specs, $this->id );
 		return false !== $specs ? $specs : array();
 	}
 

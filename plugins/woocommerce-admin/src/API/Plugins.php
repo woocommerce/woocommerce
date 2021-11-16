@@ -8,7 +8,7 @@
 namespace Automattic\WooCommerce\Admin\API;
 
 use Automattic\WooCommerce\Admin\Features\Onboarding;
-use Automattic\WooCommerce\Admin\PaymentPlugins;
+use Automattic\WooCommerce\Admin\PaymentMethodSuggestionsDataSourcePoller;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use \Automattic\WooCommerce\Admin\Notes\InstallJPAndWCSPlugins;
 
@@ -97,6 +97,19 @@ class Plugins extends \WC_REST_Data_Controller {
 				array(
 					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'recommended_payment_plugins' ),
+					'permission_callback' => array( $this, 'get_item_permissions_check' ),
+				),
+				'schema' => array( $this, 'get_item_schema' ),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/recommended-payment-plugins/dismiss',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'dismiss_recommended_payment_plugins' ),
 					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 				),
 				'schema' => array( $this, 'get_item_schema' ),
@@ -435,40 +448,23 @@ class Plugins extends \WC_REST_Data_Controller {
 	 * @return \WP_Error|\WP_HTTP_Response|\WP_REST_Response
 	 */
 	public function recommended_payment_plugins( $request ) {
-		// Default to marketing category (if no category set).
-		$all_plugins   = PaymentPlugins::get_instance()->get_recommended_plugins();
-		$valid_plugins = [];
-		$per_page      = $request->get_param( 'per_page' );
-		// We currently only support English suggestions, unless otherwise provided in locale-data.
-		$locale             = get_locale();
-		$suggestion_locales = array(
-			'en_AU',
-			'en_CA',
-			'en_GB',
-			'en_NZ',
-			'en_US',
-			'en_ZA',
-		);
-
-		foreach ( $all_plugins as $plugin ) {
-			if ( ! PluginsHelper::is_plugin_active( $plugin['product'] ) ) {
-				if ( isset( $plugin['locale-data'] ) && isset( $plugin['locale-data'][ $locale ] ) ) {
-					$locale_plugin = array_merge( $plugin, $plugin['locale-data'][ $locale ] );
-					unset( $locale_plugin['locale-data'] );
-					$valid_plugins[]      = $locale_plugin;
-					$suggestion_locales[] = $locale;
-				} else {
-					$valid_plugins[] = $plugin;
-				}
-			}
-		}
-
-		if ( ! in_array( $locale, $suggestion_locales, true ) ) {
-			// If not a supported locale we return an empty array.
+		if ( get_option( PaymentMethodSuggestionsDataSourcePoller::RECOMMENDED_PAYMENT_PLUGINS_DISMISS_OPTION, 'no' ) === 'yes' ) {
 			return rest_ensure_response( array() );
 		}
+		$all_plugins = PaymentMethodSuggestionsDataSourcePoller::get_instance()->get_suggestions();
+		$per_page    = $request->get_param( 'per_page' );
 
-		return rest_ensure_response( array_slice( $valid_plugins, 0, $per_page ) );
+		return rest_ensure_response( array_slice( $all_plugins, 0, $per_page ) );
+	}
+
+	/**
+	 * Dismisses recommended payment plugins.
+	 *
+	 * @return \WP_Error|\WP_HTTP_Response|\WP_REST_Response
+	 */
+	public function dismiss_recommended_payment_plugins() {
+		$success = update_option( PaymentMethodSuggestionsDataSourcePoller::RECOMMENDED_PAYMENT_PLUGINS_DISMISS_OPTION, 'yes' );
+		return rest_ensure_response( $success );
 	}
 
 	/**

@@ -20,6 +20,7 @@ import {
 	PaypalOnboardingStatus,
 	PluginNames,
 	SelectorKeysWithActions,
+	RecommendedTypes,
 } from './types';
 
 // Can be removed in WP 5.9, wp.data is supported in >5.7.
@@ -348,6 +349,36 @@ export function setRecommendedPlugins(
 	};
 }
 
+const SUPPORTED_TYPES = [ 'payments' ];
+export function* dismissRecommendedPlugins( type: RecommendedTypes ) {
+	if ( ! SUPPORTED_TYPES.includes( type ) ) {
+		return [];
+	}
+	const plugins: Plugin[] = yield resolveSelect(
+		STORE_NAME,
+		'getRecommendedPlugins',
+		type
+	);
+	yield setRecommendedPlugins( type, [] );
+
+	let success: boolean;
+	try {
+		const url =
+			WC_ADMIN_NAMESPACE + '/plugins/recommended-payment-plugins/dismiss';
+		success = yield apiFetch( {
+			path: url,
+			method: 'POST',
+		} );
+	} catch ( error ) {
+		success = false;
+	}
+	if ( ! success ) {
+		// Reset recommended plugins
+		yield setRecommendedPlugins( type, plugins );
+	}
+	return success;
+}
+
 export type Actions =
 	| ReturnType< typeof updateActivePlugins >
 	| ReturnType< typeof updateInstalledPlugins >
@@ -362,4 +393,5 @@ export type Actions =
 export type ActionDispatchers = {
 	installJetpackAndConnect: typeof installJetpackAndConnect;
 	installAndActivatePlugins: typeof installAndActivatePlugins;
+	dismissRecommendedPlugins: typeof dismissRecommendedPlugins;
 };
