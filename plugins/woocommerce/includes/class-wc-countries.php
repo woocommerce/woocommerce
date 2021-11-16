@@ -944,7 +944,7 @@ class WC_Countries {
 					),
 					'CR' => array(
 						'state' => array(
-							'label' => __( 'Provincia', 'woocommerce' ),
+							'label' => __( 'Province', 'woocommerce' ),
 						),
 					),
 					'CW' => array(
