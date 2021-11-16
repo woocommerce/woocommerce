@@ -326,7 +326,7 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 		// If there's still a meta query, we need to preserve it by adding it back in after
 		// WC_Data_Store_WP::get_wp_query_args() has been called, since it will strip it out.
 		if ( ! empty( $meta_query ) ) {
-			$args['_meta_query'] = $meta_query;
+			$args['_rest_api_meta_query'] = $meta_query;
 			add_filter( 'woocommerce_order_data_store_cpt_get_orders_query', array( $this, 'preserve_meta_query' ) );
 		}
 
@@ -342,9 +342,9 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 	 * @return array Filtered orders query parameters.
 	 */
 	public function preserve_meta_query( $query ) {
-		if ( ! empty( $query['_meta_query'] ) ) {
-			$query['meta_query'] = $query['meta_query'] + $query['_meta_query'];
-			unset( $query['_meta_query'] );
+		if ( ! empty( $query['_rest_api_meta_query'] ) ) {
+			$query['meta_query'] = $query['meta_query'] + $query['_rest_api_meta_query'];
+			unset( $query['_rest_api_meta_query'] );
 			remove_filter( 'woocommerce_order_data_store_cpt_get_orders_query', array( $this, __FUNCTION__ ) );
 		}
 		return $query;
