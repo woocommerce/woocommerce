@@ -1161,28 +1161,34 @@ class WC_Admin_Addons {
 			// For product-related banners icon is a product's image.
 			$mapped->icon = $data->image ?? null;
 		}
+
 		// URL.
 		$mapped->url = $data->link ?? null;
 		if ( empty( $mapped->url ) ) {
 			$mapped->url = $data->url ?? null;
 		}
+
 		// Title.
 		$mapped->title = $data->title ?? null;
+
 		// Vendor Name.
 		$mapped->vendor_name = $data->vendor_name ?? null;
 		if ( empty( $mapped->vendor_name ) ) {
 			$mapped->vendor_name = $data->vendorName ?? null; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 		}
+
 		// Vendor URL.
 		$mapped->vendor_url = $data->vendor_url ?? null;
 		if ( empty( $mapped->vendor_url ) ) {
 			$mapped->vendor_url = $data->vendorUrl ?? null; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 		}
+
 		// Description.
 		$mapped->description = $data->excerpt ?? null;
 		if ( empty( $mapped->description ) ) {
 			$mapped->description = $data->description ?? null;
 		}
+
 		$has_currency = ! empty( $data->currency ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 
 		// Is Free.
@@ -1191,17 +1197,23 @@ class WC_Admin_Addons {
 		} else {
 			$mapped->is_free = '&#36;0.00' === $data->price;
 		}
+
 		// Price.
 		if ( $has_currency ) {
 			$mapped->price = wc_price( $data->price, array( 'currency' => $data->currency ) );
 		} else {
 			$mapped->price = $data->price;
 		}
+
+		// Price suffix, e.g. "per month".
+		$mapped->price_suffix = $data->price_suffix ?? null;
+
 		// Rating.
 		$mapped->rating = $data->rating ?? null;
 		if ( null === $mapped->rating ) {
 			$mapped->rating = $data->averageRating ?? null; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 		}
+
 		// Reviews Count.
 		$mapped->reviews_count = $data->reviews_count ?? null;
 		if ( null === $mapped->reviews_count ) {
@@ -1338,7 +1350,15 @@ class WC_Admin_Addons {
 									);
 									?>
 								</span>
-								<span class="price-suffix"><?php esc_html_e( 'per year', 'woocommerce' ); ?></span>
+								<span class="price-suffix">
+									<?php
+									$price_suffix = __( 'per year', 'woocommerce' );
+									if ( ! empty( $mapped->price_suffix ) ) {
+										$price_suffix = $mapped->price_suffix;
+									}
+									echo esc_html( $price_suffix );
+									?>
+								</span>
 							<?php endif; ?>
 						</div>
 						<?php if ( ! empty( $mapped->reviews_count ) && ! empty( $mapped->rating ) ) : ?>
