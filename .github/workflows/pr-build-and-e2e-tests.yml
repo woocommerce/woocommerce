@@ -46,6 +46,9 @@ jobs:
                   npm install -g pnpm
                   pnpm install
 
+            - name: Install Grunt
+              run: npm install -g grunt-cli
+
             - name: Load docker images and start containers.
               working-directory: package/woocommerce/plugins/woocommerce
               run: pnpx wc-e2e docker:up
