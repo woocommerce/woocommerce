@@ -1,6 +1,6 @@
 import type { AxiosRequestConfig } from 'axios';
-import * as createHmac from 'create-hmac';
-import * as OAuth from 'oauth-1.0a';
+import createHmac from 'create-hmac';
+import OAuth from 'oauth-1.0a';
 import { AxiosInterceptor } from './axios-interceptor';
 import { buildURLWithParams } from './utils';
 
@@ -50,7 +50,7 @@ export class AxiosOAuthInterceptor extends AxiosInterceptor {
 				username: this.oauth.consumer.key,
 				password: this.oauth.consumer.secret,
 			};
-		} else {
+		} else if ( request.headers ) {
 			request.headers.Authorization = this.oauth.toHeader(
 				this.oauth.authorize( {
 					url,

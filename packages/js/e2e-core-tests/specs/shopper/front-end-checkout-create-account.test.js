@@ -39,7 +39,7 @@ const runCheckoutCreateAccountTest = () => {
 			await settingsPageSaveChanges();
 
 			// Set free shipping within California
-			await addShippingZoneAndMethod('Free Shipping CA', 'state:US:CA', ' ', 'free_shipping');
+			await addShippingZoneAndMethod('Free Shipping CA', 'state:US:CA', ' ', 'free_shipping' );
 
 			await merchant.logout();
 
