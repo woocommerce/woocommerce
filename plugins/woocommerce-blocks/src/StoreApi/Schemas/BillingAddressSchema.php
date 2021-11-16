@@ -95,9 +95,8 @@ class BillingAddressSchema extends AbstractAddressSchema {
 		if ( ( $address instanceof \WC_Customer || $address instanceof \WC_Order ) ) {
 			$billing_country = $address->get_billing_country();
 			$billing_state   = $address->get_billing_state();
-			$valid_states    = array_filter( (array) wc()->countries->get_states( $billing_country ) );
 
-			if ( ! empty( $billing_state ) && count( $valid_states ) && ! in_array( $billing_state, $valid_states, true ) ) {
+			if ( ! $this->validate_state( $billing_state, $billing_country ) ) {
 				$billing_state = '';
 			}
 

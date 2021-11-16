@@ -44,9 +44,8 @@ class ShippingAddressSchema extends AbstractAddressSchema {
 
 			$shipping_country = $address->get_shipping_country();
 			$shipping_state   = $address->get_shipping_state();
-			$valid_states     = array_filter( (array) wc()->countries->get_states( $shipping_country ) );
 
-			if ( ! empty( $shipping_state ) && count( $valid_states ) && ! in_array( $shipping_state, $valid_states, true ) ) {
+			if ( ! $this->validate_state( $shipping_state, $shipping_country ) ) {
 				$shipping_state = '';
 			}
 
