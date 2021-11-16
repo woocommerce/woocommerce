@@ -758,7 +758,7 @@ class WC_Admin_Addons {
 		$product_list_classes = 'products addons-products-' . $product_list_classes;
 		?>
 			<section class="addon-product-group">
-				<h1 class="addon-product-group-title"><?php echo esc_html( $block->title ); ?></h1>
+				<h2 class="addon-product-group-title"><?php echo esc_html( $block->title ); ?></h2>
 				<div class="addon-product-group-description-container">
 					<?php if ( ! empty( $block->description ) ) : ?>
 					<div class="addon-product-group-description">

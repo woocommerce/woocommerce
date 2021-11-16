@@ -1,13 +1,14 @@
-import { mock, MockProxy } from 'jest-mock-extended';
 import { UpdatesSettings } from '../../models';
 import { SettingService } from '../setting-service';
 
 describe( 'SettingService', () => {
-	let repository: MockProxy< UpdatesSettings >;
+	let repository: UpdatesSettings;
 	let service: SettingService;
 
 	beforeEach( () => {
-		repository = mock< UpdatesSettings >();
+		repository = {
+			update: jest.fn(),
+		};
 		service = new SettingService( repository );
 	} );
 
