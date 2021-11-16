@@ -97,6 +97,7 @@ class Events {
 	 */
 	public function do_wc_admin_daily() {
 		$this->possibly_add_notes();
+		$this->possibly_delete_notes();
 
 		if ( $this->is_remote_inbox_notifications_enabled() ) {
 			DataSourcePoller::get_instance()->read_specs_from_data_sources();
@@ -154,6 +155,14 @@ class Events {
 		NavigationNudge::possibly_add_note();
 		CompleteStoreDetails::possibly_add_note();
 		UpdateStoreDetails::possibly_add_note();
+	}
+
+	/**
+	 * Deletes notes that should be deleted.
+	 */
+	protected function possibly_delete_notes() {
+		NavigationNudge::delete_if_not_applicable();
+		NavigationFeedback::delete_if_not_applicable();
 	}
 
 	/**
