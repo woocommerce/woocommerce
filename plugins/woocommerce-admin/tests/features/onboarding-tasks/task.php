@@ -7,6 +7,8 @@
 
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 
+require_once __DIR__ . '/test-task.php';
+
 /**
  * class WC_Tests_OnboardingTasks_Task
  */
@@ -16,34 +18,34 @@ class WC_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 	 * Tests that a task is visible by default.
 	 */
 	public function test_capability_visible() {
-		$task = new Task(
+		$task = new TestTask(
 			array(
 				'id' => 'wc-unit-test-task',
 			)
 		);
 
-		$this->assertEquals( true, $task->can_view );
+		$this->assertEquals( true, $task->can_view() );
 	}
 
 	/**
 	 * Tests that a task is not visible when not capable of being viewed.
 	 */
 	public function test_capability_not_visible() {
-		$task = new Task(
+		$task = new TestTask(
 			array(
 				'id'       => 'wc-unit-test-task',
 				'can_view' => false,
 			)
 		);
 
-		$this->assertEquals( false, $task->can_view );
+		$this->assertEquals( false, $task->can_view() );
 	}
 
 	/**
 	 * Tests that a task can be dismissed.
 	 */
 	public function test_dismiss() {
-		$task = new Task(
+		$task = new TestTask(
 			array(
 				'id'             => 'wc-unit-test-task',
 				'is_dismissable' => true,
@@ -53,14 +55,14 @@ class WC_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 		$update    = $task->dismiss();
 		$dismissed = get_option( Task::DISMISSED_OPTION, array() );
 		$this->assertEquals( true, $update );
-		$this->assertContains( $task->id, $dismissed );
+		$this->assertContains( $task->get_id(), $dismissed );
 	}
 
 	/**
 	 * Tests that a dismissal can be undone.
 	 */
 	public function test_undo_dismiss() {
-		$task = new Task(
+		$task = new TestTask(
 			array(
 				'id'             => 'wc-unit-test-task',
 				'is_dismissable' => true,
@@ -70,14 +72,14 @@ class WC_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 		$task->dismiss();
 		$task->undo_dismiss();
 		$dismissed = get_option( Task::DISMISSED_OPTION, array() );
-		$this->assertNotContains( $task->id, $dismissed );
+		$this->assertNotContains( $task->get_id(), $dismissed );
 	}
 
 	/**
 	 * Tests that a non-dismissable task cannot be dismissed.
 	 */
 	public function test_not_dismissable() {
-		$task = new Task(
+		$task = new TestTask(
 			array(
 				'id'             => 'wc-unit-test-non-dismissable-task',
 				'is_dismissable' => false,
@@ -87,7 +89,7 @@ class WC_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 		$update    = $task->dismiss();
 		$dismissed = get_option( Task::DISMISSED_OPTION, array() );
 		$this->assertEquals( false, $update );
-		$this->assertNotContains( $task->id, $dismissed );
+		$this->assertNotContains( $task->get_id(), $dismissed );
 	}
 
 
@@ -95,7 +97,7 @@ class WC_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 	 * Tests that a task can be snoozed.
 	 */
 	public function test_snooze() {
-		$task = new Task(
+		$task = new TestTask(
 			array(
 				'id'            => 'wc-unit-test-snoozeable-task',
 				'is_snoozeable' => true,
@@ -105,14 +107,14 @@ class WC_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 		$update  = $task->snooze();
 		$snoozed = get_option( Task::SNOOZED_OPTION, array() );
 		$this->assertEquals( true, $update );
-		$this->assertArrayHasKey( $task->id, $snoozed );
+		$this->assertArrayHasKey( $task->get_id(), $snoozed );
 	}
 
 	/**
 	 * Tests that a task can be unsnoozed.
 	 */
 	public function test_undo_snooze() {
-		$task = new Task(
+		$task = new TestTask(
 			array(
 				'id'            => 'wc-unit-test-snoozeable-task',
 				'is_snoozeable' => true,
@@ -122,7 +124,7 @@ class WC_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 		$task->snooze();
 		$task->undo_snooze();
 		$snoozed = get_option( Task::SNOOZED_OPTION, array() );
-		$this->assertArrayNotHasKey( $task->id, $snoozed );
+		$this->assertArrayNotHasKey( $task->get_id(), $snoozed );
 	}
 
 	/**
@@ -134,14 +136,14 @@ class WC_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 		$snoozed['wc-unit-test-task'] = $time;
 		update_option( Task::SNOOZED_OPTION, $snoozed );
 
-		$task = new Task(
+		$task = new TestTask(
 			array(
 				'id'            => 'wc-unit-test-task',
 				'is_snoozeable' => true,
 			)
 		);
 
-		$this->assertEquals( $time, $task->snoozed_until );
+		$this->assertEquals( $time, $task->get_snoozed_until() );
 
 	}
 
@@ -149,7 +151,7 @@ class WC_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 	 * Tests that a non snoozeable task cannot be snoozed.
 	 */
 	public function test_not_snoozeable() {
-		$task = new Task(
+		$task = new TestTask(
 			array(
 				'id'            => 'wc-unit-test-snoozeable-task',
 				'is_snoozeable' => false,
@@ -164,7 +166,7 @@ class WC_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 	 * Tests that a task is no longer consider snoozed after the time has passed.
 	 */
 	public function test_snooze_time() {
-		$task = new Task(
+		$task = new TestTask(
 			array(
 				'id'            => 'wc-unit-test-snoozeable-task',
 				'is_snoozeable' => true,
@@ -184,7 +186,7 @@ class WC_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 	 * Tests that a task's properties are returned as JSON.
 	 */
 	public function test_json() {
-		$task = new Task(
+		$task = new TestTask(
 			array(
 				'id' => 'wc-unit-test-task',
 			)
@@ -211,7 +213,7 @@ class WC_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 	 * Tests that a task can be actioned.
 	 */
 	public function test_action_task() {
-		$task = new Task(
+		$task = new TestTask(
 			array(
 				'id' => 'wc-unit-test-task',
 			)
@@ -220,19 +222,19 @@ class WC_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 		$update   = $task->mark_actioned();
 		$actioned = get_option( Task::ACTIONED_OPTION, array() );
 		$this->assertEquals( true, $update );
-		$this->assertContains( $task->id, $actioned );
+		$this->assertContains( $task->get_id(), $actioned );
 	}
 
 	/**
 	 * Test task sort with empty config.
 	 */
 	public function test_sort_with_empty_sort_by_config() {
-		$task_a = new Task(
+		$task_a = new TestTask(
 			array(
 				'id' => 'a',
 			)
 		);
-		$task_b = new Task(
+		$task_b = new TestTask(
 			array(
 				'id' => 'b',
 			)
@@ -245,12 +247,12 @@ class WC_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 	 * Test task sort with config with invalid key.
 	 */
 	public function test_sort_with_sort_by_config_with_invalid_key() {
-		$task_a = new Task(
+		$task_a = new TestTask(
 			array(
 				'id' => 'a',
 			)
 		);
-		$task_b = new Task(
+		$task_b = new TestTask(
 			array(
 				'id' => 'b',
 			)
@@ -272,13 +274,13 @@ class WC_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 	 * Test task sort with config with valid key asc.
 	 */
 	public function test_sort_with_sort_by_config_with_valid_key_asc() {
-		$task_a = new Task(
+		$task_a = new TestTask(
 			array(
 				'id'    => 'a',
 				'level' => 1,
 			)
 		);
-		$task_b = new Task(
+		$task_b = new TestTask(
 			array(
 				'id'    => 'b',
 				'level' => 2,
@@ -301,13 +303,13 @@ class WC_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 	 * Test task sort with config with valid key desc.
 	 */
 	public function test_sort_with_sort_by_config_with_valid_key_desc() {
-		$task_a = new Task(
+		$task_a = new TestTask(
 			array(
 				'id'    => 'a',
 				'level' => 1,
 			)
 		);
-		$task_b = new Task(
+		$task_b = new TestTask(
 			array(
 				'id'    => 'b',
 				'level' => 2,
@@ -330,14 +332,14 @@ class WC_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 	 * Test task sort with config with multiple keys.
 	 */
 	public function test_sort_with_sort_by_config_with_multiple_keys() {
-		$task_a  = new Task(
+		$task_a  = new TestTask(
 			array(
 				'id'          => 'a',
 				'level'       => 2,
 				'is_complete' => false,
 			)
 		);
-		$task_b  = new Task(
+		$task_b  = new TestTask(
 			array(
 				'id'          => 'b',
 				'level'       => 2,

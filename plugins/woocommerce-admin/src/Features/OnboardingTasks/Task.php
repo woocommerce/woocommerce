@@ -8,109 +8,11 @@ namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks;
 /**
  * Task class.
  */
-class Task {
+abstract class Task {
 	/**
 	 * Task traits.
 	 */
 	use TaskTraits;
-
-	/**
-	 * ID.
-	 *
-	 * @var string
-	 */
-	public $id = '';
-
-	/**
-	 * Parent task list ID.
-	 *
-	 * @var string
-	 */
-	public $parent_id = '';
-
-	/**
-	 * Title.
-	 *
-	 * @var string
-	 */
-	public $title = '';
-
-	/**
-	 * Content.
-	 *
-	 * @var string
-	 */
-	public $content = '';
-
-	/**
-	 * Additional info.
-	 *
-	 * @var string
-	 */
-	public $additional_info = '';
-
-	/**
-	 * Action label.
-	 *
-	 * @var string
-	 */
-	public $action_label = '';
-
-	/**
-	 * Action URL.
-	 *
-	 * @var string|null
-	 */
-	public $action_url = null;
-
-	/**
-	 * Task completion.
-	 *
-	 * @var bool
-	 */
-	public $is_complete = false;
-
-	/**
-	 * Viewing capability.
-	 *
-	 * @var bool
-	 */
-	public $can_view = true;
-
-	/**
-	 * Time string.
-	 *
-	 * @var string|null
-	 */
-	public $time = null;
-
-	/**
-	 * Level of task importance.
-	 *
-	 * @var int|null
-	 */
-	public $level = null;
-
-	/**
-	 * Dismissability.
-	 *
-	 * @var bool
-	 */
-	public $is_dismissable = false;
-
-	/**
-	 * Snoozeability.
-	 *
-	 * @var bool
-	 */
-	public $is_snoozeable = false;
-
-	/**
-	 * Snoozeability.
-	 *
-	 * @var string|null
-	 */
-	public $snoozed_until = null;
 
 	/**
 	 * Name of the dismiss option.
@@ -159,50 +61,92 @@ class Task {
 	);
 
 	/**
-	 * Constructor
+	 * ID.
 	 *
-	 * @param array $data Task list data.
+	 * @return string
 	 */
-	public function __construct( $data = array() ) {
-		$defaults = array(
-			'id'              => null,
-			'parent_id'       => null,
-			'title'           => '',
-			'content'         => '',
-			'action_label'    => __( "Let's go", 'woocommerce-admin' ),
-			'action_url'      => null,
-			'is_complete'     => false,
-			'can_view'        => true,
-			'level'           => 3,
-			'time'            => null,
-			'is_dismissable'  => false,
-			'is_snoozeable'   => false,
-			'snoozed_until'   => null,
-			'additional_info' => '',
-			'additional_data' => (object) array(),
-		);
+	abstract public function get_id();
 
-		$data = wp_parse_args( $data, $defaults );
+	/**
+	 * Parent ID.
+	 *
+	 * @return string
+	 */
+	abstract public function get_parent_id();
 
-		$this->id              = (string) $data['id'];
-		$this->parent_id       = (string) $data['parent_id'];
-		$this->title           = (string) $data['title'];
-		$this->content         = (string) $data['content'];
-		$this->action_label    = (string) $data['action_label'];
-		$this->action_url      = (string) $data['action_url'];
-		$this->is_complete     = (bool) $data['is_complete'];
-		$this->can_view        = (bool) $data['can_view'];
-		$this->level           = (int) $data['level'];
-		$this->additional_info = (string) $data['additional_info'];
-		$this->time            = (string) $data['time'];
-		$this->is_dismissable  = (bool) $data['is_dismissable'];
-		$this->is_snoozeable   = (bool) $data['is_snoozeable'];
-		$this->additional_data = (object) $data['additional_data'];
+	/**
+	 * Title.
+	 *
+	 * @return string
+	 */
+	abstract public function get_title();
 
-		$snoozed_tasks = get_option( self::SNOOZED_OPTION, array() );
-		if ( isset( $snoozed_tasks[ $this->id ] ) ) {
-			$this->snoozed_until = $snoozed_tasks[ $this->id ];
-		}
+	/**
+	 * Content.
+	 *
+	 * @return string
+	 */
+	abstract public function get_content();
+
+	/**
+	 * Time.
+	 *
+	 * @return string
+	 */
+	abstract public function get_time();
+
+	/**
+	 * Additional info.
+	 *
+	 * @return string
+	 */
+	public function get_additional_info() {
+		return '';
+	}
+
+	/**
+	 * Additional data.
+	 *
+	 * @return mixed
+	 */
+	public function get_additional_data() {
+		return null;
+	}
+
+	/**
+	 * Level.
+	 *
+	 * @return string
+	 */
+	public function get_level() {
+		return 3;
+	}
+
+	/**
+	 * Action label.
+	 *
+	 * @return string
+	 */
+	public function get_action_label() {
+		return __( "Let's go", 'woocommerce-admin' );
+	}
+
+	/**
+	 * Action URL.
+	 *
+	 * @return string
+	 */
+	public function get_action_url() {
+		return null;
+	}
+
+	/**
+	 * Check if a task is dismissable.
+	 *
+	 * @return bool
+	 */
+	public function is_dismissable() {
+		return false;
 	}
 
 	/**
@@ -211,13 +155,13 @@ class Task {
 	 * @return bool
 	 */
 	public function is_dismissed() {
-		if ( ! $this->is_dismissable ) {
+		if ( ! $this->is_dismissable() ) {
 			return false;
 		}
 
 		$dismissed = get_option( self::DISMISSED_OPTION, array() );
 
-		return in_array( $this->id, $dismissed, true );
+		return in_array( $this->get_id(), $dismissed, true );
 	}
 
 	/**
@@ -226,16 +170,16 @@ class Task {
 	 * @return bool
 	 */
 	public function dismiss() {
-		if ( ! $this->is_dismissable ) {
+		if ( ! $this->is_dismissable() ) {
 			return false;
 		}
 
 		$dismissed   = get_option( self::DISMISSED_OPTION, array() );
-		$dismissed[] = $this->id;
+		$dismissed[] = $this->get_id();
 		$update      = update_option( self::DISMISSED_OPTION, array_unique( $dismissed ) );
 
 		if ( $update ) {
-			$this->record_tracks_event( 'dismiss_task', array( 'task_name' => $this->id ) );
+			$this->record_tracks_event( 'dismiss_task', array( 'task_name' => $this->get_id() ) );
 		}
 
 		return $update;
@@ -248,14 +192,37 @@ class Task {
 	 */
 	public function undo_dismiss() {
 		$dismissed = get_option( self::DISMISSED_OPTION, array() );
-		$dismissed = array_diff( $dismissed, array( $this->id ) );
+		$dismissed = array_diff( $dismissed, array( $this->get_id() ) );
 		$update    = update_option( self::DISMISSED_OPTION, $dismissed );
 
 		if ( $update ) {
-			$this->record_tracks_event( 'undo_dismiss_task', array( 'task_name' => $this->id ) );
+			$this->record_tracks_event( 'undo_dismiss_task', array( 'task_name' => $this->get_id() ) );
 		}
 
 		return $update;
+	}
+
+	/**
+	 * Check if a task is snoozeable.
+	 *
+	 * @return bool
+	 */
+	public function is_snoozeable() {
+		return false;
+	}
+
+	/**
+	 * Get the snoozed until datetime.
+	 *
+	 * @return string
+	 */
+	public function get_snoozed_until() {
+		$snoozed_tasks = get_option( self::SNOOZED_OPTION, array() );
+		if ( isset( $snoozed_tasks[ $this->get_id() ] ) ) {
+			return $snoozed_tasks[ $this->get_id() ];
+		}
+
+		return null;
 	}
 
 	/**
@@ -264,13 +231,13 @@ class Task {
 	 * @return bool
 	 */
 	public function is_snoozed() {
-		if ( ! $this->is_snoozeable ) {
+		if ( ! $this->is_snoozeable() ) {
 			return false;
 		}
 
 		$snoozed = get_option( self::SNOOZED_OPTION, array() );
 
-		return isset( $snoozed[ $this->id ] ) && $snoozed[ $this->id ] > ( time() * 1000 );
+		return isset( $snoozed[ $this->get_id() ] ) && $snoozed[ $this->get_id() ] > ( time() * 1000 );
 	}
 
 	/**
@@ -280,19 +247,18 @@ class Task {
 	 * @return bool
 	 */
 	public function snooze( $duration = 'day' ) {
-		if ( ! $this->is_snoozeable ) {
+		if ( ! $this->is_snoozeable() ) {
 			return false;
 		}
 
-		$snoozed              = get_option( self::SNOOZED_OPTION, array() );
-		$snoozed_until        = $this->duration_to_ms[ $duration ] + ( time() * 1000 );
-		$snoozed[ $this->id ] = $snoozed_until;
-		$update               = update_option( self::SNOOZED_OPTION, $snoozed );
+		$snoozed                    = get_option( self::SNOOZED_OPTION, array() );
+		$snoozed_until              = $this->duration_to_ms[ $duration ] + ( time() * 1000 );
+		$snoozed[ $this->get_id() ] = $snoozed_until;
+		$update                     = update_option( self::SNOOZED_OPTION, $snoozed );
 
 		if ( $update ) {
 			if ( $update ) {
-				$this->record_tracks_event( 'remindmelater_task', array( 'task_name' => $this->id ) );
-				$this->snoozed_until = $snoozed_until;
+				$this->record_tracks_event( 'remindmelater_task', array( 'task_name' => $this->get_id() ) );
 			}
 		}
 
@@ -306,11 +272,11 @@ class Task {
 	 */
 	public function undo_snooze() {
 		$snoozed = get_option( self::SNOOZED_OPTION, array() );
-		unset( $snoozed[ $this->id ] );
+		unset( $snoozed[ $this->get_id() ] );
 		$update = update_option( self::SNOOZED_OPTION, $snoozed );
 
 		if ( $update ) {
-			$this->record_tracks_event( 'undo_remindmelater_task', array( 'task_name' => $this->id ) );
+			$this->record_tracks_event( 'undo_remindmelater_task', array( 'task_name' => $this->get_id() ) );
 		}
 
 		return $update;
@@ -323,18 +289,18 @@ class Task {
 	 */
 	public function has_previously_completed() {
 		$complete = get_option( self::COMPLETED_OPTION, array() );
-		return in_array( $this->id, $complete, true );
+		return in_array( $this->get_id(), $complete, true );
 	}
 
 	/**
 	 * Track task completion if task is viewable.
 	 */
 	public function possibly_track_completion() {
-		if ( ! $this->can_view ) {
+		if ( ! $this->can_view() ) {
 			return;
 		}
 
-		if ( ! $this->is_complete ) {
+		if ( ! $this->is_complete() ) {
 			return;
 		}
 
@@ -343,9 +309,9 @@ class Task {
 		}
 
 		$completed_tasks   = get_option( self::COMPLETED_OPTION, array() );
-		$completed_tasks[] = $this->id;
+		$completed_tasks[] = $this->get_id();
 		update_option( self::COMPLETED_OPTION, $completed_tasks );
-		$this->record_tracks_event( 'task_completed', array( 'task_name' => $this->id ) );
+		$this->record_tracks_event( 'task_completed', array( 'task_name' => $this->get_id() ) );
 	}
 
 	/**
@@ -358,7 +324,7 @@ class Task {
 
 		set_transient(
 			self::ACTIVE_TASK_TRANSIENT,
-			$this->id,
+			$this->get_id(),
 			DAY_IN_SECONDS
 		);
 	}
@@ -367,7 +333,25 @@ class Task {
 	 * Check if this is the active task.
 	 */
 	public function is_active() {
-		return get_transient( self::ACTIVE_TASK_TRANSIENT ) === $this->id;
+		return get_transient( self::ACTIVE_TASK_TRANSIENT ) === $this->get_id();
+	}
+
+	/**
+	 * Check if the store is capable of viewing the task.
+	 *
+	 * @return bool
+	 */
+	public function can_view() {
+		return true;
+	}
+
+	/**
+	 * Check if the task is complete.
+	 *
+	 * @return bool
+	 */
+	public function is_complete() {
+		return self::is_actioned();
 	}
 
 
@@ -380,37 +364,41 @@ class Task {
 		$this->possibly_track_completion();
 
 		return array(
-			'id'             => $this->id,
-			'parentId'       => $this->parent_id,
-			'title'          => $this->title,
-			'canView'        => $this->can_view,
-			'content'        => $this->content,
-			'additionalInfo' => $this->additional_info,
-			'actionLabel'    => $this->action_label,
-			'actionUrl'      => $this->action_url,
-			'isComplete'     => $this->is_complete,
-			'time'           => $this->time,
-			'level'          => $this->level,
+			'id'             => $this->get_id(),
+			'parentId'       => $this->get_parent_id(),
+			'title'          => $this->get_title(),
+			'canView'        => $this->can_view(),
+			'content'        => $this->get_content(),
+			'additionalInfo' => $this->get_additional_info(),
+			'actionLabel'    => $this->get_action_label(),
+			'actionUrl'      => $this->get_action_url(),
+			'isComplete'     => $this->is_complete(),
+			'time'           => $this->get_time(),
+			'level'          => $this->get_level(),
 			'isActioned'     => $this->is_actioned(),
 			'isDismissed'    => $this->is_dismissed(),
-			'isDismissable'  => $this->is_dismissable,
+			'isDismissable'  => $this->is_dismissable(),
 			'isSnoozed'      => $this->is_snoozed(),
-			'isSnoozeable'   => $this->is_snoozeable,
-			'snoozedUntil'   => $this->snoozed_until,
-			'additionalData' => self::convert_object_to_camelcase( $this->additional_data ),
+			'isSnoozeable'   => $this->is_snoozeable(),
+			'snoozedUntil'   => $this->get_snoozed_until(),
+			'additionalData' => self::convert_object_to_camelcase( $this->get_additional_data() ),
 		);
 	}
 
 	/**
 	 * Convert object keys to camelcase.
 	 *
-	 * @param object $object Object to convert.
+	 * @param array $data Data to convert.
 	 * @return object
 	 */
-	public static function convert_object_to_camelcase( $object ) {
+	public static function convert_object_to_camelcase( $data ) {
+		if ( ! is_array( $data ) ) {
+			return $data;
+		}
+
 		$new_object = (object) array();
 
-		foreach ( $object as $key => $value ) {
+		foreach ( $data as $key => $value ) {
 			$new_key              = lcfirst( implode( '', array_map( 'ucfirst', explode( '_', $key ) ) ) );
 			$new_object->$new_key = $value;
 		}
@@ -426,11 +414,11 @@ class Task {
 	public function mark_actioned() {
 		$actioned = get_option( self::ACTIONED_OPTION, array() );
 
-		$actioned[] = $this->id;
+		$actioned[] = $this->get_id();
 		$update     = update_option( self::ACTIONED_OPTION, array_unique( $actioned ) );
 
 		if ( $update ) {
-			$this->record_tracks_event( 'actioned_task', array( 'task_name' => $this->id ) );
+			$this->record_tracks_event( 'actioned_task', array( 'task_name' => $this->get_id() ) );
 		}
 
 		return $update;
@@ -442,7 +430,7 @@ class Task {
 	 * @return bool
 	 */
 	public function is_actioned() {
-		return self::is_task_actioned( $this->id );
+		return self::is_task_actioned( $this->get_id() );
 	}
 
 	/**

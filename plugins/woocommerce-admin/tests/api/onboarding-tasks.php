@@ -9,6 +9,8 @@ use \Automattic\WooCommerce\Admin\API\OnboardingTasks;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 
+require_once __DIR__ . '/../features/onboarding-tasks/test-task.php';
+
 /**
  * WC Tests API Onboarding Tasks
  */
@@ -190,10 +192,12 @@ class WC_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 
 		TaskLists::add_task(
 			'test-list',
-			array(
-				'id'            => 'test-task',
-				'title'         => 'Test Task',
-				'is_snoozeable' => true,
+			new TestTask(
+				array(
+					'id'            => 'test-task',
+					'title'         => 'Test Task',
+					'is_snoozeable' => true,
+				)
 			)
 		);
 
@@ -207,7 +211,7 @@ class WC_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( $data['isSnoozed'], true );
 		$this->assertEquals( isset( $data['snoozedUntil'] ), true );
 		$this->assertEquals( $task->is_snoozed(), true );
-		$this->assertEquals( isset( $task->snoozed_until ), true );
+		$this->assertNotNull( $task->get_snoozed_until() );
 
 	}
 
@@ -226,10 +230,12 @@ class WC_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 
 		TaskLists::add_task(
 			'test-list',
-			array(
-				'id'            => 'test-task',
-				'title'         => 'Test Task',
-				'is_snoozeable' => true,
+			new TestTask(
+				array(
+					'id'            => 'test-task',
+					'title'         => 'Test Task',
+					'is_snoozeable' => true,
+				)
 			)
 		);
 
@@ -244,8 +250,7 @@ class WC_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( $data['isSnoozed'], true );
 		$this->assertEquals( isset( $data['snoozedUntil'] ), true );
 		$this->assertEquals( $task->is_snoozed(), true );
-		$this->assertEquals( isset( $task->snoozed_until ), true );
-
+		$this->assertNotNull( $task->get_snoozed_until() );
 	}
 
 	/**
@@ -263,10 +268,12 @@ class WC_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 
 		TaskLists::add_task(
 			'test-list',
-			array(
-				'id'            => 'test-task',
-				'title'         => 'Test Task',
-				'is_snoozeable' => true,
+			new TestTask(
+				array(
+					'id'            => 'test-task',
+					'title'         => 'Test Task',
+					'is_snoozeable' => true,
+				)
 			)
 		);
 
@@ -299,10 +306,12 @@ class WC_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 
 		TaskLists::add_task(
 			'test-list',
-			array(
-				'id'            => 'test-task',
-				'title'         => 'Test Task',
-				'is_snoozeable' => true,
+			new TestTask(
+				array(
+					'id'            => 'test-task',
+					'title'         => 'Test Task',
+					'is_snoozeable' => true,
+				)
 			)
 		);
 
@@ -355,10 +364,12 @@ class WC_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 
 		TaskLists::add_task(
 			'test-list',
-			array(
-				'id'             => 'test-task',
-				'title'          => 'Test Task',
-				'is_dismissable' => true,
+			new TestTask(
+				array(
+					'id'             => 'test-task',
+					'title'          => 'Test Task',
+					'is_dismissable' => true,
+				)
 			)
 		);
 
@@ -388,10 +399,12 @@ class WC_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 
 		TaskLists::add_task(
 			'test-list',
-			array(
-				'id'             => 'test-task',
-				'title'          => 'Test Task',
-				'is_dismissable' => true,
+			new TestTask(
+				array(
+					'id'             => 'test-task',
+					'title'          => 'Test Task',
+					'is_dismissable' => true,
+				)
 			)
 		);
 
@@ -443,10 +456,12 @@ class WC_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 
 		TaskLists::add_task(
 			'test-list',
-			array(
-				'id'             => 'test-task',
-				'title'          => 'Test Task',
-				'is_dismissable' => true,
+			new TestTask(
+				array(
+					'id'             => 'test-task',
+					'title'          => 'Test Task',
+					'is_dismissable' => true,
+				)
 			)
 		);
 
@@ -493,10 +508,12 @@ class WC_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 
 		TaskLists::add_task(
 			'test-list',
-			array(
-				'id'             => 'test-task',
-				'title'          => 'Test Task',
-				'is_dismissable' => true,
+			new TestTask(
+				array(
+					'id'             => 'test-task',
+					'title'          => 'Test Task',
+					'is_dismissable' => true,
+				)
 			)
 		);
 

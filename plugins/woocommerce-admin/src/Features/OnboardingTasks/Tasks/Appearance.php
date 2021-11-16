@@ -9,48 +9,82 @@ use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\Products;
 /**
  * Appearance Task
  */
-class Appearance {
+class Appearance extends Task {
 	/**
 	 * Initialize.
 	 */
-	public static function init() {
-		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'add_media_scripts' ) );
-		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'possibly_add_return_notice_script' ) );
+	public function __construct() {
+		add_action( 'admin_enqueue_scripts', array( $this, 'add_media_scripts' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_return_notice_script' ) );
 	}
 
 	/**
-	 * Get the task arguments.
+	 * ID.
+	 *
+	 * @return string
+	 */
+	public function get_id() {
+		return 'appearance';
+	}
+
+	/**
+	 * Parent ID.
+	 *
+	 * @return string
+	 */
+	public function get_parent_id() {
+		return 'setup';
+	}
+
+	/**
+	 * Title.
+	 *
+	 * @return string
+	 */
+	public function get_title() {
+		return __( 'Personalize my store', 'woocommerce-admin' );
+	}
+
+	/**
+	 * Content.
+	 *
+	 * @return string
+	 */
+	public function get_content() {
+		return __(
+			'Add your logo, create a homepage, and start designing your store.',
+			'woocommerce-admin'
+		);
+	}
+
+	/**
+	 * Time.
+	 *
+	 * @return string
+	 */
+	public function get_time() {
+		return __( '2 minutes', 'woocommerce-admin' );
+	}
+
+	/**
+	 * Addtional data.
 	 *
 	 * @return array
 	 */
-	public static function get_task() {
+	public function get_additional_data() {
 		return array(
-			'id'              => 'appearance',
-			'title'           => __( 'Personalize my store', 'woocommerce-admin' ),
-			'content'         => __(
-				'Add your logo, create a homepage, and start designing your store.',
-				'woocommerce-admin'
-			),
-			'action_label'    => __( "Let's go", 'woocommerce-admin' ),
-			'is_complete'     => Task::is_task_actioned( 'appearance' ),
-			'can_view'        => true,
-			'time'            => __( '2 minutes', 'woocommerce-admin' ),
-			'additional_data' => array(
-				'has_homepage' => self::has_homepage(),
-				'has_products' => Products::has_products(),
-				'stylesheet'   => get_option( 'stylesheet' ),
-				'theme_mods'   => get_theme_mods(),
-			),
+			'has_homepage' => self::has_homepage(),
+			'has_products' => Products::has_products(),
+			'stylesheet'   => get_option( 'stylesheet' ),
+			'theme_mods'   => get_theme_mods(),
 		);
 	}
 
 	/**
 	 * Add media scripts for image uploader.
 	 */
-	public static function add_media_scripts() {
-		$task = new Task( self::get_task() );
-
-		if ( ! $task->can_view ) {
+	public function add_media_scripts() {
+		if ( ! Loader::is_admin_page() || ! $this->can_view() ) {
 			return;
 		}
 
@@ -63,15 +97,14 @@ class Appearance {
 	 *
 	 * @param string $hook Page hook.
 	 */
-	public static function possibly_add_return_notice_script( $hook ) {
+	public function possibly_add_return_notice_script( $hook ) {
 		global $post;
-		$task = new Task( self::get_task() );
 
-		if ( $task->is_complete || ! $task->is_active() ) {
+		if ( 'post.php' !== $hook || 'page' !== $post->post_type ) {
 			return;
 		}
 
-		if ( 'post.php' !== $hook || 'page' !== $post->post_type ) {
+		if ( $this->is_complete() || ! $this->is_active() ) {
 			return;
 		}
 

@@ -9,24 +9,71 @@ use Automattic\WooCommerce\Admin\Features\RemoteFreeExtensions\Init as RemoteFre
 /**
  * Marketing Task
  */
-class Marketing {
+class Marketing extends Task {
 	/**
-	 * Get the task arguments.
+	 * ID.
 	 *
-	 * @return array
+	 * @return string
 	 */
-	public static function get_task() {
-		return array(
-			'id'          => 'marketing',
-			'title'       => __( 'Set up marketing tools', 'woocommerce-admin' ),
-			'content'     => __(
-				'Add recommended marketing tools to reach new customers and grow your business',
-				'woocommerce-admin'
-			),
-			'is_complete' => self::has_installed_extensions(),
-			'can_view'    => Features::is_enabled( 'remote-free-extensions' ) && count( self::get_plugins() ) > 0,
-			'time'        => __( '1 minute', 'woocommerce-admin' ),
+	public function get_id() {
+		return 'marketing';
+	}
+
+	/**
+	 * Parent ID.
+	 *
+	 * @return string
+	 */
+	public function get_parent_id() {
+		return 'setup';
+	}
+
+	/**
+	 * Title.
+	 *
+	 * @return string
+	 */
+	public function get_title() {
+		return __( 'Set up marketing tools', 'woocommerce-admin' );
+	}
+
+	/**
+	 * Content.
+	 *
+	 * @return string
+	 */
+	public function get_content() {
+		return __(
+			'Add recommended marketing tools to reach new customers and grow your business',
+			'woocommerce-admin'
 		);
+	}
+
+	/**
+	 * Time.
+	 *
+	 * @return string
+	 */
+	public function get_time() {
+		return __( '1 minute', 'woocommerce-admin' );
+	}
+
+	/**
+	 * Task completion.
+	 *
+	 * @return bool
+	 */
+	public function is_complete() {
+		return self::has_installed_extensions();
+	}
+
+	/**
+	 * Task visibility.
+	 *
+	 * @return bool
+	 */
+	public function can_view() {
+		return Features::is_enabled( 'remote-free-extensions' ) && count( self::get_plugins() ) > 0;
 	}
 
 	/**

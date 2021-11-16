@@ -8,29 +8,96 @@ use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 /**
  * Products Task
  */
-class Products {
+class Products extends Task {
 	/**
 	 * Initialize.
 	 */
-	public static function init() {
-		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'possibly_add_manual_return_notice_script' ) );
-		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'possibly_add_import_return_notice_script' ) );
+	public function __construct() {
+		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_manual_return_notice_script' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_import_return_notice_script' ) );
 	}
+
+	/**
+	 * ID.
+	 *
+	 * @return string
+	 */
+	public function get_id() {
+		return 'products';
+	}
+
+	/**
+	 * Parent ID.
+	 *
+	 * @return string
+	 */
+	public function get_parent_id() {
+		return 'setup';
+	}
+
+	/**
+	 * Title.
+	 *
+	 * @return string
+	 */
+	public function get_title() {
+		return __( 'Add my products', 'woocommerce-admin' );
+	}
+
+	/**
+	 * Content.
+	 *
+	 * @return string
+	 */
+	public function get_content() {
+		return __(
+			'Start by adding the first product to your store. You can add your products manually, via CSV, or import them from another service.',
+			'woocommerce-admin'
+		);
+	}
+
+	/**
+	 * Time.
+	 *
+	 * @return string
+	 */
+	public function get_time() {
+		return __( '1 minute per product', 'woocommerce-admin' );
+	}
+
+	/**
+	 * Task completion.
+	 *
+	 * @return bool
+	 */
+	public function is_complete() {
+		return self::has_products();
+	}
+
+	/**
+	 * Addtional data.
+	 *
+	 * @return array
+	 */
+	public function get_additional_data() {
+		return array(
+			'has_products' => self::has_products(),
+		);
+	}
+
 
 	/**
 	 * Adds a return to task list notice when completing the manual product task.
 	 *
 	 * @param string $hook Page hook.
 	 */
-	public static function possibly_add_manual_return_notice_script( $hook ) {
-		$task = new Task( self::get_task() );
-
-		if ( $task->is_complete || ! $task->is_active() ) {
+	public function possibly_add_manual_return_notice_script( $hook ) {
+		global $post;
+		if ( 'post.php' !== $hook || 'product' !== $post->post_type ) {
 			return;
 		}
 
-		global $post;
-		if ( 'post.php' !== $hook || 'product' !== $post->post_type ) {
+		if ( ! $this->is_active() || $this->is_complete() ) {
 			return;
 		}
 
@@ -51,15 +118,14 @@ class Products {
 	 *
 	 * @param string $hook Page hook.
 	 */
-	public static function possibly_add_import_return_notice_script( $hook ) {
-		$task = new Task( self::get_task() );
+	public function possibly_add_import_return_notice_script( $hook ) {
 		$step = isset( $_GET['step'] ) ? $_GET['step'] : ''; // phpcs:ignore csrf ok, sanitization ok.
 
-		if ( $task->is_complete || ! $task->is_active() ) {
+		if ( 'product_page_product_importer' !== $hook || 'done' !== $step ) {
 			return;
 		}
 
-		if ( 'product_page_product_importer' !== $hook || 'done' !== $step ) {
+		if ( ! $this->is_active() || $this->is_complete() ) {
 			return;
 		}
 
@@ -72,28 +138,6 @@ class Products {
 			array_merge( array( WC_ADMIN_APP ), $script_assets ['dependencies'] ),
 			WC_ADMIN_VERSION_NUMBER,
 			true
-		);
-	}
-
-	/**
-	 * Get the task arguments.
-	 *
-	 * @return array
-	 */
-	public static function get_task() {
-		return array(
-			'id'              => 'products',
-			'title'           => __( 'Add my products', 'woocommerce-admin' ),
-			'content'         => __(
-				'Start by adding the first product to your store. You can add your products manually, via CSV, or import them from another service.',
-				'woocommerce-admin'
-			),
-			'is_complete'     => self::has_products(),
-			'can_view'        => true,
-			'time'            => __( '1 minute per product', 'woocommerce-admin' ),
-			'additional_data' => array(
-				'has_products' => self::has_products(),
-			),
 		);
 	}
 

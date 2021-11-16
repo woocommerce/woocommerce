@@ -108,7 +108,7 @@ class TaskList {
 		$completed_count = array_reduce(
 			$viewable_tasks,
 			function( $total, $task ) {
-				return $task->is_complete ? $total + 1 : $total;
+				return $task->is_complete() ? $total + 1 : $total;
 			},
 			0
 		);
@@ -149,7 +149,7 @@ class TaskList {
 		return array_reduce(
 			$viewable_tasks,
 			function( $is_complete, $task ) {
-				return ! $task->is_complete ? false : $is_complete;
+				return ! $task->is_complete() ? false : $is_complete;
 			},
 			true
 		);
@@ -168,14 +168,17 @@ class TaskList {
 	/**
 	 * Add task to the task list.
 	 *
-	 * @param array $args Task properties.
+	 * @param Task $task Task class.
 	 */
-	public function add_task( $args ) {
-		$task_args     = wp_parse_args(
-			$args,
-			array( 'parent_id' => $this->id )
-		);
-		$this->tasks[] = new Task( $task_args );
+	public function add_task( $task ) {
+		if ( ! is_subclass_of( $task, 'Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task' ) ) {
+			return new \WP_Error(
+				'woocommerce_task_list_invalid_task',
+				__( 'Task is not a subclass of `Task`', 'woocommerce-admin' )
+			);
+		}
+
+		$this->tasks[] = $task;
 	}
 
 	/**
@@ -188,7 +191,7 @@ class TaskList {
 			array_filter(
 				$this->tasks,
 				function( $task ) {
-					return $task->can_view;
+					return $task->can_view();
 				}
 			)
 		);
@@ -238,7 +241,6 @@ class TaskList {
 	 */
 	public function get_json() {
 		$this->possibly_track_completion();
-
 		return array(
 			'id'         => $this->id,
 			'title'      => $this->title,

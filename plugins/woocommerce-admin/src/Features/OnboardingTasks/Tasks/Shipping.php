@@ -3,32 +3,87 @@
 namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks;
 
 use Automattic\WooCommerce\Admin\Features\Onboarding;
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 
 /**
  * Shipping Task
  */
-class Shipping {
+class Shipping extends Task {
 	/**
-	 * Get the task arguments.
+	 * ID.
 	 *
-	 * @return array
+	 * @return string
 	 */
-	public static function get_task() {
-		return array(
-			'id'           => 'shipping',
-			'title'        => __( 'Set up shipping', 'woocommerce-admin' ),
-			'content'      => __(
-				"Set your store location and where you'll ship to.",
-				'woocommerce-admin'
-			),
-			'action_url'   => self::has_shipping_zones()
-				? admin_url( 'admin.php?page=wc-settings&tab=shipping' )
-				: null,
-			'action_label' => __( "Let's go", 'woocommerce-admin' ),
-			'is_complete'  => self::has_shipping_zones(),
-			'can_view'     => self::has_physical_products(),
-			'time'         => __( '1 minute', 'woocommerce-admin' ),
+	public function get_id() {
+		return 'shipping';
+	}
+
+	/**
+	 * Parent ID.
+	 *
+	 * @return string
+	 */
+	public function get_parent_id() {
+		return 'setup';
+	}
+
+	/**
+	 * Title.
+	 *
+	 * @return string
+	 */
+	public function get_title() {
+		return __( 'Set up shipping', 'woocommerce-admin' );
+	}
+
+	/**
+	 * Content.
+	 *
+	 * @return string
+	 */
+	public function get_content() {
+		return __(
+			"Set your store location and where you'll ship to.",
+			'woocommerce-admin'
 		);
+	}
+
+	/**
+	 * Time.
+	 *
+	 * @return string
+	 */
+	public function get_time() {
+		return __( '1 minute', 'woocommerce-admin' );
+	}
+
+	/**
+	 * Task completion.
+	 *
+	 * @return bool
+	 */
+	public function is_complete() {
+		return self::has_shipping_zones();
+	}
+
+	/**
+	 * Task visibility.
+	 *
+	 * @return bool
+	 */
+	public function can_view() {
+		return self::has_physical_products();
+	}
+
+	/**
+	 * Action URL.
+	 *
+	 * @return string
+	 */
+	public function get_action_url() {
+		return self::has_shipping_zones()
+			? admin_url( 'admin.php?page=wc-settings&tab=shipping' )
+			: null;
 	}
 
 	/**

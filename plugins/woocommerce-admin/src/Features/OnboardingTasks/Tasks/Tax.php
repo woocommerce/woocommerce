@@ -11,27 +11,26 @@ use Automattic\WooCommerce\Admin\PluginsHelper;
 /**
  * Tax Task
  */
-class Tax {
+class Tax extends Task {
 	/**
 	 * Initialize.
 	 */
-	public static function init() {
-		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'possibly_add_return_notice_script' ) );
+	public function __construct() {
+		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_return_notice_script' ) );
 	}
 
 	/**
 	 * Adds a return to task list notice when completing the task.
 	 */
-	public static function possibly_add_return_notice_script() {
-		$task = new Task( self::get_task() );
+	public function possibly_add_return_notice_script() {
 		$page = isset( $_GET['page'] ) ? $_GET['page'] : ''; // phpcs:ignore csrf ok, sanitization ok.
 		$tab  = isset( $_GET['tab'] ) ? $_GET['tab'] : ''; // phpcs:ignore csrf ok, sanitization ok.
 
-		if ( $task->is_complete || ! $task->is_active() ) {
+		if ( 'wc-settings' !== $page || 'tax' !== $tab ) {
 			return;
 		}
 
-		if ( 'wc-settings' !== $page || 'tax' !== $tab ) {
+		if ( ! $this->is_active() || $this->is_complete() ) {
 			return;
 		}
 
@@ -48,37 +47,90 @@ class Tax {
 	}
 
 	/**
-	 * Get the task arguments.
+	 * ID.
+	 *
+	 * @return string
+	 */
+	public function get_id() {
+		return 'tax';
+	}
+
+	/**
+	 * Parent ID.
+	 *
+	 * @return string
+	 */
+	public function get_parent_id() {
+		return 'setup';
+	}
+
+	/**
+	 * Title.
+	 *
+	 * @return string
+	 */
+	public function get_title() {
+		return __( 'Set up tax', 'woocommerce-admin' );
+	}
+
+	/**
+	 * Content.
+	 *
+	 * @return string
+	 */
+	public function get_content() {
+		return self::can_use_automated_taxes()
+			? __(
+				'Good news! WooCommerce Services and Jetpack can automate your sales tax calculations for you.',
+				'woocommerce-admin'
+			)
+			: __(
+				'Set your store location and configure tax rate settings.',
+				'woocommerce-admin'
+			);
+	}
+
+	/**
+	 * Time.
+	 *
+	 * @return string
+	 */
+	public function get_time() {
+		return __( '1 minute', 'woocommerce-admin' );
+	}
+
+	/**
+	 * Action label.
+	 *
+	 * @return string
+	 */
+	public function get_action_label() {
+		return self::can_use_automated_taxes()
+			? __( 'Yes please', 'woocommerce-admin' )
+			: __( "Let's go", 'woocommerce-admin' );
+	}
+
+	/**
+	 * Task completion.
+	 *
+	 * @return bool
+	 */
+	public function is_complete() {
+		return get_option( 'wc_connect_taxes_enabled' ) ||
+			count( TaxDataStore::get_taxes( array() ) ) > 0 ||
+			false !== get_option( 'woocommerce_no_sales_tax' );
+	}
+
+	/**
+	 * Addtional data.
 	 *
 	 * @return array
 	 */
-	public static function get_task() {
+	public function get_additional_data() {
 		return array(
-			'id'              => 'tax',
-			'title'           => __( 'Set up tax', 'woocommerce-admin' ),
-			'content'         => self::can_use_automated_taxes()
-				? __(
-					'Good news! WooCommerce Services and Jetpack can automate your sales tax calculations for you.',
-					'woocommerce-admin'
-				)
-				: __(
-					'Set your store location and configure tax rate settings.',
-					'woocommerce-admin'
-				),
-			'action_label'    => self::can_use_automated_taxes()
-				? __( 'Yes please', 'woocommerce-admin' )
-				: __( "Let's go", 'woocommerce-admin' ),
-			'is_complete'     => get_option( 'wc_connect_taxes_enabled' ) ||
-				count( TaxDataStore::get_taxes( array() ) ) > 0 ||
-				false !== get_option( 'woocommerce_no_sales_tax' ) ||
-				PluginsHelper::is_plugin_active( 'woocommerce-avatax' ),
-			'is_visible'      => true,
-			'time'            => __( '1 minute', 'woocommerce-admin' ),
-			'additional_data' => array(
-				'avalara_activated'         => PluginsHelper::is_plugin_active( 'woocommerce-avatax' ),
-				'tax_jar_activated'         => class_exists( 'WC_Taxjar' ),
-				'woocommerce_tax_countries' => self::get_automated_support_countries(),
-			),
+			'avalara_activated'         => PluginsHelper::is_plugin_active( 'woocommerce-avatax' ),
+			'tax_jar_activated'         => class_exists( 'WC_Taxjar' ),
+			'woocommerce_tax_countries' => self::get_automated_support_countries(),
 		);
 	}
 

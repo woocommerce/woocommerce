@@ -3,38 +3,101 @@
 namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks;
 
 use Automattic\WooCommerce\Admin\Features\Onboarding;
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 
 /**
  * WooCommercePayments Task
  */
-class WooCommercePayments {
+class WooCommercePayments extends Task {
 	/**
-	 * Get the task arguments.
+	 * ID.
 	 *
-	 * @return array
+	 * @return string
 	 */
-	public static function get_task() {
-		return array(
-			'id'              => 'woocommerce-payments',
-			'title'           => __( 'Get paid with WooCommerce Payments', 'woocommerce-admin' ),
-			'content'         => __(
-				"You're only one step away from getting paid. Verify your business details to start managing transactions with WooCommerce Payments.",
-				'woocommerce-admin'
-			),
-			'action_label'    => __( 'Finish setup', 'woocommerce-admin' ),
-			'expanded'        => true,
-			'is_complete'     => self::is_connected(),
-			'can_view'        => self::is_requested() &&
-				self::is_installed() &&
-				self::is_supported() &&
-				! self::is_connected(),
-			'time'            => __( '2 minutes', 'woocommerce-admin' ),
-			'additional_info' => __(
-				'By setting up, you are agreeing to the <a href="https://wordpress.com/tos/" target="_blank">Terms of Service</a>',
-				'woocommerce-admin'
-			),
+	public function get_id() {
+		return 'woocommerce-payments';
+	}
+
+	/**
+	 * Parent ID.
+	 *
+	 * @return string
+	 */
+	public function get_parent_id() {
+		return 'setup';
+	}
+
+	/**
+	 * Title.
+	 *
+	 * @return string
+	 */
+	public function get_title() {
+		return __( 'Get paid with WooCommerce Payments', 'woocommerce-admin' );
+	}
+
+	/**
+	 * Content.
+	 *
+	 * @return string
+	 */
+	public function get_content() {
+		return __(
+			"You're only one step away from getting paid. Verify your business details to start managing transactions with WooCommerce Payments.",
+			'woocommerce-admin'
 		);
+	}
+
+	/**
+	 * Time.
+	 *
+	 * @return string
+	 */
+	public function get_time() {
+		return __( '2 minutes', 'woocommerce-admin' );
+	}
+
+	/**
+	 * Action label.
+	 *
+	 * @return string
+	 */
+	public function get_action_label() {
+		return __( 'Finish setup', 'woocommerce-admin' );
+	}
+
+	/**
+	 * Additional info.
+	 *
+	 * @return string
+	 */
+	public function get_additional_info() {
+		return __(
+			'By setting up, you are agreeing to the <a href="https://wordpress.com/tos/" target="_blank">Terms of Service</a>',
+			'woocommerce-admin'
+		);
+	}
+
+	/**
+	 * Task completion.
+	 *
+	 * @return bool
+	 */
+	public function is_complete() {
+		return self::is_connected();
+	}
+
+	/**
+	 * Task visibility.
+	 *
+	 * @return bool
+	 */
+	public function can_view() {
+		return self::is_requested() &&
+			self::is_installed() &&
+			self::is_supported() &&
+			! self::is_connected();
 	}
 
 	/**
