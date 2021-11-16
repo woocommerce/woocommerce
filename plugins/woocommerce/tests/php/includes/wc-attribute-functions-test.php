@@ -81,13 +81,15 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 			1,
 			$this->filter_recorder->getInvocationCount(),
 			'Filter `woocommerce_attribute_taxonomies` should have been triggered once after fetching all attribute taxonomies.'
-		);		$labels = wc_get_attribute_taxonomy_labels();
+		);
+		$labels = wc_get_attribute_taxonomy_labels();
 		$this->assertEquals( [], $labels );
 		$this->assertEquals(
 			1,
 			$this->filter_recorder->getInvocationCount(),
 			'Filter `woocommerce_attribute_taxonomies` should not be triggered a second time because the results should be loaded from the cache.'
-		);	}
+		);
+	}
 
 	/**
 	 * Test wc_attribute_taxonomy_slug() function.
