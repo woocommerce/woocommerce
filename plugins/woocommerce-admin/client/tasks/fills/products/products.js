@@ -123,7 +123,7 @@ const Products = () => {
 		window.wcAdminFeatures &&
 		window.wcAdminFeatures.subscriptions &&
 		countryCode === 'US' &&
-		profileItems.product_types.includes( 'subscriptions' ) &&
+		profileItems.product_types?.includes( 'subscriptions' ) &&
 		installedPlugins.includes( 'woocommerce-payments' )
 	) {
 		const task = subTasks.find(
