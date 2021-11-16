@@ -942,7 +942,7 @@ class WC_Countries {
 							'required' => false,
 						),
 						'state' => array(
-							'label' => __( 'Departamento', 'woocommerce' ),
+							'label' => __( 'Department', 'woocommerce' ),
 						),
 					),
 					'CW' => array(
