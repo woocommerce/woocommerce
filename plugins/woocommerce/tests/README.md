@@ -1,6 +1,6 @@
 # WooCommerce Tests
 
-This document discusses unit tests. See [the e2e README](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e) to learn how to setup testing environment for running e2e tests and run them.
+This document discusses unit tests. See [the e2e README](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/e2e/README.md) to learn how to setup testing environment for running e2e tests and run them.
 
 ## Table of contents
 
@@ -29,7 +29,7 @@ To run the tests, you need to create a test database. You can:
 
 ### Setup instructions
 
-Once you have database, from the WooCommerce root directory run the following:
+Once you have database, from the WooCommerce root directory "cd" into `plugins/woocommerce` directory and run the following:
 
 1. Install [PHPUnit](http://phpunit.de/) via Composer by running:
     ```
