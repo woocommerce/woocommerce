@@ -45,7 +45,6 @@ describe( 'Shipping zones API tests', () => {
 		);
 
 		expect( status ).toEqual( shippingZonesApi.listAll.responseCode );
-		expect( body ).toHaveLength( 2 ); // the test shipping zone, and the default 'Locations not covered by your other zones'
 		expect( body ).toEqual(
 			expect.arrayContaining( [ { id: shippingZone.id } ] )
 		);
