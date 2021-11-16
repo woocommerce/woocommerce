@@ -91,7 +91,7 @@ If you need to modify the port for your local test environment (eg. port is alre
 
 [Jest](https://jestjs.io/) is being used to run e2e tests. Jest sequencer introduces tools that can be used to specify the order in which the tests are being run. In our case, they are being run in alphabetical order of the directories where tests are located. This way, tests in the directory `activate-and-setup` will run first. By default, jest runs tests ordered by the time it takes to run the test (the test that takes longer to run will be run first, the test that takes less time to run will run last).
 
-The Setup Wizard e2e test runs first to ensure that WooCommerce is active and that the setup wizard has been completed. This is necessary because `docke-up` creates a brand new install of WordPress and WooCommerce.
+The Setup Wizard e2e test runs first to ensure that WooCommerce is active and that the setup wizard has been completed. This is necessary because `docker-up` creates a brand new install of WordPress and WooCommerce.
 
 ### Chromium Download
 
