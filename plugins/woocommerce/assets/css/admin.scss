@@ -90,36 +90,17 @@
 		@media only screen and ( min-width: 768px ) {
 			margin-bottom: 24px;
 		}
+	}
 
-		.current-section-dropdown {
-			position: relative;
-			width: 100%;
+	.current-section-dropdown {
+		background: #fff;
+		border: 1px solid #a7aaad;
+		margin-bottom: 20px;
+		position: relative;
+		width: 100%;
 
-			@media only screen and ( min-width: 600px ) {
-				margin-left: 70px;
-				width: 288px;
-			}
-		}
-
-		.current-section-name {
-			cursor: pointer;
-			font-weight: 600;
-			font-size: 14px;
-			line-height: 20px;
-			padding: 20px 16px;
-			position: relative;
-		}
-
-		.current-section-name::after {
-			background-image: url(../images/icons/gridicons-chevron-down.svg);
-			background-size: contain;
-			content: "";
-			display: block;
-			height: 20px;
-			position: absolute;
-			right: 20px;
-			top: 20px;
-			width: 20px;
+		@media only screen and (min-width: 600px) {
+			width: 288px;
 		}
 
 		ul {
@@ -136,11 +117,13 @@
 			width: 100%;
 			z-index: 10;
 
-			@media only screen and ( min-width: 600px ) {
+			@media only screen and (min-width: 600px) {
 				border: 1px solid #1e1e1e;
+				left: -1px;
+				top: 48px;
 			}
 
-			@media only screen and ( min-width: 1100px ) {
+			@media only screen and (min-width: 1100px) {
 				justify-content: center;
 			}
 
@@ -148,6 +131,17 @@
 				font-size: 13px;
 				line-height: 16px;
 				margin: 0;
+
+				&.current a::after {
+					background-image: url(../images/icons/gridicons-checkmark.svg);
+					content: "";
+					display: block;
+					height: 20px;
+					position: absolute;
+					right: 20px;
+					top: 7px;
+					width: 20px;
+				}
 			}
 
 			a,
@@ -165,32 +159,41 @@
 				position: relative;
 				width: 100%;
 
-				@media only screen and ( min-width: 600px ) {
+				@media only screen and (min-width: 600px) {
 					padding: 10px 18px;
 				}
 			}
+		}
+	}
 
-			a.current::after {
-				background-image: url(../images/icons/gridicons-checkmark.svg);
-				content: "";
-				display: block;
-				height: 20px;
-				position: absolute;
-				right: 20px;
-				top: 7px;
-				width: 20px;
-			}
+	.current-section-name {
+		cursor: pointer;
+		font-size: 14px;
+		line-height: 24px;
+		padding: 12px 16px;
+		position: relative;
+	}
+
+	.current-section-name::after {
+		background-image: url(../images/icons/gridicons-chevron-down.svg);
+		background-size: contain;
+		content: "";
+		display: block;
+		height: 20px;
+		position: absolute;
+		right: 20px;
+		top: 16px;
+		width: 20px;
+	}
+
+	.current-section-dropdown.is-open {
+
+		ul {
+			display: flex;
 		}
 
-		.current-section-dropdown.is-open {
-
-			ul {
-				display: flex;
-			}
-
-			.current-section-name::after {
-				transform: rotate(0.5turn);
-			}
+		.current-section-name::after {
+			transform: rotate(0.5turn);
 		}
 	}
 
@@ -202,7 +205,7 @@
 		font-size: 9px;
 		font-weight: 600;
 		line-height: 17px;
-		margin: 1px 0 0 2px;
+		margin: 1px 0 0 4px;
 		padding: 0 6px;
 		vertical-align: text-top;
 	}
@@ -223,7 +226,7 @@
 		font-size: 20px;
 		font-family: $font-sf-pro-display;
 		line-height: 1.2;
-		margin: 48px 0 16px;
+		margin: 48px 0 12px;
 		padding: 0;
 	}
 
@@ -430,10 +433,6 @@
 
 	@media only screen and (max-width: 400px) {
 
-		.addons-featured {
-			margin: -1% -5%;
-		}
-
 		.addons-button {
 			width: 100%;
 		}
@@ -450,9 +449,21 @@
 		width: 100%;
 	}
 
+	.addon-product-group {
+		margin-bottom: 24px;
+	}
+
 	.addon-product-group-title {
 		font-family: $font-sf-pro-display;
-		letter-spacing: 0.38px;
+		font-size: 20px;
+		font-weight: 400;
+		line-height: 24px;
+		margin: 0 0 4px;
+	}
+
+	.current-section-dropdown__title {
+		display: none;
+		font-family: $font-sf-pro-display;
 	}
 
 	.addon-product-group-description-container {
@@ -503,6 +514,7 @@
 			background: #fff;
 			border: 1px solid #dcdcde;
 			border-radius: 2px;
+			box-sizing: border-box;
 			display: flex;
 			flex: 1 0 auto;
 			flex-direction: column;
@@ -793,6 +805,36 @@
 	}
 }
 
+.marketplace-header__tabs {
+	display: flex;
+	margin: 0;
+}
+
+.marketplace-header__tab {
+	display: flex;
+	flex: 1;
+	margin: 0;
+}
+
+.marketplace-header__tab-link {
+	align-items: center;
+	border-bottom: 2px solid transparent;
+	box-sizing: border-box;
+	display: flex;
+	font-size: 14px;
+	height: 60px;
+	justify-content: center;
+	line-height: 20px;
+	padding: 0 24px;
+	text-decoration: none;
+	width: 100%;
+
+	&.is-current {
+		border-bottom: 2px solid #1e1e1e;
+		color: #1e1e1e;
+	}
+}
+
 .no-touch,
 .no-js {
 
@@ -813,6 +855,19 @@
 
 .wc-subscriptions-wrap {
 	max-width: 1200px;
+
+	.update-plugins .update-count {
+		background-color: #d54e21;
+		border-radius: 10px;
+		color: #fff;
+		display: inline-block;
+		font-size: 9px;
+		font-weight: 600;
+		line-height: 17px;
+		margin: 1px 0 0 2px;
+		padding: 0 6px;
+		vertical-align: text-top;
+	}
 }
 
 .woocommerce-page-wc-marketplace {
@@ -7696,6 +7751,89 @@ table.bar_chart {
 				float: left;
 				margin: 0 16px 0 auto;
 				width: 278px;
+			}
+		}
+	}
+
+	.marketplace-header__tab {
+		flex: none;
+	}
+}
+
+@media screen and (min-width: 961px) {
+
+	.marketplace-header__tabs {
+		margin-left: 84px;
+	}
+}
+
+@media screen and (min-width: 1024px) {
+
+	.current-section-name {
+		display: none;
+	}
+
+	.wc-addons-wrap {
+		.current-section-dropdown__title {
+			display: block;
+			font-size: 20px;
+			font-weight: 400;
+			line-height: 24px;
+			margin: 0 0 16px;
+		}
+
+		.current-section-dropdown {
+			background: none;
+			border: none;
+			margin-bottom: 32px;
+			width: 100%;
+
+			ul {
+				background: none;
+				border: none;
+				display: flex;
+				flex-direction: row;
+				flex-wrap: wrap;
+				justify-content: flex-start;
+				margin-top: -12px;
+				padding: 0;
+				position: static;
+
+				li {
+					background: #fff;
+					border: 1px solid #ccc;
+					border-radius: 32px;
+					font-size: 14px;
+					line-height: 20px;
+					margin: 12px 12px 0 0;
+
+					&.current {
+						background: #007cba;
+						border: 1px solid #007cba;
+
+						a {
+							color: #fff;
+						}
+
+						a::after {
+							background: none;
+						}
+					}
+				}
+
+				a,
+				a:visited,
+				a:hover,
+				a:active {
+					color: #2c3338;
+					padding: 10px 16px !important;
+				}
+			}
+
+			li:last-child {
+				a::after {
+					display: none;
+				}
 			}
 		}
 	}
