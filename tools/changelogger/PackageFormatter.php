@@ -1,4 +1,9 @@
 <?php
+
+namespace Automattic\WooCommerce\MonorepoTools\Changelogger;
+
+use Automattic\Jetpack\Changelogger\FormatterPlugin;
+
 /**
  * Jetpack Changelogger Formatter for WooCommerce packages
  */
@@ -10,7 +15,7 @@ require_once 'Formatter.php';
  *
  * Class Formatter
  */
-class PackageFormatter extends Formatter {
+class PackageFormatter extends Formatter implements FormatterPlugin {
 	/**
 	 * Prologue text.
 	 *

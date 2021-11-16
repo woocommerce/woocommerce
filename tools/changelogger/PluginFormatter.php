@@ -1,4 +1,9 @@
 <?php
+
+namespace Automattic\WooCommerce\MonorepoTools\Changelogger;
+
+use Automattic\Jetpack\Changelogger\FormatterPlugin;
+
 /**
  * Jetpack Changelogger Formatter for WooCommerce plugins
  */
@@ -10,7 +15,7 @@ require_once 'Formatter.php';
  *
  * Class Formatter
  */
-class PluginFormatter extends Formatter {
+class PluginFormatter extends Formatter implements FormatterPlugin {
 	/**
 	 * Epilogue text.
 	 *
@@ -24,4 +29,4 @@ class PluginFormatter extends Formatter {
 	 * @var string
 	 */
 	public $entry_pattern = '/^##?#\s+([^\n=]+)\s+((?:(?!^##).)+)/ms';
-} 
+}
