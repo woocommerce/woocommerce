@@ -1415,7 +1415,7 @@ class WC_Countries {
 					),
 					'UY' => array(
 						'state'    => array(
-							'label' => __( 'Departamento', 'woocommerce' ),
+							'label' => __( 'Department', 'woocommerce' ),
 						),
 					),
 					'GB' => array(
