@@ -2,8 +2,6 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Package;
-use Automattic\WooCommerce\Blocks\Assets;
-use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 use Automattic\WooCommerce\Blocks\StoreApi\Utilities\CartController;
 use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
 
@@ -102,7 +100,10 @@ class MiniCart extends AbstractBlock {
 
 		foreach ( $payment_methods as $payment_method ) {
 			$payment_method_script = $this->get_script_from_handle( $payment_method );
-			$this->append_script_and_deps_src( $payment_method_script );
+
+			if ( ! is_null( $payment_method_script ) ) {
+				$this->append_script_and_deps_src( $payment_method_script );
+			}
 		}
 
 		$this->scripts_to_lazy_load['wc-block-mini-cart-component-frontend'] = array(
@@ -140,7 +141,7 @@ class MiniCart extends AbstractBlock {
 	 *
 	 * @param string $handle Handle of the script.
 	 *
-	 * @return array Array containing the script data.
+	 * @return \_WP_Dependency|null Object containing the script data if found, or null.
 	 */
 	protected function get_script_from_handle( $handle ) {
 		$wp_scripts = wp_scripts();
@@ -149,28 +150,30 @@ class MiniCart extends AbstractBlock {
 				return $script;
 			}
 		}
-
-		return '';
+		return null;
 	}
 
 	/**
-	 * Recursively appends a scripts and its dependencies into the
-	 * scripts_to_lazy_load array.
+	 * Recursively appends a scripts and its dependencies into the scripts_to_lazy_load array.
 	 *
-	 * @param string $script Array containing script data.
+	 * @param \_WP_Dependency $script Object containing script data.
 	 */
 	protected function append_script_and_deps_src( $script ) {
 		$wp_scripts = wp_scripts();
+
 		// This script and its dependencies have already been appended.
-		if ( array_key_exists( $script->handle, $this->scripts_to_lazy_load ) ) {
+		if ( ! $script || array_key_exists( $script->handle, $this->scripts_to_lazy_load ) ) {
 			return;
 		}
 
-		if ( count( $script->deps ) > 0 ) {
+		if ( count( $script->deps ) ) {
 			foreach ( $script->deps as $dep ) {
 				if ( ! array_key_exists( $dep, $this->scripts_to_lazy_load ) ) {
 					$dep_script = $this->get_script_from_handle( $dep );
-					$this->append_script_and_deps_src( $dep_script );
+
+					if ( ! is_null( $dep_script ) ) {
+						$this->append_script_and_deps_src( $dep_script );
+					}
 				}
 			}
 		}
@@ -252,7 +255,7 @@ class MiniCart extends AbstractBlock {
 				</clipPath>
 			</defs>
 		</svg>';
-		$button_html = '<span class="wc-block-mini-cart__amount">' . wp_strip_all_tags( wc_price( $cart_contents_total ) ) . '</span>
+		$button_html = '<span class="wc-block-mini-cart__amount">' . esc_html( wp_strip_all_tags( wc_price( $cart_contents_total ) ) ) . '</span>
 		<span class="wc-block-mini-cart__quantity-badge">
 			' . $icon . '
 			<span class="wc-block-mini-cart__badge">' . $cart_contents_count . '</span>
@@ -260,18 +263,18 @@ class MiniCart extends AbstractBlock {
 
 		if ( is_cart() || is_checkout() ) {
 			return '<div class="wc-block-mini-cart">
-				<button class="wc-block-mini-cart__button" aria-label="' . $aria_label . '" disabled>' . $button_html . '</button>
+				<button class="wc-block-mini-cart__button" aria-label="' . esc_attr( $aria_label ) . '" disabled>' . $button_html . '</button>
 			</div>';
 		}
 
 		return '<div class="wc-block-mini-cart">
-			<button class="wc-block-mini-cart__button" aria-label="' . $aria_label . '">' . $button_html . '</button>
+			<button class="wc-block-mini-cart__button" aria-label="' . esc_attr( $aria_label ) . '">' . $button_html . '</button>
 			<div class="wc-block-mini-cart__drawer is-loading is-mobile wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--is-hidden" aria-hidden="true">
 				<div class="components-modal__frame wc-block-components-drawer">
 					<div class="components-modal__content">
 						<div class="components-modal__header">
 							<div class="components-modal__header-heading-container">
-								<h1 id="components-modal-header-1" class="components-modal__header-heading">' . $title . '</h1>
+								<h1 id="components-modal-header-1" class="components-modal__header-heading">' . wp_kses_post( $title ) . '</h1>
 							</div>
 						</div>'
 						. $this->get_cart_contents_markup( $cart_contents ) .
