@@ -261,22 +261,17 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 	protected function prepare_objects_query( $request ) {
 		// Track if the query is being filtered.
 		$query_has_filter = has_filter( 'woocommerce_rest_orders_prepare_object_query' );
+
 		// This is needed to get around an array to string notice in WC_REST_Orders_V2_Controller::prepare_objects_query.
 		$statuses = $request['status'];
 		unset( $request['status'] );
+
 		$args = parent::prepare_objects_query( $request );
 
-		$args['post_status'] = array();
+		// Format status values for WC_Order_Query.
+		$args['status'] = array();
 		foreach ( $statuses as $status ) {
-			if ( in_array( $status, $this->get_order_statuses(), true ) ) {
-				$args['post_status'][] = 'wc-' . $status;
-			} elseif ( 'any' === $status ) {
-				// Set status to "any" and short-circuit out.
-				$args['post_status'] = 'any';
-				break;
-			} else {
-				$args['post_status'][] = $status;
-			}
+			$args['status'][] = 'wc-' . $status;
 		}
 
 		// Add customer back since WC_Data_Store_WP::get_wp_query_args() will ignore the meta_query.
