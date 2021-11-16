@@ -14,6 +14,7 @@ import {
 	TotalsTaxes,
 	ExperimentalOrderMeta,
 	TotalsWrapper,
+	ExperimentalDiscountsMeta,
 } from '@woocommerce/blocks-checkout';
 
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
@@ -90,6 +91,7 @@ const Block = ( {
 					/>
 				</TotalsWrapper>
 			) }
+			<ExperimentalDiscountsMeta.Slot { ...slotFillProps } />
 			{ ! getSetting( 'displayCartPricesIncludingTax', false ) &&
 				parseInt( cartTotals.total_tax, 10 ) > 0 && (
 					<TotalsWrapper>
