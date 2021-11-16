@@ -1261,7 +1261,7 @@ class WC_Countries {
 					),
 					'PA' => array(
 						'state'    => array(
-							'label' => __( 'Provincia', 'woocommerce' ),
+							'label' => __( 'Province', 'woocommerce' ),
 						),
 					),
 					'PL' => array(
