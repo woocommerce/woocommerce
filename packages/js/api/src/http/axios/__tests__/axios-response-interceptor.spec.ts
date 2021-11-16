@@ -1,31 +1,30 @@
 import axios, { AxiosInstance } from 'axios';
-import * as moxios from 'moxios';
+import MockAdapter from 'axios-mock-adapter';
 import { AxiosResponseInterceptor } from '../axios-response-interceptor';
 
 describe( 'AxiosResponseInterceptor', () => {
 	let apiResponseInterceptor: AxiosResponseInterceptor;
 	let axiosInstance: AxiosInstance;
+	let adapter: MockAdapter;
 
 	beforeEach( () => {
 		axiosInstance = axios.create();
-		moxios.install( axiosInstance );
+		adapter = new MockAdapter( axiosInstance );
 		apiResponseInterceptor = new AxiosResponseInterceptor();
 		apiResponseInterceptor.start( axiosInstance );
 	} );
 
 	afterEach( () => {
 		apiResponseInterceptor.stop( axiosInstance );
-		moxios.uninstall();
+		adapter.restore();
 	} );
 
 	it( 'should transform responses into an HTTPResponse', async () => {
-		moxios.stubRequest( 'http://test.test', {
-			status: 200,
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			responseText: JSON.stringify( { test: 'value' } ),
-		} );
+		adapter.onGet( 'http://test.test' ).reply(
+			200,
+			{ test: 'value' },
+			{ 'content-type': 'application/json' }
+		);
 
 		const response = await axiosInstance.get( 'http://test.test' );
 
@@ -41,13 +40,11 @@ describe( 'AxiosResponseInterceptor', () => {
 	} );
 
 	it( 'should transform error responses into an HTTPResponse', async () => {
-		moxios.stubRequest( 'http://test.test', {
-			status: 404,
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			responseText: JSON.stringify( { code: 'error_code', message: 'value' } ),
-		} );
+		adapter.onGet( 'http://test.test' ).reply(
+			404,
+			{ code: 'error_code', message: 'value' },
+			{ 'content-type': 'application/json' }
+		);
 
 		await expect( axiosInstance.get( 'http://test.test' ) ).rejects.toMatchObject( {
 			statusCode: 404,
@@ -62,7 +59,7 @@ describe( 'AxiosResponseInterceptor', () => {
 	} );
 
 	it( 'should bubble non-response errors', async () => {
-		moxios.stubTimeout( 'http://test.test' );
+		adapter.onGet( 'http://test.test' ).timeout();
 
 		await expect( axiosInstance.get( 'http://test.test' ) ).rejects.toMatchObject(
 			new Error( 'timeout of 0ms exceeded' ),

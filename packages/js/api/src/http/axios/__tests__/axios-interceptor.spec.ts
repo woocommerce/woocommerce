@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
-import * as moxios from 'moxios';
+import MockAdapter from 'axios-mock-adapter';
 import { AxiosInterceptor } from '../axios-interceptor';
 
 class TestInterceptor extends AxiosInterceptor {}
@@ -7,10 +7,11 @@ class TestInterceptor extends AxiosInterceptor {}
 describe( 'AxiosInterceptor', () => {
 	let interceptors: TestInterceptor[];
 	let axiosInstance: AxiosInstance;
+	let adapter: MockAdapter;
 
 	beforeEach( () => {
 		axiosInstance = axios.create();
-		moxios.install( axiosInstance );
+		adapter = new MockAdapter( axiosInstance );
 		interceptors = [];
 	} );
 
@@ -18,11 +19,11 @@ describe( 'AxiosInterceptor', () => {
 		for ( const interceptor of interceptors ) {
 			interceptor.stop( axiosInstance );
 		}
-		moxios.uninstall( axiosInstance );
+		adapter.restore();
 	} );
 
 	it( 'should not break interceptor chaining for success', async () => {
-		moxios.stubRequest( 'http://test.test', { status: 200 } );
+		adapter.onGet( 'http://test.test' ).reply( 200 );
 
 		interceptors.push( new TestInterceptor() );
 		interceptors.push( new TestInterceptor() );
@@ -37,7 +38,7 @@ describe( 'AxiosInterceptor', () => {
 	} );
 
 	it( 'should not break interceptor chaining for errors', async () => {
-		moxios.stubRequest( 'http://test.test', { status: 401 } );
+		adapter.onGet( 'http://test.test' ).reply( 401 );
 
 		interceptors.push( new TestInterceptor() );
 		interceptors.push( new TestInterceptor() );
