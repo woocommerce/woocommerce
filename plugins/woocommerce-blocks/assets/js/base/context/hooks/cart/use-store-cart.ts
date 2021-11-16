@@ -184,6 +184,7 @@ export const useStoreCart = (
 			const cartIsLoading = ! store.hasFinishedResolution(
 				'getCartData'
 			);
+
 			const shippingRatesLoading = store.isCustomerDataUpdating();
 			const { receiveCart } = dispatch( storeKey );
 			const billingAddress = decodeValues( cartData.billingAddress );

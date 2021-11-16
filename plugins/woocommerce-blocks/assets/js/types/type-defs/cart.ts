@@ -198,3 +198,8 @@ export interface ExtensionCartUpdateArgs {
 	data: Record< string, unknown >;
 	namespace: string;
 }
+
+export interface BillingAddressShippingAddress {
+	billing_address: CartBillingAddress;
+	shipping_address: CartShippingAddress;
+}
