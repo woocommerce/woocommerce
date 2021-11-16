@@ -8,8 +8,7 @@
 		"align": false,
 		"html": false,
 		"multiple": false,
-		"reusable": false,
-		"inserter": false
+		"reusable": false
 	},
 	"attributes": {
 		"className": {
@@ -19,7 +18,7 @@
 		"lock": {
 			"type": "object",
 			"default": {
-				"remove": true,
+				"remove": false,
 				"move": true
 			}
 		}
