@@ -1,40 +1,32 @@
 {
   "compilerOptions": {
-    // Target the latest version of ECMAScript.
-    "target": "esnext",
-    "module": "esnext",
-
-    // Support incremental project builds in the compiler.
-    "composite": true,
-    "incremental": true,
-
-    // Search under node_modules for non-relative imports.
-    "moduleResolution": "node",
-
-    // Support vanilla JavaScript and type-check it.
     "allowJs": true,
     "checkJs": true,
-
-    // Ensures all modules are compatible with ES6 import syntax.
-    "esModuleInterop": true,
-
-    // Allow JSON files to be imported as objects.
-    "resolveJsonModule": true,
-
-    // Support mapping transpiled files back to source files.
-    "sourceMap": true,
+    "allowSyntheticDefaultImports": true,
+    "jsx": "preserve",
+    "target": "es6",
+    "module": "commonjs",
+    "incremental": true,
+    "declaration": true,
     "declarationMap": true,
+    "composite": true,
+    "emitDeclarationOnly": false,
+    "isolatedModules": true,
 
-    // Enable all of the strict type checks.
+    /* Strict Type-Checking Options */
     "strict": true,
 
-    // Warn developers when they write code incompatible with some build tools.
-    "isolatedModules": true
-  },
-  // Make sure we don't transpile any test files.
-  "exclude": [
-    "**/__test_data__/*",
-		"**/__tests__/*",
-		"**/__mocks__/*",
-	]
+    /* Additional Checks */
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+
+    /* Module Resolution Options */
+    "moduleResolution": "node",
+
+    /* This needs to be false so our types are possible to consume without setting this */
+    "esModuleInterop": false,
+    "resolveJsonModule": true
+  }
 }
