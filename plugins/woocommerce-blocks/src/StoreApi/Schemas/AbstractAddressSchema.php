@@ -107,18 +107,47 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 	}
 
 	/**
-	 * Format a state based on the country. If country has defined states, will return an upper case state code.
+	 * Get list of states for a country.
+	 *
+	 * @param string $country Country code.
+	 * @return array Array of state names indexed by state keys.
+	 */
+	protected function get_states_for_country( $country ) {
+		return $country ? array_filter( (array) \wc()->countries->get_states( $country ) ) : [];
+	}
+
+	/**
+	 * Validate provided state against a countries list of defined states.
+	 *
+	 * If there are no defined states for a country, any given state is valid.
+	 *
+	 * @param string $state State name or code (sanitized).
+	 * @param string $country Country code.
+	 * @return boolean Valid or not valid.
+	 */
+	protected function validate_state( $state, $country ) {
+		$states = $this->get_states_for_country( $country );
+
+		if ( count( $states ) && ! in_array( \wc_strtoupper( $state ), array_map( '\wc_strtoupper', array_keys( $states ) ), true ) ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Format a state based on the country. If country has defined states, will return a valid upper case state code.
 	 *
 	 * @param string $state State name or code (sanitized).
 	 * @param string $country Country code.
 	 * @return string
 	 */
 	protected function format_state( $state, $country ) {
-		$states = $country ? array_filter( (array) wc()->countries->get_states( $country ) ) : [];
+		$states = $this->get_states_for_country( $country );
 
 		if ( count( $states ) ) {
-			$state        = wc_strtoupper( $state );
-			$state_values = array_map( 'wc_strtoupper', array_flip( array_map( 'wc_strtoupper', $states ) ) );
+			$state        = \wc_strtoupper( $state );
+			$state_values = array_map( 'wc_strtoupper', array_flip( array_map( '\wc_strtoupper', $states ) ) );
 
 			if ( isset( $state_values[ $state ] ) ) {
 				// Convert to state code if a state name was provided.
@@ -163,15 +192,14 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 			return $errors;
 		}
 
-		$states = array_filter( array_keys( (array) wc()->countries->get_states( $address['country'] ) ) );
-
-		if ( ! empty( $address['state'] ) && count( $states ) && ! in_array( $address['state'], $states, true ) ) {
+		if ( ! empty( $address['state'] ) && ! $this->validate_state( $address['state'], $address['country'] ) ) {
 			$errors->add(
 				'invalid_state',
 				sprintf(
-					/* translators: %s valid states */
-					__( 'The provided state is not valid. Must be one of: %s', 'woo-gutenberg-products-block' ),
-					implode( ', ', $states )
+					/* translators: %1$s given state, %2$s valid states */
+					__( 'The provided state (%1$s) is not valid. Must be one of: %2$s', 'woo-gutenberg-products-block' ),
+					esc_html( $address['state'] ),
+					implode( ', ', array_keys( $this->get_states_for_country( $address['country'] ) ) )
 				)
 			);
 		}
