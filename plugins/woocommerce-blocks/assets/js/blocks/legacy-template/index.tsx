@@ -1,10 +1,8 @@
 /**
  * External dependencies
  */
-import {
-	registerExperimentalBlockType,
-	WC_BLOCKS_IMAGE_URL,
-} from '@woocommerce/block-settings';
+import { registerBlockType } from '@wordpress/blocks';
+import { WC_BLOCKS_IMAGE_URL } from '@woocommerce/block-settings';
 import { useBlockProps } from '@wordpress/block-editor';
 import { Placeholder } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
@@ -57,7 +55,7 @@ const Edit = ( { attributes }: Props ) => {
 	);
 };
 
-registerExperimentalBlockType( 'woocommerce/legacy-template', {
+registerBlockType( 'woocommerce/legacy-template', {
 	title: __( 'WooCommerce Legacy Template', 'woo-gutenberg-products-block' ),
 	category: 'woocommerce',
 	apiVersion: 2,
