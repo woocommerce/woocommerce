@@ -6,6 +6,8 @@
  * @var string $view
  * @var object $addons
  * @var object $promotions
+ * @var array $sections
+ * @var string $current_section
  */
 
 use Automattic\WooCommerce\Admin\RemoteInboxNotifications as PromotionRuleEngine;
@@ -36,13 +38,24 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 		</form>
 	</div>
 	<div class="top-bar">
-		<div id="marketplace-current-section-dropdown" class="current-section-dropdown">
-			<ul>
-				<?php foreach ( $sections as $section ) : ?>
+		<ul class="marketplace-header__tabs">
+			<li class="marketplace-header__tab">
+				<a
+					class="marketplace-header__tab-link is-current"
+					href="<?php echo esc_url( admin_url( 'admin.php?page=wc-addons' ) ); ?>"
+				>
+					<?php esc_html_e( 'Browse Extensions', 'woocommerce' ); ?>
+				</a>
+			</li>
+			<li class="marketplace-header__tab">
+				<a
+					class="marketplace-header__tab-link"
+					href="<?php echo esc_url( admin_url( 'admin.php?page=wc-addons&section=helper' ) ); ?>"
+				>
 					<?php
-					if ( $current_section === $section->slug && '_featured' !== $section->slug ) {
-						$current_section_name = $section->label;
-					}
+					$count_html = WC_Helper_Updater::get_updates_count_html();
+					/* translators: %s: WooCommerce.com Subscriptions tab count HTML. */
+					echo ( sprintf( __( 'My Subscriptions %s', 'woocommerce' ), $count_html ) );
 					?>
 					<li>
 						<a
@@ -58,6 +71,7 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 		</div>
 	<div class="wrap">
 		<div class="marketplace-content-wrapper">
+			<?php require __DIR__ . '/html-admin-page-addons-category-nav.php'; ?>
 			<?php if ( ! empty( $search ) && 0 === count( $addons ) ) : ?>
 				<h1 class="search-form-title">
 					<?php esc_html_e( 'Sorry, could not find anything. Try searching again using a different term.', 'woocommerce' ); ?></p>
