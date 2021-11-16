@@ -55,10 +55,7 @@
 		},
 		"psr-0": {
 			"Automattic\\WooCommerce\\Vendor\\": "lib/packages/"
-		},
-		"files": [
-			"../../tools/changelogger/PluginFormatter.php"
-		]
+		}
 	},
 	"autoload-dev": {
 		"psr-4": {
@@ -123,7 +120,7 @@
 		},
 		"changelogger": {
 			"formatter": {
-				"class": "PluginFormatter"
+				"filename": "../../tools/changelogger/PluginFormatter.php"
 			},
 			"types": [
 				"Fix",
