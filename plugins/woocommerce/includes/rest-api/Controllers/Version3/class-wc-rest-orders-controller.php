@@ -279,9 +279,14 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 			}
 		}
 
-		// // Add customer back since WC_Data_Store_WP::get_wp_query_args() will ignore the meta_query.
+		// Add customer back since WC_Data_Store_WP::get_wp_query_args() will ignore the meta_query.
 		if ( isset( $request['customer'] ) ) {
 			$args['customer'] = $request['customer'];
+		}
+
+		// Restore the pagination parameter for WC_Order_Query.
+		if ( isset( $request['page'])) {
+			$args['page'] = $request['page'];
 		}
 
 		// See if we need to migrate a meta_query added via filter.
