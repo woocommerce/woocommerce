@@ -36,9 +36,9 @@ class BlockTemplatesController {
 	 * Initialization method.
 	 */
 	protected function init() {
-		add_filter( 'get_block_templates', array( $this, 'add_block_templates' ), 10, 3 );
 		add_action( 'template_redirect', array( $this, 'render_block_template' ) );
 		add_filter( 'pre_get_block_template', array( $this, 'maybe_return_blocks_template' ), 10, 3 );
+		add_filter( 'get_block_templates', array( $this, 'add_block_templates' ), 10, 3 );
 	}
 
 	/**
@@ -156,6 +156,16 @@ class BlockTemplatesController {
 				continue;
 			}
 
+			// If the current $post_type is set (e.g. on an Edit Post screen), and isn't included in the available post_types
+			// on the template file, then lets skip it so that it doesn't get added. This is typically used to hide templates
+			// in the template dropdown on the Edit Post page.
+			if ( $post_type &&
+				isset( $template_file->post_types ) &&
+				! in_array( $post_type, $template_file->post_types, true )
+			) {
+				continue;
+			}
+
 			// It would be custom if the template was modified in the editor, so if it's not custom we can load it from
 			// the filesystem.
 			if ( 'custom' !== $template_file->source ) {
@@ -163,13 +173,6 @@ class BlockTemplatesController {
 			} else {
 				$template_file->title = BlockTemplateUtils::convert_slug_to_title( $template_file->slug );
 				$query_result[]       = $template_file;
-				continue;
-			}
-
-			if ( $post_type &&
-				isset( $template->post_types ) &&
-				! in_array( $post_type, $template->post_types, true )
-			) {
 				continue;
 			}
 
@@ -317,6 +320,7 @@ class BlockTemplatesController {
 				'source'      => 'woocommerce',
 				'title'       => BlockTemplateUtils::convert_slug_to_title( $template_slug ),
 				'description' => '',
+				'post_types'  => array(), // Don't appear in any Edit Post template selector dropdown.
 			);
 			$templates[]       = (object) $new_template_item;
 		}
