@@ -4,15 +4,21 @@
   "projectType": "application",
   "targets": {
     "composer-install": {
-      "executor": "@nrwl/workspace:run-script",
+      "executor": "@nrwl/workspace:run-commands",
       "options": {
-        "script": "composer:install"
+        "commands": [
+            "composer install {args.flag}"
+        ],
+        "cwd": "plugins/woocommerce"
       }
     },
     "composer-dump-autoload": {
-      "executor": "@nrwl/workspace:run-script",
+      "executor": "@nrwl/workspace:run-commands",
       "options": {
-        "script": "composer:dump-autoload"
+        "commands": [
+            "composer dump-autoload"
+        ],
+        "cwd": "plugins/woocommerce"
       }
     },
     "build": {
