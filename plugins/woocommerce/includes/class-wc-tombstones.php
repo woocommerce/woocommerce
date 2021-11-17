@@ -1,16 +1,38 @@
 <?php
 
+/**
+ * WC Tombstones
+ *
+ * Track WooCommerce objects that have been permanently deleted.
+ */
 class WC_Tombstones {
 	const OPTION = 'woocommerce_deleted_posts';
 
-	public static function init() {
+	/**
+	 *  Initialize actions and hooks.
+	 *
+	 *  @internal
+	 */
+	final public static function init() {
 		add_action( 'deleted_post', array( __CLASS__, 'deleted_post' ), 10, 2 );
 	}
 
+	/**
+	 * Get the tombstone IDs
+	 *
+	 * @param array $filters Query filters.
+	 * @return array
+	 */
 	public static function ids( $filters ) {
 		return array_keys( self::get( $filters ) );
 	}
 
+	/**
+	 * Get the tombstone objects
+	 *
+	 * @param array $filters Query filters.
+	 * @return array
+	 */
 	public static function get( $filters = null ) {
 		$tombstones = get_option( self::OPTION, array() );
 
@@ -49,6 +71,12 @@ class WC_Tombstones {
 		);
 	}
 
+	/**
+	 * Handler to track post objects as they're deleted.
+	 *
+	 * @param int     $id Post ID that has been deleted.
+	 * @param WP_Post $post Post object that has been deleted.
+	 */
 	public static function deleted_post( $id, $post ) {
 		$post_types = array(
 			'shop_order',
