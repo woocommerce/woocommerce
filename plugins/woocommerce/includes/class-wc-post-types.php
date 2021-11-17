@@ -299,14 +299,14 @@ class WC_Post_Types {
 
 		$shop_page_id = wc_get_page_id( 'shop' );
 
-		if ( current_theme_supports( 'woocommerce' ) ) {
+		if ( wc_current_theme_supports_woocommerce_or_fse() ) {
 			$has_archive = $shop_page_id && get_post( $shop_page_id ) ? urldecode( get_page_uri( $shop_page_id ) ) : 'shop';
 		} else {
 			$has_archive = false;
 		}
 
 		// If theme support changes, we may need to flush permalinks since some are changed based on this flag.
-		$theme_support = current_theme_supports( 'woocommerce' ) ? 'yes' : 'no';
+		$theme_support =  wc_current_theme_supports_woocommerce_or_fse() ? 'yes' : 'no';
 		if ( get_option( 'current_theme_supports_woocommerce' ) !== $theme_support && update_option( 'current_theme_supports_woocommerce', $theme_support ) ) {
 			update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
 		}
