@@ -67,6 +67,7 @@ class Note extends \WC_Data {
 			'layout'        => 'plain',
 			'image'         => '',
 			'is_deleted'    => false,
+			'is_read'       => false,
 		);
 
 		parent::__construct( $data );
@@ -324,6 +325,16 @@ class Note extends \WC_Data {
 		return $this->get_prop( 'is_deleted', $context );
 	}
 
+	/**
+	 * Get is_read status.
+	 *
+	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @return array
+	 */
+	public function get_is_read( $context = 'view' ) {
+		return $this->get_prop( 'is_read', $context );
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Setters
@@ -574,6 +585,15 @@ class Note extends \WC_Data {
 	}
 
 	/**
+	 * Set note is_read status. NULL is not allowed
+	 *
+	 * @param bool $is_read Note is_read status.
+	 */
+	public function set_is_read( $is_read ) {
+		$this->set_prop( 'is_read', $is_read );
+	}
+
+	/**
 	 * Add an action to the note
 	 *
 	 * @param string  $name           Action name (not presented to user).
@@ -643,7 +663,7 @@ class Note extends \WC_Data {
 	 * @throws \Exception If note name cannot be found.
 	 */
 	public function add_nonce_to_action( string $note_action_name, string $nonce_action, string $nonce_name ) {
-		$actions   = $this->get_prop( 'actions', 'edit' );
+		$actions = $this->get_prop( 'actions', 'edit' );
 
 		$matching_action = null;
 		foreach ( $actions as $i => $action ) {

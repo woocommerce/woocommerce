@@ -310,6 +310,7 @@ class Install {
 			layout varchar(20) DEFAULT '' NOT NULL,
 			image varchar(200) NULL DEFAULT NULL,
 			is_deleted boolean DEFAULT 0 NOT NULL,
+			is_read boolean DEFAULT 0 NOT NULL,
 			icon varchar(200) NOT NULL default 'info',
 			PRIMARY KEY (note_id)
 		) $collate;

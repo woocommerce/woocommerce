@@ -396,6 +396,11 @@ class Notes extends \WC_REST_CRUD_Controller {
 		if ( ! is_null( $request->get_param( 'is_deleted' ) ) ) {
 			$requested_updates['is_deleted'] = $request->get_param( 'is_deleted' );
 		}
+
+		if ( ! is_null( $request->get_param( 'is_read' ) ) ) {
+			$requested_updates['is_read'] = $request->get_param( 'is_read' );
+		}
+
 		return $requested_updates;
 	}
 
@@ -518,6 +523,7 @@ class Notes extends \WC_REST_CRUD_Controller {
 		$data['content']           = stripslashes( $data['content'] );
 		$data['is_snoozable']      = (bool) $data['is_snoozable'];
 		$data['is_deleted']        = (bool) $data['is_deleted'];
+		$data['is_read']           = (bool) $data['is_read'];
 		foreach ( (array) $data['actions'] as $key => $value ) {
 			$data['actions'][ $key ]->label  = stripslashes( $data['actions'][ $key ]->label );
 			$data['actions'][ $key ]->url    = $this->maybe_add_nonce_to_url(

@@ -110,6 +110,7 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 			$note->set_date_reminder( $note_row->date_reminder );
 			$note->set_is_snoozable( $note_row->is_snoozable );
 			$note->set_is_deleted( (bool) $note_row->is_deleted );
+			isset( $note_row->is_read ) && $note->set_is_read( (bool) $note_row->is_read );
 			$note->set_layout( $note_row->layout );
 			$note->set_image( $note_row->image );
 			$this->read_actions( $note );
@@ -165,6 +166,7 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 					'layout'        => $note->get_layout(),
 					'image'         => $note->get_image(),
 					'is_deleted'    => $note->get_is_deleted(),
+					'is_read'       => $note->get_is_read(),
 				),
 				array( 'note_id' => $note->get_id() )
 			);

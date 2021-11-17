@@ -142,6 +142,11 @@ class Notes {
 			$note_changed = true;
 		}
 
+		if ( isset( $requested_updates['is_read'] ) ) {
+			$note->set_is_read( $requested_updates['is_read'] );
+			$note_changed = true;
+		}
+
 		if ( $note_changed ) {
 			$note->save();
 		}

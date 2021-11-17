@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, _n } from '@wordpress/i18n';
-import { useEffect, useState } from '@wordpress/element';
+import { useState } from '@wordpress/element';
 import {
 	EmptyContent,
 	Section,
@@ -10,11 +10,7 @@ import {
 	EllipsisMenu,
 } from '@woocommerce/components';
 import { Card, CardHeader, Button } from '@wordpress/components';
-import {
-	NOTES_STORE_NAME,
-	useUserPreferences,
-	QUERY_DEFAULTS,
-} from '@woocommerce/data';
+import { NOTES_STORE_NAME, QUERY_DEFAULTS } from '@woocommerce/data';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
@@ -58,7 +54,6 @@ const onBodyLinkClick = ( note, innerLink ) => {
 const renderNotes = ( {
 	hasNotes,
 	isBatchUpdating,
-	lastRead,
 	notes,
 	onDismiss,
 	onNoteActionClick,
@@ -125,7 +120,6 @@ const renderNotes = ( {
 							<InboxNoteCard
 								key={ noteId }
 								note={ note }
-								lastRead={ lastRead }
 								onDismiss={ onDismiss }
 								onNoteActionClick={ onNoteActionClick }
 								onBodyLinkClick={ onBodyLinkClick }
@@ -159,6 +153,7 @@ const INBOX_QUERY = {
 		'layout',
 		'image',
 		'is_deleted',
+		'is_read',
 	],
 };
 
@@ -167,6 +162,7 @@ const InboxPanel = () => {
 	const { removeNote, updateNote, triggerNoteAction } = useDispatch(
 		NOTES_STORE_NAME
 	);
+
 	const { isError, isResolvingNotes, isBatchUpdating, notes } = useSelect(
 		( select ) => {
 			const {
@@ -186,18 +182,8 @@ const InboxPanel = () => {
 			};
 		}
 	);
-	const { updateUserPreferences, ...userPrefs } = useUserPreferences();
-	const [ lastRead ] = useState( userPrefs.activity_panel_inbox_last_read );
+
 	const [ showDismissAllModal, setShowDismissAllModal ] = useState( false );
-
-	useEffect( () => {
-		const mountTime = Date.now();
-
-		const userDataFields = {
-			activity_panel_inbox_last_read: mountTime,
-		};
-		updateUserPreferences( userDataFields );
-	}, [] );
 
 	const onDismiss = ( note ) => {
 		const screen = getScreenName();
@@ -292,7 +278,6 @@ const InboxPanel = () => {
 						renderNotes( {
 							hasNotes,
 							isBatchUpdating,
-							lastRead,
 							notes,
 							onDismiss,
 							onNoteActionClick,
