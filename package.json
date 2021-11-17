@@ -38,7 +38,7 @@
   "dependencies": {
     "@babel/core": "7.12.9",
     "@wordpress/babel-plugin-import-jsx-pragma": "^3.1.0",
-    "@wordpress/babel-preset-default": "^6.3.4",
+    "@wordpress/babel-preset-default": "^6.4.1",
     "lodash": "^4.17.21",
     "wp-textdomain": "1.0.1"
   }
