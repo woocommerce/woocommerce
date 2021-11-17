@@ -125,6 +125,7 @@
     },
     "install-unit-test-db": {
       "executor": "@nrwl/workspace:run-commands",
+      "cwd": "plugins/wooocommerce",
       "options": {
         "command": "bash ./tests/bin/install.sh woo_test root root 127.0.0.1 latest"
       }
