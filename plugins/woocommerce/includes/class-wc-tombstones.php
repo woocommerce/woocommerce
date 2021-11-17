@@ -7,12 +7,35 @@ class WC_Tombstones {
 		add_action( 'deleted_post', array( __CLASS__, 'deleted_post' ), 10, 2 );
 	}
 
-	public static function ids() {
-		return array_keys( self::get() );
+	public static function ids( $filters ) {
+		return array_keys( self::get( $filters ) );
 	}
 
-	public static function get() {
+	public static function get( $filters = null ) {
 		$tombstones = get_option( self::option, array() );
+
+		if ( $filters['modified_before'] ) {
+			$modified_before = strtotime( $filters['modified_before'] );
+
+			$tombstones = array_filter(
+				$tombstones,
+				function( $time ) use ( $modified_before ) {
+					return $modified_before > $time;
+				}
+			);
+		}
+
+		if ( $filters['modified_after'] ) {
+			$modified_after = strtotime( $filters['modified_after'] );
+
+			$tombstones = array_filter(
+				$tombstones,
+				function( $time ) use ( $modified_after ) {
+					return $modified_after < $time;
+				}
+			);
+		}
+
 		return array_filter(
 			$tombstones,
 			function( $time ) {

@@ -23,11 +23,21 @@ class WC_REST_Tombstones_Controller extends WC_REST_CRUD_Controller {
 		);
 	}
 
-	function get_items() {
-		return WC_Tombstones::ids();
+	function get_items( $request ) {
+		$filters = array();
+
+		if ( $request->get_param( 'modified_before' ) ) {
+			$filters['modified_before'] = $request->get_param( 'modified_before' );
+		}
+
+		if ( $request->get_param( 'modified_after' ) ) {
+			$filters['modified_after'] = $request->get_param( 'modified_after' );
+		}
+
+		return WC_Tombstones::ids( $filters );
 	}
 
-	function get_items_permissions_check() {
+	function get_items_permissions_check( $request ) {
 		return current_user_can( 'manage_options' );
 	}
 }
