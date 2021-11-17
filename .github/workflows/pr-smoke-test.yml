@@ -28,7 +28,7 @@ jobs:
         run: |
           npm install -g pnpm
           pnpm install
-          pnpm nx composer-install --args="--flag=--no-dev" woocommerce
+          pnpm nx composer-install-no-dev" woocommerce
           pnpm nx build-assets woocommerce
           pnpm install jest
           
