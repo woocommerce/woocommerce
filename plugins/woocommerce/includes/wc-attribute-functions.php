@@ -95,7 +95,7 @@ function wc_get_attribute_taxonomy_ids() {
 	$cache_key   = $prefix . 'ids';
 	$cache_value = wp_cache_get( $cache_key, 'woocommerce-attributes' );
 
-	if ( $cache_value ) {
+	if ( false !== $cache_value ) {
 		return $cache_value;
 	}
 
@@ -117,7 +117,7 @@ function wc_get_attribute_taxonomy_labels() {
 	$cache_key   = $prefix . 'labels';
 	$cache_value = wp_cache_get( $cache_key, 'woocommerce-attributes' );
 
-	if ( $cache_value ) {
+	if ( false !== $cache_value ) {
 		return $cache_value;
 	}
 
@@ -722,7 +722,7 @@ function wc_attribute_taxonomy_slug( $attribute_name ) {
 	$cache_key   = $prefix . 'slug-' . $attribute_name;
 	$cache_value = wp_cache_get( $cache_key, 'woocommerce-attributes' );
 
-	if ( $cache_value ) {
+	if ( false !== $cache_value ) {
 		return $cache_value;
 	}
 

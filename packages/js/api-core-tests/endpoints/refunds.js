@@ -4,7 +4,6 @@
 const {
 	getRequest,
 	postRequest,
-	putRequest,
 	deleteRequest,
 } = require( '../utils/request' );
 
