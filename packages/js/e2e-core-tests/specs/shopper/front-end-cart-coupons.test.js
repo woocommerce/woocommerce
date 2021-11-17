@@ -9,6 +9,7 @@ const {
 	applyCoupon,
 	removeCoupon,
 } = require( '@woocommerce/e2e-utils' );
+const { getCouponId, getCouponsTable } = require( '../utils/coupons' );
 
 /**
  * External dependencies
@@ -19,36 +20,12 @@ const {
 	beforeAll,
 } = require( '@jest/globals' );
 
-const couponsTable = [
-	['fixed cart', { text: '$5.00' }, { text: '$4.99' }],
-	['percentage', { text: '$4.99' }, { text: '$5.00' }],
-	['fixed product', { text: '$5.00' }, { text: '$4.99' }]
-];
-
-let couponFixedCart;
-let couponPercentage;
-let couponFixedProduct;
-
-const getCoupon = (couponType) => {
-	switch (couponType) {
-		case 'fixed cart':
-			return couponFixedCart;
-		case 'percentage':
-			return couponPercentage;
-		case 'fixed product':
-			return couponFixedProduct;
-	}
-};
-
 const runCartApplyCouponsTest = () => {
 	describe('Cart applying coupons', () => {
 		let productId;
 
 		beforeAll(async () => {
 			productId = await createSimpleProduct();
-			couponFixedCart = await createCoupon();
-			couponPercentage = await createCoupon('50', 'Percentage discount');
-			couponFixedProduct = await createCoupon('5', 'Fixed product discount');
 			await shopper.emptyCart();
 			await shopper.goToShop();
 			await shopper.addToCartFromShopPage( productId );
@@ -56,8 +33,8 @@ const runCartApplyCouponsTest = () => {
 			await shopper.goToCart();
 		});
 
-		it.each(couponsTable)('allows cart to apply %s coupon', async (couponType, cartDiscount, orderTotal) => {
-			const coupon = getCoupon(couponType);
+		it.each( getCouponsTable() )( 'allows cart to apply %s coupon', async ( couponType, cartDiscount, orderTotal ) => {
+			const coupon = await getCouponId( couponType );
 			await applyCoupon(coupon);
 			await expect(page).toMatchElement('.woocommerce-message', { text: 'Coupon code applied successfully.' });
 
@@ -69,9 +46,10 @@ const runCartApplyCouponsTest = () => {
 		});
 
 		it('prevents cart applying same coupon twice', async () => {
-			await applyCoupon(couponFixedCart);
+			const couponId = await getCouponId( 'fixed cart' );
+			await applyCoupon( couponId );
 			await expect(page).toMatchElement('.woocommerce-message', {text: 'Coupon code applied successfully.'});
-			await applyCoupon(couponFixedCart);
+			await applyCoupon( couponId );
 			// Verify only one discount applied
 			// This is a work around for Puppeteer inconsistently finding 'Coupon code already applied'
 			await expect(page).toMatchElement('.cart-discount .amount', {text: '$5.00'});
@@ -79,7 +57,7 @@ const runCartApplyCouponsTest = () => {
 		});
 
 		it('allows cart to apply multiple coupons', async () => {
-			await applyCoupon(couponFixedProduct);
+			await applyCoupon( await getCouponId( 'fixed product' ) );
 			await expect(page).toMatchElement('.woocommerce-message', {text: 'Coupon code applied successfully.'});
 
 			// Verify discount applied and order total
@@ -88,8 +66,8 @@ const runCartApplyCouponsTest = () => {
 		});
 
 		it('restores cart total when coupons are removed', async () => {
-			await removeCoupon(couponFixedCart);
-			await removeCoupon(couponFixedProduct);
+			await removeCoupon( await getCouponId( 'fixed cart' ) );
+			await removeCoupon( await getCouponId( 'fixed product' ) );
 			await expect(page).toMatchElement('.order-total .amount', {text: '$9.99'});
 		});
 	});
