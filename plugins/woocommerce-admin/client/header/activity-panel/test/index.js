@@ -70,7 +70,7 @@ describe( 'Activity Panel', () => {
 	it( 'should render inbox tab on embedded pages', () => {
 		render( <ActivityPanel isEmbedded query={ {} } /> );
 
-		expect( screen.getByText( 'Inbox' ) ).toBeDefined();
+		expect( screen.getByText( 'Activity' ) ).toBeDefined();
 	} );
 
 	it( 'should render inbox tab if not on home screen', () => {
@@ -78,7 +78,7 @@ describe( 'Activity Panel', () => {
 			<ActivityPanel query={ { page: 'wc-admin', path: '/customers' } } />
 		);
 
-		expect( screen.getByText( 'Inbox' ) ).toBeDefined();
+		expect( screen.getByText( 'Activity' ) ).toBeDefined();
 	} );
 
 	it( 'should not render inbox tab on home screen', () => {
