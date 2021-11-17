@@ -1,18 +1,22 @@
-.wc-block-mini-cart {
+.wc-block-mini-cart.wp-block-woocommerce-mini-cart {
+	background-color: transparent !important;
 	display: flex;
 	justify-content: flex-end;
+
+	&.is-transparent .wc-block-mini-cart__button {
+		background-color: transparent !important;
+	}
 }
 
 .wc-block-mini-cart__button {
 	align-items: center;
-	background: transparent;
 	border: none;
+	color: inherit;
 	display: flex;
 	font-weight: 400;
 	padding: em($gap-small) em($gap-smaller);
 
 	&:hover {
-		background: transparent;
 		opacity: 0.6;
 	}
 }
@@ -38,6 +42,7 @@
 	font-size: 1rem;
 
 	.components-modal__content {
+		box-sizing: border-box;
 		display: flex;
 		flex-direction: column;
 		height: 100%;

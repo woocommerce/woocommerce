@@ -28,10 +28,21 @@ const renderMiniCartFrontend = () => {
 	renderFrontend( {
 		selector: '.wc-block-mini-cart',
 		Block: MiniCartBlock,
-		getProps: ( el: HTMLElement ) => ( {
-			isDataOutdated: el.dataset.isDataOutdated,
-			isInitiallyOpen: el.dataset.isInitiallyOpen === 'true',
-		} ),
+		getProps: ( el: HTMLElement ) => {
+			let colorClassNames = '';
+			const button = el.querySelector( '.wc-block-mini-cart__button' );
+			if ( button !== null ) {
+				colorClassNames = button.classList
+					.toString()
+					.replace( 'wc-block-mini-cart__button', '' );
+			}
+			return {
+				isDataOutdated: el.dataset.isDataOutdated,
+				isInitiallyOpen: el.dataset.isInitiallyOpen === 'true',
+				colorClassNames,
+				style: el.dataset.style ? JSON.parse( el.dataset.style ) : {},
+			};
+		},
 	} );
 
 	// Refocus previously focused button if drawer is not open.
