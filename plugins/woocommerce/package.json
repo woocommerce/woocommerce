@@ -13,8 +13,6 @@
     "wp_org_slug": "woocommerce"
   },
   "scripts": {
-    "composer:install": "composer install",
-    "composer:dump-autoload": "composer dump-autoload",
     "preinstall": "npx only-allow pnpm",
     "build": "./bin/build-zip.sh",
     "build:core": "grunt && pnpm run makepot",
