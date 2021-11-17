@@ -47,7 +47,7 @@ jobs:
                   pnpm install
 
             - name: Load docker images and start containers.
-              working-directory: package/woocommerce
+              working-directory: package/woocommerce/plugins/woocommerce
               run: pnpm nx docker-up woocommerce
 
             - name: Move current directory to code. We will install zip file in this dir later.
