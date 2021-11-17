@@ -30,7 +30,7 @@ jobs:
           pnpm install
           pnpm nx composer-install --args="--flag=--no-dev" woocommerce
           pnpm nx build-assets woocommerce
-          pnpm nx install-jest woocommerce
+          pnpm install jest
           
       - name: Run smoke test.
         working-directory: package/woocommerce/plugins/woocommerce
