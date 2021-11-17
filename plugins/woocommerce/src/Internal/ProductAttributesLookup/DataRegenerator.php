@@ -255,10 +255,6 @@ CREATE TABLE ' . $this->lookup_table_name . '(
 	 * @return array The tools array with the entry added.
 	 */
 	private function add_initiate_regeneration_entry_to_tools_array( array $tools_array ) {
-		if ( ! $this->data_store->is_feature_visible() ) {
-			return $tools_array;
-		}
-
 		$lookup_table_exists       = $this->data_store->check_lookup_table_exists();
 		$generation_is_in_progress = $this->data_store->regeneration_is_in_progress();
 
@@ -375,9 +371,6 @@ CREATE TABLE ' . $this->lookup_table_name . '(
 	 * @throws \Exception Something prevents the regeneration from starting.
 	 */
 	private function check_can_do_lookup_table_regeneration( $product_id = null ) {
-		if ( ! $this->data_store->is_feature_visible() ) {
-			throw new \Exception( "Can't do product attribute lookup data regeneration: feature is not visible" );
-		}
 		if ( $product_id && ! $this->data_store->check_lookup_table_exists() ) {
 			throw new \Exception( "Can't do product attribute lookup data regeneration: lookup table doesn't exist" );
 		}
