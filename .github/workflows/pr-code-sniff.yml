@@ -40,9 +40,6 @@ jobs:
             npm install -g pnpm
             pnpm install
 
-      - name: Install Nx
-        run: npm install -g nx
-
       - name: Setup and install composer
         run: pnpm nx composer-install woocommerce
 
