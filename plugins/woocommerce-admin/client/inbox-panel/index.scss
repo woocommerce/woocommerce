@@ -1,6 +1,7 @@
 #activity-panel-inbox {
 	margin: 0 $gap-large;
 }
+
 .woocommerce-layout__inbox-panel-header {
 	padding: $gap-large;
 
@@ -38,5 +39,46 @@
 .wooocommerce-inbox-card__header {
 	.woocommerce-badge {
 		margin-left: 16px;
+	}
+}
+
+.woocommerce-inbox-dismiss-all-modal {
+	width: 565px;
+	max-width: 100%;
+
+	.components-modal__content::before {
+		margin-bottom: 0;
+	}
+
+	.components-modal__header {
+		border-bottom: 1px solid #ddd !important;
+	}
+
+	.woocommerce-usage-modal__message {
+		box-sizing: border-box;
+		border-bottom: 1px solid #ddd;
+		padding: $gap * 2;
+		display: flex;
+		flex-direction: row;
+		justify-content: space-between;
+		background: #fff;
+		align-items: center;
+		height: 60px;
+		z-index: 10;
+		position: relative;
+		position: sticky;
+		top: 0;
+		margin: 0 -#{$gap * 2} $gap-large;
+		font-size: 1.2em;
+	}
+
+	.woocommerce-usage-modal__actions {
+		display: flex;
+		justify-content: flex-end;
+		margin-top: $gap;
+
+		button {
+			margin-left: $gap;
+		}
 	}
 }

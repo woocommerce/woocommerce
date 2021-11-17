@@ -30,6 +30,7 @@ import {
 import { ActivityCard } from '../header/activity-panel/activity-card';
 import { hasValidNotes } from './utils';
 import { getScreenName } from '../utils';
+import DismissAllModal from './dissmiss-all-modal';
 import './index.scss';
 
 const renderEmptyCard = () => (
@@ -59,8 +60,9 @@ const renderNotes = ( {
 	isBatchUpdating,
 	lastRead,
 	notes,
-	dismissNote,
+	onDismiss,
 	onNoteActionClick,
+	setShowDismissAllModal: onDismissAll,
 } ) => {
 	if ( isBatchUpdating ) {
 		return;
@@ -94,10 +96,15 @@ const renderNotes = ( {
 				</div>
 				<EllipsisMenu
 					label={ __( 'Inbox Notes Options', 'woocommerce-admin' ) }
-					renderContent={ ( {} ) => (
+					renderContent={ ( { onToggle } ) => (
 						<div className="woocommerce-inbox-card__section-controls">
-							<Button>
-								{ __( 'Hide this', 'woocommerce-admin' ) }
+							<Button
+								onClick={ () => {
+									onDismissAll( true );
+									onToggle();
+								} }
+							>
+								{ __( 'Dismiss all', 'woocommerce-admin' ) }
 							</Button>
 						</div>
 					) }
@@ -119,7 +126,7 @@ const renderNotes = ( {
 								key={ noteId }
 								note={ note }
 								lastRead={ lastRead }
-								onDismiss={ dismissNote }
+								onDismiss={ onDismiss }
 								onNoteActionClick={ onNoteActionClick }
 								onBodyLinkClick={ onBodyLinkClick }
 								onNoteVisible={ onNoteVisible }
@@ -181,6 +188,7 @@ const InboxPanel = () => {
 	);
 	const { updateUserPreferences, ...userPrefs } = useUserPreferences();
 	const [ lastRead ] = useState( userPrefs.activity_panel_inbox_last_read );
+	const [ showDismissAllModal, setShowDismissAllModal ] = useState( false );
 
 	useEffect( () => {
 		const mountTime = Date.now();
@@ -191,7 +199,7 @@ const InboxPanel = () => {
 		updateUserPreferences( userDataFields );
 	}, [] );
 
-	const dismissNote = ( note ) => {
+	const onDismiss = ( note ) => {
 		const screen = getScreenName();
 
 		recordEvent( 'inbox_action_dismiss', {
@@ -265,6 +273,13 @@ const InboxPanel = () => {
 	// the current one is only getting 25 notes and the count of unread notes only will refer to this 25 and not all the existing ones.
 	return (
 		<>
+			{ showDismissAllModal && (
+				<DismissAllModal
+					onClose={ () => {
+						setShowDismissAllModal( false );
+					} }
+				/>
+			) }
 			<div className="woocommerce-homepage-notes-wrapper">
 				{ ( isResolvingNotes || isBatchUpdating ) && (
 					<Section>
@@ -279,8 +294,9 @@ const InboxPanel = () => {
 							isBatchUpdating,
 							lastRead,
 							notes,
-							dismissNote,
+							onDismiss,
 							onNoteActionClick,
+							setShowDismissAllModal,
 						} ) }
 				</Section>
 			</div>
