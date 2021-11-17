@@ -1863,7 +1863,7 @@ return array(
 		'Y' => __( 'Delta Amacuro', 'woocommerce' ),
 		'Z' => __( 'Amazonas', 'woocommerce' ),
 	),
-	'VN' => array(
+	'VN' => array( // Ref: https://www.gso.gov.vn/phuong-phap-thong-ke/danh-muc/don-vi-hanh-chinh/
 		'AN-GIANG'        => __( 'An Giang', 'woocommerce' ),
 		'BA-RIA-VUNG-TAU' => __( 'Ba Ria - Vung Tau', 'woocommerce' ),
 		'BAC-LIEU'        => __( 'Bac Lieu', 'woocommerce' ),
