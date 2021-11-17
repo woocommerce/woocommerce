@@ -26,6 +26,19 @@ const settings = {
 	supports: {
 		html: false,
 		multiple: false,
+		color: {
+			/**
+			 * Because we don't target the wrapper element, we don't need
+			 * to add color classes and style to the wrapper.
+			 */
+			__experimentalSkipSerialization: true,
+		},
+		/**
+		 * We need this experimental flag because we don't want to style the
+		 * wrapper but inner elements.
+		 */
+		__experimentalSelector:
+			'.wc-block-mini-cart__button, .wc-block-mini-cart__badge',
 	},
 	example: {
 		attributes: {
@@ -37,6 +50,10 @@ const settings = {
 			type: 'boolean',
 			default: false,
 			save: false,
+		},
+		transparentButton: {
+			type: 'boolean',
+			default: true,
 		},
 	},
 
