@@ -1,7 +1,7 @@
 <?php
 
 class WC_Tombstones {
-	const option = 'woocommerce_deleted_posts';
+	const OPTION = 'woocommerce_deleted_posts';
 
 	public static function init() {
 		add_action( 'deleted_post', array( __CLASS__, 'deleted_post' ), 10, 2 );
@@ -12,7 +12,7 @@ class WC_Tombstones {
 	}
 
 	public static function get( $filters = null ) {
-		$tombstones = get_option( self::option, array() );
+		$tombstones = get_option( self::OPTION, array() );
 
 		if ( $filters['modified_before'] ) {
 			$modified_before = strtotime( $filters['modified_before'] );
@@ -63,7 +63,7 @@ class WC_Tombstones {
 		$tombstones        = self::get();
 		$tombstones[ $id ] = time();
 
-		update_option( self::option, $tombstones );
+		update_option( self::OPTION, $tombstones );
 	}
 }
 
