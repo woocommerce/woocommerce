@@ -7,7 +7,7 @@
       "executor": "@nrwl/workspace:run-commands",
       "options": {
         "commands": [
-            "composer install"
+            "composer install {args.flag}"
         ],
         "cwd": "plugins/woocommerce"
       }
