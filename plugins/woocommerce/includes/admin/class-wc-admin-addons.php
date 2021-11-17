@@ -26,7 +26,7 @@ class WC_Admin_Addons {
 	 * @return array of objects
 	 */
 	public static function get_featured() {
-		$featured = get_transient( 'wc_addons_featured' );
+		$featured = get_transient( 'wc_addons_featured_2' );
 		if ( false === $featured ) {
 			$headers = array();
 			$auth    = WC_Helper_Options::get( 'auth' );
@@ -46,7 +46,7 @@ class WC_Admin_Addons {
 			if ( ! is_wp_error( $raw_featured ) ) {
 				$featured = json_decode( wp_remote_retrieve_body( $raw_featured ) );
 				if ( $featured ) {
-					set_transient( 'wc_addons_featured', $featured, DAY_IN_SECONDS );
+					set_transient( 'wc_addons_featured_2', $featured, DAY_IN_SECONDS );
 				}
 			}
 		}
@@ -758,7 +758,7 @@ class WC_Admin_Addons {
 		$product_list_classes = 'products addons-products-' . $product_list_classes;
 		?>
 			<section class="addon-product-group">
-				<h1 class="addon-product-group-title"><?php echo esc_html( $block->title ); ?></h1>
+				<h2 class="addon-product-group-title"><?php echo esc_html( $block->title ); ?></h2>
 				<div class="addon-product-group-description-container">
 					<?php if ( ! empty( $block->description ) ) : ?>
 					<div class="addon-product-group-description">
@@ -891,6 +891,7 @@ class WC_Admin_Addons {
 	 * Output HTML for a promotion action.
 	 *
 	 * @param array $action Array of action properties.
+	 *
 	 * @return void
 	 */
 	public static function output_promotion_action( array $action ) {
@@ -1056,7 +1057,7 @@ class WC_Admin_Addons {
 		if ( $rating >= $index ) {
 			// Rating more that current star to show.
 			return 'fill';
-		} else if (
+		} elseif (
 			abs( $index - 1 - floor( $rating ) ) < 0.0000001 &&
 			0 < ( $rating - floor( $rating ) )
 		) {
@@ -1160,28 +1161,34 @@ class WC_Admin_Addons {
 			// For product-related banners icon is a product's image.
 			$mapped->icon = $data->image ?? null;
 		}
+
 		// URL.
 		$mapped->url = $data->link ?? null;
 		if ( empty( $mapped->url ) ) {
 			$mapped->url = $data->url ?? null;
 		}
+
 		// Title.
 		$mapped->title = $data->title ?? null;
+
 		// Vendor Name.
 		$mapped->vendor_name = $data->vendor_name ?? null;
 		if ( empty( $mapped->vendor_name ) ) {
 			$mapped->vendor_name = $data->vendorName ?? null; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 		}
+
 		// Vendor URL.
 		$mapped->vendor_url = $data->vendor_url ?? null;
 		if ( empty( $mapped->vendor_url ) ) {
 			$mapped->vendor_url = $data->vendorUrl ?? null; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 		}
+
 		// Description.
 		$mapped->description = $data->excerpt ?? null;
 		if ( empty( $mapped->description ) ) {
 			$mapped->description = $data->description ?? null;
 		}
+
 		$has_currency = ! empty( $data->currency ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 
 		// Is Free.
@@ -1190,22 +1197,37 @@ class WC_Admin_Addons {
 		} else {
 			$mapped->is_free = '&#36;0.00' === $data->price;
 		}
+
 		// Price.
 		if ( $has_currency ) {
 			$mapped->price = wc_price( $data->price, array( 'currency' => $data->currency ) );
 		} else {
 			$mapped->price = $data->price;
 		}
+
+		// Price suffix, e.g. "per month".
+		$mapped->price_suffix = $data->price_suffix ?? null;
+
 		// Rating.
 		$mapped->rating = $data->rating ?? null;
 		if ( null === $mapped->rating ) {
 			$mapped->rating = $data->averageRating ?? null; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 		}
+
 		// Reviews Count.
 		$mapped->reviews_count = $data->reviews_count ?? null;
 		if ( null === $mapped->reviews_count ) {
 			$mapped->reviews_count = $data->reviewsCount ?? null; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 		}
+		// Featured & Promoted product card.
+		// Label.
+		$mapped->label = $data->label ?? null;
+		// Primary color.
+		$mapped->primary_color = $data->primary_color ?? null;
+		// Text color.
+		$mapped->text_color = $data->text_color ?? null;
+		// Button text.
+		$mapped->button = $data->button ?? null;
 
 		return $mapped;
 	}
@@ -1234,25 +1256,69 @@ class WC_Admin_Addons {
 		if ( 'banner' === $block_type ) {
 			$product_details_classes .= ' addon-product-banner-details';
 		}
-		?>
+
+		if ( isset( $mapped->label ) && 'promoted' === $mapped->label ) {
+			$product_details_classes .= ' promoted';
+		} elseif ( isset( $mapped->label ) && 'featured' === $mapped->label ) {
+			$product_details_classes .= ' featured';
+		}
+
+		if ( 'promoted' === $mapped->label
+			&& ! empty( $mapped->primary_color )
+			&& ! empty( $mapped->text_color )
+			&& ! empty( $mapped->button ) ) {
+			// Promoted product card.
+			?>
+			<li class="product">
+				<div class="<?php echo esc_attr( $product_details_classes ); ?>" style="border-top: 5px  solid <?php echo esc_html( $mapped->primary_color ); ?>;">
+					<span class="label promoted"><?php esc_attr_e( 'Promoted', 'woocommerce' ); ?></span>
+					<a href="<?php echo esc_url( $product_url ); ?>">
+						<h2><?php echo esc_html( $mapped->title ); ?></h2>
+					</a>
+					<p><?php echo wp_kses_post( $mapped->description ); ?></p>
+				</div>
+				<div class="product-footer-promoted">
+					<span class="icon"><img src="<?php echo esc_url( $mapped->icon ); ?>" /></span>
+					<a class="addons-button addons-button-promoted" style="background: <?php echo esc_html( $mapped->primary_color ); ?>; color: <?php echo esc_html( $mapped->text_color ); ?>;" href="<?php echo esc_url( $product_url ); ?>">
+						<?php echo esc_html( $mapped->button ); ?>
+					</a>
+				</div>
+			</li>
+			<?php
+		} else {
+			// Normal or "featured" product card.
+			?>
 			<li class="<?php echo esc_attr( implode( ' ', $class_names ) ); ?>">
 				<div class="<?php echo esc_attr( $product_details_classes ); ?>">
 					<div class="product-text-container">
+						<?php if ( isset( $mapped->label ) && 'featured' === $mapped->label ) { ?>
+							<span class="label featured"><?php esc_attr_e( 'Featured', 'woocommerce' ); ?></span>
+						<?php } ?>
 						<a href="<?php echo esc_url( $product_url ); ?>">
 							<h2><?php echo esc_html( $mapped->title ); ?></h2>
 						</a>
 						<?php if ( ! empty( $mapped->vendor_name ) && ! empty( $mapped->vendor_url ) ) : ?>
 							<div class="product-developed-by">
 								<?php
-									printf(
-										/* translators: %s vendor link */
-										esc_html__( 'Developed by %s', 'woocommerce' ),
-										sprintf(
-											'<a class="product-vendor-link" href="%1$s" target="_blank">%2$s</a>',
-											esc_url_raw( $mapped->vendor_url ),
-											esc_html( $mapped->vendor_name )
-										)
-									);
+								$vendor_url = add_query_arg(
+									array(
+										'utm_source'   => 'extensionsscreen',
+										'utm_medium'   => 'product',
+										'utm_campaign' => 'wcaddons',
+										'utm_content'  => 'devpartner',
+									),
+									$mapped->vendor_url
+								);
+
+								printf(
+								/* translators: %s vendor link */
+									esc_html__( 'Developed by %s', 'woocommerce' ),
+									sprintf(
+										'<a class="product-vendor-link" href="%1$s" target="_blank">%2$s</a>',
+										esc_url_raw( $vendor_url ),
+										esc_html( $mapped->vendor_name )
+									)
+								);
 								?>
 							</div>
 						<?php endif; ?>
@@ -1284,7 +1350,15 @@ class WC_Admin_Addons {
 									);
 									?>
 								</span>
-								<span class="price-suffix"><?php esc_html_e( 'per year', 'woocommerce' ); ?></span>
+								<span class="price-suffix">
+									<?php
+									$price_suffix = __( 'per year', 'woocommerce' );
+									if ( ! empty( $mapped->price_suffix ) ) {
+										$price_suffix = $mapped->price_suffix;
+									}
+									echo esc_html( $price_suffix );
+									?>
+								</span>
 							<?php endif; ?>
 						</div>
 						<?php if ( ! empty( $mapped->reviews_count ) && ! empty( $mapped->rating ) ) : ?>
@@ -1303,6 +1377,7 @@ class WC_Admin_Addons {
 					</a>
 				</div>
 			</li>
-		<?php
+			<?php
+		}
 	}
 }

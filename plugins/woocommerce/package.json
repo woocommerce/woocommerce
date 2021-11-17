@@ -13,9 +13,9 @@
     "wp_org_slug": "woocommerce"
   },
   "scripts": {
-    "check:subset-installed": "pnpm list --depth 1 install-subset > /dev/null 2>&1",
-    "install:subset-only": "pnpm install --no-package-lock --no-save install-subset",
-    "install:no-e2e": "pnpm run check:subset-installed --silent || pnpm run install:subset-only && pnpx install-subset i no-e2e",
+    "composer:install": "composer install",
+    "composer:dump-autoload": "composer dump-autoload",
+    "preinstall": "npx only-allow pnpm",
     "build": "./bin/build-zip.sh",
     "build:core": "grunt && pnpm run makepot",
     "build-watch": "grunt watch",
@@ -125,17 +125,5 @@
     "> 0.1%",
     "ie 8",
     "ie 9"
-  ],
-  "subsets": {
-    "no-e2e": {
-      "exclude": [
-        "@woocommerce/api",
-        "@woocommerce/api-core-tests",
-        "@woocommerce/e2e-core-tests",
-        "@woocommerce/e2e-environment",
-        "@woocommerce/e2e-utils",
-        "@wordpress/e2e-test-utils"
-      ]
-    }
-  }
+  ]
 }

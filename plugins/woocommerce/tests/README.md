@@ -1,6 +1,6 @@
 # WooCommerce Tests
 
-This document discusses unit tests. See [the e2e README](https://github.com/woocommerce/woocommerce/tree/trunk/tests/e2e) to learn how to setup testing environment for running e2e tests and run them.
+This document discusses unit tests. See [the e2e README](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/e2e/README.md) to learn how to setup testing environment for running e2e tests and run them.
 
 ## Table of contents
 
@@ -25,11 +25,11 @@ To run the tests, you need to create a test database. You can:
 - Access a database on a server
 - Connect to your local database on your machine
 - Use a solution like VVV - if you are using VVV you might need to `vagrant ssh` first
-- Run a throwaway database in docker with this one-liner: `docker run --rm --name woocommerce_test_db -p 3306:3306 -e MYSQL_ROOT_PASSWORD=woocommerce_test_password -d mysql:5.7.33`. ( Use `tests/bin/install.sh woocommerce_tests root woocommerce_test_password 0.0.0.0` in next step) 
+- Run a throwaway database in docker with this one-liner: `docker run --rm --name woocommerce_test_db -p 3306:3306 -e MYSQL_ROOT_PASSWORD=woocommerce_test_password -d mysql:5.7.33`. ( Use `tests/bin/install.sh woocommerce_tests root woocommerce_test_password 0.0.0.0` in next step)
 
 ### Setup instructions
 
-Once you have database, from the WooCommerce root directory run the following:
+Once you have database, from the WooCommerce root directory "cd" into `plugins/woocommerce` directory and run the following:
 
 1. Install [PHPUnit](http://phpunit.de/) via Composer by running:
     ```
@@ -103,7 +103,7 @@ curl -L https://github.com/woocommerce/phpunit/archive/add-compatibility-with-ph
 unzip -d /tmp/phpunit-7.5-fork /tmp/phpunit-7.5-fork.zip
 composer bin phpunit config --unset platform
 composer bin phpunit config repositories.0 '{"type": "path", "url": "/tmp/phpunit-7.5-fork/phpunit-add-compatibility-with-php8-to-phpunit-7", "options": {"symlink": false}}'
-composer bin phpunit require --dev -W phpunit/phpunit:@dev --ignore-platform-reqs    
+composer bin phpunit require --dev -W phpunit/phpunit:@dev --ignore-platform-reqs
 ```
 
 Just remember that you can't include the modified `composer.json` in any commit!
@@ -123,7 +123,7 @@ Each test file should correspond to an associated source file and be named accor
         * When testing functions: use one test file per functions group file, for example `wc-formatting-functions-test.php` for code in the `wc-formatting-functions.php` file.
 
 
-See also [the guidelines for writing unit tests for `src` code](https://github.com/woocommerce/woocommerce/tree/trunk/src/README.md#writing-unit-tests) and [the guidelines for `includes` code](https://github.com/woocommerce/woocommerce/tree/trunk/includes/README.md#writing-unit-tests). 
+See also [the guidelines for writing unit tests for `src` code](https://github.com/woocommerce/woocommerce/tree/trunk/src/README.md#writing-unit-tests) and [the guidelines for `includes` code](https://github.com/woocommerce/woocommerce/tree/trunk/includes/README.md#writing-unit-tests).
 
 General guidelines for all the unit tests:
 

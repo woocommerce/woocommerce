@@ -1,0 +1,27 @@
+{
+	"name": "woocommerce/api-core-tests",
+	"description": "WooCommerce API core test",
+	"type": "library",
+	"license": "GPL-3.0-or-later",
+	"minimum-stability": "dev",
+	"require-dev": {
+		"automattic/jetpack-changelogger": "3.0.2"
+	},
+	"extra": {
+		"changelogger": {
+			"formatter": {
+				"filename": "../../../tools/changelogger/PackageFormatter.php"
+			},
+			"types": [
+				"Fix",
+				"Add",
+				"Update",
+				"Dev",
+				"Tweak",
+				"Performance",
+				"Enhancement"
+			],
+			"changelog": "NEXT_CHANGELOG.md"
+		}
+	}
+}
