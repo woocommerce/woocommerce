@@ -11,7 +11,7 @@ jobs:
         uses: actions/checkout@v2
       - name: Build
         id: build
-        uses: woocommerce/action-build@v2
+        uses: woocommerce/action-build@trunk
       - name: Upload release asset
         uses: actions/upload-release-asset@v1
         env:
