@@ -604,6 +604,22 @@ packages:
       - supports-color
     dev: true
 
+  /@babel/helper-create-class-features-plugin/7.15.4_@babel+core@7.15.8:
+    resolution: {integrity: sha512-7ZmzFi+DwJx6A7mHRwbuucEYpyBwmh2Ca0RvI6z2+WLZYCqV0JOaLb+u0zbtmDicebgKBZgqbYfLaKNqSgv5Pw==}
+    engines: {node: '>=6.9.0'}
+    peerDependencies:
+      '@babel/core': ^7.0.0
+    dependencies:
+      '@babel/core': 7.15.8
+      '@babel/helper-annotate-as-pure': 7.15.4
+      '@babel/helper-function-name': 7.15.4
+      '@babel/helper-member-expression-to-functions': 7.15.4
+      '@babel/helper-optimise-call-expression': 7.15.4
+      '@babel/helper-replace-supers': 7.15.4
+      '@babel/helper-split-export-declaration': 7.15.4
+    transitivePeerDependencies:
+      - supports-color
+
   /@babel/helper-create-class-features-plugin/7.16.0_@babel+core@7.15.8:
     resolution: {integrity: sha512-XLwWvqEaq19zFlF5PTgOod4bUA+XbkR4WLQBct1bkzmxJGB0ZEJaoKF4c8cgH9oBtCDuYJ8BP5NB9uFiEgO5QA==}
     engines: {node: '>=6.9.0'}
@@ -5498,6 +5514,25 @@ packages:
       - utf-8-validate
     dev: true
 
+  /@nrwl/linter/13.1.4:
+    resolution: {integrity: sha512-eeBP2BOA8U7QpDbWcYQ7d30I9oSXsxl7jZnhggRUDxmrW1SzJmMTXCSAwRLFnHediFAYQVR1FxVmIjX8cxRPBQ==}
+    dependencies:
+      '@nrwl/devkit': 13.1.4
+      '@nrwl/jest': 13.1.4
+      eslint: 7.32.0
+      glob: 7.1.4
+      minimatch: 3.0.4
+      tmp: 0.2.1
+      tslib: 2.3.1
+    transitivePeerDependencies:
+      - bufferutil
+      - canvas
+      - node-notifier
+      - supports-color
+      - ts-node
+      - utf-8-validate
+    dev: true
+
   /@nrwl/tao/12.10.0:
     resolution: {integrity: sha512-YkdgTJJsDQlItVj25vW8zEen7BAra6i41Udd0v3CuxTSEXjJJnBD2KzEOGUxXS0gMg7+ILuw2rl9aOKu43TmVA==}
     hasBin: true
@@ -5807,6 +5842,49 @@ packages:
       - supports-color
       - ts-node
       - typescript
+      - utf-8-validate
+    dev: true
+
+  /@nrwl/workspace/13.1.4_wp-prettier@2.2.1-beta-1:
+    resolution: {integrity: sha512-dQlxswf2XlMyEJBK4+fZHQTpxtevcWzDCVO9iLjuvL1XZDbDQG95+N7DsASq67qOxFAlpYWVxAVZAXIHsnX9tQ==}
+    peerDependencies:
+      prettier: ^2.3.0
+    peerDependenciesMeta:
+      prettier:
+        optional: true
+    dependencies:
+      '@nrwl/cli': 13.1.4
+      '@nrwl/devkit': 13.1.4
+      '@nrwl/jest': 13.1.4
+      '@nrwl/linter': 13.1.4
+      '@parcel/watcher': 2.0.0-alpha.11
+      chalk: 4.1.0
+      chokidar: 3.5.2
+      cosmiconfig: 4.0.0
+      dotenv: 10.0.0
+      enquirer: 2.3.6
+      flat: 5.0.2
+      fs-extra: 9.1.0
+      glob: 7.1.4
+      ignore: 5.1.8
+      minimatch: 3.0.4
+      npm-run-all: 4.1.5
+      npm-run-path: 4.0.1
+      open: 7.4.2
+      prettier: /wp-prettier/2.2.1-beta-1
+      rxjs: 6.6.7
+      semver: 7.3.4
+      strip-ansi: 6.0.0
+      tmp: 0.2.1
+      tslib: 2.3.1
+      yargs: 15.4.1
+      yargs-parser: 20.0.0
+    transitivePeerDependencies:
+      - bufferutil
+      - canvas
+      - node-notifier
+      - supports-color
+      - ts-node
       - utf-8-validate
     dev: true
 
