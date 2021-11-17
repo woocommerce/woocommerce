@@ -126,13 +126,19 @@
     "install-unit-test-db": {
       "executor": "@nrwl/workspace:run-commands",
       "options": {
-        "command": "bash plugins/woocommerce/tests/bin/install.sh woo_test root root 127.0.0.1 latest"
+        "commands": [
+			"bash tests/bin/install.sh woo_test root root 127.0.0.1 latest"
+		],
+		"cwd": "plugins/woocommerce"
       }
     },
     "test-code-coverage": {
       "executor": "@nrwl/workspace:run-commands",
       "options": {
-        "command": "RUN_CODE_COVERAGE=1 bash plugins/woocommerce/tests/bin/phpunit.sh"
+        "commands": [
+			"RUN_CODE_COVERAGE=1 bash tests/bin/phpunit.sh"
+		],
+		"cwd": "plugins/woocommerce"
       }
     }
   }
