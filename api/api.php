@@ -34,3 +34,4 @@ require( 'tools/run-wc-admin-daily.php' );
 require( 'options/rest-api.php' );
 require( 'tools/delete-all-products.php');
 require( 'tools/disable-wc-email.php' );
+require( 'tools/trigger-update-callbacks.php' );

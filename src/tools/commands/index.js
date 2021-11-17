@@ -1,5 +1,12 @@
+/**
+ * Internal dependencies
+ */
 import { TriggerCronJob, TRIGGER_CRON_ACTION_NAME } from './trigger-cron';
 import { DisableEmail } from './disable-email';
+import {
+	TriggerUpdateCallbacks,
+	TRIGGER_UPDATE_CALLBACKS_ACTION_NAME,
+} from './trigger-update-callbacks';
 
 export default [
 	{
@@ -51,5 +58,10 @@ export default [
 		command: 'Disable WC emails',
 		description: <DisableEmail />,
 		action: 'runDisableEmail',
+	},
+	{
+		command: 'Run version update callbacks',
+		description: <TriggerUpdateCallbacks />,
+		action: TRIGGER_UPDATE_CALLBACKS_ACTION_NAME,
 	},
 ];

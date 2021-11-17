@@ -62,6 +62,13 @@ export function setCronJobs(cronJobs) {
 	};
 }
 
+export function setDBUpdateVersions(versions) {
+	return {
+		type: TYPES.SET_DB_UPDATE_VERSIONS,
+		versions,
+	};
+}
+
 export function setIsEmailDisabled(isEmailDisabled) {
 	return {
 		type: TYPES.IS_EMAIL_DISABLED,
@@ -177,6 +184,16 @@ export function* runSelectedCronJob(params) {
 	yield runCommand('Run selected cron job', function* () {
 		yield apiFetch({
 			path: API_NAMESPACE + '/tools/run-wc-admin-daily/v1',
+			method: 'POST',
+			data: params,
+		});
+	});
+}
+
+export function* runSelectedUpdateCallbacks(params) {
+	yield runCommand('Run version update callbacks', function* () {
+		yield apiFetch({
+			path: API_NAMESPACE + '/tools/trigger-selected-update-callbacks/v1',
 			method: 'POST',
 			data: params,
 		});
