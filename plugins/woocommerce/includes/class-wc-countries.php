@@ -1433,16 +1433,17 @@ class WC_Countries {
 					),
 					'VN' => array(
 						'state'     => array(
-							'label' => __( 'Province/City', 'woocommerce' ),
+							'priorty'  => 70,
+							'label'    => __( 'Province/City', 'woocommerce' ),
 							'required' => true,
 							'hidden'   => false,
 						),
-						'city' =>   array(
+						'city'      => array(
+							'priority' => 80,
 							'label'    => __( 'District', 'woocommerce' ),
 							'required' => false
 						),
 						'postcode'  => array(
-							'priority' => 65,
 							'required' => false,
 							'hidden'   => false,
 						),
