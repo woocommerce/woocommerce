@@ -41,6 +41,7 @@ jobs:
                   path: package/woocommerce
 
             - name: Install PNPM and install dependencies
+              working-directory: package/woocommerce
               run: |
                   npm install -g pnpm
                   npm install -g nx
@@ -51,7 +52,6 @@ jobs:
               run: pnpx wc-e2e docker:up
 
             - name: Move current directory to code. We will install zip file in this dir later.
-              working-directory: package/woocommerce/plugins/woocommerce
               run: mv ./package/woocommerce/plugins/woocommerce/* ./code/woocommerce
 
             - name: Download WooCommerce ZIP.
