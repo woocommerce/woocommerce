@@ -2,7 +2,6 @@
  * Internal dependencies
  */
 const { merchant } = require( '@woocommerce/e2e-utils' );
-const deprecated = require( '@wordpress/deprecated' );
 
 /**
  * External dependencies
@@ -12,6 +11,7 @@ const {
 	describe,
 	beforeAll,
 } = require( '@jest/globals' );
+const deprecated = require( '@wordpress/deprecated' );
 
 const runActivationTest = () => {
 	describe('Store owner can login and make sure WooCommerce is activated', () => {
