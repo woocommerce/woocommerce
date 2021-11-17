@@ -31,7 +31,7 @@ cd "$SCRIPTPATH/$(dirname "$REALPATH")/.."
 # Run scripts
 case $1 in
 	'test')
-		jest --group=$2
+		jest --group=$2 --runInBand
 		TESTRESULT=$?
 		;;
 	'make:collection')
