@@ -65,7 +65,7 @@ class Filterer {
 
 		// The extra derived table ("SELECT product_or_parent_id FROM") is needed for performance
 		// (causes the filtering subquery to be executed only once).
-		$clause_root = " {$wpdb->prefix}posts.ID IN ( SELECT product_or_parent_id FROM (";
+		$clause_root = " {$wpdb->posts}.ID IN ( SELECT product_or_parent_id FROM (";
 		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
 			$in_stock_clause = ' AND in_stock = 1';
 		} else {
