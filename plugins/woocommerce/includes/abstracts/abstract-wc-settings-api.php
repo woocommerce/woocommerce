@@ -329,6 +329,10 @@ abstract class WC_Settings_API {
 
 			if ( method_exists( $this, 'generate_' . $type . '_html' ) ) {
 				$html .= $this->{'generate_' . $type . '_html'}( $k, $v );
+			} elseif ( has_action( 'woocommerce_generate_' . $type . '_html' ) ) {
+				ob_start();
+				do_action( 'woocommerce_generate_' . $type . '_html', $k, $v, $this );
+				$html .= ob_get_clean();
 			} else {
 				$html .= $this->generate_text_html( $k, $v );
 			}
