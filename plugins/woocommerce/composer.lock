@@ -610,16 +610,16 @@
         },
         {
             "name": "woocommerce/woocommerce-blocks",
-            "version": "v6.1.0",
+            "version": "v6.3.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-gutenberg-products-block.git",
-                "reference": "8556efd69e85c01f5571d39e6581d9b8486b682f"
+                "reference": "5b3aea9adb718a1f78525881e4f0c33c72ba175d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/8556efd69e85c01f5571d39e6581d9b8486b682f",
-                "reference": "8556efd69e85c01f5571d39e6581d9b8486b682f",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/5b3aea9adb718a1f78525881e4f0c33c72ba175d",
+                "reference": "5b3aea9adb718a1f78525881e4f0c33c72ba175d",
                 "shasum": ""
             },
             "require": {
@@ -627,6 +627,8 @@
                 "composer/installers": "^1.7.0"
             },
             "require-dev": {
+                "johnbillion/wp-hooks-generator": "0.6.1",
+                "mockery/mockery": "^1.4",
                 "woocommerce/woocommerce-sniffs": "0.1.0",
                 "wp-phpunit/wp-phpunit": "^5.4",
                 "yoast/phpunit-polyfills": "^1.0"
