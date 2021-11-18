@@ -44,7 +44,6 @@ jobs:
               working-directory: package/woocommerce
               run: |
                   npm install -g pnpm
-                  npm install -g nx
                   pnpm install
 
             - name: Load docker images and start containers.
@@ -65,6 +64,12 @@ jobs:
               run: |
                   unzip woocommerce.zip -d woocommerce
                   mv woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
+
+            - name: Install dependencies again
+              working-directory: package/woocommerce
+              run: |
+                  npm install -g pnpm
+                  pnpm install
 
             - name: Run tests command.
               working-directory: package/woocommerce/plugins/woocommerce
