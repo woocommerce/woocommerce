@@ -31,20 +31,12 @@ class LookupDataStore {
 	private $lookup_table_name;
 
 	/**
-	 * Is the feature visible?
-	 *
-	 * @var bool
-	 */
-	private $is_feature_visible;
-
-	/**
 	 * LookupDataStore constructor. Makes the feature hidden by default.
 	 */
 	public function __construct() {
 		global $wpdb;
 
 		$this->lookup_table_name  = $wpdb->prefix . 'wc_product_attributes_lookup';
-		$this->is_feature_visible = false;
 
 		$this->init_hooks();
 	}
@@ -65,7 +57,7 @@ class LookupDataStore {
 		add_filter(
 			'woocommerce_get_sections_products',
 			function ( $products ) {
-				if ( $this->is_feature_visible() && $this->check_lookup_table_exists() ) {
+				if ( $this->check_lookup_table_exists() ) {
 					$products['advanced'] = __( 'Advanced', 'woocommerce' );
 				}
 				return $products;
@@ -77,7 +69,7 @@ class LookupDataStore {
 		add_filter(
 			'woocommerce_get_settings_products',
 			function ( $settings, $section_id ) {
-				if ( 'advanced' === $section_id && $this->is_feature_visible() && $this->check_lookup_table_exists() ) {
+				if ( 'advanced' === $section_id && $this->check_lookup_table_exists() ) {
 					$title_item = array(
 						'title' => __( 'Product attributes lookup table', 'woocommerce' ),
 						'type'  => 'title',
@@ -134,29 +126,6 @@ class LookupDataStore {
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		return $this->lookup_table_name === $wpdb->get_var( $query );
-	}
-
-	/**
-	 * Checks if the feature is visible (so that dedicated entries will be added to the debug tools page).
-	 *
-	 * @return bool True if the feature is visible.
-	 */
-	public function is_feature_visible() {
-		return $this->is_feature_visible;
-	}
-
-	/**
-	 * Makes the feature visible, so that dedicated entries will be added to the debug tools page.
-	 */
-	public function show_feature() {
-		$this->is_feature_visible = true;
-	}
-
-	/**
-	 * Hides the feature, so that no entries will be added to the debug tools page.
-	 */
-	public function hide_feature() {
-		$this->is_feature_visible = false;
 	}
 
 	/**
