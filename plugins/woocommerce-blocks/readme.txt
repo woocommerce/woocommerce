@@ -85,6 +85,16 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 == Changelog ==
 
+= 6.3.2 - 2021-11-17 =
+
+#### Enhancements
+
+- Legacy Template Block: allow users to delete the block. ([5176](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5176))
+
+#### Bug Fixes
+
+- Removed WooCommerce block templates from appearing in the template dropdown for a page or post. ([5167](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5167))
+
 = 6.3.1 - 2021-11-17 =
 
 #### Bug Fixes
