@@ -967,14 +967,14 @@ class WC_Admin_Addons {
 	public static function output_empty( $message = '' ) {
 		?>
 		<div class="wc-addons__empty">
-			<h2><?php echo wp_kses_post( __( 'Sorry, we\'re having trouble connecting to the extensions catalog.', 'woocommerce' ) ); ?></h2>
+			<h2><?php echo wp_kses_post( __( 'Oh no! We\'re having trouble connecting to the extensions catalog right now.', 'woocommerce' ) ); ?></h2>
 			<p>
 				<?php
 				/* translators: a url */
 				printf(
 					wp_kses_post(
 						__(
-							'Head over to <a href="%s">WooCommerce.com</a> to start growing your business with the most popular WooCommerce extensions.',
+							'To start growing your business, head over to <a href="%s">WooCommerce.com</a>, where you\'ll find the most popular WooCommerce extensions.',
 							'woocommerce'
 						)
 					),
