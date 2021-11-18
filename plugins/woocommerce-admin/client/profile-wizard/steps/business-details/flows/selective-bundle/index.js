@@ -58,6 +58,27 @@ export const filterBusinessExtensions = ( extensionInstallationOptions ) => {
 	);
 };
 
+export const prepareExtensionTrackingData = (
+	extensionInstallationOptions
+) => {
+	const installedExtensions = {};
+	for ( const [ fieldKey, value ] of Object.entries(
+		extensionInstallationOptions
+	) ) {
+		const key =
+			fieldKey === 'woocommerce-payments'
+				? 'install_wcpay'
+				: `install_${ fieldKey.replace( /-/g, '_' ).split( ':', 1 ) }`;
+		if (
+			fieldKey !== 'install_extensions' &&
+			! installedExtensions[ key ]
+		) {
+			installedExtensions[ key ] = value;
+		}
+	}
+	return installedExtensions;
+};
+
 class BusinessDetails extends Component {
 	constructor() {
 		super();
@@ -84,20 +105,15 @@ class BusinessDetails extends Component {
 			extensionInstallationOptions
 		);
 
+		const installedExtensions = prepareExtensionTrackingData(
+			extensionInstallationOptions
+		);
+
 		recordEvent( 'storeprofiler_store_business_features_continue', {
 			all_extensions_installed: Object.values(
 				extensionInstallationOptions
 			).every( ( val ) => val ),
-			install_woocommerce_services:
-				extensionInstallationOptions[
-					'woocommerce-services:shipping'
-				] || extensionInstallationOptions[ 'woocommerce-services:tax' ],
-			install_google_listings_and_ads:
-				extensionInstallationOptions[ 'google-listings-and-ads' ],
-			install_jetpack: extensionInstallationOptions.jetpack,
-			install_mailpoet: extensionInstallationOptions.mailpoet,
-			install_wcpay:
-				extensionInstallationOptions[ 'woocommerce-payments' ],
+			...installedExtensions,
 		} );
 
 		const promises = [
