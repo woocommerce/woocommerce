@@ -60,6 +60,7 @@ jobs:
         run: |
             npm install -g pnpm
             pnpm install
+            pnpm nx composer-install woocommerce
 
       - name: Add PHP8 Compatibility.
         run: |
@@ -77,4 +78,4 @@ jobs:
         run: ./tests/bin/install.sh woo_test root root 127.0.0.1 ${{ matrix.wp }}
 
       - name: Run tests
-        run: pwd && pnpm nx test-unit woocommerce
+        run: pnpm nx test-unit woocommerce
