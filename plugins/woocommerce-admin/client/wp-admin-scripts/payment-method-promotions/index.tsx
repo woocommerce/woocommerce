@@ -22,8 +22,13 @@ PAYMENT_METHOD_PROMOTIONS.forEach( ( paymentMethod ) => {
 	);
 
 	if ( container ) {
-		const sortColumn = container.children[ 0 ].innerHTML;
-		const descriptionColumn = container.children[ 3 ].innerHTML;
+		const columns = [ ...container.children ].map( ( child ) => {
+			return {
+				className: child.className,
+				html: child.innerHTML,
+				width: child.getAttribute( 'width' ),
+			};
+		} );
 		const title = container.getElementsByClassName(
 			'wc-payment-gateway-method-title'
 		);
@@ -31,9 +36,8 @@ PAYMENT_METHOD_PROMOTIONS.forEach( ( paymentMethod ) => {
 
 		render(
 			<PaymentPromotionRow
+				columns={ columns }
 				pluginSlug={ paymentMethod.pluginSlug }
-				sortColumnContent={ sortColumn }
-				descriptionColumnContent={ descriptionColumn }
 				title={ title.length === 1 ? title[ 0 ].innerHTML : undefined }
 				titleLink={ paymentMethod.link }
 				subTitleContent={

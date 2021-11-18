@@ -137,7 +137,7 @@ class Init {
 		$id       = WCPaymentGatewayPreInstallWCPayPromotion::GATEWAY_ID;
 		// Only tweak the ordering if the list hasn't been reordered with WooCommerce Payments in it already.
 		if ( ! isset( $ordering[ $id ] ) || ! is_numeric( $ordering[ $id ] ) ) {
-			$is_empty        = empty( $ordering ) || empty( $ordering[0] );
+			$is_empty        = empty( $ordering ) || ( 1 === count( $ordering ) && false === $ordering[0] );
 			$ordering[ $id ] = $is_empty ? 0 : ( min( $ordering ) - 1 );
 		}
 		return $ordering;

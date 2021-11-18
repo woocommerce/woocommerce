@@ -14,7 +14,6 @@ import { recordEvent } from '@woocommerce/tracks';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { sanitize } from 'dompurify';
 import { __ } from '@wordpress/i18n';
-import _ from 'lodash';
 
 /**
  * Internal dependencies
@@ -32,20 +31,22 @@ function sanitizeHTML( html: string ) {
 
 type PaymentPromotionRowProps = {
 	pluginSlug: string;
-	sortColumnContent: string;
-	descriptionColumnContent: string;
 	titleLink: string;
 	title: string;
+	columns: {
+		className: string;
+		html: string;
+		width: string;
+	}[];
 	subTitleContent?: string;
 };
 
 export const PaymentPromotionRow: React.FC< PaymentPromotionRowProps > = ( {
 	pluginSlug,
-	sortColumnContent,
-	descriptionColumnContent,
 	title,
 	titleLink,
 	subTitleContent,
+	columns,
 } ) => {
 	const [ installing, setInstalling ] = useState( false );
 	const { installAndActivatePlugins }: PluginsStoreActions = useDispatch(
@@ -104,51 +105,67 @@ export const PaymentPromotionRow: React.FC< PaymentPromotionRowProps > = ( {
 
 	return (
 		<>
-			<td
-				className="sort ui-sortable-handle"
-				width="1%"
-				dangerouslySetInnerHTML={ {
-					__html: sortColumnContent,
-				} }
-			></td>
-			<td className="name">
-				<div className="wc-payment-gateway-method_name">
-					<Link
-						target="_blank"
-						type="external"
-						rel="noreferrer"
-						href={ titleLink }
-					>
-						{ title }
-					</Link>
-					{ subTitleContent ? (
-						<div
-							className="pre-install-payment-gateway_subtitle"
-							dangerouslySetInnerHTML={ sanitizeHTML(
-								subTitleContent
-							) }
-						></div>
-					) : null }
-				</div>
-			</td>
-			<td className="pre-install-payment-gateway_status"></td>
-			<td
-				className="description"
-				dangerouslySetInnerHTML={ sanitizeHTML(
-					descriptionColumnContent
-				) }
-			></td>
-			<td className="action">
-				<Button
-					className="button alignright"
-					onClick={ () => installPaymentGateway() }
-					isSecondary
-					isBusy={ installing }
-					aria-disabled={ installing }
-				>
-					{ __( 'Install', 'woocommerce-admin' ) }
-				</Button>
-			</td>
+			{ columns.map( ( column ) => {
+				if ( column.className.includes( 'name' ) ) {
+					return (
+						<td className="name" key={ column.className }>
+							<div className="wc-payment-gateway-method_name">
+								<Link
+									target="_blank"
+									type="external"
+									rel="noreferrer"
+									href={ titleLink }
+								>
+									{ title }
+								</Link>
+								{ subTitleContent ? (
+									<div
+										className="pre-install-payment-gateway_subtitle"
+										dangerouslySetInnerHTML={ sanitizeHTML(
+											subTitleContent
+										) }
+									></div>
+								) : null }
+							</div>
+						</td>
+					);
+				} else if ( column.className.includes( 'status' ) ) {
+					return (
+						<td
+							className="pre-install-payment-gateway_status"
+							key={ column.className }
+						></td>
+					);
+				} else if ( column.className.includes( 'action' ) ) {
+					return (
+						<td className="action" key={ column.className }>
+							<Button
+								className="button alignright"
+								onClick={ () => installPaymentGateway() }
+								isSecondary
+								isBusy={ installing }
+								aria-disabled={ installing }
+							>
+								{ __( 'Install', 'woocommerce-admin' ) }
+							</Button>
+						</td>
+					);
+				}
+				return (
+					<td
+						key={ column.className }
+						className={ column.className }
+						width={ column.width }
+						dangerouslySetInnerHTML={
+							column.className.includes( 'sort' )
+								? {
+										__html: column.html,
+								  }
+								: sanitizeHTML( column.html )
+						}
+					></td>
+				);
+			} ) }
 		</>
 	);
 };

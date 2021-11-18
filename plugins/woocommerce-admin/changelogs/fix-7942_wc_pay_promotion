@@ -1,0 +1,4 @@
+Significance: patch
+Type: Fix
+
+Fix ordering and styling issue with WooCommerce Payments payment method promotion. #7943
