@@ -56,8 +56,11 @@ jobs:
             ./vendor
           key: ${{ runner.os }}-${{ hashFiles('./composer.lock') }}
 
-      - name: Setup and install composer
-        run: composer install
+      - name: Install PNPM and install dependencies
+        run: |
+            npm install -g pnpm
+            pnpm install
+            pnpm nx composer-install woocommerce
 
       - name: Add PHP8 Compatibility.
         run: |
@@ -75,4 +78,4 @@ jobs:
         run: ./tests/bin/install.sh woo_test root root 127.0.0.1 ${{ matrix.wp }}
 
       - name: Run tests
-        run: ./vendor/bin/phpunit -c ./phpunit.xml
+        run: pnpm nx test-unit woocommerce
