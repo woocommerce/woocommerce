@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 import classnames from 'classnames';
 import { Icon, fields } from '@woocommerce/icons';
 import { registerFeaturePluginBlockType } from '@woocommerce/block-settings';
+import { BlockInstance, createBlock } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -46,6 +47,92 @@ const settings = {
 							attributes.className
 						) }
 					/>
+				);
+			},
+			migrate: ( attributes: {
+				showOrderNotes: boolean;
+				showPolicyLinks: boolean;
+				showReturnToCart: boolean;
+				cartPageId: number;
+			} ) => {
+				const {
+					showOrderNotes,
+					showPolicyLinks,
+					showReturnToCart,
+					cartPageId,
+				} = attributes;
+				return [
+					attributes,
+					[
+						createBlock(
+							'woocommerce/checkout-fields-block',
+							{},
+							[
+								createBlock(
+									'woocommerce/checkout-express-payment-block',
+									{},
+									[]
+								),
+								createBlock(
+									'woocommerce/checkout-contact-information-block',
+									{},
+									[]
+								),
+								createBlock(
+									'woocommerce/checkout-shipping-address-block',
+									{},
+									[]
+								),
+								createBlock(
+									'woocommerce/checkout-billing-address-block',
+									{},
+									[]
+								),
+								createBlock(
+									'woocommerce/checkout-shipping-methods-block',
+									{},
+									[]
+								),
+								createBlock(
+									'woocommerce/checkout-payment-block',
+									{},
+									[]
+								),
+								showOrderNotes
+									? createBlock(
+											'woocommerce/checkout-order-note-block',
+											{},
+											[]
+									  )
+									: false,
+								showPolicyLinks
+									? createBlock(
+											'woocommerce/checkout-terms-block',
+											{},
+											[]
+									  )
+									: false,
+								createBlock(
+									'woocommerce/checkout-actions-block',
+									{
+										showReturnToCart,
+										cartPageId,
+									},
+									[]
+								),
+							].filter( Boolean ) as BlockInstance[]
+						),
+						createBlock( 'woocommerce/checkout-totals-block', {} ),
+					],
+				];
+			},
+			isEligible: (
+				attributes: Record< string, unknown >,
+				innerBlocks: BlockInstance[]
+			) => {
+				return ! innerBlocks.some(
+					( block: { name: string } ) =>
+						block.name === 'woocommerce/checkout-fields-block'
 				);
 			},
 		},
