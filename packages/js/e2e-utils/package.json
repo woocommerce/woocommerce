@@ -11,11 +11,17 @@
   "main": "build/index.js",
   "module": "build-module/index.js",
   "dependencies": {
+    "@automattic/puppeteer-utils": "github:Automattic/puppeteer-utils#0f3ec50",
     "@wordpress/deprecated": "^2.10.0",
     "@wordpress/e2e-test-utils": "^4.16.1",
     "config": "3.3.3",
     "faker": "^5.1.0",
     "fishery": "^1.2.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.3.0",
+    "@typescript-eslint/parser": "^5.3.0",
+    "eslint": "^8.1.0"
   },
   "peerDependencies": {
     "@woocommerce/api": "^0.2.0"
@@ -27,6 +33,7 @@
     "clean": "rm -rf ./build ./build-module",
     "compile": "node ./../bin/build.js",
     "build": "pnpm run clean && pnpm run compile",
-    "prepare": "pnpm run build"
+    "prepare": "pnpm run build",
+    "lint": "eslint src"
   }
 }

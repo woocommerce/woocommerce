@@ -9,31 +9,11 @@ const {
 	uiUnblocked,
 	evalAndClick,
 	createOrder,
+	clickAndWaitForSelector,
 } = require( '@woocommerce/e2e-utils' );
-
-const { waitForSelector } = require( '@woocommerce/e2e-environment' );
 
 const config = require( 'config' );
 const simpleProductPrice = config.has('products.simple.price') ? config.get('products.simple.price') : '9.99';
-
-/**
- * Evaluate and click a button selector then wait for a result selector.
- * This is a work around for what appears to be intermittent delays in handling confirm dialogs.
- *
- * @param buttonSelector
- * @param resultSelector
- * @returns {Promise<void>}
- */
-const clickAndWaitForSelector = async ( buttonSelector, resultSelector ) => {
-	await evalAndClick( buttonSelector );
-	await waitForSelector(
-		page,
-		resultSelector,
-		{
-			timeout: 5000
-		}
-	);
-};
 
 const runRefundOrderTest = () => {
 	describe('WooCommerce Orders > Refund an order', () => {

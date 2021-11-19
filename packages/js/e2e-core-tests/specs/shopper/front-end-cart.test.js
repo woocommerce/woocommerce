@@ -28,9 +28,9 @@ const runCartPageTest = () => {
 
 		beforeAll(async () => {
 			productId = await createSimpleProduct();
-			await withRestApi.resetSettingsGroupToDefault('general');
-			await withRestApi.resetSettingsGroupToDefault('products');
-			await withRestApi.resetSettingsGroupToDefault('tax');
+			await withRestApi.resetSettingsGroupToDefault( 'general', false );
+			await withRestApi.resetSettingsGroupToDefault( 'products', false );
+			await withRestApi.resetSettingsGroupToDefault( 'tax', false );
 		});
 
 		it('should display no item in the cart', async () => {

@@ -142,22 +142,26 @@ Please note: if you're using a non-SSL environment (such as a Docker container f
 
 | Function | Parameters | Description |
 |----------|------------|-------------|
-| `resetOnboarding` | | Reset onboarding settings |
+| `addShippingZoneAndMethod` | `zoneName`, `zoneLocation`, `zipCode`, `zoneMethod`, `cost`, `additionalZoneMethods`, `testResponse` | Adds a shipping zone along with a shipping method |
+| `batchCreateOrders` | `orders`, `testResponse` | Create a batch of orders using the "Batch Create Order" API endpoint |
+| `addTaxClasses` | `taxClasses` | Add an array of tax classes if they do not exist |
+| `addTaxRates` | `taxRates` | Add an array of tax rates if they do not exist |
+| `createProductCategory` | `categoryName` | Create a product category with the provided name |
 | `deleteAllCoupons` | | Permanently delete all coupons |
-| `deleteAllProducts` | | Permanently delete all products |
-| `deleteAllShippingZones` | | Permanently delete all shipping zones except the default |
-| `deleteAllShippingClasses` | Permanently delete all shipping classes |
-| `deleteCustomerByEmail` | `emailAddress` | Delete customer user account. Posts are reassigned to user ID 1 |
-| `resetSettingsGroupToDefault` | `settingsGroup` | Reset settings in settings group to default except `select` fields |
-| `batchCreateOrders` | `orders` | Create a batch of orders using the "Batch Create Order" API endpoint |
 | `deleteAllOrders` | | Permanently delete all orders |
-| `updateSettingOption` | `settingsGroup`, `settingID`, `payload` | Update a settings group |
-| `updatePaymentGateway`| `paymentGatewayId`, `payload` | Update a payment gateway |
+| `deleteAllProductAttributes` | `testResponse` | Permanently delete all product attributes |
+| `deleteAllProductCategories` | `testResponse` | Permanently delete all product categories |
+| `deleteAllProducts` | | Permanently delete all products |
+| `deleteAllProductTags` | `testResponse` | Permanently delete all product tags |
+| `deleteAllShippingClasses` | `testResponse` | Permanently delete all shipping classes |
+| `deleteAllShippingZones` | `testResponse` | Permanently delete all shipping zones except the default |
+| `deleteCoupon` | `couponId` | Permanently delete a coupon |
+| `deleteCustomerByEmail` | `emailAddress` | Delete customer user account. Posts are reassigned to user ID 1 |
 | `getSystemEnvironment` | | Get the current environment from the WooCommerce system status API. |
-| `deleteAllProductAttributes` | | Permanently delete all product attributes. |
-| `deleteAllProductCategories` | | Permanently delete all product categories. |
-| `deleteAllProductTags` | | Permanently delete all product tags. |
-| `createProductCategory` | `categoryName` | Create a product category with the provided name. |
+| `resetOnboarding` | | Reset onboarding settings |
+| `resetSettingsGroupToDefault` | `settingsGroup`, `testResponse` | Reset settings in settings group to default except `select` fields |
+| `updateSettingOption` | `settingsGroup`, `settingID`, `payload` | Update a settings group |
+| `updatePaymentGateway`| `paymentGatewayId`, `payload`, `testResponse` | Update a payment gateway |
 
 ### Classes
 
@@ -229,6 +233,7 @@ There is a general utilities object `utils` with the following functions:
 | `deleteAllShippingZones` | | Delete all the existing shipping zones |
 | `waitForSelectorWithoutThrow` | `selector`, `timeoutInSeconds` | conditionally wait for a selector without throwing an error. Default timeout is 5 seconds |
 | `createOrder` | `orderOptions` | Creates an order using the API with the passed in details |
+| `clickAndWaitForSelector` | `buttonSelector`, `resultSelector`, `timeout` | Click a button and wait for response |
 
 ### Test Utilities
 

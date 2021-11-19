@@ -1,8 +1,13 @@
 /**
  * Internal dependencies
  */
-const { getRequest, postRequest, putRequest, deleteRequest } = require('../utils/request');
-const { getOrderExample, shared } = require('../data');
+const {
+	getRequest,
+	postRequest,
+	putRequest,
+	deleteRequest,
+} = require( '../utils/request' );
+const { getOrderExample, shared } = require( '../data' );
 
 /**
  * WooCommerce Orders endpoints.
@@ -24,7 +29,8 @@ const ordersApi = {
 		method: 'GET',
 		path: 'orders/<id>',
 		responseCode: 200,
-		order: async ( orderId ) => getRequest( `orders/${ orderId }` ),
+		order: async ( orderId, ordersQuery = {} ) =>
+			getRequest( `orders/${ orderId }`, ordersQuery ),
 	},
 	listAll: {
 		name: 'List all orders',
