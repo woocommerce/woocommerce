@@ -10,10 +10,7 @@ import type { TemplateArray } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
-import {
-	useCheckoutBlockControlsContext,
-	useCheckoutBlockContext,
-} from '../../context';
+import { useCheckoutBlockControlsContext } from '../../context';
 import { useForcedLayout, getAllowedBlocks } from '../../../shared';
 import './style.scss';
 
@@ -32,12 +29,6 @@ export const Edit = ( {
 			attributes?.className
 		),
 	} );
-	const {
-		showOrderNotes,
-		showPolicyLinks,
-		showReturnToCart,
-		cartPageId,
-	} = useCheckoutBlockContext();
 	const allowedBlocks = getAllowedBlocks( innerBlockAreas.CHECKOUT_FIELDS );
 
 	const {
@@ -51,20 +42,9 @@ export const Edit = ( {
 		[ 'woocommerce/checkout-billing-address-block', {}, [] ],
 		[ 'woocommerce/checkout-shipping-methods-block', {}, [] ],
 		[ 'woocommerce/checkout-payment-block', {}, [] ],
-		showOrderNotes
-			? [ 'woocommerce/checkout-order-note-block', {}, [] ]
-			: false,
-		showPolicyLinks
-			? [ 'woocommerce/checkout-terms-block', {}, [] ]
-			: false,
-		[
-			'woocommerce/checkout-actions-block',
-			{
-				showReturnToCart,
-				cartPageId,
-			},
-			[],
-		],
+		[ 'woocommerce/checkout-order-note-block', {}, [] ],
+		[ 'woocommerce/checkout-terms-block', {}, [] ],
+		[ 'woocommerce/checkout-actions-block', {}, [] ],
 	].filter( Boolean ) as unknown ) as TemplateArray;
 
 	useForcedLayout( {
