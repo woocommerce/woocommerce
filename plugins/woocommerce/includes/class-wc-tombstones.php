@@ -33,7 +33,7 @@ class WC_Tombstones {
 	 * @param array $filters Query filters.
 	 * @return array
 	 */
-	public static function get( $filters = null ) {
+	public static function get( array $filters = array() ) {
 		$tombstones = get_option( self::OPTION, array() );
 
 		if ( $filters['modified_before'] ) {
