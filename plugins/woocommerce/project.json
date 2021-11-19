@@ -4,17 +4,26 @@
   "projectType": "application",
   "targets": {
     "composer-install": {
-      "executor": "@nrwl/workspace:run-script",
+      "executor": "@nrwl/workspace:run-commands",
       "options": {
-        "script": "composer:install"
+        "command": "composer install",
+        "cwd": "plugins/woocommerce"
       }
-	},
+    },
+    "composer-install-no-dev": {
+      "executor": "@nrwl/workspace:run-commands",
+      "options": {
+        "command": "composer install --no-dev",
+        "cwd": "plugins/woocommerce"
+      }
+    },
     "composer-dump-autoload": {
-      "executor": "@nrwl/workspace:run-script",
+      "executor": "@nrwl/workspace:run-commands",
       "options": {
-        "script": "composer:dump-autoload"
+        "command": "composer dump-autoload",
+        "cwd": "plugins/woocommerce"
       }
-	},
+    },
     "build": {
       "executor": "@nrwl/workspace:run-script",
       "options": {
@@ -121,6 +130,20 @@
       "executor": "@nrwl/workspace:run-script",
       "options": {
         "script": "make:collection"
+      }
+    },
+    "install-unit-test-db": {
+      "executor": "@nrwl/workspace:run-commands",
+      "options": {
+        "command": "bash tests/bin/install.sh woo_test root root 127.0.0.1 latest",
+        "cwd": "plugins/woocommerce"
+      }
+    },
+    "test-code-coverage": {
+      "executor": "@nrwl/workspace:run-commands",
+      "options": {
+        "command": "RUN_CODE_COVERAGE=1 bash tests/bin/phpunit.sh",
+        "cwd": "plugins/woocommerce"
       }
     }
   }
