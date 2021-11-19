@@ -169,6 +169,10 @@ class WC_Install {
 			'wc_update_600_migrate_rate_limit_options',
 			'wc_update_600_db_version',
 		),
+		'6.1.0' => array(
+			'wc_create_product_attributes_lookup_table',
+			'wc_update_610_db_version',
+		),
 	);
 
 	/**
@@ -571,22 +575,22 @@ class WC_Install {
 		$pages = apply_filters(
 			'woocommerce_create_pages',
 			array(
-				'shop'          => array(
+				'shop'           => array(
 					'name'    => _x( 'shop', 'Page slug', 'woocommerce' ),
 					'title'   => _x( 'Shop', 'Page title', 'woocommerce' ),
 					'content' => '',
 				),
-				'cart'          => array(
+				'cart'           => array(
 					'name'    => _x( 'cart', 'Page slug', 'woocommerce' ),
 					'title'   => _x( 'Cart', 'Page title', 'woocommerce' ),
 					'content' => '<!-- wp:shortcode -->[' . apply_filters( 'woocommerce_cart_shortcode_tag', 'woocommerce_cart' ) . ']<!-- /wp:shortcode -->',
 				),
-				'checkout'      => array(
+				'checkout'       => array(
 					'name'    => _x( 'checkout', 'Page slug', 'woocommerce' ),
 					'title'   => _x( 'Checkout', 'Page title', 'woocommerce' ),
 					'content' => '<!-- wp:shortcode -->[' . apply_filters( 'woocommerce_checkout_shortcode_tag', 'woocommerce_checkout' ) . ']<!-- /wp:shortcode -->',
 				),
-				'myaccount'     => array(
+				'myaccount'      => array(
 					'name'    => _x( 'my-account', 'Page slug', 'woocommerce' ),
 					'title'   => _x( 'My account', 'Page title', 'woocommerce' ),
 					'content' => '<!-- wp:shortcode -->[' . apply_filters( 'woocommerce_my_account_shortcode_tag', 'woocommerce_my_account' ) . ']<!-- /wp:shortcode -->',

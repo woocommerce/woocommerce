@@ -21,7 +21,7 @@ defined( 'ABSPATH' ) || exit;
  * the data store classes) whenever a product is created/updated.
  *
  * Additionally, after the regeneration is completed a 'woocommerce_attribute_lookup_enabled' option
- * with a value of 'no' will have been created.
+ * with a value of 'yes' will have been created, thus effectively enabling the table usage.
  *
  * This class also adds two entries to the Status - Tools menu: one for manually regenerating the table contents,
  * and another one for enabling or disabling the actual lookup table usage.
@@ -84,14 +84,8 @@ class DataRegenerator {
 	 * deletes the lookup table and related options if they exist,
 	 * then it creates the table and runs the first step of the regeneration process.
 	 *
-	 * This is the method that should be used as a callback for a data regeneration in wc-update-functions, e.g.:
-	 *
-	 * function wc_update_XX_regenerate_product_attributes_lookup_table() {
-	 *   wc_get_container()->get(DataRegenerator::class)->initiate_regeneration();
-	 *   return false;
-	 * }
-	 *
-	 * (Note how we are returning "false" since the class handles the step scheduling by itself).
+	 * This method is intended ONLY to be used as a callback for a db update in wc-update-functions,
+	 * regeneration triggered from the tools page will use initiate_regeneration_from_tools_page instead.
 	 */
 	public function initiate_regeneration() {
 		$this->enable_or_disable_lookup_table_usage( false );
@@ -107,12 +101,8 @@ class DataRegenerator {
 
 	/**
 	 * Delete all the existing data related to the lookup table, including the table itself.
-	 *
-	 * Shortcut to run this method in case the debug tools UI isn't available or for quick debugging:
-	 *
-	 * wp eval "wc_get_container()->get(Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator::class)->delete_all_attributes_lookup_data();"
 	 */
-	public function delete_all_attributes_lookup_data() {
+	private function delete_all_attributes_lookup_data() {
 		global $wpdb;
 
 		delete_option( 'woocommerce_attribute_lookup_enabled' );
@@ -244,7 +234,7 @@ CREATE TABLE ' . $this->lookup_table_name . '(
 	private function finalize_regeneration() {
 		delete_option( 'woocommerce_attribute_lookup_last_product_id_to_process' );
 		delete_option( 'woocommerce_attribute_lookup_last_products_page_processed' );
-		update_option( 'woocommerce_attribute_lookup_enabled', 'no' );
+		update_option( 'woocommerce_attribute_lookup_enabled', 'yes' );
 		$this->data_store->unset_regeneration_in_progress_flag();
 	}
 
@@ -255,42 +245,29 @@ CREATE TABLE ' . $this->lookup_table_name . '(
 	 * @return array The tools array with the entry added.
 	 */
 	private function add_initiate_regeneration_entry_to_tools_array( array $tools_array ) {
-		$lookup_table_exists       = $this->data_store->check_lookup_table_exists();
-		$generation_is_in_progress = $this->data_store->regeneration_is_in_progress();
-
-		// Regenerate table.
-
-		if ( $lookup_table_exists ) {
-			$generate_item_name   = __( 'Regenerate the product attributes lookup table', 'woocommerce' );
-			$generate_item_desc   = __( 'This tool will regenerate the product attributes lookup table data from existing product(s) data. This process may take a while.', 'woocommerce' );
-			$generate_item_return = __( 'Product attributes lookup table data is regenerating', 'woocommerce' );
-			$generate_item_button = __( 'Regenerate', 'woocommerce' );
-		} else {
-			$generate_item_name   = __( 'Create and fill product attributes lookup table', 'woocommerce' );
-			$generate_item_desc   = __( 'This tool will create the product attributes lookup table data and fill it with existing products data. This process may take a while.', 'woocommerce' );
-			$generate_item_return = __( 'Product attributes lookup table is being filled', 'woocommerce' );
-			$generate_item_button = __( 'Create', 'woocommerce' );
+		if ( ! $this->data_store->check_lookup_table_exists() ) {
+			return $tools_array;
 		}
 
-		$entry = array(
-			'name'             => $generate_item_name,
-			'desc'             => $generate_item_desc,
-			'requires_refresh' => true,
-			'callback'         => function() use ( $generate_item_return ) {
-				$this->initiate_regeneration_from_tools_page();
-				return $generate_item_return;
-			},
-		);
+		$generation_is_in_progress = $this->data_store->regeneration_is_in_progress();
 
-		if ( $lookup_table_exists ) {
-			$entry['selector'] = array(
+		$entry = array(
+			'name'             => __( 'Regenerate the product attributes lookup table', 'woocommerce' ),
+			'desc'             => __( 'This tool will regenerate the product attributes lookup table data from existing product(s) data. This process may take a while.', 'woocommerce' ),
+			'requires_refresh' => true,
+			'callback'         => function() {
+				$this->initiate_regeneration_from_tools_page();
+				return __( 'Product attributes lookup table data is regenerating', 'woocommerce' );
+
+			},
+			'selector'         => array(
 				'description'   => __( 'Select a product to regenerate the data for, or leave empty for a full table regeneration:', 'woocommerce' ),
 				'class'         => 'wc-product-search',
 				'search_action' => 'woocommerce_json_search_products',
 				'name'          => 'regenerate_product_attribute_lookup_data_product_id',
 				'placeholder'   => esc_attr__( 'Search for a product&hellip;', 'woocommerce' ),
-			);
-		}
+			),
+		);
 
 		if ( $generation_is_in_progress ) {
 			$entry['button'] = sprintf(
@@ -300,30 +277,11 @@ CREATE TABLE ' . $this->lookup_table_name . '(
 			);
 			$entry['disabled'] = true;
 		} else {
-			$entry['button'] = $generate_item_button;
+			$entry['button'] = __( 'Regenerate', 'woocommerce' );
+
 		}
 
 		$tools_array['regenerate_product_attributes_lookup_table'] = $entry;
-
-		if ( $lookup_table_exists ) {
-
-			// Delete the table.
-
-			$tools_array['delete_product_attributes_lookup_table'] = array(
-				'name'             => __( 'Delete the product attributes lookup table', 'woocommerce' ),
-				'desc'             => sprintf(
-					'<strong class="red">%1$s</strong> %2$s',
-					__( 'Note:', 'woocommerce' ),
-					__( 'This will delete the product attributes lookup table. You can create it again with the "Create and fill product attributes lookup table" tool.', 'woocommerce' )
-				),
-				'button'           => __( 'Delete', 'woocommerce' ),
-				'requires_refresh' => true,
-				'callback'         => function () {
-					$this->delete_all_attributes_lookup_data();
-					return __( 'Product attributes lookup table has been deleted.', 'woocommerce' );
-				},
-			);
-		}
 
 		return $tools_array;
 	}
