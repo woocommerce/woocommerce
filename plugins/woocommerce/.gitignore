@@ -7,12 +7,11 @@ none
 # Sass
 .sass-cache/
 
-# Compiled CSS
-/assets/css/*.css
-/assets/css/photoswipe/**/*.min.css
+# All CSS
+/assets/css/*
 
-# Minified JS
-/assets/js/**/*.min.js
+# All JS
+/assets/js/*
 
 # Behat/CLI Tests
 tests/cli/installer
