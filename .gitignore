@@ -40,6 +40,10 @@ vendor/
 # TypeScript files
 tsconfig.tsbuildinfo
 
+# WooCommerce Plugin built files
+plugins/woocommerce/assets/css/
+plugins/woocommerce/assets/js/
+
 # wp-env config
 .wp-env.override.json
 
