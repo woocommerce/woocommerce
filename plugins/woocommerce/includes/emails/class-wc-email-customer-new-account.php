@@ -115,7 +115,7 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) :
 			}
 
 			if ( $this->is_enabled() && $this->get_recipient() ) {
-				$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments(), $this->set_password_url );
+				$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
 			}
 
 			$this->restore_locale();
