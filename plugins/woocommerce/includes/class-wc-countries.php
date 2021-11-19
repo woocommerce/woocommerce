@@ -1340,6 +1340,11 @@ class WC_Countries {
 							'hidden'   => true,
 						),
 					),
+					'SV' => array(
+						'state'    => array(
+							'label' => __( 'Department', 'woocommerce' ),
+						),
+					),
 					'ES' => array(
 						'postcode' => array(
 							'priority' => 65,
