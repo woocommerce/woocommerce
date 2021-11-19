@@ -36,7 +36,7 @@ const setUp = (): void => {
 const addListeners = (): void => {
 	setUp();
 
-	if ( ! window.wcBlocksStoreCartListeners.count ) {
+	if ( window.wcBlocksStoreCartListeners.count === 0 ) {
 		const removeJQueryAddedToCartEvent = translateJQueryEventToNative(
 			'added_to_cart',
 			`wc-blocks_added_to_cart`
