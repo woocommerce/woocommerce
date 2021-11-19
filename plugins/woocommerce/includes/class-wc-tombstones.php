@@ -36,7 +36,7 @@ class WC_Tombstones {
 	public static function get( array $filters = array() ) {
 		$tombstones = get_option( self::OPTION, array() );
 
-		if ( $filters['modified_before'] ) {
+		if ( isset( $filters['modified_before'] ) ) {
 			$modified_before = strtotime( $filters['modified_before'] );
 
 			$tombstones = array_filter(
@@ -47,7 +47,7 @@ class WC_Tombstones {
 			);
 		}
 
-		if ( $filters['modified_after'] ) {
+		if ( isset( $filters['modified_after'] ) ) {
 			$modified_after = strtotime( $filters['modified_after'] );
 
 			$tombstones = array_filter(
