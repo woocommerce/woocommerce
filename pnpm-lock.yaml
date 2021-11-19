@@ -134,6 +134,7 @@ importers:
       node-stream-zip: ^1.13.6
       request: ^2.88.2
       semver: ^7.3.2
+      sprintf-js: ^1.1.2
     dependencies:
       '@automattic/puppeteer-utils': github.com/Automattic/puppeteer-utils/0f3ec50
       '@jest/test-sequencer': 25.5.4
@@ -148,6 +149,7 @@ importers:
       jest-puppeteer: 4.4.0
       node-stream-zip: 1.15.0
       request: 2.88.2
+      sprintf-js: 1.1.2
     devDependencies:
       '@babel/cli': 7.12.8_@babel+core@7.12.9
       '@babel/core': 7.12.9
@@ -5845,18 +5847,18 @@ packages:
       - utf-8-validate
     dev: true
 
-  /@nrwl/workspace/13.1.4_wp-prettier@2.2.1-beta-1:
-    resolution: {integrity: sha512-dQlxswf2XlMyEJBK4+fZHQTpxtevcWzDCVO9iLjuvL1XZDbDQG95+N7DsASq67qOxFAlpYWVxAVZAXIHsnX9tQ==}
+  /@nrwl/workspace/13.2.0_wp-prettier@2.2.1-beta-1:
+    resolution: {integrity: sha512-k0iUdJRsn8JY4SID/ybYDednKEWtYOgsapgShBzUjv2BZJoRfXuPCp21VuH6kdZDZx18/i5uOpmjzju1U12PkQ==}
     peerDependencies:
       prettier: ^2.3.0
     peerDependenciesMeta:
       prettier:
         optional: true
     dependencies:
-      '@nrwl/cli': 13.1.4
-      '@nrwl/devkit': 13.1.4
-      '@nrwl/jest': 13.1.4
-      '@nrwl/linter': 13.1.4
+      '@nrwl/cli': 13.2.0
+      '@nrwl/devkit': 13.2.0
+      '@nrwl/jest': 13.2.0
+      '@nrwl/linter': 13.2.0
       '@parcel/watcher': 2.0.0-alpha.11
       chalk: 4.1.0
       chokidar: 3.5.2
