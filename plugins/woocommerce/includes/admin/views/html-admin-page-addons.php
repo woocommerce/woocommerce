@@ -70,7 +70,7 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 	<div class="wrap">
 		<div class="marketplace-content-wrapper">
 			<?php require __DIR__ . '/html-admin-page-addons-category-nav.php'; ?>
-			<?php if ( ! empty( $search ) && 0 === count( $addons ) ) : ?>
+			<?php if ( ! empty( $search ) && ! is_wp_error( $addons ) && 0 === count( $addons ) ) : ?>
 				<h1 class="search-form-title">
 					<?php esc_html_e( 'Sorry, could not find anything. Try searching again using a different term.', 'woocommerce' ); ?></p>
 				</h1>
@@ -89,7 +89,7 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 			<?php endif; ?>
 			<?php if ( '_featured' !== $current_section ) : ?>
 				<?php if ( is_wp_error( $addons ) ) : ?>
-					<?php WC_Admin_Addons::output_empty(); ?>
+					<?php WC_Admin_Addons::output_empty( $addons->get_error_message() ); ?>
 				<?php else: ?>
 					<?php
 					if ( ! empty( $promotions ) && WC()->is_wc_admin_active() ) {

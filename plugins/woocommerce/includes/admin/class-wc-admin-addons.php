@@ -90,17 +90,16 @@ class WC_Admin_Addons {
 			if ( is_wp_error( $raw_featured ) ) {
 				do_action( 'woocommerce_page_wc-addons_connection_error', $raw_featured->get_error_message() );
 
-				$message = null;
-				if ( self::is_ssl_error( $raw_featured->get_error_message() ) ) {
-					$message = __( 'We encountered an SSL error. Please check if your site supports TLS version 1.2 or above.', 'woocommerce' );
-				}
+				$message = self::is_ssl_error( $raw_featured->get_error_message() )
+					? __( 'We encountered an SSL error. Please ensure your site supports TLS version 1.2 or above.', 'woocommerce' )
+					: $raw_featured->get_error_message();
 
 				self::output_empty( $message );
 
 				return;
 			}
 
-			$response_code = intval( wp_remote_retrieve_response_code( $raw_featured ) );
+			$response_code = (int) wp_remote_retrieve_response_code( $raw_featured );
 			if ( 200 !== $response_code ) {
 				do_action( 'woocommerce_page_wc-addons_connection_error', $response_code );
 
@@ -108,7 +107,7 @@ class WC_Admin_Addons {
 				$message = sprintf(
 					esc_html(
 						__(
-							'Error code %d.',
+							'Our request to the featured API got error code %d.',
 							'woocommerce'
 						)
 					),
@@ -123,7 +122,7 @@ class WC_Admin_Addons {
 			$featured      = json_decode( wp_remote_retrieve_body( $raw_featured ) );
 			if ( empty( $featured ) || ! is_array( $featured ) ) {
 				do_action( 'woocommerce_page_wc-addons_connection_error', 'Empty or malformed response' );
-				$message = __( 'We received an empty or malformed response', 'woocommerce' );
+				$message = __( 'Our request to the featured API got a malformed response.', 'woocommerce' );
 				self::output_empty( $message );
 
 				return;
@@ -138,7 +137,7 @@ class WC_Admin_Addons {
 	}
 
 	public static function is_ssl_error( $error_message ) {
-		return ( false !== stripos( $error_message, 'cURL error 35' ) );
+		return false !== stripos( $error_message, 'cURL error 35' );
 	}
 
 	/**
@@ -190,17 +189,17 @@ class WC_Admin_Addons {
 			return $raw_extensions;
 		}
 
-		$response_code = intval( wp_remote_retrieve_response_code( $raw_extensions ) );
+		$response_code = (int) wp_remote_retrieve_response_code( $raw_extensions );
 		if ( 200 !== $response_code ) {
 			do_action( 'woocommerce_page_wc-addons_connection_error', $response_code );
-			return new WP_Error( 'error', __( 'API error', 'woocommerce' ) );
+			return new WP_Error( 'error', __( "Our request to the search API got response code $response_code.", 'woocommerce' ) );
 		}
 
 		$addons = json_decode( wp_remote_retrieve_body( $raw_extensions ) );
 
 		if ( ! is_object( $addons ) || ! isset( $addons->products ) ) {
 			do_action( 'woocommerce_page_wc-addons_connection_error', 'Empty or malformed response' );
-			return new WP_Error( 'error', __( 'API error', 'woocommerce' ) );
+			return new WP_Error( 'error', __( "Our request to the search API got a malformed response.", 'woocommerce' ) );
 		}
 
 		return $addons;
@@ -968,6 +967,9 @@ class WC_Admin_Addons {
 		?>
 		<div class="wc-addons__empty">
 			<h2><?php echo wp_kses_post( __( 'Oh no! We\'re having trouble connecting to the extensions catalog right now.', 'woocommerce' ) ); ?></h2>
+			<?php if ( ! empty( $message ) ) : ?>
+				<p><?php echo esc_html( $message ); ?></p>
+			<?php endif; ?>
 			<p>
 				<?php
 				/* translators: a url */
@@ -982,9 +984,6 @@ class WC_Admin_Addons {
 				);
 				?>
 			</p>
-			<?php if ( ! empty( $message ) ) : ?>
-				<p><?php echo esc_html( $message ); ?></p>
-			<?php endif; ?>
 		</div>
 		<?php
 	}
@@ -1027,12 +1026,8 @@ class WC_Admin_Addons {
 			$term           = $search ? $search : null;
 			$country        = WC()->countries->get_base_country();
 			$extension_data = self::get_extension_data( $category, $term, $country );
-			if ( is_wp_error( $extension_data ) ) {
-				$addons = $extension_data;
-			} else {
-				$addons = $extension_data->products;
-			}
-			$promotions = ! empty( $extension_data->promotions ) ? $extension_data->promotions : array();
+			$addons         = is_wp_error( $extension_data ) ? $extension_data : $extension_data->products;
+			$promotions     = ! empty( $extension_data->promotions ) ? $extension_data->promotions : array();
 		}
 
 		// We need Automattic\WooCommerce\Admin\RemoteInboxNotifications for the next part, if not remove all promotions.
