@@ -2,6 +2,7 @@
 	"root": "plugins/woocommerce/legacy",
 	"sourceRoot": "plugins/woocommerce/legacy",
 	"type": "application",
+	"implicitDependencies": [],
 	"targets": {
 		"build": {
 			"executor": "@nrwl/workspace:run-commands",
