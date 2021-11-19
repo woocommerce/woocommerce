@@ -23,7 +23,10 @@ import { defaultCartState } from '../../../../data/default-states';
 
 const MiniCartBlock = ( props ) => (
 	<SlotFillProvider>
-		<Block { ...props } />
+		<Block
+			contents='<div class="wc-block-mini-cart-contents"></div>'
+			{ ...props }
+		/>
 	</SlotFillProvider>
 );
 
@@ -47,7 +50,7 @@ const mockFullCart = () => {
 	} );
 };
 
-describe( 'Testing cart', () => {
+describe( 'Testing Mini Cart', () => {
 	beforeEach( async () => {
 		mockFullCart();
 		// need to clear the store resolution state between tests.
@@ -93,10 +96,12 @@ describe( 'Testing cart', () => {
 		} );
 
 		await waitForElementToBeRemoved( () =>
-			screen.queryByLabelText( /3 items/i )
+			screen.queryByLabelText( /3 items in cart/i )
 		);
 		await waitFor( () =>
-			expect( screen.getByLabelText( /0 items/i ) ).toBeInTheDocument()
+			expect(
+				screen.getByLabelText( /0 items in cart/i )
+			).toBeInTheDocument()
 		);
 	} );
 
@@ -107,16 +112,18 @@ describe( 'Testing cart', () => {
 
 		mockFullCart();
 		// eslint-disable-next-line no-undef
-		const removedFromCartEvent = new Event( 'wc-blocks_added_to_cart' );
+		const addedToCartEvent = new Event( 'wc-blocks_added_to_cart' );
 		act( () => {
-			document.body.dispatchEvent( removedFromCartEvent );
+			document.body.dispatchEvent( addedToCartEvent );
 		} );
 
 		await waitForElementToBeRemoved( () =>
-			screen.queryByLabelText( /0 items/i )
+			screen.queryByLabelText( /0 items in cart/i )
 		);
 		await waitFor( () =>
-			expect( screen.getAllByLabelText( /3 items/i ).length > 0 )
+			expect(
+				screen.getByLabelText( /3 items in cart/i )
+			).toBeInTheDocument()
 		);
 	} );
 } );

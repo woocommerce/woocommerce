@@ -19,7 +19,7 @@ const placeholderRows = [ ...Array( 3 ) ].map( ( _x, i ) => (
 interface CartLineItemsTableProps {
 	lineItems: CartResponseItem[];
 	isLoading: boolean;
-	className: string;
+	className?: string;
 }
 
 const setRefs = ( lineItems: CartResponseItem[] ) => {

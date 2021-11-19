@@ -60,7 +60,7 @@ export const usePaymentMethodDataContext = (): PaymentMethodDataContextType => {
 export const PaymentMethodDataProvider = ( {
 	children,
 }: {
-	children: React.ReactChildren;
+	children: React.ReactNode;
 } ): JSX.Element => {
 	const {
 		isProcessing: checkoutIsProcessing,
