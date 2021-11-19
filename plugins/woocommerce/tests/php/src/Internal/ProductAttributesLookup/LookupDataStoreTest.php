@@ -9,7 +9,6 @@ use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Testing\Tools\FakeQueue;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
-use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 
 /**
  * Tests for the LookupDataStore class.
@@ -36,7 +35,6 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 	 */
 	public static function tearDownAfterClass() {
 		parent::tearDownAfterClass();
-		wc_get_container()->get( DataRegenerator::class )->delete_all_attributes_lookup_data();
 	}
 
 	/**
