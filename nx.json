@@ -35,6 +35,12 @@
       }
     ]
   },
+  "woocommerce": {
+    "implicitDependencies": [ "woocommerce-legacy-assets" ]
+  },
+  "woocommerce-legacy-assets": {
+    "implicitDependencies": []
+  },
   "affected": {
     "defaultBase": "trunk"
   }
