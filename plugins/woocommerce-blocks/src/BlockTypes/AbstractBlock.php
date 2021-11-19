@@ -107,7 +107,7 @@ abstract class AbstractBlock {
 	 */
 	protected function initialize() {
 		if ( empty( $this->block_name ) ) {
-			_doing_it_wrong( __METHOD__, esc_html( __( 'Block name is required.', 'woo-gutenberg-products-block' ) ), '4.5.0' );
+			_doing_it_wrong( __METHOD__, esc_html__( 'Block name is required.', 'woo-gutenberg-products-block' ), '4.5.0' );
 			return false;
 		}
 		$this->integration_registry->initialize( $this->block_name . '_block' );
