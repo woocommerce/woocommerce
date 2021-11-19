@@ -1413,6 +1413,11 @@ class WC_Countries {
 							'label' => __( 'State', 'woocommerce' ),
 						),
 					),
+					'UY' => array(
+						'state'    => array(
+							'label' => __( 'Department', 'woocommerce' ),
+						),
+					),
 					'GB' => array(
 						'postcode' => array(
 							'label' => __( 'Postcode', 'woocommerce' ),
