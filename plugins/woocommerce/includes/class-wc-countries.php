@@ -942,6 +942,11 @@ class WC_Countries {
 							'required' => false,
 						),
 					),
+					'CR' => array(
+						'state' => array(
+							'label' => __( 'Province', 'woocommerce' ),
+						),
+					),
 					'CW' => array(
 						'postcode' => array(
 							'required' => false,
