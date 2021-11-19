@@ -6,6 +6,7 @@
 		"@woocommerce/e2e-core-tests": "packages/js/e2e-core-tests",
 		"@woocommerce/e2e-environment": "packages/js/e2e-environment",
 		"@woocommerce/e2e-utils": "packages/js/e2e-utils",
-		"woocommerce": "plugins/woocommerce"
+		"woocommerce": "plugins/woocommerce",
+		"woocommerce-legacy-assets": "plugins/woocommerce/legacy"
 	}
 }
