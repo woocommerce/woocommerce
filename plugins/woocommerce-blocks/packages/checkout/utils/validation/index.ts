@@ -18,8 +18,8 @@ export const mustContain = (
 					'Returned value must include %1$s, you passed "%2$s"',
 					'woo-gutenberg-products-block'
 				),
-				value,
-				requiredValue
+				requiredValue,
+				value
 			)
 		);
 	}
