@@ -54,6 +54,9 @@ class BlockTemplatesController {
 	 * @return mixed|\WP_Block_Template|\WP_Error
 	 */
 	public function maybe_return_blocks_template( $template, $id, $template_type ) {
+		if ( ! function_exists( 'gutenberg_get_block_template' ) ) {
+			return $template;
+		}
 		$template_name_parts = explode( '//', $id );
 		if ( count( $template_name_parts ) < 2 ) {
 			return $template;
@@ -132,7 +135,7 @@ class BlockTemplatesController {
 	 * @return array
 	 */
 	public function add_block_templates( $query_result, $query, $template_type ) {
-		if ( ! gutenberg_supports_block_templates() || 'wp_template' !== $template_type ) {
+		if ( ! function_exists( 'gutenberg_supports_block_templates' ) || ! gutenberg_supports_block_templates() || 'wp_template' !== $template_type ) {
 			return $query_result;
 		}
 
