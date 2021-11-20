@@ -6,7 +6,7 @@ Components and utilities making it possible to integrate with the WooCommerce Ca
 
 - [Installation](#installation)
 - [Usage](#usage)
-	- [Aliased imports](#aliased-imports)
+  - [Aliased imports](#aliased-imports)
 - [Folder Structure Overview](#folder-structure-overview)
 
 ## Installation
@@ -23,36 +23,22 @@ const { ... } = wc.blocksCheckout;
 
 ### Aliased imports
 
-Alternatively, you can map this to external to a custom alias using the [WordPress Dependency Extraction Webpack Plugin](https://github.com/WordPress/gutenberg/tree/trunk/packages/dependency-extraction-webpack-plugin):
+Alternatively, you can map this to externals (or aliases) using the [WooCommerce Dependency Extraction Webpack Plugin](https://github.com/woocommerce/woocommerce-admin/tree/main/packages/dependency-extraction-webpack-plugin). Just add the above Webpack plugin to your package.json:
+
+```bash
+npm install @woocommerce/dependency-extraction-webpack-plugin --save-dev
+```
+
+Now, you can include this plugin in your Webpack configuration:
 
 ```js
 // webpack.config.js
-const DependencyExtractionWebpackPlugin = require( '@wordpress/dependency-extraction-webpack-plugin' );
-
-const dependencyMap = {
-	'@woocommerce/blocks-checkout': [ 'wc', 'blocksCheckout' ],
-};
-
-const handleMap = {
-	'@woocommerce/blocks-checkout': 'wc-blocks-checkout',
-};
+const WooCommerceDependencyExtractionWebpackPlugin = require( '@woocommerce/dependency-extraction-webpack-plugin' );
 
 module.exports = {
 	// …snip
 	plugins: [
-		new DependencyExtractionWebpackPlugin( {
-			injectPolyfill: true,
-			requestToExternal( request ) {
-				if ( dependencyMap[ request ] ) {
-					return dependencyMap[ request ];
-				}
-			},
-			requestToHandle( request ) {
-				if ( handleMap[ request ] ) {
-					return handleMap[ request ];
-				}
-			},
-		} ),
+		new WooCommerceDependencyExtractionWebpackPlugin(),
 	],
 };
 ```
