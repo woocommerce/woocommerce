@@ -12,7 +12,7 @@ WooCommerce is the world’s most popular open-source eCommerce solution.
 
 == Description ==
 
-WooCommerce is [the world’s most popular](https://trends.builtwith.com/shop) open-source eCommerce solution. 
+WooCommerce is [the world’s most popular](https://trends.builtwith.com/shop) open-source eCommerce solution.
 
 Our core platform is free, flexible, and amplified by a global community. The freedom of open-source means you retain full ownership of your store’s content and data forever.
 
@@ -43,13 +43,13 @@ Manage your store from anywhere with the free WooCommerce [mobile app](https://w
 
 With WooCommerce, your data belongs to you. Always.
 
-If you opt to share [usage data](https://woocommerce.com/usage-tracking/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing) with us, you can feel confident knowing that it’s anonymized and kept secure. Choose to opt-out at any time without impacting your store. 
+If you opt to share [usage data](https://woocommerce.com/usage-tracking/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing) with us, you can feel confident knowing that it’s anonymized and kept secure. Choose to opt-out at any time without impacting your store.
 
 Unlike hosted eCommerce solutions, WooCommerce store data is future-proof; should you wish to migrate to a different platform, you’re free to export all your content and take your site wherever you choose. No restrictions.
 
 = Why developers choose (and love) WooCommerce =
 
-Developers can use WooCommerce to create, customize, and scale a store to meet a client’s exact specifications, making enhancements through extensions or custom solutions. 
+Developers can use WooCommerce to create, customize, and scale a store to meet a client’s exact specifications, making enhancements through extensions or custom solutions.
 
 - Leverage [hooks and filters](https://docs.woocommerce.com/document/introduction-to-hooks-actions-and-filters/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing) to modify or create functionality.
 - Integrate virtually any service using a robust [REST API](https://docs.woocommerce.com/document/woocommerce-rest-api/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing) and webhooks.
@@ -103,7 +103,7 @@ We have a detailed guide on [How To Update WooCommerce](https://docs.woocommerce
 
 = My site broke – what do I do? =
 
-Start by diagnosing the issue using our helpful [troubleshooting guide](https://docs.woocommerce.com/documentation/get-help/troubleshooting-get-help/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing). 
+Start by diagnosing the issue using our helpful [troubleshooting guide](https://docs.woocommerce.com/documentation/get-help/troubleshooting-get-help/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing).
 
 If you noticed the error after updating a theme or plugin, there might be compatibility issues between it and WooCommerce. If the issue appeared after updating WooCommerce, there could be a conflict between WooCommerce and an outdated theme or plugin.
 
@@ -141,7 +141,7 @@ Visit the [WooCommerce server requirements documentation](https://docs.woocommer
 = Automatic installation =
 
 Automatic installation is the easiest option -- WordPress will handle the file transfer, and you won’t need to leave your web browser. To do an automatic install of WooCommerce, log in to your WordPress dashboard, navigate to the Plugins menu, and click “Add New.”
- 
+
 In the search field type “WooCommerce,” then click “Search Plugins.” Once you’ve found us,  you can view details about it such as the point release, rating, and description. Most importantly of course, you can install it by! Click “Install Now,” and WordPress will take it from there.
 
 = Manual installation =
@@ -160,61 +160,103 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 5.9.0 2021-11-09 =
+= 6.0.0 2021-12-14 =
 
 **WooCommerce**
 
-* Fix - Bug in the handling of remote file names for downloadable files.
-* Fix - Remove the absolute path to the currency-info.php from within locale-info.php. #31036
-* Fix - wc_get_price_excluding_tax when an order with no customer is passed. #31015
-* Fix - Rename transient used to cache data for Featured page of In-App Marketplace. #31002
-* Fix - Variable product price caching bug with VAT exemption. #30889
-* Fix - Allow to pass null as the email for billing addresses in REST API. #30850
-* Fix - Ensure woocommerce_cancel_unpaid_orders event is always re-scheduled. #30830
-* Fix - Use a more standard way to check if the product attributes lookup table exists. #30745
-* Fix - Undefined variable notice when trying to add product in orders without specifying a product. #30739
-* Fix - Use proper location for taxes when adding products via admin. #30692
-* Dev - Add mobile data to WCTracker. #30415
-* Tweak - Remove hardcode category banners in Settings > Marketplace and use the WooCommerce.com API instead. #30938
-* Tweak - Show a search again message when marketplace results are empty. #30642
-* Tweak - Add promoted cards styling to marketplace section. #30861
-* Enhancement - Add ratings, reviews and icons into Marketplace's Product Cards. #30840
-* Enhancement - Update Storefront banner width and track links in the marketplace page. #30882
-* Enhancement - Revamp the WooCommerce Marketplace page. #30900
+- Tweak - Remove the need to invoke LookupDataStore->show_feature() to use the product attributes lookup table. ([#31228](https://github.com/woocommerce/woocommerce/pull/31228))
+- Enhancement - Improve the performance of the filtering by attributes using the new lookup table. ([#31212](https://github.com/woocommerce/woocommerce/pull/31212))
+- Tweak - Disable autocomplete on quantity input field to prevent stale values in Firefox. ([#31196](https://github.com/woocommerce/woocommerce/pull/31196))
+- Fix - Duplicate coupon usage count when order is created via admin/API and status is changed. ([#31147](https://github.com/woocommerce/woocommerce/pull/31147))
+- Localization - Add 'GB' back to countries that are recommended to use automated taxes. ([#31100](https://github.com/woocommerce/woocommerce/pull/31100))
+- Tweak - Perform check for has product archive if current theme is an FSE theme, and not just if it has current_theme_supports( 'woocommerce' ); ([#31094](https://github.com/woocommerce/woocommerce/pull/31094))
+- Update - Merge Marketplace and My Subscriptions pages back into one Extensions page. ([#31085](https://github.com/woocommerce/woocommerce/pull/31085))
+- Add - Ensure empty arrays can be cached. ([#31077](https://github.com/woocommerce/woocommerce/pull/31077))
+- Fix - Fixes an issue that prevented database update notices from being dismissed. ([#31075](https://github.com/woocommerce/woocommerce/pull/31075))
+- Tweak - Correct the Iraqi Dinar (IQD) symbol. ([#31070](https://github.com/woocommerce/woocommerce/pull/31070))
+- Add - Support for dynamic price period in in-app marketplace product cards. ([#31026](https://github.com/woocommerce/woocommerce/pull/31026))
+- Tweak - Add Product Reviews filter for review comment type to the WordPress comment page. ([#31004](https://github.com/woocommerce/woocommerce/pull/31004))
+- Tweak - has_block_template method: Add apply_filters to the function which will enable third-party plugins to override the return value. ([#30997](https://github.com/woocommerce/woocommerce/pull/30997))
+- Tweak - Clarify tooltip for when the on-hold email is sent. ([#30970](https://github.com/woocommerce/woocommerce/pull/30970))
+- Enhancement - Stop using options table to store rate limits. ([#30960](https://github.com/woocommerce/woocommerce/pull/30960))
+- Add - warning to developers to avoid gotcha with shipping rates. ([#30958](https://github.com/woocommerce/woocommerce/pull/30958))
+- Fix - Corrects the display of negative refund values within the order editor screen. ([#30957](https://github.com/woocommerce/woocommerce/pull/30957))
+- Tweak - Remove the absolute path to the currency-info.php from within locale-info.php. ([#30935](https://github.com/woocommerce/woocommerce/pull/30935))
+- Dev - Remove defunct AJAX events. ([#30931](https://github.com/woocommerce/woocommerce/pull/30931))
+- Fix - Fix bug when creating REST API keys with very long descriptions. ([#30901](https://github.com/woocommerce/woocommerce/pull/30901))
+- Tweak - Update track properties to follow correct format. ([#30899](https://github.com/woocommerce/woocommerce/pull/30899))
+- Add - Add woocommerce_product_options_shipping_product_data hook to product data metabox. ([#30876](https://github.com/woocommerce/woocommerce/pull/30876))
+- Localization - Improve internationalization and add regions for Chile. ([#30875](https://github.com/woocommerce/woocommerce/pull/30875))
+- Fix - Fix products API orderby slug and include. ([#30873](https://github.com/woocommerce/woocommerce/pull/30873))
+- Tweak - Add new action hook woocommerce_after_variations_table after the product variations table (within the add-to-cart form). ([#29642](https://github.com/woocommerce/woocommerce/pull/29642))
 
-**WooCommerce Admin - 2.8.0 **
+**WooCommerce Admin - 2.9.0 **
 
-* Fix - Issue where stock activity panel was not rendering correctly. #7817
-* Fix - Increase CSS specificity to avoid conflicts and broken panel styling. #7813
-* Fix - Updated link to WooCommerce Developers Blog in readme.txt. #7824
-* Fix - Fixed navigation menu text color after Gutenberg 11.6.0. #7771
-* Fix - Add status param to notes/delete/all REST endpoint, to correctly delete all notes. #7743
-* Fix - Allow already installed marketing extensions to be activated. #7740
-* Fix - Add missing title text for marketing task. #7640
-* Fix - Assign parent order status as children order status if refund order. #7253
-* Fix - Fix category lookup logic to update children correctly. #7709
-* Fix - Fixing an unwanted page refresh when using Woo Navigation. #7615
-* Fix - Fix naming of event names and properties. #7677
-* Fix - Fix white screen for variation analytic data without a name. #7686
-* Add - Store Profiler and Product task - include Subscriptions. #7734
-* Update - Update WC pay supported country list for the default free extensions. #7873
-* Update - Update back up copy of free extension for Google Listing & Ads plugin. #7798
-* Update - Update Eway payment gateway capitalization (was eWAY). #7678
-* Update - Enable Square in France. #7679
-* Enhancement - Only load tasks during rest api requests. #7856
-* Enhancement - Add experiment for promoting WooCommerce Payments in payment methods table. #7666
+- Fix: Fix ordering and styling issue with WooCommerce Payments payment method promotion. ([#7943](https://github.com/woocommerce/woocommerce-admin/pull/7943))
+- Fix: Fix ExPlat PHP client ([#7926](https://github.com/woocommerce/woocommerce-admin/pull/7926))
+- Fix: Fix marketing extensions tracks ([#7908](https://github.com/woocommerce/woocommerce-admin/pull/7908))
+- Update: Increased number of possible items in Recommended Extensions list from 6 to 9 ([#7887](https://github.com/woocommerce/woocommerce-admin/pull/7887))
+- Update: Reverts addition of Marketplace and My Subscriptions pages to the Marketplace menu. ([#7902](https://github.com/woocommerce/woocommerce-admin/pull/7902))
+- Update: Add marketing extensions back to onboarding wizard ([#7831](https://github.com/woocommerce/woocommerce-admin/pull/7831))
+- Update: Add profile notes. ([#7861](https://github.com/woocommerce/woocommerce-admin/pull/7861))
+- Update: Change CTA text for personalize store task after completion ([#7852](https://github.com/woocommerce/woocommerce-admin/pull/7852))
+- Update: Refactor data source poller for re-usability. ([#7671](https://github.com/woocommerce/woocommerce-admin/pull/7671))
+- Update: Update WC Pay card to include in-person information ([#7830](https://github.com/woocommerce/woocommerce-admin/pull/7830))
+- Update: Updating navigation link colors ([#7833](https://github.com/woocommerce/woocommerce-admin/pull/7833))
+- Tweak: Use page title Extensions for Marketplace and My Subscriptions pages. ([#7901](https://github.com/woocommerce/woocommerce-admin/pull/7901))
+- Tweak: Remove the Spinner component to prevent undesired page flickering. ([#7886](https://github.com/woocommerce/woocommerce-admin/pull/7886))
+- Tweak: Add route and layout for unmatched path ([#7503](https://github.com/woocommerce/woocommerce-admin/pull/7503))
+- Tweak: Avoid caching extended info ([#7819](https://github.com/woocommerce/woocommerce-admin/pull/7819))
+- Tweak: Minor design update for Marketing task. ([#7732](https://github.com/woocommerce/woocommerce-admin/pull/7732))
+- Fix: Do not clear `current` class from the entire page when updating wp-admin's menu. ([#7773](https://github.com/woocommerce/woocommerce-admin/pull/7773))
+- Fix: Fix calendar not being dismissed when clicking outside. ([#7714](https://github.com/woocommerce/woocommerce-admin/pull/7714))
+- Fix: fixed warnings when using AdvancedFilters component. ([#7704](https://github.com/woocommerce/woocommerce-admin/pull/7704))
+- Fix: Fix Tasklist UI illustrations styling ([#7858](https://github.com/woocommerce/woocommerce-admin/pull/7858))
+- Fix: Revert experiment task titles back to original ([#7853](https://github.com/woocommerce/woocommerce-admin/pull/7853))
+- Add: Add Avalara to tax task ([#7874](https://github.com/woocommerce/woocommerce-admin/pull/7874))
+- Add: Add 2col expirement. ([#7872](https://github.com/woocommerce/woocommerce-admin/pull/7872))
+- Add: Added two column experimental task list ([#7669](https://github.com/woocommerce/woocommerce-admin/pull/7669))
+- Add: Add header cards for all tasks in Tasklist UI experiment ([#7838](https://github.com/woocommerce/woocommerce-admin/pull/7838))
+- Add: Add onboarding task docs ([#7762](https://github.com/woocommerce/woocommerce-admin/pull/7762))
+- Dev: Add method to check for install status ([#7808](https://github.com/woocommerce/woocommerce-admin/pull/7808))
+- Dev: Refactor tax task into separate components
+- Dev: Update the task list to use the new task list REST API ([#7736](https://github.com/woocommerce/woocommerce-admin/pull/7736))
+- Performance: Only load default tasks during REST requests ([#7904](https://github.com/woocommerce/woocommerce-admin/pull/7904))
 
-**WooCommerce Blocks - 6.0.0 & 6.0.1 & 6.0.2 & 6.1.0**
+**WooCommerce Blocks - 6.2.0 & 6.3.0 & 6.3.1 & 6.3.2**
 
-* Fix - Infinite recursion when removing an attribute filter from the Active filters block. #4816
-* Fix - Update All Reviews block so it honors 'ratings enabled' and 'show avatars' preferences. #4764
-* Fix - Products by Category: Moved renderEmptyResponsePlaceholder to separate method to prevent unnecessary rerender. #4751
-* Fix - Calculation of number of reviews in the Reviews by Category block. #4729
-* Fix - Dropdown list in Product Category List Block for nested categories #4920
-* Fix - String translations within the All Products Block. #4897
-* Fix - Filter By Price: Update aria values to be more representative of the actual values presented. #4839
-* Fix - Filter button from Filter Products by Attribute block is not aligned with the input field. #4814
-* Fix - Remove IntersectionObserver shim in favor of dropping IE11 support. #4808
-* Enhancement - Added global styles to All Reviews, Reviews by Category and Reviews by Product blocks. Now it's possible to change the text color and font size of those blocks. #4323
+* Enhancement - Legacy Template Block: allow users to delete the block. ( [5176](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5176) )
+* Enhancement - Add placeholder text when modifying product search input in the editor. ( [5122](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5122) )
+* Enhancement - FSE: Add basic product archive block template. ( [5049](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5049) )
+* Enhancement - FSE: Add basic taxonomy block templates. ( [5063](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5063) )
+* Enhancement - FSE: Add single product block template. ( [5054](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5054) )
+* Enhancement - FSE: Remove the do_action( ‘woocommerce_sidebar’ ); action from the LegacyTemplate.php block. ( [5097](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5097) )
+* Enhancement - Fix duplicate queries in product grids. ( [5002](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5002) )
+* Enhancement - FSE: Add abstract block legacy template for core PHP templates. ( [4991](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4991) )
+* Enhancement - FSE: Add render logic to BlockTemplateController. ( [4984](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4984) )
+* Enhancement - Improve accessibility by using self-explaining edit button titles. ( [5113](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5113) )
+* Enhancement - Improve readability of terms and condition text by not displaying the text justified. ( [5120](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5120) )
+* Enhancement - Improve rendering performance for Single Product block. ( [5107](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5107) )
+* Enhancement - Improve the product images placeholder display by adding a light gray border to it. ( [4950](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4950) )
+* Enhancement - Deprecate the __experimental_woocommerce_blocks_checkout_update_order_from_request action in favour of woocommerce_blocks_checkout_update_order_from_request. ( [5015](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5015) )
+* Enhancement - Deprecate the __experimental_woocommerce_blocks_checkout_update_order_meta action in favour of woocommerce_blocks_checkout_update_order_meta. ( [5017](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5017) )
+* Enhancement - Deprecate the __experimental_woocommerce_blocks_checkout_order_processed action in favour of woocommerce_blocks_checkout_order_processed. ( [5014](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5014) )
+* Enhancement - Cart v2: The cart block, like checkout block, now supports inner blocks that allow for greater customizability. ( [4973](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4973) )
+* Enhancement - BlockTemplateController: Adds the ability to load and manage block template files. ( [4981](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4981) )
+* Enhancement - Improve accessibility for the editor view of the Product search block. ( [4905](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4905) )
+* Fix - Removed WooCommerce block templates from appearing in the template dropdown for a page or post. ( [5167](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5167) )
+* Fix - Fix ‘Country is required’ error on the Cart block when updating shipping address ( [5129](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5129) )
+* Fix - Fix state validation to compare state codes, and only validate if a country is given ( [5132](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5132) )
+* Fix - Make order note block removable ( [5139](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5139) )
+* Fix - Fix label alignment of the product search in the editor. ( [5072](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5072) )
+* Fix - Fix sale badge alignment on smaller screen. ( [5061](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5061) )
+* Fix - FSE: Fix missing is_custom property for WooCommerce block template objects. ( [5067](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5067) )
+* Fix - Replace incorrect with correct text domain. ( [5020](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5020) )
+* Fix - Scripts using wc-settings or script that depend on it would be enqueued in the footer if they’re enqueued in the header. ( [5059](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5059) )
+* Fix - Fix custom classname support for inner checkout blocks. ( [4978](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4978) )
+* Fix - Fix a bug in free orders and trial subscription products. ( [4955](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4955) )
+* Fix - Remove duplicate attributes in saved block HTML. ( [4941](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4941) )
+* Fix - Fix render error of Filter by Attribute block when no attribute is selected. ( [4847](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4847) )
+* Fix - Store API – Ensure returned customer address state is valid. ( [4844](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4844) )
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
