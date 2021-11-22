@@ -14,6 +14,19 @@ const shippingZone = getShippingZoneExample();
  *
  */
 describe( 'Shipping zones API tests', () => {
+	beforeAll( async () => {
+		// Setup: Delete all pre-existing shipping zones.
+		// Skip deleting shipping zone with id = 0 because it is the "Rest of the world" zone.
+		const { body } = await shippingZonesApi.listAll.shippingZones( {
+			_fields: 'id',
+		} );
+		const ids = body.filter( ( { id } ) => id > 0 ).map( ( { id } ) => id );
+
+		for ( const id of ids ) {
+			await shippingZonesApi.delete.shippingZone( id, true );
+		}
+	} );
+
 	it( 'can create a shipping zone', async () => {
 		const { status, body } = await shippingZonesApi.create.shippingZone(
 			shippingZone
@@ -44,6 +57,7 @@ describe( 'Shipping zones API tests', () => {
 			param
 		);
 
+		expect( body ).toHaveLength( 2 ); // the test shipping zone, and the default 'Locations not covered by your other zones'
 		expect( status ).toEqual( shippingZonesApi.listAll.responseCode );
 		expect( body ).toEqual(
 			expect.arrayContaining( [ { id: shippingZone.id } ] )
