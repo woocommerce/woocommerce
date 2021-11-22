@@ -13,7 +13,7 @@ import {
 	getBlockType,
 	Block,
 	AttributeSource,
-	synchronizeBlocksWithTemplate,
+	createBlocksFromInnerBlocksTemplate,
 	TemplateArray,
 } from '@wordpress/blocks';
 import { isEqual } from 'lodash';
@@ -91,8 +91,7 @@ export const useForcedLayout = ( {
 			innerBlocks.length === 0 &&
 			currentDefaultTemplate.current.length > 0
 		) {
-			const nextBlocks = synchronizeBlocksWithTemplate(
-				innerBlocks,
+			const nextBlocks = createBlocksFromInnerBlocksTemplate(
 				currentDefaultTemplate.current
 			);
 			if ( ! isEqual( nextBlocks, innerBlocks ) ) {
