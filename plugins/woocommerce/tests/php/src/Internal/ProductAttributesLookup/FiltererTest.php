@@ -1358,7 +1358,8 @@ class FiltererTest extends \WC_Unit_Test_Case {
 
 		$filtered_product_ids = $this->do_product_request( array() );
 
-		$this->assertEquals( array( $product_simple_2->get_id(), $product_variable_2['id'] ), $filtered_product_ids );
+		$this->assertContains( $product_simple_2->get_id(), $filtered_product_ids );
+		$this->assertContains( $product_variable_2['id'], $filtered_product_ids );
 
 		$this->assert_counters( 'Color', $expected_colors_included_in_counters );
 		$this->assert_counters( 'Features', array( 'Ironable' ) );
