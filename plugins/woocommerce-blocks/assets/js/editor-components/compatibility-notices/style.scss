@@ -1,0 +1,31 @@
+.wc-block-welcome-guide {
+	width: 312px;
+
+	&.components-modal__frame.components-guide {
+		height: auto;
+	}
+
+	&__image {
+		background: #00a0d2;
+		margin: 0 0 $gap;
+	}
+
+	&__heading {
+		font-size: 24px;
+		line-height: 1.4;
+		margin: $gap 0;
+		padding: 0 $gap-large;
+	}
+
+	&__text {
+		font-size: 13px;
+		line-height: 1.4;
+		margin: 0 0 $gap-large;
+		padding: 0 $gap-large;
+	}
+
+	&__inserter-icon {
+		margin: 0 4px;
+		vertical-align: text-top;
+	}
+}
