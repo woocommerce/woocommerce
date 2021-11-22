@@ -163,6 +163,7 @@ class Events {
 	protected function possibly_delete_notes() {
 		NavigationNudge::delete_if_not_applicable();
 		NavigationFeedback::delete_if_not_applicable();
+		NavigationFeedbackFollowUp::delete_if_not_applicable();
 	}
 
 	/**
