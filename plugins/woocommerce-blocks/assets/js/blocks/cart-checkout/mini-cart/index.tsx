@@ -46,6 +46,10 @@ const settings = {
 		},
 	},
 	attributes: {
+		align: {
+			type: 'string',
+			default: 'right',
+		},
 		isPreview: {
 			type: 'boolean',
 			default: false,
