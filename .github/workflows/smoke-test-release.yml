@@ -73,10 +73,11 @@ jobs:
         with:
           path: package/woocommerce
 
-      - name: Run npm install.
-        working-directory: package/woocommerce/plugins/woocommerce
-          npm install -g pnpm
-          pnpm install
+      - name: Install PNPM and install dependencies
+        working-directory: package/woocommerce
+        run: |
+            npm install -g pnpm
+            pnpm install
 
       - name: Load docker images and start containers.
         working-directory: package/woocommerce/plugins/woocommerce
