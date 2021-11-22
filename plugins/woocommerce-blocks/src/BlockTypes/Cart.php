@@ -196,4 +196,23 @@ class Cart extends AbstractBlock {
 	protected function hydrate_from_api() {
 		$this->asset_data_registry->hydrate_api_request( '/wc/store/cart' );
 	}
+
+	/**
+	 * Register script and style assets for the block type before it is registered.
+	 *
+	 * This registers the scripts; it does not enqueue them.
+	 */
+	protected function register_block_type_assets() {
+		parent::register_block_type_assets();
+		$blocks = [
+			'cart-blocks/express-payment--checkout-blocks/express-payment--checkout-blocks/payment',
+			'cart-blocks/line-items',
+			'cart-blocks/order-summary',
+			'cart-blocks/order-summary--checkout-blocks/billing-address--checkout-blocks/shipping-address',
+			'cart-blocks/checkout-button-frontend.js',
+			'cart-blocks/express-payment',
+		];
+		$chunks = preg_filter( '/$/', '-frontend', $blocks );
+		$this->register_chunk_translations( $chunks );
+	}
 }

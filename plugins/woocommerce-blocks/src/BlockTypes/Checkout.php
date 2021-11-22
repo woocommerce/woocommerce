@@ -365,4 +365,27 @@ class Checkout extends AbstractBlock {
 		}
 		return $list_item;
 	}
+
+	/**
+	 * Register script and style assets for the block type before it is registered.
+	 *
+	 * This registers the scripts; it does not enqueue them.
+	 */
+	protected function register_block_type_assets() {
+		parent::register_block_type_assets();
+		$blocks = [
+			'checkout-blocks/express-payment',
+			'checkout-blocks/contact-information',
+			'checkout-blocks/shipping-address',
+			'checkout-blocks/billing-address',
+			'checkout-blocks/shipping-methods',
+			'checkout-blocks/payment',
+			'checkout-blocks/order-note',
+			'checkout-blocks/actions',
+			'checkout-blocks/terms',
+			'checkout-blocks/order-summary',
+		];
+		$chunks = preg_filter( '/$/', '-frontend', $blocks );
+		$this->register_chunk_translations( $chunks );
+	}
 }
