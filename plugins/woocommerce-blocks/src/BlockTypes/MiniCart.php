@@ -224,9 +224,13 @@ class MiniCart extends AbstractBlock {
 			$cart_contents_total += $cart->get_subtotal_tax();
 		}
 
-		$wrapper_classes = 'wc-block-mini-cart';
+		$wrapper_classes = 'wc-block-mini-cart  wp-block-woocommerce-mini-cart';
 		$classes         = '';
 		$style           = '';
+
+		if ( ! empty( $attributes['align'] ) ) {
+			$wrapper_classes .= ' align-' . $attributes['align'];
+		}
 
 		if ( ! isset( $attributes['transparentButton'] ) || $attributes['transparentButton'] ) {
 			$wrapper_classes .= ' is-transparent';
