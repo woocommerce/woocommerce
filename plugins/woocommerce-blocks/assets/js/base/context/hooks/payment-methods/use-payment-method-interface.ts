@@ -8,6 +8,7 @@ import PaymentMethodLabel from '@woocommerce/base-components/cart-checkout/payme
 import PaymentMethodIcons from '@woocommerce/base-components/cart-checkout/payment-method-icons';
 import { getSetting } from '@woocommerce/settings';
 import deprecated from '@wordpress/deprecated';
+import LoadingMask from '@woocommerce/base-components/loading-mask';
 
 /**
  * Internal dependencies
@@ -126,6 +127,7 @@ export const usePaymentMethodInterface = (): Record< string, unknown > => {
 			ValidationInputError,
 			PaymentMethodIcons,
 			PaymentMethodLabel,
+			LoadingMask,
 		},
 		emitResponse: {
 			noticeContexts,
