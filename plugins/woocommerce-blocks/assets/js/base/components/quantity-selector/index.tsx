@@ -6,7 +6,6 @@ import { speak } from '@wordpress/a11y';
 import classNames from 'classnames';
 import { useCallback } from '@wordpress/element';
 import { DOWN, UP } from '@wordpress/keycodes';
-import { isNumber } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -84,7 +83,8 @@ const QuantitySelector = ( {
 				onKeyDown={ quantityInputOnKeyDown }
 				onChange={ ( event ) => {
 					let value =
-						! isNumber( event.target.value ) || ! event.target.value
+						Number.isNaN( event.target.value ) ||
+						! event.target.value
 							? 0
 							: parseInt( event.target.value, 10 );
 					if ( hasMaximum ) {
