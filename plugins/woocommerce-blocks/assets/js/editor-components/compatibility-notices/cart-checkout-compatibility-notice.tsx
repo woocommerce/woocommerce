@@ -28,7 +28,7 @@ export function CartCheckoutCompatibilityNotice( {
 
 	return (
 		<Guide
-			className="edit-post-welcome-guide"
+			className="wc-block-welcome-guide"
 			contentLabel={ __(
 				'Compatibility notice',
 				'woo-gutenberg-products-block'
@@ -40,13 +40,13 @@ export function CartCheckoutCompatibilityNotice( {
 					image: <WooImage />,
 					content: (
 						<>
-							<h1 className="edit-post-welcome-guide__heading">
+							<h1 className="wc-block-welcome-guide__heading">
 								{ __(
 									'Compatibility notice',
 									'woo-gutenberg-products-block'
 								) }
 							</h1>
-							<p className="edit-post-welcome-guide__text">
+							<p className="wc-block-welcome-guide__text">
 								{ createInterpolateElement(
 									__(
 										'This block may not be compatible with <em>all</em> checkout extensions and integrations.',
@@ -57,7 +57,7 @@ export function CartCheckoutCompatibilityNotice( {
 									}
 								) }
 							</p>
-							<p className="edit-post-welcome-guide__text">
+							<p className="wc-block-welcome-guide__text">
 								{ createInterpolateElement(
 									__(
 										'We recommend reviewing our <a>expanding list</a> of compatible extensions prior to using this block on a live store.',
