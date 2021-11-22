@@ -4,6 +4,7 @@
 
 - Added quotes around `WORDPRESS_TITLE` value in .env file to address issue with docker compose 2 "key cannot contain a space" error.
 - Added `LATEST_WP_VERSION_MINUS` that allows setting a number to subtract from the current WordPress version for the WordPress Docker image.
+- Support for PHP_VERSION, MARIADB_VERSION environment variables for built in container initialization
 
 ## Fixed
 

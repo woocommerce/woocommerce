@@ -26,12 +26,12 @@ const runCheckoutPageTest = () => {
 	describe('Checkout page', () => {
 		beforeAll(async () => {
 			productId = await createSimpleProduct();
-			await withRestApi.resetSettingsGroupToDefault('general');
-			await withRestApi.resetSettingsGroupToDefault('products');
-			await withRestApi.resetSettingsGroupToDefault('tax');
+			await withRestApi.resetSettingsGroupToDefault( 'general', false );
+			await withRestApi.resetSettingsGroupToDefault( 'products', false );
+			await withRestApi.resetSettingsGroupToDefault( 'tax', false );
 
 			// Set free shipping within California
-			await withRestApi.addShippingZoneAndMethod('Free Shipping CA', 'state:US:CA', '', 'free_shipping');
+			await withRestApi.addShippingZoneAndMethod('Free Shipping CA', 'state:US:CA', '', 'free_shipping', '', [], false );
 
 			// Set base location with state CA.
 			await withRestApi.updateSettingOption( 'general', 'woocommerce_default_country', { value: 'US:CA' } );
@@ -44,14 +44,14 @@ const runCheckoutPageTest = () => {
 			// Tax calculation should have been enabled by another test - no-op
 
 			// Enable BACS payment method
-			await withRestApi.updatePaymentGateway( 'bacs', { enabled: true } );
+			await withRestApi.updatePaymentGateway( 'bacs', { enabled: true }, false );
 
 			// Enable COD payment method
-			await withRestApi.updatePaymentGateway( 'cod', { enabled: true } );
+			await withRestApi.updatePaymentGateway( 'cod', { enabled: true }, false );
 		});
 
 		afterAll(async () => {
-			await withRestApi.deleteAllShippingZones();
+			await withRestApi.deleteAllShippingZones( false );
 		});
 
 		it('should display cart items in order review', async () => {

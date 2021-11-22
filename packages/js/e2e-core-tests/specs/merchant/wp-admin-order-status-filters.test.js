@@ -45,7 +45,7 @@ const runOrderStatusFiltersTest = () => {
 			});
 
 			// Create the orders using the API
-			await withRestApi.batchCreateOrders(orders);
+			await withRestApi.batchCreateOrders( orders, false );
 
 			// Next, let's login and navigate to the Orders page
 			await merchant.login();
