@@ -9,7 +9,7 @@ const fs = require( 'fs' );
 /**
  * Internal Dependencies
  */
-const { getAppRoot } = require( '../utils' );
+const { resolveLocalE2ePath } = require( '../utils' );
 
 const failureSetup = [];
 if ( WC_E2E_SCREENSHOTS ) {
@@ -23,11 +23,10 @@ const setupFilesAfterEnv = [
 	'expect-puppeteer',
 ];
 
-const appPath = getAppRoot();
-const localJestSetupFile = path.resolve(
-	appPath,
-	'plugins/woocommerce/tests/e2e/config/jest.setup.js'
-);
+const localJestSetupFile = resolveLocalE2ePath( 'config/jest.setup.js' );
+const moduleNameMap = resolveLocalE2ePath( '$1' );
+const testSpecs = resolveLocalE2ePath( 'specs' );
+
 if ( fs.existsSync( localJestSetupFile ) ) {
 	setupFilesAfterEnv.push( localJestSetupFile );
 }
@@ -35,7 +34,7 @@ if ( fs.existsSync( localJestSetupFile ) ) {
 const combinedConfig = {
 	...jestConfig,
 	moduleNameMapper: {
-		'@woocommerce/e2e/tests/(.*)': appPath + 'tests/e2e/$1',
+		'@woocommerce/e2e/tests/(.*)': moduleNameMap,
 	},
 
 	setupFiles: [ '<rootDir>/config/env.setup.js' ],
@@ -52,7 +51,7 @@ const combinedConfig = {
 		...jestConfig.transformIgnorePatterns,
 		'node_modules/(?!(woocommerce)/)',
 	],
-	roots: [ appPath + 'tests/e2e/specs' ],
+	roots: [ testSpecs ],
 };
 
 if ( process.env.jest_test_spec ) {

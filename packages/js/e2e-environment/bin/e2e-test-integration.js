@@ -4,7 +4,7 @@ const { spawnSync } = require( 'child_process' );
 const program = require( 'commander' );
 const path = require( 'path' );
 const fs = require( 'fs' );
-const { getAppRoot } = require( '../utils' );
+const { getAppRoot, resolveLocalE2ePath } = require( '../utils' );
 const {
 	WC_E2E_SCREENSHOTS,
 	JEST_PUPPETEER_CONFIG,
@@ -21,10 +21,7 @@ const appPath = getAppRoot();
 
 // clear the screenshots folder before running tests.
 if ( WC_E2E_SCREENSHOTS ) {
-	const screenshotPath = path.resolve(
-		appPath,
-		'plugins/woocommerce/tests/e2e/screenshots'
-	);
+	const screenshotPath = resolveLocalE2ePath( 'screenshots' );
 	if ( fs.existsSync( screenshotPath ) ) {
 		fs.readdirSync( screenshotPath ).forEach( ( file, index ) => {
 			const filename = path.join( screenshotPath, file );
@@ -36,9 +33,7 @@ if ( WC_E2E_SCREENSHOTS ) {
 const nodeConfigDirs = [ path.resolve( __dirname, '../config' ) ];
 
 if ( appPath ) {
-	nodeConfigDirs.unshift(
-		path.resolve( appPath, 'plugins/woocommerce/tests/e2e/config' )
-	);
+	nodeConfigDirs.unshift( resolveLocalE2ePath( 'config' ) );
 }
 
 const testEnvVars = {
@@ -55,10 +50,7 @@ if ( DEFAULT_TIMEOUT_OVERRIDE ) {
 if ( ! JEST_PUPPETEER_CONFIG ) {
 	// Use local Puppeteer config if there is one.
 	// Load test configuration file into an object.
-	const localJestConfigFile = path.resolve(
-		appPath,
-		'tests/e2e/config/jest-puppeteer.config.js'
-	);
+	const localJestConfigFile = resolveLocalE2ePath( 'config/jest-puppeteer.config.js' );
 	const jestConfigFile = path.resolve(
 		__dirname,
 		'../config/jest-puppeteer.config.js'
@@ -100,10 +92,7 @@ let configPath = path.resolve( __dirname, '../config/jest.config.js' );
 
 // Look for a Jest config in the dependent app's path.
 if ( appPath ) {
-	const appConfig = path.resolve(
-		appPath,
-		'plugins/woocommerce/tests/e2e/config/jest.config.js'
-	);
+	const appConfig = resolveLocalE2ePath( 'config/jest.config.js' );
 
 	if ( fs.existsSync( appConfig ) ) {
 		configPath = appConfig;

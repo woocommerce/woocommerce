@@ -2,12 +2,27 @@ const path = require( 'path' );
 const fs = require( 'fs' );
 const getAppRoot = require( './app-root' );
 
-// Copy local test configuration file if it exists.
 const appPath = getAppRoot();
-const localTestConfigFile = path.resolve(
-	appPath,
-	'plugins/woocommerce/tests/e2e/config/default.json'
-);
+
+/**
+ * Resolve a local E2E file.
+ *
+ * @param {string} filename Filename to append to the path.
+ * @return {string}
+ */
+const resolveLocalE2ePath = ( filename = '' ) => {
+	const { WC_E2E_FOLDER } = process.env;
+	const localPath = `${WC_E2E_FOLDER}/tests/e2e/${filename}`;
+	const resolvedPath = path.resolve(
+		appPath,
+		localPath.indexOf( '/' ) == 0 ? localPath.slice( 1 ) : localPath
+	);
+
+	return resolvedPath;
+}
+
+// Copy local test configuration file if it exists.
+const localTestConfigFile = resolveLocalE2ePath( 'config/default.json' );
 const defaultConfigFile = path.resolve(
 	__dirname,
 	'../config/default/default.json'
@@ -78,4 +93,5 @@ const getAdminConfig = () => {
 module.exports = {
 	getTestConfig,
 	getAdminConfig,
+	resolveLocalE2ePath,
 };
