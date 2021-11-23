@@ -322,7 +322,6 @@ return array(
 		'CN32' => __( 'Xinjiang / 新疆', 'woocommerce' ),
 	),
 	'CO' => array( // Colombia States.
-		'CO-DC' => __( 'Capital District', 'woocommerce' ),
 		'CO-AMA' => __( 'Amazonas', 'woocommerce' ),
 		'CO-ANT' => __( 'Antioquia', 'woocommerce' ),
 		'CO-ARA' => __( 'Arauca', 'woocommerce' ),
@@ -337,6 +336,7 @@ return array(
 		'CO-CHO' => __( 'Chocó', 'woocommerce' ),
 		'CO-COR' => __( 'Córdoba', 'woocommerce' ),
 		'CO-CUN' => __( 'Cundinamarca', 'woocommerce' ),
+		'CO-DC' => __( 'Capital District', 'woocommerce' ),
 		'CO-GUA' => __( 'Guainía', 'woocommerce' ),
 		'CO-GUV' => __( 'Guaviare', 'woocommerce' ),
 		'CO-HUI' => __( 'Huila', 'woocommerce' ),
