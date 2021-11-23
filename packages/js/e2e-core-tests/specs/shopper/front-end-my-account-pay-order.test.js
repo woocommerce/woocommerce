@@ -34,6 +34,10 @@ const runMyAccountPayOrderTest = () => {
 			await merchant.logout();
 		});
 
+		afterAll( async () => {
+			shopper.logout();
+		} );
+
 		it('allows customer to pay for their order in My Account', async () => {
 			await shopper.login();
 			await shopper.goToOrders();

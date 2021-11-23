@@ -24,7 +24,7 @@ const {
 	SHOP_PRODUCT_PAGE
 } = require( './constants' );
 
-const { uiUnblocked } = require( '../page-utils' );
+const { uiUnblocked, clickAndWaitForSelector } = require( '../page-utils' );
 
 const gotoMyAccount = async () => {
 	await page.goto( SHOP_MY_ACCOUNT_PAGE, {
@@ -234,6 +234,13 @@ const shopper = {
 			page.waitForNavigation( { waitUntil: 'networkidle0' } ),
 			page.click( 'button[name="login"]' ),
 		] );
+	},
+	logout: async () => {
+		await gotoMyAccount();
+
+		await expect( page.title() ).resolves.toMatch( 'My account' );
+		await page.click( '.woocommerce-MyAccount-navigation-link--customer-logout a' );
+		await page.waitForNavigation( { waitUntil: 'networkidle0' } );
 	},
 };
 
