@@ -897,6 +897,9 @@ class WC_Countries {
 							'required' => false,
 							'hidden'   => true,
 						),
+						'state'    => array(
+							'label' => __( 'Department', 'woocommerce' ),
+						),
 					),
 					'BS' => array(
 						'postcode' => array(
