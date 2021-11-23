@@ -1169,8 +1169,8 @@ return array(
 		'SET' => __( 'Seti', 'woocommerce' ),
 	),
 	'NI' => array( // Nicaragua states
-		'NI-AN' => __( 'Costa Caribe Norte', 'woocommerce' ),
-		'NI-AS' => __( 'Costa Caribe Sur', 'woocommerce' ),
+		'NI-AN' => __( 'Atlántico Norte', 'woocommerce' ),
+		'NI-AS' => __( 'Atlántico Sur', 'woocommerce' ),
 		'NI-BO' => __( 'Boaco', 'woocommerce' ),
 		'NI-CA' => __( 'Carazo', 'woocommerce' ),
 		'NI-CI' => __( 'Chinandega', 'woocommerce' ),
