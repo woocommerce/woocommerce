@@ -3,6 +3,7 @@
 ## Changed
 
 - New coupon test deletes the coupon instead of trashing it.
+- A copy of sample_data.csv is included in the package.
 
 # 0.1.6
 

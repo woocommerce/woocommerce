@@ -17,8 +17,8 @@ const { it, describe, beforeAll, afterAll } = require( '@jest/globals' );
 const path = require( 'path' );
 const coreTestsPath = getCoreTestsRoot();
 const filePath = path.resolve(
-	coreTestsPath.appRoot,
-	'plugins/woocommerce/sample-data/sample_products.csv'
+	coreTestsPath.packageRoot,
+	'test-data/sample_products.csv'
 );
 const filePathOverride = path.resolve(
 	coreTestsPath.packageRoot,
