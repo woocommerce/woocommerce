@@ -35,9 +35,13 @@ const runAddNewShippingZoneTest = () => {
 
 		beforeAll(async () => {
 			productId = await createSimpleProduct();
-			await withRestApi.deleteAllShippingZones();
+			await withRestApi.deleteAllShippingZones( false );
 			await merchant.login();
 		});
+
+		afterAll( async () => {
+			shopper.logout();
+		} );
 
 		it('add shipping zone for San Francisco with free Local pickup', async () => {
 			// Add a new shipping zone for San Francisco 94107, CA, US with Local pickup

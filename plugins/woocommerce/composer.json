@@ -21,8 +21,8 @@
 		"pelago/emogrifier": "3.1.0",
 		"psr/container": "1.0.0",
 		"woocommerce/action-scheduler": "3.3.0",
-		"woocommerce/woocommerce-admin": "2.8.0",
-		"woocommerce/woocommerce-blocks": "6.1.0"
+		"woocommerce/woocommerce-admin": "2.9.0-rc.2",
+		"woocommerce/woocommerce-blocks": "6.3.2"
 	},
 	"require-dev": {
 		"bamarni/composer-bin-plugin": "^1.4",
@@ -36,7 +36,10 @@
 			"woocommerce/woocommerce-rest-api": "dist",
 			"woocommerce/woocommerce-blocks": "dist"
 		},
-		"sort-packages": true
+		"sort-packages": true,
+		"platform": {
+			"php": "7.0.33"
+	  	}
 	},
 	"autoload": {
 		"exclude-from-classmap": [
@@ -52,10 +55,7 @@
 		},
 		"psr-0": {
 			"Automattic\\WooCommerce\\Vendor\\": "lib/packages/"
-		},
-		"files": [
-			"../../tools/changelogger/PluginFormatter.php"
-		]
+		}
 	},
 	"autoload-dev": {
 		"psr-4": {
@@ -120,7 +120,7 @@
 		},
 		"changelogger": {
 			"formatter": {
-				"class": "PluginFormatter"
+				"filename": "../../tools/changelogger/PluginFormatter.php"
 			},
 			"types": [
 				"Fix",

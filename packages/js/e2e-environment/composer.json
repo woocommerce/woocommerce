@@ -10,7 +10,7 @@
 	"extra": {
 		"changelogger": {
 			"formatter": {
-				"class": "PackageFormatter"
+				"filename": "../../../tools/changelogger/PackageFormatter.php"
 			},
 			"types": [
 				"Fix",
@@ -23,10 +23,5 @@
 			],
 			"changelog": "NEXT_CHANGELOG.md"
 		}
-	},
-	"autoload": {
-		"files": [
-			"../../../tools/changelogger/PackageFormatter.php"
-		]
 	}
 }
