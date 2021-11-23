@@ -190,16 +190,23 @@ const completeOnboardingWizard = async () => {
 /**
  * Create simple product.
  *
- * @param productTitle Defaults to Simple Product. Customizable title.
- * @param productPrice Defaults to $9.99. Customizable pricing.
+ * @param {string} productTitle Defaults to Simple Product. Customizable title.
+ * @param {string} productPrice Defaults to $9.99. Customizable pricing.
+ * @param {Object} additionalProps Defaults to nothing. Additional product properties.
  */
-const createSimpleProduct = async ( productTitle = simpleProductName, productPrice = simpleProductPrice ) => {
-	const product = await factories.products.simple.create( {
+const createSimpleProduct = async (
+	productTitle = simpleProductName,
+	productPrice = simpleProductPrice,
+	additionalProps = {}
+) => {
+	const newProduct = {
 		name: productTitle,
 		regularPrice: productPrice,
-	} );
+		...additionalProps,
+	};
+	const product = await factories.products.simple.create( newProduct );
 	return product.id;
-} ;
+};
 
 /**
  * Create simple product with categories
@@ -335,21 +342,29 @@ const createGroupedProduct = async (groupedProduct = defaultGroupedProduct) => {
  */
 const createOrder = async ( orderOptions = {} ) => {
 	const newOrder = {
-		...( orderOptions.status ) && { status: orderOptions.status },
-		...( orderOptions.customerId ) && { customer_id: orderOptions.customerId },
-		...( orderOptions.customerBilling ) && { billing: orderOptions.customerBilling },
-		...( orderOptions.customerShipping ) && { shipping: orderOptions.customerShipping },
-		...( orderOptions.productId ) && { line_items: [
-				{ product_id: orderOptions.productId },
-			]
-		},
+		...( orderOptions.status && { status: orderOptions.status } ),
+		...( orderOptions.customerId && {
+			customer_id: orderOptions.customerId,
+		} ),
+		...( orderOptions.customerBilling && {
+			billing: orderOptions.customerBilling,
+		} ),
+		...( orderOptions.customerShipping && {
+			shipping: orderOptions.customerShipping,
+		} ),
+		...( orderOptions.productId && {
+			line_items: [ { product_id: orderOptions.productId } ],
+		} ),
+		...( orderOptions.lineItems && {
+			line_items: orderOptions.lineItems,
+		} ),
 	};
 
 	const repository = Order.restRepository( client );
 	const order = await repository.create( newOrder );
 
 	return order.id;
-}
+};
 
 /**
  * Create a basic order with the provided order status.

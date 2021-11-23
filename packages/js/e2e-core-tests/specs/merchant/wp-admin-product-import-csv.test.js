@@ -17,8 +17,8 @@ const { it, describe, beforeAll, afterAll } = require( '@jest/globals' );
 const path = require( 'path' );
 const coreTestsPath = getCoreTestsRoot();
 const filePath = path.resolve(
-	coreTestsPath.appRoot,
-	'plugins/woocommerce/sample-data/sample_products.csv'
+	coreTestsPath.packageRoot,
+	'test-data/sample_products.csv'
 );
 const filePathOverride = path.resolve(
 	coreTestsPath.packageRoot,
@@ -107,9 +107,9 @@ const runImportProductsTest = () => {
 		afterAll(async () => {
 			// Delete imported products
 			await withRestApi.deleteAllProducts();
-			await withRestApi.deleteAllProductAttributes();
-			await withRestApi.deleteAllProductCategories();
-			await withRestApi.deleteAllProductTags();
+			await withRestApi.deleteAllProductAttributes( false );
+			await withRestApi.deleteAllProductCategories( false );
+			await withRestApi.deleteAllProductTags( false );
 		});
 
 		it( 'should show error message if you go without providing CSV file', async () => {

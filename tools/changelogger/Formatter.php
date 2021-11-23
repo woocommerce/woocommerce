@@ -1,19 +1,24 @@
 <?php
+
+namespace Automattic\WooCommerce\MonorepoTools\Changelogger;
+
 /**
  * Base Jetpack Changelogger Formatter for WooCommerce
  */
 
 use Automattic\Jetpack\Changelog\Changelog;
 use Automattic\Jetpack\Changelog\KeepAChangelogParser;
-use Automattic\Jetpack\Changelogger\FormatterPlugin;
 use Automattic\Jetpack\Changelogger\PluginTrait;
 
 /**
  * Base Jetpack Changelogger Formatter for WooCommerce
  *
+ * Note: Since the "filename" loading relies on a single class implementing the plugin interface,
+ * we have to implement it in the child class, even though the base class satisfies it.
+ *
  * Class Formatter
  */
-class Formatter extends KeepAChangelogParser implements FormatterPlugin {
+class Formatter extends KeepAChangelogParser {
 	use PluginTrait;
 
 	/**
@@ -61,7 +66,7 @@ class Formatter extends KeepAChangelogParser implements FormatterPlugin {
 	/**
 	 * Get Release link given a version number.
 	 *
-	 * @throws InvalidArgumentException When directory parsing fails.
+	 * @throws \InvalidArgumentException When directory parsing fails.
 	 * @param string $version Release version.
 	 *
 	 * @return string Link to the version's release.
@@ -76,13 +81,13 @@ class Formatter extends KeepAChangelogParser implements FormatterPlugin {
 		preg_match( '/\/woocommerce\/(.+)/', getcwd(), $path );
 
 		if ( ! count( $path ) ) {
-			throw new InvalidArgumentException( 'Invalid directory.' );
+			throw new \InvalidArgumentException( 'Invalid directory.' );
 		}
 
 		$release_url = $path_map[ $path[1] ];
 
 		if ( ! $release_url ) {
-			throw new InvalidArgumentException( 'Release URL not found.' );
+			throw new \InvalidArgumentException( 'Release URL not found.' );
 		}
 
 		return $release_url . $version;
@@ -93,7 +98,7 @@ class Formatter extends KeepAChangelogParser implements FormatterPlugin {
 	 *
 	 * @param string $changelog Changelog contents.
 	 * @return Changelog
-	 * @throws InvalidArgumentException If the changelog data cannot be parsed.
+	 * @throws \InvalidArgumentException If the changelog data cannot be parsed.
 	 */
 	public function parse( $changelog ) {
 		$ret = new Changelog();
@@ -131,7 +136,7 @@ class Formatter extends KeepAChangelogParser implements FormatterPlugin {
 			$is_subentry = count( $subheading ) > 0;
 
 			if ( ! count( $heading ) && ! count( $subheading ) ) {
-				throw new InvalidArgumentException( 'Invalid heading' );
+				throw new \InvalidArgumentException( 'Invalid heading' );
 			}
 
 			$version         = '';
@@ -145,11 +150,11 @@ class Formatter extends KeepAChangelogParser implements FormatterPlugin {
 				try {
 					$timestamp = new DateTime( $timestamp, new DateTimeZone( 'UTC' ) );
 				} catch ( \Exception $ex ) {
-					throw new InvalidArgumentException( "Heading has an invalid timestamp: $heading", 0, $ex );
+					throw new \InvalidArgumentException( "Heading has an invalid timestamp: $heading", 0, $ex );
 				}
 
 				if ( strtotime( $heading[2], 0 ) !== strtotime( $heading[2], 1000000000 ) ) {
-					throw new InvalidArgumentException( "Heading has a relative timestamp: $heading" );
+					throw new \InvalidArgumentException( "Heading has a relative timestamp: $heading" );
 				}
 				$entry_timestamp = $timestamp;
 
@@ -271,4 +276,4 @@ class Formatter extends KeepAChangelogParser implements FormatterPlugin {
 
 		return $ret;
 	}
-} 
+}
