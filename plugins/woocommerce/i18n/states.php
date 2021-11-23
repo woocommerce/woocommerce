@@ -561,8 +561,8 @@ return array(
 	),
 	'HN' => array( // Honduras states.
 		'HN-AT' => __( 'Atlántida', 'woocommerce' ),
-		'HN-CH' => __( 'Choluteca', 'woocommerce' ),
 		'HN-IB' => __( 'Bay Islands', 'woocommerce' ),
+		'HN-CH' => __( 'Choluteca', 'woocommerce' ),
 		'HN-CL' => __( 'Colón', 'woocommerce' ),
 		'HN-CM' => __( 'Comayagua', 'woocommerce' ),
 		'HN-CP' => __( 'Copán', 'woocommerce' ),
