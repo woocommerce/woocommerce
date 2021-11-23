@@ -1,7 +1,11 @@
 /**
  * Internal dependencies
  */
-import { waitForElementByText, getElementByText } from '../utils/actions';
+import {
+	waitForElementByText,
+	getElementByText,
+	waitForTimeout,
+} from '../utils/actions';
 import { BasePage } from './BasePage';
 
 type PaymentMethodWithSetupButton =
@@ -48,6 +52,8 @@ export class PaymentsSetup extends BasePage {
 	}
 
 	async enableCashOnDelivery() {
+		await this.page.waitForSelector( '.woocommerce-task-payment-cod' );
 		await this.clickButtonWithText( 'Enable' );
+		await waitForTimeout( 500 );
 	}
 }
