@@ -188,11 +188,11 @@ return array(
 	),
 	'BO' => array( // Bolivian states.
 		'BO-B' => __( 'Beni', 'woocommerce' ),
-		'BO-C' => __( 'Cochabamba', 'woocommerce' ),
 		'BO-H' => __( 'Chuquisaca', 'woocommerce' ),
+		'BO-C' => __( 'Cochabamba', 'woocommerce' ),
 		'BO-L' => __( 'La Paz', 'woocommerce' ),
-		'BO-N' => __( 'Pando', 'woocommerce' ),
 		'BO-O' => __( 'Oruro', 'woocommerce' ),
+		'BO-N' => __( 'Pando', 'woocommerce' ),
 		'BO-P' => __( 'Potosí', 'woocommerce' ),
 		'BO-S' => __( 'Santa Cruz', 'woocommerce' ),
 		'BO-T' => __( 'Tarija', 'woocommerce' ),
