@@ -983,6 +983,11 @@ class WC_Countries {
 							'hidden'   => true,
 						),
 					),
+					'DO' => array(
+						'state'    => array(
+							'label' => __( 'Province', 'woocommerce' ),
+						),
+					),
 					'EE' => array(
 						'postcode' => array(
 							'priority' => 65,
