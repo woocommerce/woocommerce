@@ -562,6 +562,7 @@ return array(
 	'HN' => array( // Honduras states.
 		'HN-AT' => __( 'Atlántida', 'woocommerce' ),
 		'HN-CH' => __( 'Choluteca', 'woocommerce' ),
+		'HN-IB' => __( 'Bay Islands', 'woocommerce' ),
 		'HN-CL' => __( 'Colón', 'woocommerce' ),
 		'HN-CM' => __( 'Comayagua', 'woocommerce' ),
 		'HN-CP' => __( 'Copán', 'woocommerce' ),
@@ -569,7 +570,6 @@ return array(
 		'HN-EP' => __( 'El Paraíso', 'woocommerce' ),
 		'HN-FM' => __( 'Francisco Morazán', 'woocommerce' ),
 		'HN-GD' => __( 'Gracias a Dios', 'woocommerce' ),
-		'HN-IB' => __( 'Islas de la Bahía', 'woocommerce' ),
 		'HN-IN' => __( 'Intibucá', 'woocommerce' ),
 		'HN-LE' => __( 'Lempira', 'woocommerce' ),
 		'HN-LP' => __( 'La Paz', 'woocommerce' ),
