@@ -24,7 +24,7 @@ import {
  * Internal dependencies
  */
 import { ActivityCard } from '../header/activity-panel/activity-card';
-import { hasValidNotes } from './utils';
+import { hasValidNotes, truncateRenderableHTML } from './utils';
 import { getScreenName } from '../utils';
 import DismissAllModal from './dissmiss-all-modal';
 import './index.scss';
@@ -179,7 +179,10 @@ const InboxPanel = ( { showHeader = true } ) => {
 			} = select( NOTES_STORE_NAME );
 
 			return {
-				notes: getNotes( INBOX_QUERY ),
+				notes: getNotes( INBOX_QUERY ).map( ( note ) => {
+					note.content = truncateRenderableHTML( note.content, 320 );
+					return note;
+				} ),
 				isError: Boolean(
 					getNotesError( 'getNotes', [ INBOX_QUERY ] )
 				),
