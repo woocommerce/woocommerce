@@ -814,7 +814,7 @@ class WC_Countries {
 					),
 					'AL' => array(
 						'state'    => array(
-							'label' => __( 'Qarks', 'woocommerce' ),
+							'label' => __( 'County', 'woocommerce' ),
 						),
 					),
 					'AO' => array(
