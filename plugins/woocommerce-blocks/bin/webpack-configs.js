@@ -83,14 +83,6 @@ const getCoreConfig = ( options = {} ) => {
 						loader: 'babel-loader?cacheDirectory',
 						options: {
 							presets: [ '@wordpress/babel-preset-default' ],
-							plugins: [
-								require.resolve(
-									'@babel/plugin-proposal-class-properties'
-								),
-								require.resolve(
-									'@babel/plugin-proposal-nullish-coalescing-operator'
-								),
-							].filter( Boolean ),
 						},
 					},
 				},
@@ -204,12 +196,6 @@ const getMainConfig = ( options = {} ) => {
 											'babel-plugin-transform-react-remove-prop-types'
 									  )
 									: false,
-								require.resolve(
-									'@babel/plugin-proposal-class-properties'
-								),
-								require.resolve(
-									'@babel/plugin-proposal-nullish-coalescing-operator'
-								),
 							].filter( Boolean ),
 						},
 					},
@@ -316,7 +302,7 @@ const getFrontConfig = ( options = {} ) => {
 						options: {
 							presets: [
 								[
-									'@babel/preset-env',
+									'@wordpress/babel-preset-default',
 									{
 										modules: false,
 										targets: {
@@ -328,24 +314,6 @@ const getFrontConfig = ( options = {} ) => {
 								],
 							],
 							plugins: [
-								require.resolve(
-									'@babel/plugin-proposal-object-rest-spread'
-								),
-								require.resolve(
-									'@babel/plugin-transform-react-jsx'
-								),
-								require.resolve(
-									'@babel/plugin-proposal-async-generator-functions'
-								),
-								require.resolve(
-									'@babel/plugin-transform-runtime'
-								),
-								require.resolve(
-									'@babel/plugin-proposal-class-properties'
-								),
-								require.resolve(
-									'@babel/plugin-proposal-nullish-coalescing-operator'
-								),
 								isProduction
 									? require.resolve(
 											'babel-plugin-transform-react-remove-prop-types'
@@ -436,7 +404,7 @@ const getPaymentsConfig = ( options = {} ) => {
 						options: {
 							presets: [
 								[
-									'@babel/preset-env',
+									'@wordpress/babel-preset-default',
 									{
 										modules: false,
 										targets: {
@@ -448,24 +416,6 @@ const getPaymentsConfig = ( options = {} ) => {
 								],
 							],
 							plugins: [
-								require.resolve(
-									'@babel/plugin-proposal-object-rest-spread'
-								),
-								require.resolve(
-									'@babel/plugin-transform-react-jsx'
-								),
-								require.resolve(
-									'@babel/plugin-proposal-async-generator-functions'
-								),
-								require.resolve(
-									'@babel/plugin-transform-runtime'
-								),
-								require.resolve(
-									'@babel/plugin-proposal-class-properties'
-								),
-								require.resolve(
-									'@babel/plugin-proposal-nullish-coalescing-operator'
-								),
 								isProduction
 									? require.resolve(
 											'babel-plugin-transform-react-remove-prop-types'
@@ -556,7 +506,7 @@ const getExtensionsConfig = ( options = {} ) => {
 						options: {
 							presets: [
 								[
-									'@babel/preset-env',
+									'@wordpress/babel-preset-default',
 									{
 										modules: false,
 										targets: {
@@ -568,24 +518,6 @@ const getExtensionsConfig = ( options = {} ) => {
 								],
 							],
 							plugins: [
-								require.resolve(
-									'@babel/plugin-proposal-object-rest-spread'
-								),
-								require.resolve(
-									'@babel/plugin-transform-react-jsx'
-								),
-								require.resolve(
-									'@babel/plugin-proposal-async-generator-functions'
-								),
-								require.resolve(
-									'@babel/plugin-transform-runtime'
-								),
-								require.resolve(
-									'@babel/plugin-proposal-class-properties'
-								),
-								require.resolve(
-									'@babel/plugin-proposal-nullish-coalescing-operator'
-								),
 								isProduction
 									? require.resolve(
 											'babel-plugin-transform-react-remove-prop-types'

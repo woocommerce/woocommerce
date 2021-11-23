@@ -1,7 +1,7 @@
 module.exports = {
 	presets: [
 		[
-			'@babel/preset-env',
+			'@wordpress/babel-preset-default',
 			{
 				targets: {
 					node: 'current',
