@@ -1356,9 +1356,12 @@ class FiltererTest extends \WC_Unit_Test_Case {
 		wp_set_object_terms( $product_simple_1->get_id(), $terms, 'product_visibility' );
 		wp_set_object_terms( $product_variable_1['id'], $terms, 'product_visibility' );
 
-		$filtered_product_ids = $this->do_product_request( array() );
+		$actual_filtered_product_ids   = $this->do_product_request( array() );
+		$expected_filtered_product_ids = array( $product_simple_2->get_id(), $product_variable_2['id'] );
+		sort( $actual_filtered_product_ids );
+		sort( $expected_filtered_product_ids );
 
-		$this->assertEquals( array( $product_simple_2->get_id(), $product_variable_2['id'] ), $filtered_product_ids );
+		$this->assertEquals( $expected_filtered_product_ids, $actual_filtered_product_ids );
 
 		$this->assert_counters( 'Color', $expected_colors_included_in_counters );
 		$this->assert_counters( 'Features', array( 'Ironable' ) );
