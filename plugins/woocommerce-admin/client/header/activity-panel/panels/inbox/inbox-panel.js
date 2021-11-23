@@ -16,7 +16,7 @@ export const InboxPanel = ( {
 					thingsToDoNextCount={ thingsToDoNextCount }
 				/>
 			) }
-			<NotesPanel />
+			<NotesPanel showHeader={ false } />
 		</div>
 	);
 };

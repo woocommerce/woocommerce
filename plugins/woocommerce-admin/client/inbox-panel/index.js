@@ -58,6 +58,7 @@ const renderNotes = ( {
 	onDismiss,
 	onNoteActionClick,
 	setShowDismissAllModal: onDismissAll,
+	showHeader = true,
 } ) => {
 	if ( isBatchUpdating ) {
 		return;
@@ -82,29 +83,34 @@ const renderNotes = ( {
 
 	return (
 		<Card size="large">
-			<CardHeader size="medium">
-				<div className="wooocommerce-inbox-card__header">
-					<Text size="20" lineHeight="28px" variant="title.small">
-						{ __( 'Inbox', 'woocommerce-admin' ) }
-					</Text>
-					<Badge count={ notesArray.length } />
-				</div>
-				<EllipsisMenu
-					label={ __( 'Inbox Notes Options', 'woocommerce-admin' ) }
-					renderContent={ ( { onToggle } ) => (
-						<div className="woocommerce-inbox-card__section-controls">
-							<Button
-								onClick={ () => {
-									onDismissAll( true );
-									onToggle();
-								} }
-							>
-								{ __( 'Dismiss all', 'woocommerce-admin' ) }
-							</Button>
-						</div>
-					) }
-				/>
-			</CardHeader>
+			{ showHeader && (
+				<CardHeader size="medium">
+					<div className="wooocommerce-inbox-card__header">
+						<Text size="20" lineHeight="28px" variant="title.small">
+							{ __( 'Inbox', 'woocommerce-admin' ) }
+						</Text>
+						<Badge count={ notesArray.length } />
+					</div>
+					<EllipsisMenu
+						label={ __(
+							'Inbox Notes Options',
+							'woocommerce-admin'
+						) }
+						renderContent={ ( { onToggle } ) => (
+							<div className="woocommerce-inbox-card__section-controls">
+								<Button
+									onClick={ () => {
+										onDismissAll( true );
+										onToggle();
+									} }
+								>
+									{ __( 'Dismiss all', 'woocommerce-admin' ) }
+								</Button>
+							</div>
+						) }
+					/>
+				</CardHeader>
+			) }
 			<TransitionGroup role="menu">
 				{ notesArray.map( ( note ) => {
 					const { id: noteId, is_deleted: isDeleted } = note;
@@ -157,7 +163,7 @@ const INBOX_QUERY = {
 	],
 };
 
-const InboxPanel = () => {
+const InboxPanel = ( { showHeader = true } ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
 	const { removeNote, updateNote, triggerNoteAction } = useDispatch(
 		NOTES_STORE_NAME
@@ -282,6 +288,7 @@ const InboxPanel = () => {
 							onDismiss,
 							onNoteActionClick,
 							setShowDismissAllModal,
+							showHeader,
 						} ) }
 				</Section>
 			</div>
