@@ -991,6 +991,11 @@ class WC_Countries {
 							'label' => __( 'Province', 'woocommerce' ),
 						),
 					),
+          'EC' => array(
+						'state'    => array(
+							'label' => __( 'Province', 'woocommerce' ),
+						),
+					),
 					'EE' => array(
 						'postcode' => array(
 							'priority' => 65,
