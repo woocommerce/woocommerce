@@ -1196,7 +1196,7 @@ return array(
 		'PA-7' => __( 'Los Santos', 'woocommerce' ),
 		'PA-8' => __( 'Panamá', 'woocommerce' ),
 		'PA-9' => __( 'Veraguas', 'woocommerce' ),
-		'PA-10' => __( 'Panamá Oeste', 'woocommerce' ),
+		'PA-10' => __( 'West Panamá', 'woocommerce' ),
 		'PA-EM' => __( 'Emberá', 'woocommerce' ),
 		'PA-KY' => __( 'Guna Yala', 'woocommerce' ),
 		'PA-NB' => __( 'Ngöbe-Buglé', 'woocommerce' ),
