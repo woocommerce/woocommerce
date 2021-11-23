@@ -9,12 +9,41 @@ class WC_Tombstones {
 	const OPTION = 'woocommerce_deleted_posts';
 
 	/**
+	 * The single instance of the class.
+	 *
+	 * @var object
+	 */
+	public static $instance = null;
+
+	private $tombstones = array();
+
+	public function __construct() {
+		$this->tombstones = get_option( self::OPTION, array() );
+	}
+
+	/**
+	 * Get class instance.
+	 *
+	 * @return object Instance.
+	 */
+	final public static function instance() {
+		if ( null === static::$instance ) {
+			static::$instance = new static();
+		}
+		return static::$instance;
+	}
+
+	/**
 	 *  Initialize actions and hooks.
 	 *
 	 *  @internal
 	 */
-	final public static function init() {
-		add_action( 'deleted_post', array( __CLASS__, 'deleted_post' ), 10, 2 );
+	final public function init() {
+		add_action( 'deleted_post', array( $this, 'deleted_post' ), 10, 2 );
+	}
+
+	public static function auto_purge_days() {
+		return max( 10, EMPTY_TRASH_DAYS );
 	}
 
 	/**
@@ -34,7 +63,7 @@ class WC_Tombstones {
 	 * @return array
 	 */
 	public static function get( array $filters = array() ) {
-		$tombstones = get_option( self::OPTION, array() );
+		$tombstones = self::instance()->tombstones;
 
 		if ( isset( $filters['modified_before'] ) ) {
 			$modified_before = strtotime( $filters['modified_before'] );
@@ -61,11 +90,7 @@ class WC_Tombstones {
 		return array_filter(
 			$tombstones,
 			function( $time ) {
-				$threshold = EMPTY_TRASH_DAYS;
-				if ( $threshold < 10 ) {
-					$threshold = 30;
-				}
-
+				$threshold = self::auto_purge_days();
 				return $threshold < ( time() - $time );
 			}
 		);
@@ -77,7 +102,7 @@ class WC_Tombstones {
 	 * @param int     $id Post ID that has been deleted.
 	 * @param WP_Post $post Post object that has been deleted.
 	 */
-	public static function deleted_post( $id, $post ) {
+	public function deleted_post( $id, $post ) {
 		$post_types = array(
 			'shop_order',
 			'product',
@@ -88,11 +113,10 @@ class WC_Tombstones {
 		}
 
 		// TODO: Only log posts that were manually deleted.
-		$tombstones        = self::get();
-		$tombstones[ $id ] = time();
+		$this->tombstones[ $id ] = time();
 
-		update_option( self::OPTION, $tombstones );
+		update_option( self::OPTION, $this->tombstones );
 	}
 }
 
-WC_Tombstones::init();
+WC_Tombstones::instance()->init();
