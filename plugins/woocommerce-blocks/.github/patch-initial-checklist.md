@@ -67,9 +67,9 @@ Additionally, make sure to differentiate between things in the testing notes tha
 
 You only need to post public release announcements and update relevant public facing docs if this patch release is deployed to WP.org. Otherwise, you can skip this section.
 
-* [ ] Post release announcement on [WooCommerce Developer Blog](https://woocommerce.wordpress.com/category/blocks/). Use previous posts for inspiration. If the release contains new features, or API changes, explain what's new so Woo devs/builders/merchants can get excited about it. This post can take time to get right - get feedback from the team, and don't rush it :)
+* [ ] Post release announcement on [WooCommerce Developer Blog](https://developer.woocommerce.com/category/release-post/woocommerce-blocks-release-notes/). Use previous posts for inspiration. If the release contains new features, or API changes, explain what's new so Woo devs/builders/merchants can get excited about it. This post can take time to get right - get feedback from the team, and don't rush it :)
   - Ensure the release notes are included in the post verbatim.
-  - Don't forget to use category `Blocks` for the post.
+  - Don't forget to use category `WooCommerce Blocks Release Notes` for the post.
 * [ ] Announce the release internally (`#woo-announcements` slack).
 * [ ] Update user-facing documentation as needed. When the plugin is released, ensure user-facing documentation is kept up to date with new blocks and compatibility information.
   - Update minimum supported versions (WordPress, WooCommerce Core) and other requirements where necessary, including:
