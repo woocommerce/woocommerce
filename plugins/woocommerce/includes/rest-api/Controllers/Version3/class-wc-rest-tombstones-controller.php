@@ -63,7 +63,12 @@ class WC_REST_Tombstones_Controller extends WC_REST_CRUD_Controller {
 			$filters['modified_after'] = $request->get_param( 'modified_after' );
 		}
 
-		return WC_Tombstones::ids( $filters );
+		return array(
+			ids              => WC_Tombstones::instance()::ids( $filters ),
+			first            => WC_Tombstones::instance()::first( $filters ),
+			last             => WC_Tombstones::instance()::last( $filters ),
+			'sync_threshold' => WC_Tombstones::auto_purge_threshold(),
+		);
 	}
 
 	/**
