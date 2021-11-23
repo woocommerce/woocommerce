@@ -129,6 +129,7 @@ This package provides support for enabling retries in tests:
 | `goToProduct` | `productId` | Go to a single product in the shop |
 | `goToShop` |  | Go to the shop page |
 | `login` |  | Log in as the shopper |
+| `logout` |  | Log out of the shopper account |
 | `placeOrder` |  | Place an order from the checkout page |
 | `productIsInCheckout` | `productTitle, quantity, total, cartSubtotal` | Verify product is in cart on checkout page |
 | `removeFromCart` | `productIdOrTitle` | Remove a product from the cart on the cart page |
