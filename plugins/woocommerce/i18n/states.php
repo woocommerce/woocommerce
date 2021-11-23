@@ -17,6 +17,7 @@ return array(
 	'AF' => array(),
 	'AL' => array( // Albania states.
 		'AL-01' => __( 'Berat', 'woocommerce' ),
+		'AL-09' => __( 'Dibër', 'woocommerce' ),
 		'AL-02' => __( 'Durrës', 'woocommerce' ),
 		'AL-03' => __( 'Elbasan', 'woocommerce' ),
 		'AL-04' => __( 'Fier', 'woocommerce' ),
@@ -24,7 +25,6 @@ return array(
 		'AL-06' => __( 'Korçë', 'woocommerce' ),
 		'AL-07' => __( 'Kukës', 'woocommerce' ),
 		'AL-08' => __( 'Lezhë', 'woocommerce' ),
-		'AL-09' => __( 'Dibër', 'woocommerce' ),
 		'AL-10' => __( 'Shkodër', 'woocommerce' ),
 		'AL-11' => __( 'Tirana', 'woocommerce' ),
 		'AL-12' => __( 'Vlorë', 'woocommerce' ),
