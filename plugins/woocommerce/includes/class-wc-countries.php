@@ -1272,6 +1272,11 @@ class WC_Countries {
 							'required' => false,
 						),
 					),
+					'PA' => array(
+						'state'    => array(
+							'label' => __( 'Province', 'woocommerce' ),
+						),
+					),
 					'PL' => array(
 						'postcode' => array(
 							'priority' => 65,
