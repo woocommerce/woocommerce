@@ -4,7 +4,7 @@ Tags: gutenberg, woocommerce, woo commerce, products, blocks, woocommerce blocks
 Requires at least: 5.8
 Tested up to: 5.8
 Requires PHP: 7.0
-Stable tag: 6.4.0-dev
+Stable tag: 6.4.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -84,6 +84,22 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 5. WooCommerce Product Blocks in the block inserter menu
 
 == Changelog ==
+
+= 6.4.0 - 2021-11-22 =
+
+#### Enhancements
+
+- Pass to payment methods a wrapper component that handles the loading state. ([5135](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5135))
+
+#### Bugfixes
+
+- Gate WC template editing (FSE) to versions of WC 6.0 or higher. ([5210](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5210))
+- Fix manual entry within Quantity Inputs in Cart block. ([5197](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5197))
+- Correctly align Terms and Conditions block checkbox in Checkout block. ([5191](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5191))
+- Add support for decimal and thousand separators in the `formatPrice` function. ([5188](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5188))
+- Reduce the size of the checkbox component label to prevent accidental input. ([5164](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5164))
+- Lazy load missing translation files on frontend to ensure that all visible texts are translatable. ([5112](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5112))
+
 
 = 6.3.2 - 2021-11-17 =
 
