@@ -424,7 +424,7 @@ return array(
 		'EC-L' => __( 'Loja', 'woocommerce' ),
 		'EC-R' => __( 'Los Ríos', 'woocommerce' ),
 		'EC-M' => __( 'Manabí', 'woocommerce' ),
-		'EC-S' => __( 'Morona Santiago', 'woocommerce' ),
+		'EC-S' => __( 'Morona-Santiago', 'woocommerce' ),
 		'EC-N' => __( 'Napo', 'woocommerce' ),
 		'EC-D' => __( 'Orellana', 'woocommerce' ),
 		'EC-Y' => __( 'Pastaza', 'woocommerce' ),
@@ -433,7 +433,7 @@ return array(
 		'EC-SD' => __( 'Santo Domingo de los Tsáchilas', 'woocommerce' ),
 		'EC-U' => __( 'Sucumbíos', 'woocommerce' ),
 		'EC-T' => __( 'Tungurahua', 'woocommerce' ),
-		'EC-Z' => __( 'Zamora Chinchipe', 'woocommerce' ),
+		'EC-Z' => __( 'Zamora-Chinchipe', 'woocommerce' ),
 	),
 	'EG' => array( // Egypt states.
 		'EGALX' => __( 'Alexandria', 'woocommerce' ),
