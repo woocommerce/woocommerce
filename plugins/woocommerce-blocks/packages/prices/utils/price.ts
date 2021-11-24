@@ -137,6 +137,25 @@ const splitDecimal = (
 	};
 };
 
+const applyDecimal = (
+	afterDecimal: string,
+	decimalSeparator: string,
+	minorUnit: number
+): string => {
+	if ( afterDecimal ) {
+		return `${ decimalSeparator }${ afterDecimal.padEnd(
+			minorUnit,
+			'0'
+		) }`;
+	}
+
+	if ( minorUnit > 0 ) {
+		return `${ decimalSeparator }${ '0'.repeat( minorUnit ) }`;
+	}
+
+	return '';
+};
+
 /**
  * Format a price, provided using the smallest unit of the currency, as a
  * decimal complete with currency symbols using current store settings.
@@ -176,9 +195,11 @@ export const formatPrice = (
 	const formattedValue = `${ prefix }${ applyThousandSeparator(
 		beforeDecimal,
 		thousandSeparator
-	) }${
-		afterDecimal ? `${ decimalSeparator }${ afterDecimal }` : ''
-	}${ suffix }`;
+	) }${ applyDecimal(
+		afterDecimal,
+		decimalSeparator,
+		minorUnit
+	) }${ suffix }`;
 
 	// This uses a textarea to magically decode HTML currency symbols.
 	const txt = document.createElement( 'textarea' );
