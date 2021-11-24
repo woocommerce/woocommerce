@@ -3,48 +3,46 @@
  */
 import { formatPrice, getCurrency } from '../price';
 
-describe( 'formatPrice', () => {
+describe( 'The function formatPrice()', () => {
 	test.each`
-		value           | prefix   | suffix   | expected
-		${ 1000 }       | ${ '€' } | ${ '' }  | ${ '€10' }
-		${ 1000 }       | ${ '' }  | ${ '€' } | ${ '10€' }
-		${ 1000 }       | ${ '' }  | ${ '$' } | ${ '10$' }
-		${ '1000' }     | ${ '€' } | ${ '' }  | ${ '€10' }
-		${ 0 }          | ${ '€' } | ${ '' }  | ${ '€0' }
-		${ '' }         | ${ '€' } | ${ '' }  | ${ '' }
-		${ null }       | ${ '€' } | ${ '' }  | ${ '' }
-		${ undefined }  | ${ '€' } | ${ '' }  | ${ '' }
-		${ 100000 }     | ${ '€' } | ${ '' }  | ${ '€1,000' }
-		${ 1000000 }    | ${ '€' } | ${ '' }  | ${ '€10,000' }
-		${ 1000000000 } | ${ '€' } | ${ '' }  | ${ '€10,000,000' }
+		value               | prefix    | suffix   | thousandSeparator | decimalSeparator | minorUnit | expected
+		${ 1020 }           | ${ '€' }  | ${ '' }  | ${ ',' }          | ${ '.' }         | ${ 2 }    | ${ '€10.20' }
+		${ 1000 }           | ${ '€' }  | ${ '' }  | ${ ',' }          | ${ '.' }         | ${ 2 }    | ${ '€10.00' }
+		${ 1000 }           | ${ '' }   | ${ '€' } | ${ ',' }          | ${ '.' }         | ${ 2 }    | ${ '10.00€' }
+		${ 1000 }           | ${ '' }   | ${ '$' } | ${ ',' }          | ${ '.' }         | ${ 2 }    | ${ '10.00$' }
+		${ '1000' }         | ${ '€' }  | ${ '' }  | ${ ',' }          | ${ '.' }         | ${ 2 }    | ${ '€10.00' }
+		${ 0 }              | ${ '€' }  | ${ '' }  | ${ ',' }          | ${ '.' }         | ${ 2 }    | ${ '€0.00' }
+		${ '' }             | ${ '€' }  | ${ '' }  | ${ ',' }          | ${ '.' }         | ${ 2 }    | ${ '' }
+		${ null }           | ${ '€' }  | ${ '' }  | ${ ',' }          | ${ '.' }         | ${ 2 }    | ${ '' }
+		${ undefined }      | ${ '€' }  | ${ '' }  | ${ ',' }          | ${ '.' }         | ${ 2 }    | ${ '' }
+		${ 100000 }         | ${ '€' }  | ${ '' }  | ${ ',' }          | ${ '.' }         | ${ 2 }    | ${ '€1,000.00' }
+		${ 1000000 }        | ${ '€' }  | ${ '' }  | ${ ',' }          | ${ '.' }         | ${ 2 }    | ${ '€10,000.00' }
+		${ 1000000000 }     | ${ '€' }  | ${ '' }  | ${ ',' }          | ${ '.' }         | ${ 2 }    | ${ '€10,000,000.00' }
+		${ 10000000000 }    | ${ '€' }  | ${ '' }  | ${ ',' }          | ${ '.' }         | ${ 3 }    | ${ '€10,000,000.000' }
+		${ 10000000000000 } | ${ '€ ' } | ${ '' }  | ${ ',' }          | ${ '.' }         | ${ 6 }    | ${ '€ 10,000,000.000000' }
+		${ 10000000 }       | ${ '€ ' } | ${ '' }  | ${ ',' }          | ${ '.' }         | ${ 0 }    | ${ '€ 10,000,000' }
+		${ 1000000099 }     | ${ '$' }  | ${ '' }  | ${ ',' }          | ${ '.' }         | ${ 2 }    | ${ '$10,000,000.99' }
+		${ 1000000099 }     | ${ '$' }  | ${ '' }  | ${ '.' }          | ${ ',' }         | ${ 2 }    | ${ '$10.000.000,99' }
 	`(
-		'correctly formats price given "$value", "$prefix" prefix, and "$suffix" suffix as "$expected"',
-		( { value, prefix, suffix, expected } ) => {
-			const formattedPrice = formatPrice(
-				value,
-				getCurrency( { prefix, suffix } )
-			);
-
-			expect( formattedPrice ).toEqual( expected );
-		}
-	);
-
-	test.each`
-		value           | prefix   | decimalSeparator | thousandSeparator | expected
-		${ 1000000099 } | ${ '$' } | ${ '.' }         | ${ ',' }          | ${ '$10,000,000.99' }
-		${ 1000000099 } | ${ '$' } | ${ ',' }         | ${ '.' }          | ${ '$10.000.000,99' }
-	`(
-		'correctly formats price given "$value", "$prefix" prefix, "$decimalSeparator" decimal separator, "$thousandSeparator" thousand separator as "$expected"',
+		'correctly formats price given "$value", "$prefix" prefix, "$suffix" suffix, "$thousandSeparator" thousandSeparator, "$decimalSeparator" decimalSeparator, and "$minorUnit" minorUnit as "$expected"',
 		( {
 			value,
 			prefix,
-			decimalSeparator,
-			thousandSeparator,
+			suffix,
 			expected,
+			thousandSeparator,
+			decimalSeparator,
+			minorUnit,
 		} ) => {
 			const formattedPrice = formatPrice(
 				value,
-				getCurrency( { prefix, decimalSeparator, thousandSeparator } )
+				getCurrency( {
+					prefix,
+					suffix,
+					thousandSeparator,
+					decimalSeparator,
+					minorUnit,
+				} )
 			);
 
 			expect( formattedPrice ).toEqual( expected );
@@ -53,8 +51,8 @@ describe( 'formatPrice', () => {
 
 	test.each`
 		value          | expected
-		${ 1000 }      | ${ '$10' }
-		${ 0 }         | ${ '$0' }
+		${ 1000 }      | ${ '$10.00' }
+		${ 0 }         | ${ '$0.00' }
 		${ '' }        | ${ '' }
 		${ null }      | ${ '' }
 		${ undefined } | ${ '' }
