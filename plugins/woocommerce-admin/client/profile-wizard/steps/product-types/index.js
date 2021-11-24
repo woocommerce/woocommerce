@@ -101,9 +101,10 @@ export class ProductTypes extends Component {
 			updateProfileItems,
 		} = this.props;
 
-		recordEvent( 'storeprofiler_store_product_type_continue', {
+		const eventProps = {
 			product_type: selected,
-		} );
+			wcpay_installed: false,
+		};
 
 		const promises = [ updateProfileItems( { product_types: selected } ) ];
 
@@ -117,6 +118,7 @@ export class ProductTypes extends Component {
 			promises.push(
 				installAndActivatePlugins( [ 'woocommerce-payments' ] )
 					.then( ( response ) => {
+						eventProps.wcpay_installed = true;
 						createNoticesFromResponse( response );
 					} )
 					.catch( ( error ) => {
@@ -127,7 +129,13 @@ export class ProductTypes extends Component {
 		}
 
 		Promise.all( promises )
-			.then( () => goToNextStep() )
+			.then( () => {
+				recordEvent(
+					'storeprofiler_store_product_type_continue',
+					eventProps
+				);
+				goToNextStep();
+			} )
 			.catch( () =>
 				createNotice(
 					'error',
