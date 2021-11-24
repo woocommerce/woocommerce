@@ -310,6 +310,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @param string $offset Offset.
 	 * @param mixed  $value  Value.
 	 */
+	#[\ReturnTypeWillChange]
 	public function offsetSet( $offset, $value ) {
 		if ( 'item_meta_array' === $offset ) {
 			foreach ( $value as $meta_id => $meta ) {
@@ -334,6 +335,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 *
 	 * @param string $offset Offset.
 	 */
+	#[\ReturnTypeWillChange]
 	public function offsetUnset( $offset ) {
 		$this->maybe_read_meta_data();
 
@@ -359,6 +361,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @param string $offset Offset.
 	 * @return bool
 	 */
+	#[\ReturnTypeWillChange]
 	public function offsetExists( $offset ) {
 		$this->maybe_read_meta_data();
 		if ( 'item_meta_array' === $offset || 'item_meta' === $offset || array_key_exists( $offset, $this->data ) ) {
@@ -373,6 +376,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @param string $offset Offset.
 	 * @return mixed
 	 */
+	#[\ReturnTypeWillChange]
 	public function offsetGet( $offset ) {
 		$this->maybe_read_meta_data();
 
