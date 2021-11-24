@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "83379234b653f45a89537a0bb470eb69",
+    "content-hash": "d0cd349b4354a60a0d71cf9e94ee4b57",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -542,16 +542,16 @@
         },
         {
             "name": "woocommerce/woocommerce-admin",
-            "version": "2.9.0-rc.2",
+            "version": "2.9.0-rc.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-admin.git",
-                "reference": "6c81e761d9a19e6ed4484db82d6710331f375a3a"
+                "reference": "eba64a4f38284f982e08433b3b6371823fcef48c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/6c81e761d9a19e6ed4484db82d6710331f375a3a",
-                "reference": "6c81e761d9a19e6ed4484db82d6710331f375a3a",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/eba64a4f38284f982e08433b3b6371823fcef48c",
+                "reference": "eba64a4f38284f982e08433b3b6371823fcef48c",
                 "shasum": ""
             },
             "require": {
@@ -607,9 +607,9 @@
             "homepage": "https://github.com/woocommerce/woocommerce-admin",
             "support": {
                 "issues": "https://github.com/woocommerce/woocommerce-admin/issues",
-                "source": "https://github.com/woocommerce/woocommerce-admin/tree/v2.9.0-rc.2"
+                "source": "https://github.com/woocommerce/woocommerce-admin/tree/v2.9.0-rc.3"
             },
-            "time": "2021-11-18T08:35:56+00:00"
+            "time": "2021-11-24T03:52:01+00:00"
         },
         {
             "name": "woocommerce/woocommerce-blocks",
@@ -2278,6 +2278,7 @@
                 "issues": "https://github.com/sebastianbergmann/resource-operations/issues",
                 "source": "https://github.com/sebastianbergmann/resource-operations/tree/master"
             },
+            "abandoned": true,
             "time": "2015-07-28T20:34:47+00:00"
         },
         {
@@ -2853,16 +2854,16 @@
         },
         {
             "name": "yoast/phpunit-polyfills",
-            "version": "1.0.2",
+            "version": "1.0.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Yoast/PHPUnit-Polyfills.git",
-                "reference": "1a582ab1d91e86aa450340c4d35631a85314ff9f"
+                "reference": "5ea3536428944955f969bc764bbe09738e151ada"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Yoast/PHPUnit-Polyfills/zipball/1a582ab1d91e86aa450340c4d35631a85314ff9f",
-                "reference": "1a582ab1d91e86aa450340c4d35631a85314ff9f",
+                "url": "https://api.github.com/repos/Yoast/PHPUnit-Polyfills/zipball/5ea3536428944955f969bc764bbe09738e151ada",
+                "reference": "5ea3536428944955f969bc764bbe09738e151ada",
                 "shasum": ""
             },
             "require": {
@@ -2910,7 +2911,7 @@
                 "issues": "https://github.com/Yoast/PHPUnit-Polyfills/issues",
                 "source": "https://github.com/Yoast/PHPUnit-Polyfills"
             },
-            "time": "2021-10-03T08:40:26+00:00"
+            "time": "2021-11-23T01:37:03+00:00"
         }
     ],
     "aliases": [],
@@ -2925,5 +2926,5 @@
     "platform-overrides": {
         "php": "7.0.33"
     },
-    "plugin-api-version": "2.1.0"
+    "plugin-api-version": "2.0.0"
 }
