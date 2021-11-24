@@ -81,7 +81,7 @@
 		"@babel/core": "7.16.0",
 		"@babel/polyfill": "7.12.1",
 		"@babel/preset-typescript": "7.16.0",
-		"@octokit/graphql": "4.6.4",
+		"@octokit/graphql": "4.8.0",
 		"@storybook/addon-a11y": "6.3.12",
 		"@storybook/addon-actions": "6.3.12",
 		"@storybook/addon-docs": "6.3.12",
