@@ -70,7 +70,7 @@ The following snippet explains how the WooCommerce Blocks repository is structur
     │   Entry point of the WooCommerce Blocks plugin.
     │
     ├── .github/*
-    │   Config of the different Github features (issues and PR templates, CI, 
+    │   Config of the different Github features (issues and PR templates, CI,
     │   owners).
     │
     ├── .sources/*
@@ -99,7 +99,7 @@ The following snippet explains how the WooCommerce Blocks repository is structur
     │   Files that allows developers to connect their extensions to this plugin.
     │
     ├── assets/js/blocks
-    │   The main blocks of the WooCommerce Blocks plugin such as the Active 
+    │   The main blocks of the WooCommerce Blocks plugin such as the Active
     │   Filters Block.
     │
     ├── assets/js/data
@@ -134,7 +134,7 @@ The following snippet explains how the WooCommerce Blocks repository is structur
     │   The previews of various components such the All Products Block.
     │
     ├── assets/js/settings
-    │   Functionality to view the settings in the frontend. 
+    │   Functionality to view the settings in the frontend.
     │
     ├── assets/js/shared
     │   Shared components of the WooCommerce Blocks plugin.
@@ -155,7 +155,7 @@ The following snippet explains how the WooCommerce Blocks repository is structur
     │   Images for the payment options and the previews.
     │
     ├── packages
-    │   Source code of the WordPress packages. Packages can be:
+    │   Things that are likely to be published as npm packages in the future. Packages can be:
     │    - Production JavaScript scripts and styles loaded on WordPress
     │      and the WooCommerce Blocks plugin or distributed as npm packages.
     │    - Development tools available on npm.
@@ -171,9 +171,6 @@ The following snippet explains how the WooCommerce Blocks repository is structur
     │
     ├── templates/emails
     │   Email templates of the WooCommerce Blocks plugin.
-    │
-    ├── tests/bin
-    │   Set of WordPress packages integration tests.
     │
     ├── tests/e2e
     │   Set of end-to-end tests.
