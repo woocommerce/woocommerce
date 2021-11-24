@@ -99,7 +99,7 @@
 		"@types/dinero.js": "1.9.0",
 		"@types/gtag.js": "0.0.8",
 		"@types/jest": "26.0.24",
-		"@types/jquery": "3.5.8",
+		"@types/jquery": "3.5.9",
 		"@types/lodash": "4.14.177",
 		"@types/react": "16.14.21",
 		"@types/wordpress__block-editor": "2.2.9",
