@@ -1,5 +1,10 @@
 # Unreleased
 
+## Added
+
+- A `specs/data` folder to store page element data.
+- Tests to verify that different top-level menu and their associated sub-menus load successfully.
+
 ## Changed
 
 - New coupon test deletes the coupon instead of trashing it.
