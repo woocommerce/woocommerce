@@ -105,7 +105,7 @@ const runApiTests = () => {
 }
 
 const runAdminPageLoadTests = () => {
-	runWcPageLoadTest();
+	runPageLoadTest();
 }
 
 module.exports = {
