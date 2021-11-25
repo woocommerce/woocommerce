@@ -152,7 +152,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</tbody>
 	</table>
 
-	<?php do_action( 'woocommerce_webhook_options' ); ?>
+	<?php do_action( 'woocommerce_webhook_options', $webhook ); ?>
 </div>
 
 <div id="webhook-actions" class="settings-panel">
