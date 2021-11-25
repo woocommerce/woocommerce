@@ -73,6 +73,10 @@ class Install {
 			'wc_admin_update_290_update_apperance_task_option',
 			'wc_admin_update_290_db_version',
 		),
+		'3.0.0'  => array(
+			'wc_admin_update_300_update_is_read_from_last_read',
+			'wc_admin_update_300_db_version',
+		),
 	);
 
 	/**
