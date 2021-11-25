@@ -1056,7 +1056,6 @@ class WC_Countries {
 					'GT' => array(
 						'postcode' => array(
 							'required' => false,
-							'hidden'   => true,
 						),
 						'state'    => array(
 							'label' => __( 'Department', 'woocommerce' ),
