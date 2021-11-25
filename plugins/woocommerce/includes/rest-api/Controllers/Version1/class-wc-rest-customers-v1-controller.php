@@ -244,7 +244,7 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 		$prepared_args['orderby'] = $orderby_possibles[ $request['orderby'] ];
 		$prepared_args['search']  = $request['search'];
 
-		if ( '' !== $prepared_args['search'] ) {
+		if ( ! empty( $prepared_args['search'] ) ) {
 			$prepared_args['search'] = '*' . $prepared_args['search'] . '*';
 		}
 
