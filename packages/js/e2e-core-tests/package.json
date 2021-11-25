@@ -20,5 +20,9 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "scripts": {
+	"build": "./bin/build.sh",
+	"prepare": "pnpm run build"
   }
 }

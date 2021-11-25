@@ -1,7 +1,6 @@
 /**
  * External Dependencies
  */
-const { jestConfig } = require( '@automattic/puppeteer-utils' );
 const { WC_E2E_SCREENSHOTS } = process.env;
 const path = require( 'path' );
 const fs = require( 'fs' );
@@ -32,7 +31,13 @@ if ( fs.existsSync( localJestSetupFile ) ) {
 }
 
 const combinedConfig = {
-	...jestConfig,
+	preset: 'jest-puppeteer',
+	clearMocks: true,
+	moduleFileExtensions: [ 'js' ],
+	testMatch: [
+		'**/*.(test|spec).js',
+		'*.(test|spec).js'
+	],
 	moduleNameMapper: {
 		'@woocommerce/e2e/tests/(.*)': moduleNameMap,
 	},
@@ -48,7 +53,6 @@ const combinedConfig = {
 	testTimeout: parseInt( global.process.env.jest_test_timeout ),
 
 	transformIgnorePatterns: [
-		...jestConfig.transformIgnorePatterns,
 		'node_modules/(?!(woocommerce)/)',
 	],
 	roots: [ testSpecs ],
