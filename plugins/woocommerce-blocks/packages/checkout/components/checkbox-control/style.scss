@@ -17,9 +17,9 @@
 		height: em(24px);
 		width: em(24px);
 		margin: 0;
-		margin-right: $gap;
-		min-height: 24px;
-		min-width: 24px;
+    margin-right: $gap;
+		min-height: em(24px);
+		min-width: em(24px);
 		overflow: hidden;
 		position: static;
 		vertical-align: middle;
