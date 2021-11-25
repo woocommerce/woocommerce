@@ -104,10 +104,6 @@ const runApiTests = () => {
 	runTelemetryAPITest();
 }
 
-const runAdminPageLoadTests = () => {
-	runPageLoadTest();
-}
-
 module.exports = {
 	runActivationTest,
 	runOnboardingFlowTest,
