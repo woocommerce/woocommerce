@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { pressKeyWithModifier } from '@wordpress/e2e-test-utils';
-import { waitForSelector } from '@automattic/puppeteer-utils';
 
 /**
  * Internal dependencies
@@ -318,3 +317,21 @@ export const clickAndWaitForSelector = async ( buttonSelector, resultSelector, t
 		}
 	);
 };
+/**
+ * Waits for selector to be present in DOM.
+ * Throws a `TimeoutError` if element was not found after 30 sec.
+ * Behavior can be modified with @param options. Possible keys: `visible`, `hidden`, `timeout`.
+ * More details at: https://pptr.dev/#?product=Puppeteer&show=api-pagewaitforselectorselector-options
+ *
+ * @param {Puppeteer.Page} page Puppeteer representation of the page.
+ * @param {string} selector CSS selector of the element
+ * @param {Object} options Custom options to modify function behavior.
+ */
+export async function waitForSelector( page, selector, options = {} ) {
+	// set up default options
+	const defaultOptions = { timeout: 30000, logHTML: false };
+	options = Object.assign( defaultOptions, options );
+
+	const element = await page.waitForSelector( selector, options );
+	return element;
+}
