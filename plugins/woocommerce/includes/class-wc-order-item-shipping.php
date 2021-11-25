@@ -279,6 +279,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	 * @param string $offset Key.
 	 * @return mixed
 	 */
+	#[\ReturnTypeWillChange]
 	public function offsetGet( $offset ) {
 		if ( 'cost' === $offset ) {
 			$offset = 'total';
@@ -293,6 +294,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	 * @param string $offset Key.
 	 * @param mixed  $value Value to set.
 	 */
+	#[\ReturnTypeWillChange]
 	public function offsetSet( $offset, $value ) {
 		wc_deprecated_function( 'WC_Order_Item_Shipping::offsetSet', '4.4.0', '' );
 		if ( 'cost' === $offset ) {
@@ -307,6 +309,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	 * @param string $offset Key.
 	 * @return bool
 	 */
+	#[\ReturnTypeWillChange]
 	public function offsetExists( $offset ) {
 		if ( in_array( $offset, array( 'cost' ), true ) ) {
 			return true;
