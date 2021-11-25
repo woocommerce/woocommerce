@@ -215,15 +215,6 @@ const merchant = {
 		} );
 	},
 
-	/**
-	 * Opens the WordPress WooCommerce Page
-	 */
-	openAdminWcPage: async () => {
-		await page.goto( WP_ADMIN_WC_HOME, {
-			waitUntil: 'networkidle0',
-		} );
-	},
-
 	openAllUsersView: async () => {
 		await page.goto( WP_ADMIN_ALL_USERS_VIEW, {
 			waitUntil: 'networkidle0',
