@@ -21,3 +21,7 @@ export function getCronJobs( state ) {
 export function getIsEmailDisabled( state ) {
 	return state.isEmailDisabled;
 }
+
+export function getDBUpdateVersions(state) {
+	return state.dbUpdateVersions;
+}

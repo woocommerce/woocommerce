@@ -11,6 +11,7 @@ const DEFAULT_STATE = {
 	messages: {},
 	params: [],
 	status: '',
+	dbUpdateVersions: [],
 };
 
 const reducer = ( state = DEFAULT_STATE, action ) => {
@@ -73,6 +74,11 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 				params: {
 					[ action.source ]: action.params,
 				},
+			};
+		case TYPES.SET_DB_UPDATE_VERSIONS:
+			return {
+				...state,
+				dbUpdateVersions: action.versions,
 			};
 		default:
 			return state;
