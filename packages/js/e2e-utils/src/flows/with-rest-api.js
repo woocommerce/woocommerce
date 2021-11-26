@@ -81,7 +81,7 @@ export const withRestApi = {
 		};
 
 		const response = await client.put( onboardingProfileEndpoint, onboardingReset );
-		expect( response.status ).toEqual( 200 );
+		expect( response.statusCode ).toEqual( 200 );
 	},
 	/**
 	 * Use api package to delete coupons.

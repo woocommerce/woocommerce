@@ -44,9 +44,9 @@ const resolvePackage = ( packageName, allowRecurse = true ) => {
 	if ( ! resolvedPackage.path.length && allowRecurse ) {
 		const packageLockPath = path.resolve( appPath, 'package-lock.json' );
 		const packageLockContent = fs.readFileSync( packageLockPath );
-		const packageLockData = JSON.parse( packageLockContent );
+		const { dependencies } = JSON.parse( packageLockContent );
 
-		for ( const [ key, value ] of Object.entries( packageLockData.dependencies ) ) {
+		for ( const [ key, value ] of Object.entries( dependencies ) ) {
 			if ( value.version.indexOf( packageName ) == 0 ) {
 				resolvedPackage = resolvePackage( key, false );
 				break;
@@ -69,8 +69,8 @@ const resolvePackagePath = ( filename, packageName = '' ) => {
 	if ( ! packageName.length ) {
 		packagePath = path.resolve( __dirname, '../' );
 	} else {
-		const package = resolvePackage( packageName );
-		packagePath = package.path;
+		const pkg = resolvePackage( packageName );
+		packagePath = pkg.path;
 	}
 
 	const resolvedPath = path.resolve(
