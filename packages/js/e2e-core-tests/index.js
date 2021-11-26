@@ -5,18 +5,15 @@ const allSpecs = require( './specs' );
 const fs = require( 'fs' );
 
 /**
- * Read test set up configuration for the test scaffolding tool.
+ * Test set up configuration for the test scaffolding tool.
  */
-const getObjectFromJsonFile = ( filename ) => {
-	const specs = fs.readFileSync( filename );
-	return JSON.parse( specs );
+const packageInstallFiles = {
+	testSpecs: 'data/install-specs.json',
+	defaultJson: 'data/default-test-config.json',
+	initializeSh: 'data/initialize.sh.default',
 };
-
-const getTestInstallSpecs = () => getObjectFromJsonFile( './data/install-specs.json' );
-const getSampleDefaultJson = () => getObjectFromJsonFile( './data/default-test-config.json' );
 
 module.exports = {
 	allSpecs,
-	getTestInstallSpecs,
-	getSampleDefaultJson,
+	packageInstallFiles,
 };
