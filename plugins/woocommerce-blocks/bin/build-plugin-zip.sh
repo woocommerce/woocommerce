@@ -129,6 +129,11 @@ mkdir zip-file
 mkdir zip-file/build
 sh "$SOURCE_PATH/bin/copy-plugin-files.sh" "$SOURCE_PATH" "$SOURCE_PATH/zip-file"
 cd "$(pwd)/zip-file"
+if [ $TYPE = 'DEV' ]; then
+	touch blocks.ini
+	printf 'woocommerce_blocks_phase = 3\nwoocommerce_blocks_env = development' > blocks.ini
+	ls
+fi
 zip -r ../woocommerce-gutenberg-products-block.zip ./
 cd ..
 rm -r zip-file
