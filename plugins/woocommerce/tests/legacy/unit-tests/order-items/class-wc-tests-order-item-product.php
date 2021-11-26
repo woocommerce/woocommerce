@@ -213,6 +213,85 @@ class WC_Tests_Order_Item_Product extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test the get_formatted_meta_data method.
+	 *
+	 * @since x.x.x
+	 */
+	public function test_get_all_formatted_meta_data() {
+		$parent_product = new WC_Product_Variable();
+		$parent_product->set_name( 'Test Parent' );
+		$parent_product->save();
+
+		$variation_product = new WC_Product_Variation();
+		$variation_product->set_name( 'Test Variation' );
+		$variation_product->set_parent_id( $parent_product->get_id() );
+		$variation_product->set_attributes(
+			array(
+				'color' => 'Green',
+				'size'  => 'Large',
+			)
+		);
+		$variation_product->save();
+
+		$product_item = new WC_Order_Item_Product();
+		$product_item->set_product( $variation_product );
+		$product_item->add_meta_data( 'testkey', 'testval', true );
+		$product_item->save();
+
+		// Test with show_all set to default.
+		$formatted          = $product_item->get_all_formatted_meta_data( '_' );
+		$formatted_as_array = array();
+		foreach ( $formatted as $f ) {
+			$formatted_as_array[] = (array) $f;
+		}
+		$this->assertEquals(
+			array(
+				array(
+					'key'           => 'color',
+					'value'         => 'Green',
+					'display_key'   => 'color',
+					'display_value' => "<p>Green</p>\n",
+				),
+				array(
+					'key'           => 'size',
+					'value'         => 'Large',
+					'display_key'   => 'size',
+					'display_value' => "<p>Large</p>\n",
+				),
+				array(
+					'key'           => 'testkey',
+					'value'         => 'testval',
+					'display_key'   => 'testkey',
+					'display_value' => "<p>testval</p>\n",
+				),
+			),
+			$formatted_as_array
+		);
+
+		// Test with show_all off.
+		$formatted          = $product_item->get_all_formatted_meta_data( '_', false );
+		$formatted_as_array = array();
+		foreach ( $formatted as $f ) {
+			$formatted_as_array[] = (array) $f;
+		}
+		$this->assertEquals(
+			array(
+				array(
+					'key'           => 'testkey',
+					'value'         => 'testval',
+					'display_key'   => 'testkey',
+					'display_value' => "<p>testval</p>\n",
+				),
+			),
+			$formatted_as_array
+		);
+
+		// Test with an exclude prefix. Should exclude everything since they're either in the title or in the exclude prefix.
+		$formatted = $product_item->get_all_formatted_meta_data( 'test', false );
+		$this->assertEmpty( $formatted );
+	}
+
+	/**
 	 * Test the Array Access methods.
 	 *
 	 * @since 3.3.0
