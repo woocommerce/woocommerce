@@ -29,7 +29,7 @@ $hidden_order_itemmeta = apply_filters(
 );
 ?><div class="view">
 	<?php
-	$meta_data = $item->get_formatted_meta_data( '' );
+	$meta_data = $item->get_all_formatted_meta_data( '' );
 	if ( $meta_data ) :
 		?>
 		<table cellspacing="0" class="display_meta">
