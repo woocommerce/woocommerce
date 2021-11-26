@@ -1046,7 +1046,7 @@ CREATE TABLE {$wpdb->prefix}wc_reserved_stock (
 	`expires` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
 	PRIMARY KEY  (`order_id`, `product_id`)
 ) $collate;
-CREATE TABLE {$wpdb->prefix}woocommerce_rate_limits (
+CREATE TABLE {$wpdb->prefix}wc_rate_limits (
   rate_limit_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   rate_limit_key varchar(200) NOT NULL,
   rate_limit_expiry BIGINT UNSIGNED NOT NULL,
@@ -1087,7 +1087,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_rate_limits (
 			"{$wpdb->prefix}woocommerce_tax_rate_locations",
 			"{$wpdb->prefix}woocommerce_tax_rates",
 			"{$wpdb->prefix}wc_reserved_stock",
-			"{$wpdb->prefix}woocommerce_rate_limits",
+			"{$wpdb->prefix}wc_rate_limits",
 		);
 
 		/**
