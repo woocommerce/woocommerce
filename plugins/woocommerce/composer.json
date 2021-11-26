@@ -39,7 +39,7 @@
 		"sort-packages": true,
 		"platform": {
 			"php": "7.0.33"
-	  	}
+		}
 	},
 	"autoload": {
 		"exclude-from-classmap": [
@@ -122,15 +122,15 @@
 			"formatter": {
 				"filename": "../../tools/changelogger/PluginFormatter.php"
 			},
-			"types": [
-				"Fix",
-				"Add",
-				"Update",
-				"Dev",
-				"Tweak",
-				"Performance",
-				"Enhancement"
-			],
+			"types": {
+				"fix": "Fixes an existing bug",
+				"add": "Adds functionality",
+				"update": "Update existing functionality",
+				"dev": "Development related task",
+				"tweak": "A minor adjustment to the codebase",
+				"performance": "Address performance issues",
+				"enhancement": "Improve existing functionality"
+			},
 			"versioning": "wordpress",
 			"changelog": "NEXT_CHANGELOG.md"
 		}
