@@ -4,10 +4,11 @@
 import classnames from 'classnames';
 import { __ } from '@wordpress/i18n';
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
-import { PanelBody, Disabled, ExternalLink } from '@wordpress/components';
+import { PanelBody, ExternalLink } from '@wordpress/components';
 import { ADMIN_URL, getSetting } from '@woocommerce/settings';
 import ExternalLinkCard from '@woocommerce/editor-components/external-link-card';
 import { innerBlockAreas } from '@woocommerce/blocks-checkout';
+import Noninteractive from '@woocommerce/base-components/noninteractive';
 
 /**
  * Internal dependencies
@@ -119,9 +120,9 @@ export const Edit = ( {
 					</PanelBody>
 				) }
 			</InspectorControls>
-			<Disabled>
+			<Noninteractive>
 				<Block />
-			</Disabled>
+			</Noninteractive>
 			<AdditionalFields block={ innerBlockAreas.SHIPPING_METHODS } />
 		</FormStepBlock>
 	);

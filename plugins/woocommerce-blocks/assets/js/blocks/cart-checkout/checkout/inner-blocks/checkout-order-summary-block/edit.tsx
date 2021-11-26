@@ -3,8 +3,9 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
-import { Disabled, PanelBody, ToggleControl } from '@wordpress/components';
+import { PanelBody, ToggleControl } from '@wordpress/components';
 import { getSetting } from '@woocommerce/settings';
+import Noninteractive from '@woocommerce/base-components/noninteractive';
 
 /**
  * Internal dependencies
@@ -65,11 +66,11 @@ export const Edit = ( {
 						</PanelBody>
 					) }
 			</InspectorControls>
-			<Disabled>
+			<Noninteractive>
 				<Block
 					showRateAfterTaxName={ attributes.showRateAfterTaxName }
 				/>
-			</Disabled>
+			</Noninteractive>
 		</div>
 	);
 };

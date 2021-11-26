@@ -161,7 +161,7 @@ const usePaymentMethodRegistration = (
 		registeredPaymentMethods,
 	] );
 
-	const [ debouncedRefreshCanMakePayments ] = useDebouncedCallback(
+	const debouncedRefreshCanMakePayments = useDebouncedCallback(
 		refreshCanMakePayments,
 		500
 	);
