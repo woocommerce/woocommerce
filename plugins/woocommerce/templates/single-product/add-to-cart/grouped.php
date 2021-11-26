@@ -116,7 +116,7 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 
 		<?php do_action( 'woocommerce_before_add_to_cart_button' ); ?>
 
-		<button type="submit" class="single_add_to_cart_button button alt"><?php echo esc_html( $product->single_add_to_cart_text() ); ?></button>
+		<button type="submit" class="<?php echo esc_attr( apply_filters( 'woocommerce_single_add_to_cart_button_class', 'single_add_to_cart_button button alt' ) ); ?>"><?php echo esc_html( $product->single_add_to_cart_text() ); ?></button>
 
 		<?php do_action( 'woocommerce_after_add_to_cart_button' ); ?>
 
