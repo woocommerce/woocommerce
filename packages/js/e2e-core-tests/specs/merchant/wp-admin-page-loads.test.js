@@ -15,10 +15,6 @@ const runPageLoadTest = () => {
 		( menuTitle, menuElement, subMenus ) => {
 			beforeAll( async () => {
 				await merchant.login();
-				await page.setViewport( {
-					width: 1280,
-					height: 800,
-				} );
 			} );
 
 			it.each( subMenus )(
@@ -28,6 +24,10 @@ const runPageLoadTest = () => {
 					await Promise.all( [
 						page.click( menuElement ),
 						page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+						page.setViewport( {
+							width: 1280,
+							height: 800,
+						} ),
 					] );
 
 					// Click sub-menu item and wait for the page to finish loading
