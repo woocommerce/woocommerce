@@ -140,15 +140,15 @@ class Formatter extends KeepAChangelogParser {
 			}
 
 			$version         = '';
-			$timestamp       = new DateTime( 'now', new DateTimeZone( 'UTC' ) );
-			$entry_timestamp = new DateTime( 'now', new DateTimeZone( 'UTC' ) );
+			$timestamp       = new \DateTime( 'now', new \DateTimeZone( 'UTC' ) );
+			$entry_timestamp = new \DateTime( 'now', new \DateTimeZone( 'UTC' ) );
 
 			if ( count( $heading ) ) {
 				$version   = $heading[1];
 				$timestamp = $heading[2];
 
 				try {
-					$timestamp = new DateTime( $timestamp, new DateTimeZone( 'UTC' ) );
+					$timestamp = new \DateTime( $timestamp, new \DateTimeZone( 'UTC' ) );
 				} catch ( \Exception $ex ) {
 					throw new \InvalidArgumentException( "Heading has an invalid timestamp: $heading", 0, $ex );
 				}
