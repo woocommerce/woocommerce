@@ -10,7 +10,13 @@ import { Icon, arrowBack } from '@woocommerce/icons';
  */
 import './style.scss';
 
-const ReturnToCartButton = ( { link } ) => {
+interface ReturnToCartButtonProps {
+	link?: string;
+}
+
+const ReturnToCartButton = ( {
+	link,
+}: ReturnToCartButtonProps ): JSX.Element => {
 	return (
 		<a
 			href={ link || CART_URL }

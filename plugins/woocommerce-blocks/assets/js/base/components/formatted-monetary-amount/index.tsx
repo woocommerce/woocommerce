@@ -6,8 +6,8 @@ import NumberFormat, {
 	NumberFormatProps,
 } from 'react-number-format';
 import classNames from 'classnames';
-import type { Currency } from '@woocommerce/price-format';
 import type { ReactElement } from 'react';
+import type { Currency } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -20,6 +20,8 @@ interface FormattedMonetaryAmountProps {
 	value: number | string; // Value of money amount.
 	currency: Currency | Record< string, never >; // Currency configuration object.
 	onValueChange?: ( unit: number ) => void; // Function to call when value changes.
+	style?: React.CSSProperties;
+	renderText?: ( value: string ) => JSX.Element;
 }
 
 /**
