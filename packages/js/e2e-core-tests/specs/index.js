@@ -104,6 +104,7 @@ const runMerchantTests = () => {
 	runMerchantOrdersCustomerPaymentPage();
 	runAnalyticsPageLoadsTest();
 	runInitiateWccomConnectionTest();
+	runAdminPageLoadTests();
 }
 
 const runApiTests = () => {
