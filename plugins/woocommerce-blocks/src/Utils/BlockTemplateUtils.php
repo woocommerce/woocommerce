@@ -135,7 +135,7 @@ class BlockTemplateUtils {
 		$template->id             = 'woocommerce//' . $template_file->slug;
 		$template->theme          = 'woocommerce';
 		$template->content        = self::gutenberg_inject_theme_attribute_in_content( $template_content );
-		$template->source         = 'woocommerce';
+		$template->source         = 'plugin';
 		$template->slug           = $template_file->slug;
 		$template->type           = $template_type;
 		$template->title          = ! empty( $template_file->title ) ? $template_file->title : self::convert_slug_to_title( $template_file->slug );

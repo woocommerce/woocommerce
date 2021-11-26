@@ -350,7 +350,7 @@ class BlockTemplatesController {
 				'path'        => $template_file,
 				'type'        => $template_type,
 				'theme'       => 'woocommerce',
-				'source'      => 'woocommerce',
+				'source'      => 'plugin',
 				'title'       => BlockTemplateUtils::convert_slug_to_title( $template_slug ),
 				'description' => '',
 				'post_types'  => array(), // Don't appear in any Edit Post template selector dropdown.
