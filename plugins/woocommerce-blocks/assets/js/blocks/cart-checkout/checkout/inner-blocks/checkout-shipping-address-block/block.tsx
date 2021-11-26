@@ -3,7 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useMemo, useEffect, Fragment } from '@wordpress/element';
-import { Disabled } from 'wordpress-components';
 import { AddressForm } from '@woocommerce/base-components/cart-checkout';
 import {
 	useCheckoutAddress,
@@ -11,6 +10,7 @@ import {
 	useEditorContext,
 } from '@woocommerce/base-context';
 import { CheckboxControl } from '@woocommerce/blocks-checkout';
+import Noninteractive from '@woocommerce/base-components/noninteractive';
 
 /**
  * Internal dependencies
@@ -60,7 +60,7 @@ const Block = ( {
 		};
 	}, [ showCompanyField, requireCompanyField, showApartmentField ] );
 
-	const AddressFormWrapperComponent = isEditor ? Disabled : Fragment;
+	const AddressFormWrapperComponent = isEditor ? Noninteractive : Fragment;
 
 	return (
 		<>

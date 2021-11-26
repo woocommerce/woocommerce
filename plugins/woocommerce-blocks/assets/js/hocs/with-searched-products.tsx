@@ -50,17 +50,14 @@ const withSearchedProducts = (
 				.catch( setErrorState );
 		}, [ selected ] );
 
-		const [ debouncedSearch ] = useDebouncedCallback(
-			( search: string ) => {
-				getProducts( { selected, search } )
-					.then( ( results ) => {
-						setProductsList( results as ProductResponseItem[] );
-						setIsLoading( false );
-					} )
-					.catch( setErrorState );
-			},
-			400
-		);
+		const debouncedSearch = useDebouncedCallback( ( search: string ) => {
+			getProducts( { selected, search } )
+				.then( ( results ) => {
+					setProductsList( results as ProductResponseItem[] );
+					setIsLoading( false );
+				} )
+				.catch( setErrorState );
+		}, 400 );
 
 		const onSearch = useCallback(
 			( search: string ) => {
