@@ -220,10 +220,7 @@ class WC_API_Orders extends WC_API_Resource {
 		foreach ( $order->get_items() as $item_id => $item ) {
 			$product    = $item->get_product();
 			$hideprefix = ( isset( $filter['all_item_meta'] ) && 'true' === $filter['all_item_meta'] ) ? null : '_';
-
-			$include_all = false;
-			$include_all = apply_filters( 'woocommerce_get_formatted_meta_data_include_all_meta_lines', $include_all, $item );
-			$item_meta   = $item->get_formatted_meta_data( $hideprefix, $include_all );
+			$item_meta  = $item->get_formatted_meta_data( $hideprefix );
 
 			foreach ( $item_meta as $key => $values ) {
 				$item_meta[ $key ]->label = $values->display_key;
@@ -1573,10 +1570,7 @@ class WC_API_Orders extends WC_API_Resource {
 			foreach ( $refund->get_items( 'line_item' ) as $item_id => $item ) {
 				$product    = $item->get_product();
 				$hideprefix = ( isset( $filter['all_item_meta'] ) && 'true' === $filter['all_item_meta'] ) ? null : '_';
-
-				$include_all = false;
-				$include_all = apply_filters( 'woocommerce_get_formatted_meta_data_include_all_meta_lines', $include_all, $item );
-				$item_meta   = $item->get_formatted_meta_data( $hideprefix, $include_all );
+				$item_meta  = $item->get_formatted_meta_data( $hideprefix );
 
 				foreach ( $item_meta as $key => $values ) {
 					$item_meta[ $key ]->label = $values->display_key;
