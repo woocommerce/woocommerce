@@ -32,9 +32,9 @@
     "jest": "^25.1.0",
     "jest-each": "25.5.0",
     "jest-puppeteer": "^4.4.0",
-	"node-stream-zip": "^1.13.6",
+    "node-stream-zip": "^1.13.6",
     "request": "^2.88.2",
-	"sprintf-js": "^1.1.2"
+    "sprintf-js": "^1.1.2"
   },
   "devDependencies": {
     "@babel/cli": "7.12.8",
