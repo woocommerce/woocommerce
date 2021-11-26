@@ -9,27 +9,27 @@ export const MENUS = [
 		[
 			[
 				'Home',
-				'#toplevel_page_woocommerce > ul > li:nth-child(2)',
+				'#toplevel_page_woocommerce > ul > li:nth-child(2) > a',
 				'Home',
 			],
 			[
 				'Orders',
-				'#toplevel_page_woocommerce > ul > li:nth-child(3)',
+				'#toplevel_page_woocommerce > ul > li:nth-child(3) > a',
 				'Orders',
 			],
 			[
 				'Reports',
-				'#toplevel_page_woocommerce > ul > li:nth-child(6)',
+				'#toplevel_page_woocommerce > ul > li:nth-child(6) > a',
 				'Orders',
 			],
 			[
 				'Settings',
-				'#toplevel_page_woocommerce > ul > li:nth-child(7)',
+				'#toplevel_page_woocommerce > ul > li:nth-child(7) > a',
 				'General',
 			],
 			[
 				'Status',
-				'#toplevel_page_woocommerce > ul > li:nth-child(8)',
+				'#toplevel_page_woocommerce > ul > li:nth-child(8) > a',
 				'System status',
 			],
 			// [ 'Extensions', '#toplevel_page_woocommerce > ul > li:nth-child(9)', 'Extensions' ],
@@ -41,27 +41,27 @@ export const MENUS = [
 		[
 			[
 				'All Products',
-				'#menu-posts-product > ul > li:nth-child(2)',
+				'#menu-posts-product > ul > li:nth-child(2) > a',
 				'Products',
 			],
 			[
 				'Add New',
-				'#menu-posts-product > ul > li:nth-child(3)',
+				'#menu-posts-product > ul > li:nth-child(3) > a',
 				'Add New',
 			],
 			[
 				'Categories',
-				'#menu-posts-product > ul > li:nth-child(4)',
+				'#menu-posts-product > ul > li:nth-child(4) > a',
 				'Product categories',
 			],
 			[
 				'Product tags',
-				'#menu-posts-product > ul > li:nth-child(5)',
+				'#menu-posts-product > ul > li:nth-child(5) > a',
 				'Product tags',
 			],
 			[
 				'Attributes',
-				'#menu-posts-product > ul > li:nth-child(6)',
+				'#menu-posts-product > ul > li:nth-child(6) > a',
 				'Attributes',
 			],
 		],
@@ -72,12 +72,12 @@ export const MENUS = [
 		[
 			[
 				'Overview',
-				'#toplevel_page_woocommerce-marketing > ul > li:nth-child(2)',
+				'#toplevel_page_woocommerce-marketing > ul > li:nth-child(2) > a',
 				'Overview',
 			],
 			[
 				'Coupons',
-				'#toplevel_page_woocommerce-marketing > ul > li:nth-child(3)',
+				'#toplevel_page_woocommerce-marketing > ul > li:nth-child(3) > a',
 				'Coupons',
 			],
 		],
