@@ -4,14 +4,22 @@
 import { __, sprintf } from '@wordpress/i18n';
 import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-monetary-amount';
 import classNames from 'classnames';
-import PropTypes from 'prop-types';
 import { formatPrice } from '@woocommerce/price-format';
 import { createInterpolateElement } from '@wordpress/element';
+import type { Currency } from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
+
+interface PriceRangeProps {
+	currency: Currency | Record< string, never >; // Currency configuration object;
+	maxPrice: string | number;
+	minPrice: string | number;
+	priceClassName?: string;
+	priceStyle?: React.CSSProperties;
+}
 
 const PriceRange = ( {
 	currency,
@@ -19,7 +27,7 @@ const PriceRange = ( {
 	minPrice,
 	priceClassName,
 	priceStyle,
-} ) => {
+}: PriceRangeProps ) => {
 	return (
 		<>
 			<span className="screen-reader-text">
@@ -58,6 +66,16 @@ const PriceRange = ( {
 	);
 };
 
+interface SalePriceProps {
+	currency: Currency | Record< string, never >; // Currency configuration object.
+	regularPriceClassName?: string;
+	regularPriceStyle?: Record< string, string >;
+	regularPrice: number | string;
+	priceClassName?: string;
+	priceStyle?: Record< string, string >;
+	price: number | string;
+}
+
 const SalePrice = ( {
 	currency,
 	regularPriceClassName,
@@ -66,7 +84,7 @@ const SalePrice = ( {
 	priceClassName,
 	priceStyle,
 	price,
-} ) => {
+}: SalePriceProps ) => {
 	return (
 		<>
 			<span className="screen-reader-text">
@@ -110,20 +128,35 @@ const SalePrice = ( {
 	);
 };
 
+interface ProductPriceProps {
+	align?: 'left' | 'center' | 'right';
+	className?: string;
+	currency: Currency | Record< string, never >; // Currency configuration object.
+	format: string;
+	price: number | string;
+	priceClassName?: string;
+	priceStyle?: Record< string, string >;
+	maxPrice?: number | string;
+	minPrice?: number | string;
+	regularPrice?: number | string;
+	regularPriceClassName?: string;
+	regularPriceStyle?: Record< string, string >;
+}
+
 const ProductPrice = ( {
 	align,
 	className,
 	currency,
 	format = '<price/>',
-	maxPrice = null,
-	minPrice = null,
-	price = null,
+	maxPrice,
+	minPrice,
+	price,
 	priceClassName,
 	priceStyle,
 	regularPrice,
 	regularPriceClassName,
 	regularPriceStyle,
-} ) => {
+}: ProductPriceProps ): JSX.Element => {
 	const wrapperClassName = classNames(
 		className,
 		'price',
@@ -161,7 +194,7 @@ const ProductPrice = ( {
 				regularPriceStyle={ regularPriceStyle }
 			/>
 		);
-	} else if ( minPrice !== null && maxPrice !== null ) {
+	} else if ( minPrice !== undefined && maxPrice !== undefined ) {
 		priceComponent = (
 			<PriceRange
 				currency={ currency }
@@ -171,7 +204,7 @@ const ProductPrice = ( {
 				priceStyle={ priceStyle }
 			/>
 		);
-	} else if ( price !== null ) {
+	} else if ( price ) {
 		priceComponent = (
 			<FormattedMonetaryAmount
 				className={ classNames(
@@ -192,23 +225,6 @@ const ProductPrice = ( {
 			} ) }
 		</span>
 	);
-};
-
-ProductPrice.propTypes = {
-	align: PropTypes.oneOf( [ 'left', 'center', 'right' ] ),
-	className: PropTypes.string,
-	currency: PropTypes.object,
-	format: PropTypes.string,
-	price: PropTypes.oneOfType( [ PropTypes.number, PropTypes.string ] ),
-	priceClassName: PropTypes.string,
-	priceStyle: PropTypes.object,
-	// Range price props
-	maxPrice: PropTypes.oneOfType( [ PropTypes.number, PropTypes.string ] ),
-	minPrice: PropTypes.oneOfType( [ PropTypes.number, PropTypes.string ] ),
-	// On sale price props
-	regularPrice: PropTypes.oneOfType( [ PropTypes.number, PropTypes.string ] ),
-	regularPriceClassName: PropTypes.string,
-	regularPriceStyle: PropTypes.object,
 };
 
 export default ProductPrice;

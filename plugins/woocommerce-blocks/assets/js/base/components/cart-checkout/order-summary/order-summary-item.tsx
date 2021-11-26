@@ -14,11 +14,11 @@ import {
 	__experimentalApplyCheckoutFilter,
 	mustContain,
 } from '@woocommerce/blocks-checkout';
-import PropTypes from 'prop-types';
 import Dinero from 'dinero.js';
 import { getSetting } from '@woocommerce/settings';
 import { useMemo } from '@wordpress/element';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
+import { CartItem, isString } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -28,9 +28,14 @@ import ProductImage from '../product-image';
 import ProductLowStockBadge from '../product-low-stock-badge';
 import ProductMetadata from '../product-metadata';
 
-const productPriceValidation = ( value ) => mustContain( value, '<price/>' );
+const productPriceValidation = ( value: string ): true | never =>
+	mustContain( value, '<price/>' );
 
-const OrderSummaryItem = ( { cartItem } ) => {
+interface OrderSummaryProps {
+	cartItem: CartItem;
+}
+
+const OrderSummaryItem = ( { cartItem }: OrderSummaryProps ): JSX.Element => {
 	const {
 		images,
 		low_stock_remaining: lowStockRemaining,
@@ -72,13 +77,17 @@ const OrderSummaryItem = ( { cartItem } ) => {
 
 	const regularPriceSingle = Dinero( {
 		amount: parseInt( prices.raw_prices.regular_price, 10 ),
-		precision: parseInt( prices.raw_prices.precision, 10 ),
+		precision: isString( prices.raw_prices.precision )
+			? parseInt( prices.raw_prices.precision, 10 )
+			: prices.raw_prices.precision,
 	} )
 		.convertPrecision( priceCurrency.minorUnit )
 		.getAmount();
 	const priceSingle = Dinero( {
 		amount: parseInt( prices.raw_prices.price, 10 ),
-		precision: parseInt( prices.raw_prices.precision, 10 ),
+		precision: isString( prices.raw_prices.precision )
+			? parseInt( prices.raw_prices.precision, 10 )
+			: prices.raw_prices.precision,
 	} )
 		.convertPrecision( priceCurrency.minorUnit )
 		.getAmount();
@@ -126,7 +135,7 @@ const OrderSummaryItem = ( { cartItem } ) => {
 			<div className="wc-block-components-order-summary-item__image">
 				<div className="wc-block-components-order-summary-item__quantity">
 					<Label
-						label={ quantity }
+						label={ quantity.toString() }
 						screenReaderLabel={ sprintf(
 							/* translators: %d number of products of the same type in the cart */
 							_n(
@@ -201,22 +210,6 @@ const OrderSummaryItem = ( { cartItem } ) => {
 			</div>
 		</div>
 	);
-};
-
-OrderSummaryItem.propTypes = {
-	cartItems: PropTypes.shape( {
-		images: PropTypes.array,
-		low_stock_remaining: PropTypes.number,
-		name: PropTypes.string.isRequired,
-		permalink: PropTypes.string,
-		prices: PropTypes.shape( {
-			price: PropTypes.string,
-			regular_price: PropTypes.string,
-		} ),
-		quantity: PropTypes.number,
-		summary: PropTypes.string,
-		variation: PropTypes.array,
-	} ),
 };
 
 export default OrderSummaryItem;

@@ -2,7 +2,6 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import PropTypes from 'prop-types';
 import Title from '@woocommerce/base-components/title';
 
 /**
@@ -10,7 +9,12 @@ import Title from '@woocommerce/base-components/title';
  */
 import './style.scss';
 
-const StepHeading = ( { title, stepHeadingContent } ) => (
+interface StepHeadingProps {
+	title: string;
+	stepHeadingContent?: JSX.Element;
+}
+
+const StepHeading = ( { title, stepHeadingContent }: StepHeadingProps ) => (
 	<div className="wc-block-components-checkout-step__heading">
 		<Title
 			aria-hidden="true"
@@ -27,6 +31,18 @@ const StepHeading = ( { title, stepHeadingContent } ) => (
 	</div>
 );
 
+interface FormStepProps {
+	id?: string;
+	className?: string;
+	title?: string;
+	legend?: string;
+	description?: string;
+	children?: React.ReactNode;
+	disabled?: boolean;
+	showStepNumber?: boolean;
+	stepHeadingContent?: () => JSX.Element | undefined;
+}
+
 const FormStep = ( {
 	id,
 	className,
@@ -36,8 +52,8 @@ const FormStep = ( {
 	children,
 	disabled = false,
 	showStepNumber = true,
-	stepHeadingContent = () => {},
-} ) => {
+	stepHeadingContent = () => undefined,
+}: FormStepProps ): JSX.Element => {
 	// If the form step doesn't have a legend or title, render a <div> instead
 	// of a <fieldset>.
 	const Element = legend || title ? 'fieldset' : 'div';
@@ -78,18 +94,6 @@ const FormStep = ( {
 			</div>
 		</Element>
 	);
-};
-
-FormStep.propTypes = {
-	id: PropTypes.string,
-	className: PropTypes.string,
-	title: PropTypes.string,
-	description: PropTypes.string,
-	children: PropTypes.node,
-	showStepNumber: PropTypes.bool,
-	stepHeadingContent: PropTypes.func,
-	disabled: PropTypes.bool,
-	legend: PropTypes.string,
 };
 
 export default FormStep;

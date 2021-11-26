@@ -9,7 +9,7 @@ import { __, sprintf } from '@wordpress/i18n';
 export const mustContain = (
 	value: string,
 	requiredValue: string
-): true | Error => {
+): true | never => {
 	if ( ! value.includes( requiredValue ) ) {
 		throw Error(
 			sprintf(
