@@ -17,6 +17,10 @@ const runPageLoadTest = () => {
 				await merchant.login();
 			} );
 
+			afterAll( async () => {
+				await merchant.logout();
+			} );
+
 			it.each( subMenus )(
 				'can see %s page properly',
 				async ( subMenuTitle, subMenuElement, subMenuText ) => {
@@ -41,10 +45,6 @@ const runPageLoadTest = () => {
 					} );
 				}
 			);
-
-			afterAll( async () => {
-				await merchant.logout();
-			} );
 		}
 	);
 };
