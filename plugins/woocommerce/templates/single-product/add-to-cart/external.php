@@ -22,7 +22,7 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 <form class="cart" action="<?php echo esc_url( $product_url ); ?>" method="get">
 	<?php do_action( 'woocommerce_before_add_to_cart_button' ); ?>
 
-	<button type="submit" class="single_add_to_cart_button button alt"><?php echo esc_html( $button_text ); ?></button>
+	<button type="submit" class="<?php echo esc_attr( apply_filters( 'woocommerce_single_add_to_cart_button_class', 'single_add_to_cart_button button alt' ) ); ?>"><?php echo esc_html( $button_text ); ?></button>
 
 	<?php wc_query_string_form_fields( $product_url ); ?>
 
