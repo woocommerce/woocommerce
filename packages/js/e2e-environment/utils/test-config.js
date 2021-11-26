@@ -19,15 +19,72 @@ const resolveLocalE2ePath = ( filename = '' ) => {
 	);
 
 	return resolvedPath;
-}
+};
+
+/**
+ * Resolve a package name installable by npm install.
+ *
+ * @param {string} packageName Name of the installed package.
+ * @param {boolean} allowRecurse Allow a recursive call. Default true.
+ * @return {object}
+ */
+const resolvePackage = ( packageName, allowRecurse = true ) => {
+	const resolvedPackage = {};
+
+	try {
+		resolvedPackage.path = require.resolve( packageName );
+		resolvedPackage.name = packageName;
+	} catch ( e ) {
+		// Package name installed is not the package name.
+		resolvedPackage.path = '';
+		resolvedPackage.name = '';
+	}
+
+	// Attempt to find the package through the project package lock file.
+	if ( ! resolvedPackage.path.length && allowRecurse ) {
+		const packageLockPath = path.resolve( appPath, 'package-lock.json' );
+		const packageLockContent = fs.readFileSync( packageLockPath );
+		const packageLockData = JSON.parse( packageLockContent );
+
+		for ( const [ key, value ] of Object.entries( packageLockData.dependencies ) ) {
+			if ( value.version.indexOf( packageName ) == 0 ) {
+				resolvedPackage = resolvePackage( key, false );
+				break;
+			}
+		}
+	}
+
+	return resolvedPackage;
+};
+
+/**
+ * Resolve a file in a package.
+ *
+ * @param {string} filename Filename to append to the path.
+ * @param {string} packageName Name of the installed package. Default @woocommerce/e2e-environment.
+ * @return {string}
+ */
+const resolvePackagePath = ( filename, packageName = '' ) => {
+	let packagePath;
+	if ( ! packageName.length ) {
+		packagePath = path.resolve( __dirname, '../' );
+	} else {
+		const package = resolvePackage( packageName );
+		packagePath = package.path;
+	}
+
+	const resolvedPath = path.resolve(
+		packagePath,
+		filename.indexOf( '/' ) == 0 ? filename.slice( 1 ) : filename
+	);
+
+	return resolvedPath;
+};
 
 // Copy local test configuration file if it exists.
 const localTestConfigFile = resolveLocalE2ePath( 'config/default.json' );
-const defaultConfigFile = path.resolve(
-	__dirname,
-	'../config/default/default.json'
-);
-const testConfigFile = path.resolve( __dirname, '../config/default.json' );
+const defaultConfigFile = resolvePackagePath( 'config/default/default.json' );
+const testConfigFile = resolvePackagePath(  'config/default.json' );
 
 if ( fs.existsSync( localTestConfigFile ) ) {
 	fs.copyFileSync( localTestConfigFile, testConfigFile );
@@ -94,4 +151,6 @@ module.exports = {
 	getTestConfig,
 	getAdminConfig,
 	resolveLocalE2ePath,
+	resolvePackage,
+	resolvePackagePath,
 };

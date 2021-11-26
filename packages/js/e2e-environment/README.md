@@ -60,10 +60,10 @@ The E2E environment uses Jest as a test runner. Extending the base config is nec
 
 ```js
 const path = require( 'path' );
-const { useE2EJestConfig } = require( '@woocommerce/e2e-environment' );
+const { useE2EJestConfig, resolveLocalE2ePath } = require( '@woocommerce/e2e-environment' );
 
 const jestConfig = useE2EJestConfig( {
-	roots: [ path.resolve( __dirname, '../specs' ) ],
+	roots: [ resolveLocalE2ePath( 'specs' ) ],
 } );
 
 module.exports = jestConfig;
