@@ -239,7 +239,6 @@ class Formatter extends KeepAChangelogParser {
 			$version      = $entry->getVersion();
 			$is_subentry  = preg_match( $this->subentry_pattern, $version, $subentry );
 			$timestamp    = $entry->getTimestamp();
-			error_log(print_r($version, true));
 			$release_link = $this->getReleaseLink( $version );
 
 			if ( $is_subentry ) {
