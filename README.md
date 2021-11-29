@@ -122,7 +122,7 @@ This creates `woocommerce-admin-test-helper.zip` in the project root.
 
 We release the plugin using GitHub Releases. There is a script to automate this:
 
-0. Make sure the version is updated in `woocommerce-admin-test-helper.php`
+0. Make sure the version is updated in `woocommerce-admin-test-helper.php` and `package.json`
 1. Commit and push to `trunk`
 2. Run `npm run release`
 3. Make sure you provide the correct version number when prompted
