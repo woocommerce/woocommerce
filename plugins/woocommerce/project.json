@@ -44,15 +44,17 @@
       }
     },
     "build-watch": {
-      "executor": "@nrwl/workspace:run-script",
+      "executor": "@nrwl/workspace:run-commands",
       "options": {
-        "script": "build-watch"
+        "command": "grunt watch",
+        "cwd": "plugins/woocommerce"
       }
     },
     "build-assets": {
-      "executor": "@nrwl/workspace:run-script",
+      "executor": "@nrwl/workspace:run-commands",
       "options": {
-        "script": "build:assets"
+        "command": "pnpm nx build woocommerce-legacy-assets",
+        "cwd": "plugins/woocommerce"
       }
     },
     "lint-js": {
