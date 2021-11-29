@@ -1,5 +1,26 @@
 # Testing instructions
 
+## 3.0.0
+
+### Onboarding Workflow - Add number of employees field
+
+1. Go to step 4 of the OBW (Business details).
+2. Under `Currently selling elsewhere?` select any option other than "No".
+3. A drop-down list with the following options should be visible:
+
+```
+It's just me
+<10
+10-50
+50-250
++250
+I'd rather not say
+```
+
+4. Select one of those options and fill out the rest of the options.
+5. Open the browser devtools, go to the `Console` and enable the debug messages. You can do this by running `localStorage.setItem( 'debug', 'wc-admin:*' );` in the `Console` and looking for the verbose console messages.
+6. Verify that the event `wcadmin_storeprofiler_store_business_details_continue_variant` is recorded with the prop `number_employees` after pressing `Continue`.
+
 ## 2.9.0
 
 ### Add Avalara to tax task #7874
@@ -23,12 +44,14 @@
 3. Make sure you are immediately shown the manual set up flow with the "Configure" button
 
 **Partner actions**
+
 1. Visit the task tax with an Avalara supported country
 2. Click Avalara and check that a new tab opens with the WCCOM plugin page
 3. Back on the task tax, click on WooCommerce Tax
 4. Make sure you are dropped into the old configuration flow (which should be identical to the old flow)
 
 **Events**
+
 1. Enter `localStorage.setItem( 'debug', 'wc-admin:*' );` in your browser's console
 2. Set your store's country to an Avalara supported country
 3. Note the `wcadmin_tasklist_tax_view_options` event occurs
@@ -36,6 +59,7 @@
 5. Make sure that `wcadmin_tasklist_tax_select_option` is recorded with the respective `selected_option` partner key.
 
 **Completion**
+
 1. Create a fresh site without ever having set any taxes
 2. Note the task is incomplete
 3. Install the WC Avalara plugin
@@ -71,7 +95,6 @@ is visible at the bottom when `WooCommerce Payments` is not installed.
 
 ![screenshot-one wordpress test-2021 09 30-14_12_58](https://user-images.githubusercontent.com/1314156/135506696-b7812f7e-437f-4d89-956a-b73248f70f6b.png)
 
-
 13. Check `Subscriptions` and press `Continue` and verify that the `WooCommerce Payments` plugin is installed and activated and it's not shown in the `Free features` list
 
 ![screenshot-one wordpress test-2021 09 30-14_32_20](https://user-images.githubusercontent.com/1314156/135506727-d8888f2b-3424-4cf5-a4bf-b67a14a198b6.png)
@@ -93,15 +116,15 @@ is visible at the bottom when `WooCommerce Payments` is not installed.
 
 ### Add Newsletter Signup #7601
 
-- Start OBW and set up your browser console to monitor tracks. To do this, run `localStorage.setItem( 'debug', 'wc-admin:*' );`
-- Observe "Get tips, product updates and inspiration straight to your mailbox" checkbox and "Email address" field in the Store Details step.
-- Checking the checkbox should make the email field required, you should not be able to continue if it's not filled.
-- Fill in the email address field with a valid email and click on continue.
-- Observe in the track `wcadmin_storeprofiler_store_details_continue` with prop `email_signup` that appropriately flags if the user agreed to receive marketing emails.
-- Continue until Business Features step.
-- Observe the "I'm setting up a store for a client" checkbox in the step.
-- Click on continue.
-- Observe in the track `wcadmin_storeprofiler_store_business_details_continue_variant` with prop `setup_client` that appropriately flags if the user is setting up store for a client.
+-   Start OBW and set up your browser console to monitor tracks. To do this, run `localStorage.setItem( 'debug', 'wc-admin:*' );`
+-   Observe "Get tips, product updates and inspiration straight to your mailbox" checkbox and "Email address" field in the Store Details step.
+-   Checking the checkbox should make the email field required, you should not be able to continue if it's not filled.
+-   Fill in the email address field with a valid email and click on continue.
+-   Observe in the track `wcadmin_storeprofiler_store_details_continue` with prop `email_signup` that appropriately flags if the user agreed to receive marketing emails.
+-   Continue until Business Features step.
+-   Observe the "I'm setting up a store for a client" checkbox in the step.
+-   Click on continue.
+-   Observe in the track `wcadmin_storeprofiler_store_business_details_continue_variant` with prop `setup_client` that appropriately flags if the user is setting up store for a client.
 
 ### Making business details sticky in OBW #7426
 
@@ -113,20 +136,20 @@ is visible at the bottom when `WooCommerce Payments` is not installed.
 
 ### Show Pinterest for WooCommerce in `Marketing > Installed` #7417
 
-_Prerequisite_: This requires the forthcoming native [__Pinterest for WooCommerce__ extension](https://github.com/saucal/pinterest-for-woocommerce) (private repo – may not be available).
+_Prerequisite_: This requires the forthcoming native [**Pinterest for WooCommerce** extension](https://github.com/saucal/pinterest-for-woocommerce) (private repo – may not be available).
 
-If __Pinterest for WooCommerce__ is installed, marketing screen should show status info.
+If **Pinterest for WooCommerce** is installed, marketing screen should show status info.
 
-1. Install __Pinterest for WooCommerce__ extension. Don't activate it.
+1. Install **Pinterest for WooCommerce** extension. Don't activate it.
 1. Go to `WooCommerce > Marketing`.
 1. Confirm there is a row for Pinterest in `Installed marketing extensions` with `Activate` button.
 1. Activate the extension by clicking the button, or via normal `WordPress > Plugins` screen.
 1. Go to `WooCommerce > Marketing`.
 1. Confirm the Pinterest row guides merchant to set up the extension (if not yet set up) or links to settings and docs.
 
-Marketing screen should be unaffected if __Pinterest for WooCommerce__ is not installed.
+Marketing screen should be unaffected if **Pinterest for WooCommerce** is not installed.
 
-1. Ensure __Pinterest for WooCommerce__ is not installed.
+1. Ensure **Pinterest for WooCommerce** is not installed.
 1. Go to `WooCommerce > Marketing`.
 1. Should look and work the same as in previous versions.
 
