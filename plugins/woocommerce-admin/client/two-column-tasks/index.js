@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useEffect } from '@wordpress/element';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { useSelect } from '@wordpress/data';
 import { ONBOARDING_STORE_NAME, OPTIONS_STORE_NAME } from '@woocommerce/data';
 
 /**
@@ -30,7 +30,6 @@ const taskDashboardSelect = ( select ) => {
 };
 
 const TaskDashboard = ( { query, twoColumns } ) => {
-	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const {
 		keepCompletedTaskList,
 		isResolving: isResolvingOptions,
@@ -119,16 +118,6 @@ const TaskDashboard = ( { query, twoColumns } ) => {
 						'Get ready to start selling',
 						'woocommerce-admin'
 					) }
-					onComplete={ () =>
-						updateOptions( {
-							woocommerce_default_homepage_layout: 'two_columns',
-						} )
-					}
-					onHide={ () =>
-						updateOptions( {
-							woocommerce_default_homepage_layout: 'two_columns',
-						} )
-					}
 				/>
 			) }
 		</>

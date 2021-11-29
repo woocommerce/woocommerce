@@ -1,0 +1,4 @@
+Significance: patch
+Type: Fix
+
+Ensure homescreen defaults to single column layout. #7969

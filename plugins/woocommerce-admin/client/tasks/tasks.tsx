@@ -76,7 +76,6 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 		const taskListsFinished = false;
 		updateOptions( {
 			woocommerce_task_list_prompt_shown: true,
-			woocommerce_default_homepage_layout: 'two_columns',
 		} );
 	}, [ taskLists, isResolving ] );
 

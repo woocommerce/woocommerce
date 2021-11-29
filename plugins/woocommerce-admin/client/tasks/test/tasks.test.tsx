@@ -147,7 +147,6 @@ describe( 'Task', () => {
 		);
 		expect( updateOptions ).toHaveBeenCalledWith( {
 			woocommerce_task_list_prompt_shown: true,
-			woocommerce_default_homepage_layout: 'two_columns',
 		} );
 	} );
 

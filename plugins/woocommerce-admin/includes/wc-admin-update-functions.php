@@ -311,6 +311,13 @@ function wc_admin_update_290_update_apperance_task_option() {
 }
 
 /**
+ * Delete the old woocommerce_default_homepage_layout option.
+ */
+function wc_admin_update_290_delete_default_homepage_layout_option() {
+	delete_option( 'woocommerce_default_homepage_layout' );
+}
+
+/**
  * Update DB Version.
  */
 function wc_admin_update_290_db_version() {

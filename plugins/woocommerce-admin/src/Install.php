@@ -71,6 +71,7 @@ class Install {
 		),
 		'2.9.0'  => array(
 			'wc_admin_update_290_update_apperance_task_option',
+			'wc_admin_update_290_delete_default_homepage_layout_option',
 			'wc_admin_update_290_db_version',
 		),
 		'3.0.0'  => array(
