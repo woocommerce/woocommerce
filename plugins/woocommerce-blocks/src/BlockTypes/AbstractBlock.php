@@ -81,7 +81,7 @@ abstract class AbstractBlock {
 	 */
 	public function render_callback( $attributes = [], $content = '' ) {
 		$render_callback_attributes = $this->parse_render_callback_attributes( $attributes );
-		if ( ! is_admin() ) {
+		if ( ! is_admin() && ! WC()->is_rest_api_request() ) {
 			$this->enqueue_assets( $render_callback_attributes );
 		}
 		return $this->render( $render_callback_attributes, $content );
