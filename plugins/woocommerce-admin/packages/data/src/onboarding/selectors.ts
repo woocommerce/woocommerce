@@ -130,6 +130,7 @@ export type ProfileItemsState = {
 	business_extensions: [  ] | null;
 	completed: boolean | null;
 	industry: Industry[] | null;
+	number_employees: string | null;
 	other_platform: OtherPlatformSlug | null;
 	other_platform_name: string | null;
 	product_count: ProductCount | null;

@@ -10,6 +10,7 @@ export const defaultState = {
 		business_extensions: null,
 		completed: null,
 		industry: null,
+		number_employees: null,
 		other_platform: null,
 		other_platform_name: null,
 		product_count: null,

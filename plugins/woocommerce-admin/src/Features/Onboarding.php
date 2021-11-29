@@ -262,6 +262,7 @@ class Onboarding {
 			'product_types'       => array(),
 			'product_count'       => '0',
 			'selling_venues'      => 'no',
+			'number_employees'    => '1',
 			'revenue'             => 'none',
 			'other_platform'      => 'none',
 			'business_extensions' => array(),

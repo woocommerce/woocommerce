@@ -29,6 +29,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import { CurrencyContext } from '~/lib/currency-context';
 import { createNoticesFromResponse } from '~/lib/notices';
 import { platformOptions } from '../../data/platform-options';
+import { employeeOptions } from '../../data/employee-options';
 import { sellingVenueOptions } from '../../data/selling-venue-options';
 import { getRevenueOptions } from '../../data/revenue-options';
 import { getProductCountOptions } from '../../data/product-options';
@@ -154,6 +155,7 @@ class BusinessDetails extends Component {
 		const { updateProfileItems, createNotice } = this.props;
 
 		const {
+			number_employees: numberEmployees,
 			other_platform: otherPlatform,
 			other_platform_name: otherPlatformName,
 			product_count: productCount,
@@ -163,6 +165,7 @@ class BusinessDetails extends Component {
 		} = this.state.savedValues;
 
 		const updates = {
+			number_employees: numberEmployees,
 			other_platform: otherPlatform,
 			other_platform_name:
 				otherPlatform === 'other' ? otherPlatformName : '',
@@ -177,10 +180,7 @@ class BusinessDetails extends Component {
 		const finalUpdates = Object.entries( updates ).reduce(
 			( acc, [ key, val ] ) => {
 				if ( val !== '' ) {
-					return {
-						...acc,
-						[ key ]: val,
-					};
+					acc[ key ] = val;
 				}
 
 				return acc;
@@ -238,6 +238,21 @@ class BusinessDetails extends Component {
 		}
 
 		if (
+			! values.number_employees.length &&
+			[
+				'other',
+				'brick-mortar',
+				'brick-mortar-other',
+				'other-woocommerce',
+			].includes( values.selling_venues )
+		) {
+			errors.number_employees = __(
+				'This field is required',
+				'woocommerce-admin'
+			);
+		}
+
+		if (
 			! values.revenue.length &&
 			[
 				'other',
@@ -260,6 +275,7 @@ class BusinessDetails extends Component {
 	}
 
 	trackBusinessDetailsStep( {
+		number_employees: numberEmployees,
 		other_platform: otherPlatform,
 		other_platform_name: otherPlatformName,
 		product_count: productCount,
@@ -270,6 +286,7 @@ class BusinessDetails extends Component {
 		const { getCurrencyConfig } = this.context;
 
 		recordEvent( 'storeprofiler_store_business_details_continue_variant', {
+			number_employees: numberEmployees,
 			already_selling: sellingVenues,
 			currency: getCurrencyConfig().code,
 			product_number: productCount,
@@ -356,6 +373,26 @@ class BusinessDetails extends Component {
 										required
 										{ ...getInputProps( 'selling_venues' ) }
 									/>
+
+									{ [
+										'other',
+										'brick-mortar',
+										'brick-mortar-other',
+										'other-woocommerce',
+									].includes( values.selling_venues ) && (
+										<SelectControl
+											excludeSelectedOptions={ false }
+											label={ __(
+												'How many employees do you have?',
+												'woocommerce-admin'
+											) }
+											options={ employeeOptions }
+											required
+											{ ...getInputProps(
+												'number_employees'
+											) }
+										/>
+									) }
 
 									{ [
 										'other',

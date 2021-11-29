@@ -34,6 +34,7 @@ export const BusinessDetailsStep = ( props ) => {
 	}
 
 	const initialValues = {
+		number_employees: profileItems.number_employees || '',
 		other_platform: profileItems.other_platform || '',
 		other_platform_name: profileItems.other_platform_name || '',
 		product_count: profileItems.product_count || '',

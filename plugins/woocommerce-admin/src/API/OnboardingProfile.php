@@ -323,6 +323,21 @@ class OnboardingProfile extends \WC_REST_Data_Controller {
 					'other-woocommerce',
 				),
 			),
+			'number_employees'    => array(
+				'type'              => 'string',
+				'description'       => __( 'Number of employees of the store.', 'woocommerce-admin' ),
+				'context'           => array( 'view' ),
+				'readonly'          => true,
+				'validate_callback' => 'rest_validate_request_arg',
+				'enum'              => array(
+					'1',
+					'<10',
+					'10-50',
+					'50-250',
+					'+250',
+					'not specified',
+				),
+			),
 			'revenue'             => array(
 				'type'              => 'string',
 				'description'       => __( 'Current annual revenue of the store.', 'woocommerce-admin' ),
