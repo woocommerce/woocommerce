@@ -47,7 +47,7 @@
       "executor": "@nrwl/workspace:run-commands",
       "options": {
         "command": "grunt watch",
-        "cwd": "plugins/woocommerce"
+        "cwd": "plugins/woocommerce/legacy"
       }
     },
     "build-assets": {
