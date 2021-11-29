@@ -33,6 +33,18 @@ SCRIPTPATH=$(dirname "$0")
 REALPATH=$(readlink "$0")
 cd "$SCRIPTPATH/$(dirname "$REALPATH")/.."
 
+# Set a flag to distinguish between the development repo and npm package
+DEV_PATH=$(echo $0 | rev | cut -f4 -d/ | rev)
+if [ "$DEV_PATH" != "node_modules" ]; then
+	export WC_E2E_WOOCOMMERCE_DEV='true'
+	export WC_E2E_FOLDER='plugins/woocommerce'
+else
+	export WC_E2E_WOOCOMMERCE_DEV=''
+	if [ -z $WC_E2E_FOLDER ]; then
+		export WC_E2E_FOLDER=''
+	fi
+fi
+
 # Run scripts
 case $1 in
 	'docker:up')

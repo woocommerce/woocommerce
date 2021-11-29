@@ -1,7 +1,6 @@
 /**
  * External Dependencies
  */
-const { jestConfig } = require( '@automattic/puppeteer-utils' );
 const { WC_E2E_SCREENSHOTS } = process.env;
 const path = require( 'path' );
 const fs = require( 'fs' );
@@ -9,7 +8,7 @@ const fs = require( 'fs' );
 /**
  * Internal Dependencies
  */
-const { getAppRoot } = require( '../utils' );
+const { resolveLocalE2ePath } = require( '../utils' );
 
 const failureSetup = [];
 if ( WC_E2E_SCREENSHOTS ) {
@@ -23,19 +22,24 @@ const setupFilesAfterEnv = [
 	'expect-puppeteer',
 ];
 
-const appPath = getAppRoot();
-const localJestSetupFile = path.resolve(
-	appPath,
-	'plugins/woocommerce/tests/e2e/config/jest.setup.js'
-);
+const localJestSetupFile = resolveLocalE2ePath( 'config/jest.setup.js' );
+const moduleNameMap = resolveLocalE2ePath( '$1' );
+const testSpecs = resolveLocalE2ePath( 'specs' );
+
 if ( fs.existsSync( localJestSetupFile ) ) {
 	setupFilesAfterEnv.push( localJestSetupFile );
 }
 
 const combinedConfig = {
-	...jestConfig,
+	preset: 'jest-puppeteer',
+	clearMocks: true,
+	moduleFileExtensions: [ 'js' ],
+	testMatch: [
+		'**/*.(test|spec).js',
+		'*.(test|spec).js'
+	],
 	moduleNameMapper: {
-		'@woocommerce/e2e/tests/(.*)': appPath + 'tests/e2e/$1',
+		'@woocommerce/e2e/tests/(.*)': moduleNameMap,
 	},
 
 	setupFiles: [ '<rootDir>/config/env.setup.js' ],
@@ -49,10 +53,9 @@ const combinedConfig = {
 	testTimeout: parseInt( global.process.env.jest_test_timeout ),
 
 	transformIgnorePatterns: [
-		...jestConfig.transformIgnorePatterns,
 		'node_modules/(?!(woocommerce)/)',
 	],
-	roots: [ appPath + 'tests/e2e/specs' ],
+	roots: [ testSpecs ],
 };
 
 if ( process.env.jest_test_spec ) {
