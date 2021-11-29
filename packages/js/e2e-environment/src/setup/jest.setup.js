@@ -38,7 +38,10 @@ const OBSERVED_CONSOLE_MESSAGE_TYPES = {
 
 async function setupBrowser() {
 	await clearLocalStorage();
-	await setBrowserViewport( 'large' );
+	await setBrowserViewport( {
+		width: 1280,
+		height: 800,
+	});
 }
 
 /**
