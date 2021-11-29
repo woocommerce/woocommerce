@@ -33,6 +33,9 @@ tests/cli/vendor
 # Logs
 /logs
 
+# TypeScript files
+tsconfig.tsbuildinfo
+
 # Composer
 /vendor/
 /bin/composer/**/vendor/
