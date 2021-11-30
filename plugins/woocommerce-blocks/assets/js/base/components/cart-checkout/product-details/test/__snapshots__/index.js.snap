@@ -66,6 +66,7 @@ exports[`ProductDetails should render details 1`] = `
   <li
     className=""
   >
+    
     <span
       className="wc-block-components-product-details__value"
     >
