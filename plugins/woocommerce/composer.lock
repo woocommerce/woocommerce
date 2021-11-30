@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "219818e4fbca0e835d457b9907638706",
+    "content-hash": "4b8c4b760c219fe134defaabaadf7b96",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -613,16 +613,16 @@
         },
         {
             "name": "woocommerce/woocommerce-blocks",
-            "version": "v6.3.2",
+            "version": "v6.3.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-gutenberg-products-block.git",
-                "reference": "5b3aea9adb718a1f78525881e4f0c33c72ba175d"
+                "reference": "38975ad6de9c6a556059c4de6e9ffc586ab82245"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/5b3aea9adb718a1f78525881e4f0c33c72ba175d",
-                "reference": "5b3aea9adb718a1f78525881e4f0c33c72ba175d",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/38975ad6de9c6a556059c4de6e9ffc586ab82245",
+                "reference": "38975ad6de9c6a556059c4de6e9ffc586ab82245",
                 "shasum": ""
             },
             "require": {
@@ -661,9 +661,9 @@
             ],
             "support": {
                 "issues": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues",
-                "source": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/v6.3.2"
+                "source": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/v6.3.3"
             },
-            "time": "2021-11-18T03:27:03+00:00"
+            "time": "2021-11-25T09:47:27+00:00"
         }
     ],
     "packages-dev": [
