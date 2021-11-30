@@ -75,33 +75,38 @@
       }
     },
     "test-api": {
-      "executor": "@nrwl/workspace:run-script",
+      "executor": "@nrwl/workspace:run-commands",
       "options": {
-        "script": "test:api"
+        "command": "pnpx wc-api-tests test api",
+        "cwd": "plugins/woocommerce"
       }
     },
     "test-e2e": {
-      "executor": "@nrwl/workspace:run-script",
+      "executor": "@nrwl/workspace:run-commands",
       "options": {
-        "script": "test:e2e"
+        "command": "pnpx wc-e2e test:e2e",
+        "cwd": "plugins/woocommerce"
       }
     },
     "test-e2e-debug": {
-      "executor": "@nrwl/workspace:run-script",
+      "executor": "@nrwl/workspace:run-commands",
       "options": {
-        "script": "test:e2e-debug"
+        "command": "pnpx wc-e2e test:e2e-debug",
+        "cwd": "plugins/woocommerce"
       }
     },
     "test-e2e-dev": {
-      "executor": "@nrwl/workspace:run-script",
+      "executor": "@nrwl/workspace:run-commands",
       "options": {
-        "script": "test:e2e-dev"
+        "command": "pnpx wc-e2e test:e2e-dev",
+        "cwd": "plugins/woocommerce"
       }
     },
     "test-unit": {
-      "executor": "@nrwl/workspace:run-script",
+      "executor": "@nrwl/workspace:run-commands",
       "options": {
-        "script": "test:unit"
+        "command": "./vendor/bin/phpunit -c ./phpunit.xml",
+        "cwd": "plugins/woocommerce"
       }
     },
     "packages-fix-text-domain": {

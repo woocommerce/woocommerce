@@ -13,12 +13,7 @@
   },
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "test:api": "pnpx wc-api-tests test api",
     "make:collection": "pnpx wc-api-tests make:collection",
-    "test:e2e": "pnpx wc-e2e test:e2e",
-    "test:e2e-debug": "pnpx wc-e2e test:e2e-debug",
-    "test:e2e-dev": "pnpx wc-e2e test:e2e-dev",
-    "test:unit": "./vendor/bin/phpunit -c ./phpunit.xml",
     "packages:fix:textdomain": "node ./bin/package-update-textdomain.js",
     "git:update-hooks": "rm -r .git/hooks && mkdir -p .git/hooks && node ./node_modules/husky/husky.js install"
   },
