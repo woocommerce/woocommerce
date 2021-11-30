@@ -29,7 +29,7 @@
       "executor": "@nrwl/workspace:run-commands",
       "options": {
         "command": "./bin/build-zip.sh",
-		"cwd": "plugins/woocommerce"
+        "cwd": "plugins/woocommerce"
       }
     },
     "build-watch": {
@@ -50,25 +50,28 @@
       "executor": "@nrwl/workspace:run-commands",
       "options": {
         "command": "eslint legacy/js --ext=js",
-		"cwd": "plugins/woocommerce"
+        "cwd": "plugins/woocommerce"
       }
     },
     "docker-up": {
-      "executor": "@nrwl/workspace:run-script",
+      "executor": "@nrwl/workspace:run-commands",
       "options": {
-        "script": "docker:up"
+        "command": "pnpx wc-e2e docker:up",
+        "cwd": "plugins/woocommerce"
       }
     },
     "docker-down": {
-      "executor": "@nrwl/workspace:run-script",
+      "executor": "@nrwl/workspace:run-commands",
       "options": {
-        "script": "docker:down"
+        "command": "pnpx wc-e2e docker:down",
+        "cwd": "plugins/woocommerce"
       }
     },
     "docker-ssh": {
-      "executor": "@nrwl/workspace:run-script",
+      "executor": "@nrwl/workspace:run-commands",
       "options": {
-        "script": "docker:ssh"
+        "command": "pnpx wc-e2e docker:ssh",
+        "cwd": "plugins/woocommerce"
       }
     },
     "test-api": {
