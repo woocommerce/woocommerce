@@ -23,8 +23,12 @@ rsync ./ "$2"/ --recursive --delete --delete-excluded \
 	--exclude=blocks.ini \
 	--exclude=docker-compose.yml \
 	--exclude=tsconfig.json \
+	--exclude=tsconfig.base.json \
 	--exclude=woocommerce-gutenberg-products-block.zip \
 	--exclude="zip-file/" \
-	--exclude=globals.d.ts \
+	--exclude=global.d.ts \
+	--exclude=packages/ \
+    --exclude=patches/ \
+    --exclude=reports/ \
 	--exclude=storybook/
 echo -e "\nDone copying files!\n"
