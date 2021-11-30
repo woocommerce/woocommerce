@@ -194,7 +194,24 @@ const InboxNoteCard: React.FC< InboxNoteProps > = ( {
 							</span>
 						) }
 						<H className="woocommerce-inbox-message__title">
-							{ title }
+							{ note.actions && note.actions.length === 1 && (
+								<InboxNoteActionButton
+									key={ note.actions[ 0 ].id }
+									label={ title }
+									preventBusyState={ true }
+									href={
+										note.actions[ 0 ].url &&
+										note.actions[ 0 ].url.length
+											? note.actions[ 0 ].url
+											: undefined
+									}
+									onClick={ () =>
+										onActionClicked( note.actions[ 0 ] )
+									}
+								/>
+							) }
+
+							{ note.actions && note.actions.length > 1 && title }
 						</H>
 						<Section className="woocommerce-inbox-message__text">
 							<span

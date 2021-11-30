@@ -1,4 +1,5 @@
 # Unreleased
+-	Make the Inbox note title clickable. #7975
 
 # 2.1.0
 

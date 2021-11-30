@@ -24,7 +24,6 @@
 	}
 	&:hover {
 		background: $gray-100;
-		cursor: pointer;
 		.woocommerce-inbox-message__actions button.woocommerce-admin-dismiss-notification {
 			visibility: visible;
 		}
@@ -33,6 +32,9 @@
 	&:not(.message-is-unread) {
 		h3 {
 			font-weight: normal;
+			a {
+				font-weight: normal;
+			}
 		}
 		.woocommerce-inbox-message__actions a {
 			color: $gray-900;
@@ -80,6 +82,14 @@
 				margin: 5px 0;
 			}
 			margin-bottom: 10px;
+		}
+	}
+
+	h3 {
+		a {
+			@extend .woocommerce-inbox-message__title;
+			color: $gray-900 !important;
+			text-decoration: none !important;
 		}
 	}
 

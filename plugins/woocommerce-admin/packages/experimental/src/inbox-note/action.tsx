@@ -8,6 +8,7 @@ type InboxNoteActionProps = {
 	onClick: () => void;
 	label: string;
 	href?: string;
+	preventBusyState?: boolean;
 };
 
 /**
@@ -18,6 +19,7 @@ export const InboxNoteActionButton: React.FC< InboxNoteActionProps > = ( {
 	label,
 	onClick,
 	href,
+	preventBusyState,
 } ) => {
 	const [ inAction, setInAction ] = useState( false );
 
@@ -39,6 +41,10 @@ export const InboxNoteActionButton: React.FC< InboxNoteActionProps > = ( {
 			event.preventDefault();
 			isActionable = false; // link buttons shouldn't be "busy".
 			window.open( targetHref, '_blank' );
+		}
+
+		if ( preventBusyState ) {
+			isActionable = false;
 		}
 
 		setInAction( isActionable );
