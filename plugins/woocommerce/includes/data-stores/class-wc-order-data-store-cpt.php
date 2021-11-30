@@ -364,7 +364,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 				AND order_itemmeta.meta_key IN ('tax_amount', 'shipping_tax_amount')",
 				$order->get_id()
 			)
-		);
+		) ?? 0;
 
 		return abs( $total );
 	}
@@ -388,7 +388,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 				AND order_itemmeta.meta_key IN ('cost')",
 				$order->get_id()
 			)
-		);
+		) ?? 0;
 
 		return abs( $total );
 	}

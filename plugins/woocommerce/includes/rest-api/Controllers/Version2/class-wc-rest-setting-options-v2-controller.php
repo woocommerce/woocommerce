@@ -316,7 +316,7 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 		if ( is_array( $setting['option_key'] ) ) {
 			$setting['value']       = $value;
 			$option_key             = $setting['option_key'];
-			$prev                   = get_option( $option_key[0] );
+			$prev                   = get_option( $option_key[0], null ) ?? array();
 			$prev[ $option_key[1] ] = $request['value'];
 			update_option( $option_key[0], $prev );
 		} else {

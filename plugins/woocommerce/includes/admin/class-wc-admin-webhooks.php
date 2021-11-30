@@ -73,7 +73,7 @@ class WC_Admin_Webhooks {
 				/* translators: %s: date */
 				__( 'Webhook created on %s', 'woocommerce' ),
 				// @codingStandardsIgnoreStart
-				strftime( _x( '%b %d, %Y @ %I:%M %p', 'Webhook created on date parsed by strftime', 'woocommerce' ) )
+				(new DateTime('now'))->format( _x( 'M d, Y @ h:i A', 'Webhook created on date parsed by DateTime::format', 'woocommerce' ) )
 				// @codingStandardsIgnoreEnd
 			);
 		}

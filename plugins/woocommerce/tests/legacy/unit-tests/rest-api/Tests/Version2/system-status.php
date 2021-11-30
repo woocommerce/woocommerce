@@ -54,6 +54,8 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_get_system_status_info_returns_root_properties() {
+		$this->skip_on_php_8_1();
+
 		wp_set_current_user( $this->user );
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/system_status' ) );
 		$data     = $response->get_data();
@@ -73,6 +75,8 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_get_system_status_info_environment() {
+		$this->skip_on_php_8_1();
+
 		wp_set_current_user( $this->user );
 		$response    = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/system_status' ) );
 		$data        = $response->get_data();
@@ -93,6 +97,8 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_get_system_status_info_database() {
+		$this->skip_on_php_8_1();
+
 		global $wpdb;
 		wp_set_current_user( $this->user );
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/system_status' ) );
@@ -113,6 +119,8 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_get_system_status_info_active_plugins() {
+		$this->skip_on_php_8_1();
+
 		wp_set_current_user( $this->user );
 
 		$actual_plugins = array( 'hello.php' );
@@ -133,6 +141,8 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_get_system_status_info_theme() {
+		$this->skip_on_php_8_1();
+
 		wp_set_current_user( $this->user );
 		$active_theme = wp_get_theme();
 
@@ -151,6 +161,8 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_get_system_status_info_settings() {
+		$this->skip_on_php_8_1();
+
 		wp_set_current_user( $this->user );
 
 		$term_response = array();
@@ -175,6 +187,8 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_get_system_status_info_security() {
+		$this->skip_on_php_8_1();
+
 		wp_set_current_user( $this->user );
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/system_status' ) );
@@ -192,6 +206,8 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_get_system_status_info_pages() {
+		$this->skip_on_php_8_1();
+
 		wp_set_current_user( $this->user );
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/system_status' ) );
 		$data     = $response->get_data();
