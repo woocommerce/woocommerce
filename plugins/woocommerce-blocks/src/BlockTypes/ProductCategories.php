@@ -1,10 +1,13 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
+
 /**
  * ProductCategories class.
  */
 class ProductCategories extends AbstractDynamicBlock {
+
 
 	/**
 	 * Block name.
@@ -42,6 +45,10 @@ class ProductCategories extends AbstractDynamicBlock {
 				'hasEmpty'       => $this->get_schema_boolean( false ),
 				'isDropdown'     => $this->get_schema_boolean( false ),
 				'isHierarchical' => $this->get_schema_boolean( true ),
+				'textColor'      => $this->get_schema_string(),
+				'fontSize'       => $this->get_schema_string(),
+				'lineHeight'     => $this->get_schema_string(),
+				'style'          => array( 'type' => 'object' ),
 			)
 		);
 	}
@@ -77,9 +84,15 @@ class ProductCategories extends AbstractDynamicBlock {
 			}
 		}
 
-		$classes = $this->get_container_classes( $attributes );
+		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes(
+			$attributes,
+			array( 'line_height', 'text_color', 'font_size' )
+		);
 
-		$output  = '<div class="' . esc_attr( $classes ) . '">';
+		$classes = $this->get_container_classes( $attributes ) . ' ' . $classes_and_styles['classes'];
+		$styles  = $classes_and_styles['styles'];
+
+		$output  = '<div class="wp-block-woocommerce-product-categories ' . esc_attr( $classes ) . '" style="' . esc_attr( $styles ) . '">';
 		$output .= ! empty( $attributes['isDropdown'] ) ? $this->renderDropdown( $categories, $attributes, $uid ) : $this->renderList( $categories, $attributes, $uid );
 		$output .= '</div>';
 
@@ -93,6 +106,7 @@ class ProductCategories extends AbstractDynamicBlock {
 	 * @return string space-separated list of classes.
 	 */
 	protected function get_container_classes( $attributes = array() ) {
+
 		$classes = array( 'wc-block-product-categories' );
 
 		if ( isset( $attributes['align'] ) ) {
@@ -301,11 +315,15 @@ class ProductCategories extends AbstractDynamicBlock {
 	protected function renderListItems( $categories, $attributes, $uid, $depth = 0 ) {
 		$output = '';
 
+		$link_color_class_and_style = StyleAttributesUtils::get_link_color_class_and_style( $attributes );
+
+		$link_color_style = isset( $link_color_class_and_style['style'] ) ? $link_color_class_and_style['style'] : '';
+
 		foreach ( $categories as $category ) {
 			$output .= '
 				<li class="wc-block-product-categories-list-item">
-					<a href="' . esc_attr( get_term_link( $category->term_id, 'product_cat' ) ) . '">' . $this->get_image_html( $category, $attributes ) . esc_html( $category->name ) . '</a>
-					' . $this->getCount( $category, $attributes ) . '
+					<a style="' . esc_attr( $link_color_style ) . '" href="' . esc_attr( get_term_link( $category->term_id, 'product_cat' ) ) . '">' . $this->get_image_html( $category, $attributes ) . esc_html( $category->name ) . '</a>
+				' . $this->getCount( $category, $attributes ) . '
 					' . ( ! empty( $category->children ) ? $this->renderList( $category->children, $attributes, $uid, $depth + 1 ) : '' ) . '
 				</li>
 			';

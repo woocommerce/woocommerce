@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { InspectorControls } from '@wordpress/block-editor';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import ServerSideRender from '@wordpress/server-side-render';
 import PropTypes from 'prop-types';
 import {
@@ -183,8 +183,12 @@ const ProductCategoriesBlock = ( { attributes, setAttributes, name } ) => {
 		);
 	};
 
+	const blockProps = useBlockProps( {
+		className: 'wc-block-product-categories',
+	} );
+
 	return (
-		<>
+		<div { ...blockProps }>
 			{ getInspectorControls() }
 			<Disabled>
 				<ServerSideRender
@@ -193,7 +197,7 @@ const ProductCategoriesBlock = ( { attributes, setAttributes, name } ) => {
 					EmptyResponsePlaceholder={ EmptyPlaceholder }
 				/>
 			</Disabled>
-		</>
+		</div>
 	);
 };
 
