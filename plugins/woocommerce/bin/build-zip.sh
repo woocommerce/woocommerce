@@ -12,8 +12,10 @@ mkdir -p "$DEST_PATH"
 echo "Installing PHP and JS dependencies..."
 pnpm install
 composer install || exit "$?"
-echo "Running JS Build..."
-pnpm run build:core || exit "$?"
+echo "Running JS and CSS Build..."
+pnpm nx build woocommerce-legacy-assets || exit "$?"
+echo "Making POT file..."
+composer run-script makepot || exit "$?"
 echo "Cleaning up PHP dependencies..."
 composer install --no-dev || exit "$?"
 

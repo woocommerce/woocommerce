@@ -26,21 +26,10 @@
       }
     },
     "build": {
-      "executor": "@nrwl/workspace:run-script",
+      "executor": "@nrwl/workspace:run-commands",
       "options": {
-        "script": "build"
-      }
-    },
-    "build-core": {
-      "executor": "@nrwl/workspace:run-script",
-      "options": {
-        "script": "build:core"
-      }
-    },
-    "build-zip": {
-      "executor": "@nrwl/workspace:run-script",
-      "options": {
-        "script": "build:zip"
+        "command": "./bin/build-zip.sh",
+		"cwd": "plugins/woocommerce"
       }
     },
     "build-watch": {
@@ -109,12 +98,6 @@
       "executor": "@nrwl/workspace:run-script",
       "options": {
         "script": "test:unit"
-      }
-    },
-    "makepot": {
-      "executor": "@nrwl/workspace:run-script",
-      "options": {
-        "script": "makepot"
       }
     },
     "packages-fix-text-domain": {
