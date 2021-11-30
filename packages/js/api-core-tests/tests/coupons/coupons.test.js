@@ -312,6 +312,18 @@ describe( 'Coupons API tests', () => {
 			expect( status ).toEqual( ordersApi.create.responseCode );
 			expect( body.coupon_lines ).toHaveLength( 1 );
 			expect( body.coupon_lines[ 0 ].code ).toEqual( testCoupon.code );
+			// Test that the coupon meta data exists.
+			// See: https://github.com/woocommerce/woocommerce/issues/28166.
+			expect( body.coupon_lines[ 0 ].meta_data ).toEqual(
+				expect.arrayContaining( [
+					expect.objectContaining( {
+						key: 'coupon_data',
+						value: expect.objectContaining( {
+							code: testCoupon.code,
+						} ),
+					} ),
+				] )
+			);
 		} );
 	} );
 } );
