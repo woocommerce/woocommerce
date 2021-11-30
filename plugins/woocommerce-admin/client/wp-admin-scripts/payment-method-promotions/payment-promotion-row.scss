@@ -28,10 +28,10 @@
 		}
 	}
 
-	.wc-payment-gateway-method_name {
+	.wc-payment-gateway-method__name {
 		display: flex;
 
-		.pre-install-payment-gateway_subtitle {
+		.pre-install-payment-gateway__subtitle {
 			margin-left: $gap;
 			> img {
 				height: 24px;
@@ -39,5 +39,17 @@
 				margin-left: 4px;
 			}
 		}
+	}
+
+	.pre-install-payment-gateway__actions {
+		display: flex;
+	}
+
+	.pre-install-payment-gateway__actions-menu {
+		margin-right: $gap-large;
+	}
+
+	.pre-install-payment-gateway__actions-menu-options {
+		text-align: center;
 	}
 }

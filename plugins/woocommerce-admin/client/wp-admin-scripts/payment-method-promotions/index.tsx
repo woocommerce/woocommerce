@@ -12,7 +12,7 @@ const PAYMENT_METHOD_PROMOTIONS = [
 	{
 		gatewayId: 'pre_install_woocommerce_payments_promotion',
 		pluginSlug: 'woocommerce-payments',
-		link: 'https://woocommerce.com/payments/?utm_medium=product',
+		url: 'https://woocommerce.com/payments/?utm_medium=product',
 	},
 ];
 
@@ -37,9 +37,8 @@ PAYMENT_METHOD_PROMOTIONS.forEach( ( paymentMethod ) => {
 		render(
 			<PaymentPromotionRow
 				columns={ columns }
-				pluginSlug={ paymentMethod.pluginSlug }
+				paymentMethod={ paymentMethod }
 				title={ title.length === 1 ? title[ 0 ].innerHTML : undefined }
-				titleLink={ paymentMethod.link }
 				subTitleContent={
 					subTitle.length === 1 ? subTitle[ 0 ].innerHTML : undefined
 				}
