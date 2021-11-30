@@ -13,7 +13,6 @@
   },
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "lint:js": "eslint assets/js --ext=js",
     "docker:down": "pnpx wc-e2e docker:down",
     "docker:ssh": "pnpx wc-e2e docker:ssh",
     "docker:up": "pnpx wc-e2e docker:up",

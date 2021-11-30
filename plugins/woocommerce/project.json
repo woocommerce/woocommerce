@@ -47,9 +47,10 @@
       }
     },
     "lint-js": {
-      "executor": "@nrwl/workspace:run-script",
+      "executor": "@nrwl/workspace:run-commands",
       "options": {
-        "script": "lint:js"
+        "command": "eslint legacy/js --ext=js",
+		"cwd": "plugins/woocommerce"
       }
     },
     "docker-up": {
