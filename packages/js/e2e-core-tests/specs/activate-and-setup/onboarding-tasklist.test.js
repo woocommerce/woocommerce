@@ -13,7 +13,7 @@ const {
  * External dependencies
  */
 const config = require( 'config' );
-const deprecated = require( '@wordpress/deprecated' );
+import deprecated from '@wordpress/deprecated';
 const {
 	it,
 	describe,
