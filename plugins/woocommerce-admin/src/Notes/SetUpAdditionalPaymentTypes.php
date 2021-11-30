@@ -10,6 +10,8 @@ namespace Automattic\WooCommerce\Admin\Notes;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\WooCommercePayments;
+
 /**
  * Set_Up_Additional_Payment_Types
  */
@@ -71,6 +73,14 @@ class SetUpAdditionalPaymentTypes {
 	 */
 	public static function on_deactivate_wcpay() {
 		self::possibly_delete_note();
+	}
+
+	/**
+	 * Check if this note should exist.
+	 */
+	public static function is_applicable() {
+		$woocommerce_payments = new WooCommercePayments();
+		return ! $woocommerce_payments->can_view();
 	}
 
 	/**

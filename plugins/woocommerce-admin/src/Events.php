@@ -52,6 +52,7 @@ use \Automattic\WooCommerce\Admin\Notes\NavigationNudge;
 use Automattic\WooCommerce\Admin\Schedulers\MailchimpScheduler;
 use \Automattic\WooCommerce\Admin\Notes\CompleteStoreDetails;
 use \Automattic\WooCommerce\Admin\Notes\UpdateStoreDetails;
+use \Automattic\WooCommerce\Admin\Notes\SetUpAdditionalPaymentTypes;
 
 /**
  * Events Class.
@@ -164,6 +165,7 @@ class Events {
 		NavigationNudge::delete_if_not_applicable();
 		NavigationFeedback::delete_if_not_applicable();
 		NavigationFeedbackFollowUp::delete_if_not_applicable();
+		SetUpAdditionalPaymentTypes::delete_if_not_applicable();
 	}
 
 	/**

@@ -25,7 +25,8 @@ class Payments extends Task {
 	 * @return string
 	 */
 	public function get_parent_id() {
-		return 'setup';
+		$woocommerce_payments = new WooCommercePayments();
+		return $woocommerce_payments->can_view() ? 'extended' : 'setup';
 	}
 
 	/**
@@ -34,7 +35,10 @@ class Payments extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Set up payments', 'woocommerce-admin' );
+		$woocommerce_payments = new WooCommercePayments();
+		return $woocommerce_payments->can_view()
+			? __( 'Set up additional payment providers', 'woocommerce-admin' )
+			: __( 'Set up payments', 'woocommerce-admin' );
 	}
 
 	/**
@@ -73,13 +77,7 @@ class Payments extends Task {
 	 * @return bool
 	 */
 	public function can_view() {
-		return Features::is_enabled( 'payment-gateway-suggestions' ) &&
-		(
-			! WooCommercePayments::is_requested() ||
-			! WooCommercePayments::is_installed() ||
-			! WooCommercePayments::is_supported() ||
-			WooCommercePayments::is_connected()
-		);
+		return Features::is_enabled( 'payment-gateway-suggestions' );
 	}
 
 	/**
@@ -92,7 +90,7 @@ class Payments extends Task {
 		$enabled_gateways = array_filter(
 			$gateways,
 			function( $gateway ) {
-				return 'yes' === $gateway->enabled;
+				return 'yes' === $gateway->enabled && 'woocommerce_payments' !== $gateway->id;
 			}
 		);
 
