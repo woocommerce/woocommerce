@@ -45,6 +45,11 @@ const runAddSimpleProductTest = () => {
 		});
 
 		it('can create simple virtual product and add it to the cart', async () => {
+			await page.setViewport( {
+				width: 960,
+				height: 700,
+			} );
+
 			await openNewProductAndVerify();
 
 			// Set product data and publish the product
@@ -72,6 +77,11 @@ const runAddSimpleProductTest = () => {
 		});
 
 		it('can create simple non-virtual product and add it to the cart', async () => {
+			await page.setViewport( {
+				width: 960,
+				height: 700,
+			} );
+
 			await merchant.login();
 			await openNewProductAndVerify();
 
@@ -108,6 +118,11 @@ const runAddVariableProductTest = () => {
 	describe('Add New Variable Product Page', () => {
 		beforeAll(async () => {
 			await merchant.login();
+
+			await page.setViewport( {
+				width: 960,
+				height: 700,
+			} );
 		});
 
 		it('can create product with variations', async () => {
