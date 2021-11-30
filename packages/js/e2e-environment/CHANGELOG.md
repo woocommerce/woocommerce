@@ -1,5 +1,8 @@
 # Unreleased
 
+## Try
+- Testing E2E Test Suite
+
 ## Added
 
 - Added quotes around `WORDPRESS_TITLE` value in .env file to address issue with docker compose 2 "key cannot contain a space" error.
