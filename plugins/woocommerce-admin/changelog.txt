@@ -1,10 +1,14 @@
-== 2.9.0 11/08/2021 ==
+== 2.9.0 11/30/2021 ==
 
 - Fix: Do not clear `current` class from the entire page when updating wp-admin's menu. #7773
 - Fix: Fix calendar not being dismissed when clicking outside. #7714
 - Fix: fixed warnings when using AdvancedFilters component. #7704
 - Fix: Fix Tasklist UI illustrations styling #7858
 - Fix: Revert experiment task titles back to original #7853
+- Fix: Fix ordering and styling issue with WooCommerce Payments payment method promotion. #7943
+- Fix: Fix ExPlat PHP client #7926
+- Fix: Fix marketing extensions tracks #7908
+- Fix: Ensure homescreen defaults to single column layout. #7969
 - Add: Add 2col expirement. #7872
 - Add: Add Avalara to tax task #7874
 - Add: Added two column experimental task list #7669
@@ -18,10 +22,11 @@
 - Update: Reverts addition of Marketplace and My Subscriptions pages to the Marketplace menu. #7902
 - Update: Update the inbox panel with the new design #7864
 - Update: Update WC Pay card to include in-person information #7830
-- Update: Updating navigation link colors
+- Update: Updating navigation link colors #7833
 - Dev: Add method to check for install status #7808
 - Dev: Refactor tax task into separate components
 - Dev: Update the task list to use the new task list REST API #7736
+- Dev: Remove task status endpoint #7841
 - Tweak: Add route and layout for unmatched path #7503
 - Tweak: Avoid caching extended info #7819
 - Tweak: Minor design update for Marketing task. #7732
