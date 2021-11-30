@@ -123,6 +123,26 @@ class MiniCart extends AbstractBlock {
 			true
 		);
 
+		$this->asset_data_registry->add(
+			'themeSlug',
+			wp_get_theme()->get_stylesheet(),
+			''
+		);
+
+		if ( function_exists( 'gutenberg_experimental_is_site_editor_available' ) ) {
+			$this->asset_data_registry->add(
+				'isSiteEditorAvailable',
+				gutenberg_experimental_is_site_editor_available(),
+				false
+			);
+		} else {
+			$this->asset_data_registry->add(
+				'isSiteEditorAvailable',
+				false,
+				false
+			);
+		}
+
 		/**
 		 * Fires after cart block data is registered.
 		 */
