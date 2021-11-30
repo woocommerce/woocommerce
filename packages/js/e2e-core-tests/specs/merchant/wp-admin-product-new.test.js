@@ -9,11 +9,11 @@ const {
 	evalAndClick,
 	setCheckbox,
 	verifyAndPublish,
+	waitForSelector,
 	waitForSelectorWithoutThrow
 } = require( '@woocommerce/e2e-utils' );
 const {
 	waitAndClick,
-	waitForSelector,
 } = require( '@woocommerce/e2e-environment' );
 
 /**

@@ -87,17 +87,57 @@ class WC_Admin_Addons {
 				)
 			);
 
-			if ( ! is_wp_error( $raw_featured ) ) {
-				$featured = json_decode( wp_remote_retrieve_body( $raw_featured ) );
-				if ( $featured ) {
-					set_transient( 'wc_addons_featured', $featured, DAY_IN_SECONDS );
-				}
+			if ( is_wp_error( $raw_featured ) ) {
+				do_action( 'woocommerce_page_wc-addons_connection_error', $raw_featured->get_error_message() );
+
+				$message = self::is_ssl_error( $raw_featured->get_error_message() )
+					? __( 'We encountered an SSL error. Please ensure your site supports TLS version 1.2 or above.', 'woocommerce' )
+					: $raw_featured->get_error_message();
+
+				self::output_empty( $message );
+
+				return;
+			}
+
+			$response_code = (int) wp_remote_retrieve_response_code( $raw_featured );
+			if ( 200 !== $response_code ) {
+				do_action( 'woocommerce_page_wc-addons_connection_error', $response_code );
+
+				/* translators: %d: HTTP error code. */
+				$message = sprintf(
+					esc_html(
+						__(
+							'Our request to the featured API got error code %d.',
+							'woocommerce'
+						)
+					),
+					$response_code
+				);
+
+				self::output_empty( $message );
+
+				return;
+			}
+
+			$featured      = json_decode( wp_remote_retrieve_body( $raw_featured ) );
+			if ( empty( $featured ) || ! is_array( $featured ) ) {
+				do_action( 'woocommerce_page_wc-addons_connection_error', 'Empty or malformed response' );
+				$message = __( 'Our request to the featured API got a malformed response.', 'woocommerce' );
+				self::output_empty( $message );
+
+				return;
+			}
+
+			if ( $featured ) {
+				set_transient( 'wc_addons_featured', $featured, DAY_IN_SECONDS );
 			}
 		}
 
-		if ( ! empty( $featured ) ) {
-			self::output_featured( $featured );
-		}
+		self::output_featured( $featured );
+	}
+
+	public static function is_ssl_error( $error_message ) {
+		return false !== stripos( $error_message, 'cURL error 35' );
 	}
 
 	/**
@@ -127,7 +167,7 @@ class WC_Admin_Addons {
 	 * @param  string $term     Search terms.
 	 * @param  string $country  Store country.
 	 *
-	 * @return object of extensions and promotions.
+	 * @return object|WP_Error  Object with products and promotions properties, or WP_Error
 	 */
 	public static function get_extension_data( $category, $term, $country ) {
 		$parameters = self::build_parameter_string( $category, $term, $country );
@@ -144,9 +184,24 @@ class WC_Admin_Addons {
 			array( 'headers' => $headers )
 		);
 
-		if ( ! is_wp_error( $raw_extensions ) ) {
-			$addons = json_decode( wp_remote_retrieve_body( $raw_extensions ) );
+		if ( is_wp_error( $raw_extensions ) ) {
+			do_action( 'woocommerce_page_wc-addons_connection_error', $raw_extensions->get_error_message() );
+			return $raw_extensions;
 		}
+
+		$response_code = (int) wp_remote_retrieve_response_code( $raw_extensions );
+		if ( 200 !== $response_code ) {
+			do_action( 'woocommerce_page_wc-addons_connection_error', $response_code );
+			return new WP_Error( 'error', __( "Our request to the search API got response code $response_code.", 'woocommerce' ) );
+		}
+
+		$addons = json_decode( wp_remote_retrieve_body( $raw_extensions ) );
+
+		if ( ! is_object( $addons ) || ! isset( $addons->products ) ) {
+			do_action( 'woocommerce_page_wc-addons_connection_error', 'Empty or malformed response' );
+			return new WP_Error( 'error', __( "Our request to the search API got a malformed response.", 'woocommerce' ) );
+		}
+
 		return $addons;
 	}
 
@@ -908,6 +963,31 @@ class WC_Admin_Addons {
 		<?php
 	}
 
+	public static function output_empty( $message = '' ) {
+		?>
+		<div class="wc-addons__empty">
+			<h2><?php echo wp_kses_post( __( 'Oh no! We\'re having trouble connecting to the extensions catalog right now.', 'woocommerce' ) ); ?></h2>
+			<?php if ( ! empty( $message ) ) : ?>
+				<p><?php echo esc_html( $message ); ?></p>
+			<?php endif; ?>
+			<p>
+				<?php
+				/* translators: a url */
+				printf(
+					wp_kses_post(
+						__(
+							'To start growing your business, head over to <a href="%s">WooCommerce.com</a>, where you\'ll find the most popular WooCommerce extensions.',
+							'woocommerce'
+						)
+					),
+					'https://woocommerce.com/products/?utm_source=extensionsscreen&utm_medium=product&utm_campaign=connectionerror'
+				);
+				?>
+			</p>
+		</div>
+		<?php
+	}
+
 
 	/**
 	 * Handles output of the addons page in admin.
@@ -946,7 +1026,7 @@ class WC_Admin_Addons {
 			$term           = $search ? $search : null;
 			$country        = WC()->countries->get_base_country();
 			$extension_data = self::get_extension_data( $category, $term, $country );
-			$addons         = $extension_data->products;
+			$addons         = is_wp_error( $extension_data ) ? $extension_data : $extension_data->products;
 			$promotions     = ! empty( $extension_data->promotions ) ? $extension_data->promotions : array();
 		}
 

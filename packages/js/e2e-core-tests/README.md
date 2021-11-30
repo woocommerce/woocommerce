@@ -72,6 +72,7 @@ The functions to access the core tests are:
   - `runAnalyticsPageLoadsTest` - Merchant can load and see all pages in Analytics
   - `runImportProductsTest` - Merchant can import products via CSV file
   - `runInitiateWccomConnectionTest` - Merchant can initiate connection to WooCommerce.com
+  - `runAdminPageLoadTests` - Merchant can load pages from the WP Admin sidebar
 
 ### Shopper
 

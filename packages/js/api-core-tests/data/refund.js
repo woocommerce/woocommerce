@@ -14,5 +14,5 @@ const refund = {
 };
 
 module.exports = {
-	refund: refund,
+	refund,
 };
