@@ -15,7 +15,7 @@ const {
 	describe,
 	beforeAll,
 } = require( '@jest/globals' );
-const deprecated = require( '@wordpress/deprecated' );
+import deprecated from '@wordpress/deprecated';
 
 /**
  * Quick check for page title and no data message.

@@ -11,7 +11,7 @@ const {
 	describe,
 	beforeAll,
 } = require( '@jest/globals' );
-const deprecated = require( '@wordpress/deprecated' );
+import deprecated from '@wordpress/deprecated';
 
 const runActivationTest = () => {
 	describe('Store owner can login and make sure WooCommerce is activated', () => {

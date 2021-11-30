@@ -6,7 +6,7 @@ const {
 	it,
 	describe,
 } = require( '@jest/globals' );
-const deprecated = require( '@wordpress/deprecated' );
+import deprecated from '@wordpress/deprecated';
 
 /**
  * Internal dependencies
