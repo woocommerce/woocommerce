@@ -8,10 +8,12 @@ none
 .sass-cache/
 
 # All CSS
-/assets/css/*
+/assets/css/**
+/assets/css/*.css
 
 # All JS
-/assets/js/*
+/assets/js/**
+/assets/js/*.js
 
 # Behat/CLI Tests
 tests/cli/installer
