@@ -99,10 +99,12 @@ importers:
   packages/js/e2e-core-tests:
     specifiers:
       '@jest/globals': ^26.4.2
+      '@wordpress/deprecated': ^3.2.3
       config: 3.3.3
       faker: ^5.1.0
     dependencies:
       '@jest/globals': 26.6.2
+      '@wordpress/deprecated': 3.2.3
       config: 3.3.3
       faker: 5.5.3
 
@@ -158,7 +160,7 @@ importers:
       '@automattic/puppeteer-utils': github:Automattic/puppeteer-utils#0f3ec50
       '@typescript-eslint/eslint-plugin': ^5.3.0
       '@typescript-eslint/parser': ^5.3.0
-      '@wordpress/deprecated': ^2.10.0
+      '@wordpress/deprecated': ^3.2.3
       '@wordpress/e2e-test-utils': ^4.16.1
       config: 3.3.3
       eslint: ^8.1.0
@@ -166,7 +168,7 @@ importers:
       fishery: ^1.2.0
     dependencies:
       '@automattic/puppeteer-utils': github.com/Automattic/puppeteer-utils/0f3ec50
-      '@wordpress/deprecated': 2.12.3
+      '@wordpress/deprecated': 3.2.3
       '@wordpress/e2e-test-utils': 4.16.1_jest@27.3.1
       config: 3.3.3
       faker: 5.5.3
@@ -6105,11 +6107,12 @@ packages:
     engines: {node: '>=12'}
     dev: false
 
-  /@wordpress/deprecated/2.12.3:
-    resolution: {integrity: sha512-qr+yDfTQfI3M4h6oY6IeHWwoHr4jxbILjSlV+Ht6Jjto9Owap6OuzSqR13Ev4xqIoG4C7b5B3gZXVfwVDae1zg==}
+  /@wordpress/deprecated/3.2.3:
+    resolution: {integrity: sha512-YoJos/hW216PIlxbtNyb24kPR3TUFTSsfeVT23SxudW4jhmwM12vkl3KY1RDbhD/qi89OE4k+8xsBo5cM3lCSw==}
+    engines: {node: '>=12'}
     dependencies:
       '@babel/runtime': 7.16.3
-      '@wordpress/hooks': 2.12.3
+      '@wordpress/hooks': 3.2.2
     dev: false
 
   /@wordpress/e2e-test-utils/3.0.0_jest@24.9.0+puppeteer@2.1.1:
@@ -6261,6 +6264,13 @@ packages:
 
   /@wordpress/hooks/2.12.3:
     resolution: {integrity: sha512-LmKiwKldZt6UYqOxV/a6+eUFXdvALFnB/pQx3RmrMvO64sgFhfR6dhrlv+uVbuuezSuv8dce1jx8lUWAT0krMA==}
+    dependencies:
+      '@babel/runtime': 7.16.3
+    dev: false
+
+  /@wordpress/hooks/3.2.2:
+    resolution: {integrity: sha512-MlFWyu2ttJhmzDFBVWPRwZwIMqQdHFZTjFWFWm50NlzUzIJ3gEtNA95mHNtav1Fone24N+I2YkaYMNb6PEPTyA==}
+    engines: {node: '>=12'}
     dependencies:
       '@babel/runtime': 7.16.3
     dev: false
