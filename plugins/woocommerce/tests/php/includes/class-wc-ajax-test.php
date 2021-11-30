@@ -94,7 +94,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		$description  = 'This_description_is_really_very_long_and_is_meant_to_exceed_the_database_column_length_of_200_characters_';
 		$description .= $description;
 
-		$_POST['security'] = wp_create_nonce( 'update-api-key' );
+		$_POST['security']    = wp_create_nonce( 'update-api-key' );
 		$_POST['key_id']      = 0;
 		$_POST['user']        = 1;
 		$_POST['permissions'] = 'read';

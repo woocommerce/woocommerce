@@ -101,8 +101,10 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( get_option( 'woocommerce_db_version' ), $database['wc_database_version'] );
 		$this->assertEquals( $wpdb->prefix, $database['database_prefix'] );
+		//phpcs:disable WordPress.PHP.DevelopmentFunctions.error_log_print_r
 		$this->assertArrayHasKey( 'woocommerce', $database['database_tables'], print_r( $database, true ) );
 		$this->assertArrayHasKey( $wpdb->prefix . 'woocommerce_payment_tokens', $database['database_tables']['woocommerce'], print_r( $database, true ) );
+		//phpcs:enable WordPress.PHP.DevelopmentFunctions.error_log_print_r
 	}
 
 	/**
@@ -139,7 +141,8 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 		$theme    = (array) $data['theme'];
 
 		$this->assertEquals( 13, count( $theme ) );
-		$this->assertEquals( $active_theme->Name, $theme['name'] ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
+		// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+		$this->assertEquals( $active_theme->Name, $theme['name'] );
 	}
 
 	/**

@@ -477,7 +477,7 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 		 * @param WP_REST_Response $response The response data.
 		 * @param WP_REST_Request  $request  The request sent to the API.
 		 */
-		do_action( "woocommerce_rest_delete_webhook_object", $webhook, $response, $request );
+		do_action( 'woocommerce_rest_delete_webhook_object', $webhook, $response, $request );
 
 		return $response;
 	}
@@ -489,7 +489,7 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 	 * @return WP_Error|stdClass $data Post object.
 	 */
 	protected function prepare_item_for_database( $request ) {
-		$data = new stdClass;
+		$data = new stdClass();
 
 		// Post ID.
 		if ( isset( $request['id'] ) ) {
@@ -538,8 +538,8 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 	/**
 	 * Prepare a single webhook output for response.
 	 *
-	 * @param int               $id       Webhook ID or object.
-	 * @param WP_REST_Request   $request  Request object.
+	 * @param int             $id       Webhook ID or object.
+	 * @param WP_REST_Request $request  Request object.
 	 * @return WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $id, $request ) {
@@ -549,7 +549,7 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
-		$data    = array(
+		$data = array(
 			'id'            => $webhook->get_id(),
 			'name'          => $webhook->get_name(),
 			'status'        => $webhook->get_status(),
@@ -589,7 +589,7 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 	 */
 	protected function prepare_links( $id ) {
 		$links = array(
-			'self' => array(
+			'self'       => array(
 				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $id ) ),
 			),
 			'collection' => array(
@@ -611,63 +611,63 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 			'title'      => 'webhook',
 			'type'       => 'object',
 			'properties' => array(
-				'id' => array(
+				'id'            => array(
 					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'name' => array(
+				'name'          => array(
 					'description' => __( 'A friendly name for the webhook.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'status' => array(
+				'status'        => array(
 					'description' => __( 'Webhook status.', 'woocommerce' ),
 					'type'        => 'string',
 					'default'     => 'active',
 					'enum'        => array_keys( wc_get_webhook_statuses() ),
 					'context'     => array( 'view', 'edit' ),
 				),
-				'topic' => array(
+				'topic'         => array(
 					'description' => __( 'Webhook topic.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'resource' => array(
+				'resource'      => array(
 					'description' => __( 'Webhook resource.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'event' => array(
+				'event'         => array(
 					'description' => __( 'Webhook event.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'hooks' => array(
+				'hooks'         => array(
 					'description' => __( 'WooCommerce action names associated with the webhook.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 					'items'       => array(
-						'type'    => 'string',
+						'type' => 'string',
 					),
 				),
-				'delivery_url' => array(
+				'delivery_url'  => array(
 					'description' => __( 'The URL where the webhook payload is delivered.', 'woocommerce' ),
 					'type'        => 'string',
 					'format'      => 'uri',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'secret' => array(
+				'secret'        => array(
 					'description' => __( "Secret key used to generate a hash of the delivered webhook and provided in the request headers. This will default to a MD5 hash from the current user's ID|username if not provided.", 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'edit' ),
 				),
-				'date_created' => array(
+				'date_created'  => array(
 					'description' => __( "The date the webhook was created, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
@@ -695,23 +695,23 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 
 		$params['context']['default'] = 'view';
 
-		$params['after'] = array(
-			'description'        => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce' ),
-			'type'               => 'string',
-			'format'             => 'date-time',
-			'validate_callback'  => 'rest_validate_request_arg',
+		$params['after']   = array(
+			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce' ),
+			'type'              => 'string',
+			'format'            => 'date-time',
+			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['before'] = array(
-			'description'        => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'woocommerce' ),
-			'type'               => 'string',
-			'format'             => 'date-time',
-			'validate_callback'  => 'rest_validate_request_arg',
+		$params['before']  = array(
+			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'woocommerce' ),
+			'type'              => 'string',
+			'format'            => 'date-time',
+			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['exclude'] = array(
 			'description'       => __( 'Ensure result set excludes specific IDs.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
-				'type'          => 'integer',
+				'type' => 'integer',
 			),
 			'default'           => array(),
 			'sanitize_callback' => 'wp_parse_id_list',
@@ -720,36 +720,36 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 			'description'       => __( 'Limit result set to specific ids.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
-				'type'          => 'integer',
+				'type' => 'integer',
 			),
 			'default'           => array(),
 			'sanitize_callback' => 'wp_parse_id_list',
 		);
-		$params['offset'] = array(
-			'description'        => __( 'Offset the result set by a specific number of items.', 'woocommerce' ),
-			'type'               => 'integer',
-			'sanitize_callback'  => 'absint',
-			'validate_callback'  => 'rest_validate_request_arg',
+		$params['offset']  = array(
+			'description'       => __( 'Offset the result set by a specific number of items.', 'woocommerce' ),
+			'type'              => 'integer',
+			'sanitize_callback' => 'absint',
+			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['order'] = array(
-			'description'        => __( 'Order sort attribute ascending or descending.', 'woocommerce' ),
-			'type'               => 'string',
-			'default'            => 'desc',
-			'enum'               => array( 'asc', 'desc' ),
-			'validate_callback'  => 'rest_validate_request_arg',
+		$params['order']   = array(
+			'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce' ),
+			'type'              => 'string',
+			'default'           => 'desc',
+			'enum'              => array( 'asc', 'desc' ),
+			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['orderby'] = array(
-			'description'        => __( 'Sort collection by object attribute.', 'woocommerce' ),
-			'type'               => 'string',
-			'default'            => 'date',
-			'enum'               => array(
+			'description'       => __( 'Sort collection by object attribute.', 'woocommerce' ),
+			'type'              => 'string',
+			'default'           => 'date',
+			'enum'              => array(
 				'date',
 				'id',
 				'title',
 			),
-			'validate_callback'  => 'rest_validate_request_arg',
+			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['status'] = array(
+		$params['status']  = array(
 			'default'           => 'all',
 			'description'       => __( 'Limit result set to webhooks assigned a specific status.', 'woocommerce' ),
 			'type'              => 'string',
