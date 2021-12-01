@@ -76,7 +76,7 @@ final class BlockTypesController {
 	 */
 	public function add_data_attributes( $content, $block ) {
 		$block_name      = $block['blockName'];
-		$block_namespace = strtok( $block_name, '/' );
+		$block_namespace = strtok( $block_name ?? '', '/' );
 
 		/**
 		 * Filters the list of allowed block namespaces.
