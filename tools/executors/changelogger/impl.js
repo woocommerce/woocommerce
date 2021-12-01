@@ -35,6 +35,17 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 exports.__esModule = true;
 var child_process_1 = require("child_process");
 var path_1 = require("path");
@@ -42,11 +53,19 @@ var fs_1 = require("fs");
 var chalk = require("chalk");
 var changeloggerScriptPath = 'vendor/bin/changelogger';
 function runChangelogger(_a) {
-    var action = _a.action;
+    var action = _a.action, cwd = _a.cwd, extraArgs = __rest(_a, ["action", "cwd"]);
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_b) {
             return [2 /*return*/, new Promise(function (resolve, reject) {
-                    var changeloggerScript = child_process_1.spawn("./" + changeloggerScriptPath, [action], {
+                    var args = [action].concat(
+                    // Add any extra arguments supplied. NX camel cases and converts values to Numbers.
+                    // Undo all that so arguments can be passed to Jetpack Changelogger unmodified.
+                    Object.keys(extraArgs).map(function (key) {
+                        return "--" + key.replace(/[A-Z]/g, function (m) { return '-' + m.toLowerCase(); }) + "=" + (Number(extraArgs[key]) && action === 'write'
+                            ? extraArgs[key].toFixed(1)
+                            : extraArgs[key]);
+                    }));
+                    var changeloggerScript = (0, child_process_1.spawn)("./" + changeloggerScriptPath, args, {
                         stdio: 'inherit'
                     });
                     changeloggerScript.on('close', function (code) {
@@ -66,7 +85,7 @@ function changelogExecutor(options, context) {
             switch (_b.label) {
                 case 0:
                     cwd = options.cwd;
-                    projectPath = path_1.join(__dirname, '../../../', cwd);
+                    projectPath = (0, path_1.join)(__dirname, '../../../', cwd);
                     console.info(chalk.cyan("\nExecuting Changelogger...\n"));
                     try {
                         process.chdir(projectPath);
@@ -77,7 +96,7 @@ function changelogExecutor(options, context) {
                         console.error(error);
                         return [2 /*return*/, { success: false }];
                     }
-                    if (!fs_1.existsSync(changeloggerScriptPath)) {
+                    if (!(0, fs_1.existsSync)(changeloggerScriptPath)) {
                         console.error(chalk.bgRed('Changelogger scripts not found. Did you remember to `composer install` from project directory?'));
                         return [2 /*return*/, { success: false }];
                     }

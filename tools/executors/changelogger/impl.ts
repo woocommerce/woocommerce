@@ -16,11 +16,29 @@ const changeloggerScriptPath = 'vendor/bin/changelogger';
 
 async function runChangelogger( {
 	action,
+	cwd,
+	...extraArgs
 }: ChangelogExecutorOptions ): Promise< { code: number; error: string } > {
 	return new Promise( ( resolve, reject ) => {
+		const args = [ action ].concat(
+			// Add any extra arguments supplied. NX camel cases and converts values to Numbers.
+			// Undo all that so arguments can be passed to Jetpack Changelogger unmodified.
+			Object.keys( extraArgs ).map(
+				( key ) =>
+					`--${ key.replace(
+						/[A-Z]/g,
+						( m ) => '-' + m.toLowerCase()
+					) }=${
+						Number( extraArgs[ key ] ) && action === 'write'
+							? extraArgs[ key ].toFixed( 1 )
+							: extraArgs[ key ]
+					}`
+			)
+		);
+
 		const changeloggerScript = spawn(
 			`./${ changeloggerScriptPath }`,
-			[ action ],
+			args,
 			{
 				stdio: 'inherit',
 			}
