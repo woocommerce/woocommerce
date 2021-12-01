@@ -1,4 +1,0 @@
-Significance: minor
-Type: Fix
-
-Self-delete NavigationFeedbackFollowUp note when navigation feature is not present. #7939

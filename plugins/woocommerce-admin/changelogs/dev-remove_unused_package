@@ -1,4 +1,0 @@
-Significance: minor
-Type: Dev
-
-Remove unused npm package @woocommerce/settings. #7949

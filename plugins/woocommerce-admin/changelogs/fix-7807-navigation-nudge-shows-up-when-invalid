@@ -1,4 +1,0 @@
-Significance: patch
-Type: Fix
-
-Navigation nudge note and navigation feedback notes will delete themselves if the navigation feature is not available. #7914

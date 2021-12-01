@@ -1,6 +1,0 @@
-Significance: minor
-Type: Fix
-
-Fix an issue with the code that makes use of an invalid parameter
-with a PHP function. The use of this invalid parameter causes PHP 8 to 
-throw a Fatal Error. #7855

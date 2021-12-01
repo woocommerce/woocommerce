@@ -1,3 +1,27 @@
+== 3.0.0 11/30/2021 ==
+
+- Fix: Fix an issue with the code that makes use of an invalid parameter
+  with a PHP function. The use of this invalid parameter causes PHP 8 to
+  throw a Fatal Error. #7855
+- Fix: Fix TaskList UI experiment enablement logic. #7930
+- Fix: Navigation nudge note and navigation feedback notes will delete themselves if the navigation feature is not available. #7914
+- Fix: Replace old task list option calls with data store selectors. #7820
+- Fix: Self-delete NavigationFeedbackFollowUp note when navigation feature is not present. #7939
+- Add: Add option to dismiss promotional payment gateway. #7965
+- Add: OBW - Add number of employees field. #7963
+- Update: Ending wcpay promotion experiment and always displaying in payment methods table.
+- Update: Hide InboxPanel header when it is rendered in the sidebar. #7952
+- Update: Introduce a 320 character limit for inbox note contents. #7958
+- Update: Move payments task to extended task list when WC Pay task is shown. #7980
+- Update: Rename Inbox to Activity from the activity header. #7879
+- Dev: Explicitly sets the Node version to 14 in .nvmrc to prevent incompatible versions of Node from being used with nvm. #7932
+- Dev: Remove unused npm package @woocommerce/settings. #7949
+- Dev: Update payment method recommendation to new woocommerce.com endpoint. #7913
+- Dev: Use abstraction to add and retrieve task data. #7918
+- Tweak: Added dismiss all button for inbox notes.
+- Tweak: Implement note read state. #7896
+- Enhancement: Add tests to Subscriptions inclusion. #7804
+
 == 2.9.0 11/30/2021 ==
 
 - Fix: Do not clear `current` class from the entire page when updating wp-admin's menu. #7773
@@ -83,7 +107,7 @@
 - Update: Create task list REST API endpoint #7512
 - Update: Deleted OnboardingEmailMarketing note class #7595
 - Update: Removes the use of the depreciated woocommerce_shared_settings hook. #7480
-- Update: Removes non WooCommerce Admin specific settings from the `wc_admin` namespace in the `wc/data` settings store (ex: countries). #7480
+- Update: Removes non WooCommerce Admin specific settings from the `wc_admin` namespace in the `wc/data` settings store (ex countries). #7480
 - Update: Updating eway logo in payment suggestions defaults #7562
 - Update: Update marketing task completion logic. #7586
 - Dev: Add email address field to OBW #7552
@@ -104,7 +128,7 @@
 
 == 2.6.3 09/21/2021 ==
 
-- Fix unsecured reports
+- Fix unsecured reports. #7691
 - Fix fatal error and unrelated results in analytics. #7682
 
 == 2.6.2 09/14/2021 ==
@@ -220,20 +244,25 @@
 - Update: Remove facebook extension from onboarding extensions fallback list #7287
 - Performance: Add lazy loading by checking panel open status #7379
 
-== 2.4.4 7/21/2021 ==
+== 2.4.4 07/21/2021 ==
+
 - Fix: Fix homepage stock panel regression in 2.4.3. #7389
 
-== 2.4.3 7/21/2021 ==
+== 2.4.3 07/21/2021 ==
+
 - Fix: Add a new low stock products endpoint to improve the performance. #7377
 
-== 2.4.2 7/19/2021 ==
+== 2.4.2 07/19/2021 ==
+
 - Fix: Add lazy loading by checking panel open status #7376
 - Fix: Add cache-control header to low stock REST API response #7364
 
-== 2.4.1 7/1/2021 ==
+== 2.4.1 07/01/2021 ==
+
 - Fix: Fix and refactor explat polling to use setTimeout #7274
 
-== 2.4.0 6/29/2021 ==
+== 2.4.0 06/29/2021 ==
+
 - Add: SlotFill to Abbreviated Notification panel #7091
 - Add: Consume remote payment methods on frontend #6867
 - Add: Extend payment gateways REST endpoint #6919
