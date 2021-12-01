@@ -186,6 +186,15 @@ For example:
 - `PUPPETEER_SLOWMO=10` - will run tests faster
 - `PUPPETEER_SLOWMO=70` - will run tests slower
 
+### How to retry failed tests
+
+Sometimes tests may fail for different reasons such as network issues, or lost connection. To mitigate against test flakiess, failed tests are rerun up to 3 times before being marked as failed. The amount of retry attempts can be adjusted by passing the `E2E_RETRY_TIMES` variable when running tests. For example:
+
+```
+cd plugins/woocommerce
+E2E_RETRY_TIMES=2 pnpx wc-e2e test:e2e
+```
+
 ### How to run tests in debug mode
 
 Tests run in headless mode by default. While writing tests it may be useful to have the debugger loaded while running a test in non-headless mode. To run tests in debug mode:
