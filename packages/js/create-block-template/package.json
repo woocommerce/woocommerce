@@ -8,13 +8,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/opr/blocks-template.git"
+    "url": "git+https://github.com/woocommerce/blocks-template.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/opr/blocks-template/issues"
+    "url": "https://github.com/woocommerce/blocks-template/issues"
   },
-  "homepage": "https://github.com/opr/blocks-template#readme"
+  "homepage": "https://github.com/woocommerce/blocks-template#readme"
 }
