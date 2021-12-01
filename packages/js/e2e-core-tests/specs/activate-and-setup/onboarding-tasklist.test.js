@@ -13,6 +13,7 @@ const {
  * External dependencies
  */
 const config = require( 'config' );
+import deprecated from '@wordpress/deprecated';
 const {
 	it,
 	describe,
@@ -47,6 +48,9 @@ const runOnboardingFlowTest = () => {
 		}
 
 		it('can start and complete onboarding when visiting the site for the first time.', async () => {
+			deprecated( 'runOnboardingFlowTest', {
+				alternative: '@woocommerce/admin-e2e-tests `testAdminOnboardingWizard()`',
+			});
 			await completeOnboardingWizard();
 		});
 	});
@@ -59,6 +63,9 @@ const runTaskListTest = () => {
 		});
 
 		it('can setup shipping', async () => {
+			deprecated( 'runTaskListTest', {
+				alternative: '@woocommerce/admin-e2e-tests `testAdminHomescreenTasklist()`',
+			});
 			await page.evaluate(() => {
 				document.querySelector('.woocommerce-list__item-title').scrollIntoView();
 			});
