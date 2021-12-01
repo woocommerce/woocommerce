@@ -55,8 +55,6 @@ const searchParams = [
  *
  * @group api
  * @group orders
- * @group wip
- * mytodo remove wip
  *
  */
 describe( 'Order Search API tests', () => {
