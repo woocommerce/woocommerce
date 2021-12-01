@@ -55,6 +55,9 @@ const combinedConfig = {
 	transformIgnorePatterns: [
 		'node_modules/(?!(woocommerce)/)',
 	],
+
+	testRunner: 'jest-circus/runner',
+
 	roots: [ testSpecs ],
 };
 
