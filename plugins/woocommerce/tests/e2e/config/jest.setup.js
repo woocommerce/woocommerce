@@ -8,7 +8,7 @@ import {
 const config = require( 'config' );
 const { HTTPClientFactory } = require( '@woocommerce/api' );
 const { addConsoleSuppression, updateReadyPageStatus } = require( '@woocommerce/e2e-environment' );
-const { DEFAULT_TIMEOUT_OVERRIDE } = process.env;
+const { DEFAULT_TIMEOUT_OVERRIDE, E2E_RETRY_TIMES } = process.env;
 
 // @todo: remove this once https://github.com/woocommerce/woocommerce-admin/issues/6992 has been addressed
 addConsoleSuppression( 'woocommerce_shared_settings', false );
@@ -40,6 +40,8 @@ async function trashExistingPosts() {
 // each other's side-effects.
 beforeAll(async () => {
 
+	const retryTimes = E2E_RETRY_TIMES ? E2E_RETRY_TIMES : 3;
+
 	if ( DEFAULT_TIMEOUT_OVERRIDE ) {
 		page.setDefaultNavigationTimeout( DEFAULT_TIMEOUT_OVERRIDE );
 		page.setDefaultTimeout( DEFAULT_TIMEOUT_OVERRIDE );
@@ -62,6 +64,9 @@ beforeAll(async () => {
 		width: 1280,
 		height: 800,
 	});
+
+	// Set how many times to retry failed tests.
+	jest.retryTimes( retryTimes );
 });
 
 // Clear browser cookies and cache using DevTools.
