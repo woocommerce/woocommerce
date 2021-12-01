@@ -29,14 +29,14 @@ const customerBilling = {
 const customerShipping = {
 	first_name: 'Tim',
 	last_name: 'Clark',
-	company: 'Murphy LLC',
+	company: 'Automattic',
 	country: 'US',
 	address_1: 'Oxford Ave',
 	address_2: 'Linwood Ave',
 	city: 'Buffalo',
 	state: 'NY',
 	postcode: '14201',
-	phone: '6146524353',
+	phone: '123456789',
 };
 
 module.exports = {

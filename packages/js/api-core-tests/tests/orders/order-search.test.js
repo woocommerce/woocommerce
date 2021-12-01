@@ -1,11 +1,22 @@
 const { ordersApi } = require( '../../endpoints' );
-const { getOrderExample } = require( '../../data' );
+const { getOrderExample, shared } = require( '../../data' );
 
 /**
  * Order to be searched
  */
 const order = {
 	...getOrderExample(),
+	shipping: {
+		...shared.customerShipping,
+		company: 'Murphy LLC',
+		phone: '6146524353',
+	},
+	line_items: [
+		{
+			name: 'Handmade Wooden Gloves',
+			product_id: '45',
+		},
+	],
 	shipping_lines: [],
 	fee_lines: [],
 	coupon_lines: [],
@@ -44,6 +55,8 @@ const searchParams = [
  *
  * @group api
  * @group orders
+ * @group wip
+ * mytodo remove wip
  *
  */
 describe( 'Order Search API tests', () => {
