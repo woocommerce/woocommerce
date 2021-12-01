@@ -1,5 +1,10 @@
 # Unreleased
 
+## Added
+
+- Added `jest-circus` as a test runner to enable retrying failed tests
+- Added `E2E_RETRY_TIMES` environment variable to determine retry count. The default is 3.
+
 ## Fixed
 
 - Updated the browserViewport in `jest.setup.js` to match the `defaultViewport` dimensions defined in `jest-puppeteer.config.js`
