@@ -155,7 +155,7 @@
 		"ignore-loader": "0.1.2",
 		"jest-circus": "27.2.4",
 		"jest-environment-jsdom-sixteen": "1.0.3",
-		"jest-environment-puppeteer": "6.0.0",
+		"jest-environment-puppeteer": "6.0.2",
 		"jest-fetch-mock": "3.0.3",
 		"jest-html-reporters": "2.1.6",
 		"json2md": "1.12.0",
