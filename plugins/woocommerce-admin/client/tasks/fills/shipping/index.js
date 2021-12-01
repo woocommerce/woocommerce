@@ -218,7 +218,7 @@ export class Shipping extends Component {
 						}
 						shippingZones={ this.state.shippingZones }
 						onComplete={ this.completeStep }
-						{ ...this.props }
+						createNotice={ this.props.createNotice }
 					/>
 				),
 				visible:
