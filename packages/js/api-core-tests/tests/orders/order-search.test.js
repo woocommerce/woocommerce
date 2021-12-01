@@ -11,12 +11,6 @@ const order = {
 		company: 'Murphy LLC',
 		phone: '6146524353',
 	},
-	line_items: [
-		{
-			name: 'Handmade Wooden Gloves',
-			product_id: '45',
-		},
-	],
 	shipping_lines: [],
 	fee_lines: [],
 	coupon_lines: [],
