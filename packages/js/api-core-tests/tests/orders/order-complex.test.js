@@ -117,7 +117,8 @@ let order;
  * Test for adding a complex order with different product types and tax classes.
  *
  * @group orders
- * @group tax_rates
+ * @group api
+ * @group tax-rates
  */
 describe( 'Orders API test', () => {
 	beforeAll( async () => {
@@ -143,9 +144,6 @@ describe( 'Orders API test', () => {
 		);
 		simpleProduct.id = createdSimpleProduct.id;
 
-		// Link this simple product to a grouped product
-		groupedProduct.grouped_products = [ simpleProduct.id ];
-
 		// Create a variable product with 1 variation
 		const {
 			body: createdVariableProduct,
@@ -153,10 +151,11 @@ describe( 'Orders API test', () => {
 		variableProduct.id = createdVariableProduct.id;
 		await variationsApi.create.variation( variableProduct.id, variation );
 
-		// Create a grouped product
+		// Create a grouped product using the simple product created earlier.
 		const {
 			body: createdGroupedProduct,
 		} = await productsApi.create.product( groupedProduct );
+		groupedProduct.grouped_products = [ simpleProduct.id ]; // Link the simple product
 		groupedProduct.id = createdGroupedProduct.id;
 
 		// Create an external product
