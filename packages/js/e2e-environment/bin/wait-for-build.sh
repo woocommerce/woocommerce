@@ -11,7 +11,8 @@ count=0
 WP_BASE_URL=$(node utils/get-base-url.js)
 printf "Testing URL: $WP_BASE_URL\n\n"
 
-while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' ${WP_BASE_URL}/?pagename=ready)" != "200" ]]
+RAWDATA=$(curl -s -o /dev/null -w '%{http_code}' ${WP_BASE_URL}/?pagename=ready)
+while [[ "${RAWDATA: -3}" != "200" ]]
 
 do
   echo "$(date) - Waiting for testing environment"
@@ -23,6 +24,7 @@ do
 	echo "$(date) - Testing environment couldn't be found"
 	exit 1
   fi
+  RAWDATA=$(curl -s -o /dev/null -w '%{http_code}' ${WP_BASE_URL}/?pagename=ready)
 done
 
 if [[ $count -gt 0 ]]; then
