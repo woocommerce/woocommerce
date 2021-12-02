@@ -192,4 +192,41 @@ class BlockTemplateUtils {
 				return ucwords( preg_replace( '/[\-_]/', ' ', $template_slug ) );
 		}
 	}
+
+	/**
+	 * Converts template paths into a slug
+	 *
+	 * @param string $path The template's path.
+	 * @param string $directory_name The template's directory name.
+	 * @return string slug
+	 */
+	public static function generate_template_slug_from_path( $path, $directory_name = 'block-templates' ) {
+		return substr(
+			$path,
+			strpos( $path, $directory_name . DIRECTORY_SEPARATOR ) + 1 + strlen( $directory_name ),
+			-5
+		);
+	}
+
+	/**
+	 * Check if the theme has a template. So we know if to load our own in or not.
+	 *
+	 * @param string $template_name name of the template file without .html extension e.g. 'single-product'.
+	 * @return boolean
+	 */
+	public static function theme_has_template( $template_name ) {
+		return is_readable( get_template_directory() . '/block-templates/' . $template_name . '.html' ) ||
+			is_readable( get_stylesheet_directory() . '/block-templates/' . $template_name . '.html' );
+	}
+
+	/**
+	 * Check if the theme has a template. So we know if to load our own in or not.
+	 *
+	 * @param string $template_name name of the template file without .html extension e.g. 'single-product'.
+	 * @return boolean
+	 */
+	public static function theme_has_template_part( $template_name ) {
+		return is_readable( get_template_directory() . '/block-template-parts/' . $template_name . '.html' ) ||
+			is_readable( get_stylesheet_directory() . '/block-template-parts/' . $template_name . '.html' );
+	}
 }
