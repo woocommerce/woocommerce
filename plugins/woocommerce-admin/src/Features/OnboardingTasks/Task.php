@@ -318,7 +318,7 @@ abstract class Task {
 	 * Set this as the active task across page loads.
 	 */
 	public function set_active() {
-		if ( $this->is_complete ) {
+		if ( $this->is_complete() ) {
 			return;
 		}
 
