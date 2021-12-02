@@ -10,18 +10,21 @@ import { VisuallyHidden } from '@wordpress/components';
  */
 import './editor.scss';
 
+export interface ExternalLinkCardProps {
+	href: string;
+	title: string;
+	description?: string;
+}
+
 /**
- * Show a link that displays a title, description, and optional icon. Links are opened in a new tab.
+ * Show a link that displays a title, description, and an icon showing that the link is external.
+ * Links are opened in a new tab.
  */
 const ExternalLinkCard = ( {
 	href,
 	title,
 	description,
-}: {
-	href: string;
-	title: string;
-	description?: string;
-} ): JSX.Element => {
+}: ExternalLinkCardProps ): JSX.Element => {
 	return (
 		<a
 			href={ href }
