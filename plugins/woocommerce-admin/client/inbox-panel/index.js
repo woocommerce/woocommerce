@@ -142,7 +142,7 @@ const renderNotes = ( {
 const INBOX_QUERY = {
 	page: 1,
 	per_page: QUERY_DEFAULTS.pageSize,
-	status: 'unactioned',
+	status: 'unactioned,actioned',
 	type: QUERY_DEFAULTS.noteTypes,
 	orderby: 'date',
 	order: 'desc',
