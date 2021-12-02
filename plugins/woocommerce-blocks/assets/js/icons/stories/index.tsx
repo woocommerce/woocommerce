@@ -1,25 +1,44 @@
 /**
  * External dependencies
  */
-import { omitBy, omit } from 'lodash';
+import { omitBy } from 'lodash';
+import { Story, Meta } from '@storybook/react';
 import { useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
-import Icon from '../icon';
 import * as icons from '../index';
+import { IconProps } from '../icon';
 
-const availableIcons = omit( icons, 'Icon' );
+const { Icon, ...availableIcons } = icons;
 
 export default {
 	title: 'WooCommerce Blocks/@woocommerce/icons',
 	component: Icon,
+	argTypes: {
+		size: {
+			control: { type: 'range', min: 8, max: 96 },
+		},
+		srcElement: {
+			control: 'select',
+			mapping: availableIcons,
+			options: Object.keys( availableIcons ),
+		},
+	},
+} as Meta< IconProps >;
+
+const Template: Story< IconProps > = ( args ) => <Icon { ...args } />;
+
+export const BaseIcon = Template.bind( {} );
+BaseIcon.args = {
+	srcElement: icons.woo,
+	size: 24,
 };
 
-const LibraryExample = () => {
+export const Library: Story< IconProps > = ( args ) => {
 	const [ filter, setFilter ] = useState( '' );
-	const filteredIcons = omitBy( availableIcons, ( _icon, name ) => {
+	const filteredIcons = omitBy( availableIcons, ( _, name ) => {
 		return ! name.includes( filter );
 	} );
 
@@ -29,7 +48,6 @@ const LibraryExample = () => {
 				Filter Icons
 			</label>
 			<input
-				// eslint-disable-next-line no-restricted-syntax
 				id="filter-icons"
 				type="search"
 				value={ filter }
@@ -67,13 +85,18 @@ const LibraryExample = () => {
 									alignItems: 'center',
 								} }
 							>
-								<Icon srcElement={ icon } />
 								<Icon
+									className={ args.className }
+									srcElement={ icon }
+								/>
+								<Icon
+									className={ args.className }
 									style={ { paddingLeft: '10px' } }
 									srcElement={ icon }
 									size={ 36 }
 								/>
 								<Icon
+									className={ args.className }
 									style={ { paddingLeft: '10px' } }
 									srcElement={ icon }
 									size={ 48 }
@@ -86,5 +109,7 @@ const LibraryExample = () => {
 		</div>
 	);
 };
-
-export const Library = () => <LibraryExample />;
+Library.parameters = {
+	controls: { include: [], hideNoControlsWarning: true },
+};
+Library.storyName = 'Icon Library';

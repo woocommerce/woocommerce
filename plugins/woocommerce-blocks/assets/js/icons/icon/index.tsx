@@ -4,7 +4,7 @@
 import { cloneElement, isValidElement } from '@wordpress/element';
 import type { HTMLProps, ReactElement } from 'react';
 
-interface IconProps {
+export interface IconProps {
 	srcElement?: ReactElement;
 	size?: number;
 	className?: string;
