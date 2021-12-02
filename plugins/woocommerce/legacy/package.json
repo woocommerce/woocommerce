@@ -24,7 +24,7 @@
 		"grunt-sass": "3.1.0",
 		"grunt-stylelint": "0.16.0",
 		"gruntify-eslint": "5.0.0",
-		"node-sass": "6.0.1",
+		"node-sass": "4.14.1",
 		"stylelint": "13.8.0",
 		"stylelint-config-wordpress": "17.0.0"
 	}
