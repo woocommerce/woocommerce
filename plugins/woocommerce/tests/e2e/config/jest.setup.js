@@ -58,7 +58,10 @@ beforeAll(async () => {
 
 	await page.goto(WP_ADMIN_LOGIN);
 	await clearLocalStorage();
-	await setBrowserViewport('large');
+	await setBrowserViewport( {
+		width: 1280,
+		height: 800,
+	});
 });
 
 // Clear browser cookies and cache using DevTools.

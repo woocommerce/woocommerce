@@ -11,6 +11,7 @@ const {
 	describe,
 	beforeAll,
 } = require( '@jest/globals' );
+import deprecated from '@wordpress/deprecated';
 
 const runActivationTest = () => {
 	describe('Store owner can login and make sure WooCommerce is activated', () => {
@@ -19,6 +20,10 @@ const runActivationTest = () => {
 		});
 
 		it('can make sure WooCommerce is activated. If not, activate it', async () => {
+			deprecated( 'runActivationTest', {
+				alternative: '@woocommerce/admin-e2e-tests `testAdminBasicSetup()`',
+			});
+
 			const slug = 'woocommerce';
 			await merchant.openPlugins();
 			const disableLink = await page.$(`tr[data-slug="${slug}"] .deactivate a`);

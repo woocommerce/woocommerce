@@ -7,12 +7,13 @@ none
 # Sass
 .sass-cache/
 
-# Compiled CSS
+# All CSS
+/assets/css/**
 /assets/css/*.css
-/assets/css/photoswipe/**/*.min.css
 
-# Minified JS
-/assets/js/**/*.min.js
+# All JS
+/assets/js/**
+/assets/js/*.js
 
 # Behat/CLI Tests
 tests/cli/installer
@@ -33,6 +34,9 @@ tests/cli/vendor
 
 # Logs
 /logs
+
+# TypeScript files
+tsconfig.tsbuildinfo
 
 # Composer
 /vendor/

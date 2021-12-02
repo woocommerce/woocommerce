@@ -13,6 +13,8 @@
 - `withRestApi.addTaxClasses()` that adds an array of tax classes if they do not exist
 - `withRestApi.addTaxRates()` that adds an array of tax rates if they do not exist
 - `clickAndWaitForSelector( buttonSelector, resultSelector, timeout )` to click a button and wait for response
+- Optional parameter `testResponse` to `withRestApi` functions that contain an `expect()`
+- `shopper.logout()` to log out the shopper account
 
 # 0.1.6
 

@@ -6,5 +6,7 @@
 - Coupons API Tests
 - Refunds API Tests
 - Products API Tests
+- CRUD tests for the Orders API
+- Order Search API Tests
 - Shipping Zones API Tests
 - Shipping Methods API Tests
