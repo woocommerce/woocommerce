@@ -315,11 +315,7 @@ class BlockTemplatesController {
 		}
 
 		foreach ( $template_files as $template_file ) {
-			$template_slug = substr(
-				$template_file,
-				strpos( $template_file, $dir_name . DIRECTORY_SEPARATOR ) + 1 + strlen( $dir_name ),
-				-5
-			);
+			$template_slug = BlockTemplateUtils::generate_template_slug_from_path( $template_file, $dir_name );
 
 			// This template does not have a slug we're looking for. Skip it.
 			if ( is_array( $slugs ) && count( $slugs ) > 0 && ! in_array( $template_slug, $slugs, true ) ) {
@@ -329,7 +325,7 @@ class BlockTemplatesController {
 			// If the theme already has a template, or the template is already in the list (i.e. it came from the
 			// database) then we should not overwrite it with the one from the filesystem.
 			if (
-				$this->theme_has_template( $template_slug ) ||
+				BlockTemplateUtils::theme_has_template( $template_slug ) ||
 				count(
 					array_filter(
 						$already_found_templates,
@@ -390,28 +386,6 @@ class BlockTemplatesController {
 	}
 
 	/**
-	 * Check if the theme has a template. So we know if to load our own in or not.
-	 *
-	 * @param string $template_name name of the template file without .html extension e.g. 'single-product'.
-	 * @return boolean
-	 */
-	public function theme_has_template( $template_name ) {
-		return is_readable( get_template_directory() . '/block-templates/' . $template_name . '.html' ) ||
-			is_readable( get_stylesheet_directory() . '/block-templates/' . $template_name . '.html' );
-	}
-
-	/**
-	 * Check if the theme has a template. So we know if to load our own in or not.
-	 *
-	 * @param string $template_name name of the template file without .html extension e.g. 'single-product'.
-	 * @return boolean
-	 */
-	public function theme_has_template_part( $template_name ) {
-		return is_readable( get_template_directory() . '/block-template-parts/' . $template_name . '.html' ) ||
-			is_readable( get_stylesheet_directory() . '/block-template-parts/' . $template_name . '.html' );
-	}
-
-	/**
 	 * Checks whether a block template with that name exists in Woo Blocks
 	 *
 	 * @param string $template_name Template to check.
@@ -440,25 +414,25 @@ class BlockTemplatesController {
 
 		if (
 			is_singular( 'product' ) &&
-			! $this->theme_has_template( 'single-product' ) &&
+			! BlockTemplateUtils::theme_has_template( 'single-product' ) &&
 			$this->block_template_is_available( 'single-product' )
 		) {
 			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
 		} elseif (
 			( is_product_taxonomy() && is_tax( 'product_cat' ) ) &&
-			! $this->theme_has_template( 'taxonomy-product_cat' ) &&
+			! BlockTemplateUtils::theme_has_template( 'taxonomy-product_cat' ) &&
 			$this->block_template_is_available( 'taxonomy-product_cat' )
 		) {
 			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
 		} elseif (
 			( is_product_taxonomy() && is_tax( 'product_tag' ) ) &&
-			! $this->theme_has_template( 'taxonomy-product_tag' ) &&
+			! BlockTemplateUtils::theme_has_template( 'taxonomy-product_tag' ) &&
 			$this->block_template_is_available( 'taxonomy-product_tag' )
 		) {
 			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
 		} elseif (
 			( is_post_type_archive( 'product' ) || is_page( wc_get_page_id( 'shop' ) ) ) &&
-			! $this->theme_has_template( 'archive-product' ) &&
+			! BlockTemplateUtils::theme_has_template( 'archive-product' ) &&
 			$this->block_template_is_available( 'archive-product' )
 		) {
 			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
@@ -529,7 +503,7 @@ class BlockTemplatesController {
 		/**
 		 * We only use the mini cart content from file.
 		 */
-		if ( $this->theme_has_template_part( 'mini-cart' ) ) {
+		if ( BlockTemplateUtils::theme_has_template_part( 'mini-cart' ) ) {
 			$template_id    = sprintf( '%s//mini-cart', wp_get_theme()->get_stylesheet() );
 			$block_template = get_block_file_template( $template_id, 'wp_template_part' );
 		} else {
