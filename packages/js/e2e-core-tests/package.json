@@ -23,6 +23,7 @@
     "access": "public"
   },
   "scripts": {
+    "preinstall": "npx only-allow pnpm",
 	"build": "./bin/build.sh",
 	"prepare": "pnpm run build"
   }
