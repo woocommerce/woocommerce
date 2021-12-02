@@ -5,7 +5,7 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 import { SearchListControl } from '@woocommerce/components';
 import PropTypes from 'prop-types';
 import { withSearchedProducts } from '@woocommerce/block-hocs';
-import ErrorMessage from '@woocommerce/editor-components/error-placeholder/error-message.js';
+import ErrorMessage from '@woocommerce/editor-components/error-placeholder/error-message';
 
 /**
  * The products control exposes a custom selector for searching and selecting
