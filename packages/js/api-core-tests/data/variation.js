@@ -7,7 +7,7 @@
  *
  */
 const variation = {
-	regular_price: '20.00',
+	regular_price: '1.00',
 	attributes: [
 		{
 			name: 'Size',
@@ -20,10 +20,10 @@ const variation = {
 	],
 };
 
-const getExampleVariation = () => {
+const getVariationExample = () => {
 	return variation;
 };
 
 module.exports = {
-	getExampleVariation,
+	getVariationExample,
 };

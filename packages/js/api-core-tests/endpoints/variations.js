@@ -7,7 +7,7 @@ const {
 	putRequest,
 	deleteRequest,
 } = require( '../utils/request' );
-const { getExampleVariation, shared } = require( '../data' );
+const { getVariationExample, shared } = require( '../data' );
 
 /**
  * WooCommerce Product Variation endpoints.
@@ -21,7 +21,7 @@ const variationsApi = {
 		method: 'POST',
 		path: 'products/<product_id>/variations',
 		responseCode: 201,
-		payload: getExampleVariation(),
+		payload: getVariationExample(),
 		variation: async ( productId, variation ) =>
 			postRequest( `products/${ productId }/variations`, variation ),
 	},
@@ -46,7 +46,7 @@ const variationsApi = {
 		method: 'PUT',
 		path: 'products/<product_id>/variations/<id>',
 		responseCode: 200,
-		payload: getExampleVariation(),
+		payload: getVariationExample(),
 		variation: async ( productId, variationId, variationDetails ) =>
 			putRequest(
 				`products/${ productId }/variations/${ variationId }`,
@@ -72,7 +72,7 @@ const variationsApi = {
 		method: 'POST',
 		path: 'products/<product_id>/variations/batch',
 		responseCode: 200,
-		payload: shared.getBatchPayloadExample( getExampleVariation() ),
+		payload: shared.getBatchPayloadExample( getVariationExample() ),
 		variations: async ( batchUpdatePayload ) =>
 			postRequest(
 				`products/${ productId }/variations/${ variationId }`,

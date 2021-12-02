@@ -7,7 +7,7 @@ const {
 	putRequest,
 	deleteRequest,
 } = require( '../utils/request' );
-const { getExampleTaxRate, shared } = require( '../data' );
+const { getTaxRateExamples, shared } = require( '../data' );
 
 /**
  * WooCommerce Tax Rates endpoints.
@@ -21,7 +21,7 @@ const taxRatesApi = {
 		method: 'POST',
 		path: 'taxes',
 		responseCode: 201,
-		payload: getExampleTaxRate(),
+		payload: getTaxRateExamples(),
 		taxRate: async ( taxRate ) => postRequest( 'taxes', taxRate ),
 	},
 	retrieve: {
@@ -44,7 +44,7 @@ const taxRatesApi = {
 		method: 'PUT',
 		path: 'taxes/<id>',
 		responseCode: 200,
-		payload: getExampleTaxRate(),
+		payload: getTaxRateExamples(),
 		taxRate: async ( taxRateId, taxRateDetails ) =>
 			putRequest( `taxes/${ taxRateId }`, taxRateDetails ),
 	},
@@ -64,7 +64,7 @@ const taxRatesApi = {
 		method: 'POST',
 		path: 'taxes/batch',
 		responseCode: 200,
-		payload: shared.getBatchPayloadExample( getExampleTaxRate() ),
+		payload: shared.getBatchPayloadExample( getTaxRateExamples() ),
 		taxRates: async ( batchUpdatePayload ) =>
 			postRequest( `taxes/batch`, batchUpdatePayload ),
 	},

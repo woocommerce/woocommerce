@@ -1,8 +1,8 @@
 const { order, getOrderExample } = require( './order' );
 const { coupon } = require( './coupon' );
 const { refund } = require( './refund' );
-const { getExampleTaxRate } = require( './tax-rate' );
-const { getExampleVariation } = require( './variation' );
+const { getTaxRateExamples } = require( './tax-rate' );
+const { getVariationExample } = require( './variation' );
 const {
 	simpleProduct,
 	variableProduct,
@@ -19,8 +19,8 @@ module.exports = {
 	coupon,
 	shared,
 	refund,
-	getExampleTaxRate,
-	getExampleVariation,
+	getTaxRateExamples,
+	getVariationExample,
 	simpleProduct,
 	variableProduct,
 	variation,

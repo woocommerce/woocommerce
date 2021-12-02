@@ -55,23 +55,6 @@ const variableProduct = {
 };
 
 /**
- * Variation example
- */
-const variation = {
-	regular_price: '1.00',
-	attributes: [
-		{
-			name: 'Size',
-			option: 'Large',
-		},
-		{
-			name: 'Colour',
-			option: 'Red',
-		},
-	],
-};
-
-/**
  * External product example
  */
 const externalProduct = {
@@ -92,7 +75,6 @@ module.exports = {
 	simpleProduct,
 	virtualProduct,
 	variableProduct,
-	variation,
 	externalProduct,
 	groupedProduct,
 };
