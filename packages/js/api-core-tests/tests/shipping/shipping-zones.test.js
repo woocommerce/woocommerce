@@ -14,17 +14,44 @@ const shippingZone = getShippingZoneExample();
  *
  */
 describe( 'Shipping zones API tests', () => {
-	beforeAll( async () => {
-		// Setup: Delete all pre-existing shipping zones.
-		// Skip deleting shipping zone with id = 0 because it is the "Rest of the world" zone.
+	it( 'cannot delete the default shipping zone "Locations not covered by your other zones"', async () => {
+		// Delete all pre-existing shipping zones
 		const { body } = await shippingZonesApi.listAll.shippingZones( {
 			_fields: 'id',
 		} );
-		const ids = body.filter( ( { id } ) => id > 0 ).map( ( { id } ) => id );
+		const ids = body.map( ( { id } ) => id );
 
 		for ( const id of ids ) {
 			await shippingZonesApi.delete.shippingZone( id, true );
 		}
+
+		// Verify that the default shipping zone remains
+		const {
+			body: remainingZones,
+		} = await shippingZonesApi.listAll.shippingZones( {
+			_fields: 'id',
+		} );
+
+		expect( remainingZones ).toHaveLength( 1 );
+		expect( remainingZones[ 0 ].id ).toEqual( 0 );
+	} );
+
+	it( 'cannot update the default shipping zone', async () => {
+		const newZoneDetails = {
+			name: 'Default shipping zone',
+		};
+		const { status, body } = await shippingZonesApi.update.shippingZone(
+			0,
+			newZoneDetails
+		);
+
+		expect( status ).toEqual( 403 );
+		expect( body.code ).toEqual(
+			'woocommerce_rest_shipping_zone_invalid_zone'
+		);
+		expect( body.message ).toEqual(
+			'The "locations not covered by your other zones" zone cannot be updated.'
+		);
 	} );
 
 	it( 'can create a shipping zone', async () => {
