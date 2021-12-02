@@ -4,6 +4,7 @@
   "description": "API tests for WooCommerce",
   "main": "index.js",
   "scripts": {
+    "preinstall": "npx only-allow pnpm",
     "test": "jest",
     "test:api": "jest --group=api",
     "test:hello": "jest --group=hello",
