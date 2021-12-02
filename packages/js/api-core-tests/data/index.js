@@ -3,6 +3,14 @@ const { coupon } = require( './coupon' );
 const { refund } = require( './refund' );
 const { getExampleTaxRate } = require( './tax-rate' );
 const { getExampleVariation } = require( './variation' );
+const {
+	simpleProduct,
+	variableProduct,
+	variation,
+	virtualProduct,
+	groupedProduct,
+	externalProduct,
+} = require( './products-crud' );
 const shared = require( './shared' );
 
 module.exports = {
@@ -13,4 +21,10 @@ module.exports = {
 	refund,
 	getExampleTaxRate,
 	getExampleVariation,
+	simpleProduct,
+	variableProduct,
+	variation,
+	virtualProduct,
+	groupedProduct,
+	externalProduct,
 };

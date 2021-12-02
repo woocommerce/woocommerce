@@ -4,13 +4,21 @@ const {
 	ordersApi,
 	variationsApi,
 } = require( '../../endpoints' );
-const { getOrderExample, getExampleTaxRate } = require( '../../data' );
+const {
+	getOrderExample,
+	getExampleTaxRate,
+	simpleProduct: defaultSimpleProduct,
+	variableProduct: defaultVariableProduct,
+	variation: defaultVariation,
+	groupedProduct: defaultGroupedProduct,
+	externalProduct: defaultExternalProduct,
+} = require( '../../data' );
 
 /**
  * Simple product with Standard tax rate
  */
 const simpleProduct = {
-	name: 'Black Compact Keyboard',
+	...defaultSimpleProduct,
 	regular_price: '10.00',
 	tax_class: 'standard',
 };
@@ -19,72 +27,29 @@ const simpleProduct = {
  * Variable product with 1 variation with Reduced tax rate
  */
 const variableProduct = {
-	name: 'Unbranded Granite Shirt',
-	type: 'variable',
+	...defaultVariableProduct,
 	tax_class: 'reduced-rate',
-	defaultAttributes: [
-		{
-			name: 'Size',
-			option: 'Medium',
-		},
-		{
-			name: 'Colour',
-			option: 'Blue',
-		},
-	],
-	attributes: [
-		{
-			name: 'Colour',
-			visible: true,
-			variation: true,
-			options: [ 'Red', 'Green', 'Blue' ],
-		},
-		{
-			name: 'Size',
-			visible: true,
-			variation: true,
-			options: [ 'Small', 'Medium', 'Large' ],
-		},
-		{
-			name: 'Logo',
-			visible: true,
-			variation: true,
-			options: [ 'Woo', 'WordPress' ],
-		},
-	],
 };
+
 const variation = {
+	...defaultVariation,
 	regular_price: '20.00',
 	tax_class: 'reduced-rate',
-	attributes: [
-		{
-			name: 'Size',
-			option: 'Large',
-		},
-		{
-			name: 'Colour',
-			option: 'Red',
-		},
-	],
 };
 
 /**
  * External product with Zero rate tax
  */
 const externalProduct = {
-	name: 'Ergonomic Steel Computer',
+	...defaultExternalProduct,
 	regular_price: '400.00',
-	type: 'external',
 	tax_class: 'zero-rate',
 };
 
 /**
- * Grouped product with 1 linked product
+ * Grouped product
  */
-const groupedProduct = {
-	name: 'Full Modern Computer Set',
-	type: 'grouped',
-};
+const groupedProduct = defaultGroupedProduct;
 
 /**
  * Tax rates for each tax class
@@ -102,6 +67,74 @@ const zeroTaxRate = {
 };
 
 /**
+ * Delete all pre-existing tax rates.
+ */
+const deletePreExistingTaxRates = async () => {
+	const { body } = await taxRatesApi.listAll.taxRates( {
+		_fields: 'id',
+	} );
+
+	if ( Array.isArray( body ) && body.length > 0 ) {
+		const ids = body.map( ( { id } ) => id );
+		await taxRatesApi.batch.taxRates( { delete: ids } );
+	}
+};
+
+/**
+ * Create a tax rate for each tax class, and save their ID's.
+ */
+const createTaxRates = async () => {
+	const taxRates = [ standardTaxRate, reducedTaxRate, zeroTaxRate ];
+
+	for ( const taxRate of taxRates ) {
+		const { body } = await taxRatesApi.create.taxRate( taxRate );
+		taxRate.id = body.id;
+	}
+};
+
+/**
+ * Create simple, variable, grouped, and external products.
+ */
+const createProducts = async () => {
+	// Create a simple product
+	const { body: createdSimpleProduct } = await productsApi.create.product(
+		simpleProduct
+	);
+	simpleProduct.id = createdSimpleProduct.id;
+
+	// Create a variable product with 1 variation
+	const { body: createdVariableProduct } = await productsApi.create.product(
+		variableProduct
+	);
+	variableProduct.id = createdVariableProduct.id;
+	await variationsApi.create.variation( variableProduct.id, variation );
+
+	// Create a grouped product using the simple product created earlier.
+	groupedProduct.grouped_products = [ simpleProduct.id ];
+	const { body: createdGroupedProduct } = await productsApi.create.product(
+		groupedProduct
+	);
+	groupedProduct.id = createdGroupedProduct.id;
+
+	// Create an external product
+	const { body: createdExternalProduct } = await productsApi.create.product(
+		externalProduct
+	);
+	externalProduct.id = createdExternalProduct.id;
+};
+
+/**
+ * The complex order to be created.
+ */
+const order = {
+	...getOrderExample(),
+	shipping_lines: [],
+	fee_lines: [],
+	coupon_lines: [],
+	line_items: [],
+};
+
+/**
  * Expected totals
  */
 const expectedOrderTotal = '442.20';
@@ -110,59 +143,27 @@ const expectedSimpleProductTaxTotal = '1.00';
 const expectedVariableProductTaxTotal = '0.20';
 const expectedExternalProductTaxTotal = '0.00';
 
-let order;
-
 /**
  *
  * Test for adding a complex order with different product types and tax classes.
  *
- * @group orders
  * @group api
- * @group tax-rates
+ * @group orders
+ *
  */
 describe( 'Orders API test', () => {
 	beforeAll( async () => {
-		// Create a tax rate for each tax class, and save their ID's
-		const { body: createdStandardRate } = await taxRatesApi.create.taxRate(
-			standardTaxRate
-		);
-		standardTaxRate.id = createdStandardRate.id;
+		await deletePreExistingTaxRates();
+		await createTaxRates();
+		await createProducts();
 
-		const { body: createdReducedRate } = await taxRatesApi.create.taxRate(
-			reducedTaxRate
-		);
-		reducedTaxRate.id = createdReducedRate.id;
-
-		const { body: createdZeroRate } = await taxRatesApi.create.taxRate(
-			zeroTaxRate
-		);
-		zeroTaxRate.id = createdZeroRate.id;
-
-		// Create a simple product
-		const { body: createdSimpleProduct } = await productsApi.create.product(
-			simpleProduct
-		);
-		simpleProduct.id = createdSimpleProduct.id;
-
-		// Create a variable product with 1 variation
-		const {
-			body: createdVariableProduct,
-		} = await productsApi.create.product( variableProduct );
-		variableProduct.id = createdVariableProduct.id;
-		await variationsApi.create.variation( variableProduct.id, variation );
-
-		// Create a grouped product using the simple product created earlier.
-		const {
-			body: createdGroupedProduct,
-		} = await productsApi.create.product( groupedProduct );
-		groupedProduct.grouped_products = [ simpleProduct.id ]; // Link the simple product
-		groupedProduct.id = createdGroupedProduct.id;
-
-		// Create an external product
-		const {
-			body: createdExternalProduct,
-		} = await productsApi.create.product( externalProduct );
-		externalProduct.id = createdExternalProduct.id;
+		// Add line items to the order
+		order.line_items = [
+			{ product_id: simpleProduct.id },
+			{ product_id: variableProduct.id },
+			{ product_id: externalProduct.id },
+			{ product_id: groupedProduct.id },
+		];
 	} );
 
 	afterAll( async () => {
@@ -186,54 +187,32 @@ describe( 'Orders API test', () => {
 	} );
 
 	it( 'can add complex order', async () => {
-		// Create an order with products having different tax classes
-		const createOrderPayload = {
-			...getOrderExample(),
-			shipping_lines: [],
-			fee_lines: [],
-			coupon_lines: [],
-			line_items: [
-				{ product_id: simpleProduct.id },
-				{ product_id: variableProduct.id },
-				{ product_id: externalProduct.id },
-				{ product_id: groupedProduct.id },
-			],
-		};
-		const { status, body } = await ordersApi.create.order(
-			createOrderPayload
-		);
-		order = body;
+		// Create the complex order and save its ID.
+		const { status, body } = await ordersApi.create.order( order );
+		order.id = body.id;
 
 		expect( status ).toEqual( ordersApi.create.responseCode );
 
-		// Verify totals
+		// Verify order and tax totals
 		expect( body.total ).toEqual( expectedOrderTotal );
 		expect( body.total_tax ).toEqual( expectedTaxTotal );
 
-		// Verify tax total of each product line item
-		const actualSimpleProductLineItem = body.line_items.find(
-			( { product_id } ) => product_id === simpleProduct.id
-		);
-		const actualVariableProductLineItem = body.line_items.find(
-			( { product_id } ) => product_id === variableProduct.id
-		);
-		const actualGroupedProductLineItem = body.line_items.find(
-			( { product_id } ) => product_id === groupedProduct.id
-		);
-		const actualExternalProductLineItem = body.line_items.find(
-			( { product_id } ) => product_id === externalProduct.id
-		);
-		expect( actualSimpleProductLineItem.total_tax ).toEqual(
-			expectedSimpleProductTaxTotal
-		);
-		expect( actualGroupedProductLineItem.total_tax ).toEqual(
-			expectedSimpleProductTaxTotal
-		);
-		expect( actualVariableProductLineItem.total_tax ).toEqual(
-			expectedVariableProductTaxTotal
-		);
-		expect( actualExternalProductLineItem.total_tax ).toEqual(
-			expectedExternalProductTaxTotal
-		);
+		// Verify total tax of each product line item
+		const expectedTaxTotalsPerLineItem = [
+			[ simpleProduct, expectedSimpleProductTaxTotal ],
+			[ variableProduct, expectedVariableProductTaxTotal ],
+			[ groupedProduct, expectedSimpleProductTaxTotal ],
+			[ externalProduct, expectedExternalProductTaxTotal ],
+		];
+		for ( const [
+			product,
+			expectedLineTaxTotal,
+		] of expectedTaxTotalsPerLineItem ) {
+			const { total_tax: actualLineTaxTotal } = body.line_items.find(
+				( { product_id } ) => product_id === product.id
+			);
+
+			expect( actualLineTaxTotal ).toEqual( expectedLineTaxTotal );
+		}
 	} );
 } );
