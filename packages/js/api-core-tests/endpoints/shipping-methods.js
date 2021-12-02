@@ -60,7 +60,7 @@ const shippingMethodsApi = {
 			),
 	},
 	delete: {
-		name: 'shipping/zones/<zone_id>/methods/<id>',
+		name: 'Delete a shipping method from a shipping zone',
 		method: 'DELETE',
 		path: 'shipping/zones/<zone_id>/methods/<id>>',
 		responseCode: 200,
