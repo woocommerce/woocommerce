@@ -7,7 +7,7 @@ import {
 	RawHTML,
 	useState,
 	useEffect,
-	useRef,
+	useCallback,
 	unmountComponentAtNode,
 } from '@wordpress/element';
 import {
@@ -51,12 +51,17 @@ const MiniCartBlock = ( {
 	const [ skipSlideIn, setSkipSlideIn ] = useState< boolean >(
 		isInitiallyOpen
 	);
+	const [ contentsNode, setContentsNode ] = useState< HTMLDivElement | null >(
+		null
+	);
 
-	const contentsRef = useRef() as React.MutableRefObject< HTMLDivElement >;
+	const contentsRef = useCallback( ( node ) => {
+		setContentsNode( node );
+	}, [] );
 
 	useEffect( () => {
-		if ( contentsRef.current instanceof Element ) {
-			const container = contentsRef.current.querySelector(
+		if ( contentsNode instanceof Element ) {
+			const container = contentsNode.querySelector(
 				'.wc-block-mini-cart-contents'
 			);
 			if ( ! container ) {
@@ -67,16 +72,11 @@ const MiniCartBlock = ( {
 					Block: MiniCartContentsBlock,
 					container,
 				} );
-			} else {
-				unmountComponentAtNode( container );
 			}
 		}
-	}, [ isOpen ] );
 
-	useEffect( () => {
 		return () => {
-			const contentsNode = contentsRef.current as unknown;
-			if ( contentsNode instanceof Element ) {
+			if ( contentsNode instanceof Element && isOpen ) {
 				const container = contentsNode.querySelector(
 					'.wc-block-mini-cart-contents'
 				);
@@ -85,7 +85,7 @@ const MiniCartBlock = ( {
 				}
 			}
 		};
-	}, [] );
+	}, [ isOpen, contentsNode ] );
 
 	useEffect( () => {
 		const openMiniCart = () => {
