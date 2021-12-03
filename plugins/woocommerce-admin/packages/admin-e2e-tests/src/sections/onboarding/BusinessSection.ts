@@ -50,6 +50,9 @@ export class BusinessSection extends BasePage {
 		const expandButtonSelector =
 			'.woocommerce-admin__business-details__selective-extensions-bundle__expand';
 
+		await this.page.waitForSelector(
+			expandButtonSelector + ':not([disabled])'
+		);
 		await this.click( expandButtonSelector );
 
 		// Confirm that expanding the list shows all the extensions available to install.

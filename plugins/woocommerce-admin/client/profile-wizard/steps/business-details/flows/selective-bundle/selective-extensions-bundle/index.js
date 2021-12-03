@@ -284,6 +284,10 @@ export const SelectiveExtensionsBundle = ( {
 						</p>
 						<Button
 							className="woocommerce-admin__business-details__selective-extensions-bundle__expand"
+							disabled={
+								! installableExtensions ||
+								installableExtensions.length === 0
+							}
 							onClick={ () => {
 								setShowExtensions( ! showExtensions );
 
@@ -340,8 +344,8 @@ export const SelectiveExtensionsBundle = ( {
 						onClick={ () => {
 							onSubmit( values );
 						} }
-						isBusy={ isInstallingActivating }
-						disabled={ isInstallingActivating }
+						isBusy={ isInstallingActivating || isResolving }
+						disabled={ isInstallingActivating || isResolving }
 						isPrimary
 					>
 						{ __( 'Continue', 'woocommerce-admin' ) }
