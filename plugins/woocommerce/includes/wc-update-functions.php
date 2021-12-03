@@ -2357,8 +2357,8 @@ function wc_create_product_attributes_lookup_table() {
 
 /**
  *
- * Update DB version to 6.1.0.
+ * Update DB version to 6.2.0.
  */
-function wc_update_610_db_version() {
-	WC_Install::update_db_version( '6.1.0' );
+function wc_update_620_db_version() {
+	WC_Install::update_db_version( '6.2.0' );
 }
