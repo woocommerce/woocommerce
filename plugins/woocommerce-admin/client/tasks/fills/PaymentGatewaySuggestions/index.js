@@ -56,8 +56,9 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 		);
 
 		return paymentGatewaySuggestions.reduce( ( map, suggestion ) => {
-			const { id } = suggestion;
-			const installedGateway = mappedPaymentGateways[ suggestion.id ]
+			// A colon ':' is used sometimes to have multiple configs for the same gateway ex: woocommerce_payments:us.
+			const id = ( suggestion.id || '' ).split( ':' )[ 0 ];
+			const installedGateway = mappedPaymentGateways[ id ]
 				? mappedPaymentGateways[ id ]
 				: {};
 
@@ -81,7 +82,7 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 				...suggestion,
 			};
 
-			map.set( id, enrichedSuggestion );
+			map.set( suggestion.id, enrichedSuggestion );
 			return map;
 		}, new Map() );
 	};
