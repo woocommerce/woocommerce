@@ -1,0 +1,4 @@
+Significance: patch
+Type: Update
+
+Update @woocommerce/e2e-environment package to latest. #8000
