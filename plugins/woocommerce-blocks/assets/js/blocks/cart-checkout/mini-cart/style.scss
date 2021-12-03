@@ -33,6 +33,10 @@
 	display: none;
 }
 
+.wc-block-mini-cart__tax-label {
+	margin-right: em($gap-smaller);
+}
+
 @media screen and (min-width: 768px) {
 	.wc-block-mini-cart__amount {
 		display: initial;

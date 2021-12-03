@@ -25,6 +25,15 @@ export const getSetting = < T >(
 	return filter( value, fallback ) as T;
 };
 
+export const getSettingWithCoercion = < T >(
+	name: string,
+	fallback: T,
+	typeguard: ( val: unknown, fb: unknown ) => val is T
+): T => {
+	const value = name in allSettings ? allSettings[ name ] : fallback;
+	return typeguard( value, fallback ) ? value : fallback;
+};
+
 /**
  * Note: this attempts to coerce the wpVersion to a semver for comparison
  * This will result in dropping any beta/rc values.

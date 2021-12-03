@@ -20,7 +20,8 @@ import {
 	formatPrice,
 	getCurrencyFromPriceResponse,
 } from '@woocommerce/price-format';
-import { getSetting } from '@woocommerce/settings';
+import { getSettingWithCoercion } from '@woocommerce/settings';
+import { isString, isBoolean } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -113,7 +114,15 @@ const MiniCartBlock = ( {
 		};
 	}, [] );
 
-	const subTotal = getSetting( 'displayCartPricesIncludingTax', false )
+	const showIncludingTax = getSettingWithCoercion(
+		'displayCartPricesIncludingTax',
+		false,
+		isBoolean
+	);
+
+	const taxLabel = getSettingWithCoercion( 'taxLabel', '', isString );
+
+	const subTotal = showIncludingTax
 		? parseInt( cartTotals.total_items, 10 ) +
 		  parseInt( cartTotals.total_items_tax, 10 )
 		: parseInt( cartTotals.total_items, 10 );
@@ -154,6 +163,11 @@ const MiniCartBlock = ( {
 						getCurrencyFromPriceResponse( cartTotals )
 					) }
 				</span>
+				{ taxLabel !== '' && subTotal !== 0 && (
+					<small className="wc-block-mini-cart__tax-label">
+						{ taxLabel }
+					</small>
+				) }
 				<QuantityBadge
 					count={ cartItemsCount }
 					colorClassNames={ colorClassNames }
