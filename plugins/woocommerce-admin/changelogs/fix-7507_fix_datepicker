@@ -1,0 +1,4 @@
+Significance: patch
+Type: Fix
+
+Fix usage of Wordpress DatePicker component. #7982

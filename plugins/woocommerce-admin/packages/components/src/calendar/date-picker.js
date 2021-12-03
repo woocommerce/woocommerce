@@ -6,7 +6,7 @@ import 'core-js/features/array/from';
 import { __, sprintf } from '@wordpress/i18n';
 import { createElement, Component } from '@wordpress/element';
 import { Dropdown, DatePicker as WpDatePicker } from '@wordpress/components';
-import { partial } from 'lodash';
+import { partial, noop } from 'lodash';
 import moment from 'moment';
 import PropTypes from 'prop-types';
 import { dateValidationMessages, toMoment } from '@woocommerce/date';
@@ -127,6 +127,8 @@ class DatePicker extends Component {
 									this.onDateChange,
 									onToggle
 								) }
+								// onMonthPreviewed is required to prevent a React error from happening.
+								onMonthPreviewed={ noop }
 								isInvalidDate={ isInvalidDate }
 							/>
 						</div>

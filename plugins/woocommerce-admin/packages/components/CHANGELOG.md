@@ -1,5 +1,7 @@
 # Unreleased
 
+-   Fix usage of Wordpress DatePicker component in `DatePicker`. #7982
+
 # 8.1.1
 
 -   Fixed warnings when using AdvancedFilters component. #7704
