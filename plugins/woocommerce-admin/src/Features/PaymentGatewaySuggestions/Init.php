@@ -59,15 +59,15 @@ class Init {
 	 */
 	public static function get_specs() {
 		if ( 'no' === get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) ) {
-			return DefaultPaymentGateways::get_all();
+			return apply_filters( 'woocommerce_admin_payment_gateway_suggestion_specs', DefaultPaymentGateways::get_all() );
 		}
 		$specs = PaymentGatewaySuggestionsDataSourcePoller::get_instance()->get_specs_from_data_sources();
 
 		// Fetch specs if they don't yet exist.
 		if ( false === $specs || ! is_array( $specs ) || 0 === count( $specs ) ) {
-			return DefaultPaymentGateways::get_all();
+			return apply_filters( 'woocommerce_admin_payment_gateway_suggestion_specs', DefaultPaymentGateways::get_all() );
 		}
 
-		return $specs;
+		return apply_filters( 'woocommerce_admin_payment_gateway_suggestion_specs', $specs );
 	}
 }

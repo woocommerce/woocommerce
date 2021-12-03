@@ -109,7 +109,7 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 
 		const gateway = getPaymentGateway( id );
 
-		if ( ! gateway || gateway.enabled ) {
+		if ( ! gateway ) {
 			return;
 		}
 
