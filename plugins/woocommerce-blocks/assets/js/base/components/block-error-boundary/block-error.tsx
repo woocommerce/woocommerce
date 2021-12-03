@@ -2,9 +2,12 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import PropTypes from 'prop-types';
 import { WC_BLOCKS_IMAGE_URL } from '@woocommerce/block-settings';
 
+/**
+ * Internal dependencies
+ */
+import type { BlockErrorProps } from './types';
 const BlockError = ( {
 	imageUrl = `${ WC_BLOCKS_IMAGE_URL }/block-error.svg`,
 	header = __( 'Oops!', 'woo-gutenberg-products-block' ),
@@ -15,7 +18,7 @@ const BlockError = ( {
 	errorMessage,
 	errorMessagePrefix = __( 'Error:', 'woo-gutenberg-products-block' ),
 	button,
-} ) => {
+}: BlockErrorProps ): JSX.Element => {
 	return (
 		<div className="wc-block-error wc-block-components-error">
 			{ imageUrl && (
@@ -50,39 +53,6 @@ const BlockError = ( {
 			</div>
 		</div>
 	);
-};
-
-BlockError.propTypes = {
-	/**
-	 * Error message to display below the content.
-	 */
-	errorMessage: PropTypes.node,
-	/**
-	 * Text to display as the heading of the error block.
-	 * If it's `null` or an empty string, no header will be displayed.
-	 * If it's not defined, the default header will be used.
-	 */
-	header: PropTypes.string,
-	/**
-	 * URL of the image to display.
-	 * If it's `null` or an empty string, no image will be displayed.
-	 * If it's not defined, the default image will be used.
-	 */
-	imageUrl: PropTypes.string,
-	/**
-	 * Text to display in the error block below the header.
-	 * If it's `null` or an empty string, nothing will be displayed.
-	 * If it's not defined, the default text will be used.
-	 */
-	text: PropTypes.node,
-	/**
-	 * Text preceeding the error message.
-	 */
-	errorMessagePrefix: PropTypes.string,
-	/**
-	 * Button cta.
-	 */
-	button: PropTypes.node,
 };
 
 export default BlockError;
