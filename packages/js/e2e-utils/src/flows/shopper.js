@@ -28,7 +28,7 @@ const { uiUnblocked, clickAndWaitForSelector } = require( '../page-utils' );
 
 const gotoMyAccount = async () => {
 	await page.goto( SHOP_MY_ACCOUNT_PAGE, {
-		waitUntil: 'networkidle0',
+		waitUntil: 'networkidle2',
 	} );
 };
 
