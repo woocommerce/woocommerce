@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
-import PropTypes from 'prop-types';
 import { Fragment, useMemo, useState } from '@wordpress/element';
 import classNames from 'classnames';
 
@@ -10,6 +9,21 @@ import classNames from 'classnames';
  * Internal dependencies
  */
 import './style.scss';
+
+interface CheckboxListOptions {
+	label: React.ReactNode;
+	value: string;
+}
+
+interface CheckboxListProps {
+	className?: string;
+	isLoading?: boolean;
+	isDisabled?: boolean;
+	limit?: number;
+	checked?: string[];
+	onChange?: ( value: string ) => void;
+	options?: CheckboxListOptions[];
+}
 
 /**
  * Component used to show a list of checkboxes in a group.
@@ -25,13 +39,13 @@ import './style.scss';
  */
 const CheckboxList = ( {
 	className,
-	onChange = () => {},
+	onChange = () => void 0,
 	options = [],
 	checked = [],
 	isLoading = false,
 	isDisabled = false,
 	limit = 10,
-} ) => {
+}: CheckboxListProps ): JSX.Element => {
 	const [ showExpanded, setShowExpanded ] = useState( false );
 
 	const placeholder = useMemo( () => {
@@ -165,21 +179,6 @@ const CheckboxList = ( {
 			{ isLoading ? placeholder : renderedOptions }
 		</ul>
 	);
-};
-
-CheckboxList.propTypes = {
-	onChange: PropTypes.func,
-	options: PropTypes.arrayOf(
-		PropTypes.shape( {
-			label: PropTypes.node.isRequired,
-			value: PropTypes.string.isRequired,
-		} )
-	),
-	checked: PropTypes.array,
-	className: PropTypes.string,
-	isLoading: PropTypes.bool,
-	isDisabled: PropTypes.bool,
-	limit: PropTypes.number,
 };
 
 export default CheckboxList;
