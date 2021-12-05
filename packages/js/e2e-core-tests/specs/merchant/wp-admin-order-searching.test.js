@@ -51,7 +51,7 @@ const updateCustomerBilling = async () => {
 		search: 'Jane',
 		role: 'all',
 	} );
-	if ( ! customers.data | ! customers.data.length ) {
+	if ( ! customers.data || ! customers.data.length ) {
 		return;
 	}
 

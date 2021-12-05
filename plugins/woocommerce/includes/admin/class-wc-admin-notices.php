@@ -51,7 +51,7 @@ class WC_Admin_Notices {
 		add_action( 'switch_theme', array( __CLASS__, 'reset_admin_notices' ) );
 		add_action( 'woocommerce_installed', array( __CLASS__, 'reset_admin_notices' ) );
 		add_action( 'wp_loaded', array( __CLASS__, 'add_redirect_download_method_notice' ) );
-		add_action( 'wp_loaded', array( __CLASS__, 'hide_notices' ) );
+		add_action( 'admin_init', array( __CLASS__, 'hide_notices' ), 20 );
 		// @TODO: This prevents Action Scheduler async jobs from storing empty list of notices during WC installation.
 		// That could lead to OBW not starting and 'Run setup wizard' notice not appearing in WP admin, which we want
 		// to avoid.

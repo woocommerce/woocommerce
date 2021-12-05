@@ -1,6 +1,6 @@
 # WooCommerce Tests
 
-This document discusses unit tests. See [the e2e README](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e) to learn how to setup testing environment for running e2e tests and run them.
+This document discusses unit tests. See [the e2e README](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/e2e/README.md) to learn how to setup testing environment for running e2e tests and run them.
 
 ## Table of contents
 
@@ -29,7 +29,7 @@ To run the tests, you need to create a test database. You can:
 
 ### Setup instructions
 
-Once you have database, from the WooCommerce root directory run the following:
+Once you have database, from the WooCommerce root directory "cd" into `plugins/woocommerce` directory and run the following:
 
 1. Install [PHPUnit](http://phpunit.de/) via Composer by running:
     ```
@@ -96,7 +96,7 @@ To workaround this, the testing strategy used by WooCommerce is as follows:
 * We normally use PHPUnit 6.5.14
 * For PHP 8 we use [a custom fork of PHPUnit 7.5.20 with support for PHP 8](https://github.com/woocommerce/phpunit/pull/1). WooCommerce's GitHub Actions CI workflow is configured to use this fork instead of the old version 6 when running in PHP 8.
 
-If you want to run the tests locally under PHP 8 you'll need to temporarily modify `composer.json` to use the custom PHPUnit fork in the same way that the GitHub Actions CI workflow file does. These are the commands that you'll need (run them after a regular `composer install`):
+If you want to run the tests locally under PHP 8 you'll need to temporarily modify `composer.json` to use the custom PHPUnit fork in the same way that the GitHub Actions CI workflow file does. These are the commands that you'll need (run them after a regular `composer install` from within the `plugins/woocommerce` directory):
 
 ```shell
 curl -L https://github.com/woocommerce/phpunit/archive/add-compatibility-with-php8-to-phpunit-7.zip -o /tmp/phpunit-7.5-fork.zip
@@ -104,6 +104,8 @@ unzip -d /tmp/phpunit-7.5-fork /tmp/phpunit-7.5-fork.zip
 composer bin phpunit config --unset platform
 composer bin phpunit config repositories.0 '{"type": "path", "url": "/tmp/phpunit-7.5-fork/phpunit-add-compatibility-with-php8-to-phpunit-7", "options": {"symlink": false}}'
 composer bin phpunit require --dev -W phpunit/phpunit:@dev --ignore-platform-reqs
+rm -rf ./vendor/phpunit/
+composer dump-autoload
 ```
 
 Just remember that you can't include the modified `composer.json` in any commit!

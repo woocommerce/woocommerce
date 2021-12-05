@@ -10,6 +10,7 @@ const {
 	getAppRoot,
 	getAppName,
 	getTestConfig,
+	resolveLocalE2ePath,
 } = require( '../utils' );
 
 const dockerArgs = [];
@@ -56,10 +57,7 @@ if ( appPath ) {
 
 		const appInitFile = customInitFile
 			? customInitFile
-			: path.resolve(
-					appPath,
-					'plugins/woocommerce/tests/e2e/docker/initialize.sh'
-			  );
+			: resolveLocalE2ePath( 'docker/initialize.sh' );
 		// If found, copy it into the wp-cli Docker context so
 		// it gets picked up by the entrypoint script.
 		if ( fs.existsSync( appInitFile ) ) {
@@ -82,11 +80,6 @@ const testConfig = getTestConfig();
 if ( ! process.env.WC_E2E_FOLDER_MAPPING ) {
 	envVars.WC_E2E_FOLDER_MAPPING =
 		'/var/www/html/wp-content/plugins/' + getAppBase();
-}
-
-// Set some environment variables
-if ( ! process.env.WC_CORE_PATH ) {
-	envVars.WC_CORE_PATH = 'plugins/woocommerce';
 }
 
 if ( ! process.env.WORDPRESS_PORT ) {
