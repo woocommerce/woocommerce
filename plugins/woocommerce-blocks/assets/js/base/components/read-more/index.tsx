@@ -2,7 +2,6 @@
  * External dependencies
  */
 import React, { createRef, Component } from 'react';
-import PropTypes from 'prop-types';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -10,14 +9,81 @@ import { __ } from '@wordpress/i18n';
  */
 import { clampLines } from './utils';
 
+export interface ReadMoreProps {
+	/**
+	 * The entire content to clamp
+	 */
+	children: React.ReactNode;
+	/**
+	 * Class names for the wrapped component
+	 */
+	className: string;
+	/**
+	 * What symbol to show after the allowed lines are reached
+	 *
+	 * @default '&hellip';
+	 */
+	ellipsis: string;
+	/**
+	 * The string to show to collapse the entire text into its clamped form
+	 *
+	 * @default 'Read less'
+	 */
+	lessText: string;
+	/**
+	 * How many lines to show before the text is clamped
+	 *
+	 * @default 3
+	 */
+	maxLines: number;
+	/**
+	 * The string to show to expande the entire text
+	 *
+	 * @default 'Read more'
+	 */
+	moreText: string;
+}
+
+interface ReadMoreState {
+	/**
+	 * This is true when read more has been pressed and the full review is shown.
+	 */
+	isExpanded: boolean;
+	/**
+	 * True if we are clamping content. False if the review is short. Null during init.
+	 */
+	clampEnabled: boolean | null;
+	/**
+	 * Content is passed in via children.
+	 */
+	content: React.ReactNode;
+	/**
+	 * Summary content generated from content HTML.
+	 */
+	summary: string;
+}
+
+export const defaultProps = {
+	className: 'read-more-content',
+	ellipsis: '&hellip;',
+	lessText: __( 'Read less', 'woo-gutenberg-products-block' ),
+	maxLines: 3,
+	moreText: __( 'Read more', 'woo-gutenberg-products-block' ),
+};
+
 /**
  * Show text based content, limited to a number of lines, with a read more link.
  *
  * Based on https://github.com/zoltantothcom/react-clamp-lines.
  */
-class ReadMore extends Component {
-	constructor( props ) {
-		super( ...arguments );
+class ReadMore extends Component< ReadMoreProps, ReadMoreState > {
+	static defaultProps = defaultProps;
+
+	private reviewSummary: React.RefObject< HTMLDivElement >;
+	private reviewContent: React.RefObject< HTMLDivElement >;
+
+	constructor( props: ReadMoreProps ) {
+		super( props );
 
 		this.state = {
 			/**
@@ -38,15 +104,22 @@ class ReadMore extends Component {
 			summary: '.',
 		};
 
-		this.reviewSummary = createRef();
-		this.reviewContent = createRef();
+		this.reviewContent = createRef< HTMLDivElement >();
+		this.reviewSummary = createRef< HTMLDivElement >();
 		this.getButton = this.getButton.bind( this );
 		this.onClick = this.onClick.bind( this );
 	}
 
-	componentDidMount() {
+	componentDidMount(): void {
 		if ( this.props.children ) {
 			const { maxLines, ellipsis } = this.props;
+
+			if (
+				! this.reviewSummary.current ||
+				! this.reviewContent.current
+			) {
+				return;
+			}
 
 			const lineHeight = this.reviewSummary.current.clientHeight + 1;
 			const reviewHeight = this.reviewContent.current.clientHeight + 1;
@@ -70,7 +143,7 @@ class ReadMore extends Component {
 		}
 	}
 
-	getButton() {
+	getButton(): JSX.Element | undefined {
 		const { isExpanded } = this.state;
 		const { className, lessText, moreText } = this.props;
 
@@ -95,10 +168,8 @@ class ReadMore extends Component {
 
 	/**
 	 * Handles the click event for the read more/less button.
-	 *
-	 * @param {Object} e event
 	 */
-	onClick( e ) {
+	onClick( e: React.MouseEvent< HTMLAnchorElement, MouseEvent > ): void {
 		e.preventDefault();
 
 		const { isExpanded } = this.state;
@@ -108,7 +179,7 @@ class ReadMore extends Component {
 		} );
 	}
 
-	render() {
+	render(): JSX.Element | null {
 		const { className } = this.props;
 		const { content, summary, clampEnabled, isExpanded } = this.state;
 
@@ -148,22 +219,5 @@ class ReadMore extends Component {
 		);
 	}
 }
-
-ReadMore.propTypes = {
-	children: PropTypes.node.isRequired,
-	maxLines: PropTypes.number,
-	ellipsis: PropTypes.string,
-	moreText: PropTypes.string,
-	lessText: PropTypes.string,
-	className: PropTypes.string,
-};
-
-ReadMore.defaultProps = {
-	maxLines: 3,
-	ellipsis: '&hellip;',
-	moreText: __( 'Read more', 'woo-gutenberg-products-block' ),
-	lessText: __( 'Read less', 'woo-gutenberg-products-block' ),
-	className: 'read-more-content',
-};
 
 export default ReadMore;

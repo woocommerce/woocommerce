@@ -1,15 +1,24 @@
 /**
+ * External dependencies
+ */
+import { Story, Meta } from '@storybook/react';
+
+/**
  * Internal dependencies
  */
-import ReadMore from '../';
+import ReadMore, { defaultProps, ReadMoreProps } from '..';
 
 export default {
 	title: 'WooCommerce Blocks/@base-components/ReadMore',
 	component: ReadMore,
-};
+	args: defaultProps,
+	argTypes: {
+		children: { control: { disable: true } },
+	},
+} as Meta< ReadMoreProps >;
 
-export const Default = () => (
-	<ReadMore maxLines={ 2 }>
+const LongText = (
+	<>
 		<h1>
 			No! Alderaan is peaceful. We have no weapons. You can&apos;t
 			possibly…
@@ -49,5 +58,13 @@ export const Default = () => (
 				Content from http://fillerama.io &quot;Star Wars&quot;
 			</a>
 		</aside>
-	</ReadMore>
+	</>
 );
+
+const Template: Story< ReadMoreProps > = ( args ) => <ReadMore { ...args } />;
+
+export const Default = Template.bind( {} );
+Default.args = {
+	children: LongText,
+	maxLines: 6,
+};
