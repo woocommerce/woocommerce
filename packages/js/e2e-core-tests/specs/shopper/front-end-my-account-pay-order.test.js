@@ -35,7 +35,7 @@ const runMyAccountPayOrderTest = () => {
 		});
 
 		afterAll( async () => {
-			shopper.logout();
+			await shopper.logout();
 		} );
 
 		it('allows customer to pay for their order in My Account', async () => {
