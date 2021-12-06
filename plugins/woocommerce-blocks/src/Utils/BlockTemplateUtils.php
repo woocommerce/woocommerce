@@ -133,7 +133,7 @@ class BlockTemplateUtils {
 		$template_content         = file_get_contents( $template_file->path );
 		$template                 = new \WP_Block_Template();
 		$template->id             = 'woocommerce//' . $template_file->slug;
-		$template->theme          = 'woocommerce';
+		$template->theme          = 'WooCommerce';
 		$template->content        = self::gutenberg_inject_theme_attribute_in_content( $template_content );
 		$template->source         = 'plugin';
 		$template->slug           = $template_file->slug;
@@ -141,6 +141,7 @@ class BlockTemplateUtils {
 		$template->title          = ! empty( $template_file->title ) ? $template_file->title : self::convert_slug_to_title( $template_file->slug );
 		$template->status         = 'publish';
 		$template->has_theme_file = true;
+		$template->origin         = 'plugin';
 		$template->is_custom      = false; // Templates loaded from the filesystem aren't custom, ones that have been edited and loaded from the DB are.
 		$template->post_types     = array(); // Don't appear in any Edit Post template selector dropdown.
 		if ( 'wp_template_part' === $template_type ) {
