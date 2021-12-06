@@ -2,8 +2,7 @@
 
 ## Added
 
-- Added `jest-circus` as a test runner to enable retrying failed tests
-- Added `E2E_RETRY_TIMES` environment variable to determine retry count. The default is 3.
+- Added `await` for every call to `shopper.logout`
 
 ## Fixed
 
