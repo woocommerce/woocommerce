@@ -42,6 +42,10 @@ const runCheckoutLoginAccountTest = () => {
 			await shopper.goToCheckout();
 		});
 
+		afterAll( async () => {
+			await shopper.logout();
+		} );
+
 		it('can login to an existing account during checkout', async () => {
 			// Click to login during checkout
 			await page.waitForSelector('.woocommerce-form-login-toggle');
@@ -65,8 +69,11 @@ const runCheckoutLoginAccountTest = () => {
 
 			// Verify the user is logged in on my account page
 			await shopper.gotoMyAccount();
-			await expect(page.url()).toMatch('my-account/');
-			await expect(page).toMatchElement('h1', {text: 'My account'});
+
+			await Promise.all( [
+				await expect(page.url()).toMatch('my-account/'),
+				await expect(page).toMatchElement('h1', {text: 'My account'}),
+			] );
 		});
 	});
 };
