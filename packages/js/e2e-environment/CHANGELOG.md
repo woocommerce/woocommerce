@@ -1,5 +1,9 @@
 # Unreleased
 
+## Added
+
+- Added `await` for every call to `shopper.logout`
+
 ## Fixed
 
 - Update `wc-e2e` script to fix an issue with directories with a space in their name
