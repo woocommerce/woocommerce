@@ -240,7 +240,6 @@ const shopper = {
 
 		await expect( page.title() ).resolves.toMatch( 'My account' );
 		await page.click( '.woocommerce-MyAccount-navigation-link--customer-logout a' );
-		await page.waitForNavigation( { waitUntil: 'networkidle0' } );
 	},
 };
 

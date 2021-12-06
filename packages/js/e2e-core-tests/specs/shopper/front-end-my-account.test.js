@@ -16,7 +16,7 @@ const pages = [
 const runMyAccountPageTest = () => {
 	describe('My account page', () => {
 		afterAll( async () => {
-			shopper.logout();
+			await shopper.logout();
 		} );
 
 		it('allows customer to login', async () => {
