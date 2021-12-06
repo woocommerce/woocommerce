@@ -33,6 +33,7 @@ class CouponPageMoved {
 
 		add_action( 'admin_init', [ $this, 'possibly_add_note' ] );
 		add_action( 'admin_init', [ $this, 'redirect_to_coupons' ] );
+		add_action( 'woocommerce_admin_newly_installed', [ $this, 'disable_legacy_menu_for_new_install' ] );
 	}
 
 	/**
@@ -45,6 +46,11 @@ class CouponPageMoved {
 			return false;
 		}
 
+		// Don't add the notice if the legacy coupon menu is already disabled.
+		if ( ! self::should_display_legacy_menu() ) {
+			return false;
+		}
+
 		// Don't add the notice if it's been hidden by the user before.
 		if ( self::has_dismissed_note() ) {
 			return false;
@@ -52,11 +58,6 @@ class CouponPageMoved {
 
 		// If we already have a notice, don't add a new one.
 		if ( self::has_unactioned_note() ) {
-			return false;
-		}
-
-		// If new navigation feature is enabled.
-		if ( Features::is_enabled( 'navigation' ) ) {
 			return false;
 		}
 
@@ -147,5 +148,12 @@ class CouponPageMoved {
 		$this->display_legacy_menu( false );
 		wp_safe_redirect( self::get_management_url( 'coupons' ) );
 		exit;
+	}
+
+	/**
+	 * Disable legacy coupon menu when installing for the first time.
+	 */
+	public function disable_legacy_menu_for_new_install() {
+		$this->display_legacy_menu( false );
 	}
 }
