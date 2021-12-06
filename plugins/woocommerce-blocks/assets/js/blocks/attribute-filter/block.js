@@ -162,35 +162,6 @@ const AttributeFilterBlock = ( {
 		queryState.attributes,
 	] );
 
-	const checkedQuery = useMemo( () => {
-		return productAttributesQuery
-			.filter(
-				( { attribute } ) => attribute === attributeObject?.taxonomy
-			)
-			.flatMap( ( { slug } ) => slug );
-	}, [ productAttributesQuery, attributeObject?.taxonomy ] );
-
-	const currentCheckedQuery = useShallowEqual( checkedQuery );
-	const previousCheckedQuery = usePrevious( currentCheckedQuery );
-	// Track ATTRIBUTES QUERY changes so the block reflects current filters.
-	useEffect( () => {
-		if (
-			! isShallowEqual( previousCheckedQuery, currentCheckedQuery ) && // checked query changed
-			! isShallowEqual( checked, currentCheckedQuery ) // checked query doesn't match the UI
-		) {
-			setChecked( currentCheckedQuery );
-			if ( ! blockAttributes.showFilterButton ) {
-				onSubmit( currentCheckedQuery );
-			}
-		}
-	}, [
-		checked,
-		currentCheckedQuery,
-		previousCheckedQuery,
-		onSubmit,
-		blockAttributes.showFilterButton,
-	] );
-
 	/**
 	 * Returns an array of term objects that have been chosen via the checkboxes.
 	 */
@@ -229,6 +200,35 @@ const AttributeFilterBlock = ( {
 			blockAttributes.queryType,
 		]
 	);
+
+	const checkedQuery = useMemo( () => {
+		return productAttributesQuery
+			.filter(
+				( { attribute } ) => attribute === attributeObject?.taxonomy
+			)
+			.flatMap( ( { slug } ) => slug );
+	}, [ productAttributesQuery, attributeObject?.taxonomy ] );
+
+	const currentCheckedQuery = useShallowEqual( checkedQuery );
+	const previousCheckedQuery = usePrevious( currentCheckedQuery );
+	// Track ATTRIBUTES QUERY changes so the block reflects current filters.
+	useEffect( () => {
+		if (
+			! isShallowEqual( previousCheckedQuery, currentCheckedQuery ) && // checked query changed
+			! isShallowEqual( checked, currentCheckedQuery ) // checked query doesn't match the UI
+		) {
+			setChecked( currentCheckedQuery );
+			if ( ! blockAttributes.showFilterButton ) {
+				onSubmit( currentCheckedQuery );
+			}
+		}
+	}, [
+		checked,
+		currentCheckedQuery,
+		previousCheckedQuery,
+		onSubmit,
+		blockAttributes.showFilterButton,
+	] );
 
 	const multiple =
 		blockAttributes.displayStyle !== 'dropdown' ||
