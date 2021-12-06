@@ -514,7 +514,7 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Cons
 	<tbody>
 		<tr>
 			<td data-export-label="WC Database Version"><?php esc_html_e( 'WooCommerce database version', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'The database version for WooCommerce. Note that it may not match WooCommerce core version and that is normal.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The database version for WooCommerce. This should be the same as your WooCommerce version.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 			<td><?php echo esc_html( $database['wc_database_version'] ); ?></td>
 		</tr>
 		<tr>
