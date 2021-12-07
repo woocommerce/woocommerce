@@ -27,4 +27,6 @@ const getProps = ( el ) => {
 	};
 };
 
+// @ts-ignore
+// Current typing does not work with non-functional components
 renderFrontend( { selector, Block: FrontendContainerBlock, getProps } );

@@ -16,6 +16,7 @@ const getProps = ( el ) => {
 			headingLevel: el.dataset.headingLevel || 3,
 			showFilterButton: el.dataset.showFilterButton === 'true',
 		},
+		isEditor: false,
 	};
 };
 

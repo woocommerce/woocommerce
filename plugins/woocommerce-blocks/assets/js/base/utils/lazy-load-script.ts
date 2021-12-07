@@ -3,7 +3,7 @@
  */
 import { isString } from '@woocommerce/types';
 
-interface lazyLoadScriptParams {
+interface LazyLoadScriptParams {
 	handle: string;
 	src: string;
 	version?: string;
@@ -12,7 +12,7 @@ interface lazyLoadScriptParams {
 	translations?: string;
 }
 
-interface appendScriptAttributesParam {
+interface AppendScriptAttributesParam {
 	id: string;
 	innerHTML?: string;
 	onerror?: OnErrorEventHandlerNonNull;
@@ -35,7 +35,7 @@ const isScriptTagInDOM = ( scriptId: string ): boolean => {
  * Appends a script element to the document body if a script with the same id
  * doesn't exist.
  */
-const appendScript = ( attributes: appendScriptAttributesParam ): void => {
+const appendScript = ( attributes: AppendScriptAttributesParam ): void => {
 	// Abort if id is not valid or a script with the same id exists.
 	if ( ! isString( attributes.id ) || isScriptTagInDOM( attributes.id ) ) {
 		return;
@@ -47,7 +47,7 @@ const appendScript = ( attributes: appendScriptAttributesParam ): void => {
 		if ( ! attributes.hasOwnProperty( attr ) ) {
 			continue;
 		}
-		const key = attr as keyof appendScriptAttributesParam;
+		const key = attr as keyof AppendScriptAttributesParam;
 
 		// Skip the keys that aren't strings, because TS can't be sure which
 		// key in the scriptElement object we're assigning to.
@@ -90,7 +90,7 @@ const lazyLoadScript = ( {
 	after,
 	before,
 	translations,
-}: lazyLoadScriptParams ): Promise< void > => {
+}: LazyLoadScriptParams ): Promise< void > => {
 	return new Promise( ( resolve, reject ) => {
 		if ( isScriptTagInDOM( `${ handle }-js` ) ) {
 			resolve();
