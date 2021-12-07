@@ -985,7 +985,7 @@ class WC_Checkout {
 
 			$result = apply_filters( 'woocommerce_payment_successful_result', $result, $order_id );
 
-			if ( ! is_ajax() ) {
+			if ( ! wp_doing_ajax() ) {
 				// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect
 				wp_redirect( $result['redirect'] );
 				exit;
@@ -1006,7 +1006,7 @@ class WC_Checkout {
 		$order->payment_complete();
 		wc_empty_cart();
 
-		if ( ! is_ajax() ) {
+		if ( ! wp_doing_ajax() ) {
 			wp_safe_redirect(
 				apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', $order->get_checkout_order_received_url(), $order )
 			);
@@ -1106,7 +1106,7 @@ class WC_Checkout {
 	 * If checkout failed during an AJAX call, send failure response.
 	 */
 	protected function send_ajax_failure_response() {
-		if ( is_ajax() ) {
+		if ( wp_doing_ajax() ) {
 			// Only print notices if not reloading the checkout, otherwise they're lost in the page reload.
 			if ( ! isset( WC()->session->reload_checkout ) ) {
 				$messages = wc_print_notices( true );
