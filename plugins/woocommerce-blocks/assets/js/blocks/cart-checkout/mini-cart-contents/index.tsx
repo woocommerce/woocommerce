@@ -8,7 +8,8 @@ import { registerExperimentalBlockType } from '@woocommerce/block-settings';
 /**
  * Internal dependencies
  */
-import edit from './edit';
+import edit, { Save as save } from './edit';
+import './inner-blocks';
 
 const settings = {
 	apiVersion: 2,
@@ -29,6 +30,7 @@ const settings = {
 		multiple: false,
 		reusable: false,
 		inserter: false,
+		__experimentalExposeControlsToChildren: true,
 	},
 	attributes: {
 		lock: {
@@ -51,12 +53,8 @@ const settings = {
 			save: false,
 		},
 	},
-
 	edit,
-
-	save() {
-		return null;
-	},
+	save,
 };
 
 registerExperimentalBlockType( 'woocommerce/mini-cart-contents', settings );

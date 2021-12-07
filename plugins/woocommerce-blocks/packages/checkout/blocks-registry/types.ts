@@ -18,6 +18,8 @@ export enum innerBlockAreas {
 	FILLED_CART = 'woocommerce/filled-cart-block',
 	CART_ITEMS = 'woocommerce/cart-items-block',
 	CART_TOTALS = 'woocommerce/cart-totals-block',
+	EMPTY_MINI_CART = 'woocommerce/empty-mini-cart-contents-block',
+	FILLED_MINI_CART = 'woocommerce/filled-mini-cart-content-block',
 }
 
 interface CheckoutBlockOptionsMetadata extends Partial< BlockConfiguration > {
