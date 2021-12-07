@@ -117,7 +117,7 @@ These docs currently don't go into detail for all the hooks as that is fairly st
 
 ### `usePaymentMethodInterface`
 
-This hook is used to expose all the interfaces for the registered payment method components to utilize. Essentially the result from this hook is fed in as props on the registered payment components when they are setup by checkout. You can use the typedef ([`RegisteredPaymentMethodProps`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/assets/js/type-defs/registered-payment-method-props.js)) to see what is fed to payment methods as props from this hook.
+This hook is used to expose all the interfaces for the registered payment method components to utilize. Essentially the result from this hook is fed in as props on the registered payment components when they are setup by checkout. You can use the typedef ([`PaymentMethodInterface`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/assets/js/type-defs/payment-method-interface.ts)) to see what is fed to payment methods as props from this hook.
 
 _Why don't payment methods just implement this hook_?
 

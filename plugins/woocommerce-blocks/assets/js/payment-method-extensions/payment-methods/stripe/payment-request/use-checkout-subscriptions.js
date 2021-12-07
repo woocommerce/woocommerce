@@ -16,10 +16,10 @@ import {
 } from '../stripe-utils';
 
 /**
- * @typedef {import('@woocommerce/type-defs/registered-payment-method-props').EventRegistrationProps} EventRegistrationProps
- * @typedef {import('@woocommerce/type-defs/registered-payment-method-props').BillingDataProps} BillingDataProps
- * @typedef {import('@woocommerce/type-defs/registered-payment-method-props').ShippingDataProps} ShippingDataProps
- * @typedef {import('@woocommerce/type-defs/registered-payment-method-props').EmitResponseProps} EmitResponseProps
+ * @typedef {import('@woocommerce/type-defs/payment-method-interface').EventRegistrationProps} EventRegistrationProps
+ * @typedef {import('@woocommerce/type-defs/payment-method-interface').BillingDataProps} BillingDataProps
+ * @typedef {import('@woocommerce/type-defs/payment-method-interface').ShippingDataProps} ShippingDataProps
+ * @typedef {import('@woocommerce/type-defs/payment-method-interface').EmitResponseProps} EmitResponseProps
  */
 
 /**

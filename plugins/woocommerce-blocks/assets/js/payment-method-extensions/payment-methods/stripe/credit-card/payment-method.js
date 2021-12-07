@@ -14,7 +14,7 @@ import { InlineCard, CardElements } from './elements';
 /**
  * @typedef {import('../stripe-utils/type-defs').Stripe} Stripe
  * @typedef {import('../stripe-utils/type-defs').StripePaymentRequest} StripePaymentRequest
- * @typedef {import('@woocommerce/type-defs/registered-payment-method-props').RegisteredPaymentMethodProps} RegisteredPaymentMethodProps
+ * @typedef {import('@woocommerce/type-defs/payment-method-interface').PaymentMethodInterface} RegisteredPaymentMethodProps
  */
 
 export const getStripeCreditCardIcons = () => {

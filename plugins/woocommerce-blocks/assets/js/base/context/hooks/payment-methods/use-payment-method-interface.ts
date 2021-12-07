@@ -9,6 +9,7 @@ import PaymentMethodIcons from '@woocommerce/base-components/cart-checkout/payme
 import { getSetting } from '@woocommerce/settings';
 import deprecated from '@wordpress/deprecated';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
+import type { PaymentMethodInterface } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -26,7 +27,7 @@ import { prepareTotalItems } from './utils';
 /**
  * Returns am interface to use as payment method props.
  */
-export const usePaymentMethodInterface = (): Record< string, unknown > => {
+export const usePaymentMethodInterface = (): PaymentMethodInterface => {
 	const {
 		isCalculating,
 		isComplete,
@@ -65,7 +66,7 @@ export const usePaymentMethodInterface = (): Record< string, unknown > => {
 		shippingAddress,
 		setShippingAddress,
 	} = useCustomerDataContext();
-	const { cartTotals } = useStoreCart();
+	const { cartItems, cartFees, cartTotals, extensions } = useStoreCart();
 	const { appliedCoupons } = useStoreCartCoupons();
 	const { noticeContexts, responseTypes } = useEmitResponse();
 	const currentCartTotals = useRef(
@@ -106,16 +107,21 @@ export const usePaymentMethodInterface = (): Record< string, unknown > => {
 	return {
 		activePaymentMethod,
 		billing: {
+			appliedCoupons,
 			billingData,
 			cartTotal: currentCartTotal.current,
-			currency: getCurrencyFromPriceResponse( cartTotals ),
 			cartTotalItems: currentCartTotals.current,
+			currency: getCurrencyFromPriceResponse( cartTotals ),
+			customerId,
 			displayPricesIncludingTax: getSetting(
 				'displayCartPricesIncludingTax',
 				false
 			) as boolean,
-			appliedCoupons,
-			customerId,
+		},
+		cartData: {
+			cartItems,
+			cartFees,
+			extensions,
 		},
 		checkoutStatus: {
 			isCalculating,
@@ -124,38 +130,38 @@ export const usePaymentMethodInterface = (): Record< string, unknown > => {
 			isProcessing,
 		},
 		components: {
-			ValidationInputError,
+			LoadingMask,
 			PaymentMethodIcons,
 			PaymentMethodLabel,
-			LoadingMask,
+			ValidationInputError,
 		},
 		emitResponse: {
 			noticeContexts,
 			responseTypes,
 		},
 		eventRegistration: {
+			onCheckoutAfterProcessingWithError,
+			onCheckoutAfterProcessingWithSuccess,
 			onCheckoutBeforeProcessing,
 			onCheckoutValidationBeforeProcessing,
-			onCheckoutAfterProcessingWithSuccess,
-			onCheckoutAfterProcessingWithError,
-			onShippingRateSuccess,
-			onShippingRateFail,
-			onShippingRateSelectSuccess,
-			onShippingRateSelectFail,
 			onPaymentProcessing,
+			onShippingRateFail,
+			onShippingRateSelectFail,
+			onShippingRateSelectSuccess,
+			onShippingRateSuccess,
 		},
 		onSubmit,
 		paymentStatus: currentStatus,
 		setExpressPaymentError: deprecatedSetExpressPaymentError,
 		shippingData: {
-			shippingRates,
-			shippingRatesLoading,
+			isSelectingRate,
+			needsShipping,
 			selectedRates,
 			setSelectedRates,
-			isSelectingRate,
-			shippingAddress,
 			setShippingAddress,
-			needsShipping,
+			shippingAddress,
+			shippingRates,
+			shippingRatesLoading,
 		},
 		shippingStatus: {
 			shippingErrorStatus,
