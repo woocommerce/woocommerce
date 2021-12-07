@@ -14,7 +14,7 @@ import { errorTypes, errorCodes } from './constants';
  * @typedef {import('./type-defs').StripeServerData} StripeServerData
  * @typedef {import('./type-defs').StripePaymentItem} StripePaymentItem
  * @typedef {import('./type-defs').StripePaymentRequest} StripePaymentRequest
- * @typedef {import('@woocommerce/type-defs/registered-payment-method-props').PreparedCartTotalItem} CartTotalItem
+ * @typedef {import('@woocommerce/type-defs/payment-method-interface').PreparedCartTotalItem} CartTotalItem
  */
 
 /**

@@ -14,10 +14,6 @@ import { PAYMENT_METHOD_NAME } from './constants';
 const settings = getSetting( 'paypal_data', {} );
 
 /**
- * @typedef {import('@woocommerce/type-defs/registered-payment-method-props').RegisteredPaymentMethodProps} RegisteredPaymentMethodProps
- */
-
-/**
  * Content component
  */
 const Content = () => {
