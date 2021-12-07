@@ -1,5 +1,9 @@
 # Unreleased
 
+## Changes
+
+- Removed `page.waitForNavigation()` from `shopper.logout()`
+
 ## Added
 
 - `utils.waitForTimeout( delay )` pause processing for `delay` milliseconds

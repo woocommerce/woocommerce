@@ -1,5 +1,9 @@
 # Unreleased
 
+## Added
+
+- Added `await` for every call to `shopper.logout`
+
 ## Fixed
 
 - Updated the browserViewport in `jest.setup.js` to match the `defaultViewport` dimensions defined in `jest-puppeteer.config.js`

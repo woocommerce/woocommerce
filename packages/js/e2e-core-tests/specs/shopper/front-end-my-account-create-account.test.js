@@ -26,7 +26,7 @@ const runMyAccountCreateAccountTest = () => {
 		});
 
 		afterAll( async () => {
-			shopper.logout();
+			await shopper.logout();
 		} );
 
 		it('can create a new account via my account', async () => {
