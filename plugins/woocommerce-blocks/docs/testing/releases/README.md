@@ -52,3 +52,4 @@ Every release includes specific testing instructions for new features and bug fi
     -   [6.3.2](./632.md)
     -   [6.3.3](./633.md)
 -   [6.4.0](./640.md)
+-   [6.5.0](./650.md)
