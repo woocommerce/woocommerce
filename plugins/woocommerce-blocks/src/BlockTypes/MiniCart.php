@@ -7,7 +7,7 @@ use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
 use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
 use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
-use Automattic\WooCommerce\Blocks\RestApi;
+use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 
 /**
  * Mini Cart class.
@@ -306,8 +306,9 @@ class MiniCart extends AbstractBlock {
 		}
 
 		$wrapper_classes = 'wc-block-mini-cart  wp-block-woocommerce-mini-cart';
-		$classes         = '';
-		$style           = '';
+		$classes_styles  = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array( 'text_color', 'background_color' ) );
+		$classes         = $classes_styles['classes'];
+		$style           = $classes_styles['styles'];
 
 		if ( ! empty( $attributes['align'] ) ) {
 			$wrapper_classes .= ' align-' . $attributes['align'];
@@ -315,31 +316,6 @@ class MiniCart extends AbstractBlock {
 
 		if ( ! isset( $attributes['transparentButton'] ) || $attributes['transparentButton'] ) {
 			$wrapper_classes .= ' is-transparent';
-		}
-
-		/**
-		 * Get the color class and inline style.
-		 *
-		 * @todo refactor the logic of color class and style using StyleAttributesUtils.
-		 */
-		if ( ! empty( $attributes['textColor'] ) ) {
-			$classes .= sprintf(
-				' has-%s-color has-text-color',
-				esc_attr( $attributes['textColor'] )
-			);
-		} elseif ( ! empty( $attributes['style']['color']['text'] ) ) {
-			$style   .= 'color: ' . esc_attr( $attributes['style']['color']['text'] ) . ';';
-			$classes .= ' has-text-color';
-		}
-
-		if ( ! empty( $attributes['backgroundColor'] ) ) {
-			$classes .= sprintf(
-				' has-%s-background-color has-background',
-				esc_attr( $attributes['backgroundColor'] )
-			);
-		} elseif ( ! empty( $attributes['style']['color']['background'] ) ) {
-			$style   .= 'background-color: ' . esc_attr( $attributes['style']['color']['background'] ) . ';';
-			$classes .= ' has-background';
 		}
 
 		$aria_label = sprintf(
