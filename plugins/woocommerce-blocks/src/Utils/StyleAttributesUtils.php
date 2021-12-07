@@ -15,23 +15,20 @@ class StyleAttributesUtils {
 	 */
 	public static function get_font_size_class_and_style( $attributes ) {
 
-		$font_size = $attributes['fontSize'];
+		$font_size = $attributes['fontSize'] ?? '';
 
-		$custom_font_size = isset( $attributes['style']['typography']['fontSize'] ) ? $attributes['style']['typography']['fontSize'] : null;
+		$custom_font_size = $attributes['style']['typography']['fontSize'] ?? '';
 
-		if ( ! isset( $font_size ) && ! isset( $custom_font_size ) ) {
+		if ( ! $font_size && '' === $custom_font_size ) {
 			return null;
 		};
 
-		$has_named_font_size  = ! empty( $font_size );
-		$has_custom_font_size = isset( $custom_font_size );
-
-		if ( $has_named_font_size ) {
+		if ( $font_size ) {
 			return array(
 				'class' => sprintf( 'has-font-size has-%s-font-size', $font_size ),
 				'style' => null,
 			);
-		} elseif ( $has_custom_font_size ) {
+		} elseif ( '' !== $custom_font_size ) {
 			return array(
 				'class' => null,
 				'style' => sprintf( 'font-size: %s;', $custom_font_size ),
@@ -49,23 +46,20 @@ class StyleAttributesUtils {
 	 */
 	public static function get_text_color_class_and_style( $attributes ) {
 
-		$text_color = $attributes['textColor'];
+		$text_color = $attributes['textColor'] ?? '';
 
-		$custom_text_color = isset( $attributes['style']['color']['text'] ) ? $attributes['style']['color']['text'] : null;
+		$custom_text_color = $attributes['style']['color']['text'] ?? '';
 
-		if ( ! isset( $text_color ) && ! isset( $custom_text_color ) ) {
+		if ( ! $text_color && ! $custom_text_color ) {
 			return null;
 		};
 
-		$has_named_text_color  = ! empty( $text_color );
-		$has_custom_text_color = isset( $custom_text_color );
-
-		if ( $has_named_text_color ) {
+		if ( $text_color ) {
 			return array(
 				'class' => sprintf( 'has-text-color has-%s-color', $text_color ),
 				'style' => null,
 			);
-		} elseif ( $has_custom_text_color ) {
+		} elseif ( $custom_text_color ) {
 			return array(
 				'class' => null,
 				'style' => sprintf( 'color: %s;', $custom_text_color ),
@@ -117,18 +111,47 @@ class StyleAttributesUtils {
 	 */
 	public static function get_line_height_class_and_style( $attributes ) {
 
-		$line_height = isset( $attributes['style']['typography']['lineHeight'] ) ? $attributes['style']['typography']['lineHeight'] : null;
+		$line_height = $attributes['style']['typography']['lineHeight'] ?? '';
 
-		if ( ! isset( $line_height ) ) {
+		if ( ! $line_height ) {
 			return null;
 		};
 
-		$line_height_style = sprintf( 'line-height: %s;', $line_height );
-
 		return array(
 			'class' => null,
-			'style' => $line_height_style,
+			'style' => sprintf( 'line-height: %s;', $line_height ),
 		);
+	}
+
+	/**
+	 * Get class and style for background-color from attributes.
+	 *
+	 * @param array $attributes Block attributes.
+	 *
+	 * @return (array | null)
+	 */
+	public static function get_background_color_class_and_style( $attributes ) {
+
+		$background_color = $attributes['backgroundColor'] ?? '';
+
+		$custom_background_color = $attributes['style']['color']['background'] ?? '';
+
+		if ( ! $background_color && '' === $custom_background_color ) {
+			return null;
+		};
+
+		if ( $background_color ) {
+			return array(
+				'class' => sprintf( 'has-background has-%s-background-color', $background_color ),
+				'style' => null,
+			);
+		} elseif ( '' !== $custom_background_color ) {
+			return array(
+				'class' => null,
+				'style' => sprintf( 'background-color: %s;', $custom_background_color ),
+			);
+		}
+		return null;
 	}
 
 	/**
@@ -141,10 +164,11 @@ class StyleAttributesUtils {
 	 */
 	public static function get_classes_and_styles_by_attributes( $attributes, $properties = array() ) {
 		$classes_and_styles = array(
-			'line_height' => self::get_line_height_class_and_style( $attributes ),
-			'text_color'  => self::get_text_color_class_and_style( $attributes ),
-			'font_size'   => self::get_font_size_class_and_style( $attributes ),
-			'link_color'  => self::get_link_color_class_and_style( $attributes ),
+			'line_height'      => self::get_line_height_class_and_style( $attributes ),
+			'text_color'       => self::get_text_color_class_and_style( $attributes ),
+			'font_size'        => self::get_font_size_class_and_style( $attributes ),
+			'link_color'       => self::get_link_color_class_and_style( $attributes ),
+			'background_color' => self::get_background_color_class_and_style( $attributes ),
 		);
 
 		if ( ! empty( $properties ) ) {
