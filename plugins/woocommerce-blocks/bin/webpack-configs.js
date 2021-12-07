@@ -18,6 +18,7 @@ const CircularDependencyPlugin = require( 'circular-dependency-plugin' );
 const { getEntryConfig } = require( './webpack-entries' );
 const {
 	NODE_ENV,
+	FORCE_MAP,
 	CHECK_CIRCULAR_DEPS,
 	requestToExternal,
 	requestToHandle,
@@ -118,7 +119,7 @@ woocommerce_blocks_env = ${ NODE_ENV }
 				new TerserPlugin( {
 					cache: true,
 					parallel: true,
-					sourceMap: ! isProduction,
+					sourceMap: !! FORCE_MAP || ! isProduction,
 					terserOptions: {
 						output: {
 							comments: /translators:/i,
@@ -225,7 +226,7 @@ const getMainConfig = ( options = {} ) => {
 				new TerserPlugin( {
 					cache: true,
 					parallel: true,
-					sourceMap: ! isProduction,
+					sourceMap: !! FORCE_MAP || ! isProduction,
 					terserOptions: {
 						output: {
 							comments: /translators:/i,
@@ -339,7 +340,7 @@ const getFrontConfig = ( options = {} ) => {
 				new TerserPlugin( {
 					cache: true,
 					parallel: true,
-					sourceMap: ! isProduction,
+					sourceMap: !! FORCE_MAP || ! isProduction,
 					terserOptions: {
 						output: {
 							comments: /translators:/i,
@@ -441,7 +442,7 @@ const getPaymentsConfig = ( options = {} ) => {
 				new TerserPlugin( {
 					cache: true,
 					parallel: true,
-					sourceMap: ! isProduction,
+					sourceMap: !! FORCE_MAP || ! isProduction,
 					terserOptions: {
 						output: {
 							comments: /translators:/i,
@@ -537,7 +538,7 @@ const getExtensionsConfig = ( options = {} ) => {
 				new TerserPlugin( {
 					cache: true,
 					parallel: true,
-					sourceMap: ! isProduction,
+					sourceMap: !! FORCE_MAP || ! isProduction,
 					terserOptions: {
 						output: {
 							comments: /translators:/i,

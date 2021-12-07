@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { SearchListItem } from '@woocommerce/components';
+import { SearchListItem } from '@woocommerce/editor-components/search-list-control';
 import { Spinner } from '@wordpress/components';
 import classNames from 'classnames';
 

@@ -1,7 +1,13 @@
 /**
  * External dependencies
  */
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import {
+	render,
+	screen,
+	fireEvent,
+	waitFor,
+	act,
+} from '@testing-library/react';
 import { previewCart } from '@woocommerce/resource-previews';
 import { dispatch } from '@wordpress/data';
 import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
@@ -124,21 +130,27 @@ const resetMockPaymentMethods = () => {
 };
 
 describe( 'Testing Payment Method Data Context Provider', () => {
-	beforeEach( async () => {
-		registerMockPaymentMethods();
-		fetchMock.mockResponse( ( req ) => {
-			if ( req.url.match( /wc\/store\/cart/ ) ) {
-				return Promise.resolve( JSON.stringify( previewCart ) );
-			}
-			return Promise.resolve( '' );
+	beforeEach( () => {
+		act( () => {
+			registerMockPaymentMethods();
+
+			fetchMock.mockResponse( ( req ) => {
+				if ( req.url.match( /wc\/store\/cart/ ) ) {
+					return Promise.resolve( JSON.stringify( previewCart ) );
+				}
+				return Promise.resolve( '' );
+			} );
+
+			// need to clear the store resolution state between tests.
+			dispatch( storeKey ).invalidateResolutionForStore();
+			dispatch( storeKey ).receiveCart( defaultCartState.cartData );
 		} );
-		// need to clear the store resolution state between tests.
-		await dispatch( storeKey ).invalidateResolutionForStore();
-		await dispatch( storeKey ).receiveCart( defaultCartState.cartData );
 	} );
 	afterEach( async () => {
-		resetMockPaymentMethods();
-		fetchMock.resetMocks();
+		act( () => {
+			resetMockPaymentMethods();
+			fetchMock.resetMocks();
+		} );
 	} );
 	it( 'toggles active payment method correctly for express payment activation and close', async () => {
 		const TriggerActiveExpressPaymentMethod = () => {
@@ -157,7 +169,11 @@ describe( 'Testing Payment Method Data Context Provider', () => {
 				</PaymentMethodDataProvider>
 			);
 		};
-		render( <TestComponent /> );
+
+		act( () => {
+			render( <TestComponent /> );
+		} );
+
 		// should initialize by default the first payment method.
 		await waitFor( () => {
 			const activePaymentMethod = screen.queryByText(
@@ -165,26 +181,37 @@ describe( 'Testing Payment Method Data Context Provider', () => {
 			);
 			expect( activePaymentMethod ).not.toBeNull();
 		} );
-		// Express payment method clicked.
-		fireEvent.click(
-			screen.getByText( 'express-payment express payment method' )
-		);
+
+		act( () => {
+			// Express payment method clicked.
+			fireEvent.click(
+				screen.getByText( 'express-payment express payment method' )
+			);
+		} );
+
 		await waitFor( () => {
 			const activePaymentMethod = screen.queryByText(
 				/Active Payment Method: express-payment/
 			);
 			expect( activePaymentMethod ).not.toBeNull();
 		} );
-		// Express payment method closed.
-		fireEvent.click(
-			screen.getByText( 'express-payment express payment method close' )
-		);
+
+		act( () => {
+			// Express payment method closed.
+			fireEvent.click(
+				screen.getByText(
+					'express-payment express payment method close'
+				)
+			);
+		} );
+
 		await waitFor( () => {
 			const activePaymentMethod = screen.queryByText(
 				/Active Payment Method: cheque/
 			);
 			expect( activePaymentMethod ).not.toBeNull();
 		} );
+
 		// ["`select` control in `@wordpress/data-controls` is deprecated. Please use built-in `resolveSelect` control in `@wordpress/data` instead."]
 		expect( console ).toHaveWarned();
 	} );
@@ -213,7 +240,11 @@ describe( 'Testing Payment Method Data Context Provider', () => {
 				</PaymentMethodDataProvider>
 			);
 		};
-		render( <TestComponent /> );
+
+		act( () => {
+			render( <TestComponent /> );
+		} );
+
 		// Should initialize by default the default saved payment method.
 		await waitFor( () => {
 			const activePaymentMethod = screen.queryByText(
@@ -223,10 +254,14 @@ describe( 'Testing Payment Method Data Context Provider', () => {
 			expect( activePaymentMethod ).not.toBeNull();
 			expect( stripeToken ).not.toBeNull();
 		} );
-		// Express payment method clicked.
-		fireEvent.click(
-			screen.getByText( 'express-payment express payment method' )
-		);
+
+		act( () => {
+			// Express payment method clicked.
+			fireEvent.click(
+				screen.getByText( 'express-payment express payment method' )
+			);
+		} );
+
 		await waitFor( () => {
 			const activePaymentMethod = screen.queryByText(
 				/Active Payment Method: express-payment/
@@ -235,10 +270,16 @@ describe( 'Testing Payment Method Data Context Provider', () => {
 			expect( activePaymentMethod ).not.toBeNull();
 			expect( stripeToken ).toBeNull();
 		} );
-		// Express payment method closed.
-		fireEvent.click(
-			screen.getByText( 'express-payment express payment method close' )
-		);
+
+		act( () => {
+			// Express payment method closed.
+			fireEvent.click(
+				screen.getByText(
+					'express-payment express payment method close'
+				)
+			);
+		} );
+
 		await waitFor( () => {
 			const activePaymentMethod = screen.queryByText(
 				/Active Payment Method: stripe/

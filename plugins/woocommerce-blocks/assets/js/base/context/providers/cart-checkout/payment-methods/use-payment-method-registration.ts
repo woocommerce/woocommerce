@@ -163,7 +163,10 @@ const usePaymentMethodRegistration = (
 
 	const debouncedRefreshCanMakePayments = useDebouncedCallback(
 		refreshCanMakePayments,
-		500
+		500,
+		{
+			leading: true,
+		}
 	);
 
 	// Determine which payment methods are available initially and whenever
