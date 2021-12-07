@@ -33,6 +33,7 @@ jobs:
           pnpm install jest
           
       - name: Run smoke test.
+        id: tests
         working-directory: package/woocommerce/plugins/woocommerce
         env:
           SMOKE_TEST_URL: ${{ secrets.SMOKE_TEST_URL }}
@@ -49,7 +50,33 @@ jobs:
           DEFAULT_TIMEOUT_OVERRIDE: 120000
         run: |
           pnpx wc-e2e test:e2e plugins/woocommerce/tests/e2e/specs/smoke-tests/update-woocommerce.js
+          echo "::set-output name=smoke-results::$(pnpx wc-e2e fetch:e2e-results --smoke)"
           pnpx wc-e2e test:e2e
+          echo "::set-output name=e2e-results::$(pnpx wc-e2e fetch:e2e-results --e2e)"
+
+      - name: Smoke tests results comment on PR
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: ${{ steps.tests.outputs.smoke-results }}
+            })
+
+      - name: E2E tests results comment on PR
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: ${{ steps.tests.outputs.e2e-results }}
+            })
 
       - name: Remove label from pull request.
         if: "${{ contains(github.event.pull_request.labels.*.name, 'run: smoke tests') }}"
