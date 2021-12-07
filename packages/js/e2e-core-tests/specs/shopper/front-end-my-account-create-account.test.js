@@ -25,6 +25,10 @@ const runMyAccountCreateAccountTest = () => {
 			await merchant.logout();
 		});
 
+		afterAll( async () => {
+			await shopper.logout();
+		} );
+
 		it('can create a new account via my account', async () => {
 			await shopper.gotoMyAccount();
 			await page.waitForSelector('.woocommerce-form-register');

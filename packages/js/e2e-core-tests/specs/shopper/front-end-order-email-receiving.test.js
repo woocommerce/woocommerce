@@ -30,11 +30,15 @@ const runOrderEmailReceivingTest = () => {
 	describe('Shopper Order Email Receiving', () => {
 		beforeAll(async () => {
 			simplePostIdValue = await createSimpleProduct();
-			
+
 			await merchant.login();
 			await deleteAllEmailLogs();
 			await merchant.logout();
 		});
+
+		afterAll( async () => {
+			await shopper.logout();
+		} );
 
 		it('should receive order email after purchasing an item', async () => {
 			await shopper.login();

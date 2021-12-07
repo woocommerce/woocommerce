@@ -39,6 +39,10 @@ const runAddNewShippingZoneTest = () => {
 			await merchant.login();
 		});
 
+		afterAll( async () => {
+			await shopper.logout();
+		} );
+
 		it('add shipping zone for San Francisco with free Local pickup', async () => {
 			// Add a new shipping zone for San Francisco 94107, CA, US with Local pickup
 			await addShippingZoneAndMethod(shippingZoneNameSF, california, sanFranciscoZIP, 'local_pickup');

@@ -28,8 +28,8 @@ jobs:
         run: |
           npm install -g pnpm
           pnpm install
-          composer install --no-dev
-          pnpm run build:assets
+          pnpm nx composer-install-no-dev woocommerce
+          pnpm nx build-assets woocommerce
           pnpm install jest
           
       - name: Run smoke test.
