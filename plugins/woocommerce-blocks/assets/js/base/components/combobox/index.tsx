@@ -22,6 +22,20 @@ export interface ComboboxControlOption {
 	value: string;
 }
 
+export interface ComboboxProps {
+	autoComplete?: string;
+	className?: string;
+	errorId: string | null;
+	errorMessage?: string;
+	id: string;
+	instanceId?: string;
+	label: string;
+	onChange: ( filterValue: string ) => void;
+	options: ComboboxControlOption[];
+	required?: boolean;
+	value: string;
+}
+
 /**
  * Wrapper for the WordPress ComboboxControl which supports validation.
  */
@@ -40,19 +54,7 @@ const Combobox = ( {
 	errorId: incomingErrorId,
 	instanceId = '0',
 	autoComplete = 'off',
-}: {
-	id: string;
-	className: string;
-	label: string;
-	onChange: ( filterValue: string ) => void;
-	options: ComboboxControlOption[];
-	value: string;
-	required: boolean;
-	errorMessage: string;
-	errorId: string;
-	instanceId: string;
-	autoComplete: string;
-} ): JSX.Element => {
+}: ComboboxProps ): JSX.Element => {
 	const {
 		getValidationError,
 		setValidationErrors,

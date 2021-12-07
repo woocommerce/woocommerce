@@ -13,7 +13,7 @@ import Combobox from '../combobox';
 import './style.scss';
 import type { CountryInputWithCountriesProps } from './CountryInputProps';
 
-const CountryInput = ( {
+export const CountryInput = ( {
 	className,
 	countries,
 	id,
@@ -30,10 +30,12 @@ const CountryInput = ( {
 }: CountryInputWithCountriesProps ): JSX.Element => {
 	const options = useMemo(
 		() =>
-			Object.keys( countries ).map( ( key ) => ( {
-				value: key,
-				label: decodeEntities( countries[ key ] ),
-			} ) ),
+			Object.entries( countries ).map(
+				( [ countryCode, countryName ] ) => ( {
+					value: countryCode,
+					label: decodeEntities( countryName ),
+				} )
+			),
 		[ countries ]
 	);
 
