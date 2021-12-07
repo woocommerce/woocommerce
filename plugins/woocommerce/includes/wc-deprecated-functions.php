@@ -1129,11 +1129,11 @@ if ( ! function_exists( 'is_ajax' ) ) {
 	/**
 	 * Is_ajax - Returns true when the page is loaded via ajax.
 	 *
-	 * @deprecated 6.0.0
+	 * @deprecated 6.1.0
 	 * @return bool
 	 */
 	function is_ajax() {
-		wc_deprecated_function( 'is_ajax', '6.0', 'wp_doing_ajax' );
+		wc_deprecated_function( 'is_ajax', '6.1.0', 'wp_doing_ajax' );
 		return function_exists( 'wp_doing_ajax' ) ? wp_doing_ajax() : Constants::is_defined( 'DOING_AJAX' );
 	}
 }
