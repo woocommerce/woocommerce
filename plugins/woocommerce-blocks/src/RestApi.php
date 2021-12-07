@@ -50,7 +50,7 @@ class RestApi {
 	 * Get routes for a namespace.
 	 *
 	 * @param string $namespace Namespace to retrieve.
-	 * @return array|null
+	 * @return array
 	 */
 	public function get_routes_from_namespace( $namespace ) {
 		$rest_server     = rest_get_server();
@@ -61,9 +61,13 @@ class RestApi {
 			]
 		);
 
+		if ( is_wp_error( $namespace_index ) ) {
+			return [];
+		}
+
 		$response_data = $namespace_index->get_data();
 
-		return isset( $response_data['routes'] ) ? $response_data['routes'] : null;
+		return $response_data['routes'] ?? [];
 	}
 
 	/**
@@ -74,7 +78,7 @@ class RestApi {
 	 */
 	public function store_api_authentication( $result ) {
 		// Pass through errors from other authentication methods used before this one.
-		if ( ! empty( $result ) || ! self::is_request_to_store_api() ) {
+		if ( ! empty( $result ) || ! $this->is_request_to_store_api() ) {
 			return $result;
 		}
 		return true;
@@ -87,7 +91,7 @@ class RestApi {
 	 * @param string $logged_in_cookie The value for the logged in cookie.
 	 */
 	public function store_api_logged_in_cookie( $logged_in_cookie ) {
-		if ( ! defined( 'LOGGED_IN_COOKIE' ) || ! self::is_request_to_store_api() ) {
+		if ( ! defined( 'LOGGED_IN_COOKIE' ) || ! $this->is_request_to_store_api() ) {
 			return;
 		}
 		$_COOKIE[ LOGGED_IN_COOKIE ] = $logged_in_cookie;
