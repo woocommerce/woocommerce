@@ -103,13 +103,12 @@ You can get the current Mysql port with `npm run wp-env-mysql-port` command.
 
 1. Open your choice of Mysql tool.
 2. Use the following values to access the Mysql container.
-3. You can omit the username and password.
 
 | Name | Value |
 |--------|-----|
 |  Host  | 127.0.0.1 |
-| Username |  |
-| Password |  |
+| Username | root |
+| Password | password |
 | Port | Port from the command |
 
 ## HOWTOs
