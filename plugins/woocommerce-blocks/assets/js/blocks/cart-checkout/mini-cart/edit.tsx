@@ -18,6 +18,7 @@ import { __ } from '@wordpress/i18n';
 import { positionCenter, positionRight, positionLeft } from '@wordpress/icons';
 import classnames from 'classnames';
 import { isString } from '@woocommerce/types';
+import Noninteractive from '@woocommerce/base-components/noninteractive';
 
 /**
  * Internal dependencies
@@ -165,22 +166,24 @@ const MiniCartBlock = ( {
 						</PanelBody>
 					) }
 			</InspectorControls>
-			<button
-				className={ classnames(
-					'wc-block-mini-cart__button',
-					colorClassNames
-				) }
-				style={ colorStyle }
-			>
-				<span className="wc-block-mini-cart__amount">
-					{ formatPrice( productTotal ) }
-				</span>
-				<QuantityBadge
-					count={ productCount }
-					colorClassNames={ colorClassNames }
+			<Noninteractive>
+				<button
+					className={ classnames(
+						'wc-block-mini-cart__button',
+						colorClassNames
+					) }
 					style={ colorStyle }
-				/>
-			</button>
+				>
+					<span className="wc-block-mini-cart__amount">
+						{ formatPrice( productTotal ) }
+					</span>
+					<QuantityBadge
+						count={ productCount }
+						colorClassNames={ colorClassNames }
+						style={ colorStyle }
+					/>
+				</button>
+			</Noninteractive>
 			<CartCheckoutCompatibilityNotice blockName="mini-cart" />
 		</div>
 	);

@@ -34,7 +34,7 @@ const Noninteractive = ( {
 	style = {},
 	...props
 }: {
-	children: React.ReactChildren;
+	children: React.ReactNode;
 	style?: Record< string, string >;
 } ): JSX.Element => {
 	const node = useRef< HTMLDivElement >( null );
