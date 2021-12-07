@@ -1,9 +1,10 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\StoreApi;
 
-use Routes\AbstractRoute;
 use Automattic\WooCommerce\Blocks\StoreApi\Utilities\CartController;
 use Automattic\WooCommerce\Blocks\StoreApi\Utilities\OrderController;
+use Exception;
+use Routes\AbstractRoute;
 
 /**
  * RoutesController class.
