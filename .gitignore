@@ -47,3 +47,6 @@ tsconfig.tsbuildinfo
 /tmp
 packages/js/e2e-environment/config/default.json
 packages/js/e2e-environment/docker/wp-cli/initialize.sh
+
+# Test Results
+test-results.json
