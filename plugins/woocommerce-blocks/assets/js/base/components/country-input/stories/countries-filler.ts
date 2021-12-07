@@ -248,4 +248,4 @@ export const countries = {
 	YE: 'Yemen',
 	ZM: 'Zambia',
 	ZW: 'Zimbabwe',
-};
+} as const;
