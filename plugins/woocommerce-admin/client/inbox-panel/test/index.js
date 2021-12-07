@@ -1,7 +1,28 @@
 /**
+ * External dependencies
+ */
+import { render } from '@testing-library/react';
+import { useSelect } from '@wordpress/data';
+import { recordEvent } from '@woocommerce/tracks';
+
+/**
  * Internal dependencies
  */
 import { getUnreadNotesCount, hasValidNotes } from '../utils';
+import InboxPanel from '../';
+
+jest.mock( '@wordpress/data', () => {
+	// Require the original module to not be mocked...
+	const originalModule = jest.requireActual( '@wordpress/data' );
+
+	return {
+		__esModule: true, // Use it when dealing with esModules
+		...originalModule,
+		useSelect: jest.fn().mockReturnValue( {} ),
+	};
+} );
+
+jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
 
 const notes = [
 	{
@@ -9,30 +30,35 @@ const notes = [
 		date_created_gmt: '2019-05-10T16:57:31',
 		is_deleted: false,
 		status: 'unactioned',
+		actions: [],
 	},
 	{
 		id: 2,
 		date_created_gmt: '2020-05-12T16:57:31',
 		is_deleted: false,
 		status: 'unactioned',
+		actions: [],
 	},
 	{
 		id: 3,
 		date_created_gmt: '2020-05-14T16:57:31',
 		is_deleted: false,
 		status: 'unactioned',
+		actions: [],
 	},
 	{
 		id: 4,
 		date_created_gmt: '2020-05-15T16:57:31',
 		is_deleted: false,
 		status: 'unactioned',
+		actions: [],
 	},
 	{
 		id: 5,
 		date_created_gmt: '2020-05-18T16:57:31',
 		is_deleted: false,
 		status: 'unactioned',
+		actions: [],
 	},
 ];
 
@@ -77,5 +103,21 @@ describe( 'hasValidNotes', () => {
 		notes[ 0 ].is_deleted = true;
 		notes[ 3 ].is_deleted = true;
 		expect( hasValidNotes( notes ) ).toBeTruthy();
+	} );
+} );
+
+describe( 'inbox_panel_view_event', () => {
+	test( 'should fire when panel rendered', () => {
+		useSelect.mockImplementation( () => ( {
+			notes,
+			isError: false,
+			isResolvingNotes: false,
+			isBatchUpdating: false,
+		} ) );
+		render( <InboxPanel /> );
+
+		expect( recordEvent ).toHaveBeenCalledWith( 'inbox_panel_view', {
+			total: 5,
+		} );
 	} );
 } );

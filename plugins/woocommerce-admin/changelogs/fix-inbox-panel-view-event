@@ -1,0 +1,4 @@
+Significance: minor
+Type: Tweak
+
+Add inbox_panel_view tracks event. #8002

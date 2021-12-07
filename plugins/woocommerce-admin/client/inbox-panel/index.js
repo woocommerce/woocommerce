@@ -68,6 +68,10 @@ const renderNotes = ( {
 		return renderEmptyCard();
 	}
 
+	recordEvent( 'inbox_panel_view', {
+		total: notes.length,
+	} );
+
 	const screen = getScreenName();
 	const onNoteVisible = ( note ) => {
 		recordEvent( 'inbox_note_view', {
