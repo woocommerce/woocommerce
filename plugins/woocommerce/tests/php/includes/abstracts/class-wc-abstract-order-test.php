@@ -246,4 +246,27 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$this->assertEquals( 0, ( new WC_Coupon( $coupon_code_2 ) )->get_usage_count() );
 		$this->assertEquals( 0, ( new WC_Coupon( $coupon_code_3 ) )->get_usage_count() );
 	}
+
+	/**
+	 * Test apply_coupon() stores coupon meta data.
+	 * See: https://github.com/woocommerce/woocommerce/issues/28166.
+	 */
+	public function test_apply_coupon_stores_meta_data() {
+		$coupon_code = 'coupon_test_meta_data';
+		$coupon = WC_Helper_Coupon::create_coupon( $coupon_code );
+		$order  = WC_Helper_Order::create_order();
+		$order->set_status( 'processing' );
+		$order->save();
+		$order->apply_coupon( $coupon_code );
+
+		$coupon_items = $order->get_items( 'coupon' );
+		$this->assertCount( 1, $coupon_items );
+
+		$coupon_data = ( current( $coupon_items ) )->get_meta( 'coupon_data' );
+		$this->assertNotEmpty( $coupon_data, 'WC_Order_Item_Coupon missing `coupon_data` meta.' );
+		$this->assertArrayHasKey( 'id', $coupon_data );
+		$this->assertArrayHasKey( 'code', $coupon_data );
+		$this->assertEquals( $coupon->get_id(), $coupon_data['id'] );
+		$this->assertEquals( $coupon_code, $coupon_data['code'] );
+	}
 }
