@@ -63,7 +63,7 @@ const MiniCartBlock = ( {
 		if ( contentsNode instanceof Element ) {
 			const container = contentsNode.querySelector(
 				'.wc-block-mini-cart-contents'
-			);
+			) as HTMLElement;
 			if ( ! container ) {
 				return;
 			}
@@ -71,6 +71,8 @@ const MiniCartBlock = ( {
 				renderBlock( {
 					Block: MiniCartContentsBlock,
 					container,
+					attributes: {},
+					props: {},
 				} );
 			}
 		}

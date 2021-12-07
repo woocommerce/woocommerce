@@ -15,6 +15,7 @@ const getProps = ( el ) => {
 			heading: el.dataset.heading,
 			headingLevel: el.dataset.headingLevel || 3,
 		},
+		isEditor: false,
 	};
 };
 

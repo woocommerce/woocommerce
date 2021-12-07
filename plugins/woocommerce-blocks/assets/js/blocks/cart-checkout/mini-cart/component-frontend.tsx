@@ -28,7 +28,7 @@ const renderMiniCartFrontend = () => {
 	renderFrontend( {
 		selector: '.wc-block-mini-cart',
 		Block: MiniCartBlock,
-		getProps: ( el: HTMLElement ) => {
+		getProps: ( el ) => {
 			let colorClassNames = '';
 			const button = el.querySelector( '.wc-block-mini-cart__button' );
 			if ( button !== null ) {
@@ -41,9 +41,10 @@ const renderMiniCartFrontend = () => {
 				isInitiallyOpen: el.dataset.isInitiallyOpen === 'true',
 				colorClassNames,
 				style: el.dataset.style ? JSON.parse( el.dataset.style ) : {},
-				contents: el.querySelector(
-					'.wc-block-mini-cart__template-part'
-				)?.innerHTML,
+				contents:
+					el.querySelector( '.wc-block-mini-cart__template-part' )
+						?.innerHTML ?? '',
+				transparentButton: false,
 			};
 		},
 	} );

@@ -14,6 +14,7 @@ const getProps = ( el ) => {
 			showInputFields: el.dataset.showinputfields === 'true',
 			showFilterButton: el.dataset.showfilterbutton === 'true',
 		},
+		isEditor: false,
 	};
 };
 

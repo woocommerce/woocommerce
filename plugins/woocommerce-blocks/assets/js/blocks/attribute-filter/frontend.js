@@ -10,6 +10,7 @@ import Block from './block.js';
 
 const getProps = ( el ) => {
 	return {
+		isEditor: false,
 		attributes: {
 			attributeId: parseInt( el.dataset.attributeId || 0, 10 ),
 			showCounts: el.dataset.showCounts === 'true',
