@@ -51,11 +51,13 @@ const mockFullCart = () => {
 };
 
 describe( 'Testing Mini Cart', () => {
-	beforeEach( async () => {
-		mockFullCart();
-		// need to clear the store resolution state between tests.
-		await dispatch( storeKey ).invalidateResolutionForStore();
-		await dispatch( storeKey ).receiveCart( defaultCartState.cartData );
+	beforeEach( () => {
+		act( () => {
+			mockFullCart();
+			// need to clear the store resolution state between tests.
+			dispatch( storeKey ).invalidateResolutionForStore();
+			dispatch( storeKey ).receiveCart( defaultCartState.cartData );
+		} );
 	} );
 
 	afterEach( () => {
@@ -65,7 +67,9 @@ describe( 'Testing Mini Cart', () => {
 	it( 'opens Mini Cart drawer when clicking on button', async () => {
 		render( <MiniCartBlock /> );
 		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
-		fireEvent.click( screen.getByLabelText( /items/i ) );
+		act( () => {
+			fireEvent.click( screen.getByLabelText( /items/i ) );
+		} );
 
 		expect( screen.getByText( /Your cart/i ) ).toBeInTheDocument();
 		expect( fetchMock ).toHaveBeenCalledTimes( 1 );
@@ -78,7 +82,9 @@ describe( 'Testing Mini Cart', () => {
 		render( <MiniCartBlock /> );
 
 		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
-		fireEvent.click( screen.getByLabelText( /items/i ) );
+		act( () => {
+			fireEvent.click( screen.getByLabelText( /items/i ) );
+		} );
 
 		expect( screen.getByText( /Cart is empty/i ) ).toBeInTheDocument();
 		expect( fetchMock ).toHaveBeenCalledTimes( 1 );

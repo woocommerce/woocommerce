@@ -3,7 +3,10 @@
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
 import PropTypes from 'prop-types';
-import { SearchListControl, SearchListItem } from '@woocommerce/components';
+import {
+	SearchListControl,
+	SearchListItem,
+} from '@woocommerce/editor-components/search-list-control';
 import { SelectControl } from '@wordpress/components';
 import { withCategories } from '@woocommerce/block-hocs';
 import ErrorMessage from '@woocommerce/editor-components/error-placeholder/error-message';

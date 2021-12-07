@@ -14,7 +14,7 @@ import {
 	withSpokenMessages,
 } from '@wordpress/components';
 import { Icon, server, external } from '@woocommerce/icons';
-import { SearchListControl } from '@woocommerce/components';
+import { SearchListControl } from '@woocommerce/editor-components/search-list-control';
 import { mapValues, toArray, sortBy } from 'lodash';
 import { getAdminLink, getSetting } from '@woocommerce/settings';
 import HeadingToolbar from '@woocommerce/editor-components/heading-toolbar';

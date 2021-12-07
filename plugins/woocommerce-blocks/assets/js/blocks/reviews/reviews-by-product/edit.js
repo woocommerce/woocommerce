@@ -9,7 +9,7 @@ import {
 	Placeholder,
 	withSpokenMessages,
 } from '@wordpress/components';
-import { SearchListItem } from '@woocommerce/components';
+import { SearchListItem } from '@woocommerce/editor-components/search-list-control';
 import PropTypes from 'prop-types';
 import ProductControl from '@woocommerce/editor-components/product-control';
 import { Icon, comment } from '@woocommerce/icons';

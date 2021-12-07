@@ -3,7 +3,7 @@
  */
 import { registerStore } from '@wordpress/data';
 import { controls as dataControls } from '@wordpress/data-controls';
-import type { SelectFromMap, DispatchFromMap } from '@automattic/data-stores';
+
 /**
  * Internal dependencies
  */
@@ -14,6 +14,7 @@ import * as resolvers from './resolvers';
 import reducer, { State } from './reducers';
 import { controls as sharedControls } from '../shared-controls';
 import { controls } from './controls';
+import type { SelectFromMap, DispatchFromMap } from '../mapped-types';
 
 registerStore< State >( STORE_KEY, {
 	reducer,
