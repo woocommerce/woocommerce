@@ -175,7 +175,7 @@ class WC_Settings_General extends WC_Settings_Page {
 					'class'    => 'wc-enhanced-select',
 					'options'  => array(
 						''                 => __( 'No location by default', 'woocommerce' ),
-						'base'             => __( 'Shop base address', 'woocommerce' ),
+						'base'             => __( 'Shop country/region', 'woocommerce' ),
 						'geolocation'      => __( 'Geolocate', 'woocommerce' ),
 						'geolocation_ajax' => __( 'Geolocate (with page caching support)', 'woocommerce' ),
 					),

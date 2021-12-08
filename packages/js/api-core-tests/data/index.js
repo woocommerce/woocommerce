@@ -11,6 +11,8 @@ const {
 	groupedProduct,
 	externalProduct,
 } = require( './products-crud' );
+const { getShippingZoneExample } = require( './shipping-zone' );
+const { getShippingMethodExample } = require( './shipping-method' );
 const shared = require( './shared' );
 
 module.exports = {
@@ -27,4 +29,6 @@ module.exports = {
 	virtualProduct,
 	groupedProduct,
 	externalProduct,
+	getShippingZoneExample,
+	getShippingMethodExample,
 };
