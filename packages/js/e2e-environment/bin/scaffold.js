@@ -5,7 +5,6 @@
  */
 const fs = require( 'fs' );
 const sprintf = require( 'sprintf-js' ).sprintf;
-const readlineSync = require( 'readline-sync' );
 
 /**
  * Internal dependencies.
@@ -15,26 +14,26 @@ const {
 	resolvePackage,
 	resolvePackagePath,
 } = require( '../utils' );
+const {
+	createLocalE2ePath,
+	confirm,
+	confirmLocalCopy,
+	installDefaults
+} = require( '../utils/scaffold' );
 
 const args = process.argv.slice( 2 );
 const [ command, packageName ] = args;
 
 /**
- * Prompt the console for confirmation.
- *
- * @param {string} prompt Prompt for the user.
- * @param {string} choices valid responses.
- * @return {string}
- */
-const confirm = ( prompt, choices ) => {
-	const answer = readlineSync.keyIn( prompt, choices );
-	return answer;
-};
-
-/**
  * Install the test scripts and sample default.json configuration
  */
 if ( command == 'install' ) {
+	// Install some environment defaults if no package is requested.
+	if ( ! packageName ) {
+		installDefaults();
+		return;
+	}
+
 	// `package` is a reserved word
 	const pkg = resolvePackage( packageName ).name;
 	if ( ! pkg.length ) {
@@ -47,19 +46,17 @@ if ( command == 'install' ) {
 	// Write sample default.json
 	if ( defaultJson ) {
 		const defaultJsonName = `config/default-${packageSlug}.json`;
-		const defaultJsonSample = resolveLocalE2ePath( defaultJsonName );
-		const packageJsonSample = resolvePackagePath( defaultJson, pkg );
-		fs.copyFileSync( packageJsonSample, defaultJsonSample );
-		console.log( `Created sample test configuration to 'tests/e2e/${defaultJsonName}'.` );
+		if ( confirmLocalCopy( defaultJsonName, defaultJson, pkg ) ) {
+			console.log( `Created sample test configuration to 'tests/e2e/${defaultJsonName}'.` );
+		}
 	}
 
 	// Write sample initialize.sh
 	if ( initializeSh ) {
 		const defaultInitName = `docker/${packageSlug}.sh`;
-		const defaultInitPath = resolveLocalE2ePath( defaultInitName );
-		const packageInitPath = resolvePackagePath( initializeSh, pkg );
-		fs.copyFileSync( packageInitPath, defaultInitPath );
-		console.log( `Created sample test container initialization script to 'tests/e2e/${defaultInitName}'.` );
+		if ( confirmLocalCopy( defaultInitName, initializeSh, pkg ) ) {
+			console.log( `Created sample test container initialization script to 'tests/e2e/${defaultInitName}'.` );
+		}
 	}
 
 	if ( ! testSpecs ) {
@@ -103,15 +100,8 @@ if ( command == 'install' ) {
 			importLineFormat = sprintf( "import {%%s} from '%s';", pkg );
 		}
 
-		// Create the entire folder structure if not present
-		let specFolderPath;
-		const rootFolders = [ '../../tests', '../e2e', 'specs' ];
-		rootFolders.forEach( ( folder ) => {
-			specFolderPath = resolveLocalE2ePath( folder );
-			if ( ! fs.existsSync( specFolderPath ) ) {
-				fs.mkdirSync( specFolderPath );
-			}
-		} );
+		// Create the specs folder if not present
+		let specFolderPath = createLocalE2ePath( 'specs' );
 
 		// Loop through folders and files to write test scripts.
 		for ( let f = 0; f < active.length; f++ ) {
@@ -127,12 +117,11 @@ if ( command == 'install' ) {
 				continue;
 			}
 
-			const specFolder = testFolder.name.length ? `specs/${testFolder.name}` : 'specs';
-			specFolderPath = resolveLocalE2ePath( specFolder );
-
-			// Create the test folder if it doesn't exist.
-			if ( ! fs.existsSync( specFolderPath ) ) {
-				fs.mkdirSync( specFolderPath );
+			let specFolder;
+			if ( testFolder.name.length ) {
+				specFolder = createLocalE2ePath( testFolder.name );
+			} else {
+				specFolder = specFolderPath;
 			}
 
 			// Create the test files.
@@ -142,8 +131,8 @@ if ( command == 'install' ) {
 					continue;
 				}
 
-				const testFileName = `${specFolder}/${testFile.name}.${testExtension}`;
-				const testFilePath = resolveLocalE2ePath( testFileName );
+				const testFileName = `${testFolder.name}/${testFile.name}.${testExtension}`;
+				const testFilePath = `${specFolder}/${testFile.name}.${testExtension}`;
 
 				// Check to see if file exists.
 				if ( fs.existsSync( testFilePath ) ) {
@@ -161,7 +150,7 @@ if ( command == 'install' ) {
 					}
 				}
 
-				console.log( 'Writing tests/e2e/' + testFileName );
+				console.log( 'Writing tests/e2e/specs/' + testFileName );
 				let buffer = [ autoGenerate ];
 				let testSeparator, testTerminator, importPrefix;
 
@@ -185,6 +174,5 @@ if ( command == 'install' ) {
 			}
 		}
 	}
-
 	// @todo: deprecated files.
 }
