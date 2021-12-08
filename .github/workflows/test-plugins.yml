@@ -1,4 +1,4 @@
-name: Build zip for PR
+name: Run smoke tests against plugins
 on: pull_request
 # on:
 #   release:
