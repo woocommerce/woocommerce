@@ -9,8 +9,7 @@ const repository = core.getInput( 'repository' );
 const changelogFileNameRegEx = new RegExp( `.*(?=\/changelog\/${ branch }).*` );
 
 if ( ! changelogFileNameRegEx.test( diff ) ) {
-	console.log( 'no changelog detected' );
-	process.exit( 1 );
+	core.setFailed( `No changelog detected.` );
 }
 
 const result = changelogFileNameRegEx.exec( diff );
@@ -18,39 +17,39 @@ const changelogFilePath = result[ 0 ];
 
 fs.readFile( changelogFilePath, 'utf8', function ( err, data ) {
 	if ( err ) {
-		console.log( err );
-		process.exit( 1 );
+		core.setFailed( err );
 	}
 
+	// Construct a regular expression from the PR number and repository. Escaped characters need to
+	// be re-escaped.
 	const prNumberRegEx = new RegExp(
 		`\[#${ prNumber }\]\(https:\/\/github\.com\/${ repository }\/pull\/31348\)`.replace(
 			/[-\/\\^$*+?.()|[\]{}]/g,
 			'\\$&'
 		)
 	);
-	console.log( prNumberRegEx );
 
 	if ( prNumberRegEx.test( data ) ) {
-		console.log( 'Already present, move on.' );
+		core.info(
+			'Pull request number has already been appended to changelog entry.'
+		);
 		core.setOutput( 'changesMade', false );
 		process.exit( 0 );
 	}
 
-	console.log( 'Write to entry this PR number: ' + prNumber );
-
 	const prLink = `[#${ prNumber }](https://github.com/${ repository }/pull/${ prNumber })`;
 
-	console.log( 'PR url is: ' + prLink );
+	core.info( `Appending pull request link ${ prLink }.` );
 
 	const text = data.trim() + ' ' + prLink.trim() + '\n';
 
 	fs.writeFile( changelogFilePath, text, function ( err ) {
 		if ( err ) {
-			console.log( err );
+			core.setFailed( err );
 			process.exit( 1 );
 		}
 
-		console.log( 'It has been written' );
+		core.info( 'Pull request link successfully appended to changelog.' );
 		core.setOutput( 'changelogFilePath', changelogFilePath );
 		core.setOutput( 'changesMade', true );
 		process.exit( 0 );
