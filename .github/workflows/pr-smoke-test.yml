@@ -52,14 +52,13 @@ jobs:
 
       - name: E2E tests results comment on PR
         if: always()
-        working-directory: package/woocommerce/packages/js/e2e-environment
         uses: actions/github-script@v5
         env: 
           TITLE: 'E2E Test Resutls:'
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
-            const script = require( './bin/parse-jest-results.js' )
+            const script = require( './package/woocommerce/packages/js/e2e-environment/bin/parse-jest-results.js' )
             await script({github, context})
 
       - name: Remove label from pull request.
