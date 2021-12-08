@@ -1,0 +1,62 @@
+name: Build zip for PR
+on: pull_request
+# on:
+#   release:
+#     types: [published]
+jobs:
+  test-plugins:
+    name: Smoke tests with ${{ matrix.plugins }} plugin installed
+    runs-on: ubuntu-18.04
+    strategy:
+      matrix: 
+        plugins: [ 'automattic/woocommerce-payments', 'woocommerce/facebook-for-woocommerce', 'automattic/woocommerce-services', ${{ secrets.WC_SUBSCRIPTIONS_REPO }}]
+        pluginNames: [ 'WooCommerce Payments', 'Facebook for WooCommerce', 'WooCommerce Shipping & Tax', 'WooCommerce Subscriptions' ]
+    steps:
+
+      - name: Create dirs.
+        run: |
+              mkdir -p code/woocommerce
+              mkdir -p package/woocommerce
+              mkdir -p tmp/woocommerce
+              mkdir -p node_modules
+
+      - name: Checkout code.
+        uses: actions/checkout@v2
+        with:
+          path: package/woocommerce
+
+      - name: Install PNPM and install dependencies
+        working-directory: package/woocommerce
+        run: |
+            npm install -g pnpm
+            pnpm install
+
+      - name: Load docker images and start containers.
+        working-directory: package/woocommerce/plugins/woocommerce
+        run: pnpm nx docker-up woocommerce
+
+      - name: Move current directory to code. We will install zip file in this dir later.
+        run: mv ./package/woocommerce/plugins/woocommerce/* ./code/woocommerce
+
+      - name: Download WooCommerce release zip
+        working-directory: tmp
+        run: |
+          ASSET_ID=$(jq ".release.assets[0].id" $GITHUB_EVENT_PATH)
+
+          curl https://api.github.com/repos/woocommerce/woocommerce/releases/assets/${ASSET_ID} -LJOH 'Accept: application/octet-stream'
+
+          unzip woocommerce.zip -d woocommerce
+          mv woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
+
+      - name: Run tests command.
+        working-directory: package/woocommerce/plugins/woocommerce
+        env:
+          WC_E2E_SCREENSHOTS: 1
+          E2E_SLACK_TOKEN: ${{ secrets.SMOKE_TEST_SLACK_TOKEN }}
+          E2E_SLACK_CHANNEL: ${{ secrets.RELEASE_TEST_SLACK_CHANNEL }}
+          PLUGIN_REPOSITORY: ${{ matrix.plugins }}
+          PLUGIN_NAME: ${{ matrix.pluginNames }}
+          GITHUB_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
+        run: |
+          pnpx wc-e2e test:e2e plugins/woocommerce/tests/e2e/specs/smoke-tests/upload-plugin.js
+          pnpm nx test-e2e woocommerce

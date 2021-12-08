@@ -3,7 +3,7 @@
  */
 const { merchant, utils } = require( '@woocommerce/e2e-utils' );
 
-const { getRemotePluginZip, getLatestReleaseZipUrl } = require( '@woocommerce/e2e-environment' );
+const { getRemotePluginZip, getLatestReleaseZipUrl, deleteDownloadedPluginFiles } = require( '@woocommerce/e2e-environment' );
 
 /**
  * External dependencies
@@ -24,7 +24,7 @@ utils.describeIf( UPDATE_WC )( 'WooCommerce plugin can be uploaded and activated
 	beforeAll( async () => {
 
 		if ( TEST_RELEASE ) {
-			zipUrl = await getLatestReleaseZipUrl( 'woocommerce', 'woocommerce' );
+			zipUrl = await getLatestReleaseZipUrl( 'woocommerce/woocommerce' );
 		} else {
 			zipUrl = 'https://github.com/woocommerce/woocommerce/releases/download/nightly/woocommerce-trunk-nightly.zip';
 		}
@@ -35,6 +35,7 @@ utils.describeIf( UPDATE_WC )( 'WooCommerce plugin can be uploaded and activated
 
 	afterAll( async () => {
 		await merchant.logout();
+		await deleteDownloadedPluginFiles();
 	});
 
 	it( 'can upload and activate the WooCommerce plugin', async () => {
@@ -45,5 +46,9 @@ utils.describeIf( UPDATE_WC )( 'WooCommerce plugin can be uploaded and activated
 		// Check for, and run, the database upgrade if needed
 		await merchant.runDatabaseUpdate();
 	});
+
+	it( 'can remove downloaded plugin zip', async () => {
+		await deleteDownloadedPluginFiles();
+	} );
 
 });

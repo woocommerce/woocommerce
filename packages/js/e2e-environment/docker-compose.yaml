@@ -35,6 +35,7 @@ services:
       WORDPRESS_DEBUG: 1
     volumes:
       - wordpress:/var/www/html
+      - ./upload.ini:/usr/local/etc/php/conf.d/uploads.ini
       - "../../../${WC_E2E_FOLDER}:${WC_E2E_FOLDER_MAPPING}"
 
   wordpress-cli:

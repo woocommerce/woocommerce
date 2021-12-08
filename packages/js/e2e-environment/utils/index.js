@@ -12,6 +12,7 @@ module.exports = {
 	getAppName,
 	getRemotePluginZip,
 	getLatestReleaseZipUrl,
+	deleteDownloadedPluginFiles,
 	takeScreenshotFor,
 	updateReadyPageStatus,
 	...testConfig,
