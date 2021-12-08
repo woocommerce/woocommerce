@@ -153,7 +153,10 @@ class BlockTemplatesController {
 	 * @return array
 	 */
 	public function add_block_templates( $query_result, $query, $template_type ) {
-		if ( ! function_exists( 'gutenberg_supports_block_templates' ) || ! gutenberg_supports_block_templates() ) {
+		if (
+			( ! function_exists( 'wp_is_block_theme' ) || ! wp_is_block_theme() ) &&
+			( ! function_exists( 'gutenberg_supports_block_templates' ) || ! gutenberg_supports_block_templates() )
+		) {
 			return $query_result;
 		}
 
@@ -406,7 +409,11 @@ class BlockTemplatesController {
 	 * Renders the default block template from Woo Blocks if no theme templates exist.
 	 */
 	public function render_block_template() {
-		if ( is_embed() || ! function_exists( 'gutenberg_supports_block_templates' ) || ! gutenberg_supports_block_templates() ) {
+		if (
+			is_embed() ||
+			( ! function_exists( 'wp_is_block_theme' ) || ! wp_is_block_theme() ) &&
+			( ! function_exists( 'gutenberg_supports_block_templates' ) || ! gutenberg_supports_block_templates() )
+		) {
 			return;
 		}
 
