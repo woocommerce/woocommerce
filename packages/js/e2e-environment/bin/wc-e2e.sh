@@ -14,6 +14,7 @@ usage() {
 	echo '         test:e2e [test-script] - run e2e test suite or specific test-script'
 	echo '         test:e2e-dev [test-script] - run e2e test(s) in non-headless mode'
 	echo '         test:e2e-debug [test-script] - run e2e test(s) in non-headless debug mode'
+	echo '         fetch:test-results - fetches the most recent test results'
 }
 
 # Parameter check
@@ -70,6 +71,9 @@ case $1 in
 	'test:e2e-debug')
 		./bin/wait-for-build.sh && ./bin/e2e-test-integration.js --dev --debug $2
 		TESTRESULT=$?
+		;;
+	'fetch:test-results')
+		./bin/get-test-results.sh $1
 		;;
 	*)
 		usage
