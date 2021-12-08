@@ -1,53 +1,6 @@
 name: Build zip for PR
 on: pull_request
 jobs:
-    changelogger:
-        name: Validate and append changelog entry
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v2
-              with:
-                  ref: ${{ github.event.pull_request.head.sha }}
-                  fetch-depth: 0
-
-            - name: Create diff
-              run: |
-                  npm install @actions/core
-                  mkdir tmp
-                  git fetch origin trunk
-                  git diff origin/trunk..HEAD --name-only > tmp/diff
-
-            - name: Read diff contents
-              id: diff
-              uses: juliangruber/read-file-action@v1
-              with:
-                  path: tmp/diff
-
-            - name: Append changelog
-              id: changelog
-              uses: ./.github/actions/changelogger-pull-request
-              with:
-                  branch: ${{ github.head_ref }}
-                  diff: ${{ steps.diff.outputs.content }}
-                  prNumber: ${{ github.event.number }}
-                  repository: ${{ github.repository }}
-
-            - name: Save changes
-              if: ${{ steps.changelog.outputs.changesMade == 'true' }}
-              run: |
-                  git status
-                  export GIT_AUTHOR_NAME=matticbot
-                  export GIT_AUTHOR_EMAIL="${USER_EMAIL:-matticbot@users.noreply.github.com}"
-                  export GIT_COMMITTER_NAME=matticbot
-                  export GIT_COMMITTER_EMAIL="${USER_EMAIL:-matticbot@users.noreply.github.com}"
-                  git config --local http.https://github.com/.extraheader "AUTHORIZATION: basic $(printf "x-access-token:%s" "${{ secrets.API_TOKEN_GITHUB }}" | base64)"
-                  git fetch origin "${{ github.head_ref }}"
-                  git checkout -b "${{ github.head_ref }}" origin/"${{ github.head_ref }}"
-                  git add "${{ steps.changelog.outputs.changelogFilePath }}"
-                  git commit -m "Append pull request number to changelog"
-                  git push origin "${{ github.head_ref }}"
-
     build:
         name: Build zip for PR
         runs-on: ubuntu-latest
