@@ -79,6 +79,8 @@ const jestArgs = [
 	'--maxWorkers=1',
 	'--rootDir=./',
 	'--verbose',
+	'--json',
+	'--outputFile=test-results.json',
 	...program.args,
 ];
 
