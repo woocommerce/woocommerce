@@ -9,6 +9,7 @@ import {
 	setBrowserViewport,
 } from '@wordpress/e2e-test-utils';
 import { consoleShouldSuppress, addConsoleSuppression } from '../../utils';
+import { setupJestRetries } from '../../config/jest-object.config';
 
 /**
  * Array of page event tuples of [ eventName, handler ].
@@ -175,6 +176,7 @@ beforeAll( async () => {
 	capturePageEventsForTearDown();
 	enablePageDialogAccept();
 	observeConsoleLogging();
+	setupJestRetries( 2 );
 } );
 
 afterEach( async () => {
