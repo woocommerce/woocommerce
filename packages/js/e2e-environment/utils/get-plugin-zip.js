@@ -9,9 +9,10 @@ const StreamZip = require( 'node-stream-zip' );
  * Upload a plugin zip from a remote location, such as a GitHub URL or other hosted location.
  *
  * @param {string} fileUrl The URL where the zip file is located.
+ * @param {string} authorizationToken Authorization token used to authenticate with the GitHub API if required.
  * @return {string} The path where the zip file is located.
  */
-const getRemotePluginZip = async ( fileUrl ) => {
+const getRemotePluginZip = async ( fileUrl, authorizationToken = '' ) => {
 	const appPath = getAppRoot();
 	const savePath = path.resolve(
 		appPath,
@@ -19,12 +20,12 @@ const getRemotePluginZip = async ( fileUrl ) => {
 	);
 	mkdirp.sync( savePath );
 
-	// Pull the filename from the end of the URL
-	const fileName = fileUrl.split( '/' ).pop();
+	// Pull the version from the end of the URL and add .zip
+	const fileName = fileUrl.split( '/' ).pop() + '.zip';
 	let filePath = path.join( savePath, fileName );
 
 	// First, download the zip file
-	await downloadZip( fileUrl, filePath );
+	await downloadZip( fileUrl, filePath, authorizationToken );
 
 	// Check for a nested zip and update the filepath
 	filePath = await checkNestedZip( filePath, savePath );
@@ -35,24 +36,24 @@ const getRemotePluginZip = async ( fileUrl ) => {
 /**
  * Get the latest release zip for a plugin from a GiHub repository.
  *
- * @param {string} owner The owner of the plugin repository.
- * @param {string} repository The repository name.
+ * @param {string} repository The repository owner and name. For example: `woocommerce/woocommerce`.
+ * @param {string} authorizationToken Authorization token used to authenticate with the GitHub API if required.
  * @param {boolean} getPrerelease Flag on whether to get a prelease or not.
  * @param {number} perPage Limit of entries returned from the latest releases list, defaults to 3.
  * @return {Promise<string>}} Returns the URL for the release zip file.
  */
 const getLatestReleaseZipUrl = async (
-	owner,
 	repository,
+	authorizationToken = '',
 	getPrerelease = false,
 	perPage = 3
 ) => {
 	let requesturl;
 
 	if ( getPrerelease ) {
-		requesturl = `https://api.github.com/repos/${ owner }/${ repository }/releases?per_page=${ perPage }`;
+		requesturl = `https://api.github.com/repos/${ repository }/releases?per_page=${ perPage }`;
 	} else {
-		requesturl = `https://api.github.com/repos/${ owner }/${ repository }/releases/latest`;
+		requesturl = `https://api.github.com/repos/${ repository }/releases/latest`;
 	}
 
 	const options = {
@@ -61,6 +62,11 @@ const getLatestReleaseZipUrl = async (
 		json: true,
 		headers: { 'user-agent': 'node.js' },
 	};
+
+	// If provided with a token, use it for authorization
+	if ( authorizationToken ) {
+		options.headers.Authorization = `token ${ authorizationToken }`;
+	}
 
 	// Wrap in a promise to make the request async
 	return new Promise( function ( resolve, reject ) {
@@ -71,11 +77,11 @@ const getLatestReleaseZipUrl = async (
 				// Loop until we find the first pre-release, then return it.
 				body.forEach( ( release ) => {
 					if ( release.prerelease ) {
-						resolve( release.assets[ 0 ].browser_download_url );
+						resolve( release.zipball_url );
 					}
 				} );
 			} else {
-				resolve( body.assets[ 0 ].browser_download_url );
+				resolve( body.zipball_url );
 			}
 		} );
 	} );
@@ -110,17 +116,24 @@ const checkNestedZip = async ( zipFilePath, savePath ) => {
  * @param {string} downloadPath The location where to download the zip to.
  * @return {Promise<void>}
  */
-const downloadZip = async ( fileUrl, downloadPath ) => {
+const downloadZip = async ( fileUrl, downloadPath, authorizationToken ) => {
 	const options = {
 		url: fileUrl,
 		method: 'GET',
 		encoding: null,
+		headers: { 'user-agent': 'node.js' },
 	};
+
+	// If provided with a token, use it for authorization
+	if ( authorizationToken ) {
+		options.headers.Authorization = `token ${ authorizationToken }`;
+	}
 
 	// Wrap in a promise to make the request async
 	return new Promise( function ( resolve, reject ) {
 		request
 			.get( options, function ( err, resp, body ) {
+				console.log(resp.statusCode)
 				if ( err ) {
 					reject( err );
 				} else {
@@ -131,9 +144,32 @@ const downloadZip = async ( fileUrl, downloadPath ) => {
 	} );
 };
 
+/**
+ * Delete the downloaded plugin files.
+ */
+const deleteDownloadedPluginFiles = async () => {
+	const appPath = getAppRoot();
+	const pluginSavePath = path.resolve(
+		appPath,
+		'plugins/woocommerce/tests/e2e/plugins'
+	);
+
+	fs.readdir( pluginSavePath, ( err, files ) => {
+		if ( err ) throw err;
+
+		for ( const file of files ) {
+			fs.unlink(path.join( pluginSavePath, file ), err => {
+				if ( err ) throw err;
+			} );
+		}
+	} );
+
+}
+
 module.exports = {
 	getRemotePluginZip,
 	getLatestReleaseZipUrl,
 	checkNestedZip,
 	downloadZip,
+	deleteDownloadedPluginFiles,
 };

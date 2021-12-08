@@ -227,9 +227,9 @@ The above method also makes use of the following utility methods which can also 
 
 If you would like to get the latest release zip URL, which can be used in the methods mentioned above, you can use the following helper function to do so:
 
-`getLatestReleaseZipUrl( owner, repository, getPrerelease, perPage )`
+`getLatestReleaseZipUrl( repository, authorizationToken, getPrerelease, perPage )`
 
-This will return a string with the latest release URL. Optionally, you can use the `getPrerelease` boolean flag, which defaults to false, on whether or not to get a prerelease instead. The `perPage` flag can be used to return more results when getting the list of releases. The default value is 3.
+This will return a string with the latest release URL. Optionally, you can use the `getPrerelease` boolean flag, which defaults to false, on whether or not to get a prerelease instead. The `perPage` flag can be used to return more results when getting the list of releases. The default value is 3. If the repository requires authorization to access, the authorization token can be passed in to the `authorizationToken` argument.
 
 ## Additional information
 
