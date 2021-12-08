@@ -10,6 +10,7 @@ const changelogFileNameRegEx = new RegExp( `.*(?=\/changelog\/${ branch }).*` );
 
 if ( ! changelogFileNameRegEx.test( diff ) ) {
 	core.setFailed( `No changelog detected.` );
+	process.exit( 1 );
 }
 
 const result = changelogFileNameRegEx.exec( diff );
@@ -18,6 +19,7 @@ const changelogFilePath = result[ 0 ];
 fs.readFile( changelogFilePath, 'utf8', function ( err, data ) {
 	if ( err ) {
 		core.setFailed( err );
+		process.exit( 1 );
 	}
 
 	// Construct a regular expression from the PR number and repository. Escaped characters need to
