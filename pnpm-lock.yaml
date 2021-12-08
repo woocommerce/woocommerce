@@ -129,6 +129,7 @@ importers:
       jest-puppeteer: ^4.4.0
       ndb: ^1.1.5
       node-stream-zip: ^1.13.6
+      readline-sync: ^1.4.10
       request: ^2.88.2
       semver: ^7.3.2
       sprintf-js: ^1.1.2
@@ -145,6 +146,7 @@ importers:
       jest-each: 25.5.0
       jest-puppeteer: 4.4.0
       node-stream-zip: 1.15.0
+      readline-sync: 1.4.10
       request: 2.88.2
       sprintf-js: 1.1.2
     devDependencies:
@@ -18062,6 +18064,11 @@ packages:
     engines: {node: '>=8.10.0'}
     dependencies:
       picomatch: 2.3.0
+
+  /readline-sync/1.4.10:
+    resolution: {integrity: sha512-gNva8/6UAe8QYepIQH/jQ2qn91Qj0B9sYjMBBs3QOB8F2CXcKgLxQaJRP76sWVRQt+QU+8fAkCbCvjjMFu7Ycw==}
+    engines: {node: '>= 0.8.0'}
+    dev: false
 
   /realpath-native/1.1.0:
     resolution: {integrity: sha512-wlgPA6cCIIg9gKz0fgAPjnzh4yR/LnXovwuo9hvyGvx3h8nX4+/iLZplfUWasXpqD8BdnGnP5njOFjkUwPzvjA==}
