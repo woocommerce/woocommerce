@@ -520,7 +520,7 @@ add_action( 'woocommerce_product_set_stock_status', 'wc_recount_after_stock_chan
  * @return array
  */
 function wc_change_term_counts( $terms, $taxonomies ) {
-	if ( is_admin() || is_ajax() ) {
+	if ( is_admin() || wp_doing_ajax() ) {
 		return $terms;
 	}
 
