@@ -92,16 +92,9 @@ class OrderController {
 					'shipping_state'      => $order->get_shipping_state(),
 					'shipping_postcode'   => $order->get_shipping_postcode(),
 					'shipping_country'    => $order->get_shipping_country(),
+					'shipping_phone'      => $order->get_shipping_phone(),
 				]
 			);
-
-			$shipping_phone_value = is_callable( [ $order, 'get_shipping_phone' ] ) ? $order->get_shipping_phone() : $order->get_meta( '_shipping_phone', true );
-
-			if ( is_callable( [ $customer, 'set_shipping_phone' ] ) ) {
-				$customer->set_shipping_phone( $shipping_phone_value );
-			} else {
-				$customer->update_meta_data( 'shipping_phone', $shipping_phone_value );
-			}
 
 			$customer->save();
 		};

@@ -95,37 +95,29 @@ class CartUpdateCustomer extends AbstractCartRoute {
 		}
 		wc()->customer->set_props(
 			array(
-				'billing_first_name'  => isset( $billing['first_name'] ) ? $billing['first_name'] : null,
-				'billing_last_name'   => isset( $billing['last_name'] ) ? $billing['last_name'] : null,
-				'billing_company'     => isset( $billing['company'] ) ? $billing['company'] : null,
-				'billing_address_1'   => isset( $billing['address_1'] ) ? $billing['address_1'] : null,
-				'billing_address_2'   => isset( $billing['address_2'] ) ? $billing['address_2'] : null,
-				'billing_city'        => isset( $billing['city'] ) ? $billing['city'] : null,
-				'billing_state'       => isset( $billing['state'] ) ? $billing['state'] : null,
-				'billing_postcode'    => isset( $billing['postcode'] ) ? $billing['postcode'] : null,
-				'billing_country'     => isset( $billing['country'] ) ? $billing['country'] : null,
-				'billing_phone'       => isset( $billing['phone'] ) ? $billing['phone'] : null,
-				'billing_email'       => isset( $request['billing_address'], $request['billing_address']['email'] ) ? $request['billing_address']['email'] : null,
-				'shipping_first_name' => isset( $shipping['first_name'] ) ? $shipping['first_name'] : null,
-				'shipping_last_name'  => isset( $shipping['last_name'] ) ? $shipping['last_name'] : null,
-				'shipping_company'    => isset( $shipping['company'] ) ? $shipping['company'] : null,
-				'shipping_address_1'  => isset( $shipping['address_1'] ) ? $shipping['address_1'] : null,
-				'shipping_address_2'  => isset( $shipping['address_2'] ) ? $shipping['address_2'] : null,
-				'shipping_city'       => isset( $shipping['city'] ) ? $shipping['city'] : null,
-				'shipping_state'      => isset( $shipping['state'] ) ? $shipping['state'] : null,
-				'shipping_postcode'   => isset( $shipping['postcode'] ) ? $shipping['postcode'] : null,
-				'shipping_country'    => isset( $shipping['country'] ) ? $shipping['country'] : null,
+				'billing_first_name'  => $billing['first_name'] ?? null,
+				'billing_last_name'   => $billing['last_name'] ?? null,
+				'billing_company'     => $billing['company'] ?? null,
+				'billing_address_1'   => $billing['address_1'] ?? null,
+				'billing_address_2'   => $billing['address_2'] ?? null,
+				'billing_city'        => $billing['city'] ?? null,
+				'billing_state'       => $billing['state'] ?? null,
+				'billing_postcode'    => $billing['postcode'] ?? null,
+				'billing_country'     => $billing['country'] ?? null,
+				'billing_phone'       => $billing['phone'] ?? null,
+				'billing_email'       => $billing['email'] ?? null,
+				'shipping_first_name' => $shipping['first_name'] ?? null,
+				'shipping_last_name'  => $shipping['last_name'] ?? null,
+				'shipping_company'    => $shipping['company'] ?? null,
+				'shipping_address_1'  => $shipping['address_1'] ?? null,
+				'shipping_address_2'  => $shipping['address_2'] ?? null,
+				'shipping_city'       => $shipping['city'] ?? null,
+				'shipping_state'      => $shipping['state'] ?? null,
+				'shipping_postcode'   => $shipping['postcode'] ?? null,
+				'shipping_country'    => $shipping['country'] ?? null,
+				'shipping_phone'      => $shipping['phone'] ?? null,
 			)
 		);
-
-		$shipping_phone_value = isset( $shipping['phone'] ) ? $shipping['phone'] : null;
-
-		// @todo Remove custom shipping_phone handling (requires WC 5.6+)
-		if ( is_callable( [ wc()->customer, 'set_shipping_phone' ] ) ) {
-			wc()->customer->set_shipping_phone( $shipping_phone_value );
-		} else {
-			wc()->customer->update_meta_data( 'shipping_phone', $shipping_phone_value );
-		}
 
 		wc()->customer->save();
 
@@ -170,16 +162,9 @@ class CartUpdateCustomer extends AbstractCartRoute {
 				'shipping_state'      => wc()->customer->get_shipping_state(),
 				'shipping_postcode'   => wc()->customer->get_shipping_postcode(),
 				'shipping_country'    => wc()->customer->get_shipping_country(),
+				'shipping_phone'      => wc()->customer->get_shipping_phone(),
 			]
 		);
-
-		$shipping_phone_value = is_callable( [ wc()->customer, 'get_shipping_phone' ] ) ? wc()->customer->get_shipping_phone() : wc()->customer->get_meta( 'shipping_phone', true );
-
-		if ( is_callable( [ $draft_order, 'set_shipping_phone' ] ) ) {
-			$draft_order->set_shipping_phone( $shipping_phone_value );
-		} else {
-			$draft_order->update_meta_data( '_shipping_phone', $shipping_phone_value );
-		}
 
 		$draft_order->save();
 	}
