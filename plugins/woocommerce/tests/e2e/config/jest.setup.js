@@ -7,7 +7,7 @@ import {
 
 const config = require( 'config' );
 const { HTTPClientFactory } = require( '@woocommerce/api' );
-const { addConsoleSuppression, updateReadyPageStatus, setupJestObject } = require( '@woocommerce/e2e-environment' );
+const { addConsoleSuppression, updateReadyPageStatus, setupJestRetries } = require( '@woocommerce/e2e-environment' );
 const { DEFAULT_TIMEOUT_OVERRIDE } = process.env;
 
 // @todo: remove this once https://github.com/woocommerce/woocommerce-admin/issues/6992 has been addressed
@@ -40,7 +40,7 @@ async function trashExistingPosts() {
 // each other's side-effects.
 beforeAll(async () => {
 
-	setupJestObject();
+	setupJestRetries( 2 );
 
 	if ( DEFAULT_TIMEOUT_OVERRIDE ) {
 		page.setDefaultNavigationTimeout( DEFAULT_TIMEOUT_OVERRIDE );
