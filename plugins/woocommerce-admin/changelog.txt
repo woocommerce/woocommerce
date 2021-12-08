@@ -1,8 +1,6 @@
-== 3.0.0 11/30/2021 ==
+== 3.0.0 12/07/2021 ==
 
-- Fix: Fix an issue with the code that makes use of an invalid parameter
-  with a PHP function. The use of this invalid parameter causes PHP 8 to
-  throw a Fatal Error. #7855
+- Fix: Fix an issue with the code that makes use of an invalid parameter with a PHP function. The use of this invalid parameter causes PHP 8 to throw a Fatal Error. #7855
 - Fix: Fix TaskList UI experiment enablement logic. #7930
 - Fix: Navigation nudge note and navigation feedback notes will delete themselves if the navigation feature is not available. #7914
 - Fix: Replace old task list option calls with data store selectors. #7820
@@ -21,6 +19,10 @@
 - Tweak: Added dismiss all button for inbox notes.
 - Tweak: Implement note read state. #7896
 - Enhancement: Add tests to Subscriptions inclusion. #7804
+- Fix: Fix PHP Warning on 'Add new product' page. #7989
+- Fix: Fix usage of Wordpress DatePicker component. #7982
+- Update: Load both actioned and unactioned notes. #7983
+- Tweak: Add inbox_panel_view tracks event. #8002
 
 == 2.9.0 11/30/2021 ==
 
