@@ -50,29 +50,17 @@ jobs:
         run: |
           pnpx wc-e2e test:e2e ./tests/e2e/specs/wp-admin/page-loads.test.js
 
-      - name: Collect Results.
-        id: test-results
-        if: always()
-        working-directory: package/woocommerce/plugins/woocommerce
-        run: |
-          echo "::set-output name=e2e-results::$(pnpx wc-e2e fetch:test-results --e2e)"
-
       - name: E2E tests results comment on PR
         if: always()
+        working-directory: package/woocommerce/packages/js/e2e-environment
         uses: actions/github-script@v5
         env: 
-          RESULTS: ${{ steps.test-results.outputs.e2e-results }}
+          TITLE: 'E2E Test Resutls:'
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
-            console.log(process.env.RESULTS);
-
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: process.env.RESULTS
-            })
+            const script = require( './bin/parse-jest-results.js' )
+            await script({github, context})
 
       - name: Remove label from pull request.
         if: "${{ contains(github.event.pull_request.labels.*.name, 'run: smoke tests') }}"
