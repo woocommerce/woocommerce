@@ -9,6 +9,7 @@ const setupJestRetries = ( retries = 2 ) => {
 	jest.retryTimes( retryTimes );
 };
 
+// If more methods are added to setupJestObject, it should be include in the readme
 const setupJestObject = () => {
 	setupJestRetries();
 };
@@ -17,4 +18,3 @@ module.exports = {
 	setupJestObject,
 	setupJestRetries,
 };
-
