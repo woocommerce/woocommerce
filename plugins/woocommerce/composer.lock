@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "83379234b653f45a89537a0bb470eb69",
+    "content-hash": "20885acd22c0a58cff8852e7cf4ebf20",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -503,22 +503,23 @@
         },
         {
             "name": "woocommerce/action-scheduler",
-            "version": "3.3.0",
+            "version": "3.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/action-scheduler.git",
-                "reference": "5588a831cd2453ecf7d4803f3a81063e13cde93d"
+                "reference": "3218a33ff14b968f8cb05de9656c2efa1eeb1330"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/action-scheduler/zipball/5588a831cd2453ecf7d4803f3a81063e13cde93d",
-                "reference": "5588a831cd2453ecf7d4803f3a81063e13cde93d",
+                "url": "https://api.github.com/repos/woocommerce/action-scheduler/zipball/3218a33ff14b968f8cb05de9656c2efa1eeb1330",
+                "reference": "3218a33ff14b968f8cb05de9656c2efa1eeb1330",
                 "shasum": ""
             },
             "require-dev": {
                 "phpunit/phpunit": "^7.5",
                 "woocommerce/woocommerce-sniffs": "0.1.0",
-                "wp-cli/wp-cli": "~2.5.0"
+                "wp-cli/wp-cli": "~2.5.0",
+                "yoast/phpunit-polyfills": "^1.0"
             },
             "type": "wordpress-plugin",
             "extra": {
@@ -536,22 +537,22 @@
             "homepage": "https://actionscheduler.org/",
             "support": {
                 "issues": "https://github.com/woocommerce/action-scheduler/issues",
-                "source": "https://github.com/woocommerce/action-scheduler/tree/3.3.0"
+                "source": "https://github.com/woocommerce/action-scheduler/tree/3.4.0"
             },
-            "time": "2021-09-15T21:08:48+00:00"
+            "time": "2021-10-28T17:09:12+00:00"
         },
         {
             "name": "woocommerce/woocommerce-admin",
-            "version": "2.9.0-rc.2",
+            "version": "2.9.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-admin.git",
-                "reference": "6c81e761d9a19e6ed4484db82d6710331f375a3a"
+                "reference": "fdffbfef084c65a3e2141f0aff41cef3bad27553"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/6c81e761d9a19e6ed4484db82d6710331f375a3a",
-                "reference": "6c81e761d9a19e6ed4484db82d6710331f375a3a",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/fdffbfef084c65a3e2141f0aff41cef3bad27553",
+                "reference": "fdffbfef084c65a3e2141f0aff41cef3bad27553",
                 "shasum": ""
             },
             "require": {
@@ -607,22 +608,22 @@
             "homepage": "https://github.com/woocommerce/woocommerce-admin",
             "support": {
                 "issues": "https://github.com/woocommerce/woocommerce-admin/issues",
-                "source": "https://github.com/woocommerce/woocommerce-admin/tree/v2.9.0-rc.2"
+                "source": "https://github.com/woocommerce/woocommerce-admin/tree/v2.9.1"
             },
-            "time": "2021-11-18T08:35:56+00:00"
+            "time": "2021-12-08T02:59:25+00:00"
         },
         {
             "name": "woocommerce/woocommerce-blocks",
-            "version": "v6.3.2",
+            "version": "v6.3.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-gutenberg-products-block.git",
-                "reference": "5b3aea9adb718a1f78525881e4f0c33c72ba175d"
+                "reference": "38975ad6de9c6a556059c4de6e9ffc586ab82245"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/5b3aea9adb718a1f78525881e4f0c33c72ba175d",
-                "reference": "5b3aea9adb718a1f78525881e4f0c33c72ba175d",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/38975ad6de9c6a556059c4de6e9ffc586ab82245",
+                "reference": "38975ad6de9c6a556059c4de6e9ffc586ab82245",
                 "shasum": ""
             },
             "require": {
@@ -661,9 +662,9 @@
             ],
             "support": {
                 "issues": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues",
-                "source": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/v6.3.2"
+                "source": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/v6.3.3"
             },
-            "time": "2021-11-18T03:27:03+00:00"
+            "time": "2021-11-25T09:47:27+00:00"
         }
     ],
     "packages-dev": [
@@ -2853,16 +2854,16 @@
         },
         {
             "name": "yoast/phpunit-polyfills",
-            "version": "1.0.2",
+            "version": "1.0.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Yoast/PHPUnit-Polyfills.git",
-                "reference": "1a582ab1d91e86aa450340c4d35631a85314ff9f"
+                "reference": "5ea3536428944955f969bc764bbe09738e151ada"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Yoast/PHPUnit-Polyfills/zipball/1a582ab1d91e86aa450340c4d35631a85314ff9f",
-                "reference": "1a582ab1d91e86aa450340c4d35631a85314ff9f",
+                "url": "https://api.github.com/repos/Yoast/PHPUnit-Polyfills/zipball/5ea3536428944955f969bc764bbe09738e151ada",
+                "reference": "5ea3536428944955f969bc764bbe09738e151ada",
                 "shasum": ""
             },
             "require": {
@@ -2910,7 +2911,7 @@
                 "issues": "https://github.com/Yoast/PHPUnit-Polyfills/issues",
                 "source": "https://github.com/Yoast/PHPUnit-Polyfills"
             },
-            "time": "2021-10-03T08:40:26+00:00"
+            "time": "2021-11-23T01:37:03+00:00"
         }
     ],
     "aliases": [],
@@ -2925,5 +2926,5 @@
     "platform-overrides": {
         "php": "7.0.33"
     },
-    "plugin-api-version": "2.1.0"
+    "plugin-api-version": "2.0.0"
 }

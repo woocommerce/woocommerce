@@ -40,7 +40,7 @@ const runAddNewShippingZoneTest = () => {
 		});
 
 		afterAll( async () => {
-			shopper.logout();
+			await shopper.logout();
 		} );
 
 		it('add shipping zone for San Francisco with free Local pickup', async () => {

@@ -186,7 +186,7 @@ class WC_Cache_Helper {
 	 * This prevents caching of the wrong data for this request.
 	 */
 	public static function geolocation_ajax_redirect() {
-		if ( 'geolocation_ajax' === get_option( 'woocommerce_default_customer_address' ) && ! is_checkout() && ! is_cart() && ! is_account_page() && ! is_ajax() && empty( $_POST ) ) { // WPCS: CSRF ok, input var ok.
+		if ( 'geolocation_ajax' === get_option( 'woocommerce_default_customer_address' ) && ! is_checkout() && ! is_cart() && ! is_account_page() && ! wp_doing_ajax() && empty( $_POST ) ) { // WPCS: CSRF ok, input var ok.
 			$location_hash = self::geolocation_ajax_get_location_hash();
 			$current_hash  = isset( $_GET['v'] ) ? wc_clean( wp_unslash( $_GET['v'] ) ) : ''; // WPCS: sanitization ok, input var ok, CSRF ok.
 			if ( empty( $current_hash ) || $current_hash !== $location_hash ) {

@@ -47,6 +47,7 @@ const runOrderSearchingTest = require( './merchant/wp-admin-order-searching.test
 const runAnalyticsPageLoadsTest = require( './merchant/wp-admin-analytics-page-loads.test' );
 const runImportProductsTest = require( './merchant/wp-admin-product-import-csv.test' );
 const runInitiateWccomConnectionTest = require( './merchant/wp-admin-extensions-connect-wccom.test' );
+const runAdminPageLoadTests = require( './merchant/wp-admin-page-loads.test.js' );
 
 // REST API tests
 const runExternalProductAPITest = require( './api/external-product.test' );
@@ -103,6 +104,7 @@ const runMerchantTests = () => {
 	runMerchantOrdersCustomerPaymentPage();
 	runAnalyticsPageLoadsTest();
 	runInitiateWccomConnectionTest();
+	runAdminPageLoadTests();
 }
 
 const runApiTests = () => {
@@ -166,4 +168,5 @@ module.exports = {
 	runOrderEmailReceivingTest,
 	runInitiateWccomConnectionTest,
 	runTelemetryAPITest,
+	runAdminPageLoadTests,
 };
