@@ -2,7 +2,12 @@
  * External dependencies.
  */
 const fs = require( 'fs' );
+const path = require( 'path' );
 const readlineSync = require( 'readline-sync' );
+
+/**
+ * Internal dependencies.
+ */
 const { resolveLocalE2ePath, resolvePackagePath } = require( './test-config' );
 
 /**
@@ -12,7 +17,7 @@ const { resolveLocalE2ePath, resolvePackagePath } = require( './test-config' );
  */
 const createLocalE2ePath = ( relativePath ) => {
 	let specFolderPath = '';
-	const folders = [ '../../tests', '../e2e', relativePath ];
+	const folders = [ `..${path.sep}..${path.sep}tests`, `..${path.sep}e2e`, relativePath ];
 	folders.forEach( ( folder ) => {
 		specFolderPath = resolveLocalE2ePath( folder );
 		if ( ! fs.existsSync( specFolderPath ) ) {
@@ -70,11 +75,11 @@ const confirmLocalCopy = ( localE2ePath, packageE2ePath, packageName = '' ) => {
  */
 const confirmLocalDelete = ( localE2ePath ) => {
 	const localPath = resolveLocalE2ePath( localE2ePath );
-	const confirmPrompt = `${localE2ePath} exists. Delete? [y]es/[n]o: `;
-
 	if ( ! fs.existsSync( localPath ) ) {
 		return;
 	}
+
+	const confirmPrompt = `${localE2ePath} exists. Delete? [y]es/[n]o: `;
 	const deleteFile = confirm( confirmPrompt, 'ny' );
 	if ( deleteFile == 'y' ) {
 		fs.unlinkSync( localPath );
@@ -89,7 +94,7 @@ const confirmLocalDelete = ( localE2ePath ) => {
  */
 const getPackageData = ( packageName ) => {
 	const packageSlug = packageName.replace( '@', '' ).replace( /\//g, '.' );
-	const installFiles = require( `${packageName}/installFiles` );
+	const installFiles = require( `${packageName}${path.sep}installFiles` );
 
 	return { packageSlug, ...installFiles };
 };
@@ -100,13 +105,13 @@ const getPackageData = ( packageName ) => {
 const installDefaults = () => {
 	createLocalE2ePath( 'docker' );
 	console.log( 'Writing tests/e2e/docker/initialize.sh' );
-	confirmLocalCopy( 'docker/initialize.sh', 'installFiles/initialize.sh' );
+	confirmLocalCopy( `docker${path.sep}initialize.sh`, `installFiles${path.sep}initialize.sh` );
 
 	createLocalE2ePath( 'config' );
 	console.log( 'Writing tests/e2e/config/jest.config.js' );
-	confirmLocalCopy( 'config/jest.config.js', 'installFiles/jest.config.js' );
+	confirmLocalCopy( `config${path.sep}jest.config.js`, `installFiles${path.sep}jest.config.js` );
 	console.log( 'Writing tests/e2e/config/jest.setup.js' );
-	confirmLocalCopy( 'config/jest.setup.js', 'installFiles/jest.setup.js' );
+	confirmLocalCopy( `config${path.sep}jest.setup.js`, `installFiles${path.sep}jest.setup.js` );
 };
 
 module.exports = {

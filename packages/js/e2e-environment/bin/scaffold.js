@@ -4,13 +4,13 @@
  * External dependencies.
  */
 const fs = require( 'fs' );
+const path = require( 'path' );
 const sprintf = require( 'sprintf-js' ).sprintf;
 
 /**
  * Internal dependencies.
  */
 const {
-	resolveLocalE2ePath,
 	resolvePackage,
 	resolvePackagePath,
 } = require( '../utils' );
@@ -64,7 +64,7 @@ if ( command == 'install' ) {
 
 	// Write sample default.json
 	if ( defaultJson ) {
-		const defaultJsonName = `config/default-${packageSlug}.json`;
+		const defaultJsonName = `config${path.sep}default-${packageSlug}.json`;
 		createLocalE2ePath( 'config' );
 		if ( confirmLocalCopy( defaultJsonName, defaultJson, pkg ) ) {
 			console.log( `Created sample test configuration to 'tests/e2e/${defaultJsonName}'.` );
@@ -73,7 +73,7 @@ if ( command == 'install' ) {
 
 	// Write sample initialize.sh
 	if ( initializeSh ) {
-		const defaultInitName = `docker/${packageSlug}.sh`;
+		const defaultInitName = `docker${path.sep}${packageSlug}.sh`;
 		createLocalE2ePath( 'docker' );
 		if ( confirmLocalCopy( defaultInitName, initializeSh, pkg ) ) {
 			console.log( `Created sample test container initialization script to 'tests/e2e/${defaultInitName}'.` );
@@ -122,7 +122,7 @@ if ( command == 'install' ) {
 
 			let specFolder;
 			if ( testFolder.name.length ) {
-				specFolder = createLocalE2ePath( `specs/${testFolder.name}` );
+				specFolder = createLocalE2ePath( `specs${path.sep}${testFolder.name}` );
 			} else {
 				specFolder = specFolderPath;
 			}
@@ -134,8 +134,8 @@ if ( command == 'install' ) {
 					continue;
 				}
 
-				const testFileName = `${testFolder.name}/${testFile.name}.${testExtension}`;
-				const testFilePath = `${specFolder}/${testFile.name}.${testExtension}`;
+				const testFileName = `${testFolder.name}${path.sep}${testFile.name}.${testExtension}`;
+				const testFilePath = `${specFolder}${path.sep}${testFile.name}.${testExtension}`;
 
 				// Check to see if file exists.
 				if ( fs.existsSync( testFilePath ) ) {
@@ -189,13 +189,13 @@ if ( command == 'install' ) {
 
 	// Delete sample default.json
 	if ( defaultJson ) {
-		const defaultJsonName = `config/default-${packageSlug}.json`;
+		const defaultJsonName = `config${path.sep}default-${packageSlug}.json`;
 		confirmLocalDelete( defaultJsonName );
 	}
 
 	// Delete sample initialize.sh
 	if ( initializeSh ) {
-		const defaultInitName = `docker/${packageSlug}.sh`;
+		const defaultInitName = `docker${path.sep}${packageSlug}.sh`;
 		confirmLocalDelete( defaultInitName );
 	}
 
@@ -206,7 +206,7 @@ if ( command == 'install' ) {
 	const testsSpecFile = resolvePackagePath( testSpecs, pkg );
 	const specs = fs.readFileSync( testsSpecFile );
 	const tests = JSON.parse( specs );
-	const { active, deprecated } = tests;
+	const { active } = tests;
 
 	if ( ! active || ! active.length ) {
 		return;
@@ -221,10 +221,10 @@ if ( command == 'install' ) {
 			continue;
 		}
 
-		const specFolder = testFolder.name.length ? `specs/${testFolder.name}` : 'specs';
+		const specFolder = testFolder.name.length ? `specs${path.sep}${testFolder.name}` : 'specs';
 		for ( let t = 0; t < testFiles.length; t++ ) {
 			const testFile = testFiles[ t ];
-			const testFilePath = `${specFolder}/${testFile.name}.${testExtension}`;
+			const testFilePath = `${specFolder}${path.sep}${testFile.name}.${testExtension}`;
 
 			confirmLocalDelete( testFilePath );
 		}
