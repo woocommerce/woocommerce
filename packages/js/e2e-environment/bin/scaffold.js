@@ -18,11 +18,31 @@ const {
 	createLocalE2ePath,
 	confirm,
 	confirmLocalCopy,
+	confirmLocalDelete,
+	getPackageData,
 	installDefaults
 } = require( '../utils/scaffold' );
 
 const args = process.argv.slice( 2 );
 const [ command, packageName ] = args;
+
+// Allow multiple spec file extensions and formats.
+let testExtension = 'test.js';
+let testFormat = '';
+for ( let a = 2; a < args.length; a++ ) {
+	const nextArg = a + 1;
+	if ( nextArg >= args.length ) {
+		break;
+	}
+	switch ( args[ a ] ) {
+		case '--format':
+			testFormat = args[ nextArg ];
+			break;
+		case '--ext':
+			testExtension = args[ nextArg ];
+			break;
+	}
+}
 
 /**
  * Install the test scripts and sample default.json configuration
@@ -40,12 +60,12 @@ if ( command == 'install' ) {
 		//@todo add error message
 		return;
 	}
-	const packageSlug = pkg.replace( '@', '' ).replace( /\//g, '.' );
-	const { testSpecs, defaultJson, initializeSh } = require( `${pkg}/installFiles` );
+	const { packageSlug, testSpecs, defaultJson, initializeSh } = getPackageData( pkg );
 
 	// Write sample default.json
 	if ( defaultJson ) {
 		const defaultJsonName = `config/default-${packageSlug}.json`;
+		createLocalE2ePath( 'config' );
 		if ( confirmLocalCopy( defaultJsonName, defaultJson, pkg ) ) {
 			console.log( `Created sample test configuration to 'tests/e2e/${defaultJsonName}'.` );
 		}
@@ -54,6 +74,7 @@ if ( command == 'install' ) {
 	// Write sample initialize.sh
 	if ( initializeSh ) {
 		const defaultInitName = `docker/${packageSlug}.sh`;
+		createLocalE2ePath( 'docker' );
 		if ( confirmLocalCopy( defaultInitName, initializeSh, pkg ) ) {
 			console.log( `Created sample test container initialization script to 'tests/e2e/${defaultInitName}'.` );
 		}
@@ -68,24 +89,6 @@ if ( command == 'install' ) {
 	const specs = fs.readFileSync( testsSpecFile );
 	const tests = JSON.parse( specs );
 	const { active, deprecated } = tests;
-
-	// Allow multiple spec file extensions and formats.
-	let testExtension = 'test.js';
-	let testFormat = '';
-	for ( let a = 2; a < args.length; a++ ) {
-		const nextArg = a + 1;
-		if ( nextArg >= args.length ) {
-			break;
-		}
-		switch ( args[ a ] ) {
-			case '--format':
-				testFormat = args[ nextArg ];
-				break;
-			case '--ext':
-				testExtension = args[ nextArg ];
-				break;
-		}
-	}
 
 	if ( active && active.length ) {
 		const blankLine = '';
@@ -119,7 +122,7 @@ if ( command == 'install' ) {
 
 			let specFolder;
 			if ( testFolder.name.length ) {
-				specFolder = createLocalE2ePath( testFolder.name );
+				specFolder = createLocalE2ePath( `specs/${testFolder.name}` );
 			} else {
 				specFolder = specFolderPath;
 			}
@@ -137,7 +140,7 @@ if ( command == 'install' ) {
 				// Check to see if file exists.
 				if ( fs.existsSync( testFilePath ) ) {
 					if ( overwriteFiles != 'a' ) {
-						confirmPrompt = `${testFileName} already exists. Overwrite? [Y]es/[n]o/[a]ll/[q]uit: `;
+						confirmPrompt = `${testFileName} already exists. Overwrite? [y]es/[n]o/[a]ll/[q]uit: `;
 						overwriteFiles = confirm( confirmPrompt, 'anqy' );
 						overwriteFiles = overwriteFiles.toLowerCase();
 					}
@@ -175,4 +178,56 @@ if ( command == 'install' ) {
 		}
 	}
 	// @todo: deprecated files.
+} else if ( command == 'uninstall' ) {
+	if ( ! packageName ) {
+		// @todo: write error message
+		return;
+	}
+
+	const pkg = resolvePackage( packageName ).name;
+	const { packageSlug, testSpecs, defaultJson, initializeSh } = getPackageData( pkg );
+
+	// Delete sample default.json
+	if ( defaultJson ) {
+		const defaultJsonName = `config/default-${packageSlug}.json`;
+		confirmLocalDelete( defaultJsonName );
+	}
+
+	// Delete sample initialize.sh
+	if ( initializeSh ) {
+		const defaultInitName = `docker/${packageSlug}.sh`;
+		confirmLocalDelete( defaultInitName );
+	}
+
+	if ( ! testSpecs ) {
+		return;
+	}
+
+	const testsSpecFile = resolvePackagePath( testSpecs, pkg );
+	const specs = fs.readFileSync( testsSpecFile );
+	const tests = JSON.parse( specs );
+	const { active, deprecated } = tests;
+
+	if ( ! active || ! active.length ) {
+		return;
+	}
+
+	// Loop through folders and files to delete test scripts.
+	for ( let f = 0; f < active.length; f++ ) {
+		const testFolder = active[ f ];
+		const { testFiles } = testFolder;
+
+		if ( ! testFiles || ! testFiles.length ) {
+			continue;
+		}
+
+		const specFolder = testFolder.name.length ? `specs/${testFolder.name}` : 'specs';
+		for ( let t = 0; t < testFiles.length; t++ ) {
+			const testFile = testFiles[ t ];
+			const testFilePath = `${specFolder}/${testFile.name}.${testExtension}`;
+
+			confirmLocalDelete( testFilePath );
+		}
+	}
+
 }

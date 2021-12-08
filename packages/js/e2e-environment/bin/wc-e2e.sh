@@ -71,7 +71,8 @@ case $1 in
 		./bin/wait-for-build.sh && ./bin/e2e-test-integration.js --dev --debug $2
 		TESTRESULT=$?
 		;;
-	'install')
+	'install' | \
+	'uninstall')
 		./bin/scaffold.js $@
 		;;
 	*)
