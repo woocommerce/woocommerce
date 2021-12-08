@@ -3,7 +3,7 @@
  */
 const jestConfig = require( './jest.config' );
 const jestPuppeteerConfig = require( './jest-puppeteer.config' );
-const setupJestObject = require('./jest-object.config');
+const jestobjectConfig = require('./jest-object.config');
 const {
 	useE2EBabelConfig,
 	useE2EEsLintConfig,
@@ -13,7 +13,7 @@ const {
 
 module.exports = {
 	jestConfig,
-	setupJestObject,
+	...jestobjectConfig,
 	jestPuppeteerConfig,
 	useE2EBabelConfig,
 	useE2EEsLintConfig,
