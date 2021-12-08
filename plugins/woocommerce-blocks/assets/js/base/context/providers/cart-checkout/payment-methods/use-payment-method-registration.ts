@@ -53,7 +53,12 @@ const usePaymentMethodRegistration = (
 	const selectedShippingMethods = useShallowEqual( selectedRates );
 	const paymentMethodsOrder = useShallowEqual( paymentMethodsSortOrder );
 	const cart = useStoreCart();
-	const { cartTotals, cartNeedsShipping, paymentRequirements } = cart;
+	const {
+		cartTotals,
+		cartIsLoading,
+		cartNeedsShipping,
+		paymentRequirements,
+	} = cart;
 	const canPayArgument = useRef( {
 		cart,
 		cartTotals,
@@ -173,12 +178,15 @@ const usePaymentMethodRegistration = (
 	// shipping methods, cart or the billing data change.
 	// Some payment methods (e.g. COD) can be disabled for specific shipping methods.
 	useEffect( () => {
-		debouncedRefreshCanMakePayments();
+		if ( ! cartIsLoading ) {
+			debouncedRefreshCanMakePayments();
+		}
 	}, [
 		debouncedRefreshCanMakePayments,
 		cart,
 		selectedShippingMethods,
 		billingData,
+		cartIsLoading,
 	] );
 
 	return isInitialized;
