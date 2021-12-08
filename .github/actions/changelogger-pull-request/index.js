@@ -1,12 +1,11 @@
 const core = require( '@actions/core' );
 const fs = require( 'fs' );
 
-const branch = core.getInput( 'branch' ).replace( '/', '-' );
 const diff = core.getInput( 'diff' );
 const prNumber = core.getInput( 'prNumber' );
 const repository = core.getInput( 'repository' );
 
-const changelogFileNameRegEx = new RegExp( `.*(?=\/changelog\/${ branch }).*` );
+const changelogFileNameRegEx = new RegExp( `.*(?=\/changelog\/).*` );
 
 if ( ! changelogFileNameRegEx.test( diff ) ) {
 	core.setFailed( `No changelog detected.` );

@@ -1,8 +1,8 @@
-name: Validate Changelog
+name: Changelog
 on: pull_request
 jobs:
     changelogger:
-        name: Validate and append changelog entry
+        name: Append changelog entry
         runs-on: ubuntu-latest
         steps:
             - name: Checkout code
