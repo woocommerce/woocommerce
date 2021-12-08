@@ -191,7 +191,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 - Fix - Fix products API orderby slug and include. ([#30873](https://github.com/woocommerce/woocommerce/pull/30873))
 - Dev - Remove defunct AJAX events. ([#30931](https://github.com/woocommerce/woocommerce/pull/30931))
 
-**WooCommerce Admin - 2.9.0 **
+**WooCommerce Admin - 2.9.0 & 2.9.1 **
 
 - Dev - Remove task status endpoint ( [#7841](https://github.com/woocommerce/woocommerce-admin/issues/7841) )
 - Fix - Fix ordering and styling issue with WooCommerce Payments payment method promotion. ( [#7943](https://github.com/woocommerce/woocommerce-admin/issues/7943) )
@@ -216,6 +216,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 - Fix - Fix Tasklist UI illustrations styling ( [#7858](https://github.com/woocommerce/woocommerce-admin/issues/7858) )
 - Fix - Revert experiment task titles back to original ( [#7853](https://github.com/woocommerce/woocommerce-admin/issues/7853) )
 - Fix - Ensure homescreen defaults to single column layout. ( [#7969](https://github.com/woocommerce/woocommerce-admin/issues/7969) )
+- Fix: Fix shipping task not offering step 3. ( [#7985](https://github.com/woocommerce/woocommerce-admin/issues/7985) )
 - Add - Add Avalara to tax task ( [#7874](https://github.com/woocommerce/woocommerce-admin/issues/7874) )
 - Add - Add 2col expirement. ( [#7872](https://github.com/woocommerce/woocommerce-admin/issues/7872) )
 - Add - Added two column experimental task list ( [#7669](https://github.com/woocommerce/woocommerce-admin/issues/7669) )
