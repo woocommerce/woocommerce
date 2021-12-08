@@ -1,5 +1,5 @@
 module.exports = {
-	testSpecs: 'data/scaffold-tests.json',
-	defaultJson: 'data/default-test-config.json',
-	initializeSh: 'data/initialize.sh.default',
+	testSpecs: 'installFiles/scaffold-tests.json',
+	defaultJson: 'installFiles/default-test-config.json',
+	initializeSh: 'installFiles/initialize.sh.default',
 };
