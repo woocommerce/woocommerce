@@ -32,7 +32,19 @@ const resolvePackage = ( packageName, allowRecurse = true ) => {
 	const resolvedPackage = {};
 
 	try {
-		resolvedPackage.path = require.resolve( packageName );
+		const resolvedPath = path.dirname( require.resolve( packageName ) );
+		const buildPaths = [ 'dist', 'build', 'build-modules' ];
+
+		// Remove build paths from the resolved path.
+		let resolvedParts = resolvedPath.split( path.sep );
+		for ( let rp = resolvedParts.length - 1; rp >= 0; rp-- ) {
+			if ( buildPaths.includes( resolvedParts[ rp ] ) ) {
+				resolvedParts = resolvedParts.slice( 0, -1 );
+			} else {
+				break;
+			}
+		}
+		resolvedPackage.path = resolvedParts.join( path.sep );
 		resolvedPackage.name = packageName;
 	} catch ( e ) {
 		// Package name installed is not the package name.
