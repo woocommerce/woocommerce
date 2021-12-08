@@ -12,7 +12,9 @@ const buildOutput = ( results ) => {
 	output += `Total Number of Test Suites: ${ results.numTotalTestSuites }\n`;
 	output += `Total Number of Passed Test Suites: ${ results.numPassedTestSuites }\n`;
 	output += `Total Number of Failed Test Suites: ${ results.numFailedTestSuites }\n`;
-}
+
+	return output;
+};
 
 module.exports = async ( { github, context } ) => {
 	let output = '';
@@ -21,7 +23,7 @@ module.exports = async ( { github, context } ) => {
 		const data = fs.readFileSync( resultsFile );
 		const results = JSON.parse( data );
 
-		ouput = buildOutput( results );
+		output = buildOutput( results );
 	} else {
 		output = `## Test Results Not Found!`;
 	}
