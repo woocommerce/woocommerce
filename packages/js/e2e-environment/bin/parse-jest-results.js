@@ -6,12 +6,12 @@ const resultsFile = path.resolve( __dirname, '../test-results.json' );
 const buildOutput = ( results ) => {
 	const { TITLE } = process.env;
 
-	let output = `${ TITLE }:\n`;
-	output += `Total Number of Passed Tests: ${ results.numTotalTests }\n`;
-	output += `Total Number of Failed Tests: ${ results.numFailedTests }\n`;
-	output += `Total Number of Test Suites: ${ results.numTotalTestSuites }\n`;
-	output += `Total Number of Passed Test Suites: ${ results.numPassedTestSuites }\n`;
-	output += `Total Number of Failed Test Suites: ${ results.numFailedTestSuites }\n`;
+	let output = `## ${ TITLE }:\n\n`;
+	output += `**Total Number of Passed Tests:** ${ results.numTotalTests }\n`;
+	output += `**Total Number of Failed Tests:** ${ results.numFailedTests }\n`;
+	output += `**Total Number of Test Suites:** ${ results.numTotalTestSuites }\n`;
+	output += `**Total Number of Passed Test Suites:** ${ results.numPassedTestSuites }\n`;
+	output += `**Total Number of Failed Test Suites:** ${ results.numFailedTestSuites }\n`;
 
 	return output;
 };
