@@ -149,10 +149,9 @@ class WC_Geolocation {
 		}
 
 		if ( empty( $ip_address ) ) {
-			$ip_address = self::get_ip_address();
+			$ip_address   = self::get_ip_address();
+			$country_code = self::get_country_code_from_headers();
 		}
-
-		$country_code = self::get_country_code_from_headers();
 
 		/**
 		 * Get geolocation filter.
