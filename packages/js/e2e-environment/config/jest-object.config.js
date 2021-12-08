@@ -3,8 +3,8 @@
  */
 const { E2E_RETRY_TIMES } = process.env;
 
-const setupJestRetries = () => {
-	const retryTimes = E2E_RETRY_TIMES ? E2E_RETRY_TIMES : 3;
+const setupJestRetries = ( retries = 2 ) => {
+	const retryTimes = E2E_RETRY_TIMES ? E2E_RETRY_TIMES : retries;
 
 	jest.retryTimes( retryTimes );
 };
@@ -13,4 +13,8 @@ const setupJestObject = () => {
 	setupJestRetries();
 };
 
-module.exports = setupJestObject;
+module.exports = {
+	setupJestObject,
+	setupJestRetries,
+};
+
