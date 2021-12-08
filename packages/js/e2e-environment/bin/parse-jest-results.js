@@ -3,6 +3,17 @@ const path = require( 'path' );
 
 const resultsFile = path.resolve( __dirname, '../test-results.json' );
 
+const buildOutput = ( results ) => {
+	const { TITLE } = process.env;
+
+	let output = `${ TITLE }:\n`;
+	output += `Total Number of Passed Tests: ${ results.numTotalTests }\n`;
+	output += `Total Number of Failed Tests: ${ results.numFailedTests }\n`;
+	output += `Total Number of Test Suites: ${ results.numTotalTestSuites }\n`;
+	output += `Total Number of Passed Test Suites: ${ results.numPassedTestSuites }\n`;
+	output += `Total Number of Failed Test Suites: ${ results.numFailedTestSuites }\n`;
+}
+
 module.exports = async ( { github, context } ) => {
 	let output = '';
 
@@ -10,27 +21,7 @@ module.exports = async ( { github, context } ) => {
 		const data = fs.readFileSync( resultsFile );
 		const results = JSON.parse( data );
 
-		const { TITLE } = process.env;
-
-		const totalTests = results.numTotalTests;
-		const totalTestSuites = results.numTotalTestSuites;
-		const totalPassedTestSuites = results.numPassedTestSuites;
-		const totalFailedTestSuites = results.numFailedTestSuites;
-		const totalFailedTests = results.numFailedTests;
-		const totalPassedTests = results.numPassedTests;
-
-		// TODO: create funciton that makes markdown based on a object
-		/**
-		 * e.g {}
-		 */
-		output = `
-			## ${ TITLE }:
-			**Total Number of Tests:** ${ totalTests }
-			**Total Number of Passed Tests:** ${ totalPassedTests }
-			**Total Number of Failed Tests:** ${ totalFailedTests }
-			**Total Number of Test Suites:** ${ totalTestSuites }
-			**Total Number of Passed Test Suites:** ${ totalPassedTestSuites }
-			**Total Number of Failed Test Suites:** ${ totalFailedTestSuites }`;
+		ouput = buildOutput( results );
 	} else {
 		output = `## Test Results Not Found!`;
 	}
