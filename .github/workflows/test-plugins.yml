@@ -8,9 +8,17 @@ jobs:
     name: Smoke tests with ${{ matrix.plugins }} plugin installed
     runs-on: ubuntu-18.04
     strategy:
-      matrix: 
-        plugins: [ 'automattic/woocommerce-payments', 'woocommerce/facebook-for-woocommerce', 'automattic/woocommerce-services', ${{ secrets.WC_SUBSCRIPTIONS_REPO }}]
-        pluginNames: [ 'WooCommerce Payments', 'Facebook for WooCommerce', 'WooCommerce Shipping & Tax', 'WooCommerce Subscriptions' ]
+      matrix:
+        include:
+          - plugin: 'WooCommerce Payments'
+            repo: 'automattic/woocommerce-payments'
+          - plugin: 'Facebook for WooCommerce'
+            repo: 'woocommerce/facebook-for-woocommerce'
+          - plugin: 'WooCommerce Shipping & Tax'
+            repo: 'woocommerce/woocommerce-services'
+          - plugin: 'WooCommerce Subscriptions'
+            repo: WC_SUBSCRIPTIONS_REPO
+            private: true
     steps:
 
       - name: Create dirs.
@@ -54,8 +62,8 @@ jobs:
           WC_E2E_SCREENSHOTS: 1
           E2E_SLACK_TOKEN: ${{ secrets.SMOKE_TEST_SLACK_TOKEN }}
           E2E_SLACK_CHANNEL: ${{ secrets.RELEASE_TEST_SLACK_CHANNEL }}
-          PLUGIN_REPOSITORY: ${{ matrix.plugins }}
-          PLUGIN_NAME: ${{ matrix.pluginNames }}
+          PLUGIN_REPOSITORY: ${{ matrix.private && secrets[matrix.repo] || matrix.repo }}
+          PLUGIN_NAME: ${{ matrix.plugin }}
           GITHUB_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
         run: |
           pnpx wc-e2e test:e2e plugins/woocommerce/tests/e2e/specs/smoke-tests/upload-plugin.js
