@@ -2,6 +2,11 @@
 
 ## Added
 
+- Added `post-results-to-github-pr.js` to post smoke test results to a GitHub PR.
+- Added jest flags to generate a json test report
+
+## Added
+
 - Added `await` for every call to `shopper.logout`
 
 ## Fixed
