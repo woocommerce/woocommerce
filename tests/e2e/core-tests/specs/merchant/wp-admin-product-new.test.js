@@ -110,7 +110,7 @@ const runAddVariableProductTest = () => {
 			await merchant.login();
 		});
 
-		it('can create variable product', async () => {
+		it('can create product with variations', async () => {
 			await openNewProductAndVerify();
 
 			// Set product data

@@ -36,6 +36,7 @@ const runOrderApplyCouponTest = () => {
 		} );
 
 		it('can apply a coupon', async () => {
+			await page.waitForSelector('button.add-coupon');
 			const couponDialog = await expect(page).toDisplayDialog(async () => {
 				await evalAndClick('button.add-coupon');
 			});
@@ -43,7 +44,6 @@ const runOrderApplyCouponTest = () => {
 
 			// Accept the dialog with the coupon code
 			await couponDialog.accept(couponCode);
-
 			await uiUnblocked();
 
 			// Verify the coupon list is showing

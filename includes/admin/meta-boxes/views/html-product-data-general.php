@@ -31,6 +31,8 @@ defined( 'ABSPATH' ) || exit;
 				'description' => __( 'This text will be shown on the button linking to the external product.', 'woocommerce' ),
 			)
 		);
+
+		do_action( 'woocommerce_product_options_external' );
 		?>
 	</div>
 

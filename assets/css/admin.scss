@@ -197,6 +197,9 @@
 
 	h1.search-form-title {
 		clear: left;
+		font-size: 20px;
+		line-height: 1.2;
+		margin: 48px 0 16px;
 		padding: 0;
 	}
 
@@ -235,6 +238,7 @@
 		display: block;
 		height: 37px;
 		line-height: 37px;
+		margin-top: 16px;
 		text-align: center;
 		text-decoration: none;
 		width: 124px;
@@ -653,13 +657,9 @@
 	}
 
 	.marketplace-content-wrapper {
-		margin: 0 auto 0 0;
+		margin: 0 auto;
 		max-width: 1032px;
 		width: 100%;
-
-		@media only screen and ( min-width: 1300px ) {
-			margin-left: 64px;
-		}
 	}
 
 	.products {
@@ -781,17 +781,16 @@
 
 .woocommerce-page-wc-marketplace {
 
-	.woocommerce-layout {
-		display: none;
-	}
-
 	.notice {
 		margin-left: 20px;
 		margin-right: 20px;
 	}
 
-	.wp-header-end {
-		margin-top: -16px;
+	&.woocommerce-page {
+
+		.wrap {
+			margin-top: 32px;
+		}
 	}
 }
 
