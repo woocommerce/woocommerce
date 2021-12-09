@@ -1,13 +1,13 @@
-name: Run smoke tests against plugins
-on: pull_request
-# on:
-#   release:
-#     types: [published]
+name: On release run smoke tests against plugins
+on:
+  release:
+    types: [published]
 jobs:
   test-plugins:
-    name: Smoke tests with ${{ matrix.plugins }} plugin installed
+    name: Smoke tests with ${{ matrix.plugin }} plugin installed
     runs-on: ubuntu-18.04
     strategy:
+      fail-fast: false
       matrix:
         include:
           - plugin: 'WooCommerce Payments'
@@ -19,6 +19,10 @@ jobs:
           - plugin: 'WooCommerce Subscriptions'
             repo: WC_SUBSCRIPTIONS_REPO
             private: true
+          - plugin: 'WordPress SEO' # Yoast SEO in the UI, but the slug is wordpress-seo
+            repo: 'Yoast/wordpress-seo'
+          - plugin: 'Contact Form 7'
+            repo: 'takayukister/contact-form-7'
     steps:
       - name: Create dirs.
         run: |
@@ -30,7 +34,8 @@ jobs:
       - name: Checkout code.
         uses: actions/checkout@v2
         with:
-            path: package/woocommerce
+          path: package/woocommerce
+          ref: trunk
 
       - name: Install PNPM and install dependencies
         working-directory: package/woocommerce
