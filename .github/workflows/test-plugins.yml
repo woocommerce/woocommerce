@@ -20,18 +20,17 @@ jobs:
             repo: WC_SUBSCRIPTIONS_REPO
             private: true
     steps:
-
       - name: Create dirs.
         run: |
-              mkdir -p code/woocommerce
-              mkdir -p package/woocommerce
-              mkdir -p tmp/woocommerce
-              mkdir -p node_modules
+            mkdir -p code/woocommerce
+            mkdir -p package/woocommerce
+            mkdir -p tmp/woocommerce
+            mkdir -p node_modules
 
       - name: Checkout code.
         uses: actions/checkout@v2
         with:
-          path: package/woocommerce
+            path: package/woocommerce
 
       - name: Install PNPM and install dependencies
         working-directory: package/woocommerce
@@ -41,20 +40,28 @@ jobs:
 
       - name: Load docker images and start containers.
         working-directory: package/woocommerce/plugins/woocommerce
-        run: pnpm nx docker-up woocommerce
+        run: pnpx wc-e2e docker:up
 
       - name: Move current directory to code. We will install zip file in this dir later.
         run: mv ./package/woocommerce/plugins/woocommerce/* ./code/woocommerce
 
-      - name: Download WooCommerce release zip
+      - name: Download WooCommerce ZIP.
+        uses: actions/download-artifact@v2
+        with:
+            name: woocommerce
+            path: tmp
+
+      - name: Extract and replace WooCommerce zip.
         working-directory: tmp
         run: |
-          ASSET_ID=$(jq ".release.assets[0].id" $GITHUB_EVENT_PATH)
+            unzip woocommerce.zip -d woocommerce
+            mv woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
 
-          curl https://api.github.com/repos/woocommerce/woocommerce/releases/assets/${ASSET_ID} -LJOH 'Accept: application/octet-stream'
-
-          unzip woocommerce.zip -d woocommerce
-          mv woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
+      - name: Install dependencies again
+        working-directory: package/woocommerce
+        run: |
+            npm install -g pnpm
+            pnpm install
 
       - name: Run tests command.
         working-directory: package/woocommerce/plugins/woocommerce
