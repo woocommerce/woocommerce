@@ -40,7 +40,7 @@ async function trashExistingPosts() {
 // each other's side-effects.
 beforeAll(async () => {
 
-	setupJestRetries( 2 );
+	setupJestRetries();
 
 	if ( DEFAULT_TIMEOUT_OVERRIDE ) {
 		page.setDefaultNavigationTimeout( DEFAULT_TIMEOUT_OVERRIDE );

@@ -176,7 +176,7 @@ beforeAll( async () => {
 	capturePageEventsForTearDown();
 	enablePageDialogAccept();
 	observeConsoleLogging();
-	setupJestRetries( 2 );
+	setupJestRetries();
 } );
 
 afterEach( async () => {
