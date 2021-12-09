@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
 use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
+use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 
 /**
  * Mini Cart class.
@@ -172,7 +173,7 @@ class MiniCart extends AbstractBlock {
 
 		$this->asset_data_registry->add(
 			'themeSlug',
-			wp_get_theme()->get_stylesheet(),
+			BlockTemplateUtils::theme_has_template_part( 'mini-cart' ) ? wp_get_theme()->get_stylesheet() : 'woocommerce',
 			''
 		);
 
