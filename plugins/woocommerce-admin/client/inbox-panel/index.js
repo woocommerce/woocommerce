@@ -19,7 +19,7 @@ import {
 	InboxNotePlaceholder,
 	Text,
 } from '@woocommerce/experimental';
-
+import moment from 'moment';
 /**
  * Internal dependencies
  */
@@ -181,10 +181,24 @@ const InboxPanel = ( { showHeader = true } ) => {
 				isResolving,
 				isNotesRequesting,
 			} = select( NOTES_STORE_NAME );
+			const WC_VERSION_61_RELEASE_DATE = moment(
+				'2022-01-11',
+				'YYYY-MM-DD'
+			).valueOf();
 
 			return {
 				notes: getNotes( INBOX_QUERY ).map( ( note ) => {
-					note.content = truncateRenderableHTML( note.content, 320 );
+					const noteDate = moment(
+						note.date_created_gmt,
+						'YYYY-MM-DD'
+					).valueOf();
+
+					if ( noteDate >= WC_VERSION_61_RELEASE_DATE ) {
+						note.content = truncateRenderableHTML(
+							note.content,
+							320
+						);
+					}
 					return note;
 				} ),
 				isError: Boolean(
