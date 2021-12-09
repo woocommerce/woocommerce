@@ -1,7 +1,8 @@
 name: On release run smoke tests against plugins
-on:
-  release:
-    types: [published]
+# on:
+#   release:
+#     types: [published]
+on: pull_request
 jobs:
   test-plugins:
     name: Smoke tests with ${{ matrix.plugin }} plugin installed
