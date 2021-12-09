@@ -56,10 +56,19 @@ jobs:
                       ./plugins/woocommerce/vendor
                   key: ${{ runner.os }}-${{ matrix.php }}-${{ hashFiles('./plugins/woocommerce/composer.lock') }}
 
+            - name: Cache PNPM modules
+              uses: actions/cache@v2
+              with:
+                  path: ~/.pnpm-store
+                  key: ${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+                  restore-keys: |
+                      ${{ runner.os }}-
+
             - name: Install PNPM and install dependencies
-              run: |
-                  npm install -g pnpm
-                  pnpm install
+              uses: pnpm/action-setup@v2.0.1
+              with:
+                  version: 6.23.6
+                  run_install: true
 
             - name: Composer Install
               if: steps.unit-tests-composer-cache.outputs.cache-hit != 'true'
