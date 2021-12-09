@@ -40,6 +40,9 @@ vendor/
 # TypeScript files
 tsconfig.tsbuildinfo
 
+# Node Package Dependencies
+package-lock.json
+
 # wp-env config
 .wp-env.override.json
 
