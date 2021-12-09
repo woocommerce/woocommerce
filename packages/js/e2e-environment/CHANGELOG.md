@@ -3,6 +3,7 @@
 ## Added
 
 - Added `await` for every call to `shopper.logout`
+- Test setup, scaffolding, and removal via `wc-e2e install` and `wc-e2e uninstall`
 
 ## Fixed
 
