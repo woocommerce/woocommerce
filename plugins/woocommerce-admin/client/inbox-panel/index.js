@@ -164,6 +164,7 @@ const INBOX_QUERY = {
 		'image',
 		'is_deleted',
 		'is_read',
+		'locale',
 	],
 };
 
@@ -186,6 +187,14 @@ const InboxPanel = ( { showHeader = true } ) => {
 				'YYYY-MM-DD'
 			).valueOf();
 
+			const supportedLocales = [
+				'en_US',
+				'en_AU',
+				'en_CA',
+				'en_GB',
+				'en_ZA',
+			];
+
 			return {
 				notes: getNotes( INBOX_QUERY ).map( ( note ) => {
 					const noteDate = moment(
@@ -193,7 +202,10 @@ const InboxPanel = ( { showHeader = true } ) => {
 						'YYYY-MM-DD'
 					).valueOf();
 
-					if ( noteDate >= WC_VERSION_61_RELEASE_DATE ) {
+					if (
+						supportedLocales.includes( note.locale ) &&
+						noteDate >= WC_VERSION_61_RELEASE_DATE
+					) {
 						note.content = truncateRenderableHTML(
 							note.content,
 							320
