@@ -10,7 +10,51 @@
 3. Press **Add manually**.
 4. No PHP warning should be visible.
 
+## 3.1.0
+
+### Inbox - 320 character limit
+
+On a new site, with English language settings:
+
+1. Go to WooCommerce home screen
+2. See that all Inbox notes are short in length (aproximately less than 320 characters). 
+
 ## 3.0.0
+
+### Inbox - Read notes
+
+1. Go to WooCommerce home screen
+2. Interact with a note by clicking on its title or action buttons.
+3. Return to the WooCommerce home screen
+4. See that the note is in a read state, with duller appearance.
+
+### Inbox - Dismiss single note
+
+1. Go to WooCommerce home screen
+2. Dismiss a single note using the "Dismiss" button when hovering over a note.
+3. See the "Message dismissed" notification.
+4. Click "Undo" on the notification.
+5. See the note returns to inbox.
+6. Dismiss the note again.
+7. Re-load the WooCommerce home screen.
+8. See that the note no longer appears.
+
+### Inbox - Activity menu
+
+1. Go to WooCommerce products screen
+2. On Menu bar, see that "Activity" menu item exists in top right corner.
+3. Click "Activity" menu item.
+4. See notes appear in panel.
+
+### Inbox - Dismiss all notes
+
+1. Go to WooCommerce home screen
+2. On "Inbox" heading panel, click kebab menu (3 dots).
+3. Click "Dismiss all".
+4. On confirmation dialog, press "Cancel" button.
+5. See that notes still remain.
+6. Dismall all notes again and press "Yes, dismiss all" on confirmation dialog.
+7. See that all notes are removed.
 
 ### Onboarding Workflow - Add number of employees field
 
