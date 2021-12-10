@@ -130,7 +130,7 @@
 		"@wordpress/html-entities": "3.2.3",
 		"@wordpress/i18n": "4.2.4",
 		"@wordpress/is-shallow-equal": "4.2.1",
-		"@wordpress/scripts": "19.2.2",
+		"@wordpress/scripts": "17.1.0",
 		"autoprefixer": "10.3.7",
 		"axios": "0.21.4",
 		"babel-plugin-react-docgen": "4.2.1",
