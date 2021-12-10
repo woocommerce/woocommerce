@@ -34,6 +34,14 @@ class LegacyTemplate extends AbstractDynamicBlock {
 			return;
 		}
 
+		// We need to load the scripts here because when using block templates wp_head() gets run after the block template.
+		// As a result we are trying to enqueue required scripts before we have even registered them.
+		// See here for more information: https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/5328#issuecomment-989013447.
+		if ( class_exists( 'WC_Frontend_Scripts' ) ) {
+			$frontend_scripts = new \WC_Frontend_Scripts();
+			$frontend_scripts::load_scripts();
+		}
+
 		$archive_templates = array( 'archive-product', 'taxonomy-product_cat', 'taxonomy-product_tag' );
 
 		if ( 'single-product' === $attributes['template'] ) {
