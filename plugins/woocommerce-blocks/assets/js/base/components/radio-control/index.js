@@ -11,11 +11,11 @@ import RadioControlOption from './option';
 import './style.scss';
 
 const RadioControl = ( {
-	className,
+	className = '',
 	instanceId,
 	id,
 	selected,
-	onChange,
+	onChange = () => {},
 	options = [],
 } ) => {
 	const radioControlId = id || instanceId;

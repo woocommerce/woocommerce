@@ -38,6 +38,13 @@ export const usePaymentMethodDataDispatchers = (
 				void dispatch(
 					actions.setShouldSavePaymentMethod( shouldSave )
 				),
+			setActivePaymentMethod: ( paymentMethod, paymentMethodData = {} ) =>
+				void dispatch(
+					actions.setActivePaymentMethod(
+						paymentMethod,
+						paymentMethodData
+					)
+				),
 		} ),
 		[ dispatch ]
 	);
@@ -45,13 +52,7 @@ export const usePaymentMethodDataDispatchers = (
 	const setPaymentStatus = useCallback(
 		(): PaymentStatusDispatchers => ( {
 			pristine: () => dispatch( actions.statusOnly( STATUS.PRISTINE ) ),
-			started: ( paymentMethodData ) => {
-				dispatch(
-					actions.started( {
-						paymentMethodData,
-					} )
-				);
-			},
+			started: () => dispatch( actions.statusOnly( STATUS.STARTED ) ),
 			processing: () =>
 				dispatch( actions.statusOnly( STATUS.PROCESSING ) ),
 			completed: () => dispatch( actions.statusOnly( STATUS.COMPLETE ) ),

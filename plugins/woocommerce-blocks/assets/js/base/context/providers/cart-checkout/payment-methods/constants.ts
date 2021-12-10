@@ -20,16 +20,17 @@ export enum ACTION {
 	SET_REGISTERED_PAYMENT_METHODS = 'set_registered_payment_methods',
 	SET_REGISTERED_EXPRESS_PAYMENT_METHODS = 'set_registered_express_payment_methods',
 	SET_SHOULD_SAVE_PAYMENT_METHOD = 'set_should_save_payment_method',
+	SET_ACTIVE_PAYMENT_METHOD = 'set_active_payment_method',
 }
 
 // Note - if fields are added/shape is changed, you may want to update PRISTINE reducer clause to preserve your new field.
 export const DEFAULT_PAYMENT_DATA_CONTEXT_STATE: PaymentMethodDataContextState = {
 	currentStatus: STATUS.PRISTINE,
 	shouldSavePaymentMethod: false,
+	activePaymentMethod: '',
 	paymentMethodData: {
 		payment_method: '',
 	},
-	hasSavedToken: false,
 	errorMessage: '',
 	paymentMethods: {},
 	expressPaymentMethods: {},
@@ -61,9 +62,8 @@ export const DEFAULT_PAYMENT_METHOD_DATA: PaymentMethodDataContextType = {
 	paymentMethodData: {},
 	errorMessage: '',
 	activePaymentMethod: '',
-	setActivePaymentMethod: () => void null,
 	activeSavedToken: '',
-	setActiveSavedToken: () => void null,
+	setActivePaymentMethod: () => void null,
 	customerPaymentMethods: {},
 	paymentMethods: {},
 	expressPaymentMethods: {},
