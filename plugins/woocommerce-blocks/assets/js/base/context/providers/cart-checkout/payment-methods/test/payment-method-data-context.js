@@ -60,7 +60,7 @@ jest.mock( '@woocommerce/settings', () => {
 	};
 } );
 
-const registerMockPaymentMethods = () => {
+const registerMockPaymentMethods = ( savedCards = true ) => {
 	[ 'cheque', 'bacs' ].forEach( ( name ) => {
 		registerPaymentMethod( {
 			name,
@@ -84,7 +84,7 @@ const registerMockPaymentMethods = () => {
 			icons: null,
 			canMakePayment: () => true,
 			supports: {
-				showSavedCards: true,
+				showSavedCards: savedCards,
 				showSaveOption: true,
 				features: [ 'products' ],
 			},
@@ -132,7 +132,7 @@ const resetMockPaymentMethods = () => {
 describe( 'Testing Payment Method Data Context Provider', () => {
 	beforeEach( () => {
 		act( () => {
-			registerMockPaymentMethods();
+			registerMockPaymentMethods( false );
 
 			fetchMock.mockResponse( ( req ) => {
 				if ( req.url.match( /wc\/store\/cart/ ) ) {
@@ -146,12 +146,14 @@ describe( 'Testing Payment Method Data Context Provider', () => {
 			dispatch( storeKey ).receiveCart( defaultCartState.cartData );
 		} );
 	} );
+
 	afterEach( async () => {
 		act( () => {
 			resetMockPaymentMethods();
 			fetchMock.resetMocks();
 		} );
 	} );
+
 	it( 'toggles active payment method correctly for express payment activation and close', async () => {
 		const TriggerActiveExpressPaymentMethod = () => {
 			const { activePaymentMethod } = usePaymentMethodDataContext();
@@ -214,6 +216,32 @@ describe( 'Testing Payment Method Data Context Provider', () => {
 
 		// ["`select` control in `@wordpress/data-controls` is deprecated. Please use built-in `resolveSelect` control in `@wordpress/data` instead."]
 		expect( console ).toHaveWarned();
+	} );
+} );
+
+describe( 'Testing Payment Method Data Context Provider with saved cards turned on', () => {
+	beforeEach( () => {
+		act( () => {
+			registerMockPaymentMethods( true );
+
+			fetchMock.mockResponse( ( req ) => {
+				if ( req.url.match( /wc\/store\/cart/ ) ) {
+					return Promise.resolve( JSON.stringify( previewCart ) );
+				}
+				return Promise.resolve( '' );
+			} );
+
+			// need to clear the store resolution state between tests.
+			dispatch( storeKey ).invalidateResolutionForStore();
+			dispatch( storeKey ).receiveCart( defaultCartState.cartData );
+		} );
+	} );
+
+	afterEach( async () => {
+		act( () => {
+			resetMockPaymentMethods();
+			fetchMock.resetMocks();
+		} );
 	} );
 
 	it( 'resets saved payment method data after starting and closing an express payment method', async () => {

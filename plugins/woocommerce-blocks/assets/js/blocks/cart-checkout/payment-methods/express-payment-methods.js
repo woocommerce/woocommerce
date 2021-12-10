@@ -40,13 +40,14 @@ const ExpressPaymentMethods = () => {
 	/**
 	 * onExpressPaymentClick should be triggered when the express payment button is clicked.
 	 *
-	 * This will store the previous active payment method, set the express method as active, and set the payment status to started.
+	 * This will store the previous active payment method, set the express method as active, and set the payment status
+	 * to started.
 	 */
 	const onExpressPaymentClick = useCallback(
 		( paymentMethodId ) => () => {
 			previousActivePaymentMethod.current = activePaymentMethod;
 			previousPaymentMethodData.current = paymentMethodData;
-			setPaymentStatus().started( {} );
+			setPaymentStatus().started();
 			setActivePaymentMethod( paymentMethodId );
 		},
 		[
@@ -64,10 +65,10 @@ const ExpressPaymentMethods = () => {
 	 */
 	const onExpressPaymentClose = useCallback( () => {
 		setPaymentStatus().pristine();
-		setActivePaymentMethod( previousActivePaymentMethod.current );
-		if ( previousPaymentMethodData.current.isSavedToken ) {
-			setPaymentStatus().started( previousPaymentMethodData.current );
-		}
+		setActivePaymentMethod(
+			previousActivePaymentMethod.current,
+			previousPaymentMethodData.current
+		);
 	}, [ setActivePaymentMethod, setPaymentStatus ] );
 
 	/**
@@ -79,10 +80,10 @@ const ExpressPaymentMethods = () => {
 		( errorMessage ) => {
 			setPaymentStatus().error( errorMessage );
 			setExpressPaymentError( errorMessage );
-			setActivePaymentMethod( previousActivePaymentMethod.current );
-			if ( previousPaymentMethodData.current.isSavedToken ) {
-				setPaymentStatus().started( previousPaymentMethodData.current );
-			}
+			setActivePaymentMethod(
+				previousActivePaymentMethod.current,
+				previousPaymentMethodData.current
+			);
 		},
 		[ setActivePaymentMethod, setPaymentStatus, setExpressPaymentError ]
 	);

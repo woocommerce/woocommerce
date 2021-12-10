@@ -27,17 +27,21 @@ export type CustomerPaymentMethods =
 	| Record< string, CustomerPaymentMethod >
 	| EmptyObjectType;
 
-export type PaymentMethodDispatchers = {
+export interface PaymentMethodDispatchers {
 	setRegisteredPaymentMethods: ( paymentMethods: PaymentMethods ) => void;
 	setRegisteredExpressPaymentMethods: (
 		paymentMethods: ExpressPaymentMethods
 	) => void;
 	setShouldSavePayment: ( shouldSave: boolean ) => void;
-};
+	setActivePaymentMethod: (
+		paymentMethod: string,
+		paymentMethodData?: ObjectType | EmptyObjectType
+	) => void;
+}
 
 export interface PaymentStatusDispatchers {
 	pristine: () => void;
-	started: ( paymentMethodData?: ObjectType | EmptyObjectType ) => void;
+	started: () => void;
 	processing: () => void;
 	completed: () => void;
 	error: ( error: string ) => void;
@@ -56,8 +60,8 @@ export interface PaymentStatusDispatchers {
 export interface PaymentMethodDataContextState {
 	currentStatus: STATUS;
 	shouldSavePaymentMethod: boolean;
+	activePaymentMethod: string;
 	paymentMethodData: ObjectType | EmptyObjectType;
-	hasSavedToken: boolean;
 	errorMessage: string;
 	paymentMethods: PaymentMethods;
 	expressPaymentMethods: ExpressPaymentMethods;
@@ -95,12 +99,10 @@ export type PaymentMethodDataContextType = {
 	errorMessage: string;
 	// The active payment method slug.
 	activePaymentMethod: string;
-	// A function for setting the active payment method.
-	setActivePaymentMethod: ( paymentMethod: string ) => void;
 	// Current active token.
 	activeSavedToken: string;
-	// A function for setting the active payment method token.
-	setActiveSavedToken: ( activeSavedToken: string ) => void;
+	// A function for setting the active payment method.
+	setActivePaymentMethod: PaymentMethodDispatchers[ 'setActivePaymentMethod' ];
 	// Returns the customer payment for the customer if it exists.
 	customerPaymentMethods:
 		| Record< string, CustomerPaymentMethod >
@@ -120,7 +122,7 @@ export type PaymentMethodDataContextType = {
 	// True if an express payment method is active.
 	isExpressPaymentMethodActive: boolean;
 	// A function used to set the shouldSavePayment value.
-	setShouldSavePayment: ( shouldSavePayment: boolean ) => void;
+	setShouldSavePayment: PaymentMethodDispatchers[ 'setShouldSavePayment' ];
 	// True means that the configured payment method option is saved for the customer.
 	shouldSavePayment: boolean;
 };

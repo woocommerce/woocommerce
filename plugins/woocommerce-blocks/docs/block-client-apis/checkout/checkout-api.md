@@ -73,7 +73,7 @@ The payment method data context exposes the api interfaces for the following thi
 -   `paymentMethodData`: This is the current extra data tracked in the context state. This is arbitrary data provided by the payment method extension after it has completed payment for checkout to include in the processing request. Typically this would contain things like payment `token` or `payment_method` name.
 -   `errorMessage`: This exposes the current set error message provided by the active payment method (if present).
 -   `activePaymentMethod`: This is the current active payment method in the checkout.
--   `setActivePaymentMethod`: This is used to set the active payment method.
+-   `setActivePaymentMethod`: This is used to set the active payment method and any related payment method data.
 -   `onPaymentProcessing`: This is an event subscriber that can be used to subscribe observers to be called when the status for the context is `PROCESSING`.
 -   `customerPaymentMethods`: This is an object containing any saved payment method information for the current logged in user. It is provided via the server and used to generate the ui for the shopper to select a saved payment method from a previous purchase.
 -   `paymentMethods`: This is an object containing all the _initialized_ registered payment methods.
