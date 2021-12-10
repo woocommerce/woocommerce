@@ -40,14 +40,14 @@ class RoutesController {
 	/**
 	 * Get a route class instance.
 	 *
-	 * @throws Exception If the schema does not exist.
+	 * @throws \Exception If the schema does not exist.
 	 *
 	 * @param string $name Name of schema.
 	 * @return AbstractRoute
 	 */
 	public function get( $name ) {
 		if ( ! isset( $this->routes[ $name ] ) ) {
-			throw new Exception( $name . ' route does not exist' );
+			throw new \Exception( $name . ' route does not exist' );
 		}
 		return $this->routes[ $name ];
 	}

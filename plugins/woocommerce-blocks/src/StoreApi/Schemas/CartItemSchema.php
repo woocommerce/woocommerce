@@ -1,8 +1,8 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\StoreApi\Schemas;
 
+use Automattic\WooCommerce\Blocks\StoreApi\Utilities\DraftOrderTrait;
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStock;
-
 /**
  * CartItemSchema class.
  *
@@ -10,6 +10,8 @@ use Automattic\WooCommerce\Checkout\Helpers\ReserveStock;
  * @since 2.5.0
  */
 class CartItemSchema extends ProductSchema {
+	use DraftOrderTrait;
+
 	/**
 	 * The schema item name.
 	 *
@@ -374,9 +376,8 @@ class CartItemSchema extends ProductSchema {
 			return null;
 		}
 
-		$draft_order    = wc()->session->get( 'store_api_draft_order', 0 );
 		$reserve_stock  = new ReserveStock();
-		$reserved_stock = $reserve_stock->get_reserved_stock( $product, $draft_order );
+		$reserved_stock = $reserve_stock->get_reserved_stock( $product, $this->get_draft_order_id() );
 
 		return $product->get_stock_quantity() - $reserved_stock;
 	}

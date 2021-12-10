@@ -2,6 +2,7 @@
 namespace Automattic\WooCommerce\Blocks\StoreApi\Utilities;
 
 use Automattic\WooCommerce\Blocks\StoreApi\Routes\RouteException;
+use Automattic\WooCommerce\Blocks\StoreApi\Utilities\DraftOrderTrait;
 use Automattic\WooCommerce\Blocks\StoreApi\Utilities\NoticeHandler;
 use Automattic\WooCommerce\Blocks\Utils\ArrayUtils;
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStock;
@@ -15,6 +16,8 @@ use WP_Error;
  * @since 2.5.0
  */
 class CartController {
+	use DraftOrderTrait;
+
 	/**
 	 * Makes the cart and sessions available to a route by loading them from core.
 	 */
@@ -963,8 +966,7 @@ class CartController {
 	 */
 	protected function get_remaining_stock_for_product( $product ) {
 		$reserve_stock = new ReserveStock();
-		$draft_order   = wc()->session->get( 'store_api_draft_order', 0 );
-		$qty_reserved  = $reserve_stock->get_reserved_stock( $product, $draft_order );
+		$qty_reserved  = $reserve_stock->get_reserved_stock( $product, $this->get_draft_order_id() );
 
 		return $product->get_stock_quantity() - $qty_reserved;
 	}
