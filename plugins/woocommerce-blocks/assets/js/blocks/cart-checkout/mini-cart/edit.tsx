@@ -58,7 +58,7 @@ const MiniCartBlock = ( {
 
 	const themeSlug = getSetting( 'themeSlug', '' );
 
-	const isSiteEditorAvailable = getSetting( 'isSiteEditorAvailable', false );
+	const isBlockTheme = getSetting( 'isBlockTheme', false );
 
 	/**
 	 * @todo Replace `getColorClassName` and manual style manipulation with
@@ -139,7 +139,7 @@ const MiniCartBlock = ( {
 						}
 					/>
 				</PanelBody>
-				{ isSiteEditorAvailable &&
+				{ isBlockTheme &&
 					isString( themeSlug ) &&
 					themeSlug.length > 0 && (
 						<PanelBody
@@ -150,9 +150,8 @@ const MiniCartBlock = ( {
 						>
 							<ExternalLink
 								href={ addQueryArgs(
-									`${ ADMIN_URL }themes.php`,
+									`${ ADMIN_URL }site-editor.php`,
 									{
-										page: 'gutenberg-edit-site',
 										postId: `${ themeSlug }//mini-cart`,
 										postType: 'wp_template_part',
 									}
