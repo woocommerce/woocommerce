@@ -45,6 +45,15 @@
 	}
 }
 
+// Display white icon when block is selected in list view.
+.block-editor-list-view-leaf.is-selected {
+	.block-editor-list-view-block-contents {
+		svg {
+			fill: #fff;
+		}
+	}
+}
+
 // Selectors with extra specificity to override some editor styles.
 .woocommerce-search-list__list.woocommerce-search-list__list {
 	box-sizing: border-box;
