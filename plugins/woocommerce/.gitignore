@@ -54,5 +54,3 @@ yarn.lock
 
 # Language files
 i18n/languages/woocommerce.pot
-
-package-lock.json
