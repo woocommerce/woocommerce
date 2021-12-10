@@ -21,8 +21,12 @@ import './inner-blocks';
 const settings = {
 	title: __( 'Cart', 'woo-gutenberg-products-block' ),
 	icon: {
-		src: <Icon srcElement={ cart } />,
-		foreground: '#7f54b3',
+		src: (
+			<Icon
+				srcElement={ cart }
+				className="wc-block-editor-components-block-icon"
+			/>
+		),
 	},
 	category: 'woocommerce',
 	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],

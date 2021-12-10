@@ -22,8 +22,12 @@ registerBlockType( 'woocommerce/all-reviews', {
 	apiVersion: 2,
 	title: __( 'All Reviews', 'woo-gutenberg-products-block' ),
 	icon: {
-		src: <Icon srcElement={ discussion } />,
-		foreground: '#7f54b3',
+		src: (
+			<Icon
+				srcElement={ discussion }
+				className="wc-block-editor-components-block-icon"
+			/>
+		),
 	},
 	category: 'woocommerce',
 	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],

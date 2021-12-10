@@ -20,8 +20,12 @@ registerBlockType( 'woocommerce/reviews-by-category', {
 	apiVersion: 2,
 	title: __( 'Reviews by Category', 'woo-gutenberg-products-block' ),
 	icon: {
-		src: <Icon srcElement={ review } />,
-		foreground: '#7f54b3',
+		src: (
+			<Icon
+				srcElement={ review }
+				className="wc-block-editor-components-block-icon"
+			/>
+		),
 	},
 	category: 'woocommerce',
 	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],

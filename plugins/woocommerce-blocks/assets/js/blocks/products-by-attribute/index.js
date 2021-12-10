@@ -17,8 +17,12 @@ const blockTypeName = 'woocommerce/products-by-attribute';
 registerBlockType( blockTypeName, {
 	title: __( 'Products by Attribute', 'woo-gutenberg-products-block' ),
 	icon: {
-		src: <Icon srcElement={ tags } />,
-		foreground: '#7f54b3',
+		src: (
+			<Icon
+				srcElement={ tags }
+				className="wc-block-editor-components-block-icon"
+			/>
+		),
 	},
 	category: 'woocommerce',
 	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],

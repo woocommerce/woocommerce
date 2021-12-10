@@ -45,11 +45,14 @@
 	}
 }
 
-// Display white icon when block is selected in list view.
+svg.wc-block-editor-components-block-icon {
+	color: $studio-woocommerce-purple-50;
+}
+
 .block-editor-list-view-leaf.is-selected {
 	.block-editor-list-view-block-contents {
-		svg {
-			fill: #fff;
+		svg.wc-block-editor-components-block-icon {
+			color: currentColor;
 		}
 	}
 }

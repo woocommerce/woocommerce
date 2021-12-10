@@ -14,8 +14,12 @@ import edit from './edit.js';
 registerBlockType( 'woocommerce/price-filter', {
 	title: __( 'Filter Products by Price', 'woo-gutenberg-products-block' ),
 	icon: {
-		src: <Icon srcElement={ bill } />,
-		foreground: '#7f54b3',
+		src: (
+			<Icon
+				srcElement={ bill }
+				className="wc-block-editor-components-block-icon"
+			/>
+		),
 	},
 	category: 'woocommerce',
 	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],

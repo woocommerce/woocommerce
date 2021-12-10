@@ -20,10 +20,7 @@ const blockConfig: BlockConfiguration = {
 	...sharedConfig,
 	title,
 	description,
-	icon: {
-		src: icon,
-		foreground: '#7f54b3',
-	},
+	icon: { src: icon },
 	attributes,
 	edit,
 };

@@ -17,8 +17,12 @@ import { getBlockClassName } from '../utils.js';
 export const blockSettings = {
 	title: __( 'All Products', 'woo-gutenberg-products-block' ),
 	icon: {
-		src: <Icon srcElement={ grid } />,
-		foreground: '#7f54b3',
+		src: (
+			<Icon
+				srcElement={ grid }
+				className="wc-block-editor-components-block-icon"
+			/>
+		),
 	},
 	category: 'woocommerce',
 	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],

@@ -12,8 +12,12 @@ import metadata from './block.json';
 
 registerFeaturePluginBlockType( metadata, {
 	icon: {
-		src: <Icon srcElement={ filledCart } />,
-		foreground: '#7f54b3',
+		src: (
+			<Icon
+				srcElement={ filledCart }
+				className="wc-block-editor-components-block-icon"
+			/>
+		),
 	},
 	edit: Edit,
 	save: Save,
