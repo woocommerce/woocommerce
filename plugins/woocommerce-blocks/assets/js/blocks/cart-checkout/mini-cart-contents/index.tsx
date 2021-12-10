@@ -9,6 +9,7 @@ import { registerExperimentalBlockType } from '@woocommerce/block-settings';
  * Internal dependencies
  */
 import edit, { Save as save } from './edit';
+import { blockName } from './attributes';
 import './inner-blocks';
 
 const settings = {
@@ -33,6 +34,11 @@ const settings = {
 		__experimentalExposeControlsToChildren: true,
 	},
 	attributes: {
+		isPreview: {
+			type: 'boolean',
+			default: false,
+			save: false,
+		},
 		lock: {
 			type: 'object',
 			default: {
@@ -46,15 +52,8 @@ const settings = {
 			isPreview: true,
 		},
 	},
-	attributes: {
-		isPreview: {
-			type: 'boolean',
-			default: false,
-			save: false,
-		},
-	},
 	edit,
 	save,
 };
 
-registerExperimentalBlockType( 'woocommerce/mini-cart-contents', settings );
+registerExperimentalBlockType( blockName, settings );
