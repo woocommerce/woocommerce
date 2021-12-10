@@ -1,17 +1,18 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\StoreApi\Routes;
 
-use Automattic\WooCommerce\Blocks\StoreApi\Utilities\InvalidStockLevelsInCartException;
-use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\CreateAccount;
+use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Blocks\Payments\PaymentContext;
+use Automattic\WooCommerce\Blocks\Payments\PaymentResult;
 use Automattic\WooCommerce\Blocks\StoreApi\Schemas\AbstractSchema;
 use Automattic\WooCommerce\Blocks\StoreApi\Schemas\CartSchema;
 use Automattic\WooCommerce\Blocks\StoreApi\Utilities\CartController;
+use Automattic\WooCommerce\Blocks\StoreApi\Utilities\DraftOrderTrait;
+use Automattic\WooCommerce\Blocks\StoreApi\Utilities\InvalidStockLevelsInCartException;
 use Automattic\WooCommerce\Blocks\StoreApi\Utilities\OrderController;
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStock;
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStockException;
-use Automattic\WooCommerce\Blocks\Payments\PaymentResult;
-use Automattic\WooCommerce\Blocks\Payments\PaymentContext;
 
 /**
  * Checkout class.
@@ -19,6 +20,8 @@ use Automattic\WooCommerce\Blocks\Payments\PaymentContext;
  * @internal This API is used internally by Blocks--it is still in flux and may be subject to revisions.
  */
 class Checkout extends AbstractCartRoute {
+	use DraftOrderTrait;
+
 	/**
 	 * Holds the current order being processed.
 	 *
@@ -350,57 +353,14 @@ class Checkout extends AbstractCartRoute {
 	}
 
 	/**
-	 * Gets draft order data from the customer session.
-	 *
-	 * @return array
-	 */
-	private function get_draft_order_id() {
-		return wc()->session->get( 'store_api_draft_order', 0 );
-	}
-
-	/**
-	 * Updates draft order data in the customer session.
-	 *
-	 * @param integer $order_id Draft order ID.
-	 */
-	private function set_draft_order_id( $order_id ) {
-		wc()->session->set( 'store_api_draft_order', $order_id );
-	}
-
-	/**
-	 * Whether the passed argument is a draft order or an order that is
-	 * pending/failed and the cart hasn't changed.
-	 *
-	 * @param \WC_Order $order_object Order object to check.
-	 * @return boolean Whether the order is valid as a draft order.
-	 */
-	private function is_valid_draft_order( $order_object ) {
-		if ( ! $order_object instanceof \WC_Order ) {
-			return false;
-		}
-
-		// Draft orders are okay.
-		if ( $order_object->has_status( 'checkout-draft' ) ) {
-			return true;
-		}
-
-		// Pending and failed orders can be retried if the cart hasn't changed.
-		if ( $order_object->needs_payment() && $order_object->has_cart_hash( wc()->cart->get_cart_hash() ) ) {
-			return true;
-		}
-
-		return false;
-	}
-
-	/**
 	 * Create or update a draft order based on the cart.
 	 *
 	 * @throws RouteException On error.
 	 */
 	private function create_or_update_draft_order() {
-		$this->order = $this->get_draft_order_id() ? wc_get_order( $this->get_draft_order_id() ) : null;
+		$this->order = $this->get_draft_order();
 
-		if ( ! $this->is_valid_draft_order( $this->order ) ) {
+		if ( ! $this->order ) {
 			$this->order = $this->order_controller->create_order_from_cart();
 		} else {
 			$this->order_controller->update_order_from_cart( $this->order );
@@ -466,7 +426,6 @@ class Checkout extends AbstractCartRoute {
 			$reserve_stock = new ReserveStock();
 			$reserve_stock->reserve_stock_for_order( $this->order, 10 );
 		} catch ( ReserveStockException $e ) {
-			$error_data = $e->getErrorData();
 			throw new RouteException(
 				$e->getErrorCode(),
 				$e->getMessage(),

@@ -1,9 +1,9 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\StoreApi\Routes;
 
-use Automattic\WooCommerce\Blocks\StoreApi\Utilities\CartController;
 use Automattic\WooCommerce\Blocks\StoreApi\Schemas\AbstractSchema;
 use Automattic\WooCommerce\Blocks\StoreApi\Schemas\CartSchema;
+use Automattic\WooCommerce\Blocks\StoreApi\Utilities\CartController;
 
 /**
  * Abstract Cart Route
@@ -110,21 +110,6 @@ abstract class AbstractCartRoute extends AbstractRoute {
 		wc()->cart->calculate_fees();
 		wc()->cart->calculate_shipping();
 		wc()->cart->calculate_totals();
-	}
-
-	/**
-	 * If there is a draft order, releases stock.
-	 *
-	 * @return void
-	 */
-	protected function maybe_release_stock() {
-		$draft_order = wc()->session->get( 'store_api_draft_order', 0 );
-
-		if ( ! $draft_order ) {
-			return;
-		}
-
-		wc_release_stock_for_order( $draft_order );
 	}
 
 	/**

@@ -1,12 +1,16 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\StoreApi\Routes;
 
+use Automattic\WooCommerce\Blocks\StoreApi\Utilities\DraftOrderTrait;
+
 /**
  * CartRemoveItem class.
  *
  * @internal This API is used internally by Blocks--it is still in flux and may be subject to revisions.
  */
 class CartRemoveItem extends AbstractCartRoute {
+	use DraftOrderTrait;
+
 	/**
 	 * Get the path of this REST route.
 	 *
@@ -58,5 +62,20 @@ class CartRemoveItem extends AbstractCartRoute {
 		$this->maybe_release_stock();
 
 		return rest_ensure_response( $this->schema->get_item_response( $cart ) );
+	}
+
+	/**
+	 * If there is a draft order, releases stock.
+	 *
+	 * @return void
+	 */
+	protected function maybe_release_stock() {
+		$draft_order_id = $this->get_draft_order_id();
+
+		if ( ! $draft_order_id ) {
+			return;
+		}
+
+		wc_release_stock_for_order( $draft_order_id );
 	}
 }

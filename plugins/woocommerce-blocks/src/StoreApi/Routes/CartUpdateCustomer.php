@@ -1,9 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\StoreApi\Routes;
 
-use Automattic\WooCommerce\Blocks\StoreApi\Schemas\CartSchema;
-use Automattic\WooCommerce\Blocks\StoreApi\Schemas\BillingAddressSchema;
-use Automattic\WooCommerce\Blocks\StoreApi\Schemas\ShippingAddressSchema;
+use Automattic\WooCommerce\Blocks\StoreApi\Utilities\DraftOrderTrait;
 
 /**
  * CartUpdateCustomer class.
@@ -13,6 +11,8 @@ use Automattic\WooCommerce\Blocks\StoreApi\Schemas\ShippingAddressSchema;
  * @internal This API is used internally by Blocks--it is still in flux and may be subject to revisions.
  */
 class CartUpdateCustomer extends AbstractCartRoute {
+	use DraftOrderTrait;
+
 	/**
 	 * Get the namespace for this route.
 	 *
@@ -128,13 +128,13 @@ class CartUpdateCustomer extends AbstractCartRoute {
 	}
 
 	/**
-	 * If there is a draft order, update customer data there also.
+	 * If there is a draft order, update the customer data within that also so the
+	 * cart and order are kept in sync.
 	 *
 	 * @return void
 	 */
 	protected function maybe_update_order() {
-		$draft_order_id = wc()->session->get( 'store_api_draft_order', 0 );
-		$draft_order    = $draft_order_id ? wc_get_order( $draft_order_id ) : false;
+		$draft_order = $this->get_draft_order();
 
 		if ( ! $draft_order ) {
 			return;
