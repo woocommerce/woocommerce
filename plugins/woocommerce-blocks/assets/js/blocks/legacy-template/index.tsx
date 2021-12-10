@@ -6,7 +6,7 @@ import { WC_BLOCKS_IMAGE_URL } from '@woocommerce/block-settings';
 import { useBlockProps } from '@wordpress/block-editor';
 import { Placeholder } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
-import { page } from '@wordpress/icons';
+import { box, Icon } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -29,7 +29,7 @@ const Edit = ( { attributes }: Props ) => {
 	return (
 		<div { ...blockProps }>
 			<Placeholder
-				icon={ page }
+				icon={ box }
 				label={ templateTitle }
 				className="wp-block-woocommerce-legacy-template__placeholder"
 			>
@@ -57,6 +57,7 @@ const Edit = ( { attributes }: Props ) => {
 
 registerBlockType( 'woocommerce/legacy-template', {
 	title: __( 'WooCommerce Legacy Template', 'woo-gutenberg-products-block' ),
+	icon: <Icon icon={ box } color="#7f54b3" />,
 	category: 'woocommerce',
 	apiVersion: 2,
 	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],
