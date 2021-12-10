@@ -49,8 +49,12 @@ const attributes = {
 registerBlockType( 'woocommerce/product-search', {
 	title: __( 'Product Search', 'woo-gutenberg-products-block' ),
 	icon: {
-		src: <Icon srcElement={ search } />,
-		foreground: '#7f54b3',
+		src: (
+			<Icon
+				srcElement={ search }
+				className="wc-block-editor-components-block-icon"
+			/>
+		),
 	},
 	category: 'woocommerce',
 	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],

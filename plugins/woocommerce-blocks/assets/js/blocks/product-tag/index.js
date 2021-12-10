@@ -18,8 +18,12 @@ import Block from './block';
 registerBlockType( 'woocommerce/product-tag', {
 	title: __( 'Products by Tag', 'woo-gutenberg-products-block' ),
 	icon: {
-		src: <Icon srcElement={ more } />,
-		foreground: '#7f54b3',
+		src: (
+			<Icon
+				srcElement={ more }
+				className="wc-block-editor-components-block-icon"
+			/>
+		),
 	},
 	category: 'woocommerce',
 	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],

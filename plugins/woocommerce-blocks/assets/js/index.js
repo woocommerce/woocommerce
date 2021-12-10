@@ -29,6 +29,11 @@ setCategories( [
 			'WooCommerce Product Elements',
 			'woo-gutenberg-products-block'
 		),
-		icon: <Icon srcElement={ atom } style={ { fill: '#7f54b3' } } />,
+		icon: (
+			<Icon
+				srcElement={ atom }
+				className="wc-block-editor-components-block-icon"
+			/>
+		),
 	},
 ] );
