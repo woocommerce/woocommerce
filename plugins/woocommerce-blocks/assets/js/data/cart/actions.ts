@@ -393,11 +393,10 @@ export function* changeCartItemQuantity(
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- unclear how to represent multiple different yields as type
 ): Generator< unknown, void, any > {
 	const cartItem = yield select( CART_STORE_KEY, 'getCartItem', cartItemKey );
-	yield itemIsPendingQuantity( cartItemKey );
-
 	if ( cartItem?.quantity === quantity ) {
 		return;
 	}
+	yield itemIsPendingQuantity( cartItemKey );
 	try {
 		const { response } = yield apiFetchWithHeaders( {
 			path: '/wc/store/cart/update-item',
