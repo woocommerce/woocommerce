@@ -26,6 +26,8 @@ const aliases = Object.keys( tsConfig.compilerOptions.paths ).reduce(
 	{}
 );
 
+const pathToModule = ( module ) => path.join( __dirname, module );
+
 module.exports = ( { config: storybookConfig } ) => {
 	const wooBlocksConfig = getMainConfig( { alias: getAlias() } );
 	const wooStylingConfig = getStylingConfig();
@@ -42,6 +44,7 @@ module.exports = ( { config: storybookConfig } ) => {
 		'wordpress-components': require.resolve(
 			'../node_modules/wordpress-components'
 		),
+		'@emotion/styled': pathToModule( '../node_modules/@emotion/styled' ),
 	};
 	storybookConfig.module.rules.push(
 		{
