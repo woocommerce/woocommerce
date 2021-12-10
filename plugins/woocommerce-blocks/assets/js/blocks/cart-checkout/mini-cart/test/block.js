@@ -86,7 +86,7 @@ describe( 'Testing Mini Cart', () => {
 			fireEvent.click( screen.getByLabelText( /items/i ) );
 		} );
 
-		expect( screen.getByText( /Cart is empty/i ) ).toBeInTheDocument();
+		expect( screen.getByText( /0 items/i ) ).toBeInTheDocument();
 		expect( fetchMock ).toHaveBeenCalledTimes( 1 );
 	} );
 

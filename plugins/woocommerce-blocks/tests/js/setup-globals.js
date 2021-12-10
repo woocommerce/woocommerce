@@ -101,17 +101,4 @@ global.IntersectionObserver = function () {
 	};
 };
 
-const wordPressPackages = [
-	'blocks',
-	'components',
-	'date',
-	'editor',
-	'element',
-	'i18n',
-];
-
-wordPressPackages.forEach( ( lib ) => {
-	Object.defineProperty( global.wp, lib, {
-		get: () => require( `@wordpress/${ lib }` ),
-	} );
-} );
+global.__webpack_public_path__ = '';

@@ -63,6 +63,6 @@ class MiniCartContents extends AbstractBlock {
 			return '';
 		}
 
-		return '<div class="wc-block-mini-cart-contents"></div>';
+		return $content;
 	}
 }
