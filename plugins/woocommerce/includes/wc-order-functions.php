@@ -610,7 +610,7 @@ function wc_create_refund( $args = array() ) {
 			}
 
 			// Trigger notification emails.
-			if ( ( $remaining_refund_amount - $args['amount'] ) > 0 || ( $order->has_free_item() && ( $remaining_refund_items - $refund_item_count ) > 0 ) ) {
+			if ( (bool) apply_filters( 'woocommerce_order_is_partially_refunded', ( $remaining_refund_amount - $args['amount'] ) > 0 || ( $order->has_free_item() && ( $remaining_refund_items - $refund_item_count ) > 0 ), $order->get_id(), $refund->get_id() ) {
 				do_action( 'woocommerce_order_partially_refunded', $order->get_id(), $refund->get_id() );
 			} else {
 				do_action( 'woocommerce_order_fully_refunded', $order->get_id(), $refund->get_id() );
