@@ -37,6 +37,7 @@ export const PluginList: React.FC< PluginListProps > = ( {
 					description,
 					imageUrl,
 					isActive,
+					isBuiltByWC,
 					isInstalled,
 					manageUrl,
 					slug,
@@ -51,6 +52,7 @@ export const PluginList: React.FC< PluginListProps > = ( {
 						imageUrl={ imageUrl }
 						installAndActivate={ installAndActivate }
 						isActive={ isActive }
+						isBuiltByWC={ isBuiltByWC }
 						isBusy={ currentPlugin === slug }
 						isDisabled={ !! currentPlugin }
 						isInstalled={ isInstalled }

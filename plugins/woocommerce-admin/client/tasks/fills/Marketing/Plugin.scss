@@ -32,6 +32,10 @@
 .woocommerce-plugin-list__plugin-text {
 	max-width: 370px;
 	margin-right: $gap;
+	.woocommerce-pill {
+		color: $studio-gray-50;
+		margin-left: $gap-small;
+	}
 }
 
 .woocommerce-plugin-list__plugin-action {

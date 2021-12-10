@@ -6,6 +6,7 @@ import { Button } from '@wordpress/components';
 import { getAdminLink } from '@woocommerce/wc-admin-settings';
 import { recordEvent } from '@woocommerce/tracks';
 import { Text } from '@woocommerce/experimental';
+import { Pill } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -15,6 +16,7 @@ import './Plugin.scss';
 export type PluginProps = {
 	isActive: boolean;
 	isBusy?: boolean;
+	isBuiltByWC: boolean;
 	isDisabled?: boolean;
 	isInstalled: boolean;
 	description?: string;
@@ -31,6 +33,7 @@ export const Plugin: React.FC< PluginProps > = ( {
 	installAndActivate = () => {},
 	isActive,
 	isBusy,
+	isBuiltByWC,
 	isDisabled,
 	isInstalled,
 	manageUrl,
@@ -54,6 +57,14 @@ export const Plugin: React.FC< PluginProps > = ( {
 			<div className="woocommerce-plugin-list__plugin-text">
 				<Text variant="subtitle.small" as="h4">
 					{ name }
+					{ isBuiltByWC && (
+						<Pill>
+							{ __(
+								'Built by WooCommerce',
+								'woocommerce-admin'
+							) }
+						</Pill>
+					) }
 				</Text>
 				<Text variant="subtitle.small">{ description }</Text>
 			</div>

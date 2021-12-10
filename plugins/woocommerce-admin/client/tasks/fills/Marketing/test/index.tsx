@@ -14,6 +14,7 @@ const basicPlugins: Extension[] = [
 		description: 'Basic plugin description',
 		manage_url: '#',
 		image_url: 'basic.jpeg',
+		is_built_by_wc: true,
 	},
 ];
 
@@ -71,6 +72,7 @@ describe( 'transformExtensionToPlugin', () => {
 			imageUrl: 'basic.jpeg',
 			isActive: false,
 			isInstalled: false,
+			isBuiltByWC: true,
 			manageUrl: '#',
 			name: 'Basic Plugin',
 		} );
