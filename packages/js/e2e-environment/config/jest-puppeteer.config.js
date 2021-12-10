@@ -9,7 +9,6 @@ let executablePath = '';
 let dumpio = false;
 let puppeteerConfig;
 
-
 if ( ! CI && E2E_EXE_PATH !== '' ) {
 	executablePath = E2E_EXE_PATH;
 }
@@ -24,6 +23,7 @@ const jestPuppeteerLaunch = {
 		width: 1280,
 		height: 800,
 	},
+	args: [ '--user-agent=chrome' ],
 };
 
 if ( 'no' == global.process.env.node_config_dev ) {
