@@ -56,24 +56,6 @@ jobs:
                       ./plugins/woocommerce/vendor
                   key: ${{ runner.os }}-${{ matrix.php }}-${{ hashFiles('./plugins/woocommerce/composer.lock') }}
 
-            # - name: Cache PNPM modules
-            #   uses: actions/cache@v2
-            #   with:
-            #       path: ~/.pnpm-store
-            #       key: ${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-            #       restore-keys: |
-            #           ${{ runner.os }}-
-
-            # - name: Install PNPM and install dependencies
-            #   uses: pnpm/action-setup@v2.0.1
-            #   with:
-            #       version: 6.23.6
-            #       run_install: true
-
-            # - name: Composer Install
-            #   if: steps.unit-tests-composer-cache.outputs.cache-hit != 'true'
-            #   run: pnpm nx composer-install woocommerce
-
             - name: Composer Install
               if: steps.unit-tests-composer-cache.outputs.cache-hit != 'true'
               run: composer install
@@ -92,9 +74,6 @@ jobs:
 
             - name: Init DB and WP
               run: ./tests/bin/install.sh woo_test root root 127.0.0.1 ${{ matrix.wp }}
-
-            # - name: Run tests
-            #   run: pnpm nx test-unit woocommerce
 
             - name: Run tests
               run: composer test
