@@ -178,4 +178,31 @@ describe( 'Testing cart', () => {
 		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
 		expect( screen.getAllByRole( 'cell' )[ 1 ] ).toHaveTextContent( '16€' );
 	} );
+
+	it( 'updates quantity when changed in server', async () => {
+		const cart = {
+			...previewCart,
+			// Make it so there is only one item to simplify things.
+			items: [
+				{
+					...previewCart.items[ 0 ],
+					quantity: 5,
+				},
+			],
+		};
+		const itemName = cart.items[ 0 ].name;
+		render( <CartBlock /> );
+
+		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
+		const quantityInput = screen.getByLabelText(
+			`Quantity of ${ itemName } in your cart.`
+		);
+		expect( quantityInput.value ).toBe( '2' );
+
+		act( () => {
+			dispatch( storeKey ).receiveCart( cart );
+		} );
+
+		expect( quantityInput.value ).toBe( '5' );
+	} );
 } );

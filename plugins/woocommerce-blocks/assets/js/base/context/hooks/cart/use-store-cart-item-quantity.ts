@@ -66,6 +66,9 @@ export const useStoreCartItemQuantity = (
 		storeKey
 	);
 
+	// Update local state when server updates.
+	useEffect( () => setQuantity( cartItemQuantity ), [ cartItemQuantity ] );
+
 	// Track when things are already pending updates.
 	const isPending = useSelect(
 		( select ) => {
