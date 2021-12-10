@@ -156,7 +156,7 @@ The test sequencer uses the following default Puppeteer configuration:
 	};
 ```
 
-You can customize the configuration in `tests/e2e/config/jest-puppeteer.config.js`
+You can customize the configuration in [`config/jest-puppeteer.config.js`](config/jest-puppeteer.config.js)
 
 ```js
 const { useE2EJestPuppeteerConfig } = require( '@woocommerce/e2e-environment' );
@@ -172,7 +172,7 @@ module.exports = puppeteerConfig;
 
 ### Jest Setup
 
-Jest provides [setup and teardown functions](https://jestjs.io/docs/setup-teardown) similar to PHPUnit. The default setup and teardown is in [`tests/e2e/env/src/setup/jest.setup.js`](src/setup/jest.setup.js). Additional setup and teardown functions can be added to [`tests/e2e/config/jest.setup.js`](../config/jest.setup.js)
+Jest provides [setup and teardown functions](https://jestjs.io/docs/setup-teardown) similar to PHPUnit. The default setup and teardown is in [`src/setup/jest.setup.js`](src/setup/jest.setup.js). Additional setup and teardown functions can be added to [`tests/e2e/config/jest.setup.js`](../../../plugins/woocommerce/tests/e2e/config/jest.setup.js)
 
 #### Console filtering
 
