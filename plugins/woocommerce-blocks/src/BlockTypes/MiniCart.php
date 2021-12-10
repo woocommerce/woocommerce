@@ -177,17 +177,17 @@ class MiniCart extends AbstractBlock {
 			''
 		);
 
-		if ( function_exists( 'gutenberg_experimental_is_site_editor_available' ) ) {
+		if ( function_exists( 'wp_is_block_theme' ) ) {
 			$this->asset_data_registry->add(
-				'isSiteEditorAvailable',
-				gutenberg_experimental_is_site_editor_available(),
-				false
+				'isBlockTheme',
+				wp_is_block_theme(),
+				true
 			);
 		} else {
 			$this->asset_data_registry->add(
-				'isSiteEditorAvailable',
+				'isBlockTheme',
 				false,
-				false
+				true
 			);
 		}
 
