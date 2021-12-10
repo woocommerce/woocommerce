@@ -60,23 +60,9 @@ jobs:
             ./plugins/woocommerce/vendor
           key: ${{ runner.os }}-${{ matrix.php }}-${{ hashFiles('./plugins/woocommerce/composer.lock') }}
 
-      - name: Cache PNPM modules
-        uses: actions/cache@v2
-        with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-
-
-      - name: Install PNPM and install dependencies
-        uses: pnpm/action-setup@v2.0.1
-        with:
-          version: 6.23.6
-          run_install: true
-
       - name: Setup and install composer
         if: steps.ci-composer-cache.outputs.cache-hit != 'true'
-        run: pnpm nx composer-install woocommerce
+        run: composer install
 
       - name: Add PHP8 Compatibility.
         run: |
@@ -87,11 +73,11 @@ jobs:
              composer bin phpunit config repositories.0 '{"type": "path", "url": "/tmp/phpunit-7.5-fork/phpunit-add-compatibility-with-php8-to-phpunit-7", "options": {"symlink": false}}'
              composer bin phpunit require --dev -W phpunit/phpunit:@dev --ignore-platform-reqs
              rm -rf ./vendor/phpunit/
-             pnpm nx composer-dump-autoload woocommerce
+             composer dump-autoload
            fi
 
       - name: Init DB and WP
         run: ./tests/bin/install.sh woo_test root root 127.0.0.1 ${{ matrix.wp }}
 
       - name: Run tests
-        run: pnpm nx test-unit woocommerce
+        run: composer test

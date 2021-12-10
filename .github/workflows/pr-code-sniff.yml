@@ -35,13 +35,8 @@ jobs:
             ./vendor
           key: ${{ runner.os }}-${{ hashFiles('./composer.lock') }}
 
-      - name: Install PNPM and install dependencies
-        run: |
-            npm install -g pnpm
-            pnpm install
-
       - name: Setup and install composer
-        run: pnpm nx composer-install woocommerce
+        run: composer install
 
       - name: Run code sniff
         continue-on-error: true
