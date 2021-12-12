@@ -261,6 +261,7 @@ return array(
 	'EH' => __( 'Western Sahara', 'woocommerce' ),
 	'WS' => __( 'Samoa', 'woocommerce' ),
 	'YE' => __( 'Yemen', 'woocommerce' ),
+	'XK' => __( 'Kosovo', 'woocommerce' ),
 	'ZM' => __( 'Zambia', 'woocommerce' ),
 	'ZW' => __( 'Zimbabwe', 'woocommerce' ),
 );
