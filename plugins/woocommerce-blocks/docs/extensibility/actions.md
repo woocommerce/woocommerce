@@ -8,9 +8,18 @@
 
 
  - [woocommerce_add_to_cart](#woocommerce_add_to_cart)
+ - [woocommerce_after_main_content](#woocommerce_after_main_content)
+ - [woocommerce_after_main_content](#woocommerce_after_main_content-1)
+ - [woocommerce_after_shop_loop](#woocommerce_after_shop_loop)
  - [woocommerce_applied_coupon](#woocommerce_applied_coupon)
+ - [woocommerce_archive_description](#woocommerce_archive_description)
+ - [woocommerce_before_main_content](#woocommerce_before_main_content)
+ - [woocommerce_before_main_content](#woocommerce_before_main_content-1)
+ - [woocommerce_before_shop_loop](#woocommerce_before_shop_loop)
  - [woocommerce_blocks_cart_enqueue_data](#woocommerce_blocks_cart_enqueue_data)
  - [woocommerce_blocks_cart_enqueue_data](#woocommerce_blocks_cart_enqueue_data-1)
+ - [woocommerce_blocks_cart_update_customer_from_request](#woocommerce_blocks_cart_update_customer_from_request)
+ - [woocommerce_blocks_cart_update_order_from_customer_request](#woocommerce_blocks_cart_update_order_from_customer_request)
  - [woocommerce_blocks_checkout_enqueue_data](#woocommerce_blocks_checkout_enqueue_data)
  - [woocommerce_blocks_checkout_order_processed](#woocommerce_blocks_checkout_order_processed)
  - [woocommerce_blocks_checkout_update_order_from_request](#woocommerce_blocks_checkout_update_order_from_request)
@@ -23,8 +32,10 @@
  - [woocommerce_blocks_{$this->registry_identifier}_registration](#woocommerce_blocks_-this--registry_identifier-_registration)
  - [woocommerce_check_cart_items](#woocommerce_check_cart_items)
  - [woocommerce_created_customer](#woocommerce_created_customer)
+ - [woocommerce_no_products_found](#woocommerce_no_products_found)
  - [woocommerce_register_post](#woocommerce_register_post)
  - [woocommerce_rest_checkout_process_payment_with_context](#woocommerce_rest_checkout_process_payment_with_context)
+ - [woocommerce_shop_loop](#woocommerce_shop_loop)
  - [wooocommerce_store_api_validate_add_to_cart](#wooocommerce_store_api_validate_add_to_cart)
  - [wooocommerce_store_api_validate_cart_item](#wooocommerce_store_api_validate_cart_item)
 
@@ -61,6 +72,54 @@ File: [StoreApi/Utilities/CartController.php](../src/StoreApi/Utilities/CartCont
 
 ---
 
+## woocommerce_after_main_content
+
+
+Hook: woocommerce_after_main_content.
+
+```php
+do_action( 'woocommerce_after_main_content' )
+```
+
+### Source
+
+
+File: [BlockTypes/LegacyTemplate.php](../src/BlockTypes/LegacyTemplate.php)
+
+---
+
+## woocommerce_after_main_content
+
+
+Woocommerce_after_main_content hook.
+
+```php
+do_action( 'woocommerce_after_main_content' )
+```
+
+### Source
+
+
+File: [BlockTypes/LegacyTemplate.php](../src/BlockTypes/LegacyTemplate.php)
+
+---
+
+## woocommerce_after_shop_loop
+
+
+Hook: woocommerce_after_shop_loop.
+
+```php
+do_action( 'woocommerce_after_shop_loop' )
+```
+
+### Source
+
+
+File: [BlockTypes/LegacyTemplate.php](../src/BlockTypes/LegacyTemplate.php)
+
+---
+
 ## woocommerce_applied_coupon
 
 
@@ -83,19 +142,67 @@ File: [StoreApi/Utilities/CartController.php](../src/StoreApi/Utilities/CartCont
 
 ---
 
-## woocommerce_blocks_cart_enqueue_data
+## woocommerce_archive_description
 
 
-Fires after cart block data is registered.
+Hook: woocommerce_archive_description.
 
 ```php
-do_action( 'woocommerce_blocks_cart_enqueue_data' )
+do_action( 'woocommerce_archive_description' )
 ```
 
 ### Source
 
 
-File: [BlockTypes/Cart.php](../src/BlockTypes/Cart.php)
+File: [BlockTypes/LegacyTemplate.php](../src/BlockTypes/LegacyTemplate.php)
+
+---
+
+## woocommerce_before_main_content
+
+
+Woocommerce_before_main_content hook.
+
+```php
+do_action( 'woocommerce_before_main_content' )
+```
+
+### Source
+
+
+File: [BlockTypes/LegacyTemplate.php](../src/BlockTypes/LegacyTemplate.php)
+
+---
+
+## woocommerce_before_main_content
+
+
+Hook: woocommerce_before_main_content.
+
+```php
+do_action( 'woocommerce_before_main_content' )
+```
+
+### Source
+
+
+File: [BlockTypes/LegacyTemplate.php](../src/BlockTypes/LegacyTemplate.php)
+
+---
+
+## woocommerce_before_shop_loop
+
+
+Hook: woocommerce_before_shop_loop.
+
+```php
+do_action( 'woocommerce_before_shop_loop' )
+```
+
+### Source
+
+
+File: [BlockTypes/LegacyTemplate.php](../src/BlockTypes/LegacyTemplate.php)
 
 ---
 
@@ -112,6 +219,69 @@ do_action( 'woocommerce_blocks_cart_enqueue_data' )
 
 
 File: [BlockTypes/MiniCart.php](../src/BlockTypes/MiniCart.php)
+
+---
+
+## woocommerce_blocks_cart_enqueue_data
+
+
+Fires after cart block data is registered.
+
+```php
+do_action( 'woocommerce_blocks_cart_enqueue_data' )
+```
+
+### Source
+
+
+File: [BlockTypes/Cart.php](../src/BlockTypes/Cart.php)
+
+---
+
+## woocommerce_blocks_cart_update_customer_from_request
+
+
+Fires when the Checkout Block/Store API updates a customer from the API request data.
+
+```php
+do_action( 'woocommerce_blocks_cart_update_customer_from_request', \WC_Customer $customer, \WP_REST_Request $request )
+```
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $customer | \WC_Customer | Customer object. |
+| $request | \WP_REST_Request | Full details about the request. |
+
+### Source
+
+
+File: [StoreApi/Routes/CartUpdateCustomer.php](../src/StoreApi/Routes/CartUpdateCustomer.php)
+
+---
+
+## woocommerce_blocks_cart_update_order_from_customer_request
+
+
+Fires when the Checkout Block/Store API updates an existing draft order from customer data.
+
+```php
+do_action( 'woocommerce_blocks_cart_update_order_from_customer_request', \WC_Order $draft_order, \WC_Customer $customer, \WP_REST_Request $request )
+```
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $draft_order | \WC_Order | Order object. |
+| $customer | \WC_Customer | Customer object. |
+| $request | \WP_REST_Request | Full details about the request. |
+
+### Source
+
+
+File: [StoreApi/Routes/CartUpdateCustomer.php](../src/StoreApi/Routes/CartUpdateCustomer.php)
 
 ---
 
@@ -391,6 +561,22 @@ File: [Domain/Services/CreateAccount.php](../src/Domain/Services/CreateAccount.p
 
 ---
 
+## woocommerce_no_products_found
+
+
+Hook: woocommerce_no_products_found.
+
+```php
+do_action( 'woocommerce_no_products_found' )
+```
+
+### Source
+
+
+File: [BlockTypes/LegacyTemplate.php](../src/BlockTypes/LegacyTemplate.php)
+
+---
+
 ## woocommerce_register_post
 
 
@@ -444,6 +630,22 @@ do_action_ref_array( 'woocommerce_rest_checkout_process_payment_with_context', [
 
 
 File: [StoreApi/Routes/Checkout.php](../src/StoreApi/Routes/Checkout.php)
+
+---
+
+## woocommerce_shop_loop
+
+
+Hook: woocommerce_shop_loop.
+
+```php
+do_action( 'woocommerce_shop_loop' )
+```
+
+### Source
+
+
+File: [BlockTypes/LegacyTemplate.php](../src/BlockTypes/LegacyTemplate.php)
 
 ---
 

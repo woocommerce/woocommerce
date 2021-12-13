@@ -23,34 +23,44 @@ class Cart extends ControllerTestCase {
 		$fixtures = new FixtureData();
 		$fixtures->shipping_add_flat_rate();
 
-		$this->products = [
-			$fixtures->get_simple_product( [
-				'name' => 'Test Product 1',
-				'stock_status' => 'instock',
-				'regular_price' => 10,
-				'weight' => 10,
-			] ),
-			$fixtures->get_simple_product( [
-				'name' => 'Test Product 2',
-				'stock_status' => 'instock',
-				'regular_price' => 10,
-				'weight' => 10,
-			] ),
-		];
+		$this->products = array(
+			$fixtures->get_simple_product(
+				array(
+					'name'          => 'Test Product 1',
+					'stock_status'  => 'instock',
+					'regular_price' => 10,
+					'weight'        => 10,
+				)
+			),
+			$fixtures->get_simple_product(
+				array(
+					'name'          => 'Test Product 2',
+					'stock_status'  => 'instock',
+					'regular_price' => 10,
+					'weight'        => 10,
+				)
+			),
+		);
 
 		$this->coupon = $fixtures->get_coupon(
-			[
-				'code' => 'test_coupon',
+			array(
+				'code'          => 'test_coupon',
 				'discount_type' => 'fixed_cart',
-				'amount' => 1
-			]
+				'amount'        => 1,
+			)
 		);
 
 		wc_empty_cart();
-		$this->keys   = [];
+		$this->keys   = array();
 		$this->keys[] = wc()->cart->add_to_cart( $this->products[0]->get_id(), 2 );
 		$this->keys[] = wc()->cart->add_to_cart( $this->products[1]->get_id(), 1 );
 		wc()->cart->apply_coupon( $this->coupon->get_code() );
+
+		// Draft order.
+		$order = new \WC_Order();
+		$order->set_status( 'checkout-draft' );
+		$order->save();
+		wc()->session->set( 'store_api_draft_order', $order->get_id() );
 	}
 
 	/**
@@ -98,7 +108,7 @@ class Cart extends ControllerTestCase {
 	 */
 	public function test_remove_bad_cart_item() {
 		// Test removing a bad cart item - should return 404.
-		$request  = new \WP_REST_Request( 'POST', '/wc/store/cart/remove-item' );
+		$request = new \WP_REST_Request( 'POST', '/wc/store/cart/remove-item' );
 		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
@@ -117,7 +127,7 @@ class Cart extends ControllerTestCase {
 	 */
 	public function test_remove_cart_item() {
 		// Test removing a valid cart item - should return updated cart.
-		$request  = new \WP_REST_Request( 'POST', '/wc/store/cart/remove-item' );
+		$request = new \WP_REST_Request( 'POST', '/wc/store/cart/remove-item' );
 		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
@@ -172,11 +182,22 @@ class Cart extends ControllerTestCase {
 			array(
 				'shipping_address' => (object) array(
 					'country' => 'US',
-				)
+				),
 			)
 		);
+
+		$action_callback = \Mockery::mock( 'ActionCallback' );
+		$action_callback->shouldReceive( 'do_customer_callback' )->once();
+		$action_callback->shouldReceive( 'do_order_callback' )->once();
+
+		add_action( 'woocommerce_blocks_cart_update_customer_from_request', array( $action_callback, 'do_customer_callback' ) );
+		add_action( 'woocommerce_blocks_cart_update_order_from_customer_request', array( $action_callback, 'do_order_callback' ) );
+
 		$response = rest_get_server()->dispatch( $request );
 		$data     = $response->get_data();
+
+		remove_action( 'woocommerce_blocks_cart_update_customer_from_request', array( $action_callback, 'do_customer_callback' ) );
+		remove_action( 'woocommerce_blocks_cart_update_order_from_customer_request', array( $action_callback, 'do_order_callback' ) );
 
 		$this->assertEquals( 200, $response->get_status(), print_r( $response, true ) );
 		$this->assertArrayHasKey( 'shipping_rates', $data );
@@ -200,14 +221,14 @@ class Cart extends ControllerTestCase {
 			array(
 				'shipping_address' => (object) array(
 					'first_name' => 'Han',
-					'last_name' => 'Solo',
-					'address_1' => 'Test address 1',
-					'address_2' => 'Test address 2',
-					'city'      => 'Test City',
-					'state'     => 'AL',
-					'postcode'  => '90210',
-					'country'   => 'US'
-				)
+					'last_name'  => 'Solo',
+					'address_1'  => 'Test address 1',
+					'address_2'  => 'Test address 2',
+					'city'       => 'Test City',
+					'state'      => 'AL',
+					'postcode'   => '90210',
+					'country'    => 'US',
+				),
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -228,14 +249,14 @@ class Cart extends ControllerTestCase {
 			array(
 				'shipping_address' => (object) array(
 					'first_name' => 'Han',
-					'last_name' => 'Solo',
-					'address_1' => 'Test address 1',
-					'address_2' => 'Test address 2',
-					'city'      => 'Test City',
-					'state'     => 'AL',
-					'postcode'  => '90210',
-					'country' => 'ZZZZZZZZ',
-				)
+					'last_name'  => 'Solo',
+					'address_1'  => 'Test address 1',
+					'address_2'  => 'Test address 2',
+					'city'       => 'Test City',
+					'state'      => 'AL',
+					'postcode'   => '90210',
+					'country'    => 'ZZZZZZZZ',
+				),
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -250,14 +271,14 @@ class Cart extends ControllerTestCase {
 			array(
 				'shipping_address' => (object) array(
 					'first_name' => 'Han',
-					'last_name' => 'Solo',
-					'address_1' => 'Test address 1',
-					'address_2' => 'Test address 2',
-					'city'      => 'Test City',
-					'state'   =>'Alabama',
-					'postcode'  => '90210',
-					'country' => 'US'
-				)
+					'last_name'  => 'Solo',
+					'address_1'  => 'Test address 1',
+					'address_2'  => 'Test address 2',
+					'city'       => 'Test City',
+					'state'      => 'Alabama',
+					'postcode'   => '90210',
+					'country'    => 'US',
+				),
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -274,14 +295,14 @@ class Cart extends ControllerTestCase {
 			array(
 				'shipping_address' => (object) array(
 					'first_name' => 'Han',
-					'last_name' => 'Solo',
-					'address_1' => 'Test address 1',
-					'address_2' => 'Test address 2',
-					'city'      => 'Test City',
-					'state'   =>'ZZZZZZZZ',
-					'postcode'  => '90210',
-					'country' => 'US'
-				)
+					'last_name'  => 'Solo',
+					'address_1'  => 'Test address 1',
+					'address_2'  => 'Test address 2',
+					'city'       => 'Test City',
+					'state'      => 'ZZZZZZZZ',
+					'postcode'   => '90210',
+					'country'    => 'US',
+				),
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -296,14 +317,14 @@ class Cart extends ControllerTestCase {
 			array(
 				'shipping_address' => (object) array(
 					'first_name' => 'Han',
-					'last_name' => 'Solo',
-					'address_1' => 'Test address 1',
-					'address_2' => 'Test address 2',
-					'city'      => 'Test City',
-					'state'   =>'AL',
-					'postcode'  => 'ABCDE',
-					'country' => 'US'
-				)
+					'last_name'  => 'Solo',
+					'address_1'  => 'Test address 1',
+					'address_2'  => 'Test address 2',
+					'city'       => 'Test City',
+					'state'      => 'AL',
+					'postcode'   => 'ABCDE',
+					'country'    => 'US',
+				),
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -334,8 +355,8 @@ class Cart extends ControllerTestCase {
 		$fixtures = new FixtureData();
 
 		// Test coupons with different case.
-		$newcoupon = $fixtures->get_coupon( [ 'code' => 'testCoupon' ] );
-		$request = new \WP_REST_Request( 'POST', '/wc/store/cart/apply-coupon' );
+		$newcoupon = $fixtures->get_coupon( array( 'code' => 'testCoupon' ) );
+		$request   = new \WP_REST_Request( 'POST', '/wc/store/cart/apply-coupon' );
 		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
@@ -347,8 +368,8 @@ class Cart extends ControllerTestCase {
 		$this->assertEquals( 200, $response->get_status() );
 
 		// Test coupons with special chars in the code.
-		$newcoupon = $fixtures->get_coupon( [ 'code' => '$5 off' ] );
-		$request = new \WP_REST_Request( 'POST', '/wc/store/cart/apply-coupon' );
+		$newcoupon = $fixtures->get_coupon( array( 'code' => '$5 off' ) );
+		$request   = new \WP_REST_Request( 'POST', '/wc/store/cart/apply-coupon' );
 		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(

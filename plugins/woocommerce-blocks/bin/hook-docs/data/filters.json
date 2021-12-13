@@ -840,6 +840,17 @@
             }
         },
         {
+            "name": "woocommerce_show_page_title",
+            "file": "BlockTypes/LegacyTemplate.php",
+            "type": "filter",
+            "doc": {
+                "description": "",
+                "long_description": "",
+                "tags": [],
+                "long_description_html": ""
+            }
+        },
+        {
             "name": "woocommerce_store_api_disable_nonce_check",
             "file": "StoreApi/Routes/AbstractCartRoute.php",
             "type": "filter",
