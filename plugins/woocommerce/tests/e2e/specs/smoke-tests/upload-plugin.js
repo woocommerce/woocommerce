@@ -13,14 +13,14 @@ const {
 	beforeAll,
 } = require( '@jest/globals' );
 
-const { PLUGIN_REPOSITORY, PLUGIN_NAME, GITHUB_TOKEN } = process.env;
+const { GITHUB_REPOSITORY, PLUGIN_NAME, GITHUB_TOKEN } = process.env;
 
 let zipUrl;
 let pluginPath;
 
 describe( 'Upload and activate plugin', () => {
 	beforeAll( async () => {
-		zipUrl = await getLatestReleaseZipUrl( PLUGIN_REPOSITORY, GITHUB_TOKEN );
+		zipUrl = await getLatestReleaseZipUrl( GITHUB_REPOSITORY, GITHUB_TOKEN );
 
 		pluginPath = await getRemotePluginZip( zipUrl, GITHUB_TOKEN );
 
