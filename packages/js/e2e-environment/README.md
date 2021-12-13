@@ -71,6 +71,20 @@ module.exports = jestConfig;
 
 **NOTE:** Your project's Jest config file is: `tests/e2e/config/jest.config.js`.
 
+### The Jest Object
+
+The E2E environment has the following methods to let us control Jest's overall behavior.
+
+|  Function |  Parameters | Description  |
+|-----------|-------------|--------------|
+| `setupJestRetries` | `retries` | Sets the amount of retries on failed tests 
+
+**NOTE:** The amount of times failed tests are retried can also be set using the `E2E_RETRY_TIMES` environment variable when executing tests. This can be done using the command below: 
+
+```
+E2E_RETRY_TIMES=2 pnpx wc-e2e test:e2e
+```
+
 #### Test Screenshots
 
 The test sequencer provides a screenshot function for test failures. To enable screenshots on test failure use
