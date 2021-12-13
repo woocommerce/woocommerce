@@ -22,16 +22,6 @@
 		border-radius: 50%;
 		border: 0.2em solid currentColor;
 		border-left-color: transparent;
-		animation: wc-block-components-spinner__animation 1s infinite linear;
-	}
-}
-
-@keyframes wc-block-components-spinner__animation {
-	0% {
-		animation-timing-function: cubic-bezier(0.5856, 0.0703, 0.4143, 0.9297);
-		transform: rotate(0deg);
-	}
-	100% {
-		transform: rotate(360deg);
+		animation: spinner__animation 1s infinite linear;
 	}
 }
