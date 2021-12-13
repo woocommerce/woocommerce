@@ -98,6 +98,8 @@ jQuery( function( $ ) {
 
 		// Make this object available.
 		$target.data( 'product_gallery', this );
+		
+		if( this.$target.css( 'opacity' ) ) this.$target.css( 'opacity', 1 );
 
 		// Pick functionality to initialize...
 		this.flexslider_enabled = 'function' === typeof $.fn.flexslider && wc_single_product_params.flexslider_enabled;
