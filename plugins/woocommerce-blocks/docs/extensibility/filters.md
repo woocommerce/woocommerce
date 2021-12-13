@@ -30,6 +30,7 @@
  - [woocommerce_registration_errors](#woocommerce_registration_errors)
  - [woocommerce_shared_settings](#-woocommerce_shared_settings)
  - [woocommerce_shipping_package_name](#woocommerce_shipping_package_name)
+ - [woocommerce_show_page_title](#woocommerce_show_page_title)
  - [woocommerce_store_api_disable_nonce_check](#woocommerce_store_api_disable_nonce_check)
  - [woocommerce_store_api_product_quantity_limit](#woocommerce_store_api_product_quantity_limit)
  - [woocommerce_variation_option_name](#woocommerce_variation_option_name)
@@ -730,6 +731,22 @@ apply_filters( 'woocommerce_shipping_package_name', string $shipping_package_nam
 
 
 File: [StoreApi/Utilities/CartController.php](../src/StoreApi/Utilities/CartController.php)
+
+---
+
+## woocommerce_show_page_title
+
+
+
+
+```php
+apply_filters( 'woocommerce_show_page_title' )
+```
+
+### Source
+
+
+File: [BlockTypes/LegacyTemplate.php](../src/BlockTypes/LegacyTemplate.php)
 
 ---
 

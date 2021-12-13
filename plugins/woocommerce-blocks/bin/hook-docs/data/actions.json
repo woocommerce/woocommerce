@@ -62,6 +62,54 @@
             }
         },
         {
+            "name": "woocommerce_after_main_content",
+            "file": "BlockTypes/LegacyTemplate.php",
+            "type": "action",
+            "doc": {
+                "description": "Hook: woocommerce_after_main_content.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "hooked",
+                        "content": "woocommerce_output_content_wrapper_end - 10 (outputs closing divs for the content)"
+                    }
+                ],
+                "long_description_html": ""
+            }
+        },
+        {
+            "name": "woocommerce_after_main_content",
+            "file": "BlockTypes/LegacyTemplate.php",
+            "type": "action",
+            "doc": {
+                "description": "Woocommerce_after_main_content hook.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "hooked",
+                        "content": "woocommerce_output_content_wrapper_end - 10 (outputs closing divs for the content)"
+                    }
+                ],
+                "long_description_html": ""
+            }
+        },
+        {
+            "name": "woocommerce_after_shop_loop",
+            "file": "BlockTypes/LegacyTemplate.php",
+            "type": "action",
+            "doc": {
+                "description": "Hook: woocommerce_after_shop_loop.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "hooked",
+                        "content": "woocommerce_pagination - 10"
+                    }
+                ],
+                "long_description_html": ""
+            }
+        },
+        {
             "name": "woocommerce_applied_coupon",
             "file": "StoreApi/Utilities/CartController.php",
             "type": "action",
@@ -82,13 +130,90 @@
             }
         },
         {
-            "name": "woocommerce_blocks_cart_enqueue_data",
-            "file": "BlockTypes/Cart.php",
+            "name": "woocommerce_archive_description",
+            "file": "BlockTypes/LegacyTemplate.php",
             "type": "action",
             "doc": {
-                "description": "Fires after cart block data is registered.",
+                "description": "Hook: woocommerce_archive_description.",
                 "long_description": "",
-                "tags": [],
+                "tags": [
+                    {
+                        "name": "hooked",
+                        "content": "woocommerce_taxonomy_archive_description - 10"
+                    },
+                    {
+                        "name": "hooked",
+                        "content": "woocommerce_product_archive_description - 10"
+                    }
+                ],
+                "long_description_html": ""
+            }
+        },
+        {
+            "name": "woocommerce_before_main_content",
+            "file": "BlockTypes/LegacyTemplate.php",
+            "type": "action",
+            "doc": {
+                "description": "Woocommerce_before_main_content hook.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "hooked",
+                        "content": "woocommerce_output_content_wrapper - 10 (outputs opening divs for the content)"
+                    },
+                    {
+                        "name": "hooked",
+                        "content": "woocommerce_breadcrumb - 20"
+                    }
+                ],
+                "long_description_html": ""
+            }
+        },
+        {
+            "name": "woocommerce_before_main_content",
+            "file": "BlockTypes/LegacyTemplate.php",
+            "type": "action",
+            "doc": {
+                "description": "Hook: woocommerce_before_main_content.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "hooked",
+                        "content": "woocommerce_output_content_wrapper - 10 (outputs opening divs for the content)"
+                    },
+                    {
+                        "name": "hooked",
+                        "content": "woocommerce_breadcrumb - 20"
+                    },
+                    {
+                        "name": "hooked",
+                        "content": "WC_Structured_Data::generate_website_data() - 30"
+                    }
+                ],
+                "long_description_html": ""
+            }
+        },
+        {
+            "name": "woocommerce_before_shop_loop",
+            "file": "BlockTypes/LegacyTemplate.php",
+            "type": "action",
+            "doc": {
+                "description": "Hook: woocommerce_before_shop_loop.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "hooked",
+                        "content": "woocommerce_output_all_notices - 10"
+                    },
+                    {
+                        "name": "hooked",
+                        "content": "woocommerce_result_count - 20"
+                    },
+                    {
+                        "name": "hooked",
+                        "content": "woocommerce_catalog_ordering - 30"
+                    }
+                ],
                 "long_description_html": ""
             }
         },
@@ -100,6 +225,81 @@
                 "description": "Fires after cart block data is registered.",
                 "long_description": "",
                 "tags": [],
+                "long_description_html": ""
+            }
+        },
+        {
+            "name": "woocommerce_blocks_cart_enqueue_data",
+            "file": "BlockTypes/Cart.php",
+            "type": "action",
+            "doc": {
+                "description": "Fires after cart block data is registered.",
+                "long_description": "",
+                "tags": [],
+                "long_description_html": ""
+            }
+        },
+        {
+            "name": "woocommerce_blocks_cart_update_customer_from_request",
+            "file": "StoreApi/Routes/CartUpdateCustomer.php",
+            "type": "action",
+            "doc": {
+                "description": "Fires when the Checkout Block/Store API updates a customer from the API request data.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "param",
+                        "content": "Customer object.",
+                        "types": [
+                            "\\WC_Customer"
+                        ],
+                        "variable": "$customer"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Full details about the request.",
+                        "types": [
+                            "\\WP_REST_Request"
+                        ],
+                        "variable": "$request"
+                    }
+                ],
+                "long_description_html": ""
+            }
+        },
+        {
+            "name": "woocommerce_blocks_cart_update_order_from_customer_request",
+            "file": "StoreApi/Routes/CartUpdateCustomer.php",
+            "type": "action",
+            "doc": {
+                "description": "Fires when the Checkout Block/Store API updates an existing draft order from customer data.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "param",
+                        "content": "Order object.",
+                        "types": [
+                            "\\WC_Order"
+                        ],
+                        "variable": "$draft_order"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Customer object.",
+                        "types": [
+                            "\\WC_Customer"
+                        ],
+                        "variable": "$customer"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Full details about the request.",
+                        "types": [
+                            "\\WP_REST_Request"
+                        ],
+                        "variable": "$request"
+                    }
+                ],
                 "long_description_html": ""
             }
         },
@@ -319,6 +519,22 @@
             }
         },
         {
+            "name": "woocommerce_no_products_found",
+            "file": "BlockTypes/LegacyTemplate.php",
+            "type": "action",
+            "doc": {
+                "description": "Hook: woocommerce_no_products_found.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "hooked",
+                        "content": "wc_no_products_found - 10"
+                    }
+                ],
+                "long_description_html": ""
+            }
+        },
+        {
             "name": "woocommerce_register_post",
             "file": "Domain/Services/CreateAccount.php",
             "type": "action",
@@ -390,6 +606,17 @@
                         "variable": "$payment_result"
                     }
                 ],
+                "long_description_html": ""
+            }
+        },
+        {
+            "name": "woocommerce_shop_loop",
+            "file": "BlockTypes/LegacyTemplate.php",
+            "type": "action",
+            "doc": {
+                "description": "Hook: woocommerce_shop_loop.",
+                "long_description": "",
+                "tags": [],
                 "long_description_html": ""
             }
         },

@@ -75,25 +75,16 @@ class CartUpdateCustomer extends AbstractCartRoute {
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
 		$cart     = $this->cart_controller->get_cart_instance();
-		$billing  = isset( $request['billing_address'] ) ? $request['billing_address'] : [];
-		$shipping = isset( $request['shipping_address'] ) ? $request['shipping_address'] : [];
+		$billing  = $request['billing_address'] ?? [];
+		$shipping = $request['shipping_address'] ?? [];
+		$customer = wc()->customer;
 
-		// If the cart does not need shipping, shipping address is forced to match billing address unless defined.
 		if ( ! $cart->needs_shipping() && ! isset( $request['shipping_address'] ) ) {
-			$shipping = isset( $request['billing_address'] ) ? $request['billing_address'] : [
-				'first_name' => wc()->customer->get_billing_first_name(),
-				'last_name'  => wc()->customer->get_billing_last_name(),
-				'company'    => wc()->customer->get_billing_company(),
-				'address_1'  => wc()->customer->get_billing_address_1(),
-				'address_2'  => wc()->customer->get_billing_address_2(),
-				'city'       => wc()->customer->get_billing_city(),
-				'state'      => wc()->customer->get_billing_state(),
-				'postcode'   => wc()->customer->get_billing_postcode(),
-				'country'    => wc()->customer->get_billing_country(),
-				'phone'      => wc()->customer->get_billing_phone(),
-			];
+			// If the cart does not need shipping, shipping address is forced to match billing address unless defined.
+			$shipping = $request['billing_address'] ?? $this->get_customer_billing_address( $customer );
 		}
-		wc()->customer->set_props(
+
+		$customer->set_props(
 			array(
 				'billing_first_name'  => $billing['first_name'] ?? null,
 				'billing_last_name'   => $billing['last_name'] ?? null,
@@ -119,21 +110,51 @@ class CartUpdateCustomer extends AbstractCartRoute {
 			)
 		);
 
-		wc()->customer->save();
+		/**
+		 * Fires when the Checkout Block/Store API updates a customer from the API request data.
+		 *
+		 * @param \WC_Customer $customer Customer object.
+		 * @param \WP_REST_Request $request Full details about the request.
+		 */
+		do_action( 'woocommerce_blocks_cart_update_customer_from_request', $customer, $request );
+
+		$customer->save();
 
 		$this->calculate_totals();
-		$this->maybe_update_order();
+		$this->maybe_update_order_from_customer( $customer, $request );
 
 		return rest_ensure_response( $this->schema->get_item_response( $cart ) );
+	}
+
+	/**
+	 * Get full customer billing address.
+	 *
+	 * @param \WC_Customer $customer Customer object.
+	 * @return array
+	 */
+	protected function get_customer_billing_address( \WC_Customer $customer ) {
+		return [
+			'first_name' => $customer->get_billing_first_name(),
+			'last_name'  => $customer->get_billing_last_name(),
+			'company'    => $customer->get_billing_company(),
+			'address_1'  => $customer->get_billing_address_1(),
+			'address_2'  => $customer->get_billing_address_2(),
+			'city'       => $customer->get_billing_city(),
+			'state'      => $customer->get_billing_state(),
+			'postcode'   => $customer->get_billing_postcode(),
+			'country'    => $customer->get_billing_country(),
+			'phone'      => $customer->get_billing_phone(),
+		];
 	}
 
 	/**
 	 * If there is a draft order, update the customer data within that also so the
 	 * cart and order are kept in sync.
 	 *
-	 * @return void
+	 * @param \WC_Customer     $customer Customer object.
+	 * @param \WP_REST_Request $request Request object.
 	 */
-	protected function maybe_update_order() {
+	protected function maybe_update_order_from_customer( \WC_Customer $customer, \WP_REST_Request $request ) {
 		$draft_order = $this->get_draft_order();
 
 		if ( ! $draft_order ) {
@@ -142,29 +163,38 @@ class CartUpdateCustomer extends AbstractCartRoute {
 
 		$draft_order->set_props(
 			[
-				'billing_first_name'  => wc()->customer->get_billing_first_name(),
-				'billing_last_name'   => wc()->customer->get_billing_last_name(),
-				'billing_company'     => wc()->customer->get_billing_company(),
-				'billing_address_1'   => wc()->customer->get_billing_address_1(),
-				'billing_address_2'   => wc()->customer->get_billing_address_2(),
-				'billing_city'        => wc()->customer->get_billing_city(),
-				'billing_state'       => wc()->customer->get_billing_state(),
-				'billing_postcode'    => wc()->customer->get_billing_postcode(),
-				'billing_country'     => wc()->customer->get_billing_country(),
-				'billing_email'       => wc()->customer->get_billing_email(),
-				'billing_phone'       => wc()->customer->get_billing_phone(),
-				'shipping_first_name' => wc()->customer->get_shipping_first_name(),
-				'shipping_last_name'  => wc()->customer->get_shipping_last_name(),
-				'shipping_company'    => wc()->customer->get_shipping_company(),
-				'shipping_address_1'  => wc()->customer->get_shipping_address_1(),
-				'shipping_address_2'  => wc()->customer->get_shipping_address_2(),
-				'shipping_city'       => wc()->customer->get_shipping_city(),
-				'shipping_state'      => wc()->customer->get_shipping_state(),
-				'shipping_postcode'   => wc()->customer->get_shipping_postcode(),
-				'shipping_country'    => wc()->customer->get_shipping_country(),
-				'shipping_phone'      => wc()->customer->get_shipping_phone(),
+				'billing_first_name'  => $customer->get_billing_first_name(),
+				'billing_last_name'   => $customer->get_billing_last_name(),
+				'billing_company'     => $customer->get_billing_company(),
+				'billing_address_1'   => $customer->get_billing_address_1(),
+				'billing_address_2'   => $customer->get_billing_address_2(),
+				'billing_city'        => $customer->get_billing_city(),
+				'billing_state'       => $customer->get_billing_state(),
+				'billing_postcode'    => $customer->get_billing_postcode(),
+				'billing_country'     => $customer->get_billing_country(),
+				'billing_email'       => $customer->get_billing_email(),
+				'billing_phone'       => $customer->get_billing_phone(),
+				'shipping_first_name' => $customer->get_shipping_first_name(),
+				'shipping_last_name'  => $customer->get_shipping_last_name(),
+				'shipping_company'    => $customer->get_shipping_company(),
+				'shipping_address_1'  => $customer->get_shipping_address_1(),
+				'shipping_address_2'  => $customer->get_shipping_address_2(),
+				'shipping_city'       => $customer->get_shipping_city(),
+				'shipping_state'      => $customer->get_shipping_state(),
+				'shipping_postcode'   => $customer->get_shipping_postcode(),
+				'shipping_country'    => $customer->get_shipping_country(),
+				'shipping_phone'      => $customer->get_shipping_phone(),
 			]
 		);
+
+		/**
+		 * Fires when the Checkout Block/Store API updates an existing draft order from customer data.
+		 *
+		 * @param \WC_Order $draft_order Order object.
+		 * @param \WC_Customer $customer Customer object.
+		 * @param \WP_REST_Request $request Full details about the request.
+		 */
+		do_action( 'woocommerce_blocks_cart_update_order_from_customer_request', $draft_order, $customer, $request );
 
 		$draft_order->save();
 	}
