@@ -12,7 +12,11 @@ import { withDispatch, withSelect } from '@wordpress/data';
 import { Link, Stepper, Plugins } from '@woocommerce/components';
 import { getAdminLink, getSetting } from '@woocommerce/wc-admin-settings';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
-import { SETTINGS_STORE_NAME, PLUGINS_STORE_NAME } from '@woocommerce/data';
+import {
+	SETTINGS_STORE_NAME,
+	ONBOARDING_STORE_NAME,
+	PLUGINS_STORE_NAME,
+} from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { registerPlugin } from '@wordpress/plugins';
 import { WooOnboardingTask } from '@woocommerce/onboarding';
@@ -172,7 +176,17 @@ export class Shipping extends Component {
 	}
 
 	getSteps() {
-		const { countryCode, isJetpackConnected, settings } = this.props;
+		const {
+			countryCode,
+			createNotice,
+			invalidateResolutionForStoreSelector,
+			isJetpackConnected,
+			onComplete,
+			optimisticallyCompleteTask,
+			settings,
+			task,
+			updateAndPersistSettingsForGroup,
+		} = this.props;
 		const pluginsToActivate = this.getPluginsToActivate();
 		const requiresJetpackConnection =
 			! isJetpackConnected && countryCode === 'US';
@@ -187,7 +201,11 @@ export class Shipping extends Component {
 				),
 				content: (
 					<StoreLocation
-						{ ...this.props }
+						createNotice={ createNotice }
+						updateAndPersistSettingsForGroup={
+							updateAndPersistSettingsForGroup
+						}
+						settings={ settings }
 						onComplete={ ( values ) => {
 							const country = getCountryCode(
 								values.countryState
@@ -217,8 +235,13 @@ export class Shipping extends Component {
 								: __( 'Complete task', 'woocommerce-admin' )
 						}
 						shippingZones={ this.state.shippingZones }
-						onComplete={ this.completeStep }
-						createNotice={ this.props.createNotice }
+						onComplete={ () => {
+							const { id } = task;
+							optimisticallyCompleteTask( id );
+							invalidateResolutionForStoreSelector();
+							this.completeStep();
+						} }
+						createNotice={ createNotice }
 					/>
 				),
 				visible:
@@ -275,9 +298,9 @@ export class Shipping extends Component {
 								plugins_to_activate: pluginsToActivate,
 							} );
 							getHistory().push( getNewPath( {}, '/', {} ) );
+							onComplete();
 						} }
 						pluginSlugs={ pluginsToActivate }
-						{ ...this.props }
 					/>
 				),
 				visible: pluginsToActivate.length,
@@ -295,7 +318,6 @@ export class Shipping extends Component {
 							'admin.php?page=wc-admin'
 						) }
 						completeStep={ this.completeStep }
-						{ ...this.props }
 						onConnect={ () => {
 							recordEvent( 'tasklist_shipping_connect_store' );
 						} }
@@ -366,9 +388,15 @@ const ShippingWrapper = compose(
 		const { updateAndPersistSettingsForGroup } = dispatch(
 			SETTINGS_STORE_NAME
 		);
+		const {
+			invalidateResolutionForStoreSelector,
+			optimisticallyCompleteTask,
+		} = dispatch( ONBOARDING_STORE_NAME );
 
 		return {
 			createNotice,
+			invalidateResolutionForStoreSelector,
+			optimisticallyCompleteTask,
 			updateAndPersistSettingsForGroup,
 		};
 	} )
@@ -378,8 +406,10 @@ registerPlugin( 'wc-admin-onboarding-task-shipping', {
 	scope: 'woocommerce-tasks',
 	render: () => (
 		<WooOnboardingTask id="shipping">
-			{ ( { onComplete } ) => {
-				return <ShippingWrapper onComplete={ onComplete } />;
+			{ ( { onComplete, task } ) => {
+				return (
+					<ShippingWrapper onComplete={ onComplete } task={ task } />
+				);
 			} }
 		</WooOnboardingTask>
 	),
