@@ -12,6 +12,11 @@
 
 ## Added
 
+- Added a `config` export to the `@woocommerce/e2e-environment` package that has all data and methods of the [config](https://github.com/lorenwest/node-config) package
+  - it provides its own `get()` method that accepts an extra optional default parameter to be used if the property is not found in the config file. 
+
+## Added
+
 - Added `await` for every call to `shopper.logout`
 - Updated `getLatestReleaseZipUrl()` to allow passing in an authorization token and simplified arguments to just the repository name
 - Added `upload.ini` which increases the limits for uploading files (such as for plugins) in the Docker environment
