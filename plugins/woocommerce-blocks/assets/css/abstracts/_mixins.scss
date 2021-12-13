@@ -12,32 +12,56 @@ $fontSizes: (
 	font-size: map-get($fontSizes, $sizeName) * $multiplier;
 }
 
-@keyframes loading-fade {
+@keyframes spinner__animation {
 	0% {
-		opacity: 0.7;
-	}
-	50% {
-		opacity: 1;
+		animation-timing-function: cubic-bezier(0.5856, 0.0703, 0.4143, 0.9297);
+		transform: rotate(0deg);
 	}
 	100% {
-		opacity: 0.7;
+		transform: rotate(360deg);
+	}
+}
+
+@keyframes loading__animation {
+	100% {
+		transform: translateX(100%);
 	}
 }
 
 // Adds animation to placeholder section
 @mixin placeholder() {
-	animation: loading-fade 1.2s ease-in-out infinite;
-	background-color: $placeholder-color !important;
-	color: $placeholder-color !important;
 	outline: 0 !important;
 	border: 0 !important;
-	box-shadow: none;
+	background-color: #ebebeb !important;
+	color: transparent !important;
+	width: 100%;
+	border-radius: 0.25rem;
+	display: block;
+	line-height: 1;
+	position: relative !important;
+	overflow: hidden !important;
+	max-width: 100% !important;
 	pointer-events: none;
-	max-width: 100%;
+	box-shadow: none;
+	z-index: 1; /* Necessary for overflow: hidden to work correctly in Safari */
 
 	// Forces direct descendants to keep layout but lose visibility.
 	> * {
 		visibility: hidden;
+	}
+
+	&::after {
+		content: " ";
+		display: block;
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: 0;
+		height: 100%;
+		background-repeat: no-repeat;
+		background-image: linear-gradient(90deg, #ebebeb, #f5f5f5, #ebebeb);
+		transform: translateX(-100%);
+		animation: loading__animation 1.5s ease-in-out infinite;
 	}
 
 	@media screen and (prefers-reduced-motion: reduce) {
@@ -46,7 +70,7 @@ $fontSizes: (
 }
 
 @mixin force-content() {
-	&::after {
+	&::before {
 		content: "\00a0";
 	}
 }
