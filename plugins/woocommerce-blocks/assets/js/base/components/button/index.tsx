@@ -15,6 +15,9 @@ interface ButtonProps extends WPButton.ButtonProps {
 	className?: string;
 	showSpinner?: boolean;
 	children?: ReactNode;
+	disabled?: boolean;
+	onClick?: ( e: React.MouseEvent< HTMLButtonElement, MouseEvent > ) => void;
+	type?: 'input' | 'submit';
 }
 
 /**

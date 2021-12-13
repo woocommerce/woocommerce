@@ -7,7 +7,6 @@ import classnames from 'classnames';
 import {
 	ValidationInputError,
 	useValidationContext,
-	useCheckoutContext,
 } from '@woocommerce/base-context';
 import { withInstanceId } from '@wordpress/compose';
 import { isString } from '@woocommerce/types';
@@ -64,9 +63,6 @@ const ValidatedTextInput = ( {
 		clearValidationError,
 		getValidationErrorId,
 	} = useValidationContext();
-
-	const { isBeforeProcessing } = useCheckoutContext();
-
 	const textInputId =
 		typeof id !== 'undefined' ? id : 'textinput-' + instanceId;
 	const errorIdString = errorId !== undefined ? errorId : textInputId;
@@ -99,6 +95,18 @@ const ValidatedTextInput = ( {
 		[ clearValidationError, errorIdString, setValidationErrors ]
 	);
 
+	/**
+	 * Runs validation on change if the current element is not in focus. This is because autofilled elements do not
+	 * trigger the blur() event.
+	 */
+	const maybeValidateOnChange = useCallback( () => {
+		if (
+			inputRef.current?.ownerDocument.activeElement !== inputRef.current
+		) {
+			validateInput( true );
+		}
+	}, [ validateInput ] );
+
 	useEffect( () => {
 		if ( isPristine ) {
 			if ( focusOnMount ) {
@@ -117,14 +125,6 @@ const ValidatedTextInput = ( {
 		}
 	}, [ isPristine, setIsPristine, validateOnMount, validateInput ] );
 
-	/**
-	 * @todo Remove extra validation call after refactoring the validation system.
-	 */
-	useEffect( () => {
-		if ( isBeforeProcessing ) {
-			validateInput();
-		}
-	}, [ isBeforeProcessing, validateInput ] );
 	// Remove validation errors when unmounted.
 	useEffect( () => {
 		return () => {
@@ -137,9 +137,11 @@ const ValidatedTextInput = ( {
 		message?: string;
 		hidden?: boolean;
 	};
+
 	if ( isString( passedErrorMessage ) && passedErrorMessage !== '' ) {
 		errorMessage.message = passedErrorMessage;
 	}
+
 	const hasError = errorMessage.message && ! errorMessage.hidden;
 	const describedBy =
 		showError && hasError && getValidationErrorId( errorIdString )
@@ -168,6 +170,7 @@ const ValidatedTextInput = ( {
 			onChange={ ( val ) => {
 				hideValidationError( errorIdString );
 				onChange( val );
+				maybeValidateOnChange();
 			} }
 			ariaDescribedBy={ describedBy }
 			{ ...rest }
