@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import triggerFetch from '@wordpress/api-fetch';
 import {
 	useEffect,
@@ -211,34 +211,56 @@ const CheckoutProcessor = () => {
 				}
 				return response.json();
 			} )
-			.then( ( response ) => {
-				dispatchActions.setAfterProcessing( response );
+			.then( ( responseJson ) => {
+				dispatchActions.setAfterProcessing( responseJson );
 				setIsProcessingOrder( false );
 			} )
-			.catch( ( fetchResponse ) => {
-				processCheckoutResponseHeaders(
-					fetchResponse.headers,
-					dispatchActions
-				);
-				fetchResponse.json().then( ( response ) => {
-					// If updated cart state was returned, update the store.
-					if ( response.data?.cart ) {
-						receiveCart( response.data.cart );
+			.catch( ( errorResponse ) => {
+				try {
+					if ( errorResponse?.headers ) {
+						processCheckoutResponseHeaders(
+							errorResponse.headers,
+							dispatchActions
+						);
 					}
-					addErrorNotice( formatStoreApiErrorMessage( response ), {
-						id: 'checkout',
-					} );
-					response.additional_errors?.forEach?.(
-						( additionalError ) => {
-							addErrorNotice( additionalError.message, {
-								id: additionalError.error_code,
-							} );
+					// This attempts to parse a JSON error response where the status code was 4xx/5xx.
+					errorResponse.json().then( ( response ) => {
+						// If updated cart state was returned, update the store.
+						if ( response.data?.cart ) {
+							receiveCart( response.data.cart );
 						}
+						addErrorNotice(
+							formatStoreApiErrorMessage( response ),
+							{ id: 'checkout' }
+						);
+						response?.additional_errors?.forEach?.(
+							( additionalError ) => {
+								addErrorNotice( additionalError.message, {
+									id: additionalError.error_code,
+								} );
+							}
+						);
+						dispatchActions.setAfterProcessing( response );
+					} );
+				} catch {
+					addErrorNotice(
+						sprintf(
+							// Translators: %s Error text.
+							__(
+								'%s Please try placing your order again.',
+								'woo-gutenberg-products-block'
+							),
+							errorResponse?.message ??
+								__(
+									'Something went wrong.',
+									'woo-gutenberg-products-block'
+								)
+						),
+						{ id: 'checkout' }
 					);
-					dispatchActions.setHasError( true );
-					dispatchActions.setAfterProcessing( response );
-					setIsProcessingOrder( false );
-				} );
+				}
+				dispatchActions.setHasError( true );
+				setIsProcessingOrder( false );
 			} );
 	}, [
 		isProcessingOrder,
