@@ -57,28 +57,27 @@ const validateShippingCountry = (
 };
 
 interface AddressFormProps {
-	id: string;
+	// Id for component.
+	id?: string;
+	// Unique id for form.
 	instanceId: string;
+	// Array of fields in form.
 	fields: ( keyof AddressFields )[];
-	fieldConfig: Record< keyof AddressFields, Partial< AddressField > >;
+	// Field configuration for fields in form.
+	fieldConfig?: Record< keyof AddressFields, Partial< AddressField > >;
+	// Function to all for an form onChange event.
 	onChange: ( newValue: EnteredAddress ) => void;
-	type: AddressType;
+	// Type of form.
+	type?: AddressType;
+	// Values for fields.
 	values: EnteredAddress;
 }
+
 /**
  * Checkout address form.
- *
- * @param {Object} props Incoming props for component.
- * @param {string} props.id Id for component.
- * @param {Array}  props.fields Array of fields in form.
- * @param {Object} props.fieldConfig Field configuration for fields in form.
- * @param {string} props.instanceId Unique id for form.
- * @param {function(any):any} props.onChange Function to all for an form onChange event.
- * @param {string} props.type Type of form.
- * @param {Object} props.values Values for fields.
  */
 const AddressForm = ( {
-	id,
+	id = '',
 	fields = ( Object.keys(
 		defaultAddressFields
 	) as unknown ) as ( keyof AddressFields )[],
