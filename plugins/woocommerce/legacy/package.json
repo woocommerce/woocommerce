@@ -26,6 +26,6 @@
 		"gruntify-eslint": "5.0.0",
 		"sass": "^1.45.0",
 		"stylelint": "13.8.0",
-		"stylelint-config-wordpress": "17.0.0"
+		"@wordpress/stylelint-config": "19.1.0"
 	}
 }
