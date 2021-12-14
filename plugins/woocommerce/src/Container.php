@@ -6,11 +6,13 @@
 namespace Automattic\WooCommerce;
 
 use Automattic\WooCommerce\Internal\DependencyManagement\ExtendedContainer;
-use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\DownloadPermissionsAdjusterServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\AssignDefaultCategoryServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\DownloadUtilServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\DownloadPermissionsAdjusterServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ProductAttributesLookupServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ProxiesServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\RestockRefundedItemsAdjusterServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\SettingsImportExportServiceProvider;
 
 /**
  * PSR11 compliant dependency injection container for WooCommerce.
@@ -38,9 +40,11 @@ final class Container implements \Psr\Container\ContainerInterface {
 	private $service_providers = array(
 		AssignDefaultCategoryServiceProvider::class,
 		DownloadPermissionsAdjusterServiceProvider::class,
+		DownloadUtilServiceProvider::class,
 		ProductAttributesLookupServiceProvider::class,
 		ProxiesServiceProvider::class,
 		RestockRefundedItemsAdjusterServiceProvider::class,
+		SettingsImportExportServiceProvider::class,
 	);
 
 	/**

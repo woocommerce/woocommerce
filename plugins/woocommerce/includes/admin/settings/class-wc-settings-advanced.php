@@ -5,6 +5,8 @@
  * @package  WooCommerce\Admin
  */
 
+use Automattic\WooCommerce\Internal\SettingsImportExport;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -28,6 +30,14 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 
 		parent::__construct();
 		$this->notices();
+
+		add_filter( 'woocommerce_save_settings_advanced_importexport', '__return_false' );
+		add_action(
+			'woocommerce_before_settings_advanced',
+			function() {
+				$this->output_import_export_forms();
+			}
+		);
 	}
 
 	/**
@@ -42,6 +52,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 			'webhooks'        => __( 'Webhooks', 'woocommerce' ),
 			'legacy_api'      => __( 'Legacy API', 'woocommerce' ),
 			'woocommerce_com' => __( 'WooCommerce.com', 'woocommerce' ),
+			'importexport'    => __( 'Import/Export', 'woocommerce' ),
 		);
 	}
 
@@ -438,15 +449,77 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 	 * Output the settings.
 	 */
 	public function output() {
-		global $current_section;
+		global $current_section, $hide_save_button;
 
 		if ( 'webhooks' === $current_section ) {
 			WC_Admin_Webhooks::page_output();
 		} elseif ( 'keys' === $current_section ) {
 			WC_Admin_API_Keys::page_output();
+		} elseif ( 'importexport' === $current_section ) {
+			$hide_save_button = true;
+			$this->output_import_export();
 		} else {
 			parent::output();
 		}
+	}
+
+	/**
+	 * Output the forms for the "Import and export settings" section
+	 * (these need to be rendered outside the main settings form).
+	 */
+	private function output_import_export_forms() {
+		global $current_section;
+
+		if ( 'importexport' !== $current_section ) {
+			return;
+		}
+
+		$action_name = SettingsImportExport::AJAX_EXPORT_ACTION;
+
+		// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
+		?>
+		<form method='get' action='admin-ajax.php' id='wc_export_settings_form'>
+			<input type='hidden' name='action' value="<?php echo $action_name; ?>"/>
+			<?php wp_nonce_field( 'wc_export_settings' ); ?>
+		</form>
+		<?php
+		// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+	}
+
+	/**
+	 * Output the markup for the "Import and export settings" section.
+	 */
+	private function output_import_export() {
+		?>
+		<h2>Export settings</h2>
+		<div id='export-settings'>Use this to export the WooCommerce settings into a JSON file.</div>
+
+		<div style='margin-top: 15px;'>
+			<label>
+				<input form='wc_export_settings_form' type='checkbox' name='export_settings_verbose' value='on' />
+				<?php
+				/* translators: Checkbox to select if the WooCommerce settings JSON export is generated verbosely. */
+				esc_html_e( 'Verbose (include pages, sections, and settings titles, descriptions and default values)', 'woocommerce' );
+				?>
+			</label>
+		</div>
+		<div style='margin-top: 10px; margin-bottom: 20px;'>
+			<label>
+				<input form='wc_export_settings_form' type='checkbox' name='export_settings_pretty_printed' value='on' />
+				<?php
+				/* translators: Checkbox to select if the WooCommerce settings JSON export is generated pretty-printed. */
+				esc_html_e( 'Generate a pretty-printed JSON file', 'woocommerce' );
+				?>
+			</label>
+		</div>
+			<button form='wc_export_settings_form' type='submit' class="button button-primary">
+			<?php
+				/* translators: Export WooCommerce settings button text. */
+				esc_html_e( 'Export settings', 'woocommerce' );
+			?>
+			</button>
+		</div>
+		<?php
 	}
 
 	/**

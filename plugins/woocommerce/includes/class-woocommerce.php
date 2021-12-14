@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Internal\DownloadPermissionsAdjuster;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\RestockRefundedItemsAdjuster;
+use Automattic\WooCommerce\Internal\SettingsImportExport;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 /**
@@ -38,6 +39,7 @@ final class WooCommerce {
 	 */
 	public $db_version = '430';
 
+	// phpcs:disable PSR2.Classes.PropertyDeclaration.Underscore
 	/**
 	 * The single instance of the class.
 	 *
@@ -45,6 +47,7 @@ final class WooCommerce {
 	 * @since 2.1
 	 */
 	protected static $_instance = null;
+	// phpcs:enable PSR2.Classes.PropertyDeclaration.Underscore
 
 	/**
 	 * Session instance.
@@ -216,6 +219,7 @@ final class WooCommerce {
 		wc_get_container()->get( DataRegenerator::class );
 		wc_get_container()->get( LookupDataStore::class );
 		wc_get_container()->get( RestockRefundedItemsAdjuster::class );
+		wc_get_container()->get( SettingsImportExport::class );
 	}
 
 	/**
