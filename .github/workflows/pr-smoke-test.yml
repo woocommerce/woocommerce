@@ -56,7 +56,7 @@ jobs:
         if: always()
         uses: actions/github-script@v5
         env: 
-          TITLE: 'External Smoke Test Resutls:'
+          TITLE: 'Smoke Test Results:'
           SMOKE_TEST_URL: ${{ secrets.SMOKE_TEST_URL }}
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
