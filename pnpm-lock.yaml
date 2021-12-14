@@ -113,6 +113,7 @@ importers:
       '@automattic/puppeteer-utils': github:Automattic/puppeteer-utils#0f3ec50
       '@babel/cli': 7.12.8
       '@babel/core': 7.12.9
+      '@babel/polyfill': 7.12.1
       '@babel/preset-env': 7.12.7
       '@jest/test-sequencer': ^25.5.4
       '@slack/web-api': ^6.1.0
@@ -148,6 +149,7 @@ importers:
     devDependencies:
       '@babel/cli': 7.12.8_@babel+core@7.12.9
       '@babel/core': 7.12.9
+      '@babel/polyfill': 7.12.1
       '@babel/preset-env': 7.12.7_@babel+core@7.12.9
       '@wordpress/eslint-plugin': 7.3.0_eslint@8.1.0+typescript@4.2.4
       eslint: 8.1.0
@@ -3054,6 +3056,14 @@ packages:
       '@babel/core': 7.16.0
       '@babel/helper-create-regexp-features-plugin': 7.16.0_@babel+core@7.16.0
       '@babel/helper-plugin-utils': 7.14.5
+
+  /@babel/polyfill/7.12.1:
+    resolution: {integrity: sha512-X0pi0V6gxLi6lFZpGmeNa4zxtwEmCs42isWLNjZZDE0Y8yVfgu0T2OAHlzBbdYlqbW/YXVvoBHpATEM+goCj8g==}
+    deprecated: 🚨 This package has been deprecated in favor of separate inclusion of a polyfill and regenerator-runtime (when needed). See the @babel/polyfill docs (https://babeljs.io/docs/en/babel-polyfill) for more information.
+    dependencies:
+      core-js: 2.6.12
+      regenerator-runtime: 0.13.9
+    dev: true
 
   /@babel/preset-env/7.12.7_@babel+core@7.12.9:
     resolution: {integrity: sha512-OnNdfAr1FUQg7ksb7bmbKoby4qFOHw6DKWWUNB9KqnnCldxhxJlP+21dpyaWFmf2h0rTbOkXJtAGevY3XW1eew==}
