@@ -125,6 +125,7 @@ importers:
       commander: 4.1.1
       eslint: ^8.1.0
       jest: ^25.1.0
+      jest-circus: 25.1.0
       jest-each: 25.5.0
       jest-puppeteer: ^4.4.0
       ndb: ^1.1.5
@@ -156,6 +157,7 @@ importers:
       '@babel/preset-env': 7.12.7_@babel+core@7.12.9
       '@wordpress/eslint-plugin': 7.3.0_eslint@8.1.0+typescript@4.2.4
       eslint: 8.1.0
+      jest-circus: 25.1.0
       ndb: 1.1.5
       semver: 7.3.5
 
@@ -13195,6 +13197,30 @@ packages:
       '@jest/types': 27.2.5
       execa: 5.1.1
       throat: 6.0.1
+    dev: true
+
+  /jest-circus/25.1.0:
+    resolution: {integrity: sha512-Axlcr2YMxVarMW4SiZhCFCjNKhdF4xF9AIdltyutQOKyyDT795Kl/fzI95O0l8idE51Npj2wDj5GhrV7uEoEJA==}
+    engines: {node: '>= 8.3'}
+    dependencies:
+      '@babel/traverse': 7.16.3
+      '@jest/environment': 25.5.0
+      '@jest/test-result': 25.5.0
+      '@jest/types': 25.5.0
+      chalk: 3.0.0
+      co: 4.6.0
+      expect: 25.5.0
+      is-generator-fn: 2.1.0
+      jest-each: 25.5.0
+      jest-matcher-utils: 25.5.0
+      jest-message-util: 25.5.0
+      jest-snapshot: 25.5.1
+      jest-util: 25.5.0
+      pretty-format: 25.5.0
+      stack-utils: 1.0.5
+      throat: 5.0.0
+    transitivePeerDependencies:
+      - supports-color
     dev: true
 
   /jest-circus/27.3.1:

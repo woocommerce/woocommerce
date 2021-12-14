@@ -242,8 +242,15 @@
               }
 
               item = $( '<a></a>' ).attr( 'href', '#' ).text( j );
-              if ( slider.vars.controlNav === "thumbnails" ) {
-                item = $( '<img/>' ).attr( 'src', slide.attr( 'data-thumb' ) );
+              if (slider.vars.controlNav === "thumbnails") {
+                item = $('<img/>', {
+                  load: function (el) {
+                    el.currentTarget.width = el.currentTarget.naturalWidth;
+                    el.currentTarget.height = el.currentTarget.naturalHeight;
+                  },
+                  src: slide.attr('data-thumb'),
+                  alt: slide.attr('alt')
+                })
               }
 
               if ( '' !== slide.attr( 'data-thumb-alt' ) ) {

@@ -138,7 +138,7 @@ export const withRestApi = {
 		if ( productCategories.data && productCategories.data.length ) {
 			for ( let c = 0; c < productCategories.data.length; c++ ) {
 				// The default `uncategorized` category can't be deleted
-				if ( productCategories.data[c].id == 0 ) {
+				if ( productCategories.data[c].slug == 'uncategorized' ) {
 					continue;
 				}
 				const response = await client.delete( productCategoriesPath + `/${productCategories.data[c].id}?force=true` );
