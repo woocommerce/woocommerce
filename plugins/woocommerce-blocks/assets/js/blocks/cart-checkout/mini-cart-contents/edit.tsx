@@ -22,6 +22,20 @@ const ALLOWED_BLOCKS = [
 	'woocommerce/filled-mini-cart-contents-block',
 	'woocommerce/empty-mini-cart-contents-block',
 ];
+
+const views = [
+	{
+		view: 'woocommerce/filled-mini-cart-contents-block',
+		label: __( 'Filled Mini Cart', 'woo-gutenberg-products-block' ),
+		icon: <Icon srcElement={ filledCart } />,
+	},
+	{
+		view: 'woocommerce/empty-mini-cart-contents-block',
+		label: __( 'Empty Mini Cart', 'woo-gutenberg-products-block' ),
+		icon: <Icon srcElement={ removeCart } />,
+	},
+];
+
 interface Props {
 	clientId: string;
 }
@@ -36,18 +50,7 @@ const Edit = ( { clientId }: Props ): ReactElement => {
 
 	const { currentView, component: ViewSwitcherComponent } = useViewSwitcher(
 		clientId,
-		[
-			{
-				view: 'woocommerce/filled-mini-cart-contents-block',
-				label: __( 'Filled Mini Cart', 'woo-gutenberg-products-block' ),
-				icon: <Icon srcElement={ filledCart } />,
-			},
-			{
-				view: 'woocommerce/empty-mini-cart-contents-block',
-				label: __( 'Empty Mini Cart', 'woo-gutenberg-products-block' ),
-				icon: <Icon srcElement={ removeCart } />,
-			},
-		]
+		views
 	);
 
 	useForcedLayout( {
