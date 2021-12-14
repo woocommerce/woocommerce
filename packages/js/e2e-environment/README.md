@@ -85,6 +85,22 @@ The E2E environment has the following methods to let us control Jest's overall b
 E2E_RETRY_TIMES=2 pnpx wc-e2e test:e2e
 ```
 
+### Default Environment Configurations
+
+The E2E environment exports a config object which provides all the functionality of the [config](https://www.npmjs.com/package/config) package along with extending the `get` method to accept an optional second argument that will be used if the property is not found in the config file.
+
+```js
+const { config } = require( '@woocommerce/e2e-environment' );
+
+// 'users.admin.email' doesn't exist
+const adminEmail = config.get( 'users.admin.email', 'admin@woocommercecoree2etestsuite.com' );
+
+console.log( adminEmail );
+// admin@woocommercecoree2etestsuite.com
+```
+
+**Note**: If the default parameter is not found and no optional parameter is provided, an error will be thrown.
+
 #### Test Screenshots
 
 The test sequencer provides a screenshot function for test failures. To enable screenshots on test failure use
