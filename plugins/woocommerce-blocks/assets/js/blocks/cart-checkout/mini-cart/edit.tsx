@@ -12,12 +12,10 @@ import type { ReactElement } from 'react';
 import { formatPrice } from '@woocommerce/price-format';
 import { CartCheckoutCompatibilityNotice } from '@woocommerce/editor-components/compatibility-notices';
 import { PanelBody, ExternalLink, ToggleControl } from '@wordpress/components';
-import { addQueryArgs } from '@wordpress/url';
-import { ADMIN_URL, getSetting } from '@woocommerce/settings';
+import { getSetting } from '@woocommerce/settings';
 import { __ } from '@wordpress/i18n';
 import { positionCenter, positionRight, positionLeft } from '@wordpress/icons';
 import classnames from 'classnames';
-import { isString } from '@woocommerce/types';
 import Noninteractive from '@woocommerce/base-components/noninteractive';
 
 /**
@@ -56,9 +54,10 @@ const MiniCartBlock = ( {
 		} ),
 	} );
 
-	const themeSlug = getSetting( 'themeSlug', '' );
-
-	const isBlockTheme = getSetting( 'isBlockTheme', false );
+	const templatePartEditUri = getSetting(
+		'templatePartEditUri',
+		''
+	) as string;
 
 	/**
 	 * @todo Replace `getColorClassName` and manual style manipulation with
@@ -139,31 +138,21 @@ const MiniCartBlock = ( {
 						}
 					/>
 				</PanelBody>
-				{ isBlockTheme &&
-					isString( themeSlug ) &&
-					themeSlug.length > 0 && (
-						<PanelBody
-							title={ __(
-								'Template Editor',
+				{ templatePartEditUri && (
+					<PanelBody
+						title={ __(
+							'Template Editor',
+							'woo-gutenberg-products-block'
+						) }
+					>
+						<ExternalLink href={ templatePartEditUri }>
+							{ __(
+								'Edit template part',
 								'woo-gutenberg-products-block'
 							) }
-						>
-							<ExternalLink
-								href={ addQueryArgs(
-									`${ ADMIN_URL }site-editor.php`,
-									{
-										postId: `${ themeSlug }//mini-cart`,
-										postType: 'wp_template_part',
-									}
-								) }
-							>
-								{ __(
-									'Edit template part',
-									'woo-gutenberg-products-block'
-								) }
-							</ExternalLink>
-						</PanelBody>
-					) }
+						</ExternalLink>
+					</PanelBody>
+				) }
 			</InspectorControls>
 			<Noninteractive>
 				<button
