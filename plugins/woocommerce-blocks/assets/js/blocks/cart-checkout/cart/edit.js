@@ -46,6 +46,19 @@ const ALLOWED_BLOCKS = [
 	'woocommerce/empty-cart-block',
 ];
 
+const views = [
+	{
+		view: 'woocommerce/filled-cart-block',
+		label: __( 'Filled Cart', 'woo-gutenberg-products-block' ),
+		icon: <Icon srcElement={ filledCart } />,
+	},
+	{
+		view: 'woocommerce/empty-cart-block',
+		label: __( 'Empty Cart', 'woo-gutenberg-products-block' ),
+		icon: <Icon srcElement={ removeCart } />,
+	},
+];
+
 const BlockSettings = ( { attributes, setAttributes } ) => {
 	const { hasDarkControls } = attributes;
 	const { currentPostId } = useEditorContext();
@@ -104,18 +117,7 @@ export const Edit = ( { className, attributes, setAttributes, clientId } ) => {
 	const { hasDarkControls } = attributes;
 	const { currentView, component: ViewSwitcherComponent } = useViewSwitcher(
 		clientId,
-		[
-			{
-				view: 'woocommerce/filled-cart-block',
-				label: __( 'Filled Cart', 'woo-gutenberg-products-block' ),
-				icon: <Icon srcElement={ filledCart } />,
-			},
-			{
-				view: 'woocommerce/empty-cart-block',
-				label: __( 'Empty Cart', 'woo-gutenberg-products-block' ),
-				icon: <Icon srcElement={ removeCart } />,
-			},
-		]
+		views
 	);
 	const defaultTemplate = [
 		[ 'woocommerce/filled-cart-block', {}, [] ],

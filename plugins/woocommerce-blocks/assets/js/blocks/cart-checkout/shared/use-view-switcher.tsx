@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState } from '@wordpress/element';
+import { useState, useEffect } from '@wordpress/element';
 import { useDispatch, select } from '@wordpress/data';
 import { ToolbarGroup, ToolbarDropdownMenu } from '@wordpress/components';
 import { Icon, eye } from '@woocommerce/icons';
@@ -24,7 +24,45 @@ export const useViewSwitcher = (
 	const initialView = views[ 0 ];
 	const [ currentView, setCurrentView ] = useState( initialView );
 	const { selectBlock } = useDispatch( 'core/block-editor' );
-	const { getBlock } = select( blockEditorStore );
+	const {
+		getBlock,
+		getSelectedBlockClientId,
+		getBlockParentsByBlockName,
+	} = select( blockEditorStore );
+	const selectedBlockClientId = getSelectedBlockClientId();
+
+	useEffect( () => {
+		const viewNames = views.map( ( { view } ) => view );
+		const parentBlockIds = getBlockParentsByBlockName(
+			selectedBlockClientId,
+			viewNames
+		);
+
+		if ( parentBlockIds.length !== 1 ) {
+			return;
+		}
+		const parentBlock = getBlock( parentBlockIds[ 0 ] );
+
+		if ( currentView.view === parentBlock.name ) {
+			return;
+		}
+
+		const filteredViews = views.filter(
+			( { view } ) => view === parentBlock.name
+		);
+
+		if ( filteredViews.length !== 1 ) {
+			return;
+		}
+
+		setCurrentView( filteredViews[ 0 ] );
+	}, [
+		getBlockParentsByBlockName,
+		selectedBlockClientId,
+		getBlock,
+		currentView.view,
+		views,
+	] );
 
 	const ViewSwitcherComponent = (
 		<ToolbarGroup>
