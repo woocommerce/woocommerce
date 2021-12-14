@@ -7,7 +7,7 @@ const { HTTPClientFactory, VariableProduct, ProductVariation } = require( '@wooc
 /**
  * External dependencies
  */
-const config = require( 'config' );
+const { config } = require( '@woocommerce/e2e-environment' );
 const {
 	it,
 	describe,
