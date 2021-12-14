@@ -28,7 +28,7 @@ jest.mock( '../placeholder', () => ( {
 	TasksPlaceholder: () => <div>task-placeholder</div>,
 } ) );
 
-jest.mock( '../../header/activity-panel/display-options', () => ( {
+jest.mock( '~/activity-panel/display-options', () => ( {
 	DisplayOption: ( { children } ) => <div>{ children } </div>,
 } ) );
 

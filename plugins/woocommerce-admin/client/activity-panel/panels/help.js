@@ -21,7 +21,7 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import ActivityHeader from '../activity-header';
-import { getCountryCode } from '../../../dashboard/utils';
+import { getCountryCode } from '~/dashboard/utils';
 
 export const SETUP_TASK_HELP_ITEMS_FILTER =
 	'woocommerce_admin_setup_task_help_items';

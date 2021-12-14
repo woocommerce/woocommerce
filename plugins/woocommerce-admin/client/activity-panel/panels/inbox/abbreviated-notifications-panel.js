@@ -17,9 +17,9 @@ import {
 	getLowStockCount,
 	getOrderStatuses,
 	getUnreadOrders,
-} from '../../../../homescreen/activity-panel/orders/utils';
-import { getUnapprovedReviews } from '../../../../homescreen/activity-panel/reviews/utils';
-import { isWCAdmin } from '../../../../dashboard/utils';
+} from '~/homescreen/activity-panel/orders/utils';
+import { getUnapprovedReviews } from '~/homescreen/activity-panel/reviews/utils';
+import { isWCAdmin } from '~/dashboard/utils';
 import { Bell } from './icons/bell';
 
 const EXTENDED_TASK_LIST_ID = 'extended_task_list';

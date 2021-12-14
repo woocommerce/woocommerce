@@ -48,7 +48,7 @@ describe( 'Task', () => {
 	it( 'should pass the task name as id to the OnboardingTask.Slot', () => {
 		const { queryByText } = render(
 			<div>
-				<Task query={ { task: 'test' } } />
+				<Task query={ { task: 'test' } } task={ { title: 'Test' } } />
 			</div>
 		);
 		expect( queryByText( 'test' ) ).toBeInTheDocument();
@@ -63,7 +63,7 @@ describe( 'Task', () => {
 		} );
 		const { getByRole } = render(
 			<div>
-				<Task query={ { task: 'test' } } />
+				<Task query={ { task: 'test' } } task={ { title: 'Test' } } />
 			</div>
 		);
 		act( () => {

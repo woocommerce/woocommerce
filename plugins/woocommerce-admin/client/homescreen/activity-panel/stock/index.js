@@ -12,7 +12,7 @@ import { ITEMS_STORE_NAME } from '@woocommerce/data';
 /**
  * Internal dependencies
  */
-import { ActivityCardPlaceholder } from '../../../header/activity-panel/activity-card';
+import { ActivityCardPlaceholder } from '~/activity-panel/activity-card';
 import { ProductStockCard } from './card';
 import { getLowStockCountQuery } from '../orders/utils';
 

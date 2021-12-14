@@ -18,6 +18,8 @@ import { NAVIGATION_STORE_NAME } from '@woocommerce/data';
 import getReports from '../analytics/report/get-reports';
 import { getPages } from './controller';
 import { isWCAdmin } from '../dashboard/utils';
+import Navigation from '~/navigation';
+import { WooHeaderNavigationItem } from '~/header/utils';
 
 const NavigationPlugin = () => {
 	const { persistedQuery } = useSelect( ( select ) => {
@@ -26,13 +28,21 @@ const NavigationPlugin = () => {
 		};
 	} );
 
+	if ( ! window.wcAdminFeatures.navigation ) {
+		return null;
+	}
+
 	/**
 	 * If the current page is embedded, stay with the default urls
 	 * provided by Navigation because the router isn't present to
 	 * respond to <Link /> component's manipulation of the url.
 	 */
 	if ( ! isWCAdmin( window.location.href ) ) {
-		return null;
+		return (
+			<WooHeaderNavigationItem order={ -100 }>
+				<Navigation />
+			</WooHeaderNavigationItem>
+		);
 	}
 
 	const reports = getReports().filter( ( item ) => item.navArgs );
@@ -51,6 +61,9 @@ const NavigationPlugin = () => {
 
 	return (
 		<>
+			<WooHeaderNavigationItem order={ -100 }>
+				<Navigation />
+			</WooHeaderNavigationItem>
 			{ pages.map( ( page ) => (
 				<WooNavigationItem
 					item={ page.navArgs.id }

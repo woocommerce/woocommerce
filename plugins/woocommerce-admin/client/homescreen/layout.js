@@ -26,7 +26,7 @@ import { useExperiment } from '@woocommerce/explat';
 /**
  * Internal dependencies
  */
-import ActivityHeader from '../header/activity-panel/activity-header';
+import ActivityHeader from '~/activity-panel/activity-header';
 import { ActivityPanel } from './activity-panel';
 import { Column } from './column';
 import InboxPanel from '../inbox-panel';

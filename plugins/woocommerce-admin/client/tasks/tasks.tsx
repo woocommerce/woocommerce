@@ -13,7 +13,7 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
-import { DisplayOption } from '../header/activity-panel/display-options';
+import { DisplayOption } from '~/activity-panel/display-options';
 import { Task } from './task';
 import { TaskList } from './task-list';
 import { TasksPlaceholder } from './placeholder';

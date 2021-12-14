@@ -8,8 +8,8 @@ import { Spinner } from '@woocommerce/components';
 /**
  * Internal dependencies
  */
-import useFocusOnMount from '../../hooks/useFocusOnMount';
-import useFocusOutside from '../../hooks/useFocusOutside';
+import useFocusOnMount from '~/hooks/useFocusOnMount';
+import useFocusOutside from '~/hooks/useFocusOutside';
 
 export const Panel = ( {
 	content,

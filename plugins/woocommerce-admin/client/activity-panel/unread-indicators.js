@@ -11,7 +11,7 @@ import { getSetting } from '@woocommerce/wc-admin-settings';
 /**
  * Internal dependencies
  */
-import { getUnreadNotesCount } from '../../inbox-panel/utils';
+import { getUnreadNotesCount } from '~/inbox-panel/utils';
 
 const UNREAD_NOTES_QUERY = {
 	page: 1,

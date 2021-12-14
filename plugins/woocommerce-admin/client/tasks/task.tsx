@@ -1,11 +1,18 @@
 /**
  * External dependencies
  */
+import { addFilter } from '@wordpress/hooks';
 import { WooOnboardingTask } from '@woocommerce/onboarding';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
 import { ONBOARDING_STORE_NAME, TaskType } from '@woocommerce/data';
 import { useCallback } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
+
+/**
+ * Internal dependencies
+ */
+import { WooHeaderNavigationItem, WooHeaderPageTitle } from '~/header/utils';
+import { BackButton } from './back-button';
 
 export type TaskProps = {
 	query: { task: string };
@@ -26,9 +33,15 @@ export const Task: React.FC< TaskProps > = ( { query, task } ) => {
 	}, [ id ] );
 
 	return (
-		<WooOnboardingTask.Slot
-			id={ id }
-			fillProps={ { onComplete, query, task } }
-		/>
+		<>
+			<WooHeaderNavigationItem>
+				<BackButton title={ task.title } />
+			</WooHeaderNavigationItem>
+			<WooHeaderPageTitle>{ task.title }</WooHeaderPageTitle>
+			<WooOnboardingTask.Slot
+				id={ id }
+				fillProps={ { onComplete, query, task } }
+			/>
+		</>
 	);
 };

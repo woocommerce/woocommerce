@@ -8,7 +8,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { HighlightTooltip } from '../../../header/activity-panel/highlight-tooltip';
+import { HighlightTooltip } from '~/activity-panel/highlight-tooltip';
 
 const tooltipHiddenOption = 'woocommerce_navigation_favorites_tooltip_hidden';
 

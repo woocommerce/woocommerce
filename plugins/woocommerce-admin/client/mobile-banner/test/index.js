@@ -22,18 +22,18 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
-import { MobileAppBanner } from '../index';
+import { Banner } from '../banner';
 import { platform } from '../../lib/platform';
 import { TRACKING_EVENT_NAME } from '../constants';
 
-describe( 'MobileAppBanner', () => {
+describe( 'Banner', () => {
 	beforeEach( () => {
 		platform.mockReturnValue( 'android' );
 	} );
 
 	it( 'closes if the user dismisses it', () => {
 		const { container, getByTestId } = render(
-			<MobileAppBanner onInstall={ () => {} } onDismiss={ () => {} } />
+			<Banner onInstall={ () => {} } onDismiss={ () => {} } />
 		);
 
 		fireEvent.click( getByTestId( 'dismiss-btn' ) );
@@ -42,7 +42,7 @@ describe( 'MobileAppBanner', () => {
 
 	it( 'closes if the user clicks install', () => {
 		const { queryByRole, container } = render(
-			<MobileAppBanner onInstall={ () => {} } onDismiss={ () => {} } />
+			<Banner onInstall={ () => {} } onDismiss={ () => {} } />
 		);
 
 		fireEvent.click( queryByRole( 'link' ) );
@@ -51,7 +51,7 @@ describe( 'MobileAppBanner', () => {
 
 	it( 'records a tracking event for install', () => {
 		const { queryByRole } = render(
-			<MobileAppBanner onInstall={ () => {} } onDismiss={ () => {} } />
+			<Banner onInstall={ () => {} } onDismiss={ () => {} } />
 		);
 
 		fireEvent.click( queryByRole( 'link' ) );
@@ -62,7 +62,7 @@ describe( 'MobileAppBanner', () => {
 
 	it( 'records a dismiss event for dismiss', () => {
 		const { container, getByTestId } = render(
-			<MobileAppBanner onInstall={ () => {} } onDismiss={ () => {} } />
+			<Banner onInstall={ () => {} } onDismiss={ () => {} } />
 		);
 
 		fireEvent.click( getByTestId( 'dismiss-btn' ) );
@@ -76,10 +76,7 @@ describe( 'MobileAppBanner', () => {
 	it( 'calls the onDismiss handler when dismiss is clicked', () => {
 		const dismissHandler = jest.fn();
 		const { getByTestId } = render(
-			<MobileAppBanner
-				onInstall={ () => {} }
-				onDismiss={ dismissHandler }
-			/>
+			<Banner onInstall={ () => {} } onDismiss={ dismissHandler } />
 		);
 
 		fireEvent.click( getByTestId( 'dismiss-btn' ) );
@@ -89,10 +86,7 @@ describe( 'MobileAppBanner', () => {
 	it( 'calls the onInstall handler when install is clicked', () => {
 		const installHandler = jest.fn();
 		const { queryByRole } = render(
-			<MobileAppBanner
-				onInstall={ installHandler }
-				onDismiss={ () => {} }
-			/>
+			<Banner onInstall={ installHandler } onDismiss={ () => {} } />
 		);
 
 		fireEvent.click( queryByRole( 'link' ) );
@@ -103,7 +97,7 @@ describe( 'MobileAppBanner', () => {
 		platform.mockReturnValue( 'ios' );
 
 		const { container } = render(
-			<MobileAppBanner onInstall={ () => {} } onDismiss={ () => {} } />
+			<Banner onInstall={ () => {} } onDismiss={ () => {} } />
 		);
 
 		expect( container ).toBeEmptyDOMElement();

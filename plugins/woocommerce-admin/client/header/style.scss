@@ -17,16 +17,6 @@
 		min-height: $header-height;
 	}
 
-	.woocommerce-layout__header-back-button {
-		cursor: pointer;
-		margin-left: $gutter-large;
-		display: flex;
-
-		&:focus {
-			box-shadow: inset -1px -1px 0 #757575, inset 1px 1px 0 #757575;
-		}
-	}
-
 	@include breakpoint( '<782px' ) {
 		flex-flow: row wrap;
 		top: $adminbar-height-mobile;
@@ -53,10 +43,6 @@
 		background: $studio-white;
 		font-weight: 600;
 		font-size: 14px;
-
-		&.with-back-button {
-			padding-left: $fallback-gutter;
-		}
 	}
 }
 

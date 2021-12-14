@@ -29,6 +29,8 @@ import { Controller, getPages } from './controller';
 import { Header } from '../header';
 import Notices from './notices';
 import TransientNotices from './transient-notices';
+import '~/activity-panel';
+import '~/mobile-banner';
 import './navigation';
 
 const StoreAlerts = lazy( () =>

@@ -30,7 +30,7 @@ import './style.scss';
 import {
 	ActivityCard,
 	ActivityCardPlaceholder,
-} from '../../../header/activity-panel/activity-card';
+} from '~/activity-panel/activity-card';
 import CheckmarkCircleIcon from './checkmark-circle-icon';
 import { CurrencyContext } from '../../../lib/currency-context';
 import sanitizeHTML from '../../../lib/sanitize-html';

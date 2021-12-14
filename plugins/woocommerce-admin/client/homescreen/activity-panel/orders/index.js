@@ -25,7 +25,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import {
 	ActivityCard,
 	ActivityCardPlaceholder,
-} from '../../../header/activity-panel/activity-card';
+} from '~/activity-panel/activity-card';
 import './style.scss';
 
 function recordOrderEvent( eventName ) {
