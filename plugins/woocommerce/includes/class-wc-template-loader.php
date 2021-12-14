@@ -144,7 +144,7 @@ class WC_Template_Loader {
 			$object = get_queried_object();
 
 			if ( is_tax( 'product_cat' ) || is_tax( 'product_tag' ) ) {
-				if ( self::has_block_template( 'taxonomy-' . $object->taxonomy ) ) {
+				if ( self::has_block_template( 'taxonomy-' . $object->taxonomy ) || self::has_block_template( 'archive-product' ) ) {
 					$default_file = '';
 				} else {
 					$default_file = 'taxonomy-' . $object->taxonomy . '.php';
