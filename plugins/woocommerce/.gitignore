@@ -1,12 +1,3 @@
-# Editors
-/nbproject/private/
-
-# Grunt
-none
-
-# Sass
-.sass-cache/
-
 # All CSS
 /assets/css/**
 /assets/css/*.css
@@ -23,7 +14,6 @@ tests/cli/composer.json
 tests/cli/vendor
 
 # Unit tests
-/tmp
 /tests/bin/tmp
 /tests/e2e/config/local-*.json
 /tests/e2e/config/local.json
@@ -31,22 +21,6 @@ tests/cli/vendor
 /tests/e2e/docker
 /tests/e2e/screenshots
 /tests/e2e/plugins
-
-# Logs
-/logs
-
-# TypeScript files
-tsconfig.tsbuildinfo
-
-# Composer
-/vendor/
-/bin/composer/**/vendor/
-/lib/vendor/
-contributors.md
-contributors.html
-
-# Yarn
-yarn.lock
 
 # Packages
 /packages/*
