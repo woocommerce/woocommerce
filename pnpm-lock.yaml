@@ -215,6 +215,7 @@ importers:
       jest: ^25.1.0
       lint-staged: 9.5.0
       mocha: 7.2.0
+      node-sass: 6.0.1
       prettier: npm:wp-prettier@2.0.5
       stylelint: ^13.8.0
       stylelint-config-wordpress: 17.0.0
@@ -256,6 +257,7 @@ importers:
       jest: 25.5.4
       lint-staged: 9.5.0
       mocha: 7.2.0
+      node-sass: 6.0.1
       prettier: /wp-prettier/2.0.5
       stylelint: 13.13.1
       stylelint-config-wordpress: 17.0.0_stylelint@13.13.1
@@ -8637,7 +8639,7 @@ packages:
       create-hash: 1.2.0
       inherits: 2.0.4
       ripemd160: 2.0.2
-      safe-buffer: 5.1.2
+      safe-buffer: 5.2.1
       sha.js: 2.4.11
 
   /create-require/1.1.1:
