@@ -114,6 +114,7 @@ const checkNestedZip = async ( zipFilePath, savePath ) => {
  *
  * @param {string} fileUrl The URL where the zip file is located.
  * @param {string} downloadPath The location where to download the zip to.
+ * @param {string} authorizationToken Authorization token used to authenticate with the GitHub API if required.
  * @return {Promise<void>}
  */
 const downloadZip = async ( fileUrl, downloadPath, authorizationToken ) => {
@@ -133,7 +134,6 @@ const downloadZip = async ( fileUrl, downloadPath, authorizationToken ) => {
 	return new Promise( function ( resolve, reject ) {
 		request
 			.get( options, function ( err, resp, body ) {
-				console.log(resp.statusCode)
 				if ( err ) {
 					reject( err );
 				} else {
@@ -158,13 +158,12 @@ const deleteDownloadedPluginFiles = async () => {
 		if ( err ) throw err;
 
 		for ( const file of files ) {
-			fs.unlink(path.join( pluginSavePath, file ), err => {
-				if ( err ) throw err;
+			fs.unlink( path.join( pluginSavePath, file ), ( error ) => {
+				if ( error ) throw error;
 			} );
 		}
 	} );
-
-}
+};
 
 module.exports = {
 	getRemotePluginZip,
