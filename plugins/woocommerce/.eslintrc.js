@@ -18,7 +18,7 @@ module.exports = {
 		'max-len': [ 2, { code: 140 } ],
 		'no-console': 1,
 	},
-	parser: 'babel-eslint',
+	parser: '@babel/eslint-parser',
 	parserOptions: {
 		ecmaVersion: 8,
 		ecmaFeatures: {

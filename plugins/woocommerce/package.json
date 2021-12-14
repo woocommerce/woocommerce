@@ -33,6 +33,7 @@
   "devDependencies": {
     "@babel/cli": "7.12.8",
     "@babel/core": "7.12.9",
+    "@babel/eslint-parser": "^7.16.5",
     "@babel/polyfill": "7.12.1",
     "@babel/preset-env": "7.12.7",
     "@babel/register": "7.12.1",
@@ -49,7 +50,6 @@
     "@wordpress/babel-preset-default": "3.0.2",
     "@wordpress/eslint-plugin": "7.3.0",
     "autoprefixer": "9.8.6",
-    "babel-eslint": "10.1.0",
     "chai": "4.2.0",
     "chai-as-promised": "7.1.1",
     "config": "3.3.3",
@@ -64,7 +64,6 @@
     "jest": "^25.1.0",
     "lint-staged": "9.5.0",
     "mocha": "7.2.0",
-    "node-sass": "6.0.1",
     "prettier": "npm:wp-prettier@2.0.5",
     "stylelint": "^13.8.0",
     "stylelint-config-wordpress": "17.0.0",
