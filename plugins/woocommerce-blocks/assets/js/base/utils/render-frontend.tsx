@@ -62,7 +62,12 @@ export const renderBlock = <
 				{ Block && <Block { ...props } attributes={ attributes } /> }
 			</Suspense>
 		</BlockErrorBoundary>,
-		container
+		container,
+		() => {
+			if ( container.classList ) {
+				container.classList.remove( 'is-loading' );
+			}
+		}
 	);
 };
 
@@ -108,7 +113,6 @@ const renderBlockInContainers = <
 			...el.dataset,
 			...( props.attributes || {} ),
 		};
-		el.classList.remove( 'is-loading' );
 
 		renderBlock( {
 			Block,
