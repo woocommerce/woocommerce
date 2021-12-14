@@ -99,7 +99,7 @@ const checkNestedZip = async ( zipFilePath, savePath ) => {
 	const entries = await zip.entries();
 
 	for ( const entry of Object.values( entries ) ) {
-		if ( entry.name.match( /.zip/ ) ) {
+		if ( entry.name.match( /\.zip/ ) ) {
 			await zip.extract( null, savePath );
 			await zip.close();
 			return path.join( savePath, entry.name );
