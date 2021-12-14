@@ -43,7 +43,6 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 		$wpdb->insert( $wpdb->prefix . 'wc_admin_notes', $note_to_be_inserted );
 		$note_id = $wpdb->insert_id;
 		$note->set_id( $note_id );
-		$note->save_meta_data();
 		$this->save_actions( $note );
 		$note->apply_changes();
 
@@ -79,7 +78,6 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 
 		if ( 0 === $note->get_id() || '0' === $note->get_id() ) {
 			$this->read_actions( $note );
-			$note->read_meta_data();
 			$note->set_object_read( true );
 
 			/**
@@ -114,7 +112,6 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 			$note->set_layout( $note_row->layout );
 			$note->set_image( $note_row->image );
 			$this->read_actions( $note );
-			$note->read_meta_data();
 			$note->set_object_read( true );
 
 			/**
@@ -172,7 +169,6 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 			);
 		}
 
-		$note->save_meta_data();
 		$this->save_actions( $note );
 		$note->apply_changes();
 

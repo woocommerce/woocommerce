@@ -1,0 +1,4 @@
+Significance: patch
+Type: Fix
+
+Remove calls to read_meta_data in the Note DataStore. #7988
