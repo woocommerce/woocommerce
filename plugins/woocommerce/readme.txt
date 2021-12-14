@@ -4,7 +4,7 @@ Tags: e-commerce, store, sales, sell, woo, shop, cart, checkout, downloadable, d
 Requires at least: 5.6
 Tested up to: 5.8
 Requires PHP: 7.0
-Stable tag: 5.9.0
+Stable tag: 6.0.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -191,12 +191,13 @@ WooCommerce comes with some sample data you can use to see how products look; im
 - Fix - Fix products API orderby slug and include. ([#30873](https://github.com/woocommerce/woocommerce/pull/30873))
 - Dev - Remove defunct AJAX events. ([#30931](https://github.com/woocommerce/woocommerce/pull/30931))
 
-**WooCommerce Admin - 2.9.0 & 2.9.1 **
+**WooCommerce Admin - 2.9.0 & 2.9.1 & 2.9.2 **
 
 - Dev - Remove task status endpoint ( [#7841](https://github.com/woocommerce/woocommerce-admin/issues/7841) )
 - Fix - Fix ordering and styling issue with WooCommerce Payments payment method promotion. ( [#7943](https://github.com/woocommerce/woocommerce-admin/issues/7943) )
 - Fix - Fix ExPlat PHP client ( [#7926](https://github.com/woocommerce/woocommerce-admin/issues/7926) )
 - Fix - Fix marketing extensions tracks ( [#7908](https://github.com/woocommerce/woocommerce-admin/issues/7908) )
+- Fix - Fix shipping task completion status ( [#8031](https://github.com/woocommerce/woocommerce-admin/issues/8031) )
 - Update - Increased number of possible items in Recommended Extensions list from 6 to 9 ( [#7887](https://github.com/woocommerce/woocommerce-admin/issues/7887) )
 - Update - Reverts addition of Marketplace and My Subscriptions pages to the Marketplace menu. ( [#7902](https://github.com/woocommerce/woocommerce-admin/issues/7902) )
 - Update - Add marketing extensions back to onboarding wizard ( [#7831](https://github.com/woocommerce/woocommerce-admin/issues/7831) )
