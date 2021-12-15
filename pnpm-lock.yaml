@@ -7,6 +7,7 @@ importers:
       '@automattic/nx-composer': ^0.1.0
       '@babel/core': 7.12.9
       '@nrwl/cli': ^13.3.4
+      '@nrwl/devkit': ^13.1.4
       '@nrwl/linter': ^13.3.4
       '@nrwl/tao': 13.3.4
       '@nrwl/web': ^13.3.4
@@ -35,6 +36,7 @@ importers:
     devDependencies:
       '@automattic/nx-composer': 0.1.0
       '@nrwl/cli': 13.3.5
+      '@nrwl/devkit': 13.3.5
       '@nrwl/linter': 13.3.5_typescript@4.2.4
       '@nrwl/tao': 13.3.4
       '@nrwl/web': 13.3.5_42cab1dece2b2240094de84cfd414406
