@@ -20,6 +20,7 @@
     "@automattic/nx-composer": "^0.1.0",
     "@nrwl/cli": "latest",
     "@nrwl/linter": "^13.1.4",
+    "@nrwl/devkit": "^13.1.4",
     "@nrwl/tao": "latest",
     "@nrwl/web": "^13.1.4",
     "@nrwl/workspace": "latest",
