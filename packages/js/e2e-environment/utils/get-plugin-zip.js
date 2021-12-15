@@ -14,10 +14,7 @@ const StreamZip = require( 'node-stream-zip' );
  */
 const getRemotePluginZip = async ( fileUrl, authorizationToken = '' ) => {
 	const appPath = getAppRoot();
-	const savePath = path.resolve(
-		appPath,
-		'plugins/woocommerce/tests/e2e/plugins'
-	);
+	const savePath = resolveLocalE2ePath( 'plugins' );
 	mkdirp.sync( savePath );
 
 	// Pull the version from the end of the URL and add .zip
