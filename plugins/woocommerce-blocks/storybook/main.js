@@ -12,5 +12,6 @@ module.exports = {
 	],
 	features: {
 		babelModeV7: true,
+		emotionAlias: false,
 	},
 };
