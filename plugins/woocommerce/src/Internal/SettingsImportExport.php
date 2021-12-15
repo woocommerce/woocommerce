@@ -25,6 +25,26 @@ class SettingsImportExport {
 	const AJAX_IMPORT_ACTION = 'wc_import_settings';
 
 	/**
+	 * Name of the HTML input to select verbose export.
+	 */
+	const VERBOSE_EXPORT_INPUT_NAME = 'export_settings_verbose';
+
+	/**
+	 * Name of the HTML input to select pretty-printed export.
+	 */
+	const PRETTY_PRINT_EXPORT_INPUT_NAME = 'export_settings_pretty_printed';
+
+	/**
+	 * Name of the HTML input to select import mode.
+	 */
+	const IMPORT_MODE_INPUT_NAME = 'import_settings_mode';
+
+	/**
+	 * Name of the HTML input to select the file to import.
+	 */
+	const FILE_NAME_INPUT_NAME = 'settings-import-file';
+
+	/**
 	 * The injected instance of DownloadUtil.
 	 *
 	 * @var DownloadUtil
@@ -68,11 +88,11 @@ class SettingsImportExport {
 		$this->verify_nonce( static::AJAX_EXPORT_ACTION );
 
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
-		$verbose       = 'on' === ArrayUtil::get_value_or_default( $_GET, 'export_settings_verbose' );
+		$verbose       = 'on' === ArrayUtil::get_value_or_default( $_GET, self::VERBOSE_EXPORT_INPUT_NAME );
 		$settings_data = $verbose ? $this->get_settings_verbose() : $this->get_settings_simple();
 
 		$json_options  =
-			'on' === ArrayUtil::get_value_or_default( $_GET, 'export_settings_pretty_printed' ) ?
+			'on' === ArrayUtil::get_value_or_default( $_GET, self::PRETTY_PRINT_EXPORT_INPUT_NAME ) ?
 			JSON_PRETTY_PRINT : 0;
 		$settings_json = wp_json_encode( $settings_data, $json_options );
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
@@ -197,24 +217,24 @@ class SettingsImportExport {
 		$this->verify_nonce( static::AJAX_IMPORT_ACTION );
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing
-		$mode = ArrayUtil::get_value_or_default( $_POST, 'import_settings_mode' );
-		if ( ( 'full' !== $mode && 'create_only' !== $mode && 'replace_only' !== $mode ) || ! isset( $_FILES['settings-import-file'] ) ) {
+		$mode = ArrayUtil::get_value_or_default( $_POST, self::IMPORT_MODE_INPUT_NAME );
+		if ( ( 'full' !== $mode && 'create_only' !== $mode && 'replace_only' !== $mode ) || ! isset( $_FILES[ self::FILE_NAME_INPUT_NAME ] ) ) {
 			header( 'HTTP/1.1 400 Bad request' );
 			exit();
 		}
 
-		if ( empty( $_FILES['settings-import-file'] ) ) {
+		if ( empty( $_FILES[ self::FILE_NAME_INPUT_NAME ] ) ) {
 			$this->import_finished( __( 'No file provided.', 'woocommerce' ) );
 		}
 
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-		$file_upload_error = wp_unslash( $_FILES['settings-import-file']['error'] );
+		$file_upload_error = wp_unslash( $_FILES[ self::FILE_NAME_INPUT_NAME ]['error'] );
 		if ( 0 !== $file_upload_error ) {
 			$this->import_finished( $this->get_file_upload_error_message( $file_upload_error ) );
 		}
 
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-		$file_path = wp_unslash( $_FILES['settings-import-file']['tmp_name'] );
+		$file_path = wp_unslash( $_FILES[ self::FILE_NAME_INPUT_NAME ]['tmp_name'] );
 		if ( empty( $file_path ) ) {
 			$this->import_finished( __( 'No file provided.', 'woocommerce' ) );
 		}

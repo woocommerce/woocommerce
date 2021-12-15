@@ -495,13 +495,18 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 	 * Output the markup for the "Import and export settings" section.
 	 */
 	private function output_import_export() {
+		$verbose_input_name      = SettingsImportExport::VERBOSE_EXPORT_INPUT_NAME;
+		$pretty_print_input_name = SettingsImportExport::PRETTY_PRINT_EXPORT_INPUT_NAME;
+		$import_mode_input_name  = SettingsImportExport::IMPORT_MODE_INPUT_NAME;
+		$file_name_input_name    = SettingsImportExport::FILE_NAME_INPUT_NAME;
+
 		?>
 		<h2>Export settings</h2>
 		<div id='export-settings'>Use this to export the WooCommerce settings into a JSON file.</div>
 
 		<div style='margin-top: 15px;'>
 			<label>
-				<input form='wc_export_settings_form' type='checkbox' name='export_settings_verbose' value='on' />
+				<input form='wc_export_settings_form' type='checkbox' name='<?php echo esc_attr( $verbose_input_name ); ?>' value='on' />
 				<?php
 				esc_html_e( 'Verbose (include pages, sections, and settings titles, descriptions and default values)', 'woocommerce' );
 				?>
@@ -509,7 +514,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 		</div>
 		<div style='margin-top: 10px; margin-bottom: 20px;'>
 			<label>
-				<input form='wc_export_settings_form' type='checkbox' name='export_settings_pretty_printed' value='on' />
+				<input form='wc_export_settings_form' type='checkbox' name='<?php echo esc_attr( $pretty_print_input_name ); ?>' value='on' />
 				<?php
 				esc_html_e( 'Generate a pretty-printed JSON file', 'woocommerce' );
 				?>
@@ -528,7 +533,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 
 		<div style='margin-top: 15px;'>
 			<label>
-				<input form='wc_import_settings_form' type='radio' name='import_settings_mode' value='full' checked />
+				<input form='wc_import_settings_form' type='radio' name='<?php echo esc_attr( $import_mode_input_name ); ?>' value='full' checked />
 				<?php
 				esc_html_e( "Full import (replace existing settings and create settings that don't exist)", 'woocommerce' );
 				?>
@@ -536,7 +541,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 		</div>
 		<div style='margin-top: 10px;'>
 			<label>
-				<input form='wc_import_settings_form' type='radio' name='import_settings_mode' value='replace_only' />
+				<input form='wc_import_settings_form' type='radio' name='<?php echo esc_attr( $import_mode_input_name ); ?>' value='replace_only' />
 				<?php
 				esc_html_e( "Only replace existing settings (don't create settings that don't exist)", 'woocommerce' );
 				?>
@@ -544,7 +549,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 		</div>
 		<div style='margin-top: 10px; margin-bottom: 20px;'>
 			<label>
-				<input form='wc_import_settings_form' type='radio' name='import_settings_mode' value='create_only' />
+				<input form='wc_import_settings_form' type='radio' name='<?php echo esc_attr( $import_mode_input_name ); ?>' value='create_only' />
 				<?php
 				esc_html_e( "Only create settings that don't exist (don't replace already existing settings)", 'woocommerce' );
 				?>
@@ -553,7 +558,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 		<div style='margin-top: 10px; margin-bottom: 10px;'>
 			<label>
 				<span style='margin-right: 40px;''>Select a file to import:</span>
-				<input form='wc_import_settings_form' type='file' id='settings-import-file' name='settings-import-file'/>
+				<input form='wc_import_settings_form' type='file' id='settings-import-file' name='<?php echo esc_attr( $file_name_input_name ); ?>'/>
 				</label>
 		</div>
 		<div>
