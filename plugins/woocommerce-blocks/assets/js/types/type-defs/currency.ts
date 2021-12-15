@@ -1,10 +1,35 @@
 export interface Currency {
-	code: string;
+	/**
+	 * ISO 4217 Currency Code
+	 */
+	code: string; // @todo create a list of allowed currency codes
+	/**
+	 * String which separates the decimals from the integer
+	 */
 	decimalSeparator: string;
+	/**
+	 * @todo Description of this currently unknown
+	 */
 	minorUnit: number;
+	/**
+	 * String to prefix the currency with.
+	 *
+	 * This property is generally exclusive with `suffix`.
+	 */
 	prefix: string;
+	/**
+	 * String to suffix the currency with.
+	 *
+	 * This property is generally exclusive with `prefix`.
+	 */
 	suffix: string;
-	symbol: string;
+	/**
+	 * Currency symbol
+	 */
+	symbol: string; // @todo create a list of allowed currency symbols
+	/**
+	 * String which separates the thousands
+	 */
 	thousandSeparator: string;
 }
 

@@ -9,10 +9,9 @@ import {
 	useMemo,
 	useRef,
 } from '@wordpress/element';
-import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-monetary-amount';
-import { isObject } from '@woocommerce/types';
+import { Currency, isObject } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -21,37 +20,68 @@ import './style.scss';
 import { constrainRangeSliderValues } from './constrain-range-slider-values';
 import FilterSubmitButton from '../filter-submit-button';
 
-/**
- * Price slider component.
- *
- * @param {Object} props Component props.
- * @param {number} props.minPrice Minimum price for slider.
- * @param {number} props.maxPrice Maximum price for slider.
- * @param {number} props.minConstraint Minimum constraint.
- * @param {number} props.maxConstraint Maximum constraint.
- * @param {function(any):any} props.onChange Function to call on the change event.
- * @param {number} props.step What step values the slider uses.
- * @param {Object} props.currency Currency configuration object.
- * @param {boolean} props.showInputFields Whether to show input fields for the values or not.
- * @param {boolean} props.showFilterButton Whether to show the filter button for the slider.
- * @param {boolean} props.isLoading Whether values are loading or not.
- * @param {function():any} props.onSubmit Function to call when submit event fires.
- */
+export interface PriceSliderProps {
+	/**
+	 * Currency configuration object.
+	 */
+	currency: Currency;
+	/**
+	 * Whether values are loading or not.
+	 */
+	isLoading?: boolean;
+	/**
+	 * Maximum constraint.
+	 */
+	maxConstraint: number;
+	/**
+	 * Maximum price for slider.
+	 */
+	maxPrice: number;
+	/**
+	 * Minimum constraint.
+	 */
+	minConstraint: number;
+	/**
+	 * Minimum price for slider.
+	 */
+	minPrice: number;
+	/**
+	 * Function to call on the change event.
+	 */
+	onChange?: ( value: [ number, number ] ) => void;
+	/**
+	 * Function to call when submit event fires.
+	 */
+	onSubmit?: () => void;
+	/**
+	 * Whether to show the filter button for the slider.
+	 */
+	showFilterButton?: boolean;
+	/**
+	 * Whether to show input fields for the values or not.
+	 */
+	showInputFields?: boolean;
+	/**
+	 * What step values the slider uses.
+	 */
+	step: number;
+}
+
 const PriceSlider = ( {
 	minPrice,
 	maxPrice,
 	minConstraint,
 	maxConstraint,
-	onChange = () => {},
+	onChange = () => void 0,
 	step,
 	currency,
 	showInputFields = true,
 	showFilterButton = false,
 	isLoading = false,
-	onSubmit = () => {},
-} ) => {
-	const minRange = useRef();
-	const maxRange = useRef();
+	onSubmit = () => void 0,
+}: PriceSliderProps ): JSX.Element => {
+	const minRange = useRef< HTMLInputElement >( null );
+	const maxRange = useRef< HTMLInputElement >( null );
 
 	// We want step to default to 10 major units, e.g. $10.
 	const stepValue = step ? step : 10 * 10 ** currency.minorUnit;
@@ -121,16 +151,21 @@ const PriceSlider = ( {
 	 * @param {Object} event event data.
 	 */
 	const findClosestRange = useCallback(
-		( event ) => {
-			if ( isLoading || ! hasValidConstraints ) {
+		( event: React.MouseEvent< HTMLDivElement > ) => {
+			if (
+				isLoading ||
+				! hasValidConstraints ||
+				! minRange.current ||
+				! maxRange.current
+			) {
 				return;
 			}
-			const bounds = event.target.getBoundingClientRect();
+			const bounds = ( event.target as Element ).getBoundingClientRect();
 			const x = event.clientX - bounds.left;
 			const minWidth = minRange.current.offsetWidth;
-			const minValue = minRange.current.value;
+			const minValue = +minRange.current.value;
 			const maxWidth = maxRange.current.offsetWidth;
-			const maxValue = maxRange.current.value;
+			const maxValue = +maxRange.current.value;
 
 			const minX = minWidth * ( minValue / maxConstraint );
 			const maxX = maxWidth * ( maxValue / maxConstraint );
@@ -143,11 +178,11 @@ const PriceSlider = ( {
 			 * slider should be at the front and has no meaning beyond
 			 */
 			if ( minXDiff > maxXDiff ) {
-				minRange.current.style.zIndex = 20;
-				maxRange.current.style.zIndex = 21;
+				minRange.current.style.zIndex = '20';
+				maxRange.current.style.zIndex = '21';
 			} else {
-				minRange.current.style.zIndex = 21;
-				maxRange.current.style.zIndex = 20;
+				minRange.current.style.zIndex = '21';
+				maxRange.current.style.zIndex = '20';
 			}
 		},
 		[ isLoading, maxConstraint, hasValidConstraints ]
@@ -155,16 +190,14 @@ const PriceSlider = ( {
 
 	/**
 	 * Called when the slider is dragged.
-	 *
-	 * @param {Object} event Event object.
 	 */
 	const rangeInputOnChange = useCallback(
-		( event ) => {
+		( event: React.ChangeEvent< HTMLInputElement > ) => {
 			const isMin = event.target.classList.contains(
 				'wc-block-price-filter__range-input--min'
 			);
-			const targetValue = event.target.value;
-			const currentValues = isMin
+			const targetValue = +event.target.value;
+			const currentValues: [ number, number ] = isMin
 				? [
 						Math.round( targetValue / stepValue ) * stepValue,
 						maxPrice,
@@ -180,10 +213,7 @@ const PriceSlider = ( {
 				stepValue,
 				isMin
 			);
-			onChange( [
-				parseInt( values[ 0 ], 10 ),
-				parseInt( values[ 1 ], 10 ),
-			] );
+			onChange( values );
 		},
 		[
 			onChange,
@@ -197,16 +227,14 @@ const PriceSlider = ( {
 
 	/**
 	 * Called when a price input loses focus - commit changes to slider.
-	 *
-	 * @param {Object} event Event object.
 	 */
 	const priceInputOnBlur = useCallback(
-		( event ) => {
+		( event: React.FocusEvent< HTMLInputElement > ) => {
 			// Only refresh when finished editing the min and max fields.
 			if (
 				event.relatedTarget &&
-				event.relatedTarget.classList &&
-				event.relatedTarget.classList.contains(
+				( event.relatedTarget as Element ).classList &&
+				( event.relatedTarget as Element ).classList.contains(
 					'wc-block-price-filter__amount'
 				)
 			) {
@@ -222,10 +250,7 @@ const PriceSlider = ( {
 				stepValue,
 				isMin
 			);
-			onChange( [
-				parseInt( values[ 0 ], 10 ),
-				parseInt( values[ 1 ], 10 ),
-			] );
+			onChange( values );
 		},
 		[ onChange, stepValue, minPriceInput, maxPriceInput ]
 	);
@@ -250,8 +275,12 @@ const PriceSlider = ( {
 	const maxRangeStep =
 		activeElement && activeElement === maxRange.current ? stepValue : 1;
 
-	const ariaReadableMinPrice = minPriceInput / 10 ** currency.minorUnit;
-	const ariaReadableMaxPrice = maxPriceInput / 10 ** currency.minorUnit;
+	const ariaReadableMinPrice = String(
+		minPriceInput / 10 ** currency.minorUnit
+	);
+	const ariaReadableMaxPrice = String(
+		maxPriceInput / 10 ** currency.minorUnit
+	);
 
 	return (
 		<div className={ classes }>
@@ -264,7 +293,7 @@ const PriceSlider = ( {
 					<div aria-hidden={ showInputFields }>
 						<div
 							className="wc-block-price-filter__range-input-progress wc-block-components-price-slider__range-input-progress"
-							style={ progressStyles }
+							style={ progressStyles as React.CSSProperties }
 						/>
 						<input
 							type="range"
@@ -285,7 +314,7 @@ const PriceSlider = ( {
 							max={ maxConstraint }
 							ref={ minRange }
 							disabled={ isLoading }
-							tabIndex={ showInputFields ? '-1' : '0' }
+							tabIndex={ showInputFields ? -1 : 0 }
 						/>
 						<input
 							type="range"
@@ -306,7 +335,7 @@ const PriceSlider = ( {
 							max={ maxConstraint }
 							ref={ maxRange }
 							disabled={ isLoading }
-							tabIndex={ showInputFields ? '-1' : '0' }
+							tabIndex={ showInputFields ? -1 : 0 }
 						/>
 					</div>
 				) }
@@ -384,53 +413,6 @@ const PriceSlider = ( {
 			</div>
 		</div>
 	);
-};
-
-PriceSlider.propTypes = {
-	/**
-	 * Callback fired when prices changes.
-	 */
-	onChange: PropTypes.func.isRequired,
-	/**
-	 * Callback fired when the filter button is pressed.
-	 */
-	onSubmit: PropTypes.func,
-	/**
-	 * Min value.
-	 */
-	minPrice: PropTypes.number,
-	/**
-	 * Max value.
-	 */
-	maxPrice: PropTypes.number,
-	/**
-	 * Minimum allowed price.
-	 */
-	minConstraint: PropTypes.number,
-	/**
-	 * Maximum allowed price.
-	 */
-	maxConstraint: PropTypes.number,
-	/**
-	 * Step for slider inputs.
-	 */
-	step: PropTypes.number,
-	/**
-	 * Currency data used for formatting prices.
-	 */
-	currency: PropTypes.object.isRequired,
-	/**
-	 * Whether or not to show input fields above the slider.
-	 */
-	showInputFields: PropTypes.bool,
-	/**
-	 * Whether or not to show filter button above the slider.
-	 */
-	showFilterButton: PropTypes.bool,
-	/**
-	 * Whether or not to show filter button above the slider.
-	 */
-	isLoading: PropTypes.bool,
 };
 
 export default PriceSlider;
