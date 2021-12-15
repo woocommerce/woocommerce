@@ -1,43 +1,50 @@
 {
-  "root": "packages/js/api/",
-  "sourceRoot": "packages/js/api/src",
-  "projectType": "library",
-  "targets": {
-    "build": {
-      "executor": "@nrwl/workspace:run-script",
-      "options": {
-        "script": "build"
-      }
-    },
-    "clean": {
-      "executor": "@nrwl/workspace:run-script",
-      "options": {
-        "script": "clean"
-      }
-    },
-    "compile": {
-      "executor": "@nrwl/workspace:run-script",
-      "options": {
-        "script": "compile"
-      }
-    },
-    "prepare": {
-      "executor": "@nrwl/workspace:run-script",
-      "options": {
-        "script": "prepare"
-      }
-    },
-    "lint": {
-      "executor": "@nrwl/workspace:run-script",
-      "options": {
-        "script": "lint"
-      }
-    },
-    "test": {
-      "executor": "@nrwl/workspace:run-script",
-      "options": {
-        "script": "test"
-      }
-    }
-  }
+	"root": "packages/js/api/",
+	"sourceRoot": "packages/js/api/src",
+	"projectType": "library",
+	"targets": {
+		"changelog": {
+			"executor": "./tools/executors/changelogger:changelog",
+			"options": {
+				"action": "add",
+				"cwd": "packages/js/api"
+			}
+		},
+		"build": {
+			"executor": "@nrwl/workspace:run-script",
+			"options": {
+				"script": "build"
+			}
+		},
+		"clean": {
+			"executor": "@nrwl/workspace:run-script",
+			"options": {
+				"script": "clean"
+			}
+		},
+		"compile": {
+			"executor": "@nrwl/workspace:run-script",
+			"options": {
+				"script": "compile"
+			}
+		},
+		"prepare": {
+			"executor": "@nrwl/workspace:run-script",
+			"options": {
+				"script": "prepare"
+			}
+		},
+		"lint": {
+			"executor": "@nrwl/workspace:run-script",
+			"options": {
+				"script": "lint"
+			}
+		},
+		"test": {
+			"executor": "@nrwl/workspace:run-script",
+			"options": {
+				"script": "test"
+			}
+		}
+	}
 }

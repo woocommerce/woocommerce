@@ -1,37 +1,44 @@
 {
-  "root": "packages/js/e2e-utils/",
-  "sourceRoot": "packages/js/e2e-utils/src",
-  "projectType": "library",
-  "targets": {
-    "build": {
-      "executor": "@nrwl/workspace:run-script",
-      "options": {
-        "script": "build"
-      }
-    },
-    "clean": {
-      "executor": "@nrwl/workspace:run-script",
-      "options": {
-        "script": "clean"
-      }
-    },
-    "compile": {
-      "executor": "@nrwl/workspace:run-script",
-      "options": {
-        "script": "compile"
-      }
-    },
-    "prepare": {
-      "executor": "@nrwl/workspace:run-script",
-      "options": {
-        "script": "prepare"
-      }
-    },
-    "lint": {
-      "executor": "@nrwl/workspace:run-script",
-      "options": {
-        "script": "lint"
-      }
-    }
-  }
+	"root": "packages/js/e2e-utils/",
+	"sourceRoot": "packages/js/e2e-utils/src",
+	"projectType": "library",
+	"targets": {
+		"changelog": {
+			"executor": "./tools/executors/changelogger:changelog",
+			"options": {
+				"action": "add",
+				"cwd": "packages/js/e2e-utils"
+			}
+		},
+		"build": {
+			"executor": "@nrwl/workspace:run-script",
+			"options": {
+				"script": "build"
+			}
+		},
+		"clean": {
+			"executor": "@nrwl/workspace:run-script",
+			"options": {
+				"script": "clean"
+			}
+		},
+		"compile": {
+			"executor": "@nrwl/workspace:run-script",
+			"options": {
+				"script": "compile"
+			}
+		},
+		"prepare": {
+			"executor": "@nrwl/workspace:run-script",
+			"options": {
+				"script": "prepare"
+			}
+		},
+		"lint": {
+			"executor": "@nrwl/workspace:run-script",
+			"options": {
+				"script": "lint"
+			}
+		}
+	}
 }

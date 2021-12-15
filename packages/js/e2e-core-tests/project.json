@@ -1,5 +1,14 @@
 {
-  "root": "packages/js/e2e-core-tests/",
-  "sourceRoot": "packages/js/e2e-core-tests",
-  "projectType": "library"
+	"root": "packages/js/e2e-core-tests/",
+	"sourceRoot": "packages/js/e2e-core-tests",
+	"projectType": "library",
+	"targets": {
+		"changelog": {
+			"executor": "./tools/executors/changelogger:changelog",
+			"options": {
+				"action": "add",
+				"cwd": "packages/js/e2e-core-tests"
+			}
+		}
+	}
 }

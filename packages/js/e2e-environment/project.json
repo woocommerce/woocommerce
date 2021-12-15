@@ -1,79 +1,86 @@
 {
-  "root": "packages/js/e2e-environment/",
-  "sourceRoot": "packages/js/e2e-environment/src",
-  "projectType": "library",
-  "targets": {
-    "build": {
-      "executor": "@nrwl/workspace:run-script",
-      "options": {
-        "script": "build"
-      }
-    },
-    "lint": {
-      "executor": "@nrwl/workspace:run-script",
-      "options": {
-        "script": "lint"
-      }
-    },
-    "clean": {
-      "executor": "@nrwl/workspace:run-script",
-      "options": {
-        "script": "clean"
-      }
-    },
-    "compile": {
-      "executor": "@nrwl/workspace:run-script",
-      "options": {
-        "script": "compile"
-      }
-    },
-    "prepare": {
-      "executor": "@nrwl/workspace:run-script",
-      "options": {
-        "script": "prepare"
-      }
-    },
-    "docker-up": {
-      "executor": "@nrwl/workspace:run-script",
-      "options": {
-        "script": "docker:up"
-      }
-    },
-    "docker-down": {
-      "executor": "@nrwl/workspace:run-script",
-      "options": {
-        "script": "docker:down"
-      }
-    },
-    "docker-clear-all": {
-      "executor": "@nrwl/workspace:run-script",
-      "options": {
-        "script": "docker:clear-all"
-      }
-    },
-    "docker-ssh": {
-      "executor": "@nrwl/workspace:run-script",
-      "options": {
-        "script": "docker:ssh"
-      }
-    },
-    "test-e2e": {
-      "executor": "@nrwl/workspace:run-script",
-      "options": {
-        "script": "test:e2e"
-      }
-    },
-    "test-e2e-debug": {
-      "executor": "@nrwl/workspace:run-script",
-      "options": {
-        "script": "test:e2e-debug"
-      }
-    },
-    "test-e2e-dev": {
-      "executor": "@nrwl/workspace:run-script",
-      "options": {
-        "script": "test:e2e-dev"
-      }
-    }
-  }
+	"root": "packages/js/e2e-environment/",
+	"sourceRoot": "packages/js/e2e-environment/src",
+	"projectType": "library",
+	"targets": {
+		"changelog": {
+			"executor": "./tools/executors/changelogger:changelog",
+			"options": {
+				"action": "add",
+				"cwd": "packages/js/e2e-environment"
+			}
+		},
+		"build": {
+			"executor": "@nrwl/workspace:run-script",
+			"options": {
+				"script": "build"
+			}
+		},
+		"lint": {
+			"executor": "@nrwl/workspace:run-script",
+			"options": {
+				"script": "lint"
+			}
+		},
+		"clean": {
+			"executor": "@nrwl/workspace:run-script",
+			"options": {
+				"script": "clean"
+			}
+		},
+		"compile": {
+			"executor": "@nrwl/workspace:run-script",
+			"options": {
+				"script": "compile"
+			}
+		},
+		"prepare": {
+			"executor": "@nrwl/workspace:run-script",
+			"options": {
+				"script": "prepare"
+			}
+		},
+		"docker-up": {
+			"executor": "@nrwl/workspace:run-script",
+			"options": {
+				"script": "docker:up"
+			}
+		},
+		"docker-down": {
+			"executor": "@nrwl/workspace:run-script",
+			"options": {
+				"script": "docker:down"
+			}
+		},
+		"docker-clear-all": {
+			"executor": "@nrwl/workspace:run-script",
+			"options": {
+				"script": "docker:clear-all"
+			}
+		},
+		"docker-ssh": {
+			"executor": "@nrwl/workspace:run-script",
+			"options": {
+				"script": "docker:ssh"
+			}
+		},
+		"test-e2e": {
+			"executor": "@nrwl/workspace:run-script",
+			"options": {
+				"script": "test:e2e"
+			}
+		},
+		"test-e2e-debug": {
+			"executor": "@nrwl/workspace:run-script",
+			"options": {
+				"script": "test:e2e-debug"
+			}
+		},
+		"test-e2e-dev": {
+			"executor": "@nrwl/workspace:run-script",
+			"options": {
+				"script": "test:e2e-dev"
+			}
+		}
+	}
 }
