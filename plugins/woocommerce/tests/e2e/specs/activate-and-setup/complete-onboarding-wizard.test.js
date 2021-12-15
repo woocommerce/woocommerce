@@ -2,6 +2,7 @@ const {
 	testAdminOnboardingWizard,
 	testSelectiveBundleWCPay,
 } = require( '@woocommerce/admin-e2e-tests' );
+/*
 const {
 	withRestApi,
 	IS_RETEST_MODE,
@@ -11,6 +12,6 @@ const {
 if ( IS_RETEST_MODE ) {
 	withRestApi.resetOnboarding();
 }
-
+*/
 testAdminOnboardingWizard();
 testSelectiveBundleWCPay();
