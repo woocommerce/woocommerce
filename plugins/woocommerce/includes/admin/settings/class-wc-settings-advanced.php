@@ -474,13 +474,18 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 			return;
 		}
 
-		$action_name = SettingsImportExport::AJAX_EXPORT_ACTION;
+		$export_action_name = SettingsImportExport::AJAX_EXPORT_ACTION;
+		$import_action_name = SettingsImportExport::AJAX_IMPORT_ACTION;
 
 		// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
 		?>
 		<form method='get' action='admin-ajax.php' id='wc_export_settings_form'>
-			<input type='hidden' name='action' value="<?php echo $action_name; ?>"/>
+			<input type='hidden' name='action' value="<?php echo $export_action_name; ?>"/>
 			<?php wp_nonce_field( 'wc_export_settings' ); ?>
+		</form>
+		<form method='post' action='admin-ajax.php' id='wc_import_settings_form' enctype='multipart/form-data'>
+			<input type='hidden' name='action' value="<?php echo $import_action_name; ?>"/>
+			<?php wp_nonce_field( 'wc_import_settings' ); ?>
 		</form>
 		<?php
 		// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
@@ -498,7 +503,6 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 			<label>
 				<input form='wc_export_settings_form' type='checkbox' name='export_settings_verbose' value='on' />
 				<?php
-				/* translators: Checkbox to select if the WooCommerce settings JSON export is generated verbosely. */
 				esc_html_e( 'Verbose (include pages, sections, and settings titles, descriptions and default values)', 'woocommerce' );
 				?>
 			</label>
@@ -507,17 +511,57 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 			<label>
 				<input form='wc_export_settings_form' type='checkbox' name='export_settings_pretty_printed' value='on' />
 				<?php
-				/* translators: Checkbox to select if the WooCommerce settings JSON export is generated pretty-printed. */
 				esc_html_e( 'Generate a pretty-printed JSON file', 'woocommerce' );
 				?>
 			</label>
 		</div>
+		<div>
 			<button form='wc_export_settings_form' type='submit' class="button button-primary">
 			<?php
-				/* translators: Export WooCommerce settings button text. */
 				esc_html_e( 'Export settings', 'woocommerce' );
 			?>
 			</button>
+		</div>
+
+		<h2 style="margin-top: 40px;">Import settings</h2>
+		<div id='export-settings'>Use this to import the WooCommerce settings from a JSON file.</div>
+
+		<div style='margin-top: 15px;'>
+			<label>
+				<input form='wc_import_settings_form' type='radio' name='import_settings_mode' value='full' checked />
+				<?php
+				esc_html_e( "Full import (replace existing settings and create settings that don't exist)", 'woocommerce' );
+				?>
+			</label>
+		</div>
+		<div style='margin-top: 10px;'>
+			<label>
+				<input form='wc_import_settings_form' type='radio' name='import_settings_mode' value='replace_only' />
+				<?php
+				esc_html_e( "Only replace existing settings (don't create settings that don't exist)", 'woocommerce' );
+				?>
+			</label>
+		</div>
+		<div style='margin-top: 10px; margin-bottom: 20px;'>
+			<label>
+				<input form='wc_import_settings_form' type='radio' name='import_settings_mode' value='create_only' />
+				<?php
+				esc_html_e( "Only create settings that don't exist (don't replace already existing settings)", 'woocommerce' );
+				?>
+			</label>
+		</div>
+		<div style='margin-top: 10px; margin-bottom: 10px;'>
+			<label>
+				<span style='margin-right: 40px;''>Select a file to import:</span>
+				<input form='wc_import_settings_form' type='file' id='settings-import-file' name='settings-import-file'/>
+				</label>
+		</div>
+		<div>
+		<button form='wc_import_settings_form' type='submit' class="button button-primary">
+			<?php
+			esc_html_e( 'Import settings', 'woocommerce' );
+			?>
+		</button>
 		</div>
 		<?php
 	}

@@ -20,6 +20,11 @@ class SettingsImportExport {
 	const AJAX_EXPORT_ACTION = 'wc_export_settings';
 
 	/**
+	 * Id of the ajax action for settings import.
+	 */
+	const AJAX_IMPORT_ACTION = 'wc_import_settings';
+
+	/**
 	 * The injected instance of DownloadUtil.
 	 *
 	 * @var DownloadUtil
@@ -45,6 +50,13 @@ class SettingsImportExport {
 			function() {
 				$this->export_settings();
 				die();
+			}
+		);
+
+		add_action(
+			'wp_ajax_' . static::AJAX_IMPORT_ACTION,
+			function() {
+				$this->import_settings();
 			}
 		);
 	}
@@ -176,5 +188,209 @@ class SettingsImportExport {
 		}
 
 		return array( 'woocommerce_settings' => $settings_data );
+	}
+
+	/**
+	 * Receive a JSON file with settings and create or update them as appropriate.
+	 */
+	private function import_settings() {
+		$this->verify_nonce( static::AJAX_IMPORT_ACTION );
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$mode = ArrayUtil::get_value_or_default( $_POST, 'import_settings_mode' );
+		if ( ( 'full' !== $mode && 'create_only' !== $mode && 'replace_only' !== $mode ) || ! isset( $_FILES['settings-import-file'] ) ) {
+			header( 'HTTP/1.1 400 Bad request' );
+			exit();
+		}
+
+		if ( empty( $_FILES['settings-import-file'] ) ) {
+			$this->import_finished( __( 'No file provided.', 'woocommerce' ) );
+		}
+
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+		$file_upload_error = wp_unslash( $_FILES['settings-import-file']['error'] );
+		if ( 0 !== $file_upload_error ) {
+			$this->import_finished( $this->get_file_upload_error_message( $file_upload_error ) );
+		}
+
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+		$file_path = wp_unslash( $_FILES['settings-import-file']['tmp_name'] );
+		if ( empty( $file_path ) ) {
+			$this->import_finished( __( 'No file provided.', 'woocommerce' ) );
+		}
+		if ( ! is_readable( $file_path ) ) {
+			$this->import_finished( __( "Can't read the submitted file.", 'woocommerce' ) );
+		}
+
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$file_contents = file_get_contents( $file_path );
+		$file_data     = json_decode( $file_contents, true );
+		if ( null === $file_data ) {
+			$this->import_finished( __( 'Invalid file format.', 'woocommerce' ) );
+		}
+
+		$settings = $this->extract_settings( $file_data );
+		if ( null === $settings ) {
+			$this->import_finished( __( 'Not a valid settings export file.', 'woocommerce' ) );
+		}
+
+		$failed_setting_or_settings_count = $this->apply_settings( $settings, $mode );
+		if ( is_string( $failed_setting_or_settings_count ) ) {
+			/* translators: %s: name of a WordPress option that failed to be created or updated */
+			$message = sprintf( __( 'Setting creation or update failed. The setting that failed is: %s', 'woocommerce' ), $failed_setting_or_settings_count );
+			$this->import_finished( $message );
+		}
+
+		$this->import_finished( $failed_setting_or_settings_count );
+	}
+
+	/**
+	 * Convert a file upload error code to a proper error message
+	 * (https://www.php.net/manual/en/features.file-upload.errors.php).
+	 *
+	 * @param int $error_code The error code to convert.
+	 * @return string The equivalent error message.
+	 */
+	private function get_file_upload_error_message( $error_code ) {
+		switch ( $error_code ) {
+			case UPLOAD_ERR_INI_SIZE:
+			case UPLOAD_ERR_FORM_SIZE:
+				return __( 'The submitted file is too big.', 'woocommerce' );
+			case UPLOAD_ERR_PARTIAL:
+				return __( 'The submitted file was only partially uploaded.', 'woocommerce' );
+			case UPLOAD_ERR_NO_FILE:
+				return __( 'No file was uploaded.', 'woocommerce' );
+			case UPLOAD_ERR_NO_TMP_DIR:
+				return __( 'Temporary folder is missing.', 'woocommerce' );
+			case UPLOAD_ERR_CANT_WRITE:
+				return __( 'Failed to write file to disk.', 'woocommerce' );
+			case UPLOAD_ERR_EXTENSION:
+				return __( 'File upload stopped by a PHP extension.', 'woocommerce' );
+			default:
+				/* translators: %d: file upload error code (https://www.php.net/manual/en/features.file-upload.errors.php) */
+				return sprintf( __( 'Unknown file upload error, code %d.', 'woocommerce' ), $error_code );
+		}
+	}
+
+	/**
+	 * Handle the import process finish, redirecting to the original settings page
+	 * after adding the appropriate success or error message to the query string.
+	 *
+	 * @param int|string $error_message_or_settings_count The number of settings that have been crated/updated, or an error message.
+	 */
+	private function import_finished( $error_message_or_settings_count ) {
+		$url = wc_get_raw_referer();
+		if ( ! $url ) {
+			$url = admin_url( 'admin.php?page=wc-settings&tab=advanced&section=importexport' );
+		}
+		$url = remove_query_arg( 'wc_error', $url );
+		$url = remove_query_arg( 'wc_message', $url );
+
+		if ( is_string( $error_message_or_settings_count ) ) {
+			/* translators: %s: error message for settings import */
+			$url = add_query_arg( array( 'wc_error' => sprintf( __( 'Error when importing settings: %s', 'woocommerce' ), $error_message_or_settings_count ) ), $url );
+		} else {
+			if ( 0 === $error_message_or_settings_count ) {
+				$message = __( 'No settings were imported (empty file or all the settings were skipped).', 'woocommerce' );
+			} else {
+				/* translators: %d: non-zero count of settings that have been imported. */
+				$message = sprintf( __( 'Settings import completed successfully, %d settings were imported.', 'woocommerce' ), $error_message_or_settings_count );
+			}
+			$url = add_query_arg( array( 'wc_message' => $message ), $url );
+		}
+
+		wp_safe_redirect( $url );
+		exit();
+	}
+
+	/**
+	 * Extract the settings from the data in the received JSON file.
+	 *
+	 * @param array $file_data The array representation of the JSON file received.
+	 * @return array|null An array of setting name - setting value, or null if the JSON file didn't have the proper structure.
+	 */
+	private function extract_settings( $file_data ) {
+		if ( ! is_array( $file_data ) ) {
+			return null;
+		}
+
+		$settings_data = ArrayUtil::get_value_or_default( $file_data, 'woocommerce_settings_pages' );
+		if ( null !== $settings_data ) {
+			return $this->extract_settings_from_verbose_file( $settings_data );
+		}
+
+		return ArrayUtil::get_value_or_default( $file_data, 'woocommerce_settings' );
+	}
+
+	/**
+	 * Extract the settings from the data in the received JSON file, assuming it was a "verbose" file.
+	 *
+	 * @param array $settings_data The value of the 'woocommerce_settings_pages' element in the array representation of the JSON file received.
+	 * @return array|null An array of setting name - setting value, or null if the JSON file didn't have the proper structure.
+	 */
+	private function extract_settings_from_verbose_file( array $settings_data ) {
+		$all_settings = array();
+
+		foreach ( $settings_data as $page_data ) {
+			$sections = ArrayUtil::get_value_or_default( $page_data, 'sections' );
+			if ( ! is_array( $sections ) ) {
+				return null;
+			}
+
+			foreach ( $sections as $section_data ) {
+				$section_settings = ArrayUtil::get_value_or_default( $section_data, 'settings' );
+				if ( ! is_array( $section_settings ) ) {
+					return null;
+				}
+
+				foreach ( $section_settings as $setting_data ) {
+					if ( ! isset( $setting_data['id'] ) || ! is_string( $setting_data['id'] ) || ! isset( $setting_data['value'] ) ) {
+						return null;
+					}
+
+					$all_settings[ $setting_data['id'] ] = $setting_data['value'];
+				}
+			}
+		}
+
+		return $all_settings;
+	}
+
+	/**
+	 * Create or update the received settings as appropriate.
+	 *
+	 * @param array  $settings An array of setting name - setting value.
+	 * @param string $mode Settings import mode, one of 'full', 'create_only' or 'replace_only'.
+	 * @return int|string The count of settings that have been created/updated, or the name of the setting whose creation/update failed.
+	 */
+	private function apply_settings( array $settings, string $mode ) {
+		$count = 0;
+
+		foreach ( $settings as $name => $value ) {
+			$previous_value = get_option( $name, null );
+
+			if ( 'create_only' === $mode && null !== $previous_value ) {
+				continue;
+			}
+			if ( 'replace_only' === $mode && null === $previous_value ) {
+				continue;
+			}
+
+			if ( null === $previous_value ) {
+				$success = add_option( $name, $value );
+			} elseif ( $value !== $previous_value ) {
+				$success = update_option( $name, $value );
+			} else {
+				continue;
+			}
+
+			if ( ! $success ) {
+				return $name;
+			}
+
+			$count++;
+		}
+
+		return $count;
 	}
 }
