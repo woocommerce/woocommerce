@@ -14,10 +14,29 @@ import type { Currency } from '@woocommerce/types';
 import './style.scss';
 
 interface PriceRangeProps {
-	currency: Currency | Record< string, never >; // Currency configuration object;
+	/**
+	 * Currency configuration object
+	 */
+	currency: Currency | Record< string, never >;
+	/**
+	 * The maximum price for the range
+	 */
 	maxPrice: string | number;
+	/**
+	 * The minimum price for the range
+	 */
 	minPrice: string | number;
+	/**
+	 * CSS class applied to each of the elements containing the prices
+	 *
+	 * **Note:** this excludes the dash in between the elements
+	 */
 	priceClassName?: string;
+	/**
+	 * Any custom style to be applied to each of the elements containing the prices
+	 *
+	 * **Note:** this excludes the dash in between the elements
+	 */
 	priceStyle?: React.CSSProperties;
 }
 
@@ -26,7 +45,7 @@ const PriceRange = ( {
 	maxPrice,
 	minPrice,
 	priceClassName,
-	priceStyle,
+	priceStyle = {},
 }: PriceRangeProps ) => {
 	return (
 		<>
@@ -67,12 +86,41 @@ const PriceRange = ( {
 };
 
 interface SalePriceProps {
-	currency: Currency | Record< string, never >; // Currency configuration object.
+	/**
+	 * Currency configuration object
+	 */
+	currency: Currency | Record< string, never >;
+	/**
+	 * CSS class to be applied to the regular price container
+	 *
+	 * i.e. `<del>` element
+	 */
 	regularPriceClassName?: string;
-	regularPriceStyle?: Record< string, string >;
+	/**
+	 * Custom style to be applied to the regular price container
+	 *
+	 * i.e. `<del>` element
+	 */
+	regularPriceStyle?: React.CSSProperties;
+	/**
+	 * The regular price before the sale
+	 */
 	regularPrice: number | string;
+	/**
+	 * CSS class to be applied to the sale price container
+	 *
+	 * i.e. `<ins>` element
+	 */
 	priceClassName?: string;
-	priceStyle?: Record< string, string >;
+	/**
+	 * Custom style to be applied to the regular price container
+	 *
+	 * i.e. `<ins>` element
+	 */
+	priceStyle?: React.CSSProperties;
+	/**
+	 * The new price during the sale
+	 */
 	price: number | string;
 }
 
@@ -128,19 +176,69 @@ const SalePrice = ( {
 	);
 };
 
-interface ProductPriceProps {
+export interface ProductPriceProps {
+	/**
+	 * Where to align the wrapper
+	 *
+	 * Applies the `wc-block-components-product-price--align-${ align }` utility
+	 * class to the wrapper.
+	 */
 	align?: 'left' | 'center' | 'right';
+	/**
+	 * CSS class for the wrapper
+	 */
 	className?: string;
-	currency: Currency | Record< string, never >; // Currency configuration object.
+	/**
+	 * Currency configuration object
+	 */
+	currency: Currency | Record< string, never >;
+	/**
+	 * The string version of the element to use for the price interpolation
+	 *
+	 * **Note:** It should contain `<price/>` (which is also the default value)
+	 */
 	format: string;
+	/**
+	 * The current price
+	 */
 	price: number | string;
+	/**
+	 * CSS class for the current price wrapper
+	 */
 	priceClassName?: string;
-	priceStyle?: Record< string, string >;
+	/**
+	 * Custom style for the current price
+	 */
+	priceStyle?: React.CSSProperties;
+	/**
+	 * The maximum price in a range
+	 *
+	 * If both `maxPrice` and `minPrice` are set, the component will be rendered
+	 * as a `PriceRange` component, otherwise, this value will be ignored.
+	 */
 	maxPrice?: number | string;
+	/**
+	 * The minimum price in a range
+	 *
+	 * If both `maxPrice` and `minPrice` are set, the component will be rendered
+	 * as a `PriceRange` component, otherwise, this value will be ignored.
+	 */
 	minPrice?: number | string;
+	/**
+	 * The regular price if the item is currently on sale
+	 *
+	 * If this property exists and is different from the current price, then the
+	 * component will be rendered as a `SalePrice` component.
+	 */
 	regularPrice?: number | string;
+	/**
+	 * CSS class to apply to the regular price wrapper
+	 */
 	regularPriceClassName?: string;
-	regularPriceStyle?: Record< string, string >;
+	/**
+	 * Custom style to apply to the regular price wrapper.
+	 */
+	regularPriceStyle?: React.CSSProperties;
 }
 
 const ProductPrice = ( {
