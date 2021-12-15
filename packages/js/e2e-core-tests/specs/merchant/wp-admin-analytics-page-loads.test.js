@@ -15,6 +15,7 @@ const {
 	describe,
 	beforeAll,
 } = require( '@jest/globals' );
+import deprecated from '@wordpress/deprecated';
 
 /**
  * Quick check for page title and no data message.
@@ -55,6 +56,10 @@ const runAnalyticsPageLoadsTest = () => {
 	describe('Analytics > Opening Top Level Pages', () => {
 		beforeAll(async () => {
 			await merchant.login();
+		});
+
+		deprecated( 'runAnalyticsPageLoadsTest', {
+			alternative: '@woocommerce/admin-e2e-tests `testAdminAnalyticsPages()`',
 		});
 
 		it.each(pages)(
