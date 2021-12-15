@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-const { merchant } = require( '@woocommerce/e2e-utils' );
+const { merchant, utils } = require( '@woocommerce/e2e-utils' );
 
 const { getRemotePluginZip, getLatestReleaseZipUrl, deleteDownloadedPluginFiles } = require( '@woocommerce/e2e-environment' );
 
@@ -18,7 +18,7 @@ const { GITHUB_REPOSITORY, PLUGIN_NAME, GITHUB_TOKEN } = process.env;
 let zipUrl;
 let pluginPath;
 
-describe( 'Upload and activate plugin', () => {
+utils.describeIf( GITHUB_REPOSITORY )( 'Upload and activate plugin', () => {
 	beforeAll( async () => {
 		zipUrl = await getLatestReleaseZipUrl( GITHUB_REPOSITORY, GITHUB_TOKEN );
 
