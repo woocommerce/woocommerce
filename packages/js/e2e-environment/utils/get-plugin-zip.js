@@ -1,5 +1,4 @@
 const path = require( 'path' );
-const getAppRoot = require( './app-root' );
 const fs = require( 'fs' );
 const mkdirp = require( 'mkdirp' );
 const request = require( 'request' );
@@ -14,7 +13,6 @@ const { resolveLocalE2ePath } = require( './test-config' );
  * @return {string} The path where the zip file is located.
  */
 const getRemotePluginZip = async ( fileUrl ) => {
-	const appPath = getAppRoot();
 	const savePath = resolveLocalE2ePath( 'plugins' );
 	mkdirp.sync( savePath );
 
