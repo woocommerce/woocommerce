@@ -191,7 +191,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 - Fix - Fix products API orderby slug and include. ([#30873](https://github.com/woocommerce/woocommerce/pull/30873))
 - Dev - Remove defunct AJAX events. ([#30931](https://github.com/woocommerce/woocommerce/pull/30931))
 
-**WooCommerce Admin - 2.9.0 & 2.9.1 & 2.9.2 & 2.9.3 **
+**WooCommerce Admin - 2.9.0 & 2.9.1 & 2.9.2 & 2.9.3 & 2.9.4 **
 
 - Dev - Remove task status endpoint ( [#7841](https://github.com/woocommerce/woocommerce-admin/issues/7841) )
 - Fix - Fix ordering and styling issue with WooCommerce Payments payment method promotion. ( [#7943](https://github.com/woocommerce/woocommerce-admin/issues/7943) )
