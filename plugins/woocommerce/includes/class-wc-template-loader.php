@@ -45,14 +45,33 @@ class WC_Template_Loader {
 			add_filter( 'template_include', array( __CLASS__, 'template_loader' ) );
 			add_filter( 'comments_template', array( __CLASS__, 'comments_template_loader' ) );
 
-			// Loads gallery scripts on Product page for FSE themes.
 			if ( wc_current_theme_is_fse_theme() ) {
+				add_filter( 'taxonomy_template_hierarchy', array( __CLASS__, 'modify_taxonomy_block_template_hierachy' ), 10, 1 );
+
+				// Loads gallery scripts on Product page for FSE themes.
 				self::add_support_for_product_page_gallery();
 			}
 		} else {
 			// Unsupported themes.
 			add_action( 'template_redirect', array( __CLASS__, 'unsupported_theme_init' ) );
 		}
+	}
+
+	/**
+	 * If a block template has an archive-product.html file, but not a taxonomy-product_cat/taxonomy-product_tag file then we will
+	 * use the archive-product.html file in place of those as they are often then same template.
+	 *
+	 * @param array $templates list of templates in order of preference.
+	 *
+	 * @return array
+	 */
+	public static function modify_taxonomy_block_template_hierachy( $templates ) {
+		if ( is_product_taxonomy() ) {
+			// Add archive-product.php second last, as archive.php will always be last.
+			array_splice( $templates, count( $templates ) - 1, 0, 'archive-product.php' );
+		}
+
+		return $templates;
 	}
 
 	/**
