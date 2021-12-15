@@ -5,6 +5,8 @@ const mkdirp = require( 'mkdirp' );
 const request = require( 'request' );
 const StreamZip = require( 'node-stream-zip' );
 
+const { resolveLocalE2ePath } = require( './test-config' );
+
 /**
  * Upload a plugin zip from a remote location, such as a GitHub URL or other hosted location.
  *
