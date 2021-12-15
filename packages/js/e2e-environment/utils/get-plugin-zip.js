@@ -1,9 +1,9 @@
 const path = require( 'path' );
-const getAppRoot = require( './app-root' );
 const fs = require( 'fs' );
 const mkdirp = require( 'mkdirp' );
 const request = require( 'request' );
 const StreamZip = require( 'node-stream-zip' );
+const { resolveLocalE2ePath } = require( './test-config' );
 
 /**
  * Upload a plugin zip from a remote location, such as a GitHub URL or other hosted location.
@@ -13,7 +13,6 @@ const StreamZip = require( 'node-stream-zip' );
  * @return {string} The path where the zip file is located.
  */
 const getRemotePluginZip = async ( fileUrl, authorizationToken = '' ) => {
-	const appPath = getAppRoot();
 	const savePath = resolveLocalE2ePath( 'plugins' );
 	mkdirp.sync( savePath );
 
@@ -145,11 +144,7 @@ const downloadZip = async ( fileUrl, downloadPath, authorizationToken ) => {
  * Delete the downloaded plugin files.
  */
 const deleteDownloadedPluginFiles = async () => {
-	const appPath = getAppRoot();
-	const pluginSavePath = path.resolve(
-		appPath,
-		'plugins/woocommerce/tests/e2e/plugins'
-	);
+	const pluginSavePath = resolveLocalE2ePath( 'plugins' );
 
 	fs.readdir( pluginSavePath, ( err, files ) => {
 		if ( err ) throw err;
