@@ -146,7 +146,7 @@
 		"cross-env": "6.0.3",
 		"cssnano": "4.1.11",
 		"deep-freeze": "0.0.1",
-		"eslint-import-resolver-typescript": "2.3.0",
+		"eslint-import-resolver-typescript": "2.5.0",
 		"eslint-import-resolver-webpack": "0.13.2",
 		"eslint-plugin-import": "2.22.1",
 		"eslint-plugin-woocommerce": "file:bin/eslint-plugin-woocommerce",
