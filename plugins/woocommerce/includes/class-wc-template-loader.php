@@ -59,7 +59,9 @@ class WC_Template_Loader {
 
 	/**
 	 * If a block template has an archive-product.html file, but not a taxonomy-product_cat/taxonomy-product_tag file then we will
-	 * use the archive-product.html file in place of those as they are often then same template.
+	 * use the archive-product.html file in place of those as they are often the same template.
+	 *
+	 * We will add archive-product.php second to last, as taxonomy.php will always be last.
 	 *
 	 * @param array $templates list of templates in order of preference.
 	 *
@@ -67,7 +69,6 @@ class WC_Template_Loader {
 	 */
 	public static function modify_taxonomy_block_template_hierachy( $templates ) {
 		if ( is_product_taxonomy() ) {
-			// Add archive-product.php second last, as archive.php will always be last.
 			array_splice( $templates, count( $templates ) - 1, 0, 'archive-product.php' );
 		}
 
