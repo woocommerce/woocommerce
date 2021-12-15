@@ -1,10 +1,13 @@
-== 3.0.0 12/07/2021 ==
+== 3.0.0 12/14/2021 ==
 
 - Fix: Fix an issue with the code that makes use of an invalid parameter with a PHP function. The use of this invalid parameter causes PHP 8 to throw a Fatal Error. #7855
 - Fix: Fix TaskList UI experiment enablement logic. #7930
 - Fix: Navigation nudge note and navigation feedback notes will delete themselves if the navigation feature is not available. #7914
 - Fix: Replace old task list option calls with data store selectors. #7820
 - Fix: Self-delete NavigationFeedbackFollowUp note when navigation feature is not present. #7939
+- Fix: Fix PHP Warning on 'Add new product' page. #7989
+- Fix: Fix usage of Wordpress DatePicker component. #7982
+- Fix: Fix shipping task completion status. #8031
 - Add: Add option to dismiss promotional payment gateway. #7965
 - Add: OBW - Add number of employees field. #7963
 - Update: Ending wcpay promotion experiment and always displaying in payment methods table.
@@ -12,17 +15,15 @@
 - Update: Introduce a 320 character limit for inbox note contents. #7958
 - Update: Move payments task to extended task list when WC Pay task is shown. #7980
 - Update: Rename Inbox to Activity from the activity header. #7879
+- Update: Load both actioned and unactioned notes. #7983
 - Dev: Explicitly sets the Node version to 14 in .nvmrc to prevent incompatible versions of Node from being used with nvm. #7932
 - Dev: Remove unused npm package @woocommerce/settings. #7949
 - Dev: Update payment method recommendation to new woocommerce.com endpoint. #7913
 - Dev: Use abstraction to add and retrieve task data. #7918
 - Tweak: Added dismiss all button for inbox notes.
 - Tweak: Implement note read state. #7896
-- Enhancement: Add tests to Subscriptions inclusion. #7804
-- Fix: Fix PHP Warning on 'Add new product' page. #7989
-- Fix: Fix usage of Wordpress DatePicker component. #7982
-- Update: Load both actioned and unactioned notes. #7983
 - Tweak: Add inbox_panel_view tracks event. #8002
+- Enhancement: Add tests to Subscriptions inclusion. #7804
 
 == 2.9.0 11/30/2021 ==
 
@@ -130,12 +131,7 @@
 
 == 2.6.3 09/21/2021 ==
 
-- Fix unsecured reports. #7691
-- Fix fatal error and unrelated results in analytics. #7682
-
 == 2.6.2 09/14/2021 ==
-
-- Fix Update task-item logic to only display content when expanded is true. #7611
 
 == 2.6.1 09/01/2021 ==
 
