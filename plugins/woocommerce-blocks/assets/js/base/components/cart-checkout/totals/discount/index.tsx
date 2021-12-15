@@ -4,17 +4,36 @@
 import { __, sprintf } from '@wordpress/i18n';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
 import { RemovableChip } from '@woocommerce/base-components/chip';
-import PropTypes from 'prop-types';
 import {
 	__experimentalApplyCheckoutFilter,
 	TotalsItem,
 } from '@woocommerce/blocks-checkout';
 import { getSetting } from '@woocommerce/settings';
+import {
+	CartResponseCouponItemWithLabel,
+	CartTotalsItem,
+	Currency,
+} from '@woocommerce/types';
+import { LooselyMustHave } from '@woocommerce/type-defs/utils';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
+
+export interface TotalsDiscountProps {
+	cartCoupons: LooselyMustHave<
+		CartResponseCouponItemWithLabel,
+		'code' | 'label' | 'totals'
+	>[];
+	currency: Currency;
+	isRemovingCoupon: boolean;
+	removeCoupon: ( couponCode: string ) => void;
+	values: LooselyMustHave<
+		CartTotalsItem,
+		'total_discount' | 'total_discount_tax'
+	>;
+}
 
 const filteredCartCouponsFilterArg = {
 	context: 'summary',
@@ -26,7 +45,7 @@ const TotalsDiscount = ( {
 	isRemovingCoupon,
 	removeCoupon,
 	values,
-} ) => {
+}: TotalsDiscountProps ): JSX.Element | null => {
 	const {
 		total_discount: totalDiscount,
 		total_discount_tax: totalDiscountTax,
@@ -108,21 +127,6 @@ const TotalsDiscount = ( {
 			value={ discountTotalValue ? discountTotalValue * -1 : '-' }
 		/>
 	);
-};
-
-TotalsDiscount.propTypes = {
-	cartCoupons: PropTypes.arrayOf(
-		PropTypes.shape( {
-			code: PropTypes.string.isRequired,
-		} )
-	),
-	currency: PropTypes.object.isRequired,
-	isRemovingCoupon: PropTypes.bool.isRequired,
-	removeCoupon: PropTypes.func.isRequired,
-	values: PropTypes.shape( {
-		total_discount: PropTypes.string,
-		total_discount_tax: PropTypes.string,
-	} ).isRequired,
 };
 
 export default TotalsDiscount;

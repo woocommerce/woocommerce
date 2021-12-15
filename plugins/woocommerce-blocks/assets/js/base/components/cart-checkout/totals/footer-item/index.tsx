@@ -4,23 +4,48 @@
 import { __ } from '@wordpress/i18n';
 import { createInterpolateElement } from '@wordpress/element';
 import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-monetary-amount';
-import PropTypes from 'prop-types';
 import {
 	__experimentalApplyCheckoutFilter,
 	TotalsItem,
 } from '@woocommerce/blocks-checkout';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 import { getSetting } from '@woocommerce/settings';
+import { CartResponseTotals, Currency } from '@woocommerce/types';
+import { LooselyMustHave } from '@woocommerce/type-defs/utils';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
 
-const TotalsFooterItem = ( { currency, values } ) => {
+export interface TotalsFooterItemProps {
+	/**
+	 * The currency object with which to display the item
+	 */
+	currency: Currency;
+	/**
+	 * An object containing the total price and the total tax
+	 *
+	 * It accepts the entire `CartResponseTotals` to be passed, for
+	 * convenience, but will use only these two properties.
+	 */
+	values: LooselyMustHave< CartResponseTotals, 'total_price' | 'total_tax' >;
+}
+
+/**
+ * The total at the bottom of the cart
+ *
+ * Can show how much of the total is in taxes if the settings
+ * `taxesEnabled` and `displayCartPricesIncludingTax` are both
+ * enabled.
+ */
+const TotalsFooterItem = ( {
+	currency,
+	values,
+}: TotalsFooterItemProps ): JSX.Element => {
 	const SHOW_TAXES =
-		getSetting( 'taxesEnabled', true ) &&
-		getSetting( 'displayCartPricesIncludingTax', false );
+		getSetting< boolean >( 'taxesEnabled', true ) &&
+		getSetting< boolean >( 'displayCartPricesIncludingTax', false );
 
 	const { total_price: totalPrice, total_tax: totalTax } = values;
 
@@ -67,14 +92,6 @@ const TotalsFooterItem = ( { currency, values } ) => {
 			}
 		/>
 	);
-};
-
-TotalsFooterItem.propTypes = {
-	currency: PropTypes.object.isRequired,
-	values: PropTypes.shape( {
-		total_price: PropTypes.string,
-		total_tax: PropTypes.string,
-	} ).isRequired,
 };
 
 export default TotalsFooterItem;
