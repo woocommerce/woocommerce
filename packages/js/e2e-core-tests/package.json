@@ -17,7 +17,8 @@
   },
   "peerDependencies": {
     "@woocommerce/api": "^0.2.0",
-    "@woocommerce/e2e-utils": "^0.1.6"
+    "@woocommerce/e2e-utils": "^0.1.6",
+	"@woocommerce/e2e-environment": "^0.2.3"
   },
   "publishConfig": {
     "access": "public"
