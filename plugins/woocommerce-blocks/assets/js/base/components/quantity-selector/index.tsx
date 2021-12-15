@@ -12,13 +12,38 @@ import { DOWN, UP } from '@wordpress/keycodes';
  */
 import './style.scss';
 
-interface QuantitySelectorProps {
+export interface QuantitySelectorProps {
+	/**
+	 * Component wrapper classname
+	 *
+	 * @default 'wc-block-components-quantity-selector'
+	 */
 	className?: string;
+	/**
+	 * Current quantity
+	 */
 	quantity?: number;
+	/**
+	 * Minimum quantity
+	 */
 	minimum?: number;
+	/**
+	 * Maximum quantity
+	 */
 	maximum: number;
+	/**
+	 * Event handler triggered when the quantity is changed
+	 */
 	onChange: ( newQuantity: number ) => void;
+	/**
+	 * Name of the item the quantity selector refers to
+	 *
+	 * Used for a11y purposes
+	 */
 	itemName?: string;
+	/**
+	 * Whether the component should be interactable or not
+	 */
 	disabled: boolean;
 }
 
@@ -27,9 +52,7 @@ const QuantitySelector = ( {
 	quantity = 1,
 	minimum = 1,
 	maximum,
-	onChange = () => {
-		/* Do nothing. */
-	},
+	onChange = () => void 0,
 	itemName = '',
 	disabled,
 }: QuantitySelectorProps ): JSX.Element => {
