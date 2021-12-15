@@ -7,7 +7,6 @@ import Button from '@woocommerce/base-components/button';
 import { ValidatedTextInput } from '@woocommerce/base-components/text-input';
 import Label from '@woocommerce/base-components/label';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
-import PropTypes from 'prop-types';
 import { withInstanceId } from '@wordpress/compose';
 import {
 	ValidationInputError,
@@ -20,12 +19,31 @@ import { Panel } from '@woocommerce/blocks-checkout';
  */
 import './style.scss';
 
-const TotalsCoupon = ( {
+export interface TotalsCouponProps {
+	/**
+	 * Instance id of the input
+	 */
+	instanceId: string;
+	/**
+	 * Whether the component is in a loading state
+	 */
+	isLoading?: boolean;
+	/**
+	 * Whether the component's parent panel will begin in an open state
+	 */
+	initialOpen?: boolean;
+	/**
+	 * Submit handler
+	 */
+	onSubmit?: ( couponValue: string ) => void;
+}
+
+export const TotalsCoupon = ( {
 	instanceId,
 	isLoading = false,
 	initialOpen = false,
-	onSubmit = () => {},
-} ) => {
+	onSubmit = () => void 0,
+}: TotalsCouponProps ): JSX.Element => {
 	const [ couponValue, setCouponValue ] = useState( '' );
 	const currentIsLoading = useRef( false );
 	const { getValidationError, getValidationErrorId } = useValidationContext();
@@ -94,7 +112,9 @@ const TotalsCoupon = ( {
 							className="wc-block-components-totals-coupon__button"
 							disabled={ isLoading || ! couponValue }
 							showSpinner={ isLoading }
-							onClick={ ( e ) => {
+							onClick={ (
+								e: React.MouseEvent< HTMLElement, 'click' >
+							) => {
 								e.preventDefault();
 								onSubmit( couponValue );
 							} }
@@ -111,11 +131,6 @@ const TotalsCoupon = ( {
 			</LoadingMask>
 		</Panel>
 	);
-};
-
-TotalsCoupon.propTypes = {
-	onSubmit: PropTypes.func,
-	isLoading: PropTypes.bool,
 };
 
 export default withInstanceId( TotalsCoupon );

@@ -2,12 +2,12 @@
  * External dependencies
  */
 import { render } from '@testing-library/react';
+import { allSettings } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
  */
 import TotalsFooterItem from '../index';
-import { allSettings } from '../../../../../../settings/shared/settings-init';
 
 describe( 'TotalsFooterItem', () => {
 	beforeEach( () => {

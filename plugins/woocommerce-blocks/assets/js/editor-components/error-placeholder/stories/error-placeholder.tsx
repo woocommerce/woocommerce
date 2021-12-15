@@ -3,6 +3,7 @@
  */
 import { Story, Meta } from '@storybook/react';
 import { useArgs } from '@storybook/client-api';
+import { INTERACTION_TIMEOUT } from '@woocommerce/storybook-controls';
 
 /**
  * Internal dependencies
@@ -21,7 +22,10 @@ const Template: Story< ErrorPlaceholderProps > = ( args ) => {
 		? () => {
 				setArgs( { isLoading: true } );
 
-				setTimeout( () => setArgs( { isLoading: false } ), 3500 );
+				setTimeout(
+					() => setArgs( { isLoading: false } ),
+					INTERACTION_TIMEOUT
+				);
 		  }
 		: undefined;
 

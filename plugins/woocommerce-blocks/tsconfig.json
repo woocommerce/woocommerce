@@ -3,7 +3,8 @@
 	"include": [
 		"./assets/js/**/*",
 		"./assets/js/blocks/cart-checkout/checkout/inner-blocks/**/block.json",
-		"./assets/js/blocks/cart-checkout/mini-cart-contents/inner-blocks/**/block.json"
+		"./assets/js/blocks/cart-checkout/mini-cart-contents/inner-blocks/**/block.json",
+		"./storybook/**/*"
 	],
 	"exclude": [ "./assets/js/data" ],
 	"references": [
