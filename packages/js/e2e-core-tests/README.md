@@ -104,7 +104,7 @@ The functions to access the core tests are:
 
 ## Contributing a new test
 
-- In your branch create a new `example-test-name.test.js` under the `tests/e2e/core-tests/specs` folder.
+- In your branch create a new `example-test-name.test.js` under the appropriate folder in the [`specs`](specs) directory.
 - Jest does not allow its global functions to be accessed outside the jest environment. To allow the test code to be published in a package import any jest global functions used in your test
 ```js
 const {
@@ -130,7 +130,7 @@ const runExampleTestName = () => {
 
 module.exports = runExampleTestName;
 ```
-- Add your test to `tests/e2e/core-tests/specs/index.js`
+- Add your test to [`specs/index.js`](specs/index.js)
 ```js
 const runExampleTestName = require( './grouping/example-test-name.test' );
 // ...

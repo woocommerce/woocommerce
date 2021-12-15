@@ -1,31 +1,38 @@
 {
-  "root": "packages/js/api-core-tests/",
-  "sourceRoot": "packages/js/api-core-tests",
-  "projectType": "library",
-  "targets": {
-    "test": {
-      "executor": "@nrwl/workspace:run-script",
-      "options": {
-        "script": "test"
-      }
-    },
-    "test-hello": {
-      "executor": "@nrwl/workspace:run-script",
-      "options": {
-        "script": "test:hello"
-      }
-    },
-    "make-collection": {
-      "executor": "@nrwl/workspace:run-script",
-      "options": {
-        "script": "make:collection"
-      }
-    },
-    "test-api": {
-      "executor": "@nrwl/workspace:run-script",
-      "options": {
-        "script": "test:api"
-      }
-    }
-  }
+	"root": "packages/js/api-core-tests/",
+	"sourceRoot": "packages/js/api-core-tests",
+	"projectType": "library",
+	"targets": {
+		"changelog": {
+			"executor": "./tools/executors/changelogger:changelog",
+			"options": {
+				"action": "add",
+				"cwd": "packages/js/api-core-tests"
+			}
+		},
+		"test": {
+			"executor": "@nrwl/workspace:run-script",
+			"options": {
+				"script": "test"
+			}
+		},
+		"test-hello": {
+			"executor": "@nrwl/workspace:run-script",
+			"options": {
+				"script": "test:hello"
+			}
+		},
+		"make-collection": {
+			"executor": "@nrwl/workspace:run-script",
+			"options": {
+				"script": "make:collection"
+			}
+		},
+		"test-api": {
+			"executor": "@nrwl/workspace:run-script",
+			"options": {
+				"script": "test:api"
+			}
+		}
+	}
 }
