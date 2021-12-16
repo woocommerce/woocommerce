@@ -95,26 +95,6 @@ export const useCustomerData = (): {
 		shippingAddress: initialShippingAddress,
 	} );
 
-	// We only want to update the local state once, otherwise the data on the checkout page gets overwritten
-	// with the initial state of the addresses here
-	const [ hasCustomerDataSynced, setHasCustomerDataSynced ] = useState<
-		boolean
-	>( false );
-
-	if (
-		! hasCustomerDataSynced &&
-		shouldUpdateAddressStore(
-			customerData.shippingAddress,
-			initialShippingAddress
-		)
-	) {
-		setCustomerData( {
-			billingData: initialBillingAddress,
-			shippingAddress: initialShippingAddress,
-		} );
-		setHasCustomerDataSynced( true );
-	}
-
 	// Store values last sent to the server in a ref to avoid requests unless important fields are changed.
 	const previousCustomerData = useRef< CustomerData >( customerData );
 
