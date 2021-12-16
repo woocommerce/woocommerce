@@ -85,8 +85,8 @@ jobs:
         include:
           - plugin: 'WooCommerce Payments'
             repo: 'automattic/woocommerce-payments'
-          - plugin: 'Facebook for WooCommerce'
-            repo: 'woocommerce/facebook-for-woocommerce'
+          - plugin: 'WooCommerce PayPal Payments'
+            repo: 'woocommerce/woocommerce-paypal-payments'
           - plugin: 'WooCommerce Shipping & Tax'
             repo: 'woocommerce/woocommerce-services'
           - plugin: 'WooCommerce Subscriptions'
