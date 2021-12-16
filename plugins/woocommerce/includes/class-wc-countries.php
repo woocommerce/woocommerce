@@ -1314,8 +1314,7 @@ class WC_Countries {
 							'label' => __( 'Municipality', 'woocommerce' ),
 						),
 						'state' => array(
-							'required' => false,
-							'hidden'   => true,
+							'required' => true,
 						),
 					),
 					'PT' => array(
