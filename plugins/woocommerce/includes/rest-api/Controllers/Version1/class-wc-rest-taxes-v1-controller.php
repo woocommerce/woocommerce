@@ -275,24 +275,31 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 
 		$response = rest_ensure_response( $taxes );
 
-		// Store pagination values for headers then unset for count query.
 		$per_page = (int) $prepared_args['number'];
 		$page     = ceil( ( ( (int) $prepared_args['offset'] ) / $per_page ) + 1 );
 
-		// Query only for ids.
-		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
-		$query = str_replace( 'SELECT *', 'SELECT tax_rate_id', $query );
-		$wpdb->get_results(
-			$wpdb->prepare(
-				$query,
-				$wpdb_prepare_args
-			)
+		// Unset LIMIT args.
+		array_splice( $wpdb_prepare_args, -2 );
+
+		// Count query.
+		$query = str_replace(
+			array(
+				'SELECT *',
+				'LIMIT %d, %d',
+			),
+			array(
+				'SELECT COUNT(*)',
+				'',
+			),
+			$query
 		);
+
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+		$total_taxes = (int) $wpdb->get_var( empty( $wpdb_prepare_args ) ? $query : $wpdb->prepare( $query, $wpdb_prepare_args ) );
 		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 
 		// Calculate totals.
-		$total_taxes = (int) $wpdb->num_rows;
-		$response->header( 'X-WP-Total', (int) $total_taxes );
+		$response->header( 'X-WP-Total', $total_taxes );
 		$max_pages = ceil( $total_taxes / $per_page );
 		$response->header( 'X-WP-TotalPages', (int) $max_pages );
 

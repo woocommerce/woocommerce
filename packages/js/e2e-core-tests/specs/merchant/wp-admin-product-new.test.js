@@ -8,6 +8,7 @@ const {
 	uiUnblocked,
 	evalAndClick,
 	setCheckbox,
+	setBrowserViewport,
 	verifyAndPublish,
 	waitForSelector,
 	waitForSelectorWithoutThrow
@@ -45,6 +46,13 @@ const runAddSimpleProductTest = () => {
 		});
 
 		it('can create simple virtual product and add it to the cart', async () => {
+
+			// @todo: remove this once https://github.com/woocommerce/woocommerce/issues/31337 has been addressed
+			await setBrowserViewport( {
+				width: 970,
+				height: 700,
+			} );
+
 			await openNewProductAndVerify();
 
 			// Set product data and publish the product
@@ -72,6 +80,12 @@ const runAddSimpleProductTest = () => {
 		});
 
 		it('can create simple non-virtual product and add it to the cart', async () => {
+			// @todo: remove this once https://github.com/woocommerce/woocommerce/issues/31337 has been addressed
+			await setBrowserViewport( {
+				width: 960,
+				height: 700,
+			} );
+
 			await merchant.login();
 			await openNewProductAndVerify();
 

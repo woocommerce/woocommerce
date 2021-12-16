@@ -140,15 +140,15 @@ class Formatter extends KeepAChangelogParser {
 			}
 
 			$version         = '';
-			$timestamp       = new DateTime( 'now', new DateTimeZone( 'UTC' ) );
-			$entry_timestamp = new DateTime( 'now', new DateTimeZone( 'UTC' ) );
+			$timestamp       = new \DateTime( 'now', new \DateTimeZone( 'UTC' ) );
+			$entry_timestamp = new \DateTime( 'now', new \DateTimeZone( 'UTC' ) );
 
 			if ( count( $heading ) ) {
 				$version   = $heading[1];
 				$timestamp = $heading[2];
 
 				try {
-					$timestamp = new DateTime( $timestamp, new DateTimeZone( 'UTC' ) );
+					$timestamp = new \DateTime( $timestamp, new \DateTimeZone( 'UTC' ) );
 				} catch ( \Exception $ex ) {
 					throw new \InvalidArgumentException( "Heading has an invalid timestamp: $heading", 0, $ex );
 				}
@@ -239,7 +239,6 @@ class Formatter extends KeepAChangelogParser {
 			$version      = $entry->getVersion();
 			$is_subentry  = preg_match( $this->subentry_pattern, $version, $subentry );
 			$timestamp    = $entry->getTimestamp();
-			error_log(print_r($version, true));
 			$release_link = $this->getReleaseLink( $version );
 
 			if ( $is_subentry ) {
@@ -256,10 +255,11 @@ class Formatter extends KeepAChangelogParser {
 
 			foreach ( $entry->getChangesBySubheading() as $heading => $changes ) {
 				foreach ( $changes as $change ) {
-					$breaking_change = 'major' === $change->getSignificance() ? ' [ **BREAKING CHANGE** ]' : '';
+					$significance    = $change->getSignificance();
+					$breaking_change = 'major' === $significance ? ' [ **BREAKING CHANGE** ]' : '';
 					$text            = trim( $change->getContent() );
 					if ( '' !== $text ) {
-						$preamble = $is_subentry ? '' : $bullet . $heading . $breaking_change . ' - ';
+						$preamble = $is_subentry ? '' : $bullet . ucfirst( $significance ) . $breaking_change . ' - ';
 						$ret     .= $preamble . str_replace( "\n", "\n$indent", $text ) . "\n";
 					}
 				}

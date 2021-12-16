@@ -1,18 +1,10 @@
-# Editors
-/nbproject/private/
-
-# Grunt
-none
-
-# Sass
-.sass-cache/
-
-# Compiled CSS
+# All CSS
+/assets/css/**
 /assets/css/*.css
-/assets/css/photoswipe/**/*.min.css
 
-# Minified JS
-/assets/js/**/*.min.js
+# All JS
+/assets/js/**
+/assets/js/*.js
 
 # Behat/CLI Tests
 tests/cli/installer
@@ -22,7 +14,6 @@ tests/cli/composer.json
 tests/cli/vendor
 
 # Unit tests
-/tmp
 /tests/bin/tmp
 /tests/e2e/config/local-*.json
 /tests/e2e/config/local.json
@@ -30,19 +21,6 @@ tests/cli/vendor
 /tests/e2e/docker
 /tests/e2e/screenshots
 /tests/e2e/plugins
-
-# Logs
-/logs
-
-# Composer
-/vendor/
-/bin/composer/**/vendor/
-/lib/vendor/
-contributors.md
-contributors.html
-
-# Yarn
-yarn.lock
 
 # Packages
 /packages/*

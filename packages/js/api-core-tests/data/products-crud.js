@@ -54,8 +54,27 @@ const variableProduct = {
 	],
 };
 
+/**
+ * External product example
+ */
+const externalProduct = {
+	name: 'An External Product',
+	regular_price: '1.00',
+	type: 'external',
+};
+
+/**
+ * Grouped product example
+ */
+const groupedProduct = {
+	name: 'A Grouped Product',
+	type: 'grouped',
+};
+
 module.exports = {
 	simpleProduct,
 	virtualProduct,
 	variableProduct,
+	externalProduct,
+	groupedProduct,
 };

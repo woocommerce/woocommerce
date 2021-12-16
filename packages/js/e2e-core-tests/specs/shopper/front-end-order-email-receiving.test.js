@@ -37,7 +37,7 @@ const runOrderEmailReceivingTest = () => {
 		});
 
 		afterAll( async () => {
-			shopper.logout();
+			await shopper.logout();
 		} );
 
 		it('should receive order email after purchasing an item', async () => {

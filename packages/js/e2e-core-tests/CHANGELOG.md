@@ -1,5 +1,11 @@
 # Unreleased
 
+## Added
+
+- A `specs/data` folder to store page element data.
+- Tests to verify that different top-level menu and their associated sub-menus load successfully.
+- Test scaffolding via `npx wc-e2e install @woocommerce/e2e-core-tests`
+
 ## Changed
 
 - New coupon test deletes the coupon instead of trashing it.
