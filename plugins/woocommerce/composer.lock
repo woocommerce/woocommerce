@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8c4f8b290830d85dce9e69de46ca72ce",
+    "content-hash": "c4f41955bfde1a0a4e2d6d7428b8ee58",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -543,16 +543,16 @@
         },
         {
             "name": "woocommerce/woocommerce-admin",
-            "version": "2.9.3",
+            "version": "3.0.0-rc.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-admin.git",
-                "reference": "0c4f1e637ad03178999ff53ae930b8258ca95962"
+                "reference": "7c0cdd01ae98be058d684dd19023b0f40094cb63"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/0c4f1e637ad03178999ff53ae930b8258ca95962",
-                "reference": "0c4f1e637ad03178999ff53ae930b8258ca95962",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/7c0cdd01ae98be058d684dd19023b0f40094cb63",
+                "reference": "7c0cdd01ae98be058d684dd19023b0f40094cb63",
                 "shasum": ""
             },
             "require": {
@@ -608,9 +608,9 @@
             "homepage": "https://github.com/woocommerce/woocommerce-admin",
             "support": {
                 "issues": "https://github.com/woocommerce/woocommerce-admin/issues",
-                "source": "https://github.com/woocommerce/woocommerce-admin/tree/v2.9.3"
+                "source": "https://github.com/woocommerce/woocommerce-admin/tree/v3.0.0-rc.1"
             },
-            "time": "2021-12-15T03:02:58+00:00"
+            "time": "2021-12-14T23:55:42+00:00"
         },
         {
             "name": "woocommerce/woocommerce-blocks",
@@ -2926,5 +2926,5 @@
     "platform-overrides": {
         "php": "7.0.33"
     },
-    "plugin-api-version": "2.1.0"
+    "plugin-api-version": "2.0.0"
 }
