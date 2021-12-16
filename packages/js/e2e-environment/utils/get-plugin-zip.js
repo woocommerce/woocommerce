@@ -16,8 +16,8 @@ const getRemotePluginZip = async ( fileUrl, authorizationToken = '' ) => {
 	const savePath = resolveLocalE2ePath( 'plugins' );
 	mkdirp.sync( savePath );
 
-	// Pull the version from the end of the URL and add .zip
-	const fileName = fileUrl.split( '/' ).pop() + '.zip';
+	// Pull the version from the end of the URL
+	const fileName = fileUrl.split( '/' ).pop();
 	let filePath = path.join( savePath, fileName );
 
 	// First, download the zip file
@@ -73,11 +73,17 @@ const getLatestReleaseZipUrl = async (
 				// Loop until we find the first pre-release, then return it.
 				body.forEach( ( release ) => {
 					if ( release.prerelease ) {
-						resolve( release.zipball_url );
+						resolve( release.assets[ 0 ].browser_download_url );
 					}
 				} );
+			} else if ( authorizationToken ) {
+				// If it's a private repo, we need to download the archive this way
+				const tagName = body.tag_name;
+				resolve(
+					`https://github.com/${ repository }/archive/${ tagName }.zip`
+				);
 			} else {
-				resolve( body.zipball_url );
+				resolve( body.assets[ 0 ].browser_download_url );
 			}
 		} );
 	} );

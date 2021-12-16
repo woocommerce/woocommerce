@@ -29,7 +29,6 @@ utils.describeIf( GITHUB_REPOSITORY )( 'Upload and activate plugin', () => {
 
 	afterAll( async () => {
 		await merchant.logout();
-		await deleteDownloadedPluginFiles();
 	});
 
 	it( 'can upload and activate the provided plugin', async () => {
