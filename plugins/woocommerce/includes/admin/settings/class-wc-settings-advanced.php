@@ -497,6 +497,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 	private function output_import_export() {
 		$verbose_input_name      = SettingsImportExport::VERBOSE_EXPORT_INPUT_NAME;
 		$pretty_print_input_name = SettingsImportExport::PRETTY_PRINT_EXPORT_INPUT_NAME;
+		$empty_export_input_name = SettingsImportExport::EMPTY_EXPORT_INPUT_NAME;
 		$import_mode_input_name  = SettingsImportExport::IMPORT_MODE_INPUT_NAME;
 		$file_name_input_name    = SettingsImportExport::FILE_NAME_INPUT_NAME;
 
@@ -512,7 +513,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 				?>
 			</label>
 		</div>
-		<div style='margin-top: 10px; margin-bottom: 20px;'>
+		<div style='margin-top: 10px;'>
 			<label>
 				<input form='wc_export_settings_form' type='checkbox' name='<?php echo esc_attr( $pretty_print_input_name ); ?>' value='on' />
 				<?php
@@ -520,8 +521,23 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 				?>
 			</label>
 		</div>
+		<div style='margin-top: 10px; margin-bottom: 20px;'>
+			<label>
+				<input form='wc_export_settings_form' type='checkbox' name='<?php echo esc_attr( $empty_export_input_name ); ?>' value='on' />
+				<?php
+					// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
+					printf(
+						/* translators: %s are just '<code>' start and end tags. */
+						__( "Don't include WooCommerce core settings (the file will only contain data added via the %1\$swoocommerce_settings_export%2\$s filter)", 'woocommerce' ),
+						'<code>',
+						'</code>'
+					);
+					// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+				?>
+			</label>
+		</div>
 		<div>
-			<button form='wc_export_settings_form' type='submit' class="button button-primary">
+			<button form='wc_export_settings_form' type='submit' class='button button-primary'>
 			<?php
 				esc_html_e( 'Export settings', 'woocommerce' );
 			?>

@@ -30,6 +30,11 @@ class SettingsImportExport {
 	const VERBOSE_EXPORT_INPUT_NAME = 'export_settings_verbose';
 
 	/**
+	 * Name of the HTML input to select empty export.
+	 */
+	const EMPTY_EXPORT_INPUT_NAME = 'export_settings_empty';
+
+	/**
 	 * Name of the HTML input to select pretty-printed export.
 	 */
 	const PRETTY_PRINT_EXPORT_INPUT_NAME = 'export_settings_pretty_printed';
@@ -88,8 +93,25 @@ class SettingsImportExport {
 		$this->verify_nonce( static::AJAX_EXPORT_ACTION );
 
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
-		$verbose       = 'on' === ArrayUtil::get_value_or_default( $_GET, self::VERBOSE_EXPORT_INPUT_NAME );
-		$settings_data = $verbose ? $this->get_settings_verbose() : $this->get_settings_simple();
+		$verbose = 'on' === ArrayUtil::get_value_or_default( $_GET, self::VERBOSE_EXPORT_INPUT_NAME );
+		$empty   = 'on' === ArrayUtil::get_value_or_default( $_GET, self::EMPTY_EXPORT_INPUT_NAME );
+
+		if ( $empty ) {
+			$root_name     = $verbose ? 'woocommerce_settings_pages' : 'woocommerce_settings';
+			$settings_data = array( $root_name => array() );
+		} else {
+			$settings_data = $verbose ? $this->get_settings_verbose() : $this->get_settings_simple();
+		}
+
+		/**
+		 * Customize the settings export file that will be generated via WooCommerce settings - Advanced - Import/Export.
+		 *
+		 * @since 6.2.0
+		 *
+		 * @param array $settings_data The contents of the settings file that will be generated as an associative array, right before being JSON-encoded.
+		 * @return array The input $settings_data, appropriately extended/modified as needed.
+		 */
+		$settings_data = apply_filters( 'woocommerce_settings_export', $settings_data );
 
 		$json_options  =
 			'on' === ArrayUtil::get_value_or_default( $_GET, self::PRETTY_PRINT_EXPORT_INPUT_NAME ) ?
@@ -250,6 +272,18 @@ class SettingsImportExport {
 		}
 
 		$settings = $this->extract_settings( $file_data );
+
+		/**
+		 * Customize the settings that will be imported via WooCommerce settings - Advanced - Import/Export.
+		 *
+		 * @since 6.2.0
+		 *
+		 * @param array $file_data The contents of the uploaded settings file as an associative array, right after being JSON-decoded.
+		 * @param array $settings  The settings that will be created as options, as an associative array of name - value.
+		 * @return array The input $settings, appropriately extended/modified as needed.
+		 */
+		$settings = apply_filters( 'woocommerce_settings_import', $file_data, $settings );
+
 		if ( null === $settings ) {
 			$this->import_finished( __( 'Not a valid settings export file.', 'woocommerce' ) );
 		}
