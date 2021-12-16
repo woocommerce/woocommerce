@@ -13,6 +13,15 @@ project.properties
 *.sublime-workspace
 .sublimelinterrc
 
+# Grunt
+none
+
+# Sass
+.sass-cache/
+
+# Logs
+logs/
+
 # Eslint Cache
 .eslintcache
 
@@ -47,6 +56,17 @@ package-lock.json
 .wp-env.override.json
 
 # Unit tests
-/tmp
-packages/js/e2e-environment/config/default.json
-packages/js/e2e-environment/docker/wp-cli/initialize.sh
+tmp/
+
+# Composer
+vendor/
+bin/composer/**/vendor/
+lib/vendor/
+contributors.md
+contributors.html
+
+# Yarn
+yarn.lock
+
+# Editors
+nbproject/private/
