@@ -146,7 +146,7 @@ jobs:
           WC_E2E_SCREENSHOTS: 1
           E2E_SLACK_TOKEN: ${{ secrets.SMOKE_TEST_SLACK_TOKEN }}
           E2E_SLACK_CHANNEL: ${{ secrets.RELEASE_TEST_SLACK_CHANNEL }}
-          PLUGIN_REPOSITORY: ${{ matrix.private && secrets[matrix.repo] || matrix.repo }}
+          GITHUB_REPOSITORY: ${{ matrix.private && secrets[matrix.repo] || matrix.repo }}
           PLUGIN_NAME: ${{ matrix.plugin }}
           GITHUB_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
         run: |
