@@ -311,6 +311,7 @@ export function createProductInventoryTransformation(): ModelTransformation[] {
 				onePerOrder: PropertyType.Boolean,
 				stockStatus: PropertyType.String,
 				backOrderStatus: PropertyType.String,
+				lowStockThreshold: PropertyType.Integer,
 			},
 		),
 		new KeyChangeTransformation< IProductInventory >(
@@ -322,6 +323,7 @@ export function createProductInventoryTransformation(): ModelTransformation[] {
 				backorderStatus: 'backorders',
 				canBackorder: 'backorders_allowed',
 				isOnBackorder: 'backordered',
+				lowStockThreshold: 'low_stock_amount',
 			},
 		),
 	];

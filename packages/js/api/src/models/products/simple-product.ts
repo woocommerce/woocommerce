@@ -130,10 +130,11 @@ export class SimpleProduct extends AbstractProduct implements
 	public readonly onePerOrder: boolean = false;
 	public readonly trackInventory: boolean = false;
 	public readonly remainingStock: number = -1;
-	public readonly stockStatus: StockStatus = ''
+	public readonly stockStatus: StockStatus = '';
 	public readonly backorderStatus: BackorderStatus = BackorderStatus.Allowed;
 	public readonly canBackorder: boolean = false;
 	public readonly isOnBackorder: boolean = false;
+	public readonly lowStockThreshold: number = -1;
 
 	/**
 	 * @see ./abstracts/price.ts

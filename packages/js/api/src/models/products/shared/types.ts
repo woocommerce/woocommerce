@@ -53,7 +53,7 @@ export type ProductGroupedUpdateParams = 'groupedProducts';
  * Properties related to tracking inventory.
  */
 export type ProductInventoryUpdateParams = 'backorderStatus' | 'canBackorder' | 'trackInventory'
-	| 'onePerOrder' | 'remainingStock';
+	| 'onePerOrder' | 'remainingStock' | 'lowStockThreshold';
 
 /**
  * Properties related to sales tax.
