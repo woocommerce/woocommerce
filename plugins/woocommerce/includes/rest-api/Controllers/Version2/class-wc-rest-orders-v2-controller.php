@@ -119,6 +119,27 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 
 		register_rest_route(
 			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/shipping-methods',
+			array(
+				'args' => array(
+					'id' => array(
+						'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+						'type'        => 'integer',
+					),
+				),
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_shipping_methods' ),
+					'permission_callback' => array( $this, 'get_item_permissions_check' ),
+					'args'                => array(
+						'context' => $this->get_context_param( array( 'default' => 'view' ) ),
+					),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
 			'/' . $this->rest_base . '/batch',
 			array(
 				array(
@@ -130,6 +151,29 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 				'schema' => array( $this, 'get_public_batch_schema' ),
 			)
 		);
+	}
+
+	public function get_shipping_methods( $request ) {
+		$order = $this->get_object( (int) $request['id'] );
+
+		if ( ! $order || 0 === $order->get_id() ) {
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		$cart = new WC_Cart();
+		foreach ( $order->get_items( 'line_item' ) as $item ) {
+			$cart->add_to_cart( $item->get_product_id(), $item->get_quantity(), $item->get_variation_id() );
+		}
+
+		$packages = $cart->get_shipping_packages();
+		$data     = WC()->shipping()->calculate_shipping( $packages );
+		$response = rest_ensure_response( $data );
+
+		if ( $this->public ) {
+			$response->link_header( 'alternate', $this->get_permalink( $order ), array( 'type' => 'text/html' ) );
+		}
+
+		return $response;
 	}
 
 	/**
@@ -210,7 +254,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 
 		// Expand meta_data to include user-friendly values.
 		$formatted_meta_data = $item->get_formatted_meta_data( null, true );
-		$data['meta_data'] = array_map(
+		$data['meta_data']   = array_map(
 			array( $this, 'merge_meta_item_with_formatted_meta_display_attributes' ),
 			$data['meta_data'],
 			array_fill( 0, count( $data['meta_data'] ), $formatted_meta_data )
@@ -241,7 +285,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		if ( array_key_exists( $meta_item->id, $formatted_meta_data ) ) {
 			$formatted_meta_item = $formatted_meta_data[ $meta_item->id ];
 
-			$result['display_key'] = wc_clean( $formatted_meta_item->display_key );
+			$result['display_key']   = wc_clean( $formatted_meta_item->display_key );
 			$result['display_value'] = wc_clean( $formatted_meta_item->display_value );
 		}
 
@@ -260,6 +304,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		$extra_fields      = array( 'meta_data', 'line_items', 'tax_lines', 'shipping_lines', 'fee_lines', 'coupon_lines', 'refunds', 'payment_url' );
 		$format_decimal    = array( 'discount_total', 'discount_tax', 'shipping_total', 'shipping_tax', 'shipping_total', 'shipping_tax', 'cart_tax', 'total', 'total_tax' );
 		$format_date       = array( 'date_created', 'date_modified', 'date_completed', 'date_paid' );
+
 		// These fields are dependent on other fields.
 		$dependent_fields = array(
 			'date_created_gmt'   => 'date_created',
@@ -278,9 +323,9 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			}
 		}
 
-		$extra_fields      = array_intersect( $extra_fields, $fields );
-		$format_decimal    = array_intersect( $format_decimal, $fields );
-		$format_date       = array_intersect( $format_date, $fields );
+		$extra_fields   = array_intersect( $extra_fields, $fields );
+		$format_decimal = array_intersect( $format_decimal, $fields );
+		$format_date    = array_intersect( $format_date, $fields );
 
 		$format_line_items = array_intersect( $format_line_items, $fields );
 

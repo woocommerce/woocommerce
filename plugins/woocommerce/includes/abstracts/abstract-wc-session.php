@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC_Session
  */
-abstract class WC_Session {
+class WC_Session {
 
 	/**
 	 * Customer ID.
