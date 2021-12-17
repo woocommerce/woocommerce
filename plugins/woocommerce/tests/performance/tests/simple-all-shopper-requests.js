@@ -8,6 +8,7 @@ import { cartApplyCoupon } from '../requests/shopper/cart-apply-coupon.js';
 import { checkoutGuest } from '../requests/shopper/checkout-guest.js';
 import { checkoutCustomerLogin } from '../requests/shopper/checkout-customer-login.js';
 import { myAccount } from '../requests/shopper/my-account.js';
+import { categoryPage } from '../requests/shopper/category-page.js';
 
 export let options = {
     scenarios: {
@@ -88,6 +89,7 @@ export function searchProductFlow() {
 }
 export function singleProductFlow() {
     singleProduct();
+    categoryPage();
 }
 export function checkoutGuestFlow() {
     cart();

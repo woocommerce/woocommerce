@@ -1,9 +1,13 @@
 const getAppRoot = require( './app-root' );
 const { getAppName, getAppBase } = require( './app-name' );
 const testConfig = require( './test-config' );
-const { getRemotePluginZip, getLatestReleaseZipUrl } = require('./get-plugin-zip');
+const {
+	getRemotePluginZip,
+	getLatestReleaseZipUrl,
+	deleteDownloadedPluginFiles,
+} = require( './get-plugin-zip' );
 const takeScreenshotFor = require( './take-screenshot' );
-const updateReadyPageStatus = require('./update-ready-page');
+const updateReadyPageStatus = require( './update-ready-page' );
 const consoleUtils = require( './filter-console' );
 
 module.exports = {
@@ -12,6 +16,7 @@ module.exports = {
 	getAppName,
 	getRemotePluginZip,
 	getLatestReleaseZipUrl,
+	deleteDownloadedPluginFiles,
 	takeScreenshotFor,
 	updateReadyPageStatus,
 	...testConfig,
