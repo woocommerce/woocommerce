@@ -3,6 +3,8 @@
 ## Added
 
 - Added `await` for every call to `shopper.logout`
+- Updated `getLatestReleaseZipUrl()` to allow passing in an authorization token and simplified arguments to just the repository name
+- Added `upload.ini` which increases the limits for uploading files (such as for plugins) in the Docker environment
 - Test setup, scaffolding, and removal via `wc-e2e install` and `wc-e2e uninstall`
 
 ## Fixed
