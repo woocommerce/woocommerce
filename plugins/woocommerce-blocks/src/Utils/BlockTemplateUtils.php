@@ -117,7 +117,6 @@ class BlockTemplateUtils {
 		}
 
 		if ( 'woocommerce' === $theme ) {
-			$template->theme  = 'woocommerce/woocommerce';
 			$template->origin = 'plugin';
 		}
 
@@ -138,7 +137,7 @@ class BlockTemplateUtils {
 		$template_content         = file_get_contents( $template_file->path );
 		$template                 = new \WP_Block_Template();
 		$template->id             = 'woocommerce//' . $template_file->slug;
-		$template->theme          = 'woocommerce/woocommerce';
+		$template->theme          = 'WooCommerce';
 		$template->content        = self::gutenberg_inject_theme_attribute_in_content( $template_content );
 		$template->source         = 'plugin';
 		$template->slug           = $template_file->slug;
