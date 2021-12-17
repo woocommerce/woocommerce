@@ -9,6 +9,19 @@ npm install @woocommerce/e2e-environment --save
 npm install jest --global
 ```
 
+### Version 0.3.0 and newer
+
+Version 0.3.0 added a test installer that will populate the `tests/e2e/*` folder with test scripts and configuration files. The installer will create test scripts for E2E test packages that include support for the installer.
+
+- [Adding test scaffolding to E2E test packages](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/e2e-environment/test-packages.md)
+
+#### Using the installer
+
+- Install a default test environment: `npx wc-e2e install`
+- Install test specs from an E2E tests package: `npx wc-e2e install @woocommerce-e2e-tests [--format cjs] [--ext spec.js]`
+- The default test spec format and extension are `ES6` and `test.js`
+- Remove test specs for an E2E tests package: `npx wc-e2e uninstall @woocommerce-e2e-tests`
+
 ## Configuration
 
 The `@woocommerce/e2e-environment` package exports configuration objects that can be consumed in JavaScript config files in your project. Additionally, it includes a basic hosting container for running tests and includes instructions for creating your Travis CI setup.
@@ -60,10 +73,10 @@ The E2E environment uses Jest as a test runner. Extending the base config is nec
 
 ```js
 const path = require( 'path' );
-const { useE2EJestConfig } = require( '@woocommerce/e2e-environment' );
+const { useE2EJestConfig, resolveLocalE2ePath } = require( '@woocommerce/e2e-environment' );
 
 const jestConfig = useE2EJestConfig( {
-	roots: [ path.resolve( __dirname, '../specs' ) ],
+	roots: [ resolveLocalE2ePath( 'specs' ) ],
 } );
 
 module.exports = jestConfig;
@@ -241,9 +254,9 @@ The above method also makes use of the following utility methods which can also 
 
 If you would like to get the latest release zip URL, which can be used in the methods mentioned above, you can use the following helper function to do so:
 
-`getLatestReleaseZipUrl( owner, repository, getPrerelease, perPage )`
+`getLatestReleaseZipUrl( repository, authorizationToken, getPrerelease, perPage )`
 
-This will return a string with the latest release URL. Optionally, you can use the `getPrerelease` boolean flag, which defaults to false, on whether or not to get a prerelease instead. The `perPage` flag can be used to return more results when getting the list of releases. The default value is 3.
+This will return a string with the latest release URL. Optionally, you can use the `getPrerelease` boolean flag, which defaults to false, on whether or not to get a prerelease instead. The `perPage` flag can be used to return more results when getting the list of releases. The default value is 3. If the repository requires authorization to access, the authorization token can be passed in to the `authorizationToken` argument.
 
 ## Additional information
 

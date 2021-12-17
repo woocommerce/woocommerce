@@ -15,6 +15,7 @@ import { orders } from '../requests/merchant/orders.js';
 import { ordersHeartbeat } from '../requests/merchant/orders-heartbeat.js';
 import { homeWCAdmin } from '../requests/merchant/home-wc-admin.js';
 import { myAccountMerchantLogin } from '../requests/merchant/my-account-merchant.js';
+import { categoryPage } from '../requests/shopper/category-page.js';
 
 export let options = {
     scenarios: {
@@ -114,6 +115,7 @@ export function shopperBrowsingFlows() {
     cartRemoveItem();
 	cartApplyCoupon();
     myAccount();
+	categoryPage();
 }
 export function checkoutGuestFlow() {
     cart();
