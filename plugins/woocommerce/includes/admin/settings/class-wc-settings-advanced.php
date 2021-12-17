@@ -521,7 +521,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 				?>
 			</label>
 		</div>
-		<div style='margin-top: 10px; margin-bottom: 20px;'>
+		<div style='margin-top: 10px;'>
 			<label>
 				<input form='wc_export_settings_form' type='checkbox' name='<?php echo esc_attr( $empty_export_input_name ); ?>' value='on' />
 				<?php
@@ -536,6 +536,19 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 				?>
 			</label>
 		</div>
+
+		<?php
+		/**
+		 * Customize the settings export form by adding extra input fields if necessary.
+		 *
+		 * @since 6.2.0
+		 *
+		 * @param string $form_name The name of the form that any added input should be attached to via a 'form' attribute.
+		 */
+		do_action( 'woocommerce_settings_export_form_extra_inputs', 'wc_export_settings_form' );
+		?>
+
+		<div style='margin-bottom: 20px;'></div>
 		<div>
 			<button form='wc_export_settings_form' type='submit' class='button button-primary'>
 			<?php
@@ -571,12 +584,25 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 				?>
 			</label>
 		</div>
-		<div style='margin-top: 10px; margin-bottom: 10px;'>
+
+		<?php
+		/**
+		 * Customize the settings import form by adding extra input fields if necessary.
+		 *
+		 * @since 6.2.0
+		 *
+		 * @param string $form_name The name of the form that any added input should be attached to via a 'form' attribute.
+		 */
+		do_action( 'woocommerce_settings_import_form_extra_inputs', 'wc_import_settings_form' );
+		?>
+
+		<div style='margin-top: 10px;'>
 			<label>
 				<span style='margin-right: 40px;''>Select a file to import:</span>
 				<input form='wc_import_settings_form' type='file' id='settings-import-file' name='<?php echo esc_attr( $file_name_input_name ); ?>'/>
 				</label>
 		</div>
+		<div style='margin-bottom: 10px;'></div>
 		<div>
 		<button form='wc_import_settings_form' type='submit' class="button button-primary">
 			<?php
