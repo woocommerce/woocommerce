@@ -916,7 +916,7 @@ class WC_Form_Handler {
 		}
 
 		if ( false !== WC()->cart->add_to_cart( $product_id, $quantity, $variation_id, $variations ) ) {
-			wc_add_to_cart_message( array( $product_id => $quantity ), true );
+			wc_add_to_cart_message( array( $variation_id => $quantity ), true );
 			return true;
 		}
 
