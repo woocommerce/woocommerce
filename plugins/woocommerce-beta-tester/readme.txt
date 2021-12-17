@@ -53,6 +53,9 @@ See our [contributing guidelines here](https://github.com/woocommerce/woocommerc
 
 == Changelog ==
 
+= 2.0.5 - 2021-xx-xx =
+* Fix: make WC version comparison case insensitive
+
 = 2.0.4 - 2021-09-29 =
 * Dev: Bump tested to version
 * Fix: enqueue logic for css/js assets

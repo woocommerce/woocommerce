@@ -1,5 +1,8 @@
 == Changelog ==
 
+2021-xx-xx - version 2.0.5
+- Fix: make WC version comparison case insensitive
+
 2021-09-29 - version 2.0.4
 - Dev: Bump tested to version
 - Fix: enqueue logic for css/js assets
