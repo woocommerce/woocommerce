@@ -31,7 +31,7 @@ const settings = {
 		'woo-gutenberg-products-block'
 	),
 	supports: {
-		align: [ 'wide', 'full' ],
+		align: [ 'wide' ],
 		html: false,
 		multiple: false,
 	},

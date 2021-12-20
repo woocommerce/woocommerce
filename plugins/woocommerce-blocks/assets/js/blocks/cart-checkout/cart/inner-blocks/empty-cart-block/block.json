@@ -5,7 +5,7 @@
 	"description": "Contains blocks that are displayed when the cart is empty.",
 	"category": "woocommerce",
 	"supports": {
-		"align": [ "wide", "full" ],
+		"align": [ "wide" ],
 		"html": false,
 		"multiple": false,
 		"reusable": false,

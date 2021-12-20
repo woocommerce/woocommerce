@@ -5,7 +5,7 @@
 	"description": "Contains blocks that are displayed when the cart contains products.",
 	"category": "woocommerce",
 	"supports": {
-		"align": [ "wide", "full" ],
+		"align": [ "wide" ],
 		"html": false,
 		"multiple": false,
 		"reusable": false,
