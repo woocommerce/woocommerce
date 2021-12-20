@@ -71,7 +71,6 @@ describe( 'Testing Mini Cart', () => {
 			fireEvent.click( screen.getByLabelText( /items/i ) );
 		} );
 
-		expect( screen.getByText( /Your cart/i ) ).toBeInTheDocument();
 		expect( fetchMock ).toHaveBeenCalledTimes( 1 );
 		// ["`select` control in `@wordpress/data-controls` is deprecated. Please use built-in `resolveSelect` control in `@wordpress/data` instead."]
 		expect( console ).toHaveWarned();
@@ -86,7 +85,6 @@ describe( 'Testing Mini Cart', () => {
 			fireEvent.click( screen.getByLabelText( /items/i ) );
 		} );
 
-		expect( screen.getByText( /0 items/i ) ).toBeInTheDocument();
 		expect( fetchMock ).toHaveBeenCalledTimes( 1 );
 	} );
 

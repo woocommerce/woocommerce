@@ -1,0 +1,16 @@
+.wp-block-woocommerce-mini-cart-contents {
+	max-width: 480px;
+	margin: 0 auto;
+}
+
+.wp-block-woocommerce-filled-mini-cart-contents-block {
+	.block-editor-block-list__layout {
+		display: flex;
+		flex-direction: column;
+		min-height: calc(100vh - 2 * $gap-largest);
+	}
+}
+
+.wp-block-woocommerce-mini-cart-products-table-block {
+	margin-bottom: auto;
+}

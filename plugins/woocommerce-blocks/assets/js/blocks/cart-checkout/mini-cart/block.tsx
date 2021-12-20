@@ -19,7 +19,7 @@ import {
 	useEffect,
 	useState,
 } from '@wordpress/element';
-import { sprintf, _n, __ } from '@wordpress/i18n';
+import { sprintf, _n } from '@wordpress/i18n';
 import classnames from 'classnames';
 /**
  * Internal dependencies
@@ -183,27 +183,18 @@ const MiniCartBlock = ( {
 						'is-loading': cartIsLoading,
 					}
 				) }
-				title={
-					cartIsLoading
-						? __( 'Your cart', 'woo-gutenberg-products-block' )
-						: sprintf(
-								/* translators: %d is the count of items in the cart. */
-								_n(
-									'Your cart (%d item)',
-									'Your cart (%d items)',
-									cartItemsCount,
-									'woo-gutenberg-products-block'
-								),
-								cartItemsCount
-						  )
-				}
+				title=""
 				isOpen={ isOpen }
 				onClose={ () => {
 					setIsOpen( false );
 				} }
 				slideIn={ ! skipSlideIn }
 			>
-				<div ref={ contentsRef }>
+				<div
+					className="wc-block-mini-cart__template-part"
+					ref={ contentsRef }
+				>
+					{ /* @todo The `div` wrapper of RawHTML isn't removed on the front end. */ }
 					<RawHTML>{ contents }</RawHTML>
 				</div>
 			</Drawer>

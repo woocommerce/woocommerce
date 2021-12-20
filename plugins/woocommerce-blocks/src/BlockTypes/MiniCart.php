@@ -397,9 +397,7 @@ class MiniCart extends AbstractBlock {
 				<div class="components-modal__frame wc-block-components-drawer">
 					<div class="components-modal__content">
 						<div class="components-modal__header">
-							<div class="components-modal__header-heading-container">
-								<h1 id="components-modal-header-1" class="components-modal__header-heading">' . wp_kses_post( $title ) . '</h1>
-							</div>
+							<div class="components-modal__header-heading-container"></div>
 						</div>
 						<div class="wc-block-mini-cart__template-part">'
 						. wp_kses_post( $template_part_contents ) .
