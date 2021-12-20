@@ -133,22 +133,59 @@ class BlockTemplateUtils {
 	 */
 	public static function gutenberg_build_template_result_from_file( $template_file, $template_type ) {
 		$template_file = (object) $template_file;
+
+		// If the theme has an archive-products.html template but does not have product taxonomy templates
+		// then we will load in the archive-product.html template from the theme to use for product taxonomies on the frontend.
+		$template_is_from_theme = 'theme' === $template_file->source;
+		$theme_name             = wp_get_theme()->get( 'TextDomain' );
+
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-		$template_content         = file_get_contents( $template_file->path );
-		$template                 = new \WP_Block_Template();
-		$template->id             = 'woocommerce//' . $template_file->slug;
-		$template->theme          = 'WooCommerce';
-		$template->content        = self::gutenberg_inject_theme_attribute_in_content( $template_content );
+		$template_content  = file_get_contents( $template_file->path );
+		$template          = new \WP_Block_Template();
+		$template->id      = $template_is_from_theme ? $theme_name . '//' . $template_file->slug : 'woocommerce//' . $template_file->slug;
+		$template->theme   = $template_is_from_theme ? $theme_name : 'WooCommerce';
+		$template->content = self::gutenberg_inject_theme_attribute_in_content( $template_content );
+		// Plugin was agreed as a valid source value despite existing inline docs at the time of creating: https://github.com/WordPress/gutenberg/issues/36597#issuecomment-976232909.
+		$template->source         = $template_file->source ? $template_file->source : 'plugin';
 		$template->slug           = $template_file->slug;
 		$template->type           = $template_type;
 		$template->title          = ! empty( $template_file->title ) ? $template_file->title : self::convert_slug_to_title( $template_file->slug );
 		$template->status         = 'publish';
 		$template->has_theme_file = true;
-		$template->origin         = 'plugin';
-		$template->is_custom      = false;
+		$template->origin         = $template_file->source;
+		$template->is_custom      = false; // Templates loaded from the filesystem aren't custom, ones that have been edited and loaded from the DB are.
 		$template->post_types     = array(); // Don't appear in any Edit Post template selector dropdown.
 		$template->area           = 'uncategorized';
 		return $template;
+	}
+
+	/**
+	 * Build a new template object so that we can make Woo Blocks default templates available in the current theme should they not have any.
+	 *
+	 * @param string $template_file Block template file path.
+	 * @param string $template_type wp_template or wp_template_part.
+	 * @param string $template_slug Block template slug e.g. single-product.
+	 * @param bool   $template_is_from_theme If the block template file is being loaded from the current theme instead of Woo Blocks.
+	 *
+	 * @return object Block template object.
+	 */
+	public static function create_new_block_template_object( $template_file, $template_type, $template_slug, $template_is_from_theme = false ) {
+		$theme_name = wp_get_theme()->get( 'TextDomain' );
+
+		$new_template_item = array(
+			'slug'        => $template_slug,
+			'id'          => $template_is_from_theme ? $theme_name . '//' . $template_slug : 'woocommerce//' . $template_slug,
+			'path'        => $template_file,
+			'type'        => $template_type,
+			'theme'       => $template_is_from_theme ? $theme_name : 'woocommerce',
+			// Plugin was agreed as a valid source value despite existing inline docs at the time of creating: https://github.com/WordPress/gutenberg/issues/36597#issuecomment-976232909.
+			'source'      => $template_is_from_theme ? 'theme' : 'plugin',
+			'title'       => self::convert_slug_to_title( $template_slug ),
+			'description' => '',
+			'post_types'  => array(), // Don't appear in any Edit Post template selector dropdown.
+		);
+
+		return (object) $new_template_item;
 	}
 
 	/**
@@ -226,5 +263,21 @@ class BlockTemplateUtils {
 	public static function theme_has_template_part( $template_name ) {
 		return is_readable( get_template_directory() . '/block-template-parts/' . $template_name . '.html' ) ||
 			is_readable( get_stylesheet_directory() . '/block-template-parts/' . $template_name . '.html' );
+	}
+
+	/**
+	 * Checks to see if they are using a compatible version of WP, or if not they have a compatible version of the Gutenberg plugin installed.
+	 *
+	 * @return boolean
+	 */
+	public static function supports_block_templates() {
+		if (
+			( ! function_exists( 'wp_is_block_theme' ) || ! wp_is_block_theme() ) &&
+			( ! function_exists( 'gutenberg_supports_block_templates' ) || ! gutenberg_supports_block_templates() )
+		) {
+			return false;
+		}
+
+		return true;
 	}
 }
