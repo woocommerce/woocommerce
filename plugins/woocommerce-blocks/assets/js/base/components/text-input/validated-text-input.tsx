@@ -34,11 +34,11 @@ type ValidatedTextInputProps = (
 	className?: string;
 	ariaDescribedBy?: string;
 	errorId?: string;
-	validateOnMount?: boolean;
 	focusOnMount?: boolean;
 	showError?: boolean;
 	errorMessage?: string;
 	onChange: ( newValue: string ) => void;
+	value: string;
 };
 
 const ValidatedTextInput = ( {
@@ -47,11 +47,11 @@ const ValidatedTextInput = ( {
 	id,
 	ariaDescribedBy,
 	errorId,
-	validateOnMount = true,
 	focusOnMount = false,
 	onChange,
 	showError = true,
 	errorMessage: passedErrorMessage = '',
+	value = '',
 	...rest
 }: ValidatedTextInputProps ) => {
 	const [ isPristine, setIsPristine ] = useState( true );
@@ -96,34 +96,31 @@ const ValidatedTextInput = ( {
 	);
 
 	/**
-	 * Runs validation on change if the current element is not in focus. This is because autofilled elements do not
-	 * trigger the blur() event.
+	 * Focus on mount
+	 *
+	 * If the input is in pristine state, focus the element.
 	 */
-	const maybeValidateOnChange = useCallback( () => {
+	useEffect( () => {
+		if ( isPristine && focusOnMount ) {
+			inputRef.current?.focus();
+		}
+		setIsPristine( false );
+	}, [ focusOnMount, isPristine, setIsPristine ] );
+
+	/**
+	 * Value Validation
+	 *
+	 * Runs validation on state change if the current element is not in focus. This is because autofilled elements do not
+	 * trigger the blur() event, and so values can be validated in the background if the state changes elsewhere.
+	 */
+	useEffect( () => {
 		if (
-			inputRef.current?.ownerDocument.activeElement !== inputRef.current
+			inputRef.current?.ownerDocument?.activeElement !== inputRef.current
 		) {
 			validateInput( true );
 		}
-	}, [ validateInput ] );
-
-	useEffect( () => {
-		if ( isPristine ) {
-			if ( focusOnMount ) {
-				inputRef.current?.focus();
-			}
-			setIsPristine( false );
-		}
-	}, [ focusOnMount, isPristine, setIsPristine ] );
-
-	useEffect( () => {
-		if ( isPristine ) {
-			if ( validateOnMount ) {
-				validateInput();
-			}
-			setIsPristine( false );
-		}
-	}, [ isPristine, setIsPristine, validateOnMount, validateInput ] );
+		// We need to track value even if it is not directly used so we know when it changes.
+	}, [ value, validateInput ] );
 
 	// Remove validation errors when unmounted.
 	useEffect( () => {
@@ -170,9 +167,9 @@ const ValidatedTextInput = ( {
 			onChange={ ( val ) => {
 				hideValidationError( errorIdString );
 				onChange( val );
-				maybeValidateOnChange();
 			} }
 			ariaDescribedBy={ describedBy }
+			value={ value }
 			{ ...rest }
 		/>
 	);
