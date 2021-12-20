@@ -107,7 +107,7 @@ class BlockTemplateUtils {
 		$template->title          = $post->post_title;
 		$template->status         = $post->post_status;
 		$template->has_theme_file = $has_theme_file;
-		$template->is_custom      = true;
+		$template->is_custom      = false;
 		$template->post_types     = array(); // Don't appear in any Edit Post template selector dropdown.
 		if ( 'wp_template_part' === $post->post_type ) {
 			$type_terms = get_the_terms( $post, 'wp_template_part_area' );
@@ -139,14 +139,13 @@ class BlockTemplateUtils {
 		$template->id             = 'woocommerce//' . $template_file->slug;
 		$template->theme          = 'WooCommerce';
 		$template->content        = self::gutenberg_inject_theme_attribute_in_content( $template_content );
-		$template->source         = 'plugin';
 		$template->slug           = $template_file->slug;
 		$template->type           = $template_type;
 		$template->title          = ! empty( $template_file->title ) ? $template_file->title : self::convert_slug_to_title( $template_file->slug );
 		$template->status         = 'publish';
 		$template->has_theme_file = true;
 		$template->origin         = 'plugin';
-		$template->is_custom      = false; // Templates loaded from the filesystem aren't custom, ones that have been edited and loaded from the DB are.
+		$template->is_custom      = false;
 		$template->post_types     = array(); // Don't appear in any Edit Post template selector dropdown.
 		$template->area           = 'uncategorized';
 		return $template;
