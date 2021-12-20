@@ -98,7 +98,7 @@ class BlockTemplateUtils {
 		$template                 = new \WP_Block_Template();
 		$template->wp_id          = $post->ID;
 		$template->id             = $theme . '//' . $post->post_name;
-		$template->theme          = $theme;
+		$template->theme          = 'woocommerce' === $theme ? 'WooCommerce' : $theme;
 		$template->content        = $post->post_content;
 		$template->slug           = $post->post_name;
 		$template->source         = 'custom';
@@ -109,6 +109,7 @@ class BlockTemplateUtils {
 		$template->has_theme_file = $has_theme_file;
 		$template->is_custom      = false;
 		$template->post_types     = array(); // Don't appear in any Edit Post template selector dropdown.
+
 		if ( 'wp_template_part' === $post->post_type ) {
 			$type_terms = get_the_terms( $post, 'wp_template_part_area' );
 			if ( ! is_wp_error( $type_terms ) && false !== $type_terms ) {
