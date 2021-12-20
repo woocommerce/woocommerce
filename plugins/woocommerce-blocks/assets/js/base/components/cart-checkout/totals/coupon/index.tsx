@@ -104,7 +104,6 @@ export const TotalsCoupon = ( {
 							onChange={ ( newCouponValue ) => {
 								setCouponValue( newCouponValue );
 							} }
-							validateOnMount={ false }
 							focusOnMount={ true }
 							showError={ false }
 						/>
