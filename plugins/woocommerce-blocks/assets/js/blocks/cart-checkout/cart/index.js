@@ -32,7 +32,7 @@ const settings = {
 	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],
 	description: __( 'Shopping cart.', 'woo-gutenberg-products-block' ),
 	supports: {
-		align: [ 'wide', 'full' ],
+		align: [ 'wide' ],
 		html: false,
 		multiple: false,
 		__experimentalExposeControlsToChildren: true,
