@@ -152,5 +152,9 @@
 			font-size: 12px;
 			margin-top: -$gap-small;
 		}
+
+		.woocommerce-select-control__control-input {
+			padding-left: 12px;
+		}
 	}
 }
