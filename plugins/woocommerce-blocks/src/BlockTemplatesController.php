@@ -72,7 +72,13 @@ class BlockTemplatesController {
 	 * @return mixed|\WP_Block_Template|\WP_Error
 	 */
 	public function maybe_return_blocks_template( $template, $id, $template_type ) {
-		if ( ! function_exists( 'gutenberg_get_block_template' ) ) {
+		// 'get_block_template' was introduced in WP 5.9. We need to support
+		// 'gutenberg_get_block_template' for previous versions of WP with
+		// Gutenberg enabled.
+		if (
+			! function_exists( 'gutenberg_get_block_template' ) &&
+			! function_exists( 'get_block_template' )
+		) {
 			return $template;
 		}
 		$template_name_parts = explode( '//', $id );
@@ -86,7 +92,9 @@ class BlockTemplatesController {
 
 		// Check if the theme has a saved version of this template before falling back to the woo one. Please note how
 		// the slug has not been modified at this point, we're still using the default one passed to this hook.
-		$maybe_template = gutenberg_get_block_template( $id, $template_type );
+		$maybe_template = function_exists( 'get_block_template' ) ?
+			get_block_template( $id, $template_type ) :
+			gutenberg_get_block_template( $id, $template_type );
 		if ( null !== $maybe_template ) {
 			add_filter( 'pre_get_block_file_template', array( $this, 'maybe_return_blocks_template' ), 10, 3 );
 			return $maybe_template;
@@ -95,7 +103,9 @@ class BlockTemplatesController {
 		// Theme-based template didn't exist, try switching the theme to woocommerce and try again. This function has
 		// been unhooked so won't run again.
 		add_filter( 'get_block_file_template', array( $this, 'get_single_block_template' ), 10, 3 );
-		$maybe_template = gutenberg_get_block_template( 'woocommerce//' . $slug, $template_type );
+		$maybe_template = function_exists( 'get_block_template' ) ?
+			get_block_template( 'woocommerce//' . $slug, $template_type ) :
+			gutenberg_get_block_template( 'woocommerce//' . $slug, $template_type );
 
 		// Re-hook this function, it was only unhooked to stop recursion.
 		add_filter( 'pre_get_block_file_template', array( $this, 'maybe_return_blocks_template' ), 10, 3 );
