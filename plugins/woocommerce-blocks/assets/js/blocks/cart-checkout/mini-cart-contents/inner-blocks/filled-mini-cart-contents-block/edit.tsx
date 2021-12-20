@@ -1,11 +1,11 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { useBlockProps, InnerBlocks } from '@wordpress/block-editor';
 import { innerBlockAreas } from '@woocommerce/blocks-checkout';
 import type { TemplateArray } from '@wordpress/blocks';
-import { useEditorContext } from '@woocommerce/base-context';
+import { EditorProvider, useEditorContext } from '@woocommerce/base-context';
+import { previewCart } from '@woocommerce/resource-previews';
 
 /**
  * Internal dependencies
@@ -18,16 +18,9 @@ export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 	const { currentView } = useEditorContext();
 
 	const defaultTemplate = ( [
-		[
-			'core/heading',
-			{
-				content: __(
-					'Filled mini cart content',
-					'woo-gutenberg-products-block'
-				),
-				level: 2,
-			},
-		],
+		[ 'woocommerce/mini-cart-title-block', {} ],
+		[ 'woocommerce/mini-cart-products-table-block', {} ],
+		[ 'woocommerce/mini-cart-footer-block', {} ],
 	].filter( Boolean ) as unknown ) as TemplateArray;
 
 	useForcedLayout( {
@@ -43,10 +36,16 @@ export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 				currentView !== 'woocommerce/filled-mini-cart-contents-block'
 			}
 		>
-			<InnerBlocks
-				allowedBlocks={ allowedBlocks }
-				templateLock="insert"
-			/>
+			<EditorProvider
+				currentView={ currentView }
+				previewData={ { previewCart } }
+			>
+				<InnerBlocks
+					template={ defaultTemplate }
+					allowedBlocks={ allowedBlocks }
+					templateLock="insert"
+				/>
+			</EditorProvider>
 		</div>
 	);
 };

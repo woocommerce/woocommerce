@@ -54,14 +54,14 @@
 	font-size: 1rem;
 
 	.components-modal__content {
-		box-sizing: border-box;
-		display: flex;
-		flex-direction: column;
-		height: 100%;
+		padding: 0;
+		position: relative;
 	}
 
 	.components-modal__header {
-		margin: $gap 0;
+		position: absolute;
+		top: $gap-largest;
+		right: $gap;
 	}
 
 	.wc-block-mini-cart__items {
@@ -74,6 +74,21 @@
 			content: none;
 		}
 	}
+}
+
+// @todo Review the class naming convention for Mini Cart inner blocks.
+.wp-block-woocommerce-mini-cart-contents {
+	background: #fff;
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+	height: 100vh;
+	padding: $gap-largest $gap;
+}
+
+.wc-block-mini-cart__title {
+	@include font-size(large);
+	margin-top: 0;
 }
 
 .wc-block-mini-cart__footer {
