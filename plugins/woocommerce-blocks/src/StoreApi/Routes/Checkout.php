@@ -13,7 +13,6 @@ use Automattic\WooCommerce\Blocks\StoreApi\Utilities\InvalidStockLevelsInCartExc
 use Automattic\WooCommerce\Blocks\StoreApi\Utilities\OrderController;
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStock;
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStockException;
-
 /**
  * Checkout class.
  *
@@ -28,29 +27,6 @@ class Checkout extends AbstractCartRoute {
 	 * @var \WC_Order
 	 */
 	private $order = null;
-
-	/**
-	 * Order controller class instance.
-	 *
-	 * @var OrderController
-	 */
-	protected $order_controller;
-
-	/**
-	 * Constructor accepts two types of schema; one for the item being returned, and one for the cart as a whole. These
-	 * may be the same depending on the route.
-	 *
-	 * @param CartSchema      $cart_schema Schema class for the cart.
-	 * @param AbstractSchema  $item_schema Schema class for this route's items if it differs from the cart schema.
-	 * @param CartController  $cart_controller Cart controller class.
-	 * @param OrderController $order_controller Order controller class.
-	 */
-	public function __construct( CartSchema $cart_schema, AbstractSchema $item_schema = null, CartController $cart_controller, OrderController $order_controller ) {
-		$this->schema           = is_null( $item_schema ) ? $cart_schema : $item_schema;
-		$this->cart_schema      = $cart_schema;
-		$this->cart_controller  = $cart_controller;
-		$this->order_controller = $order_controller;
-	}
 
 	/**
 	 * Get the path of this REST route.

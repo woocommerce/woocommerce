@@ -87,8 +87,8 @@ abstract class AbstractRoute implements RouteInterface {
 	/**
 	 * Converts an error to a response object. Based on \WP_REST_Server.
 	 *
-	 * @param WP_Error $error WP_Error instance.
-	 * @return WP_REST_Response List of associative arrays with code and message keys.
+	 * @param \WP_Error $error WP_Error instance.
+	 * @return \WP_REST_Response List of associative arrays with code and message keys.
 	 */
 	protected function error_to_response( $error ) {
 		$error_data = $error->get_error_data();
