@@ -505,15 +505,8 @@ class OrderController {
 				'shipping_state'      => wc()->customer->get_shipping_state(),
 				'shipping_postcode'   => wc()->customer->get_shipping_postcode(),
 				'shipping_country'    => wc()->customer->get_shipping_country(),
+				'shipping_phone'      => wc()->customer->get_shipping_phone(),
 			]
 		);
-
-		$shipping_phone_value = is_callable( [ wc()->customer, 'get_shipping_phone' ] ) ? wc()->customer->get_shipping_phone() : wc()->customer->get_meta( 'shipping_phone', true );
-
-		if ( is_callable( [ $order, 'set_shipping_phone' ] ) ) {
-			$order->set_shipping_phone( $shipping_phone_value );
-		} else {
-			$order->update_meta_data( '_shipping_phone', $shipping_phone_value );
-		}
 	}
 }

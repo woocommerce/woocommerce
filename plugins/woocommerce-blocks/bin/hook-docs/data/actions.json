@@ -268,11 +268,11 @@
             }
         },
         {
-            "name": "woocommerce_blocks_cart_update_order_from_customer_request",
-            "file": "StoreApi/Routes/CartUpdateCustomer.php",
+            "name": "woocommerce_blocks_cart_update_order_from_request",
+            "file": "StoreApi/Routes/AbstractCartRoute.php",
             "type": "action",
             "doc": {
-                "description": "Fires when the Checkout Block/Store API updates an existing draft order from customer data.",
+                "description": "Fires when the order is synced with cart data from a cart route.",
                 "long_description": "",
                 "tags": [
                     {

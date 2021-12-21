@@ -19,7 +19,7 @@
  - [woocommerce_blocks_cart_enqueue_data](#woocommerce_blocks_cart_enqueue_data)
  - [woocommerce_blocks_cart_enqueue_data](#woocommerce_blocks_cart_enqueue_data-1)
  - [woocommerce_blocks_cart_update_customer_from_request](#woocommerce_blocks_cart_update_customer_from_request)
- - [woocommerce_blocks_cart_update_order_from_customer_request](#woocommerce_blocks_cart_update_order_from_customer_request)
+ - [woocommerce_blocks_cart_update_order_from_request](#woocommerce_blocks_cart_update_order_from_request)
  - [woocommerce_blocks_checkout_enqueue_data](#woocommerce_blocks_checkout_enqueue_data)
  - [woocommerce_blocks_checkout_order_processed](#woocommerce_blocks_checkout_order_processed)
  - [woocommerce_blocks_checkout_update_order_from_request](#woocommerce_blocks_checkout_update_order_from_request)
@@ -261,13 +261,13 @@ File: [StoreApi/Routes/CartUpdateCustomer.php](../src/StoreApi/Routes/CartUpdate
 
 ---
 
-## woocommerce_blocks_cart_update_order_from_customer_request
+## woocommerce_blocks_cart_update_order_from_request
 
 
-Fires when the Checkout Block/Store API updates an existing draft order from customer data.
+Fires when the order is synced with cart data from a cart route.
 
 ```php
-do_action( 'woocommerce_blocks_cart_update_order_from_customer_request', \WC_Order $draft_order, \WC_Customer $customer, \WP_REST_Request $request )
+do_action( 'woocommerce_blocks_cart_update_order_from_request', \WC_Order $draft_order, \WC_Customer $customer, \WP_REST_Request $request )
 ```
 
 ### Parameters
@@ -281,7 +281,7 @@ do_action( 'woocommerce_blocks_cart_update_order_from_customer_request', \WC_Ord
 ### Source
 
 
-File: [StoreApi/Routes/CartUpdateCustomer.php](../src/StoreApi/Routes/CartUpdateCustomer.php)
+File: [StoreApi/Routes/AbstractCartRoute.php](../src/StoreApi/Routes/AbstractCartRoute.php)
 
 ---
 

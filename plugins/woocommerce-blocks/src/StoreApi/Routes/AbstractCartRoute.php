@@ -4,13 +4,16 @@ namespace Automattic\WooCommerce\Blocks\StoreApi\Routes;
 use Automattic\WooCommerce\Blocks\StoreApi\Schemas\AbstractSchema;
 use Automattic\WooCommerce\Blocks\StoreApi\Schemas\CartSchema;
 use Automattic\WooCommerce\Blocks\StoreApi\Utilities\CartController;
-
+use Automattic\WooCommerce\Blocks\StoreApi\Utilities\DraftOrderTrait;
+use Automattic\WooCommerce\Blocks\StoreApi\Utilities\OrderController;
 /**
  * Abstract Cart Route
  *
  * @internal This API is used internally by Blocks--it is still in flux and may be subject to revisions.
  */
 abstract class AbstractCartRoute extends AbstractRoute {
+	use DraftOrderTrait;
+
 	/**
 	 * Schema class for this route's response.
 	 *
@@ -33,17 +36,26 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	protected $cart_controller;
 
 	/**
+	 * Order controller class instance.
+	 *
+	 * @var OrderController
+	 */
+	protected $order_controller;
+
+	/**
 	 * Constructor accepts two types of schema; one for the item being returned, and one for the cart as a whole. These
 	 * may be the same depending on the route.
 	 *
-	 * @param CartSchema     $cart_schema Schema class for the cart.
-	 * @param AbstractSchema $item_schema Schema class for this route's items if it differs from the cart schema.
-	 * @param CartController $cart_controller Cart controller class.
+	 * @param CartSchema      $cart_schema Schema class for the cart.
+	 * @param AbstractSchema  $item_schema Schema class for this route's items if it differs from the cart schema.
+	 * @param CartController  $cart_controller Cart controller class.
+	 * @param OrderController $order_controller Order controller class.
 	 */
-	public function __construct( CartSchema $cart_schema, AbstractSchema $item_schema = null, CartController $cart_controller ) {
-		$this->schema          = is_null( $item_schema ) ? $cart_schema : $item_schema;
-		$this->cart_schema     = $cart_schema;
-		$this->cart_controller = $cart_controller;
+	public function __construct( CartSchema $cart_schema, AbstractSchema $item_schema = null, CartController $cart_controller, OrderController $order_controller ) {
+		$this->schema           = is_null( $item_schema ) ? $cart_schema : $item_schema;
+		$this->cart_schema      = $cart_schema;
+		$this->cart_controller  = $cart_controller;
+		$this->order_controller = $order_controller;
 	}
 
 	/**
@@ -74,6 +86,8 @@ abstract class AbstractCartRoute extends AbstractRoute {
 
 		if ( is_wp_error( $response ) ) {
 			$response = $this->error_to_response( $response );
+		} elseif ( in_array( $request->get_method(), [ 'POST', 'PUT', 'PATCH', 'DELETE' ], true ) ) {
+			$this->cart_updated( $request );
 		}
 
 		return $this->add_nonce_headers( $response );
@@ -100,6 +114,29 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	 */
 	protected function requires_nonce( \WP_REST_Request $request ) {
 		return 'GET' !== $request->get_method();
+	}
+
+	/**
+	 * Triggered after an update to cart data. Re-calculates totals and updates draft orders (if they already exist) to
+	 * keep all data in sync.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 */
+	protected function cart_updated( \WP_REST_Request $request ) {
+		$draft_order = $this->get_draft_order();
+
+		if ( $draft_order ) {
+			$this->order_controller->update_order_from_cart( $draft_order );
+
+			/**
+			 * Fires when the order is synced with cart data from a cart route.
+			 *
+			 * @param \WC_Order $draft_order Order object.
+			 * @param \WC_Customer $customer Customer object.
+			 * @param \WP_REST_Request $request Full details about the request.
+			 */
+			do_action( 'woocommerce_blocks_cart_update_order_from_request', $draft_order, $request );
+		}
 	}
 
 	/**

@@ -1,8 +1,8 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\StoreApi\Schemas;
 
-use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi;
+
 /**
  * AbstractSchema class.
  *
@@ -57,6 +57,13 @@ abstract class AbstractSchema {
 	}
 
 	/**
+	 * Return schema properties.
+	 *
+	 * @return array
+	 */
+	abstract public function get_properties();
+
+	/**
 	 * Recursive removal of arg_options.
 	 *
 	 * @param array $properties Schema properties.
@@ -94,7 +101,7 @@ abstract class AbstractSchema {
 	/**
 	 * Returns extended data for a specific endpoint.
 	 *
-	 * @param string $endpoint The endpoint identifer.
+	 * @param string $endpoint The endpoint identifier.
 	 * @param array  ...$passed_args An array of arguments to be passed to callbacks.
 	 * @return object the data that will get added.
 	 */
