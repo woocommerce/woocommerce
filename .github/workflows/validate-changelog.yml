@@ -13,7 +13,7 @@ jobs:
 
             - name: Create diff
               run: |
-                  npm install @actions/core
+                  pnpm install
                   mkdir tmp
                   git fetch origin trunk
                   git diff origin/trunk..HEAD --name-only > tmp/diff
