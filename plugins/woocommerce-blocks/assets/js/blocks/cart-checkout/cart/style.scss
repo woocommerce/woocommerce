@@ -238,13 +238,6 @@ table.wc-block-cart-items {
 		}
 	}
 
-	.wc-block-cart__sidebar {
-		& > div:not(.wc-block-components-totals-wrapper) {
-			margin-left: $gap;
-			margin-right: $gap;
-		}
-	}
-
 	.wc-block-components-radio-control__input {
 		left: 0;
 	}
