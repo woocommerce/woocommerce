@@ -104,7 +104,7 @@ const NoShippingPlaceholder = ( {
 	);
 };
 
-interface TotalShippingProps {
+export interface TotalShippingProps {
 	currency: Currency;
 	values: {
 		total_shipping: string;
@@ -115,7 +115,7 @@ interface TotalShippingProps {
 	className?: string;
 }
 
-const TotalsShipping = ( {
+export const TotalsShipping = ( {
 	currency,
 	values,
 	showCalculator = true,

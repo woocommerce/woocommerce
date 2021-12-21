@@ -13,7 +13,7 @@ import type { ReactElement } from 'react';
  */
 import TotalsItem from '../item';
 
-interface TotalsFeesProps {
+export interface TotalsFeesProps {
 	currency: Currency;
 	cartFees: CartFeeItem[];
 	className?: string;
