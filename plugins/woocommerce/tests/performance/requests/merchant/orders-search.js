@@ -35,7 +35,7 @@ export function ordersSearch() {
 		postTypeOrderSearchTrend.add(response.timings.duration);
 		check(response, {
 			"is status 200": (r) => r.status === 200,
-			"body contains: 'Orders' header": (response) =>
+			"body contains: 'Search results' subtitle": (response) =>
 				response.body.includes("Search results for:"),
 		});
 	});
