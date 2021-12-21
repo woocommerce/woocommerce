@@ -91,6 +91,13 @@ npm install
 npm run storybook
 ```
 
+If you would like to view the storybook docs in right-to-left styling, you can run this instead:
+
+```
+npm install
+npm run storybook-rtl
+```
+
 ## Common Issues
 
 If you're encountering any issue setting things up, chances are we have been there too. Please have a look at our [wiki](https://github.com/woocommerce/woocommerce-admin/wiki/Common-Issues) for a list of common problems.

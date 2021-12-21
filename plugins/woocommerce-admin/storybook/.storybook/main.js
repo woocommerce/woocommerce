@@ -22,4 +22,28 @@ module.exports = {
 	},
 
 	webpackFinal: webpackOverride,
+
+	previewHead: ( head ) => `
+		${ head }
+
+		${
+			process.env.USE_RTL_STYLE === 'true'
+				? `
+			<link href="experimental-css/style-rtl.css" rel="stylesheet" />
+			<link href="component-css/style-rtl.css" rel="stylesheet" />
+			`
+				: `
+			<link href="component-css/style.css" rel="stylesheet" />
+			<link href="experimental-css/style.css" rel="stylesheet" />
+			`
+		}
+
+		<style>
+			/* Use system font, consistent with WordPress core (wp-admin) */
+			body {
+				font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+					Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+			}
+		</style>
+	`,
 };
