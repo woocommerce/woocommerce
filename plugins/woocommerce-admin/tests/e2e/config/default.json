@@ -65,7 +65,11 @@
   "onboardingwizard": {
     "industry": "Test industry",
     "numberofproducts": "1 - 10",
-    "sellingelsewhere": "No"
+    "sellingelsewhere": "No",
+    "sellingOnAnotherPlatform": "Yes, on another platform",
+    "number_employees": "< 10",
+    "revenue": "Up to $2,500.00",
+    "other_platform_name": "Etsy"
   },
   "settings": {
     "shipping": {

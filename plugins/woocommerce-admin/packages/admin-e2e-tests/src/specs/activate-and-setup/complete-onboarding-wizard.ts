@@ -517,9 +517,79 @@ const testSubscriptionsInclusion = () => {
 	} );
 };
 
+const testBusinessDetailsForm = () => {
+	describe( 'A store that is selling elsewhere will see the "Number of employees” dropdown menu', () => {
+		const profileWizard = new OnboardingWizard( page );
+		const login = new Login( page );
+
+		beforeAll( async () => {
+			await login.login();
+		} );
+
+		afterAll( async () => {
+			await deactivateAndDeleteExtension( 'woocommerce-payments' );
+			await login.logout();
+		} );
+
+		it( 'can complete the store details and product types sections', async () => {
+			await profileWizard.navigate();
+
+			// Wait for "Continue" button to become active
+			await profileWizard.continue();
+
+			// Wait for usage tracking pop-up window to appear
+			await profileWizard.optionallySelectUsageTracking();
+
+			// Query for the industries checkboxes
+			await profileWizard.industry.isDisplayed();
+			await profileWizard.continue();
+			await profileWizard.productTypes.isDisplayed( 7 );
+			await profileWizard.productTypes.uncheckProducts();
+			// Select Physical
+			await profileWizard.productTypes.selectProduct(
+				'Physical products'
+			);
+
+			await profileWizard.continue();
+			await page.waitForNavigation( { waitUntil: 'networkidle0' } );
+		} );
+
+		it( 'can complete the business details tab', async () => {
+			await profileWizard.business.isDisplayed();
+
+			expect( page ).toMatchElement( 'label', {
+				text: 'How many employees do you have?',
+			} );
+
+			await profileWizard.business.selectProductNumber(
+				config.get( 'onboardingwizard.numberofproducts' )
+			);
+			await profileWizard.business.selectCurrentlySelling(
+				config.get( 'onboardingwizard.sellingOnAnotherPlatform' )
+			);
+			await profileWizard.business.selectEmployeesNumber(
+				config.get( 'onboardingwizard.number_employees' )
+			);
+			await profileWizard.business.selectRevenue(
+				config.get( 'onboardingwizard.revenue' )
+			);
+			await profileWizard.business.selectOtherPlatformName(
+				config.get( 'onboardingwizard.other_platform_name' )
+			);
+
+			await profileWizard.continue();
+			await profileWizard.business.expandRecommendedBusinessFeatures();
+			await profileWizard.business.uncheckAllRecommendedBusinessFeatures();
+			await profileWizard.continue();
+			await profileWizard.themes.isDisplayed();
+		} );
+	} );
+};
+
 module.exports = {
 	testAdminOnboardingWizard,
 	testSelectiveBundleWCPay,
 	testDifferentStoreCurrenciesWCPay,
 	testSubscriptionsInclusion,
+	testBusinessDetailsForm,
 };

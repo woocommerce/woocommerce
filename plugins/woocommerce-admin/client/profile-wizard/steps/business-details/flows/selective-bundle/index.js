@@ -22,6 +22,7 @@ import {
 	SETTINGS_STORE_NAME,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
+import classnames from 'classnames';
 
 /**
  * Internal dependencies
@@ -297,6 +298,17 @@ class BusinessDetails extends Component {
 		} );
 	}
 
+	getSelectControlProps( getInputProps, name = '' ) {
+		const { className, ...props } = getInputProps( name );
+		return {
+			...props,
+			className: classnames(
+				`woocommerce-profile-wizard__${ name.replace( /\_/g, '-' ) }`,
+				className
+			),
+		};
+	}
+
 	renderBusinessDetailsStep() {
 		const {
 			goToNextStep,
@@ -360,7 +372,10 @@ class BusinessDetails extends Component {
 										) }
 										options={ productCountOptions }
 										required
-										{ ...getInputProps( 'product_count' ) }
+										{ ...this.getSelectControlProps(
+											getInputProps,
+											'product_count'
+										) }
 									/>
 
 									<SelectControl
@@ -371,7 +386,10 @@ class BusinessDetails extends Component {
 										) }
 										options={ sellingVenueOptions }
 										required
-										{ ...getInputProps( 'selling_venues' ) }
+										{ ...this.getSelectControlProps(
+											getInputProps,
+											'selling_venues'
+										) }
 									/>
 
 									{ [
@@ -388,7 +406,8 @@ class BusinessDetails extends Component {
 											) }
 											options={ employeeOptions }
 											required
-											{ ...getInputProps(
+											{ ...this.getSelectControlProps(
+												getInputProps,
 												'number_employees'
 											) }
 										/>
@@ -413,7 +432,10 @@ class BusinessDetails extends Component {
 												formatAmount
 											) }
 											required
-											{ ...getInputProps( 'revenue' ) }
+											{ ...this.getSelectControlProps(
+												getInputProps,
+												'revenue'
+											) }
 										/>
 									) }
 
@@ -433,7 +455,8 @@ class BusinessDetails extends Component {
 													) }
 													options={ platformOptions }
 													required
-													{ ...getInputProps(
+													{ ...this.getSelectControlProps(
+														getInputProps,
 														'other_platform'
 													) }
 												/>
@@ -445,7 +468,8 @@ class BusinessDetails extends Component {
 															'woocommerce-admin'
 														) }
 														required
-														{ ...getInputProps(
+														{ ...this.getSelectControlProps(
+															getInputProps,
 															'other_platform_name'
 														) }
 													/>
