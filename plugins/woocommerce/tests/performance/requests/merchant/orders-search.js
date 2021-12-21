@@ -25,7 +25,7 @@ export function ordersSearch() {
 		);
 
 		response = http.get(
-			`${base_url}/wp-admin/edit.php?s&` +
+			`${base_url}/wp-admin/edit.php?s=${product_search_term}&` +
 			`post_status=all&post_type=shop_order&action=-1&m=0&_customer_user&` +
 			`paged=1&action2=-1`,
 			{
