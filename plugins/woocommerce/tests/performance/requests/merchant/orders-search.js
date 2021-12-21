@@ -36,7 +36,7 @@ export function ordersSearch() {
 		check(response, {
 			"is status 200": (r) => r.status === 200,
 			"body contains: 'Orders' header": (response) =>
-				response.body.includes("Orders</h1>"),
+				response.body.includes("Search results for:"),
 		});
 	});
 
