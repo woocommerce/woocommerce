@@ -9,7 +9,7 @@ import classNames from 'classnames';
  */
 import './style.scss';
 
-type CheckboxControlProps = {
+export type CheckboxControlProps = {
 	className?: string;
 	label?: string;
 	id?: string;
@@ -22,7 +22,7 @@ type CheckboxControlProps = {
 /**
  * Component used to show a checkbox control with styles.
  */
-const CheckboxControl = ( {
+export const CheckboxControl = ( {
 	className,
 	label,
 	id,

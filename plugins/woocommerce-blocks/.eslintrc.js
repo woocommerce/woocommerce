@@ -29,7 +29,6 @@ module.exports = {
 			'@woocommerce/settings',
 			'@woocommerce/shared-context',
 			'@woocommerce/shared-hocs',
-			'@woocommerce/knobs',
 			'@wordpress/a11y',
 			'@wordpress/api-fetch',
 			'@wordpress/block-editor',

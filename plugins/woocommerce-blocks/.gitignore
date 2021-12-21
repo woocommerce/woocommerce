@@ -8,6 +8,7 @@ project.properties
 .idea
 .vscode
 !.vscode/extensions.json
+!.vscode/storybook.code-snippets
 *.sublime-project
 *.sublime-workspace
 .sublimelinterrc

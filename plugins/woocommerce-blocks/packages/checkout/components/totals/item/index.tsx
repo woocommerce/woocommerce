@@ -12,7 +12,7 @@ import type { Currency } from '@woocommerce/price-format';
  */
 import './style.scss';
 
-interface TotalsItemProps {
+export interface TotalsItemProps {
 	className?: string;
 	currency: Currency;
 	label: string;

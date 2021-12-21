@@ -38,7 +38,6 @@ module.exports = ( { config: storybookConfig } ) => {
 		'@woocommerce/base-hooks': require.resolve(
 			'./__mocks__/woocommerce-base-hooks.js'
 		),
-		'@woocommerce/storybook': require.resolve( './knobs/index.js' ),
 		'wordpress-components': require.resolve(
 			'../node_modules/wordpress-components'
 		),

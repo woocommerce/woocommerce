@@ -16,7 +16,7 @@ interface Values {
 	total_items_tax: string;
 }
 
-interface SubtotalProps {
+export interface SubtotalProps {
 	className?: string;
 	currency: Currency;
 	values: Values | Record< string, never >;

@@ -19,7 +19,7 @@ interface Values {
 	total_tax: string;
 }
 
-interface TotalsTaxesProps {
+export interface TotalsTaxesProps {
 	className?: string;
 	currency: Currency;
 	showRateAfterTaxName: boolean;
