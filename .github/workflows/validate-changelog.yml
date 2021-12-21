@@ -13,6 +13,7 @@ jobs:
 
             - name: Create diff
               run: |
+                  npm install -g pnpm
                   pnpm install
                   mkdir tmp
                   git fetch origin trunk
