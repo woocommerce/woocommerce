@@ -59,7 +59,7 @@ class SpecRunner {
 		// Set up the note.
 		$note->set_title( $locale->title );
 		$note->set_content( $locale->content );
-		$note->set_content_data( (object) array() );
+		$note->set_content_data( isset( $spec->content_data ) ? $spec->content_data : (object) array() );
 		$note->set_status( $status );
 		$note->set_type( $spec->type );
 		$note->set_name( $spec->slug );
