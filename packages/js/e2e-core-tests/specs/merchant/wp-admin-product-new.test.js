@@ -40,7 +40,32 @@ const openNewProductAndVerify = async () => {
 	await expect(page.title()).resolves.toMatch('Add new product');
 }
 
-// mytodo: const selectActionVariations = async()=>{}
+/**
+ * Select a variation action from the actions menu.
+ *
+ * @param action item you selected from the variation actions menu
+ */
+const selectVariationAction = async ( action ) => {
+	await waitForSelector( page, 'select.variation_actions:not(:disabled)' );
+	await page.focus( 'select.variation_actions' );
+	await expect( page ).toSelect( 'select.variation_actions', action );
+};
+
+const clickGoButton = async () => {
+	await evalAndClick( 'a.do_variation_action' );
+};
+
+const saveChanges = async () => {
+	await page.focus( 'button.save-variation-changes' );
+	await expect( page ).toClick( 'button.save-variation-changes', {
+		text: 'Save changes',
+	} );
+	await uiUnblocked();
+};
+
+const expandVariations = async () => {
+	await waitAndClick( page, '.variations-pagenav .expand_all' );
+};
 
 const runAddSimpleProductTest = () => {
 	describe('Add New Simple Product Page', () => {
@@ -163,14 +188,14 @@ const runAddVariableProductTest = () => {
 			// Create variations from attributes
 			await waitForSelector( page, '.variations_tab' );
 			await waitAndClick( page, '.variations_tab a' );
-			await waitForSelector( page, 'select.variation_actions:not(:disabled)');
-			await page.focus('select.variation_actions');
-			await expect(page).toSelect('select.variation_actions', 'Create variations from all attributes');
+			await selectVariationAction('Create variations from all attributes');
 
 			// headless: false doesn't require this
-			const firstDialog = await expect(page).toDisplayDialog(async () => {
-				await evalAndClick( 'a.do_variation_action' );
-			});
+			const firstDialog = await expect( page ).toDisplayDialog(
+				async () => {
+					await clickGoButton();
+				}
+			);
 
 			await expect(firstDialog.message()).toMatch('Are you sure you want to link all variations?');
 
@@ -208,7 +233,7 @@ const runAddVariableProductTest = () => {
 				await expect( page ).toMatchElement( `select[name="attribute_attr-3[${index}]"]`, attr3 ? val2 : val1 );
 			}
 
-			await waitAndClick( page, '.variations-pagenav .expand_all');
+			await expandVariations();
 			await waitForSelectorWithoutThrow( 'input[name="variable_is_virtual[0]"]', 5 );
 			await setCheckbox('input[name="variable_is_virtual[0]"]');
 			await expect(page).toFill('input[name="variable_regular_price[0]"]', '9.99');
@@ -223,18 +248,12 @@ const runAddVariableProductTest = () => {
 			await expect(page).toFill('input[name="variable_width[2]"]', '20');
 			await expect(page).toFill('input[name="variable_height[2]"]', '15');
 
-			await page.focus('button.save-variation-changes');
-			await expect(page).toClick('button.save-variation-changes', {text: 'Save changes'});
-			await uiUnblocked();
+			await saveChanges();
 		});
 
 		it( 'can bulk-edit variations', async () => {
-			// Expand all variation panels.
-			await expect( page ).toClick(
-				'.toolbar-top .variations-pagenav .expand_all'
-			);
-
 			// Verify that all 'Downloadable' checkboxes are UNCHECKED.
+			await expandVariations();
 			for ( let i = 0; i < 8; i++ ) {
 				const chkbox = await page.$(
 					`input[name="variable_is_downloadable[${ i }]"]`
@@ -246,20 +265,14 @@ const runAddVariableProductTest = () => {
 			}
 
 			// Perform the 'Toggle "Downloadable"' bulk action
-			await expect( page ).toSelect(
-				'select.variation_actions',
-				'Toggle "Downloadable"'
-			);
-			await expect( page ).toClick( 'a.do_variation_action' );
-			await uiUnblocked();
-			await uiUnblocked();
+			await selectVariationAction('Toggle "Downloadable"');
 
-			// Expand all variation panels.
-			await expect( page ).toClick(
-				'.toolbar-top .variations-pagenav .expand_all'
-			);
+			await clickGoButton();
+			await uiUnblocked();
+			await uiUnblocked();
 
 			// Verify that all 'Downloadable' checkboxes are now CHECKED.
+			await expandVariations();
 			for ( let i = 0; i < 8; i++ ) {
 				const chkbox = await page.$(
 					`input[name="variable_is_downloadable[${ i }]"]`
@@ -273,13 +286,10 @@ const runAddVariableProductTest = () => {
 
 		it( 'can delete all variations', async () => {
 			// Select "Delete all variations" from the actions menu.
-			await expect( page ).toSelect(
-				'select.variation_actions',
-				'Delete all variations'
-			);
+			await selectVariationAction( 'Delete all variations' );
 			const firstDialog = await expect( page ).toDisplayDialog(
 				async () => {
-					await evalAndClick( 'a.do_variation_action' );
+					await clickGoButton();
 				}
 			);
 
@@ -296,10 +306,7 @@ const runAddVariableProductTest = () => {
 
 		it( 'can manually add a variation', async () => {
 			// Select "Add variation" from the actions menu.
-			await expect( page ).toSelect(
-				'select.variation_actions',
-				'Add variation'
-			);
+			await selectVariationAction( 'Add variation' );
 			await expect( page ).toClick( 'a.do_variation_action' );
 			await uiUnblocked();
 
@@ -310,10 +317,7 @@ const runAddVariableProductTest = () => {
 					defaultAttributes[ i ]
 				);
 			}
-			await expect( page ).toClick( 'button.save-variation-changes', {
-				text: 'Save changes',
-			} );
-			await uiUnblocked();
+			await saveChanges();
 
 			// Verify that attribute values were saved.
 			for ( let i = 0; i < defaultAttributes.length; i++ ) {
@@ -329,10 +333,7 @@ const runAddVariableProductTest = () => {
 		} );
 
 		it( 'can manage stock at variation level', async () => {
-			// Expand the variation
-			await expect( page ).toClick(
-				'.toolbar-top .variations-pagenav .expand_all'
-			);
+			await expandVariations();
 
 			// Enable "Manage stock?" option.
 			await setCheckbox( 'input.checkbox.variable_manage_stock' );
@@ -358,12 +359,7 @@ const runAddVariableProductTest = () => {
 				'input#variable_low_stock_amount0',
 				'10'
 			);
-
-			// Save changes.
-			await expect( page ).toClick( 'button.save-variation-changes', {
-				text: 'Save changes',
-			} );
-			await uiUnblocked();
+			await saveChanges();
 
 			// Verify that field values specific to stock management were saved.
 			// Expand the variation
@@ -401,11 +397,7 @@ const runAddVariableProductTest = () => {
 				);
 			}
 
-			// Save changes.
-			await expect( page ).toClick( 'button.save-variation-changes', {
-				text: 'Save changes',
-			} );
-			await uiUnblocked();
+			await saveChanges();
 		} );
 
 		it( 'can remove a variation', async () => {
@@ -415,7 +407,7 @@ const runAddVariableProductTest = () => {
 					await expect( page ).toClick( '.remove_variation.delete' );
 				}
 			);
-			await expect( confirmDialog.message() ).toMatch(
+			expect( confirmDialog.message() ).toMatch(
 				'Are you sure you want to remove this variation?'
 			);
 			await uiUnblocked();
