@@ -70,3 +70,6 @@ yarn.lock
 
 # Editors
 nbproject/private/
+
+# Test Results
+test-results.json
