@@ -48,6 +48,7 @@ const merchant = {
 		await Promise.all( [
 			page.click( 'input[type=submit]' ),
 			page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+			merchant.dismissOnboardingWizard(),
 		] );
 	},
 
