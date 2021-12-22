@@ -52,6 +52,7 @@ const merchant = {
 		await Promise.all( [
 			page.click( 'input[type=submit]' ),
 			page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+			merchant.dismissOnboardingWizard(),
 		] );
 	},
 
@@ -409,6 +410,41 @@ const merchant = {
 			await merchant.checkDatabaseUpdateComplete();
 		}
    },
+
+	/**
+	 * Dismiss the onboarding wizard if it is open.
+	 */
+	dismissOnboardingWizard: async () => {
+		let waitForNav = false;
+		const skipButton = await page.$( '.woocommerce-profile-wizard__footer-link' );
+		if ( skipButton ) {
+			await skipButton.click();
+			waitForNav = true;
+		}
+
+		// Dismiss usage tracking pop-up window if it appears on a new site
+		const usageTrackingHeader = await page.$( '.woocommerce-usage-modal button.is-secondary' );
+		if ( usageTrackingHeader ) {
+			await usageTrackingHeader.click();
+			waitForNav = true;
+		}
+
+		if ( waitForNav ) {
+			await page.waitForNavigation( { waitUntil: 'networkidle0' } );
+		}
+	},
+
+	/**
+	 * Expand or collapse the WP admin menu.
+	 * @param {boolean} collapse Flag to collapse or expand the menu. Default collapse.
+	 */
+	collapseAdminMenu: async ( collapse = true ) => {
+		const collapseButton = await page.$( '.folded #collapse-button' );
+		if ( ( ! collapseButton ) == collapseButton ) {
+			await collapseButton.click();
+		}
+
+	},
 };
 
 module.exports = merchant;
