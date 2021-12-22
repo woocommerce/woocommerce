@@ -362,25 +362,23 @@ const runAddVariableProductTest = () => {
 			await saveChanges();
 
 			// Verify that field values specific to stock management were saved.
-			// Expand the variation
-			await expect( page ).toClick(
-				'.toolbar-top .variations-pagenav .expand_all'
-			);
 
-			// Verify 'Stock quantity'.
+			await expandVariations();
+
+			// Stock quantity
 			const actualStockQty = await page.$eval(
 				'input#variable_stock0',
 				( stockQtyInput ) => stockQtyInput.value
 			);
 			expect( actualStockQty ).toEqual( '100' );
 
-			// Verify 'Allow backorders?'.
+			// Allow backorders?
 			await expect( page ).toMatchElement(
 				'select#variable_backorders0 option[selected]',
 				'Allow, but notify customer'
 			);
 
-			// Verify 'Low stock threshold'.
+			// Low stock threshold
 			const actualLowStockThresh = await page.$eval(
 				'input#variable_low_stock_amount0',
 				( lowStockThreshInput ) => lowStockThreshInput.value
