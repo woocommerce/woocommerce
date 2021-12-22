@@ -77,27 +77,6 @@ class WC_Admin_Notes extends DeprecatedClassFacade {
 }
 
 /**
- * WC_Admin_Notes_Choose_Niche.
- *
- * @deprecated since 1.7.0, use ChooseNiche
- */
-class WC_Admin_Notes_Choose_Niche extends DeprecatedClassFacade {
-	/**
-	 * The name of the non-deprecated class that this facade covers.
-	 *
-	 * @var string
-	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\ChooseNiche';
-
-	/**
-	 * The version that this class was deprecated in.
-	 *
-	 * @var string
-	 */
-	protected static $deprecated_in_version = '1.7.0';
-}
-
-/**
  * WC_Admin_Notes_Coupon_Page_Moved.
  *
  * @deprecated since 1.7.0, use CouponPageMoved
@@ -151,27 +130,6 @@ class WC_Admin_Notes_Deactivate_Plugin extends DeprecatedClassFacade {
 	 * @var string
 	 */
 	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\DeactivatePlugin';
-
-	/**
-	 * The version that this class was deprecated in.
-	 *
-	 * @var string
-	 */
-	protected static $deprecated_in_version = '1.7.0';
-}
-
-/**
- * WC_Admin_Notes_Draw_Attention.
- *
- * @deprecated since 1.7.0, use DrawAttention
- */
-class WC_Admin_Notes_Draw_Attention extends DeprecatedClassFacade {
-	/**
-	 * The name of the non-deprecated class that this facade covers.
-	 *
-	 * @var string
-	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\DrawAttention';
 
 	/**
 	 * The version that this class was deprecated in.
@@ -350,27 +308,6 @@ class WC_Admin_Notes_Launch_Checklist extends DeprecatedClassFacade {
 }
 
 /**
- * WC_Admin_Notes_Marketing.
- *
- * @deprecated since 1.7.0, use Marketing
- */
-class WC_Admin_Notes_Marketing extends DeprecatedClassFacade {
-	/**
-	 * The name of the non-deprecated class that this facade covers.
-	 *
-	 * @var string
-	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\Marketing';
-
-	/**
-	 * The version that this class was deprecated in.
-	 *
-	 * @var string
-	 */
-	protected static $deprecated_in_version = '1.7.0';
-}
-
-/**
  * WC_Admin_Notes_Migrate_From_Shopify.
  *
  * @deprecated since 1.7.0, use MigrateFromShopify
@@ -403,27 +340,6 @@ class WC_Admin_Notes_Mobile_App extends DeprecatedClassFacade {
 	 * @var string
 	 */
 	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\MobileApp';
-
-	/**
-	 * The version that this class was deprecated in.
-	 *
-	 * @var string
-	 */
-	protected static $deprecated_in_version = '1.7.0';
-}
-
-/**
- * WC_Admin_Notes_Need_Some_Inspiration.
- *
- * @deprecated since 1.7.0, use NeedSomeInspiration
- */
-class WC_Admin_Notes_Need_Some_Inspiration extends DeprecatedClassFacade {
-	/**
-	 * The name of the non-deprecated class that this facade covers.
-	 *
-	 * @var string
-	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\NeedSomeInspiration';
 
 	/**
 	 * The version that this class was deprecated in.
@@ -634,27 +550,6 @@ class WC_Admin_Notes_Set_Up_Additional_Payment_Types extends DeprecatedClassFaca
 	 * @var string
 	 */
 	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\SetUpAdditionalPaymentTypes';
-
-	/**
-	 * The version that this class was deprecated in.
-	 *
-	 * @var string
-	 */
-	protected static $deprecated_in_version = '1.7.0';
-}
-
-/**
- * WC_Admin_Notes_Start_Dropshipping_Business.
- *
- * @deprecated since 1.7.0, use StartDropshippingBusiness
- */
-class WC_Admin_Notes_Start_Dropshipping_Business extends DeprecatedClassFacade {
-	/**
-	 * The name of the non-deprecated class that this facade covers.
-	 *
-	 * @var string
-	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\Notes\StartDropshippingBusiness';
 
 	/**
 	 * The version that this class was deprecated in.

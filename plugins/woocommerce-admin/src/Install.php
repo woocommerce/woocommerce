@@ -543,6 +543,16 @@ class Install {
 			'wc-admin-home-screen-feedback',
 			'wc-admin-effortless-payments-by-mollie',
 			'wc-admin-google-ads-and-marketing',
+			'wc-admin-marketing-intro',
+			'wc-admin-draw-attention',
+			'wc-admin-need-some-inspiration',
+			'wc-admin-choose-niche',
+			'wc-admin-start-dropshipping-business',
+			'wc-admin-filter-by-product-variations-in-reports',
+			'wc-admin-learn-more-about-variable-products',
+			'wc-admin-getting-started-ecommerce-webinar',
+			'wc-admin-navigation-feedback',
+			'wc-admin-navigation-feedback-follow-up',
 		);
 
 		$additional_obsolete_notes_names = apply_filters(
