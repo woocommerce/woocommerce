@@ -30,6 +30,7 @@ const config = require( 'config' );
 const VirtualProductName = 'Virtual Product Name';
 const NonVirtualProductName = 'Non-Virtual Product Name';
 const simpleProductPrice = config.has('products.simple.price') ? config.get('products.simple.price') : '9.99';
+const defaultAttributes = [ 'val2', 'val1', 'val2' ];
 
 const openNewProductAndVerify = async () => {
 	// Go to "add product" page
@@ -263,18 +264,12 @@ const runAddVariableProductTest = () => {
 			await uiUnblocked();
 
 			// Set attribute values.
-			await expect( page ).toSelect(
-				'select[name="attribute_attr-1[0]"]',
-				'val2'
-			);
-			await expect( page ).toSelect(
-				'select[name="attribute_attr-2[0]"]',
-				'val1'
-			);
-			await expect( page ).toSelect(
-				'select[name="attribute_attr-3[0]"]',
-				'val2'
-			);
+			for ( let i = 0; i < defaultAttributes.length; i++ ) {
+				await expect( page ).toSelect(
+					`select[name="attribute_attr-${ i + 1 }[0]"]`,
+					defaultAttributes[ i ]
+				);
+			}
 			await expect( page ).toClick( 'button.save-variation-changes', {
 				text: 'Save changes',
 			} );
@@ -284,24 +279,16 @@ const runAddVariableProductTest = () => {
 			await uiUnblocked();
 
 			// Verify that attribute values were saved.
-			await expect( page ).toMatchElement(
-				'select[name="attribute_attr-1[0]"] option[selected]',
-				{
-					text: 'val2',
-				}
-			);
-			await expect( page ).toMatchElement(
-				'select[name="attribute_attr-2[0]"] option[selected]',
-				{
-					text: 'val1',
-				}
-			);
-			await expect( page ).toMatchElement(
-				'select[name="attribute_attr-3[0]"] option[selected]',
-				{
-					text: 'val2',
-				}
-			);
+			for ( let i = 0; i < defaultAttributes.length; i++ ) {
+				await expect( page ).toMatchElement(
+					`select[name="attribute_attr-${
+						i + 1
+					}[0]"] option[selected]`,
+					{
+						text: defaultAttributes[ i ],
+					}
+				);
+			}
 		} );
 
 		it( 'can manage stock at variation level', async () => {
@@ -312,6 +299,12 @@ const runAddVariableProductTest = () => {
 
 			// Enable "Manage stock?" option.
 			await setCheckbox( 'input.checkbox.variable_manage_stock' );
+
+			// Input a regular price
+			await expect( page ).toFill(
+				'input#variable_regular_price_0',
+				simpleProductPrice
+			);
 
 			// Verify that the "Stock status" dropdown menu disappears.
 			await expect( page ).toMatchElement( 'p.variable_stock_status', {
@@ -363,7 +356,39 @@ const runAddVariableProductTest = () => {
 		} );
 
 		it( 'can set variation defaults', async () => {
-			// mytodo
+			// Get the product permalink
+			const permalink = await page.$eval(
+				'#sample-permalink a',
+				( a ) => a.href
+			);
+
+			// Set default attribute values
+			for ( let i = 0; i < defaultAttributes.length; i++ ) {
+				await expect( page ).toSelect(
+					`select[name="default_attribute_attr-${ i + 1 }"]`,
+					defaultAttributes[ i ]
+				);
+			}
+
+			// Save changes.
+			await expect( page ).toClick( 'button.save-variation-changes', {
+				text: 'Save changes',
+			} );
+			await uiUnblocked();
+
+			// Navigate to the product URL
+			await page.goto( permalink, { waitUntil: 'networkidle0' } );
+
+			// Verify that default values per attribute were selected.
+			for ( let i = 0; i < defaultAttributes.length; i++ ) {
+				await expect( page ).toMatchElement(
+					`select#attr-${ i + 1 } option[selected]`,
+					defaultAttributes[ i ]
+				);
+			}
+
+			// Navigate back to Product page
+			await page.goBack( { waitUntil: 'networkidle0' } );
 		} );
 
 		it( 'can remove a variation', async () => {
