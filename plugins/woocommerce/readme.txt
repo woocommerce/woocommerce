@@ -233,7 +233,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Tweak - Add inbox_panel_view tracks event. ( [#8002](https://github.com/woocommerce/woocommerce-admin/pull/8002) )
 * Enhancement - Add tests to Subscriptions inclusion. ( [#7804](https://github.com/woocommerce/woocommerce-admin/pull/7804) )
 
-**WooCommerce Blocks - 6.4.0 & 6.5.0**
+**WooCommerce Blocks - 6.4.0 & 6.5.0 & 6.5.1**
 
 * Enhancement - Pass to payment methods a wrapper component that handles the loading state. ( [#5135](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5135) )
 * Enhancement - Added global styles (text color, link color, line height, and font size) to the Product Title block. ( [#5133](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5133) )
@@ -244,6 +244,13 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Reduce the size of the checkbox component label to prevent accidental input. ( [#5164](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5164) )
 * Fix - Lazy load missing translation files on frontend to ensure that all visible texts are translatable. ( [#5112](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5112) )
 * Fix - Fixed Featured Product Block search not working for large stores. ( [#5156](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5156) )
+* Fix - Fixed error reporting block templates do not exist after editing WooCommerce templates on WP 5.8. ( [#5425](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5425) )
+* Fix - Added By template column value is user friendly for modified WooCommerce block templates. ( [#5420](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5420) )
+* Fix - Avoid WooCommerce template names being editable. ( [#5385](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5385) )
+* Fix - Use the themes product archive block template for product category & product tag pages if the theme does not have more specific templates for those. ( [#5380](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5380) )
+* Fix - Fixed issue with variable products add to cart error, and gallery not updating to show correct product variant image. ( [#5346](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5346) )
+* Fix - Fix error when reverting WooCommerce templates. ( [#5342](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5342) )
+* Fix - Fix: WooCommerce block templates loading for WP 5.9 without Gutenberg plugin. ( [#5335](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5335) )
 
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
