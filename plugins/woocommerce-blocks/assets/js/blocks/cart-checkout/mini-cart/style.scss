@@ -66,9 +66,8 @@
 
 	.wc-block-mini-cart__items {
 		flex-grow: 1;
-		margin-right: -$gap;
 		overflow-y: auto;
-		padding-right: $gap;
+		padding: 0 $gap;
 
 		.wc-block-cart-items__row:last-child::after {
 			content: none;
@@ -83,21 +82,18 @@
 	display: flex;
 	flex-direction: column;
 	height: 100vh;
-	padding: $gap-largest $gap;
+	padding: 0;
+	justify-content: center;
 }
 
 .wc-block-mini-cart__title {
 	@include font-size(large);
-	margin-top: 0;
+	margin: $gap-largest $gap 0;
 }
 
 .wc-block-mini-cart__footer {
 	border-top: 1px solid $gray-300;
-	margin-bottom: -$gap-largest;
-	margin-left: -$gap;
-	margin-right: -$gap;
-	padding: $gap-large;
-
+	padding: $gap-large $gap;
 }
 
 .wc-block-components-totals-item.wc-block-mini-cart__footer-subtotal {
