@@ -1,7 +1,5 @@
 name: Smoke test release
-on:
-  release:
-    types: [published]
+on: pull_request
 jobs:
   login-run:
     name: Daily smoke test on release.
@@ -93,10 +91,19 @@ jobs:
         run: |
           ASSET_ID=$(jq ".release.assets[0].id" $GITHUB_EVENT_PATH)
 
-          curl https://api.github.com/repos/woocommerce/woocommerce/releases/assets/${ASSET_ID} -LJOH 'Accept: application/octet-stream'
+          curl https://api.github.com/repos/woocommerce/woocommerce/releases/assets/52302540 -LJOH 'Accept: application/octet-stream'
 
           unzip woocommerce.zip -d woocommerce
           mv woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
+      
+      - name: Copy relevant e2e files for testing purposes
+        run: |
+            mv ./code/woocommerce/node_modules ./package/woocommerce/plugins/woocommerce
+            mv ./code/woocommerce/package.json ./package/woocommerce/plugins/woocommerce
+            mv ./code/woocommerce/project.json ./package/woocommerce/plugins/woocommerce
+            mv ./code/woocommerce/legacy/project.json ./package/woocommerce/plugins/woocommerce/legacy
+            mv ./code/woocommerce/tests ./package/woocommerce/plugins/woocommerce
+            ls ./package/woocommerce/plugins/woocommerce/node_modules/.bin/wc-e2e
 
       - name: Run tests command.
         working-directory: package/woocommerce/plugins/woocommerce
