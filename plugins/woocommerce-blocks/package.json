@@ -147,7 +147,7 @@
 		"deep-freeze": "0.0.1",
 		"eslint-import-resolver-typescript": "2.5.0",
 		"eslint-import-resolver-webpack": "0.13.2",
-		"eslint-plugin-import": "2.22.1",
+		"eslint-plugin-import": "2.25.3",
 		"eslint-plugin-woocommerce": "file:bin/eslint-plugin-woocommerce",
 		"eslint-plugin-you-dont-need-lodash-underscore": "6.10.0",
 		"fs-extra": "9.1.0",
