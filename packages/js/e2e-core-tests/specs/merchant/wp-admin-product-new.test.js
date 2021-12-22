@@ -254,7 +254,6 @@ const runAddVariableProductTest = () => {
 		} );
 
 		it( 'can manually add a variation', async () => {
-			// mytodo
 			// Select "Add variation" from the actions menu.
 			await expect( page ).toSelect(
 				'select.variation_actions',
@@ -306,7 +305,61 @@ const runAddVariableProductTest = () => {
 		} );
 
 		it( 'can manage stock at variation level', async () => {
-			// mytodo
+			// Expand the variation
+			await expect( page ).toClick(
+				'.toolbar-top .variations-pagenav .expand_all'
+			);
+
+			// Enable "Manage stock?" option.
+			await setCheckbox( 'input.checkbox.variable_manage_stock' );
+
+			// Verify that the "Stock status" dropdown menu disappears.
+			await expect( page ).toMatchElement( 'p.variable_stock_status', {
+				visible: false,
+			} );
+
+			// Fill out the "Stock quantity", "Allow backorders?", and "Low stock threshold" fields.
+			await expect( page ).toFill( 'input#variable_stock0', '100' );
+			await expect( page ).toSelect(
+				'select#variable_backorders0',
+				'Allow, but notify customer'
+			);
+			await expect( page ).toFill(
+				'input#variable_low_stock_amount0',
+				'10'
+			);
+
+			// Save changes.
+			await expect( page ).toClick( 'button.save-variation-changes', {
+				text: 'Save changes',
+			} );
+			await uiUnblocked();
+
+			// Verify that field values specific to stock management were saved.
+			// Expand the variation
+			await expect( page ).toClick(
+				'.toolbar-top .variations-pagenav .expand_all'
+			);
+
+			// Verify 'Stock quantity'.
+			const actualStockQty = await page.$eval(
+				'input#variable_stock0',
+				( stockQtyInput ) => stockQtyInput.value
+			);
+			expect( actualStockQty ).toEqual( '100' );
+
+			// Verify 'Allow backorders?'.
+			await expect( page ).toMatchElement(
+				'select#variable_backorders0 option[selected]',
+				'Allow, but notify customer'
+			);
+
+			// Verify 'Low stock threshold'.
+			const actualLowStockThresh = await page.$eval(
+				'input#variable_low_stock_amount0',
+				( lowStockThreshInput ) => lowStockThreshInput.value
+			);
+			expect( actualLowStockThresh ).toEqual( '10' );
 		} );
 
 		it( 'can set variation defaults', async () => {
