@@ -222,8 +222,50 @@ const runAddVariableProductTest = () => {
 
 			await page.focus('button.save-variation-changes');
 			await expect(page).toClick('button.save-variation-changes', {text: 'Save changes'});
-			// @todo: https://github.com/woocommerce/woocommerce/issues/30580
 		});
+
+		it( 'can bulk-edit variations', async () => {
+			// mytodo
+		} );
+
+		it( 'can delete all variations', async () => {
+			// Select "Delete all variations" from the actions menu.
+			await expect( page ).toSelect(
+				'select.variation_actions',
+				'Delete all variations'
+			);
+			const firstDialog = await expect( page ).toDisplayDialog(
+				async () => {
+					await evalAndClick( 'a.do_variation_action' );
+				}
+			);
+
+			// Verify that confirmation dialog shows the correct message.
+			await expect( firstDialog.message() ).toMatch(
+				'Are you sure you want to delete all variations? This cannot be undone.'
+			);
+			await uiUnblocked();
+
+			// Verify that no variations were displayed.
+			const variationsCount = await page.$$( '.woocommerce_variation' );
+			expect( variationsCount ).toHaveLength( 0 );
+		} );
+
+		it( 'can manually add a variation', async () => {
+			// mytodo
+		} );
+
+		it( 'can set variation defaults', async () => {
+			// mytodo
+		} );
+
+		it( 'can manage stock at variation level', async () => {
+			// mytodo
+		} );
+
+		it( 'can remove a variation', async () => {
+			// mytodo
+		} );
 	});
 };
 
