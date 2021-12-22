@@ -39,6 +39,8 @@ const openNewProductAndVerify = async () => {
 	await expect(page.title()).resolves.toMatch('Add new product');
 }
 
+// mytodo: const selectActionVariations = async()=>{}
+
 const runAddSimpleProductTest = () => {
 	describe('Add New Simple Product Page', () => {
 		beforeAll(async () => {
@@ -253,13 +255,61 @@ const runAddVariableProductTest = () => {
 
 		it( 'can manually add a variation', async () => {
 			// mytodo
-		} );
+			// Select "Add variation" from the actions menu.
+			await expect( page ).toSelect(
+				'select.variation_actions',
+				'Add variation'
+			);
+			await expect( page ).toClick( 'a.do_variation_action' );
+			await uiUnblocked();
 
-		it( 'can set variation defaults', async () => {
-			// mytodo
+			// Set attribute values.
+			await expect( page ).toSelect(
+				'select[name="attribute_attr-1[0]"]',
+				'val2'
+			);
+			await expect( page ).toSelect(
+				'select[name="attribute_attr-2[0]"]',
+				'val1'
+			);
+			await expect( page ).toSelect(
+				'select[name="attribute_attr-3[0]"]',
+				'val2'
+			);
+			await expect( page ).toClick( 'button.save-variation-changes', {
+				text: 'Save changes',
+			} );
+
+			// Wait for attribute form to save (triggers 2 UI blocks)
+			await uiUnblocked();
+			await uiUnblocked();
+
+			// Verify that attribute values were saved.
+			await expect( page ).toMatchElement(
+				'select[name="attribute_attr-1[0]"] option[selected]',
+				{
+					text: 'val2',
+				}
+			);
+			await expect( page ).toMatchElement(
+				'select[name="attribute_attr-2[0]"] option[selected]',
+				{
+					text: 'val1',
+				}
+			);
+			await expect( page ).toMatchElement(
+				'select[name="attribute_attr-3[0]"] option[selected]',
+				{
+					text: 'val2',
+				}
+			);
 		} );
 
 		it( 'can manage stock at variation level', async () => {
+			// mytodo
+		} );
+
+		it( 'can set variation defaults', async () => {
 			// mytodo
 		} );
 
