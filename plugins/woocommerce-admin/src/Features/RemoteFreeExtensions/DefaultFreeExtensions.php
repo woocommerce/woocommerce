@@ -112,7 +112,7 @@ class DefaultFreeExtensions {
 			'woocommerce-payments'              => [
 				'description'    => sprintf(
 					/* translators: 1: opening product link tag. 2: closing link tag */
-					__( 'Accept credit cards with %1$sWooCommerce Payments%2$s', 'woocommerce-admin' ),
+					__( 'Accept credit cards and other popular payment methods with %1$sWooCommerce Payments%2$s', 'woocommerce-admin' ),
 					'<a href="https://woocommerce.com/products/woocommerce-payments" target="_blank">',
 					'</a>'
 				),
