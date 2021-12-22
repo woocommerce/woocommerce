@@ -2,16 +2,12 @@ const {
 	testAdminOnboardingWizard,
 	testSelectiveBundleWCPay,
 } = require( '@woocommerce/admin-e2e-tests' );
-/*
+
 const {
 	withRestApi,
 	IS_RETEST_MODE,
 } = require( '@woocommerce/e2e-utils' );
+const skipOnRetest = require( '../smoke-tests/skip-retest' );
 
-// Reset onboarding profile when re-running tests on a site
-if ( IS_RETEST_MODE ) {
-	withRestApi.resetOnboarding();
-}
-*/
-testAdminOnboardingWizard();
-testSelectiveBundleWCPay();
+skipOnRetest( testAdminOnboardingWizard, 'Onboarding wizard' );
+skipOnRetest( testSelectiveBundleWCPay, 'WC Pay' );

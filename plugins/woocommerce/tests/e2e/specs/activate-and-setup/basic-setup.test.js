@@ -1,3 +1,4 @@
 const { testAdminBasicSetup } = require( '@woocommerce/admin-e2e-tests' );
+const skipOnRetest = require( '../smoke-tests/skip-retest' );
 
-testAdminBasicSetup();
+skipOnRetest( testAdminBasicSetup, 'Basic setup' );

@@ -1,3 +1,4 @@
 const { testAdminAnalyticsPages } = require( '@woocommerce/admin-e2e-tests' );
+const skipOnRetest = require( '../smoke-tests/skip-retest' );
 
-testAdminAnalyticsPages();
+skipOnRetest( testAdminAnalyticsPages, 'Analytics pages' );
