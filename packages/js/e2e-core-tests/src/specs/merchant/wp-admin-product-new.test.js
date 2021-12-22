@@ -269,9 +269,6 @@ const runAddVariableProductTest = () => {
 			await expect( page ).toClick( 'button.save-variation-changes', {
 				text: 'Save changes',
 			} );
-
-			// Wait for attribute form to save (triggers 2 UI blocks)
-			await uiUnblocked();
 			await uiUnblocked();
 
 			// Verify that attribute values were saved.
@@ -372,6 +369,9 @@ const runAddVariableProductTest = () => {
 			} );
 			await uiUnblocked();
 
+			// Publish product.
+			await verifyAndPublish();
+
 			// Navigate to the product URL
 			await page.goto( permalink, { waitUntil: 'networkidle0' } );
 
@@ -385,10 +385,29 @@ const runAddVariableProductTest = () => {
 
 			// Navigate back to Product page
 			await page.goBack( { waitUntil: 'networkidle0' } );
+			await waitForSelector( page, '.variations_tab' );
+			await waitAndClick( page, '.variations_tab a' );
+			await waitForSelector(
+				page,
+				'select.variation_actions:not(:disabled)'
+			);
 		} );
 
 		it( 'can remove a variation', async () => {
-			// mytodo
+			// Click 'Remove' and confirm
+			const confirmDialog = await expect( page ).toDisplayDialog(
+				async () => {
+					await expect( page ).toClick( '.remove_variation.delete' );
+				}
+			);
+			await expect( confirmDialog.message() ).toMatch(
+				'Are you sure you want to remove this variation?'
+			);
+			await uiUnblocked();
+
+			// Verify that no variations were displayed.
+			const variationsCount = await page.$$( '.woocommerce_variation' );
+			expect( variationsCount ).toHaveLength( 0 );
 		} );
 	});
 };
