@@ -159,7 +159,7 @@ const runAddVariableProductTest = () => {
 			await uiUnblocked();
 		});
 
-		it('can create variable product variations', async () => {
+		it('can create variations from all attributes', async () => {
 			// Create variations from attributes
 			await waitForSelector( page, '.variations_tab' );
 			await waitAndClick( page, '.variations_tab a' );
@@ -225,10 +225,50 @@ const runAddVariableProductTest = () => {
 
 			await page.focus('button.save-variation-changes');
 			await expect(page).toClick('button.save-variation-changes', {text: 'Save changes'});
+			await uiUnblocked();
 		});
 
 		it( 'can bulk-edit variations', async () => {
-			// mytodo
+			// Expand all variation panels.
+			await expect( page ).toClick(
+				'.toolbar-top .variations-pagenav .expand_all'
+			);
+
+			// Verify that all 'Downloadable' checkboxes are UNCHECKED.
+			for ( let i = 0; i < 8; i++ ) {
+				const chkbox = await page.$(
+					`input[name="variable_is_downloadable[${ i }]"]`
+				);
+				const isChecked = await (
+					await chkbox.getProperty( 'checked' )
+				 ).jsonValue();
+				expect( isChecked ).toEqual( false );
+			}
+
+			// Perform the 'Toggle "Downloadable"' bulk action
+			await expect( page ).toSelect(
+				'select.variation_actions',
+				'Toggle "Downloadable"'
+			);
+			await expect( page ).toClick( 'a.do_variation_action' );
+			await uiUnblocked();
+			await uiUnblocked();
+
+			// Expand all variation panels.
+			await expect( page ).toClick(
+				'.toolbar-top .variations-pagenav .expand_all'
+			);
+
+			// Verify that all 'Downloadable' checkboxes are now CHECKED.
+			for ( let i = 0; i < 8; i++ ) {
+				const chkbox = await page.$(
+					`input[name="variable_is_downloadable[${ i }]"]`
+				);
+				const isChecked = await (
+					await chkbox.getProperty( 'checked' )
+				 ).jsonValue();
+				expect( isChecked ).toEqual( true );
+			}
 		} );
 
 		it( 'can delete all variations', async () => {
@@ -353,12 +393,6 @@ const runAddVariableProductTest = () => {
 		} );
 
 		it( 'can set variation defaults', async () => {
-			// Get the product permalink
-			const permalink = await page.$eval(
-				'#sample-permalink a',
-				( a ) => a.href
-			);
-
 			// Set default attribute values
 			for ( let i = 0; i < defaultAttributes.length; i++ ) {
 				await expect( page ).toSelect(
@@ -372,29 +406,6 @@ const runAddVariableProductTest = () => {
 				text: 'Save changes',
 			} );
 			await uiUnblocked();
-
-			// Publish product.
-			await verifyAndPublish();
-
-			// Navigate to the product URL
-			await page.goto( permalink, { waitUntil: 'networkidle0' } );
-
-			// Verify that default values per attribute were selected.
-			for ( let i = 0; i < defaultAttributes.length; i++ ) {
-				await expect( page ).toMatchElement(
-					`select#attr-${ i + 1 } option[selected]`,
-					defaultAttributes[ i ]
-				);
-			}
-
-			// Navigate back to Product page
-			await page.goBack( { waitUntil: 'networkidle0' } );
-			await waitForSelector( page, '.variations_tab' );
-			await waitAndClick( page, '.variations_tab a' );
-			await waitForSelector(
-				page,
-				'select.variation_actions:not(:disabled)'
-			);
 		} );
 
 		it( 'can remove a variation', async () => {
