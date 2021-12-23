@@ -32,6 +32,7 @@ jQuery( function ( $ ) {
 			var report = '';
 
 			$( '.wc_status_table thead, .wc_status_table tbody' ).each( function() {
+				var export_type = $( this ).closest( 'table' ).find( 'thead th:eq(0)' ).data( 'export-type' ) || '';
 				if ( $( this ).is( 'thead' ) ) {
 					var label = $( this ).find( 'th:eq(0)' ).data( 'exportLabel' ) || $( this ).text();
 					report = report + '\n### ' + label.trim() + ' ###\n\n';
@@ -48,17 +49,20 @@ jQuery( function ( $ ) {
 
 						// Format value
 						var the_value   = $value_html.text().trim();
-						var value_array = the_value.split( ', ' );
 
-						if ( value_array.length > 1 ) {
-							// If value have a list of plugins ','.
-							// Split to add new line.
-							var temp_line ='';
-							$.each( value_array, function( key, line ) {
-								temp_line = temp_line + line + '\n';
-							});
-
-							the_value = temp_line;
+						if ( export_type != 'active-plugins' && export_type != 'inactive-plugins' && export_type != 'dropin-plugins' && export_type != 'must-use-plugins') {
+							var value_array = the_value.split( ', ' );
+	
+							if ( value_array.length > 1 ) {
+								// If value have a list of plugins ','.
+								// Split to add new line.
+								var temp_line ='';
+								$.each( value_array, function( key, line ) {
+									temp_line = temp_line + line + '\n';
+								});
+	
+								the_value = temp_line;
+							}
 						}
 
 						report = report + '' + the_name + ': ' + the_value + '\n';
