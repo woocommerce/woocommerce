@@ -96,9 +96,7 @@ jobs:
             await script({github, context})
 
       - name: Remove label from pull request.
-        if: |
-          ${{ contains(github.event.label.name, 'run: smoke tests') }} &&
-          always()
+        if: always()
         uses: actions-ecosystem/action-remove-labels@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
