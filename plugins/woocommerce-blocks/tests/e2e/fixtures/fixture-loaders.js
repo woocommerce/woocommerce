@@ -149,18 +149,36 @@ const deleteCategories = ( categories ) => {
  * @todo  add more products to e2e fixtures data.
  *
  * @param {Array}    categories Array of category objects so we can replace names with ids in the request.
+ * @param {Array}    attributes Array of attribute objects so we can replace names with ids in the request.
  * @param {Object[]} fixture An array of objects describing our data, defaults
  * to our fixture.
  * @return {Promise} a promise that resolves to an array of newly created products,
  * or rejects if the request failed.
  */
-const createProducts = ( categories, fixture = fixtures.Products() ) => {
+const createProducts = (
+	categories,
+	attributes,
+	fixture = fixtures.Products()
+) => {
 	const hydratedFixture = fixture.map( ( product ) => {
 		if ( categories && product.categories ) {
 			product.categories = product.categories.map( ( categoryName ) =>
 				categories.find(
 					( category ) => category.name === categoryName
 				)
+			);
+		}
+		if ( attributes && product.attributes ) {
+			product.attributes = product.attributes.map(
+				( productAttribute ) => {
+					return {
+						...attributes.find(
+							( attribute ) =>
+								attribute.name === productAttribute.name
+						),
+						...productAttribute,
+					};
+				}
 			);
 		}
 		return product;
@@ -334,7 +352,61 @@ const deleteBlockPages = ( ids ) => {
 	);
 };
 
+/**
+ * Create Products attributes and terms.
+ *
+ * @param {Object[]} fixture An array of objects describing our data, defaults
+ *                           to our fixture.
+ * @return {Promise} a promise that resolves to an array of newly created product attributes IDs, or rejects if the request failed.
+ */
+const createProductAttributes = ( fixture = fixtures.Attributes() ) => {
+	return Promise.all(
+		fixture.map( ( { attribute, terms } ) => {
+			return WooCommerce.post( 'products/attributes', attribute )
+				.then( ( response ) => {
+					return response.data.id;
+				} )
+				.then( ( attributeId ) => {
+					const termsPromise = WooCommerce.put(
+						`products/attributes/${ attributeId }/terms/batch`,
+						{ create: terms }
+					);
+
+					return [ attributeId, termsPromise ];
+				} )
+				.then( ( [ attributeId, termsPromise ] ) =>
+					Promise.all( [ attributeId, termsPromise ] ).then( () => ( {
+						name: attribute.name,
+						id: attributeId,
+					} ) )
+				)
+				.catch( () => {
+					// At this point, the attributes probably already exist. Get them and return them instead.
+					return WooCommerce.get( 'products/attributes' ).then(
+						( response ) => response.data
+					);
+				} );
+		} )
+	);
+};
+
+/**
+ * Delete Products attributes.
+ *
+ * Deleting all passed product attributes, will also delete terms within it.
+ *
+ * @param {number[]} ids an array of product attributes IDs to delete.
+ *
+ * @return {Promise} return a promise that resolves to an array of deleted data or
+ * reject if the request failed.
+ */
+const deleteProductAttributes = ( ids ) => {
+	return WooCommerce.post( 'products/attributes/batch', { delete: ids } );
+};
+
 module.exports = {
+	createProductAttributes,
+	deleteProductAttributes,
 	setupSettings,
 	setupPageSettings,
 	createTaxes,
