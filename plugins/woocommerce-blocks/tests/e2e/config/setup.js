@@ -17,6 +17,7 @@ import {
 	createShippingZones,
 	createBlockPages,
 	enablePaymentGateways,
+	createProductAttributes,
 } from '../fixtures/fixture-loaders';
 
 module.exports = async ( globalConfig ) => {
@@ -39,14 +40,20 @@ module.exports = async ( globalConfig ) => {
 			createCoupons(),
 			createCategories(),
 			createShippingZones(),
+			createProductAttributes(),
 			enablePaymentGateways(),
 			setupPageSettings(),
 		] );
-		const [ taxes, coupons, categories, shippingZones ] = results;
-
+		const [
+			taxes,
+			coupons,
+			categories,
+			shippingZones,
+			attributes,
+		] = results;
 		// Create products after categories.
-		const products = await createProducts( categories );
 
+		const products = await createProducts( categories, attributes );
 		/**
 		 * Create fixture reviews data for each product.
 		 */
@@ -60,6 +67,7 @@ module.exports = async ( globalConfig ) => {
 			products,
 			shippingZones,
 			pages,
+			attributes,
 		};
 	} catch ( e ) {
 		console.log( e );
