@@ -35,7 +35,7 @@ jobs:
 
       - name: Run smoke test.
         working-directory: package/woocommerce/plugins/woocommerce
-        if: steps.installation.outcome == 'success'
+        if: always()
         env:
           SMOKE_TEST_URL: ${{ secrets.SMOKE_TEST_URL }}
           SMOKE_TEST_ADMIN_USER: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
@@ -66,7 +66,7 @@ jobs:
 
       - name: Run E2E tests.
         working-directory: package/woocommerce/plugins/woocommerce
-        if: steps.installation.outcome == 'success'
+        if: always()
         env:
           SMOKE_TEST_URL: ${{ secrets.SMOKE_TEST_URL }}
           SMOKE_TEST_ADMIN_USER: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
