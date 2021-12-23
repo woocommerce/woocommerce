@@ -58,7 +58,7 @@ abstract class AbstractProductInventory extends Model {
 	public readonly isOnBackorder: boolean = false;
 
 	/**
-	 * Indicates when the threshold for when low stock notification will be sent to the store admin.
+	 * Indicates the threshold for when the low stock notification will be sent to the merchant.
 	 *
 	 * @type {number}
 	 */
