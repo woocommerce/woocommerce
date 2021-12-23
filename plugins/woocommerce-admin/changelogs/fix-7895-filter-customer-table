@@ -1,0 +1,4 @@
+Significance: patch
+Type: Fix
+
+Fix unexpected analytics report table filter results. #8072

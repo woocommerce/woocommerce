@@ -598,7 +598,9 @@ export default compose(
 			SETTINGS_STORE_NAME
 		).getSetting( 'wc_admin', 'wcAdminSettings' );
 
-		if ( isRequesting ) {
+		const noSearchResultsFound =
+			query.search && ! ( query[ endpoint ] && query[ endpoint ].length );
+		if ( isRequesting || noSearchResultsFound ) {
 			return EMPTY_OBJECT;
 		}
 
