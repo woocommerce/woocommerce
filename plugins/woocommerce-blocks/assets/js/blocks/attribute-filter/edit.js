@@ -20,6 +20,7 @@ import { getAdminLink, getSetting } from '@woocommerce/settings';
 import HeadingToolbar from '@woocommerce/editor-components/heading-toolbar';
 import BlockTitle from '@woocommerce/editor-components/block-title';
 import ToggleButtonControl from '@woocommerce/editor-components/toggle-button-control';
+import classnames from 'classnames';
 
 /**
  * Internal dependencies
@@ -384,7 +385,12 @@ const Edit = ( { attributes, setAttributes, debouncedSpeak } ) => {
 			{ isEditing ? (
 				renderEditMode()
 			) : (
-				<div className={ className }>
+				<div
+					className={ classnames(
+						className,
+						'wc-block-attribute-filter'
+					) }
+				>
 					<BlockTitle
 						className="wc-block-attribute-filter__title"
 						headingLevel={ headingLevel }

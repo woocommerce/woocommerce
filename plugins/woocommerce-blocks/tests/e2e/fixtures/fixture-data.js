@@ -5,6 +5,43 @@
  */
 
 /**
+ * Product attributes fixture data, using the create attribute and batch create terms.
+ *
+ * @see {@link https://woocommerce.github.io/woocommerce-rest-api-docs/#create-a-product-attribute|Create a product attribute}
+ * @see {@link https://woocommerce.github.io/woocommerce-rest-api-docs/#batch-update-attribute-terms|Batch update attribute terms}
+ */
+const Attributes = () => [
+	{
+		attribute: { name: 'Capacity' },
+		terms: [
+			{
+				name: '32gb',
+			},
+			{
+				name: '64gb',
+			},
+			{
+				name: '128gb',
+			},
+		],
+	},
+	{
+		attribute: { name: 'Shade' },
+		terms: [
+			{
+				name: 'Red',
+			},
+			{
+				name: 'Blue',
+			},
+			{
+				name: 'Black',
+			},
+		],
+	},
+];
+
+/**
  * Coupons fixture data, using the create batch endpoint
  *
  * @see {@link https://woocommerce.github.io/woocommerce-rest-api-docs/#batch-update-coupons|Batch update coupons}
@@ -115,6 +152,48 @@ const Products = () => [
 			},
 		],
 		categories: [ 'Music' ],
+	},
+	{
+		name: '128GB USB Stick',
+		type: 'simple',
+		regular_price: '2.99',
+		virtual: false,
+		downloadable: false,
+		images: [
+			{
+				src:
+					'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/cd_4_angle.jpg',
+			},
+		],
+		attributes: [
+			{
+				name: 'Capacity',
+				position: 0,
+				visible: true,
+				options: [ '128gb' ],
+			},
+		],
+	},
+	{
+		name: '32GB USB Stick',
+		type: 'simple',
+		regular_price: '1.99',
+		virtual: false,
+		downloadable: false,
+		images: [
+			{
+				src:
+					'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/cd_4_angle.jpg',
+			},
+		],
+		attributes: [
+			{
+				name: 'Capacity',
+				position: 0,
+				visible: true,
+				options: [ '32gb' ],
+			},
+		],
 	},
 	{
 		name: 'Woo Single #2',
@@ -283,6 +362,7 @@ const Taxes = () => [
 ];
 
 module.exports = {
+	Attributes,
 	Coupons,
 	ReviewsInProduct,
 	Categories,

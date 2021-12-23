@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import classNames from 'classnames';
 import { InspectorControls } from '@wordpress/block-editor';
 import {
 	Placeholder,
@@ -155,7 +156,12 @@ export default function ( { attributes, setAttributes } ) {
 			{ blocksConfig.productCount === 0 ? (
 				noProductsPlaceholder()
 			) : (
-				<div className={ className }>
+				<div
+					className={ classNames(
+						className,
+						'wp-block-woocommerce-price-filter'
+					) }
+				>
 					{ getInspectorControls() }
 					<BlockTitle
 						className="wc-block-price-filter__title"

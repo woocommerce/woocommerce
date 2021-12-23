@@ -39,7 +39,6 @@ Since these drive the user interface, they need to run against a test environmen
 To set up to run e2e tests:
 
 -   `npm run build:e2e-test` builds the assets (js/css), you can exclude this step if you've already got built files to test with.
--   `npm run wp-env clean` to clean the test env
 -   `npm run wp-env start` to start the test environment
 
     Then, to run the tests:
@@ -48,6 +47,7 @@ To set up to run e2e tests:
 
 When you're iterating on a new test you'll often run this repeatedly, as you develop, until your test is just right.
 
+Between tests, especially when they rely on the fixture data added, it might help to run `npm run wp-env clean`.
 When you're done, you may want to shut down the test environment:
 
 -   `npm run wp-env stop` to stop the test environment

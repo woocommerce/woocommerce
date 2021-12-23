@@ -1,0 +1,1 @@
+{"title":"Active Product Filters Block","pageContent":"<!-- wp:woocommerce/active-filters -->\n<div class=\"wp-block-woocommerce-active-filters is-loading\" data-display-style=\"list\" data-heading=\"Active filters\" data-heading-level=\"3\"><span aria-hidden=\"true\" class=\"wc-block-active-product-filters__placeholder\"></span></div>\n<!-- /wp:woocommerce/active-filters -->"}
