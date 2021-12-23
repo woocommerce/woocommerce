@@ -103,7 +103,6 @@ jobs:
             mv ./code/woocommerce/project.json ./package/woocommerce/plugins/woocommerce
             mv ./code/woocommerce/legacy/project.json ./package/woocommerce/plugins/woocommerce/legacy
             mv ./code/woocommerce/tests ./package/woocommerce/plugins/woocommerce
-            ls ./package/woocommerce/plugins/woocommerce/node_modules/.bin/wc-e2e
 
       - name: Run tests command.
         working-directory: package/woocommerce/plugins/woocommerce
