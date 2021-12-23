@@ -216,13 +216,13 @@ class BlockTemplateUtils {
 	public static function convert_slug_to_title( $template_slug ) {
 		switch ( $template_slug ) {
 			case 'single-product':
-				return __( 'Single Product Page', 'woo-gutenberg-products-block' );
+				return __( 'Single Product', 'woo-gutenberg-products-block' );
 			case 'archive-product':
-				return __( 'Product Archive Page', 'woo-gutenberg-products-block' );
+				return __( 'Product Archive', 'woo-gutenberg-products-block' );
 			case 'taxonomy-product_cat':
-				return __( 'Product Category Page', 'woo-gutenberg-products-block' );
+				return __( 'Product Category', 'woo-gutenberg-products-block' );
 			case 'taxonomy-product_tag':
-				return __( 'Product Tag Page', 'woo-gutenberg-products-block' );
+				return __( 'Product Tag', 'woo-gutenberg-products-block' );
 			default:
 				// Replace all hyphens and underscores with spaces.
 				return ucwords( preg_replace( '/[\-_]/', ' ', $template_slug ) );
