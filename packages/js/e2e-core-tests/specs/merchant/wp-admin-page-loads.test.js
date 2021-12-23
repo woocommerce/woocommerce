@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-const { merchant, waitForSelectorWithoutThrow } = require( '@woocommerce/e2e-utils' );
+const { merchant } = require( '@woocommerce/e2e-utils' );
 const { MENUS } = require( '../data/elements' );
 
 /**

@@ -440,7 +440,7 @@ const merchant = {
 	 */
 	collapseAdminMenu: async ( collapse = true ) => {
 		const collapseButton = await page.$( '.folded #collapse-button' );
-		if ( ( ! collapseButton ) == collapseButton ) {
+		if ( ( ! collapseButton ) == collapse ) {
 			await collapseButton.click();
 		}
 
