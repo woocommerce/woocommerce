@@ -60,7 +60,7 @@ abstract class AbstractProductInventory extends Model {
 	/**
 	 * Indicates when the threshold for when low stock notification will be sent to the store admin.
 	 *
-	 * @type {boolean}
+	 * @type {number}
 	 */
 	public readonly lowStockThreshold: number = -1;
 }
