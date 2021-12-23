@@ -1,5 +1,7 @@
 name: Smoke test release
-on: pull_request
+on:
+  release:
+    types: [published]
 jobs:
   login-run:
     name: Daily smoke test on release.
@@ -91,7 +93,7 @@ jobs:
         run: |
           ASSET_ID=$(jq ".release.assets[0].id" $GITHUB_EVENT_PATH)
 
-          curl https://api.github.com/repos/woocommerce/woocommerce/releases/assets/52302540 -LJOH 'Accept: application/octet-stream'
+          curl https://api.github.com/repos/woocommerce/woocommerce/releases/assets/${ASSET_ID} -LJOH 'Accept: application/octet-stream'
 
           unzip woocommerce.zip -d woocommerce
           mv woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
