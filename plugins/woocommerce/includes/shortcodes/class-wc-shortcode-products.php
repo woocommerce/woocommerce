@@ -111,7 +111,7 @@ class WC_Shortcode_Products {
 		$attributes = $this->parse_legacy_attributes( $attributes );
 
 		$attributes = shortcode_atts(
-			array(
+			apply_filters( 'woocommerce_products_shortcode_atts', array(
 				'limit'          => '-1',      // Results limit.
 				'columns'        => '',        // Number of columns.
 				'rows'           => '',        // Number of rows. If defined, limit will be ignored.
@@ -131,7 +131,7 @@ class WC_Shortcode_Products {
 				'page'           => 1,         // Page for pagination.
 				'paginate'       => false,     // Should results be paginated.
 				'cache'          => true,      // Should shortcode output be cached.
-			),
+			) ),
 			$attributes,
 			$this->type
 		);
