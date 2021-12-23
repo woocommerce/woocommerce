@@ -20,8 +20,8 @@ const {
 const { config } = require( '@woocommerce/e2e-environment' );
 const simpleProductName = config.get( 'products.simple.name' );
 const singleProductPrice = config.get( 'products.simple.price', '9.99' );
-const singleProductPrice2 = '1' + config.get( 'products.simple.price', '19.99' );
-const singleProductPrice3 = '2' + config.get( 'products.simple.price', '29.99' );
+const singleProductPrice2 = '1' + singleProductPrice;
+const singleProductPrice3 = '2' + singleProductPrice;
 const clothing = 'Clothing';
 const audio = 'Audio';
 const hardware = 'Hardware';
