@@ -84,6 +84,7 @@ const Block = ( {
 			{ needsShipping && (
 				<TotalsWrapper>
 					<TotalsShipping
+						isCheckout={ true }
 						showCalculator={ false }
 						showRateSelector={ false }
 						values={ cartTotals }
