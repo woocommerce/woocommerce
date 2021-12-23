@@ -97,6 +97,14 @@ jobs:
 
           unzip woocommerce.zip -d woocommerce
           mv woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
+      
+      - name: Copy relevant e2e files for testing purposes
+        run: |
+            mv ./code/woocommerce/node_modules ./package/woocommerce/plugins/woocommerce
+            mv ./code/woocommerce/package.json ./package/woocommerce/plugins/woocommerce
+            mv ./code/woocommerce/project.json ./package/woocommerce/plugins/woocommerce
+            mv ./code/woocommerce/legacy/project.json ./package/woocommerce/plugins/woocommerce/legacy
+            mv ./code/woocommerce/tests ./package/woocommerce/plugins/woocommerce
 
       - name: Run tests command.
         working-directory: package/woocommerce/plugins/woocommerce
