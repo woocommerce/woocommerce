@@ -175,16 +175,10 @@ class BlockTemplatesController {
 		// @todo: Add apply_filters to _gutenberg_get_template_files() in Gutenberg to prevent duplication of logic.
 		foreach ( $template_files as $template_file ) {
 
-			// Avoid adding the same template if it's already in the array of $query_result.
-			if (
-				array_filter(
-					$query_result,
-					function( $query_result_template ) use ( $template_file ) {
-						return $query_result_template->slug === $template_file->slug &&
-								$query_result_template->theme === $template_file->theme;
-					}
-				)
-			) {
+			// If we have a template which is eligible for a fallback, we need to explicitly tell Gutenberg that
+			// it has a theme file (because it is using the fallback template file). And then `continue` to avoid
+			// adding duplicates.
+			if ( BlockTemplateUtils::set_has_theme_file_if_fallback_is_available( $query_result, $template_file ) ) {
 				continue;
 			}
 
@@ -348,14 +342,7 @@ class BlockTemplatesController {
 			}
 
 			// If the theme has an archive-product.html template, but not a taxonomy-product_cat.html template let's use the themes archive-product.html template.
-			if ( 'taxonomy-product_cat' === $template_slug && ! BlockTemplateUtils::theme_has_template( 'taxonomy-product_cat' ) && BlockTemplateUtils::theme_has_template( 'archive-product' ) ) {
-				$template_file = get_stylesheet_directory() . '/' . self::TEMPLATES_DIR_NAME . '/archive-product.html';
-				$templates[]   = BlockTemplateUtils::create_new_block_template_object( $template_file, $template_type, $template_slug, true );
-				continue;
-			}
-
-			// If the theme has an archive-product.html template, but not a taxonomy-product_tag.html template let's use the themes archive-product.html template.
-			if ( 'taxonomy-product_tag' === $template_slug && ! BlockTemplateUtils::theme_has_template( 'taxonomy-product_tag' ) && BlockTemplateUtils::theme_has_template( 'archive-product' ) ) {
+			if ( BlockTemplateUtils::template_is_eligible_for_product_archive_fallback( $template_slug ) ) {
 				$template_file = get_stylesheet_directory() . '/' . self::TEMPLATES_DIR_NAME . '/archive-product.html';
 				$templates[]   = BlockTemplateUtils::create_new_block_template_object( $template_file, $template_type, $template_slug, true );
 				continue;
