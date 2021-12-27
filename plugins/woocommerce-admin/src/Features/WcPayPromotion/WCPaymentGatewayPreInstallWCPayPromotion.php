@@ -24,7 +24,10 @@ class WCPaymentGatewayPreInstallWCPayPromotion extends \WC_Payment_Gateway {
 	 * Constructor
 	 */
 	public function __construct() {
-		$wc_pay_spec        = Init::get_wc_pay_promotion_spec();
+		$wc_pay_spec = Init::get_wc_pay_promotion_spec();
+		if ( ! $wc_pay_spec ) {
+			return;
+		}
 		$this->id           = static::GATEWAY_ID;
 		$this->method_title = $wc_pay_spec->title;
 		if ( property_exists( $wc_pay_spec, 'sub_title' ) ) {
