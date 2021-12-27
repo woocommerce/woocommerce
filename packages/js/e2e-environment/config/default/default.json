@@ -13,10 +13,22 @@
   },
   "products": {
     "simple": {
-      "name": "Simple product"
-    },
-    "variable": {
-      "name": "Variable Product with Three Variations",
+	  "name": "Simple product"
+	},
+	"variable": {
+	  "name": "Variable Product with Three Attributes",
+	  "defaultAttributes": [
+		{
+		  "id": 0,
+		  "name": "Size",
+		  "option": "Medium"
+		},
+		{
+		  "id": 0,
+		  "name": "Colour",
+		  "option": "Blue"
+		}
+	  ],
 	  "attributes": [
 		{
 		  "id": 0,
