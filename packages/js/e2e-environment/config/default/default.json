@@ -1,14 +1,14 @@
 {
   "url": "http://localhost:8084/",
   "users": {
-    "admin": {
-      "username": "admin",
-      "password": "password"
-    },
-    "customer": {
-      "username": "customer",
-      "password": "password"
-    }
+	"admin": {
+	  "username": "admin",
+	  "password": "password"
+	},
+	"customer": {
+	  "username": "customer",
+	  "password": "password"
+	}
   },
   "products": {
     "simple": {
@@ -54,7 +54,7 @@
 		  "sortOrder": 0
 		}
 	  ]
-    },
+	},
 	"variations": [
 	  {
 		"regularPrice": "19.99",
@@ -128,47 +128,47 @@
 	}
   },
   "addresses": {
-    "admin": {
-      "store": {
+	"admin": {
+	  "store": {
 		"email": "admin@woocommercecoree2etestsuite.com",
 		"firstname": "John",
-        "lastname": "Doe",
-        "company": "Automattic",
-        "country": "United States (US)",
-        "addressfirstline": "addr 1",
-        "addresssecondline": "addr 2",
-        "countryandstate": "United States (US) — California",
-        "city": "San Francisco",
-        "state": "CA",
-        "postcode": "94107"
-      }
-    },
-    "customer": {
-      "billing": {
-        "firstname": "John",
-        "lastname": "Doe",
-        "company": "Automattic",
-        "country": "United States (US)",
-        "addressfirstline": "addr 1",
-        "addresssecondline": "addr 2",
-        "city": "San Francisco",
-        "state": "CA",
-        "postcode": "94107",
-        "phone": "123456789",
-        "email": "john.doe@example.com"
-      },
-      "shipping": {
-        "firstname": "John",
-        "lastname": "Doe",
-        "company": "Automattic",
-        "country": "United States (US)",
-        "addressfirstline": "addr 1",
-        "addresssecondline": "addr 2",
-        "city": "San Francisco",
-        "state": "CA",
-        "postcode": "94107"
-      }
-    }
+		"lastname": "Doe",
+		"company": "Automattic",
+		"country": "United States (US)",
+		"addressfirstline": "addr 1",
+		"addresssecondline": "addr 2",
+		"countryandstate": "United States (US) — California",
+		"city": "San Francisco",
+		"state": "CA",
+		"postcode": "94107"
+	  }
+	},
+	"customer": {
+	  "billing": {
+		"firstname": "John",
+		"lastname": "Doe",
+		"company": "Automattic",
+		"country": "United States (US)",
+		"addressfirstline": "addr 1",
+		"addresssecondline": "addr 2",
+		"city": "San Francisco",
+		"state": "CA",
+		"postcode": "94107",
+		"phone": "123456789",
+		"email": "john.doe@example.com"
+	  },
+	  "shipping": {
+		"firstname": "John",
+		"lastname": "Doe",
+		"company": "Automattic",
+		"country": "United States (US)",
+		"addressfirstline": "addr 1",
+		"addresssecondline": "addr 2",
+		"city": "San Francisco",
+		"state": "CA",
+		"postcode": "94107"
+	  }
+	}
   },
   "orders": {
 	"basicPaidOrder": {
@@ -182,15 +182,15 @@
 	}
   },
   "onboardingwizard": {
-    "industry": "Test industry",
-    "numberofproducts": "1 - 10",
-    "sellingelsewhere": "No"
+	"industry": "Test industry",
+	"numberofproducts": "1 - 10",
+	"sellingelsewhere": "No"
   },
   "settings": {
-    "shipping": {
-      "zonename": "United States",
-      "zoneregions": "United States (US)",
-      "shippingmethod": "Free shipping"
-    }
+	"shipping": {
+	  "zonename": "United States",
+	  "zoneregions": "United States (US)",
+	  "shippingmethod": "Free shipping"
+	}
   }
 }
