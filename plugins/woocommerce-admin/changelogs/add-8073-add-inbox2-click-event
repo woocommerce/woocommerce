@@ -1,0 +1,4 @@
+Significance: patch
+Type: Add
+
+Add inbox_action_click track when a note gets clicked #8086

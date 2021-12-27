@@ -51,6 +51,8 @@ const onBodyLinkClick = ( note, innerLink ) => {
 	} );
 };
 
+let hasFiredPanelViewTrack = false;
+
 const renderNotes = ( {
 	hasNotes,
 	isBatchUpdating,
@@ -68,9 +70,12 @@ const renderNotes = ( {
 		return renderEmptyCard();
 	}
 
-	recordEvent( 'inbox_panel_view', {
-		total: notes.length,
-	} );
+	if ( ! hasFiredPanelViewTrack ) {
+		recordEvent( 'inbox_panel_view', {
+			total: notes.length,
+		} );
+		hasFiredPanelViewTrack = true;
+	}
 
 	const screen = getScreenName();
 	const onNoteVisible = ( note ) => {
@@ -269,6 +274,14 @@ const InboxPanel = ( { showHeader = true } ) => {
 
 	const onNoteActionClick = ( note, action ) => {
 		triggerNoteAction( note.id, action.id );
+		const screen = getScreenName();
+		recordEvent( 'inbox_action_click', {
+			note_content: note.content,
+			note_name: note.name,
+			note_title: note.title,
+			note_type: note.type,
+			screen,
+		} );
 	};
 
 	if ( isError ) {
