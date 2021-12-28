@@ -25,6 +25,18 @@
 - Tweak: Add inbox_panel_view tracks event. #8002
 - Enhancement: Add tests to Subscriptions inclusion. #7804
 
+== 2.9.3 12/15/2021 ==
+
+- Fix: Correctly match payment gateways by id #7994
+
+== 2.9.2 12/13/2021 ==
+
+- Fix: Fix shipping task completion status #8031
+
+== 2.9.1 12/07/2021 ==
+
+- Fix: Fix shipping task not offering step 3. #7985
+
 == 2.9.0 11/30/2021 ==
 
 - Fix: Do not clear `current` class from the entire page when updating wp-admin's menu. #7773
