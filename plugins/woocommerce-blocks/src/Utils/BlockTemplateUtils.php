@@ -7,6 +7,27 @@ namespace Automattic\WooCommerce\Blocks\Utils;
  */
 class BlockTemplateUtils {
 	/**
+	 * Directory names for block templates
+	 *
+	 * Directory names conventions for block templates have changed with Gutenberg 12.1.0,
+	 * however, for backwards-compatibility, we also keep the older conventions, prefixed
+	 * with `DEPRECATED_`.
+	 *
+	 * @var array {
+	 *     @var string DEPRECATED_TEMPLATES  Old directory name of the block templates directory.
+	 *     @var string DEPRECATED_TEMPLATE_PARTS  Old directory name of the block template parts directory.
+	 *     @var string TEMPLATES_DIR_NAME  Directory name of the block templates directory.
+	 *     @var string TEMPLATE_PARTS_DIR_NAME  Directory name of the block template parts directory.
+	 * }
+	 */
+	const DIRECTORY_NAMES = array(
+		'DEPRECATED_TEMPLATES'      => 'block-templates',
+		'DEPRECATED_TEMPLATE_PARTS' => 'block-template-parts',
+		'TEMPLATES'                 => 'templates',
+		'TEMPLATE_PARTS'            => 'parts',
+	);
+
+	/**
 	 * Returns an array containing the references of
 	 * the passed blocks and their inner blocks.
 	 *
@@ -245,14 +266,64 @@ class BlockTemplateUtils {
 	}
 
 	/**
+	 * Gets the first matching template part within themes directories
+	 *
+	 * Since [Gutenberg 12.1.0](https://github.com/WordPress/gutenberg/releases/tag/v12.1.0), the conventions for
+	 * block templates and parts directory has changed from `block-templates` and `block-templates-parts`
+	 * to `templates` and `parts` respectively.
+	 *
+	 * This function traverses all possible combinations of directory paths where a template or part
+	 * could be located and returns the first one which is readable, prioritizing the new convention
+	 * over the deprecated one, but maintaining that one for backwards compatibility.
+	 *
+	 * @param string $template_slug  The slug of the template (i.e. without the file extension).
+	 * @param string $template_type  Either `wp_template` or `wp_template_part`.
+	 *
+	 * @return string|null  The matched path or `null` if no match was found.
+	 */
+	public static function get_theme_template_path( $template_slug, $template_type = 'wp_template' ) {
+		$template_filename      = $template_slug . '.html';
+		$possible_templates_dir = 'wp_template' === $template_type ? array(
+			self::DIRECTORY_NAMES['TEMPLATES'],
+			self::DIRECTORY_NAMES['DEPRECATED_TEMPLATES'],
+		) : array(
+			self::DIRECTORY_NAMES['TEMPLATE_PARTS'],
+			self::DIRECTORY_NAMES['DEPRECATED_TEMPLATE_PARTS'],
+		);
+
+		// Combine the possible root directory names with either the template directory
+		// or the stylesheet directory for child themes.
+		$possible_paths = array_reduce(
+			$possible_templates_dir,
+			function( $carry, $item ) use ( $template_filename ) {
+				$filepath = DIRECTORY_SEPARATOR . $item . DIRECTORY_SEPARATOR . $template_filename;
+
+				$carry[] = get_template_directory() . $filepath;
+				$carry[] = get_stylesheet_directory() . $filepath;
+
+				return $carry;
+			},
+			array()
+		);
+
+		// Return the first matching.
+		foreach ( $possible_paths as $path ) {
+			if ( is_readable( $path ) ) {
+				return $path;
+			}
+		}
+
+		return null;
+	}
+
+	/**
 	 * Check if the theme has a template. So we know if to load our own in or not.
 	 *
 	 * @param string $template_name name of the template file without .html extension e.g. 'single-product'.
 	 * @return boolean
 	 */
 	public static function theme_has_template( $template_name ) {
-		return is_readable( get_template_directory() . '/block-templates/' . $template_name . '.html' ) ||
-			is_readable( get_stylesheet_directory() . '/block-templates/' . $template_name . '.html' );
+		return ! ! self::get_theme_template_path( $template_name, 'wp_template' );
 	}
 
 	/**
@@ -262,8 +333,7 @@ class BlockTemplateUtils {
 	 * @return boolean
 	 */
 	public static function theme_has_template_part( $template_name ) {
-		return is_readable( get_template_directory() . '/block-template-parts/' . $template_name . '.html' ) ||
-			is_readable( get_stylesheet_directory() . '/block-template-parts/' . $template_name . '.html' );
+		return ! ! self::get_theme_template_path( $template_name, 'wp_template_part' );
 	}
 
 	/**
@@ -311,8 +381,8 @@ class BlockTemplateUtils {
 	 *
 	 * It returns `true` if anything was changed, `false` otherwise.
 	 *
-	 * @param array $query_result Array of template objects.
-	 * @param array $template A specific template object which could have a fallback.
+	 * @param array  $query_result Array of template objects.
+	 * @param object $template A specific template object which could have a fallback.
 	 *
 	 * @return boolean
 	 */
