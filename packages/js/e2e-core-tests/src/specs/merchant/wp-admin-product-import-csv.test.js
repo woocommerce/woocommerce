@@ -17,11 +17,11 @@ const { it, describe, beforeAll, afterAll } = require( '@jest/globals' );
 const path = require( 'path' );
 const coreTestsPath = getCoreTestsRoot();
 const filePath = path.resolve(
-	coreTestsPath.packageRoot,
+	coreTestsPath.coreTestsRoot,
 	'test-data/sample_products.csv'
 );
 const filePathOverride = path.resolve(
-	coreTestsPath.packageRoot,
+	coreTestsPath.coreTestsRoot,
 	'test-data/sample_products_override.csv'
 );
 const productNames = [
