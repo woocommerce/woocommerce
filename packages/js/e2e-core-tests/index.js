@@ -1,6 +1,6 @@
 /*
  * Internal dependencies
  */
-const allSpecs = require( './specs' );
+const allSpecs = require( './src' );
 
 module.exports = allSpecs;
