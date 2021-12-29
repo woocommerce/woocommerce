@@ -7,7 +7,7 @@ const {
 	setCheckbox,
 	withRestApi,
 } = require( '@woocommerce/e2e-utils' );
-const getCoreTestsRoot = require( '../../core-tests-root' );
+const getCoreTestsRoot = require( '../../../core-tests-root' );
 
 /**
  * External dependencies
