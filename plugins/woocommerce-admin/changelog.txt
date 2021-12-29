@@ -1,4 +1,4 @@
-== 3.0.0 12/14/2021 ==
+== 3.0.0 12/28/2021 ==
 
 - Fix: Fix an issue with the code that makes use of an invalid parameter with a PHP function. The use of this invalid parameter causes PHP 8 to throw a Fatal Error. #7855
 - Fix: Fix TaskList UI experiment enablement logic. #7930
