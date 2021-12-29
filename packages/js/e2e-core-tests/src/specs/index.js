@@ -1,15 +1,12 @@
+/* eslint-disable jest/expect-expect */
 /*
  * Internal dependencies
  */
-const allSpecs = require( './specs' );
 
 // Setup and onboarding tests
 const runActivationTest = require( './activate-and-setup/activate.test' );
 const { runOnboardingFlowTest, runTaskListTest } = require( './activate-and-setup/onboarding-tasklist.test' );
 const runInitialStoreSettingsTest = require( './activate-and-setup/setup.test' );
-
-// API tests
-const runGroupedProductAPITest = require( './api/grouped-product' );
 
 // Shopper tests
 const runProductBrowseSearchSortTest = require( './shopper/front-end-product-browse-search-sort.test' );
@@ -25,6 +22,8 @@ const runVariableProductUpdateTest = require( './shopper/front-end-variable-prod
 const runCheckoutCreateAccountTest = require( './shopper/front-end-checkout-create-account.test' );
 const runCheckoutLoginAccountTest = require( './shopper/front-end-checkout-login-account.test' );
 const runCartCalculateShippingTest = require( './shopper/front-end-cart-calculate-shipping.test' );
+const runCartRedirectionTest = require( './shopper/front-end-cart-redirection.test' );
+const runOrderEmailReceivingTest = require( './shopper/front-end-order-email-receiving.test' );
 
 // Merchant tests
 const runAddNewShippingZoneTest = require ( './merchant/wp-admin-settings-shipping-zones.test' );
@@ -46,10 +45,17 @@ const runMerchantOrdersCustomerPaymentPage = require( './merchant/wp-admin-order
 const runMerchantOrderEmailsTest = require( './merchant/wp-admin-order-emails.test' );
 const runOrderSearchingTest = require( './merchant/wp-admin-order-searching.test' );
 const runAnalyticsPageLoadsTest = require( './merchant/wp-admin-analytics-page-loads.test' );
+const runImportProductsTest = require( './merchant/wp-admin-product-import-csv.test' );
+const runInitiateWccomConnectionTest = require( './merchant/wp-admin-extensions-connect-wccom.test' );
+const runAdminPageLoadTests = require( './merchant/wp-admin-page-loads.test.js' );
 
 // REST API tests
 const runExternalProductAPITest = require( './api/external-product.test' );
 const runCouponApiTest = require( './api/coupon.test' );
+const runGroupedProductAPITest = require( './api/grouped-product.test' );
+const runVariableProductAPITest = require( './api/variable-product.test' );
+const runOrderApiTest = require( './api/order.test' );
+const runTelemetryAPITest = require( './api/telemetry.test' );
 
 const runSetupOnboardingTests = () => {
 	runActivationTest();
@@ -72,9 +78,14 @@ const runShopperTests = () => {
 	runCheckoutCreateAccountTest();
 	runCheckoutLoginAccountTest();
 	runCartCalculateShippingTest();
+	runCartRedirectionTest();
+	runOrderEmailReceivingTest();
 };
 
 const runMerchantTests = () => {
+	runAddShippingClassesTest();
+	runImportProductsTest();
+	runOrderSearchingTest();
 	runAddNewShippingZoneTest();
 	runCreateCouponTest();
 	runCreateOrderTest();
@@ -111,7 +122,10 @@ module.exports = {
 	runTaskListTest,
 	runInitialStoreSettingsTest,
 	runSetupOnboardingTests,
+	runExternalProductAPITest,
 	runGroupedProductAPITest,
+	runVariableProductAPITest,
+	runCouponApiTest,
 	runCartApplyCouponsTest,
 	runCartPageTest,
 	runCheckoutApplyCouponsTest,
@@ -139,8 +153,20 @@ module.exports = {
 	runMerchantOrdersCustomerPaymentPage,
 	runMerchantOrderEmailsTest,
 	runMerchantTests,
+	runOrderSearchingTest,
+	runAddNewShippingZoneTest,
+	runProductBrowseSearchSortTest,
 	runApiTests,
+	runAddShippingClassesTest,
+	runAnalyticsPageLoadsTest,
 	runCheckoutCreateAccountTest,
-	runMyAccountCreateAccountTest,
+	runImportProductsTest,
+	runCheckoutLoginAccountTest,
+	runCartCalculateShippingTest,
 	runCartRedirectionTest,
+	runMyAccountCreateAccountTest,
+	runOrderEmailReceivingTest,
+	runInitiateWccomConnectionTest,
+	runTelemetryAPITest,
+	runAdminPageLoadTests,
 };
