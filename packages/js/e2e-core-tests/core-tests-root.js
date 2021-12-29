@@ -21,7 +21,7 @@ const getCoreTestsRoot = () => {
 	return {
 		appRoot: coreTestsPath,
 		moduleRoot: moduleDir,
-		coreTestsRoot: process.cwd()
+		coreTestsRoot: __dirname
 	};
 };
 
