@@ -9,7 +9,7 @@ import { pluginNames } from '@woocommerce/data';
 /**
  * Internal dependencies
  */
-import { SelectiveExtensionsBundle } from '../';
+import { SelectiveExtensionsBundle, ExtensionSection } from '../';
 
 jest.mock( '../../app-illustration', () => ( {
 	AppIllustration: jest.fn().mockReturnValue( '[illustration]' ),
@@ -128,5 +128,40 @@ describe( 'Selective extensions bundle', () => {
 		expect( getByText( 'Mailpoet Description' ) ).toBeInTheDocument();
 		expect( queryByText( 'Google Description' ) ).toBeInTheDocument();
 		expect( queryByText( 'Random Description' ) ).not.toBeInTheDocument();
+	} );
+
+	describe( '<ExtensionSection />', () => {
+		it( 'should render title and extensions', () => {
+			const title = 'This is title';
+			const { queryByText } = render(
+				<ExtensionSection
+					isResolving={ false }
+					title={ title }
+					extensions={ freeExtensions[ 0 ].plugins }
+					installExtensionOptions={ {} }
+					onCheckboxChange={ () => {} }
+				/>
+			);
+
+			expect( queryByText( title ) ).toBeInTheDocument();
+			freeExtensions[ 0 ].plugins.forEach( ( { description } ) => {
+				expect( queryByText( description ) ).toBeInTheDocument();
+			} );
+		} );
+
+		it( 'should render not title when no plugins', () => {
+			const title = 'This is title';
+			const { queryByText } = render(
+				<ExtensionSection
+					isResolving={ false }
+					title={ title }
+					extensions={ [] }
+					installExtensionOptions={ {} }
+					onCheckboxChange={ () => {} }
+				/>
+			);
+
+			expect( queryByText( title ) ).not.toBeInTheDocument();
+		} );
 	} );
 } );

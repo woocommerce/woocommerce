@@ -5,7 +5,7 @@ import {
 	filterBusinessExtensions,
 	prepareExtensionTrackingData,
 } from '../flows/selective-bundle';
-import { createInitialValues } from '../flows/selective-bundle/selective-extensions-bundle';
+import { createInstallExtensionOptions } from '../flows/selective-bundle/selective-extensions-bundle';
 
 describe( 'BusinessDetails', () => {
 	test( 'filtering extensions', () => {
@@ -101,7 +101,7 @@ describe( 'BusinessDetails', () => {
 		} );
 	} );
 
-	describe( 'createInitialValues', () => {
+	describe( 'createInstallExtensionOptions', () => {
 		test( 'selected by default', () => {
 			const extensions = [
 				{
@@ -125,7 +125,12 @@ describe( 'BusinessDetails', () => {
 				},
 			];
 
-			const values = createInitialValues( extensions, 'US', '', [] );
+			const values = createInstallExtensionOptions(
+				extensions,
+				'US',
+				'',
+				[]
+			);
 
 			expect( values ).toEqual(
 				expect.objectContaining( {
