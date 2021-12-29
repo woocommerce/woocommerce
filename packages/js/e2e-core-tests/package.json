@@ -8,8 +8,8 @@
     "url": "https://github.com/woocommerce/woocommerce.git"
   },
   "license": "GPL-3.0+",
-  "main": "index.js",
-  "module": "index.js",
+  "main": "build/index.js",
+  "module": "build-module/index.js",
   "dependencies": {
     "@jest/globals": "^26.4.2",
     "@wordpress/deprecated": "^3.2.3",
