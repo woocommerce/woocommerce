@@ -8,7 +8,8 @@
     "url": "https://github.com/woocommerce/woocommerce.git"
   },
   "license": "GPL-3.0+",
-  "main": "index.js",
+  "main": "build/index.js",
+  "module": "build-module/index.js",
   "dependencies": {
     "@jest/globals": "^26.4.2",
     "@wordpress/deprecated": "^3.2.3",
@@ -24,7 +25,9 @@
   },
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-	"build": "./bin/build.sh",
-	"prepare": "pnpm run build"
+	"prepare": "pnpm run build",
+	"clean": "rm -rf ./build ./build-module",
+	"compile": "node ./../bin/build.js",
+	"build": "./bin/build.sh && pnpm run clean && pnpm run compile"
   }
 }
