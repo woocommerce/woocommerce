@@ -119,22 +119,18 @@ class WC_Template_Loader {
 		$template_filename       = $template_name . '.html';
 		// Since Gutenberg 12.1.0, the conventions for block templates directories have changed,
 		// we should check both these possible directories for backwards-compatibility.
-		$possible_templates_dirs = array('templates', 'block-templates');
+		$possible_templates_dirs = array( 'templates', 'block-templates' );
 
 		// Combine the possible root directory names with either the template directory
 		// or the stylesheet directory for child themes, getting all possible block templates
 		// locations combinations.
-		$possible_paths = array_reduce(
-			$possible_templates_dirs,
-			function( $carry, $item ) use ( $template_filename ) {
-				$filepath = DIRECTORY_SEPARATOR . $item . DIRECTORY_SEPARATOR . $template_filename;
-
-				$carry[] = get_template_directory() . $filepath;
-				$carry[] = get_stylesheet_directory() . $filepath;
-
-				return $carry;
-			},
-			array()
+		$filepath        = DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . $template_filename;
+		$legacy_filepath = DIRECTORY_SEPARATOR . 'block-templates' . DIRECTORY_SEPARATOR . $template_filename;
+		$possible_paths  = array(
+			get_stylesheet_directory() . $filepath,
+			get_stylesheet_directory() . $legacy_filepath,
+			get_template_directory() . $filepath,
+			get_template_directory() . $legacy_filepath,
 		);
 
 		// Check the first matching one.
