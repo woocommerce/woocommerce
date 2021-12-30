@@ -226,9 +226,8 @@ class BusinessDetails extends Component {
 				'woocommerce-admin'
 			);
 		}
-
 		if (
-			! values.other_platform_name &&
+			! values.other_platform_name.trim().length &&
 			values.other_platform === 'other' &&
 			[ 'other', 'brick-mortar-other' ].includes( values.selling_venues )
 		) {

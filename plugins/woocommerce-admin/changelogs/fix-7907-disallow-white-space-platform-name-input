@@ -1,0 +1,4 @@
+Significance: patch
+Type: Fix
+
+Disallow whitespace as the platform name input. #8090
