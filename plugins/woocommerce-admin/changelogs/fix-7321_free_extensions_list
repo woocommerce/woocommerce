@@ -1,4 +1,0 @@
-Significance: patch
-Type: Fix
-
-Fix Onboarding flow where extensions might not be selected and installed. #7979

@@ -1,4 +1,0 @@
-Significance: patch
-Type: Fix
-
-Fix select-control component label/value alignment. #8045

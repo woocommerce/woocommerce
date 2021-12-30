@@ -1,4 +1,0 @@
-Significance: patch
-Type: Fix
-
-Prevent coupon move notice for new installs. #7995
