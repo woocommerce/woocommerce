@@ -361,6 +361,11 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 		$product_variations      = $wpdb->get_results( "SELECT ID as variation_id, post_parent as product_id from {$wpdb->posts} WHERE post_parent IN ( " . implode( ',', $prime_product_ids ) . ' )', ARRAY_A );
 		$prime_variation_ids     = array_column( $product_variations, 'variation_id' );
 		$variation_ids_by_parent = array_column( $product_variations, 'product_id', 'variation_id' );
+
+		if ( empty( $prime_variation_ids ) ) {
+			return;
+		}
+
 		$all_variation_meta_data = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT post_id as variation_id, meta_key as attribute_key, meta_value as attribute_value FROM {$wpdb->postmeta} WHERE post_id IN (" . implode( ',', array_map( 'esc_sql', $prime_variation_ids ) ) . ') AND meta_key LIKE %s',
@@ -368,7 +373,6 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 			)
 		);
 		// phpcs:enable
-
 		// Prepare the data to cache by indexing by the parent product.
 		$primed_data = array_reduce(
 			$all_variation_meta_data,
