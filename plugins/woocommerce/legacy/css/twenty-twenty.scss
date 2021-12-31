@@ -193,6 +193,7 @@ a.button {
 	font-family: $headings;
 	list-style: none;
 	overflow: hidden;
+	width: 100%;
 }
 
 .woocommerce-message,
@@ -1663,6 +1664,7 @@ a.reset_variations {
 
 	form[name="checkout"] {
 		display: table;
+		width: 100%;
 	}
 
 	.blockUI.blockOverlay {
@@ -2547,10 +2549,6 @@ a.reset_variations {
 			max-width: 1600px;
 			padding: 4vw 6vw;
 			margin: 0 auto;
-
-			.site-main {
-
-			}
 		}
 
 		.onsale {
