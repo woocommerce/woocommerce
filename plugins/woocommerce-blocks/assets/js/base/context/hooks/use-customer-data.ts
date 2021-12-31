@@ -4,7 +4,7 @@
 import { useDispatch } from '@wordpress/data';
 import { useEffect, useState, useCallback, useRef } from '@wordpress/element';
 import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
-import { useDebounce } from 'use-debounce';
+import { useDebouncedCallback } from 'use-debounce';
 import isShallowEqual from '@wordpress/is-shallow-equal';
 import {
 	formatStoreApiErrorMessage,
@@ -15,8 +15,6 @@ import {
 	CartResponseBillingAddress,
 	CartResponseShippingAddress,
 	BillingAddressShippingAddress,
-	CartBillingAddress,
-	CartShippingAddress,
 } from '@woocommerce/types';
 
 declare type CustomerData = {
@@ -82,12 +80,17 @@ export const useCustomerData = (): {
 	const { addErrorNotice, removeNotice } = useStoreNotices();
 
 	// Grab the initial values from the store cart hook.
+	// NOTE: The initial values may not be current if the cart has not yet finished loading. See cartIsLoading.
 	const {
 		billingAddress: initialBillingAddress,
 		shippingAddress: initialShippingAddress,
-	}: Omit< CustomerData, 'billingData' > & {
-		billingAddress: CartResponseBillingAddress;
+		cartIsLoading,
 	} = useStoreCart();
+
+	// We only want to update the local state once, otherwise the data on the checkout page gets overwritten
+	// with the initial state of the addresses. We also only want to start triggering updates to the server when the
+	// initial data has fully initialized. Track that header.
+	const [ isInitialized, setIsInitialized ] = useState< boolean >( false );
 
 	// State of customer data is tracked here from this point, using the initial values from the useStoreCart hook.
 	const [ customerData, setCustomerData ] = useState< CustomerData >( {
@@ -98,24 +101,36 @@ export const useCustomerData = (): {
 	// Store values last sent to the server in a ref to avoid requests unless important fields are changed.
 	const previousCustomerData = useRef< CustomerData >( customerData );
 
-	// Debounce updates to the customerData state so it's not triggered excessively.
-	const [ debouncedCustomerData ] = useDebounce( customerData, 1000, {
-		// Default equalityFn is prevData === newData.
-		equalityFn: ( prevData, newData ) => {
-			return (
-				isShallowEqual( prevData.billingData, newData.billingData ) &&
-				isShallowEqual(
-					prevData.shippingAddress,
-					newData.shippingAddress
-				)
-			);
-		},
-	} );
+	// When the cart data is resolved from server for the first time (using cartIsLoading) we need to update
+	// the initial billing and shipping values to respect customer data from the server.
+	useEffect( () => {
+		if ( isInitialized || cartIsLoading ) {
+			return;
+		}
+		const initializedCustomerData = {
+			billingData: initialBillingAddress,
+			shippingAddress: initialShippingAddress,
+		};
+		// Updates local state to the now-resolved cart address.
+		previousCustomerData.current = initializedCustomerData;
+		setCustomerData( initializedCustomerData );
+		// We are now initialized.
+		setIsInitialized( true );
+	}, [
+		cartIsLoading,
+		isInitialized,
+		initialBillingAddress,
+		initialShippingAddress,
+	] );
 
 	/**
 	 * Set billing data.
 	 *
-	 * Contains special handling for email so those fields are not overwritten if simply updating address.
+	 * Callback used to set billing data for the customer. This merges the previous and new state, and in turn,
+	 * will trigger an update to the server if enough data has changed (see the useEffect call below).
+	 *
+	 * This callback contains special handling for the "email" address field so that field is never overwritten if
+	 * simply updating the billing address and not the email address.
 	 */
 	const setBillingData = useCallback( ( newData ) => {
 		setCustomerData( ( prevState ) => {
@@ -130,7 +145,10 @@ export const useCustomerData = (): {
 	}, [] );
 
 	/**
-	 * Set shipping data.
+	 * Set shipping address.
+	 *
+	 * Callback used to set shipping data for the customer. This merges the previous and new state, and in turn, will
+	 * trigger an update to the server if enough data has changed (see the useEffect call below).
 	 */
 	const setShippingAddress = useCallback( ( newData ) => {
 		setCustomerData( ( prevState ) => {
@@ -146,43 +164,38 @@ export const useCustomerData = (): {
 
 	/**
 	 * This pushes changes to the API when the local state differs from the address in the cart.
+	 *
+	 * The function shouldUpdateAddressStore() determines if enough data has changed to trigger the update.
 	 */
-	useEffect( () => {
-		// Only push updates when enough fields are populated.
-		const shouldUpdateBillingAddress = shouldUpdateAddressStore(
-			previousCustomerData.current.billingData,
-			debouncedCustomerData.billingData
-		);
+	const pushCustomerData = () => {
+		const customerDataToUpdate: Partial< BillingAddressShippingAddress > = {};
 
-		const shouldUpdateShippingAddress = shouldUpdateAddressStore(
-			previousCustomerData.current.shippingAddress,
-			debouncedCustomerData.shippingAddress
-		);
+		if (
+			shouldUpdateAddressStore(
+				previousCustomerData.current.billingData,
+				customerData.billingData
+			)
+		) {
+			customerDataToUpdate.billing_address = customerData.billingData;
+		}
 
-		if ( ! shouldUpdateBillingAddress && ! shouldUpdateShippingAddress ) {
+		if (
+			shouldUpdateAddressStore(
+				previousCustomerData.current.shippingAddress,
+				customerData.shippingAddress
+			)
+		) {
+			customerDataToUpdate.shipping_address =
+				customerData.shippingAddress;
+		}
+
+		if ( Object.keys( customerDataToUpdate ).length === 0 ) {
 			return;
 		}
 
-		const customerDataToUpdate:
-			| Partial< BillingAddressShippingAddress >
-			| Record<
-					keyof BillingAddressShippingAddress,
-					CartBillingAddress | CartShippingAddress
-			  > = {};
+		previousCustomerData.current = customerData;
 
-		if ( shouldUpdateBillingAddress ) {
-			customerDataToUpdate.billing_address =
-				debouncedCustomerData.billingData;
-		}
-		if ( shouldUpdateShippingAddress ) {
-			customerDataToUpdate.shipping_address =
-				debouncedCustomerData.shippingAddress;
-		}
-
-		previousCustomerData.current = debouncedCustomerData;
-		updateCustomerData(
-			customerDataToUpdate as Partial< BillingAddressShippingAddress >
-		)
+		updateCustomerData( customerDataToUpdate )
 			.then( () => {
 				removeNotice( 'checkout' );
 			} )
@@ -191,12 +204,21 @@ export const useCustomerData = (): {
 					id: 'checkout',
 				} );
 			} );
-	}, [
-		debouncedCustomerData,
-		addErrorNotice,
-		removeNotice,
-		updateCustomerData,
-	] );
+	};
+
+	const debouncedPushCustomerData = useDebouncedCallback(
+		pushCustomerData,
+		1000
+	);
+
+	// If data changes, trigger an update to the server only if initialized.
+	useEffect( () => {
+		if ( ! isInitialized ) {
+			return;
+		}
+		debouncedPushCustomerData();
+	}, [ isInitialized, customerData, debouncedPushCustomerData ] );
+
 	return {
 		billingData: customerData.billingData,
 		shippingAddress: customerData.shippingAddress,

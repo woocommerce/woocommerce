@@ -30,7 +30,7 @@ type WPNotice = {
 type NoticeOptions = {
 	id: string;
 	type?: string;
-	isDismissible: boolean;
+	isDismissible?: boolean;
 };
 
 type NoticeCreator = ( text: string, noticeProps: NoticeOptions ) => void;
@@ -39,7 +39,7 @@ export const useStoreNotices = (): {
 	notices: WPNotice[];
 	hasNoticesOfType: ( type: string ) => boolean;
 	removeNotices: ( status: string | null ) => void;
-	removeNotice: ( id: string, context: string ) => void;
+	removeNotice: ( id: string, context?: string ) => void;
 	addDefaultNotice: NoticeCreator;
 	addErrorNotice: NoticeCreator;
 	addWarningNotice: NoticeCreator;

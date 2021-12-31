@@ -27,7 +27,7 @@ export const useCheckoutAddress = () => {
 	} = useCustomerDataContext();
 
 	const currentShippingAsBilling = useRef( shippingAsBilling );
-	const previousBillingData = useRef( billingData );
+	const previousBillingData = useRef();
 
 	/**
 	 * Sets shipping address data, and also billing if using the same address.
@@ -71,7 +71,7 @@ export const useCheckoutAddress = () => {
 					email,
 					/* eslint-enable no-unused-vars */
 					...billingAddress
-				} = previousBillingData.current;
+				} = previousBillingData.current || billingData;
 
 				setBillingData( {
 					...billingAddress,
