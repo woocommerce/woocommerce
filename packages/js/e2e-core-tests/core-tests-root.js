@@ -20,7 +20,7 @@ const getCoreTestsRoot = () => {
 
 	return {
 		appRoot: coreTestsPath,
-		moduleRoot: moduleDir,
+		packageRoot: moduleDir,
 		coreTestsRoot: __dirname
 	};
 };
