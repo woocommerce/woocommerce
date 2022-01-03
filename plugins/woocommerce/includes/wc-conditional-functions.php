@@ -484,12 +484,15 @@ function wc_is_file_valid_csv( $file, $check_path = true ) {
 }
 
 /**
- * Check if the current theme is an FSE theme.
+ * Check if the current theme is a block theme.
  *
  * @since x.x.x
  * @return bool
  */
 function wc_current_theme_is_fse_theme() {
+	if ( function_exists( 'wp_is_block_theme' ) ) {
+		return (bool) wp_is_block_theme();
+	}
 	if ( function_exists( 'gutenberg_is_fse_theme' ) ) {
 		return (bool) gutenberg_is_fse_theme();
 	}

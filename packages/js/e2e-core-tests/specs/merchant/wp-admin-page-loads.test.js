@@ -28,13 +28,17 @@ const runPageLoadTest = () => {
 					await Promise.all( [
 						page.click( menuElement ),
 						page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+						merchant.dismissOnboardingWizard(),
+						merchant.collapseAdminMenu( false ),
 					] );
 
 					// Click sub-menu item and wait for the page to finish loading
-					await Promise.all( [
-						page.click( subMenuElement ),
-						page.waitForNavigation( { waitUntil: 'networkidle0' } ),
-					] );
+					if ( subMenuElement.length ) {
+						await Promise.all([
+							page.click( subMenuElement ),
+							page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+						] );
+					}
 
 					await expect( page ).toMatchElement( 'h1', {
 						text: subMenuText,

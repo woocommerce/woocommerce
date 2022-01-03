@@ -84,6 +84,8 @@ This package provides support for enabling retries in tests:
 
 | Function | Parameters | Description |
 |----------|-------------|------------|
+| `collapseAdminMenu` | `collapse` | Collapse or expand the WP admin menu |
+| `dismissOnboardingWizard` |  | Dismiss the onboarding wizard if present |
 | `goToOrder` | `orderId` | Go to view a single order |
 | `goToProduct` | `productId` | Go to view a single product |
 | `login` | | Log in as merchant |

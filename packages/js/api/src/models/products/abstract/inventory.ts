@@ -34,7 +34,7 @@ abstract class AbstractProductInventory extends Model {
 	 *
 	 * @type {StockStatus}
 	 */
-	public readonly stockStatus: StockStatus = ''
+	public readonly stockStatus: StockStatus = '';
 
 	/**
 	 * The status of backordering for a product.
@@ -56,6 +56,13 @@ abstract class AbstractProductInventory extends Model {
 	 * @type {boolean}
 	 */
 	public readonly isOnBackorder: boolean = false;
+
+	/**
+	 * Indicates the threshold for when the low stock notification will be sent to the merchant.
+	 *
+	 * @type {number}
+	 */
+	public readonly lowStockThreshold: number = -1;
 }
 
 export interface IProductInventory extends AbstractProductInventory {}

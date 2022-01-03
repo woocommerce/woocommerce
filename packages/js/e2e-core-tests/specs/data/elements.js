@@ -9,7 +9,7 @@ export const MENUS = [
 		[
 			[
 				'Home',
-				'#toplevel_page_woocommerce > ul > li:nth-child(2) > a',
+				'',
 				'Home',
 			],
 			[
