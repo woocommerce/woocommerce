@@ -12,7 +12,6 @@
   "dependencies": {
     "@jest/globals": "^26.4.2",
     "@wordpress/deprecated": "^3.2.3",
-    "config": "3.3.3",
     "faker": "^5.1.0"
   },
   "peerDependencies": {
