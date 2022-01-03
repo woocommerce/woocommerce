@@ -1,5 +1,8 @@
 # Unreleased
 
+## Fixed
+- Moved `merchant.login()` out of `beforeAll()` block and into test body for retried runs.
+
 ## Added
 
 - This package is now transpiled with Babel, which allows the usage of modern, yet compatible JS code.
