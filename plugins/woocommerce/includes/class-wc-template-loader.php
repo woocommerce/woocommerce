@@ -102,7 +102,7 @@ class WC_Template_Loader {
 
 	/**
 	 * Checks whether a block template with that name exists.
-	 * 
+	 *
 	 * **Note: ** This checks both the `templates` and `block-templates` directories
 	 * as both conventions should be supported.
 	 *
@@ -137,7 +137,7 @@ class WC_Template_Loader {
 		foreach ( $possible_paths as $path ) {
 			if ( is_readable( $path ) ) {
 				$has_template = true;
-				continue;
+				break;
 			}
 		}
 
