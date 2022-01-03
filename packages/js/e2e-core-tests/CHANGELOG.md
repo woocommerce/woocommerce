@@ -1,5 +1,9 @@
 # Unreleased
 
+## Changes
+
+- Removed the node-config dependency
+
 ## Added
 
 - A `specs/data` folder to store page element data.
