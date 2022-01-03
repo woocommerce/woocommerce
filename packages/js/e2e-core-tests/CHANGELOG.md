@@ -4,6 +4,9 @@
 
 - Removed the node-config dependency
 
+## Fixed
+- Moved `merchant.login()` out of `beforeAll()` block and into test body for retried runs.
+
 ## Added
 
 - A `specs/data` folder to store page element data.

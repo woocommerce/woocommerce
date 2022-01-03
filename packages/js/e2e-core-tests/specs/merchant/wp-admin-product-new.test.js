@@ -23,7 +23,6 @@ const {
 const {
 	it,
 	describe,
-	beforeAll,
 } = require( '@jest/globals' );
 const { config } = require( '@woocommerce/e2e-environment' );
 
@@ -41,10 +40,6 @@ const openNewProductAndVerify = async () => {
 
 const runAddSimpleProductTest = () => {
 	describe('Add New Simple Product Page', () => {
-		beforeAll(async () => {
-			await merchant.login();
-		});
-
 		it('can create simple virtual product and add it to the cart', async () => {
 
 			// @todo: remove this once https://github.com/woocommerce/woocommerce/issues/31337 has been addressed
@@ -53,6 +48,7 @@ const runAddSimpleProductTest = () => {
 				height: 700,
 			} );
 
+			await merchant.login();
 			await openNewProductAndVerify();
 
 			// Set product data and publish the product
@@ -120,11 +116,8 @@ const runAddSimpleProductTest = () => {
 
 const runAddVariableProductTest = () => {
 	describe('Add New Variable Product Page', () => {
-		beforeAll(async () => {
-			await merchant.login();
-		});
-
 		it('can create product with variations', async () => {
+			await merchant.login();
 			await openNewProductAndVerify();
 
 			// Set product data
