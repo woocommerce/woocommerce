@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { registerBlockType } from '@wordpress/blocks';
 import { Icon, toggle } from '@woocommerce/icons';
 import classNames from 'classnames';
+import { useBlockProps } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
@@ -12,6 +13,7 @@ import classNames from 'classnames';
 import edit from './edit.js';
 
 registerBlockType( 'woocommerce/active-filters', {
+	apiVersion: 2,
 	title: __( 'Active Product Filters', 'woo-gutenberg-products-block' ),
 	icon: {
 		src: (
@@ -30,6 +32,10 @@ registerBlockType( 'woocommerce/active-filters', {
 	supports: {
 		html: false,
 		multiple: false,
+		color: {
+			text: true,
+			background: false,
+		},
 	},
 	example: {
 		attributes: {},
@@ -57,9 +63,12 @@ registerBlockType( 'woocommerce/active-filters', {
 			'data-heading': heading,
 			'data-heading-level': headingLevel,
 		};
+
 		return (
 			<div
-				className={ classNames( 'is-loading', className ) }
+				{ ...useBlockProps.save( {
+					className: classNames( 'is-loading', className ),
+				} ) }
 				{ ...data }
 			>
 				<span
