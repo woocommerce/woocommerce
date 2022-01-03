@@ -19,7 +19,7 @@ const {
 	beforeAll,
 } = require( '@jest/globals' );
 
-const config = require('config');
+const { config } = require( '@woocommerce/e2e-environment' );
 
 const runCheckoutLoginAccountTest = () => {
 	describe('Shopper Checkout Login Account', () => {
