@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "97d29d724f0342a99e7bf3f9d1d3c262",
+    "content-hash": "ebdb5708b79cdb94e4b2ff5fbed40d89",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -543,16 +543,16 @@
         },
         {
             "name": "woocommerce/woocommerce-admin",
-            "version": "3.0.0-rc.1",
+            "version": "3.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-admin.git",
-                "reference": "7c0cdd01ae98be058d684dd19023b0f40094cb63"
+                "reference": "5542e80021a43d24ab9b1d2d67083b608899835d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/7c0cdd01ae98be058d684dd19023b0f40094cb63",
-                "reference": "7c0cdd01ae98be058d684dd19023b0f40094cb63",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/5542e80021a43d24ab9b1d2d67083b608899835d",
+                "reference": "5542e80021a43d24ab9b1d2d67083b608899835d",
                 "shasum": ""
             },
             "require": {
@@ -608,22 +608,22 @@
             "homepage": "https://github.com/woocommerce/woocommerce-admin",
             "support": {
                 "issues": "https://github.com/woocommerce/woocommerce-admin/issues",
-                "source": "https://github.com/woocommerce/woocommerce-admin/tree/v3.0.0-rc.1"
+                "source": "https://github.com/woocommerce/woocommerce-admin/tree/v3.0.1"
             },
-            "time": "2021-12-14T23:55:42+00:00"
+            "time": "2021-12-30T18:38:11+00:00"
         },
         {
             "name": "woocommerce/woocommerce-blocks",
-            "version": "v6.5.0",
+            "version": "v6.5.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-gutenberg-products-block.git",
-                "reference": "655a9c1de46262304cc8ac187ca8fcc0abf23b6d"
+                "reference": "260dddfe93e30d09d34dd0cf3b662ac1d6191aef"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/655a9c1de46262304cc8ac187ca8fcc0abf23b6d",
-                "reference": "655a9c1de46262304cc8ac187ca8fcc0abf23b6d",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/260dddfe93e30d09d34dd0cf3b662ac1d6191aef",
+                "reference": "260dddfe93e30d09d34dd0cf3b662ac1d6191aef",
                 "shasum": ""
             },
             "require": {
@@ -662,9 +662,9 @@
             ],
             "support": {
                 "issues": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues",
-                "source": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/v6.5.0"
+                "source": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/v6.5.1"
             },
-            "time": "2021-12-07T11:28:05+00:00"
+            "time": "2021-12-22T11:40:29+00:00"
         }
     ],
     "packages-dev": [

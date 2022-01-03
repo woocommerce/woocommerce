@@ -2,6 +2,12 @@
 
 ## Added
 
+- Added `post-results-to-github-pr.js` to post smoke test results to a GitHub PR.
+- Added jest flags to generate a json test report
+- Added more entries to `default.json`
+
+## Added
+
 - Added `await` for every call to `shopper.logout`
 - Updated `getLatestReleaseZipUrl()` to allow passing in an authorization token and simplified arguments to just the repository name
 - Added `upload.ini` which increases the limits for uploading files (such as for plugins) in the Docker environment
