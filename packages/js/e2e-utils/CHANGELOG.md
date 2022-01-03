@@ -1,4 +1,9 @@
 # Unreleased
+## Changes
+
+- Removed node-config dependency
+- Added @woocommerce/e2e-environment peerDependency
+- Updated the package to use the custom node-config object from @woocommerce/e2e-environment
 
 ## Fixed
 
