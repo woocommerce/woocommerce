@@ -15,6 +15,15 @@ use \Automattic\WooCommerce\Admin\WCAdminHelper;
 class WC_Admin_Tests_Admin_Helper extends WP_UnitTestCase {
 
 	/**
+	 * Test get_wcadmin_active_for_in_seconds_with with invalid timestamp option.
+	 */
+	public function test_get_wcadmin_active_for_in_seconds_with_invalid_timestamp_option() {
+		update_option( WCAdminHelper::WC_ADMIN_TIMESTAMP_OPTION, 'invalid-time' );
+		$this->assertEquals( is_numeric( WCAdminHelper::get_wcadmin_active_for_in_seconds() ), true );
+	}
+
+
+	/**
 	 * Test wc_admin_active_for one hour
 	 */
 	public function test_is_wc_admin_active_for_one_hour() {

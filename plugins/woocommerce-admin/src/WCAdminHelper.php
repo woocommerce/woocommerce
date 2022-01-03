@@ -48,7 +48,7 @@ class WCAdminHelper {
 	public static function get_wcadmin_active_for_in_seconds() {
 		$install_timestamp = get_option( self::WC_ADMIN_TIMESTAMP_OPTION );
 
-		if ( false === $install_timestamp ) {
+		if ( ! is_numeric( $install_timestamp ) ) {
 			$install_timestamp = time();
 			update_option( self::WC_ADMIN_TIMESTAMP_OPTION, $install_timestamp );
 		}
