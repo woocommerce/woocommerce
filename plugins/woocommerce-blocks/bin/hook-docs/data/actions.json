@@ -1,5 +1,5 @@
 {
-    "$schema": "https://raw.githubusercontent.com/johnbillion/wp-hooks-generator/0.6.1/schema.json",
+    "$schema": "https://raw.githubusercontent.com/johnbillion/wp-hooks-generator/0.7.0/schema.json",
     "hooks": [
         {
             "name": "woocommerce_add_to_cart",
@@ -59,39 +59,44 @@
                     }
                 ],
                 "long_description_html": "<p>This hook fires when an item is added to the cart. This is triggered from the Store API in this context, but WooCommerce core add to cart events trigger the same hook.</p>"
-            }
+            },
+            "args": 6
         },
         {
             "name": "woocommerce_after_main_content",
             "file": "BlockTypes/LegacyTemplate.php",
             "type": "action",
             "doc": {
-                "description": "Hook: woocommerce_after_main_content.",
-                "long_description": "",
+                "description": "Hook: woocommerce_after_main_content",
+                "long_description": "Called after rendering the main content for a product.",
                 "tags": [
                     {
-                        "name": "hooked",
-                        "content": "woocommerce_output_content_wrapper_end - 10 (outputs closing divs for the content)"
+                        "name": "see",
+                        "content": "Outputs closing DIV for the content (priority 10)",
+                        "refers": "woocommerce_output_content_wrapper_end()"
                     }
                 ],
-                "long_description_html": ""
-            }
+                "long_description_html": "<p>Called after rendering the main content for a product.</p>"
+            },
+            "args": 0
         },
         {
             "name": "woocommerce_after_main_content",
             "file": "BlockTypes/LegacyTemplate.php",
             "type": "action",
             "doc": {
-                "description": "Woocommerce_after_main_content hook.",
-                "long_description": "",
+                "description": "Hook: woocommerce_after_main_content",
+                "long_description": "Called after rendering the main content for a product.",
                 "tags": [
                     {
-                        "name": "hooked",
-                        "content": "woocommerce_output_content_wrapper_end - 10 (outputs closing divs for the content)"
+                        "name": "see",
+                        "content": "Outputs closing DIV for the content (priority 10)",
+                        "refers": "woocommerce_output_content_wrapper_end()"
                     }
                 ],
-                "long_description_html": ""
-            }
+                "long_description_html": "<p>Called after rendering the main content for a product.</p>"
+            },
+            "args": 0
         },
         {
             "name": "woocommerce_after_shop_loop",
@@ -102,12 +107,14 @@
                 "long_description": "",
                 "tags": [
                     {
-                        "name": "hooked",
-                        "content": "woocommerce_pagination - 10"
+                        "name": "see",
+                        "content": "Renders pagination (priority 10)",
+                        "refers": "woocommerce_pagination()"
                     }
                 ],
                 "long_description_html": ""
-            }
+            },
+            "args": 0
         },
         {
             "name": "woocommerce_applied_coupon",
@@ -127,7 +134,8 @@
                     }
                 ],
                 "long_description_html": ""
-            }
+            },
+            "args": 1
         },
         {
             "name": "woocommerce_archive_description",
@@ -138,60 +146,75 @@
                 "long_description": "",
                 "tags": [
                     {
-                        "name": "hooked",
-                        "content": "woocommerce_taxonomy_archive_description - 10"
+                        "name": "see",
+                        "content": "Renders the taxonomy archive description (priority 10)",
+                        "refers": "woocommerce_taxonomy_archive_description()"
                     },
                     {
-                        "name": "hooked",
-                        "content": "woocommerce_product_archive_description - 10"
+                        "name": "see",
+                        "content": "Renders the product archive description (priority 10)",
+                        "refers": "woocommerce_product_archive_description()"
                     }
                 ],
                 "long_description_html": ""
-            }
+            },
+            "args": 0
         },
         {
             "name": "woocommerce_before_main_content",
             "file": "BlockTypes/LegacyTemplate.php",
             "type": "action",
             "doc": {
-                "description": "Woocommerce_before_main_content hook.",
-                "long_description": "",
+                "description": "Hook: woocommerce_before_main_content",
+                "long_description": "Called before rendering the main content for a product.",
                 "tags": [
                     {
-                        "name": "hooked",
-                        "content": "woocommerce_output_content_wrapper - 10 (outputs opening divs for the content)"
+                        "name": "see",
+                        "content": "Outputs opening DIV for the content (priority 10)",
+                        "refers": "woocommerce_output_content_wrapper()"
                     },
                     {
-                        "name": "hooked",
-                        "content": "woocommerce_breadcrumb - 20"
+                        "name": "see",
+                        "content": "Outputs breadcrumb trail to the current product (priority 20)",
+                        "refers": "woocommerce_breadcrumb()"
+                    },
+                    {
+                        "name": "see",
+                        "content": "Outputs schema markup (priority 30)",
+                        "refers": "WC_Structured_Data::generate_website_data()"
                     }
                 ],
-                "long_description_html": ""
-            }
+                "long_description_html": "<p>Called before rendering the main content for a product.</p>"
+            },
+            "args": 0
         },
         {
             "name": "woocommerce_before_main_content",
             "file": "BlockTypes/LegacyTemplate.php",
             "type": "action",
             "doc": {
-                "description": "Hook: woocommerce_before_main_content.",
-                "long_description": "",
+                "description": "Hook: woocommerce_before_main_content",
+                "long_description": "Called before rendering the main content for a product.",
                 "tags": [
                     {
-                        "name": "hooked",
-                        "content": "woocommerce_output_content_wrapper - 10 (outputs opening divs for the content)"
+                        "name": "see",
+                        "content": "Outputs opening DIV for the content (priority 10)",
+                        "refers": "woocommerce_output_content_wrapper()"
                     },
                     {
-                        "name": "hooked",
-                        "content": "woocommerce_breadcrumb - 20"
+                        "name": "see",
+                        "content": "Outputs breadcrumb trail to the current product (priority 20)",
+                        "refers": "woocommerce_breadcrumb()"
                     },
                     {
-                        "name": "hooked",
-                        "content": "WC_Structured_Data::generate_website_data() - 30"
+                        "name": "see",
+                        "content": "Outputs schema markup (priority 30)",
+                        "refers": "WC_Structured_Data::generate_website_data()"
                     }
                 ],
-                "long_description_html": ""
-            }
+                "long_description_html": "<p>Called before rendering the main content for a product.</p>"
+            },
+            "args": 0
         },
         {
             "name": "woocommerce_before_shop_loop",
@@ -202,20 +225,24 @@
                 "long_description": "",
                 "tags": [
                     {
-                        "name": "hooked",
-                        "content": "woocommerce_output_all_notices - 10"
+                        "name": "see",
+                        "content": "Render error notices (priority 10)",
+                        "refers": "woocommerce_output_all_notices()"
                     },
                     {
-                        "name": "hooked",
-                        "content": "woocommerce_result_count - 20"
+                        "name": "see",
+                        "content": "Show number of results found (priority 20)",
+                        "refers": "woocommerce_result_count()"
                     },
                     {
-                        "name": "hooked",
-                        "content": "woocommerce_catalog_ordering - 30"
+                        "name": "see",
+                        "content": "Show form to control sort order (priority 30)",
+                        "refers": "woocommerce_catalog_ordering()"
                     }
                 ],
                 "long_description_html": ""
-            }
+            },
+            "args": 0
         },
         {
             "name": "woocommerce_blocks_cart_enqueue_data",
@@ -226,7 +253,8 @@
                 "long_description": "",
                 "tags": [],
                 "long_description_html": ""
-            }
+            },
+            "args": 0
         },
         {
             "name": "woocommerce_blocks_cart_enqueue_data",
@@ -237,7 +265,8 @@
                 "long_description": "",
                 "tags": [],
                 "long_description_html": ""
-            }
+            },
+            "args": 0
         },
         {
             "name": "woocommerce_blocks_cart_update_customer_from_request",
@@ -265,7 +294,8 @@
                     }
                 ],
                 "long_description_html": ""
-            }
+            },
+            "args": 2
         },
         {
             "name": "woocommerce_blocks_cart_update_order_from_request",
@@ -301,7 +331,8 @@
                     }
                 ],
                 "long_description_html": ""
-            }
+            },
+            "args": 2
         },
         {
             "name": "woocommerce_blocks_checkout_enqueue_data",
@@ -312,7 +343,8 @@
                 "long_description": "",
                 "tags": [],
                 "long_description_html": ""
-            }
+            },
+            "args": 0
         },
         {
             "name": "woocommerce_blocks_checkout_order_processed",
@@ -341,7 +373,8 @@
                     }
                 ],
                 "long_description_html": "<p>This hook informs extensions that $order has completed processing and is ready for payment.</p> <p>This is similar to existing core hook woocommerce_checkout_order_processed. We're using a new action:</p> <ul> <li>To keep the interface focused (only pass $order, not passing request data).</li> <li>This also explicitly indicates these orders are from checkout block/StoreAPI.</li> </ul>"
-            }
+            },
+            "args": 1
         },
         {
             "name": "woocommerce_blocks_checkout_update_order_from_request",
@@ -369,7 +402,8 @@
                     }
                 ],
                 "long_description_html": "<p>This hook gives extensions the chance to update orders based on the data in the request. This can be used in conjunction with the ExtendRestAPI class to post custom data and then process it.</p>"
-            }
+            },
+            "args": 2
         },
         {
             "name": "woocommerce_blocks_checkout_update_order_meta",
@@ -394,7 +428,8 @@
                     }
                 ],
                 "long_description_html": "<p>This hook gives extensions the chance to add or update meta data on the $order.</p> <p>This is similar to existing core hook woocommerce_checkout_update_order_meta. We're using a new action:</p> <ul> <li>To keep the interface focused (only pass $order, not passing request data).</li> <li>This also explicitly indicates these orders are from checkout block/StoreAPI.</li> </ul>"
-            }
+            },
+            "args": 1
         },
         {
             "name": "woocommerce_blocks_enqueue_cart_block_scripts_after",
@@ -405,7 +440,8 @@
                 "long_description": "",
                 "tags": [],
                 "long_description_html": ""
-            }
+            },
+            "args": 0
         },
         {
             "name": "woocommerce_blocks_enqueue_cart_block_scripts_before",
@@ -416,7 +452,8 @@
                 "long_description": "",
                 "tags": [],
                 "long_description_html": ""
-            }
+            },
+            "args": 0
         },
         {
             "name": "woocommerce_blocks_enqueue_checkout_block_scripts_after",
@@ -427,7 +464,8 @@
                 "long_description": "",
                 "tags": [],
                 "long_description_html": ""
-            }
+            },
+            "args": 0
         },
         {
             "name": "woocommerce_blocks_enqueue_checkout_block_scripts_before",
@@ -438,7 +476,8 @@
                 "long_description": "",
                 "tags": [],
                 "long_description_html": ""
-            }
+            },
+            "args": 0
         },
         {
             "name": "woocommerce_blocks_loaded",
@@ -449,7 +488,8 @@
                 "long_description": "This hook is intended to be used as a safe event hook for when the plugin has been loaded, and all dependency requirements have been met.",
                 "tags": [],
                 "long_description_html": "<p>This hook is intended to be used as a safe event hook for when the plugin has been loaded, and all dependency requirements have been met.</p>"
-            }
+            },
+            "args": 0
         },
         {
             "name": "woocommerce_blocks_{$this->registry_identifier}_registration",
@@ -469,7 +509,8 @@
                     }
                 ],
                 "long_description_html": "<p>Runs before integrations are initialized allowing new integration to be registered for use. This should be used as the primary hook for integrations to include their scripts, styles, and other code extending the blocks.</p>"
-            }
+            },
+            "args": 1
         },
         {
             "name": "woocommerce_check_cart_items",
@@ -480,7 +521,8 @@
                 "long_description": "Allow 3rd parties to validate cart items. This is a legacy hook from Woo core. This filter will be deprecated because it encourages usage of wc_add_notice. For the API we need to capture notices and convert to exceptions instead.",
                 "tags": [],
                 "long_description_html": "<p>Allow 3rd parties to validate cart items. This is a legacy hook from Woo core. This filter will be deprecated because it encourages usage of wc_add_notice. For the API we need to capture notices and convert to exceptions instead.</p>"
-            }
+            },
+            "args": 0
         },
         {
             "name": "woocommerce_created_customer",
@@ -516,7 +558,8 @@
                     }
                 ],
                 "long_description_html": "<p>This hook fires after customer accounts are created and passes the customer data.</p>"
-            }
+            },
+            "args": 3
         },
         {
             "name": "woocommerce_no_products_found",
@@ -527,12 +570,14 @@
                 "long_description": "",
                 "tags": [
                     {
-                        "name": "hooked",
-                        "content": "wc_no_products_found - 10"
+                        "name": "see",
+                        "content": "Default no products found content (priority 10)",
+                        "refers": "wc_no_products_found()"
                     }
                 ],
                 "long_description_html": ""
-            }
+            },
+            "args": 0
         },
         {
             "name": "woocommerce_register_post",
@@ -568,7 +613,8 @@
                     }
                 ],
                 "long_description_html": "<p>This hook fires before customer accounts are created and passes the form data (username, email) and an array of errors.</p> <p>This could be used to add extra validation logic and append errors to the array.</p>"
-            }
+            },
+            "args": 3
         },
         {
             "name": "woocommerce_rest_checkout_process_payment_with_context",
@@ -607,7 +653,8 @@
                     }
                 ],
                 "long_description_html": ""
-            }
+            },
+            "args": 1
         },
         {
             "name": "woocommerce_shop_loop",
@@ -618,7 +665,8 @@
                 "long_description": "",
                 "tags": [],
                 "long_description_html": ""
-            }
+            },
+            "args": 0
         },
         {
             "name": "wooocommerce_store_api_validate_add_to_cart",
@@ -646,7 +694,8 @@
                     }
                 ],
                 "long_description_html": "<p>Fire action to validate add to cart. Functions hooking into this should throw an \\Exception to prevent add to cart from happening.</p>"
-            }
+            },
+            "args": 2
         },
         {
             "name": "wooocommerce_store_api_validate_cart_item",
@@ -674,7 +723,8 @@
                     }
                 ],
                 "long_description_html": ""
-            }
+            },
+            "args": 2
         }
     ]
 }

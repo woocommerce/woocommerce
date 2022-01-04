@@ -59,7 +59,7 @@ apply_filters( '__experimental_woocommerce_blocks_add_data_attributes_to_block',
 ### Source
 
 
-File: [BlockTypesController.php](../src/BlockTypesController.php)
+ - [BlockTypesController.php](../src/BlockTypesController.php)
 
 ---
 
@@ -85,7 +85,7 @@ apply_filters( '__experimental_woocommerce_blocks_add_data_attributes_to_namespa
 ### Source
 
 
-File: [BlockTypesController.php](../src/BlockTypesController.php)
+ - [BlockTypesController.php](../src/BlockTypesController.php)
 
 ---
 
@@ -129,7 +129,7 @@ add_filter( '__experimental_woocommerce_blocks_payment_gateway_features_list', '
 ### Source
 
 
-File: [Payments/Integrations/PayPal.php](../src/Payments/Integrations/PayPal.php)
+ - [Payments/Integrations/PayPal.php](../src/Payments/Integrations/PayPal.php)
 
 ---
 
@@ -156,7 +156,7 @@ apply_filters( 'wc_stripe_allow_prepaid_card', boolean $allow_prepaid_card )
 ### Source
 
 
-File: [Payments/Integrations/Stripe.php](../src/Payments/Integrations/Stripe.php)
+ - [Payments/Integrations/Stripe.php](../src/Payments/Integrations/Stripe.php)
 
 ---
 
@@ -184,7 +184,7 @@ apply_filters( 'wc_stripe_display_save_payment_method_checkbox', boolean $saved_
 
 `boolean` 
 
-### Related
+### See
 
 
  - https://github.com/woocommerce/woocommerce-gateway-stripe/blob/ad19168b63df86176cbe35c3e95203a245687640/includes/class-wc-gateway-stripe.php#L271
@@ -193,7 +193,7 @@ apply_filters( 'wc_stripe_display_save_payment_method_checkbox', boolean $saved_
 ### Source
 
 
-File: [Payments/Integrations/Stripe.php](../src/Payments/Integrations/Stripe.php)
+ - [Payments/Integrations/Stripe.php](../src/Payments/Integrations/Stripe.php)
 
 ---
 
@@ -220,7 +220,7 @@ apply_filters( 'wc_stripe_payment_request_button_locale', string $locale )
 ### Source
 
 
-File: [Payments/Integrations/Stripe.php](../src/Payments/Integrations/Stripe.php)
+ - [Payments/Integrations/Stripe.php](../src/Payments/Integrations/Stripe.php)
 
 ---
 
@@ -248,7 +248,7 @@ apply_filters( 'woocommerce_add_cart_item', array $cart_item_data, string $cart_
 ### Source
 
 
-File: [StoreApi/Utilities/CartController.php](../src/StoreApi/Utilities/CartController.php)
+ - [StoreApi/Utilities/CartController.php](../src/StoreApi/Utilities/CartController.php)
 
 ---
 
@@ -278,7 +278,7 @@ apply_filters( 'woocommerce_add_cart_item_data', array $cart_item_data, integer 
 ### Source
 
 
-File: [StoreApi/Utilities/CartController.php](../src/StoreApi/Utilities/CartController.php)
+ - [StoreApi/Utilities/CartController.php](../src/StoreApi/Utilities/CartController.php)
 
 ---
 
@@ -309,7 +309,7 @@ apply_filters( 'woocommerce_add_to_cart_sold_individually_quantity', integer $so
 ### Source
 
 
-File: [StoreApi/Utilities/CartController.php](../src/StoreApi/Utilities/CartController.php)
+ - [StoreApi/Utilities/CartController.php](../src/StoreApi/Utilities/CartController.php)
 
 ---
 
@@ -347,7 +347,7 @@ apply_filters( 'woocommerce_add_to_cart_validation', boolean $passed_validation,
 ### Source
 
 
-File: [StoreApi/Utilities/CartController.php](../src/StoreApi/Utilities/CartController.php)
+ - [StoreApi/Utilities/CartController.php](../src/StoreApi/Utilities/CartController.php)
 
 ---
 
@@ -378,7 +378,7 @@ apply_filters( 'woocommerce_adjust_non_base_location_prices', boolean $adjust_no
 ### Source
 
 
-File: [StoreApi/Utilities/ProductQuery.php](../src/StoreApi/Utilities/ProductQuery.php)
+ - [StoreApi/Utilities/ProductQuery.php](../src/StoreApi/Utilities/ProductQuery.php)
 
 ---
 
@@ -407,7 +407,7 @@ apply_filters( 'woocommerce_apply_individual_use_coupon', array $coupons, \WC_Co
 ### Source
 
 
-File: [StoreApi/Utilities/CartController.php](../src/StoreApi/Utilities/CartController.php)
+ - [StoreApi/Utilities/CartController.php](../src/StoreApi/Utilities/CartController.php)
 
 ---
 
@@ -437,7 +437,7 @@ apply_filters( 'woocommerce_apply_with_individual_use_coupon', boolean $apply_wi
 ### Source
 
 
-File: [StoreApi/Utilities/CartController.php](../src/StoreApi/Utilities/CartController.php)
+ - [StoreApi/Utilities/CartController.php](../src/StoreApi/Utilities/CartController.php)
 
 ---
 
@@ -465,7 +465,7 @@ apply_filters( 'woocommerce_blocks_product_grid_is_cacheable', boolean $is_cache
 ### Source
 
 
-File: [BlockTypes/AbstractProductGrid.php](../src/BlockTypes/AbstractProductGrid.php)
+ - [BlockTypes/AbstractProductGrid.php](../src/BlockTypes/AbstractProductGrid.php)
 
 ---
 
@@ -494,7 +494,7 @@ apply_filters( 'woocommerce_blocks_product_grid_item_html', string $html, array 
 ### Source
 
 
-File: [BlockTypes/AbstractProductGrid.php](../src/BlockTypes/AbstractProductGrid.php)
+ - [BlockTypes/AbstractProductGrid.php](../src/BlockTypes/AbstractProductGrid.php)
 
 ---
 
@@ -522,7 +522,7 @@ apply_filters( 'woocommerce_blocks_register_script_dependencies', array $depende
 ### Source
 
 
-File: [Assets/Api.php](../src/Assets/Api.php)
+ - [Assets/Api.php](../src/Assets/Api.php)
 
 ---
 
@@ -549,7 +549,7 @@ apply_filters( 'woocommerce_cart_contents_changed', array $cart_contents )
 ### Source
 
 
-File: [StoreApi/Utilities/CartController.php](../src/StoreApi/Utilities/CartController.php)
+ - [StoreApi/Utilities/CartController.php](../src/StoreApi/Utilities/CartController.php)
 
 ---
 
@@ -571,7 +571,7 @@ apply_filters( 'woocommerce_ga_disable_tracking', boolean $disable_tracking )
 ### Source
 
 
-File: [Domain/Services/GoogleAnalytics.php](../src/Domain/Services/GoogleAnalytics.php)
+ - [Domain/Services/GoogleAnalytics.php](../src/Domain/Services/GoogleAnalytics.php)
 
 ---
 
@@ -603,7 +603,7 @@ apply_filters( 'woocommerce_get_item_data', array $item_data, array $cart_item )
 ### Source
 
 
-File: [StoreApi/Schemas/CartItemSchema.php](../src/StoreApi/Schemas/CartItemSchema.php)
+ - [StoreApi/Schemas/CartItemSchema.php](../src/StoreApi/Schemas/CartItemSchema.php)
 
 ---
 
@@ -634,7 +634,7 @@ apply_filters( 'woocommerce_new_customer_data', array $customer_data )
 ### Source
 
 
-File: [Domain/Services/CreateAccount.php](../src/Domain/Services/CreateAccount.php)
+ - [Domain/Services/CreateAccount.php](../src/Domain/Services/CreateAccount.php)
 
 ---
 
@@ -667,7 +667,7 @@ apply_filters( 'woocommerce_registration_errors', \WP_Error $errors, string $use
 ### Source
 
 
-File: [Domain/Services/CreateAccount.php](../src/Domain/Services/CreateAccount.php)
+ - [Domain/Services/CreateAccount.php](../src/Domain/Services/CreateAccount.php)
 
 ---
 
@@ -701,7 +701,7 @@ apply_filters( 'woocommerce_shared_settings', array $data )
 ### Source
 
 
-File: [Assets/AssetDataRegistry.php](../src/Assets/AssetDataRegistry.php)
+ - [Assets/AssetDataRegistry.php](../src/Assets/AssetDataRegistry.php)
 
 ---
 
@@ -730,23 +730,28 @@ apply_filters( 'woocommerce_shipping_package_name', string $shipping_package_nam
 ### Source
 
 
-File: [StoreApi/Utilities/CartController.php](../src/StoreApi/Utilities/CartController.php)
+ - [StoreApi/Utilities/CartController.php](../src/StoreApi/Utilities/CartController.php)
 
 ---
 
 ## woocommerce_show_page_title
 
 
-
+We need to load the scripts here because when using block templates wp_head() gets run after the block template. As a result we are trying to enqueue required scripts before we have even registered them.
 
 ```php
 apply_filters( 'woocommerce_show_page_title' )
 ```
 
+### See
+
+
+ - https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/5328#issuecomment-989013447
+
 ### Source
 
 
-File: [BlockTypes/LegacyTemplate.php](../src/BlockTypes/LegacyTemplate.php)
+ - [BlockTypes/LegacyTemplate.php](../src/BlockTypes/LegacyTemplate.php)
 
 ---
 
@@ -777,7 +782,7 @@ apply_filters( 'woocommerce_store_api_disable_nonce_check', boolean $disable_non
 ### Source
 
 
-File: [StoreApi/Routes/AbstractCartRoute.php](../src/StoreApi/Routes/AbstractCartRoute.php)
+ - [StoreApi/Routes/AbstractCartRoute.php](../src/StoreApi/Routes/AbstractCartRoute.php)
 
 ---
 
@@ -809,7 +814,7 @@ apply_filters( 'woocommerce_store_api_product_quantity_limit', integer $quantity
 ### Source
 
 
-File: [StoreApi/Schemas/ProductSchema.php](../src/StoreApi/Schemas/ProductSchema.php)
+ - [StoreApi/Schemas/ProductSchema.php](../src/StoreApi/Schemas/ProductSchema.php)
 
 ---
 
@@ -843,6 +848,6 @@ apply_filters( 'woocommerce_variation_option_name', string $value, null $unused,
 ### Source
 
 
-File: [StoreApi/Schemas/CartItemSchema.php](../src/StoreApi/Schemas/CartItemSchema.php)
+ - [StoreApi/Schemas/CartItemSchema.php](../src/StoreApi/Schemas/CartItemSchema.php)
 
 ---
