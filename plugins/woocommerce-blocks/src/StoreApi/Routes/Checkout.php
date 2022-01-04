@@ -5,12 +5,8 @@ use Automattic\WooCommerce\Blocks\Domain\Services\CreateAccount;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Payments\PaymentContext;
 use Automattic\WooCommerce\Blocks\Payments\PaymentResult;
-use Automattic\WooCommerce\Blocks\StoreApi\Schemas\AbstractSchema;
-use Automattic\WooCommerce\Blocks\StoreApi\Schemas\CartSchema;
-use Automattic\WooCommerce\Blocks\StoreApi\Utilities\CartController;
 use Automattic\WooCommerce\Blocks\StoreApi\Utilities\DraftOrderTrait;
 use Automattic\WooCommerce\Blocks\StoreApi\Utilities\InvalidStockLevelsInCartException;
-use Automattic\WooCommerce\Blocks\StoreApi\Utilities\OrderController;
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStock;
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStockException;
 /**
@@ -87,12 +83,6 @@ class Checkout extends AbstractCartRoute {
 					$this->schema->get_endpoint_args_for_item_schema( \WP_REST_Server::CREATABLE )
 				),
 			],
-			[
-				'methods'             => \WP_REST_Server::EDITABLE,
-				'callback'            => array( $this, 'get_response' ),
-				'permission_callback' => '__return_true',
-				'args'                => $this->schema->get_endpoint_args_for_item_schema( \WP_REST_Server::EDITABLE ),
-			],
 			'schema'      => [ $this->schema, 'get_public_item_schema' ],
 			'allow_batch' => [ 'v1' => true ],
 		];
@@ -141,30 +131,7 @@ class Checkout extends AbstractCartRoute {
 	}
 
 	/**
-	 * Update the current order.
-	 *
-	 * @internal Customer data is updated first so OrderController::update_addresses_from_cart uses up to date data.
-	 *
-	 * @throws RouteException On error.
-	 * @param \WP_REST_Request $request Request object.
-	 * @return \WP_REST_Response
-	 */
-	protected function get_route_update_response( \WP_REST_Request $request ) {
-		$this->update_customer_from_request( $request );
-		$this->create_or_update_draft_order();
-		$this->update_order_from_request( $request );
-
-		return $this->prepare_item_for_response(
-			(object) [
-				'order'          => $this->order,
-				'payment_result' => new PaymentResult(),
-			],
-			$request
-		);
-	}
-
-	/**
-	 * Update and process an order.
+	 * Process an order.
 	 *
 	 * 1. Obtain Draft Order
 	 * 2. Process Request
@@ -448,7 +415,7 @@ class Checkout extends AbstractCartRoute {
 	 */
 	private function update_order_from_request( \WP_REST_Request $request ) {
 		$this->order->set_customer_note( $request['customer_note'] ?? '' );
-		$this->order->set_payment_method( $request['payment_method'] ?? '' );
+		$this->order->set_payment_method( $this->get_request_payment_method_id( $request ) );
 
 		/**
 		 * Fires when the Checkout Block/Store API updates an order's from the API request data.
@@ -551,17 +518,7 @@ class Checkout extends AbstractCartRoute {
 	 * @return string
 	 */
 	private function get_request_payment_method_id( \WP_REST_Request $request ) {
-		$payment_method_id = wc_clean( wp_unslash( $request['payment_method'] ?? '' ) );
-
-		if ( empty( $payment_method_id ) ) {
-			throw new RouteException(
-				'woocommerce_rest_checkout_missing_payment_method',
-				__( 'No payment method provided.', 'woo-gutenberg-products-block' ),
-				400
-			);
-		}
-
-		return $payment_method_id;
+		return $this->get_request_payment_method( $request )->id;
 	}
 
 	/**
@@ -572,18 +529,30 @@ class Checkout extends AbstractCartRoute {
 	 * @return \WC_Payment_Gateway
 	 */
 	private function get_request_payment_method( \WP_REST_Request $request ) {
-		$payment_method_id  = $this->get_request_payment_method_id( $request );
-		$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
+		$available_gateways     = WC()->payment_gateways->get_available_payment_gateways();
+		$request_payment_method = wc_clean( wp_unslash( $request['payment_method'] ?? '' ) );
 
-		if ( ! isset( $available_gateways[ $payment_method_id ] ) ) {
+		if ( empty( $request_payment_method ) ) {
 			throw new RouteException(
-				'woocommerce_rest_checkout_payment_method_disabled',
-				__( 'This payment gateway is not available.', 'woo-gutenberg-products-block' ),
+				'woocommerce_rest_checkout_missing_payment_method',
+				__( 'No payment method provided.', 'woo-gutenberg-products-block' ),
 				400
 			);
 		}
 
-		return $available_gateways[ $payment_method_id ];
+		if ( ! isset( $available_gateways[ $request_payment_method ] ) ) {
+			throw new RouteException(
+				'woocommerce_rest_checkout_payment_method_disabled',
+				sprintf(
+					// Translators: %s Payment method ID.
+					__( 'The %s payment gateway is not available.', 'woo-gutenberg-products-block' ),
+					esc_html( $request_payment_method )
+				),
+				400
+			);
+		}
+
+		return $available_gateways[ $request_payment_method ];
 	}
 
 	/**
