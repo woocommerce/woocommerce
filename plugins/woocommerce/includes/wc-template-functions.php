@@ -3477,7 +3477,7 @@ function wc_display_product_attributes( $product ) {
 		}
 
 		$product_attributes[ 'attribute_' . sanitize_title_with_dashes( $attribute->get_name() ) ] = array(
-			'label' => wc_attribute_label( $attribute->get_name() ),
+			'label' => apply_filters( 'woocommerce_attribute_label', wc_attribute_label( $attribute->get_name() ), $attribute ),
 			'value' => apply_filters( 'woocommerce_attribute', wpautop( wptexturize( implode( ', ', $values ) ) ), $attribute, $values ),
 		);
 	}
