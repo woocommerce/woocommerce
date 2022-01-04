@@ -217,8 +217,14 @@ class Control extends Component {
 						'is-disabled': disabled,
 					}
 				) }
-				onClick={ () => {
-					this.input.current.focus();
+				onClick={ ( event ) => {
+					// Don't focus the input if the click event is from the error message.
+					if (
+						event.target.className !==
+						'components-base-control__help'
+					) {
+						this.input.current.focus();
+					}
 				} }
 			>
 				{ isSearchable && (
