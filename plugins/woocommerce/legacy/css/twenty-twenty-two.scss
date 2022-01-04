@@ -27,6 +27,8 @@
 
 @import "mixins";
 
+$tt2-gray: #f7f7f7;
+
 /**
  * Main layout.
  */
@@ -88,53 +90,55 @@
 		display: none;
 	}
 
-	.woocommerce-notices-wrapper {
+	.woocommerce-message,
+	.woocommerce-error,
+	.woocommerce-info {
+		background: $tt2-gray;
+		border-top-color: var( --wp--preset--color--primary );
+		border-top-style: solid;
+		padding: 1rem 1.5rem;
+		list-style: none;
+		font-size: var(--wp--preset--font-size--small);
 
-		.woocommerce-message,
-		.woocommerce-error,
-		.woocommerce-info {
-			margin-bottom: 5rem;
-			background: #f7f7f7;
-			border-top-color: var( --wp--preset--color--primary );
-			border-top-style: solid;
-			padding: 1rem;
-			list-style: none;
+		&[role='alert']::before {
+			color: var( --wp--preset--color--background );
+			background: var( --wp--preset--color--primary );
+			border-radius: 5rem;
+			font-size: 1rem;
+			padding-left: 3px;
+			padding-right: 3px;
+			margin-right: 1rem;
+		}
 
-			&[role='alert']::before {
-				color: var( --wp--preset--color--background );
-				background: var( --wp--preset--color--primary );
-				border-radius: 5rem;
-				font-size: 1rem;
-				padding-left: 3px;
-				padding-right: 3px;
-				margin-right: 1rem;
-			}
+		a.button {
+			margin-top: -0.5rem;
+			background: #ebe9eb;
+			color: var(--wp--preset--color--black);
 
-			a.button {
-				margin-top: -0.5rem;
-				background: #ebe9eb;
+			&:hover,
+			&:visited {
 				color: var(--wp--preset--color--black);
 			}
 		}
+	}
 
-		.woocommerce-error[role='alert'] {
-			margin: 0;
+	.woocommerce-error[role='alert'] {
+		margin: 0;
 
-			&::before {
-				content: 'X';
-				padding-right: 4px;
-				padding-left: 4px;
-			}
-
-			li {
-				display: inline-block;
-			}
+		&::before {
+			content: 'X';
+			padding-right: 4px;
+			padding-left: 4px;
 		}
 
-		.woocommerce-message {
-			&[role='alert']::before {
-				content: '\2713';
-			}
+		li {
+			display: inline-block;
+		}
+	}
+
+	.woocommerce-message {
+		&[role='alert']::before {
+			content: '\2713';
 		}
 	}
 
