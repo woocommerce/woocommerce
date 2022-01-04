@@ -289,6 +289,15 @@
 		a.reset_variations {
 			margin-left: 0.5em;
 		}
+
+		table.group_table {
+			td {
+				padding-right: 0.5rem;
+				padding-bottom: 1rem;
+			}
+
+			margin-bottom: var( --wp--style--block-gap );
+		}
 	}
 
 	.woocommerce-tabs {
