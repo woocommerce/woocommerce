@@ -1,5 +1,9 @@
 # Unreleased
 
+## Changes
+
+- Removed the node-config dependency
+
 ## Fixed
 - Moved `merchant.login()` out of `beforeAll()` block and into test body for retried runs.
 
