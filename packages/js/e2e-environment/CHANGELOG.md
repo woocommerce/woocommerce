@@ -1,5 +1,9 @@
 # Unreleased
 
+## Fixed
+
+- Added the ability to take screenshots from multiple test failures (when retried) in `utils/take-screenshot.js`.
+
 ## Added
 
 - Added `post-results-to-github-pr.js` to post smoke test results to a GitHub PR.
