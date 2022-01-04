@@ -34,9 +34,12 @@ class LegacyTemplate extends AbstractDynamicBlock {
 			return;
 		}
 
-		// We need to load the scripts here because when using block templates wp_head() gets run after the block template.
-		// As a result we are trying to enqueue required scripts before we have even registered them.
-		// See here for more information: https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/5328#issuecomment-989013447.
+		/**
+		 * We need to load the scripts here because when using block templates wp_head() gets run after the block
+		 * template. As a result we are trying to enqueue required scripts before we have even registered them.
+		 *
+		 * @see https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/5328#issuecomment-989013447
+		 */
 		if ( class_exists( 'WC_Frontend_Scripts' ) ) {
 			$frontend_scripts = new \WC_Frontend_Scripts();
 			$frontend_scripts::load_scripts();
@@ -67,10 +70,13 @@ class LegacyTemplate extends AbstractDynamicBlock {
 		ob_start();
 
 		/**
-		 * Woocommerce_before_main_content hook.
+		 * Hook: woocommerce_before_main_content
 		 *
-		 * @hooked woocommerce_output_content_wrapper - 10 (outputs opening divs for the content)
-		 * @hooked woocommerce_breadcrumb - 20
+		 * Called before rendering the main content for a product.
+		 *
+		 * @see woocommerce_output_content_wrapper() Outputs opening DIV for the content (priority 10)
+		 * @see woocommerce_breadcrumb() Outputs breadcrumb trail to the current product (priority 20)
+		 * @see WC_Structured_Data::generate_website_data() Outputs schema markup (priority 30)
 		 */
 		do_action( 'woocommerce_before_main_content' );
 
@@ -82,9 +88,11 @@ class LegacyTemplate extends AbstractDynamicBlock {
 		endwhile;
 
 		/**
-		 * Woocommerce_after_main_content hook.
+		 * Hook: woocommerce_after_main_content
 		 *
-		 * @hooked woocommerce_output_content_wrapper_end - 10 (outputs closing divs for the content)
+		 * Called after rendering the main content for a product.
+		 *
+		 * @see woocommerce_output_content_wrapper_end() Outputs closing DIV for the content (priority 10)
 		 */
 		do_action( 'woocommerce_after_main_content' );
 
@@ -102,11 +110,13 @@ class LegacyTemplate extends AbstractDynamicBlock {
 		ob_start();
 
 		/**
-		 * Hook: woocommerce_before_main_content.
+		 * Hook: woocommerce_before_main_content
 		 *
-		 * @hooked woocommerce_output_content_wrapper - 10 (outputs opening divs for the content)
-		 * @hooked woocommerce_breadcrumb - 20
-		 * @hooked WC_Structured_Data::generate_website_data() - 30
+		 * Called before rendering the main content for a product.
+		 *
+		 * @see woocommerce_output_content_wrapper() Outputs opening DIV for the content (priority 10)
+		 * @see woocommerce_breadcrumb() Outputs breadcrumb trail to the current product (priority 20)
+		 * @see WC_Structured_Data::generate_website_data() Outputs schema markup (priority 30)
 		 */
 		do_action( 'woocommerce_before_main_content' );
 
@@ -120,8 +130,8 @@ class LegacyTemplate extends AbstractDynamicBlock {
 			/**
 			 * Hook: woocommerce_archive_description.
 			 *
-			 * @hooked woocommerce_taxonomy_archive_description - 10
-			 * @hooked woocommerce_product_archive_description - 10
+			 * @see woocommerce_taxonomy_archive_description() Renders the taxonomy archive description (priority 10)
+			 * @see woocommerce_product_archive_description() Renders the product archive description (priority 10)
 			 */
 			do_action( 'woocommerce_archive_description' );
 			?>
@@ -132,9 +142,9 @@ class LegacyTemplate extends AbstractDynamicBlock {
 			/**
 			 * Hook: woocommerce_before_shop_loop.
 			 *
-			 * @hooked woocommerce_output_all_notices - 10
-			 * @hooked woocommerce_result_count - 20
-			 * @hooked woocommerce_catalog_ordering - 30
+			 * @see woocommerce_output_all_notices() Render error notices (priority 10)
+			 * @see woocommerce_result_count() Show number of results found (priority 20)
+			 * @see woocommerce_catalog_ordering() Show form to control sort order (priority 30)
 			 */
 			do_action( 'woocommerce_before_shop_loop' );
 
@@ -158,22 +168,24 @@ class LegacyTemplate extends AbstractDynamicBlock {
 			/**
 			 * Hook: woocommerce_after_shop_loop.
 			 *
-			 * @hooked woocommerce_pagination - 10
+			 * @see woocommerce_pagination() Renders pagination (priority 10)
 			 */
 			do_action( 'woocommerce_after_shop_loop' );
 		} else {
 			/**
 			 * Hook: woocommerce_no_products_found.
 			 *
-			 * @hooked wc_no_products_found - 10
+			 * @see wc_no_products_found() Default no products found content (priority 10)
 			 */
 			do_action( 'woocommerce_no_products_found' );
 		}
 
 		/**
-		 * Hook: woocommerce_after_main_content.
+		 * Hook: woocommerce_after_main_content
 		 *
-		 * @hooked woocommerce_output_content_wrapper_end - 10 (outputs closing divs for the content)
+		 * Called after rendering the main content for a product.
+		 *
+		 * @see woocommerce_output_content_wrapper_end() Outputs closing DIV for the content (priority 10)
 		 */
 		do_action( 'woocommerce_after_main_content' );
 
