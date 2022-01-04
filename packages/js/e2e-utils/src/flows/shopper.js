@@ -2,7 +2,7 @@
  * External dependencies
  */
 const { pressKeyWithModifier } = require( '@wordpress/e2e-test-utils' );
-const config = require( 'config' );
+const { config } = require( '@woocommerce/e2e-environment' );
 
 /**
  * Internal dependencies

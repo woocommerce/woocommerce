@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-const config = require( 'config' );
+const { config } = require( '@woocommerce/e2e-environment' );
 
 /**
  * Internal dependencies
@@ -440,10 +440,9 @@ const merchant = {
 	 */
 	collapseAdminMenu: async ( collapse = true ) => {
 		const collapseButton = await page.$( '.folded #collapse-button' );
-		if ( ( ! collapseButton ) == collapse ) {
+		if ( ( ! collapse ) == collapseButton ) {
 			await collapseButton.click();
 		}
-
 	},
 };
 
