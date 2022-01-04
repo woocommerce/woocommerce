@@ -15,6 +15,7 @@ const {
 	returns,
 	example,
 	related,
+	files,
 } = require( '../format-hook-doc' );
 const {
 	createDocs,
@@ -52,9 +53,8 @@ const generate = ( hooks ) => {
 				...sectionWithHeading( exceptions( hookDocs ), 'Exceptions' ),
 				...sectionWithHeading( returns( hookDocs ), 'Returns' ),
 				...sectionWithHeading( example( hookDocs ), 'Example' ),
-				...sectionWithHeading( related( hookDocs ), 'Related' ),
-				{ h3: `Source` },
-				{ p: `File: [${ hook.file }](../src/${ hook.file })` },
+				...sectionWithHeading( related( hookDocs ), 'See' ),
+				...sectionWithHeading( files( hook.file ), 'Source' ),
 				{ hr: '' },
 			].filter( Boolean );
 		} ),

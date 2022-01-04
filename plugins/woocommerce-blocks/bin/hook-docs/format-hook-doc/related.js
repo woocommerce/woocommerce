@@ -5,7 +5,9 @@ const related = ( hookDoc ) => {
 
 	return seeDocs && seeDocs.length
 		? {
-				ul: seeDocs.map( ( { refers } ) => refers ),
+				ul: seeDocs.map( ( { refers, content = '' } ) => {
+					return content ? refers + ' - ' + content : refers;
+				} ),
 		  }
 		: null;
 };

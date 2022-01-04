@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "35125888589aa8a4adfdb2cdbc266442",
+    "content-hash": "94edc00af416eb4f7b05b5f56548373a",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -452,16 +452,16 @@
         },
         {
             "name": "johnbillion/wp-hooks-generator",
-            "version": "0.6.1",
+            "version": "0.7.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/johnbillion/wp-hooks-generator.git",
-                "reference": "56f316b9716d441c4cfa35b8820dab21899dbee8"
+                "reference": "26027e46d5396afbeb5ed18b0cd6a75deb2f2996"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/johnbillion/wp-hooks-generator/zipball/56f316b9716d441c4cfa35b8820dab21899dbee8",
-                "reference": "56f316b9716d441c4cfa35b8820dab21899dbee8",
+                "url": "https://api.github.com/repos/johnbillion/wp-hooks-generator/zipball/26027e46d5396afbeb5ed18b0cd6a75deb2f2996",
+                "reference": "26027e46d5396afbeb5ed18b0cd6a75deb2f2996",
                 "shasum": ""
             },
             "require": {
@@ -469,7 +469,7 @@
                 "php": ">=7"
             },
             "require-dev": {
-                "oomphinc/composer-installers-extender": "^1.1",
+                "oomphinc/composer-installers-extender": "^2",
                 "opis/json-schema": "^1"
             },
             "bin": [
@@ -489,9 +489,15 @@
             "description": "Generates a JSON representation of the WordPress actions and filters in your code",
             "support": {
                 "issues": "https://github.com/johnbillion/wp-hooks-generator/issues",
-                "source": "https://github.com/johnbillion/wp-hooks-generator/tree/0.6.1"
+                "source": "https://github.com/johnbillion/wp-hooks-generator/tree/0.7.0"
             },
-            "time": "2020-10-31T17:46:42+00:00"
+            "funding": [
+                {
+                    "url": "https://github.com/johnbillion",
+                    "type": "github"
+                }
+            ],
+            "time": "2021-11-10T17:22:21+00:00"
         },
         {
             "name": "johnbillion/wp-parser-lib",
