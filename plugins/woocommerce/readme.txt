@@ -191,6 +191,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Update - Change Label of States for Venezuela & fix iso code for states. ( [#31175](https://github.com/woocommerce/woocommerce/pull/31175) )
 * Update - Change Label of States for Uruguay & add states. ( [#31167](https://github.com/woocommerce/woocommerce/pull/31167) )
 * Update - Show fallback message when extensions marketplace cannot connect to WCCOM API. ( [#31126](https://github.com/woocommerce/woocommerce/pull/31126) )
+* Update - Add support for Gutenberg 12.1.0 block template naming convention in themes. ( [#31522](https://github.com/woocommerce/woocommerce/pull/31522) )
 * Dev - Deprecated is_ajax() in favor of WordPress's own wp_doing_ajax() function. ( [#31113](https://github.com/woocommerce/woocommerce/pull/31113) )
 
 **ActionScheduler - 3.4.0**
