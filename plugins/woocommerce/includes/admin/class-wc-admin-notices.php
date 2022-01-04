@@ -136,7 +136,7 @@ class WC_Admin_Notices {
 
 		self::add_custom_notice(
 			'php72_required_in_woo_65',
-			__( '<h4>PHP version requirements will change soon</h4><p>WooCommerce 6.5, scheduled for <b>May 2022</b>, will require PHP 7.2 or newer to work. An upgrade to at least PHP 7.4 is recommended. <b><a href="">Learn more about this change.</a></b></p>', 'woocommerce' )
+			__( '<h4>PHP version requirements will change soon</h4><p>WooCommerce 6.5, scheduled for <b>May 2022</b>, will require PHP 7.2 or newer to work. An upgrade to at least PHP 7.4 is recommended. <b><a href="https://developer.woocommerce.com/?p=11584">Learn more about this change.</a></b></p>', 'woocommerce' )
 		);
 	}
 
