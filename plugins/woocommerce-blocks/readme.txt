@@ -4,7 +4,7 @@ Tags: gutenberg, woocommerce, woo commerce, products, blocks, woocommerce blocks
 Requires at least: 5.8
 Tested up to: 5.8
 Requires PHP: 7.0
-Stable tag: 6.7.0-dev
+Stable tag: 6.7.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -84,6 +84,22 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 5. WooCommerce Product Blocks in the block inserter menu
 
 == Changelog ==
+
+= 6.7.0 - 2022-01-03 =
+
+#### Enhancements
+
+- Added global styles (text color) to the Active Filters block. ([5465](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5465))
+- Prevent a 0 value shipping price being shown in the Checkout if no shipping methods are available. ([5444](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5444))
+
+#### Bug Fixes
+
+- Fixed an issue where the checkout address fields would be blank for logged in customers. ([5473](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5473))
+- Account for products without variations in the On Sale Products block. ([5470](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5470))
+- Update the template retrieving logic to allow for older Gutenberg convention and newer one (`block-templates`/`block-template-parts` vs. `templates`/`parts`). ([5455](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5455))
+- Ensure that the translation of the "Proceed to Checkout" button is working. ([5453](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5453))
+- Fix custom templates with fallback to archive being incorrectly attributed to the user in the editor instead of the parent theme. ([5447](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5447))
+- Remove text decorations from product filtering blocks items. ([5384](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5384))
 
 = 6.6.0 - 2021-12-20 =
 
