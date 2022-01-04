@@ -13,7 +13,6 @@ use Automattic\WooCommerce\Blocks\StoreApi\Formatters\HtmlFormatter;
 use Automattic\WooCommerce\Blocks\StoreApi\Formatters\CurrencyFormatter;
 use Automattic\WooCommerce\Blocks\Domain\Services\FeatureGating;
 use Automattic\WooCommerce\Blocks\StoreApi\Schemas\CheckoutSchema;
-use Automattic\WooCommerce\Blocks\Tests\StoreApi\Routes\ControllerTestCase;
 use Automattic\WooCommerce\Blocks\Tests\Helpers\FixtureData;
 use Automattic\WooCommerce\Blocks\StoreApi\Routes\Checkout as CheckoutRoute;
 use Automattic\WooCommerce\Blocks\StoreApi\Utilities\CartController;
@@ -62,6 +61,7 @@ class Checkout extends MockeryTestCase {
 
 		$fixtures = new FixtureData();
 		$fixtures->shipping_add_flat_rate();
+		$fixtures->payments_enable_bacs();
 		$this->products = array(
 			$fixtures->get_simple_product(
 				array(

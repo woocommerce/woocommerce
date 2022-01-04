@@ -20,9 +20,9 @@ class FixtureData {
 		$product->set_props(
 			wp_parse_args(
 				$props,
-				[
+				array(
 					'name' => 'Simple Product',
-				]
+				)
 			)
 		);
 		$product->save();
@@ -37,20 +37,20 @@ class FixtureData {
 	 * @param array $attributes Product attributes from which to create variations.
 	 * @return \WC_Product
 	 */
-	public function get_variable_product( $props, $attributes = [] ) {
+	public function get_variable_product( $props, $attributes = array() ) {
 		$product = new \WC_Product_Variable();
 		$product->set_props(
 			wp_parse_args(
 				$props,
-				[
+				array(
 					'name' => 'Variable Product',
-				]
+				)
 			)
 		);
 		$product->save();
 
 		if ( $attributes ) {
-			$product_attributes = [];
+			$product_attributes = array();
 
 			foreach ( $attributes as $attribute ) {
 				$product_attribute = new \WC_Product_Attribute();
@@ -74,23 +74,23 @@ class FixtureData {
 	 * Create and return a variation of a product.
 	 *
 	 * @param integer $parent_id Parent product ID.
-	 * @param array $attributes Variation attributes.
-	 * @param array $props Product props.
+	 * @param array   $attributes Variation attributes.
+	 * @param array   $props Product props.
 	 * @return \WC_Product_Variation
 	 */
-	public function get_variation_product( $parent_id, $attributes = [], $props = [] ) {
+	public function get_variation_product( $parent_id, $attributes = array(), $props = array() ) {
 		$variation = new \WC_Product_Variation();
 		$variation->set_props(
 			array_merge(
 				wp_parse_args(
 					$props,
-					[
-						'name' => 'Variation of ' . $parent_id,
+					array(
+						'name'          => 'Variation of ' . $parent_id,
 						'regular_price' => '10',
-					]
+					)
 				),
 				array(
-					'parent_id'     => $parent_id,
+					'parent_id' => $parent_id,
 				)
 			)
 		);
@@ -103,7 +103,7 @@ class FixtureData {
 	 * Create a product attribute.
 	 *
 	 * @param string $raw_name Name of attribute to create.
-	 * @param array $terms Terms to create for the attribute.
+	 * @param array  $terms Terms to create for the attribute.
 	 * @return array Attribute data and created terms.
 	 */
 	public static function get_product_attribute( $raw_name = 'size', $terms = array( 'small' ) ) {
@@ -180,10 +180,10 @@ class FixtureData {
 				$result               = wp_insert_term(
 					$term,
 					$attribute->slug,
-					[
-						'slug' => $term . '-slug',
+					array(
+						'slug'        => $term . '-slug',
 						'description' => 'Description of ' . $term,
-					]
+					)
 				);
 				$return['term_ids'][] = $result['term_id'];
 			} else {
@@ -225,30 +225,30 @@ class FixtureData {
 	 *
 	 * @param integer $product_id Product ID.
 	 * @param integer $rating Review rating.
-	 * @param string $content Review content.
-	 * @param array $props Review props.
+	 * @param string  $content Review content.
+	 * @param array   $props Review props.
 	 * @return void
 	 */
-	public function add_product_review( $product_id, $rating = 5, $content = 'Product review.', $props = [] ) {
+	public function add_product_review( $product_id, $rating = 5, $content = 'Product review.', $props = array() ) {
 		wp_insert_comment(
 			array_merge(
 				wp_parse_args(
 					$props,
-					[
+					array(
 						'comment_author'       => 'admin',
 						'comment_author_email' => 'woo@woo.local',
 						'comment_author_url'   => '',
 						'comment_approved'     => 1,
 						'comment_type'         => 'review',
-					]
+					)
 				),
-				[
-					'comment_post_ID'      => $product_id,
-					'comment_content'      => $content,
-					'comment_meta'         => [
+				array(
+					'comment_post_ID' => $product_id,
+					'comment_content' => $content,
+					'comment_meta'    => array(
 						'rating' => $rating,
-					],
-				]
+					),
+				)
 			)
 		);
 		\WC_Comments::clear_transients( $product_id );
@@ -272,5 +272,26 @@ class FixtureData {
 		update_option( 'woocommerce_flat_rate', array() );
 		\WC_Cache_Helper::get_transient_version( 'shipping', true );
 		WC()->shipping()->load_shipping_methods();
+	}
+
+	/**
+	 * Enable bacs payment method.
+	 */
+	public function payments_enable_bacs() {
+		$bacs_settings = array(
+			'enabled'         => 'yes',
+			'title'           => 'Direct bank transfer',
+			'description'     => 'Make your payment directly into our bank account. Please use your Order ID as the payment reference. Your order will not be shipped until the funds have cleared in our account.',
+			'instructions'    => '',
+			'account_details' => '',
+			'account_name'    => '',
+			'account_number'  => '',
+			'sort_code'       => '',
+			'bank_name'       => '',
+			'iban'            => '',
+			'bic'             => '',
+		);
+		update_option( 'woocommerce_bacs_settings', $bacs_settings );
+		WC()->payment_gateways()->init();
 	}
 }
