@@ -525,3 +525,58 @@ $tt2-gray: #f7f7f7;
 		z-index: 99;
 	}
 }
+
+/**
+ * Account section
+ */
+ .woocommerce-account {
+
+	main {
+
+		.woocommerce {
+			@include clearfix();
+			max-width: 1000px;
+		}
+	}
+
+	.woocommerce-MyAccount-navigation {
+
+		ul {
+			margin: 0;
+			padding: 0;
+		}
+
+		li {
+			list-style: none;
+			padding: 1rem 0;
+
+			&:first-child {
+				padding-top: 0;
+			}
+
+			a {
+				box-shadow: none;
+				text-decoration: none;
+
+				&:hover {
+					text-decoration: underline;
+				}
+			}
+
+			&.is-active {
+
+				a {
+					color: var( --wp--preset--color--primary );
+					text-decoration: underline;
+				}
+			}
+		}
+	}
+
+	.woocommerce-MyAccount-content {
+
+		p:first-of-type {
+			margin-block-start: 0px;
+		}
+	}
+}
