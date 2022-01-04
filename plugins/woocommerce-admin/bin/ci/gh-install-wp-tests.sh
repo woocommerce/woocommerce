@@ -38,7 +38,7 @@ install_wp() {
 		local VERSION_ESCAPED=`echo $WP_VERSION | sed 's/\./\\\\./g'`
 		LATEST_VERSION=$(grep -o '"version":"'$VERSION_ESCAPED'[^"]*' $TMPDIR/wp-latest.json | sed 's/"version":"//' | head -1)
 	fi
-			
+
 	if [[ -z "$LATEST_VERSION" ]]; then
 		local ARCHIVE_NAME="wordpress-$WP_VERSION"
 	else
@@ -93,6 +93,11 @@ install_db() {
 	echo "::endgroup::"
 }
 
+version() {
+	# convert version numbers to digits
+	echo "$@" | awk -F. '{ printf("%03d%03d%03d\n", $1,$2,$3); }';
+}
+
 install_deps() {
 	echo "::group::{install_deps}"
 	# Script Variables
@@ -114,32 +119,43 @@ install_deps() {
 
 	# Install WooCommerce (latest non-hyphenated (beta, RC) tag)
 	if [[ "$WC_VERSION" == "latest" ]]; then
-		LATEST_WC_TAG="$(git ls-remote --tags https://github.com/woocommerce/woocommerce.git | awk '{print $2}' | sed 's/^refs\/tags\///' | grep -E '^[0-9]\.[0-9]\.[0-9]$' | sort -V | tail -n 1)"
+		INSTALL_WC_TAG="$(git ls-remote --tags https://github.com/woocommerce/woocommerce.git | awk '{print $2}' | sed 's/^refs\/tags\///' | grep -E '^[0-9]\.[0-9]\.[0-9]$' | sort -V | tail -n 1)"
 	else
-		LATEST_WC_TAG="$WC_VERSION"
+		INSTALL_WC_TAG="$WC_VERSION"
+	fi
+
+
+	# As zip file does not include tests, we have to get it from git repo.
+	git clone --depth 1 --branch $INSTALL_WC_TAG https://github.com/woocommerce/woocommerce.git
+
+	if [ "$(version "$INSTALL_WC_TAG")" -ge "$(version "6.0.0")" ]; then
+		# WooCommerce 6.0.0 introduced a breaking change to the repo structure.
+		# We need to clone and use the correct folder path.
+		mv woocommerce/plugins/woocommerce wp-content/plugins/
+	else
+		mv woocommerce wp-content/plugins/
 	fi
 
 	cd "wp-content/plugins/"
-	# As zip file does not include tests, we have to get it from git repo.
-	git clone --depth 1 --branch $LATEST_WC_TAG https://github.com/woocommerce/woocommerce.git
 
 	# Bring in WooCommerce Core dependencies
 	composer self-update $COMPOSER_VERSION
 	cd "woocommerce"
- 	composer install --no-dev
+
+	composer install --no-dev
 	composer self-update 2.0.6
 
-  # Activate WooCommerce
+
 	cd "$WP_CORE_DIR"
 	php wp-cli.phar plugin activate woocommerce
-	
-  # Install woocommerce-admin
-  cd "$WP_CORE_DIR/wp-content/plugins"
-  cp -R $GITHUB_WORKSPACE ./
 
-  # Activate woocommerce-admin
+	# Install woocommerce-admin
+	cd "$WP_CORE_DIR/wp-content/plugins"
+	cp -R $GITHUB_WORKSPACE ./
+
+	# Activate woocommerce-admin
 	cd "$WP_CORE_DIR"
-  php wp-cli.phar plugin activate woocommerce-admin
+	php wp-cli.phar plugin activate woocommerce-admin
 
 	# Back to original dir
 	cd "$WORKING_DIR"
