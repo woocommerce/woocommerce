@@ -1,0 +1,4 @@
+Significance: patch
+Type: Fix
+
+Replace all docs.woocommerce.com links with woocommerce.com/document. #8105

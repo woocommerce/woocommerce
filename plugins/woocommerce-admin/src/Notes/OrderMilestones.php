@@ -237,7 +237,7 @@ class OrderMilestones {
 				return array(
 					'name'  => 'learn-more',
 					'label' => __( 'Learn more', 'woocommerce-admin' ),
-					'query' => 'https://docs.woocommerce.com/document/managing-orders/?utm_source=inbox&utm_medium=product',
+					'query' => 'https://woocommerce.com/document/managing-orders/?utm_source=inbox&utm_medium=product',
 				);
 			case 10:
 				return array(

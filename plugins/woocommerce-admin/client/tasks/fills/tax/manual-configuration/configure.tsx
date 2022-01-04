@@ -53,7 +53,7 @@ export const Configure: React.FC< TaxChildProps > = ( {
 						components: {
 							link: (
 								<Link
-									href="https://docs.woocommerce.com/document/setting-up-taxes-in-woocommerce/?utm_medium=product#section-1"
+									href="https://woocommerce.com/document/setting-up-taxes-in-woocommerce/?utm_medium=product#section-1"
 									target="_blank"
 									type="external"
 								/>
