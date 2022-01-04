@@ -9,10 +9,10 @@ const {
 	deleteAllEmailLogs,
 } = require( '@woocommerce/e2e-utils' );
 
-const config = require( 'config' );
+const { config } = require( '@woocommerce/e2e-environment' );
 const customerEmail = config.get( 'addresses.customer.billing.email' );
-const adminEmail = config.has( 'users.admin.email' ) ? config.get( 'users.admin.email' )  : 'admin@woocommercecoree2etestsuite.com';
-const storeName = 'WooCommerce Core E2E Test Suite';
+const adminEmail = config.get( 'users.admin.email', 'admin@woocommercecoree2etestsuite.com' );
+const storeName = config.get( 'storeName', 'WooCommerce Core E2E Test Suite' );
 
 let orderId;
 

@@ -13,7 +13,6 @@
   "dependencies": {
     "@jest/globals": "^26.4.2",
     "@wordpress/deprecated": "^3.2.3",
-    "config": "3.3.3",
     "faker": "^5.1.0"
   },
   "devDependencies": {
@@ -31,7 +30,8 @@
   },
   "peerDependencies": {
     "@woocommerce/api": "^0.2.0",
-    "@woocommerce/e2e-utils": "^0.1.6"
+    "@woocommerce/e2e-utils": "^0.1.6",
+	"@woocommerce/e2e-environment": "^0.2.3"
   },
   "publishConfig": {
     "access": "public"

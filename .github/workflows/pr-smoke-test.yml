@@ -13,10 +13,10 @@ jobs:
     steps:
       - name: Create dirs.
         run: |
-              mkdir -p code/woocommerce
-              mkdir -p package/woocommerce
-              mkdir -p tmp/woocommerce
-              mkdir -p node_modules
+          mkdir -p code/woocommerce
+          mkdir -p package/woocommerce
+          mkdir -p tmp/woocommerce
+          mkdir -p node_modules
 
       - name: Checkout code.
         uses: actions/checkout@v2
@@ -32,10 +32,10 @@ jobs:
           pnpm nx composer-install-no-dev woocommerce
           pnpm nx build-assets woocommerce
           pnpm install jest
-          
+
       - name: Run smoke test.
         working-directory: package/woocommerce/plugins/woocommerce
-        if: steps.installation.outcome == 'success'
+        if: always()
         env:
           SMOKE_TEST_URL: ${{ secrets.SMOKE_TEST_URL }}
           SMOKE_TEST_ADMIN_USER: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
@@ -55,7 +55,7 @@ jobs:
       - name: Post Smoke tests results comment on PR
         if: always()
         uses: actions/github-script@v5
-        env: 
+        env:
           TITLE: 'Smoke Test Results'
           SMOKE_TEST_URL: ${{ secrets.SMOKE_TEST_URL }}
         with:
@@ -66,7 +66,7 @@ jobs:
 
       - name: Run E2E tests.
         working-directory: package/woocommerce/plugins/woocommerce
-        if: steps.installation.outcome == 'success'
+        if: always()
         env:
           SMOKE_TEST_URL: ${{ secrets.SMOKE_TEST_URL }}
           SMOKE_TEST_ADMIN_USER: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
@@ -86,7 +86,7 @@ jobs:
       - name: Post E2E tests results comment on PR
         if: always()
         uses: actions/github-script@v5
-        env: 
+        env:
           TITLE: 'E2E Test Results'
           SMOKE_TEST_URL: ${{ secrets.SMOKE_TEST_URL }}
         with:
@@ -96,7 +96,7 @@ jobs:
             await script({github, context})
 
       - name: Remove label from pull request.
-        if: "${{ contains(github.event.pull_request.labels.*.name, 'run: smoke tests') }}"
+        if: always() && ${{ contains(github.event.label.name, format( 'run{0} smoke tests', ':') ) }}
         uses: actions-ecosystem/action-remove-labels@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
