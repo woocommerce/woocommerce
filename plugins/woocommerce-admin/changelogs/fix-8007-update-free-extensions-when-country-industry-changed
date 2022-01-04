@@ -1,0 +1,4 @@
+Significance: patch
+Type: Fix
+
+Fix free extensions list isn't updated after store location or industry is changed. #8099

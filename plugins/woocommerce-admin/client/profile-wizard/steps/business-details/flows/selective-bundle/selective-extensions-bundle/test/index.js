@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { render } from '@testing-library/react';
-import { useSelect } from '@wordpress/data';
+import { useSelect, useDispatch } from '@wordpress/data';
 import userEvent from '@testing-library/user-event';
 import { pluginNames } from '@woocommerce/data';
 
@@ -83,15 +83,19 @@ const freeExtensions = [
 	},
 ];
 
-const profileItems = { product_types: [] };
-
 describe( 'Selective extensions bundle', () => {
-	it( 'should list installable free extensions from obw/basics and obw/grow', () => {
+	beforeAll( () => {
 		useSelect.mockReturnValue( {
 			freeExtensions,
 			isResolving: false,
-			profileItems,
 		} );
+
+		useDispatch.mockReturnValue( {
+			invalidateResolutionForStoreSelector: () => {},
+		} );
+	} );
+
+	it( 'should list installable free extensions from obw/basics and obw/grow', () => {
 		const { getByText, queryByText } = render(
 			<SelectiveExtensionsBundle isInstallingActivating={ false } />
 		);
@@ -112,11 +116,6 @@ describe( 'Selective extensions bundle', () => {
 	} );
 
 	it( 'should list installable extensions when dropdown is clicked', () => {
-		useSelect.mockReturnValue( {
-			freeExtensions,
-			isResolving: false,
-			profileItems,
-		} );
 		const { getAllByRole, getByText, queryByText } = render(
 			<SelectiveExtensionsBundle isInstallingActivating={ false } />
 		);
@@ -149,7 +148,7 @@ describe( 'Selective extensions bundle', () => {
 			} );
 		} );
 
-		it( 'should render not title when no plugins', () => {
+		it( 'should not render title when no plugins', () => {
 			const title = 'This is title';
 			const { queryByText } = render(
 				<ExtensionSection

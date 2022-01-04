@@ -8,13 +8,9 @@ import { Link } from '@woocommerce/components';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { Icon, chevronDown, chevronUp } from '@wordpress/icons';
 import interpolateComponents from 'interpolate-components';
-import {
-	pluginNames,
-	ONBOARDING_STORE_NAME,
-	SETTINGS_STORE_NAME,
-} from '@woocommerce/data';
+import { pluginNames, ONBOARDING_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import { useSelect } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -25,7 +21,7 @@ import sanitizeHTML from '~/lib/sanitize-html';
 import { setAllPropsToValue } from '~/lib/collections';
 import { getCountryCode } from '../../../../../../dashboard/utils';
 
-const ALLOWED_PLUGIN_LISTS = [ 'obw/basics', 'obw/grow' ];
+const ALLOWED_PLUGIN_CATEGORIES = [ 'obw/basics', 'obw/grow' ];
 
 const FreeBadge = () => {
 	return (
@@ -215,44 +211,45 @@ export const createInstallExtensionOptions = ( extensions = [] ) => {
 export const SelectiveExtensionsBundle = ( {
 	isInstallingActivating,
 	onSubmit,
+	country,
+	productTypes,
+	industry,
 } ) => {
 	const [ showExtensions, setShowExtensions ] = useState( false );
 	const [ installExtensionOptions, setInstallExtensionOptions ] = useState(
 		createInstallExtensionOptions()
 	);
-
 	const {
-		countryCode,
-		freeExtensions,
+		freeExtensions: freeExtensionBundleByCategory,
 		isResolving,
-		profileItems,
 	} = useSelect( ( select ) => {
-		const {
-			getFreeExtensions,
-			getProfileItems,
-			hasFinishedResolution,
-		} = select( ONBOARDING_STORE_NAME );
-		const { getSettings } = select( SETTINGS_STORE_NAME );
-		const { general: settings = {} } = getSettings( 'general' );
-
+		const { getFreeExtensions, hasFinishedResolution } = select(
+			ONBOARDING_STORE_NAME
+		);
 		return {
-			countryCode: getCountryCode( settings.woocommerce_default_country ),
 			freeExtensions: getFreeExtensions(),
 			isResolving: ! hasFinishedResolution( 'getFreeExtensions' ),
-			profileItems: getProfileItems(),
 		};
 	} );
 
+	const { invalidateResolutionForStoreSelector } = useDispatch(
+		ONBOARDING_STORE_NAME
+	);
+
+	useEffect( () => {
+		invalidateResolutionForStoreSelector( 'getFreeExtensions' );
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [ country, industry ] );
+
 	const installableExtensions = useMemo( () => {
-		const { product_types: productTypes } = profileItems;
-		return freeExtensions.filter( ( list ) => {
+		return freeExtensionBundleByCategory.filter( ( extensionBundle ) => {
 			if (
 				window.wcAdminFeatures &&
 				window.wcAdminFeatures.subscriptions &&
-				countryCode === 'US'
+				getCountryCode( country ) === 'US'
 			) {
 				if ( productTypes.includes( 'subscriptions' ) ) {
-					list.plugins = list.plugins.filter(
+					extensionBundle.plugins = extensionBundle.plugins.filter(
 						( extension ) =>
 							extension.key !== 'woocommerce-payments' ||
 							( extension.key === 'woocommerce-payments' &&
@@ -260,9 +257,9 @@ export const SelectiveExtensionsBundle = ( {
 					);
 				}
 			}
-			return ALLOWED_PLUGIN_LISTS.includes( list.key );
+			return ALLOWED_PLUGIN_CATEGORIES.includes( extensionBundle.key );
 		} );
-	}, [ freeExtensions, profileItems, countryCode ] );
+	}, [ freeExtensionBundleByCategory, productTypes, country ] );
 
 	useEffect( () => {
 		if ( ! isInstallingActivating ) {
