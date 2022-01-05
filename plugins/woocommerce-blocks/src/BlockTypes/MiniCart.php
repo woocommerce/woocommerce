@@ -378,12 +378,12 @@ class MiniCart extends AbstractBlock {
 		}
 
 		$template_part_contents = '';
-		if ( function_exists( 'gutenberg_get_block_template' ) ) {
-			$template_part = gutenberg_get_block_template( get_stylesheet() . '//mini-cart', 'wp_template_part' );
-			if ( $template_part && ! empty( $template_part->content ) ) {
-				$template_part_contents = do_blocks( $template_part->content );
-			}
+		$template_part          = BlockTemplateUtils::get_block_template( get_stylesheet() . '//mini-cart', 'wp_template_part' );
+
+		if ( $template_part && ! empty( $template_part->content ) ) {
+			$template_part_contents = do_blocks( $template_part->content );
 		}
+
 		if ( '' === $template_part_contents ) {
 			$template_part_contents = do_blocks(
 				// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
