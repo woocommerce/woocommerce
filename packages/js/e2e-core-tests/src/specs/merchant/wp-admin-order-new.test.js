@@ -7,7 +7,7 @@ const {
 	withRestApi,
 	AdminEdit,
 } = require( '@woocommerce/e2e-utils' );
-const { config } = require( '@woocommerce/e2e-environment' );
+const config = require( 'config' );
 const {
 	HTTPClientFactory,
 	VariableProduct,

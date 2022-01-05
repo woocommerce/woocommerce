@@ -11,7 +11,7 @@ const {
 
 let simplePostIdValue;
 let orderNum;
-const { config } = require( '@woocommerce/e2e-environment' );
+const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );
 
 const runMyAccountPayOrderTest = () => {

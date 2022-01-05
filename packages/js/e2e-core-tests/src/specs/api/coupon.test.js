@@ -6,7 +6,7 @@ const { HTTPClientFactory, Coupon } = require( '@woocommerce/api' );
 /**
  * External dependencies
  */
-const { config } = require( '@woocommerce/e2e-environment' );
+const config = require( 'config' );
 const { it, describe, beforeAll } = require( '@jest/globals' );
 
 /**
