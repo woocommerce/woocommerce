@@ -21,7 +21,7 @@
 	afterAll,
 } = require( '@jest/globals' );
 
-const { config } = require( '@woocommerce/e2e-environment' );
+const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );
 
 const runCartRedirectionTest = () => {

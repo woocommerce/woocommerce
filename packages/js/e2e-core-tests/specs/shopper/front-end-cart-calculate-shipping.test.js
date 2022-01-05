@@ -18,8 +18,8 @@ const {
 	beforeAll,
 } = require( '@jest/globals' );
 
-const { config } = require( '@woocommerce/e2e-environment' );
-const firstProductPrice = config.get( 'products.simple.price', '9.99' );
+const config = require( 'config' );
+const firstProductPrice = config.has( 'products.simple.price' ) ? config.get( 'products.simple.price' ) : '9.99';
 const secondProductPrice = '4.99';
 const fourProductPrice = firstProductPrice * 4;
 var twoProductsPrice = (+firstProductPrice) + (+secondProductPrice);
