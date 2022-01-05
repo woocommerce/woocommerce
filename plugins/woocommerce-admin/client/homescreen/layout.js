@@ -162,7 +162,7 @@ export const Layout = ( {
 							) }
 						/>
 					) }
-					{ ! isRunningTaskListExperiment && <ActivityPanel /> }
+					{ <ActivityPanel /> }
 					{ hasTaskList && renderTaskList() }
 					<InboxPanel />
 				</Column>
