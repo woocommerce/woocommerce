@@ -53,7 +53,7 @@
 		"build-watch": {
 			"executor": "@nrwl/workspace:run-commands",
 			"options": {
-				"command": "grunt watch",
+				"command": "pnpx grunt watch",
 				"cwd": "plugins/woocommerce/legacy"
 			}
 		},
