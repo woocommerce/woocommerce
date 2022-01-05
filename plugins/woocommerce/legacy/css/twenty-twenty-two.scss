@@ -644,6 +644,44 @@ $tt2-gray: #f7f7f7;
 		> p:first-of-type {
 			margin-block-start: 0px;
 		}
+
+		table {
+			
+			width: 100%;
+			text-align: left;
+			border-collapse: collapse;
+
+			th,
+			td {
+				font-size: var(--wp--preset--font-size--small);
+				font-weight: normal;
+			}
+
+			th {
+				padding-bottom: 1rem;
+			}
+
+			tbody {
+
+				tr {
+					border-top: 1px solid var( --wp--preset--color--black );
+				}
+
+				td {
+					a.button {
+						margin-bottom: 1rem;
+						border: none;
+						background: #ebe9eb;
+						color: var(--wp--preset--color--black);
+			
+						&:hover,
+						&:visited {
+							color: var(--wp--preset--color--black);
+						}
+					}
+				}
+			}
+		}
 	}
 
 	&.woocommerce-edit-address {
