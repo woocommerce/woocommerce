@@ -11,7 +11,43 @@ const { config } = require( '@woocommerce/e2e-environment' );
 let variablePostIdValue;
 
 const cartDialogMessage = 'Please select some product options before adding this product to your cart.';
-const attributes = config.get( 'products.variable.attributes' )
+const attributes = config.get( 'products.variable.attributes', [
+	{
+		"id": 0,
+		"name": "Colour",
+		"isVisibleOnProductPage": true,
+		"isForVariations": true,
+		"options": [
+			"Red",
+			"Green",
+			"Blue"
+		],
+		"sortOrder": 0
+	},
+	{
+		"id": 0,
+		"name": "Size",
+		"isVisibleOnProductPage": true,
+		"isForVariations": true,
+		"options": [
+			"Small",
+			"Medium",
+			"Large"
+		],
+		"sortOrder": 0
+	},
+	{
+		"id": 0,
+		"name": "Logo",
+		"isVisibleOnProductPage": true,
+		"isForVariations": true,
+		"options": [
+			"Woo",
+			"WordPress"
+		],
+		"sortOrder": 0
+	}
+] )
 
 const runVariableProductUpdateTest = () => {
 	describe('Shopper > Update variable product',() => {

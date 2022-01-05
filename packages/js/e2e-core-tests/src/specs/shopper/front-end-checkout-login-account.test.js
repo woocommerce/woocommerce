@@ -52,8 +52,8 @@ const runCheckoutLoginAccountTest = () => {
 			await expect(page).toClick('.woocommerce-info > a.showlogin');
 
 			// Fill shopper's login credentials and proceed further
-			await page.type( '#username', config.get('users.customer.username') );
-			await page.type( '#password', config.get('users.customer.password') );
+			await page.type( '#username', config.get('users.customer.username', 'customer') );
+			await page.type( '#password', config.get('users.customer.password', 'password') );
 
 			await Promise.all([
 				page.waitForNavigation({waitUntil: 'networkidle0'}),

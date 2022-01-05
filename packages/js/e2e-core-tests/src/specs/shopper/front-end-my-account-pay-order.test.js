@@ -12,7 +12,7 @@ const {
 let simplePostIdValue;
 let orderNum;
 const { config } = require( '@woocommerce/e2e-environment' );
-const simpleProductName = config.get( 'products.simple.name' );
+const simpleProductName = config.get( 'products.simple.name', 'Simple product' );
 
 const runMyAccountPayOrderTest = () => {
 	describe('Customer can pay for their order through My Account', () => {
@@ -22,7 +22,19 @@ const runMyAccountPayOrderTest = () => {
 			await shopper.goToProduct(simplePostIdValue);
 			await shopper.addToCart(simpleProductName);
 			await shopper.goToCheckout();
-			await shopper.fillBillingDetails(config.get('addresses.customer.billing'));
+			await shopper.fillBillingDetails(config.get('addresses.customer.billing', {
+				"firstname": "John",
+				"lastname": "Doe",
+				"company": "Automattic",
+				"country": "United States (US)",
+				"addressfirstline": "addr 1",
+				"addresssecondline": "addr 2",
+				"city": "San Francisco",
+				"state": "CA",
+				"postcode": "94107",
+				"phone": "123456789",
+				"email": "john.doe@example.com"
+			}));
 			await uiUnblocked();
 			await shopper.placeOrder();
 

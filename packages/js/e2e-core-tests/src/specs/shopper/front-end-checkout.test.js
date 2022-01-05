@@ -10,8 +10,32 @@ const {
 } = require( '@woocommerce/e2e-utils' );
 
 const { config } = require( '@woocommerce/e2e-environment' );
-const simpleProductName = config.get( 'products.simple.name' );
+const simpleProductName = config.get( 'products.simple.name', 'Simple product' );
 const singleProductPrice = config.get( 'products.simple.price', '9.99' );
+const billingAddress = config.get( 'addresses.customer.billing', {
+	"firstname": "John",
+	"lastname": "Doe",
+	"company": "Automattic",
+	"country": "United States (US)",
+	"addressfirstline": "addr 1",
+	"addresssecondline": "addr 2",
+	"city": "San Francisco",
+	"state": "CA",
+	"postcode": "94107",
+	"phone": "123456789",
+	"email": "john.doe@example.com"
+} );
+const shippingAddress = config.get( 'addresses.customer.shipping', {
+	"firstname": "John",
+	"lastname": "Doe",
+	"company": "Automattic",
+	"country": "United States (US)",
+	"addressfirstline": "addr 1",
+	"addresssecondline": "addr 2",
+	"city": "San Francisco",
+	"state": "CA",
+	"postcode": "94107"
+} );
 const twoProductPrice = singleProductPrice * 2;
 const threeProductPrice = singleProductPrice * 3;
 const fourProductPrice = singleProductPrice * 4;
@@ -76,7 +100,7 @@ const runCheckoutPageTest = () => {
 			await shopper.addToCartFromShopPage( productId );
 			await shopper.goToCheckout();
 			await shopper.productIsInCheckout(simpleProductName, `3`, threeProductPrice, threeProductPrice);
-			await shopper.fillBillingDetails(config.get('addresses.customer.billing'));
+			await shopper.fillBillingDetails(billingAddress);
 		});
 
 		it('allows customer to fill shipping details', async () => {
@@ -91,7 +115,7 @@ const runCheckoutPageTest = () => {
 			});
 			await uiUnblocked();
 
-			await shopper.fillShippingDetails(config.get('addresses.customer.shipping'));
+			await shopper.fillShippingDetails(shippingAddress);
 		});
 
 		it('allows guest customer to place order', async () => {
@@ -99,7 +123,7 @@ const runCheckoutPageTest = () => {
 			await shopper.addToCartFromShopPage( productId );
 			await shopper.goToCheckout();
 			await shopper.productIsInCheckout(simpleProductName, `5`, fiveProductPrice, fiveProductPrice);
-			await shopper.fillBillingDetails(config.get('addresses.customer.billing'));
+			await shopper.fillBillingDetails(billingAddress);
 
 			await uiUnblocked();
 
@@ -122,7 +146,7 @@ const runCheckoutPageTest = () => {
 			await shopper.addToCartFromShopPage( productId );
 			await shopper.goToCheckout();
 			await shopper.productIsInCheckout(simpleProductName, `1`, singleProductPrice, singleProductPrice);
-			await shopper.fillBillingDetails(config.get('addresses.customer.billing'));
+			await shopper.fillBillingDetails(billingAddress);
 
 			await uiUnblocked();
 

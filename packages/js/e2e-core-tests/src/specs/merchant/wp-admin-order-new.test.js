@@ -50,9 +50,9 @@ const taxRates = [
 const taxTotals = ['$10.00', '$40.00', '$240.00'];
 
 const initProducts = async () => {
-	const apiUrl = config.get('url');
-	const adminUsername = config.get('users.admin.username');
-	const adminPassword = config.get('users.admin.password');
+	const apiUrl = config.get( 'url', 'http://localhost:8084/' );
+	const adminUsername = config.get( 'users.admin.username', 'admin' );
+	const adminPassword = config.get( 'users.admin.password', 'password' );
 	const httpClient = HTTPClientFactory.build(apiUrl)
 		.withBasicAuth(adminUsername, adminPassword)
 		.create();
@@ -120,7 +120,23 @@ const initProducts = async () => {
 	};
 	const initGroupedProduct = async () => {
 		const groupedRepo = GroupedProduct.restRepository(httpClient);
-		const defaultGroupedData = config.get('products.grouped');
+		const defaultGroupedData = config.get( 'products.grouped', {
+			"name": "Grouped Product with Three Children",
+			"groupedProducts": [
+				{
+					"name": "Base Unit",
+					"regularPrice": "29.99"
+				},
+				{
+					"name": "Add-on A",
+					"regularPrice": "11.95"
+				},
+				{
+					"name": "Add-on B",
+					"regularPrice": "18.97"
+				}
+			]
+		} );
 		const groupedProductData = {
 			...defaultGroupedData,
 			name: 'Grouped Product 858012'
@@ -130,7 +146,12 @@ const initProducts = async () => {
 	};
 	const initExternalProduct = async () => {
 		const repo = ExternalProduct.restRepository(httpClient);
-		const defaultProps = config.get('products.external');
+		const defaultProps = config.get( 'products.external', {
+			"name": "External product",
+			"regularPrice": "24.99",
+			"buttonText": "Buy now",
+			"externalUrl": "https://wordpress.org/plugins/woocommerce"
+		} );
 		const props = {
 			...defaultProps,
 			name: 'External product 786794',

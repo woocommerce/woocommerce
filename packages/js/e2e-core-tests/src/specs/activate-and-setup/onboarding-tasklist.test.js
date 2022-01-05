@@ -19,7 +19,7 @@ const {
 	describe,
 } = require( '@jest/globals' );
 
-const shippingZoneNameUS = config.get( 'addresses.customer.shipping.country' );
+const shippingZoneNameUS = config.get( 'addresses.customer.shipping.country', 'United States (US)' );
 
 const runOnboardingFlowTest = () => {
 	describe('Store owner can go through store Onboarding', () => {

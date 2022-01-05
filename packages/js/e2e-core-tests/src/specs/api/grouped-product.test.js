@@ -27,9 +27,28 @@ const runGroupedProductAPITest = () => {
 		let repository;
 
 		beforeAll( async () => {
-			defaultGroupedProduct = config.get( 'products.grouped' );
-			const admin = config.get( 'users.admin' );
-			const url = config.get( 'url' );
+			defaultGroupedProduct = config.get( 'products.grouped', {
+				"name": "Grouped Product with Three Children",
+				"groupedProducts": [
+					{
+						"name": "Base Unit",
+						"regularPrice": "29.99"
+					},
+					{
+						"name": "Add-on A",
+						"regularPrice": "11.95"
+					},
+					{
+						"name": "Add-on B",
+						"regularPrice": "18.97"
+					}
+				]
+			} );
+			const admin = config.get( 'users.admin', {
+				"username": "admin",
+				"password": "password"
+			} );
+			const url = config.get( 'url', 'http://localhost:8084/' );
 
 			client = HTTPClientFactory.build( url )
 				.withBasicAuth( admin.username, admin.password )

@@ -17,8 +17,11 @@ const runTelemetryAPITest = () => {
 		let client;
 
 		beforeAll( async () => {
-			const admin = config.get( 'users.admin' );
-			const url = config.get( 'url' );
+			const admin = config.get( 'users.admin', {
+				"username": "admin",
+				"password": "password"
+			} );
+			const url = config.get( 'url', 'http://localhost:8084/' );
 
 			client = HTTPClientFactory.build( url )
 				.withBasicAuth( admin.username, admin.password )

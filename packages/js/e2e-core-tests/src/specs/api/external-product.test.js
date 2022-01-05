@@ -21,9 +21,17 @@ const runExternalProductAPITest = () => {
 		let repository;
 
 		beforeAll( async () => {
-			defaultExternalProduct = config.get( 'products.external' );
-			const admin = config.get( 'users.admin' );
-			const url = config.get( 'url' );
+			defaultExternalProduct = config.get( 'products.external', {
+				"name": "External product",
+				"regularPrice": "24.99",
+				"buttonText": "Buy now",
+				"externalUrl": "https://wordpress.org/plugins/woocommerce"
+			} );
+			const admin = config.get( 'users.admin', {
+				"username": "admin",
+				"password": "password"
+			} );
+			const url = config.get( 'url', 'http://localhost:8084/' );
 
 			client = HTTPClientFactory.build( url )
 				.withBasicAuth( admin.username, admin.password )
