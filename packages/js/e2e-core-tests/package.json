@@ -15,7 +15,8 @@
 	"build-module",
 	"test-data",
 	"core-tests-root.js",
-	"installFiles"
+	"installFiles",
+	"CHANGELOG.md"
   ],
   "dependencies": {
     "@jest/globals": "^26.4.2",
