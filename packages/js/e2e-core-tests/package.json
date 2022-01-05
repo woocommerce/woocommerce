@@ -10,6 +10,12 @@
   "license": "GPL-3.0+",
   "main": "build/index.js",
   "module": "build-module/index.js",
+  "files": [
+	"build",
+	"build-module",
+	"test-data",
+	"core-tests-root.js"
+  ],
   "dependencies": {
     "@jest/globals": "^26.4.2",
     "@wordpress/deprecated": "^3.2.3",
