@@ -142,7 +142,11 @@ $tt2-gray: #f7f7f7;
 		}
 	}
 
-	a.button, button[name='add-to-cart'], input[name='submit'], button.single_add_to_cart_button {
+	a.button,
+	button[name='add-to-cart'],
+	input[name='submit'],
+	button.single_add_to_cart_button,
+	button[type='submit'] {
 		display: inline-block;
 		text-align: center;
 		word-break: break-word;
@@ -527,6 +531,66 @@ $tt2-gray: #f7f7f7;
 }
 
 /**
+ * Form fields
+ */
+.woocommerce-page {
+	
+	form {
+
+		.input-text {
+			height: 3.5rem;
+			border: 1px solid var(--wp--preset--color--black);
+			border-radius: 0;
+			font-size: var(--wp--preset--font-size--medium);
+			padding: .9rem 1.1rem;
+		}
+
+		label {
+			margin-bottom: .7rem;
+		}
+
+		abbr.required {
+			text-decoration: none;
+		}
+	}
+}
+
+.select2-container {
+
+	.select2-selection,
+	.select2-search__field {
+		height: 3.5rem;
+		font-size: var(--wp--preset--font-size--medium);
+		padding: .9rem 1.1rem;
+	}
+
+	.select2-selection,
+	.select2-dropdown {
+		border: 1px solid var(--wp--preset--color--black);
+		border-radius: 0;
+	}
+
+	.select2-dropdown {
+		border-top: 0;
+		padding: .9rem 1.1rem;
+
+		.select2-search__field {
+			border: 1px solid var(--wp--preset--color--black);
+			border-radius: 0;
+			margin-bottom: 1rem;
+		}
+	}
+
+	.select2-selection .select2-selection__arrow {
+		height: 3.5rem;
+		position: absolute;
+		top: 0;
+		right: 0;
+		width: 3rem;
+	}
+}
+
+/**
  * Account section
  */
  .woocommerce-account {
@@ -575,8 +639,17 @@ $tt2-gray: #f7f7f7;
 
 	.woocommerce-MyAccount-content {
 
-		p:first-of-type {
+		> p:first-of-type {
 			margin-block-start: 0px;
+		}
+	}
+
+	&.woocommerce-edit-address {
+
+		.woocommerce-MyAccount-content {
+			form > h3 {
+				margin-block-start: 0px;
+			}
 		}
 	}
 }
