@@ -6,7 +6,7 @@ const {
 	shopper,
 	createVariableProduct,
 } = require( '@woocommerce/e2e-utils' );
-const { config } = require( '@woocommerce/e2e-environment' );
+const config = require('config');
 
 let variablePostIdValue;
 
@@ -100,7 +100,7 @@ const runVariableProductUpdateTest = () => {
 		});
 
 	});
-
+	
 };
 
 module.exports = runVariableProductUpdateTest;

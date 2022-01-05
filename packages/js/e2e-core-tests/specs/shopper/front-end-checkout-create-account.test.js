@@ -21,7 +21,7 @@ const {
 	beforeAll,
 } = require( '@jest/globals' );
 
-const { config } = require( '@woocommerce/e2e-environment' );
+const config = require( 'config' );
 const customerBilling = config.get( 'addresses.customer.billing' );
 
 const runCheckoutCreateAccountTest = () => {

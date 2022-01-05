@@ -102,10 +102,12 @@ importers:
     specifiers:
       '@jest/globals': ^26.4.2
       '@wordpress/deprecated': ^3.2.3
+      config: 3.3.3
       faker: ^5.1.0
     dependencies:
       '@jest/globals': 26.6.2
       '@wordpress/deprecated': 3.2.3
+      config: 3.3.3
       faker: 5.5.3
 
   packages/js/e2e-environment:
@@ -193,6 +195,7 @@ importers:
       '@wordpress/browserslist-config': ^4.1.0
       '@wordpress/deprecated': ^3.2.3
       '@wordpress/e2e-test-utils': ^4.16.1
+      config: 3.3.3
       eslint: ^8.1.0
       faker: ^5.1.0
       fishery: ^1.2.0
@@ -200,6 +203,7 @@ importers:
       '@automattic/puppeteer-utils': github.com/Automattic/puppeteer-utils/0f3ec50
       '@wordpress/deprecated': 3.2.3
       '@wordpress/e2e-test-utils': 4.16.1_jest@27.3.1
+      config: 3.3.3
       faker: 5.5.3
       fishery: 1.4.0
     devDependencies:
@@ -7545,7 +7549,6 @@ packages:
     engines: {node: '>= 6.0.0'}
     dependencies:
       json5: 2.2.0
-    dev: true
 
   /config/3.3.6:
     resolution: {integrity: sha512-Hj5916C5HFawjYJat1epbyY2PlAgLpBtDUlr0MxGLgo3p5+7kylyvnRY18PqJHgnNWXcdd0eWDemT7eYWuFgwg==}

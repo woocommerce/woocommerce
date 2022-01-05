@@ -17,11 +17,11 @@ const {
 	beforeAll,
 } = require( '@jest/globals' );
 
-const { config } = require( '@woocommerce/e2e-environment' );
+const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );
-const singleProductPrice = config.get( 'products.simple.price', '9.99' );
-const singleProductPrice2 = '1' + singleProductPrice;
-const singleProductPrice3 = '2' + singleProductPrice;
+const singleProductPrice = config.has('products.simple.price') ? config.get('products.simple.price') : '9.99';
+const singleProductPrice2 = config.has('products.simple.price') ? '1' + singleProductPrice : '19.99';
+const singleProductPrice3 = config.has('products.simple.price') ? '2' + singleProductPrice : '29.99';
 const clothing = 'Clothing';
 const audio = 'Audio';
 const hardware = 'Hardware';
