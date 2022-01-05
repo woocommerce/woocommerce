@@ -3,6 +3,7 @@
 -   Fix usage of Wordpress DatePicker component in `DatePicker`. #7982
 -   Fix select-control component label/value alignment. #8045
 -   Fix clicking the error message opens the dropdown. #8094
+-   Fix misaligned "Rows per page" dropdown. #8113
 
 # 8.1.1
 

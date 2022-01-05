@@ -182,6 +182,7 @@ class Pagination extends Component {
 			<div className="woocommerce-pagination__per-page-picker">
 				<SelectControl
 					label={ __( 'Rows per page', 'woocommerce-admin' ) }
+					labelPosition="side"
 					value={ this.props.perPage }
 					onChange={ this.perPageChange }
 					options={ pickerOptions }
