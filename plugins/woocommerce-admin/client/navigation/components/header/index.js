@@ -117,6 +117,7 @@ const Header = () => {
 				{ buttonIcon }
 			</Button>
 			<Button
+				title={ siteTitle }
 				href={ homeUrl }
 				className="woocommerce-navigation-header__site-title"
 				as="span"

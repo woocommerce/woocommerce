@@ -1,0 +1,4 @@
+Significance: patch
+Type: Fix
+
+Truncate the long site title with an ellipses on the second line. #8112
