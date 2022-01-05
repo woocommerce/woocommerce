@@ -1,5 +1,5 @@
 import { HTTPClientFactory } from '@woocommerce/api';
-const config = require( 'config' );
+const { config } = require( '@woocommerce/e2e-environment' );
 import { simpleProductFactory } from './factories/simple-product';
 import { variableProductFactory } from './factories/variable-product';
 import { variationFactory } from './factories/variation';
