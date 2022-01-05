@@ -20,9 +20,16 @@ const runCouponApiTest = () => {
 		let repository;
 
 		beforeAll( async () => {
-			percentageCoupon = config.get( 'coupons.percentage' );
-			const admin = config.get( 'users.admin' );
-			const url = config.get( 'url' );
+			percentageCoupon = config.get( 'coupons.percentage', {
+				"code": "20percent",
+				"discountType": "percent",
+				"amount": "20.00"
+			} );
+			const admin = config.get( 'users.admin', {
+				"username": "admin",
+				"password": "password"
+			} );
+			const url = config.get( 'url', 'http://localhost:8084/' );
 
 			client = HTTPClientFactory.build( url )
 				.withBasicAuth( admin.username, admin.password )

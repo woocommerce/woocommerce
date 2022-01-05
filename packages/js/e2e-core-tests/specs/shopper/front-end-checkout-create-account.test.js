@@ -22,7 +22,19 @@ const {
 } = require( '@jest/globals' );
 
 const { config } = require( '@woocommerce/e2e-environment' );
-const customerBilling = config.get( 'addresses.customer.billing' );
+const customerBilling = config.get( 'addresses.customer.billing', {
+	"firstname": "John",
+	"lastname": "Doe",
+	"company": "Automattic",
+	"country": "United States (US)",
+	"addressfirstline": "addr 1",
+	"addresssecondline": "addr 2",
+	"city": "San Francisco",
+	"state": "CA",
+	"postcode": "94107",
+	"phone": "123456789",
+	"email": "john.doe@example.com"
+} );
 
 const runCheckoutCreateAccountTest = () => {
 	describe('Shopper Checkout Create Account', () => {

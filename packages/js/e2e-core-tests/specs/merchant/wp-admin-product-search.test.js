@@ -9,7 +9,7 @@ const {
 } = require( '@woocommerce/e2e-utils' );
 
 const { config } = require( '@woocommerce/e2e-environment' );
-const simpleProductName = config.get( 'products.simple.name' );
+const simpleProductName = config.get( 'products.simple.name', 'Simple product' );
 const simpleProductPrice = config.get( 'products.simple.price', '9.99' );
 
 const runProductSearchTest = () => {

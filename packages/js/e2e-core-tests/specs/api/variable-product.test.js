@@ -29,10 +29,104 @@ const runVariableProductAPITest = () => {
 		let variationRepository;
 
 		beforeAll(async () => {
-			defaultVariableProduct = config.get('products.variable');
-			defaultVariations = config.get('products.variations');
-			const admin = config.get('users.admin');
-			const url = config.get('url');
+			defaultVariableProduct = config.get( 'products.variable', {
+				"name": "Variable Product with Three Attributes",
+				"defaultAttributes": [
+					{
+						"id": 0,
+						"name": "Size",
+						"option": "Medium"
+					},
+					{
+						"id": 0,
+						"name": "Colour",
+						"option": "Blue"
+					}
+				],
+				"attributes": [
+					{
+						"id": 0,
+						"name": "Colour",
+						"isVisibleOnProductPage": true,
+						"isForVariations": true,
+						"options": [
+							"Red",
+							"Green",
+							"Blue"
+						],
+						"sortOrder": 0
+					},
+					{
+						"id": 0,
+						"name": "Size",
+						"isVisibleOnProductPage": true,
+						"isForVariations": true,
+						"options": [
+							"Small",
+							"Medium",
+							"Large"
+						],
+						"sortOrder": 0
+					},
+					{
+						"id": 0,
+						"name": "Logo",
+						"isVisibleOnProductPage": true,
+						"isForVariations": true,
+						"options": [
+							"Woo",
+							"WordPress"
+						],
+						"sortOrder": 0
+					}
+				]
+			} );
+			defaultVariations = config.get( 'products.variations', [
+				{
+					"regularPrice": "19.99",
+					"attributes": [
+						{
+							"name": "Size",
+							"option": "Large"
+						},
+						{
+							"name": "Colour",
+							"option": "Red"
+						}
+					]
+				},
+				{
+					"regularPrice": "18.99",
+					"attributes": [
+						{
+							"name": "Size",
+							"option": "Medium"
+						},
+						{
+							"name": "Colour",
+							"option": "Green"
+						}
+					]
+				},
+				{
+					"regularPrice": "17.99",
+					"attributes": [
+						{
+							"name": "Size",
+							"option": "Small"
+						},
+						{
+							"name": "Colour",
+							"option": "Blue"
+						}
+					]
+				}
+			] );
+			const admin = config.get( 'users.admin', {
+				"username": "admin",
+				"password": "password"
+			} );
+			const url = config.get( 'url', 'http://localhost:8084/' );
 
 			client = HTTPClientFactory.build(url)
 				.withBasicAuth(admin.username, admin.password)

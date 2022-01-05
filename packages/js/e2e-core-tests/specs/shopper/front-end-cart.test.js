@@ -18,7 +18,7 @@ const {
 } = require( '@jest/globals' );
 
 const { config } = require( '@woocommerce/e2e-environment' );
-const simpleProductName = config.get( 'products.simple.name' );
+const simpleProductName = config.get( 'products.simple.name', 'Simple product' );
 const singleProductPrice = config.get( 'products.simple.price', '9.99' );
 const twoProductPrice = singleProductPrice * 2;
 

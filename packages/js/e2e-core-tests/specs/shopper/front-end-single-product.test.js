@@ -12,11 +12,62 @@ const {
 const { config } = require( '@woocommerce/e2e-environment' );
 
 // Variables for simple product
-const simpleProductName = config.get( 'products.simple.name' );
+const simpleProductName = config.get( 'products.simple.name', 'Simple product' );
 let simplePostIdValue;
 
 // Variables for variable product
-const defaultVariableProduct = config.get( 'products.variable' );
+const defaultVariableProduct = config.get( 'products.variable', {
+	"name": "Variable Product with Three Attributes",
+	"defaultAttributes": [
+		{
+			"id": 0,
+			"name": "Size",
+			"option": "Medium"
+		},
+		{
+			"id": 0,
+			"name": "Colour",
+			"option": "Blue"
+		}
+	],
+	"attributes": [
+		{
+			"id": 0,
+			"name": "Colour",
+			"isVisibleOnProductPage": true,
+			"isForVariations": true,
+			"options": [
+				"Red",
+				"Green",
+				"Blue"
+			],
+			"sortOrder": 0
+		},
+		{
+			"id": 0,
+			"name": "Size",
+			"isVisibleOnProductPage": true,
+			"isForVariations": true,
+			"options": [
+				"Small",
+				"Medium",
+				"Large"
+			],
+			"sortOrder": 0
+		},
+		{
+			"id": 0,
+			"name": "Logo",
+			"isVisibleOnProductPage": true,
+			"isForVariations": true,
+			"options": [
+				"Woo",
+				"WordPress"
+			],
+			"sortOrder": 0
+		}
+	]
+} );
 let variableProductId;
 
 // Variables for grouped product

@@ -22,7 +22,7 @@
 } = require( '@jest/globals' );
 
 const { config } = require( '@woocommerce/e2e-environment' );
-const simpleProductName = config.get( 'products.simple.name' );
+const simpleProductName = config.get( 'products.simple.name', 'Simple product' );
 
 const runCartRedirectionTest = () => {
 	describe('Cart > Redirect to cart from shop', () => {

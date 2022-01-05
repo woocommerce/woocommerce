@@ -19,9 +19,20 @@ const runOrderApiTest = () => {
 		let repository;
 
 		beforeAll( async () => {
-			order = config.get( 'orders.basicPaidOrder' );
-			const admin = config.get( 'users.admin' );
-			const url = config.get( 'url' );
+			order = config.get( 'orders.basicPaidOrder', {
+				"paymentMethod": "cod",
+				"status": "processing",
+				"billing": {
+					"firstName": "John",
+					"lastName": "Doe",
+					"email": "john.doe@example.com"
+				}
+			} );
+			const admin = config.get( 'users.admin', {
+				"username": "admin",
+				"password": "password"
+			} );
+			const url = config.get( 'url', 'http://localhost:8084/' );
 
 			client = HTTPClientFactory.build( url )
 				.withBasicAuth( admin.username, admin.password )

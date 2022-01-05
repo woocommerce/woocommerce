@@ -13,8 +13,8 @@
 let simplePostIdValue;
 let orderId;
 const { config } = require( '@woocommerce/e2e-environment' );
-const simpleProductName = config.get( 'products.simple.name' );
-const customerEmail = config.get( 'addresses.customer.billing.email' );
+const simpleProductName = config.get( 'products.simple.name', 'Simple product' );
+const customerEmail = config.get( 'addresses.customer.billing.email', 'john.doe@example.com' );
 const storeName = 'WooCommerce Core E2E Test Suite';
 
 /**
