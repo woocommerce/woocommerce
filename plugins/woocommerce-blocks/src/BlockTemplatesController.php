@@ -25,18 +25,11 @@ class BlockTemplatesController {
 	private $template_parts_directory;
 
 	/**
-	 * Directory name of the block template directory.
+	 * Directory which contains all templates
 	 *
 	 * @var string
 	 */
-	const TEMPLATES_DIR_NAME = 'block-templates';
-
-	/**
-	 * Directory name of the block template parts directory.
-	 *
-	 * @var string
-	 */
-	const TEMPLATE_PARTS_DIR_NAME = 'block-template-parts';
+	const TEMPLATES_ROOT_DIR = 'templates';
 
 	/**
 	 * Constructor.
@@ -44,8 +37,10 @@ class BlockTemplatesController {
 	public function __construct() {
 		// This feature is gated for WooCommerce versions 6.0.0 and above.
 		if ( defined( 'WC_VERSION' ) && version_compare( WC_VERSION, '6.0.0', '>=' ) ) {
-			$this->templates_directory      = plugin_dir_path( __DIR__ ) . 'templates/' . self::TEMPLATES_DIR_NAME;
-			$this->template_parts_directory = plugin_dir_path( __DIR__ ) . 'templates/' . self::TEMPLATE_PARTS_DIR_NAME;
+			$root_path = plugin_dir_path( __DIR__ ) . self::TEMPLATES_ROOT_DIR . DIRECTORY_SEPARATOR;
+
+			$this->templates_directory      = $root_path . BlockTemplateUtils::DIRECTORY_NAMES['TEMPLATES'];
+			$this->template_parts_directory = $root_path . BlockTemplateUtils::DIRECTORY_NAMES['TEMPLATE_PARTS'];
 			$this->init();
 		}
 	}
@@ -61,7 +56,7 @@ class BlockTemplatesController {
 
 	/**
 	 * This function checks if there's a blocks template (ultimately it resolves either a saved blocks template from the
-	 * database or a template file in `woo-gutenberg-products-block/templates/block-templates/`)
+	 * database or a template file in `woo-gutenberg-products-block/templates/templates/`)
 	 * to return to pre_get_posts short-circuiting the query in Gutenberg.
 	 *
 	 * @param \WP_Block_Template|null $template Return a block template object to short-circuit the default query,
@@ -311,14 +306,8 @@ class BlockTemplatesController {
 		$template_files = BlockTemplateUtils::gutenberg_get_template_paths( $directory );
 		$templates      = array();
 
-		if ( 'wp_template_part' === $template_type ) {
-			$dir_name = self::TEMPLATE_PARTS_DIR_NAME;
-		} else {
-			$dir_name = self::TEMPLATES_DIR_NAME;
-		}
-
 		foreach ( $template_files as $template_file ) {
-			$template_slug = BlockTemplateUtils::generate_template_slug_from_path( $template_file, $dir_name );
+			$template_slug = BlockTemplateUtils::generate_template_slug_from_path( $template_file );
 
 			// This template does not have a slug we're looking for. Skip it.
 			if ( is_array( $slugs ) && count( $slugs ) > 0 && ! in_array( $template_slug, $slugs, true ) ) {
