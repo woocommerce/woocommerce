@@ -70,21 +70,18 @@
 	}
 
 	.woocommerce-breadcrumb {
-		margin-bottom: var( --wp--style--block-gap );
-		padding-bottom: var( --wp--style--block-gap );
-		font-size: 0.9em;
-		font-weight: 300;
+		display: none;
 	}
 
 	.woocommerce-notices-wrapper {
-		margin-bottom: 5rem;
-		background: #f7f7f7;
-		border-top-color: var( --wp--preset--color--primary );
-		border-top-style: solid;
 
 		.woocommerce-message,
 		.woocommerce-error,
 		.woocommerce-info {
+			margin-bottom: 5rem;
+			background: #f7f7f7;
+			border-top-color: var( --wp--preset--color--primary );
+			border-top-style: solid;
 			padding: 1rem;
 			list-style: none;
 
