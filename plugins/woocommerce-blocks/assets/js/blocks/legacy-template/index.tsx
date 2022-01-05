@@ -34,14 +34,28 @@ const Edit = ( { attributes }: Props ) => {
 				className="wp-block-woocommerce-legacy-template__placeholder"
 			>
 				<div className="wp-block-woocommerce-legacy-template__placeholder-copy">
-					{ sprintf(
-						/* translators: %s is the template title */
-						__(
-							'This is an editor placeholder for the %s. On your store this will be replaced by the template and display with your product image(s), title, price, etc. You can move this placeholder around and add further blocks around it to extend the template.',
+					<p className="wp-block-woocommerce-legacy-template__placeholder-warning">
+						<strong>
+							{ __(
+								'Attention: Do not remove this block!',
+								'woo-gutenberg-products-block'
+							) }
+						</strong>{ ' ' }
+						{ __(
+							'Removal will cause unintended effects on your store.',
 							'woo-gutenberg-products-block'
-						),
-						templateTitle
-					) }
+						) }
+					</p>
+					<p>
+						{ sprintf(
+							/* translators: %s is the template title */
+							__(
+								'This is an editor placeholder for the %s. On your store this will be replaced by the template and display with your product image(s), title, price, etc. You can move this placeholder around and add further blocks around it to extend the template.',
+								'woo-gutenberg-products-block'
+							),
+							templateTitle
+						) }
+					</p>
 				</div>
 				<div className="wp-block-woocommerce-legacy-template__placeholder-wireframe">
 					<img
