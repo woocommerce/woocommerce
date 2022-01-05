@@ -93,4 +93,39 @@ class WC_REST_Coupons_Controller_Tests extends WC_REST_Unit_Test_Case {
 			$this->assertContains( $field, $response_fields, "Field $field was expected but not present in coupon API response." );
 		}
 	}
+
+	/**
+	 * Test that coupons are filtered by status when requested.
+	 */
+	public function test_filter_coupons_by_status() {
+		wp_set_current_user( $this->user );
+
+		$coupon_1 = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper::create_coupon( 'dummycoupon-1', 'draft' );
+		$post_1   = get_post( $coupon_1->get_id() );
+		$coupon_2 = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper::create_coupon( 'dummycoupon-2');
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/coupons' );
+		$request->set_query_params(
+			array(
+				'status'    => 'publish'
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$coupons  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 1, count( $coupons ) );
+	}
+
+	/**
+	 * Test that `prepare_object_for_response` method works.
+	 */
+	public function test_prepare_object_for_response() {
+		$coupon = WC_Helper_Coupon::create_coupon();
+		$coupon->save();
+		$response = ( new WC_REST_Coupons_Controller() )->prepare_object_for_response( $coupon, new WP_REST_Request() );
+		$this->assertArrayHasKey( 'id', $response->data );
+		$this->assertEquals( $coupon->get_id(), $response->data['id'] );
+		$this->assertEquals( $coupon->get_status(), $response->data['status'] );
+	}
 }
