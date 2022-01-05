@@ -57,8 +57,9 @@ defined( 'ABSPATH' ) || exit;
 		 * @since 3.6.0
 		 *
 		 * @param WP_Post $variation Post data.
+		 * @param int     $loop      Position in the loop.
 		 */
-		do_action( 'woocommerce_variation_header', $variation );
+		do_action( 'woocommerce_variation_header', $variation, $loop );
 		?>
 	</h3>
 	<div class="woocommerce_variable_attributes wc-metabox-content" style="display: none;">
