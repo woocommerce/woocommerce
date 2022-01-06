@@ -4,6 +4,7 @@
 -   Fix select-control component label/value alignment. #8045
 -   Fix clicking the error message opens the dropdown. #8094
 -   Fix misaligned "Rows per page" dropdown. #8113
+-   Remove dev dependency `@woocommerce/wc-admin-settings`. #8057
 
 # 8.1.1
 

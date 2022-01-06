@@ -8,7 +8,6 @@ import { Component, Fragment } from '@wordpress/element';
 import { ESCAPE } from '@wordpress/keycodes';
 import { get } from 'lodash';
 import { Link, ProductImage } from '@woocommerce/components';
-import { getSetting } from '@woocommerce/wc-admin-settings';
 import { recordEvent } from '@woocommerce/tracks';
 import moment from 'moment';
 
@@ -16,6 +15,7 @@ import moment from 'moment';
  * Internal dependencies
  */
 import { ActivityCard } from '~/activity-panel/activity-card';
+import { getAdminSetting } from '~/utils/admin-settings';
 
 export class ProductStockCard extends Component {
 	constructor( props ) {
@@ -194,7 +194,10 @@ export class ProductStockCard extends Component {
 	render() {
 		const { product } = this.props;
 		const { edited, editing } = this.state;
-		const notifyLowStockAmount = getSetting( 'notifyLowStockAmount', 0 );
+		const notifyLowStockAmount = getAdminSetting(
+			'notifyLowStockAmount',
+			0
+		);
 		const lowStockAmount = Number.isFinite( product.low_stock_amount )
 			? product.low_stock_amount
 			: notifyLowStockAmount;

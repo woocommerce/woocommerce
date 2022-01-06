@@ -18,7 +18,7 @@ import {
 	ProductImage,
 	Section,
 } from '@woocommerce/components';
-import { getAdminLink } from '@woocommerce/wc-admin-settings';
+import { getAdminLink } from '@woocommerce/settings';
 import { get, isNull } from 'lodash';
 import { REVIEWS_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';

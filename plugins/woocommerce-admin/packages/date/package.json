@@ -26,9 +26,6 @@
 		"moment": "2.29.1",
 		"qs": "6.9.6"
 	},
-	"devDependencies": {
-		"@woocommerce/wc-admin-settings": "file:../wc-admin-settings"
-	},
 	"peerDependencies": {
 		"lodash": "^4.17.0"
 	},

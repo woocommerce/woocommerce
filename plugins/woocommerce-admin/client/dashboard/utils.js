@@ -3,7 +3,11 @@
  */
 import { decodeEntities } from '@wordpress/html-entities';
 import { without } from 'lodash';
-import { getSetting } from '@woocommerce/wc-admin-settings';
+
+/**
+ * Internal dependencies
+ */
+import { getAdminSetting } from '~/utils/admin-settings';
 
 /**
  * Gets the country code from a country:state value string.
@@ -23,7 +27,7 @@ export function getCountryCode( countryState ) {
 export function getCurrencyRegion( countryState ) {
 	let region = getCountryCode( countryState );
 	const euCountries = without(
-		getSetting( 'onboarding', { euCountries: [] } ).euCountries,
+		getAdminSetting( 'onboarding', { euCountries: [] } ).euCountries,
 		'GB'
 	);
 	if ( euCountries.includes( region ) ) {
@@ -143,7 +147,7 @@ export function getProductList(
 		}
 	} );
 
-	const onboarding = getSetting( 'onboarding', {} );
+	const onboarding = getAdminSetting( 'onboarding', {} );
 	let theme = null;
 	if ( onboarding && onboarding.themes ) {
 		theme = onboarding.themes.find(

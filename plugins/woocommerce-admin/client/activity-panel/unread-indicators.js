@@ -6,12 +6,12 @@ import {
 	USER_STORE_NAME,
 	QUERY_DEFAULTS,
 } from '@woocommerce/data';
-import { getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
  */
 import { getUnreadNotesCount } from '~/inbox-panel/utils';
+import { getAdminSetting } from '~/utils/admin-settings';
 
 const UNREAD_NOTES_QUERY = {
 	page: 1,
@@ -55,5 +55,5 @@ export function isNotesPanelVisible( select ) {
 }
 
 export function getLowStockCount() {
-	return getSetting( 'lowStockCount', 0 );
+	return getAdminSetting( 'lowStockCount', 0 );
 }

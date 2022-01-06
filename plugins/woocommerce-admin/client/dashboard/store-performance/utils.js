@@ -11,7 +11,7 @@ import {
 } from '@woocommerce/data';
 import { getNewPath } from '@woocommerce/navigation';
 import { calculateDelta, formatValue } from '@woocommerce/number';
-import { getAdminLink } from '@woocommerce/wc-admin-settings';
+import { getAdminLink } from '@woocommerce/settings';
 
 function getReportUrl( href, persistedQuery, primaryItem ) {
 	if ( ! href ) {

@@ -10,7 +10,6 @@ import PropTypes from 'prop-types';
 import { get, isArray } from 'lodash';
 import { PLUGINS_STORE_NAME } from '@woocommerce/data';
 import { withDispatch, withSelect } from '@wordpress/data';
-import { getSetting } from '@woocommerce/wc-admin-settings';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -20,8 +19,9 @@ import '../style.scss';
 import DismissModal from '../dismiss-modal';
 import SetupNotice, { setupErrorTypes } from '../setup-notice';
 import { getWcsAssets, acceptWcsTos } from '../wcs-api';
+import { getAdminSetting } from '~/utils/admin-settings';
 
-const wcAdminAssetUrl = getSetting( 'wcAdminAssetUrl', '' );
+const wcAdminAssetUrl = getAdminSetting( 'wcAdminAssetUrl', '' );
 const wcsPluginSlug = 'woocommerce-services';
 
 export class ShippingBanner extends Component {

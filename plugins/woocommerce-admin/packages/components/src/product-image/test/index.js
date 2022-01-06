@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { render } from '@testing-library/react';
-import { setSetting } from '@woocommerce/wc-admin-settings';
 import { createElement } from '@wordpress/element';
 
 /**
@@ -74,15 +73,10 @@ describe( 'ProductImage', () => {
 	} );
 
 	test( 'should render a placeholder image if no product images are found', () => {
-		setSetting(
-			'wcAssetUrl',
-			'https://woocommerce.com/wp-content/plugins/woocommerce/assets/'
-		);
 		const product = {
 			name: 'Test Product',
 		};
 		const { container } = render( <ProductImage product={ product } /> );
 		expect( container ).toMatchSnapshot();
-		setSetting( 'wcAssetUrl', '' );
 	} );
 } );

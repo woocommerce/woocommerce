@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { decodeEntities } from '@wordpress/html-entities';
 import { Icon, wordpress } from '@wordpress/icons';
-import { getSetting } from '@woocommerce/wc-admin-settings';
+import { getSetting } from '@woocommerce/settings';
 import { useSelect } from '@wordpress/data';
 import { useEffect, useState } from '@wordpress/element';
 import classnames from 'classnames';

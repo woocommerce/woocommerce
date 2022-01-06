@@ -5,10 +5,14 @@ import { __ } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
 import { escapeRegExp } from 'lodash';
 import { useEffect, useMemo, useState, useRef } from '@wordpress/element';
-import { getSetting } from '@woocommerce/wc-admin-settings';
 import { SelectControl, TextControl } from '@woocommerce/components';
 
-const { countries } = getSetting( 'dataEndpoints', { countries: {} } );
+/**
+ * Internal dependencies
+ */
+import { getAdminSetting } from '~/utils/admin-settings';
+
+const { countries } = getAdminSetting( 'dataEndpoints', { countries: {} } );
 /**
  * Form validation.
  *

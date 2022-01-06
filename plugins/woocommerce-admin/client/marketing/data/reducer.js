@@ -1,15 +1,15 @@
 /**
  * External dependencies
  */
-import { getSetting } from '@woocommerce/wc-admin-settings';
 import { without } from 'lodash';
 
 /**
  * Internal dependencies
  */
 import TYPES from './action-types';
+import { getAdminSetting } from '~/utils/admin-settings';
 
-const { installedExtensions } = getSetting( 'marketing', {} );
+const { installedExtensions } = getAdminSetting( 'marketing', {} );
 
 const DEFAULT_STATE = {
 	installedPlugins: installedExtensions,

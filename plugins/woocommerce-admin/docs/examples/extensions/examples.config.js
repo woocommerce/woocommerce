@@ -86,10 +86,6 @@ const webpackConfig = {
 				__dirname,
 				'../../../node_modules/@wordpress/components/src'
 			),
-			'@woocommerce/wc-admin-settings': path.resolve(
-				__dirname,
-				'../../../client/wc-admin-settings/index.js'
-			),
 		},
 	},
 	plugins: [

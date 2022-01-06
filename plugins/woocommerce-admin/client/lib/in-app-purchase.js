@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { addQueryArgs } from '@wordpress/url';
-import { getSetting } from '@woocommerce/wc-admin-settings';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Returns an in-app-purchase URL.

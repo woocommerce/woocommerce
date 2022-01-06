@@ -7,7 +7,6 @@ import { map } from 'lodash';
 import { Date, Link } from '@woocommerce/components';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { formatValue } from '@woocommerce/number';
-import { getSetting } from '@woocommerce/wc-admin-settings';
 import { defaultTableDateFormat } from '@woocommerce/date';
 
 /**
@@ -15,6 +14,7 @@ import { defaultTableDateFormat } from '@woocommerce/date';
  */
 import ReportTable from '../../components/report-table';
 import { CurrencyContext } from '../../../lib/currency-context';
+import { getAdminSetting } from '~/utils/admin-settings';
 
 class CouponsReportTable extends Component {
 	constructor() {
@@ -66,7 +66,10 @@ class CouponsReportTable extends Component {
 	getRowsContent( coupons ) {
 		const { query } = this.props;
 		const persistedQuery = getPersistedQuery( query );
-		const dateFormat = getSetting( 'dateFormat', defaultTableDateFormat );
+		const dateFormat = getAdminSetting(
+			'dateFormat',
+			defaultTableDateFormat
+		);
 		const {
 			formatAmount,
 			formatDecimal: getCurrencyFormatDecimal,

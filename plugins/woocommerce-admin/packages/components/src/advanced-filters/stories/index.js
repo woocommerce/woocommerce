@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { AdvancedFilters } from '@woocommerce/components';
-import { CURRENCY } from '@woocommerce/wc-admin-settings';
+import { getSetting } from '@woocommerce/settings';
 
 const ORDER_STATUSES = {
 	cancelled: 'Cancelled',
@@ -15,7 +15,7 @@ const ORDER_STATUSES = {
 };
 
 const siteLocale = 'en_US';
-
+const currency = getSetting( 'currency' );
 const path = new URL( document.location ).searchParams.get( 'path' );
 const query = {
 	component: 'advanced-filters',
@@ -181,7 +181,7 @@ export const Basic = () => (
 		query={ query }
 		filterTitle="Orders"
 		config={ advancedFilters }
-		currency={ CURRENCY }
+		currency={ currency }
 	/>
 );
 

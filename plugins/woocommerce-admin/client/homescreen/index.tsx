@@ -4,7 +4,6 @@
 import { compose } from '@wordpress/compose';
 import { withSelect } from '@wordpress/data';
 import { identity } from 'lodash';
-import { getSetting } from '@woocommerce/wc-admin-settings';
 import {
 	ONBOARDING_STORE_NAME,
 	withOnboardingHydration,
@@ -16,6 +15,7 @@ import type { History } from 'history';
  * Internal dependencies
  */
 import Layout from './layout';
+import { getAdminSetting } from '~/utils/admin-settings';
 
 type HomescreenProps = ReturnType< typeof withSelectHandler > & {
 	hasFinishedResolution: boolean;
@@ -39,7 +39,7 @@ const Homescreen = ( {
 	return <Layout query={ query } />;
 };
 
-const onboardingData = getSetting( 'onboarding', {} );
+const onboardingData = getAdminSetting( 'onboarding', {} );
 
 const withSelectHandler = ( select: WCDataSelector ) => {
 	const { getProfileItems, hasFinishedResolution } = select(

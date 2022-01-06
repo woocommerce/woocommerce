@@ -2,29 +2,20 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { getSetting } from '@woocommerce/settings';
 
 // Remove mutable data from settings object to prevent access. Data stores should be used instead.
 const mutableSources = [ 'wcAdminSettings', 'preloadSettings' ];
-const settings = typeof wcSettings === 'object' ? wcSettings : {};
-const SOURCE = Object.keys( settings ).reduce( ( source, key ) => {
-	if ( ! mutableSources.includes( key ) ) {
-		source[ key ] = settings[ key ];
-	}
-	return source;
-}, {} );
-Object.keys( settings.admin || {} ).forEach( ( key ) => {
-	if ( ! mutableSources.includes( key ) ) {
-		SOURCE[ key ] = settings.admin[ key ];
-	}
-} );
-
-export const ADMIN_URL = SOURCE.adminUrl;
-export const COUNTRIES = SOURCE.countries;
-export const CURRENCY = SOURCE.currency;
-export const LOCALE = SOURCE.locale;
-export const ORDER_STATUSES = SOURCE.orderStatuses;
-export const SITE_TITLE = SOURCE.siteTitle;
-export const WC_ASSET_URL = SOURCE.wcAssetUrl;
+const adminSettings = getSetting( 'admin', {} );
+const ADMIN_SETTINGS_SOURCE = Object.keys( adminSettings ).reduce(
+	( source, key ) => {
+		if ( ! mutableSources.includes( key ) ) {
+			source[ key ] = adminSettings[ key ];
+		}
+		return source;
+	},
+	{}
+);
 
 /**
  * Retrieves a setting value from the setting state.
@@ -42,15 +33,29 @@ export const WC_ASSET_URL = SOURCE.wcAssetUrl;
  * @return {*}  The value present in the settings state for the given
  *                   name.
  */
-export function getSetting( name, fallback = false, filter = ( val ) => val ) {
+export function getAdminSetting(
+	name,
+	fallback = false,
+	filter = ( val ) => val
+) {
 	if ( mutableSources.includes( name ) ) {
 		throw new Error(
 			__( 'Mutable settings should be accessed via data store.' )
 		);
 	}
-	const value = SOURCE.hasOwnProperty( name ) ? SOURCE[ name ] : fallback;
+	const value = ADMIN_SETTINGS_SOURCE.hasOwnProperty( name )
+		? ADMIN_SETTINGS_SOURCE[ name ]
+		: fallback;
 	return filter( value, fallback );
 }
+
+export const ADMIN_URL = getSetting( 'adminUrl' );
+export const COUNTRIES = getSetting( 'countries' );
+export const CURRENCY = getSetting( 'currency' );
+export const LOCALE = getSetting( 'locale' );
+export const SITE_TITLE = getSetting( 'siteTitle' );
+export const WC_ASSET_URL = getSetting( 'wcAssetUrl' );
+export const ORDER_STATUSES = getAdminSetting( 'orderStatuses' );
 
 /**
  * Sets a value to a property on the settings state.
@@ -67,44 +72,11 @@ export function getSetting( name, fallback = false, filter = ( val ) => val ) {
  *                                               to sanitize the setting (eg.
  *                                               ensure it's a number)
  */
-export function setSetting( name, value, filter = ( val ) => val ) {
+export function setAdminSetting( name, value, filter = ( val ) => val ) {
 	if ( mutableSources.includes( name ) ) {
 		throw new Error(
 			__( 'Mutable settings should be mutated via data store.' )
 		);
 	}
-	SOURCE[ name ] = filter( value );
-}
-
-/**
- * Returns a string with the site's wp-admin URL appended. JS version of `admin_url`.
- *
- * @param {string} path Relative path.
- * @return {string} Full admin URL.
- */
-export function getAdminLink( path ) {
-	return ( ADMIN_URL || '' ) + path;
-}
-
-/**
- * Adds a script to the page if it has not already been loaded. JS version of `wp_enqueue_script`.
- *
- * @param {Object} script WP_Script
- * @param {string} script.handle Script handle.
- * @param {string} script.src Script URL.
- */
-export function enqueueScript( script ) {
-	return new Promise( ( resolve, reject ) => {
-		if ( document.querySelector( `#${ script.handle }-js` ) ) {
-			resolve();
-		}
-
-		const domElement = document.createElement( 'script' );
-		domElement.src = script.src;
-		domElement.id = `${ script.handle }-js`;
-		domElement.async = true;
-		domElement.onload = resolve;
-		domElement.onerror = reject;
-		document.body.appendChild( domElement );
-	} );
+	ADMIN_SETTINGS_SOURCE[ name ] = filter( value );
 }

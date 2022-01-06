@@ -7,12 +7,12 @@ import {
 	withCurrentUserHydration,
 	withSettingsHydration,
 } from '@woocommerce/data';
-import { getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
  */
 import './stylesheets/_index.scss';
+import { getAdminSetting } from '~/utils/admin-settings';
 import { PageLayout, EmbedLayout, PrimaryLayout as NoticeArea } from './layout';
 import { CustomerEffortScoreTracksContainer } from './customer-effort-score-tracks';
 import { EmbeddedBodyLayout } from './embedded-body-layout';
@@ -24,7 +24,7 @@ __webpack_public_path__ = global.wcAdminAssets.path;
 const appRoot = document.getElementById( 'root' );
 const embeddedRoot = document.getElementById( 'woocommerce-embedded-root' );
 const settingsGroup = 'wc_admin';
-const hydrateUser = getSetting( 'currentUserData' );
+const hydrateUser = getAdminSetting( 'currentUserData' );
 
 if ( appRoot ) {
 	let HydratedPageLayout = withSettingsHydration(

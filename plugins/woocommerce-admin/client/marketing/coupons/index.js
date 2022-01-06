@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
@@ -10,10 +9,11 @@ import { getSetting } from '@woocommerce/wc-admin-settings';
 import './style.scss';
 import RecommendedExtensions from '../components/recommended-extensions';
 import KnowledgeBase from '../components/knowledge-base';
+import { getAdminSetting } from '~/utils/admin-settings';
 import '../data';
 
 const CouponsOverview = () => {
-	const allowMarketplaceSuggestions = getSetting(
+	const allowMarketplaceSuggestions = getAdminSetting(
 		'allowMarketplaceSuggestions',
 		false
 	);

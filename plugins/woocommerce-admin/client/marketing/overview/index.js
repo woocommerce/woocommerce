@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { getSetting } from '@woocommerce/wc-admin-settings';
 import { withOptionsHydration } from '@woocommerce/data';
 
 /**
@@ -12,10 +11,11 @@ import InstalledExtensions from './installed-extensions';
 import RecommendedExtensions from '../components/recommended-extensions';
 import KnowledgeBase from '../components/knowledge-base';
 import WelcomeCard from './welcome-card';
+import { getAdminSetting } from '~/utils/admin-settings';
 import '../data';
 
 const MarketingOverview = () => {
-	const allowMarketplaceSuggestions = getSetting(
+	const allowMarketplaceSuggestions = getAdminSetting(
 		'allowMarketplaceSuggestions',
 		false
 	);
@@ -33,5 +33,5 @@ const MarketingOverview = () => {
 };
 
 export default withOptionsHydration( {
-	...getSetting( 'preloadOptions', {} ),
+	...getAdminSetting( 'preloadOptions', {} ),
 } )( MarketingOverview );

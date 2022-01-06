@@ -10,7 +10,7 @@ import { difference, filter } from 'lodash';
 import interpolateComponents from 'interpolate-components';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { Link, Stepper, Plugins } from '@woocommerce/components';
-import { getAdminLink, getSetting } from '@woocommerce/wc-admin-settings';
+import { getAdminLink } from '@woocommerce/settings';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
 import {
 	SETTINGS_STORE_NAME,
@@ -29,6 +29,7 @@ import { getCountryCode } from '../../../dashboard/utils';
 import StoreLocation from '../steps/location';
 import ShippingRates from './rates';
 import { createNoticesFromResponse } from '../../../lib/notices';
+import { getAdminSetting } from '~/utils/admin-settings';
 import './shipping.scss';
 
 export class Shipping extends Component {
@@ -367,7 +368,7 @@ const ShippingWrapper = compose(
 			settings.woocommerce_default_country
 		);
 
-		const { countries = [] } = getSetting( 'dataEndpoints', {} );
+		const { countries = [] } = getAdminSetting( 'dataEndpoints', {} );
 		const country = countryCode
 			? countries.find( ( c ) => c.code === countryCode )
 			: null;

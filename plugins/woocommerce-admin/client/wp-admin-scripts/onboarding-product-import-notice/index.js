@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import domReady from '@wordpress/dom-ready';
-import { getAdminLink } from '@woocommerce/wc-admin-settings';
+import { getAdminLink } from '@woocommerce/settings';
 
 domReady( () => {
 	const actionButtons = document.querySelector( '.wc-actions' );

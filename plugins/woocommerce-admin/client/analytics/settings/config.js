@@ -4,12 +4,12 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
 import interpolateComponents from 'interpolate-components';
-import { getSetting, ORDER_STATUSES } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
  */
 import DefaultDate from './default-date';
+import { getAdminSetting, ORDER_STATUSES } from '~/utils/admin-settings';
 
 const SETTINGS_FILTER = 'woocommerce_admin_analytics_settings';
 export const DEFAULT_ACTIONABLE_STATUSES = [ 'processing', 'on-hold' ];
@@ -37,7 +37,10 @@ const filteredOrderStatuses = Object.keys( ORDER_STATUSES )
 		};
 	} );
 
-const unregisteredOrderStatuses = getSetting( 'unregisteredOrderStatuses', {} );
+const unregisteredOrderStatuses = getAdminSetting(
+	'unregisteredOrderStatuses',
+	{}
+);
 
 const orderStatusOptions = [
 	{

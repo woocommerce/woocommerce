@@ -9,7 +9,6 @@ import { compose } from '@wordpress/compose';
 import { get, memoize } from 'lodash';
 import { Date, Link } from '@woocommerce/components';
 import { formatValue } from '@woocommerce/number';
-import { getSetting } from '@woocommerce/wc-admin-settings';
 import {
 	getReportTableQuery,
 	REPORTS_STORE_NAME,
@@ -27,6 +26,7 @@ import { stringify } from 'qs';
  * Internal dependencies
  */
 import ReportTable from '../../components/report-table';
+import { getAdminSetting } from '~/utils/admin-settings';
 import { CurrencyContext } from '../../../lib/currency-context';
 
 const EMPTY_ARRAY = [];
@@ -121,7 +121,10 @@ class RevenueReportTable extends Component {
 	}
 
 	getRowsContent( data = [] ) {
-		const dateFormat = getSetting( 'dateFormat', defaultTableDateFormat );
+		const dateFormat = getAdminSetting(
+			'dateFormat',
+			defaultTableDateFormat
+		);
 		const {
 			formatAmount,
 			render: renderCurrency,

@@ -11,7 +11,7 @@ import {
 } from '@woocommerce/data';
 import { H } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
-import { getAdminLink } from '@woocommerce/wc-admin-settings';
+import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies

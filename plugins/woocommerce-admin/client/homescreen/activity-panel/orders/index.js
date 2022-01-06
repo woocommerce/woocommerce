@@ -15,7 +15,7 @@ import {
 	Section,
 } from '@woocommerce/components';
 import { getNewPath } from '@woocommerce/navigation';
-import { getAdminLink, getSetting } from '@woocommerce/wc-admin-settings';
+import { getAdminLink } from '@woocommerce/settings';
 import { ITEMS_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -26,6 +26,7 @@ import {
 	ActivityCard,
 	ActivityCardPlaceholder,
 } from '~/activity-panel/activity-card';
+import { getAdminSetting } from '~/utils/admin-settings';
 import './style.scss';
 
 function recordOrderEvent( eventName ) {
@@ -188,7 +189,7 @@ function renderOrders( orders ) {
 			>
 				<OrderStatus
 					order={ order }
-					orderStatusMap={ getSetting( 'orderStatuses', {} ) }
+					orderStatusMap={ getAdminSetting( 'orderStatuses', {} ) }
 				/>
 			</ActivityCard>
 		);

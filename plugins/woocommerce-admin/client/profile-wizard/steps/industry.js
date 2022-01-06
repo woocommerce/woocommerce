@@ -13,7 +13,6 @@ import {
 import { compose } from '@wordpress/compose';
 import { filter, find, findIndex, get } from 'lodash';
 import { withDispatch, withSelect } from '@wordpress/data';
-import { getSetting } from '@woocommerce/wc-admin-settings';
 import { ONBOARDING_STORE_NAME, SETTINGS_STORE_NAME } from '@woocommerce/data';
 import { TextControl } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
@@ -23,8 +22,9 @@ import { Text } from '@woocommerce/experimental';
  * Internal dependencies
  */
 import { getCurrencyRegion } from '../../dashboard/utils';
+import { getAdminSetting } from '~/utils/admin-settings';
 
-const onboarding = getSetting( 'onboarding', {} );
+const onboarding = getAdminSetting( 'onboarding', {} );
 
 class Industry extends Component {
 	constructor( props ) {

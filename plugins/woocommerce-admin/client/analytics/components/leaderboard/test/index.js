@@ -4,13 +4,13 @@
 import { render } from '@testing-library/react';
 import { numberFormat } from '@woocommerce/number';
 import CurrencyFactory from '@woocommerce/currency';
-import { CURRENCY } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
  */
 import { Leaderboard } from '../';
 import mockData from '../data/top-selling-products-mock-data';
+import { CURRENCY } from '~/utils/admin-settings';
 
 const { formatAmount, formatDecimal } = CurrencyFactory( CURRENCY );
 

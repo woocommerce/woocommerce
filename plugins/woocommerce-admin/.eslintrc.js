@@ -5,6 +5,8 @@ module.exports = {
 	extends: [ 'plugin:@woocommerce/eslint-plugin/recommended' ],
 	settings: {
 		'import/resolver': 'typescript',
+		// List of modules that are externals in our webpack config.
+		'import/core-modules': [ '@woocommerce/settings', 'lodash', 'react' ],
 		react: {
 			pragma: 'createElement',
 		},

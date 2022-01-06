@@ -13,7 +13,6 @@ import {
 	Link,
 } from '@woocommerce/components';
 import { useUserPreferences, PLUGINS_STORE_NAME } from '@woocommerce/data';
-import { getSetting } from '@woocommerce/wc-admin-settings';
 import { getNewPath } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
 import { Text } from '@woocommerce/experimental';
@@ -26,8 +25,9 @@ import './style.scss';
 import { DEFAULT_STATS, DEFAULT_HIDDEN_STATS } from './defaults';
 import StatsList from './stats-list';
 import { InstallJetpackCTA } from './install-jetpack-cta';
+import { getAdminSetting } from '~/utils/admin-settings';
 
-const { performanceIndicators = [] } = getSetting( 'dataEndpoints', {
+const { performanceIndicators = [] } = getAdminSetting( 'dataEndpoints', {
 	performanceIndicators: [],
 } );
 

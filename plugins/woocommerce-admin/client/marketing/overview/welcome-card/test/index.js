@@ -12,7 +12,7 @@ import { createElement } from '@wordpress/element';
 import { WelcomeCard } from '../index.js';
 
 jest.mock( '@woocommerce/tracks' );
-jest.mock( '@woocommerce/wc-admin-settings' );
+jest.mock( '@woocommerce/settings' );
 
 describe( 'WelcomeCard hide button', () => {
 	it( 'should record an event when clicked', () => {

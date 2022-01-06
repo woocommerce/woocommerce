@@ -21,7 +21,7 @@ import {
 	QUERY_DEFAULTS,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import { getAdminLink, getSetting } from '@woocommerce/wc-admin-settings';
+import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -32,6 +32,7 @@ import ProductTypes from './steps/product-types';
 import ProfileWizardHeader from './header';
 import StoreDetails from './steps/store-details';
 import Theme from './steps/theme';
+import { getAdminSetting } from '~/utils/admin-settings';
 import './style.scss';
 
 const STEPS_FILTER = 'woocommerce_admin_profile_wizard_steps';
@@ -318,10 +319,11 @@ export default compose(
 			updateProfileItems,
 		};
 	} ),
-	getSetting( 'plugins' )
+	getAdminSetting( 'plugins' )
 		? withPluginsHydration( {
-				...getSetting( 'plugins' ),
-				jetpackStatus: getSetting( 'dataEndpoints', {} ).jetpackStatus,
+				...getAdminSetting( 'plugins' ),
+				jetpackStatus: getAdminSetting( 'dataEndpoints', {} )
+					.jetpackStatus,
 		  } )
 		: identity
 )( ProfileWizard );

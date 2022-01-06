@@ -14,7 +14,6 @@ import {
 	payment,
 	pencil,
 } from '@wordpress/icons';
-import { getSetting } from '@woocommerce/wc-admin-settings';
 import { recordEvent } from '@woocommerce/tracks';
 import { Text } from '@woocommerce/experimental';
 
@@ -24,6 +23,7 @@ import { Text } from '@woocommerce/experimental';
 import './style.scss';
 import { QuickLinkCategory } from './quick-link-category';
 import { QuickLink } from './quick-link';
+import { getAdminSetting } from '~/utils/admin-settings';
 
 export function getItemsByCategory( shopUrl ) {
 	return [
@@ -156,7 +156,7 @@ export const generateExtensionLinks = ( links ) => {
 };
 
 export const StoreManagementLinks = () => {
-	const shopUrl = getSetting( 'shopUrl' );
+	const shopUrl = getAdminSetting( 'shopUrl' );
 
 	const extensionQuickLinks = generateExtensionLinks(
 		applyFilters( 'woocommerce_admin_homescreen_quicklinks', [] )

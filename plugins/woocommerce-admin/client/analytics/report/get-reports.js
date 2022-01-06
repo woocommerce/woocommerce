@@ -3,15 +3,12 @@
  */
 import { __ } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
-import { getSetting } from '@woocommerce/wc-admin-settings';
 import { lazy } from '@wordpress/element';
-
-const manageStock = getSetting( 'manageStock', 'no' );
-const REPORTS_FILTER = 'woocommerce_admin_reports_list';
 
 /**
  * Internal dependencies
  */
+import { getAdminSetting } from '~/utils/admin-settings';
 const RevenueReport = lazy( () =>
 	import( /* webpackChunkName: "analytics-report-revenue" */ './revenue' )
 );
@@ -46,6 +43,9 @@ const StockReport = lazy( () =>
 const CustomersReport = lazy( () =>
 	import( /* webpackChunkName: "analytics-report-customers" */ './customers' )
 );
+
+const manageStock = getAdminSetting( 'manageStock', 'no' );
+const REPORTS_FILTER = 'woocommerce_admin_reports_list';
 
 export default () => {
 	const reports = [

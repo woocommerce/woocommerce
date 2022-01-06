@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { dispatch } from '@wordpress/data';
 import domReady from '@wordpress/dom-ready';
-import { getAdminLink } from '@woocommerce/wc-admin-settings';
+import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Returns a promise and resolves when the loader overlay no longer exists.

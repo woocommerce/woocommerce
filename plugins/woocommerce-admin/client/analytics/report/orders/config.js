@@ -3,7 +3,6 @@
  */
 import { __, _x } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
-import { ORDER_STATUSES } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
@@ -14,6 +13,7 @@ import {
 	getTaxRateLabels,
 	getVariationLabels,
 } from '../../../lib/async-requests';
+import { ORDER_STATUSES } from '~/utils/admin-settings';
 
 const ORDERS_REPORT_CHARTS_FILTER = 'woocommerce_admin_orders_report_charts';
 const ORDERS_REPORT_FILTERS_FILTER = 'woocommerce_admin_orders_report_filters';

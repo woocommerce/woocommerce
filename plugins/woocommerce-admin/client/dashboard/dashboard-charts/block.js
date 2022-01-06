@@ -10,7 +10,7 @@ import {
 	getNewPath,
 	getPersistedQuery,
 } from '@woocommerce/navigation';
-import { getAdminLink } from '@woocommerce/wc-admin-settings';
+import { getAdminLink } from '@woocommerce/settings';
 import { Text } from '@woocommerce/experimental';
 
 /**

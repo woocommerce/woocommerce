@@ -7,7 +7,7 @@ import { decodeEntities } from '@wordpress/html-entities';
 import { Link } from '@woocommerce/components';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { formatValue } from '@woocommerce/number';
-import { getAdminLink, getSetting } from '@woocommerce/wc-admin-settings';
+import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -15,8 +15,9 @@ import { getAdminLink, getSetting } from '@woocommerce/wc-admin-settings';
 import ReportTable from '../../components/report-table';
 import { isLowStock } from './utils';
 import { CurrencyContext } from '../../../lib/currency-context';
+import { getAdminSetting } from '~/utils/admin-settings';
 
-const stockStatuses = getSetting( 'stockStatuses', {} );
+const stockStatuses = getAdminSetting( 'stockStatuses', {} );
 
 class StockReportTable extends Component {
 	constructor() {

@@ -5,7 +5,6 @@ import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { getPersistedQuery } from '@woocommerce/navigation';
-import { getSetting } from '@woocommerce/wc-admin-settings';
 import { withSelect } from '@wordpress/data';
 import { SETTINGS_STORE_NAME } from '@woocommerce/data';
 import {
@@ -26,10 +25,14 @@ import { recordEvent } from '@woocommerce/tracks';
 import './style.scss';
 import { CurrencyContext } from '../../lib/currency-context';
 import { getIndicatorData, getIndicatorValues } from './utils';
+import { getAdminSetting } from '~/utils/admin-settings';
 
-const { performanceIndicators: indicators } = getSetting( 'dataEndpoints', {
-	performanceIndicators: [],
-} );
+const { performanceIndicators: indicators } = getAdminSetting(
+	'dataEndpoints',
+	{
+		performanceIndicators: [],
+	}
+);
 
 class StorePerformance extends Component {
 	renderMenu() {

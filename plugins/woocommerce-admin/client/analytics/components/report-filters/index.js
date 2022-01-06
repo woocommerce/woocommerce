@@ -7,7 +7,6 @@ import PropTypes from 'prop-types';
 import { omitBy, isUndefined, snakeCase } from 'lodash';
 import { withSelect, withDispatch } from '@wordpress/data';
 import { ReportFilters as Filters } from '@woocommerce/components';
-import { LOCALE } from '@woocommerce/wc-admin-settings';
 import { SETTINGS_STORE_NAME } from '@woocommerce/data';
 import {
 	getCurrentDates,
@@ -21,6 +20,7 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import { CurrencyContext } from '../../../lib/currency-context';
 import { STORE_KEY as CES_STORE_KEY } from '../../../customer-effort-score-tracks/data/constants';
+import { LOCALE } from '~/utils/admin-settings';
 
 class ReportFilters extends Component {
 	constructor() {

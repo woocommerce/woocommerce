@@ -8,7 +8,6 @@ import { Button, Modal } from '@wordpress/components';
 import { find } from 'lodash';
 import { decodeEntities } from '@wordpress/html-entities';
 import { withSelect } from '@wordpress/data';
-import { getSetting } from '@woocommerce/wc-admin-settings';
 import { List } from '@woocommerce/components';
 import { ONBOARDING_STORE_NAME, PLUGINS_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -19,6 +18,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import { getProductIdsForCart } from '../utils';
 import sanitizeHTML from '../../lib/sanitize-html';
 import { getInAppPurchaseUrl } from '../../lib/in-app-purchase';
+import { getAdminSetting } from '~/utils/admin-settings';
 
 class CartModal extends Component {
 	constructor( props ) {
@@ -81,7 +81,7 @@ class CartModal extends Component {
 
 	renderProducts() {
 		const { productIds, productTypes } = this.props;
-		const { themes = [] } = getSetting( 'onboarding', {} );
+		const { themes = [] } = getAdminSetting( 'onboarding', {} );
 		const listItems = [];
 
 		productIds.forEach( ( productId ) => {

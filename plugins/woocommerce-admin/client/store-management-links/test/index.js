@@ -3,8 +3,8 @@ jest.mock( '@woocommerce/tracks', () => ( {
 	recordEvent: jest.fn(),
 } ) );
 
-jest.mock( '@woocommerce/wc-admin-settings', () => ( {
-	...jest.requireActual( '@woocommerce/wc-admin-settings' ),
+jest.mock( '@woocommerce/settings', () => ( {
+	...jest.requireActual( '@woocommerce/settings' ),
 	getSetting: jest.fn( () => 'https://fake-site-url.com' ),
 } ) );
 

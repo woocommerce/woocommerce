@@ -1,5 +1,5 @@
-jest.mock( '@woocommerce/wc-admin-settings', () => ( {
-	...jest.requireActual( '@woocommerce/wc-admin-settings' ),
+jest.mock( '@woocommerce/settings', () => ( {
+	...jest.requireActual( '@woocommerce/settings' ),
 	getSetting() {
 		return 'Fake Site Title';
 	},

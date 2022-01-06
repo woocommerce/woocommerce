@@ -4,7 +4,7 @@
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
-import { getAdminLink } from '@woocommerce/wc-admin-settings';
+import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -51,7 +51,7 @@ jest.mock(
 	} )
 );
 
-jest.mock( '@woocommerce/wc-admin-settings', () => ( {
+jest.mock( '@woocommerce/settings', () => ( {
 	getAdminLink: jest
 		.fn()
 		.mockImplementation( ( link: string ) => 'https://test.ca/' + link ),

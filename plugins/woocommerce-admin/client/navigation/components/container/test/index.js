@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { act, render, waitFor } from '@testing-library/react';
-import { getAdminLink } from '@woocommerce/wc-admin-settings';
+import { getAdminLink } from '@woocommerce/settings';
 import { getHistory } from '@woocommerce/navigation';
 import { useSelect } from '@wordpress/data';
 import userEvent from '@testing-library/user-event';

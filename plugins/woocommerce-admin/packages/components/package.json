@@ -76,7 +76,6 @@
 		"@testing-library/react": "11.2.7",
 		"@testing-library/user-event": "13.2.1",
 		"@woocommerce/style-build": "file:../style-build",
-		"@woocommerce/wc-admin-settings": "file:../wc-admin-settings",
 		"@wordpress/scripts": "12.6.1",
 		"concurrently": "5.3.0"
 	},

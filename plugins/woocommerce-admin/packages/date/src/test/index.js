@@ -2,7 +2,6 @@
  * External dependencies
  */
 import moment from 'moment';
-import { getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
@@ -719,7 +718,10 @@ describe( 'getRangeLabel', () => {
 } );
 
 describe( 'loadLocaleData', () => {
-	const originalLocale = getSetting( 'locale' );
+	const originalLocale = {
+		siteLocale: 'en_US',
+		userLocale: 'en_US',
+	};
 	beforeEach( () => {
 		// Reset to default settings
 		loadLocaleData( originalLocale );

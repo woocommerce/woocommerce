@@ -6,7 +6,7 @@ import { Component, Fragment } from '@wordpress/element';
 import { Tooltip } from '@wordpress/components';
 import { Date, Link } from '@woocommerce/components';
 import { formatValue } from '@woocommerce/number';
-import { getAdminLink, getSetting } from '@woocommerce/wc-admin-settings';
+import { getAdminLink } from '@woocommerce/settings';
 import { defaultTableDateFormat } from '@woocommerce/date';
 
 /**
@@ -14,8 +14,9 @@ import { defaultTableDateFormat } from '@woocommerce/date';
  */
 import ReportTable from '../../components/report-table';
 import { CurrencyContext } from '../../../lib/currency-context';
+import { getAdminSetting } from '~/utils/admin-settings';
 
-const { countries } = getSetting( 'dataEndpoints', { countries: {} } );
+const { countries } = getAdminSetting( 'dataEndpoints', { countries: {} } );
 
 class CustomersReportTable extends Component {
 	constructor() {
@@ -109,7 +110,10 @@ class CustomersReportTable extends Component {
 	}
 
 	getRowsContent( customers ) {
-		const dateFormat = getSetting( 'dateFormat', defaultTableDateFormat );
+		const dateFormat = getAdminSetting(
+			'dateFormat',
+			defaultTableDateFormat
+		);
 		const {
 			formatAmount,
 			formatDecimal: getCurrencyFormatDecimal,

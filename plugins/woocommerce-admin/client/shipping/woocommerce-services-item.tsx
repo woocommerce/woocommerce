@@ -6,18 +6,20 @@ import { useSelect, useDispatch } from '@wordpress/data';
 import { Button, ExternalLink } from '@wordpress/components';
 import { Pill } from '@woocommerce/components';
 import { PLUGINS_STORE_NAME } from '@woocommerce/data';
-import { getAdminLink, getSetting } from '@woocommerce/wc-admin-settings';
+import { getAdminLink } from '@woocommerce/settings';
+
 /**
  * Internal dependencies
  */
 import './woocommerce-services-item.scss';
 import WooIcon from './woo-icon.svg';
+import { getAdminSetting } from '../utils/admin-settings';
 
 const WooCommerceServicesItem: React.FC< {
 	pluginsBeingSetup: Array< string >;
 	onSetupClick: ( slugs: string[] ) => PromiseLike< void >;
 } > = ( { onSetupClick, pluginsBeingSetup } ) => {
-	const wcAdminAssetUrl = getSetting( 'wcAdminAssetUrl', '' );
+	const wcAdminAssetUrl = getAdminSetting( 'wcAdminAssetUrl', '' );
 	const { createSuccessNotice } = useDispatch( 'core/notices' );
 
 	const isSiteConnectedToJetpack = useSelect( ( select ) =>

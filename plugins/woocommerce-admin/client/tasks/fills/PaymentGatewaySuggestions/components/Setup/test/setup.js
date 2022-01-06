@@ -2,12 +2,12 @@
  * External dependencies
  */
 import { act, render } from '@testing-library/react';
-import { enqueueScript } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
  */
 import { Setup } from '../';
+import { enqueueScript } from '~/utils/enqueue-script';
 
 jest.mock( '@woocommerce/components', () => {
 	const originalModule = jest.requireActual( '@woocommerce/components' );
@@ -19,7 +19,8 @@ jest.mock( '@woocommerce/components', () => {
 	};
 } );
 
-jest.mock( '@woocommerce/wc-admin-settings' );
+jest.mock( '@woocommerce/settings' );
+jest.mock( '~/utils/enqueue-script' );
 
 const mockGateway = {
 	id: 'mock-gateway',

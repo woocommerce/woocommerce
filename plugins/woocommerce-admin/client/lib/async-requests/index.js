@@ -6,12 +6,12 @@ import apiFetch from '@wordpress/api-fetch';
 import { identity } from 'lodash';
 import { getIdsFromQuery } from '@woocommerce/navigation';
 import { NAMESPACE } from '@woocommerce/data';
-import { getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
  */
 import { getTaxCode } from '../../analytics/report/taxes/utils';
+import { getAdminSetting } from '~/utils/admin-settings';
 
 /**
  * Get a function that accepts ids as they are found in url parameter and
@@ -96,7 +96,10 @@ export const getTaxRateLabels = getRequestByIdString(
  * @return {string} - formatted variation name
  */
 export function getVariationName( { attributes, name } ) {
-	const separator = getSetting( 'variationTitleAttributesSeparator', ' - ' );
+	const separator = getAdminSetting(
+		'variationTitleAttributesSeparator',
+		' - '
+	);
 
 	if ( name && name.indexOf( separator ) > -1 ) {
 		return name;

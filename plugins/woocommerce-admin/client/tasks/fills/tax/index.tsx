@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Card, CardBody, Spinner } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { getAdminLink } from '@woocommerce/wc-admin-settings';
+import { getAdminLink } from '@woocommerce/settings';
 import {
 	ONBOARDING_STORE_NAME,
 	OPTIONS_STORE_NAME,

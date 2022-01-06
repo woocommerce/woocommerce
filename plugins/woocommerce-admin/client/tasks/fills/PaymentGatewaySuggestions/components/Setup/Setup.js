@@ -3,7 +3,6 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { Card, CardBody } from '@wordpress/components';
-import { enqueueScript } from '@woocommerce/wc-admin-settings';
 import {
 	OPTIONS_STORE_NAME,
 	PAYMENT_GATEWAYS_STORE_NAME,
@@ -20,6 +19,7 @@ import { useSlot } from '@woocommerce/experimental';
  * Internal dependencies
  */
 import { createNoticesFromResponse } from '~/lib/notices';
+import { enqueueScript } from '~/utils/enqueue-script';
 import { Configure } from './Configure';
 import './Setup.scss';
 

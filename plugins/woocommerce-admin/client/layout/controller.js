@@ -13,7 +13,6 @@ import {
 	getQueryExcludedScreens,
 	getScreenFromPath,
 } from '@woocommerce/navigation';
-import { getSetting } from '@woocommerce/wc-admin-settings';
 import { Spinner } from '@woocommerce/components';
 
 /**
@@ -21,6 +20,7 @@ import { Spinner } from '@woocommerce/components';
  */
 import getReports from '../analytics/report/get-reports';
 import { isWCAdmin } from '../dashboard/utils';
+import { getAdminSetting } from '~/utils/admin-settings';
 import { NoMatch } from './NoMatch';
 
 const AnalyticsReport = lazy( () =>
@@ -55,7 +55,7 @@ export const PAGES_FILTER = 'woocommerce_admin_pages_list';
 export const getPages = () => {
 	const pages = [];
 	const initialBreadcrumbs = [
-		[ '', getSetting( 'woocommerceTranslation' ) ],
+		[ '', getAdminSetting( 'woocommerceTranslation' ) ],
 	];
 
 	pages.push( {
@@ -179,7 +179,7 @@ export const getPages = () => {
 			path: '/settings/:page',
 			breadcrumbs: ( { match } ) => {
 				// @todo This might need to be refactored to retreive groups via data store.
-				const settingsPages = getSetting( 'settingsPages' );
+				const settingsPages = getAdminSetting( 'settingsPages' );
 				const page = settingsPages[ match.params.page ];
 				if ( ! page ) {
 					return [];

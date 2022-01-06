@@ -38,9 +38,6 @@
 		"qs": "6.9.6",
 		"rememo": "^3.0.0"
 	},
-	"devDependencies": {
-		"@woocommerce/wc-admin-settings": "file:../wc-admin-settings"
-	},
 	"publishConfig": {
 		"access": "public"
 	},

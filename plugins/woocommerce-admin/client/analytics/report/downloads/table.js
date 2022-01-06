@@ -9,7 +9,7 @@ import moment from 'moment';
 import { Date, Link } from '@woocommerce/components';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { formatValue } from '@woocommerce/number';
-import { getAdminLink, getSetting } from '@woocommerce/wc-admin-settings';
+import { getAdminLink } from '@woocommerce/settings';
 import { SETTINGS_STORE_NAME } from '@woocommerce/data';
 import { getCurrentDates, defaultTableDateFormat } from '@woocommerce/date';
 
@@ -18,6 +18,7 @@ import { getCurrentDates, defaultTableDateFormat } from '@woocommerce/date';
  */
 import ReportTable from '../../components/report-table';
 import { CurrencyContext } from '../../../lib/currency-context';
+import { getAdminSetting } from '~/utils/admin-settings';
 
 class DownloadsReportTable extends Component {
 	constructor() {
@@ -67,7 +68,10 @@ class DownloadsReportTable extends Component {
 	getRowsContent( downloads ) {
 		const { query } = this.props;
 		const persistedQuery = getPersistedQuery( query );
-		const dateFormat = getSetting( 'dateFormat', defaultTableDateFormat );
+		const dateFormat = getAdminSetting(
+			'dateFormat',
+			defaultTableDateFormat
+		);
 
 		return map( downloads, ( download ) => {
 			const {

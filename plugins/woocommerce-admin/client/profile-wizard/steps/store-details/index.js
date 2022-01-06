@@ -16,7 +16,6 @@ import { Component, useRef } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { Form, TextControl } from '@woocommerce/components';
-import { getSetting } from '@woocommerce/wc-admin-settings';
 import {
 	ONBOARDING_STORE_NAME,
 	OPTIONS_STORE_NAME,
@@ -36,6 +35,7 @@ import {
 } from '../../../dashboard/components/settings/general/store-address';
 import UsageModal from '../usage-modal';
 import { CurrencyContext } from '../../../lib/currency-context';
+import { getAdminSetting } from '~/utils/admin-settings';
 import './style.scss';
 
 // FlexItem is not available until WP version 5.5. This code is safe to remove
@@ -77,7 +77,7 @@ class StoreDetails extends Component {
 
 		const Currency = this.context;
 		const country = getCountryCode( countryState );
-		const { currencySymbols = {}, localeInfo = {} } = getSetting(
+		const { currencySymbols = {}, localeInfo = {} } = getAdminSetting(
 			'onboarding',
 			{}
 		);

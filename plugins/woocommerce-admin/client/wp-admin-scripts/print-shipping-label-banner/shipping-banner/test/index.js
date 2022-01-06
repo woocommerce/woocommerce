@@ -17,7 +17,6 @@ jest.mock( '../../wcs-api.js' );
 acceptWcsTos.mockReturnValue( Promise.resolve() );
 
 jest.mock( '@woocommerce/tracks' );
-jest.mock( '@woocommerce/wc-admin-settings' );
 
 const wcsPluginSlug = 'woocommerce-services';
 

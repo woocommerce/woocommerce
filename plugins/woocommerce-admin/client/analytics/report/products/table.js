@@ -10,7 +10,7 @@ import { map } from 'lodash';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { Link, Tag } from '@woocommerce/components';
 import { formatValue } from '@woocommerce/number';
-import { getAdminLink, getSetting } from '@woocommerce/wc-admin-settings';
+import { getAdminLink } from '@woocommerce/settings';
 import { ITEMS_STORE_NAME } from '@woocommerce/data';
 
 /**
@@ -20,10 +20,12 @@ import CategoryBreacrumbs from '../categories/breadcrumbs';
 import { isLowStock } from './utils';
 import ReportTable from '../../components/report-table';
 import { CurrencyContext } from '../../../lib/currency-context';
+import { getAdminSetting } from '~/utils/admin-settings';
+
 import './style.scss';
 
-const manageStock = getSetting( 'manageStock', 'no' );
-const stockStatuses = getSetting( 'stockStatuses', {} );
+const manageStock = getAdminSetting( 'manageStock', 'no' );
+const stockStatuses = getAdminSetting( 'stockStatuses', {} );
 
 class ProductsReportTable extends Component {
 	constructor() {

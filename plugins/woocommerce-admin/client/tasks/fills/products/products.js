@@ -19,7 +19,7 @@ import {
 } from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
 import { List, Pill } from '@woocommerce/components';
-import { getAdminLink } from '@woocommerce/wc-admin-settings';
+import { getAdminLink } from '@woocommerce/settings';
 import { recordEvent } from '@woocommerce/tracks';
 import { registerPlugin } from '@wordpress/plugins';
 import { WooOnboardingTask } from '@woocommerce/onboarding';

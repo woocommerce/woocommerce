@@ -3,12 +3,12 @@
  */
 import { render } from '@wordpress/element';
 import { withPluginsHydration } from '@woocommerce/data';
-import { getSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
  */
 import ShippingBanner from './shipping-banner';
+import { getAdminSetting } from '~/utils/admin-settings';
 
 const metaBox = document.getElementById( 'wc-admin-shipping-banner-root' );
 const args =
@@ -16,7 +16,7 @@ const args =
 
 // Render the header.
 const HydratedShippingBanner = withPluginsHydration( {
-	...getSetting( 'plugins' ),
-	jetpackStatus: getSetting( 'dataEndpoints', {} ).jetpackStatus,
+	...getAdminSetting( 'plugins' ),
+	jetpackStatus: getAdminSetting( 'dataEndpoints', {} ).jetpackStatus,
 } )( ShippingBanner );
 render( <HydratedShippingBanner itemsCount={ args.items } />, metaBox );

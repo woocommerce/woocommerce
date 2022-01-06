@@ -2,12 +2,12 @@
  * External dependencies
  */
 import { render, fireEvent } from '@testing-library/react';
-import { setSetting } from '@woocommerce/wc-admin-settings';
 
 /**
  * Internal dependencies
  */
 import { StoreAlerts } from '../';
+import { setAdminSetting } from '~/utils/admin-settings';
 
 const alerts = [
 	{
@@ -39,7 +39,7 @@ describe( 'StoreAlerts', () => {
 	} );
 
 	it( 'should show the placeholder when loading and preloaded alerts exist', () => {
-		setSetting( 'alertCount', 2 );
+		setAdminSetting( 'alertCount', 2 );
 		const { container } = render(
 			<StoreAlerts isLoading alerts={ alerts } />
 		);

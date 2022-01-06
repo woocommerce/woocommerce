@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { getAdminLink } from '@woocommerce/wc-admin-settings';
+import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies

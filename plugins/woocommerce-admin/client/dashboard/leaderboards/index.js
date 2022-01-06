@@ -14,13 +14,13 @@ import {
 	SectionHeader,
 } from '@woocommerce/components';
 import { useUserPreferences, ITEMS_STORE_NAME } from '@woocommerce/data';
-import { getSetting } from '@woocommerce/wc-admin-settings';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
 import Leaderboard from '../../analytics/components/leaderboard';
+import { getAdminSetting } from '~/utils/admin-settings';
 import './style.scss';
 
 const renderLeaderboardToggles = ( {
@@ -175,9 +175,12 @@ Leaderboards.propTypes = {
 export default compose(
 	withSelect( ( select ) => {
 		const { getItems, getItemsError } = select( ITEMS_STORE_NAME );
-		const { leaderboards: allLeaderboards } = getSetting( 'dataEndpoints', {
-			leaderboards: [],
-		} );
+		const { leaderboards: allLeaderboards } = getAdminSetting(
+			'dataEndpoints',
+			{
+				leaderboards: [],
+			}
+		);
 
 		return {
 			allLeaderboards,
