@@ -23,6 +23,8 @@
 - `clickAndWaitForSelector( buttonSelector, resultSelector, timeout )` to click a button and wait for response
 - Optional parameter `testResponse` to `withRestApi` functions that contain an `expect()`
 - `shopper.logout()` to log out the shopper account
+- `merchant.dismissOnboardingWizard()` to dismiss the onboarding wizard
+- `merchant.collapseAdminMenu()` to expand or collapse the WP admin menu
 
 # 0.1.6
 

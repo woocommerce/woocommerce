@@ -103,6 +103,9 @@ class WC_Template_Loader {
 	/**
 	 * Checks whether a block template with that name exists.
 	 *
+	 * **Note: ** This checks both the `templates` and `block-templates` directories
+	 * as both conventions should be supported.
+	 *
 	 * @since  5.5.0
 	 * @param string $template_name Template to check.
 	 * @return boolean
@@ -112,7 +115,31 @@ class WC_Template_Loader {
 			return false;
 		}
 
-		$has_template = is_readable( get_stylesheet_directory() . '/block-templates/' . $template_name . '.html' );
+		$has_template            = false;
+		$template_filename       = $template_name . '.html';
+		// Since Gutenberg 12.1.0, the conventions for block templates directories have changed,
+		// we should check both these possible directories for backwards-compatibility.
+		$possible_templates_dirs = array( 'templates', 'block-templates' );
+
+		// Combine the possible root directory names with either the template directory
+		// or the stylesheet directory for child themes, getting all possible block templates
+		// locations combinations.
+		$filepath        = DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . $template_filename;
+		$legacy_filepath = DIRECTORY_SEPARATOR . 'block-templates' . DIRECTORY_SEPARATOR . $template_filename;
+		$possible_paths  = array(
+			get_stylesheet_directory() . $filepath,
+			get_stylesheet_directory() . $legacy_filepath,
+			get_template_directory() . $filepath,
+			get_template_directory() . $legacy_filepath,
+		);
+
+		// Check the first matching one.
+		foreach ( $possible_paths as $path ) {
+			if ( is_readable( $path ) ) {
+				$has_template = true;
+				break;
+			}
+		}
 
 		/**
 		 * Filters the value of the result of the block template check.
