@@ -9,7 +9,7 @@ const {
 	uiUnblocked
 } = require( '@woocommerce/e2e-utils' );
 
-const { config } = require( '@woocommerce/e2e-environment' );
+const config = require( 'config' );
 
 // Variables for simple product
 const simpleProductName = config.get( 'products.simple.name' );
@@ -20,7 +20,7 @@ const defaultVariableProduct = config.get( 'products.variable' );
 let variableProductId;
 
 // Variables for grouped product
-const simpleProductPrice = config.get( 'products.simple.price', '9.99' );
+const simpleProductPrice = config.has('products.simple.price') ? config.get('products.simple.price') : '9.99';
 const simple1 = {
 	name: simpleProductName + ' 1',
 	regularPrice: simpleProductPrice

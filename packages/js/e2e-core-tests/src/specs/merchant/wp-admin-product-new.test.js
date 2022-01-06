@@ -24,11 +24,11 @@ const {
 	it,
 	describe,
 } = require( '@jest/globals' );
-const { config } = require( '@woocommerce/e2e-environment' );
+const config = require( 'config' );
 
 const VirtualProductName = 'Virtual Product Name';
 const NonVirtualProductName = 'Non-Virtual Product Name';
-const simpleProductPrice = config.get( 'products.simple.price', '9.99' );
+const simpleProductPrice = config.has('products.simple.price') ? config.get('products.simple.price') : '9.99';
 
 const openNewProductAndVerify = async () => {
 	// Go to "add product" page

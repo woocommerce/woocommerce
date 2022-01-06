@@ -39,6 +39,11 @@
 		"sort-packages": true,
 		"platform": {
 			"php": "7.0.33"
+		},
+		"allow-plugins": {
+			"automattic/jetpack-autoloader": true,
+			"composer/installers": true,
+			"bamarni/composer-bin-plugin": true
 		}
 	},
 	"autoload": {
