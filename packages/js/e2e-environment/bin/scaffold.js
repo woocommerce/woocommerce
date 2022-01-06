@@ -20,7 +20,7 @@ const {
 	confirmLocalCopy,
 	confirmLocalDelete,
 	getPackageData,
-	installDefaults
+	installDefaults,
 } = require( '../utils/scaffold' );
 
 const args = process.argv.slice( 2 );
