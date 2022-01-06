@@ -32,6 +32,18 @@ $tt2-gray: #f7f7f7;
 /**
  * Main layout.
  */
+
+.woocommerce-page {
+
+	h1.wp-block-post-title {
+		font-size: var(--wp--preset--font-size--huge);
+	}
+
+	h2 {
+		font-size: var(--wp--preset--font-size--large);
+	}
+}
+
 .woocommerce {
 
 	.woocommerce-products-header,
@@ -595,7 +607,7 @@ $tt2-gray: #f7f7f7;
 /**
  * Account section
  */
- .woocommerce-account {
+.woocommerce-account {
 
 	main {
 
@@ -690,6 +702,16 @@ $tt2-gray: #f7f7f7;
 			form > h3 {
 				margin-block-start: 0px;
 			}
+		}
+	}
+
+	.woocommerce-form-login {
+		max-width: 516px;
+		margin: 0 auto;
+
+		.show-password-input {
+			top: 1.2rem;
+			right: 1.2rem;
 		}
 	}
 }
