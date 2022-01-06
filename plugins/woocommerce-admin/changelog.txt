@@ -16,6 +16,14 @@
 - Tweak: OBW: Update WC Pay label on recommended extensions list #8038
 - Enhancement: Add SlotFill areas to header #7805
 
+== 3.0.2 01/05/2022 ==
+
+- Render the activity panel when the experimental tasklist is hidden. #8111
+
+== 3.0.1 12/30/2021 ==
+
+- Do not initialize WC Pay promotion if spec is empty. #8087
+
 == 3.0.0 12/28/2021 ==
 
 - Fix: Fix an issue with the code that makes use of an invalid parameter with a PHP function. The use of this invalid parameter causes PHP 8 to throw a Fatal Error. #7855
