@@ -348,8 +348,8 @@ class WC_REST_Coupons_V2_Controller extends WC_REST_CRUD_Controller {
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'status'                      => array(
-					'description' => __( 'The status of the coupon. Should always be draft, published or pending review', 'woocommerce' ),
+				'status' => array(
+					'description' => __( 'The status of the coupon. Should always be draft, published, or pending review', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
