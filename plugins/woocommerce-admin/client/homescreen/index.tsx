@@ -18,13 +18,19 @@ import type { History } from 'history';
 import Layout from './layout';
 
 type HomescreenProps = ReturnType< typeof withSelectHandler > & {
+	hasFinishedResolution: boolean;
 	query: Record< string, string >;
 };
 
-const Homescreen = ( { profileItems, query }: HomescreenProps ) => {
-	const { completed: profilerCompleted, skipped: profilerSkipped } =
-		profileItems || {};
-	if ( ! profilerCompleted && ! profilerSkipped ) {
+const Homescreen = ( {
+	profileItems: {
+		completed: profilerCompleted,
+		skipped: profilerSkipped,
+	} = {},
+	hasFinishedResolution,
+	query,
+}: HomescreenProps ) => {
+	if ( hasFinishedResolution && ! profilerCompleted && ! profilerSkipped ) {
 		( getHistory() as History ).push(
 			getNewPath( {}, '/setup-wizard', {} )
 		);
@@ -36,10 +42,14 @@ const Homescreen = ( { profileItems, query }: HomescreenProps ) => {
 const onboardingData = getSetting( 'onboarding', {} );
 
 const withSelectHandler = ( select: WCDataSelector ) => {
-	const { getProfileItems } = select( ONBOARDING_STORE_NAME );
-	const profileItems = getProfileItems();
+	const { getProfileItems, hasFinishedResolution } = select(
+		ONBOARDING_STORE_NAME
+	);
 
-	return { profileItems };
+	return {
+		profileItems: getProfileItems(),
+		hasFinishedResolution: hasFinishedResolution( 'getProfileItems', [] ),
+	};
 };
 
 export default compose(
