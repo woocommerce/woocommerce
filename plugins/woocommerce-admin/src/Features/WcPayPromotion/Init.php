@@ -106,6 +106,10 @@ class Init {
 			return false;
 		}
 
+		$wc_pay_spec = self::get_wc_pay_promotion_spec();
+		if ( ! $wc_pay_spec ) {
+			return false;
+		}
 		return true;
 	}
 
