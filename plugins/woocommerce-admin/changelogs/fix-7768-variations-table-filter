@@ -1,0 +1,4 @@
+Significance: patch
+Type: Fix
+
+Fix variations table product filter query. #8120
