@@ -29,7 +29,7 @@ class WC_REST_Coupons_Controller extends WC_REST_Coupons_V2_Controller {
 		$args = WC_REST_CRUD_Controller::prepare_objects_query( $request );
 
 		// Set post_status.
-		$args['post_status'] = $request['status'] ?: 'all';
+		$args['post_status'] = $request['status'];
 
 		if ( ! empty( $request['code'] ) ) {
 			$id               = wc_get_coupon_id_by_code( $request['code'] );
