@@ -100,8 +100,8 @@ class BlockTemplatesController {
 		// been unhooked so won't run again.
 		add_filter( 'get_block_file_template', array( $this, 'get_single_block_template' ), 10, 3 );
 		$maybe_template = function_exists( 'gutenberg_get_block_template' ) ?
-			gutenberg_get_block_template( 'woocommerce//' . $slug, $template_type ) :
-			get_block_template( 'woocommerce//' . $slug, $template_type );
+			gutenberg_get_block_template( BlockTemplateUtils::PLUGIN_SLUG . '//' . $slug, $template_type ) :
+			get_block_template( BlockTemplateUtils::PLUGIN_SLUG . '//' . $slug, $template_type );
 
 		// Re-hook this function, it was only unhooked to stop recursion.
 		add_filter( 'pre_get_block_file_template', array( $this, 'maybe_return_blocks_template' ), 10, 3 );
@@ -265,6 +265,11 @@ class BlockTemplatesController {
 	 * @return int[]|\WP_Post[] An array of found templates.
 	 */
 	public function get_block_templates_from_db( $slugs = array(), $template_type = 'wp_template' ) {
+		// This was the previously incorrect slug used to save DB templates against.
+		// To maintain compatibility with users sites who have already customised WooCommerce block templates using this slug we have to still use it to query those.
+		// More context found here: https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/5423.
+		$invalid_plugin_slug = 'woocommerce';
+
 		$check_query_args = array(
 			'post_type'      => $template_type,
 			'posts_per_page' => -1,
@@ -273,13 +278,15 @@ class BlockTemplatesController {
 				array(
 					'taxonomy' => 'wp_theme',
 					'field'    => 'name',
-					'terms'    => array( 'woocommerce', get_stylesheet() ),
+					'terms'    => array( $invalid_plugin_slug, BlockTemplateUtils::PLUGIN_SLUG, get_stylesheet() ),
 				),
 			),
 		);
+
 		if ( is_array( $slugs ) && count( $slugs ) > 0 ) {
 			$check_query_args['post_name__in'] = $slugs;
 		}
+
 		$check_query         = new \WP_Query( $check_query_args );
 		$saved_woo_templates = $check_query->posts;
 
