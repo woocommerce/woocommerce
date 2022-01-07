@@ -9,9 +9,9 @@ when:
         - rubik-fp-squad
   - author:
       teamIs:
-        - rubik-fse-squad
+        - kirigami
       ignore:
         nameIs:
     assign:
       teams:
-        - rubik-fse-squad
+        - kirigami
