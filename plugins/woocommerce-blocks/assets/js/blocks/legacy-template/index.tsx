@@ -82,7 +82,7 @@ registerBlockType( 'woocommerce/legacy-template', {
 		'woo-gutenberg-products-block'
 	),
 	supports: {
-		align: false,
+		align: [ 'wide', 'full' ],
 		html: false,
 		multiple: false,
 		reusable: false,
