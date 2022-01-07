@@ -155,6 +155,59 @@ class StyleAttributesUtils {
 	}
 
 	/**
+	 * Get class and style for align from attributes.
+	 *
+	 * @param array $attributes Block attributes.
+	 *
+	 * @return (array | null)
+	 */
+	public static function get_align_class_and_style( $attributes ) {
+
+		$align_attribute = isset( $attributes['align'] ) ? $attributes['align'] : null;
+
+		if ( ! $align_attribute ) {
+			return null;
+		};
+
+		if ( 'wide' === $align_attribute ) {
+			return array(
+				'class' => 'alignwide',
+				'style' => null,
+			);
+		}
+
+		if ( 'full' === $align_attribute ) {
+			return array(
+				'class' => 'alignfull',
+				'style' => null,
+			);
+		}
+
+		if ( 'left' === $align_attribute ) {
+			return array(
+				'class' => 'alignleft',
+				'style' => null,
+			);
+		}
+
+		if ( 'right' === $align_attribute ) {
+			return array(
+				'class' => 'alignright',
+				'style' => null,
+			);
+		}
+
+		if ( 'center' === $align_attribute ) {
+			return array(
+				'class' => 'aligncenter',
+				'style' => null,
+			);
+		}
+
+		return null;
+	}
+
+	/**
 	 * Get classes and styles from attributes.
 	 *
 	 * @param array $attributes Block attributes.
