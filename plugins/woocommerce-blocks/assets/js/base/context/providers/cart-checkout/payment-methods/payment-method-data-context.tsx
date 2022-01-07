@@ -195,14 +195,14 @@ export const PaymentMethodDataProvider = ( {
 			)[ 0 ] || undefined;
 
 		if ( customerPaymentMethod ) {
-			const token = customerPaymentMethod.tokenId;
+			const token = customerPaymentMethod.tokenId.toString();
 			const paymentMethodSlug = customerPaymentMethod.method.gateway;
 			const savedTokenKey = `wc-${ paymentMethodSlug }-payment-token`;
 
 			dispatchActions.setActivePaymentMethod( paymentMethodSlug, {
 				token,
 				payment_method: paymentMethodSlug,
-				[ savedTokenKey ]: token.toString(),
+				[ savedTokenKey ]: token,
 				isSavedToken: true,
 			} );
 			return;
