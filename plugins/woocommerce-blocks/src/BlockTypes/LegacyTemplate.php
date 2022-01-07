@@ -1,6 +1,8 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
+
 /**
  * Legacy Single Product class
  *
@@ -20,6 +22,14 @@ class LegacyTemplate extends AbstractDynamicBlock {
 	 * @var string
 	 */
 	protected $api_version = '2';
+
+	/**
+	 * Initialize this block.
+	 */
+	protected function initialize() {
+		parent::initialize();
+		add_filter( 'render_block', array( $this, 'add_alignment_class_to_wrapper' ), 10, 2 );
+	}
 
 	/**
 	 * Render method for the Legacy Template block. This method will determine which template to render.
@@ -192,4 +202,43 @@ class LegacyTemplate extends AbstractDynamicBlock {
 		wp_reset_postdata();
 		return ob_get_clean();
 	}
+
+	/**
+	 * Get HTML markup with the right classes by attributes.
+	 * This function appends the classname at the first element that have the class attribute.
+	 * Based on the experience, all the wrapper elements have a class attribute.
+	 *
+	 * @param string $content Block content.
+	 * @param array  $block Parsed block data.
+	 * @return string Rendered block type output.
+	 */
+	public function add_alignment_class_to_wrapper( string $content, array $block ) {
+		if ( ( 'woocommerce/' . $this->block_name ) !== $block['blockName'] ) {
+			return $content;
+		}
+
+		$attributes            = (array) $block['attrs'];
+		$align_class_and_style = StyleAttributesUtils::get_align_class_and_style( $attributes );
+
+		if ( ! isset( $align_class_and_style['class'] ) ) {
+			return $content;
+		}
+
+		// Find the first tag.
+		$first_tag = '<[^<>]+>';
+		$matches   = array();
+		preg_match( $first_tag, $content, $matches );
+
+		// If there is a tag, but it doesn't have a class attribute, add the class attribute.
+		if ( isset( $matches[0] ) && strpos( $matches[0], ' class=' ) === false ) {
+			$pattern_before_tag_closing = '/.+?(?=>)/';
+			return preg_replace( $pattern_before_tag_closing, '$0 class="' . $align_class_and_style['class'] . '"', $content, 1 );
+		}
+
+		// If there is a tag, and it has a class already, add the class attribute.
+		$pattern_get_class = '/(?<=class=\"|\')[^"|\']+(?=\"|\')/';
+		return preg_replace( $pattern_get_class, '$0 ' . $align_class_and_style['class'], $content, 1 );
+	}
+
+
 }
