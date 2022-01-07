@@ -152,7 +152,7 @@ class WC_Product_Attribute implements ArrayAccess {
 	/**
 	 * Set name (this is the attribute name or taxonomy).
 	 *
-	 * @param int $value Attribute name.
+	 * @param string $value Attribute name.
 	 */
 	public function set_name( $value ) {
 		$this->data['name'] = $value;
