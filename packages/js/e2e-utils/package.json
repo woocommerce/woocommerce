@@ -14,6 +14,7 @@
     "@automattic/puppeteer-utils": "github:Automattic/puppeteer-utils#0f3ec50",
     "@wordpress/deprecated": "^3.2.3",
     "@wordpress/e2e-test-utils": "^4.16.1",
+    "config": "3.3.3",
     "faker": "^5.1.0",
     "fishery": "^1.2.0"
   },
@@ -34,8 +35,7 @@
     "eslint": "^8.1.0"
   },
   "peerDependencies": {
-    "@woocommerce/api": "^0.2.0",
-	"@woocommerce/e2e-environment": "^0.2.3"
+    "@woocommerce/api": "^0.2.0"
   },
   "publishConfig": {
     "access": "public"

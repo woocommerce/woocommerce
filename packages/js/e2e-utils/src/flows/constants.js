@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-const { config } = require( '@woocommerce/e2e-environment' );
+const config = require( 'config' );
 const baseUrl = config.get( 'url' );
 
 /**

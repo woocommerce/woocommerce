@@ -6,15 +6,10 @@
 
 ## Added
 
-- Added a `config` export to the `@woocommerce/e2e-environment` package that has all data and methods of the [config](https://github.com/lorenwest/node-config) package
-  - it provides its own `get()` method that accepts an optional default parameter to be used if the property is not found in the config file.
-  
-## Added
-
 - Added `post-results-to-github-pr.js` to post smoke test results to a GitHub PR.
 - Added jest flags to generate a json test report
 - Added more entries to `default.json`
-  
+
 ## Added
 
 - Added `await` for every call to `shopper.logout`
