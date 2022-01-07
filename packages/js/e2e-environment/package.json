@@ -30,6 +30,7 @@
     "app-root-path": "^3.0.0",
     "commander": "4.1.1",
     "jest": "^25.1.0",
+	"jest-circus": "25.1.0",
     "jest-each": "25.5.0",
     "jest-puppeteer": "^4.4.0",
     "node-stream-zip": "^1.13.6",
@@ -51,7 +52,6 @@
     "@wordpress/browserslist-config": "^4.1.0",
     "@wordpress/eslint-plugin": "7.3.0",
     "eslint": "^8.1.0",
-    "jest-circus": "25.1.0",
     "ndb": "^1.1.5",
     "semver": "^7.3.2"
   },
@@ -59,7 +59,6 @@
     "access": "public"
   },
   "scripts": {
-    "preinstall": "npx only-allow pnpm",
     "clean": "rm -rf ./build ./build-module",
     "compile": "node ./../bin/build.js",
     "build": "pnpm run clean && pnpm run compile",
