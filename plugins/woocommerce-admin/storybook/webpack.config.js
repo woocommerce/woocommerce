@@ -34,7 +34,7 @@ module.exports = ( storybookConfig ) => {
 
 	storybookConfig.resolve.alias[ '@woocommerce/settings' ] = path.resolve(
 		__dirname,
-		`../client/wc-admin-settings/index`
+		'./setting.mock.js'
 	);
 
 	storybookConfig.resolve.modules = [
