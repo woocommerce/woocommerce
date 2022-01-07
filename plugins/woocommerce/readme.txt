@@ -4,7 +4,7 @@ Tags: e-commerce, store, sales, sell, woo, shop, cart, checkout, downloadable, d
 Requires at least: 5.6
 Tested up to: 5.8
 Requires PHP: 7.0
-Stable tag: 6.0.0
+Stable tag: 6.1.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -208,7 +208,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Dev - Adds new filter action_scheduler_claim_actions_order_by to allow tuning of the claim query (props @glagonikas). ( [#773](https://github.com/woocommerce/action-scheduler/pull/773) )
 * Dev - PHPCS fixes for ActionScheduler_WpPostStore class (props @ovidiul). ( [#780](https://github.com/woocommerce/action-scheduler/pull/780) )
 
-**WooCommerce Admin - 3.0.0 & 3.0.1**
+**WooCommerce Admin - 3.0.0 & 3.0.1 & 3.0.2 & 3.0.3**
 
 * Fix - Fix an issue with the code that makes use of an invalid parameter with a PHP function. The use of this invalid parameter causes PHP 8 to throw a Fatal Error. ( [#7855](https://github.com/woocommerce/woocommerce-admin/pull/7855) )
 * Fix - Fix TaskList UI experiment enablement logic. ( [#7930](https://github.com/woocommerce/woocommerce-admin/pull/7930) )
@@ -219,8 +219,11 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Fix usage of Wordpress DatePicker component. ( [#7982](https://github.com/woocommerce/woocommerce-admin/pull/7982) )
 * Fix - Fix shipping task completion status. ( [#8031](https://github.com/woocommerce/woocommerce-admin/pull/8031) )
 * Fix - Do not initialize WC Pay promotion if spec is empty. ( [#8087](https://github.com/woocommerce/woocommerce-admin/pull/8087) )
+* Fix - Render the activity panel when the experimental tasklist is hidden. ( [#8111](https://github.com/woocommerce/woocommerce-admin/pull/8111) )
+* Fix - Fix blank payment gateway method in table when WooCommerce Payments is not supported. ( [#8122](https://github.com/woocommerce/woocommerce-admin/pull/8122) )
 * Add - Add option to dismiss promotional payment gateway. ( [#7965](https://github.com/woocommerce/woocommerce-admin/pull/7965) )
 * Add - OBW - Add number of employees field. ( [#7963](https://github.com/woocommerce/woocommerce-admin/pull/7963) )
+* Add - Add `woocommerce_allow_marketplace_suggestions` filter to WooCommerce Payments payment method promotion. ( [#8117](https://github.com/woocommerce/woocommerce-admin/pull/8117) )
 * Update - Ending wcpay promotion experiment and always displaying in payment methods table.
 * Update - Hide InboxPanel header when it is rendered in the sidebar. ( [#7952](https://github.com/woocommerce/woocommerce-admin/pull/7952) )
 * Update - Introduce a 320 character limit for inbox note contents. ( [#7958](https://github.com/woocommerce/woocommerce-admin/pull/7958) )
