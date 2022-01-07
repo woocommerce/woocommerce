@@ -28,6 +28,15 @@ class BlockTemplateUtils {
 	);
 
 	/**
+	 * WooCommerce plugin slug
+	 *
+	 * This is used to save templates to the DB which are stored against this value in the wp_terms table.
+	 *
+	 * @var string
+	 */
+	const PLUGIN_SLUG = 'woocommerce/woocommerce';
+
+	/**
 	 * Returns an array containing the references of
 	 * the passed blocks and their inner blocks.
 	 *
@@ -119,7 +128,7 @@ class BlockTemplateUtils {
 		$template                 = new \WP_Block_Template();
 		$template->wp_id          = $post->ID;
 		$template->id             = $theme . '//' . $post->post_name;
-		$template->theme          = 'woocommerce' === $theme ? 'WooCommerce' : $theme;
+		$template->theme          = $theme;
 		$template->content        = $post->post_content;
 		$template->slug           = $post->post_name;
 		$template->source         = 'custom';
@@ -138,7 +147,10 @@ class BlockTemplateUtils {
 			}
 		}
 
-		if ( 'woocommerce' === $theme ) {
+		// We are checking 'woocommerce' to maintain legacy templates which are saved to the DB,
+		// prior to updating to use the correct slug.
+		// More information found here: https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/5423.
+		if ( self::PLUGIN_SLUG === $theme || 'woocommerce' === strtolower( $theme ) ) {
 			$template->origin = 'plugin';
 		}
 
@@ -164,8 +176,8 @@ class BlockTemplateUtils {
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		$template_content  = file_get_contents( $template_file->path );
 		$template          = new \WP_Block_Template();
-		$template->id      = $template_is_from_theme ? $theme_name . '//' . $template_file->slug : 'woocommerce//' . $template_file->slug;
-		$template->theme   = $template_is_from_theme ? $theme_name : 'WooCommerce';
+		$template->id      = $template_is_from_theme ? $theme_name . '//' . $template_file->slug : self::PLUGIN_SLUG . '//' . $template_file->slug;
+		$template->theme   = $template_is_from_theme ? $theme_name : self::PLUGIN_SLUG;
 		$template->content = self::gutenberg_inject_theme_attribute_in_content( $template_content );
 		// Plugin was agreed as a valid source value despite existing inline docs at the time of creating: https://github.com/WordPress/gutenberg/issues/36597#issuecomment-976232909.
 		$template->source         = $template_file->source ? $template_file->source : 'plugin';
@@ -196,10 +208,10 @@ class BlockTemplateUtils {
 
 		$new_template_item = array(
 			'slug'        => $template_slug,
-			'id'          => $template_is_from_theme ? $theme_name . '//' . $template_slug : 'woocommerce//' . $template_slug,
+			'id'          => $template_is_from_theme ? $theme_name . '//' . $template_slug : self::PLUGIN_SLUG . '//' . $template_slug,
 			'path'        => $template_file,
 			'type'        => $template_type,
-			'theme'       => $template_is_from_theme ? $theme_name : 'woocommerce',
+			'theme'       => $template_is_from_theme ? $theme_name : self::PLUGIN_SLUG,
 			// Plugin was agreed as a valid source value despite existing inline docs at the time of creating: https://github.com/WordPress/gutenberg/issues/36597#issuecomment-976232909.
 			'source'      => $template_is_from_theme ? 'theme' : 'plugin',
 			'title'       => self::convert_slug_to_title( $template_slug ),
