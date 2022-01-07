@@ -15,7 +15,6 @@ import { defaultTableDateFormat } from '@woocommerce/date';
 import ReportTable from '../../components/report-table';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { CurrencyContext } from '../../../lib/currency-context';
-import './style.scss';
 
 const capitalizeFirstLetter = ( expr ) =>
 	expr.charAt( 0 ).toUpperCase() + expr.slice( 1 );
@@ -179,6 +178,7 @@ class OrdersReportTable extends Component {
 						<OrderStatus
 							className="woocommerce-orders-table__status"
 							order={ { status } }
+							labelPositionToLeft={ true }
 							orderStatusMap={ getAdminSetting(
 								'orderStatuses',
 								{}

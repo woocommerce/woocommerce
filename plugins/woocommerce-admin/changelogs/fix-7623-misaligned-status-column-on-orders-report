@@ -1,0 +1,4 @@
+Significance: patch
+Type: Fix
+
+Fix misaligned status column on order report. #8121

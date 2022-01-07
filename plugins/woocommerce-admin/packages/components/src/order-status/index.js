@@ -1,22 +1,27 @@
 /**
  * External dependencies
  */
+import { createElement, Fragment } from '@wordpress/element';
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
-import { createElement } from '@wordpress/element';
 
 /**
  * Use `OrderStatus` to display a badge with human-friendly text describing the current order status.
  *
  * @param {Object} props
  * @param {Object} props.order
+ * @param {string} props.order.status
  * @param {string} props.className
  * @param {Object} props.orderStatusMap
+ * @param {boolean} props.labelPositionToLeft
  * @return {Object} -
  */
-const OrderStatus = ( { order, className, orderStatusMap } ) => {
-	const { status } = order;
-	const classes = classnames( 'woocommerce-order-status', className );
+const OrderStatus = ( {
+	order: { status },
+	className,
+	orderStatusMap,
+	labelPositionToLeft = false,
+} ) => {
 	const indicatorClasses = classnames(
 		'woocommerce-order-status__indicator',
 		{
@@ -24,10 +29,20 @@ const OrderStatus = ( { order, className, orderStatusMap } ) => {
 		}
 	);
 	const label = orderStatusMap[ status ] || status;
+
 	return (
-		<div className={ classes }>
-			<span className={ indicatorClasses } />
-			{ label }
+		<div className={ classnames( 'woocommerce-order-status', className ) }>
+			{ labelPositionToLeft ? (
+				<Fragment>
+					{ label }
+					<span className={ indicatorClasses } />
+				</Fragment>
+			) : (
+				<Fragment>
+					<span className={ indicatorClasses } />
+					{ label }
+				</Fragment>
+			) }
 		</div>
 	);
 };
