@@ -109,9 +109,9 @@ const installDefaults = () => {
 
 	createLocalE2ePath( 'config' );
 	console.log( 'Writing tests/e2e/config/jest.config.js' );
-	confirmLocalCopy( `config${path.sep}jest.config.js`, `installFiles${path.sep}jest.config.js` );
+	confirmLocalCopy( `config${path.sep}jest.config.js`, `installFiles${path.sep}jest.config.js.default` );
 	console.log( 'Writing tests/e2e/config/jest.setup.js' );
-	confirmLocalCopy( `config${path.sep}jest.setup.js`, `installFiles${path.sep}jest.setup.js` );
+	confirmLocalCopy( `config${path.sep}jest.setup.js`, `installFiles${path.sep}jest.setup.js.default` );
 };
 
 module.exports = {
