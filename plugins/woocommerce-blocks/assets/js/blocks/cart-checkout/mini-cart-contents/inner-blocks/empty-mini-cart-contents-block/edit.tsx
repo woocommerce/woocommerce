@@ -1,40 +1,50 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { useBlockProps, InnerBlocks } from '@wordpress/block-editor';
-import { innerBlockAreas } from '@woocommerce/blocks-checkout';
-import type { TemplateArray } from '@wordpress/blocks';
 import { useEditorContext } from '@woocommerce/base-context';
+import { getBlockTypes } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
-import { useForcedLayout, getAllowedBlocks } from '../../../shared';
 
-export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
+const EXCLUDED_BLOCKS: readonly string[] = [
+	'woocommerce/mini-cart',
+	'woocommerce/single-product',
+	'core/post-template',
+	'core/comment-template',
+	'core/query-pagination',
+	'core/comments-query-loop',
+	'core/post-comments-form',
+	'core/post-comments-link',
+	'core/post-comments-count',
+	'core/comments-pagination',
+	'core/post-navigation-link',
+];
+
+export const Edit = (): JSX.Element => {
 	const blockProps = useBlockProps();
-	const allowedBlocks = getAllowedBlocks( innerBlockAreas.EMPTY_MINI_CART );
 	const { currentView } = useEditorContext();
+	const allowedBlocks = getBlockTypes()
+		.filter( ( block ) => {
+			if ( EXCLUDED_BLOCKS.includes( block.name ) ) {
+				return false;
+			}
 
-	const defaultTemplate = ( [
-		[
-			'core/heading',
-			{
-				content: __(
-					'Empty mini cart content',
-					'woo-gutenberg-products-block'
-				),
-				level: 2,
-			},
-		],
-	].filter( Boolean ) as unknown ) as TemplateArray;
+			// Exclude child blocks of EXCLUDED_BLOCKS.
+			if (
+				block.parent &&
+				block.parent.filter( ( value ) =>
+					EXCLUDED_BLOCKS.includes( value )
+				).length > 0
+			) {
+				return false;
+			}
 
-	useForcedLayout( {
-		clientId,
-		registeredBlocks: allowedBlocks,
-		defaultTemplate,
-	} );
+			return true;
+		} )
+		.map( ( { name } ) => name );
 
 	return (
 		<div
@@ -44,8 +54,7 @@ export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 			}
 		>
 			<InnerBlocks
-				template={ defaultTemplate }
-				templateLock={ false }
+				allowedBlocks={ allowedBlocks }
 				renderAppender={ InnerBlocks.ButtonBlockAppender }
 			/>
 		</div>
