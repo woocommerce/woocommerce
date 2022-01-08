@@ -7,7 +7,7 @@ import { registerFeaturePluginBlockType } from '@woocommerce/block-settings';
 /**
  * Internal dependencies
  */
-import { Edit } from './edit';
+import { Edit, Save } from './edit';
 import metadata from './block.json';
 
 registerFeaturePluginBlockType( metadata, {
@@ -18,4 +18,5 @@ registerFeaturePluginBlockType( metadata, {
 		/>
 	),
 	edit: Edit,
+	save: Save,
 } );
