@@ -63,9 +63,7 @@ const Edit = ( { clientId }: Props ): ReactElement => {
 	return (
 		<div { ...blockProps }>
 			<EditorProvider currentView={ currentView }>
-				<BlockControls __experimentalShareWithChildBlocks>
-					{ ViewSwitcherComponent }
-				</BlockControls>
+				<BlockControls>{ ViewSwitcherComponent }</BlockControls>
 				<InnerBlocks
 					allowedBlocks={ ALLOWED_BLOCKS }
 					template={ defaultTemplate }

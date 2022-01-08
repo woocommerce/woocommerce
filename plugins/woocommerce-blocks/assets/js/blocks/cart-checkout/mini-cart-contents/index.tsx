@@ -35,7 +35,6 @@ const settings = {
 		multiple: false,
 		reusable: false,
 		inserter: false,
-		__experimentalExposeControlsToChildren: true,
 		color: {
 			text: false,
 		},
