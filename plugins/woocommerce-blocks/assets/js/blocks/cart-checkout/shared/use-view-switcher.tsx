@@ -14,6 +14,10 @@ interface View {
 	icon: string | JSX.Element;
 }
 
+function getView( viewName: string, views: View[] ) {
+	return views.find( ( view ) => view.view === viewName );
+}
+
 export const useViewSwitcher = (
 	clientId: string,
 	views: View[]
@@ -32,7 +36,25 @@ export const useViewSwitcher = (
 	const selectedBlockClientId = getSelectedBlockClientId();
 
 	useEffect( () => {
+		const selectedBlock = getBlock( selectedBlockClientId );
+
+		if ( ! selectedBlock ) {
+			return;
+		}
+
+		if ( currentView.view === selectedBlock.name ) {
+			return;
+		}
+
 		const viewNames = views.map( ( { view } ) => view );
+
+		if ( viewNames.includes( selectedBlock.name ) ) {
+			const newView = getView( selectedBlock.name, views );
+			if ( newView ) {
+				return setCurrentView( newView );
+			}
+		}
+
 		const parentBlockIds = getBlockParentsByBlockName(
 			selectedBlockClientId,
 			viewNames
@@ -47,15 +69,11 @@ export const useViewSwitcher = (
 			return;
 		}
 
-		const filteredViews = views.filter(
-			( { view } ) => view === parentBlock.name
-		);
+		const newView = getView( parentBlock.name, views );
 
-		if ( filteredViews.length !== 1 ) {
-			return;
+		if ( newView ) {
+			setCurrentView( newView );
 		}
-
-		setCurrentView( filteredViews[ 0 ] );
 	}, [
 		getBlockParentsByBlockName,
 		selectedBlockClientId,
