@@ -65,9 +65,18 @@
 	}
 
 	.wc-block-mini-cart__items {
+		display: flex;
+		flex-direction: column;
 		flex-grow: 1;
-		overflow-y: auto;
+		overflow-y: hidden;
 		padding: 0 $gap;
+	}
+
+	.wc-block-mini-cart__products-table {
+		margin-bottom: auto;
+		margin-right: -$gap;
+		overflow-y: auto;
+		padding-right: $gap;
 
 		.wc-block-cart-items__row:last-child::after {
 			content: none;
@@ -86,8 +95,8 @@
 	justify-content: center;
 }
 
-.wc-block-mini-cart__title {
-	@include font-size(large);
+h2.wc-block-mini-cart__title {
+	@include font-size(larger);
 	margin: $gap-largest $gap 0;
 }
 

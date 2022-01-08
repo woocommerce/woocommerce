@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Icon, card } from '@woocommerce/icons';
+import { Icon, grid } from '@woocommerce/icons';
 import { registerFeaturePluginBlockType } from '@woocommerce/block-settings';
 
 /**
@@ -14,7 +14,7 @@ registerFeaturePluginBlockType( metadata, {
 	icon: {
 		src: (
 			<Icon
-				srcElement={ card }
+				srcElement={ grid }
 				className="wc-block-editor-components-block-icon"
 			/>
 		),

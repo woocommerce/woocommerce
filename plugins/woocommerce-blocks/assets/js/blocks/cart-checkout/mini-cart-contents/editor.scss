@@ -5,14 +5,31 @@
 	margin: 0 auto !important;
 }
 
-.wp-block-woocommerce-filled-mini-cart-contents-block {
-	.block-editor-block-list__layout {
+.wp-block-woocommerce-filled-mini-cart-contents-block > .block-editor-inner-blocks > .block-editor-block-list__layout {
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+}
+
+.wp-block-woocommerce-mini-cart-items-block {
+	display: grid;
+	flex-grow: 1;
+	margin-bottom: $gap;
+	padding: 0 $gap;
+
+	> .block-editor-inner-blocks > .block-editor-block-list__layout {
 		display: flex;
 		flex-direction: column;
-		min-height: 100vh;
+		height: 100%;
 	}
 }
 
 .wp-block-woocommerce-mini-cart-products-table-block {
 	margin-bottom: auto;
+	margin-top: $gap;
+}
+
+.editor-styles-wrapper h2.wc-block-mini-cart__title {
+	@include font-size(larger);
+	margin: $gap-largest $gap 0;
 }
