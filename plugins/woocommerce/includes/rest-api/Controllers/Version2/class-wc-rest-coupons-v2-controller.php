@@ -166,6 +166,7 @@ class WC_REST_Coupons_V2_Controller extends WC_REST_CRUD_Controller {
 			'id'                          => $object->get_id(),
 			'code'                        => $data['code'],
 			'amount'                      => $data['amount'],
+			'status'                      => $data['status'],
 			'date_created'                => $data['date_created'],
 			'date_created_gmt'            => $data['date_created_gmt'],
 			'date_modified'               => $data['date_modified'],
@@ -344,6 +345,11 @@ class WC_REST_Coupons_V2_Controller extends WC_REST_CRUD_Controller {
 				),
 				'amount'                      => array(
 					'description' => __( 'The amount of discount. Should always be numeric, even if setting a percentage.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'status' => array(
+					'description' => __( 'The status of the coupon. Should always be draft, published, or pending review', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
