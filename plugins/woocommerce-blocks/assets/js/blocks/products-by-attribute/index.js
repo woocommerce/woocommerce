@@ -116,6 +116,14 @@ registerBlockType( blockTypeName, {
 			type: 'boolean',
 			default: false,
 		},
+
+		/**
+		 * Whether to display in stock, out of stock or backorder products.
+		 */
+		stockStatus: {
+			type: 'string',
+			default: getSetting( 'stockStatusOptions', [] ),
+		},
 	},
 
 	/**

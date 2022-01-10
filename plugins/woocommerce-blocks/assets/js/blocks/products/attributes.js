@@ -18,6 +18,7 @@ export const defaults = {
 	orderby: 'date',
 	layoutConfig: DEFAULT_PRODUCT_LIST_LAYOUT,
 	isPreview: false,
+	stockStatus: 'any',
 };
 
 export const attributes = {
@@ -63,5 +64,13 @@ export const attributes = {
 	isPreview: {
 		type: 'boolean',
 		default: false,
+	},
+
+	/**
+	 * Whether to display in stock, out of stock or backorder products.
+	 */
+	stockStatus: {
+		type: 'string',
+		default: 'any',
 	},
 };
