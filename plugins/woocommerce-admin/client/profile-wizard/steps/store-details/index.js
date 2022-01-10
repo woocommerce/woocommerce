@@ -201,15 +201,6 @@ class StoreDetails extends Component {
 		const errors = validateStoreAddress( values );
 
 		if (
-			values.isAgreeMarketing &&
-			( ! values.storeEmail || ! values.storeEmail.trim().length )
-		) {
-			errors.storeEmail = __(
-				'Please add an email address',
-				'woocommerce-admin'
-			);
-		}
-		if (
 			values.storeEmail &&
 			values.storeEmail.trim().length &&
 			values.storeEmail.indexOf( '@' ) === -1
@@ -342,14 +333,31 @@ class StoreDetails extends Component {
 								/>
 
 								<TextControl
-									label={ __(
-										'Email address',
-										'woocommerce-admin'
-									) }
-									required
+									label={
+										values.isAgreeMarketing
+											? __(
+													'Email address',
+													'woocommerce-admin'
+											  )
+											: __(
+													'Email address (Optional)',
+													'woocommerce-admin'
+											  )
+									}
+									required={ values.isAgreeMarketing }
 									autoComplete="email"
 									{ ...getInputProps( 'storeEmail' ) }
 								/>
+								{ values.isAgreeMarketing &&
+									( ! values.storeEmail ||
+										! values.storeEmail.trim().length ) && (
+										<div className="woocommerce-profile-wizard__store-details-error">
+											{ __(
+												'Please enter your email address to subscribe',
+												'woocommerce-admin'
+											) }
+										</div>
+									) }
 							</CardBody>
 
 							<CardFooter>
