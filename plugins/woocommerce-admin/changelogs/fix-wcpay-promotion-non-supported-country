@@ -1,4 +1,0 @@
-Significance: patch
-Type: Fix
-
-Fix blank payment gateway method in table when WooCommerce Payments is not supported. #8122

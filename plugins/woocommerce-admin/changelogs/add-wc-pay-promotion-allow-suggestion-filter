@@ -1,4 +1,0 @@
-Significance: patch
-Type: Add
-
-Add woocommerce_allow_marketplace_suggestions filter to WooCommerce Payments payment method promotion. #8117

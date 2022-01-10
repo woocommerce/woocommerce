@@ -16,6 +16,11 @@
 - Tweak: OBW: Update WC Pay label on recommended extensions list #8038
 - Enhancement: Add SlotFill areas to header #7805
 
+== 3.0.3 01/06/2022 ==
+
+- Fix: Fix blank payment gateway method in table when WooCommerce Payments is not supported. #8122
+- Add: Add woocommerce_allow_marketplace_suggestions filter to WooCommerce Payments payment method promotion. #8117
+
 == 3.0.2 01/05/2022 ==
 
 - Render the activity panel when the experimental tasklist is hidden. #8111
