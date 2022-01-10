@@ -10,6 +10,7 @@ import PropTypes from 'prop-types';
 import GridContentControl from '@woocommerce/editor-components/grid-content-control';
 import GridLayoutControl from '@woocommerce/editor-components/grid-layout-control';
 import ProductCategoryControl from '@woocommerce/editor-components/product-category-control';
+import ProductStockControl from '@woocommerce/editor-components/product-stock-control';
 import { gridBlockPreview } from '@woocommerce/resource-previews';
 import { getSetting } from '@woocommerce/settings';
 
@@ -26,6 +27,7 @@ class ProductNewestBlock extends Component {
 			contentVisibility,
 			rows,
 			alignButtons,
+			stockStatus,
 		} = attributes;
 
 		return (
@@ -54,6 +56,18 @@ class ProductNewestBlock extends Component {
 						onChange={ ( value ) =>
 							setAttributes( { contentVisibility: value } )
 						}
+					/>
+				</PanelBody>
+				<PanelBody
+					title={ __(
+						'Filter by stock status',
+						'woo-gutenberg-products-block'
+					) }
+					initialOpen={ false }
+				>
+					<ProductStockControl
+						setAttributes={ setAttributes }
+						value={ stockStatus }
 					/>
 				</PanelBody>
 				<PanelBody
