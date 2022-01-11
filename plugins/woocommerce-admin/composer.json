@@ -22,6 +22,12 @@
 	"config": {
 		"platform": {
 			"php": "7.1"
+		},
+		"allow-plugins": {
+			"automattic/jetpack-autoloader": true,
+			"bamarni/composer-bin-plugin": true,
+			"composer/installers": true,
+			"dealerdirect/phpcodesniffer-composer-installer": true
 		}
 	},
 	"scripts": {
