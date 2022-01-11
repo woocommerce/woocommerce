@@ -111,14 +111,12 @@ class ProductCategorySchema extends TermSchema {
 			$terms_to_count_str = implode( ',', $terms_to_count );
 		}
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$products_of_category_sql = $wpdb->prepare(
-			"SELECT SUM(comment_count) as review_count
+		$products_of_category_sql = "
+			SELECT SUM(comment_count) as review_count
 			FROM {$wpdb->posts} AS posts
 			INNER JOIN {$wpdb->term_relationships} AS term_relationships ON posts.ID = term_relationships.object_id
-			WHERE term_relationships.term_taxonomy_id IN ({$terms_to_count_str})"
-		);
-		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			WHERE term_relationships.term_taxonomy_id IN (" . esc_sql( $terms_to_count_str ) . ')
+		';
 
 		$review_count = $wpdb->get_var( $products_of_category_sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 
