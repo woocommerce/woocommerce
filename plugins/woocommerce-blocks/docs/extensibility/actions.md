@@ -44,7 +44,7 @@
 Fires when an item is added to the cart.
 
 ```php
-do_action( 'woocommerce_add_to_cart', string $cart_id, integer $product_id, integer $quantity, integer $variation_id, array $variation, array $cart_item_data )
+do_action( 'woocommerce_add_to_cart', string $cart_id, integer $product_id, integer $request_quantity, integer $variation_id, array $variation, array $cart_item_data )
 ```
 
 ### Description
@@ -57,7 +57,7 @@ do_action( 'woocommerce_add_to_cart', string $cart_id, integer $product_id, inte
 | -------- | ---- | ----------- |
 | $cart_id | string | ID of the item in the cart. |
 | $product_id | integer | ID of the product added to the cart. |
-| $quantity | integer | Quantity of the item added to the cart. |
+| $request_quantity | integer | Quantity of the item added to the cart. |
 | $variation_id | integer | Variation ID of the product added to the cart. |
 | $variation | array | Array of variation data. |
 | $cart_item_data | array | Array of other cart item data. |
