@@ -21,6 +21,13 @@ class OrderRefund extends \WC_Order_Refund {
 	use OrderTraits;
 
 	/**
+	 * Caches the customer ID.
+	 *
+	 * @var int
+	 */
+	protected $customer_id = null;
+
+	/**
 	 * Add filter(s) required to hook this class to substitute WC_Order_Refund.
 	 */
 	public static function add_filters() {
@@ -51,13 +58,17 @@ class OrderRefund extends \WC_Order_Refund {
 	 * @return int|bool Customer ID of parent order, or false if parent order not found.
 	 */
 	public function get_report_customer_id() {
-		$parent_order = wc_get_order( $this->get_parent_id() );
+		if ( is_null( $this->customer_id ) ) {
+			$parent_order = \wc_get_order( $this->get_parent_id() );
 
-		if ( ! $parent_order ) {
-			return false;
+			if ( ! $parent_order ) {
+				$this->customer_id = false;
+			}
+
+			$this->customer_id = CustomersDataStore::get_or_create_customer_from_order( $parent_order );
 		}
 
-		return CustomersDataStore::get_or_create_customer_from_order( $parent_order );
+		return $this->customer_id;
 	}
 
 	/**

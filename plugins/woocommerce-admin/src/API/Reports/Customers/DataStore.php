@@ -705,14 +705,14 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			return false;
 		}
 
-		$last_order = $customer->get_last_order();
+		$first_name = $customer->get_first_name();
+		$last_name  = $customer->get_last_name();
 
-		if ( ! $last_order ) {
-			$first_name = get_user_meta( $user_id, 'first_name', true );
-			$last_name  = get_user_meta( $user_id, 'last_name', true );
-		} else {
-			$first_name = $last_order->get_customer_first_name();
-			$last_name  = $last_order->get_customer_last_name();
+		if ( empty( $first_name ) ) {
+			$first_name = $customer->get_billing_first_name();
+		}
+		if ( empty( $last_name ) ) {
+			$last_name = $customer->get_billing_last_name();
 		}
 
 		$last_active = $customer->get_meta( 'wc_last_active', true, 'edit' );
@@ -772,14 +772,15 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @return bool
 	 */
 	protected static function is_valid_customer( $user_id ) {
-		$customer = new \WC_Customer( $user_id );
+		$user = new \WP_User( $user_id );
 
-		if ( absint( $customer->get_id() ) !== absint( $user_id ) ) {
+		if ( (int) $user_id !== $user->ID ) {
 			return false;
 		}
 
 		$customer_roles = (array) apply_filters( 'woocommerce_analytics_customer_roles', array( 'customer' ) );
-		if ( $customer->get_order_count() < 1 && ! in_array( $customer->get_role(), $customer_roles, true ) ) {
+
+		if ( empty( $user->roles ) || empty( array_intersect( $user->roles, $customer_roles ) ) ) {
 			return false;
 		}
 
