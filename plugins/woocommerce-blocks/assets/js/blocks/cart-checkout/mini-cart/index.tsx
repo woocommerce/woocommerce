@@ -36,7 +36,7 @@ const settings = {
 			 * to add color classes and style to the wrapper.
 			 */
 			__experimentalSkipSerialization: true,
-			background: false,
+			background: true,
 		},
 		/**
 		 * We need this experimental flag because we don't want to style the
