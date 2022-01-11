@@ -12,8 +12,8 @@ const {
 	clickAndWaitForSelector,
 } = require( '@woocommerce/e2e-utils' );
 
-const config = require( 'config' );
-const simpleProductPrice = config.has('products.simple.price') ? config.get('products.simple.price') : '9.99';
+const { config } = require( '@woocommerce/e2e-environment' );
+const simpleProductPrice = config.get( 'products.simple.price', '9.99' );
 
 const runRefundOrderTest = () => {
 	describe('WooCommerce Orders > Refund an order', () => {
