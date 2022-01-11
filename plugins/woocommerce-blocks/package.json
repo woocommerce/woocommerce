@@ -193,8 +193,6 @@
 		"npm": "^8.0.0"
 	},
 	"dependencies": {
-		"@stripe/react-stripe-js": "1.6.0",
-		"@stripe/stripe-js": "1.16.0",
 		"@wordpress/autop": "3.2.3",
 		"@wordpress/deprecated": "3.2.3",
 		"@wordpress/icons": "6.1.1",

@@ -12,7 +12,6 @@ use Automattic\WooCommerce\Blocks\Registry\Container;
 use Automattic\WooCommerce\Blocks\RestApi;
 use Automattic\WooCommerce\Blocks\Payments\Api as PaymentsApi;
 use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
-use Automattic\WooCommerce\Blocks\Payments\Integrations\Stripe;
 use Automattic\WooCommerce\Blocks\Payments\Integrations\Cheque;
 use Automattic\WooCommerce\Blocks\Payments\Integrations\PayPal;
 use Automattic\WooCommerce\Blocks\Payments\Integrations\BankTransfer;
@@ -300,18 +299,8 @@ class Bootstrap {
 
 	/**
 	 * Register payment method integrations with the container.
-	 *
-	 * @internal Stripe is a temporary method that is used for setting up payment method integrations with Cart and
-	 *           Checkout blocks. This logic should get moved to the payment gateway extensions.
 	 */
 	protected function register_payment_methods() {
-		$this->container->register(
-			Stripe::class,
-			function( Container $container ) {
-				$asset_api = $container->get( AssetApi::class );
-				return new Stripe( $asset_api );
-			}
-		);
 		$this->container->register(
 			Cheque::class,
 			function( Container $container ) {
