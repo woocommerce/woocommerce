@@ -238,6 +238,11 @@ $tt2-gray: #f7f7f7;
 			a.add_to_cart_button {
 				padding: 0.8rem 2.7rem;
 			}
+
+			a.added_to_cart {
+				display: block;
+				margin-top: 1rem;
+			}
 		}
 	}
 
@@ -564,6 +569,15 @@ $tt2-gray: #f7f7f7;
 		top: 1rem;
 		right: 1rem;
 		z-index: 99;
+	}
+
+	.return-to-shop {
+		a.button {
+			background-color: #fff;
+			color: var( --wp--preset--color--primary );
+			border: 2px solid var( --wp--preset--color--primary );
+			padding: 0.7rem 2rem;
+		}
 	}
 }
 
