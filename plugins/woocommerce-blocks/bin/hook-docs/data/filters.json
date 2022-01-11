@@ -816,7 +816,7 @@
         },
         {
             "name": "woocommerce_store_api_product_quantity_limit",
-            "file": "StoreApi/Schemas/ProductSchema.php",
+            "file": "StoreApi/Utilities/QuantityLimits.php",
             "type": "filter",
             "doc": {
                 "description": "Filters the quantity limit for a product being added to the cart via the Store API.",
@@ -849,6 +849,51 @@
                 "long_description_html": "<p>Filters the variation option name for custom option slugs.</p>"
             },
             "args": 2
+        },
+        {
+            "name": "woocommerce_store_api_product_quantity_{$value_type}",
+            "file": "StoreApi/Utilities/QuantityLimits.php",
+            "type": "filter",
+            "doc": {
+                "description": "Filters the quantity minimum for a cart item in Store API. This allows extensions to control the minimum qty of items already within the cart.",
+                "long_description": "The suffix of the hook will vary depending on the value being filtered. For example, minimum, maximum, multiple_of, editable.",
+                "tags": [
+                    {
+                        "name": "param",
+                        "content": "The value being filtered.",
+                        "types": [
+                            "mixed"
+                        ],
+                        "variable": "$value"
+                    },
+                    {
+                        "name": "param",
+                        "content": "The product object.",
+                        "types": [
+                            "\\WC_Product"
+                        ],
+                        "variable": "$product"
+                    },
+                    {
+                        "name": "param",
+                        "content": "The cart item if the product exists in the cart, or null.",
+                        "types": [
+                            "array",
+                            "null"
+                        ],
+                        "variable": "$cart_item"
+                    },
+                    {
+                        "name": "return",
+                        "content": "",
+                        "types": [
+                            "mixed"
+                        ]
+                    }
+                ],
+                "long_description_html": "<p>The suffix of the hook will vary depending on the value being filtered. For example, minimum, maximum, multiple_of, editable.</p>"
+            },
+            "args": 3
         },
         {
             "name": "woocommerce_variation_option_name",

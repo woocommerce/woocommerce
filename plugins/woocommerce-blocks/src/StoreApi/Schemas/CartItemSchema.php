@@ -2,7 +2,7 @@
 namespace Automattic\WooCommerce\Blocks\StoreApi\Schemas;
 
 use Automattic\WooCommerce\Blocks\StoreApi\Utilities\DraftOrderTrait;
-use Automattic\WooCommerce\Checkout\Helpers\ReserveStock;
+use Automattic\WooCommerce\Blocks\StoreApi\Utilities\QuantityLimits;
 /**
  * CartItemSchema class.
  *
@@ -47,15 +47,43 @@ class CartItemSchema extends ProductSchema {
 			],
 			'quantity'             => [
 				'description' => __( 'Quantity of this item in the cart.', 'woo-gutenberg-products-block' ),
-				'type'        => 'integer',
+				'type'        => 'number',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
-			'quantity_limit'       => [
-				'description' => __( 'The maximum quantity than can be added to the cart at once.', 'woo-gutenberg-products-block' ),
-				'type'        => 'integer',
+			'quantity_limits'      => [
+				'description' => __( 'How the quantity of this item should be controlled, for example, any limits in place.', 'woo-gutenberg-products-block' ),
+				'type'        => 'object',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
+				'properties'  => [
+					'minimum'     => [
+						'description' => __( 'The minimum quantity allowed in the cart for this line item.', 'woo-gutenberg-products-block' ),
+						'type'        => 'integer',
+						'context'     => [ 'view', 'edit' ],
+						'readonly'    => true,
+					],
+					'maximum'     => [
+						'description' => __( 'The maximum quantity allowed in the cart for this line item.', 'woo-gutenberg-products-block' ),
+						'type'        => 'integer',
+						'context'     => [ 'view', 'edit' ],
+						'readonly'    => true,
+					],
+					'multiple_of' => [
+						'description' => __( 'The amount that quantities increment by. Quantity must be an multiple of this value.', 'woo-gutenberg-products-block' ),
+						'type'        => 'integer',
+						'context'     => [ 'view', 'edit' ],
+						'readonly'    => true,
+						'default'     => 1,
+					],
+					'editable'    => [
+						'description' => __( 'If the quantity in the cart is editable or fixed.', 'woo-gutenberg-products-block' ),
+						'type'        => 'boolean',
+						'context'     => [ 'view', 'edit' ],
+						'readonly'    => true,
+						'default'     => true,
+					],
+				],
 			],
 			'name'                 => [
 				'description' => __( 'Product name.', 'woo-gutenberg-products-block' ),
@@ -313,7 +341,7 @@ class CartItemSchema extends ProductSchema {
 			'key'                  => $cart_item['key'],
 			'id'                   => $product->get_id(),
 			'quantity'             => wc_stock_amount( $cart_item['quantity'] ),
-			'quantity_limit'       => $this->get_product_quantity_limit( $product ),
+			'quantity_limits'      => (object) ( new QuantityLimits() )->get_cart_item_quantity_limits( $cart_item ),
 			'name'                 => $this->prepare_html_response( $product->get_title() ),
 			'short_description'    => $this->prepare_html_response( wc_format_content( wp_kses_post( $product->get_short_description() ) ) ),
 			'description'          => $this->prepare_html_response( wc_format_content( wp_kses_post( $product->get_description() ) ) ),
@@ -361,25 +389,6 @@ class CartItemSchema extends ProductSchema {
 		];
 
 		return $prices;
-	}
-
-	/**
-	 * Returns the remaining stock for a product if it has stock.
-	 *
-	 * This also factors in draft orders.
-	 *
-	 * @param \WC_Product $product Product instance.
-	 * @return integer|null
-	 */
-	protected function get_remaining_stock( \WC_Product $product ) {
-		if ( is_null( $product->get_stock_quantity() ) ) {
-			return null;
-		}
-
-		$reserve_stock  = new ReserveStock();
-		$reserved_stock = $reserve_stock->get_reserved_stock( $product, $this->get_draft_order_id() );
-
-		return $product->get_stock_quantity() - $reserved_stock;
 	}
 
 	/**
@@ -452,8 +461,7 @@ class CartItemSchema extends ProductSchema {
 	}
 
 	/**
-	 * Remove HTML tags from cart item data and set the `hidden` property to
-	 * `__experimental_woocommerce_blocks_hidden`.
+	 * Remove HTML tags from cart item data and set the `hidden` property to `__experimental_woocommerce_blocks_hidden`.
 	 *
 	 * @param array $item_data_element Individual element of a cart item data.
 	 * @return array

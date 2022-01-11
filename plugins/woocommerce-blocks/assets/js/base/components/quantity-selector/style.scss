@@ -41,6 +41,7 @@
 		line-height: 1;
 		vertical-align: middle;
 		-moz-appearance: textfield;
+		font-weight: 600;
 
 		&:focus {
 			background: $gray-100;
@@ -70,11 +71,12 @@
 
 	.wc-block-components-quantity-selector__button {
 		@include reset-button;
-		@include font-size(regular);
+		@include font-size(regular, 0.9em);
 		min-width: 30px;
 		cursor: pointer;
-		color: $gray-900;
+		color: $gray-600;
 		font-style: normal;
+		font-weight: normal;
 		text-align: center;
 		text-decoration: none;
 
