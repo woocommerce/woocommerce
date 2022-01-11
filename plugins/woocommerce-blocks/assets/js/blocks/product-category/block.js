@@ -18,6 +18,7 @@ import GridContentControl from '@woocommerce/editor-components/grid-content-cont
 import GridLayoutControl from '@woocommerce/editor-components/grid-layout-control';
 import ProductCategoryControl from '@woocommerce/editor-components/product-category-control';
 import ProductOrderbyControl from '@woocommerce/editor-components/product-orderby-control';
+import ProductStockControl from '@woocommerce/editor-components/product-stock-control';
 import { gridBlockPreview } from '@woocommerce/resource-previews';
 import { Icon, folder } from '@woocommerce/icons';
 import { getSetting } from '@woocommerce/settings';
@@ -147,7 +148,15 @@ class ProductByCategoryBlock extends Component {
 	getInspectorControls() {
 		const { attributes, setAttributes } = this.props;
 		const { isEditing } = this.state;
-		const { columns, catOperator, contentVisibility, orderby, rows } = attributes;
+		const {
+			columns,
+			catOperator,
+			contentVisibility,
+			orderby,
+			rows,
+			alignButtons,
+			stockStatus,
+		} = attributes;
 
 		return (
 			<InspectorControls key="inspector">
@@ -212,6 +221,18 @@ class ProductByCategoryBlock extends Component {
 					<ProductOrderbyControl
 						setAttributes={ setAttributes }
 						value={ orderby }
+					/>
+				</PanelBody>
+				<PanelBody
+					title={ __(
+						'Stock level',
+						'woo-gutenberg-products-block'
+					) }
+					initialOpen={ false }
+				>
+					<ProductStockControl
+						setAttributes={ setAttributes }
+						value={ stockStatus }
 					/>
 				</PanelBody>
 			</InspectorControls>
