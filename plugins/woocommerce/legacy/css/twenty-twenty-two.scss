@@ -44,6 +44,17 @@ $tt2-gray: #f7f7f7;
 	}
 }
 
+.woocommerce-page {
+
+	main {
+
+		.woocommerce {
+			@include clearfix();
+			max-width: 1000px;
+		}
+	}
+}
+
 .woocommerce {
 
 	.woocommerce-products-header,
@@ -128,6 +139,7 @@ $tt2-gray: #f7f7f7;
 			border: none;
 			background: #ebe9eb;
 			color: var(--wp--preset--color--black);
+			padding: 0.5rem 1rem;
 
 			&:hover,
 			&:visited {
@@ -167,7 +179,7 @@ $tt2-gray: #f7f7f7;
 		background-color: var( --wp--preset--color--primary );
 		color: #fff;
 		border: 1px solid var(--wp--preset--color--black);
-		padding: 0.5rem 1rem 0.5rem 1rem;
+		padding: 1rem 2rem;
 		margin-top: 1rem;
 		text-decoration: none;
 		font-size: medium;
@@ -567,6 +579,140 @@ $tt2-gray: #f7f7f7;
 			text-decoration: none;
 		}
 	}
+
+	table.shop_table_responsive {
+			
+		width: 100%;
+		text-align: left;
+		border-collapse: collapse;
+
+		th,
+		td {
+			font-size: var(--wp--preset--font-size--small);
+			font-weight: normal;
+		}
+
+		th {
+			padding-bottom: 1rem;
+		}
+
+		tbody {
+
+			tr {
+				border-top: 1px solid var( --wp--preset--color--black );
+			}
+
+			td {
+				a.button,
+				button {
+					margin-bottom: 1rem;
+					border: none;
+					background: #ebe9eb;
+					color: var(--wp--preset--color--black);
+					padding: 0.5rem 1rem 0.5rem 1rem;
+		
+					&:hover,
+					&:visited {
+						color: var(--wp--preset--color--black);
+					}
+				}
+			}
+		}
+	}
+
+	/*
+	 * Cart / Checkout
+	 */
+	.woocommerce-cart-form {
+
+		#coupon_code {
+			width: auto;
+		}
+
+		table.shop_table_responsive {
+
+			td, th {
+				padding: 1rem 0 0.5rem 1rem;
+			}
+
+			tbody {
+
+				tr:last-of-type {
+					border-top: none;
+				}
+
+				@media only screen and (max-width: 768px) {
+					td {
+						padding-left: 0;
+					}
+
+					.product-remove {
+						width: auto;
+						text-align: left !important;
+					}
+
+					#coupon_code {
+						width: 50%;
+						float: left;
+						margin-bottom: 1rem;
+					}
+				}
+			}
+
+			button[name='apply_coupon'],
+			button[name='update_cart'] {
+				padding: 1rem 2rem;
+				border: 1px solid #ebe9eb;
+				margin: 0;
+			}
+
+			.product-remove {
+				width: 1rem;
+				font-size: var(--wp--preset--font-size--large);
+
+				a {
+					text-decoration: none;
+				}
+			}
+
+			.product-thumbnail {
+				width: 7.5rem;
+	
+				a {
+					img {
+						width: 117px;
+					}
+				}
+			}
+
+			.product-name {
+				a:not(:hover) {
+					text-decoration: none;
+				}
+
+				a:hover {
+					text-decoration: underline;
+					text-decoration-thickness: 1px;
+				}
+
+				.variation {
+					dt {
+						font-style: italic;
+						margin-right: 0.25rem;
+						float: left;
+					}
+
+					dd {
+						font-style: normal;
+
+						a {
+							font-style: normal;
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 .select2-container {
@@ -655,44 +801,6 @@ $tt2-gray: #f7f7f7;
 
 		> p:first-of-type {
 			margin-block-start: 0px;
-		}
-
-		table {
-			
-			width: 100%;
-			text-align: left;
-			border-collapse: collapse;
-
-			th,
-			td {
-				font-size: var(--wp--preset--font-size--small);
-				font-weight: normal;
-			}
-
-			th {
-				padding-bottom: 1rem;
-			}
-
-			tbody {
-
-				tr {
-					border-top: 1px solid var( --wp--preset--color--black );
-				}
-
-				td {
-					a.button {
-						margin-bottom: 1rem;
-						border: none;
-						background: #ebe9eb;
-						color: var(--wp--preset--color--black);
-			
-						&:hover,
-						&:visited {
-							color: var(--wp--preset--color--black);
-						}
-					}
-				}
-			}
 		}
 	}
 
