@@ -193,7 +193,10 @@ export const Layout = ( {
 						userPreferences={ userPrefs }
 						twoColumns={ twoColumns }
 					/>
-					<TwoColumnTasksExtended query={ query } />
+					<TwoColumnTasksExtended
+						query={ query }
+						shouldRenderTask={ false }
+					/>
 				</>
 			);
 		}
