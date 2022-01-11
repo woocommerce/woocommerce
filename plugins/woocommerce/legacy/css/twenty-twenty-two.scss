@@ -204,11 +204,11 @@
 		position: relative;
 		max-width: 1000px;
 
-		span.onsale {
+		> span.onsale {
 			position: absolute;
 			left: -1rem;
 			top: -1rem;
-			width: 2.4em;
+			width: 1.8rem;
 			z-index: 1;
 		}
 
