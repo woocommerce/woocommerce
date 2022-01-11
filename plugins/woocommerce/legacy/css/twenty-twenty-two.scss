@@ -32,6 +32,14 @@
  */
 .woocommerce {
 
+	.woocommerce-products-header,
+	.woocommerce-notices-wrapper,
+	.woocommerce-result-count,
+	.woocommerce-ordering,
+	.products {
+		max-width: 1000px;
+	}
+
 	// Common
 	.woocommerce-products-header {
 		h1.page-title {
@@ -152,8 +160,9 @@
 	}
 
 	.woocommerce-ordering {
-		//170px is box size, 50% - 170px is to give right alignment
-		width: max( 170px, calc( 50% - 170px ) );
+		//170px is box size, 50% - 330px is to give right alignment.
+		// 330 = 500 (50% of max container width) - 170 (box size).
+		width: max(170px, calc( 50% - 330px ) );
 		// For wide screens
 		max-width: 100%;
 
@@ -190,6 +199,7 @@
 
 	div.product {
 		position: relative;
+		max-width: 1000px;
 
 		span.onsale {
 			position: absolute;
@@ -225,6 +235,10 @@
 
 		div.summary {
 			font-size: 1rem;
+
+			> *{
+				margin-bottom: var( --wp--style--block-gap );
+			}
 
 			h1.product_title {
 				font-size: 2.5rem;
