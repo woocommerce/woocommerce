@@ -44,7 +44,7 @@ jest.mock( '@woocommerce/settings', () => {
 					cc: [
 						{
 							method: {
-								gateway: 'stripe',
+								gateway: 'credit-card',
 								last4: '4242',
 								brand: 'Visa',
 							},
@@ -75,7 +75,7 @@ const registerMockPaymentMethods = ( savedCards = true ) => {
 			ariaLabel: name,
 		} );
 	} );
-	[ 'stripe' ].forEach( ( name ) => {
+	[ 'credit-card' ].forEach( ( name ) => {
 		registerPaymentMethod( {
 			name,
 			label: name,
@@ -121,7 +121,7 @@ const registerMockPaymentMethods = ( savedCards = true ) => {
 };
 
 const resetMockPaymentMethods = () => {
-	[ 'cheque', 'bacs', 'stripe' ].forEach( ( name ) => {
+	[ 'cheque', 'bacs', 'credit-card' ].forEach( ( name ) => {
 		__experimentalDeRegisterPaymentMethod( name );
 	} );
 	[ 'express-payment' ].forEach( ( name ) => {
@@ -255,8 +255,8 @@ describe( 'Testing Payment Method Data Context Provider with saved cards turned 
 					<CheckoutExpressPayment />
 					<SavedPaymentMethodOptions onChange={ () => void null } />
 					{ 'Active Payment Method: ' + activePaymentMethod }
-					{ paymentMethodData[ 'wc-stripe-payment-token' ] && (
-						<span>Stripe token</span>
+					{ paymentMethodData[ 'wc-credit-card-payment-token' ] && (
+						<span>credit-card token</span>
 					) }
 				</>
 			);
@@ -276,11 +276,11 @@ describe( 'Testing Payment Method Data Context Provider with saved cards turned 
 		// Should initialize by default the default saved payment method.
 		await waitFor( () => {
 			const activePaymentMethod = screen.queryByText(
-				/Active Payment Method: stripe/
+				/Active Payment Method: credit-card/
 			);
-			const stripeToken = screen.queryByText( /Stripe token/ );
+			const creditCardToken = screen.queryByText( /credit-card token/ );
 			expect( activePaymentMethod ).not.toBeNull();
-			expect( stripeToken ).not.toBeNull();
+			expect( creditCardToken ).not.toBeNull();
 		} );
 
 		act( () => {
@@ -294,9 +294,9 @@ describe( 'Testing Payment Method Data Context Provider with saved cards turned 
 			const activePaymentMethod = screen.queryByText(
 				/Active Payment Method: express-payment/
 			);
-			const stripeToken = screen.queryByText( /Stripe token/ );
+			const creditCardToken = screen.queryByText( /credit-card token/ );
 			expect( activePaymentMethod ).not.toBeNull();
-			expect( stripeToken ).toBeNull();
+			expect( creditCardToken ).toBeNull();
 		} );
 
 		act( () => {
@@ -310,11 +310,11 @@ describe( 'Testing Payment Method Data Context Provider with saved cards turned 
 
 		await waitFor( () => {
 			const activePaymentMethod = screen.queryByText(
-				/Active Payment Method: stripe/
+				/Active Payment Method: credit-card/
 			);
-			const stripeToken = screen.queryByText( /Stripe token/ );
+			const creditCardToken = screen.queryByText( /credit-card token/ );
 			expect( activePaymentMethod ).not.toBeNull();
-			expect( stripeToken ).not.toBeNull();
+			expect( creditCardToken ).not.toBeNull();
 		} );
 	} );
 } );

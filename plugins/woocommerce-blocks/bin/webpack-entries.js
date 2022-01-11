@@ -134,8 +134,6 @@ const entries = {
 			'./assets/js/blocks/cart-checkout/mini-cart/component-frontend.tsx',
 	},
 	payments: {
-		'wc-payment-method-stripe':
-			'./assets/js/payment-method-extensions/payment-methods/stripe/index.js',
 		'wc-payment-method-cheque':
 			'./assets/js/payment-method-extensions/payment-methods/cheque/index.js',
 		'wc-payment-method-paypal':

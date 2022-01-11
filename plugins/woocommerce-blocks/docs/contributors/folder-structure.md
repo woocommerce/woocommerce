@@ -128,7 +128,7 @@ The following snippet explains how the WooCommerce Blocks repository is structur
     │   The middleware code to handle Store API calls.
     │
     ├── assets/js/payment-method-extensions
-    │   Functionality for the payment options such as PayPal and Stripe.
+    │   Functionality for the payment options such as PayPal.
     │
     ├── assets/js/previews
     │   The previews of various components such the All Products Block.

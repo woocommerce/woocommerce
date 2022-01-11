@@ -35,7 +35,7 @@ jest.mock(
 	() => ( { onChange } ) => (
 		<>
 			<span>Payment method options</span>
-			<button onClick={ () => onChange( 'stripe' ) }>
+			<button onClick={ () => onChange( 'credit-card' ) }>
 				Select new payment
 			</button>
 		</>
@@ -43,7 +43,7 @@ jest.mock(
 );
 
 const registerMockPaymentMethods = () => {
-	[ 'stripe' ].forEach( ( name ) => {
+	[ 'credit-card' ].forEach( ( name ) => {
 		registerPaymentMethod( {
 			name,
 			label: name,
@@ -62,7 +62,7 @@ const registerMockPaymentMethods = () => {
 };
 
 const resetMockPaymentMethods = () => {
-	[ 'stripe' ].forEach( ( name ) => {
+	[ 'credit-card' ].forEach( ( name ) => {
 		__experimentalDeRegisterPaymentMethod( name );
 	} );
 };
@@ -137,7 +137,7 @@ describe( 'PaymentMethods', () => {
 			expect( savedPaymentMethodOptions ).not.toBeNull();
 			expect( paymentMethodOptions ).not.toBeNull();
 			const savedToken = screen.queryByText(
-				/Active Payment Method: stripe/
+				/Active Payment Method: credit-card/
 			);
 			expect( savedToken ).toBeNull();
 		} );
@@ -146,7 +146,7 @@ describe( 'PaymentMethods', () => {
 
 		await waitFor( () => {
 			const activePaymentMethod = screen.queryByText(
-				/Active Payment Method: stripe/
+				/Active Payment Method: credit-card/
 			);
 			expect( activePaymentMethod ).not.toBeNull();
 		} );

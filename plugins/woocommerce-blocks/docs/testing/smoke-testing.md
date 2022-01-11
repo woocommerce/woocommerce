@@ -131,6 +131,6 @@ In the `wp:woocommerce/product-search` substitute the URL used for the `action` 
 * [ ] Do critical flows for the Cart and Checkout blocks work?
   * [ ] Address and shipping calculations
   * [ ] Payment with core payment methods
-  * [ ] Payment with Stripe and saved payment methods
+  * [ ] Payment with Stripe (extension) and saved payment methods
   * [ ] Payment with Express payment methods (Chrome Pay or Apple Pay)
   * [ ] Make sure you test with logged in user and in browser incognito mode.

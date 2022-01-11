@@ -135,7 +135,7 @@ const usePaymentMethodRegistration = (
 			} catch ( e ) {
 				if ( CURRENT_USER_IS_ADMIN || isEditor ) {
 					const errorText = sprintf(
-						/* translators: %s the id of the payment method being registered (bank transfer, Stripe...) */
+						/* translators: %s the id of the payment method being registered (bank transfer, cheque...) */
 						__(
 							`There was an error registering the payment method with id '%s': `,
 							'woo-gutenberg-products-block'
@@ -153,8 +153,7 @@ const usePaymentMethodRegistration = (
 		// Re-dispatch available payment methods to store.
 		dispatcher( availablePaymentMethods );
 
-		// Note: some payment methods use the `canMakePayment` callback to initialize / setup.
-		// Example: Stripe CC, Stripe Payment Request.
+		// Note: Some 4rd party payment methods use the `canMakePayment` callback to initialize / setup.
 		// That's why we track "is initialized" state here.
 		setIsInitialized( true );
 	}, [
