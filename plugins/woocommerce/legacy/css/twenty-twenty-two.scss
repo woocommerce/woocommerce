@@ -686,7 +686,7 @@ $tt2-gray: #f7f7f7;
 			button[name='apply_coupon'],
 			button[name='update_cart'] {
 				padding: 1rem 2rem;
-				border: 1px solid #ebe9eb;
+				border: 2px solid #ebe9eb;
 				margin: 0;
 			}
 
@@ -735,6 +735,53 @@ $tt2-gray: #f7f7f7;
 					}
 				}
 			}
+		}
+	}
+
+	.cart-collaterals {
+		margin-top: 1.5rem;
+
+		h2 {
+			text-transform: uppercase;
+			font-family: inherit;
+			font-size: var(--wp--preset--font-size--medium);
+		}
+
+		table.shop_table_responsive {
+
+			tr {
+				border-top: none;
+			}
+
+			th {
+				width: 11rem;
+			}
+
+			td, th {
+				padding: 1rem 0;
+				vertical-align: text-top;
+			}
+		}
+
+		.woocommerce-shipping-totals {
+			ul {
+				margin-top: 0;
+				margin-bottom: 0;
+				list-style-type: none;
+				padding-left: 0;
+			}
+
+			td[data-title='Shipping'] {
+
+			}
+		}
+
+		button[name='calc_shipping'] {
+			padding: 1rem 2rem;
+		}
+
+		.woocommerce-Price-amount {
+			font-weight: normal;
 		}
 	}
 }
