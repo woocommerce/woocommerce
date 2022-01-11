@@ -192,6 +192,12 @@ $tt2-gray: #f7f7f7;
 		}
 	}
 
+	button.woocommerce-form-login__submit,
+	button.single_add_to_cart_button,
+	a.checkout-button {
+		font-size: 18px;
+		padding: 1.5rem 3.5rem;
+	}
 
 	// Shop page
 
@@ -227,6 +233,10 @@ $tt2-gray: #f7f7f7;
 				font-size: 1.2rem;
 				text-decoration: none;
 				margin-bottom: 0;
+			}
+
+			a.add_to_cart_button {
+				padding: 0.8rem 2.7rem;
 			}
 		}
 	}
