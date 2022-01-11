@@ -40,6 +40,7 @@ Additionally, make sure to differentiate between things in the testing notes tha
 * [ ] Execute `npm run deploy`
   * Note: the script automatically updates version numbers (commits on your behalf).
   * **ALERT**: This script will ask you if this release will be deployed to WordPress.org. You should only answer yes for this release **if it's the latest release and you want to deploy to WordPress.org**. Otherwise, answer no. If you answer yes, you will get asked additional verification by the `npm run deploy` script about deploying a patch release to WordPress.org.
+  * An email confirmation is required before the new version will be released, so check your email in order to confirm the release.
 
 ## If this release is deployed to WordPress.org...
 
