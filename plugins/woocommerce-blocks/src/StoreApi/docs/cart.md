@@ -107,7 +107,12 @@ All endpoints under `/cart` (listed in this doc) return responses in the same fo
 			"key": "9bf31c7ff062936a96d3c8bd1f8f2ff3",
 			"id": 15,
 			"quantity": 1,
-			"quantity_limit": 99,
+			"quantity_limits": {
+				"minimum": 1,
+				"maximum": 99,
+				"multiple_of": 1,
+				"editable": true
+			},
 			"name": "Beanie",
 			"summary": "<p>This is a simple product.</p>",
 			"short_description": "<p>This is a simple product.</p>",
@@ -167,7 +172,12 @@ All endpoints under `/cart` (listed in this doc) return responses in the same fo
 			"key": "e369853df766fa44e1ed0ff613f563bd",
 			"id": 34,
 			"quantity": 1,
-			"quantity_limit": 99,
+			"quantity_limits": {
+				"minimum": 1,
+				"maximum": 99,
+				"multiple_of": 1,
+				"editable": true
+			},
 			"name": "WordPress Pennant",
 			"summary": "<p>This is an external product.</p>",
 			"short_description": "<p>This is an external product.</p>",

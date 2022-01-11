@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Blocks\StoreApi\Utilities;
 use Automattic\WooCommerce\Blocks\StoreApi\Routes\RouteException;
 use Automattic\WooCommerce\Blocks\StoreApi\Utilities\DraftOrderTrait;
 use Automattic\WooCommerce\Blocks\StoreApi\Utilities\NoticeHandler;
+use Automattic\WooCommerce\Blocks\StoreApi\Utilities\QuantityLimits;
 use Automattic\WooCommerce\Blocks\Utils\ArrayUtils;
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStock;
 use WP_Error;
@@ -62,24 +63,32 @@ class CartController {
 
 		$this->validate_add_to_cart( $product, $request );
 
+		$quantity_limits  = new QuantityLimits();
 		$existing_cart_id = $cart->find_product_in_cart( $cart_id );
 
 		if ( $existing_cart_id ) {
-			if ( $product->is_sold_individually() ) {
-				throw new RouteException(
-					'woocommerce_rest_cart_product_sold_individually',
-					sprintf(
-						/* translators: %s: product name */
-						__( 'You cannot add another "%s" to your cart.', 'woo-gutenberg-products-block' ),
-						$product->get_name()
-					),
-					400
-				);
+			$cart_item           = $cart->cart_contents[ $existing_cart_id ];
+			$quantity_validation = $quantity_limits->validate_cart_item_quantity( $request['quantity'] + $cart_item['quantity'], $cart_item );
+
+			if ( is_wp_error( $quantity_validation ) ) {
+				throw new RouteException( $quantity_validation->get_error_code(), $quantity_validation->get_error_message(), 400 );
 			}
+
 			$cart->set_quantity( $existing_cart_id, $request['quantity'] + $cart->cart_contents[ $existing_cart_id ]['quantity'], true );
 
 			return $existing_cart_id;
 		}
+
+		// Normalize quantity.
+		$add_to_cart_limits = $quantity_limits->get_add_to_cart_limits( $product );
+		$request_quantity   = (int) $request['quantity'];
+
+		if ( $add_to_cart_limits['maximum'] ) {
+			$request_quantity = min( $request_quantity, $add_to_cart_limits['maximum'] );
+		}
+
+		$request_quantity = max( $request_quantity, $add_to_cart_limits['minimum'] );
+		$request_quantity = $quantity_limits->limit_to_multiple( $request_quantity, $add_to_cart_limits['multiple_of'] );
 
 		/**
 		 * Filters the item being added to the cart.
@@ -97,7 +106,7 @@ class CartController {
 					'product_id'   => $this->get_product_id( $product ),
 					'variation_id' => $this->get_variation_id( $product ),
 					'variation'    => $request['variation'],
-					'quantity'     => $request['quantity'],
+					'quantity'     => $request_quantity,
 					'data'         => $product,
 					'data_hash'    => wc_get_cart_item_data_hash( $product ),
 				)
@@ -121,7 +130,7 @@ class CartController {
 		 *
 		 * @param string $cart_id ID of the item in the cart.
 		 * @param integer $product_id ID of the product added to the cart.
-		 * @param integer $quantity Quantity of the item added to the cart.
+		 * @param integer $request_quantity Quantity of the item added to the cart.
 		 * @param integer $variation_id Variation ID of the product added to the cart.
 		 * @param array $variation Array of variation data.
 		 * @param array $cart_item_data Array of other cart item data.
@@ -130,7 +139,7 @@ class CartController {
 			'woocommerce_add_to_cart',
 			$cart_id,
 			$this->get_product_id( $product ),
-			$request['quantity'],
+			$request_quantity,
 			$this->get_variation_id( $product ),
 			$request['variation'],
 			$request['cart_item_data']
@@ -140,7 +149,8 @@ class CartController {
 	}
 
 	/**
-	 * Based on core `set_quantity` method, but validates if an item is sold individually first.
+	 * Based on core `set_quantity` method, but validates if an item is sold individually first and enforces any limits in
+	 * place.
 	 *
 	 * @throws RouteException Exception if invalid data is detected.
 	 *
@@ -160,17 +170,12 @@ class CartController {
 			throw new RouteException( 'woocommerce_rest_cart_invalid_product', __( 'Cart item is invalid.', 'woo-gutenberg-products-block' ), 404 );
 		}
 
-		if ( $product->is_sold_individually() && $quantity > 1 ) {
-			throw new RouteException(
-				'woocommerce_rest_cart_product_sold_individually',
-				sprintf(
-					/* translators: %s: product name */
-					__( 'You cannot add another "%s" to your cart.', 'woo-gutenberg-products-block' ),
-					$product->get_name()
-				),
-				400
-			);
+		$quantity_validation = ( new QuantityLimits() )->validate_cart_item_quantity( $quantity, $cart_item );
+
+		if ( is_wp_error( $quantity_validation ) ) {
+			throw new RouteException( $quantity_validation->get_error_code(), $quantity_validation->get_error_message(), 400 );
 		}
+
 		$cart = $this->get_cart_instance();
 		$cart->set_quantity( $item_id, $quantity );
 	}

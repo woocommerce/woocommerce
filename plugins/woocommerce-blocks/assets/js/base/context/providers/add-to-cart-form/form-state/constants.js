@@ -13,7 +13,7 @@ export const STATUS = {
 export const DEFAULT_STATE = {
 	status: STATUS.PRISTINE,
 	hasError: false,
-	quantity: 1,
+	quantity: 0,
 	processingResponse: null,
 	requestParams: {},
 };

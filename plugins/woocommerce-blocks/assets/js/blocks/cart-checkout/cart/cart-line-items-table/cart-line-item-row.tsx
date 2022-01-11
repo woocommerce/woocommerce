@@ -70,7 +70,13 @@ const CartLineItemRow = forwardRef< HTMLTableRowElement, CartLineItemRowProps >(
 			description: fullDescription = '',
 			low_stock_remaining: lowStockRemaining = null,
 			show_backorder_badge: showBackorderBadge = false,
-			quantity_limit: quantityLimit = 99,
+			quantity_limits: quantityLimits = {
+				minimum: 1,
+				maximum: 99,
+				multiple_of: 1,
+				editable: true,
+			},
+			sold_individually: soldIndividually = false,
 			permalink = '',
 			images = [],
 			variation = [],
@@ -278,19 +284,26 @@ const CartLineItemRow = forwardRef< HTMLTableRowElement, CartLineItemRowProps >(
 					/>
 
 					<div className="wc-block-cart-item__quantity">
-						<QuantitySelector
-							disabled={ isPendingDelete }
-							quantity={ quantity }
-							maximum={ quantityLimit }
-							onChange={ ( newQuantity ) => {
-								setItemQuantity( newQuantity );
-								dispatchStoreEvent( 'cart-set-item-quantity', {
-									product: lineItem,
-									quantity: newQuantity,
-								} );
-							} }
-							itemName={ name }
-						/>
+						{ ! soldIndividually && !! quantityLimits.editable && (
+							<QuantitySelector
+								disabled={ isPendingDelete }
+								quantity={ quantity }
+								minimum={ quantityLimits.minimum }
+								maximum={ quantityLimits.maximum }
+								step={ quantityLimits.multiple_of }
+								onChange={ ( newQuantity ) => {
+									setItemQuantity( newQuantity );
+									dispatchStoreEvent(
+										'cart-set-item-quantity',
+										{
+											product: lineItem,
+											quantity: newQuantity,
+										}
+									);
+								} }
+								itemName={ name }
+							/>
+						) }
 						<button
 							className="wc-block-cart-item__remove-link"
 							onClick={ () => {

@@ -23,6 +23,7 @@ const Variable = () => {
 		quantity,
 		minQuantity,
 		maxQuantity,
+		multipleOf,
 		dispatchActions,
 		isDisabled,
 	} = useAddToCartFormContext();
@@ -52,6 +53,7 @@ const Variable = () => {
 				value={ quantity }
 				min={ minQuantity }
 				max={ maxQuantity }
+				step={ multipleOf }
 				disabled={ isDisabled }
 				onChange={ dispatchActions.setQuantity }
 			/>

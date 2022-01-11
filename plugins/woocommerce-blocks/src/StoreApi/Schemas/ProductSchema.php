@@ -2,7 +2,7 @@
 namespace Automattic\WooCommerce\Blocks\StoreApi\Schemas;
 
 use Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi;
-
+use Automattic\WooCommerce\Blocks\StoreApi\Utilities\QuantityLimits;
 
 /**
  * ProductSchema class.
@@ -392,12 +392,6 @@ class ProductSchema extends AbstractSchema {
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
-			'quantity_limit'      => [
-				'description' => __( 'The maximum quantity than can be added to the cart at once.', 'woo-gutenberg-products-block' ),
-				'type'        => 'integer',
-				'context'     => [ 'view', 'edit' ],
-				'readonly'    => true,
-			],
 			'add_to_cart'         => [
 				'description' => __( 'Add to cart button parameters.', 'woo-gutenberg-products-block' ),
 				'type'        => 'object',
@@ -421,6 +415,25 @@ class ProductSchema extends AbstractSchema {
 						'type'        => 'string',
 						'context'     => [ 'view', 'edit' ],
 						'readonly'    => true,
+					],
+					'minimum'     => [
+						'description' => __( 'The minimum quantity that can be added to the cart.', 'woo-gutenberg-products-block' ),
+						'type'        => 'integer',
+						'context'     => [ 'view', 'edit' ],
+						'readonly'    => true,
+					],
+					'maximum'     => [
+						'description' => __( 'The maximum quantity that can be added to the cart.', 'woo-gutenberg-products-block' ),
+						'type'        => 'integer',
+						'context'     => [ 'view', 'edit' ],
+						'readonly'    => true,
+					],
+					'multiple_of' => [
+						'description' => __( 'The amount that quantities increment by. Quantity must be an multiple of this value.', 'woo-gutenberg-products-block' ),
+						'type'        => 'integer',
+						'context'     => [ 'view', 'edit' ],
+						'readonly'    => true,
+						'default'     => 1,
 					],
 				],
 			],
@@ -460,13 +473,13 @@ class ProductSchema extends AbstractSchema {
 			'is_on_backorder'     => 'onbackorder' === $product->get_stock_status(),
 			'low_stock_remaining' => $this->get_low_stock_remaining( $product ),
 			'sold_individually'   => $product->is_sold_individually(),
-			'quantity_limit'      => $this->get_product_quantity_limit( $product ),
-			'add_to_cart'         => (object) $this->prepare_html_response(
+			'add_to_cart'         => (object) array_merge(
 				[
-					'text'        => $product->add_to_cart_text(),
-					'description' => $product->add_to_cart_description(),
-					'url'         => $product->add_to_cart_url(),
-				]
+					'text'        => $this->prepare_html_response( $product->add_to_cart_text() ),
+					'description' => $this->prepare_html_response( $product->add_to_cart_description() ),
+					'url'         => $this->prepare_html_response( $product->add_to_cart_url() ),
+				],
+				( new QuantityLimits() )->get_add_to_cart_limits( $product )
 			),
 		];
 	}
@@ -510,33 +523,6 @@ class ProductSchema extends AbstractSchema {
 		}
 
 		return null;
-	}
-
-	/**
-	 * Get the quantity limit for an item in the cart.
-	 *
-	 * @param \WC_Product $product Product instance.
-	 * @return int
-	 */
-	protected function get_product_quantity_limit( \WC_Product $product ) {
-		$limits = [ 99 ];
-
-		if ( $product->is_sold_individually() ) {
-			$limits[] = 1;
-		} elseif ( ! $product->backorders_allowed() ) {
-			$limits[] = $this->get_remaining_stock( $product );
-		}
-
-		/**
-		 * Filters the quantity limit for a product being added to the cart via the Store API.
-		 *
-		 * Filters the variation option name for custom option slugs.
-		 *
-		 * @param integer $quantity_limit Quantity limit which defaults to 99 unless sold individually.
-		 * @param \WC_Product $product Product instance.
-		 * @return integer
-		 */
-		return apply_filters( 'woocommerce_store_api_product_quantity_limit', max( min( array_filter( $limits ) ), 1 ), $product );
 	}
 
 	/**
