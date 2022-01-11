@@ -2,7 +2,7 @@ export const previewSavedPaymentMethods = {
 	cc: [
 		{
 			method: {
-				gateway: 'stripe',
+				gateway: 'credit-card',
 				last4: '5678',
 				brand: 'Visa',
 			},
