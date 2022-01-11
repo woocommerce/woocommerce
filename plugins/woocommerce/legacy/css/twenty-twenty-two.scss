@@ -36,6 +36,7 @@
 	.woocommerce-notices-wrapper,
 	.woocommerce-result-count,
 	.woocommerce-ordering,
+	.woocommerce-breadcrumb,
 	.products {
 		max-width: 1000px;
 	}
@@ -77,7 +78,7 @@
 		}
 	}
 
-	.woocommerce-breadcrumb {
+	&.woocommerce-shop .woocommerce-breadcrumb {
 		display: none;
 	}
 
