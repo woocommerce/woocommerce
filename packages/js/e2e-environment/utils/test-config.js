@@ -95,7 +95,7 @@ const resolvePackagePath = ( filename, packageName = '' ) => {
 
 /**
  * Removes duplicates from a file path in order to allow backwards support for executing tests commands
- * that prepend `plugins/woocommerce` and/or `tests/e2e`.
+ * that may prepend `plugins/woocommerce` and/or `tests/e2e`.
  *
  * @param {string} filePath Path to a specific test file
  * @param {Array} exclude An array of strings that won't be removed in the event that duplicates exist.
