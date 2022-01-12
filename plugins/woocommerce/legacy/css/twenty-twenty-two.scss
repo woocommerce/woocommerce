@@ -231,6 +231,7 @@ $tt2-gray: #f7f7f7;
 			}
 
 			h2.woocommerce-loop-product__title {
+				color: var( --wp--preset--color--primary );
 				font-family: var( --wp--preset--font-family--system-font );
 				font-size: 1.2rem;
 				text-decoration: none;
