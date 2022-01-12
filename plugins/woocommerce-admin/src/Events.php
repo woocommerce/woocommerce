@@ -45,6 +45,7 @@ use \Automattic\WooCommerce\Admin\Notes\CompleteStoreDetails;
 use \Automattic\WooCommerce\Admin\Notes\UpdateStoreDetails;
 use \Automattic\WooCommerce\Admin\Notes\SetUpAdditionalPaymentTypes;
 use \Automattic\WooCommerce\Admin\Notes\PaymentsRemindMeLater;
+use \Automattic\WooCommerce\Admin\Notes\MagentoMigration;
 
 /**
  * Events Class.
@@ -140,6 +141,7 @@ class Events {
 		CompleteStoreDetails::possibly_add_note();
 		UpdateStoreDetails::possibly_add_note();
 		PaymentsRemindMeLater::possibly_add_note();
+		MagentoMigration::possibly_add_note();
 	}
 
 	/**

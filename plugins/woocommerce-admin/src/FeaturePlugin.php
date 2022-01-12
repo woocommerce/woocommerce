@@ -20,6 +20,7 @@ use \Automattic\WooCommerce\Admin\Notes\MerchantEmailNotifications\MerchantEmail
 use \Automattic\WooCommerce\Admin\Notes\WelcomeToWooCommerceForStoreUsers;
 use \Automattic\WooCommerce\Admin\Notes\ManageStoreActivityFromHomeScreen;
 use \Automattic\WooCommerce\Admin\Notes\NavigationNudge;
+use \Automattic\WooCommerce\Admin\Notes\MagentoMigration;
 use Automattic\WooCommerce\Admin\Features\Features;
 
 /**
@@ -192,6 +193,7 @@ class FeaturePlugin {
 		new WelcomeToWooCommerceForStoreUsers();
 		new ManageStoreActivityFromHomeScreen();
 		new NavigationNudge();
+		new MagentoMigration();
 
 		// Initialize MerchantEmailNotifications.
 		MerchantEmailNotifications::init();
