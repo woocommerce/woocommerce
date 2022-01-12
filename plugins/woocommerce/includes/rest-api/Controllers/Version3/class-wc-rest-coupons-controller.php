@@ -25,8 +25,8 @@ class WC_REST_Coupons_Controller extends WC_REST_Coupons_V2_Controller {
 	 */
 	protected $namespace = 'wc/v3';
 
-	protected function prepare_objects_query($request) {
-		$args = $this->prepare_objects_query( $request );
+	protected function prepare_objects_query( $request ) {
+		$args = parent::prepare_objects_query( $request );
 
 		// Set post_status.
 		$args['post_status'] = $request['status'];
