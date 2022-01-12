@@ -12,7 +12,7 @@ const appPath = getAppRoot();
  */
 const resolveLocalE2ePath = ( filename = '' ) => {
 	const { WC_E2E_FOLDER } = process.env;
-	const localPath = `${WC_E2E_FOLDER}/tests/e2e/${filename}`;
+	const localPath = `${ WC_E2E_FOLDER }/tests/e2e/${ filename }`;
 	const resolvedPath = path.resolve(
 		appPath,
 		localPath.indexOf( '/' ) == 0 ? localPath.slice( 1 ) : localPath
@@ -26,7 +26,7 @@ const resolveLocalE2ePath = ( filename = '' ) => {
  *
  * @param {string} packageName Name of the installed package.
  * @param {boolean} allowRecurse Allow a recursive call. Default true.
- * @return {object}
+ * @return {Object}
  */
 const resolvePackage = ( packageName, allowRecurse = true ) => {
 	const resolvedPackage = {};
@@ -101,8 +101,20 @@ const resolvePackagePath = ( filename, packageName = '' ) => {
  * @param {Array} exclude An array of strings that won't be removed in the event that duplicates exist
  * @return {string}
  */
-const removePathDuplicates = ( filePath, exclude = [] ) => {
-	const pathArray = resolveLocalE2ePath( filePath ).split( '/' );
+const removePathDuplicates = ( filePath, exclude = [ 'woocommerce' ] ) => {
+	const { SMOKE_TEST_URL } = process.env;
+	let prunedPath;
+
+	/**
+	 * Removes 'plugins/woocommerce/' from path only tests against a smoke test site.
+	 */
+	if ( SMOKE_TEST_URL ) {
+		prunedPath = filePath.replace( 'plugins/woocommerce/', '' );
+	} else {
+		prunedPath = filePath;
+	}
+
+	const pathArray = resolveLocalE2ePath( prunedPath ).split( '/' );
 	return pathArray
 		.filter( ( element, index, arr ) => {
 			return (
@@ -113,11 +125,10 @@ const removePathDuplicates = ( filePath, exclude = [] ) => {
 		.join( '/' );
 };
 
-
 // Copy local test configuration file if it exists.
 const localTestConfigFile = resolveLocalE2ePath( 'config/default.json' );
 const defaultConfigFile = resolvePackagePath( 'config/default/default.json' );
-const testConfigFile = resolvePackagePath(  'config/default.json' );
+const testConfigFile = resolvePackagePath( 'config/default.json' );
 
 if ( fs.existsSync( localTestConfigFile ) ) {
 	fs.copyFileSync( localTestConfigFile, testConfigFile );
