@@ -591,7 +591,7 @@ $tt2-gray: #f7f7f7;
 		.input-text {
 			border: 1px solid var(--wp--preset--color--black);
 			border-radius: 0;
-			font-size: var(--wp--preset--font-size--medium);
+			font-size: var(--wp--preset--font-size--small);
 			padding: .9rem 1.1rem;
 		}
 
@@ -763,19 +763,6 @@ $tt2-gray: #f7f7f7;
 			}
 		}
 
-		.woocommerce-shipping-totals {
-			ul {
-				margin-top: 0;
-				margin-bottom: 0;
-				list-style-type: none;
-				padding-left: 0;
-			}
-
-			td[data-title='Shipping'] {
-
-			}
-		}
-
 		button[name='calc_shipping'] {
 			padding: 1rem 2rem;
 		}
@@ -786,18 +773,79 @@ $tt2-gray: #f7f7f7;
 	}
 
 	.woocommerce-checkout {
+		h3 {
+			font-family: inherit;
+			font-size: var(--wp--preset--font-size--normal);
+			font-weight: 700;
+		}
+
 		.col2-set {
-			width: 48%;
+			width: 43%;
 			float: right;
 		}
 
 		#customer_details {
+			width: 53%;
 			float: left;
 
 			.col-1, .col-2 {
 				width: 100%;
 				float: none;
 			}
+		}
+
+		.woocommerce-billing-fields__field-wrapper,
+		.woocommerce-checkout-review-order-table,
+		.woocommerce-checkout-payment {
+			margin-top: 4rem;
+		}
+
+		.woocommerce-checkout-review-order-table {
+			border-collapse: collapse;
+			width: 100%;
+
+			thead {
+				display: none;
+			}
+
+			th {
+				text-align: left;
+				font-weight: normal;
+				vertical-align: text-top;
+			}
+
+			th, td {
+				padding: 1rem 1rem 1rem 0;
+			}
+
+			tbody,
+			tr.woocommerce-shipping-totals {
+				border-bottom: 1px solid #d2ced2;
+			}
+
+			.product-quantity {
+				font-weight: normal;
+			}
+
+			.product-total,
+			.cart-subtotal,
+			.order-total {
+				.woocommerce-Price-amount {
+					font-weight: bold;
+				}
+			}
+		}
+	}
+
+	ul.wc_payment_methods,
+	ul.woocommerce-shipping-methods {
+		margin-top: 0;
+		margin-bottom: 0;
+		list-style-type: none;
+		padding-left: 0;
+
+		input[type='radio'] {
+			margin-right: .6rem;
 		}
 	}
 }
@@ -807,7 +855,7 @@ $tt2-gray: #f7f7f7;
 	.select2-selection,
 	.select2-search__field {
 		height: 3.5rem;
-		font-size: var(--wp--preset--font-size--medium);
+		font-size: var(--wp--preset--font-size--small);
 		padding: .9rem 1.1rem;
 	}
 
