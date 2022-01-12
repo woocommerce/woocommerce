@@ -20,6 +20,7 @@ import Block from './block';
 import withProductSelector from '../shared/with-product-selector';
 import { BLOCK_TITLE, BLOCK_ICON } from './constants';
 import { Attributes } from './types';
+import './editor.scss';
 
 interface Props {
 	attributes: Attributes;
