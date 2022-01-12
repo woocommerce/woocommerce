@@ -235,6 +235,7 @@ $tt2-gray: #f7f7f7;
 		li.product {
 			list-style: none;
 			margin-top: var(--wp--style--block-gap);
+			text-align: center;
 
 			a.woocommerce-loop-product__link {
 				text-decoration: none;
@@ -242,6 +243,8 @@ $tt2-gray: #f7f7f7;
 			}
 
 			h2.woocommerce-loop-product__title {
+				color: var( --wp--preset--color--primary );
+				font-family: var( --wp--preset--font-family--system-font );
 				font-size: 1.2rem;
 				text-decoration: none;
 				margin-bottom: 0;
@@ -480,9 +483,8 @@ $tt2-gray: #f7f7f7;
 		line-height: 1;
 		width: 5.4rem;
 		font-family: star;
-		margin-bottom: 0.7rem;
 		color: var( --wp--preset--color--secondary );
-		margin-top: 1rem;
+		margin: 1rem auto .7rem auto;
 
 		&::before {
 			content: "\73\73\73\73\73";
