@@ -933,6 +933,20 @@ $tt2-gray: #f7f7f7;
 		}
 	}
 
+	form.checkout_coupon {
+		background: $tt2-gray;
+		padding-left: 1.5rem;
+		float: left;
+		// 1.5 rem is to account for extra padding we added above.
+		width: calc(100% - 1.5rem);
+
+		.form-row {
+			button[name='apply_coupon'] {
+				margin-top: 0;
+			}
+		}
+	}
+
 	ul.wc_payment_methods,
 	ul.woocommerce-shipping-methods {
 		margin-top: 0;
