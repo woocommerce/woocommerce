@@ -49,7 +49,7 @@ jobs:
           USER_KEY: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
           USER_SECRET: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
         run: |
-          pnpx wc-e2e test:e2e plugins/woocommerce/tests/e2e/specs/smoke-tests/update-woocommerce.js
+          pnpx wc-e2e test:e2e tests/e2e/specs/smoke-tests/update-woocommerce.js
           pnpx wc-e2e test:e2e
           pnpx wc-api-tests test api
 
@@ -150,5 +150,5 @@ jobs:
           PLUGIN_NAME: ${{ matrix.plugin }}
           GITHUB_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
         run: |
-          pnpx wc-e2e test:e2e plugins/woocommerce/tests/e2e/specs/smoke-tests/upload-plugin.js
+          pnpx wc-e2e test:e2e tests/e2e/specs/smoke-tests/upload-plugin.js
           pnpm nx test-e2e woocommerce
