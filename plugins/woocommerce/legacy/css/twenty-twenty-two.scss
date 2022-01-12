@@ -609,61 +609,61 @@ $tt2-gray: #f7f7f7;
 			list-style-type: none;
 			padding-left: 0;
 		}
+	}
 
-		input[type="radio"][name='payment_method'],
-		input[type="radio"].shipping_method {
-			display: none;
-	
-			& + label {
-	
-				&::before {
-					content: "";
-					display: inline-block;
-					width: 1rem;
-					height: 1rem;
-					border: 2px solid var(--wp--preset--color--black);
-					background: var(--wp--preset--color--white);
-					margin-left: 4px;
-					margin-right: 1.2rem;
-					border-radius: 100%;
-					transform: translateY(.2rem);
-				}
-			}
-	
-			&:checked + label {
-	
-				&::before {
-					background: radial-gradient(circle at center, black 45%, white 0);
-				}
+	input[type="radio"][name='payment_method'],
+	input[type="radio"].shipping_method {
+		display: none;
+
+		& + label {
+
+			&::before {
+				content: "";
+				display: inline-block;
+				width: 1rem;
+				height: 1rem;
+				border: 2px solid var(--wp--preset--color--black);
+				background: var(--wp--preset--color--white);
+				margin-left: 4px;
+				margin-right: 1.2rem;
+				border-radius: 100%;
+				transform: translateY(.2rem);
 			}
 		}
 
-		label.woocommerce-form__label-for-checkbox {
-			font-weight: normal;
-			cursor: pointer;
-	
-			span {
-	
-				&::before {
-					content: "";
-					display: inline-block;
-					height: 1rem;
-					width: 1rem;
-					border: 2px solid var(--wp--preset--color--black);
-					background: var(--wp--preset--color--white);
-					margin-right: .5rem;
-					transform: translateY(.2rem);
-				}
+		&:checked + label {
+
+			&::before {
+				background: radial-gradient(circle at center, black 45%, white 0);
 			}
-	
-			input[type="checkbox"] {
-				display: none;
+		}
+	}
+
+	label.woocommerce-form__label-for-checkbox {
+		font-weight: normal;
+		cursor: pointer;
+
+		span {
+
+			&::before {
+				content: "";
+				display: inline-block;
+				height: 1rem;
+				width: 1rem;
+				border: 2px solid var(--wp--preset--color--black);
+				background: var(--wp--preset--color--white);
+				margin-right: .5rem;
+				transform: translateY(.2rem);
 			}
-	
-			input[type="checkbox"]:checked + span::before {
-				background: var(--wp--preset--color--black);
-				box-shadow: inset .2rem .2rem var(--wp--preset--color--white), inset -.2rem -.2rem var(--wp--preset--color--white);
-			}
+		}
+
+		input[type="checkbox"] {
+			display: none;
+		}
+
+		input[type="checkbox"]:checked + span::before {
+			background: var(--wp--preset--color--black);
+			box-shadow: inset .2rem .2rem var(--wp--preset--color--white), inset -.2rem -.2rem var(--wp--preset--color--white);
 		}
 	}
 
