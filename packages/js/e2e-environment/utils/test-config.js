@@ -95,19 +95,17 @@ const resolvePackagePath = ( filename, packageName = '' ) => {
 
 /**
  * Removes duplicates from a file path in order to allow backwards support for executing tests commands
- * that prepend `plugins/woocommerce` and/or `tests/e2e.
+ * that prepend `plugins/woocommerce` and/or `tests/e2e`.
  *
  * @param {string} filePath Path to a specific test file
- * @param {Array} exclude An array of strings that won't be removed in the event that duplicates exist
+ * @param {Array} exclude An array of strings that won't be removed in the event that duplicates exist.
  * @return {string}
  */
 const removePathDuplicates = ( filePath, exclude = [ 'woocommerce' ] ) => {
 	const { SMOKE_TEST_URL } = process.env;
 	let prunedPath;
 
-	/**
-	 * Removes 'plugins/woocommerce/' from path only tests against a smoke test site.
-	 */
+	// Removes 'plugins/woocommerce/' from path only for tests against a smoke test site.
 	if ( SMOKE_TEST_URL ) {
 		prunedPath = filePath.replace( 'plugins/woocommerce/', '' );
 	} else {
