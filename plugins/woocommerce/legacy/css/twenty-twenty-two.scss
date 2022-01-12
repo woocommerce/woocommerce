@@ -334,7 +334,6 @@ $tt2-gray: #f7f7f7;
 					padding: 2px;
 				}
 			}
-
 		}
 
 		ol.flex-control-thumbs {
@@ -586,7 +585,7 @@ $tt2-gray: #f7f7f7;
  * Form fields
  */
 .woocommerce-page {
-	
+
 	form {
 
 		.input-text {
@@ -669,7 +668,7 @@ $tt2-gray: #f7f7f7;
 	}
 
 	table.shop_table_responsive {
-			
+
 		width: 100%;
 		text-align: left;
 		border-collapse: collapse;
@@ -698,7 +697,7 @@ $tt2-gray: #f7f7f7;
 					background: #ebe9eb;
 					color: var(--wp--preset--color--black);
 					padding: 0.5rem 1rem 0.5rem 1rem;
-		
+
 					&:hover,
 					&:visited {
 						color: var(--wp--preset--color--black);
@@ -765,7 +764,7 @@ $tt2-gray: #f7f7f7;
 
 			.product-thumbnail {
 				width: 7.5rem;
-	
+
 				a {
 					img {
 						width: 117px;
@@ -1304,3 +1303,109 @@ $tt2-gray: #f7f7f7;
 		}
 	}
 }
+
+/**
+ * Order confirmation page.
+ */
+
+.woocommerce-order-received {
+	main {
+		margin-top: 0;
+
+		div.wp-block-group {
+			display: none;
+		}
+
+		.wp-block-spacer {
+			display: none;
+		}
+
+		.woocommerce-thankyou-order-received {
+			margin-top: 0;
+			font-size: 150%;
+		}
+
+		ul.woocommerce-order-overview {
+			display: inline-flex;
+			flex-direction: row;
+			align-items: stretch;
+			padding: 0;
+			margin-bottom: 50px;
+
+			li {
+				list-style: none;
+				text-transform: uppercase;
+				font-size: 90%;
+				display: inline-grid;
+				flex: 1;
+
+				strong {
+					display: block;
+					text-transform: initial;
+					font-size: initial;
+				}
+			}
+		}
+
+		.woocommerce-order-details {
+			.woocommerce-order-details__title {
+				display: none;
+			}
+
+			table.order_details {
+				border: solid 1px black;
+				border-collapse: collapse;
+				thead {
+					text-align: left;
+					text-transform: uppercase;
+
+					th {
+						font-weight: normal;
+						padding: 10px;
+					}
+				}
+
+				tr {
+					border: solid 1px black;
+
+					td {
+						padding: 10px;
+					}
+				}
+
+				tfoot {
+					th {
+						text-align: left;
+						padding: 10px;
+						font-weight: normal;
+					}
+				}
+
+				ul.wc-item-meta {
+					list-style: none;
+					padding-left: 0;
+					margin-bottom: 0;
+
+					p {
+						display: inline;
+					}
+				}
+			}
+		}
+
+		.woocommerce-customer-details {
+			h2 {
+				margin-top: 50px;
+				margin-bottom: 30px;
+				font-size: 2.5em;
+				font-family: inherit;
+			}
+
+			address {
+				border: solid 1px black;
+				padding: 20px;
+			}
+		}
+	}
+}
+
