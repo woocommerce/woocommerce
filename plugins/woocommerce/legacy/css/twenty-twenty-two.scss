@@ -223,6 +223,7 @@ $tt2-gray: #f7f7f7;
 		li.product {
 			list-style: none;
 			margin-top: var(--wp--style--block-gap);
+			text-align: center;
 
 			a.woocommerce-loop-product__link {
 				text-decoration: none;
@@ -230,6 +231,7 @@ $tt2-gray: #f7f7f7;
 			}
 
 			h2.woocommerce-loop-product__title {
+				font-family: var( --wp--preset--font-family--system-font );
 				font-size: 1.2rem;
 				text-decoration: none;
 				margin-bottom: 0;
@@ -585,7 +587,7 @@ $tt2-gray: #f7f7f7;
  * Form fields
  */
 .woocommerce-page {
-	
+
 	form {
 
 		.input-text {
@@ -668,7 +670,7 @@ $tt2-gray: #f7f7f7;
 	}
 
 	table.shop_table_responsive {
-			
+
 		width: 100%;
 		text-align: left;
 		border-collapse: collapse;
@@ -697,7 +699,7 @@ $tt2-gray: #f7f7f7;
 					background: #ebe9eb;
 					color: var(--wp--preset--color--black);
 					padding: 0.5rem 1rem 0.5rem 1rem;
-		
+
 					&:hover,
 					&:visited {
 						color: var(--wp--preset--color--black);
@@ -764,7 +766,7 @@ $tt2-gray: #f7f7f7;
 
 			.product-thumbnail {
 				width: 7.5rem;
-	
+
 				a {
 					img {
 						width: 117px;
