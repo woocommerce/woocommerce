@@ -602,6 +602,41 @@ $tt2-gray: #f7f7f7;
 		abbr.required {
 			text-decoration: none;
 		}
+
+		ul {
+			margin-top: 0;
+			margin-bottom: 0;
+			list-style-type: none;
+			padding-left: 0;
+		}
+
+		input[type="radio"][name='payment_method'],
+		input[type="radio"].shipping_method {
+			display: none;
+	
+			& + label {
+	
+				&::before {
+					content: "";
+					display: inline-block;
+					width: 14px !important;
+					height: 14px;
+					border: 2px solid var(--wp--preset--color--black);
+					background: var(--wp--preset--color--white);
+					margin-left: 4px;
+					margin-right: 1.2rem;
+					border-radius: 100%;
+					transform: translateY(2px);
+				}
+			}
+	
+			&:checked + label {
+	
+				&::before {
+					background: radial-gradient(circle at center, black 45%, white 0);
+				}
+			}
+		}
 	}
 
 	table.shop_table_responsive {
