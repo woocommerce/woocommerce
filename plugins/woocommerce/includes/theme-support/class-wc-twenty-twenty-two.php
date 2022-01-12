@@ -30,6 +30,10 @@ class WC_Twenty_Twenty_Two {
 		// Enqueue theme compatibility styles.
 		add_filter( 'woocommerce_enqueue_styles', array( __CLASS__, 'enqueue_styles' ) );
 
+		// Wrap checkout form elements for styling.
+		add_action( 'woocommerce_checkout_before_order_review_heading', array( __CLASS__, 'before_order_review' ) );
+		add_action( 'woocommerce_checkout_after_order_review', array( __CLASS__, 'after_order_review' ) );
+
 		// Register theme features.
 		add_theme_support( 'wc-product-gallery-zoom' );
 		add_theme_support( 'wc-product-gallery-lightbox' );
@@ -63,6 +67,19 @@ class WC_Twenty_Twenty_Two {
 		return apply_filters( 'woocommerce_twenty_twenty_two_styles', $styles );
 	}
 
+	/**
+	 * Wrap checkout order review with a `col2-set` div.
+	 */
+	public static function before_order_review() {
+		echo '<div class="col2-set">';
+	}
+
+	/**
+	 * Close the div wrapper.
+	 */
+	public static function after_order_review() {
+		echo '</div>';
+	}
 }
 
 WC_Twenty_Twenty_Two::init();
