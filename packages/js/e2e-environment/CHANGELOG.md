@@ -9,6 +9,7 @@
 - Added `post-results-to-github-pr.js` to post smoke test results to a GitHub PR.
 - Added jest flags to generate a json test report
 - Added more entries to `default.json`
+- Print the full path to `test-results.json` when the tests ends to make it easier to find the test results file.
 
 ## Added
 
