@@ -358,9 +358,6 @@ class StoreDetails extends Component {
 											) }
 										</div>
 									) }
-							</CardBody>
-
-							<CardFooter>
 								<FlexItem>
 									<div className="woocommerce-profile-wizard__newsletter-signup">
 										<CheckboxControl
@@ -384,7 +381,7 @@ class StoreDetails extends Component {
 										/>
 									</div>
 								</FlexItem>
-							</CardFooter>
+							</CardBody>
 
 							<CardFooter justify="center">
 								<Button
