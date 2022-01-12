@@ -168,6 +168,18 @@ $tt2-gray: #f7f7f7;
 		}
 	}
 
+	.woocommerce-NoticeGroup-checkout {
+		ul.woocommerce-error[role='alert'] {
+			&::before {
+				display: none;
+			}
+			li {
+				display: inherit;
+				margin-bottom: 1rem;
+			}
+		}
+	}
+
 	a.button,
 	button[name='add-to-cart'],
 	input[name='submit'],
@@ -585,7 +597,7 @@ $tt2-gray: #f7f7f7;
  * Form fields
  */
 .woocommerce-page {
-	
+
 	form {
 
 		.input-text {
@@ -631,6 +643,11 @@ $tt2-gray: #f7f7f7;
 			}
 		}
 
+		& ~ .payment_box {
+			padding-left: 3rem;
+			margin-top: 1rem;
+		}
+
 		&:checked + label {
 
 			&::before {
@@ -668,7 +685,7 @@ $tt2-gray: #f7f7f7;
 	}
 
 	table.shop_table_responsive {
-			
+
 		width: 100%;
 		text-align: left;
 		border-collapse: collapse;
@@ -697,7 +714,7 @@ $tt2-gray: #f7f7f7;
 					background: #ebe9eb;
 					color: var(--wp--preset--color--black);
 					padding: 0.5rem 1rem 0.5rem 1rem;
-		
+
 					&:hover,
 					&:visited {
 						color: var(--wp--preset--color--black);
@@ -764,7 +781,7 @@ $tt2-gray: #f7f7f7;
 
 			.product-thumbnail {
 				width: 7.5rem;
-	
+
 				a {
 					img {
 						width: 117px;
@@ -889,9 +906,12 @@ $tt2-gray: #f7f7f7;
 				padding: 1rem 1rem 1rem 0;
 			}
 
-			tbody,
-			tr.woocommerce-shipping-totals {
+			tbody {
 				border-bottom: 1px solid #d2ced2;
+			}
+
+			tr.order-total {
+				border-top: 1px solid #d2ced2;
 			}
 
 			.product-quantity {
@@ -913,6 +933,20 @@ $tt2-gray: #f7f7f7;
 		}
 	}
 
+	form.checkout_coupon {
+		background: $tt2-gray;
+		padding-left: 1.5rem;
+		float: left;
+		// 1.5 rem is to account for extra padding we added above.
+		width: calc(100% - 1.5rem);
+
+		.form-row {
+			button[name='apply_coupon'] {
+				margin-top: 0;
+			}
+		}
+	}
+
 	ul.wc_payment_methods,
 	ul.woocommerce-shipping-methods {
 		margin-top: 0;
@@ -923,18 +957,32 @@ $tt2-gray: #f7f7f7;
 		input[type='radio'] {
 			margin-right: .6rem;
 		}
+
+		li.wc_payment_method {
+			margin-bottom: 1rem;
+		}
 	}
 
 	.woocommerce-thankyou-order-received {
+		margin-top: 0;
+	}
+
+	.woocommerce-thankyou-order-received,
+	h2.woocommerce-column__title {
 		font-family: var(--wp--preset--font-family--source-serif-pro);
 		font-size: var(--wp--preset--font-size--large);
 		font-weight: 300;
+	}
+
+	.woocommerce-order > * {
+		margin-bottom: var( --wp--style--block-gap );
 	}
 
 	ul.woocommerce-order-overview {
 		font-size: var(--wp--preset--font-size--small);
 		display: flex;
 		padding-left: 0;
+		width: 100%;
 
 		li {
 			display: inline;
@@ -957,6 +1005,27 @@ $tt2-gray: #f7f7f7;
 		address {
 			padding: 2rem;
 			border: 1px solid var(--wp--preset--color--black);
+			font-style: inherit;
+
+			p[class^='woocommerce-customer-details--'] {
+				&:first-of-type {
+					margin-top: 2rem;
+				}
+
+				margin-top: 1rem;
+				margin-bottom: 0;
+			}
+
+			.woocommerce-customer-details--phone::before {
+				content: '\01F4DE';
+				margin-right: 1rem;
+			}
+
+			.woocommerce-customer-details--email::before {
+				content: '\2709';
+				margin-right: 1rem;
+				font-size: 1.8rem;
+			}
 		}
 	}
 
