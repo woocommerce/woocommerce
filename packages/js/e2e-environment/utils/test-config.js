@@ -93,6 +93,27 @@ const resolvePackagePath = ( filename, packageName = '' ) => {
 	return resolvedPath;
 };
 
+/**
+ * Removes duplicates from a file path in order to allow backwards support for executing tests commands
+ * that prepend `plugins/woocommerce` and/or `tests/e2e.
+ *
+ * @param {string} filePath Path to a specific test file
+ * @param {Array} exclude An array of strings that won't be removed in the event that duplicates exist
+ * @return {string}
+ */
+const removePathDuplicates = ( filePath, exclude = [] ) => {
+	const pathArray = resolveLocalE2ePath( filePath ).split( '/' );
+	return pathArray
+		.filter( ( element, index, arr ) => {
+			return (
+				arr.indexOf( element ) === index ||
+				exclude.indexOf( element ) !== -1
+			);
+		} )
+		.join( '/' );
+};
+
+
 // Copy local test configuration file if it exists.
 const localTestConfigFile = resolveLocalE2ePath( 'config/default.json' );
 const defaultConfigFile = resolvePackagePath( 'config/default/default.json' );
@@ -165,4 +186,5 @@ module.exports = {
 	resolveLocalE2ePath,
 	resolvePackage,
 	resolvePackagePath,
+	removePathDuplicates,
 };
