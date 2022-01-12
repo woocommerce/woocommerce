@@ -110,7 +110,7 @@ const jestProcess = spawnSync( jestCommand, jestArgs, {
 	env: envVars,
 } );
 
-console.log( 'Test result file path: ' +  outputFile );
+console.log( 'Test result file path: ' + outputFile );
 console.log( 'Jest exit code: ' + jestProcess.status );
 
 // Pass Jest exit code to npm
