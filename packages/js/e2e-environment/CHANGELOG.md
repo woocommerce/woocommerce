@@ -2,6 +2,11 @@
 
 ## Fixed
 
+- Added the `removePathDuplicates` method which fixes the need prepend `plugins/woocommerce` and/or `tests/e2e` when executing a single test
+  - It still supports the use of `plugins/woocommerce` and/or `tests/e2e` to avoid any breaking changes
+
+## Fixed
+
 - Added the ability to take screenshots from multiple test failures (when retried) in `utils/take-screenshot.js`.
 
 ## Added
