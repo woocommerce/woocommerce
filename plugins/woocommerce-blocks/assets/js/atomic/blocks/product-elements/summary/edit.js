@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { useBlockProps } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
@@ -11,7 +12,12 @@ import withProductSelector from '../shared/with-product-selector';
 import { BLOCK_TITLE, BLOCK_ICON } from './constants';
 
 const Edit = ( { attributes } ) => {
-	return <Block { ...attributes } />;
+	const blockProps = useBlockProps();
+	return (
+		<div { ...blockProps }>
+			<Block { ...attributes } />
+		</div>
+	);
 };
 
 export default withProductSelector( {
