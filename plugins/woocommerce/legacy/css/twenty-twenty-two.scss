@@ -857,6 +857,14 @@ $tt2-gray: #f7f7f7;
 			}
 		}
 
+		@media only screen and (max-width: 768px) {
+			.col2-set,
+			#customer_details {
+				width: 100%;
+				float: none;
+			}
+		}
+
 		.woocommerce-billing-fields__field-wrapper,
 		.woocommerce-checkout-review-order-table,
 		.woocommerce-checkout-payment {
@@ -897,6 +905,11 @@ $tt2-gray: #f7f7f7;
 					font-weight: bold;
 				}
 			}
+		}
+
+		button#place_order {
+			width: 100%;
+			text-transform: uppercase;
 		}
 	}
 
