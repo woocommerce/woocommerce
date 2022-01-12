@@ -1102,8 +1102,9 @@ class Loader {
 			$settings['embedBreadcrumbs'] = self::get_embed_breadcrumbs();
 		}
 
-		$settings['allowMarketplaceSuggestions'] = WC_Marketplace_Suggestions::allow_suggestions();
-		$settings['connectNonce']                = wp_create_nonce( 'connect' );
+		$settings['allowMarketplaceSuggestions']      = WC_Marketplace_Suggestions::allow_suggestions();
+		$settings['connectNonce']                     = wp_create_nonce( 'connect' );
+		$settings['wcpay_welcome_page_connect_nonce'] = wp_create_nonce( 'wcpay-connect' );
 
 		return $settings;
 	}

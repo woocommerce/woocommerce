@@ -44,6 +44,7 @@ use Automattic\WooCommerce\Admin\Schedulers\MailchimpScheduler;
 use \Automattic\WooCommerce\Admin\Notes\CompleteStoreDetails;
 use \Automattic\WooCommerce\Admin\Notes\UpdateStoreDetails;
 use \Automattic\WooCommerce\Admin\Notes\SetUpAdditionalPaymentTypes;
+use \Automattic\WooCommerce\Admin\Notes\PaymentsRemindMeLater;
 
 /**
  * Events Class.
@@ -138,6 +139,7 @@ class Events {
 		NavigationNudge::possibly_add_note();
 		CompleteStoreDetails::possibly_add_note();
 		UpdateStoreDetails::possibly_add_note();
+		PaymentsRemindMeLater::possibly_add_note();
 	}
 
 	/**
@@ -146,6 +148,7 @@ class Events {
 	protected function possibly_delete_notes() {
 		NavigationNudge::delete_if_not_applicable();
 		SetUpAdditionalPaymentTypes::delete_if_not_applicable();
+		PaymentsRemindMeLater::delete_if_not_applicable();
 	}
 
 	/**

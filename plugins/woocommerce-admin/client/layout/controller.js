@@ -50,6 +50,12 @@ const SettingsGroup = lazy( () =>
 	import( /* webpackChunkName: "profile-wizard" */ '../settings' )
 );
 
+const WCPaymentsWelcomePage = lazy( () =>
+	import(
+		/* webpackChunkName: "wcpay-payment-welcome-page" */ '../payments-welcome'
+	)
+);
+
 export const PAGES_FILTER = 'woocommerce_admin_pages_list';
 
 export const getPages = () => {
@@ -198,6 +204,25 @@ export const getPages = () => {
 				];
 			},
 			wpOpenMenu: 'toplevel_page_woocommerce',
+			capability: 'manage_woocommerce',
+		} );
+	}
+
+	if ( window.wcAdminFeatures[ 'wc-pay-welcome-page' ] ) {
+		pages.push( {
+			container: WCPaymentsWelcomePage,
+			path: '/wc-pay-welcome-page',
+			breadcrumbs: [
+				[
+					'/wc-pay-welcome-page',
+					__( 'WooCommerce Payments', 'woocommerce-admin' ),
+				],
+				__( 'WooCommerce Payments', 'woocommerce-admin' ),
+			],
+			navArgs: {
+				id: 'woocommerce-wc-pay-welcome-page',
+			},
+			wpOpenMenu: 'toplevel_page_woocommerce-wc-pay-welcome-page',
 			capability: 'manage_woocommerce',
 		} );
 	}

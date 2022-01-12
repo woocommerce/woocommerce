@@ -136,7 +136,7 @@ final class Experimental_Abtest {
 		}
 
 		// Store the variation in our internal cache.
-		$this->tests[ $test_name ] = $results['variations'][ $test_name ];
+		$this->tests[ $test_name ] = $results['variations'][ $test_name ] ?? null;
 
 		$variation = $results['variations'][ $test_name ] ?? 'control';
 
