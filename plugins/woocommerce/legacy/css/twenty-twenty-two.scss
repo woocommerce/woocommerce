@@ -784,6 +784,22 @@ $tt2-gray: #f7f7f7;
 			font-weight: normal;
 		}
 	}
+
+	.woocommerce-checkout {
+		.col2-set {
+			width: 48%;
+			float: right;
+		}
+
+		#customer_details {
+			float: left;
+
+			.col-1, .col-2 {
+				width: 100%;
+				float: none;
+			}
+		}
+	}
 }
 
 .select2-container {
