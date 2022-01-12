@@ -925,7 +925,10 @@ $tt2-gray: #f7f7f7;
 
 			.product-total,
 			.cart-subtotal,
-			.order-total {
+			.order-total,
+			.tax-rate,
+			input[type="radio"].shipping_method:checked + label,
+			input[type="hidden"].shipping_method + label {
 				.woocommerce-Price-amount {
 					font-weight: bold;
 				}
