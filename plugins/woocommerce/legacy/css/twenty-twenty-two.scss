@@ -969,7 +969,9 @@ $tt2-gray: #f7f7f7;
 
 	.woocommerce-MyAccount-content {
 
-		> p:first-of-type {
+		> p:first-of-type,
+		p.form-row-first,
+		p.form-row-last {
 			margin-block-start: 0px;
 		}
 	}
