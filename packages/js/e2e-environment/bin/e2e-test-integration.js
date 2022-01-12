@@ -75,7 +75,7 @@ if ( program.args.length == 1 ) {
 }
 
 let jestCommand = 'jest';
-let outputFile = __dirname + '/test-results.json';
+let outputFile = process.cwd() + '/test-results.json';
 const jestArgs = [
 	'--maxWorkers=1',
 	'--rootDir=./',
