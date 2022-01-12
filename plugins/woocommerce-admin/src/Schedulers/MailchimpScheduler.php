@@ -87,7 +87,7 @@ class MailchimpScheduler {
 	 * @return mixed
 	 */
 	public function make_request( $store_email ) {
-		if ( 'development' === constant( 'WP_ENVIRONMENT_TYPE' ) ) {
+		if ( true === defined( 'WP_ENVIRONMENT_TYPE' ) && 'development' === constant( 'WP_ENVIRONMENT_TYPE' ) ) {
 			$subscribe_endpoint = self::SUBSCRIBE_ENDPOINT_DEV;
 		} else {
 			$subscribe_endpoint = self::SUBSCRIBE_ENDPOINT;
