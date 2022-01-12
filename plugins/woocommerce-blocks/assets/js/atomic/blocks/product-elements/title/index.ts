@@ -15,6 +15,8 @@ import {
 	BLOCK_ICON as icon,
 	BLOCK_DESCRIPTION as description,
 } from './constants';
+import { Save } from './save';
+import { hasSpacingStyleSupport } from '../../../../utils/global-style';
 
 const blockConfig: BlockConfiguration = {
 	...sharedConfig,
@@ -24,17 +26,32 @@ const blockConfig: BlockConfiguration = {
 	icon: { src: icon },
 	attributes,
 	edit,
-	supports: isFeaturePluginBuild()
-		? {
-				html: false,
-				color: {
-					background: false,
+	save: Save,
+	supports: {
+		...sharedConfig.supports,
+		...( isFeaturePluginBuild() && {
+			typography: {
+				fontSize: true,
+				lineHeight: true,
+				__experimentalFontWeight: true,
+				__experimentalTextTransform: true,
+				__experimentalFontFamily: true,
+			},
+			color: {
+				text: true,
+				background: true,
+				link: false,
+				gradients: true,
+				__experimentalSkipSerialization: true,
+			},
+			...( hasSpacingStyleSupport() && {
+				spacing: {
+					margin: true,
+					__experimentalSkipSerialization: true,
 				},
-				typography: {
-					fontSize: true,
-				},
-		  }
-		: sharedConfig.supports,
+			} ),
+		} ),
+	},
 };
 
 registerBlockType( 'woocommerce/product-title', blockConfig );

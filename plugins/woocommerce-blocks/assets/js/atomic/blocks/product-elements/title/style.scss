@@ -1,3 +1,7 @@
+.wp-block-woocommerce-product-title {
+	width: fit-content;
+}
+
 .wc-block-components-product-title {
 	margin-top: 0;
 	margin-bottom: $gap-small;
@@ -10,6 +14,11 @@
 	font-size: inherit;
 	display: block;
 }
+
+.wc-block-components-product-name {
+	color: inherit;
+}
+
 .is-loading {
 	.wc-block-components-product-title::before {
 		@include placeholder();
