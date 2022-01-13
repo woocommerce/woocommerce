@@ -37,6 +37,11 @@ class RuleEvaluator {
 	 * @return bool The result of the operation.
 	 */
 	public function evaluate( $rules, $stored_state = null, $logger_args = array() ) {
+
+		if ( is_bool( $rules ) ) {
+			return $rules;
+		}
+
 		if ( ! is_array( $rules ) ) {
 			$rules = array( $rules );
 		}
