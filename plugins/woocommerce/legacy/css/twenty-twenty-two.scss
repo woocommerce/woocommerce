@@ -26,6 +26,7 @@
 }
 
 @import "mixins";
+@import "animation";
 
 $tt2-gray: #f7f7f7;
 
@@ -252,6 +253,10 @@ $tt2-gray: #f7f7f7;
 
 			a.add_to_cart_button {
 				padding: 0.8rem 2.7rem;
+
+				&.loading {
+					opacity: 0.5;
+				}
 			}
 
 			a.added_to_cart {
@@ -880,6 +885,8 @@ $tt2-gray: #f7f7f7;
 	}
 
 	.woocommerce-checkout {
+		display: table;
+
 		h3 {
 			font-family: inherit;
 			font-size: var(--wp--preset--font-size--normal);
@@ -889,6 +896,11 @@ $tt2-gray: #f7f7f7;
 		.col2-set {
 			width: 43%;
 			float: right;
+		}
+
+		.blockUI.blockOverlay {
+			position: relative;
+			@include loader();
 		}
 
 		#customer_details {
