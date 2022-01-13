@@ -140,7 +140,7 @@
 }
 
 .wc-block-components-review-list-item__product + .wc-block-components-review-list-item__author + .wc-block-components-review-list-item__published-date {
-	padding-left: $gap/2;
+	padding-left: $gap*0.5;
 	position: relative;
 
 	&::before {
