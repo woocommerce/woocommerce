@@ -312,8 +312,7 @@ class WC_Admin_Notices {
 	 * @deprecated 4.6.0
 	 */
 	public static function install_notice() {
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.6.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.6.0', esc_html__( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 	}
 
 	/**
