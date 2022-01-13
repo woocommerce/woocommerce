@@ -147,7 +147,7 @@ class WC_Admin_Notices {
 	 * TODO: Remove this method in WooCommerce 6.5.
 	 */
 	private static function maybe_remove_php72_required_notice() {
-		if ( version_compare( phpversion(), '7.2', '>=' ) ) {
+		if ( version_compare( phpversion(), '7.2', '>=' ) && self::has_notice( 'php72_required_in_woo_65' ) ) {
 			self::remove_notice( 'php72_required_in_woo_65' );
 		}
 	}
