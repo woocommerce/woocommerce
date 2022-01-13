@@ -26,6 +26,7 @@
 }
 
 @import "mixins";
+@import "animation";
 
 $tt2-gray: #f7f7f7;
 
@@ -235,6 +236,7 @@ $tt2-gray: #f7f7f7;
 		li.product {
 			list-style: none;
 			margin-top: var(--wp--style--block-gap);
+			text-align: center;
 
 			a.woocommerce-loop-product__link {
 				text-decoration: none;
@@ -242,6 +244,8 @@ $tt2-gray: #f7f7f7;
 			}
 
 			h2.woocommerce-loop-product__title {
+				color: var( --wp--preset--color--primary );
+				font-family: var( --wp--preset--font-family--system-font );
 				font-size: 1.2rem;
 				text-decoration: none;
 				margin-bottom: 0;
@@ -249,6 +253,10 @@ $tt2-gray: #f7f7f7;
 
 			a.add_to_cart_button {
 				padding: 0.8rem 2.7rem;
+
+				&.loading {
+					opacity: 0.5;
+				}
 			}
 
 			a.added_to_cart {
@@ -374,6 +382,10 @@ $tt2-gray: #f7f7f7;
 
 			margin-bottom: var( --wp--style--block-gap );
 		}
+
+		.related.products {
+			margin-top: 7rem;
+		}
 	}
 
 	.woocommerce-tabs {
@@ -396,8 +408,8 @@ $tt2-gray: #f7f7f7;
 				border-style: solid;
 				border-width: 1px;
 				border-left-color: var( --wp--preset--color--background );
-				font-weight: 500;
-				font-size: 0.8em;
+				font-weight: 600;
+				font-size: var(--wp--preset--font-size--medium);
 
 				&:first-child {
 					border-left-color: #EAE9EB;
@@ -407,6 +419,7 @@ $tt2-gray: #f7f7f7;
 				&.active {
 					background: var( --wp--preset--color--background );
 					border-bottom-color: var( --wp--preset--color--background );
+					box-shadow: 0 1px var( --wp--preset--color--background );
 				}
 
 				a {
@@ -417,7 +430,7 @@ $tt2-gray: #f7f7f7;
 
 		.woocommerce-Tabs-panel {
 			padding-top: var( --wp--style--block-gap );
-			font-size: 0.8em;
+			font-size: var(--wp--preset--font-size--small);
 			margin-left: 1em;
 
 			h2 {
@@ -445,6 +458,8 @@ $tt2-gray: #f7f7f7;
 
 				.star-rating {
 					margin-top: 0;
+					margin-right: unset;
+					margin-left: unset;
 				}
 			}
 		}
@@ -470,6 +485,15 @@ $tt2-gray: #f7f7f7;
 				padding-right: var( --wp--style--block-gap );
 			}
 		}
+
+		#review_form_wrapper {
+			margin-top: 5rem;
+		}
+
+		.comment-reply-title {
+			font-size: var(--wp--preset--font-size--medium);
+			font-weight: 700;
+		}
 	}
 
 
@@ -480,9 +504,8 @@ $tt2-gray: #f7f7f7;
 		line-height: 1;
 		width: 5.4rem;
 		font-family: star;
-		margin-bottom: 0.7rem;
 		color: var( --wp--preset--color--secondary );
-		margin-top: 1rem;
+		margin: 1rem auto .7rem auto;
 
 		&::before {
 			content: "\73\73\73\73\73";
@@ -590,6 +613,10 @@ $tt2-gray: #f7f7f7;
 			border: 2px solid var( --wp--preset--color--primary );
 			padding: 0.7rem 2rem;
 		}
+	}
+
+	mark {
+		background: var( --wp--preset--color--secondary );
 	}
 }
 
@@ -723,6 +750,38 @@ $tt2-gray: #f7f7f7;
 			}
 		}
 	}
+	
+	table.shop_table,
+	table.shop_table_responsive {
+		tbody {
+			.product-name {
+				a:not(:hover) {
+					text-decoration: none;
+				}
+
+				a:hover {
+					text-decoration: underline;
+					text-decoration-thickness: 1px;
+				}
+
+				.variation {
+					dt {
+						font-style: italic;
+						margin-right: 0.25rem;
+						float: left;
+					}
+
+					dd {
+						font-style: normal;
+
+						a {
+							font-style: normal;
+						}
+					}
+				}
+			}
+		}
+	}
 
 	/*
 	 * Cart / Checkout
@@ -788,33 +847,6 @@ $tt2-gray: #f7f7f7;
 					}
 				}
 			}
-
-			.product-name {
-				a:not(:hover) {
-					text-decoration: none;
-				}
-
-				a:hover {
-					text-decoration: underline;
-					text-decoration-thickness: 1px;
-				}
-
-				.variation {
-					dt {
-						font-style: italic;
-						margin-right: 0.25rem;
-						float: left;
-					}
-
-					dd {
-						font-style: normal;
-
-						a {
-							font-style: normal;
-						}
-					}
-				}
-			}
 		}
 	}
 
@@ -853,6 +885,8 @@ $tt2-gray: #f7f7f7;
 	}
 
 	.woocommerce-checkout {
+		display: table;
+
 		h3 {
 			font-family: inherit;
 			font-size: var(--wp--preset--font-size--normal);
@@ -862,6 +896,11 @@ $tt2-gray: #f7f7f7;
 		.col2-set {
 			width: 43%;
 			float: right;
+		}
+
+		.blockUI.blockOverlay {
+			position: relative;
+			@include loader();
 		}
 
 		#customer_details {
@@ -899,11 +938,11 @@ $tt2-gray: #f7f7f7;
 			th {
 				text-align: left;
 				font-weight: normal;
-				vertical-align: text-top;
 			}
 
 			th, td {
 				padding: 1rem 1rem 1rem 0;
+				vertical-align: text-top;
 			}
 
 			tbody {
@@ -920,7 +959,10 @@ $tt2-gray: #f7f7f7;
 
 			.product-total,
 			.cart-subtotal,
-			.order-total {
+			.order-total,
+			.tax-rate,
+			input[type="radio"].shipping_method:checked + label,
+			input[type="hidden"].shipping_method + label {
 				.woocommerce-Price-amount {
 					font-weight: bold;
 				}
@@ -1044,6 +1086,10 @@ $tt2-gray: #f7f7f7;
 
 		thead th {
 			text-transform: uppercase;
+		}
+
+		@media only screen and (max-width: 768px) {
+			width: 100%;
 		}
 	}
 }
