@@ -880,6 +880,8 @@ $tt2-gray: #f7f7f7;
 	}
 
 	.woocommerce-checkout {
+		display: table;
+
 		h3 {
 			font-family: inherit;
 			font-size: var(--wp--preset--font-size--normal);
@@ -889,6 +891,11 @@ $tt2-gray: #f7f7f7;
 		.col2-set {
 			width: 43%;
 			float: right;
+		}
+
+		.blockUI.blockOverlay {
+			position: relative;
+			@include loader();
 		}
 
 		#customer_details {
