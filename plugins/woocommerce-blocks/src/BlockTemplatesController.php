@@ -144,7 +144,11 @@ class BlockTemplatesController {
 			return $template;
 		}
 
-		$available_templates = $this->get_block_templates( array( $slug ), $template_type );
+		$available_templates = $this->get_block_templates_from_woocommerce(
+			array( $slug ),
+			$this->get_block_templates_from_db( array( $slug ), $template_type ),
+			$template_type
+		);
 		return ( is_array( $available_templates ) && count( $available_templates ) > 0 )
 			? BlockTemplateUtils::gutenberg_build_template_result_from_file( $available_templates[0], $available_templates[0]->type )
 			: $template;
