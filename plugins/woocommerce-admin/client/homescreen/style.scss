@@ -59,6 +59,10 @@
 		margin-bottom: $gap-large;
 	}
 
+	.components-text + .woocommerce-badge {
+		margin-left: 16px;
+	}
+
 	@include breakpoint( '<782px' ) {
 		width: 100%;
 		position: inherit;
