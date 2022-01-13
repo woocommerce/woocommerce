@@ -1,0 +1,4 @@
+Significance: patch
+Type: Fix
+
+Fix category report query returns invalid net sales. #8153

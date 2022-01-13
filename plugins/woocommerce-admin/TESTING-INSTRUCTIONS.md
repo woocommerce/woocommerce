@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+### Fix category report query returns invalid net sales
+
+1. Create a new store and finish the Onboarding flow
+2. Go to **Products > Add New** and create a product called **Hoodie with Pocket** with the price $35
+3. Create a new category called **Hoodie** with **Clothing** as the parent category in the **Product categories** on the right.
+4. Select **Clothing** and **Hoodie with Pocket** as well and click **Update**
+5. Create an order with a single item of **Hoodie with Pocket** (keep note of the total price)
+6. Run the action scheduler (make sure all are run)
+7. Go to **Analytics > Overview** and scroll down to the **Leaderboards**
+8. Observe that the **Clothing** category has only **1** items sold and net sales is $35
+9. Click on **Clothing** it will redirect to the Categories page and show the correct numbers
+10. Now click on **Analytics > Categories** again and scroll down to the table
+11. Observe that the **Clothing** category has only **1** items sold and net sales is $35
+
 ## 3.1.0
 
 ### Inbox - 320 character limit

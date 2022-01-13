@@ -94,21 +94,20 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$this->subquery->add_sql_clause( 'left_join', "LEFT JOIN {$wpdb->term_relationships} ON {$order_product_lookup_table}.product_id = {$wpdb->term_relationships}.object_id" );
 		// Adding this (inner) JOIN as a LEFT JOIN for ordering purposes. See comment in add_order_by_params().
 		$this->subquery->add_sql_clause( 'left_join', "JOIN {$wpdb->term_taxonomy} ON {$wpdb->term_taxonomy}.term_taxonomy_id = {$wpdb->term_relationships}.term_taxonomy_id" );
-		$this->subquery->add_sql_clause( 'left_join', "LEFT JOIN {$wpdb->wc_category_lookup} ON {$wpdb->term_taxonomy}.term_id = {$wpdb->wc_category_lookup}.category_id" );
 
 		$included_categories = $this->get_included_categories( $query_args );
 		if ( $included_categories ) {
-			$this->subquery->add_sql_clause( 'where', "AND {$wpdb->wc_category_lookup}.category_tree_id IN ({$included_categories})" );
+			$this->subquery->add_sql_clause( 'where', "AND {$wpdb->term_relationships}.term_taxonomy_id IN ({$included_categories})" );
 
 			// Limit is left out here so that the grouping in code by PHP can be applied correctly.
 			// This also needs to be put after the term_taxonomy JOIN so that we can match the correct term name.
 			$this->add_order_by_params( $query_args, 'outer', 'default_results.category_id' );
 		} else {
-			$this->add_order_by_params( $query_args, 'inner', "{$wpdb->wc_category_lookup}.category_tree_id" );
+			$this->add_order_by_params( $query_args, 'inner', "{$wpdb->term_relationships}.term_taxonomy_id" );
 		}
 
 		$this->add_order_status_clause( $query_args, $order_product_lookup_table, $this->subquery );
-		$this->subquery->add_sql_clause( 'where', "AND {$wpdb->wc_category_lookup}.category_tree_id IS NOT NULL" );
+		$this->subquery->add_sql_clause( 'where', "AND {$wpdb->term_taxonomy}.taxonomy = 'product_cat'" );
 	}
 
 	/**
@@ -263,9 +262,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				$categories_query = $this->subquery->get_query_statement();
 			}
 			$categories_data = $wpdb->get_results(
-				$categories_query,
+				$categories_query, // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 				ARRAY_A
-			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+			);
 
 			if ( null === $categories_data ) {
 				return new \WP_Error( 'woocommerce_analytics_categories_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce-admin' ), array( 'status' => 500 ) );
@@ -299,8 +298,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	protected function initialize_queries() {
 		global $wpdb;
 		$this->subquery = new SqlQuery( $this->context . '_subquery' );
-		$this->subquery->add_sql_clause( 'select', "{$wpdb->wc_category_lookup}.category_tree_id as category_id," );
+		$this->subquery->add_sql_clause( 'select', "{$wpdb->term_taxonomy}.term_taxonomy_id as category_id," );
 		$this->subquery->add_sql_clause( 'from', self::get_db_table_name() );
-		$this->subquery->add_sql_clause( 'group_by', "{$wpdb->wc_category_lookup}.category_tree_id" );
+		$this->subquery->add_sql_clause( 'group_by', "{$wpdb->term_taxonomy}.term_taxonomy_id" );
 	}
 }
