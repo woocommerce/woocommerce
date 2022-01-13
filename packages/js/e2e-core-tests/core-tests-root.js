@@ -21,6 +21,7 @@ const getCoreTestsRoot = () => {
 	return {
 		appRoot: coreTestsPath,
 		packageRoot: moduleDir,
+		coreTestsRoot: __dirname
 	};
 };
 

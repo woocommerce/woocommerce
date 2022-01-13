@@ -1323,6 +1323,16 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				if ( ! $item_id ) {
 					$coupon_item = new WC_Order_Item_Coupon();
 					$coupon_item->set_code( $coupon_code );
+
+					// Add coupon data.
+					$coupon_id = wc_get_coupon_id_by_code( $coupon_code );
+					$coupon    = new WC_Coupon( $coupon_id );
+
+					// Avoid storing used_by - it's not needed and can get large.
+					$coupon_data = $coupon->get_data();
+					unset( $coupon_data['used_by'] );
+
+					$coupon_item->add_meta_data( 'coupon_data', $coupon_data );
 				} else {
 					$coupon_item = $this->get_item( $item_id, false );
 				}
