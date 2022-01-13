@@ -1087,6 +1087,10 @@ $tt2-gray: #f7f7f7;
 		thead th {
 			text-transform: uppercase;
 		}
+
+		@media only screen and (max-width: 768px) {
+			width: 100%;
+		}
 	}
 }
 
