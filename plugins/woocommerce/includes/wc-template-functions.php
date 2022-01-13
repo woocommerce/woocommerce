@@ -1408,7 +1408,17 @@ if ( ! function_exists( 'woocommerce_get_product_thumbnail' ) ) {
 	 */
 	function woocommerce_get_product_thumbnail( $size = 'woocommerce_thumbnail', $attr = array(), $placeholder = true ) {
 		global $product;
-
+		
+		if( ! is_array( $attr ) )
+		{
+			$attr = array();
+		}
+		
+		if( ! is_bool( $placeholder ) )
+		{
+			$placeholder = true;
+		}
+		
 		$image_size = apply_filters( 'single_product_archive_thumbnail_size', $size );
 
 		return $product ? $product->get_image( $image_size, $attr, $placeholder ) : '';
