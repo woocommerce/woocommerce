@@ -19,10 +19,7 @@ class WC_Template_Loader_Test extends \WC_Unit_Test_Case {
 		$this->initialize_template_loader();
 
 		// forcing has_block_template to be false
-		add_filter(
-			'woocommerce_has_block_template',
-			'__return_false', 2, 10,
-		);
+		add_filter( 'woocommerce_has_block_template', '__return_false', 10, 2 );
 
 		// Check Single Product
 		$this->load_product_in_query();
@@ -55,7 +52,7 @@ class WC_Template_Loader_Test extends \WC_Unit_Test_Case {
 		// forcing has_block_template to be false
 		add_filter(
 			'woocommerce_has_block_template',
-			'__return_true', 2, 10,
+			'__return_true', 10, 2,
 		);
 
 		// Check Single Product
@@ -83,14 +80,9 @@ class WC_Template_Loader_Test extends \WC_Unit_Test_Case {
 
 	private function initialize_template_loader() {
 		// be sure shop is always returning same id doesn't matter the test setup environment
-		add_filter(
-			'woocommerce_get_shop_page_id',
-			function ( $page ) {
-				return 5;
-			},
-			1,
-			10
-		);
+		add_filter( 'woocommerce_get_shop_page_id', function ( $page ) {
+			return 5;
+		}, 10, 1 );
 
 		if ( ! function_exists( 'wp_is_block_theme' ) ) {
 			function wp_is_block_theme() {
