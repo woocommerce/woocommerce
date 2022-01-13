@@ -13,10 +13,10 @@
 	display: flex;
 	font-size: 0.875em;
 	font-weight: 600;
-	height: em(20px)/0.875;
+	height: math.div(em(20px), 0.875);
 	justify-content: center;
-	margin-left: em(-10px)/0.875;
-	min-width: em(20px)/0.875;
+	margin-left: math.div(em(-10px), 0.875);
+	min-width: math.div(em(20px), 0.875);
 	padding: 0 em($gap-smallest);
 	transform: translateY(-50%);
 	white-space: nowrap;
