@@ -2,8 +2,8 @@
 
 ## Fixed
 
-- Added the `removePathDuplicates` method which fixes the need prepend `plugins/woocommerce` and/or `tests/e2e` when executing a single test
-  - It still supports the use of `plugins/woocommerce` and/or `tests/e2e` to avoid any breaking changes
+- Added the `resolveSingleE2EPath` method which builds a path to a specific E2E test
+  - It still supports the use of `plugins/woocommerce` and/or `tests/e2e` in file paths to avoid any breaking changes
 
 ## Fixed
 
