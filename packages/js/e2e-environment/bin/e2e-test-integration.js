@@ -8,6 +8,7 @@ const {
 	getAppRoot,
 	resolveLocalE2ePath,
 	resolvePackagePath,
+	resolveSingleE2EPath,
 } = require( '../utils' );
 const {
 	WC_E2E_SCREENSHOTS,
@@ -66,7 +67,7 @@ if ( ! JEST_PUPPETEER_CONFIG ) {
 if ( program.args.length == 1 ) {
 	// Check for both absolute and relative paths
 	const testSpecAbs = path.resolve( program.args[ 0 ] );
-	const testSpecRel = path.resolve( appPath, program.args[ 0 ] );
+	const testSpecRel = resolveSingleE2EPath( program.args[ 0 ] );
 	if ( fs.existsSync( testSpecAbs ) ) {
 		process.env.jest_test_spec = testSpecAbs;
 	} else if ( fs.existsSync( testSpecRel ) ) {
