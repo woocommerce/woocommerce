@@ -741,6 +741,38 @@ $tt2-gray: #f7f7f7;
 			}
 		}
 	}
+	
+	table.shop_table,
+	table.shop_table_responsive {
+		tbody {
+			.product-name {
+				a:not(:hover) {
+					text-decoration: none;
+				}
+
+				a:hover {
+					text-decoration: underline;
+					text-decoration-thickness: 1px;
+				}
+
+				.variation {
+					dt {
+						font-style: italic;
+						margin-right: 0.25rem;
+						float: left;
+					}
+
+					dd {
+						font-style: normal;
+
+						a {
+							font-style: normal;
+						}
+					}
+				}
+			}
+		}
+	}
 
 	/*
 	 * Cart / Checkout
@@ -803,33 +835,6 @@ $tt2-gray: #f7f7f7;
 				a {
 					img {
 						width: 117px;
-					}
-				}
-			}
-
-			.product-name {
-				a:not(:hover) {
-					text-decoration: none;
-				}
-
-				a:hover {
-					text-decoration: underline;
-					text-decoration-thickness: 1px;
-				}
-
-				.variation {
-					dt {
-						font-style: italic;
-						margin-right: 0.25rem;
-						float: left;
-					}
-
-					dd {
-						font-style: normal;
-
-						a {
-							font-style: normal;
-						}
 					}
 				}
 			}
@@ -917,11 +922,11 @@ $tt2-gray: #f7f7f7;
 			th {
 				text-align: left;
 				font-weight: normal;
-				vertical-align: text-top;
 			}
 
 			th, td {
 				padding: 1rem 1rem 1rem 0;
+				vertical-align: text-top;
 			}
 
 			tbody {
@@ -938,7 +943,10 @@ $tt2-gray: #f7f7f7;
 
 			.product-total,
 			.cart-subtotal,
-			.order-total {
+			.order-total,
+			.tax-rate,
+			input[type="radio"].shipping_method:checked + label,
+			input[type="hidden"].shipping_method + label {
 				.woocommerce-Price-amount {
 					font-weight: bold;
 				}
