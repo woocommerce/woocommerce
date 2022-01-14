@@ -68,7 +68,7 @@ class WC_Admin_Meta_Boxes {
 		add_action( 'admin_notices', array( $this, 'output_errors' ) );
 		add_action( 'shutdown', array( $this, 'save_errors' ) );
 
-		add_filter( 'theme_product_templates', array( $this, 'filter_product_block_templates' ), 10, 1 );
+		add_filter( 'theme_product_templates', array( $this, 'remove_block_templates' ), 10, 1 );
 	}
 
 	/**
@@ -233,8 +233,8 @@ class WC_Admin_Meta_Boxes {
 	 *
 	 * @return string[] Templates array excluding block-based templates.
 	 */
-	public function filter_product_block_templates( $templates ) {
-		if ( count( $templates ) === 0 || ! wc_current_theme_is_fse_theme() || ! function_exists( 'gutenberg_get_block_template' ) ) {
+	public function remove_block_templates( $templates ) {
+		if ( count( $templates ) === 0 || ! wc_current_theme_is_fse_theme() || ( ! function_exists( 'gutenberg_get_block_template' ) && ! function_exists( 'get_block_template' ) ) ) {
 			return $templates;
 		}
 
@@ -247,10 +247,12 @@ class WC_Admin_Meta_Boxes {
 				continue;
 			}
 
-			$block_template = gutenberg_get_block_template( $theme . '//' . $template_key );
+			$block_template = function_exists( 'gutenberg_get_block_template' ) ?
+				gutenberg_get_block_template( $theme . '//' . $template_key ) :
+				get_block_template( $theme . '//' . $template_key );
 
 			// If the block template has the product post type specified, include it.
-			if ( in_array( 'product', $block_template->post_types ) ) {
+			if ( $block_template && in_array( 'product', $block_template->post_types ) ) {
 				$filtered_templates[ $template_key ] = $template_name;
 			}
 		}
