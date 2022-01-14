@@ -2,10 +2,8 @@ import { GroupedProduct } from '@woocommerce/api';
 import { Factory } from 'fishery';
 
 /**
- * Creates a new factory for creating variable products.
- * This does not include creating product variations.
- * Instead, use `variationFactory()` for that.
- * 
+ * Creates a new factory for creating grouped products.
+ *
  * @param {HTTPClient} httpClient The HTTP client we will give the repository.
  * @return {AsyncFactory} The factory for creating models.
  */
