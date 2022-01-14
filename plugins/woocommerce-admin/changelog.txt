@@ -1,4 +1,4 @@
-== 3.1.0 12/28/2021 ==
+== 3.1.0 01/13/2022 ==
 
 - Fix: Fix Onboarding flow where extensions might not be selected and installed. #7979
 - Fix: Fix pagination issue with Analytics Coupons page. #8001
@@ -6,14 +6,22 @@
 - Fix: Fix unexpected analytics report table filter results. #8072
 - Fix: Prevent coupon move notice for new installs. #7995
 - Fix: Remove calls to read_meta_data in the Note DataStore. #7988
+- Fix: Fix free extensions list isn't updated after store location or industry is changed. #8099
+- Fix: Fix misaligned "Rows per page" dropdown. #8113
+- Fix: Hide the extensions header when no available plugins in the category. #8089
+- Fix: Replace all docs.woocommerce.com links with woocommerce.com/document. #8105
+- Fix: Fixing marketing task not displaying on Atomic sites #8150
 - Add: Add featured pill for MailPoet and Google Listings in marketing task #8009
 - Add: Add inbox_action_click track when a note gets clicked #8086
+- Add: Activate promo note after WC Pay is activated. #8104
+- Add: Add payment remind me later note. #8085
+- Add: Add WC Pay welcome page #8083
 - Update: Allow content data note props to be passed from remote sources #8047
 - Update: Update @woocommerce/e2e-environment package to latest. #8000
 - Dev: Add payment gateway suggestion docs and example extensions #7966
 - Dev: Remove low performing inbox notes. #8054
 - Dev: Remove navigation feedback note. #8055
-- Tweak: OBW: Update WC Pay label on recommended extensions list #8038
+- Tweak: OBW Update WC Pay label on recommended extensions list #8038
 - Enhancement: Add SlotFill areas to header #7805
 
 == 3.0.3 01/06/2022 ==
