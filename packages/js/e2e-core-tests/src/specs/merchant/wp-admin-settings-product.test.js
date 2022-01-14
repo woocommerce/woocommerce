@@ -8,7 +8,7 @@ const {
 	settingsPageSaveChanges,
 	unsetCheckbox,
 	verifyCheckboxIsSet,
-	verifyCheckboxIsUnset
+	verifyCheckboxIsUnset,
 } = require( '@woocommerce/e2e-utils' );
 
 const runProductSettingsTest = () => {

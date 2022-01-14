@@ -11,7 +11,7 @@ const {
 	setBrowserViewport,
 	verifyAndPublish,
 	waitForSelector,
-	waitForSelectorWithoutThrow
+	waitForSelectorWithoutThrow,
 } = require( '@woocommerce/e2e-utils' );
 const {
 	waitAndClick,

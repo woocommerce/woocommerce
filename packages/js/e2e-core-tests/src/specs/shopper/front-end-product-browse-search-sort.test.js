@@ -11,11 +11,7 @@ const {
 /**
  * External dependencies
  */
-const {
-	it,
-	describe,
-	beforeAll,
-} = require( '@jest/globals' );
+const { it, beforeAll } = require( '@jest/globals' );
 
 const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );

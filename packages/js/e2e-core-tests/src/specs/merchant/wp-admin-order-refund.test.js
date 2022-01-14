@@ -7,7 +7,6 @@ const {
 	verifyCheckboxIsSet,
 	verifyValueOfInputField,
 	uiUnblocked,
-	evalAndClick,
 	createOrder,
 	clickAndWaitForSelector,
 } = require( '@woocommerce/e2e-utils' );

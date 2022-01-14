@@ -15,11 +15,7 @@
 /**
  * External dependencies
  */
-const {
-	it,
-	describe,
-	beforeAll,
-} = require( '@jest/globals' );
+const { it, describe, beforeAll } = require( '@jest/globals' );
 
 const config = require( 'config' );
 const customerBilling = config.get( 'addresses.customer.billing' );

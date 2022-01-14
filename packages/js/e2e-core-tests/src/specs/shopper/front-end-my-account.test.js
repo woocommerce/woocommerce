@@ -6,6 +6,11 @@ const {
 	shopper,
 } = require( '@woocommerce/e2e-utils' );
 
+/**
+ * External dependencies
+ */
+const { it, describe } = require( '@jest/globals' );
+
 const pages = [
 	['Orders', 'my-account/orders', shopper.goToOrders],
 	['Downloads', 'my-account/downloads', shopper.goToDownloads],

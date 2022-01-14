@@ -10,21 +10,17 @@
 	deleteAllEmailLogs,
 } = require( '@woocommerce/e2e-utils' );
 
+/**
+ * External dependencies
+ */
+const { it, describe, beforeAll, afterAll } = require( '@jest/globals' );
+
 let simplePostIdValue;
 let orderId;
 const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );
 const customerEmail = config.get( 'addresses.customer.billing.email' );
 const storeName = 'WooCommerce Core E2E Test Suite';
-
-/**
- * External dependencies
- */
-const {
-	it,
-	describe,
-	beforeAll,
-} = require( '@jest/globals' );
 
 const runOrderEmailReceivingTest = () => {
 	describe('Shopper Order Email Receiving', () => {

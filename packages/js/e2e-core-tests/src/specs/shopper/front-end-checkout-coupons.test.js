@@ -3,7 +3,6 @@
  */
 const {
 	shopper,
-	createCoupon,
 	createSimpleProduct,
 	uiUnblocked,
 	applyCoupon,
@@ -15,11 +14,7 @@ const { getCouponId, getCouponsTable } = require( '../utils/coupons' );
 /**
  * External dependencies
  */
-const {
-	it,
-	describe,
-	beforeAll,
-} = require( '@jest/globals' );
+const { it, describe, beforeAll } = require( '@jest/globals' );
 
 
 const runCheckoutApplyCouponsTest = () => {

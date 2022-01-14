@@ -1,8 +1,6 @@
 /**
  * Internal dependencies
  */
-const config = require( 'config' );
-
 const {
 	merchant,
 	withRestApi,

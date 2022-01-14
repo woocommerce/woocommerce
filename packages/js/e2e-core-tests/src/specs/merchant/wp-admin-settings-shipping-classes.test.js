@@ -2,6 +2,10 @@
  * Internal dependencies
  */
 const { merchant, withRestApi } = require('@woocommerce/e2e-utils');
+
+/**
+ * External dependencies
+ */
 const { lorem, helpers } = require('faker');
 
 const runAddShippingClassesTest = () => {

@@ -9,6 +9,11 @@ const {
 	uiUnblocked,
 } = require( '@woocommerce/e2e-utils' );
 
+/**
+ * External dependencies
+ */
+const { it, describe, beforeAll, afterAll } = require( '@jest/globals' );
+
 const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );
 const singleProductPrice = config.has('products.simple.price') ? config.get('products.simple.price') : '9.99';
