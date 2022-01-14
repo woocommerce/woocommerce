@@ -124,6 +124,13 @@ function getReviewRating( review ) {
 		__( 'Rated %f out of 5', 'woo-gutenberg-products-block' ),
 		rating
 	);
+	const ratingHTML = {
+		__html: sprintf(
+			/* translators: %s is referring to the average rating value */
+			__( 'Rated %s out of 5', 'woo-gutenberg-products-block' ),
+			sprintf( '<strong class="rating">%f</strong>', rating )
+		),
+	};
 	return (
 		<div className="wc-block-review-list-item__rating wc-block-components-review-list-item__rating">
 			<div
@@ -131,7 +138,10 @@ function getReviewRating( review ) {
 				role="img"
 				aria-label={ ratingText }
 			>
-				<span style={ starStyle }>{ ratingText }</span>
+				<span
+					style={ starStyle }
+					dangerouslySetInnerHTML={ ratingHTML }
+				/>
 			</div>
 		</div>
 	);
