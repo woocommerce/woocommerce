@@ -159,7 +159,7 @@ class WC_Template_Loader {
 	 * @since  3.0.0
 	 * @since  5.5.0 If a block template with the same name exists, return an
 	 * empty string.
-	 * @since  6.1.0 It checks custom product taxonomies
+	 * @since  6.3.0 It checks custom product taxonomies
 	 * @return string
 	 */
 	private static function get_template_loader_default_file() {
