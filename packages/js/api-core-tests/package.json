@@ -26,6 +26,9 @@
     "postman-collection": "^4.1.0",
     "supertest": "^6.1.4"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "bin": {
     "wc-api-tests": "bin/wc-api-tests.sh"
   }
