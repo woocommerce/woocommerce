@@ -169,7 +169,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		// Add SKU and PRICE to products.
 		if ( is_callable( array( $item, 'get_product' ) ) ) {
 			$data['sku']   = $item->get_product() ? $item->get_product()->get_sku() : null;
-			$data['price'] = $item->get_quantity() ? (float) number_format( $item->get_total() / $item->get_quantity(), wc_get_price_decimals(), '.', '' ) : 0;
+			$data['price'] = $item->get_quantity() ? wc_format_decimal( $item->get_total() / $item->get_quantity(), $this->request['dp'] ) : 0;
 		}
 
 		// Add parent_name if the product is a variation.
