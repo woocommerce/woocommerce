@@ -1409,13 +1409,11 @@ if ( ! function_exists( 'woocommerce_get_product_thumbnail' ) ) {
 	function woocommerce_get_product_thumbnail( $size = 'woocommerce_thumbnail', $attr = array(), $placeholder = true ) {
 		global $product;
 		
-		if( ! is_array( $attr ) )
-		{
+		if ( ! is_array( $attr ) ) {
 			$attr = array();
 		}
 		
-		if( ! is_bool( $placeholder ) )
-		{
+		if ( ! is_bool( $placeholder ) ) {
 			$placeholder = true;
 		}
 		
