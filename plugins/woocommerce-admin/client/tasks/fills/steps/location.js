@@ -3,32 +3,37 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
-import { Component, Fragment } from '@wordpress/element';
-import { Form } from '@woocommerce/components';
+import { COUNTRIES_STORE_NAME } from '@woocommerce/data';
+import { Fragment } from '@wordpress/element';
+import { Form, Spinner } from '@woocommerce/components';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
 import {
 	StoreAddress,
-	validateStoreAddress,
+	getStoreAddressValidator,
 } from '../../../dashboard/components/settings/general/store-address';
 
-export default class StoreLocation extends Component {
-	constructor() {
-		super( ...arguments );
-		this.onSubmit = this.onSubmit.bind( this );
-	}
-
-	async onSubmit( values ) {
-		const {
-			onComplete,
-			createNotice,
-			isSettingsError,
-			updateAndPersistSettingsForGroup,
-			settings,
-		} = this.props;
-
+const StoreLocation = ( {
+	onComplete,
+	createNotice,
+	isSettingsError,
+	isSettingsRequesting,
+	updateAndPersistSettingsForGroup,
+	settings,
+} ) => {
+	const { getLocale, hasFinishedResolution } = useSelect( ( select ) => {
+		return {
+			getLocale: select( COUNTRIES_STORE_NAME ).getLocale,
+			locales: select( COUNTRIES_STORE_NAME ).getLocales(),
+			hasFinishedResolution: select(
+				COUNTRIES_STORE_NAME
+			).hasFinishedResolution( 'getLocales' ),
+		};
+	} );
+	const onSubmit = async ( values ) => {
 		await updateAndPersistSettingsForGroup( 'general', {
 			general: {
 				...settings,
@@ -51,11 +56,9 @@ export default class StoreLocation extends Component {
 				)
 			);
 		}
-	}
+	};
 
-	getInitialValues() {
-		const { settings } = this.props;
-
+	const getInitialValues = () => {
 		const {
 			woocommerce_store_address: storeAddress,
 			woocommerce_store_address_2: storeAddress2,
@@ -71,33 +74,37 @@ export default class StoreLocation extends Component {
 			countryState: defaultCountry || '',
 			postCode: storePostcode || '',
 		};
+	};
+
+	const validate = ( values ) => {
+		const locale = getLocale( values.countryState );
+		const validator = getStoreAddressValidator( locale );
+		return validator( values );
+	};
+
+	if ( isSettingsRequesting || ! hasFinishedResolution ) {
+		return <Spinner />;
 	}
 
-	render() {
-		const { isSettingsRequesting } = this.props;
+	return (
+		<Form
+			initialValues={ getInitialValues() }
+			onSubmit={ onSubmit }
+			validate={ validate }
+		>
+			{ ( { getInputProps, handleSubmit, setValue } ) => (
+				<Fragment>
+					<StoreAddress
+						getInputProps={ getInputProps }
+						setValue={ setValue }
+					/>
+					<Button isPrimary onClick={ handleSubmit }>
+						{ __( 'Continue', 'woocommerce-admin' ) }
+					</Button>
+				</Fragment>
+			) }
+		</Form>
+	);
+};
 
-		if ( isSettingsRequesting ) {
-			return null;
-		}
-
-		return (
-			<Form
-				initialValues={ this.getInitialValues() }
-				onSubmit={ this.onSubmit }
-				validate={ validateStoreAddress }
-			>
-				{ ( { getInputProps, handleSubmit, setValue } ) => (
-					<Fragment>
-						<StoreAddress
-							getInputProps={ getInputProps }
-							setValue={ setValue }
-						/>
-						<Button isPrimary onClick={ handleSubmit }>
-							{ __( 'Continue', 'woocommerce-admin' ) }
-						</Button>
-					</Fragment>
-				) }
-			</Form>
-		);
-	}
-}
+export default StoreLocation;

@@ -17,6 +17,7 @@ import { compose } from '@wordpress/compose';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { Form, TextControl } from '@woocommerce/components';
 import {
+	COUNTRIES_STORE_NAME,
 	ONBOARDING_STORE_NAME,
 	OPTIONS_STORE_NAME,
 	SETTINGS_STORE_NAME,
@@ -31,7 +32,7 @@ import { Icon, info } from '@wordpress/icons';
 import { getCountryCode, getCurrencyRegion } from '../../../dashboard/utils';
 import {
 	StoreAddress,
-	validateStoreAddress,
+	getStoreAddressValidator,
 } from '../../../dashboard/components/settings/general/store-address';
 import UsageModal from '../usage-modal';
 import { CurrencyContext } from '../../../lib/currency-context';
@@ -68,6 +69,7 @@ class StoreDetails extends Component {
 
 		this.onContinue = this.onContinue.bind( this );
 		this.onSubmit = this.onSubmit.bind( this );
+		this.validateStoreDetails = this.validateStoreDetails.bind( this );
 	}
 
 	deriveCurrencySettings( countryState ) {
@@ -198,7 +200,10 @@ class StoreDetails extends Component {
 	}
 
 	validateStoreDetails( values ) {
-		const errors = validateStoreAddress( values );
+		const { getLocale } = this.props;
+		const locale = getLocale( values.countryState );
+		const validateAddress = getStoreAddressValidator( locale );
+		const errors = validateAddress( values );
 
 		if (
 			values.storeEmail &&
@@ -459,6 +464,11 @@ export default compose(
 			getEmailPrefill,
 			hasFinishedResolution: hasFinishedResolutionOnboarding,
 		} = select( ONBOARDING_STORE_NAME );
+		const {
+			getLocale,
+			getLocales,
+			hasFinishedResolution: hasFinishedResolutionCountries,
+		} = select( COUNTRIES_STORE_NAME );
 		const { isResolving } = select( OPTIONS_STORE_NAME );
 
 		const profileItems = getProfileItems();
@@ -471,7 +481,8 @@ export default compose(
 			isResolving( 'getOption', [ 'woocommerce_allow_tracking' ] );
 		const isLoading =
 			! hasFinishedResolutionOnboarding( 'getProfileItems' ) ||
-			! hasFinishedResolutionOnboarding( 'getEmailPrefill' );
+			! hasFinishedResolutionOnboarding( 'getEmailPrefill' ) ||
+			! hasFinishedResolutionCountries( 'getLocales' );
 		const errorsRef = useRef( {
 			settings: null,
 		} );
@@ -484,6 +495,7 @@ export default compose(
 			( settings.woocommerce_store_address &&
 				settings.woocommerce_default_country ) ||
 			'';
+		getLocales();
 
 		const initialValues = {
 			addressLine1: settings.woocommerce_store_address || '',
@@ -502,6 +514,7 @@ export default compose(
 		};
 
 		return {
+			getLocale,
 			initialValues,
 			isLoading,
 			profileItems,

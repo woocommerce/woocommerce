@@ -2,10 +2,13 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { COUNTRIES_STORE_NAME } from '@woocommerce/data';
 import { decodeEntities } from '@wordpress/html-entities';
 import { escapeRegExp } from 'lodash';
 import { useEffect, useMemo, useState, useRef } from '@wordpress/element';
 import { SelectControl, TextControl } from '@woocommerce/components';
+import { Spinner } from '@wordpress/components';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -14,34 +17,75 @@ import { getAdminSetting } from '~/utils/admin-settings';
 
 const { countries } = getAdminSetting( 'dataEndpoints', { countries: {} } );
 /**
+ * Check if a given address field is required for the locale.
+ *
+ * @param {string} fieldName Name of the field to check.
+ * @param {Object} locale Locale data.
+ * @return {boolean} Field requirement.
+ */
+export function isAddressFieldRequired( fieldName, locale = {} ) {
+	if ( locale[ fieldName ]?.hasOwnProperty( 'required' ) ) {
+		return locale[ fieldName ]?.required;
+	}
+
+	if ( fieldName === 'address_2' ) {
+		return false;
+	}
+
+	return true;
+}
+
+/**
  * Form validation.
  *
- * @param {Object} values Keyed values of all fields in the form.
- * @return {Object} Key value of fields and error messages, { myField: 'This field is required' }
+ * @param {Object} locale The store locale.
+ * @return {Function} Validator function.
  */
-export function validateStoreAddress( values ) {
-	const errors = {};
+export function getStoreAddressValidator( locale = {} ) {
+	/**
+	 * Form validator.
+	 *
+	 * @param {Object} values Keyed values of all fields in the form.
+	 * @return {Object} Key value of fields and error messages, { myField: 'This field is required' }
+	 */
+	return ( values ) => {
+		const errors: {
+			[ key: string ]: string;
+		} = {};
 
-	if ( ! values.addressLine1.trim().length ) {
-		errors.addressLine1 = __(
-			'Please add an address',
-			'woocommerce-admin'
-		);
-	}
-	if ( ! values.countryState.trim().length ) {
-		errors.countryState = __(
-			'Please select a country / region',
-			'woocommerce-admin'
-		);
-	}
-	if ( ! values.city.trim().length ) {
-		errors.city = __( 'Please add a city', 'woocommerce-admin' );
-	}
-	if ( ! values.postCode.trim().length ) {
-		errors.postCode = __( 'Please add a post code', 'woocommerce-admin' );
-	}
+		if (
+			isAddressFieldRequired( 'address_1', locale ) &&
+			! values.addressLine1.trim().length
+		) {
+			errors.addressLine1 = __(
+				'Please add an address',
+				'woocommerce-admin'
+			);
+		}
+		if ( ! values.countryState.trim().length ) {
+			errors.countryState = __(
+				'Please select a country / region',
+				'woocommerce-admin'
+			);
+		}
+		if (
+			isAddressFieldRequired( 'city', locale ) &&
+			! values.city.trim().length
+		) {
+			errors.city = __( 'Please add a city', 'woocommerce-admin' );
+		}
+		if (
+			isAddressFieldRequired( 'postcode', locale ) &&
+			! values.postCode.trim().length
+		) {
+			errors.postCode = __(
+				'Please add a post code',
+				'woocommerce-admin'
+			);
+		}
 
-	return errors;
+		return errors;
+	};
 }
 
 /**
@@ -89,7 +133,9 @@ export function getCountryStateOptions() {
 export function useGetCountryStateAutofill( options, countryState, setValue ) {
 	const [ autofillCountry, setAutofillCountry ] = useState( '' );
 	const [ autofillState, setAutofillState ] = useState( '' );
-	const isAutofillChange = useRef();
+	const isAutofillChange: {
+		current: boolean;
+	} = useRef();
 
 	useEffect( () => {
 		const option = options.find( ( opt ) => opt.key === countryState );
@@ -212,26 +258,45 @@ export function useGetCountryStateAutofill( options, countryState, setValue ) {
  * @return {Object} -
  */
 export function StoreAddress( props ) {
-	const { getInputProps, setValue } = props;
+	const { getInputProps, setValue, onChange } = props;
+	const countryState = getInputProps( 'countryState' ).value;
+	const { locale, hasFinishedResolution } = useSelect( ( select ) => {
+		return {
+			locale: select( COUNTRIES_STORE_NAME ).getLocale( countryState ),
+			hasFinishedResolution: select(
+				COUNTRIES_STORE_NAME
+			).hasFinishedResolution( 'getLocales' ),
+		};
+	} );
 	const countryStateOptions = useMemo( () => getCountryStateOptions(), [] );
 	const countryStateAutofill = useGetCountryStateAutofill(
 		countryStateOptions,
-		getInputProps( 'countryState' ).value,
+		countryState,
 		setValue
 	);
+
+	if ( ! hasFinishedResolution ) {
+		return <Spinner />;
+	}
 
 	return (
 		<div className="woocommerce-store-address-fields">
 			<TextControl
-				label={ __( 'Address line 1', 'woocommerce-admin' ) }
-				required
+				label={
+					locale?.address_1?.label ||
+					__( 'Address line 1', 'woocommerce-admin' )
+				}
+				required={ isAddressFieldRequired( 'address_1', locale ) }
 				autoComplete="address-line1"
 				{ ...getInputProps( 'addressLine1' ) }
 			/>
 
 			<TextControl
-				label={ __( 'Address line 2 (optional)', 'woocommerce-admin' ) }
-				required
+				label={
+					locale?.address_2?.label ||
+					__( 'Address line 2 (optional)', 'woocommerce-admin' )
+				}
+				required={ isAddressFieldRequired( 'address_2', locale ) }
 				autoComplete="address-line2"
 				{ ...getInputProps( 'addressLine2' ) }
 			/>
@@ -251,15 +316,20 @@ export function StoreAddress( props ) {
 			</SelectControl>
 
 			<TextControl
-				label={ __( 'City', 'woocommerce-admin' ) }
-				required
+				label={
+					locale?.city?.label || __( 'City', 'woocommerce-admin' )
+				}
+				required={ isAddressFieldRequired( 'city', locale ) }
 				{ ...getInputProps( 'city' ) }
 				autoComplete="address-level2"
 			/>
 
 			<TextControl
-				label={ __( 'Post code', 'woocommerce-admin' ) }
-				required
+				label={
+					locale?.postcode?.label ||
+					__( 'Post code', 'woocommerce-admin' )
+				}
+				required={ isAddressFieldRequired( 'postcode', locale ) }
 				autoComplete="postal-code"
 				{ ...getInputProps( 'postCode' ) }
 			/>
