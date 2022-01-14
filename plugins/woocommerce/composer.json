@@ -21,7 +21,7 @@
 		"pelago/emogrifier": "3.1.0",
 		"psr/container": "1.0.0",
 		"woocommerce/action-scheduler": "3.4.0",
-		"woocommerce/woocommerce-admin": "3.0.3",
+		"woocommerce/woocommerce-admin": "3.1.0-rc.1",
 		"woocommerce/woocommerce-blocks": "6.7.1"
 	},
 	"require-dev": {
