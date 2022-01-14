@@ -52,6 +52,13 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) :
 		public $password_generated;
 
 		/**
+		 * Magic link to set initial password.
+		 *
+		 * @var string
+		 */
+		public $set_password_url;
+
+		/**
 		 * Constructor.
 		 */
 		public function __construct() {
@@ -104,6 +111,7 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) :
 				$this->user_email         = stripslashes( $this->object->user_email );
 				$this->recipient          = $this->user_email;
 				$this->password_generated = $password_generated;
+				$this->set_password_url   = $this->generate_set_password_url();
 			}
 
 			if ( $this->is_enabled() && $this->get_recipient() ) {
@@ -131,6 +139,7 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) :
 					'sent_to_admin'      => false,
 					'plain_text'         => false,
 					'email'              => $this,
+					'set_password_url'   => $this->set_password_url,
 				)
 			);
 		}
@@ -153,6 +162,7 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) :
 					'sent_to_admin'      => false,
 					'plain_text'         => true,
 					'email'              => $this,
+					'set_password_url'   => $this->set_password_url,
 				)
 			);
 		}
@@ -166,6 +176,26 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) :
 		public function get_default_additional_content() {
 			return __( 'We look forward to seeing you soon.', 'woocommerce' );
 		}
+
+		/**
+		 * Generate set password URL link for a new user.
+		 * 
+		 * See also Automattic\WooCommerce\Blocks\Domain\Services\Email\CustomerNewAccount and wp_new_user_notification.
+		 * 
+		 * @since 6.0.0
+		 * @return string
+		 */
+		protected function generate_set_password_url() {
+			// Generate a magic link so user can set initial password.
+			$key = get_password_reset_key( $this->object );
+			if ( ! is_wp_error( $key ) ) {
+				$action                 = 'newaccount';
+				return wc_get_account_endpoint_url( 'lost-password' ) . "?action=$action&key=$key&login=" . rawurlencode( $this->object->user_login );
+			} else {
+				// Something went wrong while getting the key for new password URL, send customer to the generic password reset.
+				return wc_get_account_endpoint_url( 'lost-password' );
+			}
+		} 
 	}
 
 endif;

@@ -63,12 +63,16 @@ class Filterer {
 			return $args;
 		}
 
-		$clause_root = " {$wpdb->prefix}posts.ID IN (";
+		// The extra derived table ("SELECT product_or_parent_id FROM") is needed for performance
+		// (causes the filtering subquery to be executed only once).
+		$clause_root = " {$wpdb->posts}.ID IN ( SELECT product_or_parent_id FROM (";
 		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
 			$in_stock_clause = ' AND in_stock = 1';
 		} else {
 			$in_stock_clause = '';
 		}
+
+		$attribute_ids_for_and_filtering = array();
 
 		foreach ( $attributes_to_filter_by as $taxonomy => $data ) {
 			$all_terms                  = get_terms( $taxonomy, array( 'hide_empty' => false ) );
@@ -79,24 +83,10 @@ class Filterer {
 			$is_and_query               = 'and' === $data['query_type'];
 
 			$count = count( $term_ids_to_filter_by );
+
 			if ( 0 !== $count ) {
-				if ( $is_and_query ) {
-					$clauses[] = "
-						{$clause_root}
-						SELECT product_or_parent_id
-						FROM {$this->lookup_table_name} lt
-						WHERE is_variation_attribute=0
-						{$in_stock_clause}
-						AND term_id in {$term_ids_to_filter_by_list}
-						GROUP BY product_id
-						HAVING COUNT(product_id)={$count}
-						UNION
-						SELECT product_or_parent_id
-						FROM {$this->lookup_table_name} lt
-						WHERE is_variation_attribute=1
-						{$in_stock_clause}
-						AND term_id in {$term_ids_to_filter_by_list}
-					)";
+				if ( $is_and_query && $count > 1 ) {
+					$attribute_ids_for_and_filtering = array_merge( $attribute_ids_for_and_filtering, $term_ids_to_filter_by );
 				} else {
 					$clauses[] = "
 							{$clause_root}
@@ -109,8 +99,30 @@ class Filterer {
 			}
 		}
 
+		if ( ! empty( $attribute_ids_for_and_filtering ) ) {
+			$count                      = count( $attribute_ids_for_and_filtering );
+			$term_ids_to_filter_by_list = '(' . join( ',', $attribute_ids_for_and_filtering ) . ')';
+			$clauses[]                  = "
+				{$clause_root}
+				SELECT product_or_parent_id
+				FROM {$this->lookup_table_name} lt
+				WHERE is_variation_attribute=0
+				{$in_stock_clause}
+				AND term_id in {$term_ids_to_filter_by_list}
+				GROUP BY product_id
+				HAVING COUNT(product_id)={$count}
+				UNION
+				SELECT product_or_parent_id
+				FROM {$this->lookup_table_name} lt
+				WHERE is_variation_attribute=1
+				{$in_stock_clause}
+				AND term_id in {$term_ids_to_filter_by_list}
+			)";
+		}
+
 		if ( ! empty( $clauses ) ) {
-			$args['where'] .= ' AND (' . join( ' AND ', $clauses ) . ')';
+			// "temp" is needed because the extra derived tables require an alias.
+			$args['where'] .= ' AND (' . join( ' temp ) AND ', $clauses ) . ' temp ))';
 		} elseif ( ! empty( $attributes_to_filter_by ) ) {
 			$args['where'] .= ' AND 1=0';
 		}
@@ -228,10 +240,12 @@ class Filterer {
 				}
 
 				if ( ! empty( $and_term_ids ) ) {
-					$terms_count     = count( $and_term_ids );
-					$term_ids_list   = '(' . join( ',', $and_term_ids ) . ')';
+					$terms_count   = count( $and_term_ids );
+					$term_ids_list = '(' . join( ',', $and_term_ids ) . ')';
+					// The extra derived table ("SELECT product_or_parent_id FROM") is needed for performance
+					// (causes the filtering subquery to be executed only once).
 					$query['where'] .= "
-						AND product_or_parent_id IN (
+						AND product_or_parent_id IN ( SELECT product_or_parent_id FROM (
 							SELECT product_or_parent_id
 							FROM {$this->lookup_table_name} lt
 							WHERE is_variation_attribute=0
@@ -245,17 +259,17 @@ class Filterer {
 							WHERE is_variation_attribute=1
 							{$in_stock_clause}
 							AND term_id in {$term_ids_list}
-						)";
+						) temp )";
 				}
 
 				if ( ! empty( $or_term_ids ) ) {
 					$term_ids_list   = '(' . join( ',', $or_term_ids ) . ')';
 					$query['where'] .= "
-						AND product_or_parent_id IN (
+						AND product_or_parent_id IN ( SELECT product_or_parent_id FROM (
 							SELECT product_or_parent_id FROM {$this->lookup_table_name}
 							WHERE term_id in {$term_ids_list}
 							{$in_stock_clause}
-						)";
+						) temp )";
 
 				}
 			} else {

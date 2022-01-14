@@ -9,6 +9,7 @@ import {
 	setBrowserViewport,
 } from '@wordpress/e2e-test-utils';
 import { consoleShouldSuppress, addConsoleSuppression } from '../../utils';
+import { setupJestRetries } from '../../config/jest-object.config';
 
 /**
  * Array of page event tuples of [ eventName, handler ].
@@ -38,7 +39,10 @@ const OBSERVED_CONSOLE_MESSAGE_TYPES = {
 
 async function setupBrowser() {
 	await clearLocalStorage();
-	await setBrowserViewport( 'large' );
+	await setBrowserViewport( {
+		width: 1280,
+		height: 800,
+	});
 }
 
 /**
@@ -172,6 +176,7 @@ beforeAll( async () => {
 	capturePageEventsForTearDown();
 	enablePageDialogAccept();
 	observeConsoleLogging();
+	setupJestRetries();
 } );
 
 afterEach( async () => {

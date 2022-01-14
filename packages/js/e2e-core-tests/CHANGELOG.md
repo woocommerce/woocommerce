@@ -1,8 +1,19 @@
 # Unreleased
 
+## Fixed
+- Moved `merchant.login()` out of `beforeAll()` block and into test body for retried runs.
+
+## Added
+
+- This package is now transpiled with Babel, which allows the usage of modern, yet compatible JS code.
+- A `specs/data` folder to store page element data.
+- Tests to verify that different top-level menu and their associated sub-menus load successfully.
+- Test scaffolding via `npx wc-e2e install @woocommerce/e2e-core-tests`
+
 ## Changed
 
 - New coupon test deletes the coupon instead of trashing it.
+- A copy of sample_data.csv is included in the package.
 
 # 0.1.6
 

@@ -152,7 +152,7 @@ class WC_Product_Attribute implements ArrayAccess {
 	/**
 	 * Set name (this is the attribute name or taxonomy).
 	 *
-	 * @param int $value Attribute name.
+	 * @param string $value Attribute name.
 	 */
 	public function set_name( $value ) {
 		$this->data['name'] = $value;
@@ -266,6 +266,7 @@ class WC_Product_Attribute implements ArrayAccess {
 	 * @param string $offset Offset.
 	 * @return mixed
 	 */
+	#[\ReturnTypeWillChange]
 	public function offsetGet( $offset ) {
 		switch ( $offset ) {
 			case 'is_variation':
@@ -291,6 +292,7 @@ class WC_Product_Attribute implements ArrayAccess {
 	 * @param string $offset Offset.
 	 * @param mixed  $value  Value.
 	 */
+	#[\ReturnTypeWillChange]
 	public function offsetSet( $offset, $value ) {
 		switch ( $offset ) {
 			case 'is_variation':
@@ -304,7 +306,7 @@ class WC_Product_Attribute implements ArrayAccess {
 				break;
 			default:
 				if ( is_callable( array( $this, "set_$offset" ) ) ) {
-					return $this->{"set_$offset"}( $value );
+					$this->{"set_$offset"}( $value );
 				}
 				break;
 		}
@@ -315,6 +317,7 @@ class WC_Product_Attribute implements ArrayAccess {
 	 *
 	 * @param string $offset Offset.
 	 */
+	#[\ReturnTypeWillChange]
 	public function offsetUnset( $offset ) {}
 
 	/**
@@ -323,6 +326,7 @@ class WC_Product_Attribute implements ArrayAccess {
 	 * @param string $offset Offset.
 	 * @return bool
 	 */
+	#[\ReturnTypeWillChange]
 	public function offsetExists( $offset ) {
 		return in_array( $offset, array_merge( array( 'is_variation', 'is_visible', 'is_taxonomy', 'value' ), array_keys( $this->data ) ), true );
 	}

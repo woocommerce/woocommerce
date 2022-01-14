@@ -270,7 +270,7 @@ class WC_Download_Handler {
 		);
 
 		$count            = 0;
-		$file_path        = str_replace( array_keys( $replacements ), array_values( $replacements ), $file_path );
+		$file_path        = str_replace( array_keys( $replacements ), array_values( $replacements ), $file_path, $count );
 		$parsed_file_path = wp_parse_url( $file_path );
 		$remote_file      = null === $count || 0 === $count; // Remote file only if there were no replacements.
 

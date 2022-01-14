@@ -50,7 +50,7 @@ export class AxiosOAuthInterceptor extends AxiosInterceptor {
 				username: this.oauth.consumer.key,
 				password: this.oauth.consumer.secret,
 			};
-		} else {
+		} else if ( request.headers ) {
 			request.headers.Authorization = this.oauth.toHeader(
 				this.oauth.authorize( {
 					url,

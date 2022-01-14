@@ -180,6 +180,7 @@ class WC_Install {
 		add_action( 'admin_init', array( __CLASS__, 'wc_admin_db_update_notice' ) );
 		add_action( 'admin_init', array( __CLASS__, 'add_admin_note_after_page_created' ) );
 		add_action( 'woocommerce_run_update_callback', array( __CLASS__, 'run_update_callback' ) );
+		add_action( 'woocommerce_update_db_to_current_version', array( __CLASS__, 'update_db_version' ) );
 		add_action( 'admin_init', array( __CLASS__, 'install_actions' ) );
 		add_action( 'woocommerce_page_created', array( __CLASS__, 'page_created' ), 10, 2 );
 		add_filter( 'plugin_action_links_' . WC_PLUGIN_BASENAME, array( __CLASS__, 'plugin_action_links' ) );
@@ -486,6 +487,20 @@ class WC_Install {
 					$loop++;
 				}
 			}
+		}
+
+		// After the callbacks finish, update the db version to the current WC version.
+		$current_wc_version = WC()->version;
+		if ( version_compare( $current_db_version, $current_wc_version, '<' ) &&
+			! WC()->queue()->get_next( 'woocommerce_update_db_to_current_version' ) ) {
+			WC()->queue()->schedule_single(
+				time() + $loop,
+				'woocommerce_update_db_to_current_version',
+				array(
+					'version' => $current_wc_version,
+				),
+				'woocommerce-db-updates'
+			);
 		}
 	}
 
@@ -1046,7 +1061,7 @@ CREATE TABLE {$wpdb->prefix}wc_reserved_stock (
 	`expires` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
 	PRIMARY KEY  (`order_id`, `product_id`)
 ) $collate;
-CREATE TABLE {$wpdb->prefix}woocommerce_rate_limits (
+CREATE TABLE {$wpdb->prefix}wc_rate_limits (
   rate_limit_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   rate_limit_key varchar(200) NOT NULL,
   rate_limit_expiry BIGINT UNSIGNED NOT NULL,
@@ -1087,7 +1102,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_rate_limits (
 			"{$wpdb->prefix}woocommerce_tax_rate_locations",
 			"{$wpdb->prefix}woocommerce_tax_rates",
 			"{$wpdb->prefix}wc_reserved_stock",
-			"{$wpdb->prefix}woocommerce_rate_limits",
+			"{$wpdb->prefix}wc_rate_limits",
 		);
 
 		/**

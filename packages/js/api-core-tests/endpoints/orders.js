@@ -1,8 +1,13 @@
 /**
  * Internal dependencies
  */
-const { getRequest, postRequest, putRequest, deleteRequest } = require('../utils/request');
-const { getOrderExample, shared } = require('../data');
+const {
+	getRequest,
+	postRequest,
+	putRequest,
+	deleteRequest,
+} = require( '../utils/request' );
+const { getOrderExample, shared } = require( '../data' );
 
 /**
  * WooCommerce Orders endpoints.
@@ -24,14 +29,16 @@ const ordersApi = {
 		method: 'GET',
 		path: 'orders/<id>',
 		responseCode: 200,
-		order: async ( orderId ) => getRequest( `orders/${orderId}` ),
+		order: async ( orderId, ordersQuery = {} ) =>
+			getRequest( `orders/${ orderId }`, ordersQuery ),
 	},
 	listAll: {
 		name: 'List all orders',
 		method: 'GET',
 		path: 'orders',
 		responseCode: 200,
-		orders: async () => getRequest( 'orders' ),
+		orders: async ( ordersQuery = {} ) =>
+			getRequest( 'orders', ordersQuery ),
 	},
 	update: {
 		name: 'Update an order',
@@ -39,7 +46,8 @@ const ordersApi = {
 		path: 'orders/<id>',
 		responseCode: 200,
 		payload: getOrderExample(),
-		order: async ( orderId, orderDetails ) => putRequest( `orders/${orderId}`, orderDetails ),
+		order: async ( orderId, orderDetails ) =>
+			putRequest( `orders/${ orderId }`, orderDetails ),
 	},
 	delete: {
 		name: 'Delete an order',
@@ -47,9 +55,10 @@ const ordersApi = {
 		path: 'orders/<id>',
 		responseCode: 200,
 		payload: {
-			force: false
+			force: false,
 		},
-		order: async ( orderId, deletePermanently ) => deleteRequest( `orders/${orderId}`, deletePermanently ),
+		order: async ( orderId, deletePermanently ) =>
+			deleteRequest( `orders/${ orderId }`, deletePermanently ),
 	},
 	batch: {
 		name: 'Batch update orders',
@@ -57,7 +66,8 @@ const ordersApi = {
 		path: 'orders/batch',
 		responseCode: 200,
 		payload: shared.getBatchPayloadExample( getOrderExample() ),
-		orders: async ( batchUpdatePayload ) => postRequest( `orders/batch`, batchUpdatePayload ),
+		orders: async ( batchUpdatePayload ) =>
+			postRequest( `orders/batch`, batchUpdatePayload ),
 	},
 };
 

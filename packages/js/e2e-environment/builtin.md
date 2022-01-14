@@ -119,16 +119,29 @@ You can override these in `/tests/e2e/config/default.json`.
 
 ### Folder Mapping
 
-The built in container defaults to mapping the root folder of the repository to a folder in the `plugins` folder. For example `woocommerce` is mapped to `/var/www/html/wp-content/plugins/woocommerce`. Use the `WC_E2E_FOLDER_MAPPING` environment variable to override this mapping.
+The built in container defaults to mapping the root folder of the repository to a folder in the `plugins` folder. Use the environment variables `WC_E2E_FOLDER` and `WC_E2E_FOLDER_MAPPING` to override this mapping. The `WC_E2E_FOLDER` is a path relative to the root of the project. For example, in the  `woocommerce` repository this mapping is:
+
+- `WC_E2E_FOLDER=plugins/woocommerce`
+- `WC_E2E_FOLDER_MAPPING=/var/www/html/wp-content/plugins/woocommerce`
+
+Other repository examples:
 
 - Storefront Theme - ```WC_E2E_FOLDER_MAPPING=/var/www/html/wp-content/themes/storefront npx wc-e2e docker:up```
 - Site Project - ```WC_E2E_FOLDER_MAPPING=/var/www/html/wp-content npx wc-e2e docker:up```
 
 Since the introduction of the WooCommerce Monorepo, a `WC_CORE_PATH` environment variable maps to Core WooCommerce at `plugins/woocommerce`. It can also be overriden in a similar fashion.
 
+### Specifying Server Software versions
+
+The built-in container supports these variables for use locally and in CI environments:
+
+- `WP_VERSION` - WordPress (default `latest`)
+- `PHP_VERSION` - PHP (default `latest`)
+- `MARIADB_VERSION` - MariaDB (default `latest`)
+
 ### Travis CI Supported Versions
 
-Travis CI uses environment variables to allow control of some software versions in the testing environment. The built in container supports these variables:
+Travis CI uses environment variables to allow control of some software versions in the testing environment. The built-in container supports these variables:
 
 - `WP_VERSION` - WordPress (default `latest`)
 - `TRAVIS_PHP_VERSION` - PHP (default `latest`)

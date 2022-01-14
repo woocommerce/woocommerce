@@ -1,6 +1,6 @@
 const path = require( 'path' );
 const mkdirp = require( 'mkdirp' );
-const getAppRoot = require( './app-root' );
+const { resolveLocalE2ePath } = require( './test-config' );
 
 /**
  * Take a screenshot if browser context exists.
@@ -8,13 +8,10 @@ const getAppRoot = require( './app-root' );
  * @param message
  * @return {Promise<{filePath: string, title: string}|{filePath: *, title: *}>}
  */
-const takeScreenshotFor = async ( message ) => {
-	const title = message.replace( /\.$/, '' );
-	const appPath = getAppRoot();
-	const savePath = path.resolve(
-		appPath,
-		'plugins/woocommerce/tests/e2e/screenshots'
-	);
+const takeScreenshotFor = async (message) => {
+	let now = new Date();
+	const title = `${message.replace( /\.$/, '' )}-${now.getDate()}${now.getHours()}${now.getMinutes()}${now.getSeconds()}`;
+	const savePath = resolveLocalE2ePath( 'screenshots' );
 	const filePath = path.join(
 		savePath,
 		`${ title }.png`.replace( /[^a-z0-9.-]+/gi, '-' )

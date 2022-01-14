@@ -101,7 +101,7 @@ describe( 'ModelRepository', () => {
 
 		const created = await repository.create( { parent: 'yes' }, { childName: 'test' } );
 		expect( created ).toBe( model );
-		expect( callback ).toHaveBeenCalledWith( { childName: 'test' } );
+		expect( callback ).toHaveBeenCalledWith( { parent: 'yes' }, { childName: 'test' } );
 	} );
 
 	it( 'should throw error on create without callback', () => {

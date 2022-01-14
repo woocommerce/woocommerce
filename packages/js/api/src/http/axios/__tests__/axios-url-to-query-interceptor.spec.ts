@@ -1,31 +1,33 @@
 import axios, { AxiosInstance } from 'axios';
-import * as moxios from 'moxios';
+import MockAdapter from 'axios-mock-adapter';
 import { AxiosURLToQueryInterceptor } from '../axios-url-to-query-interceptor';
 
 describe( 'AxiosURLToQueryInterceptor', () => {
 	let urlToQueryInterceptor: AxiosURLToQueryInterceptor;
 	let axiosInstance: AxiosInstance;
+	let adapter: MockAdapter;
 
 	beforeEach( () => {
 		axiosInstance = axios.create();
-		moxios.install( axiosInstance );
+		adapter = new MockAdapter( axiosInstance );
 		urlToQueryInterceptor = new AxiosURLToQueryInterceptor( 'test' );
 		urlToQueryInterceptor.start( axiosInstance );
 	} );
 
 	afterEach( () => {
 		urlToQueryInterceptor.stop( axiosInstance );
-		moxios.uninstall();
+		adapter.restore();
 	} );
 
 	it( 'should put path in query string', async () => {
-		moxios.stubRequest( 'http://test.test/?test=%2Ftest%2Froute', {
-			status: 200,
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			responseText: JSON.stringify( { test: 'value' } ),
-		} );
+		adapter.onGet(
+			'http://test.test/',
+			{ params: { test: '/test/route' } }
+		).reply(
+			200,
+			{ test: 'value' },
+			{ 'content-type': 'application/json' }
+		);
 
 		const response = await axiosInstance.get( 'http://test.test/test/route' );
 

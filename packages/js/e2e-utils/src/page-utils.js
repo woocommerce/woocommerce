@@ -220,11 +220,11 @@ export const evalAndClick = async ( selector ) => {
  * @param {string} selector Selector of the select2 search field
  */
 export const selectOptionInSelect2 = async ( value, selector = 'input.select2-search__field' ) => {
-	await page.waitForSelector(selector);
-	await page.click(selector);
-	await page.type(selector, value);
+	await page.waitForSelector( selector );
+	await page.click( selector );
+	await page.type( selector, value );
 	await waitForTimeout( 2000 ); // to avoid flakyness, must wait before pressing Enter
-	await page.keyboard.press('Enter');
+	await page.keyboard.press( 'Enter' );
 };
 
 /**
@@ -234,12 +234,12 @@ export const selectOptionInSelect2 = async ( value, selector = 'input.select2-se
  * @param {string} orderId Order ID
  * @param {string} customerName Customer's full name attached to order ID.
  */
-export const searchForOrder = async (value, orderId, customerName) => {
-	await clearAndFillInput('#post-search-input', value);
-	await expect(page).toMatchElement('#post-search-input', value);
-	await expect(page).toClick('#search-submit' );
-	await page.waitForSelector('#the-list', { timeout: 10000 } );
-	await expect(page).toMatchElement('.order_number > a.order-view', {text: `#${orderId} ${customerName}`});
+export const searchForOrder = async ( value, orderId, customerName) => {
+	await clearAndFillInput( '#post-search-input', value );
+	await expect( page ).toMatchElement( '#post-search-input', value );
+	await expect( page ).toClick( '#search-submit' );
+	await page.waitForSelector( '#the-list', { timeout: 10000 } );
+	await expect( page ).toMatchElement( '.order_number > a.order-view', { text: `#${orderId} ${customerName}` } );
 };
 
 /**
@@ -255,16 +255,16 @@ export const applyCoupon = async ( couponCode ) => {
 			page.reload(),
 			page.waitForNavigation( { waitUntil: 'networkidle0' } ),
 		]);
-		await expect(page).toClick('a', {text: 'Click here to enter your code'});
+		await expect( page ).toClick( 'a', { text: 'Click here to enter your code' } );
 		await uiUnblocked();
-		await clearAndFillInput('#coupon_code', couponCode);
-		await expect(page).toClick('button', {text: 'Apply coupon'});
+		await clearAndFillInput( '#coupon_code', couponCode );
+		await expect( page ).toClick( 'button', {text: 'Apply coupon' } );
 		await uiUnblocked();
-	} catch (error) {
-		await clearAndFillInput('#coupon_code', couponCode);
-		await expect(page).toClick('button', {text: 'Apply coupon'});
+	} catch ( error ) {
+		await clearAndFillInput( '#coupon_code', couponCode );
+		await expect( page ).toClick( 'button', { text: 'Apply coupon' } );
 		await uiUnblocked();
-	};
+	}
 };
 
 /**
@@ -278,9 +278,9 @@ export const removeCoupon = async ( couponCode ) => {
 		page.reload(),
 		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
 	]);
-	await expect(page).toClick('[data-coupon="'+couponCode.toLowerCase()+'"]', {text: '[Remove]'});
+	await expect( page ).toClick( '[data-coupon="'+couponCode.toLowerCase()+'"]', {text: '[Remove]' } );
 	await uiUnblocked();
-	await expect(page).toMatchElement('.woocommerce-message', {text: 'Coupon has been removed.'});
+	await expect( page ).toMatchElement( '.woocommerce-message', {text: 'Coupon has been removed.' } );
 };
 
 /**
@@ -295,4 +295,43 @@ export const selectOrderAction = async ( action ) => {
 		page.click( '.wc-reload' ),
 		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
 	] );
+}
+
+
+/**
+ * Evaluate and click a button selector then wait for a result selector.
+ * This is a work around for what appears to be intermittent delays in handling confirm dialogs.
+ *
+ * @param {string} buttonSelector Selector of button to click
+ * @param {string} resultSelector Selector to wait for after click
+ * @param {number} timeout Timeout length in milliseconds. Default 5000.
+ * @returns {Promise<void>}
+ */
+export const clickAndWaitForSelector = async ( buttonSelector, resultSelector, timeout = 5000 ) => {
+	await evalAndClick( buttonSelector );
+	await waitForSelector(
+		page,
+		resultSelector,
+		{
+			timeout
+		}
+	);
+};
+/**
+ * Waits for selector to be present in DOM.
+ * Throws a `TimeoutError` if element was not found after 30 sec.
+ * Behavior can be modified with @param options. Possible keys: `visible`, `hidden`, `timeout`.
+ * More details at: https://pptr.dev/#?product=Puppeteer&show=api-pagewaitforselectorselector-options
+ *
+ * @param {Puppeteer.Page} page Puppeteer representation of the page.
+ * @param {string} selector CSS selector of the element
+ * @param {Object} options Custom options to modify function behavior.
+ */
+export async function waitForSelector( page, selector, options = {} ) {
+	// set up default options
+	const defaultOptions = { timeout: 30000, logHTML: false };
+	options = Object.assign( defaultOptions, options );
+
+	const element = await page.waitForSelector( selector, options );
+	return element;
 }

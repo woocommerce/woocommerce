@@ -1,5 +1,9 @@
 # Unreleased
 
+## Added
+
+- Added low stock threshold field for products
+
 # 0.2.0
 
 ## Added

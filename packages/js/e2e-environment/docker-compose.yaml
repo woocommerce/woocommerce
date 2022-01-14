@@ -35,7 +35,8 @@ services:
       WORDPRESS_DEBUG: 1
     volumes:
       - wordpress:/var/www/html
-      - "../../../${WC_CORE_PATH}:${WC_E2E_FOLDER_MAPPING}"
+      - ./upload.ini:/usr/local/etc/php/conf.d/uploads.ini
+      - "../../../${WC_E2E_FOLDER}:${WC_E2E_FOLDER_MAPPING}"
 
   wordpress-cli:
     container_name: "${APP_NAME}_wordpress-cli"
@@ -60,7 +61,7 @@ services:
 
     volumes:
       - wordpress:/var/www/html
-      - "../../../plugins/woocommerce:${WC_E2E_FOLDER_MAPPING}"
+      - "../../../${WC_E2E_FOLDER}:${WC_E2E_FOLDER_MAPPING}"
 
 volumes:
   db:
