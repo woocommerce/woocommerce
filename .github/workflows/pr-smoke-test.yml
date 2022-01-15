@@ -50,7 +50,7 @@ jobs:
           UPDATE_WC: 1
           DEFAULT_TIMEOUT_OVERRIDE: 120000
         run: |
-          pnpx wc-e2e test:e2e tests/e2e/specs/smoke-tests/update-woocommerce.j
+          pnpx wc-e2e test:e2e tests/e2e/specs/smoke-tests/update-woocommerce.js
 
       - name: Post Smoke tests results comment on PR
         if: always()
@@ -81,7 +81,7 @@ jobs:
           UPDATE_WC: 1
           DEFAULT_TIMEOUT_OVERRIDE: 120000
         run: |
-          pnpx wc-e2e test:e2e tests/e2e/specs/smoke-tests/update-woocommerce.j
+          pnpx wc-e2e test:e2e
 
       - name: Post E2E tests results comment on PR
         if: always()
@@ -96,36 +96,9 @@ jobs:
             await script({github, context})
 
       - name: Remove label from pull request.
-        if: always() && ${{ contains( github.event.pull_request.labels.*.name, format('run{0} smoke tests', ':')) }}
-        uses: actions-ecosystem/action-remove-labels@v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          labels: 'run: smoke tests'
-
-      - name: Remove label from pull request 2.
-        if: |
-            always() && 
-            ${{ contains( github.event.pull_request.labels.*.name, format('run{0} smoke tests', ':')) }}
-        uses: actions-ecosystem/action-remove-labels@v1
-        with:
-            github_token: ${{ secrets.GITHUB_TOKEN }}
-            labels: 'run: smoke tests'
-            
-      - name: Remove label from pull request 3.
-        if: |
-          ${{ always() 
-            && contains( github.event.pull_request.labels.*.name, format('run{0} smoke tests', ':')) 
-          }}
-        uses: actions-ecosystem/action-remove-labels@v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          labels: 'run: smoke tests'    
-
-      - name: Remove label from pull request 4.
         if: |
           always() 
            && contains( github.event.pull_request.labels.*.name, format('run{0} smoke tests', ':')) 
-          
         uses: actions-ecosystem/action-remove-labels@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
