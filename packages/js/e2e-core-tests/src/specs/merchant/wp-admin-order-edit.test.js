@@ -1,20 +1,28 @@
 /**
  * Internal dependencies
  */
-const {
+ const {
 	merchant,
-	createSimpleOrder,
 	withRestApi,
 	utils,
+	createSimpleDownloadableProduct,
+	createOrder,
+	verifyValueOfInputField,
+	orderPageSaveChanges,
 } = require( '@woocommerce/e2e-utils' );
 
 let orderId;
 
+const orderStatus = {
+	processing: 'processing',
+	completed: 'completed'
+};
+
 const runEditOrderTest = () => {
 	describe('WooCommerce Orders > Edit order', () => {
 		beforeAll(async () => {
+			orderId = await createOrder( { status: orderStatus.processing } );
 			await merchant.login();
-			orderId = await createSimpleOrder('Processing');
 		});
 
 		afterAll( async () => {
@@ -69,14 +77,152 @@ const runEditOrderTest = () => {
 			await utils.waitForTimeout( 2000 );
 
 			// Save the order changes
-			await expect( page ).toClick( 'button.save_order' );
-			await page.waitForSelector( '#message' );
+			await orderPageSaveChanges();
 
 			// Verify
 			await expect( page ).toMatchElement( '#message', { text: 'Order updated.' } );
-			await expect( page ).toMatchElement( 'input[name=order_date]', { value: '2018-12-14' } );
+		 	await verifyValueOfInputField( 'input[name=order_date]' , '2018-12-14' );
+		});
+
+		afterAll( async () => {
+			await withRestApi.deleteAllOrders();
 		});
 	});
+
+	describe( 'WooCommerce Orders > Edit order > Downloadable product permissions', () => {
+		const productName = 'TDP 001';
+		const customerBilling = {
+			email: 'john.doe@example.com',
+		};
+
+		let productId;
+
+		beforeAll( async () => {
+			await merchant.login();
+		} );
+
+		beforeEach(async () => {
+			productId = await createSimpleDownloadableProduct( productName );
+			orderId = await createOrder( {
+				productId,
+				customerBilling ,
+				status: orderStatus.processing
+			} );
+		} );
+
+		it( 'can add downloadable product permissions to order without product', async () => {
+			// Create order without product
+			orderId = await createOrder( {
+				customerBilling,
+				status: orderStatus.processing
+			} );
+
+			// Open order we created
+			await merchant.goToOrder( orderId );
+
+			// Add permission
+			await merchant.addDownloadableProductPermission( productName );
+
+			// Verify new downloadable product permission details
+			await merchant.verifyDownloadableProductPermission( productName )
+		} );
+
+		it( 'can add downloadable product permissions to order with product', async () => {
+			// Create new downloadable product
+			const product2Name = 'TDP 002';
+			productId = await createSimpleDownloadableProduct( product2Name );
+
+			// Open order we created
+			await merchant.goToOrder( orderId );
+
+			// Add permission
+			await merchant.addDownloadableProductPermission( product2Name );
+
+			// Verify new downloadable product permission details
+			await merchant.verifyDownloadableProductPermission( product2Name )
+		} );
+
+		it( 'can edit downloadable product permissions', async () => {
+			// Define expected downloadable product attributes
+			const expectedDownloadsRemaining = '10';
+			const expectedDownloadsExpirationDate = '2050-01-01';
+
+			// Open order we created
+			await merchant.goToOrder( orderId );
+
+			// Update permission
+			await merchant.updateDownloadableProductPermission(
+				productName,
+				expectedDownloadsExpirationDate,
+				expectedDownloadsRemaining
+			);
+
+			// Verify new downloadable product permission details
+			await merchant.verifyDownloadableProductPermission(
+				productName,
+				expectedDownloadsExpirationDate,
+				expectedDownloadsRemaining
+			);
+		} );
+
+		it( 'can revoke downloadable product permissions', async () => {
+			// Open order we created
+			await merchant.goToOrder( orderId );
+
+			// Revoke permission
+			await merchant.revokeDownloadableProductPermission( productName );
+
+			// Verify
+			await expect( page ).not.toMatchElement( 'div.order_download_permissions', {
+				text: productName
+			} );
+		} );
+
+		it( 'should not allow downloading a product if download attempts are exceeded', async () => {
+			// Define expected download error reason
+			const expectedReason = 'Sorry, you have reached your download limit for this file';
+
+			// Setup data
+			productId = await createSimpleDownloadableProduct( productName, 0 );
+			orderId = await createOrder( {
+				productId,
+				customerBilling,
+				status: orderStatus.processing
+			} );
+
+			// Open order we created
+			await merchant.goToOrder( orderId );
+
+			// Open download page
+			const downloadPage = await merchant.openDownloadLink();
+
+			// Verify file download cannot start
+	  		await merchant.verifyCannotDownloadFromBecause( downloadPage, expectedReason );
+		} );
+
+		it( 'should not allow downloading a product if expiration date is exceeded', async () => {
+			// Define expected download error reason
+			const expectedReason = 'Sorry, this download has expired';
+
+			// Open order we created
+			await merchant.goToOrder( orderId );
+
+			// Update permission so that the expiration date has already passed
+			// Note: Seems this operation can't be performed through the API
+			await merchant.updateDownloadableProductPermission( productName, '2018-12-14' );
+
+			// Open download page
+			const downloadPage = await merchant.openDownloadLink();
+
+			// Verify file download cannot start
+	  		await merchant.verifyCannotDownloadFromBecause( downloadPage, expectedReason );
+		} );
+
+		afterEach( async () => {
+			await withRestApi.deleteAllOrders();
+			await withRestApi.deleteAllProducts();
+		} );
+	} );
 }
 
 module.exports = runEditOrderTest;
