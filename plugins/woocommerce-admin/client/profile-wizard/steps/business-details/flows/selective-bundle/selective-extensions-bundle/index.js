@@ -191,21 +191,26 @@ export const ExtensionSection = ( {
 	);
 };
 
-export const createInstallExtensionOptions = ( extensions = [] ) => {
-	const defaultInstallExtensionOptions = { install_extensions: true };
-	return extensions.reduce( ( acc, curr ) => {
-		const plugins = curr.plugins.reduce(
-			( pluginAcc, { key, selected } ) => {
-				return { ...pluginAcc, [ key ]: selected ?? true };
-			},
-			{}
-		);
-
+export const createInstallExtensionOptions = ( {
+	installableExtensions,
+	prevInstallExtensionOptions,
+} ) => {
+	return installableExtensions.reduce( ( acc, curr ) => {
+		const plugins = curr.plugins.reduce( ( pluginAcc, plugin ) => {
+			// If the option exists in the previous state, use that so the option won't be reset.
+			if ( prevInstallExtensionOptions.hasOwnProperty( plugin.key ) ) {
+				return pluginAcc;
+			}
+			return {
+				...pluginAcc,
+				[ plugin.key ]: true,
+			};
+		}, {} );
 		return {
 			...acc,
 			...plugins,
 		};
-	}, defaultInstallExtensionOptions );
+	}, prevInstallExtensionOptions );
 };
 
 export const SelectiveExtensionsBundle = ( {
@@ -216,9 +221,9 @@ export const SelectiveExtensionsBundle = ( {
 	industry,
 } ) => {
 	const [ showExtensions, setShowExtensions ] = useState( false );
-	const [ installExtensionOptions, setInstallExtensionOptions ] = useState(
-		createInstallExtensionOptions()
-	);
+	const [ installExtensionOptions, setInstallExtensionOptions ] = useState( {
+		install_extensions: true,
+	} );
 	const {
 		freeExtensions: freeExtensionBundleByCategory,
 		isResolving,
@@ -263,11 +268,16 @@ export const SelectiveExtensionsBundle = ( {
 
 	useEffect( () => {
 		if ( ! isInstallingActivating ) {
-			setInstallExtensionOptions(
-				createInstallExtensionOptions( installableExtensions )
+			setInstallExtensionOptions( ( currInstallExtensionOptions ) =>
+				createInstallExtensionOptions( {
+					installableExtensions,
+					prevInstallExtensionOptions: currInstallExtensionOptions,
+				} )
 			);
 		}
-	}, [ installableExtensions, isInstallingActivating ] );
+		// Disable reason: This effect should only called when the installableExtensions are changed.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [ installableExtensions ] );
 
 	const getCheckboxChangeHandler = ( key ) => {
 		return ( checked ) => {

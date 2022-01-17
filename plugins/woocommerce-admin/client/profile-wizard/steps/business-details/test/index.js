@@ -103,34 +103,31 @@ describe( 'BusinessDetails', () => {
 
 	describe( 'createInstallExtensionOptions', () => {
 		test( 'selected by default', () => {
-			const extensions = [
+			const installableExtensions = [
 				{
 					plugins: [
 						{
 							key: 'visible-and-not-selected',
-							selected: false,
 							isVisible: () => true,
 						},
 						{
 							key: 'visible-and-selected',
-							selected: true,
 							isVisible: () => true,
 						},
 						{
 							key: 'this-should-not-show-at-all',
-							selected: true,
 							isVisible: () => false,
 						},
 					],
 				},
 			];
 
-			const values = createInstallExtensionOptions(
-				extensions,
-				'US',
-				'',
-				[]
-			);
+			const values = createInstallExtensionOptions( {
+				installableExtensions,
+				prevInstallExtensionOptions: {
+					'visible-and-not-selected': false,
+				},
+			} );
 
 			expect( values ).toEqual(
 				expect.objectContaining( {
