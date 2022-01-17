@@ -272,7 +272,7 @@ defined( 'ABSPATH' ) || exit;
 					$label = sprintf(
 						/* translators: %s: weight unit */
 						__( 'Weight (%s)', 'woocommerce' ),
-						esc_html__( get_option( 'woocommerce_weight_unit', 'woocommerce' ) )
+						esc_html__( get_option( 'woocommerce_weight_unit' ), 'woocommerce' )
 					);
 
 					woocommerce_wp_text_input(
@@ -303,7 +303,7 @@ defined( 'ABSPATH' ) || exit;
 							printf(
 								/* translators: %s: dimension unit */
 								esc_html__( 'Dimensions (L&times;W&times;H) (%s)', 'woocommerce' ),
-								esc_html__( get_option( 'woocommerce_dimension_unit', 'woocommerce' ) )
+								esc_html__( get_option( 'woocommerce_dimension_unit' ), 'woocommerce' )
 							);
 							?>
 						</label>
