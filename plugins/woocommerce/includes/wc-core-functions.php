@@ -1048,7 +1048,7 @@ function wc_print_js() {
  * @param  bool    $httponly Whether the cookie is only accessible over HTTP, not scripting languages like JavaScript. @since 3.6.0.
  */
 function wc_setcookie( $name, $value, $expire = 0, $secure = false, $httponly = false ) {
-	if ( apply_filters( 'woocommerce_cookie_consent', true, $name ) === false && !Constants::is_true( 'WP_DEBUG' ) ) {
+	if ( ! apply_filters( 'woocommerce_set_cookie_enabled', true, $name ,$value, $expire, $secure ) ) {
 		return;
 	}
 
