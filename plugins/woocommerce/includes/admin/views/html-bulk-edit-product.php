@@ -155,9 +155,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</span>
 				</label>
 				<label class="change-input">
-					<input type="text" name="_length" class="text length" placeholder="<?php printf( esc_attr__( 'Length (%s)', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ); ?>" value="">
-					<input type="text" name="_width" class="text width" placeholder="<?php printf( esc_attr__( 'Width (%s)', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ); ?>" value="">
-					<input type="text" name="_height" class="text height" placeholder="<?php printf( esc_attr__( 'Height (%s)', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ); ?>" value="">
+					<input type="text" name="_length" class="text length" placeholder="<?php printf( esc_attr__( 'Length (%s)', 'woocommerce' ), __( get_option( 'woocommerce_dimension_unit' ), 'woocommerce' ) ); ?>" value="">
+					<input type="text" name="_width" class="text width" placeholder="<?php printf( esc_attr__( 'Width (%s)', 'woocommerce' ), __( get_option( 'woocommerce_dimension_unit' ), 'woocommerce' ) ); ?>" value="">
+					<input type="text" name="_height" class="text height" placeholder="<?php printf( esc_attr__( 'Height (%s)', 'woocommerce' ), __( get_option( 'woocommerce_dimension_unit' ), 'woocommerce' ) ); ?>" value="">
 				</label>
 			</div>
 		<?php endif; ?>

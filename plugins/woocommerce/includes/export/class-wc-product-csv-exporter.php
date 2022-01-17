@@ -121,13 +121,13 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 				'backorders'         => __( 'Backorders allowed?', 'woocommerce' ),
 				'sold_individually'  => __( 'Sold individually?', 'woocommerce' ),
 				/* translators: %s: weight */
-				'weight'             => sprintf( __( 'Weight (%s)', 'woocommerce' ), get_option( 'woocommerce_weight_unit' ) ),
+				'weight'             => sprintf( __( 'Weight (%s)', 'woocommerce' ), __( get_option( 'woocommerce_weight_unit' ), 'woocommerce' ) ),
 				/* translators: %s: length */
-				'length'             => sprintf( __( 'Length (%s)', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ),
+				'length'             => sprintf( __( 'Length (%s)', 'woocommerce' ), __( get_option( 'woocommerce_dimension_unit' ), 'woocommerce' ) ),
 				/* translators: %s: width */
-				'width'              => sprintf( __( 'Width (%s)', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ),
+				'width'              => sprintf( __( 'Width (%s)', 'woocommerce' ), __( get_option( 'woocommerce_dimension_unit' ), 'woocommerce' ) ),
 				/* translators: %s: Height */
-				'height'             => sprintf( __( 'Height (%s)', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ),
+				'height'             => sprintf( __( 'Height (%s)', 'woocommerce' ), __( get_option( 'woocommerce_dimension_unit' ), 'woocommerce' ) ),
 				'reviews_allowed'    => __( 'Allow customer reviews?', 'woocommerce' ),
 				'purchase_note'      => __( 'Purchase note', 'woocommerce' ),
 				'sale_price'         => __( 'Sale price', 'woocommerce' ),

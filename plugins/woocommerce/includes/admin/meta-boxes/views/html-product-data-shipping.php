@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				array(
 					'id'          => '_weight',
 					'value'       => $product_object->get_weight( 'edit' ),
-					'label'       => __( 'Weight', 'woocommerce' ) . ' (' . get_option( 'woocommerce_weight_unit' ) . ')',
+					'label'       => __( 'Weight', 'woocommerce' ) . ' (' . __( get_option( 'woocommerce_weight_unit' ), 'woocommerce' ) . ')',
 					'placeholder' => wc_format_localized_decimal( 0 ),
 					'desc_tip'    => true,
 					'description' => __( 'Weight in decimal form', 'woocommerce' ),
@@ -25,7 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			?>
 			<p class="form-field dimensions_field">
 				<?php /* translators: WooCommerce dimension unit*/ ?>
-				<label for="product_length"><?php printf( __( 'Dimensions (%s)', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ); ?></label>
+				<label for="product_length"><?php printf( __( 'Dimensions (%s)', 'woocommerce' ), __( get_option( 'woocommerce_dimension_unit' ), 'woocommerce' ) ); ?></label>
 				<span class="wrap">
 					<input id="product_length" placeholder="<?php esc_attr_e( 'Length', 'woocommerce' ); ?>" class="input-text wc_input_decimal" size="6" type="text" name="_length" value="<?php echo esc_attr( wc_format_localized_decimal( $product_object->get_length( 'edit' ) ) ); ?>" />
 					<input id="product_width" placeholder="<?php esc_attr_e( 'Width', 'woocommerce' ); ?>" class="input-text wc_input_decimal" size="6" type="text" name="_width" value="<?php echo esc_attr( wc_format_localized_decimal( $product_object->get_width( 'edit' ) ) ); ?>" />

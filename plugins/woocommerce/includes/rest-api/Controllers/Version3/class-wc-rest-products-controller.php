@@ -730,8 +730,8 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 * @return array
 	 */
 	public function get_item_schema() {
-		$weight_unit    = get_option( 'woocommerce_weight_unit' );
-		$dimension_unit = get_option( 'woocommerce_dimension_unit' );
+		$weight_unit    = __( get_option( 'woocommerce_weight_unit' ), 'woocommerce' );
+		$dimension_unit = __( get_option( 'woocommerce_dimension_unit' ), 'woocommerce' );
 		$schema         = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
 			'title'      => $this->post_type,

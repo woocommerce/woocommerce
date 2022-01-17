@@ -1293,7 +1293,7 @@ function wc_format_weight( $weight ) {
 	$weight_string = wc_format_localized_decimal( $weight );
 
 	if ( ! empty( $weight_string ) ) {
-		$weight_string .= ' ' . get_option( 'woocommerce_weight_unit' );
+		$weight_string .= ' ' . __( get_option( 'woocommerce_weight_unit' ), 'woocommerce' );
 	} else {
 		$weight_string = __( 'N/A', 'woocommerce' );
 	}
@@ -1312,7 +1312,7 @@ function wc_format_dimensions( $dimensions ) {
 	$dimension_string = implode( ' &times; ', array_filter( array_map( 'wc_format_localized_decimal', $dimensions ) ) );
 
 	if ( ! empty( $dimension_string ) ) {
-		$dimension_string .= ' ' . get_option( 'woocommerce_dimension_unit' );
+		$dimension_string .= ' ' . __( get_option( 'woocommerce_dimension_unit' ), 'woocommerce' );
 	} else {
 		$dimension_string = __( 'N/A', 'woocommerce' );
 	}

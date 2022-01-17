@@ -36,8 +36,8 @@ function wc_importer_default_english_mappings( $mappings ) {
 		return $mappings;
 	}
 
-	$weight_unit    = get_option( 'woocommerce_weight_unit' );
-	$dimension_unit = get_option( 'woocommerce_dimension_unit' );
+	$weight_unit    = __( get_option( 'woocommerce_weight_unit' ), 'woocommerce' );
+	$dimension_unit = __( get_option( 'woocommerce_dimension_unit' ), 'woocommerce' );
 	$new_mappings   = array(
 		'ID'                                      => 'id',
 		'Type'                                    => 'type',

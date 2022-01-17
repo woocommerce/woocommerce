@@ -490,8 +490,8 @@ class WC_Product_CSV_Importer_Controller {
 	 * @return array
 	 */
 	protected function auto_map_columns( $raw_headers, $num_indexes = true ) {
-		$weight_unit    = get_option( 'woocommerce_weight_unit' );
-		$dimension_unit = get_option( 'woocommerce_dimension_unit' );
+		$weight_unit    = __( get_option( 'woocommerce_weight_unit' ), 'woocommerce' );
+		$dimension_unit = __( get_option( 'woocommerce_dimension_unit' ), 'woocommerce' );
 
 		/*
 		 * @hooked wc_importer_generic_mappings - 10
@@ -663,8 +663,8 @@ class WC_Product_CSV_Importer_Controller {
 		$meta = str_replace( 'meta:', '', $item );
 
 		// Available options.
-		$weight_unit    = get_option( 'woocommerce_weight_unit' );
-		$dimension_unit = get_option( 'woocommerce_dimension_unit' );
+		$weight_unit    = __( get_option( 'woocommerce_weight_unit' ), 'woocommerce' );
+		$dimension_unit = __( get_option( 'woocommerce_dimension_unit' ), 'woocommerce' );
 		$options        = array(
 			'id'                 => __( 'ID', 'woocommerce' ),
 			'type'               => __( 'Type', 'woocommerce' ),
