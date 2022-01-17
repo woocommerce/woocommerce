@@ -1,14 +1,20 @@
-.components-disabled .wc-block-price-filter__range-input-wrapper .wc-block-price-filter__range-input {
-	&::-webkit-slider-thumb {
-		pointer-events: none;
-	}
-	&::-moz-range-thumb {
-		pointer-events: none;
-	}
-	&::-ms-thumb {
-		pointer-events: none;
+.wp-block-woocommerce-price-filter .components-disabled {
+	border-radius: inherit;
+	border-color: inherit;
+
+	.wc-block-price-filter__range-input-wrapper .wc-block-price-filter__range-input {
+		&::-webkit-slider-thumb {
+			pointer-events: none;
+		}
+		&::-moz-range-thumb {
+			pointer-events: none;
+		}
+		&::-ms-thumb {
+			pointer-events: none;
+		}
 	}
 }
+
 .wc-block-price-slider {
 	.components-placeholder__instructions {
 		border-bottom: 1px solid #e0e2e6;

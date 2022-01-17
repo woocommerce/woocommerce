@@ -17,6 +17,7 @@ import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
  * Internal dependencies
  */
 import usePriceConstraints from './use-price-constraints.js';
+import './style.scss';
 
 /**
  * Component displaying a price filter.

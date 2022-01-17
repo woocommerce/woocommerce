@@ -2,8 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import classNames from 'classnames';
-import { InspectorControls } from '@wordpress/block-editor';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import {
 	Placeholder,
 	Disabled,
@@ -26,12 +25,13 @@ import './editor.scss';
 
 export default function ( { attributes, setAttributes } ) {
 	const {
-		className,
 		heading,
 		headingLevel,
 		showInputFields,
 		showFilterButton,
 	} = attributes;
+
+	const blockProps = useBlockProps();
 
 	const getInspectorControls = () => {
 		return (
@@ -152,16 +152,11 @@ export default function ( { attributes, setAttributes } ) {
 	);
 
 	return (
-		<>
+		<div { ...blockProps }>
 			{ blocksConfig.productCount === 0 ? (
 				noProductsPlaceholder()
 			) : (
-				<div
-					className={ classNames(
-						className,
-						'wp-block-woocommerce-price-filter'
-					) }
-				>
+				<>
 					{ getInspectorControls() }
 					<BlockTitle
 						className="wc-block-price-filter__title"
@@ -174,8 +169,8 @@ export default function ( { attributes, setAttributes } ) {
 					<Disabled>
 						<Block attributes={ attributes } isEditor={ true } />
 					</Disabled>
-				</div>
+				</>
 			) }
-		</>
+		</div>
 	);
 }
