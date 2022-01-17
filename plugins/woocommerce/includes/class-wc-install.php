@@ -169,9 +169,9 @@ class WC_Install {
 			'wc_update_600_migrate_rate_limit_options',
 			'wc_update_600_db_version',
 		),
-		'6.2.0' => array(
-			'wc_create_product_attributes_lookup_table',
-			'wc_update_620_db_version',
+		'6.3.0' => array(
+			'wc_update_630_create_product_attributes_lookup_table',
+			'wc_update_630_db_version',
 		),
 	);
 
