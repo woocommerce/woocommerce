@@ -9,17 +9,96 @@ import PropTypes from 'prop-types';
 import { Flag, Form, TextControlWithAffixes } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 import { Icon, globe } from '@wordpress/icons';
+import classnames from 'classnames';
 
 /**
  * Internal dependencies
  */
 import { CurrencyContext } from '../../../lib/currency-context';
 
+const ShippingRateIcon = ( { zone } ) => (
+	<div className="woocommerce-shipping-rate__icon">
+		{ zone.locations ? (
+			zone.locations.map( ( location ) => (
+				<Flag
+					size={ 24 }
+					code={ location.code }
+					key={ location.code }
+				/>
+			) )
+		) : (
+			// Icon used for zones without locations or "Rest of the world".
+			<Icon icon={ globe } />
+		) }
+	</div>
+);
+
+const ShippingRateToggle = ( { zone, getInputProps } ) => (
+	<label
+		htmlFor={ `woocommerce-shipping-rate__toggle-${ zone.id }` }
+		className="woocommerce-shipping-rate__name"
+	>
+		{ zone.name }
+		<FormToggle
+			id={ `woocommerce-shipping-rate__toggle-${ zone.id }` }
+			{ ...getInputProps( `${ zone.id }_enabled` ) }
+		/>
+	</label>
+);
+
+const ShippingRateInput = ( {
+	zone,
+	values,
+	setTouched,
+	setValue,
+	getFormattedRate,
+	renderInputPrefix,
+	renderInputSuffix,
+	inputProps: { className, ...restInputProps },
+} ) => {
+	const textControlClassName = classnames(
+		'muriel-input-text',
+		'woocommerce-shipping-rate__control-wrapper',
+		className
+	);
+	return (
+		<Fragment>
+			{ ! zone.toggleable && (
+				<div className="woocommerce-shipping-rate__name">
+					{ zone.name }
+				</div>
+			) }
+			{ ( ! zone.toggleable || values[ `${ zone.id }_enabled` ] ) && (
+				<TextControlWithAffixes
+					label={ __( 'Shipping cost', 'woocommerce-admin' ) }
+					required
+					className={ textControlClassName }
+					{ ...restInputProps }
+					onBlur={ () => {
+						setTouched( `${ zone.id }_rate` );
+						setValue(
+							`${ zone.id }_rate`,
+							getFormattedRate( values[ `${ zone.id }_rate` ] )
+						);
+					} }
+					prefix={ renderInputPrefix() }
+					suffix={ renderInputSuffix(
+						values[ `${ zone.id }_rate` ]
+					) }
+				/>
+			) }
+		</Fragment>
+	);
+};
+
 class ShippingRates extends Component {
 	constructor() {
 		super( ...arguments );
 
 		this.updateShippingZones = this.updateShippingZones.bind( this );
+		this.getFormattedRate = this.getFormattedRate.bind( this );
+		this.renderInputPrefix = this.renderInputPrefix.bind( this );
+		this.renderInputSuffix = this.renderInputSuffix.bind( this );
 	}
 
 	getShippingMethods( zone, type = null ) {
@@ -207,7 +286,6 @@ class ShippingRates extends Component {
 		if ( ! shippingZones.length ) {
 			return null;
 		}
-
 		return (
 			<Form
 				initialValues={ this.getInitialValues() }
@@ -229,80 +307,34 @@ class ShippingRates extends Component {
 										className="woocommerce-shipping-rate"
 										key={ zone.id }
 									>
-										<div className="woocommerce-shipping-rate__icon">
-											{ zone.locations ? (
-												zone.locations.map(
-													( location ) => (
-														<Flag
-															size={ 24 }
-															code={
-																location.code
-															}
-															key={
-																location.code
-															}
-														/>
-													)
-												)
-											) : (
-												// Icon used for zones without locations or "Rest of the world".
-												<Icon icon={ globe } />
-											) }
-										</div>
+										<ShippingRateIcon zone={ zone } />
 										<div className="woocommerce-shipping-rate__main">
-											{ zone.toggleable ? (
-												<label
-													htmlFor={ `woocommerce-shipping-rate__toggle-${ zone.id }` }
-													className="woocommerce-shipping-rate__name"
-												>
-													{ zone.name }
-													<FormToggle
-														id={ `woocommerce-shipping-rate__toggle-${ zone.id }` }
-														{ ...getInputProps(
-															`${ zone.id }_enabled`
-														) }
-													/>
-												</label>
-											) : (
-												<div className="woocommerce-shipping-rate__name">
-													{ zone.name }
-												</div>
-											) }
-											{ ( ! zone.toggleable ||
-												values[
-													`${ zone.id }_enabled`
-												] ) && (
-												<TextControlWithAffixes
-													label={ __(
-														'Shipping cost',
-														'woocommerce-admin'
-													) }
-													required
-													{ ...getInputProps(
-														`${ zone.id }_rate`
-													) }
-													onBlur={ () => {
-														setTouched(
-															`${ zone.id }_rate`
-														);
-														setValue(
-															`${ zone.id }_rate`,
-															this.getFormattedRate(
-																values[
-																	`${ zone.id }_rate`
-																]
-															)
-														);
-													} }
-													prefix={ this.renderInputPrefix() }
-													suffix={ this.renderInputSuffix(
-														values[
-															`${ zone.id }_rate`
-														]
-													) }
-													className="muriel-input-text woocommerce-shipping-rate__control-wrapper"
+											{ zone.toggleable && (
+												<ShippingRateToggle
+													zone={ zone }
+													getInputProps={
+														getInputProps
+													}
 												/>
 											) }
+											<ShippingRateInput
+												zone={ zone }
+												values={ values }
+												inputProps={ getInputProps(
+													`${ zone.id }_rate`
+												) }
+												setTouched={ setTouched }
+												setValue={ setValue }
+												getFormattedRate={
+													this.getFormattedRate
+												}
+												renderInputPrefix={
+													this.renderInputPrefix
+												}
+												renderInputSuffix={
+													this.renderInputSuffix
+												}
+											/>
 										</div>
 									</div>
 								) ) }
