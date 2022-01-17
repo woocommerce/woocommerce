@@ -66,7 +66,7 @@ importers:
       eslint: ^8.2.0
       jest: ^27.3.1
       oauth-1.0a: 2.2.6
-      ts-jest: 25.5.0
+      ts-jest: ^27
       typescript: ^4.4.4
     dependencies:
       axios: 0.24.0
@@ -81,7 +81,7 @@ importers:
       axios-mock-adapter: 1.20.0_axios@0.24.0
       eslint: 8.2.0
       jest: 27.3.1
-      ts-jest: 25.5.0_jest@27.3.1+typescript@4.4.4
+      ts-jest: 27.1.2_f41fed5da8d4caa8e32db7d6695d4125
       typescript: 4.4.4
 
   packages/js/api-core-tests:
@@ -19364,26 +19364,39 @@ packages:
     resolution: {integrity: sha512-rvuRbTarPXmMb79SmzEp8aqXNKcK+y0XaB298IXueQ8I2PsrATcPBCSPyK/dDNa2iWOhKlfNnOjdAOTBU/nkFA==}
     dev: true
 
-  /ts-jest/25.5.0_jest@27.3.1+typescript@4.4.4:
-    resolution: {integrity: sha512-govrjbOk1UEzcJ5cX5k8X8IUtFuP3lp3mrF3ZuKtCdAOQzdeCM7qualhb/U8s8SWFwEDutOqfF5PLkJ+oaYD4w==}
-    engines: {node: '>= 8'}
+  /ts-jest/27.1.2_f41fed5da8d4caa8e32db7d6695d4125:
+    resolution: {integrity: sha512-eSOiJOWq6Hhs6Khzk5wKC5sgWIXgXqOCiIl1+3lfnearu58Hj4QpE5tUhQcA3xtZrELbcvAGCsd6HB8OsaVaTA==}
+    engines: {node: ^10.13.0 || ^12.13.0 || ^14.15.0 || >=15.0.0}
     hasBin: true
     peerDependencies:
-      jest: '>=25 <26'
-      typescript: '>=3.4 <4.0'
+      '@babel/core': '>=7.0.0-beta.0 <8'
+      '@types/jest': ^27.0.0
+      babel-jest: '>=27.0.0 <28'
+      esbuild: ~0.14.0
+      jest: ^27.0.0
+      typescript: '>=3.8 <5.0'
+    peerDependenciesMeta:
+      '@babel/core':
+        optional: true
+      '@types/jest':
+        optional: true
+      babel-jest:
+        optional: true
+      esbuild:
+        optional: true
     dependencies:
+      '@babel/core': 7.12.9
+      '@types/jest': 27.0.2
       bs-logger: 0.2.6
-      buffer-from: 1.1.2
       fast-json-stable-stringify: 2.1.0
       jest: 27.3.1
+      jest-util: 27.3.1
       json5: 2.2.0
       lodash.memoize: 4.1.2
       make-error: 1.3.6
-      micromatch: 4.0.4
-      mkdirp: 0.5.5
-      semver: 6.3.0
+      semver: 7.3.5
       typescript: 4.4.4
-      yargs-parser: 18.1.3
+      yargs-parser: 20.2.9
     dev: true
 
   /ts-loader/9.2.6_typescript@4.2.4+webpack@5.64.1:
