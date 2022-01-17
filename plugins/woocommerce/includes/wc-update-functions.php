@@ -2344,7 +2344,7 @@ function wc_update_600_db_version() {
  *
  * @return false Always false, since the LookupDataStore class handles all the data filling process.
  */
-function wc_create_product_attributes_lookup_table() {
+function wc_update_630_create_product_attributes_lookup_table() {
 	$data_store = wc_get_container()->get( LookupDataStore::class );
 	if ( $data_store->check_lookup_table_exists() ) {
 		return false;
@@ -2357,8 +2357,8 @@ function wc_create_product_attributes_lookup_table() {
 
 /**
  *
- * Update DB version to 6.2.0.
+ * Update DB version to 6.3.0.
  */
-function wc_update_620_db_version() {
-	WC_Install::update_db_version( '6.2.0' );
+function wc_update_630_db_version() {
+	WC_Install::update_db_version( '6.3.0' );
 }
