@@ -36,7 +36,7 @@ export class OrderItemTax extends Model {
 /**
  * An order address.
  */
-export class OrderAddress extends Model {
+export class ShippingOrderAddress extends Model {
 	/**
 	 * The first name of the person in the address.
 	 *
@@ -56,7 +56,7 @@ export class OrderAddress extends Model {
 	 *
 	 * @type {string}
 	 */
-	public readonly companyName: string = '';
+	public readonly company: string = '';
 
 	/**
 	 * The first address line in the address.
@@ -98,21 +98,61 @@ export class OrderAddress extends Model {
 	 *
 	 * @type {string}
 	 */
-	public readonly countryCode: string = '';
+	public readonly country: string = '';
 
+	/**
+	 * Adapter to keep backward compatibility with renamed property.
+	 *
+	 * @type {string|null}
+	 */
+	get companyName() {
+		return this.company;
+	}
+
+	/**
+	 * Adapter to keep backward compatibility with renamed property.
+	 *
+	 * @type {string|null}
+	 */
+	get countryCode() {
+		return this.country;
+	}
+
+	/**
+	 * Creates a new order instance with the given properties
+	 *
+	 * @param {Object} properties The properties to set in the object.
+	 */
+	public constructor( properties?: Partial< ShippingOrderAddress > ) {
+		super();
+		Object.assign( this, properties );
+	}
+}
+
+export class BillingOrderAddress extends ShippingOrderAddress {
 	/**
 	 * The email address of the person in the address.
 	 *
-	 * @type {string}
+	 * @type {string|null}
 	 */
-	public readonly email: string = '';
+	public readonly email: undefined | string = '';
 
 	/**
 	 * The phone number of the person in the address.
 	 *
-	 * @type {string}
+	 * @type {string|null}
 	 */
-	public readonly phone: string = '';
+	public readonly phone: undefined | string = '';
+
+	/**
+	 * Creates a new order instance with the given properties
+	 *
+	 * @param {Object} properties The properties to set in the object.
+	 */
+	public constructor( properties?: Partial< BillingOrderAddress > ) {
+		super();
+		Object.assign( this, properties );
+	}
 }
 
 /**

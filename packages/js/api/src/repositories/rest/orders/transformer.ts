@@ -8,7 +8,8 @@ import {
 } from '../../../framework';
 import {
 	Order,
-	OrderAddress,
+	BillingOrderAddress,
+	ShippingOrderAddress,
 	OrderCouponLine,
 	OrderFeeLine,
 	OrderLineItem,
@@ -26,7 +27,8 @@ export function createOrderTransformer(): ModelTransformer< Order > {
 	return new ModelTransformer(
 		[
 			new IgnorePropertyTransformation( [ 'date_created', 'date_modified' ] ),
-			new ModelTransformerTransformation( 'billing', OrderAddress, createOrderAddressTransformer() ),
+			new ModelTransformerTransformation( 'billing', BillingOrderAddress, createBillingAddressTransformer() ),
+			new ModelTransformerTransformation( 'shipping', ShippingOrderAddress, createShippingAddressTransformer() ),
 			new ModelTransformerTransformation( 'tax_lines', OrderTaxRate, createOrderTaxRateTransformer() ),
 			new ModelTransformerTransformation( 'refunds', OrderRefundLine, createOrderRefundLineTransformer() ),
 			new ModelTransformerTransformation( 'coupon_lines', OrderCouponLine, createOrdeCouponLineTransformer() ),
@@ -78,7 +80,7 @@ export function createOrderTransformer(): ModelTransformer< Order > {
  *
  * @return {ModelTransformer} The created transformer.
  */
-export function createOrderAddressTransformer(): ModelTransformer< OrderAddress > {
+export function createBillingAddressTransformer(): ModelTransformer< BillingOrderAddress > {
 	return new ModelTransformer(
 		[
 			new PropertyTypeTransformation(
@@ -92,9 +94,45 @@ export function createOrderAddressTransformer(): ModelTransformer< OrderAddress 
 					state: PropertyType.String,
 					postCode: PropertyType.String,
 					country: PropertyType.String,
+					phone: PropertyType.String,
+					email: PropertyType.String,
 				},
 			),
-			new KeyChangeTransformation< OrderAddress >(
+			new KeyChangeTransformation< BillingOrderAddress >(
+				{
+					firstName: 'first_name',
+					lastName: 'last_name',
+					address1: 'address_1',
+					address2: 'address_2',
+					postCode: 'postcode',
+				},
+			),
+		],
+	);
+}
+
+/**
+ * Creates a transformer for an order address object.
+ *
+ * @return {ModelTransformer} The created transformer.
+ */
+export function createShippingAddressTransformer(): ModelTransformer< ShippingOrderAddress > {
+	return new ModelTransformer(
+		[
+			new PropertyTypeTransformation(
+				{
+					firstName: PropertyType.String,
+					lastName: PropertyType.String,
+					company: PropertyType.String,
+					address1: PropertyType.String,
+					address2: PropertyType.String,
+					city: PropertyType.String,
+					state: PropertyType.String,
+					postCode: PropertyType.String,
+					country: PropertyType.String
+				},
+			),
+			new KeyChangeTransformation< ShippingOrderAddress >(
 				{
 					firstName: 'first_name',
 					lastName: 'last_name',

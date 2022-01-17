@@ -9,7 +9,8 @@ import {
 	DeletesModels,
 } from '../../framework';
 import {
-	OrderAddressUpdateParams,
+	BillingOrderAddressUpdateParams,
+	ShippingOrderAddressUpdateParams,
 	OrderCouponUpdateParams,
 	OrderDataUpdateParams,
 	OrderFeeUpdateParams,
@@ -19,7 +20,8 @@ import {
 	OrderTaxUpdateParams,
 	OrderTotalUpdateParams,
 	OrderItemMeta,
-	OrderAddress,
+	BillingOrderAddress,
+	ShippingOrderAddress,
 	OrderCouponLine,
 	OrderFeeLine,
 	OrderLineItem,
@@ -33,7 +35,8 @@ import { ObjectLinks } from '../shared-types';
 /**
  * The parameters that orders can update.
  */
-type OrderUpdateParams = OrderAddressUpdateParams
+type OrderUpdateParams = BillingOrderAddressUpdateParams
+	& ShippingOrderAddressUpdateParams
 	& OrderCouponUpdateParams
 	& OrderDataUpdateParams
 	& OrderFeeUpdateParams
@@ -194,16 +197,16 @@ export class Order extends OrderItemMeta {
 	/**
 	 * The billing address.
 	 *
-	 * @type {OrderAddress}
+	 * @type {BillingOrderAddress}
 	 */
-	public readonly billing: OrderAddress | null = null;
+	public readonly billing: BillingOrderAddress | null = null;
 
 	/**
 	 * The shipping address.
 	 *
-	 * @type {OrderAddress}
+	 * @type {ShippingOrderAddress}
 	 */
-	public readonly shipping: OrderAddress | null = null;
+	public readonly shipping: ShippingOrderAddress | null = null;
 
 	/**
 	 * Name of the payment method.
