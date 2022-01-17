@@ -13,6 +13,9 @@ trait DraftOrderTrait {
 	 * @return integer
 	 */
 	protected function get_draft_order_id() {
+		if ( ! wc()->session ) {
+			wc()->initialize_session();
+		}
 		return wc()->session->get( 'store_api_draft_order', 0 );
 	}
 
@@ -22,6 +25,9 @@ trait DraftOrderTrait {
 	 * @param integer $order_id Draft order ID.
 	 */
 	protected function set_draft_order_id( $order_id ) {
+		if ( ! wc()->session ) {
+			wc()->initialize_session();
+		}
 		wc()->session->set( 'store_api_draft_order', $order_id );
 	}
 
