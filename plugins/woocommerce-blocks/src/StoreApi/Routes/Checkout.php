@@ -119,7 +119,7 @@ class Checkout extends AbstractCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_response( \WP_REST_Request $request ) {
-		$this->create_or_update_draft_order();
+		$this->create_or_update_draft_order( $request );
 
 		return $this->prepare_item_for_response(
 			(object) [
@@ -161,7 +161,7 @@ class Checkout extends AbstractCartRoute {
 		 * uses the up to date customer address.
 		 */
 		$this->update_customer_from_request( $request );
-		$this->create_or_update_draft_order();
+		$this->create_or_update_draft_order( $request );
 		$this->update_order_from_request( $request );
 
 		/**
@@ -298,9 +298,10 @@ class Checkout extends AbstractCartRoute {
 	/**
 	 * Create or update a draft order based on the cart.
 	 *
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @throws RouteException On error.
 	 */
-	private function create_or_update_draft_order() {
+	private function create_or_update_draft_order( \WP_REST_Request $request ) {
 		$this->order = $this->get_draft_order();
 
 		if ( ! $this->order ) {
@@ -364,10 +365,16 @@ class Checkout extends AbstractCartRoute {
 		// Store order ID to session.
 		$this->set_draft_order_id( $this->order->get_id() );
 
-		// Try to reserve stock for 10 mins, if available.
+		/**
+		 * Try to reserve stock for the order.
+		 *
+		 * If creating a draft order on checkout entry, set the timeout to 10 mins.
+		 * If POSTing to the checkout (attempting to pay), set the timeout to 60 mins (using the woocommerce_hold_stock_minutes option).
+		 */
 		try {
 			$reserve_stock = new ReserveStock();
-			$reserve_stock->reserve_stock_for_order( $this->order, 10 );
+			$duration      = $request->get_method() === 'POST' ? (int) get_option( 'woocommerce_hold_stock_minutes', 60 ) : 10;
+			$reserve_stock->reserve_stock_for_order( $this->order, $duration );
 		} catch ( ReserveStockException $e ) {
 			throw new RouteException(
 				$e->getErrorCode(),
