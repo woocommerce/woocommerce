@@ -9,6 +9,11 @@ const {
 	withRestApi,
 } = require( '@woocommerce/e2e-utils' );
 
+/**
+ * External dependencies
+ */
+const { it, describe, beforeAll, afterAll } = require( '@jest/globals' );
+
 const customerEmailAddress = 'john.doe.test@example.com';
 
 const runMyAccountCreateAccountTest = () => {

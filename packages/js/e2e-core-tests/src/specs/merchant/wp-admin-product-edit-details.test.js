@@ -7,8 +7,13 @@ const {
 	merchant,
 	uiUnblocked,
 	verifyAndPublish,
-	createSimpleProduct
+	createSimpleProduct,
 } = require( '@woocommerce/e2e-utils' );
+
+/**
+ * External dependencies
+ */
+const { it, describe, beforeAll } = require( '@jest/globals' );
 
 let productId;
 

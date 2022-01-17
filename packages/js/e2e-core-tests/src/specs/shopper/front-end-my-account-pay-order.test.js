@@ -9,6 +9,11 @@ const {
 	uiUnblocked
 } = require( '@woocommerce/e2e-utils' );
 
+/**
+ * External dependencies
+ */
+const { it, describe, beforeAll, afterAll } = require( '@jest/globals' );
+
 let simplePostIdValue;
 let orderNum;
 const config = require( 'config' );
