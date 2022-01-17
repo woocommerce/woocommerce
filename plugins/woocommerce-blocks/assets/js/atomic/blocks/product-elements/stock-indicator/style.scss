@@ -3,15 +3,4 @@
 	margin-bottom: em($gap-small);
 	display: block;
 	@include font-size(small);
-
-	&--in-stock {
-		color: $in-stock-color;
-	}
-	&--out-of-stock {
-		color: $no-stock-color;
-	}
-	&--low-stock,
-	&--available-on-backorder {
-		color: $low-stock-color;
-	}
 }

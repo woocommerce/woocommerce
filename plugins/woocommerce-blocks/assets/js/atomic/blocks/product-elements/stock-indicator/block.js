@@ -14,6 +14,10 @@ import { withProductDataContext } from '@woocommerce/shared-hocs';
  * Internal dependencies
  */
 import './style.scss';
+import {
+	useColorProps,
+	useTypographyProps,
+} from '../../../../hooks/style-attributes';
 
 /**
  * Product Stock Indicator Block Component.
@@ -22,9 +26,12 @@ import './style.scss';
  * @param {string} [props.className] CSS Class name for the component.
  * @return {*} The component.
  */
-const Block = ( { className } ) => {
+const Block = ( props ) => {
+	const { className } = props;
 	const { parentClassName } = useInnerBlockLayoutContext();
 	const { product } = useProductDataContext();
+	const colorProps = useColorProps( props );
+	const typographyProps = useTypographyProps( props );
 
 	if ( ! product.id || ! product.is_purchasable ) {
 		return null;
@@ -38,6 +45,7 @@ const Block = ( { className } ) => {
 		<div
 			className={ classnames(
 				className,
+				colorProps.className,
 				'wc-block-components-product-stock-indicator',
 				{
 					[ `${ parentClassName }__stock-indicator` ]: parentClassName,
@@ -47,6 +55,7 @@ const Block = ( { className } ) => {
 					'wc-block-components-product-stock-indicator--available-on-backorder': !! isBackordered,
 				}
 			) }
+			style={ { ...colorProps.style, ...typographyProps.style } }
 		>
 			{ lowStock
 				? lowStockText( lowStock )
