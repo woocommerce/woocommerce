@@ -1,5 +1,6 @@
 # Unreleased
 -	Make the Inbox note title clickable. #7975
+-   Fix incorrectly displayed note created date. #8179
 
 # 2.1.0
 

@@ -157,7 +157,6 @@ const InboxNoteCard: React.FC< InboxNoteProps > = ( {
 	}
 
 	const unread = is_read === false;
-	const date = dateCreated;
 	const hasImage = layout === 'thumbnail';
 	const cardClassName = classnames(
 		'woocommerce-inbox-message',
@@ -188,9 +187,9 @@ const InboxNoteCard: React.FC< InboxNoteProps > = ( {
 						{ unread && (
 							<div className="woocommerce-inbox-message__unread-indicator" />
 						) }
-						{ date && (
+						{ dateCreatedGmt && (
 							<span className="woocommerce-inbox-message__date">
-								{ moment.utc( date ).fromNow() }
+								{ moment.utc( dateCreatedGmt ).fromNow() }
 							</span>
 						) }
 						<H className="woocommerce-inbox-message__title">
