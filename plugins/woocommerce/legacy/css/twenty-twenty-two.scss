@@ -747,6 +747,12 @@ $tt2-gray: #f7f7f7;
 						color: var(--wp--preset--color--black);
 					}
 				}
+
+				&.woocommerce-orders-table__cell-order-actions {
+					a.button {
+						display: block;
+					}
+				}
 			}
 		}
 	}
