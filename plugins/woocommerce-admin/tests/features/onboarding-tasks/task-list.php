@@ -349,4 +349,18 @@ class WC_Tests_OnboardingTasks_TaskList extends WC_Unit_Test_Case {
 		$json = $list->get_json();
 		$this->assertEquals( array_column( $json['tasks'], 'id' ), array( 'task-2', 'task-3', 'task-1', 'task-4' ) );
 	}
+
+	/**
+	 * Test that the list ID is retreived.
+	 */
+	public function test_get_list_id() {
+		$this->assertEquals( 'setup', $this->list->get_list_id() );
+	}
+
+	/**
+	 * Test that tracks events are recorded with the correct IDs.
+	 */
+	public function test_record_tracks_event() {
+		$this->assertEquals( 'tasklist_test_event', $this->list->record_tracks_event( 'test_event' ) );
+	}
 }

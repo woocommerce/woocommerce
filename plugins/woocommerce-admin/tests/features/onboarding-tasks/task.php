@@ -365,5 +365,31 @@ class WC_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 		// Given levels are the same it should return the comparison of is_complete.
 		$this->assertEquals( 0, $result );
 	}
+
+	/**
+	 * Test that the parent list ID is retreived.
+	 */
+	public function test_get_list_id() {
+		$task = new TestTask(
+			array(
+				'id' => 'wc-unit-test-task',
+			)
+		);
+
+		$this->assertEquals( 'extended', $task->get_list_id() );
+	}
+
+	/**
+	 * Test that tracks events are recorded with the correct IDs.
+	 */
+	public function test_record_tracks_event() {
+		$task = new TestTask(
+			array(
+				'id' => 'wc-unit-test-task',
+			)
+		);
+
+		$this->assertEquals( 'extended_tasklist_test_event', $task->record_tracks_event( 'test_event' ) );
+	}
 }
 

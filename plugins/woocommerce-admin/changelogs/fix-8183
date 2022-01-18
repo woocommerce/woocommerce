@@ -1,0 +1,4 @@
+Significance: patch
+Type: Dev
+
+Fix task ID class check and add tests around tracking #8185
