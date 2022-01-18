@@ -69,6 +69,11 @@ export function createOrderTransformer(): ModelTransformer< Order > {
 					paymentMethod: 'payment_method',
 					transactionId: 'transaction_id',
 					setPaid: 'set_paid',
+					lineItems: 'line_items',
+					taxLines: 'tax_lines',
+					shippingLines: 'shipping_lines',
+					feeLines: 'fee_lines',
+					couponLines: 'coupon_lines',
 				},
 			),
 		],
@@ -213,6 +218,7 @@ function createOrdeCouponLineTransformer(): ModelTransformer< OrderCouponLine > 
 			new KeyChangeTransformation< OrderCouponLine >(
 				{
 					discountTax: 'discount_tax',
+					metaData: 'meta_data'
 				},
 			),
 		],
