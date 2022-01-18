@@ -4,10 +4,8 @@
 
 **WooCommerce**
 
-* Enhancement - Add support for 2022 theme. ([#31536](https://github.com/woocommerce/woocommerce/pull/31536)) ([#31575](https://github.com/woocommerce/woocommerce/pull/31575)) ([#31611](https://github.com/woocommerce/woocommerce/pull/31611)) ([#31619](https://github.com/woocommerce/woocommerce/pull/31619)) ([#31626](https://github.com/woocommerce/woocommerce/pull/31626)) ([#31630](https://github.com/woocommerce/woocommerce/pull/31630)) ([#31632](https://github.com/woocommerce/woocommerce/pull/31632)) ([#31633](https://github.com/woocommerce/woocommerce/pull/31633)) ([#31634](https://github.com/woocommerce/woocommerce/pull/31634))
 * Add - Admin notice warning about the upcoming minimum PHP 4.2 version bump coming in WooCommerce 6.5. ([#31557](https://github.com/woocommerce/woocommerce/pull/31557))
 * Tweak - Removed images referred to from deprecated functions. ([#31395](https://github.com/woocommerce/woocommerce/pull/31395))
-* Tweak - Use `--wp--preset--color--secondary` as default backgroud of `.woocommerce mark` elements. ([#31631](https://github.com/woocommerce/woocommerce/pull/31631))
 * Fix - Checkout scroll to notices fallback scroll element. ([#30955](https://github.com/woocommerce/woocommerce/pull/30955))
 * Fix - Prevent PhotoSwipe tap from interacting with elements directly underneath. Props @Edsuns and @andi34. ([#31591](https://github.com/woocommerce/woocommerce/pull/31591))
 * Dev - Added logic to `do_variation_action` prematurely return on custom actions. ([#31088](https://github.com/woocommerce/woocommerce/pull/31088))
