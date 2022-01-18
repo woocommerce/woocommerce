@@ -155,7 +155,7 @@ class Tax extends Task {
 	public static function get_automated_support_countries() {
 		// https://developers.taxjar.com/api/reference/#countries .
 		$tax_supported_countries = array_merge(
-			array( 'US', 'CA', 'AU' ),
+			array( 'US', 'CA', 'AU', 'GB' ),
 			WC()->countries->get_european_union_countries()
 		);
 

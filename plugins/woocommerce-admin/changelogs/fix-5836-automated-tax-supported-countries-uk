@@ -1,0 +1,4 @@
+Significance: patch
+Type: Fix
+
+Fix get_automated_tax_supported_countries doesn't include UK. #8180
