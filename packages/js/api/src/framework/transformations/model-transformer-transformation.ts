@@ -74,12 +74,27 @@ export class ModelTransformerTransformation< T extends Model > implements ModelT
 	 * @return {*} The transformed properties.
 	 */
 	public toModel( properties: any ): any {
-		const val = properties[ this.property ];
+		let propertyName = this.property;
+		let val = properties[ propertyName ];
+
+		if ( ! val ) {
+			/*
+			 * Properties are defined in snake_case format, but the properties in the models are camelCase.
+			 * Due to how the hydration of the model works, using TypeScript's Partial, the properties object
+			 * might have been transformed from snake_case to camelCase already, so we try to convert
+			 * the property name to camelCase before giving up.
+			 */
+			propertyName = propertyName.toLowerCase().replace(/[^a-zA-Z0-9]+(.)/g, function (_match, chr) {
+				return chr.toUpperCase();
+			});
+			val = properties[ propertyName ];
+		}
+
 		if ( val ) {
 			if ( Array.isArray( val ) ) {
-				properties[ this.property ] = val.map( ( v ) => this.transformer.toModel( this.modelClass, v ) );
+				properties[ propertyName ] = val.map( ( v ) => this.transformer.toModel( this.modelClass, v ) );
 			} else {
-				properties[ this.property ] = this.transformer.toModel( this.modelClass, val );
+				properties[ propertyName ] = this.transformer.toModel( this.modelClass, val );
 			}
 		}
 
