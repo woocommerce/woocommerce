@@ -4,7 +4,7 @@ Tags: e-commerce, store, sales, sell, woo, shop, cart, checkout, downloadable, d
 Requires at least: 5.6
 Tested up to: 5.8
 Requires PHP: 7.0
-Stable tag: 6.1.0
+Stable tag: 6.1.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -159,6 +159,27 @@ If you encounter issues with the shop/category pages after an update, flush the 
 WooCommerce comes with some sample data you can use to see how products look; import sample_products.xml via the [WordPress importer](https://wordpress.org/plugins/wordpress-importer/). You can also use the core [CSV importer](https://docs.woocommerce.com/document/product-csv-importer-exporter/?utm_source=wp%20org%20repo%20listing&utm_content=3.6) or our [CSV Import Suite extension](https://woocommerce.com/products/product-csv-import-suite/?utm_source=wp%20org%20repo%20listing&utm_content=3.6) to import sample_products.csv
 
 == Changelog ==
+
+= 6.1.1 2022-01-20 =
+
+**WooCommerce**
+
+* Enhancement - Add support for 2022 theme shop and product pages. ( [#31536](https://github.com/woocommerce/woocommerce/pull/31536) )
+* Enhancement - Add support for 2022 my account pages. ( [#31575](https://github.com/woocommerce/woocommerce/pull/31575) )
+* Enhancement - Add support for 2022 checkout page. ( [#31630](https://github.com/woocommerce/woocommerce/pull/31630) )
+* Fix - Use inline `onload` event instead of jQuery `load`. ( [#31623](https://github.com/woocommerce/woocommerce/pull/31623) )
+* Fix - Removes the revert warning about is_ajax. ( [#31672](https://github.com/woocommerce/woocommerce/pull/31672) )
+* Tweak - Better styling for checkout form for 2022 theme. ( [#31619](https://github.com/woocommerce/woocommerce/pull/31619) )
+* Tweak - Center product cards in the 2022 theme. ( [#31626](https://github.com/woocommerce/woocommerce/pull/31626) )
+* Tweak - Fix font sizes in single product tabs area in 2022 theme. ( [#31632](https://github.com/woocommerce/woocommerce/pull/31632) )
+* Tweak - Modify background color for `mark` elements in 2022 theme. ( [#31631](https://github.com/woocommerce/woocommerce/pull/31631) )
+* Tweak - Adjusts basis of overlay in 2022 theme checkout. ( [#31633](https://github.com/woocommerce/woocommerce/pull/31633) )
+* Tweak - Improve order details table on narrow viewports in 2022 theme. ( [#31634](https://github.com/woocommerce/woocommerce/pull/31634) )
+
+**WooCommerce Blocks - 6.5.2**
+
+* Fix - Update WooCommerce plugin slug for Block Templates. ( [#5519](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5519) )
+
 
 = 6.1.0 2022-01-11 =
 
