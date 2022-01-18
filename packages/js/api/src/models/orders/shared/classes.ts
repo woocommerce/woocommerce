@@ -249,6 +249,16 @@ export class OrderLineItem extends OrderItemMeta {
 	 * @type {string|null}
 	 */
 	public readonly parentName: string | null = null;
+
+	/**
+	 * Creates a new order instance with the given properties
+	 *
+	 * @param {Object} properties The properties to set in the object.
+	 */
+	public constructor( properties?: Partial< OrderLineItem > ) {
+		super();
+		Object.assign( this, properties );
+	}
 }
 
 /**
