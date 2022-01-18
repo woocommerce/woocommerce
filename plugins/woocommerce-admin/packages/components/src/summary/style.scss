@@ -315,10 +315,20 @@ $border: $gray-200;
 	}
 
 	.woocommerce-summary__item-label {
-		display: block;
+		display: flex;
 		margin-bottom: $gap;
 
 		color: $gray-700;
+	}
+
+	.woocommerce-summary__info-tooltip {
+		color: $gray-600;
+		line-height: 1em;
+		margin-left: $gap-smallest;
+
+		svg {
+			fill: currentColor;
+		}
 	}
 
 	.woocommerce-summary__item-value {

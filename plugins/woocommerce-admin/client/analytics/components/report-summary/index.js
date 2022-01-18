@@ -82,6 +82,7 @@ export class ReportSummary extends Component {
 					label,
 					type,
 					isReverseTrend,
+					labelTooltipText,
 				} = chart;
 				const newPath = { chart: key };
 				if ( orderby ) {
@@ -109,6 +110,7 @@ export class ReportSummary extends Component {
 						prevValue={ prevValue }
 						selected={ isSelected }
 						value={ value }
+						labelTooltipText={ labelTooltipText }
 						onLinkClickCallback={ () => {
 							// Wider than a certain breakpoint, there is no dropdown so avoid calling onToggle.
 							if ( onToggle ) {
