@@ -1123,17 +1123,3 @@ function get_woocommerce_term_meta( $term_id, $key, $single = true ) {
 	wc_deprecated_function( 'get_woocommerce_term_meta', '3.6', 'get_term_meta' );
 	return function_exists( 'get_term_meta' ) ? get_term_meta( $term_id, $key, $single ) : get_metadata( 'woocommerce_term', $term_id, $key, $single );
 }
-
-if ( ! function_exists( 'is_ajax' ) ) {
-
-	/**
-	 * Is_ajax - Returns true when the page is loaded via ajax.
-	 *
-	 * @deprecated 6.1.0
-	 * @return bool
-	 */
-	function is_ajax() {
-		wc_deprecated_function( 'is_ajax', '6.1.0', 'wp_doing_ajax' );
-		return function_exists( 'wp_doing_ajax' ) ? wp_doing_ajax() : Constants::is_defined( 'DOING_AJAX' );
-	}
-}
