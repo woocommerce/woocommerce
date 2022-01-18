@@ -29,6 +29,7 @@ class WC_Tests_Coupon_Data_Store extends WC_Unit_Test_Case {
 
 		$this->assertEquals( $code, $coupon->get_code() );
 		$this->assertNotEquals( 0, $coupon->get_id() );
+		$this->assertNotEquals( 'publish', $coupon->get_status() );
 	}
 
 	/**
@@ -95,6 +96,7 @@ class WC_Tests_Coupon_Data_Store extends WC_Unit_Test_Case {
 
 		$this->assertEquals( 5, $coupon_read->get_usage_count() );
 		$this->assertEquals( $code, $coupon_read->get_code() );
+		$this->assertEquals( 'publish', $coupon_read->get_status() );
 		$this->assertEquals( 0, $coupon->get_amount() );
 		$this->assertEquals( 'This is a test coupon.', $coupon_read->get_description() );
 	}

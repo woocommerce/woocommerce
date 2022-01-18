@@ -159,6 +159,7 @@ class WC_Template_Loader {
 	 * @since  3.0.0
 	 * @since  5.5.0 If a block template with the same name exists, return an
 	 * empty string.
+	 * @since  6.3.0 It checks custom product taxonomies
 	 * @return string
 	 */
 	private static function get_template_loader_default_file() {
@@ -170,14 +171,16 @@ class WC_Template_Loader {
 		} elseif ( is_product_taxonomy() ) {
 			$object = get_queried_object();
 
-			if ( is_tax( 'product_cat' ) || is_tax( 'product_tag' ) ) {
-				if ( self::has_block_template( 'taxonomy-' . $object->taxonomy ) ) {
-					$default_file = '';
-				} else {
+			if ( self::has_block_template( 'taxonomy-' . $object->taxonomy ) ) {
+				$default_file = '';
+			} else {
+				if ( is_tax( 'product_cat' ) || is_tax( 'product_tag' ) ) {
 					$default_file = 'taxonomy-' . $object->taxonomy . '.php';
+				} elseif ( ! self::has_block_template( 'archive-product' ) ) {
+					$default_file = 'archive-product.php';
+				} else {
+					$default_file = '';
 				}
-			} elseif ( ! self::has_block_template( 'archive-product' ) ) {
-				$default_file = 'archive-product.php';
 			}
 		} elseif (
 			( is_post_type_archive( 'product' ) || is_page( wc_get_page_id( 'shop' ) ) ) &&
