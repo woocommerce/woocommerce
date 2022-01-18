@@ -8,6 +8,7 @@
 * Enhancement - Add support for 2022 my account pages. ( [#31575](https://github.com/woocommerce/woocommerce/pull/31575) )
 * Enhancement - Add support for 2022 checkout page. ( [#31630](https://github.com/woocommerce/woocommerce/pull/31630) )
 * Fix - Use inline `onload` event instead of jQuery `load`. ( [#31623](https://github.com/woocommerce/woocommerce/pull/31623) )
+* Fix - Removes the revert warning about is_ajax. ( [#31672](https://github.com/woocommerce/woocommerce/pull/31672) )
 * Tweak - Better styling for checkout form for 2022 theme. ( [#31619](https://github.com/woocommerce/woocommerce/pull/31619) )
 * Tweak - Center product cards in the 2022 theme. ( [#31626](https://github.com/woocommerce/woocommerce/pull/31626) )
 * Tweak - Fix font sizes in single product tabs area in 2022 theme. ( [#31632](https://github.com/woocommerce/woocommerce/pull/31632) )
