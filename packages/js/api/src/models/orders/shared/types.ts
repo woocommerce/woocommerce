@@ -30,14 +30,14 @@ export type OrderTotalUpdateParams = 'total' | 'totalTax';
 /**
  * Billing address properties
  */
-export type BillingOrderAddressUpdateParams = 'firstName' | 'lastName' | 'companyName' | 'address1'
-	| 'address2' | 'city' | 'state' | 'postCode' | 'countryCode' | 'email' | 'phone';
+export type BillingOrderAddressUpdateParams = 'firstName' | 'lastName' | 'company' | 'address1'
+	| 'address2' | 'city' | 'state' | 'postCode' | 'country' | 'email' | 'phone';
 
 /**
  * Shipping address properties
  */
-export type ShippingOrderAddressUpdateParams = 'firstName' | 'lastName' | 'companyName' | 'address1'
-	| 'address2' | 'city' | 'state' | 'postCode' | 'countryCode';
+export type ShippingOrderAddressUpdateParams = 'firstName' | 'lastName' | 'company' | 'address1'
+	| 'address2' | 'city' | 'state' | 'postCode' | 'country';
 
 /**
  * Line item properties
