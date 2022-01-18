@@ -1,14 +1,5 @@
 # Unreleased
 
-## Fixed
-
-- Added the `resolveSingleE2EPath` method which builds a path to a specific E2E test
-  - It still supports the use of `plugins/woocommerce` and/or `tests/e2e` in file paths to avoid any breaking changes
-
-## Fixed
-
-- Added the ability to take screenshots from multiple test failures (when retried) in `utils/take-screenshot.js`.
-
 ## Added
 
 - Added `post-results-to-github-pr.js` to post smoke test results to a GitHub PR.
