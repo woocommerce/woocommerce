@@ -55,7 +55,13 @@ const jsonPayloadFull = JSON.stringify({
 	date_paid: 'Foo Date Paid',
 	cart_hash: 'Foo Cart Hash',
 	number: '1218',
-	meta_data: [],
+	meta_data: [
+		{
+			id: 123,
+			key: "Foo Metadata Key 1",
+			value: "Foo Metadata Value 1"
+		}
+	],
 	line_items: [
 		{
 			id: 6137,
@@ -265,6 +271,14 @@ describe( 'OrderTransformer', () => {
 		//expect(shipping.phone).toStrictEqual('Shipping Phone');
 		expect( createShippingAddressTransformer().fromModel(shipping) ).toStrictEqual(JSON.parse(jsonPayloadFull).shipping);
 
+		// Metadata
+		//expect(order.metaData).toHaveLength(1);
+		//expect(order.metaData[0]['id']).toStrictEqual(123);
+		//expect(order.metaData[0]['key']).toStrictEqual('Foo Metadata Key 1');
+		//expect(order.metaData[0]['value']).toStrictEqual('Foo Metadata Value 1');
 
+		// Line Items
+		console.log(order.lineItems);
+		expect(order.lineItems).toHaveLength(1);
 	} );
 } );
