@@ -40,7 +40,7 @@ printf(
 		<li class="woocommerce-OrderUpdate comment note">
 			<div class="woocommerce-OrderUpdate-inner comment_container">
 				<div class="woocommerce-OrderUpdate-text comment-text">
-					<p class="woocommerce-OrderUpdate-meta meta"><?php echo date_i18n( esc_html__( 'l jS \o\f F Y, h:ia', 'woocommerce' ), strtotime( $note->comment_date ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></p>
+					<p class="woocommerce-OrderUpdate-meta meta"><?php echo date_i18n( esc_html__( 'j F Y g:i', 'woocommerce' ), strtotime( $note->comment_date ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></p>
 					<div class="woocommerce-OrderUpdate-description description">
 						<?php echo wpautop( wptexturize( $note->comment_content ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 					</div>
