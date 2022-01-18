@@ -85,7 +85,7 @@ class DataStore extends DownloadsDataStore implements DataStoreInterface {
 			$this->initialize_queries();
 			$selections = $this->selected_columns( $query_args );
 			$this->add_sql_query_params( $query_args );
-			$this->add_time_period_sql_params( $query_args, $table_name );
+			$where_time = $this->add_time_period_sql_params( $query_args, $table_name );
 			$this->add_intervals_sql_params( $query_args, $table_name );
 
 			$this->interval_query->add_sql_clause( 'select', $this->get_sql_clause( 'select' ) . ' AS time_interval' );
@@ -94,7 +94,7 @@ class DataStore extends DownloadsDataStore implements DataStoreInterface {
 
 			$db_intervals = $wpdb->get_col(
 				$this->interval_query->get_query_statement()
-			); // WPCS: cache ok, DB call ok, , unprepared SQL ok.
+			); // phpcs:ignore cache ok, DB call ok, unprepared SQL ok.
 
 			$db_records_count = count( $db_intervals );
 
@@ -109,11 +109,13 @@ class DataStore extends DownloadsDataStore implements DataStoreInterface {
 			$this->interval_query->str_replace_clause( 'where_time', 'date_created', 'timestamp' );
 			$this->total_query->add_sql_clause( 'select', $selections );
 			$this->total_query->add_sql_clause( 'where', $this->interval_query->get_sql_clause( 'where' ) );
+			if ( $where_time ) {
+				$this->total_query->add_sql_clause( 'where_time', $where_time );
+			}
 			$totals = $wpdb->get_results(
 				$this->total_query->get_query_statement(),
 				ARRAY_A
-			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
-
+			); // phpcs:ignore cache ok, DB call ok, unprepared SQL ok.
 			if ( null === $totals ) {
 				return new \WP_Error( 'woocommerce_analytics_downloads_stats_result_failed', __( 'Sorry, fetching downloads data failed.', 'woocommerce-admin' ) );
 			}
@@ -128,7 +130,7 @@ class DataStore extends DownloadsDataStore implements DataStoreInterface {
 			$intervals = $wpdb->get_results(
 				$this->interval_query->get_query_statement(),
 				ARRAY_A
-			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+			); // phpcs:ignore cache ok, DB call ok, unprepared SQL ok.
 
 			if ( null === $intervals ) {
 				return new \WP_Error( 'woocommerce_analytics_downloads_stats_result_failed', __( 'Sorry, fetching downloads data failed.', 'woocommerce-admin' ) );

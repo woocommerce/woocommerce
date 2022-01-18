@@ -1,0 +1,4 @@
+Significance: patch
+Type: Fix
+
+Fix incorrect total count of downloads on the analytics download report. #8182
