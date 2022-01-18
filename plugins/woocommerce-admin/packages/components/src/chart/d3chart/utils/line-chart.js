@@ -93,7 +93,10 @@ export const getLineData = ( data, orderedKeys ) =>
 		visible: row.visible,
 		label: row.label,
 		values: data.map( ( d ) => ( {
+			// To have the same X-axis scale, we use the same dates for all lines.
 			date: d.date,
+			// To have actual date for the screenReader, we need to use label date.
+			labelDate: d[ row.key ].labelDate,
 			focus: row.focus,
 			value: get( d, [ row.key, 'value' ], 0 ),
 			visible: row.visible,
@@ -144,7 +147,6 @@ export const drawLines = ( node, data, params, scales, formats, tooltip ) => {
 			.attr( 'd', ( d ) => line( d.values ) );
 
 	const minDataPointSpacing = 36;
-
 	// eslint-disable-next-line no-unused-expressions
 	width / params.uniqueDates.length > minDataPointSpacing &&
 		series
@@ -173,7 +175,9 @@ export const drawLines = ( node, data, params, scales, formats, tooltip ) => {
 			.attr( 'role', 'graphics-symbol' )
 			.attr( 'aria-label', ( d ) => {
 				const label = formats.screenReaderFormat(
-					d.date instanceof Date ? d.date : moment( d.date ).toDate()
+					d.labelDate instanceof Date
+						? d.labelDate
+						: moment( d.labelDate ).toDate()
 				);
 				return `${ label } ${ tooltip.valueFormat( d.value ) }`;
 			} )

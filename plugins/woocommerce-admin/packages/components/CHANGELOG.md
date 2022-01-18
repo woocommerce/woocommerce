@@ -6,6 +6,7 @@
 -   Fix misaligned "Rows per page" dropdown. #8113
 -   Add `labelPositionToLeft` prop to the `OrderStatus` component. #8121
 -   Remove dev dependency `@woocommerce/wc-admin-settings`. #8057
+-   Fix incorrect screen reader text generated for data points on charts table. #8181
 
 # 8.1.1
 

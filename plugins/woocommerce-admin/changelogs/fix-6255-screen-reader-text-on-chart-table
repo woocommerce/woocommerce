@@ -1,0 +1,4 @@
+Significance: patch
+Type: Fix
+
+Fix incorrect screen reader text generated for data points on charts table. #8181
