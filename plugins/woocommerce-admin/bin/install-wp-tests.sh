@@ -150,6 +150,11 @@ install_db() {
 	mysqladmin create $DB_NAME --user="$DB_USER" --password="$DB_PASS"$EXTRA
 }
 
+version() {
+	# convert version numbers to digits
+	echo "$@" | awk -F. '{ printf("%03d%03d%03d\n", $1,$2,$3); }';
+}
+
 install_deps() {
 
 	# Script Variables
@@ -170,15 +175,25 @@ install_deps() {
 	php wp-cli.phar core install --url="$WP_SITE_URL" --title="Example" --admin_user=admin --admin_password=password --admin_email=info@example.com --path=$WP_CORE_DIR --skip-email
 
 	# Install WooCommerce (latest non-hyphenated (beta, RC) tag)
-	if [[ "$WC_VERSION" == "" || "$WC_VERSION" == "latest" ]]; then
-		LATEST_WC_TAG="$(git ls-remote --tags https://github.com/woocommerce/woocommerce.git | awk '{print $2}' | sed 's/^refs\/tags\///' | grep -E '^[0-9]\.[0-9]\.[0-9]$' | sort -V | tail -n 1)"
+	if [[ "$WC_VERSION" == "latest" ]]; then
+		INSTALL_WC_TAG="$(git ls-remote --tags https://github.com/woocommerce/woocommerce.git | awk '{print $2}' | sed 's/^refs\/tags\///' | grep -E '^[0-9]\.[0-9]\.[0-9]$' | sort -V | tail -n 1)"
 	else
-		LATEST_WC_TAG="$WC_VERSION"
+		INSTALL_WC_TAG="$WC_VERSION"
 	fi
-	cd "wp-content/plugins/"
-	# As zip file does not include tests, we have to get it from git repo.
-	git clone --depth 1 --branch $LATEST_WC_TAG https://github.com/woocommerce/woocommerce.git
 
+
+	# As zip file does not include tests, we have to get it from git repo.
+	git clone --depth 1 --branch $INSTALL_WC_TAG https://github.com/woocommerce/woocommerce.git
+
+	if [ "$(version "$INSTALL_WC_TAG")" -ge "$(version "6.0.0")" ]; then
+		# WooCommerce 6.0.0 introduced a breaking change to the repo structure.
+		# We need to clone and use the correct folder path.
+		mv woocommerce/plugins/woocommerce wp-content/plugins/
+	else
+		mv woocommerce wp-content/plugins/
+	fi
+
+	cd "wp-content/plugins/"
 	# Bring in WooCommerce Core dependencies
 	cd "woocommerce"
  	composer install --no-dev

@@ -343,46 +343,38 @@ class WC_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 		$coupon_1->set_amount( $coupon_1_amount );
 		$coupon_1->save();
 
-		// Coupon that will be deleted.
-		$coupon_2_amount = 7;
+		// Coupon that will be deleted, but order item will have metadata that will preserve its ID.
+		$coupon_2_amount = 1;
 		$coupon_2        = WC_Helper_Coupon::create_coupon( 'coupon_2' );
 		$coupon_2->set_amount( $coupon_2_amount );
 		$coupon_2->save();
-
-		// Coupon that will be deleted, but order item will have metadata that will preserve its ID.
-		$coupon_3_amount = 1;
-		$coupon_3        = WC_Helper_Coupon::create_coupon( 'coupon_3' );
-		$coupon_3->set_amount( $coupon_3_amount );
-		$coupon_3->save();
-		$coupon_3_id = $coupon_3->get_id();
+		$coupon_2_id = $coupon_2->get_id();
 
 		// Order with coupons.
 		$order = WC_Helper_Order::create_order( 1, $product );
 		$order->set_status( 'completed' );
 		$order->apply_coupon( $coupon_1 );
 		$order->apply_coupon( $coupon_2 );
-		$order->apply_coupon( $coupon_3 );
 		$order->calculate_totals();
 		$order->save();
 
-		// Add coupon_3 metadata to its order item.
+		// Add coupon_2 metadata to its order item.
 		$coupon_items = $order->get_items( 'coupon' );
 
 		// This would normally happen at checkout.
 		foreach ( $coupon_items as $coupon_item ) {
-			if ( 'coupon_3' !== $coupon_item->get_code() ) {
+			if ( 'coupon_2' !== $coupon_item->get_code() ) {
 				continue;
 			}
 
-			$coupon_3_data = $coupon_3->get_data();
-			unset( $coupon_3_data['used_by'] );
-			$coupon_item->add_meta_data( 'coupon_data', $coupon_3_data );
+			$coupon_2_data = $coupon_2->get_data();
+			unset( $coupon_2_data['used_by'] );
+			$coupon_item->add_meta_data( 'coupon_data', $coupon_2_data );
 			$coupon_item->save();
 		}
 
 		// Delete the coupons.
 		$coupon_2->delete( true );
-		$coupon_3->delete( true );
 
 		WC_Helper_Queue::run_all_pending();
 
@@ -402,14 +394,8 @@ class WC_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 			'extended_info' => new ArrayObject(),
 		);
 		$coupon_2_response = array(
-			'coupon_id'     => -1, // coupon_2 was deleted, so a new ID was created.
+			'coupon_id'     => $coupon_2_id, // coupon_2 was deleted, but has metadata containing the ID.
 			'amount'        => floatval( $coupon_2_amount ),
-			'orders_count'  => 1,
-			'extended_info' => new ArrayObject(),
-		);
-		$coupon_3_response = array(
-			'coupon_id'     => $coupon_3_id, // coupon_3 was deleted, but has metadata containing the ID.
-			'amount'        => floatval( $coupon_3_amount ),
 			'orders_count'  => 1,
 			'extended_info' => new ArrayObject(),
 		);
@@ -417,14 +403,13 @@ class WC_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 		// Order by coupon id DESC is the default.
 		$data          = $data_store->get_data( $args );
 		$expected_data = (object) array(
-			'total'   => 3,
+			'total'   => 2,
 			'pages'   => 1,
 			'page_no' => 1,
 			'data'    => array(
-				// Order is 3, 1, 2 since query is sorted by coupon ID descending.
-				0 => $coupon_3_response,
+				// Order query is sorted by coupon ID descending.
+				0 => $coupon_2_response,
 				1 => $coupon_1_response,
-				2 => $coupon_2_response,
 			),
 		);
 		$this->assertEquals( $expected_data, $data );
@@ -470,22 +455,8 @@ class WC_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 		);
 
 		$coupon_2_response = array(
-			'coupon_id'     => -1,
+			'coupon_id'     => $coupon_2_id, // coupon_2 was deleted, but has metadata containing the ID.
 			'amount'        => floatval( $coupon_2_amount ),
-			'orders_count'  => 1,
-			'extended_info' => array(
-				'code'             => '(Deleted)',
-				'date_created'     => '',
-				'date_created_gmt' => '',
-				'date_expires'     => '',
-				'date_expires_gmt' => '',
-				'discount_type'    => 'N/A',
-			),
-		);
-
-		$coupon_3_response = array(
-			'coupon_id'     => $coupon_3_id, // coupon_3 was deleted, but has metadata containing the ID.
-			'amount'        => floatval( $coupon_3_amount ),
 			'orders_count'  => 1,
 			'extended_info' => array(
 				'code'             => '(Deleted)',
@@ -504,14 +475,13 @@ class WC_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 		);
 		$data          = $data_store->get_data( $args );
 		$expected_data = (object) array(
-			'total'   => 3,
+			'total'   => 2,
 			'pages'   => 1,
 			'page_no' => 1,
 			'data'    => array(
-				// Order is 3, 1, 2 since query is sorted by coupon ID descending.
-				0 => $coupon_3_response,
+				// Order query is sorted by coupon ID descending.
+				0 => $coupon_2_response,
 				1 => $coupon_1_response,
-				2 => $coupon_2_response,
 			),
 		);
 		$this->assertEquals( $expected_data, $data );
