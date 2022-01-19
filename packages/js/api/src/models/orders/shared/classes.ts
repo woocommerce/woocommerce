@@ -470,6 +470,16 @@ export class OrderCouponLine extends OrderItemMeta {
 	 * @type {string}
 	 */
 	public readonly discountTax: string = '';
+
+	/**
+	 * Creates a new order instance with the given properties
+	 *
+	 * @param {Object} properties The properties to set in the object.
+	 */
+	public constructor( properties?: Partial< OrderCouponLine > ) {
+		super();
+		Object.assign( this, properties );
+	}
 }
 
 /**
@@ -489,4 +499,14 @@ export class OrderRefundLine extends Model {
 	 * @type {string}
 	 */
 	public readonly total: string = '';
+
+	/**
+	 * Creates a new order instance with the given properties
+	 *
+	 * @param {Object} properties The properties to set in the object.
+	 */
+	public constructor( properties?: Partial< OrderRefundLine > ) {
+		super();
+		Object.assign( this, properties );
+	}
 }
