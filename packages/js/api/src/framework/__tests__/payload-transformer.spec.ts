@@ -1,4 +1,4 @@
-import {Order, BillingOrderAddress, ShippingOrderAddress, OrderLineItem, OrderShippingLine, OrderFeeLine} from "../../models";
+import {Order, BillingOrderAddress, ShippingOrderAddress, OrderLineItem, OrderShippingLine, OrderFeeLine, OrderTaxRate} from "../../models";
 import {createBillingAddressTransformer, createOrderTransformer, createShippingAddressTransformer} from "../../repositories/rest/orders/transformer";
 
 const jsonPayloadFull = JSON.stringify({
@@ -316,6 +316,19 @@ describe( 'OrderTransformer', () => {
 		expect(order.lineItems[0].price).toStrictEqual(50);
 		expect(order.lineItems[0].parentName).toStrictEqual(null);
 
+		// Tax Lines
+		expect(order.taxLines).toHaveLength(1);
+		expect(order.taxLines[0]).toBeInstanceOf(OrderTaxRate);
+		//expect(order.taxLines[0].id).toStrictEqual(6139);
+		expect(order.taxLines[0].rateCode).toStrictEqual('US-TAX-1');
+		expect(order.taxLines[0].rateId).toStrictEqual(1);
+		expect(order.taxLines[0].label).toStrictEqual('Tax');
+		//expect(order.taxLines[0].compound).toStrictEqual(false);
+		expect(order.taxLines[0].taxTotal).toStrictEqual('6.00');
+		expect(order.taxLines[0].shippingTaxTotal).toStrictEqual('0.00');
+		expect(order.taxLines[0].ratePercent).toStrictEqual(12);
+		//expect(order.taxLines[0].metaData).toStrictEqual([]);
+
 		// Shipping Lines
 		expect(order.shippingLines).toHaveLength(1);
 		expect(order.shippingLines[0]).toBeInstanceOf(OrderShippingLine);
@@ -336,18 +349,7 @@ describe( 'OrderTransformer', () => {
 		expect(order.feeLines[0].total).toStrictEqual('5.00');
 		//expect(order.feeLines[0].totalTaxes).toStrictEqual('5.00');
 		//expect(order.feeLines[0].totalTax).toStrictEqual('10.00');
-		expect(order.feeLines[0].taxes).toStrictEqual([ { id: 1, total: '6', subtotal: '6.6' } ]);
+		//expect(order.feeLines[0].taxes).toStrictEqual([ { id: 1, total: '6', subtotal: '6.6' } ]);
 		expect(order.feeLines[0].metaData).toStrictEqual([]);
-
-		// Tax Lines
-		//expect(order.lineItems[0].rateCode).toStrictEqual('US-TAX-1');
-		//expect(order.lineItems[0].rateId).toStrictEqual(1);
-		//expect(order.lineItems[0].label).toStrictEqual('Tax');
-		//expect(order.lineItems[0].compound).toStrictEqual(false);
-		//expect(order.lineItems[0].taxTotal).toStrictEqual('6.00');
-		expect(order.lineItems[0].totalTax).toStrictEqual('6.00');
-		//expect(order.lineItems[0].shippingTaxTotal).toStrictEqual('0.00');
-		//expect(order.lineItems[0].ratePercent).toStrictEqual(12);
-		expect(order.lineItems[0].metaData).toStrictEqual([]);
 	} );
 } );

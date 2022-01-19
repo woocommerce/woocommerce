@@ -313,6 +313,16 @@ export class OrderTaxRate extends Model {
 	 * @type {number}
 	 */
 	public readonly ratePercent: number = 0;
+
+	/**
+	 * Creates a new order instance with the given properties
+	 *
+	 * @param {Object} properties The properties to set in the object.
+	 */
+	public constructor( properties?: Partial< OrderTaxRate > ) {
+		super();
+		Object.assign( this, properties );
+	}
 }
 
 /**

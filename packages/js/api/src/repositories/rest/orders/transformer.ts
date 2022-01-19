@@ -175,6 +175,7 @@ function createOrderTaxRateTransformer(): ModelTransformer< OrderTaxRate > {
 			new KeyChangeTransformation< OrderTaxRate >(
 				{
 					rateCode: 'rate_code',
+					ratePercent: 'rate_percent',
 					rateId: 'rate_id',
 					compoundRate: 'compound',
 					taxTotal: 'tax_total',
