@@ -965,7 +965,6 @@
           slider.container.height((slider.count + slider.cloneCount) * 200 + "%").css("position", "absolute").width("100%");
           setTimeout(function(){
             slider.newSlides.css({"display": "block"});
-            slider.doMath();
             slider.viewport.height(slider.h);
             slider.setProps(sliderOffset * slider.h, "init");
           }, (type === "init") ? 100 : 0);
@@ -973,7 +972,6 @@
           slider.container.width((slider.count + slider.cloneCount) * 200 + "%");
           slider.setProps(sliderOffset * slider.computedW, "init");
           setTimeout(function(){
-            slider.doMath();
           if(slider.vars.rtl){
               slider.newSlides.css({"width": slider.computedW, "marginRight" : slider.computedM, "float": "right", "display": "block"});
            }
@@ -984,6 +982,7 @@
             if (slider.vars.smoothHeight) { methods.smoothHeight(); }
           }, (type === "init") ? 100 : 0);
         }
+		slider.doMath();
       } else { // FADE:
         if(slider.vars.rtl){
           slider.slides.css({"width": "100%", "float": 'right', "marginLeft": "-100%", "position": "relative"});
