@@ -1,4 +1,4 @@
-import {Order, BillingOrderAddress, ShippingOrderAddress, OrderLineItem, OrderShippingLine, OrderFeeLine, OrderTaxRate} from "../../models";
+import {Order, BillingOrderAddress, ShippingOrderAddress, OrderLineItem, OrderShippingLine, OrderFeeLine, OrderTaxRate, OrderCouponLine, MetaData, OrderRefundLine} from "../../models";
 import {createBillingAddressTransformer, createOrderTransformer, createShippingAddressTransformer} from "../../repositories/rest/orders/transformer";
 
 const jsonPayloadFull = JSON.stringify({
@@ -199,7 +199,13 @@ const jsonPayloadFull = JSON.stringify({
 			]
 		}
 	],
-	refunds: [],
+	refunds: [
+		{
+			id: 123,
+			reason: 'Foo Reason',
+			total: '5.00'
+		}
+	],
 	date_created_gmt: '2021-11-30T16:43:38',
 	date_modified_gmt: '2021-11-30T18:31:05',
 	date_completed_gmt: null,
@@ -351,5 +357,27 @@ describe( 'OrderTransformer', () => {
 		//expect(order.feeLines[0].totalTax).toStrictEqual('10.00');
 		//expect(order.feeLines[0].taxes).toStrictEqual([ { id: 1, total: '6', subtotal: '6.6' } ]);
 		expect(order.feeLines[0].metaData).toStrictEqual([]);
+
+		// Coupon Lines
+		expect(order.couponLines).toHaveLength(1);
+		expect(order.couponLines[0]).toBeInstanceOf(OrderCouponLine);
+		//expect(order.couponLines[0].id).toStrictEqual(6138);
+		expect(order.couponLines[0].code).toStrictEqual('save5');
+		expect(order.couponLines[0].discount).toStrictEqual('5');
+		expect(order.couponLines[0].discountTax).toStrictEqual('0.6');
+		expect(order.couponLines[0].metaData).toHaveLength(1);
+		expect(order.couponLines[0].metaData[0]).toBeInstanceOf(MetaData);
+		//expect(order.couponLines[0].metaData[0].id).toStrictEqual(57112);
+		expect(order.couponLines[0].metaData[0].key).toStrictEqual('coupon_data');
+		expect(order.couponLines[0].metaData[0].value).toStrictEqual( JSON.parse(jsonPayloadFull).coupon_lines[0].meta_data[0].value);
+		expect(order.couponLines[0].metaData[0].displayKey).toStrictEqual('coupon_data');
+		expect(order.couponLines[0].metaData[0].displayValue).toStrictEqual( JSON.parse(jsonPayloadFull).coupon_lines[0].meta_data[0].display_value);
+
+		// Refunds
+		expect(order.refunds).toHaveLength(1);
+		expect(order.refunds[0]).toBeInstanceOf(OrderRefundLine);
+		//expect(order.refunds[0].id).toStrictEqual(123);
+		expect(order.refunds[0].reason).toStrictEqual('Foo Reason');
+		expect(order.refunds[0].total).toStrictEqual('5.00');
 	} );
 } );

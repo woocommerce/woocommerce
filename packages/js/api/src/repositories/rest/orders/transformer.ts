@@ -212,10 +212,11 @@ function createOrderRefundLineTransformer(): ModelTransformer< OrderRefundLine >
 function createOrdeCouponLineTransformer(): ModelTransformer< OrderCouponLine > {
 	return new ModelTransformer(
 		[
+			new ModelTransformerTransformation( 'meta_data', MetaData, createMetaDataTransformer() ),
 			new PropertyTypeTransformation(
 				{
 					code: PropertyType.String,
-					discount: PropertyType.Integer,
+					discount: PropertyType.String,
 					discountTax: PropertyType.String,
 				},
 			),
