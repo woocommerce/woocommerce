@@ -401,7 +401,7 @@ function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_
 	 * @since 5.2
 	 * @param bool
 	 */
-	if ( ! apply_filters( 'woocommerce_product_recount_terms', '__return_true' ) ) {
+	if ( ! apply_filters( 'woocommerce_product_recount_terms', true ) ) {
 		return;
 	}
 
