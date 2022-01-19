@@ -11,9 +11,9 @@ import StockPanel from './stock';
 import ReviewsPanel from './reviews';
 
 export function getAllPanels( {
-	countLowStockProducts,
-	countUnapprovedReviews,
-	countUnreadOrders,
+	lowStockProductsCount,
+	unapprovedReviewsCount,
+	unreadOrdersCount,
 	manageStock,
 	isTaskListHidden,
 	orderStatuses,
@@ -28,13 +28,13 @@ export function getAllPanels( {
 	return [
 		totalOrderCount > 0 && {
 			className: 'woocommerce-homescreen-card',
-			count: countUnreadOrders,
+			count: unreadOrdersCount,
 			collapsible: true,
 			id: 'orders-panel',
 			initialOpen: false,
 			panel: (
 				<OrdersPanel
-					countUnreadOrders={ countUnreadOrders }
+					unreadOrdersCount={ unreadOrdersCount }
 					orderStatuses={ orderStatuses }
 				/>
 			),
@@ -44,27 +44,28 @@ export function getAllPanels( {
 			publishedProductCount > 0 &&
 			manageStock === 'yes' && {
 				className: 'woocommerce-homescreen-card',
-				count: countLowStockProducts,
+				count: lowStockProductsCount,
 				id: 'stock-panel',
 				initialOpen: false,
-				collapsible: countLowStockProducts !== 0,
+				collapsible: lowStockProductsCount !== 0,
 				panel: (
 					<StockPanel
-						countLowStockProducts={ countLowStockProducts }
+						lowStockProductsCount={ lowStockProductsCount }
 					/>
 				),
 				title: __( 'Stock', 'woocommerce-admin' ),
 			},
 		publishedProductCount > 0 &&
+			unapprovedReviewsCount > 0 &&
 			reviewsEnabled === 'yes' && {
 				className: 'woocommerce-homescreen-card',
 				id: 'reviews-panel',
-				count: countUnapprovedReviews,
+				count: unapprovedReviewsCount,
 				initialOpen: false,
-				collapsible: countUnapprovedReviews !== 0,
+				collapsible: unapprovedReviewsCount !== 0,
 				panel: (
 					<ReviewsPanel
-						hasUnapprovedReviews={ countUnapprovedReviews > 0 }
+						hasUnapprovedReviews={ unapprovedReviewsCount > 0 }
 					/>
 				),
 				title: __( 'Reviews', 'woocommerce-admin' ),

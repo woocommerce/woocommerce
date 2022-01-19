@@ -81,7 +81,7 @@ export class StockPanel extends Component {
 
 	render() {
 		const {
-			countLowStockProducts,
+			lowStockProductsCount,
 			isError,
 			isRequesting,
 			products,
@@ -110,7 +110,7 @@ export class StockPanel extends Component {
 
 		// Show placeholders only for the first products fetch.
 		if ( isRequesting || ! products.length ) {
-			const numPlaceholders = Math.min( 5, countLowStockProducts ?? 1 );
+			const numPlaceholders = Math.min( 5, lowStockProductsCount ?? 1 );
 			const placeholders = Array.from(
 				new Array( numPlaceholders )
 			).map( ( v, idx ) => (
@@ -130,7 +130,7 @@ export class StockPanel extends Component {
 }
 
 StockPanel.propTypes = {
-	countLowStockProducts: PropTypes.number,
+	lowStockProductsCount: PropTypes.number,
 	products: PropTypes.array.isRequired,
 	isError: PropTypes.bool,
 	isRequesting: PropTypes.bool,

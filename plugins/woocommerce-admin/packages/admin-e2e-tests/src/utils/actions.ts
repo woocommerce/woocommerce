@@ -7,6 +7,7 @@ import { ElementHandle } from 'puppeteer';
  * Internal dependencies
  */
 import { NewOrder } from '../pages/NewOrder';
+import { Login } from '../pages/Login';
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 const { expect } = require( '@jest/globals' );
@@ -185,6 +186,37 @@ const deactivateAndDeleteExtension = async ( extension: string ) => {
 	await deleteExtension?.click();
 };
 
+const addReviewToProduct = async ( productId: number, productName: string ) => {
+	// we need a guest user
+	const login = new Login( page );
+	await login.logout();
+
+	const baseUrl = config.get( 'url' );
+	const productUrl = `/?p=${ productId }`;
+	await page.goto( baseUrl + productUrl, {
+		waitUntil: 'networkidle0',
+		timeout: 10000,
+	} );
+	await waitForElementByText( 'h1', productName );
+
+	// Reviews tab
+	const reviewTab = await page.$( '#tab-title-reviews' );
+	await reviewTab?.click();
+	const fiveStars = await page.$( '.star-5' );
+	await fiveStars?.click();
+
+	// write a comment
+	await page.type( '#comment', 'My comment' );
+	await page.type( '#author', 'John Doe' );
+	await page.type( '#email', 'john.doe@john.doe' );
+
+	const submit = await page.$( '#submit' );
+	await submit?.click();
+	// the comment was published
+	await waitForElementByText( 'p', 'My comment' );
+	await login.login();
+};
+
 export {
 	uiUnblocked,
 	verifyPublishAndTrash,
@@ -196,4 +228,5 @@ export {
 	hasClass,
 	waitForTimeout,
 	deactivateAndDeleteExtension,
+	addReviewToProduct,
 };

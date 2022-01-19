@@ -209,7 +209,7 @@ function renderOrders( orders ) {
 	);
 }
 
-function OrdersPanel( { countUnreadOrders, orderStatuses } ) {
+function OrdersPanel( { unreadOrdersCount, orderStatuses } ) {
 	const actionableOrdersQuery = useMemo(
 		() => ( {
 			page: 1,
@@ -233,7 +233,7 @@ function OrdersPanel( { countUnreadOrders, orderStatuses } ) {
 			ITEMS_STORE_NAME
 		);
 
-		if ( ! orderStatuses.length && countUnreadOrders === 0 ) {
+		if ( ! orderStatuses.length && unreadOrdersCount === 0 ) {
 			return { isRequesting: false };
 		}
 
@@ -247,7 +247,7 @@ function OrdersPanel( { countUnreadOrders, orderStatuses } ) {
 
 		if (
 			isRequestingActionable ||
-			countUnreadOrders === null ||
+			unreadOrdersCount === null ||
 			orderItems === null
 		) {
 			return {
@@ -331,7 +331,7 @@ function OrdersPanel( { countUnreadOrders, orderStatuses } ) {
 OrdersPanel.propTypes = {
 	isError: PropTypes.bool,
 	isRequesting: PropTypes.bool,
-	countUnreadOrders: PropTypes.number,
+	unreadOrdersCount: PropTypes.number,
 	orders: PropTypes.array.isRequired,
 	orderStatuses: PropTypes.array,
 };

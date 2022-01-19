@@ -11,7 +11,7 @@ import { OnboardingWizard } from '../../pages/OnboardingWizard';
 import { WcHomescreen } from '../../pages/WcHomescreen';
 import { createOrder, removeAllOrders, unhideTaskList } from '../../fixtures';
 import { OrdersActivityPanel } from '../../elements/OrdersActivityPanel';
-import { waitForElementByText } from '../../utils/actions';
+import { addReviewToProduct, waitForElementByText } from '../../utils/actions';
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 const { afterAll, beforeAll, describe, it } = require( '@jest/globals' );
@@ -65,10 +65,13 @@ const testAdminHomescreenActivityPanel = () => {
 		} );
 
 		it( 'should show Reviews panel when we have at-least one product', async () => {
-			await createSimpleProduct( simpleProductName, '9.99' );
-			await page.reload( {
-				waitUntil: [ 'networkidle0', 'domcontentloaded' ],
-			} );
+			const productId = await createSimpleProduct(
+				simpleProductName,
+				'9.99'
+			);
+			await addReviewToProduct( productId, simpleProductName );
+			await homeScreen.navigate();
+			await homeScreen.isDisplayed();
 			const activityPanels = await homeScreen.getActivityPanels();
 			expect( activityPanels ).toHaveLength( 1 );
 			expect( activityPanels ).toEqual(

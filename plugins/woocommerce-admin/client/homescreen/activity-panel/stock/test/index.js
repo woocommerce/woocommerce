@@ -14,7 +14,7 @@ describe( 'StockPanel', () => {
 	it( 'should the correct number of placeholders', () => {
 		const { container } = render(
 			<StockPanel
-				countLowStockProducts={ 3 }
+				lowStockProductsCount={ 3 }
 				isError={ false }
 				isRequesting={ true }
 				products={ [] }
@@ -35,7 +35,7 @@ describe( 'StockPanel', () => {
 
 		const { getByRole } = render(
 			<StockPanel
-				countLowStockProducts={ 1 }
+				lowStockProductsCount={ 1 }
 				isError={ false }
 				isRequesting={ false }
 				products={ [

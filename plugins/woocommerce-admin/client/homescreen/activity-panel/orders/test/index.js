@@ -27,7 +27,7 @@ describe( 'OrdersPanel', () => {
 			isError: false,
 			isRequesting: false,
 		} );
-		render( <OrdersPanel orderStatuses={ [] } countUnreadOrders={ 0 } /> );
+		render( <OrdersPanel orderStatuses={ [] } unreadOrdersCount={ 0 } /> );
 		expect(
 			screen.queryByText( 'You’ve fulfilled all your orders' )
 		).toBeInTheDocument();

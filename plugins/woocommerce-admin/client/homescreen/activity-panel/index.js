@@ -34,10 +34,10 @@ export const ActivityPanel = () => {
 		const totalOrderCount = getAdminSetting( 'orderCount', 0 );
 		const orderStatuses = getOrderStatuses( select );
 		const reviewsEnabled = getAdminSetting( 'reviewsEnabled', 'no' );
-		const countUnreadOrders = getUnreadOrders( select, orderStatuses );
+		const unreadOrdersCount = getUnreadOrders( select, orderStatuses );
 		const manageStock = getAdminSetting( 'manageStock', 'no' );
-		const countLowStockProducts = getLowStockCount( select );
-		const countUnapprovedReviews = getUnapprovedReviews( select );
+		const lowStockProductsCount = getLowStockCount( select );
+		const unapprovedReviewsCount = getUnapprovedReviews( select );
 		const publishedProductCount = getAdminSetting(
 			'publishedProductCount',
 			0
@@ -45,9 +45,9 @@ export const ActivityPanel = () => {
 		const taskList = select( ONBOARDING_STORE_NAME ).getTaskList( 'setup' );
 
 		return {
-			countLowStockProducts,
-			countUnapprovedReviews,
-			countUnreadOrders,
+			lowStockProductsCount,
+			unapprovedReviewsCount,
+			unreadOrdersCount,
 			manageStock,
 			isTaskListHidden: taskList?.isHidden,
 			publishedProductCount,
