@@ -175,6 +175,9 @@ final class BlockTypesController {
 			'StockFilter',
 			'ActiveFilters',
 			'LegacyTemplate',
+			'ProductTitle',
+			'ProductSummary',
+			'ProductStockIndicator',
 		];
 
 		if ( Package::feature()->is_feature_plugin_build() ) {
@@ -216,17 +219,14 @@ final class BlockTypesController {
 	 */
 	protected function get_atomic_blocks() {
 		return [
-			'product-title',
 			'product-button',
 			'product-image',
 			'product-price',
 			'product-rating',
 			'product-sale-badge',
-			'product-summary',
 			'product-sku',
 			'product-category-list',
 			'product-tag-list',
-			'product-stock-indicator',
 			'product-add-to-cart',
 		];
 	}

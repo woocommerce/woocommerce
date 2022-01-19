@@ -10,8 +10,9 @@ export const supports = {
 			background: false,
 			link: false,
 		},
+		typography: {
+			fontSize: true,
+		},
+		__experimentalSelector: '.wc-block-components-product-stock-indicator',
 	} ),
-	typography: {
-		fontSize: true,
-	},
 };
