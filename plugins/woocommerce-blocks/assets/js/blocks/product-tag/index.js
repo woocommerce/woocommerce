@@ -115,7 +115,7 @@ registerBlockType( 'woocommerce/product-tag', {
 		 */
 		stockStatus: {
 			type: 'array',
-			default: getSetting( 'stockStatusOptions', [] ),
+			default: Object.keys( getSetting( 'stockStatusOptions', [] ) ),
 		},
 	},
 
