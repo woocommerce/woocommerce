@@ -1,5 +1,5 @@
 import { MetaData } from '../../shared-types';
-import { Model } from '../../model';
+import {Model, ModelID} from '../../model';
 import { TaxStatus } from './types';
 
 /**
@@ -329,9 +329,9 @@ export class OrderShippingLine extends OrderItemMeta {
 	/**
 	 * The shipping method id.
 	 *
-	 * @type {string}
+	 * @type {string|number}
 	 */
-	public readonly methodId: string = '';
+	public readonly methodId: ModelID | undefined;
 
 	/**
 	 * The shipping method instance id.
@@ -360,6 +360,16 @@ export class OrderShippingLine extends OrderItemMeta {
 	 * @type {ReadonlyArray.<OrderItemTax>}
 	 */
 	public readonly taxes: OrderItemTax[] = [];
+
+	/**
+	 * Creates a new order instance with the given properties
+	 *
+	 * @param {Object} properties The properties to set in the object.
+	 */
+	public constructor( properties?: Partial< OrderShippingLine > ) {
+		super();
+		Object.assign( this, properties );
+	}
 }
 
 /**
@@ -414,6 +424,16 @@ export class OrderFeeLine extends OrderItemMeta {
 	 * @type {ReadonlyArray.<OrderItemTax>}
 	 */
 	public readonly taxes: OrderItemTax[] = [];
+
+	/**
+	 * Creates a new order instance with the given properties
+	 *
+	 * @param {Object} properties The properties to set in the object.
+	 */
+	public constructor( properties?: Partial< OrderFeeLine > ) {
+		super();
+		Object.assign( this, properties );
+	}
 }
 
 /**

@@ -15,8 +15,9 @@ import {
 	OrderLineItem,
 	OrderRefundLine,
 	OrderShippingLine,
-	OrderTaxRate,
+	OrderTaxRate, MetaData,
 } from '../../../models';
+import {createMetaDataTransformer} from "../shared";
 
 /**
  * Creates a transformer for an order object.
@@ -35,6 +36,7 @@ export function createOrderTransformer(): ModelTransformer< Order > {
 			new ModelTransformerTransformation( 'fee_lines', OrderFeeLine, createOrderFeeLineTransformer() ),
 			new ModelTransformerTransformation( 'line_items', OrderLineItem, createOrderLineItemTransformer() ),
 			new ModelTransformerTransformation( 'shipping_lines', OrderShippingLine, createOrderShippingItemTransformer() ),
+			new ModelTransformerTransformation( 'meta_data', MetaData, createMetaDataTransformer() ),
 
 			new PropertyTypeTransformation(
 				{
@@ -74,6 +76,7 @@ export function createOrderTransformer(): ModelTransformer< Order > {
 					shippingLines: 'shipping_lines',
 					feeLines: 'fee_lines',
 					couponLines: 'coupon_lines',
+					metaData: 'meta_data',
 				},
 			),
 		],
@@ -304,7 +307,7 @@ function createOrderShippingItemTransformer(): ModelTransformer< OrderShippingLi
 			new PropertyTypeTransformation(
 				{
 					methodTitle: PropertyType.String,
-					methodId: PropertyType.String,
+					methodId: PropertyType.Integer,
 					total: PropertyType.String,
 					totalTax: PropertyType.String,
 				},
