@@ -10,6 +10,7 @@ import { useBlockProps } from '@wordpress/block-editor';
 import Block from './block';
 import withProductSelector from '../shared/with-product-selector';
 import { BLOCK_TITLE, BLOCK_ICON } from './constants';
+import './editor.scss';
 
 const Edit = ( { attributes } ) => {
 	const blockProps = useBlockProps();

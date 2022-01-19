@@ -3,10 +3,7 @@
  */
 import classnames from 'classnames';
 import { HTMLAttributes } from 'react';
-import {
-	useInnerBlockLayoutContext,
-	useProductDataContext,
-} from '@woocommerce/shared-context';
+import { useProductDataContext } from '@woocommerce/shared-context';
 import { isFeaturePluginBuild } from '@woocommerce/block-settings';
 import { withProductDataContext } from '@woocommerce/shared-hocs';
 import ProductName from '@woocommerce/base-components/product-name';
@@ -61,7 +58,6 @@ export const Block = ( props: Props ): JSX.Element => {
 		align,
 	} = props;
 
-	const { parentClassName } = useInnerBlockLayoutContext();
 	const { product } = useProductDataContext();
 	const { dispatchStoreEvent } = useStoreEvents();
 
@@ -75,41 +71,13 @@ export const Block = ( props: Props ): JSX.Element => {
 				headingLevel={ headingLevel }
 				className={ classnames(
 					className,
+					colorProps.className,
 					'wc-block-components-product-title',
 					{
-						[ `${ parentClassName }__product-title` ]: parentClassName,
 						[ `wc-block-components-product-title--align-${ align }` ]:
 							align && isFeaturePluginBuild(),
 					}
 				) }
-			/>
-		);
-	}
-
-	return (
-		<TagName
-			headingLevel={ headingLevel }
-			className={ classnames(
-				className,
-				'wc-block-components-product-title',
-				{
-					[ `${ parentClassName }__product-title` ]: parentClassName,
-					[ `wc-block-components-product-title--align-${ align }` ]:
-						align && isFeaturePluginBuild(),
-				}
-			) }
-		>
-			<ProductName
-				className={ colorProps.className }
-				disabled={ ! showProductLink }
-				name={ product.name }
-				permalink={ product.permalink }
-				rel={ showProductLink ? 'nofollow' : '' }
-				onClick={ () => {
-					dispatchStoreEvent( 'product-view-link', {
-						product,
-					} );
-				} }
 				style={
 					isFeaturePluginBuild()
 						? {
@@ -119,6 +87,42 @@ export const Block = ( props: Props ): JSX.Element => {
 						  }
 						: {}
 				}
+			/>
+		);
+	}
+
+	return (
+		<TagName
+			headingLevel={ headingLevel }
+			className={ classnames(
+				className,
+				colorProps.className,
+				'wc-block-components-product-title',
+				{
+					[ `wc-block-components-product-title--align-${ align }` ]:
+						align && isFeaturePluginBuild(),
+				}
+			) }
+			style={
+				isFeaturePluginBuild()
+					? {
+							...spacingProps.style,
+							...typographyProps.style,
+							...colorProps.style,
+					  }
+					: {}
+			}
+		>
+			<ProductName
+				disabled={ ! showProductLink }
+				name={ product.name }
+				permalink={ product.permalink }
+				rel={ showProductLink ? 'nofollow' : '' }
+				onClick={ () => {
+					dispatchStoreEvent( 'product-view-link', {
+						product,
+					} );
+				} }
 			/>
 		</TagName>
 	);

@@ -50,6 +50,7 @@ const blockConfig: BlockConfiguration = {
 					__experimentalSkipSerialization: true,
 				},
 			} ),
+			__experimentalSelector: '.wc-block-components-product-title',
 		} ),
 	},
 };
