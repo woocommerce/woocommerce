@@ -281,25 +281,29 @@ export function StoreAddress( props ) {
 
 	return (
 		<div className="woocommerce-store-address-fields">
-			<TextControl
-				label={
-					locale?.address_1?.label ||
-					__( 'Address line 1', 'woocommerce-admin' )
-				}
-				required={ isAddressFieldRequired( 'address_1', locale ) }
-				autoComplete="address-line1"
-				{ ...getInputProps( 'addressLine1' ) }
-			/>
+			{ ! locale?.address_1?.hidden && (
+				<TextControl
+					label={
+						locale?.address_1?.label ||
+						__( 'Address line 1', 'woocommerce-admin' )
+					}
+					required={ isAddressFieldRequired( 'address_1', locale ) }
+					autoComplete="address-line1"
+					{ ...getInputProps( 'addressLine1' ) }
+				/>
+			) }
 
-			<TextControl
-				label={
-					locale?.address_2?.label ||
-					__( 'Address line 2 (optional)', 'woocommerce-admin' )
-				}
-				required={ isAddressFieldRequired( 'address_2', locale ) }
-				autoComplete="address-line2"
-				{ ...getInputProps( 'addressLine2' ) }
-			/>
+			{ ! locale?.address_2?.hidden && (
+				<TextControl
+					label={
+						locale?.address_2?.label ||
+						__( 'Address line 2 (optional)', 'woocommerce-admin' )
+					}
+					required={ isAddressFieldRequired( 'address_2', locale ) }
+					autoComplete="address-line2"
+					{ ...getInputProps( 'addressLine2' ) }
+				/>
+			) }
 
 			<SelectControl
 				label={ __( 'Country / Region', 'woocommerce-admin' ) }
@@ -315,24 +319,28 @@ export function StoreAddress( props ) {
 				{ countryStateAutofill }
 			</SelectControl>
 
-			<TextControl
-				label={
-					locale?.city?.label || __( 'City', 'woocommerce-admin' )
-				}
-				required={ isAddressFieldRequired( 'city', locale ) }
-				{ ...getInputProps( 'city' ) }
-				autoComplete="address-level2"
-			/>
+			{ ! locale?.city?.hidden && (
+				<TextControl
+					label={
+						locale?.city?.label || __( 'City', 'woocommerce-admin' )
+					}
+					required={ isAddressFieldRequired( 'city', locale ) }
+					{ ...getInputProps( 'city' ) }
+					autoComplete="address-level2"
+				/>
+			) }
 
-			<TextControl
-				label={
-					locale?.postcode?.label ||
-					__( 'Post code', 'woocommerce-admin' )
-				}
-				required={ isAddressFieldRequired( 'postcode', locale ) }
-				autoComplete="postal-code"
-				{ ...getInputProps( 'postCode' ) }
-			/>
+			{ ! locale?.postcode?.hidden && (
+				<TextControl
+					label={
+						locale?.postcode?.label ||
+						__( 'Post code', 'woocommerce-admin' )
+					}
+					required={ isAddressFieldRequired( 'postcode', locale ) }
+					autoComplete="postal-code"
+					{ ...getInputProps( 'postCode' ) }
+				/>
+			) }
 		</div>
 	);
 }
