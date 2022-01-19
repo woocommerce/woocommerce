@@ -121,8 +121,8 @@ registerBlockType( blockTypeName, {
 		 * Whether to display in stock, out of stock or backorder products.
 		 */
 		stockStatus: {
-			type: 'string',
-			default: getSetting( 'stockStatusOptions', [] ),
+			type: 'array',
+			default: Object.keys( getSetting( 'stockStatusOptions', [] ) ),
 		},
 	},
 

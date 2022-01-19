@@ -225,7 +225,7 @@ class ProductByCategoryBlock extends Component {
 				</PanelBody>
 				<PanelBody
 					title={ __(
-						'Stock level',
+						'Filter by stock status',
 						'woo-gutenberg-products-block'
 					) }
 					initialOpen={ false }
