@@ -57,7 +57,10 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 			'align'             => $this->get_schema_align(),
 			'alignButtons'      => $this->get_schema_boolean( false ),
 			'isPreview'         => $this->get_schema_boolean( false ),
-			'stockStatus'       => array_keys( wc_get_product_stock_status_options() ),
+			'stockStatus'       => array(
+				'type'    => 'array',
+				'default' => array_keys( wc_get_product_stock_status_options() ),
+			),
 		);
 	}
 
@@ -292,15 +295,16 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 	 * @return void
 	 */
 	protected function set_stock_status_query_args( &$query_args ) {
+		$stock_statuses = array_keys( wc_get_product_stock_status_options() );
+
 		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-		if ( isset( $this->attributes['stockStatus'] ) &&
-			( array_keys( wc_get_product_stock_status_options() ) !== $this->attributes['stockStatus'] || [] !== $this->attributes['stockStatus'] )
-		) {
+		if ( isset( $this->attributes['stockStatus'] ) && $stock_statuses !== $this->attributes['stockStatus'] ) {
 			// Reset meta_query then update with our stock status.
 			$query_args['meta_query']   = $this->meta_query;
 			$query_args['meta_query'][] = array(
-				'key'   => '_stock_status',
-				'value' => $this->attributes['stockStatus'],
+				'key'     => '_stock_status',
+				'value'   => array_merge( [ '' ], $this->attributes['stockStatus'] ),
+				'compare' => 'IN',
 			);
 		} else {
 			$query_args['meta_query'] = $this->meta_query;
