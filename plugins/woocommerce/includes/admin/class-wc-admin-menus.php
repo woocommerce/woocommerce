@@ -87,6 +87,13 @@ class WC_Admin_Menus {
 	}
 
 	/**
+	 * Check if the user can access the top-level WooCommerce item.
+	 */
+	public static function can_view_woocommerce_menu_item() {
+		return current_user_can( 'edit_others_shop_orders' );
+	}
+
+	/**
 	 * Loads gateways and shipping methods into memory for use within settings.
 	 */
 	public function settings_page_init() {
