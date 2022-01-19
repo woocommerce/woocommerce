@@ -1,6 +1,7 @@
 # Unreleased
 
 -   Remove dev dependency `@woocommerce/wc-admin-settings`. #8057
+-   Add "defaultDateRange" argument to "getAllowedIntervalsForQuery" for default period value. #8189
 
 # 3.1.0
 

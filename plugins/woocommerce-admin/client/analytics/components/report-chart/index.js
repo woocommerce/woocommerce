@@ -86,12 +86,11 @@ export class ReportChart extends Component {
 			selectedChart,
 			defaultDateRange,
 		} = this.props;
-		const currentInterval = getIntervalForQuery( query );
+		const currentInterval = getIntervalForQuery( query, defaultDateRange );
 		const { primary, secondary } = getCurrentDates(
 			query,
 			defaultDateRange
 		);
-
 		const chartData = primaryData.data.intervals.map( function (
 			interval,
 			index
@@ -157,9 +156,13 @@ export class ReportChart extends Component {
 			selectedChart,
 			showHeaderControls,
 			primaryData,
+			defaultDateRange,
 		} = this.props;
-		const currentInterval = getIntervalForQuery( query );
-		const allowedIntervals = getAllowedIntervalsForQuery( query );
+		const currentInterval = getIntervalForQuery( query, defaultDateRange );
+		const allowedIntervals = getAllowedIntervalsForQuery(
+			query,
+			defaultDateRange
+		);
 		const formats = getDateFormatsForInterval(
 			currentInterval,
 			primaryData.data.intervals.length

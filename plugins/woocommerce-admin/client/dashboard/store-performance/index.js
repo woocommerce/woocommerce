@@ -6,7 +6,6 @@ import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { getPersistedQuery } from '@woocommerce/navigation';
 import { withSelect } from '@wordpress/data';
-import { SETTINGS_STORE_NAME } from '@woocommerce/data';
 import {
 	EllipsisMenu,
 	MenuItem,
@@ -201,15 +200,11 @@ export default compose(
 		const userIndicators = indicators.filter(
 			( indicator ) => ! hiddenBlocks.includes( indicator.stat )
 		);
-		const { woocommerce_default_date_range: defaultDateRange } = select(
-			SETTINGS_STORE_NAME
-		).getSetting( 'wc_admin', 'wcAdminSettings' );
 
 		const data = {
 			hiddenBlocks,
 			userIndicators,
 			indicators,
-			defaultDateRange,
 		};
 		if ( userIndicators.length === 0 ) {
 			return data;

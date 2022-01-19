@@ -195,9 +195,9 @@ export function isReportDataEmpty( report, endpoint ) {
  * @return {Object} data request query parameters.
  */
 function getRequestQuery( options ) {
-	const { endpoint, dataType, query, fields } = options;
-	const datesFromQuery = getCurrentDates( query, options.defaultDateRange );
-	const interval = getIntervalForQuery( query );
+	const { endpoint, dataType, query, fields, defaultDateRange } = options;
+	const datesFromQuery = getCurrentDates( query, defaultDateRange );
+	const interval = getIntervalForQuery( query, defaultDateRange );
 	const filterQuery = getFilterQuery( options );
 	const end = datesFromQuery[ dataType ].before;
 

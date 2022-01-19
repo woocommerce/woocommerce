@@ -271,6 +271,7 @@ const CustomizableDashboard = ( { defaultDateRange, path, query } ) => {
 									section.key
 								) }
 								path={ path }
+								defaultDateRange={ defaultDateRange }
 								query={ query }
 								title={ section.title }
 								onMove={ partial( onMove, index ) }
@@ -310,10 +311,8 @@ export default compose(
 			SETTINGS_STORE_NAME
 		).getSetting( 'wc_admin', 'wcAdminSettings' );
 
-		const withSelectData = {
+		return {
 			defaultDateRange,
 		};
-
-		return withSelectData;
 	} )
 )( CustomizableDashboard );

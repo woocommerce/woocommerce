@@ -485,11 +485,16 @@ export const getPreviousDate = ( date, date1, date2, compare, interval ) => {
  * Returns the allowed selectable intervals for a specific query.
  *
  * @param  {Object} query Current query
+ * @param {string} defaultDateRange - the store's default date range
  * @return {Array} Array containing allowed intervals.
  */
-export function getAllowedIntervalsForQuery( query ) {
+export function getAllowedIntervalsForQuery(
+	query,
+	defaultDateRange = 'period=&compare=previous_year'
+) {
+	const { period } = getDateParamsFromQuery( query, defaultDateRange );
 	let allowed = [];
-	if ( query.period === 'custom' ) {
+	if ( period === 'custom' ) {
 		const { primary } = getCurrentDates( query );
 		const differenceInDays = getDateDifferenceInDays(
 			primary.before,
@@ -509,7 +514,7 @@ export function getAllowedIntervalsForQuery( query ) {
 			allowed = [ 'hour', 'day' ];
 		}
 	} else {
-		switch ( query.period ) {
+		switch ( period ) {
 			case 'today':
 			case 'yesterday':
 				allowed = [ 'hour', 'day' ];
@@ -541,11 +546,15 @@ export function getAllowedIntervalsForQuery( query ) {
 /**
  * Returns the current interval to use.
  *
- * @param  {Object} query Current query
+ * @param {Object} query Current query
+ * @param {string} defaultDateRange - the store's default date range
  * @return {string} Current interval.
  */
-export function getIntervalForQuery( query ) {
-	const allowed = getAllowedIntervalsForQuery( query );
+export function getIntervalForQuery(
+	query,
+	defaultDateRange = 'period=&compare=previous_year'
+) {
+	const allowed = getAllowedIntervalsForQuery( query, defaultDateRange );
 	const defaultInterval = allowed[ 0 ];
 	let current = query.interval || defaultInterval;
 	if ( query.interval && ! allowed.includes( query.interval ) ) {

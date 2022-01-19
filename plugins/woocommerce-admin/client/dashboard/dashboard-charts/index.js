@@ -50,8 +50,16 @@ const renderChartToggles = ( { hiddenBlocks, onToggleHiddenBlock } ) => {
 	} );
 };
 
-const renderIntervalSelector = ( { chartInterval, setInterval, query } ) => {
-	const allowedIntervals = getAllowedIntervalsForQuery( query );
+const renderIntervalSelector = ( {
+	chartInterval,
+	setInterval,
+	query,
+	defaultDateRange,
+} ) => {
+	const allowedIntervals = getAllowedIntervalsForQuery(
+		query,
+		defaultDateRange
+	);
 	if ( ! allowedIntervals || allowedIntervals.length < 1 ) {
 		return null;
 	}
@@ -127,6 +135,7 @@ const DashboardCharts = ( props ) => {
 		title,
 		titleInput,
 		filters,
+		defaultDateRange,
 	} = props;
 	const { updateUserPreferences, ...userPrefs } = useUserPreferences();
 	const [ chartType, setChartType ] = useState(
@@ -198,6 +207,7 @@ const DashboardCharts = ( props ) => {
 					chartInterval,
 					setInterval,
 					query,
+					defaultDateRange,
 				} ) }
 				<NavigableMenu
 					className="woocommerce-chart__types"
@@ -247,6 +257,7 @@ const DashboardCharts = ( props ) => {
 DashboardCharts.propTypes = {
 	path: PropTypes.string.isRequired,
 	query: PropTypes.object.isRequired,
+	defaultDateRange: PropTypes.string.isRequired,
 };
 
 export default DashboardCharts;

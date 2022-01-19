@@ -100,18 +100,43 @@ describe( 'toMoment', () => {
 
 describe( 'getAllowedIntervalsForQuery', () => {
 	it( 'should return days when query period is defined but empty', () => {
-		const allowedIntervals = getAllowedIntervalsForQuery( { period: '' } );
+		const allowedIntervals = getAllowedIntervalsForQuery( {
+			period: '',
+			compare: 'previous_year',
+		} );
 		expect( allowedIntervals ).toEqual( [ 'day' ] );
+	} );
+
+	it( 'should return days, hours when query period is empty but defaultDateRange is today and yesterday', () => {
+		const allowedIntervals = getAllowedIntervalsForQuery(
+			{
+				period: '',
+				compare: 'previous_year',
+			},
+			'period=today&compare=previous_year'
+		);
+		expect( allowedIntervals ).toEqual( [ 'hour', 'day' ] );
+
+		const allowedIntervalsYesterday = getAllowedIntervalsForQuery(
+			{
+				period: '',
+				compare: 'previous_year',
+			},
+			'period=yesterday&compare=previous_year'
+		);
+		expect( allowedIntervalsYesterday ).toEqual( [ 'hour', 'day' ] );
 	} );
 
 	it( 'should return days and hours for today and yesterday periods', () => {
 		const allowedIntervalsToday = getAllowedIntervalsForQuery( {
 			period: 'today',
+			compare: 'previous_year',
 		} );
 		expect( allowedIntervalsToday ).toEqual( [ 'hour', 'day' ] );
 
 		const allowedIntervalsYesterday = getAllowedIntervalsForQuery( {
 			period: 'yesterday',
+			compare: 'previous_year',
 		} );
 		expect( allowedIntervalsYesterday ).toEqual( [ 'hour', 'day' ] );
 	} );
@@ -119,11 +144,13 @@ describe( 'getAllowedIntervalsForQuery', () => {
 	it( 'should return day for week and last_week periods', () => {
 		const allowedIntervalsWeek = getAllowedIntervalsForQuery( {
 			period: 'week',
+			compare: 'previous_year',
 		} );
 		expect( allowedIntervalsWeek ).toEqual( [ 'day' ] );
 
 		const allowedIntervalsLastWeek = getAllowedIntervalsForQuery( {
 			period: 'last_week',
+			compare: 'previous_year',
 		} );
 		expect( allowedIntervalsLastWeek ).toEqual( [ 'day' ] );
 	} );
@@ -131,11 +158,13 @@ describe( 'getAllowedIntervalsForQuery', () => {
 	it( 'should return day, week for month and last_month periods', () => {
 		const allowedIntervalsMonth = getAllowedIntervalsForQuery( {
 			period: 'month',
+			compare: 'previous_year',
 		} );
 		expect( allowedIntervalsMonth ).toEqual( [ 'day', 'week' ] );
 
 		const allowedIntervalsLastMonth = getAllowedIntervalsForQuery( {
 			period: 'last_month',
+			compare: 'previous_year',
 		} );
 		expect( allowedIntervalsLastMonth ).toEqual( [ 'day', 'week' ] );
 	} );
@@ -143,11 +172,13 @@ describe( 'getAllowedIntervalsForQuery', () => {
 	it( 'should return day, week, month for quarter and last_quarter periods', () => {
 		const allowedIntervalsQuarter = getAllowedIntervalsForQuery( {
 			period: 'quarter',
+			compare: 'previous_year',
 		} );
 		expect( allowedIntervalsQuarter ).toEqual( [ 'day', 'week', 'month' ] );
 
 		const allowedIntervalsLastQuarter = getAllowedIntervalsForQuery( {
 			period: 'last_quarter',
+			compare: 'previous_year',
 		} );
 		expect( allowedIntervalsLastQuarter ).toEqual( [
 			'day',
@@ -159,6 +190,7 @@ describe( 'getAllowedIntervalsForQuery', () => {
 	it( 'should return day, week, month, quarter for year and last_year periods', () => {
 		const allowedIntervalsYear = getAllowedIntervalsForQuery( {
 			period: 'year',
+			compare: 'previous_year',
 		} );
 		expect( allowedIntervalsYear ).toEqual( [
 			'day',
@@ -169,6 +201,7 @@ describe( 'getAllowedIntervalsForQuery', () => {
 
 		const allowedIntervalsLastYear = getAllowedIntervalsForQuery( {
 			period: 'last_year',
+			compare: 'previous_year',
 		} );
 		expect( allowedIntervalsLastYear ).toEqual( [
 			'day',
