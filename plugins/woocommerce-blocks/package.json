@@ -202,7 +202,7 @@
 		"@wordpress/wordcount": "3.2.3",
 		"classnames": "2.3.1",
 		"compare-versions": "3.6.0",
-		"config": "3.3.6",
+		"config": "3.3.7",
 		"dataloader": "2.0.0",
 		"dinero.js": "1.9.1",
 		"downshift": "6.1.7",
