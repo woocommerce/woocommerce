@@ -971,7 +971,7 @@
 		  slider.setProps(sliderOffset * slider.h, "init");
         } else {
 			slider.doMath();
-			slider.container.css({"height": slider.h + slider.computedW / slider.count, "overflow":"hidden"});
+			slider.container.css({"height": slider.h, "overflow":"hidden"});
 			if(slider.vars.rtl){
 				slider.newSlides.css({"width": slider.computedW, "marginRight" : slider.computedM, "float": "right", "display": "block"});
 			} else {
