@@ -148,12 +148,9 @@ export const CheckoutStateProvider = ( {
 				const paymentResult = getPaymentResultFromCheckoutResponse(
 					response
 				);
-
-				if ( paymentResult.redirectUrl ) {
-					dispatch(
-						actions.setRedirectUrl( paymentResult.redirectUrl )
-					);
-				}
+				dispatch(
+					actions.setRedirectUrl( paymentResult?.redirectUrl || '' )
+				);
 				dispatch( actions.setProcessingResponse( paymentResult ) );
 				dispatch( actions.setAfterProcessing() );
 			},
@@ -302,6 +299,7 @@ export const CheckoutStateProvider = ( {
 							// the last observer response always "wins" for success.
 							successResponse = response;
 						}
+
 						if (
 							isErrorResponse( response ) ||
 							isFailResponse( response )
@@ -331,8 +329,7 @@ export const CheckoutStateProvider = ( {
 							dispatch( actions.setHasError( true ) );
 						}
 					} else {
-						// nothing hooked in had any response type so let's just
-						// consider successful
+						// nothing hooked in had any response type so let's just consider successful.
 						dispatch( actions.setComplete() );
 					}
 				} );
