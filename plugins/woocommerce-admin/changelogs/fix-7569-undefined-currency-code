@@ -1,0 +1,4 @@
+Significance: patch
+Type: Fix
+
+Fix undefined derived_currency value for the track 'wcadmin_storeprofiler_store_details_continue'. #8193
