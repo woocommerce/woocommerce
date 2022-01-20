@@ -246,6 +246,8 @@
                 item = $('<img/>', {
                   onload: 'this.width = this.naturalWidth; this.height = this.naturalHeight',
                   src: slide.attr('data-thumb'),
+                  srcset: `${slide.attr('data-thumb')} ${Math.round(slider.itemW / slider.count)}w, ${slide.find('img').attr('src')} ${Math.round(slider.w)}w`,
+                  sizes: `(max-width: ${Math.round(slider.w)}px) ${Math.round(slider.itemW / slider.count)}px, ${Math.round(slider.w)}px`,
                   alt: slide.attr('alt')
                 })
               }
