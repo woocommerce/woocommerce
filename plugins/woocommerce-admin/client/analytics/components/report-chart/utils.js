@@ -3,6 +3,7 @@
  */
 import { find, get } from 'lodash';
 import { flattenFilters } from '@woocommerce/navigation';
+import { format as formatDate } from '@wordpress/date';
 
 export const DEFAULT_FILTER = 'all';
 
@@ -42,4 +43,8 @@ export function getChartMode( selectedFilter, query ) {
 	}
 
 	return null;
+}
+
+export function createDateFormatter( format ) {
+	return ( date ) => formatDate( format, date );
 }

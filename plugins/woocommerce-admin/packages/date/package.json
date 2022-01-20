@@ -26,6 +26,9 @@
 		"moment": "2.29.1",
 		"qs": "6.9.6"
 	},
+	"devDependencies": {
+		"d3-time-format": "2.3.0"
+	},
 	"peerDependencies": {
 		"lodash": "^4.17.0"
 	},

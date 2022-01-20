@@ -29,7 +29,7 @@ import {
  */
 import { CurrencyContext } from '../../../lib/currency-context';
 import ReportError from '../report-error';
-import { getChartMode, getSelectedFilter } from './utils';
+import { getChartMode, getSelectedFilter, createDateFormatter } from './utils';
 
 /**
  * Component that renders the chart in reports.
@@ -165,7 +165,8 @@ export class ReportChart extends Component {
 		);
 		const formats = getDateFormatsForInterval(
 			currentInterval,
-			primaryData.data.intervals.length
+			primaryData.data.intervals.length,
+			{ type: 'php' }
 		);
 		const emptyMessage = emptySearchResults
 			? __( 'No data for the current search', 'woocommerce-admin' )
@@ -187,10 +188,14 @@ export class ReportChart extends Component {
 				mode={ mode }
 				path={ path }
 				query={ query }
-				screenReaderFormat={ formats.screenReaderFormat }
+				screenReaderFormat={ createDateFormatter(
+					formats.screenReaderFormat
+				) }
 				showHeaderControls={ showHeaderControls }
 				title={ selectedChart.label }
-				tooltipLabelFormat={ formats.tooltipLabelFormat }
+				tooltipLabelFormat={ createDateFormatter(
+					formats.tooltipLabelFormat
+				) }
 				tooltipTitle={
 					( mode === 'time-comparison' && selectedChart.label ) ||
 					null
@@ -201,8 +206,8 @@ export class ReportChart extends Component {
 				) }
 				chartType={ getChartTypeForQuery( query ) }
 				valueType={ selectedChart.type }
-				xFormat={ formats.xFormat }
-				x2Format={ formats.x2Format }
+				xFormat={ createDateFormatter( formats.xFormat ) }
+				x2Format={ createDateFormatter( formats.x2Format ) }
 				currency={ getCurrencyConfig() }
 			/>
 		);

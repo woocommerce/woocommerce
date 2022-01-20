@@ -584,13 +584,37 @@ export const defaultTableDateFormat = 'm/d/Y';
 
 /**
  * Returns date formats for the current interval.
+ *
+ * @param {string} interval Interval to get date formats for.
+ * @param {number} [ticks] Number of ticks the axis will have.
+ * @param {Object} [option] Options
+ * @param {string} [option.type] Date format type, d3 or php, defaults to d3.
+ * @return {string} Current interval.
+ */
+export function getDateFormatsForInterval(
+	interval,
+	ticks = 0,
+	option = { type: 'd3' }
+) {
+	switch ( option.type ) {
+		case 'php':
+			return getDateFormatsForIntervalPhp( interval, ticks );
+
+		case 'd3':
+		default:
+			return getDateFormatsForIntervalD3( interval, ticks );
+	}
+}
+
+/**
+ * Returns d3 date formats for the current interval.
  * See https://github.com/d3/d3-time-format for chart formats.
  *
  * @param  {string} interval Interval to get date formats for.
  * @param  {number}    [ticks] Number of ticks the axis will have.
  * @return {string} Current interval.
  */
-export function getDateFormatsForInterval( interval, ticks = 0 ) {
+export function getDateFormatsForIntervalD3( interval, ticks = 0 ) {
 	let screenReaderFormat = '%B %-d, %Y';
 	let tooltipLabelFormat = '%B %-d, %Y';
 	let xFormat = '%Y-%m-%d';
@@ -621,10 +645,12 @@ export function getDateFormatsForInterval( interval, ticks = 0 ) {
 				xFormat = '%b';
 				x2Format = '%Y';
 			}
+			// eslint-disable-next-line @wordpress/i18n-translator-comments
 			screenReaderFormat = __(
 				'Week of %B %-d, %Y',
 				'woocommerce-admin'
 			);
+			// eslint-disable-next-line @wordpress/i18n-translator-comments
 			tooltipLabelFormat = __(
 				'Week of %B %-d, %Y',
 				'woocommerce-admin'
@@ -641,6 +667,78 @@ export function getDateFormatsForInterval( interval, ticks = 0 ) {
 			screenReaderFormat = '%Y';
 			tooltipLabelFormat = '%Y';
 			xFormat = '%Y';
+			break;
+	}
+
+	return {
+		screenReaderFormat,
+		tooltipLabelFormat,
+		xFormat,
+		x2Format,
+		tableFormat,
+	};
+}
+
+/**
+ * Returns php date formats for the current interval.
+ * See see https://www.php.net/manual/en/datetime.format.php.
+ *
+ * @param  {string} interval Interval to get date formats for.
+ * @param  {number}    [ticks] Number of ticks the axis will have.
+ * @return {string} Current interval.
+ */
+export function getDateFormatsForIntervalPhp( interval, ticks = 0 ) {
+	let screenReaderFormat = 'F j, Y';
+	let tooltipLabelFormat = 'F j, Y';
+	let xFormat = 'Y-m-d';
+	let x2Format = 'M Y';
+	let tableFormat = defaultTableDateFormat;
+
+	switch ( interval ) {
+		case 'hour':
+			screenReaderFormat = 'gA F j, Y';
+			tooltipLabelFormat = 'gA M j, Y';
+			xFormat = 'gA';
+			x2Format = 'M j, Y';
+			tableFormat = 'h A';
+			break;
+		case 'day':
+			if ( ticks < dayTicksThreshold ) {
+				xFormat = 'j';
+			} else {
+				xFormat = 'M';
+				x2Format = 'Y';
+			}
+			break;
+		case 'week':
+			if ( ticks < weekTicksThreshold ) {
+				xFormat = 'j';
+				x2Format = 'M Y';
+			} else {
+				xFormat = 'M';
+				x2Format = 'Y';
+			}
+
+			// Since some alphabet letters have php associated formats, we need to escape them first.
+			const escapedWeekOfStr = __(
+				'Week of',
+				'woocommerce-admin'
+			).replace( /(\w)/g, '\\$1' );
+
+			screenReaderFormat = `${ escapedWeekOfStr } F j, Y`;
+			tooltipLabelFormat = `${ escapedWeekOfStr } F j, Y`;
+			break;
+		case 'quarter':
+		case 'month':
+			screenReaderFormat = 'F Y';
+			tooltipLabelFormat = 'F Y';
+			xFormat = 'M';
+			x2Format = 'Y';
+			break;
+		case 'year':
+			screenReaderFormat = 'Y';
+			tooltipLabelFormat = 'Y';
+			xFormat = 'Y';
 			break;
 	}
 

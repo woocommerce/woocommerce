@@ -2,7 +2,8 @@
  * External dependencies
  */
 import moment from 'moment';
-
+import { format as formatDate } from '@wordpress/date';
+import { timeFormat as d3TimeFormat } from 'd3-time-format';
 /**
  * Internal dependencies
  */
@@ -22,6 +23,9 @@ import {
 	getChartTypeForQuery,
 	getAllowedIntervalsForQuery,
 	getStoreTimeZoneMoment,
+	getDateFormatsForIntervalPhp,
+	getDateFormatsForIntervalD3,
+	dayTicksThreshold,
 } from '../';
 
 jest.mock( 'moment', () => {
@@ -1041,4 +1045,56 @@ describe( 'getStoreTimeZoneMoment', () => {
 		expect( mockTz ).not.toHaveBeenCalled();
 		expect( utcOffset ).toHaveBeenCalledWith( '-04:00' );
 	} );
+} );
+
+describe( 'getDateFormatsForIntervalPhp', () => {
+	test.each( [
+		{ interval: 'hour', ticks: 0 },
+		{ interval: 'day', ticks: dayTicksThreshold - 1 },
+		{ interval: 'day', ticks: dayTicksThreshold + 1 },
+		{ interval: 'week', ticks: dayTicksThreshold - 1 },
+		{ interval: 'week', ticks: dayTicksThreshold + 1 },
+		{ interval: 'quarter', ticks: 0 },
+		{ interval: 'month', ticks: 0 },
+		{ interval: 'year', ticks: 0 },
+		{ interval: 'default', ticks: 0 },
+	] )(
+		'should return formatted date same as getDateFormatsForIntervalD3 when interval is $interval and ticks is $ticks',
+		( { interval, ticks } ) => {
+			const date = new Date();
+
+			const dateFormatsPhp = getDateFormatsForIntervalPhp(
+				interval,
+				ticks
+			);
+			const dateFormatsD3 = getDateFormatsForIntervalD3(
+				interval,
+				ticks
+			);
+
+			expect(
+				formatDate( dateFormatsPhp.screenReaderFormat, date )
+			).toBe(
+				d3TimeFormat( dateFormatsD3.screenReaderFormat )(
+					date
+				).trimStart() // trim the leading space since d3.timeFormat adds it but it does not affect the UI
+			);
+
+			expect(
+				formatDate( dateFormatsPhp.tooltipLabelFormat, date )
+			).toBe(
+				d3TimeFormat( dateFormatsD3.tooltipLabelFormat )(
+					date
+				).trimStart()
+			);
+
+			expect( formatDate( dateFormatsPhp.xFormat, date ) ).toBe(
+				d3TimeFormat( dateFormatsD3.xFormat )( date ).trimStart()
+			);
+
+			expect( formatDate( dateFormatsPhp.x2Format, date ) ).toBe(
+				d3TimeFormat( dateFormatsD3.x2Format )( date ).trimStart()
+			);
+		}
+	);
 } );

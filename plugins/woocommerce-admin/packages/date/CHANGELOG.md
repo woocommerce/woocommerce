@@ -2,6 +2,7 @@
 
 -   Remove dev dependency `@woocommerce/wc-admin-settings`. #8057
 -   Add "defaultDateRange" argument to "getAllowedIntervalsForQuery" for default period value. #8189
+-   Add type option to `getDateFormatsForInterval` to support `getDateFormatsForIntervalPhp` feature. #8129
 
 # 3.1.0
 
