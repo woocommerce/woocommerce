@@ -6,9 +6,13 @@ const {
 	createSimpleProduct,
 	createVariableProduct,
 	createGroupedProduct,
-	uiUnblocked
+	uiUnblocked,
 } = require( '@woocommerce/e2e-utils' );
 
+/**
+ * External dependencies
+ */
+const { it, describe, beforeAll } = require( '@jest/globals' );
 const { config } = require( '@woocommerce/e2e-environment' );
 
 // Variables for simple product

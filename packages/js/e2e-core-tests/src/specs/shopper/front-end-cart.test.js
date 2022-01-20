@@ -5,17 +5,13 @@ const {
 	shopper,
 	withRestApi,
 	createSimpleProduct,
-	uiUnblocked
+	uiUnblocked,
 } = require( '@woocommerce/e2e-utils' );
 
 /**
  * External dependencies
  */
-const {
-	it,
-	describe,
-	beforeAll,
-} = require( '@jest/globals' );
+const { it, describe, beforeAll } = require( '@jest/globals' );
 
 const { config } = require( '@woocommerce/e2e-environment' );
 const simpleProductName = config.get( 'products.simple.name', 'Simple product' );

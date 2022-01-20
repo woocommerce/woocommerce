@@ -5,7 +5,7 @@
 const {
 	merchant,
 	settingsPageSaveChanges,
-	verifyValueOfInputField
+	verifyValueOfInputField,
 } = require( '@woocommerce/e2e-utils' );
 
 /**

@@ -12,11 +12,7 @@ const {
 /**
  * External dependencies
  */
-const {
-	it,
-	describe,
-	beforeAll,
-} = require( '@jest/globals' );
+const { it, describe, beforeAll } = require( '@jest/globals' );
 
 const { config } = require( '@woocommerce/e2e-environment' );
 const firstProductPrice = config.get( 'products.simple.price', '9.99' );
