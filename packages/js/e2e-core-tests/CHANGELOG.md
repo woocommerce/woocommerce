@@ -1,6 +1,20 @@
 # Unreleased
 
 ## Fixed
+- Updated assertion in the block `can update order details` from the e2e test `order-edit.test.js` that wasn't checking properly the date value when editing an order, allowing the test to return a false positive.
+
+## Added
+
+- Additional Merchant Order Edit tests to increase the downloadable products coverage.
+
+## Changed
+
+- The e2e test `update-product-settings.test.js` now covers setting and unsetting the `X-Accel-Redirect/X-Sendfile` download method and `Append a unique string to filename for security` flag.
+- The e2e test `order-edit.test.js` now uses the API to create orders.
+
+# 0.1.7
+
+## Fixed
 - Moved `merchant.login()` out of `beforeAll()` block and into test body for retried runs.
 
 ## Added
