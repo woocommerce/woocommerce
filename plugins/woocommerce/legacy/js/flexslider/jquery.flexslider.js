@@ -965,12 +965,10 @@
         // VERTICAL:
         if (vertical && !carousel) {
           slider.doMath();
-          slider.container.height((slider.count + slider.cloneCount) * 200 + "%").css("position", "absolute").width("100%");
-          setTimeout(function(){
-            slider.newSlides.css({"display": "block"});
-            slider.viewport.height(slider.h);
-            slider.setProps(sliderOffset * slider.h, "init");
-          }, (type === "init") ? 100 : 0);
+		  slider.viewport.height(slider.h);
+          slider.newSlides.css({"display": "block", "width": slider.computedW, "height": slider.computedW});
+		  slider.container.height((slider.count + slider.cloneCount) * 200 + "%").css("position", "absolute").width("100%");
+		  slider.setProps(sliderOffset * slider.h, "init");
         } else {
 			slider.doMath();
 			slider.container.css({"height": slider.h + slider.computedW / slider.count, "overflow":"hidden"});
