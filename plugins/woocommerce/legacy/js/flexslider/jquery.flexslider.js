@@ -634,7 +634,7 @@
       },
       smoothHeight: function(dur) {
         if (!vertical || fade) {
-          var $obj = (fade) ? slider : slider.viewport;
+          var $obj = (fade) ? slider.container : slider.viewport;
           (dur) ? $obj.animate({"height": slider.slides.eq(slider.animatingTo).innerHeight()}, dur) : $obj.innerHeight(slider.slides.eq(slider.animatingTo).innerHeight());
         }
       },
