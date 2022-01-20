@@ -1,0 +1,4 @@
+Significance: patch
+Type: Fix
+
+changed email validation in Store Details onboarding task to more closely match PHP backend validation. #8197
