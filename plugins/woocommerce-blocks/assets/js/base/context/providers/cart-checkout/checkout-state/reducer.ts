@@ -57,11 +57,8 @@ export const reducer = (
 					? {
 							...state,
 							status: STATUS.COMPLETE,
-							// @todo Investigate why redirectURL could be non-truthy and whether this would cause a bug if multiple gateways were used for payment e.g. 1st set the redirect URL but failed, and then the 2nd did not provide a redirect URL and succeeded.
 							redirectUrl:
-								data !== undefined &&
-								typeof data.redirectUrl === 'string' &&
-								data.redirectUrl
+								typeof data?.redirectUrl === 'string'
 									? data.redirectUrl
 									: state.redirectUrl,
 					  }
