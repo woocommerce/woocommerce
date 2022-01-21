@@ -292,6 +292,9 @@ const merchant = {
 		await expect( page ).toMatchElement( 'div.wp-die-message', {
 			text: reason
 		} );
+
+		// Close tab
+		await page.close();
 	},
 
 	openNewShipping: async () => {

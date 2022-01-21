@@ -6,6 +6,8 @@
 - `orderPageSaveChanges()` to save changes in the order page.
 - `getSelectorAttribute( selector, attribute )` to retrieve the desired HTML attribute from an element.
 - `verifyValueOfElementAttribute( selector, attribute, expectedValue )` to check that a specific HTML attribute from an element matches the expected value.
+- `withRestApi.deleteProduct()` that deletes a single product.
+- `withRestApi.deleteOrder()` that deletes a single order.
 - `merchant.addDownloadableProductPermission()` to add a downloadable product permission to an order.
 - `merchant.updateDownloadableProductPermission()` to update the attributes of an existing downloadable product permission.
 - `merchant.revokeDownloadableProductPermission()` to remove the existing downloadable product permission from an order.

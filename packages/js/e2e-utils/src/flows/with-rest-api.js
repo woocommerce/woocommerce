@@ -109,6 +109,16 @@ export const withRestApi = {
 		await deleteAllRepositoryObjects( repository );
 	},
 	/**
+	 * Use api package to delete a product.
+	 *
+	 * @param {number} productId Product ID.
+	 * @return {Promise} Promise resolving once the product has been deleted.
+	 */
+	deleteProduct: async ( productId ) => {
+		const repository = SimpleProduct.restRepository( client );
+		await repository.delete( productId );
+	},
+	/**
 	 * Use the API to delete all product attributes.
 	 *
 	 * @param {boolean} testResponse Test the response status code.
@@ -176,6 +186,16 @@ export const withRestApi = {
 		const orderStatuses = ['pending', 'processing', 'on-hold', 'completed', 'cancelled', 'refunded', 'failed', 'trash'];
 		const repository = Order.restRepository( client );
 		await deleteAllRepositoryObjects( repository, null, orderStatuses );
+	},
+	/**
+	 * Use api package to delete an order.
+	 *
+	 * @param {number} orderId Order ID.
+	 * @return {Promise} Promise resolving once the order has been deleted.
+	 */
+	deleteOrder: async ( orderId ) => {
+		const repository = Order.restRepository( client );
+		await repository.delete( orderId );
 	},
 	/**
 	 * Adds a shipping zone along with a shipping method using the API.

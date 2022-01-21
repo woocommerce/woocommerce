@@ -166,6 +166,8 @@ Please note: if you're using a non-SSL environment (such as a Docker container f
 | `deleteAllShippingZones` | `testResponse` | Permanently delete all shipping zones except the default |
 | `deleteCoupon` | `couponId` | Permanently delete a coupon |
 | `deleteCustomerByEmail` | `emailAddress` | Delete customer user account. Posts are reassigned to user ID 1 |
+| `deleteOrder` | `orderId` | Permanently delete an order |
+| `deleteProduct` | `productId` | Permanently delete a simple product |
 | `getSystemEnvironment` | | Get the current environment from the WooCommerce system status API. |
 | `resetOnboarding` | | Reset onboarding settings |
 | `resetSettingsGroupToDefault` | `settingsGroup`, `testResponse` | Reset settings in settings group to default except `select` fields |
