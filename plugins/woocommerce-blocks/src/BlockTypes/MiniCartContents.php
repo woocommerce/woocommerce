@@ -5,6 +5,7 @@ use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Assets;
 use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 use Automattic\WooCommerce\Blocks\StoreApi\Utilities\CartController;
+use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 
 /**
  * Mini Cart class.
@@ -64,5 +65,82 @@ class MiniCartContents extends AbstractBlock {
 		}
 
 		return $content;
+	}
+
+	/**
+	 * Enqueue frontend assets for this block, just in time for rendering.
+	 *
+	 * @param array $attributes  Any attributes that currently are available from the block.
+	 */
+	protected function enqueue_assets( array $attributes ) {
+		parent::enqueue_assets( $attributes );
+		$text_color = StyleAttributesUtils::get_text_color_class_and_style( $attributes );
+		$bg_color   = StyleAttributesUtils::get_background_color_class_and_style( $attributes );
+
+		$styles = array(
+			array(
+				'selector'   => '.wc-block-mini-cart__drawer .components-modal__header',
+				'properties' => array(
+					array(
+						'property' => 'color',
+						'value'    => $text_color ? $text_color['value'] : false,
+					),
+				),
+			),
+			array(
+				'selector'   => '.wc-block-mini-cart__footer .wc-block-mini-cart__footer-actions .wc-block-mini-cart__footer-cart.wc-block-components-button',
+				'properties' => array(
+					array(
+						'property' => 'color',
+						'value'    => $text_color ? $text_color['value'] : false,
+					),
+					array(
+						'property' => 'border-color',
+						'value'    => $text_color ? $text_color['value'] : false,
+					),
+				),
+			),
+			array(
+				'selector'   => '.wc-block-mini-cart__footer .wc-block-mini-cart__footer-actions .wc-block-mini-cart__footer-checkout',
+				'properties' => array(
+					array(
+						'property' => 'color',
+						'value'    => $bg_color ? $bg_color['value'] : false,
+					),
+					array(
+						'property' => 'border-color',
+						'value'    => $text_color ? $text_color['value'] : false,
+					),
+					array(
+						'property' => 'background-color',
+						'value'    => $text_color ? $text_color['value'] : false,
+					),
+				),
+			),
+		);
+
+		$parsed_style = '';
+
+		foreach ( $styles as $style ) {
+			$properties = array_filter(
+				$style['properties'],
+				function( $property ) {
+					return $property['value'];
+				}
+			);
+
+			if ( ! empty( $properties ) ) {
+				$parsed_style .= $style['selector'] . '{' . PHP_EOL;
+				foreach ( $properties as $property ) {
+					$parsed_style .= $property['property'] . ':' . $property['value'] . ';' . PHP_EOL;
+				}
+				$parsed_style .= '}' . PHP_EOL;
+			}
+		}
+
+		wp_add_inline_style(
+			'wc-blocks-style',
+			$parsed_style
+		);
 	}
 }
