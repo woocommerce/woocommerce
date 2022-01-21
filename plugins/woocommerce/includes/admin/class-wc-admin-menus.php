@@ -248,7 +248,7 @@ class WC_Admin_Menus {
 	 * @return bool
 	 */
 	public function custom_menu_order( $enabled ) {
-		return $enabled || current_user_can( 'edit_others_shop_orders' );
+		return $enabled || self::can_view_woocommerce_menu_item();
 	}
 
 	/**
