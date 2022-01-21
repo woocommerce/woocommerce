@@ -217,7 +217,10 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 			}
 
 			$this->id = absint( $file['id'] );
-		} elseif ( file_exists( ABSPATH . $file_url ) ) {
+		} elseif (
+			( 0 === stripos( realpath( ABSPATH . $file_url ), ABSPATH ) ) &&
+			file_exists( ABSPATH . $file_url )
+		) {
 			if ( ! wc_is_file_valid_csv( ABSPATH . $file_url ) ) {
 				$this->import_error( __( 'Invalid file type. The importer supports CSV and TXT file formats.', 'woocommerce' ) );
 			}
