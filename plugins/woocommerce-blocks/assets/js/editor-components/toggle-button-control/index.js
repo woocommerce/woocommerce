@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { isFunction } from 'lodash';
 import classnames from 'classnames';
 import { BaseControl, ButtonGroup, Button } from '@wordpress/components';
 import { Component } from '@wordpress/element';
@@ -40,7 +39,7 @@ class ToggleButtonControl extends Component {
 		let helpLabel;
 
 		if ( help ) {
-			helpLabel = isFunction( help ) ? help( checked ) : help;
+			helpLabel = typeof help === 'function' ? help( checked ) : help;
 		}
 
 		return (
