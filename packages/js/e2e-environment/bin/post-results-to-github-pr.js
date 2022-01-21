@@ -1,7 +1,8 @@
 const fs = require( 'fs' );
 const path = require( 'path' );
+const { resolveLocalE2ePath } = require( '../utils' );
 
-const resultsFile = path.resolve( __dirname, '../test-results.json' );
+const resultsFile = resolveLocalE2ePath( 'test-results.json' );
 
 const buildOutput = ( results ) => {
 	const { TITLE, SMOKE_TEST_URL } = process.env;
