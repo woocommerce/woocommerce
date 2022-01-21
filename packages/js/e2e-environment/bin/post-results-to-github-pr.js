@@ -1,4 +1,6 @@
-const fs = require( 'fs' );
+#!/usr/bin/env node
+
+const fs = require('fs');
 const path = require( 'path' );
 const { resolveLocalE2ePath } = require( '../utils' );
 
