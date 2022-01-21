@@ -8,6 +8,7 @@ namespace Automattic\WooCommerce;
 use Automattic\WooCommerce\Internal\DependencyManagement\ExtendedContainer;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\DownloadPermissionsAdjusterServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\AssignDefaultCategoryServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\OrdersDataStoreServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ProductAttributesLookupServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ProxiesServiceProvider;
 
@@ -37,6 +38,7 @@ final class Container implements \Psr\Container\ContainerInterface {
 	private $service_providers = array(
 		AssignDefaultCategoryServiceProvider::class,
 		DownloadPermissionsAdjusterServiceProvider::class,
+		OrdersDataStoreServiceProvider::class,
 		ProductAttributesLookupServiceProvider::class,
 		ProxiesServiceProvider::class,
 		DownloadPermissionsAdjusterServiceProvider::class,
