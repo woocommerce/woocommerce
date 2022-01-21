@@ -36,7 +36,7 @@ const settings = {
 		reusable: false,
 		inserter: false,
 		color: {
-			text: false,
+			link: true,
 		},
 	},
 	attributes: {
