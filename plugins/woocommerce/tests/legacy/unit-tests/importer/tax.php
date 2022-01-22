@@ -39,4 +39,23 @@ class WC_Tests_Tax_CSV_Importer extends WC_Unit_Test_Case {
 		$rate_count = $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_tax_rates" );
 		$this->assertEquals( 5, $rate_count );
 	}
+
+	/**
+	 * Test that directory traversal is prevented.
+	 */
+	public function test_import_path_traversal() {
+		$importer =
+			$this->getMockBuilder( WC_Tax_Rate_Importer::class )
+				->setMethods( array( 'import_error' ) )
+				->getMock();
+
+		$importer
+			->expects( $this->once() )
+			->method( 'import_error' )
+			->willReturn( false );
+
+		$_POST['file_url'] = '../sample_tax_rates.csv';
+
+		$importer->handle_upload();
+	}
 }
