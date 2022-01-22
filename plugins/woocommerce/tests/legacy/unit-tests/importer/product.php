@@ -669,4 +669,18 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 		$this->assertFalse( WC_Product_CSV_Importer_Controller::is_file_valid_csv( '/srv/www/woodev/wp-content/uploads/2018/10/img.jpg' ) );
 		$this->assertFalse( WC_Product_CSV_Importer_Controller::is_file_valid_csv( 'file:///srv/www/woodev/wp-content/uploads/2018/10/1098488_single.csv' ) );
 	}
+
+	/**
+	 * Test that directory traversal is prevented.
+	 */
+	public function test_server_path_traversal() {
+		self::file_copy( $this->csv_file, ABSPATH . '../sample.csv' );
+
+		$_POST['file_url'] = '../sample.csv';
+		$import_controller = new WC_Product_CSV_Importer_Controller();
+		$import_result     = $import_controller->handle_upload();
+
+		$this->assertTrue( is_wp_error( $import_result ) );
+		$this->assertEquals( $import_result->get_error_code(), 'woocommerce_product_csv_importer_upload_invalid_file' );
+	}
 }
