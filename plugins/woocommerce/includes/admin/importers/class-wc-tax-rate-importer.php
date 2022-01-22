@@ -322,7 +322,7 @@ class WC_Tax_Rate_Importer extends WP_Importer {
 	 *
 	 * @param  string $message Error message.
 	 */
-	private function import_error( $message = '' ) {
+	public function import_error( $message = '' ) {
 		echo '<p><strong>' . esc_html__( 'Sorry, there has been an error.', 'woocommerce' ) . '</strong><br />';
 		if ( $message ) {
 			echo esc_html( $message );
