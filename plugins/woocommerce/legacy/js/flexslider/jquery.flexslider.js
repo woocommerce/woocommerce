@@ -50,6 +50,7 @@
         slider.slides = $(slider.vars.selector, slider);
         slider.container = $(slider.containerSelector, slider);
         slider.count = slider.slides.length;
+		slider.itemsPerRow = parseInt(el.dataset.columns);
         // SYNC:
         slider.syncExists = $(slider.vars.sync).length > 0;
         // SLIDE:
@@ -244,9 +245,10 @@
               item = $( '<a></a>' ).attr( 'href', '#' ).text( j );
               if (slider.vars.controlNav === "thumbnails") {
                 item = $('<img/>', {
-                  onload: 'this.width = this.naturalWidth; this.height = this.naturalHeight',
+				  Width: slider.navItemSize,
+				  Height: slider.navItemSize,
                   src: slide.attr('data-thumb'),
-                  srcset: `${slide.attr('data-thumb')} ${Math.round(slider.itemW / slider.count)}w, ${slide.find('img').attr('src')} ${Math.round(slider.w)}w`,
+				  srcset: `${slide.attr('data-thumb')} ${Math.round( slider.w / slider.navItemSize )}w, ${slide.find('img').attr('src')} ${Math.round(slider.w)}w`,
                   sizes: `(max-width: ${Math.round(slider.w)}px) 100vw, ${Math.round(slider.w)}px`,
                   alt: slide.attr('alt')
                 })
@@ -962,15 +964,14 @@
         slider.newSlides = $(slider.vars.selector, slider);
 
         sliderOffset = (reverse) ? slider.count - 1 - slider.currentSlide + slider.cloneOffset : slider.currentSlide + slider.cloneOffset;
+        slider.doMath();
         // VERTICAL:
         if (vertical && !carousel) {
-          slider.doMath();
 		  slider.viewport.height(slider.h);
           slider.newSlides.css({"display": "block", "width": slider.computedW, "height": slider.computedW});
 		  slider.container.height((slider.count + slider.cloneCount) * 200 + "%").css("position", "absolute").width("100%");
 		  slider.setProps(sliderOffset * slider.h, "init");
         } else {
-			slider.doMath();
 			slider.container.css({"height": slider.h, "overflow":"hidden"});
 			if(slider.vars.rtl){
 				slider.newSlides.css({"width": slider.computedW, "marginRight" : slider.computedM, "float": "right", "display": "block"});
@@ -1024,7 +1025,8 @@
       if (slider.isFirefox) { slider.w = slider.width(); }
       slider.h = slide.height();
       slider.boxPadding = slide.outerWidth() - slide.width();
-
+	  slider.firstRowCount = slider.itemsPerRow > slider.count ? slider.itemsPerRow : Math.min(slider.itemsPerRow, slider.count);
+	  slider.navItemSize = Math.round(slider.w / slider.firstRowCount);
       // CAROUSEL:
       if (carousel) {
         slider.itemT = slider.vars.itemWidth + slideMargin;
