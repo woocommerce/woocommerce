@@ -28,6 +28,11 @@
 
 	.woocommerce-ellipsis-menu__content {
 		width: 100%;
+
+		.components-button {
+			justify-content: center;
+			width: 100%;
+		}
 	}
 
 	.woocommerce-ellipsis-menu__title,
