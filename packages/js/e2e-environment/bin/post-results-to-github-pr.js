@@ -1,8 +1,8 @@
 const fs = require('fs');
 const path = require( 'path' );
-const { resolveLocalE2ePath } = require( '../utils' );
+// const { resolveLocalE2ePath } = require( '../utils' );
 
-const resultsFile = resolveLocalE2ePath( '/test-results.json' );
+const resultsFile = '../../../../plugins/woocommerce/tests/e2e/test-results.json';
 
 const buildOutput = ( results ) => {
 	const { TITLE, SMOKE_TEST_URL } = process.env;
