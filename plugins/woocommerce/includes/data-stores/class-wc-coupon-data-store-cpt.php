@@ -123,6 +123,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			array(
 				'code'                        => $post_object->post_title,
 				'description'                 => $post_object->post_excerpt,
+				'status'                      => $post_object->post_status,
 				'date_created'                => $this->string_to_timestamp( $post_object->post_date_gmt ),
 				'date_modified'               => $this->string_to_timestamp( $post_object->post_modified_gmt ),
 				'date_expires'                => metadata_exists( 'post', $coupon_id, 'date_expires' ) ? get_post_meta( $coupon_id, 'date_expires', true ) : get_post_meta( $coupon_id, 'expiry_date', true ), // @todo: Migrate expiry_date meta to date_expires in upgrade routine.

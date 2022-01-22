@@ -245,10 +245,10 @@
               item = $( '<a></a>' ).attr( 'href', '#' ).text( j );
               if (slider.vars.controlNav === "thumbnails") {
                 item = $('<img/>', {
-				  Width: slider.navItemSize,
-				  Height: slider.navItemSize,
+                  Width: slider.navItemSize,
+                  Height: slider.navItemSize,
                   src: slide.attr('data-thumb'),
-				  srcset: `${slide.attr('data-thumb')} ${Math.round( slider.w / slider.navItemSize )}w, ${slide.find('img').attr('src')} ${Math.round(slider.w)}w`,
+                  srcset: `${slide.attr('data-thumb')} ${Math.round( slider.w / slider.navItemSize )}w, ${slide.find('img').attr('src')} ${Math.round(slider.w)}w`,
                   sizes: `(max-width: ${Math.round(slider.w)}px) 100vw, ${Math.round(slider.w)}px`,
                   alt: slide.attr('alt')
                 })

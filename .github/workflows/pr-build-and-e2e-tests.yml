@@ -130,7 +130,7 @@ jobs:
             - name: Run tests command.
               working-directory: package/woocommerce/plugins/woocommerce
               env:
-                  BASE_URL: ${{ secrets.PR_E2E_TEST_URL }}
-                  USER_KEY: ${{ secrets.PR_E2E_TEST_ADMIN_USER }}
-                  USER_SECRET: ${{ secrets.PR_E2E_TEST_ADMIN_PASSWORD }}
+                  BASE_URL: http://localhost:8084
+                  USER_KEY: admin
+                  USER_SECRET: password
               run: pnpx wc-api-tests test api

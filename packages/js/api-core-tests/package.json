@@ -4,6 +4,7 @@
   "description": "API tests for WooCommerce",
   "main": "index.js",
   "scripts": {
+    "preinstall": "npx only-allow pnpm",
     "test": "jest",
     "test:api": "jest --group=api",
     "test:hello": "jest --group=hello",
@@ -24,6 +25,9 @@
     "jest-runner-groups": "^2.1.0",
     "postman-collection": "^4.1.0",
     "supertest": "^6.1.4"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "bin": {
     "wc-api-tests": "bin/wc-api-tests.sh"

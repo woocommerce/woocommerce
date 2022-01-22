@@ -118,6 +118,7 @@ export class ProductVariation extends AbstractProductData implements
 	public readonly backorderStatus: BackorderStatus = BackorderStatus.Allowed;
 	public readonly canBackorder: boolean = false;
 	public readonly isOnBackorder: boolean = false;
+	public readonly lowStockThreshold: number = -1;
 
 	/**
 	 * @see ./abstracts/price.ts
