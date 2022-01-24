@@ -40,10 +40,10 @@ Additionally, make sure to differentiate between things in the testing notes tha
 * [ ] Execute `npm run deploy`
   * Note: the script automatically updates version numbers (commits on your behalf).
   * **ALERT**: This script will ask you if this release will be deployed to WordPress.org. You should only answer yes for this release **if it's the latest release and you want to deploy to WordPress.org**. Otherwise, answer no. If you answer yes, you will get asked additional verification by the `npm run deploy` script about deploying a patch release to WordPress.org.
-  * An email confirmation is required before the new version will be released, so check your email in order to confirm the release.
 
 ## If this release is deployed to WordPress.org...
 
+* [ ] An email confirmation is required before the new version will be released. Ask team members to check their email.
 * [ ] Edit the [GitHub release](https://github.com/woocommerce/woocommerce-gutenberg-products-block/releases) and copy changelog into the release notes.
 * [ ] The `#team-rubik` slack instance will be notified about the progress with the WordPress.org deploy. Watch for that. If anything goes wrong, an error will be reported and you can followup via the GitHub actions tab and the log for that workflow.
 * [ ] After the wp.org workflow completes, confirm the following
