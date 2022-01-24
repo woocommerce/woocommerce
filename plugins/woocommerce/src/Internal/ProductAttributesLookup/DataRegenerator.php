@@ -21,7 +21,9 @@ defined( 'ABSPATH' ) || exit;
  * the data store classes) whenever a product is created/updated.
  *
  * Additionally, after the regeneration is completed a 'woocommerce_attribute_lookup_enabled' option
- * with a value of 'yes' will have been created, thus effectively enabling the table usage.
+ * with a value of 'yes' will have been created, thus effectively enabling the table usage
+ * (with an exception: if the regeneration was manually aborted via deleting the
+ * 'woocommerce_attribute_lookup_regeneration_in_progress' option) the option will be set to 'no'.
  *
  * This class also adds two entries to the Status - Tools menu: one for manually regenerating the table contents,
  * and another one for enabling or disabling the actual lookup table usage.
@@ -96,7 +98,7 @@ class DataRegenerator {
 		if ( $products_exist ) {
 			$this->enqueue_regeneration_step_run();
 		} else {
-			$this->finalize_regeneration();
+			$this->finalize_regeneration( true );
 		}
 	}
 
@@ -172,7 +174,7 @@ CREATE TABLE ' . $this->lookup_table_name . '(
 			// No regeneration in progress at this point means that the regeneration process
 			// was manually aborted via deleting the 'woocommerce_attribute_lookup_regeneration_in_progress' option.
 			$this->data_store->set_regeneration_aborted_flag();
-			$this->finalize_regeneration();
+			$this->finalize_regeneration( false );
 			return;
 		}
 
@@ -180,7 +182,7 @@ CREATE TABLE ' . $this->lookup_table_name . '(
 		if ( $result ) {
 			$this->enqueue_regeneration_step_run();
 		} else {
-			$this->finalize_regeneration();
+			$this->finalize_regeneration( true );
 		}
 	}
 
@@ -243,11 +245,14 @@ CREATE TABLE ' . $this->lookup_table_name . '(
 
 	/**
 	 * Cleanup/final option setup after the regeneration has been completed.
+	 *
+	 * @param bool $enable_usage Whether the table usage should be enabled or not.
+	 *
 	 */
-	private function finalize_regeneration() {
+	private function finalize_regeneration( bool $enable_usage ) {
 		delete_option( 'woocommerce_attribute_lookup_last_product_id_to_process' );
 		delete_option( 'woocommerce_attribute_lookup_processed_count' );
-		update_option( 'woocommerce_attribute_lookup_enabled', 'no' );
+		update_option( 'woocommerce_attribute_lookup_enabled', $enable_usage ? 'yes' : 'no' );
 		$this->data_store->unset_regeneration_in_progress_flag();
 	}
 
