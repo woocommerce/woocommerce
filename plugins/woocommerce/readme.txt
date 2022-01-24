@@ -4,7 +4,7 @@ Tags: e-commerce, store, sales, sell, woo, shop, cart, checkout, downloadable, d
 Requires at least: 5.6
 Tested up to: 5.8
 Requires PHP: 7.0
-Stable tag: 6.1.0
+Stable tag: 6.1.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -160,6 +160,70 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 6.1.0 2021-XX-XX =
+= 6.2.0 2022-02-08 =
+
+**WooCommerce**
+
+* Add - Admin notice warning about the upcoming minimum PHP 4.2 version bump coming in WooCommerce 6.5. ([#31557](https://github.com/woocommerce/woocommerce/pull/31557))
+* Tweak - Removed images referred to from deprecated functions. ([#31395](https://github.com/woocommerce/woocommerce/pull/31395))
+* Fix - Checkout scroll to notices fallback scroll element. ([#30955](https://github.com/woocommerce/woocommerce/pull/30955))
+* Fix - Prevent PhotoSwipe tap from interacting with elements directly underneath. Props @Edsuns and @andi34. ([#31591](https://github.com/woocommerce/woocommerce/pull/31591))
+* Dev - Added logic to `do_variation_action` prematurely return on custom actions. ([#31088](https://github.com/woocommerce/woocommerce/pull/31088))
+* Dev - REST API - Adds `status` field to the GET `/coupons` endpoint. ([#31561](https://github.com/woocommerce/woocommerce/pull/31561))
+* Dev - Use `calc` function to prevent deprecated warnings when building SCSS.
+
+**WooCommerce Admin - 3.1.0**
+
+* Enhancement - Add SlotFill areas to header. ([#7805](https://github.com/woocommerce/woocommerce-admin/pull/7805))
+* Add - Add featured pill for MailPoet and Google Listings in marketing task. ([#8009](https://github.com/woocommerce/woocommerce-admin/pull/8009))
+* Add - Add inbox_action_click track when a note gets clicked. ([#8086](https://github.com/woocommerce/woocommerce-admin/pull/8086))
+* Add - Activate promo note after WC Pay is activated. ([#8104](https://github.com/woocommerce/woocommerce-admin/pull/8104))
+* Add - Add payment remind me later note. ([#8085](https://github.com/woocommerce/woocommerce-admin/pull/8085))
+* Add - Add WC Pay welcome page. ([#8083](https://github.com/woocommerce/woocommerce-admin/pull/8083))
+* Update - Allow content data note props to be passed from remote sources ([#8047](https://github.com/woocommerce/woocommerce-admin/pull/8047))
+* Update - Update @woocommerce/e2e-environment package to latest. ([#8000](https://github.com/woocommerce/woocommerce-admin/pull/8000))
+* Tweak - OBW Update WC Pay label on recommended extensions list ([#8038](https://github.com/woocommerce/woocommerce-admin/pull/8038))
+* Fix - Fix Onboarding flow where extensions might not be selected and installed. ([#7979](https://github.com/woocommerce/woocommerce-admin/pull/7979))
+* Fix - Fix pagination issue with Analytics Coupons page. ([#8001](https://github.com/woocommerce/woocommerce-admin/pull/8001))
+* Fix - Fix select-control component label/value alignment. ([#8045](https://github.com/woocommerce/woocommerce-admin/pull/8045))
+* Fix - Fix unexpected analytics report table filter results. ([#8072](https://github.com/woocommerce/woocommerce-admin/pull/8072))
+* Fix - Prevent coupon move notice for new installs. ([#7995](https://github.com/woocommerce/woocommerce-admin/pull/7995))
+* Fix - Remove calls to read_meta_data in the Note DataStore. ([#7988](https://github.com/woocommerce/woocommerce-admin/pull/7988))
+* Fix - Fix free extensions list isn't updated after store location or industry is changed. ([#8099](https://github.com/woocommerce/woocommerce-admin/pull/8099))
+* Fix - Fix misaligned "Rows per page" dropdown. ([#8113](https://github.com/woocommerce/woocommerce-admin/pull/8113))
+* Fix - Hide the extensions header when no available plugins in the category. ([#8089](https://github.com/woocommerce/woocommerce-admin/pull/8089))
+* Fix - Replace all docs.woocommerce.com links with woocommerce.com/document. ([#8105](https://github.com/woocommerce/woocommerce-admin/pull/8105))
+* Fix - Fixing marketing task not displaying on Atomic sites ([#8150](https://github.com/woocommerce/woocommerce-admin/pull/8150))
+* Dev - Add payment gateway suggestion docs and example extensions ([#7966](https://github.com/woocommerce/woocommerce-admin/pull/7966))
+* Dev - Remove low performing inbox notes. ([#8054](https://github.com/woocommerce/woocommerce-admin/pull/8054))
+* Dev - Remove navigation feedback note. ([#8055](https://github.com/woocommerce/woocommerce-admin/pull/8055))
+
+**WooCommerce Blocks - 6.6.0 & 6.7.0 & 6.7.1 & 6.7.2 & 6.7.3**
+
+* Enhancement - Added global styles (text color) to the Active Filters block. ([5465](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5465))
+* Enhancement - Prevent a 0 value shipping price being shown in the Checkout if no shipping methods are available. ([5444](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5444))
+* Fix - Convert token to string when setting the active payment method. ([5535](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5535))
+* Fix - Fixed an issue where the checkout address fields would be blank for logged in customers. ([5473](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5473))
+* Fix - Account for products without variations in the On Sale Products block. ([5470](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5470))
+* Fix - Update the template retrieving logic to allow for older Gutenberg convention and newer one (`block-templates`/`block-template-parts` vs. `templates`/`parts`). ([5455](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5455))
+* Fix - Ensure that the translation of the "Proceed to Checkout" button is working. ([5453](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5453))
+* Fix - Fix custom templates with fallback to archive being incorrectly attributed to the user in the editor instead of the parent theme. ([5447](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5447))
+* Fix - Remove text decorations from product filtering blocks items. ([5384](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5384))
+* Fix - "Added By" template column value is user friendly for modified WooCommerce block templates. ([5420](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5420))
+* Fix - Fixed a performance issue with the cart by preventing an extra network request on mount. ([5394](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5394))
+* Fix - Use the themes product archive block template for product category & product tag pages if the theme does not have more specific templates for those. ([5380](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5380))
+* Fix - Cart block: Switch to correct view if inner block is selected. ([5358](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5358))
+* Fix - Respect implicit quantity updates coming from server or directly from data stores. ([5352](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5352))
+* Fix - Fixed a case where payments could fail after validation errors when using saved cards. ([5350](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5350))
+* Fix - Add error handling for network errors during checkout. ([5341](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5341))
+* Fix - Fix cart and checkout margin problem by removing the full-width option. ([5315](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5315))
+* Fix - Enable Mini Cart template parts only for experimental builds. ([#5606](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5606))
+* Tweak - Sync draft orders whenever cart data changes. ([5379](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5379))
+* Tweak - Removed legacy handling for shipping_phone in Store API. ([5326](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5326))
+* Tweak - Site Editor template list: Fix wrong icon displayed on WooCommerce templates after they have been edited. ([5375](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5375))
+* Tweak - Fix validation error handling after using browser autofill. ([5373](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5373))
+* Tweak - Update loading skeleton animations. ([5362](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5362))
+* Tweak - Add error handling to `get_routes_from_namespace` method. ([5319](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5319))
+* Tweak - Update WooCommerce plugin slug for Block Templates. ([#5519](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5519))
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).

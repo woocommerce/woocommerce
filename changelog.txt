@@ -38,7 +38,7 @@
 * Dev - Remove low performing inbox notes. ([#8054](https://github.com/woocommerce/woocommerce-admin/pull/8054))
 * Dev - Remove navigation feedback note. ([#8055](https://github.com/woocommerce/woocommerce-admin/pull/8055))
 
-**WooCommerce Blocks - 6.6.0 & 6.7.0 & 6.7.1**
+**WooCommerce Blocks - 6.6.0 & 6.7.0 & 6.7.1 & 6.7.2 & 6.7.3**
 
 * Enhancement - Added global styles (text color) to the Active Filters block. ([5465](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5465))
 * Enhancement - Prevent a 0 value shipping price being shown in the Checkout if no shipping methods are available. ([5444](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5444))
@@ -57,12 +57,14 @@
 * Fix - Fixed a case where payments could fail after validation errors when using saved cards. ([5350](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5350))
 * Fix - Add error handling for network errors during checkout. ([5341](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5341))
 * Fix - Fix cart and checkout margin problem by removing the full-width option. ([5315](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5315))
+* Fix - Enable Mini Cart template parts only for experimental builds. ([#5606](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5606))
 * Tweak - Sync draft orders whenever cart data changes. ([5379](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5379))
 * Tweak - Removed legacy handling for shipping_phone in Store API. ([5326](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5326))
 * Tweak - Site Editor template list: Fix wrong icon displayed on WooCommerce templates after they have been edited. ([5375](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5375))
 * Tweak - Fix validation error handling after using browser autofill. ([5373](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5373))
 * Tweak - Update loading skeleton animations. ([5362](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5362))
 * Tweak - Add error handling to `get_routes_from_namespace` method. ([5319](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5319))
+* Tweak - Update WooCommerce plugin slug for Block Templates. ([#5519](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5519))
 
 = 6.1.0 2022-01-11 =
 
