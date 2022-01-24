@@ -88,7 +88,14 @@ if ( ! class_exists( 'WC_Admin_Dashboard_Setup', false ) ) :
 		 */
 		public function get_button_link( $task ) {
 			$url = $task->get_json()['actionUrl'];
-			return $url ? $url : 'admin.php?page=wc-admin&task=' . $task->get_id();
+
+			if ( substr( $url, 0, 4 ) === 'http' ) {
+				return $url;
+			} elseif ( $url ) {
+				return wc_admin_url( '&path=' . $url );
+			}
+
+			return admin_url( 'admin.php?page=wc-admin&task=' . $task->get_id() );
 		}
 
 		/**
