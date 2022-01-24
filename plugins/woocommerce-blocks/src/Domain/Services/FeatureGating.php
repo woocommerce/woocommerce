@@ -137,4 +137,32 @@ class FeatureGating {
 	public function is_test_environment() {
 		return self::TEST_ENVIRONMENT === $this->environment;
 	}
+
+	/**
+	 * Returns core flag value.
+	 *
+	 * @return number
+	 */
+	public static function get_core_flag() {
+		return self::CORE_FLAG;
+	}
+
+	/**
+	 * Returns feature plugin flag value.
+	 *
+	 * @return number
+	 */
+	public static function get_feature_plugin_flag() {
+		return self::FEATURE_PLUGIN_FLAG;
+	}
+
+	/**
+	 * Returns experimental flag value.
+	 *
+	 * @return number
+	 */
+	public static function get_experimental_flag() {
+		return self::EXPERIMENTAL_FLAG;
+	}
+
 }

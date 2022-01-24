@@ -1,6 +1,9 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Utils;
 
+use Automattic\WooCommerce\Blocks\Domain\Services\FeatureGating;
+
+
 /**
  * BlockTemplateUtils class used for serving block templates from Woo Blocks.
  * IMPORTANT: These methods have been duplicated from Gutenberg/lib/full-site-editing/block-templates.php as those functions are not for public usage.
@@ -433,4 +436,36 @@ class BlockTemplateUtils {
 
 		return false;
 	}
+
+	/**
+	 * Filter block templates by feature flag.
+	 *
+	 * @param WP_Block_Template[] $block_templates An array of block template objects.
+	 *
+	 * @return WP_Block_Template[] An array of block template objects.
+	 */
+	public static function filter_block_templates_by_feature_flag( $block_templates ) {
+		$feature_gating = new FeatureGating();
+		$flag           = $feature_gating->get_flag();
+
+		/**
+		 * An array of block templates with slug as key and flag as value.
+		 *
+		 * @var array
+		*/
+		$block_templates_with_feature_gate = array(
+			'mini-cart' => $feature_gating->get_experimental_flag(),
+		);
+
+		return array_filter(
+			$block_templates,
+			function( $block_template ) use ( $flag, $block_templates_with_feature_gate ) {
+				if ( isset( $block_templates_with_feature_gate[ $block_template->slug ] ) ) {
+					return $block_templates_with_feature_gate[ $block_template->slug ] <= $flag;
+				}
+				return true;
+			}
+		);
+	}
+
 }
