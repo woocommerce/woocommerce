@@ -5,6 +5,9 @@
 - Added `post-results-to-github-pr.js` to post smoke test results to a GitHub PR.
 - Added jest flags to generate a json test report
 - Added more entries to `default.json`
+- Print the full path to `test-results.json` when the tests ends to make it easier to find the test results file.
+- Added `await` for every call to `shopper.logout`
+- Updated `getLatestReleaseZipUrl()` to allow passing in an authorization token and simplified arguments to just the repository name
 - Added `upload.ini` which increases the limits for uploading files (such as for plugins) in the Docker environment
 - Test setup, scaffolding, and removal via `wc-e2e install` and `wc-e2e uninstall`
 - Added quotes around `WORDPRESS_TITLE` value in .env file to address issue with docker compose 2 "key cannot contain a space" error.
