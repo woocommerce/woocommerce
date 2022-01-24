@@ -118,6 +118,18 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 - Update the block theme folders to latest Gutenberg convention (i.e. `templates` and `parts`). ([5464](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5464))
 
+= 6.7.3 - 2022-01-24 =
+
+#### Bug Fixes
+
+- Enable Mini Cart template parts only for experimental builds. ([#5606](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5606))
+
+= 6.7.2 - 2022-01-17 =
+
+#### Bug Fixes
+
+- Update WooCommerce plugin slug for Block Templates. ([#5519](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5519))
+
 = 6.7.1 - 2022-01-07 =
 
 #### Bug Fixes
