@@ -157,7 +157,7 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 
 		$this->assertFalse( get_option( 'woocommerce_attribute_lookup_last_product_id_to_process' ) );
 		$this->assertFalse( get_option( 'woocommerce_attribute_lookup_processed_count' ) );
-		$this->assertEquals( 'no', get_option( 'woocommerce_attribute_lookup_enabled' ) );
+		$this->assertEquals( 'yes', get_option( 'woocommerce_attribute_lookup_enabled' ) );
 		$this->assertEmpty( $this->queue->get_methods_called() );
 	}
 
@@ -279,7 +279,7 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( $product_ids, $this->lookup_data_store->passed_products );
 		$this->assertFalse( get_option( 'woocommerce_attribute_lookup_last_product_id_to_process' ) );
 		$this->assertFalse( get_option( 'woocommerce_attribute_lookup_processed_count' ) );
-		$this->assertEquals( 'no', get_option( 'woocommerce_attribute_lookup_enabled' ) );
+		$this->assertEquals( 'yes', get_option( 'woocommerce_attribute_lookup_enabled' ) );
 		$this->assertEmpty( $this->queue->get_methods_called() );
 	}
 }
