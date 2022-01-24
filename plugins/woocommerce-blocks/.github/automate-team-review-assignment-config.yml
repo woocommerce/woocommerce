@@ -1,12 +1,12 @@
 when:
   - author:
       teamIs:
-        - rubik-fp-squad
+        - rubik
       ignore:
         nameIs:
     assign:
       teams:
-        - rubik-fp-squad
+        - rubik
   - author:
       teamIs:
         - kirigami
