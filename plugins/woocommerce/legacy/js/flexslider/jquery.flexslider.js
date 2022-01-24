@@ -624,12 +624,16 @@
             slider.setProps();
           }
           else if (vertical) { //VERTICAL:
-            slider.viewport.height(slider.h);
-            slider.setProps(slider.h, "setTotal");
+			slider.viewport.height(slider.computedW);
+			slider.newSlides.css({"width": slider.computedW, "height": slider.computedW});
+		    if (slider.vars.smoothHeight) {
+		    	methods.smoothHeight();
+		    }
+            slider.setProps(slider.computedW, "setTotal");
           } else {
             // SMOOTH HEIGHT:
-            if (slider.vars.smoothHeight) { methods.smoothHeight(); }
             slider.newSlides.width(slider.computedW);
+            if (slider.vars.smoothHeight) { methods.smoothHeight(); }
             slider.setProps(slider.computedW, "setTotal");
           }
         }
@@ -972,18 +976,18 @@
 		  slider.container.height((slider.count + slider.cloneCount) * 200 + "%").css("position", "absolute").width("100%");
 		  slider.setProps(sliderOffset * slider.h, "init");
         } else {
-			slider.container.css({"height": slider.h, "overflow":"hidden"});
-			if(slider.vars.rtl){
-				slider.newSlides.css({"width": slider.computedW, "marginRight" : slider.computedM, "float": "right", "display": "block"});
-			} else {
-				slider.newSlides.css({"width": slider.computedW, "marginRight" : slider.computedM, "float": "left", "display": "block"});
-			}
+		  if (type === "init") slider.container.css({"height": slider.h, "overflow":"hidden"});
+          if(slider.vars.rtl){
+            slider.newSlides.css({"width": slider.computedW, "marginRight" : slider.computedM, "float": "right", "display": "block"});
+          } else {
+            slider.newSlides.css({"width": slider.computedW, "marginRight" : slider.computedM, "float": "left", "display": "block"});
+          }
+		  setTimeout(function(){
 			slider.container.css({"height": "","width": (slider.count + slider.cloneCount) * 200 + "%"});
 			slider.setProps(sliderOffset * slider.computedW, "init");
-			setTimeout(function(){
-				// SMOOTH HEIGHT:
-				if (slider.vars.smoothHeight) { methods.smoothHeight(); }
-			}, (type === "init") ? 100 : 0);
+			// SMOOTH HEIGHT:
+			if (slider.vars.smoothHeight) { methods.smoothHeight(); }
+		  }, (type === "init") ? 100 : 0);
         }
       } else { // FADE:
         if(slider.vars.rtl){
