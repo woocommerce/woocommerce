@@ -12,6 +12,7 @@ import { Text, useSlot } from '@woocommerce/experimental';
  * Internal dependencies
  */
 import { Action } from '../Action';
+import { getPluginTrackKey } from '~/utils';
 import './List.scss';
 
 export const Item = ( { isRecommended, markConfigured, paymentGateway } ) => {
@@ -88,7 +89,7 @@ export const Item = ( { isRecommended, markConfigured, paymentGateway } ) => {
 						markConfigured={ markConfigured }
 						onSetUp={ () =>
 							recordEvent( 'tasklist_payment_setup', {
-								selected: id,
+								selected: getPluginTrackKey( id ),
 							} )
 						}
 					/>

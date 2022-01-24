@@ -377,7 +377,10 @@ export const SelectiveExtensionsBundle = ( {
 				<div className="woocommerce-profile-wizard__business-details__free-features__action">
 					<Button
 						onClick={ () => {
-							onSubmit( installExtensionOptions );
+							onSubmit(
+								installExtensionOptions,
+								installableExtensions
+							);
 						} }
 						isBusy={ isInstallingActivating || isResolving }
 						disabled={ isInstallingActivating || isResolving }

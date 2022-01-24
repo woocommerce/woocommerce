@@ -19,6 +19,7 @@ import {
  */
 
 import { Action } from '../Action';
+import { getPluginTrackKey } from '~/utils';
 
 const TosPrompt = () =>
 	interpolateComponents( {
@@ -82,6 +83,11 @@ export const Suggestion = ( { paymentGateway, onSetupCallback = null } ) => {
 							'woocommerce-admin'
 						) }
 						onSetupCallback={ onSetupCallback }
+						onSetUp={ () =>
+							recordEvent( 'tasklist_payment_setup', {
+								selected: getPluginTrackKey( id ),
+							} )
+						}
 					/>
 				</>
 			</WCPayCardFooter>

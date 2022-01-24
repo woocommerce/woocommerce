@@ -1,0 +1,4 @@
+Significance: minor
+Type: Add
+
+Add extra tracking for plugin installation performance during onboarding. #8042

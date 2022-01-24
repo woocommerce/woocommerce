@@ -119,6 +119,16 @@ export class ProductTypes extends Component {
 				installAndActivatePlugins( [ 'woocommerce-payments' ] )
 					.then( ( response ) => {
 						eventProps.wcpay_installed = true;
+						if (
+							response.data &&
+							response.data.install_time &&
+							response.data.install_time[ 'woocommerce-payments' ]
+						) {
+							eventProps.install_time_wcpay =
+								response.data.install_time[
+									'woocommerce-payments'
+								];
+						}
 						createNoticesFromResponse( response );
 					} )
 					.catch( ( error ) => {

@@ -22,6 +22,7 @@ import './Marketing.scss';
 import { createNoticesFromResponse } from '~/lib/notices';
 import { PluginList, PluginListProps } from './PluginList';
 import { PluginProps } from './Plugin';
+import { getPluginSlug } from '../../../utils';
 
 const ALLOWED_PLUGIN_LISTS = [ 'task-list/reach', 'task-list/grow' ];
 
@@ -53,7 +54,7 @@ export const transformExtensionToPlugin = (
 		manage_url,
 		name,
 	} = extension;
-	const slug = key.split( ':' )[ 0 ];
+	const slug = getPluginSlug( key );
 	return {
 		description,
 		slug,

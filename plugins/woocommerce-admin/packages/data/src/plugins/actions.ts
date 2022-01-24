@@ -39,6 +39,7 @@ type PluginsResponse< PluginData > = {
 type InstallPluginsResponse = PluginsResponse< {
 	installed: string[];
 	results: Record< string, boolean >;
+	install_time?: Record< string, number >;
 } >;
 
 type ActivatePluginsResponse = PluginsResponse< {
@@ -50,6 +51,12 @@ function isWPError(
 	error: WPError< PluginNames > | Error | string
 ): error is WPError< PluginNames > {
 	return ( error as WPError ).errors !== undefined;
+}
+
+class PluginError extends Error {
+	constructor( message: string, public data: unknown ) {
+		super( message );
+	}
 }
 
 export function formatErrors(
@@ -209,7 +216,7 @@ export function* installPlugins( plugins: string[] ) {
 			error = { [ plugins[ 0 ] ]: error.message };
 		}
 		yield setError( 'installPlugins', error );
-		throw new Error( formatErrorMessage( error ) );
+		throw new PluginError( formatErrorMessage( error ), error );
 	}
 }
 
@@ -240,19 +247,29 @@ export function* activatePlugins( plugins: string[] ) {
 			error = { [ plugins[ 0 ] ]: error.message };
 		}
 		yield setError( 'activatePlugins', error );
-		throw new Error( formatErrorMessage( error, 'activate' ) );
+		throw new PluginError( formatErrorMessage( error, 'activate' ), error );
 	}
 }
 
 export function* installAndActivatePlugins( plugins: string[] ) {
 	try {
-		yield dispatch( STORE_NAME, 'installPlugins', plugins );
+		const installations: InstallPluginsResponse = yield dispatch(
+			STORE_NAME,
+			'installPlugins',
+			plugins
+		);
 		const activations: InstallPluginsResponse = yield dispatch(
 			STORE_NAME,
 			'activatePlugins',
 			plugins
 		);
-		return activations;
+		return {
+			...activations,
+			data: {
+				...activations.data,
+				...installations.data,
+			},
+		};
 	} catch ( error ) {
 		throw error;
 	}

@@ -254,6 +254,7 @@ class Plugins extends \WC_REST_Data_Controller {
 		$existing_plugins  = PluginsHelper::get_installed_plugins_paths();
 		$installed_plugins = array();
 		$results           = array();
+		$install_time      = array();
 		$errors            = new \WP_Error();
 
 		foreach ( $plugins as $plugin ) {
@@ -263,6 +264,8 @@ class Plugins extends \WC_REST_Data_Controller {
 				$installed_plugins[] = $plugin;
 				continue;
 			}
+
+			$start_time = microtime( true );
 
 			$api = plugins_api(
 				'plugin_information',
@@ -297,9 +300,10 @@ class Plugins extends \WC_REST_Data_Controller {
 				continue;
 			}
 
-			$upgrader           = new \Plugin_Upgrader( new \Automatic_Upgrader_Skin() );
-			$result             = $upgrader->install( $api->download_link );
-			$results[ $plugin ] = $result;
+			$upgrader                = new \Plugin_Upgrader( new \Automatic_Upgrader_Skin() );
+			$result                  = $upgrader->install( $api->download_link );
+			$results[ $plugin ]      = $result;
+			$install_time[ $plugin ] = round( ( microtime( true ) - $start_time ) * 1000 );
 
 			if ( is_wp_error( $result ) || is_null( $result ) ) {
 				$properties = array(
@@ -330,8 +334,9 @@ class Plugins extends \WC_REST_Data_Controller {
 
 		return array(
 			'data'    => array(
-				'installed' => $installed_plugins,
-				'results'   => $results,
+				'installed'    => $installed_plugins,
+				'results'      => $results,
+				'install_time' => $install_time,
 			),
 			'errors'  => $errors,
 			'success' => count( $errors->errors ) === 0,

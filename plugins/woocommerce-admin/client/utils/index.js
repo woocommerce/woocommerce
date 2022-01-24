@@ -1,3 +1,5 @@
+export * from './plugins';
+
 /**
  * Get the URL params.
  *

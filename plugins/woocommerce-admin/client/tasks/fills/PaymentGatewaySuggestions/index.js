@@ -19,6 +19,7 @@ import { WooOnboardingTask } from '@woocommerce/onboarding';
 import { List, Placeholder as ListPlaceholder } from './components/List';
 import { Setup, Placeholder as SetupPlaceholder } from './components/Setup';
 import { WCPaySuggestion } from './components/WCPay';
+import { getPluginSlug } from '~/utils';
 import './plugins/Bacs';
 import './payment-gateway-suggestions.scss';
 
@@ -57,7 +58,7 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 
 		return paymentGatewaySuggestions.reduce( ( map, suggestion ) => {
 			// A colon ':' is used sometimes to have multiple configs for the same gateway ex: woocommerce_payments:us.
-			const id = ( suggestion.id || '' ).split( ':' )[ 0 ];
+			const id = getPluginSlug( suggestion.id );
 			const installedGateway = mappedPaymentGateways[ id ]
 				? mappedPaymentGateways[ id ]
 				: {};
