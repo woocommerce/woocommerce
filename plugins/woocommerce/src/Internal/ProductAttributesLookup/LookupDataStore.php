@@ -678,7 +678,7 @@ class LookupDataStore {
 	 *
 	 * @return bool True if the last lookup table regeneration process was aborted.
 	 */
-	public function regeneration_was_aborted() {
+	public function regeneration_was_aborted(): bool {
 		return 'yes' === get_option( 'woocommerce_attribute_lookup_regeneration_aborted' );
 	}
 }
