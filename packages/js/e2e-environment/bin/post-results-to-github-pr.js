@@ -1,8 +1,7 @@
 const fs = require( 'fs' );
 const path = require( 'path' );
-const { resolveLocalE2ePath } = require( '../utils' );
 
-const resultsFile = resolveLocalE2ePath( 'test-results.json' );
+const resultsFile = path.resolve( __dirname, '../../../../plugins/woocommerce/tests/e2e/test-results.json' );
 
 const buildOutput = ( results ) => {
 	const { TITLE, SMOKE_TEST_URL } = process.env;
@@ -27,7 +26,8 @@ module.exports = async ( { github, context } ) => {
 
 		output = buildOutput( results );
 	} else {
-		output = `## Test Results Not Found!`;
+		output = `## Test Results Not Found! \n\n`;
+		output += 'The path to the `test-results.json` file may need to be updated in the `post-results-to-github-pr.js` script';
 	}
 
 	await github.rest.issues.createComment( {
