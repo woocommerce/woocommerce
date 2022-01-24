@@ -91,6 +91,11 @@ $border-radius: 5px;
 			width: 50%;
 		}
 
+		> li:only-child {
+			display: block;
+			width: 100%;
+		}
+
 		> li:nth-child(even) {
 			padding-left: $gap-smaller;
 		}
