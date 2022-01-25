@@ -15,11 +15,7 @@
 /**
  * External dependencies
  */
-const {
-	it,
-	describe,
-	beforeAll,
-} = require( '@jest/globals' );
+const { it, describe, beforeAll } = require( '@jest/globals' );
 
 const config = require( 'config' );
 const customerBilling = config.get( 'addresses.customer.billing' );
@@ -48,7 +44,7 @@ const runCheckoutCreateAccountTest = () => {
 			await shopper.addToCartFromShopPage( productId );
 			await uiUnblocked();
 			await shopper.goToCheckout();
-		});
+		}, 45000 );
 
 		it('can create an account during checkout', async () => {
 			// Fill all the details for a new customer
