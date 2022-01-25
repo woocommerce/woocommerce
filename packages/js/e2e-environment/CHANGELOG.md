@@ -26,6 +26,7 @@
 
 - Updated the browserViewport in `jest.setup.js` to match the `defaultViewport` dimensions defined in `jest-puppeteer.config.js`
 - Use consistent `defaultViewport` in both headless and non-headless context
+- Add missing `config` dependency
 
 # 0.2.3
 
