@@ -194,9 +194,11 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Hide the extensions header when no available plugins in the category. ([#8089](https://github.com/woocommerce/woocommerce-admin/pull/8089))
 * Fix - Replace all docs.woocommerce.com links with woocommerce.com/document. ([#8105](https://github.com/woocommerce/woocommerce-admin/pull/8105))
 * Fix - Fixing marketing task not displaying on Atomic sites ([#8150](https://github.com/woocommerce/woocommerce-admin/pull/8150))
+* Fix - Fix setup wizard free features checkbox re-check itself. ([#8169](https://github.com/woocommerce/woocommerce-admin/pull/8169))
 * Dev - Add payment gateway suggestion docs and example extensions ([#7966](https://github.com/woocommerce/woocommerce-admin/pull/7966))
 * Dev - Remove low performing inbox notes. ([#8054](https://github.com/woocommerce/woocommerce-admin/pull/8054))
 * Dev - Remove navigation feedback note. ([#8055](https://github.com/woocommerce/woocommerce-admin/pull/8055))
+* Dev - Fix task ID class check and add tests around tracking ([#8185](https://github.com/woocommerce/woocommerce-admin/pull/8185))
 
 **WooCommerce Blocks - 6.6.0 & 6.7.0 & 6.7.1 & 6.7.2 & 6.7.3**
 
