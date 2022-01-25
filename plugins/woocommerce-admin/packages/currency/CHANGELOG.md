@@ -1,5 +1,7 @@
 # Unreleased
 
+# 3.2.1
+
 -   Tweak - Added `useCode` parameter to `formatAmount`, to render currency code instead of symbol. #7575
 
 # 3.2.0

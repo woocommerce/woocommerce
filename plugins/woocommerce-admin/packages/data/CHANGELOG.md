@@ -1,10 +1,42 @@
 # Unreleased
 
+# 2.0.0
+
+## Breaking changes
+
 -   Fix the batch fetch logic for the options data store. #7587
 -   Add backwards compability for old function format. #7688
 -   Add console warning for inbox note contents exceeding 320 characters and add dompurify dependency. #7869
 -   Fix race condition in data package's options module. #7947
 -   Remove dev dependency `@woocommerce/wc-admin-settings`. #8057
+-   Update plugins data store actions #8042
+-   Add `defaultDateRange` parameter to `getRequestQuery` #8189
+-   Change `getLocale` selector parameter from country to id #8123
+-   Add countries data store #8119
+-   Rename `is_visible` to `can_view` #7918
+-   Replace old task list option calls with data store selectors #7820
+-   Remove task status endpoint #7841
+-   Add country validation to subscription inclusion #7777
+-   Move some of the deprecated tasks #7761
+-   Change how `getTasksFromDeprecatedFilter` works #7749
+-   Add query args for removeAllNotes #7743
+-   Removed some attributes from `TasksStatusState` #7736
+-   Add an endpoint and method for actioning tasks #7746
+-   Add show/hide behavior for task list API #7733
+-   Add optimistic task completion and cache invalidation #7722
+-   Add extended task list support to the new REST api task lists #7730
+-   Migrate tasks to task API #7699
+-   Revert `searchItemsByString` to use selector param again #7682
+-   Add hide task list endpoint and data actions #7578
+-   Add task list components to consume task list REST API #7556
+-   Add Newsletter Signup to onboarding data store #7601
+-   Add task selectors and actions to onboarding data store #7545
+-   Add super admin check to preloaded user data #7489
+-   Add free extensions data store #7420
+-   Add `isPluginsRequesting` selector #7383
+-   Add options and change selector param for `searchItemsByString`. #7385
+-   Change select to selector param for `searchItemsByString`. #7355
+-   Change item data store's `getItems` selector #7395
 
 # 1.4.0
 

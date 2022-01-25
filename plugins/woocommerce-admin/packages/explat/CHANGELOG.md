@@ -1,8 +1,11 @@
 # Unreleased
 
+# 1.1.4
+
 - Fix an error when getting woocommerce_default_country value. #7600
 - Attempts to get the woocommerce_default_country value in wcSettings.preloadSettings.general first for the backward compatibility #7600
-# 1.1.3 
+
+# 1.1.3
 
 - Retry fix for missing build-module folder
 
