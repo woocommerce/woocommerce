@@ -5,14 +5,22 @@ const resultsFile = path.resolve( __dirname, '../../../../plugins/woocommerce/te
 
 const buildOutput = ( results ) => {
 	const { TITLE, SMOKE_TEST_URL } = process.env;
+	const resultKeys = Object.keys( results );
 
 	let output = `## ${ TITLE }:\n\n`;
 	output += `**Test URL:** ${ SMOKE_TEST_URL }\n`;
-	output += `**Total Number of Passed Tests:** ${ results.numTotalTests }\n`;
-	output += `**Total Number of Failed Tests:** ${ results.numFailedTests }\n`;
-	output += `**Total Number of Test Suites:** ${ results.numTotalTestSuites }\n`;
-	output += `**Total Number of Passed Test Suites:** ${ results.numPassedTestSuites }\n`;
-	output += `**Total Number of Failed Test Suites:** ${ results.numFailedTestSuites }\n`;
+
+	resultKeys.forEach( ( key ) => {
+		// The keys that we care about all start with 'num'
+		if ( key.includes( 'num' ) ) {
+			// match only capitalized words
+			const words = key.match( /[A-Z][a-z]+/g );
+
+			output += `**Total Number of ${ words.join( ' ' ) }:** ${
+				results[ key ]
+			}\n`;
+		}
+	} );
 
 	return output;
 };
