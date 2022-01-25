@@ -9,8 +9,8 @@ const {
 	uiUnblocked,
 	evalAndClick,
 	clickUpdateOrder,
+	waitForSelector,
 } = require( '@woocommerce/e2e-utils' );
-const { waitForSelector } = require( '@woocommerce/e2e-environment' );
 
 /**
  * Evaluate and click a button selector then wait for a result selector.
