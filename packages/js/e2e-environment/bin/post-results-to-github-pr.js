@@ -1,7 +1,7 @@
 const fs = require( 'fs' );
 const path = require( 'path' );
 
-const resultsFile = path.resolve( __dirname, '../../../../plugins/woocommerce/tests/e2e/test-results.json' );
+const resultsFile = path.resolve( __dirname, '../test-results.json' );
 
 const buildOutput = ( results ) => {
 	const { TITLE, SMOKE_TEST_URL } = process.env;
