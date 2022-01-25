@@ -1,4 +1,0 @@
-Significance: patch
-Type: Fix
-
-Fix setup wizard free features checkbox re-check itself. #8169

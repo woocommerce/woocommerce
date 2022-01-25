@@ -1,4 +1,4 @@
-== 3.1.0 01/13/2022 ==
+== 3.1.0 01/25/2022 ==
 
 - Fix: Fix Onboarding flow where extensions might not be selected and installed. #7979
 - Fix: Fix pagination issue with Analytics Coupons page. #8001
@@ -11,6 +11,7 @@
 - Fix: Hide the extensions header when no available plugins in the category. #8089
 - Fix: Replace all docs.woocommerce.com links with woocommerce.com/document. #8105
 - Fix: Fixing marketing task not displaying on Atomic sites #8150
+- Fix: Fix setup wizard free features checkbox re-check itself. #8169
 - Add: Add featured pill for MailPoet and Google Listings in marketing task #8009
 - Add: Add inbox_action_click track when a note gets clicked #8086
 - Add: Activate promo note after WC Pay is activated. #8104
@@ -21,6 +22,7 @@
 - Dev: Add payment gateway suggestion docs and example extensions #7966
 - Dev: Remove low performing inbox notes. #8054
 - Dev: Remove navigation feedback note. #8055
+- Dev: Fix task ID class check and add tests around tracking #8185
 - Tweak: OBW Update WC Pay label on recommended extensions list #8038
 - Enhancement: Add SlotFill areas to header #7805
 
