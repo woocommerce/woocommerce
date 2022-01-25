@@ -137,8 +137,16 @@ class Appearance extends Component {
 				this.setState( { isPending: false } );
 				this.completeStep();
 			} )
-			.catch( ( error ) => {
-				createNotice( 'error', error.message );
+			.catch( ( { message } ) => {
+				createNotice(
+					'error',
+					message ||
+						__(
+							'There was an error importing the sample products',
+							'woocommerce-admin'
+						),
+					{ __unstableHTML: true }
+				);
 				this.setState( { isPending: false } );
 			} );
 	}

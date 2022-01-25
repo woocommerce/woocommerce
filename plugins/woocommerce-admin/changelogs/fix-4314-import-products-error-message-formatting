@@ -1,0 +1,4 @@
+Significance: minor
+Type: Fix
+
+Preserve HTML markup in server-side error messages received from sample product import request. #8173

@@ -4,7 +4,12 @@
 import { noop } from 'lodash';
 import classnames from 'classnames';
 import { speak } from '@wordpress/a11y';
-import { useEffect, forwardRef, renderToString } from '@wordpress/element';
+import {
+	RawHTML,
+	useEffect,
+	forwardRef,
+	renderToString,
+} from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import warning from '@wordpress/warning';
 import { Button } from '@wordpress/components';
@@ -45,6 +50,7 @@ function Snackbar(
 		// It is distinct from onRemove, which _looks_ like a callback but is
 		// actually the function to call to remove the snackbar from the UI.
 		onDismiss = null,
+		__unstableHTML = false,
 	},
 	ref
 ) {
@@ -101,6 +107,10 @@ function Snackbar(
 			'components-snackbar__content-with-icon': !! icon,
 		}
 	);
+
+	if ( __unstableHTML === true ) {
+		children = <RawHTML>{ children }</RawHTML>;
+	}
 
 	return (
 		<div
