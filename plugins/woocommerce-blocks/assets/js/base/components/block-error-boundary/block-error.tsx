@@ -18,8 +18,9 @@ const BlockError = ( {
 	errorMessage,
 	errorMessagePrefix = __( 'Error:', 'woo-gutenberg-products-block' ),
 	button,
-}: BlockErrorProps ): JSX.Element => {
-	return (
+	showErrorBlock = true,
+}: BlockErrorProps ): React.ReactNode => {
+	return showErrorBlock ? (
 		<div className="wc-block-error wc-block-components-error">
 			{ imageUrl && (
 				<img
@@ -52,7 +53,7 @@ const BlockError = ( {
 				) }
 			</div>
 		</div>
-	);
+	) : null;
 };
 
 export default BlockError;

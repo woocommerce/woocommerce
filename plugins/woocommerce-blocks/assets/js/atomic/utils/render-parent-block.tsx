@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { renderFrontend } from '@woocommerce/base-utils';
+import { CURRENT_USER_IS_ADMIN } from '@woocommerce/settings';
 import {
 	Fragment,
 	Suspense,
@@ -13,6 +14,7 @@ import {
 	getRegisteredBlocks,
 	hasInnerBlocks,
 } from '@woocommerce/blocks-checkout';
+import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundary';
 
 /**
  * This file contains logic used on the frontend to convert DOM elements (saved by the block editor) to React
@@ -53,7 +55,7 @@ const renderForcedBlocks = (
 	block: string,
 	blockMap: Record< string, React.ReactNode >,
 	// Current children from the parent (siblings of the forced block)
-	blockChildren: HTMLCollection | null,
+	blockChildren: NodeListOf< ChildNode > | null,
 	// Wrapper for inner components.
 	blockWrapper?: React.ElementType
 ) => {
@@ -63,9 +65,9 @@ const renderForcedBlocks = (
 
 	const currentBlocks = blockChildren
 		? ( Array.from( blockChildren )
-				.map( ( element: Element ) =>
-					element instanceof HTMLElement
-						? element?.dataset.blockName || null
+				.map( ( node: Node ) =>
+					node instanceof HTMLElement
+						? node?.dataset.blockName || null
 						: null
 				)
 				.filter( Boolean ) as string[] )
@@ -80,7 +82,7 @@ const renderForcedBlocks = (
 	const InnerBlockComponentWrapper = blockWrapper ? blockWrapper : Fragment;
 
 	return (
-		<InnerBlockComponentWrapper>
+		<>
 			{ forcedBlocks.map(
 				(
 					{ blockName, component },
@@ -90,15 +92,35 @@ const renderForcedBlocks = (
 						? component
 						: getBlockComponentFromMap( blockName, blockMap );
 					return ForcedComponent ? (
-						<ForcedComponent
-							key={ `${ blockName }_forced_${ index }` }
-						/>
+						<BlockErrorBoundary
+							text={ `Unexpected error in: ${ blockName }` }
+							showErrorBlock={ CURRENT_USER_IS_ADMIN as boolean }
+						>
+							<InnerBlockComponentWrapper>
+								<ForcedComponent
+									key={ `${ blockName }_forced_${ index }` }
+								/>
+							</InnerBlockComponentWrapper>
+						</BlockErrorBoundary>
 					) : null;
 				}
 			) }
-		</InnerBlockComponentWrapper>
+		</>
 	);
 };
+
+interface renderInnerBlocksProps {
+	// Block (parent) being rendered. Used for inner block component mapping.
+	block: string;
+	// Map of block names to block components for children.
+	blockMap: Record< string, React.ReactNode >;
+	// Wrapper for inner components.
+	blockWrapper?: React.ElementType | undefined;
+	// Elements from the DOM being converted to components.
+	children: HTMLCollection | NodeList;
+	// Depth within the DOM hierarchy.
+	depth?: number;
+}
 
 /**
  * Recursively replace block markup in the DOM with React Components.
@@ -114,30 +136,19 @@ const renderInnerBlocks = ( {
 	children,
 	// Current depth of the children. Used to ensure keys are unique.
 	depth = 1,
-}: {
-	// Block (parent) being rendered. Used for inner block component mapping.
-	block: string;
-	// Map of block names to block components for children.
-	blockMap: Record< string, React.ReactNode >;
-	// Wrapper for inner components.
-	blockWrapper?: React.ElementType;
-	// Elements from the DOM being converted to components.
-	children: HTMLCollection | NodeList;
-	// Depth within the DOM hierarchy.
-	depth?: number;
-} ): ( JSX.Element | null )[] | null => {
+}: renderInnerBlocksProps ): ( JSX.Element | null )[] | null => {
 	if ( ! children || children.length === 0 ) {
 		return null;
 	}
-	return Array.from( children ).map( ( element: Element, index: number ) => {
+	return Array.from( children ).map( ( node: Node, index: number ) => {
 		/**
 		 * This will grab the blockName from the data- attributes stored in block markup. Without a blockName, we cannot
 		 * convert the HTMLElement to a React component.
 		 */
 		const { blockName = '', ...componentProps } = {
 			key: `${ block }_${ depth }_${ index }`,
-			...( element instanceof HTMLElement ? element.dataset : {} ),
-			className: element.className || '',
+			...( node instanceof HTMLElement ? node.dataset : {} ),
+			className: node instanceof Element ? node?.className : '',
 		};
 
 		const InnerBlockComponent = getBlockComponentFromMap(
@@ -153,7 +164,9 @@ const renderInnerBlocks = ( {
 		 */
 		if ( ! InnerBlockComponent ) {
 			const parsedElement = parse(
-				element?.outerHTML || element?.textContent || ''
+				( node instanceof Element && node?.outerHTML ) ||
+					node?.textContent ||
+					''
 			);
 
 			// Returns text nodes without manipulation.
@@ -166,11 +179,11 @@ const renderInnerBlocks = ( {
 				return null;
 			}
 
-			const renderedChildren = element.childNodes.length
+			const renderedChildren = node.childNodes.length
 				? renderInnerBlocks( {
 						block,
 						blockMap,
-						children: element.childNodes,
+						children: node.childNodes,
 						depth: depth + 1,
 						blockWrapper,
 				  } )
@@ -195,39 +208,45 @@ const renderInnerBlocks = ( {
 				key={ `${ block }_${ depth }_${ index }_suspense` }
 				fallback={ <div className="wc-block-placeholder" /> }
 			>
-				<InnerBlockComponentWrapper>
-					<InnerBlockComponent { ...componentProps }>
-						{
-							/**
-							 * Within this Inner Block Component we also need to recursively render it's children. This
-							 * is done here with a depth+1. The same block map and parent is used, but we pass new
-							 * children from this element.
-							 */
-							renderInnerBlocks( {
-								block,
-								blockMap,
-								children: element.children,
-								depth: depth + 1,
-								blockWrapper,
-							} )
-						}
-						{
-							/**
-							 * In addition to the inner blocks, we may also need to render FORCED blocks which have not
-							 * yet been added to the inner block template. We do this by comparing the current children
-							 * to the list of registered forced blocks.
-							 *
-							 * @see registerCheckoutBlock
-							 */
-							renderForcedBlocks(
-								blockName,
-								blockMap,
-								element.children,
-								blockWrapper
-							)
-						}
-					</InnerBlockComponent>
-				</InnerBlockComponentWrapper>
+				{ /* Prevent third party components from breaking the entire checkout */ }
+				<BlockErrorBoundary
+					text={ `Unexpected error in: ${ blockName }` }
+					showErrorBlock={ CURRENT_USER_IS_ADMIN as boolean }
+				>
+					<InnerBlockComponentWrapper>
+						<InnerBlockComponent { ...componentProps }>
+							{
+								/**
+								 * Within this Inner Block Component we also need to recursively render it's children. This
+								 * is done here with a depth+1. The same block map and parent is used, but we pass new
+								 * children from this element.
+								 */
+								renderInnerBlocks( {
+									block,
+									blockMap,
+									children: node.childNodes,
+									depth: depth + 1,
+									blockWrapper,
+								} )
+							}
+							{
+								/**
+								 * In addition to the inner blocks, we may also need to render FORCED blocks which have not
+								 * yet been added to the inner block template. We do this by comparing the current children
+								 * to the list of registered forced blocks.
+								 *
+								 * @see registerCheckoutBlock
+								 */
+								renderForcedBlocks(
+									blockName,
+									blockMap,
+									node.childNodes,
+									blockWrapper
+								)
+							}
+						</InnerBlockComponent>
+					</InnerBlockComponentWrapper>
+				</BlockErrorBoundary>
 			</Suspense>
 		);
 	} );

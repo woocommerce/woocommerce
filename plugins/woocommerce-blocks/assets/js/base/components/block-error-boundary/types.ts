@@ -24,7 +24,11 @@ interface BlockErrorBase {
 	/**
 	 * Button cta.
 	 */
-	button: React.ReactNode;
+	button?: React.ReactNode;
+	/**
+	 * Controls wether to show the error block or fail silently
+	 */
+	showErrorBlock?: boolean;
 }
 
 export interface BlockErrorProps extends BlockErrorBase {
@@ -34,7 +38,7 @@ export interface BlockErrorProps extends BlockErrorBase {
 	errorMessage: React.ReactNode;
 }
 
-type RenderErrorProps = {
+export type RenderErrorProps = {
 	errorMessage: React.ReactNode;
 };
 
@@ -42,7 +46,8 @@ export interface BlockErrorBoundaryProps extends BlockErrorBase {
 	/**
 	 * Override the default error with a function that takes the error message and returns a React component
 	 */
-	renderError: ( props: RenderErrorProps ) => React.ReactNode;
+	renderError?: ( props: RenderErrorProps ) => React.ReactNode;
+	showErrorMessage?: boolean;
 }
 
 export interface DerivedStateReturn {
