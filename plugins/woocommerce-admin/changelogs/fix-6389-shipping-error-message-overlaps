@@ -1,4 +1,0 @@
-Significance: patch
-Type: Fix
-
-Fix shipping rate error message overlaps with the 'Proceed' button. #8165

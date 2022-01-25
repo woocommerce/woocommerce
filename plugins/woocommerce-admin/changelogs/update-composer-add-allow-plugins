@@ -1,4 +1,0 @@
-Significance: patch
-Type: Update
-
-Adding "allow-plugins" property for composer configuration. #8139

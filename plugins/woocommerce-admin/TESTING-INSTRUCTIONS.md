@@ -1,6 +1,6 @@
 # Testing instructions
 
-## Unreleased
+## 3.2.0
 
 ### Fix category report query returns invalid net sales
 

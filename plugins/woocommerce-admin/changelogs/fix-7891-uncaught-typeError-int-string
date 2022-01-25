@@ -1,4 +1,0 @@
-Significance: patch
-Type: Fix
-
-Reset "install_timestamp" if it's not numeric to avoid TypeError. #8100

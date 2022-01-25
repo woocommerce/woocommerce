@@ -1,4 +1,0 @@
-Significance: patch
-Type: Fix
-
-Fix incorrect date options when the "Default Date Range" is set from Analytics settings. #8189

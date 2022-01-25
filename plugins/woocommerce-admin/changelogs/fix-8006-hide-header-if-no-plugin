@@ -1,4 +1,0 @@
-Significance: patch
-Type: Fix
-
-Hide the extensions header when no available plugins in the category. #8089

@@ -1,4 +1,0 @@
-Significance: patch
-Type: Fix
-
-Fix clicking the error message opens the dropdown. #8094
