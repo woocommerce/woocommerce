@@ -28,7 +28,6 @@ const args = process.argv.slice( 2 );
 const command = args[0];
 
 let packageName = null;
-
 if (args[1].substr(0, 2) !== '--') {
 	packageName = args[1];
 }
@@ -37,26 +36,26 @@ if (args[1].substr(0, 2) !== '--') {
 let testExtension = 'test.js';
 let testFormat = '';
 let force = false;
+for ( let a = 1; a < args.length; a++ ) {
+	if (args[a] === '--force') {
+		force = true;
+		continue;
+	}
 
-args.forEach((el) => {
-	console.log(el);
-	switch ( el ) {
+	// These arguments take a value, eg: --format foo
+	const nextArg = a + 1;
+	if ( nextArg >= args.length ) {
+		break;
+	}
+	switch ( args[ a ] ) {
 		case '--format':
-			testFormat = el;
+			testFormat = args[ nextArg ];
 			break;
 		case '--ext':
-			testExtension = el;
-			break;
-		case '--force':
-			force = true;
+			testExtension = args[ nextArg ];
 			break;
 	}
-});
-
-console.log('Command: ' + command );
-console.log('Package Name: ' + packageName );
-console.log('Test Extension: ' + testExtension );
-console.log('Test Format: ' + testFormat );
+}
 
 /**
  * Install the test scripts and sample default.json configuration
@@ -64,7 +63,7 @@ console.log('Test Format: ' + testFormat );
 if ( command == 'install' ) {
 	// Install some environment defaults if no package is requested.
 	if ( ! packageName ) {
-		installDefaults();
+		installDefaults(force);
 		return;
 	}
 
@@ -80,7 +79,7 @@ if ( command == 'install' ) {
 	if ( defaultJson ) {
 		const defaultJsonName = `config${path.sep}default-${packageSlug}.json`;
 		createLocalE2ePath( 'config' );
-		if ( confirmLocalCopy( defaultJsonName, defaultJson, pkg ) ) {
+		if ( confirmLocalCopy( defaultJsonName, defaultJson, pkg, force ) ) {
 			console.log( `Created sample test configuration to 'tests/e2e/${defaultJsonName}'.` );
 		}
 	}
@@ -89,7 +88,7 @@ if ( command == 'install' ) {
 	if ( initializeSh ) {
 		const defaultInitName = `docker${path.sep}${packageSlug}.sh`;
 		createLocalE2ePath( 'docker' );
-		if ( confirmLocalCopy( defaultInitName, initializeSh, pkg ) ) {
+		if ( confirmLocalCopy( defaultInitName, initializeSh, pkg, force ) ) {
 			console.log( `Created sample test container initialization script to 'tests/e2e/${defaultInitName}'.` );
 		}
 	}
