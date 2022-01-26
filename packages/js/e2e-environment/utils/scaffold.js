@@ -55,11 +55,11 @@ const confirmLocalCopy = ( localE2ePath, packageE2ePath, packageName = '', force
 	const confirmPrompt = `${localE2ePath} already exists. Overwrite? [Y]es/[n]o: `;
 
 	let overwriteFiles;
-	if ( !fs.existsSync( localPath ) || force ) {
-		overwriteFiles = 'y';
-	} else {
+	if ( ! force && fs.existsSync( localPath ) ) {
 		overwriteFiles = confirm( confirmPrompt, 'ny' );
 		overwriteFiles = overwriteFiles.toLowerCase();
+	} else {
+		overwriteFiles = 'y';
 	}
 	if ( overwriteFiles == 'y' ) {
 		fs.copyFileSync( packagePath, localPath );
