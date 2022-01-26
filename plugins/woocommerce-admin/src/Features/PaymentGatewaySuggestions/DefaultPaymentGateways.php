@@ -374,7 +374,7 @@ class DefaultPaymentGateways {
 								self::get_rules_for_cbd( true ),
 							),
 							array(
-								self::get_rules_for_countries( array( 'US', 'CA', 'JP', 'GB', 'AU', 'IE', 'FR' ) ),
+								self::get_rules_for_countries( array( 'US', 'CA', 'JP', 'GB', 'AU', 'IE', 'FR', 'ES' ) ),
 								self::get_rules_for_selling_venues( array( 'brick-mortar', 'brick-mortar-other' ) ),
 							),
 						),
