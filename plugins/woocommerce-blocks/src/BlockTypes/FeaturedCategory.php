@@ -1,6 +1,8 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
+
 /**
  * FeaturedCategory class.
  */
@@ -11,6 +13,14 @@ class FeaturedCategory extends AbstractDynamicBlock {
 	 * @var string
 	 */
 	protected $block_name = 'featured-category';
+
+
+	/**
+	 * Global style enabled for this block.
+	 *
+	 * @var array
+	 */
+	protected $global_style_wrapper = array( 'text_color', 'font_size', 'border_color', 'border_radius', 'border_width', 'background_color', 'text_color' );
 
 	/**
 	 * Default attribute values, should match what's set in JS `registerBlockType`.
@@ -29,6 +39,23 @@ class FeaturedCategory extends AbstractDynamicBlock {
 	);
 
 	/**
+	 * Get block attributes.
+	 *
+	 * @return array
+	 */
+	protected function get_block_type_attributes() {
+		return array_merge(
+			parent::get_block_type_attributes(),
+			array(
+				'textColor'  => $this->get_schema_string(),
+				'fontSize'   => $this->get_schema_string(),
+				'lineHeight' => $this->get_schema_string(),
+				'style'      => array( 'type' => 'object' ),
+			)
+		);
+	}
+
+	/**
 	 * Render the Featured Category block.
 	 *
 	 * @param array  $attributes Block attributes.
@@ -36,6 +63,7 @@ class FeaturedCategory extends AbstractDynamicBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content ) {
+
 		$id       = absint( isset( $attributes['categoryId'] ) ? $attributes['categoryId'] : 0 );
 		$category = get_term( $id, 'product_cat' );
 
@@ -57,7 +85,10 @@ class FeaturedCategory extends AbstractDynamicBlock {
 			wc_format_content( wp_kses_post( $category->description ) )
 		);
 
-		$output  = sprintf( '<div class="%1$s" style="%2$s">', esc_attr( $this->get_classes( $attributes ) ), esc_attr( $this->get_styles( $attributes, $category ) ) );
+		$styles  = $this->get_styles( $attributes, $category );
+		$classes = $this->get_classes( $attributes );
+
+		$output  = sprintf( '<div class="%1$s wp-block-woocommerce-featured-category" style="%2$s">', esc_attr( trim( $classes ) ), esc_attr( $styles ) );
 		$output .= '<div class="wc-block-featured-category__wrapper">';
 		$output .= $title;
 		if ( $attributes['showDesc'] ) {
@@ -103,11 +134,15 @@ class FeaturedCategory extends AbstractDynamicBlock {
 
 		if ( is_array( $attributes['focalPoint'] ) && 2 === count( $attributes['focalPoint'] ) ) {
 			$style .= sprintf(
-				'background-position: %s%% %s%%',
+				'background-position: %s%% %s%%;',
 				$attributes['focalPoint']['x'] * 100,
 				$attributes['focalPoint']['y'] * 100
 			);
 		}
+
+		$global_style_style = StyleAttributesUtils::get_styles_by_attributes( $attributes, $this->global_style_wrapper );
+
+		$style .= $global_style_style;
 
 		return $style;
 	}
@@ -137,13 +172,13 @@ class FeaturedCategory extends AbstractDynamicBlock {
 			$classes[] = "has-{$attributes['contentAlign']}-content";
 		}
 
-		if ( isset( $attributes['overlayColor'] ) ) {
-			$classes[] = "has-{$attributes['overlayColor']}-background-color";
-		}
-
 		if ( isset( $attributes['className'] ) ) {
 			$classes[] = $attributes['className'];
 		}
+
+		$global_style_classes = StyleAttributesUtils::get_classes_by_attributes( $attributes, $this->global_style_wrapper );
+
+		$classes[] = $global_style_classes;
 
 		return implode( ' ', $classes );
 	}
@@ -165,7 +200,6 @@ class FeaturedCategory extends AbstractDynamicBlock {
 
 		return $image;
 	}
-
 	/**
 	 * Extra data passed through from server to client for block.
 	 *

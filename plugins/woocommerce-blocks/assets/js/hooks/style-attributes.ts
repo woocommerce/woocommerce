@@ -5,6 +5,7 @@
 import {
 	__experimentalUseColorProps,
 	__experimentalGetSpacingClassesAndStyles,
+	__experimentalUseBorderProps,
 } from '@wordpress/block-editor';
 
 /**
@@ -79,4 +80,20 @@ export const useColorProps = ( attributes: unknown ): WithStyle & WithClass => {
 	const style = parseStyle( attributesObject.style );
 
 	return __experimentalUseColorProps( { ...attributesObject, style } );
+};
+
+export const useBorderProps = (
+	attributes: unknown
+): WithStyle & WithClass => {
+	if ( ! isFeaturePluginBuild() ) {
+		return {
+			className: '',
+			style: {},
+		};
+	}
+
+	const attributesObject = isObject( attributes ) ? attributes : {};
+	const style = parseStyle( attributesObject.style );
+
+	return __experimentalUseBorderProps( { ...attributesObject, style } );
 };
