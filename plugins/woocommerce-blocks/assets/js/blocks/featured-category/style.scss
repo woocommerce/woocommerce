@@ -1,10 +1,16 @@
+.wp-block-woocommerce-featured-category {
+	background-color: #000;
+	border-color: transparent;
+	color: #fff;
+	overflow: hidden;
+}
+
 .wc-block-featured-category {
 	position: relative;
-	background-color: $gray-900;
 	background-size: cover;
 	background-position: center center;
 	width: 100%;
-	margin: 0 0 1.5em 0;
+	margin: 0 0 0 0;
 	display: flex;
 	justify-content: center;
 	align-items: center;
@@ -63,6 +69,8 @@
 	.wc-block-featured-category__description,
 	.wc-block-featured-category__price,
 	.wc-block-featured-category__link {
+		color: inherit;
+		font-size: inherit;
 		width: 100%;
 		padding: 0 48px 16px 48px;
 		z-index: 1;
@@ -71,12 +79,19 @@
 	.wc-block-featured-category__title {
 		margin-top: 0;
 
+		div {
+			color: inherit;
+			font-size: inherit;
+		}
+
 		&::before {
 			display: none;
 		}
 	}
 
 	.wc-block-featured-category__description {
+		color: inherit;
+		font-size: inherit;
 		p {
 			margin: 0;
 		}
