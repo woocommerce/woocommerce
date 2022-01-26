@@ -13,19 +13,20 @@ const {
 	beforeAll,
 } = require( '@jest/globals' );
 
-const { GITHUB_REPOSITORY, PLUGIN_NAME, GITHUB_TOKEN } = process.env;
+const { GITHUB_REPOSITORY, PLUGIN_NAME, GITHUB_TOKEN, PLUGIN_REPOSITORY } = process.env;
+
+// allows us to upload plugins from different repositories.
+const pluginName = PLUGIN_NAME ? PLUGIN_NAME : 'WooCommerce';
+const repository = PLUGIN_REPOSITORY ? PLUGIN_REPOSITORY : GITHUB_REPOSITORY;
 
 let zipUrl;
 let pluginPath;
 
-utils.describeIf( GITHUB_REPOSITORY )(
-	`Upload and activate ${ PLUGIN_NAME } from ${ GITHUB_REPOSITORY }`,
+utils.describeIf( GITHUB_REPOSITORY || PLUGIN_REPOSITORY )(
+	`Upload and activate ${ pluginName } from ${ repository }`,
 	() => {
 		beforeAll( async () => {
-			zipUrl = await getLatestReleaseZipUrl(
-				GITHUB_REPOSITORY,
-				GITHUB_TOKEN
-			);
+			zipUrl = await getLatestReleaseZipUrl( repository, GITHUB_TOKEN );
 
 			pluginPath = await getRemotePluginZip( zipUrl, GITHUB_TOKEN );
 
