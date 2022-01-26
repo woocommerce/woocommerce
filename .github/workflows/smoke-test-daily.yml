@@ -132,7 +132,7 @@ jobs:
         working-directory: tmp
         run: |
             unzip woocommerce.zip -d woocommerce
-            mv woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/tests/e2e/plugins/
+            mv woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
 
       - name: Install dependencies again
         working-directory: package/woocommerce
@@ -146,9 +146,9 @@ jobs:
           WC_E2E_SCREENSHOTS: 1
           E2E_SLACK_TOKEN: ${{ secrets.SMOKE_TEST_SLACK_TOKEN }}
           E2E_SLACK_CHANNEL: ${{ secrets.RELEASE_TEST_SLACK_CHANNEL }}
-          GITHUB_REPOSITORY: ${{ matrix.private && secrets[matrix.repo] || matrix.repo }}
+          PLUGIN_REPOSITORY: ${{ matrix.private && secrets[matrix.repo] || matrix.repo }}
           PLUGIN_NAME: ${{ matrix.plugin }}
           GITHUB_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
         run: |
           pnpx wc-e2e test:e2e tests/e2e/specs/smoke-tests/upload-plugin.js
-          pnpm nx test-e2e woocommerce
+          pnpx wc-e2e test-e2e
