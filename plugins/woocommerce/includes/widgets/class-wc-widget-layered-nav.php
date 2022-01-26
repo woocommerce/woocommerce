@@ -176,8 +176,6 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 		$terms = get_transient( $terms_transient_name );
 
-		ray( $terms );
-
 		// If transient is expired.
 		if ( false === $terms ) {
 
@@ -207,8 +205,8 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 							'tax_query'      => array(
 								array(
 									'taxonomy' => $taxonomy,
-									'field' => 'slug',
-									'terms' => $term->slug,
+									'field'    => 'slug',
+									'terms'    => $term->slug,
 								),
 							),
 						)
