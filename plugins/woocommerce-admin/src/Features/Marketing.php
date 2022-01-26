@@ -265,8 +265,7 @@ class Marketing {
 						'author_avatar' => isset( $raw_post['author_avatar_url'] ) ? $raw_post['author_avatar_url'] : '',
 					];
 
-					$featured_media = $raw_post['_embedded']['wp:featuredmedia'];
-
+					$featured_media = $raw_post['_embedded']['wp:featuredmedia'] ?? [];
 					if ( count( $featured_media ) > 0 ) {
 						$image         = current( $featured_media );
 						$post['image'] = add_query_arg(
