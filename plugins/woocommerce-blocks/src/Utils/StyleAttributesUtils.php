@@ -161,6 +161,79 @@ class StyleAttributesUtils {
 	}
 
 	/**
+	 * Get class and style for border-color from attributes.
+	 *
+	 * @param array $attributes Block attributes.
+	 *
+	 * @return (array | null)
+	 */
+	public static function get_border_color_class_and_style( $attributes ) {
+
+		$border_color = $attributes['borderColor'] ?? '';
+
+		$custom_border_color = $attributes['style']['border']['color'] ?? '';
+
+		if ( ! $border_color && '' === $custom_border_color ) {
+			return null;
+		};
+
+		if ( $border_color ) {
+			return array(
+				'class' => sprintf( 'has-border-color has-%s-border-color', $border_color ),
+				'style' => null,
+			);
+		} elseif ( '' !== $custom_border_color ) {
+			return array(
+				'class' => null,
+				'style' => sprintf( 'border-color: %s;', $custom_border_color ),
+			);
+		}
+		return null;
+	}
+
+	/**
+	 * Get class and style for border-radius from attributes.
+	 *
+	 * @param array $attributes Block attributes.
+	 *
+	 * @return (array | null)
+	 */
+	public static function get_border_radius_class_and_style( $attributes ) {
+
+		$custom_border_radius = $attributes['style']['border']['radius'] ?? '';
+
+		if ( '' === $custom_border_radius ) {
+			return null;
+		};
+
+		return array(
+			'class' => null,
+			'style' => sprintf( 'border-radius: %s;', $custom_border_radius ),
+		);
+	}
+
+	/**
+	 * Get class and style for border width from attributes.
+	 *
+	 * @param array $attributes Block attributes.
+	 *
+	 * @return (array | null)
+	 */
+	public static function get_border_width_class_and_style( $attributes ) {
+
+		$custom_border_width = $attributes['style']['border']['width'] ?? '';
+
+		if ( '' === $custom_border_width ) {
+			return null;
+		};
+
+		return array(
+			'class' => null,
+			'style' => sprintf( 'border-width: %s;', $custom_border_width ),
+		);
+	}
+
+	/**
 	 * Get class and style for align from attributes.
 	 *
 	 * @param array $attributes Block attributes.
@@ -228,6 +301,9 @@ class StyleAttributesUtils {
 			'font_size'        => self::get_font_size_class_and_style( $attributes ),
 			'link_color'       => self::get_link_color_class_and_style( $attributes ),
 			'background_color' => self::get_background_color_class_and_style( $attributes ),
+			'border_color'     => self::get_border_color_class_and_style( $attributes ),
+			'border_radius'    => self::get_border_radius_class_and_style( $attributes ),
+			'border_width'     => self::get_border_width_class_and_style( $attributes ),
 		);
 
 		if ( ! empty( $properties ) ) {
