@@ -24,25 +24,39 @@ const {
 } = require( '../utils/scaffold' );
 
 const args = process.argv.slice( 2 );
-const [ command, packageName ] = args;
+
+const command = args[0];
+
+let packageName = null;
+
+if (args[1].substr(0, 2) !== '--') {
+	packageName = args[1];
+}
 
 // Allow multiple spec file extensions and formats.
 let testExtension = 'test.js';
 let testFormat = '';
-for ( let a = 2; a < args.length; a++ ) {
-	const nextArg = a + 1;
-	if ( nextArg >= args.length ) {
-		break;
-	}
-	switch ( args[ a ] ) {
+let force = false;
+
+args.forEach((el) => {
+	console.log(el);
+	switch ( el ) {
 		case '--format':
-			testFormat = args[ nextArg ];
+			testFormat = el;
 			break;
 		case '--ext':
-			testExtension = args[ nextArg ];
+			testExtension = el;
+			break;
+		case '--force':
+			force = true;
 			break;
 	}
-}
+});
+
+console.log('Command: ' + command );
+console.log('Package Name: ' + packageName );
+console.log('Test Extension: ' + testExtension );
+console.log('Test Format: ' + testFormat );
 
 /**
  * Install the test scripts and sample default.json configuration
