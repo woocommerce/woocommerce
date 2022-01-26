@@ -226,17 +226,15 @@ class Filterer {
 
 			if ( ! empty( $attributes_to_filter_by ) ) {
 				$and_term_ids = array();
-				$or_term_ids  = array();
 
 				foreach ( $attributes_to_filter_by as $taxonomy => $data ) {
+					if ( 'and' !== $data['query_type'] ) {
+						continue;
+					}
 					$all_terms             = get_terms( $taxonomy, array( 'hide_empty' => false ) );
 					$term_ids_by_slug      = wp_list_pluck( $all_terms, 'term_id', 'slug' );
 					$term_ids_to_filter_by = array_values( array_intersect_key( $term_ids_by_slug, array_flip( $data['terms'] ) ) );
-					if ( 'and' === $data['query_type'] ) {
-						$and_term_ids = array_merge( $and_term_ids, $term_ids_to_filter_by );
-					} else {
-						$or_term_ids = array_merge( $or_term_ids, $term_ids_to_filter_by );
-					}
+					$and_term_ids          = array_merge( $and_term_ids, $term_ids_to_filter_by );
 				}
 
 				if ( ! empty( $and_term_ids ) ) {
@@ -260,17 +258,6 @@ class Filterer {
 							{$in_stock_clause}
 							AND term_id in {$term_ids_list}
 						) temp )";
-				}
-
-				if ( ! empty( $or_term_ids ) ) {
-					$term_ids_list   = '(' . join( ',', $or_term_ids ) . ')';
-					$query['where'] .= "
-						AND product_or_parent_id IN ( SELECT product_or_parent_id FROM (
-							SELECT product_or_parent_id FROM {$this->lookup_table_name}
-							WHERE term_id in {$term_ids_list}
-							{$in_stock_clause}
-						) temp )";
-
 				}
 			} else {
 				$query['where'] .= $in_stock_clause;

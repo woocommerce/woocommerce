@@ -114,6 +114,10 @@ await takeScreenshotFor( 'name of current step' );
 
 Screenshots will be saved to `tests/e2e/screenshots`. This folder is cleared at the beginning of each test run.
 
+#### Test results
+
+The test results are saved in `json` format in `tests/e2e/test-results.json`.
+
 ### Override default test timeout
 
 To override the default timeout for the tests, you can use the `DEFAULT_TIMEOUT_OVERRIDE` flag and pass in a maximum timeout in milliseconds. For example, you can pass it in when running the tests from the command line:
