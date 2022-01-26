@@ -92,5 +92,7 @@ jobs:
           PLUGIN_NAME: ${{ matrix.plugin }}
           GITHUB_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
         run: |
+          echo "GITHUB_REPOSITORY=${{ matrix.repo }}}"
+          echo $GITHUB_REPOSITORY
           pnpx wc-e2e test:e2e tests/e2e/specs/smoke-tests/upload-plugin.js
           pnpm nx test-e2e woocommerce
