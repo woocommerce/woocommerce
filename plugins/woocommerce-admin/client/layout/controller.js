@@ -173,7 +173,7 @@ export const getPages = () => {
 			path: '/setup-wizard',
 			breadcrumbs: [
 				...initialBreadcrumbs,
-				[ '/setup-wizard', __( 'Setup Wizard', 'woocommerce-admin' ) ],
+				__( 'Setup Wizard', 'woocommerce-admin' ),
 			],
 			capability: 'manage_woocommerce',
 		} );
