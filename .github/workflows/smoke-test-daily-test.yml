@@ -93,4 +93,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
         run: |
           pnpx wc-e2e test:e2e tests/e2e/specs/smoke-tests/upload-plugin.js
-          pnpm wc-e2e test-e2e
+          pnpx wc-e2e test-e2e
