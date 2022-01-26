@@ -22,7 +22,7 @@ const repository = PLUGIN_REPOSITORY ? PLUGIN_REPOSITORY : GITHUB_REPOSITORY;
 let zipUrl;
 let pluginPath;
 
-utils.describeIf( GITHUB_REPOSITORY || PLUGIN_REPOSITORY )(
+utils.describeIf( repository )(
 	`Upload and activate ${ pluginName } from ${ repository }`,
 	() => {
 		beforeAll( async () => {
