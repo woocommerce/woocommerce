@@ -77,7 +77,7 @@
 	"devDependencies": {
 		"@automattic/color-studio": "2.5.0",
 		"@babel/cli": "7.16.8",
-		"@babel/core": "7.16.10",
+		"@babel/core": "7.16.12",
 		"@babel/plugin-proposal-class-properties": "7.16.7",
 		"@babel/plugin-syntax-jsx": "7.16.7",
 		"@babel/polyfill": "7.12.1",
