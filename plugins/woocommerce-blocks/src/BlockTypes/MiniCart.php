@@ -455,4 +455,16 @@ class MiniCart extends AbstractBlock {
 			'display_cart_prices_including_tax' => false,
 		);
 	}
+
+	/**
+	 * Get the supports array for this block type.
+	 *
+	 * @see $this->register_block_type()
+	 * @return string;
+	 */
+	protected function get_block_type_supports() {
+		return [
+			'__experimentalSelector' => '.wc-block-mini-cart__button, .wc-block-mini-cart__badge',
+		];
+	}
 }
