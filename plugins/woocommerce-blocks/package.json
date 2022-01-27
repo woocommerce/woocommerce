@@ -116,6 +116,7 @@
 		"@wordpress/api-fetch": "5.2.6",
 		"@wordpress/babel-preset-default": "6.4.1",
 		"@wordpress/base-styles": "4.0.4",
+		"@wordpress/block-editor": "^8.0.13",
 		"@wordpress/blocks": "11.1.5",
 		"@wordpress/browserslist-config": "4.1.0",
 		"@wordpress/components": "19.1.5",
