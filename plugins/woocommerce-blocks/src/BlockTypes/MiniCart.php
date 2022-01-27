@@ -178,7 +178,7 @@ class MiniCart extends AbstractBlock {
 			function_exists( 'wp_is_block_theme' ) &&
 			wp_is_block_theme()
 		) {
-			$theme_slug      = BlockTemplateUtils::theme_has_template_part( 'mini-cart' ) ? wp_get_theme()->get_stylesheet() : 'woocommerce';
+			$theme_slug      = BlockTemplateUtils::theme_has_template_part( 'mini-cart' ) ? wp_get_theme()->get_stylesheet() : BlockTemplateUtils::PLUGIN_SLUG;
 			$site_editor_uri = admin_url( 'site-editor.php' );
 
 			if ( version_compare( get_bloginfo( 'version' ), '5.9', '<' ) ) {
