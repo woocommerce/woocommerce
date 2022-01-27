@@ -23,7 +23,7 @@ services:
             - phpunit-db
 
     phpunit-db:
-        image: mysql:5.7
+        image: mariadb:10.5.8
         hostname: 'phpunit-db'
         environment:
             MYSQL_DATABASE: 'wordpress_test'
