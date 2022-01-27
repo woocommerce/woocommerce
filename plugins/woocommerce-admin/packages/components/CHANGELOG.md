@@ -10,6 +10,7 @@
 -   Remove dev dependency `@woocommerce/wc-admin-settings`. #8057
 -   Fix incorrect screen reader text generated for data points on charts table. #8181
 -   Grow and center buttons in all WooCommerce ellipsis menu popover containers. #8168
+-   Added random IDs to SVG checkmarks in stepper component #8222  
 
 # 8.1.1
 
