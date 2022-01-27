@@ -35,3 +35,4 @@ require( 'options/rest-api.php' );
 require( 'tools/delete-all-products.php');
 require( 'tools/disable-wc-email.php' );
 require( 'tools/trigger-update-callbacks.php' );
+require( 'tracks/tracks-debug-log.php' );
