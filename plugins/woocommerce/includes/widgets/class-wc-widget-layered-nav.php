@@ -169,8 +169,9 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			return;
 		}
 
-		// @todo Flush Transients on update.
-		// @todo Update Transient lengths.
+		// Length for this widget's transients in seconds.
+		$transient_length = 10;
+
 		// Ensure the transient name is not too long and includes the most unique data, located at the end of the string.
 		$terms_transient_name = substr( 'wp_layered_widget_terms_' . $this->id, -172 );
 
@@ -187,7 +188,8 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			}
 
 			// Only include terms that are actually used (enabled) in variations.
-			$terms = array_filter( $terms, function( $term ) use ( $taxonomy ) {
+			$terms = array_filter( $terms, function( $term ) use ( $taxonomy, $transient_length ) {
+
 				$term_transient_name = 'wc_layered_widget_term_products _' . $term->term_taxonomy_id;
 
 				$products = get_transient( $term_transient_name );
@@ -216,7 +218,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 					$products = $term_query->posts;
 
 					// @todo Transient length.
-					set_transient( $term_transient_name, $products, 10 );
+					set_transient( $term_transient_name, $products, $transient_length );
 				}
 
 				// Sanity check.
@@ -251,9 +253,8 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 				return ! empty( $products );
 			});
 
-			// @todo Transient length.
 			// Store terms for quick retrieval later.
-			set_transient( $terms_transient_name, $terms, 10 );
+			set_transient( $terms_transient_name, $terms, $transient_length );
 		}
 
 		if ( empty( $terms ) || ! is_array( $terms ) ) {
