@@ -1,5 +1,8 @@
 # Unreleased
 
+## Changes 
+- Updated `deleteDownloadedPluginFiles()` to also be able to delete directories.
+
 ## Added
 
 - Added `post-results-to-github-pr.js` to post smoke test results to a GitHub PR.
