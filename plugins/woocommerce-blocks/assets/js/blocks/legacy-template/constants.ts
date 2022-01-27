@@ -3,12 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 
-/**
- * Internal dependencies
- */
-import { TemplateAttributes } from './types';
-
-export const TEMPLATES: Record< string, TemplateAttributes > = {
+export const TEMPLATES: Record< string, Record< string, string > > = {
 	'single-product': {
 		title: __(
 			'WooCommerce Single Product Block',
