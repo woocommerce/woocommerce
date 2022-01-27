@@ -5,13 +5,9 @@
 export const MENUS = [
 	[
 		'WooCommerce',
-		'#adminmenu > li:nth-child(8) > a',
+		'.menu-top > a[href*=wc-admin].menu-top-first',
 		[
-			[
-				'Home',
-				'',
-				'Home',
-			],
+			[ 'Home', '', 'Home' ],
 			[
 				'Orders',
 				'#toplevel_page_woocommerce > ul > li:nth-child(3) > a',
@@ -37,7 +33,7 @@ export const MENUS = [
 	],
 	[
 		'Products',
-		'#adminmenu > li:nth-child(9) > a',
+		'.menu-top > a[href*=product].menu-top',
 		[
 			[
 				'All Products',
@@ -68,7 +64,7 @@ export const MENUS = [
 	],
 	[
 		'Marketing',
-		'#adminmenu > li:nth-child(11) > a',
+		'.menu-top > a[href*=marketing].menu-top',
 		[
 			[
 				'Overview',
