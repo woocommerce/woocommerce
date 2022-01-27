@@ -118,7 +118,7 @@ jobs:
           - plugin: 'WooCommerce PayPal Payments'
             repo: 'woocommerce/woocommerce-paypal-payments'
           - plugin: 'WooCommerce Shipping & Tax'
-            repo: 'woocommerce/woocommerce-services'
+            repo: 'automattic/woocommerce-services'
           - plugin: 'WooCommerce Subscriptions'
             repo: WC_SUBSCRIPTIONS_REPO
             private: true
