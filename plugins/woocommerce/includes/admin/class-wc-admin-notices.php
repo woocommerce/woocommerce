@@ -138,6 +138,11 @@ class WC_Admin_Notices {
 			'php72_required_in_woo_65',
 			__( '<h4>PHP version requirements will change soon</h4><p>WooCommerce 6.5, scheduled for <b>May 2022</b>, will require PHP 7.2 or newer to work. Your server is currently running an older version of PHP, so this change will impact your store. Upgrading to at least PHP 7.4 is recommended. <b><a href="https://developer.woocommerce.com/2022/01/05/new-requirement-for-woocommerce-6-5-php-7-2/">Learn more about this change.</a></b></p>', 'woocommerce' )
 		);
+
+		$wp_version_is_ok = version_compare( get_bloginfo( 'version' ), WC_NOTICE_MIN_WP_VERSION, '>=' );
+		if ( $wp_version_is_ok ) {
+			self::hide_notice( WC_PHP_MIN_REQUIREMENTS_NOTICE );
+		}
 	}
 
 	/**
@@ -209,12 +214,21 @@ class WC_Admin_Notices {
 
 			$hide_notice = sanitize_text_field( wp_unslash( $_GET['wc-hide-notice'] ) ); // WPCS: input var ok, CSRF ok.
 
-			self::remove_notice( $hide_notice );
-
-			update_user_meta( get_current_user_id(), 'dismissed_' . $hide_notice . '_notice', true );
-
-			do_action( 'woocommerce_hide_' . $hide_notice . '_notice' );
+			self::hide_notice( $hide_notice );
 		}
+	}
+
+	/**
+	 * Hide a single notice.
+	 *
+	 * @param $name Notice name.
+	 */
+	private static function hide_notice( $name ) {
+		self::remove_notice( $name );
+
+		update_user_meta( get_current_user_id(), 'dismissed_' . $name . '_notice', true );
+
+		do_action( 'woocommerce_hide_' . $name . '_notice' );
 	}
 
 	/**
