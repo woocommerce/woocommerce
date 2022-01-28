@@ -125,21 +125,12 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 			}
 		);
 
-		$completed_tasks = array( 'payments' );
-		$tasks           = $this->get_widget()->get_tasks();
-		$tasks_count     = count( $tasks );
-		unset( $tasks['payments'] ); // That one is completed already.
-		foreach ( $tasks as $key => $task ) {
-			array_push( $completed_tasks, $key );
-			update_option( 'woocommerce_task_list_tracked_completed_tasks', $completed_tasks );
-			$completed_tasks_count = count( $completed_tasks );
-			// When all tasks are completed, assert that the widget output is empty.
-			// As widget won't be rendered when tasks are completed.
-			if ( $completed_tasks_count === $tasks_count ) {
-				$this->assertEmpty( $this->get_widget_output() );
-			} else {
-				$this->assertRegexp( "/Step ${completed_tasks_count} of 6/", $this->get_widget_output() );
-			}
+		$completed_tasks_count = $this->get_widget()->get_completed_tasks_count();
+		$tasks_count           = count( $this->get_widget()->get_tasks() );
+		if ( $completed_tasks_count === $tasks_count ) {
+			$this->assertEmpty( $this->get_widget_output() );
+		} else {
+			$this->assertRegexp( "/Step ${completed_tasks_count} of 6/", $this->get_widget_output() );
 		}
 	}
 
