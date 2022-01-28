@@ -172,10 +172,11 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 
 		$completed_tasks_count = $this->get_widget()->get_completed_tasks_count();
 		$tasks_count           = count( $this->get_widget()->get_tasks() );
+		$step_number           = $completed_tasks_count + 1;
 		if ( $completed_tasks_count === $tasks_count ) {
 			$this->assertEmpty( $this->get_widget_output() );
 		} else {
-			$this->assertRegexp( "/Step ${completed_tasks_count} of 6/", $this->get_widget_output() );
+			$this->assertRegexp( "/Step ${step_number} of 6/", $this->get_widget_output() );
 		}
 	}
 }
