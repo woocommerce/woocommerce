@@ -41,9 +41,6 @@ if ( ! class_exists( 'WC_Admin_Dashboard_Setup', false ) ) :
 		 * WC_Admin_Dashboard_Setup constructor.
 		 */
 		public function __construct() {
-			$this->task_list = TaskLists::get_list( 'setup' );
-			$this->tasks     = $this->task_list->get_viewable_tasks();
-
 			if ( $this->should_display_widget() ) {
 				add_meta_box(
 					'wc_admin_dashboard_setup',
@@ -99,6 +96,27 @@ if ( ! class_exists( 'WC_Admin_Dashboard_Setup', false ) ) :
 		}
 
 		/**
+		 * Get the task list.
+		 *
+		 * @return array
+		 */
+		public function get_task_list() {
+			if ( $this->task_list ) {
+				return $this->task_list;
+			}
+
+			$this->set_task_list( TaskLists::get_list( 'setup' ) );
+			return $this->task_list;
+		}
+
+		/**
+		 * Set the task list.
+		 */
+		public function set_task_list( $task_list ) {
+			return $this->task_list = $task_list;
+		}
+
+		/**
 		 * Get the tasks.
 		 *
 		 * @return array
@@ -108,7 +126,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard_Setup', false ) ) :
 				return $this->tasks;
 			}
 
-			$this->tasks = $this->task_list->get_viewable_tasks();
+			$this->tasks = $this->get_task_list()->get_viewable_tasks();
 			return $this->tasks;
 		}
 
@@ -148,11 +166,11 @@ if ( ! class_exists( 'WC_Admin_Dashboard_Setup', false ) ) :
 		 *
 		 * @return bool
 		 */
-		private function should_display_widget() {
+		public function should_display_widget() {
 			return current_user_can( 'manage_woocommerce' ) &&
 				WC()->is_wc_admin_active() &&
-				! $this->task_list->is_complete() &&
-				! $this->task_list->is_hidden();
+				! $this->get_task_list()->is_complete() &&
+				! $this->get_task_list()->is_hidden();
 		}
 
 	}
