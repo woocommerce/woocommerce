@@ -30,7 +30,7 @@ const sharedConfig = {
 	watchOptions: {
 		ignored: /node_modules/,
 	},
-	devtool: NODE_ENV === 'development',
+	devtool: NODE_ENV === 'development' ? 'source-map' : false,
 };
 
 // Core config for shared libraries.
