@@ -28,6 +28,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	protected $data = array(
 		'code'                        => '',
 		'amount'                      => 0,
+		'status'                      => null,
 		'date_created'                => null,
 		'date_modified'               => null,
 		'date_expires'                => null,
@@ -182,6 +183,17 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 */
 	public function get_description( $context = 'view' ) {
 		return $this->get_prop( 'description', $context );
+	}
+
+	/**
+	 * Get coupon status.
+	 *
+	 * @since  6.2.0
+	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @return string
+	 */
+	public function get_status( $context = 'view' ) {
+		return $this->get_prop( 'status', $context );
 	}
 
 	/**
@@ -489,6 +501,16 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 */
 	public function set_description( $description ) {
 		$this->set_prop( 'description', $description );
+	}
+
+	/**
+	 * Set coupon status.
+	 *
+	 * @since 3.0.0
+	 * @param string $status Status.
+	 */
+	public function set_status( $status ) {
+		$this->set_prop( 'status', $status );
 	}
 
 	/**

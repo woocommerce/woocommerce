@@ -13,30 +13,36 @@ const {
 	beforeAll,
 } = require( '@jest/globals' );
 
-const { GITHUB_REPOSITORY, PLUGIN_NAME, GITHUB_TOKEN } = process.env;
+const { GITHUB_REPOSITORY, PLUGIN_NAME, GITHUB_TOKEN, PLUGIN_REPOSITORY } = process.env;
+
+// allows us to upload plugins from different repositories.
+const pluginName = PLUGIN_NAME ? PLUGIN_NAME : 'WooCommerce';
+const repository = PLUGIN_REPOSITORY ? PLUGIN_REPOSITORY : GITHUB_REPOSITORY;
 
 let zipUrl;
 let pluginPath;
 
-utils.describeIf( GITHUB_REPOSITORY )( 'Upload and activate plugin', () => {
-	beforeAll( async () => {
-		zipUrl = await getLatestReleaseZipUrl( GITHUB_REPOSITORY, GITHUB_TOKEN );
+utils.describeIf( repository )(
+	`Upload and activate ${ pluginName } from ${ repository }`,
+	() => {
+		beforeAll( async () => {
+			zipUrl = await getLatestReleaseZipUrl( repository, GITHUB_TOKEN );
 
-		pluginPath = await getRemotePluginZip( zipUrl, GITHUB_TOKEN );
+			pluginPath = await getRemotePluginZip( zipUrl, GITHUB_TOKEN );
 
-		await merchant.login();
-	});
+			await merchant.login();
+		} );
 
-	afterAll( async () => {
-		await merchant.logout();
-	});
+		afterAll( async () => {
+			await merchant.logout();
+		} );
 
-	it( 'can upload and activate the provided plugin', async () => {
-		await merchant.uploadAndActivatePlugin( pluginPath, PLUGIN_NAME );
-	});
+		it( 'can upload and activate the provided plugin', async () => {
+			await merchant.uploadAndActivatePlugin( pluginPath, PLUGIN_NAME );
+		} );
 
-	it( 'can remove downloaded plugin zip', async () => {
-		await deleteDownloadedPluginFiles();
-	} );
-
-});
+		it( 'can remove downloaded plugin zip', async () => {
+			await deleteDownloadedPluginFiles();
+		} );
+	}
+);

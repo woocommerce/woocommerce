@@ -27,7 +27,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '6.1.0';
+	public $version = '6.3.0';
 
 	/**
 	 * WooCommerce Schema version.
@@ -570,6 +570,9 @@ final class WooCommerce {
 					break;
 				case 'twentytwentyone':
 					include_once WC_ABSPATH . 'includes/theme-support/class-wc-twenty-twenty-one.php';
+					break;
+				case 'twentytwentytwo':
+					include_once WC_ABSPATH . 'includes/theme-support/class-wc-twenty-twenty-two.php';
 					break;
 			}
 		}

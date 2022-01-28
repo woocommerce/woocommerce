@@ -244,10 +244,7 @@
               item = $( '<a></a>' ).attr( 'href', '#' ).text( j );
               if (slider.vars.controlNav === "thumbnails") {
                 item = $('<img/>', {
-                  load: function (el) {
-                    el.currentTarget.width = el.currentTarget.naturalWidth;
-                    el.currentTarget.height = el.currentTarget.naturalHeight;
-                  },
+                  onload: 'this.width = this.naturalWidth; this.height = this.naturalHeight',
                   src: slide.attr('data-thumb'),
                   alt: slide.attr('alt')
                 })
