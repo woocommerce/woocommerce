@@ -45,7 +45,6 @@
     "access": "public"
   },
   "scripts": {
-    "preinstall": "npx only-allow pnpm",
 	"prepare": "pnpm run build",
 	"clean": "rm -rf ./build ./build-module",
 	"compile": "node ./../bin/build.js",

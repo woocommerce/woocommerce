@@ -17,8 +17,8 @@ export function simpleProductFactory( httpClient ) {
 		} );
 
 		return {
-			name: params.name ?? faker.commerce.productName(),
-			regularPrice: params.regularPrice ?? faker.commerce.price(),
+			name: params.name ? params.name : faker.commerce.productName(),
+			regularPrice: params.regularPrice ? params.regularPrice : faker.commerce.price(),
 		};
 	} );
 }
