@@ -102,7 +102,6 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 			'Step 0 of 6',
 			'You&#039;re almost there! Once you complete store setup you can start receiving orders.',
 			'Start selling',
-			'admin.php\?page=wc-admin&amp;path=%2Fsetup-wizard',
 		);
 
 		foreach ( $required_strings as $required_string ) {
