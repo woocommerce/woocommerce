@@ -2,7 +2,7 @@
  * Internal dependencies
  */
 const FallbackModuleDirectoryPlugin = require( './bin/fallback-module-directory-webpack-plugin' );
-const { NODE_ENV, FORCE_MAP, getAlias } = require( './bin/webpack-helpers.js' );
+const { NODE_ENV, getAlias } = require( './bin/webpack-helpers.js' );
 const {
 	getCoreConfig,
 	getMainConfig,
@@ -30,7 +30,7 @@ const sharedConfig = {
 	watchOptions: {
 		ignored: /node_modules/,
 	},
-	devtool: NODE_ENV === 'development' || FORCE_MAP ? 'source-map' : false,
+	devtool: NODE_ENV === 'development',
 };
 
 // Core config for shared libraries.

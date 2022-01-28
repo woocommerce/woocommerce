@@ -5,7 +5,6 @@
 const path = require( 'path' );
 const chalk = require( 'chalk' );
 const NODE_ENV = process.env.NODE_ENV || 'development';
-const FORCE_MAP = process.env.FORCE_MAP || false;
 const CHECK_CIRCULAR_DEPS = process.env.CHECK_CIRCULAR_DEPS || false;
 
 // If a package is not available, or missing functionality, in an old but __supported__ version of WordPress, it should be listed here.
@@ -139,7 +138,6 @@ const getProgressBarPluginConfig = ( name, fileSuffix ) => {
 
 module.exports = {
 	NODE_ENV,
-	FORCE_MAP,
 	CHECK_CIRCULAR_DEPS,
 	getAlias,
 	findModuleMatch,
