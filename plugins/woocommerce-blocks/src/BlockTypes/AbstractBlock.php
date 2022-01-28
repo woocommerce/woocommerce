@@ -181,13 +181,29 @@ abstract class AbstractBlock {
 			'editor_script'   => $this->get_block_type_editor_script( 'handle' ),
 			'editor_style'    => $this->get_block_type_editor_style(),
 			'style'           => $this->get_block_type_style(),
-			'attributes'      => $this->get_block_type_attributes(),
-			'supports'        => $this->get_block_type_supports(),
 		];
 
 		if ( isset( $this->api_version ) && '2' === $this->api_version ) {
 			$block_settings['api_version'] = 2;
 		}
+
+		$metadata_path = $this->asset_api->get_block_metadata_path( $this->block_name );
+		// Prefer to register with metadata if the path is set in the block's class.
+		if ( ! empty( $metadata_path ) ) {
+			register_block_type(
+				$metadata_path,
+				$block_settings
+			);
+			return;
+		}
+
+		/*
+		 * Insert attributes and supports if we're not registering the block using metadata.
+		 * These are left unset until now and only added here because if they were set when registering with metadata,
+		 * the attributes and supports from $block_settings would override the values from metadata.
+		 */
+		$block_settings['attributes'] = $this->get_block_type_attributes();
+		$block_settings['supports']   = $this->get_block_type_supports();
 
 		register_block_type(
 			$this->get_block_type(),

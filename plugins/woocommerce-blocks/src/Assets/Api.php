@@ -61,6 +61,21 @@ class Api {
 	}
 
 	/**
+	 * Get the path to a block's metadata
+	 *
+	 * @param string $block_name The block to get metadata for.
+	 *
+	 * @return string|boolean False if metadata file is not found for the block.
+	 */
+	public function get_block_metadata_path( $block_name ) {
+		$path_to_metadata_from_plugin_root = $this->package->get_path( 'assets/js/blocks/' . $block_name . '/block.json' );
+		if ( ! file_exists( $path_to_metadata_from_plugin_root ) ) {
+			return false;
+		}
+		return $path_to_metadata_from_plugin_root;
+	}
+
+	/**
 	 * Get src, version and dependencies given a script relative src.
 	 *
 	 * @param string $relative_src Relative src to the script.

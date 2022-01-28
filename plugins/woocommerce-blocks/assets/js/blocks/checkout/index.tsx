@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import classnames from 'classnames';
 import { Icon, fields } from '@woocommerce/icons';
 import { registerFeaturePluginBlockType } from '@woocommerce/block-settings';
@@ -11,11 +10,11 @@ import { BlockInstance, createBlock } from '@wordpress/blocks';
  * Internal dependencies
  */
 import { Edit, Save } from './edit';
-import { blockName, blockAttributes } from './attributes';
+import { blockAttributes, deprecatedAttributes } from './attributes';
 import './inner-blocks';
+import metadata from './block.json';
 
 const settings = {
-	title: __( 'Checkout', 'woo-gutenberg-products-block' ),
 	icon: {
 		src: (
 			<Icon
@@ -24,25 +23,21 @@ const settings = {
 			/>
 		),
 	},
-	category: 'woocommerce',
-	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],
-	description: __(
-		'Display a checkout form so your customers can submit orders.',
-		'woo-gutenberg-products-block'
-	),
-	supports: {
-		align: [ 'wide' ],
-		html: false,
-		multiple: false,
+	attributes: {
+		...metadata.attributes,
+		...blockAttributes,
+		...deprecatedAttributes,
 	},
-	attributes: blockAttributes,
-	apiVersion: 2,
 	edit: Edit,
 	save: Save,
 	// Migrates v1 to v2 checkout.
 	deprecated: [
 		{
-			attributes: blockAttributes,
+			attributes: {
+				...metadata.attributes,
+				...blockAttributes,
+				...deprecatedAttributes,
+			},
 			save( { attributes }: { attributes: { className: string } } ) {
 				return (
 					<div
@@ -143,4 +138,4 @@ const settings = {
 	],
 };
 
-registerFeaturePluginBlockType( blockName, settings );
+registerFeaturePluginBlockType( metadata, settings );
