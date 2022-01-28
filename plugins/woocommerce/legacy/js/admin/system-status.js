@@ -32,7 +32,6 @@ jQuery( function ( $ ) {
 			var report = '';
 
 			$( '.wc_status_table thead, .wc_status_table tbody' ).each( function() {
-				var export_type = $( this ).closest( 'table' ).find( 'thead th:eq(0)' ).data( 'export-type' ) || '';
 				if ( $( this ).is( 'thead' ) ) {
 					var label = $( this ).find( 'th:eq(0)' ).data( 'exportLabel' ) || $( this ).text();
 					report = report + '\n### ' + label.trim() + ' ###\n\n';
@@ -49,10 +48,6 @@ jQuery( function ( $ ) {
 
 						// Format value
 						var the_value   = $value_html.text().trim();
-
-						
-						}
-
 						report = report + '' + the_name + ': ' + the_value + '\n';
 					});
 				}

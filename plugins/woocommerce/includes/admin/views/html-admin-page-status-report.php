@@ -50,7 +50,7 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Cons
 <table class="wc_status_table widefat" cellspacing="0" id="status">
 	<thead>
 		<tr>
-			<th colspan="3" data-export-type="wordpress-environment" data-export-label="WordPress Environment"><h2><?php esc_html_e( 'WordPress environment', 'woocommerce' ); ?></h2></th>
+			<th colspan="3" data-export-label="WordPress Environment"><h2><?php esc_html_e( 'WordPress environment', 'woocommerce' ); ?></h2></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -276,7 +276,7 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Cons
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
-			<th colspan="3" data-export-type="server-environment" data-export-label="Server Environment"><h2><?php esc_html_e( 'Server environment', 'woocommerce' ); ?></h2></th>
+			<th colspan="3" data-export-label="Server Environment"><h2><?php esc_html_e( 'Server environment', 'woocommerce' ); ?></h2></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -501,7 +501,7 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Cons
 <table id="status-database" class="wc_status_table widefat" cellspacing="0">
 	<thead>
 	<tr>
-		<th colspan="3" data-export-type="database" data-export-label="Database">
+		<th colspan="3" data-export-label="Database">
 			<h2>
 				<?php
 					esc_html_e( 'Database', 'woocommerce' );
@@ -600,7 +600,7 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Cons
 	<table class="wc_status_table widefat" cellspacing="0">
 		<thead>
 		<tr>
-			<th colspan="3" data-export-type="post-type-counts" data-export-label="Post Type Counts"><h2><?php esc_html_e( 'Post Type Counts', 'woocommerce' ); ?></h2></th>
+			<th colspan="3" data-export-label="Post Type Counts"><h2><?php esc_html_e( 'Post Type Counts', 'woocommerce' ); ?></h2></th>
 		</tr>
 		</thead>
 		<tbody>
@@ -621,7 +621,7 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Cons
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
-			<th colspan="3" data-export-type="security" data-export-label="Security"><h2><?php esc_html_e( 'Security', 'woocommerce' ); ?></h2></th>
+			<th colspan="3" data-export-label="Security"><h2><?php esc_html_e( 'Security', 'woocommerce' ); ?></h2></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -657,7 +657,7 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Cons
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
-			<th colspan="3" data-export-type="active-plugins" data-export-label="Active Plugins (<?php echo count( $active_plugins ); ?>)"><h2><?php esc_html_e( 'Active plugins', 'woocommerce' ); ?> (<?php echo count( $active_plugins ); ?>)</h2></th>
+			<th colspan="3" data-export-label="Active Plugins (<?php echo count( $active_plugins ); ?>)"><h2><?php esc_html_e( 'Active plugins', 'woocommerce' ); ?> (<?php echo count( $active_plugins ); ?>)</h2></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -667,7 +667,7 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Cons
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
-			<th colspan="3" data-export-type="inactive-plugins" data-export-label="Inactive Plugins (<?php echo count( $inactive_plugins ); ?>)"><h2><?php esc_html_e( 'Inactive plugins', 'woocommerce' ); ?> (<?php echo count( $inactive_plugins ); ?>)</h2></th>
+			<th colspan="3" data-export-label="Inactive Plugins (<?php echo count( $inactive_plugins ); ?>)"><h2><?php esc_html_e( 'Inactive plugins', 'woocommerce' ); ?> (<?php echo count( $inactive_plugins ); ?>)</h2></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -680,7 +680,7 @@ if ( 0 < count( $dropins_mu_plugins['dropins'] ) ) :
 	<table class="wc_status_table widefat" cellspacing="0">
 		<thead>
 			<tr>
-				<th colspan="3" data-export-type="dropin-plugins" data-export-label="Dropin Plugins (<?php echo count( $dropins_mu_plugins['dropins'] ); ?>)"><h2><?php esc_html_e( 'Dropin Plugins', 'woocommerce' ); ?> (<?php echo count( $dropins_mu_plugins['dropins'] ); ?>)</h2></th>
+				<th colspan="3" data-export-label="Dropin Plugins (<?php echo count( $dropins_mu_plugins['dropins'] ); ?>)"><h2><?php esc_html_e( 'Dropin Plugins', 'woocommerce' ); ?> (<?php echo count( $dropins_mu_plugins['dropins'] ); ?>)</h2></th>
 			</tr>
 		</thead>
 		<tbody>
@@ -704,7 +704,7 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 	<table class="wc_status_table widefat" cellspacing="0">
 		<thead>
 			<tr>
-				<th colspan="3" data-export-type="must-use-plugins" data-export-label="Must Use Plugins (<?php echo count( $dropins_mu_plugins['mu_plugins'] ); ?>)"><h2><?php esc_html_e( 'Must Use Plugins', 'woocommerce' ); ?> (<?php echo count( $dropins_mu_plugins['mu_plugins'] ); ?>)</h2></th>
+				<th colspan="3" data-export-label="Must Use Plugins (<?php echo count( $dropins_mu_plugins['mu_plugins'] ); ?>)"><h2><?php esc_html_e( 'Must Use Plugins', 'woocommerce' ); ?> (<?php echo count( $dropins_mu_plugins['mu_plugins'] ); ?>)</h2></th>
 			</tr>
 		</thead>
 		<tbody>
@@ -734,7 +734,7 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
-			<th colspan="3" data-export-type="settings" data-export-label="Settings"><h2><?php esc_html_e( 'Settings', 'woocommerce' ); ?></h2></th>
+			<th colspan="3" data-export-label="Settings"><h2><?php esc_html_e( 'Settings', 'woocommerce' ); ?></h2></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -809,7 +809,7 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
-			<th colspan="3" data-export-type="wc-pages" data-export-label="WC Pages"><h2><?php esc_html_e( 'WooCommerce pages', 'woocommerce' ); ?></h2></th>
+			<th colspan="3" data-export-label="WC Pages"><h2><?php esc_html_e( 'WooCommerce pages', 'woocommerce' ); ?></h2></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -863,7 +863,7 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
-			<th colspan="3" data-export-type="theme" data-export-label="Theme"><h2><?php esc_html_e( 'Theme', 'woocommerce' ); ?></h2></th>
+			<th colspan="3" data-export-label="Theme"><h2><?php esc_html_e( 'Theme', 'woocommerce' ); ?></h2></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -948,7 +948,7 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
-			<th colspan="3" data-export-type="templates" data-export-label="Templates"><h2><?php esc_html_e( 'Templates', 'woocommerce' ); ?><?php echo wc_help_tip( esc_html__( 'This section shows any files that are overriding the default WooCommerce template pages.', 'woocommerce' ) ); ?></h2></th>
+			<th colspan="3" data-export-label="Templates"><h2><?php esc_html_e( 'Templates', 'woocommerce' ); ?><?php echo wc_help_tip( esc_html__( 'This section shows any files that are overriding the default WooCommerce template pages.', 'woocommerce' ) ); ?></h2></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -1018,7 +1018,7 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 	<tr>
-		<th colspan="3" data-export-type="status-report-information" data-export-label="Status report information"><h2><?php esc_html_e( 'Status report information', 'woocommerce' ); ?><?php echo wc_help_tip( esc_html__( 'This section shows information about this status report.', 'woocommerce' ) ); ?></h2></th>
+		<th colspan="3" data-export-label="Status report information"><h2><?php esc_html_e( 'Status report information', 'woocommerce' ); ?><?php echo wc_help_tip( esc_html__( 'This section shows information about this status report.', 'woocommerce' ) ); ?></h2></th>
 	</tr>
 	</thead>
 	<tbody>
