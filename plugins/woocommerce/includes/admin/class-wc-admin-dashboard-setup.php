@@ -67,6 +67,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard_Setup', false ) ) :
 
 			$button_link           = $this->get_button_link( $task );
 			$completed_tasks_count = $this->get_completed_tasks_count();
+			$step_number           = $this->get_completed_tasks_count() + 1;
 			$tasks_count           = count( $this->get_tasks() );
 
 			// Given 'r' (circle element's r attr), dashoffset = ((100-$desired_percentage)/100) * PI * (r*2).
