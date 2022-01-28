@@ -70,7 +70,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard_Setup', false ) ) :
 
 			$button_link           = $this->get_button_link( $task );
 			$completed_tasks_count = $this->get_completed_tasks_count();
-			$tasks_count           = count( $this->tasks );
+			$tasks_count           = count( $this->get_tasks() );
 
 			// Given 'r' (circle element's r attr), dashoffset = ((100-$desired_percentage)/100) * PI * (r*2).
 			$progress_percentage = ( $completed_tasks_count / $tasks_count ) * 100;
@@ -99,11 +99,27 @@ if ( ! class_exists( 'WC_Admin_Dashboard_Setup', false ) ) :
 		}
 
 		/**
+		 * Get the tasks.
+		 *
+		 * @return array
+		 */
+		public function get_tasks() {
+			if ( $this->tasks ) {
+				return $this->tasks;
+			}
+
+			$this->tasks = $this->task_list->get_viewable_tasks();
+			return $this->tasks;
+		}
+
+		/**
 		 * Return # of completed tasks
+		 *
+		 * @return integer
 		 */
 		public function get_completed_tasks_count() {
 			$completed_tasks = array_filter(
-				$this->tasks,
+				$this->get_tasks(),
 				function( $task ) {
 					return $task->is_complete();
 				}
@@ -118,7 +134,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard_Setup', false ) ) :
 		 * @return array|null
 		 */
 		private function get_next_task() {
-			foreach ( $this->task_list->get_viewable_tasks() as $task ) {
+			foreach ( $this->get_tasks() as $task ) {
 				if ( false === $task->is_complete() ) {
 					return $task;
 				}
