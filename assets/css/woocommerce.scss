@@ -327,7 +327,7 @@ p.demo_store,
 				position: relative;
 
 				li {
-					border: 1px solid darken(var( --wc-secondary ), 10%);
+					border: 1px solid #{gen-custom-prop( $wc-secondary, false, false, -10% )};
 					background-color: var( --wc-secondary );
 					display: inline-block;
 					position: relative;
@@ -345,7 +345,7 @@ p.demo_store,
 
 						&:hover {
 							text-decoration: none;
-							color: lighten($secondarytext, 10%);
+							color: #{gen-custom-prop( $wc-secondary-text, false, false, 10% )};
 						}
 					}
 
@@ -370,7 +370,7 @@ p.demo_store,
 
 					&::before,
 					&::after {
-						border: 1px solid darken($secondary, 10%);
+						border: 1px solid #{gen-custom-prop( $wc-secondary, false, false, -10% )};
 						position: absolute;
 						bottom: -1px;
 						width: 5px;
@@ -400,7 +400,7 @@ p.demo_store,
 					width: 100%;
 					bottom: 0;
 					left: 0;
-					border-bottom: 1px solid darken(var( --wc-secondary ), 10%);
+					border-bottom: 1px solid #{gen-custom-prop( $wc-secondary, false, false, -10% )};
 					z-index: 1;
 				}
 			}
@@ -453,12 +453,13 @@ p.demo_store,
 				td,
 				th {
 					border: 0;
-					vertical-align: top;
 					line-height: 2em;
+					vertical-align: top;
 				}
 
 				label {
 					font-weight: 700;
+					text-align: left;
 				}
 
 				select {
@@ -533,7 +534,7 @@ p.demo_store,
 		margin: 0;
 		border-radius: 100%;
 		background-color: var( --wc-highlight );
-		color: var( --wc-highlight )ext;
+		color: var( --wc-highlight );
 		font-size: 0.857em;
 		z-index: 9;
 	}
@@ -623,7 +624,7 @@ p.demo_store,
 				font-size: 0.67em;
 				margin: -2px 0 0 0;
 				text-transform: uppercase;
-				color: rgba(desaturate(var( --wc-highlight ), 75%), 0.5);
+				color: #{gen-custom-prop( $wc-highlight, false, -75%, false, .5 )};
 			}
 		}
 	}
@@ -648,12 +649,12 @@ p.demo_store,
 			white-space: nowrap;
 			padding: 0;
 			clear: both;
-			border: 1px solid darken(var( --wc-secondary ), 10%);
+			border: 1px solid #{gen-custom-prop( $wc-secondary, false, false, -10% )};
 			border-right: 0;
 			margin: 1px;
 
 			li {
-				border-right: 1px solid darken(var( --wc-secondary ), 10%);
+				border-right: 1px solid #{gen-custom-prop( $wc-secondary, false, false, -10% )};
 				padding: 0;
 				margin: 0;
 				float: left;
@@ -677,7 +678,7 @@ p.demo_store,
 				a:hover,
 				a:focus {
 					background: var( --wc-secondary );
-					color: darken(var( --wc-secondary ), 40%);
+					color: #{gen-custom-prop( $wc-secondary, false, false, -40% )};
 				}
 			}
 		}
@@ -733,7 +734,7 @@ p.demo_store,
 		}
 
 		&:hover {
-			background-color: darken(var( --wc-secondary ), 5%);
+			background-color: #{gen-custom-prop( $wc-secondary, false, false, -5% )};
 			text-decoration: none;
 			background-image: none;
 			color: var( --wc-secondary-text );
@@ -745,7 +746,7 @@ p.demo_store,
 			-webkit-font-smoothing: antialiased;
 
 			&:hover {
-				background-color: darken(var( --wc-primary ), 5%);
+				background-color: #{gen-custom-prop( $wc-primary, false, false, -5% )};
 				color: var( --wc-primary-text );
 			}
 
@@ -857,14 +858,14 @@ p.demo_store,
 						width: 32px;
 						height: auto;
 						background: var( --wc-secondary );
-						border: 1px solid darken(var( --wc-secondary ), 3%);
+						border: 1px solid #{gen-custom-prop( $wc-secondary, false, false, -3% )};
 						margin: 0;
 						box-shadow: none;
 					}
 
 					.comment-text {
 						margin: 0 0 0 50px;
-						border: 1px solid darken(var( --wc-secondary ), 3%);
+						border: 1px solid #{gen-custom-prop( $wc-secondary, false, false, -3% )};
 						border-radius: 4px;
 						padding: 1em 1em 0;
 
@@ -890,7 +891,7 @@ p.demo_store,
 				}
 
 				#respond {
-					border: 1px solid darken(var( --wc-secondary ), 3%);
+					border: 1px solid #{gen-custom-prop( $wc-secondary, false, false, -3% )};
 					border-radius: 4px;
 					padding: 1em 1em 0;
 					margin: 20px 0 0 50px;
@@ -918,7 +919,7 @@ p.demo_store,
 
 		&::before {
 			content: "\73\73\73\73\73";
-			color: darken(var( --wc-secondary ), 10%);
+			color: #{gen-custom-prop( $wc-secondary, false, false, -10% )};
 			float: left;
 			top: 0;
 			left: 0;
@@ -1436,7 +1437,7 @@ p.demo_store,
 	form.login,
 	form.checkout_coupon,
 	form.register {
-		border: 1px solid darken(var( --wc-secondary ), 10%);
+		border: 1px solid #{gen-custom-prop( $wc-secondary, false, false, -10% )};
 		padding: 20px;
 		margin: 2em 0;
 		text-align: left;
@@ -1487,7 +1488,7 @@ p.demo_store,
 			text-transform: uppercase;
 			font-size: 0.715em;
 			line-height: 1;
-			border-right: 1px dashed darken(var( --wc-secondary ), 10%);
+			border-right: 1px dashed #{gen-custom-prop( $wc-secondary, false, false, -10% )};
 			padding-right: 2em;
 			margin-left: 0;
 			padding-left: 0;
@@ -1670,7 +1671,7 @@ p.demo_store,
 
 		.price_slider_wrapper .ui-widget-content {
 			border-radius: 1em;
-			background-color: darken(var( --wc-primary ), 30%);
+			background-color: #{gen-custom-prop( $wc-primary, false, false, -30% )};
 			border: 0;
 		}
 
@@ -1758,7 +1759,7 @@ p.demo_store,
 	padding: 1em 2em 1em 3.5em;
 	margin: 0 0 2em;
 	position: relative;
-	background-color: lighten(var( --wc-secondary ), 5%);
+	background-color: #{gen-custom-prop( $wc-secondary, false, false, 5% )};
 	color: var( --wc-secondary-text );
 	border-top: 3px solid var( --wc-primary );
 	list-style: none outside;
@@ -1906,7 +1907,7 @@ p.demo_store,
 		td.actions .coupon .input-text {
 			float: left;
 			box-sizing: border-box;
-			border: 1px solid darken(var( --wc-secondary ), 10%);
+			border: 1px solid #{gen-custom-prop( $wc-secondary, false, false, -10% )};
 			padding: 6px 6px 5px;
 			margin: 0 4px 0 0;
 			outline: 0;
@@ -2053,7 +2054,7 @@ p.demo_store,
 			@include clearfix();
 			text-align: left;
 			padding: 1em;
-			border-bottom: 1px solid darken(var( --wc-secondary ), 10%);
+			border-bottom: 1px solid #{gen-custom-prop( $wc-secondary, false, false, -10% )};
 			margin: 0;
 			list-style: none outside;
 
@@ -2099,25 +2100,25 @@ p.demo_store,
 			font-size: 0.92em;
 			border-radius: 2px;
 			line-height: 1.5;
-			background-color: darken(var( --wc-secondary ), 5%);
+			background-color: #{gen-custom-prop( $wc-secondary, false, false, -5% )};
 			color: var( --wc-secondary-text );
 
 			input.input-text,
 			textarea {
-				border-color: darken(var( --wc-secondary ), 15%);
-				border-top-color: darken(var( --wc-secondary ), 20%);
+				border-color: #{gen-custom-prop( $wc-secondary, false, false, -15% )};
+				border-top-color: #{gen-custom-prop( $wc-secondary, false, false, -20% )};
 			}
 
 			::-webkit-input-placeholder {
-				color: darken(var( --wc-secondary ), 20%);
+				color: #{gen-custom-prop( $wc-secondary, false, false, -20% )};
 			}
 
 			:-moz-placeholder {
-				color: darken(var( --wc-secondary ), 20%);
+				color: #{gen-custom-prop( $wc-secondary, false, false, -20% )};
 			}
 
 			:-ms-input-placeholder {
-				color: darken(var( --wc-secondary ), 20%);
+				color:  #{gen-custom-prop( $wc-secondary, false, false, -20% )};
 			}
 
 			.woocommerce-SavedPaymentMethods {
@@ -2205,7 +2206,7 @@ p.demo_store,
 			&::before {
 				content: "";
 				display: block;
-				border: 1em solid darken(var( --wc-secondary ), 5%); /* arrow size / color */
+				border: 1em solid  #{gen-custom-prop( $wc-secondary, false, false, -5% )}; /* arrow size / color */
 				border-right-color: transparent;
 				border-left-color: transparent;
 				border-top-color: transparent;
