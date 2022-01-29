@@ -8,31 +8,46 @@ $red:           	#a00 !default;
 $orange:        	#ffba00 !default;
 $blue:          	#2ea2cc !default;
 
-$primary:           #a46497 !default;                                  // Primary color for buttons (alt)
-$primarytext:       desaturate(lighten($primary, 50%), 18%) !default;    // Text on primary color bg
+$wc-primary: var(--wc-hue), var(--wc-sat), var(--wc-luma);									// Primary color for buttons (alt)
+$wc-primary-text: var(--wc-hue), calc(var(--wc-sat) - 18%), calc(var(--wc-luma) + 50%);		// Text on primary color bg
 
-$secondary:         desaturate(lighten($primary, 40%), 21%) !default;    // Secondary buttons
-$secondarytext:     desaturate(darken($secondary, 60%), 21%) !default;   // Text on secondary color bg
+$wc-secondary: var(--wc-hue), var(--wc-sat--secondary), calc(var(--wc-luma) + 40%); 		// Secondary buttons
+$wc-secondary-text: var(--wc-hue), var(--wc-sat--secondary), calc(var(--wc-luma) - 20%); 	// Text on secondary color bg
 
-$highlight:         adjust-hue($primary, 150deg) !default;               // Prices, In stock labels, sales flash
-$highlightext:      desaturate(lighten($highlight, 50%), 18%) !default;  // Text on highlight color bg
+$wc-highlight: var(--wc-hue--highlight), var(--wc-sat), var(--wc-luma); 								// Prices, In stock labels, sales flash
+$wc-highlight-text: var(--wc-hue--highlight), calc(var(--wc-sat) - 18%), calc(var(--wc-luma) + 50%); 	// Text on highlight color bg
 
-$contentbg:         #fff !default;                                     // Content BG - Tabs (active state)
-$subtext:           #767676 !default;                                  // small, breadcrumbs etc
 
 // export vars as CSS vars
 :root {
+	// base color values
+	--wc-hue: 312;
+	--wc-hue--highlight: calc(var(--wc-hue) + 150);
+
+	--wc-sat: 26%;
+	--wc-sat--secondary: calc(var(--wc-sat) - 21%);
+
+	--wc-luma: 52%;
+	--wc-luma-white: 100%;
+
+	// WooCommerce base colors
 	--woocommerce: #{$woocommerce};
-	--wc-green: #{$green};
-	--wc-red: #{$red};
-	--wc-orange: #{$orange};
-	--wc-blue: #{$blue};
-	--wc-primary: #{$primary};
-	--wc-primary-text: #{$primarytext};
-	--wc-secondary: #{$secondary};
-	--wc-secondary-text: #{$secondarytext};
-	--wc-highlight: #{$highlight};
-	--wc-highligh-text: #{$highlightext};
-	--wc-content-bg: #{$contentbg};
-	--wc-subtext: #{$subtext};
+	--wc-green: var(--wp--preset--color--vivid-green-cyan, #{$green});
+	--wc-red: var(--wp--preset--color--vivid-red, #{$red});
+	--wc-orange: var(--wp--preset--color--luminous-vivid-amber, #{$orange});
+	--wc-blue: var(--wp--preset--color--pale-cyan-blue, #{$blue});
+	--wc-white: hsl(0,0%,var(--wc-luma-white));
+	--wc-gray: hsl(0,0%,calc(var(--wc-luma-white) * .46));
+	--wc-black: hsl(0,0%,calc(var(--wc-luma-white) * 0));
+
+	// theme colors
+	--wc-primary: hsl(#{$wc-primary});
+	--wc-primary-text: hsl(#{$wc-primary-text});
+	--wc-secondary: hsl(#{$wc-secondary});
+	--wc-secondary-text: hsl(#{$wc-secondary-text});
+	--wc-highlight: hsl(#{$wc-highlight});
+	--wc-highlight-text: hsl(#{$wc-highlight-text});
+
+	--wc-content-bg: var(--wc-white);
+	--wc-subtext: var(--wc-gray);
 }

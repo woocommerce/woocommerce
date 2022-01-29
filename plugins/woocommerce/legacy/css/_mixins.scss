@@ -286,3 +286,40 @@
 		text-decoration: none !important;
 	}
 }
+
+@function set_value($val, $val2) {
+	@if (type-of($val) == string) {
+		@return calc(#{$val} + #{$val2});
+	} @else {
+		@return $val + $val2;
+	}
+}
+
+@function gen-custom-prop($color, $hue: false, $saturation: false, $luminosity: false, $alpha: false) {
+
+	@if (type_of($color) == string) {
+		@error("Error in _variables.scss: colors needs to be a list like 150, 100%, 50% and not " + $color)
+	}
+
+	$h: nth($color, 1);
+	$s: nth($color, 2);
+	$l: nth($color, 3);
+
+	@if($hue != false) {
+		$h: set_value($h, $hue);
+	}
+
+	@if($saturation != false) {
+		$s: set_value($s, $saturation);
+	}
+
+	@if($luminosity != false) {
+		$l: set_value($l, $luminosity);
+	}
+
+	@if($alpha != false) {
+		@return unquote("hsla(#{$h}, #{$s}, #{$l}, #{$alpha})");
+	}
+
+	@return unquote("hsl(#{$h}, #{$s}, #{$l})");
+}

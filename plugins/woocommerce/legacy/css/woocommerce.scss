@@ -26,14 +26,14 @@ p.demo_store,
 	font-size: 1em;
 	padding: 1em 0;
 	text-align: center;
-	background-color: $primary;
-	color: $primarytext;
+	background-color: var( --wc-primary );
+	color: var( --wc-primary-text );
 	z-index: 99998;
 	box-shadow: 0 1px 1em rgba(0, 0, 0, 0.2);
 	display: none;
 
 	a {
-		color: $primarytext;
+		color: var( --wc-primary-text );
 		text-decoration: underline;
 	}
 }
@@ -95,7 +95,7 @@ p.demo_store,
 
 	small.note {
 		display: block;
-		color: $subtext;
+		color: var( --wc-subtext );
 		font-size: 0.857em;
 		margin-top: 10px;
 	}
@@ -106,10 +106,10 @@ p.demo_store,
 		margin: 0 0 1em;
 		padding: 0;
 		font-size: 0.92em;
-		color: $subtext;
+		color: var( --wc-subtext );
 
 		a {
-			color: $subtext;
+			color: var( --wc-subtext );
 		}
 	}
 
@@ -133,7 +133,7 @@ p.demo_store,
 
 		span.price,
 		p.price {
-			color: $highlight;
+			color: var( --wc-highlight );
 			font-size: 1.25em;
 
 			ins {
@@ -153,7 +153,7 @@ p.demo_store,
 		}
 
 		.stock {
-			color: $highlight;
+			color: var( --wc-highlight );
 		}
 
 		.out-of-stock {
@@ -327,8 +327,8 @@ p.demo_store,
 				position: relative;
 
 				li {
-					border: 1px solid darken($secondary, 10%);
-					background-color: $secondary;
+					border: 1px solid #{gen-custom-prop( $wc-secondary, false, false, -10% )};
+					background-color: var( --wc-secondary );
 					display: inline-block;
 					position: relative;
 					z-index: 0;
@@ -340,19 +340,19 @@ p.demo_store,
 						display: inline-block;
 						padding: 0.5em 0;
 						font-weight: 700;
-						color: $secondarytext;
+						color: var( --wc-secondary-text );
 						text-decoration: none;
 
 						&:hover {
 							text-decoration: none;
-							color: lighten($secondarytext, 10%);
+							color: #{gen-custom-prop( $wc-secondary-text, false, false, 10% )};
 						}
 					}
 
 					&.active {
-						background: $contentbg;
+						background: var( --wc-content-bg );
 						z-index: 2;
-						border-bottom-color: $contentbg;
+						border-bottom-color: var( --wc-content-bg );
 
 						a {
 							color: inherit;
@@ -360,17 +360,17 @@ p.demo_store,
 						}
 
 						&::before {
-							box-shadow: 2px 2px 0 $contentbg;
+							box-shadow: 2px 2px 0 var( --wc-content-bg );
 						}
 
 						&::after {
-							box-shadow: -2px 2px 0 $contentbg;
+							box-shadow: -2px 2px 0 var( --wc-content-bg );
 						}
 					}
 
 					&::before,
 					&::after {
-						border: 1px solid darken($secondary, 10%);
+						border: 1px solid #{gen-custom-prop( $wc-secondary, false, false, -10% )};
 						position: absolute;
 						bottom: -1px;
 						width: 5px;
@@ -383,14 +383,14 @@ p.demo_store,
 						left: -5px;
 						border-bottom-right-radius: 4px;
 						border-width: 0 1px 1px 0;
-						box-shadow: 2px 2px 0 $secondary;
+						box-shadow: 2px 2px 0 var( --wc-secondary );
 					}
 
 					&::after {
 						right: -5px;
 						border-bottom-left-radius: 4px;
 						border-width: 0 0 1px 1px;
-						box-shadow: -2px 2px 0 $secondary;
+						box-shadow: -2px 2px 0 var( --wc-secondary );
 					}
 				}
 
@@ -400,7 +400,7 @@ p.demo_store,
 					width: 100%;
 					bottom: 0;
 					left: 0;
-					border-bottom: 1px solid darken($secondary, 10%);
+					border-bottom: 1px solid #{gen-custom-prop( $wc-secondary, false, false, -10% )};
 					z-index: 1;
 				}
 			}
@@ -533,8 +533,8 @@ p.demo_store,
 		left: -0.5em;
 		margin: 0;
 		border-radius: 100%;
-		background-color: $highlight;
-		color: $highlightext;
+		background-color: var( --wc-highlight );
+		color: var( --wc-highlight );
 		font-size: 0.857em;
 		z-index: 9;
 	}
@@ -602,7 +602,7 @@ p.demo_store,
 		}
 
 		.price {
-			color: $highlight;
+			color: var( --wc-highlight );
 			display: block;
 			font-weight: normal;
 			margin-bottom: 0.5em;
@@ -624,7 +624,7 @@ p.demo_store,
 				font-size: 0.67em;
 				margin: -2px 0 0 0;
 				text-transform: uppercase;
-				color: rgba(desaturate($highlight, 75%), 0.5);
+				color: #{gen-custom-prop( $wc-highlight, false, -75%, false, .5 )};
 			}
 		}
 	}
@@ -649,12 +649,12 @@ p.demo_store,
 			white-space: nowrap;
 			padding: 0;
 			clear: both;
-			border: 1px solid darken($secondary, 10%);
+			border: 1px solid #{gen-custom-prop( $wc-secondary, false, false, -10% )};
 			border-right: 0;
 			margin: 1px;
 
 			li {
-				border-right: 1px solid darken($secondary, 10%);
+				border-right: 1px solid #{gen-custom-prop( $wc-secondary, false, false, -10% )};
 				padding: 0;
 				margin: 0;
 				float: left;
@@ -677,8 +677,8 @@ p.demo_store,
 				span.current,
 				a:hover,
 				a:focus {
-					background: $secondary;
-					color: darken($secondary, 40%);
+					background: var( --wc-secondary );
+					color: #{gen-custom-prop( $wc-secondary, false, false, -40% )};
 				}
 			}
 		}
@@ -702,8 +702,8 @@ p.demo_store,
 		font-weight: 700;
 		border-radius: 3px;
 		left: auto;
-		color: $secondarytext;
-		background-color: $secondary;
+		color: var( --wc-secondary-text );
+		background-color: var( --wc-secondary );
 		border: 0;
 		display: inline-block;
 		background-image: none;
@@ -734,20 +734,20 @@ p.demo_store,
 		}
 
 		&:hover {
-			background-color: darken($secondary, 5%);
+			background-color: #{gen-custom-prop( $wc-secondary, false, false, -5% )};
 			text-decoration: none;
 			background-image: none;
-			color: $secondarytext;
+			color: var( --wc-secondary-text );
 		}
 
 		&.alt {
-			background-color: $primary;
-			color: $primarytext;
+			background-color: var( --wc-primary );
+			color: var( --wc-primary-text );
 			-webkit-font-smoothing: antialiased;
 
 			&:hover {
-				background-color: darken($primary, 5%);
-				color: $primarytext;
+				background-color: #{gen-custom-prop( $wc-primary, false, false, -5% )};
+				color: var( --wc-primary-text );
 			}
 
 			&.disabled,
@@ -756,8 +756,8 @@ p.demo_store,
 			&.disabled:hover,
 			&:disabled:hover,
 			&:disabled[disabled]:hover {
-				background-color: $primary;
-				color: $primarytext;
+				background-color: var( --wc-primary );
+				color: var( --wc-primary-text );
 			}
 		}
 
@@ -771,7 +771,7 @@ p.demo_store,
 
 			&:hover {
 				color: inherit;
-				background-color: $secondary;
+				background-color: var( --wc-secondary );
 			}
 		}
 	}
@@ -793,13 +793,13 @@ p.demo_store,
 
 		h2 small {
 			float: right;
-			color: $subtext;
+			color: var( --wc-subtext );
 			font-size: 15px;
 			margin: 10px 0 0;
 
 			a {
 				text-decoration: none;
-				color: $subtext;
+				color: var( --wc-subtext );
 			}
 		}
 
@@ -845,7 +845,7 @@ p.demo_store,
 					border: 0;
 
 					.meta {
-						color: $subtext;
+						color: var( --wc-subtext );
 						font-size: 0.75em;
 					}
 
@@ -857,15 +857,15 @@ p.demo_store,
 						padding: 3px;
 						width: 32px;
 						height: auto;
-						background: $secondary;
-						border: 1px solid darken($secondary, 3%);
+						background: var( --wc-secondary );
+						border: 1px solid #{gen-custom-prop( $wc-secondary, false, false, -3% )};
 						margin: 0;
 						box-shadow: none;
 					}
 
 					.comment-text {
 						margin: 0 0 0 50px;
-						border: 1px solid darken($secondary, 3%);
+						border: 1px solid #{gen-custom-prop( $wc-secondary, false, false, -3% )};
 						border-radius: 4px;
 						padding: 1em 1em 0;
 
@@ -891,7 +891,7 @@ p.demo_store,
 				}
 
 				#respond {
-					border: 1px solid darken($secondary, 3%);
+					border: 1px solid #{gen-custom-prop( $wc-secondary, false, false, -3% )};
 					border-radius: 4px;
 					padding: 1em 1em 0;
 					margin: 20px 0 0 50px;
@@ -919,7 +919,7 @@ p.demo_store,
 
 		&::before {
 			content: "\73\73\73\73\73";
-			color: darken($secondary, 10%);
+			color: #{gen-custom-prop( $wc-secondary, false, false, -10% )};
 			float: left;
 			top: 0;
 			left: 0;
@@ -1263,7 +1263,7 @@ p.demo_store,
 	.widget_shopping_cart {
 
 		.total {
-			border-top: 3px double $secondary;
+			border-top: 3px double var( --wc-secondary );
 			padding: 4px 0 0;
 
 			strong {
@@ -1402,13 +1402,13 @@ p.demo_store,
 		&.woocommerce-invalid {
 
 			label {
-				color: $red;
+				color: var( --wc-red );
 			}
 
 			.select2-container,
 			input.input-text,
 			select {
-				border-color: $red;
+				border-color: var( --wc-red );
 			}
 		}
 
@@ -1437,7 +1437,7 @@ p.demo_store,
 	form.login,
 	form.checkout_coupon,
 	form.register {
-		border: 1px solid darken($secondary, 10%);
+		border: 1px solid #{gen-custom-prop( $wc-secondary, false, false, -10% )};
 		padding: 20px;
 		margin: 2em 0;
 		text-align: left;
@@ -1488,7 +1488,7 @@ p.demo_store,
 			text-transform: uppercase;
 			font-size: 0.715em;
 			line-height: 1;
-			border-right: 1px dashed darken($secondary, 10%);
+			border-right: 1px dashed #{gen-custom-prop( $wc-secondary, false, false, -10% )};
 			padding-right: 2em;
 			margin-left: 0;
 			padding-left: 0;
@@ -1582,7 +1582,7 @@ p.demo_store,
 		.woocommerce-widget-layered-nav-list__item--chosen a::before {
 
 			@include iconbefore( "\e013" );
-			color: $red;
+			color: var( --wc-red );
 		}
 	}
 
@@ -1609,7 +1609,7 @@ p.demo_store,
 				&::before {
 
 					@include iconbefore( "\e013" );
-					color: $red;
+					color: var( --wc-red );
 					vertical-align: inherit;
 					margin-right: 0.5em;
 				}
@@ -1649,7 +1649,7 @@ p.demo_store,
 			z-index: 2;
 			width: 1em;
 			height: 1em;
-			background-color: $primary;
+			background-color: var( --wc-primary );
 			border-radius: 1em;
 			cursor: ew-resize;
 			outline: none;
@@ -1666,12 +1666,12 @@ p.demo_store,
 			display: block;
 			border: 0;
 			border-radius: 1em;
-			background-color: $primary;
+			background-color: var( --wc-primary );
 		}
 
 		.price_slider_wrapper .ui-widget-content {
 			border-radius: 1em;
-			background-color: darken($primary, 30%);
+			background-color: #{gen-custom-prop( $wc-primary, false, false, -30% )};
 			border: 0;
 		}
 
@@ -1722,7 +1722,7 @@ p.demo_store,
 		li.chosen a::before {
 
 			@include iconbefore( "\e013" );
-			color: $red;
+			color: var( --wc-red );
 		}
 	}
 
@@ -1759,9 +1759,9 @@ p.demo_store,
 	padding: 1em 2em 1em 3.5em;
 	margin: 0 0 2em;
 	position: relative;
-	background-color: lighten($secondary, 5%);
-	color: $secondarytext;
-	border-top: 3px solid $primary;
+	background-color: #{gen-custom-prop( $wc-secondary, false, false, 5% )};
+	color: var( --wc-secondary-text );
+	border-top: 3px solid var( --wc-primary );
 	list-style: none outside;
 
 	@include clearfix();
@@ -1907,7 +1907,7 @@ p.demo_store,
 		td.actions .coupon .input-text {
 			float: left;
 			box-sizing: border-box;
-			border: 1px solid darken($secondary, 10%);
+			border: 1px solid #{gen-custom-prop( $wc-secondary, false, false, -10% )};
 			padding: 6px 6px 5px;
 			margin: 0 4px 0 0;
 			outline: 0;
@@ -1953,7 +1953,7 @@ p.demo_store,
 		.cart_totals {
 
 			p small {
-				color: $subtext;
+				color: var( --wc-subtext );
 				font-size: 0.83em;
 			}
 
@@ -1983,7 +1983,7 @@ p.demo_store,
 				}
 
 				small {
-					color: $subtext;
+					color: var( --wc-subtext );
 				}
 
 				select {
@@ -1992,12 +1992,12 @@ p.demo_store,
 			}
 
 			.discount td {
-				color: $highlight;
+				color: var( --wc-highlight );
 			}
 
 			tr td,
 			tr th {
-				border-top: 1px solid $secondary;
+				border-top: 1px solid var( --wc-secondary );
 			}
 
 			.woocommerce-shipping-destination {
@@ -2030,7 +2030,7 @@ p.demo_store,
 
 		.create-account small {
 			font-size: 11px;
-			color: $subtext;
+			color: var( --wc-subtext );
 			font-weight: normal;
 		}
 
@@ -2046,7 +2046,7 @@ p.demo_store,
 	}
 
 	#payment {
-		background: $secondary;
+		background: var( --wc-secondary );
 		border-radius: 5px;
 
 		ul.payment_methods {
@@ -2054,7 +2054,7 @@ p.demo_store,
 			@include clearfix();
 			text-align: left;
 			padding: 1em;
-			border-bottom: 1px solid darken($secondary, 10%);
+			border-bottom: 1px solid #{gen-custom-prop( $wc-secondary, false, false, -10% )};
 			margin: 0;
 			list-style: none outside;
 
@@ -2100,25 +2100,25 @@ p.demo_store,
 			font-size: 0.92em;
 			border-radius: 2px;
 			line-height: 1.5;
-			background-color: darken($secondary, 5%);
-			color: $secondarytext;
+			background-color: #{gen-custom-prop( $wc-secondary, false, false, -5% )};
+			color: var( --wc-secondary-text );
 
 			input.input-text,
 			textarea {
-				border-color: darken($secondary, 15%);
-				border-top-color: darken($secondary, 20%);
+				border-color: #{gen-custom-prop( $wc-secondary, false, false, -15% )};
+				border-top-color: #{gen-custom-prop( $wc-secondary, false, false, -20% )};
 			}
 
 			::-webkit-input-placeholder {
-				color: darken($secondary, 20%);
+				color: #{gen-custom-prop( $wc-secondary, false, false, -20% )};
 			}
 
 			:-moz-placeholder {
-				color: darken($secondary, 20%);
+				color: #{gen-custom-prop( $wc-secondary, false, false, -20% )};
 			}
 
 			:-ms-input-placeholder {
-				color: darken($secondary, 20%);
+				color:  #{gen-custom-prop( $wc-secondary, false, false, -20% )};
 			}
 
 			.woocommerce-SavedPaymentMethods {
@@ -2191,7 +2191,7 @@ p.demo_store,
 
 			span.help {
 				font-size: 0.857em;
-				color: $subtext;
+				color: var( --wc-subtext );
 				font-weight: normal;
 			}
 
@@ -2206,7 +2206,7 @@ p.demo_store,
 			&::before {
 				content: "";
 				display: block;
-				border: 1em solid darken($secondary, 5%); /* arrow size / color */
+				border: 1em solid  #{gen-custom-prop( $wc-secondary, false, false, -5% )}; /* arrow size / color */
 				border-right-color: transparent;
 				border-left-color: transparent;
 				border-top-color: transparent;
