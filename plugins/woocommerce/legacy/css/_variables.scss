@@ -11,8 +11,8 @@ $blue:          	#2ea2cc !default;
 $wc-primary: var(--wc-hue), var(--wc-sat), var(--wc-luma);									// Primary color for buttons (alt)
 $wc-primary-text: var(--wc-hue), calc(var(--wc-sat) - 18%), calc(var(--wc-luma) + 50%);		// Text on primary color bg
 
-$wc-secondary: var(--wc-hue), var(--wc-sat--secondary), calc(var(--wc-luma) + 40%); 		// Secondary buttons
-$wc-secondary-text: var(--wc-hue), var(--wc-sat--secondary), calc(var(--wc-luma) - 20%); 	// Text on secondary color bg
+$wc-secondary: var(--wc-hue), var(--wc-sat--secondary), var(--wc-luma--secondary) ; 		// Secondary buttons
+$wc-secondary-text: var(--wc-hue), var(--wc-sat--secondary), var(--wc-luma--secondary-text); 	// Text on secondary color bg
 
 $wc-highlight: var(--wc-hue--highlight), var(--wc-sat), var(--wc-luma); 								// Prices, In stock labels, sales flash
 $wc-highlight-text: var(--wc-hue--highlight), calc(var(--wc-sat) - 18%), calc(var(--wc-luma) + 50%); 	// Text on highlight color bg
@@ -28,7 +28,9 @@ $wc-highlight-text: var(--wc-hue--highlight), calc(var(--wc-sat) - 18%), calc(va
 	--wc-sat--secondary: calc(var(--wc-sat) - 21%);
 
 	--wc-luma: 52%;
-	--wc-luma-white: 100%;
+	--wc-luma--secondary-text: calc(var(--wc-luma) - 20%);
+	--wc-luma--secondary: calc(var(--wc-luma) + 40%);
+	--wc-luma--white: 100%;
 
 	// WooCommerce base colors
 	--woocommerce: #{$woocommerce};
@@ -36,7 +38,7 @@ $wc-highlight-text: var(--wc-hue--highlight), calc(var(--wc-sat) - 18%), calc(va
 	--wc-red: var(--wp--preset--color--vivid-red, #{$red});
 	--wc-orange: var(--wp--preset--color--luminous-vivid-amber, #{$orange});
 	--wc-blue: var(--wp--preset--color--pale-cyan-blue, #{$blue});
-	--wc-white: hsl(0,0%,var(--wc-luma-white));
+	--wc-white: hsl(0,0%,var(--wc-luma--white));
 	--wc-gray: hsl(0,0%,calc(var(--wc-luma-white) * .46));
 	--wc-black: hsl(0,0%,calc(var(--wc-luma-white) * 0));
 

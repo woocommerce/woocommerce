@@ -534,7 +534,7 @@ p.demo_store,
 		margin: 0;
 		border-radius: 100%;
 		background-color: var( --wc-highlight );
-		color: var( --wc-highlight );
+		color: var( --wc-highlight-text );
 		font-size: 0.857em;
 		z-index: 9;
 	}
@@ -665,7 +665,6 @@ p.demo_store,
 				span {
 					margin: 0;
 					text-decoration: none;
-					padding: 0;
 					line-height: 1;
 					font-size: 1em;
 					font-weight: normal;

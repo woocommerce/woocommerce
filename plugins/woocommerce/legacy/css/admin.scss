@@ -7272,13 +7272,13 @@ table.bar_chart {
   */
 .admin-color {
 	$wp_admin_colors: (
-		blue: #096484,
-		coffee: #c7a589,
-		ectoplasm: #a3b745,
-		midnight: #e14d43,
-		ocean: #9ebaa0,
-		sunrise: #dd823b,
-		light: #04a4cc,
+		"blue": #096484,
+		"coffee": #c7a589,
+		"ectoplasm": #a3b745,
+		"midnight": #e14d43,
+		"ocean": #9ebaa0,
+		"sunrise": #dd823b,
+		"light": #04a4cc
 	);
 
 	@each $name, $color in $wp_admin_colors {
