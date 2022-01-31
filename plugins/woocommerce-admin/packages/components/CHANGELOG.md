@@ -1,5 +1,7 @@
 # Unreleased
 
+- Update line-height of SelectControl label to avoid truncated descenders in some typefaces and zoom levels. #8186
+
 # 8.2.0
 
 -   Fix usage of Wordpress DatePicker component in `DatePicker`. #7982
