@@ -40,9 +40,6 @@ registerBlockType( 'woocommerce/featured-category', {
 		align: [ 'wide', 'full' ],
 		html: false,
 		color: true,
-		typography: {
-			fontSize: true,
-		},
 		...( isFeaturePluginBuild() && {
 			__experimentalBorder: {
 				color: true,
