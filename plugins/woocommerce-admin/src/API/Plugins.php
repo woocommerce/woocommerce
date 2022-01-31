@@ -53,6 +53,32 @@ class Plugins extends \WC_REST_Data_Controller {
 
 		register_rest_route(
 			$this->namespace,
+			'/' . $this->rest_base . '/install/status',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_installation_status' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+				),
+				'schema' => array( $this, 'get_item_schema' ),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/install/status/(?P<job_id>[a-z0-9_\-]+)',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_job_installation_status' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+				),
+				'schema' => array( $this, 'get_item_schema' ),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
 			'/' . $this->rest_base . '/active',
 			array(
 				array(
@@ -84,6 +110,32 @@ class Plugins extends \WC_REST_Data_Controller {
 				array(
 					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'activate_plugins' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+				),
+				'schema' => array( $this, 'get_item_schema' ),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/activate/status',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_activation_status' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+				),
+				'schema' => array( $this, 'get_item_schema' ),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/activate/status/(?P<job_id>[a-z0-9_\-]+)',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_job_activation_status' ),
 					'permission_callback' => array( $this, 'update_item_permissions_check' ),
 				),
 				'schema' => array( $this, 'get_item_schema' ),
@@ -196,22 +248,6 @@ class Plugins extends \WC_REST_Data_Controller {
 	}
 
 	/**
-	 * Create an alert notification in response to an error installing a plugin.
-	 *
-	 * @todo This should be moved to a filter to make this API more generic and less plugin-specific.
-	 *
-	 * @param string $slug The slug of the plugin being installed.
-	 */
-	private function create_install_plugin_error_inbox_notification_for_jetpack_installs( $slug ) {
-		// Exit early if we're not installing the Jetpack or the WooCommerce Shipping & Tax plugins.
-		if ( 'jetpack' !== $slug && 'woocommerce-services' !== $slug ) {
-			return;
-		}
-
-		InstallJPAndWCSPlugins::possibly_add_note();
-	}
-
-	/**
 	 * Install the requested plugin.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
@@ -233,117 +269,58 @@ class Plugins extends \WC_REST_Data_Controller {
 	public function install_plugins( $request ) {
 		$plugins = explode( ',', $request['plugins'] );
 
-		/**
-		 * Filter the list of plugins to install.
-		 *
-		 * @param array $plugins A list of the plugins to install.
-		 */
-		$plugins = apply_filters( 'woocommerce_admin_plugins_pre_install', $plugins );
-
 		if ( empty( $request['plugins'] ) || ! is_array( $plugins ) ) {
 			return new \WP_Error( 'woocommerce_rest_invalid_plugins', __( 'Plugins must be a non-empty array.', 'woocommerce-admin' ), 404 );
 		}
 
-		require_once ABSPATH . 'wp-admin/includes/plugin.php';
-		include_once ABSPATH . '/wp-admin/includes/admin.php';
-		include_once ABSPATH . '/wp-admin/includes/plugin-install.php';
-		include_once ABSPATH . '/wp-admin/includes/plugin.php';
-		include_once ABSPATH . '/wp-admin/includes/class-wp-upgrader.php';
-		include_once ABSPATH . '/wp-admin/includes/class-plugin-upgrader.php';
+		if ( isset( $request['async'] ) && $request['async'] ) {
+			$job_id = PluginsHelper::schedule_install_plugins( $plugins );
 
-		$existing_plugins  = PluginsHelper::get_installed_plugins_paths();
-		$installed_plugins = array();
-		$results           = array();
-		$install_time      = array();
-		$errors            = new \WP_Error();
-
-		foreach ( $plugins as $plugin ) {
-			$slug = sanitize_key( $plugin );
-
-			if ( isset( $existing_plugins[ $slug ] ) ) {
-				$installed_plugins[] = $plugin;
-				continue;
-			}
-
-			$start_time = microtime( true );
-
-			$api = plugins_api(
-				'plugin_information',
-				array(
-					'slug'   => $slug,
-					'fields' => array(
-						'sections' => false,
-					),
-				)
+			return array(
+				'data'    => array(
+					'job_id'  => $job_id,
+					'plugins' => $plugins,
+				),
+				'message' => __( 'Plugin installation has been scheduled.', 'woocommerce-admin' ),
 			);
-
-			if ( is_wp_error( $api ) ) {
-				$properties = array(
-					/* translators: %s: plugin slug (example: woocommerce-services) */
-					'error_message' => __( 'The requested plugin `%s` could not be installed. Plugin API call failed.', 'woocommerce-admin' ),
-					'api'           => $api,
-					'slug'          => $slug,
-				);
-				wc_admin_record_tracks_event( 'install_plugin_error', $properties );
-
-				$this->create_install_plugin_error_inbox_notification_for_jetpack_installs( $slug );
-
-				$errors->add(
-					$plugin,
-					sprintf(
-						/* translators: %s: plugin slug (example: woocommerce-services) */
-						__( 'The requested plugin `%s` could not be installed. Plugin API call failed.', 'woocommerce-admin' ),
-						$slug
-					)
-				);
-
-				continue;
-			}
-
-			$upgrader                = new \Plugin_Upgrader( new \Automatic_Upgrader_Skin() );
-			$result                  = $upgrader->install( $api->download_link );
-			$results[ $plugin ]      = $result;
-			$install_time[ $plugin ] = round( ( microtime( true ) - $start_time ) * 1000 );
-
-			if ( is_wp_error( $result ) || is_null( $result ) ) {
-				$properties = array(
-					/* translators: %s: plugin slug (example: woocommerce-services) */
-					'error_message' => __( 'The requested plugin `%s` could not be installed.', 'woocommerce-admin' ),
-					'slug'          => $slug,
-					'api'           => $api,
-					'upgrader'      => $upgrader,
-					'result'        => $result,
-				);
-				wc_admin_record_tracks_event( 'install_plugin_error', $properties );
-
-				$this->create_install_plugin_error_inbox_notification_for_jetpack_installs( $slug );
-
-				$errors->add(
-					$plugin,
-					sprintf(
-						/* translators: %s: plugin slug (example: woocommerce-services) */
-						__( 'The requested plugin `%s` could not be installed. Upgrader install failed.', 'woocommerce-admin' ),
-						$slug
-					)
-				);
-				continue;
-			}
-
-			$installed_plugins[] = $plugin;
 		}
+
+		$data = PluginsHelper::install_plugins( $plugins );
 
 		return array(
 			'data'    => array(
-				'installed'    => $installed_plugins,
-				'results'      => $results,
-				'install_time' => $install_time,
+				'installed'    => $data['installed'],
+				'results'      => $data['results'],
+				'install_time' => $data['time'],
 			),
-			'errors'  => $errors,
-			'success' => count( $errors->errors ) === 0,
-			'message' => count( $errors->errors ) === 0
+			'errors'  => $data['errors'],
+			'success' => count( $data['errors']->errors ) === 0,
+			'message' => count( $data['errors']->errors ) === 0
 				? __( 'Plugins were successfully installed.', 'woocommerce-admin' )
 				: __( 'There was a problem installing some of the requested plugins.', 'woocommerce-admin' ),
 		);
+	}
+
+	/**
+	 * Returns a list of recently scheduled installation jobs.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return array Jobs.
+	 */
+	public function get_installation_status( $request ) {
+		return PluginsHelper::get_installation_status();
+	}
+
+	/**
+	 * Returns a list of recently scheduled installation jobs.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return array Job.
+	 */
+	public function get_job_installation_status( $request ) {
+		$job_id = $request->get_param( 'job_id' );
+		$jobs   = PluginsHelper::get_installation_status( $job_id );
+		return reset( $jobs );
 	}
 
 	/**
@@ -384,66 +361,59 @@ class Plugins extends \WC_REST_Data_Controller {
 	 * @return WP_Error|array Plugin Status
 	 */
 	public function activate_plugins( $request ) {
-		$plugin_paths      = PluginsHelper::get_installed_plugins_paths();
-		$plugins           = explode( ',', $request['plugins'] );
-		$errors            = new \WP_Error();
-		$activated_plugins = array();
+		$plugins = explode( ',', $request['plugins'] );
 
 		if ( empty( $request['plugins'] ) || ! is_array( $plugins ) ) {
 			return new \WP_Error( 'woocommerce_rest_invalid_plugins', __( 'Plugins must be a non-empty array.', 'woocommerce-admin' ), 404 );
 		}
 
-		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		if ( isset( $request['async'] ) && $request['async'] ) {
+			$job_id = PluginsHelper::schedule_activate_plugins( $plugins );
 
-		// the mollie-payments-for-woocommerce plugin calls `WP_Filesystem()` during it's activation hook, which crashes without this include.
-		require_once ABSPATH . 'wp-admin/includes/file.php';
-
-		/**
-		 * Filter the list of plugins to activate.
-		 *
-		 * @param array $plugins A list of the plugins to activate.
-		 */
-		$plugins = apply_filters( 'woocommerce_admin_plugins_pre_activate', $plugins );
-
-		foreach ( $plugins as $plugin ) {
-			$slug = $plugin;
-			$path = isset( $plugin_paths[ $slug ] ) ? $plugin_paths[ $slug ] : false;
-
-			if ( ! $path ) {
-				$errors->add(
-					$plugin,
-					/* translators: %s: plugin slug (example: woocommerce-services) */
-					sprintf( __( 'The requested plugin `%s`. is not yet installed.', 'woocommerce-admin' ), $slug )
-				);
-				continue;
-			}
-
-			$result = activate_plugin( $path );
-			if ( ! is_null( $result ) ) {
-				$this->create_install_plugin_error_inbox_notification_for_jetpack_installs( $slug );
-
-				$errors->add(
-					$plugin,
-					/* translators: %s: plugin slug (example: woocommerce-services) */
-					sprintf( __( 'The requested plugin `%s` could not be activated.', 'woocommerce-admin' ), $slug )
-				);
-				continue;
-			}
-
-			$activated_plugins[] = $plugin;
+			return array(
+				'data'    => array(
+					'job_id'  => $job_id,
+					'plugins' => $plugins,
+				),
+				'message' => __( 'Plugin activation has been scheduled.', 'woocommerce-admin' ),
+			);
 		}
+
+		$data = PluginsHelper::activate_plugins( $plugins );
 
 		return( array(
 			'data'    => array(
-				'activated' => $activated_plugins,
-				'active'    => self::get_active_plugins(),
+				'activated' => $data['activated'],
+				'active'    => $data['active'],
 			),
-			'errors'  => $errors,
-			'success' => count( $errors->errors ) === 0,
-			'message' => count( $errors->errors ) === 0
+			'errors'  => $data['errors'],
+			'success' => count( $data['errors']->errors ) === 0,
+			'message' => count( $data['errors']->errors ) === 0
 				? __( 'Plugins were successfully activated.', 'woocommerce-admin' )
 				: __( 'There was a problem activating some of the requested plugins.', 'woocommerce-admin' ),
 		) );
+	}
+
+	/**
+	 * Returns a list of recently scheduled activation jobs.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return array Job.
+	 */
+	public function get_activation_status( $request ) {
+		return PluginsHelper::get_activation_status();
+	}
+
+	/**
+	 * Returns a list of recently scheduled activation jobs.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return array Jobs.
+	 */
+	public function get_job_activation_status( $request ) {
+		$job_id = $request->get_param( 'job_id' );
+		$jobs   = PluginsHelper::get_activation_status( $job_id );
+		return reset( $jobs );
 	}
 
 	/**
