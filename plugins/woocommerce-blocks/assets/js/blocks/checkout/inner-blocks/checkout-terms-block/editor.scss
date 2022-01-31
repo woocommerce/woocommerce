@@ -14,6 +14,10 @@
 
 .wc-block-components-checkbox {
 	margin-top: 0;
+
+	&.wc-block-checkout__create-account {
+		margin-top: 1em;
+	}
 }
 
 .wc-block-checkout__terms_notice .components-notice__action {
