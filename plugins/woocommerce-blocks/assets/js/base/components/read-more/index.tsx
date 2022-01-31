@@ -111,6 +111,29 @@ class ReadMore extends Component< ReadMoreProps, ReadMoreState > {
 	}
 
 	componentDidMount(): void {
+		this.setSummary();
+	}
+
+	componentDidUpdate( prevProps: ReadMoreProps ): void {
+		if (
+			prevProps.maxLines !== this.props.maxLines ||
+			prevProps.children !== this.props.children
+		) {
+			/**
+			 * if maxLines or content changed we need to reset the state to
+			 * initial values so that summary can be calculated again
+			 */
+			this.setState(
+				{
+					clampEnabled: null,
+					summary: '.',
+				},
+				this.setSummary
+			);
+		}
+	}
+
+	setSummary(): void {
 		if ( this.props.children ) {
 			const { maxLines, ellipsis } = this.props;
 
