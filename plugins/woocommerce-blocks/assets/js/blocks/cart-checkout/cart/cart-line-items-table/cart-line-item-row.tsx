@@ -235,102 +235,105 @@ const CartLineItemRow = forwardRef< HTMLTableRowElement, CartLineItemRowProps >(
 					) }
 				</td>
 				<td className="wc-block-cart-item__product">
-					<ProductName
-						disabled={
-							isPendingDelete || isProductHiddenFromCatalog
-						}
-						name={ name }
-						permalink={ permalink }
-					/>
-					{ showBackorderBadge ? (
-						<ProductBackorderBadge />
-					) : (
-						!! lowStockRemaining && (
-							<ProductLowStockBadge
-								lowStockRemaining={ lowStockRemaining }
-							/>
-						)
-					) }
-
-					<div className="wc-block-cart-item__prices">
-						<ProductPrice
-							currency={ priceCurrency }
-							regularPrice={ getAmountFromRawPrice(
-								regularAmountSingle,
-								priceCurrency
-							) }
-							price={ getAmountFromRawPrice(
-								purchaseAmountSingle,
-								priceCurrency
-							) }
-							format={ subtotalPriceFormat }
+					<div className="wc-block-cart-item__wrap">
+						<ProductName
+							disabled={
+								isPendingDelete || isProductHiddenFromCatalog
+							}
+							name={ name }
+							permalink={ permalink }
 						/>
-					</div>
-
-					<ProductSaleBadge
-						currency={ priceCurrency }
-						saleAmount={ getAmountFromRawPrice(
-							saleAmountSingle,
-							priceCurrency
+						{ showBackorderBadge ? (
+							<ProductBackorderBadge />
+						) : (
+							!! lowStockRemaining && (
+								<ProductLowStockBadge
+									lowStockRemaining={ lowStockRemaining }
+								/>
+							)
 						) }
-						format={ saleBadgePriceFormat }
-					/>
 
-					<ProductMetadata
-						shortDescription={ shortDescription }
-						fullDescription={ fullDescription }
-						itemData={ itemData }
-						variation={ variation }
-					/>
+						<div className="wc-block-cart-item__prices">
+							<ProductPrice
+								currency={ priceCurrency }
+								regularPrice={ getAmountFromRawPrice(
+									regularAmountSingle,
+									priceCurrency
+								) }
+								price={ getAmountFromRawPrice(
+									purchaseAmountSingle,
+									priceCurrency
+								) }
+								format={ subtotalPriceFormat }
+							/>
+						</div>
 
-					<div className="wc-block-cart-item__quantity">
-						{ ! soldIndividually && !! quantityLimits.editable && (
-							<QuantitySelector
-								disabled={ isPendingDelete }
-								quantity={ quantity }
-								minimum={ quantityLimits.minimum }
-								maximum={ quantityLimits.maximum }
-								step={ quantityLimits.multiple_of }
-								onChange={ ( newQuantity ) => {
-									setItemQuantity( newQuantity );
-									dispatchStoreEvent(
-										'cart-set-item-quantity',
-										{
-											product: lineItem,
-											quantity: newQuantity,
-										}
+						<ProductSaleBadge
+							currency={ priceCurrency }
+							saleAmount={ getAmountFromRawPrice(
+								saleAmountSingle,
+								priceCurrency
+							) }
+							format={ saleBadgePriceFormat }
+						/>
+
+						<ProductMetadata
+							shortDescription={ shortDescription }
+							fullDescription={ fullDescription }
+							itemData={ itemData }
+							variation={ variation }
+						/>
+
+						<div className="wc-block-cart-item__quantity">
+							{ ! soldIndividually &&
+								!! quantityLimits.editable && (
+									<QuantitySelector
+										disabled={ isPendingDelete }
+										quantity={ quantity }
+										minimum={ quantityLimits.minimum }
+										maximum={ quantityLimits.maximum }
+										step={ quantityLimits.multiple_of }
+										onChange={ ( newQuantity ) => {
+											setItemQuantity( newQuantity );
+											dispatchStoreEvent(
+												'cart-set-item-quantity',
+												{
+													product: lineItem,
+													quantity: newQuantity,
+												}
+											);
+										} }
+										itemName={ name }
+									/>
+								) }
+							<button
+								className="wc-block-cart-item__remove-link"
+								onClick={ () => {
+									onRemove();
+									removeItem();
+									dispatchStoreEvent( 'cart-remove-item', {
+										product: lineItem,
+										quantity,
+									} );
+									speak(
+										sprintf(
+											/* translators: %s refers to the item name in the cart. */
+											__(
+												'%s has been removed from your cart.',
+												'woo-gutenberg-products-block'
+											),
+											name
+										)
 									);
 								} }
-								itemName={ name }
-							/>
-						) }
-						<button
-							className="wc-block-cart-item__remove-link"
-							onClick={ () => {
-								onRemove();
-								removeItem();
-								dispatchStoreEvent( 'cart-remove-item', {
-									product: lineItem,
-									quantity,
-								} );
-								speak(
-									sprintf(
-										/* translators: %s refers to the item name in the cart. */
-										__(
-											'%s has been removed from your cart.',
-											'woo-gutenberg-products-block'
-										),
-										name
-									)
-								);
-							} }
-							disabled={ isPendingDelete }
-						>
-							{ __(
-								'Remove item',
-								'woo-gutenberg-products-block'
-							) }
-						</button>
+								disabled={ isPendingDelete }
+							>
+								{ __(
+									'Remove item',
+									'woo-gutenberg-products-block'
+								) }
+							</button>
+						</div>
 					</div>
 				</td>
 				<td className="wc-block-cart-item__total">
