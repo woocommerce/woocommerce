@@ -1,5 +1,5 @@
 .wp-block-woocommerce-featured-category {
-	background-color: #000;
+	background-color: $gray-900;
 	border-color: transparent;
 	color: #fff;
 	overflow: hidden;
@@ -70,7 +70,6 @@
 	.wc-block-featured-category__price,
 	.wc-block-featured-category__link {
 		color: inherit;
-		font-size: inherit;
 		width: 100%;
 		padding: 0 48px 16px 48px;
 		z-index: 1;
@@ -81,7 +80,6 @@
 
 		div {
 			color: inherit;
-			font-size: inherit;
 		}
 
 		&::before {
@@ -91,7 +89,6 @@
 
 	.wc-block-featured-category__description {
 		color: inherit;
-		font-size: inherit;
 		p {
 			margin: 0;
 		}
