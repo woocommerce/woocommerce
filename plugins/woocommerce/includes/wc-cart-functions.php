@@ -107,9 +107,6 @@ function wc_add_to_cart_message( $products, $show_qty = false, $return = false, 
 		$products = array_fill_keys( array_keys( $products ), 1 );
 	}
 
-	$titles = array_filter( $titles );
-	/* translators: %s: product name */
-
   foreach ( $products as $product_id => $qty ) {
     /* translators: %s: product name */
 
@@ -120,6 +117,9 @@ function wc_add_to_cart_message( $products, $show_qty = false, $return = false, 
     $titles[] = apply_filters( 'woocommerce_add_to_cart_qty_html', ( $qty > 1 ? absint( $qty ) . ' &times; ' : '' ), $product_id ) . apply_filters( 'woocommerce_add_to_cart_item_name_in_quotes', sprintf( _x( '&ldquo;%s&rdquo;', 'Item name in quotes', 'woocommerce' ), strip_tags( get_the_title( $product_id ) ) ), $product_id );
     $count   += $qty;
   }
+
+	$titles = array_filter( $titles );
+	/* translators: %s: product name */
 
 	$added_text = sprintf( _n( '%s has been added to your cart.', '%s have been added to your cart.', $count, 'woocommerce' ), wc_format_list_of_items( $titles ) );
 
