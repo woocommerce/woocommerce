@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		  <circle r="6.5" cx="10" cy="10" fill="transparent" stroke-dasharray="40.859" stroke-dashoffset="0"></circle>
 		  <circle class="bar" r="6.5" cx="190" cy="10" fill="transparent" stroke-dasharray="40.859" stroke-dashoffset="<?php echo esc_attr( $circle_dashoffset ); ?>" transform='rotate(-90 100 100)'></circle>
 		</svg>
-		<span><?php echo esc_html_e( 'Step', 'woocommerce' ); ?> <?php echo esc_html( $completed_tasks_count ); ?> <?php echo esc_html_e( 'of', 'woocommerce' ); ?> <?php echo esc_html( $tasks_count ); ?></span>
+		<span><?php echo esc_html_e( 'Step', 'woocommerce' ); ?> <?php echo esc_html( $step_number ); ?> <?php echo esc_html_e( 'of', 'woocommerce' ); ?> <?php echo esc_html( $tasks_count ); ?></span>
 	</span>
 
 	<div class="description">
