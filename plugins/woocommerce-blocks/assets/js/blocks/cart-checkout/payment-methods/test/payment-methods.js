@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { previewCart } from '@woocommerce/resource-previews';
 import { dispatch } from '@wordpress/data';
 import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
@@ -14,7 +14,7 @@ import {
 	PaymentMethodDataProvider,
 	usePaymentMethodDataContext,
 } from '@woocommerce/base-context';
-
+import userEvent from '@testing-library/user-event';
 /**
  * Internal dependencies
  */
@@ -142,7 +142,7 @@ describe( 'PaymentMethods', () => {
 			expect( savedToken ).toBeNull();
 		} );
 
-		fireEvent.click( screen.getByText( 'Select new payment' ) );
+		userEvent.click( screen.getByText( 'Select new payment' ) );
 
 		await waitFor( () => {
 			const activePaymentMethod = screen.queryByText(
