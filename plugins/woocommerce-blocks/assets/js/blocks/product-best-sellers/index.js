@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { without } from 'lodash';
-import { Icon, stonks } from '@woocommerce/icons';
+import { Icon, trendingUp } from '@wordpress/icons';
 import { createBlock, registerBlockType } from '@wordpress/blocks';
 
 /**
@@ -19,7 +19,7 @@ registerBlockType( 'woocommerce/product-best-sellers', {
 	icon: {
 		src: (
 			<Icon
-				srcElement={ stonks }
+				icon={ trendingUp }
 				className="wc-block-editor-components-block-icon"
 			/>
 		),

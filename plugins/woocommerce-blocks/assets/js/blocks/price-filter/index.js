@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { registerBlockType } from '@wordpress/blocks';
 import classNames from 'classnames';
-import { Icon, bill } from '@woocommerce/icons';
+import { Icon, currencyDollar } from '@wordpress/icons';
 import { isFeaturePluginBuild } from '@woocommerce/block-settings';
 import { useBlockProps } from '@wordpress/block-editor';
 
@@ -19,7 +19,7 @@ registerBlockType( 'woocommerce/price-filter', {
 	icon: {
 		src: (
 			<Icon
-				srcElement={ bill }
+				icon={ currencyDollar }
 				className="wc-block-editor-components-block-icon"
 			/>
 		),

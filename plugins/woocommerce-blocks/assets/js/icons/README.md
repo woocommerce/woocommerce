@@ -4,26 +4,24 @@ WooCommerce Blocks Icons Library.
 
 ## Usage
 
+Note we use the `Icon` component from `@wordpress/icons`. We use some SVG icons from `@woocommerce/icons` for WC Blocks specific icons, but we also use existing icons from `@wordpress/icons`.
+
 ```js
-import { Icon, bill, woo } from '@woocommerce/icons';
+import { woo } from '@woocommerce/icons';
+import { Icon, postComments } from '@wordpress/icons';
 
-<Icon srcElement={ bill } />
-
-<Icon srcElement={ bill } size={ 16 } />
-
-<Icon srcElement={ woo } width={ 20 } height={ Math.floor( 20 * 1.67 ) } />
+<Icon icon={ woo } /> // icon  from '@woocommerce/icons'
+<Icon icon={ postComments } /> // icon from '@wordpress/icons'
+<Icon icon={ woo } size={ 16 } />
+<Icon icon={ woo } width={ 20 } height={ Math.floor( 20 * 1.67 ) } />
 ```
-
-## Props
-
-| Name   | Type      | Default | Description             |
-| ------ | --------- | ------- | ----------------------- |
-| `size` | `integer` | `24`    | Size of icon in pixels. |
 
 ## Adding Icons
 
+Before adding a new icon, make sure the icon is not already included in the [Library that comes with @wordpress/icons package](https://wordpress.github.io/gutenberg/?path=/story/icons-icon--library). If there is no existing icon suitable:
+
 1. Add the icon file to `./library` folder.
-2. Make sure to use `SVG` primitive from `wordpress-components` and not a native svg. `SVG` offers more accessibility features.
+2. Make sure to use `SVG` primitive from `@wordpress/primitives` and not a native svg. `SVG` offers more accessibility features.
 3. Remove width and height since they're handled by Icon.
 4. Remove any hardcoded colors on the svg. If necessary, use `CurrentColor`.
 5. Export the Icon in `./library/index.js`.

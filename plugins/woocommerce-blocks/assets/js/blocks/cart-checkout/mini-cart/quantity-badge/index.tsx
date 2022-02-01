@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { Icon, miniCart } from '@woocommerce/icons';
+import { miniCart } from '@woocommerce/icons';
+import { Icon } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -24,7 +25,7 @@ const QuantityBadge = ( {
 			<Icon
 				className="wc-block-mini-cart__icon"
 				size={ 20 }
-				srcElement={ miniCart }
+				icon={ miniCart }
 			/>
 			<span
 				className={ `wc-block-mini-cart__badge ${ colorClassNames }` }

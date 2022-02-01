@@ -5,7 +5,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { Placeholder, Spinner } from '@wordpress/components';
 import PropTypes from 'prop-types';
 import ErrorPlaceholder from '@woocommerce/editor-components/error-placeholder';
-import { Icon, comment } from '@woocommerce/icons';
+import { Icon, commentContent } from '@wordpress/icons';
 import { withProduct } from '@woocommerce/block-hocs';
 
 const NoReviewsPlaceholder = ( { error, getProduct, isLoading, product } ) => {
@@ -41,7 +41,7 @@ const NoReviewsPlaceholder = ( { error, getProduct, isLoading, product } ) => {
 			className="wc-block-reviews-by-product"
 			icon={
 				<Icon
-					srcElement={ comment }
+					icon={ commentContent }
 					className="block-editor-block-icon"
 				/>
 			}

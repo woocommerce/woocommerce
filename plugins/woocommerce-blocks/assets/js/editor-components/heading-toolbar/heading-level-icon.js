@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Path, SVG } from '@wordpress/components';
+import { Path, SVG } from '@wordpress/primitives';
 
 export default function HeadingLevelIcon( { level } ) {
 	const levelToPath = {

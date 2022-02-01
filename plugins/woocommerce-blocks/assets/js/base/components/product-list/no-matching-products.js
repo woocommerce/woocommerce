@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useInnerBlockLayoutContext } from '@woocommerce/shared-context';
-import { Icon, search } from '@woocommerce/icons';
+import { Icon, search } from '@wordpress/icons';
 
 const NoMatchingProducts = ( { resetCallback = () => {} } ) => {
 	const { parentClassName } = useInnerBlockLayoutContext();
@@ -11,8 +11,7 @@ const NoMatchingProducts = ( { resetCallback = () => {} } ) => {
 		<div className={ `${ parentClassName }__no-products` }>
 			<Icon
 				className={ `${ parentClassName }__no-products-image` }
-				alt=""
-				srcElement={ search }
+				icon={ search }
 				size={ 100 }
 			/>
 			<strong className={ `${ parentClassName }__no-products-title` }>

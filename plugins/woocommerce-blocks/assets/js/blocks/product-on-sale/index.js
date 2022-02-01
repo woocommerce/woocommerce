@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { createBlock, registerBlockType } from '@wordpress/blocks';
 import { without } from 'lodash';
-import { Icon, tag } from '@woocommerce/icons';
+import { Icon, percent } from '@wordpress/icons';
 /**
  * Internal dependencies
  */
@@ -19,7 +19,7 @@ registerBlockType( 'woocommerce/product-on-sale', {
 	icon: {
 		src: (
 			<Icon
-				srcElement={ tag }
+				icon={ percent }
 				className="wc-block-editor-components-block-icon"
 			/>
 		),

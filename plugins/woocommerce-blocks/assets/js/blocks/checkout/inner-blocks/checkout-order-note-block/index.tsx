@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Icon, notes } from '@woocommerce/icons';
+import { Icon, page } from '@wordpress/icons';
 import { registerFeaturePluginBlockType } from '@woocommerce/block-settings';
 
 /**
@@ -14,7 +14,7 @@ registerFeaturePluginBlockType( metadata, {
 	icon: {
 		src: (
 			<Icon
-				srcElement={ notes }
+				icon={ page }
 				className="wc-block-editor-components-block-icon"
 			/>
 		),

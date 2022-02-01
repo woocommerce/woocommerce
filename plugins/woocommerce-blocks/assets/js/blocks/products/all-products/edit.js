@@ -21,7 +21,7 @@ import {
 import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import PropTypes from 'prop-types';
-import { Icon, grid } from '@woocommerce/icons';
+import { Icon, grid } from '@wordpress/icons';
 import GridLayoutControl from '@woocommerce/editor-components/grid-layout-control';
 import {
 	InnerBlockLayoutContextProvider,
@@ -84,7 +84,7 @@ class Editor extends Component {
 	};
 
 	getIcon = () => {
-		return <Icon srcElement={ grid } />;
+		return <Icon icon={ grid } />;
 	};
 
 	togglePreview = () => {
@@ -245,7 +245,7 @@ class Editor extends Component {
 						</Button>
 						<Button
 							className="wc-block-all-products__reset-button"
-							icon={ <Icon srcElement={ grid } /> }
+							icon={ <Icon icon={ grid } /> }
 							label={ __(
 								'Reset layout to default',
 								'woo-gutenberg-products-block'

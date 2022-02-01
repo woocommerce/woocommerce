@@ -11,7 +11,7 @@ import {
 } from '@woocommerce/shared-context';
 import { createBlocksFromTemplate } from '@woocommerce/atomic-utils';
 import { PanelBody, Button } from '@wordpress/components';
-import { Icon, restore } from '@woocommerce/icons';
+import { Icon, backup } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -65,7 +65,7 @@ const LayoutEditor = ( { isLoading, product, clientId } ) => {
 							isTertiary
 							className="wc-block-single-product__reset-layout"
 						>
-							<Icon srcElement={ restore } />{ ' ' }
+							<Icon icon={ backup } />{ ' ' }
 							{ __(
 								'Reset layout',
 								'woo-gutenberg-products-block'

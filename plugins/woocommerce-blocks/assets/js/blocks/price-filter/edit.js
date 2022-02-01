@@ -15,7 +15,7 @@ import { blocksConfig } from '@woocommerce/block-settings';
 import HeadingToolbar from '@woocommerce/editor-components/heading-toolbar';
 import BlockTitle from '@woocommerce/editor-components/block-title';
 import ToggleButtonControl from '@woocommerce/editor-components/toggle-button-control';
-import { Icon, bill, external } from '@woocommerce/icons';
+import { Icon, currencyDollar, external } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -116,7 +116,7 @@ export default function ( { attributes, setAttributes } ) {
 	const noProductsPlaceholder = () => (
 		<Placeholder
 			className="wc-block-price-slider"
-			icon={ <Icon srcElement={ bill } /> }
+			icon={ <Icon icon={ currencyDollar } /> }
 			label={ __(
 				'Filter Products by Price',
 				'woo-gutenberg-products-block'
@@ -139,7 +139,7 @@ export default function ( { attributes, setAttributes } ) {
 			>
 				{ __( 'Add new product', 'woo-gutenberg-products-block' ) +
 					' ' }
-				<Icon srcElement={ external } />
+				<Icon icon={ external } />
 			</Button>
 			<Button
 				className="wc-block-price-slider__read_more_button"

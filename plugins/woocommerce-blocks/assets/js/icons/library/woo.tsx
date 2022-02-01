@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { SVG } from 'wordpress-components';
+import { SVG } from '@wordpress/primitives';
 import classnames from 'classnames';
 const Component = ( { className, height, width, ...props } ) => {
 	return (

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Icon, truck } from '@woocommerce/icons';
+import { Icon, shipping } from '@wordpress/icons';
 import { registerFeaturePluginBlockType } from '@woocommerce/block-settings';
 
 /**
@@ -15,7 +15,7 @@ registerFeaturePluginBlockType( metadata, {
 	icon: {
 		src: (
 			<Icon
-				srcElement={ truck }
+				icon={ shipping }
 				className="wc-block-editor-components-block-icon"
 			/>
 		),

@@ -13,12 +13,12 @@ import ProductCategoryControl from '@woocommerce/editor-components/product-categ
 import ProductOrderbyControl from '@woocommerce/editor-components/product-orderby-control';
 import ProductStockControl from '@woocommerce/editor-components/product-stock-control';
 import { gridBlockPreview } from '@woocommerce/resource-previews';
-import { Icon, tag } from '@woocommerce/icons';
+import { Icon, percent } from '@wordpress/icons';
 import { getSetting } from '@woocommerce/settings';
 
 const EmptyPlaceholder = () => (
 	<Placeholder
-		icon={ <Icon srcElement={ tag } /> }
+		icon={ <Icon icon={ percent } /> }
 		label={ __( 'On Sale Products', 'woo-gutenberg-products-block' ) }
 		className="wc-block-product-on-sale"
 	>

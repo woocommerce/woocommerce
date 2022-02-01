@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { bill, Icon } from '@woocommerce/icons';
+import { currencyDollar, Icon } from '@wordpress/icons';
 
 export const BLOCK_TITLE = __(
 	'Product Price',
@@ -10,7 +10,7 @@ export const BLOCK_TITLE = __(
 );
 export const BLOCK_ICON = (
 	<Icon
-		srcElement={ bill }
+		icon={ currencyDollar }
 		className="wc-block-editor-components-block-icon"
 	/>
 );

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Icon, external } from '@woocommerce/icons';
+import { Icon, external } from '@wordpress/icons';
 import { ADMIN_URL } from '@woocommerce/settings';
 import { InspectorControls } from '@wordpress/block-editor';
 import { useProductDataContext } from '@woocommerce/shared-context';
@@ -34,7 +34,7 @@ const EditProductLink = ( props ) => {
 							"Edit this product's details",
 							'woo-gutenberg-products-block'
 						) }
-						<Icon srcElement={ external } size={ 16 } />
+						<Icon icon={ external } size={ 16 } />
 					</a>
 				</div>
 				<div className="wc-block-single-product__edit-card-description">

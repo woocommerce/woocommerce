@@ -19,7 +19,7 @@ import GridLayoutControl from '@woocommerce/editor-components/grid-layout-contro
 import ProductTagControl from '@woocommerce/editor-components/product-tag-control';
 import ProductOrderbyControl from '@woocommerce/editor-components/product-orderby-control';
 import ProductStockControl from '@woocommerce/editor-components/product-stock-control';
-import { Icon, more } from '@woocommerce/icons';
+import { Icon, tag } from '@wordpress/icons';
 import { gridBlockPreview } from '@woocommerce/resource-previews';
 import { getSetting } from '@woocommerce/settings';
 
@@ -194,10 +194,7 @@ class ProductsByTagBlock extends Component {
 		return (
 			<Placeholder
 				icon={
-					<Icon
-						srcElement={ more }
-						className="block-editor-block-icon"
-					/>
+					<Icon icon={ tag } className="block-editor-block-icon" />
 				}
 				label={ __(
 					'Products by Tag',
@@ -251,7 +248,7 @@ class ProductsByTagBlock extends Component {
 					<Placeholder
 						icon={
 							<Icon
-								icon={ more }
+								icon={ tag }
 								className="block-editor-block-icon"
 							/>
 						}
@@ -305,7 +302,7 @@ class ProductsByTagBlock extends Component {
 		) : (
 			<Placeholder
 				icon={
-					<Icon icon={ more } className="block-editor-block-icon" />
+					<Icon icon={ tag } className="block-editor-block-icon" />
 				}
 				label={ __(
 					'Products by Tag',

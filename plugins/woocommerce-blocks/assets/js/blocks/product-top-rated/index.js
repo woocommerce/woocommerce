@@ -3,7 +3,8 @@
  */
 import { __ } from '@wordpress/i18n';
 import { createBlock, registerBlockType } from '@wordpress/blocks';
-import { Icon, thumbUp } from '@woocommerce/icons';
+import { thumbUp } from '@woocommerce/icons';
+import { Icon } from '@wordpress/icons';
 import { without } from 'lodash';
 
 /**
@@ -21,7 +22,7 @@ registerBlockType( blockTypeName, {
 	icon: {
 		src: (
 			<Icon
-				srcElement={ thumbUp }
+				icon={ thumbUp }
 				className="wc-block-editor-components-block-icon"
 			/>
 		),

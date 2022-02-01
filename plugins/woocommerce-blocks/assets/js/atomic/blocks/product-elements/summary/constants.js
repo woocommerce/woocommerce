@@ -2,17 +2,14 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { notes, Icon } from '@woocommerce/icons';
+import { page, Icon } from '@wordpress/icons';
 
 export const BLOCK_TITLE = __(
 	'Product Summary',
 	'woo-gutenberg-products-block'
 );
 export const BLOCK_ICON = (
-	<Icon
-		srcElement={ notes }
-		className="wc-block-editor-components-block-icon"
-	/>
+	<Icon icon={ page } className="wc-block-editor-components-block-icon" />
 );
 export const BLOCK_DESCRIPTION = __(
 	'Display a short description about a product.',

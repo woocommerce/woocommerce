@@ -5,8 +5,8 @@ import { __ } from '@wordpress/i18n';
 import { InnerBlocks } from '@wordpress/block-editor';
 import { registerBlockType } from '@wordpress/blocks';
 import { getSetting } from '@woocommerce/settings';
-import { Icon, star } from '@woocommerce/icons';
 import { isFeaturePluginBuild } from '@woocommerce/block-settings';
+import { Icon, starEmpty } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -24,7 +24,7 @@ registerBlockType( 'woocommerce/featured-product', {
 	icon: {
 		src: (
 			<Icon
-				srcElement={ star }
+				icon={ starEmpty }
 				className="wc-block-editor-components-block-icon"
 			/>
 		),

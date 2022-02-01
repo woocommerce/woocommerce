@@ -28,7 +28,8 @@ import { withSelect } from '@wordpress/data';
 import { compose, createHigherOrderComponent } from '@wordpress/compose';
 import PropTypes from 'prop-types';
 import { getSetting } from '@woocommerce/settings';
-import { Icon, folderStarred } from '@woocommerce/icons';
+import { folderStarred } from '@woocommerce/icons';
+import { Icon } from '@wordpress/icons';
 import ProductCategoryControl from '@woocommerce/editor-components/product-category-control';
 import ErrorPlaceholder from '@woocommerce/editor-components/error-placeholder';
 
@@ -196,7 +197,7 @@ const FeaturedCategory = ( {
 
 		return (
 			<Placeholder
-				icon={ <Icon srcElement={ folderStarred } /> }
+				icon={ <Icon icon={ folderStarred } /> }
 				label={ __(
 					'Featured Category',
 					'woo-gutenberg-products-block'
@@ -340,7 +341,7 @@ const FeaturedCategory = ( {
 	const renderNoCategory = () => (
 		<Placeholder
 			className="wc-block-featured-category"
-			icon={ <Icon srcElement={ folderStarred } /> }
+			icon={ <Icon icon={ folderStarred } /> }
 			label={ __( 'Featured Category', 'woo-gutenberg-products-block' ) }
 		>
 			{ isLoading ? (

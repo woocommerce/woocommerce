@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { registerBlockType } from '@wordpress/blocks';
 import { getSetting } from '@woocommerce/settings';
-import { Icon, more } from '@woocommerce/icons';
+import { Icon, tag } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -20,7 +20,7 @@ registerBlockType( 'woocommerce/product-tag', {
 	icon: {
 		src: (
 			<Icon
-				srcElement={ more }
+				icon={ tag }
 				className="wc-block-editor-components-block-icon"
 			/>
 		),

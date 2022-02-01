@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Icon, asterisk } from '@woocommerce/icons';
+import { Icon, customPostType } from '@wordpress/icons';
 import { registerFeaturePluginBlockType } from '@woocommerce/block-settings';
 /**
  * Internal dependencies
@@ -13,7 +13,7 @@ registerFeaturePluginBlockType( metadata, {
 	icon: {
 		src: (
 			<Icon
-				srcElement={ asterisk }
+				icon={ customPostType }
 				className="wc-block-editor-components-block-icon"
 			/>
 		),

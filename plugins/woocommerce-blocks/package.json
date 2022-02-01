@@ -201,6 +201,7 @@
 		"@wordpress/icons": "6.1.1",
 		"@wordpress/notices": "3.2.8",
 		"@wordpress/plugins": "4.0.7",
+		"@wordpress/primitives": "^3.0.4",
 		"@wordpress/server-side-render": "3.0.17",
 		"@wordpress/wordcount": "3.2.3",
 		"classnames": "2.3.1",
