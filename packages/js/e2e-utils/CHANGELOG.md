@@ -4,10 +4,6 @@
 
 - Identified the default product category using `slug == 'uncategorized'` in `deleteAllProductCategories`
 
-## Changes
-
-- Removed `page.waitForNavigation()` from `shopper.logout()`
-
 ## Added
 
 - `utils.waitForTimeout( delay )` pause processing for `delay` milliseconds

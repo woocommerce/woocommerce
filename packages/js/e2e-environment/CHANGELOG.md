@@ -1,12 +1,8 @@
 # Unreleased
 
-## Changes 
-- Updated `deleteDownloadedPluginFiles()` to also be able to delete directories.
-
 ## Added
 
-- Added `post-results-to-github-pr.js` to post smoke test results to a GitHub PR.
-- Added jest flags to generate a json test report
+- Added `post-results-to-github-pr.js` to post test results to a GitHub PR.
 - Added more entries to `default.json`
 - Print the full path to `test-results.json` when the tests ends to make it easier to find the test results file.
 
