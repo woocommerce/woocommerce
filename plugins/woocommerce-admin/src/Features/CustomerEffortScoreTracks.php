@@ -30,6 +30,21 @@ class CustomerEffortScoreTracks {
 	const SHOWN_FOR_ACTIONS_OPTION_NAME = 'woocommerce_ces_shown_for_actions';
 
 	/**
+	 * Action name for product add/publish.
+	 */
+	const PRODUCT_ADD_PUBLISH_ACTION_NAME = 'product_add_publish';
+
+	/**
+	 * Action name for product update.
+	 */
+	const PRODUCT_UPDATE_ACTION_NAME = 'product_update';
+
+	/**
+	 * Action name for shop order update.
+	 */
+	const SHOP_ORDER_UPDATE_ACTION_NAME = 'shop_order_update';
+
+	/**
 	 * Action name for settings change.
 	 */
 	const SETTINGS_CHANGE_ACTION_NAME = 'settings_change';
@@ -100,7 +115,20 @@ class CustomerEffortScoreTracks {
 		add_action( 'woocommerce_attribute_added', array( $this, 'run_on_add_product_attributes' ), 10, 3 );
 		add_action( 'load-edit.php', array( $this, 'run_on_load_edit_php' ), 10, 3 );
 		add_action( 'product_page_product_importer', array( $this, 'run_on_product_import' ), 10, 3 );
-
+		// Only hook up the transition_post_status action handler
+		// if on the edit page.
+		global $pagenow;
+		if ( 'post.php' === $pagenow ) {
+			add_action(
+				'transition_post_status',
+				array(
+					$this,
+					'run_on_transition_post_status',
+				),
+				10,
+				3
+			);
+		}
 		$this->onsubmit_label = __( 'Thank you for your feedback!', 'woocommerce-admin' );
 	}
 
@@ -252,6 +280,122 @@ class CustomerEffortScoreTracks {
 				'adminpage'      => $admin_page,
 				'props'          => (object) array(
 					'search_area' => $search_area,
+				),
+			)
+		);
+	}
+
+	/**
+	 * Hook into the post status lifecycle, to detect relevant user actions
+	 * that we want to survey about.
+	 *
+	 * @param string $new_status The new status.
+	 * @param string $old_status The old status.
+	 * @param Post   $post The post.
+	 */
+	public function run_on_transition_post_status(
+		$new_status,
+		$old_status,
+		$post
+	) {
+		if ( 'product' === $post->post_type ) {
+			$this->maybe_enqueue_ces_survey_for_product( $new_status, $old_status );
+		} elseif ( 'shop_order' === $post->post_type ) {
+			$this->enqueue_ces_survey_for_edited_shop_order();
+		}
+	}
+
+	/**
+	 * Maybe enqueue the CES survey, if product is being added or edited.
+	 *
+	 * @param string $new_status The new status.
+	 * @param string $old_status The old status.
+	 */
+	private function maybe_enqueue_ces_survey_for_product(
+		$new_status,
+		$old_status
+	) {
+		if ( 'publish' !== $new_status ) {
+			return;
+		}
+
+		if ( 'publish' !== $old_status ) {
+			$this->enqueue_ces_survey_for_new_product();
+		} else {
+			$this->enqueue_ces_survey_for_edited_product();
+		}
+	}
+
+	/**
+	 * Enqueue the CES survey trigger for a new product.
+	 */
+	private function enqueue_ces_survey_for_new_product() {
+		if ( $this->has_been_shown( self::PRODUCT_ADD_PUBLISH_ACTION_NAME ) ) {
+			return;
+		}
+
+		$this->enqueue_to_ces_tracks(
+			array(
+				'action'         => self::PRODUCT_ADD_PUBLISH_ACTION_NAME,
+				'label'          => __(
+					'How easy was it to add a product?',
+					'woocommerce-admin'
+				),
+				'onsubmit_label' => $this->onsubmit_label,
+				'pagenow'        => 'product',
+				'adminpage'      => 'post-php',
+				'props'          => array(
+					'product_count' => $this->get_product_count(),
+				),
+			)
+		);
+	}
+
+	/**
+	 * Enqueue the CES survey trigger for an existing product.
+	 */
+	private function enqueue_ces_survey_for_edited_product() {
+		if ( $this->has_been_shown( self::PRODUCT_UPDATE_ACTION_NAME ) ) {
+			return;
+		}
+
+		$this->enqueue_to_ces_tracks(
+			array(
+				'action'         => self::PRODUCT_UPDATE_ACTION_NAME,
+				'label'          => __(
+					'How easy was it to edit your product?',
+					'woocommerce-admin'
+				),
+				'onsubmit_label' => $this->onsubmit_label,
+				'pagenow'        => 'product',
+				'adminpage'      => 'post-php',
+				'props'          => array(
+					'product_count' => $this->get_product_count(),
+				),
+			)
+		);
+	}
+
+	/**
+	 * Enqueue the CES survey trigger for an existing shop order.
+	 */
+	private function enqueue_ces_survey_for_edited_shop_order() {
+		if ( $this->has_been_shown( self::SHOP_ORDER_UPDATE_ACTION_NAME ) ) {
+			return;
+		}
+
+		$this->enqueue_to_ces_tracks(
+			array(
+				'action'         => self::SHOP_ORDER_UPDATE_ACTION_NAME,
+				'label'          => __(
+					'How easy was it to update an order?',
+					'woocommerce-admin'
+				),
+				'onsubmit_label' => $this->onsubmit_label,
+				'pagenow'        => 'shop_order',
+				'adminpage'      => 'post-php',
+				'props'          => array(
+					'order_count' => $this->get_shop_order_count(),
 				),
 			)
 		);
