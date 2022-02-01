@@ -1,10 +1,16 @@
+.wp-block-woocommerce-featured-product {
+	background-color: $gray-900;
+	border-color: transparent;
+	color: #fff;
+	overflow: hidden;
+}
+
 .wc-block-featured-product {
 	position: relative;
-	background-color: $gray-900;
 	background-size: cover;
 	background-position: center center;
 	width: 100%;
-	margin: 0 0 1.5em 0;
+	margin: 0;
 	display: flex;
 	justify-content: center;
 	align-items: center;
@@ -49,10 +55,10 @@
 	.wc-block-featured-product__variation,
 	.wc-block-featured-product__description,
 	.wc-block-featured-product__price {
-		color: $white;
 		line-height: 1.25;
 		margin-bottom: 0;
 		text-align: center;
+		color: inherit;
 
 		a,
 		a:hover,
