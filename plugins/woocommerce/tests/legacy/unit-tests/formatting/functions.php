@@ -795,6 +795,12 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 		// UK postcode.
 		$this->assertEquals( 'PCRN 1ZZ', wc_format_postcode( 'pcrn1zz', 'GB' ) );
 
+		// IE postcode.
+		$this->assertEquals( 'D02 AF30', wc_format_postcode( 'D02AF30', 'IE' ) );
+
+		// PT postcode.
+		$this->assertEquals( '1000-205', wc_format_postcode( '1000205', 'PT' ) );
+
 		// BR/PL postcode.
 		$this->assertEquals( '99999-999', wc_format_postcode( '99999999', 'BR' ) );
 
