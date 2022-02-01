@@ -110,17 +110,7 @@ class Theme extends Component {
 			path: '/wc-admin/onboarding/themes/install?theme=' + slug,
 			method: 'POST',
 		} )
-			.then( ( response ) => {
-				createNotice(
-					'success',
-					sprintf(
-						__(
-							'%s was installed on your site',
-							'woocommerce-admin'
-						),
-						response.name
-					)
-				);
+			.then( () => {
 				this.activateTheme( slug );
 			} )
 			.catch( ( response ) => {
@@ -140,8 +130,9 @@ class Theme extends Component {
 				createNotice(
 					'success',
 					sprintf(
+						/* translators: The name of the theme that was installed and activated */
 						__(
-							'%s was activated on your site',
+							'%s was installed and activated on your site',
 							'woocommerce-admin'
 						),
 						response.name
