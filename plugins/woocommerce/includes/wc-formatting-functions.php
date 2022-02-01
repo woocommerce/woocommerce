@@ -993,6 +993,11 @@ function wc_format_postcode( $postcode, $country ) {
 		case 'NL':
 			$postcode = substr_replace( $postcode, ' ', 4, 0 );
 			break;
+		case 'LV':
+			if ( preg_match( '/(?:LV)?-?(\d+)/i', $postcode, $matches ) ) {
+				$postcode = count( $matches ) >= 2 ? "LV-$matches[1]" : $postcode;
+			}
+			break;
 	}
 
 	return apply_filters( 'woocommerce_format_postcode', trim( $postcode ), $country );
