@@ -166,8 +166,31 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		}
 
 		$packages = $cart->get_shipping_packages();
-		$data     = WC()->shipping()->calculate_shipping( $packages );
-		$response = rest_ensure_response( $data );
+		$shipping = WC()->shipping()->calculate_shipping( $packages );
+		$rates    = wp_list_pluck( $shipping, 'rates' );
+
+		if ( !$rates ) {
+			return [];
+		}
+
+		$shipping_method_ids = array_keys( $rates[0] );
+
+		// Calculate total for all packages for each method
+		$shipping_totals = [];
+		foreach( $rates as $rate ) {
+			foreach ( $shipping_method_ids as $id ) {
+				if ( !$shipping_totals[$id] ) {
+					$shipping_totals[$id] = [
+						'label' => $rates[0][$id]->label,
+						'cost' => 0,
+					];
+				}
+
+				$shipping_totals[$id]['cost'] += $rate[$id]->cost;
+			}
+		}
+
+		$response = rest_ensure_response( $shipping_totals );
 
 		if ( $this->public ) {
 			$response->link_header( 'alternate', $this->get_permalink( $order ), array( 'type' => 'text/html' ) );
