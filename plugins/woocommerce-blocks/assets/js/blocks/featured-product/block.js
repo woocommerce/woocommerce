@@ -8,8 +8,6 @@ import {
 	InnerBlocks,
 	InspectorControls,
 	MediaReplaceFlow,
-	PanelColorSettings,
-	withColors,
 	RichText,
 } from '@wordpress/block-editor';
 import { withSelect } from '@wordpress/data';
@@ -55,10 +53,8 @@ import {
  * @param {function(any):any} props.getProduct Function for getting the product.
  * @param {boolean} props.isLoading Whether product is loading or not.
  * @param {boolean} props.isSelected Whether block is selected or not.
- * @param {Object} props.overlayColor Overlay color object.
  * @param {Object} props.product Product object.
  * @param {function(any):any} props.setAttributes Setter for attributes.
- * @param {function(any):any} props.setOverlayColor Setter for overlay color.
  * @param {function():any} props.triggerUrlUpdate Function for triggering a url update for product.
  */
 const FeaturedProduct = ( {
@@ -68,10 +64,8 @@ const FeaturedProduct = ( {
 	getProduct,
 	isLoading,
 	isSelected,
-	overlayColor,
 	product,
 	setAttributes,
-	setOverlayColor,
 	triggerUrlUpdate = () => void null,
 } ) => {
 	const renderApiError = () => (
@@ -210,21 +204,14 @@ const FeaturedProduct = ( {
 						}
 					/>
 				</PanelBody>
-				<PanelColorSettings
-					title={ __( 'Overlay', 'woo-gutenberg-products-block' ) }
-					colorSettings={ [
-						{
-							value: overlayColor.color,
-							onChange: setOverlayColor,
-							label: __(
-								'Overlay Color',
+				{ !! url && (
+					<>
+						<PanelBody
+							title={ __(
+								'Overlay',
 								'woo-gutenberg-products-block'
-							),
-						},
-					] }
-				>
-					{ !! url && (
-						<>
+							) }
+						>
 							<RangeControl
 								label={ __(
 									'Background Opacity',
@@ -251,16 +238,15 @@ const FeaturedProduct = ( {
 									}
 								/>
 							) }
-						</>
-					) }
-				</PanelColorSettings>
+						</PanelBody>
+					</>
+				) }
 			</InspectorControls>
 		);
 	};
 
 	const renderProduct = () => {
 		const {
-			className,
 			contentAlign,
 			dimRatio,
 			focalPoint,
@@ -277,17 +263,13 @@ const FeaturedProduct = ( {
 				'has-background-dim': dimRatio !== 0,
 			},
 			dimRatioToClass( dimRatio ),
-			contentAlign !== 'center' && `has-${ contentAlign }-content`,
-			className
+			contentAlign !== 'center' && `has-${ contentAlign }-content`
 		);
 
 		const style = getBackgroundImageStyles(
 			attributes.mediaSrc || product
 		);
 
-		if ( overlayColor.color ) {
-			style.backgroundColor = overlayColor.color;
-		}
 		if ( focalPoint ) {
 			const bgPosX = focalPoint.x * 100;
 			const bgPosY = focalPoint.y * 100;
@@ -451,9 +433,6 @@ FeaturedProduct.propTypes = {
 		price_html: PropTypes.node,
 		permalink: PropTypes.string,
 	} ),
-	// from withColors
-	overlayColor: PropTypes.object,
-	setOverlayColor: PropTypes.func.isRequired,
 	// from withSpokenMessages
 	debouncedSpeak: PropTypes.func.isRequired,
 	triggerUrlUpdate: PropTypes.func,
@@ -461,7 +440,6 @@ FeaturedProduct.propTypes = {
 
 export default compose( [
 	withProduct,
-	withColors( { overlayColor: 'background-color' } ),
 	withSpokenMessages,
 	withSelect( ( select, { clientId }, { dispatch } ) => {
 		const Block = select( 'core/block-editor' ).getBlock( clientId );

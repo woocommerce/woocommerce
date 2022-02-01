@@ -1,6 +1,8 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
+
 /**
  * FeaturedProduct class.
  */
@@ -28,6 +30,13 @@ class FeaturedProduct extends AbstractDynamicBlock {
 		'showDesc'     => true,
 		'showPrice'    => true,
 	);
+
+	/**
+	 * Global style enabled for this block.
+	 *
+	 * @var array
+	 */
+	protected $global_style_wrapper = array( 'text_color', 'font_size', 'border_color', 'border_radius', 'border_width', 'background_color', 'text_color' );
 
 	/**
 	 * Render the Featured Product block.
@@ -68,7 +77,10 @@ class FeaturedProduct extends AbstractDynamicBlock {
 			wp_kses_post( $product->get_price_html() )
 		);
 
-		$output  = sprintf( '<div class="%1$s" style="%2$s">', esc_attr( $this->get_classes( $attributes ) ), esc_attr( $this->get_styles( $attributes, $product ) ) );
+		$styles  = $this->get_styles( $attributes, $product );
+		$classes = $this->get_classes( $attributes );
+
+		$output  = sprintf( '<div class="%1$s wp-block-woocommerce-featured-product" style="%2$s">', esc_attr( trim( $classes ) ), esc_attr( $styles ) );
 		$output .= '<div class="wc-block-featured-product__wrapper">';
 		$output .= $title;
 		if ( $attributes['showDesc'] ) {
@@ -118,11 +130,14 @@ class FeaturedProduct extends AbstractDynamicBlock {
 
 		if ( is_array( $attributes['focalPoint'] ) && 2 === count( $attributes['focalPoint'] ) ) {
 			$style .= sprintf(
-				'background-position: %s%% %s%%',
+				'background-position: %s%% %s%%;',
 				$attributes['focalPoint']['x'] * 100,
 				$attributes['focalPoint']['y'] * 100
 			);
 		}
+
+		$global_style_style = StyleAttributesUtils::get_styles_by_attributes( $attributes, $this->global_style_wrapper );
+		$style             .= $global_style_style;
 
 		return $style;
 	}
@@ -152,13 +167,12 @@ class FeaturedProduct extends AbstractDynamicBlock {
 			$classes[] = "has-{$attributes['contentAlign']}-content";
 		}
 
-		if ( isset( $attributes['overlayColor'] ) ) {
-			$classes[] = "has-{$attributes['overlayColor']}-background-color";
-		}
-
 		if ( isset( $attributes['className'] ) ) {
 			$classes[] = $attributes['className'];
 		}
+
+		$global_style_classes = StyleAttributesUtils::get_classes_by_attributes( $attributes, $this->global_style_wrapper );
+		$classes[]            = $global_style_classes;
 
 		return implode( ' ', $classes );
 	}

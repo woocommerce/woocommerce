@@ -6,19 +6,20 @@ import { InnerBlocks } from '@wordpress/block-editor';
 import { registerBlockType } from '@wordpress/blocks';
 import { getSetting } from '@woocommerce/settings';
 import { Icon, star } from '@woocommerce/icons';
+import { isFeaturePluginBuild } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import './editor.scss';
 import { example } from './example';
-import Block from './block';
+import { Edit } from './edit';
 
 /**
  * Register and run the "Featured Product" block.
  */
 registerBlockType( 'woocommerce/featured-product', {
+	apiVersion: 2,
 	title: __( 'Featured Product', 'woo-gutenberg-products-block' ),
 	icon: {
 		src: (
@@ -37,6 +38,15 @@ registerBlockType( 'woocommerce/featured-product', {
 	supports: {
 		align: [ 'wide', 'full' ],
 		html: false,
+		color: true,
+		...( isFeaturePluginBuild() && {
+			__experimentalBorder: {
+				color: true,
+				radius: true,
+				width: true,
+				__experimentalSkipSerialization: false,
+			},
+		} ),
 	},
 	example,
 	attributes: {
@@ -154,9 +164,7 @@ registerBlockType( 'woocommerce/featured-product', {
 	 *
 	 * @param {Object} props Props to pass to block.
 	 */
-	edit( props ) {
-		return <Block { ...props } />;
-	},
+	edit: Edit,
 
 	/**
 	 * Block content is rendered in PHP, not via save function.
