@@ -1,5 +1,7 @@
 # Unreleased
 
+- Make ExPlat request URL args filterable. Added woocommerce_explat_request_args filter #8231
+
 # 1.1.4
 
 - Fix an error when getting woocommerce_default_country value. #7600

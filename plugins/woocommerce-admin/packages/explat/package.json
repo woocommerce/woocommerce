@@ -37,6 +37,9 @@
 		"clean": "npx rimraf tsconfig.tsbuildinfo build build-*",
 		"build": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
 		"start": "tsc --build --watch",
-		"prepack": "npm run clean && npm run build"
+		"prepack": "npm run clean && npm run build",
+		"test": "lerna run build && npm run test:nobuild",
+		"test:nobuild": "jest --config ./jest.config.json",
+		"test-staged": "jest --bail --config ./jest.config.json --findRelatedTests"		
 	}
 }
