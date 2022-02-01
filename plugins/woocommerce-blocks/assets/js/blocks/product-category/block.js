@@ -20,12 +20,12 @@ import ProductCategoryControl from '@woocommerce/editor-components/product-categ
 import ProductOrderbyControl from '@woocommerce/editor-components/product-orderby-control';
 import ProductStockControl from '@woocommerce/editor-components/product-stock-control';
 import { gridBlockPreview } from '@woocommerce/resource-previews';
-import { Icon, folder } from '@woocommerce/icons';
+import { Icon, file } from '@wordpress/icons';
 import { getSetting } from '@woocommerce/settings';
 
 const EmptyPlaceholder = () => (
 	<Placeholder
-		icon={ <Icon srcElement={ folder } /> }
+		icon={ <Icon icon={ file } /> }
 		label={ __( 'Products by Category', 'woo-gutenberg-products-block' ) }
 		className="wc-block-products-grid wc-block-products-category"
 	>
@@ -229,7 +229,7 @@ class ProductByCategoryBlock extends Component {
 
 		return (
 			<Placeholder
-				icon={ <Icon srcElement={ folder } /> }
+				icon={ <Icon icon={ file } /> }
 				label={ __(
 					'Products by Category',
 					'woo-gutenberg-products-block'

@@ -32,7 +32,7 @@ import { getSetting } from '@woocommerce/settings';
 import ProductControl from '@woocommerce/editor-components/product-control';
 import ErrorPlaceholder from '@woocommerce/editor-components/error-placeholder';
 import { withProduct } from '@woocommerce/block-hocs';
-import { Icon, star } from '@woocommerce/icons';
+import { Icon, starEmpty } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -92,7 +92,7 @@ const FeaturedProduct = ( {
 			<>
 				{ getBlockControls() }
 				<Placeholder
-					icon={ <Icon srcElement={ star } /> }
+					icon={ <Icon icon={ starEmpty } /> }
 					label={ __(
 						'Featured Product',
 						'woo-gutenberg-products-block'
@@ -375,7 +375,7 @@ const FeaturedProduct = ( {
 	const renderNoProduct = () => (
 		<Placeholder
 			className="wc-block-featured-product"
-			icon={ <Icon srcElement={ star } /> }
+			icon={ <Icon icon={ starEmpty } /> }
 			label={ __( 'Featured Product', 'woo-gutenberg-products-block' ) }
 		>
 			{ isLoading ? (

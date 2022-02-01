@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Icon, grid } from '@woocommerce/icons';
+import { Icon, grid } from '@wordpress/icons';
 import { registerFeaturePluginBlockType } from '@woocommerce/block-settings';
 
 /**
@@ -14,7 +14,7 @@ registerFeaturePluginBlockType( metadata, {
 	icon: {
 		src: (
 			<Icon
-				srcElement={ grid }
+				icon={ grid }
 				className="wc-block-editor-components-block-icon"
 			/>
 		),

@@ -13,7 +13,7 @@ import {
 	withSpokenMessages,
 } from '@wordpress/components';
 import { Component } from '@wordpress/element';
-import { Icon, tags } from '@woocommerce/icons';
+import { Icon, category } from '@wordpress/icons';
 import PropTypes from 'prop-types';
 import GridContentControl from '@woocommerce/editor-components/grid-content-control';
 import GridLayoutControl from '@woocommerce/editor-components/grid-layout-control';
@@ -133,7 +133,7 @@ class ProductsByAttributeBlock extends Component {
 
 		return (
 			<Placeholder
-				icon={ <Icon srcElement={ tags } /> }
+				icon={ <Icon icon={ category } /> }
 				label={ __(
 					'Products by Attribute',
 					'woo-gutenberg-products-block'

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Icon, notice } from '@woocommerce/icons';
+import { Icon, warning } from '@wordpress/icons';
 import classNames from 'classnames';
 import { Button, Placeholder, Spinner } from '@wordpress/components';
 
@@ -50,7 +50,7 @@ const ErrorPlaceholder = ( {
 	onRetry,
 }: ErrorPlaceholderProps ): JSX.Element => (
 	<Placeholder
-		icon={ <Icon srcElement={ notice } /> }
+		icon={ <Icon icon={ warning } /> }
 		label={ __(
 			'Sorry, an error occurred',
 			'woo-gutenberg-products-block'

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Icon, card } from '@woocommerce/icons';
+import { Icon, payment } from '@wordpress/icons';
 import { registerFeaturePluginBlockType } from '@woocommerce/block-settings';
 
 /**
@@ -15,7 +15,7 @@ registerFeaturePluginBlockType( metadata, {
 	icon: {
 		src: (
 			<Icon
-				srcElement={ card }
+				icon={ payment }
 				className="wc-block-editor-components-block-icon"
 			/>
 		),

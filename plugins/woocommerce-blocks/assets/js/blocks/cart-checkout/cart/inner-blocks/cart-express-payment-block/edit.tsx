@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { useBlockProps } from '@wordpress/block-editor';
 import { Placeholder, Button } from 'wordpress-components';
 import { useExpressPaymentMethods } from '@woocommerce/base-context/hooks';
-import { Icon, card } from '@woocommerce/icons';
+import { Icon, payment } from '@wordpress/icons';
 import { ADMIN_URL } from '@woocommerce/settings';
 import classnames from 'classnames';
 
@@ -21,7 +21,7 @@ import './editor.scss';
 const NoExpressPaymentMethodsPlaceholder = () => {
 	return (
 		<Placeholder
-			icon={ <Icon srcElement={ card } /> }
+			icon={ <Icon icon={ payment } /> }
 			label={ __( 'Express Checkout', 'woo-gutenberg-products-block' ) }
 			className="wp-block-woocommerce-checkout-express-payment-block-placeholder"
 		>

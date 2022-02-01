@@ -111,12 +111,12 @@ exports[`RemovableChip should render custom aria label 1`] = `
       focusable={false}
       height={16}
       role="img"
-      viewBox="0 0 20 20"
+      viewBox="0 0 24 24"
       width={16}
       xmlns="http://www.w3.org/2000/svg"
     >
       <path
-        d="M14.95 6.46L11.41 10l3.54 3.54-1.41 1.41L10 11.42l-3.53 3.53-1.42-1.42L8.58 10 5.05 6.47l1.42-1.42L10 8.58l3.54-3.53z"
+        d="M12 13.06l3.712 3.713 1.061-1.06L13.061 12l3.712-3.712-1.06-1.06L12 10.938 8.288 7.227l-1.061 1.06L10.939 12l-3.712 3.712 1.06 1.061L12 13.061z"
       />
     </svg>
   </button>
@@ -153,12 +153,12 @@ exports[`RemovableChip should render default aria label if text is a node 1`] = 
       focusable={false}
       height={16}
       role="img"
-      viewBox="0 0 20 20"
+      viewBox="0 0 24 24"
       width={16}
       xmlns="http://www.w3.org/2000/svg"
     >
       <path
-        d="M14.95 6.46L11.41 10l3.54 3.54-1.41 1.41L10 11.42l-3.53 3.53-1.42-1.42L8.58 10 5.05 6.47l1.42-1.42L10 8.58l3.54-3.53z"
+        d="M12 13.06l3.712 3.713 1.061-1.06L13.061 12l3.712-3.712-1.06-1.06L12 10.938 8.288 7.227l-1.061 1.06L10.939 12l-3.712 3.712 1.06 1.061L12 13.061z"
       />
     </svg>
   </button>
@@ -193,12 +193,12 @@ exports[`RemovableChip should render screen reader text aria label 1`] = `
       focusable={false}
       height={16}
       role="img"
-      viewBox="0 0 20 20"
+      viewBox="0 0 24 24"
       width={16}
       xmlns="http://www.w3.org/2000/svg"
     >
       <path
-        d="M14.95 6.46L11.41 10l3.54 3.54-1.41 1.41L10 11.42l-3.53 3.53-1.42-1.42L8.58 10 5.05 6.47l1.42-1.42L10 8.58l3.54-3.53z"
+        d="M12 13.06l3.712 3.713 1.061-1.06L13.061 12l3.712-3.712-1.06-1.06L12 10.938 8.288 7.227l-1.061 1.06L10.939 12l-3.712 3.712 1.06 1.061L12 13.061z"
       />
     </svg>
   </button>
@@ -228,12 +228,12 @@ exports[`RemovableChip should render text and the remove button 1`] = `
       focusable={false}
       height={16}
       role="img"
-      viewBox="0 0 20 20"
+      viewBox="0 0 24 24"
       width={16}
       xmlns="http://www.w3.org/2000/svg"
     >
       <path
-        d="M14.95 6.46L11.41 10l3.54 3.54-1.41 1.41L10 11.42l-3.53 3.53-1.42-1.42L8.58 10 5.05 6.47l1.42-1.42L10 8.58l3.54-3.53z"
+        d="M12 13.06l3.712 3.713 1.061-1.06L13.061 12l3.712-3.712-1.06-1.06L12 10.938 8.288 7.227l-1.061 1.06L10.939 12l-3.712 3.712 1.06 1.061L12 13.061z"
       />
     </svg>
   </button>
@@ -263,12 +263,12 @@ exports[`RemovableChip should render with disabled remove button 1`] = `
       focusable={false}
       height={16}
       role="img"
-      viewBox="0 0 20 20"
+      viewBox="0 0 24 24"
       width={16}
       xmlns="http://www.w3.org/2000/svg"
     >
       <path
-        d="M14.95 6.46L11.41 10l3.54 3.54-1.41 1.41L10 11.42l-3.53 3.53-1.42-1.42L8.58 10 5.05 6.47l1.42-1.42L10 8.58l3.54-3.53z"
+        d="M12 13.06l3.712 3.713 1.061-1.06L13.061 12l3.712-3.712-1.06-1.06L12 10.938 8.288 7.227l-1.061 1.06L10.939 12l-3.712 3.712 1.06 1.061L12 13.061z"
       />
     </svg>
   </button>
@@ -299,12 +299,12 @@ exports[`RemovableChip with removeOnAnyClick should be a button when removeOnAny
       focusable={false}
       height={16}
       role="img"
-      viewBox="0 0 20 20"
+      viewBox="0 0 24 24"
       width={16}
       xmlns="http://www.w3.org/2000/svg"
     >
       <path
-        d="M14.95 6.46L11.41 10l3.54 3.54-1.41 1.41L10 11.42l-3.53 3.53-1.42-1.42L8.58 10 5.05 6.47l1.42-1.42L10 8.58l3.54-3.53z"
+        d="M12 13.06l3.712 3.713 1.061-1.06L13.061 12l3.712-3.712-1.06-1.06L12 10.938 8.288 7.227l-1.061 1.06L10.939 12l-3.712 3.712 1.06 1.061L12 13.061z"
       />
     </svg>
   </span>

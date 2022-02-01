@@ -2,7 +2,13 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import { Icon, bank, bill, card, checkPayment } from '@woocommerce/icons';
+import { checkPayment } from '@woocommerce/icons';
+import {
+	Icon,
+	institution as bank,
+	currencyDollar as bill,
+	payment as card,
+} from '@wordpress/icons';
 import { isString, objectHasProp } from '@woocommerce/types';
 import { useCallback } from '@wordpress/element';
 
@@ -60,7 +66,7 @@ export const PaymentMethodLabel = ( {
 	return (
 		<span className={ className }>
 			{ hasNamedIcon( icon ) ? (
-				<Icon srcElement={ namedIcons[ icon ] } />
+				<Icon icon={ namedIcons[ icon ] } />
 			) : (
 				icon
 			) }

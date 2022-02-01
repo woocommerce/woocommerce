@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { star, Icon } from '@woocommerce/icons';
+import { starEmpty, Icon } from '@wordpress/icons';
 
 export const BLOCK_TITLE = __(
 	'Product Rating',
@@ -10,7 +10,7 @@ export const BLOCK_TITLE = __(
 );
 export const BLOCK_ICON = (
 	<Icon
-		srcElement={ star }
+		icon={ starEmpty }
 		className="wc-block-editor-components-block-icon"
 	/>
 );
