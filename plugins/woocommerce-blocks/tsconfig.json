@@ -2,7 +2,7 @@
 	"extends": "./tsconfig.base.json",
 	"include": [
 		"./assets/js/**/*",
-		"./assets/js/blocks/cart-checkout/checkout/**/block.json",
+		"./assets/js/blocks/checkout/**/block.json",
 		"./assets/js/blocks/cart-checkout/mini-cart-contents/inner-blocks/**/block.json",
 		"./storybook/**/*"
 	],

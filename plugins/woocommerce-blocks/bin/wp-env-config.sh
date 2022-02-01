@@ -17,5 +17,6 @@ wp rewrite structure '/%postname%/'
 wp rewrite flush
 wp core version --extra
 wp plugin list
+wp theme activate storefront
 
 exit $EXIT_CODE
