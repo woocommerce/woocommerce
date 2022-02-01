@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Icon, list } from '@woocommerce/icons';
+import { Icon, list } from '@wordpress/icons';
 import { registerFeaturePluginBlockType } from '@woocommerce/block-settings';
 
 /**
@@ -12,10 +12,7 @@ import metadata from './block.json';
 
 registerFeaturePluginBlockType( metadata, {
 	icon: (
-		<Icon
-			srcElement={ list }
-			className="wc-block-editor-components-block-icon"
-		/>
+		<Icon icon={ list } className="wc-block-editor-components-block-icon" />
 	),
 	edit: Edit,
 	save: Save,

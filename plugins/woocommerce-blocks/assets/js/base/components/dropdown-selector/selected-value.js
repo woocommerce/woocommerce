@@ -3,7 +3,7 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { useEffect, useRef } from '@wordpress/element';
-import { Icon, noAlt } from '@woocommerce/icons';
+import { Icon, closeSmall } from '@wordpress/icons';
 
 const DropdownSelectorSelectedValue = ( { onClick, onRemoveItem, option } ) => {
 	const labelRef = useRef( null );
@@ -48,7 +48,7 @@ const DropdownSelectorSelectedValue = ( { onClick, onRemoveItem, option } ) => {
 					option.name
 				) }
 			>
-				<Icon srcElement={ noAlt } size={ 16 } />
+				<Icon icon={ closeSmall } size={ 16 } />
 			</button>
 		</div>
 	);

@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { createBlock, registerBlockType } from '@wordpress/blocks';
 import { without } from 'lodash';
-import { Icon, exclamation } from '@woocommerce/icons';
+import { Icon, sparkles } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -19,8 +19,8 @@ registerBlockType( 'woocommerce/product-new', {
 	icon: {
 		src: (
 			<Icon
-				srcElement={ exclamation }
-				className="wc-block-editor-components-block-icon"
+				icon={ sparkles }
+				className="wc-block-editor-components-block-icon wc-block-editor-components-block-icon--sparkles"
 			/>
 		),
 	},

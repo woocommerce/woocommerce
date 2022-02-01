@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useInnerBlockLayoutContext } from '@woocommerce/shared-context';
-import { Icon, notice } from '@woocommerce/icons';
+import { Icon, warning } from '@wordpress/icons';
 
 const NoProducts = () => {
 	const { parentClassName } = useInnerBlockLayoutContext();
@@ -11,8 +11,7 @@ const NoProducts = () => {
 		<div className={ `${ parentClassName }__no-products` }>
 			<Icon
 				className={ `${ parentClassName }__no-products-image` }
-				alt=""
-				srcElement={ notice }
+				icon={ warning }
 				size={ 100 }
 			/>
 			<strong className={ `${ parentClassName }__no-products-title` }>

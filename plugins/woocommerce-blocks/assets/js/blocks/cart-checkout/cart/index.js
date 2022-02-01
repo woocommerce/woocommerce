@@ -4,7 +4,8 @@
 import { __ } from '@wordpress/i18n';
 import classnames from 'classnames';
 import { InnerBlocks } from '@wordpress/block-editor';
-import { Icon, cart } from '@woocommerce/icons';
+import { cart } from '@woocommerce/icons';
+import { Icon } from '@wordpress/icons';
 import { registerFeaturePluginBlockType } from '@woocommerce/block-settings';
 import { createBlock } from '@wordpress/blocks';
 /**
@@ -23,7 +24,7 @@ const settings = {
 	icon: {
 		src: (
 			<Icon
-				srcElement={ cart }
+				icon={ cart }
 				className="wc-block-editor-components-block-icon"
 			/>
 		),

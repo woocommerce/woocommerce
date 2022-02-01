@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { registerBlockType } from '@wordpress/blocks';
-import { Icon, comment } from '@woocommerce/icons';
+import { Icon, commentContent } from '@wordpress/icons';
 /**
  * Internal dependencies
  */
@@ -22,7 +22,7 @@ registerBlockType( 'woocommerce/reviews-by-product', {
 	icon: {
 		src: (
 			<Icon
-				srcElement={ comment }
+				icon={ commentContent }
 				className="wc-block-editor-components-block-icon"
 			/>
 		),

@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { registerBlockType } from '@wordpress/blocks';
-import { Icon, server } from '@woocommerce/icons';
+import { Icon, box } from '@wordpress/icons';
 import classNames from 'classnames';
 
 /**
@@ -16,7 +16,7 @@ registerBlockType( 'woocommerce/stock-filter', {
 	icon: {
 		src: (
 			<Icon
-				srcElement={ server }
+				icon={ box }
 				className="wc-block-editor-components-block-icon"
 			/>
 		),

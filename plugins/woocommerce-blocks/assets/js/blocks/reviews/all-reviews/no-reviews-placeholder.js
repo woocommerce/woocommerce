@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Placeholder } from '@wordpress/components';
-import { Icon, discussion } from '@woocommerce/icons';
+import { Icon, postComments } from '@wordpress/icons';
 
 const NoCategoryReviewsPlaceholder = () => {
 	return (
@@ -11,7 +11,7 @@ const NoCategoryReviewsPlaceholder = () => {
 			className="wc-block-all-reviews"
 			icon={
 				<Icon
-					srcElement={ discussion }
+					icon={ postComments }
 					className="block-editor-block-icon"
 				/>
 			}

@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { CART_URL } from '@woocommerce/block-settings';
-import { Icon, arrowBack } from '@woocommerce/icons';
+import { Icon, arrowLeft } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -22,7 +22,7 @@ const ReturnToCartButton = ( {
 			href={ link || CART_URL }
 			className="wc-block-components-checkout-return-to-cart-button"
 		>
-			<Icon srcElement={ arrowBack } />
+			<Icon icon={ arrowLeft } />
 			{ __( 'Return to Cart', 'woo-gutenberg-products-block' ) }
 		</a>
 	);

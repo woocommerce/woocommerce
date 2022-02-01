@@ -8,7 +8,8 @@ import {
 	BlockControls,
 } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
-import { Icon, filledCart, removeCart } from '@woocommerce/icons';
+import { filledCart, removeCart } from '@woocommerce/icons';
+import { Icon } from '@wordpress/icons';
 import { EditorProvider } from '@woocommerce/base-context';
 import type { TemplateArray } from '@wordpress/blocks';
 
@@ -28,12 +29,12 @@ const views = [
 	{
 		view: 'woocommerce/filled-mini-cart-contents-block',
 		label: __( 'Filled Mini Cart', 'woo-gutenberg-products-block' ),
-		icon: <Icon srcElement={ filledCart } />,
+		icon: <Icon icon={ filledCart } />,
 	},
 	{
 		view: 'woocommerce/empty-mini-cart-contents-block',
 		label: __( 'Empty Mini Cart', 'woo-gutenberg-products-block' ),
-		icon: <Icon srcElement={ removeCart } />,
+		icon: <Icon icon={ removeCart } />,
 	},
 ];
 

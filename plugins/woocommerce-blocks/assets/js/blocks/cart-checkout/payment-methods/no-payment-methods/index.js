@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Placeholder, Button, Notice } from 'wordpress-components';
-import { Icon, card } from '@woocommerce/icons';
+import { Icon, payment } from '@wordpress/icons';
 import { ADMIN_URL } from '@woocommerce/settings';
 import { useEditorContext } from '@woocommerce/base-context';
 import classnames from 'classnames';
@@ -32,7 +32,7 @@ const NoPaymentMethods = () => {
 const NoPaymentMethodsPlaceholder = () => {
 	return (
 		<Placeholder
-			icon={ <Icon srcElement={ card } /> }
+			icon={ <Icon icon={ payment } /> }
 			label={ __( 'Payment methods', 'woo-gutenberg-products-block' ) }
 			className="wc-block-checkout__no-payment-methods-placeholder"
 		>

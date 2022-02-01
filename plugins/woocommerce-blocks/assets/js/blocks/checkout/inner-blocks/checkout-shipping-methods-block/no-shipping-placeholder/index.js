@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Placeholder, Button } from 'wordpress-components';
-import { Icon, truck } from '@woocommerce/icons';
+import { Icon, shipping } from '@wordpress/icons';
 import { ADMIN_URL } from '@woocommerce/settings';
 
 /**
@@ -14,7 +14,7 @@ import './style.scss';
 const NoShippingPlaceholder = () => {
 	return (
 		<Placeholder
-			icon={ <Icon srcElement={ truck } /> }
+			icon={ <Icon icon={ shipping } /> }
 			label={ __( 'Shipping options', 'woo-gutenberg-products-block' ) }
 			className="wc-block-checkout__no-shipping-placeholder"
 		>

@@ -3,7 +3,7 @@
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
 import Button from '@woocommerce/base-components/button';
-import { Icon, done as doneIcon } from '@woocommerce/icons';
+import { Icon, check } from '@wordpress/icons';
 import { useState, useEffect } from '@wordpress/element';
 import { useAddToCartFormContext } from '@woocommerce/base-context';
 import {
@@ -161,12 +161,7 @@ const ButtonComponent = ( {
 						quantityInCart
 				  )
 				: __( 'Add to cart', 'woo-gutenberg-products-block' ) }
-			{ !! isDone && (
-				<Icon
-					srcElement={ doneIcon }
-					alt={ __( 'Done', 'woo-gutenberg-products-block' ) }
-				/>
-			) }
+			{ !! isDone && <Icon icon={ check } /> }
 		</Button>
 	);
 };
