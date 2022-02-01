@@ -7,7 +7,7 @@ import { render, fireEvent } from '@testing-library/react';
 /**
  * Internal dependencies
  */
-import { useGetCountryStateAutofill } from '../store-address';
+import { useGetCountryStateAutofill, getStateFilter } from '../store-address';
 
 const AutofillWrapper = ( { options, value, onChange } ) => {
 	const [ values, setValues ] = useState( { countryState: value || '' } );
@@ -41,7 +41,12 @@ const DEFAULT_OPTIONS = [
 	{ key: 'CA:BC', label: 'Canada — British Columbia' },
 	{ key: 'CA:MB', label: 'Canada — Manitoba' },
 	{ key: 'US:CA', label: 'United States - California' },
+	{ key: 'US:AR', label: 'United States (US) — Arkansas' },
+	{ key: 'US:KS', label: 'United States (US) — Kansas' },
+	{ key: 'CN:CN2', label: 'China — Beijing / 北京' },
+	{ key: 'IR:THR', label: 'Iran — Tehran (تهران)' },
 ];
+
 describe( 'useGetCountryStateAutofill', () => {
 	it( 'should render a country and state inputs with autoComplete', () => {
 		const { queryAllByRole } = render(
@@ -54,7 +59,23 @@ describe( 'useGetCountryStateAutofill', () => {
 		expect( inputs[ 1 ].autocomplete ).toEqual( 'address-level1' );
 	} );
 
-	it( 'should set autocomplete fields if a value is selected', () => {
+	it( 'should set countryState value if a value is provided', () => {
+		const onChange = jest.fn();
+		render(
+			<AutofillWrapper
+				options={ [ ...DEFAULT_OPTIONS ] }
+				value="US:KS"
+				onChange={ onChange }
+			/>
+		);
+
+		// check the most recent call values
+		expect( onChange.mock.calls.pop() ).toEqual( [
+			{ countryState: 'US:KS' },
+		] );
+	} );
+
+	it( 'should set autocomplete fields if the countryState is not empty', () => {
 		const { queryAllByRole } = render(
 			<AutofillWrapper options={ [ ...DEFAULT_OPTIONS ] } value="CA:MB" />
 		);
@@ -65,7 +86,7 @@ describe( 'useGetCountryStateAutofill', () => {
 		expect( inputs[ 1 ].value ).toEqual( 'Manitoba' );
 	} );
 
-	it( 'should select region by key if abbreviation is used', () => {
+	it( 'should set countryState if auto complete fields are changed and abbreviation is used', () => {
 		const onChange = jest.fn();
 		const { queryAllByRole } = render(
 			<AutofillWrapper
@@ -81,7 +102,7 @@ describe( 'useGetCountryStateAutofill', () => {
 		expect( onChange ).toHaveBeenCalledWith( { countryState: 'US:CA' } );
 	} );
 
-	it( 'should update the value if the auto complete fields changed', () => {
+	it( 'should set countryState if auto complete fields are changed and abbreviation is not used', () => {
 		const onChange = jest.fn();
 		const { queryAllByRole } = render(
 			<AutofillWrapper
@@ -97,7 +118,7 @@ describe( 'useGetCountryStateAutofill', () => {
 		expect( onChange ).toHaveBeenCalledWith( { countryState: 'CA:BC' } );
 	} );
 
-	it( 'should update the value if the auto complete fields changed and value was already set', () => {
+	it( 'should update the countryState if the auto complete fields changed and countryState was already set', () => {
 		const onChange = jest.fn();
 		const { queryAllByRole } = render(
 			<AutofillWrapper
@@ -116,7 +137,7 @@ describe( 'useGetCountryStateAutofill', () => {
 		expect( onChange ).toHaveBeenCalledWith( { countryState: 'CA:BC' } );
 	} );
 
-	it( 'should update the auto complete inputs when value changed and inputs already set', () => {
+	it( 'should update the auto complete fields when countryState is changed and inputs already set', () => {
 		const onChange = jest.fn();
 		const options = [ ...DEFAULT_OPTIONS ];
 		const { rerender, queryAllByRole } = render(
@@ -139,4 +160,54 @@ describe( 'useGetCountryStateAutofill', () => {
 		expect( inputs[ 0 ].value ).toEqual( 'Cambodia' );
 		expect( inputs[ 1 ].value ).toEqual( '' );
 	} );
+} );
+
+describe( 'getStateFilter', () => {
+	test.each( [
+		{
+			isStateAbbreviation: false,
+			normalizedAutofillState: 'britishcolumbia',
+			expected: { key: 'CA:BC', label: 'Canada — British Columbia' },
+		},
+		{
+			isStateAbbreviation: true,
+			normalizedAutofillState: 'ks',
+			expected: {
+				key: 'US:KS',
+				label: 'United States (US) — Kansas',
+			},
+		},
+		{
+			isStateAbbreviation: false,
+			normalizedAutofillState: '北京',
+			expected: { key: 'CN:CN2', label: 'China — Beijing / 北京' },
+		},
+		{
+			isStateAbbreviation: false,
+			normalizedAutofillState: 'beijing',
+			expected: { key: 'CN:CN2', label: 'China — Beijing / 北京' },
+		},
+		{
+			isStateAbbreviation: false,
+			normalizedAutofillState: 'تهران',
+			expected: { key: 'IR:THR', label: 'Iran — Tehran (تهران)' },
+		},
+		{
+			isStateAbbreviation: false,
+			normalizedAutofillState: 'tehran',
+			expected: { key: 'IR:THR', label: 'Iran — Tehran (تهران)' },
+		},
+	] )(
+		'should filter state matches with isStateAbbreviation=$isStateAbbreviation and normalizedAutofillState=$normalizedAutofillState',
+		( { isStateAbbreviation, normalizedAutofillState, expected } ) => {
+			expect(
+				DEFAULT_OPTIONS.filter(
+					getStateFilter(
+						isStateAbbreviation,
+						normalizedAutofillState
+					)
+				)
+			).toEqual( [ expected ] );
+		}
+	);
 } );

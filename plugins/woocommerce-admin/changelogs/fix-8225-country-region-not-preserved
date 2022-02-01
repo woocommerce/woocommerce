@@ -1,0 +1,4 @@
+Significance: patch
+Type: Fix
+
+Fix country/region selection not preserved in store details task. #8228

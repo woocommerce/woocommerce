@@ -16,6 +16,9 @@ import { useSelect } from '@wordpress/data';
 import { getAdminSetting } from '~/utils/admin-settings';
 
 const { countries } = getAdminSetting( 'dataEndpoints', { countries: {} } );
+
+type Option = { key: string; label: string };
+
 /**
  * Check if a given address field is required for the locale.
  *
@@ -23,9 +26,12 @@ const { countries } = getAdminSetting( 'dataEndpoints', { countries: {} } );
  * @param {Object} locale Locale data.
  * @return {boolean} Field requirement.
  */
-export function isAddressFieldRequired( fieldName, locale = {} ) {
+export function isAddressFieldRequired(
+	fieldName: string,
+	locale: unknown = {}
+): boolean {
 	if ( locale[ fieldName ]?.hasOwnProperty( 'required' ) ) {
-		return locale[ fieldName ]?.required;
+		return locale[ fieldName ]?.required as boolean;
 	}
 
 	if ( fieldName === 'address_2' ) {
@@ -123,6 +129,58 @@ export function getCountryStateOptions() {
 }
 
 /**
+ * Normalize state string for matching.
+ *
+ * @param {string} state The state to normalize.
+ * @return {Function} filter function.
+ */
+export const normalizeState = ( state: string ): string => {
+	return state.replace( /\s/g, '' ).toLowerCase();
+};
+
+/**
+ * Get state filter
+ *
+ * @param {string} isStateAbbreviation Whether to use state abbreviation or not.
+ * @param {string} normalizedAutofillState The value of the autofillState field.
+ * @return {Function} filter function.
+ */
+export const getStateFilter = (
+	isStateAbbreviation: boolean,
+	normalizedAutofillState: string
+): ( ( option: Option ) => boolean ) => ( option: Option ) => {
+	const countryStateArray = isStateAbbreviation
+		? option.key.split( ':' )
+		: option.label.split( '—' );
+
+	// No region options in the country
+	if ( countryStateArray.length <= 1 ) {
+		return false;
+	}
+
+	const state = countryStateArray[ 1 ];
+	// Handle special case, for example: China — Beijing / 北京
+	if ( state.includes( '/' ) ) {
+		const stateStrList = state.split( '/' );
+		return (
+			normalizeState( stateStrList[ 0 ] ) === normalizedAutofillState ||
+			normalizeState( stateStrList[ 1 ] ) === normalizedAutofillState
+		);
+	}
+
+	// Handle special case, for example: Iran — Alborz (البرز)
+	if ( state.includes( '(' ) && state.includes( ')' ) ) {
+		const stateStrList = state.replace( ')', '' ).split( '(' );
+		return (
+			normalizeState( stateStrList[ 0 ] ) === normalizedAutofillState ||
+			normalizeState( stateStrList[ 1 ] ) === normalizedAutofillState
+		);
+	}
+
+	return normalizeState( state ) === normalizedAutofillState;
+};
+
+/**
  * Get the autofill countryState fields and set value from filtered options.
  *
  * @param {Array} options Array of filterable options.
@@ -130,91 +188,94 @@ export function getCountryStateOptions() {
  * @param {Function} setValue Set value of the countryState input.
  * @return {Object} React component.
  */
-export function useGetCountryStateAutofill( options, countryState, setValue ) {
+export function useGetCountryStateAutofill(
+	options: Option[],
+	countryState: string,
+	setValue: ( key: string, value: string ) => void
+): JSX.Element {
 	const [ autofillCountry, setAutofillCountry ] = useState( '' );
 	const [ autofillState, setAutofillState ] = useState( '' );
 	const isAutofillChange: {
 		current: boolean;
 	} = useRef();
 
+	// Sync the autofill fields on first render and the countryState value changes.
 	useEffect( () => {
-		const option = options.find( ( opt ) => opt.key === countryState );
-		const labels = option ? option.label.split( /\u2013|\u2014|\-/ ) : [];
-		const newCountry = ( labels[ 0 ] || '' ).trim();
-		const newState = ( labels[ 1 ] || '' ).trim();
+		if ( ! isAutofillChange.current ) {
+			const option = options.find( ( opt ) => opt.key === countryState );
+			const labels = option
+				? option.label.split( /\u2013|\u2014|\-/ )
+				: [];
+			const newCountry = ( labels[ 0 ] || '' ).trim();
+			const newState = ( labels[ 1 ] || '' ).trim();
 
-		if (
-			! isAutofillChange.current &&
-			( newCountry !== autofillCountry || newState !== autofillState )
-		) {
-			setAutofillCountry( newCountry );
-			setAutofillState( newState );
+			if (
+				newCountry !== autofillCountry ||
+				newState !== autofillState
+			) {
+				setAutofillCountry( newCountry );
+				setAutofillState( newState );
+			}
 		}
 		isAutofillChange.current = false;
-	}, [ countryState ] );
+		// Disable reason: If we include autofillCountry/autofillState in the dependency array, we will have an unnecessary function call because we also update them in this function.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [ countryState, options ] );
 
+	// Sync the countryState value the autofill fields changes
 	useEffect( () => {
+		// Skip on first render since we only want to update the value when the autofill fields changes.
+		if ( isAutofillChange.current === undefined ) {
+			return;
+		}
+
 		if ( ! autofillCountry && ! autofillState && countryState ) {
-			// Clear form.
+			// Clear form
 			isAutofillChange.current = true;
 			setValue( 'countryState', '' );
+			return;
 		}
-		let filteredOptions = [];
 		const countrySearch = new RegExp(
 			escapeRegExp( autofillCountry ),
 			'i'
 		);
-		const stateSearch = new RegExp(
-			escapeRegExp( autofillState.replace( /\s/g, '' ) ) + '$', // Always match the end of string for region.
-			'i'
-		);
-		if ( autofillState.length || autofillCountry.length ) {
-			filteredOptions = options.filter( ( option ) =>
-				( autofillCountry.length ? countrySearch : stateSearch ).test(
-					option.label
-				)
-			);
-		}
+		const isCountryAbbreviation = autofillCountry.length < 3;
+		const isStateAbbreviation =
+			autofillState.length < 3 && !! autofillState.match( /^[\w]+$/ );
+		let filteredOptions = [];
+
 		if ( autofillCountry.length && autofillState.length ) {
-			const isStateAbbreviation = autofillState.length < 3;
-			filteredOptions = filteredOptions.filter( ( option ) =>
-				stateSearch.test(
-					( isStateAbbreviation ? option.key : option.label )
-						.replace( '-', '' )
-						.replace( /\s/g, '' )
+			filteredOptions = options.filter( ( option ) =>
+				countrySearch.test(
+					isCountryAbbreviation ? option.key : option.label
 				)
 			);
-
-			const isCountryAbbreviation = autofillCountry.length < 3;
+			// no country matches so use all options for state filter.
+			if ( ! filteredOptions.length ) {
+				filteredOptions = [ ...options ];
+			}
 			if ( filteredOptions.length > 1 ) {
-				let countryKeyOptions = [];
-				countryKeyOptions = filteredOptions.filter( ( option ) =>
-					countrySearch.test(
-						isCountryAbbreviation ? option.key : option.label
+				filteredOptions = filteredOptions.filter(
+					getStateFilter(
+						isStateAbbreviation,
+						normalizeState( autofillState )
 					)
 				);
-
-				if ( countryKeyOptions.length > 0 ) {
-					filteredOptions = countryKeyOptions;
-				}
 			}
-
-			if ( filteredOptions.length > 1 ) {
-				let stateKeyOptions = [];
-				stateKeyOptions = filteredOptions.filter( ( option ) =>
-					stateSearch.test(
-						( isStateAbbreviation ? option.key : option.label )
-							.replace( '-', '' )
-							.replace( /\s/g, '' )
-					)
-				);
-
-				if ( stateKeyOptions.length === 1 ) {
-					filteredOptions = stateKeyOptions;
-				}
-			}
+		} else if ( autofillCountry.length ) {
+			filteredOptions = options.filter( ( option ) =>
+				countrySearch.test(
+					isCountryAbbreviation ? option.key : option.label
+				)
+			);
+		} else if ( autofillState.length ) {
+			filteredOptions = options.filter(
+				getStateFilter(
+					isStateAbbreviation,
+					normalizeState( autofillState )
+				)
+			);
 		}
-
 		if (
 			filteredOptions.length === 1 &&
 			countryState !== filteredOptions[ 0 ].key
@@ -222,6 +283,8 @@ export function useGetCountryStateAutofill( options, countryState, setValue ) {
 			isAutofillChange.current = true;
 			setValue( 'countryState', filteredOptions[ 0 ].key );
 		}
+		// Disable reason: If we include countryState in the dependency array, we will have an unnecessary function call because we also update it in this function.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [ autofillCountry, autofillState, options, setValue ] );
 
 	return (
@@ -234,7 +297,7 @@ export function useGetCountryStateAutofill( options, countryState, setValue ) {
 				name="country"
 				type="text"
 				className="woocommerce-select-control__autofill-input"
-				tabIndex="-1"
+				tabIndex={ -1 }
 				autoComplete="country"
 			/>
 
@@ -244,21 +307,32 @@ export function useGetCountryStateAutofill( options, countryState, setValue ) {
 				name="state"
 				type="text"
 				className="woocommerce-select-control__autofill-input"
-				tabIndex="-1"
+				tabIndex={ -1 }
 				autoComplete="address-level1"
 			/>
 		</>
 	);
 }
 
+type StoreAddressProps = {
+	// Disable reason: The getInputProps type are not provided by the caller and source.
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	getInputProps: any;
+	setValue: ( key: string, value: string ) => void;
+};
+
 /**
  * Store address fields.
  *
  * @param {Object} props Props for input components.
+ * @param {Function} props.getInputProps Get input props.
+ * @param {Function} props.setValue Set value of the countryState input.
  * @return {Object} -
  */
-export function StoreAddress( props ) {
-	const { getInputProps, setValue, onChange } = props;
+export function StoreAddress( {
+	getInputProps,
+	setValue,
+}: StoreAddressProps ): JSX.Element {
 	const countryState = getInputProps( 'countryState' ).value;
 	const { locale, hasFinishedResolution } = useSelect( ( select ) => {
 		return {
@@ -274,7 +348,6 @@ export function StoreAddress( props ) {
 		countryState,
 		setValue
 	);
-
 	if ( ! hasFinishedResolution ) {
 		return <Spinner />;
 	}
