@@ -35,7 +35,7 @@ module.exports = async ( { github, context } ) => {
 		output = buildOutput( results );
 	} else {
 		output = `## Test Results Not Found! \n\n`;
-		output += 'The path to the `test-results.json` file may need to be updated in the `post-results-to-github-pr.js` script';
+		output += 'The path to the `test-results.json` file may need to be updated.';
 	}
 
 	await github.rest.issues.createComment( {
