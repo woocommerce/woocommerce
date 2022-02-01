@@ -169,7 +169,7 @@ function wc_rest_set_uploaded_image_as_attachment( $upload, $id = 0 ) {
  * Validate reports request arguments.
  *
  * @since 2.6.0
- * @param mixed           $value   Value to valdate.
+ * @param mixed           $value   Value to validate.
  * @param WP_REST_Request $request Request instance.
  * @param string          $param   Param to validate.
  * @return WP_Error|boolean

@@ -275,7 +275,7 @@ class WC_Admin {
 	 *
 	 * @since 3.6.2
 	 *
-	 * @param array $args Scehduled action post type registration args.
+	 * @param array $args Scheduled action post type registration args.
 	 *
 	 * @return array
 	 */
