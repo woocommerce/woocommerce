@@ -41,4 +41,16 @@
 		box-shadow: inset 0 0 0 1px;
 		color: inherit;
 	}
+
+	.wp-block-woocommerce-empty-mini-cart-contents-block {
+		overflow-y: unset;
+		padding: 0;
+
+		> .block-editor-inner-blocks {
+			max-height: 100vh;
+			overflow-y: auto;
+			box-sizing: border-box;
+			padding: $gap-largest $gap $gap;
+		}
+	}
 }

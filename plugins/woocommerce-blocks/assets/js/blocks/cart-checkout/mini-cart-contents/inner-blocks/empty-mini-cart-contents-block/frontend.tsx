@@ -20,7 +20,11 @@ const EmptyMiniCartContentsBlock = ( {
 		return null;
 	}
 
-	return <>{ children }</>;
+	return (
+		<div className="wp-block-woocommerce-empty-mini-cart-contents-block">
+			{ children }
+		</div>
+	);
 };
 
 export default EmptyMiniCartContentsBlock;
