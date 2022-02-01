@@ -152,13 +152,20 @@ const downloadZip = async ( fileUrl, downloadPath, authorizationToken ) => {
 const deleteDownloadedPluginFiles = async () => {
 	const pluginSavePath = resolveLocalE2ePath( 'plugins' );
 
-	fs.readdir( pluginSavePath, ( err, files ) => {
+	fs.readdir( pluginSavePath, ( err, contents ) => {
 		if ( err ) throw err;
 
-		for ( const file of files ) {
-			fs.unlink( path.join( pluginSavePath, file ), ( error ) => {
-				if ( error ) throw error;
-			} );
+		for ( const content of contents ) {
+			const contentPath = path.join( pluginSavePath, content );
+			const stats = fs.lstatSync( contentPath );
+
+			if ( stats.isDirectory() ) {
+				fs.rmSync( contentPath, { recursive: true, force: true } );
+			} else {
+				fs.unlink( contentPath, ( error ) => {
+					if ( error ) throw error;
+				} );
+			}
 		}
 	} );
 };
