@@ -119,7 +119,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->rest_base . '/(?P<id>[\d]+)/shipping-methods',
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/shipping_methods',
 			array(
 				'args' => array(
 					'id' => array(
