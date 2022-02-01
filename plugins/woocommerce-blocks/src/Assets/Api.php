@@ -68,7 +68,7 @@ class Api {
 	 * @return string|boolean False if metadata file is not found for the block.
 	 */
 	public function get_block_metadata_path( $block_name ) {
-		$path_to_metadata_from_plugin_root = $this->package->get_path( 'assets/js/blocks/' . $block_name . '/block.json' );
+		$path_to_metadata_from_plugin_root = $this->package->get_path( 'build/' . $block_name . '/block.json' );
 		if ( ! file_exists( $path_to_metadata_from_plugin_root ) ) {
 			return false;
 		}
