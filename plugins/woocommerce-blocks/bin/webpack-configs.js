@@ -12,6 +12,7 @@ const TerserPlugin = require( 'terser-webpack-plugin' );
 const CreateFileWebpack = require( 'create-file-webpack' );
 const CircularDependencyPlugin = require( 'circular-dependency-plugin' );
 const { BundleAnalyzerPlugin } = require( 'webpack-bundle-analyzer' );
+const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 
 /**
  * Internal dependencies
@@ -253,6 +254,14 @@ const getMainConfig = ( options = {} ) => {
 			new ProgressBarPlugin(
 				getProgressBarPluginConfig( 'Main', options.fileSuffix )
 			),
+			new CopyWebpackPlugin( {
+				patterns: [
+					{
+						from: './assets/js/blocks/checkout/block.json',
+						to: './checkout/block.json',
+					},
+				],
+			} ),
 		],
 		resolve: {
 			...resolve,
