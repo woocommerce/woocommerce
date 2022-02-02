@@ -1,0 +1,12 @@
+name: 'Compare Assets'
+description: 'Compares two assets files created by DependencyExtractionWebpackPlugin and reports the differences.'
+inputs:
+    repo-token:
+        description: 'GitHub token'
+        required: true
+    compare:
+        description: 'Path to assets file to compare the build assets with.'
+        required: true
+runs:
+    using: 'node16'
+    main: 'index.js'
