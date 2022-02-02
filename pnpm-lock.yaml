@@ -163,6 +163,7 @@ importers:
       jest-puppeteer: ^4.4.0
       ndb: ^1.1.5
       node-stream-zip: ^1.13.6
+      puppeteer: 2.1.1
       readline-sync: ^1.4.10
       request: ^2.88.2
       semver: ^7.3.2
@@ -172,7 +173,7 @@ importers:
       '@jest/test-sequencer': 25.5.4
       '@slack/web-api': 6.5.1
       '@woocommerce/api': link:../api
-      '@wordpress/e2e-test-utils': 4.16.1_jest@25.5.4
+      '@wordpress/e2e-test-utils': 4.16.1_jest@25.5.4+puppeteer@2.1.1
       '@wordpress/jest-preset-default': 7.1.3_@babel+core@7.12.9+jest@25.5.4
       app-root-path: 3.0.0
       commander: 4.1.1
@@ -180,8 +181,9 @@ importers:
       jest: 25.5.4
       jest-circus: 25.1.0
       jest-each: 25.5.0
-      jest-puppeteer: 4.4.0
+      jest-puppeteer: 4.4.0_puppeteer@2.1.1
       node-stream-zip: 1.15.0
+      puppeteer: 2.1.1
       readline-sync: 1.4.10
       request: 2.88.2
       sprintf-js: 1.1.2
@@ -5346,7 +5348,7 @@ packages:
       - react-native
     dev: false
 
-  /@wordpress/e2e-test-utils/4.16.1_jest@25.5.4:
+  /@wordpress/e2e-test-utils/4.16.1_jest@25.5.4+puppeteer@2.1.1:
     resolution: {integrity: sha512-Dpsq5m0VSvjIhro2MjACSzkOkOf1jGEryzgEMW1ikbT6YI+motspHfGtisKXgYhZJOnjV4PwuEg+9lPVnd971g==}
     engines: {node: '>=8'}
     peerDependencies:
@@ -5359,6 +5361,7 @@ packages:
       jest: 25.5.4
       lodash: 4.17.21
       node-fetch: 2.6.5
+      puppeteer: 2.1.1
     transitivePeerDependencies:
       - react-native
     dev: false
@@ -13271,13 +13274,14 @@ packages:
       jest-resolve: 27.3.1
     dev: true
 
-  /jest-puppeteer/4.4.0:
+  /jest-puppeteer/4.4.0_puppeteer@2.1.1:
     resolution: {integrity: sha512-ZaiCTlPZ07B9HW0erAWNX6cyzBqbXMM7d2ugai4epBDKpKvRDpItlRQC6XjERoJELKZsPziFGS0OhhUvTvQAXA==}
     peerDependencies:
       puppeteer: '>= 1.5.0 < 3'
     dependencies:
       expect-puppeteer: 4.4.0
       jest-environment-puppeteer: 4.4.0
+      puppeteer: 2.1.1
     transitivePeerDependencies:
       - supports-color
     dev: false
