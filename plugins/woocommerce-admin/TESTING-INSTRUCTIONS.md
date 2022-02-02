@@ -9,12 +9,61 @@
 3. Create a new category called **Hoodie** with **Clothing** as the parent category in the **Product categories** on the right.
 4. Select **Clothing** and **Hoodie with Pocket** as well and click **Update**
 5. Create an order with a single item of **Hoodie with Pocket** (keep note of the total price)
-6. Run the action scheduler (make sure all are run)
+6. Run the action scheduler (make sure all are run), you can do this manually by going to **WooCommerce > Status > Scheduled Actions**. If your queue is large, just make sure that the `wc-admin_import_orders` actions are run.
 7. Go to **Analytics > Overview** and scroll down to the **Leaderboards**
 8. Observe that the **Clothing** category has only **1** items sold and net sales is $35
 9. Click on **Clothing** it will redirect to the Categories page and show the correct numbers
 10. Now click on **Analytics > Categories** again and scroll down to the table
 11. Observe that the **Clothing** category has only **1** items sold and net sales is $35
+
+### Hide store address fields in regions that specify hidden #8172
+
+1. Go to the store setup wizard
+2. Change to a country like Guatemala that hides the post code
+3. Verify that the post code is hidden and "Continue" still works as expected
+4. Switch to a different country with all fields shown and make sure things still work as expected
+
+### Add localized validation to store address #8123
+
+**Store details**
+
+1. Navigate to the Store Details step of the profiler
+2. Change the country/region to US.
+3. Check that all fields are still required
+4. Change your country to Australia
+5. Make sure post code and city labels are updated (you can check this [list here](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/includes/class-wc-countries.php#L795-L1528) for other country requirements by shortcode)
+6. Change the country to Hong Kong
+7. Check that zip/postal is no longer required
+
+**Tasks**
+
+1. Delete any shipping zones you might have
+2. Clear your address in **WooCommerce > Settings** aside from the country/region.
+3. Visit the Shipping task in the task list
+4. It should prompt you to put in the store address.
+5. This should follow the same store address validation as the Store Details step.
+
+### Enhance report chart i18n support #8129
+
+1. Go to **Analytics > Overview**
+2. Observe chart texts show normally in English/site language.
+3. Select different "stats" by click on the 3 dots on the right hand and enabling other stats, now repeat step 2 until all options are confirmed.
+4. Go to **Settings > General**
+5. Change the "Site Language" to another languages like "Português do Brasil"
+6. Repeat 1 ~ 3 steps
+
+### Add MailPoet to Installed marketing extensions #8091
+
+1. Go to **Marketing > Overview**
+2. MailPoet is not shown in **Installed marketing extensions**
+3. Go to **Plugins** and install but don't activate **MailPoet 3**
+4. Go to **Marketing > Overview**
+5. See MailPoet in **Installed marketing extensions**
+6. Click **Activate**
+7. Click **Finish Setup**
+8. Finish MailPoet setup (fill with dummy data)
+9. Go to **Marketing > Overview**
+10. See MailPoet links to Docs, Support, and Settings
 
 ## 3.1.0
 
