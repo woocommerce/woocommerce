@@ -140,7 +140,8 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		$this->assertEmpty( $order->get_payment_tokens() );
 
 		$token = WC_Helper_Payment_Token::create_cc_token();
-		update_post_meta( $order->get_id(), '_payment_tokens', array( $token->get_id() ) );
+		$order->update_meta_data( '_payment_tokens', array( $token->get_id() ) );
+		$order->save_meta_data();
 
 		$this->assertCount( 1, $order->get_payment_tokens() );
 	}

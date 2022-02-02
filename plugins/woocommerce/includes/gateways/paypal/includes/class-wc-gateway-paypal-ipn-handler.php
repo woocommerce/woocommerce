@@ -344,14 +344,23 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	 * @param array    $posted Posted data.
 	 */
 	protected function save_paypal_meta_data( $order, $posted ) {
+		$needs_save = false;
+
 		if ( ! empty( $posted['payment_type'] ) ) {
-			update_post_meta( $order->get_id(), 'Payment type', wc_clean( $posted['payment_type'] ) );
+			$order->update_meta_data( 'Payment type', wc_clean( $posted['payment_type'] ) );
+			$needs_save = true;
 		}
 		if ( ! empty( $posted['txn_id'] ) ) {
-			update_post_meta( $order->get_id(), '_transaction_id', wc_clean( $posted['txn_id'] ) );
+			$order->update_meta_data( '_transaction_id', wc_clean( $posted['txn_id'] ) );
+			$needs_save = true;
 		}
 		if ( ! empty( $posted['payment_status'] ) ) {
-			update_post_meta( $order->get_id(), '_paypal_status', wc_clean( $posted['payment_status'] ) );
+			$order->update_meta_data( '_paypal_status', wc_clean( $posted['payment_status'] ) );
+			$needs_save = true;
+		}
+
+		if ( $needs_save ) {
+			$order->save_meta_data();
 		}
 	}
 

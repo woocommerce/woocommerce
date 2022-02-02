@@ -333,11 +333,12 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 */
 	public function set_address( $address, $type = 'billing' ) {
 		foreach ( $address as $key => $value ) {
-			update_post_meta( $this->get_id(), "_{$type}_" . $key, $value );
+			$this->update_meta_data( "_{$type}_" . $key, $value );
 			if ( is_callable( array( $this, "set_{$type}_{$key}" ) ) ) {
 				$this->{"set_{$type}_{$key}"}( $value );
 			}
 		}
+		$this->save_meta_data();
 	}
 
 	/**
@@ -355,34 +356,35 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 			case 'total' :
 				$amount = wc_format_decimal( $amount, wc_get_price_decimals() );
 				$this->set_total( $amount );
-				update_post_meta( $this->get_id(), '_order_total', $amount );
+				$this->update_meta_data( '_order_total', $amount );
 				break;
 			case 'cart_discount' :
 				$amount = wc_format_decimal( $amount );
 				$this->set_discount_total( $amount );
-				update_post_meta( $this->get_id(), '_cart_discount', $amount );
+				$this->update_meta_data( '_cart_discount', $amount );
 				break;
 			case 'cart_discount_tax' :
 				$amount = wc_format_decimal( $amount );
 				$this->set_discount_tax( $amount );
-				update_post_meta( $this->get_id(), '_cart_discount_tax', $amount );
+				$this->update_meta_data( '_cart_discount_tax', $amount );
 				break;
 			case 'shipping' :
 				$amount = wc_format_decimal( $amount );
 				$this->set_shipping_total( $amount );
-				update_post_meta( $this->get_id(), '_order_shipping', $amount );
+				$this->update_meta_data( '_order_shipping', $amount );
 				break;
 			case 'shipping_tax' :
 				$amount = wc_format_decimal( $amount );
 				$this->set_shipping_tax( $amount );
-				update_post_meta( $this->get_id(), '_order_shipping_tax', $amount );
+				$this->update_meta_data( '_order_shipping_tax', $amount );
 				break;
 			case 'tax' :
 				$amount = wc_format_decimal( $amount );
 				$this->set_cart_tax( $amount );
-				update_post_meta( $this->get_id(), '_order_tax', $amount );
+				$this->update_meta_data( '_order_tax', $amount );
 				break;
 		}
+		$this->save_meta_data();
 
 		return true;
 	}
