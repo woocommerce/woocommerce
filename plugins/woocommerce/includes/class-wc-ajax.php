@@ -966,8 +966,6 @@ class WC_AJAX {
 
 			do_action( 'woocommerce_ajax_order_items_added', $added_items, $order );
 
-			$data = get_post_meta( $order_id );
-
 			// Get HTML to return.
 			ob_start();
 			include __DIR__ . '/admin/meta-boxes/views/html-order-items.php';
@@ -1120,8 +1118,6 @@ class WC_AJAX {
 			if ( ! $rate_id ) {
 				throw new Exception( __( 'Invalid rate', 'woocommerce' ) );
 			}
-
-			$data = get_post_meta( $order_id );
 
 			// Add new tax.
 			$item = new WC_Order_Item_Tax();
