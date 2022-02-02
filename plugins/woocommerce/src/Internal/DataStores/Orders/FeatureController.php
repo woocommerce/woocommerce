@@ -35,7 +35,7 @@ class FeatureController {
 	 *
 	 * @var DataSyncrhonizer
 	 */
-	public $data_synchronizer;
+	private $data_synchronizer;
 
 	/**
 	 * Is the feature visible?

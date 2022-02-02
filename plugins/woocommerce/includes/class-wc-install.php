@@ -364,7 +364,7 @@ class WC_Install {
 	/**
 	 * Verify if the table(s) already exists.
 	 *
-	 * @param string $schema Schema definition to check agains.
+	 * @param string $schema Schema definition to check against.
 	 *
 	 * return array List of missing tables.
 	 */

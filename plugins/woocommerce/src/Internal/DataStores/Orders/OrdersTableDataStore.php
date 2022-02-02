@@ -114,17 +114,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @param \WC_Order $order
 	 */
 	public function create( &$order ) {
-		global $wpdb;
-		$order->set_version( Constants::get_constant( 'WC_VERSION' ) );
-		$order->set_currency( $order->get_currency() ? $order->get_currency() : get_woocommerce_currency() );
-		if ( ! $order->get_date_created( 'edit' ) ) {
-			$order->set_date_created( time() );
-		}
-
-		$table_name = $this->get_orders_table_name();
-		$insert_query = "
-			INSERT INTO $table_name ()
-		";
+		throw new \Exception( 'Unimplemented' );
 	}
 
 	public function update( &$order ) {
