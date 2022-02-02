@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       ref:
-        description: 'By default the zip file is generated from the branch the workflow runs from, but you can specify an explicit reference to use instead here (e.g. refs/tags/tag_name). The resulting file will be available as an artifact on the workflow run.'
+        description: 'By default the zip file is generated from the branch the workflow runs from, but you can specify an explicit reference to use instead here (e.g. refs/tags/tag_name or refs/heads/release/x.x). The resulting file will be available as an artifact on the workflow run.'
         required: false
         default: ''
 jobs:

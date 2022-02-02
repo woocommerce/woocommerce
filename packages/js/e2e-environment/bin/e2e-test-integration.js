@@ -76,12 +76,13 @@ if ( program.args.length == 1 ) {
 }
 
 let jestCommand = 'jest';
+let outputFile = 'test-results.json';
 const jestArgs = [
 	'--maxWorkers=1',
 	'--rootDir=./',
 	'--verbose',
 	'--json',
-	'--outputFile=test-results.json',
+	'--outputFile=' + outputFile,
 	...program.args,
 ];
 
@@ -110,6 +111,11 @@ const jestProcess = spawnSync( jestCommand, jestArgs, {
 	env: envVars,
 } );
 
+let results = resolvePackagePath( outputFile );
+if ( fs.existsSync( results ) ) {
+	let localResults = resolveLocalE2ePath( outputFile );
+	fs.copyFileSync( results, localResults );
+}
 console.log( 'Jest exit code: ' + jestProcess.status );
 
 // Pass Jest exit code to npm
