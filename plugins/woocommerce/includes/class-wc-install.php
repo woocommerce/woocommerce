@@ -337,21 +337,14 @@ class WC_Install {
 	 * @param bool $modify_notice Whether to modify notice based on if all tables are present.
 	 * @param bool $execute       Whether to execute get_schema queries as well.
 	 *
-	 * @return array List of querues.
+	 * @return array List of queries.
 	 */
 	public static function verify_base_tables( $modify_notice = true, $execute = false ) {
-		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-
 		if ( $execute ) {
 			self::create_tables();
 		}
-		$queries        = dbDelta( self::get_schema(), false );
-		$missing_tables = array();
-		foreach ( $queries as $table_name => $result ) {
-			if ( "Created table $table_name" === $result ) {
-				$missing_tables[] = $table_name;
-			}
-		}
+
+		$missing_tables = self::verify_schema( self::get_schema() );
 
 		if ( 0 < count( $missing_tables ) ) {
 			if ( $modify_notice ) {
@@ -364,6 +357,27 @@ class WC_Install {
 			}
 			update_option( 'woocommerce_schema_version', WC()->db_version );
 			delete_option( 'woocommerce_schema_missing_tables' );
+		}
+		return $missing_tables;
+	}
+
+	/**
+	 * Verify if the table(s) already exists.
+	 *
+	 * @param string $schema Schema definition to check agains.
+	 *
+	 * return array List of missing tables.
+	 */
+	public static function verify_schema( $schema ) {
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+
+		$missing_tables = array();
+		$queries        = dbDelta( $schema, false );
+
+		foreach ( $queries as $table_name => $result ) {
+			if ( "Created table $table_name" === $result ) {
+				$missing_tables[] = $table_name;
+			}
 		}
 		return $missing_tables;
 	}
