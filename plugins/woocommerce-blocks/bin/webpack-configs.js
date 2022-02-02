@@ -19,6 +19,7 @@ const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
  */
 const { getEntryConfig } = require( './webpack-entries' );
 const {
+	ASSET_CHECK,
 	NODE_ENV,
 	CHECK_CIRCULAR_DEPS,
 	requestToExternal,
@@ -45,6 +46,8 @@ const sharedPlugins = [
 	process.env.WP_BUNDLE_ANALYZER && new BundleAnalyzerPlugin(),
 	new DependencyExtractionWebpackPlugin( {
 		injectPolyfill: true,
+		combineAssets: ASSET_CHECK,
+		outputFormat: ASSET_CHECK ? 'json' : 'php',
 		requestToExternal,
 		requestToHandle,
 	} ),
