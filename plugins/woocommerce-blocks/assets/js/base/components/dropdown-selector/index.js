@@ -23,6 +23,7 @@ import './style.scss';
  * @param {Object} props Incoming props for the component.
  * @param {string} props.attributeLabel Label for the attributes.
  * @param {string} props.className CSS class used.
+ * @param {import('react').CSSProperties} props.style CSS style object used.
  * @param {Array} props.checked Which items are checked.
  * @param {string} props.inputLabel Label used for the input.
  * @param {boolean} props.isDisabled Whether the input is disabled or not.
@@ -34,6 +35,7 @@ import './style.scss';
 const DropdownSelector = ( {
 	attributeLabel = '',
 	className,
+	style = {},
 	checked = [],
 	inputLabel = '',
 	isDisabled = false,
@@ -105,6 +107,7 @@ const DropdownSelector = ( {
 						'has-checked': checked.length > 0,
 						'is-open': isOpen,
 					} ) }
+					style={ style }
 				>
 					{ /* eslint-disable-next-line jsx-a11y/label-has-for */ }
 					<label

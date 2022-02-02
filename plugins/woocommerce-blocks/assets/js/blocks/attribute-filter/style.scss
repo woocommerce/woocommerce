@@ -1,9 +1,19 @@
+.wp-block-woocommerce-attribute-filter {
+	// We need to override it because by default the global styles applied the border-style: solid;
+	// Our goal is not to have a border on main wrapper DOM element
+	border-style: none !important;
+}
+
 .wc-block-attribute-filter {
 	margin-bottom: $gap-large;
+	border-radius: inherit;
+	border-color: inherit;
 
 	&.style-dropdown {
 		display: flex;
 		gap: $gap;
+		border-radius: inherit;
+		border-color: inherit;
 	}
 
 	.wc-block-attribute-filter-list {
@@ -26,6 +36,8 @@
 		flex-grow: 1;
 		max-width: unset;
 		width: 0;
+		border-radius: inherit;
+		border-color: inherit;
 	}
 
 	.is-single .wc-block-attribute-filter-list-count,
@@ -35,5 +47,7 @@
 
 	.wc-block-components-dropdown-selector__input-wrapper {
 		height: 100%;
+		border-radius: inherit;
+		border-color: inherit;
 	}
 }
