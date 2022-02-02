@@ -1,4 +1,0 @@
-Significance: minor
-Type: Fix
-
-Make sure WooCommerce Payments tasklist_payment_setup is triggered again. #8146

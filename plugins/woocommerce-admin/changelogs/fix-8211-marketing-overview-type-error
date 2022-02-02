@@ -1,4 +1,0 @@
-Significance: patch
-Type: Fix
-
-Fix Uncaught TypeError count(NULL) for php8+ in Marketing.php. #8213

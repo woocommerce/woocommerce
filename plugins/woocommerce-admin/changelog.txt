@@ -1,10 +1,11 @@
-== 3.2.0 01/25/2022 ==
+== 3.2.0 02/01/2022 == 
 
 - Fix: changed email validation in Store Details onboarding task to more closely match PHP backend validation. #8197
 - Fix: Disallow whitespace as the platform name input. #8090
 - Fix: Ensure setup-wizard redirection on homescreen is stable. #8114
 - Fix: Fix category report query returns invalid net sales. #8153
 - Fix: Fix clicking the error message opens the dropdown. #8094
+- Fix: Fix country/region selection not preserved in store details task. #8228
 - Fix: Fix get_automated_tax_supported_countries doesn't include UK. #8180
 - Fix: Fix incorrect date options when the "Default Date Range" is set from Analytics settings. #8189
 - Fix: Fix incorrectly displayed note created date. #8179
@@ -12,8 +13,10 @@
 - Fix: Fix incorrect total count of downloads on the analytics download report. #8182
 - Fix: Fix misaligned status column on order report. #8121
 - Fix: Fix shipping rate error message overlaps with the 'Proceed' button. #8165
+- Fix: Fix Uncaught TypeError count(NULL) for php8+ in Marketing.php. #8213
 - Fix: Fix undefined derived_currency value for the track 'wcadmin_storeprofiler_store_details_continue'. #8193
 - Fix: Fix variations table product filter query. #8120
+- Fix: Make sure WooCommerce Payments tasklist_payment_setup is triggered again. #8146
 - Fix: Preserve HTML markup in server-side error messages received from sample product import request. #8173
 - Fix: Remove border between email input and newsletter checkbox in OBW store details. #8148
 - Fix: Reset "install_timestamp" if it's not numeric to avoid TypeError. #8100
@@ -24,6 +27,7 @@
 - Add: Add localized validation to store address #8123
 - Add: Add Magento migration note #8145
 - Add: Add REST endpoint to retrieve address locales #8116
+- Add: Add Spain to Square country suggestion list. #8210
 - Add: Change the reviews empty state panels logic #8147
 - Update: Add custom error for store details email and allow continue #8110
 - Update: Adding "allow-plugins" property for composer configuration. #8139
@@ -34,9 +38,10 @@
 - Tweak: Padding tweak for marketing tools plugin list headings. #8171
 - Performance: Speed up customer syncing action. #8021
 - Enhancement: Enhance report chart i18n support. #8129
+- Enhancement: Make ExPlat request URL args filterable. Added woocommerce_explat_request_args filter. #8231
 - Enhancement: Show MailPoet in Installed marketing extensions. #8091
 
-== 3.1.0 01/25/2022 ==
+== 3.1.0 01/25/2022 == 
 
 - Fix: Fix Onboarding flow where extensions might not be selected and installed. #7979
 - Fix: Fix pagination issue with Analytics Coupons page. #8001
@@ -64,7 +69,7 @@
 - Tweak: OBW Update WC Pay label on recommended extensions list #8038
 - Enhancement: Add SlotFill areas to header #7805
 
-== 3.0.3 01/06/2022 ==
+== 3.0.3 01/06/2022 == 
 
 - Fix: Fix blank payment gateway method in table when WooCommerce Payments is not supported. #8122
 - Add: Add woocommerce_allow_marketplace_suggestions filter to WooCommerce Payments payment method promotion. #8117
@@ -77,7 +82,7 @@
 
 - Do not initialize WC Pay promotion if spec is empty. #8087
 
-== 3.0.0 12/28/2021 ==
+== 3.0.0 12/28/2021 == 
 
 - Fix: Fix an issue with the code that makes use of an invalid parameter with a PHP function. The use of this invalid parameter causes PHP 8 to throw a Fatal Error. #7855
 - Fix: Fix TaskList UI experiment enablement logic. #7930
@@ -104,19 +109,19 @@
 - Tweak: Add inbox_panel_view tracks event. #8002
 - Enhancement: Add tests to Subscriptions inclusion. #7804
 
-== 2.9.3 12/15/2021 ==
+== 2.9.3 12/15/2021 == 
 
 - Fix: Correctly match payment gateways by id #7994
 
-== 2.9.2 12/13/2021 ==
+== 2.9.2 12/13/2021 == 
 
 - Fix: Fix shipping task completion status #8031
 
-== 2.9.1 12/07/2021 ==
+== 2.9.1 12/07/2021 == 
 
 - Fix: Fix shipping task not offering step 3. #7985
 
-== 2.9.0 11/30/2021 ==
+== 2.9.0 11/30/2021 == 
 
 - Fix: Do not clear `current` class from the entire page when updating wp-admin's menu. #7773
 - Fix: Fix calendar not being dismissed when clicking outside. #7714
@@ -152,7 +157,7 @@
 - Tweak: Use page title Extensions for Marketplace and My Subscriptions pages. #7901
 - Performance: Only load default tasks during REST requests #7904
 
-== 2.8.0 11/02/2021 ==
+== 2.8.0 11/02/2021 == 
 
 - Add: Store Profiler and Product task - include Subscriptions #7734
 - Fix: Fix issue where stock activity panel was not rendering correctly. #7817
@@ -174,11 +179,11 @@
 - Enhancement: Add experiment for promoting WooCommerce Payments in payment methods table. #7666
 - Performance: Only load tasks during rest api requests #7856
 
-== 2.7.2 10/11/2021 ==
+== 2.7.2 10/11/2021 == 
 
 - Fix: Fix analytics crashing on daylight saving #7763
 
-== 2.7.1 10/01/2021 ==
+== 2.7.1 10/01/2021 == 
 
 - Fix: Allow super admins all capabilities within WooCommerce Admin #7489
 - Fix: Fix end date for last periods #6584
@@ -212,11 +217,11 @@
 - Tweak: Update analytics card header text styles #6506
 - Enhancement: Align Table fields with the fallback on isNumeric. #7431
 
-== 2.6.5 09/22/2021 ==
+== 2.6.5 09/22/2021 == 
 
 - Fix: Add filters to get new hidden options #7698
 
-== 2.6.4 09/21/2021 ==
+== 2.6.4 09/21/2021 == 
 
 - Fix: Use installable extensions for local state versus free extensions. #7585
 
@@ -224,11 +229,11 @@
 
 == 2.6.2 09/14/2021 ==
 
-== 2.6.1 09/01/2021 ==
+== 2.6.1 09/01/2021 == 
 
 - Update: Update marketing task completion logic. #7586
 
-== 2.6.0 08/31/2021 ==
+== 2.6.0 08/31/2021 == 
 
 - Fix: Fixes action button mis-alignment within card footer. #7412
 - Fix: Fixing issues with ReportTable component data not populating correctly #7355
@@ -264,11 +269,11 @@
 - Tweak: Refactor on payment settings recommendations eligibility component for reuse. #7447
 - Tweak: Register wc-admin page for all users and handle authorization in client #7285
 
-== 2.5.1 08/16/2021 ==
+== 2.5.1 08/16/2021 == 
 
 - Fix: Fix blank screen by setting a default value #7506
 
-== 2.5.0 08/09/2021 ==
+== 2.5.0 08/09/2021 == 
 
 - Add: Add a delete option to completed tasks #7300
 - Add: Add unit tests around extended payment gateway controller #7133
@@ -333,24 +338,24 @@
 - Update: Remove facebook extension from onboarding extensions fallback list #7287
 - Performance: Add lazy loading by checking panel open status #7379
 
-== 2.4.4 07/21/2021 ==
+== 2.4.4 07/21/2021 == 
 
 - Fix: Fix homepage stock panel regression in 2.4.3. #7389
 
-== 2.4.3 07/21/2021 ==
+== 2.4.3 07/21/2021 == 
 
 - Fix: Add a new low stock products endpoint to improve the performance. #7377
 
-== 2.4.2 07/19/2021 ==
+== 2.4.2 07/19/2021 == 
 
 - Fix: Add lazy loading by checking panel open status #7376
 - Fix: Add cache-control header to low stock REST API response #7364
 
-== 2.4.1 07/01/2021 ==
+== 2.4.1 07/01/2021 == 
 
 - Fix: Fix and refactor explat polling to use setTimeout #7274
 
-== 2.4.0 06/29/2021 ==
+== 2.4.0 06/29/2021 == 
 
 - Add: SlotFill to Abbreviated Notification panel #7091
 - Add: Consume remote payment methods on frontend #6867
@@ -448,7 +453,7 @@
 - Update: Remove original business step flow #7103
 - Update: WooCommerce Shipping copy on onboarding steps #7148
 
-== 2.3.1 05/24/2021 ==
+== 2.3.1 05/24/2021 == 
 
 - Tweak: Store profiler  Changed MailPoet's title and description #6990
 - Tweak: Adjust WC Pay supported countries #7048
@@ -456,7 +461,7 @@
 - Fix: A JS exception being thrown on the product tags page. #7053
 - Fix: Show Google Listing and Ads in installed marketing extensions section. #7029
 
-== 2.3.0 05/13/2021 ==
+== 2.3.0 05/13/2021 == 
 
 - Add: Add plugin installer to allow installation of plugins via URL #6805
 - Add: Optional children prop to SummaryNumber component #6748
@@ -497,30 +502,30 @@
 - Update: Update payment gateway suggestions semantics to be more consistent #7130
 - Update: Adding setup required icon for nonconfigured payment methods #6811
 
-== 2.2.6 05/07/2021 ==
+== 2.2.6 05/07/2021 == 
 
 - Fix: Address an issue with OBW when installing only WooCommerce payments and Jetpack. #6957
 
-== 2.2.5 05/07/2021 ==
+== 2.2.5 05/07/2021 == 
 
 - Fix: Calling of get_script_asset_filename with extra parameter #6955
 
-== 2.2.4 05/07/2021 ==
+== 2.2.4 05/07/2021 == 
 
 - Dev: Fix a bug where trying to load an asset registry causes a crash. #6951
 
-== 2.2.3 05/06/2021 ==
+== 2.2.3 05/06/2021 == 
 
 - Dev: Do a git clean before the core release. #6945
 
-== 2.2.2 04/28/2021 ==
+== 2.2.2 04/28/2021 == 
 
 - Fix: Disable the continue btn on OBW when requested are being made #6838
 - Tweak: Revert WCPay international support for bundled package #6901
 - Tweak: Store profiler  Changed MailPoet's title and description #6886
 - Tweak: Update PayU logo #6829
 
-== 2.2.0 03/30/2021 ==
+== 2.2.0 03/30/2021 == 
 
 - Fix: Check if features are currently being enabled #6688
 - Fix: Fix the activity panel toggle not closing on click #6679
@@ -596,26 +601,26 @@
 - Dev: Ensure script asset.php files are included in builds #6635
 - Dev: Ensure production script asset names don't include .min suffix #6681
 
-== 2.1.4 03/29/2021 ==
+== 2.1.4 03/29/2021 == 
 
 - Fix: Adding New Zealand and Ireland to selective bundle option, previously missed. #6649
 
-== 2.1.3 03/14/2021 ==
+== 2.1.3 03/14/2021 == 
 
 - Feature: Increase target audience for business feature step. #6508
 - Fix: Correct a bug where the JP connection flow would not happen when installing JP in the OBW. #6521
 - Fix: Add customer name column to CSV export #6556
 
-== 2.1.2 03/10/2021 ==
+== 2.1.2 03/10/2021 == 
 
 - Fix: Add guard to "Deactivate Plugin" note handlers to prevent fatal error. #6532
 - Fix: Crash of Analytics > Settings page when Gutenberg is installed. #6540
 
-== 2.1.1 03/04/2021 ==
+== 2.1.1 03/04/2021 == 
 
 - Fix: Restore missing Correct the Klarna slug #6440
 
-== 2.1.0 03/04/2021 ==
+== 2.1.0 03/04/2021 == 
 
 - Dev: Allow highlight tooltip to use body tag as parent. #6309
 - Dev: Remove Google fonts and material icons. #6343
@@ -665,15 +670,15 @@
 - Enhancement: override wpbody styles when nav present #6354
 - Enhancement: Move favorited menu items to primary menu #6290
 
-== 2.0.3 03/10/2021 ==
+== 2.0.3 03/10/2021 == 
 
 - Fix: Crash of Analytics > Settings page when Gutenberg is installed. #6540
 
-== 2.0.2 05/25/2021 ==
+== 2.0.2 05/25/2021 == 
 
 - Fix: Correct the Klarna slug #6440
 
-== 2.0.0 02/05/2021 ==
+== 2.0.0 02/05/2021 == 
 
 - Tweak: Bump minimum supported version of PHP to 7.0. #6046
 - Tweak: update the content and timing of the NeedSomeInspiration note. #6076
@@ -697,7 +702,7 @@
 - Dev: Remove old debug code for connecting to Calypso / Wordpress.com. #6097
 - Dev: Allow highlight tooltip to use body tag as parent. #6309
 
-== 1.9.0 01/15/2021 ==
+== 1.9.0 01/15/2021 == 
 
 - Fix: Add Customer Type column to the Orders report table. #5820
 - Fix: Product exclusion filter on Orders Report.
@@ -730,21 +735,21 @@
 - Add: Note for users coming from Calypso. #6030
 - Add: Manage activity from home screen inbox message. #6072
 
-== 1.8.3 01/05/2021 ==
+== 1.8.3 01/05/2021 == 
 
 - Fix: Compile the debug module so it can be used in older browsers like IE11. #5987
 
-== 1.8.2 12/22/2020 ==
+== 1.8.2 12/22/2020 == 
 
 - Fix: Completed tasks tracking causing infinite loop #5941
 - Fix: Remove Navigation access #5940
 
-== 1.8.1 12/15/2020 ==
+== 1.8.1 12/15/2020 == 
 
 - Fix: Product exclusion filter on Orders Report.
 - Fix: Typo in Variation Stats DataStore context filter value. #5784
 
-== 1.8.0 12/07/2020 ==
+== 1.8.0 12/07/2020 == 
 
 - Enhancement: Add "filter by variations in reports" inbox note. #5208
 - Enhancement: Tasks extensibility in Home Screen. #5794
@@ -780,7 +785,7 @@
 - Fix: Load wctracks to avoid fatal errors. #5645 #5638
 - Fix: Preventing desktopsized navigation placeholder from appearing on mobile during load. #5616
 
-== 1.7.0 11/11/2020 ==
+== 1.7.0 11/11/2020 == 
 
 - Enhancement: Variations report.  #5167
 - Enhancement: Add ability to toggle homescreen layouts. #5429
@@ -839,7 +844,7 @@
 - Dev: Rearrange the store management links under categories add filter woocommerce_admin_homescreen_quicklinks. #5476
 - Dev: Restyle the setup task list header to display incomplete tasks #5520
 
-== 1.6.2 10/16/2020 ==
+== 1.6.2 10/16/2020 == 
 
 - Fix: Missing activity panels on ugraded sites #5400
 - Fix: Casting of onboarding profile data to array #5415
@@ -847,12 +852,12 @@
 - Fix: i18n of Performance Indicator strings #5405
 - Fix: Gutenberg 9.1.1 compat for empty data sets #5409
 
-== 1.6.1 10/13/2020 ==
+== 1.6.1 10/13/2020 == 
 
 - Fix: Hide setup checklist shortcut when setup checklist skipped #5360
 - Fix: use of undefined function on WC < 4.0.0.
 
-== 1.6.0 10/09/2020 ==
+== 1.6.0 10/09/2020 == 
 
 - Dev: Reviews wp.data store #4941
 - Dev: Notes wp.data store #4943
@@ -901,7 +906,7 @@
 - Fix: Search all variation attribute values #5141
 - Fix: Force float before addition in taxes #5149
 
-== 1.5.0 08/07/2020 ==
+== 1.5.0 08/07/2020 == 
 
 - Dev: New notification
 - Dev: Enable tax calculation before redirecting to standard tax rates page. #4878
@@ -913,7 +918,7 @@
 - Fix: Use clipRule and fillRule props. #4889, part of #4864
 - Enhancement: Add eWAY to Payment Setup for AU/NZ Stores. #4947
 
-== 1.4.0 07/22/2020 ==
+== 1.4.0 07/22/2020 == 
 
 - Fix: Update returning customer total to include customers whose first order was within the report date range #4430
 - Fix: Fix an error in the Analytics/Orders table when there is an order deleted directly from the database #4630
@@ -952,15 +957,15 @@
 - Dev: Customize webpack jsonpFunction to avoid potential collision with other Webpack bundles #4644 🎉 @aaemnnosttv
 - Dev: Update @wordpress/basestyles and replace deprecated variables #4759
 
-== 1.3.2 07/29/2020 ==
+== 1.3.2 07/29/2020 == 
 
 - Fix: bug preventing saving user preferences on WP 5.3. #4869
 
-== 1.3.1 07/20/2020 ==
+== 1.3.1 07/20/2020 == 
 
 - Fix: PHP Fatal errors when columns are missing from the Notes table. #4831
 
-== 1.3.0 07/08/2020 ==
+== 1.3.0 07/08/2020 == 
 
 - Enhancement: Add Jetpack stats to performance indicatorts / homepage #4291
 - Enhancement: New "Store Management" quick links card on WooCommerce home screen. #4350
@@ -1008,21 +1013,21 @@
 - Tweak: Remove duplicate/redundant inbox note after first order received. #4659
 - Tweak: Fix the embed page CSS so the top content sits better #4622
 
-== 1.2.4 06/11/2020 ==
+== 1.2.4 06/11/2020 == 
 
 - Tweak: reduce asset filename length and remove tilde characters. #4535
 - Fix: RTL stylesheet loading for split code chunks. #4542
 
-== 1.2.3 05/22/2020 ==
+== 1.2.3 05/22/2020 == 
 
 - Tweak: Updates to WooCommerce Payments in Setup Checklist #4293
 
-== 1.2.2 05/18/2020 ==
+== 1.2.2 05/18/2020 == 
 
 - Fix: Respect tracking optin before new page load. #4368
 - Enhancement: Add Jetpack connection to plugin benefits step #4374
 
-== 1.2.0 05/18/2020 ==
+== 1.2.0 05/18/2020 == 
 
 - Enhancement: Add onboarding payments note #4157
 - Enhancement: Marketing Inbox Note #4030
@@ -1053,20 +1058,20 @@
 - Dev: Dynamic Currency with Context API #4027
 - Dev: Remove Duplicate array entry #4049 🎉 @tivnet
 
-== 1.1.3 05/18/2020 ==
+== 1.1.3 05/18/2020 == 
 
 - Tweak: Onboarding
 - Fix: Respect tracking optin before new page load. #4368
 
 == 1.1.2 05/12/2020 ==
 
-== 1.1.1 05/05/2020 ==
+== 1.1.1 05/05/2020 == 
 
 - Fix: Storefront should show at top of theme options in onboarding wizard. #4187
 - Tweak: Remove Stripe autoconnect from payment task. #4164
 - Tweak: Hide suggested extensions in Marketing Tab if opted out of "Marketplace Suggestions"
 
-== 1.1.0 04/23/2020 ==
+== 1.1.0 04/23/2020 == 
 
 - Tweak: Added link to "go shopping" button #3712
 - Tweak: Add PayFast payment gateway option for sites in South Africa #3738
@@ -1111,19 +1116,19 @@
 - Dev: Handle orphaned order statuses in analytics settings. #4090
 - Dev: Fix usage of WP_Error in nonglobal namespaces. #4115
 
-== 1.0.3 03/22/2020 ==
+== 1.0.3 03/22/2020 == 
 
 - Fix: Stop calling protected has_satisfied_dependencies() on outdated plugin. #3938
 - Fix: Rename image assets in OBW business details step. #3931
 - Fix: Stop using WP Post store for Action Scheduler. #3936
 
-== 1.0.2 03/18/2020 ==
+== 1.0.2 03/18/2020 == 
 
 - Enhancement: Onboarding
 - Dev: Update prestart script so readme.txt stable tag is updated #3911
 - Tweak: create database tables on an earlier hook to avoid conflicts with core WooCommerce. #3896
 
-== 1.0.1 03/12/2020 ==
+== 1.0.1 03/12/2020 == 
 
 - Fix: Add Report Extension Example
 - Fix: Product report sorting by SKU when some products don't have SKUs
@@ -1135,7 +1140,7 @@
 - Dev: Fix failing tests after WC core merge.
 - Dev: Bump WooCommerce tested up to tag
 
-== 1.0.0 03/05/2020 ==
+== 1.0.0 03/05/2020 == 
 
 - Fix: Customers Report
 - Fix: OBW Connect
@@ -1149,7 +1154,7 @@
 - Fix: Tracking on migrated options #3828
 - Dev: Onboarding
 
-== 0.26.1 02/26/2020 ==
+== 0.26.1 02/26/2020 == 
 
 - Fix: Remove free text Search option when no query exists #3755
 - Fix: StoreAlert
@@ -1160,7 +1165,7 @@
 - Fix: Add deactivation hook to Package.php #3770
 - Fix: Add active version functions #3772
 
-== 0.26.0 02/21/2020 ==
+== 0.26.0 02/21/2020 == 
 
 - Fix: Warning in product data store when tax amount is nonnumeric. #3656
 - Fix: Enable onboarding in production. #3680
@@ -1177,12 +1182,12 @@
 - Dev: Travis tests on Github for release branch #3751
 - Add: Deactivation note for feature plugin #3687
 
-== 0.25.1 02/07/2020 ==
+== 0.25.1 02/07/2020 == 
 
 - Dev: Enable onboarding #3651 (Onboarding)
 - Fix: Fix styling of search control in report table header and filters. #3603 (Analytics, Components, Packages)
 
-== 0.25.0 01/29/2020 ==
+== 0.25.0 01/29/2020 == 
 
 - Fix: Onboarding
 - Fix: Fix styling of search control in report table header and filters. #3603 (Analytics, Components, Packages)
@@ -1240,7 +1245,7 @@
 - Bug: Onboarding
 - Bug: Onboarding
 
-== 0.24.0 01/06/2020 ==
+== 0.24.0 01/06/2020 == 
 
 - Bug: Add SelectControl debouncing and keyboard fixes #3507 (Components, Packages)
 - Bug: Onboarding
@@ -1279,11 +1284,11 @@
 - Tweak: Add/disable plugin filter #3361
 - Enhancement: allow report cache layer to be turned off. #3434
 
-== 0.23.3 12/26/2019 ==
+== 0.23.3 12/26/2019 == 
 
 - Fix: don't run database migrations on new installs. #3473
 
-== 0.23.2 12/19/2019 ==
+== 0.23.2 12/19/2019 == 
 
 - Enhancement: allow filtering of hidden WP notices. #3391 (Activity Panel, Extensibility)
 - Fix: error when trying to download report data. #3429 (Analytics)
@@ -1292,11 +1297,11 @@
 - Fix: remove the header when user doesn't have required permissions #3386 (Activity Panel)
 - Bug: Fix user data fields filter name. #3428 (Dashboard)
 
-== 0.23.1 12/08/2019 ==
+== 0.23.1 12/08/2019 == 
 
 - Fix: undefined function error.
 
-== 0.23.0 12/06/2019 ==
+== 0.23.0 12/06/2019 == 
 
 - Dev: Add currency extension #3328 (Packages)
 - Dev: Packages
@@ -1328,7 +1333,7 @@
 - Tweak: remove global settings dependency from Navigation package. #3294 (Components, Packages)
 - Tweak: Search component
 
-== 0.22.0 11/13/2019 ==
+== 0.22.0 11/13/2019 == 
 
 - Fix: Incorrect calculation of tax summary on Taxes screen. #3158 (Analytics)
 - Fix: Correct product and coupon count on edited orders. #3103 (Analytics)
@@ -1344,7 +1349,7 @@
 - Tweak: Field misalignment in product edit screen. #3145
 - Task: Fix PHP linter errors. #3188
 
-== 0.21.0 10/30/2019 ==
+== 0.21.0 10/30/2019 == 
 
 - Fix: report export format when generated serverside. #2987 (Analytics, Packages)
 - Fix: Address discrepancies in Revenue totals between Analytics screens. #3095 (Analytics)
@@ -1359,12 +1364,12 @@
 - Dev: Add the ability to create custom plugin builds #3044 (Build)
 - Enhancement: add management link to Reviews panel. #3011 (Activity Panel)
 
-== 0.20.1 09/24/2019 ==
+== 0.20.1 09/24/2019 == 
 
 - Fix: use category lookup id instead of term taxonomy id (#3027)
 - Fix: Update order stats table status index length. (#3022)
 
-== 0.20.0 09/24/2019 ==
+== 0.20.0 09/24/2019 == 
 
 - Dev: Fix issue #2992 (order number in orders panel) #2994
 - Dev: Replace lodash isNaN() with native Number.isNaN() #2998 (Build, Packages)
@@ -1387,7 +1392,7 @@
 - Performance: reduce JS bundle size. #2933 (Build)
 - Bug: Fix conflict with Blocks 2.4 #2846
 
-== 0.19.0 09/24/2019 ==
+== 0.19.0 09/24/2019 == 
 
 - Dev: Use upstream webpackrtlplugin #2870 (Build)
 - Dev: Fix variable name typo #2922
@@ -1399,7 +1404,7 @@
 - Tweak: change report charts filter name. #2843 (Components, Documentation, Packages)
 - Bug: Fix chart type buttons misalignment #2871 (Components, Packages)
 
-== 0.18.0 08/28/2019 ==
+== 0.18.0 08/28/2019 == 
 
 - Fix: Product in dropdown clickable in FF/Safari #2839 (Components, Packages) 👏 @cojennin
 - Fix: gross order total calculation. #2817 (Analytics)
@@ -1417,7 +1422,7 @@
 - Dev: Update List actionable items to be wrapped with Link #2779 (Components, Packages)
 - Tweak: add empty dataset treatment for report tables. #2801 (Analytics, Components, Packages)
 
-== 0.17.0 08/15/2019 ==
+== 0.17.0 08/15/2019 == 
 
 - Fix: chart data fetch/render over long time periods #2785 (Analytics)
 - Fix: chart display when comparing categories. #2710 (Analytics)
@@ -1437,7 +1442,7 @@
 - Bug: Only apply current submenu CSS reset on nonembed pages. #2687
 - Dev: Add `wc_admin_get_feature_config` filter to feature config array. #2689
 
-== 0.16.0 07/24/2019 ==
+== 0.16.0 07/24/2019 == 
 
 - Tweak: Change verbiage of feedback notification. #2677
 - Dev: Update unit tests to work with PHPUnit 7+. #2678
@@ -1456,7 +1461,7 @@
 - Task: Add priority 3 Tracks events #2638 (Components, Packages)
 - Task: Add instructions for translating to contributing docs. #2618 (Documentation)
 
-== 0.15.0 07/11/2019 ==
+== 0.15.0 07/11/2019 == 
 
 - Fix: Compare checkboxes in report tables #2571
 - Fix: Use correct links in DevDocs. #2602 (Documentation)
@@ -1493,7 +1498,7 @@
 - Tweak: fix some report endpoint default params. #2496 (REST API)
 - Bug: Fix batch queue range bug. #2521
 
-== 0.14.0 06/24/2019 ==
+== 0.14.0 06/24/2019 == 
 
 - Dev: Action Scheduler
 - Dev: Fix Activity Panel being overlapped by editor toolbar #2446 (Activity Panel)
@@ -1516,15 +1521,15 @@
 - Tweak: Reduce style dependencies on WP core, avoid errantly including WP core's Google Fonts. #2432 (Components)
 - Task: Remove test menu from Orders panel #2438 (Activity Panel)
 
-== 0.13.2 06/13/2019 ==
+== 0.13.2 06/13/2019 == 
 
 - Fix: Bump plugin version for database update.
 
-== 0.13.1 06/12/2019 ==
+== 0.13.1 06/12/2019 == 
 
 - Fix: Exit deactivate early if WooCommerce not active. #2410
 
-== 0.13.0 06/12/2019 ==
+== 0.13.0 06/12/2019 == 
 
 - Fix: Notes
 - Fix: Double space at 191 row #2369  👏 @shoheitanaka
@@ -1567,7 +1572,7 @@
 - Task: Remove second beta warning from readme #2362
 - Task: Remove beta warning from readme. #2340
 
-== 0.12.0 05/14/2019 ==
+== 0.12.0 05/14/2019 == 
 
 - Fix: dashboard issues #2194
 - Fix: Dashboard
@@ -1599,7 +1604,7 @@
 - Dev: Scroll to top of the table when navigating table pages #2051
 - Dev: Add empty state for the Reviews panels #2124
 
-== 0.11.0 04/17/2019 ==
+== 0.11.0 04/17/2019 == 
 
 - Dev: Extend report submenu items #2033
 - Dev: Extension Examples #2018
@@ -1634,7 +1639,7 @@
 - Enhancement: Scroll to top only when URL changes #1989
 - Enhancement: Allow negative values in charts #1979
 
-== 0.10.0 04/02/2019 ==
+== 0.10.0 04/02/2019 == 
 
 - Dev: Properly namespaced methods in wcadmin.php. props @ronakganatra9 #1804
 - Dev: Changed textdomain to `woocommerceadmin` #1795
@@ -1693,7 +1698,7 @@
 - Performance: Don't dispatch REST API requests when window/tab is hidden #1732
 - Performance: Only check for unsnooze note on admin_init #1960
 
-== 0.8.0 02/28/2019 ==
+== 0.8.0 02/28/2019 == 
 
 - Table Component: Reset search on compare
 - Table Component: Fix search positioning in small viewports
