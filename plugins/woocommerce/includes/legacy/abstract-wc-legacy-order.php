@@ -456,7 +456,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	 	} elseif ( is_callable( array( $this, "get_{$key}" ) ) ) {
 			return $this->{"get_{$key}"}();
 		} else {
-			return get_post_meta( $this->get_id(), '_' . $key, true );
+			return $this->get_meta( '_' . $key, true );
 		}
 	}
 
