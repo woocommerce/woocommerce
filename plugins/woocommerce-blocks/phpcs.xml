@@ -8,7 +8,7 @@
 	<exclude-pattern>languages/woo-gutenberg-products-block.php</exclude-pattern>
 
 	<!-- Configs -->
-	<config name="minimum_supported_wp_version" value="5.8" />
+	<config name="minimum_supported_wp_version" value="5.9" />
 	<config name="testVersion" value="7.0-" />
 
 	<!-- Rules -->

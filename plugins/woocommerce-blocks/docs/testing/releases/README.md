@@ -59,3 +59,4 @@ Every release includes specific testing instructions for new features and bug fi
     -   [6.7.2](./672.md)
     -   [6.7.3](./673.md)
 -   [6.8.0](./680.md)
+-   [6.9.0](./690.md)
