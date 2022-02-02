@@ -29,6 +29,7 @@
 	"scripts": {
 		"analyze-bundles": "cross-env WP_BUNDLE_ANALYZER=1 npm run build",
 		"build": "rimraf build/* && cross-env BABEL_ENV=default NODE_ENV=production webpack",
+		"build:check-assets": "rimraf build/* && cross-env ASSET_CHECK=true BABEL_ENV=default NODE_ENV=production webpack",
 		"build:deploy": "rimraf vendor/* && cross-env WOOCOMMERCE_BLOCKS_PHASE=2 composer install --no-dev && cross-env WOOCOMMERCE_BLOCKS_PHASE=2 npm run build --loglevel error",
 		"build:e2e-test": "npm run build",
 		"prebuild:docs": "rimraf docs/extensibility/actions.md & rimraf docs/extensibility/filters.md",
@@ -76,6 +77,8 @@
 		"wp-env:phpunit-config": "./bin/wp-env-phpunit-pre-config.sh"
 	},
 	"devDependencies": {
+		"@actions/core": "^1.6.0",
+		"@actions/github": "^5.0.0",
 		"@automattic/color-studio": "2.5.0",
 		"@babel/cli": "7.16.8",
 		"@babel/core": "7.16.12",
