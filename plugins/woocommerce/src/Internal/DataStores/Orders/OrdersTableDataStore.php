@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * This class is the standard data store to be used when the custom orders table is in use.
  */
-class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements \WC_Object_Data_Store_Interface, \WC_Order_Data_Store_Interface {
+class OrdersTableDataStore implements \WC_Object_Data_Store_Interface, \WC_Order_Data_Store_Interface {
 
 	/**
 	 * Get the custom orders table name.
@@ -22,6 +22,30 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	public function get_orders_table_name() {
 		global $wpdb;
 		return $wpdb->prefix . 'wc_orders';
+	}
+
+	public function read( &$data ) {
+		// TODO: Implement read() method.
+	}
+
+	public function read_meta( &$data ) {
+		// TODO: Implement read_meta() method.
+	}
+
+	public function delete( &$data, $args = array() ) {
+		// TODO: Implement delete() method.
+	}
+
+	public function delete_meta( &$data, $meta ) {
+		// TODO: Implement delete_meta() method.
+	}
+
+	public function add_meta( &$data, $meta ) {
+		// TODO: Implement add_meta() method.
+	}
+
+	public function update_meta( &$data, $meta ) {
+		// TODO: Implement update_meta() method.
 	}
 
 	public function get_addresses_table_name() {
