@@ -12,7 +12,7 @@ import { WcHomescreen } from '../../pages/WcHomescreen';
 import { TaskTitles } from '../../constants/taskTitles';
 import { HelpMenu } from '../../elements/HelpMenu';
 import { WcSettings } from '../../pages/WcSettings';
-import { unhideTaskList } from '../../fixtures';
+import { resetWooCommerceState, unhideTaskList } from '../../fixtures';
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 const { afterAll, beforeAll, describe, it } = require( '@jest/globals' );
@@ -28,6 +28,7 @@ const testAdminHomescreenTasklist = () => {
 
 		beforeAll( async () => {
 			await login.login();
+			await resetWooCommerceState();
 
 			// This makes this test more isolated, by always navigating to the
 			// profile wizard and skipping, this behaves the same as if the

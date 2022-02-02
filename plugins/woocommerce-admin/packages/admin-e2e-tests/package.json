@@ -27,8 +27,8 @@
 		"config": "3.3.6"
 	},
 	"peerDependencies": {
-		"@woocommerce/e2e-environment": "0.2.2",
-		"@woocommerce/e2e-utils": "0.1.5",
+		"@woocommerce/e2e-environment": "0.2.3",
+		"@woocommerce/e2e-utils": "0.1.6",
 		"puppeteer": "^2.0.0"
 	},
 	"devDependencies": {

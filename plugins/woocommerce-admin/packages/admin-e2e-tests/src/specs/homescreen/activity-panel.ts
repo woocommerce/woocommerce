@@ -9,7 +9,14 @@ import { createSimpleProduct, withRestApi } from '@woocommerce/e2e-utils';
 import { Login } from '../../pages/Login';
 import { OnboardingWizard } from '../../pages/OnboardingWizard';
 import { WcHomescreen } from '../../pages/WcHomescreen';
-import { createOrder, removeAllOrders, unhideTaskList } from '../../fixtures';
+import {
+	createOrder,
+	removeAllOrders,
+	unhideTaskList,
+	runActionScheduler,
+	updateOption,
+	resetWooCommerceState,
+} from '../../fixtures';
 import { OrdersActivityPanel } from '../../elements/OrdersActivityPanel';
 import { addReviewToProduct, waitForElementByText } from '../../utils/actions';
 
@@ -27,10 +34,7 @@ const testAdminHomescreenActivityPanel = () => {
 
 		beforeAll( async () => {
 			await login.login();
-
-			await withRestApi.deleteAllProducts();
-			await removeAllOrders();
-			await unhideTaskList( 'setup' );
+			await resetWooCommerceState();
 			await profileWizard.navigate();
 			await profileWizard.skipStoreSetup();
 
@@ -42,6 +46,8 @@ const testAdminHomescreenActivityPanel = () => {
 			await withRestApi.deleteAllProducts();
 			await removeAllOrders();
 			await unhideTaskList( 'setup' );
+			await runActionScheduler();
+			await updateOption( 'woocommerce_task_list_hidden', 'no' );
 			await login.logout();
 		} );
 
