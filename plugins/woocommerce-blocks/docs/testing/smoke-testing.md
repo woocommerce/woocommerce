@@ -134,3 +134,12 @@ In the `wp:woocommerce/product-search` substitute the URL used for the `action` 
   * [ ] Payment with Stripe (extension) and saved payment methods
   * [ ] Payment with Express payment methods (Chrome Pay or Apple Pay)
   * [ ] Make sure you test with logged in user and in browser incognito mode.
+
+<!-- FEEDBACK -->
+---
+
+[We're hiring!](https://woocommerce.com/careers/) Come work with us!
+
+🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/testing/smoke-testing.md)
+<!-- /FEEDBACK -->
+

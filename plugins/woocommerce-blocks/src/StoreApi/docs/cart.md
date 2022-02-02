@@ -466,3 +466,12 @@ curl --header "X-WC-Store-API-Nonce: 12345" --request POST /cart/select-shipping
 ```
 
 Returns the full [Cart Response](#cart-response) on success, or an [Error Response](#error-response) on failure.
+
+<!-- FEEDBACK -->
+---
+
+[We're hiring!](https://woocommerce.com/careers/) Come work with us!
+
+🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./src/StoreApi/docs/cart.md)
+<!-- /FEEDBACK -->
+
