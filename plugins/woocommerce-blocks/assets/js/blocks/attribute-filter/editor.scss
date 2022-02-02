@@ -1,3 +1,10 @@
+.editor-styles-wrapper .wp-block-woocommerce-attribute-filter {
+	// We need to override it because by default the global styles applied the border-style: solid;
+	// Our goal is not to have a border on main wrapper DOM element
+	border-style: none !important;
+}
+
+
 .wc-block-attribute-filter {
 	.components-placeholder__instructions {
 		border-bottom: 1px solid #e0e2e6;
@@ -33,4 +40,10 @@
 		display: block;
 		margin-bottom: 1em;
 	}
+
+	.components-disabled {
+		border-radius: inherit;
+		border-color: inherit;
+	}
+
 }

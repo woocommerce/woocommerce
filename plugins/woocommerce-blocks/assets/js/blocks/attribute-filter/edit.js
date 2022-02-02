@@ -3,7 +3,11 @@
  */
 import { __, sprintf, _n } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
-import { InspectorControls, BlockControls } from '@wordpress/block-editor';
+import {
+	InspectorControls,
+	BlockControls,
+	useBlockProps,
+} from '@wordpress/block-editor';
 import {
 	Placeholder,
 	Disabled,
@@ -46,6 +50,8 @@ const Edit = ( { attributes, setAttributes, debouncedSpeak } ) => {
 	const [ isEditing, setIsEditing ] = useState(
 		! attributeId && ! isPreview
 	);
+
+	const blockProps = useBlockProps();
 
 	const getBlockControls = () => {
 		return (
@@ -379,7 +385,7 @@ const Edit = ( { attributes, setAttributes, debouncedSpeak } ) => {
 	return Object.keys( ATTRIBUTES ).length === 0 ? (
 		noAttributesPlaceholder()
 	) : (
-		<>
+		<div { ...blockProps }>
 			{ getBlockControls() }
 			{ getInspectorControls() }
 			{ isEditing ? (
@@ -404,7 +410,7 @@ const Edit = ( { attributes, setAttributes, debouncedSpeak } ) => {
 					</Disabled>
 				</div>
 			) }
-		</>
+		</div>
 	);
 };
 
