@@ -321,6 +321,21 @@
 	}
 }
 
+.theme-twentytwentytwo {
+	.wc-block-grid__product-add-to-cart {
+		.added_to_cart {
+			margin-top: $gap-small;
+			display: block;
+		}
+	}
+
+	.wc-block-components-product-price {
+		ins {
+			text-decoration: none;
+		}
+	}
+}
+
 // Default screen-reader styles. Included as a fallback for themes that don't have support.
 .screen-reader-text {
 	@include visually-hidden();
