@@ -131,3 +131,12 @@ Current list of events:
 -   `experimental__woocommerce_blocks-checkout-set-shipping-address` - Fired when a shipping address is added during checkout.
 -   `experimental__woocommerce_blocks-checkout-set-billing-address` - Fired when a billing address is added during checkout.
 -   `experimental__woocommerce_blocks-checkout-set-phone-number` - Fired when a phone number is added during checkout.
+
+<!-- FEEDBACK -->
+---
+
+[We're hiring!](https://woocommerce.com/careers/) Come work with us!
+
+🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/blocks/feature-flags-and-experimental-interfaces.md)
+<!-- /FEEDBACK -->
+
