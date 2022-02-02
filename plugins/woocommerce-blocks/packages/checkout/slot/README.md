@@ -6,20 +6,20 @@ This module is an abstraction on top of the Slot and Fill implementation in Word
 
 ## Table of Contents <!-- omit in toc -->
 
-- [`createSlotFill( slotName )`](#createslotfill-slotname-)
-  - [Usage](#usage)
-  - [Options](#options)
-    - [`slotName (string, required)`](#slotname-string-required)
-    - [`onError (Function)`](#onerror-function)
-  - [`Slot` Component](#slot-component)
-    - [Usage](#usage-1)
-    - [Options](#options-1)
-      - [`as (string|element)`](#as-stringelement)
-      - [`className (string)`](#classname-string)
-      - [`fillProps (object)`](#fillprops-object)
-    - [`Fill` Component](#fill-component)
-- [Extending Checkout via Slot Fills](#extending-checkout-via-slot-fills)
-- [Available Slot Fills](#available-slot-fills)
+-   [`createSlotFill( slotName )`](#createslotfill-slotname-)
+    -   [Usage](#usage)
+    -   [Options](#options)
+        -   [`slotName (string, required)`](#slotname-string-required)
+        -   [`onError (Function)`](#onerror-function)
+    -   [`Slot` Component](#slot-component)
+        -   [Usage](#usage-1)
+        -   [Options](#options-1)
+            -   [`as (string|element)`](#as-stringelement)
+            -   [`className (string)`](#classname-string)
+            -   [`fillProps (object)`](#fillprops-object)
+        -   [`Fill` Component](#fill-component)
+-   [Extending Checkout via Slot Fills](#extending-checkout-via-slot-fills)
+-   [Available Slot Fills](#available-slot-fills)
 
 ## `createSlotFill( slotName )`
 
@@ -183,8 +183,11 @@ registerPlugin( 'my-plugin', { render } );
 
 Slot Fills are implemented throughout the Cart and Checkout Blocks, as well as some components. For a list of available Slot Fills, [see this document](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/docs/extensibility/available-slot-fills.md).
 
-<br/><br/><p align="center">
-<a href="https://woocommerce.com/">
-<img src="https://woocommerce.com/wp-content/themes/woo/images/logo-woocommerce@2x.png" alt="WooCommerce" height="28px" style="filter: grayscale(100%);
-	opacity: 0.2;" />
-</a><br/><a href="https://woocommerce.com/careers/">We're hiring</a>! Come work with us!</p>
+<!-- FEEDBACK -->
+---
+
+[We're hiring!](https://woocommerce.com/careers/) Come work with us!
+
+🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./packages/checkout/slot/README.md)
+<!-- /FEEDBACK -->
+

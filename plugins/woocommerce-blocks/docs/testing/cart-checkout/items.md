@@ -23,3 +23,12 @@
   - [ ] In one browser, increase the quantity of that item to the maximum you can.
   - [ ] In the other browser, try increasing the quantity. An error should appear.
 - [ ] You should be able to remove an item.
+
+<!-- FEEDBACK -->
+---
+
+[We're hiring!](https://woocommerce.com/careers/) Come work with us!
+
+🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/testing/cart-checkout/items.md)
+<!-- /FEEDBACK -->
+

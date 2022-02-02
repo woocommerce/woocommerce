@@ -93,3 +93,12 @@ The point of which stock is reserved differs between the new Block based checkou
 ![Checkout Processes](checkout.jpg)
 
 You can see that in both Checkouts, if stock cannot be reserved for all items in the order, either the order is rejected, or the user cannot proceed with checkout.
+
+<!-- FEEDBACK -->
+---
+
+[We're hiring!](https://woocommerce.com/careers/) Come work with us!
+
+🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/blocks/stock-reservation.md)
+<!-- /FEEDBACK -->
+

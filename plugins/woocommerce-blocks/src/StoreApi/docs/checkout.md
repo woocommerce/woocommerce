@@ -129,3 +129,12 @@ curl --header "X-WC-Store-API-Nonce: 12345" --request POST https://example-store
 	}
 }
 ```
+
+<!-- FEEDBACK -->
+---
+
+[We're hiring!](https://woocommerce.com/careers/) Come work with us!
+
+🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./src/StoreApi/docs/checkout.md)
+<!-- /FEEDBACK -->
+

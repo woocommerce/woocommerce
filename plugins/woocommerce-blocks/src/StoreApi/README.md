@@ -11,6 +11,7 @@ This API is used internally by Blocks--it is still in flux and may be subject to
 ## Extensibility
 
 Store API offers the possibility to extend endpoints using `ExtendRestAPI`. You can read more about extending Store API in the [Extensibility in WooCommerce Blocks](https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/trunk/docs/extensibility) section.
+
 ## Basic usage
 
 Example of a valid API request using cURL:
@@ -52,7 +53,7 @@ The following table shows the possible return codes for API requests.
 | `200 OK`                 | The request was successful, the resource(s) itself is returned as JSON.                                                                     |
 | `204 No Content`         | The server has successfully fulfilled the request and that there is no additional content to send in the response payload body.             |
 | `201 Created`            | The POST request was successful and the resource is returned as JSON.                                                                       |
-| `400 Bad Request`        | A required attribute of the API request is missing.                                                                                         |  |
+| `400 Bad Request`        | A required attribute of the API request is missing.                                                                                         |
 | `403 Forbidden`          | The request is not allowed.                                                                                                                 |
 | `404 Not Found`          | A resource could not be accessed, for example it doesn't exist.                                                                             |
 | `405 Method Not Allowed` | The request is not supported.                                                                                                               |
@@ -88,20 +89,33 @@ Additional pagination headers are also sent back.
 
 Available resources in the Store API are listed below, with links to more detailed documentation.
 
-| Resource                                                     | Available endpoints                                                                   |
-| :----------------------------------------------------------- | :------------------------------------------------------------------------------------ |
-| [`Cart`](docs/cart.md)                                       | [`/wc/store/cart`](docs/cart.md#get-cart)                                             |
-|                                                              | [`/wc/store/cart/add-item`](docs/cart.md#add-item)                                    |
-|                                                              | [`/wc/store/cart/remove-item`](docs/cart.md#remove-item)                              |
-|                                                              | [`/wc/store/cart/update-item`](docs/cart.md#update-item)                              |
-|                                                              | [`/wc/store/cart/apply-coupon`](docs/cart.md#apply-coupon)                            |
-|                                                              | [`/wc/store/cart/remove-coupon`](docs/cart.md#remove-coupon)                          |
-|                                                              | [`/wc/store/cart/update-customer`](docs/cart.md#update-customer)                      |
-|                                                              | [`/wc/store/cart/select-shipping-rate`](docs/cart.md#select-shipping-rate)            |
-| [`Cart Items`](docs/cart-items.md)                           | [`/wc/store/cart/items`](docs/cart-items.md#list-cart-items)                          |
-| [`Cart Coupons`](docs/cart-coupons.md)                       | [`/wc/store/cart/coupons`](docs/cart-coupons.md#list-cart-coupons)                    |
-| [`Checkout`](docs/checkout.md)                               | [`/wc/store/checkout`](docs/checkout.md)                                              |
-| [`Products`](docs/products.md)                               | [`/wc/store/products`](docs/products.md#list-products)                                |
-| [`Product Collection Data`](docs/product-collection-data.md) | [`/wc/store/products/collection-data`](docs/product-collection-data.md)               |
-| [`Product Attributes`](docs/product-attributes.md)           | [`/wc/store/products/attributes`](docs/product-attributes.md#list-product-attributes) |
-| [`Product Attribute Terms`](docs/product-attribute-terms.md) | [`/wc/store/products/attributes/1/terms`](docs/product-attribute-terms.md)            |
+| Resource                                                     | Methods                        | Endpoints                                                                                  |
+| :----------------------------------------------------------- | :----------------------------- | ------------------------------------------------------------------------------------------ |
+| [`Cart`](docs/cart.md)                                       | `GET`                          | [`/wc/store/cart`](docs/cart.md#get-cart)                                                  |
+|                                                              | `POST`                         | [`/wc/store/cart/add-item`](docs/cart.md#add-item)                                         |
+|                                                              | `POST`                         | [`/wc/store/cart/remove-item`](docs/cart.md#remove-item)                                   |
+|                                                              | `POST`                         | [`/wc/store/cart/update-item`](docs/cart.md#update-item)                                   |
+|                                                              | `POST`                         | [`/wc/store/cart/apply-coupon`](docs/cart.md#apply-coupon)                                 |
+|                                                              | `POST`                         | [`/wc/store/cart/remove-coupon`](docs/cart.md#remove-coupon)                               |
+|                                                              | `POST`                         | [`/wc/store/cart/update-customer`](docs/cart.md#update-customer)                           |
+|                                                              | `POST`                         | [`/wc/store/cart/select-shipping-rate`](docs/cart.md#select-shipping-rate)                 |
+| [`Cart Items`](docs/cart-items.md)                           | `GET`, `POST`, `DELETE`        | [`/wc/store/cart/items`](docs/cart-items.md#list-cart-items)                               |
+|                                                              | `GET`, `POST`, `PUT`, `DELETE` | [`/wc/store/cart/items/:key`](docs/cart-items.md#single-cart-item)                         |
+| [`Cart Coupons`](docs/cart-coupons.md)                       | `GET`, `POST`, `DELETE`        | [`/wc/store/cart/coupons`](docs/cart-coupons.md#list-cart-coupons)                         |
+|                                                              | `GET`, `DELETE`                | [`/wc/store/cart/coupon/:code`](docs/cart-coupons.md#single-cart-coupon)                   |
+| [`Checkout`](docs/checkout.md)                               | `GET`, `POST`                  | [`/wc/store/checkout`](docs/checkout.md)                                                   |
+| [`Products`](docs/products.md)                               | `GET`                          | [`/wc/store/products`](docs/products.md#list-products)                                     |
+|                                                              | `GET`                          | [`/wc/store/products/:id`](docs/products.md#single-product)                                |
+| [`Product Collection Data`](docs/product-collection-data.md) | `GET`                          | [`/wc/store/products/collection-data`](docs/product-collection-data.md)                    |
+| [`Product Attributes`](docs/product-attributes.md)           | `GET`                          | [`/wc/store/products/attributes`](docs/product-attributes.md#list-product-attributes)      |
+|                                                              | `GET`                          | [`/wc/store/products/attributes/:id`](docs/product-attributes.md#single-product-attribute) |
+| [`Product Attribute Terms`](docs/product-attribute-terms.md) | `GET`                          | [`/wc/store/products/attributes/:id/terms`](docs/product-attribute-terms.md)               |
+
+<!-- FEEDBACK -->
+---
+
+[We're hiring!](https://woocommerce.com/careers/) Come work with us!
+
+🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./src/StoreApi/README.md)
+<!-- /FEEDBACK -->
+
