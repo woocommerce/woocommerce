@@ -5,6 +5,8 @@
 
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
+use Automattic\Jetpack\Constants;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -19,8 +21,17 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 */
 	public function get_orders_table_name() {
 		global $wpdb;
-
 		return $wpdb->prefix . 'wc_orders';
+	}
+
+	public function get_addresses_table_name() {
+		global $wpdb;
+		return $wpdb->prefix . 'wc_order_addresses';
+	}
+
+	public function get_operational_data_table_name() {
+		global $wpdb;
+		return $wpdb->prefix . 'wc_order_operational_data';
 	}
 
 	// TODO: Add methods for other table names as appropriate.
@@ -99,8 +110,21 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		return 'shop_order';
 	}
 
+	/**
+	 * @param \WC_Order $order
+	 */
 	public function create( &$order ) {
-		throw new \Exception( 'Unimplemented' );
+		global $wpdb;
+		$order->set_version( Constants::get_constant( 'WC_VERSION' ) );
+		$order->set_currency( $order->get_currency() ? $order->get_currency() : get_woocommerce_currency() );
+		if ( ! $order->get_date_created( 'edit' ) ) {
+			$order->set_date_created( time() );
+		}
+
+		$table_name = $this->get_orders_table_name();
+		$insert_query = "
+			INSERT INTO $table_name ()
+		";
 	}
 
 	public function update( &$order ) {
@@ -140,4 +164,74 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	}
 
 	//phpcs:enable Squiz.Commenting.FunctionComment.Missing
+
+
+	public function get_schema() {
+		$orders_table_name = $this->get_orders_table_name();
+		$addresses_table_name = $this->get_addresses_table_name();
+		$operational_data_table_name = $this->get_operational_data_table_name();
+		$table = "
+CREATE TABLE $orders_table_name (
+	id bigint(20) unsigned auto_increment,
+	post_id bigint(20) unsigned null,
+	status varchar(20) null,
+	currency varchar(10) null,
+	tax_amount decimal(26,8) null,
+	total_amount decimal(26,8) null,
+	customer_id bigint(20) unsigned null,
+	billing_email varchar(320) null,
+	date_created_gmt datetime null,
+	date_updated_gmt datetime null,
+	parent_order_id bigint(20) unsigned null,
+	payment_method varchar(100) null,
+	payment_method_title text null,
+	transaction_id varchar(100) null,
+	ip_address varchar(100) null,
+	user_agent text null,
+	PRIMARY KEY (id),
+	KEY post_id (post_id),
+	KEY status (status),
+	KEY date_created (date_created_gmt),
+	KEY customer_id_billing_email (customer_id, billing_email)
+);
+CREATE TABLE $addresses_table_name (
+	id bigint(20) unsigned auto_increment primary key,
+	order_id bigint(20) unsigned NOT NULL,
+	address_type varchar(20) null,
+	first_name text null,
+	last_name text null,
+	company text null,
+	address_1 text null,
+	address_2 text null,
+	city text null,
+	state text null,
+	postcode text null,
+	country text null,
+	email varchar(320) null,
+	phone varchar(100) null,
+	KEY order_id (order_id)
+);
+CREATE TABLE $operational_data_table_name (
+	id bigint(20) unsigned auto_increment primary key,
+	order_id bigint(20) unsigned NULL,
+	created_via varchar(100) NULL,
+	woocommerce_version varchar(20) NULL,
+	prices_include_tax tinyint(1) NULL,
+	coupon_usages_are_counted tinyint(1) NULL,
+	download_permissionis_granted tinyint(1) NULL,
+	cart_hash varchar(100) NULL,
+	new_order_email_sent tinyint(1) NULL,
+	order_key varchar(100) NULL,
+	order_stock_reduced tinyint(1) NULL,
+	date_paid_gmt datetime NULL,
+	date_completed_gmt datetime NULL,
+	shipping_tax_amount decimal(26, 8) NULL,
+	shopping_total_amount decimal(26, 8) NULL,
+	discount_tax_amount decimal(26, 8) NULL,
+	discount_total_amount decimal(26, 8) NULL,
+	KEY order_id (order_id),
+	KEY order_key (order_key)
+);";
+		return $table;
+	}
 }
