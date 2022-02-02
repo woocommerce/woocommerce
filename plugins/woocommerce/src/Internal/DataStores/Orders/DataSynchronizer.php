@@ -5,6 +5,8 @@
 
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
+use Automattic\Jetpack\Constants;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -43,13 +45,8 @@ class DataSynchronizer {
 	 * @return bool True if the custom orders table exist in the database.
 	 */
 	public function check_orders_table_exists(): bool {
-		global $wpdb;
-
-		$table_name = $this->data_store->get_orders_table_name();
-
-		$query = $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $this->$table_name ) );
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		return $table_name === $wpdb->get_var( $query );
+		$missing_tables = \WC_Install::verify_schema( $this->data_store->get_schema() );
+		return count( $missing_tables ) === 0;
 	}
 
 	/**
@@ -65,10 +62,10 @@ class DataSynchronizer {
 	 * Initiate a table regeneration process.
 	 */
 	public function initiate_regeneration() {
+		require_once( Constants::get_constant( 'ABSPATH' ) . 'wp-admin/includes/upgrade.php' );
 		update_option( self::CUSTOM_ORDERS_TABLE_DATA_REGENERATION_IN_PROGRESS, 'yes' );
 		update_option( self::CUSTOM_ORDERS_TABLE_DATA_REGENERATION_DONE_COUNT, 0 );
-
-		// TODO: Create the tables as appropriate, schedule the table filling in batches with Action Scheduler.
+		dbDelta( $this->data_store->get_schema() );
 	}
 
 	/**

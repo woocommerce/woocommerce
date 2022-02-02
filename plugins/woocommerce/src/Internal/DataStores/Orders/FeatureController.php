@@ -35,7 +35,7 @@ class FeatureController {
 	 *
 	 * @var DataSyncrhonizer
 	 */
-	private $data_synchronizer;
+	public $data_synchronizer;
 
 	/**
 	 * Is the feature visible?
@@ -247,7 +247,7 @@ class FeatureController {
 	 * @throws \Exception The table regeneration can't be started.
 	 */
 	private function check_can_do_table_regeneration() {
-		if ( ! $this->$this->is_feature_visible() ) {
+		if ( ! $this->is_feature_visible() ) {
 			throw new \Exception( "Can't do custom orders table regeneration: the feature isn't enabled" );
 		}
 
@@ -271,7 +271,7 @@ class FeatureController {
 	 * @return array The updated settings sections array.
 	 */
 	private function get_settings_sections( array $sections ): array {
-		if ( ! $this->is_feature_visible() || ! $this->data_synchronizer->check_orders_table_exists() ) {
+		if ( ! $this->is_feature_visible() ) {
 			return $sections;
 		}
 
@@ -289,7 +289,7 @@ class FeatureController {
 	 * @return array The updated settings array.
 	 */
 	private function get_settings( array $settings, string $section_id ): array {
-		if ( ! $this->is_feature_visible() || 'custom_data_stores' !== $section_id || ! $this->data_synchronizer->check_orders_table_exists() ) {
+		if ( ! $this->is_feature_visible() || 'custom_data_stores' !== $section_id ) {
 			return $settings;
 		}
 
@@ -298,24 +298,16 @@ class FeatureController {
 			'type'  => 'title',
 		);
 
-		$regeneration_is_in_progress = $this->data_synchronizer->data_regeneration_is_in_progress();
-
-		if ( $regeneration_is_in_progress ) {
-			$title_item['desc'] = __( 'These settings are not available while the orders table regeneration is in progress.', 'woocommerce' );
-		}
-
 		$settings[] = $title_item;
 
-		if ( ! $regeneration_is_in_progress ) {
-			$settings[] = array(
-				'title'         => __( 'Enable table usage', 'woocommerce' ),
-				'desc'          => __( 'Use the custom orders table as the main orders data store.', 'woocommerce' ),
-				'id'            => self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
-				'default'       => 'no',
-				'type'          => 'checkbox',
-				'checkboxgroup' => 'start',
-			);
-		}
+		$settings[] = array(
+			'title'         => __( 'Enable table usage', 'woocommerce' ),
+			'desc'          => __( 'Use the custom orders table as the main orders data store.', 'woocommerce' ),
+			'id'            => self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
+			'default'       => 'no',
+			'type'          => 'checkbox',
+			'checkboxgroup' => 'start',
+		);
 
 		$settings[] = array( 'type' => 'sectionend' );
 
