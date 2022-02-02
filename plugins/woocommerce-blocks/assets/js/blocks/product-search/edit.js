@@ -115,9 +115,12 @@ const Edit = ( {
 					<button
 						type="submit"
 						className="wc-block-product-search__button"
-						label={ __( 'Search', 'woo-gutenberg-products-block' ) }
+						aria-label={ __(
+							'Search',
+							'woo-gutenberg-products-block'
+						) }
 						onClick={ ( e ) => e.preventDefault() }
-						tabIndex="-1"
+						tabIndex={ -1 }
 					>
 						<svg
 							aria-hidden="true"

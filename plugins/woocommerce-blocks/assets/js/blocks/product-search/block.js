@@ -58,7 +58,10 @@ const ProductSearchBlock = ( {
 					<button
 						type="submit"
 						className="wc-block-product-search__button"
-						label={ __( 'Search', 'woo-gutenberg-products-block' ) }
+						aria-label={ __(
+							'Search',
+							'woo-gutenberg-products-block'
+						) }
 					>
 						<svg
 							aria-hidden="true"
