@@ -312,7 +312,7 @@ return array(
 		'DE-HB' => __( 'Bremen', 'woocommerce' ),
 		'DE-HH' => __( 'Hamburg', 'woocommerce' ),
 		'DE-HE' => __( 'Hesse', 'woocommerce' ),
-		'DE-MV' => __( 'Mecklenburg-Western Pomerania', 'woocommerce' ),
+		'DE-MV' => __( 'Mecklenburg-Vorpommern', 'woocommerce' ),
 		'DE-NI' => __( 'Lower Saxony', 'woocommerce' ),
 		'DE-NW' => __( 'North Rhine-Westphalia', 'woocommerce' ),
 		'DE-RP' => __( 'Rhineland-Palatinate', 'woocommerce' ),
