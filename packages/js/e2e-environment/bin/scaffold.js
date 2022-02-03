@@ -27,7 +27,7 @@ const args = process.argv.slice( 2 );
 const command = args[0];
 let packageName = null;
 
-if ( args[1] && args[1].substr(0, 2) !== '--') {
+if ( args[1] && args[1].substr(0, 2) !== '--' ) {
 	packageName = args[1];
 }
 
