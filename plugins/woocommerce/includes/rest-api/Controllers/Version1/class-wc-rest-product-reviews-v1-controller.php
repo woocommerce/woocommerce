@@ -130,7 +130,7 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
-		if ( ! wc_rest_check_post_permissions( 'product', 'read' ) ) {
+		if ( ! wc_rest_check_product_reviews_permissions( 'read' ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
@@ -144,9 +144,10 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
-		$post = get_post( (int) $request['product_id'] );
+		$id     = (int) $request['id'];
+		$review = get_comment( $id );
 
-		if ( $post && ! wc_rest_check_post_permissions( 'product', 'read', $post->ID ) ) {
+		if ( $review && ! wc_rest_check_product_reviews_permissions( 'read', $review->comment_ID ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
@@ -160,10 +161,10 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function create_item_permissions_check( $request ) {
-		$post = get_post( (int) $request['product_id'] );
-		if ( $post && ! wc_rest_check_post_permissions( 'product', 'create', $post->ID ) ) {
+		if ( ! wc_rest_check_product_reviews_permissions( 'create' ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
+
 		return true;
 	}
 
@@ -174,10 +175,13 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function update_item_permissions_check( $request ) {
-		$post = get_post( (int) $request['product_id'] );
-		if ( $post && ! wc_rest_check_post_permissions( 'product', 'edit', $post->ID ) ) {
+		$id     = (int) $request['id'];
+		$review = get_comment( $id );
+
+		if ( $review && ! wc_rest_check_product_reviews_permissions( 'edit', $review->comment_ID ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you cannot edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
+
 		return true;
 	}
 
@@ -188,10 +192,13 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function delete_item_permissions_check( $request ) {
-		$post = get_post( (int) $request['product_id'] );
-		if ( $post && ! wc_rest_check_post_permissions( 'product', 'delete', $post->ID ) ) {
+		$id     = (int) $request['id'];
+		$review = get_comment( $id );
+
+		if ( $review && ! wc_rest_check_product_reviews_permissions( 'delete', $review->comment_ID ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you cannot delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
+
 		return true;
 	}
 
