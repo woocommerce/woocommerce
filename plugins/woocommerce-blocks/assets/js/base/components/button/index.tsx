@@ -11,13 +11,35 @@ import Spinner from '@woocommerce/base-components/spinner';
  */
 import './style.scss';
 
-interface ButtonProps extends WPButton.ButtonProps {
+export interface ButtonProps extends WPButton.ButtonProps {
+	/**
+	 * Component wrapper classname
+	 *
+	 * @default 'wc-block-components-button'
+	 */
 	className?: string;
+	/**
+	 * Show spinner
+	 *
+	 * @default false
+	 */
 	showSpinner?: boolean;
+	/**
+	 * Button content
+	 */
 	children?: ReactNode;
+	/**
+	 * Button state
+	 */
 	disabled?: boolean;
+	/**
+	 * Event handler triggered when the button is clicked
+	 */
 	onClick?: ( e: React.MouseEvent< HTMLButtonElement, MouseEvent > ) => void;
-	type?: 'input' | 'submit';
+	/**
+	 * Button type
+	 */
+	type?: 'button' | 'input' | 'submit';
 }
 
 /**
