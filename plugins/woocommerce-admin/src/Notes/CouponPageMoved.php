@@ -94,15 +94,13 @@ class CouponPageMoved {
 	 * @return bool
 	 */
 	protected static function has_unactioned_note() {
-		$notes = self::get_data_store()->get_notes(
-			[
-				'name'       => [ self::NOTE_NAME ],
-				'status'     => [ 'unactioned' ],
-				'is_deleted' => false,
-			]
-		);
+		$note = Notes::get_note_by_name( self::NOTE_NAME );
 
-		return ! empty( $notes );
+		if ( ! $note ) {
+			return false;
+		}
+
+		return $note->get_status() === 'unactioned';
 	}
 
 	/**
@@ -111,14 +109,13 @@ class CouponPageMoved {
 	 * @return bool
 	 */
 	protected static function has_dismissed_note() {
-		$notes = self::get_data_store()->get_notes(
-			[
-				'name'       => [ self::NOTE_NAME ],
-				'is_deleted' => true,
-			]
-		);
+		$note = Notes::get_note_by_name( self::NOTE_NAME );
 
-		return ! empty( $notes );
+		if ( ! $note ) {
+			return false;
+		}
+
+		return ! $note->get_is_deleted();
 	}
 
 	/**
