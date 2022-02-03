@@ -30,13 +30,13 @@ export function createOrderTransformer(): ModelTransformer< Order > {
 			new IgnorePropertyTransformation( [ 'date_created', 'date_modified' ] ),
 			new ModelTransformerTransformation( 'billing', BillingOrderAddress, createBillingAddressTransformer() ),
 			new ModelTransformerTransformation( 'shipping', ShippingOrderAddress, createShippingAddressTransformer() ),
-			new ModelTransformerTransformation( 'tax_lines', OrderTaxRate, createOrderTaxRateTransformer() ),
+			new ModelTransformerTransformation( 'taxLines', OrderTaxRate, createOrderTaxRateTransformer() ),
 			new ModelTransformerTransformation( 'refunds', OrderRefundLine, createOrderRefundLineTransformer() ),
-			new ModelTransformerTransformation( 'coupon_lines', OrderCouponLine, createOrdeCouponLineTransformer() ),
-			new ModelTransformerTransformation( 'fee_lines', OrderFeeLine, createOrderFeeLineTransformer() ),
-			new ModelTransformerTransformation( 'line_items', OrderLineItem, createOrderLineItemTransformer() ),
-			new ModelTransformerTransformation( 'shipping_lines', OrderShippingLine, createOrderShippingItemTransformer() ),
-			new ModelTransformerTransformation( 'meta_data', MetaData, createMetaDataTransformer() ),
+			new ModelTransformerTransformation( 'couponLines', OrderCouponLine, createOrdeCouponLineTransformer() ),
+			new ModelTransformerTransformation( 'feeLines', OrderFeeLine, createOrderFeeLineTransformer() ),
+			new ModelTransformerTransformation( 'lineItems', OrderLineItem, createOrderLineItemTransformer() ),
+			new ModelTransformerTransformation( 'shippingLines', OrderShippingLine, createOrderShippingItemTransformer() ),
+			new ModelTransformerTransformation( 'metaData', MetaData, createMetaDataTransformer() ),
 
 			new PropertyTypeTransformation(
 				{
@@ -212,7 +212,7 @@ function createOrderRefundLineTransformer(): ModelTransformer< OrderRefundLine >
 function createOrdeCouponLineTransformer(): ModelTransformer< OrderCouponLine > {
 	return new ModelTransformer(
 		[
-			new ModelTransformerTransformation( 'meta_data', MetaData, createMetaDataTransformer() ),
+			new ModelTransformerTransformation( 'metaData', MetaData, createMetaDataTransformer() ),
 			new PropertyTypeTransformation(
 				{
 					code: PropertyType.String,
