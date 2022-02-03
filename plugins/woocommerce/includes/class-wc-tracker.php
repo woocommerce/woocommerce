@@ -151,6 +151,9 @@ class WC_Tracker {
 		// Payment gateway info.
 		$data['gateways'] = self::get_active_payment_gateways();
 
+		// WcPay settings info.
+		$data['wcpay_settings'] = self::get_wcpay_settings();
+
 		// Shipping method info.
 		$data['shipping_methods'] = self::get_active_shipping_methods();
 
@@ -301,6 +304,15 @@ class WC_Tracker {
 			'active_plugins'   => $active_plugins,
 			'inactive_plugins' => $plugins,
 		);
+	}
+
+	/**
+	 * Get the settings of WooCommerce Payments plugin
+	 *
+	 * @return array
+	 */
+	private static function get_wcpay_settings() {
+		return get_option( 'woocommerce_woocommerce_payments_settings' );
 	}
 
 	/**
@@ -588,6 +600,7 @@ class WC_Tracker {
 
 		return $active_gateways;
 	}
+
 
 	/**
 	 * Get a list of all active shipping methods.
