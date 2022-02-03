@@ -611,16 +611,16 @@
         },
         {
             "name": "woocommerce/woocommerce-blocks",
-            "version": "v6.7.3",
+            "version": "v6.9.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-gutenberg-products-block.git",
-                "reference": "742439da222272235190cbf14cc5ea0d4f178fa5"
+                "reference": "ea6675c86c11138860766a824420b6c7fbcb7e47"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/742439da222272235190cbf14cc5ea0d4f178fa5",
-                "reference": "742439da222272235190cbf14cc5ea0d4f178fa5",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/ea6675c86c11138860766a824420b6c7fbcb7e47",
+                "reference": "ea6675c86c11138860766a824420b6c7fbcb7e47",
                 "shasum": ""
             },
             "require": {
@@ -628,7 +628,7 @@
                 "composer/installers": "^1.7.0"
             },
             "require-dev": {
-                "johnbillion/wp-hooks-generator": "0.6.1",
+                "johnbillion/wp-hooks-generator": "^0.7.0",
                 "mockery/mockery": "^1.4",
                 "woocommerce/woocommerce-sniffs": "0.1.0",
                 "wp-phpunit/wp-phpunit": "^5.4",
@@ -704,8 +704,8 @@
             },
             "autoload": {
                 "psr-4": {
-                    "Automattic\\Jetpack\\Changelogger\\": "src",
-                    "Automattic\\Jetpack\\Changelog\\": "lib"
+                    "Automattic\\Jetpack\\Changelog\\": "lib",
+                    "Automattic\\Jetpack\\Changelogger\\": "src"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
