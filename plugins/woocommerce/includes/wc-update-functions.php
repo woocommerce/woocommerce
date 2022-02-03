@@ -2345,13 +2345,15 @@ function wc_update_600_db_version() {
  * @return false Always false, since the LookupDataStore class handles all the data filling process.
  */
 function wc_update_630_create_product_attributes_lookup_table() {
-	$data_store = wc_get_container()->get( LookupDataStore::class );
+	$data_store       = wc_get_container()->get( LookupDataStore::class );
+	$data_regenerator = wc_get_container()->get( DataRegenerator::class );
+
 	if ( $data_store->check_lookup_table_exists() ) {
-		return false;
+		$data_regenerator->maybe_create_table_indices();
+	} else {
+		$data_regenerator->initiate_regeneration();
 	}
 
-	$data_regenerator = wc_get_container()->get( DataRegenerator::class );
-	$data_regenerator->initiate_regeneration();
 	return false;
 }
 

@@ -141,6 +141,8 @@ CREATE TABLE ' . $this->lookup_table_name . '(
 		);
 		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 
+		$this->maybe_create_table_indices();
+
 		$last_existing_product_id =
 			WC()->call_function(
 				'wc_get_products',
@@ -163,6 +165,41 @@ CREATE TABLE ' . $this->lookup_table_name . '(
 		update_option( 'woocommerce_attribute_lookup_processed_count', 0 );
 
 		return true;
+	}
+
+	/**
+	 * Create the indices for the lookup table unless they exist already.
+	 */
+	public function maybe_create_table_indices() {
+		global $wpdb;
+
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+		$wpdb->query(
+			"
+IF (SELECT COUNT(1)
+	FROM INFORMATION_SCHEMA.STATISTICS
+	WHERE table_schema=' " . $wpdb->dbname . "'
+	AND table_name='" . $this->lookup_table_name . "'
+	AND index_name='product_or_parent_id_term_id')=0
+THEN
+	ALTER TABLE wp_wc_product_attributes_lookup
+	ADD INDEX product_or_parent_id_term_id (product_or_parent_id, term_id);
+END IF;"
+		);
+
+		$wpdb->query(
+			"
+IF (SELECT COUNT(1)
+	FROM INFORMATION_SCHEMA.STATISTICS
+	WHERE table_schema=' " . $wpdb->dbname . "'
+	AND table_name='" . $this->lookup_table_name . "'
+	AND index_name='is_variation_attribute_term_id')=0
+THEN
+	ALTER TABLE wp_wc_product_attributes_lookup
+	ADD INDEX is_variation_attribute_term_id (is_variation_attribute, term_id);
+END IF;"
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 	}
 
 	/**
@@ -247,7 +284,6 @@ CREATE TABLE ' . $this->lookup_table_name . '(
 	 * Cleanup/final option setup after the regeneration has been completed.
 	 *
 	 * @param bool $enable_usage Whether the table usage should be enabled or not.
-	 *
 	 */
 	private function finalize_regeneration( bool $enable_usage ) {
 		delete_option( 'woocommerce_attribute_lookup_last_product_id_to_process' );
