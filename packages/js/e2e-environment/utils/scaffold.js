@@ -103,7 +103,7 @@ const getPackageData = ( packageName ) => {
 /**
  * Install test runner and test container defaults
  */
-const installDefaults = (force) => {
+const installDefaults = ( force ) => {
 	createLocalE2ePath( 'docker' );
 	console.log( 'Writing tests/e2e/docker/initialize.sh' );
 	confirmLocalCopy( `docker${path.sep}initialize.sh`, `installFiles${path.sep}initialize.sh`, '', force );
