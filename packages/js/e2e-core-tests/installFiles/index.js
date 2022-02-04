@@ -1,5 +1,12 @@
+/**
+ * External dependencies
+ */
+const path = require( 'path' );
+
+const buildPath = ( filename ) => `installFiles${path.sep}${filename}`;
+
 module.exports = {
-	testSpecs: 'installFiles/scaffold-tests.json',
-	defaultJson: 'installFiles/default-test-config.json',
-	initializeSh: 'installFiles/initialize.sh.default',
+	testSpecs: buildPath( 'scaffold-tests.json' ),
+	defaultJson: buildPath( 'default-test-config.json' ),
+	initializeSh: buildPath( 'initialize.sh.default' ),
 };
