@@ -17,7 +17,7 @@ import classnames from 'classnames';
  */
 import '../tasks/task-list.scss';
 import taskHeaders from './task-headers';
-import DismissModal from './dissmiss-modal';
+import DismissModal from './dismiss-modal';
 import TaskListCompleted from './completed';
 
 export const TaskList = ( {

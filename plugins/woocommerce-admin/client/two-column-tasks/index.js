@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useEffect } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { ONBOARDING_STORE_NAME, OPTIONS_STORE_NAME } from '@woocommerce/data';
 
@@ -34,11 +33,6 @@ const TaskDashboard = ( { query, twoColumns } ) => {
 		keepCompletedTaskList,
 		isResolving: isResolvingOptions,
 	} = useSelect( taskDashboardSelect );
-
-	useEffect( () => {
-		document.body.classList.add( 'woocommerce-onboarding' );
-		document.body.classList.add( 'woocommerce-task-dashboard__body' );
-	}, [] );
 
 	const { task } = query;
 

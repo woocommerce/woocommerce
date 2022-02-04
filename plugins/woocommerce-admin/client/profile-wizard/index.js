@@ -76,7 +76,6 @@ class ProfileWizard extends Component {
 
 	componentDidMount() {
 		document.body.classList.remove( 'woocommerce-admin-is-loading' );
-		document.body.classList.add( 'woocommerce-onboarding' );
 		document.body.classList.add( 'woocommerce-profile-wizard__body' );
 		document.body.classList.add( 'woocommerce-admin-full-screen' );
 		document.body.classList.add( 'is-wp-toolbar-disabled' );
@@ -87,7 +86,6 @@ class ProfileWizard extends Component {
 	}
 
 	componentWillUnmount() {
-		document.body.classList.remove( 'woocommerce-onboarding' );
 		document.body.classList.remove( 'woocommerce-profile-wizard__body' );
 		document.body.classList.remove( 'woocommerce-admin-full-screen' );
 		document.body.classList.remove( 'is-wp-toolbar-disabled' );

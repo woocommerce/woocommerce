@@ -4,7 +4,7 @@
 import { Button, Modal } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
-const DissmissModal = ( {
+const DismissModal = ( {
 	showDismissModal,
 	setShowDismissModal,
 	hideTasks,
@@ -55,4 +55,4 @@ const DissmissModal = ( {
 	);
 };
 
-export default DissmissModal;
+export default DismissModal;

@@ -7,7 +7,7 @@ import { useDispatch } from '@wordpress/data';
 import { Button, Modal } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
-const DissmissAllModal = ( { onClose } ) => {
+const DismissAllModal = ( { onClose } ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
 
 	const { batchUpdateNotes, removeAllNotes } = useDispatch(
@@ -81,4 +81,4 @@ const DissmissAllModal = ( { onClose } ) => {
 	);
 };
 
-export default DissmissAllModal;
+export default DismissAllModal;

@@ -26,7 +26,7 @@ import moment from 'moment';
 import { ActivityCard } from '~/activity-panel/activity-card';
 import { hasValidNotes, truncateRenderableHTML } from './utils';
 import { getScreenName } from '../utils';
-import DismissAllModal from './dissmiss-all-modal';
+import DismissAllModal from './dismiss-all-modal';
 import './index.scss';
 
 const renderEmptyCard = () => (
