@@ -31,8 +31,9 @@ const fetchAssetId = () => {
 			} );
 
 			response.on( 'end', () => {
-				const parsedBody = JSON.parse( responseBody );
-				resolve( parsedBody[0].id );
+				const assets = JSON.parse( responseBody );
+				// use the most recently uploaded asset
+				resolve( assets[ assets.length - 1 ].id );
 			} );
 		} );
 
