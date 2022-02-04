@@ -3070,6 +3070,7 @@ class WC_AJAX {
 					continue;
 				}
 				$enabled = $gateway->get_option( 'enabled', 'no' );
+				$gateway->add_admin_options_tracking();
 
 				if ( ! wc_string_to_bool( $enabled ) ) {
 					if ( $gateway->needs_setup() ) {
@@ -3083,6 +3084,7 @@ class WC_AJAX {
 					$gateway->update_option( 'enabled', 'no' );
 				}
 
+				do_action( 'woocommerce_update_options' );
 				wp_send_json_success( ! wc_string_to_bool( $enabled ) );
 				wp_die();
 			}
