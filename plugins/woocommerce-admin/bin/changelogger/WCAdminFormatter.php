@@ -103,12 +103,9 @@ class WCAdminFormatter extends KeepAChangelogParser implements FormatterPlugin {
 					$row = preg_replace( '/' . $this->bullet . '/', '', $row, 1 );
 					$row_segments = explode( ':', $row );
 
-					array_push(
-						$changes,
-						array(
-							'subheading' => trim( $row_segments[0] ),
-							'content'    => trim( $row_segments[1] ),
-						)
+					$changes[] = array(
+						'subheading' => trim($row_segments[0]),
+						'content' => count( $row_segments ) > 1 ? trim($row_segments[1]) : '',
 					);
 				}
 

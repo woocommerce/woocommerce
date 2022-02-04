@@ -60,7 +60,8 @@ class WriteCommand extends Command {
 	protected function configure() {
 		$this->setDescription( 'Generate test instructions from a given version.' )
 			->addArgument( 'version', InputArgument::REQUIRED, 'Release version from changelog.txt.' )
-			->addOption( 'save-to', null, InputOption::VALUE_REQUIRED, 'Specificity a file path to save the output.' );
+			->addOption( 'save-to', null, InputOption::VALUE_REQUIRED, 'Specificity a file path to save the output.' )
+			->addOption( 'types', null, InputOption::VALUE_REQUIRED, 'List of changelog types to use for testing instructions.' );
 	}
 
 	/**
@@ -77,6 +78,11 @@ class WriteCommand extends Command {
 		$saveTo = $input->getOption( 'save-to' );
 		if ( null === $saveTo ) {
 			$saveTo = $this->config->getOutputFilePath();
+		}
+		$types = $input->getOption( 'types');
+		$changelog_types = array();
+		if ( null !== $types ) {
+			$changelog_types = explode( ',', strtolower( $types ) );
 		}
 
 		$changelog = $this->changeloggerFormatter->parse( file_get_contents( $this->config->getChangelogFilepath() ) );
@@ -102,8 +108,8 @@ class WriteCommand extends Command {
 			$output->writeln( "<error>{$version} does not exist.</>" );
 			return 1;
 		}
-		
-		$prs = $this->extractPrNumbers( $entry->getChanges() );
+
+		$prs = $this->extractPrNumbers( $entry->getChanges(), $changelog_types );
 		$prContents = $this->getPrContents( $prs );
 
 		if ( count($prContents) === 0 ) {
@@ -137,30 +143,28 @@ class WriteCommand extends Command {
 		$output = array();
 
 		// Get the first line (heading) from the TESTING-INSTRUCTIONS.md.
-		array_push( $output, array_shift( $testingInstructions ) );
+		$output[] = array_shift( $testingInstructions );
 
 		// Put the version.
-		array_push( $output, '## '.$version );
+		$output[] = '## '.$version;
 
 		foreach ( $prContents as $pr => $prContent ) {
 			if ( empty( $prContent['testInstructions'] ) ) {
 				continue;
 			}
-			array_push( $output, '### '.$prContent[ 'title' ].' #'.$pr );
-			array_push( $output, $prContent[ 'testInstructions' ] );
+			$output[] = "\n### ".$prContent[ 'title' ].' #'.$pr."\n";
+			$output[] = rtrim( $prContent[ 'testInstructions' ] );
 		}
 
 		// Put the remaining contents from TESTING-INSTRUCTIONS.md.
-		foreach ( $testingInstructions as $testingInstruction ) {
-			array_push( $output, $testingInstruction );
-		}
+		$output[] = implode( '', $testingInstructions );
 
 		return implode( "\n", $output);
 	}
 
 	/**
 	 * Get ChangelogEntry by the given version.
-	 * 
+	 *
 	 * @param Changelog $changelog
 	 * @param $version
 	 *
@@ -212,9 +216,13 @@ class WriteCommand extends Command {
 	 * @return array
 	 * @throws Exception
 	 */
-	protected function extractPrNumbers( $changeEntires = [] ) {
+	protected function extractPrNumbers( $changeEntires = [], $changelogSubheadings = [] ) {
 		$prs = [];
 		foreach ( $changeEntires as $changeEntry ) {
+			$subheading = strtolower( $changeEntry->getSubheading() );
+			if ( 0 !== count( $changelogSubheadings ) && false === in_array( $subheading, $changelogSubheadings ) ) {
+				continue;
+			}
 			preg_match( "/#[0-9]+/", $changeEntry->getContent(), $matches );
 			if ( count( $matches ) ) {
 				array_push( $prs, str_replace( "#", "", $matches[0] ) );
