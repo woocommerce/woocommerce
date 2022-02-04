@@ -1,6 +1,6 @@
 <?php
 /**
- * ProductAttributesLookupServiceProvider class file.
+ * OrdersDataStoreServiceProvider class file.
  */
 
 namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;

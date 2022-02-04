@@ -24,8 +24,27 @@ class OrdersTableDataStore implements \WC_Object_Data_Store_Interface, \WC_Order
 		return $wpdb->prefix . 'wc_orders';
 	}
 
-	public function read( &$data ) {
-		// TODO: Implement read() method.
+	public function read( &$order ) {
+
+	}
+
+	public function get_custom_order_id( $data ) {
+		return $data->id;
+	}
+
+	/**
+	 * @param $order_data
+	 * @param string $classname
+	 */
+	public function load_order_from_custom_object( $order_data, $classname ) {
+		$order = new $classname();
+		$order->set_object_read( false );
+		$order->set_id( $order_data->id );
+		$order->set_status( $order_data->status );
+		$order->set_date_created( $order_data->date_created_gmt );
+		$order->set_total( $order_data->total_amount );
+		$order->set_object_read();
+		return $order;
 	}
 
 	public function read_meta( &$data ) {
@@ -130,7 +149,6 @@ class OrdersTableDataStore implements \WC_Object_Data_Store_Interface, \WC_Order
 	}
 
 	public function get_order_type( $order_id ) {
-		// TODO: Implement get_order_type() method.
 		return 'shop_order';
 	}
 
@@ -170,7 +188,30 @@ class OrdersTableDataStore implements \WC_Object_Data_Store_Interface, \WC_Order
 	}
 
 	public function query( $query_vars ) {
-		return array();
+		global $wpdb;
+
+		$limit = $query_vars['page_total'] ?? 10;
+		$offset = isset( $query_vars['page'] ) ? ( $query_vars['page'] - 1 ) * $limit : 0;
+		$query = $wpdb->prepare(
+			"
+SELECT id, post_id, status, date_created_gmt, total_amount, tax_amount
+FROM {$wpdb->prefix}wc_orders
+LIMIT %d
+OFFSET %d
+",
+			$limit,
+			$offset
+		);
+		$results = $wpdb->get_results( $query );
+		$orders = [];
+		foreach ( $results as $result ) {
+			$orders[] = \WC_Order_Factory::get_order( $result );
+		}
+		return array(
+			'orders' => $orders,
+			'total' => 10,
+			'max_num_pages' => 123,
+		);
 	}
 
 	public function get_order_item_type( $order, $order_item_id ) {

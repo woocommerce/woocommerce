@@ -33,7 +33,7 @@ class FeatureController {
 	/**
 	 * The data synchronizer object to use.
 	 *
-	 * @var DataSyncrhonizer
+	 * @var DataSynchronizer
 	 */
 	private $data_synchronizer;
 
@@ -42,14 +42,12 @@ class FeatureController {
 	 *
 	 * @var bool
 	 */
-	private $is_feature_visible;
+	private $is_feature_visible = false;
 
 	/**
 	 * Class constructor.
 	 */
 	public function __construct() {
-		$this->is_feature_visible = false;
-
 		$this->init_hooks();
 	}
 
@@ -142,8 +140,8 @@ class FeatureController {
 	/**
 	 * Gets the instance of the orders data store to use.
 	 *
-	 * @param WC_Object_Data_Store_Interface|string $default_data_store The default data store (as received via the woocommerce_order_data_store hooks).
-	 * @return WC_Object_Data_Store_Interface|string The actual data store to use.
+	 * @param \WC_Object_Data_Store_Interface|string $default_data_store The default data store (as received via the woocommerce_order_data_store hooks).
+	 * @return \WC_Object_Data_Store_Interface|string The actual data store to use.
 	 */
 	private function get_data_store_instance( $default_data_store ) {
 		if ( $this->is_feature_visible() && $this->custom_orders_table_usage_is_enabled() && ! $this->data_synchronizer->data_regeneration_is_in_progress() ) {
