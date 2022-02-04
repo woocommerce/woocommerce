@@ -24,11 +24,11 @@ const {
 } = require( '../utils/scaffold' );
 
 const args = process.argv.slice( 2 );
-const command = args[0];
+const command = args[ 0 ];
 let packageName = null;
 
-if ( args[1] && args[1].substr(0, 2) !== '--' ) {
-	packageName = args[1];
+if ( args[ 1 ] && args[ 1 ].substr(0, 2) !== '--' ) {
+	packageName = args[ 1 ];
 }
 
 // Allow multiple spec file extensions and formats.
@@ -36,7 +36,7 @@ let testExtension = 'test.js';
 let testFormat = '';
 let force = false;
 for ( let a = 1; a < args.length; a++ ) {
-	if (args[a] === '--force') {
+	if ( args[ a ] === '--force' ) {
 		force = true;
 		continue;
 	}
@@ -62,7 +62,7 @@ for ( let a = 1; a < args.length; a++ ) {
 if ( command == 'install' ) {
 	// Install some environment defaults if no package is requested.
 	if ( ! packageName ) {
-		installDefaults(force);
+		installDefaults( force );
 		return;
 	}
 
@@ -114,7 +114,7 @@ if ( command == 'install' ) {
 			importLineFormat = sprintf( "import {%%s} from '%s';", pkg );
 		}
 		let overwriteFiles;
-		if (force) {
+		if ( force ) {
 			overwriteFiles = 'a';
 		}
 
