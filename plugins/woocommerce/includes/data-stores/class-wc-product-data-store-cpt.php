@@ -164,6 +164,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$post_object = get_post( $product->get_id() );
 
 		if ( ! $product->get_id() || ! $post_object || 'product' !== $post_object->post_type ) {
+			do_action( 'woocommerce_read_invalid_product', $product );
 			throw new Exception( __( 'Invalid product.', 'woocommerce' ) );
 		}
 
