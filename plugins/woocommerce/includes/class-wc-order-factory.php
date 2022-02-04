@@ -18,11 +18,13 @@ class WC_Order_Factory {
 	/**
 	 * Get order.
 	 *
-	 * @param  mixed $order_id (default: false) Order ID to get.
+	 * @param  mixed $order_object (default: false) Order ID to get.
+	 *
 	 * @return WC_Order|bool
 	 */
-	public static function get_order( $order_id = false ) {
-		$order_id = self::get_order_id( $order_id );
+	public static function get_order( $order_object = false ) {
+		$data_store = WC_Data_Store::load( 'order' );
+		$order_id = self::get_order_id( $order_object );
 
 		if ( ! $order_id ) {
 			return false;
@@ -44,6 +46,9 @@ class WC_Order_Factory {
 		}
 
 		try {
+			if ( method_exists( $data_store->get_current_class_name(), 'load_order_from_custom_object' ) ) {
+				return $data_store->load_order_from_custom_object( $order_object, $classname );
+			}
 			return new $classname( $order_id );
 		} catch ( Exception $e ) {
 			wc_caught_exception( $e, __FUNCTION__, array( $order_id ) );
@@ -116,6 +121,7 @@ class WC_Order_Factory {
 	public static function get_order_id( $order ) {
 		global $post;
 
+		$data_store = WC_Data_Store::load( 'order' );
 		if ( false === $order && is_a( $post, 'WP_Post' ) && 'shop_order' === get_post_type( $post ) ) {
 			return absint( $post->ID );
 		} elseif ( is_numeric( $order ) ) {
@@ -124,6 +130,8 @@ class WC_Order_Factory {
 			return $order->get_id();
 		} elseif ( ! empty( $order->ID ) ) {
 			return $order->ID;
+		} elseif( is_callable( array( $data_store, 'get_custom_order_id' ) ) ) {
+			return $data_store->get_custom_order_id( $order );
 		} else {
 			return false;
 		}
