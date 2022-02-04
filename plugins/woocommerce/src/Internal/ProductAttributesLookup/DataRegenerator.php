@@ -174,31 +174,39 @@ CREATE TABLE ' . $this->lookup_table_name . '(
 		global $wpdb;
 
 		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+		$wpdb->query( 'DROP PROCEDURE IF EXISTS __create_wc_product_attributes_lookup_indices;' );
 		$wpdb->query(
 			"
+CREATE PROCEDURE __create_wc_product_attributes_lookup_indices()
+
+BEGIN
+
 IF (SELECT COUNT(1)
 	FROM INFORMATION_SCHEMA.STATISTICS
-	WHERE table_schema=' " . $wpdb->dbname . "'
+	WHERE table_schema='" . $wpdb->dbname . "'
 	AND table_name='" . $this->lookup_table_name . "'
 	AND index_name='product_or_parent_id_term_id')=0
 THEN
-	ALTER TABLE wp_wc_product_attributes_lookup
+	ALTER TABLE " . $this->lookup_table_name . "
 	ADD INDEX product_or_parent_id_term_id (product_or_parent_id, term_id);
-END IF;"
-		);
+END IF;
 
-		$wpdb->query(
-			"
 IF (SELECT COUNT(1)
 	FROM INFORMATION_SCHEMA.STATISTICS
-	WHERE table_schema=' " . $wpdb->dbname . "'
+	WHERE table_schema='" . $wpdb->dbname . "'
 	AND table_name='" . $this->lookup_table_name . "'
 	AND index_name='is_variation_attribute_term_id')=0
 THEN
-	ALTER TABLE wp_wc_product_attributes_lookup
+	ALTER TABLE " . $this->lookup_table_name . '
 	ADD INDEX is_variation_attribute_term_id (is_variation_attribute, term_id);
-END IF;"
+END IF;
+
+END;
+'
 		);
+
+		$wpdb->query( 'CALL __create_wc_product_attributes_lookup_indices();' );
+		$wpdb->query( 'DROP PROCEDURE IF EXISTS __create_wc_product_attributes_lookup_indices;' );
 		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 	}
 
