@@ -106,6 +106,10 @@ class WC_Admin_Post_Types {
 				include_once __DIR__ . '/list-tables/class-wc-admin-list-table-products.php';
 				$wc_list_table = new WC_Admin_List_Table_Products();
 				break;
+			case 'woocommerce_page_shop-orders':
+				$wc_list_table = wc_get_container()
+					->get( Automattic\WooCommerce\AdminLists\Orders::class );
+				break;
 		}
 
 		// Ensure the table handler is only loaded once. Prevents multiple loads if a plugin calls check_ajax_referer many times.

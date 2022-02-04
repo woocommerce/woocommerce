@@ -64,6 +64,8 @@ class WC_Admin_Menus {
 		add_menu_page( __( 'WooCommerce', 'woocommerce' ), __( 'WooCommerce', 'woocommerce' ), 'edit_others_shop_orders', 'woocommerce', null, $woocommerce_icon, '55.5' );
 
 		add_submenu_page( 'edit.php?post_type=product', __( 'Attributes', 'woocommerce' ), __( 'Attributes', 'woocommerce' ), 'manage_product_terms', 'product_attributes', array( $this, 'attributes_page' ) );
+
+		add_submenu_page( 'woocommerce', __( 'Orders', 'woocommerce' ), __( 'Orders', 'woocommerce' ), 'edit_others_shop_orders', 'shop-orders', array( $this, 'orders_page') );
 	}
 
 	/**
@@ -285,6 +287,15 @@ class WC_Admin_Menus {
 	 */
 	public function status_page() {
 		WC_Admin_Status::output();
+	}
+
+	/**
+	 * Init and display orders page.
+	 */
+	public function orders_page() {
+		wc_get_container()
+			->get( Automattic\WooCommerce\AdminLists\Orders::class )
+			->display();
 	}
 
 	/**
