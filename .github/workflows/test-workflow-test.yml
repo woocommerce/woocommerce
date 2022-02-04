@@ -1,0 +1,15 @@
+name: Workflow Test
+on: pull_request
+jobs:
+  run-release-smoke-tests:
+    name: Run Smoke test release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Invoke release smoke testing workflow
+        uses: aurelien-baudet/workflow-dispatch@v2
+        with:
+          workflow: Smoke test release test
+          repo: ${{ github.repository }}
+          token: ${{ secrets.E2E_WORKFLOW_GH_TOKEN }}
+          ref: refs/heads/trunk
+          inputs: '{ "release_id": 58553226 }'
