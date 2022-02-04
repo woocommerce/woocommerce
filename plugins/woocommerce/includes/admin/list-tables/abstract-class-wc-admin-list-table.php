@@ -245,24 +245,6 @@ abstract class WC_Admin_List_Table {
 	protected function prepare_row_data( $post_id ) {}
 
 	/**
-	 * Render individual columns.
-	 *
-	 * @param string $column Column ID to render.
-	 * @param int    $post_id Post ID being shown.
-	 */
-	public function render_columns( $column, $post_id ) {
-		$this->prepare_row_data( $post_id );
-
-		if ( ! $this->object ) {
-			return;
-		}
-
-		if ( is_callable( array( $this, 'render_' . $column . '_column' ) ) ) {
-			$this->{"render_{$column}_column"}();
-		}
-	}
-
-	/**
 	 * Handle bulk actions.
 	 *
 	 * @param  string $redirect_to URL to redirect to.
