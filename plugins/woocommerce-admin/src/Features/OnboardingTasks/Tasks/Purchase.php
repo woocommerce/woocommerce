@@ -154,18 +154,18 @@ class Purchase extends Task {
 		$profiler_data = get_option( Onboarding::PROFILE_DATA_OPTION, array() );
 		$installed     = PluginsHelper::get_installed_plugin_slugs();
 		$product_types = isset( $profiler_data['product_types'] ) ? $profiler_data['product_types'] : array();
-		$allowed       = Onboarding::get_allowed_product_types();
+		$product_data  = Onboarding::get_product_data( Onboarding::get_allowed_product_types() );
 		$purchaseable  = array();
 		$remaining     = array();
 		foreach ( $product_types as $type ) {
-			if ( ! isset( $allowed[ $type ]['slug'] ) ) {
+			if ( ! isset( $product_data[ $type ]['slug'] ) ) {
 				continue;
 			}
 
-			$purchaseable[] = $allowed[ $type ];
+			$purchaseable[] = $product_data[ $type ];
 
-			if ( ! in_array( $allowed[ $type ]['slug'], $installed, true ) ) {
-				$remaining[] = $allowed[ $type ]['label'];
+			if ( ! in_array( $product_data[ $type ]['slug'], $installed, true ) ) {
+				$remaining[] = $product_data[ $type ]['label'];
 			}
 		}
 

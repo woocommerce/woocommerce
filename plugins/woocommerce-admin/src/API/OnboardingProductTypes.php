@@ -72,7 +72,7 @@ class OnboardingProductTypes extends \WC_REST_Data_Controller {
 	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function get_product_types( $request ) {
-		return Onboarding::get_allowed_product_types();
+		return Onboarding::get_product_data( Onboarding::get_allowed_product_types() );
 	}
 
 }

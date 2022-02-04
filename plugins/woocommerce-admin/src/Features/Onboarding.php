@@ -508,9 +508,8 @@ class Onboarding {
 		if ( ! Features::is_enabled( 'subscriptions' ) || 'US' !== $base_location['country'] ) {
 			$products['subscriptions']['product'] = 27147;
 		}
-		$product_types = self::append_product_data( $products );
 
-		return apply_filters( 'woocommerce_admin_onboarding_product_types', $product_types );
+		return apply_filters( 'woocommerce_admin_onboarding_product_types', $products );
 	}
 
 	/**
@@ -633,12 +632,12 @@ class Onboarding {
 	}
 
 	/**
-	 * Append dynamic product data from API.
+	 * Get dynamic product data from API.
 	 *
 	 * @param array $product_types Array of product types.
 	 * @return array
 	 */
-	public static function append_product_data( $product_types ) {
+	public static function get_product_data( $product_types ) {
 		$woocommerce_products = get_transient( self::PRODUCT_DATA_TRANSIENT );
 		if ( false === $woocommerce_products ) {
 			$woocommerce_products = wp_remote_get( 'https://woocommerce.com/wp-json/wccom-extensions/1.0/search' );
@@ -649,12 +648,13 @@ class Onboarding {
 			set_transient( self::PRODUCT_DATA_TRANSIENT, $woocommerce_products, DAY_IN_SECONDS );
 		}
 
-		$product_data = json_decode( $woocommerce_products['body'] );
+		$data         = json_decode( $woocommerce_products['body'] );
 		$products     = array();
+		$product_data = array();
 
 		// Map product data by ID.
-		if ( isset( $product_data ) && isset( $product_data->products ) ) {
-			foreach ( $product_data->products as $product_datum ) {
+		if ( isset( $data ) && isset( $data->products ) ) {
+			foreach ( $data->products as $product_datum ) {
 				if ( isset( $product_datum->id ) ) {
 					$products[ $product_datum->id ] = $product_datum;
 				}
@@ -663,21 +663,23 @@ class Onboarding {
 
 		// Loop over product types and append data.
 		foreach ( $product_types as $key => $product_type ) {
+			$product_data[ $key ] = $product_types[ $key ];
+
 			if ( isset( $product_type['product'] ) && isset( $products[ $product_type['product'] ] ) ) {
 				$price        = html_entity_decode( $products[ $product_type['product'] ]->price );
 				$yearly_price = (float) str_replace( '$', '', $price );
 
-				$product_types[ $key ]['yearly_price'] = $yearly_price;
-				$product_types[ $key ]['description']  = $products[ $product_type['product'] ]->excerpt;
-				$product_types[ $key ]['more_url']     = $products[ $product_type['product'] ]->link;
-				$product_types[ $key ]['slug']         = strtolower( preg_replace( '~[^\pL\d]+~u', '-', $products[ $product_type['product'] ]->slug ) );
+				$product_data[ $key ]['yearly_price'] = $yearly_price;
+				$product_data[ $key ]['description']  = $products[ $product_type['product'] ]->excerpt;
+				$product_data[ $key ]['more_url']     = $products[ $product_type['product'] ]->link;
+				$product_data[ $key ]['slug']         = strtolower( preg_replace( '~[^\pL\d]+~u', '-', $products[ $product_type['product'] ]->slug ) );
 			} elseif ( isset( $product_type['product'] ) ) {
 				/* translators: site currency symbol (used to show that the product costs money) */
-				$product_types[ $key ]['label'] .= sprintf( __( ' — %s', 'woocommerce-admin' ), html_entity_decode( get_woocommerce_currency_symbol() ) );
+				$product_data[ $key ]['label'] .= sprintf( __( ' — %s', 'woocommerce-admin' ), html_entity_decode( get_woocommerce_currency_symbol() ) );
 			}
 		}
 
-		return $product_types;
+		return $product_data;
 	}
 
 	/**
