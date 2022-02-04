@@ -32,6 +32,7 @@ class WC_Settings_Tracking {
 	public function init() {
 		add_action( 'woocommerce_settings_page_init', array( $this, 'track_settings_page_view' ) );
 		add_action( 'woocommerce_update_option', array( $this, 'add_option_to_list' ) );
+		add_action( 'woocommerce_update_options_payment_gateways', array( $this, 'add_option_to_list' ) );
 		add_action( 'woocommerce_update_options', array( $this, 'send_settings_change_event' ) );
 	}
 
@@ -62,6 +63,7 @@ class WC_Settings_Tracking {
 	 * @param mixed  $new_value New value of option.
 	 */
 	public function track_setting_change( $option_name, $old_value, $new_value ) {
+		global $current_tab;
 		// Make sure this is a WooCommerce option.
 		if ( ! in_array( $option_name, $this->allowed_options, true ) ) {
 			return;
@@ -78,14 +80,24 @@ class WC_Settings_Tracking {
 			return;
 		}
 
-		$this->updated_options[] = $option_name;
+		// Verify if this is a Payments tab setting.
+		// This tab has a different way to save and track settings.
+		if ( 'checkout' === $current_tab ) {
+			// Format the updated option to send it later.
+			foreach ( array_diff( $new_value, $old_value ) as $key => $value ) {
+				$this->updated_options[] = $key . '=' . $value;
+			}
+		} else {
+			$this->updated_options[] = $option_name;
+		}
+
 	}
 
 	/**
 	 * Send a Tracks event for WooCommerce options that changed values.
 	 */
 	public function send_settings_change_event() {
-		global $current_tab;
+		global $current_tab, $current_section;
 
 		if ( empty( $this->updated_options ) ) {
 			return;
@@ -97,6 +109,9 @@ class WC_Settings_Tracking {
 
 		if ( isset( $current_tab ) ) {
 			$properties['tab'] = $current_tab;
+		}
+		if ( isset( $current_section ) ) {
+			$properties['section'] = $current_section;
 		}
 
 		WC_Tracks::record_event( 'settings_change', $properties );
