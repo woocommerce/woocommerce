@@ -1,34 +1,31 @@
 # Unreleased
 
-## Changes 
-- Updated `deleteDownloadedPluginFiles()` to also be able to delete directories.
-
 ## Added
 
-- Added `post-results-to-github-pr.js` to post smoke test results to a GitHub PR.
-- Added jest flags to generate a json test report
+- Added `post-results-to-github-pr.js` to post test results to a GitHub PR.
 - Added more entries to `default.json`
+- Added test retry support
 - Save `test-results.json` from test runs to the `tests/e2e` folder.
-- Added `await` for every call to `shopper.logout`
-- Updated `getLatestReleaseZipUrl()` to allow passing in an authorization token and simplified arguments to just the repository name
 - Added `upload.ini` which increases the limits for uploading files (such as for plugins) in the Docker environment
 - Test setup, scaffolding, and removal via `wc-e2e install` and `wc-e2e uninstall`
-- Added quotes around `WORDPRESS_TITLE` value in .env file to address issue with docker compose 2 "key cannot contain a space" error.
 - Added `LATEST_WP_VERSION_MINUS` that allows setting a number to subtract from the current WordPress version for the WordPress Docker image.
 - Support for PHP_VERSION, MARIADB_VERSION environment variables for built in container initialization
-- `resolveLocalE2ePath` to resolve path to local E2E file
+- `resolveLocalE2ePath()` to resolve path to local E2E file
+- `resolvePackagePath()` to resolve path to package file
 - `WC_E2E_FOLDER` for mapping plugin root to path within repo
-- Added the `resolveSingleE2EPath` method which builds a path to a specific E2E test
+- Added the `resolveSingleE2EPath()` method which builds a path to a specific E2E test
 - Added the ability to take screenshots from multiple test failures (when retried) in `utils/take-screenshot.js`.
 
 ## Changed
 
 - Updated `getLatestReleaseZipUrl()` to allow passing in an authorization token and simplified arguments to just the repository name
+- Updated `deleteDownloadedPluginFiles()` to also be able to delete directories.
 
 ## Fixed
 
 - Updated the browserViewport in `jest.setup.js` to match the `defaultViewport` dimensions defined in `jest-puppeteer.config.js`
 - Use consistent `defaultViewport` in both headless and non-headless context
+- Fixed issue with docker compose 2 "key cannot contain a space" error.
 - Add missing `config` dependency
 
 # 0.2.3
