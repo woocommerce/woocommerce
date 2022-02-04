@@ -11,5 +11,5 @@ jobs:
           workflow: Smoke test release test
           repo: ${{ github.repository }}
           token: ${{ secrets.E2E_WORKFLOW_GH_TOKEN }}
-          ref: refs/heads/trunk
+          ref: refs/heads/fix/31833
           inputs: '{ "release_id": 58553226 }'
