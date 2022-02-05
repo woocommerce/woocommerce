@@ -63,7 +63,6 @@ class WC_Settings_Tracking {
 	 * @param mixed  $new_value New value of option.
 	 */
 	public function track_setting_change( $option_name, $old_value, $new_value ) {
-		global $current_tab;
 		// Make sure this is a WooCommerce option.
 		if ( ! in_array( $option_name, $this->allowed_options, true ) ) {
 			return;
@@ -80,17 +79,7 @@ class WC_Settings_Tracking {
 			return;
 		}
 
-		// Verify if this is a Payments tab setting.
-		// This tab has a different way to save and track settings.
-		if ( 'checkout' === $current_tab ) {
-			// Format the updated option to send it later.
-			foreach ( array_diff( $new_value, $old_value ) as $key => $value ) {
-				$this->updated_options[] = $key . '=' . $value;
-			}
-		} else {
-			$this->updated_options[] = $option_name;
-		}
-
+		$this->updated_options[] = $option_name;
 	}
 
 	/**
