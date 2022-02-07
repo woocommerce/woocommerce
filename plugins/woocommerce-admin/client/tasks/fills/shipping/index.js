@@ -214,7 +214,7 @@ export class Shipping extends Component {
 							recordEvent( 'tasklist_shipping_set_location', {
 								country,
 							} );
-							this.completeStep();
+							// Don't need to trigger completeStep here as it's triggered by the address updates in the componentDidUpdate function.
 						} }
 					/>
 				),
