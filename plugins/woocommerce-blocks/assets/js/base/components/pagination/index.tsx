@@ -2,36 +2,66 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import Label from '@woocommerce/base-components/label';
 
 /**
  * Internal dependencies
  */
-import { getIndexes } from './utils.js';
+import { getIndexes } from './utils';
 import './style.scss';
+
+interface PaginationProps {
+	/**
+	 * Number of the page currently being displayed.
+	 */
+	currentPage: number;
+	/**
+	 * Total number of pages.
+	 */
+	totalPages: number;
+	/**
+	 * Displays first and last pages if they are not in the current range of pages displayed.
+	 */
+	displayFirstAndLastPages?: boolean;
+	/**
+	 * Displays arrows to navigate to the previous and next pages.
+	 */
+	displayNextAndPreviousArrows?: boolean;
+	/**
+	 * Callback function called when the user triggers a page change.
+	 */
+	onPageChange: ( currentPage: number ) => void;
+	/**
+	 * Number of pages to display at the same time, including the active page
+	 * and the pages displayed before and after it. It doesn't include the first
+	 * and last pages.
+	 */
+	pagesToDisplay?: number;
+}
 
 const Pagination = ( {
 	currentPage,
-	displayFirstAndLastPages,
-	displayNextAndPreviousArrows,
-	pagesToDisplay,
+	displayFirstAndLastPages = true,
+	displayNextAndPreviousArrows = true,
+	pagesToDisplay = 3,
 	onPageChange,
 	totalPages,
-} ) => {
+}: PaginationProps ): JSX.Element => {
 	let { minIndex, maxIndex } = getIndexes(
 		pagesToDisplay,
 		currentPage,
 		totalPages
 	);
+
 	const showFirstPage = displayFirstAndLastPages && Boolean( minIndex !== 1 );
 	const showLastPage =
 		displayFirstAndLastPages && Boolean( maxIndex !== totalPages );
 	const showFirstPageEllipsis =
-		displayFirstAndLastPages && Boolean( minIndex > 3 );
+		displayFirstAndLastPages && Boolean( minIndex && minIndex > 3 );
 	const showLastPageEllipsis =
-		displayFirstAndLastPages && Boolean( maxIndex < totalPages - 2 );
+		displayFirstAndLastPages &&
+		Boolean( maxIndex && maxIndex < totalPages - 2 );
 
 	// Handle the cases where there would be an ellipsis replacing one single page
 	if ( showFirstPage && minIndex === 3 ) {
@@ -91,7 +121,7 @@ const Pagination = ( {
 					disabled={ currentPage === 1 }
 				>
 					<Label
-						label={ 1 }
+						label={ '1' }
 						screenReaderLabel={ sprintf(
 							/* translators: %d is the page number (1, 2, 3...). */
 							__( 'Page %d', 'woo-gutenberg-products-block' ),
@@ -124,13 +154,13 @@ const Pagination = ( {
 						) }
 						onClick={
 							currentPage === page
-								? null
+								? undefined
 								: () => onPageChange( page )
 						}
 						disabled={ currentPage === page }
 					>
 						<Label
-							label={ page }
+							label={ page.toString() }
 							screenReaderLabel={ sprintf(
 								/* translators: %d is the page number (1, 2, 3...). */
 								__( 'Page %d', 'woo-gutenberg-products-block' ),
@@ -164,7 +194,7 @@ const Pagination = ( {
 					disabled={ currentPage === totalPages }
 				>
 					<Label
-						label={ totalPages }
+						label={ totalPages.toString() }
 						screenReaderLabel={ sprintf(
 							/* translators: %d is the page number (1, 2, 3...). */
 							__( 'Page %d', 'woo-gutenberg-products-block' ),
@@ -191,41 +221,6 @@ const Pagination = ( {
 			) }
 		</div>
 	);
-};
-
-Pagination.propTypes = {
-	/**
-	 * Number of the page currently being displayed.
-	 */
-	currentPage: PropTypes.number.isRequired,
-	/**
-	 * Total number of pages.
-	 */
-	totalPages: PropTypes.number.isRequired,
-	/**
-	 * Displays first and last pages if they are not in the current range of pages displayed.
-	 */
-	displayFirstAndLastPages: PropTypes.bool,
-	/**
-	 * Displays arrows to navigate to the previous and next pages.
-	 */
-	displayNextAndPreviousArrows: PropTypes.bool,
-	/**
-	 * Callback function called when the user triggers a page change.
-	 */
-	onPageChange: PropTypes.func,
-	/**
-	 * Number of pages to display at the same time, including the active page
-	 * and the pages displayed before and after it. It doesn't include the first
-	 * and last pages.
-	 */
-	pagesToDisplay: PropTypes.number,
-};
-
-Pagination.defaultProps = {
-	displayFirstAndLastPages: true,
-	displayNextAndPreviousArrows: true,
-	pagesToDisplay: 3,
 };
 
 export default Pagination;

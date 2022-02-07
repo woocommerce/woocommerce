@@ -3,31 +3,28 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useInnerBlockLayoutContext } from '@woocommerce/shared-context';
-import { Icon, search } from '@wordpress/icons';
+import { Icon, warning } from '@wordpress/icons';
 
-const NoMatchingProducts = ( { resetCallback = () => {} } ) => {
+const NoProducts = (): JSX.Element => {
 	const { parentClassName } = useInnerBlockLayoutContext();
 	return (
 		<div className={ `${ parentClassName }__no-products` }>
 			<Icon
 				className={ `${ parentClassName }__no-products-image` }
-				icon={ search }
+				icon={ warning }
 				size={ 100 }
 			/>
 			<strong className={ `${ parentClassName }__no-products-title` }>
-				{ __( 'No products found', 'woo-gutenberg-products-block' ) }
+				{ __( 'No products', 'woo-gutenberg-products-block' ) }
 			</strong>
 			<p className={ `${ parentClassName }__no-products-description` }>
 				{ __(
-					'We were unable to find any results based on your search.',
+					'There are currently no products available to display.',
 					'woo-gutenberg-products-block'
 				) }
 			</p>
-			<button onClick={ resetCallback }>
-				{ __( 'Reset Search', 'woo-gutenberg-products-block' ) }
-			</button>
 		</div>
 	);
 };
 
-export default NoMatchingProducts;
+export default NoProducts;

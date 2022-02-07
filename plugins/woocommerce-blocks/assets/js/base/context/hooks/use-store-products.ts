@@ -1,4 +1,8 @@
 /**
+ * External dependencies
+ */
+import { Query, ProductResponseItem, isString } from '@woocommerce/types';
+/**
  * Internal dependencies
  */
 import { useCollectionHeader, useCollection } from './collections';
@@ -20,7 +24,13 @@ import { useCollectionHeader, useCollection } from './collections';
  *                  - productsLoading A boolean indicating whether the products
  *                                    are still loading or not.
  */
-export const useStoreProducts = ( query ) => {
+export const useStoreProducts = (
+	query: Query
+): {
+	products: ProductResponseItem[];
+	totalProducts: number;
+	productsLoading: boolean;
+} => {
 	const collectionOptions = {
 		namespace: '/wc/store',
 		resourceName: 'products',
@@ -34,8 +44,8 @@ export const useStoreProducts = ( query ) => {
 		query,
 	} );
 	return {
-		products,
-		totalProducts: parseInt( totalProducts, 10 ),
+		products: products as ProductResponseItem[], // TODO: Remove this once getCollection selector and resolver is converted to TS.
+		totalProducts: parseInt( isString( totalProducts ).toString(), 10 ),
 		productsLoading,
 	};
 };

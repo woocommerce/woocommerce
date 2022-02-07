@@ -2,15 +2,25 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import PropTypes from 'prop-types';
 import Label from '@woocommerce/base-components/label';
+import type { MouseEventHandler } from 'react';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
 
-export const LoadMoreButton = ( { onClick, label, screenReaderLabel } ) => {
+interface LoadMoreButtonProps {
+	onClick: MouseEventHandler;
+	label?: string;
+	screenReaderLabel?: string;
+}
+
+export const LoadMoreButton = ( {
+	onClick,
+	label = __( 'Load more', 'woo-gutenberg-products-block' ),
+	screenReaderLabel = __( 'Load more', 'woo-gutenberg-products-block' ),
+}: LoadMoreButtonProps ): JSX.Element => {
 	return (
 		<div className="wp-block-button wc-block-load-more wc-block-components-load-more">
 			<button className="wp-block-button__link" onClick={ onClick }>
@@ -21,16 +31,6 @@ export const LoadMoreButton = ( { onClick, label, screenReaderLabel } ) => {
 			</button>
 		</div>
 	);
-};
-
-LoadMoreButton.propTypes = {
-	label: PropTypes.string,
-	onClick: PropTypes.func,
-	screenReaderLabel: PropTypes.string,
-};
-
-LoadMoreButton.defaultProps = {
-	label: __( 'Load more', 'woo-gutenberg-products-block' ),
 };
 
 export default LoadMoreButton;
