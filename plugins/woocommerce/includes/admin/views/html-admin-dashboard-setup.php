@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		  <circle r="6.5" cx="10" cy="10" fill="transparent" stroke-dasharray="40.859" stroke-dashoffset="0"></circle>
 		  <circle class="bar" r="6.5" cx="190" cy="10" fill="transparent" stroke-dasharray="40.859" stroke-dashoffset="<?php echo esc_attr( $circle_dashoffset ); ?>" transform='rotate(-90 100 100)'></circle>
 		</svg>
-		<span><?php echo esc_html_e( 'Step', 'woocommerce' ); ?> <?php echo esc_html( $step_number ); ?> <?php echo esc_html_e( 'of', 'woocommerce' ); ?> <?php echo esc_html( $tasks_count ); ?></span>
+		<span><?php echo esc_html_e( 'Step', 'woocommerce' ); ?> <span id="dashboard-widget-finish-setup__current-step"><?php echo esc_html( $step_number ); ?></span> <?php echo esc_html_e( 'of', 'woocommerce' ); ?> <span id="dashboard-widget-finish-setup__total-steps"><?php echo esc_html( $tasks_count ); ?></span></span>
 	</span>
 
 	<div class="description">
@@ -27,3 +27,26 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</div>
 	<div class="clear"></div>
 </div>
+
+<script type="text/javascript">
+	/*global jQuery */
+	(function( $ ) {
+		const currentStep = parseInt( $( '#dashboard-widget-finish-setup__current-step' ).text() ) - 1;
+		const totalSteps = parseInt( $( '#dashboard-widget-finish-setup__total-steps' ).text() );
+
+		$( document ).on( 'ready', function() {
+			window.wcTracks.recordEvent( 'wcadmin_setup_widget_view', {
+				completed_tasks: currentStep,
+				total_tasks: totalSteps,
+			} );
+		});
+
+
+		$( '.dashboard-widget-finish-setup a' ).on( 'click', function() {
+			window.wcTracks.recordEvent( 'wcadmin_setup_widget_click', {
+				completed_tasks: currentStep,
+				total_tasks: totalSteps,
+			} );
+		});
+	})( jQuery );
+</script>
