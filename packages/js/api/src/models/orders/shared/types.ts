@@ -30,8 +30,7 @@ export type OrderTotalUpdateParams = 'total' | 'totalTax';
 /**
  * Billing address properties
  */
-export type BillingOrderAddressUpdateParams = 'firstName' | 'lastName' | 'company' | 'address1'
-	| 'address2' | 'city' | 'state' | 'postCode' | 'country' | 'email' | 'phone';
+export type BillingOrderAddressUpdateParams = ShippingOrderAddressUpdateParams | 'email' | 'phone';
 
 /**
  * Shipping address properties
