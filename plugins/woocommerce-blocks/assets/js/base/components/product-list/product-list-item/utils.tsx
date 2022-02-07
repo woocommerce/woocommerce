@@ -3,6 +3,12 @@
  */
 import { getBlockMap } from '@woocommerce/atomic-utils';
 import { Suspense } from '@wordpress/element';
+import { ProductResponseItem } from '@woocommerce/type-defs/product-response';
+
+/**
+ * Internal dependencies
+ */
+import { LayoutConfig } from '../types';
 
 /**
  * Maps a layout config into atomic components.
@@ -13,21 +19,22 @@ import { Suspense } from '@wordpress/element';
  * @param {number} componentId Parent component ID needed for key generation.
  */
 export const renderProductLayout = (
-	blockName,
-	product,
-	layoutConfig,
-	componentId
-) => {
+	blockName: string,
+	product: Partial< ProductResponseItem >,
+	layoutConfig: LayoutConfig | undefined,
+	componentId: number
+): ( JSX.Element | null )[] | undefined => {
 	if ( ! layoutConfig ) {
 		return;
 	}
 
 	const blockMap = getBlockMap( blockName );
-
 	return layoutConfig.map( ( [ name, props = {} ], index ) => {
-		let children = [];
+		let children = [] as ( JSX.Element | null )[] | undefined;
 
 		if ( !! props.children && props.children.length > 0 ) {
+			// props.children here refers to the children stored in the block attributes. which
+			// has the same shape as `layoutConfig`, not React children, which has a different shape */
 			children = renderProductLayout(
 				blockName,
 				product,
@@ -36,7 +43,9 @@ export const renderProductLayout = (
 			);
 		}
 
-		const LayoutComponent = blockMap[ name ];
+		const LayoutComponent = blockMap[ name ] as React.ComponentType< {
+			product: Partial< ProductResponseItem >;
+		} >;
 
 		if ( ! LayoutComponent ) {
 			return null;

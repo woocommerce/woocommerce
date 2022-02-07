@@ -52,3 +52,11 @@ export interface StoreCart {
 	paymentRequirements: Array< string >;
 	receiveCart: ( cart: CartResponse ) => void;
 }
+
+export type Query = {
+	catalog_visibility: 'catalog';
+	per_page: number;
+	page: number;
+	orderby: string;
+	order: string;
+};

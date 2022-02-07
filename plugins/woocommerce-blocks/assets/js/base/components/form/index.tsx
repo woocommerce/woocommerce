@@ -2,14 +2,20 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import PropTypes from 'prop-types';
+import type { FormEvent } from 'react';
+
+interface FormProps {
+	className: string;
+	children?: React.ReactChildren;
+	onSubmit: ( event: FormEvent ) => void;
+}
 
 const Form = ( {
 	className,
 	children,
 	onSubmit = ( event ) => void event,
-} ) => {
-	const formOnSubmit = ( event ) => {
+}: FormProps ): JSX.Element => {
+	const formOnSubmit = ( event: FormEvent ) => {
 		event.preventDefault();
 		onSubmit( event );
 	};
@@ -22,12 +28,6 @@ const Form = ( {
 			{ children }
 		</form>
 	);
-};
-
-Form.propTypes = {
-	className: PropTypes.string,
-	children: PropTypes.node,
-	onSubmit: PropTypes.func,
 };
 
 export default Form;

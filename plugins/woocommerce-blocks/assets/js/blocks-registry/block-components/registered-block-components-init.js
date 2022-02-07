@@ -1,3 +1,0 @@
-const registeredBlockComponents = {};
-
-export { registeredBlockComponents };

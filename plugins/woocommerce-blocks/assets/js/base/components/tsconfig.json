@@ -9,7 +9,10 @@
 		"../../../../packages/checkout",
 		"../context",
 		"../../type-defs",
-		"../hocs"
+		"../hocs",
+		"../../atomic/utils",
+		"../../atomic/blocks/component-init.js",
+		"../../shared/context"
 	],
 	"exclude": [ "**/test/**" ]
 }

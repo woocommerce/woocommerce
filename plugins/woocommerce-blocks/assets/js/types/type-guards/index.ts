@@ -38,3 +38,7 @@ export const isFunction = < T extends Function, U >(
 export const isBoolean = ( term: unknown ): term is boolean => {
 	return typeof term === 'boolean';
 };
+
+export const isError = ( term: unknown ): term is Error => {
+	return term instanceof Error;
+};

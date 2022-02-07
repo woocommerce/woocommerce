@@ -5,6 +5,7 @@ import { COLLECTIONS_STORE_KEY as storeKey } from '@woocommerce/block-data';
 import { useSelect } from '@wordpress/data';
 import { useRef } from '@wordpress/element';
 import { useShallowEqual, useThrowError } from '@woocommerce/base-hooks';
+import { isError, Query } from '@woocommerce/types';
 
 /**
  * This is a custom hook that is wired up to the `wc/store/collections` data
@@ -38,7 +39,21 @@ import { useShallowEqual, useThrowError } from '@woocommerce/base-hooks';
  *                  - isLoading A boolean indicating whether the collection is
  *                              loading (true) or not.
  */
-export const useCollection = ( options ) => {
+
+export interface useCollectionOptions {
+	namespace: string;
+	resourceName: string;
+	resourceValues?: number[];
+	query: Query;
+	shouldSelect?: boolean;
+}
+
+export const useCollection = (
+	options: useCollectionOptions
+): {
+	results: unknown;
+	isLoading: boolean;
+} => {
 	const {
 		namespace,
 		resourceName,
@@ -52,7 +67,10 @@ export const useCollection = ( options ) => {
 				'the resource properties.'
 		);
 	}
-	const currentResults = useRef( { results: [], isLoading: true } );
+	const currentResults = useRef< { results: unknown; isLoading: boolean } >( {
+		results: [],
+		isLoading: true,
+	} );
 	// ensure we feed the previous reference if it's equivalent
 	const currentQuery = useShallowEqual( query );
 	const currentResourceValues = useShallowEqual( resourceValues );
@@ -72,11 +90,17 @@ export const useCollection = ( options ) => {
 			const error = store.getCollectionError( ...args );
 
 			if ( error ) {
-				throwError( error );
+				if ( isError( error ) ) {
+					throwError( error );
+				} else {
+					throw new Error(
+						'TypeError: `error` object is not an instance of Error constructor'
+					);
+				}
 			}
 
 			return {
-				results: store.getCollection( ...args ),
+				results: store.getCollection< T >( ...args ),
 				isLoading: ! store.hasFinishedResolution(
 					'getCollection',
 					args

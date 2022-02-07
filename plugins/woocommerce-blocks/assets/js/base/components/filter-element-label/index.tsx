@@ -9,6 +9,10 @@ import Label from '@woocommerce/base-components/label';
  */
 import './style.scss';
 
+interface FilterElementLabelProps {
+	name: string;
+	count: number;
+}
 /**
  * The label for an filter elements.
  *
@@ -16,13 +20,16 @@ import './style.scss';
  * @param {string} props.name The name for the label.
  * @param {number} props.count The count of products this status is attached to.
  */
-const FilterElementLabel = ( { name, count } ) => {
+const FilterElementLabel = ( {
+	name,
+	count,
+}: FilterElementLabelProps ): JSX.Element => {
 	return (
 		<>
 			{ name }
 			{ Number.isFinite( count ) && (
 				<Label
-					label={ count }
+					label={ count.toString() }
 					screenReaderLabel={ sprintf(
 						/* translators: %s number of products. */
 						_n(

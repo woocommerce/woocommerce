@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import { useInnerBlockLayoutContext } from '@woocommerce/shared-context';
 import { withInstanceId } from '@wordpress/compose';
@@ -10,8 +9,13 @@ import { withInstanceId } from '@wordpress/compose';
  * Internal dependencies
  */
 import { renderProductLayout } from './utils';
+import { ProductListItemProps } from '../types';
 
-const ProductListItem = ( { product, attributes, instanceId } ) => {
+const ProductListItem = ( {
+	product = {},
+	attributes,
+	instanceId,
+}: ProductListItemProps ): JSX.Element => {
 	const { layoutConfig } = attributes;
 	const { parentClassName, parentName } = useInnerBlockLayoutContext();
 	const isLoading = Object.keys( product ).length === 0;
@@ -33,13 +37,6 @@ const ProductListItem = ( { product, attributes, instanceId } ) => {
 			) }
 		</li>
 	);
-};
-
-ProductListItem.propTypes = {
-	attributes: PropTypes.object.isRequired,
-	product: PropTypes.object,
-	// from withInstanceId
-	instanceId: PropTypes.number.isRequired,
 };
 
 export default withInstanceId( ProductListItem );

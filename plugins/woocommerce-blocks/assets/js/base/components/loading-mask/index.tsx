@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 /**
@@ -11,6 +10,13 @@ import classNames from 'classnames';
 import './style.scss';
 import Spinner from '../spinner';
 
+interface LoadingMaskProps {
+	children?: React.ReactNode | React.ReactNode[];
+	className?: string;
+	screenReaderLabel?: string;
+	showSpinner?: boolean;
+	isLoading?: boolean;
+}
 // @todo Find a way to block buttons/form components when LoadingMask isLoading
 const LoadingMask = ( {
 	children,
@@ -18,7 +24,7 @@ const LoadingMask = ( {
 	screenReaderLabel,
 	showSpinner = false,
 	isLoading = true,
-} ) => {
+}: LoadingMaskProps ): JSX.Element => {
 	return (
 		<div
 			className={ classNames( className, {
@@ -42,13 +48,6 @@ const LoadingMask = ( {
 			) }
 		</div>
 	);
-};
-
-LoadingMask.propTypes = {
-	className: PropTypes.string,
-	screenReaderLabel: PropTypes.string,
-	showSpinner: PropTypes.bool,
-	isLoading: PropTypes.bool,
 };
 
 export default LoadingMask;

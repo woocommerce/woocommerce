@@ -3,7 +3,6 @@
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { isEqual } from 'lodash';
-import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import Pagination from '@woocommerce/base-components/pagination';
 import { useEffect } from '@wordpress/element';
@@ -25,32 +24,45 @@ import NoProducts from './no-products';
 import NoMatchingProducts from './no-matching-products';
 import ProductSortSelect from './product-sort-select';
 import ProductListItem from './product-list-item';
+import {
+	GenerateQuery,
+	GetSortArgs,
+	Query,
+	AreQueryTotalsDifferent,
+	ProductListProps,
+	TotalQuery,
+} from './types';
 import './style.scss';
 
-const generateQuery = ( { sortValue, currentPage, attributes } ) => {
+const getSortArgs: GetSortArgs = ( orderName ) => {
+	switch ( orderName ) {
+		case 'menu_order':
+		case 'popularity':
+		case 'rating':
+		case 'price':
+			return {
+				orderby: orderName,
+				order: 'asc',
+			};
+		case 'price-desc':
+			return {
+				orderby: 'price',
+				order: 'desc',
+			};
+		case 'date':
+			return {
+				orderby: 'date',
+				order: 'desc',
+			};
+	}
+};
+
+const generateQuery: GenerateQuery = ( {
+	sortValue,
+	currentPage,
+	attributes,
+} ) => {
 	const { columns, rows } = attributes;
-	const getSortArgs = ( orderName ) => {
-		switch ( orderName ) {
-			case 'menu_order':
-			case 'popularity':
-			case 'rating':
-			case 'price':
-				return {
-					orderby: orderName,
-					order: 'asc',
-				};
-			case 'price-desc':
-				return {
-					orderby: 'price',
-					order: 'desc',
-				};
-			case 'date':
-				return {
-					orderby: 'date',
-					order: 'desc',
-				};
-		}
-	};
 
 	return {
 		...getSortArgs( sortValue ),
@@ -69,13 +81,13 @@ const generateQuery = ( { sortValue, currentPage, attributes } ) => {
  * @return {Object} Same query without pagination and sorting attributes.
  */
 
-const extractPaginationAndSortAttributes = ( query ) => {
+const extractPaginationAndSortAttributes = ( query: Query ): TotalQuery => {
 	/* eslint-disable-next-line no-unused-vars */
 	const { order, orderby, page, per_page: perPage, ...totalQuery } = query;
 	return totalQuery || {};
 };
 
-const announceLoadingCompletion = ( totalProducts ) => {
+const announceLoadingCompletion = ( totalProducts: number ): void => {
 	if ( ! Number.isFinite( totalProducts ) ) {
 		return;
 	}
@@ -98,7 +110,7 @@ const announceLoadingCompletion = ( totalProducts ) => {
 	}
 };
 
-const areQueryTotalsDifferent = (
+const areQueryTotalsDifferent: AreQueryTotalsDifferent = (
 	{ totalQuery: nextQuery, totalProducts: nextProducts },
 	{ totalQuery: currentQuery } = {}
 ) => ! isEqual( nextQuery, currentQuery ) && Number.isFinite( nextProducts );
@@ -110,7 +122,7 @@ const ProductList = ( {
 	onSortChange,
 	sortValue,
 	scrollToTop,
-} ) => {
+}: ProductListProps ): JSX.Element => {
 	// These are possible filters.
 	const [ productAttributes, setProductAttributes ] = useQueryStateByKey(
 		'attributes',
@@ -169,7 +181,7 @@ const ProductList = ( {
 		totalQuery,
 	] );
 
-	const onPaginationChange = ( newPage ) => {
+	const onPaginationChange = ( newPage: number ) => {
 		scrollToTop( { focusableSelector: 'a, button' } );
 		onPageChange( newPage );
 	};
@@ -195,7 +207,7 @@ const ProductList = ( {
 		! Number.isFinite( totalProducts ) &&
 		Number.isFinite( previousQueryTotals?.totalProducts ) &&
 		isEqual( totalQuery, previousQueryTotals?.totalQuery )
-			? Math.ceil( previousQueryTotals.totalProducts / perPage )
+			? Math.ceil( ( previousQueryTotals?.totalProducts || 0 ) / perPage )
 			: Math.ceil( totalProducts / perPage );
 	const listProducts = products.length
 		? products
@@ -209,7 +221,7 @@ const ProductList = ( {
 
 	return (
 		<div className={ getClassnames() }>
-			{ contentVisibility.orderBy && hasProducts && (
+			{ contentVisibility?.orderBy && hasProducts && (
 				<ProductSortSelect
 					onChange={ onSortChange }
 					value={ sortValue }
@@ -228,7 +240,7 @@ const ProductList = ( {
 			{ ! hasProducts && ! hasFilters && <NoProducts /> }
 			{ hasProducts && (
 				<ul className={ `${ parentClassName }__products` }>
-					{ listProducts.map( ( product = {}, i ) => (
+					{ listProducts.map( ( product = {}, i: number ) => (
 						<ProductListItem
 							key={ product.id || i }
 							attributes={ attributes }
@@ -246,12 +258,6 @@ const ProductList = ( {
 			) }
 		</div>
 	);
-};
-
-ProductList.propTypes = {
-	attributes: PropTypes.object.isRequired,
-	// From withScrollToTop.
-	scrollToTop: PropTypes.func,
 };
 
 export default withScrollToTop( ProductList );
