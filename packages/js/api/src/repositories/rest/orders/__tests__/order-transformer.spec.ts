@@ -20,9 +20,8 @@ import {
 	This Object is a JSON representation of single Order GET operation from the WooCommerce REST API.
 
 	Developer note:
-	We use JSON.stringify here to convert an Object into a String.
-	This is done like this because JavaScript passes Objects around by reference,
-	and we don't want tests to modify the original `jsonPayloadFull` variable.
+	We use JSON.stringify here to convert an Object into a String, as JavaScript passes Objects
+	around by reference, and we don't want tests to modify the original `responseOrderJson` variable.
  */
 const responseOrderJson = JSON.stringify({
 	id: 1218,
