@@ -195,11 +195,11 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 		$id     = (int) $request['id'];
 		$review = get_comment( $id );
 
-		if ( $review && ! wc_rest_check_product_reviews_permissions( 'delete', $review->comment_ID ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you cannot delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		if ( $review && get_comment_type( $id ) === 'review' && wc_rest_check_product_reviews_permissions( 'delete', $review->comment_ID ) ) {
+			return true;
 		}
 
-		return true;
+		return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you cannot delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 	}
 
 	/**
