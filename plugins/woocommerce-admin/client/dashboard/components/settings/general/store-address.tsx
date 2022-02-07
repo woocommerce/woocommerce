@@ -16,6 +16,13 @@ import { useSelect } from '@wordpress/data';
 import { getAdminSetting } from '~/utils/admin-settings';
 
 const { countries } = getAdminSetting( 'dataEndpoints', { countries: {} } );
+const storeAddressFields = [
+	'addressLine1',
+	'addressLine2',
+	'city',
+	'countryState',
+	'postCode',
+];
 
 type Option = { key: string; label: string };
 
@@ -348,6 +355,21 @@ export function StoreAddress( {
 		countryState,
 		setValue
 	);
+
+	useEffect( () => {
+		if ( locale ) {
+			storeAddressFields.forEach( ( field ) => {
+				const fieldKey = field
+					.replace( /(address)Line([0-9])/, '$1$2' )
+					.toLowerCase();
+				const props = getInputProps( field );
+				if ( locale[ fieldKey ]?.hidden && props.value?.length > 0 ) {
+					// Clear hidden field.
+					setValue( field, '' );
+				}
+			} );
+		}
+	}, [ countryState, locale ] );
 	if ( ! hasFinishedResolution ) {
 		return <Spinner />;
 	}
