@@ -1,13 +1,13 @@
 /**
- * External dependencies
- */
-import { switchUserToAdmin, getAllBlocks } from '@wordpress/e2e-test-utils';
-import { visitBlockPage } from '@woocommerce/blocks-test-utils';
-
-/**
  * Internal dependencies
  */
-import { insertBlockDontWaitForInsertClose } from '../../utils.js';
+import {
+	openWidgetsEditorBlockInserter,
+	closeModalIfExists,
+	openWidgetEditor,
+	searchForBlock,
+	isBlockInsertedInWidgetsArea,
+} from '../../utils.js';
 
 const block = {
 	name: 'Mini Cart',
@@ -20,52 +20,72 @@ if ( process.env.WOOCOMMERCE_BLOCKS_PHASE < 3 ) {
 	test.only( `skipping ${ block.name } tests`, () => {} );
 }
 
+const removeDismissedCompatibilityNoticesFromLocalStorage = async () => {
+	await page.evaluate( () => {
+		localStorage.removeItem( 'wc-blocks_dismissed_compatibility_notices' );
+	} );
+};
+
+const addBlockToWidgetsArea = async () => {
+	await closeModalIfExists();
+	await openWidgetsEditorBlockInserter();
+	await searchForBlock( block.name );
+	const miniCartButton = await page.$x(
+		`//button//span[text()='${ block.name }']`
+	);
+
+	await miniCartButton[ 0 ].click();
+};
+
 describe( `${ block.name } Block`, () => {
-	describe( `before compatibility notice is dismissed`, () => {
+	describe( 'in widget editor', () => {
 		beforeAll( async () => {
-			// make sure CartCheckoutCompatibilityNotice will appear
-			await page.evaluate( () => {
-				localStorage.removeItem(
-					'wc-blocks_dismissed_compatibility_notices'
-				);
-			} );
-			await visitBlockPage( `${ block.name } Block` );
+			await removeDismissedCompatibilityNoticesFromLocalStorage();
 		} );
 
-		it( 'shows compatibility notice', async () => {
+		beforeEach( async () => {
+			await openWidgetEditor();
+		} );
+
+		it( 'can be inserted in widget area', async () => {
+			await addBlockToWidgetsArea();
+			expect( await isBlockInsertedInWidgetsArea( block.slug ) ).toBe(
+				true
+			);
+		} );
+
+		it( 'the compatibility notice appears', async () => {
+			await addBlockToWidgetsArea();
 			const compatibilityNoticeTitle = await page.$x(
 				`//h1[contains(text(), 'Compatibility notice')]`
 			);
 			expect( compatibilityNoticeTitle.length ).toBe( 1 );
 		} );
-	} );
 
-	describe( 'after compatibility notice is dismissed', () => {
-		beforeAll( async () => {
+		it( "after the compatibility notice is dismissed, it doesn't appear again", async () => {
 			await page.evaluate( () => {
 				localStorage.setItem(
 					'wc-blocks_dismissed_compatibility_notices',
 					'["mini-cart"]'
 				);
 			} );
-			await switchUserToAdmin();
-			await visitBlockPage( `${ block.name } Block` );
+			await addBlockToWidgetsArea();
+			const compatibilityNoticeTitle = await page.$x(
+				`//h1[contains(text(), 'Compatibility notice')]`
+			);
+			expect( compatibilityNoticeTitle.length ).toBe( 0 );
 		} );
 
-		afterAll( async () => {
-			await page.evaluate( () => {
-				localStorage.removeItem(
-					'wc-blocks_dismissed_compatibility_notices'
-				);
-			} );
-		} );
 		it( 'can only be inserted once', async () => {
-			await insertBlockDontWaitForInsertClose( block.name );
-			expect( await getAllBlocks() ).toHaveLength( 1 );
-		} );
+			await addBlockToWidgetsArea();
+			const miniCartButton = await page.$x(
+				`//button[@aria-disabled]//span[text()='${ block.name }']`
+			);
 
-		it( 'renders without crashing', async () => {
-			await expect( page ).toRenderBlock( block );
+			expect( miniCartButton ).toHaveLength( 1 );
 		} );
 	} );
+
+	// @todo Add tests for the Mini Cart block in FSE editor
+	// describe( 'in FSE editor', () => {} );
 } );

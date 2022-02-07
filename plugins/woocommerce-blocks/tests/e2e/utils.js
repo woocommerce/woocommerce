@@ -80,3 +80,15 @@ export const openWidgetsEditorBlockInserter = async () => {
 		'.edit-widgets-header [aria-label="Add block"],.edit-widgets-header [aria-label="Toggle block inserter"]'
 	);
 };
+
+export const isBlockInsertedInWidgetsArea = async ( blockName ) => {
+	const widgetAreaSelector = '.wp-block-widget-area';
+
+	const widgetsArea = await page.$$( widgetAreaSelector );
+
+	return widgetsArea.some(
+		async ( widgetArea ) =>
+			( await widgetArea.$$( `[data-block-title="${ blockName }"]` )
+				.length ) > 0
+	);
+};
