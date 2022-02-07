@@ -9,14 +9,13 @@ import {
 	OrderCouponLine,
 	MetaData,
 	OrderRefundLine
-} from "../../models";
+} from "../../../../models";
 
 import {
 	createBillingAddressTransformer,
 	createOrderTransformer,
 	createShippingAddressTransformer
-} from "../../repositories/rest/orders/transformer";
-
+} from "../transformer";
 /*
 	This Object is a JSON representation of single Order GET operation from the WooCommerce REST API.
 
