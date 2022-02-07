@@ -7,14 +7,12 @@ import { check } from '@wordpress/icons';
 import { Fragment, useEffect } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { ONBOARDING_STORE_NAME, OPTIONS_STORE_NAME } from '@woocommerce/data';
-import { useExperiment } from '@woocommerce/explat';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
 import { DisplayOption } from '~/activity-panel/display-options';
-import { Task } from '../tasks/task';
 import { TaskList } from '../tasks/task-list';
 import { TasksPlaceholder } from '../tasks/placeholder';
 import '../tasks/tasks.scss';
@@ -24,13 +22,10 @@ export type TasksProps = {
 	query: { task?: string };
 };
 
-const ExtendedTask: React.FC< TasksProps > = ( {
-	query,
-	shouldRenderTask,
-} ) => {
-	const { task } = query;
+const ExtendedTask: React.FC< TasksProps > = ( { query } ) => {
 	const { hideTaskList } = useDispatch( ONBOARDING_STORE_NAME );
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
+	const { task } = query;
 
 	const { isResolving, taskLists } = useSelect( ( select ) => {
 		return {
@@ -40,25 +35,6 @@ const ExtendedTask: React.FC< TasksProps > = ( {
 			taskLists: select( ONBOARDING_STORE_NAME ).getTaskLists(),
 		};
 	} );
-
-	const getCurrentTask = () => {
-		if ( ! task ) {
-			return null;
-		}
-
-		const tasks = taskLists.reduce(
-			( acc, taskList ) => [ ...acc, ...taskList.tasks ],
-			[]
-		);
-
-		const currentTask = tasks.find( ( t ) => t.id === task );
-
-		if ( ! currentTask ) {
-			return null;
-		}
-
-		return currentTask;
-	};
 
 	const toggleTaskList = ( taskList ) => {
 		const { id, isHidden } = taskList;
@@ -78,22 +54,13 @@ const ExtendedTask: React.FC< TasksProps > = ( {
 		} );
 	}, [ taskLists, isResolving ] );
 
-	const currentTask = getCurrentTask();
-
-	if ( task && ! currentTask ) {
+	// If a task detail is being shown, we shouldn't show the extended tasklist.
+	if ( task ) {
 		return null;
 	}
 
 	if ( isResolving ) {
 		return <TasksPlaceholder query={ query } />;
-	}
-
-	if ( currentTask && shouldRenderTask ) {
-		return (
-			<div className="woocommerce-task-dashboard__container">
-				<Task query={ query } task={ currentTask } />
-			</div>
-		);
 	}
 
 	const extendedTaskList = taskLists.find( ( list ) => {

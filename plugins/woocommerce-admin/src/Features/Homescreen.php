@@ -165,6 +165,7 @@ class Homescreen {
 	 */
 	public function preload_options( $options ) {
 		$options[] = 'woocommerce_default_homepage_layout';
+		$options[] = 'woocommerce_admin_install_timestamp';
 
 		return $options;
 	}

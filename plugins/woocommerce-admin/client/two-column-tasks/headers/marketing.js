@@ -13,7 +13,7 @@ import GetMoreSales from './illustrations/get-more-sales.js';
 const MarketingHeader = ( { task, goToTask } ) => {
 	return (
 		<div className="woocommerce-task-header__contents-container">
-			<GetMoreSales class="svg-background" />
+			<GetMoreSales className="svg-background" />
 			<div className="woocommerce-task-header__contents">
 				<h1>{ __( 'Get more sales', 'woocommerce-admin' ) }</h1>
 				<p>

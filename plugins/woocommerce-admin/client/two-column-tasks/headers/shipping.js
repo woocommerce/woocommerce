@@ -13,7 +13,7 @@ import Shipping from './illustrations/shipping.js';
 const ShippingHeader = ( { task, goToTask } ) => {
 	return (
 		<div className="woocommerce-task-header__contents-container">
-			<Shipping class="svg-background" />
+			<Shipping className="svg-background" />
 			<div className="woocommerce-task-header__contents">
 				<h1>
 					{ __(

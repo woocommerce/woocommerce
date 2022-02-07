@@ -13,7 +13,7 @@ import AddTaxRates from './illustrations/add-tax-rates.js';
 const TaxHeader = ( { task, goToTask } ) => {
 	return (
 		<div className="woocommerce-task-header__contents-container">
-			<AddTaxRates class="svg-background" />
+			<AddTaxRates className="svg-background" />
 			<div className="woocommerce-task-header__contents">
 				<h1>
 					{ __( 'Next up, add your tax rates', 'woocommerce-admin' ) }

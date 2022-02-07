@@ -20,8 +20,6 @@ import {
 	OPTIONS_STORE_NAME,
 } from '@woocommerce/data';
 import { __ } from '@wordpress/i18n';
-import moment from 'moment';
-import { useExperiment } from '@woocommerce/explat';
 
 /**
  * Internal dependencies
@@ -37,9 +35,11 @@ import { TasksPlaceholder } from '../tasks';
 import {
 	WELCOME_MODAL_DISMISSED_OPTION_NAME,
 	WELCOME_FROM_CALYPSO_MODAL_DISMISSED_OPTION_NAME,
+	WOOCOMMERCE_ADMIN_INSTALL_TIMESTAMP_OPTION_NAME,
 } from './constants';
 import { WelcomeFromCalypsoModal } from './welcome-from-calypso-modal';
 import { WelcomeModal } from './welcome-modal';
+import { useHeadercardExperimentHook } from './hooks/use-headercard-experiment-hook';
 import './style.scss';
 import '../dashboard/style.scss';
 
@@ -67,6 +67,8 @@ export const Layout = ( {
 	shouldShowWelcomeFromCalypsoModal,
 	isTaskListHidden,
 	updateOptions,
+	installTimestamp,
+	installTimestampHasResolved,
 } ) => {
 	const userPrefs = useUserPreferences();
 	const shouldShowStoreLinks = taskListComplete || isTaskListHidden;
@@ -74,27 +76,14 @@ export const Layout = ( {
 		shouldShowStoreLinks || window.wcAdminFeatures.analytics;
 	const [ showInbox, setShowInbox ] = useState( true );
 	const isDashboardShown = ! query.task;
-
-	const momentDate = moment().utc();
-
-	const [
+	const {
 		isLoadingExperimentAssignment,
-		experimentAssignment,
-	] = useExperiment(
-		'woocommerce_tasklist_progression_headercard_' +
-			momentDate.format( 'YYYY' ) +
-			'_' +
-			momentDate.format( 'MM' )
-	);
-
-	const [
 		isLoadingTwoColExperimentAssignment,
+		experimentAssignment,
 		twoColExperimentAssignment,
-	] = useExperiment(
-		'woocommerce_tasklist_progression_headercard_2col_' +
-			momentDate.format( 'YYYY' ) +
-			'_' +
-			momentDate.format( 'MM' )
+	} = useHeadercardExperimentHook(
+		installTimestampHasResolved,
+		installTimestamp
 	);
 
 	const isRunningTwoColumnExperiment =
@@ -149,19 +138,21 @@ export const Layout = ( {
 		return (
 			<>
 				<Column shouldStick={ shouldStickColumns }>
-					{ ! isRunningTaskListExperiment && (
-						<ActivityHeader
-							className="your-store-today"
-							title={ __(
-								'Your store today',
-								'woocommerce-admin'
-							) }
-							subtitle={ __(
-								"To do's, tips, and insights for your business",
-								'woocommerce-admin'
-							) }
-						/>
-					) }
+					{ ! isLoadingExperimentAssignment &&
+						! isLoadingTwoColExperimentAssignment &&
+						! isRunningTaskListExperiment && (
+							<ActivityHeader
+								className="your-store-today"
+								title={ __(
+									'Your store today',
+									'woocommerce-admin'
+								) }
+								subtitle={ __(
+									"To do's, tips, and insights for your business",
+									'woocommerce-admin'
+								) }
+							/>
+						) }
 					{ <ActivityPanel /> }
 					{ hasTaskList && renderTaskList() }
 					<InboxPanel />
@@ -179,7 +170,9 @@ export const Layout = ( {
 			return (
 				// When running the two-column experiment, we still need to render
 				// the component in the left column for the extended task list.
-				<TwoColumnTasksExtended query={ query } />
+				<Suspense fallback={ null }>
+					<TwoColumnTasksExtended query={ query } />
+				</Suspense>
 			);
 		} else if (
 			! twoColumns &&
@@ -187,17 +180,16 @@ export const Layout = ( {
 			! isLoadingExperimentAssignment
 		) {
 			return (
-				<>
-					<TwoColumnTasks
-						query={ query }
-						userPreferences={ userPrefs }
-						twoColumns={ twoColumns }
-					/>
-					<TwoColumnTasksExtended
-						query={ query }
-						shouldRenderTask={ false }
-					/>
-				</>
+				<Suspense fallback={ null }>
+					<>
+						<TwoColumnTasks
+							query={ query }
+							userPreferences={ userPrefs }
+							twoColumns={ twoColumns }
+						/>
+						<TwoColumnTasksExtended query={ query } />
+					</>
+				</Suspense>
 			);
 		}
 
@@ -211,11 +203,13 @@ export const Layout = ( {
 	return (
 		<>
 			{ twoColumns && isRunningTaskListExperiment && (
-				<TwoColumnTasks
-					query={ query }
-					userPreferences={ userPrefs }
-					twoColumns={ twoColumns }
-				/>
+				<Suspense fallback={ null }>
+					<TwoColumnTasks
+						query={ query }
+						userPreferences={ userPrefs }
+						twoColumns={ twoColumns }
+					/>
+				</Suspense>
 			) }
 			<div
 				className={ classnames( 'woocommerce-homescreen', {
@@ -272,6 +266,14 @@ Layout.propTypes = {
 	 */
 	shouldShowWelcomeFromCalypsoModal: PropTypes.bool,
 	/**
+	 * Timestamp of WooCommerce Admin installation.
+	 */
+	installTimestamp: PropTypes.string,
+	/**
+	 * Resolution of WooCommerce Admin installation timetsamp.
+	 */
+	installTimestampHasResolved: PropTypes.bool,
+	/**
 	 * Dispatch an action to update an option
 	 */
 	updateOptions: PropTypes.func.isRequired,
@@ -305,9 +307,18 @@ export default compose(
 		const welcomeModalDismissed =
 			getOption( WELCOME_MODAL_DISMISSED_OPTION_NAME ) === 'yes';
 
+		const installTimestamp = getOption(
+			WOOCOMMERCE_ADMIN_INSTALL_TIMESTAMP_OPTION_NAME
+		);
+
 		const welcomeModalDismissedHasResolved = hasFinishedResolution(
 			'getOption',
 			[ WELCOME_MODAL_DISMISSED_OPTION_NAME ]
+		);
+
+		const installTimestampHasResolved = hasFinishedResolution(
+			'getOption',
+			[ WOOCOMMERCE_ADMIN_INSTALL_TIMESTAMP_OPTION_NAME ]
 		);
 
 		const shouldShowWelcomeModal =
@@ -328,6 +339,8 @@ export default compose(
 			isTaskListHidden: getTaskList( 'setup' )?.isHidden,
 			hasTaskList: taskLists.find( ( list ) => list.isVisible ),
 			taskListComplete: getTaskList( 'setup' )?.isComplete,
+			installTimestamp,
+			installTimestampHasResolved,
 		};
 	} ),
 	withDispatch( ( dispatch ) => ( {
