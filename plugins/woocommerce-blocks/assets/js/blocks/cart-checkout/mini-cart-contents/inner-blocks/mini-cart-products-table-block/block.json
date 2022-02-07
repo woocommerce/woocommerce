@@ -16,7 +16,7 @@
 			"type": "object",
 			"default": {
 				"remove": true,
-				"move": false 
+				"move": false
 			}
 		}
 	},

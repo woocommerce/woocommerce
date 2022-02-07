@@ -1,1 +1,4 @@
-{"title":"Newest Products Block","pageContent":"<!-- wp:woocommerce/product-new /-->"}
+{
+	"title": "Newest Products Block",
+	"pageContent": "<!-- wp:woocommerce/product-new /-->"
+}
