@@ -115,7 +115,6 @@ class CheckoutSchema extends AbstractSchema {
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'enum'        => wc()->payment_gateways->get_payment_gateway_ids(),
-				'required'    => true,
 			],
 			'create_account'    => [
 				'description' => __( 'Whether to create a new user account as part of order processing.', 'woo-gutenberg-products-block' ),
