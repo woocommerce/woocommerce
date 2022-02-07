@@ -184,41 +184,6 @@ const responseOrderJson = JSON.stringify({
 						virtual: false,
 						meta_data: []
 					},
-					display_key: 'coupon_data',
-					display_value: {
-						id: 171,
-						code: 'save5',
-						amount: '5',
-						date_created: {
-							date: '2021-05-19 04:28:31.000000',
-							timezone_type: 3,
-							timezone: 'Pacific/Auckland'
-						},
-						date_modified: {
-							date: '2021-05-19 04:28:31.000000',
-							timezone_type: 3,
-							timezone: 'Pacific/Auckland'
-						},
-						date_expires: null,
-						discount_type: 'fixed_cart',
-						description: '',
-						usage_count: 3,
-						individual_use: false,
-						product_ids: [],
-						excluded_product_ids: [],
-						usage_limit: 0,
-						usage_limit_per_user: 0,
-						limit_usage_to_x_items: null,
-						free_shipping: false,
-						product_categories: [],
-						excluded_product_categories: [],
-						exclude_sale_items: false,
-						minimum_amount: '',
-						maximum_amount: '',
-						email_restrictions: [],
-						virtual: false,
-						meta_data: []
-					}
 				}
 			]
 		}
@@ -394,8 +359,6 @@ describe( 'OrderTransformer', () => {
 		//expect(order.couponLines[0].metaData[0].id).toStrictEqual(57112);
 		expect(order.couponLines[0].metaData[0].key).toStrictEqual('coupon_data');
 		expect(order.couponLines[0].metaData[0].value).toStrictEqual( JSON.parse(responseOrderJson).coupon_lines[0].meta_data[0].value);
-		expect(order.couponLines[0].metaData[0].displayKey).toStrictEqual('coupon_data');
-		expect(order.couponLines[0].metaData[0].displayValue).toStrictEqual( JSON.parse(responseOrderJson).coupon_lines[0].meta_data[0].display_value);
 
 		// Refunds
 		expect(order.refunds).toHaveLength(1);
