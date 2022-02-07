@@ -56,18 +56,22 @@ Additionally, make sure to differentiate between things in the testing notes tha
   * Note: the script automatically updates version numbers on Github (commits on your behalf).
   * **ALERT**: This script will ask you if this release will be deployed to WordPress.org. You should answer yes for this release even if it is a pre-release.
   * A GitHub release will automatically be created and this will trigger a workflow that automatically deploys the plugin to WordPress.org.
-  * An email confirmation is required before the new version will be released, so check your email in order to confirm the release.
+  
+
+## If this release is deployed to WordPress.org...
+
+* [ ] An email confirmation is required before the new version will be released, so check your email in order to confirm the release.
 * [ ] Edit the [GitHub release](https://github.com/woocommerce/woocommerce-gutenberg-products-block/releases) and copy changelog into the release notes. Ensure there is a release with the correct version, the one you entered above.
 * [ ] The `#team-rubik` slack instance will be notified about the progress with the WordPress.org deploy. Watch for that. If anything goes wrong, an error will be reported and you can followup via the GitHub actions tab and the log for that workflow.
-
-## After Workflow completes
-
 * [ ] After the wp.org workflow completes, confirm the following
   * [ ] Changelog, Version, and Last Updated on [WP.org plugin page](https://wordpress.org/plugins/woo-gutenberg-products-block/) is correct.
   * [ ] Confirm svn tag is correct, e.g. [{{version}}](https://plugins.svn.wordpress.org/woo-gutenberg-products-block/tags/{{version}}/)
   * [ ] Confirm [WooCommerce.com plugin page](https://woocommerce.com/products/woocommerce-gutenberg-products-block/) is updated.
   * [ ] Download zip and smoke test.
   * [ ] Test updating plugin from previous version.
+
+## After Workflow completes
+
 * [ ] Merge this pull request back into `trunk`. This may have merge conflicts needing resolved if there are any cherry-picked commits in the release branch.
 * [ ] Update version on the `trunk` branch to be for the next version of the plugin and include the `dev` suffix (e.g. something like [`2.6-dev`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/commit/e27f053e7be0bf7c1d376f5bdb9d9999190ce158)) for the next version. Be sure to update the version number in the following files:
     * [ ] `package-lock.json`
