@@ -107,6 +107,7 @@ class VariationsReportTable extends Component {
 				stock_status: stockStatus,
 				stock_quantity: stockQuantity,
 				low_stock_amount: lowStockAmount,
+				deleted,
 				sku,
 			} = extendedInfo;
 			const name = getFullVariationName( row );
@@ -124,7 +125,9 @@ class VariationsReportTable extends Component {
 
 			return [
 				{
-					display: (
+					display: deleted ? (
+						name + ' ' + __( '(Deleted)', ' woocommerce-admin' )
+					) : (
 						<Link href={ editPostLink } type="wp-admin">
 							{ name }
 						</Link>
