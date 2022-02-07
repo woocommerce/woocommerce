@@ -525,7 +525,8 @@ class Checkout extends AbstractCartRoute {
 	 * @return string
 	 */
 	private function get_request_payment_method_id( \WP_REST_Request $request ) {
-		return $this->get_request_payment_method( $request )->id;
+		$payment_method = $this->get_request_payment_method( $request );
+		return is_null( $payment_method ) ? '' : $payment_method->id;
 	}
 
 	/**
@@ -533,18 +534,22 @@ class Checkout extends AbstractCartRoute {
 	 *
 	 * @throws RouteException On error.
 	 * @param \WP_REST_Request $request Request object.
-	 * @return \WC_Payment_Gateway
+	 * @return \WC_Payment_Gateway|null
 	 */
 	private function get_request_payment_method( \WP_REST_Request $request ) {
-		$available_gateways     = WC()->payment_gateways->get_available_payment_gateways();
-		$request_payment_method = wc_clean( wp_unslash( $request['payment_method'] ?? '' ) );
+		$available_gateways      = WC()->payment_gateways->get_available_payment_gateways();
+		$request_payment_method  = wc_clean( wp_unslash( $request['payment_method'] ?? '' ) );
+		$requires_payment_method = $this->order->needs_payment();
 
 		if ( empty( $request_payment_method ) ) {
-			throw new RouteException(
-				'woocommerce_rest_checkout_missing_payment_method',
-				__( 'No payment method provided.', 'woo-gutenberg-products-block' ),
-				400
-			);
+			if ( $requires_payment_method ) {
+				throw new RouteException(
+					'woocommerce_rest_checkout_missing_payment_method',
+					__( 'No payment method provided.', 'woo-gutenberg-products-block' ),
+					400
+				);
+			}
+			return null;
 		}
 
 		if ( ! isset( $available_gateways[ $request_payment_method ] ) ) {
