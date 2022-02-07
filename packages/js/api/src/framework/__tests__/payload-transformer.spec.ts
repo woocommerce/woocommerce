@@ -1,7 +1,31 @@
-import {Order, BillingOrderAddress, ShippingOrderAddress, OrderLineItem, OrderShippingLine, OrderFeeLine, OrderTaxRate, OrderCouponLine, MetaData, OrderRefundLine} from "../../models";
-import {createBillingAddressTransformer, createOrderTransformer, createShippingAddressTransformer} from "../../repositories/rest/orders/transformer";
+import {
+	Order,
+	BillingOrderAddress,
+	ShippingOrderAddress,
+	OrderLineItem,
+	OrderShippingLine,
+	OrderFeeLine,
+	OrderTaxRate,
+	OrderCouponLine,
+	MetaData,
+	OrderRefundLine
+} from "../../models";
 
-const jsonPayloadFull = JSON.stringify({
+import {
+	createBillingAddressTransformer,
+	createOrderTransformer,
+	createShippingAddressTransformer
+} from "../../repositories/rest/orders/transformer";
+
+/*
+	This Object is a JSON representation of single Order GET operation from the WooCommerce REST API.
+
+	Developer note:
+	We use JSON.stringify here to convert an Object into a String.
+	This is done like this because JavaScript passes Objects around by reference,
+	and we don't want tests to modify the original `jsonPayloadFull` variable.
+ */
+const responseOrderJson = JSON.stringify({
 	id: 1218,
 	parent_id: 0,
 	status: 'pending',
@@ -227,9 +251,9 @@ const jsonPayloadFull = JSON.stringify({
 
 describe( 'OrderTransformer', () => {
 	it( 'should transform an order JSON', () => {
-		const order = createOrderTransformer().toModel( Order, JSON.parse(jsonPayloadFull) );
-		const billing = createBillingAddressTransformer().toModel(BillingOrderAddress, JSON.parse(jsonPayloadFull).billing);
-		const shipping = createShippingAddressTransformer().toModel(ShippingOrderAddress, JSON.parse(jsonPayloadFull).shipping);
+		const order = createOrderTransformer().toModel( Order, JSON.parse(responseOrderJson) );
+		const billing = createBillingAddressTransformer().toModel(BillingOrderAddress, JSON.parse(responseOrderJson).billing);
+		const shipping = createShippingAddressTransformer().toModel(ShippingOrderAddress, JSON.parse(responseOrderJson).shipping);
 
 		// Order
 		expect( order ).toBeInstanceOf( Order );
@@ -276,7 +300,7 @@ describe( 'OrderTransformer', () => {
 		expect(billing.country).toStrictEqual('Billing Country');
 		expect(billing.email).toStrictEqual('Billing Email');
 		expect(billing.phone).toStrictEqual('Billing Phone');
-		expect( createBillingAddressTransformer().fromModel(billing) ).toStrictEqual(JSON.parse(jsonPayloadFull).billing);
+		expect( createBillingAddressTransformer().fromModel(billing) ).toStrictEqual(JSON.parse(responseOrderJson).billing);
 
 		// Shipping
 		expect(shipping.firstName).toStrictEqual('Shipping First Name');
@@ -295,7 +319,7 @@ describe( 'OrderTransformer', () => {
 		 */
 		//expect(shipping.email).toStrictEqual('Shipping Email');
 		//expect(shipping.phone).toStrictEqual('Shipping Phone');
-		expect( createShippingAddressTransformer().fromModel(shipping) ).toStrictEqual(JSON.parse(jsonPayloadFull).shipping);
+		expect( createShippingAddressTransformer().fromModel(shipping) ).toStrictEqual(JSON.parse(responseOrderJson).shipping);
 
 		// Metadata
 		expect(order.metaData).toHaveLength(1);
@@ -369,9 +393,9 @@ describe( 'OrderTransformer', () => {
 		expect(order.couponLines[0].metaData[0]).toBeInstanceOf(MetaData);
 		//expect(order.couponLines[0].metaData[0].id).toStrictEqual(57112);
 		expect(order.couponLines[0].metaData[0].key).toStrictEqual('coupon_data');
-		expect(order.couponLines[0].metaData[0].value).toStrictEqual( JSON.parse(jsonPayloadFull).coupon_lines[0].meta_data[0].value);
+		expect(order.couponLines[0].metaData[0].value).toStrictEqual( JSON.parse(responseOrderJson).coupon_lines[0].meta_data[0].value);
 		expect(order.couponLines[0].metaData[0].displayKey).toStrictEqual('coupon_data');
-		expect(order.couponLines[0].metaData[0].displayValue).toStrictEqual( JSON.parse(jsonPayloadFull).coupon_lines[0].meta_data[0].display_value);
+		expect(order.couponLines[0].metaData[0].displayValue).toStrictEqual( JSON.parse(responseOrderJson).coupon_lines[0].meta_data[0].display_value);
 
 		// Refunds
 		expect(order.refunds).toHaveLength(1);
