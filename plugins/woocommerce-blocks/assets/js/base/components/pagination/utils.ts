@@ -7,7 +7,15 @@
  * @param {number} totalPages Total pages available.
  * @return {Object} Object containing the min and max index to display in the pagination component.
  */
-export const getIndexes = ( pagesToDisplay, currentPage, totalPages ) => {
+type minMaxIndex = {
+	minIndex: number | null;
+	maxIndex: number | null;
+};
+export const getIndexes = (
+	pagesToDisplay: number,
+	currentPage: number,
+	totalPages: number
+): minMaxIndex => {
 	if ( totalPages <= 2 ) {
 		return { minIndex: null, maxIndex: null };
 	}

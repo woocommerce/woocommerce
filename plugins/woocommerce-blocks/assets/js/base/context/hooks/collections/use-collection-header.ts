@@ -6,6 +6,11 @@ import { useSelect } from '@wordpress/data';
 import { useShallowEqual } from '@woocommerce/base-hooks';
 
 /**
+ * Internal dependencies
+ */
+import { useCollectionOptions } from '.';
+
+/**
  * This is a custom hook that is wired up to the `wc/store/collections` data
  * store. Given a header key and a collections option object, this will ensure a
  * component is kept up to date with the collection header value matching that
@@ -36,7 +41,14 @@ import { useShallowEqual } from '@woocommerce/base-hooks';
  *                  - isLoading A boolean indicating whether the header is
  *                              loading (true) or not.
  */
-export const useCollectionHeader = ( headerKey, options ) => {
+
+export const useCollectionHeader = (
+	headerKey: string,
+	options: Omit< useCollectionOptions, 'shouldSelect' >
+): {
+	value: unknown;
+	isLoading: boolean;
+} => {
 	const {
 		namespace,
 		resourceName,
