@@ -18,6 +18,7 @@
 
 ## Changed
 
+- Updated `external.md` with instructions to manually set up sites for e2e testing.
 - Updated `getLatestReleaseZipUrl()` to allow passing in an authorization token and simplified arguments to just the repository name
 - Updated `deleteDownloadedPluginFiles()` to also be able to delete directories.
 
