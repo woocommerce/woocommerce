@@ -15,7 +15,8 @@ import {
 	OrderLineItem,
 	OrderRefundLine,
 	OrderShippingLine,
-	OrderTaxRate, MetaData,
+	OrderTaxRate,
+	MetaData,
 } from '../../../models';
 import {createMetaDataTransformer} from "../shared";
 
