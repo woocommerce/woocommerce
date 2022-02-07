@@ -1,1 +1,4 @@
-{"title":"Best Selling Products Block","pageContent":"<!-- wp:woocommerce/product-best-sellers /-->"}
+{
+	"title": "Best Selling Products Block",
+	"pageContent": "<!-- wp:woocommerce/product-best-sellers /-->"
+}
