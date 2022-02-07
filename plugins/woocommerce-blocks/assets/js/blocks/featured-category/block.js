@@ -32,6 +32,7 @@ import { folderStarred } from '@woocommerce/icons';
 import { Icon } from '@wordpress/icons';
 import ProductCategoryControl from '@woocommerce/editor-components/product-category-control';
 import ErrorPlaceholder from '@woocommerce/editor-components/error-placeholder';
+import TextToolbarButton from '@woocommerce/editor-components/text-toolbar-button';
 
 /**
  * Internal dependencies
@@ -90,18 +91,29 @@ const FeaturedCategory = ( {
 						setAttributes( { contentAlign: nextAlign } );
 					} }
 				/>
-				<MediaReplaceFlow
-					mediaId={ mediaId }
-					mediaURL={ mediaSrc }
-					accept="image/*"
-					onSelect={ ( media ) => {
-						setAttributes( {
-							mediaId: media.id,
-							mediaSrc: media.url,
-						} );
-					} }
-					allowedTypes={ [ 'image' ] }
-				/>
+				<ToolbarGroup>
+					<MediaReplaceFlow
+						mediaId={ mediaId }
+						mediaURL={ mediaSrc }
+						accept="image/*"
+						onSelect={ ( media ) => {
+							setAttributes( {
+								mediaId: media.id,
+								mediaSrc: media.url,
+							} );
+						} }
+						allowedTypes={ [ 'image' ] }
+					/>
+					{ mediaId && mediaSrc ? (
+						<TextToolbarButton
+							onClick={ () =>
+								setAttributes( { mediaId: 0, mediaSrc: '' } )
+							}
+						>
+							{ __( 'Remove', 'woo-gutenberg-products-block' ) }
+						</TextToolbarButton>
+					) : null }
+				</ToolbarGroup>
 				<ToolbarGroup
 					controls={ [
 						{
