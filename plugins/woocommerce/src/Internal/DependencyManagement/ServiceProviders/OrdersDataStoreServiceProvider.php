@@ -7,7 +7,7 @@ namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;
 
 use Automattic\WooCommerce\Internal\DependencyManagement\AbstractServiceProvider;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
-use Automattic\WooCommerce\Internal\DataStores\Orders\FeatureController;
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 
 /**
@@ -22,7 +22,7 @@ class OrdersDataStoreServiceProvider extends AbstractServiceProvider {
 	 */
 	protected $provides = array(
 		DataSynchronizer::class,
-		FeatureController::class,
+		CustomOrdersTableController::class,
 		OrdersTableDataStore::class,
 	);
 
@@ -31,7 +31,7 @@ class OrdersDataStoreServiceProvider extends AbstractServiceProvider {
 	 */
 	public function register() {
 		$this->share( DataSynchronizer::class )->addArgument( OrdersTableDataStore::class );
-		$this->share( FeatureController::class )->addArguments( array( OrdersTableDataStore::class, DataSynchronizer::class ) );
+		$this->share( CustomOrdersTableController::class )->addArguments( array( OrdersTableDataStore::class, DataSynchronizer::class ) );
 		$this->share( OrdersTableDataStore::class );
 	}
 }

@@ -11,7 +11,7 @@ defined( 'ABSPATH' ) || exit;
  * This class handles the data migration/synchronization for the custom orders table. Its responsibilites are:
  *
  * - Performing the initial table creation and filling (triggered by initiate_regeneration)
- * - Syncrhonizing changes between the custom orders table and the posts table whenever changes in orders happen.
+ * - Synchronizing changes between the custom orders table and the posts table whenever changes in orders happen.
  */
 class DataSynchronizer {
 
@@ -77,7 +77,7 @@ class DataSynchronizer {
 	 * @return int Number of orders already processed, 0 if no regeneration is in progress.
 	 */
 	public function get_regeneration_processed_orders_count(): int {
-		return get_option( self::CUSTOM_ORDERS_TABLE_DATA_REGENERATION_DONE_COUNT, 0 );
+		return (int)get_option( self::CUSTOM_ORDERS_TABLE_DATA_REGENERATION_DONE_COUNT, 0 );
 	}
 
 	/**

@@ -9,7 +9,7 @@
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
-use Automattic\WooCommerce\Internal\DataStores\Orders\FeatureController as OrdersTableFeatureController;
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DownloadPermissionsAdjuster;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
