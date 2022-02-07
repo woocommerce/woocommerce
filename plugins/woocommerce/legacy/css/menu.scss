@@ -43,8 +43,8 @@ span.mce_woocommerce_shortcodes_button {
 	.wc_plugin_upgrade_notice {
 		font-weight: normal;
 		background: #fff8e5 !important;
-		border-left: 4px solid #ffb900;
-		border-top: 1px solid #ffb900;
+		border-left: 4px solid var(--wc-yellow);
+		border-top: 1px solid var(--wc-yellow);
 		padding: 9px 0 9px 12px !important;
 		margin: 0 -12px 0 -16px !important;
 
@@ -138,8 +138,8 @@ span.mce_woocommerce_shortcodes_button {
 		padding: 0.75em 1em;
 		line-height: 1.5em;
 		font-size: 2em;
-		border-bottom: 1px solid #eee;
-		color: #fff;
+		border-bottom: 1px solid #{wc-shade( 93 )};
+		color: var(--wc-white);
 		background: #96578a;
 		border-top-left-radius: 4px;
 		border-top-right-radius: 4px;
@@ -175,7 +175,7 @@ span.mce_woocommerce_shortcodes_button {
 	}
 
 	.actions {
-		border-top: 1px solid #eee;
+		border-top: 1px solid #{wc-shade( 93 )};
 		margin: 0;
 		padding: 1em 0 2em 0;
 		overflow: hidden;
@@ -186,24 +186,24 @@ span.mce_woocommerce_shortcodes_button {
 
 		a.button-primary {
 			float: right;
-			background: #bb77ae;
-			border-color: #a36597;
-			box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
-			color: #fff;
+			background: #{wc-hsl( 'orchid',  calc(var(--wc--primary-sat) + 5%), calc( var(--wc--primary-luma) + 8% ) )};
+			border-color: var(--woocommerce);
+			box-shadow: inset 0 1px 0 wc-shade( 100 , 'white', 25% ), 0 1px 0 var(--woocommerce);
+			color: var(--wc-white);
 			text-shadow:
-				0 -1px 1px #a36597,
-				1px 0 1px #a36597,
-				0 1px 1px #a36597,
-				-1px 0 1px #a36597;
+				0 -1px 1px var(--woocommerce),
+				1px 0 1px var(--woocommerce),
+				0 1px 1px var(--woocommerce),
+				-1px 0 1px var(--woocommerce);
 
 			&:hover,
 			&:focus,
 			&:active {
-				background: #a36597;
-				border-color: #a36597;
+				background: var(--woocommerce);
+				border-color: var(--woocommerce);
 				box-shadow:
-					inset 0 1px 0 rgba(255, 255, 255, 0.25),
-					0 1px 0 #a36597;
+					inset 0 1px 0 wc-shade( 100 , 'white', 25% ),
+					0 1px 0 var(--woocommerce);
 			}
 		}
 	}

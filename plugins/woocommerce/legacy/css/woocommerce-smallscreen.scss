@@ -59,7 +59,7 @@
 
 			&:nth-child( 2n ) {
 				td {
-					background-color: rgba(0, 0, 0, 0.025);
+					background-color: wc-shade( 0, black, 2.5% );
 				}
 			}
 		}

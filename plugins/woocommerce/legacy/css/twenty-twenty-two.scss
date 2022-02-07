@@ -1,34 +1,11 @@
 /**
 * Fonts
 */
-@font-face {
-	font-family: star;
-	src: url(../fonts/star.eot);
-	src:
-		url(../fonts/star.eot?#iefix) format("embedded-opentype"),
-		url(../fonts/star.woff) format("woff"),
-		url(../fonts/star.ttf) format("truetype"),
-		url(../fonts/star.svg#star) format("svg");
-	font-weight: 400;
-	font-style: normal;
-}
-
-@font-face {
-	font-family: WooCommerce;
-	src: url(../fonts/WooCommerce.eot);
-	src:
-		url(../fonts/WooCommerce.eot?#iefix) format("embedded-opentype"),
-		url(../fonts/WooCommerce.woff) format("woff"),
-		url(../fonts/WooCommerce.ttf) format("truetype"),
-		url(../fonts/WooCommerce.svg#WooCommerce) format("svg");
-	font-weight: 400;
-	font-style: normal;
-}
-
 @import "mixins";
 @import "animation";
+@import "fonts";
 
-$tt2-gray: #f7f7f7;
+$tt2-gray: wc-shade( 96 );
 
 /**
  * Main layout.
@@ -92,7 +69,7 @@ $tt2-gray: #f7f7f7;
 		border-radius: 2rem;
 		line-height: 2.6rem;
 		font-size: 0.8rem;
-		padding: 0rem 0.5rem 0rem 0.5rem;
+		padding: 0 0.5rem 0 0.5rem;
 	}
 
 	.price ins, bdi {
@@ -138,7 +115,7 @@ $tt2-gray: #f7f7f7;
 		a.button {
 			margin-top: -0.5rem;
 			border: none;
-			background: #ebe9eb;
+			background: #{wc-hsl( 'orchid',  5%, 92%)};
 			color: var(--wp--preset--color--black);
 			padding: 0.5rem 1rem;
 
@@ -190,7 +167,7 @@ $tt2-gray: #f7f7f7;
 		text-align: center;
 		word-break: break-word;
 		background-color: var( --wp--preset--color--primary );
-		color: #fff;
+		color: var(--wc-white);
 		border: 1px solid var(--wp--preset--color--black);
 		padding: 1rem 2rem;
 		margin-top: 1rem;
@@ -405,13 +382,13 @@ $tt2-gray: #f7f7f7;
 			padding: 0;
 			border-bottom-style: solid;
 			border-bottom-width: 1px;
-			border-bottom-color: #EAE9EB;
+			border-bottom-color: #{wc-hsl( 'purple',  5%, 90%)};
 
 			li {
-				background: #EAE9EB;
+				background: #{wc-hsl( 'purple',  5%, 90%)};
 				margin: 0;
 				padding: 0.5em 1em 0.5em 1em;
-				border-color: #EAE9EB;
+				border-color: #{wc-hsl( 'purple',  5%, 90%)};
 				border-top-left-radius: 5px;
 				border-top-right-radius: 5px;
 				float: left;
@@ -422,7 +399,7 @@ $tt2-gray: #f7f7f7;
 				font-size: var(--wp--preset--font-size--medium);
 
 				&:first-child {
-					border-left-color: #EAE9EB;
+					border-left-color: #{wc-hsl( 'purple',  5%, 90%)};
 					margin-left: 1em;
 				}
 
@@ -618,7 +595,7 @@ $tt2-gray: #f7f7f7;
 
 	.return-to-shop {
 		a.button {
-			background-color: #fff;
+			background-color: var(--wc-content-bg);
 			color: var( --wp--preset--color--primary );
 			border: 2px solid var( --wp--preset--color--primary );
 			padding: 0.7rem 2rem;
@@ -688,7 +665,7 @@ $tt2-gray: #f7f7f7;
 		&:checked + label {
 
 			&::before {
-				background: radial-gradient(circle at center, black 45%, white 0);
+				background: radial-gradient(circle at center, var(--wc-black) 45%, var(--wc-white) 0);
 			}
 		}
 	}
@@ -748,7 +725,7 @@ $tt2-gray: #f7f7f7;
 				button {
 					margin-bottom: 1rem;
 					border: none;
-					background: #ebe9eb;
+					background: #{wc-hsl( 'orchid',  5%, 92%)};
 					color: var(--wp--preset--color--black);
 					padding: 0.5rem 1rem 0.5rem 1rem;
 
@@ -766,7 +743,7 @@ $tt2-gray: #f7f7f7;
 			}
 		}
 	}
-	
+
 	table.shop_table,
 	table.shop_table_responsive {
 		tbody {
@@ -841,7 +818,7 @@ $tt2-gray: #f7f7f7;
 			button[name='apply_coupon'],
 			button[name='update_cart'] {
 				padding: 1rem 2rem;
-				border: 2px solid #ebe9eb;
+				border: 2px solid #{wc-hsl( 'orchid',  5%, 92%)};
 				margin: 0;
 			}
 
@@ -965,11 +942,11 @@ $tt2-gray: #f7f7f7;
 			}
 
 			tbody {
-				border-bottom: 1px solid #d2ced2;
+				border-bottom: 1px solid #{wc-hsl( 'purple',  5%, 80%)};
 			}
 
 			tr.order-total {
-				border-top: 1px solid #d2ced2;
+				border-top: 1px solid #{wc-hsl( 'purple',  5%, 80%)};
 			}
 
 			.product-quantity {
@@ -988,7 +965,7 @@ $tt2-gray: #f7f7f7;
 			}
 		}
 
-		button#place_order {
+		#place_order {
 			width: 100%;
 			text-transform: uppercase;
 		}
@@ -1200,7 +1177,7 @@ $tt2-gray: #f7f7f7;
 		> p:first-of-type,
 		p.form-row-first,
 		p.form-row-last {
-			margin-block-start: 0px;
+			margin-block-start: 0;
 		}
 	}
 
@@ -1208,7 +1185,7 @@ $tt2-gray: #f7f7f7;
 
 		.woocommerce-MyAccount-content {
 			form > h3 {
-				margin-block-start: 0px;
+				margin-block-start: 0;
 			}
 		}
 	}
@@ -1256,7 +1233,7 @@ $tt2-gray: #f7f7f7;
 			.wc-block-product-search__button {
 				display: flex;
 				background-color: var( --wp--preset--color--primary );
-				color: #fff;
+				color: var(--wc-white);
 				border: 1px solid var(--wp--preset--color--black);
 				padding: 1rem 1.2rem;
 				margin: 0 0 0 .7rem;

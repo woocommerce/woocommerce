@@ -1,4 +1,8 @@
+/**
+ * Imports
+ */
 @import "mixins";
+@import "variables";
 
 /**
  * Sass variables
@@ -13,29 +17,7 @@ $highlights-color: #cd2653;
 /**
  * Fonts
  */
-@font-face {
-	font-family: star;
-	src: url(../fonts/star.eot);
-	src:
-		url(../fonts/star.eot?#iefix) format("embedded-opentype"),
-		url(../fonts/star.woff) format("woff"),
-		url(../fonts/star.ttf) format("truetype"),
-		url(../fonts/star.svg#star) format("svg");
-	font-weight: 400;
-	font-style: normal;
-}
-
-@font-face {
-	font-family: WooCommerce;
-	src: url(../fonts/WooCommerce.eot);
-	src:
-		url(../fonts/WooCommerce.eot?#iefix) format("embedded-opentype"),
-		url(../fonts/WooCommerce.woff) format("woff"),
-		url(../fonts/WooCommerce.ttf) format("truetype"),
-		url(../fonts/WooCommerce.svg#WooCommerce) format("svg");
-	font-weight: 400;
-	font-style: normal;
-}
+@import "fonts";
 
 /**
  * Global elements
@@ -45,12 +27,12 @@ a.button {
 	text-align: center;
 	box-sizing: border-box;
 	word-break: break-word;
-	color: #fff;
+	color: var(--wc-white);
 	text-decoration: none !important;
 
 	&:hover,
 	&:visited {
-		color: #fff;
+		color: var(--wc-white);
 		text-decoration: underline !important;
 	}
 }
@@ -83,7 +65,7 @@ a.button {
 		}
 
 		input {
-			border: 1px solid #ddd;
+			border: 1px solid wc-shade( 87 );
 		}
 	}
 
@@ -101,13 +83,13 @@ a.button {
 			border: 0;
 
 			tbody {
-				border-bottom: 1px solid #ddd;
+				border-bottom: 1px solid wc-shade( 87 );
 			}
 
 			tfoot {
 
 				tr:last-of-type {
-					border-top: 1px solid #ddd;
+					border-top: 1px solid wc-shade( 87 );
 
 					.woocommerce-Price-amount {
 						font-weight: 700;
@@ -158,7 +140,7 @@ a.button {
 	left: 0;
 	display: inline-block;
 	background: $highlights-color;
-	color: #fff;
+	color: var(--wc-white);
 	font-family: $headings;
 	font-size: 1.7rem;
 	font-weight: 700;
@@ -188,7 +170,7 @@ a.button {
 .woocommerce-info {
 	margin-bottom: 5rem;
 	margin-left: 0;
-	background: #eee;
+	background: wc-shade( 93 );
 	font-size: 0.88889em;
 	font-family: $headings;
 	list-style: none;
@@ -209,19 +191,19 @@ a.button {
 }
 
 .woocommerce-message {
-	background: #eee;
+	background: wc-shade( 93 );
 	color: $body-color;
 }
 
 .woocommerce-error {
-	color: #fff;
+	color: var(--wc-white);
 	background: #b22222;
 
 	a {
-		color: #fff;
+		color: var(--wc-white);
 
 		&:hover {
-			color: #fff;
+			color: var(--wc-white);
 		}
 
 		&.button {
@@ -243,15 +225,15 @@ a.button {
 }
 
 .woocommerce-info {
-	background: #eee;
-	color: #000;
+	background: wc-shade( 93 );
+	color: var(--wc-black);
 	border-top: 2px solid $highlights-color;
 
 	a {
-		color: #444;
+		color: wc-shade( 27 );
 
 		&:hover {
-			color: #000;
+			color: var(--wc-black);
 		}
 
 		&.button {
@@ -262,8 +244,8 @@ a.button {
 }
 
 .woocommerce-store-notice {
-	background: #eee;
-	color: #000;
+	background: wc-shade( 93 );
+	color: var(--wc-black);
 	border-top: 2px solid $highlights-color;
 	padding: 2rem;
 	position: absolute;
@@ -279,11 +261,11 @@ a.button {
 
 .woocommerce-store-notice__dismiss-link {
 	float: right;
-	color: #000;
+	color: var(--wc-black);
 
 	&:hover {
 		text-decoration: none;
-		color: #000;
+		color: var(--wc-black);
 	}
 }
 
@@ -393,7 +375,7 @@ ul.products {
 		}
 
 		.woocommerce-placeholder {
-			border: 1px solid #f2f2f2;
+			border: 1px solid wc-shade( 5 );
 		}
 
 		.button {
@@ -455,12 +437,12 @@ a.remove {
 	text-align: center;
 	border-radius: 100%;
 	text-decoration: none !important;
-	background: #fff;
-	color: #000;
+	background: var(--wc-content-bg);
+	color: var(--wc-black);
 
 	&:hover {
 		background: $highlights-color;
-		color: #fff !important;
+		color: var(--wc-white) !important;
 	}
 }
 
@@ -574,12 +556,12 @@ dl.variation,
 	.woocommerce-Tabs-panel--reviews {
 
 		table {
-			border: 1px solid #ddd;
+			border: 1px solid wc-shade( 87 );
 
 			tr,
 			td,
 			th {
-				border: 1px solid #ddd;
+				border: 1px solid wc-shade( 87 );
 			}
 		}
 
@@ -588,7 +570,7 @@ dl.variation,
 		}
 
 		input {
-			border: 1px solid #ddd;
+			border: 1px solid wc-shade( 87 );
 		}
 	}
 
@@ -632,12 +614,12 @@ a.reset_variations {
 	}
 
 	.zoomImg {
-		background-color: #fff;
+		background-color: var(--wc-content-bg);
 		opacity: 0;
 	}
 
 	.woocommerce-product-gallery__image--placeholder {
-		border: 1px solid #f2f2f2;
+		border: 1px solid wc-shade( 5 );
 	}
 
 	.woocommerce-product-gallery__image:nth-child(n+2) {
@@ -971,7 +953,7 @@ a.reset_variations {
 			float: left;
 			margin-top: 7px;
 			line-height: 20px;
-			color: #fff;
+			color: var(--wc-white);
 			margin-right: 0.5rem;
 		}
 	}
@@ -1009,7 +991,7 @@ a.reset_variations {
 			font-size: 16px;
 			text-align: center;
 			border-radius: 100%;
-			border: 1px solid #000;
+			border: 1px solid var(--wc-black);
 			margin-right: 0.25rem;
 		}
 	}
@@ -1044,7 +1026,7 @@ a.reset_variations {
 		z-index: 2;
 		width: 1em;
 		height: 1em;
-		background-color: #000;
+		background-color: var(--wc-black);
 		border-radius: 1em;
 		cursor: ew-resize;
 		outline: none;
@@ -1059,12 +1041,12 @@ a.reset_variations {
 		display: block;
 		border: 0;
 		border-radius: 1em;
-		background-color: #000;
+		background-color: var(--wc-black);
 	}
 
 	.price_slider_wrapper .ui-widget-content {
 		border-radius: 1em;
-		background-color: #666;
+		background-color: wc-shade( 40 );
 		border: 0;
 	}
 
@@ -1158,10 +1140,10 @@ a.reset_variations {
 				box-shadow: none;
 				text-decoration: none;
 				font-weight: 600;
-				color: #aaa;
+				color: wc-shade( 66 );
 
 				&:hover {
-					color: #000;
+					color: var(--wc-black);
 					text-decoration: underline;
 				}
 			}
@@ -1206,7 +1188,7 @@ a.reset_variations {
 		}
 
 		thead {
-			border-bottom: 1px solid #ddd;
+			border-bottom: 1px solid wc-shade( 87 );
 		}
 
 		.button {
@@ -1222,14 +1204,14 @@ a.reset_variations {
 			tr:nth-child(2n) {
 
 				td {
-					background: #eee;
+					background: wc-shade( 93 );
 				}
 			}
 
 			tr:nth-child(2n+1) {
 
 				td {
-					background: #fff;
+					background: var(--wc-content-bg);
 				}
 			}
 		}
@@ -1238,11 +1220,11 @@ a.reset_variations {
 	.woocommerce-EditAccountForm {
 
 		input {
-			border: 1px solid #ddd;
+			border: 1px solid wc-shade( 87 );
 		}
 
 		fieldset {
-			border: 0.2rem solid #ddd;
+			border: 0.2rem solid wc-shade( 87 );
 		}
 
 		button {
@@ -1299,20 +1281,20 @@ a.reset_variations {
 			width: 200px !important;
 			float: left;
 			margin-right: 0.25rem;
-			border: 1px solid #ddd;
+			border: 1px solid wc-shade( 87 );
 			padding-top: 1.55rem;
 			padding-bottom: 1.59rem;
 		}
 
 		.button {
-			background: #f9f9f9;
+			background: wc-shade( 98 );
 			border: 1px solid #555;
 			color: #555;
 		}
 
 		button[name="update_cart"] {
-			background: #fff;
-			color: #000;
+			background: var(--wc-content-bg);
+			color: var(--wc-black);
 		}
 	}
 
@@ -1320,7 +1302,7 @@ a.reset_variations {
 
 		input {
 			width: 8rem;
-			border: 1px solid #eee;
+			border: 1px solid wc-shade( 93 );
 		}
 	}
 
@@ -1345,7 +1327,7 @@ a.reset_variations {
 		tbody {
 
 			tr {
-				border-top: 1px solid #eee;
+				border-top: 1px solid wc-shade( 93 );
 			}
 		}
 
@@ -1410,9 +1392,9 @@ a.reset_variations {
 				display: inline-block;
 				width: 14px;
 				height: 14px;
-				border: 2px solid #fff;
+				border: 2px solid var(--wc-white);
 				box-shadow: 0 0 0 2px #6d6d6d;
-				background: #fff;
+				background: var(--wc-content-bg);
 				margin-left: 4px;
 				margin-right: 1.2rem;
 				border-radius: 100%;
@@ -1463,12 +1445,12 @@ a.reset_variations {
 .checkout-button {
 	display: block;
 	padding: 1rem 2rem;
-	border: 2px solid #000;
+	border: 2px solid var(--wc-black);
 	text-align: center;
 	font-weight: 800;
 
 	&:hover {
-		border-color: #999;
+		border-color: wc-shade( 60 );
 	}
 
 	&::after {
@@ -1505,7 +1487,7 @@ a.reset_variations {
 		line-height: 48px;
 		font-family: $headings;
 		font-size: 1.6rem;
-		color: #000;
+		color: var(--wc-black);
 		padding-left: 1.8rem;
 	}
 
@@ -1514,7 +1496,7 @@ a.reset_variations {
 	}
 
 	.select2-container--focus .select2-selection {
-		border-color: #000;
+		border-color: var(--wc-black);
 	}
 
 	.select2-results__option {
@@ -1525,14 +1507,14 @@ a.reset_variations {
 
 		.select2-search__field {
 			height: 4rem;
-			background: #eee;
+			background: wc-shade( 93 );
 		}
 	}
 
 	p.form-row {
 
 		input {
-			border: 1px solid #ddd;
+			border: 1px solid wc-shade( 87 );
 		}
 	}
 }
@@ -1575,7 +1557,7 @@ a.reset_variations {
 				display: block;
 				width: 14px;
 				height: 14px;
-				background: #fff;
+				background: var(--wc-content-bg);
 				position: absolute;
 				top: 3px;
 				right: 17px;
@@ -1593,8 +1575,8 @@ a.reset_variations {
 		}
 
 		input[type="checkbox"]:checked + span::before {
-			border-color: #000;
-			background: #000;
+			border-color: var(--wc-black);
+			background: var(--wc-black);
 		}
 	}
 }
@@ -1614,9 +1596,9 @@ a.reset_variations {
 }
 
 .woocommerce-terms-and-conditions {
-	border: 1px solid rgba(0, 0, 0, 0.2);
-	box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
-	background: rgba(0, 0, 0, 0.05);
+	border: 1px solid wc-shade( 0, black, 20% );
+	box-shadow: inset 0 1px 2px wc-shade( 0, black, 10% );
+	background: wc-shade( 0, black, 5% );
 }
 
 .woocommerce-terms-and-conditions-link {
@@ -1685,7 +1667,7 @@ a.reset_variations {
 			}
 
 			input {
-				border: 1px solid #ddd;
+				border: 1px solid wc-shade( 87 );
 			}
 
 			label {
@@ -1734,7 +1716,7 @@ a.reset_variations {
 
 				.cart-subtotal,
 				.order-total {
-					border-top: 1px solid #ddd;
+					border-top: 1px solid wc-shade( 87 );
 				}
 			}
 		}
@@ -1752,7 +1734,7 @@ a.reset_variations {
 
 		.description {
 			background: #4169e1;
-			color: #fff;
+			color: var(--wc-white);
 			border-radius: 3px;
 			padding: 1rem;
 			margin: 0.5rem 0 0;
@@ -1761,7 +1743,7 @@ a.reset_variations {
 			position: relative;
 
 			a {
-				color: #fff;
+				color: var(--wc-white);
 				text-decoration: underline;
 				border: 0;
 				box-shadow: none;
@@ -1791,10 +1773,10 @@ a.reset_variations {
 		}
 	}
 
-	input#coupon_code {
+	#coupon_code {
 		padding-top: 1.55rem;
 		padding-bottom: 1.59rem;
-		border: 1px solid #ddd;
+		border: 1px solid wc-shade( 87 );
 	}
 
 	button[name="apply_coupon"] {
@@ -1820,7 +1802,7 @@ a.reset_variations {
 		line-height: 48px;
 		font-family: $headings;
 		font-size: 1.6rem;
-		color: #000;
+		color: var(--wc-black);
 		padding-left: 1.8rem;
 	}
 
@@ -1829,7 +1811,7 @@ a.reset_variations {
 	}
 
 	.select2-container--focus .select2-selection {
-		border-color: #000;
+		border-color: var(--wc-black);
 	}
 
 	.select2-results__option {
@@ -1840,7 +1822,7 @@ a.reset_variations {
 
 		.select2-search__field {
 			height: 4rem;
-			background: #eee;
+			background: wc-shade( 93 );
 		}
 	}
 }
@@ -1857,9 +1839,9 @@ a.reset_variations {
 				display: inline-block;
 				width: 14px;
 				height: 14px;
-				border: 2px solid #fff;
+				border: 2px solid var(--wc-white);
 				box-shadow: 0 0 0 2px #6d6d6d;
-				background: #fff;
+				background: var(--wc-content-bg);
 				margin-left: 4px;
 				margin-right: 1.2rem;
 				border-radius: 100%;
@@ -1922,11 +1904,11 @@ a.reset_variations {
 		}
 
 		tfoot {
-			border-top: 1px solid #ddd;
+			border-top: 1px solid wc-shade( 87 );
 
 			/* Targeting total */
 			tr:last-of-type {
-				border-top: 1px solid #ddd;
+				border-top: 1px solid wc-shade( 87 );
 
 				.woocommerce-Price-amount {
 					font-weight: 700;
@@ -1954,7 +1936,7 @@ a.reset_variations {
 
 	.payment_box {
 		padding: 1rem;
-		background: #eee;
+		background: wc-shade( 93 );
 
 		ul,
 		ol {
@@ -1968,7 +1950,7 @@ a.reset_variations {
 			padding: 1.5rem;
 			padding-bottom: 0;
 			border: 0;
-			background: #f6f6f6;
+			background: wc-shade( 96 );
 		}
 
 		li {
@@ -2013,9 +1995,9 @@ a.reset_variations {
 				display: inline-block;
 				width: 14px;
 				height: 14px;
-				border: 2px solid #fff;
+				border: 2px solid var(--wc-white);
 				box-shadow: 0 0 0 2px #6d6d6d;
-				background: #fff;
+				background: var(--wc-content-bg);
 				margin-left: 4px;
 				margin-right: 1.2rem;
 				border-radius: 100%;
@@ -2211,7 +2193,7 @@ a.reset_variations {
 				&:nth-child(2n) {
 
 					td {
-						background: #fff;
+						background: var(--wc-content-bg);
 					}
 				}
 
@@ -2464,7 +2446,7 @@ a.reset_variations {
 			}
 
 			thead {
-				border-bottom: 1px solid #ddd;
+				border-bottom: 1px solid wc-shade( 87 );
 			}
 
 			.button {

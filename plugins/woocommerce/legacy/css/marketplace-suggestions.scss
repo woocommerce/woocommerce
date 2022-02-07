@@ -6,19 +6,14 @@
 @import "mixins";
 @import "variables";
 
-$suggestions-pale-gray: #ddd;
-$suggestions-metabox-pale-gray: #eee;
-
-$suggestions-copy-text: #444;
-
 a.suggestion-dismiss {
 	border: none;
 	box-shadow: none;
-	color: $suggestions-pale-gray;
+	color: wc-shade( 87 );
 }
 
 a.suggestion-dismiss:hover {
-	color: #aaa;
+	color: wc-shade( 66 );
 }
 
 a.suggestion-dismiss::before {
@@ -94,7 +89,7 @@ a.suggestion-dismiss::before {
 			p {
 				margin: 0;
 				margin-top: 4px;
-				color: $suggestions-copy-text;
+				color: wc-shade( 27 );
 			}
 		}
 
@@ -139,7 +134,6 @@ a.suggestion-dismiss::before {
 			h4 {
 				font-size: 1.1em;
 				margin: 0;
-				margin-bottom: 0;
 			}
 		}
 	}
@@ -284,8 +278,8 @@ a.suggestion-dismiss::before {
 .marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="product-edit-meta-tab-body"] {
 
 	border: none;
-	border-top: 1px solid $suggestions-metabox-pale-gray;
-	border-bottom: 1px solid $suggestions-metabox-pale-gray;
+	border-top: 1px solid #{wc-shade( 93 )};
+	border-bottom: 1px solid #{wc-shade( 93 )};
 }
 
 .marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-header"],
@@ -295,10 +289,10 @@ a.suggestion-dismiss::before {
 .marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="orders-list-empty-footer"],
 .marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="orders-list-empty-body"] {
 
-	border: 1px solid $suggestions-pale-gray;
+	border: 1px solid wc-shade( 87 );
 	border-bottom: none;
 
 	&:last-child {
-		border-bottom: 1px solid $suggestions-pale-gray;
+		border-bottom: 1px solid wc-shade( 87 );
 	}
 }

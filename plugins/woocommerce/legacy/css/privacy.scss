@@ -5,6 +5,12 @@
  */
 
 /**
+ * Imports
+ */
+@import "mixins";
+@import "variables";
+
+/**
  * Styling begins
  */
 
@@ -33,7 +39,7 @@
 // 5.4 support for white background and padding.
 .branch-5-4 .policy-text ul:not(.privacy-policy-tutorial):not(.wp-policy-help),
 .branch-5-4 .policy-text ol:not(.privacy-policy-tutorial):not(.wp-policy-help) {
-	background-color: #fff;
+	background-color: var(--wc-content-bg);
 	margin: 0;
 	padding: 1em;
 }

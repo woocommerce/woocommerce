@@ -35,7 +35,6 @@ module.exports = function ( grunt ) {
 		// Minify .js files.
 		uglify: {
 			options: {
-				ie8: true,
 				parse: {
 					strict: false,
 				},
@@ -89,6 +88,13 @@ module.exports = function ( grunt ) {
 
 		// Minify all .css files.
 		cssmin: {
+			options: {
+				compatibility: {
+					properties: {
+						colors: false,
+					}
+				}
+			},
 			minify: {
 				files: [
 					{

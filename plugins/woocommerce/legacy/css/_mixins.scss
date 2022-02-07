@@ -88,7 +88,7 @@
  * Deprecated
  * Vendor prefix no longer required.
  */
-@mixin text_shadow($shadow_x: 3px, $shadow_y: 3px, $shadow_rad: 3px, $shadow_color: #fff) {
+@mixin text_shadow($shadow_x: 3px, $shadow_y: 3px, $shadow_rad: 3px, $shadow_color: var(--wc-white)) {
 	text-shadow: $shadow_x $shadow_y $shadow_rad $shadow_color;
 }
 
@@ -96,7 +96,7 @@
  * Deprecated
  * Vendor prefix no longer required.
  */
-@mixin vertical_gradient($from: #000, $to: #fff) {
+@mixin vertical_gradient($from: var(--wc-black), $to: var(--wc-white)) {
 	background-color: $from;
 	background: -webkit-linear-gradient($from, $to);
 }
@@ -130,12 +130,12 @@
 
 	@if lightness($a) >= 65% {
 
-		@include text_shadow(0, -1px, 0, rgba(0, 0, 0, $opacity));
+		@include text_shadow(0, -1px, 0, wc-shade( 0, black, $opacity ));
 	}
 
 	@else {
 
-		@include text_shadow(0, 1px, 0, rgba(255, 255, 255, $opacity));
+		@include text_shadow(0, 1px, 0, wc-shade( 0, black, $opacity ));
 	}
 }
 
@@ -254,7 +254,11 @@
 	text-decoration: none;
 }
 
-@mixin loader() {
+@mixin loader($color: false) {
+
+	@if ($color == false) {
+		$color: wc-shade( 0, 'black', 75% );
+	}
 
 	&::before {
 		height: 1em;
@@ -272,7 +276,7 @@
 		line-height: 1;
 		text-align: center;
 		font-size: 2em;
-		color: rgba(#000, 0.75);
+		color: $color;
 	}
 }
 
@@ -295,9 +299,10 @@
 	}
 }
 
-@function gen-custom-prop($color, $hue: false, $saturation: false, $luminosity: false, $alpha: false) {
+@function gen-custom-prop( $color, $hue: false, $saturation: false, $luminosity: false, $alpha: false ) {
 
 	@if (type_of($color) == string) {
+		$color: hsl($color);
 		@error("Error in _variables.scss: colors needs to be a list like 150, 100%, 50% and not " + $color)
 	}
 
@@ -322,4 +327,27 @@
 	}
 
 	@return unquote("hsl(#{$h}, #{$s}, #{$l})");
+}
+
+@function wc-hsl(  $h, $s: 100%, $l: 50%, $a : false ) {
+
+	@if (type_of($h) == string) {
+		$h: 'var(--wc--#{$h}-hue)';
+	} @else if (type_of($h) != number) {
+		$h: 0;
+	}
+
+	@if($a != false) {
+		@return unquote("hsla(#{$h}, #{$s}, #{$l}, #{$a})");
+	}
+
+	@return unquote("hsl(#{$h}, #{$s}, #{$l})");
+}
+
+@function wc-shade( $l, $tone : 'white', $alpha: 100% ) {
+	@if (type_of($tone) == string) {
+		@return hsla(0, 0%, calc( var(--wc--#{$tone}-luma) * #{$l * .01}), $alpha );
+	} @else {
+		@return hsla(0, 0%, $l * 1%, $alpha );
+	}
 }

@@ -5,13 +5,19 @@
  */
 
 /**
+ * Imports
+ */
+@import "mixins";
+@import "variables";
+
+/**
  * Styling begins
  */
 
 .dashboard-widget-finish-setup {
 
 	.progress-wrapper {
-		border: 1px solid #757575;
+		border: 1px solid wc-shade( 46 );
 		border-radius: 16px;
 		font-size: 0.9em;
 		padding: 2px 8px 2px 8px;
@@ -22,7 +28,7 @@
 	.progress-wrapper > span {
 		position: relative;
 		top: -3px;
-		color: #757575;
+		color: wc-shade( 46 );
 	}
 
 	.description div {
@@ -41,12 +47,12 @@
 		margin-left: -3px;
 
 		circle {
-			stroke: #f0f0f0;
+			stroke: wc-shade( 94 );
 			stroke-width: 1px;
 		}
 
 		.bar {
-			stroke: #949494;
+			stroke: wc-shade( 58 );
 		}
 	}
 }

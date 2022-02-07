@@ -431,11 +431,23 @@ class WC_Frontend_Scripts {
 		wp_register_style( 'woocommerce-inline', false ); // phpcs:ignore
 		wp_enqueue_style( 'woocommerce-inline' );
 
+		// Used to hold the whole inline css
+		$wc_inline_style = '';
+
+		// Get the content of the custom-properties.css
+		if ( apply_filters( 'enqueue_woo_global_styles' , true ) )
+			$wc_inline_style .= file_get_contents( self::get_asset_url( 'assets/css/custom-properties.css' ) );
+
 		if ( true === wc_string_to_bool( get_option( 'woocommerce_checkout_highlight_required_fields', 'yes' ) ) ) {
-			wp_add_inline_style( 'woocommerce-inline', '.woocommerce form .form-row .required { visibility: visible; }' );
+			$wc_inline_style .= '.woocommerce form .form-row .required { visibility: visible; }';
 		} else {
-			wp_add_inline_style( 'woocommerce-inline', '.woocommerce form .form-row .required { visibility: hidden; }' );
+			$wc_inline_style .= '.woocommerce form .form-row .required { visibility: hidden; }';
 		}
+
+		// Allow users to replace or add inline styles to wc global style
+		$wc_inline_style =  apply_filters( 'wc_global_styles' , $wc_inline_style );
+
+		wp_add_inline_style( 'woocommerce-inline', $wc_inline_style );
 	}
 
 	/**

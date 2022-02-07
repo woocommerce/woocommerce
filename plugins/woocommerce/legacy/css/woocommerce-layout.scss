@@ -147,7 +147,6 @@
 			padding: 0;
 			position: relative;
 			width: 22.05%;
-			margin-left: 0;
 		}
 
 		li.first {
@@ -592,8 +591,8 @@
 		padding-right: 7.6923%;
 		padding-top: 7.6923%;
 		margin-bottom: 7.6923%;
-		background: #fff;
-		box-shadow: 0 0 1px rgba(0, 0, 0, 0.15);
+		background: var(--wc-content-bg);
+		box-shadow: 0 0 1px wc-shade( 0, black, 15% );
 
 		.page-title {
 			margin-left: 0;

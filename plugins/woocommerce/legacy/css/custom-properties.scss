@@ -1,0 +1,90 @@
+/**
+ * WooCommerce CSS Custom Properties
+ */
+@import "variables";
+@import "mixins";
+
+:root {
+	--woocommerce: #{wc-hsl(  312, 26%, 52% )};
+
+	// base color values
+	--wc--primary-hue: 312;
+	--wc--highlight-hue: calc(var(--wc--primary-hue) + 150);
+
+	--wc--red-hue: 0;
+	--wc--deep-orange-hue: 22;
+	--wc--orange-hue: 44;
+	--wc--yellow-hue: 60;
+	--wc--green-hue: 94;
+	--wc--blue-hue: 196;
+	--wc--purple-hue: 265;
+	--wc--orchid-hue: 312;
+
+	--wc--primary-sat: 26%;
+	--wc--secondary-sat: calc(var(--wc--primary-sat) - 21%);
+
+	--wc--primary-luma: 52%;
+	--wc--secondary-luma--text: calc(var(--wc--primary-luma) - 20%);
+	--wc--secondary-luma: calc(var(--wc--primary-luma) + 40%);
+
+	--wc--black-luma: 0%;
+	--wc--white-luma: 100%;
+
+	// color mappings
+	--wc--error-hue: var(--wc--red-hue);
+	--wc--warning-hue: var(--wc--deep-orange-hue);
+	--wc--alert-hue: var(--wc--orange-hue);
+	--wc--success-hue: var(--wc--green-hue);
+	--wc--info-hue: var(--wc--blue-hue);
+
+	--wc-tips--color: var(--wc-blue);
+
+	// WooCommerce base colors
+	--wc-red: #{wc-hsl( 'red', 80%)};
+	--wc-deep-orange: #{wc-hsl( 'deep-orange', 80%)};
+	--wc-orange: #{wc-hsl( 'orange', 80%)};
+	--wc-yellow: #{wc-hsl( 'yellow', 100%)};
+	--wc-green: #{wc-hsl( 'green', 50%)};
+	--wc-blue: #{wc-hsl( 'blue', 60%)};
+	--wc-purple: #{wc-hsl( 'purple', 36%, 42%)};
+
+	--wc-black: hsl(0,0%,var(--wc--black-luma));
+	--wc-white: hsl(0,0%,var(--wc--white-luma));
+	--wc-gray: #{wc-shade( 46 )};
+
+	// theme colors
+	--wc-primary: hsl(#{$wc-primary});
+	--wc-primary-text: hsl(#{$wc-primary-text});
+	--wc-secondary: hsl(#{$wc-secondary});
+	--wc-secondary-text: hsl(#{$wc-secondary-text});
+	--wc-highlight: hsl(#{$wc-highlight});
+	--wc-highlight-text: hsl(#{$wc-highlight-text});
+
+	--wc-error: #{wc-hsl( 'error',  80%)};
+	--wc-warning: #{wc-hsl( 'warning',  100%)};
+	--wc-alert: #{wc-hsl( 'alert',  100%)};
+	--wc-success: #{wc-hsl( 'success',  60%)};
+	--wc-info: #{wc-hsl( 'info',  60%)};
+
+	--wc-content-bg: var(--wc-white);
+	--wc-subtext: var(--wc-gray);
+}
+
+// GENERATE CUSTOM PROPERTIES - color variation with opacity
+// #{gen-custom-prop( $wc-primary, false, -50%, false, 25% )}; // the primary color desaturated at 50% and with 25% of opacity
+
+// WC-HSL - generate variations of a color
+// wc-hsl( xyz, 85%, 83%);
+// note: this will output the xyz color hue with 85% of saturation and 83% of lightness
+// "xyz" is a short for --wc--xyz-hue variable so you need to define a --wc--COLOR-hue for each color used.
+
+// WC-GRAY - generate tints and tones of a color (with opacity)
+// A) passing a number 0-100 will output the corresponding shade of gray
+// wc-shade( 80 ); // gray 80
+// B) pass a shade amount, the base color and optionally an opacity
+// $shade - the shade of the yxz tone (not a color! this function use the lightness and not the hue)
+// $opacity - the opacity of that shade
+// "xyz" is a short for --wc--xyz-luma variable so you need to define a --wc--COLOR-luma for each tone used.
+// wc-shade( $shade, xyz, $opacity );
+// wc-shade( $shade, xyz, 10% ); // rgba(0,0,0,.1);
+

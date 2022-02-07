@@ -37,6 +37,18 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			$screen    = get_current_screen();
 			$screen_id = $screen ? $screen->id : '';
 
+			// Get the content of the custom-properties.css
+			if ( apply_filters( 'enqueue_woo_global_styles' , true ) ) {
+
+				wp_register_style( 'woocommerce-inline', false ); // phpcs:ignore
+				wp_enqueue_style( 'woocommerce-inline' );
+
+				// Allow users to replace or add inline styles to wc global style
+				$wc_inline_style = apply_filters( 'wc_global_styles', file_get_contents( WC()->plugin_url() . '/assets/css/custom-properties.css' ) );
+
+				wp_add_inline_style( 'woocommerce-inline', $wc_inline_style );
+			}
+
 			// Register admin styles.
 			wp_register_style( 'woocommerce_admin_menu_styles', WC()->plugin_url() . '/assets/css/menu.css', array(), $version );
 			wp_register_style( 'woocommerce_admin_styles', WC()->plugin_url() . '/assets/css/admin.css', array(), $version );
