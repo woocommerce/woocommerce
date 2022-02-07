@@ -43,7 +43,7 @@ Additionally, make sure to differentiate between things in the testing notes tha
 
 ## If this release is deployed to WordPress.org...
 
-* [ ] An email confirmation is required before the new version will be released. Ask team members to check their email.
+* [ ] An email confirmation is required before the new version will be released, so check your email in order to confirm the release.
 * [ ] Edit the [GitHub release](https://github.com/woocommerce/woocommerce-gutenberg-products-block/releases) and copy changelog into the release notes.
 * [ ] The `#team-rubik` slack instance will be notified about the progress with the WordPress.org deploy. Watch for that. If anything goes wrong, an error will be reported and you can followup via the GitHub actions tab and the log for that workflow.
 * [ ] After the wp.org workflow completes, confirm the following
