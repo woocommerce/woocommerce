@@ -39,7 +39,7 @@ import { getPluginSlug, getPluginTrackKey } from '~/utils';
 import './style.scss';
 
 const BUSINESS_DETAILS_TAB_NAME = 'business-details';
-const FREE_FEATURES_TAB_NAME = 'free-features';
+const BUSINESS_FEATURES_TAB_NAME = 'business-features';
 
 export const filterBusinessExtensions = (
 	extensionInstallationOptions,
@@ -240,7 +240,7 @@ class BusinessDetails extends Component {
 
 		Promise.all( promises )
 			.then( () => {
-				goToNextStep();
+				goToNextStep( { step: BUSINESS_FEATURES_TAB_NAME } );
 			} )
 			.catch( () => {
 				createNotice(
@@ -386,6 +386,9 @@ class BusinessDetails extends Component {
 			used_platform_name: otherPlatformName,
 			setup_client: isSetupClient,
 		} );
+		recordEvent( 'storeprofiler_step_complete', {
+			step: BUSINESS_DETAILS_TAB_NAME,
+		} );
 	}
 
 	getSelectControlProps( getInputProps, name = '' ) {
@@ -420,10 +423,13 @@ class BusinessDetails extends Component {
 				onSubmit={ ( values ) => {
 					this.setState( {
 						savedValues: values,
-						currentTab: 'free-features',
+						currentTab: BUSINESS_FEATURES_TAB_NAME,
 					} );
 
 					this.trackBusinessDetailsStep( values );
+					recordEvent( 'storeprofiler_step_view', {
+						step: BUSINESS_FEATURES_TAB_NAME,
+					} );
 				} }
 				onChange={ ( _, values, isValid ) => {
 					this.setState( { savedValues: values, isValid } );
@@ -600,7 +606,9 @@ class BusinessDetails extends Component {
 										<Button
 											onClick={ () => {
 												this.persistProfileItems();
-												goToNextStep();
+												goToNextStep( {
+													step: BUSINESS_FEATURES_TAB_NAME,
+												} );
 											} }
 										>
 											{ __(
@@ -681,6 +689,9 @@ class BusinessDetails extends Component {
 							savedValues:
 								this.state.savedValues || initialValues,
 						} );
+						recordEvent( 'storeprofiler_step_view', {
+							step: tabName,
+						} );
 					}
 				} }
 				tabs={ [
@@ -694,10 +705,10 @@ class BusinessDetails extends Component {
 					},
 					{
 						name:
-							this.state.currentTab === FREE_FEATURES_TAB_NAME
+							this.state.currentTab === BUSINESS_FEATURES_TAB_NAME
 								? 'current-tab'
-								: FREE_FEATURES_TAB_NAME,
-						id: FREE_FEATURES_TAB_NAME,
+								: BUSINESS_FEATURES_TAB_NAME,
+						id: BUSINESS_FEATURES_TAB_NAME,
 						title: __( 'Free features', 'woocommerce-admin' ),
 						className: this.state.isValid ? '' : 'is-disabled',
 					},

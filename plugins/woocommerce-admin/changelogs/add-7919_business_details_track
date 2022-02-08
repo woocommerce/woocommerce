@@ -1,0 +1,4 @@
+Significance: patch
+Type: Add
+
+Add additional store profiler track for the business details tab. #8265
