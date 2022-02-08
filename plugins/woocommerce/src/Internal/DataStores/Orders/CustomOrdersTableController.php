@@ -63,7 +63,7 @@ class CustomOrdersTableController {
 				return $this->get_data_store_instance( $default_data_store );
 			},
 			999,
-			10
+			1
 		);
 
 		add_filter(
