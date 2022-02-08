@@ -243,7 +243,7 @@
               }
 
               item = $( '<a></a>' ).attr( 'href', '#' ).text( j );
-              if (slider.vars.controlNav === "thumbnails") {
+              if (slider.vars.controlNav === "thumbnails" && slider.vars.manualControls === '') {
                 item = $('<img/>', {
 				  Width: slider.navItemSize,
 				  Height: slider.navItemSize,
@@ -252,7 +252,14 @@
                   sizes: `(max-width: ${Math.round(slider.w)}px) 100vw, ${Math.round(slider.w)}px`,
                   alt: slide.attr('alt')
                 })
-              }
+              } else {
+                item = $('<img/>', {
+                  Width: slider.navItemSize,
+                  Height: slider.navItemSize,
+                  src: slide.attr('data-thumb'),
+                  alt: slide.attr('alt')
+                })
+			  }
 
               if ( '' !== slide.attr( 'data-thumb-alt' ) ) {
                 item.attr( 'alt', slide.attr( 'data-thumb-alt' ) );
@@ -945,7 +952,11 @@
         var sliderOffset, arr;
 
         if (type === "init") {
-          slider.viewport = $('<div class="' + namespace + 'viewport"></div>').css({"overflow": "hidden", "position": "relative"}).appendTo(slider).append(slider.container);
+		  if (slider.vars.manualControls === '') {
+			  slider.viewport = $('<div class="' + namespace + 'viewport"></div>').css({"overflow": "hidden", "position": "relative"}).appendTo(slider).append(slider.container);
+		  } else {
+			  slider.viewport = $('<div class="' + namespace + 'viewport"></div>').css({"overflow": "hidden", "position": "relative"}).prependTo(slider).prepend(slider.container);
+		  }
           // INFINITE LOOP:
           slider.cloneCount = 0;
           slider.cloneOffset = 0;

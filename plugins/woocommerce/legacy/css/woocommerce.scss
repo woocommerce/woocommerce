@@ -210,6 +210,20 @@ p.demo_store,
 				width: 20%;
 			}
 
+			&.woocommerce-product-gallery.woocommerce-product-gallery--custom-nav  {
+
+				.woocommerce-product-gallery__wrapper {
+					white-space: nowrap;
+					overflow: hidden;
+					line-height: 0;
+				}
+
+				.woocommerce-product-gallery__image {
+					width: 100%;
+					display: inline-block;
+				}
+			}
+
 			.woocommerce-product-gallery__trigger {
 				position: absolute;
 				top: 0.5em;

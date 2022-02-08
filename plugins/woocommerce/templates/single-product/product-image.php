@@ -25,6 +25,7 @@ if ( ! function_exists( 'wc_get_gallery_image_html' ) ) {
 global $product;
 
 $columns           = apply_filters( 'woocommerce_product_thumbnails_columns', 4 );
+$flexslider_nav    = (bool) apply_filters( 'woocommerce_single_product_nav_flexslider', false );
 $post_thumbnail_id = $product->get_image_id();
 $wrapper_classes   = apply_filters(
 	'woocommerce_single_product_image_gallery_classes',
@@ -32,6 +33,7 @@ $wrapper_classes   = apply_filters(
 		'woocommerce-product-gallery',
 		'woocommerce-product-gallery--' . ( $post_thumbnail_id ? 'with-images' : 'without-images' ),
 		'woocommerce-product-gallery--columns-' . absint( $columns ),
+		$flexslider_nav ? 'woocommerce-product-gallery--custom-nav' : 'woocommerce-product-gallery--nav',
 		'images',
 	)
 );
@@ -52,4 +54,11 @@ $wrapper_classes   = apply_filters(
 		do_action( 'woocommerce_product_thumbnails' );
 		?>
 	</figure>
+	<?php if ( $flexslider_nav && $post_thumbnail_id && $nav_thumbnails_ids = $product->get_gallery_image_ids() ) {
+		echo '<ol class="flex-control-nav flex-control-thumbs">';
+		foreach ( array_merge( array( $post_thumbnail_id ), $nav_thumbnails_ids ) as $count => $attachment_id ) {
+			echo apply_filters( 'woocommerce_single_product_image_nav_html', wc_get_gallery_image_html( $attachment_id, $count ), $attachment_id ); // phpcs:disable WordPress.XSS.EscapeOutput.OutputNotEscaped
+		}
+		echo '</ol>';
+	} ?>
 </div>
