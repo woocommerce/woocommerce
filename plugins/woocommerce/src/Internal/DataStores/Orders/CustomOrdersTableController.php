@@ -1,6 +1,6 @@
 <?php
 /**
- * FeatureController class file.
+ * CustomOrdersTableController class file.
  */
 
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
@@ -16,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * ...and in general, any functionality that doesn't imply database access.
  */
-class FeatureController {
+class CustomOrdersTableController {
 
 	/**
 	 * The name of the option for enabling the usage of the custom orders table
@@ -33,7 +33,7 @@ class FeatureController {
 	/**
 	 * The data synchronizer object to use.
 	 *
-	 * @var DataSyncrhonizer
+	 * @var DataSynchronizer
 	 */
 	private $data_synchronizer;
 
@@ -62,8 +62,8 @@ class FeatureController {
 			function ( $default_data_store ) {
 				return $this->get_data_store_instance( $default_data_store );
 			},
-			10,
-			999
+			999,
+			10
 		);
 
 		add_filter(
@@ -71,8 +71,8 @@ class FeatureController {
 			function( $tools ) {
 				return $this->add_initiate_regeneration_entry_to_tools_array( $tools );
 			},
-			1,
-			999
+			999,
+			1
 		);
 
 		add_filter(
@@ -80,8 +80,8 @@ class FeatureController {
 			function( $sections ) {
 				return $this->get_settings_sections( $sections );
 			},
-			1,
-			999
+			999,
+			1
 		);
 
 		add_filter(
@@ -89,8 +89,8 @@ class FeatureController {
 			function ( $settings, $section_id ) {
 				return $this->get_settings( $settings, $section_id );
 			},
-			2,
-			999
+			999,
+			2
 		);
 	}
 
