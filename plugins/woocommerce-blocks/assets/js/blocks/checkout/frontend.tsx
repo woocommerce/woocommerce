@@ -17,11 +17,12 @@ import { renderParentBlock } from '@woocommerce/atomic-utils';
 import './inner-blocks/register-components';
 import Block from './block';
 import { blockName, blockAttributes } from './attributes';
+import metadata from './block.json';
 
 const getProps = ( el: Element ) => {
 	return {
 		attributes: getValidBlockAttributes(
-			blockAttributes,
+			{ ...metadata.attributes, ...blockAttributes },
 			/* eslint-disable @typescript-eslint/no-explicit-any */
 			( el instanceof HTMLElement ? el.dataset : {} ) as any
 		),
