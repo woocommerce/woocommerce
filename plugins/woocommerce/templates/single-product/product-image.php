@@ -25,7 +25,7 @@ if ( ! function_exists( 'wc_get_gallery_image_html' ) ) {
 global $product;
 
 $columns           = apply_filters( 'woocommerce_product_thumbnails_columns', 4 );
-$flexslider_nav    = (bool) apply_filters( 'woocommerce_single_product_nav_flexslider', false );
+$flexslider_nav    = (bool) apply_filters( 'woocommerce_single_product_nav_flexslider', get_theme_support( 'wc-product-gallery-slider-nav' ) );
 $post_thumbnail_id = $product->get_image_id();
 $wrapper_classes   = apply_filters(
 	'woocommerce_single_product_image_gallery_classes',

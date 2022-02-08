@@ -492,7 +492,7 @@ class WC_Frontend_Scripts {
 							'smoothHeight'   => true,
 							'directionNav'   => false,
 							'controlNav'     => 'thumbnails',
-							'manualControls' => apply_filters( 'woocommerce_single_product_nav_flexslider', false ) ? '.flex-control-nav img' : '',
+							'manualControls' => apply_filters( 'woocommerce_single_product_nav_flexslider', get_theme_support( 'wc-product-gallery-slider-nav' ) ) ? '.flex-control-nav img' : null,
 							'slideshow'      => false,
 							'animationSpeed' => 500,
 							'animationLoop'  => false, // Breaks photoswipe pagination if true.

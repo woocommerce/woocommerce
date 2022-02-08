@@ -1559,7 +1559,7 @@ if ( ! function_exists( 'woocommerce_show_product_thumbnails' ) ) {
  */
 function wc_get_gallery_image_html( $attachment_id, $main_image = false ) {
 	$flexslider        = (bool) apply_filters( 'woocommerce_single_product_flexslider_enabled', get_theme_support( 'wc-product-gallery-slider' ) );
-	$flexslider_nav    = (bool) apply_filters( 'woocommerce_single_product_nav_flexslider', false );
+	$flexslider_nav    = (bool) apply_filters( 'woocommerce_single_product_nav_flexslider', get_theme_support( 'wc-product-gallery-slider-nav' ) );
 	$full_size         = apply_filters( 'woocommerce_gallery_full_size', apply_filters( 'woocommerce_product_thumbnails_large_size', 'full' ) );
 	$full_src          = wp_get_attachment_image_src( $attachment_id, $full_size );
 	$alt_text          = trim( wp_strip_all_tags( get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ) );
@@ -1567,6 +1567,8 @@ function wc_get_gallery_image_html( $attachment_id, $main_image = false ) {
 	$thumbnail_size    = apply_filters( 'woocommerce_gallery_thumbnail_size', array( $gallery_thumbnail['width'], $gallery_thumbnail['height'] ) );
 	$image_size        = apply_filters( 'woocommerce_gallery_image_size', $flexslider || $flexslider_nav || is_bool($main_image)  ? 'woocommerce_single' : $thumbnail_size );
 
+
+	// Gallery uses true false to indicate whether it is the main image
 	if (is_bool($main_image)) {
 		$thumbnail_src     = wp_get_attachment_image_src( $attachment_id, $thumbnail_size );
 		$image_params = array(
@@ -1580,7 +1582,7 @@ function wc_get_gallery_image_html( $attachment_id, $main_image = false ) {
 			'loading'                 => esc_attr( $main_image ? 'eager' : 'lazy' ),
 		);
 	} else {
-		$image_size = apply_filters( 'woocommerce_gallery_thumbnail_size', array( $gallery_thumbnail['width'], $gallery_thumbnail['height'] ) );
+		// Nav use int values in order to have different parameters
 		$image_params = array(
 			'alt' => _wp_specialchars( get_post_field( 'post_title', $attachment_id ), ENT_QUOTES, 'UTF-8', true ),
 			'loading' => ($main_image <= apply_filters( 'woocommerce_product_thumbnails_columns', 4 )) ? null : 'lazy',
@@ -1605,42 +1607,6 @@ function wc_get_gallery_image_html( $attachment_id, $main_image = false ) {
 		return '<div data-thumb="' . esc_url( $thumbnail_src[0] ) . '" data-thumb-alt="' . esc_attr( $alt_text ) . '" class="woocommerce-product-gallery__image"><a href="' . esc_url( $full_src[0] ) . '">' . $image . '</a></div>';
 	else
 		return '<li>' . $image . '</li>';
-}
-
-/**
- * Get HTML for slider navigation.
- *
- * Hooks: woocommerce_gallery_thumbnail_size accept name based image sizes, or an array of width/height values.
- * woocommerce_gallery_nav_image_html_attachment_image_params accept an array of attributes for nav items.
- *
- * @since 6.1.0
- * @param int  $attachment_id Attachment ID.
- * @return string
- */
-function wc_get_gallery_nav_image_html( $attachment_id, $count = false ) {
-	$flexslider_nav    = (bool) apply_filters( 'woocommerce_single_product_flexslider_nav_enabled', get_theme_support( 'wc-product-gallery-slider-nav' ) );
-	$gallery_thumbnail = wc_get_image_size( 'gallery_thumbnail' );
-	$thumbnail_size    = apply_filters( 'woocommerce_gallery_thumbnail_size', array( $gallery_thumbnail['width'], $gallery_thumbnail['height'] ) );
-	if ($flexslider_nav && $attachment_id){
-		$thumbnail = wp_get_attachment_image(
-			$attachment_id,
-			$thumbnail_size,
-			false,
-			apply_filters(
-				'woocommerce_gallery_nav_image_html_attachment_image_params',
-				array(
-					'title' => _wp_specialchars( get_post_field( 'post_title', $attachment_id ), ENT_QUOTES, 'UTF-8', true ),
-					'class' => $count === 0 ? 'flex-active' : null,
-				),
-				$attachment_id,
-				$thumbnail_size
-			)
-		);
-
-		return '<li>' . $thumbnail . '</li>';
-	}
-
-	return false;
 }
 
 if ( ! function_exists( 'woocommerce_output_product_data_tabs' ) ) {
