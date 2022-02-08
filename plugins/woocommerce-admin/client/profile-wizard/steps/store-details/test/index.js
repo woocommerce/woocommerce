@@ -79,5 +79,15 @@ describe( 'StoreDetails', () => {
 				container.queryByText( 'Invalid email address' )
 			).toBeNull();
 		} );
+
+		test( 'should pass email validation when field is empty', async () => {
+			const container = render( <StoreDetails { ...testProps } /> );
+			const emailInput = container.getByLabelText( 'Email address' );
+			await userEvent.clear( emailInput );
+			userEvent.tab();
+			expect(
+				container.queryByText( 'Invalid email address' )
+			).toBeNull();
+		} );
 	} );
 } );

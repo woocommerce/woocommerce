@@ -206,7 +206,7 @@ export class StoreDetails extends Component {
 		const validateAddress = getStoreAddressValidator( locale );
 		const errors = validateAddress( values );
 
-		if ( ! isEmail( values.storeEmail ) ) {
+		if ( values.storeEmail && ! isEmail( values.storeEmail ) ) {
 			errors.storeEmail = __(
 				'Invalid email address',
 				'woocommerce-admin'
