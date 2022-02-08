@@ -164,7 +164,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
-* Add - Admin notice warning about the upcoming minimum PHP 4.2 version bump coming in WooCommerce 6.5. ([#31557](https://github.com/woocommerce/woocommerce/pull/31557))
+* Add - Admin notice warning about the upcoming minimum PHP 7.2 version bump coming in WooCommerce 6.5. ([#31557](https://github.com/woocommerce/woocommerce/pull/31557))
 * Tweak - Removed images referred to from deprecated functions. ([#31395](https://github.com/woocommerce/woocommerce/pull/31395))
 * Tweak - Update store setup widget to use task list API. ([#31755](https://github.com/woocommerce/woocommerce/pull/31755))
 * Fix - Fixed styling of "pay for order" form for 2022 theme. ([#31682](https://github.com/woocommerce/woocommerce/pull/31682))
