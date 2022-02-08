@@ -298,6 +298,11 @@ class CustomOrdersTableController {
 			'type'  => 'title',
 		);
 
+
+		if ( ! $this->data_synchronizer->check_orders_table_exists() ) {
+			$title_item['desc'] = __( 'Generate custom tables first by going to WooCommerce > Status > Tools > Create and fill custom orders table', 'woocommerce' );
+		}
+
 		$settings[] = $title_item;
 
 		$settings[] = array(
