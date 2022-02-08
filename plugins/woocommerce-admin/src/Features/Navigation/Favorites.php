@@ -48,17 +48,9 @@ class Favorites {
 	 * @param string|number $user_id Identifier of user to add to.
 	 * @return WP_Error|Boolean   Throws exception if item already exists.
 	 */
-	public static function add_item( $item_id, $user_id = null ) {
-		$user = $user_id ?? get_current_user_id();
+	public static function add_item( $item_id, $user_id ) {
 
-		if ( ! $user || ! $item_id ) {
-			return new \WP_Error(
-				'woocommerce_favorites_invalid_request',
-				__( 'Sorry, invalid request', 'woocommerce-admin' )
-			);
-		}
-
-		$all_favorites = self::get_all( $user );
+		$all_favorites = self::get_all( $user_id );
 
 		if ( in_array( $item_id, $all_favorites, true ) ) {
 			return new \WP_Error(
@@ -69,7 +61,7 @@ class Favorites {
 
 		$all_favorites[] = $item_id;
 
-		self::set_meta_value( $user, $all_favorites );
+		self::set_meta_value( $user_id, $all_favorites );
 
 		return true;
 	}
@@ -81,17 +73,8 @@ class Favorites {
 	 * @param string|number $user_id Identifier of user to remove from.
 	 * @return \WP_Error|Boolean   Throws exception if item does not exist.
 	 */
-	public static function remove_item( $item_id, $user_id = null ) {
-		$user = $user_id ?? get_current_user_id();
-
-		if ( ! $user || ! $item_id ) {
-			return new \WP_Error(
-				'woocommerce_favorites_invalid_request',
-				__( 'Sorry, invalid request', 'woocommerce-admin' )
-			);
-		}
-
-		$all_favorites = self::get_all( $user );
+	public static function remove_item( $item_id, $user_id ) {
+		$all_favorites = self::get_all( $user_id );
 
 		if ( ! in_array( $item_id, $all_favorites, true ) ) {
 			return new \WP_Error(
@@ -102,7 +85,7 @@ class Favorites {
 
 		$remaining = array_values( array_diff( $all_favorites, [ $item_id ] ) );
 
-		self::set_meta_value( $user, $remaining );
+		self::set_meta_value( $user_id, $remaining );
 
 		return true;
 	}
@@ -113,17 +96,8 @@ class Favorites {
 	 * @param string|number $user_id Identifier of user to query.
 	 * @return WP_Error|Array
 	 */
-	public static function get_all( $user_id = null ) {
-		$user = $user_id ?? get_current_user_id();
-
-		if ( ! $user ) {
-			return new \WP_Error(
-				'woocommerce_favorites_invalid_request',
-				__( 'Sorry, invalid request', 'woocommerce-admin' )
-			);
-		}
-
-		$response = Loader::get_user_data_field( $user, self::META_NAME );
+	public static function get_all( $user_id ) {
+		$response = Loader::get_user_data_field( $user_id, self::META_NAME );
 
 		return $response ? json_decode( $response, true ) : array();
 	}

@@ -51,79 +51,26 @@ class NavigationFavorites extends \WC_REST_Data_Controller {
 	public function register_routes() {
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->rest_base,
+			'/' . $this->rest_base . '/me',
 			array(
 				array(
 					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
-					'permission_callback' => array( $this, 'get_items_permissions_check' ),
-					'args'                => array(
-						'user_id' => array(
-							'required'          => true,
-							'validate_callback' => function( $param, $request, $key ) {
-								return is_numeric( $param );
-							},
-						),
-					),
+					'permission_callback' => array( $this, 'current_user_permissions_check' ),
 				),
 				array(
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'add_item' ),
-					'permission_callback' => array( $this, 'add_item_permissions_check' ),
+					'permission_callback' => array( $this, 'current_user_permissions_check' ),
 					'args'                => array(
 						'item_id' => array(
 							'required' => true,
-						),
-						'user_id' => array(
-							'required'          => true,
-							'validate_callback' => function( $param, $request, $key ) {
-								return is_numeric( $param );
-							},
 						),
 					),
 				),
 				array(
 					'methods'             => \WP_REST_Server::DELETABLE,
 					'callback'            => array( $this, 'delete_item' ),
-					'permission_callback' => array( $this, 'delete_item_permissions_check' ),
-					'args'                => array(
-						'item_id' => array(
-							'required' => true,
-						),
-						'user_id' => array(
-							'required'          => true,
-							'validate_callback' => function( $param, $request, $key ) {
-								return is_numeric( $param );
-							},
-						),
-					),
-				),
-				'schema' => array( $this, 'get_public_item_schema' ),
-			)
-		);
-
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base . '/me',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_items_by_current_user' ),
-					'permission_callback' => array( $this, 'current_user_permissions_check' ),
-				),
-				array(
-					'methods'             => \WP_REST_Server::CREATABLE,
-					'callback'            => array( $this, 'add_item_by_current_user' ),
-					'permission_callback' => array( $this, 'current_user_permissions_check' ),
-					'args'                => array(
-						'item_id' => array(
-							'required' => true,
-						),
-					),
-				),
-				array(
-					'methods'             => \WP_REST_Server::DELETABLE,
-					'callback'            => array( $this, 'delete_item_by_current_user' ),
 					'permission_callback' => array( $this, 'current_user_permissions_check' ),
 					'args'                => array(
 						'item_id' => array(
@@ -144,9 +91,7 @@ class NavigationFavorites extends \WC_REST_Data_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function get_items( $request ) {
-		$user_id = $request->get_param( 'user_id' );
-
-		$response = Favorites::get_all( $user_id );
+		$response = Favorites::get_all( get_current_user_id() );
 
 		if ( is_wp_error( $response ) || ! $response ) {
 			return rest_ensure_response( $this->prepare_error( $response ) );
@@ -158,36 +103,13 @@ class NavigationFavorites extends \WC_REST_Data_Controller {
 	}
 
 	/**
-	 * Get all favorites of current user.
-	 *
-	 * @param WP_REST_Request $request Request data.
-	 * @return WP_REST_Response
-	 */
-	public function get_items_by_current_user( $request ) {
-		$current_user = get_current_user_id();
-
-		if ( ! $current_user ) {
-			return $this->prepare_error(
-				new \WP_Error(
-					'woocommerce_favorites_unauthenticated',
-					__( 'You must be authenticated to use this endpoint', 'woocommerce-admin' )
-				)
-			);
-		}
-
-		$request->set_param( 'user_id', $current_user );
-
-		return $this->get_items( $request );
-	}
-
-	/**
 	 * Add a favorite.
 	 *
 	 * @param WP_REST_Request $request Request data.
 	 * @return WP_REST_Response
 	 */
 	public function add_item( $request ) {
-		$user_id = $request->get_param( 'user_id' );
+		$user_id = get_current_user_id();
 		$fav_id  = $request->get_param( 'item_id' );
 		$user    = get_userdata( $user_id );
 
@@ -210,35 +132,13 @@ class NavigationFavorites extends \WC_REST_Data_Controller {
 	}
 
 	/**
-	 * Add a favorite for current user.
-	 *
-	 * @param WP_REST_Request $request Request data.
-	 * @return WP_REST_Response
-	 */
-	public function add_item_by_current_user( $request ) {
-		$current_user = get_current_user_id();
-
-		if ( ! $current_user ) {
-			return $this->prepare_error(
-				new \WP_Error(
-					'woocommerce_favorites_unauthenticated',
-					__( 'You must be authenticated to use this endpoint', 'woocommerce-admin' )
-				)
-			);
-		}
-
-		$request->set_param( 'user_id', get_current_user_id() );
-		return $this->add_item( $request );
-	}
-
-	/**
 	 * Delete a favorite.
 	 *
 	 * @param WP_REST_Request $request Request data.
 	 * @return WP_REST_Response
 	 */
 	public function delete_item( $request ) {
-		$user_id = $request->get_param( 'user_id' );
+		$user_id = get_current_user_id();
 		$fav_id  = $request->get_param( 'item_id' );
 
 		$response = Favorites::remove_item( $fav_id, $user_id );
@@ -249,30 +149,6 @@ class NavigationFavorites extends \WC_REST_Data_Controller {
 
 		return rest_ensure_response( Favorites::get_all( $user_id ) );
 	}
-
-	/**
-	 * Delete a favorite for current user.
-	 *
-	 * @param WP_REST_Request $request Request data.
-	 * @return WP_REST_Response
-	 */
-	public function delete_item_by_current_user( $request ) {
-		$current_user = get_current_user_id();
-
-		if ( ! $current_user ) {
-			return $this->prepare_error(
-				new \WP_Error(
-					'woocommerce_favorites_unauthenticated',
-					__( 'You must be authenticated to use this endpoint', 'woocommerce-admin' )
-				)
-			);
-		}
-
-		$request->set_param( 'user_id', $current_user );
-
-		return $this->delete_item( $request );
-	}
-
 
 	/**
 	 * Check whether a given request has permission to create favorites.

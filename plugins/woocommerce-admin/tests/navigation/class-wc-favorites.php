@@ -32,31 +32,17 @@ class WC_Tests_Navigation_Favorites extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that errors are given when no user is provided or logged in.
-	 */
-	public function test_favorites_without_user() {
-		$result = $this->instance->add_item( 'menu-item' );
-		$this->assertInstanceOf( 'WP_Error', $result );
-
-		$result = $this->instance->remove_item( 'menu-item' );
-		$this->assertInstanceOf( 'WP_Error', $result );
-
-		$result = $this->instance->get_all();
-		$this->assertInstanceOf( 'WP_Error', $result );
-	}
-
-	/**
 	 * Test that favorites can be added.
 	 */
 	public function test_add_favorites() {
 		wp_set_current_user( $this->user );
 
-		$result = $this->instance->add_item( 'menu-item' );
+		$result = $this->instance->add_item( 'menu-item', get_current_user_id() );
 		$this->assertTrue( $result );
-		$result = $this->instance->add_item( 'menu-item2' );
+		$result = $this->instance->add_item( 'menu-item2', get_current_user_id() );
 		$this->assertTrue( $result );
 
-		$favorites = $this->instance->get_all();
+		$favorites = $this->instance->get_all( get_current_user_id() );
 		$this->assertContains( 'menu-item', $favorites );
 		$this->assertContains( 'menu-item2', $favorites );
 	}
@@ -67,14 +53,14 @@ class WC_Tests_Navigation_Favorites extends WC_Unit_Test_Case {
 	public function test_remove_favorites() {
 		wp_set_current_user( $this->user );
 
-		$result = $this->instance->add_item( 'item-to-remove' );
+		$result = $this->instance->add_item( 'item-to-remove', get_current_user_id() );
 		$this->assertTrue( $result );
 
-		$favorites = $this->instance->get_all();
+		$favorites = $this->instance->get_all( get_current_user_id() );
 		$this->assertContains( 'item-to-remove', $favorites );
 
-		$result    = $this->instance->remove_item( 'item-to-remove' );
-		$favorites = $this->instance->get_all();
+		$result    = $this->instance->remove_item( 'item-to-remove', get_current_user_id() );
+		$favorites = $this->instance->get_all( get_current_user_id() );
 		$this->assertNotContains( 'item-to-remove', $favorites );
 	}
 
@@ -84,10 +70,10 @@ class WC_Tests_Navigation_Favorites extends WC_Unit_Test_Case {
 	public function test_add_previously_added_favorite() {
 		wp_set_current_user( $this->user );
 
-		$result = $this->instance->add_item( 'duplicate-item' );
+		$result = $this->instance->add_item( 'duplicate-item', get_current_user_id() );
 		$this->assertTrue( $result );
 
-		$result = $this->instance->add_item( 'duplicate-item' );
+		$result = $this->instance->add_item( 'duplicate-item', get_current_user_id() );
 		$this->assertInstanceOf( 'WP_Error', $result );
 	}
 
@@ -97,7 +83,7 @@ class WC_Tests_Navigation_Favorites extends WC_Unit_Test_Case {
 	public function test_remove_invalid_favorite() {
 		wp_set_current_user( $this->user );
 
-		$result = $this->instance->remove_item( 'does-not-exist' );
+		$result = $this->instance->remove_item( 'does-not-exist', get_current_user_id() );
 		$this->assertInstanceOf( 'WP_Error', $result );
 	}
 }

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { withOptionsHydration } from '@woocommerce/data';
+import { useUser, withOptionsHydration } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -15,16 +15,17 @@ import { getAdminSetting } from '~/utils/admin-settings';
 import '../data';
 
 const MarketingOverview = () => {
-	const allowMarketplaceSuggestions = getAdminSetting(
-		'allowMarketplaceSuggestions',
-		false
-	);
+	const { currentUserCan } = useUser();
+
+	const shouldShowExtensions =
+		getAdminSetting( 'allowMarketplaceSuggestions', false ) &&
+		currentUserCan( 'install_plugins' );
 
 	return (
 		<div className="woocommerce-marketing-overview">
 			<WelcomeCard />
 			<InstalledExtensions />
-			{ allowMarketplaceSuggestions && (
+			{ shouldShowExtensions && (
 				<RecommendedExtensions category="marketing" />
 			) }
 			<KnowledgeBase category="marketing" />

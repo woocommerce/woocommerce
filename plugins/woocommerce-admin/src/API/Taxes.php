@@ -101,7 +101,7 @@ class Taxes extends \WC_REST_Taxes_Controller {
 		}
 
 		// Filter by included tax rate IDs.
-		$included_taxes = $prepared_args['include'];
+		$included_taxes = array_map( 'absint', $prepared_args['include'] );
 		if ( ! empty( $included_taxes ) ) {
 			$included_taxes = implode( ',', $prepared_args['include'] );
 			$query         .= " AND tax_rate_id IN ({$included_taxes})";

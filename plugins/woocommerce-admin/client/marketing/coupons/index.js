@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { useUser } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -13,14 +14,15 @@ import { getAdminSetting } from '~/utils/admin-settings';
 import '../data';
 
 const CouponsOverview = () => {
-	const allowMarketplaceSuggestions = getAdminSetting(
-		'allowMarketplaceSuggestions',
-		false
-	);
+	const { currentUserCan } = useUser();
+
+	const shouldShowExtensions =
+		getAdminSetting( 'allowMarketplaceSuggestions', false ) &&
+		currentUserCan( 'install_plugins' );
 
 	return (
 		<div className="woocommerce-marketing-coupons">
-			{ allowMarketplaceSuggestions && (
+			{ shouldShowExtensions && (
 				<RecommendedExtensions
 					title={ __(
 						'Recommended coupon extensions',

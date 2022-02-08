@@ -69,7 +69,7 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function update_item_permissions_check( $request ) {
-		if ( ! current_user_can( 'install_themes' ) ) {
+		if ( ! current_user_can( 'switch_themes' ) ) {
 			return new \WP_Error( 'woocommerce_rest_cannot_update', __( 'Sorry, you cannot manage themes.', 'woocommerce-admin' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 		return true;

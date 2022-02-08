@@ -44,7 +44,7 @@ class Marketing extends \WC_REST_Data_Controller {
 				array(
 					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_recommended_plugins' ),
-					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'permission_callback' => array( $this, 'get_recommended_plugins_permissions_check' ),
 					'args'                => array(
 						'per_page' => $this->get_collection_params()['per_page'],
 						'category' => array(
@@ -78,6 +78,21 @@ class Marketing extends \WC_REST_Data_Controller {
 			)
 		);
 	}
+
+	/**
+	 * Check whether a given request has permission to install plugins.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|boolean
+	 */
+	public function get_recommended_plugins_permissions_check( $request ) {
+		if ( ! current_user_can( 'install_plugins' ) ) {
+			return new \WP_Error( 'woocommerce_rest_cannot_update', __( 'Sorry, you cannot manage plugins.', 'woocommerce-admin' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		return true;
+	}
+
 
 	/**
 	 * Return installed marketing extensions data.

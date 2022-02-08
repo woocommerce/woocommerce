@@ -12,6 +12,8 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Options Controller.
  *
+ * @deprecated since 3.1.0
+ *
  * @extends WC_REST_Data_Controller
  */
 class Options extends \WC_REST_Data_Controller {
@@ -87,15 +89,17 @@ class Options extends \WC_REST_Data_Controller {
 	 *
 	 * @param  string          $option Option name.
 	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  bool            $is_update If the request is to update the option.
 	 * @return boolean
 	 */
-	public function user_has_permission( $option, $request ) {
+	public function user_has_permission( $option, $request, $is_update = false ) {
 		$permissions = $this->get_option_permissions( $request );
 
 		if ( isset( $permissions[ $option ] ) ) {
 			return $permissions[ $option ];
 		}
 
+		wc_deprecated_function( 'Automattic\WooCommerce\Admin\API\Options::' . ( $is_update ? 'update_options' : 'get_options' ), '3.1' );
 		return current_user_can( 'manage_options' );
 	}
 
@@ -113,7 +117,7 @@ class Options extends \WC_REST_Data_Controller {
 		}
 
 		foreach ( $params as $option_name => $option_value ) {
-			if ( ! $this->user_has_permission( $option_name, $request ) ) {
+			if ( ! $this->user_has_permission( $option_name, $request, true ) ) {
 				return new \WP_Error( 'woocommerce_rest_cannot_update', __( 'Sorry, you cannot manage these options.', 'woocommerce-admin' ), array( 'status' => rest_authorization_required_code() ) );
 			}
 		}
@@ -128,19 +132,65 @@ class Options extends \WC_REST_Data_Controller {
 	 * @return array
 	 */
 	public function get_option_permissions( $request ) {
-		$permissions = array(
-			'theme_mods_' . get_stylesheet()               => current_user_can( 'edit_theme_options' ),
-			'woocommerce_setup_jetpack_opted_in'           => current_user_can( 'manage_woocommerce' ),
-			'woocommerce_stripe_settings'                  => current_user_can( 'manage_woocommerce' ),
-			'woocommerce-ppcp-settings'                    => current_user_can( 'manage_woocommerce' ),
-			'woocommerce_ppcp-gateway_setting'             => current_user_can( 'manage_woocommerce' ),
-			'woocommerce_demo_store'                       => current_user_can( 'manage_woocommerce' ),
-			'woocommerce_demo_store_notice'                => current_user_can( 'manage_woocommerce' ),
-			'woocommerce_ces_tracks_queue'                 => current_user_can( 'manage_woocommerce' ),
-			'woocommerce_navigation_intro_modal_dismissed' => current_user_can( 'manage_woocommerce' ),
+		$permissions = self::get_default_option_permissions();
+		return apply_filters_deprecated( 'woocommerce_rest_api_option_permissions', array( $permissions, $request ), '3.1.0' );
+	}
+
+	/**
+	 * Get the default available option permissions.
+	 *
+	 * @return array
+	 */
+	public static function get_default_option_permissions() {
+		$is_woocommerce_admin    = \Automattic\WooCommerce\Admin\Features\Homescreen::is_admin_user();
+		$woocommerce_permissions = array(
+			'woocommerce_setup_jetpack_opted_in',
+			'woocommerce_stripe_settings',
+			'woocommerce-ppcp-settings',
+			'woocommerce_ppcp-gateway_setting',
+			'woocommerce_demo_store',
+			'woocommerce_demo_store_notice',
+			'woocommerce_ces_tracks_queue',
+			'woocommerce_navigation_intro_modal_dismissed',
+			'woocommerce_shipping_dismissed_timestamp',
+			'woocommerce_allow_tracking',
+			'woocommerce_task_list_keep_completed',
+			'woocommerce_task_list_prompt_shown',
+			'woocommerce_default_homepage_layout',
+			'woocommerce_setup_jetpack_opted_in',
+			'woocommerce_no_sales_tax',
+			'woocommerce_calc_taxes',
+			'woocommerce_bacs_settings',
+			'woocommerce_bacs_accounts',
+			'woocommerce_task_list_prompt_shown',
+			'woocommerce_settings_shipping_recommendations_hidden',
+			'woocommerce_task_list_dismissed_tasks',
+			'woocommerce_setting_payments_recommendations_hidden',
+			'woocommerce_navigation_favorites_tooltip_hidden',
+			'woocommerce_marketing_overview_welcome_hidden',
+			'woocommerce_admin_transient_notices_queue',
+			'woocommerce_task_list_welcome_modal_dismissed',
+			'woocommerce_welcome_from_calypso_modal_dismissed',
+			'woocommerce_task_list_hidden',
+			'woocommerce_task_list_complete',
+			'woocommerce_extended_task_list_hidden',
+			'woocommerce_ces_shown_for_actions',
+			'woocommerce_clear_ces_tracks_queue_for_page',
+			'woocommerce_admin_install_timestamp',
+			'woocommerce_task_list_tracked_completed_tasks',
+			'woocommerce_show_marketplace_suggestions',
+			'wc_connect_options',
 		);
 
-		return apply_filters( 'woocommerce_rest_api_option_permissions', $permissions, $request );
+		$theme_permissions = array(
+			'theme_mods_' . get_stylesheet() => current_user_can( 'edit_theme_options' ),
+			'stylesheet'                     => current_user_can( 'edit_theme_options' ),
+		);
+
+		return array_merge(
+			array_fill_keys( $theme_permissions, current_user_can( 'edit_theme_options' ) ),
+			array_fill_keys( $woocommerce_permissions, $is_woocommerce_admin )
+		);
 	}
 
 	/**

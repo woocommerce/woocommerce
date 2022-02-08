@@ -118,7 +118,11 @@ class TaskLists {
 	 * Most tasks do not need this.
 	 */
 	public static function set_active_task() {
-		if ( ! isset( $_GET[ Task::ACTIVE_TASK_TRANSIENT ] ) ) { // phpcs:ignore csrf ok.
+		if ( ! isset( $_GET[ Task::ACTIVE_TASK_TRANSIENT ] ) || ! current_user_can( 'manage_woocommerce' ) ) { // phpcs:ignore csrf ok.
+			return;
+		}
+		$referer = wp_get_referer();
+		if ( ! $referer || 0 !== strpos( $referer, wc_admin_url() ) ) {
 			return;
 		}
 

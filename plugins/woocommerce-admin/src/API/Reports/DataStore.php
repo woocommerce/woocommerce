@@ -577,7 +577,7 @@ class DataStore extends SqlQuery {
 	 */
 	protected static function get_excluded_report_order_statuses() {
 		$excluded_statuses = \WC_Admin_Settings::get_option( 'woocommerce_excluded_report_order_statuses', array( 'pending', 'failed', 'cancelled' ) );
-		$excluded_statuses = array_merge( array( 'trash' ), $excluded_statuses );
+		$excluded_statuses = array_merge( array( 'trash' ), array_map( 'esc_sql', $excluded_statuses ) );
 		return apply_filters( 'woocommerce_analytics_excluded_order_statuses', $excluded_statuses );
 	}
 
@@ -721,10 +721,11 @@ class DataStore extends SqlQuery {
 	 * @return array
 	 */
 	protected function get_limit_sql_params( $query_args ) {
+		global $wpdb;
 		$params = $this->get_limit_params( $query_args );
 
 		$this->clear_sql_clause( 'limit' );
-		$this->add_sql_clause( 'limit', "LIMIT {$params['offset']}, {$params['per_page']}" );
+		$this->add_sql_clause( 'limit', $wpdb->prepare( 'LIMIT %d, %d', $params['offset'], $params['per_page'] ) );
 		return $params;
 	}
 
@@ -758,12 +759,15 @@ class DataStore extends SqlQuery {
 	 * @return array
 	 */
 	protected function get_ids_table( $ids, $id_field, $other_values = array() ) {
+		global $wpdb;
 		$selects = array();
 		foreach ( $ids as $id ) {
-			$new_select = "SELECT {$id} AS {$id_field}";
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$new_select = $wpdb->prepare( "SELECT %s AS {$id_field}", $id );
 			foreach ( $other_values as $key => $value ) {
-				$new_select .= ", {$value} AS {$key}";
+				$new_select .= $wpdb->prepare( ", %s AS {$key}", $value );
 			}
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			array_push( $selects, $new_select );
 		}
 		return join( ' UNION ', $selects );
@@ -794,6 +798,7 @@ class DataStore extends SqlQuery {
 		foreach ( $fields as $i => $field ) {
 			foreach ( $default_results_fields as $default_results_field ) {
 				if ( $field === $default_results_field ) {
+					$field        = esc_sql( $field );
 					$fields[ $i ] = "default_results.{$field} AS {$field}";
 				}
 			}
@@ -811,7 +816,7 @@ class DataStore extends SqlQuery {
 	 */
 	protected function add_order_by_sql_params( $query_args ) {
 		if ( isset( $query_args['orderby'] ) ) {
-			$order_by_clause = $this->normalize_order_by( $query_args['orderby'] );
+			$order_by_clause = $this->normalize_order_by( esc_sql( $query_args['orderby'] ) );
 		} else {
 			$order_by_clause = '';
 		}
@@ -919,6 +924,7 @@ class DataStore extends SqlQuery {
 		}
 
 		$lookup_name = isset( $wpdb->$filter_table ) ? $wpdb->$filter_table : $wpdb->prefix . $filter_table;
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		return " {$select_table}.{$select_field} {$compare} (
 			SELECT
 				DISTINCT {$filter_table}.{$select_field}
@@ -927,6 +933,7 @@ class DataStore extends SqlQuery {
 			WHERE
 				{$filter_table}.{$filter_field} IN ({$id_list})
 		)";
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
 
 	/**
@@ -1113,7 +1120,7 @@ class DataStore extends SqlQuery {
 		$subqueries        = array();
 		$excluded_statuses = array();
 		if ( isset( $query_args['status_is'] ) && is_array( $query_args['status_is'] ) && count( $query_args['status_is'] ) > 0 ) {
-			$allowed_statuses = array_map( array( $this, 'normalize_order_status' ), $query_args['status_is'] );
+			$allowed_statuses = array_map( array( $this, 'normalize_order_status' ), esc_sql( $query_args['status_is'] ) );
 			if ( $allowed_statuses ) {
 				$subqueries[] = "{$wpdb->prefix}wc_order_stats.status IN ( '" . implode( "','", $allowed_statuses ) . "' )";
 			}
@@ -1164,7 +1171,7 @@ class DataStore extends SqlQuery {
 
 		$sql_query->clear_sql_clause( array( 'order_by' ) );
 		if ( isset( $query_args['orderby'] ) ) {
-			$order_by_clause = $this->normalize_order_by( $query_args['orderby'] );
+			$order_by_clause = $this->normalize_order_by( esc_sql( $query_args['orderby'] ) );
 			$sql_query->add_sql_clause( 'order_by', $order_by_clause );
 		}
 
@@ -1180,7 +1187,7 @@ class DataStore extends SqlQuery {
 	 */
 	protected function add_orderby_order_clause( $query_args, &$sql_query ) {
 		if ( isset( $query_args['order'] ) ) {
-			$sql_query->add_sql_clause( 'order_by', $query_args['order'] );
+			$sql_query->add_sql_clause( 'order_by', esc_sql( $query_args['order'] ) );
 		} else {
 			$sql_query->add_sql_clause( 'order_by', 'DESC' );
 		}
@@ -1272,6 +1279,7 @@ class DataStore extends SqlQuery {
 				$join_alias = 'orderitemmeta1';
 
 				if ( empty( $sql_clauses['join'] ) ) {
+					$table_name            = esc_sql( $table_name );
 					$sql_clauses['join'][] = "JOIN {$wpdb->prefix}woocommerce_order_items orderitems ON orderitems.order_id = {$table_name}.order_id";
 				}
 
