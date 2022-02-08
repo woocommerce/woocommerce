@@ -8,6 +8,7 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper as WCConnectionHelper;
+use Automattic\WooCommerce\Utilities\DBUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -344,7 +345,7 @@ class WC_Install {
 			self::create_tables();
 		}
 
-		$missing_tables = self::verify_schema( self::get_schema() );
+		$missing_tables = DBUtil::verify_database_tables_exist( self::get_schema() );
 
 		if ( 0 < count( $missing_tables ) ) {
 			if ( $modify_notice ) {
@@ -357,27 +358,6 @@ class WC_Install {
 			}
 			update_option( 'woocommerce_schema_version', WC()->db_version );
 			delete_option( 'woocommerce_schema_missing_tables' );
-		}
-		return $missing_tables;
-	}
-
-	/**
-	 * Verify if the table(s) already exists.
-	 *
-	 * @param string $schema Schema definition to check against.
-	 *
-	 * return array List of missing tables.
-	 */
-	public static function verify_schema( $schema ) {
-		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-
-		$missing_tables = array();
-		$queries        = dbDelta( $schema, false );
-
-		foreach ( $queries as $table_name => $result ) {
-			if ( "Created table $table_name" === $result ) {
-				$missing_tables[] = $table_name;
-			}
 		}
 		return $missing_tables;
 	}

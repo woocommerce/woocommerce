@@ -35,7 +35,7 @@ class CustomOrdersTableController {
 	 *
 	 * @var DataSynchronizer
 	 */
-	private $data_synchronizer;
+	public $data_synchronizer;
 
 	/**
 	 * Is the feature visible?
