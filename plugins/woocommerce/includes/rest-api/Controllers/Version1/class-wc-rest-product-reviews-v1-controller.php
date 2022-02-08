@@ -195,7 +195,7 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 		$id     = (int) $request['id'];
 		$review = get_comment( $id );
 
-		if ( $review && get_comment_type( $id ) === 'review' && wc_rest_check_product_reviews_permissions( 'delete', $review->comment_ID ) ) {
+		if ( $review && wc_rest_check_product_reviews_permissions( 'delete', $review->comment_ID ) ) {
 			return true;
 		}
 
