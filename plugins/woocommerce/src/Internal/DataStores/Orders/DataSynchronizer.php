@@ -46,6 +46,9 @@ class DataSynchronizer {
 	 */
 	public function check_orders_table_exists(): bool {
 		$missing_tables = DBUtil::verify_database_tables_exist( $this->data_store->get_schema() );
+		if ( count( $missing_tables ) > 0 ) {
+			delete_option( self::CUSTOM_ORDERS_TABLE_DATA_REGENERATION_IN_PROGRESS );
+		}
 		return count( $missing_tables ) === 0;
 	}
 
