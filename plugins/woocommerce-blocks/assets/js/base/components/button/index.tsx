@@ -40,6 +40,10 @@ export interface ButtonProps extends WPButton.ButtonProps {
 	 * Button type
 	 */
 	type?: 'button' | 'input' | 'submit';
+	/**
+	 * Button variant
+	 */
+	variant?: 'text' | 'contained' | 'outlined';
 }
 
 /**
@@ -50,11 +54,13 @@ const Button = ( {
 	className,
 	showSpinner = false,
 	children,
+	variant = 'contained',
 	...props
 }: ButtonProps ): JSX.Element => {
 	const buttonClassName = classNames(
 		'wc-block-components-button',
 		className,
+		variant,
 		{
 			'wc-block-components-button--loading': showSpinner,
 		}
