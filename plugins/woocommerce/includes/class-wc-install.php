@@ -7,6 +7,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper as WCConnectionHelper;
 use Automattic\WooCommerce\Utilities\DBUtil;
 
@@ -349,7 +350,9 @@ class WC_Install {
 			self::create_tables();
 		}
 
-		$missing_tables = DBUtil::verify_database_tables_exist( self::get_schema() );
+		$missing_tables = wc_get_container()
+			->get( DatabaseUtil::class )
+			->get_missing_tables( self::get_schema() );
 
 		if ( 0 < count( $missing_tables ) ) {
 			if ( $modify_notice ) {
