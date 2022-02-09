@@ -78,8 +78,8 @@
 		"wp-env:phpunit-config": "./bin/wp-env-phpunit-pre-config.sh"
 	},
 	"devDependencies": {
-		"@actions/core": "^1.6.0",
-		"@actions/github": "^5.0.0",
+		"@actions/core": "1.6.0",
+		"@actions/github": "5.0.0",
 		"@automattic/color-studio": "2.5.0",
 		"@babel/cli": "7.16.8",
 		"@babel/core": "7.16.12",
