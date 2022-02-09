@@ -5,8 +5,6 @@
 
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
-use Automattic\Jetpack\Constants;
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -24,19 +22,42 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		return $wpdb->prefix . 'wc_orders';
 	}
 
+	/**
+	 * Get the order addresses table name.
+	 *
+	 * @return string The order addresses table name.
+	 */
 	public function get_addresses_table_name() {
 		global $wpdb;
 		return $wpdb->prefix . 'wc_order_addresses';
 	}
 
+	/**
+	 * Get the orders operational data table name.
+	 *
+	 * @return string The orders operational data table name.
+	 */
 	public function get_operational_data_table_name() {
 		global $wpdb;
 		return $wpdb->prefix . 'wc_order_operational_data';
 	}
 
+	/**
+	 * Get the names of all the tables involved in the custom orders table feature.
+	 *
+	 * @return string[]
+	 */
+	public function get_all_table_names() {
+		return array(
+			$this->get_orders_table_name(),
+			$this->get_addresses_table_name(),
+			$this->get_operational_data_table_name(),
+		);
+	}
+
 	// TODO: Add methods for other table names as appropriate.
 
-	//phpcs:disable Squiz.Commenting.FunctionComment.Missing
+	//phpcs:disable Squiz.Commenting, Generic.Commenting
 
 	public function get_total_refunded( $order ) {
 		// TODO: Implement get_total_refunded() method.
@@ -153,14 +174,19 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		return 'line_item';
 	}
 
-	//phpcs:enable Squiz.Commenting.FunctionComment.Missing
+	//phpcs:enable Squiz.Commenting, Generic.Commenting
 
-
-	public function get_schema() {
-		$orders_table_name = $this->get_orders_table_name();
-		$addresses_table_name = $this->get_addresses_table_name();
+	/**
+	 * Get the SQL needed to create all the tables needed for the custom orders table feature.
+	 *
+	 * @return string
+	 */
+	public function get_database_schema() {
+		$orders_table_name           = $this->get_orders_table_name();
+		$addresses_table_name        = $this->get_addresses_table_name();
 		$operational_data_table_name = $this->get_operational_data_table_name();
-		$table = "
+
+		$sql = "
 CREATE TABLE $orders_table_name (
 	id bigint(20) unsigned auto_increment,
 	post_id bigint(20) unsigned null,
@@ -222,6 +248,6 @@ CREATE TABLE $operational_data_table_name (
 	KEY order_id (order_id),
 	KEY order_key (order_key)
 );";
-		return $table;
+		return $sql;
 	}
 }

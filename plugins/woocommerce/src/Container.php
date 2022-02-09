@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\Orders
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ProductAttributesLookupServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ProxiesServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\RestockRefundedItemsAdjusterServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\UtilsClassesServiceProvider;
 
 /**
  * PSR11 compliant dependency injection container for WooCommerce.
@@ -43,6 +44,7 @@ final class Container implements \Psr\Container\ContainerInterface {
 		ProductAttributesLookupServiceProvider::class,
 		ProxiesServiceProvider::class,
 		RestockRefundedItemsAdjusterServiceProvider::class,
+		UtilsClassesServiceProvider::class,
 	);
 
 	/**

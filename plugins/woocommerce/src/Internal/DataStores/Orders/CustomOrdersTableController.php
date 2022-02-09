@@ -8,7 +8,7 @@ namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * This is the main class that controls the custom orders table feature. Its responsibilities are:
+ * This is the main class that controls the custom orders tables feature. Its responsibilities are:
  *
  * - Allowing to enable and disable the feature while it's in development (show_feature method)
  * - Displaying UI components (entries in the tools page and in settings)
@@ -19,7 +19,7 @@ defined( 'ABSPATH' ) || exit;
 class CustomOrdersTableController {
 
 	/**
-	 * The name of the option for enabling the usage of the custom orders table
+	 * The name of the option for enabling the usage of the custom orders tables
 	 */
 	const CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION = 'woocommerce_custom_orders_table_enabled';
 
@@ -146,7 +146,7 @@ class CustomOrdersTableController {
 	 * @return WC_Object_Data_Store_Interface|string The actual data store to use.
 	 */
 	private function get_data_store_instance( $default_data_store ) {
-		if ( $this->is_feature_visible() && $this->custom_orders_table_usage_is_enabled() && ! $this->data_synchronizer->data_regeneration_is_in_progress() ) {
+		if ( $this->is_feature_visible() && $this->custom_orders_table_usage_is_enabled() ) {
 			return $this->data_store;
 		} else {
 			return $default_data_store;
@@ -160,66 +160,37 @@ class CustomOrdersTableController {
 	 * @param array $tools_array The array of tools to add the tool to.
 	 * @return array The updated array of tools-
 	 */
-	private function add_initiate_regeneration_entry_to_tools_array(array $tools_array ): array {
+	private function add_initiate_regeneration_entry_to_tools_array( array $tools_array ): array {
 		if ( ! $this->is_feature_visible() ) {
 			return $tools_array;
 		}
 
-		$orders_table_exists       = $this->data_synchronizer->check_orders_table_exists();
-		$generation_is_in_progress = $this->data_synchronizer->data_regeneration_is_in_progress();
-
-		if ( $orders_table_exists ) {
-			$generate_item_name   = __( 'Regenerate the custom orders table', 'woocommerce' );
-			$generate_item_desc   = __( 'This tool will regenerate the custom orders table data from existing orders data from the posts table. This process may take a while.', 'woocommerce' );
-			$generate_item_return = __( 'Custom orders table is being regenerated', 'woocommerce' );
-			$generate_item_button = __( 'Regenerate', 'woocommerce' );
-		} else {
-			$generate_item_name   = __( 'Create and fill custom orders table', 'woocommerce' );
-			$generate_item_desc   = __( 'This tool will create the custom orders table and fill it with existing orders data from the posts table. This process may take a while.', 'woocommerce' );
-			$generate_item_return = __( 'Custom orders table is being filled', 'woocommerce' );
-			$generate_item_button = __( 'Create', 'woocommerce' );
-		}
-
-		$entry = array(
-			'name'             => $generate_item_name,
-			'desc'             => $generate_item_desc,
-			'requires_refresh' => true,
-			'callback'         => function() use ( $generate_item_return ) {
-				$this->initiate_regeneration_from_tools_page();
-				return $generate_item_return;
-			},
-		);
-
-		if ( $generation_is_in_progress ) {
-			$entry['button'] = sprintf(
-			/* translators: %d: How many orders have been processed so far. */
-				__( 'Filling in progress (%d)', 'woocommerce' ),
-				$this->data_synchronizer->get_regeneration_processed_orders_count()
-			);
-			$entry['disabled'] = true;
-		} else {
-			$entry['button'] = $generate_item_button;
-		}
-
-		$tools_array['regenerate_custom_orders_table'] = $entry;
-
-		if ( $orders_table_exists ) {
-
-			// Delete the table.
-
+		if ( $this->data_synchronizer->check_orders_table_exists() ) {
 			$tools_array['delete_custom_orders_table'] = array(
-				'name'             => __( 'Delete the custom orders table', 'woocommerce' ),
+				'name'             => __( 'Delete the custom orders tables', 'woocommerce' ),
 				'desc'             => sprintf(
 					'<strong class="red">%1$s</strong> %2$s',
 					__( 'Note:', 'woocommerce' ),
-					__( 'This will delete the custom orders table. You can create it again with the "Create and fill custom orders table" tool.', 'woocommerce' )
+					__( 'This will delete the custom orders tables. The tables can be deleted only if they are not not in use (via Settings > Advanced > Custom data stores). You can create them again at any time with the "Create the custom orders tables" tool.', 'woocommerce' )
 				),
-				'button'           => __( 'Delete', 'woocommerce' ),
 				'requires_refresh' => true,
 				'callback'         => function () {
-					$this->delete_custom_orders_table();
-					return __( 'Custom orders table has been deleted.', 'woocommerce' );
+					$this->delete_custom_orders_tables();
+					return __( 'Custom orders tables have been deleted.', 'woocommerce' );
 				},
+				'button'           => __( 'Delete', 'woocommerce' ),
+				'disabled'         => $this->custom_orders_table_usage_is_enabled(),
+			);
+		} else {
+			$tools_array['create_custom_orders_table'] = array(
+				'name'             => __( 'Create the custom orders tables', 'woocommerce' ),
+				'desc'             => __( 'This tool will create the custom orders tables. Once created you can go to WooCommerce > Settings > Advanced > Custom data stores and configure the usage of the tables.', 'woocommerce' ),
+				'requires_refresh' => true,
+				'callback'         => function() {
+					$this->create_custom_orders_tables();
+					return __( 'Custom orders tables have been created. You can now go to WooCommerce > Settings > Advanced > Custom data stores.', 'woocommerce' );
+				},
+				'button'           => __( 'Create', 'woocommerce' ),
 			);
 		}
 
@@ -227,41 +198,35 @@ class CustomOrdersTableController {
 	}
 
 	/**
-	 * Initiate the custom orders table (re)generation in response to the user pressing the tool button.
+	 * Create the custom orders tables in response to the user pressing the tool button.
 	 *
-	 * @throws \Exception Can't initiate regeneration.
+	 * @throws \Exception Can't create the tables.
 	 */
-	private function initiate_regeneration_from_tools_page() {
+	private function create_custom_orders_tables() {
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 		if ( ! isset( $_REQUEST['_wpnonce'] ) || false === wp_verify_nonce( $_REQUEST['_wpnonce'], 'debug_action' ) ) {
 			throw new \Exception( 'Invalid nonce' );
 		}
 
-		$this->check_can_do_table_regeneration();
-		$this->data_synchronizer->initiate_regeneration();
-	}
-
-	/**
-	 * Can the custom orders table regeneration be started?
-	 *
-	 * @throws \Exception The table regeneration can't be started.
-	 */
-	private function check_can_do_table_regeneration() {
 		if ( ! $this->is_feature_visible() ) {
-			throw new \Exception( "Can't do custom orders table regeneration: the feature isn't enabled" );
+			throw new \Exception( "Can't create the custom orders tables: the feature isn't enabled" );
 		}
 
-		if ( $this->data_synchronizer->data_regeneration_is_in_progress() ) {
-			throw new \Exception( "Can't do custom orders table regeneration: regeneration is already in progress" );
-		}
+		$this->data_synchronizer->create_database_tables();
 	}
 
 	/**
-	 * Delete the custom orders table and any related options and data.
+	 * Delete the custom orders tables and any related options and data in response to the user pressing the tool button.
+	 *
+	 * @throws \Exception Can't delete the tables.
 	 */
-	private function delete_custom_orders_table() {
+	private function delete_custom_orders_tables() {
+		if ( $this->custom_orders_table_usage_is_enabled() ) {
+			throw new \Exception( "Can't delete the custom orders tables: they are currently in use (via Settings > Advanced > Custom data stores)." );
+		}
+
 		delete_option( self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION );
-		$this->data_synchronizer->delete_custom_orders_table();
+		$this->data_synchronizer->delete_database_tables();
 	}
 
 	/**
@@ -282,7 +247,7 @@ class CustomOrdersTableController {
 
 	/**
 	 * Get the settings for the "Custom data stores" section in the "Advanced" tab,
-	 * with entries for managing the custom orders table if appropriate.
+	 * with entries for managing the custom orders tables if appropriate.
 	 *
 	 * @param array  $settings The original settings array.
 	 * @param string $section_id The settings section to get the settings for.
@@ -294,25 +259,30 @@ class CustomOrdersTableController {
 		}
 
 		$title_item = array(
-			'title' => __( 'Custom orders table', 'woocommerce' ),
+			'title' => __( 'Custom orders tables', 'woocommerce' ),
 			'type'  => 'title',
 		);
 
+		if ( $this->data_synchronizer->check_orders_table_exists() ) {
+			$settings[] = $title_item;
 
-		if ( ! $this->data_synchronizer->check_orders_table_exists() ) {
-			$title_item['desc'] = __( 'Generate custom tables first by going to WooCommerce > Status > Tools > Create and fill custom orders table', 'woocommerce' );
+			$settings[] = array(
+				'title'         => __( 'Enable tables usage', 'woocommerce' ),
+				'desc'          => __( 'Use the custom orders tables as the main orders data store.', 'woocommerce' ),
+				'id'            => self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
+				'default'       => 'no',
+				'type'          => 'checkbox',
+				'checkboxgroup' => 'start',
+			);
+		} else {
+			$title_item['desc'] = sprintf(
+				/* translators: %1$ = <em> tag, %2$ = </em> tag. */
+				__( 'Create the tables first by going to %1$sWooCommerce > Status > Tools%2$s and running %1$sCreate the custom orders tables%2$s.', 'woocommerce' ),
+				'<em>',
+				'</em>'
+			);
+			$settings[] = $title_item;
 		}
-
-		$settings[] = $title_item;
-
-		$settings[] = array(
-			'title'         => __( 'Enable table usage', 'woocommerce' ),
-			'desc'          => __( 'Use the custom orders table as the main orders data store.', 'woocommerce' ),
-			'id'            => self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
-			'default'       => 'no',
-			'type'          => 'checkbox',
-			'checkboxgroup' => 'start',
-		);
 
 		$settings[] = array( 'type' => 'sectionend' );
 
