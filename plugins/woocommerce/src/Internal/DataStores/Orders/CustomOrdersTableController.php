@@ -141,14 +141,20 @@ class CustomOrdersTableController {
 	 * Gets the instance of the orders data store to use.
 	 *
 	 * @param \WC_Object_Data_Store_Interface|string $default_data_store The default data store (as received via the woocommerce_order_data_store hooks).
+	 *
 	 * @return \WC_Object_Data_Store_Interface|string The actual data store to use.
 	 */
 	private function get_data_store_instance( $default_data_store ) {
-		if ( $this->is_feature_visible() && $this->custom_orders_table_usage_is_enabled() && ! $this->data_synchronizer->data_regeneration_is_in_progress() ) {
-			return $this->data_store;
-		} else {
-			return $default_data_store;
-		}
+		return $this->should_load_custom_data_store() ? $this->data_store : $default_data_store;
+	}
+
+	/**
+	 * Whether or not custom data store can be loaded.
+	 *
+	 * @return bool Should load custom order data store.
+	 */
+	public function should_load_custom_data_store() {
+		return $this->is_feature_visible() && $this->custom_orders_table_usage_is_enabled() && ! $this->data_synchronizer->data_regeneration_is_in_progress();
 	}
 
 	/**
