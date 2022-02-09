@@ -14,6 +14,7 @@ import { useSelect } from '@wordpress/data';
  * Internal dependencies
  */
 import { getAdminSetting } from '~/utils/admin-settings';
+import { FormInputProps } from '~/utils/types';
 
 const { countries } = getAdminSetting( 'dataEndpoints', { countries: {} } );
 const storeAddressFields = [
@@ -322,9 +323,7 @@ export function useGetCountryStateAutofill(
 }
 
 type StoreAddressProps = {
-	// Disable reason: The getInputProps type are not provided by the caller and source.
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	getInputProps: any;
+	getInputProps: ( key: string ) => FormInputProps;
 	setValue: ( key: string, value: string ) => void;
 };
 
