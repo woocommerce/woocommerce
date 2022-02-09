@@ -23,6 +23,9 @@ import { getPluginSlug } from '~/utils';
 import './plugins/Bacs';
 import './payment-gateway-suggestions.scss';
 
+const comparePaymentGatewaysByPriority = ( a, b ) =>
+	a.recommendation_priority - b.recommendation_priority;
+
 export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 	const { updatePaymentGateway } = useDispatch( PAYMENT_GATEWAYS_STORE_NAME );
 	const {
@@ -66,6 +69,7 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 			const enrichedSuggestion = {
 				installed: !! mappedPaymentGateways[ id ],
 				postInstallScripts: installedGateway.post_install_scripts,
+				hasPlugins: suggestion.plugins && suggestion.plugins.length,
 				enabled: installedGateway.enabled || false,
 				needsSetup: installedGateway.needs_setup,
 				settingsUrl: installedGateway.settings_url,
@@ -140,10 +144,7 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 		() =>
 			Array.from( paymentGateways.values() )
 				.filter( ( gateway ) => gateway.recommendation_priority )
-				.sort(
-					( a, b ) =>
-						a.recommendation_priority - b.recommendation_priority
-				)
+				.sort( comparePaymentGatewaysByPriority )
 				.map( ( gateway ) => gateway.id )
 				.shift(),
 		[ paymentGateways ]
@@ -165,27 +166,40 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 
 	const [ wcPayGateway, enabledGateways, additionalGateways ] = useMemo(
 		() =>
-			Array.from( paymentGateways.values() ).reduce(
-				( all, gateway ) => {
-					const [ wcPay, enabled, additional ] = all;
-
-					// WCPay is handled separately when not installed and configured
-					if (
-						gateway.plugins?.length === 1 &&
-						gateway.plugins[ 0 ] === 'woocommerce-payments' &&
-						! ( gateway.installed && ! gateway.needsSetup )
-					) {
-						wcPay.push( gateway );
-					} else if ( gateway.enabled ) {
-						enabled.push( gateway );
-					} else {
-						additional.push( gateway );
+			Array.from( paymentGateways.values() )
+				.sort( ( a, b ) => {
+					if ( a.hasPlugins === b.hasPlugins ) {
+						return comparePaymentGatewaysByPriority( a, b );
 					}
 
-					return all;
-				},
-				[ [], [], [] ]
-			),
+					// hasPlugins payment first
+					if ( a.hasPlugins ) {
+						return -1;
+					}
+
+					return 1;
+				} )
+				.reduce(
+					( all, gateway ) => {
+						const [ wcPay, enabled, additional ] = all;
+
+						// WCPay is handled separately when not installed and configured
+						if (
+							gateway.plugins?.length === 1 &&
+							gateway.plugins[ 0 ] === 'woocommerce-payments' &&
+							! ( gateway.installed && ! gateway.needsSetup )
+						) {
+							wcPay.push( gateway );
+						} else if ( gateway.enabled ) {
+							enabled.push( gateway );
+						} else {
+							additional.push( gateway );
+						}
+
+						return all;
+					},
+					[ [], [], [] ]
+				),
 		[ paymentGateways ]
 	);
 
