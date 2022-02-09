@@ -6,6 +6,8 @@
  * @version 2.5.0
  */
 
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+
 defined( 'ABSPATH' ) || exit;
 
 if ( class_exists( 'WC_Admin_Menus', false ) ) {
@@ -65,7 +67,14 @@ class WC_Admin_Menus {
 
 		add_submenu_page( 'edit.php?post_type=product', __( 'Attributes', 'woocommerce' ), __( 'Attributes', 'woocommerce' ), 'manage_product_terms', 'product_attributes', array( $this, 'attributes_page' ) );
 
-		add_submenu_page( 'woocommerce', __( 'Orders', 'woocommerce' ), __( 'Orders', 'woocommerce' ), 'edit_others_shop_orders', 'shop-orders', array( $this, 'orders_page') );
+		if ( wc_get_container()->get( CustomOrdersTableController::class )->should_load_custom_data_store() ) {
+			$menu_slug = 'shop-orders';
+			$function = array( $this, 'orders_page' );
+		} else {
+			$menu_slug = admin_url( 'edit.php?post_type=shop_order' );
+			$function = '';
+		}
+		add_submenu_page( 'woocommerce', __( 'Orders', 'woocommerce' ), __( 'Orders', 'woocommerce' ), 'edit_others_shop_orders', $menu_slug, $function );
 	}
 
 	/**
