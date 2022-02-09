@@ -5,7 +5,7 @@ const babelConfig = require( './babel.config' );
 const esLintConfig = require( './.eslintrc.js' );
 const allE2EConfig = require( './config' );
 const allE2EUtils = require( './utils' );
-const slackUtils = require( './src/slack' );
+const slackUtils = require( './build/slack' );
 /**
  * External dependencies
  */
