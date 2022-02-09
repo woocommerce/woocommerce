@@ -9,6 +9,8 @@ import {
 	useStoreAddToCart,
 } from '@woocommerce/base-context/hooks';
 import { decodeEntities } from '@wordpress/html-entities';
+import { CART_URL } from '@woocommerce/block-settings';
+import { getSetting } from '@woocommerce/settings';
 import {
 	useInnerBlockLayoutContext,
 	useProductDataContext,
@@ -101,6 +103,12 @@ const AddToCartButton = ( { product } ) => {
 			dispatchStoreEvent( 'cart-add-item', {
 				product,
 			} );
+			// redirect to cart if the setting to redirect to the cart page
+			// on cart add item is enabled
+			const { cartRedirectAfterAdd } = getSetting( 'productsSettings' );
+			if ( cartRedirectAfterAdd ) {
+				window.location.href = CART_URL;
+			}
 		};
 	}
 

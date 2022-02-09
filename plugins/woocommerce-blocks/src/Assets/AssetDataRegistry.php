@@ -89,6 +89,7 @@ class AssetDataRegistry {
 			'locale'             => $this->get_locale_data(),
 			'orderStatuses'      => $this->get_order_statuses(),
 			'placeholderImgSrc'  => wc_placeholder_img_src(),
+			'productsSettings'   => $this->get_products_settings(),
 			'siteTitle'          => get_bloginfo( 'name' ),
 			'storePages'         => $this->get_store_pages(),
 			'wcAssetUrl'         => plugins_url( 'assets/', WC_PLUGIN_FILE ),
@@ -149,6 +150,19 @@ class AssetDataRegistry {
 				'terms'     => wc_terms_and_conditions_page_id(),
 			]
 		);
+	}
+
+	/**
+	 * Get product related settings.
+	 *
+	 * Note: For the time being we are exposing only the settings that are used by blocks.
+	 *
+	 * @return array
+	 */
+	protected function get_products_settings() {
+		return [
+			'cartRedirectAfterAdd' => get_option( 'woocommerce_cart_redirect_after_add' ) === 'yes',
+		];
 	}
 
 	/**
