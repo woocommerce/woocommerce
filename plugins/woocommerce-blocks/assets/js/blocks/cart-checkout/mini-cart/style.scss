@@ -138,9 +138,6 @@ h2.wc-block-mini-cart__title {
 		gap: $gap;
 
 		.wc-block-mini-cart__footer-cart.wc-block-components-button {
-			background-color: transparent;
-			border: 1px solid $gray-900;
-			color: $gray-900;
 			display: none;
 			flex-grow: 1;
 			font-weight: 600;
@@ -151,7 +148,6 @@ h2.wc-block-mini-cart__title {
 		}
 
 		.wc-block-mini-cart__footer-checkout {
-			border: 1px solid $gray-900;
 			flex-grow: 1;
 			font-weight: 600;
 		}
