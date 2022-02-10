@@ -1,5 +1,8 @@
 <?php
 
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
+
 /**
  * Tests relating to WC_REST_Product_Reviews_V1_Controller.
  */
@@ -68,8 +71,8 @@ class WC_REST_Product_Attributes_V1_Controller_Tests extends WC_Unit_Test_Case {
 			)
 		);
 
-		self::$product_id = WC_Helper_Product::create_simple_product()->get_id();
-		self::$review_id  = WC_Helper_Product::create_product_review(
+		self::$product_id = ProductHelper::create_simple_product()->get_id();
+		self::$review_id  = ProductHelper::create_product_review(
 			self::$product_id,
 			'Supposed to be made from real unicorn horn but was actually cheap cardboard. OK for the price.'
 		);
@@ -78,7 +81,7 @@ class WC_REST_Product_Attributes_V1_Controller_Tests extends WC_Unit_Test_Case {
 	}
 
 	public function test_permissions_for_reading_product_reviews() {
-		$api_request = new WP_REST_Request( 'GET', '/wc/v2/products/' . self::$product_id . '/reviews/' );
+		$api_request = new WP_REST_Request( 'GET', '/wc/v1/products/' . self::$product_id . '/reviews/' );
 
 		wp_set_current_user( self::$customer_id );
 		$this->assertEquals(
@@ -97,7 +100,7 @@ class WC_REST_Product_Attributes_V1_Controller_Tests extends WC_Unit_Test_Case {
 	 * @testdox Ensure attempts to create product reviews are checked for user permissions.
 	 */
 	public function test_permissions_for_updating_product_reviews() {
-		$api_request = new WP_REST_Request( 'PUT', '/wc/v2/products/' . self::$product_id . '/reviews/' . self::$review_id );
+		$api_request = new WP_REST_Request( 'PUT', '/wc/v1/products/' . self::$product_id . '/reviews/' . self::$review_id );
 		$api_request->set_param( 'id', self::$review_id );
 		$api_request->set_body( '{ "review": "Modified automatically." }' );
 
@@ -115,7 +118,7 @@ class WC_REST_Product_Attributes_V1_Controller_Tests extends WC_Unit_Test_Case {
 		);
 
 		$nonexistent_product_id = self::$product_id * 10;
-		$api_request->set_route( "/wc/v2/products/{$nonexistent_product_id}/reviews/" . self::$review_id );
+		$api_request->set_route( "/wc/v1/products/{$nonexistent_product_id}/reviews/" . self::$review_id );
 		$this->assertEquals(
 			'woocommerce_rest_product_invalid_id',
 			self::$sut->update_item( $api_request )->get_error_code(),
@@ -127,7 +130,7 @@ class WC_REST_Product_Attributes_V1_Controller_Tests extends WC_Unit_Test_Case {
 	 * @testdox Ensure attempts to delete product reviews are checked for user permissions.
 	 */
 	public function test_permissions_for_deleting_product_reviews() {
-		$request = new WP_REST_Request( 'DELETE', '/wc/v2/products/123456789/reviews/' . self::$review_id );
+		$request = new WP_REST_Request( 'DELETE', '/wc/v1/products/123456789/reviews/' . self::$review_id );
 		$request->set_param( 'id', self::$review_id );
 
 		wp_set_current_user( self::$editor_id );
@@ -143,10 +146,10 @@ class WC_REST_Product_Attributes_V1_Controller_Tests extends WC_Unit_Test_Case {
 			'A user (such as a shop manager) who has the edit_comment permission can delete a product review.'
 		);
 
-		$order         = WC_Helper_Order::create_order();
+		$order         = OrderHelper::create_order();
 		$order_note_id = $order->add_order_note( 'Dispatched with all due haste.' );
 
-		$request = new WP_REST_Request( 'DELETE', '/wc/v2/products/123456789/reviews/' . $order_note_id );
+		$request = new WP_REST_Request( 'DELETE', '/wc/v1/products/123456789/reviews/' . $order_note_id );
 		$request->set_param( 'id', $order_note_id );
 
 		$this->assertEquals(
@@ -154,6 +157,22 @@ class WC_REST_Product_Attributes_V1_Controller_Tests extends WC_Unit_Test_Case {
 			self::$sut->delete_item_permissions_check( $request )->get_error_code(),
 			'Comments that are not product reviews cannot be deleted via this endpoint.'
 		);
+
+		$comment_id = wp_insert_comment(
+			array(
+				'comment_post_ID' => self::$product_id,
+				'comment_type'    => 'comment',
+				'comment_content' => 'I am a regular comment (typically left by an admin/shop manager as a response to product reviews.'
+			)
+		);
+
+		$request = new WP_REST_Request( 'DELETE', '/wc/v1/products/123456789/reviews/' . $comment_id );
+		$request->set_param( 'id', $comment_id );
+
+		$this->assertEquals(
+			'woocommerce_rest_cannot_delete',
+			self::$sut->delete_item_permissions_check( $request )->get_error_code(),
+			'Comments that are not product reviews (including other types of comments belonging to prodcuts) cannot be deleted via this endpoint.'
+		);
 	}
 }
-
