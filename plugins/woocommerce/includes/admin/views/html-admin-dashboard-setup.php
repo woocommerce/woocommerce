@@ -9,13 +9,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 ?>
-<div class="dashboard-widget-finish-setup">
+<div class="dashboard-widget-finish-setup" data-current-step="<?php echo esc_html( $step_number - 1 ); ?>" data-total-steps="<?php echo esc_html( $tasks_count ); ?>">
 	<span class='progress-wrapper'>
 		<svg class="circle-progress" width="17" height="17" version="1.1" xmlns="http://www.w3.org/2000/svg">
 		  <circle r="6.5" cx="10" cy="10" fill="transparent" stroke-dasharray="40.859" stroke-dashoffset="0"></circle>
 		  <circle class="bar" r="6.5" cx="190" cy="10" fill="transparent" stroke-dasharray="40.859" stroke-dashoffset="<?php echo esc_attr( $circle_dashoffset ); ?>" transform='rotate(-90 100 100)'></circle>
 		</svg>
-		<span><?php echo esc_html_e( 'Step', 'woocommerce' ); ?> <span id="dashboard-widget-finish-setup__current-step"><?php echo esc_html( $step_number ); ?></span> <?php echo esc_html_e( 'of', 'woocommerce' ); ?> <span id="dashboard-widget-finish-setup__total-steps"><?php echo esc_html( $tasks_count ); ?></span></span>
+		<span><?php echo esc_html_e( 'Step', 'woocommerce' ); ?> <?php echo esc_html( $step_number ); ?> <?php echo esc_html_e( 'of', 'woocommerce' ); ?> <?php echo esc_html( $tasks_count ); ?></span>
 	</span>
 
 	<div class="description">
@@ -31,8 +31,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 <script type="text/javascript">
 	/*global jQuery */
 	(function( $ ) {
-		const currentStep = parseInt( $( '#dashboard-widget-finish-setup__current-step' ).text() ) - 1;
-		const totalSteps = parseInt( $( '#dashboard-widget-finish-setup__total-steps' ).text() );
+		const widget = $( '.dashboard-widget-finish-setup' );
+		const currentStep = widget.data( 'current-step' );
+		const totalSteps = widget.data( 'total-steps' );
+		console.log(currentStep);
+		console.log(totalSteps);
 
 		$( document ).on( 'ready', function() {
 			window.wcTracks.recordEvent( 'wcadmin_setup_widget_view', {
