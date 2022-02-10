@@ -373,19 +373,18 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		);
 
 		if ( '' === $count ) {
-			global $wpdb;
-
-			$count = $wpdb->get_var(
-				// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
-				"SELECT COUNT(*)
-				FROM $wpdb->posts as posts
-				LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
-				WHERE   meta.meta_key = '_customer_user'
-				AND     posts.post_type = 'shop_order'
-				AND     posts.post_status IN ( '" . implode( "','", array_map( 'esc_sql', array_keys( wc_get_order_statuses() ) ) ) . "' )
-				AND     meta_value = '" . esc_sql( $customer->get_id() ) . "'"
-				// phpcs:enable
+			$orders_query = new WC_Order_Query(
+				array(
+					'type'        => 'shop_order',
+					'customer_id' => $customer->get_id(),
+					'status'      => array_keys( wc_get_order_statuses() ),
+					'limit'       => 1,
+					'return'      => 'ids',
+					'paginate'    => true,
+				)
 			);
+			$count        = $orders_query->found_posts;
+
 			update_user_meta( $customer->get_id(), '_order_count', $count );
 		}
 
