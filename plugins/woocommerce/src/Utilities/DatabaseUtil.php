@@ -58,6 +58,7 @@ class DatabaseUtil {
 	 *
 	 * @param string $table_name The name of the table to drop.
 	 * @param bool   $add_prefix True if the table name passed needs to be prefixed with $wpdb->prefix before processing.
+	 * @return bool True on success, false on error.
 	 */
 	public function drop_database_table( string $table_name, bool $add_prefix = false ) {
 		global $wpdb;
@@ -67,6 +68,6 @@ class DatabaseUtil {
 		}
 
 		//phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$wpdb->query( "DROP TABLE IF EXISTS {$table_name}" );
+		return $wpdb->query( "DROP TABLE IF EXISTS `{$table_name}`" );
 	}
 }

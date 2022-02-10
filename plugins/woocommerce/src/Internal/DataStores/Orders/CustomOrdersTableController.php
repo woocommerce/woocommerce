@@ -35,7 +35,7 @@ class CustomOrdersTableController {
 	 *
 	 * @var DataSynchronizer
 	 */
-	public $data_synchronizer;
+	private $data_synchronizer;
 
 	/**
 	 * Is the feature visible?
@@ -261,6 +261,12 @@ class CustomOrdersTableController {
 		$title_item = array(
 			'title' => __( 'Custom orders tables', 'woocommerce' ),
 			'type'  => 'title',
+			'desc'  => sprintf(
+				/* translators: %1$s = <strong> tag, %2$s = </strong> tag. */
+				__( '%1$sWARNING:%2$s This feature is currently under development and may cause database instability. For contributors only.', 'woocommerce' ),
+				'<strong>',
+				'</strong>'
+			),
 		);
 
 		if ( $this->data_synchronizer->check_orders_table_exists() ) {
@@ -276,7 +282,7 @@ class CustomOrdersTableController {
 			);
 		} else {
 			$title_item['desc'] = sprintf(
-				/* translators: %1$ = <em> tag, %2$ = </em> tag. */
+				/* translators: %1$s = <em> tag, %2$s = </em> tag. */
 				__( 'Create the tables first by going to %1$sWooCommerce > Status > Tools%2$s and running %1$sCreate the custom orders tables%2$s.', 'woocommerce' ),
 				'<em>',
 				'</em>'
