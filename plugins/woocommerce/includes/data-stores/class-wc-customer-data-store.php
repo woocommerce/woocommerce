@@ -337,13 +337,14 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		if ( '' === $last_order ) {
 			$result     = wc_get_orders(
 				array(
-					'type'        => 'shop_order',
-					'customer_id' => $customer->get_id(),
-					'status'      => array_keys( wc_get_order_statuses() ),
-					'limit'       => 1,
-					'orderby'     => 'ID',
-					'order'       => 'DESC',
-					'return'      => 'ids',
+					'type'          => 'shop_order',
+					'customer_id'   => $customer->get_id(),
+					'status'        => array_keys( wc_get_order_statuses() ),
+					'limit'         => 1,
+					'orderby'       => 'ID',
+					'order'         => 'DESC',
+					'return'        => 'ids',
+					'no_found_rows' => true,
 				)
 			);
 			$last_order = $result ? $result[0] : '';
