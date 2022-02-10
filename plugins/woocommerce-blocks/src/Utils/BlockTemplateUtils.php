@@ -40,6 +40,16 @@ class BlockTemplateUtils {
 	const PLUGIN_SLUG = 'woocommerce/woocommerce';
 
 	/**
+	 * Deprecated WooCommerce plugin slug
+	 *
+	 * For supporting users who have customized templates under the incorrect plugin slug during the first release.
+	 * More context found here: https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/5423.
+	 *
+	 * @var string
+	 */
+	const DEPRECATED_PLUGIN_SLUG = 'woocommerce';
+
+	/**
 	 * Returns an array containing the references of
 	 * the passed blocks and their inner blocks.
 	 *
@@ -153,7 +163,7 @@ class BlockTemplateUtils {
 		// We are checking 'woocommerce' to maintain legacy templates which are saved to the DB,
 		// prior to updating to use the correct slug.
 		// More information found here: https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/5423.
-		if ( self::PLUGIN_SLUG === $theme || 'woocommerce' === strtolower( $theme ) ) {
+		if ( self::PLUGIN_SLUG === $theme || self::DEPRECATED_PLUGIN_SLUG === strtolower( $theme ) ) {
 			$template->origin = 'plugin';
 		}
 
@@ -163,12 +173,12 @@ class BlockTemplateUtils {
 	/**
 	 * Build a unified template object based on a theme file.
 	 *
-	 * @param array $template_file Theme file.
-	 * @param array $template_type wp_template or wp_template_part.
+	 * @param array|object $template_file Theme file.
+	 * @param string       $template_type wp_template or wp_template_part.
 	 *
 	 * @return \WP_Block_Template Template.
 	 */
-	public static function gutenberg_build_template_result_from_file( $template_file, $template_type ) {
+	public static function build_template_result_from_file( $template_file, $template_type ) {
 		$template_file = (object) $template_file;
 
 		// If the theme has an archive-products.html template but does not have product taxonomy templates
