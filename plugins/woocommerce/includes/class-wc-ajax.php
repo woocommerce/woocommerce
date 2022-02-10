@@ -3086,16 +3086,20 @@ class WC_AJAX {
 					continue;
 				}
 				$enabled = $gateway->get_option( 'enabled', 'no' );
-				$gateway->add_admin_options_tracking();
+				$option = array(
+					'id' => $gateway->get_option_key()
+				);
 
 				if ( ! wc_string_to_bool( $enabled ) ) {
 					if ( $gateway->needs_setup() ) {
 						wp_send_json_error( 'needs_setup' );
 						wp_die();
 					} else {
+						do_action( 'woocommerce_update_option', $option );
 						$gateway->update_option( 'enabled', 'yes' );
 					}
 				} else {
+					do_action( 'woocommerce_update_option', $option );
 					// Disable the gateway.
 					$gateway->update_option( 'enabled', 'no' );
 				}
