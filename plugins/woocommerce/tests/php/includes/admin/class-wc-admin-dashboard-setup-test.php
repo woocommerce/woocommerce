@@ -130,6 +130,16 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests widget does not display when task list is unavailable.
+	 */
+	public function test_widget_does_not_display_when_no_task_list() {
+		$widget = $this->get_widget();
+		$widget->set_task_list( null );
+
+		$this->assertFalse( $widget->should_display_widget() );
+	}
+
+	/**
 	 * Tests the widget output when 1 task has been completed.
 	 */
 	public function test_initial_widget_output() {

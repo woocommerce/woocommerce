@@ -7,6 +7,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -168,10 +169,23 @@ if ( ! class_exists( 'WC_Admin_Dashboard_Setup', false ) ) :
 		 * @return bool
 		 */
 		public function should_display_widget() {
-			return current_user_can( 'manage_woocommerce' ) &&
-				WC()->is_wc_admin_active() &&
-				! $this->get_task_list()->is_complete() &&
-				! $this->get_task_list()->is_hidden();
+			if ( ! class_exists( 'Automattic\WooCommerce\Admin\Features\Features' ) || ! class_exists( 'Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists' ) ) {
+				return false;
+			}
+
+			if ( ! Features::is_enabled( 'onboarding' ) || ! WC()->is_wc_admin_active() ) {
+				return false;
+			}
+
+			if ( ! current_user_can( 'manage_woocommerce' ) ) {
+				return false;
+			}
+
+			if ( ! $this->get_task_list() || $this->get_task_list()->is_complete() || $this->get_task_list()->is_hidden() ) {
+				return false;
+			}
+
+			return true;
 		}
 
 	}
