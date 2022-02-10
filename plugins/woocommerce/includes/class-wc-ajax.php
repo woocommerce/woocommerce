@@ -3075,10 +3075,13 @@ class WC_AJAX {
 	 */
 	public static function toggle_gateway_enabled() {
 		if ( current_user_can( 'manage_woocommerce' ) && check_ajax_referer( 'woocommerce-toggle-payment-gateway-enabled', 'security' ) && isset( $_POST['gateway_id'] ) ) {
-			global $current_tab;
-
 			// Set current tab.
-			$current_tab = 'checkout';
+			$referer = wp_get_referer();
+			if ( $referer ) {
+				global $current_tab;
+				parse_str( wp_parse_url( $referer, PHP_URL_QUERY ), $queries );
+				$current_tab = $queries['tab'] ?? '';
+			}
 
 			// Load gateways.
 			$payment_gateways = WC()->payment_gateways->payment_gateways();
