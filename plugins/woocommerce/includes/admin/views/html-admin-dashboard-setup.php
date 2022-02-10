@@ -34,8 +34,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 		const widget = $( '.dashboard-widget-finish-setup' );
 		const currentStep = widget.data( 'current-step' );
 		const totalSteps = widget.data( 'total-steps' );
-		console.log(currentStep);
-		console.log(totalSteps);
 
 		$( document ).on( 'ready', function() {
 			window.wcTracks.recordEvent( 'wcadmin_setup_widget_view', {
