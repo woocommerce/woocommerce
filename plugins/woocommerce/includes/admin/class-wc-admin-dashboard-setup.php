@@ -22,6 +22,11 @@ if ( ! class_exists( 'WC_Admin_Dashboard_Setup', false ) ) :
 	class WC_Admin_Dashboard_Setup {
 
 		/**
+		 * Check for task list initialization.
+		 */
+		private $initalized = false;
+
+		/**
 		 * The task list.
 		 */
 		private $task_list = null;
@@ -103,11 +108,12 @@ if ( ! class_exists( 'WC_Admin_Dashboard_Setup', false ) ) :
 		 * @return array
 		 */
 		public function get_task_list() {
-			if ( $this->task_list ) {
+			if ( $this->task_list || $this->initalized ) {
 				return $this->task_list;
 			}
 
 			$this->set_task_list( TaskLists::get_list( 'setup' ) );
+			$this->initalized = true;
 			return $this->task_list;
 		}
 
