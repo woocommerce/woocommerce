@@ -107,8 +107,6 @@ class MiniCart extends AbstractBlock {
 
 		// Hydrate the following data depending on admin or frontend context.
 		if ( ! is_admin() && ! WC()->is_rest_api_request() ) {
-			$this->hydrate_from_api();
-
 			$label_info = $this->get_tax_label();
 
 			$this->tax_label                         = $label_info['tax_label'];
@@ -207,13 +205,6 @@ class MiniCart extends AbstractBlock {
 		 * Fires after cart block data is registered.
 		 */
 		do_action( 'woocommerce_blocks_cart_enqueue_data' );
-	}
-
-	/**
-	 * Hydrate the cart block with data from the API.
-	 */
-	protected function hydrate_from_api() {
-		$this->asset_data_registry->hydrate_api_request( '/wc/store/cart' );
 	}
 
 	/**

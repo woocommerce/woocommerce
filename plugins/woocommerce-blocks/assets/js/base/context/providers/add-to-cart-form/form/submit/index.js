@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 import triggerFetch from '@wordpress/api-fetch';
 import { useEffect, useCallback, useState } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
+import { triggerAddedToCartEvent } from '@woocommerce/base-utils';
 
 /**
  * Internal dependencies
@@ -107,6 +108,7 @@ const FormSubmit = () => {
 					} else {
 						receiveCart( response );
 					}
+					triggerAddedToCartEvent( { preserveCartData: true } );
 					dispatchActions.setAfterProcessing( response );
 					setIsSubmitting( false );
 				} );

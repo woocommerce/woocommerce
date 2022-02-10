@@ -39,11 +39,12 @@ class SingleProduct extends AbstractBlock {
 	}
 
 	/**
-	 * Hydrate the cart block with data from the API.
+	 * Hydrate the Single Product block with data from the API.
 	 *
 	 * @param int $product_id ID of the product.
 	 */
 	protected function hydrate_from_api( int $product_id ) {
 		$this->asset_data_registry->hydrate_api_request( "/wc/store/products/$product_id" );
+		$this->asset_data_registry->hydrate_api_request( '/wc/store/cart' );
 	}
 }
