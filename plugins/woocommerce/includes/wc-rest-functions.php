@@ -343,15 +343,15 @@ function wc_rest_check_product_reviews_permissions( $context = 'read', $object_i
 	$contexts   = array(
 		'read'   => 'moderate_comments',
 		'create' => 'edit_products',
-		'edit'   => 'edit_comment',
-		'delete' => 'edit_comment',
+		'edit'   => 'edit_products',
+		'delete' => 'edit_products',
 		'batch'  => 'edit_products',
 	);
 
 	if ( $object_id > 0 ) {
 		$object = get_comment( $object_id );
 
-		if ( ! is_a( $object, 'WP_Comment' ) || $object->comment_type !== 'review' ) {
+		if ( ! is_a( $object, 'WP_Comment' ) || get_comment_type( $object ) !== 'review' ) {
 			return false;
 		}
 	}
