@@ -220,13 +220,6 @@ abstract class WC_Settings_API {
 	}
 
 	/**
-	 * Add tracking to Payment settings.
-	 */
-	public function add_admin_options_tracking() {
-		do_action( 'woocommerce_update_options_payment_gateways', array( 'id' => $this->get_option_key() ) );
-	}
-
-	/**
 	 * Add an error message for display in admin on save.
 	 *
 	 * @param string $error Error message.
