@@ -27,7 +27,7 @@ import {
 import { useCheckoutContext } from '../checkout-state';
 import { useCustomerDataContext } from '../customer';
 import { useStoreCart } from '../../../hooks/cart/use-store-cart';
-import { useSelectShippingRates } from '../../../hooks/shipping/use-select-shipping-rates';
+import { useSelectShippingRate } from '../../../hooks/shipping/use-select-shipping-rate';
 
 /**
  * @typedef {import('@woocommerce/type-defs/contexts').ShippingDataContext} ShippingDataContext
@@ -60,7 +60,7 @@ export const ShippingDataProvider = ( { children } ) => {
 		shippingRatesLoading,
 		cartErrors,
 	} = useStoreCart();
-	const { selectShippingRate, isSelectingRate } = useSelectShippingRates();
+	const { selectShippingRate, isSelectingRate } = useSelectShippingRate();
 	const [ shippingErrorStatus, dispatchErrorStatus ] = useReducer(
 		errorStatusReducer,
 		NONE

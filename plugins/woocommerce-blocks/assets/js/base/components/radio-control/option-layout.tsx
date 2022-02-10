@@ -1,8 +1,7 @@
 /**
- * External dependencies
+ * Internal dependencies
  */
-import type { ReactElement } from 'react';
-import type { PackageRateOption } from '@woocommerce/type-defs/shipping';
+import type { RadioControlOptionLayout } from './types';
 
 const OptionLayout = ( {
 	label,
@@ -10,7 +9,7 @@ const OptionLayout = ( {
 	description,
 	secondaryDescription,
 	id,
-}: Partial< PackageRateOption > ): ReactElement => {
+}: RadioControlOptionLayout ): JSX.Element => {
 	return (
 		<div className="wc-block-components-radio-control__option-layout">
 			<div className="wc-block-components-radio-control__label-group">
