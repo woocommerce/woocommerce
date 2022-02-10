@@ -3091,7 +3091,7 @@ class WC_AJAX {
 					continue;
 				}
 				$enabled = $gateway->get_option( 'enabled', 'no' );
-				$option = array(
+				$option  = array(
 					'id' => $gateway->get_option_key()
 				);
 
