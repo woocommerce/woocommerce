@@ -335,20 +335,19 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		);
 
 		if ( '' === $last_order ) {
-			global $wpdb;
-
-			$last_order = $wpdb->get_var(
-				// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
-				"SELECT posts.ID
-				FROM $wpdb->posts AS posts
-				LEFT JOIN {$wpdb->postmeta} AS meta on posts.ID = meta.post_id
-				WHERE meta.meta_key = '_customer_user'
-				AND   meta.meta_value = '" . esc_sql( $customer->get_id() ) . "'
-				AND   posts.post_type = 'shop_order'
-				AND   posts.post_status IN ( '" . implode( "','", array_map( 'esc_sql', array_keys( wc_get_order_statuses() ) ) ) . "' )
-				ORDER BY posts.ID DESC"
-				// phpcs:enable
+			$result     = wc_get_orders(
+				array(
+					'type'        => 'shop_order',
+					'customer_id' => $customer->get_id(),
+					'status'      => array_keys( wc_get_order_statuses() ),
+					'limit'       => 1,
+					'orderby'     => 'ID',
+					'order'       => 'DESC',
+					'return'      => 'ids',
+				)
 			);
+			$last_order = $result ? $result[0] : '';
+
 			update_user_meta( $customer->get_id(), '_last_order', $last_order );
 		}
 
