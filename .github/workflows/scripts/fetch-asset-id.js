@@ -9,7 +9,7 @@ const options = {
 	path: `/repos/${process.env.REPO}/releases/${process.env.RELEASE_ID}/assets`,
 	method: 'GET',
 	headers: {
-		'Content-Type': 'applicatipon/json',
+		'Content-Type': 'application/json',
 		'Authorization': `Bearer ${ process.env.GITHUB_TOKEN }`,
 		'User-Agent': 'WooCommerce Smoke Build'
 	},
