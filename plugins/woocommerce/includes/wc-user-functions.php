@@ -683,18 +683,7 @@ function wc_get_customer_order_count( $user_id ) {
  * @param int $user_id User ID.
  */
 function wc_reset_order_customer_id_on_deleted_user( $user_id ) {
-	global $wpdb;
-
-	$wpdb->update(
-		$wpdb->postmeta,
-		array(
-			'meta_value' => 0,
-		),
-		array(
-			'meta_key'   => '_customer_user',
-			'meta_value' => $user_id,
-		)
-	); // WPCS: slow query ok.
+	WC_Data_Store::load( 'order' )->remove_customer_id_from_orders( $user_id );
 }
 
 add_action( 'deleted_user', 'wc_reset_order_customer_id_on_deleted_user' );

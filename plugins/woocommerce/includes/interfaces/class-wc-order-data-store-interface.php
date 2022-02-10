@@ -80,6 +80,13 @@ interface WC_Order_Data_Store_Interface {
 	public function get_unpaid_orders( $date );
 
 	/**
+	 * Reset association to orders when a user is deleted.
+	 *
+	 * @param int $customer_id Customer ID that was deleted.
+	 */
+	public function remove_customer_id_from_orders( $customer_id );
+
+	/**
 	 * Search order data for a term and return ids.
 	 *
 	 * @param  string $term Term name.

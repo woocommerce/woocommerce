@@ -541,6 +541,26 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	}
 
 	/**
+	 * Reset association to orders when a user is deleted.
+	 *
+	 * @param int $customer_id Customer ID that was deleted.
+	 */
+	public function remove_customer_id_from_orders( $customer_id ) {
+		global $wpdb;
+
+		$wpdb->update(
+			$wpdb->postmeta,
+			array(
+				'meta_value' => 0,
+			),
+			array(
+				'meta_key'   => '_customer_user',
+				'meta_value' => $customer_id,
+			)
+		); // WPCS: slow query ok.
+	}
+
+	/**
 	 * Search order data for a term and return ids.
 	 *
 	 * @param  string $term Searched term.
