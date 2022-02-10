@@ -64,7 +64,6 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 		);
 
 		// Actions.
-		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'add_admin_options_tracking' ) );
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'save_account_details' ) );
 		add_action( 'woocommerce_thankyou_bacs', array( $this, 'thankyou_page' ) );

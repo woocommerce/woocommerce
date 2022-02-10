@@ -41,7 +41,6 @@ class WC_Gateway_Cheque extends WC_Payment_Gateway {
 		$this->instructions = $this->get_option( 'instructions' );
 
 		// Actions.
-		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'add_admin_options_tracking' ) );
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 		add_action( 'woocommerce_thankyou_cheque', array( $this, 'thankyou_page' ) );
 
