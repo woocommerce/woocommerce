@@ -37,8 +37,7 @@ class BlockTemplatesController {
 	public function __construct() {
 		// This feature is gated for WooCommerce versions 6.0.0 and above.
 		if ( defined( 'WC_VERSION' ) && version_compare( WC_VERSION, '6.0.0', '>=' ) ) {
-			$root_path = plugin_dir_path( __DIR__ ) . self::TEMPLATES_ROOT_DIR . DIRECTORY_SEPARATOR;
-
+			$root_path                      = plugin_dir_path( __DIR__ ) . self::TEMPLATES_ROOT_DIR . DIRECTORY_SEPARATOR;
 			$this->templates_directory      = $root_path . BlockTemplateUtils::DIRECTORY_NAMES['TEMPLATES'];
 			$this->template_parts_directory = $root_path . BlockTemplateUtils::DIRECTORY_NAMES['TEMPLATE_PARTS'];
 			$this->init();
@@ -50,108 +49,72 @@ class BlockTemplatesController {
 	 */
 	protected function init() {
 		add_action( 'template_redirect', array( $this, 'render_block_template' ) );
-		add_filter( 'pre_get_block_file_template', array( $this, 'maybe_return_blocks_template' ), 10, 3 );
+		add_filter( 'pre_get_block_file_template', array( $this, 'get_block_file_template' ), 10, 3 );
 		add_filter( 'get_block_templates', array( $this, 'add_block_templates' ), 10, 3 );
 	}
 
 	/**
-	 * This function checks if there's a blocks template (ultimately it resolves either a saved blocks template from the
-	 * database or a template file in `woo-gutenberg-products-block/templates/templates/`)
+	 * This function checks if there's a block template file in `woo-gutenberg-products-block/templates/templates/`
 	 * to return to pre_get_posts short-circuiting the query in Gutenberg.
 	 *
 	 * @param \WP_Block_Template|null $template Return a block template object to short-circuit the default query,
 	 *                                               or null to allow WP to run its normal queries.
 	 * @param string                  $id Template unique identifier (example: theme_slug//template_slug).
-	 * @param array                   $template_type wp_template or wp_template_part.
+	 * @param string                  $template_type wp_template or wp_template_part.
 	 *
 	 * @return mixed|\WP_Block_Template|\WP_Error
 	 */
-	public function maybe_return_blocks_template( $template, $id, $template_type ) {
-		// 'get_block_template' was introduced in WP 5.9. We need to support
-		// 'gutenberg_get_block_template' for previous versions of WP with
-		// Gutenberg enabled.
-		if (
-			! function_exists( 'gutenberg_get_block_template' ) &&
-			! function_exists( 'get_block_template' )
-		) {
-			return $template;
-		}
+	public function get_block_file_template( $template, $id, $template_type ) {
 		$template_name_parts = explode( '//', $id );
+
 		if ( count( $template_name_parts ) < 2 ) {
 			return $template;
 		}
-		list( , $slug ) = $template_name_parts;
 
-		// Remove the filter at this point because if we don't then this function will infinite loop.
-		remove_filter( 'pre_get_block_file_template', array( $this, 'maybe_return_blocks_template' ), 10, 3 );
+		list( $template_id, $template_slug ) = $template_name_parts;
 
-		// Check if the theme has a saved version of this template before falling back to the woo one. Please note how
-		// the slug has not been modified at this point, we're still using the default one passed to this hook.
-		$maybe_template = function_exists( 'gutenberg_get_block_template' ) ?
-			gutenberg_get_block_template( $id, $template_type ) :
-			get_block_template( $id, $template_type );
-
-		if ( null !== $maybe_template ) {
-			add_filter( 'pre_get_block_file_template', array( $this, 'maybe_return_blocks_template' ), 10, 3 );
-			return $maybe_template;
+		// If the theme has an archive-product.html template, but not a taxonomy-product_cat/tag.html template let's use the themes archive-product.html template.
+		if ( BlockTemplateUtils::template_is_eligible_for_product_archive_fallback( $template_slug ) ) {
+			$template_path   = BlockTemplateUtils::get_theme_template_path( 'archive-product' );
+			$template_object = BlockTemplateUtils::create_new_block_template_object( $template_path, $template_type, $template_slug, true );
+			return BlockTemplateUtils::build_template_result_from_file( $template_object, $template_type );
 		}
 
-		// Theme-based template didn't exist, try switching the theme to woocommerce and try again. This function has
-		// been unhooked so won't run again.
-		add_filter( 'get_block_file_template', array( $this, 'get_single_block_template' ), 10, 3 );
-		$maybe_template = function_exists( 'gutenberg_get_block_template' ) ?
-			gutenberg_get_block_template( BlockTemplateUtils::PLUGIN_SLUG . '//' . $slug, $template_type ) :
-			get_block_template( BlockTemplateUtils::PLUGIN_SLUG . '//' . $slug, $template_type );
+		// This is a real edge-case, we are supporting users who have saved templates under the deprecated slug. See its definition for more information.
+		// You can likely ignore this code unless you're supporting/debugging early customised templates.
+		if ( BlockTemplateUtils::DEPRECATED_PLUGIN_SLUG === strtolower( $template_id ) ) {
+			// Because we are using get_block_templates we have to unhook this method to prevent a recursive loop where this filter is applied.
+			remove_filter( 'pre_get_block_file_template', array( $this, 'get_block_file_template' ), 10, 3 );
+			$template_with_deprecated_id = BlockTemplateUtils::get_block_template( $id, $template_type );
+			// Let's hook this method back now that we have used the function.
+			add_filter( 'pre_get_block_file_template', array( $this, 'get_block_file_template' ), 10, 3 );
 
-		// Re-hook this function, it was only unhooked to stop recursion.
-		add_filter( 'pre_get_block_file_template', array( $this, 'maybe_return_blocks_template' ), 10, 3 );
-		remove_filter( 'get_block_file_template', array( $this, 'get_single_block_template' ), 10, 3 );
-		if ( null !== $maybe_template ) {
-			return $maybe_template;
+			if ( null !== $template_with_deprecated_id ) {
+				return $template_with_deprecated_id;
+			}
 		}
 
-		// At this point we haven't had any luck finding a template. Give up and let Gutenberg take control again.
+		// If we are not dealing with a WooCommerce template let's return early and let it continue through the process.
+		if ( BlockTemplateUtils::PLUGIN_SLUG !== $template_id ) {
+			return $template;
+		}
+
+		// If we don't have a template let Gutenberg do its thing.
+		if ( ! $this->block_template_is_available( $template_slug, $template_type ) ) {
+			return $template;
+		}
+
+		$directory          = $this->get_templates_directory( $template_type );
+		$template_file_path = $directory . '/' . $template_slug . '.html';
+		$template_object    = BlockTemplateUtils::create_new_block_template_object( $template_file_path, $template_type, $template_slug );
+		$template_built     = BlockTemplateUtils::build_template_result_from_file( $template_object, $template_type );
+
+		if ( null !== $template_built ) {
+			return $template_built;
+		}
+
+		// Hand back over to Gutenberg if we can't find a template.
 		return $template;
-	}
-
-	/**
-	 * Runs on the get_block_template hook. If a template is already found and passed to this function, then return it
-	 * and don't run.
-	 * If a template is *not* passed, try to look for one that matches the ID in the database, if that's not found defer
-	 * to Blocks templates files. Priority goes: DB-Theme, DB-Blocks, Filesystem-Theme, Filesystem-Blocks.
-	 *
-	 * @param \WP_Block_Template $template The found block template.
-	 * @param string             $id Template unique identifier (example: theme_slug//template_slug).
-	 * @param array              $template_type wp_template or wp_template_part.
-	 *
-	 * @return mixed|null
-	 */
-	public function get_single_block_template( $template, $id, $template_type ) {
-
-		// The template was already found before the filter runs, just return it immediately.
-		if ( null !== $template ) {
-			return $template;
-		}
-
-		$template_name_parts = explode( '//', $id );
-		if ( count( $template_name_parts ) < 2 ) {
-			return $template;
-		}
-		list( , $slug ) = $template_name_parts;
-
-		// If this blocks template doesn't exist then we should just skip the function and let Gutenberg handle it.
-		if ( ! $this->block_template_is_available( $slug, $template_type ) ) {
-			return $template;
-		}
-
-		$available_templates = $this->get_block_templates_from_woocommerce(
-			array( $slug ),
-			$this->get_block_templates_from_db( array( $slug ), $template_type ),
-			$template_type
-		);
-		return ( is_array( $available_templates ) && count( $available_templates ) > 0 )
-			? BlockTemplateUtils::gutenberg_build_template_result_from_file( $available_templates[0], $available_templates[0]->type )
-			: $template;
 	}
 
 	/**
@@ -194,7 +157,7 @@ class BlockTemplatesController {
 			// It would be custom if the template was modified in the editor, so if it's not custom we can load it from
 			// the filesystem.
 			if ( 'custom' !== $template_file->source ) {
-				$template = BlockTemplateUtils::gutenberg_build_template_result_from_file( $template_file, $template_type );
+				$template = BlockTemplateUtils::build_template_result_from_file( $template_file, $template_type );
 			} else {
 				$template_file->title = BlockTemplateUtils::convert_slug_to_title( $template_file->slug );
 				$query_result[]       = $template_file;
@@ -269,11 +232,6 @@ class BlockTemplatesController {
 	 * @return int[]|\WP_Post[] An array of found templates.
 	 */
 	public function get_block_templates_from_db( $slugs = array(), $template_type = 'wp_template' ) {
-		// This was the previously incorrect slug used to save DB templates against.
-		// To maintain compatibility with users sites who have already customised WooCommerce block templates using this slug we have to still use it to query those.
-		// More context found here: https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/5423.
-		$invalid_plugin_slug = 'woocommerce';
-
 		$check_query_args = array(
 			'post_type'      => $template_type,
 			'posts_per_page' => -1,
@@ -282,7 +240,7 @@ class BlockTemplatesController {
 				array(
 					'taxonomy' => 'wp_theme',
 					'field'    => 'name',
-					'terms'    => array( $invalid_plugin_slug, BlockTemplateUtils::PLUGIN_SLUG, get_stylesheet() ),
+					'terms'    => array( BlockTemplateUtils::DEPRECATED_PLUGIN_SLUG, BlockTemplateUtils::PLUGIN_SLUG, get_stylesheet() ),
 				),
 			),
 		);
