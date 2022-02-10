@@ -32,7 +32,6 @@ class WC_Settings_Tracking {
 	public function init() {
 		add_action( 'woocommerce_settings_page_init', array( $this, 'track_settings_page_view' ) );
 		add_action( 'woocommerce_update_option', array( $this, 'add_option_to_list' ) );
-		add_action( 'woocommerce_update_options_payment_gateways', array( $this, 'add_option_to_list' ) );
 		add_action( 'woocommerce_update_options', array( $this, 'send_settings_change_event' ) );
 	}
 
