@@ -23,7 +23,11 @@ echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
 /* translators: %s: Customer first name */
 echo sprintf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $order->get_billing_first_name() ) ) . "\n\n";
-echo esc_html__( 'Thanks for your order. It’s on-hold until we confirm that payment has been received. In the meantime, here’s a reminder of what you ordered:', 'woocommerce' ) . "\n\n";
+echo esc_html__( 'Thanks for your order. It’s on-hold until we confirm that payment has been received.', 'woocommerce' ) . "\n\n";
+
+do_action( 'woocommerce_email_payment_instructions', $order, $sent_to_admin, $plain_text, $email );
+
+echo esc_html__( 'In the meantime, here’s a reminder of what you ordered:', 'woocommerce' ) . "\n\n";
 
 /*
  * @hooked WC_Emails::order_details() Shows the order details table.
