@@ -20,6 +20,14 @@ function getQuery() {
  */
 export class DeprecatedTasks {
 	constructor() {
+		/**
+		 * **Deprecated** Filter Onboarding tasks.
+		 *
+		 * @filter woocommerce_admin_onboarding_task_list
+		 * @deprecated
+		 * @param {Array} tasks Array of tasks.
+		 * @param {Array} query Url query parameters.
+		 */
 		this.filteredTasks = applyFilters(
 			'woocommerce_admin_onboarding_task_list',
 			[],

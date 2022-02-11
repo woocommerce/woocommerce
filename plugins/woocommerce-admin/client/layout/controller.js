@@ -227,6 +227,12 @@ export const getPages = () => {
 		} );
 	}
 
+	/**
+	 * List of WooCommerce Admin pages.
+	 *
+	 * @filter woocommerce_admin_pages_list
+	 * @param {Array.<Object>} pages Array page objects.
+	 */
 	const filteredPages = applyFilters( PAGES_FILTER, pages );
 
 	filteredPages.push( {

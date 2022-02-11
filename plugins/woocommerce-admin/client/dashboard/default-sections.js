@@ -41,6 +41,24 @@ const StorePerformance = ( props ) => (
 
 const DEFAULT_SECTIONS_FILTER = 'woocommerce_dashboard_default_sections';
 
+/**
+ * An object defining a dashboard section.
+ *
+ * @typedef {Object} section
+ * @property {string} key Unique identifying string.
+ * @property {Node} component React component to render.
+ * @property {string} title Title.
+ * @property {boolean} isVisible The default visibilty.
+ * @property {Node} icon Section icon.
+ * @property {Array.<string>} hiddenBlocks Blocks that are hidden by default.
+ */
+
+/**
+ * Default Dashboard sections. Defaults are Store Performance, Charts, and Leaderboards
+ *
+ * @filter woocommerce_dashboard_default_sections
+ * @param {Array.<section>} sections Report filters.
+ */
 export default applyFilters( DEFAULT_SECTIONS_FILTER, [
 	{
 		key: 'store-performance',

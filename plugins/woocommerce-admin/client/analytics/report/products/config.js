@@ -23,6 +23,16 @@ const PRODUCTS_REPORT_ADVANCED_FILTERS_FILTER =
 
 const { addCesSurveyForAnalytics } = dispatch( CES_STORE_KEY );
 
+/**
+ * @typedef {import('../index.js').chart} chart
+ */
+
+/**
+ * Products Report charts filter.
+ *
+ * @filter woocommerce_admin_products_report_charts
+ * @param {Array.<chart>} charts Report charts.
+ */
 export const charts = applyFilters( PRODUCTS_REPORT_CHARTS_FILTER, [
 	{
 		key: 'items_sold',
@@ -169,6 +179,14 @@ const variationsConfig = {
 	],
 };
 
+/**
+ * Produts Report Advanced Filters.
+ *
+ * @filter woocommerce_admin_products_report_advanced_filters
+ * @param {Object} advancedFilters Report Advanced Filters.
+ * @param {string} advancedFilters.title Interpolated component string for Advanced Filters title.
+ * @param {Object} advancedFilters.filters An object specifying a report's Advanced Filters.
+ */
 export const advancedFilters = applyFilters(
 	PRODUCTS_REPORT_ADVANCED_FILTERS_FILTER,
 	{
@@ -192,6 +210,16 @@ if ( Object.keys( advancedFilters.filters ).length ) {
 	} );
 }
 
+/**
+ * @typedef {import('../index.js').filter} filter
+ */
+
+/**
+ * Products Report Filters.
+ *
+ * @filter woocommerce_admin_products_report_filters
+ * @param {Array.<filter>} filters Report filters.
+ */
 export const filters = applyFilters( PRODUCTS_REPORT_FILTERS_FILTER, [
 	filterConfig,
 	variationsConfig,

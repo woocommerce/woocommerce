@@ -137,7 +137,12 @@ class ProfileWizard extends Component {
 				profileItems.hasOwnProperty( 'theme' ) &&
 				profileItems.theme !== null,
 		} );
-
+		/**
+		 * Filter for Onboarding steps configuration.
+		 *
+		 * @filter woocommerce_admin_profile_wizard_steps
+		 * @param {Array.<Object>} steps Array of steps for Onboarding Wizard.
+		 */
 		return applyFilters( STEPS_FILTER, steps );
 	}
 

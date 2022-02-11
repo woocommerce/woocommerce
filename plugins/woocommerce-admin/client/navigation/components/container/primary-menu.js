@@ -21,11 +21,23 @@ export const PrimaryMenu = ( {
 		return null;
 	}
 
+	/**
+	 * Navigation's exit button WooCommerce label.
+	 *
+	 * @filter woocommerce_navigation_root_back_label
+	 * @param {string} label Back button label.
+	 */
 	const rootBackLabel = applyFilters(
 		'woocommerce_navigation_root_back_label',
 		__( 'WordPress Dashboard', 'woocommerce-admin' )
 	);
 
+	/**
+	 * Navigation's exit button url.
+	 *
+	 * @filter woocommerce_navigation_root_back_url
+	 * @param {string} url Back button url.
+	 */
 	const rootBackUrl = applyFilters(
 		'woocommerce_navigation_root_back_url',
 		window.wcNavigation.rootBackUrl

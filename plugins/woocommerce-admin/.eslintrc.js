@@ -23,6 +23,7 @@ module.exports = {
 					'filter',
 					'action',
 					'slotFill',
+					'scope',
 				],
 			},
 		],

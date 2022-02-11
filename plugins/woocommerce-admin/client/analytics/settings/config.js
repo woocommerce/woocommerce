@@ -75,6 +75,12 @@ const orderStatusOptions = [
 	},
 ];
 
+/**
+ * Filter Analytics Report settings. Add a UI element to the Analytics Settings page.
+ *
+ * @filter woocommerce_admin_analytics_settings
+ * @param {Object} reportSettings Report settings.
+ */
 export const config = applyFilters( SETTINGS_FILTER, {
 	woocommerce_excluded_report_order_statuses: {
 		label: __( 'Excluded statuses:', 'woocommerce-admin' ),

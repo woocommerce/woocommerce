@@ -10,6 +10,16 @@ const REVENUE_REPORT_FILTERS_FILTER =
 const REVENUE_REPORT_ADVANCED_FILTERS_FILTER =
 	'woocommerce_admin_revenue_report_advanced_filters';
 
+/**
+ * @typedef {import('../index.js').chart} chart
+ */
+
+/**
+ * Revenue Report charts filter.
+ *
+ * @filter woocommerce_admin_revenue_report_charts
+ * @param {Array.<chart>} charts Report charts.
+ */
 export const charts = applyFilters( REVENUE_REPORT_CHARTS_FILTER, [
 	{
 		key: 'gross_sales',
@@ -75,6 +85,14 @@ export const charts = applyFilters( REVENUE_REPORT_CHARTS_FILTER, [
 	},
 ] );
 
+/**
+ * Revenue Report Advanced Filters.
+ *
+ * @filter woocommerce_admin_revenue_report_advanced_filters
+ * @param {Object} advancedFilters Report Advanced Filters.
+ * @param {string} advancedFilters.title Interpolated component string for Advanced Filters title.
+ * @param {Object} advancedFilters.filters An object specifying a report's Advanced Filters.
+ */
 export const advancedFilters = applyFilters(
 	REVENUE_REPORT_ADVANCED_FILTERS_FILTER,
 	{
@@ -100,6 +118,16 @@ if ( Object.keys( advancedFilters.filters ).length ) {
 	} );
 }
 
+/**
+ * @typedef {import('../index.js').filter} filter
+ */
+
+/**
+ * Revenue Report Filters.
+ *
+ * @filter woocommerce_admin_revenue_report_filters
+ * @param {Array.<filter>} filters Report filters.
+ */
 export const filters = applyFilters( REVENUE_REPORT_FILTERS_FILTER, [
 	{
 		label: __( 'Show', 'woocommerce-admin' ),

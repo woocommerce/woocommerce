@@ -32,6 +32,17 @@ import {
 } from '../lib/currency-context';
 
 const DASHBOARD_FILTERS_FILTER = 'woocommerce_admin_dashboard_filters';
+
+/**
+ * @typedef {import('../analytics/report/index.js').filter} filter
+ */
+
+/**
+ * Add Report filters to the dashboard. None are added by default.
+ *
+ * @filter woocommerce_admin_dashboard_filters
+ * @param {Array.<filter>} filters Report filters.
+ */
 const filters = applyFilters( DASHBOARD_FILTERS_FILTER, [] );
 
 const mergeSectionsWithDefaults = ( prefSections ) => {

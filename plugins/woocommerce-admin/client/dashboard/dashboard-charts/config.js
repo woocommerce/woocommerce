@@ -93,6 +93,12 @@ const defaultCharts = [
 	},
 ];
 
+/**
+ * Dashboard Charts section charts.
+ *
+ * @filter woocommerce_admin_dashboard_charts_filter
+ * @param {Array.<Object>} charts Array of visible charts.
+ */
 export const uniqCharts = applyFilters(
 	DASHBOARD_CHARTS_FILTER,
 	defaultCharts.map( ( chartDef ) => ( {

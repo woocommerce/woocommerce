@@ -22,6 +22,7 @@ const createOrderedChildren = ( children, order, props ) => {
  * Create a Fill for extensions to add items to the WooCommerce Admin header.
  *
  * @slotFill WooHeaderItem
+ * @scope woocommerce-admin
  * @example
  * const MyHeaderItem = () => (
  * <WooHeaderItem>My header item</WooHeaderItem>
@@ -60,6 +61,7 @@ WooHeaderItem.Slot = ( { fillProps } ) => (
  * navigation area left of the page title.
  *
  * @slotFill WooHeaderNavigationItem
+ * @scope woocommerce-admin
  * @example
  * const MyNavigationItem = () => (
  * <WooHeaderNavigationItem>My nav item</WooHeaderNavigationItem>
@@ -97,6 +99,7 @@ WooHeaderNavigationItem.Slot = ( { fillProps } ) => (
  * Create a Fill for extensions to add custom page titles.
  *
  * @slotFill WooHeaderPageTitle
+ * @scope woocommerce-admin
  * @example
  * const MyPageTitle = () => (
  * 	<WooHeaderPageTitle>My page title</WooHeaderPageTitle>

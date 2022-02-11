@@ -18,6 +18,16 @@ const COUPON_REPORT_ADVANCED_FILTERS_FILTER =
 
 const { addCesSurveyForAnalytics } = dispatch( CES_STORE_KEY );
 
+/**
+ * @typedef {import('../index.js').chart} chart
+ */
+
+/**
+ * Coupons Report charts filter.
+ *
+ * @filter woocommerce_admin_coupons_report_charts
+ * @param {Array.<chart>} charts Report charts.
+ */
 export const charts = applyFilters( COUPON_REPORT_CHARTS_FILTER, [
 	{
 		key: 'orders_count',
@@ -35,6 +45,14 @@ export const charts = applyFilters( COUPON_REPORT_CHARTS_FILTER, [
 	},
 ] );
 
+/**
+ * Coupons Report Advanced Filters.
+ *
+ * @filter woocommerce_admin_coupon_report_advanced_filters
+ * @param {Object} advancedFilters Report Advanced Filters.
+ * @param {string} advancedFilters.title Interpolated component string for Advanced Filters title.
+ * @param {Object} advancedFilters.filters An object specifying a report's Advanced Filters.
+ */
 export const advancedFilters = applyFilters(
 	COUPON_REPORT_ADVANCED_FILTERS_FILTER,
 	{
@@ -101,6 +119,16 @@ if ( Object.keys( advancedFilters.filters ).length ) {
 	} );
 }
 
+/**
+ * @typedef {import('../index.js').filter} filter
+ */
+
+/**
+ * Coupons Report Filters.
+ *
+ * @filter woocommerce_admin_coupons_report_filters
+ * @param {Array.<filter>} filters Report filters.
+ */
 export const filters = applyFilters( COUPON_REPORT_FILTERS_FILTER, [
 	{
 		label: __( 'Show', 'woocommerce-admin' ),

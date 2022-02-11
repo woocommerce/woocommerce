@@ -20,6 +20,16 @@ const TAXES_REPORT_ADVANCED_FILTERS_FILTER =
 
 const { addCesSurveyForAnalytics } = dispatch( CES_STORE_KEY );
 
+/**
+ * @typedef {import('../index.js').chart} chart
+ */
+
+/**
+ * Taxes Report charts filter.
+ *
+ * @filter woocommerce_admin_taxes_report_charts
+ * @param {Array.<chart>} charts Report charts.
+ */
 export const charts = applyFilters( TAXES_REPORT_CHARTS_FILTER, [
 	{
 		key: 'total_tax',
@@ -51,6 +61,14 @@ export const charts = applyFilters( TAXES_REPORT_CHARTS_FILTER, [
 	},
 ] );
 
+/**
+ * Taxes Report Advanced Filters.
+ *
+ * @filter woocommerce_admin_taxes_report_advanced_filters
+ * @param {Object} advancedFilters Report Advanced Filters.
+ * @param {string} advancedFilters.title Interpolated component string for Advanced Filters title.
+ * @param {Object} advancedFilters.filters An object specifying a report's Advanced Filters.
+ */
 export const advancedFilters = applyFilters(
 	TAXES_REPORT_ADVANCED_FILTERS_FILTER,
 	{
@@ -104,6 +122,16 @@ if ( Object.keys( advancedFilters.filters ).length ) {
 	} );
 }
 
+/**
+ * @typedef {import('../index.js').filter} filter
+ */
+
+/**
+ * Coupons Report Filters.
+ *
+ * @filter woocommerce_admin_taxes_report_filters
+ * @param {Array.<filter>} filters Report filters.
+ */
 export const filters = applyFilters( TAXES_REPORT_FILTERS_FILTER, [
 	{
 		label: __( 'Show', 'woocommerce-admin' ),

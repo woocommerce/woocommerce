@@ -58,6 +58,12 @@ function TransientNotices( props ) {
 
 	useEffect( () => {
 		getCurrentUserNotices().forEach( ( queuedNotice ) => {
+			/**
+			 * Filter each transient notice.
+			 *
+			 * @filter woocommerce_admin_queued_notice_filter
+			 * @param {Object} notice A transient notice.
+			 */
 			const notice = applyFilters( QUEUED_NOTICE_FILTER, queuedNotice );
 
 			createNotice2( notice.status, notice.content, {

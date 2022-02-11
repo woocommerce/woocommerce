@@ -53,16 +53,42 @@ const prepareHooks = async ( path ) => {
 const makeDocObjects = async ( path ) => {
 	const hooks = await prepareHooks( path );
 	return hooks.map( ( { description, tags, sourceFile } ) => {
-		const example = tags.find( ( tag ) => tag.tag === 'example' );
 		const tag = tags.find( ( tag ) => dataTypes.includes( tag.tag ) );
 
-		return {
+		paramTags = tags.reduce(
+			( result, { tag, name, type, description } ) => {
+				if ( tag === 'param' ) {
+					result.push( {
+						name,
+						type,
+						description,
+					} );
+				}
+				return result;
+			},
+			[]
+		);
+
+		const docObject = {
 			description,
 			sourceFile,
 			name: tag ? tag.name : '',
-			example: example ? example.description : '',
 			type: tag.tag,
+			params: paramTags,
 		};
+
+		if ( tag.tag === 'slotFill' ) {
+			const scopeTab = tags.find( ( tag ) => tag.tag === 'scope' );
+			if ( scopeTab ) {
+				docObject.scope = scopeTab.name;
+			} else {
+				console.warn(
+					`Failed to find "scope" tag for slotFill "${ tag.name }" doc.`
+				);
+			}
+		}
+
+		return docObject;
 	} );
 };
 

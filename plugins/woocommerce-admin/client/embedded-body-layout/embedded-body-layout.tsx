@@ -37,6 +37,13 @@ export const EmbeddedBodyLayout = () => {
 	if ( isWPPage( query ) ) {
 		queryParams = query;
 	}
+	/**
+	 * Filter an array of body components for WooCommerce non-react pages.
+	 *
+	 * @filter woocommerce_admin_embedded_layout_components
+	 * @param {Array.<Node>} embeddedBodyComponentList Array of body components.
+	 * @param {Object} query url query parameters.
+	 */
 	const componentList = applyFilters(
 		'woocommerce_admin_embedded_layout_components',
 		EMBEDDED_BODY_COMPONENT_LIST,

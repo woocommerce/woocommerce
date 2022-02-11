@@ -133,6 +133,21 @@ export default function ProductTemplateModal( { onClose } ) {
 		  )
 		: getProductTemplates();
 
+	/**
+	 * An object defining a product template.
+	 *
+	 * @typedef {Object} template
+	 * @property {string} key Icon to render.
+	 * @property {string} title Url.
+	 * @property {string} subtitle Link title.
+	 */
+
+	/**
+	 * Store product templates.
+	 *
+	 * @filter woocommerce_admin_onboarding_product_templates
+	 * @param {Array.<template>} templates Array of product templates.
+	 */
 	const templates = applyFilters(
 		ONBOARDING_PRODUCT_TEMPLATES_FILTER,
 		productTemplates

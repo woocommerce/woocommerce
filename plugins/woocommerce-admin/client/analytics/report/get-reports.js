@@ -130,5 +130,21 @@ export default () => {
 		},
 	].filter( Boolean );
 
+	/**
+	 * An object defining a report page.
+	 *
+	 * @typedef {Object} report
+	 * @property {string} report Report slug.
+	 * @property {string} title Report title.
+	 * @property {Node} component React Component to render.
+	 * @property {Object} navArgs Arguments supplied to WooCommerce Navigation.
+	 */
+
+	/**
+	 * Filter Report pages list.
+	 *
+	 * @filter woocommerce_admin_reports_list
+	 * @param {Array.<report>} reports Report pages list.
+	 */
 	return applyFilters( REPORTS_FILTER, reports );
 };

@@ -10,6 +10,14 @@ const STOCK_REPORT_ADVANCED_FILTERS_FILTER =
 
 export const showDatePicker = false;
 
+/**
+ * Stock Report Advanced Filters.
+ *
+ * @filter woocommerce_admin_stock_report_advanced_filters
+ * @param {Object} advancedFilters Report Advanced Filters.
+ * @param {string} advancedFilters.title Interpolated component string for Advanced Filters title.
+ * @param {Object} advancedFilters.filters An object specifying a report's Advanced Filters.
+ */
 export const advancedFilters = applyFilters(
 	STOCK_REPORT_ADVANCED_FILTERS_FILTER,
 	{
@@ -22,6 +30,16 @@ export const advancedFilters = applyFilters(
 	}
 );
 
+/**
+ * @typedef {import('../index.js').filter} filter
+ */
+
+/**
+ * Stock Report Filters.
+ *
+ * @filter woocommerce_admin_stock_report_filters
+ * @param {Array.<filter>} filters Report filters.
+ */
 export const filters = applyFilters( STOCK_REPORT_FILTERS_FILTER, [
 	{
 		label: __( 'Show', 'woocommerce-admin' ),
