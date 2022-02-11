@@ -6,6 +6,7 @@ docs/**/dist
 build
 build-module
 build-style
+build-types
 languages/*
 !languages/README.md
 woocommerce-admin.zip

@@ -24,6 +24,7 @@
 		"build-style/**",
 		"src/**/*.scss"
 	],
+	"types": "build-types",
 	"dependencies": {
 		"@storybook/addon-knobs": "^6.3.0",
 		"@woocommerce/csv-export": "file:../csv-export",
@@ -85,7 +86,7 @@
 		"build:css": "webpack",
 		"clean": "npx rimraf tsconfig.tsbuildinfo build build-*",
 		"prepack": "npm run clean && npm run build",
-		"start": "concurrently \"tsc --build --watch\" \"webpack --watch\"",
+		"start": "concurrently \"tsc --build ./tsconfig.json --watch\" \"webpack --watch\"",
 		"test": "lerna run build && npm run test:nobuild",
 		"test:nobuild": "jest --config ./jest.config.json",
 		"test:update-snapshots": "npm run test:nobuild --updateSnapshot",

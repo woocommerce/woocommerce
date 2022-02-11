@@ -14,8 +14,10 @@
 	},
 	"exclude": [
 		"node_modules",
+		"**/stories",
 		"**/build",
 		"**/build-module",
+		"**/build-types",
 		"**/test/*",
 		"**/jest.config.js",
 		"**/webpack.*.js"
