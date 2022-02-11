@@ -1,0 +1,4 @@
+Significance: minor
+Type: Add
+
+Add wc_version property to the store profile onboarding tracks for view and complete steps. #8290

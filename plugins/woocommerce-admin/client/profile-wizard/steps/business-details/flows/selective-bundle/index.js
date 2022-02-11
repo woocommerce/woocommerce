@@ -21,6 +21,7 @@ import {
 	PLUGINS_STORE_NAME,
 	SETTINGS_STORE_NAME,
 } from '@woocommerce/data';
+import { getSetting } from '@woocommerce/settings';
 import { recordEvent } from '@woocommerce/tracks';
 import classnames from 'classnames';
 
@@ -388,6 +389,7 @@ class BusinessDetails extends Component {
 		} );
 		recordEvent( 'storeprofiler_step_complete', {
 			step: BUSINESS_DETAILS_TAB_NAME,
+			wc_version: getSetting( 'wcVersion' ),
 		} );
 	}
 
@@ -429,6 +431,7 @@ class BusinessDetails extends Component {
 					this.trackBusinessDetailsStep( values );
 					recordEvent( 'storeprofiler_step_view', {
 						step: BUSINESS_FEATURES_TAB_NAME,
+						wc_version: getSetting( 'wcVersion' ),
 					} );
 				} }
 				onChange={ ( _, values, isValid ) => {
@@ -691,6 +694,7 @@ class BusinessDetails extends Component {
 						} );
 						recordEvent( 'storeprofiler_step_view', {
 							step: tabName,
+							wc_version: getSetting( 'wcVersion' ),
 						} );
 					}
 				} }
