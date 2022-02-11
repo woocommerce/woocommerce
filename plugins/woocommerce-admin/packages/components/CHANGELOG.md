@@ -1,7 +1,8 @@
 # Unreleased
 
 - Update line-height of SelectControl label to avoid truncated descenders in some typefaces and zoom levels. #8186
-- Added Typescript type declarations to build for @woocommerce/components #8282
+- Added Typescript type declarations to build for @woocommerce/components. #8282
+- Made @woocommerce/components/Stepper a Typescript file. #8286
 # 8.2.0
 
 -   Fix usage of Wordpress DatePicker component in `DatePicker`. #7982
