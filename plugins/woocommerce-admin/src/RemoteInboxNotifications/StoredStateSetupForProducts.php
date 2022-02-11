@@ -89,11 +89,7 @@ class StoredStateSetupForProducts {
 		}
 		// phpcs:enable
 
-		$stored_state                         = RemoteInboxNotificationsEngine::get_stored_state();
-		$stored_state->there_are_now_products = true;
-		RemoteInboxNotificationsEngine::update_stored_state( $stored_state );
-
-		self::enqueue_async_run_remote_notifications();
+		self::update_stored_state_and_possibly_run_remote_notifications();
 	}
 
 	/**
@@ -112,19 +108,24 @@ class StoredStateSetupForProducts {
 			return;
 		}
 
-		$stored_state                         = RemoteInboxNotificationsEngine::get_stored_state();
-		$stored_state->there_are_now_products = true;
-
-		RemoteInboxNotificationsEngine::update_stored_state( $stored_state );
-
-		self::enqueue_async_run_remote_notifications();
+		self::update_stored_state_and_possibly_run_remote_notifications();
 	}
 
 	/**
 	 * Enqueues an async action (using action-scheduler) to run remote
 	 * notifications.
 	 */
-	private static function enqueue_async_run_remote_notifications() {
+	private static function update_stored_state_and_possibly_run_remote_notifications() {
+		$stored_state = RemoteInboxNotificationsEngine::get_stored_state();
+		// If the stored_state is the same, we don't need to run remote notifications to avoid unnecessary action scheduling.
+		if ( true === $stored_state->there_are_now_products ) {
+			return;
+		}
+
+		$stored_state->there_are_now_products = true;
+		RemoteInboxNotificationsEngine::update_stored_state( $stored_state );
+
+		// Run self::run_remote_notifications asynchronously.
 		as_enqueue_async_action( self::ASYNC_RUN_REMOTE_NOTIFICATIONS_ACTION_NAME );
 	}
 }
