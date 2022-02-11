@@ -32,7 +32,7 @@ $graphql_api_url = getenv( 'GITHUB_GRAPHQL_URL' );
 function get_latest_milestone_from_api( $use_latest_when_null = false ) {
 	global $repo_owner, $repo_name;
 
-	echo "Getting the list of milestones...\n";
+	echo 'Getting the list of milestones...' . PHP_EOL;
 
 	$query      = "
 	  repository(owner:\"$repo_owner\", name:\"$repo_name\") {
@@ -61,7 +61,7 @@ function get_latest_milestone_from_api( $use_latest_when_null = false ) {
 		}
 	);
 
-	echo 'Latest open milestone: ' . $milestones[0]['title'] . "\n";
+	echo 'Latest open milestone: ' . $milestones[0]['title'] . PHP_EOL;
 
 	$chosen_milestone = null;
 	foreach ( $milestones as $milestone ) {
@@ -86,7 +86,7 @@ function get_latest_milestone_from_api( $use_latest_when_null = false ) {
 
 	// If all the milestones have a release branch, just take the newest one.
 	if ( $use_latest_when_null && is_null( $chosen_milestone ) ) {
-		echo "WARNING: No milestone without release branch found, the newest one will be assigned.\n";
+		echo 'WARNING: No milestone without release branch found, the newest one will be assigned.' . PHP_EOL;
 		$chosen_milestone = $milestones[0];
 	}
 
