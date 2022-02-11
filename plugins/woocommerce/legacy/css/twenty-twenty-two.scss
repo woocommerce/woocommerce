@@ -115,7 +115,7 @@ $tt2-gray: wc-shade( 96 );
 		a.button {
 			margin-top: -0.5rem;
 			border: none;
-			background: #{wc-hsl( 'orchid',  5%, 92%)};
+			background: wc-hsl( 'orchid',  5%, 92%);
 			color: var(--wp--preset--color--black);
 			padding: 0.5rem 1rem;
 
@@ -382,13 +382,13 @@ $tt2-gray: wc-shade( 96 );
 			padding: 0;
 			border-bottom-style: solid;
 			border-bottom-width: 1px;
-			border-bottom-color: #{wc-hsl( 'purple',  5%, 90%)};
+			border-bottom-color: wc-hsl( 'purple',  5%, 90%);
 
 			li {
-				background: #{wc-hsl( 'purple',  5%, 90%)};
+				background: wc-hsl( 'purple',  5%, 90%);
 				margin: 0;
 				padding: 0.5em 1em 0.5em 1em;
-				border-color: #{wc-hsl( 'purple',  5%, 90%)};
+				border-color: wc-hsl( 'purple',  5%, 90%);
 				border-top-left-radius: 5px;
 				border-top-right-radius: 5px;
 				float: left;
@@ -399,7 +399,7 @@ $tt2-gray: wc-shade( 96 );
 				font-size: var(--wp--preset--font-size--medium);
 
 				&:first-child {
-					border-left-color: #{wc-hsl( 'purple',  5%, 90%)};
+					border-left-color: wc-hsl( 'purple',  5%, 90%);
 					margin-left: 1em;
 				}
 
@@ -725,7 +725,7 @@ $tt2-gray: wc-shade( 96 );
 				button {
 					margin-bottom: 1rem;
 					border: none;
-					background: #{wc-hsl( 'orchid',  5%, 92%)};
+					background: wc-hsl( 'orchid',  5%, 92%);
 					color: var(--wp--preset--color--black);
 					padding: 0.5rem 1rem 0.5rem 1rem;
 
@@ -818,7 +818,7 @@ $tt2-gray: wc-shade( 96 );
 			button[name='apply_coupon'],
 			button[name='update_cart'] {
 				padding: 1rem 2rem;
-				border: 2px solid #{wc-hsl( 'orchid',  5%, 92%)};
+				border: 2px solid wc-hsl( 'orchid',  5%, 92%);
 				margin: 0;
 			}
 
@@ -942,11 +942,11 @@ $tt2-gray: wc-shade( 96 );
 			}
 
 			tbody {
-				border-bottom: 1px solid #{wc-hsl( 'purple',  5%, 80%)};
+				border-bottom: 1px solid wc-hsl( 'purple',  5%, 80%);
 			}
 
 			tr.order-total {
-				border-top: 1px solid #{wc-hsl( 'purple',  5%, 80%)};
+				border-top: 1px solid wc-hsl( 'purple',  5%, 80%);
 			}
 
 			.product-quantity {

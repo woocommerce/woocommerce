@@ -62,33 +62,33 @@
 						color: wc-shade( 47 );
 						background: wc-shade( 90 );
 						border-radius: 4px;
-						border-bottom: 1px solid wc-shade( 0, black, 5% );
+						border-bottom: 1px solid wc-shade( 0,'black', 5% );
 						margin: -.5em 0;
 						cursor: inherit !important;
 
 						&.status-completed {
-							background: #{wc-hsl( 'info',  29%, 83%)};
-							color: #{wc-hsl( 'info',  29%, 25%)};
+							background: wc-hsl( 'info',  29%, 83%);
+							color: wc-hsl( 'info',  29%, 25%);
 						}
 
 						&.status-on-hold {
-							background: #{wc-hsl( 'warning',  85%, 83%)};
-							color: #{wc-hsl( 'warning',  85%, 31%)};
+							background: wc-hsl( 'warning',  85%, 83%);
+							color: wc-hsl( 'warning',  85%, 31%);
 						}
 
 						&.status-failed {
-							background: #{wc-hsl( 'error',  65%, 83%)};
-							color: #{wc-hsl( 'error',  65%, 31%)};
+							background: wc-hsl( 'error',  65%, 83%);
+							color: wc-hsl( 'error',  65%, 31%);
 						}
 
 						&.status-processing {
-							background: #{wc-hsl( 'success',  50%, 82%)};
-							color: #{wc-hsl( 'success',  50%, 31%)};
+							background: wc-hsl( 'success',  50%, 82%);
+							color: wc-hsl( 'success',  50%, 31%);
 						}
 
 						&.status-trash {
-							background: #{wc-hsl( 'error',  65%, 83%)};
-							color: #{wc-hsl( 'error',  65%, 31%)};
+							background: wc-hsl( 'error',  65%, 83%);
+							color: wc-hsl( 'error',  65%, 31%);
 						}
 					}
 				}

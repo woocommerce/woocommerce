@@ -5,7 +5,7 @@
 @import "variables";
 
 body {
-	background: #f1f1f1;
+	background: wc-shade( 94 );
 	box-shadow: none;
 	margin: 100px auto 24px;
 	padding: 0;
@@ -24,7 +24,7 @@ body {
 
 .wc-auth-content {
 	background: var(--wc-content-bg);
-	box-shadow: 0 1px 3px wc-shade( 0 , black, 13% );
+	box-shadow: 0 1px 3px wc-shade( 0 ,'black', 13% );
 	overflow: hidden;
 	padding: 24px 24px 0;
 	zoom: 1;
@@ -51,7 +51,7 @@ body {
 	a {
 		color: var(--woocommerce);
 		&:hover, &:focus {
-			color: #111;
+			color: wc-shade( 7 );
 		}
 	}
 
@@ -115,7 +115,7 @@ body {
 
 	.button {
 		background: wc-shade( 96 );
-		border: 1px solid #d7d7d7;
+		border: 1px solid wc-shade( 84 );
 		box-sizing: border-box;
 		color: wc-shade( 47 );
 		float: right;
@@ -131,16 +131,19 @@ body {
 		}
 	}
 	.button-primary {
-		background: #ad6ea1;
+		background: wc-hsl( 'orchid',  var(--wc--primary-sat), calc( var(--wc--primary-luma) + 5% ) );
 		border-color: var(--woocommerce);
-		box-shadow: inset 0 1px 0 rgba( 255, 255, 255, 0.2 ), 0 1px 0 rgba( 0, 0, 0, 0.15 );
+		box-shadow: inset 0 1px 0 wc-shade( 100 , 'white', 20% ), 0 1px 0 wc-shade( 100 , 'black', 15% );
 		color: var(--wc-white);
 		float: right;
 		opacity: 1;
-		text-shadow: 0 -1px 1px #8a4f7f, 1px 0 1px #8a4f7f, 0 1px 1px #8a4f7f, -1px 0 1px #8a4f7f;
+		text-shadow: 0 -1px 1px wc-hsl( 'orchid', var(--wc--primary-sat), calc( var(--wc--primary-luma) - 10% ) ),
+			1px 0 1px wc-hsl( 'orchid',  var(--wc--primary-sat), calc( var(--wc--primary-luma) - 10% ) ),
+			0 1px 1px wc-hsl( 'orchid',  var(--wc--primary-sat), calc( var(--wc--primary-luma) - 10% ) ),
+			-1px 0 1px wc-hsl( 'orchid',  var(--wc--primary-sat), calc( var(--wc--primary-luma) - 10% ) );
 
 		&:hover, &:focus {
-			background: #b472a8;
+			background: wc-hsl( 'orchid',  var(--wc--primary-sat), calc( var(--wc--primary-luma) + 10% ) );
 			color: var(--wc-white);
 		}
 	}

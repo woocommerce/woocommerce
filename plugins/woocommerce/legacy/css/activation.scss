@@ -16,7 +16,7 @@ div.woocommerce-message {
 	position: relative;
 
 	&.updated {
-		border-left-color: wc-hsl( orchid, calc(var(--wc--primary-sat) + 5%), calc( var(--wc--primary-luma) + 18% ) ) !important;
+		border-left-color: wc-hsl( 'orchid', var(--wc--primary-sat), calc( var(--wc--primary-luma) + 28% ) ) !important;
 	}
 }
 
@@ -24,7 +24,7 @@ p.woocommerce-actions,
 .woocommerce-message {
 
 	.button-primary {
-		background: #{wc-hsl( 'orchid',  calc(var(--wc--primary-sat) + 5%), calc( var(--wc--primary-luma) + 8% ) )};
+		background: wc-hsl( 'orchid',  var(--wc--primary-sat), calc( var(--wc--primary-luma) + 10% ) );
 		border-color: var(--woocommerce);
 		box-shadow: inset 0 1px 0 wc-shade( 100 , 'white', 25% ), 0 1px 0 var(--woocommerce);
 		color: var(--wc-white);

@@ -40,7 +40,7 @@
 	.button:hover,
 	.button:focus,
 	.button:active {
-		background-color: #{wc-hsl( 'orchid',  calc(var(--wc--primary-sat) + 5%), calc( var(--wc--primary-luma) + 10 ) )};
+		background-color: wc-hsl( 'orchid',  calc(var(--wc--primary-sat) + 5%), calc( var(--wc--primary-luma) + 10 ) );
 		border-width: 0;
 		box-shadow: none;
 		border-radius: 3px;
@@ -67,7 +67,7 @@
 }
 
 .wc-helper .subscription-filter {
-	color: #2e4453;
+	color: wc-hsl( 'blue', 29%, 25% );
 	font-size: 13px;
 	line-height: 13px;
 	margin: 22px 0;
@@ -88,13 +88,13 @@
 	}
 
 	li {
-		color: #0073aa;
+		color: wc-hsl( 'blue', 100%, 33% );
 		display: inline-block;
 		padding: 0 4px 0 8px;
 		position: relative;
 
 		&::before {
-			background-color: #979797;
+			background-color: wc-shade( 59 );
 			content: " ";
 			position: absolute;
 			top: 0;
@@ -112,7 +112,7 @@
 	}
 
 	a {
-		color: #0073aa;
+		color: wc-hsl( 'blue', 100%, 33% );
 		text-decoration: none;
 
 		&.current {
@@ -122,7 +122,7 @@
 	}
 
 	.count {
-		color: #555d66;
+		color: wc-hsl( 'blue', 10%, 22% );
 		font-weight: 400;
 	}
 
@@ -172,14 +172,14 @@
 		}
 
 		span.chevron {
-			color: #555;
+			color: wc-shade( 33 );
 			opacity: 0.5;
 			transform: rotateX(180deg);
 		}
 
 		&:focus,
 		&:hover {
-			box-shadow: 0 3px 5px wc-shade( 0, black, 20% );
+			box-shadow: 0 3px 5px wc-shade( 0,'black', 20% );
 
 			label {
 				border-bottom: 1px solid wc-shade( 88 );
@@ -263,11 +263,11 @@
 		}
 
 		&:hover {
-			box-shadow: 0 3px 5px wc-shade( 0, black, 20% );
+			box-shadow: 0 3px 5px wc-shade( 0,'black', 20% );
 		}
 
 		header {
-			color: #555;
+			color: wc-shade( 33 );
 			font-weight: 600;
 			padding: 6px 14px;
 			position: relative;
@@ -381,7 +381,7 @@
 	.widefat thead tr td,
 	.widefat tfoot tr th,
 	.widefat tfoot tr td {
-		color: #32373c;
+		color: wc-hsl( 'blue', 10%, 22% );
 		padding-bottom: 15px;
 		padding-top: 10px;
 	}
@@ -449,7 +449,7 @@
 		}
 
 		&:last-child td {
-			border-bottom: 24px solid #f1f1f1;
+			border-bottom: 24px solid wc-shade( 94 );
 			box-shadow: inset 0 -1px 0 wc-shade( 88 );
 		}
 	}
@@ -481,7 +481,7 @@
 	}
 
 	.wp-list-table__ext-title {
-		color: #{wc-hsl( 'blue',  100%, 33%)};
+		color: wc-hsl( 'blue', 100%, 33%);
 		font-size: 18px;
 		font-weight: 600;
 		width: 60%;
@@ -674,7 +674,7 @@
 	.wp-list-table__licence-label {
 
 		label {
-			color: #23282d;
+			color: wc-hsl( 'blue', 12%, 16% );
 			font-weight: 600;
 			line-height: 30px;
 		}
@@ -784,7 +784,7 @@
 			display: none;
 
 			&:hover {
-				color: #{wc-hsl( 'orchid',  calc(var(--wc--primary-sat) + 5%), calc( var(--wc--primary-luma) + 10 ) )};
+				color: wc-hsl( 'orchid',  calc(var(--wc--primary-sat) + 5%), calc( var(--wc--primary-luma) + 10 ) );
 				cursor: pointer;
 			}
 		}
@@ -843,7 +843,7 @@
 
 	.start-container {
 		background-color: var(--wc-content-bg);
-		border-left: 4px solid #{wc-hsl( 'orchid',  33%, 70%)};
+		border-left: 4px solid wc-hsl( 'orchid',  33%, 70%);
 		padding: 45px 20px 20px 30px;
 		position: relative;
 		overflow: hidden;
@@ -855,7 +855,7 @@
 	}
 
 	.start-container::before {
-		color: #{wc-hsl( 'orchid',  26%, 91%)};
+		color: wc-hsl( 'orchid',  26%, 91%);
 		content: "\e01C";
 		display: block;
 		font-family: WooCommerce;
@@ -931,7 +931,7 @@
 
 .form-toggle__switch {
 	align-self: flex-start;
-	background: #{wc-hsl( 'blue',  28%, 83%)};
+	background: wc-hsl( 'blue', 28%, 83%);
 	border-radius: 12px;
 	box-sizing: border-box;
 	display: inline-block;
@@ -964,7 +964,7 @@
 	}
 
 	.accessible-focus &:focus {
-		box-shadow: 0 0 0 2px #{wc-hsl( 'orchid',  calc(var(--wc--primary-sat) + 5%), calc( var(--wc--primary-luma) + 10 ) )};
+		box-shadow: 0 0 0 2px wc-hsl( 'orchid',  calc(var(--wc--primary-sat) + 5%), calc( var(--wc--primary-luma) + 10 ) );
 	}
 
 
@@ -975,7 +975,7 @@
 	z-index: 1;
 
 	.form-toggle__label-content {
-		color: #{wc-hsl( 'blue',  28%, 63%)};
+		color: wc-hsl( 'blue', 28%, 63%);
 		flex: 0 1 100%;
 		font-size: 13px;
 		line-height: 16px;
@@ -995,29 +995,29 @@
 	.accessible-focus &:focus {
 
 		+ .form-toggle__label .form-toggle__switch {
-			box-shadow: 0 0 0 2px #{wc-hsl( 'orchid',  calc(var(--wc--primary-sat) + 5%), calc( var(--wc--primary-luma) + 10 ) )};
+			box-shadow: 0 0 0 2px wc-hsl( 'orchid',  calc(var(--wc--primary-sat) + 5%), calc( var(--wc--primary-luma) + 10 ) );
 		}
 
 		&:checked + .form-toggle__label .form-toggle__switch {
-			box-shadow: 0 0 0 2px #{wc-hsl( 'orchid',  calc(var(--wc--primary-sat) + 5%), calc( var(--wc--primary-luma) - 5 ) )};
+			box-shadow: 0 0 0 2px wc-hsl( 'orchid',  calc(var(--wc--primary-sat) + 5%), calc( var(--wc--primary-luma) - 5 ) );
 		}
 	}
 
 	& + .form-toggle__label .form-toggle__switch {
-		background: #{wc-hsl( 'blue',  28%, 73%)};
+		background: wc-hsl( 'blue', 28%, 73%);
 	}
 
 	&:not(:disabled) {
 
 		+ .form-toggle__label:hover .form-toggle__switch {
-			background: #{wc-hsl( 'blue',  28%, 83%)};
+			background: wc-hsl( 'blue', 28%, 83%);
 		}
 	}
 
 	&.active {
 
 		+ .form-toggle__label .form-toggle__switch {
-			background: wc-hsl( orchid , calc(var(--wc--primary-sat) + 5%), calc( var(--wc--primary-luma) + 10 ) );
+			background: wc-hsl( 'orchid' , calc(var(--wc--primary-sat) + 5%), calc( var(--wc--primary-luma) + 10 ) );
 
 			&::after {
 				left: 8px;
@@ -1025,7 +1025,7 @@
 		}
 
 		+ .form-toggle__label:hover .form-toggle__switch {
-			background: wc-hsl( orchid , calc(var(--wc--primary-sat) + 5%), calc( var(--wc--primary-luma) - 5 ) );
+			background: wc-hsl( 'orchid' , calc(var(--wc--primary-sat) + 5%), calc( var(--wc--primary-luma) - 5 ) );
 		}
 	}
 
@@ -1041,13 +1041,13 @@
 .form-toggle.is-toggling {
 
 	+ .form-toggle__label .form-toggle__switch {
-		background: wc-hsl( orchid , calc(var(--wc--primary-sat) + 5%), calc( var(--wc--primary-luma) + 10 ) );
+		background: wc-hsl( 'orchid' , calc(var(--wc--primary-sat) + 5%), calc( var(--wc--primary-luma) + 10 ) );
 	}
 
 	&:checked {
 
 		+ .form-toggle__label .form-toggle__switch {
-			background: wc-hsl( blue , 28%, 83%);
+			background: wc-hsl( 'blue' , 28%, 83%);
 		}
 	}
 }

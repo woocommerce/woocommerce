@@ -11,7 +11,7 @@
 $headings: -apple-system, blinkmacsystemfont, "Helvetica Neue", helvetica, sans-serif;
 $body: nonbreakingspaceoverride, "Hoefler Text", garamond, "Times New Roman", serif;
 
-$body-color: #111;
+$body-color: wc-shade( 7 );
 $highlights-color: #cd2653;
 
 /**
@@ -207,7 +207,7 @@ a.button {
 		}
 
 		&.button {
-			background: #111;
+			background: wc-shade( 7 );
 		}
 	}
 
@@ -1288,8 +1288,8 @@ a.reset_variations {
 
 		.button {
 			background: wc-shade( 98 );
-			border: 1px solid #555;
-			color: #555;
+			border: 1px solid wc-shade( 33 );
+			color: wc-shade( 33 );
 		}
 
 		button[name="update_cart"] {
@@ -1393,7 +1393,7 @@ a.reset_variations {
 				width: 14px;
 				height: 14px;
 				border: 2px solid var(--wc-white);
-				box-shadow: 0 0 0 2px #6d6d6d;
+				box-shadow: 0 0 0 2px wc-shade( 43 );
 				background: var(--wc-content-bg);
 				margin-left: 4px;
 				margin-right: 1.2rem;
@@ -1405,7 +1405,7 @@ a.reset_variations {
 		&:checked + label {
 
 			&::before {
-				background: #555;
+				background: wc-shade( 33 );
 			}
 		}
 	}
@@ -1596,9 +1596,9 @@ a.reset_variations {
 }
 
 .woocommerce-terms-and-conditions {
-	border: 1px solid wc-shade( 0, black, 20% );
-	box-shadow: inset 0 1px 2px wc-shade( 0, black, 10% );
-	background: wc-shade( 0, black, 5% );
+	border: 1px solid wc-shade( 0,'black', 20% );
+	box-shadow: inset 0 1px 2px wc-shade( 0,'black', 10% );
+	background: wc-shade( 0,'black', 5% );
 }
 
 .woocommerce-terms-and-conditions-link {
@@ -1733,7 +1733,7 @@ a.reset_variations {
 	.woocommerce-input-wrapper {
 
 		.description {
-			background: #4169e1;
+			background: wc-hsl( 'blue', 73%, 57% );
 			color: var(--wc-white);
 			border-radius: 3px;
 			padding: 1rem;
@@ -1758,7 +1758,7 @@ a.reset_variations {
 				position: absolute;
 				border-width: 4px 6px 0 6px;
 				border-style: solid;
-				border-color: #4169e1 transparent transparent transparent;
+				border-color: wc-hsl( 'blue', 73%, 57% ) transparent transparent transparent;
 				z-index: 100;
 				display: block;
 			}
@@ -1840,7 +1840,7 @@ a.reset_variations {
 				width: 14px;
 				height: 14px;
 				border: 2px solid var(--wc-white);
-				box-shadow: 0 0 0 2px #6d6d6d;
+				box-shadow: 0 0 0 2px wc-shade( 27 );
 				background: var(--wc-content-bg);
 				margin-left: 4px;
 				margin-right: 1.2rem;
@@ -1852,7 +1852,7 @@ a.reset_variations {
 		&:checked + label {
 
 			&::before {
-				background: #555;
+				background: wc-shade( 33 );
 			}
 		}
 	}
@@ -1996,7 +1996,7 @@ a.reset_variations {
 				width: 14px;
 				height: 14px;
 				border: 2px solid var(--wc-white);
-				box-shadow: 0 0 0 2px #6d6d6d;
+				box-shadow: 0 0 0 2px wc-shade( 27 );
 				background: var(--wc-content-bg);
 				margin-left: 4px;
 				margin-right: 1.2rem;
@@ -2008,7 +2008,7 @@ a.reset_variations {
 		&:checked + label {
 
 			&::before {
-				background: #555;
+				background: wc-shade( 33 );
 			}
 		}
 	}

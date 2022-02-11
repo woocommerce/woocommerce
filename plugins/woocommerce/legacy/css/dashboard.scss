@@ -80,7 +80,6 @@ ul.woocommerce_stats {
 				display: block;
 				color: wc-shade( 66 );
 				padding: 9px 12px;
-				transition: all ease 0.5s;
 				position: relative;
 				font-size: 12px;
 
@@ -101,26 +100,26 @@ ul.woocommerce_stats {
 					line-height: 1.2em;
 					font-weight: normal;
 					display: block;
-					color: #{wc-hsl( 'blue',  65%, 39%)};
+					color: wc-hsl( 'blue', 65%, 37%);
 				}
 
 				&:hover {
-					color: #{wc-hsl( 'blue',  65%, 50%)};
+					color: wc-hsl( 'blue', 65%, 50%);
 
 					&::before,
 					strong {
-						color: #{wc-hsl( 'blue',  65%, 50%)} !important;
+						color: #{wc-hsl( 'blue', 65%, 50%)};
 					}
 				}
 
 				&::before {
-
 					@include icon();
 					font-size: 2em;
 					position: relative;
 					width: auto;
 					line-height: 1.2em;
 					color: wc-shade( 27 );
+					transition: all ease 0.175s;
 					float: left;
 					margin-right: 12px;
 					margin-bottom: 12px;
@@ -149,16 +148,20 @@ ul.woocommerce_stats {
 			}
 		}
 
-		li.processing-orders {
+		.processing-orders {
 			border-right: 1px solid wc-shade( 92 );
+
+			&:hover a::before {
+				color: wc-hsl('green', 50%, 70%);
+			}
 
 			a::before {
 				content: "\e011";
-				color: var(--wc-green);
+				color: wc-hsl('green', 50%, 50%);
 			}
 		}
 
-		li.on-hold-orders {
+		.on-hold-orders {
 
 			a::before {
 				content: "\e033";
@@ -166,20 +169,28 @@ ul.woocommerce_stats {
 			}
 		}
 
-		li.low-in-stock {
+		.low-in-stock {
 			border-right: 1px solid wc-shade( 92 );
+
+			&:hover a::before {
+				color: wc-hsl('red', 80%, 70%);
+			}
 
 			a::before {
 				content: "\e016";
-				color: var(--wc-alert);
+				color: wc-hsl('red', 80%, 50%);
 			}
 		}
 
-		li.out-of-stock {
+		.out-of-stock {
+
+			&:hover a::before {
+				color: wc-hsl('orange', 80%, 70%);
+			}
 
 			a::before {
 				content: "\e013";
-				color: var(--wc-error);
+				color: wc-hsl('orange', 80%, 50%);
 			}
 		}
 	}
@@ -246,7 +257,7 @@ ul.woocommerce_stats {
 			left: 0;
 			letter-spacing: 0.1em;
 			letter-spacing: 0\9; // IE8 & below hack ;-(
-			color: #{gen-custom-prop( $woocommerce-brand, false, false, -5% )};
+			color: wc-hsl( 'orchid',  var(--wc--primary-sat), calc( var(--wc--primary-luma) - 5% ) );
 		}
 	}
 }
@@ -270,3 +281,4 @@ ul.woocommerce_stats {
 		}
 	}
 }
+

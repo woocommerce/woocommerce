@@ -94,7 +94,7 @@
 
 	.current-section-dropdown {
 		background: var(--wc-content-bg);
-		border: 1px solid #{wc-hsl( 'blue',  3%, 66%)};
+		border: 1px solid wc-hsl( 'blue', 3%, 66%);
 		margin-bottom: 20px;
 		position: relative;
 		width: 100%;
@@ -365,7 +365,7 @@
 	}
 
 	.addons-button-solid {
-		background-color: #{wc-hsl( 'purple',  39%, 43%)};
+		background-color: wc-hsl( 'purple',  39%, 43%);
 		color: var(--wc-white);
 	}
 
@@ -392,22 +392,22 @@
 	}
 
 	.addons-button-outline-green {
-		border: 1px solid #{wc-hsl( 'green',  50%, 45%)};
-		color: #{wc-hsl( 'green',  50%, 45%)};
+		border: 1px solid wc-hsl( 'green',  50%, 45%);
+		color: wc-hsl( 'green',  50%, 45%);
 	}
 
 	.addons-button-outline-green:hover {
-		color: #{wc-hsl( 'green',  50%, 45%)};
+		color: wc-hsl( 'green',  50%, 45%);
 		opacity: 0.8;
 	}
 
 	.addons-button-outline-purple {
-		border: 1px solid #{wc-hsl( 'purple',  39%, 43%)};
-		color: #{wc-hsl( 'purple',  39%, 43%)};
+		border: 1px solid wc-hsl( 'purple',  39%, 43%);
+		color: wc-hsl( 'purple',  39%, 43%);
 	}
 
 	.addons-button-outline-purple:hover {
-		color: #{wc-hsl( 'purple',  39%, 43%)};
+		color: wc-hsl( 'purple',  39%, 43%);
 		opacity: 0.8;
 	}
 
@@ -792,7 +792,7 @@
 			max-width: 400px;
 			height: auto;
 			margin: 0 auto 16px;
-			box-shadow: 0 1px 6px wc-shade( 0, black, 10% );
+			box-shadow: 0 1px 6px wc-shade( 0, 'black', 10% );
 		}
 
 		p:last-of-type {
@@ -908,7 +908,7 @@
 
 	a.button-primary,
 	button.button-primary {
-		background: #{wc-hsl( 'orchid',  calc(var(--wc--primary-sat) + 5%), calc( var(--wc--primary-luma) + 8% ) )};
+		background: wc-hsl( 'orchid',  calc(var(--wc--primary-sat) + 5%), calc( var(--wc--primary-luma) + 8% ) );
 		border-color: var(--woocommerce);
 		box-shadow: inset 0 1px 0 wc-shade( 100 , 'white', 25% ), 0 1px 0 var(--woocommerce);
 		color: var(--wc-white);
@@ -1240,7 +1240,7 @@ table.wc_status_table--tools {
 #log-viewer {
 	background: var(--wc-content-bg);
 	border: 1px solid wc-shade( 90 );
-	box-shadow: 0 1px 1px wc-shade( 0, black, 4% );
+	box-shadow: 0 1px 1px wc-shade( 0, 'black', 4% );
 	padding: 5px 20px;
 
 	pre {
@@ -1936,7 +1936,7 @@ ul.wc_coupon_list_block {
 				textarea {
 					font-size: 14px;
 					padding: 4px;
-					color: #555;
+					color: wc-shade( 33 );
 				}
 
 				&:last-child {
@@ -1968,7 +1968,7 @@ ul.wc_coupon_list_block {
 				.wc-order-item-thumbnail {
 					width: 38px;
 					height: 38px;
-					border: 2px solid #e8e8e8;
+					border: 2px solid wc_shade( 91 );
 					background: wc-shade( 97 );
 					color: wc-shade( 80 );
 					position: relative;
@@ -2050,7 +2050,7 @@ ul.wc_coupon_list_block {
 					display: inline-block;
 					background: var(--wc-content-bg);
 					border: 1px solid wc-shade( 87 );
-					box-shadow: inset 0 1px 2px wc-shade( 0, black, 7% );
+					box-shadow: inset 0 1px 2px wc-shade( 0, 'black', 7% );
 					margin: 1px 0;
 					min-width: 80px;
 					overflow: hidden;
@@ -2064,7 +2064,7 @@ ul.wc_coupon_list_block {
 						label {
 							font-size: 0.75em;
 							padding: 4px 6px 0;
-							color: #555;
+							color: wc-shade( 33 );
 							display: block;
 						}
 
@@ -2075,7 +2075,7 @@ ul.wc_coupon_list_block {
 							box-shadow: none;
 							margin: 0;
 							padding: 0 6px 4px;
-							color: #555;
+							color: wc-shade( 33 );
 							background: transparent;
 
 							&::-webkit-input-placeholder {
@@ -2153,7 +2153,7 @@ ul.wc_coupon_list_block {
 			}
 
 			.calculated {
-				border-color: #{wc-hsl( 'orchid',  17%, 62%)};
+				border-color: wc-hsl( 'orchid',  17%, 62%);
 				border-style: dotted;
 			}
 
@@ -2750,7 +2750,7 @@ ul.wc_coupon_list_block {
 			}
 
 			&:hover {
-				border: 2px solid #{wc-hsl( 'blue',  100%, 41%)};
+				border: 2px solid wc-hsl( 'blue', 100%, 41%);
 			}
 		}
 
@@ -2771,35 +2771,35 @@ ul.wc_coupon_list_block {
 	color: wc-shade( 47 );
 	background: wc-shade( 90 );
 	border-radius: 4px;
-	border-bottom: 1px solid wc-shade( 0, black, 5% );
+	border-bottom: 1px solid wc-shade( 0, 'black', 5% );
 	margin: -0.25em 0;
 	cursor: inherit !important;
 	white-space: nowrap;
 	max-width: 100%;
 
 	&.status-completed {
-		background: #{wc-hsl( 'info',  29%, 83%)};
-		color: #{wc-hsl( 'info',  29%, 25%)};
+		background: wc-hsl( 'info',  29%, 83%);
+		color: wc-hsl( 'info',  29%, 25%);
 	}
 
 	&.status-on-hold {
-		background: #{wc-hsl( 'warning',  85%, 83%)};
-		color: #{wc-hsl( 'warning',  85%, 31%)};
+		background: wc-hsl( 'warning',  85%, 83%);
+		color: wc-hsl( 'warning',  85%, 31%);
 	}
 
 	&.status-failed {
-		background: #{wc-hsl( 'error',  65%, 83%)};
-		color: #{wc-hsl( 'error',  65%, 31%)};
+		background: wc-hsl( 'error',  65%, 83%);
+		color: wc-hsl( 'error',  65%, 31%);
 	}
 
 	&.status-processing {
-		background: #{wc-hsl( 'success',  50%, 82%)};
-		color: #{wc-hsl( 'success',  50%, 31%)};
+		background: wc-hsl( 'success',  50%, 82%);
+		color: wc-hsl( 'success',  50%, 31%);
 	}
 
 	&.status-trash {
-		background: #{wc-hsl( 'error',  65%, 83%)};
-		color: #{wc-hsl( 'error',  65%, 31%)};
+		background: wc-hsl( 'error',  65%, 83%);
+		color: wc-hsl( 'error',  65%, 31%);
 	}
 
 	> span {
@@ -3139,7 +3139,7 @@ ul.order_notes {
 	li.system-note {
 
 		.note_content {
-			background: #{wc-hsl( 'red',  14%, 81%)};
+			background: wc-hsl( 'red',  14%, 81%);
 		}
 
 		.note_content::after {
@@ -3150,11 +3150,11 @@ ul.order_notes {
 	li.customer-note {
 
 		.note_content {
-			background: #{wc-hsl( 'blue',  43%, 73%)};
+			background: wc-hsl( 'blue', 43%, 73%);
 		}
 
 		.note_content::after {
-			border-color: #{wc-hsl( 'blue',  43%, 73%)} transparent;
+			border-color: #{wc-hsl( 'blue', 43%, 73%)} transparent;
 		}
 	}
 }
@@ -3324,11 +3324,11 @@ table.wp-list-table {
 		}
 
 		&.outofstock {
-			color: #{wc-hsl( 'error',  43%, 46%)};
+			color: wc-hsl( 'error',  43%, 46%);
 		}
 
 		&.onbackorder {
-			color: #{wc-hsl( 'alert',  100%, 46%)};
+			color: wc-hsl( 'alert',  100%, 46%);
 		}
 	}
 
@@ -3476,7 +3476,7 @@ table.wc_input_table {
 	}
 
 	tr.current td {
-		background-color: #{wc-hsl( 'yellow',  96%, 90%)};
+		background-color: wc-hsl( 'yellow',  96%, 90%);
 	}
 
 	.item_cost,
@@ -3638,7 +3638,7 @@ table.wc_shipping {
 				background: transparent;
 				border: none;
 				box-shadow: none;
-				color: #82878c;
+				color: wc-hsl( 'blue', 4%, 53% );
 				text-indent: -9999px;
 				cursor: pointer;
 				outline: none;
@@ -3660,7 +3660,7 @@ table.wc_shipping {
 
 			button:hover,
 			button:focus {
-				color: #191e23;
+				color: wc-shade( 34 );
 			}
 
 			.wc-move-down::before {
@@ -3840,7 +3840,7 @@ table.wc-shipping-classes {
 		overflow: hidden;
 		position: relative;
 		padding: 7.5em 7.5% !important;
-		border-bottom: 2px solid #{wc-hsl( 'orchid',  26%, 91%)};
+		border-bottom: 2px solid wc-hsl( 'orchid',  26%, 91%);
 
 		&.wc-shipping-zone-method-blank-state {
 			padding: 2em !important;
@@ -3875,7 +3875,7 @@ table.wc-shipping-classes {
 			font-family: "WooCommerce";
 			text-align: center;
 			line-height: 1;
-			color: #{wc-hsl( 'orchid',  26%, 91%)};
+			color: wc-hsl( 'orchid',  26%, 91%);
 			display: block;
 			width: 1em;
 			font-size: 40em;
@@ -3886,18 +3886,18 @@ table.wc-shipping-classes {
 		}
 
 		.button-primary {
-			background-color: #804877;
-			border-color: #804877;
+			background-color: wc-hsl( 'orchid',  var(--wc--primary-sat), calc( var(--wc--primary-luma) - 13% ) );
+			border-color: wc-hsl( 'orchid',  var(--wc--primary-sat), calc( var(--wc--primary-luma) - 13% ) );
 			box-shadow:
 				inset 0 1px 0 wc-shade( 100 , 'white', 2% ),
-				0 1px 0 wc-shade( 0, black, 15% );
+				0 1px 0 wc-shade( 0, 'black', 15% );
 			margin: 0;
 			opacity: 1;
 			text-shadow:
-				0 -1px 1px #8a4f7f,
-				1px 0 1px #8a4f7f,
-				0 1px 1px #8a4f7f,
-				-1px 0 1px #8a4f7f;
+				0 -1px 1px wc-hsl( 'orchid',  var(--wc--primary-sat), calc( var(--wc--primary-luma) - 10% ) ),
+				1px 0 1px wc-hsl( 'orchid',  var(--wc--primary-sat), calc( var(--wc--primary-luma) - 10% ) ),
+				0 1px 1px wc-hsl( 'orchid',  var(--wc--primary-sat), calc( var(--wc--primary-luma) - 10% ) ),
+				-1px 0 1px wc-hsl( 'orchid',  var(--wc--primary-sat), calc( var(--wc--primary-luma) - 10% ) );
 			font-size: 1.5em;
 			padding: 0.75em 1em;
 			height: auto;
@@ -4020,7 +4020,7 @@ table.wc-shipping-classes {
 	}
 
 	td.wc-shipping-zone-methods {
-		color: #555;
+		color: wc-shade( 33 );
 
 		.method_disabled {
 			text-decoration: line-through;
@@ -4031,7 +4031,7 @@ table.wc-shipping-classes {
 			padding-right: 32px;
 
 			li {
-				color: #555;
+				color: wc-shade( 33 );
 				display: inline;
 				margin: 0;
 			}
@@ -4123,8 +4123,8 @@ table.wc-shipping-classes {
 .woocommerce-input-toggle {
 	height: 16px;
 	width: 32px;
-	border: 2px solid #935687;
-	background-color: #935687;
+	border: 2px solid wc-hsl( 'orchid',  var(--wc--primary-sat), calc( var(--wc--primary-luma) - 7% ) );
+	background-color: wc-hsl( 'orchid',  var(--wc--primary-sat), calc( var(--wc--primary-luma) - 7% ) );
 	display: inline-block;
 	text-indent: -9999px;
 	border-radius: 10em;
@@ -4476,7 +4476,7 @@ img.help_tip {
 			position: absolute;
 			border: 1px solid wc-shade( 80 );
 			border-radius: 3px;
-			box-shadow: 0 1px 3px wc-shade( 0, black, 20% );
+			box-shadow: 0 1px 3px wc-shade( 0, 'black', 20% );
 
 			.ui-slider {
 				border: 0 !important;
@@ -4492,7 +4492,7 @@ img.help_tip {
 		}
 
 		.iris-error {
-			background-color: wc-hsl(  'red', 100%, 85% );
+			background-color: wc-hsl( 'red', 100%, 85% );
 		}
 
 		.colorpickpreview {
@@ -4601,7 +4601,7 @@ img.help_tip {
 				padding: 0;
 				width: 30px;
 				height: 30px;
-				box-shadow: inset 0 0 0 1px wc-shade( 0, black, 20% );
+				box-shadow: inset 0 0 0 1px wc-shade( 0, 'black', 20% );
 				font-size: 16px;
 				border-radius: 4px;
 				margin-right: 3px;
@@ -4877,7 +4877,7 @@ img.help_tip {
 		line-height: 1em;
 		padding: 0 0 10px;
 		position: relative;
-		background-color: #fafafa;
+		background-color: wc-shade(98);
 		border-right: 1px solid #{wc-shade( 93 )};
 		box-sizing: border-box;
 
@@ -4889,7 +4889,7 @@ img.help_tip {
 			position: absolute;
 			bottom: -9999em;
 			left: 0;
-			background-color: #fafafa;
+			background-color: wc-shade(98);
 			border-right: 1px solid #{wc-shade( 93 )};
 		}
 
@@ -4969,7 +4969,7 @@ img.help_tip {
 			}
 
 			&.active a {
-				color: #555;
+				color: wc-shade( 33 );
 				position: relative;
 				background-color: #{wc-shade( 93 )};
 			}
@@ -5023,7 +5023,7 @@ img.help_tip {
 .woocommerce_options_panel,
 .panel {
 	padding: 9px;
-	color: #555;
+	color: wc-shade( 33 );
 
 	.form-field .woocommerce-help-tip {
 		font-size: 1.4em;
@@ -5596,7 +5596,7 @@ img.help_tip {
 					display: block;
 					font-size: 14px;
 					padding: 4px;
-					color: #555;
+					color: wc-shade( 33 );
 				}
 
 				select,
@@ -5649,7 +5649,7 @@ img.help_tip {
 
 	a {
 		padding: 0 10px 3px;
-		background: wc-shade( 0, black, 5% );
+		background: wc-shade( 0, 'black', 5% );
 		font-size: 16px;
 		font-weight: 400;
 		text-decoration: none;
@@ -5660,7 +5660,7 @@ img.help_tip {
 	a.disabled:focus,
 	a.disabled:hover {
 		color: #a0a5aa;
-		background: wc-shade( 0, black, 5% );
+		background: wc-shade( 0, 'black', 5% );
 	}
 }
 
@@ -5890,7 +5890,7 @@ img.tips {
 	text-align: center;
 	border-radius: 3px;
 	padding: 0.618em 1em;
-	box-shadow: 0 1px 3px wc-shade( 0, black, 20% );
+	box-shadow: 0 1px 3px wc-shade( 0, 'black', 20% );
 
 	code {
 		padding: 1px;
@@ -6121,7 +6121,7 @@ img.ui-datepicker-trigger {
 
 			li.chart-widget {
 				margin: 0 0 1em;
-				background: #fafafa;
+				background: wc-shade(98);
 				border: 1px solid wc-shade( 87 );
 
 				&::after {
@@ -6295,10 +6295,10 @@ img.ui-datepicker-trigger {
 				&:hover {
 					box-shadow:
 						inset 0 -1px 0 0 wc-shade( 87 ),
-						inset 300px 0 0 #{wc-hsl( 'orchid',  var(--wc--primary-sat), calc( var(--wc--primary-luma) - 5 ), .1 )};
+						inset 300px 0 0 wc-hsl( 'orchid',  var(--wc--primary-sat), calc( var(--wc--primary-luma) - 5 ), .1 );
 					border-right: 5px solid #{wc-hsl( 'orchid',  var(--wc--primary-sat), calc( var(--wc--primary-luma) - 5 ) )} !important;
 					padding-left: 1.5em;
-					color: #{wc-hsl( 'orchid',  var(--wc--primary-sat), calc( var(--wc--primary-luma) - 5 ) )};
+					color: wc-hsl( 'orchid',  var(--wc--primary-sat), calc( var(--wc--primary-luma) - 5 ) );
 				}
 			}
 		}
@@ -6440,17 +6440,17 @@ table.bar_chart {
 			width: 25%;
 			text-align: left !important;
 			font-weight: normal !important;
-			border-bottom: 1px solid #{wc-hsl( 'red',  100%, 95%)};
+			border-bottom: 1px solid wc-hsl( 'red',  100%, 95%);
 		}
 
 		td {
 			text-align: right;
 			line-height: 24px;
 			padding: 6px 6px 6px 0;
-			border-bottom: 1px solid #{wc-hsl( 'red',  100%, 95%)};
+			border-bottom: 1px solid wc-hsl( 'red',  100%, 95%);
 
 			span {
-				color: #{wc-hsl( 'orchid',  var(--wc--primary-sat), calc( var(--wc--primary-luma) - 10 ) )};
+				color: wc-hsl( 'orchid',  var(--wc--primary-sat), calc( var(--wc--primary-luma) - 10 ) );
 				display: block;
 			}
 
@@ -6464,13 +6464,13 @@ table.bar_chart {
 			position: relative;
 			text-align: left;
 			padding: 6px 6px 6px 0;
-			border-bottom: 1px solid #{wc-hsl( 'red',  100%, 95%)};
+			border-bottom: 1px solid wc-hsl( 'red',  100%, 95%);
 
 			span,
 			a {
 				text-decoration: none;
 				clear: both;
-				background: #{wc-hsl( 'orchid',  var(--wc--primary-sat), calc( var(--wc--primary-luma) - 10 ) )};
+				background: wc-hsl( 'orchid',  var(--wc--primary-sat), calc( var(--wc--primary-luma) - 10 ) );
 				float: left;
 				display: block;
 				line-height: 24px;
@@ -6532,7 +6532,7 @@ table.bar_chart {
 		&::before {
 			color: wc-shade( 87 );
 			text-shadow:
-				0 -1px 1px wc-shade( 0, black, 20% ),
+				0 -1px 1px wc-shade( 0, 'black', 20% ),
 				0 1px 0 wc-shade( 100 , 'white', 8% );
 			font-size: 8em;
 			display: block;
@@ -7011,7 +7011,7 @@ table.bar_chart {
 		padding: 1em 1.5em;
 		background: wc-shade( 99 );
 		border-top: 1px solid wc-shade( 87 );
-		box-shadow: 0 -4px 4px -4px wc-shade( 0, black, 10% );
+		box-shadow: 0 -4px 4px -4px wc-shade( 0, 'black', 10% );
 
 		.inner {
 			text-align: right;
@@ -7053,11 +7053,11 @@ table.bar_chart {
 }
 
 .select2-dropdown--below {
-	box-shadow: 0 1px 1px wc-shade( 0, black, 10% );
+	box-shadow: 0 1px 1px wc-shade( 0, 'black', 10% );
 }
 
 .select2-dropdown--above {
-	box-shadow: 0 -1px 1px wc-shade( 0, black, 10% );
+	box-shadow: 0 -1px 1px wc-shade( 0, 'black', 10% );
 }
 
 .select2-container {
@@ -7151,7 +7151,7 @@ table.bar_chart {
 	}
 
 	.select2-dropdown--below {
-		box-shadow: 0 0 0 1px var(--wc-blue), 0 2px 1px wc-shade( 0, black, 10% );
+		box-shadow: 0 0 0 1px var(--wc-blue), 0 2px 1px wc-shade( 0, 'black', 10% );
 
 		&::after {
 			top: -1px;
@@ -7159,7 +7159,7 @@ table.bar_chart {
 	}
 
 	.select2-dropdown--above {
-		box-shadow: 0 0 0 1px var(--wc-blue), 0 -2px 1px wc-shade( 0, black, 10% );
+		box-shadow: 0 0 0 1px var(--wc-blue), 0 -2px 1px wc-shade( 0, 'black', 10% );
 
 		&::after {
 			bottom: -1px;
@@ -7178,7 +7178,7 @@ table.bar_chart {
 
 		.select2-selection--single {
 			height: 30px;
-			border-color: #{wc-hsl( 'blue',  9%, 53%)};
+			border-color: wc-hsl( 'blue', 9%, 53%);
 
 			@media only screen and (max-width: 782px) {
 				height: 40px;
@@ -7228,7 +7228,7 @@ table.bar_chart {
 
 		.select2-selection--multiple {
 			min-height: 30px;
-			border-color: #{wc-hsl( 'blue',  9%, 53%)};
+			border-color: wc-hsl( 'blue', 9%, 53%);
 			border-radius: 4px;
 		}
 
@@ -7285,11 +7285,11 @@ table.bar_chart {
 			}
 
 			.select2-dropdown--below {
-				box-shadow: 0 0 0 1px $color, 0 2px 1px wc-shade( 0, black, 10% );
+				box-shadow: 0 0 0 1px $color, 0 2px 1px wc-shade( 0, 'black', 10% );
 			}
 
 			.select2-dropdown--above {
-				box-shadow: 0 0 0 1px $color, 0 -2px 1px wc-shade( 0, black, 10% );
+				box-shadow: 0 0 0 1px $color, 0 -2px 1px wc-shade( 0, 'black', 10% );
 			}
 
 			.select2-selection--single .select2-selection__rendered:hover {
@@ -7409,29 +7409,29 @@ table.bar_chart {
 		line-height: 1.5em !important;
 		height: auto !important;
 		border-radius: 4px;
-		background-color: #{wc-hsl( 'orchid',  calc(var(--wc--primary-sat) + 5%), calc( var(--wc--primary-luma) + 8% ) )};
-		border-color: var(--woocommerce);
+		background-color: wc-hsl( 'orchid',  calc(var(--wc--primary-sat) + 5%), calc( var(--wc--primary-luma) + 8% ) );
+		border-color: wc-hsl( 'orchid',  var(--wc--primary-sat), var(--wc--primary-luma) );
 		-webkit-box-shadow:
 			inset 0 1px 0 wc-shade( 100 , 'white', 25% ),
-			0 1px 0 var(--woocommerce);
-		box-shadow: inset 0 1px 0 wc-shade( 100 , 'white', 25% ), 0 1px 0 var(--woocommerce);
+			0 1px 0 wc-hsl( 'orchid',  var(--wc--primary-sat), var(--wc--primary-luma) );
+		box-shadow: inset 0 1px 0 wc-shade( 100 , 'white', 25% ), 0 1px 0 wc-hsl( 'orchid',  var(--wc--primary-sat), var(--wc--primary-luma) );
 		text-shadow:
-			0 -1px 1px var(--woocommerce),
-			1px 0 1px var(--woocommerce),
-			0 1px 1px var(--woocommerce),
-			-1px 0 1px var(--woocommerce);
+			0 -1px 1px wc-hsl( 'orchid',  var(--wc--primary-sat), var(--wc--primary-luma) ),
+			1px 0 1px wc-hsl( 'orchid',  var(--wc--primary-sat), var(--wc--primary-luma) ),
+			0 1px 1px wc-hsl( 'orchid',  var(--wc--primary-sat), var(--wc--primary-luma) ),
+			-1px 0 1px wc-hsl( 'orchid',  var(--wc--primary-sat), var(--wc--primary-luma) );
 		margin: 0;
 		opacity: 1;
 
 		&:hover,
 		&:focus,
 		&:active {
-			background: var(--woocommerce);
-			border-color: var(--woocommerce);
+			background: wc-hsl( 'orchid',  var(--wc--primary-sat), var(--wc--primary-luma) );
+			border-color: wc-hsl( 'orchid',  var(--wc--primary-sat), var(--wc--primary-luma) );
 			-webkit-box-shadow:
 				inset 0 1px 0 wc-shade( 100 , 'white', 25% ),
-				0 1px 0 var(--woocommerce);
-			box-shadow: inset 0 1px 0 wc-shade( 100 , 'white', 25% ), 0 1px 0 var(--woocommerce);
+				0 1px 0 wc-hsl( 'orchid',  var(--wc--primary-sat), var(--wc--primary-luma) );
+			box-shadow: inset 0 1px 0 wc-shade( 100 , 'white', 25% ), 0 1px 0 wc-hsl( 'orchid',  var(--wc--primary-sat), var(--wc--primary-luma) );
 		}
 	}
 
@@ -7462,8 +7462,8 @@ table.bar_chart {
 		overflow: hidden;
 		padding: 0;
 		margin: 0 0 16px;
-		box-shadow: 0 1px 3px wc-shade( 0, black, 13% );
-		color: #555;
+		box-shadow: 0 1px 3px wc-shade( 0, 'black', 13% );
+		color: wc-shade( 33 );
 		text-align: left;
 
 		header {
@@ -7478,7 +7478,7 @@ table.bar_chart {
 
 		h2 {
 			margin: 0 0 24px;
-			color: #555;
+			color: wc-shade( 33 );
 			font-size: 24px;
 			font-weight: normal;
 			line-height: 1em;
@@ -7487,7 +7487,7 @@ table.bar_chart {
 		p {
 			line-height: 1.75em;
 			font-size: 16px;
-			color: #555;
+			color: wc-shade( 33 );
 			margin: 0 0 24px;
 		}
 
@@ -7508,7 +7508,7 @@ table.bar_chart {
 			padding: 0 0 24px 0;
 
 			label {
-				color: #555;
+				color: wc-shade( 33 );
 				font-weight: normal;
 			}
 
@@ -7526,10 +7526,10 @@ table.bar_chart {
 
 			.woocommerce-importer-file-url-field-wrapper {
 				border: 1px solid wc-shade( 87 );
-				-webkit-box-shadow: inset 0 1px 2px wc-shade( 0, black, 7% );
-				box-shadow: inset 0 1px 2px wc-shade( 0, black, 7% );
+				-webkit-box-shadow: inset 0 1px 2px wc-shade( 0, 'black', 7% );
+				box-shadow: inset 0 1px 2px wc-shade( 0, 'black', 7% );
 				background-color: var(--wc-content-bg);
-				color: #32373c;
+				color: wc-hsl( 'blue', 10%, 22%);
 				outline: 0;
 				line-height: 1;
 				display: block;
@@ -7718,7 +7718,7 @@ table.bar_chart {
 }
 
 .wc-quick-edit-warning {
-	color: wc-hsl( red , 100%, 30%);
+	color: wc-hsl( 'red' , 100%, 30%);
 	font-weight: bold;
 }
 

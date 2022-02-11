@@ -11,8 +11,8 @@
 $headings: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",sans-serif;
 $body: "NonBreakingSpaceOverride", "Hoefler Text", "Baskerville Old Face", Garamond, "Times New Roman", serif;
 
-$body-color: #111;
-$highlights-color: #0073aa;
+$body-color: wc-shade( 7 );
+$highlights-color: wc-hsl( 'blue', 100%, 33% );
 
 :root {
 	--wc--black-luma: 7;
@@ -146,7 +146,7 @@ a.button {
 		}
 
 		&.button {
-			background: #111;
+			background: wc-shade( 7 );
 		}
 	}
 }
@@ -840,7 +840,7 @@ table.variations {
 				font-weight: 600;
 
 				&:hover {
-					color: #005177;
+					color: wc-hsl( 'blue', 100%, 23% );
 					text-decoration: underline;
 				}
 			}
@@ -1032,9 +1032,9 @@ table.variations {
 }
 
 .woocommerce-terms-and-conditions {
-	border: 1px solid wc-shade( 0, black, 20% );
-	box-shadow: inset 0 1px 2px wc-shade( 0, black, 10% );
-	background: wc-shade( 0, black, 5% );
+	border: 1px solid wc-shade( 0,'black', 20% );
+	box-shadow: inset 0 1px 2px wc-shade( 0,'black', 10% );
+	background: wc-shade( 0,'black', 5% );
 }
 
 .woocommerce-terms-and-conditions-link {

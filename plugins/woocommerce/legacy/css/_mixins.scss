@@ -130,12 +130,12 @@
 
 	@if lightness($a) >= 65% {
 
-		@include text_shadow(0, -1px, 0, wc-shade( 0, black, $opacity ));
+		@include text_shadow(0, -1px, 0, wc-shade( 0,'black', $opacity ));
 	}
 
 	@else {
 
-		@include text_shadow(0, 1px, 0, wc-shade( 0, black, $opacity ));
+		@include text_shadow(0, 1px, 0, wc-shade( 100,'white', $opacity ));
 	}
 }
 
@@ -329,7 +329,7 @@
 	@return unquote("hsl(#{$h}, #{$s}, #{$l})");
 }
 
-@function wc-hsl(  $h, $s: 100%, $l: 50%, $a : false ) {
+@function wc-hsl( $h, $s: 100%, $l: 50%, $a : false ) {
 
 	@if (type_of($h) == string) {
 		$h: 'var(--wc--#{$h}-hue)';

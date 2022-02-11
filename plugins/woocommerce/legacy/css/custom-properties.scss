@@ -5,7 +5,7 @@
 @import "mixins";
 
 :root {
-	--woocommerce: #{wc-hsl(  312, 26%, 52% )};
+	--woocommerce: #{wc-hsl( 312, 26%, 52% )};
 
 	// base color values
 	--wc--primary-hue: 312;
@@ -37,8 +37,6 @@
 	--wc--success-hue: var(--wc--green-hue);
 	--wc--info-hue: var(--wc--blue-hue);
 
-	--wc-tips--color: var(--wc-blue);
-
 	// WooCommerce base colors
 	--wc-red: #{wc-hsl( 'red', 80%)};
 	--wc-deep-orange: #{wc-hsl( 'deep-orange', 80%)};
@@ -47,6 +45,7 @@
 	--wc-green: #{wc-hsl( 'green', 50%)};
 	--wc-blue: #{wc-hsl( 'blue', 60%)};
 	--wc-purple: #{wc-hsl( 'purple', 36%, 42%)};
+	--wc-woocommerce: #{wc-hsl( 'orchid', 26%, 52%)};
 
 	--wc-black: hsl(0,0%,var(--wc--black-luma));
 	--wc-white: hsl(0,0%,var(--wc--white-luma));
@@ -68,23 +67,25 @@
 
 	--wc-content-bg: var(--wc-white);
 	--wc-subtext: var(--wc-gray);
+
+	--wc-tips--color: var(--wc-blue);
 }
 
 // GENERATE CUSTOM PROPERTIES - color variation with opacity
-// #{gen-custom-prop( $wc-primary, false, -50%, false, 25% )}; // the primary color desaturated at 50% and with 25% of opacity
+// #{gen-custom-prop( $wc-primary, false, -50%, false, 25% )}; // the primary color 50% desaturated and 25% opacity
 
 // WC-HSL - generate variations of a color
-// wc-hsl( xyz, 85%, 83%);
+// wc-hsl( 'xyz', 85%, 83%);
 // note: this will output the xyz color hue with 85% of saturation and 83% of lightness
 // "xyz" is a short for --wc--xyz-hue variable so you need to define a --wc--COLOR-hue for each color used.
 
-// WC-GRAY - generate tints and tones of a color (with opacity)
+// WC-SHADE - generate tints and tones of a color (with opacity)
 // A) passing a number 0-100 will output the corresponding shade of gray
 // wc-shade( 80 ); // gray 80
 // B) pass a shade amount, the base color and optionally an opacity
 // $shade - the shade of the yxz tone (not a color! this function use the lightness and not the hue)
 // $opacity - the opacity of that shade
 // "xyz" is a short for --wc--xyz-luma variable so you need to define a --wc--COLOR-luma for each tone used.
-// wc-shade( $shade, xyz, $opacity );
-// wc-shade( $shade, xyz, 10% ); // rgba(0,0,0,.1);
+// wc-shade( $shade, 'xyz', $opacity );
+// wc-shade( $shade, 'xyz', 10% ); // rgba(0,0,0,.1);
 

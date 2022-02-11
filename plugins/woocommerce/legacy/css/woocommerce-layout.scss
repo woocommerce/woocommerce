@@ -426,7 +426,7 @@
 		}
 
 		.show-password-input.display-password::after {
-			color: #585858;
+			color: wc-shade( 34 );
 		}
 	}
 
@@ -592,7 +592,7 @@
 		padding-top: 7.6923%;
 		margin-bottom: 7.6923%;
 		background: var(--wc-content-bg);
-		box-shadow: 0 0 1px wc-shade( 0, black, 15% );
+		box-shadow: 0 0 1px wc-shade( 0,'black', 15% );
 
 		.page-title {
 			margin-left: 0;
