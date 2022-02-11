@@ -1,4 +1,4 @@
-== 3.2.0 02/01/2022 == 
+== 3.2.0 02/08/2022 == 
 
 - Fix: changed email validation in Store Details onboarding task to more closely match PHP backend validation. #8197
 - Fix: Disallow whitespace as the platform name input. #8090
@@ -6,6 +6,7 @@
 - Fix: Fix category report query returns invalid net sales. #8153
 - Fix: Fix clicking the error message opens the dropdown. #8094
 - Fix: Fix country/region selection not preserved in store details task. #8228
+- Fix: Fixed email address not being optional in OBW #8263
 - Fix: Fix get_automated_tax_supported_countries doesn't include UK. #8180
 - Fix: Fix incorrect date options when the "Default Date Range" is set from Analytics settings. #8189
 - Fix: Fix incorrectly displayed note created date. #8179
@@ -13,6 +14,7 @@
 - Fix: Fix incorrect total count of downloads on the analytics download report. #8182
 - Fix: Fix misaligned status column on order report. #8121
 - Fix: Fix shipping rate error message overlaps with the 'Proceed' button. #8165
+- Fix: Fix Shipping task sometimes skipping the set shipping costs step. #8260
 - Fix: Fix Uncaught TypeError count(NULL) for php8+ in Marketing.php. #8213
 - Fix: Fix undefined derived_currency value for the track 'wcadmin_storeprofiler_store_details_continue'. #8193
 - Fix: Fix variations table product filter query. #8120
@@ -21,6 +23,7 @@
 - Fix: Remove border between email input and newsletter checkbox in OBW store details. #8148
 - Fix: Reset "install_timestamp" if it's not numeric to avoid TypeError. #8100
 - Fix: Truncate the long site title with an ellipses on the second line. #8112
+- Add: Add additional store profiler track for the business details tab. #8265
 - Add: Add countries data store #8119
 - Add: Add extra tracking for plugin installation performance during onboarding. #8042
 - Add: Adding tooltip to describe the lack of refund deductions from revenue summaries. #8187
@@ -40,6 +43,7 @@
 - Enhancement: Enhance report chart i18n support. #8129
 - Enhancement: Make ExPlat request URL args filterable. Added woocommerce_explat_request_args filter. #8231
 - Enhancement: Show MailPoet in Installed marketing extensions. #8091
+- Enhancement: Update headercard to use filter to add ExPlat parameter #8233
 
 == 3.1.0 01/25/2022 == 
 

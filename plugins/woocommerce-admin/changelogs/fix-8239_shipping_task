@@ -1,4 +1,0 @@
-Significance: patch
-Type: Fix
-
-Fix Shipping task sometimes skipping the set shipping costs step. #8260

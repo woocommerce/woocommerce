@@ -65,6 +65,16 @@
 9. Go to **Marketing > Overview**
 10. See MailPoet links to Docs, Support, and Settings
 
+### Add additional store profiler track for the business details tab. #8265
+
+1. Open your console and make sure you have tracks outputted ( `localStorage.setItem( 'debug', 'wc-admin:*' );` )
+2. Go to the Onboarding wizard and step through until the business details `/wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard&step=business-details`
+3. A `storeprofiler_step_view` should be triggered with `business-details` as the step.
+4. Fill out the dropdowns and click continue
+5. A `storeprofiler_step_complete` should of fired with a `step` prop of `business-details`. A new `storeprofiler_step_view` should of also fired with `business-features` as a step. Now select some free features and click continue.
+6. A `storeprofiler_step_complete` should of fired with a `step` prop of `business-features`.
+7. Check the general styling of the business features tab to make sure things look good still.
+
 ## 3.1.0
 
 ### Inbox - 320 character limit
