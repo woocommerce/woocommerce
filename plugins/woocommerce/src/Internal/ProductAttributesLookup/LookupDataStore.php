@@ -89,7 +89,7 @@ class LookupDataStore {
 							sprintf(
 								"<p><strong style='color: #E00000'>%s</strong></p><p>%s</p>",
 								__( 'WARNING: The product attributes lookup table regeneration process was aborted.', 'woocommerce' ),
-								__( 'This means that the table is probably in an inconsistent state. It\'s recommended to run a new regeneration process (Status - Tools - Regenerate the product attributes lookup table) before enabling the table usage.', 'woocommerce' )
+								__( 'This means that the table is probably in an inconsistent state. It\'s recommended to run a new regeneration process or to resume the aborted process (Status - Tools - Regenerate the product attributes lookup table/Resume the product attributes lookup table regeneration) before enabling the table usage.', 'woocommerce' )
 							) : null;
 
 						$settings[] = array(

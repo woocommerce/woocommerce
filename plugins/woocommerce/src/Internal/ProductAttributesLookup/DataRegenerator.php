@@ -284,7 +284,7 @@ END;
 		$products_already_processed += count( $product_ids );
 		update_option( 'woocommerce_attribute_lookup_processed_count', $products_already_processed );
 
-		$last_product_id_to_process = get_option( 'woocommerce_attribute_lookup_last_product_id_to_process' );
+		$last_product_id_to_process = get_option( 'woocommerce_attribute_lookup_last_product_id_to_process', PHP_INT_MAX );
 		return end( $product_ids ) < $last_product_id_to_process;
 	}
 
@@ -312,6 +312,7 @@ END;
 		}
 
 		$generation_is_in_progress = $this->data_store->regeneration_is_in_progress();
+		$generation_was_aborted    = $this->data_store->regeneration_was_aborted();
 
 		$entry = array(
 			'name'             => __( 'Regenerate the product attributes lookup table', 'woocommerce' ),
@@ -340,10 +341,41 @@ END;
 			$entry['disabled'] = true;
 		} else {
 			$entry['button'] = __( 'Regenerate', 'woocommerce' );
-
 		}
 
 		$tools_array['regenerate_product_attributes_lookup_table'] = $entry;
+
+		if ( $generation_is_in_progress ) {
+			$entry = array(
+				'name'             => __( 'Abort the product attributes lookup table regeneration', 'woocommerce' ),
+				'desc'             => __( 'This tool will abort the regenerate product attributes lookup table regeneration. After this is done the process can be either started over, or resumed to continue where it stopped.', 'woocommerce' ),
+				'requires_refresh' => true,
+				'callback'         => function() {
+					$this->abort_regeneration_from_tools_page();
+					return __( 'Product attributes lookup table regeneration process has been aborted.', 'woocommerce' );
+				},
+				'button'           => __( 'Abort', 'woocommerce' ),
+			);
+			$tools_array['abort_product_attributes_lookup_table_regeneration'] = $entry;
+		} elseif ( $generation_was_aborted ) {
+			$processed_count = get_option( 'woocommerce_attribute_lookup_processed_count', 0 );
+			$entry           = array(
+				'name'             => __( 'Resume the product attributes lookup table regeneration', 'woocommerce' ),
+				'desc'             =>
+					sprintf(
+						/* translators: %1$s = count of products already processed. */
+						__( 'This tool will resume the product attributes lookup table regeneration at the point in which it was aborted (%1$s products were already processed).', 'woocommerce' ),
+						$processed_count
+					),
+				'requires_refresh' => true,
+				'callback'         => function() {
+					$this->resume_regeneration_from_tools_page();
+					return __( 'Product attributes lookup table regeneration process has been resumed.', 'woocommerce' );
+				},
+				'button'           => __( 'Resume', 'woocommerce' ),
+			);
+			$tools_array['resume_product_attributes_lookup_table_regeneration'] = $entry;
+		}
 
 		return $tools_array;
 	}
@@ -354,11 +386,9 @@ END;
 	 * @throws \Exception The regeneration is already in progress.
 	 */
 	private function initiate_regeneration_from_tools_page() {
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-		if ( ! isset( $_REQUEST['_wpnonce'] ) || false === wp_verify_nonce( $_REQUEST['_wpnonce'], 'debug_action' ) ) {
-			throw new \Exception( 'Invalid nonce' );
-		}
+		$this->verify_tool_execution_nonce();
 
+		//phpcs:disable WordPress.Security.NonceVerification.Recommended
 		if ( isset( $_REQUEST['regenerate_product_attribute_lookup_data_product_id'] ) ) {
 			$product_id = (int) $_REQUEST['regenerate_product_attribute_lookup_data_product_id'];
 			$this->check_can_do_lookup_table_regeneration( $product_id );
@@ -367,6 +397,7 @@ END;
 			$this->check_can_do_lookup_table_regeneration();
 			$this->initiate_regeneration();
 		}
+		//phpcs:enable WordPress.Security.NonceVerification.Recommended
 	}
 
 	/**
@@ -399,6 +430,63 @@ END;
 		}
 		if ( $product_id && ! wc_get_product( $product_id ) ) {
 			throw new \Exception( "Can't do product attribute lookup data regeneration: product doesn't exist" );
+		}
+	}
+
+	/**
+	 * Callback to abort the regeneration process from the Status - Tools page.
+	 *
+	 * @throws \Exception The lookup table doesn't exist, or there's no regeneration process in progress to abort.
+	 */
+	private function abort_regeneration_from_tools_page() {
+		$this->verify_tool_execution_nonce();
+
+		if ( ! $this->data_store->check_lookup_table_exists() ) {
+			throw new \Exception( "Can't abort the product attribute lookup data regeneration process: lookup table doesn't exist" );
+		}
+		if ( ! $this->data_store->regeneration_is_in_progress() ) {
+			throw new \Exception( "Can't abort the product attribute lookup data regeneration process since it's not currently in progress" );
+		}
+
+		$queue = WC()->get_instance_of( \WC_Queue::class );
+		$queue->cancel_all( 'woocommerce_run_product_attribute_lookup_regeneration_callback' );
+		$this->data_store->unset_regeneration_in_progress_flag();
+		$this->data_store->set_regeneration_aborted_flag();
+		$this->enable_or_disable_lookup_table_usage( false );
+
+		// Note that we are NOT deleting the options that track the regeneration progress (processed count, last product id to process).
+		// This is on purpose so that the regeneration can be resumed where it stopped.
+	}
+
+	/**
+	 * Callback to resume the regeneration process from the Status - Tools page.
+	 *
+	 * @throws \Exception The lookup table doesn't exist, or a regeneration process is already in place.
+	 */
+	private function resume_regeneration_from_tools_page() {
+		$this->verify_tool_execution_nonce();
+
+		if ( ! $this->data_store->check_lookup_table_exists() ) {
+			throw new \Exception( "Can't resume the product attribute lookup data regeneration process: lookup table doesn't exist" );
+		}
+		if ( $this->data_store->regeneration_is_in_progress() ) {
+			throw new \Exception( "Can't resume the product attribute lookup data regeneration process: regeneration is already in progress" );
+		}
+
+		$this->data_store->unset_regeneration_aborted_flag();
+		$this->data_store->set_regeneration_in_progress_flag();
+		$this->enqueue_regeneration_step_run();
+	}
+
+	/**
+	 * Verify the validity of the nonce received when executing a tool from the Status - Tools page.
+	 *
+	 * @throws \Exception Missing or invalid nonce received.
+	 */
+	private function verify_tool_execution_nonce() {
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+		if ( ! isset( $_REQUEST['_wpnonce'] ) || false === wp_verify_nonce( $_REQUEST['_wpnonce'], 'debug_action' ) ) {
+			throw new \Exception( 'Invalid nonce' );
 		}
 	}
 }
