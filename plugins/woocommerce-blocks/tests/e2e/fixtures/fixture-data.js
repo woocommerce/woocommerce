@@ -302,8 +302,8 @@ const PageSettings = ( pages = [] ) => {
  * location, and shipping method endpoint.
  *
  * @see {@link https://woocommerce.github.io/woocommerce-rest-api-docs/#create-a-shipping-zone|Create a shipping zone}
- *  * @see {@link https://woocommerce.github.io/woocommerce-rest-api-docs/#update-a-locations-of-a-shipping-zone|Update a locations of a shipping zone}
- *  * @see {@link https://woocommerce.github.io/woocommerce-rest-api-docs/#include-a-shipping-method-to-a-shipping-zone|Include a shipping method to a shipping zone}
+ * @see {@link https://woocommerce.github.io/woocommerce-rest-api-docs/#update-a-locations-of-a-shipping-zone|Update a locations of a shipping zone}
+ * @see {@link https://woocommerce.github.io/woocommerce-rest-api-docs/#include-a-shipping-method-to-a-shipping-zone|Include a shipping method to a shipping zone}
  */
 const Shipping = () => [
 	{
