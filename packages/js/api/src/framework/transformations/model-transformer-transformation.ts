@@ -43,6 +43,10 @@ export class ModelTransformerTransformation< T extends Model > implements ModelT
 	 * @template T
 	 */
 	public constructor( property: string, modelClass: ModelConstructor< T >, transformer: ModelTransformer< T > ) {
+		// Developer-friendly error to make sure this doesn't go unnoticed.
+		if (property.includes('_')) {
+			throw new Error('The property must be camelCase');
+		}
 		this.property = property;
 		this.modelClass = modelClass;
 		this.transformer = transformer;

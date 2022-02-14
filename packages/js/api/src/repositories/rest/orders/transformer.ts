@@ -8,14 +8,17 @@ import {
 } from '../../../framework';
 import {
 	Order,
-	OrderAddress,
+	BillingOrderAddress,
+	ShippingOrderAddress,
 	OrderCouponLine,
 	OrderFeeLine,
 	OrderLineItem,
 	OrderRefundLine,
 	OrderShippingLine,
 	OrderTaxRate,
+	MetaData,
 } from '../../../models';
+import {createMetaDataTransformer} from "../shared";
 
 /**
  * Creates a transformer for an order object.
@@ -26,13 +29,15 @@ export function createOrderTransformer(): ModelTransformer< Order > {
 	return new ModelTransformer(
 		[
 			new IgnorePropertyTransformation( [ 'date_created', 'date_modified' ] ),
-			new ModelTransformerTransformation( 'billing', OrderAddress, createOrderAddressTransformer() ),
-			new ModelTransformerTransformation( 'tax_lines', OrderTaxRate, createOrderTaxRateTransformer() ),
+			new ModelTransformerTransformation( 'billing', BillingOrderAddress, createBillingAddressTransformer() ),
+			new ModelTransformerTransformation( 'shipping', ShippingOrderAddress, createShippingAddressTransformer() ),
+			new ModelTransformerTransformation( 'taxLines', OrderTaxRate, createOrderTaxRateTransformer() ),
 			new ModelTransformerTransformation( 'refunds', OrderRefundLine, createOrderRefundLineTransformer() ),
-			new ModelTransformerTransformation( 'coupon_lines', OrderCouponLine, createOrdeCouponLineTransformer() ),
-			new ModelTransformerTransformation( 'fee_lines', OrderFeeLine, createOrderFeeLineTransformer() ),
-			new ModelTransformerTransformation( 'line_items', OrderLineItem, createOrderLineItemTransformer() ),
-			new ModelTransformerTransformation( 'shipping_lines', OrderShippingLine, createOrderShippingItemTransformer() ),
+			new ModelTransformerTransformation( 'couponLines', OrderCouponLine, createOrdeCouponLineTransformer() ),
+			new ModelTransformerTransformation( 'feeLines', OrderFeeLine, createOrderFeeLineTransformer() ),
+			new ModelTransformerTransformation( 'lineItems', OrderLineItem, createOrderLineItemTransformer() ),
+			new ModelTransformerTransformation( 'shippingLines', OrderShippingLine, createOrderShippingItemTransformer() ),
+			new ModelTransformerTransformation( 'metaData', MetaData, createMetaDataTransformer() ),
 
 			new PropertyTypeTransformation(
 				{
@@ -67,6 +72,12 @@ export function createOrderTransformer(): ModelTransformer< Order > {
 					paymentMethod: 'payment_method',
 					transactionId: 'transaction_id',
 					setPaid: 'set_paid',
+					lineItems: 'line_items',
+					taxLines: 'tax_lines',
+					shippingLines: 'shipping_lines',
+					feeLines: 'fee_lines',
+					couponLines: 'coupon_lines',
+					metaData: 'meta_data',
 				},
 			),
 		],
@@ -78,7 +89,7 @@ export function createOrderTransformer(): ModelTransformer< Order > {
  *
  * @return {ModelTransformer} The created transformer.
  */
-export function createOrderAddressTransformer(): ModelTransformer< OrderAddress > {
+export function createBillingAddressTransformer(): ModelTransformer< BillingOrderAddress > {
 	return new ModelTransformer(
 		[
 			new PropertyTypeTransformation(
@@ -92,9 +103,45 @@ export function createOrderAddressTransformer(): ModelTransformer< OrderAddress 
 					state: PropertyType.String,
 					postCode: PropertyType.String,
 					country: PropertyType.String,
+					phone: PropertyType.String,
+					email: PropertyType.String,
 				},
 			),
-			new KeyChangeTransformation< OrderAddress >(
+			new KeyChangeTransformation< BillingOrderAddress >(
+				{
+					firstName: 'first_name',
+					lastName: 'last_name',
+					address1: 'address_1',
+					address2: 'address_2',
+					postCode: 'postcode',
+				},
+			),
+		],
+	);
+}
+
+/**
+ * Creates a transformer for an order address object.
+ *
+ * @return {ModelTransformer} The created transformer.
+ */
+export function createShippingAddressTransformer(): ModelTransformer< ShippingOrderAddress > {
+	return new ModelTransformer(
+		[
+			new PropertyTypeTransformation(
+				{
+					firstName: PropertyType.String,
+					lastName: PropertyType.String,
+					company: PropertyType.String,
+					address1: PropertyType.String,
+					address2: PropertyType.String,
+					city: PropertyType.String,
+					state: PropertyType.String,
+					postCode: PropertyType.String,
+					country: PropertyType.String
+				},
+			),
+			new KeyChangeTransformation< ShippingOrderAddress >(
 				{
 					firstName: 'first_name',
 					lastName: 'last_name',
@@ -129,6 +176,7 @@ function createOrderTaxRateTransformer(): ModelTransformer< OrderTaxRate > {
 			new KeyChangeTransformation< OrderTaxRate >(
 				{
 					rateCode: 'rate_code',
+					ratePercent: 'rate_percent',
 					rateId: 'rate_id',
 					compoundRate: 'compound',
 					taxTotal: 'tax_total',
@@ -165,16 +213,18 @@ function createOrderRefundLineTransformer(): ModelTransformer< OrderRefundLine >
 function createOrdeCouponLineTransformer(): ModelTransformer< OrderCouponLine > {
 	return new ModelTransformer(
 		[
+			new ModelTransformerTransformation( 'metaData', MetaData, createMetaDataTransformer() ),
 			new PropertyTypeTransformation(
 				{
 					code: PropertyType.String,
-					discount: PropertyType.Integer,
+					discount: PropertyType.String,
 					discountTax: PropertyType.String,
 				},
 			),
 			new KeyChangeTransformation< OrderCouponLine >(
 				{
 					discountTax: 'discount_tax',
+					metaData: 'meta_data'
 				},
 			),
 		],
@@ -260,7 +310,7 @@ function createOrderShippingItemTransformer(): ModelTransformer< OrderShippingLi
 			new PropertyTypeTransformation(
 				{
 					methodTitle: PropertyType.String,
-					methodId: PropertyType.String,
+					methodId: PropertyType.Integer,
 					total: PropertyType.String,
 					totalTax: PropertyType.String,
 				},

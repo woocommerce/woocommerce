@@ -28,10 +28,15 @@ export type OrderDataUpdateParams = 'id' | 'parentId' | 'status' | 'currency' | 
 export type OrderTotalUpdateParams = 'total' | 'totalTax';
 
 /**
- * Order address properties
+ * Billing address properties
  */
-export type OrderAddressUpdateParams = 'firstName' | 'lastName' | 'companyName' | 'address1'
-	| 'address2' | 'city' | 'state' | 'postCode' | 'countryCode' | 'email' | 'phone';
+export type BillingOrderAddressUpdateParams = ShippingOrderAddressUpdateParams | 'email' | 'phone';
+
+/**
+ * Shipping address properties
+ */
+export type ShippingOrderAddressUpdateParams = 'firstName' | 'lastName' | 'company' | 'address1'
+	| 'address2' | 'city' | 'state' | 'postCode' | 'country';
 
 /**
  * Line item properties
