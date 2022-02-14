@@ -16,6 +16,10 @@ import { HTMLAttributes } from 'react';
  */
 import './style.scss';
 import { Attributes } from './types';
+import {
+	useColorProps,
+	useTypographyProps,
+} from '../../../../hooks/style-attributes';
 
 type Props = Attributes & HTMLAttributes< HTMLDivElement >;
 
@@ -26,9 +30,13 @@ type Props = Attributes & HTMLAttributes< HTMLDivElement >;
  * @param {string} [props.className] CSS Class name for the component.
  * @return {*} The component.
  */
-const Block = ( { className }: Props ): JSX.Element | null => {
+const Block = ( props: Props ): JSX.Element | null => {
+	const { className } = props;
 	const { parentClassName } = useInnerBlockLayoutContext();
 	const { product } = useProductDataContext();
+
+	const colorProps = useColorProps( props );
+	const typographyProps = useTypographyProps( props );
 
 	if ( isEmpty( product.categories ) ) {
 		return null;
@@ -39,10 +47,12 @@ const Block = ( { className }: Props ): JSX.Element | null => {
 			className={ classnames(
 				className,
 				'wc-block-components-product-category-list',
+				colorProps.className,
 				{
 					[ `${ parentClassName }__product-category-list` ]: parentClassName,
 				}
 			) }
+			style={ { ...colorProps.style, ...typographyProps.style } }
 		>
 			{ __( 'Categories:', 'woo-gutenberg-products-block' ) }{ ' ' }
 			<ul>
