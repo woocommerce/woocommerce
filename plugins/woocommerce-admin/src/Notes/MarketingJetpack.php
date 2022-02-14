@@ -84,7 +84,7 @@ class MarketingJetpack {
 		}
 
 		// Check requirements.
-		if ( ! self::is_wc_admin_active_in_date_range( 'week-1-4' ) || ! self::can_be_added() || self::has_backups() ) {
+		if ( ! self::is_wc_admin_active_in_date_range( 'week-1-4', DAY_IN_SECONDS * 3 ) || ! self::can_be_added() || self::has_backups() ) {
 			return;
 		}
 
@@ -102,6 +102,13 @@ class MarketingJetpack {
 		$note->set_content( __( 'Store downtime means lost sales. One-click restores get you back online quickly if something goes wrong.', 'woocommerce-admin' ) );
 		$note->set_type( Note::E_WC_ADMIN_NOTE_MARKETING );
 		$note->set_name( self::NOTE_NAME );
+		$note->set_layout( 'thumbnail' );
+		$note->set_image(
+			plugins_url(
+				'/images/admin_notes/marketing-jetpack-2x.png',
+				WC_ADMIN_PLUGIN_FILE
+			)
+		);
 		$note->set_content_data( (object) array() );
 		$note->set_source( 'woocommerce-admin-notes' );
 		$note->add_action(
