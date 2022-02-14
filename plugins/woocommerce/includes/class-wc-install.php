@@ -9,7 +9,6 @@
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper as WCConnectionHelper;
-use Automattic\WooCommerce\Utilities\DBUtil;
 
 defined( 'ABSPATH' ) || exit;
 
