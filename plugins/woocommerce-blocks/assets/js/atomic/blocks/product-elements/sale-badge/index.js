@@ -14,16 +14,40 @@ import {
 	BLOCK_ICON as icon,
 	BLOCK_DESCRIPTION as description,
 } from './constants';
+import { Save } from './save';
 
 const blockConfig = {
 	title,
 	description,
 	icon: { src: icon },
+	apiVersion: 2,
 	supports: {
 		html: false,
+		color: {
+			gradients: true,
+			background: true,
+			link: false,
+			__experimentalSkipSerialization: true,
+		},
+		typography: {
+			fontSize: true,
+			__experimentalSkipSerialization: true,
+		},
+		__experimentalBorder: {
+			color: true,
+			radius: true,
+			width: true,
+			__experimentalSkipSerialization: true,
+		},
+		spacing: {
+			padding: true,
+			__experimentalSkipSerialization: true,
+		},
+		__experimentalSelector: '.wc-block-components-product-sale-badge',
 	},
 	attributes,
 	edit,
+	save: Save,
 };
 
 registerBlockType( 'woocommerce/product-sale-badge', {

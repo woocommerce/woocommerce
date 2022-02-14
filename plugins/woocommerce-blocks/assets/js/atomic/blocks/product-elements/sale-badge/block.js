@@ -15,6 +15,12 @@ import { withProductDataContext } from '@woocommerce/shared-hocs';
  * Internal dependencies
  */
 import './style.scss';
+import {
+	useBorderProps,
+	useColorProps,
+	useSpacingProps,
+	useTypographyProps,
+} from '../../../../hooks/style-attributes';
 
 /**
  * Product Sale Badge Block Component.
@@ -24,9 +30,15 @@ import './style.scss';
  * @param {string} [props.align]     Alignment of the badge.
  * @return {*} The component.
  */
-const Block = ( { className, align } ) => {
+const Block = ( props ) => {
+	const { className, align } = props;
 	const { parentClassName } = useInnerBlockLayoutContext();
 	const { product } = useProductDataContext();
+	const borderProps = useBorderProps( props );
+	const colorProps = useColorProps( props );
+
+	const typographyProps = useTypographyProps( props );
+	const spacingProps = useSpacingProps( props );
 
 	if ( ! product.id || ! product.on_sale ) {
 		return null;
@@ -45,8 +57,16 @@ const Block = ( { className, align } ) => {
 				alignClass,
 				{
 					[ `${ parentClassName }__product-onsale` ]: parentClassName,
-				}
+				},
+				colorProps.className,
+				borderProps.className
 			) }
+			style={ {
+				...colorProps.style,
+				...borderProps.style,
+				...typographyProps.style,
+				...spacingProps.style,
+			} }
 		>
 			<Label
 				label={ __( 'Sale', 'woo-gutenberg-products-block' ) }
