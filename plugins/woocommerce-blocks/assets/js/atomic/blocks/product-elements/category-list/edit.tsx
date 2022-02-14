@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Disabled } from '@wordpress/components';
 import EditProductLink from '@woocommerce/editor-components/edit-product-link';
+import { useBlockProps } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
@@ -18,13 +19,15 @@ interface Props {
 }
 
 const Edit = ( { attributes }: Props ): JSX.Element => {
+	const blockProps = useBlockProps();
+
 	return (
-		<>
+		<div { ...blockProps }>
 			<EditProductLink />
 			<Disabled>
 				<Block { ...attributes } />
 			</Disabled>
-		</>
+		</div>
 	);
 };
 
