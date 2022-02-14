@@ -13,7 +13,6 @@ import {
 import { getSettingWithCoercion } from '@woocommerce/settings';
 import { isBoolean, isString } from '@woocommerce/types';
 import {
-	RawHTML,
 	unmountComponentAtNode,
 	useCallback,
 	useEffect,
@@ -193,10 +192,8 @@ const MiniCartBlock = ( {
 				<div
 					className="wc-block-mini-cart__template-part"
 					ref={ contentsRef }
-				>
-					{ /* @todo The `div` wrapper of RawHTML isn't removed on the front end. */ }
-					<RawHTML>{ contents }</RawHTML>
-				</div>
+					dangerouslySetInnerHTML={ { __html: contents } }
+				></div>
 			</Drawer>
 		</>
 	);
