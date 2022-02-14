@@ -153,6 +153,7 @@ final class BlockTypesController {
 	protected function get_block_types() {
 		global $wp_version, $pagenow;
 
+		// @todo Add a comment why some atomic blocks are included in this array.
 		$block_types = [
 			'AllReviews',
 			'FeaturedCategory',
@@ -178,6 +179,7 @@ final class BlockTypesController {
 			'ProductTitle',
 			'ProductSummary',
 			'ProductStockIndicator',
+			'ProductSaleBadge',
 		];
 
 		if ( Package::feature()->is_feature_plugin_build() ) {
@@ -233,7 +235,6 @@ final class BlockTypesController {
 			'product-image',
 			'product-price',
 			'product-rating',
-			'product-sale-badge',
 			'product-sku',
 			'product-category-list',
 			'product-tag-list',

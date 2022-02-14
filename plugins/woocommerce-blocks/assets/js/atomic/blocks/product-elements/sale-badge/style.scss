@@ -13,4 +13,10 @@
 	font-weight: 600;
 	z-index: 9;
 	position: static;
+
+	span {
+		color: inherit;
+		background-color: inherit;
+	}
+
 }
