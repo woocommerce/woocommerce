@@ -2,7 +2,8 @@
  * External dependencies
  */
 import { useSelect } from '@wordpress/data';
-import { render } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
@@ -16,6 +17,8 @@ jest.mock( '@wordpress/data', () => ( {
 		updatePaymentGateway: jest.fn(),
 	} ) ),
 } ) );
+
+jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
 
 const paymentGatewaySuggestions = [
 	{
@@ -174,5 +177,38 @@ describe( 'PaymentGatewaySuggestions', () => {
 		);
 
 		expect( getByText( 'Finish setup' ) ).toBeInTheDocument();
+	} );
+	test( 'should record event correctly when finish setup is clicked', () => {
+		const onComplete = jest.fn();
+		const query = {};
+		useSelect.mockImplementation( () => ( {
+			isResolving: false,
+			getPaymentGateway: jest.fn(),
+			paymentGatewaySuggestions,
+			installedPaymentGateways: [
+				{
+					id: 'ppcp-gateway',
+					title: 'PayPal Payments',
+					content:
+						"Safe and secure payments using credit cards or your customer's PayPal account.",
+					image:
+						'http://localhost:8888/wp-content/plugins/woocommerce/assets/images/paypal.png',
+					plugins: [ 'woocommerce-paypal-payments' ],
+					is_visible: true,
+				},
+			],
+		} ) );
+
+		render(
+			<PaymentGatewaySuggestions
+				onComplete={ onComplete }
+				query={ query }
+			/>
+		);
+
+		fireEvent.click( screen.getByText( 'Finish setup' ) );
+		expect( recordEvent ).toHaveBeenCalledWith( 'tasklist_payment_setup', {
+			selected: 'ppcp_gateway',
+		} );
 	} );
 } );
