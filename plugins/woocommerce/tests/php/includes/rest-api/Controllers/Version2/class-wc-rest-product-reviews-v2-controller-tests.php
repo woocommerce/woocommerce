@@ -30,9 +30,8 @@ class WC_REST_Product_Reviews_V2_Controller_Test extends WC_REST_Unit_Test_case 
 	/**
 	 * @testdox Ensure attempts to modify product reviews (via batches) are subject to appropriate permission checks.
 	 */
-	public function test_permissions_for_deleting_product_reviews() {
+	public function test_permissions_for_batch_product_reviews() {
 		$request = new WP_REST_Request( 'POST', '/wc/v2/products/123/reviews/batch' );
-		$request->set_param( 'id', $this->review_id );
 
 		wp_set_current_user( $this->editor_id );
 		$this->assertEquals(
