@@ -7,6 +7,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper as WCConnectionHelper;
 
 defined( 'ABSPATH' ) || exit;
@@ -341,21 +342,16 @@ class WC_Install {
 	 * @param bool $modify_notice Whether to modify notice based on if all tables are present.
 	 * @param bool $execute       Whether to execute get_schema queries as well.
 	 *
-	 * @return array List of querues.
+	 * @return array List of queries.
 	 */
 	public static function verify_base_tables( $modify_notice = true, $execute = false ) {
-		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-
 		if ( $execute ) {
 			self::create_tables();
 		}
-		$queries        = dbDelta( self::get_schema(), false );
-		$missing_tables = array();
-		foreach ( $queries as $table_name => $result ) {
-			if ( "Created table $table_name" === $result ) {
-				$missing_tables[] = $table_name;
-			}
-		}
+
+		$missing_tables = wc_get_container()
+			->get( DatabaseUtil::class )
+			->get_missing_tables( self::get_schema() );
 
 		if ( 0 < count( $missing_tables ) ) {
 			if ( $modify_notice ) {

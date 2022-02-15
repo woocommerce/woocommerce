@@ -5,18 +5,17 @@
 
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
+use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
- * This class handles the data migration/synchronization for the custom orders table. Its responsibilites are:
+ * This class handles the database structure creation and the data synchronization for the custom orders tables. Its responsibilites are:
  *
- * - Performing the initial table creation and filling (triggered by initiate_regeneration)
- * - Synchronizing changes between the custom orders table and the posts table whenever changes in orders happen.
+ * - Providing entry points for creating and deleting the required database tables.
+ * - Synchronizing changes between the custom orders tables and the posts table whenever changes in orders happen.
  */
 class DataSynchronizer {
-
-	const CUSTOM_ORDERS_TABLE_DATA_REGENERATION_IN_PROGRESS = 'woocommerce_custom_orders_table_data_regeneration_in_progress';
-	const CUSTOM_ORDERS_TABLE_DATA_REGENERATION_DONE_COUNT  = 'woocommerce_custom_orders_table_data_regeneration_done_count';
 
 	/**
 	 * The data store object to use.
@@ -25,6 +24,13 @@ class DataSynchronizer {
 	 */
 	private $data_store;
 
+	/**
+	 * The database util object to use.
+	 *
+	 * @var DatabaseUtil
+	 */
+	private $database_util;
+
 	// TODO: Add a constructor to handle hooks as appropriate.
 
 	/**
@@ -32,58 +38,41 @@ class DataSynchronizer {
 	 *
 	 * @internal
 	 * @param OrdersTableDataStore $data_store The data store to use.
+	 * @param DatabaseUtil         $database_util The database util class to use.
 	 */
-	final public function init( OrdersTableDataStore $data_store ) {
-		$this->data_store = $data_store;
+	final public function init( OrdersTableDataStore $data_store, DatabaseUtil $database_util ) {
+		$this->data_store    = $data_store;
+		$this->database_util = $database_util;
 	}
 
 	/**
-	 * Does the custom orders table exist in the database?
+	 * Does the custom orders tables exist in the database?
 	 *
-	 * @return bool True if the custom orders table exist in the database.
+	 * @return bool True if the custom orders tables exist in the database.
 	 */
 	public function check_orders_table_exists(): bool {
-		global $wpdb;
+		$missing_tables = $this->database_util->get_missing_tables( $this->data_store->get_database_schema() );
 
-		$table_name = $this->data_store->get_orders_table_name();
-
-		$query = $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $this->$table_name ) );
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		return $table_name === $wpdb->get_var( $query );
+		return count( $missing_tables ) === 0;
 	}
 
 	/**
-	 * Is a table regeneration in progress?
-	 *
-	 * @return bool True if a table regeneration in currently progress
+	 * Create the custom orders database tables.
 	 */
-	public function data_regeneration_is_in_progress(): bool {
-		return 'yes' === get_option( self::CUSTOM_ORDERS_TABLE_DATA_REGENERATION_IN_PROGRESS );
+	public function create_database_tables() {
+		$this->database_util->dbdelta( $this->data_store->get_database_schema() );
 	}
 
 	/**
-	 * Initiate a table regeneration process.
+	 * Delete the custom orders database tables.
 	 */
-	public function initiate_regeneration() {
-		update_option( self::CUSTOM_ORDERS_TABLE_DATA_REGENERATION_IN_PROGRESS, 'yes' );
-		update_option( self::CUSTOM_ORDERS_TABLE_DATA_REGENERATION_DONE_COUNT, 0 );
+	public function delete_database_tables() {
+		$table_names = $this->data_store->get_all_table_names();
 
-		// TODO: Create the tables as appropriate, schedule the table filling in batches with Action Scheduler.
+		foreach ( $table_names as $table_name ) {
+			$this->database_util->drop_database_table( $table_name );
+		}
 	}
 
-	/**
-	 * How many orders have been processed as part of the custom orders table regeneration?
-	 *
-	 * @return int Number of orders already processed, 0 if no regeneration is in progress.
-	 */
-	public function get_regeneration_processed_orders_count(): int {
-		return (int)get_option( self::CUSTOM_ORDERS_TABLE_DATA_REGENERATION_DONE_COUNT, 0 );
-	}
 
-	/**
-	 * Delete the custom orders table and the associated information.
-	 */
-	public function delete_custom_orders_table() {
-		// TODO: Delete the tables and any associated data (e.g. options).
-	}
 }
