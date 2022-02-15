@@ -31,7 +31,10 @@ class Server {
 		add_action( 'rest_api_init', array( $this, 'register_rest_routes' ), 10 );
 
 		// Set up a cart with an in-memory store (instead of storing in a cookie).
-		add_filter( 'woocommerce_session_handler', fn() => 'WC_Session' );
+		add_filter( 'woocommerce_session_handler', function() {
+			return 'WC_Session';
+		});
+
 		wc_load_cart();
 	}
 
