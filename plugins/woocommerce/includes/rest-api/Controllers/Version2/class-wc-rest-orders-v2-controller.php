@@ -130,7 +130,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_shipping_methods' ),
-					'permission_callback' => array( $this, 'get_item_permissions_check' ),
+					'permission_callback' => array( $this, 'get_shipping_methods_permissions_check' ),
 					'args'                => array(
 						'context' => $this->get_context_param( array( 'default' => 'view' ) ),
 					),
@@ -151,6 +151,14 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 				'schema' => array( $this, 'get_public_batch_schema' ),
 			)
 		);
+	}
+
+	public function get_shipping_methods_permissions_check( $request ) {
+		if ( ! wc_rest_check_manager_permissions( 'shipping_methods', 'read' ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		return $this->get_item_permission_check( $request );
 	}
 
 	public function get_shipping_methods( $request ) {
