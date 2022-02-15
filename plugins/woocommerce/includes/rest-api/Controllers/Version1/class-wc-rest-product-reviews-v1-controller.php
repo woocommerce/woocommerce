@@ -365,7 +365,7 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 	 * @return bool|WP_Error|WP_REST_Response
 	 */
 	public function delete_item( $request ) {
-		$product_review_id = absint( is_array( $request['id'] ) ? $request['id']['id'] : $request['id'] );
+		$product_review_id = (int) $request['id'];
 		$force             = isset( $request['force'] ) ? (bool) $request['force']     : false;
 
 		$product_review = get_comment( $product_review_id );
