@@ -2,11 +2,12 @@
 
 
 /**
- * Tests relating to the Product Reviews controller in APIv2.
+ * Tests relating to the Product Reviews controller in APIv3.
  */
 class WC_REST_Product_Reviews_Controller_Tests extends WC_REST_Unit_Test_Case {
 	/**
-	 * @var WC_REST_Product_Reviews_V2_Controller
+	 * @var WC_REST_Product_Reviews_Controller
+	 * @var WC_REST_Product_Reviews_Controller
 	 */
 	private $sut;
 
@@ -23,7 +24,7 @@ class WC_REST_Product_Reviews_Controller_Tests extends WC_REST_Unit_Test_Case {
 	public function setUp() {
 		parent::setUp();
 
-		$this->sut             = new WC_REST_Product_Reviews_V2_Controller();
+		$this->sut             = new WC_REST_Product_Reviews_Controller();
 		$this->shop_manager_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
 		$this->editor_id       = self::factory()->user->create( array( 'role' => 'editor' ) );
 	}
@@ -31,9 +32,8 @@ class WC_REST_Product_Reviews_Controller_Tests extends WC_REST_Unit_Test_Case {
 	/**
 	 * @testdox Ensure attempts to modify product reviews (via batches) are subject to appropriate permission checks.
 	 */
-	public function test_permissions_for_deleting_product_reviews() {
-		$request = new WP_REST_Request( 'POST', '/wc/v2/products/123/reviews/batch' );
-		$request->set_param( 'id', $this->review_id );
+	public function test_permissions_for_batch_product_reviews() {
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/reviews/batch' );
 
 		wp_set_current_user( $this->editor_id );
 		$this->assertEquals(
