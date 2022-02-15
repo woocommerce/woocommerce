@@ -42,42 +42,16 @@ class WC_REST_Product_Reviews_V1_Controller_Tests extends WC_Unit_Test_Case {
 	 */
 	public function setUp() {
 		parent::setUp();
-		$password = wp_generate_password();
 
-		$this->shop_manager_id = wp_insert_user(
-			array(
-				'user_login' => "test_shopman_$password",
-				'user_pass'  => $password,
-				'user_email' => "shopman_$password@example.com",
-				'role'       => 'shop_manager',
-			)
-		);
-
-		$this->editor_id = wp_insert_user(
-			array(
-				'user_login' => "test_editor_$password",
-				'user_pass'  => $password,
-				'user_email' => "editor_$password@example.com",
-				'role'       => 'editor',
-			)
-		);
-
-		$this->customer_id = wp_insert_user(
-			array(
-				'user_login' => "test_customer_$password",
-				'user_pass'  => $password,
-				'user_email' => "customer_$password@example.com",
-				'role'       => 'customer',
-			)
-		);
-
-		$this->product_id = ProductHelper::create_simple_product()->get_id();
-		$this->review_id  = ProductHelper::create_product_review(
+		$this->sut             = new WC_REST_Product_Reviews_V1_Controller();
+		$this->shop_manager_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$this->editor_id       = self::factory()->user->create( array( 'role' => 'editor' ) );
+		$this->customer_id     = self::factory()->user->create( array( 'role' => 'customer' ) );
+		$this->product_id      = ProductHelper::create_simple_product()->get_id();
+		$this->review_id       = ProductHelper::create_product_review(
 			$this->product_id,
 			'Supposed to be made from real unicorn horn but was actually cheap cardboard. OK for the price.'
 		);
-
-		$this->sut = new WC_REST_Product_Reviews_V1_Controller();
 	}
 
 	public function test_permissions_for_reading_product_reviews() {
