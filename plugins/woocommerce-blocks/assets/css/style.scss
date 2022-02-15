@@ -104,6 +104,7 @@
 
 .wc-block-grid__product-rating {
 	display: block;
+	color: #000;
 
 	.wc-block-grid__product-rating__stars,
 	.star-rating {
@@ -139,11 +140,11 @@
 		}
 		span::before {
 			content: "\53\53\53\53\53";
+			color: inherit;
 			top: 0;
 			left: 0;
 			right: 0;
 			position: absolute;
-			color: #000;
 			white-space: nowrap;
 		}
 	}

@@ -14,13 +14,17 @@ import {
 	BLOCK_ICON as icon,
 	BLOCK_DESCRIPTION as description,
 } from './constants';
+import { supports } from './support';
+import { Save } from './save';
 
 const blockConfig = {
 	title,
 	description,
 	icon: { src: icon },
 	attributes,
+	supports,
 	edit,
+	save: Save,
 };
 
 registerBlockType( 'woocommerce/product-rating', {
