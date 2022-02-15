@@ -147,7 +147,7 @@ class WC_REST_Product_Reviews_V1_Controller_Tests extends WC_Unit_Test_Case {
 		$this->assertEquals(
 			'woocommerce_rest_cannot_delete',
 			$this->sut->delete_item_permissions_check( $request )->get_error_code(),
-			'Comments that are not product reviews (including other types of comments belonging to prodcuts) cannot be deleted via this endpoint.'
+			'Comments that are not product reviews (including other types of comments belonging to products) cannot be deleted via this endpoint.'
 		);
 	}
 }
