@@ -157,3 +157,14 @@ h2.wc-block-mini-cart__title {
 		margin-top: $gap;
 	}
 }
+
+.wc-block-mini-cart__shopping-button {
+	display: flex;
+	justify-content: center;
+
+	a {
+		border: 2px solid;
+		padding: $gap-small $gap-large;
+		text-decoration: none;
+	}
+}
