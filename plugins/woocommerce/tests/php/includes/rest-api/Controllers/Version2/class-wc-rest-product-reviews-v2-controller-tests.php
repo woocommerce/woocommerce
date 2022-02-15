@@ -21,27 +21,10 @@ class WC_REST_Product_Reviews_V2_Controller_Test extends WC_REST_Unit_Test_case 
 
 	public function setUp() {
 		parent::setUp();
-		$password = wp_generate_password();
 
-		$this->shop_manager_id = wp_insert_user(
-			array(
-				'user_login' => "test_shopman_$password",
-				'user_pass'  => $password,
-				'user_email' => "shopman_$password@example.com",
-				'role'       => 'shop_manager',
-			)
-		);
-
-		$this->editor_id = wp_insert_user(
-			array(
-				'user_login' => "test_editor_$password",
-				'user_pass'  => $password,
-				'user_email' => "editor_$password@example.com",
-				'role'       => 'editor',
-			)
-		);
-
-		$this->sut = new WC_REST_Product_Reviews_V2_Controller();
+		$this->sut             = new WC_REST_Product_Reviews_V2_Controller();
+		$this->shop_manager_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$this->editor_id       = self::factory()->user->create( array( 'role' => 'editor' ) );
 	}
 
 	/**
