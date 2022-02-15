@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Query, ProductResponseItem, isString } from '@woocommerce/types';
+import { Query, ProductResponseItem } from '@woocommerce/types';
 /**
  * Internal dependencies
  */
@@ -45,7 +45,7 @@ export const useStoreProducts = (
 	} );
 	return {
 		products: products as ProductResponseItem[], // TODO: Remove this once getCollection selector and resolver is converted to TS.
-		totalProducts: parseInt( isString( totalProducts ).toString(), 10 ),
+		totalProducts: parseInt( totalProducts as string, 10 ),
 		productsLoading,
 	};
 };
