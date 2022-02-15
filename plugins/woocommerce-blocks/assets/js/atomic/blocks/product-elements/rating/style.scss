@@ -23,7 +23,7 @@
 			right: 0;
 			position: absolute;
 			opacity: 0.5;
-			color: #aaa;
+			color: inherit;
 			white-space: nowrap;
 		}
 		span {
@@ -32,6 +32,7 @@
 			left: 0;
 			right: 0;
 			position: absolute;
+			color: inherit;
 			padding-top: 1.5em;
 		}
 		span::before {
@@ -40,7 +41,7 @@
 			left: 0;
 			right: 0;
 			position: absolute;
-			color: #000;
+			color: inherit;
 			white-space: nowrap;
 		}
 	}

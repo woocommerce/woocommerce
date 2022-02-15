@@ -179,6 +179,7 @@ final class BlockTypesController {
 			'ProductTitle',
 			'ProductSummary',
 			'ProductStockIndicator',
+			'ProductRating',
 			'ProductSaleBadge',
 		];
 
@@ -234,7 +235,6 @@ final class BlockTypesController {
 			'product-button',
 			'product-image',
 			'product-price',
-			'product-rating',
 			'product-sku',
 			'product-category-list',
 			'product-tag-list',
