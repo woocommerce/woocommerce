@@ -1,0 +1,26 @@
+{
+	"name": "woocommerce/mini-cart-shopping-button-block",
+	"version": "1.0.0",
+	"title": "Mini Cart Shopping Button",
+	"description": "Block that displays the shopping button for the Mini Cart block.",
+	"category": "woocommerce",
+	"supports": {
+		"align": false,
+		"html": false,
+		"multiple": false,
+		"reusable": false,
+		"inserter": true 
+	},
+	"attributes": {
+		"lock": {
+			"type": "object",
+			"default": {
+				"remove": false,
+				"move": false 
+			}
+		}
+	},
+	"parent": [ "woocommerce/empty-mini-cart-contents-block" ],
+	"textdomain": "woo-gutenberg-products-block",
+	"apiVersion": 2
+}
