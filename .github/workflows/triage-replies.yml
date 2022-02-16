@@ -5,7 +5,7 @@ on:
       - labeled
 jobs:
   add-dev-comment:
-    if: "github.event.label.name == 'needs developer feedback'"
+    if: "github.event.label.name == 'needs: developer feedback'"
     runs-on: ubuntu-latest
     permissions:
       issues: write
@@ -25,7 +25,7 @@ jobs:
               Please note it may take a few days for them to get to this issue. Thank you for your patience.'
             })              
   add-reproduction-comment:
-    if: "github.event.label.name == 'status: needs reproduction'"
+    if: "github.event.label.name == 'status: reproduction'"
     runs-on: ubuntu-latest
     permissions:
       issues: write
@@ -84,7 +84,7 @@ jobs:
                   state: 'closed'
                 })
   add-votes-comment:
-    if: "github.event.label.name == 'votes needed'"
+    if: "github.event.label.name == 'need: votes'"
     runs-on: ubuntu-latest
     permissions:
       issues: write
