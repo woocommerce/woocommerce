@@ -54,6 +54,7 @@ class Features {
 	 * Constructor.
 	 */
 	public function __construct() {
+		$this->register_internal_class_aliases();
 		// Load feature before WooCommerce update hooks.
 		add_action( 'init', array( __CLASS__, 'load_features' ), 4 );
 		add_filter( 'woocommerce_get_sections_advanced', array( __CLASS__, 'add_features_section' ) );
@@ -388,5 +389,22 @@ class Features {
 
 		$admin_body_class = implode( ' ', array_unique( $classes ) );
 		return " $admin_body_class ";
+	}
+
+	/**
+	 * Alias internal features classes to make them backward compatible.
+	 * We've moved our feature classes to src-internal as part of merging this
+	 * repository with WooCommerce Core to form a monorepo.
+	 * See https://wp.me/p90Yrv-2HY for details.
+	 */
+	private function register_internal_class_aliases() {
+		$aliases = array(
+			// new class => original class (this will be aliased).
+			'Automattic\WooCommerce\Internal\Admin\WCPayPromotion\Init' => 'Automattic\WooCommerce\Admin\Features\WcPayPromotion\Init',
+			'Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions\Init' => 'Automattic\WooCommerce\Admin\Features\RemoteFreeExtensions\Init',
+		);
+		foreach ( $aliases as $new_class => $orig_class ) {
+			class_alias( $new_class, $orig_class );
+		}
 	}
 }

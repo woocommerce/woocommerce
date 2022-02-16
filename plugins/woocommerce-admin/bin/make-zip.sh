@@ -40,4 +40,5 @@ zip -r "${ZIP_FILE}" \
 	readme.txt \
 	changelog.txt \
 	src/ \
-	vendor/
+	vendor/ \
+	src-internal/

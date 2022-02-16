@@ -3,7 +3,7 @@
  * Handles wcpay promotion
  */
 
-namespace Automattic\WooCommerce\Admin\Features\WcPayPromotion;
+namespace Automattic\WooCommerce\Internal\Admin\WCPayPromotion;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -65,7 +65,7 @@ class Init {
 	 */
 	public static function possibly_register_pre_install_wc_pay_promotion_gateway( $gateways ) {
 		if ( self::can_show_promotion() && ! WCPaymentGatewayPreInstallWCPayPromotion::is_dismissed() ) {
-			$gateways[] = 'Automattic\WooCommerce\Admin\Features\WCPayPromotion\WCPaymentGatewayPreInstallWCPayPromotion';
+			$gateways[] = 'Automattic\WooCommerce\Internal\Admin\WCPayPromotion\WCPaymentGatewayPreInstallWCPayPromotion';
 		}
 		return $gateways;
 	}
@@ -176,7 +176,7 @@ class Init {
 	 * Delete the specs transient.
 	 */
 	public static function delete_specs_transient() {
-		WcPayPromotionDataSourcePoller::get_instance()->delete_specs_transient();
+		WCPayPromotionDataSourcePoller::get_instance()->delete_specs_transient();
 	}
 
 	/**
@@ -186,7 +186,7 @@ class Init {
 		if ( 'no' === get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) ) {
 			return array();
 		}
-		return WcPayPromotionDataSourcePoller::get_instance()->get_specs_from_data_sources();
+		return WCPayPromotionDataSourcePoller::get_instance()->get_specs_from_data_sources();
 	}
 }
 

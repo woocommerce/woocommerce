@@ -3,12 +3,11 @@
  * Handles running payment method specs
  */
 
-namespace Automattic\WooCommerce\Admin\Features\RemoteFreeExtensions;
+namespace Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\RemoteInboxNotifications\SpecRunner;
-use Automattic\WooCommerce\Admin\Features\RemoteFreeExtensions\DefaultFreeExtensions;
+use Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions\DefaultFreeExtensions;
 
 /**
  * Remote Payment Methods engine.

@@ -1,6 +1,6 @@
 <?php
 
-namespace Automattic\WooCommerce\Admin\Features\RemoteFreeExtensions;
+namespace Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions;
 
 /**
  * Specs data source poller class for remote free extensions.

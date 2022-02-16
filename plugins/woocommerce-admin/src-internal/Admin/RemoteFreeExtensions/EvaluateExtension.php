@@ -3,7 +3,7 @@
  * Evaluates the spec and returns a status.
  */
 
-namespace Automattic\WooCommerce\Admin\Features\RemoteFreeExtensions;
+namespace Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions;
 
 defined( 'ABSPATH' ) || exit;
 

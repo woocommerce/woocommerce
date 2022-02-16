@@ -1,13 +1,12 @@
 <?php
-
-namespace Automattic\WooCommerce\Admin\Features\WcPayPromotion;
+namespace Automattic\WooCommerce\Internal\Admin\WCPayPromotion;
 
 use Automattic\WooCommerce\Admin\DataSourcePoller;
 
 /**
  * Specs data source poller class for WooCommerce Payment Promotion.
  */
-class WcPayPromotionDataSourcePoller extends DataSourcePoller {
+class WCPayPromotionDataSourcePoller extends DataSourcePoller {
 
 	const ID = 'payment_method_promotion';
 

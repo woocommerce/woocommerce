@@ -3,11 +3,10 @@
  * Gets a list of fallback methods if remote fetching is disabled.
  */
 
-namespace Automattic\WooCommerce\Admin\Features\RemoteFreeExtensions;
+namespace Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Init as OnboardingTasks;
 
 /**
  * Default Free Extensions
