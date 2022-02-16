@@ -50,10 +50,14 @@ We release a new version of WooCommerce Blocks onto WordPress.org every few week
 
 1. Make sure you have the latest versions of WordPress and WooCommerce on your site.
 2. Get a copy of this plugin using the green "Clone or download" button on the right.
-3. `npm install` to install the dependencies.
-4. `composer install` to install core dependencies.
-5. `npm run build` (build once) or `npm start` (keep watching for changes) to compile the code.
-6. Activate the plugin.
+3. Make sure you're using Node.js v16.
+4. `npm install` to install the dependencies.
+5. `composer install` to install core dependencies.
+6. To compile the code, run any of the following commands
+   1. `npm run build` (production build).
+   2. `npm run dev` (development build).
+   3. `npm start` (development build + watching for changes).
+7. Activate the plugin.
 
 The source code is in the `assets/` folder and the compiled code is built into `build/`.
 
