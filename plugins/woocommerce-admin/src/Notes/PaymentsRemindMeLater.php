@@ -66,7 +66,7 @@ class PaymentsRemindMeLater {
 		if ( ! self::should_display_note() ) {
 			return;
 		}
-		$content = __( 'Save up to 50% in fees by managing transactions in WooCommerce Payments. With WooCommerce Payments, you can securely accept major cards, Apple Pay, and payments in over 100 currencies.', 'woocommerce-admin' );
+		$content = __( 'Save up to $800 in fees by managing transactions with WooCommerce Payments. With WooCommerce Payments, you can securely accept major cards, Apple Pay, and payments in over 100 currencies.', 'woocommerce-admin' );
 
 		$note = new Note();
 		$note->set_title( __( 'Save big with WooCommerce Payments', 'woocommerce-admin' ) );

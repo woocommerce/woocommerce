@@ -15,7 +15,7 @@ export default {
 		'woocommerce-admin'
 	),
 	bannerCopy: __(
-		'50% transaction fee discount for up to $125,000 in payments or six months',
+		'No transaction fees for up to 3 months (or $25,000 in payments)',
 		'woocommerce-admin'
 	),
 	discountCopy: __(
@@ -26,7 +26,7 @@ export default {
 
 	onboarding: {
 		description: __(
-			"Save 50% on transaction fees by managing transactions with WooCommerce Payments. With WooCommerce Payments, you can securely accept major cards, Apple Pay, and payments in over 100 currencies. Track cash flow and manage recurring revenue directly from your store's dashboard - with no setup costs or monthly fees.",
+			"Save up to $800 in fees by managing transactions with WooCommerce Payments. With WooCommerce Payments, you can securely accept major cards, Apple Pay, and payments in over 100 currencies. Track cash flow and manage recurring revenue directly from your store's dashboard - with no setup costs or monthly fees.",
 			'woocommerce-admin'
 		),
 	},

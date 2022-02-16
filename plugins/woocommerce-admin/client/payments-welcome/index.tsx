@@ -50,7 +50,7 @@ interface activatePromoResponse {
 	success: boolean;
 }
 
-const PROMO_NAME = 'wcpay-promo-2021-6-incentive-2';
+const PROMO_NAME = 'wcpay-promo-2022-3-incentive-100-off';
 
 const LearnMore = () => {
 	const handleClick = () => {

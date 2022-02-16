@@ -39,7 +39,7 @@ class Notes extends \WC_REST_CRUD_Controller {
 	 * @var array
 	 */
 	protected $allowed_promo_notes = array(
-		'wcpay-promo-2021-6-incentive-2',
+		'wcpay-promo-2022-3-incentive-100-off',
 	);
 
 	/**
