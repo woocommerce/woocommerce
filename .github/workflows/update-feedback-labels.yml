@@ -7,21 +7,21 @@ jobs:
       github.actor != 'github-actions' &&
       github.event.issue &&
       github.event.issue.state == 'open' &&
-      contains(github.event.issue.labels.*.name, 'needs feedback')
+      contains(github.event.issue.labels.*.name, 'needs: author feedback')
     runs-on: ubuntu-latest
     steps:
     - name: Add has feedback
       uses: actions-ecosystem/action-add-labels@v1
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        labels: 'has feedback'
+        labels: 'needs: triage feedback'
     - name: remove needs feedback
       uses: actions-ecosystem/action-remove-labels@v1
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        labels: 'needs feedback'
+        labels: 'needs: author feedback'
     - name: remove stale
       uses: actions-ecosystem/action-remove-labels@v1
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        labels: Stale
+        labels: 'status: stale'
