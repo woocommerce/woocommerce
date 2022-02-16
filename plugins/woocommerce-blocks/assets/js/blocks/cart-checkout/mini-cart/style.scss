@@ -100,7 +100,7 @@ h2.wc-block-mini-cart__title {
 	flex-direction: column;
 	flex-grow: 1;
 	overflow-y: hidden;
-	padding: 0 $gap;
+	padding: $gap $gap 0;
 
 	.wc-block-mini-cart__products-table {
 		margin-bottom: auto;
@@ -108,8 +108,13 @@ h2.wc-block-mini-cart__title {
 		overflow-y: auto;
 		padding-right: $gap;
 
-		.wc-block-cart-items__row:last-child::after {
-			content: none;
+		.wc-block-cart-items__row {
+			padding-top: $gap-smaller;
+			padding-bottom: $gap-smaller;
+
+			&:last-child::after {
+				content: none;
+			}
 		}
 	}
 }
