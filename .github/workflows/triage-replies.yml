@@ -84,7 +84,7 @@ jobs:
                   state: 'closed'
                 })
   add-votes-comment:
-    if: "github.event.label.name == 'need: votes'"
+    if: "github.event.label.name == 'needs: votes'"
     runs-on: ubuntu-latest
     permissions:
       issues: write
