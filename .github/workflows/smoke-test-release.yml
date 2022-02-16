@@ -1,7 +1,10 @@
 name: Smoke test release
 on:
-  release:
-    types: [published]
+  workflow_dispatch:
+    inputs:
+      release_id:
+        description: 'WooCommerce Release Id'
+        required: true
 jobs:
   login-run:
     name: Daily smoke test on release.
@@ -72,6 +75,17 @@ jobs:
         uses: actions/checkout@v2
         with:
           path: package/woocommerce
+      - name: Fetch Asset ID
+        id: fetch_asset_id
+        uses: actions/github-script@v5
+        env:
+          RELEASE_ID: ${{ github.event.inputs.release_id }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        with:
+          script: |
+            const script = require( './package/woocommerce/.github/workflows/scripts/fetch-asset-id.js' )
+            await script({github, context, core})
 
       - name: Install PNPM and install dependencies
         working-directory: package/woocommerce
@@ -91,9 +105,7 @@ jobs:
       - name: Download WooCommerce release zip
         working-directory: tmp
         run: |
-          ASSET_ID=$(jq ".release.assets[0].id" $GITHUB_EVENT_PATH)
-
-          curl https://api.github.com/repos/woocommerce/woocommerce/releases/assets/${ASSET_ID} -LJOH 'Accept: application/octet-stream'
+          curl https://api.github.com/repos/${{ github.repository }}/releases/assets/${{ steps.fetch_asset_id.outputs.asset_id }} -LJOH 'Accept: application/octet-stream'
 
           unzip woocommerce.zip -d woocommerce
           mv woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
@@ -138,6 +150,17 @@ jobs:
         uses: actions/checkout@v2
         with:
           path: package/woocommerce
+      - name: Fetch Asset ID
+        id: fetch_asset_id
+        uses: actions/github-script@v5
+        env:
+          RELEASE_ID: ${{ github.event.inputs.release_id }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        with:
+          script: |
+            const script = require( './package/woocommerce/.github/workflows/scripts/fetch-asset-id.js' )
+            await script({github, context, core})
 
       - name: Install PNPM and install dependencies
         working-directory: package/woocommerce
@@ -157,9 +180,7 @@ jobs:
       - name: Download WooCommerce release zip
         working-directory: tmp
         run: |
-          ASSET_ID=$(jq ".release.assets[0].id" $GITHUB_EVENT_PATH)
-
-          curl https://api.github.com/repos/woocommerce/woocommerce/releases/assets/${ASSET_ID} -LJOH 'Accept: application/octet-stream'
+          curl https://api.github.com/repos/${{ github.repository }}/releases/assets/${{ steps.fetch_asset_id.outputs.asset_id }} -LJOH 'Accept: application/octet-stream'
 
           unzip woocommerce.zip -d woocommerce
           mv woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
