@@ -4,7 +4,7 @@ Tags: gutenberg, woocommerce, woo commerce, products, blocks, woocommerce blocks
 Requires at least: 5.9
 Tested up to: 5.9
 Requires PHP: 7.0
-Stable tag: 7.0.0-dev
+Stable tag: 7.0.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -84,6 +84,25 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 5. WooCommerce Product Blocks in the block inserter menu
 
 == Changelog ==
+
+= 7.0.0 - 2022-02-14 =
+
+#### Enhancements
+
+- Add a remove image button to the WooCommerce Feature Category block. ([5719](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5719))
+- Add support for the global style for the On-Sale Badge block. ([5565](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5565))
+- Add support for the global style for the Attribute Filter block. ([5557](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5557))
+- Category List block: Add support for global style. ([5516](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5516))
+
+#### Bug Fixes
+
+- Fix wide appender buttons overlap in Cart & Checkout blocks in the Editor. ([5801](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5801))
+- Fixed an issue where clear customizations functionality was not working for WooCommerce templates. ([5746](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5746))
+- Fixed an issue where default block attributes were not being passed to the Checkout block correctly. ([5732](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5732))
+- Fixed an issue where orders would break if they did not require a payment. ([5720](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5720))
+- Fixed hover and focus states for button components. ([5712](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5712))
+- Add to Cart button on Products listing blocks will respect the "Redirect to the cart page after successful addition" setting. ([5708](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5708))
+- Fixes Twenty Twenty Two issues with sales price and added to cart "View Cart" call out styling in the "Products by Category" block. ([5684](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5684))
 
 = 6.9.0 - 2022-01-31 =
 
