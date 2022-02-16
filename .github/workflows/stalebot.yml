@@ -6,7 +6,7 @@ on:
 jobs:
   stale:
     if: |
-      ! contains(github.event.issue.labels.*.name, 'enhancement')
+      ! contains(github.event.issue.labels.*.name, 'type: enhancement')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/stale@v3
@@ -17,6 +17,6 @@ jobs:
           days-before-issue-stale: 7
           days-before-issue-close: 7
           days-before-pr-close: -1
-          only-issue-labels: 'needs feedback'
-          close-issue-label: "category: can't reproduce"
+          only-issue-labels: 'needs: author feedback'
+          close-issue-label: "status: can't reproduce"
           ascending: true
