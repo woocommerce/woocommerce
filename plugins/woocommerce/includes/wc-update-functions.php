@@ -2348,9 +2348,11 @@ function wc_update_630_create_product_attributes_lookup_table() {
 	$data_store       = wc_get_container()->get( LookupDataStore::class );
 	$data_regenerator = wc_get_container()->get( DataRegenerator::class );
 
-	if ( $data_store->check_lookup_table_exists() ) {
-		$data_regenerator->maybe_create_table_indices();
-	} else {
+	/**
+	 * If the table exists and contains data, it was manually created by user before the migration ran.
+	 * If the table exists but is empty, it was likely created right now via dbDelta, so a table regenerations is needed.
+	 */
+	if ( ! $data_store->check_lookup_table_exists() || ! $data_store->lookup_table_has_data() ) {
 		$data_regenerator->initiate_regeneration();
 	}
 

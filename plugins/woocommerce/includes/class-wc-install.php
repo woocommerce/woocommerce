@@ -7,6 +7,8 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
+use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper as WCConnectionHelper;
 
 defined( 'ABSPATH' ) || exit;
@@ -853,6 +855,8 @@ class WC_Install {
 		 */
 		$max_index_length = 191;
 
+		$product_attributes_lookup_table_creation_sql = wc_get_container()->get( DataRegenerator::class )->get_table_creation_sql();
+
 		$tables = "
 CREATE TABLE {$wpdb->prefix}woocommerce_sessions (
   session_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -1072,6 +1076,7 @@ CREATE TABLE {$wpdb->prefix}wc_rate_limits (
   PRIMARY KEY  (rate_limit_id),
   UNIQUE KEY rate_limit_key (rate_limit_key($max_index_length))
 ) $collate;
+$product_attributes_lookup_table_creation_sql
 		";
 
 		return $tables;
@@ -1107,6 +1112,7 @@ CREATE TABLE {$wpdb->prefix}wc_rate_limits (
 			"{$wpdb->prefix}woocommerce_tax_rates",
 			"{$wpdb->prefix}wc_reserved_stock",
 			"{$wpdb->prefix}wc_rate_limits",
+			wc_get_container()->get( DataRegenerator::class )->get_lookup_table_name(),
 		);
 
 		/**
