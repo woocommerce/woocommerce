@@ -3,12 +3,14 @@
  * Keeps the product category lookup table in sync with live data.
  */
 
-namespace Automattic\WooCommerce\Admin;
+namespace Automattic\WooCommerce\Internal\Admin;
+
+use Automattic\WooCommerce\Internal\Admin\Install;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * \Automattic\WooCommerce\Admin\CategoryLookup class.
+ * \Automattic\WooCommerce\Internal\Admin\CategoryLookup class.
  */
 class CategoryLookup {
 

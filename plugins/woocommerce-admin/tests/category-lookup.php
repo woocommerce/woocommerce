@@ -5,7 +5,7 @@
  * @package WooCommerce\Admin\Tests\CategoryLookup
  */
 
-use \Automattic\WooCommerce\Admin\CategoryLookup;
+use Automattic\WooCommerce\Internal\Admin\CategoryLookup;
 
 /**
  * WC_Admin_Tests_Admin_Helper Class

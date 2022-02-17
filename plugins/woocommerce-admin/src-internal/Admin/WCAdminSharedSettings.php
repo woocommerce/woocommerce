@@ -3,12 +3,12 @@
  * Manages the WC Admin settings that need to be pre-loaded.
  */
 
-namespace Automattic\WooCommerce\Admin;
+namespace Automattic\WooCommerce\Internal\Admin;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * \Automattic\WooCommerce\Admin\WCAdminSharedSettings class.
+ * \Automattic\WooCommerce\Internal\Admin\WCAdminSharedSettings class.
  */
 class WCAdminSharedSettings {
 	/**

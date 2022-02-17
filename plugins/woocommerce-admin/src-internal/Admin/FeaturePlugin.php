@@ -3,10 +3,13 @@
  * WooCommerce Admin: Feature plugin main class.
  */
 
-namespace Automattic\WooCommerce\Admin;
+namespace Automattic\WooCommerce\Internal\Admin;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Admin\API;
+use Automattic\WooCommerce\Internal\Admin\Install;
+use Automattic\WooCommerce\Admin\Loader;
 use \Automattic\WooCommerce\Admin\Notes\Notes;
 use \Automattic\WooCommerce\Admin\Notes\OrderMilestones;
 use \Automattic\WooCommerce\Admin\Notes\WooSubscriptionsNotes;
@@ -22,6 +25,12 @@ use \Automattic\WooCommerce\Admin\Notes\ManageStoreActivityFromHomeScreen;
 use \Automattic\WooCommerce\Admin\Notes\NavigationNudge;
 use \Automattic\WooCommerce\Admin\Notes\MagentoMigration;
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Admin\PluginsHelper;
+use Automattic\WooCommerce\Admin\PluginsInstaller;
+use Automattic\WooCommerce\Admin\ReportExporter;
+use Automattic\WooCommerce\Admin\ReportsSync;
+use Automattic\WooCommerce\Internal\Admin\CategoryLookup;
+use Automattic\WooCommerce\Internal\Admin\Events;
 
 /**
  * Feature plugin main class.
@@ -140,7 +149,7 @@ class FeaturePlugin {
 	 */
 	protected function define_constants() {
 		$this->define( 'WC_ADMIN_APP', 'wc-admin-app' );
-		$this->define( 'WC_ADMIN_ABSPATH', dirname( __DIR__ ) . '/' );
+		$this->define( 'WC_ADMIN_ABSPATH', dirname( __DIR__, 2 ) . '/' );
 		$this->define( 'WC_ADMIN_DIST_JS_FOLDER', 'dist/' );
 		$this->define( 'WC_ADMIN_DIST_CSS_FOLDER', 'dist/' );
 		$this->define( 'WC_ADMIN_PLUGIN_FILE', WC_ADMIN_ABSPATH . 'woocommerce-admin.php' );

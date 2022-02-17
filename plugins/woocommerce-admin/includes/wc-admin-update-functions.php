@@ -7,7 +7,7 @@
  * @package WooCommerce\Admin
  */
 
-use \Automattic\WooCommerce\Admin\Install as Installer;
+use Automattic\WooCommerce\Internal\Admin\Install as Installer;
 use \Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
 use \Automattic\WooCommerce\Admin\Notes\Notes;
 use \Automattic\WooCommerce\Admin\Notes\UnsecuredReportFiles;

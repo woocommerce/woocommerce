@@ -3,7 +3,7 @@
  * Survey helper methods.
  */
 
-namespace Automattic\WooCommerce\Admin;
+namespace Automattic\WooCommerce\Internal\Admin;
 
 defined( 'ABSPATH' ) || exit;
 

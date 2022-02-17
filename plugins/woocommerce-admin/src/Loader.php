@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Admin\API\Reports\Orders\DataStore as OrdersDataStore
 use Automattic\WooCommerce\Admin\API\Plugins;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\Navigation\Screen;
+use Automattic\WooCommerce\Internal\Admin\WCAdminSharedSettings;
 use WC_Marketplace_Suggestions;
 
 /**

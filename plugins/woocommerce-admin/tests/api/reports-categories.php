@@ -6,7 +6,7 @@
  * @since 3.5.0
  */
 
-use Automattic\WooCommerce\Admin\CategoryLookup;
+use Automattic\WooCommerce\Internal\Admin\CategoryLookup;
 
 /**
  * Class WC_Tests_API_Reports_Categories

@@ -8,7 +8,7 @@
 namespace Automattic\WooCommerce\Admin\Features\Navigation;
 
 use Automattic\WooCommerce\Admin\Loader;
-use Automattic\WooCommerce\Admin\Survey;
+use Automattic\WooCommerce\Internal\Admin\Survey;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\Navigation\Screen;
 use Automattic\WooCommerce\Admin\Features\Navigation\Menu;

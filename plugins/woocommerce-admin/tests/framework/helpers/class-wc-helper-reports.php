@@ -21,6 +21,6 @@ class WC_Helper_Reports {
 		$wpdb->query( 'DELETE FROM ' . \Automattic\WooCommerce\Admin\API\Reports\Products\DataStore::get_db_table_name() ); // @codingStandardsIgnoreLine.
 		$wpdb->query( 'DELETE FROM ' . \Automattic\WooCommerce\Admin\API\Reports\Coupons\DataStore::get_db_table_name() ); // @codingStandardsIgnoreLine.
 		$wpdb->query( 'DELETE FROM ' . \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore::get_db_table_name() ); // @codingStandardsIgnoreLine.
-		\Automattic\WooCommerce\Admin\CategoryLookup::instance()->regenerate();
+		\Automattic\WooCommerce\Internal\Admin\CategoryLookup::instance()->regenerate();
 	}
 }

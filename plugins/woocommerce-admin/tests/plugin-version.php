@@ -36,7 +36,7 @@ class WC_Admin_Tests_Plugin_Version extends WP_UnitTestCase {
 	 * Ensure that a DB version callback is defined when there are updates.
 	 */
 	public function test_db_update_callbacks() {
-		$all_callbacks = \Automattic\WooCommerce\Admin\Install::get_db_update_callbacks();
+		$all_callbacks = \Automattic\WooCommerce\Internal\Admin\Install::get_db_update_callbacks();
 
 		foreach ( $all_callbacks as $version => $version_callbacks ) {
 			// Verify all callbacks have been defined.

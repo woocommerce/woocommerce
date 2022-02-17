@@ -16,7 +16,7 @@ if (
 	return;
 }
 
-use \Automattic\WooCommerce\Admin\Install;
+use Automattic\WooCommerce\Internal\Admin\Install;
 
 require_once dirname( __FILE__ ) . '/woocommerce-admin.php';
 

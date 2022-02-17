@@ -5,7 +5,7 @@
  * @package WooCommerce\Admin\Tests
  */
 
-use \Automattic\WooCommerce\Admin\Install;
+use Automattic\WooCommerce\Internal\Admin\Install;
 
 /**
  * Tests for \Automattic\WooCommerce\Admin\Install class.

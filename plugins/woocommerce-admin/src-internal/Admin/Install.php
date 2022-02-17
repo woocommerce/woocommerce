@@ -3,13 +3,12 @@
  * Installation related functions and actions.
  */
 
-namespace Automattic\WooCommerce\Admin;
+namespace Automattic\WooCommerce\Internal\Admin;
 
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\Cache;
-use \Automattic\WooCommerce\Admin\Notes\Notes;
-
+use Automattic\WooCommerce\Admin\Notes\Notes;
 /**
  * Install Class.
  */
