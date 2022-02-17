@@ -105,20 +105,32 @@ class WC_REST_Product_Reviews_V1_Controller_Tests extends WC_Unit_Test_Case {
 	 * @testdox Ensure attempts to delete product reviews are checked for user permissions.
 	 */
 	public function test_permissions_for_deleting_product_reviews() {
-		$request = new WP_REST_Request( 'DELETE', '/wc/v1/products/123456789/reviews/' . $this->review_id );
-		$request->set_param( 'id', $this->review_id );
+		$api_request = new WP_REST_Request( 'DELETE', '/wc/v1/products/' . $this->product_id . '/reviews/' . $this->review_id );
+		$api_request->set_param( 'product_id', $this->product_id );
+		$api_request->set_param( 'id', $this->review_id );
 
 		wp_set_current_user( $this->editor_id );
 		$this->assertEquals(
 			'woocommerce_rest_cannot_delete',
-			$this->sut->delete_item_permissions_check( $request )->get_error_code(),
+			$this->sut->delete_item_permissions_check( $api_request )->get_error_code(),
 			'A user lacking edit_comment permissions (such as an editor) cannot delete a product review.'
 		);
 
 		wp_set_current_user( $this->shop_manager_id );
 		$this->assertTrue(
-			$this->sut->delete_item_permissions_check( $request ),
+			$this->sut->delete_item_permissions_check( $api_request ),
 			'A user (such as a shop manager) who has the edit_comment permission can delete a product review.'
+		);
+
+		$nonexistent_product_id = $this->product_id * 10;
+		$api_request = new WP_REST_Request( 'DELETE', '/wc/v1/products/' . $nonexistent_product_id . '/reviews/' . $this->review_id );
+		$api_request->set_param( 'product_id', $nonexistent_product_id );
+		$api_request->set_param( 'id', $this->review_id );
+
+		$this->assertEquals(
+			'woocommerce_rest_product_invalid_id',
+			$this->sut->delete_item( $api_request )->get_error_code(),
+			'Attempts to delete reviews for non-existent products are rejected, even if the review ID is valid.'
 		);
 	}
 
