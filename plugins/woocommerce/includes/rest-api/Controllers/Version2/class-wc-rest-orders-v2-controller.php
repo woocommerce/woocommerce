@@ -158,7 +158,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
-		return $this->get_item_permission_check( $request );
+		return $this->get_item_permissions_check( $request );
 	}
 
 	public function get_shipping_methods( $request ) {
