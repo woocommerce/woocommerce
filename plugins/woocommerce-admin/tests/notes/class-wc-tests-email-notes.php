@@ -5,10 +5,10 @@
  * @package WooCommerce\Admin\Tests\Notes
  */
 
-use \Automattic\WooCommerce\Admin\Notes\Notes;
+use \Automattic\WooCommerce\Internal\Admin\Notes\MerchantEmailNotifications;
 use \Automattic\WooCommerce\Admin\Notes\Note;
-use \Automattic\WooCommerce\Admin\Notes\MerchantEmailNotifications\MerchantEmailNotifications;
-use \Automattic\WooCommerce\Admin\Notes\MerchantEmailNotifications\NotificationEmail;
+use \Automattic\WooCommerce\Admin\Notes\Notes;
+use \Automattic\WooCommerce\Admin\Notes\EmailNotification;
 
 /**
  * Class WC_Tests_Email_Notes
@@ -35,7 +35,7 @@ class WC_Tests_Email_Notes extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests NotificationEmail default values.
+	 * Tests EmailNotification default values.
 	 */
 	public function test_default_values_create_notification_email() {
 		$note = new Note();
@@ -57,7 +57,7 @@ class WC_Tests_Email_Notes extends WC_Unit_Test_Case {
 			'?s=PHPUNIT_TEST_EMAIL_ACTION_URL'
 		);
 		$note->set_is_deleted( false );
-		$notification_email = new NotificationEmail( $note );
+		$notification_email = new EmailNotification( $note );
 
 		$this->assertEquals( $notification_email->id, 'merchant_notification' );
 		$this->assertEquals( $notification_email->get_default_heading(), $note->get_title() );
@@ -67,7 +67,7 @@ class WC_Tests_Email_Notes extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests NotificationEmail is created correctly.
+	 * Tests EmailNotification is created correctly.
 	 */
 	public function test_create_notification_email() {
 		$data_store   = WC_Data_Store::load( 'admin-note' );
@@ -85,7 +85,7 @@ class WC_Tests_Email_Notes extends WC_Unit_Test_Case {
 		$note->set_content_data( (object) $content_data );
 		$note->save();
 		$note->set_image( '' );
-		$notification_email                          = new NotificationEmail( $note );
+		$notification_email                          = new EmailNotification( $note );
 		$notification_email->opened_tracking_url     = 'PHPUNIT_TEST_NOTE_EMAIL_TRACKING_URL';
 		$notification_email->trigger_note_action_url = 'PHPUNIT_TEST_NOTE_EMAIL_TRIGGER_ACTION_URL';
 		$content_html                                = $notification_email->get_content_html();
@@ -107,7 +107,7 @@ class WC_Tests_Email_Notes extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests NotificationEmail validations.
+	 * Tests EmailNotification validations.
 	 */
 	public function test_create_invalid_notification_email() {
 		$data_store   = WC_Data_Store::load( 'admin-note' );
@@ -122,7 +122,7 @@ class WC_Tests_Email_Notes extends WC_Unit_Test_Case {
 			'role' => 'invalid_role',
 		);
 		$note->set_content_data( (object) $content_data );
-		$notification_email = new NotificationEmail( $note );
+		$notification_email = new EmailNotification( $note );
 
 		$this->assertEmpty( MerchantEmailNotifications::get_notification_recipients( $note ) );
 		$this->assertEmpty( $notification_email->get_template_filename( 'wrong_type' ) );

@@ -16,7 +16,7 @@ use \Automattic\WooCommerce\Admin\Notes\InstallJPAndWCSPlugins;
 use \Automattic\WooCommerce\Admin\Notes\SetUpAdditionalPaymentTypes;
 use \Automattic\WooCommerce\Admin\Notes\TestCheckout;
 use \Automattic\WooCommerce\Admin\Notes\SellingOnlineCourses;
-use \Automattic\WooCommerce\Admin\Notes\MerchantEmailNotifications\MerchantEmailNotifications;
+use \Automattic\WooCommerce\Internal\Admin\Notes\MerchantEmailNotifications;
 use \Automattic\WooCommerce\Admin\Notes\WelcomeToWooCommerceForStoreUsers;
 use \Automattic\WooCommerce\Admin\Notes\ManageStoreActivityFromHomeScreen;
 use \Automattic\WooCommerce\Admin\Notes\NavigationNudge;
