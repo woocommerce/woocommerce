@@ -101,8 +101,16 @@ const resolvePackagePath = ( filename, packageName = '' ) => {
  * @return {string}
  */
 const resolveSingleE2EPath = ( filePath, exclude = [ 'woocommerce' ] ) => {
-	const { SMOKE_TEST_URL } = process.env;
+	const { SMOKE_TEST_URL, GITHUB_ACTIONS } = process.env;
 	let prunedPath;
+
+	// If running in GitHub CI, add the project root to the exclude array
+	// This is done because the project root is always duplicated in GitHub CI
+	if ( GITHUB_ACTIONS ) {
+		const appPathArray = appPath.split( '/' );
+		const projectRoot = appPathArray[ appPathArray.length - 2 ];
+		exclude.push( projectRoot );
+	}
 
 	// Removes 'plugins/woocommerce/' from path only for tests against a smoke test site.
 	if ( SMOKE_TEST_URL ) {
