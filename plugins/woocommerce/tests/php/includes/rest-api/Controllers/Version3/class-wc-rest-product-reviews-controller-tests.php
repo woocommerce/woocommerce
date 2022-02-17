@@ -1,5 +1,6 @@
 <?php
 
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
 
 /**
@@ -162,6 +163,40 @@ class WC_REST_Product_Reviews_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertTrue(
 			$this->sut->batch_items_permissions_check( $request ),
 			'A user (such as a shop manager) who has the edit_products permission can perform batch requests for product reviews.'
+		);
+	}
+
+	/**
+	 * @testdox Ensure attempts to delete comments other than product reviews are not possible via the product review endpoints.
+	 */
+	public function test_cannot_delete_other_comment_types() {
+		$order         = OrderHelper::create_order();
+		$order_note_id = $order->add_order_note( 'Updated quantities per customer request.' );
+
+		$request = new WP_REST_Request( 'DELETE', '/wc/v3/products/reviews/' . $order_note_id );
+		$request->set_param( 'id', $order_note_id );
+
+		$this->assertEquals(
+			'woocommerce_rest_cannot_delete',
+			$this->sut->delete_item_permissions_check( $request )->get_error_code(),
+			'Comments that are not product reviews cannot be deleted via this endpoint.'
+		);
+
+		$comment_id = wp_insert_comment(
+			array(
+				'comment_post_ID' => ProductHelper::create_simple_product()->get_id(),
+				'comment_type'    => 'comment',
+				'comment_content' => 'I am a regular comment (typically left by an admin/shop manager as a response to product reviews.'
+			)
+		);
+
+		$request = new WP_REST_Request( 'DELETE', '/wc/v3/products/reviews/' . $comment_id );
+		$request->set_param( 'id', $comment_id );
+
+		$this->assertEquals(
+			'woocommerce_rest_cannot_delete',
+			$this->sut->delete_item_permissions_check( $request )->get_error_code(),
+			'Comments that are not product reviews (including other types of comments belonging to products) cannot be deleted via this endpoint.'
 		);
 	}
 }
