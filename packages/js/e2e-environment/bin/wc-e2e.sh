@@ -9,6 +9,7 @@ usage() {
 	echo 'scripts:'
 	echo '         docker:up [initialization-script] - boot docker container'
 	echo '         docker:down - shut down docker container'
+	echo '         docker:wait - wait for env to be built'
 	echo '         docker:ssh - open SSH shell into docker container'
 	echo '         docker:clear-all - remove all docker containers'
 	echo '         test:e2e [test-script] - run e2e test suite or specific test-script'
@@ -49,6 +50,9 @@ fi
 case $1 in
 	'docker:up')
 		./bin/docker-compose.sh up $2
+		;;
+	'docker:wait')
+		./bin/wait-for-build.sh
 		;;
 	'docker:down')
 		./bin/docker-compose.sh down
