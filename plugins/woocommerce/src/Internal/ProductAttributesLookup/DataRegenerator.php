@@ -69,6 +69,13 @@ class DataRegenerator {
 				$this->run_regeneration_step_callback();
 			}
 		);
+
+		add_action(
+			'woocommerce_installed',
+			function() {
+				$this->run_woocommerce_installed_callback();
+			}
+		);
 	}
 
 	/**
@@ -126,22 +133,8 @@ class DataRegenerator {
 	private function initialize_table_and_data() {
 		global $wpdb;
 
-		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
-		$wpdb->query(
-			'
-CREATE TABLE ' . $this->lookup_table_name . '(
-  product_id bigint(20) NOT NULL,
-  product_or_parent_id bigint(20) NOT NULL,
-  taxonomy varchar(32) NOT NULL,
-  term_id bigint(20) NOT NULL,
-  is_variation_attribute tinyint(1) NOT NULL,
-  in_stock tinyint(1) NOT NULL
- );
-		'
-		);
-		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
-
-		$this->maybe_create_table_indices();
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$wpdb->query( $this->get_table_creation_sql() );
 
 		$last_existing_product_id =
 			WC()->call_function(
@@ -488,5 +481,46 @@ END;
 		if ( ! isset( $_REQUEST['_wpnonce'] ) || false === wp_verify_nonce( $_REQUEST['_wpnonce'], 'debug_action' ) ) {
 			throw new \Exception( 'Invalid nonce' );
 		}
+	}
+
+   /*
+	* Get the name of the product attributes lookup table.
+	*
+	* @return string
+	*/
+   public function get_lookup_table_name() {
+	   return $this->lookup_table_name;
+   }
+
+   /**
+	* Get the SQL statement that creates the product attributes lookup table, including the indices.
+	*
+	* @return string
+	*/
+   public function get_table_creation_sql() {
+	   global $wpdb;
+
+	   $collate = $wpdb->has_cap( 'collation' ) ? $wpdb->get_charset_collate() : '';
+
+	   return "CREATE TABLE {$this->lookup_table_name} (
+ product_id bigint(20) NOT NULL,
+ product_or_parent_id bigint(20) NOT NULL,
+ taxonomy varchar(32) NOT NULL,
+ term_id bigint(20) NOT NULL,
+ is_variation_attribute tinyint(1) NOT NULL,
+ in_stock tinyint(1) NOT NULL,
+ INDEX product_or_parent_id_term_id (product_or_parent_id, term_id),
+ INDEX is_variation_attribute_term_id (is_variation_attribute, term_id)
+) $collate;";
+   }
+
+   /**
+	* Run additional setup needed after a clean WooCommerce install finishes.
+	*/
+   private function run_woocommerce_installed_callback() {
+	   // The table must exist at this point (created via dbDelta), but we check just in case.
+	   if ( $this->data_store->check_lookup_table_exists() ) {
+		   $this->finalize_regeneration( true );
+	   }
 	}
 }

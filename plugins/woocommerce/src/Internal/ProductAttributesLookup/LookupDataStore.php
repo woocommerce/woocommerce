@@ -124,8 +124,6 @@ class LookupDataStore {
 	/**
 	 * Check if the lookup table exists in the database.
 	 *
-	 * TODO: Remove this method and references to it once the lookup table is created via data migration.
-	 *
 	 * @return bool
 	 */
 	public function check_lookup_table_exists() {
@@ -680,5 +678,17 @@ class LookupDataStore {
 	 */
 	public function regeneration_was_aborted(): bool {
 		return 'yes' === get_option( 'woocommerce_attribute_lookup_regeneration_aborted' );
+	}
+
+	/**
+	 * Check if the lookup table contains any entry at all.
+	 *
+	 * @return bool True if the table contains entries, false if the table is empty.
+	 */
+	public function lookup_table_has_data(): bool {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		return ( (int) $wpdb->get_var( "SELECT EXISTS (SELECT 1 FROM {$this->lookup_table_name})" ) ) !== 0;
 	}
 }
