@@ -9,7 +9,7 @@ All checkout endpoints require [Nonce Tokens](nonce-tokens.md).
 
 ## Get Checkout Data
 
-Returns data required for the checkout. This includes a draft order (created from the current cart) and customer billing and shipping addresses.
+Returns data required for the checkout. This includes a draft order (created from the current cart) and customer billing and shipping addresses. The payment information will be empty, as it's only persisted when the order gets updated via POST requests (right before payment processing). 
 
 This endpoint will return an error unless a valid [Nonce Token](nonce-tokens.md) is provided.
 
