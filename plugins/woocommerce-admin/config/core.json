@@ -8,7 +8,7 @@
 		"marketing": true,
 		"minified-js": false,
 		"mobile-app-banner": true,
-		"navigation": false,
+		"navigation": true,
 		"onboarding": true,
 		"remote-inbox-notifications": true,
 		"remote-free-extensions": true,
