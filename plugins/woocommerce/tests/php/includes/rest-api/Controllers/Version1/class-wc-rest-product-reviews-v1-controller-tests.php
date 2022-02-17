@@ -120,7 +120,12 @@ class WC_REST_Product_Reviews_V1_Controller_Tests extends WC_Unit_Test_Case {
 			$this->sut->delete_item_permissions_check( $request ),
 			'A user (such as a shop manager) who has the edit_comment permission can delete a product review.'
 		);
+	}
 
+	/**
+	 * @testdox Ensure attempts to delete comments other than product reviews are not possible via the product review endpoints.
+	 */
+	public function test_cannot_delete_other_comment_types() {
 		$order         = OrderHelper::create_order();
 		$order_note_id = $order->add_order_note( 'Dispatched with all due haste.' );
 
