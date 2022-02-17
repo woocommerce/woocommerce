@@ -15,6 +15,7 @@
 - `WC_E2E_FOLDER` for mapping plugin root to path within repo
 - Added the `resolveSingleE2EPath()` method which builds a path to a specific E2E test
 - Added the ability to take screenshots from multiple test failures (when retried) in `utils/take-screenshot.js`.
+- `docker:wait` to allow for waiting for env to be built without running tests
 
 ## Changed
 
