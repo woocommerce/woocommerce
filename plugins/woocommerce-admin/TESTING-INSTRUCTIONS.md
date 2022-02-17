@@ -1,5 +1,18 @@
 # Testing instructions
 
+## Unreleased
+
+### Prompt a modal to save any unsaved changes in OBW
+
+1. Start with a fresh install.
+2. Navigate to WooCommerce -> Home to start the OBW.
+3. Complete a few steps.
+4. Click any of the previous steps and make some changes.
+5. Click the next/previous step. You should be prompted by the modal to save your changes. Click the save button.
+6. Go back to the step and confirm the changes.
+7. Repeat the step, but click the disregard button for this time.
+8. Confirm the changes are not saved for this time.
+
 ## 3.2.0
 
 ### Fix category report query returns invalid net sales

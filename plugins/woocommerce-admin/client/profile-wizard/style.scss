@@ -402,3 +402,36 @@
 		margin-left: auto;
 	}
 }
+
+.woocommerce-obw-unsaved-changes {
+	width: 565px;
+	max-width: 100%;
+
+	.components-modal__header {
+		border-bottom: 1px solid #ddd;
+	}
+
+	.woocommerce-usage-modal__message {
+		box-sizing: border-box;
+		border-bottom: 1px solid #ddd;
+		padding: 0 32px;
+		background: #fff;
+		align-items: center;
+		height: 60px;
+		z-index: 10;
+		position: relative;
+		position: sticky;
+		top: 0;
+		margin: 0 -32px 24px;
+	}
+
+	.woocommerce-usage-modal__actions {
+		display: flex;
+		justify-content: flex-end;
+		margin-top: $gap;
+
+		button {
+			margin-left: $gap;
+		}
+	}
+}

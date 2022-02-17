@@ -42,6 +42,11 @@ class ProfileWizard extends Component {
 		super( props );
 		this.cachedActivePlugins = props.activePlugins;
 		this.goToNextStep = this.goToNextStep.bind( this );
+		this.trackStepValueChanges = this.trackStepValueChanges.bind( this );
+		this.updateCurrentStepValues = this.updateCurrentStepValues.bind(
+			this
+		);
+		this.stepValueChanges = {};
 	}
 
 	componentDidUpdate( prevProps ) {
@@ -91,6 +96,36 @@ class ProfileWizard extends Component {
 		document.body.classList.remove( 'woocommerce-profile-wizard__body' );
 		document.body.classList.remove( 'woocommerce-admin-full-screen' );
 		document.body.classList.remove( 'is-wp-toolbar-disabled' );
+	}
+
+	/**
+	 * Set the initial and current values of a step to track the state of the step.
+	 * This is used to determine if the step has been changes or not.
+	 *
+	 * @param {string} step key of the step
+	 * @param {*} initialValues the initial values of the step
+	 * @param {*} currentValues the current values of the step
+	 * @param {Function} onSave a function to call when the step is saved
+	 */
+	trackStepValueChanges( step, initialValues, currentValues, onSave ) {
+		this.stepValueChanges[ step ] = {
+			initialValues,
+			currentValues,
+			onSave,
+		};
+	}
+
+	/**
+	 * Update currentValues of the given step.
+	 *
+	 * @param {string} step key of the step
+	 * @param {*} currentValues the current values of the step
+	 */
+	updateCurrentStepValues( step, currentValues ) {
+		if ( ! this.stepValueChanges[ step ] ) {
+			return;
+		}
+		this.stepValueChanges[ step ].currentValues = currentValues;
 	}
 
 	getSteps() {
@@ -256,6 +291,8 @@ class ProfileWizard extends Component {
 			skipProfiler: () => {
 				this.skipProfiler();
 			},
+			trackStepValueChanges: this.trackStepValueChanges,
+			updateCurrentStepValues: this.updateCurrentStepValues,
 		} );
 		const steps = this.getSteps().map( ( _step ) =>
 			pick( _step, [ 'key', 'label', 'isComplete' ] )
@@ -264,7 +301,11 @@ class ProfileWizard extends Component {
 
 		return (
 			<>
-				<ProfileWizardHeader currentStep={ stepKey } steps={ steps } />
+				<ProfileWizardHeader
+					currentStep={ stepKey }
+					steps={ steps }
+					stepValueChanges={ this.stepValueChanges }
+				/>
 				<div className={ classNames }>{ container }</div>
 			</>
 		);

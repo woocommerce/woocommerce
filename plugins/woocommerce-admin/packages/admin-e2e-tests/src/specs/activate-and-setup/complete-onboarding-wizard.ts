@@ -412,6 +412,7 @@ const testSubscriptionsInclusion = () => {
 		} );
 
 		it( 'should display the task "Add Subscriptions to my store"', async () => {
+			await profileWizard.navigate();
 			await profileWizard.goToOBWStep( 'Store Details' );
 			await profileWizard.skipStoreSetup();
 			const homescreen = new WcHomescreen( page );
@@ -495,6 +496,7 @@ const testSubscriptionsInclusion = () => {
 		} );
 
 		it( 'should not display the task "Add Subscriptions to my store"', async () => {
+			await profileWizard.navigate();
 			await profileWizard.goToOBWStep( 'Store Details' );
 			await profileWizard.skipStoreSetup();
 			const homescreen = new WcHomescreen( page );
