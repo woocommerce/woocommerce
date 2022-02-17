@@ -1,6 +1,6 @@
 <?php
 
-namespace Automattic\WooCommerce\Admin\Schedulers;
+namespace Automattic\WooCommerce\Internal\Admin\Schedulers;
 
 /**
  * Class MailchimpScheduler
@@ -26,6 +26,7 @@ class MailchimpScheduler {
 	/**
 	 * MailchimpScheduler constructor.
 	 *
+	 * @internal
 	 * @param \WC_Logger_Interface|null $logger Logger instance.
 	 */
 	public function __construct( \WC_Logger_Interface $logger = null ) {
@@ -37,6 +38,8 @@ class MailchimpScheduler {
 
 	/**
 	 * Attempt to subscribe store_email to MailChimp.
+	 *
+	 * @internal
 	 */
 	public function run() {
 		// Abort if we've already subscribed to MailChimp.
@@ -82,6 +85,7 @@ class MailchimpScheduler {
 	/**
 	 * Make an HTTP request to the API.
 	 *
+	 * @internal
 	 * @param string $store_email Email address to subscribe.
 	 *
 	 * @return mixed

@@ -6,14 +6,14 @@
  */
 
 use Automattic\WooCommerce\Admin\Features\Onboarding;
-use Automattic\WooCommerce\Admin\Schedulers\MailchimpScheduler;
+use Automattic\WooCommerce\Internal\Admin\Schedulers\MailchimpScheduler;
 
 /**
  * Class WC_Tests_Mailchimp_Scheduler
  */
 class WC_Tests_Mailchimp_Scheduler extends WC_Unit_Test_Case {
 	/**
-	 * @var MailchimpScheduler MailchimpScheduler instance to test
+	 * @var \Automattic\WooCommerce\Internal\Admin\Schedulers\MailchimpScheduler MailchimpScheduler instance to test
 	 */
 	private $instance;
 

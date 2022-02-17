@@ -3,7 +3,7 @@
  * Order syncing related functions and actions.
  */
 
-namespace Automattic\WooCommerce\Admin\Schedulers;
+namespace Automattic\WooCommerce\Internal\Admin\Schedulers;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -13,7 +13,6 @@ use \Automattic\WooCommerce\Admin\API\Reports\Products\DataStore as ProductsData
 use \Automattic\WooCommerce\Admin\API\Reports\Taxes\DataStore as TaxesDataStore;
 use \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
 use \Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
-use \Automattic\WooCommerce\Admin\Schedulers\CustomersScheduler;
 
 /**
  * OrdersScheduler Class.
@@ -28,6 +27,8 @@ class OrdersScheduler extends ImportScheduler {
 
 	/**
 	 * Attach order lookup update hooks.
+	 *
+	 * @internal
 	 */
 	public static function init() {
 		// Activate WC_Order extension.
@@ -49,17 +50,19 @@ class OrdersScheduler extends ImportScheduler {
 	/**
 	 * Add customer dependencies.
 	 *
+	 * @internal
 	 * @return array
 	 */
 	public static function get_dependencies() {
 		return array(
-			'import_batch_init' => CustomersScheduler::get_action( 'import_batch_init' ),
+			'import_batch_init' => \Automattic\WooCommerce\Internal\Admin\Schedulers\CustomersScheduler::get_action( 'import_batch_init' ),
 		);
 	}
 
 	/**
 	 * Get the order/refund IDs and total count that need to be synced.
 	 *
+	 * @internal
 	 * @param int      $limit Number of records to retrieve.
 	 * @param int      $page  Page number.
 	 * @param int|bool $days Number of days prior to current date to limit search results.
@@ -111,6 +114,8 @@ class OrdersScheduler extends ImportScheduler {
 
 	/**
 	 * Get total number of rows imported.
+	 *
+	 * @internal
 	 */
 	public static function get_total_imported() {
 		global $wpdb;
@@ -120,6 +125,7 @@ class OrdersScheduler extends ImportScheduler {
 	/**
 	 * Schedule this import if the post is an order or refund.
 	 *
+	 * @internal
 	 * @param int $post_id Post ID.
 	 */
 	public static function possibly_schedule_import( $post_id ) {
@@ -134,6 +140,7 @@ class OrdersScheduler extends ImportScheduler {
 	 * Imports a single order or refund to update lookup tables for.
 	 * If an error is encountered in one of the updates, a retry action is scheduled.
 	 *
+	 * @internal
 	 * @param int $order_id Order or refund ID.
 	 * @return void
 	 */
@@ -179,6 +186,7 @@ class OrdersScheduler extends ImportScheduler {
 	/**
 	 * Delete a batch of orders.
 	 *
+	 * @internal
 	 * @param int $batch_size Number of items to delete.
 	 * @return void
 	 */

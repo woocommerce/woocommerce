@@ -7,9 +7,9 @@ namespace Automattic\WooCommerce\Admin;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\Schedulers\CustomersScheduler;
-use Automattic\WooCommerce\Admin\Schedulers\OrdersScheduler;
-use Automattic\WooCommerce\Admin\Schedulers\ImportScheduler;
+use Automattic\WooCommerce\Internal\Admin\Schedulers\CustomersScheduler;
+use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
+use Automattic\WooCommerce\Internal\Admin\Schedulers\ImportScheduler;
 
 /**
  * ReportsSync Class.
@@ -45,8 +45,8 @@ class ReportsSync {
 		);
 
 		foreach ( $schedulers as $scheduler ) {
-			if ( ! is_subclass_of( $scheduler, 'Automattic\WooCommerce\Admin\Schedulers\ImportScheduler' ) ) {
-				throw new \Exception( __( 'Report sync schedulers should be derived from the Automattic\WooCommerce\Admin\Schedulers\ImportScheduler class.', 'woocommerce-admin' ) );
+			if ( ! is_subclass_of( $scheduler, 'Automattic\WooCommerce\Internal\Admin\Schedulers\ImportScheduler' ) ) {
+				throw new \Exception( __( 'Report sync schedulers should be derived from the Automattic\WooCommerce\Internal\Admin\Schedulers\ImportScheduler class.', 'woocommerce-admin' ) );
 			}
 		}
 

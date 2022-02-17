@@ -3,7 +3,7 @@
  * Import related functions and actions.
  */
 
-namespace Automattic\WooCommerce\Admin\Schedulers;
+namespace Automattic\WooCommerce\Internal\Admin\Schedulers;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -29,6 +29,7 @@ abstract class ImportScheduler implements ImportInterface {
 	/**
 	 * Returns true if an import is in progress.
 	 *
+	 * @internal
 	 * @return bool
 	 */
 	public static function is_importing() {
@@ -58,6 +59,7 @@ abstract class ImportScheduler implements ImportInterface {
 	/**
 	 * Get batch sizes.
 	 *
+	 * @internal
 	 * @retun array
 	 */
 	public static function get_batch_sizes() {
@@ -76,6 +78,7 @@ abstract class ImportScheduler implements ImportInterface {
 	 * Get all available scheduling actions.
 	 * Used to determine action hook names and clear events.
 	 *
+	 * @internal
 	 * @return array
 	 */
 	public static function get_scheduler_actions() {
@@ -91,6 +94,7 @@ abstract class ImportScheduler implements ImportInterface {
 	/**
 	 * Queue the imports into multiple batches.
 	 *
+	 * @internal
 	 * @param integer|boolean $days Number of days to import.
 	 * @param boolean         $skip_existing Skip exisiting records.
 	 */
@@ -110,6 +114,7 @@ abstract class ImportScheduler implements ImportInterface {
 	/**
 	 * Imports a batch of items to update.
 	 *
+	 * @internal
 	 * @param int      $batch_number Batch number to import (essentially a query page number).
 	 * @param int|bool $days Number of days to import.
 	 * @param bool     $skip_existing Skip exisiting records.
@@ -146,6 +151,8 @@ abstract class ImportScheduler implements ImportInterface {
 
 	/**
 	 * Queue item deletion in batches.
+	 *
+	 * @internal
 	 */
 	public static function delete_batch_init() {
 		global $wpdb;
@@ -164,6 +171,7 @@ abstract class ImportScheduler implements ImportInterface {
 	/**
 	 * Delete a batch by passing the count to be deleted to the child delete method.
 	 *
+	 * @internal
 	 * @return void
 	 */
 	public static function delete_batch() {

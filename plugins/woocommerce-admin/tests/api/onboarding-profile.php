@@ -7,7 +7,7 @@
 
 use \Automattic\WooCommerce\Admin\API\OnboardingProfile;
 use Automattic\WooCommerce\Admin\Features\Onboarding;
-use Automattic\WooCommerce\Admin\Schedulers\MailchimpScheduler;
+use Automattic\WooCommerce\Internal\Admin\Schedulers\MailchimpScheduler;
 
 /**
  * WC Tests API Onboarding Profile

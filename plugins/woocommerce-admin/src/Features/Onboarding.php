@@ -11,7 +11,7 @@ use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Admin\WCAdminHelper;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Init as OnboardingTasks;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
-use Automattic\WooCommerce\Admin\Schedulers\MailchimpScheduler;
+use Automattic\WooCommerce\Internal\Admin\Schedulers\MailchimpScheduler;
 
 /**
  * Contains backend logic for the onboarding profile and checklist feature.

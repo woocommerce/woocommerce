@@ -6,8 +6,8 @@
  * @since 3.5.0
  */
 
-use Automattic\WooCommerce\Admin\Schedulers\CustomersScheduler;
-use Automattic\WooCommerce\Admin\Schedulers\OrdersScheduler;
+use Automattic\WooCommerce\Internal\Admin\Schedulers\CustomersScheduler;
+use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
 
 /**
  * Reports Generation Batch Queue Test Class

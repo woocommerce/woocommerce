@@ -40,7 +40,7 @@ use \Automattic\WooCommerce\Admin\Notes\PerformanceOnMobile;
 use \Automattic\WooCommerce\Admin\Notes\ManageOrdersOnTheGo;
 use \Automattic\WooCommerce\Admin\Notes\AddFirstProduct;
 use \Automattic\WooCommerce\Admin\Notes\NavigationNudge;
-use Automattic\WooCommerce\Admin\Schedulers\MailchimpScheduler;
+use Automattic\WooCommerce\Internal\Admin\Schedulers\MailchimpScheduler;
 use \Automattic\WooCommerce\Admin\Notes\CompleteStoreDetails;
 use \Automattic\WooCommerce\Admin\Notes\UpdateStoreDetails;
 use \Automattic\WooCommerce\Admin\Notes\SetUpAdditionalPaymentTypes;
