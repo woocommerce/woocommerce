@@ -14,8 +14,8 @@ const Block = (): JSX.Element | null => {
 	}
 
 	return (
-		<div className="wp-block-button aligncenter is-style-outline">
-			<a className="wp-block-button__link" href={ SHOP_URL }>
+		<div className="wc-block-mini-cart__shopping-button">
+			<a href={ SHOP_URL }>
 				{ __( 'Start shopping', 'woo-gutenberg-products-block' ) }
 			</a>
 		</div>
