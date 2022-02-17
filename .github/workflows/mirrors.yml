@@ -4,7 +4,7 @@ on:
     branches: ["trunk", "release/**"]
 jobs:
   build:
-    if: github.repository_owner == 'woocommerce'
+    if: github.repository == 'woocommerce/woocommerce'
     name: Build WooCommerce zip
     runs-on: ubuntu-latest
     steps:
@@ -24,7 +24,7 @@ jobs:
           path: ${{ steps.build.outputs.zip_path }}
           retention-days: 7
   mirror:
-    if: github.repository_owner == 'woocommerce'
+    if: github.repository == 'woocommerce/woocommerce'
     name: Push to Mirror
     runs-on: ubuntu-latest
     needs: [build]
