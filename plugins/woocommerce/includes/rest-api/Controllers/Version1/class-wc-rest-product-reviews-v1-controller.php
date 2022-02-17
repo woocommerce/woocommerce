@@ -365,8 +365,13 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 	 * @return bool|WP_Error|WP_REST_Response
 	 */
 	public function delete_item( $request ) {
+		$product_id        = (int) $request['product_id'];
 		$product_review_id = (int) $request['id'];
 		$force             = isset( $request['force'] ) ? (bool) $request['force']     : false;
+
+		if ( 'product' !== get_post_type( $product_id ) ) {
+			return new WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
 
 		$product_review = get_comment( $product_review_id );
 		if ( empty( $product_review_id ) || empty( $product_review->comment_ID ) || empty( $product_review->comment_post_ID ) ) {
