@@ -141,6 +141,7 @@ class WC_REST_Product_Reviews_V1_Controller_Tests extends WC_Unit_Test_Case {
 		$order         = OrderHelper::create_order();
 		$order_note_id = $order->add_order_note( 'Dispatched with all due haste.' );
 
+		wp_set_current_user( $this->shop_manager_id );
 		$request = new WP_REST_Request( 'DELETE', '/wc/v1/products/123456789/reviews/' . $order_note_id );
 		$request->set_param( 'id', $order_note_id );
 
