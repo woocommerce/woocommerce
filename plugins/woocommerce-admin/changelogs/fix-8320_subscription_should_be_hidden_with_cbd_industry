@@ -1,0 +1,4 @@
+Significance: patch
+Type: Fix
+
+Make sure free subscriptions does not show when cbd industry is selected. #8323

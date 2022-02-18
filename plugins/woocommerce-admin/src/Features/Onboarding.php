@@ -462,7 +462,7 @@ class Onboarding {
 	 * @return array
 	 */
 	public static function get_allowed_product_types() {
-		$products      = array(
+		$products         = array(
 			'physical'        => array(
 				'label'   => __( 'Physical products', 'woocommerce-admin' ),
 				'default' => true,
@@ -490,8 +490,15 @@ class Onboarding {
 				'product' => 18618,
 			),
 		);
-		$base_location = wc_get_base_location();
-		if ( ! Features::is_enabled( 'subscriptions' ) || 'US' !== $base_location['country'] ) {
+		$base_location    = wc_get_base_location();
+		$has_cbd_industry = false;
+		if ( 'US' === $base_location['country'] ) {
+			$profile = get_option( self::PROFILE_DATA_OPTION, array() );
+			if ( ! empty( $profile['industry'] ) ) {
+				$has_cbd_industry = in_array( 'cbd-other-hemp-derived-products', array_column( $profile['industry'], 'slug' ), true );
+			}
+		}
+		if ( ! Features::is_enabled( 'subscriptions' ) || 'US' !== $base_location['country'] || $has_cbd_industry ) {
 			$products['subscriptions']['product'] = 27147;
 		}
 
