@@ -49,6 +49,7 @@ class TaskLists {
 		'Shipping',
 		'Marketing',
 		'Appearance',
+		'AdditionalPayments',
 	);
 
 	/**

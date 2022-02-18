@@ -96,8 +96,7 @@ class WooCommercePayments extends Task {
 	public function can_view() {
 		return self::is_requested() &&
 			self::is_installed() &&
-			self::is_supported() &&
-			! self::is_connected();
+			self::is_supported();
 	}
 
 	/**

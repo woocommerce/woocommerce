@@ -71,17 +71,25 @@ const ExtendedTask: React.FC< TasksProps > = ( { query } ) => {
 	const setupTaskList = taskLists.find( ( list ) => {
 		return list.id === 'setup';
 	} );
+	const hasSetupPaymentsTask = setupTaskList.tasks.find(
+		( t ) => t.id === 'payments'
+	);
 
 	extendedTaskList.tasks = [
 		...new Set(
-			extendedTaskList.tasks.concat(
-				setupTaskList?.tasks.filter( ( unallowedTask ) => {
-					return (
-						! allowedTasks.includes( unallowedTask.id ) &&
-						unallowedTask.id !== 'store_details'
-					);
-				} ) || []
-			)
+			// Filter out the additional payments task if it is already present in the setup tasks.
+			extendedTaskList.tasks
+				.filter(
+					( t ) => t.id !== 'payments' || ! hasSetupPaymentsTask
+				)
+				.concat(
+					setupTaskList?.tasks.filter( ( unallowedTask ) => {
+						return (
+							! allowedTasks.includes( unallowedTask.id ) &&
+							unallowedTask.id !== 'store_details'
+						);
+					} ) || []
+				)
 		),
 	];
 

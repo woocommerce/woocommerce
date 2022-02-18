@@ -83,9 +83,13 @@ const TaskDashboard = ( { query, twoColumns } ) => {
 	}
 	// List of task items to be shown on the main task list.
 	// Any other remaining tasks will be moved to the extended task list.
-	const setupTasks = taskLists[ 0 ].tasks.filter( ( setupTask ) =>
-		allowedTasks.includes( setupTask.id )
-	);
+	const setupTasks = taskLists[ 0 ].tasks.filter( ( setupTask ) => {
+		if ( setupTask.id === 'woocommerce-payments' && setupTask.isComplete ) {
+			// filter out woocommerce payments task if complete.
+			return false;
+		}
+		return allowedTasks.includes( setupTask.id );
+	} );
 
 	const completedTasks = setupTasks.filter(
 		( setupTask ) => setupTask.isComplete

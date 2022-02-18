@@ -1,0 +1,4 @@
+Significance: patch
+Type: Fix
+
+Adjusted task list logic to fix conflict between current and experimental task list. #8321
