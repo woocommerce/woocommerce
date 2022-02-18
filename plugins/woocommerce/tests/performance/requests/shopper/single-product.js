@@ -5,7 +5,7 @@ import { randomIntBetween } from "https://jslib.k6.io/k6-utils/1.1.0/index.js";
 import {
 	base_url,
 	product_url,
-	product_id,
+	product_sku,
 	think_time_min,
 	think_time_max,
 } from "../../config.js";
@@ -36,8 +36,8 @@ export function singleProduct() {
 		productPageTrend.add(response.timings.duration);
 		check(response, {
 			"is status 200": (r) => r.status === 200,
-			"body contains: product ID": (response) =>
-				response.body.includes(`id="product-${product_id}`),
+			"body contains: product SKU": (response) =>
+				response.body.includes(`class="sku">${product_sku}`),
 		});
 	});
 
