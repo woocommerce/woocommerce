@@ -732,7 +732,7 @@ function wc_restock_refunded_items( $order, $refunded_line_items ) {
 		/**
 		 * Allow the restock note to be modified.
 		 *
-		 * @since 6.3.0
+		 * @since 6.4.0
 		 *
 		 * @param string $restock_note The original note.
 		 * @param int $old_stock The old stock.
