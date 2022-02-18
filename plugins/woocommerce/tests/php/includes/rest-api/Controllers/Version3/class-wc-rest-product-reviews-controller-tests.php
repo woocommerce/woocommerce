@@ -173,6 +173,7 @@ class WC_REST_Product_Reviews_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$order         = OrderHelper::create_order();
 		$order_note_id = $order->add_order_note( 'Updated quantities per customer request.' );
 
+		wp_set_current_user( $this->shop_manager_id );
 		$request = new WP_REST_Request( 'DELETE', '/wc/v3/products/reviews/' . $order_note_id );
 		$request->set_param( 'id', $order_note_id );
 
