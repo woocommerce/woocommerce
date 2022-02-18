@@ -107,8 +107,9 @@ const resolveSingleE2EPath = ( filePath, exclude = [ 'woocommerce' ] ) => {
 	// If running in GitHub CI, add the project root to the exclude array
 	// This is done because the project root is always duplicated in GitHub CI
 	if ( GITHUB_ACTIONS ) {
-		const appPathArray = appPath.split( '/' );
-		const projectRoot = appPathArray[ appPathArray.length - 2 ];
+		const trimmedPath = appPath.replace( /\/$/, '' );
+		const appPathArray = trimmedPath.split( '/' );
+		const projectRoot = appPathArray[ appPathArray.length - 1 ];
 		exclude.push( projectRoot );
 	}
 
