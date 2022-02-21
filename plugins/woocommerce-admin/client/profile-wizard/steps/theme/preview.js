@@ -5,7 +5,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import classnames from 'classnames';
 import { Component } from '@wordpress/element';
-import interpolateComponents from 'interpolate-components';
+import interpolateComponents from '@automattic/interpolate-components';
 import { WebPreview } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 import { Icon, close } from '@wordpress/icons';

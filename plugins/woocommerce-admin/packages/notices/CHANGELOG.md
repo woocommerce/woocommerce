@@ -1,4 +1,12 @@
 <!-- Learn how to maintain this file at https://github.com/WordPress/gutenberg/tree/master/packages#maintaining-changelogs. -->
+
+# Unreleased
+
+## Breaking changes
+
+-   Update dependencies to support react 17. #8305
+-   Drop support for IE11. #8305
+
 ## 3.1.0
 
 -   Fix commonjs module build, allow package to be built in isolation. #7286
@@ -7,7 +15,6 @@
 ## Breaking changes
 
 -   Move Lodash to a peer dependency.
-
 ## 2.0.0 (2020-02-10)
 
 ### Breaking Change

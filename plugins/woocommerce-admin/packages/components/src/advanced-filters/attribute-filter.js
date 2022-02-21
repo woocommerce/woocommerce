@@ -4,7 +4,7 @@
 import PropTypes from 'prop-types';
 import { SelectControl as Select, Spinner } from '@wordpress/components';
 import { partial } from 'lodash';
-import interpolateComponents from 'interpolate-components';
+import interpolateComponents from '@automattic/interpolate-components';
 import classnames from 'classnames';
 import {
 	createElement,

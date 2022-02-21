@@ -4,7 +4,7 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { Button, Popover, Tooltip } from '@wordpress/components';
 import { Fragment, useState } from '@wordpress/element';
-import interpolateComponents from 'interpolate-components';
+import interpolateComponents from '@automattic/interpolate-components';
 import { Link, Pill } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 import { Icon, info } from '@wordpress/icons';

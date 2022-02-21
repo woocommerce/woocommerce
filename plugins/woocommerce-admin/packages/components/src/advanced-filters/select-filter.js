@@ -5,7 +5,7 @@ import { createElement, Component, Fragment } from '@wordpress/element';
 import { SelectControl, Spinner } from '@wordpress/components';
 import { find, partial } from 'lodash';
 import PropTypes from 'prop-types';
-import interpolateComponents from 'interpolate-components';
+import interpolateComponents from '@automattic/interpolate-components';
 import classnames from 'classnames';
 import { getDefaultOptionValue } from '@woocommerce/navigation';
 

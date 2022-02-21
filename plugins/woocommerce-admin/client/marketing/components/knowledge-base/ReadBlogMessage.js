@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Link } from '@woocommerce/components';
-import interpolateComponents from 'interpolate-components';
+import interpolateComponents from '@automattic/interpolate-components';
 
 const ReadBlogMessage = () => {
 	return interpolateComponents( {

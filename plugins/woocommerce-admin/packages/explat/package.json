@@ -26,7 +26,7 @@
 	},
 	"dependencies": {
 		"@automattic/explat-client": "0.0.2",
-		"@automattic/explat-client-react-helpers": "0.0.2",
+		"@automattic/explat-client-react-helpers": "0.0.3",
 		"cookie": "^0.4.1",
 		"qs": "6.9.6"
 	},

@@ -3,33 +3,53 @@
 exports[`AbbreviatedCard it renders correctly 1`] = `
 <div>
   <div
-    class="components-card is-size-medium woocommerce-abbreviated-card css-1xs3c37-CardUI e1q7k77g0"
+    class="components-surface components-card woocommerce-abbreviated-card css-1vyvcpq-View-Surface-getBorders-primary-Card-rounded em57xhy0"
+    data-wp-c16t="true"
+    data-wp-component="Card"
   >
     <div
-      class="components-card__body css-xmjzce-BodyUI e1q7k77g3"
+      class="css-mgwsf4-View-Content em57xhy0"
     >
-      <a
-        data-link-type="wc-admin"
-        href="#"
+      <div
+        class="components-card__body components-card-body css-1sfrl79-View-Body-borderRadius em57xhy0"
+        data-wp-c16t="true"
+        data-wp-component="CardBody"
       >
-        <div
-          class="woocommerce-abbreviated-card__icon"
+        <a
+          data-link-type="wc-admin"
+          href="#"
         >
           <div
-            size="24"
+            class="woocommerce-abbreviated-card__icon"
           >
-            icon
+            <div
+              size="24"
+            >
+              icon
+            </div>
           </div>
-        </div>
-        <div
-          class="woocommerce-abbreviated-card__content"
-        >
-          <p>
-            Abbreviated card content
-          </p>
-        </div>
-      </a>
+          <div
+            class="woocommerce-abbreviated-card__content"
+          >
+            <p>
+              Abbreviated card content
+            </p>
+          </div>
+        </a>
+      </div>
     </div>
+    <div
+      aria-hidden="true"
+      class="components-elevation css-91yjwm-View-Elevation-sx-Base-elevationClassName em57xhy0"
+      data-wp-c16t="true"
+      data-wp-component="Elevation"
+    />
+    <div
+      aria-hidden="true"
+      class="components-elevation css-91yjwm-View-Elevation-sx-Base-elevationClassName em57xhy0"
+      data-wp-c16t="true"
+      data-wp-component="Elevation"
+    />
   </div>
 </div>
 `;

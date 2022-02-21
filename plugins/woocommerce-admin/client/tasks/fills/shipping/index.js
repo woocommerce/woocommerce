@@ -7,7 +7,7 @@ import { Component } from '@wordpress/element';
 import { Card, CardBody } from '@wordpress/components';
 import { compose } from '@wordpress/compose';
 import { difference, filter } from 'lodash';
-import interpolateComponents from 'interpolate-components';
+import interpolateComponents from '@automattic/interpolate-components';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { Link, Stepper, Plugins } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/settings';

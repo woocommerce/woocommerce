@@ -8,7 +8,7 @@ import { useDispatch } from '@wordpress/data';
 import { useState } from '@wordpress/element';
 import { WC_ADMIN_NAMESPACE } from '@woocommerce/data';
 import { Link } from '@woocommerce/components';
-import interpolateComponents from 'interpolate-components';
+import interpolateComponents from '@automattic/interpolate-components';
 
 /**
  * Internal dependencies

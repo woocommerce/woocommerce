@@ -1,5 +1,10 @@
 # Unreleased
 
+## Breaking changes
+
+-   Update dependencies to support react 17. #8305
+-   Drop support for IE11. #8305
+
 # 2.2.0
 -   Make the Inbox note title clickable. #7975
 -   Fix incorrectly displayed note created date. #8179

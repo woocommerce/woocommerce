@@ -53,14 +53,10 @@ describe( 'Activity Panel - Homescreen Display Options', () => {
 		fireEvent.click( getByRole( 'button', { name: 'Display options' } ) );
 
 		// Verify the default of two columns.
-		expect(
-			getByText( 'Single column', { selector: 'button' } )
-		).toBeChecked();
-		expect(
-			getByText( 'Two columns', { selector: 'button' } )
-		).not.toBeChecked();
+		expect( getByText( 'Single column' ).parentNode ).toBeChecked();
+		expect( getByText( 'Two columns' ).parentNode ).not.toBeChecked();
 
-		fireEvent.click( getByText( 'Two columns', { selector: 'button' } ) );
+		fireEvent.click( getByText( 'Two columns' ).parentNode );
 
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'homescreen_display_option',

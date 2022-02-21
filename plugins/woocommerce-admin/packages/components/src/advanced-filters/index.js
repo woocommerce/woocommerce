@@ -15,7 +15,7 @@ import { createElement, Component, createRef } from '@wordpress/element';
 import { partial, difference, isEqual } from 'lodash';
 import PropTypes from 'prop-types';
 import AddOutlineIcon from 'gridicons/dist/add-outline';
-import interpolateComponents from 'interpolate-components';
+import interpolateComponents from '@automattic/interpolate-components';
 import {
 	getActiveFiltersFromQuery,
 	getDefaultOptionValue,

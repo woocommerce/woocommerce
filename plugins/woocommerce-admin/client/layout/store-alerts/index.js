@@ -12,7 +12,7 @@ import {
 	SelectControl,
 } from '@wordpress/components';
 import classnames from 'classnames';
-import interpolateComponents from 'interpolate-components';
+import interpolateComponents from '@automattic/interpolate-components';
 import { compose } from '@wordpress/compose';
 import { withDispatch, withSelect } from '@wordpress/data';
 import moment from 'moment';

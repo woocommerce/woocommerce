@@ -1,6 +1,10 @@
 # Unreleased
 
 - Make ExPlat request URL args filterable. Added woocommerce_explat_request_args filter #8231
+## Breaking changes
+
+-   Update dependencies to support react 17. #8305
+-   Drop support for IE11. #8305
 
 # 1.1.4
 

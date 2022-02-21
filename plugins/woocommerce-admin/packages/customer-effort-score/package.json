@@ -21,12 +21,12 @@
 	"react-native": "src/index",
 	"dependencies": {
 		"@woocommerce/experimental": "file:../experimental",
-		"@wordpress/components": "^11.1.1",
-		"@wordpress/compose": "^3.22.0",
-		"@wordpress/data": "^4.27.3",
-		"@wordpress/element": "2.19.0",
-		"@wordpress/i18n": "3.17.0",
-		"@wordpress/notices": "^2.11.0",
+		"@wordpress/components": "19.4.0",
+		"@wordpress/compose":  "5.1.1",
+		"@wordpress/data": "^6.2.1",
+		"@wordpress/element": "4.1.1",
+		"@wordpress/i18n": "4.3.1",
+		"@wordpress/notices": "^3.3.0",
 		"classnames": "2.3.1",
 		"prop-types": "15.7.2",
 		"react-transition-group": "4.4.1"

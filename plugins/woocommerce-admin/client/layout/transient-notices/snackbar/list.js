@@ -3,7 +3,7 @@
  */
 import classnames from 'classnames';
 import { omit, noop } from 'lodash';
-import { useTransition, animated } from 'react-spring/web.cjs';
+import { useTransition, animated } from '@react-spring/web';
 import { useReducedMotion } from '@wordpress/compose';
 import { useState } from '@wordpress/element';
 
@@ -32,7 +32,8 @@ function SnackbarList( {
 } ) {
 	const isReducedMotion = useReducedMotion();
 	const [ refMap ] = useState( () => new WeakMap() );
-	const transitions = useTransition( notices, ( notice ) => notice.id, {
+	const transitions = useTransition( notices, {
+		keys: ( notice ) => notice.id,
 		from: { opacity: 0, height: 0 },
 		enter: ( item ) => async ( next ) =>
 			await next( {
@@ -56,8 +57,8 @@ function SnackbarList( {
 	return (
 		<div className={ className }>
 			{ children }
-			{ transitions.map( ( { item: notice, key, props: style } ) => (
-				<animated.div key={ key } style={ style }>
+			{ transitions( ( style, notice ) => (
+				<animated.div style={ style }>
 					<div
 						className="components-snackbar-list__notice-container"
 						ref={ ( ref ) => ref && refMap.set( notice, ref ) }

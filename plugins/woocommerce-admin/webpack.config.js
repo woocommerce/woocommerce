@@ -87,7 +87,12 @@ const webpackConfig = {
 			},
 			{
 				test: /\.(t|j)sx?$/,
-				exclude: [ /node_modules(\/|\\)(?!(debug))/ ],
+				exclude: [
+					// Exclude node_modules/ but not node_modules/debug* and node_modules/explat-client-react-helpers
+					// explat-client-react-helpers module contains optional chaining operators which need to be processed via babel loader for webpack 4.
+					// see webpack issue for details: https://github.com/webpack/webpack/issues/10227#issue-547480527
+					/node_modules(\/|\\)(?!(debug|@automattic\/explat-client-react-helpers))/,
+				],
 				use: {
 					loader: 'babel-loader',
 					options: {

@@ -11,7 +11,6 @@ import { isDevelopmentMode } from './utils';
 import { logError } from './error';
 import { fetchExperimentAssignment } from './assignment';
 import { getAnonId, initializeAnonId } from './anon';
-
 declare global {
 	interface Window {
 		wcTracks: {

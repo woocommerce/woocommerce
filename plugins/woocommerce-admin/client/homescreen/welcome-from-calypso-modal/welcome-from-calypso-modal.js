@@ -5,7 +5,7 @@ import React, { useState, useEffect } from '@wordpress/element';
 import { Guide } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
-import interpolateComponents from 'interpolate-components';
+import interpolateComponents from '@automattic/interpolate-components';
 import classNames from 'classnames';
 import { Link } from '@woocommerce/components';
 

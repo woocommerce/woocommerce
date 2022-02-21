@@ -10,7 +10,7 @@ import { withSelect, withDispatch } from '@wordpress/data';
 import PropTypes from 'prop-types';
 import StarIcon from 'gridicons/dist/star';
 import StarOutlineIcon from 'gridicons/dist/star-outline';
-import interpolateComponents from 'interpolate-components';
+import interpolateComponents from '@automattic/interpolate-components';
 import {
 	EmptyContent,
 	Link,

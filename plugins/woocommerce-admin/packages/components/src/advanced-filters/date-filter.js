@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { createElement, Component, Fragment } from '@wordpress/element';
-import interpolateComponents from 'interpolate-components';
+import interpolateComponents from '@automattic/interpolate-components';
 import { SelectControl } from '@wordpress/components';
 import { find, partial } from 'lodash';
 import classnames from 'classnames';

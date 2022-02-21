@@ -23,16 +23,16 @@
 	"dependencies": {
 		"@woocommerce/date": "file:../date",
 		"@woocommerce/navigation": "file:../navigation",
-		"@wordpress/api-fetch": "2.2.8",
-		"@wordpress/compose": "3.23.1",
-		"@wordpress/core-data": "3.0.0",
-		"@wordpress/data": "5.0.0",
-		"@wordpress/data-controls": "2.0.0",
-		"@wordpress/deprecated": "^3.1.1",
-		"@wordpress/element": "2.19.0",
+		"@wordpress/api-fetch": "6.0.1",
+		"@wordpress/compose":  "5.1.1",
+		"@wordpress/core-data": "4.1.0",
+		"@wordpress/data": "6.2.1",
+		"@wordpress/data-controls": "2.3.1",
+		"@wordpress/deprecated": "^3.3.1",
+		"@wordpress/element": "4.1.1",
 		"@wordpress/hooks": "2.11.0",
-		"@wordpress/i18n": "3.17.0",
-		"@wordpress/url": "2.21.0",
+		"@wordpress/i18n": "4.3.1",
+		"@wordpress/url": "3.4.1",
 		"dompurify": "^2.3.3",
 		"md5": "^2.3.0",
 		"qs": "6.9.6",
@@ -42,7 +42,7 @@
 		"access": "public"
 	},
 	"peerDependencies": {
-		"@wordpress/core-data": "^3.0.0"
+		"@wordpress/core-data": "^4.1.0"
 	},
 	"scripts": {
 		"clean": "npx rimraf tsconfig.tsbuildinfo build build-*",

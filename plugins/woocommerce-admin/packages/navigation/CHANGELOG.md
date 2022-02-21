@@ -1,9 +1,14 @@
+# Unreleased
+## Breaking changes
+
+-   Update dependencies to support react 17. #8305
+-   Drop support for IE11. #8305
+
 ## 6.1.0
 
 -   Fix commonjs module build, allow package to be built in isolation. #7286
 -   Add `getSetOfIdsFromQuery` util.
 -   Fix `getIdsFromQuery` support for `0` as a valid id.
-
 # 6.0.1
 
 -   Update dependencies.

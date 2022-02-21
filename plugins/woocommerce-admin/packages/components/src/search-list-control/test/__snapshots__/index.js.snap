@@ -47,13 +47,13 @@ Object {
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control"
+            class="components-base-control css-wdf2ti-Wrapper e1puf3u4"
           >
             <div
-              class="components-base-control__field"
+              class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
             >
               <label
-                class="components-base-control__label"
+                class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
                 for="inspector-text-control-10"
               >
                 Search for items
@@ -246,13 +246,13 @@ Object {
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control"
+          class="components-base-control css-wdf2ti-Wrapper e1puf3u4"
         >
           <div
-            class="components-base-control__field"
+            class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
           >
             <label
-              class="components-base-control__label"
+              class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
               for="inspector-text-control-10"
             >
               Search for items
@@ -526,13 +526,13 @@ Object {
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control"
+            class="components-base-control css-wdf2ti-Wrapper e1puf3u4"
           >
             <div
-              class="components-base-control__field"
+              class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
             >
               <label
-                class="components-base-control__label"
+                class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
                 for="inspector-text-control-0"
               >
                 Search for items
@@ -710,13 +710,13 @@ Object {
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control"
+          class="components-base-control css-wdf2ti-Wrapper e1puf3u4"
         >
           <div
-            class="components-base-control__field"
+            class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
           >
             <label
-              class="components-base-control__label"
+              class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
               for="inspector-text-control-0"
             >
               Search for items
@@ -975,13 +975,13 @@ Object {
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control"
+            class="components-base-control css-wdf2ti-Wrapper e1puf3u4"
           >
             <div
-              class="components-base-control__field"
+              class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
             >
               <label
-                class="components-base-control__label"
+                class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
                 for="inspector-text-control-1"
               >
                 Search for items
@@ -1159,13 +1159,13 @@ Object {
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control"
+          class="components-base-control css-wdf2ti-Wrapper e1puf3u4"
         >
           <div
-            class="components-base-control__field"
+            class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
           >
             <label
-              class="components-base-control__label"
+              class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
               for="inspector-text-control-1"
             >
               Search for items
@@ -1424,13 +1424,13 @@ Object {
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control"
+            class="components-base-control css-wdf2ti-Wrapper e1puf3u4"
           >
             <div
-              class="components-base-control__field"
+              class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
             >
               <label
-                class="components-base-control__label"
+                class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
                 for="inspector-text-control-9"
               >
                 Search for items
@@ -1506,13 +1506,13 @@ Object {
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control"
+          class="components-base-control css-wdf2ti-Wrapper e1puf3u4"
         >
           <div
-            class="components-base-control__field"
+            class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
           >
             <label
-              class="components-base-control__label"
+              class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
               for="inspector-text-control-9"
             >
               Search for items
@@ -1669,13 +1669,13 @@ Object {
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control"
+            class="components-base-control css-wdf2ti-Wrapper e1puf3u4"
           >
             <div
-              class="components-base-control__field"
+              class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
             >
               <label
-                class="components-base-control__label"
+                class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
                 for="inspector-text-control-8"
               >
                 Testing search label
@@ -1853,13 +1853,13 @@ Object {
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control"
+          class="components-base-control css-wdf2ti-Wrapper e1puf3u4"
         >
           <div
-            class="components-base-control__field"
+            class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
           >
             <label
-              class="components-base-control__label"
+              class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
               for="inspector-text-control-8"
             >
               Testing search label
@@ -2118,13 +2118,13 @@ Object {
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control"
+            class="components-base-control css-wdf2ti-Wrapper e1puf3u4"
           >
             <div
-              class="components-base-control__field"
+              class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
             >
               <label
-                class="components-base-control__label"
+                class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
                 for="inspector-text-control-4"
               >
                 Search for items
@@ -2156,7 +2156,7 @@ Object {
             >
               <g>
                 <path
-                  d="M12 4c4.41 0 8 3.59 8 8s-3.59 8-8 8-8-3.59-8-8 3.59-8 8-8m0-2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm1 13h-2v2h2v-2zm-2-2h2l.5-6h-3l.5 6z"
+                  d="M12 4c4.411 0 8 3.589 8 8s-3.589 8-8 8-8-3.589-8-8 3.589-8 8-8m0-2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm1 13h-2v2h2v-2zm-2-2h2l.5-6h-3l.5 6z"
                 />
               </g>
             </svg>
@@ -2189,13 +2189,13 @@ Object {
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control"
+          class="components-base-control css-wdf2ti-Wrapper e1puf3u4"
         >
           <div
-            class="components-base-control__field"
+            class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
           >
             <label
-              class="components-base-control__label"
+              class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
               for="inspector-text-control-4"
             >
               Search for items
@@ -2227,7 +2227,7 @@ Object {
           >
             <g>
               <path
-                d="M12 4c4.41 0 8 3.59 8 8s-3.59 8-8 8-8-3.59-8-8 3.59-8 8-8m0-2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm1 13h-2v2h2v-2zm-2-2h2l.5-6h-3l.5 6z"
+                d="M12 4c4.411 0 8 3.589 8 8s-3.589 8-8 8-8-3.589-8-8 3.589-8 8-8m0-2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm1 13h-2v2h2v-2zm-2-2h2l.5-6h-3l.5 6z"
               />
             </g>
           </svg>
@@ -2341,13 +2341,13 @@ Object {
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control"
+            class="components-base-control css-wdf2ti-Wrapper e1puf3u4"
           >
             <div
-              class="components-base-control__field"
+              class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
             >
               <label
-                class="components-base-control__label"
+                class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
                 for="inspector-text-control-7"
               >
                 Search for items
@@ -2379,7 +2379,7 @@ Object {
             >
               <g>
                 <path
-                  d="M12 4c4.41 0 8 3.59 8 8s-3.59 8-8 8-8-3.59-8-8 3.59-8 8-8m0-2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm1 13h-2v2h2v-2zm-2-2h2l.5-6h-3l.5 6z"
+                  d="M12 4c4.411 0 8 3.589 8 8s-3.589 8-8 8-8-3.589-8-8 3.589-8 8-8m0-2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm1 13h-2v2h2v-2zm-2-2h2l.5-6h-3l.5 6z"
                 />
               </g>
             </svg>
@@ -2412,13 +2412,13 @@ Object {
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control"
+          class="components-base-control css-wdf2ti-Wrapper e1puf3u4"
         >
           <div
-            class="components-base-control__field"
+            class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
           >
             <label
-              class="components-base-control__label"
+              class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
               for="inspector-text-control-7"
             >
               Search for items
@@ -2450,7 +2450,7 @@ Object {
           >
             <g>
               <path
-                d="M12 4c4.41 0 8 3.59 8 8s-3.59 8-8 8-8-3.59-8-8 3.59-8 8-8m0-2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm1 13h-2v2h2v-2zm-2-2h2l.5-6h-3l.5 6z"
+                d="M12 4c4.411 0 8 3.589 8 8s-3.589 8-8 8-8-3.589-8-8 3.589-8 8-8m0-2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm1 13h-2v2h2v-2zm-2-2h2l.5-6h-3l.5 6z"
               />
             </g>
           </svg>
@@ -2564,13 +2564,13 @@ Object {
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control"
+            class="components-base-control css-wdf2ti-Wrapper e1puf3u4"
           >
             <div
-              class="components-base-control__field"
+              class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
             >
               <label
-                class="components-base-control__label"
+                class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
                 for="inspector-text-control-5"
               >
                 Search for items
@@ -2664,13 +2664,13 @@ Object {
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control"
+          class="components-base-control css-wdf2ti-Wrapper e1puf3u4"
         >
           <div
-            class="components-base-control__field"
+            class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
           >
             <label
-              class="components-base-control__label"
+              class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
               for="inspector-text-control-5"
             >
               Search for items
@@ -2845,13 +2845,13 @@ Object {
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control"
+            class="components-base-control css-wdf2ti-Wrapper e1puf3u4"
           >
             <div
-              class="components-base-control__field"
+              class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
             >
               <label
-                class="components-base-control__label"
+                class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
                 for="inspector-text-control-6"
               >
                 Search for items
@@ -2945,13 +2945,13 @@ Object {
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control"
+          class="components-base-control css-wdf2ti-Wrapper e1puf3u4"
         >
           <div
-            class="components-base-control__field"
+            class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
           >
             <label
-              class="components-base-control__label"
+              class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
               for="inspector-text-control-6"
             >
               Search for items
@@ -3159,7 +3159,6 @@ Object {
                     class="clear-icon"
                     focusable="false"
                     height="20"
-                    role="img"
                     viewBox="0 0 24 24"
                     width="20"
                     xmlns="http://www.w3.org/2000/svg"
@@ -3177,13 +3176,13 @@ Object {
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control"
+            class="components-base-control css-wdf2ti-Wrapper e1puf3u4"
           >
             <div
-              class="components-base-control__field"
+              class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
             >
               <label
-                class="components-base-control__label"
+                class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
                 for="inspector-text-control-2"
               >
                 Search for items
@@ -3395,7 +3394,6 @@ Object {
                   class="clear-icon"
                   focusable="false"
                   height="20"
-                  role="img"
                   viewBox="0 0 24 24"
                   width="20"
                   xmlns="http://www.w3.org/2000/svg"
@@ -3413,13 +3411,13 @@ Object {
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control"
+          class="components-base-control css-wdf2ti-Wrapper e1puf3u4"
         >
           <div
-            class="components-base-control__field"
+            class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
           >
             <label
-              class="components-base-control__label"
+              class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
               for="inspector-text-control-2"
             >
               Search for items
@@ -3712,7 +3710,6 @@ Object {
                     class="clear-icon"
                     focusable="false"
                     height="20"
-                    role="img"
                     viewBox="0 0 24 24"
                     width="20"
                     xmlns="http://www.w3.org/2000/svg"
@@ -3754,7 +3751,6 @@ Object {
                     class="clear-icon"
                     focusable="false"
                     height="20"
-                    role="img"
                     viewBox="0 0 24 24"
                     width="20"
                     xmlns="http://www.w3.org/2000/svg"
@@ -3772,13 +3768,13 @@ Object {
           class="woocommerce-search-list__search"
         >
           <div
-            class="components-base-control"
+            class="components-base-control css-wdf2ti-Wrapper e1puf3u4"
           >
             <div
-              class="components-base-control__field"
+              class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
             >
               <label
-                class="components-base-control__label"
+                class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
                 for="inspector-text-control-3"
               >
                 Search for items
@@ -3991,7 +3987,6 @@ Object {
                   class="clear-icon"
                   focusable="false"
                   height="20"
-                  role="img"
                   viewBox="0 0 24 24"
                   width="20"
                   xmlns="http://www.w3.org/2000/svg"
@@ -4033,7 +4028,6 @@ Object {
                   class="clear-icon"
                   focusable="false"
                   height="20"
-                  role="img"
                   viewBox="0 0 24 24"
                   width="20"
                   xmlns="http://www.w3.org/2000/svg"
@@ -4051,13 +4045,13 @@ Object {
         class="woocommerce-search-list__search"
       >
         <div
-          class="components-base-control"
+          class="components-base-control css-wdf2ti-Wrapper e1puf3u4"
         >
           <div
-            class="components-base-control__field"
+            class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
           >
             <label
-              class="components-base-control__label"
+              class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
               for="inspector-text-control-3"
             >
               Search for items

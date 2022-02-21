@@ -36,13 +36,16 @@ Object {
           class="woocommerce-profile-wizard__step-header"
         >
           <h2
-            class="css-1ahfdc3-Text e15wbhsk0"
-            size="20"
+            class="components-truncate components-text css-7a2wz9-View-Text-sx-Base em57xhy0"
+            data-wp-c16t="true"
+            data-wp-component="Text"
           >
             Welcome to WooCommerce
           </h2>
           <p
-            class="css-1f0yw52-Text e15wbhsk0"
+            class="components-truncate components-text css-sgni2d-View-Text-sx-Base em57xhy0"
+            data-wp-c16t="true"
+            data-wp-component="Text"
           >
             Tell us about your store and we'll get you set up in no time
             <button
@@ -54,7 +57,6 @@ Object {
                 aria-hidden="true"
                 focusable="false"
                 height="24"
-                role="img"
                 viewBox="0 0 24 24"
                 width="24"
                 xmlns="http://www.w3.org/2000/svg"
@@ -67,105 +69,146 @@ Object {
           </p>
         </div>
         <div
-          class="components-card is-size-medium css-1xs3c37-CardUI e1q7k77g0"
+          class="components-surface components-card css-1vyvcpq-View-Surface-getBorders-primary-Card-rounded em57xhy0"
+          data-wp-c16t="true"
+          data-wp-component="Card"
         >
           <div
-            class="components-card__body is-size-medium css-xmjzce-BodyUI e1q7k77g3"
+            class="css-mgwsf4-View-Content em57xhy0"
           >
-            <span
-              class="components-spinner"
-            />
-            <div>
-              <div
-                class="components-base-control muriel-component muriel-input-text with-value"
-              >
-                <div
-                  class="components-base-control__field"
-                >
-                  <label
-                    class="components-base-control__label"
-                    for="inspector-text-control-0"
-                  >
-                    Email address
-                  </label>
-                  <input
-                    autocomplete="email"
-                    checked=""
-                    class="components-text-control__input"
-                    id="inspector-text-control-0"
-                    placeholder="Email address"
-                    required=""
-                    type="text"
-                    value="wordpress@example.com"
-                  />
-                </div>
-              </div>
-            </div>
             <div
-              class="components-flex__item css-1s295sp-Item eboqfv51"
+              class="components-card__body components-card-body css-1lr0m0h-View-Body-borderRadius-medium em57xhy0"
+              data-wp-c16t="true"
+              data-wp-component="CardBody"
             >
-              <div
-                class="woocommerce-profile-wizard__newsletter-signup"
+              <svg
+                class="components-spinner css-1igdw1q-StyledSpinner e1bj2jdf2"
+                focusable="false"
+                role="presentation"
+                viewBox="0 0 100 100"
+                xmlns="http://www.w3.org/2000/svg"
               >
+                <circle
+                  class="css-mx768t-SpinnerTrack-commonPathProps e1bj2jdf1"
+                  cx="50"
+                  cy="50"
+                  r="50"
+                  vector-effect="non-scaling-stroke"
+                />
+                <path
+                  class="css-7c7ebc-SpinnerIndicator-commonPathProps e1bj2jdf0"
+                  d="m 50 0 a 50 50 0 0 1 50 50"
+                  vector-effect="non-scaling-stroke"
+                />
+              </svg>
+              <div>
                 <div
-                  class="components-base-control css-wdf2ti-Wrapper e1puf3u0"
+                  class="components-base-control muriel-component muriel-input-text with-value css-wdf2ti-Wrapper e1puf3u4"
                 >
                   <div
-                    class="components-base-control__field css-11vcxb9-StyledField e1puf3u1"
+                    class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
                   >
-                    <span
-                      class="components-checkbox-control__input-container"
-                    >
-                      <input
-                        checked=""
-                        class="components-checkbox-control__input"
-                        id="inspector-checkbox-control-0"
-                        type="checkbox"
-                        value="true"
-                      />
-                      <svg
-                        aria-hidden="true"
-                        class="components-checkbox-control__checked"
-                        focusable="false"
-                        height="24"
-                        role="img"
-                        viewBox="0 0 24 24"
-                        width="24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M18.3 5.6L9.9 16.9l-4.6-3.4-.9 1.2 5.8 4.3 9.3-12.6z"
-                        />
-                      </svg>
-                    </span>
                     <label
-                      class="components-checkbox-control__label"
-                      for="inspector-checkbox-control-0"
+                      class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
+                      for="inspector-text-control-0"
                     >
-                      Get tips, product updates and inspiration straight to your mailbox.
-                       
-                      <span
-                        class="woocommerce-profile-wizard__powered-by-mailchimp"
-                      >
-                        Powered by Mailchimp
-                      </span>
+                      Email address
                     </label>
+                    <input
+                      autocomplete="email"
+                      checked=""
+                      class="components-text-control__input"
+                      id="inspector-text-control-0"
+                      placeholder="Email address"
+                      required=""
+                      type="text"
+                      value="wordpress@example.com"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div
+                class="components-flex-item css-mw3lhz-View-Item-sx-Base em57xhy0"
+                data-wp-c16t="true"
+                data-wp-component="FlexItem"
+              >
+                <div
+                  class="woocommerce-profile-wizard__newsletter-signup"
+                >
+                  <div
+                    class="components-base-control components-checkbox-control css-wdf2ti-Wrapper e1puf3u4"
+                  >
+                    <div
+                      class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
+                    >
+                      <span
+                        class="components-checkbox-control__input-container"
+                      >
+                        <input
+                          checked=""
+                          class="components-checkbox-control__input"
+                          id="inspector-checkbox-control-0"
+                          type="checkbox"
+                          value="true"
+                        />
+                        <svg
+                          aria-hidden="true"
+                          class="components-checkbox-control__checked"
+                          focusable="false"
+                          height="24"
+                          role="presentation"
+                          viewBox="0 0 24 24"
+                          width="24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M16.7 7.1l-6.3 8.5-3.3-2.5-.9 1.2 4.5 3.4L17.9 8z"
+                          />
+                        </svg>
+                      </span>
+                      <label
+                        class="components-checkbox-control__label"
+                        for="inspector-checkbox-control-0"
+                      >
+                        Get tips, product updates and inspiration straight to your mailbox.
+                         
+                        <span
+                          class="woocommerce-profile-wizard__powered-by-mailchimp"
+                        >
+                          Powered by Mailchimp
+                        </span>
+                      </label>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
+            <div
+              class="components-flex components-card__footer components-card-footer css-kiriyp-View-Flex-sx-Base-sx-Items-ItemsRow-Footer-borderRadius-borderColor-medium em57xhy0"
+              data-wp-c16t="true"
+              data-wp-component="CardFooter"
+            >
+              <button
+                class="components-button is-primary"
+                disabled=""
+                type="button"
+              >
+                Continue
+              </button>
+            </div>
           </div>
           <div
-            class="components-flex components-card__footer is-size-medium e1q7k77g4 css-1fpr7ir-Flex-FooterUI eboqfv50"
-          >
-            <button
-              class="components-button is-primary"
-              disabled=""
-              type="button"
-            >
-              Continue
-            </button>
-          </div>
+            aria-hidden="true"
+            class="components-elevation css-91yjwm-View-Elevation-sx-Base-elevationClassName em57xhy0"
+            data-wp-c16t="true"
+            data-wp-component="Elevation"
+          />
+          <div
+            aria-hidden="true"
+            class="components-elevation css-91yjwm-View-Elevation-sx-Base-elevationClassName em57xhy0"
+            data-wp-c16t="true"
+            data-wp-component="Elevation"
+          />
         </div>
         <div
           class="woocommerce-profile-wizard__footer"
@@ -186,7 +229,6 @@ Object {
               aria-hidden="true"
               focusable="false"
               height="24"
-              role="img"
               viewBox="0 0 24 24"
               width="24"
               xmlns="http://www.w3.org/2000/svg"
@@ -208,13 +250,16 @@ Object {
         class="woocommerce-profile-wizard__step-header"
       >
         <h2
-          class="css-1ahfdc3-Text e15wbhsk0"
-          size="20"
+          class="components-truncate components-text css-7a2wz9-View-Text-sx-Base em57xhy0"
+          data-wp-c16t="true"
+          data-wp-component="Text"
         >
           Welcome to WooCommerce
         </h2>
         <p
-          class="css-1f0yw52-Text e15wbhsk0"
+          class="components-truncate components-text css-sgni2d-View-Text-sx-Base em57xhy0"
+          data-wp-c16t="true"
+          data-wp-component="Text"
         >
           Tell us about your store and we'll get you set up in no time
           <button
@@ -226,7 +271,6 @@ Object {
               aria-hidden="true"
               focusable="false"
               height="24"
-              role="img"
               viewBox="0 0 24 24"
               width="24"
               xmlns="http://www.w3.org/2000/svg"
@@ -239,105 +283,146 @@ Object {
         </p>
       </div>
       <div
-        class="components-card is-size-medium css-1xs3c37-CardUI e1q7k77g0"
+        class="components-surface components-card css-1vyvcpq-View-Surface-getBorders-primary-Card-rounded em57xhy0"
+        data-wp-c16t="true"
+        data-wp-component="Card"
       >
         <div
-          class="components-card__body is-size-medium css-xmjzce-BodyUI e1q7k77g3"
+          class="css-mgwsf4-View-Content em57xhy0"
         >
-          <span
-            class="components-spinner"
-          />
-          <div>
-            <div
-              class="components-base-control muriel-component muriel-input-text with-value"
-            >
-              <div
-                class="components-base-control__field"
-              >
-                <label
-                  class="components-base-control__label"
-                  for="inspector-text-control-0"
-                >
-                  Email address
-                </label>
-                <input
-                  autocomplete="email"
-                  checked=""
-                  class="components-text-control__input"
-                  id="inspector-text-control-0"
-                  placeholder="Email address"
-                  required=""
-                  type="text"
-                  value="wordpress@example.com"
-                />
-              </div>
-            </div>
-          </div>
           <div
-            class="components-flex__item css-1s295sp-Item eboqfv51"
+            class="components-card__body components-card-body css-1lr0m0h-View-Body-borderRadius-medium em57xhy0"
+            data-wp-c16t="true"
+            data-wp-component="CardBody"
           >
-            <div
-              class="woocommerce-profile-wizard__newsletter-signup"
+            <svg
+              class="components-spinner css-1igdw1q-StyledSpinner e1bj2jdf2"
+              focusable="false"
+              role="presentation"
+              viewBox="0 0 100 100"
+              xmlns="http://www.w3.org/2000/svg"
             >
+              <circle
+                class="css-mx768t-SpinnerTrack-commonPathProps e1bj2jdf1"
+                cx="50"
+                cy="50"
+                r="50"
+                vector-effect="non-scaling-stroke"
+              />
+              <path
+                class="css-7c7ebc-SpinnerIndicator-commonPathProps e1bj2jdf0"
+                d="m 50 0 a 50 50 0 0 1 50 50"
+                vector-effect="non-scaling-stroke"
+              />
+            </svg>
+            <div>
               <div
-                class="components-base-control css-wdf2ti-Wrapper e1puf3u0"
+                class="components-base-control muriel-component muriel-input-text with-value css-wdf2ti-Wrapper e1puf3u4"
               >
                 <div
-                  class="components-base-control__field css-11vcxb9-StyledField e1puf3u1"
+                  class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
                 >
-                  <span
-                    class="components-checkbox-control__input-container"
-                  >
-                    <input
-                      checked=""
-                      class="components-checkbox-control__input"
-                      id="inspector-checkbox-control-0"
-                      type="checkbox"
-                      value="true"
-                    />
-                    <svg
-                      aria-hidden="true"
-                      class="components-checkbox-control__checked"
-                      focusable="false"
-                      height="24"
-                      role="img"
-                      viewBox="0 0 24 24"
-                      width="24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M18.3 5.6L9.9 16.9l-4.6-3.4-.9 1.2 5.8 4.3 9.3-12.6z"
-                      />
-                    </svg>
-                  </span>
                   <label
-                    class="components-checkbox-control__label"
-                    for="inspector-checkbox-control-0"
+                    class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
+                    for="inspector-text-control-0"
                   >
-                    Get tips, product updates and inspiration straight to your mailbox.
-                     
-                    <span
-                      class="woocommerce-profile-wizard__powered-by-mailchimp"
-                    >
-                      Powered by Mailchimp
-                    </span>
+                    Email address
                   </label>
+                  <input
+                    autocomplete="email"
+                    checked=""
+                    class="components-text-control__input"
+                    id="inspector-text-control-0"
+                    placeholder="Email address"
+                    required=""
+                    type="text"
+                    value="wordpress@example.com"
+                  />
+                </div>
+              </div>
+            </div>
+            <div
+              class="components-flex-item css-mw3lhz-View-Item-sx-Base em57xhy0"
+              data-wp-c16t="true"
+              data-wp-component="FlexItem"
+            >
+              <div
+                class="woocommerce-profile-wizard__newsletter-signup"
+              >
+                <div
+                  class="components-base-control components-checkbox-control css-wdf2ti-Wrapper e1puf3u4"
+                >
+                  <div
+                    class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
+                  >
+                    <span
+                      class="components-checkbox-control__input-container"
+                    >
+                      <input
+                        checked=""
+                        class="components-checkbox-control__input"
+                        id="inspector-checkbox-control-0"
+                        type="checkbox"
+                        value="true"
+                      />
+                      <svg
+                        aria-hidden="true"
+                        class="components-checkbox-control__checked"
+                        focusable="false"
+                        height="24"
+                        role="presentation"
+                        viewBox="0 0 24 24"
+                        width="24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M16.7 7.1l-6.3 8.5-3.3-2.5-.9 1.2 4.5 3.4L17.9 8z"
+                        />
+                      </svg>
+                    </span>
+                    <label
+                      class="components-checkbox-control__label"
+                      for="inspector-checkbox-control-0"
+                    >
+                      Get tips, product updates and inspiration straight to your mailbox.
+                       
+                      <span
+                        class="woocommerce-profile-wizard__powered-by-mailchimp"
+                      >
+                        Powered by Mailchimp
+                      </span>
+                    </label>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
+          <div
+            class="components-flex components-card__footer components-card-footer css-kiriyp-View-Flex-sx-Base-sx-Items-ItemsRow-Footer-borderRadius-borderColor-medium em57xhy0"
+            data-wp-c16t="true"
+            data-wp-component="CardFooter"
+          >
+            <button
+              class="components-button is-primary"
+              disabled=""
+              type="button"
+            >
+              Continue
+            </button>
+          </div>
         </div>
         <div
-          class="components-flex components-card__footer is-size-medium e1q7k77g4 css-1fpr7ir-Flex-FooterUI eboqfv50"
-        >
-          <button
-            class="components-button is-primary"
-            disabled=""
-            type="button"
-          >
-            Continue
-          </button>
-        </div>
+          aria-hidden="true"
+          class="components-elevation css-91yjwm-View-Elevation-sx-Base-elevationClassName em57xhy0"
+          data-wp-c16t="true"
+          data-wp-component="Elevation"
+        />
+        <div
+          aria-hidden="true"
+          class="components-elevation css-91yjwm-View-Elevation-sx-Base-elevationClassName em57xhy0"
+          data-wp-c16t="true"
+          data-wp-component="Elevation"
+        />
       </div>
       <div
         class="woocommerce-profile-wizard__footer"
@@ -358,7 +443,6 @@ Object {
             aria-hidden="true"
             focusable="false"
             height="24"
-            role="img"
             viewBox="0 0 24 24"
             width="24"
             xmlns="http://www.w3.org/2000/svg"

@@ -6,7 +6,7 @@ import { SelectControl } from '@wordpress/components';
 import { getIdsFromQuery } from '@woocommerce/navigation';
 import { find, isEqual, partial } from 'lodash';
 import PropTypes from 'prop-types';
-import interpolateComponents from 'interpolate-components';
+import interpolateComponents from '@automattic/interpolate-components';
 import classnames from 'classnames';
 
 /**

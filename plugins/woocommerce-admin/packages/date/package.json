@@ -21,8 +21,8 @@
 	"module": "build-module/index.js",
 	"react-native": "src/index",
 	"dependencies": {
-		"@wordpress/date": "3.13.0",
-		"@wordpress/i18n": "3.17.0",
+		"@wordpress/date": "4.3.1",
+		"@wordpress/i18n": "4.3.1",
 		"moment": "2.29.1",
 		"qs": "6.9.6"
 	},

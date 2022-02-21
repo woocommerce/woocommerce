@@ -3,7 +3,6 @@
  */
 import { act, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { WooOnboardingTaskListItem } from '@woocommerce/onboarding';
 import { SlotFillProvider } from '@wordpress/components';
 import { useDispatch } from '@wordpress/data';
 import { useSlot } from '@woocommerce/experimental';
@@ -13,7 +12,17 @@ import { useSlot } from '@woocommerce/experimental';
  */
 import { TaskListItem } from '../task-list-item';
 
-jest.mock( '@wordpress/data' );
+jest.mock( '@wordpress/data', () => {
+	const originalModule = jest.requireActual( '@wordpress/data' );
+	return {
+		...originalModule,
+		useDispatch: jest.fn(),
+		// Mock dispatch to avoid errors for @wordpress/viewport listener.
+		dispatch: jest.fn().mockReturnValue( {
+			setIsMatching: jest.fn(),
+		} ),
+	};
+} );
 
 const mockDispatch = {
 	createNotice: jest.fn(),

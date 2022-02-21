@@ -1,4 +1,8 @@
 # Unreleased
+## Breaking changes
+
+-   Update dependencies to support react 17. #8305
+-   Drop support for IE11. #8305
 
 # 3.2.1
 
