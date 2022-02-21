@@ -1,6 +1,6 @@
-name: Label Pull Request Project
+name: 'Label Pull Request Project'
 on:
-  pull_request
+  pull_request:
     types:
       - opened
       - synchronize
