@@ -5,6 +5,7 @@
   "config": {
     "platform": {
       "php": "7.3"
-    }
+    },
+	"bin-dir": "../../../vendor/bin"
   }
 }
