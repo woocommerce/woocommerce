@@ -1,6 +1,6 @@
 # Checkout <!-- omit in toc -->
 
-Components and utilities making it possible to integrate with the WooCommerce Cart and Checkout Blocks.
+Components and utilities making it possible to integrate with the WooCommerce Mini Cart, Cart and Checkout Blocks.
 
 ## Table of Contents <!-- omit in toc -->
 
