@@ -9,6 +9,8 @@ import { teardown as teardownPuppeteer } from 'jest-environment-puppeteer';
  */
 import {
 	deleteTaxes,
+	deleteCategories,
+	deleteTags,
 	deleteCoupons,
 	deleteProducts,
 	deleteShippingZones,
@@ -20,6 +22,8 @@ module.exports = async ( globalConfig ) => {
 	await teardownPuppeteer( globalConfig );
 	const {
 		taxes,
+		tags,
+		categories,
 		coupons,
 		products,
 		shippingZones,
@@ -27,6 +31,8 @@ module.exports = async ( globalConfig ) => {
 		attributes,
 	} = global.fixtureData;
 	return Promise.allSettled( [
+		deleteCategories( categories ),
+		deleteTags( tags ),
 		deleteTaxes( taxes ),
 		deleteCoupons( coupons ),
 		deleteProducts( products ),
