@@ -79,6 +79,17 @@ class DefaultFreeExtensions {
 				'image_url'      => plugins_url( 'images/onboarding/google-listings-and-ads.png', WC_ADMIN_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=wc-admin&path=%2Fgoogle%2Fstart',
 				'is_built_by_wc' => true,
+				'is_visible'     => [
+					[
+						'type'    => 'not',
+						'operand' => [
+							[
+								'type'    => 'plugins_activated',
+								'plugins' => [ 'google-listings-and-ads' ],
+							],
+						],
+					],
+				],
 			],
 			'google-listings-and-ads:alt'       => [
 				'name'           => __( 'Google Listings & Ads', 'woocommerce-admin' ),
