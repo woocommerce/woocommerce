@@ -49,7 +49,7 @@ The sale badges are not shown here, so those filters are not applied in the Orde
 
 Each of these filters has the following additional arguments passed to it: `{ context: 'summary', cartItem: CartItem }` ([CartItem](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/c00da597efe4c16fcf5481c213d8052ec5df3766/assets/js/type-defs/cart.ts#L113))
 
-### Totals footer item (in Cart and Checkout)
+### Totals footer item (in Mini Cart, Cart and Checkout)
 
 The word 'Total' that precedes the amount due, present in both the Cart _and_ Checkout blocks, is also passed through filters.
 
@@ -122,7 +122,7 @@ To reiterate, the _value_ here will determine whether this notice gets displayed
 
 ## Examples
 
-### Changing the wording of the Totals label in the Cart and Checkout
+### Changing the wording of the Totals label in the Mini Cart, Cart and Checkout
 
 For this example, let's suppose we are building an extension that lets customers pay a deposit, and defer the full amount until a later date.
 
@@ -151,14 +151,14 @@ __experimentalRegisterCheckoutFilters( 'my-hypothetical-deposit-plugin', {
 
 ### Changing the format of the item's single price
 
-Let's say we want to add a little bit of text after an item's single price **in the Cart only**, just to make sure our customers know
+Let's say we want to add a little bit of text after an item's single price **in the Mini Cart and Cart blocks only**, just to make sure our customers know
 that's the price per item.
 
 1. We will need to register a function to be executed when the `subtotalPriceFormat` is applied. Since we only want this to happen in the
    Cart context, our function will need to check the additional arguments passed to it to ensure the `context` value is `cart`.
 
 We can see from the table above, that our function needs to return a string that contains a substring of `<price/>`.
-This is a placeholder for the numeric value. The Cart block will interpolate the value into the string we return.
+This is a placeholder for the numeric value. The Mini Cart and Cart blocks will interpolate the value into the string we return.
 
 ```typescript
 const appendTextToPriceInCart = ( value, extensions, args ) => {

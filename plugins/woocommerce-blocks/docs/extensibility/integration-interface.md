@@ -7,10 +7,10 @@ data, and you'd like this to be available to your scripts.
 
 ## The solution
 You may use the `IntegrationRegistry` to register an `IntegrationInterface` this will be a class that will handle the
-enqueuing of scripts, styles, and data. You may have a different `IntegrationInterface` for both the Cart and Checkout
-blocks, or you may use the same one, it is entirely dependent on your use case.
+enqueuing of scripts, styles, and data. You may have a different `IntegrationInterface` for each block (Mini Cart, Cart
+and Checkout), or you may use the same one, it is entirely dependent on your use case.
 
-You should use the hooks: `woocommerce_blocks_cart_block_registration` and
+You should use the hooks: `woocommerce_blocks_mini-cart_block_registration`. `woocommerce_blocks_cart_block_registration` and
 `woocommerce_blocks_checkout_block_registration`. These hooks both pass an instance of [`IntegrationRegistry`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/src/Integrations/IntegrationRegistry.php) to the callback.
 
 You may then use the `register` method on this object to register your `IntegrationInterface`.
@@ -45,7 +45,7 @@ The keys and values of this array should all be serializable.
 
 ## Usage example
 Let's suppose we're the author of an extension: `WooCommerce Example Plugin`. We want to enqueue scripts, styles,
-and data on the frontend when either the Cart or Checkout blocks are being used.
+and data on the frontend when either the Mini Cart, Cart or Checkout blocks are being used.
 
 We also want some data from a server-side function to be available to our front-end scripts.
 
@@ -164,9 +164,15 @@ class WooCommerce_Example_Plugin_Integration implements IntegrationInterface {
 ```
 
 As mentioned, we will need register our `IntegrationInterface` with WooCommerce Blocks, as we want our scripts
-to be included when either the Cart or Checkout is used, we need to register callbacks for two actions.
+to be included when either the Mini Cart, Cart or Checkout is used, we need to register callbacks for two actions.
 
 ```php
+add_action(
+    'woocommerce_blocks_mini-cart_block_registration',
+    function( $integration_registry ) {
+        $integration_registry->register( new WooCommerce_Example_Plugin_Integration() );
+    }
+);
 add_action(
     'woocommerce_blocks_cart_block_registration',
     function( $integration_registry ) {
