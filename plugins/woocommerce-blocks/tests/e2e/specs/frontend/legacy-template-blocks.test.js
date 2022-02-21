@@ -111,4 +111,39 @@ describe( 'Legacy Template blocks', () => {
 			expect( $productElements ).toHaveLength( Number( displayedCount ) );
 		} );
 	} );
+
+	describe( 'Product Tag block', () => {
+		it( 'renders a list of products with their count, pagination and the tag title', async () => {
+			const TAG_NAME = 'Newest';
+			const { productArchivePage } = SELECTORS;
+
+			await page.goto(
+				new URL( `/product-tag/${ TAG_NAME.toLowerCase() }`, BASE_URL )
+			);
+
+			await expect( page ).toMatchElement( productArchivePage.title, {
+				text: TAG_NAME,
+			} );
+
+			await page.waitForSelector( productArchivePage.productsList );
+			await page.waitForSelector( productArchivePage.resultsCount );
+
+			const {
+				displayedCount,
+				shouldHavePaginationUI,
+			} = await extractPaginationData();
+
+			if ( shouldHavePaginationUI ) {
+				await expect( page ).toMatchElement(
+					productArchivePage.paginationUI
+				);
+			}
+
+			const $productElements = await page.$$(
+				productArchivePage.productContainers
+			);
+
+			expect( $productElements ).toHaveLength( displayedCount );
+		} );
+	} );
 } );

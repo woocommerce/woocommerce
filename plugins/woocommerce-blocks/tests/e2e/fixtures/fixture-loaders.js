@@ -142,6 +142,35 @@ const deleteCategories = ( categories ) => {
 };
 
 /**
+ * Create Product Tags.
+ *
+ * @param {Object[]} fixture An array of objects describing our data, defaults
+ * to our fixture.
+ * @return {Promise} a promise that resolves to an array of newly created tags,
+ * or rejects if the request failed.
+ */
+const createTags = ( fixture = fixtures.Tags() ) =>
+	WooCommerce.post( 'products/tags/batch', {
+		create: fixture,
+	} ).then( ( response ) => response.data.create );
+
+/**
+ * Delete Product Tags.
+ *
+ * @param {Object[]} tags an array of tags to delete.
+ *
+ * @return {Promise} return a promise that resolves to the deleted data or
+ * reject if the request failed.
+ */
+const deleteTags = ( tags ) => {
+	const ids = tags.map( ( tag ) => tag.id );
+
+	return WooCommerce.post( 'products/tags/batch', {
+		delete: ids,
+	} );
+};
+
+/**
  * Create Products.
  *
  * currently this only creates a single product for the sake of reviews.
@@ -149,6 +178,7 @@ const deleteCategories = ( categories ) => {
  * @todo  add more products to e2e fixtures data.
  *
  * @param {Array}    categories Array of category objects so we can replace names with ids in the request.
+ * @param {Array}    tags Array of category objects so we can replace names with ids in the request.
  * @param {Array}    attributes Array of attribute objects so we can replace names with ids in the request.
  * @param {Object[]} fixture An array of objects describing our data, defaults
  * to our fixture.
@@ -157,6 +187,7 @@ const deleteCategories = ( categories ) => {
  */
 const createProducts = (
 	categories,
+	tags,
 	attributes,
 	fixture = fixtures.Products()
 ) => {
@@ -166,6 +197,11 @@ const createProducts = (
 				categories.find(
 					( category ) => category.name === categoryName
 				)
+			);
+		}
+		if ( tags && product.tags ) {
+			product.tags = product.tags.map( ( tagName ) =>
+				tags.find( ( tag ) => tag.name === tagName )
 			);
 		}
 		if ( attributes && product.attributes ) {
@@ -415,6 +451,8 @@ module.exports = {
 	deleteCoupons,
 	createCategories,
 	deleteCategories,
+	createTags,
+	deleteTags,
 	createProducts,
 	deleteProducts,
 	createReviews,

@@ -14,6 +14,7 @@ import {
 	createProducts,
 	createReviews,
 	createCategories,
+	createTags,
 	createShippingZones,
 	createBlockPages,
 	enablePaymentGateways,
@@ -39,21 +40,23 @@ module.exports = async ( globalConfig ) => {
 			createTaxes(),
 			createCoupons(),
 			createCategories(),
+			createTags(),
 			createShippingZones(),
 			createProductAttributes(),
 			enablePaymentGateways(),
 			setupPageSettings(),
-		] );
+		] ).catch( console.log );
 		const [
 			taxes,
 			coupons,
 			categories,
+			tags,
 			shippingZones,
 			attributes,
 		] = results;
 		// Create products after categories.
 
-		const products = await createProducts( categories, attributes );
+		const products = await createProducts( categories, tags, attributes );
 		/**
 		 * Create fixture reviews data for each product.
 		 */
@@ -68,6 +71,8 @@ module.exports = async ( globalConfig ) => {
 			shippingZones,
 			pages,
 			attributes,
+			categories,
+			tags,
 		};
 	} catch ( e ) {
 		console.log( e );
