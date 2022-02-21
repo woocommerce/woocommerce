@@ -2,6 +2,8 @@
 
 # Unreleased
 
+# 4.0.0
+
 ## Breaking changes
 
 -   Update dependencies to support react 17. #8305

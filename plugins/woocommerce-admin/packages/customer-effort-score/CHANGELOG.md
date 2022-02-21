@@ -1,5 +1,7 @@
 # Unreleased
 
+# 2.0.0
+
 - Update dependencies to support react 17 #8305
 
 # 1.1.0

@@ -1,5 +1,7 @@
 # Unreleased
 
+# 9.0.0
+
 - Update line-height of SelectControl label to avoid truncated descenders in some typefaces and zoom levels. #8186
 - Made @woocommerce/components/Stepper a Typescript file. #8286
 - Added Typescript type declarations to build for @woocommerce/components #8282

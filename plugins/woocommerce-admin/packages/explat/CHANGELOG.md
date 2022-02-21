@@ -1,5 +1,7 @@
 # Unreleased
 
+# 2.0.0
+
 - Make ExPlat request URL args filterable. Added woocommerce_explat_request_args filter #8231
 ## Breaking changes
 
