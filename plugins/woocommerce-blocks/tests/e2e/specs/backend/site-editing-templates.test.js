@@ -73,6 +73,14 @@ const BLOCK_DATA = {
 		},
 		name: 'woocommerce/legacy-template',
 	},
+	'taxonomy-product_cat': {
+		attributes: {
+			placeholder: 'archive-product',
+			template: 'taxonomy-product_cat',
+			title: 'WooCommerce Product Taxonomy Block',
+		},
+		name: 'woocommerce/legacy-template',
+	},
 };
 
 const SELECTORS = {
@@ -151,7 +159,7 @@ describe( 'Store Editing Templates', () => {
 
 			await visitTemplateAndAddCustomParagraph( 'single-product' );
 
-			await goToSiteEditor( 'postType=wp_template' );
+			await goToSiteEditor( '?postType=wp_template' );
 			const templates = await getAllTemplates();
 
 			try {
@@ -245,7 +253,7 @@ describe( 'Store Editing Templates', () => {
 
 			await visitTemplateAndAddCustomParagraph( 'archive-product' );
 
-			await goToSiteEditor( 'postType=wp_template' );
+			await goToSiteEditor( '?postType=wp_template' );
 			const templates = await getAllTemplates();
 
 			try {
@@ -284,6 +292,100 @@ describe( 'Store Editing Templates', () => {
 			const permalink = await getNormalPagePermalink();
 
 			await page.goto( permalink );
+
+			await expect( page ).toMatchElement( 'p', {
+				text: CUSTOMIZED_STRING,
+				timeout: DEFAULT_TIMEOUT,
+			} );
+		} );
+	} );
+
+	describe( 'Product Category block template', () => {
+		it( 'default template from WooCommerce Blocks is available on an FSE theme', async () => {
+			const EXPECTED_TEMPLATE = defaultTemplateProps(
+				'Product Category'
+			);
+
+			await goToSiteEditor( '?postType=wp_template' );
+
+			const templates = await getAllTemplates();
+
+			try {
+				expect( templates ).toContainEqual( EXPECTED_TEMPLATE );
+			} catch ( ok ) {
+				// Depending on the speed of the execution and whether Chrome is headless or not
+				// the id might be parsed or not
+
+				expect( templates ).toContainEqual( {
+					...EXPECTED_TEMPLATE,
+					addedBy: WOOCOMMERCE_PARSED_ID,
+				} );
+			}
+		} );
+
+		it( 'should contain the "WooCommerce Product Taxonomy Block" legacy template', async () => {
+			const templateQuery = addQueryArgs( '', {
+				postId: 'woocommerce/woocommerce//taxonomy-product_cat',
+				postType: 'wp_template',
+			} );
+
+			await goToSiteEditor( templateQuery );
+			await waitForCanvas();
+
+			const [ legacyBlock ] = await filterCurrentBlocks(
+				( block ) =>
+					block.name === BLOCK_DATA[ 'taxonomy-product_cat' ].name
+			);
+
+			expect( legacyBlock.attributes.template ).toBe(
+				BLOCK_DATA[ 'taxonomy-product_cat' ].attributes.template
+			);
+			expect( await getCurrentSiteEditorContent() ).toMatchSnapshot();
+		} );
+
+		it( 'should show the action menu if the template has been customized by the user', async () => {
+			const EXPECTED_TEMPLATE = {
+				...defaultTemplateProps( 'Product Category' ),
+				hasActions: true,
+			};
+
+			await visitTemplateAndAddCustomParagraph( 'taxonomy-product_cat' );
+
+			await goToSiteEditor( '?postType=wp_template' );
+			const templates = await getAllTemplates();
+
+			try {
+				expect( templates ).toContainEqual( EXPECTED_TEMPLATE );
+			} catch ( ok ) {
+				// Depending on the speed of the execution and whether Chrome is headless or not
+				// the id might be parsed or not
+
+				expect( templates ).toContainEqual( {
+					...EXPECTED_TEMPLATE,
+					addedBy: WOOCOMMERCE_PARSED_ID,
+				} );
+			}
+		} );
+
+		it( 'should preserve and correctly show the user customization on the back-end', async () => {
+			const templateQuery = addQueryArgs( '', {
+				postId: 'woocommerce/woocommerce//taxonomy-product_cat',
+				postType: 'wp_template',
+			} );
+
+			await goToSiteEditor( templateQuery );
+			await waitForCanvas();
+
+			await expect( canvas() ).toMatchElement(
+				SELECTORS.blocks.paragraph,
+				{ text: CUSTOMIZED_STRING, timeout: DEFAULT_TIMEOUT }
+			);
+		} );
+
+		it( 'should show the user customization on the front-end', async () => {
+			await page.goto(
+				new URL( '/product-category/uncategorized', BASE_URL )
+			);
 
 			await expect( page ).toMatchElement( 'p', {
 				text: CUSTOMIZED_STRING,
