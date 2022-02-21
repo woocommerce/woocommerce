@@ -1,6 +1,6 @@
 <?php
 
-namespace Automattic\WooCommerce\Admin\Features;
+namespace Automattic\WooCommerce\Internal\Admin;
 
 defined( 'ABSPATH' ) || exit;
 

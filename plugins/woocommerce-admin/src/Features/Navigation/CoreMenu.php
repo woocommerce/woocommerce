@@ -189,11 +189,11 @@ class CoreMenu {
 		}
 
 		$home_item = array();
-		if ( defined( '\Automattic\WooCommerce\Admin\Features\Homescreen::MENU_SLUG' ) ) {
+		if ( defined( '\Automattic\WooCommerce\Internal\Admin\Features\Homescreen::MENU_SLUG' ) ) {
 			$home_item = array(
 				'id'              => 'woocommerce-home',
 				'title'           => __( 'Home', 'woocommerce-admin' ),
-				'url'             => \Automattic\WooCommerce\Admin\Features\Homescreen::MENU_SLUG,
+				'url'             => \Automattic\WooCommerce\Internal\Admin\Homescreen::MENU_SLUG,
 				'order'           => 0,
 				'matchExpression' => 'page=wc-admin((?!path=).)*$',
 			);

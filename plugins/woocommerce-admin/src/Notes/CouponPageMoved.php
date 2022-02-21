@@ -7,8 +7,7 @@
 
 namespace Automattic\WooCommerce\Admin\Notes;
 
-use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\Admin\Features\CouponsMovedTrait;
+use Automattic\WooCommerce\Internal\Admin\CouponsMovedTrait;
 use stdClass;
 use WC_Data_Store;
 

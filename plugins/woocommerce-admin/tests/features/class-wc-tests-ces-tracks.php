@@ -5,7 +5,7 @@
  * @package Automattic\WooCommerce\Admin\Features
  */
 
-use \Automattic\WooCommerce\Admin\Features\CustomerEffortScoreTracks;
+use Automattic\WooCommerce\Internal\Admin\CustomerEffortScoreTracks;
 
 // CustomerEffortScoreTracks only works in wp-admin, so let's fake it.
 define( 'WP_ADMIN', true );

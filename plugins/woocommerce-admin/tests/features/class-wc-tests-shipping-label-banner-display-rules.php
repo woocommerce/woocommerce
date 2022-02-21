@@ -5,7 +5,7 @@
  * @package WooCommerce\Admin\Tests\ShippingLabelBannerDisplayRules
  */
 
-use \Automattic\WooCommerce\Admin\Features\ShippingLabelBannerDisplayRules;
+use Automattic\WooCommerce\Internal\Admin\ShippingLabelBannerDisplayRules;
 
 /**
  * Class WC_Tests_Shipping_Label_Banner_Display_Rules
