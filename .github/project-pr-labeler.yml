@@ -1,0 +1,17 @@
+'package: @woocommerce/api':
+- packages/js/api/*
+
+'package: @woocommerce/e2e-utils':
+- packages/js/e2e-utils/*
+
+'package: @woocommerce/e2e-environment':
+- packages/js/e2e-environment/*
+
+'package: @woocommerce/api-core-tests':
+- packages/js/api-core-tests/*
+
+'package: @woocommerce/e2e-core-tests':
+- packages/js/e2e-core-tests/*
+
+'plugin: woocommerce':
+- plugins/woocommerce/*
