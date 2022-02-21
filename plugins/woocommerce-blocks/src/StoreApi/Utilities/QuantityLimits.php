@@ -93,7 +93,7 @@ final class QuantityLimits {
 		if ( ! $limits['editable'] ) {
 			return new \WP_Error(
 				'readonly_quantity',
-				__( 'This item is already in the cart and it\'s quantity cannot be edited', 'woo-gutenberg-products-block' )
+				__( 'This item is already in the cart and its quantity cannot be edited', 'woo-gutenberg-products-block' )
 			);
 		}
 
