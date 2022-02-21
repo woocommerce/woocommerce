@@ -1240,7 +1240,7 @@ if ( ! function_exists( 'woocommerce_taxonomy_archive_description' ) ) {
 			$term = get_queried_object();
 
 			if ( $term && ! empty( $term->description ) ) {
-				echo '<div class="term-description">' . wc_format_content( wp_kses_post( $term->description ) ) . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				echo '<div class="term-description">' . wc_format_content( wp_kses_post( apply_filters( 'woocommerce_taxonomy_archive_description_raw', $term->description, $term ) ) ) . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			}
 		}
 	}
