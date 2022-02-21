@@ -1,5 +1,15 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Store Editing Templates Product Archive block template should contain the "WooCommerce Product Archive Block" legacy template 1`] = `
+"<!-- wp:template-part {\\"slug\\":\\"header\\",\\"theme\\":\\"emptytheme\\"} /-->
+
+<!-- wp:group {\\"layout\\":{\\"inherit\\":true}} -->
+<div class=\\"wp-block-group\\"><!-- wp:woocommerce/legacy-template {\\"template\\":\\"archive-product\\"} /--></div>
+<!-- /wp:group -->
+
+<!-- wp:template-part {\\"slug\\":\\"footer\\",\\"theme\\":\\"emptytheme\\"} /-->"
+`;
+
 exports[`Store Editing Templates Single Product block template should contain the "WooCommerce Single Product Block" legacy template 1`] = `
 "<!-- wp:template-part {\\"slug\\":\\"header\\",\\"theme\\":\\"emptytheme\\"} /-->
 

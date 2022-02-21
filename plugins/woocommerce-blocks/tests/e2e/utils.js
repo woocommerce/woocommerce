@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import config from 'config';
 import {
 	disableSiteEditorWelcomeGuide,
 	openGlobalBlockInserter,
@@ -25,6 +26,7 @@ import { elementExists, getTextContent } from './page-utils';
  * @typedef {{ addedBy: string, hasActions: boolean, templateTitle: string }} TemplateTableItem
  */
 
+export const BASE_URL = config.get( 'url' );
 export const DEFAULT_TIMEOUT = 30000;
 
 const SELECTORS = {
