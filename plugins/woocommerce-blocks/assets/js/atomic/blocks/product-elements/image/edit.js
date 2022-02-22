@@ -14,7 +14,6 @@ import { getAdminLink } from '@woocommerce/settings';
 import Block from './block';
 import withProductSelector from '../shared/with-product-selector';
 import { BLOCK_TITLE, BLOCK_ICON } from './constants';
-import './editor.scss';
 
 const Edit = ( { attributes, setAttributes } ) => {
 	const {
