@@ -25,7 +25,7 @@ const Block = ( {
 		shouldCreateAccount,
 		setShouldCreateAccount,
 	} = useCheckoutContext();
-	const { billingFields, setEmail } = useCheckoutAddress();
+	const { billingData, setEmail } = useCheckoutAddress();
 	const { dispatchCheckoutEvent } = useStoreEvents();
 
 	const onChangeEmail = ( value ) => {
@@ -54,7 +54,7 @@ const Block = ( {
 				id="email"
 				type="email"
 				label={ __( 'Email address', 'woo-gutenberg-products-block' ) }
-				value={ billingFields.email }
+				value={ billingData.email }
 				autoComplete="email"
 				onChange={ onChangeEmail }
 				required={ true }

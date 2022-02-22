@@ -9,17 +9,6 @@
  */
 
 /**
- * @typedef {Object} CustomerDataContext
- *
- * @property {BillingData}          billingData          The current billing data, including address and email.
- * @property {CartShippingAddress}  shippingAddress      The current set address for shipping.
- * @property {Function}             setBillingData       A function for setting billing data.
- * @property {Function}             setShippingAddress   A function for setting shipping address.
- * @property {boolean}              shippingAsBilling    A boolean which tracks if the customer is using the same billing and shipping address.
- * @property {Function}             setShippingAsBilling A function for toggling shipping as billing.
- */
-
-/**
  * @typedef {Object} ShippingDataContext
  *
  * @property {ShippingErrorStatus}  shippingErrorStatus         The current shipping error status.

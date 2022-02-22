@@ -2,6 +2,7 @@
  * External dependencies
  */
 import type { Cart, CartTotals, CartMeta, CartItem } from '@woocommerce/types';
+import { BillingAddress, ShippingAddress } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -17,6 +18,18 @@ import type { ResponseError } from '../types';
  */
 export const getCartData = ( state: CartState ): Cart => {
 	return state.cartData;
+};
+
+export const getCustomerData = (
+	state: CartState
+): {
+	shippingAddress: ShippingAddress;
+	billingData: BillingAddress;
+} => {
+	return {
+		shippingAddress: state.cartData.shippingAddress,
+		billingData: state.cartData.billingAddress,
+	};
 };
 
 /**

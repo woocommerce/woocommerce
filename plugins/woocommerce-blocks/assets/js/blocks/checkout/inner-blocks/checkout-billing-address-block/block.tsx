@@ -9,6 +9,11 @@ import {
 } from '@woocommerce/base-context';
 import { AddressForm } from '@woocommerce/base-components/cart-checkout';
 import Noninteractive from '@woocommerce/base-components/noninteractive';
+import type {
+	BillingAddress,
+	AddressField,
+	AddressFields,
+} from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -30,9 +35,9 @@ const Block = ( {
 } ): JSX.Element => {
 	const {
 		defaultAddressFields,
-		billingFields,
-		setBillingFields,
-		setPhone,
+		billingData,
+		setBillingData,
+		setBillingPhone,
 	} = useCheckoutAddress();
 	const { dispatchCheckoutEvent } = useStoreEvents();
 	const { isEditor } = useEditorContext();
@@ -40,9 +45,9 @@ const Block = ( {
 	// Clears data if fields are hidden.
 	useEffect( () => {
 		if ( ! showPhoneField ) {
-			setPhone( '' );
+			setBillingPhone( '' );
 		}
-	}, [ showPhoneField, setPhone ] );
+	}, [ showPhoneField, setBillingPhone ] );
 
 	const addressFieldsConfig = useMemo( () => {
 		return {
@@ -54,7 +59,11 @@ const Block = ( {
 				hidden: ! showApartmentField,
 			},
 		};
-	}, [ showCompanyField, requireCompanyField, showApartmentField ] );
+	}, [
+		showCompanyField,
+		requireCompanyField,
+		showApartmentField,
+	] ) as Record< keyof AddressFields, Partial< AddressField > >;
 
 	const AddressFormWrapperComponent = isEditor ? Noninteractive : Fragment;
 
@@ -63,20 +72,24 @@ const Block = ( {
 			<AddressForm
 				id="billing"
 				type="billing"
-				onChange={ ( values: Record< string, unknown > ) => {
-					setBillingFields( values );
+				onChange={ ( values: Partial< BillingAddress > ) => {
+					setBillingData( values );
 					dispatchCheckoutEvent( 'set-billing-address' );
 				} }
-				values={ billingFields }
-				fields={ Object.keys( defaultAddressFields ) }
+				values={ billingData }
+				fields={
+					Object.keys(
+						defaultAddressFields
+					) as ( keyof AddressFields )[]
+				}
 				fieldConfig={ addressFieldsConfig }
 			/>
 			{ showPhoneField && (
 				<PhoneNumber
 					isRequired={ requirePhoneField }
-					value={ billingFields.phone }
+					value={ billingData.phone }
 					onChange={ ( value ) => {
-						setPhone( value );
+						setBillingPhone( value );
 						dispatchCheckoutEvent( 'set-phone-number', {
 							step: 'billing',
 						} );

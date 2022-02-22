@@ -47,6 +47,7 @@ export interface EnteredAddress {
 	city: string;
 	state: string;
 	postcode: string;
+	phone: string;
 }
 
 export type KeyedAddressField = AddressField & {
@@ -54,7 +55,9 @@ export type KeyedAddressField = AddressField & {
 	errorMessage?: string;
 };
 export type ShippingAddress = EnteredAddress;
-export type BillingAddress = EnteredAddress;
+export interface BillingAddress extends EnteredAddress {
+	email: string;
+}
 export type CountryAddressFields = Record< string, AddressFields >;
 
 /**

@@ -11,6 +11,7 @@ import type {
 } from '@woocommerce/types';
 import { camelCase, mapKeys } from 'lodash';
 import type { AddToCartEventDetail } from '@woocommerce/type-defs/events';
+import { BillingAddress, ShippingAddress } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -38,6 +39,29 @@ export const receiveCart = (
 	return {
 		type: types.RECEIVE_CART,
 		response: cart,
+	};
+};
+
+/**
+ * Returns an action object used in updating the store with the provided cart.
+ *
+ * This omits the customer addresses so that only updates to cart items and totals are received. This is useful when
+ * currently editing address information to prevent it being overwritten from the server.
+ *
+ * This is a generic response action.
+ *
+ * @param  {CartResponse}      response
+ */
+export const receiveCartContents = (
+	response: CartResponse
+): { type: string; response: Partial< Cart > } => {
+	const cart = ( mapKeys( response, ( _, key ) =>
+		camelCase( key )
+	) as unknown ) as Cart;
+	const { shippingAddress, billingAddress, ...cartWithoutAddress } = cart;
+	return {
+		type: types.RECEIVE_CART,
+		response: cartWithoutAddress,
 	};
 };
 
@@ -462,6 +486,19 @@ export function* selectShippingRate(
 }
 
 /**
+ * Sets billing data locally, as opposed to updateCustomerData which sends it to the server.
+ */
+export const setBillingData = ( billingData: Partial< BillingAddress > ) =>
+	( { type: types.SET_BILLING_DATA, billingData } as const );
+
+/**
+ * Sets shipping address locally, as opposed to updateCustomerData which sends it to the server.
+ */
+export const setShippingAddress = (
+	shippingAddress: Partial< ShippingAddress >
+) => ( { type: types.SET_SHIPPING_ADDRESS, shippingAddress } as const );
+
+/**
  * Updates the shipping and/or billing address for the customer and returns an
  * updated cart.
  *
@@ -481,7 +518,7 @@ export function* updateCustomerData(
 			cache: 'no-store',
 		} );
 
-		yield receiveCart( response );
+		yield receiveCartContents( response );
 	} catch ( error ) {
 		yield receiveError( error );
 		yield updatingCustomerData( false );
@@ -501,6 +538,9 @@ export function* updateCustomerData(
 
 export type CartAction = ReturnOrGeneratorYieldUnion<
 	| typeof receiveCart
+	| typeof receiveCartContents
+	| typeof setBillingData
+	| typeof setShippingAddress
 	| typeof receiveError
 	| typeof receiveApplyingCoupon
 	| typeof receiveRemovingCoupon

@@ -28,7 +28,6 @@ const FrontendBlock = ( {
 	className?: string;
 } ): JSX.Element | null => {
 	const { isProcessing: checkoutIsProcessing } = useCheckoutContext();
-	const { showBillingFields } = useCheckoutAddress();
 	const {
 		requireCompanyField,
 		requirePhoneField,
@@ -36,6 +35,7 @@ const FrontendBlock = ( {
 		showCompanyField,
 		showPhoneField,
 	} = useCheckoutBlockContext();
+	const { showBillingFields } = useCheckoutAddress();
 
 	if ( ! showBillingFields ) {
 		return null;

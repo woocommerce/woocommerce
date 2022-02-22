@@ -15,8 +15,9 @@ import reducer, { State } from './reducers';
 import { controls as sharedControls } from '../shared-controls';
 import { controls } from './controls';
 import type { SelectFromMap, DispatchFromMap } from '../mapped-types';
+import { pushChanges } from './push-changes';
 
-registerStore< State >( STORE_KEY, {
+const registeredStore = registerStore< State >( STORE_KEY, {
 	reducer,
 	actions,
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -24,6 +25,8 @@ registerStore< State >( STORE_KEY, {
 	selectors,
 	resolvers,
 } );
+
+registeredStore.subscribe( pushChanges );
 
 export const CART_STORE_KEY = STORE_KEY;
 
@@ -33,5 +36,7 @@ declare module '@wordpress/data' {
 	): DispatchFromMap< typeof actions >;
 	function select(
 		key: typeof CART_STORE_KEY
-	): SelectFromMap< typeof selectors >;
+	): SelectFromMap< typeof selectors > & {
+		hasFinishedResolution: ( selector: string ) => boolean;
+	};
 }

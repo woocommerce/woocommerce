@@ -69,7 +69,10 @@ const reducer: Reducer< CartState > = (
 				state = {
 					...state,
 					errors: EMPTY_CART_ERRORS,
-					cartData: action.response,
+					cartData: {
+						...state.cartData,
+						...action.response,
+					},
 				};
 			}
 			break;
@@ -84,6 +87,31 @@ const reducer: Reducer< CartState > = (
 				};
 			}
 			break;
+		case types.SET_BILLING_DATA:
+			state = {
+				...state,
+				cartData: {
+					...state.cartData,
+					billingAddress: {
+						...state.cartData.billingAddress,
+						...action.billingData,
+					},
+				},
+			};
+			break;
+		case types.SET_SHIPPING_ADDRESS:
+			state = {
+				...state,
+				cartData: {
+					...state.cartData,
+					shippingAddress: {
+						...state.cartData.shippingAddress,
+						...action.shippingAddress,
+					},
+				},
+			};
+			break;
+
 		case types.REMOVING_COUPON:
 			if ( action.couponCode || action.couponCode === '' ) {
 				state = {
