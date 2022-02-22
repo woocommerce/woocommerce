@@ -377,7 +377,7 @@ class MiniCart extends AbstractBlock {
 		}
 
 		$template_part_contents = '';
-		$template_part          = BlockTemplateUtils::get_block_template( get_stylesheet() . '//mini-cart', 'wp_template_part' );
+		$template_part          = BlockTemplateUtils::get_block_template( BlockTemplateUtils::PLUGIN_SLUG . '//mini-cart', 'wp_template_part' );
 
 		if ( $template_part && ! empty( $template_part->content ) ) {
 			$template_part_contents = do_blocks( $template_part->content );
