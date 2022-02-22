@@ -8,8 +8,9 @@ export const supports = {
 		__experimentalBorder: {
 			radius: true,
 		},
+		typography: {
+			fontSize: true,
+		},
+		__experimentalSelector: '.wc-block-components-product-image',
 	} ),
-	typography: {
-		fontSize: true,
-	},
 };

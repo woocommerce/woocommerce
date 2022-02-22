@@ -59,7 +59,9 @@ export const useTypographyProps = ( attributes: unknown ): WithStyle => {
 
 	return {
 		style: {
-			fontSize: attributesObject.fontSize || typography.fontSize,
+			fontSize: attributesObject.fontSize
+				? `var(--wp--preset--font-size--${ attributesObject.fontSize })`
+				: typography.fontSize,
 			lineHeight: typography.lineHeight,
 			fontWeight: typography.fontWeight,
 			textTransform: typography.textTransform,
