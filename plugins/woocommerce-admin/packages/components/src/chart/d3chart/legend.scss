@@ -19,6 +19,7 @@
 	display: flex;
 	height: 100%;
 	margin: 0;
+	flex-flow: row wrap;
 
 	.woocommerce-legend__direction-column & {
 		flex-direction: column;
@@ -165,6 +166,7 @@
 	.woocommerce-legend__direction-row & {
 		padding: 0;
 		margin: 0;
+		flex-basis: 20%;
 
 		& > button {
 			padding: 0 17px;

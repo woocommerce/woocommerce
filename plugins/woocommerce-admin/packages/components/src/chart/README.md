@@ -105,3 +105,17 @@ Name | Type | Default | Description
 `yBelow1Format` | String | `null` | A number formatting string, passed to d3Format
 `yFormat` | String | `null` | A number formatting string, passed to d3Format
 `currency` | Object | `{}` | An object with currency properties for usage in the chart. The following properties are expected: `decimal`, `symbol`, `symbolPosition`, `thousands`. This is passed to d3Format.
+
+## Overriding chart colors
+
+Char colors can be overridden by hooking into the filter `woocommerce_admin_chart_item_color`. For example:
+
+```js
+const colorScales = [
+  "#0A2F51",
+  "#0E4D64",
+  "#137177",
+  "#188977",
+];
+addFilter( 'woocommerce_admin_chart_item_color', 'example', ( index, key, orderedKeys ) => colorScales[index] );
+```
