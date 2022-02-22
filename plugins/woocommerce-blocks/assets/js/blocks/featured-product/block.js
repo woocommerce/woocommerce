@@ -356,15 +356,21 @@ const FeaturedProduct = ( {
 			<InnerBlocks
 				template={ [
 					[
-						'core/button',
-						{
-							text: __(
-								'Shop now',
-								'woo-gutenberg-products-block'
-							),
-							url: product.permalink,
-							align: 'center',
-						},
+						'core/buttons',
+						{},
+						[
+							[
+								'core/button',
+								{
+									text: __(
+										'Shop now',
+										'woo-gutenberg-products-block'
+									),
+									url: product.permalink,
+									align: 'center',
+								},
+							],
+						],
 					],
 				] }
 				templateLock="all"

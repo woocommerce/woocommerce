@@ -270,15 +270,21 @@ const FeaturedCategory = ( {
 			<InnerBlocks
 				template={ [
 					[
-						'core/button',
-						{
-							text: __(
-								'Shop now',
-								'woo-gutenberg-products-block'
-							),
-							url: category.permalink,
-							align: 'center',
-						},
+						'core/buttons',
+						{},
+						[
+							[
+								'core/button',
+								{
+									text: __(
+										'Shop now',
+										'woo-gutenberg-products-block'
+									),
+									url: category.permalink,
+									align: 'center',
+								},
+							],
+						],
 					],
 				] }
 				templateLock="all"
