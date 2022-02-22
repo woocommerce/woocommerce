@@ -19,6 +19,7 @@ export enum ACTION {
 	SET_ORDER_NOTES = 'set_checkout_order_notes',
 	INCREMENT_CALCULATING = 'increment_calculating',
 	DECREMENT_CALCULATING = 'decrement_calculating',
+	SET_SHIPPING_ADDRESS_AS_BILLING_ADDRESS = 'set_shipping_address_as_billing_address',
 	SET_SHOULD_CREATE_ACCOUNT = 'set_should_create_account',
 	SET_EXTENSION_DATA = 'set_extension_data',
 }
@@ -91,6 +92,11 @@ export const actions = {
 		( {
 			type: ACTION.SET_ORDER_ID,
 			orderId,
+		} as const ),
+	setUseShippingAsBilling: ( useShippingAsBilling: boolean ) =>
+		( {
+			type: ACTION.SET_SHIPPING_ADDRESS_AS_BILLING_ADDRESS,
+			useShippingAsBilling,
 		} as const ),
 	setShouldCreateAccount: ( shouldCreateAccount: boolean ) =>
 		( {

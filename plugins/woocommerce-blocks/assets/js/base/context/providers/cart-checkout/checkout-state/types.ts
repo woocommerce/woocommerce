@@ -45,6 +45,7 @@ export interface CheckoutStateContextState {
 	orderId: number;
 	orderNotes: string;
 	customerId: number;
+	useShippingAsBilling: boolean;
 	shouldCreateAccount: boolean;
 	processingResponse: PaymentResultDataType | null;
 	extensionData: extensionData;
@@ -88,6 +89,8 @@ export type CheckoutStateContextType = {
 	onCheckoutBeforeProcessing: ReturnType< typeof emitterCallback >;
 	// Used to register a callback that will fire when the checkout has been submitted before being sent off to the server.
 	onCheckoutValidationBeforeProcessing: ReturnType< typeof emitterCallback >;
+	// Toggle using shipping address as billing address.
+	setUseShippingAsBilling: ( useShippingAsBilling: boolean ) => void;
 	// Set if user account should be created.
 	setShouldCreateAccount: ( shouldCreateAccount: boolean ) => void;
 	// True when the checkout has a draft order from the API.
@@ -104,6 +107,8 @@ export type CheckoutStateContextType = {
 	orderNotes: CheckoutStateContextState[ 'orderNotes' ];
 	// This is the ID of the customer the draft order belongs to.
 	customerId: CheckoutStateContextState[ 'customerId' ];
+	// Should the billing form be hidden and inherit the shipping address?
+	useShippingAsBilling: CheckoutStateContextState[ 'useShippingAsBilling' ];
 	// Should a user account be created?
 	shouldCreateAccount: CheckoutStateContextState[ 'shouldCreateAccount' ];
 	// Custom checkout data passed to the store API on processing.
