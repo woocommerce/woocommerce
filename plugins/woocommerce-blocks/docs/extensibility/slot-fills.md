@@ -1,6 +1,7 @@
 # Slot and Fill
 
 ## The problem
+
 You added custom data to the [Store API](./extend-rest-api-add-data.md). You changed several strings using [Checkout filters](./available-filters.md). Now you want to render your own components in specific places in the Cart and Checkout.
 
 ## Solution
@@ -15,22 +16,26 @@ Slot and Fill use WordPress' API, and you can learn more about how they work in 
 
 ## Basic Usage
 
-`ExperimentalOrderMeta` is a fill that will render in a slot below the order summary section in the Cart and Checkout blocks.
-The `ExperimentalOrderMeta` will automatically pass props to its top level child: `cart` which contains cart data, and `extensions` which contains data registered with `ExtendRestAPI` in `wc/store/cart` endpoint.
+`ExperimentalOrderMeta` is a fill that will render in a slot below the Order summary section in the Cart and Checkout blocks.
+The `ExperimentalOrderMeta` will automatically pass props to its top level child:
+
+-   `cart` which contains cart data
+-   `extensions` which contains data registered with `ExtendRestAPI` in `wc/store/cart` endpoint
+-   `context`, equal to the name of the Block in which the fill is rendered: `woocommerce/cart` or `woocommerce/checkout`
 
 ```jsx
 const { registerPlugin } = wp.plugins;
 const { ExperimentalOrderMeta } = wc.blocksCheckout;
 
 const MyCustomComponent = ( { cart, extensions } ) => {
-	return <div className='my-component'>Hello WooCommerce</div>
-}
+	return <div className="my-component">Hello WooCommerce</div>;
+};
 
 const render = () => {
 	return (
-			<ExperimentalOrderMeta>
-				<MyCustomComponent />
-			</ExperimentalOrderMeta>
+		<ExperimentalOrderMeta>
+			<MyCustomComponent />
+		</ExperimentalOrderMeta>
 	);
 };
 
@@ -47,13 +52,13 @@ In the above example, we're using `registerPlugin`. This plugin will take our co
 You use `registerPlugin` to feed in your plugin namespace, your component `render`, and the scope of your `registerPlugin`. The value of scope should always be `woocommerce-checkout`.
 
 ## Requirements
+
 For this to work, your script must be enqueued after Cart and Checkout. You can follow the [IntegrationInterface](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/50f9b3e8d012f425d318908cc13d9c601d97bd68/docs/extensibility/integration-interface.md) documentation for enqueueing your script.
 
-<!-- FEEDBACK -->
----
+## <!-- FEEDBACK -->
 
 [We're hiring!](https://woocommerce.com/careers/) Come work with us!
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/extensibility/slot-fills.md)
-<!-- /FEEDBACK -->
 
+<!-- /FEEDBACK -->

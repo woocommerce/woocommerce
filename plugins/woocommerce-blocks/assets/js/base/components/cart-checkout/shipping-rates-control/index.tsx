@@ -81,6 +81,7 @@ interface ShippingRatesControlProps {
 	shippingRatesLoading: boolean;
 	noResultsMessage: ReactElement;
 	renderOption: PackageRateRenderOption;
+	context: 'woocommerce/cart' | 'woocommerce/checkout';
 }
 /**
  * Renders the shipping rates control element.
@@ -92,6 +93,7 @@ interface ShippingRatesControlProps {
  * @param {boolean} [props.collapsible] If true, when multiple packages are rendered they can be toggled open and closed.
  * @param {ReactElement} props.noResultsMessage Rendered when there are no packages.
  * @param {Function} [props.renderOption] Function to render a shipping rate.
+ * @param {string} [props.context] String equal to the block name where the Slot is rendered
  */
 const ShippingRatesControl = ( {
 	shippingRates,
@@ -100,6 +102,7 @@ const ShippingRatesControl = ( {
 	collapsible = false,
 	noResultsMessage,
 	renderOption,
+	context,
 }: ShippingRatesControlProps ): JSX.Element => {
 	useEffect( () => {
 		if ( shippingRatesLoading ) {
@@ -161,6 +164,7 @@ const ShippingRatesControl = ( {
 		components: {
 			ShippingRatesControlPackage,
 		},
+		context,
 	};
 	const { isEditor } = useEditorContext();
 
