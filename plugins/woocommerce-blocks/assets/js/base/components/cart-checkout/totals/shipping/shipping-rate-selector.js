@@ -40,6 +40,7 @@ const ShippingRateSelector = ( {
 				}
 				shippingRates={ shippingRates }
 				shippingRatesLoading={ shippingRatesLoading }
+				context="woocommerce/cart"
 			/>
 		</fieldset>
 	);

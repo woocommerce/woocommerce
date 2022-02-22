@@ -103,6 +103,7 @@ const Block = (): JSX.Element | null => {
 					renderOption={ renderShippingRatesControlOption }
 					shippingRates={ shippingRates }
 					shippingRatesLoading={ shippingRatesLoading }
+					context="woocommerce/checkout"
 				/>
 			) }
 		</>
