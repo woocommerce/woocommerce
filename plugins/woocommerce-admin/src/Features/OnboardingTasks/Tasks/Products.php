@@ -108,7 +108,7 @@ class Products extends Task {
 			'onboarding-product-notice',
 			Loader::get_url( 'wp-admin-scripts/onboarding-product-notice', 'js' ),
 			array_merge( array( WC_ADMIN_APP ), $script_assets ['dependencies'] ),
-			WC_ADMIN_VERSION_NUMBER,
+			WC_VERSION,
 			true
 		);
 	}
@@ -136,7 +136,7 @@ class Products extends Task {
 			'onboarding-product-import-notice',
 			Loader::get_url( 'wp-admin-scripts/onboarding-product-import-notice', 'js' ),
 			array_merge( array( WC_ADMIN_APP ), $script_assets ['dependencies'] ),
-			WC_ADMIN_VERSION_NUMBER,
+			WC_VERSION,
 			true
 		);
 	}

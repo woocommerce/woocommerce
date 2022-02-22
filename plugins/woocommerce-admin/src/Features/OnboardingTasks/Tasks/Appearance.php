@@ -115,7 +115,7 @@ class Appearance extends Task {
 			'onboarding-homepage-notice',
 			Loader::get_url( 'wp-admin-scripts/onboarding-homepage-notice', 'js' ),
 			array_merge( array( WC_ADMIN_APP ), $script_assets ['dependencies'] ),
-			WC_ADMIN_VERSION_NUMBER,
+			WC_VERSION,
 			true
 		);
 	}

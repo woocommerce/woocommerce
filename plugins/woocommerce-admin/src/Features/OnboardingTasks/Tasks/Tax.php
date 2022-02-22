@@ -41,7 +41,7 @@ class Tax extends Task {
 			'onboarding-tax-notice',
 			Loader::get_url( 'wp-admin-scripts/onboarding-tax-notice', 'js' ),
 			array_merge( array( WC_ADMIN_APP ), $script_assets ['dependencies'] ),
-			WC_ADMIN_VERSION_NUMBER,
+			WC_VERSION,
 			true
 		);
 	}

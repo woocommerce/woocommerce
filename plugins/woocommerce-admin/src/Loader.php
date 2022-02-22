@@ -292,7 +292,7 @@ class Loader {
 		if ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) {
 			return filemtime( WC_ADMIN_ABSPATH . self::get_path( $ext ) );
 		}
-		return WC_ADMIN_VERSION_NUMBER;
+		return WC_VERSION;
 	}
 
 	/**
