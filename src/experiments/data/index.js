@@ -13,10 +13,10 @@ import * as selectors from './selectors';
 import reducer from './reducer';
 import { STORE_KEY } from './constants';
 
-export default registerStore(STORE_KEY, {
+export default registerStore( STORE_KEY, {
 	actions,
 	selectors,
 	resolvers,
 	controls,
 	reducer,
-});
+} );

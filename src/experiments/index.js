@@ -11,7 +11,7 @@ import { Button } from '@wordpress/components';
 import { STORE_KEY } from './data/constants';
 import './data';
 
-function Experiments({ experiments, toggleExperiment }) {
+function Experiments( { experiments, toggleExperiment } ) {
 	return (
 		<div id="wc-admin-test-helper-experiments">
 			<h2>Experiments</h2>
@@ -24,16 +24,16 @@ function Experiments({ experiments, toggleExperiment }) {
 					</tr>
 				</thead>
 				<tbody>
-					{experiments.map(({ name, variation }, index) => {
+					{ experiments.map( ( { name, variation }, index ) => {
 						return (
-							<tr key={index}>
-								<td className="experiment-name">{name}</td>
-								<td align="center">{variation}</td>
+							<tr key={ index }>
+								<td className="experiment-name">{ name }</td>
+								<td align="center">{ variation }</td>
 								<td align="center">
 									<Button
-										onClick={() => {
-											toggleExperiment(name);
-										}}
+										onClick={ () => {
+											toggleExperiment( name );
+										} }
 										isPrimary
 									>
 										Toggle
@@ -41,7 +41,7 @@ function Experiments({ experiments, toggleExperiment }) {
 								</td>
 							</tr>
 						);
-					})}
+					} ) }
 				</tbody>
 			</table>
 		</div>
@@ -49,17 +49,17 @@ function Experiments({ experiments, toggleExperiment }) {
 }
 
 export default compose(
-	withSelect((select) => {
-		const { getExperiments } = select(STORE_KEY);
+	withSelect( ( select ) => {
+		const { getExperiments } = select( STORE_KEY );
 		return {
 			experiments: getExperiments(),
 		};
-	}),
-	withDispatch((dispatch) => {
-		const { toggleExperiment } = dispatch(STORE_KEY);
+	} ),
+	withDispatch( ( dispatch ) => {
+		const { toggleExperiment } = dispatch( STORE_KEY );
 
 		return {
 			toggleExperiment,
 		};
-	})
-)(Experiments);
+	} )
+)( Experiments );

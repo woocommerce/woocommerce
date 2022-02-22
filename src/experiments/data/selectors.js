@@ -1,3 +1,3 @@
-export function getExperiments(state) {
+export function getExperiments( state ) {
 	return state.experiments;
 }

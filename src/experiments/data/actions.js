@@ -4,9 +4,9 @@
 import TYPES from './action-types';
 import { EXPERIMENT_NAME_PREFIX } from './constants';
 
-export function toggleExperiment(experimentName) {
+export function toggleExperiment( experimentName ) {
 	const storageItem = JSON.parse(
-		window.localStorage.getItem(EXPERIMENT_NAME_PREFIX + experimentName)
+		window.localStorage.getItem( EXPERIMENT_NAME_PREFIX + experimentName )
 	);
 
 	const newVariation =
@@ -16,7 +16,7 @@ export function toggleExperiment(experimentName) {
 
 	window.localStorage.setItem(
 		EXPERIMENT_NAME_PREFIX + experimentName,
-		JSON.stringify(storageItem)
+		JSON.stringify( storageItem )
 	);
 
 	return {
@@ -26,7 +26,7 @@ export function toggleExperiment(experimentName) {
 	};
 }
 
-export function setExperiments(experiments) {
+export function setExperiments( experiments ) {
 	return {
 		type: TYPES.SET_EXPERIMENTS,
 		experiments,
