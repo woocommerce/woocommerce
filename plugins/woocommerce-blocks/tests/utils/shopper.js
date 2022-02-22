@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { shopper as wcShopper } from '@woocommerce/e2e-utils';
-import { createURL } from '@wordpress/e2e-test-utils';
 
 /**
  * Internal dependencies
@@ -49,11 +48,9 @@ export const shopper = {
 	},
 
 	goToBlockPage: async ( title ) => {
-		await page.goto( createURL( '/' ), { waitUntil: 'networkidle0' } );
-
-		await expect( page ).toClick( '.nav-menu a', { text: title } );
-
-		await page.waitForNavigation();
+		await page.goto( await getBlockPagePermalink( title ), {
+			waitUntil: 'networkidle0',
+		} );
 
 		await expect( page ).toMatchElement( 'h1', { text: title } );
 	},
