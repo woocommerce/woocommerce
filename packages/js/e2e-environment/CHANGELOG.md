@@ -1,5 +1,10 @@
 # Unreleased
 
+## Changed
+- Updated `resolveSingleE2EPath` 
+  - it resolves the full path if the filePath is valid
+  - otherwise, it removes `tests/e2e` from the given filePath before resolving a full path.
+
 ## Added
 
 - Added `post-results-to-github-pr.js` to post test results to a GitHub PR.
