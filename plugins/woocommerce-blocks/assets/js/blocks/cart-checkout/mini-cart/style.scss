@@ -24,7 +24,7 @@
 	font-weight: 400;
 	padding: em($gap-small) em($gap-smaller);
 
-	&:hover {
+	&:hover:not([disabled]) {
 		opacity: 0.6;
 	}
 }
