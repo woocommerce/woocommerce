@@ -26,7 +26,7 @@
 		"@woocommerce/eslint-plugin": "1.1.0",
 		"@wordpress/prettier-config": "^1.0.1",
 		"@wordpress/scripts": "^13.0.3",
-		"prettier": "^2.2.1"
+		"prettier": "npm:wp-prettier@^2.2.1-beta-1"
 	},
 	"dependencies": {
 		"@woocommerce/data": "^1.1.1",
