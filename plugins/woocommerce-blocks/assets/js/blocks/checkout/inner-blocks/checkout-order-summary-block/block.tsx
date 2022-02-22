@@ -54,6 +54,7 @@ const Block = ( {
 	const slotFillProps = {
 		extensions,
 		cart,
+		context: 'woocommerce/checkout',
 	};
 
 	return (
