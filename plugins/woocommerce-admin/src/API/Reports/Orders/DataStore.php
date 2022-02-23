@@ -169,8 +169,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$where_subquery[] = 'variation_lookup.order_id IS NULL';
 		}
 
-		$included_tax_rates = ! empty( $query_args['tax_rate_includes'] ) ? implode( ',', $query_args['tax_rate_includes'] ) : false;
-		$excluded_tax_rates = ! empty( $query_args['tax_rate_excludes'] ) ? implode( ',', $query_args['tax_rate_excludes'] ) : false;
+		$included_tax_rates = ! empty( $query_args['tax_rate_includes'] ) ? implode( ',', array_map( 'esc_sql', $query_args['tax_rate_includes'] ) ) : false;
+		$excluded_tax_rates = ! empty( $query_args['tax_rate_excludes'] ) ? implode( ',', array_map( 'esc_sql', $query_args['tax_rate_excludes'] ) ) : false;
 		if ( $included_tax_rates || $excluded_tax_rates ) {
 			$this->subquery->add_sql_clause( 'join', "LEFT JOIN {$order_tax_lookup_table} ON {$order_stats_lookup_table}.order_id = {$order_tax_lookup_table}.order_id" );
 		}

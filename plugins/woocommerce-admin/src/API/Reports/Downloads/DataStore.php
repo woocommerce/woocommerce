@@ -188,10 +188,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @return string
 	 */
 	protected function get_included_ip_addresses( $query_args ) {
-		if ( isset( $query_args['ip_address_includes'] ) && is_array( $query_args['ip_address_includes'] ) && count( $query_args['ip_address_includes'] ) > 0 ) {
-			$query_args['ip_address_includes'] = array_map( 'esc_sql', $query_args['ip_address_includes'] );
-		}
-		return self::get_filtered_ids( $query_args, 'ip_address_includes', "','" );
+		return $this->get_filtered_ip_addresses( $query_args, 'ip_address_includes' );
 	}
 
 	/**
@@ -201,10 +198,35 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @return string
 	 */
 	protected function get_excluded_ip_addresses( $query_args ) {
-		if ( isset( $query_args['ip_address_excludes'] ) && is_array( $query_args['ip_address_excludes'] ) && count( $query_args['ip_address_excludes'] ) > 0 ) {
-			$query_args['ip_address_excludes'] = array_map( 'esc_sql', $query_args['ip_address_excludes'] );
+		return $this->get_filtered_ip_addresses( $query_args, 'ip_address_excludes' );
+	}
+
+	/**
+	 * Returns filtered comma separated ids, based on query arguments from the user.
+	 *
+	 * @param array  $query_args  Parameters supplied by the user.
+	 * @param string $field       Query field to filter.
+	 * @return string
+	 */
+	protected function get_filtered_ip_addresses( $query_args, $field ) {
+		if ( isset( $query_args[ $field ] ) && is_array( $query_args[ $field ] ) && count( $query_args[ $field ] ) > 0 ) {
+			$ip_addresses = array_map( 'esc_sql', $query_args[ $field ] );
+
+			/**
+			 * Filter the IDs before retrieving report data.
+			 *
+			 * Allows filtering of the objects included or excluded from reports.
+			 *
+			 * @param array  $ids        List of object Ids.
+			 * @param array  $query_args The original arguments for the request.
+			 * @param string $field      The object type.
+			 * @param string $context    The data store context.
+			 */
+			$ip_addresses = apply_filters( 'woocommerce_analytics_' . $field, $ip_addresses, $query_args, $field, $this->context );
+
+			return implode( "','", $ip_addresses );
 		}
-		return self::get_filtered_ids( $query_args, 'ip_address_excludes', "','" );
+		return '';
 	}
 
 	/**
@@ -260,7 +282,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$this->clear_sql_clause( 'order_by' );
 		$order_by = '';
 		if ( isset( $query_args['orderby'] ) ) {
-			$order_by = $this->normalize_order_by( $query_args['orderby'] );
+			$order_by = $this->normalize_order_by( esc_sql( $query_args['orderby'] ) );
 			$this->add_sql_clause( 'order_by', $order_by );
 		}
 
@@ -315,11 +337,13 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$selections = $this->selected_columns( $query_args );
 			$this->add_sql_query_params( $query_args );
 
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$db_records_count = (int) $wpdb->get_var(
 				"SELECT COUNT(*) FROM (
 					{$this->subquery->get_query_statement()}
 				) AS tt"
-			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+			);
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 			$params      = $this->get_limit_params( $query_args );
 			$total_pages = (int) ceil( $db_records_count / $params['per_page'] );
@@ -333,9 +357,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$this->subquery->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
 
 			$download_data = $wpdb->get_results(
-				$this->subquery->get_query_statement(),
+				$this->subquery->get_query_statement(), // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 				ARRAY_A
-			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+			);
 
 			if ( null === $download_data ) {
 				return $data;

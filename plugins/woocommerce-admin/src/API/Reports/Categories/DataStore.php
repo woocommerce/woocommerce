@@ -119,12 +119,17 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 */
 	protected function add_order_by_params( $query_args, $from_arg, $id_cell ) {
 		global $wpdb;
+
+		// Sanitize input: guarantee that the id cell in the join is quoted with backticks.
+		$id_cell_segments   = explode( '.', str_replace( '`', '', $id_cell ) );
+		$id_cell_identifier = '`' . implode( '`.`', $id_cell_segments ) . '`';
+
 		$lookup_table    = self::get_db_table_name();
 		$order_by_clause = $this->add_order_by_clause( $query_args, $this );
 		$this->add_orderby_order_clause( $query_args, $this );
 
 		if ( false !== strpos( $order_by_clause, '_terms' ) ) {
-			$join = "JOIN {$wpdb->terms} AS _terms ON {$id_cell} = _terms.term_id";
+			$join = "JOIN {$wpdb->terms} AS _terms ON {$id_cell_identifier} = _terms.term_id";
 			if ( 'inner' === $from_arg ) {
 				// Even though this is an (inner) JOIN, we're adding it as a `left_join` to
 				// affect its order in the query statement. The SqlQuery::$sql_filters variable

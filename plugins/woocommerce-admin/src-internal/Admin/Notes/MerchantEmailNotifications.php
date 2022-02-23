@@ -44,7 +44,7 @@ class MerchantEmailNotifications {
 
 		$note = Notes::get_note( $note_id );
 
-		if ( ! $note ) {
+		if ( ! $note || Note::E_WC_ADMIN_NOTE_EMAIL !== $note->get_type() ) {
 			return;
 		}
 

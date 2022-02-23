@@ -71,12 +71,16 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @param array $query_args       Query arguments supplied by the user.
 	 */
 	protected function update_sql_query_params( $query_args ) {
+		global $wpdb;
+
 		$taxes_where_clause     = '';
 		$order_tax_lookup_table = self::get_db_table_name();
 
 		if ( isset( $query_args['taxes'] ) && ! empty( $query_args['taxes'] ) ) {
-			$allowed_taxes       = implode( ',', $query_args['taxes'] );
-			$taxes_where_clause .= " AND {$order_tax_lookup_table}.tax_rate_id IN ({$allowed_taxes})";
+			$tax_id_placeholders = implode( ',', array_fill( 0, count( $query_args['taxes'] ), '%d' ) );
+			/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
+			$taxes_where_clause .= $wpdb->prepare( " AND {$order_tax_lookup_table}.tax_rate_id IN ({$tax_id_placeholders})", $query_args['taxes'] );
+			/* phpcs:enable */
 		}
 
 		$order_status_filter = $this->get_status_subquery( $query_args );
@@ -111,8 +115,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			FROM {$wpdb->prefix}woocommerce_tax_rates
 		";
 		if ( ! empty( $args['include'] ) ) {
-			$included_taxes = implode( ',', $args['include'] );
-			$query         .= " WHERE tax_rate_id IN ({$included_taxes})";
+			/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
+			$tax_placeholders = implode( ',', array_fill( 0, count( $args['include'] ), '%d' ) );
+			$query           .= $wpdb->prepare( " WHERE tax_rate_id IN ({$tax_placeholders})", $args['include'] );
+			/* phpcs:enable */
 		}
 		return $wpdb->get_results( $query, ARRAY_A ); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 	}

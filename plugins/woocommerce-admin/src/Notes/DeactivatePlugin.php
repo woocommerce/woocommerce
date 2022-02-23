@@ -50,6 +50,7 @@ class DeactivatePlugin {
 			Note::E_WC_ADMIN_NOTE_UNACTIONED,
 			true
 		);
+		$note->add_nonce_to_action( 'deactivate-feature-plugin', 'deactivate-plugin_' . WC_ADMIN_PLUGIN_FILE, '' );
 		return $note;
 	}
 
@@ -64,7 +65,6 @@ class DeactivatePlugin {
 	 * Deactivate feature plugin.
 	 */
 	public function deactivate_feature_plugin() {
-		/* phpcs:disable WordPress.Security.NonceVerification */
 		if (
 			! isset( $_GET['page'] ) ||
 			'wc-admin' !== $_GET['page'] ||
@@ -74,10 +74,35 @@ class DeactivatePlugin {
 		) {
 			return;
 		}
-		/* phpcs:enable */
 
-		$deactivate_url = admin_url( 'plugins.php?action=deactivate&plugin=' . rawurlencode( WC_ADMIN_PLUGIN_FILE ) . '&plugin_status=all&paged=1&_wpnonce=' . wp_create_nonce( 'deactivate-plugin_' . WC_ADMIN_PLUGIN_FILE ) );
+		$note   = self::get_note();
+		$action = $note->get_action( 'deactivate-feature-plugin' );
+
+		// Preserve compatability with notes populated before nonce implementation.
+		if ( ! isset( $_GET['_wpnonce'] ) && ( ! $action || ! isset( $action->nonce_action ) ) ) {
+			self::deactivate_redirect( wp_create_nonce( 'deactivate-plugin_' . WC_ADMIN_PLUGIN_FILE ) );
+			return;
+		}
+
+		$nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
+
+		if ( ! wp_verify_nonce( $nonce, 'deactivate-plugin_' . WC_ADMIN_PLUGIN_FILE ) ) {
+			return;
+		}
+
+		self::deactivate_redirect( $nonce );
+	}
+
+	/**
+	 * Deactivation redirect
+	 *
+	 * @param  string $nonce The nonce.
+	 */
+	public static function deactivate_redirect( $nonce ) {
+
+		$deactivate_url = admin_url( 'plugins.php?action=deactivate&plugin=' . rawurlencode( WC_ADMIN_PLUGIN_FILE ) . '&plugin_status=all&paged=1&_wpnonce=' . $nonce );
 		wp_safe_redirect( $deactivate_url );
+
 		exit;
 	}
 }

@@ -29,8 +29,19 @@ class PluginsInstaller {
 	 */
 	public static function possibly_install_activate_plugins() {
 		/* phpcs:disable WordPress.Security.NonceVerification.Recommended */
-		if ( ! isset( $_GET['plugin_action'] ) || ! isset( $_GET['plugins'] ) || ! current_user_can( 'install_plugins' ) ) {
+		if (
+			! isset( $_GET['plugin_action'] ) ||
+			! isset( $_GET['plugins'] ) ||
+			! current_user_can( 'install_plugins' ) ||
+			! isset( $_GET['nonce'] )
+		) {
 			return;
+		}
+
+		$nonce = sanitize_text_field( wp_unslash( $_GET['nonce'] ) );
+
+		if ( ! wp_verify_nonce( $nonce, 'install-plugin' ) ) {
+			wp_nonce_ays( 'install-plugin' );
 		}
 
 		$plugins       = sanitize_text_field( wp_unslash( $_GET['plugins'] ) );

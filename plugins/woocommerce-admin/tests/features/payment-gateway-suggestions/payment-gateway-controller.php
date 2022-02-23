@@ -116,7 +116,7 @@ class WC_Tests_PaymentGatewaySuggestions_PaymentGatewaysController extends WC_RE
 	public function test_connection_url() {
 		$response = $this->get_mock_gateway_response();
 		$this->assertEquals(
-			'http://testconnection.com?return=' . wc_admin_url( '&task=payments&connection-return=mock-enhanced' ),
+			'http://testconnection.com?return=' . wc_admin_url( '&task=payments&connection-return=mock-enhanced&_wpnonce=' . wp_create_nonce( 'connection-return' ) ),
 			$response['connection_url']
 		);
 	}

@@ -40,7 +40,7 @@ class PaymentGatewaysController {
 			? $gateway->get_settings_url()
 			: admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . strtolower( $gateway->id ) );
 
-		$return_url             = wc_admin_url( '&task=payments&connection-return=' . strtolower( $gateway->id ) );
+		$return_url             = wc_admin_url( '&task=payments&connection-return=' . strtolower( $gateway->id ) . '&_wpnonce=' . wp_create_nonce( 'connection-return' ) );
 		$data['connection_url'] = method_exists( $gateway, 'get_connection_url' )
 			? $gateway->get_connection_url( $return_url )
 			: null;
@@ -85,20 +85,19 @@ class PaymentGatewaysController {
 	 * Call an action after a gating has been successfully returned.
 	 */
 	public static function possibly_do_connection_return_action() {
-		// phpcs:disable WordPress.Security.NonceVerification
 		if (
 			! isset( $_GET['page'] ) ||
 			'wc-admin' !== $_GET['page'] ||
 			! isset( $_GET['task'] ) ||
 			'payments' !== $_GET['task'] ||
-			! isset( $_GET['connection-return'] )
+			! isset( $_GET['connection-return'] ) ||
+			! isset( $_GET['_wpnonce'] ) ||
+			! wp_verify_nonce( wc_clean( wp_unslash( $_GET['_wpnonce'] ) ), 'connection-return' )
 		) {
 			return;
 		}
 
 		$gateway_id = sanitize_text_field( wp_unslash( $_GET['connection-return'] ) );
-
-		// phpcs:enable WordPress.Security.NonceVerification
 
 		do_action( 'woocommerce_admin_payment_gateway_connection_return', $gateway_id );
 	}

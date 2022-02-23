@@ -1338,6 +1338,8 @@ class DataStore extends SqlQuery {
 	 * @return string
 	 */
 	protected function get_filtered_ids( $query_args, $field, $separator = ',' ) {
+		global $wpdb;
+
 		$ids_str = '';
 		$ids     = isset( $query_args[ $field ] ) && is_array( $query_args[ $field ] ) ? $query_args[ $field ] : array();
 
@@ -1354,7 +1356,10 @@ class DataStore extends SqlQuery {
 		$ids = apply_filters( 'woocommerce_analytics_' . $field, $ids, $query_args, $field, $this->context );
 
 		if ( ! empty( $ids ) ) {
-			$ids_str = implode( $separator, $ids );
+			$placeholders = implode( $separator, array_fill( 0, count( $ids ), '%d' ) );
+			/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
+			$ids_str = $wpdb->prepare( "{$placeholders}", $ids );
+			/* phpcs:enable */
 		}
 		return $ids_str;
 	}
