@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 
-export const STORE_KEY = 'wc/store/cart';
+export const STORE_KEY = 'wc/store/v1/cart';
 export const CART_API_ERROR = {
 	code: 'cart_api_error',
 	message: __(

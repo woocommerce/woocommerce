@@ -14,7 +14,7 @@ class ProductQueryFilters {
 	 * Get filtered min price for current products.
 	 *
 	 * @param \WP_REST_Request $request The request object.
-	 * @return array
+	 * @return object
 	 */
 	public function get_filtered_price( $request ) {
 		global $wpdb;

@@ -1,7 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\StoreApi\Utilities;
 
-use Automattic\WooCommerce\Blocks\StoreApi\Routes\RouteException;
+use Automattic\WooCommerce\Blocks\StoreApi\Exceptions\RouteException;
 
 /**
  * NoticeHandler class.

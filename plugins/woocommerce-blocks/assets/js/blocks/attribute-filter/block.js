@@ -64,7 +64,7 @@ const AttributeFilterBlock = ( {
 		results: attributeTerms,
 		isLoading: attributeTermsLoading,
 	} = useCollection( {
-		namespace: '/wc/store',
+		namespace: '/wc/store/v1',
 		resourceName: 'products/attributes/terms',
 		resourceValues: [ attributeObject?.id || 0 ],
 		shouldSelect: blockAttributes.attributeId > 0,

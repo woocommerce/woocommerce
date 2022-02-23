@@ -22,35 +22,43 @@ class CartItems extends ControllerTestCase {
 
 		$fixtures = new FixtureData();
 
-		$this->products = [
-			$fixtures->get_simple_product( [
-				'name' => 'Test Product 1',
-				'stock_status' => 'instock',
-				'regular_price' => 10,
-				'weight' => 10,
-				'image_id' => $fixtures->sideload_image(),
-			] ),
-		];
+		$this->products = array(
+			$fixtures->get_simple_product(
+				array(
+					'name'          => 'Test Product 1',
+					'stock_status'  => 'instock',
+					'regular_price' => 10,
+					'weight'        => 10,
+					'image_id'      => $fixtures->sideload_image(),
+				)
+			),
+		);
 
 		$variable_product = $fixtures->get_variable_product(
-			[
-				'name' => 'Test Product 2',
-				'stock_status' => 'instock',
+			array(
+				'name'          => 'Test Product 2',
+				'stock_status'  => 'instock',
 				'regular_price' => 10,
-				'weight' => 10,
-				'image_id' => $fixtures->sideload_image(),
-			],
-			[
-				$fixtures->get_product_attribute( 'color', [ 'red', 'green', 'blue' ] ),
-				$fixtures->get_product_attribute( 'size', [ 'small', 'medium', 'large' ] )
-			]
+				'weight'        => 10,
+				'image_id'      => $fixtures->sideload_image(),
+			),
+			array(
+				$fixtures->get_product_attribute( 'color', array( 'red', 'green', 'blue' ) ),
+				$fixtures->get_product_attribute( 'size', array( 'small', 'medium', 'large' ) ),
+			)
 		);
-		$variation = $fixtures->get_variation_product( $variable_product->get_id(), [ 'pa_color' => 'red', 'pa_size' => 'small' ] );
+		$variation        = $fixtures->get_variation_product(
+			$variable_product->get_id(),
+			array(
+				'pa_color' => 'red',
+				'pa_size'  => 'small',
+			)
+		);
 
 		$this->products[] = $variable_product;
 
 		wc_empty_cart();
-		$this->keys   = [];
+		$this->keys   = array();
 		$this->keys[] = wc()->cart->add_to_cart( $this->products[0]->get_id(), 2 );
 		$this->keys[] = wc()->cart->add_to_cart(
 			$this->products[1]->get_id(),
@@ -58,54 +66,63 @@ class CartItems extends ControllerTestCase {
 			$variation->get_id(),
 			array(
 				'attribute_pa_color' => 'red',
-				'attribute_pa_size' => 'small',
+				'attribute_pa_size'  => 'small',
 			)
 		);
-	}
-
-	/**
-	 * Test route registration.
-	 */
-	public function test_register_routes() {
-		$routes = rest_get_server()->get_routes();
-		$this->assertArrayHasKey( '/wc/store/cart/items', $routes );
-		$this->assertArrayHasKey( '/wc/store/cart/items/(?P<key>[\w-]{32})', $routes );
 	}
 
 	/**
 	 * Test getting cart.
 	 */
 	public function test_get_items() {
-		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/cart/items' ) );
-		$data     = $response->get_data();
-
-		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 2, count( $data ) );
+		$this->assertAPIResponse(
+			'/wc/store/v1/cart/items',
+			200,
+			array(
+				0 => array(
+					'key'       => $this->keys[0],
+					'id'        => $this->products[0]->get_id(),
+					'name'      => $this->products[0]->get_name(),
+					'sku'       => $this->products[0]->get_sku(),
+					'permalink' => $this->products[0]->get_permalink(),
+					'quantity'  => 2,
+					'totals'    => array(
+						'line_subtotal' => '2000',
+						'line_total'    => '2000',
+					),
+				),
+				1 => array(
+					'key'      => $this->keys[1],
+					'quantity' => 1,
+					'totals'   => array(
+						'line_subtotal' => '1000',
+						'line_total'    => '1000',
+					),
+				),
+			)
+		);
 	}
 
 	/**
 	 * Test getting cart item by key.
 	 */
 	public function test_get_item() {
-		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/cart/items/' . $this->keys[0] ) );
-		$data     = $response->get_data();
-
-		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( $this->keys[0], $data['key'] );
-		$this->assertEquals( $this->products[0]->get_id(), $data['id'] );
-		$this->assertEquals( $this->products[0]->get_name(), $data['name'] );
-		$this->assertEquals( $this->products[0]->get_sku(), $data['sku'] );
-		$this->assertEquals( $this->products[0]->get_permalink(), $data['permalink'] );
-		$this->assertEquals( 2, $data['quantity'] );
-		$this->assertEquals( '2000', $data['totals']->line_subtotal );
-		$this->assertEquals( '2000', $data['totals']->line_total );
-
-		$request  = new \WP_REST_Request( 'DELETE', '/wc/store/cart/items/XXX815416f775098fe977004015c6193' );
-		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
-		$response = rest_get_server()->dispatch( $request );
-		$data     = $response->get_data();
-
-		$this->assertEquals( 404, $response->get_status() );
+		$this->assertAPIResponse(
+			'/wc/store/v1/cart/items/' . $this->keys[0],
+			200,
+			array(
+				'key'       => $this->keys[0],
+				'id'        => $this->products[0]->get_id(),
+				'name'      => $this->products[0]->get_name(),
+				'sku'       => $this->products[0]->get_sku(),
+				'permalink' => $this->products[0]->get_permalink(),
+				'quantity'  => 2,
+				'totals'    => array(
+					'line_subtotal' => '2000',
+					'line_total'    => '2000',
+				),
+			)
+		);
 	}
 
 	/**
@@ -114,7 +131,7 @@ class CartItems extends ControllerTestCase {
 	public function test_create_item() {
 		wc_empty_cart();
 
-		$request = new \WP_REST_Request( 'POST', '/wc/store/cart/items' );
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/items' );
 		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
@@ -122,19 +139,24 @@ class CartItems extends ControllerTestCase {
 				'quantity' => '10',
 			)
 		);
-		$response = rest_get_server()->dispatch( $request );
-		$data     = $response->get_data();
 
-		$this->assertEquals( 201, $response->get_status() );
-		$this->assertEquals( $this->products[0]->get_id(), $data['id'] );
-		$this->assertEquals( 10, $data['quantity'] );
+		$this->assertAPIResponse(
+			$request,
+			201,
+			array(
+				'id'       => $this->products[0]->get_id(),
+				'quantity' => 10,
+			)
+		);
 
-		$response = rest_get_server()->dispatch( $request );
-		$data     = $response->get_data();
-
-		$this->assertEquals( 201, $response->get_status() );
-		$this->assertEquals( $this->products[0]->get_id(), $data['id'] );
-		$this->assertEquals( 20, $data['quantity'] );
+		$this->assertAPIResponse(
+			$request,
+			201,
+			array(
+				'id'       => $this->products[0]->get_id(),
+				'quantity' => 20,
+			)
+		);
 	}
 
 	/**
@@ -144,12 +166,14 @@ class CartItems extends ControllerTestCase {
 		wc_empty_cart();
 
 		$fixtures        = new FixtureData();
-		$invalid_product = $fixtures->get_simple_product( [
-			'name' => 'Invalid Product',
-			'regular_price' => '',
-		] );
+		$invalid_product = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Invalid Product',
+				'regular_price' => '',
+			)
+		);
 
-		$request = new \WP_REST_Request( 'POST', '/wc/store/cart/items' );
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/items' );
 		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
@@ -157,16 +181,17 @@ class CartItems extends ControllerTestCase {
 				'quantity' => '10',
 			)
 		);
-		$response = rest_get_server()->dispatch( $request );
-
-		$this->assertEquals( 400, $response->get_status() );
+		$this->assertAPIResponse(
+			$request,
+			400
+		);
 	}
 
 	/**
 	 * Test updating an item.
 	 */
 	public function test_update_item() {
-		$request = new \WP_REST_Request( 'PUT', '/wc/store/cart/items/' . $this->keys[0] );
+		$request = new \WP_REST_Request( 'PUT', '/wc/store/v1/cart/items/' . $this->keys[0] );
 		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
@@ -184,35 +209,35 @@ class CartItems extends ControllerTestCase {
 	 * Test delete item.
 	 */
 	public function test_delete_item() {
-		$request  = new \WP_REST_Request( 'DELETE', '/wc/store/cart/items/' . $this->keys[0] );
+		$request = new \WP_REST_Request( 'DELETE', '/wc/store/v1/cart/items/' . $this->keys[0] );
 		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
-		$response = rest_get_server()->dispatch( $request );
-		$data     = $response->get_data();
+		$this->assertAPIResponse(
+			$request,
+			204,
+			array()
+		);
 
-		$this->assertEquals( 204, $response->get_status() );
-		$this->assertEmpty( $data );
-
-		$request  = new \WP_REST_Request( 'DELETE', '/wc/store/cart/items/' . $this->keys[0] );
+		$request = new \WP_REST_Request( 'DELETE', '/wc/store/v1/cart/items/' . $this->keys[0] );
 		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
-		$response = rest_get_server()->dispatch( $request );
-		$data     = $response->get_data();
-
-		$this->assertEquals( 404, $response->get_status() );
+		$this->assertAPIResponse(
+			$request,
+			404
+		);
 	}
 
 	/**
 	 * Test delete all items.
 	 */
 	public function test_delete_items() {
-		$request  = new \WP_REST_Request( 'DELETE', '/wc/store/cart/items' );
+		$request = new \WP_REST_Request( 'DELETE', '/wc/store/v1/cart/items' );
 		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$response = rest_get_server()->dispatch( $request );
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( [], $data );
+		$this->assertEquals( array(), $data );
 
-		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/cart/items' ) );
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/cart/items' ) );
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
@@ -224,7 +249,7 @@ class CartItems extends ControllerTestCase {
 	 */
 	public function test_prepare_item() {
 		$routes     = new \Automattic\WooCommerce\Blocks\StoreApi\RoutesController( new \Automattic\WooCommerce\Blocks\StoreApi\SchemaController( $this->mock_extend ) );
-		$controller = $routes->get( 'cart-items' );
+		$controller = $routes->get( 'cart-items', 'v1' );
 		$cart       = wc()->cart->get_cart();
 		$response   = $controller->prepare_item_for_response( current( $cart ), new \WP_REST_Request() );
 		$data       = $response->get_data();
@@ -253,7 +278,7 @@ class CartItems extends ControllerTestCase {
 	 */
 	public function test_get_item_schema() {
 		$routes     = new \Automattic\WooCommerce\Blocks\StoreApi\RoutesController( new \Automattic\WooCommerce\Blocks\StoreApi\SchemaController( $this->mock_extend ) );
-		$controller = $routes->get( 'cart-items' );
+		$controller = $routes->get( 'cart-items', 'v1' );
 		$schema     = $controller->get_item_schema();
 		$cart       = wc()->cart->get_cart();
 		$validate   = new ValidateSchema( $schema );

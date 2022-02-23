@@ -221,7 +221,7 @@ export function* applyExtensionCartUpdate(
 ): Generator< unknown, CartResponse, { response: CartResponse } > {
 	try {
 		const { response } = yield apiFetchWithHeaders( {
-			path: '/wc/store/cart/extensions',
+			path: '/wc/store/v1/cart/extensions',
 			method: 'POST',
 			data: { namespace: args.namespace, data: args.data },
 			cache: 'no-store',
@@ -255,7 +255,7 @@ export function* applyCoupon(
 
 	try {
 		const { response } = yield apiFetchWithHeaders( {
-			path: '/wc/store/cart/apply-coupon',
+			path: '/wc/store/v1/cart/apply-coupon',
 			method: 'POST',
 			data: {
 				code: couponCode,
@@ -296,7 +296,7 @@ export function* removeCoupon(
 
 	try {
 		const { response } = yield apiFetchWithHeaders( {
-			path: '/wc/store/cart/remove-coupon',
+			path: '/wc/store/v1/cart/remove-coupon',
 			method: 'POST',
 			data: {
 				code: couponCode,
@@ -340,7 +340,7 @@ export function* addItemToCart(
 	try {
 		yield triggerAddingToCartEvent();
 		const { response } = yield apiFetchWithHeaders( {
-			path: `/wc/store/cart/add-item`,
+			path: `/wc/store/v1/cart/add-item`,
 			method: 'POST',
 			data: {
 				id: productId,
@@ -381,7 +381,7 @@ export function* removeItemFromCart(
 
 	try {
 		const { response } = yield apiFetchWithHeaders( {
-			path: `/wc/store/cart/remove-item`,
+			path: `/wc/store/v1/cart/remove-item`,
 			data: {
 				key: cartItemKey,
 			},
@@ -423,7 +423,7 @@ export function* changeCartItemQuantity(
 	yield itemIsPendingQuantity( cartItemKey );
 	try {
 		const { response } = yield apiFetchWithHeaders( {
-			path: '/wc/store/cart/update-item',
+			path: '/wc/store/v1/cart/update-item',
 			method: 'POST',
 			data: {
 				key: cartItemKey,
@@ -459,7 +459,7 @@ export function* selectShippingRate(
 	try {
 		yield shippingRatesBeingSelected( true );
 		const { response } = yield apiFetchWithHeaders( {
-			path: `/wc/store/cart/select-shipping-rate`,
+			path: `/wc/store/v1/cart/select-shipping-rate`,
 			method: 'POST',
 			data: {
 				package_id: packageId,
@@ -512,7 +512,7 @@ export function* updateCustomerData(
 
 	try {
 		const { response } = yield apiFetchWithHeaders( {
-			path: '/wc/store/cart/update-customer',
+			path: '/wc/store/v1/cart/update-customer',
 			method: 'POST',
 			data: customerData,
 			cache: 'no-store',

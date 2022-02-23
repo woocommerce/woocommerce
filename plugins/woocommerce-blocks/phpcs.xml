@@ -30,6 +30,11 @@
 		<exclude-pattern>src/*</exclude-pattern>
 	</rule>
 
+	<rule ref="WordPress.PHP.DisallowShortTernary.Found">
+		<exclude-pattern>src/*</exclude-pattern>
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+
 	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">
 		<exclude-pattern>src/*</exclude-pattern>
 		<exclude-pattern>tests/*</exclude-pattern>

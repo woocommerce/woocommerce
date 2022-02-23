@@ -25,7 +25,10 @@
 	"autoload": {
 		"psr-4": {
 			"Automattic\\WooCommerce\\Blocks\\": "src/"
-		}
+		},
+		"files": [
+			"src/deprecated.php"
+		]
 	},
 	"autoload-dev": {
 		"psr-4": {
