@@ -30,6 +30,14 @@ class Packages {
 	);
 
 	/**
+	 * Array of user-defined disabled packages from WC_DISABLED_PACKAGES string
+	 * example: define('WC_DISABLED_PACKAGES', 'woocommerce-admin, woocommerce-thing')
+	 *
+	 * @var array List of packages names as strings
+	 */
+	protected static $disabled_packages = [];
+
+	/**
 	 * Init the package loader.
 	 *
 	 * @since 3.7.0
@@ -42,6 +50,9 @@ class Packages {
 	 * Callback for WordPress init hook.
 	 */
 	public static function on_init() {
+		if ( defined( 'WC_DISABLED_PACKAGES' ) ) {
+			self::$disabled_packages = array_map( 'trim', explode( ',', WC_DISABLED_PACKAGES ) );
+		}
 		self::load_packages();
 	}
 
@@ -62,11 +73,13 @@ class Packages {
 	 */
 	protected static function load_packages() {
 		foreach ( self::$packages as $package_name => $package_class ) {
-			if ( ! self::package_exists( $package_name ) ) {
-				self::missing_package( $package_name );
-				continue;
+			if ( !in_array ( $package_name, self::$disabled_packages ) ) {
+				if ( ! self::package_exists( $package_name ) ) {
+					self::missing_package( $package_name );
+					continue;
+				}
+				call_user_func( array( $package_class, 'init' ) );
 			}
-			call_user_func( array( $package_class, 'init' ) );
 		}
 
 		// Proxies "activated_plugin" hook for embedded packages listen on WC plugin activation
