@@ -18,7 +18,7 @@ GET /products/collection-data?calculate_rating_counts=true
 **In addition to the above attributes**, all product list attributes are supported. This allows you to get data for a certain subset of products. See [the products API list products section](products.md#list-products) for the full list.
 
 ```http
-curl "https://example-store.com/wp-json/wc/store/products/collection-data?calculate_price_range=true&calculate_attribute_counts=pa_size,pa_color&calculate_rating_counts=true"
+curl "https://example-store.com/wp-json/wc/store/v1/products/collection-data?calculate_price_range=true&calculate_attribute_counts=pa_size,pa_color&calculate_rating_counts=true"
 ```
 
 **Example response:**

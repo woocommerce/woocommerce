@@ -1,7 +1,12 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\StoreApi\Utilities;
 
-use Automattic\WooCommerce\Blocks\StoreApi\Routes\RouteException;
+use Automattic\WooCommerce\Blocks\StoreApi\Exceptions\InvalidStockLevelsInCartException;
+use Automattic\WooCommerce\Blocks\StoreApi\Exceptions\NotPurchasableException;
+use Automattic\WooCommerce\Blocks\StoreApi\Exceptions\OutOfStockException;
+use Automattic\WooCommerce\Blocks\StoreApi\Exceptions\PartialOutOfStockException;
+use Automattic\WooCommerce\Blocks\StoreApi\Exceptions\TooManyInCartException;
+use Automattic\WooCommerce\Blocks\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\Blocks\StoreApi\Utilities\DraftOrderTrait;
 use Automattic\WooCommerce\Blocks\StoreApi\Utilities\NoticeHandler;
 use Automattic\WooCommerce\Blocks\StoreApi\Utilities\QuantityLimits;

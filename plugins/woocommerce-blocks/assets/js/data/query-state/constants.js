@@ -1,1 +1,1 @@
-export const STORE_KEY = 'wc/store/query-state';
+export const STORE_KEY = 'wc/store/v1/query-state';

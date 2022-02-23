@@ -67,7 +67,7 @@ describe( 'Testing cart', () => {
 	beforeEach( () => {
 		act( () => {
 			fetchMock.mockResponse( ( req ) => {
-				if ( req.url.match( /wc\/store\/cart/ ) ) {
+				if ( req.url.match( /wc\/store\/v1\/cart/ ) ) {
 					return Promise.resolve( JSON.stringify( previewCart ) );
 				}
 				return Promise.resolve( '' );
@@ -134,7 +134,7 @@ describe( 'Testing cart', () => {
 
 	it( 'renders empty cart if there are no items in the cart', async () => {
 		fetchMock.mockResponse( ( req ) => {
-			if ( req.url.match( /wc\/store\/cart/ ) ) {
+			if ( req.url.match( /wc\/store\/v1\/cart/ ) ) {
 				return Promise.resolve(
 					JSON.stringify( defaultCartState.cartData )
 				);
@@ -150,7 +150,7 @@ describe( 'Testing cart', () => {
 
 	it( 'renders correct cart line subtotal when currency has 0 decimals', async () => {
 		fetchMock.mockResponse( ( req ) => {
-			if ( req.url.match( /wc\/store\/cart/ ) ) {
+			if ( req.url.match( /wc\/store\/v1\/cart/ ) ) {
 				const cart = {
 					...previewCart,
 					// Make it so there is only one item to simplify things.

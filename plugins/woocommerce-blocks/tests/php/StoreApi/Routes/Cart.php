@@ -64,98 +64,105 @@ class Cart extends ControllerTestCase {
 	}
 
 	/**
-	 * Test route registration.
-	 */
-	public function test_register_routes() {
-		$routes = rest_get_server()->get_routes();
-		$this->assertArrayHasKey( '/wc/store/cart', $routes );
-		$this->assertArrayHasKey( '/wc/store/cart/apply-coupon', $routes );
-		$this->assertArrayHasKey( '/wc/store/cart/remove-coupon', $routes );
-		$this->assertArrayHasKey( '/wc/store/cart/update-customer', $routes );
-		$this->assertArrayHasKey( '/wc/store/cart/select-shipping-rate', $routes );
-	}
-
-	/**
 	 * Test getting cart.
 	 */
 	public function test_get_item() {
-		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/cart' ) );
-		$data     = $response->get_data();
-
-		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 3, $data['items_count'] );
-		$this->assertEquals( 2, count( $data['items'] ) );
-		$this->assertEquals( true, $data['needs_payment'] );
-		$this->assertEquals( true, $data['needs_shipping'] );
-		$this->assertEquals( '30', $data['items_weight'] );
-
-		$this->assertEquals( 'USD', $data['totals']->currency_code );
-		$this->assertEquals( 2, $data['totals']->currency_minor_unit );
-		$this->assertEquals( '3000', $data['totals']->total_items );
-		$this->assertEquals( '0', $data['totals']->total_items_tax );
-		$this->assertEquals( '0', $data['totals']->total_fees );
-		$this->assertEquals( '0', $data['totals']->total_fees_tax );
-		$this->assertEquals( '100', $data['totals']->total_discount );
-		$this->assertEquals( '0', $data['totals']->total_discount_tax );
-		$this->assertEquals( '0', $data['totals']->total_shipping );
-		$this->assertEquals( '0', $data['totals']->total_shipping_tax );
-		$this->assertEquals( '0', $data['totals']->total_tax );
-		$this->assertEquals( '2900', $data['totals']->total_price );
+		$this->assertAPIResponse(
+			'/wc/store/v1/cart',
+			200,
+			array(
+				'items_count'    => 3,
+				'needs_payment'  => true,
+				'needs_shipping' => true,
+				'items_weight'   => '30',
+				'items'          => function( $value ) {
+					return count( $value ) === 2;
+				},
+				'totals'         => array(
+					'currency_code'               => 'USD',
+					'currency_minor_unit'         => 2,
+					'currency_symbol'             => '$',
+					'currency_decimal_separator'  => '.',
+					'currency_thousand_separator' => ',',
+					'currency_prefix'             => '$',
+					'currency_suffix'             => '',
+					'total_items'                 => '3000',
+					'total_items_tax'             => '0',
+					'total_fees'                  => '0',
+					'total_fees_tax'              => '0',
+					'total_discount'              => '100',
+					'total_discount_tax'          => '0',
+					'total_shipping'              => '0',
+					'total_shipping_tax'          => '0',
+					'total_tax'                   => '0',
+					'total_price'                 => '2900',
+					'tax_lines'                   => array(),
+				),
+			)
+		);
 	}
 
 	/**
-	 * Test removing a nonexistent cart item.
+	 * Test removing a nonexistent cart item. This should return 409 conflict with updated cart data.
 	 */
 	public function test_remove_bad_cart_item() {
-		// Test removing a bad cart item - should return 404.
-		$request = new \WP_REST_Request( 'POST', '/wc/store/cart/remove-item' );
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/remove-item' );
 		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
 				'key' => 'bad_item_key_123',
 			)
 		);
-		$response = rest_get_server()->dispatch( $request );
-		$data     = $response->get_data();
-
-		$this->assertEquals( 409, $response->get_status() );
-		$this->assertEquals( 'woocommerce_rest_cart_invalid_key', $data['code'] );
+		$this->assertAPIResponse(
+			$request,
+			409,
+			array(
+				'code' => 'woocommerce_rest_cart_invalid_key',
+			)
+		);
 	}
 
 	/**
 	 * Test remove cart item.
 	 */
 	public function test_remove_cart_item() {
-		// Test removing a valid cart item - should return updated cart.
-		$request = new \WP_REST_Request( 'POST', '/wc/store/cart/remove-item' );
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/remove-item' );
 		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
 				'key' => $this->keys[0],
 			)
 		);
-		$response = rest_get_server()->dispatch( $request );
-		$data     = $response->get_data();
-
-		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 1, $data['items_count'] );
-		$this->assertEquals( 1, count( $data['items'] ) );
-		$this->assertEquals( '10', $data['items_weight'] );
-		$this->assertEquals( '1000', $data['totals']->total_items );
+		$this->assertAPIResponse(
+			$request,
+			200,
+			array(
+				'items_count'  => 1,
+				'items'        => function( $value ) {
+					return count( $value ) === 1;
+				},
+				'items_weight' => '10',
+				'totals'       => array(
+					'total_items' => '1000',
+				),
+			)
+		);
 
 		// Test removing same item again - should return 404 (item is already removed).
-		$response = rest_get_server()->dispatch( $request );
-		$data     = $response->get_data();
-
-		$this->assertEquals( 409, $response->get_status() );
-		$this->assertEquals( 'woocommerce_rest_cart_invalid_key', $data['code'] );
+		$this->assertAPIResponse(
+			$request,
+			409,
+			array(
+				'code' => 'woocommerce_rest_cart_invalid_key',
+			)
+		);
 	}
 
 	/**
 	 * Test changing the quantity of a cart item.
 	 */
 	public function test_update_item() {
-		$request = new \WP_REST_Request( 'POST', '/wc/store/cart/update-item' );
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/update-item' );
 		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
@@ -163,20 +170,28 @@ class Cart extends ControllerTestCase {
 				'quantity' => 10,
 			)
 		);
-		$response = rest_get_server()->dispatch( $request );
-		$data     = $response->get_data();
-
-		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 10, $data['items'][0]['quantity'] );
-		$this->assertEquals( 11, $data['items_count'] );
-		$this->assertEquals( '11000', $data['totals']->total_items );
+		$this->assertAPIResponse(
+			$request,
+			200,
+			array(
+				'items_count' => 11,
+				'totals'      => array(
+					'total_items' => '11000',
+				),
+				'items'       => array(
+					0 => array(
+						'quantity' => 10,
+					),
+				),
+			)
+		);
 	}
 
 	/**
 	 * Test getting updated shipping.
 	 */
 	public function test_update_customer() {
-		$request = new \WP_REST_Request( 'POST', '/wc/store/cart/update-customer' );
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/update-customer' );
 		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
@@ -191,28 +206,33 @@ class Cart extends ControllerTestCase {
 
 		add_action( 'woocommerce_blocks_cart_update_customer_from_request', array( $action_callback, 'do_customer_callback' ) );
 
-		$response = rest_get_server()->dispatch( $request );
-		$data     = $response->get_data();
+		$this->assertAPIResponse(
+			$request,
+			200,
+			array(
+				'shipping_rates' => array(
+					0 => array(
+						'destination' => array(
+							'address_1' => '',
+							'address_2' => '',
+							'city'      => '',
+							'state'     => '',
+							'postcode'  => '',
+							'country'   => 'US',
+						),
+					),
+				),
+			)
+		);
 
 		remove_action( 'woocommerce_blocks_cart_update_customer_from_request', array( $action_callback, 'do_customer_callback' ) );
-
-		$this->assertEquals( 200, $response->get_status(), print_r( $response, true ) );
-		$this->assertArrayHasKey( 'shipping_rates', $data );
-
-		$this->assertEquals( null, $data['shipping_rates'][0]['destination']->address_1 );
-		$this->assertEquals( null, $data['shipping_rates'][0]['destination']->address_2 );
-		$this->assertEquals( null, $data['shipping_rates'][0]['destination']->city );
-		$this->assertEquals( null, $data['shipping_rates'][0]['destination']->state );
-		$this->assertEquals( null, $data['shipping_rates'][0]['destination']->postcode );
-		$this->assertEquals( 'US', $data['shipping_rates'][0]['destination']->country );
 	}
 
 	/**
 	 * Test shipping address validation.
 	 */
 	public function test_update_customer_address() {
-		// US address.
-		$request = new \WP_REST_Request( 'POST', '/wc/store/cart/update-customer' );
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/update-customer' );
 		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
@@ -228,19 +248,27 @@ class Cart extends ControllerTestCase {
 				),
 			)
 		);
-		$response = rest_get_server()->dispatch( $request );
-		$data     = $response->get_data();
-
-		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 'Test address 1', $data['shipping_rates'][0]['destination']->address_1 );
-		$this->assertEquals( 'Test address 2', $data['shipping_rates'][0]['destination']->address_2 );
-		$this->assertEquals( 'Test City', $data['shipping_rates'][0]['destination']->city );
-		$this->assertEquals( 'AL', $data['shipping_rates'][0]['destination']->state );
-		$this->assertEquals( '90210', $data['shipping_rates'][0]['destination']->postcode );
-		$this->assertEquals( 'US', $data['shipping_rates'][0]['destination']->country );
+		$this->assertAPIResponse(
+			$request,
+			200,
+			array(
+				'shipping_rates' => array(
+					0 => array(
+						'destination' => array(
+							'address_1' => 'Test address 1',
+							'address_2' => 'Test address 2',
+							'city'      => 'Test City',
+							'state'     => 'AL',
+							'postcode'  => '90210',
+							'country'   => 'US',
+						),
+					),
+				),
+			)
+		);
 
 		// Address with invalid country.
-		$request = new \WP_REST_Request( 'POST', '/wc/store/cart/update-customer' );
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/update-customer' );
 		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
@@ -256,13 +284,13 @@ class Cart extends ControllerTestCase {
 				),
 			)
 		);
-		$response = rest_get_server()->dispatch( $request );
-		$data     = $response->get_data();
-
-		$this->assertEquals( 400, $response->get_status() );
+		$this->assertAPIResponse(
+			$request,
+			400
+		);
 
 		// US address with named state.
-		$request = new \WP_REST_Request( 'POST', '/wc/store/cart/update-customer' );
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/update-customer' );
 		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
@@ -278,15 +306,23 @@ class Cart extends ControllerTestCase {
 				),
 			)
 		);
-		$response = rest_get_server()->dispatch( $request );
-		$data     = $response->get_data();
-
-		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 'AL', $data['shipping_rates'][0]['destination']->state );
-		$this->assertEquals( 'US', $data['shipping_rates'][0]['destination']->country );
+		$this->assertAPIResponse(
+			$request,
+			200,
+			array(
+				'shipping_rates' => array(
+					0 => array(
+						'destination' => array(
+							'state'   => 'AL',
+							'country' => 'US',
+						),
+					),
+				),
+			)
+		);
 
 		// US address with invalid state.
-		$request = new \WP_REST_Request( 'POST', '/wc/store/cart/update-customer' );
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/update-customer' );
 		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
@@ -302,13 +338,13 @@ class Cart extends ControllerTestCase {
 				),
 			)
 		);
-		$response = rest_get_server()->dispatch( $request );
-		$data     = $response->get_data();
-
-		$this->assertEquals( 400, $response->get_status() );
+		$this->assertAPIResponse(
+			$request,
+			400
+		);
 
 		// US address with invalid postcode.
-		$request = new \WP_REST_Request( 'POST', '/wc/store/cart/update-customer' );
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/update-customer' );
 		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
@@ -324,10 +360,10 @@ class Cart extends ControllerTestCase {
 				),
 			)
 		);
-		$response = rest_get_server()->dispatch( $request );
-		$data     = $response->get_data();
-
-		$this->assertEquals( 400, $response->get_status() );
+		$this->assertAPIResponse(
+			$request,
+			400
+		);
 	}
 
 
@@ -337,45 +373,52 @@ class Cart extends ControllerTestCase {
 	public function test_apply_coupon() {
 		wc()->cart->remove_coupon( $this->coupon->get_code() );
 
-		$request = new \WP_REST_Request( 'POST', '/wc/store/cart/apply-coupon' );
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/apply-coupon' );
 		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
 				'code' => $this->coupon->get_code(),
 			)
 		);
-		$response = rest_get_server()->dispatch( $request );
-		$data     = $response->get_data();
-		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( '100', $data['totals']->total_discount );
+		$this->assertAPIResponse(
+			$request,
+			200,
+			array(
+				'totals' => array(
+					'total_discount' => '100',
+				),
+			)
+		);
 
 		$fixtures = new FixtureData();
 
 		// Test coupons with different case.
 		$newcoupon = $fixtures->get_coupon( array( 'code' => 'testCoupon' ) );
-		$request   = new \WP_REST_Request( 'POST', '/wc/store/cart/apply-coupon' );
+		$request   = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/apply-coupon' );
 		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
 				'code' => 'testCoupon',
 			)
 		);
-		$response = rest_get_server()->dispatch( $request );
-		$data     = $response->get_data();
-		$this->assertEquals( 200, $response->get_status() );
+		$this->assertAPIResponse(
+			$request,
+			200
+		);
 
 		// Test coupons with special chars in the code.
 		$newcoupon = $fixtures->get_coupon( array( 'code' => '$5 off' ) );
-		$request   = new \WP_REST_Request( 'POST', '/wc/store/cart/apply-coupon' );
+		$request   = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/apply-coupon' );
 		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
 				'code' => '$5 off',
 			)
 		);
-		$response = rest_get_server()->dispatch( $request );
-		$data     = $response->get_data();
-		$this->assertEquals( 200, $response->get_status() );
+		$this->assertAPIResponse(
+			$request,
+			200
+		);
 	}
 
 	/**
@@ -383,29 +426,35 @@ class Cart extends ControllerTestCase {
 	 */
 	public function test_remove_coupon() {
 		// Invalid coupon.
-		$request = new \WP_REST_Request( 'POST', '/wc/store/cart/remove-coupon' );
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/remove-coupon' );
 		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
 				'code' => 'doesnotexist',
 			)
 		);
-		$response = rest_get_server()->dispatch( $request );
-		$data     = $response->get_data();
-		$this->assertEquals( 400, $response->get_status() );
+		$this->assertAPIResponse(
+			$request,
+			400
+		);
 
 		// Applied coupon.
-		$request = new \WP_REST_Request( 'POST', '/wc/store/cart/remove-coupon' );
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/remove-coupon' );
 		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
 				'code' => $this->coupon->get_code(),
 			)
 		);
-		$response = rest_get_server()->dispatch( $request );
-		$data     = $response->get_data();
-		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( '0', $data['totals']->total_discount );
+		$this->assertAPIResponse(
+			$request,
+			200,
+			array(
+				'totals' => array(
+					'total_discount' => '0',
+				),
+			)
+		);
 	}
 
 	/**
@@ -413,7 +462,7 @@ class Cart extends ControllerTestCase {
 	 */
 	public function test_prepare_item() {
 		$routes     = new \Automattic\WooCommerce\Blocks\StoreApi\RoutesController( new \Automattic\WooCommerce\Blocks\StoreApi\SchemaController( $this->mock_extend ) );
-		$controller = $routes->get( 'cart' );
+		$controller = $routes->get( 'cart', 'v1' );
 		$cart       = wc()->cart;
 		$response   = $controller->prepare_item_for_response( $cart, new \WP_REST_Request() );
 		$data       = $response->get_data();
@@ -433,7 +482,7 @@ class Cart extends ControllerTestCase {
 	 */
 	public function test_get_item_schema() {
 		$routes     = new \Automattic\WooCommerce\Blocks\StoreApi\RoutesController( new \Automattic\WooCommerce\Blocks\StoreApi\SchemaController( $this->mock_extend ) );
-		$controller = $routes->get( 'cart' );
+		$controller = $routes->get( 'cart', 'v1' );
 		$schema     = $controller->get_item_schema();
 		$cart       = wc()->cart;
 		$response   = $controller->prepare_item_for_response( $cart, new \WP_REST_Request() );
@@ -441,6 +490,6 @@ class Cart extends ControllerTestCase {
 		$validate   = new ValidateSchema( $schema );
 
 		$diff = $validate->get_diff_from_object( $response->get_data() );
-		$this->assertEmpty( $diff, print_r( $diff, true ) );
+		$this->assertEmpty( $diff );
 	}
 }

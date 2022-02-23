@@ -195,7 +195,7 @@ const CheckoutProcessor = () => {
 		};
 
 		triggerFetch( {
-			path: '/wc/store/checkout',
+			path: '/wc/store/v1/checkout',
 			method: 'POST',
 			data,
 			cache: 'no-store',

@@ -22,19 +22,10 @@ class ProductAttributes extends ControllerTestCase {
 
 		$fixtures = new FixtureData();
 
-		$this->attributes = [
-			$fixtures->get_product_attribute( 'color', [ 'red', 'green', 'blue' ] ),
-			$fixtures->get_product_attribute( 'size', [ 'small', 'medium', 'large' ] )
-		];
-	}
-
-	/**
-	 * Test route registration.
-	 */
-	public function test_register_routes() {
-		$routes = rest_get_server()->get_routes();
-		$this->assertArrayHasKey( '/wc/store/products/attributes', $routes );
-		$this->assertArrayHasKey( '/wc/store/products/attributes/(?P<id>[\d]+)', $routes );
+		$this->attributes = array(
+			$fixtures->get_product_attribute( 'color', array( 'red', 'green', 'blue' ) ),
+			$fixtures->get_product_attribute( 'size', array( 'small', 'medium', 'large' ) ),
+		);
 	}
 
 	/**
@@ -42,7 +33,7 @@ class ProductAttributes extends ControllerTestCase {
 	 */
 	public function test_get_item() {
 		$attribute = wc_get_attribute( $this->attributes[0]['attribute_id'] );
-		$response  = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/products/attributes/' . $attribute->id ) );
+		$response  = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/attributes/' . $attribute->id ) );
 		$data      = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
@@ -58,7 +49,7 @@ class ProductAttributes extends ControllerTestCase {
 	 * Test getting items.
 	 */
 	public function test_get_items() {
-		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/products/attributes' ) );
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/attributes' ) );
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );

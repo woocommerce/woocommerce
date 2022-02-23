@@ -28,7 +28,7 @@ const isStoreApiRequest = ( options ) => {
 	if ( ! url || ! options.method || options.method === 'GET' ) {
 		return false;
 	}
-	return /wc\/store\//.exec( url ) !== null;
+	return /wc\/store\/v1\//.exec( url ) !== null;
 };
 
 /**

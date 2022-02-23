@@ -43,7 +43,13 @@ class RestApi {
 	 * Register REST API routes.
 	 */
 	public function register_rest_routes() {
-		$this->routes->register_routes();
+		$api_versions = [
+			'wc/store'    => 'v1',
+			'wc/store/v1' => 'v1',
+		];
+		foreach ( $api_versions as $api_namespace => $api_version ) {
+			$this->routes->register_routes( $api_version, $api_namespace );
+		}
 	}
 
 	/**

@@ -5,7 +5,7 @@
 
 namespace Automattic\WooCommerce\Blocks\Tests\StoreApi\Utilities;
 
-use Automattic\WooCommerce\Blocks\StoreApi\Routes\RouteException;
+use Automattic\WooCommerce\Blocks\StoreApi\Exceptions\RouteException;
 use Yoast\PHPUnitPolyfills\Polyfills\ExpectException;
 use Automattic\WooCommerce\Blocks\StoreApi\Utilities\OrderController;
 use Yoast\PHPUnitPolyfills\TestCases\TestCase;

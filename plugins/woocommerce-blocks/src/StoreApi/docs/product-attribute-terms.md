@@ -12,7 +12,7 @@ GET /products/attributes/:id/terms&orderby=slug
 | `orderby` | string  |    no    | Sort collection by object attribute. Allowed values: `name`, `slug`, `count`. |
 
 ```http
-curl "https://example-store.com/wp-json/wc/store/products/attributes/1/terms"
+curl "https://example-store.com/wp-json/wc/store/v1/products/attributes/1/terms"
 ```
 
 **Example response:**

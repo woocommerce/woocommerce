@@ -2,7 +2,7 @@
 namespace Automattic\WooCommerce\Blocks\Domain\Services;
 
 use Automattic\WooCommerce\Blocks\Domain\Package;
-use Automattic\WooCommerce\Blocks\StoreApi\Routes\RouteException;
+use Automattic\WooCommerce\Blocks\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\Blocks\StoreApi\Formatters;
 use Throwable;
 use Exception;

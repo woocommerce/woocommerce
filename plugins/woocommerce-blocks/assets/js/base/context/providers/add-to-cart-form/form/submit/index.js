@@ -72,7 +72,7 @@ const FormSubmit = () => {
 		};
 
 		triggerFetch( {
-			path: '/wc/store/cart/add-item',
+			path: '/wc/store/v1/cart/add-item',
 			method: 'POST',
 			data: fetchData,
 			cache: 'no-store',

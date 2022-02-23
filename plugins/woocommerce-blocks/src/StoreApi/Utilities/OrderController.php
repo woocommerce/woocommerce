@@ -2,7 +2,7 @@
 namespace Automattic\WooCommerce\Blocks\StoreApi\Utilities;
 
 use \Exception;
-use Automattic\WooCommerce\Blocks\StoreApi\Routes\RouteException;
+use Automattic\WooCommerce\Blocks\StoreApi\Exceptions\RouteException;
 
 /**
  * OrderController class.

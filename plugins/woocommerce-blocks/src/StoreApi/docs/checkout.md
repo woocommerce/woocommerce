@@ -4,23 +4,23 @@ The checkout API facilitates the creation of orders (from the current cart) and 
 
 All checkout endpoints require [Nonce Tokens](nonce-tokens.md).
 
-- [Get Checkout Data](#get-checkout-data)
-- [Process Order and Payment](#process-order-and-payment)
+-   [Get Checkout Data](#get-checkout-data)
+-   [Process Order and Payment](#process-order-and-payment)
 
 ## Get Checkout Data
 
-Returns data required for the checkout. This includes a draft order (created from the current cart) and customer billing and shipping addresses. The payment information will be empty, as it's only persisted when the order gets updated via POST requests (right before payment processing). 
+Returns data required for the checkout. This includes a draft order (created from the current cart) and customer billing and shipping addresses. The payment information will be empty, as it's only persisted when the order gets updated via POST requests (right before payment processing).
 
 This endpoint will return an error unless a valid [Nonce Token](nonce-tokens.md) is provided.
 
 ```http
-GET /wc/store/checkout
+GET /wc/store/v1/checkout
 ```
 
 There are no parameters required for this endpoint.
 
 ```http
-curl --header "X-WC-Store-API-Nonce: 12345" --request GET https://example-store.com/wp-json/wc/store/checkout
+curl --header "X-WC-Store-API-Nonce: 12345" --request GET https://example-store.com/wp-json/wc/store/v1/checkout
 ```
 
 **Example response:**
@@ -73,7 +73,7 @@ returns the result.
 This endpoint will return an error unless a valid [Nonce Token](nonce-tokens.md) is provided.
 
 ```http
-POST /wc/store/checkout
+POST /wc/store/v1/checkout
 ```
 
 | Attribute          | Type    | Required | Description                                                         |
@@ -85,7 +85,7 @@ POST /wc/store/checkout
 | `payment_data`     | array   |    No    | Data to pass through to the payment method when processing payment. |
 
 ```http
-curl --header "X-WC-Store-API-Nonce: 12345" --request POST https://example-store.com/wp-json/wc/store/checkout?payment_method=paypal&payment_data[0][key]=test-key&payment_data[0][value]=test-value
+curl --header "X-WC-Store-API-Nonce: 12345" --request POST https://example-store.com/wp-json/wc/store/v1/checkout?payment_method=paypal&payment_data[0][key]=test-key&payment_data[0][value]=test-value
 ```
 
 **Example response:**

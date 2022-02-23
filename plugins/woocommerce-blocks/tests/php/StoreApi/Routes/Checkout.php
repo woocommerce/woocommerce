@@ -12,11 +12,9 @@ use Automattic\WooCommerce\Blocks\StoreApi\Formatters\MoneyFormatter;
 use Automattic\WooCommerce\Blocks\StoreApi\Formatters\HtmlFormatter;
 use Automattic\WooCommerce\Blocks\StoreApi\Formatters\CurrencyFormatter;
 use Automattic\WooCommerce\Blocks\Domain\Services\FeatureGating;
-use Automattic\WooCommerce\Blocks\StoreApi\Schemas\CheckoutSchema;
+use Automattic\WooCommerce\Blocks\StoreApi\Schemas\V1\CheckoutSchema;
 use Automattic\WooCommerce\Blocks\Tests\Helpers\FixtureData;
-use Automattic\WooCommerce\Blocks\StoreApi\Routes\Checkout as CheckoutRoute;
-use Automattic\WooCommerce\Blocks\StoreApi\Utilities\CartController;
-use Automattic\WooCommerce\Blocks\StoreApi\Utilities\OrderController;
+use Automattic\WooCommerce\Blocks\StoreApi\Routes\V1\Checkout as CheckoutRoute;
 use Automattic\WooCommerce\Blocks\StoreApi\SchemaController;
 
 use Mockery\Adapter\Phpunit\MockeryTestCase;
@@ -56,7 +54,7 @@ class Checkout extends MockeryTestCase {
 			)
 		);
 		$schema_controller = new SchemaController( $this->mock_extend );
-		$route             = new CheckoutRoute( $schema_controller->get( 'cart' ), $schema_controller->get( 'checkout' ), new CartController(), new OrderController() );
+		$route             = new CheckoutRoute( $schema_controller, $schema_controller->get( 'checkout' ) );
 		register_rest_route( $route->get_namespace(), $route->get_path(), $route->get_args(), true );
 
 		$fixtures = new FixtureData();
@@ -96,18 +94,10 @@ class Checkout extends MockeryTestCase {
 	}
 
 	/**
-	 * Test route registration.
-	 */
-	public function test_register_routes() {
-		$routes = rest_get_server()->get_routes();
-		$this->assertArrayHasKey( '/wc/store/checkout', $routes );
-	}
-
-	/**
 	 * Ensure that registered extension data is correctly shown on options requests.
 	 */
 	public function test_options_extension_data() {
-		$request  = new \WP_REST_Request( 'OPTIONS', '/wc/store/checkout' );
+		$request  = new \WP_REST_Request( 'OPTIONS', '/wc/store/v1/checkout' );
 		$response = rest_get_server()->dispatch( $request );
 		$data     = $response->get_data();
 		$this->assertEquals(
@@ -115,7 +105,8 @@ class Checkout extends MockeryTestCase {
 				'description' => 'Test key',
 				'type'        => 'boolean',
 			),
-			$data['schema']['properties']['extensions']['properties']['extension_namespace']['properties']['extension_key']
+			$data['schema']['properties']['extensions']['properties']['extension_namespace']['properties']['extension_key'],
+			print_r( $data, true )
 		);
 	}
 
@@ -123,7 +114,7 @@ class Checkout extends MockeryTestCase {
 	 * Ensure that registered extension data is correctly posted and visible on the server after sanitization.
 	 */
 	public function test_post_extension_data() {
-		$request = new \WP_REST_Request( 'POST', '/wc/store/checkout' );
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
 		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
@@ -181,7 +172,7 @@ class Checkout extends MockeryTestCase {
 	 * Ensure that registered extension data is correctly posted and visible on the server after sanitization.
 	 */
 	public function test_post_invalid_extension_data() {
-		$request = new \WP_REST_Request( 'POST', '/wc/store/checkout' );
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
 		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(

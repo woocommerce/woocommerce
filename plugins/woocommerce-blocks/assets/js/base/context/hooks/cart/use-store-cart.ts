@@ -119,7 +119,7 @@ export const defaultCartData: StoreCart = {
 };
 
 /**
- * This is a custom hook that is wired up to the `wc/store/cart` data
+ * This is a custom hook that is wired up to the `wc/store/v1/cart` data
  * store.
  *
  * @param {Object} options                An object declaring the various

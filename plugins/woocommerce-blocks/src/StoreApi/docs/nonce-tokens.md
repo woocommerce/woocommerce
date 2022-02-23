@@ -2,10 +2,10 @@
 
 Nonces are generated numbers used to verify origin and intent of requests for security purposes. You can read more about [nonces in the WordPress codex](https://developer.wordpress.org/plugins/security/nonces/).
 
-- [Store API Endpoints that Require Nonces](#store-api-endpoints-that-require-nonces)
-- [Sending Nonce Tokens with requests](#sending-nonce-tokens-with-requests)
-- [Generating security nonces from WordPress](#generating-security-nonces-from-wordpress)
-- [Disabling Nonces for Development](#disabling-nonces-for-development)
+-   [Store API Endpoints that Require Nonces](#store-api-endpoints-that-require-nonces)
+-   [Sending Nonce Tokens with requests](#sending-nonce-tokens-with-requests)
+-   [Generating security nonces from WordPress](#generating-security-nonces-from-wordpress)
+-   [Disabling Nonces for Development](#disabling-nonces-for-development)
 
 ## Store API Endpoints that Require Nonces
 
@@ -18,7 +18,7 @@ Nonce tokens are included with the request headers. Create a request header name
 **Example:**
 
 ```http
-curl --header "X-WC-Store-API-Nonce: 12345" --request GET https://example-store.com/wp-json/wc/store/checkout
+curl --header "X-WC-Store-API-Nonce: 12345" --request GET https://example-store.com/wp-json/wc/store/v1/checkout
 ```
 
 After making a successful request, an updated `X-WC-Store-API-Nonce` header will be sent back--this needs to be stored and updated by the client to make subsequent requests.
@@ -28,7 +28,7 @@ After making a successful request, an updated `X-WC-Store-API-Nonce` header will
 Nonces must be created using the [`wp_create_nonce` function](https://developer.wordpress.org/reference/functions/wp_create_nonce/) with the key `wc_store_api`.
 
 ```php
-wp_create_nonce( 'wc_store_api' ) 
+wp_create_nonce( 'wc_store_api' )
 ```
 
 There is no other mechanism in place for creating nonces.

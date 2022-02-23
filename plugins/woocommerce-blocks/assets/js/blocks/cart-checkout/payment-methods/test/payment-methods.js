@@ -70,7 +70,7 @@ const resetMockPaymentMethods = () => {
 describe( 'PaymentMethods', () => {
 	beforeEach( () => {
 		fetchMock.mockResponse( ( req ) => {
-			if ( req.url.match( /wc\/store\/cart/ ) ) {
+			if ( req.url.match( /wc\/store\/v1\/cart/ ) ) {
 				return Promise.resolve( JSON.stringify( previewCart ) );
 			}
 			return Promise.resolve( '' );

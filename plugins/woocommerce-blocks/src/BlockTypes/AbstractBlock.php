@@ -365,7 +365,7 @@ abstract class AbstractBlock {
 					'pluginUrl'     => plugins_url( '/', dirname( __DIR__ ) ),
 					'productCount'  => array_sum( (array) wp_count_posts( 'product' ) ),
 					'restApiRoutes' => [
-						'/wc/store' => array_keys( Package::container()->get( RestApi::class )->get_routes_from_namespace( 'wc/store' ) ),
+						'/wc/store/v1' => array_keys( Package::container()->get( RestApi::class )->get_routes_from_namespace( 'wc/store/v1' ) ),
 					],
 					'defaultAvatar' => get_avatar_url( 0, [ 'force_default' => true ] ),
 
