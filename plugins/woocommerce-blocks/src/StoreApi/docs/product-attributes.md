@@ -1,7 +1,7 @@
 # Product Attributes API <!-- omit in toc -->
 
-- [List Product Attributes](#list-product-attributes)
-- [Single Product Attribute](#single-product-attribute)
+-   [List Product Attributes](#list-product-attributes)
+-   [Single Product Attribute](#single-product-attribute)
 
 ## List Product Attributes
 
@@ -12,7 +12,7 @@ GET /products/attributes
 There are no parameters required for this endpoint.
 
 ```http
-curl "https://example-store.com/wp-json/wc/store/products/attributes"
+curl "https://example-store.com/wp-json/wc/store/v1/products/attributes"
 ```
 
 Example response:
@@ -51,7 +51,7 @@ GET /products/attributes/:id
 | `id`      | integer |   Yes    | The ID of the attribute to retrieve. |
 
 ```http
-curl "https://example-store.com/wp-json/wc/store/products/attributes/1"
+curl "https://example-store.com/wp-json/wc/store/v1/products/attributes/1"
 ```
 
 **Example response:**

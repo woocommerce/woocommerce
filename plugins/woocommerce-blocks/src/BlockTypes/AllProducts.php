@@ -34,7 +34,7 @@ class AllProducts extends AbstractBlock {
 	 * Hydrate the All Product block with data from the API.
 	 */
 	protected function hydrate_from_api() {
-		$this->asset_data_registry->hydrate_api_request( '/wc/store/cart' );
+		$this->asset_data_registry->hydrate_api_request( '/wc/store/v1/cart' );
 	}
 
 	/**

@@ -32,7 +32,7 @@ const MiniCartBlock = ( props ) => (
 
 const mockEmptyCart = () => {
 	fetchMock.mockResponse( ( req ) => {
-		if ( req.url.match( /wc\/store\/cart/ ) ) {
+		if ( req.url.match( /wc\/store\/v1\/cart/ ) ) {
 			return Promise.resolve(
 				JSON.stringify( defaultCartState.cartData )
 			);
@@ -43,7 +43,7 @@ const mockEmptyCart = () => {
 
 const mockFullCart = () => {
 	fetchMock.mockResponse( ( req ) => {
-		if ( req.url.match( /wc\/store\/cart/ ) ) {
+		if ( req.url.match( /wc\/store\/v1\/cart/ ) ) {
 			return Promise.resolve( JSON.stringify( previewCart ) );
 		}
 		return Promise.resolve( '' );

@@ -8,13 +8,6 @@ namespace Automattic\WooCommerce\Blocks\StoreApi\Routes;
  */
 interface RouteInterface {
 	/**
-	 * Get the namespace for this route.
-	 *
-	 * @return string
-	 */
-	public function get_namespace();
-
-	/**
 	 * Get the path of this REST route.
 	 *
 	 * @return string

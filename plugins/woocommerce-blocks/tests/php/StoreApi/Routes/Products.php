@@ -22,36 +22,31 @@ class Products extends ControllerTestCase {
 
 		$fixtures = new FixtureData();
 
-		$this->products = [
-			$fixtures->get_simple_product( [
-				'name' => 'Test Product 1',
-				'stock_status' => 'instock',
-				'regular_price' => 10,
-				'image_id' => $fixtures->sideload_image(),
-			] ),
-			$fixtures->get_simple_product( [
-				'name' => 'Test Product 2',
-				'stock_status' => 'instock',
-				'regular_price' => 10,
-				'image_id' => $fixtures->sideload_image(),
-			] ),
-		];
-	}
-
-	/**
-	 * Test route registration.
-	 */
-	public function test_register_routes() {
-		$routes = rest_get_server()->get_routes();
-		$this->assertArrayHasKey( '/wc/store/products', $routes );
-		$this->assertArrayHasKey( '/wc/store/products/(?P<id>[\d]+)', $routes );
+		$this->products = array(
+			$fixtures->get_simple_product(
+				array(
+					'name'          => 'Test Product 1',
+					'stock_status'  => 'instock',
+					'regular_price' => 10,
+					'image_id'      => $fixtures->sideload_image(),
+				)
+			),
+			$fixtures->get_simple_product(
+				array(
+					'name'          => 'Test Product 2',
+					'stock_status'  => 'instock',
+					'regular_price' => 10,
+					'image_id'      => $fixtures->sideload_image(),
+				)
+			),
+		);
 	}
 
 	/**
 	 * Test getting item.
 	 */
 	public function test_get_item() {
-		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/products/' . $this->products[0]->get_id() ) );
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $this->products[0]->get_id() ) );
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
@@ -74,7 +69,7 @@ class Products extends ControllerTestCase {
 	 * Test getting items.
 	 */
 	public function test_get_items() {
-		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/products' ) );
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products' ) );
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
@@ -104,7 +99,7 @@ class Products extends ControllerTestCase {
 		$product->set_sku( 'search-for-this-value' );
 		$product->save();
 
-		$request = new \WP_REST_Request( 'GET', '/wc/store/products' );
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
 		$request->set_param( 'search', 'search-for-this' );
 
 		$response = rest_get_server()->dispatch( $request );
@@ -148,7 +143,7 @@ class Products extends ControllerTestCase {
 	 * Test collection params getter.
 	 */
 	public function test_get_collection_params() {
-		$routes     = new \Automattic\WooCommerce\Blocks\StoreApi\RoutesController( new \Automattic\WooCommerce\Blocks\StoreApi\SchemaController($this->mock_extend) );
+		$routes     = new \Automattic\WooCommerce\Blocks\StoreApi\RoutesController( new \Automattic\WooCommerce\Blocks\StoreApi\SchemaController( $this->mock_extend ) );
 		$controller = $routes->get( 'products' );
 		$params     = $controller->get_collection_params();
 
@@ -186,7 +181,7 @@ class Products extends ControllerTestCase {
 	 * Test schema matches responses.
 	 */
 	public function test_get_item_schema() {
-		$routes     = new \Automattic\WooCommerce\Blocks\StoreApi\RoutesController( new \Automattic\WooCommerce\Blocks\StoreApi\SchemaController($this->mock_extend) );
+		$routes     = new \Automattic\WooCommerce\Blocks\StoreApi\RoutesController( new \Automattic\WooCommerce\Blocks\StoreApi\SchemaController( $this->mock_extend ) );
 		$controller = $routes->get( 'products' );
 		$schema     = $controller->get_item_schema();
 		$response   = $controller->prepare_item_for_response( $this->products[0], new \WP_REST_Request() );
