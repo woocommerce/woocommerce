@@ -12,7 +12,9 @@ class MailchimpScheduler {
 	const SUBSCRIBE_ENDPOINT     = 'https://woocommerce.com/wp-json/wccom/v1/subscribe';
 	const SUBSCRIBE_ENDPOINT_DEV = 'http://woocommerce.test/wp-json/wccom/v1/subscribe';
 
-	const SUBSCRIBED_OPTION_NAME = 'woocommerce_onboarding_subscribed_to_mailchimp';
+	const SUBSCRIBED_OPTION_NAME             = 'woocommerce_onboarding_subscribed_to_mailchimp';
+	const SUBSCRIBED_ERROR_COUNT_OPTION_NAME = 'woocommerce_onboarding_subscribed_to_mailchimp_error_count';
+	const MAX_ERROR_THRESHOLD                = 3;
 
 	const LOGGER_CONTEXT = 'mailchimp_scheduler';
 
@@ -48,7 +50,6 @@ class MailchimpScheduler {
 		}
 
 		$profile_data = get_option( 'woocommerce_onboarding_profile' );
-
 		if ( ! isset( $profile_data['is_agree_marketing'] ) || false === $profile_data['is_agree_marketing'] ) {
 			return false;
 		}
@@ -58,28 +59,25 @@ class MailchimpScheduler {
 			return false;
 		}
 
-		$response = $this->make_request( $profile_data['store_email'] );
-
-		if ( is_wp_error( $response ) || ! isset( $response['body'] ) ) {
-			$this->logger->error(
-				'Error getting a response from Mailchimp API.',
-				array( 'source' => self::LOGGER_CONTEXT )
-			);
+		// Abort if failed requests reaches the threshold.
+		if ( intval( get_option( self::SUBSCRIBED_ERROR_COUNT_OPTION_NAME, 0 ) ) >= self::MAX_ERROR_THRESHOLD ) {
 			return false;
-		} else {
-			$body = json_decode( $response['body'] );
-			if ( isset( $body->success ) && true === $body->success ) {
-				update_option( self::SUBSCRIBED_OPTION_NAME, 'yes' );
-				return true;
-			} else {
-				$this->logger->error(
-				// phpcs:ignore
-					'Incorrect response from Mailchimp API with: ' . print_r( $body, true ),
-					array( 'source' => self::LOGGER_CONTEXT )
-				);
-				return false;
-			}
 		}
+
+		$response = $this->make_request( $profile_data['store_email'] );
+		if ( is_wp_error( $response ) || ! isset( $response['body'] ) ) {
+			$this->handle_request_error();
+			return false;
+		}
+
+		$body = json_decode( $response['body'] );
+		if ( isset( $body->success ) && true === $body->success ) {
+			update_option( self::SUBSCRIBED_OPTION_NAME, 'yes' );
+			return true;
+		}
+
+		$this->handle_request_error( $body );
+		return false;
 	}
 
 	/**
@@ -106,5 +104,31 @@ class MailchimpScheduler {
 				),
 			)
 		);
+	}
+
+	/**
+	 * Reset options.
+	 *
+	 * @internal
+	 */
+	public static function reset() {
+		delete_option( self::SUBSCRIBED_OPTION_NAME );
+		delete_option( self::SUBSCRIBED_ERROR_COUNT_OPTION_NAME );
+	}
+
+	/**
+	 * Handle subscribe API error.
+	 *
+	 * @internal
+	 * @param string $extra_msg  Extra message to log.
+	 */
+	private function handle_request_error( $extra_msg = null ) {
+		// phpcs:ignore
+		$msg = isset( $extra_msg ) ? 'Incorrect response from Mailchimp API with: ' . print_r( $extra_msg, true ) : 'Error getting a response from Mailchimp API.';
+
+		$this->logger->error( $msg, array( 'source' => self::LOGGER_CONTEXT ) );
+
+		$accumulated_error_count = intval( get_option( self::SUBSCRIBED_ERROR_COUNT_OPTION_NAME, 0 ) ) + 1;
+		update_option( self::SUBSCRIBED_ERROR_COUNT_OPTION_NAME, $accumulated_error_count );
 	}
 }

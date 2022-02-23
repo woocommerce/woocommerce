@@ -33,7 +33,7 @@ class WC_Tests_Mailchimp_Scheduler extends WC_Unit_Test_Case {
 								->setMethods( array( 'make_request' ) )
 								->getMock();
 
-		delete_option( MailchimpScheduler::SUBSCRIBED_OPTION_NAME );
+		MailchimpScheduler::reset();
 
 		parent::setUp();
 	}
@@ -83,10 +83,33 @@ class WC_Tests_Mailchimp_Scheduler extends WC_Unit_Test_Case {
 		$this->assertFalse( $this->instance->run() );
 	}
 
+
+	/**
+	 * When failed requests reaches the threshold.
+	 * Then it should abort.
+	 */
+	public function test_it_aborts_if_failed_requests_reaches_the_threshold() {
+		// Given.
+		$profile_data = array(
+			'is_agree_marketing' => true,
+			'store_email'        => 'test@test.com',
+		);
+		update_option( Onboarding::PROFILE_DATA_OPTION, $profile_data );
+
+		// When.
+		update_option(
+			MailchimpScheduler::SUBSCRIBED_ERROR_COUNT_OPTION_NAME,
+			MailchimpScheduler::MAX_ERROR_THRESHOLD
+		);
+
+		// Then.
+		$this->assertFalse( $this->instance->run() );
+	}
+
 	/**
 	 * Given is_agree_marketing and store_email values are set.
 	 * When the request to the API returns WP_Error.
-	 * Then it should log an error message.
+	 * Then it should log error message and error count.
 	 */
 	public function test_it_logs_error_when_wp_error_is_returned() {
 		// Given.
@@ -106,16 +129,20 @@ class WC_Tests_Mailchimp_Scheduler extends WC_Unit_Test_Case {
 							->with( 'Error getting a response from Mailchimp API.', array( 'source' => MailchimpScheduler::LOGGER_CONTEXT ) );
 
 		$this->instance->run();
+		$this->assertEquals( 1, get_option( MailchimpScheduler::SUBSCRIBED_ERROR_COUNT_OPTION_NAME ) );
 
 		// Check for the missing 'body'.
 		$this->instance->method( 'make_request' )->willReturn( array() );
 		$this->instance->run();
+		$this->assertEquals( 2, get_option( MailchimpScheduler::SUBSCRIBED_ERROR_COUNT_OPTION_NAME ) );
 	}
+
+
 
 	/**
 	 * Given is_agree_marketing and store_email values are set.
 	 * When the request to the API returns body without 'success'.
-	 * Then it should log an error message.
+	 * Then it should log error message and error count.
 	 */
 	public function test_it_logs_error_when_response_data_is_incorrect() {
 		// Given.
@@ -139,6 +166,7 @@ class WC_Tests_Mailchimp_Scheduler extends WC_Unit_Test_Case {
 						);
 
 		$this->instance->run();
+		$this->assertEquals( 1, get_option( MailchimpScheduler::SUBSCRIBED_ERROR_COUNT_OPTION_NAME ) );
 	}
 
 	/**

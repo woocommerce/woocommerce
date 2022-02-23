@@ -1015,7 +1015,7 @@ class Onboarding {
 	}
 
 	/**
-	 * Delete MailchimpScheduler::SUBSCRIBED_OPTION_NAME option if profile data is being updated with a new email.
+	 * Reset MailchimpScheduler if profile data is being updated with a new email.
 	 *
 	 * @param array $existing_data Existing option data.
 	 * @param array $updating_data Updating option data.
@@ -1026,7 +1026,7 @@ class Onboarding {
 			isset( $updating_data['store_email'] ) &&
 			$existing_data['store_email'] !== $updating_data['store_email']
 		) {
-			delete_option( MailchimpScheduler::SUBSCRIBED_OPTION_NAME );
+			MailchimpScheduler::reset();
 		}
 	}
 }
