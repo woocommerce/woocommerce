@@ -1,5 +1,12 @@
 == Changelog ==
 
+= 6.2.1 2022-02-22 =
+
+**WooCommerce**
+
+* Security - Fixed permission check for reviews in v1 & v2 REST API.
+* Security - Fixed Path Traversal in Importers.
+
 = 6.2.0 2022-02-08 =
 
 **WooCommerce**
