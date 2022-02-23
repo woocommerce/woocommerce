@@ -158,7 +158,7 @@
 		"eslint-plugin-woocommerce": "file:bin/eslint-plugin-woocommerce",
 		"eslint-plugin-you-dont-need-lodash-underscore": "6.12.0",
 		"expect-puppeteer": "6.0.2",
-		"follow-redirects": "1.14.7",
+		"follow-redirects": "1.14.8",
 		"fs-extra": "9.1.0",
 		"gh-pages": "3.2.3",
 		"github-label-sync": "2.0.2",
