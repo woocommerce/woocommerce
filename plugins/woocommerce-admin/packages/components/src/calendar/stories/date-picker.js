@@ -2,23 +2,25 @@
  * External dependencies
  */
 import moment from 'moment';
-import { withState } from '@wordpress/compose';
 import { DatePicker, H, Section } from '@woocommerce/components';
-import { createElement } from '@wordpress/element';
-
+import { useState } from '@wordpress/element';
 const dateFormat = 'MM/DD/YYYY';
 
-const DatePickerExample = withState( {
-	after: null,
-	afterText: '',
-	before: null,
-	beforeText: '',
-	afterError: null,
-	beforeError: null,
-	focusedInput: 'startDate',
-} )( ( { after, afterText, afterError, setState } ) => {
+const DatePickerExample = () => {
+	const [ state, setState ] = useState( {
+		after: null,
+		afterText: '',
+		before: null,
+		beforeText: '',
+		afterError: null,
+		beforeError: null,
+		focusedInput: 'startDate',
+	} );
+	const { after, afterText, afterError } = state;
+
 	function onDatePickerUpdate( { date, text, error } ) {
 		setState( {
+			...state,
 			after: date,
 			afterText: text,
 			afterError: error,
@@ -40,7 +42,7 @@ const DatePickerExample = withState( {
 			</Section>
 		</div>
 	);
-} );
+};
 
 export const Basic = () => <DatePickerExample />;
 

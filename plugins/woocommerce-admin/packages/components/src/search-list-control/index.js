@@ -8,8 +8,13 @@ import {
 	TextControl,
 	withSpokenMessages,
 } from '@wordpress/components';
-import { createElement, Component, Fragment } from '@wordpress/element';
-import { compose, withInstanceId, withState } from '@wordpress/compose';
+import {
+	createElement,
+	Fragment,
+	useState,
+	useEffect,
+} from '@wordpress/element';
+import { compose, withInstanceId } from '@wordpress/compose';
 import { escapeRegExp, findIndex } from 'lodash';
 import NoticeOutlineIcon from 'gridicons/dist/notice-outline';
 import PropTypes from 'prop-types';
@@ -43,28 +48,33 @@ const defaultMessages = {
 
 /**
  * Component to display a searchable, selectable list of items.
+ *
+ * @param {Object} props
  */
-export class SearchListControl extends Component {
-	constructor() {
-		super( ...arguments );
+export const SearchListControl = ( props ) => {
+	const [ searchValue, setSearchValue ] = useState( props.search || '' );
+	const {
+		isSingle,
+		isLoading,
+		onChange,
+		selected,
+		instanceId,
+		messages: propsMessages,
+		isCompact,
+		debouncedSpeak,
+		onSearch,
+		className = '',
+	} = props;
 
-		this.onSelect = this.onSelect.bind( this );
-		this.onRemove = this.onRemove.bind( this );
-		this.onClear = this.onClear.bind( this );
-		this.isSelected = this.isSelected.bind( this );
-		this.defaultRenderItem = this.defaultRenderItem.bind( this );
-		this.renderList = this.renderList.bind( this );
-	}
+	const messages = { ...defaultMessages, ...propsMessages };
 
-	componentDidUpdate( prevProps ) {
-		const { onSearch, search } = this.props;
-		if ( search !== prevProps.search && typeof onSearch === 'function' ) {
-			onSearch( search );
+	useEffect( () => {
+		if ( typeof onSearch === 'function' ) {
+			onSearch( searchValue );
 		}
-	}
+	}, [ onSearch, searchValue ] );
 
-	onRemove( id ) {
-		const { isSingle, onChange, selected } = this.props;
+	const onRemove = ( id ) => {
 		return () => {
 			if ( isSingle ) {
 				onChange( [] );
@@ -75,13 +85,12 @@ export class SearchListControl extends Component {
 				...selected.slice( i + 1 ),
 			] );
 		};
-	}
+	};
 
-	onSelect( item ) {
-		const { isSingle, onChange, selected } = this.props;
+	const onSelect = ( item ) => {
 		return () => {
-			if ( this.isSelected( item ) ) {
-				this.onRemove( item.id )();
+			if ( isSelected( item ) ) {
+				onRemove( item.id )();
 				return;
 			}
 			if ( isSingle ) {
@@ -90,39 +99,32 @@ export class SearchListControl extends Component {
 				onChange( [ ...selected, item ] );
 			}
 		};
-	}
+	};
 
-	onClear() {
-		this.props.onChange( [] );
-	}
+	const isSelected = ( item ) =>
+		findIndex( selected, { id: item.id } ) !== -1;
 
-	isSelected( item ) {
-		return findIndex( this.props.selected, { id: item.id } ) !== -1;
-	}
-
-	getFilteredList( list, search ) {
-		const { isHierarchical } = this.props;
+	const getFilteredList = ( list, search ) => {
+		const { isHierarchical } = props;
 		if ( ! search ) {
 			return isHierarchical ? buildTermsTree( list ) : list;
 		}
-		const messages = { ...defaultMessages, ...this.props.messages };
 		const re = new RegExp( escapeRegExp( search ), 'i' );
-		this.props.debouncedSpeak( messages.updated );
+		debouncedSpeak( messages.updated );
 		const filteredList = list
 			.map( ( item ) => ( re.test( item.name ) ? item : false ) )
 			.filter( Boolean );
 		return isHierarchical
 			? buildTermsTree( filteredList, list )
 			: filteredList;
-	}
+	};
 
-	defaultRenderItem( args ) {
+	const defaultRenderItem = ( args ) => {
 		return <SearchListItem { ...args } />;
-	}
+	};
 
-	renderList( list, depth = 0 ) {
-		const { isSingle, search, instanceId } = this.props;
-		const renderItem = this.props.renderItem || this.defaultRenderItem;
+	const renderList = ( list, depth = 0 ) => {
+		const renderItem = props.renderItem || defaultRenderItem;
 		if ( ! list ) {
 			return null;
 		}
@@ -132,23 +134,20 @@ export class SearchListControl extends Component {
 				<li>
 					{ renderItem( {
 						item,
-						isSelected: this.isSelected( item ),
-						onSelect: this.onSelect,
+						isSelected: isSelected( item ),
+						onSelect,
 						isSingle,
-						search,
+						search: searchValue,
 						depth,
 						controlId: instanceId,
 					} ) }
 				</li>
-				{ this.renderList( item.children, depth + 1 ) }
+				{ renderList( item.children, depth + 1 ) }
 			</Fragment>
 		) );
-	}
+	};
 
-	renderListSection() {
-		const { isLoading, search } = this.props;
-		const messages = { ...defaultMessages, ...this.props.messages };
-
+	const renderListSection = () => {
 		if ( isLoading ) {
 			return (
 				<div className="woocommerce-search-list__list is-loading">
@@ -156,7 +155,7 @@ export class SearchListControl extends Component {
 				</div>
 			);
 		}
-		const list = this.getFilteredList( this.props.list, search );
+		const list = getFilteredList( props.list, searchValue );
 
 		if ( ! list.length ) {
 			return (
@@ -169,9 +168,9 @@ export class SearchListControl extends Component {
 						/>
 					</span>
 					<span className="woocommerce-search-list__not-found-text">
-						{ search
+						{ searchValue
 							? // eslint-disable-next-line @wordpress/valid-sprintf
-							  sprintf( messages.noResults, search )
+							  sprintf( messages.noResults, searchValue )
 							: messages.noItems }
 					</span>
 				</div>
@@ -180,15 +179,12 @@ export class SearchListControl extends Component {
 
 		return (
 			<ul className="woocommerce-search-list__list">
-				{ this.renderList( list ) }
+				{ renderList( list ) }
 			</ul>
 		);
-	}
+	};
 
-	renderSelectedSection() {
-		const { isLoading, isSingle, selected } = this.props;
-		const messages = { ...defaultMessages, ...this.props.messages };
-
+	const renderSelectedSection = () => {
 		if ( isLoading || isSingle || ! selected ) {
 			return null;
 		}
@@ -202,7 +198,7 @@ export class SearchListControl extends Component {
 						<Button
 							isLink
 							isDestructive
-							onClick={ this.onClear }
+							onClick={ onChange( [] ) }
 							aria-label={ messages.clear }
 						>
 							{ __( 'Clear all', 'woocommerce-admin' ) }
@@ -216,7 +212,7 @@ export class SearchListControl extends Component {
 								<Tag
 									label={ item.name }
 									id={ item.id }
-									remove={ this.onRemove }
+									remove={ onRemove }
 								/>
 							</li>
 						) ) }
@@ -224,34 +220,29 @@ export class SearchListControl extends Component {
 				) : null }
 			</div>
 		);
-	}
+	};
 
-	render() {
-		const { className = '', isCompact, search, setState } = this.props;
-		const messages = { ...defaultMessages, ...this.props.messages };
+	return (
+		<div
+			className={ classnames( 'woocommerce-search-list', className, {
+				'is-compact': isCompact,
+			} ) }
+		>
+			{ renderSelectedSection() }
 
-		return (
-			<div
-				className={ classnames( 'woocommerce-search-list', className, {
-					'is-compact': isCompact,
-				} ) }
-			>
-				{ this.renderSelectedSection() }
-
-				<div className="woocommerce-search-list__search">
-					<TextControl
-						label={ messages.search }
-						type="search"
-						value={ search }
-						onChange={ ( value ) => setState( { search: value } ) }
-					/>
-				</div>
-
-				{ this.renderListSection() }
+			<div className="woocommerce-search-list__search">
+				<TextControl
+					label={ messages.search }
+					type="search"
+					value={ searchValue }
+					onChange={ ( value ) => setSearchValue( value ) }
+				/>
 			</div>
-		);
-	}
-}
+
+			{ renderListSection() }
+		</div>
+	);
+};
 
 SearchListControl.propTypes = {
 	/**
@@ -334,19 +325,12 @@ SearchListControl.propTypes = {
 	 * The list of currently selected items.
 	 */
 	selected: PropTypes.array.isRequired,
-	// from withState
-	search: PropTypes.string,
-	setState: PropTypes.func,
 	// from withSpokenMessages
 	debouncedSpeak: PropTypes.func,
 	// from withInstanceId
 	instanceId: PropTypes.number,
 };
 
-export default compose( [
-	withState( {
-		search: '',
-	} ),
-	withSpokenMessages,
-	withInstanceId,
-] )( SearchListControl );
+export default compose( [ withSpokenMessages, withInstanceId ] )(
+	SearchListControl
+);

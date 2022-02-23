@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 import { createElement } from '@wordpress/element';
 
 /**
@@ -34,5 +34,27 @@ describe( 'Tag', () => {
 			<Tag label="foo" screenReaderLabel="FooBar" />
 		);
 		expect( component ).toMatchSnapshot();
+	} );
+
+	test( 'Do not show popoverContents by default', () => {
+		const { queryByText } = render(
+			<Tag label="foo" popoverContents={ <p>This is a popover</p> } />
+		);
+		expect( queryByText( 'This is a popover' ) ).toBeNull();
+	} );
+
+	test( 'Show popoverContents after clicking the button', () => {
+		const { queryByText, queryByRole } = render(
+			<Tag
+				label="foo"
+				instanceId="1"
+				popoverContents={ <p>This is a popover</p> }
+			/>
+		);
+
+		fireEvent.click(
+			queryByRole( 'button', { id: 'woocommerce-tag__label-1' } )
+		);
+		expect( queryByText( 'This is a popover' ) ).toBeDefined();
 	} );
 } );

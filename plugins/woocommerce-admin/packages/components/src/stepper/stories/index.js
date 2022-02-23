@@ -1,15 +1,17 @@
 /**
  * External dependencies
  */
-import { withState } from '@wordpress/compose';
 import { Stepper } from '@woocommerce/components';
-import { createElement } from '@wordpress/element';
+import { useState } from '@wordpress/element';
 
-const BasicExamples = withState( {
-	currentStep: 'first',
-	isComplete: false,
-	isPending: false,
-} )( ( { currentStep, isComplete, isPending, setState } ) => {
+const BasicExamples = () => {
+	const [ state, setState ] = useState( {
+		currentStep: 'first',
+		isComplete: false,
+		isPending: false,
+	} );
+	const { currentStep, isComplete, isPending } = state;
+
 	const goToStep = ( key ) => {
 		setState( { currentStep: key } );
 	};
@@ -56,7 +58,11 @@ const BasicExamples = withState( {
 			{ isComplete ? (
 				<button
 					onClick={ () =>
-						setState( { currentStep: 'first', isComplete: false } )
+						setState( {
+							...state,
+							currentStep: 'first',
+							isComplete: false,
+						} )
 					}
 				>
 					Reset
@@ -66,6 +72,7 @@ const BasicExamples = withState( {
 					<button
 						onClick={ () =>
 							setState( {
+								...state,
 								currentStep: steps[ currentIndex - 1 ].key,
 							} )
 						}
@@ -76,6 +83,7 @@ const BasicExamples = withState( {
 					<button
 						onClick={ () =>
 							setState( {
+								...state,
 								currentStep: steps[ currentIndex + 1 ].key,
 							} )
 						}
@@ -84,13 +92,17 @@ const BasicExamples = withState( {
 						Next step
 					</button>
 					<button
-						onClick={ () => setState( { isComplete: true } ) }
+						onClick={ () =>
+							setState( { ...state, isComplete: true } )
+						}
 						disabled={ currentIndex !== steps.length - 1 }
 					>
 						Complete
 					</button>
 					<button
-						onClick={ () => setState( { isPending: ! isPending } ) }
+						onClick={ () =>
+							setState( { ...state, isPending: ! isPending } )
+						}
 					>
 						Toggle Spinner
 					</button>
@@ -113,7 +125,7 @@ const BasicExamples = withState( {
 			/>
 		</div>
 	);
-} );
+};
 
 export const Examples = () => <BasicExamples />;
 

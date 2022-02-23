@@ -2,38 +2,37 @@
  * External dependencies
  */
 import { TableCard } from '@woocommerce/components';
-
-/**
- * External dependencies
- */
-import { withState } from '@wordpress/compose';
+import { useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { headers, rows, summary } from './index';
 
-const TableCardExample = withState( {
-	query: {
-		paged: 1,
-	},
-} )( ( { query, setState } ) => (
-	<TableCard
-		title="Revenue last week"
-		rows={ rows }
-		headers={ headers }
-		onQueryChange={ ( param ) => ( value ) =>
-			setState( {
-				query: {
-					[ param ]: value,
-				},
-			} ) }
-		query={ query }
-		rowsPerPage={ 7 }
-		totalRows={ 10 }
-		summary={ summary }
-	/>
-) );
+const TableCardExample = () => {
+	const [ { query }, setState ] = useState( {
+		query: {
+			paged: 1,
+		},
+	} );
+	return (
+		<TableCard
+			title="Revenue last week"
+			rows={ rows }
+			headers={ headers }
+			onQueryChange={ ( param ) => ( value ) =>
+				setState( {
+					query: {
+						[ param ]: value,
+					},
+				} ) }
+			query={ query }
+			rowsPerPage={ 7 }
+			totalRows={ 10 }
+			summary={ summary }
+		/>
+	);
+};
 
 export const Basic = () => <TableCardExample />;
 

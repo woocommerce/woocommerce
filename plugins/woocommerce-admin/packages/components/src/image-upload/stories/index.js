@@ -1,17 +1,19 @@
 /**
  * External dependencies
  */
-import { withState } from '@wordpress/compose';
+import { useState } from '@wordpress/element';
 import { ImageUpload } from '@woocommerce/components';
 
-const ImageUploadExample = withState( {
-	image: null,
-} )( ( { setState, logo } ) => (
-	<ImageUpload
-		image={ logo }
-		onChange={ ( image ) => setState( { logo: image } ) }
-	/>
-) );
+const ImageUploadExample = () => {
+	const [ image, setImage ] = useState( null );
+
+	return (
+		<ImageUpload
+			image={ image }
+			onChange={ ( _image ) => setImage( _image ) }
+		/>
+	);
+};
 
 export const Basic = () => <ImageUploadExample />;
 

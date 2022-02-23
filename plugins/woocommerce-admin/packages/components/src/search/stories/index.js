@@ -1,35 +1,37 @@
 /**
  * External dependencies
  */
-import { withState } from '@wordpress/compose';
 import { H, Search, Section } from '@woocommerce/components';
+import { useState } from '@wordpress/element';
 
-const SearchExample = withState( {
-	selected: [],
-	inlineSelected: [],
-} )( ( { selected, inlineSelected, setState } ) => (
-	<div>
-		<H>Tags Below Input</H>
-		<Section component={ false }>
-			<Search
-				type="products"
-				placeholder="Search for a product"
-				selected={ selected }
-				onChange={ ( items ) => setState( { selected: items } ) }
-			/>
-		</Section>
-		<H>Tags Inline with Input</H>
-		<Section component={ false }>
-			<Search
-				type="products"
-				placeholder="Search for a product"
-				selected={ inlineSelected }
-				onChange={ ( items ) => setState( { inlineSelected: items } ) }
-				inlineTags
-			/>
-		</Section>
-	</div>
-) );
+const SearchExample = () => {
+	const [ selected, setSelected ] = useState( [] );
+	const [ inlineSelected, setInlineSelect ] = useState( [] );
+
+	return (
+		<div>
+			<H>Tags Below Input</H>
+			<Section component={ false }>
+				<Search
+					type="products"
+					placeholder="Search for a product"
+					selected={ selected }
+					onChange={ ( items ) => setSelected( items ) }
+				/>
+			</Section>
+			<H>Tags Inline with Input</H>
+			<Section component={ false }>
+				<Search
+					type="products"
+					placeholder="Search for a product"
+					selected={ inlineSelected }
+					onChange={ ( items ) => setInlineSelect( items ) }
+					inlineTags
+				/>
+			</Section>
+		</div>
+	);
+};
 
 export const Basic = () => <SearchExample />;
 

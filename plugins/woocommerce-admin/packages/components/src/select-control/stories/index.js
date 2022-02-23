@@ -2,11 +2,7 @@
  * External dependencies
  */
 import { SelectControl } from '@woocommerce/components';
-
-/**
- * External dependencies
- */
-import { withState } from '@wordpress/compose';
+import { useState } from '@wordpress/element';
 
 const options = [
 	{
@@ -52,16 +48,18 @@ const options = [
 	},
 ];
 
-const SelectControlExample = withState( {
-	simpleSelected: [],
-	simpleMultipleSelected: [],
-	singleSelected: [],
-	singleSelectedShowAll: [],
-	multipleSelected: [],
-	inlineSelected: [],
-	allOptionsIncludingSelected: options[ options.length - 1 ].key,
-} )(
-	( {
+const SelectControlExample = () => {
+	const [ state, setState ] = useState( {
+		simpleSelected: [],
+		simpleMultipleSelected: [],
+		singleSelected: [],
+		singleSelectedShowAll: [],
+		multipleSelected: [],
+		inlineSelected: [],
+		allOptionsIncludingSelected: options[ options.length - 1 ].key,
+	} );
+
+	const {
 		simpleSelected,
 		simpleMultipleSelected,
 		singleSelected,
@@ -69,13 +67,14 @@ const SelectControlExample = withState( {
 		multipleSelected,
 		inlineSelected,
 		allOptionsIncludingSelected,
-		setState,
-	} ) => (
+	} = state;
+
+	return (
 		<div>
 			<SelectControl
 				label="Simple single value"
 				onChange={ ( selected ) =>
-					setState( { simpleSelected: selected } )
+					setState( { ...state, simpleSelected: selected } )
 				}
 				options={ options }
 				placeholder="Start typing to filter options..."
@@ -86,7 +85,7 @@ const SelectControlExample = withState( {
 				label="Multiple values"
 				multiple
 				onChange={ ( selected ) =>
-					setState( { simpleMultipleSelected: selected } )
+					setState( { ...state, simpleMultipleSelected: selected } )
 				}
 				options={ options }
 				placeholder="Start typing to filter options..."
@@ -96,7 +95,10 @@ const SelectControlExample = withState( {
 			<SelectControl
 				label="Show all options with default selected"
 				onChange={ ( selected ) =>
-					setState( { allOptionsIncludingSelected: selected } )
+					setState( {
+						...state,
+						allOptionsIncludingSelected: selected,
+					} )
 				}
 				options={ options }
 				placeholder="Start typing to filter options..."
@@ -110,7 +112,7 @@ const SelectControlExample = withState( {
 				label="Single value searchable"
 				isSearchable
 				onChange={ ( selected ) =>
-					setState( { singleSelected: selected } )
+					setState( { ...state, singleSelected: selected } )
 				}
 				options={ options }
 				placeholder="Start typing to filter options..."
@@ -121,7 +123,7 @@ const SelectControlExample = withState( {
 				label="Single value searchable with options on refocus"
 				isSearchable
 				onChange={ ( selected ) =>
-					setState( { singleSelectedShowAll: selected } )
+					setState( { ...state, singleSelectedShowAll: selected } )
 				}
 				options={ options }
 				placeholder="Start typing to filter options..."
@@ -135,7 +137,7 @@ const SelectControlExample = withState( {
 				multiple
 				inlineTags
 				onChange={ ( selected ) =>
-					setState( { inlineSelected: selected } )
+					setState( { ...state, inlineSelected: selected } )
 				}
 				options={ options }
 				placeholder="Start typing to filter options..."
@@ -148,7 +150,7 @@ const SelectControlExample = withState( {
 				label="Hidden options before search"
 				multiple
 				onChange={ ( selected ) =>
-					setState( { multipleSelected: selected } )
+					setState( { ...state, multipleSelected: selected } )
 				}
 				options={ options }
 				placeholder="Start typing to filter options..."
@@ -156,8 +158,8 @@ const SelectControlExample = withState( {
 				showClearButton
 			/>
 		</div>
-	)
-);
+	);
+};
 
 export const Basic = () => <SelectControlExample />;
 

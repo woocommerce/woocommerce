@@ -2,13 +2,13 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { createElement, Fragment } from '@wordpress/element';
+import { createElement, Fragment, useState } from '@wordpress/element';
 import classnames from 'classnames';
 import { Button, Popover } from '@wordpress/components';
 import { Icon, cancelCircleFilled } from '@wordpress/icons';
 import { decodeEntities } from '@wordpress/html-entities';
 import PropTypes from 'prop-types';
-import { withState, withInstanceId } from '@wordpress/compose';
+import { withInstanceId } from '@wordpress/compose';
 
 /**
  * This component can be used to show an item styled as a "tag", optionally with an `X` + "remove"
@@ -17,26 +17,24 @@ import { withState, withInstanceId } from '@wordpress/compose';
  * @param {Object} props
  * @param {number|string} props.id
  * @param {string}props.instanceId
- * @param {boolean} props.isVisible
  * @param {string} props.label
  * @param {Object} props.popoverContents
  * @param {Function} props.remove
  * @param {string} props.screenReaderLabel
- * @param {Function} props.setState
  * @param {string} props.className
  * @return {Object} -
  */
 const Tag = ( {
 	id,
 	instanceId,
-	isVisible,
 	label,
 	popoverContents,
 	remove,
 	screenReaderLabel,
-	setState,
 	className,
 } ) => {
+	const [ isVisible, setIsVisible ] = useState( false );
+
 	screenReaderLabel = screenReaderLabel || label;
 	if ( ! label ) {
 		// A null label probably means something went wrong
@@ -61,7 +59,7 @@ const Tag = ( {
 				<Button
 					className="woocommerce-tag__text"
 					id={ labelId }
-					onClick={ () => setState( () => ( { isVisible: true } ) ) }
+					onClick={ () => setIsVisible( true ) }
 				>
 					{ labelTextNode }
 				</Button>
@@ -71,9 +69,7 @@ const Tag = ( {
 				</span>
 			) }
 			{ popoverContents && isVisible && (
-				<Popover
-					onClose={ () => setState( () => ( { isVisible: false } ) ) }
-				>
+				<Popover onClose={ () => setIsVisible( false ) }>
 					{ popoverContents }
 				</Popover>
 			) }
@@ -122,6 +118,4 @@ Tag.propTypes = {
 	screenReaderLabel: PropTypes.string,
 };
 
-export default withState( {
-	isVisible: false,
-} )( withInstanceId( Tag ) );
+export default withInstanceId( Tag );

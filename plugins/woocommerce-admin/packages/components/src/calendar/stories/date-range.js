@@ -2,23 +2,29 @@
  * External dependencies
  */
 import moment from 'moment';
-import { withState } from '@wordpress/compose';
 import { DateRange, H, Section } from '@woocommerce/components';
-import { createElement, Fragment } from '@wordpress/element';
+import { useState } from '@wordpress/element';
 
 const dateFormat = 'MM/DD/YYYY';
 
-const DateRangeExample = withState( {
-	after: null,
-	afterText: '',
-	before: null,
-	beforeText: '',
-	afterError: null,
-	beforeError: null,
-	focusedInput: 'startDate',
-} )( ( { after, afterText, before, beforeText, focusedInput, setState } ) => {
+const DateRangeExample = () => {
+	const [ state, setState ] = useState( {
+		after: null,
+		afterText: '',
+		before: null,
+		beforeText: '',
+		afterError: null,
+		beforeError: null,
+		focusedInput: 'startDate',
+	} );
+
+	const { after, afterText, before, beforeText, focusedInput } = state;
+
 	function onRangeUpdate( update ) {
-		setState( update );
+		setState( {
+			...state,
+			...update,
+		} );
 	}
 
 	return (
@@ -40,7 +46,7 @@ const DateRangeExample = withState( {
 			</Section>
 		</>
 	);
-} );
+};
 
 export const Basic = () => <DateRangeExample />;
 

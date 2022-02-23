@@ -1,5 +1,7 @@
 # Unreleased
 
+- Replace deprecated wp.compose.withState with wp.element.useState. #8338
+
 # 9.0.0
 
 - Update line-height of SelectControl label to avoid truncated descenders in some typefaces and zoom levels. #8186
