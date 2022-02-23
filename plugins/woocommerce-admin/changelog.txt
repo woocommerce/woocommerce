@@ -1,5 +1,6 @@
-== 3.2.0 02/08/2022 == 
+== 3.2.0 02/22/2022 == 
 
+- Fix: Adjusted task list logic to fix conflict between current and experimental task list. #8321
 - Fix: changed email validation in Store Details onboarding task to more closely match PHP backend validation. #8197
 - Fix: Disallow whitespace as the platform name input. #8090
 - Fix: Ensure setup-wizard redirection on homescreen is stable. #8114
@@ -18,6 +19,7 @@
 - Fix: Fix Uncaught TypeError count(NULL) for php8+ in Marketing.php. #8213
 - Fix: Fix undefined derived_currency value for the track 'wcadmin_storeprofiler_store_details_continue'. #8193
 - Fix: Fix variations table product filter query. #8120
+- Fix: Make sure free subscriptions does not show when cbd industry is selected. #8323
 - Fix: Make sure WooCommerce Payments tasklist_payment_setup is triggered again. #8146
 - Fix: Preserve HTML markup in server-side error messages received from sample product import request. #8173
 - Fix: Remove border between email input and newsletter checkbox in OBW store details. #8148
@@ -31,10 +33,12 @@
 - Add: Add Magento migration note #8145
 - Add: Add REST endpoint to retrieve address locales #8116
 - Add: Add Spain to Square country suggestion list. #8210
+- Add: Add wc_version property to the store profile onboarding tracks for view and complete steps. #8290
 - Add: Change the reviews empty state panels logic #8147
 - Update: Add custom error for store details email and allow continue #8110
 - Update: Adding "allow-plugins" property for composer configuration. #8139
 - Dev: Remove wc-admin-settings package and rename getSetting to getAdminSetting. #8057
+- Tweak: Fix WCPay in core texts and promo slug #8296
 - Tweak: Grow and center buttons in all WooCommerce ellipsis menu popover containers. #8168
 - Tweak: Hide store address fields in regions that specify hidden #8172
 - Tweak: Make activity panel badges margin consistent. #8152
