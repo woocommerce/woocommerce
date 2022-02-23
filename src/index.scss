@@ -51,8 +51,8 @@
     float: right;
 }
 
-#wc-admin-test-helper-tools {
-    table.tools {
+#wc-admin-test-helper-tools, #wc-admin-test-helper-experiments {
+    table.tools, table.experiments {
         thead th {
             text-align: center;
         }
