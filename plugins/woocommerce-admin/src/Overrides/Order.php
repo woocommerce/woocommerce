@@ -33,7 +33,7 @@ class Order extends \WC_Order {
 	 *
 	 * @var int
 	 */
-	protected $customer_id = null;
+	public $customer_id = null;
 
 	/**
 	 * Get only core class data in array format.
