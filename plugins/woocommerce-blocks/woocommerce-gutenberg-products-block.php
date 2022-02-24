@@ -172,7 +172,8 @@ function woocommerce_blocks_get_i18n_data_json( $translations, $file, $handle, $
 		return $translations;
 	}
 
-	$handle_filename = basename( $wp_scripts->registered[ $handle ]->src );
+	$handle_src      = explode( '/build/', $wp_scripts->registered[ $handle ]->src );
+	$handle_filename = $handle_src[1];
 	$locale          = determine_locale();
 	$lang_dir        = WP_LANG_DIR . '/plugins';
 
@@ -203,7 +204,13 @@ function woocommerce_blocks_get_i18n_data_json( $translations, $file, $handle, $
 	} )( "{$domain}", {$json_translations} );
 JS;
 
-	printf( "<script type='text/javascript'>\n%s\n</script>\n", $output ); // phpcs:ignore
+	// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.NoExplicitVersion
+	wp_register_script( $handle_filename, '', array( 'wp-i18n' ), false, true );
+	wp_enqueue_script( $handle_filename );
+	wp_add_inline_script(
+		$handle_filename,
+		$output
+	);
 
 	// Finally, short circuit the pre_load_script_translations hook by returning
 	// the translation JSON from the feature plugin, if it exists so this hook
