@@ -14,13 +14,18 @@ import {
 	BLOCK_ICON as icon,
 	BLOCK_DESCRIPTION as description,
 } from './constants';
+import { supports } from './supports';
+import { Save } from '../title/save';
 
 const blockConfig = {
+	apiVersion: 2,
 	title,
 	description,
 	icon: { src: icon },
 	attributes,
+	supports,
 	edit,
+	save: Save,
 };
 
 registerBlockType( 'woocommerce/product-button', {

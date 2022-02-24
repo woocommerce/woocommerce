@@ -5,11 +5,14 @@
 	margin-bottom: $gap-small;
 
 	.wc-block-components-product-button__button {
-		word-break: break-word;
-		white-space: normal;
-		margin: 0 auto;
+		border-style: none;
 		display: inline-flex;
+		font-family: inherit;
+		font-weight: inherit;
 		justify-content: center;
+		margin: 0 auto;
+		white-space: normal;
+		word-break: break-word;
 	}
 
 	.wc-block-components-product-button__button--placeholder {
@@ -24,7 +27,6 @@
 	min-width: 8em;
 	min-height: 3em;
 }
-
 
 .theme-twentytwentyone {
 	// Prevent buttons appearing disabled in the editor.

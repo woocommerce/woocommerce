@@ -179,6 +179,7 @@ final class BlockTypesController {
 			'ProductTitle',
 			'ProductSummary',
 			'ProductStockIndicator',
+			'ProductButton',
 			'ProductRating',
 			'ProductSaleBadge',
 			'ProductImage',
@@ -235,7 +236,6 @@ final class BlockTypesController {
 	 */
 	protected function get_atomic_blocks() {
 		return [
-			'product-button',
 			'product-price',
 			'product-sku',
 			'product-add-to-cart',
