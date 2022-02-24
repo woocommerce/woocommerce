@@ -35,8 +35,7 @@
 * Dev - Data migration to create and activate the product attributes lookup table. ([#31256](https://github.com/woocommerce/woocommerce/pull/31256))
 * Dev - A new filter hook woocommerce_cart_item_removed_because_modified_message($message, $product) which allows to update the notice message if a product is modified and page is loaded while product is in cart. ([#31193](https://github.com/woocommerce/woocommerce/pull/31193))
 
-
-**WooCommerce Admin - 3.2.0**
+**WooCommerce Admin - 3.2.0 & 3.2.1**
 
 * Fix - Adjusted task list logic to fix conflict between current and experimental task list. ([#8321](https://github.com/woocommerce/woocommerce-admin/pull/8321))
 * Fix - changed email validation in Store Details onboarding task to more closely match PHP backend validation. ([#8197](https://github.com/woocommerce/woocommerce-admin/pull/8197))
@@ -63,6 +62,7 @@
 * Fix - Remove border between email input and newsletter checkbox in OBW store details. ([#8148](https://github.com/woocommerce/woocommerce-admin/pull/8148))
 * Fix - Reset "install_timestamp" if it's not numeric to avoid TypeError. ([#8100](https://github.com/woocommerce/woocommerce-admin/pull/8100))
 * Fix - Truncate the long site title with an ellipses on the second line. ([#8112](https://github.com/woocommerce/woocommerce-admin/pull/8112))
+* Fix - Fix backwards compatibility with SkyVerge payment gateway.([#8371](https://github.com/woocommerce/woocommerce-admin/pull/8371))
 * Add - Add additional store profiler track for the business details tab. ([#8265](https://github.com/woocommerce/woocommerce-admin/pull/8265))
 * Add - Add countries data store ([#8119](https://github.com/woocommerce/woocommerce-admin/pull/8119))
 * Add - Add extra tracking for plugin installation performance during onboarding. ([#8042](https://github.com/woocommerce/woocommerce-admin/pull/8042))
@@ -114,6 +114,13 @@
 * Dev - Remove Stripe Payment Method Integration (which is now part of the Stripe Payment Method extension itself). ([#5449](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5449))
 * Dev - Update the block theme folders to latest Gutenberg convention (i.e. `templates` and `parts`). ([#5464](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5464))
 * Dev - Revert "Allow LegacyTemplate block to be reinserted, only on WooCommerce block templates.". ([#5643](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5643))
+
+= 6.2.1 2022-02-22 =
+
+**WooCommerce**
+
+* Security - Fixed permission check for reviews in v1 & v2 REST API.
+* Security - Fixed Path Traversal in Importers.
 
 = 6.2.0 2022-02-08 =
 
