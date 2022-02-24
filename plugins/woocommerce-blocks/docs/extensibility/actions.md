@@ -33,8 +33,8 @@
  - [woocommerce_register_post](#woocommerce_register_post)
  - [woocommerce_rest_checkout_process_payment_with_context](#woocommerce_rest_checkout_process_payment_with_context)
  - [woocommerce_shop_loop](#woocommerce_shop_loop)
- - [wooocommerce_store_api_validate_add_to_cart](#wooocommerce_store_api_validate_add_to_cart)
- - [wooocommerce_store_api_validate_cart_item](#wooocommerce_store_api_validate_cart_item)
+ - [woocommerce_store_api_validate_add_to_cart](#woocommerce_store_api_validate_add_to_cart)
+ - [woocommerce_store_api_validate_cart_item](#woocommerce_store_api_validate_cart_item)
 
 ---
 

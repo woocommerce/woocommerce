@@ -669,7 +669,7 @@
             "args": 0
         },
         {
-            "name": "wooocommerce_store_api_validate_add_to_cart",
+            "name": "woocommerce_store_api_validate_add_to_cart",
             "file": "StoreApi/Utilities/CartController.php",
             "type": "action",
             "doc": {
@@ -698,7 +698,7 @@
             "args": 2
         },
         {
-            "name": "wooocommerce_store_api_validate_cart_item",
+            "name": "woocommerce_store_api_validate_cart_item",
             "file": "StoreApi/Utilities/CartController.php",
             "type": "action",
             "doc": {
