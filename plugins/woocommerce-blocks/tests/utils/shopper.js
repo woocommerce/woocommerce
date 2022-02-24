@@ -19,7 +19,7 @@ export const shopper = {
 		await page.goto( checkoutBlockPermalink, {
 			waitUntil: 'networkidle0',
 		} );
-		await page.waitForSelector( 'h1', { text: 'Checkout' } );
+		await expect( page ).toMatchElement( 'h1', { text: 'Checkout' } );
 	},
 
 	productIsInCheckoutBlock: async ( productTitle, quantity, total ) => {
@@ -30,16 +30,16 @@ export const shopper = {
 		if ( button ) {
 			await button.click();
 		}
-		await page.waitForSelector( 'span', {
+		await expect( page ).toMatchElement( 'span', {
 			text: productTitle,
 		} );
-		await page.waitForSelector(
+		await expect( page ).toMatchElement(
 			'div.wc-block-components-order-summary-item__quantity',
 			{
 				text: quantity,
 			}
 		);
-		await page.waitForSelector(
+		await expect( page ).toMatchElement(
 			'span.wc-block-components-product-price__value',
 			{
 				text: total,
