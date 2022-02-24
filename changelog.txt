@@ -18,6 +18,7 @@
 * Fix - Ensure that WooCommerce panel within the Customizer is showing a back button. ([#31508](https://github.com/woocommerce/woocommerce/pull/31508))
 * Fix - Avoids incorrectly setting the search argument under some conditions, when the Customers endpoint of the REST API is used. ([#31295](https://github.com/woocommerce/woocommerce/pull/31295))
 * Fix - Reverted #31593 that caused the returned line item price to be a string instead of a float. ([#31935](https://github.com/woocommerce/woocommerce/pull/31935))
+* Fix - Add prefix to easy identify guest sessions.
 * Dev - The cart session is now updated later on during the woocommerce_after_calculate_totals action (priority 1000, instead of priority 10 as previously). ([#31711](https://github.com/woocommerce/woocommerce/pull/31711))
 * Dev - Enable browser-suggested passwords on checkout signup. ([#31701](https://github.com/woocommerce/woocommerce/pull/31701))
 * Dev - Add method can_view_woocommerce_menu_item to check if the user can access the top-level WooCommerce menu item. ([#31689](https://github.com/woocommerce/woocommerce/pull/31689))
