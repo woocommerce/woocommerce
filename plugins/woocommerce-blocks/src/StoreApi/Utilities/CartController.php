@@ -263,13 +263,31 @@ class CartController {
 		/**
 		 * Fires during validation when adding an item to the cart via the Store API.
 		 *
+		 * @param \WC_Product $product Product object being added to the cart.
+		 * @param array       $request Add to cart request params including id, quantity, and variation attributes.
+		 * @deprecated 7.1.0 Use woocommerce_store_api_validate_add_to_cart instead.
+		 */
+		wc_do_deprecated_action(
+			'wooocommerce_store_api_validate_add_to_cart',
+			array(
+				$product,
+				$request,
+			),
+			'7.1.0',
+			'woocommerce_store_api_validate_add_to_cart',
+			'This action was deprecated in WooCommerce Blocks version 7.1.0. Please use woocommerce_store_api_validate_add_to_cart instead.'
+		);
+
+		/**
+		 * Fires during validation when adding an item to the cart via the Store API.
+		 *
 		 * Fire action to validate add to cart. Functions hooking into this should throw an \Exception to prevent
 		 * add to cart from happening.
 		 *
 		 * @param \WC_Product $product Product object being added to the cart.
 		 * @param array       $request Add to cart request params including id, quantity, and variation attributes.
 		 */
-		do_action( 'wooocommerce_store_api_validate_add_to_cart', $product, $request );
+		do_action( 'woocommerce_store_api_validate_add_to_cart', $product, $request );
 	}
 
 	/**
@@ -578,8 +596,27 @@ class CartController {
 		 *
 		 * @param \WC_Product $product Product object being added to the cart.
 		 * @param array       $cart_item Cart item array.
+		 * @deprecated 7.1.0 Use woocommerce_store_api_validate_cart_item instead.
 		 */
-		do_action( 'wooocommerce_store_api_validate_cart_item', $product, $cart_item );
+		wc_do_deprecated_action(
+			'wooocommerce_store_api_validate_cart_item',
+			array(
+				$product,
+				$cart_item,
+			),
+			'7.1.0',
+			'woocommerce_store_api_validate_cart_item',
+			'This action was deprecated in WooCommerce Blocks version 7.1.0. Please use woocommerce_store_api_validate_cart_item instead.'
+		);
+
+		/**
+		 * Fire action to validate add to cart. Functions hooking into this should throw an \Exception to prevent
+		 * add to cart from occurring.
+		 *
+		 * @param \WC_Product $product Product object being added to the cart.
+		 * @param array       $cart_item Cart item array.
+		 */
+		do_action( 'woocommerce_store_api_validate_cart_item', $product, $cart_item );
 	}
 
 	/**
