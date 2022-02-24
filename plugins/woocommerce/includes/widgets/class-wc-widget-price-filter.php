@@ -32,6 +32,16 @@ class WC_Widget_Price_Filter extends WC_Widget {
 				'label' => __( 'Title', 'woocommerce' ),
 			),
 		);
+		
+		add_action( 'wp_enqueue_scripts', [ $this, 'scripts' ] );
+
+		parent::__construct();
+	}
+
+	/**
+	 * Scripts
+	 */
+	public function scripts() {
 		$suffix                   = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
 		$version                  = Constants::get_constant( 'WC_VERSION' );
 		wp_register_script( 'accounting', WC()->plugin_url() . '/assets/js/accounting/accounting' . $suffix . '.js', array( 'jquery' ), '0.4.2', true );
@@ -52,8 +62,6 @@ class WC_Widget_Price_Filter extends WC_Widget {
 		if ( is_customize_preview() ) {
 			wp_enqueue_script( 'wc-price-slider' );
 		}
-
-		parent::__construct();
 	}
 
 	/**
