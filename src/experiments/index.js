@@ -24,24 +24,32 @@ function Experiments( { experiments, toggleExperiment } ) {
 					</tr>
 				</thead>
 				<tbody>
-					{ experiments.map( ( { name, variation }, index ) => {
-						return (
-							<tr key={ index }>
-								<td className="experiment-name">{ name }</td>
-								<td align="center">{ variation }</td>
-								<td align="center">
-									<Button
-										onClick={ () => {
-											toggleExperiment( name );
-										} }
-										isPrimary
-									>
-										Toggle
-									</Button>
-								</td>
-							</tr>
-						);
-					} ) }
+					{ experiments.map(
+						( { name, variation, source }, index ) => {
+							return (
+								<tr key={ index }>
+									<td className="experiment-name">
+										{ name }
+									</td>
+									<td align="center">{ variation }</td>
+									<td align="center">
+										<Button
+											onClick={ () => {
+												toggleExperiment(
+													name,
+													variation,
+													source
+												);
+											} }
+											isPrimary
+										>
+											Toggle
+										</Button>
+									</td>
+								</tr>
+							);
+						}
+					) }
 				</tbody>
 			</table>
 		</div>
