@@ -150,12 +150,8 @@ const shopper = {
 		if ( ( await page.$( '.remove' ) ) !== null ) {
 			let products = await page.$$( '.remove' );
 			while ( products && products.length > 0 ) {
-				products.forEach( async ( product ) => {
-					await page.evaluate( ( el ) => {
-						return el.click();
-					}, product );
-					await uiUnblocked();
-				} );
+				await page.click( '.remove' );
+				await uiUnblocked();
 				products = await page.$$( '.remove' );
 			}
 		}
