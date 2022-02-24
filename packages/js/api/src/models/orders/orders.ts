@@ -362,7 +362,7 @@ export class Order extends OrderItemMeta {
 	}
 
 	/**
-	 * Returns the repository for interacting with this type of model.
+	 * Returns the repository for interacting with the Order model.
 	 *
 	 * @param {HTTPClient} httpClient The client for communicating via HTTP.
 	 */
