@@ -175,7 +175,19 @@ class WooCommercePayments {
 			return;
 		}
 
-		$note   = self::get_note();
+		$data_store = Notes::load_data_store();
+
+		// We already have this note? Then mark the note as actioned.
+		$note_ids = $data_store->get_notes_with_name( self::NOTE_NAME );
+		if ( empty( $note_ids ) ) {
+			return;
+		}
+
+		$note_id = array_pop( $note_ids );
+		$note    = Notes::get_note( $note_id );
+		if ( false === $note ) {
+			return;
+		}
 		$action = $note->get_action( 'get-started' );
 		if ( ! $action ||
 			( isset( $action->nonce_action ) &&

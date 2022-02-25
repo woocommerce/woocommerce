@@ -309,6 +309,7 @@ class Note extends \WC_Data {
 		foreach ( $actions as $i => $action ) {
 			if ( $action->name === $action_name ) {
 				$matching_action =& $actions[ $i ];
+				break;
 			}
 		}
 		return $matching_action;
