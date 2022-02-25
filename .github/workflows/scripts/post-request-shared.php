@@ -219,7 +219,7 @@ function create_github_branch_from_branch( $source, $target ) {
  * @return mixed The json-decoded response if a response is received, 'false' (or whatever file_get_contents returns) otherwise.
  */
 function do_github_api_post_request( $request_path, $body ) {
-	global $github_token, $github_api_url;
+	global $github_token, $github_api_url, $github_api_response_code;
 
 	$context = stream_context_create(
 		array(
@@ -242,7 +242,8 @@ function do_github_api_post_request( $request_path, $body ) {
 	// Verify that the post request was sucessful.
 	$status_line = $http_response_header[0];
 	preg_match( "/^HTTPS?\/\d\.\d\s+(\d{3})\s+/i", $status_line, $matches );
-	if ( '2' !== substr( $matches[1], 0, 1 ) ) {
+	$github_api_response_code = $matches[1];
+	if ( '2' !== substr( $github_api_response_code, 0, 1 ) ) {
 		return false;
 	}
 
