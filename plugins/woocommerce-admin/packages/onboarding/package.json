@@ -24,12 +24,13 @@
 		"access": "public"
 	},
 	"dependencies": {
+		"@automattic/interpolate-components": "^1.2.0",
+		"@woocommerce/tracks": "file:../tracks",
 		"@wordpress/components": "19.4.0",
 		"@wordpress/element": "4.1.1",
 		"@wordpress/i18n": "^4.1.0",
 		"concurrently": "5.3.0",
-		"gridicons": "^3.3.1",
-		"@automattic/interpolate-components": "^1.2.0"
+		"gridicons": "^3.3.1"
 	},
 	"devDependencies": {
 		"@woocommerce/style-build": "file:../style-build"
