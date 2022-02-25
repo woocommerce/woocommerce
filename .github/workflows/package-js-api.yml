@@ -1,5 +1,4 @@
-name: woocommerce/api JS Package Tests
-description: Runs @woocommerce/api JS package tests when there are changes to the package.
+name: Tests for woocommerce/api JS package
 
 on:
   pull_request:
