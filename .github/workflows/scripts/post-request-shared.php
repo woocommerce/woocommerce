@@ -94,6 +94,47 @@ function get_latest_milestone_from_api( $use_latest_when_null = false ) {
 }
 
 /**
+ * Function to get the last major.minor version with a release from the API.
+ *
+ * @return string Returns the latest version with a release formatted as "major.minor".
+ */
+function get_latest_version_with_release() {
+	global $repo_owner, $repo_name;
+
+	echo 'Getting the list of releases...' . PHP_EOL;
+
+	$query = "
+	repository(owner:\"$repo_owner\", name:\"$repo_name\") {
+		releases(first: 25, orderBy: { field: CREATED_AT, direction: DESC}) {
+			nodes {
+				tagName
+			}
+		}
+	}
+	";
+	$json     = do_graphql_api_request( $query );
+	$releases = $json['data']['repository']['releases']['nodes'];
+	$releases = array_map(
+		function( $x ) {
+			return 1 === preg_match( '/^\d+\.\d+\.\d+/D', $x['tagName'] ) ? $x : null;
+		},
+		$releases
+	);
+	$releases = array_filter( $releases );
+	usort(
+		$releases,
+		function( $a, $b ) {
+			return version_compare( $b['tagName'], $a['tagName'] );
+		}
+	);
+
+	$major_minor = preg_replace( '/(^\d+\.\d+).*?$/', '\1', $releases[0]['tagName'] );
+	echo 'Most recent version with a release: ' . $major_minor . PHP_EOL;
+
+	return $major_minor;
+}
+
+/**
  * Function to retreive the sha1 reference for a given branch name.
  *
  * @param string $branch The name of the branch.
@@ -115,6 +156,7 @@ function get_ref_from_branch( $branch ) {
 	}
 	";
 	$result = do_graphql_api_request( $query );
+
 	// Warnings suppressed here because traversing this level of arrays with isset / is_array checks would be messy.
 	return @$result['data']['repository']['ref']['target']['history']['edges'][0]['node']['oid'];
 }
@@ -131,6 +173,7 @@ function create_github_milestone( $title ) {
 	$result = do_github_api_post_request( "/repos/{$repo_owner}/{$repo_name}/milestones", array(
 		'title' => $title,
 	) );
+
 	return is_array( $result ) && $result['title'] === $title;
 }
 
@@ -149,6 +192,7 @@ function create_github_branch( $branch, $sha ) {
 		'ref' => $ref,
 		'sha' => $sha,
 	) );
+
 	return is_array( $result ) && $result['ref'] === $ref;
 }
 
@@ -193,7 +237,15 @@ function do_github_api_post_request( $request_path, $body ) {
 	);
 
 	$full_request_url = rtrim( $github_api_url, '/' ) . '/' . ltrim( $request_path, '/' );
-	$result = file_get_contents( $full_request_url, false, $context );
+	$result = @file_get_contents( $full_request_url, false, $context );
+
+	// Verify that the post request was sucessful.
+	$status_line = $http_response_header[0];
+	preg_match( "/^HTTPS?\/\d\.\d\s+(\d{3})\s+/i", $status_line, $matches );
+	if ( '2' !== substr( $matches[1], 0, 1 ) ) {
+		return false;
+	}
+
 	return is_string( $result ) ? json_decode( $result, true ) : $result;
 }
 

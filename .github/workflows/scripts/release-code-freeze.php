@@ -23,23 +23,21 @@ if ( 'Tuesday' !== $release_day_of_week || $release_day_of_month < 8 || $release
 	return;
 }
 
-$latest_milestone = get_latest_milestone_from_api();
+$latest_version_with_release = get_latest_version_with_release();
 
-if ( is_null( $latest_milestone ) ) {
-	echo '*** Error: Unable to get latest milestone' . PHP_EOL;
+if ( empty( $latest_version_with_release ) ) {
+	echo '*** Error: Unable to get latest version with release' . PHP_EOL;
 	return;
 }
 
-$version_parts      = explode( '.', $latest_milestone['title'], 3 );
-$latest_major_minor = "{$version_parts[0]}.{$version_parts[1]}";
-
 // Because we go from 5.9 to 6.0, we can get the next major_minor by adding 0.1 and formatting appropriately.
-$latest_float     = (float) $latest_major_minor;
-$next_major_minor = number_format( $latest_float + 0.1, 1 );
+$latest_float          = (float) $latest_version_with_release;
+$branch_major_minor    = number_format( $latest_float + 0.1, 1 );
+$milestone_major_minor = number_format( $latest_float + 0.2, 1 );
 
 // We use those values to get the release branch and next milestones that we need to create.
-$release_branch_to_create = "release/{$latest_major_minor}";
-$milestone_to_create      = "{$next_major_minor}.0";
+$release_branch_to_create = "release/{$branch_major_minor}";
+$milestone_to_create      = "{$milestone_major_minor}.0";
 
 if ( getenv( 'DRY_RUN' ) ) {
 	echo 'DRY RUN: Skipping actual creation of release branch and milestone...' . PHP_EOL;
