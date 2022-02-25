@@ -161,35 +161,25 @@ describe( 'BusinessDetails', () => {
 					plugins: [
 						{
 							key: 'visible-and-not-selected',
-							isVisible: () => true,
 						},
 						{
 							key: 'visible-and-selected',
-							isVisible: () => true,
-						},
-						{
-							key: 'this-should-not-show-at-all',
-							isVisible: () => false,
 						},
 					],
 				},
 			];
 
-			const values = createInstallExtensionOptions( {
-				installableExtensions,
-				prevInstallExtensionOptions: {
-					'visible-and-not-selected': false,
-				},
-			} );
+			const values = createInstallExtensionOptions(
+				installableExtensions
+			);
 
 			expect( values ).toEqual(
 				expect.objectContaining( {
-					'visible-and-not-selected': false,
+					install_extensions: true,
+					'visible-and-not-selected': true,
 					'visible-and-selected': true,
 				} )
 			);
-
-			expect( values ).not.toContain( 'this-should-not-show-at-all' );
 		} );
 	} );
 

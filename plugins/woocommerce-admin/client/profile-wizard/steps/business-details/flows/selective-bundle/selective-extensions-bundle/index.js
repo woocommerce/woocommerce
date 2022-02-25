@@ -68,14 +68,37 @@ const renderBusinessExtensionHelpText = ( values, isInstallingActivating ) => {
 		);
 	}
 
-	const installingJetpackOrWcShipping =
-		extensions.includes( 'jetpack' ) ||
-		extensions.includes( 'woocommerce-shipping' );
-
 	const accountRequiredText = __(
 		'User accounts are required to use these features.',
 		'woocommerce-admin'
 	);
+
+	const extensionsWithToS = extensions.filter(
+		( extension ) =>
+			extension === 'jetpack' ||
+			extension.includes( 'woocommerce-services' )
+	);
+
+	const isInstallingJetpackAndWCServices =
+		extensionsWithToS.includes( 'jetpack' ) &&
+		( extensionsWithToS.includes( 'woocommerce-services:shipping' ) ||
+			extensionsWithToS.includes( 'woocommerce-services:tax' ) );
+
+	const extensionsListText = isInstallingJetpackAndWCServices
+		? 'Jetpack and WooCommerce Shipping & Tax'
+		: pluginNames[ extensionsWithToS[ 0 ] ];
+
+	const installingJetpackShippingTaxToS = sprintf(
+		/* translators: %s: a list of plugins, e.g. Jetpack */
+		_n(
+			'By installing %s plugin for free you agree to our {{link}}Terms of Service{{/link}}.',
+			'By installing %s plugins for free you agree to our {{link}}Terms of Service{{/link}}.',
+			extensionsWithToS.length,
+			'woocommerce-admin'
+		),
+		extensionsListText
+	);
+
 	return (
 		<div className="woocommerce-profile-wizard__footnote">
 			<Text variant="caption" as="p" size="12" lineHeight="16px">
@@ -91,13 +114,10 @@ const renderBusinessExtensionHelpText = ( values, isInstallingActivating ) => {
 					accountRequiredText
 				) }
 			</Text>
-			{ installingJetpackOrWcShipping && (
+			{ extensionsWithToS.length > 0 && (
 				<Text variant="caption" as="p" size="12" lineHeight="16px">
 					{ interpolateComponents( {
-						mixedString: __(
-							'By installing Jetpack and WooCommerce Shipping plugins for free you agree to our {{link}}Terms of Service{{/link}}.',
-							'woocommerce-admin'
-						),
+						mixedString: installingJetpackShippingTaxToS,
 						components: {
 							link: (
 								<Link
@@ -191,26 +211,22 @@ export const ExtensionSection = ( {
 	);
 };
 
-export const createInstallExtensionOptions = ( {
-	installableExtensions,
-	prevInstallExtensionOptions,
-} ) => {
-	return installableExtensions.reduce( ( acc, curr ) => {
-		const plugins = curr.plugins.reduce( ( pluginAcc, plugin ) => {
-			// If the option exists in the previous state, use that so the option won't be reset.
-			if ( prevInstallExtensionOptions.hasOwnProperty( plugin.key ) ) {
-				return pluginAcc;
-			}
+export const createInstallExtensionOptions = ( installableExtensions ) => {
+	return installableExtensions.reduce(
+		( acc, curr ) => {
+			const plugins = curr.plugins.reduce( ( pluginAcc, plugin ) => {
+				return {
+					...pluginAcc,
+					[ plugin.key ]: true,
+				};
+			}, {} );
 			return {
-				...pluginAcc,
-				[ plugin.key ]: true,
+				...acc,
+				...plugins,
 			};
-		}, {} );
-		return {
-			...acc,
-			...plugins,
-		};
-	}, prevInstallExtensionOptions );
+		},
+		{ install_extensions: true }
+	);
 };
 
 export const SelectiveExtensionsBundle = ( {
@@ -268,11 +284,8 @@ export const SelectiveExtensionsBundle = ( {
 
 	useEffect( () => {
 		if ( ! isInstallingActivating ) {
-			setInstallExtensionOptions( ( currInstallExtensionOptions ) =>
-				createInstallExtensionOptions( {
-					installableExtensions,
-					prevInstallExtensionOptions: currInstallExtensionOptions,
-				} )
+			setInstallExtensionOptions( () =>
+				createInstallExtensionOptions( installableExtensions )
 			);
 		}
 		// Disable reason: This effect should only called when the installableExtensions are changed.
