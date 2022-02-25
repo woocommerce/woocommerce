@@ -147,25 +147,26 @@ const shopper = {
 		} );
 
 		// Remove products if they exist
-		if ( await page.$( '.remove' ) !== null ) {
-			products = await page.$( '.remove' );
+		if ( ( await page.$( '.remove' ) ) !== null ) {
+			let products = await page.$$( '.remove' );
 			while ( products && products.length > 0 ) {
-				for (let p = 0; p < products.length; p++ ) {
-					await page.click( p );
-					await uiUnblocked();
-				}
-				products = await page.$( '.remove' );
+				await page.click( '.remove' );
+				await uiUnblocked();
+				products = await page.$$( '.remove' );
 			}
 		}
 
 		// Remove coupons if they exist
-		if ( await page.$( '.woocommerce-remove-coupon' ) !== null ) {
+		if ( ( await page.$( '.woocommerce-remove-coupon' ) ) !== null ) {
 			await page.click( '.woocommerce-remove-coupon' );
 			await uiUnblocked();
 		}
 
-		await page.waitForSelector('.woocommerce-info');
-		await expect( page ).toMatchElement( '.woocommerce-info', { text: 'Your cart is currently empty.' } );
+		await page.waitForSelector( '.woocommerce-info' );
+		// eslint-disable-next-line jest/no-standalone-expect
+		await expect( page ).toMatchElement( '.woocommerce-info', {
+			text: 'Your cart is currently empty.',
+		} );
 	},
 
 	setCartQuantity: async ( productTitle, quantityValue ) => {
