@@ -48,12 +48,18 @@ if ( getenv( 'DRY_RUN' ) ) {
 
 if ( create_github_milestone( $milestone_to_create ) ) {
 	echo "Created milestone {$milestone_to_create}" . PHP_EOL;
+} else if ( '422' === $github_api_response_code ) {
+	// The milestone already existed when GitHub returns a 422 status.
+	echo "Notice: Unable to create {$milestone_to_create} milestone. Maybe it already exists? Skipping..." . PHP_EOL;
 } else {
 	echo "*** Error: Unable to create {$milestone_to_create} milestone" . PHP_EOL;
 }
 
 if ( create_github_branch_from_branch( 'trunk', $release_branch_to_create ) ) {
 	echo "Created branch {$release_branch_to_create}" . PHP_EOL;
+} else if ( '422' === $github_api_response_code ) {
+	// The release branch already existed when GitHub returns a 422 status.
+	echo "Notice: Unable to create {$release_branch_to_create} branch. Maybe it already exists? Skipping..." . PHP_EOL;
 } else {
 	echo "*** Error: Unable to create {$release_branch_to_create}" . PHP_EOL;
 }
