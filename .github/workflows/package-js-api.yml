@@ -5,8 +5,7 @@ on:
   pull_request:
     paths:
       - 'packages/js/api/**'
-    paths-ignore:
-      - '**.md'
+      - '!**.md'
 
 jobs:
   package_js_api:
