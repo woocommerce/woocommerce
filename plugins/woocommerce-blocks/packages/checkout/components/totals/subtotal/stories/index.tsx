@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Story, Meta } from '@storybook/react';
-import { currencyControl } from '@woocommerce/storybook-controls';
+import { currencies, currencyControl } from '@woocommerce/storybook-controls';
 
 /**
  * Internal dependencies
@@ -23,9 +23,22 @@ export default {
 	},
 } as Meta< SubtotalProps >;
 
-const Template: Story< SubtotalProps > = ( args ) => <Subtotal { ...args } />;
+type StorybookSubtotalProps = SubtotalProps & { total_items: string };
+
+const Template: Story< StorybookSubtotalProps > = ( args ) => {
+	const totalItems = args.total_items;
+	const values = {
+		total_items: totalItems,
+		total_items_tax: args.values.total_items_tax,
+	};
+
+	return (
+		<Subtotal { ...args } currency={ args.currency } values={ values } />
+	);
+};
 
 export const Default = Template.bind( {} );
-Default.args = {};
-
-// @todo Revise Storybook entries for `Checkout Blocks/totals` components
+Default.args = {
+	currency: currencies.USD,
+	total_items: '1000',
+};
