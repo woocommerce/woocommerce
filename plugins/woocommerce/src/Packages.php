@@ -64,18 +64,18 @@ class Packages {
 		foreach ( self::$packages as $package_name => $package_class ) {
 			$filter_name = str_replace('-', '_', $package_name) . "_disabled";
  
-                        /**
-                         * Filter to control what optional WooCommerce features are disabled.
-                         * This codepath being called really early, only a plugin in mu-plugins
-                         * can add the filter early enough for it to be taken into account.
-                         * The filter name is the package name with underscores instead of dashes,
-                         * with _disabled as the suffix.
-                         *
-                         * @example add_filter( 'woocommerce_admin_disabled', '__return_true', 0, 1);
-                         * @example add_filter( 'woocommerce_blocks_disabled', '__return_true', 0, 1);
-                         *
-                         * @return true if the feature is to be disabled.
-                         */
+			/**
+			 * Filter to control what optional WooCommerce features are disabled.
+			 * This codepath being called really early, only a plugin in mu-plugins
+			 * can add the filter early enough for it to be taken into account.
+			 * The filter name is the package name with underscores instead of dashes,
+			 * with _disabled as the suffix.
+			 *
+			 * @example add_filter( 'woocommerce_admin_disabled', '__return_true', 0, 1);
+			 * @example add_filter( 'woocommerce_blocks_disabled', '__return_true', 0, 1);
+			 *
+			 * @return true if the feature is to be disabled.
+			 */
 			if ( ! apply_filters( $filter_name, false ) ) {
 				if ( ! self::package_exists( $package_name ) ) {
 					self::missing_package( $package_name );
