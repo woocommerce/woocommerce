@@ -11,7 +11,7 @@ GET /products/attributes/:id/terms&orderby=slug
 | `order`   | string  |    no    | Order ascending or descending. Allowed values: `asc`, `desc`                  |
 | `orderby` | string  |    no    | Sort collection by object attribute. Allowed values: `name`, `slug`, `count`. |
 
-```http
+```sh
 curl "https://example-store.com/wp-json/wc/store/v1/products/attributes/1/terms"
 ```
 

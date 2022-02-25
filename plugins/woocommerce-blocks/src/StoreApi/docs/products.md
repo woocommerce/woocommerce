@@ -64,7 +64,7 @@ GET /products?return_rating_counts=true
 | `catalog_visibility` | string  |    no    | Determines if hidden or visible catalog products are shown. Allowed values: `any`, `visible`, `catalog`, `search`, `hidden`                                               |
 | `rating`             | boolean |    no    | Limit result set to products with a certain average rating.                                                                                                               |
 
-```http
+```sh
 curl "https://example-store.com/wp-json/wc/store/v1/products"
 ```
 
@@ -132,7 +132,7 @@ GET /products/:id
 | :-------- | :------ | :------: | :--------------------------------- |
 | `id`      | integer |   Yes    | The ID of the product to retrieve. |
 
-```http
+```sh
 curl "https://example-store.com/wp-json/wc/store/v1/products/34"
 ```
 

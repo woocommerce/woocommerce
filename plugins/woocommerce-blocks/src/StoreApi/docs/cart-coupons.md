@@ -14,7 +14,7 @@ GET /cart/coupons
 
 There are no parameters required for this endpoint.
 
-```http
+```sh
 curl "https://example-store.com/wp-json/wc/store/v1/cart/coupons"
 ```
 
@@ -64,7 +64,7 @@ GET /cart/coupons/:code
 | :-------- | :----- | :------: | :---------------------------------------------- |
 | `code`    | string |   Yes    | The coupon code of the cart coupon to retrieve. |
 
-```http
+```sh
 curl "https://example-store.com/wp-json/wc/store/v1/cart/coupons/20off"
 ```
 
@@ -100,7 +100,7 @@ POST /cart/coupons/
 | :-------- | :----- | :------: | :--------------------------------------------- |
 | `code`    | string |   Yes    | The coupon code you wish to apply to the cart. |
 
-```http
+```sh
 curl --request POST https://example-store.com/wp-json/wc/store/v1/cart/coupons?code=20off
 ```
 
@@ -136,7 +136,7 @@ DELETE /cart/coupons/:code
 | :-------- | :----- | :------: | :------------------------------------------------ |
 | `code`    | string |   Yes    | The coupon code you wish to remove from the cart. |
 
-```http
+```sh
 curl --request DELETE https://example-store.com/wp-json/wc/store/v1/cart/coupons/20off
 ```
 
@@ -150,7 +150,7 @@ DELETE /cart/coupons/
 
 There are no parameters required for this endpoint.
 
-```http
+```sh
 curl --request DELETE https://example-store.com/wp-json/wc/store/v1/cart/coupons
 ```
 

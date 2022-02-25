@@ -14,7 +14,7 @@ GET /cart/items
 
 There are no parameters required for this endpoint.
 
-```http
+```sh
 curl "https://example-store.com/wp-json/wc/store/v1/cart/items"
 ```
 
@@ -193,7 +193,7 @@ GET /cart/items/:key
 | :-------- | :----- | :------: | :------------------------------------ |
 | `key`     | string |   Yes    | The key of the cart item to retrieve. |
 
-```http
+```sh
 curl "https://example-store.com/wp-json/wc/store/v1/cart/items/e369853df766fa44e1ed0ff613f563bd"
 ```
 
@@ -294,7 +294,7 @@ POST /cart/items/
 | `quantity`  | integer |   Yes    | Quantity of this item in the cart.                                                                   |
 | `variation` | array   |   Yes    | Chosen attributes (for variations) containing an array of objects with keys `attribute` and `value`. |
 
-```http
+```sh
 curl --request POST https://example-store.com/wp-json/wc/store/v1/cart/items?id=100&quantity=1
 ```
 
@@ -313,7 +313,7 @@ PUT /cart/items/:key
 | `key`      | string  |   Yes    | The key of the cart item to edit.  |
 | `quantity` | integer |   Yes    | Quantity of this item in the cart. |
 
-```http
+```sh
 curl --request PUT https://example-store.com/wp-json/wc/store/v1/cart/items/e369853df766fa44e1ed0ff613f563bd?quantity=10
 ```
 
@@ -331,7 +331,7 @@ DELETE /cart/items/:key
 | :-------- | :----- | :------: | :-------------------------------- |
 | `key`     | string |   Yes    | The key of the cart item to edit. |
 
-```http
+```sh
 curl --request DELETE https://example-store.com/wp-json/wc/store/v1/cart/items/e369853df766fa44e1ed0ff613f563bd
 ```
 
@@ -345,7 +345,7 @@ DELETE /cart/items/
 
 There are no parameters required for this endpoint.
 
-```http
+```sh
 curl --request DELETE https://example-store.com/wp-json/wc/store/v1/cart/items
 ```
 

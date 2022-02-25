@@ -17,7 +17,7 @@ Nonce tokens are included with the request headers. Create a request header name
 
 **Example:**
 
-```http
+```sh
 curl --header "X-WC-Store-API-Nonce: 12345" --request GET https://example-store.com/wp-json/wc/store/v1/checkout
 ```
 
