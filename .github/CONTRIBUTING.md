@@ -26,7 +26,7 @@ If you have questions about the process to contribute code or want to discuss de
 - [Minification of SCSS and JS](https://github.com/woocommerce/woocommerce/wiki/Minification-of-SCSS-and-JS)
 - [Naming conventions](https://github.com/woocommerce/woocommerce/wiki/Naming-conventions)
 - [String localisation guidelines](https://github.com/woocommerce/woocommerce/wiki/String-localisation-guidelines)
-- [Running unit tests](https://github.com/woocommerce/woocommerce/blob/trunk/tests/README.md)
+- [Running unit tests](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/README.md)
 - [Running e2e tests](https://github.com/woocommerce/woocommerce/wiki/End-to-end-Testing)
 
 ## Coding Guidelines and Development 🛠
