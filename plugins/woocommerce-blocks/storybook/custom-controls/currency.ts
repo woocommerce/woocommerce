@@ -37,7 +37,6 @@ export const currenciesAPIShape: Record<
 
 export const currencyControl = {
 	control: 'select',
-	defaultValue: currencies.USD,
-	mapping: currencies,
-	options: Object.keys( currencies ),
+	options: currencies,
+	mapping: Object.keys( currencies ),
 };

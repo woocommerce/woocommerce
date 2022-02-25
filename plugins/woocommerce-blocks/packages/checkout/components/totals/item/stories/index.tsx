@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Story, Meta } from '@storybook/react';
-import { currencyControl } from '@woocommerce/storybook-controls';
+import { currencies, currencyControl } from '@woocommerce/storybook-controls';
 
 /**
  * Internal dependencies
@@ -17,12 +17,8 @@ export default {
 		description: { control: { type: 'text' } },
 	},
 	args: {
-		description: (
-			<span>
-				This item is <strong>so interesting</strong>
-			</span>
-		),
-		label: 'Intersting item',
+		description: 'This item is so interesting',
+		label: 'Interesting item',
 		value: 2000,
 	},
 } as Meta< TotalsItemProps >;
@@ -30,6 +26,7 @@ export default {
 const Template: Story< TotalsItemProps > = ( args ) => <Item { ...args } />;
 
 export const Default = Template.bind( {} );
-Default.args = {};
-
-// @todo Revise Storybook entries for `Checkout Blocks/totals` components
+Default.args = {
+	currency: currencies.USD,
+	description: 'This item is so interesting',
+};
