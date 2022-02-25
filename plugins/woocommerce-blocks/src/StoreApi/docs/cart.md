@@ -302,7 +302,7 @@ GET /cart
 
 There are no parameters required for this endpoint.
 
-```http
+```sh
 curl "https://example-store.com/wp-json/wc/store/v1/cart"
 ```
 
@@ -324,7 +324,7 @@ POST /cart/add-item
 | `quantity`  | integer |   Yes    | Quantity of this item in the cart.                                                                   |
 | `variation` | array   |   Yes    | Chosen attributes (for variations) containing an array of objects with keys `attribute` and `value`. |
 
-```http
+```sh
 curl --header "X-WC-Store-API-Nonce: 12345" --request POST https://example-store.com/wp-json/wc/store/v1/cart/add-item?id=100&quantity=1
 ```
 
@@ -344,7 +344,7 @@ POST /cart/remove-item
 | :-------- | :----- | :------: | :-------------------------------- |
 | `key`     | string |   Yes    | The key of the cart item to edit. |
 
-```http
+```sh
 curl --header "X-WC-Store-API-Nonce: 12345" --request POST https://example-store.com/wp-json/wc/store/v1/cart/remove-item?key=e369853df766fa44e1ed0ff613f563bd
 ```
 
@@ -365,7 +365,7 @@ POST /cart/update-item
 | `key`      | string  |   Yes    | The key of the cart item to edit.  |
 | `quantity` | integer |   Yes    | Quantity of this item in the cart. |
 
-```http
+```sh
 curl --header "X-WC-Store-API-Nonce: 12345" --request POST https://example-store.com/wp-json/wc/store/v1/cart/update-item?key=e369853df766fa44e1ed0ff613f563bd&quantity=10
 ```
 
@@ -385,7 +385,7 @@ POST /cart/apply-coupon/
 | :-------- | :----- | :------: | :--------------------------------------------- |
 | `code`    | string |   Yes    | The coupon code you wish to apply to the cart. |
 
-```http
+```sh
 curl --header "X-WC-Store-API-Nonce: 12345" --request POST https://example-store.com/wp-json/wc/store/v1/cart/apply-coupon?code=20off
 ```
 
@@ -405,7 +405,7 @@ POST /cart/remove-coupon/
 | :-------- | :----- | :------: | :------------------------------------------------ |
 | `code`    | string |   Yes    | The coupon code you wish to remove from the cart. |
 
-```http
+```sh
 curl --header "X-WC-Store-API-Nonce: 12345" --request POST https://example-store.com/wp-json/wc/store/v1/cart/remove-coupon?code=20off
 ```
 
@@ -461,7 +461,7 @@ POST /cart/select-shipping-rate
 | `package_id` | integer |  string  | yes                                 | The ID of the shipping package within the cart. |
 | `rate_id`    | string  |   yes    | The chosen rate ID for the package. |
 
-```http
+```sh
 curl --header "X-WC-Store-API-Nonce: 12345" --request POST /cart/select-shipping-rate?package_id=1&rate_id=flat_rate:1
 ```
 
