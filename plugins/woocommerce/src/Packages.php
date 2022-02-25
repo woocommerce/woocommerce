@@ -66,8 +66,9 @@ class Packages {
  
 			/**
 			 * Filter to control what optional WooCommerce features are disabled.
-			 * This codepath being called really early, only a plugin in mu-plugins
-			 * can add the filter early enough for it to be taken into account.
+			 * This codepath being called early, only a plugin can add the filter
+			 * early enough for it to be taken into account, not a theme's functions.php.
+			 *
 			 * The filter name is the package name with underscores instead of dashes,
 			 * with _disabled as the suffix.
 			 *
