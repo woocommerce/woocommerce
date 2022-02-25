@@ -199,20 +199,8 @@ class Notes extends \WC_REST_CRUD_Controller {
 
 		$notes = NotesRepository::get_notes( 'edit', $query_args );
 
-		$is_tasklist_experiment_assigned_treatment = $this->is_tasklist_experiment_assigned_treatment();
-
 		$data = array();
 		foreach ( (array) $notes as $note_obj ) {
-			// Hide selected notes for users not in experiment.
-			if ( ! $is_tasklist_experiment_assigned_treatment ) {
-				if ( 'wc-admin-complete-store-details' === $note_obj['name'] ) {
-					continue;
-				}
-
-				if ( 'wc-admin-update-store-details' === $note_obj['name'] ) {
-					continue;
-				}
-			}
 			$note   = $this->prepare_item_for_response( $note_obj, $request );
 			$note   = $this->prepare_response_for_collection( $note );
 			$data[] = $note;
@@ -276,6 +264,12 @@ class Notes extends \WC_REST_CRUD_Controller {
 
 		if ( 'date' === $args['orderby'] ) {
 			$args['orderby'] = 'date_created';
+		}
+
+		// Hide selected notes for users not in experiment.
+		$is_tasklist_experiment_assigned_treatment = $this->is_tasklist_experiment_assigned_treatment();
+		if ( false === $is_tasklist_experiment_assigned_treatment ) {
+			$args['excluded_name'] = array( 'wc-admin-complete-store-details', 'wc-admin-update-store-details' );
 		}
 
 		/**

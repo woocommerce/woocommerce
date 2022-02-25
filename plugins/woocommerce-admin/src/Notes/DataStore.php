@@ -418,14 +418,16 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 			$escaped_is_deleted = esc_sql( $args['is_deleted'] );
 		}
 
-		$where_name_array   = $this->get_escaped_arguments_array_by_key( $args, 'name' );
-		$where_source_array = $this->get_escaped_arguments_array_by_key( $args, 'source' );
+		$where_name_array          = $this->get_escaped_arguments_array_by_key( $args, 'name' );
+		$where_excluded_name_array = $this->get_escaped_arguments_array_by_key( $args, 'excluded_name' );
+		$where_source_array        = $this->get_escaped_arguments_array_by_key( $args, 'source' );
 
-		$escaped_where_types  = implode( ',', $where_type_array );
-		$escaped_where_status = implode( ',', $where_status_array );
-		$escaped_where_names  = implode( ',', $where_name_array );
-		$escaped_where_source = implode( ',', $where_source_array );
-		$where_clauses        = '';
+		$escaped_where_types          = implode( ',', $where_type_array );
+		$escaped_where_status         = implode( ',', $where_status_array );
+		$escaped_where_names          = implode( ',', $where_name_array );
+		$escaped_where_excluded_names = implode( ',', $where_excluded_name_array );
+		$escaped_where_source         = implode( ',', $where_source_array );
+		$where_clauses                = '';
 
 		if ( ! empty( $escaped_where_types ) ) {
 			$where_clauses .= " AND type IN ($escaped_where_types)";
@@ -437,6 +439,10 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 
 		if ( ! empty( $escaped_where_names ) ) {
 			$where_clauses .= " AND name IN ($escaped_where_names)";
+		}
+
+		if ( ! empty( $escaped_where_excluded_names ) ) {
+			$where_clauses .= " AND name NOT IN ($escaped_where_excluded_names)";
 		}
 
 		if ( ! empty( $escaped_where_source ) ) {

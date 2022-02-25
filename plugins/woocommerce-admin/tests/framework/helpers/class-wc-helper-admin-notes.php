@@ -132,4 +132,25 @@ class WC_Helper_Admin_Notes {
 		);
 		$note_5->save();
 	}
+
+	/**
+	 * Create a note that we can use for tests on `name` related filters
+	 *
+	 * @param string $name The name of the new note.
+	 */
+	public static function add_note_for_test( string $name = 'default_name' ) {
+		$data_store = WC_Data_Store::load( 'admin-note' );
+
+		$note = new Note();
+		$note->set_title( 'PHPUNIT_TEST_NOTE_TITLE' );
+		$note->set_content( 'PHPUNIT_TEST_NOTE_CONTENT' );
+
+		$note->set_type( Note::E_WC_ADMIN_NOTE_MARKETING );
+		$note->set_name( $name );
+		$note->set_source( 'PHPUNIT_TEST' );
+		$note->set_is_snoozable( false );
+		$note->set_layout( 'plain' );
+		$note->set_image( '' );
+		$note->save();
+	}
 }
