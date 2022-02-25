@@ -1,6 +1,6 @@
 <?php
 /**
- * Loads WooCommece packages from the /packages directory. These are packages developed outside of core.
+ * Loads WooCommerce packages from the /packages directory. These are packages developed outside of core.
  */
 
 namespace Automattic\WooCommerce;
@@ -62,11 +62,27 @@ class Packages {
 	 */
 	protected static function load_packages() {
 		foreach ( self::$packages as $package_name => $package_class ) {
-			if ( ! self::package_exists( $package_name ) ) {
-				self::missing_package( $package_name );
-				continue;
+			$filter_name = str_replace('-', '_', $package_name) . "_disabled";
+ 
+                        /**
+                         * Filter to control what optional WooCommerce features are disabled.
+                         * This codepath being called really early, only a plugin in mu-plugins
+                         * can add the filter early enough for it to be taken into account.
+                         * The filter name is the package name with underscores instead of dashes,
+                         * with _disabled as the suffix.
+                         *
+                         * @example add_filter( 'woocommerce_admin_disabled', '__return_true', 0, 1);
+                         * @example add_filter( 'woocommerce_blocks_disabled', '__return_true', 0, 1);
+                         *
+                         * @return true if the feature is to be disabled.
+                         */
+			if ( ! apply_filters( $filter_name, false ) ) {
+				if ( ! self::package_exists( $package_name ) ) {
+					self::missing_package( $package_name );
+					continue;
+				}
+				call_user_func( array( $package_class, 'init' ) );
 			}
-			call_user_func( array( $package_class, 'init' ) );
 		}
 
 		// Proxies "activated_plugin" hook for embedded packages listen on WC plugin activation
