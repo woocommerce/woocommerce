@@ -11,7 +11,7 @@ GET /products/attributes
 
 There are no parameters required for this endpoint.
 
-```http
+```sh
 curl "https://example-store.com/wp-json/wc/store/v1/products/attributes"
 ```
 
@@ -50,7 +50,7 @@ GET /products/attributes/:id
 | :-------- | :------ | :------: | :----------------------------------- |
 | `id`      | integer |   Yes    | The ID of the attribute to retrieve. |
 
-```http
+```sh
 curl "https://example-store.com/wp-json/wc/store/v1/products/attributes/1"
 ```
 

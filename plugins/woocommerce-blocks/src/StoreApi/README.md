@@ -4,7 +4,7 @@
 
 Example of a valid API request using cURL:
 
-```http
+```sh
 curl "https://example-store.com/wp-json/wc/store/v1/products"
 ```
 
@@ -87,7 +87,7 @@ If collections contain many results, they may be paginated. When listing resourc
 
 In the example below, we list 20 products per page and return page 2.
 
-```http
+```sh
 curl "https://example-store.com/wp-json/wc/store/v1/products?page=2&per_page=20"
 ```
 
