@@ -122,8 +122,8 @@ describe( `${ block.name } Block (frontend)`, () => {
 		await shopper.goToCheckoutBlock();
 		const html = await page.content();
 
-		expect( page ).toMatchElement( 'h1', { text: 'Checkout Block' } );
-		expect( page ).toMatchElement( 'strong', {
+		await expect( page ).toMatchElement( 'h1', { text: 'Checkout Block' } );
+		await expect( page ).toMatchElement( 'strong', {
 			text: 'Your cart is empty!',
 		} );
 	} );
