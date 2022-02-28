@@ -77,7 +77,8 @@ const merchant = {
 		} );
 
 		// Confirm logout using XPath, which works on all languages.
-		await expect( page ).toClick( '//a[contains(@href,\'action=logout\')]' );
+		const elements = await page.$x('//a[contains(@href,\'action=logout\')]')
+		await elements[0].click()
 
 		await page.waitForNavigation( { waitUntil: 'networkidle0' } );
 	},
