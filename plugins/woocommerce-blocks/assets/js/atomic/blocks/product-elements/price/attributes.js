@@ -13,31 +13,7 @@ let blockAttributes = {
 if ( isFeaturePluginBuild() ) {
 	blockAttributes = {
 		...blockAttributes,
-		align: {
-			type: 'string',
-		},
-		fontSize: {
-			type: 'string',
-		},
-		customFontSize: {
-			type: 'number',
-		},
-		saleFontSize: {
-			type: 'string',
-		},
-		customSaleFontSize: {
-			type: 'number',
-		},
-		color: {
-			type: 'string',
-		},
-		saleColor: {
-			type: 'string',
-		},
-		customColor: {
-			type: 'string',
-		},
-		customSaleColor: {
+		textAlign: {
 			type: 'string',
 		},
 	};
