@@ -11,37 +11,40 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import { createNoticesFromResponse } from '~/lib/notices';
 
+export function connectWcpay( createNotice, onCatch ) {
+	const errorMessage = __(
+		'There was an error connecting to WooCommerce Payments. Please try again or connect later in store settings.',
+		'woocommerce-admin'
+	);
+	apiFetch( {
+		path: WC_ADMIN_NAMESPACE + '/plugins/connect-wcpay',
+		method: 'POST',
+	} )
+		.then( ( response ) => {
+			window.location = response.connectUrl;
+		} )
+		.catch( () => {
+			createNotice( 'error', errorMessage );
+			if ( typeof onCatch === 'function' ) {
+				onCatch();
+			}
+		} );
+}
+
 export function installActivateAndConnectWcpay(
 	reject,
 	createNotice,
 	installAndActivatePlugins
 ) {
-	const errorMessage = __(
-		'There was an error connecting to WooCommerce Payments. Please try again or connect later in store settings.',
-		'woocommerce-admin'
-	);
-
-	const connect = () => {
-		apiFetch( {
-			path: WC_ADMIN_NAMESPACE + '/plugins/connect-wcpay',
-			method: 'POST',
-		} )
-			.then( ( response ) => {
-				window.location = response.connectUrl;
-			} )
-			.catch( () => {
-				createNotice( 'error', errorMessage );
-				reject();
-			} );
-	};
-
 	installAndActivatePlugins( [ 'woocommerce-payments' ] )
 		.then( () => {
 			recordEvent( 'woocommerce_payments_install', {
 				context: 'tasklist',
 			} );
 
-			connect();
+			connectWcpay( createNotice, () => {
+				reject();
+			} );
 		} )
 		.catch( ( error ) => {
 			createNoticesFromResponse( error );
