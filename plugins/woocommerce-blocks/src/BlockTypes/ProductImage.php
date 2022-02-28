@@ -45,11 +45,18 @@ class ProductImage extends AbstractBlock {
 		return array(
 			'__experimentalBorder'   =>
 			array(
-				'radius' => true,
+				'radius'                          => true,
+				'__experimentalSkipSerialization' => true,
 			),
 			'typography'             =>
 			array(
-				'fontSize' => true,
+				'fontSize'                        => true,
+				'__experimentalSkipSerialization' => true,
+			),
+			'spacing'                =>
+			array(
+				'margin'                          => true,
+				'__experimentalSkipSerialization' => true,
 			),
 			'__experimentalSelector' => '.wc-block-components-product-image',
 		);
