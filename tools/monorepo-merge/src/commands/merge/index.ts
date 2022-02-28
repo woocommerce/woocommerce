@@ -88,7 +88,7 @@ export default class Merge extends Command {
 	}
 
 	/**
-	 * Validates all of the arguments to make sure
+	 * Validates all of the arguments to make sure they're compatible with the command.
 	 * 
 	 * @param {string} source The GitHub repository we are merging.
 	 * @param {string} destination The local path we're merging into.
@@ -102,15 +102,15 @@ export default class Merge extends Command {
 		}
 		
 		// We can't merge into a directory that already exists.
-		let existence = false;
+		let exists = false;
 		try {
 			await access( join( MONOREPO_ROOT, destination ) );
-			existence = true;
+			exists = true;
 		} catch (err: any) {
-			existence = false;
+			exists = false;
 		}
 
-		if ( existence ) {
+		if ( exists ) {
 			this.error('The "destination" argument points to a directory that already exists');
 		}
 	}
