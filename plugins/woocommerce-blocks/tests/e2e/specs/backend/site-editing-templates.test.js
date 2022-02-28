@@ -213,9 +213,9 @@ describe( 'Store Editing Templates', () => {
 		} );
 	} );
 
-	describe( 'Product Archive block template', () => {
+	describe( 'Product Catalog block template', () => {
 		it( 'default template from WooCommerce Blocks is available on an FSE theme', async () => {
-			const EXPECTED_TEMPLATE = defaultTemplateProps( 'Product Archive' );
+			const EXPECTED_TEMPLATE = defaultTemplateProps( 'Product Catalog' );
 
 			await goToSiteEditor( '?postType=wp_template' );
 
@@ -234,7 +234,7 @@ describe( 'Store Editing Templates', () => {
 			}
 		} );
 
-		it( 'should contain the "WooCommerce Product Archive Block" legacy template', async () => {
+		it( 'should contain the "WooCommerce Product Grid Block" legacy template', async () => {
 			const templateQuery = addQueryArgs( '', {
 				postId: 'woocommerce/woocommerce//archive-product',
 				postType: 'wp_template',
@@ -255,7 +255,7 @@ describe( 'Store Editing Templates', () => {
 
 		it( 'should show the action menu if the template has been customized by the user', async () => {
 			const EXPECTED_TEMPLATE = {
-				...defaultTemplateProps( 'Product Archive' ),
+				...defaultTemplateProps( 'Product Catalog' ),
 				hasActions: true,
 			};
 
@@ -308,10 +308,10 @@ describe( 'Store Editing Templates', () => {
 		} );
 	} );
 
-	describe( 'Product Category block template', () => {
+	describe( 'Product by Category block template', () => {
 		it( 'default template from WooCommerce Blocks is available on an FSE theme', async () => {
 			const EXPECTED_TEMPLATE = defaultTemplateProps(
-				'Product Category'
+				'Products by Category'
 			);
 
 			await goToSiteEditor( '?postType=wp_template' );
@@ -353,7 +353,7 @@ describe( 'Store Editing Templates', () => {
 
 		it( 'should show the action menu if the template has been customized by the user', async () => {
 			const EXPECTED_TEMPLATE = {
-				...defaultTemplateProps( 'Product Category' ),
+				...defaultTemplateProps( 'Products by Category' ),
 				hasActions: true,
 			};
 
@@ -402,9 +402,9 @@ describe( 'Store Editing Templates', () => {
 		} );
 	} );
 
-	describe( 'Product Tag block template', () => {
+	describe( 'Products by Tag block template', () => {
 		it( 'default template from WooCommerce Blocks is available on an FSE theme', async () => {
-			const EXPECTED_TEMPLATE = defaultTemplateProps( 'Product Tag' );
+			const EXPECTED_TEMPLATE = defaultTemplateProps( 'Products by Tag' );
 
 			await goToSiteEditor( '?postType=wp_template' );
 
@@ -445,7 +445,7 @@ describe( 'Store Editing Templates', () => {
 
 		it( 'should show the action menu if the template has been customized by the user', async () => {
 			const EXPECTED_TEMPLATE = {
-				...defaultTemplateProps( 'Product Tag' ),
+				...defaultTemplateProps( 'Products by Tag' ),
 				hasActions: true,
 			};
 

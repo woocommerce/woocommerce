@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Store Editing Templates Product Archive block template should contain the "WooCommerce Product Archive Block" legacy template 1`] = `
+exports[`Store Editing Templates Product Catalog block template should contain the "WooCommerce Product Grid Block" legacy template 1`] = `
 "<!-- wp:template-part {\\"slug\\":\\"header\\",\\"theme\\":\\"emptytheme\\"} /-->
 
 <!-- wp:group {\\"layout\\":{\\"inherit\\":true}} -->
@@ -10,7 +10,7 @@ exports[`Store Editing Templates Product Archive block template should contain t
 <!-- wp:template-part {\\"slug\\":\\"footer\\",\\"theme\\":\\"emptytheme\\"} /-->"
 `;
 
-exports[`Store Editing Templates Product Category block template should contain the "WooCommerce Product Taxonomy Block" legacy template 1`] = `
+exports[`Store Editing Templates Product by Category block template should contain the "WooCommerce Product Taxonomy Block" legacy template 1`] = `
 "<!-- wp:template-part {\\"slug\\":\\"header\\",\\"theme\\":\\"emptytheme\\"} /-->
 
 <!-- wp:group {\\"layout\\":{\\"inherit\\":true}} -->
@@ -20,7 +20,7 @@ exports[`Store Editing Templates Product Category block template should contain 
 <!-- wp:template-part {\\"slug\\":\\"footer\\",\\"theme\\":\\"emptytheme\\"} /-->"
 `;
 
-exports[`Store Editing Templates Product Tag block template should contain the "WooCommerce Product Taxonomy Block" legacy template 1`] = `
+exports[`Store Editing Templates Products by Tag block template should contain the "WooCommerce Product Taxonomy Block" legacy template 1`] = `
 "<!-- wp:template-part {\\"slug\\":\\"header\\",\\"theme\\":\\"emptytheme\\"} /-->
 
 <!-- wp:group {\\"layout\\":{\\"inherit\\":true}} -->
