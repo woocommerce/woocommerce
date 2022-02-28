@@ -177,6 +177,7 @@ final class BlockTypesController {
 			'ActiveFilters',
 			'LegacyTemplate',
 			'ProductTitle',
+			'ProductPrice',
 			'ProductSummary',
 			'ProductStockIndicator',
 			'ProductButton',
@@ -236,7 +237,6 @@ final class BlockTypesController {
 	 */
 	protected function get_atomic_blocks() {
 		return [
-			'product-price',
 			'product-sku',
 			'product-add-to-cart',
 		];

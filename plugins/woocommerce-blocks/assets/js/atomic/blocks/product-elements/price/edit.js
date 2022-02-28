@@ -1,19 +1,18 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
-import { PanelBody, BaseControl } from '@wordpress/components';
-import { compose } from '@wordpress/compose';
-import {
-	InspectorControls,
-	BlockControls,
-	AlignmentToolbar,
-	withColors,
-	ColorPalette,
-	FontSizePicker,
-	withFontSizes,
-} from '@wordpress/block-editor';
 import { isFeaturePluginBuild } from '@woocommerce/block-settings';
+import {
+	AlignmentToolbar,
+	BlockControls,
+	useBlockProps,
+} from '@wordpress/block-editor';
+import { __ } from '@wordpress/i18n';
+
+/**
+ *
+ */
+
 /**
  * Internal dependencies
  */
@@ -21,113 +20,32 @@ import Block from './block';
 import withProductSelector from '../shared/with-product-selector';
 import { BLOCK_TITLE, BLOCK_ICON } from './constants';
 
-const TextControl = ( {
-	fontSize,
-	setFontSize,
-	color,
-	setColor,
-	colorLabel,
-} ) => (
-	<>
-		<FontSizePicker value={ fontSize.size } onChange={ setFontSize } />
-		{ /* ColorPalette doesn't accept an id. */
-		/* eslint-disable-next-line @wordpress/no-base-control-with-label-without-id */ }
-		<BaseControl label={ colorLabel }>
-			<ColorPalette
-				value={ color.color }
-				onChange={ setColor }
-				label={ __( 'Color', 'woo-gutenberg-products-block' ) }
-			/>
-		</BaseControl>
-	</>
-);
-const PriceEdit = ( {
-	fontSize,
-	saleFontSize,
-	setFontSize,
-	setSaleFontSize,
-	color,
-	saleColor,
-	setColor,
-	setSaleColor,
-	attributes,
-	setAttributes,
-} ) => {
-	const { align } = attributes;
+const PriceEdit = ( { attributes, setAttributes } ) => {
+	const blockProps = useBlockProps();
 	return (
 		<>
-			{ isFeaturePluginBuild() && (
-				<BlockControls>
+			<BlockControls>
+				{ isFeaturePluginBuild() && (
 					<AlignmentToolbar
-						value={ align }
-						onChange={ ( nextAlign ) => {
-							setAttributes( { align: nextAlign } );
+						value={ attributes.textAlign }
+						onChange={ ( newAlign ) => {
+							setAttributes( { textAlign: newAlign } );
 						} }
 					/>
-				</BlockControls>
-			) }
-			<InspectorControls>
-				{ isFeaturePluginBuild() && (
-					<>
-						<PanelBody
-							title={ __(
-								'Price',
-								'woo-gutenberg-products-block'
-							) }
-						>
-							<TextControl
-								color={ color }
-								setColor={ setColor }
-								fontSize={ fontSize }
-								setFontSize={ setFontSize }
-								colorLabel={ __(
-									'Color',
-									'woo-gutenberg-products-block'
-								) }
-							/>
-						</PanelBody>
-						<PanelBody
-							title={ __(
-								'Sale price',
-								'woo-gutenberg-products-block'
-							) }
-						>
-							<TextControl
-								color={ saleColor }
-								setColor={ setSaleColor }
-								fontSize={ saleFontSize }
-								setFontSize={ setSaleFontSize }
-								colorLabel={ __(
-									'Color',
-									'woo-gutenberg-products-block'
-								) }
-							/>
-						</PanelBody>
-					</>
 				) }
-			</InspectorControls>
-			<Block { ...attributes } />
+			</BlockControls>
+			<div { ...blockProps }>
+				<Block { ...attributes } />
+			</div>
 		</>
 	);
 };
 
-const Price = isFeaturePluginBuild()
-	? compose( [
-			withFontSizes( 'fontSize' ),
-			withFontSizes( 'saleFontSize' ),
-			withFontSizes( 'originalFontSize' ),
-			withColors( 'color', { textColor: 'color' } ),
-			withColors( 'saleColor', { textColor: 'saleColor' } ),
-			withColors( 'originalColor', { textColor: 'originalColor' } ),
-			withProductSelector( {
-				icon: BLOCK_ICON,
-				label: BLOCK_TITLE,
-				description: __(
-					'Choose a product to display its price.',
-					'woo-gutenberg-products-block'
-				),
-			} ),
-	  ] )( PriceEdit )
-	: PriceEdit;
-
-export default Price;
+export default withProductSelector( {
+	icon: BLOCK_ICON,
+	label: BLOCK_TITLE,
+	description: __(
+		'Choose a product to display its price.',
+		'woo-gutenberg-products-block'
+	),
+} )( PriceEdit );
