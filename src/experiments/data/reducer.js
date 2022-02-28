@@ -15,7 +15,8 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 				experiments: state.experiments.map( ( experiment ) => ( {
 					...experiment,
 					variation:
-						experiment.name === action.experimentName
+						experiment.name === action.experimentName &&
+						experiment.source === action.source
 							? action.newVariation
 							: experiment.variation,
 				} ) ),
