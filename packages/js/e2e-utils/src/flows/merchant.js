@@ -6,7 +6,16 @@ const config = require( 'config' );
 /**
  * Internal dependencies
  */
-const { clearAndFillInput, setCheckbox } = require( '../page-utils' );
+const {
+	clearAndFillInput,
+	selectOptionInSelect2,
+	setCheckbox,
+	verifyValueOfInputField,
+	getSelectorAttribute,
+	orderPageSaveChanges,
+	verifyValueOfElementAttribute,
+} = require( '../page-utils' );
+
 const {
 	WP_ADMIN_ALL_ORDERS_VIEW,
 	WP_ADMIN_ALL_PRODUCTS_VIEW,
@@ -35,6 +44,12 @@ const { getSlug, waitForTimeout } = require('./utils');
 
 const baseUrl = config.get( 'url' );
 const WP_ADMIN_SINGLE_CPT_VIEW = ( postId ) => baseUrl + `wp-admin/post.php?post=${ postId }&action=edit`;
+
+// Reusable selectors
+const INPUT_DOWNLOADS_REMAINING = 'input[name="downloads_remaining[0]"]';
+const INPUT_EXPIRATION_DATE = 'input[name="access_expires[0]"]';
+const ORDER_DOWNLOADS = '#woocommerce-order-downloads';
+const BTN_COPY_DOWNLOAD_LINK = '#copy-download-link';
 
 const merchant = {
 	login: async () => {
@@ -149,7 +164,6 @@ const merchant = {
 		} );
 	},
 
-
 	goToOrder: async ( orderId ) => {
 		await page.goto( WP_ADMIN_SINGLE_CPT_VIEW( orderId ), {
 			waitUntil: 'networkidle0',
@@ -196,6 +210,91 @@ const merchant = {
 			// Verify customer profile link is present to verify order was placed by a registered customer, not a guest
 			await expect( page ).toMatchElement( 'label[for="customer_user"] a[href*=user-edit]', { text: 'Profile' } );
 		}
+	},
+
+	addDownloadableProductPermission: async ( productName ) => {
+		// Add downloadable product permission
+		await selectOptionInSelect2( productName );
+		await expect( page ).toClick( 'button.grant_access' );
+
+		// Save the order changes
+		await orderPageSaveChanges();
+	},
+
+	updateDownloadableProductPermission: async ( productName, expirationDate, downloadsRemaining ) => {
+		// Update downloadable product permission
+		await expect(page).toClick( ORDER_DOWNLOADS, { text: productName } );
+
+		if ( downloadsRemaining ) {
+			await clearAndFillInput( INPUT_DOWNLOADS_REMAINING, downloadsRemaining );
+		}
+
+		if ( expirationDate ) {
+			await clearAndFillInput( INPUT_EXPIRATION_DATE, expirationDate );
+		}
+
+		// Save the order changes
+		await orderPageSaveChanges();
+	},
+
+	revokeDownloadableProductPermission: async ( productName ) => {
+		// Revoke downloadable product permission
+		const permission = await expect(page).toMatchElement( 'div.wc-metabox > h3', { text: productName } );
+		await expect( permission ).toClick('button.revoke_access');
+
+		// Wait for auto save
+		await waitForTimeout( 2000 );
+
+		// Save the order changes
+		await orderPageSaveChanges();
+	},
+
+	verifyDownloadableProductPermission: async ( productName, expirationDate = '', downloadsRemaining = '' ) => {
+		// Open downloadable product permission details
+		await expect(page).toClick( ORDER_DOWNLOADS, { text: productName } );
+
+		// Verify downloads remaining
+		await verifyValueOfElementAttribute( INPUT_DOWNLOADS_REMAINING, 'placeholder', 'Unlimited' );
+		await verifyValueOfInputField( INPUT_DOWNLOADS_REMAINING, downloadsRemaining );
+
+		// Verify downloads expiration date
+		await verifyValueOfElementAttribute( INPUT_EXPIRATION_DATE, 'placeholder', 'Never' );
+		await verifyValueOfInputField( INPUT_EXPIRATION_DATE, expirationDate );
+
+		// Verify 'Copy link' and 'View report' buttons are available
+		await expect( page ).toMatchElement( BTN_COPY_DOWNLOAD_LINK, { text: 'Copy link'} );
+		await expect( page ).toMatchElement( '.button', { text: 'View report' } );
+	},
+
+	openDownloadLink: async () => {
+		// Open downloadable product permission details
+		await expect( page ).toClick( '#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div' );
+
+		// Get download link
+		const downloadLink = await getSelectorAttribute( BTN_COPY_DOWNLOAD_LINK, 'href' );
+
+		const newPage = await browser.newPage();
+
+		// Open download link in new tab
+		await newPage.goto( downloadLink , {
+			waitUntil: 'networkidle0',
+		} );
+
+		return newPage;
+	},
+
+	verifyCannotDownloadFromBecause: async ( page, reason ) => {
+		// Select download page tab
+		await page.bringToFront();
+
+		// Verify error in download page
+		await expect( page.title() ).resolves.toMatch( 'WordPress › Error' );
+		await expect( page ).toMatchElement( 'div.wp-die-message', {
+			text: reason
+		} );
+
+		// Close tab
+		await page.close();
 	},
 
 	openNewShipping: async () => {
