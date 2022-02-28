@@ -6,7 +6,16 @@ const config = require( 'config' );
 /**
  * Internal dependencies
  */
-const { clearAndFillInput, setCheckbox } = require( '../page-utils' );
+const {
+	clearAndFillInput,
+	selectOptionInSelect2,
+	setCheckbox,
+	verifyValueOfInputField,
+	getSelectorAttribute,
+	orderPageSaveChanges,
+	verifyValueOfElementAttribute,
+} = require( '../page-utils' );
+
 const {
 	WP_ADMIN_ALL_ORDERS_VIEW,
 	WP_ADMIN_ALL_PRODUCTS_VIEW,
@@ -31,6 +40,12 @@ const { getSlug, waitForTimeout } = require('./utils');
 
 const baseUrl = config.get( 'url' );
 const WP_ADMIN_SINGLE_CPT_VIEW = ( postId ) => baseUrl + `wp-admin/post.php?post=${ postId }&action=edit`;
+
+// Reusable selectors
+const INPUT_DOWNLOADS_REMAINING = 'input[name="downloads_remaining[0]"]';
+const INPUT_EXPIRATION_DATE = 'input[name="access_expires[0]"]';
+const ORDER_DOWNLOADS = '#woocommerce-order-downloads';
+const BTN_COPY_DOWNLOAD_LINK = '#copy-download-link';
 
 const merchant = {
 	login: async () => {
@@ -144,7 +159,6 @@ const merchant = {
 			waitUntil: 'networkidle0',
 		} );
 	},
-
 
 	goToOrder: async ( orderId ) => {
 		await page.goto( WP_ADMIN_SINGLE_CPT_VIEW( orderId ), {
