@@ -29,13 +29,15 @@ $fontSizes: (
 }
 
 // Adds animation to placeholder section
-@mixin placeholder() {
+@mixin placeholder($include-border-radius: true) {
 	outline: 0 !important;
 	border: 0 !important;
 	background-color: #ebebeb !important;
 	color: transparent !important;
 	width: 100%;
-	border-radius: 0.25rem;
+	@if $include-border-radius == true {
+		border-radius: 0.25rem;
+	}
 	display: block;
 	line-height: 1;
 	position: relative !important;

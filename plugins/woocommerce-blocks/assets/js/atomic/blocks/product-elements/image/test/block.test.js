@@ -23,6 +23,9 @@ jest.mock( '../../../../../hooks/style-attributes', () => ( {
 	useTypographyProps: jest.fn( () => ( {
 		style: {},
 	} ) ),
+	useSpacingProps: jest.fn( () => ( {
+		style: {},
+	} ) ),
 } ) );
 
 const productWithoutImages = {
