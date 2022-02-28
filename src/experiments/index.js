@@ -20,6 +20,7 @@ function Experiments( { experiments, toggleExperiment } ) {
 					<tr>
 						<th>Experiment</th>
 						<th>Variation</th>
+						<th>Source</th>
 						<th>Toggle</th>
 					</tr>
 				</thead>
@@ -32,6 +33,7 @@ function Experiments( { experiments, toggleExperiment } ) {
 										{ name }
 									</td>
 									<td align="center">{ variation }</td>
+									<td align="center">{ source }</td>
 									<td align="center">
 										<Button
 											onClick={ () => {

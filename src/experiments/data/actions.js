@@ -51,6 +51,7 @@ export function* toggleExperiment( experimentName, currentVariation, source ) {
 		type: TYPES.TOGGLE_EXPERIMENT,
 		experimentName,
 		newVariation,
+		source,
 	};
 }
 
