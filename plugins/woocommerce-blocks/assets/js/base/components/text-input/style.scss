@@ -44,7 +44,8 @@
 	input[type="email"] {
 		@include font-size(regular);
 		background-color: #fff;
-		padding: em($gap-small) $gap;
+		padding: em($gap-small) 0;
+		text-indent: $gap;
 		border-radius: 4px;
 		border: 1px solid $input-border-gray;
 		width: 100%;
@@ -91,7 +92,7 @@
 	&.is-active input[type="text"],
 	&.is-active input[type="number"],
 	&.is-active input[type="email"] {
-		padding: em($gap-large) 0 em($gap-smallest) $gap;
+		padding: em($gap-large) 0 em($gap-smallest);
 	}
 
 	&.has-error input {
