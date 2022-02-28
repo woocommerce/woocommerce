@@ -74,7 +74,7 @@ describe( 'Legacy Template blocks', () => {
 		} );
 	} );
 
-	describe( 'Product Category block', () => {
+	describe( 'Products by Category block', () => {
 		it( 'renders a list of products with their count, pagination and the category title', async () => {
 			const CATEGORY_NAME = 'Uncategorized';
 			const { productArchivePage } = SELECTORS;
@@ -112,7 +112,7 @@ describe( 'Legacy Template blocks', () => {
 		} );
 	} );
 
-	describe( 'Product Tag block', () => {
+	describe( 'Products by Tag block', () => {
 		it( 'renders a list of products with their count, pagination and the tag title', async () => {
 			const TAG_NAME = 'Newest';
 			const { productArchivePage } = SELECTORS;

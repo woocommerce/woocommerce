@@ -264,11 +264,11 @@ class BlockTemplateUtils {
 			case 'single-product':
 				return __( 'Single Product', 'woo-gutenberg-products-block' );
 			case 'archive-product':
-				return __( 'Product Archive', 'woo-gutenberg-products-block' );
+				return __( 'Product Catalog', 'woo-gutenberg-products-block' );
 			case 'taxonomy-product_cat':
-				return __( 'Product Category', 'woo-gutenberg-products-block' );
+				return __( 'Products by Category', 'woo-gutenberg-products-block' );
 			case 'taxonomy-product_tag':
-				return __( 'Product Tag', 'woo-gutenberg-products-block' );
+				return __( 'Products by Tag', 'woo-gutenberg-products-block' );
 			default:
 				// Replace all hyphens and underscores with spaces.
 				return ucwords( preg_replace( '/[\-_]/', ' ', $template_slug ) );
