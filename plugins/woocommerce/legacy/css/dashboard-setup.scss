@@ -19,7 +19,7 @@
 		box-sizing: border-box;
 	}
 
-	.progress-wrapper span {
+	.progress-wrapper > span {
 		position: relative;
 		top: -3px;
 		color: #757575;

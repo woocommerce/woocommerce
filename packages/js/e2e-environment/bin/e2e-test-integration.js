@@ -8,6 +8,7 @@ const {
 	getAppRoot,
 	resolveLocalE2ePath,
 	resolvePackagePath,
+	resolveSingleE2EPath,
 } = require( '../utils' );
 const {
 	WC_E2E_SCREENSHOTS,
@@ -66,7 +67,7 @@ if ( ! JEST_PUPPETEER_CONFIG ) {
 if ( program.args.length == 1 ) {
 	// Check for both absolute and relative paths
 	const testSpecAbs = path.resolve( program.args[ 0 ] );
-	const testSpecRel = path.resolve( appPath, program.args[ 0 ] );
+	const testSpecRel = resolveSingleE2EPath( program.args[ 0 ] );
 	if ( fs.existsSync( testSpecAbs ) ) {
 		process.env.jest_test_spec = testSpecAbs;
 	} else if ( fs.existsSync( testSpecRel ) ) {
@@ -75,12 +76,13 @@ if ( program.args.length == 1 ) {
 }
 
 let jestCommand = 'jest';
+let outputFile = 'test-results.json';
 const jestArgs = [
 	'--maxWorkers=1',
 	'--rootDir=./',
 	'--verbose',
 	'--json',
-	'--outputFile=test-results.json',
+	'--outputFile=' + outputFile,
 	...program.args,
 ];
 
@@ -109,6 +111,11 @@ const jestProcess = spawnSync( jestCommand, jestArgs, {
 	env: envVars,
 } );
 
+let results = resolvePackagePath( outputFile );
+if ( fs.existsSync( results ) ) {
+	let localResults = resolveLocalE2ePath( outputFile );
+	fs.copyFileSync( results, localResults );
+}
 console.log( 'Jest exit code: ' + jestProcess.status );
 
 // Pass Jest exit code to npm

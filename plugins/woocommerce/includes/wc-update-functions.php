@@ -11,6 +11,8 @@
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
+use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
+use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 
 /**
  * Update file paths for 2.0
@@ -2306,7 +2308,7 @@ function wc_update_560_db_version() {
 function wc_update_600_migrate_rate_limit_options() {
 	global $wpdb;
 
-	$rate_limits = $wpdb->get_results(
+	$rate_limits   = $wpdb->get_results(
 		"
 			SELECT option_name, option_value
 			FROM $wpdb->options
@@ -2334,4 +2336,33 @@ function wc_update_600_migrate_rate_limit_options() {
  */
 function wc_update_600_db_version() {
 	WC_Install::update_db_version( '6.0.0' );
+}
+
+/**
+ * Create the product attributes lookup table and initiate its filling,
+ * unless the table had been already created manually (via the tools page).
+ *
+ * @return false Always false, since the LookupDataStore class handles all the data filling process.
+ */
+function wc_update_630_create_product_attributes_lookup_table() {
+	$data_store       = wc_get_container()->get( LookupDataStore::class );
+	$data_regenerator = wc_get_container()->get( DataRegenerator::class );
+
+	/**
+	 * If the table exists and contains data, it was manually created by user before the migration ran.
+	 * If the table exists but is empty, it was likely created right now via dbDelta, so a table regenerations is needed.
+	 */
+	if ( ! $data_store->check_lookup_table_exists() || ! $data_store->lookup_table_has_data() ) {
+		$data_regenerator->initiate_regeneration();
+	}
+
+	return false;
+}
+
+/**
+ *
+ * Update DB version to 6.3.0.
+ */
+function wc_update_630_db_version() {
+	WC_Install::update_db_version( '6.3.0' );
 }

@@ -247,19 +247,21 @@ class WC_Checkout {
 
 		if ( 'no' === get_option( 'woocommerce_registration_generate_username' ) ) {
 			$this->fields['account']['account_username'] = array(
-				'type'        => 'text',
-				'label'       => __( 'Account username', 'woocommerce' ),
-				'required'    => true,
-				'placeholder' => esc_attr__( 'Username', 'woocommerce' ),
+				'type'         => 'text',
+				'label'        => __( 'Account username', 'woocommerce' ),
+				'required'     => true,
+				'placeholder'  => esc_attr__( 'Username', 'woocommerce' ),
+				'autocomplete' => 'username',
 			);
 		}
 
 		if ( 'no' === get_option( 'woocommerce_registration_generate_password' ) ) {
 			$this->fields['account']['account_password'] = array(
-				'type'        => 'password',
-				'label'       => __( 'Create account password', 'woocommerce' ),
-				'required'    => true,
-				'placeholder' => esc_attr__( 'Password', 'woocommerce' ),
+				'type'         => 'password',
+				'label'        => __( 'Create account password', 'woocommerce' ),
+				'required'     => true,
+				'placeholder'  => esc_attr__( 'Password', 'woocommerce' ),
+				'autocomplete' => 'new-password',
 			);
 		}
 		$this->fields = apply_filters( 'woocommerce_checkout_fields', $this->fields );
@@ -831,7 +833,7 @@ class WC_Checkout {
 
 				if ( $validate_fieldset && $required && '' === $data[ $key ] ) {
 					/* translators: %s: field name */
-					$errors->add( $key . '_required', apply_filters( 'woocommerce_checkout_required_field_notice', sprintf( __( '%s is a required field.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ), $field_label ), array( 'id' => $key ) );
+					$errors->add( $key . '_required', apply_filters( 'woocommerce_checkout_required_field_notice', sprintf( __( '%s is a required field.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ), $field_label, $key ), array( 'id' => $key ) );
 				}
 			}
 		}

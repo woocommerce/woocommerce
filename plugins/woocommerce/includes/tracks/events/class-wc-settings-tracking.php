@@ -85,7 +85,7 @@ class WC_Settings_Tracking {
 	 * Send a Tracks event for WooCommerce options that changed values.
 	 */
 	public function send_settings_change_event() {
-		global $current_tab;
+		global $current_tab, $current_section;
 
 		if ( empty( $this->updated_options ) ) {
 			return;
@@ -97,6 +97,9 @@ class WC_Settings_Tracking {
 
 		if ( isset( $current_tab ) ) {
 			$properties['tab'] = $current_tab;
+		}
+		if ( isset( $current_section ) ) {
+			$properties['section'] = $current_section;
 		}
 
 		WC_Tracks::record_event( 'settings_change', $properties );

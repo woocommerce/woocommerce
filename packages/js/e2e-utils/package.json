@@ -1,6 +1,6 @@
 {
   "name": "@woocommerce/e2e-utils",
-  "version": "0.1.6",
+  "version": "0.2.0",
   "description": "End-To-End (E2E) test utils for WooCommerce",
   "homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/e2e-utils/README.md",
   "repository": {
@@ -41,7 +41,6 @@
     "access": "public"
   },
   "scripts": {
-    "preinstall": "npx only-allow pnpm",
     "clean": "rm -rf ./build ./build-module",
     "compile": "node ./../bin/build.js",
     "build": "pnpm run clean && pnpm run compile",

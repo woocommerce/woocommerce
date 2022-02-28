@@ -12,7 +12,7 @@ const appPath = getAppRoot();
  */
 const resolveLocalE2ePath = ( filename = '' ) => {
 	const { WC_E2E_FOLDER } = process.env;
-	const localPath = `${WC_E2E_FOLDER}/tests/e2e/${filename}`;
+	const localPath = `${ WC_E2E_FOLDER }/tests/e2e/${ filename }`;
 	const resolvedPath = path.resolve(
 		appPath,
 		localPath.indexOf( '/' ) == 0 ? localPath.slice( 1 ) : localPath
@@ -26,7 +26,7 @@ const resolveLocalE2ePath = ( filename = '' ) => {
  *
  * @param {string} packageName Name of the installed package.
  * @param {boolean} allowRecurse Allow a recursive call. Default true.
- * @return {object}
+ * @return {Object}
  */
 const resolvePackage = ( packageName, allowRecurse = true ) => {
 	const resolvedPackage = {};
@@ -93,10 +93,29 @@ const resolvePackagePath = ( filename, packageName = '' ) => {
 	return resolvedPath;
 };
 
+/**
+ * Resolves the path a single E2E test
+ *
+ * @param {string} filePath Path to a specific test file
+ * @param {Array} exclude An array of directories that won't be removed in the event that duplicates exist.
+ * @return {string}
+ */
+const resolveSingleE2EPath = ( filePath ) => {
+	const { SMOKE_TEST_URL, GITHUB_ACTIONS } = process.env;
+	const localPath = resolveLocalE2ePath( filePath );
+
+	if ( fs.existsSync( localPath ) ) {
+		return localPath;
+	} else {
+		const prunedPath = filePath.replace( 'tests/e2e', '' );
+		return resolveLocalE2ePath( prunedPath );
+	}
+};
+
 // Copy local test configuration file if it exists.
 const localTestConfigFile = resolveLocalE2ePath( 'config/default.json' );
 const defaultConfigFile = resolvePackagePath( 'config/default/default.json' );
-const testConfigFile = resolvePackagePath(  'config/default.json' );
+const testConfigFile = resolvePackagePath( 'config/default.json' );
 
 if ( fs.existsSync( localTestConfigFile ) ) {
 	fs.copyFileSync( localTestConfigFile, testConfigFile );
@@ -165,4 +184,5 @@ module.exports = {
 	resolveLocalE2ePath,
 	resolvePackage,
 	resolvePackagePath,
+	resolveSingleE2EPath,
 };

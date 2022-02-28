@@ -11,7 +11,9 @@ const { addConsoleSuppression, updateReadyPageStatus, setupJestRetries } = requi
 const { DEFAULT_TIMEOUT_OVERRIDE } = process.env;
 
 // @todo: remove this once https://github.com/woocommerce/woocommerce-admin/issues/6992 has been addressed
-addConsoleSuppression( 'woocommerce_shared_settings', false );
+addConsoleSuppression('woocommerce_shared_settings', false);
+// @todo: remove this once https://github.com/woocommerce/woocommerce/issues/31867 has been addressed
+addConsoleSuppression('wp.compose.withState', false);
 
 /**
  * Uses the WordPress API to delete all existing posts

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "fb68c78e4ab4269155c3c9613af1a22a",
+    "content-hash": "95b6d7da4314500d65c7f840bf173dde",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -543,16 +543,16 @@
         },
         {
             "name": "woocommerce/woocommerce-admin",
-            "version": "3.0.3",
+            "version": "3.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-admin.git",
-                "reference": "0b1abab35c62717f3121428fe7f378998ef4899c"
+                "reference": "5988146485fb915236dae0f46120f5c8d26256c8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/0b1abab35c62717f3121428fe7f378998ef4899c",
-                "reference": "0b1abab35c62717f3121428fe7f378998ef4899c",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/5988146485fb915236dae0f46120f5c8d26256c8",
+                "reference": "5988146485fb915236dae0f46120f5c8d26256c8",
                 "shasum": ""
             },
             "require": {
@@ -608,22 +608,22 @@
             "homepage": "https://github.com/woocommerce/woocommerce-admin",
             "support": {
                 "issues": "https://github.com/woocommerce/woocommerce-admin/issues",
-                "source": "https://github.com/woocommerce/woocommerce-admin/tree/v3.0.3"
+                "source": "https://github.com/woocommerce/woocommerce-admin/tree/v3.2.1"
             },
-            "time": "2022-01-06T22:46:17+00:00"
+            "time": "2022-02-24T02:22:41+00:00"
         },
         {
             "name": "woocommerce/woocommerce-blocks",
-            "version": "v6.5.1",
+            "version": "v6.9.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-gutenberg-products-block.git",
-                "reference": "260dddfe93e30d09d34dd0cf3b662ac1d6191aef"
+                "reference": "ea6675c86c11138860766a824420b6c7fbcb7e47"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/260dddfe93e30d09d34dd0cf3b662ac1d6191aef",
-                "reference": "260dddfe93e30d09d34dd0cf3b662ac1d6191aef",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/ea6675c86c11138860766a824420b6c7fbcb7e47",
+                "reference": "ea6675c86c11138860766a824420b6c7fbcb7e47",
                 "shasum": ""
             },
             "require": {
@@ -631,7 +631,7 @@
                 "composer/installers": "^1.7.0"
             },
             "require-dev": {
-                "johnbillion/wp-hooks-generator": "0.6.1",
+                "johnbillion/wp-hooks-generator": "^0.7.0",
                 "mockery/mockery": "^1.4",
                 "woocommerce/woocommerce-sniffs": "0.1.0",
                 "wp-phpunit/wp-phpunit": "^5.4",
@@ -662,9 +662,9 @@
             ],
             "support": {
                 "issues": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues",
-                "source": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/v6.5.1"
+                "source": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/v6.9.0"
             },
-            "time": "2021-12-22T11:40:29+00:00"
+            "time": "2022-02-02T10:37:29+00:00"
         }
     ],
     "packages-dev": [
@@ -711,8 +711,8 @@
             },
             "autoload": {
                 "psr-4": {
-                    "Automattic\\Jetpack\\Changelogger\\": "src",
-                    "Automattic\\Jetpack\\Changelog\\": "lib"
+                    "Automattic\\Jetpack\\Changelog\\": "lib",
+                    "Automattic\\Jetpack\\Changelogger\\": "src"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -2926,5 +2926,5 @@
     "platform-overrides": {
         "php": "7.0.33"
     },
-    "plugin-api-version": "2.0.0"
+    "plugin-api-version": "2.1.0"
 }

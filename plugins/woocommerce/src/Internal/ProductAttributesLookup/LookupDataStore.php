@@ -36,7 +36,7 @@ class LookupDataStore {
 	public function __construct() {
 		global $wpdb;
 
-		$this->lookup_table_name  = $wpdb->prefix . 'wc_product_attributes_lookup';
+		$this->lookup_table_name = $wpdb->prefix . 'wc_product_attributes_lookup';
 
 		$this->init_hooks();
 	}
@@ -84,9 +84,18 @@ class LookupDataStore {
 					$settings[] = $title_item;
 
 					if ( ! $regeneration_is_in_progress ) {
+						$regeneration_aborted_warning =
+							$this->regeneration_was_aborted() ?
+							sprintf(
+								"<p><strong style='color: #E00000'>%s</strong></p><p>%s</p>",
+								__( 'WARNING: The product attributes lookup table regeneration process was aborted.', 'woocommerce' ),
+								__( 'This means that the table is probably in an inconsistent state. It\'s recommended to run a new regeneration process or to resume the aborted process (Status - Tools - Regenerate the product attributes lookup table/Resume the product attributes lookup table regeneration) before enabling the table usage.', 'woocommerce' )
+							) : null;
+
 						$settings[] = array(
 							'title'         => __( 'Enable table usage', 'woocommerce' ),
 							'desc'          => __( 'Use the product attributes lookup table for catalog filtering.', 'woocommerce' ),
+							'desc_tip'      => $regeneration_aborted_warning,
 							'id'            => 'woocommerce_attribute_lookup_enabled',
 							'default'       => 'no',
 							'type'          => 'checkbox',
@@ -114,8 +123,6 @@ class LookupDataStore {
 
 	/**
 	 * Check if the lookup table exists in the database.
-	 *
-	 * TODO: Remove this method and references to it once the lookup table is created via data migration.
 	 *
 	 * @return bool
 	 */
@@ -647,5 +654,41 @@ class LookupDataStore {
 	 */
 	public function unset_regeneration_in_progress_flag() {
 		delete_option( 'woocommerce_attribute_lookup_regeneration_in_progress' );
+	}
+
+	/**
+	 * Set a flag indicating that the last lookup table regeneration process started was aborted.
+	 */
+	public function set_regeneration_aborted_flag() {
+		update_option( 'woocommerce_attribute_lookup_regeneration_aborted', 'yes' );
+	}
+
+	/**
+	 * Remove the flag indicating that the last lookup table regeneration process started was aborted.
+	 */
+	public function unset_regeneration_aborted_flag() {
+		delete_option( 'woocommerce_attribute_lookup_regeneration_aborted' );
+	}
+
+	/**
+	 * Tells if the last lookup table regeneration process started was aborted
+	 * (via deleting the 'woocommerce_attribute_lookup_regeneration_in_progress' option).
+	 *
+	 * @return bool True if the last lookup table regeneration process was aborted.
+	 */
+	public function regeneration_was_aborted(): bool {
+		return 'yes' === get_option( 'woocommerce_attribute_lookup_regeneration_aborted' );
+	}
+
+	/**
+	 * Check if the lookup table contains any entry at all.
+	 *
+	 * @return bool True if the table contains entries, false if the table is empty.
+	 */
+	public function lookup_table_has_data(): bool {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		return ( (int) $wpdb->get_var( "SELECT EXISTS (SELECT 1 FROM {$this->lookup_table_name})" ) ) !== 0;
 	}
 }
