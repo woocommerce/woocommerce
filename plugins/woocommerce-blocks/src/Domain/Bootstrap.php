@@ -1,33 +1,32 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Domain;
 
-use Automattic\WooCommerce\Blocks\AssetsController as AssetsController;
 use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
 use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
-use Automattic\WooCommerce\Blocks\BlockTypesController;
+use Automattic\WooCommerce\Blocks\AssetsController as AssetsController;
 use Automattic\WooCommerce\Blocks\BlockTemplatesController;
+use Automattic\WooCommerce\Blocks\BlockTypesController;
+use Automattic\WooCommerce\Blocks\Domain\Services\CreateAccount;
+use Automattic\WooCommerce\Blocks\Domain\Services\DraftOrders;
+use Automattic\WooCommerce\Blocks\Domain\Services\FeatureGating;
+use Automattic\WooCommerce\Blocks\Domain\Services\GoogleAnalytics;
 use Automattic\WooCommerce\Blocks\InboxNotifications;
 use Automattic\WooCommerce\Blocks\Installer;
-use Automattic\WooCommerce\Blocks\Registry\Container;
-use Automattic\WooCommerce\Blocks\RestApi;
 use Automattic\WooCommerce\Blocks\Payments\Api as PaymentsApi;
-use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
-use Automattic\WooCommerce\Blocks\Payments\Integrations\Cheque;
-use Automattic\WooCommerce\Blocks\Payments\Integrations\PayPal;
 use Automattic\WooCommerce\Blocks\Payments\Integrations\BankTransfer;
 use Automattic\WooCommerce\Blocks\Payments\Integrations\CashOnDelivery;
-use Automattic\WooCommerce\Blocks\Domain\Services\FeatureGating;
-use Automattic\WooCommerce\Blocks\Domain\Services\DraftOrders;
-use Automattic\WooCommerce\Blocks\Domain\Services\CreateAccount;
-use Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi;
-use Automattic\WooCommerce\Blocks\Domain\Services\Email\CustomerNewAccount;
+use Automattic\WooCommerce\Blocks\Payments\Integrations\Cheque;
+use Automattic\WooCommerce\Blocks\Payments\Integrations\PayPal;
+use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
+use Automattic\WooCommerce\Blocks\Registry\Container;
+use Automattic\WooCommerce\Blocks\RestApi;
 use Automattic\WooCommerce\Blocks\StoreApi\Formatters;
-use Automattic\WooCommerce\Blocks\StoreApi\Formatters\MoneyFormatter;
-use Automattic\WooCommerce\Blocks\StoreApi\Formatters\HtmlFormatter;
 use Automattic\WooCommerce\Blocks\StoreApi\Formatters\CurrencyFormatter;
+use Automattic\WooCommerce\Blocks\StoreApi\Formatters\HtmlFormatter;
+use Automattic\WooCommerce\Blocks\StoreApi\Formatters\MoneyFormatter;
 use Automattic\WooCommerce\Blocks\StoreApi\RoutesController;
 use Automattic\WooCommerce\Blocks\StoreApi\SchemaController;
-use Automattic\WooCommerce\Blocks\Domain\Services\GoogleAnalytics;
+use Automattic\WooCommerce\Blocks\StoreApi\Schemas\ExtendSchema;
 
 /**
  * Takes care of bootstrapping the plugin.
@@ -97,7 +96,7 @@ class Bootstrap {
 		}
 		$this->container->get( DraftOrders::class )->init();
 		$this->container->get( CreateAccount::class )->init();
-		$this->container->get( ExtendRestApi::class );
+		$this->container->get( ExtendSchema::class );
 		$this->container->get( RestApi::class );
 		$this->container->get( GoogleAnalytics::class );
 		$this->container->get( BlockTypesController::class );
@@ -259,7 +258,15 @@ class Bootstrap {
 		$this->container->register(
 			SchemaController::class,
 			function( Container $container ) {
-				return new SchemaController( $container->get( ExtendRestApi::class ) );
+				return new SchemaController( $container->get( ExtendSchema::class ) );
+			}
+		);
+		// Backwards compatibility with old name space.
+		$this->container->register(
+			'Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi',
+			function( Container $container ) {
+				_deprecated_function( 'Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi', '7.1.0', 'Automattic\WooCommerce\Blocks\StoreApi\Schemas\ExtendSchema' );
+				return $container->get( ExtendSchema::class );
 			}
 		);
 		$this->container->register(
@@ -269,9 +276,9 @@ class Bootstrap {
 			}
 		);
 		$this->container->register(
-			ExtendRestApi::class,
+			ExtendSchema::class,
 			function( Container $container ) {
-				return new ExtendRestApi( $container->get( Package::class ), $container->get( Formatters::class ) );
+				return new ExtendSchema( $container->get( Formatters::class ) );
 			}
 		);
 		$this->container->register(

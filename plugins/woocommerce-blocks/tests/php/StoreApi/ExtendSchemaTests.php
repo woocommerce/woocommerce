@@ -1,24 +1,25 @@
 <?php
 
-
-namespace Automattic\WooCommerce\Blocks\Tests\Library;
+namespace Automattic\WooCommerce\Blocks\Tests\StoreApi;
 
 use Yoast\PHPUnitPolyfills\TestCases\TestCase;
-use Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi;
+use Automattic\WooCommerce\Blocks\StoreApi\Schemas\ExtendSchema;
 use Automattic\WooCommerce\Blocks\StoreApi\Formatters;
 use Automattic\WooCommerce\Blocks\StoreApi\Formatters\CurrencyFormatter;
 use Automattic\WooCommerce\Blocks\StoreApi\Formatters\HtmlFormatter;
 use Automattic\WooCommerce\Blocks\StoreApi\Formatters\MoneyFormatter;
-use Exception;
-use Automattic\WooCommerce\Blocks\Domain\Services\FeatureGating;
-use Automattic\WooCommerce\Blocks\Domain\Package as DomainPackage;
 
 /**
- * Tests Delete Draft Orders functionality
+ * Tests Extend Schema Functionality and helpers.
  *
  * @since $VID:$
  */
-class TestExtendRestApi extends TestCase {
+class ExtendSchemaTests extends TestCase {
+	/**
+	 * Extend mock.
+	 *
+	 * @var ExtendSchema
+	 */
 	private $mock_extend;
 
 	/**
@@ -28,31 +29,18 @@ class TestExtendRestApi extends TestCase {
 	private $dummy;
 
 	/**
-	 * Tracking caught exceptions from API.
-	 */
-	private $caught_exception;
-
-	/**
 	 * Setup test products data. Called before every test.
 	 */
-	public function setUp() {
+	protected function setUp(): void {
 		parent::setUp();
 		$formatters = new Formatters();
 		$formatters->register( 'money', MoneyFormatter::class );
 		$formatters->register( 'html', HtmlFormatter::class );
 		$formatters->register( 'currency', CurrencyFormatter::class );
-		$this->mock_extend = new ExtendRestApi( new DomainPackage( '', '', new FeatureGating( 2 ) ), $formatters );
+		$this->mock_extend = new ExtendSchema( $formatters );
 		$this->dummy       = function () {
 			return null;
 		};
-		// set listening for exceptions
-		add_action(
-			'woocommerce_caught_exception',
-			function( $exception_object ) {
-				$this->caught_exception = $exception_object;
-				throw $exception_object;
-			}
-		);
 	}
 
 	/**
@@ -72,7 +60,7 @@ class TestExtendRestApi extends TestCase {
 	 * Test that we can register a callback and the same function is returned.
 	 */
 	public function test_fail_register_callback() {
-		$this->expectException( Exception::class );
+		$this->expectException( \Exception::class );
 		$this->expectExceptionMessage( 'You must provide a plugin namespace when extending a Store REST endpoint.' );
 		$this->mock_extend->register_update_callback(
 			array(
@@ -85,7 +73,7 @@ class TestExtendRestApi extends TestCase {
 	 * Test that we can register a callback and the same function is returned.
 	 */
 	public function test_fail_get_callback() {
-		$this->expectException( Exception::class );
+		$this->expectException( \Exception::class );
 		$this->expectExceptionMessage( 'There is no such namespace registered: nonexistent-plugin.' );
 		$this->mock_extend->register_update_callback(
 			array(
@@ -100,7 +88,7 @@ class TestExtendRestApi extends TestCase {
 	 * Test that we can register a callback and the same function is returned.
 	 */
 	public function test_fail_get_callback_with_uncallable() {
-		$this->expectException( Exception::class );
+		$this->expectException( \Exception::class );
 		$this->expectExceptionMessage( 'There is no valid callback supplied to register_update_callback.' );
 		$this->mock_extend->register_update_callback(
 			array(

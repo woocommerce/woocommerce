@@ -6,8 +6,6 @@
 namespace Automattic\WooCommerce\Blocks\Tests\StoreApi\Routes;
 
 use Automattic\WooCommerce\Blocks\Tests\StoreApi\Routes\ControllerTestCase;
-use Automattic\WooCommerce\Blocks\StoreApi\Routes\RouteException;
-use Automattic\WooCommerce\Blocks\Tests\Helpers\ValidateSchema;
 
 /**
  * Cart Controller Tests.

@@ -443,7 +443,7 @@ class Checkout extends AbstractCartRoute {
 		 * Fires when the Checkout Block/Store API updates an order's from the API request data.
 		 *
 		 * This hook gives extensions the chance to update orders based on the data in the request. This can be used in
-		 * conjunction with the ExtendRestAPI class to post custom data and then process it.
+		 * conjunction with the ExtendSchema class to post custom data and then process it.
 		 *
 		 * @internal This Hook is experimental and may change or be removed.
 		 *
@@ -467,7 +467,7 @@ class Checkout extends AbstractCartRoute {
 		 * Fires when the Checkout Block/Store API updates an order's from the API request data.
 		 *
 		 * This hook gives extensions the chance to update orders based on the data in the request. This can be used in
-		 * conjunction with the ExtendRestAPI class to post custom data and then process it.
+		 * conjunction with the ExtendSchema class to post custom data and then process it.
 		 *
 		 * @param \WC_Order $order Order object.
 		 * @param \WP_REST_Request $request Full details about the request.
