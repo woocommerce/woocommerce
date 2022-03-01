@@ -5,6 +5,7 @@
 		"outDir": "build-module",
 		"declaration": true,
 		"declarationMap": true,
-		"declarationDir": "./build-types"
+		"declarationDir": "./build-types",
+		"composite": true
 	}
 }

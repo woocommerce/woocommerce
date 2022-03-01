@@ -40,6 +40,6 @@
 		"prepack": "npm run clean && npm run build",
 		"test": "lerna run build && npm run test:nobuild",
 		"test:nobuild": "jest --config ./jest.config.json",
-		"test-staged": "jest --bail --config ./jest.config.json --findRelatedTests"		
+		"test-staged": "jest --bail --config ./jest.config.json --findRelatedTests"
 	}
 }

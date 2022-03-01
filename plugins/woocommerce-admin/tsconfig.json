@@ -1,5 +1,6 @@
 {
 	"compilerOptions": {
+		"noEmit": true,
 		// Target latest version of ECMAScript.
 		"target": "esnext",
 		// Search under node_modules for non-relative imports.
@@ -27,6 +28,7 @@
 	"exclude": [ "node_modules", "build", "build-module", "dist", "vendor" ],
 	"files": [],
 	"references": [
+		{ "path": "client/" },
 		{ "path": "packages/admin-e2e-tests" },
         { "path": "packages/components" },
 		{ "path": "packages/csv-export" },

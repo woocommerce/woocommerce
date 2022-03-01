@@ -25,7 +25,9 @@ wp-cli.local.yml
 *.tgz
 *.zip
 .idea
-.vscode/
+.vscode/*
+!.vscode/tasks.json
+!.vscode/settings.json
 
 # Composer
 /vendor/

@@ -29,6 +29,15 @@ For some debugging tools/help [see here](./CONTRIBUTING.md#debugging)
 
 For local development setup using Docker [see here](./docker/wc-admin-wp-env/README.md)
 
+### Typescript
+
+The `npm run ts:check` command will check your TypeScript files for errors, and has been added to `.vscode/tasks.json`. 
+Running this task in vscode will highlight the errors in your editor file navigator.
+
+If you allow the `npm run ts:check:watch` command to run automatically as configured, it will run in the background and pick up any errors as you save the files.
+Note: Even if you don't run this task, the IDE uses its language server to pick up type errors in files that are open. This is only necessary for picking up errors
+across the entire repository even when they haven't been opened in the IDE.
+
 ### Testing
 
 #### End-to-end tests

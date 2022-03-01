@@ -12,11 +12,7 @@ import {
 import { H } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 import { getAdminLink } from '@woocommerce/settings';
-
-/**
- * Internal dependencies
- */
-import { createErrorNotice } from '../../../packages/data/src/plugins/actions';
+import { createErrorNotice } from '@woocommerce/data/src/plugins/actions';
 
 const getJetpackInstallText = ( jetpackInstallState ) => {
 	return (

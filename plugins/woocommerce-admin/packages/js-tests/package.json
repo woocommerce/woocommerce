@@ -16,7 +16,9 @@
 	"private": true,
 	"main": "build/util/index.js",
 	"scripts": {
-		"build": "tsc --build",
+		"build": "npm run ts:check && npm run build:cjs",
+		"build:cjs": "tsc --build ./tsconfig-cjs.json",
+		"ts:check": "tsc --noEmit --project ./tsconfig.json",
 		"clean": "npx rimraf tsconfig.tsbuildinfo build build-*",
 		"prepack": "npm run clean && npm run build"
 	}
