@@ -9,7 +9,7 @@ use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 /**
  * Payments Task
  */
-class Payments extends Task {
+class ExtendedPayments extends Task {
 	/**
 	 * ID.
 	 *
@@ -25,7 +25,7 @@ class Payments extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Set up payments', 'woocommerce-admin' );
+		return __( 'Set up additional payment providers', 'woocommerce-admin' );
 	}
 
 	/**
@@ -64,8 +64,11 @@ class Payments extends Task {
 	 * @return bool
 	 */
 	public function can_view() {
-		$woocommerce_payments = $this->task_list->get_task( 'woocommerce-payments' );
-		return Features::is_enabled( 'payment-gateway-suggestions' ) && ! $woocommerce_payments->can_view();
+		return Features::is_enabled( 'payment-gateway-suggestions' ) &&
+			WooCommercePayments::is_requested() &&
+			WooCommercePayments::is_installed() &&
+			WooCommercePayments::is_supported() &&
+			( $this->get_parent_id() !== 'extended_two_column' || ! WooCommercePayments::is_connected() );
 	}
 
 	/**

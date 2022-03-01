@@ -60,11 +60,11 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 	};
 
 	const toggleTaskList = ( taskList ) => {
-		const { id, isHidden } = taskList;
+		const { id, eventPrefix, isHidden } = taskList;
 		const newValue = ! isHidden;
 
 		recordEvent(
-			newValue ? `${ id }_tasklist_hide` : `${ id }_tasklist_show`,
+			newValue ? `${ eventPrefix }hide` : `${ eventPrefix }show`,
 			{}
 		);
 
@@ -101,62 +101,63 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 		return <TasksPlaceholder query={ query } />;
 	}
 
-	return taskLists.map( ( taskList ) => {
-		const {
-			id,
-			isComplete,
-			isHidden,
-			isVisible,
-			isToggleable,
-			title,
-		} = taskList;
+	return taskLists
+		.filter( ( { id } ) =>
+			experimentAssignment?.variationName === 'treatment'
+				? id.endsWith( 'two_column' )
+				: ! id.endsWith( 'two_column' )
+		)
+		.map( ( taskList ) => {
+			const {
+				id,
+				eventPrefix,
+				isComplete,
+				isHidden,
+				isVisible,
+				isToggleable,
+				title,
+				tasks,
+			} = taskList;
 
-		if ( ! isVisible ) {
-			return null;
-		}
-		const hasMultiplePaymentTasks =
-			( taskList.tasks || [] ).filter(
-				( t ) => t.id === 'payments' || t.id === 'woocommerce-payments'
-			).length > 1;
-		const tasks =
-			id === 'setup' && hasMultiplePaymentTasks && taskList.tasks
-				? taskList.tasks.filter( ( t ) => t.id !== 'payments' )
-				: taskList.tasks;
+			if ( ! isVisible ) {
+				return null;
+			}
 
-		return (
-			<Fragment key={ id }>
-				<TaskList
-					id={ id }
-					isComplete={ isComplete }
-					isExpandable={
-						experimentAssignment?.variationName === 'treatment'
-					}
-					query={ query }
-					tasks={ tasks }
-					title={ title }
-				/>
-				{ isToggleable && (
-					<DisplayOption>
-						<MenuGroup
-							className="woocommerce-layout__homescreen-display-options"
-							label={ __( 'Display', 'woocommerce-admin' ) }
-						>
-							<MenuItem
-								className="woocommerce-layout__homescreen-extension-tasklist-toggle"
-								icon={ ! isHidden && check }
-								isSelected={ ! isHidden }
-								role="menuitemcheckbox"
-								onClick={ () => toggleTaskList( taskList ) }
+			return (
+				<Fragment key={ id }>
+					<TaskList
+						id={ id }
+						eventPrefix={ eventPrefix }
+						isComplete={ isComplete }
+						isExpandable={
+							experimentAssignment?.variationName === 'treatment'
+						}
+						query={ query }
+						tasks={ tasks }
+						title={ title }
+					/>
+					{ isToggleable && (
+						<DisplayOption>
+							<MenuGroup
+								className="woocommerce-layout__homescreen-display-options"
+								label={ __( 'Display', 'woocommerce-admin' ) }
 							>
-								{ __(
-									'Show things to do next',
-									'woocommerce-admin'
-								) }
-							</MenuItem>
-						</MenuGroup>
-					</DisplayOption>
-				) }
-			</Fragment>
-		);
-	} );
+								<MenuItem
+									className="woocommerce-layout__homescreen-extension-tasklist-toggle"
+									icon={ ! isHidden && check }
+									isSelected={ ! isHidden }
+									role="menuitemcheckbox"
+									onClick={ () => toggleTaskList( taskList ) }
+								>
+									{ __(
+										'Show things to do next',
+										'woocommerce-admin'
+									) }
+								</MenuItem>
+							</MenuGroup>
+						</DisplayOption>
+					) }
+				</Fragment>
+			);
+		} );
 };

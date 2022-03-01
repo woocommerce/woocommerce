@@ -10,10 +10,14 @@ use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\Products;
  * Appearance Task
  */
 class Appearance extends Task {
+
 	/**
-	 * Initialize.
+	 * Constructor
+	 *
+	 * @param TaskList $task_list Parent task list.
 	 */
-	public function __construct() {
+	public function __construct( $task_list ) {
+		parent::__construct( $task_list );
 		add_action( 'admin_enqueue_scripts', array( $this, 'add_media_scripts' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_return_notice_script' ) );
 	}
@@ -25,15 +29,6 @@ class Appearance extends Task {
 	 */
 	public function get_id() {
 		return 'appearance';
-	}
-
-	/**
-	 * Parent ID.
-	 *
-	 * @return string
-	 */
-	public function get_parent_id() {
-		return 'setup';
 	}
 
 	/**

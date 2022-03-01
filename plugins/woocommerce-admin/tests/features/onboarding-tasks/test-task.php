@@ -35,9 +35,11 @@ class TestTask extends Task {
 	/**
 	 * Constructor.
 	 *
-	 * @param array $args Array of task args.
+	 * @param TaskList|null $task_list Parent task list.
+	 * @param array         $args Array of task args.
 	 */
-	public function __construct( $args ) {
+	public function __construct( $task_list, $args ) {
+		parent::__construct( $task_list );
 		$task_args = wp_parse_args(
 			$args,
 			array(

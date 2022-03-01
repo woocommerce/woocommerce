@@ -67,7 +67,6 @@ class TaskLists {
 	 */
 	public static function init() {
 		self::init_default_lists();
-		self::maybe_add_default_tasks();
 		add_action( 'admin_init', array( __CLASS__, 'set_active_task' ), 5 );
 		add_action( 'init', array( __CLASS__, 'init_tasks' ) );
 	}
@@ -78,11 +77,22 @@ class TaskLists {
 	public static function init_default_lists() {
 		self::add_list(
 			array(
-				'id'    => 'setup',
-				'title' => __( 'Get ready to start selling', 'woocommerce-admin' ),
+				'id'           => 'setup',
+				'title'        => __( 'Get ready to start selling', 'woocommerce-admin' ),
+				'tasks'        => array(
+					'StoreDetails',
+					'Purchase',
+					'Products',
+					'WooCommercePayments',
+					'Payments',
+					'Tax',
+					'Shipping',
+					'Marketing',
+					'Appearance',
+				),
+				'event_prefix' => 'tasklist_',
 			)
 		);
-
 		self::add_list(
 			array(
 				'id'      => 'extended',
@@ -97,6 +107,47 @@ class TaskLists {
 						'order' => 'asc',
 					),
 				),
+				'tasks'   => array(
+					'ExtendedPayments',
+				),
+			)
+		);
+		self::add_list(
+			array(
+				'id'           => 'setup_two_column',
+				'hidden_id'    => 'setup',
+				'title'        => __( 'Get ready to start selling', 'woocommerce-admin' ),
+				'tasks'        => array(
+					'Products',
+					'WooCommercePayments',
+					'Payments',
+					'Tax',
+					'Shipping',
+					'Marketing',
+					'Appearance',
+				),
+				'event_prefix' => 'tasklist_',
+			)
+		);
+		self::add_list(
+			array(
+				'id'           => 'extended_two_column',
+				'hidden_id'    => 'extended',
+				'title'        => __( 'Things to do next', 'woocommerce-admin' ),
+				'sort_by'      => array(
+					array(
+						'key'   => 'is_complete',
+						'order' => 'asc',
+					),
+					array(
+						'key'   => 'level',
+						'order' => 'asc',
+					),
+				),
+				'tasks'        => array(
+					'ExtendedPayments',
+				),
+				'event_prefix' => 'extended_tasklist_',
 			)
 		);
 	}
@@ -142,7 +193,7 @@ class TaskLists {
 	 * Add a task list.
 	 *
 	 * @param array $args Task list properties.
-	 * @return WP_Error|Task
+	 * @return WP_Error|TaskList
 	 */
 	public static function add_list( $args ) {
 		if ( isset( self::$lists[ $args['id'] ] ) ) {
@@ -153,6 +204,7 @@ class TaskLists {
 		}
 
 		self::$lists[ $args['id'] ] = new TaskList( $args );
+		return self::$lists[ $args['id'] ];
 	}
 
 	/**
@@ -174,34 +226,23 @@ class TaskLists {
 	}
 
 	/**
-	 * Add default task lists.
-	 */
-	public static function maybe_add_default_tasks() {
-		if ( ! apply_filters( 'woocommerce_admin_onboarding_tasks_add_default_tasks', ! self::$default_tasks_loaded ) ) {
-			return;
-		}
-
-		self::$default_tasks_loaded = true;
-
-		foreach ( self::DEFAULT_TASKS as $task_name ) {
-			$class = 'Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\\' . $task_name;
-			$task  = new $class();
-			self::add_task( $task->get_parent_id(), $task );
-		}
-	}
-
-	/**
 	 * Add default extended task lists.
 	 *
 	 * @param array $extended_tasks list of extended tasks.
 	 */
 	public static function maybe_add_extended_tasks( $extended_tasks ) {
-		$tasks = $extended_tasks ? $extended_tasks : array();
+		$tasks = $extended_tasks ?? array();
 
-		foreach ( $tasks as $args ) {
-			$task = new DeprecatedExtendedTask( $args );
-			self::add_task( $task->get_parent_id(), $task );
+		foreach ( self::$lists as $task_list ) {
+			if ( 'extended' !== substr( $task_list->id, 0, 8 ) ) {
+				continue;
+			}
+			foreach ( $tasks as $args ) {
+				$task = new DeprecatedExtendedTask( $task_list, $args );
+				$task_list->add_task( $task );
+			}
 		}
+
 	}
 
 	/**
@@ -211,6 +252,30 @@ class TaskLists {
 	 */
 	public static function get_lists() {
 		return self::$lists;
+	}
+
+	/**
+	 * Get all task lists.
+	 *
+	 * @param array $ids list of task list ids.
+	 * @return array
+	 */
+	public static function get_lists_by_ids( $ids ) {
+		return array_filter(
+			self::$lists,
+			function( $list ) use ( $ids ) {
+				return in_array( $list->get_list_id(), $ids, true );
+			}
+		);
+	}
+
+	/**
+	 * Get all task list ids.
+	 *
+	 * @return array
+	 */
+	public static function get_list_ids() {
+		return array_keys( self::$lists );
 	}
 
 	/**
@@ -242,10 +307,8 @@ class TaskLists {
 	 * @return TaskList|null
 	 */
 	public static function get_list( $id ) {
-		foreach ( self::get_lists() as $task_list ) {
-			if ( $task_list->id === $id ) {
-				return $task_list;
-			}
+		if ( isset( self::$lists[ $id ] ) ) {
+			return self::$lists[ $id ];
 		}
 
 		return null;

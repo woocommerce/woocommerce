@@ -20,4 +20,5 @@ export type TaskListType = {
 	isExpandable?: boolean;
 	tasks: TaskType[];
 	title: string;
+	eventPrefix: string;
 };

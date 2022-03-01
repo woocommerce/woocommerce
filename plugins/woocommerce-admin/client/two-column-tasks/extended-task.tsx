@@ -16,7 +16,6 @@ import { DisplayOption } from '~/activity-panel/display-options';
 import { TaskList } from '../tasks/task-list';
 import { TasksPlaceholder } from '../tasks/placeholder';
 import '../tasks/tasks.scss';
-import allowedTasks from './allowed-tasks';
 
 export type TasksProps = {
 	query: { task?: string };
@@ -30,9 +29,11 @@ const ExtendedTask: React.FC< TasksProps > = ( { query } ) => {
 	const { isResolving, taskLists } = useSelect( ( select ) => {
 		return {
 			isResolving: select( ONBOARDING_STORE_NAME ).isResolving(
-				'getTaskLists'
+				'getTaskListsByIds'
 			),
-			taskLists: select( ONBOARDING_STORE_NAME ).getTaskLists(),
+			taskLists: select( ONBOARDING_STORE_NAME ).getTaskListsByIds( [
+				'extended_two_column',
+			] ),
 		};
 	} );
 
@@ -63,37 +64,9 @@ const ExtendedTask: React.FC< TasksProps > = ( { query } ) => {
 		return <TasksPlaceholder query={ query } />;
 	}
 
-	const extendedTaskList = taskLists.find( ( list ) => {
-		return list.id === 'extended';
-	} );
+	const extendedTaskList = taskLists[ 0 ];
 
-	// See if we need to move any of the main tasks to the extended task list
-	const setupTaskList = taskLists.find( ( list ) => {
-		return list.id === 'setup';
-	} );
-	const hasSetupPaymentsTask = setupTaskList.tasks.find(
-		( t ) => t.id === 'payments'
-	);
-
-	extendedTaskList.tasks = [
-		...new Set(
-			// Filter out the additional payments task if it is already present in the setup tasks.
-			extendedTaskList.tasks
-				.filter(
-					( t ) => t.id !== 'payments' || ! hasSetupPaymentsTask
-				)
-				.concat(
-					setupTaskList?.tasks.filter( ( unallowedTask ) => {
-						return (
-							! allowedTasks.includes( unallowedTask.id ) &&
-							unallowedTask.id !== 'store_details'
-						);
-					} ) || []
-				)
-		),
-	];
-
-	if ( extendedTaskList.tasks.length === 0 ) {
+	if ( ! extendedTaskList || extendedTaskList.tasks.length === 0 ) {
 		return null;
 	}
 
@@ -109,6 +82,7 @@ const ExtendedTask: React.FC< TasksProps > = ( { query } ) => {
 
 	const {
 		id,
+		eventPrefix,
 		isHidden,
 		isVisible,
 		isToggleable,
@@ -124,6 +98,7 @@ const ExtendedTask: React.FC< TasksProps > = ( { query } ) => {
 		<Fragment key={ id }>
 			<TaskList
 				id={ id }
+				eventPrefix={ eventPrefix }
 				isComplete={ isComplete }
 				query={ query }
 				tasks={ tasks }

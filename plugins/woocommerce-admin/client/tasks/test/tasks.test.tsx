@@ -46,6 +46,7 @@ describe( 'Task', () => {
 			taskLists: [
 				{
 					id: 'main',
+					eventPrefix: 'main_tasklist_',
 					isVisible: true,
 					tasks: [ { id: 'main-task-1' }, { id: 'main-task-2' } ],
 				},
@@ -124,6 +125,7 @@ describe( 'Task', () => {
 			taskLists: [
 				{
 					id: 'main',
+					eventPrefix: 'main_tasklist_',
 					isVisible: true,
 					isToggleable: true,
 					isHidden: false,
@@ -157,6 +159,7 @@ describe( 'Task', () => {
 				taskLists: [
 					{
 						id: 'main',
+						eventPrefix: 'main_tasklist_',
 						isVisible: true,
 						isToggleable: true,
 						isHidden: false,
@@ -185,6 +188,7 @@ describe( 'Task', () => {
 				taskLists: [
 					{
 						id: 'main',
+						eventPrefix: 'main_tasklist_',
 						isVisible: true,
 						isToggleable: true,
 						isHidden: true,

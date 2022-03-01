@@ -5,9 +5,10 @@
  * @package WooCommerce\Admin\Tests\OnboardingTasks
  */
 
-use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
-
 require_once __DIR__ . '/test-task.php';
+
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskList;
 
 /**
  * class WC_Tests_OnboardingTasks_Task
@@ -19,6 +20,7 @@ class WC_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 	 */
 	public function test_capability_visible() {
 		$task = new TestTask(
+			new TaskList( array( 'id' => 'setup' ) ),
 			array(
 				'id' => 'wc-unit-test-task',
 			)
@@ -32,6 +34,7 @@ class WC_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 	 */
 	public function test_capability_not_visible() {
 		$task = new TestTask(
+			new TaskList( array( 'id' => 'setup' ) ),
 			array(
 				'id'       => 'wc-unit-test-task',
 				'can_view' => false,
@@ -46,6 +49,7 @@ class WC_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 	 */
 	public function test_dismiss() {
 		$task = new TestTask(
+			new TaskList( array( 'id' => 'setup' ) ),
 			array(
 				'id'             => 'wc-unit-test-task',
 				'is_dismissable' => true,
@@ -63,6 +67,7 @@ class WC_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 	 */
 	public function test_undo_dismiss() {
 		$task = new TestTask(
+			new TaskList( array( 'id' => 'setup' ) ),
 			array(
 				'id'             => 'wc-unit-test-task',
 				'is_dismissable' => true,
@@ -80,6 +85,7 @@ class WC_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 	 */
 	public function test_not_dismissable() {
 		$task = new TestTask(
+			new TaskList( array( 'id' => 'setup' ) ),
 			array(
 				'id'             => 'wc-unit-test-non-dismissable-task',
 				'is_dismissable' => false,
@@ -98,6 +104,7 @@ class WC_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 	 */
 	public function test_snooze() {
 		$task = new TestTask(
+			new TaskList( array( 'id' => 'setup' ) ),
 			array(
 				'id'            => 'wc-unit-test-snoozeable-task',
 				'is_snoozeable' => true,
@@ -115,6 +122,7 @@ class WC_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 	 */
 	public function test_undo_snooze() {
 		$task = new TestTask(
+			new TaskList( array( 'id' => 'setup' ) ),
 			array(
 				'id'            => 'wc-unit-test-snoozeable-task',
 				'is_snoozeable' => true,
@@ -137,6 +145,7 @@ class WC_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 		update_option( Task::SNOOZED_OPTION, $snoozed );
 
 		$task = new TestTask(
+			new TaskList( array( 'id' => 'setup' ) ),
 			array(
 				'id'            => 'wc-unit-test-task',
 				'is_snoozeable' => true,
@@ -152,6 +161,7 @@ class WC_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 	 */
 	public function test_not_snoozeable() {
 		$task = new TestTask(
+			new TaskList( array( 'id' => 'setup' ) ),
 			array(
 				'id'            => 'wc-unit-test-snoozeable-task',
 				'is_snoozeable' => false,
@@ -167,6 +177,7 @@ class WC_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 	 */
 	public function test_snooze_time() {
 		$task = new TestTask(
+			new TaskList( array( 'id' => 'setup' ) ),
 			array(
 				'id'            => 'wc-unit-test-snoozeable-task',
 				'is_snoozeable' => true,
@@ -187,6 +198,7 @@ class WC_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 	 */
 	public function test_json() {
 		$task = new TestTask(
+			new TaskList( array( 'id' => 'setup' ) ),
 			array(
 				'id' => 'wc-unit-test-task',
 			)
@@ -214,6 +226,7 @@ class WC_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 	 */
 	public function test_action_task() {
 		$task = new TestTask(
+			new TaskList( array( 'id' => 'setup' ) ),
 			array(
 				'id' => 'wc-unit-test-task',
 			)
@@ -230,11 +243,13 @@ class WC_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 	 */
 	public function test_sort_with_empty_sort_by_config() {
 		$task_a = new TestTask(
+			new TaskList( array( 'id' => 'setup' ) ),
 			array(
 				'id' => 'a',
 			)
 		);
 		$task_b = new TestTask(
+			new TaskList( array( 'id' => 'setup' ) ),
 			array(
 				'id' => 'b',
 			)
@@ -248,11 +263,13 @@ class WC_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 	 */
 	public function test_sort_with_sort_by_config_with_invalid_key() {
 		$task_a = new TestTask(
+			new TaskList( array( 'id' => 'setup' ) ),
 			array(
 				'id' => 'a',
 			)
 		);
 		$task_b = new TestTask(
+			new TaskList( array( 'id' => 'setup' ) ),
 			array(
 				'id' => 'b',
 			)
@@ -275,12 +292,14 @@ class WC_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 	 */
 	public function test_sort_with_sort_by_config_with_valid_key_asc() {
 		$task_a = new TestTask(
+			new TaskList( array( 'id' => 'setup' ) ),
 			array(
 				'id'    => 'a',
 				'level' => 1,
 			)
 		);
 		$task_b = new TestTask(
+			new TaskList( array( 'id' => 'setup' ) ),
 			array(
 				'id'    => 'b',
 				'level' => 2,
@@ -304,12 +323,14 @@ class WC_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 	 */
 	public function test_sort_with_sort_by_config_with_valid_key_desc() {
 		$task_a = new TestTask(
+			new TaskList( array( 'id' => 'setup' ) ),
 			array(
 				'id'    => 'a',
 				'level' => 1,
 			)
 		);
 		$task_b = new TestTask(
+			new TaskList( array( 'id' => 'setup' ) ),
 			array(
 				'id'    => 'b',
 				'level' => 2,
@@ -333,6 +354,7 @@ class WC_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 	 */
 	public function test_sort_with_sort_by_config_with_multiple_keys() {
 		$task_a  = new TestTask(
+			new TaskList( array( 'id' => 'setup' ) ),
 			array(
 				'id'          => 'a',
 				'level'       => 2,
@@ -340,6 +362,7 @@ class WC_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 			)
 		);
 		$task_b  = new TestTask(
+			new TaskList( array( 'id' => 'setup' ) ),
 			array(
 				'id'          => 'b',
 				'level'       => 2,
@@ -371,6 +394,7 @@ class WC_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 	 */
 	public function test_get_list_id() {
 		$task = new TestTask(
+			new TaskList( array( 'id' => 'setup' ) ),
 			array(
 				'id' => 'wc-unit-test-task',
 			)
@@ -384,6 +408,7 @@ class WC_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 	 */
 	public function test_record_tracks_event() {
 		$task = new TestTask(
+			new TaskList( array( 'id' => 'extended' ) ),
 			array(
 				'id' => 'wc-unit-test-task',
 			)

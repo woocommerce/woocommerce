@@ -12,22 +12,6 @@ defined( 'ABSPATH' ) || exit;
  */
 trait TaskTraits {
 	/**
-	 * Prefix event for backwards compatibility with tracks event naming.
-	 *
-	 * @param string $event_name Event name.
-	 * @return string
-	 */
-	public function prefix_event( $event_name ) {
-		$id = self::get_list_id();
-
-		if ( 'setup' === $id ) {
-			return 'tasklist_' . $event_name;
-		}
-
-		return $id . '_tasklist_' . $event_name;
-	}
-
-	/**
 	 * Record a tracks event with the prefixed event name.
 	 *
 	 * @param string $event_name Event name.

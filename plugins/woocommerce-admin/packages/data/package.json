@@ -36,7 +36,7 @@
 		"dompurify": "^2.3.3",
 		"md5": "^2.3.0",
 		"qs": "6.9.6",
-		"rememo": "^3.0.0"
+		"rememo": "^4.0.0"
 	},
 	"publishConfig": {
 		"access": "public"

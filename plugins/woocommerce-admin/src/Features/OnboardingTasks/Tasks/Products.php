@@ -9,10 +9,14 @@ use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
  * Products Task
  */
 class Products extends Task {
+
 	/**
-	 * Initialize.
+	 * Constructor
+	 *
+	 * @param TaskList $task_list Parent task list.
 	 */
-	public function __construct() {
+	public function __construct( $task_list ) {
+		parent::__construct( $task_list );
 		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_manual_return_notice_script' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_import_return_notice_script' ) );
 	}
@@ -24,15 +28,6 @@ class Products extends Task {
 	 */
 	public function get_id() {
 		return 'products';
-	}
-
-	/**
-	 * Parent ID.
-	 *
-	 * @return string
-	 */
-	public function get_parent_id() {
-		return 'setup';
 	}
 
 	/**

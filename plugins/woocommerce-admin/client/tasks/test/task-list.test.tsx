@@ -7,7 +7,7 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
-import { TaskList, prefixEvent } from '../task-list';
+import { TaskList } from '../task-list';
 
 jest.mock( '@woocommerce/tracks', () => ( {
 	recordEvent: jest.fn(),
@@ -90,7 +90,13 @@ describe( 'TaskList', () => {
 
 	it( 'should trigger tasklist_view event on initial render for setup task list', () => {
 		render(
-			<TaskList id="setup" tasks={ [] } title="List title" query={ {} } />
+			<TaskList
+				id="setup"
+				eventPrefix="tasklist_"
+				tasks={ [] }
+				title="List title"
+				query={ {} }
+			/>
 		);
 		expect( recordEvent ).toHaveBeenCalledTimes( 1 );
 		expect( recordEvent ).toHaveBeenCalledWith( 'tasklist_view', {
@@ -103,6 +109,7 @@ describe( 'TaskList', () => {
 		render(
 			<TaskList
 				id="extended"
+				eventPrefix="extended_tasklist_"
 				tasks={ [] }
 				title="List title"
 				query={ {} }
@@ -181,19 +188,5 @@ describe( 'TaskList', () => {
 			<TaskList tasks={ dismissedTask } title="List title" query={ {} } />
 		);
 		expect( queryByText( dismissedTask[ 0 ].title ) ).toBeInTheDocument();
-	} );
-
-	describe( 'prefixEvent', () => {
-		it( 'should not prefix tasklist id if id is setup', () => {
-			expect( prefixEvent( 'setup', 'action' ) ).toEqual(
-				'tasklist_action'
-			);
-		} );
-
-		it( 'should prefix tasklist id if id does not equal setup', () => {
-			expect( prefixEvent( 'extended', 'action' ) ).toEqual(
-				'extended_tasklist_action'
-			);
-		} );
 	} );
 } );

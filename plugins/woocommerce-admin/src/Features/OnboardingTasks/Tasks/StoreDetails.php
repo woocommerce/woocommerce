@@ -19,15 +19,6 @@ class StoreDetails extends Task {
 	}
 
 	/**
-	 * Parent ID.
-	 *
-	 * @return string
-	 */
-	public function get_parent_id() {
-		return 'setup';
-	}
-
-	/**
 	 * Title.
 	 *
 	 * @return string

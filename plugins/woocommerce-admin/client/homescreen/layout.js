@@ -337,7 +337,7 @@ export default compose(
 			shouldShowWelcomeModal,
 			shouldShowWelcomeFromCalypsoModal,
 			isTaskListHidden: getTaskList( 'setup' )?.isHidden,
-			hasTaskList: taskLists.find( ( list ) => list.isVisible ),
+			hasTaskList: !! taskLists.find( ( list ) => list.isVisible ),
 			taskListComplete: getTaskList( 'setup' )?.isComplete,
 			installTimestamp,
 			installTimestampHasResolved,

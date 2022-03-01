@@ -193,6 +193,7 @@ class WC_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 		TaskLists::add_task(
 			'test-list',
 			new TestTask(
+				TaskLists::get_list( 'test-list' ),
 				array(
 					'id'            => 'test-task',
 					'title'         => 'Test Task',
@@ -231,6 +232,7 @@ class WC_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 		TaskLists::add_task(
 			'test-list',
 			new TestTask(
+				TaskLists::get_list( 'test-list' ),
 				array(
 					'id'            => 'test-task',
 					'title'         => 'Test Task',
@@ -269,6 +271,7 @@ class WC_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 		TaskLists::add_task(
 			'test-list',
 			new TestTask(
+				TaskLists::get_list( 'test-list' ),
 				array(
 					'id'            => 'test-task',
 					'title'         => 'Test Task',
@@ -307,6 +310,7 @@ class WC_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 		TaskLists::add_task(
 			'test-list',
 			new TestTask(
+				TaskLists::get_list( 'test-list' ),
 				array(
 					'id'            => 'test-task',
 					'title'         => 'Test Task',
@@ -365,6 +369,7 @@ class WC_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 		TaskLists::add_task(
 			'test-list',
 			new TestTask(
+				TaskLists::get_list( 'test-list' ),
 				array(
 					'id'             => 'test-task',
 					'title'          => 'Test Task',
@@ -400,6 +405,7 @@ class WC_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 		TaskLists::add_task(
 			'test-list',
 			new TestTask(
+				TaskLists::get_list( 'test-list' ),
 				array(
 					'id'             => 'test-task',
 					'title'          => 'Test Task',
@@ -457,6 +463,7 @@ class WC_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 		TaskLists::add_task(
 			'test-list',
 			new TestTask(
+				TaskLists::get_list( 'test-list' ),
 				array(
 					'id'             => 'test-task',
 					'title'          => 'Test Task',
@@ -509,6 +516,7 @@ class WC_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 		TaskLists::add_task(
 			'test-list',
 			new TestTask(
+				TaskLists::get_list( 'test-list' ),
 				array(
 					'id'             => 'test-task',
 					'title'          => 'Test Task',

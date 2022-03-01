@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import createSelector from 'rememo';
+
+/**
  * Internal dependencies
  */
 import { TaskType, TaskListType } from './types';
@@ -16,27 +21,42 @@ export const getProfileItems = (
 	return state.profileItems || {};
 };
 
-const initialTaskLists: TaskListType[] = [];
-
 const EMPTY_ARRAY: Product[] = [];
-export const getTaskLists = ( state: OnboardingState ): TaskListType[] => {
-	return state.taskLists || initialTaskLists;
-};
+
+export const getTaskLists = createSelector(
+	( state: OnboardingState ): TaskListType[] => {
+		return Object.values( state.taskLists );
+	},
+	( state: OnboardingState ) => [ state.taskLists ]
+);
+
+export const getTaskListsByIds = createSelector(
+	( state: OnboardingState, ids: string[] ): TaskListType[] => {
+		return ids.map( ( id ) => state.taskLists[ id ] );
+	},
+	( state: OnboardingState, ids: string[] ) =>
+		ids.map( ( id ) => state.taskLists[ id ] )
+);
 
 export const getTaskList = (
 	state: OnboardingState,
 	selector: string
 ): TaskListType | undefined => {
-	return state.taskLists.find( ( list ) => list.id === selector );
+	return state.taskLists[ selector ];
 };
 
 export const getTask = (
 	state: OnboardingState,
 	selector: string
 ): TaskType | undefined => {
-	return state.taskLists.reduce(
-		( value: TaskType | undefined, list: TaskListType ) => {
-			return value || list.tasks.find( ( task ) => task.id === selector );
+	return Object.keys( state.taskLists ).reduce(
+		( value: TaskType | undefined, listId: string ) => {
+			return (
+				value ||
+				state.taskLists[ listId ].tasks.find(
+					( task ) => task.id === selector
+				)
+			);
 		},
 		undefined
 	);
@@ -83,7 +103,7 @@ export type OnboardingSelectors = {
 export type OnboardingState = {
 	freeExtensions: ExtensionList[];
 	profileItems: ProfileItemsState;
-	taskLists: TaskListType[];
+	taskLists: Record< string, TaskListType >;
 	paymentMethods: PaymentMethodsState[];
 	productTypes: Product[];
 	emailPrefill: string;

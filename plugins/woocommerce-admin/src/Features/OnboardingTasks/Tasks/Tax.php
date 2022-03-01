@@ -12,10 +12,14 @@ use Automattic\WooCommerce\Admin\PluginsHelper;
  * Tax Task
  */
 class Tax extends Task {
+
 	/**
-	 * Initialize.
+	 * Constructor
+	 *
+	 * @param TaskList $task_list Parent task list.
 	 */
-	public function __construct() {
+	public function __construct( $task_list ) {
+		parent::__construct( $task_list );
 		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_return_notice_script' ) );
 	}
 
@@ -53,15 +57,6 @@ class Tax extends Task {
 	 */
 	public function get_id() {
 		return 'tax';
-	}
-
-	/**
-	 * Parent ID.
-	 *
-	 * @return string
-	 */
-	public function get_parent_id() {
-		return 'setup';
 	}
 
 	/**

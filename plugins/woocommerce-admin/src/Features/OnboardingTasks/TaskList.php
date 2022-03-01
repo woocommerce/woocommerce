@@ -34,6 +34,13 @@ class TaskList {
 	public $id = '';
 
 	/**
+	 * ID.
+	 *
+	 * @var string
+	 */
+	public $hidden_id = '';
+
+	/**
 	 * Title.
 	 *
 	 * @var string
@@ -55,24 +62,40 @@ class TaskList {
 	public $sort_by = array();
 
 	/**
+	 * Event prefix.
+	 *
+	 * @var string|null
+	 */
+	public $event_prefix = null;
+
+	/**
 	 * Constructor
 	 *
 	 * @param array $data Task list data.
 	 */
 	public function __construct( $data = array() ) {
 		$defaults = array(
-			'id'      => null,
-			'title'   => '',
-			'tasks'   => array(),
-			'sort_by' => array(),
+			'id'           => null,
+			'hidden_id'    => null,
+			'title'        => '',
+			'tasks'        => array(),
+			'sort_by'      => array(),
+			'event_prefix' => null,
 		);
 
 		$data = wp_parse_args( $data, $defaults );
 
-		$this->id      = $data['id'];
-		$this->title   = $data['title'];
-		$this->tasks   = $data['tasks'];
-		$this->sort_by = $data['sort_by'];
+		$this->id           = $data['id'];
+		$this->hidden_id    = $data['hidden_id'];
+		$this->title        = $data['title'];
+		$this->sort_by      = $data['sort_by'];
+		$this->event_prefix = $data['event_prefix'];
+
+		foreach ( $data['tasks'] as $task_name ) {
+			$class = 'Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\\' . $task_name;
+			$task  = new $class( $this );
+			$this->add_task( $task );
+		}
 	}
 
 	/**
@@ -82,7 +105,7 @@ class TaskList {
 	 */
 	public function is_hidden() {
 		$hidden = get_option( self::HIDDEN_OPTION, array() );
-		return in_array( $this->id, $hidden, true );
+		return in_array( $this->hidden_id ? $this->hidden_id : $this->id, $hidden, true );
 	}
 
 	/**
@@ -123,7 +146,7 @@ class TaskList {
 		);
 
 		$hidden   = get_option( self::HIDDEN_OPTION, array() );
-		$hidden[] = $this->id;
+		$hidden[] = $this->hidden_id ? $this->hidden_id : $this->id;
 		return update_option( self::HIDDEN_OPTION, array_unique( $hidden ) );
 	}
 
@@ -134,7 +157,7 @@ class TaskList {
 	 */
 	public function unhide() {
 		$hidden = get_option( self::HIDDEN_OPTION, array() );
-		$hidden = array_diff( $hidden, array( $this->id ) );
+		$hidden = array_diff( $hidden, array( $this->hidden_id ? $this->hidden_id : $this->id ) );
 		return update_option( self::HIDDEN_OPTION, $hidden );
 	}
 
@@ -162,7 +185,7 @@ class TaskList {
 	 */
 	public function has_previously_completed() {
 		$complete = get_option( self::COMPLETED_OPTION, array() );
-		return in_array( $this->id, $complete, true );
+		return in_array( $this->get_list_id(), $complete, true );
 	}
 
 	/**
@@ -177,8 +200,28 @@ class TaskList {
 				__( 'Task is not a subclass of `Task`', 'woocommerce-admin' )
 			);
 		}
+		if ( array_search( $task, $this->tasks ) ) {
+			return;
+		}
 
 		$this->tasks[] = $task;
+	}
+
+	/**
+	 * Get only visible tasks in list.
+	 *
+	 * @param string $task_id id of task.
+	 * @return Task
+	 */
+	public function get_task( $task_id ) {
+		return current(
+			array_filter(
+				$this->tasks,
+				function( $task ) use ( $task_id ) {
+					return $task->get_id() === $task_id;
+				}
+			)
+		);
 	}
 
 	/**
@@ -210,7 +253,7 @@ class TaskList {
 		}
 
 		$completed_lists   = get_option( self::COMPLETED_OPTION, array() );
-		$completed_lists[] = $this->id;
+		$completed_lists[] = $this->get_list_id();
 		update_option( self::COMPLETED_OPTION, $completed_lists );
 		$this->record_tracks_event( 'tasks_completed' );
 	}
@@ -235,6 +278,19 @@ class TaskList {
 	}
 
 	/**
+	 * Prefix event for track event naming.
+	 *
+	 * @param string $event_name Event name.
+	 * @return string
+	 */
+	public function prefix_event( $event_name ) {
+		if ( null !== $this->event_prefix ) {
+			return $this->event_prefix . $event_name;
+		}
+		return $this->get_list_id() . '_tasklist_' . $event_name;
+	}
+
+	/**
 	 * Get the list for use in JSON.
 	 *
 	 * @return array
@@ -242,19 +298,18 @@ class TaskList {
 	public function get_json() {
 		$this->possibly_track_completion();
 		return array(
-			'id'         => $this->id,
-			'title'      => $this->title,
-			'isHidden'   => $this->is_hidden(),
-			'isVisible'  => $this->is_visible(),
-			'isComplete' => $this->is_complete(),
-			'tasks'      => array_map(
+			'id'          => $this->get_list_id(),
+			'title'       => $this->title,
+			'isHidden'    => $this->is_hidden(),
+			'isVisible'   => $this->is_visible(),
+			'isComplete'  => $this->is_complete(),
+			'tasks'       => array_map(
 				function( $task ) {
 					return $task->get_json();
 				},
 				$this->get_viewable_tasks()
 			),
-
+			'eventPrefix' => $this->prefix_event( '' ),
 		);
 	}
-
 }

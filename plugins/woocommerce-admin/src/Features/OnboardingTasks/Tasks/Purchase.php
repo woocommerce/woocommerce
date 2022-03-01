@@ -11,9 +11,12 @@ use Automattic\WooCommerce\Admin\PluginsHelper;
  */
 class Purchase extends Task {
 	/**
-	 * Initialize.
+	 * Constructor
+	 *
+	 * @param TaskList $task_list Parent task list.
 	 */
-	public function __construct() {
+	public function __construct( $task_list ) {
+		parent::__construct( $task_list );
 		add_action( 'update_option_woocommerce_onboarding_profile', array( $this, 'clear_dismissal' ), 10, 2 );
 	}
 
@@ -42,15 +45,6 @@ class Purchase extends Task {
 	 */
 	public function get_id() {
 		return 'purchase';
-	}
-
-	/**
-	 * Parent ID.
-	 *
-	 * @return string
-	 */
-	public function get_parent_id() {
-		return 'setup';
 	}
 
 	/**

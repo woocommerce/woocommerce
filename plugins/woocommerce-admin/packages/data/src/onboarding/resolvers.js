@@ -71,6 +71,10 @@ export function* getTaskLists() {
 	}
 }
 
+export function* getTaskListsByIds() {
+	yield resolveSelect( STORE_NAME, 'getTaskLists' );
+}
+
 export function* getTaskList() {
 	yield resolveSelect( STORE_NAME, 'getTaskLists' );
 }

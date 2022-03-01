@@ -13,7 +13,6 @@ import './style.scss';
 import TaskList from './task-list';
 import TaskListPlaceholder from './placeholder';
 import { Task } from '../tasks/task';
-import allowedTasks from './allowed-tasks';
 
 const taskDashboardSelect = ( select ) => {
 	const { getOption, hasFinishedResolution } = select( OPTIONS_STORE_NAME );
@@ -38,9 +37,12 @@ const TaskDashboard = ( { query, twoColumns } ) => {
 
 	const { isResolving, taskLists } = useSelect( ( select ) => {
 		return {
-			taskLists: select( ONBOARDING_STORE_NAME ).getTaskLists(),
+			taskLists: select( ONBOARDING_STORE_NAME ).getTaskListsByIds( [
+				'setup_two_column',
+				'extended_two_column',
+			] ),
 			isResolving: select( ONBOARDING_STORE_NAME ).isResolving(
-				'getTaskLists'
+				'getTaskListsByIds'
 			),
 		};
 	} );
@@ -70,7 +72,7 @@ const TaskDashboard = ( { query, twoColumns } ) => {
 		return null;
 	}
 
-	if ( isResolving || isResolvingOptions ) {
+	if ( isResolving || isResolvingOptions || ! taskLists[ 0 ] ) {
 		return <TaskListPlaceholder twoColumns={ twoColumns } />;
 	}
 
@@ -83,13 +85,8 @@ const TaskDashboard = ( { query, twoColumns } ) => {
 	}
 	// List of task items to be shown on the main task list.
 	// Any other remaining tasks will be moved to the extended task list.
-	const setupTasks = taskLists[ 0 ].tasks.filter( ( setupTask ) => {
-		if ( setupTask.id === 'woocommerce-payments' && setupTask.isComplete ) {
-			// filter out woocommerce payments task if complete.
-			return false;
-		}
-		return allowedTasks.includes( setupTask.id );
-	} );
+	const taskList = taskLists[ 0 ];
+	const setupTasks = taskList.tasks;
 
 	const completedTasks = setupTasks.filter(
 		( setupTask ) => setupTask.isComplete
@@ -102,9 +99,9 @@ const TaskDashboard = ( { query, twoColumns } ) => {
 
 	return (
 		<>
-			{ setupTasks && ( taskLists[ 0 ].isVisible || task ) && (
+			{ setupTasks && ( taskList.isVisible || task ) && (
 				<TaskList
-					taskListId={ taskLists[ 0 ].id }
+					taskListId={ taskList.id }
 					eventName="tasklist"
 					twoColumns={ twoColumns }
 					keepCompletedTaskList={ keepCompletedTaskList }
