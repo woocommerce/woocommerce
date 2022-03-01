@@ -53,6 +53,8 @@ class ProductCategoryList extends AbstractBlock {
 			'typography'             =>
 			array(
 				'fontSize'                        => true,
+				'__experimentalFontStyle'         => true,
+				'__experimentalFontWeight'        => true,
 				'__experimentalSkipSerialization' => true,
 			),
 			'__experimentalSelector' => '.wc-block-components-product-category-list',
