@@ -1,12 +1,20 @@
 # WooCommerce API Client
 
-An isometric API client for interacting with WooCommerce installations. Here are the current and planned
+An API client for interacting with WooCommerce installations that works both on Browser and Node environments. Here are the current and planned
 features:
 
-- [x] TypeScript Definitions
+- [x] TypeScript Definitions*
 - [x] Axios API Client with support for OAuth & basic auth
-- [x] Repositories to simplify interaction with basic data types
-- [x] Service classes for common activities such as changing settings
+- [X] Partial support to Repositories, to simplify interaction with basic data types*
+- [x] Service classes for common activities such as changing settings4
+
+* TypeScript Definitions and Repositories are only supported for Products, and partially supported for Orders.
+
+## Diferences between this and @woocommerce/woocomerce-rest-api
+
+WooCommerce has two API clients in JavaScript for interacting with WooCommerce installation. This one, and [@woocommerce/woocomerce-rest-api](https://www.npmjs.com/package/@woocommerce/woocommerce-rest-api).
+
+The main difference between them is the Repositories and the TypeScript definitions for the supported endpoints. When using Axios directly, as you can do with both libraries, you query the WooCommerce API in a raw object format, following the API documentation parameters.  With Repositories, you have the parameters as properties of an object, so you have auto-complete and strict types, for instance.
 
 ## Usage
 
