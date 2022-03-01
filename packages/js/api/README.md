@@ -10,7 +10,7 @@ features:
 
 _\* TypeScript Definitions and Repositories are only supported for Products, and partially supported for Orders._
 
-## Diferences between this and @woocommerce/woocomerce-rest-api
+## Differences from @woocommerce/woocomerce-rest-api
 
 WooCommerce has two API clients in JavaScript for interacting with WooCommerce installation. This one, and [@woocommerce/woocomerce-rest-api](https://www.npmjs.com/package/@woocommerce/woocommerce-rest-api).
 
