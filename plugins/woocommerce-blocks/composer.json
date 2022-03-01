@@ -27,7 +27,8 @@
 			"Automattic\\WooCommerce\\Blocks\\": "src/"
 		},
 		"files": [
-			"src/deprecated.php"
+			"src/StoreApi/deprecated.php",
+			"src/StoreApi/functions.php"
 		]
 	},
 	"autoload-dev": {

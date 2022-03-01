@@ -382,7 +382,7 @@
             "type": "action",
             "doc": {
                 "description": "Fires when the Checkout Block/Store API updates an order's from the API request data.",
-                "long_description": "This hook gives extensions the chance to update orders based on the data in the request. This can be used in conjunction with the ExtendRestAPI class to post custom data and then process it.",
+                "long_description": "This hook gives extensions the chance to update orders based on the data in the request. This can be used in conjunction with the ExtendSchema class to post custom data and then process it.",
                 "tags": [
                     {
                         "name": "param",
@@ -401,7 +401,7 @@
                         "variable": "$request"
                     }
                 ],
-                "long_description_html": "<p>This hook gives extensions the chance to update orders based on the data in the request. This can be used in conjunction with the ExtendRestAPI class to post custom data and then process it.</p>"
+                "long_description_html": "<p>This hook gives extensions the chance to update orders based on the data in the request. This can be used in conjunction with the ExtendSchema class to post custom data and then process it.</p>"
             },
             "args": 2
         },

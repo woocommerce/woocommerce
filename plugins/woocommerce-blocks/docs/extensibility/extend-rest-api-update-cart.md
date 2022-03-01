@@ -13,7 +13,7 @@ inadvertently updating it with malformed or invalid data which will cause the wh
 
 ## The solution
 
-`ExtendRestApi` offers the ability for extensions to register callback functions to be executed when
+`ExtendSchema` offers the ability for extensions to register callback functions to be executed when
 signalled to do so by the client-side Cart or Checkout.
 
 WooCommerce Blocks also provides a front-end function called `extensionCartUpdate` which can be called by client-side
@@ -27,12 +27,12 @@ In your extension's server-side integration code:
 
 ```PHP
 use Automattic\WooCommerce\Blocks\Package;
-use Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi;
+use Automattic\WooCommerce\Blocks\ExtendSchema;
 
 add_action('woocommerce_blocks_loaded', function() {
- // ExtendRestApi is stored in the container as a shared instance between the API and consumers.
- // You shouldn't initiate your own ExtendRestApi instance using `new ExtendRestApi` but should always use the shared instance from the Package dependency injection container.
- $extend = Package::container()->get( ExtendRestApi::class );
+ // Extend is stored in the container as a shared instance between the API and consumers.
+ // You shouldn't initiate your own Extend instance but should always use the shared instance from the Package dependency injection container.
+ $extend = Package::container()->get( ExtendSchema::class );
  $extend->register_update_callback(
    [
     'namespace' => 'extension-unique-namespace',
@@ -82,7 +82,7 @@ Example:
 <?php
 
 use Automattic\WooCommerce\Blocks\Package;
-use Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi;
+use Automattic\WooCommerce\Blocks\Domain\Services\ExtendSchema;
 
 function add_discount() {
     /* Do some processing here */
@@ -92,9 +92,9 @@ function remove_discount() {
 }
 
 add_action('woocommerce_blocks_loaded', function() {
- // ExtendRestApi is stored in the container as a shared instance between the API and consumers.
- // You shouldn't initiate your own ExtendRestApi instance using `new ExtendRestApi` but should always use the shared instance from the Package dependency injection container.
- $extend = Package::container()->get( ExtendRestApi::class );
+ // ExtendSchema is stored in the container as a shared instance between the API and consumers.
+ // You shouldn't initiate your own ExtendSchema instance using `new ExtendSchema` but should always use the shared instance from the Package dependency injection container.
+ $extend = Package::container()->get( ExtendSchema::class );
  $extend->register_update_callback(
    [
     'namespace' => 'extension-unique-namespace',
@@ -117,7 +117,7 @@ If you try to register again, under the same namespace, the previously registere
 
 ### PHP
 
-`ExtendRestApi::register_update_callback`: Used to register a callback to be executed when the `cart/extensions`
+`ExtendSchema::register_update_callback`: Used to register a callback to be executed when the `cart/extensions`
 endpoint gets hit with a given namespace. It takes an array of arguments
 
 | Attribute   | Type       | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                 |
@@ -180,7 +180,7 @@ So far, we haven't registered a callback with WooCommerce Blocks yet, so when `e
 
 Much like adding data to the Store API (described in more detail in
 [Exposing your data in the Store API](./extend-rest-api-add-data.md).) we can add the callback
-by invoking the `register_update_callback` method on the `ExtendRestApi` class from WooCommerce Blocks.
+by invoking the `register_update_callback` method on the `ExtendSchema` class from WooCommerce Blocks.
 
 We have written a function called `redeem_points` which applies a discount to the WooCommerce cart. This function does
 not return anything. Note, the actual implementation of this function is not the focus of this document, so has been
@@ -190,16 +190,16 @@ omitted. All that is important to note is that it modifies the WooCommerce cart.
 <?php
 
 use Automattic\WooCommerce\Blocks\Package;
-use Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi;
+use Automattic\WooCommerce\Blocks\Domain\Services\ExtendSchema;
 
 function redeem_points( $points ) {
     /* Do some processing here that applies a discount to the WC cart based on the value of $points */
 }
 
 add_action('woocommerce_blocks_loaded', function() {
- // ExtendRestApi is stored in the container as a shared instance between the API and consumers.
- // You shouldn't initiate your own ExtendRestApi instance using `new ExtendRestApi` but should always use the shared instance from the Package dependency injection container.
- $extend = Package::container()->get( ExtendRestApi::class );
+ // ExtendSchema is stored in the container as a shared instance between the API and consumers.
+ // You shouldn't initiate your own ExtendSchema instance using `new ExtendSchema` but should always use the shared instance from the Package dependency injection container.
+ $extend = Package::container()->get( ExtendSchema::class );
  $extend->register_update_callback(
    [
     'namespace' => 'super-coupons',

@@ -5,22 +5,20 @@
 
 namespace Automattic\WooCommerce\Blocks\Tests\StoreApi\Routes;
 
-use Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi;
-use Automattic\WooCommerce\Blocks\Domain\Package as DomainPackage;
+use Automattic\WooCommerce\Blocks\StoreApi\Schemas\ExtendSchema;
 use Automattic\WooCommerce\Blocks\StoreApi\Formatters;
 use Automattic\WooCommerce\Blocks\StoreApi\Formatters\MoneyFormatter;
 use Automattic\WooCommerce\Blocks\StoreApi\Formatters\HtmlFormatter;
 use Automattic\WooCommerce\Blocks\StoreApi\Formatters\CurrencyFormatter;
-use Automattic\WooCommerce\Blocks\Domain\Services\FeatureGating;
 
 /**
  * ControllerTestCase class.
  */
 abstract class ControllerTestCase extends \WP_Test_REST_TestCase {
 	/**
-	 * ExtendRestApi class instance.
+	 * ExtendSchema class instance.
 	 *
-	 * @var ExtendRestApi
+	 * @var ExtendSchema
 	 */
 	protected $mock_extend;
 
@@ -42,7 +40,7 @@ abstract class ControllerTestCase extends \WP_Test_REST_TestCase {
 		$formatters->register( 'money', MoneyFormatter::class );
 		$formatters->register( 'html', HtmlFormatter::class );
 		$formatters->register( 'currency', CurrencyFormatter::class );
-		$this->mock_extend = new ExtendRestApi( new DomainPackage( '', '', new FeatureGating( 2 ) ), $formatters );
+		$this->mock_extend = new ExtendSchema( $formatters );
 	}
 
 	/**

@@ -5,6 +5,12 @@
  * This file is autoloaded via composer.json and maps the old namespaces to new namespaces.
  */
 
+// Exceptions.
+class_alias( Automattic\WooCommerce\Blocks\StoreApi\Exceptions\RouteException::class, Automattic\WooCommerce\Blocks\StoreApi\Routes\RouteException::class );
+
+// Extend.
+class_alias( Automattic\WooCommerce\Blocks\StoreApi\Schemas\ExtendSchema::class, Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi::class );
+
 // Unversioned schema to v1 schema.
 class_alias( Automattic\WooCommerce\Blocks\StoreApi\Schemas\V1\AbstractAddressSchema::class, Automattic\WooCommerce\Blocks\StoreApi\Schemas\AbstractAddressSchema::class );
 class_alias( Automattic\WooCommerce\Blocks\StoreApi\Schemas\V1\AbstractSchema::class, Automattic\WooCommerce\Blocks\StoreApi\Schemas\AbstractSchema::class );
@@ -26,9 +32,6 @@ class_alias( Automattic\WooCommerce\Blocks\StoreApi\Schemas\V1\ProductReviewSche
 class_alias( Automattic\WooCommerce\Blocks\StoreApi\Schemas\V1\ProductSchema::class, Automattic\WooCommerce\Blocks\StoreApi\Schemas\ProductSchema::class );
 class_alias( Automattic\WooCommerce\Blocks\StoreApi\Schemas\V1\ShippingAddressSchema::class, Automattic\WooCommerce\Blocks\StoreApi\Schemas\ShippingAddressSchema::class );
 class_alias( Automattic\WooCommerce\Blocks\StoreApi\Schemas\V1\TermSchema::class, Automattic\WooCommerce\Blocks\StoreApi\Schemas\TermSchema::class );
-
-// Exceptions.
-class_alias( Automattic\WooCommerce\Blocks\StoreApi\Exceptions\RouteException::class, Automattic\WooCommerce\Blocks\StoreApi\Routes\RouteException::class );
 
 // Unversioned routes to v1 routes.
 class_alias( Automattic\WooCommerce\Blocks\StoreApi\Routes\V1\AbstractCartRoute::class, Automattic\WooCommerce\Blocks\StoreApi\Routes\AbstractCartRoute::class );
