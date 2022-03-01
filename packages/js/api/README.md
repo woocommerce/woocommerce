@@ -3,12 +3,12 @@
 An API client for interacting with WooCommerce installations that works both on Browser and Node environments. Here are the current and planned
 features:
 
-- [x] TypeScript Definitions*
+- [x] TypeScript Definitions \*
 - [x] Axios API Client with support for OAuth & basic auth
-- [X] Partial support to Repositories, to simplify interaction with basic data types*
-- [x] Service classes for common activities such as changing settings4
+- [X] Partial support to Repositories, to simplify interaction with basic data types \*
+- [x] Service classes for common activities such as changing settings
 
-* TypeScript Definitions and Repositories are only supported for Products, and partially supported for Orders.
+\* TypeScript Definitions and Repositories are only supported for Products, and partially supported for Orders.
 
 ## Diferences between this and @woocommerce/woocomerce-rest-api
 
