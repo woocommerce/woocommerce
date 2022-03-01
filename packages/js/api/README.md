@@ -8,7 +8,7 @@ features:
 - [X] Partial support to Repositories, to simplify interaction with basic data types \*
 - [x] Service classes for common activities such as changing settings
 
-\* TypeScript Definitions and Repositories are only supported for Products, and partially supported for Orders.
+_\* TypeScript Definitions and Repositories are only supported for Products, and partially supported for Orders._
 
 ## Diferences between this and @woocommerce/woocomerce-rest-api
 
