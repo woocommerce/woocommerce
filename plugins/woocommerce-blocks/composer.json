@@ -47,6 +47,11 @@
 	"config": {
 		"platform": {
 			"php": "7.4.24"
+		},
+		"allow-plugins": {
+			"automattic/jetpack-autoloader": true,
+			"composer/installers": true,
+			"dealerdirect/phpcodesniffer-composer-installer": true
 		}
 	},
 	"extra": {
