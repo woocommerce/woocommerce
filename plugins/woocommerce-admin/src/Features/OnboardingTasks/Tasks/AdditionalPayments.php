@@ -37,8 +37,19 @@ class AdditionalPayments extends Payments {
 	 * @return bool
 	 */
 	public function can_view() {
+		if ( ! Features::is_enabled( 'payment-gateway-suggestions' ) ) {
+			// Hide task if feature not enabled.
+			return false;
+		}
+
 		$woocommerce_payments = new WooCommercePayments();
-		return Features::is_enabled( 'payment-gateway-suggestions' ) && $woocommerce_payments->can_view();
+
+		if ( $woocommerce_payments->is_requested() && $woocommerce_payments->is_supported() && ! $woocommerce_payments->is_connected() ) {
+			// Hide task if WC Pay is installed via OBW, in supported country, but not connected.
+			return false;
+		}
+
+		return true;
 	}
 }
 
