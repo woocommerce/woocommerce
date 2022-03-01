@@ -81,7 +81,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						?>
 						<tr>
 							<th><code><?php echo esc_html( $error_data['row'] ); ?></code></th>
-							<td><?php echo esc_html( $error->get_error_message() ); ?></td>
+							<td><?php echo wp_kses_post( $error->get_error_message() ); ?></td>
 						</tr>
 						<?php
 					}
