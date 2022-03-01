@@ -1,7 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\StoreApi;
 
-use Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi;
+use Automattic\WooCommerce\Blocks\StoreApi\Schemas\ExtendSchema;
 
 /**
  * SchemaController class.
@@ -20,16 +20,16 @@ class SchemaController {
 	/**
 	 * Stores Rest Extending instance
 	 *
-	 * @var ExtendRestApi
+	 * @var ExtendSchema
 	 */
 	private $extend;
 
 	/**
 	 * Constructor.
 	 *
-	 * @param ExtendRestApi $extend Rest Extending instance.
+	 * @param ExtendSchema $extend Rest Extending instance.
 	 */
-	public function __construct( ExtendRestApi $extend ) {
+	public function __construct( ExtendSchema $extend ) {
 		$this->extend = $extend;
 		$this->initialize();
 	}

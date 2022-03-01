@@ -768,7 +768,7 @@ This release fixes an error that some users experienced when their site automati
 #### Enhancements
 
 - Dev: Change register_endpoint_data to use an array of params instead of individual params. ([3478](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3478))
-- Dev: Expose store/cart via ExtendRestApi to extensions. ([3445](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3445))
+- Dev: Expose store/cart via ExtendSchema to extensions. ([3445](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3445))
 - Dev: Added formatting classes to the Store API for extensions to consume.
 
 #### Bug Fixes
