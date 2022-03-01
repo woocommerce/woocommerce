@@ -4,9 +4,8 @@
 import { __, _x } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
 import { applyFilters } from '@wordpress/hooks';
-import { NAMESPACE } from '@woocommerce/data';
-
-const { countries } = getAdminSetting( 'dataEndpoints', { countries: {} } );
+import { resolveSelect } from '@wordpress/data';
+import { NAMESPACE, COUNTRIES_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -15,7 +14,6 @@ import {
 	getCustomerLabels,
 	getRequestByIdString,
 } from '../../../lib/async-requests';
-import { getAdminSetting } from '~/utils/admin-settings';
 
 const CUSTOMERS_REPORT_FILTERS_FILTER =
 	'woocommerce_admin_customers_report_filters';
@@ -191,6 +189,10 @@ export const advancedFilters = applyFilters(
 					component: 'Search',
 					type: 'countries',
 					getLabels: async ( value ) => {
+						const countries = await resolveSelect(
+							COUNTRIES_STORE_NAME
+						).getCountries();
+
 						const allLabels = countries.map( ( country ) => ( {
 							key: country.code,
 							label: decodeEntities( country.name ),

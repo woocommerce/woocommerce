@@ -16,6 +16,7 @@ import {
 	SETTINGS_STORE_NAME,
 	ONBOARDING_STORE_NAME,
 	PLUGINS_STORE_NAME,
+	COUNTRIES_STORE_NAME,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { registerPlugin } from '@wordpress/plugins';
@@ -29,7 +30,6 @@ import { getCountryCode } from '../../../dashboard/utils';
 import StoreLocation from '../steps/location';
 import ShippingRates from './rates';
 import { createNoticesFromResponse } from '../../../lib/notices';
-import { getAdminSetting } from '~/utils/admin-settings';
 import './shipping.scss';
 
 export class Shipping extends Component {
@@ -57,7 +57,6 @@ export class Shipping extends Component {
 	}
 
 	async fetchShippingZones() {
-		this.setState( { isPending: true } );
 		const { countryCode, countryName } = this.props;
 
 		// @todo The following fetches for shipping information should be moved into
@@ -117,7 +116,7 @@ export class Shipping extends Component {
 	}
 
 	componentDidUpdate( prevProps, prevState ) {
-		const { countryCode, settings } = this.props;
+		const { countryCode, countryName, settings } = this.props;
 		const {
 			woocommerce_store_address: storeAddress,
 			woocommerce_default_country: defaultCountry,
@@ -128,9 +127,13 @@ export class Shipping extends Component {
 		if (
 			step === 'rates' &&
 			( prevProps.countryCode !== countryCode ||
+				prevProps.countryName !== countryName ||
 				prevState.step !== 'rates' )
 		) {
-			this.fetchShippingZones();
+			this.setState( { isPending: true } );
+			if ( countryName ) {
+				this.fetchShippingZones();
+			}
 		}
 
 		const isCompleteAddress = Boolean(
@@ -362,16 +365,14 @@ const ShippingWrapper = compose(
 		const { getActivePlugins, isJetpackConnected } = select(
 			PLUGINS_STORE_NAME
 		);
+		const { getCountry } = select( COUNTRIES_STORE_NAME );
 
 		const { general: settings = {} } = getSettings( 'general' );
 		const countryCode = getCountryCode(
 			settings.woocommerce_default_country
 		);
 
-		const { countries = [] } = getAdminSetting( 'dataEndpoints', {} );
-		const country = countryCode
-			? countries.find( ( c ) => c.code === countryCode )
-			: null;
+		const country = countryCode ? getCountry( countryCode ) : null;
 		const countryName = country ? country.name : null;
 		const activePlugins = getActivePlugins();
 

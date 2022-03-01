@@ -2,12 +2,14 @@
  * External dependencies
  */
 import { __, _n } from '@wordpress/i18n';
-import { Component, Fragment } from '@wordpress/element';
+import { Fragment, useContext } from '@wordpress/element';
+import { useSelect } from '@wordpress/data';
 import { Tooltip } from '@wordpress/components';
 import { Date, Link } from '@woocommerce/components';
 import { formatValue } from '@woocommerce/number';
 import { getAdminLink } from '@woocommerce/settings';
 import { defaultTableDateFormat } from '@woocommerce/date';
+import { COUNTRIES_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -16,18 +18,24 @@ import ReportTable from '../../components/report-table';
 import { CurrencyContext } from '../../../lib/currency-context';
 import { getAdminSetting } from '~/utils/admin-settings';
 
-const { countries } = getAdminSetting( 'dataEndpoints', { countries: {} } );
+function CustomersReportTable( {
+	isRequesting,
+	query,
+	filters,
+	advancedFilters,
+} ) {
+	const context = useContext( CurrencyContext );
+	const { countries, loadingCountries } = useSelect( ( select ) => {
+		const { getCountries, hasFinishedResolution } = select(
+			COUNTRIES_STORE_NAME
+		);
+		return {
+			countries: getCountries(),
+			loadingCountries: ! hasFinishedResolution( 'getCountries' ),
+		};
+	} );
 
-class CustomersReportTable extends Component {
-	constructor() {
-		super();
-
-		this.getHeadersContent = this.getHeadersContent.bind( this );
-		this.getRowsContent = this.getRowsContent.bind( this );
-		this.getSummary = this.getSummary.bind( this );
-	}
-
-	getHeadersContent() {
+	const getHeadersContent = () => {
 		return [
 			{
 				label: __( 'Name', 'woocommerce-admin' ),
@@ -101,15 +109,15 @@ class CustomersReportTable extends Component {
 				isSortable: true,
 			},
 		];
-	}
+	};
 
-	getCountryName( code ) {
+	const getCountryName = ( code ) => {
 		return typeof countries[ code ] !== 'undefined'
 			? countries[ code ]
 			: null;
-	}
+	};
 
-	getRowsContent( customers ) {
+	const getRowsContent = ( customers ) => {
 		const dateFormat = getAdminSetting(
 			'dateFormat',
 			defaultTableDateFormat
@@ -118,7 +126,7 @@ class CustomersReportTable extends Component {
 			formatAmount,
 			formatDecimal: getCurrencyFormatDecimal,
 			getCurrencyConfig,
-		} = this.context;
+		} = context;
 
 		return customers?.map( ( customer ) => {
 			const {
@@ -136,7 +144,7 @@ class CustomersReportTable extends Component {
 				state,
 				country,
 			} = customer;
-			const countryName = this.getCountryName( country );
+			const countryName = getCountryName( country );
 
 			const customerNameLink = userId ? (
 				<Link
@@ -225,16 +233,16 @@ class CustomersReportTable extends Component {
 				},
 			];
 		} );
-	}
+	};
 
-	getSummary( totals ) {
+	const getSummary = ( totals ) => {
 		const {
 			customers_count: customersCount = 0,
 			avg_orders_count: avgOrdersCount = 0,
 			avg_total_spend: avgTotalSpend = 0,
 			avg_avg_order_value: avgAvgOrderValue = 0,
 		} = totals;
-		const { formatAmount, getCurrencyConfig } = this.context;
+		const { formatAmount, getCurrencyConfig } = context;
 		const currency = getCurrencyConfig();
 		return [
 			{
@@ -264,42 +272,36 @@ class CustomersReportTable extends Component {
 				value: formatAmount( avgAvgOrderValue ),
 			},
 		];
-	}
+	};
 
-	render() {
-		const { isRequesting, query, filters, advancedFilters } = this.props;
-
-		return (
-			<ReportTable
-				endpoint="customers"
-				getHeadersContent={ this.getHeadersContent }
-				getRowsContent={ this.getRowsContent }
-				getSummary={ this.getSummary }
-				summaryFields={ [
-					'customers_count',
-					'avg_orders_count',
-					'avg_total_spend',
-					'avg_avg_order_value',
-				] }
-				isRequesting={ isRequesting }
-				itemIdField="id"
-				query={ query }
-				labels={ {
-					placeholder: __(
-						'Search by customer name',
-						'woocommerce-admin'
-					),
-				} }
-				searchBy="customers"
-				title={ __( 'Customers', 'woocommerce-admin' ) }
-				columnPrefsKey="customers_report_columns"
-				filters={ filters }
-				advancedFilters={ advancedFilters }
-			/>
-		);
-	}
+	return (
+		<ReportTable
+			endpoint="customers"
+			getHeadersContent={ getHeadersContent }
+			getRowsContent={ getRowsContent }
+			getSummary={ getSummary }
+			summaryFields={ [
+				'customers_count',
+				'avg_orders_count',
+				'avg_total_spend',
+				'avg_avg_order_value',
+			] }
+			isRequesting={ isRequesting || loadingCountries }
+			itemIdField="id"
+			query={ query }
+			labels={ {
+				placeholder: __(
+					'Search by customer name',
+					'woocommerce-admin'
+				),
+			} }
+			searchBy="customers"
+			title={ __( 'Customers', 'woocommerce-admin' ) }
+			columnPrefsKey="customers_report_columns"
+			filters={ filters }
+			advancedFilters={ advancedFilters }
+		/>
+	);
 }
-
-CustomersReportTable.contextType = CurrencyContext;
 
 export default CustomersReportTable;

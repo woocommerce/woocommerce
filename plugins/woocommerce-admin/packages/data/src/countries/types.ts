@@ -20,6 +20,15 @@ export type Locale = {
 	state?: SettingProperties;
 };
 
+export type Country = {
+	code: string;
+	name: string;
+	states: Array< {
+		code: string;
+		name: string;
+	} >;
+};
+
 export type Locales = {
 	[ key: string ]: Locale;
 };
@@ -29,4 +38,5 @@ export type CountriesState = {
 		[ key: string ]: string;
 	};
 	locales: Locales;
+	countries: Country[];
 };

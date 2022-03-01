@@ -218,18 +218,6 @@ class Onboarding {
 		add_filter( 'woocommerce_admin_preload_settings', array( $this, 'preload_settings' ) );
 		add_filter( 'admin_body_class', array( __CLASS__, 'add_loading_classes' ) );
 		add_filter( 'woocommerce_show_admin_notice', array( $this, 'remove_install_notice' ), 10, 2 );
-		add_filter( 'woocommerce_component_settings_preload_endpoints', array( $this, 'add_preload_endpoints' ) );
-	}
-
-	/**
-	 * Preload data from the countries endpoint.
-	 *
-	 * @param array $endpoints Array of preloaded endpoints.
-	 * @return array
-	 */
-	public function add_preload_endpoints( $endpoints ) {
-		$endpoints['countries'] = '/wc-analytics/data/countries';
-		return $endpoints;
 	}
 
 	/**

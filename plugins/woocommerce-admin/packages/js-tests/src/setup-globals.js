@@ -69,7 +69,6 @@ global.wcSettings = {
 			woocommerce_excluded_report_order_statuses: [],
 		},
 		dataEndpoints: {
-			countries: [],
 			performanceIndicators: [
 				{
 					chart: 'total_sales',

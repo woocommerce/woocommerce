@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { COUNTRIES_STORE_NAME } from '@woocommerce/data';
+import { COUNTRIES_STORE_NAME, Country } from '@woocommerce/data';
 import { decodeEntities } from '@wordpress/html-entities';
 import { escapeRegExp } from 'lodash';
 import { useEffect, useMemo, useState, useRef } from '@wordpress/element';
@@ -13,10 +13,8 @@ import { useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { getAdminSetting } from '~/utils/admin-settings';
 import { FormInputProps } from '~/utils/types';
 
-const { countries } = getAdminSetting( 'dataEndpoints', { countries: {} } );
 const storeAddressFields = [
 	'addressLine1',
 	'addressLine2',
@@ -107,7 +105,7 @@ export function getStoreAddressValidator( locale = {} ) {
  *
  * @return {Object} Select options, { value: 'US:GA', label: 'United States - Georgia' }
  */
-export function getCountryStateOptions() {
+export function getCountryStateOptions( countries: Country[] ) {
 	const countryStateOptions = countries.reduce( ( acc, country ) => {
 		if ( ! country.states.length ) {
 			acc.push( {
@@ -340,15 +338,28 @@ export function StoreAddress( {
 	setValue,
 }: StoreAddressProps ): JSX.Element {
 	const countryState = getInputProps( 'countryState' ).value;
-	const { locale, hasFinishedResolution } = useSelect( ( select ) => {
+	const {
+		locale,
+		hasFinishedResolution,
+		countries,
+		loadingCountries,
+	} = useSelect( ( select ) => {
+		const {
+			getLocale,
+			getCountries,
+			hasFinishedResolution: hasFinishedCountryResolution,
+		} = select( COUNTRIES_STORE_NAME );
 		return {
-			locale: select( COUNTRIES_STORE_NAME ).getLocale( countryState ),
-			hasFinishedResolution: select(
-				COUNTRIES_STORE_NAME
-			).hasFinishedResolution( 'getLocales' ),
+			locale: getLocale( countryState ),
+			countries: getCountries(),
+			loadingCountries: ! hasFinishedCountryResolution( 'getCountries' ),
+			hasFinishedResolution: hasFinishedCountryResolution( 'getLocales' ),
 		};
 	} );
-	const countryStateOptions = useMemo( () => getCountryStateOptions(), [] );
+	const countryStateOptions = useMemo(
+		() => getCountryStateOptions( countries ),
+		[ countries ]
+	);
 	const countryStateAutofill = useGetCountryStateAutofill(
 		countryStateOptions,
 		countryState,
@@ -369,7 +380,7 @@ export function StoreAddress( {
 			} );
 		}
 	}, [ countryState, locale ] );
-	if ( ! hasFinishedResolution ) {
+	if ( ! hasFinishedResolution || loadingCountries ) {
 		return <Spinner />;
 	}
 

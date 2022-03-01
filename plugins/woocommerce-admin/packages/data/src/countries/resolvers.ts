@@ -7,9 +7,14 @@ import { controls } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { getLocalesSuccess, getLocalesError } from './actions';
+import {
+	getLocalesSuccess,
+	getLocalesError,
+	getCountriesSuccess,
+	getCountriesError,
+} from './actions';
 import { NAMESPACE } from '../constants';
-import { Locales } from './types';
+import { Locales, Country } from './types';
 import { STORE_NAME } from './constants';
 
 const resolveSelect =
@@ -30,5 +35,23 @@ export function* getLocales() {
 		return getLocalesSuccess( results );
 	} catch ( error ) {
 		return getLocalesError( error );
+	}
+}
+
+export function* getCountry() {
+	yield resolveSelect( STORE_NAME, 'getCountries' );
+}
+
+export function* getCountries() {
+	try {
+		const url = NAMESPACE + '/data/countries';
+		const results: Country[] = yield apiFetch( {
+			path: url,
+			method: 'GET',
+		} );
+
+		return getCountriesSuccess( results );
+	} catch ( error ) {
+		return getCountriesError( error );
 	}
 }

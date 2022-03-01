@@ -134,3 +134,4 @@ export interface WCDataSelector {
 }
 export * from './onboarding/selectors';
 export * from './onboarding/types';
+export * from './countries/types';

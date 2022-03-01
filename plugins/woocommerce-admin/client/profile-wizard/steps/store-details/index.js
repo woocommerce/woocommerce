@@ -493,6 +493,7 @@ export default compose(
 		const {
 			getLocale,
 			getLocales,
+			getCountries,
 			hasFinishedResolution: hasFinishedResolutionCountries,
 		} = select( COUNTRIES_STORE_NAME );
 		const { isResolving } = select( OPTIONS_STORE_NAME );
@@ -508,7 +509,8 @@ export default compose(
 		const isLoading =
 			! hasFinishedResolutionOnboarding( 'getProfileItems' ) ||
 			! hasFinishedResolutionOnboarding( 'getEmailPrefill' ) ||
-			! hasFinishedResolutionCountries( 'getLocales' );
+			! hasFinishedResolutionCountries( 'getLocales' ) ||
+			! hasFinishedResolutionCountries( 'getCountries' );
 		const errorsRef = useRef( {
 			settings: null,
 		} );
@@ -521,6 +523,7 @@ export default compose(
 			( settings.woocommerce_store_address &&
 				settings.woocommerce_default_country ) ||
 			'';
+		getCountries();
 		getLocales();
 
 		const initialValues = {

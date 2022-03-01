@@ -25,12 +25,14 @@ const StoreLocation = ( {
 	settings,
 } ) => {
 	const { getLocale, hasFinishedResolution } = useSelect( ( select ) => {
+		const countryStore = select( COUNTRIES_STORE_NAME );
+		countryStore.getCountries();
 		return {
-			getLocale: select( COUNTRIES_STORE_NAME ).getLocale,
-			locales: select( COUNTRIES_STORE_NAME ).getLocales(),
-			hasFinishedResolution: select(
-				COUNTRIES_STORE_NAME
-			).hasFinishedResolution( 'getLocales' ),
+			getLocale: countryStore.getLocale,
+			locales: countryStore.getLocales(),
+			hasFinishedResolution:
+				countryStore.hasFinishedResolution( 'getLocales' ) &&
+				countryStore.hasFinishedResolution( 'getCountries' ),
 		};
 	} );
 	const onSubmit = async ( values ) => {

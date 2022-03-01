@@ -104,7 +104,6 @@ class Analytics {
 	 * @return array
 	 */
 	public function add_preload_endpoints( $endpoints ) {
-		$endpoints['countries']             = '/wc-analytics/data/countries';
 		$endpoints['performanceIndicators'] = '/wc-analytics/reports/performance-indicators/allowed';
 		$endpoints['leaderboards']          = '/wc-analytics/leaderboards/allowed';
 		return $endpoints;
