@@ -37,6 +37,9 @@ const blockConfig: BlockConfiguration = {
 			},
 			typography: {
 				fontSize: true,
+				lineHeight: true,
+				__experimentalFontStyle: true,
+				__experimentalFontWeight: true,
 				__experimentalSkipSerialization: true,
 			},
 			__experimentalSelector:
