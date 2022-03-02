@@ -21,6 +21,25 @@ export async function elementExists( selector, root = page ) {
 }
 
 /**
+ * Gets data from an HTML element
+ *
+ * @param {string} selector The selector for the desired element
+ * @param {string} dataKey The key in the element data to look for
+ * @param {Page | ElementHandle} root The root from which to search for the selector
+ *
+ * @return {Promise<string | undefined>} The data of that element if it exists
+ */
+export async function getElementData( selector, dataKey, root = page ) {
+	return root.$eval(
+		selector,
+		( $element, key ) => {
+			return $element.dataset[ key ];
+		},
+		dataKey
+	);
+}
+
+/**
  * Gets the text value of an element
  *
  * If the element is an `input` it will get the `value`, otherwise,
