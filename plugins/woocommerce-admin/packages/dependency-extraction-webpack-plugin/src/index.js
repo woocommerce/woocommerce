@@ -21,6 +21,7 @@ const wooRequestToExternal = ( request, excludedExternals ) => {
 	if ( packages.includes( request ) ) {
 		const handle = request.substring( WOOCOMMERCE_NAMESPACE.length );
 		const irregularExternalMap = {
+			'block-data': [ 'wc', 'wcBlocksData' ],
 			'blocks-registry': [ 'wc', 'wcBlocksRegistry' ],
 			settings: [ 'wc', 'wcSettings' ],
 		};
@@ -42,6 +43,7 @@ const wooRequestToHandle = ( request ) => {
 		const handle = request.substring( WOOCOMMERCE_NAMESPACE.length );
 		const irregularHandleMap = {
 			data: 'wc-store-data',
+			'block-data': 'wc-blocks-data-store',
 			'csv-export': 'wc-csv',
 		};
 

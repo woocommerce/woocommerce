@@ -1,0 +1,4 @@
+Significance: patch
+Type: Add
+
+#7911 - Added @woocommerce/block-data to Webpack Dependency Extraction plugin
