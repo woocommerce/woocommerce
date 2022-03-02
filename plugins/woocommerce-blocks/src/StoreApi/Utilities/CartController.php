@@ -1,12 +1,12 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\StoreApi\Utilities;
 
-use Automattic\WooCommerce\Blocks\StoreApi\Exceptions\InvalidStockLevelsInCartException;
 use Automattic\WooCommerce\Blocks\StoreApi\Exceptions\NotPurchasableException;
 use Automattic\WooCommerce\Blocks\StoreApi\Exceptions\OutOfStockException;
 use Automattic\WooCommerce\Blocks\StoreApi\Exceptions\PartialOutOfStockException;
 use Automattic\WooCommerce\Blocks\StoreApi\Exceptions\TooManyInCartException;
 use Automattic\WooCommerce\Blocks\StoreApi\Exceptions\RouteException;
+use Automattic\WooCommerce\Blocks\StoreApi\Exceptions\InvalidCartException;
 use Automattic\WooCommerce\Blocks\StoreApi\Utilities\DraftOrderTrait;
 use Automattic\WooCommerce\Blocks\StoreApi\Utilities\NoticeHandler;
 use Automattic\WooCommerce\Blocks\StoreApi\Utilities\QuantityLimits;
@@ -379,79 +379,34 @@ class CartController {
 	}
 
 	/**
-	 * Validate all items in the cart and check for errors.
+	 * Validate cart and check for errors.
 	 *
-	 * @throws InvalidStockLevelsInCartException Exception if invalid data is detected due to insufficient stock levels.
+	 * @throws InvalidCartException Exception if invalid data is detected in the cart.
 	 */
-	public function validate_cart_items() {
-		$cart       = $this->get_cart_instance();
-		$cart_items = $this->get_cart_items();
+	public function validate_cart() {
+		$this->validate_cart_items();
+		$this->validate_cart_coupons();
 
-		$out_of_stock_products         = [];
-		$too_many_in_cart_products     = [];
-		$partial_out_of_stock_products = [];
-		$not_purchasable_products      = [];
+		$cart        = $this->get_cart_instance();
+		$cart_errors = new WP_Error();
 
-		foreach ( $cart_items as $cart_item_key => $cart_item ) {
-			try {
-				$this->validate_cart_item( $cart_item );
-			} catch ( TooManyInCartException $error ) {
-				$too_many_in_cart_products[] = $error;
-			} catch ( NotPurchasableException $error ) {
-				$not_purchasable_products[] = $error;
-			} catch ( PartialOutOfStockException $error ) {
-				$partial_out_of_stock_products[] = $error;
-			} catch ( OutOfStockException $error ) {
-				$out_of_stock_products[] = $error;
-			}
-		}
+		/**
+		 * Fires an action to validate the cart.
+		 *
+		 * Functions hooking into this should add custom errors using the provided WP_Error instance.
+		 *
+		 * @example See docs/examples/validate-cart.md
+		 *
+		 * @param \WP_Error $errors  WP_Error object.
+		 * @param \WC_Cart  $cart    Cart object.
+		 */
+		do_action( 'woocommerce_store_api_cart_errors', $cart_errors, $cart );
 
-		$error = new WP_Error();
-
-		if ( count( $out_of_stock_products ) > 0 ) {
-			$singular_error = $this->get_error_message_for_stock_exception_type( 'out_of_stock', 'singular' );
-			$plural_error   = $this->get_error_message_for_stock_exception_type( 'out_of_stock', 'plural' );
-
-			$error->add(
-				409,
-				$this->add_product_names_to_message( $singular_error, $plural_error, $out_of_stock_products )
-			);
-		}
-
-		if ( count( $not_purchasable_products ) > 0 ) {
-			$singular_error = $this->get_error_message_for_stock_exception_type( 'not_purchasable', 'singular' );
-			$plural_error   = $this->get_error_message_for_stock_exception_type( 'not_purchasable', 'plural' );
-
-			$error->add(
-				409,
-				$this->add_product_names_to_message( $singular_error, $plural_error, $not_purchasable_products )
-			);
-		}
-
-		if ( count( $too_many_in_cart_products ) > 0 ) {
-			$singular_error = $this->get_error_message_for_stock_exception_type( 'too_many_in_cart', 'singular' );
-			$plural_error   = $this->get_error_message_for_stock_exception_type( 'too_many_in_cart', 'plural' );
-
-			$error->add(
-				409,
-				$this->add_product_names_to_message( $singular_error, $plural_error, $too_many_in_cart_products )
-			);
-		}
-
-		if ( count( $partial_out_of_stock_products ) > 0 ) {
-			$singular_error = $this->get_error_message_for_stock_exception_type( 'partial_out_of_stock', 'singular' );
-			$plural_error   = $this->get_error_message_for_stock_exception_type( 'partial_out_of_stock', 'plural' );
-
-			$error->add(
-				409,
-				$this->add_product_names_to_message( $singular_error, $plural_error, $partial_out_of_stock_products )
-			);
-		}
-
-		if ( $error->has_errors() ) {
-			throw new InvalidStockLevelsInCartException(
-				'woocommerce_stock_availability_error',
-				$error
+		if ( $cart_errors->has_errors() ) {
+			throw new InvalidCartException(
+				'woocommerce_cart_error',
+				$cart_errors,
+				409
 			);
 		}
 
@@ -464,34 +419,98 @@ class CartController {
 		 *
 		 * Allow 3rd parties to validate cart items. This is a legacy hook from Woo core.
 		 * This filter will be deprecated because it encourages usage of wc_add_notice. For the API we need to capture
-		 * notices and convert to exceptions instead.
+		 * notices and convert to wp errors instead.
+		 *
+		 * @deprecated
 		 */
 		do_action( 'woocommerce_check_cart_items' );
-		NoticeHandler::convert_notices_to_exceptions( 'woocommerce_rest_cart_item_error' );
+
+		$cart_errors = NoticeHandler::convert_notices_to_wp_errors( 'woocommerce_rest_cart_item_error' );
+
+		if ( $cart_errors->has_errors() ) {
+			throw new InvalidCartException(
+				'woocommerce_cart_error',
+				$cart_errors,
+				409
+			);
+		}
+	}
+
+	/**
+	 * Validate all items in the cart and check for errors.
+	 *
+	 * @throws InvalidCartException Exception if invalid data is detected due to insufficient stock levels.
+	 */
+	public function validate_cart_items() {
+		$cart       = $this->get_cart_instance();
+		$cart_items = $this->get_cart_items();
+
+		$errors                        = [];
+		$out_of_stock_products         = [];
+		$too_many_in_cart_products     = [];
+		$partial_out_of_stock_products = [];
+		$not_purchasable_products      = [];
+
+		foreach ( $cart_items as $cart_item_key => $cart_item ) {
+			try {
+				$this->validate_cart_item( $cart_item );
+			} catch ( RouteException $error ) {
+				$errors[] = new WP_Error( $error->getErrorCode(), $error->getMessage(), $error->getAdditionalData() );
+			} catch ( TooManyInCartException $error ) {
+				$too_many_in_cart_products[] = $error;
+			} catch ( NotPurchasableException $error ) {
+				$not_purchasable_products[] = $error;
+			} catch ( PartialOutOfStockException $error ) {
+				$partial_out_of_stock_products[] = $error;
+			} catch ( OutOfStockException $error ) {
+				$out_of_stock_products[] = $error;
+			}
+		}
+
+		if ( count( $errors ) > 0 ) {
+
+			$error = new WP_Error();
+			foreach ( $errors as $wp_error ) {
+				$error->merge_from( $wp_error );
+			}
+
+			throw new InvalidCartException(
+				'woocommerce_cart_error',
+				$error,
+				409
+			);
+		}
+
+		$error = $this->stock_exceptions_to_wp_errors( $too_many_in_cart_products, $not_purchasable_products, $partial_out_of_stock_products, $out_of_stock_products );
+		if ( $error->has_errors() ) {
+
+			throw new InvalidCartException(
+				'woocommerce_stock_availability_error',
+				$error,
+				409
+			);
+		}
 	}
 
 	/**
 	 * This method will take arrays of exceptions relating to stock, and will convert them to a WP_Error object.
 	 *
-	 * @param TooManyInCartException[]     $too_many_in_cart_products         Array of TooManyInCartExceptions.
-	 * @param NotPurchasableException[]    $not_purchasable_products         Array of NotPurchasableExceptions.
+	 * @param TooManyInCartException[]     $too_many_in_cart_products     Array of TooManyInCartExceptions.
+	 * @param NotPurchasableException[]    $not_purchasable_products      Array of NotPurchasableExceptions.
 	 * @param PartialOutOfStockException[] $partial_out_of_stock_products Array of PartialOutOfStockExceptions.
-	 * @param OutOfStockException[]        $out_of_stock_products                Array of OutOfStockExceptions.
+	 * @param OutOfStockException[]        $out_of_stock_products         Array of OutOfStockExceptions.
 	 *
-	 * @return WP_Error[] The WP_Error object returned. Will have errors if any exceptions were in the args. It will be empty if they do not.
+	 * @return WP_Error  The WP_Error object returned. Will have errors if any exceptions were in the args. It will be empty if they do not.
 	 */
 	private function stock_exceptions_to_wp_errors( $too_many_in_cart_products, $not_purchasable_products, $partial_out_of_stock_products, $out_of_stock_products ) {
-		$too_many_in_cart_error     = new WP_Error();
-		$out_of_stock_error         = new WP_Error();
-		$partial_out_of_stock_error = new WP_Error();
-		$not_purchasable_error      = new WP_Error();
+		$error = new WP_Error();
 
 		if ( count( $out_of_stock_products ) > 0 ) {
 
 			$singular_error = $this->get_error_message_for_stock_exception_type( 'out_of_stock', 'singular' );
 			$plural_error   = $this->get_error_message_for_stock_exception_type( 'out_of_stock', 'plural' );
 
-			$out_of_stock_error->add(
+			$error->add(
 				'woocommerce-blocks-product-out-of-stock',
 				$this->add_product_names_to_message( $singular_error, $plural_error, $out_of_stock_products )
 			);
@@ -501,7 +520,7 @@ class CartController {
 			$singular_error = $this->get_error_message_for_stock_exception_type( 'not_purchasable', 'singular' );
 			$plural_error   = $this->get_error_message_for_stock_exception_type( 'not_purchasable', 'plural' );
 
-			$not_purchasable_error->add(
+			$error->add(
 				'woocommerce-blocks-product-not-purchasable',
 				$this->add_product_names_to_message( $singular_error, $plural_error, $not_purchasable_products )
 			);
@@ -511,7 +530,7 @@ class CartController {
 			$singular_error = $this->get_error_message_for_stock_exception_type( 'too_many_in_cart', 'singular' );
 			$plural_error   = $this->get_error_message_for_stock_exception_type( 'too_many_in_cart', 'plural' );
 
-			$too_many_in_cart_error->add(
+			$error->add(
 				'woocommerce-blocks-too-many-of-product-in-cart',
 				$this->add_product_names_to_message( $singular_error, $plural_error, $too_many_in_cart_products )
 			);
@@ -521,23 +540,13 @@ class CartController {
 			$singular_error = $this->get_error_message_for_stock_exception_type( 'partial_out_of_stock', 'singular' );
 			$plural_error   = $this->get_error_message_for_stock_exception_type( 'partial_out_of_stock', 'plural' );
 
-			$partial_out_of_stock_error->add(
+			$error->add(
 				'woocommerce-blocks-product-partially-out-of-stock',
 				$this->add_product_names_to_message( $singular_error, $plural_error, $partial_out_of_stock_products )
 			);
 		}
 
-		return array_filter(
-			[
-				$too_many_in_cart_error,
-				$partial_out_of_stock_error,
-				$out_of_stock_error,
-				$not_purchasable_error,
-			],
-			function( $error ) {
-				return $error->has_errors();
-			}
-		);
+		return $error;
 	}
 
 	/**
@@ -622,70 +631,52 @@ class CartController {
 	/**
 	 * Validate all coupons in the cart and check for errors.
 	 *
-	 * @throws RouteException Exception if invalid data is detected.
+	 * @throws InvalidCartException Exception if invalid data is detected.
 	 */
 	public function validate_cart_coupons() {
 		$cart_coupons = $this->get_cart_coupons();
+		$errors       = [];
 
 		foreach ( $cart_coupons as $code ) {
 			$coupon = new \WC_Coupon( $code );
-			$this->validate_cart_coupon( $coupon );
-		}
-	}
-
-	/**
-	 * Validate all items in the cart and get a list of errors.
-	 *
-	 * @return WP_Error[] An array of WP_Errors describing the cart's error state.
-	 */
-	public function get_cart_item_errors() {
-		$errors     = [];
-		$cart_items = $this->get_cart_items();
-
-		$too_many_in_cart_exceptions     = [];
-		$not_purchasable_exceptions      = [];
-		$partial_out_of_stock_exceptions = [];
-		$out_of_stock_exceptions         = [];
-
-		foreach ( $cart_items as $cart_item_key => $cart_item ) {
 			try {
-				$this->validate_cart_item( $cart_item );
-			} catch ( RouteException $error ) {
-				$errors[] = new WP_Error( $error->getErrorCode(), $error->getMessage() );
-			} catch ( TooManyInCartException $error ) {
-				$too_many_in_cart_exceptions[] = $error;
-			} catch ( NotPurchasableException $error ) {
-				$not_purchasable_exceptions[] = $error;
-			} catch ( PartialOutOfStockException $error ) {
-				$partial_out_of_stock_exceptions[] = $error;
-			} catch ( OutOfStockException $error ) {
-				$out_of_stock_exceptions[] = $error;
-			}
-		}
-
-		if ( count( $errors ) > 0 ) {
-			return $errors;
-		}
-
-		return $this->stock_exceptions_to_wp_errors( $too_many_in_cart_exceptions, $not_purchasable_exceptions, $partial_out_of_stock_exceptions, $out_of_stock_exceptions );
-	}
-
-	/**
-	 * Validate all items in the cart and get a list of errors.
-	 *
-	 * @throws RouteException Exception if invalid data is detected.
-	 */
-	public function get_cart_coupon_errors() {
-		$errors       = [];
-		$cart_coupons = $this->get_cart_coupons();
-
-		foreach ( $cart_coupons as $code ) {
-			try {
-				$coupon = new \WC_Coupon( $code );
 				$this->validate_cart_coupon( $coupon );
 			} catch ( RouteException $error ) {
-				$errors[] = new \WP_Error( $error->getErrorCode(), $error->getMessage() );
+				$errors[] = new WP_Error( $error->getErrorCode(), $error->getMessage(), $error->getAdditionalData() );
 			}
+		}
+
+		if ( ! empty( $errors ) ) {
+
+			$error = new WP_Error();
+			foreach ( $errors as $wp_error ) {
+				$error->merge_from( $wp_error );
+			}
+
+			throw new InvalidCartException(
+				'woocommerce_coupons_error',
+				$error,
+				409
+			);
+		}
+	}
+
+	/**
+	 * Validate the cart and get a list of errors.
+	 *
+	 * @return WP_Error A WP_Error instance containing the cart's errors.
+	 */
+	public function get_cart_errors() {
+		$errors = new WP_Error();
+
+		try {
+			$this->validate_cart();
+		} catch ( RouteException $error ) {
+			$errors->add( $error->getErrorCode(), $error->getMessage(), $error->getAdditionalData() );
+		} catch ( InvalidCartException $error ) {
+			$errors->merge_from( $error->getError() );
+		} catch ( \Exception $error ) {
+			$errors->add( $error->getCode(), $error->getMessage() );
 		}
 
 		return $errors;
