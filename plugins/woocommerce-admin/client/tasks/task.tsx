@@ -26,11 +26,18 @@ export const Task: React.FC< TaskProps > = ( { query, task } ) => {
 		optimisticallyCompleteTask,
 	} = useDispatch( ONBOARDING_STORE_NAME );
 
-	const onComplete = useCallback( () => {
-		optimisticallyCompleteTask( id );
-		getHistory().push( getNewPath( {}, '/', {} ) );
-		invalidateResolutionForStoreSelector( 'getTaskLists' );
-	}, [ id ] );
+	const onComplete = useCallback(
+		( options ) => {
+			optimisticallyCompleteTask( id );
+			getHistory().push(
+				options && options.redirectPath
+					? options.redirectPath
+					: getNewPath( {}, '/', {} )
+			);
+			invalidateResolutionForStoreSelector( 'getTaskLists' );
+		},
+		[ id ]
+	);
 
 	return (
 		<>
