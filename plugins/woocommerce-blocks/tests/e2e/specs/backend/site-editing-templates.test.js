@@ -19,6 +19,7 @@ import {
 	getAllTemplates,
 	goToSiteEditor,
 	saveTemplate,
+	useTheme,
 	waitForCanvas,
 } from '../../utils';
 
@@ -106,14 +107,11 @@ const WOOCOMMERCE_ID = 'woocommerce/woocommerce';
 const WOOCOMMERCE_PARSED_ID = 'WooCommerce';
 
 describe( 'Store Editing Templates', () => {
+	useTheme( 'emptytheme' );
+
 	beforeAll( async () => {
-		await activateTheme( 'emptytheme' );
 		await trashAllPosts( 'wp_template' );
 		await trashAllPosts( 'wp_template_part' );
-	} );
-
-	afterAll( async () => {
-		await activateTheme( 'twentytwentyone' );
 	} );
 
 	describe( 'Single Product block template', () => {

@@ -3,9 +3,11 @@
  */
 import config from 'config';
 import {
+	activateTheme,
 	disableSiteEditorWelcomeGuide,
 	openGlobalBlockInserter,
 	pressKeyWithModifier,
+	switchUserToAdmin,
 	visitAdminPage,
 	visitSiteEditor,
 } from '@wordpress/e2e-test-utils';
@@ -15,7 +17,7 @@ import { WP_ADMIN_DASHBOARD } from '@woocommerce/e2e-utils';
 /**
  * Internal dependencies
  */
-import { elementExists, getTextContent } from './page-utils';
+import { elementExists, getElementData, getTextContent } from './page-utils';
 
 /**
  * @typedef {import('@types/puppeteer').ElementHandle} ElementHandle
@@ -42,6 +44,9 @@ const SELECTORS = {
 		root: '.edit-site-list-table',
 		rows: '.edit-site-list-table-row',
 		templateTitle: '[data-wp-component="Heading"]',
+	},
+	themesPage: {
+		currentTheme: '.theme.active',
 	},
 	toolbar: {
 		confirmSave: '.editor-entities-saved-states__save-button',
@@ -241,4 +246,34 @@ export async function filterCurrentBlocks( predicate ) {
 	} );
 
 	return blocks.filter( predicate );
+}
+
+/**
+ * Sets up a suite to use a theme without side-effects
+ *
+ * *Note:* this “hook” is supposed to be used within `describe` calls to
+ * make it easier to set theme dependencies for tests without messing
+ * the environment of any other test and to explicitly declare a
+ * dependency.
+ *
+ * @param {string} themeSlug The theme the test suite should use
+ */
+export function useTheme( themeSlug ) {
+	let previousTheme;
+
+	beforeAll( async () => {
+		await switchUserToAdmin();
+		await visitAdminPage( 'themes.php' );
+
+		previousTheme = await getElementData(
+			SELECTORS.themesPage.currentTheme,
+			'slug'
+		);
+
+		await activateTheme( themeSlug );
+	} );
+
+	afterAll( async () => {
+		await activateTheme( previousTheme );
+	} );
 }
