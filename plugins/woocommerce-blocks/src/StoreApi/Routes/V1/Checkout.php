@@ -166,8 +166,7 @@ class Checkout extends AbstractCartRoute {
 		 * Validate items etc are allowed in the order before the order is processed. This will fix violations and tell
 		 * the customer.
 		 */
-		$this->cart_controller->validate_cart_items();
-		$this->cart_controller->validate_cart_coupons();
+		$this->cart_controller->validate_cart();
 
 		/**
 		 * Obtain Draft Order and process request data.
@@ -356,6 +355,7 @@ class Checkout extends AbstractCartRoute {
 		 * Fires when the Checkout Block/Store API updates an order's meta data.
 		 *
 		 * This hook gives extensions the chance to add or update meta data on the $order.
+		 * Throwing an exception from a callback attached to this action will make the Checkout Block render in a warning state, effectively preventing checkout.
 		 *
 		 * This is similar to existing core hook woocommerce_checkout_update_order_meta.
 		 * We're using a new action:

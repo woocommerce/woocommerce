@@ -11,7 +11,7 @@ use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
 class CartControllerTests extends TestCase {
 
-	public function test_get_cart_item_errors()    {
+	public function test_get_cart_errors()    {
 		$class    = new CartController();
 		$fixtures = new FixtureData();
 
@@ -59,13 +59,12 @@ class CartControllerTests extends TestCase {
 			return true;
 		}, 10, 2 );
 
-		$errors = array_map(
-			function( $error ) {
-				return $error->get_error_code();
-			},
-			$class->get_cart_item_errors()
-		);
+		$errors          = $class->get_cart_errors();
 
+		$this->assertTrue( is_wp_error( $errors ) );
+		$this->assertTrue( $errors->has_errors() );
+
+		$error_codes     = $errors->get_error_codes();
 		$expected_errors = [
 			'woocommerce-blocks-product-partially-out-of-stock',
 			'woocommerce-blocks-product-out-of-stock',
@@ -74,7 +73,7 @@ class CartControllerTests extends TestCase {
 		];
 
 		foreach( $expected_errors as $expected_error ) {
-			$this->assertContains( $expected_error, $errors );
+			$this->assertContains( $expected_error, $error_codes );
 		}
 
 	}
