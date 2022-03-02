@@ -59,7 +59,6 @@ class InboxNotifications {
 	 * Creates a notification letting merchants know about the Cart and Checkout Blocks.
 	 */
 	public static function create_surface_cart_checkout_blocks_notification() {
-
 		// If this is the feature plugin, then we don't need to do this. This should only show when Blocks is bundled
 		// with WooCommerce Core.
 		if ( Package::feature()->is_feature_plugin_build() ) {
@@ -74,9 +73,12 @@ class InboxNotifications {
 			return;
 		}
 
+		if ( apply_filters( 'woocommerce_admin_disabled', false ) ) {
+			return;
+		}
+
 		$data_store = \WC_Data_Store::load( 'admin-note' );
 		$note_ids   = $data_store->get_notes_with_name( self::SURFACE_CART_CHECKOUT_NOTE_NAME );
-
 		// Calculate store's eligibility to be shown the notice, starting with whether they have any plugins we know to
 		// be incompatible with Blocks. This check is done before checking if the note exists already because we want to
 		// delete the note if the merchant activates an ineligible plugin.
