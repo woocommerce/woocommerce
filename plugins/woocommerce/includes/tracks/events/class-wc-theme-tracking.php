@@ -17,27 +17,27 @@ class WC_Theme_Tracking {
 	 */
 	public function init() {
 		$this->track_initial_theme();
-		add_action( 'switch_theme', array( $this, 'track_active_theme' ) );
+		add_action( 'switch_theme', array( $this, 'track_activated_theme' ) );
 	}
 
 	/**
 	 * Tracking the initial theme being used for the first time.
 	 */
 	public function track_initial_theme() {
-		$has_been_initially_tracked = get_option( 'has_tracked_default_theme' );
+		$has_been_initially_tracked = get_option( 'wc_has_tracked_default_theme' );
 
 		if ( $has_been_initially_tracked ) {
 			return;
 		}
 
-		$this->track_active_theme();
-		add_option( 'has_tracked_default_theme', 'true' );
+		$this->track_activated_theme();
+		add_option( 'wc_has_tracked_default_theme', 1 );
 	}
 
 	/**
 	 * Send a Tracks event when a theme is activated so that we can track active block themes.
 	 */
-	public function track_active_theme() {
+	public function track_activated_theme() {
 		$is_block_theme = false;
 		$theme_object = wp_get_theme();
 
@@ -50,6 +50,6 @@ class WC_Theme_Tracking {
 			'theme_domain' => $theme_object->get( 'TextDomain' ),
 		);
 
-		WC_Tracks::record_event( 'theme_activated', $properties );
+		WC_Tracks::record_event( 'woocommerce_activated_theme', $properties );
 	}
 }
