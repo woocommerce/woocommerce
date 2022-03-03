@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 3.3.0
+
 ### Prompt a modal to save any unsaved changes in OBW
 
 1. Start with a fresh install.
