@@ -50,6 +50,6 @@ class WC_Theme_Tracking {
 			'theme_domain' => $theme_object->get( 'TextDomain' ),
 		);
 
-		WC_Tracks::record_event( 'woocommerce_activated_theme', $properties );
+		WC_Tracks::record_event( 'activated_theme', $properties );
 	}
 }
