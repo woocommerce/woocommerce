@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
-import { useShippingDataContext } from '@woocommerce/base-context';
 import type { EnteredAddress } from '@woocommerce/settings';
+import { useCustomerData } from '@woocommerce/base-context/hooks';
 
 /**
  * Internal dependencies
@@ -21,7 +21,7 @@ const ShippingCalculator = ( {
 	},
 	addressFields = [ 'country', 'state', 'city', 'postcode' ],
 }: ShippingCalculatorProps ): JSX.Element => {
-	const { shippingAddress, setShippingAddress } = useShippingDataContext();
+	const { shippingAddress, setShippingAddress } = useCustomerData();
 	return (
 		<div className="wc-block-components-shipping-calculator">
 			<ShippingCalculatorAddress

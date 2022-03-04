@@ -4,10 +4,8 @@
 import classnames from 'classnames';
 import { __ } from '@wordpress/i18n';
 import { FormStep } from '@woocommerce/base-components/cart-checkout';
-import {
-	useCheckoutContext,
-	useShippingDataContext,
-} from '@woocommerce/base-context';
+import { useCheckoutContext } from '@woocommerce/base-context';
+import { useShippingData } from '@woocommerce/base-context/hooks';
 
 /**
  * Internal dependencies
@@ -15,7 +13,7 @@ import {
 import CheckoutOrderNotes from '../../order-notes';
 
 const Block = ( { className }: { className?: string } ): JSX.Element => {
-	const { needsShipping } = useShippingDataContext();
+	const { needsShipping } = useShippingData();
 	const {
 		isProcessing: checkoutIsProcessing,
 		orderNotes,
