@@ -9,7 +9,6 @@ const config = {
 	testDir: 'tests',
 	reporter: [['list'], ['html', { outputFolder: 'e2e/output' }]],
 	use: {
-	  workers: 3,
 	  retries: 2,
 	  screenshot: 'only-on-failure',
 	  video: 'retain-on-failure',
