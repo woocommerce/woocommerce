@@ -10,10 +10,7 @@ import type LoadingMask from '@woocommerce/base-components/loading-mask';
  * Internal dependencies
  */
 import type { Currency } from './currency';
-import type {
-	CartBillingAddress,
-	CartShippingPackageShippingRate,
-} from './cart';
+import type { CartBillingAddress, CartShippingRate } from './cart';
 import type {
 	responseTypes,
 	noticeContexts,
@@ -114,8 +111,8 @@ export interface ShippingDataProps {
 	isSelectingRate: boolean;
 	// True if cart requires shipping.
 	needsShipping: boolean;
-	// An array of selected rates (rate ids).
-	selectedRates: string[];
+	// An object containing package IDs as the key and selected rate as the value (rate ids).
+	selectedRates: Record< string, unknown >;
 	// A function for setting selected rates (receives id).
 	setSelectedRates: (
 		newShippingRateId: string,
@@ -126,7 +123,7 @@ export interface ShippingDataProps {
 	// The current set shipping address.
 	shippingAddress: CartResponseShippingAddress;
 	// All the available shipping rates.
-	shippingRates: CartShippingPackageShippingRate[];
+	shippingRates: CartShippingRate[];
 	// Whether the rates are loading or not.
 	shippingRatesLoading: boolean;
 }

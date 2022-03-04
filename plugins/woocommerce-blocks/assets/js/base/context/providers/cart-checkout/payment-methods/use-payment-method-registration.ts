@@ -21,12 +21,12 @@ import { useDebouncedCallback } from 'use-debounce';
  * Internal dependencies
  */
 import { useEditorContext } from '../../editor-context';
-import { useShippingDataContext } from '../shipping';
 import { useCustomerDataContext } from '../customer';
 import { useStoreCart } from '../../../hooks/cart/use-store-cart';
 import { useStoreNotices } from '../../../hooks/use-store-notices';
 import { useEmitResponse } from '../../../hooks/use-emit-response';
 import type { PaymentMethodsDispatcherType } from './types';
+import { useShippingData } from '../../../hooks/shipping/use-shipping-data';
 
 /**
  * This hook handles initializing registered payment methods and exposing all
@@ -48,7 +48,7 @@ const usePaymentMethodRegistration = (
 ) => {
 	const [ isInitialized, setIsInitialized ] = useState( false );
 	const { isEditor } = useEditorContext();
-	const { selectedRates } = useShippingDataContext();
+	const { selectedRates } = useShippingData();
 	const { billingData, shippingAddress } = useCustomerDataContext();
 	const selectedShippingMethods = useShallowEqual( selectedRates );
 	const paymentMethodsOrder = useShallowEqual( paymentMethodsSortOrder );
