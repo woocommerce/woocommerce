@@ -1,10 +1,12 @@
 /**
  * External dependencies
  */
-import { useMemo } from '@wordpress/element';
+import { useMemo, useRef } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { CURRENT_USER_IS_ADMIN } from '@woocommerce/settings';
 import deprecated from '@wordpress/deprecated';
+import isShallowEqual, { ComparableObject } from '@wordpress/is-shallow-equal';
+import { isNull, isObject, objectHasProp } from '@woocommerce/types';
 
 /**
  * A function that always return true.
@@ -86,6 +88,96 @@ const getCheckoutFilters = ( filterName: string ): CheckoutFilterFunction[] => {
 	return filters;
 };
 
+const cachedFilterRuns: Record<
+	string,
+	{
+		arg?: CheckoutFilterArguments;
+		extensions?: Record< string, unknown > | null;
+	} & Record< string, unknown >
+> = {};
+
+const updatePreviousFilterRun = (
+	filterName: string,
+	arg: CheckoutFilterArguments,
+	extensions: Record< string, unknown > | null
+): void => {
+	cachedFilterRuns[ filterName ] = {
+		arg,
+		extensions,
+	};
+};
+
+/**
+ * A function that checks the shallow equality of an object's members.
+ */
+const checkMembersShallowEqual = <
+	T extends Record< string, unknown > | null,
+	U extends Record< string, unknown > | null
+>(
+	a: T,
+	b: U
+) => {
+	// For the case when extensions is null across runs.
+	if ( isNull( a ) && isNull( b ) ) {
+		return true;
+	}
+
+	return (
+		isObject( a ) &&
+		isObject( b ) &&
+		Object.keys( a ).length === Object.keys( b ).length &&
+		Object.keys( a ).every( ( aKey ) => {
+			return (
+				objectHasProp( b, aKey ) &&
+				isShallowEqual(
+					a[ aKey ] as ComparableObject,
+					b[ aKey ] as ComparableObject
+				)
+			);
+		} )
+	);
+};
+
+/**
+ * A function that checks the arg and extensions that were passed the last time a specific filter ran.
+ * If they are shallowly equal, then return the cached value and prevent third party code running. If they are
+ * different then the third party filters are run and the result is cached.
+ */
+const shouldReRunFilters = (
+	filterName: string,
+	arg: CheckoutFilterArguments,
+	extensions: Record< string, unknown > | null
+): boolean => {
+	const previousFilterRun = cachedFilterRuns[ filterName ];
+
+	if ( ! previousFilterRun ) {
+		// This is the first time the filter is running so let it continue;
+		updatePreviousFilterRun( filterName, arg, extensions );
+		return true;
+	}
+	const {
+		arg: previousArg = {} as Record< string, unknown >,
+		extensions: previousExtensions = {} as Record< string, unknown >,
+	} = previousFilterRun;
+
+	// Check length of arg and previousArg, and that all keys are present in both arg and previousArg
+	const argIsEqual = checkMembersShallowEqual( arg, previousArg );
+	if ( ! argIsEqual ) {
+		updatePreviousFilterRun( filterName, arg, extensions );
+		return true;
+	}
+
+	const extensionsIsEqual = checkMembersShallowEqual(
+		extensions,
+		previousExtensions
+	);
+	if ( ! extensionsIsEqual ) {
+		updatePreviousFilterRun( filterName, arg, extensions );
+		return true;
+	}
+	return false;
+};
+
 /**
  * Apply a filter.
  */
@@ -107,9 +199,16 @@ export const __experimentalApplyCheckoutFilter = < T >( {
 	/** Function that needs to return true when the filtered value is passed in order for the filter to be applied. */
 	validation?: ( value: T ) => true | Error;
 } ): T => {
-	return useMemo( () => {
-		const filters = getCheckoutFilters( filterName );
+	const cachedValues = useRef< Record< string, T > >( {} );
 
+	return useMemo( () => {
+		if (
+			! shouldReRunFilters( filterName, arg, extensions ) &&
+			cachedValues.current[ filterName ] !== undefined
+		) {
+			return cachedValues.current[ filterName ];
+		}
+		const filters = getCheckoutFilters( filterName );
 		let value = defaultValue;
 		filters.forEach( ( filter ) => {
 			try {
@@ -137,6 +236,7 @@ export const __experimentalApplyCheckoutFilter = < T >( {
 				}
 			}
 		} );
+		cachedValues.current[ filterName ] = value;
 		return value;
 	}, [ filterName, defaultValue, extensions, arg, validation ] );
 };
