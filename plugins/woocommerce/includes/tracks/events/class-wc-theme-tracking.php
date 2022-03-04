@@ -8,7 +8,7 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * This class adds actions to track usage of a WooCommerce Order.
+ * This class adds actions to track usage of themes on a WooCommerce store.
  */
 class WC_Theme_Tracking {
 
@@ -21,7 +21,7 @@ class WC_Theme_Tracking {
 	}
 
 	/**
-	 * Tracking the initial theme being used for the first time.
+	 * Tracks the sites current theme the first time this code is run, and will only be run once.
 	 */
 	public function track_initial_theme() {
 		$has_been_initially_tracked = get_option( 'wc_has_tracked_default_theme' );
