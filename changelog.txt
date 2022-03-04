@@ -35,6 +35,7 @@
 * Dev - A $file param is now available via the woocommerce_[product_]csv_importer_check_import_file_path filter hooks. ([#31266](https://github.com/woocommerce/woocommerce/pull/31266))
 * Dev - Data migration to create and activate the product attributes lookup table. ([#31256](https://github.com/woocommerce/woocommerce/pull/31256))
 * Dev - A new filter hook woocommerce_cart_item_removed_because_modified_message($message, $product) which allows to update the notice message if a product is modified and page is loaded while product is in cart. ([#31193](https://github.com/woocommerce/woocommerce/pull/31193))
+* Security - Add prefix to identify guest sessions.
 
 **WooCommerce Admin - 3.2.0 & 3.2.1**
 
