@@ -1,7 +1,7 @@
 <?php
-namespace Automattic\WooCommerce\Blocks\StoreApi;
+namespace Automattic\WooCommerce\StoreApi;
 
-use Automattic\WooCommerce\Blocks\StoreApi\Schemas\ExtendSchema;
+use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
 
 /**
  * SchemaController class.
@@ -30,33 +30,7 @@ class SchemaController {
 	 * @param ExtendSchema $extend Rest Extending instance.
 	 */
 	public function __construct( ExtendSchema $extend ) {
-		$this->extend = $extend;
-		$this->initialize();
-	}
-
-	/**
-	 * Get a schema class instance.
-	 *
-	 * @throws \Exception If the schema does not exist.
-	 *
-	 * @param string $name Name of schema.
-	 * @param int    $version API Version being requested.
-	 * @return Schemas\V1\AbstractSchema A new instance of the requested schema.
-	 */
-	public function get( $name, $version = 1 ) {
-		$schema = $this->schemas[ "v${version}" ][ $name ] ?? false;
-
-		if ( ! $schema ) {
-			throw new \Exception( "${name} v{$version} schema does not exist" );
-		}
-
-		return new $schema( $this->extend, $this );
-	}
-
-	/**
-	 * Initialize the list of available schemas.
-	 */
-	protected function initialize() {
+		$this->extend  = $extend;
 		$this->schemas = [
 			'v1' => [
 				Schemas\V1\BatchSchema::IDENTIFIER         => Schemas\V1\BatchSchema::class,
@@ -80,5 +54,24 @@ class SchemaController {
 				Schemas\V1\ProductReviewSchema::IDENTIFIER => Schemas\V1\ProductReviewSchema::class,
 			],
 		];
+	}
+
+	/**
+	 * Get a schema class instance.
+	 *
+	 * @throws \Exception If the schema does not exist.
+	 *
+	 * @param string $name Name of schema.
+	 * @param int    $version API Version being requested.
+	 * @return Schemas\V1\AbstractSchema A new instance of the requested schema.
+	 */
+	public function get( $name, $version = 1 ) {
+		$schema = $this->schemas[ "v${version}" ][ $name ] ?? false;
+
+		if ( ! $schema ) {
+			throw new \Exception( "${name} v{$version} schema does not exist" );
+		}
+
+		return new $schema( $this->extend, $this );
 	}
 }

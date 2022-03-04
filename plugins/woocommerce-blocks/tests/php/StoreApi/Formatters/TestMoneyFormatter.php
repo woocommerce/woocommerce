@@ -5,7 +5,7 @@
 
 namespace Automattic\WooCommerce\Blocks\Tests\StoreApi\Formatters;
 
-use Automattic\WooCommerce\Blocks\StoreApi\Formatters\MoneyFormatter;
+use Automattic\WooCommerce\StoreApi\Formatters\MoneyFormatter;
 
 /**
  * TestMoneyFormatter tests.

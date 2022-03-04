@@ -1,5 +1,5 @@
 <?php
-namespace Automattic\WooCommerce\Blocks\StoreApi\Schemas\V1;
+namespace Automattic\WooCommerce\StoreApi\Schemas\V1;
 
 use WC_Shipping_Rate as ShippingRate;
 

@@ -20,18 +20,10 @@ This example below uses the Cart endpoint, [see passed parameters.](./available-
 **Note: Make sure to read the "Things to consider" section below.**
 
 ```PHP
-
-use Automattic\WooCommerce\Blocks\Package;
-use Automattic\WooCommerce\Blocks\Domain\Services\ExtendSchema;
-use Automattic\WooCommerce\Blocks\StoreApi\Schemas\CartSchema;
+use Automattic\WooCommerce\StoreApi\Schemas\V1\CartSchema;
 
 add_action('woocommerce_blocks_loaded', function() {
- // ExtendSchema is stored in the container as a shared instance between the API and consumers.
- // You shouldn't initiate your own ExtendSchema instance using `new ExtendSchema` but should
- // always use the shared instance from the Package dependency injection container.
- $extend = Package::container()->get( ExtendSchema::class );
-
- $extend->register_endpoint_data(
+ woocommerce_store_api_register_endpoint_data(
 	array(
 		'endpoint' => CartSchema::IDENTIFIER,
 		'namespace' => 'plugin_namespace',
@@ -81,22 +73,30 @@ $product = $cart_item['data'];
 ### ExtendSchema is a shared instance
 
 The ExtendSchema is stored as a shared instance between the API and consumers (third-party developers). So you shouldn't initiate the class yourself with `new ExtendSchema` because it would not work.
-Instead, you should always use the shared instance from the Package dependency injection container like this.
+Instead, you should always use the shared instance from the StoreApi dependency injection container like this.
 
 ```php
-$extend = Package::container()->get( ExtendSchema::class );
+$extend = StoreApi::container()->get( ExtendSchema::class );
 ```
 
-### Dependency injection container is not always available
-
-You can't call `Package::container()` and expect it to work. The Package class is only available after the `woocommerce_blocks_loaded` action has been fired, so you should hook your file that action
+Also note that the dependency injection container is not available until after the `woocommerce_blocks_loaded` action has been fired, so you should hook your file that action:
 
 ```php
+use Automattic\WooCommerce\StoreApi\StoreApi;
+use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
+
 add_action( 'woocommerce_blocks_loaded', function() {
-	$extend = Package::container()->get( ExtendSchema::class );
+	$extend = StoreApi::container()->get( ExtendSchema::class );
 	// my logic.
 });
 ```
+
+Or use the global helper functions:
+
+-   `woocommerce_store_api_register_endpoint_data( $args )`
+-   `woocommerce_store_api_register_update_callback( $args )`
+-   `woocommerce_store_api_register_payment_requirements( $args )`
+-   `woocommerce_store_api_get_formatter( $name )`
 
 ### Errors and fatals are silence for non-admins
 
@@ -135,20 +135,14 @@ This example uses [Formatters](./extend-rest-api-formatters.md), utility classes
  *
  * @package WooCommerce Subscriptions
  */
+use Automattic\WooCommerce\StoreApi\StoreApi;
+use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
+use Automattic\WooCommerce\StoreApi\Schemas\V1\CartItemSchema;
 
-use Automattic\WooCommerce\Blocks\Package;
-use Automattic\WooCommerce\Blocks\Domain\Services\ExtendSchema;
-use Automattic\WooCommerce\Blocks\StoreApi\Schemas\CartItemSchema;
-
-if ( class_exists( 'Package' ) && version_compare( Package::get_version(), '4.8.0', '>=' ) ) {
-	// This class needs to run after WooCommerce Blocks is ready.
-	add_action( 'woocommerce_blocks_loaded', function() {
-
-		$extend = Package::container()->get( ExtendSchema::class );
-		WC_Subscriptions_Extend_Store_Endpoint::init( $extend );
-
-	} );
-}
+add_action( 'woocommerce_blocks_loaded', function() {
+	$extend = StoreApi::container()->get( ExtendSchema::class );
+	WC_Subscriptions_Extend_Store_Endpoint::init( $extend );
+});
 
 class WC_Subscriptions_Extend_Store_Endpoint {
 	/**

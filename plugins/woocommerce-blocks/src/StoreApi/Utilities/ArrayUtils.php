@@ -1,5 +1,5 @@
 <?php
-namespace Automattic\WooCommerce\Blocks\Utils;
+namespace Automattic\WooCommerce\StoreApi\Utilities;
 
 /**
  * ArrayUtils class used for custom functions to operate on arrays

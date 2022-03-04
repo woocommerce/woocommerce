@@ -1,7 +1,7 @@
 <?php
-namespace Automattic\WooCommerce\Blocks\StoreApi\Routes\V1;
+namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
-use Automattic\WooCommerce\Blocks\StoreApi\Utilities\Pagination;
+use Automattic\WooCommerce\StoreApi\Utilities\Pagination;
 use WP_Term_Query;
 
 /**

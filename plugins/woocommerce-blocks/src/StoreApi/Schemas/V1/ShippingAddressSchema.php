@@ -1,7 +1,7 @@
 <?php
-namespace Automattic\WooCommerce\Blocks\StoreApi\Schemas\V1;
+namespace Automattic\WooCommerce\StoreApi\Schemas\V1;
 
-use Automattic\WooCommerce\Blocks\StoreApi\Exceptions\RouteException;
+use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 
 /**
  * ShippingAddressSchema class.

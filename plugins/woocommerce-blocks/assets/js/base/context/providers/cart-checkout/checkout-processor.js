@@ -189,7 +189,7 @@ const CheckoutProcessor = () => {
 				currentShippingAddress.current
 			),
 			customer_note: orderNotes,
-			should_create_account: shouldCreateAccount,
+			create_account: shouldCreateAccount,
 			...paymentData,
 			extensions: { ...extensionData },
 		};

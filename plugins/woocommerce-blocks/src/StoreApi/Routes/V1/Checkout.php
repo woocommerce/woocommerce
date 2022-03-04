@@ -1,15 +1,14 @@
 <?php
-namespace Automattic\WooCommerce\Blocks\StoreApi\Routes\V1;
+namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
-use Automattic\WooCommerce\Blocks\Domain\Services\CreateAccount;
-use Automattic\WooCommerce\Blocks\Package;
-use Automattic\WooCommerce\Blocks\Payments\PaymentContext;
-use Automattic\WooCommerce\Blocks\Payments\PaymentResult;
-use Automattic\WooCommerce\Blocks\StoreApi\Exceptions\InvalidStockLevelsInCartException;
-use Automattic\WooCommerce\Blocks\StoreApi\Exceptions\RouteException;
-use Automattic\WooCommerce\Blocks\StoreApi\Utilities\DraftOrderTrait;
+use Automattic\WooCommerce\StoreApi\Payments\PaymentContext;
+use Automattic\WooCommerce\StoreApi\Payments\PaymentResult;
+use Automattic\WooCommerce\StoreApi\Exceptions\InvalidStockLevelsInCartException;
+use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
+use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStock;
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStockException;
+
 /**
  * Checkout class.
  *
@@ -613,10 +612,19 @@ class Checkout extends AbstractCartRoute {
 	 */
 	private function process_customer( \WP_REST_Request $request ) {
 		try {
-			$create_account = Package::container()->get( CreateAccount::class );
-			$create_account->from_order_request( $request );
-			$this->order->set_customer_id( get_current_user_id() );
-			$this->order->save();
+			if ( $this->should_create_customer_account( $request ) ) {
+				$customer_id = $this->create_customer_account(
+					$request['billing_address']['email'],
+					$request['billing_address']['first_name'],
+					$request['billing_address']['last_name']
+				);
+				// Log the customer in.
+				wc_set_customer_auth_cookie( $customer_id );
+
+				// Associate customer with the order.
+				$this->order->set_customer_id( $customer_id );
+				$this->order->save();
+			}
 		} catch ( \Exception $error ) {
 			switch ( $error->getMessage() ) {
 				case 'registration-error-invalid-email':
@@ -636,5 +644,167 @@ class Checkout extends AbstractCartRoute {
 
 		// Persist customer address data to account.
 		$this->order_controller->sync_customer_data_with_order( $this->order );
+	}
+
+	/**
+	 * Check request options and store (shop) config to determine if a user account should be created as part of order
+	 * processing.
+	 *
+	 * @param \WP_REST_Request $request The current request object being handled.
+	 * @return boolean True if a new user account should be created.
+	 */
+	private function should_create_customer_account( \WP_REST_Request $request ) {
+		if ( is_user_logged_in() ) {
+			return false;
+		}
+
+		// Return false if registration is not enabled for the store.
+		if ( false === filter_var( wc()->checkout()->is_registration_enabled(), FILTER_VALIDATE_BOOLEAN ) ) {
+			return false;
+		}
+
+		// Return true if the store requires an account for all purchases. Note - checkbox is not displayed to shopper in this case.
+		if ( true === filter_var( wc()->checkout()->is_registration_required(), FILTER_VALIDATE_BOOLEAN ) ) {
+			return true;
+		}
+
+		// Create an account if requested via the endpoint.
+		if ( true === filter_var( $request['create_account'], FILTER_VALIDATE_BOOLEAN ) ) {
+			// User has requested an account as part of checkout processing.
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Create a new account for a customer.
+	 *
+	 * The account is created with a generated username. The customer is sent
+	 * an email notifying them about the account and containing a link to set
+	 * their (initial) password.
+	 *
+	 * Intended as a replacement for wc_create_new_customer in WC core.
+	 *
+	 * @throws \Exception If an error is encountered when creating the user account.
+	 *
+	 * @param string $user_email The email address to use for the new account.
+	 * @param string $first_name The first name to use for the new account.
+	 * @param string $last_name  The last name to use for the new account.
+	 *
+	 * @return int User id if successful
+	 */
+	private function create_customer_account( $user_email, $first_name, $last_name ) {
+		if ( empty( $user_email ) || ! is_email( $user_email ) ) {
+			throw new \Exception( 'registration-error-invalid-email' );
+		}
+
+		if ( email_exists( $user_email ) ) {
+			throw new \Exception( 'registration-error-email-exists' );
+		}
+
+		$username = wc_create_new_customer_username( $user_email );
+
+		// Handle password creation.
+		$password           = wp_generate_password();
+		$password_generated = true;
+
+		// Use WP_Error to handle registration errors.
+		$errors = new \WP_Error();
+
+		/**
+		 * Fires before a customer account is registered.
+		 *
+		 * This hook fires before customer accounts are created and passes the form data (username, email) and an array
+		 * of errors.
+		 *
+		 * This could be used to add extra validation logic and append errors to the array.
+		 *
+		 * @param string $username Customer username.
+		 * @param string $user_email Customer email address.
+		 * @param \WP_Error $errors Error object.
+		 */
+		do_action( 'woocommerce_register_post', $username, $user_email, $errors );
+
+		/**
+		 * Filters registration errors before a customer account is registered.
+		 *
+		 * This hook filters registration errors. This can be used to manipulate the array of errors before
+		 * they are displayed.
+		 *
+		 * @param \WP_Error $errors Error object.
+		 * @param string $username Customer username.
+		 * @param string $user_email Customer email address.
+		 * @return \WP_Error
+		 */
+		$errors = apply_filters( 'woocommerce_registration_errors', $errors, $username, $user_email );
+
+		if ( is_wp_error( $errors ) && $errors->get_error_code() ) {
+			throw new \Exception( $errors->get_error_code() );
+		}
+
+		/**
+		 * Filters customer data before a customer account is registered.
+		 *
+		 * This hook filters customer data. It allows user data to be changed, for example, username, password, email,
+		 * first name, last name, and role.
+		 *
+		 * @param array $customer_data An array of customer (user) data.
+		 * @return array
+		 */
+		$new_customer_data = apply_filters(
+			'woocommerce_new_customer_data',
+			array(
+				'user_login' => $username,
+				'user_pass'  => $password,
+				'user_email' => $user_email,
+				'first_name' => $first_name,
+				'last_name'  => $last_name,
+				'role'       => 'customer',
+				'source'     => 'store-api,',
+			)
+		);
+
+		$customer_id = wp_insert_user( $new_customer_data );
+
+		if ( is_wp_error( $customer_id ) ) {
+			throw $this->map_create_account_error( $customer_id );
+		}
+
+		// Set account flag to remind customer to update generated password.
+		update_user_option( $customer_id, 'default_password_nag', true, true );
+
+		/**
+		 * Fires after a customer account has been registered.
+		 *
+		 * This hook fires after customer accounts are created and passes the customer data.
+		 *
+		 * @param integer $customer_id New customer (user) ID.
+		 * @param array $new_customer_data Array of customer (user) data.
+		 * @param string $password_generated The generated password for the account.
+		 */
+		do_action( 'woocommerce_created_customer', $customer_id, $new_customer_data, $password_generated );
+
+		return $customer_id;
+	}
+
+	/**
+	 * Convert an account creation error to an exception.
+	 *
+	 * @param \WP_Error $error An error object.
+	 * @return \Exception.
+	 */
+	private function map_create_account_error( \WP_Error $error ) {
+		switch ( $error->get_error_code() ) {
+			// WordPress core error codes.
+			case 'empty_username':
+			case 'invalid_username':
+			case 'empty_email':
+			case 'invalid_email':
+			case 'email_exists':
+			case 'registerfail':
+				return new \Exception( 'woocommerce_rest_checkout_create_account_failure' );
+		}
+		return new \Exception( 'woocommerce_rest_checkout_create_account_failure' );
 	}
 }
