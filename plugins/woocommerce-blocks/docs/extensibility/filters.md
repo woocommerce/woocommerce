@@ -15,6 +15,7 @@
  - [woocommerce_add_to_cart_sold_individually_quantity](#woocommerce_add_to_cart_sold_individually_quantity)
  - [woocommerce_add_to_cart_validation](#-woocommerce_add_to_cart_validation)
  - [woocommerce_adjust_non_base_location_prices](#woocommerce_adjust_non_base_location_prices)
+ - [woocommerce_admin_disabled](#woocommerce_admin_disabled)
  - [woocommerce_apply_individual_use_coupon](#woocommerce_apply_individual_use_coupon)
  - [woocommerce_apply_with_individual_use_coupon](#woocommerce_apply_with_individual_use_coupon)
  - [woocommerce_blocks_product_grid_is_cacheable](#woocommerce_blocks_product_grid_is_cacheable)
@@ -289,6 +290,22 @@ apply_filters( 'woocommerce_adjust_non_base_location_prices', boolean $adjust_no
 
 ---
 
+## woocommerce_admin_disabled
+
+
+
+
+```php
+apply_filters( 'woocommerce_admin_disabled' )
+```
+
+### Source
+
+
+ - [InboxNotifications.php](../src/InboxNotifications.php)
+
+---
+
 ## woocommerce_apply_individual_use_coupon
 
 
@@ -541,7 +558,7 @@ apply_filters( 'woocommerce_new_customer_data', array $customer_data )
 ### Source
 
 
- - [Domain/Services/CreateAccount.php](../src/Domain/Services/CreateAccount.php)
+ - [StoreApi/Routes/V1/Checkout.php](../src/StoreApi/Routes/V1/Checkout.php)
 
 ---
 
@@ -574,7 +591,7 @@ apply_filters( 'woocommerce_registration_errors', \WP_Error $errors, string $use
 ### Source
 
 
- - [Domain/Services/CreateAccount.php](../src/Domain/Services/CreateAccount.php)
+ - [StoreApi/Routes/V1/Checkout.php](../src/StoreApi/Routes/V1/Checkout.php)
 
 ---
 

@@ -5,7 +5,7 @@
 
 namespace Automattic\WooCommerce\Blocks\Tests\StoreApi\Formatters;
 
-use Automattic\WooCommerce\Blocks\StoreApi\Formatters\CurrencyFormatter;
+use Automattic\WooCommerce\StoreApi\Formatters\CurrencyFormatter;
 
 /**
  * TestCurrencyFormatter tests.

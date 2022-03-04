@@ -24,6 +24,7 @@
 	},
 	"autoload": {
 		"psr-4": {
+			"Automattic\\WooCommerce\\StoreApi\\": "src/StoreApi/",
 			"Automattic\\WooCommerce\\Blocks\\": "src/"
 		},
 		"files": [

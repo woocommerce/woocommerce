@@ -2,39 +2,6 @@
     "$schema": "https://raw.githubusercontent.com/johnbillion/wp-hooks-generator/0.7.0/schema.json",
     "hooks": [
         {
-            "name": "woocommerce_store_api_cart_errors",
-            "file": "StoreApi/Utilities/CartController.php",
-            "type": "action",
-            "doc": {
-                "description": "Fires an action to validate the cart.",
-                "long_description": "Functions hooking into this should add custom errors using the provided WP_Error instance.",
-                "tags": [
-                    {
-                        "name": "example",
-                        "content": "docs/examples/validate-cart.md"
-                    },
-                    {
-                        "name": "param",
-                        "content": "WP_Error object.",
-                        "types": [
-                            "\\WP_Error"
-                        ],
-                        "variable": "$errors"
-                    },
-                    {
-                        "name": "param",
-                        "content": "Cart object.",
-                        "types": [
-                            "\\WC_Cart"
-                        ],
-                        "variable": "$cart"
-                    }
-                ],
-                "long_description_html": "<p>Functions hooking into this should add custom errors using the provided WP_Error instance.</p>"
-            },
-            "args": 2
-        },
-        {
             "name": "woocommerce_add_to_cart",
             "file": "StoreApi/Utilities/CartController.php",
             "type": "action",
@@ -279,7 +246,7 @@
         },
         {
             "name": "woocommerce_blocks_cart_enqueue_data",
-            "file": "BlockTypes/Cart.php",
+            "file": "BlockTypes/MiniCart.php",
             "type": "action",
             "doc": {
                 "description": "Fires after cart block data is registered.",
@@ -291,7 +258,7 @@
         },
         {
             "name": "woocommerce_blocks_cart_enqueue_data",
-            "file": "BlockTypes/MiniCart.php",
+            "file": "BlockTypes/Cart.php",
             "type": "action",
             "doc": {
                 "description": "Fires after cart block data is registered.",
@@ -564,7 +531,7 @@
         },
         {
             "name": "woocommerce_created_customer",
-            "file": "Domain/Services/CreateAccount.php",
+            "file": "StoreApi/Routes/V1/Checkout.php",
             "type": "action",
             "doc": {
                 "description": "Fires after a customer account has been registered.",
@@ -619,7 +586,7 @@
         },
         {
             "name": "woocommerce_register_post",
-            "file": "Domain/Services/CreateAccount.php",
+            "file": "StoreApi/Routes/V1/Checkout.php",
             "type": "action",
             "doc": {
                 "description": "Fires before a customer account is registered.",
@@ -677,7 +644,7 @@
                         "name": "param",
                         "content": "Holds context for the payment, including order ID and payment method.",
                         "types": [
-                            "\\Automattic\\WooCommerce\\Blocks\\Payments\\PaymentContext"
+                            "\\Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentContext"
                         ],
                         "variable": "$context"
                     },
@@ -685,7 +652,7 @@
                         "name": "param",
                         "content": "Result object for the transaction.",
                         "types": [
-                            "\\Automattic\\WooCommerce\\Blocks\\Payments\\PaymentResult"
+                            "\\Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult"
                         ],
                         "variable": "$payment_result"
                     }
@@ -705,6 +672,39 @@
                 "long_description_html": ""
             },
             "args": 0
+        },
+        {
+            "name": "woocommerce_store_api_cart_errors",
+            "file": "StoreApi/Utilities/CartController.php",
+            "type": "action",
+            "doc": {
+                "description": "Fires an action to validate the cart.",
+                "long_description": "Functions hooking into this should add custom errors using the provided WP_Error instance.",
+                "tags": [
+                    {
+                        "name": "example",
+                        "content": "docs/examples/validate-cart.md"
+                    },
+                    {
+                        "name": "param",
+                        "content": "WP_Error object.",
+                        "types": [
+                            "\\WP_Error"
+                        ],
+                        "variable": "$errors"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Cart object.",
+                        "types": [
+                            "\\WC_Cart"
+                        ],
+                        "variable": "$cart"
+                    }
+                ],
+                "long_description_html": "<p>Functions hooking into this should add custom errors using the provided WP_Error instance.</p>"
+            },
+            "args": 2
         },
         {
             "name": "woocommerce_store_api_validate_add_to_cart",

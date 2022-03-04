@@ -1,8 +1,8 @@
 <?php
-namespace Automattic\WooCommerce\Blocks\StoreApi\Routes\V1;
+namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
-use Automattic\WooCommerce\Blocks\StoreApi\Utilities\Pagination;
-use Automattic\WooCommerce\Blocks\StoreApi\Utilities\ProductQuery;
+use Automattic\WooCommerce\StoreApi\Utilities\Pagination;
+use Automattic\WooCommerce\StoreApi\Utilities\ProductQuery;
 
 /**
  * Products class.

@@ -1,7 +1,7 @@
 <?php
-namespace Automattic\WooCommerce\Blocks\StoreApi\Routes\V1;
+namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
-use Automattic\WooCommerce\Blocks\StoreApi\Utilities\ProductQueryFilters;
+use Automattic\WooCommerce\StoreApi\Utilities\ProductQueryFilters;
 
 /**
  * ProductCollectionData route.

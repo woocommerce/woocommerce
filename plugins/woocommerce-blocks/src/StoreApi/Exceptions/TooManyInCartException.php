@@ -1,5 +1,5 @@
 <?php
-namespace Automattic\WooCommerce\Blocks\StoreApi\Exceptions;
+namespace Automattic\WooCommerce\StoreApi\Exceptions;
 
 /**
  * TooManyInCartException class.

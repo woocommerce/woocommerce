@@ -1,5 +1,5 @@
 <?php
-namespace Automattic\WooCommerce\Blocks\StoreApi\Formatters;
+namespace Automattic\WooCommerce\StoreApi\Formatters;
 
 /**
  * Html Formatter.

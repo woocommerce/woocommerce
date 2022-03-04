@@ -1,7 +1,7 @@
 <?php
-namespace Automattic\WooCommerce\Blocks\StoreApi\Utilities;
+namespace Automattic\WooCommerce\StoreApi\Utilities;
 
-use Automattic\WooCommerce\Blocks\StoreApi\Utilities\ProductQuery;
+use Automattic\WooCommerce\StoreApi\Utilities\ProductQuery;
 
 /**
  * Product Query filters class.

@@ -2,8 +2,8 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\BlocksWpQuery;
-use Automattic\WooCommerce\Blocks\StoreApi\SchemaController;
-use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\StoreApi\SchemaController;
+use Automattic\WooCommerce\StoreApi\StoreApi;
 
 /**
  * AbstractProductGrid class.
@@ -101,7 +101,7 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 				rawurlencode(
 					wp_json_encode(
 						array_map(
-							[ Package::container()->get( SchemaController::class )->get( 'product' ), 'get_item_response' ],
+							[ StoreApi::container()->get( SchemaController::class )->get( 'product' ), 'get_item_response' ],
 							$products
 						)
 					)

@@ -1,7 +1,7 @@
 <?php
-namespace Automattic\WooCommerce\Blocks\StoreApi;
+namespace Automattic\WooCommerce\StoreApi;
 
-use Automattic\WooCommerce\Blocks\StoreApi\SchemaController;
+use Automattic\WooCommerce\StoreApi\SchemaController;
 use Exception;
 use Routes\AbstractRoute;
 
@@ -11,13 +11,12 @@ use Routes\AbstractRoute;
  * @internal This API is used internally by Blocks--it is still in flux and may be subject to revisions.
  */
 class RoutesController {
-
 	/**
-	 * Stores schemas.
+	 * Stores schema_controller.
 	 *
 	 * @var SchemaController
 	 */
-	protected $schemas;
+	protected $schema_controller;
 
 	/**
 	 * Stores routes.
@@ -29,64 +28,11 @@ class RoutesController {
 	/**
 	 * Constructor.
 	 *
-	 * @param SchemaController $schemas Schema controller class passed to each route.
+	 * @param SchemaController $schema_controller Schema controller class passed to each route.
 	 */
-	public function __construct( SchemaController $schemas ) {
-		$this->schemas = $schemas;
-		$this->initialize();
-	}
-
-	/**
-	 * Get a route class instance.
-	 *
-	 * Each route class is instantized with the SchemaController instance, and its main Schema Type.
-	 *
-	 * @throws \Exception If the schema does not exist.
-	 * @param string $name Name of schema.
-	 * @param string $version API Version being requested.
-	 * @return AbstractRoute
-	 */
-	public function get( $name, $version = 'v1' ) {
-		$route = $this->routes[ $version ][ $name ] ?? false;
-
-		if ( ! $route ) {
-			throw new \Exception( "${name} {$version} route does not exist" );
-		}
-
-		return new $route(
-			$this->schemas,
-			$this->schemas->get( $route::SCHEMA_TYPE, $route::SCHEMA_VERSION )
-		);
-	}
-
-	/**
-	 * Register defined list of routes with WordPress.
-	 *
-	 * @param string $version API Version being registered..
-	 * @param string $namespace Overrides the default route namespace.
-	 */
-	public function register_routes( $version = 'v1', $namespace = 'wc/store/v1' ) {
-		if ( ! isset( $this->routes[ $version ] ) ) {
-			return;
-		}
-		$route_identifiers = array_keys( $this->routes[ $version ] );
-		foreach ( $route_identifiers as $route ) {
-			$route_instance = $this->get( $route, $version );
-			$route_instance->set_namespace( $namespace );
-
-			register_rest_route(
-				$route_instance->get_namespace(),
-				$route_instance->get_path(),
-				$route_instance->get_args()
-			);
-		}
-	}
-
-	/**
-	 * Load route class instances.
-	 */
-	protected function initialize() {
-		$this->routes = [
+	public function __construct( SchemaController $schema_controller ) {
+		$this->schema_controller = $schema_controller;
+		$this->routes            = [
 			'v1' => [
 				Routes\V1\Batch::IDENTIFIER              => Routes\V1\Batch::class,
 				Routes\V1\Cart::IDENTIFIER               => Routes\V1\Cart::class,
@@ -115,5 +61,59 @@ class RoutesController {
 				Routes\V1\ProductsById::IDENTIFIER       => Routes\V1\ProductsById::class,
 			],
 		];
+	}
+
+	/**
+	 * Register all Store API routes. This includes routes under specific version namespaces.
+	 */
+	public function register_all_routes() {
+		$this->register_routes( 'v1', 'wc/store' );
+		$this->register_routes( 'v1', 'wc/store/v1' );
+	}
+
+	/**
+	 * Get a route class instance.
+	 *
+	 * Each route class is instantized with the SchemaController instance, and its main Schema Type.
+	 *
+	 * @throws \Exception If the schema does not exist.
+	 * @param string $name Name of schema.
+	 * @param string $version API Version being requested.
+	 * @return AbstractRoute
+	 */
+	public function get( $name, $version = 'v1' ) {
+		$route = $this->routes[ $version ][ $name ] ?? false;
+
+		if ( ! $route ) {
+			throw new \Exception( "${name} {$version} route does not exist" );
+		}
+
+		return new $route(
+			$this->schema_controller,
+			$this->schema_controller->get( $route::SCHEMA_TYPE, $route::SCHEMA_VERSION )
+		);
+	}
+
+	/**
+	 * Register defined list of routes with WordPress.
+	 *
+	 * @param string $version API Version being registered..
+	 * @param string $namespace Overrides the default route namespace.
+	 */
+	protected function register_routes( $version = 'v1', $namespace = 'wc/store/v1' ) {
+		if ( ! isset( $this->routes[ $version ] ) ) {
+			return;
+		}
+		$route_identifiers = array_keys( $this->routes[ $version ] );
+		foreach ( $route_identifiers as $route ) {
+			$route_instance = $this->get( $route, $version );
+			$route_instance->set_namespace( $namespace );
+
+			register_rest_route(
+				$route_instance->get_namespace(),
+				$route_instance->get_path(),
+				$route_instance->get_args()
+			);
+		}
 	}
 }

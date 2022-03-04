@@ -1,10 +1,10 @@
 <?php
-namespace Automattic\WooCommerce\Blocks\StoreApi\Schemas;
+namespace Automattic\WooCommerce\StoreApi\Schemas;
 
-use Automattic\WooCommerce\Blocks\StoreApi\Schemas\V1\CartItemSchema;
-use Automattic\WooCommerce\Blocks\StoreApi\Schemas\V1\CartSchema;
-use Automattic\WooCommerce\Blocks\StoreApi\Schemas\V1\CheckoutSchema;
-use Automattic\WooCommerce\Blocks\StoreApi\Formatters;
+use Automattic\WooCommerce\StoreApi\Schemas\V1\CartItemSchema;
+use Automattic\WooCommerce\StoreApi\Schemas\V1\CartSchema;
+use Automattic\WooCommerce\StoreApi\Schemas\V1\CheckoutSchema;
+use Automattic\WooCommerce\StoreApi\Formatters;
 
 /**
  * Provides utility functions to extend Store API schemas.

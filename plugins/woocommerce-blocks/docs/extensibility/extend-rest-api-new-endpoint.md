@@ -10,7 +10,7 @@ ExtendSchema needs to expose each endpoint individually. If you want to expose a
 
 ```php
 
-use Automattic\WooCommerce\Blocks\StoreApi\Schemas\BillingAddressSchema;
+use Automattic\WooCommerce\StoreApi\Schemas\BillingAddressSchema;
 
 private $endpoints = [ /* other identifiers */, BillingAddressSchema::IDENTIFIER ];
 

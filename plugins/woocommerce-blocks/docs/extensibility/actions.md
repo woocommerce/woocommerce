@@ -7,7 +7,6 @@
 ## Table of Contents
 
 
- - [__experimental_woocommerce_store_api_cart_errors](#__experimental_woocommerce_store_api_cart_errors)
  - [woocommerce_add_to_cart](#woocommerce_add_to_cart)
  - [woocommerce_after_main_content](#woocommerce_after_main_content)
  - [woocommerce_after_shop_loop](#woocommerce_after_shop_loop)
@@ -34,51 +33,9 @@
  - [woocommerce_register_post](#woocommerce_register_post)
  - [woocommerce_rest_checkout_process_payment_with_context](#woocommerce_rest_checkout_process_payment_with_context)
  - [woocommerce_shop_loop](#woocommerce_shop_loop)
+ - [woocommerce_store_api_cart_errors](#woocommerce_store_api_cart_errors)
  - [woocommerce_store_api_validate_add_to_cart](#woocommerce_store_api_validate_add_to_cart)
  - [woocommerce_store_api_validate_cart_item](#woocommerce_store_api_validate_cart_item)
-
----
-
-## __experimental_woocommerce_store_api_cart_errors
-
-
-Fires an action to validate the cart.
-
-```php
-do_action( '__experimental_woocommerce_store_api_cart_errors', \WP_Error $errors, \WC_Cart $cart )
-```
-
-### Description
-
-<p>Functions hooking into this should add custom errors using the provided WP_Error instance.</p>
-
-### Parameters
-
-| Argument | Type | Description |
-| -------- | ---- | ----------- |
-| $errors | \WP_Error | WP_Error object. |
-| $cart | \WC_Cart | Cart object. |
-
-### Example
-
-```php
-// The action callback function.
-function my_function_callback( $errors, $cart ) {
-
-  // Validate the $cart object and add errors. For example, to create an error if the cart contains more than 10 items:
-  if ( $cart->get_cart_contents_count() > 10 ) {
-    $errors->add( 'my_error_code', 'Too many cart items!' );
-  }
-}
-
-add_action( '__experimental_woocommerce_store_api_cart_errors', 'my_function_callback', 10 );
-```
-
-
-### Source
-
-
- - [StoreApi/Utilities/CartController.php](../src/StoreApi/Utilities/CartController.php)
 
 ---
 
@@ -267,8 +224,8 @@ do_action( 'woocommerce_blocks_cart_enqueue_data' )
 ### Source
 
 
- - [BlockTypes/Cart.php](../src/BlockTypes/Cart.php)
  - [BlockTypes/MiniCart.php](../src/BlockTypes/MiniCart.php)
+ - [BlockTypes/Cart.php](../src/BlockTypes/Cart.php)
 
 ---
 
@@ -594,7 +551,7 @@ do_action( 'woocommerce_created_customer', integer $customer_id, array $new_cust
 ### Source
 
 
- - [Domain/Services/CreateAccount.php](../src/Domain/Services/CreateAccount.php)
+ - [StoreApi/Routes/V1/Checkout.php](../src/StoreApi/Routes/V1/Checkout.php)
 
 ---
 
@@ -643,7 +600,7 @@ do_action( 'woocommerce_register_post', string $username, string $user_email, \W
 ### Source
 
 
- - [Domain/Services/CreateAccount.php](../src/Domain/Services/CreateAccount.php)
+ - [StoreApi/Routes/V1/Checkout.php](../src/StoreApi/Routes/V1/Checkout.php)
 
 ---
 
@@ -653,15 +610,15 @@ do_action( 'woocommerce_register_post', string $username, string $user_email, \W
 Process payment with context.
 
 ```php
-do_action_ref_array( 'woocommerce_rest_checkout_process_payment_with_context', [ \Automattic\WooCommerce\Blocks\Payments\PaymentContext $context, \Automattic\WooCommerce\Blocks\Payments\PaymentResult $payment_result ] )
+do_action_ref_array( 'woocommerce_rest_checkout_process_payment_with_context', [ \Automattic\WooCommerce\StoreApi\Payments\PaymentContext $context, \Automattic\WooCommerce\StoreApi\Payments\PaymentResult $payment_result ] )
 ```
 
 ### Parameters
 
 | Argument | Type | Description |
 | -------- | ---- | ----------- |
-| $context | \Automattic\WooCommerce\Blocks\Payments\PaymentContext | Holds context for the payment, including order ID and payment method. |
-| $payment_result | \Automattic\WooCommerce\Blocks\Payments\PaymentResult | Result object for the transaction. |
+| $context | \Automattic\WooCommerce\StoreApi\Payments\PaymentContext | Holds context for the payment, including order ID and payment method. |
+| $payment_result | \Automattic\WooCommerce\StoreApi\Payments\PaymentResult | Result object for the transaction. |
 
 ### Exceptions
 
@@ -688,6 +645,49 @@ do_action( 'woocommerce_shop_loop' )
 
 
  - [BlockTypes/LegacyTemplate.php](../src/BlockTypes/LegacyTemplate.php)
+
+---
+
+## woocommerce_store_api_cart_errors
+
+
+Fires an action to validate the cart.
+
+```php
+do_action( 'woocommerce_store_api_cart_errors', \WP_Error $errors, \WC_Cart $cart )
+```
+
+### Description
+
+<p>Functions hooking into this should add custom errors using the provided WP_Error instance.</p>
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $errors | \WP_Error | WP_Error object. |
+| $cart | \WC_Cart | Cart object. |
+
+### Example
+
+```php
+// The action callback function.
+function my_function_callback( $errors, $cart ) {
+
+  // Validate the $cart object and add errors. For example, to create an error if the cart contains more than 10 items:
+  if ( $cart->get_cart_contents_count() > 10 ) {
+    $errors->add( 'my_error_code', 'Too many cart items!' );
+  }
+}
+
+add_action( 'woocommerce_store_api_cart_errors', 'my_function_callback', 10 );
+```
+
+
+### Source
+
+
+ - [StoreApi/Utilities/CartController.php](../src/StoreApi/Utilities/CartController.php)
 
 ---
 

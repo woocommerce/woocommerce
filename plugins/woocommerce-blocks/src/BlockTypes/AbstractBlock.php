@@ -6,7 +6,6 @@ use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
 use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
-use Automattic\WooCommerce\Blocks\RestApi;
 
 /**
  * AbstractBlock class.
@@ -365,7 +364,7 @@ abstract class AbstractBlock {
 					'pluginUrl'     => plugins_url( '/', dirname( __DIR__ ) ),
 					'productCount'  => array_sum( (array) wp_count_posts( 'product' ) ),
 					'restApiRoutes' => [
-						'/wc/store/v1' => array_keys( Package::container()->get( RestApi::class )->get_routes_from_namespace( 'wc/store/v1' ) ),
+						'/wc/store/v1' => array_keys( $this->get_routes_from_namespace( 'wc/store/v1' ) ),
 					],
 					'defaultAvatar' => get_avatar_url( 0, [ 'force_default' => true ] ),
 
@@ -378,6 +377,30 @@ abstract class AbstractBlock {
 				]
 			);
 		}
+	}
+
+	/**
+	 * Get routes from a REST API namespace.
+	 *
+	 * @param string $namespace Namespace to retrieve.
+	 * @return array
+	 */
+	protected function get_routes_from_namespace( $namespace ) {
+		$rest_server     = rest_get_server();
+		$namespace_index = $rest_server->get_namespace_index(
+			[
+				'namespace' => $namespace,
+				'context'   => 'view',
+			]
+		);
+
+		if ( is_wp_error( $namespace_index ) ) {
+			return [];
+		}
+
+		$response_data = $namespace_index->get_data();
+
+		return $response_data['routes'] ?? [];
 	}
 
 	/**

@@ -1,17 +1,17 @@
 <?php
-namespace Automattic\WooCommerce\Blocks\StoreApi\Utilities;
+namespace Automattic\WooCommerce\StoreApi\Utilities;
 
-use Automattic\WooCommerce\Blocks\StoreApi\Exceptions\NotPurchasableException;
-use Automattic\WooCommerce\Blocks\StoreApi\Exceptions\OutOfStockException;
-use Automattic\WooCommerce\Blocks\StoreApi\Exceptions\PartialOutOfStockException;
-use Automattic\WooCommerce\Blocks\StoreApi\Exceptions\TooManyInCartException;
-use Automattic\WooCommerce\Blocks\StoreApi\Exceptions\RouteException;
-use Automattic\WooCommerce\Blocks\StoreApi\Exceptions\InvalidCartException;
-use Automattic\WooCommerce\Blocks\StoreApi\Utilities\DraftOrderTrait;
-use Automattic\WooCommerce\Blocks\StoreApi\Utilities\NoticeHandler;
-use Automattic\WooCommerce\Blocks\StoreApi\Utilities\QuantityLimits;
-use Automattic\WooCommerce\Blocks\Utils\ArrayUtils;
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStock;
+use Automattic\WooCommerce\StoreApi\Exceptions\InvalidCartException;
+use Automattic\WooCommerce\StoreApi\Exceptions\NotPurchasableException;
+use Automattic\WooCommerce\StoreApi\Exceptions\OutOfStockException;
+use Automattic\WooCommerce\StoreApi\Exceptions\PartialOutOfStockException;
+use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
+use Automattic\WooCommerce\StoreApi\Exceptions\TooManyInCartException;
+use Automattic\WooCommerce\StoreApi\Utilities\ArrayUtils;
+use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
+use Automattic\WooCommerce\StoreApi\Utilities\NoticeHandler;
+use Automattic\WooCommerce\StoreApi\Utilities\QuantityLimits;
 use WP_Error;
 
 /**
