@@ -11,7 +11,7 @@ Currently we have a small set of public-facing packages that can be dowloaded fr
 
 ## Working with existing packages
 
--   You can make changes to packages files as normal, and running `npm start` will compile and watch both app files and packages.
+-   You can make changes to packages files as normal, and running `pnpm start` will compile and watch both app files and packages.
 -   :warning: Make sure any dependencies you add to a package are also added to that package's `package.json`, not just the woocommerce-admin package.json
 -   :warning: Make sure you're not importing from any woocommerce-admin files outside of the package (you can import from other packages, just use the `import from @woocommerce/package` syntax).
 -   Add your change to the CHANGELOG for that package under the next version number, creating one if necessary (we use semantic versioning for packages, [see these guidelines](https://github.com/WordPress/gutenberg/blob/master/CONTRIBUTING.md#maintaining-changelogs)).
@@ -61,7 +61,7 @@ To create a new package, add a new folder to `/packages`, containing…
     - Package description
     - Installation details
     - Usage example
-4. A `src` directory for the source of your module, which will be built by default using the `npm run build:packages` command. Note that you'll want an `index.js` file that exports the package contents, see other packages for examples.
+4. A `src` directory for the source of your module, which will be built by default using the `pnpm run build:packages` command. Note that you'll want an `index.js` file that exports the package contents, see other packages for examples.
 
 5. Add the new package name to `packages/dependency-extraction-webpack-plugin/assets/packages.js` so that users of that plugin will also be able to use the new package without enqueuing it.
 
@@ -69,32 +69,17 @@ To create a new package, add a new folder to `/packages`, containing…
 
 ## Publishing packages
 
--   Run `npm run publish-packages:check` to see which packages will be published
+-   Run `pnpm run publish-packages:check` to run pnpm publish with the `--dry-run` option
 -   Create a PR with a CHANGELOG for each updated package (or try to add to the CHANGELOG with any PR editing `packages/`)
--   Run `npm run publish-packages:prod` to publish the package
--   _OR_ Run `npm run publish-packages:dev` to publish "next" releases (installed as `npm i @woocommerce/package@next`). Only use `:dev` if you have a reason to.
--   Both commands will run `build:packages` before the lerna task, just to catch any last updates.
-
-It will confirm with you once more before publishing:
-
-```
-Changes:
- - @woocommerce/components: 1.0.1 => 1.1.0
- - @woocommerce/date: 1.0.1 => 1.0.2
- - @woocommerce/navigation: 1.0.0 => 1.1.0
-
-? Are you sure you want to publish these packages?
-```
-
-If you accept, Lerna will create git tags, publish those to github, then push your packages to npm.
-
-🎉 You have a published package!
+-   Run `pnpm run publish-packages:prod` to publish the package
+-   _OR_ Run `pnpm run publish-packages:dev` to publish "next" releases (installed as `pnpm i @woocommerce/package@next`). Only use `:dev` if you have a reason to.
+-   Both commands will run `build:packages` before the publishing  task, just to catch any last updates.
 
 ### Publishing a single package
 
-Sometimes, its helpful to release a singular package. This can be done directly through npm. Be sure versions and builds are correct.
+Sometimes, its helpful to release a singular package. This can be done directly through pnpm. Be sure versions and builds are correct.
 
 -   Bump the version in the package's package.json as well as its CHANGELOG file.
--   `npm install && npm run build:packages` to build packages.
+-   `pnpm install && pnpm run build:packages` to build packages.
 -   `cd packages/<package-name>`
--   `npm publish`
+-   `pnpm publish`

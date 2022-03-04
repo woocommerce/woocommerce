@@ -7,13 +7,13 @@ Examples for extending WooCommerce Admin
 Install dependencies, if you haven't already.
 
 ```bash
-npm install
+pnpm install
 ```
 
-Build the example extension by running the npm script and passing the example name.
+Build the example extension by running the pnpm script and passing the example name.
 
 ```bash
-npm run example -- --ext=<example>
+pnpm run example -- --ext=<example>
 ```
 
 Go to your WordPress installation's plugins page and activate the plugin. WooCommerce Analytics reports will now reflect the changes made by the example extension.

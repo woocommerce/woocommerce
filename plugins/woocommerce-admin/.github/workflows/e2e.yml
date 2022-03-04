@@ -23,6 +23,11 @@ jobs:
               uses: actions/setup-node@v2-beta
               with:
                   node-version: '14'
+            - name: Install PNPM and install dependencies
+              uses: pnpm/action-setup@v2.2.1
+              with:
+                version: ^6.24.2
+                run_install: true
             - name: Build and run E2E Tests
               env:
                   WC_E2E_SCREENSHOTS: 1
@@ -30,12 +35,11 @@ jobs:
                   E2E_SLACK_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
                   WP_VERSION: '5.8.0'
               run: |
-                  npm i
                   composer require wp-cli/i18n-command
-                  npm run build
-                  npx wc-e2e docker:up
+                  pnpm run build
+                  pnpm run e2e:docker-up
                   sleep 10
-                  npx wc-e2e test:e2e
+                  pnpm exec wc-e2e test:e2e
             - name: Archive e2e test screenshots
               if: ${{ always() }}
               uses: actions/upload-artifact@v2

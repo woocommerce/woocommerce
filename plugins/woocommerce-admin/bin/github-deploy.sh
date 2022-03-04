@@ -69,7 +69,7 @@ echo " • Ensure you have checked out the branch you wish to release"
 echo " • Ensure you have committed/pushed all local changes"
 echo " • Did you remember to update changelogs, the readme and plugin files?"
 echo " • Are there any changes needed to the readme file?"
-echo " • If you are running this script directly instead of via '$ npm run build:release', ensure you have built assets and installed composer in --no-dev mode."
+echo " • If you are running this script directly instead of via '$ pnpm run build:release', ensure you have built assets and installed composer in --no-dev mode."
 echo
 output 3 "Do you want to continue? [y/N]: "
 read -r PROCEED
@@ -109,17 +109,17 @@ git checkout -b $BRANCH
 git add includes/feature-config.php --force $DRY_RUN_ARG
 git add . $DRY_RUN_ARG
 git commit -m "Adding feature-config.php directory to release" --no-verify $DRY_RUN_ARG
-  
+
 # Force add language files
 git add languages/woocommerce-admin.pot --force $DRY_RUN_ARG
 git add . $DRY_RUN_ARG
 git commit -m "Adding translations to release" --no-verify $DRY_RUN_ARG
-  
+
 # Force add build directory and commit.
 git add dist/. --force $DRY_RUN_ARG
 git add . $DRY_RUN_ARG
 git commit -m "Adding /dist directory to release" --no-verify $DRY_RUN_ARG
-  
+
 # Force add vendor directory and commit.
 git add vendor/. --force $DRY_RUN_ARG
 git add . $DRY_RUN_ARG

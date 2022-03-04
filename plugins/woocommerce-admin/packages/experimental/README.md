@@ -11,7 +11,7 @@ It also contains several in-development components that are slated for inclusion
 Install the module
 
 ```bash
-npm install @woocommerce/experimental --save
+pnpm install @woocommerce/experimental --save
 ```
 
 ## Usage

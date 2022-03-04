@@ -17,7 +17,6 @@
 /package-lock.json export-ignore
 /babel.config.js export-ignore
 /Gruntfile.js export-ignore
-/lerna.json export-ignore
 /packages* export-ignore
 /docs* export-ignore
 /config* export-ignore

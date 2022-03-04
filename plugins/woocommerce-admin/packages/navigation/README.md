@@ -7,7 +7,7 @@ A collection of navigation-related functions for handling query parameter object
 Install the module
 
 ```bash
-npm install @woocommerce/navigation --save
+pnpm install @woocommerce/navigation --save
 ```
 
 ## Usage

@@ -107,7 +107,7 @@ composer install --no-dev
 
 # Build the plugin files.
 status "Generating the plugin build... 👷‍♀️"
- WC_ADMIN_PHASE=plugin npm run build
+ WC_ADMIN_PHASE=plugin pnpm run build
 
 # Make a Github release.
 status "Starting a Github release... 👷‍♀️"
@@ -130,7 +130,7 @@ if [ $IS_CUSTOM_BUILD = false ]; then
 
 	# Build the Core files.
 	status "Generating a Core build... 👷‍♀️"
-	WC_ADMIN_PHASE=core npm run build
+	WC_ADMIN_PHASE=core pnpm run build
 
 	# Make a Github release.
 	status "Starting a Github release... 👷‍♀️"

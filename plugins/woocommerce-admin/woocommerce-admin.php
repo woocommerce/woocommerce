@@ -126,8 +126,8 @@ if ( ! woocommerce_admin_check_build_files() ) {
 				/* Translators: %1$s, %2$s, and %3$s are all build commands to be run in order.  */
 				esc_html__( 'You have installed a development version of WooCommerce Admin which requires files to be built. From the plugin directory, run %1$s and %2$s to install dependencies, then %3$s to build the files.', 'woocommerce-admin' ),
 				'<code>composer install</code>',
-				'<code>npm install</code>',
-				'<code>npm run build</code>'
+				'<code>pnpm install</code>',
+				'<code>pnpm run build</code>'
 			);
 			printf(
 				/* translators: 1: URL of GitHub Repository build page */

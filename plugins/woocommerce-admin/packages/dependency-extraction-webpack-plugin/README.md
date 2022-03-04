@@ -7,7 +7,7 @@ Extends Wordpress [Dependency Extraction Webpack Plugin](https://github.com/Word
 Install the module
 
 ```
-npm install @woocommerce/dependency-extraction-webpack-plugin --save-dev
+pnpm install @woocommerce/dependency-extraction-webpack-plugin --save-dev
 ```
 
 ## Usage

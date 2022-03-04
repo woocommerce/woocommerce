@@ -7,7 +7,7 @@ Compile a publishable JSON object of WooCommerce's JavaScript filters and slotFi
 Generate a new reference found at `bin/hook-reference/data.json` by running the following command.
 
 ```
-npm run create-hook-reference
+pnpm run create-hook-reference
 ```
 
 The data includes references to code in the Github repository by commit hash, so it is essential to commit the resulting data in a pull request to `main` so code references are publicly available.

@@ -118,6 +118,6 @@ The `onboarding` feature flag is enabled in the main WooCommerce Admin plugin bu
 Sometimes, it may be necessary to generate a separate build of the plugin between public releases for internal testing or debugging. This can be done using the [building custom plugin builds](https://github.com/woocommerce/woocommerce-admin/blob/main/docs/feature-flags.md#building-custom-plugin-builds) feature of our build system.
 
 * Switch to the latest `main` branch and pull down any changes
-* Run `npm run build:release -- --slug onboarding --features '{"onboarding":true}'`
+* Run `pnpm run build:release -- --slug onboarding --features '{"onboarding":true}'`
 * A special `woocommerce-admin-onboarding.zip` release will be generated, containing the latest onboarding code
 * Make sure to follow the directions in the "enabling onboarding" section above to properly use the build

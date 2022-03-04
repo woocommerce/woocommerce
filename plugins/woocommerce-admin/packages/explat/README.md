@@ -7,7 +7,7 @@ This packages includes a component and utility functions that can be used to run
 Install the module
 
 ```bash
-npm install @woocommerce/explat --save
+pnpm install @woocommerce/explat --save
 ```
 
 This package assumes that your code will run in an ES2015+ environment. If you're using an environment that has limited or no support for ES2015+ such as lower versions of IE then using core-js or @babel/polyfill will add support for these methods. Learn more about it in Babel docs.

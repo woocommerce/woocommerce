@@ -22,14 +22,19 @@ jobs:
               uses: actions/setup-node@v2-beta
               with:
                   node-version: '14'
+            - name: Install PNPM and install dependencies
+              uses: pnpm/action-setup@v2.2.1
+              with:
+                version: ^6.24.2
+                run_install: true
             - name: Build
               run: |
-                  npm run build:feature-config	
+                  pnpm run build:feature-config	
                   composer install  --no-dev
               shell: bash
             - name: Run the PHP unit tests
               env:
                   WP_VERSION: ${{ matrix.wordpress }}
                   WC_VERSION: ${{ matrix.woocommerce }}
-              run: npm run test:php
+              run: pnpm run test:php
               shell: bash

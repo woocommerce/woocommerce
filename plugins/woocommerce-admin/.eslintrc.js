@@ -11,6 +11,7 @@ module.exports = {
 			pragma: 'createElement',
 		},
 	},
+	root: true,
 	rules: {
 		// temporary conversion to warnings until the below are all handled.
 		'@wordpress/i18n-translator-comments': 'warn',

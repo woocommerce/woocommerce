@@ -7,7 +7,7 @@ An end-to-end test suite for WooCommerce setup, onboarding, home screen/task lis
 Install the module
 
 ```bash
-npm install @woocommerce/admin-e2e-tests --save
+pnpm install @woocommerce/admin-e2e-tests --save
 ```
 
 ## Usage

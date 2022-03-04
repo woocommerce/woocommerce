@@ -10,6 +10,8 @@
 
 -   Add tests to Subscriptions inclusion. #7804
 
+-   Add missing dependencies. #8349
+
 # 0.1.2
 
 -   Add Customers to analytics pages tested #7573

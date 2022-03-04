@@ -4,10 +4,10 @@ A docker app to run the PHP Test Suite.
 
 ## Getting Started
 
-For convenience, the PHP Test Suite can be run from an npm script.
+For convenience, the PHP Test Suite can be run from an pnpm script.
 
 ```shell
-npm run test:php
+pnpm run test:php
 ```
 
 This runs the the `phpunit` container with `docker-compose -f run --rm phpunit`. On first use, the container will install the PHP Test Suite and perform the tests. Subsequent use will only perform the tests.
@@ -20,14 +20,14 @@ Re-installation is useful to update WordPress to the latest version. To do this,
 docker volume rm -f wc-admin-php-test-suite_test-suite
 ```
 
-Then run the test suite normally using the npm script. Installation will be automatically performed.
+Then run the test suite normally using the pnpm script. Installation will be automatically performed.
 
 ## Testing a single test case
 
-PHPUnit flags can be passed to the npm script. To limit testing to a single test case, use the `--filter` flag.
+PHPUnit flags can be passed to the pnpm script. To limit testing to a single test case, use the `--filter` flag.
 
 ```shell
-npm run test:php -- --filter=<name of test>
+pnpm run test:php -- --filter=<name of test>
 ```
 
 ## Selecting the WordPress and WooCommerce Versions
@@ -35,7 +35,7 @@ npm run test:php -- --filter=<name of test>
 By default, the minimum supported versions of WordPress and WooCommerce are used to build the test suite. This can be overridden with environment variables.
 
 ```shell
-WP_VERSION=5.6 WC_VERSION=4.9.0 npm run test:php
+WP_VERSION=5.6 WC_VERSION=4.9.0 pnpm run test:php
 ```
 
 ## Selecting PHP versions
@@ -47,7 +47,7 @@ As mentioned in the readme, when running tests in PHP 8 it will modify the compo
 To run tests using PHP 8:
 
 ```shell
-PHP_VERSION=8 npm run test:php
+PHP_VERSION=8 pnpm run test:php
 ```
 
 ## Development

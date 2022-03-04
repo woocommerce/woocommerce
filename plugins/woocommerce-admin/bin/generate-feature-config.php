@@ -15,7 +15,7 @@
 $phase = getenv( 'WC_ADMIN_PHASE' );
 
 if ( ! in_array( $phase, array( 'development', 'plugin', 'core' ), true ) ) {
-	$phase = 'plugin'; // Default to plugin when running `npm run build`.
+	$phase = 'plugin'; // Default to plugin when running `pnpm run build`.
 }
 $config_json = file_get_contents( 'config/' . $phase . '.json' );
 $config      = json_decode( $config_json );

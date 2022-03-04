@@ -1,5 +1,7 @@
 # Unreleased
 
+-   Add "moment" to peerDependencies. #8349
+
 # 3.0.0
 
 ## Breaking changes

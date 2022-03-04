@@ -17,7 +17,7 @@ However, this ruleset does implement the following (which do not conflict with W
 Install the module
 
 ```
-npm install @woocommerce/eslint-plugin --save-dev
+pnpm install @woocommerce/eslint-plugin --save-dev
 ```
 
 ## Usage

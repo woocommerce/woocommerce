@@ -24,4 +24,4 @@ Please add your test instructions to `/TESTING-INSTRUCTIONS.md`.
 
 <!--- Please add a Changelog note
 
-Enter a changelog note using the following CLI command `npm run changelogger -- add` and commit changes. --->
+Enter a changelog note using the following CLI command `pnpm run changelogger -- add` and commit changes. --->

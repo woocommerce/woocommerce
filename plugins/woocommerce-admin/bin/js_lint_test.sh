@@ -2,8 +2,8 @@
 
 set -o errexit
 
-npm run -s install-if-deps-outdated
-npm run lint
-npm run build
-npm test
+pnpm run -s install-if-deps-outdated
+pnpm run lint
+pnpm run build
+pnpm test
 

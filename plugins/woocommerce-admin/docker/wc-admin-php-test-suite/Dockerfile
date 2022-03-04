@@ -12,12 +12,12 @@ RUN apk --no-cache add \
 	mariadb-client \
 	ncurses \
 	nodejs \
-	npm \
+	pnpm \
 	subversion \
 	unzip \
 	wget
-	
-COPY install-php-version.sh /tmp/  
+
+COPY install-php-version.sh /tmp/
 RUN chmod u+x /tmp/install-php-version.sh && /tmp/install-php-version.sh
 
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"

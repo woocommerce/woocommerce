@@ -1,9 +1,9 @@
 module.exports = {
-	'*.scss': [ 'npm run lint:css-fix' ],
+	'*.scss': [ 'pnpm run lint:css-fix' ],
 	'client/**/*.(t|j)s?(x)': [
 		'wp-scripts format-js',
 		'wp-scripts lint-js',
-		'npm run test-staged',
+		'pnpm run test-staged',
 	],
 	'packages/**/*.(t|j)s?(x)': ( packageFiles ) => {
 		const globalScripts = [
@@ -36,7 +36,7 @@ module.exports = {
 
 		const workspaceScripts = Object.keys( filesByPackage ).map(
 			( packageName ) =>
-				`lerna --scope @woocommerce/${ packageName } run test-staged -- ${ filesByPackage[
+				`pnpm --filter @woocommerce/${ packageName } run test-staged -- ${ filesByPackage[
 					packageName
 				].join( ' ' ) }`
 		);

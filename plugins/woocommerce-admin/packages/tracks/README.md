@@ -7,7 +7,7 @@ WooCommerce user event tracking utilities for Automattic based projects.
 Install the module
 
 ```bash
-npm install @woocommerce/tracks --save
+pnpm install @woocommerce/tracks --save
 ```
 
 ## Usage

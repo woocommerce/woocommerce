@@ -11,7 +11,7 @@ via [@vercel/ncc](https://github.com/vercel/ncc).
 Run these commands from the root of the action before pushing an update to `dist/index.js`:
 
 ```
-npm i -g @vercel/ncc
+pnpm i -g @vercel/ncc
 ncc build index.js
 ```
 

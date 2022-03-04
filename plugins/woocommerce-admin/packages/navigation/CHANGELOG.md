@@ -1,5 +1,7 @@
 # Unreleased
 
+-   Add missing dependencies. #8349
+
 # 7.0.0
 
 ## Breaking changes

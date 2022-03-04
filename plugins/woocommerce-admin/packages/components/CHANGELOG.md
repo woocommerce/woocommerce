@@ -1,12 +1,13 @@
 # Unreleased
 
-- Replace deprecated wp.compose.withState with wp.element.useState. #8338
+-   Replace deprecated wp.compose.withState with wp.element.useState. #8338
+-   Add missing dependencies. #8349
 
 # 9.0.0
 
-- Update line-height of SelectControl label to avoid truncated descenders in some typefaces and zoom levels. #8186
-- Made @woocommerce/components/Stepper a Typescript file. #8286
-- Added Typescript type declarations to build for @woocommerce/components #8282
+-   Update line-height of SelectControl label to avoid truncated descenders in some typefaces and zoom levels. #8186
+-   Made @woocommerce/components/Stepper a Typescript file. #8286
+-   Added Typescript type declarations to build for @woocommerce/components #8282
 ## Breaking changes
 
 -   Update dependencies to support react 17. #8305

@@ -21,8 +21,8 @@ Language packs are automatically generated once 95% of the plugin's strings are 
 ### Testing translations in development without language packs
 
 1. Requires `WP-CLI` version 2.1.0 or greater.
-1. Generate a translation file with `npm run i18n xx_YY` (Where xx_YY is your locale, like it_IT).
-1. Generate needed JSON files for JavaScript-based strings: `npm run i18n:json`.
+1. Generate a translation file with `pnpm run i18n xx_YY` (Where xx_YY is your locale, like it_IT).
+1. Generate needed JSON files for JavaScript-based strings: `pnpm run i18n:json`.
 1. Generate needed `woocommerce-admin-xx_YY.mo` file using your translation tool.
 1. Move `.mo` and `.json` files to `/wp-content/languages/plugins`.
 
@@ -37,7 +37,7 @@ If you're a first-time code contributor to the repository, here's a quick guide 
 1. Fork the repo to your own account.
 2. Clone your fork into the `wp-content/plugins` directory of your preferred WordPress development environment.
 3. Don't forget to create a branch to keep your changes. (`git checkout -b add/my-cool-thing`).
-4. From the `woocommerce-admin` plugin directory, build with `npm install` and `npm start`.
+4. From the `woocommerce-admin` plugin directory, build with `pnpm install` and `pnpm start`.
 5. Visit your dev environment in the browser to enable the `WooCommerce Admin` plugin and try it out.
 
 Tips:
@@ -47,7 +47,7 @@ Tips:
 
 After you've made your updates, you're ready to commit:
 
-1. Run a complete build via `npm run build`.
+1. Run a complete build via `pnpm run build`.
 2. Do a `composer install` to ensure PHP dependencies can run on the pre-commit hook.
 3. Create your commit. Write a descriptive, but short first line (e.g. "Reports: Reticulate the splines"), and add more details below. If your commit addresses a github issue, reference it by number here (e.g. "This commit fixes issue #123 by reticulating all the splines.")
 4. Push the branch up to your local fork, then create a PR via the GitHub web interface.
@@ -60,7 +60,7 @@ The pull request template will remind you of some of the details you need to fil
 
 For many pull requests a changelog entry is required. We make use of the [Jetpack Changelogger tool](https://packagist.org/packages/automattic/jetpack-changelogger) to handle our changelogs.
 
-To create a changelog entry run `npm run changelogger -- add` and answer the questions. This will create a changelog entry in the [./changelogs](./changelogs) directory with the data you provided. Upon our next release this will be added to our [changelog.txt](./changelog.txt).
+To create a changelog entry run `pnpm run changelogger -- add` and answer the questions. This will create a changelog entry in the [./changelogs](./changelogs) directory with the data you provided. Upon our next release this will be added to our [changelog.txt](./changelog.txt).
 
 In most cases you'll have to provide a changelog entry (the last question), be sure to add your PR number at the end, in the format below:
 
@@ -137,10 +137,10 @@ For example, to just run Order Report Stats tests:
 
 There are a number of helper scripts exposed via our `package.json` (below list is not exhaustive, you can view the [`package.json` file directly to see all](https://github.com/woocommerce/woocommerce-admin/blob/main/package.json)):
 
- - `npm run lint` : Run eslint over the javascript files
- - `npm run i18n` : A multi-step process, used to create a pot file from both the JS and PHP gettext calls. First it runs `i18n:js`, which creates a temporary `.pot` file from the JS files. Next it runs `i18n:php`, which converts that `.pot` file to a PHP file. Lastly, it runs `i18n:pot`, which creates the final `.pot` file from all the PHP files in the plugin (including the generated one with the JS strings).
- - `npm test` : Run the JS test suite
- - `npm run docs`: Runs the script for generating/updating docs.
+ - `pnpm run lint` : Run eslint over the javascript files
+ - `pnpm run i18n` : A multi-step process, used to create a pot file from both the JS and PHP gettext calls. First it runs `i18n:js`, which creates a temporary `.pot` file from the JS files. Next it runs `i18n:php`, which converts that `.pot` file to a PHP file. Lastly, it runs `i18n:pot`, which creates the final `.pot` file from all the PHP files in the plugin (including the generated one with the JS strings).
+ - `pnpm test` : Run the JS test suite
+ - `pnpm run docs`: Runs the script for generating/updating docs.
 
 ## Debugging
 
@@ -166,7 +166,7 @@ localStorage.setItem( 'debug', 'wc-admin:*' );
 
 WooCommerce Admin is licensed under [GNU General Public License v3 (or later)](/license.txt).
 
-All materials contributed should be compatible with the GPLv3. This means that if you own the material, you agree to license it under the GPLv3 license. If you are contributing code that is not your own, such as adding a component from another Open Source project, or adding an `npm` package, you need to make sure you follow these steps:
+All materials contributed should be compatible with the GPLv3. This means that if you own the material, you agree to license it under the GPLv3 license. If you are contributing code that is not your own, such as adding a component from another Open Source project, or adding an `pnpm` package, you need to make sure you follow these steps:
 
 1. Check that the code has a license. If you can't find one, you can try to contact the original author and get permission to use, or ask them to release under a compatible Open Source license.
 2. Check the license is compatible with [GPLv3](https://www.gnu.org/licenses/license-list.en.html#GPLCompatibleLicenses), note that the Apache 2.0 license is *not* compatible.

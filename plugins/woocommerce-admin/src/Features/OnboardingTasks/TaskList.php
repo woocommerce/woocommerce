@@ -200,7 +200,7 @@ class TaskList {
 				__( 'Task is not a subclass of `Task`', 'woocommerce-admin' )
 			);
 		}
-		if ( array_search( $task, $this->tasks ) ) {
+		if ( array_search( $task, $this->tasks, true ) ) {
 			return;
 		}
 

@@ -13,12 +13,12 @@ Scaffold a modern JavaScript WordPress plugin with WooCommerce tooling.
 At the root of a [WooCommerce Admin](https://github.com/woocommerce/woocommerce-admin) installation, run the create extension command.
 
 ```
-npm run create-wc-extension
+pnpm run create-wc-extension
 ```
 
 The script will create a sibling directory by a name of your choosing. Once you change directories into the new folder, install dependencies and start a development build.
 
 ```
-npm install
-npm start
+pnpm install
+pnpm start
 ```

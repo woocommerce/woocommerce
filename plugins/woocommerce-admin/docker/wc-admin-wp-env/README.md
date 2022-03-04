@@ -8,7 +8,7 @@ Please install WP-ENV before getting started. You can find more about WP-ENV on 
 
 The following command installs WP-ENV globally.
 
-`npm -g i @wordpress/env`
+`pnpm -g i @wordpress/env`
 
 
 ## Starting WP-ENV
@@ -30,8 +30,8 @@ The port # might be different depending on your `.wp-env.override.json` configur
 
 Once you have WP-ENV container up, we need to run a few commands to start developing.
 
-1. Run `npm install` to install npm modules.
-2. Run `npm run dev`
+1. Run `pnpm install` to install pnpm modules.
+2. Run `pnpm run dev`
 3. Run `composer install` to install PHP dependencies.
 
 If you don't have Composer available locally, run the following command. It runs the command in WP-ENV container.
@@ -39,7 +39,7 @@ If you don't have Composer available locally, run the following command. It runs
 `wp-env run composer composer install`
 
 
-You might also want to run `npm start` to watch your CSS and JS changes if you are working on the frontend.
+You might also want to run `pnpm start` to watch your CSS and JS changes if you are working on the frontend.
 
 You're now ready to develop!
 
@@ -99,7 +99,7 @@ This method is simpler, but the plugin does not get activated on startup. You ne
 
 The Mysql port can change when you restart your container.
 
-You can get the current Mysql port with `npm run wp-env-mysql-port` command.
+You can get the current Mysql port with `pnpm run wp-env-mysql-port` command.
 
 1. Open your choice of Mysql tool.
 2. Use the following values to access the Mysql container.

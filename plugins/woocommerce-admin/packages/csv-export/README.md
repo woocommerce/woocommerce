@@ -7,7 +7,7 @@ A set of functions to convert data into CSV values, and enable a browser downloa
 Install the module
 
 ```bash
-npm install @woocommerce/csv-export --save
+pnpm install @woocommerce/csv-export --save
 ```
 
 ## Usage
