@@ -26,14 +26,23 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 	protected $identity_token;
 
 	/**
+	 * Receiver email address to validate.
+	 *
+	 * @var string Receiver email address.
+	 */
+	protected $receiver_email;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param bool   $sandbox Whether to use sandbox mode or not.
 	 * @param string $identity_token Identity token for PDT support.
+	 * @param string $receiver_email Email to receive PDT notification from.
 	 */
-	public function __construct( $sandbox = false, $identity_token = '' ) {
+	public function __construct( $sandbox = false, $identity_token = '', $receiver_email = '' ) {
 		add_action( 'woocommerce_thankyou_paypal', array( $this, 'check_response' ) );
 
+		$this->receiver_email = $receiver_email;
 		$this->identity_token = $identity_token;
 		$this->sandbox        = $sandbox;
 	}
@@ -84,24 +93,42 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 	/**
 	 * Check Response for PDT.
 	 */
-	public function check_response() {
-		if ( empty( $_REQUEST['cm'] ) || empty( $_REQUEST['tx'] ) || empty( $_REQUEST['st'] ) ) { // WPCS: Input var ok, CSRF ok, sanitization ok.
+	public function check_response( $wc_order_id ) {
+		if ( empty( $_REQUEST['tx'] ) ) { // WPCS: Input var ok, CSRF ok, sanitization ok.
 			return;
 		}
 
-		$order_id    = wc_clean( wp_unslash( $_REQUEST['cm'] ) ); // WPCS: input var ok, CSRF ok, sanitization ok.
-		$status      = wc_clean( strtolower( wp_unslash( $_REQUEST['st'] ) ) ); // WPCS: input var ok, CSRF ok, sanitization ok.
-		$amount      = isset( $_REQUEST['amt'] ) ? wc_clean( wp_unslash( $_REQUEST['amt'] ) ) : 0; // WPCS: input var ok, CSRF ok, sanitization ok.
-		$transaction = wc_clean( wp_unslash( $_REQUEST['tx'] ) ); // WPCS: input var ok, CSRF ok, sanitization ok.
-		$order       = $this->get_paypal_order( $order_id );
-
-		if ( ! $order || ! $order->needs_payment() ) {
-			return false;
+		$wc_order = wc_get_order( $wc_order_id );
+		if ( ! $wc_order->needs_payment() ) {
+			return;
 		}
 
+		$transaction        = wc_clean( wp_unslash( $_REQUEST['tx'] ) ); // WPCS: input var ok, CSRF ok, sanitization ok.
 		$transaction_result = $this->validate_transaction( $transaction );
 
 		if ( $transaction_result ) {
+			$status = strtolower( $transaction_result['payment_status'] );
+			$amount = isset( $transaction_result['mc_gross'] ) ? $transaction_result['mc_gross'] : 0;
+			$order  = $this->get_paypal_order( $transaction_result['custom'] );
+
+			if ( ! $order ) {
+				// No valid WC order found on tx data.
+				return;
+			}
+
+			if ( $wc_order->get_id() !== $order->get_id() ) {
+				/* translators: 1: order ID, 2: order ID. */
+				WC_Gateway_Paypal::log( sprintf( __( 'Received PDT notification for order %1$d on endpoint for order %2$d.', 'woocommerce' ), $order->get_id(), $wc_order_id ), 'error' );
+				return;
+			}
+
+			if ( 0 !== strcasecmp( trim( $transaction_result['receiver_email'] ), trim( $this->receiver_email ) ) ) {
+				/* translators: 1: email address, 2: order ID . */
+				WC_Gateway_Paypal::log( sprintf( __( 'Received PDT notification for another account: %1$s. Order ID: %2$d.', 'woocommerce' ), $transaction_result['receiver_email'], $order->get_id() ), 'error' );
+				return;
+			}
+
+			// We have a valid response from PayPal.
 			WC_Gateway_Paypal::log( 'PDT Transaction Status: ' . wc_print_r( $status, true ) );
 
 			$order->add_meta_data( '_paypal_status', $status );
