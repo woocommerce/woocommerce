@@ -9,8 +9,6 @@ import {
 	useMemo,
 	useRef,
 } from '@wordpress/element';
-import isShallowEqual from '@wordpress/is-shallow-equal';
-import { deriveSelectedShippingRates } from '@woocommerce/base-utils';
 
 /**
  * Internal dependencies
@@ -25,9 +23,9 @@ import {
 	emitEvent,
 } from './event-emit';
 import { useCheckoutContext } from '../checkout-state';
-import { useCustomerDataContext } from '../customer';
 import { useStoreCart } from '../../../hooks/cart/use-store-cart';
 import { useSelectShippingRate } from '../../../hooks/shipping/use-select-shipping-rate';
+import { useShippingData } from '../../../hooks/shipping/use-shipping-data';
 
 /**
  * @typedef {import('@woocommerce/type-defs/contexts').ShippingDataContext} ShippingDataContext
@@ -52,15 +50,9 @@ export const useShippingDataContext = () => {
  */
 export const ShippingDataProvider = ( { children } ) => {
 	const { dispatchActions } = useCheckoutContext();
-	const { shippingAddress, setShippingAddress } = useCustomerDataContext();
-	const {
-		cartNeedsShipping: needsShipping,
-		cartHasCalculatedShipping: hasCalculatedShipping,
-		shippingRates,
-		shippingRatesLoading,
-		cartErrors,
-	} = useStoreCart();
-	const { selectShippingRate, isSelectingRate } = useSelectShippingRate();
+	const { shippingRates, shippingRatesLoading, cartErrors } = useStoreCart();
+	const { isSelectingRate } = useSelectShippingRate();
+	const { selectedRates } = useShippingData();
 	const [ shippingErrorStatus, dispatchErrorStatus ] = useReducer(
 		errorStatusReducer,
 		NONE
@@ -84,19 +76,6 @@ export const ShippingDataProvider = ( { children } ) => {
 	useEffect( () => {
 		currentObservers.current = observers;
 	}, [ observers ] );
-
-	// set selected rates on ref so it's always current.
-	const selectedRates = useRef( () =>
-		deriveSelectedShippingRates( shippingRates )
-	);
-	useEffect( () => {
-		const derivedSelectedRates = deriveSelectedShippingRates(
-			shippingRates
-		);
-		if ( ! isShallowEqual( selectedRates.current, derivedSelectedRates ) ) {
-			selectedRates.current = derivedSelectedRates;
-		}
-	}, [ shippingRates ] );
 
 	// increment/decrement checkout calculating counts when shipping is loading.
 	useEffect( () => {
@@ -198,6 +177,7 @@ export const ShippingDataProvider = ( { children } ) => {
 			);
 		}
 	}, [
+		selectedRates,
 		isSelectingRate,
 		currentErrorStatus.hasError,
 		currentErrorStatus.hasInvalidAddress,
@@ -210,15 +190,6 @@ export const ShippingDataProvider = ( { children } ) => {
 		shippingErrorStatus: currentErrorStatus,
 		dispatchErrorStatus,
 		shippingErrorTypes: ERROR_TYPES,
-		shippingRates,
-		shippingRatesLoading,
-		selectedRates: selectedRates.current,
-		setSelectedRates: selectShippingRate,
-		isSelectingRate,
-		shippingAddress,
-		setShippingAddress,
-		needsShipping,
-		hasCalculatedShipping,
 		...eventObservers,
 	};
 

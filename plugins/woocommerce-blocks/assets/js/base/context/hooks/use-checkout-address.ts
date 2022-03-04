@@ -13,11 +13,9 @@ import { useCallback } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import {
-	useShippingDataContext,
-	useCheckoutContext,
-} from '../providers/cart-checkout';
+import { useCheckoutContext } from '../providers/cart-checkout';
 import { useCustomerData } from './use-customer-data';
+import { useShippingData } from './shipping/use-shipping-data';
 
 interface CheckoutAddress {
 	shippingAddress: ShippingAddress;
@@ -38,7 +36,7 @@ interface CheckoutAddress {
  * Custom hook for exposing address related functionality for the checkout address form.
  */
 export const useCheckoutAddress = (): CheckoutAddress => {
-	const { needsShipping } = useShippingDataContext();
+	const { needsShipping } = useShippingData();
 	const {
 		useShippingAsBilling,
 		setUseShippingAsBilling,

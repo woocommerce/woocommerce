@@ -5,6 +5,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { useCallback } from '@wordpress/element';
 import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
 import { useThrowError } from '@woocommerce/base-hooks';
+import { SelectShippingRateType } from '@woocommerce/type-defs/shipping';
 
 /**
  * Internal dependencies
@@ -18,15 +19,7 @@ import { useStoreEvents } from '../use-store-events';
  * 		- selectShippingRate: A function that immediately returns the selected rate and dispatches an action generator.
  *		- isSelectingRate: True when rates are being resolved to the API.
  */
-export const useSelectShippingRate = (): {
-	// Returns a function that accepts a shipping rate ID and a package ID.
-	selectShippingRate: (
-		newShippingRateId: string,
-		packageId: string | number
-	) => unknown;
-	// True when a rate is currently being selected and persisted to the server.
-	isSelectingRate: boolean;
-} => {
+export const useSelectShippingRate = (): SelectShippingRateType => {
 	const throwError = useThrowError();
 	const { dispatchCheckoutEvent } = useStoreEvents();
 
