@@ -6,7 +6,7 @@
 namespace Automattic\WooCommerce\Blocks\Tests\StoreApi\Utilities;
 
 use Automattic\WooCommerce\Blocks\Tests\Helpers\FixtureData;
-use Automattic\WooCommerce\Blocks\StoreApi\Utilities\CartController;
+use Automattic\WooCommerce\StoreApi\Utilities\CartController;
 use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
 class CartControllerTests extends TestCase {

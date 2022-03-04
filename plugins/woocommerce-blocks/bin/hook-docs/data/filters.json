@@ -324,6 +324,18 @@
             "args": 1
         },
         {
+            "name": "woocommerce_admin_disabled",
+            "file": "InboxNotifications.php",
+            "type": "filter",
+            "doc": {
+                "description": "",
+                "long_description": "",
+                "tags": [],
+                "long_description_html": ""
+            },
+            "args": 1
+        },
+        {
             "name": "woocommerce_apply_individual_use_coupon",
             "file": "StoreApi/Utilities/CartController.php",
             "type": "filter",
@@ -622,7 +634,7 @@
         },
         {
             "name": "woocommerce_new_customer_data",
-            "file": "Domain/Services/CreateAccount.php",
+            "file": "StoreApi/Routes/V1/Checkout.php",
             "type": "filter",
             "doc": {
                 "description": "Filters customer data before a customer account is registered.",
@@ -650,7 +662,7 @@
         },
         {
             "name": "woocommerce_registration_errors",
-            "file": "Domain/Services/CreateAccount.php",
+            "file": "StoreApi/Routes/V1/Checkout.php",
             "type": "filter",
             "doc": {
                 "description": "Filters registration errors before a customer account is registered.",

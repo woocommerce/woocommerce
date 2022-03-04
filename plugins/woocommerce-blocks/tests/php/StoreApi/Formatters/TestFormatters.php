@@ -5,11 +5,11 @@
 
 namespace Automattic\WooCommerce\Blocks\Tests\StoreApi\Formatters;
 
-use Automattic\WooCommerce\Blocks\StoreApi\Formatters;
-use Automattic\WooCommerce\Blocks\StoreApi\Formatters\MoneyFormatter;
-use Automattic\WooCommerce\Blocks\StoreApi\Formatters\HtmlFormatter;
-use Automattic\WooCommerce\Blocks\StoreApi\Formatters\DefaultFormatter;
-use Automattic\WooCommerce\Blocks\StoreApi\Formatters\CurrencyFormatter;
+use Automattic\WooCommerce\StoreApi\Formatters;
+use Automattic\WooCommerce\StoreApi\Formatters\MoneyFormatter;
+use Automattic\WooCommerce\StoreApi\Formatters\HtmlFormatter;
+use Automattic\WooCommerce\StoreApi\Formatters\DefaultFormatter;
+use Automattic\WooCommerce\StoreApi\Formatters\CurrencyFormatter;
 
 /**
  * TestFormatters tests.

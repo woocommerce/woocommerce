@@ -1,8 +1,8 @@
 <?php
-namespace Automattic\WooCommerce\Blocks\StoreApi\Schemas\V1;
+namespace Automattic\WooCommerce\StoreApi\Schemas\V1;
 
-use Automattic\WooCommerce\Blocks\StoreApi\Utilities\DraftOrderTrait;
-use Automattic\WooCommerce\Blocks\StoreApi\Utilities\QuantityLimits;
+use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
+use Automattic\WooCommerce\StoreApi\Utilities\QuantityLimits;
 /**
  * CartItemSchema class.
  *

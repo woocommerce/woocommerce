@@ -1,8 +1,8 @@
 <?php
-namespace Automattic\WooCommerce\Blocks\StoreApi\Routes\V1;
+namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
-use Automattic\WooCommerce\Blocks\StoreApi\Routes\RouteInterface;
-use Automattic\WooCommerce\Blocks\StoreApi\Exceptions\RouteException;
+use Automattic\WooCommerce\StoreApi\Routes\RouteInterface;
+use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use WP_REST_Request;
 use WP_REST_Response;
 

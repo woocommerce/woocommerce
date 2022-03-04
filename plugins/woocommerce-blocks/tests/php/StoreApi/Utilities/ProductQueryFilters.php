@@ -1,7 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Tests\StoreApi\Utilities;
 
-use Automattic\WooCommerce\Blocks\StoreApi\Utilities\ProductQueryFilters;
+use Automattic\WooCommerce\StoreApi\Utilities\ProductQueryFilters;
 use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 use Automattic\WooCommerce\Blocks\Tests\Helpers\FixtureData;
 

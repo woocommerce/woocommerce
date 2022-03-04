@@ -180,7 +180,7 @@ class Checkout extends AbstractBlock {
 		$this->asset_data_registry->add(
 			'checkoutAllowsGuest',
 			false === filter_var(
-				WC()->checkout()->is_registration_required(),
+				wc()->checkout()->is_registration_required(),
 				FILTER_VALIDATE_BOOLEAN
 			),
 			true
@@ -188,7 +188,7 @@ class Checkout extends AbstractBlock {
 		$this->asset_data_registry->add(
 			'checkoutAllowsSignup',
 			filter_var(
-				WC()->checkout()->is_registration_enabled(),
+				wc()->checkout()->is_registration_enabled(),
 				FILTER_VALIDATE_BOOLEAN
 			),
 			true
