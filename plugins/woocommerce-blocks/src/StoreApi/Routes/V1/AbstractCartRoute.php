@@ -83,7 +83,7 @@ abstract class AbstractCartRoute extends AbstractRoute {
 		} catch ( RouteException $error ) {
 			$response = $this->get_route_error_response( $error->getErrorCode(), $error->getMessage(), $error->getCode(), $error->getAdditionalData() );
 		} catch ( \Exception $error ) {
-			$response = $this->get_route_error_response( 'unknown_server_error', $error->getMessage(), 500 );
+			$response = $this->get_route_error_response( 'woocommerce_rest_unknown_server_error', $error->getMessage(), 500 );
 		}
 
 		if ( is_wp_error( $response ) ) {
@@ -130,6 +130,17 @@ abstract class AbstractCartRoute extends AbstractRoute {
 		if ( $draft_order ) {
 			$this->order_controller->update_order_from_cart( $draft_order );
 
+			wc_do_deprecated_action(
+				'woocommerce_blocks_cart_update_order_from_request',
+				array(
+					$draft_order,
+					$request,
+				),
+				'7.2.0',
+				'woocommerce_store_api_cart_update_order_from_request',
+				'This action was deprecated in WooCommerce Blocks version 7.2.0. Please use woocommerce_store_api_cart_update_order_from_request instead.'
+			);
+
 			/**
 			 * Fires when the order is synced with cart data from a cart route.
 			 *
@@ -137,7 +148,7 @@ abstract class AbstractCartRoute extends AbstractRoute {
 			 * @param \WC_Customer $customer Customer object.
 			 * @param \WP_REST_Request $request Full details about the request.
 			 */
-			do_action( 'woocommerce_blocks_cart_update_order_from_request', $draft_order, $request );
+			do_action( 'woocommerce_store_api_cart_update_order_from_request', $draft_order, $request );
 		}
 	}
 

@@ -98,6 +98,8 @@ class CartController {
 		/**
 		 * Filters the item being added to the cart.
 		 *
+		 * @internal Matches filter name in WooCommerce core.
+		 *
 		 * @param array $cart_item_data Array of cart item data being added to the cart.
 		 * @param string $cart_id Id of the item in the cart.
 		 * @return array Updated cart item data.
@@ -122,6 +124,8 @@ class CartController {
 		/**
 		 * Filters the entire cart contents when the cart changes.
 		 *
+		 * @internal Matches filter name in WooCommerce core.
+		 *
 		 * @param array $cart_contents Array of all cart items.
 		 * @return array Updated array of all cart items.
 		 */
@@ -132,6 +136,8 @@ class CartController {
 		 *
 		 * This hook fires when an item is added to the cart. This is triggered from the Store API in this context, but
 		 * WooCommerce core add to cart events trigger the same hook.
+		 *
+		 * @internal Matches action name in WooCommerce core.
 		 *
 		 * @param string $cart_id ID of the item in the cart.
 		 * @param integer $product_id ID of the product added to the cart.
@@ -200,7 +206,7 @@ class CartController {
 
 		if ( ! $product->is_in_stock() ) {
 			throw new RouteException(
-				'woocommerce_rest_cart_product_no_stock',
+				'woocommerce_rest_product_out_of_stock',
 				sprintf(
 					/* translators: %s: product name */
 					__( 'You cannot add &quot;%s&quot; to the cart because the product is out of stock.', 'woo-gutenberg-products-block' ),
@@ -216,7 +222,7 @@ class CartController {
 
 			if ( $qty_remaining < $qty_in_cart + $request['quantity'] ) {
 				throw new RouteException(
-					'woocommerce_rest_cart_product_no_stock',
+					'woocommerce_rest_product_partially_out_of_stock',
 					sprintf(
 						/* translators: 1: product name 2: quantity in stock */
 						__( 'You cannot add that amount of &quot;%1$s&quot; to the cart because there is not enough stock (%2$s remaining).', 'woo-gutenberg-products-block' ),
@@ -422,6 +428,7 @@ class CartController {
 		 * notices and convert to wp errors instead.
 		 *
 		 * @deprecated
+		 * @internal Matches action name in WooCommerce core.
 		 */
 		do_action( 'woocommerce_check_cart_items' );
 
@@ -511,7 +518,7 @@ class CartController {
 			$plural_error   = $this->get_error_message_for_stock_exception_type( 'out_of_stock', 'plural' );
 
 			$error->add(
-				'woocommerce-blocks-product-out-of-stock',
+				'woocommerce_rest_product_out_of_stock',
 				$this->add_product_names_to_message( $singular_error, $plural_error, $out_of_stock_products )
 			);
 		}
@@ -521,7 +528,7 @@ class CartController {
 			$plural_error   = $this->get_error_message_for_stock_exception_type( 'not_purchasable', 'plural' );
 
 			$error->add(
-				'woocommerce-blocks-product-not-purchasable',
+				'woocommerce_rest_product_not_purchasable',
 				$this->add_product_names_to_message( $singular_error, $plural_error, $not_purchasable_products )
 			);
 		}
@@ -531,7 +538,7 @@ class CartController {
 			$plural_error   = $this->get_error_message_for_stock_exception_type( 'too_many_in_cart', 'plural' );
 
 			$error->add(
-				'woocommerce-blocks-too-many-of-product-in-cart',
+				'woocommerce_rest_product_too_many_in_cart',
 				$this->add_product_names_to_message( $singular_error, $plural_error, $too_many_in_cart_products )
 			);
 		}
@@ -541,7 +548,7 @@ class CartController {
 			$plural_error   = $this->get_error_message_for_stock_exception_type( 'partial_out_of_stock', 'plural' );
 
 			$error->add(
-				'woocommerce-blocks-product-partially-out-of-stock',
+				'woocommerce_rest_product_partially_out_of_stock',
 				$this->add_product_names_to_message( $singular_error, $plural_error, $partial_out_of_stock_products )
 			);
 		}
@@ -568,21 +575,21 @@ class CartController {
 
 		if ( ! $product->is_purchasable() ) {
 			throw new NotPurchasableException(
-				'woocommerce_rest_cart_product_not_purchasable',
+				'woocommerce_rest_product_not_purchasable',
 				$product->get_name()
 			);
 		}
 
 		if ( $product->is_sold_individually() && $cart_item['quantity'] > 1 ) {
 			throw new TooManyInCartException(
-				'woocommerce_rest_cart_product_sold_individually',
+				'woocommerce_rest_product_too_many_in_cart',
 				$product->get_name()
 			);
 		}
 
 		if ( ! $product->is_in_stock() ) {
 			throw new OutOfStockException(
-				'woocommerce_rest_cart_product_no_stock',
+				'woocommerce_rest_product_out_of_stock',
 				$product->get_name()
 			);
 		}
@@ -593,7 +600,7 @@ class CartController {
 
 			if ( $qty_remaining < $qty_in_cart ) {
 				throw new PartialOutOfStockException(
-					'woocommerce_rest_cart_product_partially_no_stock',
+					'woocommerce_rest_product_partially_out_of_stock',
 					$product->get_name()
 				);
 			}
@@ -812,6 +819,8 @@ class CartController {
 		/**
 		 * Filters the shipping package name.
 		 *
+		 * @internal Matches filter name in WooCommerce core.
+		 *
 		 * @param string $shipping_package_name Shipping package name.
 		 * @param string $package_id Shipping package ID.
 		 * @param array $package Shipping package from WooCommerce.
@@ -907,6 +916,8 @@ class CartController {
 			/**
 			 * Filters if a coupon can be applied alongside other individual use coupons.
 			 *
+			 * @internal Matches filter name in WooCommerce core.
+			 *
 			 * @param boolean $apply_with_individual_use_coupon Defaults to false.
 			 * @param \WC_Coupon $coupon Coupon object applied to the cart.
 			 * @param \WC_Coupon $individual_use_coupon Individual use coupon already applied to the cart.
@@ -930,6 +941,8 @@ class CartController {
 			/**
 			 * Filter coupons to remove when applying an individual use coupon.
 			 *
+			 * @internal Matches filter name in WooCommerce core.
+			 *
 			 * @param array $coupons Array of coupons to remove from the cart.
 			 * @param \WC_Coupon $coupon Coupon object applied to the cart.
 			 * @param array $applied_coupons Array of applied coupons already applied to the cart.
@@ -949,6 +962,8 @@ class CartController {
 
 		/**
 		 * Fires after a coupon has been applied to the cart.
+		 *
+		 * @internal Matches action name in WooCommerce core.
 		 *
 		 * @param string $coupon_code The coupon code that was applied.
 		 */
@@ -1052,13 +1067,13 @@ class CartController {
 	/**
 	 * Default exception thrown when an item cannot be added to the cart.
 	 *
-	 * @throws RouteException Exception with code woocommerce_rest_cart_product_is_not_purchasable.
+	 * @throws RouteException Exception with code woocommerce_rest_product_not_purchasable.
 	 *
 	 * @param \WC_Product $product Product object associated with the cart item.
 	 */
 	protected function throw_default_product_exception( \WC_Product $product ) {
 		throw new RouteException(
-			'woocommerce_rest_cart_product_is_not_purchasable',
+			'woocommerce_rest_product_not_purchasable',
 			sprintf(
 				/* translators: %s: product name */
 				__( '&quot;%s&quot; is not available for purchase.', 'woo-gutenberg-products-block' ),
@@ -1087,6 +1102,8 @@ class CartController {
 		/**
 		 * Filter cart item data for add to cart requests.
 		 *
+		 * @internal Matches filter name in WooCommerce core.
+		 *
 		 * @param array $cart_item_data Array of other cart item data.
 		 * @param integer $product_id ID of the product added to the cart.
 		 * @param integer $variation_id Variation ID of the product added to the cart.
@@ -1104,6 +1121,8 @@ class CartController {
 		if ( $product->is_sold_individually() ) {
 			/**
 			 * Filter sold individually quantity for add to cart requests.
+			 *
+			 * @internal Matches filter name in WooCommerce core.
 			 *
 			 * @param integer $sold_individually_quantity Defaults to 1.
 			 * @param integer $quantity Quantity of the item added to the cart.

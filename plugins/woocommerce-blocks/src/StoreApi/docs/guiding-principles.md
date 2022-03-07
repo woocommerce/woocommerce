@@ -2,14 +2,15 @@
 
 The following principles should be considered when extending, creating, or updating endpoints in the Store API.
 
--   [Routes must include a well-defined JSON schema](#routes-must-include-a-well-defined-json-schema)
--   [Routes should be designed around resources with a single type of schema](#routes-should-be-designed-around-resources-with-a-single-type-of-schema)
-    -   [Error Handling](#error-handling)
-    -   [Cart Operations](#cart-operations)
--   [Exposed data must belong to the current user or be non-sensitive](#exposed-data-must-belong-to-the-current-user-or-be-non-sensitive)
--   [Collections of resources should be paginated](#collections-of-resources-should-be-paginated)
--   [API Responses should use standard HTTP status codes](#api-responses-should-use-standard-http-status-codes)
--   [Breaking changes should be avoided where possible](#breaking-changes-should-be-avoided-where-possible)
+- [Routes must include a well-defined JSON schema](#routes-must-include-a-well-defined-json-schema)
+- [Routes should be designed around resources with a single type of schema](#routes-should-be-designed-around-resources-with-a-single-type-of-schema)
+  - [Error Handling](#error-handling)
+  - [Cart Operations](#cart-operations)
+- [Exposed data must belong to the current user or be non-sensitive](#exposed-data-must-belong-to-the-current-user-or-be-non-sensitive)
+- [Collections of resources should be paginated](#collections-of-resources-should-be-paginated)
+- [API Responses should use standard HTTP status codes](#api-responses-should-use-standard-http-status-codes)
+- [Breaking changes should be avoided where possible](#breaking-changes-should-be-avoided-where-possible)
+- [](#)
 
 ## Routes must include a [well-defined JSON schema](https://developer.wordpress.org/rest-api/extending-the-rest-api/schema/)
 
@@ -71,6 +72,8 @@ There are 2 notable exceptions to this rule in the Store API; _Errors_ and _Cart
 Errors, including validation errors, should return an error response code (4xx or 5xx) and a [`WP_Error` object](https://developer.wordpress.org/reference/classes/wp_error/). The `AbstractRoute` class will handle the conversion of the `WP_Error` object into a valid JSON response.
 
 Error messages should be localized, but do not need to be written with language aimed at customers (clients should use the given error code to create customer-facing notices as needed).
+
+Error codes should have the prefix `woocommerce_rest_`.
 
 ### Cart Operations
 

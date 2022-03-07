@@ -92,6 +92,10 @@
                 "long_description": "",
                 "tags": [
                     {
+                        "name": "internal",
+                        "content": "Matches filter name in WooCommerce core."
+                    },
+                    {
                         "name": "param",
                         "content": "Array of cart item data being added to the cart.",
                         "types": [
@@ -127,6 +131,10 @@
                 "description": "Filter cart item data for add to cart requests.",
                 "long_description": "",
                 "tags": [
+                    {
+                        "name": "internal",
+                        "content": "Matches filter name in WooCommerce core."
+                    },
                     {
                         "name": "param",
                         "content": "Array of other cart item data.",
@@ -179,6 +187,10 @@
                 "description": "Filter sold individually quantity for add to cart requests.",
                 "long_description": "",
                 "tags": [
+                    {
+                        "name": "internal",
+                        "content": "Matches filter name in WooCommerce core."
+                    },
                     {
                         "name": "param",
                         "content": "Defaults to 1.",
@@ -304,6 +316,10 @@
                 "long_description": "The woocommerce_adjust_non_base_location_prices filter can stop base taxes being taken off when dealing with out of base locations. e.g. If a product costs 10 including tax, all users will pay 10 regardless of location and taxes.",
                 "tags": [
                     {
+                        "name": "internal",
+                        "content": "Matches filter name in WooCommerce core."
+                    },
+                    {
                         "name": "param",
                         "content": "True by default.",
                         "types": [
@@ -343,6 +359,10 @@
                 "description": "Filter coupons to remove when applying an individual use coupon.",
                 "long_description": "",
                 "tags": [
+                    {
+                        "name": "internal",
+                        "content": "Matches filter name in WooCommerce core."
+                    },
                     {
                         "name": "param",
                         "content": "Array of coupons to remove from the cart.",
@@ -387,6 +407,10 @@
                 "description": "Filters if a coupon can be applied alongside other individual use coupons.",
                 "long_description": "",
                 "tags": [
+                    {
+                        "name": "internal",
+                        "content": "Matches filter name in WooCommerce core."
+                    },
                     {
                         "name": "param",
                         "content": "Defaults to false.",
@@ -556,6 +580,10 @@
                 "long_description": "",
                 "tags": [
                     {
+                        "name": "internal",
+                        "content": "Matches filter name in WooCommerce core."
+                    },
+                    {
                         "name": "param",
                         "content": "Array of all cart items.",
                         "types": [
@@ -584,6 +612,10 @@
                 "long_description": "",
                 "tags": [
                     {
+                        "name": "internal",
+                        "content": "Matches filter name in GA extension."
+                    },
+                    {
                         "name": "param",
                         "content": "If true, tracking will be disabled.",
                         "types": [
@@ -604,6 +636,10 @@
                 "description": "Filters cart item data.",
                 "long_description": "Filters the variation option name for custom option slugs.",
                 "tags": [
+                    {
+                        "name": "internal",
+                        "content": "Matches filter name in WooCommerce core."
+                    },
                     {
                         "name": "param",
                         "content": "Cart item data. Empty by default.",
@@ -668,6 +704,10 @@
                 "description": "Filters registration errors before a customer account is registered.",
                 "long_description": "This hook filters registration errors. This can be used to manipulate the array of errors before they are displayed.",
                 "tags": [
+                    {
+                        "name": "internal",
+                        "content": "Matches filter name in WooCommerce core."
+                    },
                     {
                         "name": "param",
                         "content": "Error object.",
@@ -744,6 +784,10 @@
                 "description": "Filters the shipping package name.",
                 "long_description": "",
                 "tags": [
+                    {
+                        "name": "internal",
+                        "content": "Matches filter name in WooCommerce core."
+                    },
                     {
                         "name": "param",
                         "content": "Shipping package name.",
@@ -915,6 +959,10 @@
                 "description": "Filters the variation option name.",
                 "long_description": "Filters the variation option name for custom option slugs.",
                 "tags": [
+                    {
+                        "name": "internal",
+                        "content": "Matches filter name in WooCommerce core."
+                    },
                     {
                         "name": "param",
                         "content": "The name to display.",

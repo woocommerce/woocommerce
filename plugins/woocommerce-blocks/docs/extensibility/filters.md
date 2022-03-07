@@ -141,6 +141,9 @@ Filters the item being added to the cart.
 apply_filters( 'woocommerce_add_cart_item', array $cart_item_data, string $cart_id )
 ```
 
+
+**Note: Matches filter name in WooCommerce core.**
+
 ### Parameters
 
 | Argument | Type | Description |
@@ -168,6 +171,9 @@ Filter cart item data for add to cart requests.
 ```php
 apply_filters( 'woocommerce_add_cart_item_data', array $cart_item_data, integer $product_id, integer $variation_id, integer $quantity )
 ```
+
+
+**Note: Matches filter name in WooCommerce core.**
 
 ### Parameters
 
@@ -198,6 +204,9 @@ Filter sold individually quantity for add to cart requests.
 ```php
 apply_filters( 'woocommerce_add_to_cart_sold_individually_quantity', integer $sold_individually_quantity, integer $quantity, integer $product_id, integer $variation_id, array $cart_item_data )
 ```
+
+
+**Note: Matches filter name in WooCommerce core.**
 
 ### Parameters
 
@@ -268,6 +277,9 @@ Filters if taxes should be removed from locations outside the store base locatio
 apply_filters( 'woocommerce_adjust_non_base_location_prices', boolean $adjust_non_base_location_prices )
 ```
 
+
+**Note: Matches filter name in WooCommerce core.**
+
 ### Description
 
 <p>The woocommerce_adjust_non_base_location_prices filter can stop base taxes being taken off when dealing with out of base locations. e.g. If a product costs 10 including tax, all users will pay 10 regardless of location and taxes.</p>
@@ -315,6 +327,9 @@ Filter coupons to remove when applying an individual use coupon.
 apply_filters( 'woocommerce_apply_individual_use_coupon', array $coupons, \WC_Coupon $coupon, array $applied_coupons )
 ```
 
+
+**Note: Matches filter name in WooCommerce core.**
+
 ### Parameters
 
 | Argument | Type | Description |
@@ -343,6 +358,9 @@ Filters if a coupon can be applied alongside other individual use coupons.
 ```php
 apply_filters( 'woocommerce_apply_with_individual_use_coupon', boolean $apply_with_individual_use_coupon, \WC_Coupon $coupon, \WC_Coupon $individual_use_coupon, array $applied_coupons )
 ```
+
+
+**Note: Matches filter name in WooCommerce core.**
 
 ### Parameters
 
@@ -459,6 +477,9 @@ Filters the entire cart contents when the cart changes.
 apply_filters( 'woocommerce_cart_contents_changed', array $cart_contents )
 ```
 
+
+**Note: Matches filter name in WooCommerce core.**
+
 ### Parameters
 
 | Argument | Type | Description |
@@ -486,6 +507,9 @@ Filter to disable Google Analytics tracking.
 apply_filters( 'woocommerce_ga_disable_tracking', boolean $disable_tracking )
 ```
 
+
+**Note: Matches filter name in GA extension.**
+
 ### Parameters
 
 | Argument | Type | Description |
@@ -507,6 +531,9 @@ Filters cart item data.
 ```php
 apply_filters( 'woocommerce_get_item_data', array $item_data, array $cart_item )
 ```
+
+
+**Note: Matches filter name in WooCommerce core.**
 
 ### Description
 
@@ -570,6 +597,9 @@ Filters registration errors before a customer account is registered.
 ```php
 apply_filters( 'woocommerce_registration_errors', \WP_Error $errors, string $username, string $user_email )
 ```
+
+
+**Note: Matches filter name in WooCommerce core.**
 
 ### Description
 
@@ -637,6 +667,9 @@ Filters the shipping package name.
 ```php
 apply_filters( 'woocommerce_shipping_package_name', string $shipping_package_name, string $package_id, array $package )
 ```
+
+
+**Note: Matches filter name in WooCommerce core.**
 
 ### Parameters
 
@@ -783,6 +816,9 @@ Filters the variation option name.
 ```php
 apply_filters( 'woocommerce_variation_option_name', string $value, null $unused, string $taxonomy, \WC_Product $product )
 ```
+
+
+**Note: Matches filter name in WooCommerce core.**
 
 ### Description
 

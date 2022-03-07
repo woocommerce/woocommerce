@@ -204,7 +204,7 @@ class Cart extends ControllerTestCase {
 		$action_callback = \Mockery::mock( 'ActionCallback' );
 		$action_callback->shouldReceive( 'do_customer_callback' )->once();
 
-		add_action( 'woocommerce_blocks_cart_update_customer_from_request', array( $action_callback, 'do_customer_callback' ) );
+		add_action( 'woocommerce_store_api_cart_update_customer_from_request', array( $action_callback, 'do_customer_callback' ) );
 
 		$this->assertAPIResponse(
 			$request,
@@ -225,7 +225,7 @@ class Cart extends ControllerTestCase {
 			)
 		);
 
-		remove_action( 'woocommerce_blocks_cart_update_customer_from_request', array( $action_callback, 'do_customer_callback' ) );
+		remove_action( 'woocommerce_store_api_cart_update_customer_from_request', array( $action_callback, 'do_customer_callback' ) );
 	}
 
 	/**
