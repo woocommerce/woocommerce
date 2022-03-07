@@ -41,7 +41,7 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 	 */
 	public function __construct( $sandbox = false, $identity_token = '' ) {
 		add_action( 'woocommerce_thankyou_paypal', array( $this, 'check_response_for_order' ) );
-
+		
 		$this->identity_token = $identity_token;
 		$this->sandbox        = $sandbox;
 	}
@@ -104,14 +104,9 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 	 * @deprecated 6.4 Use check_response_for_order instead.
 	 */
 	public function check_response() {
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended
-		if ( empty( $_REQUEST['cm'] ) ) {
-			return;
-		}
+		global $wp;
+		$order_id = apply_filters( 'woocommerce_thankyou_order_id', absint( $wp->query_vars['order-received'] ) );
 
-		$order_id = wc_clean( wp_unslash( $_REQUEST['cm'] ) );
-
-		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 		$this->check_response_for_order( $order_id );
 	}
 
