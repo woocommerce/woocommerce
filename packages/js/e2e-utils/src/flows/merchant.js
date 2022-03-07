@@ -72,17 +72,15 @@ const merchant = {
 	},
 
 	logout: async () => {
-		// Log out link in admin bar is not visible so can't be clicked directly.
-		const logoutLinks = await page.$$eval(
-			'#wp-admin-bar-logout a',
-			( am ) => am.filter( ( e ) => e.href ).map( ( e ) => e.href )
-		);
+		await page.goto( WP_ADMIN_LOGIN + '?action=logout', {
+			waitUntil: 'networkidle0',
+		} );
 
-		if ( logoutLinks && logoutLinks[0] ) {
-			await page.goto(logoutLinks[0], {
-				waitUntil: 'networkidle0',
-			});
-		}
+		// Confirm logout using XPath, which works on all languages.
+		const elements = await page.$x('//a[contains(@href,\'action=logout\')]')
+		await elements[0].click()
+
+		await page.waitForNavigation( { waitUntil: 'networkidle0' } );
 	},
 
 	openAllOrdersView: async () => {
