@@ -130,6 +130,7 @@
 		"debug": "4.3.1",
 		"dompurify": "2.2.9",
 		"github-label-sync": "2.0.0",
+		"grapheme-splitter": "^1.0.4",
 		"gridicons": "3.4.0",
 		"history": "4.10.1",
 		"lodash": "^4.17.21",

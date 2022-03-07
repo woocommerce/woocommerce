@@ -134,6 +134,7 @@ importers:
       fork-ts-checker-webpack-plugin: 6.2.10
       fs-extra: 8.1.0
       github-label-sync: 2.0.0
+      grapheme-splitter: ^1.0.4
       gridicons: 3.4.0
       grunt: 1.3.0
       grunt-checktextdomain: 1.0.1
@@ -224,6 +225,7 @@ importers:
       debug: 4.3.1
       dompurify: 2.2.9
       github-label-sync: 2.0.0
+      grapheme-splitter: 1.0.4
       gridicons: 3.4.0_react@17.0.2
       history: 4.10.1
       lodash: 4.17.21
@@ -13473,6 +13475,10 @@ packages:
   /gradient-parser/0.1.5:
     resolution: {integrity: sha1-DH4heVWeXOfY1x9EI6+TcQCyJIw=}
     engines: {node: '>=0.10.0'}
+    dev: false
+
+  /grapheme-splitter/1.0.4:
+    resolution: {integrity: sha512-bzh50DW9kTPM00T8y4o8vQg89Di9oLJVLW/KaOGIXJWP/iqCN6WKYkbNOF04vFLJhwcpYUh9ydh/+5vpOqV4YQ==}
     dev: false
 
   /gridicons/3.4.0_react@17.0.2:

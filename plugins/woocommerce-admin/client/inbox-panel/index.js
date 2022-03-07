@@ -20,6 +20,7 @@ import {
 	Text,
 } from '@woocommerce/experimental';
 import moment from 'moment';
+
 /**
  * Internal dependencies
  */
@@ -211,10 +212,13 @@ const InboxPanel = ( { showHeader = true } ) => {
 						supportedLocales.includes( note.locale ) &&
 						noteDate >= WC_VERSION_61_RELEASE_DATE
 					) {
-						note.content = truncateRenderableHTML(
-							note.content,
-							320
-						);
+						return {
+							...note,
+							content: truncateRenderableHTML(
+								note.content,
+								320
+							),
+						};
 					}
 					return note;
 				} ),

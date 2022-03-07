@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { filter, truncate } from 'lodash';
+import { filter } from 'lodash';
+import GraphemeSplitter from 'grapheme-splitter';
 
 /**
  * Get the count of the unread notes from the received list.
@@ -43,6 +44,26 @@ export function hasValidNotes( notes ) {
 }
 
 /**
+ * Truncates array of text characters.
+ *
+ * @param {Array} letters The letter array to truncate.
+ * @param {number} limit number of characters to limit to
+ * @param {string} separator The separator string to truncate to.
+ */
+export const truncate = ( letters, limit, separator = ' ' ) => {
+	let truncatedLetters = letters.slice( 0, limit );
+
+	if ( letters.indexOf( separator, limit ) !== limit ) {
+		// If there's a space in the text, we need to truncate at the space to preserve whole words.
+		const index = truncatedLetters.lastIndexOf( separator );
+		if ( index > -1 ) {
+			truncatedLetters = truncatedLetters.slice( 0, index );
+		}
+	}
+	return truncatedLetters.join( '' );
+};
+
+/**
  * Truncates characters inside of an element.
  * Currently does not count <br> as a character even though it should.
  *
@@ -52,37 +73,33 @@ export function hasValidNotes( notes ) {
 const truncateElement = ( element, limit ) => {
 	const truncatedNode = document.createElement( 'div' );
 	const childNodes = Array.from( element.childNodes );
+	const splitter = new GraphemeSplitter();
+	let truncatedTextLength = 0;
+
 	for ( let i = 0; i < childNodes.length; i++ ) {
 		// Deep clone.
 		let clone = childNodes[ i ].cloneNode( true );
-		if (
-			truncatedNode.textContent.length + clone.textContent.length <=
-			limit
-		) {
+		const cloneNodeLetters = splitter.splitGraphemes( clone.textContent );
+
+		if ( truncatedTextLength + cloneNodeLetters.length <= limit ) {
 			// No problem including a whole child node, no need to consider truncating at all.
 			truncatedNode.appendChild( clone );
-		} else {
-			const charactersRemaining =
-				limit - truncatedNode.textContent.length;
-			if (
-				! clone.innerHTML ||
-				clone.textContent.slice( 0, charactersRemaining ) ===
-					clone.innerHTML.slice( 0, charactersRemaining )
-			) {
-				// If text until the limit doesn't contain any markup, we're all good to truncate.
-				clone.textContent = truncate( clone.textContent, {
-					length: charactersRemaining,
-					separator: ' ',
-					omission: '',
-				} );
-			} else {
-				// If it does, then we'd need to recursively run this with balance of characters remaining.
-				clone = truncateElement( clone, charactersRemaining );
-			}
-			truncatedNode.appendChild( clone );
-			// Exceeded limit at this point, safe to exit loop.
-			break;
+			truncatedTextLength += cloneNodeLetters.length;
+			continue;
 		}
+
+		const charactersRemaining = limit - truncatedTextLength;
+		if ( clone.hasChildNodes() ) {
+			clone = truncateElement( clone, charactersRemaining );
+		} else {
+			clone.textContent = truncate(
+				cloneNodeLetters,
+				charactersRemaining
+			);
+		}
+		truncatedNode.appendChild( clone );
+		// Exceeded limit at this point, safe to exit loop.
+		break;
 	}
 	return truncatedNode;
 };
@@ -95,8 +112,10 @@ const truncateElement = ( element, limit ) => {
  */
 export const truncateRenderableHTML = ( originalHTML, limit ) => {
 	const tempNode = document.createElement( 'div' );
+	const splitter = new GraphemeSplitter();
+
 	tempNode.innerHTML = originalHTML;
-	if ( tempNode.textContent.length > limit ) {
+	if ( splitter.splitGraphemes( tempNode.textContent ).length > limit ) {
 		return truncateElement( tempNode, limit ).innerHTML + '...';
 	}
 	return originalHTML;
