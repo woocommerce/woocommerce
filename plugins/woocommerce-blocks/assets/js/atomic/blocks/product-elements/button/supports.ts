@@ -3,6 +3,11 @@
  */
 import { isFeaturePluginBuild } from '@woocommerce/block-settings';
 
+/**
+ * Internal dependencies
+ */
+import { hasSpacingStyleSupport } from '../../../../utils/global-style';
+
 export const supports = {
 	...( isFeaturePluginBuild() && {
 		color: {
@@ -15,10 +20,12 @@ export const supports = {
 			radius: true,
 			__experimentalSkipSerialization: true,
 		},
-		spacing: {
-			padding: true,
-			__experimentalSkipSerialization: true,
-		},
+		...( hasSpacingStyleSupport() && {
+			spacing: {
+				padding: true,
+				__experimentalSkipSerialization: true,
+			},
+		} ),
 		typography: {
 			fontSize: true,
 			__experimentalFontWeight: true,
