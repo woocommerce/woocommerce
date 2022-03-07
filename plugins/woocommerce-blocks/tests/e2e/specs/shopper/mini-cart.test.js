@@ -223,11 +223,11 @@ describe( 'Shopper → Mini Cart', () => {
 
 	describe( 'Update quantity', () => {
 		beforeAll( async () => {
-			await shopper.emptyCart();
+			await shopper.block.emptyCart();
 		} );
 
 		afterEach( async () => {
-			await shopper.emptyCart();
+			await shopper.block.emptyCart();
 		} );
 
 		it( 'The quantity of a product can be updated using plus and minus button', async () => {
@@ -325,7 +325,7 @@ describe( 'Shopper → Mini Cart', () => {
 
 	describe( 'Cart page', () => {
 		beforeAll( async () => {
-			await shopper.emptyCart();
+			await shopper.block.emptyCart();
 		} );
 
 		it( 'Can go to cart page from the Mini Cart Footer', async () => {
@@ -361,7 +361,7 @@ describe( 'Shopper → Mini Cart', () => {
 
 	describe( 'Checkout page', () => {
 		beforeAll( async () => {
-			await shopper.emptyCart();
+			await shopper.block.emptyCart();
 		} );
 
 		it( 'Can go to checkout page from the Mini Cart Footer', async () => {
