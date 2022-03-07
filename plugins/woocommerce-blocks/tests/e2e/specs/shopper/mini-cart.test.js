@@ -132,11 +132,11 @@ describe( 'Shopper → Mini Cart', () => {
 
 	describe( 'Filled mini cart', () => {
 		beforeAll( async () => {
-			await shopper.emptyCart();
+			await shopper.block.emptyCart();
 		} );
 
 		afterEach( async () => {
-			await shopper.emptyCart();
+			await shopper.block.emptyCart();
 		} );
 
 		it( 'The Mini Cart title shows correct amount', async () => {
