@@ -191,30 +191,24 @@ class Checkout extends AbstractCartRoute {
 		 */
 		$this->order_controller->validate_order_before_payment( $this->order );
 
-		/**
-		 * Fires before an order is processed by the Checkout Block/Store API.
-		 *
-		 * This hook informs extensions that $order has completed processing and is ready for payment.
-		 *
-		 * This is similar to existing core hook woocommerce_checkout_order_processed. We're using a new action:
-		 * - To keep the interface focused (only pass $order, not passing request data).
-		 * - This also explicitly indicates these orders are from checkout block/StoreAPI.
-		 *
-		 * @see https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3238
-		 * @example See docs/examples/checkout-order-processed.md
-		 * @internal This Hook is experimental and may change or be removed.
-
-		 * @param \WC_Order $order Order object.
-		 * @deprecated 6.3.0 Use woocommerce_blocks_checkout_order_processed instead.
-		 */
 		wc_do_deprecated_action(
 			'__experimental_woocommerce_blocks_checkout_order_processed',
 			array(
 				$this->order,
 			),
 			'6.3.0',
+			'woocommerce_store_api_checkout_order_processed',
+			'This action was deprecated in WooCommerce Blocks version 6.3.0. Please use woocommerce_store_api_checkout_order_processed instead.'
+		);
+
+		wc_do_deprecated_action(
 			'woocommerce_blocks_checkout_order_processed',
-			'This action was deprecated in WooCommerce Blocks version 6.3.0. Please use woocommerce_blocks_checkout_order_processed instead.'
+			array(
+				$this->order,
+			),
+			'7.2.0',
+			'woocommerce_store_api_checkout_order_processed',
+			'This action was deprecated in WooCommerce Blocks version 7.2.0. Please use woocommerce_store_api_checkout_order_processed instead.'
 		);
 
 		/**
@@ -231,7 +225,7 @@ class Checkout extends AbstractCartRoute {
 
 		 * @param \WC_Order $order Order object.
 		 */
-		do_action( 'woocommerce_blocks_checkout_order_processed', $this->order );
+		do_action( 'woocommerce_store_api_checkout_order_processed', $this->order );
 
 		/**
 		 * Process the payment and return the results.
@@ -323,31 +317,24 @@ class Checkout extends AbstractCartRoute {
 			$this->order_controller->update_order_from_cart( $this->order );
 		}
 
-		/**
-		 * Fires when the Checkout Block/Store API updates an order's meta data.
-		 *
-		 * This hook gives extensions the chance to add or update meta data on the $order.
-		 *
-		 * This is similar to existing core hook woocommerce_checkout_update_order_meta.
-		 * We're using a new action:
-		 * - To keep the interface focused (only pass $order, not passing request data).
-		 * - This also explicitly indicates these orders are from checkout block/StoreAPI.
-		 *
-		 * @see https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3686
-		 * @internal This Hook is experimental and may change or be removed.
-		 *
-		 * @param \WC_Order $order Order object.
-		 *
-		 * @deprecated 6.3.0 Use woocommerce_blocks_checkout_update_order_meta instead.
-		 */
 		wc_do_deprecated_action(
 			'__experimental_woocommerce_blocks_checkout_update_order_meta',
 			array(
 				$this->order,
 			),
 			'6.3.0',
+			'woocommerce_store_api_checkout_update_order_meta',
+			'This action was deprecated in WooCommerce Blocks version 6.3.0. Please use woocommerce_store_api_checkout_update_order_meta instead.'
+		);
+
+		wc_do_deprecated_action(
 			'woocommerce_blocks_checkout_update_order_meta',
-			'This action was deprecated in WooCommerce Blocks version 6.3.0. Please use woocommerce_blocks_checkout_update_order_meta instead.'
+			array(
+				$this->order,
+			),
+			'7.2.0',
+			'woocommerce_store_api_checkout_update_order_meta',
+			'This action was deprecated in WooCommerce Blocks version 7.2.0. Please use woocommerce_store_api_checkout_update_order_meta instead.'
 		);
 
 		/**
@@ -365,7 +352,7 @@ class Checkout extends AbstractCartRoute {
 		 *
 		 * @param \WC_Order $order Order object.
 		 */
-		do_action( 'woocommerce_blocks_checkout_update_order_meta', $this->order );
+		do_action( 'woocommerce_store_api_checkout_update_order_meta', $this->order );
 
 		// Confirm order is valid before proceeding further.
 		if ( ! $this->order instanceof \WC_Order ) {
@@ -438,19 +425,6 @@ class Checkout extends AbstractCartRoute {
 		$this->order->set_customer_note( $request['customer_note'] ?? '' );
 		$this->order->set_payment_method( $this->get_request_payment_method_id( $request ) );
 
-		/**
-		 * Fires when the Checkout Block/Store API updates an order's from the API request data.
-		 *
-		 * This hook gives extensions the chance to update orders based on the data in the request. This can be used in
-		 * conjunction with the ExtendSchema class to post custom data and then process it.
-		 *
-		 * @internal This Hook is experimental and may change or be removed.
-		 *
-		 * @param \WC_Order $order Order object.
-		 * @param \WP_REST_Request $request Full details about the request.
-		 *
-		 * @deprecated 6.3.0 Use woocommerce_blocks_checkout_update_order_from_request instead.
-		 */
 		wc_do_deprecated_action(
 			'__experimental_woocommerce_blocks_checkout_update_order_from_request',
 			array(
@@ -458,8 +432,18 @@ class Checkout extends AbstractCartRoute {
 				$request,
 			),
 			'6.3.0',
+			'woocommerce_store_api_checkout_update_order_from_request',
+			'This action was deprecated in WooCommerce Blocks version 6.3.0. Please use woocommerce_store_api_checkout_update_order_from_request instead.'
+		);
+
+		wc_do_deprecated_action(
 			'woocommerce_blocks_checkout_update_order_from_request',
-			'This action was deprecated in WooCommerce Blocks version 6.3.0. Please use woocommerce_blocks_checkout_update_order_from_request instead.'
+			array(
+				$this->order,
+			),
+			'7.2.0',
+			'woocommerce_store_api_checkout_update_order_from_request',
+			'This action was deprecated in WooCommerce Blocks version 7.2.0. Please use woocommerce_store_api_checkout_update_order_from_request instead.'
 		);
 
 		/**
@@ -471,7 +455,7 @@ class Checkout extends AbstractCartRoute {
 		 * @param \WC_Order $order Order object.
 		 * @param \WP_REST_Request $request Full details about the request.
 		 */
-		do_action( 'woocommerce_blocks_checkout_update_order_from_request', $this->order, $request );
+		do_action( 'woocommerce_store_api_checkout_update_order_from_request', $this->order, $request );
 
 		$this->order->save();
 	}
@@ -720,6 +704,8 @@ class Checkout extends AbstractCartRoute {
 		 *
 		 * This could be used to add extra validation logic and append errors to the array.
 		 *
+		 * @internal Matches filter name in WooCommerce core.
+		 *
 		 * @param string $username Customer username.
 		 * @param string $user_email Customer email address.
 		 * @param \WP_Error $errors Error object.
@@ -731,6 +717,8 @@ class Checkout extends AbstractCartRoute {
 		 *
 		 * This hook filters registration errors. This can be used to manipulate the array of errors before
 		 * they are displayed.
+		 *
+		 * @internal Matches filter name in WooCommerce core.
 		 *
 		 * @param \WP_Error $errors Error object.
 		 * @param string $username Customer username.
@@ -778,6 +766,8 @@ class Checkout extends AbstractCartRoute {
 		 * Fires after a customer account has been registered.
 		 *
 		 * This hook fires after customer accounts are created and passes the customer data.
+		 *
+		 * @internal Matches filter name in WooCommerce core.
 		 *
 		 * @param integer $customer_id New customer (user) ID.
 		 * @param array $new_customer_data Array of customer (user) data.
