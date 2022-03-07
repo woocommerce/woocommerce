@@ -36,9 +36,6 @@
 				font-weight: normal;
 			}
 		}
-		.woocommerce-inbox-message__actions a {
-			color: $gray-900;
-		}
 	}
 
 	.woocommerce-homepage-column & {
@@ -192,7 +189,7 @@
 		}
 	}
 }
-.woocommerce-inbox-message__wrapper .woocommerce-inbox-message__actions {
+.woocommerce-inbox-message__wrapper {
 	padding-top: 0;
 }
 

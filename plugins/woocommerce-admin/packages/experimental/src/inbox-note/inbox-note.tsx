@@ -128,6 +128,7 @@ const InboxNoteCard: React.FC< InboxNoteProps > = ( {
 					<InboxNoteActionButton
 						key={ action.id }
 						label={ action.label }
+						variant="secondary"
 						href={
 							action && action.url && action.url.length
 								? action.url
@@ -198,6 +199,7 @@ const InboxNoteCard: React.FC< InboxNoteProps > = ( {
 									key={ note.actions[ 0 ].id }
 									label={ title }
 									preventBusyState={ true }
+									variant="link"
 									href={
 										note.actions[ 0 ].url &&
 										note.actions[ 0 ].url.length

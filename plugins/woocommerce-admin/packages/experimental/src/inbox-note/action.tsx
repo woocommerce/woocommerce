@@ -9,6 +9,7 @@ type InboxNoteActionProps = {
 	label: string;
 	href?: string;
 	preventBusyState?: boolean;
+	variant: 'link' | 'secondary';
 };
 
 /**
@@ -20,6 +21,7 @@ export const InboxNoteActionButton: React.FC< InboxNoteActionProps > = ( {
 	onClick,
 	href,
 	preventBusyState,
+	variant = 'link',
 } ) => {
 	const [ inAction, setInAction ] = useState( false );
 
@@ -53,7 +55,8 @@ export const InboxNoteActionButton: React.FC< InboxNoteActionProps > = ( {
 
 	return (
 		<Button
-			isLink={ true }
+			isSecondary={ variant === 'secondary' }
+			isLink={ variant === 'link' }
 			isBusy={ inAction }
 			disabled={ inAction }
 			href={ href }
