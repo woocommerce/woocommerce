@@ -37,7 +37,6 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 	 *
 	 * @param bool   $sandbox Whether to use sandbox mode or not.
 	 * @param string $identity_token Identity token for PDT support.
-	 * @param string $receiver_email Email to receive PDT notification from.
 	 */
 	public function __construct( $sandbox = false, $identity_token = '' ) {
 		add_action( 'woocommerce_thankyou_paypal', array( $this, 'check_response_for_order' ) );
@@ -49,7 +48,7 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 	/**
 	 * Set receiver email to enable more strict validation.
 	 *
-	 * @param  string $receiver_email PayPal reciever email.
+	 * @param string $receiver_email Email to receive PDT notification from.
 	 */
 	public function set_receiver_email( $receiver_email = '' ) {
 		$this->receiver_email = $receiver_email;
