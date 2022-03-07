@@ -421,6 +421,8 @@ class CartItemSchema extends ProductSchema {
 				 *
 				 * Filters the variation option name for custom option slugs.
 				 *
+				 * @internal Matches filter name in WooCommerce core.
+				 *
 				 * @param string $value The name to display.
 				 * @param null $unused Unused because this is not a variation taxonomy.
 				 * @param string $taxonomy Taxonomy or product attribute name.
@@ -451,6 +453,8 @@ class CartItemSchema extends ProductSchema {
 		 * Filters cart item data.
 		 *
 		 * Filters the variation option name for custom option slugs.
+		 *
+		 * @internal Matches filter name in WooCommerce core.
 		 *
 		 * @param array $item_data Cart item data. Empty by default.
 		 * @param array $cart_item Cart item array.

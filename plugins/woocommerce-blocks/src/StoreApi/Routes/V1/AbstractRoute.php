@@ -116,7 +116,7 @@ abstract class AbstractRoute implements RouteInterface {
 		} catch ( InvalidCartException $error ) {
 			$response = $this->get_route_error_response_from_object( $error->getError(), $error->getCode(), $error->getAdditionalData() );
 		} catch ( \Exception $error ) {
-			$response = $this->get_route_error_response( 'unknown_server_error', $error->getMessage(), 500 );
+			$response = $this->get_route_error_response( 'woocommerce_rest_unknown_server_error', $error->getMessage(), 500 );
 		}
 
 		if ( is_wp_error( $response ) ) {

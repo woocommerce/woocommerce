@@ -10,6 +10,10 @@
                 "long_description": "This hook fires when an item is added to the cart. This is triggered from the Store API in this context, but WooCommerce core add to cart events trigger the same hook.",
                 "tags": [
                     {
+                        "name": "internal",
+                        "content": "Matches action name in WooCommerce core."
+                    },
+                    {
                         "name": "param",
                         "content": "ID of the item in the cart.",
                         "types": [
@@ -124,6 +128,10 @@
                 "description": "Fires after a coupon has been applied to the cart.",
                 "long_description": "",
                 "tags": [
+                    {
+                        "name": "internal",
+                        "content": "Matches action name in WooCommerce core."
+                    },
                     {
                         "name": "param",
                         "content": "The coupon code that was applied.",
@@ -269,72 +277,6 @@
             "args": 0
         },
         {
-            "name": "woocommerce_blocks_cart_update_customer_from_request",
-            "file": "StoreApi/Routes/V1/CartUpdateCustomer.php",
-            "type": "action",
-            "doc": {
-                "description": "Fires when the Checkout Block/Store API updates a customer from the API request data.",
-                "long_description": "",
-                "tags": [
-                    {
-                        "name": "param",
-                        "content": "Customer object.",
-                        "types": [
-                            "\\WC_Customer"
-                        ],
-                        "variable": "$customer"
-                    },
-                    {
-                        "name": "param",
-                        "content": "Full details about the request.",
-                        "types": [
-                            "\\WP_REST_Request"
-                        ],
-                        "variable": "$request"
-                    }
-                ],
-                "long_description_html": ""
-            },
-            "args": 2
-        },
-        {
-            "name": "woocommerce_blocks_cart_update_order_from_request",
-            "file": "StoreApi/Routes/V1/AbstractCartRoute.php",
-            "type": "action",
-            "doc": {
-                "description": "Fires when the order is synced with cart data from a cart route.",
-                "long_description": "",
-                "tags": [
-                    {
-                        "name": "param",
-                        "content": "Order object.",
-                        "types": [
-                            "\\WC_Order"
-                        ],
-                        "variable": "$draft_order"
-                    },
-                    {
-                        "name": "param",
-                        "content": "Customer object.",
-                        "types": [
-                            "\\WC_Customer"
-                        ],
-                        "variable": "$customer"
-                    },
-                    {
-                        "name": "param",
-                        "content": "Full details about the request.",
-                        "types": [
-                            "\\WP_REST_Request"
-                        ],
-                        "variable": "$request"
-                    }
-                ],
-                "long_description_html": ""
-            },
-            "args": 2
-        },
-        {
             "name": "woocommerce_blocks_checkout_enqueue_data",
             "file": "BlockTypes/Checkout.php",
             "type": "action",
@@ -345,91 +287,6 @@
                 "long_description_html": ""
             },
             "args": 0
-        },
-        {
-            "name": "woocommerce_blocks_checkout_order_processed",
-            "file": "StoreApi/Routes/V1/Checkout.php",
-            "type": "action",
-            "doc": {
-                "description": "Fires before an order is processed by the Checkout Block/Store API.",
-                "long_description": "This hook informs extensions that $order has completed processing and is ready for payment.\n This is similar to existing core hook woocommerce_checkout_order_processed. We're using a new action: - To keep the interface focused (only pass $order, not passing request data). - This also explicitly indicates these orders are from checkout block/StoreAPI.",
-                "tags": [
-                    {
-                        "name": "see",
-                        "content": "",
-                        "refers": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3238"
-                    },
-                    {
-                        "name": "example",
-                        "content": "docs/examples/checkout-order-processed.md"
-                    },
-                    {
-                        "name": "param",
-                        "content": "Order object.",
-                        "types": [
-                            "\\WC_Order"
-                        ],
-                        "variable": "$order"
-                    }
-                ],
-                "long_description_html": "<p>This hook informs extensions that $order has completed processing and is ready for payment.</p> <p>This is similar to existing core hook woocommerce_checkout_order_processed. We're using a new action:</p> <ul> <li>To keep the interface focused (only pass $order, not passing request data).</li> <li>This also explicitly indicates these orders are from checkout block/StoreAPI.</li> </ul>"
-            },
-            "args": 1
-        },
-        {
-            "name": "woocommerce_blocks_checkout_update_order_from_request",
-            "file": "StoreApi/Routes/V1/Checkout.php",
-            "type": "action",
-            "doc": {
-                "description": "Fires when the Checkout Block/Store API updates an order's from the API request data.",
-                "long_description": "This hook gives extensions the chance to update orders based on the data in the request. This can be used in conjunction with the ExtendSchema class to post custom data and then process it.",
-                "tags": [
-                    {
-                        "name": "param",
-                        "content": "Order object.",
-                        "types": [
-                            "\\WC_Order"
-                        ],
-                        "variable": "$order"
-                    },
-                    {
-                        "name": "param",
-                        "content": "Full details about the request.",
-                        "types": [
-                            "\\WP_REST_Request"
-                        ],
-                        "variable": "$request"
-                    }
-                ],
-                "long_description_html": "<p>This hook gives extensions the chance to update orders based on the data in the request. This can be used in conjunction with the ExtendSchema class to post custom data and then process it.</p>"
-            },
-            "args": 2
-        },
-        {
-            "name": "woocommerce_blocks_checkout_update_order_meta",
-            "file": "StoreApi/Routes/V1/Checkout.php",
-            "type": "action",
-            "doc": {
-                "description": "Fires when the Checkout Block/Store API updates an order's meta data.",
-                "long_description": "This hook gives extensions the chance to add or update meta data on the $order. Throwing an exception from a callback attached to this action will make the Checkout Block render in a warning state, effectively preventing checkout.\n This is similar to existing core hook woocommerce_checkout_update_order_meta. We're using a new action: - To keep the interface focused (only pass $order, not passing request data). - This also explicitly indicates these orders are from checkout block/StoreAPI.",
-                "tags": [
-                    {
-                        "name": "see",
-                        "content": "",
-                        "refers": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3686"
-                    },
-                    {
-                        "name": "param",
-                        "content": "Order object.",
-                        "types": [
-                            "\\WC_Order"
-                        ],
-                        "variable": "$order"
-                    }
-                ],
-                "long_description_html": "<p>This hook gives extensions the chance to add or update meta data on the $order. Throwing an exception from a callback attached to this action will make the Checkout Block render in a warning state, effectively preventing checkout.</p> <p>This is similar to existing core hook woocommerce_checkout_update_order_meta. We're using a new action:</p> <ul> <li>To keep the interface focused (only pass $order, not passing request data).</li> <li>This also explicitly indicates these orders are from checkout block/StoreAPI.</li> </ul>"
-            },
-            "args": 1
         },
         {
             "name": "woocommerce_blocks_enqueue_cart_block_scripts_after",
@@ -480,18 +337,6 @@
             "args": 0
         },
         {
-            "name": "woocommerce_blocks_loaded",
-            "file": "Domain/Bootstrap.php",
-            "type": "action",
-            "doc": {
-                "description": "Fires after WooCommerce Blocks plugin has loaded.",
-                "long_description": "This hook is intended to be used as a safe event hook for when the plugin has been loaded, and all dependency requirements have been met.",
-                "tags": [],
-                "long_description_html": "<p>This hook is intended to be used as a safe event hook for when the plugin has been loaded, and all dependency requirements have been met.</p>"
-            },
-            "args": 0
-        },
-        {
             "name": "woocommerce_blocks_{$this->registry_identifier}_registration",
             "file": "Integrations/IntegrationRegistry.php",
             "type": "action",
@@ -523,6 +368,10 @@
                     {
                         "name": "deprecated",
                         "content": ""
+                    },
+                    {
+                        "name": "internal",
+                        "content": "Matches action name in WooCommerce core."
                     }
                 ],
                 "long_description_html": "<p>Allow 3rd parties to validate cart items. This is a legacy hook from Woo core. This filter will be deprecated because it encourages usage of wc_add_notice. For the API we need to capture notices and convert to wp errors instead.</p>"
@@ -537,6 +386,10 @@
                 "description": "Fires after a customer account has been registered.",
                 "long_description": "This hook fires after customer accounts are created and passes the customer data.",
                 "tags": [
+                    {
+                        "name": "internal",
+                        "content": "Matches filter name in WooCommerce core."
+                    },
                     {
                         "name": "param",
                         "content": "New customer (user) ID.",
@@ -592,6 +445,10 @@
                 "description": "Fires before a customer account is registered.",
                 "long_description": "This hook fires before customer accounts are created and passes the form data (username, email) and an array of errors.\n This could be used to add extra validation logic and append errors to the array.",
                 "tags": [
+                    {
+                        "name": "internal",
+                        "content": "Matches filter name in WooCommerce core."
+                    },
                     {
                         "name": "param",
                         "content": "Customer username.",
@@ -705,6 +562,157 @@
                 "long_description_html": "<p>Functions hooking into this should add custom errors using the provided WP_Error instance.</p>"
             },
             "args": 2
+        },
+        {
+            "name": "woocommerce_store_api_cart_update_customer_from_request",
+            "file": "StoreApi/Routes/V1/CartUpdateCustomer.php",
+            "type": "action",
+            "doc": {
+                "description": "Fires when the Checkout Block/Store API updates a customer from the API request data.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "param",
+                        "content": "Customer object.",
+                        "types": [
+                            "\\WC_Customer"
+                        ],
+                        "variable": "$customer"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Full details about the request.",
+                        "types": [
+                            "\\WP_REST_Request"
+                        ],
+                        "variable": "$request"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 2
+        },
+        {
+            "name": "woocommerce_store_api_cart_update_order_from_request",
+            "file": "StoreApi/Routes/V1/AbstractCartRoute.php",
+            "type": "action",
+            "doc": {
+                "description": "Fires when the order is synced with cart data from a cart route.",
+                "long_description": "",
+                "tags": [
+                    {
+                        "name": "param",
+                        "content": "Order object.",
+                        "types": [
+                            "\\WC_Order"
+                        ],
+                        "variable": "$draft_order"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Customer object.",
+                        "types": [
+                            "\\WC_Customer"
+                        ],
+                        "variable": "$customer"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Full details about the request.",
+                        "types": [
+                            "\\WP_REST_Request"
+                        ],
+                        "variable": "$request"
+                    }
+                ],
+                "long_description_html": ""
+            },
+            "args": 2
+        },
+        {
+            "name": "woocommerce_store_api_checkout_order_processed",
+            "file": "StoreApi/Routes/V1/Checkout.php",
+            "type": "action",
+            "doc": {
+                "description": "Fires before an order is processed by the Checkout Block/Store API.",
+                "long_description": "This hook informs extensions that $order has completed processing and is ready for payment.\n This is similar to existing core hook woocommerce_checkout_order_processed. We're using a new action: - To keep the interface focused (only pass $order, not passing request data). - This also explicitly indicates these orders are from checkout block/StoreAPI.",
+                "tags": [
+                    {
+                        "name": "see",
+                        "content": "",
+                        "refers": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3238"
+                    },
+                    {
+                        "name": "example",
+                        "content": "docs/examples/checkout-order-processed.md"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Order object.",
+                        "types": [
+                            "\\WC_Order"
+                        ],
+                        "variable": "$order"
+                    }
+                ],
+                "long_description_html": "<p>This hook informs extensions that $order has completed processing and is ready for payment.</p> <p>This is similar to existing core hook woocommerce_checkout_order_processed. We're using a new action:</p> <ul> <li>To keep the interface focused (only pass $order, not passing request data).</li> <li>This also explicitly indicates these orders are from checkout block/StoreAPI.</li> </ul>"
+            },
+            "args": 1
+        },
+        {
+            "name": "woocommerce_store_api_checkout_update_order_from_request",
+            "file": "StoreApi/Routes/V1/Checkout.php",
+            "type": "action",
+            "doc": {
+                "description": "Fires when the Checkout Block/Store API updates an order's from the API request data.",
+                "long_description": "This hook gives extensions the chance to update orders based on the data in the request. This can be used in conjunction with the ExtendSchema class to post custom data and then process it.",
+                "tags": [
+                    {
+                        "name": "param",
+                        "content": "Order object.",
+                        "types": [
+                            "\\WC_Order"
+                        ],
+                        "variable": "$order"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Full details about the request.",
+                        "types": [
+                            "\\WP_REST_Request"
+                        ],
+                        "variable": "$request"
+                    }
+                ],
+                "long_description_html": "<p>This hook gives extensions the chance to update orders based on the data in the request. This can be used in conjunction with the ExtendSchema class to post custom data and then process it.</p>"
+            },
+            "args": 2
+        },
+        {
+            "name": "woocommerce_store_api_checkout_update_order_meta",
+            "file": "StoreApi/Routes/V1/Checkout.php",
+            "type": "action",
+            "doc": {
+                "description": "Fires when the Checkout Block/Store API updates an order's meta data.",
+                "long_description": "This hook gives extensions the chance to add or update meta data on the $order. Throwing an exception from a callback attached to this action will make the Checkout Block render in a warning state, effectively preventing checkout.\n This is similar to existing core hook woocommerce_checkout_update_order_meta. We're using a new action: - To keep the interface focused (only pass $order, not passing request data). - This also explicitly indicates these orders are from checkout block/StoreAPI.",
+                "tags": [
+                    {
+                        "name": "see",
+                        "content": "",
+                        "refers": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3686"
+                    },
+                    {
+                        "name": "param",
+                        "content": "Order object.",
+                        "types": [
+                            "\\WC_Order"
+                        ],
+                        "variable": "$order"
+                    }
+                ],
+                "long_description_html": "<p>This hook gives extensions the chance to add or update meta data on the $order. Throwing an exception from a callback attached to this action will make the Checkout Block render in a warning state, effectively preventing checkout.</p> <p>This is similar to existing core hook woocommerce_checkout_update_order_meta. We're using a new action:</p> <ul> <li>To keep the interface focused (only pass $order, not passing request data).</li> <li>This also explicitly indicates these orders are from checkout block/StoreAPI.</li> </ul>"
+            },
+            "args": 1
         },
         {
             "name": "woocommerce_store_api_validate_add_to_cart",

@@ -164,10 +164,10 @@ class Checkout extends MockeryTestCase {
 				),
 			)
 		)->once();
-		add_action( 'woocommerce_blocks_checkout_update_order_from_request', array( $action_callback, 'do_callback' ), 10, 2 );
+		add_action( 'woocommerce_store_api_checkout_update_order_from_request', array( $action_callback, 'do_callback' ), 10, 2 );
 		$response = rest_get_server()->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
-		remove_action( 'woocommerce_blocks_checkout_update_order_from_request', array( $action_callback, 'do_callback' ), 10, 2 );
+		remove_action( 'woocommerce_store_api_checkout_update_order_from_request', array( $action_callback, 'do_callback' ), 10, 2 );
 	}
 
 	/**
