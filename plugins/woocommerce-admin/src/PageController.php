@@ -440,7 +440,7 @@ class PageController {
 				$options['path'],
 				array( __CLASS__, 'page_wrapper' ),
 				$options['icon'],
-				$options['position']
+				intval( round( $options['position'] ) )
 			);
 		} else {
 			$parent_path = $this->get_path_from_id( $options['parent'] );

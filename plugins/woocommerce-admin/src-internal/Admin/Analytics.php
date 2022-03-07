@@ -186,7 +186,7 @@ class Analytics {
 			'title'    => __( 'Analytics', 'woocommerce-admin' ),
 			'path'     => '/analytics/overview',
 			'icon'     => 'dashicons-chart-bar',
-			'position' => 56, // After WooCommerce & Product menu items.
+			'position' => 57, // After WooCommerce & Product menu items.
 		);
 
 		$report_pages = array(
