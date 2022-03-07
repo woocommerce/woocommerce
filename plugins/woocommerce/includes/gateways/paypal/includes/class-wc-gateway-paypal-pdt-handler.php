@@ -40,7 +40,7 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 	 * @param string $receiver_email Email to receive PDT notification from.
 	 */
 	public function __construct( $sandbox = false, $identity_token = '', $receiver_email = '' ) {
-		add_action( 'woocommerce_thankyou_paypal', array( $this, 'check_response' ) );
+		add_action( 'woocommerce_thankyou_paypal', array( $this, 'check_response_for_order' ) );
 
 		$this->receiver_email = $receiver_email;
 		$this->identity_token = $identity_token;
@@ -91,10 +91,32 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 	}
 
 	/**
-	 * Check Response for PDT.
+	 * Check Response for PDT, taking the order id from the request.
+	 *
+	 * @deprecated 6.4 Use check_response_for_order instead.
 	 */
-	public function check_response( $wc_order_id ) {
-		if ( empty( $_REQUEST['tx'] ) ) { // WPCS: Input var ok, CSRF ok, sanitization ok.
+	public function check_response() {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		if ( empty( $_REQUEST['cm'] ) ) {
+			return;
+		}
+
+		$order_id = wc_clean( wp_unslash( $_REQUEST['cm'] ) );
+
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+		check_response_for_order( $order_id );
+	}
+
+	/**
+	 * Check Response for PDT.
+	 *
+	 * @since 6.4
+	 *
+	 * @param mixed $wc_order_id The order id to check the response against.
+	 */
+	public function check_response_for_order( $wc_order_id ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( empty( $_REQUEST['tx'] ) ) {
 			return;
 		}
 
@@ -103,7 +125,8 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 			return;
 		}
 
-		$transaction        = wc_clean( wp_unslash( $_REQUEST['tx'] ) ); // WPCS: input var ok, CSRF ok, sanitization ok.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$transaction        = wc_clean( wp_unslash( $_REQUEST['tx'] ) );
 		$transaction_result = $this->validate_transaction( $transaction );
 
 		if ( $transaction_result ) {
