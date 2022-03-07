@@ -380,8 +380,7 @@ export function* dismissRecommendedPlugins( type: RecommendedTypes ) {
 
 	let success: boolean;
 	try {
-		const url =
-			WC_ADMIN_NAMESPACE + '/plugins/recommended-payment-plugins/dismiss';
+		const url = WC_ADMIN_NAMESPACE + '/payment-gateway-suggestions/dismiss';
 		success = yield apiFetch( {
 			path: url,
 			method: 'POST',

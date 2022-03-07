@@ -9,6 +9,9 @@ use Automattic\WooCommerce\Admin\DataSourcePoller;
  */
 class PaymentGatewaySuggestionsDataSourcePoller extends DataSourcePoller {
 
+	/**
+	 * Data Source Poller ID.
+	 */
 	const ID = 'payment_gateway_suggestions';
 
 	/**

@@ -176,7 +176,7 @@ export function* getRecommendedPlugins( type: RecommendedTypes ) {
 	yield setIsRequesting( 'getRecommendedPlugins', true );
 
 	try {
-		const url = WC_ADMIN_NAMESPACE + '/plugins/recommended-payment-plugins';
+		const url = WC_ADMIN_NAMESPACE + '/payment-gateway-suggestions';
 		const results: Plugin[] = yield apiFetch( {
 			path: url,
 			method: 'GET',

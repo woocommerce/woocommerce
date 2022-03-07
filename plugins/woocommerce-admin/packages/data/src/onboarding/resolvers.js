@@ -86,7 +86,7 @@ export function* getTask() {
 export function* getPaymentGatewaySuggestions() {
 	try {
 		const results = yield apiFetch( {
-			path: WC_ADMIN_NAMESPACE + '/onboarding/payments',
+			path: WC_ADMIN_NAMESPACE + '/payment-gateway-suggestions',
 			method: 'GET',
 		} );
 

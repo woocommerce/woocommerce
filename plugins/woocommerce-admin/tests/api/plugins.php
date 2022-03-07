@@ -6,7 +6,6 @@
  */
 
 use \Automattic\WooCommerce\Admin\API\Plugins;
-use Automattic\WooCommerce\Admin\PaymentMethodSuggestionsDataSourcePoller;
 
 /**
  * WC Tests API Plugins
@@ -154,112 +153,10 @@ class WC_Tests_API_Plugins extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that recommended payment plugins are returned correctly.
-	 */
-	public function test_get_recommended_payment_plugins() {
-		wp_set_current_user( $this->user );
-		set_transient(
-			'woocommerce_admin_' . PaymentMethodSuggestionsDataSourcePoller::ID . '_specs',
-			array(
-				(object) array(
-					'plugins' => array( 'plugin' ),
-					'title'   => 'test',
-				),
-			)
-		);
-
-		$request  = new WP_REST_Request( 'GET', $this->endpoint . '/recommended-payment-plugins' );
-		$response = $this->server->dispatch( $request );
-		$data     = $response->get_data();
-
-		$this->assertEquals( 1, count( $data ) );
-		$this->assertEquals( 'plugin', $data[0]->plugins[0] );
-		delete_transient( 'woocommerce_admin_' . PaymentMethodSuggestionsDataSourcePoller::ID . '_specs' );
-	}
-
-	/**
 	 * @return string locale
 	 */
 	public function set_france_locale() {
 		return 'fr_FR';
 	}
 
-	/**
-	 * Test that recommended payment plugins are not returned when active.
-	 */
-	public function test_get_recommended_payment_plugins_that_are_active() {
-		wp_set_current_user( $this->user );
-		update_option( 'active_plugins', array( 'woocommerce-gateway-stripe/woocommerce-gateway-stripe.php' ) );
-		set_transient(
-			'woocommerce_admin_' . PaymentMethodSuggestionsDataSourcePoller::ID . '_specs',
-			array(
-				(object) array(
-					'plugins'    => array( 'woocommerce-gateway-stripe' ),
-					'title'      => 'test',
-					'is_visible' => array(
-						(object) array(
-							'type'    => 'not',
-							'operand' => array(
-								(object) array(
-									'type'    => 'plugins_activated',
-									'plugins' => array( 'woocommerce-gateway-stripe' ),
-								),
-							),
-						),
-					),
-				),
-			)
-		);
-
-		$request  = new WP_REST_Request( 'GET', $this->endpoint . '/recommended-payment-plugins' );
-		$response = $this->server->dispatch( $request );
-		$data     = $response->get_data();
-
-		$this->assertEquals( 0, count( $data ) );
-		delete_transient( 'woocommerce_admin_' . PaymentMethodSuggestionsDataSourcePoller::ID . '_specs' );
-
-		delete_option( 'active_plugins' );
-	}
-
-	/**
-	 * Test that recommended payment plugins are not returned when active.
-	 */
-	public function test_plugins_when_dismissed_is_set_to_yes() {
-		wp_set_current_user( $this->user );
-		update_option( 'woocommerce_setting_payments_recommendations_hidden', 'yes' );
-		set_transient(
-			'woocommerce_admin_' . PaymentMethodSuggestionsDataSourcePoller::ID . '_specs',
-			array(
-				(object) array(
-					'plugins' => array( 'plugin' ),
-					'title'   => 'test',
-				),
-			)
-		);
-
-		$request  = new WP_REST_Request( 'GET', $this->endpoint . '/recommended-payment-plugins' );
-		$response = $this->server->dispatch( $request );
-		$data     = $response->get_data();
-
-		$this->assertEquals( 0, count( $data ) );
-		delete_transient( 'woocommerce_admin_' . PaymentMethodSuggestionsDataSourcePoller::ID . '_specs' );
-		delete_option( 'woocommerce_setting_payments_recommendations_hidden' );
-	}
-
-	/**
-	 * Test dismissing recommended payment plugins endpoint.
-	 */
-	public function test_dismiss_recommended_payment_plugins() {
-		$this->assertEquals( 'no', get_option( 'woocommerce_setting_payments_recommendations_hidden', 'no' ) );
-		wp_set_current_user( $this->user );
-
-		$request  = new WP_REST_Request( 'POST', $this->endpoint . '/recommended-payment-plugins/dismiss' );
-		$response = $this->server->dispatch( $request );
-		$data     = $response->get_data();
-
-		$this->assertEquals( true, $data );
-
-		$this->assertEquals( 'yes', get_option( 'woocommerce_setting_payments_recommendations_hidden' ) );
-		delete_option( 'woocommerce_setting_payments_recommendations_hidden' );
-	}
 }

@@ -10,7 +10,7 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Admin\DataSourcePoller;
 use Automattic\WooCommerce\Admin\Loader;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\EvaluateSuggestion;
-use Automattic\WooCommerce\Admin\PaymentMethodSuggestionsDataSourcePoller;
+use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\PaymentGatewaySuggestionsDataSourcePoller as PaymentGatewaySuggestionsDataSourcePoller;
 
 /**
  * WC Pay Promotion engine.
@@ -25,7 +25,6 @@ class Init {
 		include_once __DIR__ . '/WCPaymentGatewayPreInstallWCPayPromotion.php';
 
 		add_action( 'change_locale', array( __CLASS__, 'delete_specs_transient' ) );
-		add_filter( DataSourcePoller::FILTER_NAME_SPECS, array( __CLASS__, 'possibly_filter_recommended_payment_gateways' ), 10, 2 );
 
 		$is_payments_page = isset( $_GET['page'] ) && 'wc-settings' === $_GET['page'] && isset( $_GET['tab'] ) && 'checkout' === $_GET['tab']; // phpcs:ignore WordPress.Security.NonceVerification
 		if ( ! wp_is_json_request() && ! $is_payments_page ) {
@@ -68,25 +67,6 @@ class Init {
 			$gateways[] = 'Automattic\WooCommerce\Internal\Admin\WCPayPromotion\WCPaymentGatewayPreInstallWCPayPromotion';
 		}
 		return $gateways;
-	}
-
-	/**
-	 * Possibly filters out woocommerce-payments from recommended payment methods.
-	 *
-	 * @param array  $specs list of payment methods.
-	 * @param string $datasource_poller_id id of data source poller.
-	 * @return array list of payment method.
-	 */
-	public static function possibly_filter_recommended_payment_gateways( $specs, $datasource_poller_id ) {
-		if ( PaymentMethodSuggestionsDataSourcePoller::ID === $datasource_poller_id && self::can_show_promotion() ) {
-			return array_filter(
-				$specs,
-				function( $spec ) {
-					return 'woocommerce-payments' !== $spec->plugins[0];
-				}
-			);
-		}
-		return $specs;
 	}
 
 	/**

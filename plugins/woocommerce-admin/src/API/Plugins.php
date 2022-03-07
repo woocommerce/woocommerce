@@ -8,7 +8,6 @@
 namespace Automattic\WooCommerce\Admin\API;
 
 use Automattic\WooCommerce\Admin\Features\Onboarding;
-use Automattic\WooCommerce\Admin\PaymentMethodSuggestionsDataSourcePoller;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use \Automattic\WooCommerce\Admin\Notes\InstallJPAndWCSPlugins;
 
@@ -137,32 +136,6 @@ class Plugins extends \WC_REST_Data_Controller {
 					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_job_activation_status' ),
 					'permission_callback' => array( $this, 'update_item_permissions_check' ),
-				),
-				'schema' => array( $this, 'get_item_schema' ),
-			)
-		);
-
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base . '/recommended-payment-plugins',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'recommended_payment_plugins' ),
-					'permission_callback' => array( $this, 'get_item_permissions_check' ),
-				),
-				'schema' => array( $this, 'get_item_schema' ),
-			)
-		);
-
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base . '/recommended-payment-plugins/dismiss',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::CREATABLE,
-					'callback'            => array( $this, 'dismiss_recommended_payment_plugins' ),
-					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 				),
 				'schema' => array( $this, 'get_item_schema' ),
 			)
@@ -414,32 +387,6 @@ class Plugins extends \WC_REST_Data_Controller {
 		$job_id = $request->get_param( 'job_id' );
 		$jobs   = PluginsHelper::get_activation_status( $job_id );
 		return reset( $jobs );
-	}
-
-	/**
-	 * Return recommended payment plugins.
-	 *
-	 * @param WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|\WP_HTTP_Response|\WP_REST_Response
-	 */
-	public function recommended_payment_plugins( $request ) {
-		if ( get_option( PaymentMethodSuggestionsDataSourcePoller::RECOMMENDED_PAYMENT_PLUGINS_DISMISS_OPTION, 'no' ) === 'yes' ) {
-			return rest_ensure_response( array() );
-		}
-		$all_plugins = PaymentMethodSuggestionsDataSourcePoller::get_instance()->get_suggestions();
-		$per_page    = $request->get_param( 'per_page' );
-
-		return rest_ensure_response( array_slice( $all_plugins, 0, $per_page ) );
-	}
-
-	/**
-	 * Dismisses recommended payment plugins.
-	 *
-	 * @return \WP_Error|\WP_HTTP_Response|\WP_REST_Response
-	 */
-	public function dismiss_recommended_payment_plugins() {
-		$success = update_option( PaymentMethodSuggestionsDataSourcePoller::RECOMMENDED_PAYMENT_PLUGINS_DISMISS_OPTION, 'yes' );
-		return rest_ensure_response( $success );
 	}
 
 	/**

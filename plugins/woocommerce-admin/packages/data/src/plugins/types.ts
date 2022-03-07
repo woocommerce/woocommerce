@@ -30,14 +30,15 @@ export type PluginsState = {
 };
 
 export type Plugin = {
-	slug: string;
-	copy: string;
-	product: string;
+	id: string;
+	content: string;
+	plugins: string[];
 	title: string;
-	icon: string;
-	'button-text': string;
-	'setup-link': string;
-	recommended?: boolean;
+	image: string;
+	square_image?: string;
+	recommendation_priority?: number;
+	is_visible?: boolean;
+	is_local_partner?: boolean;
 };
 
 type PaypalOnboardingState = 'unknown' | 'start' | 'progressive' | 'onboarded';

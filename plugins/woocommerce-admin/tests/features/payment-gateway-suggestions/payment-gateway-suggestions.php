@@ -156,4 +156,35 @@ class WC_Tests_PaymentGatewaySuggestions_Init extends WC_Unit_Test_Case {
 		$this->assertEquals( 'default-gateway', $suggestions[0]->id );
 	}
 
+	/**
+	 * Test that the suggestions can be displayed when a user has marketplace
+	 * suggestions enabled and is a user capable of installing plugins.
+	 */
+	public function test_should_display() {
+		update_option( 'woocommerce_show_marketplace_suggestions', 'yes' );
+		$this->assertTrue( PaymentGatewaySuggestions::should_display() );
+	}
+
+	/**
+	 * Test that suggestions are not shown when the marketplace suggestions are off.
+	 */
+	public function test_should_not_display_when_marketplace_suggestions_off() {
+		wp_set_current_user( $this->user );
+		update_option( 'woocommerce_show_marketplace_suggestions', 'no' );
+		$this->assertFalse( PaymentGatewaySuggestions::should_display() );
+	}
+
+	/**
+	 * Test dismissing suggestions.
+	 */
+	public function test_dismiss() {
+		$this->assertEquals( 'no', get_option( PaymentGatewaySuggestions::RECOMMENDED_PAYMENT_PLUGINS_DISMISS_OPTION, 'no' ) );
+		wp_set_current_user( $this->user );
+
+		PaymentGatewaySuggestions::dismiss();
+
+		$this->assertEquals( 'yes', get_option( PaymentGatewaySuggestions::RECOMMENDED_PAYMENT_PLUGINS_DISMISS_OPTION ) );
+		delete_option( PaymentGatewaySuggestions::RECOMMENDED_PAYMENT_PLUGINS_DISMISS_OPTION );
+	}
+
 }
