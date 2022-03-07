@@ -104,7 +104,7 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 		$order_id = wc_clean( wp_unslash( $_REQUEST['cm'] ) );
 
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
-		check_response_for_order( $order_id );
+		$this->check_response_for_order( $order_id );
 	}
 
 	/**
