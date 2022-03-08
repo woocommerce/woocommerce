@@ -47,9 +47,8 @@ const blockConfig = {
 					padding: true,
 					__experimentalSkipSerialization: true,
 				},
-				__experimentalSelector:
-					'.wc-block-components-product-sale-badge',
 			} ),
+			__experimentalSelector: '.wc-block-components-product-sale-badge',
 		} ),
 	},
 	attributes,
