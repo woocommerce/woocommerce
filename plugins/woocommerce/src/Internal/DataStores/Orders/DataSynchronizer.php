@@ -17,6 +17,13 @@ defined( 'ABSPATH' ) || exit;
  */
 class DataSynchronizer {
 
+	const ORDERS_DATA_SYNC_ENABLED_OPTION            = 'woocommerce_custom_orders_table_data_sync_enabled';
+	const INITIAL_ORDERS_PENDING_SYNC_COUNT_OPTION   = 'woocommerce_initial_orders_pending_sync_count';
+	const AUTO_FLIP_AUTHORITATIVE_TABLE_ROLES_OPTION = 'woocommerce_auto_flip_authoritative_table_roles';
+	const PENDING_SYNC_IS_IN_PROGRESS_OPTION         = 'woocommerce_custom_orders_table_pending_sync_in_progress';
+	const ORDERS_SYNC_SCHEDULED_ACTION_CALLBACK      = 'woocommerce_run_orders_sync_callback';
+	const PENDING_SYNCHRONIZATION_FINISHED_ACTION    = 'woocommerce_orders_sync_finished';
+
 	/**
 	 * The data store object to use.
 	 *
@@ -31,7 +38,17 @@ class DataSynchronizer {
 	 */
 	private $database_util;
 
-	// TODO: Add a constructor to handle hooks as appropriate.
+	/**
+	 * Class constructor.
+	 */
+	public function __construct() {
+		add_action(
+			self::ORDERS_SYNC_SCHEDULED_ACTION_CALLBACK,
+			function() {
+				$this->do_pending_orders_synchronization();
+			}
+		);
+	}
 
 	/**
 	 * Class initialization, invoked by the DI container.
@@ -74,5 +91,113 @@ class DataSynchronizer {
 		}
 	}
 
+	/**
+	 * Is the data sync between old and new tables currently enabled?
+	 *
+	 * @return bool
+	 */
+	public function data_sync_is_enabled(): bool {
+		return 'yes' === get_option( self::ORDERS_DATA_SYNC_ENABLED_OPTION );
+	}
 
+	/**
+	 * Is a sync process currently in progress?
+	 *
+	 * @return bool
+	 */
+	public function pending_data_sync_is_in_progress(): bool {
+		return 'yes' === get_option( self::PENDING_SYNC_IS_IN_PROGRESS_OPTION );
+	}
+
+	/**
+	 * Get the current sync process status.
+	 * The information is meaningful only if pending_data_sync_is_in_progress return true.
+	 *
+	 * @return array
+	 */
+	public function get_sync_status() {
+		return array(
+			'initial_pending_count' => (int) get_option( self::INITIAL_ORDERS_PENDING_SYNC_COUNT_OPTION, 0 ),
+			'current_pending_count' => $this->get_current_orders_pending_sync_count(),
+			'auto_flip'             => 'yes' === get_option( self::AUTO_FLIP_AUTHORITATIVE_TABLE_ROLES_OPTION ),
+			'sync_in_progress'      => $this->pending_data_sync_is_in_progress(),
+		);
+	}
+
+	/**
+	 * Calculate how many orders need to be synchronized currently.
+	 */
+	public function get_current_orders_pending_sync_count(): int {
+		// TODO: get this value by querying the database.
+		return get_option( 'woocommerce_fake_orders_pending_sync_count', 0 );
+	}
+
+	/**
+	 * Start an orders synchronization process.
+	 * This will setup the appropriate status information and schedule the first synchronization batch.
+	 */
+	public function start_synchronizing_pending_orders() {
+		$initial_pending_count = $this->get_current_orders_pending_sync_count();
+		if ( 0 === $initial_pending_count ) {
+			return;
+		}
+
+		update_option( self::INITIAL_ORDERS_PENDING_SYNC_COUNT_OPTION, $initial_pending_count );
+
+		$queue = WC()->get_instance_of( \WC_Queue::class );
+		$queue->cancel_all( self::ORDERS_SYNC_SCHEDULED_ACTION_CALLBACK );
+
+		update_option( self::PENDING_SYNC_IS_IN_PROGRESS_OPTION, 'yes' );
+		$this->schedule_pending_orders_synchronization();
+	}
+
+	/**
+	 * Schedule the next orders synchronization batch.
+	 */
+	private function schedule_pending_orders_synchronization() {
+		$queue = WC()->get_instance_of( \WC_Queue::class );
+		$queue->schedule_single(
+			WC()->call_function( 'time' ) + 1,
+			self::ORDERS_SYNC_SCHEDULED_ACTION_CALLBACK,
+			array(),
+			'woocommerce-db-updates'
+		);
+	}
+
+	/**
+	 * Run one orders synchronization batch.
+	 */
+	private function do_pending_orders_synchronization() {
+		if ( ! $this->pending_data_sync_is_in_progress() ) {
+			return;
+		}
+
+		// TODO: Syncrhonize a batch of orders.
+		$fake_count = (int) get_option( 'woocommerce_fake_orders_pending_sync_count', 0 );
+		if ( $fake_count > 0 ) {
+			update_option( 'woocommerce_fake_orders_pending_sync_count', $fake_count - 1 );
+		}
+
+		if ( 0 === $this->get_current_orders_pending_sync_count() ) {
+			$this->cleanup_synchronization_state();
+
+			/**
+			 * Hook to signal that the orders tables synchronization process has finised (nothing left to synchronize).
+			 */
+			do_action( self::PENDING_SYNCHRONIZATION_FINISHED_ACTION );
+		} else {
+			$this->schedule_pending_orders_synchronization();
+		}
+	}
+
+	/**
+	 * Cleanup all the synchronization status information,
+	 * because the process has been disabled by the user via settings,
+	 * or because there's nothing left to syncrhonize.
+	 */
+	public function cleanup_synchronization_state() {
+		delete_option( self::INITIAL_ORDERS_PENDING_SYNC_COUNT_OPTION );
+		delete_option( self::PENDING_SYNC_IS_IN_PROGRESS_OPTION );
+		delete_option( self::AUTO_FLIP_AUTHORITATIVE_TABLE_ROLES_OPTION );
+	}
 }
