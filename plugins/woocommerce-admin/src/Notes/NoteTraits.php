@@ -143,6 +143,26 @@ trait NoteTraits {
 		}
 	}
 
+
+	/**
+	 * Update the note if it passes predefined conditions.
+	 *
+	 * @throws NotesUnavailableException Throws exception when notes are unavailable.
+	 */
+	public static function possibly_update_note() {
+		$note = Notes::get_note_by_name( self::NOTE_NAME );
+
+		if ( ! $note ) {
+			return;
+		}
+
+		// Update note content if it's changed.
+		$latest_note_content = self::get_note()->get_content();
+		if ( $note->get_content() !== $latest_note_content ) {
+			$note->set_content( $latest_note_content );
+			$note->save();
+		}
+	}
 	/**
 	 * Get if the note has been actioned.
 	 *

@@ -92,6 +92,7 @@ class Events {
 	public function do_wc_admin_daily() {
 		$this->possibly_add_notes();
 		$this->possibly_delete_notes();
+		$this->possibly_update_notes();
 
 		if ( $this->is_remote_inbox_notifications_enabled() ) {
 			DataSourcePoller::get_instance()->read_specs_from_data_sources();
@@ -151,6 +152,43 @@ class Events {
 		NavigationNudge::delete_if_not_applicable();
 		SetUpAdditionalPaymentTypes::delete_if_not_applicable();
 		PaymentsRemindMeLater::delete_if_not_applicable();
+	}
+
+	/**
+	 * Updates notes that should be updated.
+	 */
+	protected function possibly_update_notes() {
+		NewSalesRecord::possibly_update_note();
+		MobileApp::possibly_update_note();
+		TrackingOptIn::possibly_update_note();
+		OnboardingPayments::possibly_update_note();
+		PersonalizeStore::possibly_update_note();
+		WooCommercePayments::possibly_update_note();
+		EUVATNumber::possibly_update_note();
+		MarketingJetpack::possibly_update_note();
+		WooCommerceSubscriptions::possibly_update_note();
+		MigrateFromShopify::possibly_update_note();
+		InsightFirstSale::possibly_update_note();
+		LaunchChecklist::possibly_update_note();
+		OnlineClothingStore::possibly_update_note();
+		FirstProduct::possibly_update_note();
+		RealTimeOrderAlerts::possibly_update_note();
+		CustomizeStoreWithBlocks::possibly_update_note();
+		TestCheckout::possibly_update_note();
+		EditProductsOnTheMove::possibly_update_note();
+		PerformanceOnMobile::possibly_update_note();
+		ManageOrdersOnTheGo::possibly_update_note();
+		ChoosingTheme::possibly_update_note();
+		InsightFirstProductAndPayment::possibly_update_note();
+		AddFirstProduct::possibly_update_note();
+		AddingAndManangingProducts::possibly_update_note();
+		CustomizingProductCatalog::possibly_update_note();
+		FirstDownlaodableProduct::possibly_update_note();
+		NavigationNudge::possibly_update_note();
+		CompleteStoreDetails::possibly_update_note();
+		UpdateStoreDetails::possibly_update_note();
+		PaymentsRemindMeLater::possibly_update_note();
+		MagentoMigration::possibly_update_note();
 	}
 
 	/**

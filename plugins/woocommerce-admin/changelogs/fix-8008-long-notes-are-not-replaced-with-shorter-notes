@@ -1,0 +1,4 @@
+Significance: patch
+Type: Fix
+
+Add 'possibly_update_note' to replace long notes with shorter notes. #8401

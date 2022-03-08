@@ -7,7 +7,6 @@
 
 use Automattic\WooCommerce\Admin\Notes\NotesUnavailableException;
 use Automattic\WooCommerce\Admin\Notes\Note;
-use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Admin\Notes\NoteTraits;
 
 /**
@@ -98,6 +97,11 @@ class WC_Tests_NoteTraits extends WC_Unit_Test_Case {
 			array(
 				function () {
 					self::possibly_delete_note();
+				},
+			),
+			array(
+				function () {
+					self::possibly_update_note();
 				},
 			),
 			array(
