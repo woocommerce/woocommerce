@@ -68,6 +68,12 @@ export const shopper = {
 			} );
 		},
 
+		goToCheckout: async () => {
+			await page.goto( SHOP_CHECKOUT_BLOCK_PAGE, {
+				waitUntil: 'networkidle0',
+			} );
+		},
+
 		/**
 		 * For some reason "wcShopper.emptyCart" sometimes result in an error, but using the same
 		 * implementation here fixes the problem.
@@ -98,6 +104,60 @@ export const shopper = {
 			await expect( page ).toMatchElement( '.woocommerce-info', {
 				text: 'Your cart is currently empty.',
 			} );
+		},
+
+		placeOrder: async () => {
+			await Promise.all( [
+				page.waitForNavigation( {
+					waitUntil: 'networkidle0',
+				} ),
+				expect( page ).toClick( '.wc-block-components-button__text', {
+					text: 'Place Order',
+				} ),
+			] );
+		},
+
+		fillBillingDetails: async ( customerBillingDetails ) => {
+			await expect( page ).toFill(
+				'#billing-first_name',
+				customerBillingDetails.firstname
+			);
+			await expect( page ).toFill(
+				'#billing-last_name',
+				customerBillingDetails.lastname
+			);
+			await expect( page ).toFill(
+				'#components-form-token-input-0',
+				customerBillingDetails.country
+			);
+			await expect( page ).toFill(
+				'#billing-address_1',
+				customerBillingDetails.addressfirstline
+			);
+			await expect( page ).toFill(
+				'#billing-address_2',
+				customerBillingDetails.addresssecondline
+			);
+			await expect( page ).toFill(
+				'#billing-city',
+				customerBillingDetails.city
+			);
+			await expect( page ).toFill(
+				'#components-form-token-input-2',
+				customerBillingDetails.state
+			);
+			await expect( page ).toFill(
+				'#billing-postcode',
+				customerBillingDetails.postcode
+			);
+			await expect( page ).toFill(
+				'#phone',
+				customerBillingDetails.phone
+			);
+			await expect( page ).toFill(
+				'#email',
+				customerBillingDetails.email
+			);
 		},
 	},
 };
