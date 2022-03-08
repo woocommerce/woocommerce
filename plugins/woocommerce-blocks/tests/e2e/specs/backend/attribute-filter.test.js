@@ -23,9 +23,12 @@ describe( `${ block.name } Block`, () => {
 		await switchUserToAdmin();
 		await visitBlockPage( `${ block.name } Block` );
 
-		await expect( page ).toClick( 'span.woocommerce-search-list__item-name', { text: 'Capacity' } );
+		await expect( page ).toClick(
+			'span.woocommerce-search-list__item-name',
+			{ text: 'Capacity' }
+		);
 		//needed for attributes list to load correctly
-		await page.waitFor(1000);
+		await page.waitFor( 1000 );
 
 		await expect( page ).toClick( 'button', { text: 'Done' } );
 		await page.waitForNetworkIdle();
@@ -118,7 +121,6 @@ describe( `${ block.name } Block`, () => {
 				// Capacity has only 2 attributes
 			).toEqual( 2 );
 
-
 			await expect( page ).toClick(
 				'span.woocommerce-search-list__item-name',
 				{
@@ -126,7 +128,7 @@ describe( `${ block.name } Block`, () => {
 				}
 			);
 			//needed for attributes list to load correctly
-			await page.waitFor(1000);
+			await page.waitFor( 1000 );
 
 			// reset
 			await expect( page ).toClick(
@@ -136,7 +138,7 @@ describe( `${ block.name } Block`, () => {
 				}
 			);
 			//needed for attributes list to load correctly
-			await page.waitFor(1000);
+			await page.waitFor( 1000 );
 		} );
 
 		it( 'renders on the frontend', async () => {

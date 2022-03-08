@@ -11,7 +11,7 @@ import {
 } from '@wordpress/e2e-test-utils';
 
 // Set the default test timeout.
-jest.setTimeout( 60000 );
+jest.setTimeout( 120000 );
 
 /**
  * Array of page event tuples of [ eventName, handler ].
