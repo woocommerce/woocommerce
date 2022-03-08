@@ -43,7 +43,7 @@ describe( 'Legacy Template blocks', () => {
 	} );
 
 	afterAll( async () => {
-		await activateTheme( 'twentytwentyone' );
+		await activateTheme( 'storefront' );
 	} );
 
 	describe( 'Product Archive block', () => {
