@@ -514,8 +514,7 @@ class Install {
 	 * @param string|null $version New WooCommerce Admin DB version or null.
 	 */
 	public static function update_db_version( $version = null ) {
-		delete_option( self::VERSION_OPTION );
-		add_option( self::VERSION_OPTION, is_null( $version ) ? WC_ADMIN_VERSION_NUMBER : $version );
+		update_option( self::VERSION_OPTION, is_null( $version ) ? WC_ADMIN_VERSION_NUMBER : $version );
 	}
 
 	/**
