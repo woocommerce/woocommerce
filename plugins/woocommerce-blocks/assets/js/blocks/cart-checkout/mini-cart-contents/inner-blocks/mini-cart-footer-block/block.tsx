@@ -14,6 +14,7 @@ import { getSetting } from '@woocommerce/settings';
 import { CART_URL, CHECKOUT_URL } from '@woocommerce/block-settings';
 import Button from '@woocommerce/base-components/button';
 import { PaymentMethodDataProvider } from '@woocommerce/base-context';
+import classNames from 'classnames';
 
 const PaymentMethodIconsElement = (): JSX.Element => {
 	const { paymentMethods } = usePaymentMethods();
@@ -27,16 +28,19 @@ const PaymentMethodIconsElement = (): JSX.Element => {
 interface Props {
 	color?: string;
 	backgroundColor?: string;
+	className: string;
 }
 
-const Block = ( { color, backgroundColor }: Props ): JSX.Element => {
+const Block = ( { color, backgroundColor, className }: Props ): JSX.Element => {
 	const { cartTotals } = useStoreCart();
 	const subTotal = getSetting( 'displayCartPricesIncludingTax', false )
 		? parseInt( cartTotals.total_items, 10 ) +
 		  parseInt( cartTotals.total_items_tax, 10 )
 		: parseInt( cartTotals.total_items, 10 );
 	return (
-		<div className="wc-block-mini-cart__footer">
+		<div
+			className={ classNames( className, 'wc-block-mini-cart__footer' ) }
+		>
 			<TotalsItem
 				className="wc-block-mini-cart__footer-subtotal"
 				currency={ getCurrencyFromPriceResponse( cartTotals ) }

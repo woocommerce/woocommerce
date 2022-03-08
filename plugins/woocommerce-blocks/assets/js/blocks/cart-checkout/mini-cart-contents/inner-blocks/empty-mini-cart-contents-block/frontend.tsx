@@ -10,10 +10,12 @@ import { useEffect, useRef } from 'react';
 
 type EmptyMiniCartContentsBlockProps = {
 	children: JSX.Element | JSX.Element[];
+	className: string;
 };
 
 const EmptyMiniCartContentsBlock = ( {
 	children,
+	className,
 }: EmptyMiniCartContentsBlockProps ): JSX.Element | null => {
 	const { cartItems, cartIsLoading } = useStoreCart();
 
@@ -30,11 +32,7 @@ const EmptyMiniCartContentsBlock = ( {
 	}
 
 	return (
-		<div
-			tabIndex={ -1 }
-			ref={ elementRef }
-			className="wp-block-woocommerce-empty-mini-cart-contents-block"
-		>
+		<div tabIndex={ -1 } ref={ elementRef } className={ className }>
 			{ children }
 		</div>
 	);

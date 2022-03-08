@@ -3,18 +3,22 @@
  */
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 
+type FilledMiniCartContentsBlockProps = {
+	children: JSX.Element;
+	className: string;
+};
+
 const FilledMiniCartContentsBlock = ( {
 	children,
-}: {
-	children: JSX.Element | JSX.Element[];
-} ): JSX.Element | null => {
+	className,
+}: FilledMiniCartContentsBlockProps ): JSX.Element | null => {
 	const { cartItems } = useStoreCart();
 
 	if ( cartItems.length === 0 ) {
 		return null;
 	}
 
-	return <>{ children }</>;
+	return <div className={ className }>{ children }</div>;
 };
 
 export default FilledMiniCartContentsBlock;
