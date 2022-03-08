@@ -20,7 +20,7 @@
 	"module": "build-module/index.js",
 	"react-native": "src/index",
 	"dependencies": {
-		"locutus": "2.0.15"
+		"locutus": "^2.0.16"
 	},
 	"publishConfig": {
 		"access": "public"

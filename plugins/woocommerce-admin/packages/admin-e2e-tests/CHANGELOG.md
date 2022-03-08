@@ -12,6 +12,8 @@
 
 -   Add missing dependencies. #8349
 
+-   Update all js packages with minor/patch version changes. #8392
+
 # 0.1.2
 
 -   Add Customers to analytics pages tested #7573

@@ -107,7 +107,7 @@ describe( 'connectToJetpack', () => {
 		);
 
 		connect.next();
-		connect.throw( 'Failed' );
+		connect.throw( new Error( 'Failed' ) );
 		connect.next();
 
 		expect( global.window.location.href ).toBe(

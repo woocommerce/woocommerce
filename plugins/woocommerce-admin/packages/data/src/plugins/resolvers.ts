@@ -22,6 +22,7 @@ import {
 	setRecommendedPlugins,
 } from './actions';
 import { PaypalOnboardingStatus, RecommendedTypes } from './types';
+import { WPError } from '../types';
 
 // Can be removed in WP 5.9, wp.data is supported in >5.7.
 const resolveSelect =
@@ -51,7 +52,7 @@ export function* getActivePlugins() {
 
 		yield updateActivePlugins( results.plugins, true );
 	} catch ( error ) {
-		yield setError( 'getActivePlugins', error );
+		yield setError( 'getActivePlugins', error as WPError[ 'errors' ] );
 	}
 }
 
@@ -67,7 +68,7 @@ export function* getInstalledPlugins() {
 
 		yield updateInstalledPlugins( results.plugins, true );
 	} catch ( error ) {
-		yield setError( 'getInstalledPlugins', error );
+		yield setError( 'getInstalledPlugins', error as WPError[ 'errors' ] );
 	}
 }
 
@@ -83,7 +84,7 @@ export function* isJetpackConnected() {
 
 		yield updateIsJetpackConnected( results.isActive );
 	} catch ( error ) {
-		yield setError( 'isJetpackConnected', error );
+		yield setError( 'isJetpackConnected', error as WPError[ 'errors' ] );
 	}
 
 	yield setIsRequesting( 'isJetpackConnected', false );
@@ -107,7 +108,7 @@ export function* getJetpackConnectUrl( query: { redirect_url: string } ) {
 			results.connectAction
 		);
 	} catch ( error ) {
-		yield setError( 'getJetpackConnectUrl', error );
+		yield setError( 'getJetpackConnectUrl', error as WPError[ 'errors' ] );
 	}
 
 	yield setIsRequesting( 'getJetpackConnectUrl', false );
@@ -161,7 +162,10 @@ export function* getPaypalOnboardingStatus() {
 			yield setPaypalOnboardingStatus( results );
 		} catch ( error ) {
 			yield setOnboardingStatusWithOptions();
-			yield setError( 'getPaypalOnboardingStatus', error );
+			yield setError(
+				'getPaypalOnboardingStatus',
+				error as WPError[ 'errors' ]
+			);
 		}
 	}
 
@@ -184,7 +188,7 @@ export function* getRecommendedPlugins( type: RecommendedTypes ) {
 
 		yield setRecommendedPlugins( type, results );
 	} catch ( error ) {
-		yield setError( 'getRecommendedPlugins', error );
+		yield setError( 'getRecommendedPlugins', error as WPError[ 'errors' ] );
 	}
 
 	yield setIsRequesting( 'getRecommendedPlugins', false );

@@ -1,13 +1,8 @@
 /**
  * Internal dependencies
  */
-import {
-	PaymentGateway,
-	PluginsState,
-	RestApiError,
-	WPDataSelector,
-	WPDataSelectors,
-} from './types';
+import { PaymentGateway, PluginsState } from './types';
+import { RestApiError, WPDataSelector, WPDataSelectors } from '../types';
 
 export function getPaymentGateway(
 	state: PluginsState,

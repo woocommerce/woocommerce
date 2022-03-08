@@ -211,12 +211,13 @@ export function* installPlugins( plugins: string[] ) {
 
 		return results;
 	} catch ( error ) {
-		if ( plugins.length === 1 && ! error[ plugins[ 0 ] ] ) {
+		if ( error instanceof Error && plugins.length === 1 ) {
 			// Incase of a network error
 			error = { [ plugins[ 0 ] ]: error.message };
 		}
-		yield setError( 'installPlugins', error );
-		throw new PluginError( formatErrorMessage( error ), error );
+		const errors = error as WPError[ 'errors' ];
+		yield setError( 'installPlugins', errors );
+		throw new PluginError( formatErrorMessage( errors ), errors );
 	}
 }
 
@@ -242,12 +243,13 @@ export function* activatePlugins( plugins: string[] ) {
 
 		return results;
 	} catch ( error ) {
-		if ( plugins.length === 1 && ! error[ plugins[ 0 ] ] ) {
+		if ( error instanceof Error && plugins.length === 1 ) {
 			// Incase of a network error
 			error = { [ plugins[ 0 ] ]: error.message };
 		}
-		yield setError( 'activatePlugins', error );
-		throw new PluginError( formatErrorMessage( error, 'activate' ), error );
+		const errors = error as WPError[ 'errors' ];
+		yield setError( 'installPlugins', errors );
+		throw new PluginError( formatErrorMessage( errors ), errors );
 	}
 }
 
@@ -317,7 +319,11 @@ export function* installJetpackAndConnect(
 		);
 		window.location.href = url;
 	} catch ( error ) {
-		yield errorAction( error.message );
+		if ( error instanceof Error ) {
+			yield errorAction( error.message );
+		} else {
+			throw error;
+		}
 	}
 }
 
@@ -334,7 +340,11 @@ export function* connectToJetpackWithFailureRedirect(
 		);
 		window.location.href = url;
 	} catch ( error ) {
-		yield errorAction( error.message );
+		if ( error instanceof Error ) {
+			yield errorAction( error.message );
+		} else {
+			throw error;
+		}
 		window.location.href = failureRedirect;
 	}
 }

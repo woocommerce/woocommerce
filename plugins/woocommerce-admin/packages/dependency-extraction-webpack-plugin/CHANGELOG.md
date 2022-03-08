@@ -1,3 +1,7 @@
+# Unreleased
+
+-   Update all js packages with minor/patch version changes. #8392
+
 # 1.6.0
 
 -   Add new `bundledPackages` option to bundle in specific packages.

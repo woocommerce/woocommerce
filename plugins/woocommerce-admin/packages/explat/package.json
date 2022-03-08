@@ -25,14 +25,14 @@
 		"access": "public"
 	},
 	"dependencies": {
-		"@automattic/explat-client": "0.0.2",
-		"@automattic/explat-client-react-helpers": "0.0.3",
-		"@wordpress/hooks": "^2.11.0",
-		"cookie": "^0.4.1",
-		"qs": "6.9.6"
+		"@automattic/explat-client": "^0.0.3",
+		"@automattic/explat-client-react-helpers": "^0.0.3",
+		"@wordpress/hooks": "^2.12.3",
+		"cookie": "^0.4.2",
+		"qs": "^6.10.3"
 	},
 	"devDependencies": {
-		"@types/cookie": "0.4.1"
+		"@types/cookie": "^0.4.1"
 	},
 	"scripts": {
 		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",

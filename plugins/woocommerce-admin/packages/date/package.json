@@ -21,13 +21,13 @@
 	"module": "build-module/index.js",
 	"react-native": "src/index",
 	"dependencies": {
-		"@wordpress/date": "4.3.1",
-		"@wordpress/i18n": "4.3.1",
-		"moment": "2.29.1",
-		"qs": "6.9.6"
+		"@wordpress/date": "^4.3.1",
+		"@wordpress/i18n": "^4.3.1",
+		"moment": "^2.29.1",
+		"qs": "^6.10.3"
 	},
 	"devDependencies": {
-		"d3-time-format": "2.3.0"
+		"d3-time-format": "^2.3.0"
 	},
 	"peerDependencies": {
 		"lodash": "^4.17.0"

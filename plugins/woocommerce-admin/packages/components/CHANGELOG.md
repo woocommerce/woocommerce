@@ -2,6 +2,7 @@
 
 -   Replace deprecated wp.compose.withState with wp.element.useState. #8338
 -   Add missing dependencies. #8349
+-   Update all js packages with minor/patch version changes. #8392
 
 # 9.0.0
 

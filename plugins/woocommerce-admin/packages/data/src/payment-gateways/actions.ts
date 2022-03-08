@@ -8,7 +8,8 @@ import { apiFetch } from '@wordpress/data-controls';
  */
 import { ACTION_TYPES } from './action-types';
 import { API_NAMESPACE } from './constants';
-import { PaymentGateway, RestApiError } from './types';
+import { PaymentGateway } from './types';
+import { RestApiError } from '../types';
 
 export function getPaymentGatewaysRequest(): {
 	type: ACTION_TYPES.GET_PAYMENT_GATEWAYS_REQUEST;
@@ -123,7 +124,7 @@ export function* updatePaymentGateway(
 			return response;
 		}
 	} catch ( e ) {
-		yield updatePaymentGatewayError( e );
+		yield updatePaymentGatewayError( e as RestApiError );
 		throw e;
 	}
 }

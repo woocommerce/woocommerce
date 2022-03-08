@@ -1,5 +1,7 @@
 # Unreleased
 
+-   Update all js packages with minor/patch version changes. #8392
+
 # 2.0.0
 
 - Update dependencies to support react 17 #8305

@@ -21,8 +21,8 @@
 	"module": "build-module/index.js",
 	"react-native": "src/index",
 	"dependencies": {
-		"browser-filesaver": "1.1.1",
-		"moment": "2.29.1"
+		"browser-filesaver": "^1.1.1",
+		"moment": "^2.29.1"
 	},
 	"publishConfig": {
 		"access": "public"

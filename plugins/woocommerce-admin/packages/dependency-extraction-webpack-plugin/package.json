@@ -18,7 +18,7 @@
 	},
 	"main": "src/index.js",
 	"dependencies": {
-		"@wordpress/dependency-extraction-webpack-plugin": "^2.8.0"
+		"@wordpress/dependency-extraction-webpack-plugin": "^2.9.0"
 	},
 	"publishConfig": {
 		"access": "public"

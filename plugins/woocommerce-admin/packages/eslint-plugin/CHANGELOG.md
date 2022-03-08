@@ -1,3 +1,7 @@
+# Unreleased
+
+-   Update all js packages with minor/patch version changes. #8392
+
 # 1.2.0
 
 -   Updated `dependency-group` rule to have imports starting with `~/` labeled as local. #6517

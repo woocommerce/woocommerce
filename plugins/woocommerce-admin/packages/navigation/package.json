@@ -21,15 +21,15 @@
 	"module": "build-module/index.js",
 	"react-native": "src/index",
 	"dependencies": {
-		"@wordpress/api-fetch": "6.0.1",
-		"@wordpress/compose":  "5.1.1",
-		"@wordpress/notices": "3.3.0",
-		"@wordpress/components": "19.4.0",
-		"@wordpress/element": "4.1.1",
-		"@wordpress/hooks": "2.11.0",
-		"@wordpress/url": "3.4.1",
-		"history": "4.10.1",
-		"qs": "6.9.6"
+		"@wordpress/api-fetch": "^6.0.1",
+		"@wordpress/components": "^19.5.0",
+		"@wordpress/compose": "^5.1.2",
+		"@wordpress/element": "^4.1.1",
+		"@wordpress/hooks": "^2.12.3",
+		"@wordpress/notices": "^3.3.2",
+		"@wordpress/url": "^3.4.1",
+		"history": "^4.10.1",
+		"qs": "^6.10.3"
 	},
 	"peerDependencies": {
 		"lodash": "^4.17.0"

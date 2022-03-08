@@ -22,10 +22,10 @@
 	"react-native": "src/index",
 	"dependencies": {
 		"@woocommerce/number": "workspace:*",
-		"@wordpress/deprecated": "^2.9.0",
-		"@wordpress/element": "4.1.1",
-		"@wordpress/html-entities": "3.3.1",
-		"@wordpress/i18n": "3.17.0"
+		"@wordpress/deprecated": "^2.12.3",
+		"@wordpress/element": "^4.1.1",
+		"@wordpress/html-entities": "^3.3.1",
+		"@wordpress/i18n": "^3.20.0"
 	},
 	"publishConfig": {
 		"access": "public"
