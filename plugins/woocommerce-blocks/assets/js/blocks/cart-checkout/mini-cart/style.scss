@@ -77,11 +77,24 @@
 .wp-block-woocommerce-mini-cart-contents {
 	background: #fff;
 	box-sizing: border-box;
-	display: flex;
-	flex-direction: column;
 	height: 100vh;
 	padding: 0;
 	justify-content: center;
+}
+
+.wp-block-woocommerce-empty-mini-cart-contents-block,
+.wp-block-woocommerce-filled-mini-cart-contents-block {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+}
+
+.wp-block-woocommerce-empty-mini-cart-contents-block {
+	justify-content: center;
+}
+
+.wp-block-woocommerce-filled-mini-cart-contents-block {
+	justify-content: space-between;
 }
 
 .wp-block-woocommerce-empty-mini-cart-contents-block {
