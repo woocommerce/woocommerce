@@ -137,6 +137,7 @@ export const isBlockInsertedInWidgetsArea = async ( blockName ) => {
 				.length ) > 0
 	);
 };
+
 /**
  * Visits the Site Editor main page in Core WordPress
  *

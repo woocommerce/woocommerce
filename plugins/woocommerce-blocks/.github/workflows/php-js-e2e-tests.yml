@@ -74,8 +74,8 @@ jobs:
               if: ${{ failure() }}
               uses: actions/upload-artifact@v2
               with:
-                name: e2e-with-gutenberg-test-report
-                path: reports/e2e
+                  name: e2e-with-gutenberg-test-report
+                  path: reports/e2e
 
     JSE2ETests:
         name: JavaScript E2E Tests (latest)
@@ -137,10 +137,10 @@ jobs:
                   npm run wp-env start
                   npm run wp-env clean all
                   npm run test:e2e
-                
+
             - name: Upload artifacts on failure
               if: ${{ failure() }}
               uses: actions/upload-artifact@v2
               with:
-                name: e2e-test-report
-                path: reports/e2e
+                  name: e2e-test-report
+                  path: reports/e2e
