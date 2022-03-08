@@ -7,7 +7,6 @@ namespace Automattic\WooCommerce\Internal\Admin\Notes;
 
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\Notes;
-use Automattic\WooCommerce\Admin\Notes\EmailNotification;
 
 defined( 'ABSPATH' ) || exit;
 

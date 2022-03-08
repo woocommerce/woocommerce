@@ -8,7 +8,7 @@
 use \Automattic\WooCommerce\Internal\Admin\Notes\MerchantEmailNotifications;
 use \Automattic\WooCommerce\Admin\Notes\Note;
 use \Automattic\WooCommerce\Admin\Notes\Notes;
-use \Automattic\WooCommerce\Admin\Notes\EmailNotification;
+use \Automattic\WooCommerce\Internal\Admin\Notes\EmailNotification;
 
 /**
  * Class WC_Tests_Email_Notes

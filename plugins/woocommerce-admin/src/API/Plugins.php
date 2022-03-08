@@ -9,7 +9,7 @@ namespace Automattic\WooCommerce\Admin\API;
 
 use Automattic\WooCommerce\Admin\Features\Onboarding;
 use Automattic\WooCommerce\Admin\PluginsHelper;
-use \Automattic\WooCommerce\Admin\Notes\InstallJPAndWCSPlugins;
+use \Automattic\WooCommerce\Internal\Admin\Notes\InstallJPAndWCSPlugins;
 
 defined( 'ABSPATH' ) || exit;
 

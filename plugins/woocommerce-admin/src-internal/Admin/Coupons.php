@@ -9,7 +9,7 @@ namespace Automattic\WooCommerce\Internal\Admin;
 
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Loader;
-use Automattic\WooCommerce\Admin\Notes\CouponPageMoved;
+use Automattic\WooCommerce\Internal\Admin\Notes\CouponPageMoved;
 use Automattic\WooCommerce\Admin\PageController;
 
 /**
