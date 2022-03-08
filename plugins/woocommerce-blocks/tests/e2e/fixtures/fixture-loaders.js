@@ -256,6 +256,21 @@ const createReviews = ( id, fixture = fixtures.ReviewsInProduct( id ) ) =>
 	} );
 
 /**
+ * Enable Cash on delivery payments.
+ *
+ * This is not called directly but is called within enablePaymentGateways.
+ *
+ * @return {Promise} a promise that resolves to an server response data, or
+ * rejects if the request failed.
+ */
+const enableCashOnDelivery = () =>
+	WooCommerce.post( 'payment_gateways/cod', {
+		description: 'Cash on delivery',
+		enabled: true,
+		settings: { instructions: 'Cash on delivery' },
+	} );
+
+/**
  * Enable Cheque payments.
  *
  * This is not called directly but is called within enablePaymentGateways.
@@ -276,7 +291,8 @@ const enableCheque = () =>
  * @return {Promise} a promise that resolves to an array of server response
  * data, or rejects if the request failed.
  */
-const enablePaymentGateways = () => Promise.all( [ enableCheque() ] );
+const enablePaymentGateways = () =>
+	Promise.all( [ enableCashOnDelivery(), enableCheque() ] );
 
 /**
  * Create shipping zones.
