@@ -18,7 +18,7 @@ if ( process.env.WOOCOMMERCE_BLOCKS_PHASE < 2 )
 	test.only( `skipping ${ block.name } tests`, () => {} );
 
 describe( 'Shopper → Checkout → Can place an order as guest', () => {
-	beforeAll( async () => {
+	beforeEach( async () => {
 		await shopper.block.emptyCart();
 	} );
 

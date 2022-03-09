@@ -119,7 +119,7 @@ describe( `${ block.name } Block (frontend)`, () => {
 	} );
 
 	it( 'should display an empty cart message when cart is empty', async () => {
-		await shopper.goToCheckoutBlock();
+		await shopper.block.goToCheckout();
 		const html = await page.content();
 
 		await expect( page ).toMatchElement( 'h1', { text: 'Checkout Block' } );
@@ -131,17 +131,17 @@ describe( `${ block.name } Block (frontend)`, () => {
 	it( 'allows customer to choose available payment methods', async () => {
 		await page.goto( productPermalink );
 		await shopper.addToCart();
-		await shopper.goToCheckoutBlock();
+		await shopper.block.goToCheckout();
 
-		await shopper.productIsInCheckoutBlock(
+		await shopper.block.productIsInCheckout(
 			simpleProductName,
 			`1`,
 			singleProductPrice
 		);
 		await page.goBack( { waitUntil: 'networkidle2' } );
 		await shopper.addToCart();
-		await shopper.goToCheckoutBlock();
-		await shopper.productIsInCheckoutBlock(
+		await shopper.block.goToCheckout();
+		await shopper.block.productIsInCheckout(
 			simpleProductName,
 			`2`,
 			twoProductPrice
