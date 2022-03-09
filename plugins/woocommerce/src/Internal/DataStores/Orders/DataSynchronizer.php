@@ -24,6 +24,9 @@ class DataSynchronizer {
 	const ORDERS_SYNC_SCHEDULED_ACTION_CALLBACK      = 'woocommerce_run_orders_sync_callback';
 	const PENDING_SYNCHRONIZATION_FINISHED_ACTION    = 'woocommerce_orders_sync_finished';
 
+	// TODO: Remove the usage of the fake pending orders count once development of the feature is complete.
+	const FAKE_ORDERS_PENDING_SYNC_COUNT_OPTION = 'woocommerce_fake_orders_pending_sync_count';
+
 	/**
 	 * The data store object to use.
 	 *
@@ -126,10 +129,53 @@ class DataSynchronizer {
 
 	/**
 	 * Calculate how many orders need to be synchronized currently.
+	 *
+	 * If an option whose name is given by self::FAKE_ORDERS_PENDING_SYNC_COUNT_OPTION exists,
+	 * then the value of that option is returned. This is temporary, to ease testing the feature
+	 * while it is in development.
+	 *
+	 * Otherwise a database query is performed to get how many orders match one of the following:
+	 *
+	 * - Existing in the authoritative table but not in the backup table.
+	 * - Existing in both tables, but they have a different update date.
 	 */
 	public function get_current_orders_pending_sync_count(): int {
-		// TODO: get this value by querying the database.
-		return get_option( 'woocommerce_fake_orders_pending_sync_count', 0 );
+		global $wpdb;
+
+		// TODO: Remove the usage of the fake pending orders count once development of the feature is complete.
+		$count = get_option( self::FAKE_ORDERS_PENDING_SYNC_COUNT_OPTION );
+		if ( false !== $count ) {
+			return (int) $count;
+		}
+
+		$orders_table = $wpdb->prefix . 'wc_orders';
+
+		if ( 'yes' === get_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION ) ) {
+			$missing_orders_count_sql = "SELECT COUNT(1) FROM $orders_table WHERE post_id IS NULL";
+		} else {
+			$missing_orders_count_sql = "
+SELECT COUNT(1) FROM (
+	SELECT posts.ID,orders.post_id FROM $wpdb->posts posts
+	LEFT JOIN $orders_table orders ON posts.ID = orders.post_id
+	WHERE posts.post_type='shop_order' AND orders.post_id IS NULL
+	AND posts.post_status != 'auto-draft'
+) x";
+
+		}
+
+		$sql = "
+SELECT(
+	($missing_orders_count_sql)
+	+
+	(SELECT COUNT(1) FROM (
+		SELECT orders.post_id FROM $orders_table orders
+		JOIN $wpdb->posts posts on posts.ID = orders.post_id
+		WHERE orders.date_updated_gmt != posts.post_modified_gmt
+	) x)
+) count";
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		return (int) $wpdb->get_var( $wpdb->prepare( $sql ) );
 	}
 
 	/**
@@ -172,10 +218,13 @@ class DataSynchronizer {
 			return;
 		}
 
-		// TODO: Syncrhonize a batch of orders.
-		$fake_count = (int) get_option( 'woocommerce_fake_orders_pending_sync_count', 0 );
-		if ( $fake_count > 0 ) {
-			update_option( 'woocommerce_fake_orders_pending_sync_count', $fake_count - 1 );
+		// TODO: Remove the usage of the fake pending orders count once development of the feature is complete.
+		$fake_count = get_option( self::FAKE_ORDERS_PENDING_SYNC_COUNT_OPTION );
+		if ( false !== $fake_count ) {
+			update_option( 'woocommerce_fake_orders_pending_sync_count', (int) $fake_count - 1 );
+		// phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedElse
+		} else {
+			// TODO: Synchronize a batch of orders.
 		}
 
 		if ( 0 === $this->get_current_orders_pending_sync_count() ) {
