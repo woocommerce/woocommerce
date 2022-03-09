@@ -4,8 +4,7 @@ namespace Automattic\WooCommerce\StoreApi\Exceptions;
 /**
  * StockAvailabilityException class.
  *
- * @internal This API is used internally by Blocks, this exception is thrown when more than one of a product that
- * can only be purchased individually is in a cart.
+ * This exception is thrown when more than one of a product that can only be purchased individually is in a cart.
  */
 class StockAvailabilityException extends \Exception {
 	/**

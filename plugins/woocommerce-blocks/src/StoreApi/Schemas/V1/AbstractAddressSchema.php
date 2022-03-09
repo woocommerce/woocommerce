@@ -5,9 +5,6 @@ namespace Automattic\WooCommerce\StoreApi\Schemas\V1;
  * AddressSchema class.
  *
  * Provides a generic address schema for composition in other schemas.
- *
- * @internal This API is used internally by Blocks--it is still in flux and may be subject to revisions.
- * @since 4.1.0
  */
 abstract class AbstractAddressSchema extends AbstractSchema {
 	/**

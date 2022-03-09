@@ -7,8 +7,6 @@ use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
  * CartUpdateCustomer class.
  *
  * Updates the customer billing and shipping address and returns an updated cart--things such as taxes may be recalculated.
- *
- * @internal This API is used internally by Blocks--it is still in flux and may be subject to revisions.
  */
 class CartUpdateCustomer extends AbstractCartRoute {
 	use DraftOrderTrait;

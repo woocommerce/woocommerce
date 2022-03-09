@@ -6,8 +6,7 @@ use WP_Error;
 /**
  * InvalidStockLevelsInCartException class.
  *
- * @internal This API is used internally by Blocks, this exception is thrown if any items are out of stock
- * after each product on a draft order has been stock checked.
+ * This exception is thrown if any items are out of stock after each product on a draft order has been stock checked.
  */
 class InvalidStockLevelsInCartException extends \Exception {
 	/**
