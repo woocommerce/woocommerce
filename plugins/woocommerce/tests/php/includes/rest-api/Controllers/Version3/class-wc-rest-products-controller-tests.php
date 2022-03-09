@@ -84,6 +84,7 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 			'categories',
 			'tags',
 			'images',
+			'has_options',
 			'attributes',
 			'default_attributes',
 			'variations',
