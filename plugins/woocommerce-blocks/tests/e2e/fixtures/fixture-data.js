@@ -344,6 +344,30 @@ const Shipping = () => [
 			},
 		],
 	},
+	{
+		name: 'US',
+		locations: [
+			{
+				code: 'US',
+			},
+		],
+		methods: [
+			{
+				method_id: 'flat_rate',
+				settings: {
+					title: 'Normal Shipping',
+					cost: '20.00',
+				},
+			},
+			{
+				method_id: 'free_shipping',
+				settings: {
+					title: 'Free Shipping',
+					cost: '00.00',
+				},
+			},
+		],
+	},
 ];
 
 /**
