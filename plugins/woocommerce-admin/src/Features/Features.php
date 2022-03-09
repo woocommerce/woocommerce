@@ -5,7 +5,9 @@
 
 namespace Automattic\WooCommerce\Admin\Features;
 
-use Automattic\WooCommerce\Admin\Loader;
+use Automattic\WooCommerce\Admin\PageController;
+use Automattic\WooCommerce\Internal\Admin\Loader;
+use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 
 /**
  * Features Class.
@@ -339,16 +341,16 @@ class Features {
 
 		wp_enqueue_style(
 			'wc-admin-beta-features-tracking-modal',
-			Loader::get_url( "beta-features-tracking-modal/style{$rtl}", 'css' ),
+			WCAdminAssets::get_url( "beta-features-tracking-modal/style{$rtl}", 'css' ),
 			array( 'wp-components' ),
-			Loader::get_file_version( 'css' )
+			WCAdminAssets::get_file_version( 'css' )
 		);
 
 		wp_enqueue_script(
 			'wc-admin-beta-features-tracking-modal',
-			Loader::get_url( 'wp-admin-scripts/beta-features-tracking-modal', 'js' ),
+			WCAdminAssets::get_url( 'wp-admin-scripts/beta-features-tracking-modal', 'js' ),
 			array( 'wp-i18n', 'wp-element', WC_ADMIN_APP ),
-			Loader::get_file_version( 'js' ),
+			WCAdminAssets::get_file_version( 'js' ),
 			true
 		);
 	}
@@ -357,7 +359,7 @@ class Features {
 	 * Loads the required scripts on the correct pages.
 	 */
 	public static function load_scripts() {
-		if ( ! Loader::is_admin_or_embed_page() ) {
+		if ( ! PageController::is_admin_or_embed_page() ) {
 			return;
 		}
 
@@ -376,7 +378,7 @@ class Features {
 	 * @param string $admin_body_class Body class to add.
 	 */
 	public static function add_admin_body_classes( $admin_body_class = '' ) {
-		if ( ! Loader::is_admin_or_embed_page() ) {
+		if ( ! PageController::is_admin_or_embed_page() ) {
 			return $admin_body_class;
 		}
 

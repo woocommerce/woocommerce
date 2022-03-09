@@ -55,7 +55,7 @@ class CategoryLookup {
 		add_action( 'edit_product_cat', array( $this, 'before_edit' ), 99 );
 		add_action( 'edited_product_cat', array( $this, 'on_edit' ), 99 );
 		add_action( 'created_product_cat', array( $this, 'on_create' ), 99 );
-
+		add_action( 'init', array( $this, 'define_category_lookup_tables_in_wpdb' ) );
 	}
 
 	/**
@@ -292,5 +292,22 @@ class CategoryLookup {
 				)
 			)
 		);
+	}
+
+	/**
+	 * Add category lookup table to $wpdb object.
+	 */
+	public static function define_category_lookup_tables_in_wpdb() {
+		global $wpdb;
+
+		// List of tables without prefixes.
+		$tables = array(
+			'wc_category_lookup' => 'wc_category_lookup',
+		);
+
+		foreach ( $tables as $name => $table ) {
+			$wpdb->$name    = $wpdb->prefix . $table;
+			$wpdb->tables[] = $table;
+		}
 	}
 }

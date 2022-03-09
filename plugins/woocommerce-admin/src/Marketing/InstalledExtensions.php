@@ -5,7 +5,7 @@
 
 namespace Automattic\WooCommerce\Admin\Marketing;
 
-use Automattic\WooCommerce\Admin\Loader;
+use Automattic\WooCommerce\Internal\Admin\Loader;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 
 /**

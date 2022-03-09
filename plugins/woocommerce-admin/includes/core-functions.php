@@ -7,7 +7,7 @@
  * @package WooCommerce\Admin\Functions
  */
 
-use \Automattic\WooCommerce\Admin\Loader;
+use \Automattic\WooCommerce\Internal\Admin\Loader;
 
 /**
  * Format a number using the decimal and thousands separator settings in WooCommerce.

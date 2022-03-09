@@ -6,7 +6,7 @@
 
 namespace Automattic\WooCommerce\Admin\Features;
 
-use \Automattic\WooCommerce\Admin\Loader;
+use \Automattic\WooCommerce\Internal\Admin\Loader;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Admin\WCAdminHelper;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Init as OnboardingTasks;
@@ -211,7 +211,7 @@ class Onboarding {
 		}
 
 		// Old settings injection.
-		// Run after Automattic\WooCommerce\Admin\Loader.
+		// Run after Automattic\WooCommerce\Internal\Admin\Loader.
 		add_filter( 'woocommerce_components_settings', array( $this, 'component_settings' ), 20 );
 		// New settings injection.
 		add_filter( 'woocommerce_admin_shared_settings', array( $this, 'component_settings' ), 20 );
@@ -856,7 +856,7 @@ class Onboarding {
 	 */
 	public static function reset_task_list() {
 		if (
-			! Loader::is_admin_page() ||
+			! PageController::is_admin_page() ||
 			! isset( $_GET['reset_task_list'] ) // phpcs:ignore CSRF ok.
 		) {
 			return;
@@ -888,7 +888,7 @@ class Onboarding {
 	 */
 	public static function reset_extended_task_list() {
 		if (
-			! Loader::is_admin_page() ||
+			! PageController::is_admin_page() ||
 			! isset( $_GET['reset_extended_task_list'] ) // phpcs:ignore CSRF ok.
 		) {
 			return;

@@ -8,9 +8,9 @@ namespace Automattic\WooCommerce\Internal\Admin\WCPayPromotion;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\DataSourcePoller;
-use Automattic\WooCommerce\Admin\Loader;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\EvaluateSuggestion;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\PaymentGatewaySuggestionsDataSourcePoller as PaymentGatewaySuggestionsDataSourcePoller;
+use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 
 /**
  * WC Pay Promotion engine.
@@ -39,19 +39,19 @@ class Init {
 
 		wp_enqueue_style(
 			'wc-admin-payment-method-promotions',
-			Loader::get_url( "payment-method-promotions/style{$rtl}", 'css' ),
+			WCAdminAssets::get_url( "payment-method-promotions/style{$rtl}", 'css' ),
 			array( 'wp-components' ),
-			Loader::get_file_version( 'css' )
+			WCAdminAssets::get_file_version( 'css' )
 		);
 
-		$script_assets_filename = Loader::get_script_asset_filename( 'wp-admin-scripts', 'payment-method-promotions' );
+		$script_assets_filename = WCAdminAssets::get_script_asset_filename( 'wp-admin-scripts', 'payment-method-promotions' );
 		$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . 'wp-admin-scripts/' . $script_assets_filename;
 
 		wp_enqueue_script(
 			'wc-admin-payment-method-promotions',
-			Loader::get_url( 'wp-admin-scripts/payment-method-promotions', 'js' ),
+			WCAdminAssets::get_url( 'wp-admin-scripts/payment-method-promotions', 'js' ),
 			array_merge( array( WC_ADMIN_APP ), $script_assets ['dependencies'] ),
-			Loader::get_file_version( 'js' ),
+			WCAdminAssets::get_file_version( 'js' ),
 			true
 		);
 	}

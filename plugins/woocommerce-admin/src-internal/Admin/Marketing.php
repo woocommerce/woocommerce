@@ -8,7 +8,7 @@ namespace Automattic\WooCommerce\Internal\Admin;
 
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Marketing\InstalledExtensions;
-use Automattic\WooCommerce\Admin\Loader;
+use Automattic\WooCommerce\Internal\Admin\Loader;
 use Automattic\WooCommerce\Admin\PageController;
 
 /**
@@ -177,7 +177,7 @@ class Marketing {
 	 */
 	public function component_settings( $settings ) {
 		// Bail early if not on a wc-admin powered page.
-		if ( ! Loader::is_admin_page() ) {
+		if ( ! PageController::is_admin_page() ) {
 			return $settings;
 		}
 

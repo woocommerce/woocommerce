@@ -34,7 +34,7 @@ class ActivityPanels {
 	 */
 	public function __construct() {
 		add_filter( 'woocommerce_admin_get_user_data_fields', array( $this, 'add_user_data_fields' ) );
-		// Run after Automattic\WooCommerce\Admin\Loader.
+		// Run after Automattic\WooCommerce\Internal\Admin\Loader.
 		add_filter( 'woocommerce_components_settings', array( $this, 'component_settings' ), 20 );
 		// New settings injection.
 		add_filter( 'woocommerce_admin_shared_settings', array( $this, 'component_settings' ), 20 );

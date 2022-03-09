@@ -9,13 +9,13 @@
  * Register the JS.
  */
 function wc_admin_important_notice_register_script() {
-	if ( ! class_exists( 'Automattic\WooCommerce\Admin\Loader' ) ) {
+	if ( ! class_exists( 'Automattic\WooCommerce\Internal\Admin\Loader' ) ) {
 		return;
 	}
 
 	if (
-		! \Automattic\WooCommerce\Admin\Loader::is_admin_page() &&
-		! \Automattic\WooCommerce\Admin\Loader::is_embed_page()
+		! \Automattic\WooCommerce\Admin\PageController::is_admin_page() &&
+		! \Automattic\WooCommerce\Admin\PageController::is_embed_page()
 	) {
 		return;
 	}

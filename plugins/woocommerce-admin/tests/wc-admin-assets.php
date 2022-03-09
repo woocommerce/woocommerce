@@ -5,14 +5,14 @@
  * @package WooCommerce\Admin\Tests\Loader
  */
 
-use \Automattic\WooCommerce\Admin\Loader;
+use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 
 /**
- * WC_Admin_Tests_Page_Loader Class
+ * WC_Admin_Tests_Page_WCAdminAssets Class
  *
- * @package WooCommerce\Admin\Tests\Loader
+ * @package WooCommerce\Admin\Tests\WCAdminAssets
  */
-class WC_Admin_Tests_Loader extends WP_UnitTestCase {
+class WC_Admin_Tests_WCAdminAssets extends WP_UnitTestCase {
 	/**
 	 * Setup
 	 */
@@ -40,8 +40,7 @@ class WC_Admin_Tests_Loader extends WP_UnitTestCase {
 	 * Test get_url()
 	 */
 	public function test_get_url() {
-		$loader = Loader::get_instance();
-		$result = $loader->get_url( 'flavortown', 'js' );
+		$result = WCAdminAssets::get_url( 'flavortown', 'js' );
 
 		// All we are concerned about in this test is the js filename. Pop it off the end of the asset url.
 		$parts           = explode( '/', $result );
@@ -61,20 +60,18 @@ class WC_Admin_Tests_Loader extends WP_UnitTestCase {
 	 * Tests for should_use_minified_js_file
 	 */
 	public function test_should_use_minified_js_file() {
-		$loader = Loader::get_instance();
-
 		// We will simulate a call with SCRIPT_DEBUG on.
 		$script_debug = true;
 
 		$this->assertFalse(
-			$loader->should_use_minified_js_file( $script_debug ),
+			WCAdminAssets::should_use_minified_js_file( $script_debug ),
 			'Since unminifed js feature is TRUE/on, and script_debug is true, should_use_minified_js_file should return false'
 		);
 
 		// Now we will simulate SCRIPT_DEBUG off/false.
 		$script_debug = false;
 		$this->assertTrue(
-			$loader->should_use_minified_js_file( $script_debug ),
+			WCAdminAssets::should_use_minified_js_file( $script_debug ),
 			'Since unminifed js feature is TRUE/on, and script_debug is false, should_use_minified_js_file should return true'
 		);
 	}

@@ -6,7 +6,7 @@
 
 namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks;
 
-use \Automattic\WooCommerce\Admin\Loader;
+use \Automattic\WooCommerce\Internal\Admin\Loader;
 use Automattic\WooCommerce\Admin\API\Reports\Taxes\Stats\DataStore as TaxDataStore;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\DeprecatedOptions;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\Appearance;

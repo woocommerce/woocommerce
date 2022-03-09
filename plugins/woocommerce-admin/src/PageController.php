@@ -5,7 +5,8 @@
 
 namespace Automattic\WooCommerce\Admin;
 
-use Automattic\WooCommerce\Admin\Loader;
+use Automattic\WooCommerce\Admin\Features\Navigation\Screen;
+use Automattic\WooCommerce\Internal\Admin\Loader;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -13,6 +14,11 @@ defined( 'ABSPATH' ) || exit;
  * PageController
  */
 class PageController {
+	/**
+	 * App entry point.
+	 */
+	const APP_ENTRY_POINT = 'wc-admin';
+
 	// JS-powered page root.
 	const PAGE_ROOT = 'wc-admin';
 
@@ -47,6 +53,18 @@ class PageController {
 		}
 
 		return self::$instance;
+	}
+
+	/**
+	 * Constructor.
+	 * Hooks added here should be removed in `wc_admin_initialize` via the feature plugin.
+	 */
+	public function __construct() {
+		add_action( 'admin_menu', array( $this, 'register_page_handler' ) );
+		add_action( 'admin_menu', array( $this, 'register_store_details_page' ) );
+
+		// priority is 20 to run after https://github.com/woocommerce/woocommerce/blob/a55ae325306fc2179149ba9b97e66f32f84fdd9c/includes/admin/class-wc-admin-menus.php#L165.
+		add_action( 'admin_head', array( $this, 'remove_app_entry_page_menu_item' ), 20 );
 	}
 
 	/**
@@ -472,5 +490,79 @@ class PageController {
 	 */
 	public static function page_wrapper() {
 		Loader::page_wrapper();
+	}
+
+	/**
+	 * Connects existing WooCommerce pages.
+	 *
+	 * @todo The entry point for the embed needs moved to this class as well.
+	 */
+	public function register_page_handler() {
+		require_once WC_ADMIN_ABSPATH . 'includes/connect-existing-pages.php';
+	}
+
+	/**
+	 * Registers the store details (profiler) page.
+	 */
+	public function register_store_details_page() {
+		wc_admin_register_page(
+			array(
+				'title'  => __( 'Setup Wizard', 'woocommerce-admin' ),
+				'parent' => '',
+				'path'   => '/setup-wizard',
+			)
+		);
+	}
+
+	/**
+	 * Remove the menu item for the app entry point page.
+	 */
+	public function remove_app_entry_page_menu_item() {
+		global $submenu;
+		// User does not have capabilites to see the submenu.
+		if ( ! current_user_can( 'manage_woocommerce' ) || empty( $submenu['woocommerce'] ) ) {
+			return;
+		}
+
+		$wc_admin_key = null;
+		foreach ( $submenu['woocommerce'] as $submenu_key => $submenu_item ) {
+			// Our app entry page menu item has no title.
+			if ( is_null( $submenu_item[0] ) && self::APP_ENTRY_POINT === $submenu_item[2] ) {
+				$wc_admin_key = $submenu_key;
+				break;
+			}
+		}
+
+		if ( ! $wc_admin_key ) {
+			return;
+		}
+
+		unset( $submenu['woocommerce'][ $wc_admin_key ] );
+	}
+
+	/**
+	 * Returns true if we are on a JS powered admin page or
+	 * a "classic" (non JS app) powered admin page (an embedded page).
+	 */
+	public static function is_admin_or_embed_page() {
+		return self::is_admin_page() || self::is_embed_page();
+	}
+
+	/**
+	 * Returns true if we are on a JS powered admin page.
+	 */
+	public static function is_admin_page() {
+		// phpcs:disable WordPress.Security.NonceVerification
+		return isset( $_GET['page'] ) && 'wc-admin' === $_GET['page'];
+		// phpcs:enable WordPress.Security.NonceVerification
+	}
+
+	/**
+	 *  Returns true if we are on a "classic" (non JS app) powered admin page.
+	 *
+	 * TODO: See usage in `admin.php`. This needs refactored and implemented properly in core.
+	 */
+	public static function is_embed_page() {
+		return wc_admin_is_connected_page() || ( ! self::is_admin_page() && class_exists( 'Automattic\WooCommerce\Admin\Features\Navigation\Screen' ) && Screen::is_woocommerce_page() );
 	}
 }

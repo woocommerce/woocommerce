@@ -9,10 +9,10 @@
  * Register the JS.
  */
 function add_extension_register_script() {
-	if ( ! class_exists( 'Automattic\WooCommerce\Admin\Loader' ) || ! \Automattic\WooCommerce\Admin\Loader::is_admin_or_embed_page() ) {
+	if ( ! class_exists( 'Automattic\WooCommerce\Admin\PageController' ) || ! \Automattic\WooCommerce\Admin\PageController::is_admin_or_embed_page() ) {
 		return;
 	}
-	
+
 	$script_path       = '/build/index.js';
 	$script_asset_path = dirname( __FILE__ ) . '/build/index.asset.php';
 	$script_asset      = file_exists( $script_asset_path )

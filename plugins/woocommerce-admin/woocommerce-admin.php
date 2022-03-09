@@ -20,7 +20,8 @@
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\Admin\FeaturePlugin;
-use \Automattic\WooCommerce\Admin\Loader;
+use \Automattic\WooCommerce\Internal\Admin\Loader;
+use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 
 /**
  * Autoload packages.
@@ -91,7 +92,7 @@ function woocommerce_admin_is_development_version() {
  */
 function woocommerce_admin_check_build_files() {
 	$script_debug = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG;
-	$suffix       = Loader::should_use_minified_js_file( $script_debug ) ? '.min' : '';
+	$suffix       = WCAdminAssets::should_use_minified_js_file( $script_debug ) ? '.min' : '';
 	return file_exists( __DIR__ . "/dist/app/index{$suffix}.js" );
 }
 

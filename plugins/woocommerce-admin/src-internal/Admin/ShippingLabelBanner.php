@@ -6,7 +6,6 @@
 
 namespace Automattic\WooCommerce\Internal\Admin;
 
-use \Automattic\WooCommerce\Admin\Loader;
 use \Automattic\Jetpack\Connection\Manager as Jetpack_Connection_Manager;
 
 /**
@@ -130,19 +129,19 @@ class ShippingLabelBanner {
 		$rtl = is_rtl() ? '.rtl' : '';
 		wp_enqueue_style(
 			'print-shipping-label-banner-style',
-			Loader::get_url( "print-shipping-label-banner/style{$rtl}", 'css' ),
+			WCAdminAssets::get_url( "print-shipping-label-banner/style{$rtl}", 'css' ),
 			array( 'wp-components' ),
-			Loader::get_file_version( 'css' )
+			WCAdminAssets::get_file_version( 'css' )
 		);
 
-		$script_assets_filename = Loader::get_script_asset_filename( 'wp-admin-scripts', 'print-shipping-label-banner' );
+		$script_assets_filename = WCAdminAssets::get_script_asset_filename( 'wp-admin-scripts', 'print-shipping-label-banner' );
 		$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . 'wp-admin-scripts/' . $script_assets_filename;
 
 		wp_enqueue_script(
 			'print-shipping-label-banner',
-			Loader::get_url( 'wp-admin-scripts/print-shipping-label-banner', 'js' ),
+			WCAdminAssets::get_url( 'wp-admin-scripts/print-shipping-label-banner', 'js' ),
 			array_merge( array( WC_ADMIN_APP ), $script_assets ['dependencies'] ),
-			Loader::get_file_version( 'js' ),
+			WCAdminAssets::get_file_version( 'js' ),
 			true
 		);
 

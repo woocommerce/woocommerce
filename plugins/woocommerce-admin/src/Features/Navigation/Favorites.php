@@ -7,7 +7,7 @@
 
 namespace Automattic\WooCommerce\Admin\Features\Navigation;
 
-use Automattic\WooCommerce\Admin\Loader;
+use Automattic\WooCommerce\Internal\Admin\WCAdminUser;
 
 /**
  * Contains logic for the WooCommerce Navigation menu.
@@ -38,7 +38,7 @@ class Favorites {
 	 * @param array         $favorites Array of favorite values to set.
 	 */
 	private static function set_meta_value( $user_id, $favorites ) {
-		Loader::update_user_data_field( $user_id, self::META_NAME, wp_json_encode( (array) $favorites ) );
+		WCAdminUser::update_user_data_field( $user_id, self::META_NAME, wp_json_encode( (array) $favorites ) );
 	}
 
 	/**
@@ -97,7 +97,7 @@ class Favorites {
 	 * @return WP_Error|Array
 	 */
 	public static function get_all( $user_id ) {
-		$response = Loader::get_user_data_field( $user_id, self::META_NAME );
+		$response = WCAdminUser::get_user_data_field( $user_id, self::META_NAME );
 
 		return $response ? json_decode( $response, true ) : array();
 	}

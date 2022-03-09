@@ -6,7 +6,7 @@
 
 namespace Automattic\WooCommerce\Internal\Admin;
 
-use Automattic\WooCommerce\Admin\Loader;
+use Automattic\WooCommerce\Internal\Admin\Loader;
 
 /**
  * Contains backend logic for the homescreen feature.

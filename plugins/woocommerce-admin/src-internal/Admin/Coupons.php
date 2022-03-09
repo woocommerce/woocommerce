@@ -8,7 +8,6 @@
 namespace Automattic\WooCommerce\Internal\Admin;
 
 use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\Admin\Loader;
 use Automattic\WooCommerce\Internal\Admin\Notes\CouponPageMoved;
 use Automattic\WooCommerce\Admin\PageController;
 
@@ -124,19 +123,19 @@ class Coupons {
 
 		wp_enqueue_style(
 			'wc-admin-marketing-coupons',
-			Loader::get_url( "marketing-coupons/style{$rtl}", 'css' ),
+			WCAdminAssets::get_url( "marketing-coupons/style{$rtl}", 'css' ),
 			array(),
-			Loader::get_file_version( 'css' )
+			WCAdminAssets::get_file_version( 'css' )
 		);
 
-		$script_assets_filename = Loader::get_script_asset_filename( 'wp-admin-scripts', 'marketing-coupons' );
+		$script_assets_filename = WCAdminAssets::get_script_asset_filename( 'wp-admin-scripts', 'marketing-coupons' );
 		$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . 'wp-admin-scripts/' . $script_assets_filename;
 
 		wp_enqueue_script(
 			'wc-admin-marketing-coupons',
-			Loader::get_url( 'wp-admin-scripts/marketing-coupons', 'js' ),
+			WCAdminAssets::get_url( 'wp-admin-scripts/marketing-coupons', 'js' ),
 			array_merge( array( WC_ADMIN_APP ), $script_assets ['dependencies'] ),
-			Loader::get_file_version( 'js' ),
+			WCAdminAssets::get_file_version( 'js' ),
 			true
 		);
 	}

@@ -10,8 +10,8 @@
  */
 function add_abbreviated_notification_register_script() {
 	if (
-		! class_exists( 'Automattic\WooCommerce\Admin\Loader' ) ||
-		! \Automattic\WooCommerce\Admin\Loader::is_admin_or_embed_page()
+		! class_exists( 'Automattic\WooCommerce\Internal\Admin\Loader' ) ||
+		! \Automattic\WooCommerce\Admin\PageController::is_admin_or_embed_page()
 	) {
 		return;
 	}

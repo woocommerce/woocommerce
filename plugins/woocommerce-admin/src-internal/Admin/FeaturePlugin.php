@@ -9,7 +9,6 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API;
 use Automattic\WooCommerce\Internal\Admin\Install;
-use Automattic\WooCommerce\Admin\Loader;
 use \Automattic\WooCommerce\Admin\Notes\Notes;
 use \Automattic\WooCommerce\Internal\Admin\Notes\OrderMilestones;
 use \Automattic\WooCommerce\Internal\Admin\Notes\WooSubscriptionsNotes;
@@ -216,6 +215,7 @@ class FeaturePlugin {
 		add_filter( 'woocommerce_admin_features', array( $this, 'replace_supported_features' ), 0 );
 
 		Loader::get_instance();
+		WCAdminAssets::get_instance();
 	}
 
 	/**

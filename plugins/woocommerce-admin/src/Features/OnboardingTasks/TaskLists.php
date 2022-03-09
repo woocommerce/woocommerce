@@ -7,7 +7,7 @@ namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks;
 
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\DeprecatedExtendedTask;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
-use Automattic\WooCommerce\Admin\Loader;
+use Automattic\WooCommerce\Internal\Admin\Loader;
 
 /**
  * Task Lists class.

@@ -7,12 +7,12 @@
 
 namespace Automattic\WooCommerce\Admin\Features\Navigation;
 
-use Automattic\WooCommerce\Admin\Loader;
 use Automattic\WooCommerce\Internal\Admin\Survey;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\Navigation\Screen;
 use Automattic\WooCommerce\Admin\Features\Navigation\Menu;
 use Automattic\WooCommerce\Admin\Features\Navigation\CoreMenu;
+use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 
 /**
  * Contains logic for the Navigation
@@ -132,19 +132,19 @@ class Init {
 		$rtl = is_rtl() ? '.rtl' : '';
 		wp_enqueue_style(
 			'wc-admin-navigation-opt-out',
-			Loader::get_url( "navigation-opt-out/style{$rtl}", 'css' ),
+			WCAdminAssets::get_url( "navigation-opt-out/style{$rtl}", 'css' ),
 			array( 'wp-components' ),
-			Loader::get_file_version( 'css' )
+			WCAdminAssets::get_file_version( 'css' )
 		);
 
-		$script_assets_filename = Loader::get_script_asset_filename( 'wp-admin-scripts', 'navigation-opt-out' );
+		$script_assets_filename = WCAdminAssets::get_script_asset_filename( 'wp-admin-scripts', 'navigation-opt-out' );
 		$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . 'wp-admin-scripts/' . $script_assets_filename;
 
 		wp_enqueue_script(
 			'wc-admin-navigation-opt-out',
-			Loader::get_url( 'wp-admin-scripts/navigation-opt-out', 'js' ),
+			WCAdminAssets::get_url( 'wp-admin-scripts/navigation-opt-out', 'js' ),
 			array_merge( array( WC_ADMIN_APP ), $script_assets ['dependencies'] ),
-			Loader::get_file_version( 'js' ),
+			WCAdminAssets::get_file_version( 'js' ),
 			true
 		);
 

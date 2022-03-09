@@ -2,8 +2,8 @@
 
 namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks;
 
-use Automattic\WooCommerce\Admin\Loader;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
+use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 
 /**
  * Products Task
@@ -96,12 +96,12 @@ class Products extends Task {
 			return;
 		}
 
-		$script_assets_filename = Loader::get_script_asset_filename( 'wp-admin-scripts', 'onboarding-product-notice' );
+		$script_assets_filename = WCAdminAssets::get_script_asset_filename( 'wp-admin-scripts', 'onboarding-product-notice' );
 		$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . 'wp-admin-scripts/' . $script_assets_filename;
 
 		wp_enqueue_script(
 			'onboarding-product-notice',
-			Loader::get_url( 'wp-admin-scripts/onboarding-product-notice', 'js' ),
+			WCAdminAssets::get_url( 'wp-admin-scripts/onboarding-product-notice', 'js' ),
 			array_merge( array( WC_ADMIN_APP ), $script_assets ['dependencies'] ),
 			WC_VERSION,
 			true
@@ -124,12 +124,12 @@ class Products extends Task {
 			return;
 		}
 
-		$script_assets_filename = Loader::get_script_asset_filename( 'wp-admin-scripts', 'onboarding-product-import-notice' );
+		$script_assets_filename = WCAdminAssets::get_script_asset_filename( 'wp-admin-scripts', 'onboarding-product-import-notice' );
 		$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . 'wp-admin-scripts/' . $script_assets_filename;
 
 		wp_enqueue_script(
 			'onboarding-product-import-notice',
-			Loader::get_url( 'wp-admin-scripts/onboarding-product-import-notice', 'js' ),
+			WCAdminAssets::get_url( 'wp-admin-scripts/onboarding-product-import-notice', 'js' ),
 			array_merge( array( WC_ADMIN_APP ), $script_assets ['dependencies'] ),
 			WC_VERSION,
 			true
