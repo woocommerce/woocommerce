@@ -37,7 +37,6 @@ import { blockName } from '../mini-cart-contents/attributes';
 
 interface Props {
 	isInitiallyOpen?: boolean;
-	transparentButton: boolean;
 	colorClassNames?: string;
 	style?: Record< string, Record< string, string > >;
 	contents: string;
@@ -209,11 +208,7 @@ const MiniCartBlock = ( {
 						{ taxLabel }
 					</small>
 				) }
-				<QuantityBadge
-					count={ cartItemsCount }
-					colorClassNames={ colorClassNames }
-					style={ colorStyle }
-				/>
+				<QuantityBadge count={ cartItemsCount } />
 			</button>
 			<Drawer
 				className={ classnames(
