@@ -1,23 +1,10 @@
 .wc-block-mini-cart {
-	background-color: transparent !important;
-	display: flex;
-	justify-content: flex-end;
-
-	&.align-center {
-		justify-content: center;
-	}
-
-	&.align-left {
-		justify-content: flex-start;
-	}
-
-	&.is-transparent .wc-block-mini-cart__button {
-		background-color: transparent !important;
-	}
+	display: inline-block;
 }
 
 .wc-block-mini-cart__button {
 	align-items: center;
+	background-color: transparent;
 	border: none;
 	color: inherit;
 	display: flex;
