@@ -8,9 +8,6 @@ use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
  * AbstractSchema class.
  *
  * For REST Route Schemas
- *
- * @internal This API is used internally by Blocks--it is still in flux and may be subject to revisions.
- * @since 2.5.0
  */
 abstract class AbstractSchema {
 	/**

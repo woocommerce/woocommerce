@@ -7,9 +7,6 @@ use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
  * ShippingAddressSchema class.
  *
  * Provides a generic shipping address schema for composition in other schemas.
- *
- * @internal This API is used internally by Blocks--it is still in flux and may be subject to revisions.
- * @since 2.5.0
  */
 class ShippingAddressSchema extends AbstractAddressSchema {
 	/**

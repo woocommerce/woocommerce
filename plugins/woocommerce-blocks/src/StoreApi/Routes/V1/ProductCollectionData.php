@@ -8,8 +8,6 @@ use Automattic\WooCommerce\StoreApi\Utilities\ProductQueryFilters;
  * Get aggregate data from a collection of products.
  *
  * Supports the same parameters as /products, but returns a different response.
- *
- * @internal This API is used internally by Blocks--it is still in flux and may be subject to revisions.
  */
 class ProductCollectionData extends AbstractRoute {
 	/**

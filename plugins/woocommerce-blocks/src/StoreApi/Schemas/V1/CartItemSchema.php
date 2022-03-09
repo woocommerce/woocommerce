@@ -3,11 +3,9 @@ namespace Automattic\WooCommerce\StoreApi\Schemas\V1;
 
 use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
 use Automattic\WooCommerce\StoreApi\Utilities\QuantityLimits;
+
 /**
  * CartItemSchema class.
- *
- * @internal This API is used internally by Blocks--it is still in flux and may be subject to revisions.
- * @since 2.5.0
  */
 class CartItemSchema extends ProductSchema {
 	use DraftOrderTrait;
