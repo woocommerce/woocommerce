@@ -16,7 +16,7 @@ jobs:
               if: github.event.pull_request.user.login != 'renovate[bot]'
             - name: skip-workflow
               id: skip-workflow
-              uses: saulmaldonado/skip-workflow@v1.1.0
+              uses: saulmaldonado/skip-workflow@v1.1.1
               with:
                   phrase: /no changelog/i
                   github-token: ${{ secrets.GITHUB_TOKEN }}
