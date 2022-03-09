@@ -147,4 +147,68 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 			$this->assertContains( $field, $response_fields, "Field $field was expected but not present in product API response." );
 		}
 	}
+
+	/**
+	 * Test that products with partial name or SKU case-insensitive match are returned given a `search` parameter.
+	 */
+	public function test_products_with_search_param_returns_products_with_sku_and_name_match() {
+		// Given.
+		wp_set_current_user( $this->user );
+		WC_Helper_Product::create_simple_product( true, array( 'name' => 'WooCommerce Tests' ) );
+		WC_Helper_Product::create_simple_product( true, array( 'name' => 'WordCamp' ) );
+		WC_Helper_Product::create_simple_product( true, array( 'name' => 'WoO' ) );
+		WC_Helper_Product::create_simple_product( true, array( 'sku' => 'Woo' ) );
+		WC_Helper_Product::create_simple_product( true, array( 'sku' => 'wordpress' ) );
+		WC_Helper_Product::create_simple_product( true, array( 'sku' => '*sunglasses-woo*' ) );
+
+		// When.
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_query_params(
+			array(
+				'search'  => 'woo',
+				'order'   => 'asc',
+				'orderby' => 'id',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$response_products = $response->get_data();
+
+		// Then.
+		$this->assertEquals( 4, count( $response_products ) );
+		$this->assertEquals( $response_products[0]['name'], 'WooCommerce Tests' );
+		$this->assertEquals( $response_products[1]['name'], 'WoO' );
+		$this->assertEquals( $response_products[2]['sku'], 'Woo' );
+		$this->assertEquals( $response_products[3]['sku'], '*sunglasses-woo*' );
+	}
+
+	/**
+	 * Test that the first product with full SKU case-insensitive match are returned given a `sku` parameter.
+	 */
+	public function test_products_with_sku_param_returns_the_first_product_with_full_sku_match() {
+		// Given.
+		wp_set_current_user( $this->user );
+		WC_Helper_Product::create_simple_product( true, array( 'sku' => '0oWoO' ) );
+		WC_Helper_Product::create_simple_product( true, array( 'sku' => 'WoO' ) );
+		WC_Helper_Product::create_simple_product( true, array( 'sku' => 'woo' ) );
+		WC_Helper_Product::create_simple_product( true, array( 'sku' => 'woo-sunglasses' ) );
+
+		// When.
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_query_params(
+			array(
+				'sku'     => 'woo',
+				'order'   => 'asc',
+				'orderby' => 'id',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$response_products = $response->get_data();
+
+		// Then.
+		$this->assertEquals( 1, count( $response_products ) );
+		$response_product = $response_products[0];
+		$this->assertEquals( 'WoO', $response_product['sku'] );
+	}
 }

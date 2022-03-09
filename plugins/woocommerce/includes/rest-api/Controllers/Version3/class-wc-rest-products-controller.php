@@ -25,6 +25,9 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 */
 	protected $namespace = 'wc/v3';
 
+	private $search_param                 = 'search';
+	private static $wp_query_search_param = 's';
+
 	/**
 	 * Get the images for a product or product variation.
 	 *
@@ -68,6 +71,66 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		}
 
 		return $images;
+	}
+
+	/**
+	 * Get a collection of products and add other search criteria to WP_Query.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function get_items( $request ) {
+		 // Add filters for search criteria in product postmeta via the lookup table.
+		if ( ! empty( $request[ $this->search_param ] ) ) {
+			add_filter( 'posts_where', array( __CLASS__, 'add_search_criteria_to_wp_query_filter' ), 10, 2 );
+			add_filter( 'posts_join', array( __CLASS__, 'add_search_criteria_to_wp_query_join' ), 10, 2 );
+		}
+
+		$response = parent::get_items( $request );
+
+		// Remove filters for search criteria in product postmeta via the lookup table.
+		if ( ! empty( $request[ $this->search_param ] ) ) {
+			remove_filter( 'posts_where', array( __CLASS__, 'add_search_criteria_to_wp_query_filter' ), 10 );
+			remove_filter( 'posts_join', array( __CLASS__, 'add_search_criteria_to_wp_query_join' ), 10 );
+		}
+		return $response;
+	}
+
+	/**
+	 * Add in conditional search filters for products.
+	 *
+	 * @param string $where Where clause used to search posts.
+	 * @param object $wp_query WP_Query object.
+	 * @return string
+	 */
+	public static function add_search_criteria_to_wp_query_filter( $where, $wp_query ) {
+		global $wpdb;
+		$search = $wp_query->get( self::$wp_query_search_param );
+		if ( ! empty( $search ) ) {
+			$like_search = '%' . $wpdb->esc_like( $search ) . '%';
+			$conditions  = array(
+				$wpdb->prepare( 'wc_product_meta_lookup.sku LIKE %s', $like_search ),
+			);
+			$where      .= ' OR (' . implode( ' OR ', $conditions ) . ')';
+		}
+		return $where;
+	}
+
+	/**
+	 * Join `wc_product_meta_lookup` table when product search query is present.
+	 *
+	 * @param string $join Join clause used to search posts.
+	 * @param object $wp_query WP_Query object.
+	 * @return string
+	 */
+	public static function add_search_criteria_to_wp_query_join( $join, $wp_query ) {
+		global $wpdb;
+		$search = $wp_query->get( self::$wp_query_search_param );
+		if ( ! empty( $search ) ) {
+			$join .= " LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup
+						ON $wpdb->posts.ID = wc_product_meta_lookup.product_id ";
+		}
+		return $join;
 	}
 
 	/**
