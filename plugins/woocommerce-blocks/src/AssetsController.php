@@ -35,6 +35,7 @@ final class AssetsController {
 	 */
 	protected function init() {
 		add_action( 'init', array( $this, 'register_assets' ) );
+		add_filter( 'wp_resource_hints', array( $this, 'add_resource_hints' ), 10, 2 );
 		add_action( 'body_class', array( $this, 'add_theme_body_class' ), 1 );
 		add_action( 'admin_body_class', array( $this, 'add_theme_body_class' ), 1 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'update_block_style_dependencies' ), 20 );
@@ -74,6 +75,102 @@ final class AssetsController {
 			};
 			",
 			'before'
+		);
+	}
+
+	/**
+	 * Defines resource hints to help speed up the loading of some critical blocks.
+	 *
+	 * These will not impact page loading times negatively because they are loaded once the current page is idle.
+	 *
+	 * @param array  $urls          URLs to print for resource hints. Each URL is an array of resource attributes, or a URL string.
+	 * @param string $relation_type The relation type the URLs are printed. Possible values: preconnect, dns-prefetch, prefetch, prerender.
+	 * @return array URLs to print for resource hints.
+	 */
+	public function add_resource_hints( $urls, $relation_type ) {
+		if ( ! Package::feature()->is_feature_plugin_build() || ! in_array( $relation_type, [ 'prefetch', 'prerender' ], true ) ) {
+			return $urls;
+		}
+
+		// We only need to prefetch when the cart has contents.
+		$cart = wc()->cart;
+
+		if ( ! $cart || ! $cart instanceof \WC_Cart || 0 === $cart->get_cart_contents_count() ) {
+			return $urls;
+		}
+
+		$resources         = [];
+		$is_block_cart     = has_block( 'woocommerce/cart' );
+		$is_block_checkout = has_block( 'woocommerce/checkout' );
+
+		if ( 'prefetch' === $relation_type ) {
+			if ( ! $is_block_cart ) {
+				$resources = array_merge( $resources, $this->get_block_asset_resource_hints( 'cart-frontend' ) );
+			}
+
+			if ( ! $is_block_checkout ) {
+				$resources = array_merge( $resources, $this->get_block_asset_resource_hints( 'checkout-frontend' ) );
+			}
+
+			$urls = array_merge(
+				$urls,
+				array_map(
+					function( $src ) {
+						return array(
+							'href' => $src,
+							'as'   => 'script',
+						);
+					},
+					array_unique( array_filter( $resources ) )
+				)
+			);
+		}
+
+		if ( 'prerender' === $relation_type && $is_block_cart ) {
+			$checkout_page_id  = wc_get_page_id( 'checkout' );
+			$checkout_page_url = $checkout_page_id ? get_permalink( $checkout_page_id ) : '';
+			if ( $checkout_page_url ) {
+				$urls[] = $checkout_page_url;
+			}
+		}
+
+		return $urls;
+	}
+
+	/**
+	 * Get resource hint for a block by name.
+	 *
+	 * @param string $filename Block filename.
+	 * @return array
+	 */
+	private function get_block_asset_resource_hints( $filename = '' ) {
+		if ( ! $filename ) {
+			return [];
+		}
+		$script_data = $this->api->get_script_data(
+			$this->api->get_block_asset_build_path( $filename )
+		);
+		return array_merge( [ add_query_arg( 'ver', $script_data['version'], $script_data['src'] ) ], $this->get_script_dependency_src_array( $script_data['dependencies'] ) );
+	}
+
+	/**
+	 * Get the src of all script dependencies (handles).
+	 *
+	 * @param array $dependencies Array of dependency handles.
+	 * @return string[] Array of src strings.
+	 */
+	private function get_script_dependency_src_array( array $dependencies ) {
+		$wp_scripts = wp_scripts();
+		return array_reduce(
+			$dependencies,
+			function( $src, $handle ) use ( $wp_scripts ) {
+				if ( isset( $wp_scripts->registered[ $handle ] ) ) {
+					$src[] = add_query_arg( 'ver', $wp_scripts->registered[ $handle ]->ver, $wp_scripts->registered[ $handle ]->src );
+					$src   = array_merge( $src, $this->get_script_dependency_src_array( $wp_scripts->registered[ $handle ]->deps ) );
+				}
+				return $src;
+			},
+			[]
 		);
 	}
 
