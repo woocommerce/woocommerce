@@ -15,7 +15,7 @@ import { shopper } from '../../../utils';
 import { getTextContent } from '../../page-utils';
 
 const block = {
-	name: 'Mini Cart Block',
+	name: 'Mini Cart',
 };
 
 const options = getDefaultOptions();
@@ -50,7 +50,7 @@ describe( 'Shopper → Mini Cart', () => {
 	} );
 
 	beforeEach( async () => {
-		await shopper.goToBlockPage( block.name );
+		await shopper.block.goToBlockPage( block.name );
 	} );
 
 	describe( 'Icon', () => {

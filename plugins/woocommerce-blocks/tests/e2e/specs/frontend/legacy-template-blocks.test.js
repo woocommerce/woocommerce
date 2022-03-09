@@ -1,8 +1,5 @@
 import { URL } from 'url';
-import { activateTheme } from '@wordpress/e2e-test-utils';
-
-import { BASE_URL } from '../../utils';
-
+import { BASE_URL, useTheme } from '../../utils';
 const SELECTORS = {
 	productArchivePage: {
 		paginationUI: '.woocommerce-pagination',
@@ -38,13 +35,7 @@ function extractPaginationData() {
 }
 
 describe( 'Legacy Template blocks', () => {
-	beforeAll( async () => {
-		await activateTheme( 'emptytheme' );
-	} );
-
-	afterAll( async () => {
-		await activateTheme( 'storefront' );
-	} );
+	useTheme( 'emptytheme' );
 
 	describe( 'Product Archive block', () => {
 		it( 'renders a list of products with their count and pagination', async () => {

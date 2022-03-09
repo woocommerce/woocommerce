@@ -15,6 +15,10 @@ const productWooSingle1 = Products().find(
 	( prod ) => prod.name === 'Woo Single #1'
 );
 
+if ( process.env.WOOCOMMERCE_BLOCKS_PHASE < 2 )
+	// eslint-disable-next-line jest/no-focused-tests
+	test.only( `skipping ${ block.name } tests`, () => {} );
+
 describe( 'Shopper -> Tax', () => {
 	beforeEach( async () => {
 		await shopper.block.emptyCart();
