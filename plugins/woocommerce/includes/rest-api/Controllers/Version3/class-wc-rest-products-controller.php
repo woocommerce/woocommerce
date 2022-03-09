@@ -25,7 +25,6 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 */
 	protected $namespace = 'wc/v3';
 
-	private $search_param                 = 'search';
 	private static $wp_query_search_param = 's';
 
 	/**
@@ -80,8 +79,9 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
-		 // Add filters for search criteria in product postmeta via the lookup table.
-		if ( ! empty( $request[ $this->search_param ] ) ) {
+		// Add filters for search criteria in product postmeta via the lookup table.
+		$can_search_products_by_sku = $this->can_search_products_by_sku( $request );
+		if ( $can_search_products_by_sku ) {
 			add_filter( 'posts_where', array( __CLASS__, 'add_search_criteria_to_wp_query_filter' ), 10, 2 );
 			add_filter( 'posts_join', array( __CLASS__, 'add_search_criteria_to_wp_query_join' ), 10, 2 );
 		}
@@ -89,7 +89,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		$response = parent::get_items( $request );
 
 		// Remove filters for search criteria in product postmeta via the lookup table.
-		if ( ! empty( $request[ $this->search_param ] ) ) {
+		if ( $can_search_products_by_sku ) {
 			remove_filter( 'posts_where', array( __CLASS__, 'add_search_criteria_to_wp_query_filter' ), 10 );
 			remove_filter( 'posts_join', array( __CLASS__, 'add_search_criteria_to_wp_query_join' ), 10 );
 		}
@@ -1431,6 +1431,13 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
+		$params['search_includes_sku'] = array(
+			'description'       => __( 'When `search` parameter is set, whether to also search products by partial SKU.', 'woocommerce' ),
+			'type'              => 'boolean',
+			'sanitize_callback' => 'wc_string_to_bool',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
 		return $params;
 	}
 
@@ -1455,5 +1462,15 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			}
 		}
 		return $data;
+	}
+
+	/**
+	 * Determine whether products search should include SKU.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return bool Whether SKU can be included in products search.
+	 */
+	private function can_search_products_by_sku( WP_REST_Request $request ) {
+		return ! empty( $request['search'] ) && $request['search_includes_sku'] && wc_product_sku_enabled();
 	}
 }
