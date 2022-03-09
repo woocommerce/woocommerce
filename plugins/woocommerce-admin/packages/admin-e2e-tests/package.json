@@ -27,7 +27,7 @@
 		"config": "^3.3.7"
 	},
 	"peerDependencies": {
-		"@woocommerce/e2e-environment": "^0.2.3",
+		"@woocommerce/e2e-environment": "^0.2.3 || ^0.3.0",
 		"@woocommerce/e2e-utils": "^0.2.0",
 		"puppeteer": "^2.0.0"
 	},
