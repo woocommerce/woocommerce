@@ -1221,7 +1221,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 					),
 				),
 				'has_options'     => array(
-					'description' => __( 'Shows if the product needs confiruging before it can be bought.', 'woocommerce' ),
+					'description' => __( 'Shows if the product needs to be configured before it can be bought.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
