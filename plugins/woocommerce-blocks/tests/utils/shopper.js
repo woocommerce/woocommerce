@@ -274,5 +274,24 @@ export const shopper = {
 				page.waitForNavigation( { waitUntil: 'networkidle0' } ),
 			] );
 		},
+
+		selectAndVerifyShippingOption: async (
+			shippingName,
+			shippingPrice
+		) => {
+			await expect( page ).toClick(
+				'.wc-block-components-radio-control__label',
+				{
+					text: shippingName,
+				}
+			);
+			await page.waitForTimeout( 1000 );
+			await expect( page ).toMatchElement(
+				'.wc-block-components-totals-shipping .wc-block-formatted-money-amount',
+				{
+					text: shippingPrice,
+				}
+			);
+		},
 	},
 };
