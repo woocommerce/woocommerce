@@ -8,8 +8,6 @@ use WP_REST_Response;
 
 /**
  * Batch Route class.
- *
- * @internal This API is used internally by Blocks--it is still in flux and may be subject to revisions.
  */
 class Batch extends AbstractRoute implements RouteInterface {
 	/**

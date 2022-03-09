@@ -6,8 +6,6 @@ use Automattic\WooCommerce\StoreApi\Utilities\Pagination;
 
 /**
  * ProductReviews class.
- *
- * @internal This API is used internally by Blocks--it is still in flux and may be subject to revisions.
  */
 class ProductReviews extends AbstractRoute {
 	/**

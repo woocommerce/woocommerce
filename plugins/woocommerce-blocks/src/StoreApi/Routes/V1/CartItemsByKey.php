@@ -5,8 +5,6 @@ use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 
 /**
  * CartItemsByKey class.
- *
- * @internal This API is used internally by Blocks--it is still in flux and may be subject to revisions.
  */
 class CartItemsByKey extends AbstractCartRoute {
 	/**

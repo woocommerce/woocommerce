@@ -7,8 +7,6 @@ use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
  * BillingAddressSchema class.
  *
  * Provides a generic billing address schema for composition in other schemas.
- *
- * @internal This API is used internally by Blocks--it is still in flux and may be subject to revisions.
  */
 class BillingAddressSchema extends AbstractAddressSchema {
 	/**

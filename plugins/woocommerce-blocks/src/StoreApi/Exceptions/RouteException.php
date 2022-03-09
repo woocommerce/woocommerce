@@ -3,8 +3,6 @@ namespace Automattic\WooCommerce\StoreApi\Exceptions;
 
 /**
  * RouteException class.
- *
- * @internal This API is used internally by Blocks--it is still in flux and may be subject to revisions.
  */
 class RouteException extends \Exception {
 	/**

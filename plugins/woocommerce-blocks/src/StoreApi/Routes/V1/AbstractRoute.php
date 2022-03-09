@@ -10,8 +10,6 @@ use WP_Error;
 
 /**
  * AbstractRoute class.
- *
- * @internal This API is used internally by Blocks--it is still in flux and may be subject to revisions.
  */
 abstract class AbstractRoute implements RouteInterface {
 	/**

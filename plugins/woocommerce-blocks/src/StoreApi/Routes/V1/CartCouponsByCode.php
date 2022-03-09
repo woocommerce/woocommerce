@@ -5,8 +5,6 @@ use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 
 /**
  * CartCouponsByCode class.
- *
- * @internal This API is used internally by Blocks--it is still in flux and may be subject to revisions.
  */
 class CartCouponsByCode extends AbstractCartRoute {
 	/**

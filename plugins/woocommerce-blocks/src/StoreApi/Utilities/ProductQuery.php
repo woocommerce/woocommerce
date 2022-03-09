@@ -5,10 +5,8 @@ use WC_Tax;
 
 /**
  * Product Query class.
- * Helper class to handle product queries for the API.
  *
- * @internal This API is used internally by Blocks--it is still in flux and may be subject to revisions.
- * @since 2.5.0
+ * Helper class to handle product queries for the API.
  */
 class ProductQuery {
 	/**
