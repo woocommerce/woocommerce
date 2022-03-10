@@ -70,12 +70,12 @@ class FeaturePlugin {
 	public function init() {
 		// Load the page controller functions file first to prevent fatal errors when disabling WooCommerce Admin.
 		$this->define_constants();
-		require_once WC_ADMIN_ABSPATH . '/includes/page-controller-functions.php';
-		require_once WC_ADMIN_ABSPATH . '/src/Notes/DeprecatedNotes.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/core-functions.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/feature-config.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/wc-admin-update-functions.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/class-experimental-abtest.php';
+		require_once WC_ADMIN_ABSPATH . '/includes/legacy/page-controller-functions.php';
+		require_once WC_ADMIN_ABSPATH . '/src/Admin/Notes/DeprecatedNotes.php';
+		require_once WC_ADMIN_ABSPATH . '/includes/legacy/core-functions.php';
+		require_once WC_ADMIN_ABSPATH . '/includes/legacy/feature-config.php';
+		require_once WC_ADMIN_ABSPATH . '/includes/legacy/wc-admin-update-functions.php';
+		require_once WC_ADMIN_ABSPATH . '/includes/legacy/class-experimental-abtest.php';
 
 		register_activation_hook( WC_ADMIN_PLUGIN_FILE, array( $this, 'on_activation' ) );
 		register_deactivation_hook( WC_ADMIN_PLUGIN_FILE, array( $this, 'on_deactivation' ) );
@@ -148,10 +148,10 @@ class FeaturePlugin {
 	 */
 	protected function define_constants() {
 		$this->define( 'WC_ADMIN_APP', 'wc-admin-app' );
-		$this->define( 'WC_ADMIN_ABSPATH', dirname( __DIR__, 2 ) . '/' );
-		$this->define( 'WC_ADMIN_DIST_JS_FOLDER', '../woocommerce/assets/client/admin/' );
-		$this->define( 'WC_ADMIN_DIST_CSS_FOLDER', '../woocommerce/assets/client/admin/' );
-		$this->define( 'WC_ADMIN_PLUGIN_FILE', WC_ADMIN_ABSPATH . 'woocommerce-admin.php' );
+		$this->define( 'WC_ADMIN_ABSPATH', dirname( __DIR__, 3 ) . '/' );
+		$this->define( 'WC_ADMIN_DIST_JS_FOLDER', '../assets/client/admin/' );
+		$this->define( 'WC_ADMIN_DIST_CSS_FOLDER', '../assets/client/admin/' );
+		$this->define( 'WC_ADMIN_PLUGIN_FILE', WC_PLUGIN_FILE );
 		$this->define( 'WC_ADMIN_IMAGES_FOLDER_URL', plugins_url( 'assets/images', WC_PLUGIN_FILE ) );
 
 		// WARNING: Do not directly edit this version number constant.

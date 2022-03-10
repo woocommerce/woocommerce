@@ -68,6 +68,6 @@
 	<rule ref="Suin.Classes.PSR4">
 		<exclude-pattern>includes/</exclude-pattern>
 		<exclude-pattern>tests/</exclude-pattern>
-		<exclude-pattern>src/Notes/DeprecatedNotes.php</exclude-pattern>
+		<exclude-pattern>src/Admin/Notes/DeprecatedNotes.php</exclude-pattern>
 	</rule>
 </ruleset>

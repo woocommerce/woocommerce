@@ -27,6 +27,7 @@ require __DIR__ . '/src/Packages.php';
 if ( ! \Automattic\WooCommerce\Autoloader::init() ) {
 	return;
 }
+\Automattic\WooCommerce\Admin\Composer\Package::init();
 \Automattic\WooCommerce\Packages::init();
 
 // Include the main WooCommerce class.
