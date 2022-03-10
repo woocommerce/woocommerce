@@ -188,7 +188,7 @@ class MetaToCustomTableMigrator {
 				'errors' => array(),
 			);
 		}
-		$entity_ids       = array_column( $entity_data, 'primary_key_id' );
+		$entity_ids       = array_column( $entity_data, 'entity_rel_column' );
 
 		$meta_table_query = $this->build_meta_data_query( $entity_ids );
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Output of $this->build_meta_data_query is already prepared.
@@ -210,12 +210,21 @@ class MetaToCustomTableMigrator {
 		global $wpdb;
 		$entity_table         = $this->escape_backtick( $this->schema_config['entity_schema']['table_name'] );
 		$primary_id_column    = $this->escape_backtick( $this->schema_config['entity_schema']['primary_id'] );
-		$entity_keys          = $this->escape_backtick( array_keys( $this->core_column_mapping ) );
-		$entity_column_string = '`' . implode( '`, `', $entity_keys ) . '`';
+		$entity_rel_column = $this->escape_backtick( $this->schema_config['entity_meta_relation']['entity_rel_column'] );
+		$entity_keys = array();
+		foreach ( $this->core_column_mapping as $column_name => $column_schema ) {
+			if ( isset( $column_schema['select_clause'] ) ) {
+				$select_clause = $column_schema['select_clause'];
+				$entity_keys[] = "$select_clause AS $column_name";
+			} else {
+				$entity_keys[] = '`' . $this->escape_backtick( $column_name ) . '`';
+			}
+		}
+		$entity_column_string = implode( ', ', $entity_keys );
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $entity_table, $primary_id_column and $entity_column_string is escaped for backticks. $where clause and $order_by should already be escaped.
 		$query                = $wpdb->prepare(
 			"
-SELECT `$primary_id_column` as primary_key_id, $entity_column_string FROM $entity_table WHERE $where_clause ORDER BY $order_by LIMIT %d;
+SELECT `$primary_id_column` as primary_key_id, `$entity_rel_column` AS entity_rel_column, $entity_column_string FROM $entity_table WHERE $where_clause ORDER BY $order_by LIMIT %d;
 ",
 			array(
 				$batch_size,
@@ -251,7 +260,7 @@ SELECT `$primary_id_column` as primary_key_id, $entity_column_string FROM $entit
 		$meta_keys                 = array_keys( $this->meta_column_mapping );
 		$meta_key_column           = $this->escape_backtick( $this->schema_config['entity_meta_schema']['meta_key_column'] );
 		$meta_value_column         = $this->escape_backtick( $this->schema_config['entity_meta_schema']['meta_value_column'] );
-		$meta_table_relational_key = $this->escape_backtick( $this->schema_config['entity_meta_relation']['meta'] );
+		$meta_table_relational_key = $this->escape_backtick( $this->schema_config['entity_meta_relation']['meta_rel_column'] );
 
 		$meta_column_string = implode( ', ', array_fill( 0, count( $meta_keys ), '%s' ) );
 		$entity_id_string   = implode( ', ', array_fill( 0, count( $entity_ids ), '%d' ) );
