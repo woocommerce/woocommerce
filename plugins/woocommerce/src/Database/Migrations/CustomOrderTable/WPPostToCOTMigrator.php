@@ -22,11 +22,25 @@ class WPPostToCOTMigrator {
 	private $error_logger;
 
 	/**
-	 * Migrator instance to actually perform migrations.
+	 * Migrator instance to migrate data into wc_order table.
 	 *
 	 * @var MetaToCustomTableMigrator
 	 */
 	private $order_table_migrator;
+
+	/**
+	 * Migrator instance to migrate data into address table.
+	 *
+	 * @var MetaToCustomTableMigrator
+	 */
+	private $address_table_migrator;
+
+	/**
+	 * Names of different order tables.
+	 *
+	 * @var array
+	 */
+	private $table_names;
 
 	/**
 	 * WPPostToCOTMigrator constructor.
@@ -34,6 +48,27 @@ class WPPostToCOTMigrator {
 	public function __construct() {
 		global $wpdb;
 
+		// TODO: Remove hardcoding.
+		$this->table_names = array(
+			'orders'    => $wpdb->prefix . 'wc_orders',
+			'addresses' => $wpdb->prefix . 'wc_order_addresses',
+			'op_data'   => $wpdb->prefix . 'wc_order_operational_data',
+		);
+
+		$order_config                 = $this->get_config_for_order_table();
+		$address_config               = $this->get_config_for_address_table_billing();
+		$this->order_table_migrator   = new MetaToCustomTableMigrator( $order_config['schema'], $order_config['meta'], $order_config['core'] );
+		$this->address_table_migrator = new MetaToCustomTableMigrator( $address_config['schema'], $address_config['meta'], $address_config['core'] );
+		$this->error_logger           = new MigrationErrorLogger();
+	}
+
+	/**
+	 * Returns migration configuration for order table.
+	 *
+	 * @return array Config for order table.
+	 */
+	public function get_config_for_order_table() {
+		global $wpdb;
 		$order_table_schema_config = array(
 			'entity_schema'        => array(
 				'primary_id' => 'ID',
@@ -46,8 +81,8 @@ class WPPostToCOTMigrator {
 			),
 			'destination_table'    => $wpdb->prefix . 'wc_orders',
 			'entity_meta_relation' => array(
-				'entity' => 'ID',
-				'meta'   => 'post_id',
+				'entity_rel_column' => 'ID',
+				'meta_rel_column'   => 'post_id',
 			),
 
 		);
@@ -75,7 +110,7 @@ class WPPostToCOTMigrator {
 			),
 		);
 
-		$order_table_meta_config    = array(
+		$order_table_meta_config = array(
 			'_order_currency'       => array(
 				'type'        => 'string',
 				'destination' => 'currency',
@@ -113,8 +148,104 @@ class WPPostToCOTMigrator {
 				'destination' => 'user_agent',
 			),
 		);
-		$this->order_table_migrator = new MetaToCustomTableMigrator( $order_table_schema_config, $order_table_meta_config, $order_table_core_config );
-		$this->error_logger         = new MigrationErrorLogger();
+
+		return array(
+			'schema' => $order_table_schema_config,
+			'core'   => $order_table_core_config,
+			'meta'   => $order_table_meta_config,
+		);
+	}
+
+	/**
+	 * Get configuration for billing addresses for migration.
+	 *
+	 * @return array Billing address migration config.
+	 */
+	public function get_config_for_address_table_billing() {
+		global $wpdb;
+		// We join order core table and post meta table to get data  for address, since we need order ID.
+		// So order core record needs to be already present.
+		$schema_config = array(
+			'entity_schema'        => array(
+				'primary_id' => 'id',
+				'table_name' => $this->table_names['orders'],
+			),
+			'entity_meta_schema'   => array(
+				'meta_key_column'   => 'meta_key',
+				'meta_value_column' => 'meta_value',
+				'table_name'        => $wpdb->postmeta,
+			),
+			'destination_table'    => $this->table_names['addresses'],
+			'entity_meta_relation' => array(
+				'entity_rel_column' => 'post_id',
+				'meta_rel_column'   => 'post_id',
+			),
+		);
+
+		$core_config = array(
+			'id'      => array(
+				'type'        => 'int',
+				'destination' => 'order_id',
+			),
+			'billing' => array(
+				'type'          => 'string',
+				'destination'   => 'address_type',
+				'select_clause' => "'billing'",
+			),
+		);
+
+		$meta_config = array(
+			'_billing_first_name' => array(
+				'type'        => 'string',
+				'destination' => 'first_name',
+			),
+			'_billing_last_name'  => array(
+				'type'        => 'string',
+				'destination' => 'last_name',
+			),
+			'_billing_company'    => array(
+				'type'        => 'string',
+				'destination' => 'company',
+			),
+			'_billing_address_1'  => array(
+				'type'        => 'string',
+				'destination' => 'address_1',
+			),
+			'_billing_address_2'  => array(
+				'type'        => 'string',
+				'destination' => 'address_2',
+			),
+			'_billing_city'       => array(
+				'type'        => 'string',
+				'destination' => 'city',
+			),
+			'_billing_state'      => array(
+				'type'        => 'string',
+				'destination' => 'state',
+			),
+			'_billing_postcode'   => array(
+				'type'        => 'string',
+				'destination' => 'postcode',
+			),
+			'_billing_country'    => array(
+				'type'        => 'string',
+				'destination' => 'country',
+			),
+			'_billing_email'      => array(
+				'type'        => 'string',
+				'destination' => 'email',
+			),
+			'_billing_phone'      => array(
+				'type'        => 'string',
+				'destination' => 'phone',
+			),
+		);
+
+		return array(
+			'schema' => $schema_config,
+			'core'   => $core_config,
+			'meta'   => $meta_config,
+		);
 	}
 
 	/**
@@ -128,25 +259,39 @@ class WPPostToCOTMigrator {
 		global $wpdb;
 		$order_by = 'ID ASC';
 
-		$data = $this->order_table_migrator->fetch_data_for_migration( $this->get_where_clause(), $batch_size, $order_by );
+		$order_data = $this->order_table_migrator->fetch_data_for_migration( $this->get_where_clause(), $batch_size, $order_by );
 
-		foreach ( $data['errors'] as $post_id => $error ) {
+		foreach ( $order_data['errors'] as $post_id => $error ) {
 			$this->error_logger->log( 'info', "Error in importing post id $post_id: " . print_r( $error, true ) );
 		}
 
-		if ( count( $data['data'] ) === 0 ) {
+		if ( count( $order_data['data'] ) === 0 ) {
 			return true;
 		}
 
-		$queries = $this->order_table_migrator->generate_insert_sql_for_batch( $data['data'], 'insert' );
+		$queries = $this->order_table_migrator->generate_insert_sql_for_batch( $order_data['data'], 'insert' );
 		$result  = $wpdb->query( $queries ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $queries is already prepared.
-		if ( count( $data['data'] ) !== $result ) {
+		if ( count( $order_data['data'] ) !== $result ) {
 			// Some rows were not inserted.
 			// TODO: Find and log the entity ids that were not inserted.
 			echo ' error ';
 		}
 
-		$last_post_migrated = max( array_keys( $data['data'] ) );
+		$order_post_ids        = array_column( $order_data['data'], 'post_id' );
+		$post_ids_where_clause = $this->get_where_id_clause( $order_post_ids, 'post_id' );
+		$address_data          = $this->address_table_migrator->fetch_data_for_migration( $post_ids_where_clause, $batch_size, $order_by );
+		foreach ( $address_data['errors'] as $order_id => $error ) {
+			$this->error_logger->log( 'info', "Error in importing address data for Order ID $order_id: " . print_r( $error, true ) );
+		}
+		$address_queries = $this->address_table_migrator->generate_insert_sql_for_batch( $address_data['data'], 'insert' );
+		$result          = $wpdb->query( $address_queries ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Insert statements should already be escaped.
+		if ( count( $address_data['data'] ) !== $result ) {
+			// Some rows were not inserted.
+			// TODO: Find and log the entity ids that were not inserted.
+			echo 'error';
+		}
+
+		$last_post_migrated = max( array_keys( $order_data['data'] ) );
 		$this->update_checkpoint( $last_post_migrated );
 
 		return false;
@@ -195,6 +340,26 @@ class WPPostToCOTMigrator {
 		);
 
 		return $where_clause;
+	}
+
+	/**
+	 * Helper method to create `ID in (.., .., ...)` clauses.
+	 *
+	 * @param array  $ids List of IDs.
+	 * @param string $column_name Name of the ID column.
+	 *
+	 * @return string Prepared clause for where.
+	 */
+	private function get_where_id_clause( $ids, $column_name = 'ID' ) {
+		global $wpdb;
+
+		if ( 0 === count( $ids ) ) {
+			return '';
+		}
+
+		$id_placeholder_array = '(' . implode( ',', array_fill( 0, count( $ids ), '%d' ) ) . ')';
+
+		return $wpdb->prepare( "`$column_name` IN $id_placeholder_array", $ids ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Both $column_name and $id_placeholder_array should already be prepared.
 	}
 
 	/**
