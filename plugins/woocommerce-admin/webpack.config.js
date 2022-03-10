@@ -144,7 +144,7 @@ const webpackConfig = {
 		} ),
 		new CopyWebpackPlugin(
 			wcAdminPackages.map( ( packageName ) => ( {
-				from: `./packages/${ packageName }/build-style/*.css`,
+				from: `../../packages/js/${ packageName }/build-style/*.css`,
 				to: `./${ packageName }/`,
 				flatten: true,
 				transform: ( content ) => content,
