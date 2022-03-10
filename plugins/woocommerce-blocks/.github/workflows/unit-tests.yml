@@ -24,10 +24,10 @@ jobs:
                       ${{ runner.OS }}-build-${{ secrets.CACHE_VERSION }}-${{ env.cache-name }}-
                       ${{ runner.OS }}-build-${{ secrets.CACHE_VERSION }}-
 
-            - name: Use Node.js 14.x
+            - name: Use Node.js 16.13.2
               uses: actions/setup-node@v1
               with:
-                  node-version: 14.x
+                  node-version: 16.13.2
 
             - name: Npm install and build
               run: |
@@ -73,10 +73,10 @@ jobs:
                   restore-keys: |
                       ${{ runner.OS }}-build-${{ secrets.CACHE_VERSION }}-${{ env.cache-name }}-
                       ${{ runner.OS }}-build-${{ secrets.CACHE_VERSION }}-
-            - name: Use Node.js 14.x
+            - name: Use Node.js 16.13.2
               uses: actions/setup-node@v1
               with:
-                  node-version: 14.x
+                  node-version: 16.13.2
 
             - name: Npm install #build is not needed
               run: |
@@ -118,10 +118,10 @@ jobs:
                       ${{ runner.OS }}-build-${{ secrets.CACHE_VERSION }}-${{ env.cache-name }}-
                       ${{ runner.OS }}-build-${{ secrets.CACHE_VERSION }}-
 
-            - name: Use Node.js 14.x
+            - name: Use Node.js 16.13.2
               uses: actions/setup-node@v1
               with:
-                  node-version: 14.x
+                  node-version: 16.13.2
 
             - name: Npm install and build
               run: |
