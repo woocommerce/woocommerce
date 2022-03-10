@@ -24,6 +24,7 @@ class NoticeHandler {
 	 */
 	public static function convert_notices_to_exceptions( $error_code = 'unknown_server_error' ) {
 		if ( 0 === wc_notice_count( 'error' ) ) {
+			wc_clear_notices();
 			return;
 		}
 
@@ -40,10 +41,10 @@ class NoticeHandler {
 	/**
 	 * Collects queued error notices into a \WP_Error.
 	 *
-	 * For example, Payment methods may add error notices during validate_fields call to prevent checkout.
+	 * For example, cart validation processes may add error notices to prevent checkout.
 	 * Since we're not rendering notices at all, we need to catch them and group them in a single WP_Error instance.
 	 *
-	 * This method will discards notices once complete.
+	 * This method will discard notices once complete.
 	 *
 	 * @param string $error_code Error code for the thrown exceptions.
 	 *
@@ -53,6 +54,7 @@ class NoticeHandler {
 		$errors = new WP_Error();
 
 		if ( 0 === wc_notice_count( 'error' ) ) {
+			wc_clear_notices();
 			return $errors;
 		}
 
