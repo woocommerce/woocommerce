@@ -12,7 +12,7 @@ declare class AdvancedFilters extends Component<any, any, any> {
         match: any;
         activeFilters: any;
     };
-    filterListRef: import("react").RefObject<any>;
+    filterListRef: import(".pnpm/@types+react@17.0.40/node_modules/@types/react").RefObject<any>;
     onMatchChange(match: any): void;
     onFilterChange(index: any, property: any, value: any, shouldResetValue?: boolean): void;
     getAvailableFilterKeys(): string[];

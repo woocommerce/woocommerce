@@ -1,4 +1,3 @@
-/// <reference types="react" />
 export declare type Field = {
     id: string;
     type: 'text' | 'password' | 'checkbox' | 'select';

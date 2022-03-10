@@ -32,7 +32,7 @@ export namespace Plugins {
         export { pluginSlugs_1 as pluginSlugs };
     }
 }
-declare var _default: import("react").ComponentType<{}>;
+declare var _default: import(".pnpm/@types+react@17.0.40/node_modules/@types/react").ComponentType<{}>;
 export default _default;
 import { Component } from "@wordpress/element/build-types/react";
 import PropTypes from "prop-types";

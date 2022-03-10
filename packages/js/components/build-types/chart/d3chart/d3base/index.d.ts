@@ -11,7 +11,7 @@
  */
 declare class D3Base extends Component<any, any, any> {
     constructor(props: any);
-    chartRef: import("react").RefObject<any>;
+    chartRef: import(".pnpm/@types+react@17.0.40/node_modules/@types/react").RefObject<any>;
     componentDidMount(): void;
     shouldComponentUpdate(nextProps: any): boolean;
     componentDidUpdate(): void;

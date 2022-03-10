@@ -13,7 +13,7 @@ declare class D3Chart extends Component<any, any, any> {
         uniqueDates: any;
         visibleKeys: any;
     };
-    tooltipRef: import("react").RefObject<any>;
+    tooltipRef: import(".pnpm/@types+react@17.0.40/node_modules/@types/react").RefObject<any>;
     getFormatParams(): {
         screenReaderFormat: Function;
         xFormat: Function;

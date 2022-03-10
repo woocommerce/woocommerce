@@ -7,7 +7,7 @@ declare class Control extends Component<any, any, any> {
     state: {
         isActive: boolean;
     };
-    input: import("react").RefObject<any>;
+    input: import(".pnpm/@types+react@17.0.40/node_modules/@types/react").RefObject<any>;
     updateSearch(onSearch: any): (event: any) => void;
     onFocus(onSearch: any): (event: any) => void;
     onBlur(): void;

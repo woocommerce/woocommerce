@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { Field } from './types';
 declare type DynamicFormProps = {
     fields: Field[] | {

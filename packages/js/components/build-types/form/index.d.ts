@@ -44,7 +44,7 @@ declare class Form extends Component<any, any, any> {
         };
         isValidForm: boolean;
     };
-    render(): import("react").DetailedReactHTMLElement<import("react").HTMLAttributes<HTMLElement>, HTMLElement>;
+    render(): import(".pnpm/@types+react@17.0.40/node_modules/@types/react").DetailedReactHTMLElement<import(".pnpm/@types+react@17.0.40/node_modules/@types/react").HTMLAttributes<HTMLElement>, HTMLElement>;
 }
 declare namespace Form {
     namespace propTypes {

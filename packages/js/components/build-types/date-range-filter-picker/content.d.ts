@@ -2,7 +2,7 @@ export default DatePickerContent;
 declare class DatePickerContent extends Component<any, any, any> {
     constructor();
     onTabSelect(tab: any): void;
-    controlsRef: import("react").RefObject<any>;
+    controlsRef: import(".pnpm/@types+react@17.0.40/node_modules/@types/react").RefObject<any>;
     isFutureDate(dateString: any): boolean;
     render(): JSX.Element;
 }

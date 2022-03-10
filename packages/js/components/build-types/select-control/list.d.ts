@@ -7,7 +7,7 @@ declare class List extends Component<any, any, any> {
     handleKeyDown(event: any): void;
     select(option: any): void;
     optionRefs: {};
-    listbox: import("react").RefObject<any>;
+    listbox: import(".pnpm/@types+react@17.0.40/node_modules/@types/react").RefObject<any>;
     componentDidUpdate(prevProps: any): void;
     getOptionRef(index: any): any;
     scrollToOption(index: any): void;

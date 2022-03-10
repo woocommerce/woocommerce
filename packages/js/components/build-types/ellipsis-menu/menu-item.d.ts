@@ -9,7 +9,7 @@ declare class MenuItem extends Component<any, any, any> {
     onClick(event: any): void;
     onFocusFormToggle(): void;
     onKeyDown(event: any): void;
-    container: import("react").RefObject<any>;
+    container: import(".pnpm/@types+react@17.0.40/node_modules/@types/react").RefObject<any>;
     render(): JSX.Element;
 }
 declare namespace MenuItem {

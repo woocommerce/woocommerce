@@ -3,5 +3,5 @@
  *
  * See https://medium.com/@Heydon/managing-heading-levels-in-design-systems-18be9a746fa3
  */
-export const Level: import("react").Context<number>;
+export const Level: import(".pnpm/@types+react@17.0.40/node_modules/@types/react").Context<number>;
 //# sourceMappingURL=context.d.ts.map

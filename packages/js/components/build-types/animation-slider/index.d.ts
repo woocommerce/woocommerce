@@ -8,7 +8,7 @@ declare class AnimationSlider extends Component<any, any, any> {
     state: {
         animate: null;
     };
-    container: import("react").RefObject<any>;
+    container: import(".pnpm/@types+react@17.0.40/node_modules/@types/react").RefObject<any>;
     onExited(): void;
     render(): JSX.Element;
 }

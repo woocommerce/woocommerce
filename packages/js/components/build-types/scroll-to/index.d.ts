@@ -4,7 +4,7 @@ declare class ScrollTo extends Component<any, any, any> {
     scrollTo(): void;
     componentDidMount(): void;
     render(): JSX.Element;
-    ref: import("react").RefObject<any> | undefined;
+    ref: import(".pnpm/@types+react@17.0.40/node_modules/@types/react").RefObject<any> | undefined;
 }
 declare namespace ScrollTo {
     namespace propTypes {

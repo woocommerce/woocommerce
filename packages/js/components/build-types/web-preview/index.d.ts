@@ -7,7 +7,7 @@ declare class WebPreview extends Component<any, any, any> {
     state: {
         isLoading: boolean;
     };
-    iframeRef: import("react").RefObject<any>;
+    iframeRef: import(".pnpm/@types+react@17.0.40/node_modules/@types/react").RefObject<any>;
     setLoaded(): void;
     componentDidMount(): void;
     render(): JSX.Element;
