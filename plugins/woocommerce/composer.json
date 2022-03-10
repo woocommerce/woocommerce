@@ -21,7 +21,6 @@
 		"pelago/emogrifier": "3.1.0",
 		"psr/container": "1.0.0",
 		"woocommerce/action-scheduler": "3.4.0",
-		"woocommerce/woocommerce-admin": "3.2.1",
 		"woocommerce/woocommerce-blocks": "6.9.0"
 	},
 	"require-dev": {
@@ -109,8 +108,7 @@
 		"installer-paths": {
 			"packages/{$name}": [
 				"woocommerce/action-scheduler",
-				"woocommerce/woocommerce-blocks",
-				"woocommerce/woocommerce-admin"
+				"woocommerce/woocommerce-blocks"
 			]
 		},
 		"scripts-description": {
