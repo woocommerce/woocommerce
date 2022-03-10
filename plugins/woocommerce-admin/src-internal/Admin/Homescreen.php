@@ -6,7 +6,7 @@
 
 namespace Automattic\WooCommerce\Internal\Admin;
 
-use Automattic\WooCommerce\Internal\Admin\Loader;
+use Automattic\WooCommerce\Internal\Admin\Settings;
 
 /**
  * Contains backend logic for the homescreen feature.
@@ -186,7 +186,7 @@ class Homescreen {
 	 * @param array $settings Shared component settings.
 	 */
 	public function component_settings( $settings ) {
-		$allowed_statuses = Loader::get_order_statuses( wc_get_order_statuses() );
+		$allowed_statuses = Settings::get_order_statuses( wc_get_order_statuses() );
 
 		// Remove the Draft Order status (from the Checkout Block).
 		unset( $allowed_statuses['checkout-draft'] );

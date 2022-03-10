@@ -7,7 +7,7 @@
  * @package WooCommerce\Admin\Functions
  */
 
-use \Automattic\WooCommerce\Internal\Admin\Loader;
+use \Automattic\WooCommerce\Internal\Admin\Settings;
 
 /**
  * Format a number using the decimal and thousands separator settings in WooCommerce.
@@ -16,7 +16,7 @@ use \Automattic\WooCommerce\Internal\Admin\Loader;
  * @return string
  */
 function wc_admin_number_format( $number ) {
-	$currency_settings = Loader::get_currency_settings();
+	$currency_settings = Settings::get_currency_settings();
 	return number_format(
 		$number,
 		0,
