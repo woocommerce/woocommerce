@@ -25,6 +25,9 @@ class WC_Tests_API_Reports_Variations extends WC_REST_Unit_Test_Case {
 	 */
 	public function setUp() {
 		parent::setUp();
+		$this->product = new WC_Product_Variable();
+		$this->product->set_name( 'Variable Product' );
+		$this->product->save();
 
 		$this->user = $this->factory->user->create(
 			array(
@@ -55,6 +58,7 @@ class WC_Tests_API_Reports_Variations extends WC_REST_Unit_Test_Case {
 
 		// Populate all of the data.
 		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $this->product->get_id() );
 		$variation->set_name( 'Test Variation' );
 		$variation->set_regular_price( 25 );
 		$variation->set_attributes( array( 'color' => 'green' ) );
@@ -95,12 +99,14 @@ class WC_Tests_API_Reports_Variations extends WC_REST_Unit_Test_Case {
 
 		// Populate all of the data.
 		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $this->product->get_id() );
 		$variation->set_name( 'Test Variation' );
 		$variation->set_regular_price( 25 );
 		$variation->set_attributes( array( 'color' => 'green' ) );
 		$variation->save();
 
 		$variation_2 = new WC_Product_Variation();
+		$variation_2->set_parent_id( $this->product->get_id() );
 		$variation_2->set_name( 'Test Variation 2' );
 		$variation_2->set_regular_price( 100 );
 		$variation_2->set_attributes( array( 'color' => 'red' ) );
