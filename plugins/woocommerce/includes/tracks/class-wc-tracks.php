@@ -16,6 +16,15 @@ class WC_Tracks {
 	const PREFIX = 'wcadmin_';
 
 	/**
+	 * Get event name prefix.
+	 *
+	 * @return string Filtered event prefix.
+	 */
+	public static function get_event_prefix() {
+		return apply_filters( 'woocommerce_tracks_event_prefix', self::PREFIX );
+	}
+
+	/**
 	 * Get total product counts.
 	 *
 	 * @return int Number of products.
@@ -88,7 +97,7 @@ class WC_Tracks {
 		if ( $user instanceof WP_User && 'wptests_capabilities' === $user->cap_key ) {
 			return false;
 		}
-		$prefixed_event_name = self::PREFIX . $event_name;
+		$prefixed_event_name = self::get_event_prefix() . $event_name;
 
 		$data = array(
 			'_en' => $prefixed_event_name,

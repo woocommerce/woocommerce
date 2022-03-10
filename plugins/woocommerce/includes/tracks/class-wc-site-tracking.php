@@ -72,7 +72,7 @@ class WC_Site_Tracking {
 					return;
 				}
 
-				var eventName = '<?php echo esc_attr( WC_Tracks::PREFIX ); ?>' + name;
+				var eventName = '<?php echo esc_attr( WC_Tracks::get_event_prefix() ); ?>' + name;
 				var eventProperties = properties || {};
 				eventProperties.url = '<?php echo esc_html( home_url() ); ?>'
 				eventProperties.products_count = '<?php echo intval( WC_Tracks::get_products_count() ); ?>';
