@@ -439,9 +439,10 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function delete_item( $request ) {
-		$force  = (bool) $request['force'];
-		$object = $this->get_object( (int) $request['id'] );
-		$result = false;
+        $object = $this->get_object( (int) $request['id'] );
+        $id     = $object->get_id();
+        $force  = (bool) $request['force'];
+        $result = false;
 
 		if ( ! $object || 0 === $object->get_id() ) {
 			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
@@ -465,12 +466,19 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 		}
 
 		$request->set_param( 'context', 'edit' );
-		$response = $this->prepare_object_for_response( $object, $request );
 
 		// If we're forcing, then delete permanently.
 		if ( $force ) {
-			$object->delete( true );
-			$result = 0 === $object->get_id();
+            $previous = $this->prepare_object_for_response($object, $request);
+            $object->delete( true );
+            $result   = 0 === $object->get_id();
+            $response = new WP_REST_Response();
+            $response->set_data(
+                array(
+					'deleted'  => true,
+					'previous' => $previous->get_data(),
+                )
+            );
 		} else {
 			// If we don't support trashing for this type, error out.
 			if ( ! $supports_trash ) {
@@ -486,7 +494,10 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 				}
 
 				$object->delete();
-				$result = 'trash' === $object->get_status();
+				$object   = $this->get_object( $id );
+                $result   = 'trash' === $object->get_status();
+                $response = $this->prepare_object_for_response( $object, $request );
+
 			}
 		}
 
