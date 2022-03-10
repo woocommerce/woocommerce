@@ -13,7 +13,7 @@ registerBlockComponent( {
 	blockName: 'woocommerce/product-price',
 	component: lazy( () =>
 		import(
-			/* webpackChunkName: "atomic-block-components/price" */ './product-elements/price/block'
+			/* webpackChunkName: "product-price" */ './product-elements/price/block'
 		)
 	),
 } );
@@ -22,7 +22,7 @@ registerBlockComponent( {
 	blockName: 'woocommerce/product-image',
 	component: lazy( () =>
 		import(
-			/* webpackChunkName: "atomic-block-components/image" */ './product-elements/image/frontend'
+			/* webpackChunkName: "product-image" */ './product-elements/image/frontend'
 		)
 	),
 } );
@@ -31,7 +31,7 @@ registerBlockComponent( {
 	blockName: 'woocommerce/product-title',
 	component: lazy( () =>
 		import(
-			/* webpackChunkName: "atomic-block-components/title" */ './product-elements/title/frontend'
+			/* webpackChunkName: "product-title" */ './product-elements/title/frontend'
 		)
 	),
 } );
@@ -40,7 +40,7 @@ registerBlockComponent( {
 	blockName: 'woocommerce/product-rating',
 	component: lazy( () =>
 		import(
-			/* webpackChunkName: "atomic-block-components/rating" */ './product-elements/rating/block'
+			/* webpackChunkName: "product-rating" */ './product-elements/rating/block'
 		)
 	),
 } );
@@ -49,7 +49,7 @@ registerBlockComponent( {
 	blockName: 'woocommerce/product-button',
 	component: lazy( () =>
 		import(
-			/* webpackChunkName: "atomic-block-components/button" */ './product-elements/button/block'
+			/* webpackChunkName: "product-button" */ './product-elements/button/block'
 		)
 	),
 } );
@@ -58,7 +58,7 @@ registerBlockComponent( {
 	blockName: 'woocommerce/product-summary',
 	component: lazy( () =>
 		import(
-			/* webpackChunkName: "atomic-block-components/summary" */ './product-elements/summary/block'
+			/* webpackChunkName: "product-summary" */ './product-elements/summary/block'
 		)
 	),
 } );
@@ -67,7 +67,7 @@ registerBlockComponent( {
 	blockName: 'woocommerce/product-sale-badge',
 	component: lazy( () =>
 		import(
-			/* webpackChunkName: "atomic-block-components/sale-badge" */ './product-elements/sale-badge/block'
+			/* webpackChunkName: "product-sale-badge" */ './product-elements/sale-badge/block'
 		)
 	),
 } );
@@ -76,7 +76,7 @@ registerBlockComponent( {
 	blockName: 'woocommerce/product-sku',
 	component: lazy( () =>
 		import(
-			/* webpackChunkName: "atomic-block-components/sku" */ './product-elements/sku/block'
+			/* webpackChunkName: "product-sku" */ './product-elements/sku/block'
 		)
 	),
 } );
@@ -85,7 +85,7 @@ registerBlockComponent( {
 	blockName: 'woocommerce/product-category-list',
 	component: lazy( () =>
 		import(
-			/* webpackChunkName: "atomic-block-components/category-list" */ './product-elements/category-list/block'
+			/* webpackChunkName: "product-category-list" */ './product-elements/category-list/block'
 		)
 	),
 } );
@@ -94,7 +94,7 @@ registerBlockComponent( {
 	blockName: 'woocommerce/product-tag-list',
 	component: lazy( () =>
 		import(
-			/* webpackChunkName: "atomic-block-components/tag-list" */ './product-elements/tag-list/block'
+			/* webpackChunkName: "product-tag-list" */ './product-elements/tag-list/block'
 		)
 	),
 } );
@@ -103,7 +103,7 @@ registerBlockComponent( {
 	blockName: 'woocommerce/product-stock-indicator',
 	component: lazy( () =>
 		import(
-			/* webpackChunkName: "atomic-block-components/stock-indicator" */ './product-elements/stock-indicator/block'
+			/* webpackChunkName: "product-stock-indicator" */ './product-elements/stock-indicator/block'
 		)
 	),
 } );
@@ -112,7 +112,7 @@ registerBlockComponent( {
 	blockName: 'woocommerce/product-add-to-cart',
 	component: lazy( () =>
 		import(
-			/* webpackChunkName: "atomic-block-components/add-to-cart" */ './product-elements/add-to-cart/frontend'
+			/* webpackChunkName: "product-add-to-cart" */ './product-elements/add-to-cart/frontend'
 		)
 	),
 } );

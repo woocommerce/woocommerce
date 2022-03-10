@@ -2,7 +2,7 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 /**
- * ProductTag class.
+ * ProductSaleBadge class.
  */
 class ProductSaleBadge extends AbstractBlock {
 
@@ -53,4 +53,13 @@ class ProductSaleBadge extends AbstractBlock {
 		);
 	}
 
+	/**
+	 * Register script and style assets for the block type before it is registered.
+	 *
+	 * This registers the scripts; it does not enqueue them.
+	 */
+	protected function register_block_type_assets() {
+		parent::register_block_type_assets();
+		$this->register_chunk_translations( [ $this->block_name ] );
+	}
 }
