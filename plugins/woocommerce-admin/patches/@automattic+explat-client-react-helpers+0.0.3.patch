@@ -1,0 +1,29 @@
+diff --git a/node_modules/@automattic/explat-client-react-helpers/dist/types/index.d.ts b/node_modules/@automattic/explat-client-react-helpers/dist/types/index.d.ts
+index 594f134..22f31d1 100644
+--- a/node_modules/@automattic/explat-client-react-helpers/dist/types/index.d.ts
++++ b/node_modules/@automattic/explat-client-react-helpers/dist/types/index.d.ts
+@@ -1,6 +1,6 @@
+ import * as React from 'react';
+ import type { ExPlatClient, ExperimentAssignment } from '@automattic/explat-client';
+-interface ExperimentOptions {
++export interface ExperimentOptions {
+     /**
+      * Determines whether a participant is currenlty eligible for an assignment.
+      * - Only loads the experimentAssignment if isEligible is true.
+@@ -8,7 +8,7 @@ interface ExperimentOptions {
+      */
+     isEligible?: boolean;
+ }
+-interface ExPlatClientReactHelpers {
++export interface ExPlatClientReactHelpers {
+     /**
+      * An ExPlat useExperiment hook.
+      *
+@@ -38,5 +38,5 @@ interface ExPlatClientReactHelpers {
+     }) => JSX.Element;
+ }
+ export default function createExPlatClientReactHelpers(exPlatClient: ExPlatClient): ExPlatClientReactHelpers;
+-export {};
++// export {};
+ //# sourceMappingURL=index.d.ts.map
+\ No newline at end of file

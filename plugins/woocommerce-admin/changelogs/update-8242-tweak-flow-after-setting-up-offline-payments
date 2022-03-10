@@ -1,0 +1,4 @@
+Significance: minor
+Type: Tweak
+
+Redirect customers back to the payment task after enabling an offline payment gateway #8389

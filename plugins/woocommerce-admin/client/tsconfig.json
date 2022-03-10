@@ -1,0 +1,49 @@
+{
+	"compilerOptions": {
+		// Target latest version of ECMAScript.
+		"target": "esnext",
+		// Search under node_modules for non-relative imports.
+		"moduleResolution": "node",
+		// Process & infer types from .js files.
+		"allowJs": true,
+		"jsx": "preserve",
+		// Enable strictest settings like strictNullChecks & noImplicitAny.
+		"strict": true,
+		// Import non-ES modules as default imports.
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"noEmit": true,
+		"module": "esnext",
+		"typeRoots": [
+			"../typings",
+			"../node_modules/@types",
+			"../packages/**/node_modules/@types"
+		],
+		"baseUrl": "./",
+		"paths": {
+			"@woocommerce/*": [ "../packages/*/src" ],
+			"~/*": [ "./*" ]
+		},
+		"declaration": false,
+		"rootDir": "./"
+
+	},
+	"exclude": [ "node_modules", "build", "build-module", "dist", "vendor" ],
+	"references": [
+		{ "path": "../packages/admin-e2e-tests" },
+        { "path": "../packages/components" },
+		{ "path": "../packages/csv-export" },
+		{ "path": "../packages/currency" },
+		{ "path": "../packages/customer-effort-score" },
+		{ "path": "../packages/data" },
+		{ "path": "../packages/date" },
+		{ "path": "../packages/experimental" },
+		{ "path": "../packages/explat" },
+		{ "path": "../packages/js-tests" },
+		{ "path": "../packages/navigation" },
+		{ "path": "../packages/notices" },
+		{ "path": "../packages/number" },
+		{ "path": "../packages/onboarding" },
+		{ "path": "../packages/tracks" }
+    ]
+}
