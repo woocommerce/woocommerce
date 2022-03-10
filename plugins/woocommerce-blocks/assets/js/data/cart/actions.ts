@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { select } from '@wordpress/data-controls';
 import type {
 	Cart,
 	CartResponse,
@@ -12,6 +11,7 @@ import type {
 import { camelCase, mapKeys } from 'lodash';
 import type { AddToCartEventDetail } from '@woocommerce/type-defs/events';
 import { BillingAddress, ShippingAddress } from '@woocommerce/settings';
+import { controls } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -416,7 +416,11 @@ export function* changeCartItemQuantity(
 	quantity: number
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- unclear how to represent multiple different yields as type
 ): Generator< unknown, void, any > {
-	const cartItem = yield select( CART_STORE_KEY, 'getCartItem', cartItemKey );
+	const cartItem = yield controls.resolveSelect(
+		CART_STORE_KEY,
+		'getCartItem',
+		cartItemKey
+	);
 	if ( cartItem?.quantity === quantity ) {
 		return;
 	}
