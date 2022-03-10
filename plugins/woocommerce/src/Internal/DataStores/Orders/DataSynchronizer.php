@@ -24,6 +24,11 @@ class DataSynchronizer {
 	const ORDERS_SYNC_SCHEDULED_ACTION_CALLBACK      = 'woocommerce_run_orders_sync_callback';
 	const PENDING_SYNCHRONIZATION_FINISHED_ACTION    = 'woocommerce_orders_sync_finished';
 
+	// Allowed values for $type in get_ids_of_orders_pending_sync method.
+	const ID_TYPE_MISSING_IN_ORDERS_TABLE = 0;
+	const ID_TYPE_MISSING_IN_POSTS_TABLE  = 1;
+	const ID_TYPE_DIFFERENT_UPDATE_DATE   = 2;
+
 	// TODO: Remove the usage of the fake pending orders count once development of the feature is complete.
 	const FAKE_ORDERS_PENDING_SYNC_COUNT_OPTION = 'woocommerce_fake_orders_pending_sync_count';
 
@@ -160,7 +165,6 @@ SELECT COUNT(1) FROM (
 	WHERE posts.post_type='shop_order' AND orders.post_id IS NULL
 	AND posts.post_status != 'auto-draft'
 ) x";
-
 		}
 
 		$sql = "
@@ -176,6 +180,54 @@ SELECT(
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		return (int) $wpdb->get_var( $wpdb->prepare( $sql ) );
+	}
+
+	/**
+	 * Get a list of ids of orders than are out of sync.
+	 *
+	 * Valid values for $type are:
+	 *
+	 * ID_TYPE_MISSING_IN_ORDERS_TABLE: orders that exist in posts table but not in orders table. Returns post ids.
+	 * ID_TYPE_MISSING_IN_POSTS_TABLE: orders that exist in orders table but not in posts table. Returns ids from orders table.
+	 * ID_TYPE_DIFFERENT_UPDATE_DATE: orders that exist in both tables but have different last update dates. Returns ids from orders table.
+	 *
+	 * @param int $type One of ID_TYPE_MISSING_IN_ORDERS_TABLE, ID_TYPE_MISSING_IN_POSTS_TABLE, ID_TYPE_DIFFERENT_UPDATE_DATE.
+	 * @param int $limit Maximum number of ids to return.
+	 * @return array An array of order or post ids.
+	 * @throws \Exception Invalid parameter.
+	 */
+	private function get_ids_of_orders_pending_sync( int $type, int $limit ) {
+		global $wpdb;
+
+		if ( $limit < 1 ) {
+			throw new \Exception( '$limit must be at least 1' );
+		}
+
+		$orders_table = $wpdb->prefix . 'wc_orders';
+
+		switch ( $type ) {
+			case self::ID_TYPE_MISSING_IN_ORDERS_TABLE:
+				$sql = "
+SELECT posts.ID FROM $wpdb->posts posts
+LEFT JOIN $orders_table orders ON posts.ID = orders.post_id
+WHERE posts.post_type='shop_order' AND orders.post_id IS NULL
+AND posts.post_status != 'auto-draft'";
+				break;
+			case self::ID_TYPE_MISSING_IN_POSTS_TABLE:
+				$sql = "SELECT id FROM $orders_table WHERE post_id IS NULL";
+				break;
+			case self::ID_TYPE_DIFFERENT_UPDATE_DATE:
+				$sql = "
+SELECT orders.id FROM $orders_table orders
+JOIN $wpdb->posts posts on posts.ID = orders.post_id
+WHERE orders.date_updated_gmt != posts.post_modified_gmt";
+				break;
+			default:
+				throw new \Exception( 'Invalid $type, must be one of the ID_TYPE_... constants.' );
+		}
+
+		// phpcs:ignore WordPress.DB
+		return array_map( 'intval', $wpdb->get_col( $sql . " LIMIT $limit" ) );
 	}
 
 	/**
@@ -224,7 +276,7 @@ SELECT(
 			update_option( 'woocommerce_fake_orders_pending_sync_count', (int) $fake_count - 1 );
 		// phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedElse
 		} else {
-			// TODO: Synchronize a batch of orders.
+			// TODO: Use get_ids_of_orders_pending_sync to get a batch of order ids and syncrhonize them.
 		}
 
 		if ( 0 === $this->get_current_orders_pending_sync_count() ) {
