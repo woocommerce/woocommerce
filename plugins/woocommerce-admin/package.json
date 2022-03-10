@@ -21,7 +21,7 @@
 		"preinstall": "npx only-allow pnpm",
 		"prebuild": "pnpm run install-if-deps-outdated",
 		"run:packages": "pnpm run --filter ./packages",
-		"build": "pnpm run build:feature-config && pnpm run build:packages && cross-env NODE_ENV=production webpack",
+		"build": "pnpm run build:feature-config && cross-env NODE_ENV=production webpack",
 		"analyze": "cross-env NODE_ENV=production ANALYZE=true webpack",
 		"postbuild": "pnpm run -s i18n:pot && pnpm run -s i18n:build",
 		"build:feature-config": "php bin/generate-feature-config.php",
