@@ -149,8 +149,8 @@ class FeaturePlugin {
 	protected function define_constants() {
 		$this->define( 'WC_ADMIN_APP', 'wc-admin-app' );
 		$this->define( 'WC_ADMIN_ABSPATH', dirname( __DIR__, 3 ) . '/' );
-		$this->define( 'WC_ADMIN_DIST_JS_FOLDER', '../assets/client/admin/' );
-		$this->define( 'WC_ADMIN_DIST_CSS_FOLDER', '../assets/client/admin/' );
+		$this->define( 'WC_ADMIN_DIST_JS_FOLDER', 'assets/client/admin/' );
+		$this->define( 'WC_ADMIN_DIST_CSS_FOLDER', 'assets/client/admin/' );
 		$this->define( 'WC_ADMIN_PLUGIN_FILE', WC_PLUGIN_FILE );
 		$this->define( 'WC_ADMIN_IMAGES_FOLDER_URL', plugins_url( 'assets/images', WC_PLUGIN_FILE ) );
 
