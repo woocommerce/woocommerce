@@ -83,22 +83,24 @@ describe( 'Testing cart', () => {
 	} );
 
 	it( 'renders cart if there are items in the cart', async () => {
-		render( <CartBlock /> );
+		act( () => {
+			render( <CartBlock /> );
+		} );
 		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
 		expect(
 			screen.getByText( /Proceed to Checkout/i )
 		).toBeInTheDocument();
 
 		expect( fetchMock ).toHaveBeenCalledTimes( 1 );
-		// ["`select` control in `@wordpress/data-controls` is deprecated. Please use built-in `resolveSelect` control in `@wordpress/data` instead."]
-		expect( console ).toHaveWarned();
 	} );
 
 	it( 'Contains a Taxes section if Core options are set to show it', async () => {
 		allSettings.displayCartPricesIncludingTax = false;
 		// The criteria for showing the Taxes section is:
 		// Display prices during basket and checkout: 'Excluding tax'.
-		render( <CartBlock /> );
+		act( () => {
+			render( <CartBlock /> );
+		} );
 
 		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
 		expect( screen.getByText( /Tax/i ) ).toBeInTheDocument();
@@ -110,7 +112,9 @@ describe( 'Testing cart', () => {
 		// The criteria for showing the lines in the Taxes section is:
 		// Display prices during basket and checkout: 'Excluding tax'.
 		// Display tax totals: 'Itemized';
-		render( <CartBlock /> );
+		act( () => {
+			render( <CartBlock /> );
+		} );
 		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
 		expect( screen.getByText( /Sales tax/i ) ).toBeInTheDocument();
 	} );
@@ -133,15 +137,19 @@ describe( 'Testing cart', () => {
 	} );
 
 	it( 'renders empty cart if there are no items in the cart', async () => {
-		fetchMock.mockResponse( ( req ) => {
-			if ( req.url.match( /wc\/store\/v1\/cart/ ) ) {
-				return Promise.resolve(
-					JSON.stringify( defaultCartState.cartData )
-				);
-			}
-			return Promise.resolve( '' );
+		act( () => {
+			fetchMock.mockResponse( ( req ) => {
+				if ( req.url.match( /wc\/store\/v1\/cart/ ) ) {
+					return Promise.resolve(
+						JSON.stringify( defaultCartState.cartData )
+					);
+				}
+				return Promise.resolve( '' );
+			} );
 		} );
-		render( <CartBlock /> );
+		act( () => {
+			render( <CartBlock /> );
+		} );
 
 		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
 		expect( screen.getByText( /Empty Cart/i ) ).toBeInTheDocument();
@@ -173,7 +181,9 @@ describe( 'Testing cart', () => {
 				return Promise.resolve( JSON.stringify( cart ) );
 			}
 		} );
-		render( <CartBlock /> );
+		act( () => {
+			render( <CartBlock /> );
+		} );
 
 		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
 		expect( screen.getAllByRole( 'cell' )[ 1 ] ).toHaveTextContent( '16€' );
@@ -191,7 +201,9 @@ describe( 'Testing cart', () => {
 			],
 		};
 		const itemName = cart.items[ 0 ].name;
-		render( <CartBlock /> );
+		act( () => {
+			render( <CartBlock /> );
+		} );
 
 		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
 		const quantityInput = screen.getByLabelText(

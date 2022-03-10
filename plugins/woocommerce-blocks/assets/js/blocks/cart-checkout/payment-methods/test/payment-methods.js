@@ -99,8 +99,6 @@ describe( 'PaymentMethods', () => {
 			// creates an extra `div` with the notice contents used for a11y.
 			expect( noPaymentMethods.length ).toBeGreaterThanOrEqual( 1 );
 		} );
-		// ["`select` control in `@wordpress/data-controls` is deprecated. Please use built-in `resolveSelect` control in `@wordpress/data` instead."]
-		expect( console ).toHaveWarned();
 	} );
 
 	test( 'selecting new payment method', async () => {
