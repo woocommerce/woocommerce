@@ -109,7 +109,8 @@
 		"@types/jquery": "3.5.14",
 		"@types/lodash": "4.14.179",
 		"@types/puppeteer": "5.4.5",
-		"@types/react": "16.14.23",
+		"@types/react": "17.0.39",
+		"@types/react-dom": "17.0.13",
 		"@types/wordpress__block-editor": "6.0.5",
 		"@types/wordpress__compose": "4.0.1",
 		"@types/wordpress__data": "4.6.10",
@@ -125,14 +126,14 @@
 		"@wordpress/api-fetch": "5.2.6",
 		"@wordpress/babel-preset-default": "6.4.1",
 		"@wordpress/base-styles": "4.0.4",
-		"@wordpress/block-editor": "8.0.13",
+		"@wordpress/block-editor": "8.2.0",
 		"@wordpress/blocks": "11.1.5",
 		"@wordpress/browserslist-config": "4.1.0",
 		"@wordpress/components": "19.1.5",
 		"@wordpress/data-controls": "2.2.7",
 		"@wordpress/dependency-extraction-webpack-plugin": "3.2.1",
 		"@wordpress/dom": "3.2.7",
-		"@wordpress/e2e-test-utils": "6.0.1",
+		"@wordpress/e2e-test-utils": "6.0.2",
 		"@wordpress/element": "4.0.4",
 		"@wordpress/env": "4.1.3",
 		"@wordpress/html-entities": "3.2.3",
@@ -180,7 +181,7 @@
 		"markdown-it": "12.3.2",
 		"merge-config": "2.0.0",
 		"mini-css-extract-plugin": "1.3.6",
-		"ndb": "^1.1.5",
+		"ndb": "1.1.5",
 		"patch-package": "6.4.7",
 		"postcss": "8.2.13",
 		"postcss-loader": "4.2.0",
@@ -228,6 +229,10 @@
 		"trim-html": "0.1.9",
 		"use-debounce": "7.0.1",
 		"wordpress-components": "npm:@wordpress/components@14.2.0"
+	},
+	"peerDependencies": {
+		"react": "^17.0.0",
+		"react-dom": "^17.0.0"
 	},
 	"husky": {
 		"hooks": {

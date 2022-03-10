@@ -62,9 +62,6 @@ final class BlockTypesController {
 			$block_type_instance = new $block_type_class( $this->asset_api, $this->asset_data_registry, new IntegrationRegistry() );
 		}
 
-		foreach ( self::get_atomic_blocks() as $block_type ) {
-			$block_type_instance = new AtomicBlock( $this->asset_api, $this->asset_data_registry, new IntegrationRegistry(), $block_type );
-		}
 	}
 
 	/**
@@ -176,16 +173,18 @@ final class BlockTypesController {
 			'StockFilter',
 			'ActiveFilters',
 			'LegacyTemplate',
-			'ProductTitle',
-			'ProductPrice',
-			'ProductSummary',
-			'ProductStockIndicator',
+			'ProductAddToCart',
 			'ProductButton',
+			'ProductCategoryList',
+			'ProductImage',
+			'ProductPrice',
 			'ProductRating',
 			'ProductSaleBadge',
-			'ProductImage',
+			'ProductSKU',
+			'ProductStockIndicator',
+			'ProductSummary',
 			'ProductTagList',
-			'ProductCategoryList',
+			'ProductTitle',
 		];
 
 		if ( Package::feature()->is_feature_plugin_build() ) {
@@ -230,15 +229,4 @@ final class BlockTypesController {
 		return $block_types;
 	}
 
-	/**
-	 * Get atomic blocks types.
-	 *
-	 * @return array
-	 */
-	protected function get_atomic_blocks() {
-		return [
-			'product-sku',
-			'product-add-to-cart',
-		];
-	}
 }

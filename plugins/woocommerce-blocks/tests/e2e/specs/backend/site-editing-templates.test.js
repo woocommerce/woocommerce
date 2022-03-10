@@ -1,11 +1,10 @@
 import { URL } from 'url';
 
 import {
-	activateTheme,
 	canvas,
+	deleteAllTemplates,
 	getCurrentSiteEditorContent,
 	insertBlock,
-	trashAllPosts,
 } from '@wordpress/e2e-test-utils';
 import { addQueryArgs } from '@wordpress/url';
 import {
@@ -110,8 +109,8 @@ describe( 'Store Editing Templates', () => {
 	useTheme( 'emptytheme' );
 
 	beforeAll( async () => {
-		await trashAllPosts( 'wp_template' );
-		await trashAllPosts( 'wp_template_part' );
+		await deleteAllTemplates( 'wp_template' );
+		await deleteAllTemplates( 'wp_template_part' );
 	} );
 
 	describe( 'Single Product block template', () => {

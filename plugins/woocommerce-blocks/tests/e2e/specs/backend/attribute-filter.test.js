@@ -28,7 +28,7 @@ describe( `${ block.name } Block`, () => {
 			{ text: 'Capacity' }
 		);
 		//needed for attributes list to load correctly
-		await page.waitFor( 1000 );
+		await page.waitForTimeout( 1000 );
 
 		await expect( page ).toClick( 'button', { text: 'Done' } );
 		await page.waitForNetworkIdle();
@@ -128,7 +128,7 @@ describe( `${ block.name } Block`, () => {
 				}
 			);
 			//needed for attributes list to load correctly
-			await page.waitFor( 1000 );
+			await page.waitForTimeout( 1000 );
 
 			// reset
 			await expect( page ).toClick(
@@ -138,7 +138,7 @@ describe( `${ block.name } Block`, () => {
 				}
 			);
 			//needed for attributes list to load correctly
-			await page.waitFor( 1000 );
+			await page.waitForTimeout( 1000 );
 		} );
 
 		it( 'renders on the frontend', async () => {
