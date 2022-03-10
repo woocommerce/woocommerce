@@ -62,6 +62,19 @@ class WC_Site_Tracking {
 	 * Adds the tracking function to the admin footer.
 	 */
 	public static function add_tracking_function() {
+		$user = wp_get_current_user();
+		$blog_details = WC_Tracks::get_blog_details( $user->ID );
+
+		// Prepare blog details object to be inserted as a JS object.
+		// Borrowed lovingly from WP_Scripts::localize().
+		foreach ( $blog_details as $key => $value ) {
+			if ( ! is_scalar( $value ) ) {
+				continue;
+			}
+
+			$blog_details[ $key ] = html_entity_decode( (string) $value, ENT_QUOTES, 'UTF-8' );
+		}
+
 		?>
 		<!-- WooCommerce Tracks -->
 		<script type="text/javascript">
@@ -74,15 +87,21 @@ class WC_Site_Tracking {
 
 				var eventName = '<?php echo esc_attr( WC_Tracks::get_event_prefix() ); ?>' + name;
 				var eventProperties = properties || {};
-				eventProperties.url = '<?php echo esc_html( home_url() ); ?>'
-				eventProperties.products_count = '<?php echo intval( WC_Tracks::get_products_count() ); ?>';
 				if ( window.wp && window.wp.hooks && window.wp.hooks.applyFilters ) {
 					eventProperties = window.wp.hooks.applyFilters( 'woocommerce_tracks_client_event_properties', eventProperties, eventName );
 					delete( eventProperties._ui );
 					delete( eventProperties._ut );
 				}
+				// Merge blog details and event properties.
+				var propertiesToRecord = <?php echo wp_json_encode( $blog_details ); ?>;
+				for ( var prop in eventProperties ) {
+					if ( eventProperties.hasOwnProperty( prop ) ) {
+						propertiesToRecord[ prop ] = eventProperties[ prop ];
+					}
+				}
+
 				window._tkq = window._tkq || [];
-				window._tkq.push( [ 'recordEvent', eventName, eventProperties ] );
+				window._tkq.push( [ 'recordEvent', eventName, propertiesToRecord ] );
 			}
 		</script>
 		<?php
