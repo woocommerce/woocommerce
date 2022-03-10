@@ -12,6 +12,11 @@
 			border-right: none;
 		}
 	}
+
+	&.woocommerce-legend__direction-row {
+		flex-grow: 1;
+		flex-direction: row;
+	}
 }
 
 .woocommerce-legend__list {
@@ -20,6 +25,7 @@
 	height: 100%;
 	margin: 0;
 	flex-flow: row wrap;
+	flex-wrap: wrap;
 
 	.woocommerce-legend__direction-column & {
 		flex-direction: column;
@@ -166,7 +172,8 @@
 	.woocommerce-legend__direction-row & {
 		padding: 0;
 		margin: 0;
-		flex-basis: 20%;
+		flex: 1 0 20%;
+		max-width: 338px;
 
 		& > button {
 			padding: 0 17px;

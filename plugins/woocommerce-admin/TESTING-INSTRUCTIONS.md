@@ -90,6 +90,7 @@
 ```
 2. Navigate to the profile wizard. `wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Fproducts`.
 3. Make sure the chart line colors are purple.
+4. Confirm that chart legend items are not overflowing.
 ### Add additional store profiler track for the business details tab. #8265
 
 1. Open your console and make sure you have tracks outputted ( `localStorage.setItem( 'debug', 'wc-admin:*' );` )
