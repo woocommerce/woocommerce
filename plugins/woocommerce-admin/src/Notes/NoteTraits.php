@@ -150,17 +150,25 @@ trait NoteTraits {
 	 * @throws NotesUnavailableException Throws exception when notes are unavailable.
 	 */
 	public static function possibly_update_note() {
-		$note = Notes::get_note_by_name( self::NOTE_NAME );
+		$note_in_db = Notes::get_note_by_name( self::NOTE_NAME );
+		if ( ! $note_in_db ) {
+			return;
+		}
 
-		if ( ! $note ) {
+		if ( ! method_exists( self::class, 'get_note' ) ) {
+			return;
+		}
+
+		$note = self::get_note();
+		if ( ! $note instanceof Note && ! $note instanceof WC_Admin_Note ) {
 			return;
 		}
 
 		// Update note content if it's changed.
-		$latest_note_content = self::get_note()->get_content();
-		if ( $note->get_content() !== $latest_note_content ) {
-			$note->set_content( $latest_note_content );
-			$note->save();
+		$latest_note_content = $note->get_content();
+		if ( $note_in_db->get_content() !== $latest_note_content ) {
+			$note_in_db->set_content( $latest_note_content );
+			$note_in_db->save();
 		}
 	}
 	/**
