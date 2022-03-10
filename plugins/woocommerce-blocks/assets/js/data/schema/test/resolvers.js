@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { select, apiFetch } from '@wordpress/data-controls';
+import { apiFetch } from '@wordpress/data-controls';
+import { controls } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -11,12 +12,13 @@ import { receiveRoutes } from '../actions';
 import { STORE_KEY } from '../constants';
 
 jest.mock( '@wordpress/data-controls' );
+jest.mock( '@wordpress/data' );
 
 describe( 'getRoute', () => {
 	it( 'yields select control response', () => {
 		const fulfillment = getRoute( 'wc/blocks' );
 		fulfillment.next();
-		expect( select ).toHaveBeenCalledWith(
+		expect( controls.resolveSelect ).toHaveBeenCalledWith(
 			STORE_KEY,
 			'getRoutes',
 			'wc/blocks'
