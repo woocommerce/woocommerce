@@ -184,6 +184,9 @@ final class WooCommerce {
 	 * @since 3.6.0
 	 */
 	public function on_plugins_loaded() {
+		// Initialize WCA.
+		\Automattic\WooCommerce\Admin\Composer\Package::init();
+
 		do_action( 'woocommerce_loaded' );
 	}
 
