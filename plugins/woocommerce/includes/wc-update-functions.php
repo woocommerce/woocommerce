@@ -346,8 +346,6 @@ function wc_update_200_line_items() {
 						$order_tax_row->post_id
 					)
 				);
-
-				unset( $tax_amount );
 			}
 		}
 	}
