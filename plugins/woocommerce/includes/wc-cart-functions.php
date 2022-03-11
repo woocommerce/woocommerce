@@ -192,7 +192,7 @@ function wc_clear_cart_after_payment() {
 		}
 	}
 }
-add_action( 'get_header', 'wc_clear_cart_after_payment' );
+add_action( 'template_redirect', 'wc_clear_cart_after_payment', 20 );
 
 /**
  * Get the subtotal.

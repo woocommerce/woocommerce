@@ -1706,7 +1706,7 @@ $product_attributes_lookup_table_creation_sql
 	 * Gets the content of the sample refunds and return policy page.
 	 *
 	 * @since 5.6.0
-	 * @return HTML The content for the page
+	 * @return string The content for the page
 	 */
 	private static function get_refunds_return_policy_page_content() {
 		return <<<EOT

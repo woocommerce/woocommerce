@@ -54,6 +54,14 @@ export const permalinkSettingsPageSaveChanges = async () => {
 };
 
 /**
+ * Save changes on Order page.
+ */
+ export const orderPageSaveChanges = async () => {
+	await expect( page ).toClick( 'button.save_order' );
+	await page.waitForSelector( '#message' );
+};
+
+/**
  * Set checkbox.
  *
  * @param {string} selector
@@ -334,4 +342,26 @@ export async function waitForSelector( page, selector, options = {} ) {
 
 	const element = await page.waitForSelector( selector, options );
 	return element;
+}
+
+/**
+ * Retrieves the desired HTML attribute from a selector.
+ * For example, the 'value' attribute of an input element.
+ * @param {string} selector Selector of the element you want to get the attribute from.
+ * @param {string} attribute The desired HTML attribute.
+ * @returns {Promise<string>}
+ */
+export async function getSelectorAttribute ( selector, attribute ) {
+	return await page.$eval( selector, ( element, attribute ) => element.getAttribute( attribute ), attribute );
+}
+
+/**
+ * Asserts the value of the desired HTML attribute of a selector.
+ * @param {string} selector Selector of the element you want to verify.
+ * @param {string} attribute The desired HTML attribute.
+ * @param {string} expectedValue The expected value.
+ */
+ export async function verifyValueOfElementAttribute ( selector, attribute, expectedValue ) {
+	const actualValue = await getSelectorAttribute ( selector, attribute );
+	expect( actualValue ).toBe( expectedValue );
 }

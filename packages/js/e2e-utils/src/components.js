@@ -27,6 +27,8 @@ const simpleProductPrice = config.has('products.simple.price') ? config.get('pro
 const defaultVariableProduct = config.get('products.variable');
 const defaultGroupedProduct = config.get('products.grouped');
 
+const uuid = require( 'uuid' );
+
 /**
  * Verify and publish
  *
@@ -231,6 +233,28 @@ const createSimpleProductWithCategory = async ( productName, productPrice, categ
 	} );
 
 	return product.id;
+};
+
+/**
+ * Create simple downloadable product
+ *
+ * @param name Product's name. Defaults to 'Simple Product' (see createSimpleProduct definition).
+ * @param downloadLimit Product's download limit. Defaults to '-1' (unlimited).
+ * @param downloadName Product's download name. Defaults to 'Single'.
+ * @param price Product's price. Defaults to '$9.99' (see createSimpleProduct definition).
+ */
+ const createSimpleDownloadableProduct = async ( name, downloadLimit = -1, downloadName = 'Single', price ) => {
+	const productDownloadDetails = {
+		downloadable: true,
+		downloads: [ {
+			id: uuid.v4(),
+			name: downloadName,
+			file: 'https://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2017/08/single.jpg'
+		   } ],
+		download_limit: downloadLimit
+	};
+
+	return await createSimpleProduct( name, price, productDownloadDetails );
 };
 
 /**
@@ -594,6 +618,7 @@ export {
 	createCoupon,
 	addShippingZoneAndMethod,
 	createSimpleProductWithCategory,
+	createSimpleDownloadableProduct,
 	clickUpdateOrder,
 	deleteAllEmailLogs,
 	deleteAllShippingZones,
