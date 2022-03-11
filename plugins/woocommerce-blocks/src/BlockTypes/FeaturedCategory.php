@@ -124,10 +124,6 @@ class FeaturedCategory extends AbstractDynamicBlock {
 			$style .= sprintf( 'background-image:url(%s);', esc_url( $image ) );
 		}
 
-		if ( isset( $attributes['customOverlayColor'] ) ) {
-			$style .= sprintf( 'background-color:%s;', esc_attr( $attributes['customOverlayColor'] ) );
-		}
-
 		if ( isset( $attributes['height'] ) ) {
 			$style .= sprintf( 'min-height:%dpx;', intval( $attributes['height'] ) );
 		}

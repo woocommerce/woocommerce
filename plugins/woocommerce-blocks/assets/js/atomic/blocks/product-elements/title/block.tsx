@@ -47,9 +47,6 @@ const TagName = ( {
  * @param {number}  [props.headingLevel]    Heading level (h1, h2 etc)
  * @param {boolean} [props.showProductLink] Whether or not to display a link to the product page.
  * @param {string}  [props.align]           Title alignment.
- * @param {string}  [props.textColor]       Title color name.
- * @param {string}  [props.fontSize]        Title font size name.
- * @param {string}  [props.style]           Title inline style.
  * will be used if this is not provided.
  * @return {*} The component.
  */
