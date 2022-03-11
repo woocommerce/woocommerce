@@ -117,7 +117,7 @@ class Checkout extends MockeryTestCase {
 	 */
 	public function test_post_extension_data() {
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
-		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
 				'billing_address'  => (object) array(
@@ -175,7 +175,7 @@ class Checkout extends MockeryTestCase {
 	 */
 	public function test_post_invalid_extension_data() {
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
-		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
 				'billing_address'  => (object) array(
@@ -224,7 +224,7 @@ class Checkout extends MockeryTestCase {
 		update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
 
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
-		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
 				'billing_address'  => (object) array(
@@ -281,7 +281,7 @@ class Checkout extends MockeryTestCase {
 		update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
 
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
-		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
 				'billing_address'  => (object) array(
@@ -335,7 +335,7 @@ class Checkout extends MockeryTestCase {
 		update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
 
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
-		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
 				'billing_address'  => (object) array(

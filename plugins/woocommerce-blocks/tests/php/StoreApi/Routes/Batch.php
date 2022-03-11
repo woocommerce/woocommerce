@@ -42,7 +42,7 @@ class Batch extends ControllerTestCase {
 	 */
 	public function test_success_cart_route_batch() {
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/batch' );
-		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
 				'requests' => array(
@@ -54,7 +54,7 @@ class Batch extends ControllerTestCase {
 							'quantity' => 1,
 						),
 						'headers' => array(
-							'X-WC-Store-API-Nonce' => wp_create_nonce( 'wc_store_api' ),
+							'Nonce' => wp_create_nonce( 'wc_store_api' ),
 						),
 					),
 					array(
@@ -65,7 +65,7 @@ class Batch extends ControllerTestCase {
 							'quantity' => 1,
 						),
 						'headers' => array(
-							'X-WC-Store-API-Nonce' => wp_create_nonce( 'wc_store_api' ),
+							'Nonce' => wp_create_nonce( 'wc_store_api' ),
 						),
 					),
 				),
@@ -85,7 +85,7 @@ class Batch extends ControllerTestCase {
 	 */
 	public function test_mix_cart_route_batch() {
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/batch' );
-		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
 				'requests' => array(
@@ -97,7 +97,7 @@ class Batch extends ControllerTestCase {
 							'quantity' => 1,
 						),
 						'headers' => array(
-							'X-WC-Store-API-Nonce' => wp_create_nonce( 'wc_store_api' ),
+							'Nonce' => wp_create_nonce( 'wc_store_api' ),
 						),
 					),
 					array(
@@ -108,7 +108,7 @@ class Batch extends ControllerTestCase {
 							'quantity' => 1,
 						),
 						'headers' => array(
-							'X-WC-Store-API-Nonce' => wp_create_nonce( 'wc_store_api' ),
+							'Nonce' => wp_create_nonce( 'wc_store_api' ),
 						),
 					),
 				),
@@ -127,7 +127,7 @@ class Batch extends ControllerTestCase {
 	 */
 	public function test_get_cart_route_batch() {
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/batch' );
-		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
 				'requests' => array(

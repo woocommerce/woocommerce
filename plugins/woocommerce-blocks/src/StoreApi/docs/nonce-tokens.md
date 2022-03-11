@@ -13,15 +13,15 @@ POST requests to the `/cart` endpoints and all requests to the `/checkout` endpo
 
 ## Sending Nonce Tokens with requests
 
-Nonce tokens are included with the request headers. Create a request header named `X-WC-Store-API-Nonce`. This will be validated by the API.
+Nonce tokens are included with the request headers. Create a request header named `Nonce`. This will be validated by the API.
 
 **Example:**
 
 ```sh
-curl --header "X-WC-Store-API-Nonce: 12345" --request GET https://example-store.com/wp-json/wc/store/v1/checkout
+curl --header "Nonce: 12345" --request GET https://example-store.com/wp-json/wc/store/v1/checkout
 ```
 
-After making a successful request, an updated `X-WC-Store-API-Nonce` header will be sent back--this needs to be stored and updated by the client to make subsequent requests.
+After making a successful request, an updated `Nonce` header will be sent back--this needs to be stored and updated by the client to make subsequent requests.
 
 ## Generating security nonces from WordPress
 
@@ -46,10 +46,9 @@ Nonce checks will be bypassed if `woocommerce_store_api_disable_nonce_check` eva
 NOTE: This should only be done on development sites where security is not important. Do not enable this in production.
 
 <!-- FEEDBACK -->
----
 
 [We're hiring!](https://woocommerce.com/careers/) Come work with us!
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./src/StoreApi/docs/nonce-tokens.md)
-<!-- /FEEDBACK -->
 
+<!-- /FEEDBACK -->

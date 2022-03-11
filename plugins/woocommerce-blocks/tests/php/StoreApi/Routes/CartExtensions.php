@@ -17,7 +17,7 @@ class CartExtensions extends ControllerTestCase {
 	 */
 	public function test_post() {
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/extensions' );
-		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
 				'namespace' => 'test-plugin',

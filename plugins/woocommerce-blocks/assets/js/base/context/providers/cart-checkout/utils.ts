@@ -55,9 +55,9 @@ export const processCheckoutResponseHeaders = (
 	}
 
 	// Update user using headers.
-	if ( headers?.get( 'X-WC-Store-API-User' ) ) {
+	if ( headers?.get( 'User-ID' ) ) {
 		dispatchActions.setCustomerId(
-			parseInt( headers.get( 'X-WC-Store-API-User' ) || '0', 10 )
+			parseInt( headers.get( 'User-ID' ) || '0', 10 )
 		);
 	}
 };
