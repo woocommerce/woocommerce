@@ -274,14 +274,10 @@ class Notes {
 		}
 
 		$data_store = self::load_data_store();
-		$notes      = $data_store->get_notes(
-			array(
-				'type' => array( Note::E_WC_ADMIN_NOTE_MARKETING ),
-			)
-		);
+		$note_ids   = $data_store->get_note_ids_by_type( Note::E_WC_ADMIN_NOTE_MARKETING );
 
-		foreach ( $notes as $note ) {
-			$note = self::get_note( $note->note_id );
+		foreach ( $note_ids as $note_id ) {
+			$note = self::get_note( $note_id );
 			if ( $note ) {
 				$note->delete();
 			}
@@ -293,16 +289,11 @@ class Notes {
 	 */
 	public static function possibly_delete_survey_notes() {
 		$data_store = self::load_data_store();
-		$notes      = $data_store->get_notes(
-			array(
-				'type'   => array( Note::E_WC_ADMIN_NOTE_SURVEY ),
-				'status' => array( 'actioned' ),
-			)
-		);
+		$note_ids   = $data_store->get_note_ids_by_type( Note::E_WC_ADMIN_NOTE_SURVEY );
 
-		foreach ( $notes as $note ) {
-			$note = self::get_note( $note->note_id );
-			if ( $note ) {
+		foreach ( $note_ids as $note_id ) {
+			$note = self::get_note( $note_id );
+			if ( $note && ( $note->get_status() === Note::E_WC_ADMIN_NOTE_ACTIONED ) ) {
 				$note->set_is_deleted( 1 );
 				$note->save();
 			}
