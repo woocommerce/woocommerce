@@ -20,7 +20,7 @@ GET /wc/store/v1/checkout
 There are no parameters required for this endpoint.
 
 ```sh
-curl --header "X-WC-Store-API-Nonce: 12345" --request GET https://example-store.com/wp-json/wc/store/v1/checkout
+curl --header "Nonce: 12345" --request GET https://example-store.com/wp-json/wc/store/v1/checkout
 ```
 
 **Example response:**
@@ -85,7 +85,7 @@ POST /wc/store/v1/checkout
 | `payment_data`     | array   |    No    | Data to pass through to the payment method when processing payment. |
 
 ```sh
-curl --header "X-WC-Store-API-Nonce: 12345" --request POST https://example-store.com/wp-json/wc/store/v1/checkout?payment_method=paypal&payment_data[0][key]=test-key&payment_data[0][value]=test-value
+curl --header "Nonce: 12345" --request POST https://example-store.com/wp-json/wc/store/v1/checkout?payment_method=paypal&payment_data[0][key]=test-key&payment_data[0][value]=test-value
 ```
 
 **Example response:**
@@ -131,10 +131,9 @@ curl --header "X-WC-Store-API-Nonce: 12345" --request POST https://example-store
 ```
 
 <!-- FEEDBACK -->
----
 
 [We're hiring!](https://woocommerce.com/careers/) Come work with us!
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./src/StoreApi/docs/checkout.md)
-<!-- /FEEDBACK -->
 
+<!-- /FEEDBACK -->

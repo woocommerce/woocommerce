@@ -107,7 +107,7 @@ class Cart extends ControllerTestCase {
 	 */
 	public function test_remove_bad_cart_item() {
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/remove-item' );
-		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
 				'key' => 'bad_item_key_123',
@@ -127,7 +127,7 @@ class Cart extends ControllerTestCase {
 	 */
 	public function test_remove_cart_item() {
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/remove-item' );
-		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
 				'key' => $this->keys[0],
@@ -163,7 +163,7 @@ class Cart extends ControllerTestCase {
 	 */
 	public function test_update_item() {
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/update-item' );
-		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
 				'key'      => $this->keys[0],
@@ -192,7 +192,7 @@ class Cart extends ControllerTestCase {
 	 */
 	public function test_update_customer() {
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/update-customer' );
-		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
 				'shipping_address' => (object) array(
@@ -233,7 +233,7 @@ class Cart extends ControllerTestCase {
 	 */
 	public function test_update_customer_address() {
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/update-customer' );
-		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
 				'shipping_address' => (object) array(
@@ -269,7 +269,7 @@ class Cart extends ControllerTestCase {
 
 		// Address with invalid country.
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/update-customer' );
-		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
 				'shipping_address' => (object) array(
@@ -291,7 +291,7 @@ class Cart extends ControllerTestCase {
 
 		// US address with named state.
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/update-customer' );
-		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
 				'shipping_address' => (object) array(
@@ -323,7 +323,7 @@ class Cart extends ControllerTestCase {
 
 		// US address with invalid state.
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/update-customer' );
-		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
 				'shipping_address' => (object) array(
@@ -345,7 +345,7 @@ class Cart extends ControllerTestCase {
 
 		// US address with invalid postcode.
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/update-customer' );
-		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
 				'shipping_address' => (object) array(
@@ -374,7 +374,7 @@ class Cart extends ControllerTestCase {
 		wc()->cart->remove_coupon( $this->coupon->get_code() );
 
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/apply-coupon' );
-		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
 				'code' => $this->coupon->get_code(),
@@ -395,7 +395,7 @@ class Cart extends ControllerTestCase {
 		// Test coupons with different case.
 		$newcoupon = $fixtures->get_coupon( array( 'code' => 'testCoupon' ) );
 		$request   = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/apply-coupon' );
-		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
 				'code' => 'testCoupon',
@@ -409,7 +409,7 @@ class Cart extends ControllerTestCase {
 		// Test coupons with special chars in the code.
 		$newcoupon = $fixtures->get_coupon( array( 'code' => '$5 off' ) );
 		$request   = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/apply-coupon' );
-		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
 				'code' => '$5 off',
@@ -427,7 +427,7 @@ class Cart extends ControllerTestCase {
 	public function test_remove_coupon() {
 		// Invalid coupon.
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/remove-coupon' );
-		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
 				'code' => 'doesnotexist',
@@ -440,7 +440,7 @@ class Cart extends ControllerTestCase {
 
 		// Applied coupon.
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/remove-coupon' );
-		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
 				'code' => $this->coupon->get_code(),

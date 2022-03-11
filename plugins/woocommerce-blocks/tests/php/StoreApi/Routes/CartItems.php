@@ -132,7 +132,7 @@ class CartItems extends ControllerTestCase {
 		wc_empty_cart();
 
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/items' );
-		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
 				'id'       => $this->products[0]->get_id(),
@@ -174,7 +174,7 @@ class CartItems extends ControllerTestCase {
 		);
 
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/items' );
-		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
 				'id'       => $invalid_product->get_id(),
@@ -192,7 +192,7 @@ class CartItems extends ControllerTestCase {
 	 */
 	public function test_update_item() {
 		$request = new \WP_REST_Request( 'PUT', '/wc/store/v1/cart/items/' . $this->keys[0] );
-		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
 			array(
 				'quantity' => '10',
@@ -210,7 +210,7 @@ class CartItems extends ControllerTestCase {
 	 */
 	public function test_delete_item() {
 		$request = new \WP_REST_Request( 'DELETE', '/wc/store/v1/cart/items/' . $this->keys[0] );
-		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$this->assertAPIResponse(
 			$request,
 			204,
@@ -218,7 +218,7 @@ class CartItems extends ControllerTestCase {
 		);
 
 		$request = new \WP_REST_Request( 'DELETE', '/wc/store/v1/cart/items/' . $this->keys[0] );
-		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$this->assertAPIResponse(
 			$request,
 			404
@@ -230,7 +230,7 @@ class CartItems extends ControllerTestCase {
 	 */
 	public function test_delete_items() {
 		$request = new \WP_REST_Request( 'DELETE', '/wc/store/v1/cart/items' );
-		$request->set_header( 'X-WC-Store-API-Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$response = rest_get_server()->dispatch( $request );
 		$data     = $response->get_data();
 
