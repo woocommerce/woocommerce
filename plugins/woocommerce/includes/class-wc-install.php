@@ -1068,6 +1068,7 @@ CREATE TABLE {$wpdb->prefix}wc_rate_limits (
   rate_limit_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   rate_limit_key varchar(200) NOT NULL,
   rate_limit_expiry BIGINT UNSIGNED NOT NULL,
+  rate_limit_remaining smallint(10) NOT NULL DEFAULT '0',
   PRIMARY KEY  (rate_limit_id),
   UNIQUE KEY rate_limit_key (rate_limit_key($max_index_length))
 ) $collate;
