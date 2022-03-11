@@ -377,6 +377,7 @@ class Checkout extends AbstractBlock {
 			'checkout-blocks/express-payment',
 			'checkout-blocks/contact-information',
 			'checkout-blocks/shipping-address',
+			'checkout-blocks/billing-address--checkout-blocks/shipping-address',
 			'checkout-blocks/billing-address',
 			'checkout-blocks/shipping-methods',
 			'checkout-blocks/payment',
