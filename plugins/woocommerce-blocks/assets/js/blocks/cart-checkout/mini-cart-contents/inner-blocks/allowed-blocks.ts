@@ -19,6 +19,7 @@ const EXCLUDED_BLOCKS: readonly string[] = [
 	'core/post-comments-count',
 	'core/comments-pagination',
 	'core/post-navigation-link',
+	'core/button',
 ];
 
 export const getMiniCartAllowedBlocks = (): string[] =>
