@@ -283,7 +283,7 @@ WHERE orders.date_updated_gmt != posts.post_modified_gmt";
 			$this->cleanup_synchronization_state();
 
 			/**
-			 * Hook to signal that the orders tables synchronization process has finised (nothing left to synchronize).
+			 * Hook to signal that the orders tables synchronization process has finished (nothing left to synchronize).
 			 */
 			do_action( self::PENDING_SYNCHRONIZATION_FINISHED_ACTION );
 		} else {

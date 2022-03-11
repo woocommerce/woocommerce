@@ -338,10 +338,10 @@ class CustomOrdersTableController {
 				}
 
 				if ( $this->data_synchronizer->pending_data_sync_is_in_progress() ) {
-					$text .= __( '<br/>Syncrhonization for these orders is currently in progress.', 'woocommerce' );
+					$text .= __( "<br/>Synchronization for these orders is currently in progress.<br/>The authoritative table can't be changed until sync completes.", 'woocommerce' );
+				} else {
+					$text .= __( "<br/>The authoritative table can't be changed until these orders are synchronized.", 'woocommerce' );
 				}
-
-				$text .= __( "<br/>The authoritative table can't be changed until sync completes.", 'woocommerce' );
 
 				$settings[] = array(
 					'type' => 'info',
