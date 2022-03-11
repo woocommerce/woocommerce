@@ -507,7 +507,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 							$html .= '<div class="wc-order-item-sku">' . esc_html( $product_object->get_sku() ) . '</div>';
 						}
 
-						$meta_data = $item->get_formatted_meta_data( '' );
+						$meta_data = $item->get_all_formatted_meta_data( '' );
 
 						if ( $meta_data ) {
 							$html .= '<table cellspacing="0" class="wc-order-item-meta">';

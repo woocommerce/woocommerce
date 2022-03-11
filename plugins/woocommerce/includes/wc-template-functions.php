@@ -3344,7 +3344,7 @@ if ( ! function_exists( 'wc_display_item_meta' ) ) {
 			)
 		);
 
-		foreach ( $item->get_formatted_meta_data() as $meta_id => $meta ) {
+		foreach ( $item->get_all_formatted_meta_data() as $meta_id => $meta ) {
 			$value     = $args['autop'] ? wp_kses_post( $meta->display_value ) : wp_kses_post( make_clickable( trim( $meta->display_value ) ) );
 			$strings[] = $args['label_before'] . wp_kses_post( $meta->display_key ) . $args['label_after'] . $value;
 		}
