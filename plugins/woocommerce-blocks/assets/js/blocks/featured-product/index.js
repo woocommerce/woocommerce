@@ -106,20 +106,6 @@ registerBlockType( 'woocommerce/featured-product', {
 		},
 
 		/**
-		 * The overlay color, from the color list.
-		 */
-		overlayColor: {
-			type: 'string',
-		},
-
-		/**
-		 * The overlay color, if a custom color value.
-		 */
-		customOverlayColor: {
-			type: 'string',
-		},
-
-		/**
 		 * Text for the product link.
 		 */
 		linkText: {
