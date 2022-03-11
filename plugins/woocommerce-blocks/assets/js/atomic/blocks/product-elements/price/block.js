@@ -25,8 +25,6 @@ import {
  * @param {Object} props                          Incoming props.
  * @param {string} [props.className]              CSS Class name for the component.
  * @param {string} [props.textAlign]              Text alignment.
- * @param {string} [props.fontSize]               Normal Price font size name.
- * @param {string} [props.color]                  Normal Price text color.
  * context will be used if this is not provided.
  * @return {*} The component.
  */
@@ -91,10 +89,6 @@ Block.propTypes = {
 	className: PropTypes.string,
 	product: PropTypes.object,
 	textAlign: PropTypes.oneOf( [ 'left', 'right', 'center' ] ),
-	fontSize: PropTypes.string,
-	fontWidth: PropTypes.string,
-	fontStyle: PropTypes.string,
-	color: PropTypes.string,
 };
 
 export default withProductDataContext( Block );
