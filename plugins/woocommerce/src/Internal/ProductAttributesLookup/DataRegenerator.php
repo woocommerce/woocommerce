@@ -440,26 +440,26 @@ class DataRegenerator {
 		}
 	}
 
-   /*
-	* Get the name of the product attributes lookup table.
-	*
-	* @return string
-	*/
-   public function get_lookup_table_name() {
-	   return $this->lookup_table_name;
-   }
+	/**
+	 * Get the name of the product attributes lookup table.
+	 *
+	 * @return string
+	 */
+	public function get_lookup_table_name() {
+		return $this->lookup_table_name;
+	}
 
-   /**
-	* Get the SQL statement that creates the product attributes lookup table, including the indices.
-	*
-	* @return string
-	*/
-   public function get_table_creation_sql() {
-	   global $wpdb;
+	/**
+	 * Get the SQL statement that creates the product attributes lookup table, including the indices.
+	 *
+	 * @return string
+	 */
+	public function get_table_creation_sql() {
+		global $wpdb;
 
-	   $collate = $wpdb->has_cap( 'collation' ) ? $wpdb->get_charset_collate() : '';
+		$collate = $wpdb->has_cap( 'collation' ) ? $wpdb->get_charset_collate() : '';
 
-	   return "CREATE TABLE {$this->lookup_table_name} (
+		return "CREATE TABLE {$this->lookup_table_name} (
  product_id bigint(20) NOT NULL,
  product_or_parent_id bigint(20) NOT NULL,
  taxonomy varchar(32) NOT NULL,
@@ -467,17 +467,35 @@ class DataRegenerator {
  is_variation_attribute tinyint(1) NOT NULL,
  in_stock tinyint(1) NOT NULL,
  INDEX product_or_parent_id_term_id (product_or_parent_id, term_id),
- INDEX is_variation_attribute_term_id (is_variation_attribute, term_id)
+ INDEX is_variation_attribute_term_id (is_variation_attribute, term_id),
+ PRIMARY KEY  (`product_id`, `product_or_parent_id`, `taxonomy`, `term_id`)
 ) $collate;";
-   }
+	}
 
-   /**
-	* Run additional setup needed after a clean WooCommerce install finishes.
-	*/
-   private function run_woocommerce_installed_callback() {
-	   // The table must exist at this point (created via dbDelta), but we check just in case.
-	   if ( $this->data_store->check_lookup_table_exists() ) {
-		   $this->finalize_regeneration( true );
-	   }
+	/**
+	 * Create the primary key for the table if it doesn't exist already.
+	 *
+	 * @return void
+	 */
+	public function create_table_primary_index() {
+		global $wpdb;
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$wpdb->query(
+			"
+ALTER TABLE {$this->lookup_table_name}
+ADD PRIMARY KEY IF NOT EXISTS (`product_id`, `product_or_parent_id`, `taxonomy`, `term_id`)"
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	}
+
+	/**
+	 * Run additional setup needed after a clean WooCommerce install finishes.
+	 */
+	private function run_woocommerce_installed_callback() {
+		// The table must exist at this point (created via dbDelta), but we check just in case.
+		if ( $this->data_store->check_lookup_table_exists() ) {
+			$this->finalize_regeneration( true );
+		}
 	}
 }
