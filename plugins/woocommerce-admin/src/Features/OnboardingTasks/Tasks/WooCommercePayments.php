@@ -107,8 +107,11 @@ class WooCommercePayments extends Task {
 	 */
 	public static function is_requested() {
 		$profiler_data       = get_option( Onboarding::PROFILE_DATA_OPTION, array() );
+		$product_types       = isset( $profiler_data['product_types'] ) ? $profiler_data['product_types'] : array();
 		$business_extensions = isset( $profiler_data['business_extensions'] ) ? $profiler_data['business_extensions'] : array();
-		return in_array( 'woocommerce-payments', $business_extensions, true );
+
+		$subscriptions_and_us = in_array( 'subscriptions', $product_types, true ) && 'US' === WC()->countries->get_base_country();
+		return in_array( 'woocommerce-payments', $business_extensions, true ) || $subscriptions_and_us;
 	}
 
 	/**

@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+### Display WCPay task when installed via subscriptions option on profiler
+
+1. Start with a fresh install.
+2. Navigate to WooCommerce -> Home to start the OBW.
+3. Ensure you select "subscriptions" under the step for product types.
+4. Complete the rest of the onboarding wizard.
+5. Confirm that "Get paid with WooCommerce Payments" appears under primary task list.
+6. When clicked, it should redirect to WCPay connection page.
+7. Set up/connect WooCommerce Payments.
+8. After WCPay is connected, go to the Homescreen and confirm that "Set up additional payment providers" appears under extended task list.
+9. When clicked, it should direct to the payments task.
+
 ## 3.3.0
 
 ### Prompt a modal to save any unsaved changes in OBW
