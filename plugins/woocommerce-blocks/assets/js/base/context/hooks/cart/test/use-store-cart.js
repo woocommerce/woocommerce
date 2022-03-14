@@ -66,7 +66,7 @@ describe( 'useStoreCart', () => {
 		},
 		shippingRates: previewCart.shipping_rates,
 		extensions: {},
-		shippingRatesLoading: false,
+		isLoadingRates: false,
 		cartHasCalculatedShipping: true,
 	};
 
@@ -112,7 +112,7 @@ describe( 'useStoreCart', () => {
 		shippingAddress: mockShippingAddress,
 		shippingRates: [],
 		extensions: {},
-		shippingRatesLoading: false,
+		isLoadingRates: false,
 		cartHasCalculatedShipping: true,
 		receiveCart: undefined,
 		paymentRequirements: [],

@@ -19,7 +19,7 @@ interface ShippingData extends SelectShippingRateType {
 	needsShipping: Cart[ 'needsShipping' ];
 	hasCalculatedShipping: Cart[ 'hasCalculatedShipping' ];
 	shippingRates: Cart[ 'shippingRates' ];
-	shippingRatesLoading: boolean;
+	isLoadingRates: boolean;
 	selectedRates: Record< string, string | unknown >;
 }
 
@@ -28,14 +28,14 @@ export const useShippingData = (): ShippingData => {
 		shippingRates,
 		needsShipping,
 		hasCalculatedShipping,
-		shippingRatesLoading,
+		isLoadingRates,
 	} = useSelect( ( select ) => {
 		const store = select( storeKey );
 		return {
 			shippingRates: store.getShippingRates(),
 			needsShipping: store.getNeedsShipping(),
 			hasCalculatedShipping: store.getHasCalculatedShipping(),
-			shippingRatesLoading: store.isCustomerDataUpdating(),
+			isLoadingRates: store.isCustomerDataUpdating(),
 		};
 	} );
 	const { isSelectingRate, selectShippingRate } = useSelectShippingRate();
@@ -61,6 +61,6 @@ export const useShippingData = (): ShippingData => {
 		shippingRates,
 		needsShipping,
 		hasCalculatedShipping,
-		shippingRatesLoading,
+		isLoadingRates,
 	};
 };

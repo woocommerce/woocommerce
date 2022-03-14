@@ -78,7 +78,7 @@ interface ShippingRatesControlProps {
 	collapsible?: boolean;
 	shippingRates: CartResponseShippingRate[];
 	className?: string;
-	shippingRatesLoading: boolean;
+	isLoadingRates: boolean;
 	noResultsMessage: ReactElement;
 	renderOption: PackageRateRenderOption;
 	context: 'woocommerce/cart' | 'woocommerce/checkout';
@@ -88,7 +88,7 @@ interface ShippingRatesControlProps {
  *
  * @param {Object} props Incoming props.
  * @param {Array} props.shippingRates Array of packages containing shipping rates.
- * @param {boolean} props.shippingRatesLoading True when rates are being loaded.
+ * @param {boolean} props.isLoadingRates True when rates are being loaded.
  * @param {string} props.className Class name for package rates.
  * @param {boolean} [props.collapsible] If true, when multiple packages are rendered they can be toggled open and closed.
  * @param {ReactElement} props.noResultsMessage Rendered when there are no packages.
@@ -97,7 +97,7 @@ interface ShippingRatesControlProps {
  */
 const ShippingRatesControl = ( {
 	shippingRates,
-	shippingRatesLoading,
+	isLoadingRates,
 	className,
 	collapsible = false,
 	noResultsMessage,
@@ -105,7 +105,7 @@ const ShippingRatesControl = ( {
 	context,
 }: ShippingRatesControlProps ): JSX.Element => {
 	useEffect( () => {
-		if ( shippingRatesLoading ) {
+		if ( isLoadingRates ) {
 			return;
 		}
 		const packageCount = getShippingRatesPackageCount( shippingRates );
@@ -148,7 +148,7 @@ const ShippingRatesControl = ( {
 					)
 			);
 		}
-	}, [ shippingRatesLoading, shippingRates ] );
+	}, [ isLoadingRates, shippingRates ] );
 
 	// Prepare props to pass to the ExperimentalOrderShippingPackages slot fill.
 	// We need to pluck out receiveCart.
@@ -170,7 +170,7 @@ const ShippingRatesControl = ( {
 
 	return (
 		<LoadingMask
-			isLoading={ shippingRatesLoading }
+			isLoading={ isLoadingRates }
 			screenReaderLabel={ __(
 				'Loading shipping rates…',
 				'woo-gutenberg-products-block'

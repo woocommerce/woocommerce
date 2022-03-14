@@ -13,7 +13,7 @@ import ShippingRatesControl from '../../shipping-rates-control';
 const ShippingRateSelector = ( {
 	hasRates,
 	shippingRates,
-	shippingRatesLoading,
+	isLoadingRates,
 } ) => {
 	const legend = hasRates
 		? __( 'Shipping options', 'woo-gutenberg-products-block' )
@@ -39,7 +39,7 @@ const ShippingRateSelector = ( {
 					</Notice>
 				}
 				shippingRates={ shippingRates }
-				shippingRatesLoading={ shippingRatesLoading }
+				isLoadingRates={ isLoadingRates }
 				context="woocommerce/cart"
 			/>
 		</fieldset>

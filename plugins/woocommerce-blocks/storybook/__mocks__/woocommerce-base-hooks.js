@@ -22,7 +22,7 @@ export const useStoreCart = () => ( {
 	billingAddress: {},
 	shippingAddress: {},
 	shippingRates: previewShippingRates,
-	shippingRatesLoading: false,
+	isLoadingRates: false,
 	cartHasCalculatedShipping: previewCart.has_calculated_shipping,
 	receiveCart: () => void null,
 } );

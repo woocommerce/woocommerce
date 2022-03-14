@@ -138,7 +138,7 @@ export const TotalsShipping = ( {
 		shippingAddress,
 		cartHasCalculatedShipping,
 		shippingRates,
-		shippingRatesLoading,
+		isLoadingRates,
 	} = useStoreCart();
 
 	const totalShippingValue = getSetting(
@@ -209,7 +209,7 @@ export const TotalsShipping = ( {
 				<ShippingRateSelector
 					hasRates={ hasRates }
 					shippingRates={ shippingRates }
-					shippingRatesLoading={ shippingRatesLoading }
+					isLoadingRates={ isLoadingRates }
 				/>
 			) }
 		</div>
