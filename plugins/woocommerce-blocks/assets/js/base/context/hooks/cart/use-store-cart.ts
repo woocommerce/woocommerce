@@ -108,7 +108,7 @@ export const defaultCartData: StoreCart = {
 	billingAddress: defaultBillingAddress,
 	shippingAddress: defaultShippingAddress,
 	shippingRates: EMPTY_SHIPPING_RATES,
-	shippingRatesLoading: false,
+	isLoadingRates: false,
 	cartHasCalculatedShipping: false,
 	paymentRequirements: EMPTY_PAYMENT_REQUIREMENTS,
 	receiveCart: () => undefined,
@@ -163,7 +163,7 @@ export const useStoreCart = (
 					shippingAddress: defaultShippingAddress,
 					extensions: EMPTY_EXTENSIONS,
 					shippingRates: previewCart.shipping_rates,
-					shippingRatesLoading: false,
+					isLoadingRates: false,
 					cartHasCalculatedShipping:
 						previewCart.has_calculated_shipping,
 					paymentRequirements: previewCart.paymentRequirements,
@@ -182,7 +182,7 @@ export const useStoreCart = (
 				'getCartData'
 			);
 
-			const shippingRatesLoading = store.isCustomerDataUpdating();
+			const isLoadingRates = store.isCustomerDataUpdating();
 			const { receiveCart } = dispatch( storeKey );
 			const billingAddress = decodeValues( cartData.billingAddress );
 			const shippingAddress = cartData.needsShipping
@@ -224,7 +224,7 @@ export const useStoreCart = (
 				shippingAddress: emptyHiddenAddressFields( shippingAddress ),
 				extensions: cartData.extensions,
 				shippingRates: cartData.shippingRates,
-				shippingRatesLoading,
+				isLoadingRates,
 				cartHasCalculatedShipping: cartData.hasCalculatedShipping,
 				paymentRequirements: cartData.paymentRequirements,
 				receiveCart,
