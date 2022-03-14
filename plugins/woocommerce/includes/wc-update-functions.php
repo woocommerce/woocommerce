@@ -2364,3 +2364,22 @@ function wc_update_630_create_product_attributes_lookup_table() {
 function wc_update_630_db_version() {
 	WC_Install::update_db_version( '6.3.0' );
 }
+
+/**
+ * Create the primary key for the product attributes lookup table if it doesn't exist already.
+ *
+ * @return bool Always false.
+ */
+function wc_update_640_add_primary_key_to_product_attributes_lookup_table() {
+	wc_get_container()->get( DataRegenerator::class )->create_table_primary_index();
+
+	return false;
+}
+
+/**
+ *
+ * Update DB version to 6.4.0.
+ */
+function wc_update_640_db_version() {
+	WC_Install::update_db_version( '6.4.0' );
+}
