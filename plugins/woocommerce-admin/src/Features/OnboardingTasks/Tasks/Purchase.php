@@ -53,7 +53,7 @@ class Purchase extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		$products = self::get_products();
+		$products = $this->get_products();
 
 		return count( $products['remaining'] ) === 1
 			? sprintf(
@@ -76,7 +76,7 @@ class Purchase extends Task {
 	 * @return string
 	 */
 	public function get_content() {
-		$products = self::get_products();
+		$products = $this->get_products();
 
 		return count( $products['remaining'] ) === 1
 			? $products['purchaseable'][0]['description']
@@ -116,7 +116,7 @@ class Purchase extends Task {
 	 * @return bool
 	 */
 	public function is_complete() {
-		$products = self::get_products();
+		$products = $this->get_products();
 		return count( $products['remaining'] ) === 0;
 	}
 
@@ -135,8 +135,43 @@ class Purchase extends Task {
 	 * @return bool
 	 */
 	public function can_view() {
-		$products = self::get_products();
+		$products = $this->get_products();
 		return count( $products['purchaseable'] ) > 0;
+	}
+
+	/**
+	 * Get puchasable theme by slug.
+	 *
+	 * @param string $price_string string of price.
+	 * @return float|null
+	 */
+	private function get_price_from_string( $price_string ) {
+		$price_match = null;
+		// Parse price from string as it includes the currency symbol.
+		preg_match( '/\\d+\.\d{2}\s*/', $price_string, $price_match );
+		if ( count( $price_match ) > 0 ) {
+			return (float) $price_match[0];
+		}
+		return null;
+	}
+
+	/**
+	 * Get puchasable theme by slug.
+	 *
+	 * @param string $slug from theme.
+	 * @return array|null
+	 */
+	private function get_paid_theme_by_slug( $slug ) {
+		$themes    = Onboarding::get_themes();
+		$theme_key = array_search( $slug, array_column( $themes, 'slug' ), true );
+		$theme     = false !== $theme_key ? $themes[ $theme_key ] : null;
+		if ( $theme && isset( $theme['id'] ) && isset( $theme['price'] ) && ( ! isset( $theme['is_installed'] ) || ! $theme['is_installed'] ) ) {
+			$price = $this->get_price_from_string( $theme['price'] );
+			if ( $price && $price > 0 ) {
+				return $themes[ $theme_key ];
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -144,13 +179,21 @@ class Purchase extends Task {
 	 *
 	 * @return array
 	 */
-	public static function get_products() {
+	private function get_products() {
 		$profiler_data = get_option( Onboarding::PROFILE_DATA_OPTION, array() );
 		$installed     = PluginsHelper::get_installed_plugin_slugs();
 		$product_types = isset( $profiler_data['product_types'] ) ? $profiler_data['product_types'] : array();
 		$product_data  = Onboarding::get_product_data( Onboarding::get_allowed_product_types() );
-		$purchaseable  = array();
-		$remaining     = array();
+
+		$theme      = isset( $profiler_data['theme'] ) ? $profiler_data['theme'] : null;
+		$paid_theme = $theme ? $this->get_paid_theme_by_slug( $theme ) : null;
+		if ( $paid_theme ) {
+			$product_types[]        = 'themes';
+			$product_data['themes'] = $paid_theme;
+		}
+
+		$purchaseable = array();
+		$remaining    = array();
 		foreach ( $product_types as $type ) {
 			if ( ! isset( $product_data[ $type ]['slug'] ) ) {
 				continue;
@@ -159,7 +202,11 @@ class Purchase extends Task {
 			$purchaseable[] = $product_data[ $type ];
 
 			if ( ! in_array( $product_data[ $type ]['slug'], $installed, true ) ) {
-				$remaining[] = $product_data[ $type ]['label'];
+				if ( isset( $product_data[ $type ]['label'] ) ) {
+					$remaining[] = $product_data[ $type ]['label'];
+				} else {
+					$remaining[] = $product_data[ $type ]['title'];
+				}
 			}
 		}
 
