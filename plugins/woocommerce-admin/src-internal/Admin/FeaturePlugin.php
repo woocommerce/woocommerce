@@ -152,6 +152,8 @@ class FeaturePlugin {
 		$this->define( 'WC_ADMIN_DIST_JS_FOLDER', 'dist/' );
 		$this->define( 'WC_ADMIN_DIST_CSS_FOLDER', 'dist/' );
 		$this->define( 'WC_ADMIN_PLUGIN_FILE', WC_ADMIN_ABSPATH . 'woocommerce-admin.php' );
+		$this->define( 'WC_ADMIN_IMAGES_FOLDER_URL', plugins_url( 'images', WC_ADMIN_PLUGIN_FILE ) );
+
 		// WARNING: Do not directly edit this version number constant.
 		// It is updated as part of the prebuild process from the package.json value.
 		$this->define( 'WC_ADMIN_VERSION_NUMBER', '3.4.0-dev' );

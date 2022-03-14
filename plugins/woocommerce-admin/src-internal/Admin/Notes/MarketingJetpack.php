@@ -107,10 +107,7 @@ class MarketingJetpack {
 		$note->set_name( self::NOTE_NAME );
 		$note->set_layout( 'thumbnail' );
 		$note->set_image(
-			plugins_url(
-				'/images/admin_notes/marketing-jetpack-2x.png',
-				WC_ADMIN_PLUGIN_FILE
-			)
+			WC_ADMIN_IMAGES_FOLDER_URL . '/admin_notes/marketing-jetpack-2x.png'
 		);
 		$note->set_content_data( (object) array() );
 		$note->set_source( 'woocommerce-admin-notes' );

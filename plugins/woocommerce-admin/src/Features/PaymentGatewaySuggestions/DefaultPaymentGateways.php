@@ -96,7 +96,7 @@ class DefaultPaymentGateways {
 				'id'         => 'paystack',
 				'title'      => __( 'Paystack', 'woocommerce-admin' ),
 				'content'    => __( 'Paystack helps African merchants accept one-time and recurring payments online with a modern, safe, and secure payment gateway.', 'woocommerce-admin' ),
-				'image'      => plugins_url( 'images/onboarding/paystack.png', WC_ADMIN_PLUGIN_FILE ),
+				'image'      => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/paystack.png',
 				'plugins'    => array( 'woo-paystack' ),
 				'is_visible' => array(
 					self::get_rules_for_countries( array( 'ZA', 'GH', 'NG' ) ),
@@ -143,7 +143,7 @@ class DefaultPaymentGateways {
 				'id'         => 'mollie_wc_gateway_banktransfer',
 				'title'      => __( 'Mollie', 'woocommerce-admin' ),
 				'content'    => __( 'Effortless payments by Mollie: Offer global and local payment methods, get onboarded in minutes, and supported in your language.', 'woocommerce-admin' ),
-				'image'      => plugins_url( 'images/onboarding/mollie.svg', WC_ADMIN_PLUGIN_FILE ),
+				'image'      => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/mollie.svg',
 				'plugins'    => array( 'mollie-payments-for-woocommerce' ),
 				'is_visible' => array(
 					self::get_rules_for_countries(
@@ -167,7 +167,7 @@ class DefaultPaymentGateways {
 				'id'                      => 'woo-mercado-pago-custom',
 				'title'                   => __( 'Mercado Pago Checkout Pro & Custom', 'woocommerce-admin' ),
 				'content'                 => __( 'Accept credit and debit cards, offline (cash or bank transfer) and logged-in payments with money in Mercado Pago. Safe and secure payments with the leading payment processor in LATAM.', 'woocommerce-admin' ),
-				'image'                   => plugins_url( 'images/onboarding/mercadopago.png', WC_ADMIN_PLUGIN_FILE ),
+				'image'                   => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/mercadopago.png',
 				'plugins'                 => array( 'woocommerce-mercadopago' ),
 				'is_visible'              => array(
 					self::get_rules_for_countries( array( 'AR', 'BR', 'CL', 'CO', 'MX', 'PE', 'UY' ) ),
@@ -194,7 +194,7 @@ class DefaultPaymentGateways {
 				'id'         => 'cod',
 				'title'      => __( 'Cash on delivery', 'woocommerce-admin' ),
 				'content'    => __( 'Take payments in cash upon delivery.', 'woocommerce-admin' ),
-				'image'      => plugins_url( 'images/onboarding/cod.svg', WC_ADMIN_PLUGIN_FILE ),
+				'image'      => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/cod.svg',
 				'is_visible' => array(
 					self::get_rules_for_cbd( false ),
 				),
@@ -203,7 +203,7 @@ class DefaultPaymentGateways {
 				'id'         => 'bacs',
 				'title'      => __( 'Direct bank transfer', 'woocommerce-admin' ),
 				'content'    => __( 'Take payments via bank transfer.', 'woocommerce-admin' ),
-				'image'      => plugins_url( 'images/onboarding/bacs.svg', WC_ADMIN_PLUGIN_FILE ),
+				'image'      => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/bacs.svg',
 				'is_visible' => array(
 					self::get_rules_for_cbd( false ),
 				),
@@ -215,7 +215,7 @@ class DefaultPaymentGateways {
 					'Manage transactions without leaving your WordPress Dashboard. Only with WooCommerce Payments.',
 					'woocommerce-admin'
 				),
-				'image'                   => plugins_url( 'images/onboarding/wcpay.svg', WC_ADMIN_PLUGIN_FILE ),
+				'image'                   => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/wcpay.svg',
 				'plugins'                 => array( 'woocommerce-payments' ),
 				'description'             => 'With WooCommerce Payments, you can securely accept major cards, Apple Pay, and payments in over 100 currencies. Track cash flow and manage recurring revenue directly from your store’s dashboard - with no setup costs or monthly fees.',
 				'is_visible'              => array(
@@ -257,7 +257,7 @@ class DefaultPaymentGateways {
 					'Manage transactions without leaving your WordPress Dashboard. Only with WooCommerce Payments.',
 					'woocommerce-admin'
 				),
-				'image'                   => plugins_url( 'images/onboarding/wcpay.svg', WC_ADMIN_PLUGIN_FILE ),
+				'image'                   => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/wcpay.svg',
 				'plugins'                 => array( 'woocommerce-payments' ),
 				'description'             => 'With WooCommerce Payments, you can securely accept major cards, Apple Pay, and payments in over 100 currencies. Track cash flow and manage recurring revenue directly from your store’s dashboard - with no setup costs or monthly fees.',
 				'is_visible'              => array(
@@ -291,7 +291,7 @@ class DefaultPaymentGateways {
 					'Manage transactions without leaving your WordPress Dashboard. Only with WooCommerce Payments.',
 					'woocommerce-admin'
 				),
-				'image'                   => plugins_url( 'images/onboarding/wcpay.svg', WC_ADMIN_PLUGIN_FILE ),
+				'image'                   => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/wcpay.svg',
 				'plugins'                 => array( 'woocommerce-payments' ),
 				'description'             => 'With WooCommerce Payments, you can securely accept major cards, Apple Pay, and payments in over 100 currencies – with no setup costs or monthly fees – and you can now accept in-person payments with the Woo mobile app.',
 				'is_visible'              => array(
@@ -322,7 +322,7 @@ class DefaultPaymentGateways {
 				'id'         => 'razorpay',
 				'title'      => __( 'Razorpay', 'woocommerce-admin' ),
 				'content'    => __( 'The official Razorpay extension for WooCommerce allows you to accept credit cards, debit cards, netbanking, wallet, and UPI payments.', 'woocommerce-admin' ),
-				'image'      => plugins_url( 'images/onboarding/razorpay.svg', WC_ADMIN_PLUGIN_FILE ),
+				'image'      => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/razorpay.svg',
 				'plugins'    => array( 'woo-razorpay' ),
 				'is_visible' => array(
 					(object) array(
@@ -337,7 +337,7 @@ class DefaultPaymentGateways {
 				'id'         => 'payubiz',
 				'title'      => __( 'PayU for WooCommerce', 'woocommerce-admin' ),
 				'content'    => __( 'Enable PayU’s exclusive plugin for WooCommerce to start accepting payments in 100+ payment methods available in India including credit cards, debit cards, UPI, & more!', 'woocommerce-admin' ),
-				'image'      => plugins_url( 'images/onboarding/payu.svg', WC_ADMIN_PLUGIN_FILE ),
+				'image'      => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/payu.svg',
 				'plugins'    => array( 'payu-india' ),
 				'is_visible' => array(
 					(object) array(
@@ -352,7 +352,7 @@ class DefaultPaymentGateways {
 				'id'         => 'eway',
 				'title'      => __( 'Eway', 'woocommerce-admin' ),
 				'content'    => __( 'The Eway extension for WooCommerce allows you to take credit card payments directly on your store without redirecting your customers to a third party site to make payment.', 'woocommerce-admin' ),
-				'image'      => plugins_url( 'images/onboarding/eway.png', WC_ADMIN_PLUGIN_FILE ),
+				'image'      => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/eway.png',
 				'plugins'    => array( 'woocommerce-gateway-eway' ),
 				'is_visible' => array(
 					self::get_rules_for_countries( array( 'AU', 'NZ' ) ),

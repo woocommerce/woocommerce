@@ -97,7 +97,7 @@ class InstalledExtensions {
 		}
 
 		$data         = self::get_extension_base_data( $slug );
-		$data['icon'] = plugins_url( 'images/marketing/automatewoo.svg', WC_ADMIN_PLUGIN_FILE );
+		$data['icon'] = WC_ADMIN_IMAGES_FOLDER_URL . '/marketing/automatewoo.svg';
 
 		if ( 'activated' === $data['status'] && function_exists( 'AW' ) ) {
 			$data['settingsUrl'] = admin_url( 'admin.php?page=automatewoo-settings' );
@@ -121,7 +121,7 @@ class InstalledExtensions {
 		}
 
 		$data         = self::get_extension_base_data( $slug );
-		$data['icon'] = plugins_url( 'images/marketing/mailchimp.svg', WC_ADMIN_PLUGIN_FILE );
+		$data['icon'] = WC_ADMIN_IMAGES_FOLDER_URL . '/marketing/mailchimp.svg';
 
 		if ( 'activated' === $data['status'] && function_exists( 'mailchimp_is_configured' ) ) {
 			$data['docsUrl']     = 'https://mailchimp.com/help/connect-or-disconnect-mailchimp-for-woocommerce/';
@@ -148,7 +148,7 @@ class InstalledExtensions {
 		}
 
 		$data         = self::get_extension_base_data( $slug );
-		$data['icon'] = plugins_url( 'images/marketing/facebook.svg', WC_ADMIN_PLUGIN_FILE );
+		$data['icon'] = WC_ADMIN_IMAGES_FOLDER_URL . '/marketing/facebook.svg';
 
 		if ( 'activated' === $data['status'] && function_exists( 'facebook_for_woocommerce' ) ) {
 			$integration = facebook_for_woocommerce()->get_integration();
@@ -177,7 +177,7 @@ class InstalledExtensions {
 		}
 
 		$data         = self::get_extension_base_data( $slug );
-		$data['icon'] = plugins_url( 'images/marketing/pinterest.svg', WC_ADMIN_PLUGIN_FILE );
+		$data['icon'] = WC_ADMIN_IMAGES_FOLDER_URL . '/marketing/pinterest.svg';
 
 		// TODO: Finalise docs url.
 		$data['docsUrl'] = 'https://woocommerce.com/document/pinterest-for-woocommerce/?utm_medium=product';
@@ -208,7 +208,7 @@ class InstalledExtensions {
 		}
 
 		$data         = self::get_extension_base_data( $slug );
-		$data['icon'] = plugins_url( 'images/marketing/google.svg', WC_ADMIN_PLUGIN_FILE );
+		$data['icon'] = WC_ADMIN_IMAGES_FOLDER_URL . '/marketing/google.svg';
 
 		if ( 'activated' === $data['status'] && function_exists( 'woogle_get_container' ) && class_exists( '\Automattic\WooCommerce\GoogleListingsAndAds\MerchantCenter\MerchantCenterService' ) ) {
 
@@ -240,7 +240,7 @@ class InstalledExtensions {
 		}
 
 		$data         = self::get_extension_base_data( $slug );
-		$data['icon'] = plugins_url( 'images/marketing/hubspot.svg', WC_ADMIN_PLUGIN_FILE );
+		$data['icon'] = WC_ADMIN_IMAGES_FOLDER_URL . '/marketing/hubspot.svg';
 
 		if ( 'activated' === $data['status'] && class_exists( '\Hubwoo' ) ) {
 
@@ -269,7 +269,7 @@ class InstalledExtensions {
 		}
 
 		$data         = self::get_extension_base_data( $slug );
-		$data['icon'] = plugins_url( 'images/marketing/amazon-ebay.svg', WC_ADMIN_PLUGIN_FILE );
+		$data['icon'] = WC_ADMIN_IMAGES_FOLDER_URL . '/marketing/amazon-ebay.svg';
 
 		if ( 'activated' === $data['status'] && class_exists( '\CodistoConnect' ) ) {
 
@@ -300,7 +300,7 @@ class InstalledExtensions {
 		}
 
 		$data         = self::get_extension_base_data( $slug );
-		$data['icon'] = plugins_url( 'images/marketing/mailpoet.svg', WC_ADMIN_PLUGIN_FILE );
+		$data['icon'] = WC_ADMIN_IMAGES_FOLDER_URL . '/marketing/mailpoet.svg';
 
 		if ( 'activated' === $data['status'] && class_exists( '\MailPoet\API\API' ) ) {
 			$mailpoet_api = \MailPoet\API\API::MP( 'v1' );

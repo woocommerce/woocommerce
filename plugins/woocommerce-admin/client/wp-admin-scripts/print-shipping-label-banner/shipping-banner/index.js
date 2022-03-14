@@ -399,7 +399,7 @@ export class ShippingBanner extends Component {
 				<div className="wc-admin-shipping-banner-container">
 					<img
 						className="wc-admin-shipping-banner-illustration"
-						src={ wcAdminAssetUrl + 'shippingillustration.svg' }
+						src={ wcAdminAssetUrl + '/shippingillustration.svg' }
 						alt={ __( 'Shipping ', 'woocommerce-admin' ) }
 					/>
 					<div className="wc-admin-shipping-banner-blob">

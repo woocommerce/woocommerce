@@ -561,7 +561,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		$industry_images = array();
 		$industries      = Onboarding::get_allowed_industries();
 		foreach ( $industries as $industry_slug => $label ) {
-			$industry_images[ $industry_slug ] = apply_filters( 'woocommerce_admin_onboarding_industry_image', plugins_url( 'images/onboarding/other-small.jpg', WC_ADMIN_PLUGIN_FILE ), $industry_slug );
+			$industry_images[ $industry_slug ] = apply_filters( 'woocommerce_admin_onboarding_industry_image', WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/other-small.jpg', $industry_slug );
 		}
 		return $industry_images;
 	}
