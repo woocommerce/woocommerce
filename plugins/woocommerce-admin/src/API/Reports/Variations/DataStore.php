@@ -126,7 +126,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$attr_subquery = new SqlQuery( $this->context . '_attribute_subquery' );
 			$attr_subquery->add_sql_clause( 'select', "DISTINCT {$order_product_lookup_table}.order_item_id" );
 			$attr_subquery->add_sql_clause( 'from', $order_product_lookup_table );
-			$attr_subquery->add_sql_clause( 'where', "AND {$order_product_lookup_table}.variation_id != 0" );
+
+			if ( $this->should_exclude_simple_products( $query_args ) ) {
+				$attr_subquery->add_sql_clause( 'where', "AND {$order_product_lookup_table}.variation_id != 0" );
+			}
 
 			foreach ( $attribute_subqueries['join'] as $attribute_join ) {
 				$attr_subquery->add_sql_clause( 'join', $attribute_join );
@@ -177,7 +180,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		if ( $included_variations ) {
 			$this->subquery->add_sql_clause( 'where', "AND {$order_product_lookup_table}.variation_id IN ({$included_variations})" );
 		} elseif ( ! $included_products ) {
-			$this->subquery->add_sql_clause( 'where', "AND {$order_product_lookup_table}.variation_id != 0" );
+			if ( $this->should_exclude_simple_products( $query_args ) ) {
+				$this->subquery->add_sql_clause( 'where', "AND {$order_product_lookup_table}.variation_id != 0" );
+			}
 		}
 
 		$order_status_filter = $this->get_status_subquery( $query_args );
@@ -287,6 +292,19 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	}
 
 	/**
+	 * Returns if simple products should be excluded from the report.
+	 *
+	 * @internal
+	 *
+	 * @param array $query_args Query parameters.
+	 *
+	 * @return boolean
+	 */
+	protected function should_exclude_simple_products( array $query_args ) {
+		return apply_filters( 'experimental_woocommerce_analytics_variations_should_exclude_simple_products', true, $query_args );
+	}
+
+	/**
 	 * Fill missing extended_info.name for the deleted products.
 	 *
 	 * @param array $products Product data.
@@ -331,12 +349,12 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				{$wpdb->prefix}wc_order_product_lookup as product_lookup
 				left join {$wpdb->prefix}woocommerce_order_items as order_items
 				on product_lookup.order_item_id = order_items.order_item_id
-			where 
-				{$where_clauses}	
-			group by 
-				product_lookup.product_id, 
-				product_lookup.variation_id, 
-				order_items.order_item_name				
+			where
+				{$where_clauses}
+			group by
+				product_lookup.product_id,
+				product_lookup.variation_id,
+				order_items.order_item_name
 		";
 
 		// phpcs:ignore

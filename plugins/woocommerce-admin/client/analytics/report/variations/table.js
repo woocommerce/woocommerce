@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { __, _n, _x } from '@wordpress/i18n';
+import { applyFilters } from '@wordpress/hooks';
 import { Component } from '@wordpress/element';
 import { map } from 'lodash';
 import { Link } from '@woocommerce/components';
@@ -17,6 +18,11 @@ import { isLowStock } from '../products/utils';
 import { CurrencyContext } from '../../../lib/currency-context';
 import { getVariationName } from '../../../lib/async-requests';
 import { getAdminSetting } from '~/utils/admin-settings';
+
+const EXPERIMENTAL_VARIATIONS_REPORT_TABLE_TITLE_FILTER =
+	'experimental_woocommerce_admin_variations_report_table_title';
+const EXPERIMENTAL_VARIATIONS_REPORT_TABLE_SUMMARY_VARIATIONS_COUNT_LABEL_FILTER =
+	'experimental_woocommerce_admin_variations_report_table_summary_variations_count_label';
 
 const manageStock = getAdminSetting( 'manageStock', 'no' );
 const stockStatuses = getAdminSetting( 'stockStatuses', {} );
@@ -189,6 +195,7 @@ class VariationsReportTable extends Component {
 	}
 
 	getSummary( totals ) {
+		const { query } = this.props;
 		const {
 			variations_count: variationsCount = 0,
 			items_sold: itemsSold = 0,
@@ -199,11 +206,25 @@ class VariationsReportTable extends Component {
 		const currency = getCurrencyConfig();
 		return [
 			{
-				label: _n(
-					'variation sold',
-					'variations sold',
+				/**
+				 * Experimental: Filter the label used for the number of variations in the report table summary.
+				 *
+				 * @filter experimental_woocommerce_admin_variations_report_table_summary_variations_count_label
+				 *
+				 * @param {string} label Label used for the count.
+				 * @param {string} variationsCount Number of variations.
+				 * @param {Array} query Query parameters.
+				 */
+				label: applyFilters(
+					EXPERIMENTAL_VARIATIONS_REPORT_TABLE_SUMMARY_VARIATIONS_COUNT_LABEL_FILTER,
+					_n(
+						'variation sold',
+						'variations sold',
+						variationsCount,
+						'woocommerce-admin'
+					),
 					variationsCount,
-					'woocommerce-admin'
+					query
 				),
 				value: formatValue( currency, 'number', variationsCount ),
 			},
@@ -278,7 +299,19 @@ class VariationsReportTable extends Component {
 					product_includes: query.product_includes,
 					variations: query.variations,
 				} }
-				title={ __( 'Variations', 'woocommerce-admin' ) }
+				/**
+				 * Experimental: Filter the title used for the report table.
+				 *
+				 * @filter experimental_woocommerce_admin_variations_report_table_title
+				 *
+				 * @param {string} title Title used for the report table.
+				 * @param {Array} query Query parameters.
+				 */
+				title={ applyFilters(
+					EXPERIMENTAL_VARIATIONS_REPORT_TABLE_TITLE_FILTER,
+					__( 'Variations', 'woocommerce-admin' ),
+					query
+				) }
 				columnPrefsKey="variations_report_columns"
 				filters={ filters }
 				advancedFilters={ advancedFilters }

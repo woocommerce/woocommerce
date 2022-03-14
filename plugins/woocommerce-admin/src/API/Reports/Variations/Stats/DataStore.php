@@ -83,7 +83,7 @@ class DataStore extends VariationsDataStore implements DataStoreInterface {
 		$included_variations = $this->get_included_variations( $query_args );
 		if ( $included_variations ) {
 			$products_where_clause .= " AND {$order_product_lookup_table}.variation_id IN ({$included_variations})";
-		} else {
+		} elseif ( $this->should_exclude_simple_products( $query_args ) ) {
 			$products_where_clause .= " AND {$order_product_lookup_table}.variation_id != 0";
 		}
 
@@ -117,6 +117,19 @@ class DataStore extends VariationsDataStore implements DataStoreInterface {
 		$this->interval_query->add_sql_clause( 'where', $products_where_clause );
 		$this->interval_query->add_sql_clause( 'join', $products_from_clause );
 		$this->interval_query->add_sql_clause( 'select', $this->get_sql_clause( 'select' ) . ' AS time_interval' );
+	}
+
+	/**
+	 * Returns if simple products should be excluded from the report.
+	 *
+	 * @internal
+	 *
+	 * @param array $query_args Query parameters.
+	 *
+	 * @return boolean
+	 */
+	protected function should_exclude_simple_products( array $query_args ) {
+		return apply_filters( 'experimental_woocommerce_analytics_variations_stats_should_exclude_simple_products', true, $query_args );
 	}
 
 	/**
