@@ -48,7 +48,7 @@ const CheckoutProcessor = () => {
 	const { hasValidationErrors } = useValidationContext();
 	const { shippingErrorStatus } = useShippingDataContext();
 	const { billingData, shippingAddress } = useCustomerDataContext();
-	const { cartNeedsPayment, receiveCart } = useStoreCart();
+	const { cartNeedsPayment, cartNeedsShipping, receiveCart } = useStoreCart();
 	const {
 		activePaymentMethod,
 		isExpressPaymentMethodActive,
@@ -185,14 +185,17 @@ const CheckoutProcessor = () => {
 			billing_address: emptyHiddenAddressFields(
 				currentBillingData.current
 			),
-			shipping_address: emptyHiddenAddressFields(
-				currentShippingAddress.current
-			),
 			customer_note: orderNotes,
 			create_account: shouldCreateAccount,
 			...paymentData,
 			extensions: { ...extensionData },
 		};
+
+		if ( cartNeedsShipping ) {
+			data.shipping_address = emptyHiddenAddressFields(
+				currentShippingAddress.current
+			);
+		}
 
 		triggerFetch( {
 			path: '/wc/store/v1/checkout',
@@ -265,14 +268,15 @@ const CheckoutProcessor = () => {
 	}, [
 		isProcessingOrder,
 		removeNotice,
-		orderNotes,
-		shouldCreateAccount,
 		cartNeedsPayment,
 		paymentMethodId,
 		paymentMethodData,
 		shouldSavePayment,
 		activePaymentMethod,
+		orderNotes,
+		shouldCreateAccount,
 		extensionData,
+		cartNeedsShipping,
 		dispatchActions,
 		addErrorNotice,
 		receiveCart,

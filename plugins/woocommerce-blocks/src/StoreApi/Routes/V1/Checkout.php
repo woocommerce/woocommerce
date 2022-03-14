@@ -393,21 +393,21 @@ class Checkout extends AbstractCartRoute {
 	private function update_customer_from_request( \WP_REST_Request $request ) {
 		$customer = wc()->customer;
 
-		if ( isset( $request['billing_address'] ) ) {
-			foreach ( $request['billing_address'] as $key => $value ) {
-				if ( is_callable( [ $customer, "set_billing_$key" ] ) ) {
-					$customer->{"set_billing_$key"}( $value );
-				}
+		// Billing address is a required field.
+		foreach ( $request['billing_address'] as $key => $value ) {
+			if ( is_callable( [ $customer, "set_billing_$key" ] ) ) {
+				$customer->{"set_billing_$key"}( $value );
 			}
 		}
 
-		if ( isset( $request['shipping_address'] ) ) {
-			foreach ( $request['shipping_address'] as $key => $value ) {
-				if ( is_callable( [ $customer, "set_shipping_$key" ] ) ) {
-					$customer->{"set_shipping_$key"}( $value );
-				} elseif ( 'phone' === $key ) {
-					$customer->update_meta_data( 'shipping_phone', $value );
-				}
+		// If shipping address (optional field) was not provided, set it to the given billing address (required field).
+		$shipping_address_values = $request['shipping_address'] ?? $request['billing_address'];
+
+		foreach ( $shipping_address_values as $key => $value ) {
+			if ( is_callable( [ $customer, "set_shipping_$key" ] ) ) {
+				$customer->{"set_shipping_$key"}( $value );
+			} elseif ( 'phone' === $key ) {
+				$customer->update_meta_data( 'shipping_phone', $value );
 			}
 		}
 
