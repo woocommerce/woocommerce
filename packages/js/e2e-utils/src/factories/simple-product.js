@@ -1,5 +1,4 @@
 import { SimpleProduct } from '@woocommerce/api';
-const faker = require( 'faker/locale/en' );
 import { Factory } from 'fishery';
 
 /**
@@ -17,8 +16,8 @@ export function simpleProductFactory( httpClient ) {
 		} );
 
 		return {
-			name: params.name ? params.name : faker.commerce.productName(),
-			regularPrice: params.regularPrice ? params.regularPrice : faker.commerce.price(),
+			name: params.name ? params.name : 'Simple Product',
+			regularPrice: params.regularPrice ? params.regularPrice : '10.99',
 		};
 	} );
 }

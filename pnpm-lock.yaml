@@ -114,12 +114,10 @@ importers:
       '@wordpress/browserslist-config': ^4.1.0
       '@wordpress/deprecated': ^3.2.3
       config: 3.3.3
-      faker: ^5.1.0
     dependencies:
       '@jest/globals': 26.6.2
       '@wordpress/deprecated': 3.2.3
       config: 3.3.3
-      faker: 5.5.3
     devDependencies:
       '@babel/cli': 7.12.8_@babel+core@7.12.9
       '@babel/core': 7.12.9
@@ -224,14 +222,12 @@ importers:
       '@wordpress/e2e-test-utils': ^4.16.1
       config: 3.3.3
       eslint: ^8.1.0
-      faker: ^5.1.0
       fishery: ^1.2.0
     dependencies:
       '@automattic/puppeteer-utils': github.com/Automattic/puppeteer-utils/0f3ec50
       '@wordpress/deprecated': 3.2.3
       '@wordpress/e2e-test-utils': 4.16.1_jest@27.3.1
       config: 3.3.3
-      faker: 5.5.3
       fishery: 1.4.0
     devDependencies:
       '@babel/cli': 7.12.8_@babel+core@7.12.9
@@ -10497,10 +10493,6 @@ packages:
     resolution: {integrity: sha1-lpGEQOMEGnpBT4xS48V06zw+HgU=}
     engines: {'0': node >=0.6.0}
 
-  /faker/5.5.3:
-    resolution: {integrity: sha512-wLTv2a28wjUyWkbnX7u/ABZBkUkIF2fCd73V6P2oFqEGEktDfzWx4UxrSqtPRw0xPRAcjeAOIiJWqZm3pP4u3g==}
-    dev: false
-
   /fast-deep-equal/3.1.3:
     resolution: {integrity: sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==}
 
@@ -18026,7 +18018,6 @@ packages:
     resolution: {integrity: sha512-J9IpCMXpGDLN7MGhdMcUbZ0SIWLCcTVdrjTgKVYubkW1sn1KcDqJgsdTr/ItkO8dOXKLuhvnq2QnE5Vrzb3WMA==}
     engines: {node: '>=10'}
     dependencies:
-      faker: 5.5.3
       file-type: 3.9.0
       http-reasons: 0.1.0
       iconv-lite: 0.6.3
