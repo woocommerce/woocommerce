@@ -6,6 +6,7 @@
 namespace Automattic\WooCommerce\Internal\ProductAttributesLookup;
 
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
+use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -466,27 +467,31 @@ class DataRegenerator {
  term_id bigint(20) NOT NULL,
  is_variation_attribute tinyint(1) NOT NULL,
  in_stock tinyint(1) NOT NULL,
- INDEX product_or_parent_id_term_id (product_or_parent_id, term_id),
  INDEX is_variation_attribute_term_id (is_variation_attribute, term_id),
- PRIMARY KEY  (`product_id`, `product_or_parent_id`, `taxonomy`, `term_id`)
+ PRIMARY KEY  ( `product_or_parent_id`, `term_id`, `product_id`, `taxonomy` )
 ) $collate;";
 	}
 
 	/**
 	 * Create the primary key for the table if it doesn't exist already.
+	 * It also deletes the product_or_parent_id_term_id index if it exists, since it's now redundant.
 	 *
 	 * @return void
 	 */
 	public function create_table_primary_index() {
 		global $wpdb;
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:disable WordPress.DB.PreparedSQL
 		$wpdb->query(
 			"
 ALTER TABLE {$this->lookup_table_name}
-ADD PRIMARY KEY IF NOT EXISTS (`product_id`, `product_or_parent_id`, `taxonomy`, `term_id`)"
+ADD PRIMARY KEY IF NOT EXISTS ( `product_or_parent_id`, `term_id`, `product_id`, `taxonomy` )"
 		);
-		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:enable WordPress.DB.PreparedSQL
+
+		wc_get_container()
+			->get( DatabaseUtil::class )
+			->drop_table_index( $this->lookup_table_name, 'product_or_parent_id_term_id' );
 	}
 
 	/**
