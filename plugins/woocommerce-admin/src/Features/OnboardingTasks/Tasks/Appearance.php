@@ -39,6 +39,12 @@ class Appearance extends Task {
 	 * @return string
 	 */
 	public function get_title() {
+		if ( true === $this->get_parent_option( 'use_completed_title' ) ) {
+			if ( $this->is_complete() ) {
+				return __( 'You personalized your store', 'woocommerce-admin' );
+			}
+			return __( 'Personalize your store', 'woocommerce-admin' );
+		}
 		return __( 'Personalize my store', 'woocommerce-admin' );
 	}
 

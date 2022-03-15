@@ -5,6 +5,7 @@
 
 namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks;
 
+use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\DeprecatedExtendedTask;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 use Automattic\WooCommerce\Internal\Admin\Loader;
@@ -91,8 +92,33 @@ class TaskLists {
 					'Appearance',
 				),
 				'event_prefix' => 'tasklist_',
+				'visible'      => ! Features::is_enabled( 'tasklist-setup-experiment-1' ),
 			)
 		);
+
+		self::add_list(
+			array(
+				'id'           => 'setup_experiment_1',
+				'hidden_id'    => 'setup',
+				'title'        => __( 'Get ready to start selling', 'woocommerce-admin' ),
+				'tasks'        => array(
+					'StoreDetails',
+					'Products',
+					'WooCommercePayments',
+					'Payments',
+					'Tax',
+					'Shipping',
+					'Marketing',
+					'Appearance',
+				),
+				'event_prefix' => 'tasklist_',
+				'options'      => array(
+					'use_completed_title' => true,
+				),
+				'visible'      => Features::is_enabled( 'tasklist-setup-experiment-1' ),
+			)
+		);
+
 		self::add_list(
 			array(
 				'id'      => 'extended',
@@ -150,6 +176,7 @@ class TaskLists {
 				'event_prefix' => 'extended_tasklist_',
 			)
 		);
+
 	}
 
 	/**

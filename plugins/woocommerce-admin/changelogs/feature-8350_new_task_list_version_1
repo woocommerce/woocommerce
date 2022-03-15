@@ -1,0 +1,4 @@
+Significance: minor
+Type: Add
+
+Allow for custom completed task titles and use of dynamic task lists. #8457

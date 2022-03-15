@@ -57,6 +57,7 @@ type TaskItemProps = {
 		args?: ActionArgs
 	) => void;
 	actionLabel?: string;
+	className?: string;
 };
 
 const OptionalTaskTooltip: React.FC< {

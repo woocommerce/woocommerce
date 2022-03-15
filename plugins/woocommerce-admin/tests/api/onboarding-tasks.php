@@ -289,6 +289,8 @@ class WC_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 		$task = TaskLists::get_task( 'test-task' );
 
 		$week_in_ms = WEEK_IN_SECONDS * 1000;
+		// Taking off 1 minute as matching a week is very precise and we might run into some race conditions otherwise.
+		$week_in_ms -= MINUTE_IN_SECONDS * 1000;
 
 		$this->assertEquals( $data['snoozedUntil'] >= ( ( time() * 1000 ) + $week_in_ms ), true );
 

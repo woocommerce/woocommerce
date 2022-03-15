@@ -86,6 +86,21 @@ class WC_Tests_OnboardingTasks_TaskList extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that lists can be hidden.
+	 */
+	public function test_visible() {
+		$this->assertTrue( $this->list->is_visible() );
+	}
+
+	/**
+	 * Tests that lists can be hidden.
+	 */
+	public function test_visible_prop() {
+		$this->list->visible = false;
+		$this->assertFalse( $this->list->is_visible() );
+	}
+
+	/**
 	 * Tests adding a task.
 	 */
 	public function test_add_task() {

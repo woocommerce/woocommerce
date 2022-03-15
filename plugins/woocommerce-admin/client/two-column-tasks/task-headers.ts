@@ -9,7 +9,7 @@ import ProductsHeader from './headers/products';
 import PaymentsHeader from './headers/payments';
 import WoocommercePaymentsHeader from './headers/woocommerce-payments';
 
-export default {
+const taskHeaders: Record< string, React.ElementType > = {
 	tax: TaxHeader,
 	shipping: ShippingHeader,
 	marketing: MarketingHeader,
@@ -18,3 +18,5 @@ export default {
 	products: ProductsHeader,
 	'woocommerce-payments': WoocommercePaymentsHeader,
 };
+
+export default taskHeaders;

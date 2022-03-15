@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render, act, cleanup } from '@testing-library/react';
+import { render, act, cleanup, waitFor } from '@testing-library/react';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useExperiment } from '@woocommerce/explat';
 import { recordEvent } from '@woocommerce/tracks';
@@ -16,9 +16,10 @@ jest.mock( '@wordpress/data' );
 jest.mock( '@woocommerce/explat' );
 jest.mock( '@woocommerce/tracks' );
 
-jest.mock( '../task-list', () => ( {
-	TaskList: ( { id } ) => <div>task-list:{ id }</div>,
-} ) );
+jest.mock( '../task-list', () => ( { id } ) => <div>task-list:{ id }</div> );
+jest.mock( '../../two-column-tasks/task-list', () => ( { id } ) => (
+	<div>two-column-list:{ id }</div>
+) );
 
 jest.mock( '../task', () => ( {
 	Task: ( { query } ) => <div>task:{ query.task }</div>,
@@ -69,8 +70,13 @@ describe( 'Task', () => {
 				<Tasks query={ {} } />
 			</div>
 		);
-		expect( queryByText( 'task-list:main' ) ).toBeInTheDocument();
-		expect( queryByText( 'task-list:extended' ) ).toBeInTheDocument();
+		waitFor( () => {
+			expect( queryByText( 'task-list:main' ) ).toBeInTheDocument();
+			expect( queryByText( 'task-list:extended' ) ).toBeInTheDocument();
+			expect(
+				queryByText( 'two-column-list:setup_experiment_1' )
+			).not.toBeInTheDocument();
+		} );
 	} );
 
 	it( 'should render the task component if query has an existing task', () => {
@@ -147,8 +153,36 @@ describe( 'Task', () => {
 				<Tasks query={ {} } />
 			</div>
 		);
-		expect( updateOptions ).toHaveBeenCalledWith( {
-			woocommerce_task_list_prompt_shown: true,
+		waitFor( () => {
+			expect( updateOptions ).toHaveBeenCalledWith( {
+				woocommerce_task_list_prompt_shown: true,
+			} );
+		} );
+	} );
+
+	it( 'should render the two column set up task list when id is setup_experiment_1', () => {
+		( useSelect as jest.Mock ).mockImplementation( () => ( {
+			isResolving: false,
+			taskLists: [
+				{
+					id: 'setup_experiment_1',
+					eventPrefix: 'main_tasklist_',
+					isVisible: true,
+					tasks: [ { id: 'main-task-1' }, { id: 'main-task-2' } ],
+				},
+				{ id: 'extended', isVisible: true, tasks: [] },
+			],
+		} ) );
+		const { queryByText } = render(
+			<div>
+				<Tasks query={ {} } />
+			</div>
+		);
+		waitFor( () => {
+			expect(
+				queryByText( 'two-column-list:setup_experiment_1' )
+			).toBeInTheDocument();
+			expect( queryByText( 'task-list:extended' ) ).toBeInTheDocument();
 		} );
 	} );
 

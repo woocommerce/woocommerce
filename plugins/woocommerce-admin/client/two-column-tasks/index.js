@@ -101,7 +101,7 @@ const TaskDashboard = ( { query, twoColumns } ) => {
 		<>
 			{ setupTasks && ( taskList.isVisible || task ) && (
 				<TaskList
-					taskListId={ taskList.id }
+					id={ taskList.id }
 					eventName="tasklist"
 					twoColumns={ twoColumns }
 					keepCompletedTaskList={ keepCompletedTaskList }

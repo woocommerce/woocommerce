@@ -65,6 +65,12 @@ class Tax extends Task {
 	 * @return string
 	 */
 	public function get_title() {
+		if ( true === $this->get_parent_option( 'use_completed_title' ) ) {
+			if ( $this->is_complete() ) {
+				return __( 'You added tax rates', 'woocommerce-admin' );
+			}
+			return __( 'Add tax rates', 'woocommerce-admin' );
+		}
 		return __( 'Set up tax', 'woocommerce-admin' );
 	}
 
