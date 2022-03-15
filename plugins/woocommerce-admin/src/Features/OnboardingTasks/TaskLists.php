@@ -108,7 +108,7 @@ class TaskLists {
 					),
 				),
 				'tasks'   => array(
-					'ExtendedPayments',
+					'AdditionalPayments',
 				),
 			)
 		);
@@ -145,7 +145,7 @@ class TaskLists {
 					),
 				),
 				'tasks'        => array(
-					'ExtendedPayments',
+					'AdditionalPayments',
 				),
 				'event_prefix' => 'extended_tasklist_',
 			)

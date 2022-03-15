@@ -13,12 +13,12 @@ use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\WooCommercePayme
 class AdditionalPayments extends Payments {
 
 	/**
-	 * Parent ID.
+	 * ID.
 	 *
 	 * @return string
 	 */
-	public function get_parent_id() {
-		return 'extended';
+	public function get_id() {
+		return 'payments';
 	}
 
 	/**
@@ -30,6 +30,35 @@ class AdditionalPayments extends Payments {
 		return __( 'Set up additional payment providers', 'woocommerce-admin' );
 	}
 
+	/**
+	 * Content.
+	 *
+	 * @return string
+	 */
+	public function get_content() {
+		return __(
+			'Choose payment providers and enable payment methods at checkout.',
+			'woocommerce-admin'
+		);
+	}
+
+	/**
+	 * Time.
+	 *
+	 * @return string
+	 */
+	public function get_time() {
+		return __( '2 minutes', 'woocommerce-admin' );
+	}
+
+	/**
+	 * Task completion.
+	 *
+	 * @return bool
+	 */
+	public function is_complete() {
+		return self::has_gateways();
+	}
 
 	/**
 	 * Task visibility.
@@ -51,5 +80,21 @@ class AdditionalPayments extends Payments {
 
 		return true;
 	}
-}
 
+	/**
+	 * Check if the store has any enabled gateways.
+	 *
+	 * @return bool
+	 */
+	public static function has_gateways() {
+		$gateways         = WC()->payment_gateways->get_available_payment_gateways();
+		$enabled_gateways = array_filter(
+			$gateways,
+			function( $gateway ) {
+				return 'yes' === $gateway->enabled && 'woocommerce_payments' !== $gateway->id;
+			}
+		);
+
+		return ! empty( $enabled_gateways );
+	}
+}
