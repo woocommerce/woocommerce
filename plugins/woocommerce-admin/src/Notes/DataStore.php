@@ -354,6 +354,29 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 	}
 
 	/**
+	 * Return an ordered list of notes, without paging or applying the 'woocommerce_note_where_clauses' filter.
+	 * INTERNAL: This method is not intended to be used by external code, and may change without notice.
+	 *
+	 * @param array $args Query arguments.
+	 * @return array An array of database records.
+	 */
+	public function lookup_notes( $args = array() ) {
+		global $wpdb;
+
+		$defaults = array(
+			'order'   => 'DESC',
+			'orderby' => 'date_created',
+		);
+		$args     = wp_parse_args( $args, $defaults );
+
+		$where_clauses = $this->args_to_where_clauses( $args );
+
+		$query = "SELECT * FROM {$wpdb->prefix}wc_admin_notes WHERE 1=1{$where_clauses} ORDER BY {$args['orderby']} {$args['order']}";
+
+		return $wpdb->get_results( $query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+	}
+
+	/**
 	 * Return a count of notes.
 	 *
 	 * @param string $type Comma separated list of note types.
@@ -402,11 +425,34 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 
 	/**
 	 * Return where clauses for getting notes by status and type. For use in both the count and listing queries.
+	 * Applies woocommerce_note_where_clauses filter.
 	 *
+	 * @uses args_to_where_clauses
 	 *  @param array $args Array of args to pass.
 	 * @return string Where clauses for the query.
 	 */
 	public function get_notes_where_clauses( $args = array() ) {
+		$where_clauses = $this->args_to_where_clauses( $args );
+
+		/**
+		 * Filter the notes WHERE clause before retrieving the data.
+		 *
+		 * Allows modification of the notes select criterial.
+		 *
+		 * @param string $where_clauses The generated WHERE clause.
+		 * @param array  $args          The original arguments for the request.
+		 */
+		return apply_filters( 'woocommerce_note_where_clauses', $where_clauses, $args );
+	}
+
+	/**
+	 * Return where clauses for notes queries without applying woocommerce_note_where_clauses filter.
+	 * INTERNAL: This method is not intended to be used by external code, and may change without notice.
+	 *
+	 * @param array $args Array of arguments for query conditionals.
+	 * @return string Where clauses.
+	 */
+	protected function args_to_where_clauses( $args = array() ) {
 		$allowed_types    = Note::get_allowed_types();
 		$where_type_array = $this->get_escaped_arguments_array_by_key( $args, 'type', $allowed_types );
 
@@ -451,15 +497,7 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 
 		$where_clauses .= $escaped_is_deleted ? ' AND is_deleted = 1' : ' AND is_deleted = 0';
 
-		/**
-		 * Filter the notes WHERE clause before retrieving the data.
-		 *
-		 * Allows modification of the notes select criterial.
-		 *
-		 * @param string $where_clauses The generated WHERE clause.
-		 * @param array  $args          The original arguments for the request.
-		 */
-		return apply_filters( 'woocommerce_note_where_clauses', $where_clauses, $args );
+		return $where_clauses;
 	}
 
 	/**

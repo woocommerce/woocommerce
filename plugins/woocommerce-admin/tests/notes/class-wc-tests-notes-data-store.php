@@ -59,6 +59,8 @@ class WC_Tests_Notes_Data_Store extends WC_Unit_Test_Case {
 		$data_store = WC_Data_Store::load( 'admin-note' );
 
 		$note = new Note();
+		$note->set_name( 'PHPUNIT_TEST_NOTE_NAME' );
+		$note->set_source( 'PHPUNIT_TEST' );
 		$note->set_title( 'PHPUNIT_TEST_NOTE' );
 		$note->set_content( 'PHPUNIT_TEST_NOTE_CONTENT' );
 		$note->save();
@@ -109,6 +111,7 @@ class WC_Tests_Notes_Data_Store extends WC_Unit_Test_Case {
 			for ( $i = 0; $i < 3; $i++ ) {
 				$note = new Note();
 				$note->set_name( $note_name );
+				$note->set_source( 'PHPUNIT_TEST' );
 				$note->set_title( 'PHPUNIT_TEST_NOTE' );
 				$note->set_content( 'PHPUNIT_TEST_NOTE_CONTENT' );
 				$note->save();
@@ -160,6 +163,7 @@ class WC_Tests_Notes_Data_Store extends WC_Unit_Test_Case {
 			for ( $i = 0; $i < 3; $i++ ) {
 				$note = new Note();
 				$note->set_name( $note_name );
+				$note->set_source( 'PHPUNIT_TEST' );
 				$note->set_title( 'PHPUNIT_TEST_NOTE' );
 				$note->set_content( 'PHPUNIT_TEST_NOTE_CONTENT' );
 				$note->save();
@@ -210,6 +214,7 @@ class WC_Tests_Notes_Data_Store extends WC_Unit_Test_Case {
 		// Create a test note.
 		$note = new Note();
 		$note->set_name( 'PHPUNIT_TEST_NOTE_NAME' );
+		$note->set_source( 'PHPUNIT_TEST' );
 		$note->set_title( 'PHPUNIT_TEST_NOTE_TITLE' );
 		$note->set_content( 'PHPUNIT_TEST_NOTE_CONTENT' );
 		$note->save();
@@ -223,7 +228,7 @@ class WC_Tests_Notes_Data_Store extends WC_Unit_Test_Case {
 		$mock_datastore->method( 'read' )->will( $this->throwException( new \Exception() ) );
 
 		// Suppress deliberately caused errors.
-		$log_file = ini_set( 'error_log', '/dev/null' );
+		$log_file = ini_set( 'error_log', '/dev/null' );  // phpcs:ignore WordPress.PHP.IniSet.Risky
 
 		$filter_datastore = function() use ( $mock_datastore ) {
 			return $mock_datastore;
@@ -236,7 +241,7 @@ class WC_Tests_Notes_Data_Store extends WC_Unit_Test_Case {
 
 		remove_filter( 'woocommerce_admin-note_data_store', $filter_datastore );
 
-		ini_set( 'error_log', $log_file );
+		ini_set( 'error_log', $log_file );  // phpcs:ignore WordPress.PHP.IniSet.Risky
 
 		$this->assertFalse( $note );
 		$this->assertEquals( 1, did_action( 'woocommerce_caught_exception' ) );
@@ -271,5 +276,81 @@ class WC_Tests_Notes_Data_Store extends WC_Unit_Test_Case {
 			sprintf( " AND type IN ('%s') AND is_deleted = 0", Note::E_WC_ADMIN_NOTE_MARKETING ),
 			$where_clause
 		);
+	}
+
+	/**
+	 * Test the differences between lookup_notes() and get_notes()
+	 */
+	public function test_lookup_notes_versus_get_notes() {
+		// Create two test notes.
+		for ( $i = 0; $i < 2; $i++ ) {
+			$note = new Note();
+			$note->set_title( 'PHPUNIT_PAGING_TEST_NOTE_' . $i );
+			$note->set_content( 'PHPUNIT_PAGING_TEST_NOTE_CONTENT' );
+			$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
+			$note->set_name( 'PHPUNIT_PAGING_TEST_NOTE_NAME' );
+			$note->set_source( 'PHPUNIT_TEST' );
+			$note->set_is_snoozable( false );
+			$note->set_layout( 'plain' );
+			$note->set_image( '' );
+			$note->add_action(
+				'PHPUNIT_TEST_ACTION_SLUG',
+				'PHPUNIT_TEST_ACTION_LABEL',
+				'?s=PHPUNIT_TEST_ACTION_URL'
+			);
+			$note->set_is_deleted( false );
+			$note->save();
+		}
+
+		// Add filter for 'woocommerce_note_where_clauses' that should be called only once.
+		$filter_hit_count = 0;
+		$filter_callback  = function( $arg ) use ( &$filter_hit_count ) {
+			$filter_hit_count++;
+			return $arg;
+		};
+		add_filter( 'woocommerce_note_where_clauses', $filter_callback, 1 );
+
+		// Retrieve test notes by lookup_notes and get_notes.
+		$data_store = WC_Data_Store::load( 'admin-note' );
+
+		$args = array(
+			'source'   => array( 'PHPUNIT_TEST' ),
+			'name'     => array( 'PHPUNIT_PAGING_TEST_NOTE_NAME' ),
+			'per_page' => 1, // lookup_notes should ignore this.
+		);
+
+		$lookup_result = $data_store->lookup_notes( $args );
+		$get_result    = $data_store->get_notes( $args );
+
+		// We should have hit the filter exactly once.
+		$this->assertEquals( $filter_hit_count, 1 );
+
+		// We should have two notes in the lookup_result, because lookup_notes() ignores the 'per_page' arg.
+		$this->assertEquals( count( $lookup_result ), 2 );
+
+		// We should have one note in the get_result, because get_notes() respects the 'per_page' arg.
+		$this->assertEquals( count( $get_result ), 1 );
+
+		// Lookup and get should return well-formed Notes.
+		$lookup_note_zero = new Note();
+		$lookup_note_zero->set_id( $lookup_result[0]->note_id );
+		$data_store->read( $lookup_note_zero );
+
+		$get_note_zero = new Note();
+		$get_note_zero->set_id( $get_result[0]->note_id );
+		$data_store->read( $get_note_zero );
+
+		// The first note in each result set should be the same.
+		$this->assertEquals( $lookup_note_zero->get_id(), $get_note_zero->get_id() );
+	}
+
+	/**
+	 * Delete notes created by this class's tests.
+	 */
+	public function tearDown() {
+		global $wpdb;
+
+		parent::tearDown();
+		$wpdb->query( $wpdb->prepare( 'DELETE n.*, a.* FROM ' . $wpdb->prefix . 'wc_admin_notes n JOIN ' . $wpdb->prefix . 'wc_admin_note_actions a ON n.note_id = a.note_id WHERE n.source = %s', 'PHPUNIT_TEST' ) );
 	}
 }
