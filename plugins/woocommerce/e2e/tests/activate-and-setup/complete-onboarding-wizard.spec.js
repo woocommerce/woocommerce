@@ -30,6 +30,7 @@ test.describe('Store owner can complete onboarding wizard', () => {
 		const dialogHeading = await page.textContent('.components-modal__header-heading')
 		expect(dialogHeading).toContain('Build a better WooCommerce');
 		await page.click('button >> text=No thanks');
+		await page.waitForLoadState('networkidle'); // not autowaiting for form submission
 	});
 
 	test('can complete the industry section', async ({ page }) => {
@@ -129,6 +130,7 @@ test.describe('A japanese store can complete the selective bundle install but do
 		await page.check('#inspector-checkbox-control-0');
 		await page.click('button >> text=Continue');
 		await page.click('button >> text=No thanks');
+		await page.waitForLoadState('networkidle'); // not autowaiting for form submission
 	});
 
 	test('can choose the "Other" industry', async ({ page }) => {
