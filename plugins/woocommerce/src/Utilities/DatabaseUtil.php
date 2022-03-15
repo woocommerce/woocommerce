@@ -70,4 +70,37 @@ class DatabaseUtil {
 		//phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		return $wpdb->query( "DROP TABLE IF EXISTS `{$table_name}`" );
 	}
+
+	/**
+	 * Drops a table index, if both the table and the index exist.
+	 *
+	 * @param string $table_name The name of the table that contains the index.
+	 * @param string $index_name The name of the index to be dropped.
+	 * @return bool True if the index has been dropped, false if either the table or the index don't exist.
+	 */
+	public function drop_table_index( string $table_name, string $index_name ): bool {
+		global $wpdb;
+
+		// phpcs:disable WordPress.DB.PreparedSQL
+
+		$index_count = intval(
+			$wpdb->get_var(
+				"
+SELECT COUNT(1) FROM INFORMATION_SCHEMA.STATISTICS
+WHERE table_name='$table_name'
+AND table_schema='" . DB_NAME . "'
+AND index_name='$index_name'"
+			)
+		);
+
+		if ( 0 === $index_count ) {
+			return false;
+		}
+
+		$wpdb->query( "ALTER TABLE $table_name DROP INDEX $index_name" );
+
+		// phpcs:enable WordPress.DB.PreparedSQL
+
+		return true;
+	}
 }
