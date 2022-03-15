@@ -2,12 +2,13 @@
  * External dependencies
  */
 import { apiFetch } from '@wordpress/data-controls';
+import { controls } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
 import TYPES from './action-types';
-import { API_NAMESPACE } from './constants';
+import { API_NAMESPACE, STORE_KEY } from './constants';
 
 export function* resetModifiedFeatures() {
 	try {
@@ -30,7 +31,12 @@ export function* toggleFeature(featureName) {
 			path: API_NAMESPACE + '/features/' + featureName + '/toggle',
 			headers: { 'content-type': 'application/json' },
 		});
-		return yield setFeatures(response);
+		yield setFeatures(response);
+		yield controls.dispatch(
+			STORE_KEY,
+			'invalidateResolutionForStoreSelector',
+			'getModifiedFeatures'
+		);
 	} catch (error) {
 		throw new Error();
 	}

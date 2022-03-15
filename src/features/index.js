@@ -23,13 +23,17 @@ function Features() {
 
 	return (
 		<div id="wc-admin-test-helper-features">
-			<h2>Features</h2>
-			<Button
-				disabled={modifiedFeatures.length === 0}
-				onClick={() => resetModifiedFeatures()}
-			>
-				Reset to defaults
-			</Button>
+			<h2>
+				Features
+				<Button
+					disabled={modifiedFeatures.length === 0}
+					onClick={() => resetModifiedFeatures()}
+					isSecondary
+					style={{ marginLeft: '24px' }}
+				>
+					Reset to defaults
+				</Button>
+			</h2>
 			<table className="features wp-list-table striped table-view-list widefat">
 				<thead>
 					<tr>

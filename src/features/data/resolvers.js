@@ -12,10 +12,14 @@ import { API_NAMESPACE, OPTION_NAME_PREFIX } from './constants';
 export function* getModifiedFeatures() {
 	try {
 		const response = yield apiFetch({
-			path: `${API_NAMESPACE}/options?search=` + OPTION_NAME_PREFIX,
+			path: `wc-admin/options?options=` + OPTION_NAME_PREFIX,
 		});
 
-		yield setModifiedFeatures(Object.keys(response));
+		yield setModifiedFeatures(
+			response && response[OPTION_NAME_PREFIX]
+				? Object.keys(response[OPTION_NAME_PREFIX])
+				: []
+		);
 	} catch (error) {
 		throw new Error();
 	}
