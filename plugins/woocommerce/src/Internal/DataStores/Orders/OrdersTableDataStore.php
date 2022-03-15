@@ -5,6 +5,8 @@
 
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
+use WC_Customer;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -249,5 +251,25 @@ CREATE TABLE $operational_data_table_name (
 	KEY order_key (order_key)
 );";
 		return $sql;
+	}
+
+	/**
+	 * Get the total spent by a customer.
+	 *
+	 * @param WC_Customer $customer Customer object.
+	 *
+	 * @return string Total spent as string float.
+	 */
+	public function get_total_spent_by_customer( $customer ) {
+		throw new \Exception( 'Unimplemented' );
+	}
+
+	/**
+	 * Reset association to orders when a user is deleted.
+	 *
+	 * @param int $customer_id Customer ID that was deleted.
+	 */
+	public function remove_customer_id_from_orders( $customer_id ) {
+		throw new \Exception( 'Unimplemented' );
 	}
 }
