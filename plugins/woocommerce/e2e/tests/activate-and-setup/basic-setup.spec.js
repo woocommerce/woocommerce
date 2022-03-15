@@ -21,6 +21,7 @@ test.describe('Store owner can finish initial store setup', () => {
 		await page.fill('#woocommerce_permalink_structure', '/product/');
 		await page.click('#submit');
 		// Verify that settings have been saved
+		await page.waitForLoadState('networkidle'); // not autowaiting for form submission
 		const notice = await page.textContent('#setting-error-settings_updated');
 		expect(notice).toContain('Permalink structure updated.');
 		const postSlug = await page.getAttribute('#permalink_structure', 'value');
