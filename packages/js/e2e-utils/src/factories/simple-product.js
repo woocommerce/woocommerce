@@ -9,6 +9,8 @@ import { Factory } from 'fishery';
  */
 export function simpleProductFactory( httpClient ) {
 	const repository = SimpleProduct.restRepository( httpClient );
+	const defaultProductName = `Simple product ${ crypto.randomUUID() }`;
+	const defaultRegularPrice = '10.99';
 
 	return Factory.define( ( { params, onCreate } ) => {
 		onCreate( ( model ) => {
@@ -16,8 +18,10 @@ export function simpleProductFactory( httpClient ) {
 		} );
 
 		return {
-			name: params.name ? params.name : 'Simple Product',
-			regularPrice: params.regularPrice ? params.regularPrice : '10.99',
+			name: params.name ? params.name : defaultProductName,
+			regularPrice: params.regularPrice
+				? params.regularPrice
+				: defaultRegularPrice,
 		};
 	} );
 }
