@@ -177,13 +177,13 @@ use Automattic\WooCommerce\TheDependencyNamespace\TheDependencyClass;
 
 class TheClassServiceProvider extends AbstractServiceProvider {
 
-	protected $provides = array(
-		TheClass::class
-	);
+    protected $provides = array(
+        TheClass::class
+    );
 
-	public function register() {
-		$this->add( TheClass::class )->addArgument( TheDependencyClass::class );
-	}
+    public function register() {
+        $this->add( TheClass::class )->addArgument( TheDependencyClass::class );
+    }
 }
 ```
 
@@ -209,15 +209,15 @@ use Automattic\WooCommerce\TheDependencyNamespace\TheDependencyClass;
 
 class TheClassServiceProvider extends AbstractServiceProvider {
 
-	protected $provides = array(
-		TheClass::class,
+    protected $provides = array(
+        TheClass::class,
         TheDependencyClass::class
-	);
+    );
 
-	public function register() {
+    public function register() {
         $this->share( TheDependencyClass::class );
-		$this->share_with_auto_arguments( ActionsProxy::class );
-	}
+        $this->share_with_auto_arguments( ActionsProxy::class );
+    }
 }
 ```
 
@@ -405,7 +405,7 @@ Unit tests are a fundamental tool to keep the code reliable and reasonably safe 
 
 ### Mocking dependencies
 
-Since all the dependencies for classes in this directory are dependency-injected or retrieved lazily by directly accessing the container, it's easy to mock them by either manually creating a mock class with the same public surface or by using [PHPUnit's test doubles](https://phpunit.readthedocs.io/en/9.2/test-doubles.html):
+Since all the dependencies for classes in this directory are dependency-injected or retrieved lazily by directly accessing the container, it's easy to mock them by either manually creating a mock class with the same public surface or by using [PHPUnit's test doubles](https://phpunit.readthedocs.io/en/9.5/test-doubles.html):
 
 ```php
 $dependency_mock = somehow_create_mock();

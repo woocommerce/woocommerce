@@ -27,7 +27,7 @@ If you have questions about the process to contribute code or want to discuss de
 - [Naming conventions](https://github.com/woocommerce/woocommerce/wiki/Naming-conventions)
 - [String localisation guidelines](https://github.com/woocommerce/woocommerce/wiki/String-localisation-guidelines)
 - [Running unit tests](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/README.md)
-- [Running e2e tests](https://github.com/woocommerce/woocommerce/wiki/End-to-end-Testing)
+- [Running e2e tests](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/e2e/README.md)
 
 ## Coding Guidelines and Development 🛠
 
@@ -48,8 +48,8 @@ If you are contributing code to the (Javascript-driven) WooCommerce Admin projec
 
 ## Feature Requests 🚀
 
-Feature requests can be [submitted to our issue tracker](https://github.com/woocommerce/woocommerce/issues/new?template=6-Feature-request.md). Be sure to include a description of the expected behavior and use case, and before submitting a request, please search for similar ones in the closed issues.
+Feature requests can be [submitted to our issue tracker](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+enhancement%2Cstatus%3A+awaiting+triage&template=2-enhancement.yml&title=%5BEnhancement%5D%3A+). Be sure to include a description of the expected behavior and use case, and before submitting a request, please search for similar ones in the closed issues.
 
 Feature request issues will remain closed until we see sufficient interest via comments and [👍 reactions](https://help.github.com/articles/about-discussions-in-issues-and-pull-requests/) from the community.
 
-You can see a [list of current feature requests which require votes here](https://github.com/woocommerce/woocommerce/issues?q=is%3Aclosed+label%3A%22type%3A+enhancement%22+label%3A%22votes+needed%22+sort%3Areactions-%2B1-desc).
+You can see a [list of current feature requests which require votes here](https://github.com/woocommerce/woocommerce/issues?q=is%3Aissue+sort%3Areactions-%2B1-desc+label%3A%22needs%3A+votes%22+).
