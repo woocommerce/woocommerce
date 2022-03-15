@@ -1,6 +1,6 @@
 import { SimpleProduct } from '@woocommerce/api';
 import { Factory } from 'fishery';
-import crypto from 'crypto'
+import crypto from 'crypto';
 
 /**
  * Creates a new factory for creating models.
