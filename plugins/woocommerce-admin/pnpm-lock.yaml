@@ -51,6 +51,7 @@ importers:
       '@types/react-transition-group': ^4.4.4
       '@types/wordpress__components': ^19.3.0
       '@types/wordpress__data-controls': ^2.2.0
+      '@types/wordpress__notices': ^3.3.0
       '@typescript-eslint/eslint-plugin': ^4.33.0
       '@typescript-eslint/parser': ^4.33.0
       '@woocommerce/admin-e2e-tests': workspace:*
@@ -283,6 +284,7 @@ importers:
       '@types/react-transition-group': 4.4.4
       '@types/wordpress__components': 19.3.0_react-dom@17.0.2+react@17.0.2
       '@types/wordpress__data-controls': 2.2.0
+      '@types/wordpress__notices': 3.3.0
       '@typescript-eslint/eslint-plugin': 4.33.0_65e88d2733f36d3624b406e590cf0b3b
       '@typescript-eslint/parser': 4.33.0_eslint@7.32.0+typescript@4.6.2
       '@woocommerce/admin-e2e-tests': link:packages/admin-e2e-tests
@@ -5587,7 +5589,7 @@ packages:
     dependencies:
       '@types/react': 17.0.39
       '@types/tinycolor2': 1.4.3
-      '@types/wordpress__notices': 1.5.4
+      '@types/wordpress__notices': 3.3.0
       '@types/wordpress__rich-text': 3.4.6
       '@wordpress/element': 3.2.0
       downshift: 6.1.7_react@17.0.2
@@ -5632,6 +5634,12 @@ packages:
     dependencies:
       '@types/react': 17.0.39
       '@types/wordpress__data': 4.6.10
+    dev: true
+
+  /@types/wordpress__notices/3.3.0:
+    resolution: {integrity: sha512-XR9WE4qes2wJCLuStD5Vm9yh/DMsELpcgYmmQW4Rs+zP+bIc6NMnKeDhr9OAhdkWNPVZ/YVshBz1GGjOdNSqDA==}
+    dependencies:
+      '@types/react': 17.0.39
     dev: true
 
   /@types/wordpress__rich-text/3.4.6:
