@@ -1,8 +1,12 @@
 /**
  * External dependencies
  */
-import { FilterPicker } from '@woocommerce/components';
 import { createElement } from '@wordpress/element';
+
+/**
+ * Internal dependencies
+ */
+import FilterPicker from '../';
 
 const query = {
 	meal: 'breakfast',

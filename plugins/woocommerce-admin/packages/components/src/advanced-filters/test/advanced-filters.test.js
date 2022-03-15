@@ -6,8 +6,12 @@
  */
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { AdvancedFilters } from '@woocommerce/components';
 import { createElement } from '@wordpress/element';
+
+/**
+ * Internal dependencies
+ */
+import AdvancedFilters from '../';
 
 const ORDER_STATUSES = {
 	cancelled: 'Cancelled',

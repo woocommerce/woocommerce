@@ -239,7 +239,6 @@ importers:
       react-transition-group: 4.4.2_react-dom@17.0.2+react@17.0.2
       react-visibility-sensor: 5.1.1_react-dom@17.0.2+react@17.0.2
       redux: 4.1.2
-      typescript: 4.6.2
     devDependencies:
       '@automattic/color-studio': 2.5.0
       '@automattic/mini-css-extract-plugin-with-rtl': 0.8.0_webpack@4.46.0
@@ -370,6 +369,7 @@ importers:
       stylelint-config-wordpress: 13.1.0_stylelint@9.10.1
       terser-webpack-plugin: 2.3.8_webpack@4.46.0
       ts-jest: 27.1.3_e0136da8ea7c802a721b6bb3c039eded
+      typescript: 4.6.2
       url-loader: 1.1.2_webpack@4.46.0
       webpack: 4.46.0_webpack-cli@3.3.12
       webpack-bundle-analyzer: 3.9.0
@@ -379,6 +379,7 @@ importers:
 
   packages/admin-e2e-tests:
     specifiers:
+      '@babel/core': ^7.17.5
       '@jest/globals': ^26.6.2
       '@types/expect-puppeteer': ^4.4.7
       '@types/jest': ^26.0.24
@@ -386,30 +387,45 @@ importers:
       '@typescript-eslint/eslint-plugin': ^4.33.0
       '@woocommerce/api': ^0.2.0
       config: ^3.3.7
+      jest: ^27.5.1
+      jest-cli: ^27.5.1
       jest-mock-extended: ^1.0.18
       rimraf: ^3.0.2
+      ts-jest: ^27.1.3
       typescript: ^4.6.2
     dependencies:
       '@jest/globals': 26.6.2
       '@types/jest': 26.0.24
       config: 3.3.7
     devDependencies:
+      '@babel/core': 7.17.5
       '@types/expect-puppeteer': 4.4.7
       '@types/puppeteer': 5.4.5
       '@typescript-eslint/eslint-plugin': 4.33.0_65e88d2733f36d3624b406e590cf0b3b
       '@woocommerce/api': 0.2.0
+      jest: 27.5.1
+      jest-cli: 27.5.1
       jest-mock-extended: 1.0.18_jest@27.5.1+typescript@4.6.2
       rimraf: 3.0.2
+      ts-jest: 27.1.3_e0136da8ea7c802a721b6bb3c039eded
       typescript: 4.6.2
 
   packages/components:
     specifiers:
       '@automattic/interpolate-components': ^1.2.0
+      '@babel/core': ^7.17.5
+      '@storybook/addon-actions': ^6.4.0
       '@storybook/addon-console': ^1.2.3
       '@storybook/addon-docs': ^6.4.19
       '@storybook/addon-knobs': ^6.4.0
       '@storybook/addon-links': ^6.4.19
+      '@storybook/addons': ^6.4.0
+      '@storybook/api': ^6.4.0
+      '@storybook/components': ^6.4.0
+      '@storybook/core-events': ^6.4.0
       '@storybook/react': ^6.4.19
+      '@storybook/theming': ^6.4.0
+      '@testing-library/dom': ^8.11.3
       '@testing-library/jest-dom': ^5.16.2
       '@testing-library/react': ^12.1.3
       '@testing-library/user-event': ^13.5.0
@@ -420,6 +436,7 @@ importers:
       '@woocommerce/navigation': workspace:*
       '@woocommerce/style-build': workspace:*
       '@wordpress/api-fetch': ^6.0.1
+      '@wordpress/browserslist-config': ^4.1.1
       '@wordpress/components': ^19.5.0
       '@wordpress/compose': ^5.1.2
       '@wordpress/date': ^4.3.1
@@ -437,6 +454,7 @@ importers:
       classnames: ^2.3.1
       concurrently: ^5.3.0
       core-js: ^3.21.1
+      css-loader: ^3.6.0
       d3-axis: ^1.0.12
       d3-format: ^1.4.5
       d3-scale: ^2.2.2
@@ -447,13 +465,22 @@ importers:
       dompurify: ^2.3.6
       emoji-flags: ^1.3.0
       gridicons: ^3.4.0
+      jest: ^27.5.1
+      jest-cli: ^27.5.1
       memoize-one: ^5.2.1
       moment: ^2.29.1
+      postcss-loader: ^3.0.0
       moment-timezone: ^0.5.34
       prop-types: ^15.8.1
       react-dates: ^17.2.0
       react-router-dom: ^5.3.0
       react-transition-group: ^4.4.2
+      rimraf: ^3.0.2
+      sass-loader: ^10.2.1
+      ts-jest: ^27.1.3
+      typescript: ^4.6.2
+      webpack: ^4.46.0
+      webpack-cli: ^3.3.12
     dependencies:
       '@automattic/interpolate-components': 1.2.0_react@17.0.2
       '@storybook/addon-knobs': 6.4.0_6d3fd42cc2dc28673127a5aba3ab9a43
@@ -496,45 +523,93 @@ importers:
       react-router-dom: 5.3.0_react@17.0.2
       react-transition-group: 4.4.2_react-dom@17.0.2+react@17.0.2
     devDependencies:
+      '@babel/core': 7.17.5
+      '@storybook/addon-actions': 6.4.19_react-dom@17.0.2+react@17.0.2
       '@storybook/addon-console': 1.2.3_@storybook+addon-actions@6.4.19
       '@storybook/addon-docs': 6.4.19_772ff87dcfc57eb6db4b42ada64cd38c
       '@storybook/addon-links': 6.4.19_react-dom@17.0.2+react@17.0.2
+      '@storybook/addons': 6.4.19_react-dom@17.0.2+react@17.0.2
+      '@storybook/api': 6.4.19_react-dom@17.0.2+react@17.0.2
+      '@storybook/components': 6.4.19_react-dom@17.0.2+react@17.0.2
+      '@storybook/core-events': 6.4.19
       '@storybook/react': 6.4.19_3f9c2633716c6116b17102446a21a981
+      '@storybook/theming': 6.4.19_react-dom@17.0.2+react@17.0.2
+      '@testing-library/dom': 8.11.3
       '@testing-library/jest-dom': 5.16.2
       '@testing-library/react': 12.1.3_react-dom@17.0.2+react@17.0.2
       '@testing-library/user-event': 13.5.0_@testing-library+dom@8.11.3
       '@woocommerce/style-build': link:../style-build
+      '@wordpress/browserslist-config': 4.1.1
       '@wordpress/scripts': 12.6.1_3d2d8d4acee74eea68cf8002a5de7191
       concurrently: 5.3.0
+      css-loader: 3.6.0_webpack@4.46.0
+      jest: 27.5.1
+      jest-cli: 27.5.1
+      postcss-loader: 3.0.0
+      rimraf: 3.0.2
+      sass-loader: 10.2.1_sass@1.49.9+webpack@4.46.0
+      ts-jest: 27.1.3_e0136da8ea7c802a721b6bb3c039eded
+      typescript: 4.6.2
+      webpack: 4.46.0_webpack-cli@3.3.12
+      webpack-cli: 3.3.12_webpack@4.46.0
 
   packages/csv-export:
     specifiers:
+      '@babel/core': ^7.17.5
       browser-filesaver: ^1.1.1
+      jest: ^27.5.1
+      jest-cli: ^27.5.1
       moment: ^2.29.1
+      rimraf: ^3.0.2
+      ts-jest: ^27.1.3
+      typescript: ^4.6.2
     dependencies:
       browser-filesaver: 1.1.1
       moment: 2.29.1
+    devDependencies:
+      '@babel/core': 7.17.5
+      jest: 27.5.1
+      jest-cli: 27.5.1
+      rimraf: 3.0.2
+      ts-jest: 27.1.3_e0136da8ea7c802a721b6bb3c039eded
+      typescript: 4.6.2
 
   packages/currency:
     specifiers:
+      '@babel/core': ^7.17.5
       '@woocommerce/number': workspace:*
       '@wordpress/deprecated': ^2.12.3
       '@wordpress/element': ^4.1.1
       '@wordpress/html-entities': ^3.3.1
       '@wordpress/i18n': ^3.20.0
+      jest: ^27.5.1
+      jest-cli: ^27.5.1
+      rimraf: ^3.0.2
+      ts-jest: ^27.1.3
+      typescript: ^4.6.2
     dependencies:
       '@woocommerce/number': link:../number
       '@wordpress/deprecated': 2.12.3
       '@wordpress/element': 4.1.1
       '@wordpress/html-entities': 3.3.1
       '@wordpress/i18n': 3.20.0
+    devDependencies:
+      '@babel/core': 7.17.5
+      jest: 27.5.1
+      jest-cli: 27.5.1
+      rimraf: 3.0.2
+      ts-jest: 27.1.3_e0136da8ea7c802a721b6bb3c039eded
+      typescript: 4.6.2
 
   packages/customer-effort-score:
     specifiers:
+      '@babel/core': ^7.17.5
       '@testing-library/react': ^12.1.3
+      '@types/prop-types': ^15.7.4
       '@types/wordpress__components': ^9.8.6
       '@woocommerce/experimental': workspace:*
       '@woocommerce/style-build': workspace:*
+      '@wordpress/browserslist-config': ^4.1.1
       '@wordpress/components': ^19.5.0
       '@wordpress/compose': ^5.1.2
       '@wordpress/data': ^6.3.0
@@ -543,8 +618,18 @@ importers:
       '@wordpress/notices': ^3.3.2
       classnames: ^2.3.1
       concurrently: ^5.3.0
+      css-loader: ^3.6.0
+      jest: ^27.5.1
+      jest-cli: ^27.5.1
+      postcss-loader: ^3.0.0
       prop-types: ^15.8.1
       react-transition-group: ^4.4.2
+      rimraf: ^3.0.2
+      sass-loader: ^10.2.1
+      ts-jest: ^27.1.3
+      typescript: ^4.6.2
+      webpack: ^4.46.0
+      webpack-cli: ^3.3.12
     dependencies:
       '@woocommerce/experimental': link:../experimental
       '@wordpress/components': 19.5.0_33bdac975a6e334c49640fab91e2abb4
@@ -557,15 +642,30 @@ importers:
       prop-types: 15.8.1
       react-transition-group: 4.4.2_react-dom@17.0.2+react@17.0.2
     devDependencies:
+      '@babel/core': 7.17.5
       '@testing-library/react': 12.1.3_react-dom@17.0.2+react@17.0.2
+      '@types/prop-types': 15.7.4
       '@types/wordpress__components': 9.8.6_react-dom@17.0.2+react@17.0.2
       '@woocommerce/style-build': link:../style-build
+      '@wordpress/browserslist-config': 4.1.1
       concurrently: 5.3.0
+      css-loader: 3.6.0_webpack@4.46.0
+      jest: 27.5.1
+      jest-cli: 27.5.1
+      postcss-loader: 3.0.0
+      rimraf: 3.0.2
+      sass-loader: 10.2.1_sass@1.49.9+webpack@4.46.0
+      ts-jest: 27.1.3_e0136da8ea7c802a721b6bb3c039eded
+      typescript: 4.6.2
+      webpack: 4.46.0_webpack-cli@3.3.12
+      webpack-cli: 3.3.12_webpack@4.46.0
 
   packages/data:
     specifiers:
+      '@babel/core': ^7.17.5
       '@testing-library/react': ^12.1.3
       '@testing-library/react-hooks': ^7.0.2
+      '@types/wordpress__data-controls': ^2.2.0
       '@woocommerce/date': workspace:*
       '@woocommerce/navigation': workspace:*
       '@wordpress/api-fetch': ^6.0.1
@@ -579,9 +679,14 @@ importers:
       '@wordpress/i18n': ^4.3.1
       '@wordpress/url': ^3.4.1
       dompurify: ^2.3.6
+      jest: ^27.5.1
+      jest-cli: ^27.5.1
       md5: ^2.3.0
       qs: ^6.10.3
       rememo: ^4.0.0
+      rimraf: ^3.0.2
+      ts-jest: ^27.1.3
+      typescript: ^4.6.2
     dependencies:
       '@woocommerce/date': link:../date
       '@woocommerce/navigation': link:../navigation
@@ -600,38 +705,79 @@ importers:
       qs: 6.10.3
       rememo: 4.0.0
     devDependencies:
+      '@babel/core': 7.17.5
       '@testing-library/react': 12.1.3_react-dom@17.0.2+react@17.0.2
       '@testing-library/react-hooks': 7.0.2_react-dom@17.0.2+react@17.0.2
+      '@types/wordpress__data-controls': 2.2.0
+      jest: 27.5.1
+      jest-cli: 27.5.1
+      rimraf: 3.0.2
+      ts-jest: 27.1.3_e0136da8ea7c802a721b6bb3c039eded
+      typescript: 4.6.2
 
   packages/date:
     specifiers:
+      '@babel/core': ^7.17.5
       '@wordpress/date': ^4.3.1
       '@wordpress/i18n': ^4.3.1
       d3-time-format: ^2.3.0
+      jest: ^27.5.1
+      jest-cli: ^27.5.1
       moment: ^2.29.1
       qs: ^6.10.3
+      rimraf: ^3.0.2
+      ts-jest: ^27.1.3
+      typescript: ^4.6.2
     dependencies:
       '@wordpress/date': 4.3.1
       '@wordpress/i18n': 4.3.1
       moment: 2.29.1
       qs: 6.10.3
     devDependencies:
+      '@babel/core': 7.17.5
       d3-time-format: 2.3.0
+      jest: 27.5.1
+      jest-cli: 27.5.1
+      rimraf: 3.0.2
+      ts-jest: 27.1.3_e0136da8ea7c802a721b6bb3c039eded
+      typescript: 4.6.2
 
   packages/dependency-extraction-webpack-plugin:
     specifiers:
+      '@babel/core': ^7.17.5
       '@wordpress/dependency-extraction-webpack-plugin': ^2.9.0
+      jest: ^27.5.1
+      jest-cli: ^27.5.1
+      rimraf: ^3.0.2
+      ts-jest: ^27.1.3
+      typescript: ^4.6.2
+      webpack: ^4.46.0
+      webpack-cli: ^3.3.12
     dependencies:
       '@wordpress/dependency-extraction-webpack-plugin': 2.9.0_webpack@4.46.0
+    devDependencies:
+      '@babel/core': 7.17.5
+      jest: 27.5.1
+      jest-cli: 27.5.1
+      rimraf: 3.0.2
+      ts-jest: 27.1.3_e0136da8ea7c802a721b6bb3c039eded
+      typescript: 4.6.2
+      webpack: 4.46.0_webpack-cli@3.3.12
+      webpack-cli: 3.3.12_webpack@4.46.0
 
   packages/eslint-plugin:
     specifiers:
+      '@babel/core': ^7.17.5
       '@typescript-eslint/parser': ^4.33.0
       '@wordpress/eslint-plugin': ^8.0.2
       eslint: ^7.32.0
       eslint-plugin-react-hooks: ^4.3.0
       eslint-plugin-testing-library: ^3.10.2
+      jest: ^27.5.1
+      jest-cli: ^27.5.1
       requireindex: ^1.2.0
+      rimraf: ^3.0.2
+      ts-jest: ^27.1.3
       typescript: ^4.6.2
     dependencies:
       '@typescript-eslint/parser': 4.33.0_eslint@7.32.0+typescript@4.6.2
@@ -640,19 +786,29 @@ importers:
       eslint-plugin-react-hooks: 4.3.0_eslint@7.32.0
       eslint-plugin-testing-library: 3.10.2_eslint@7.32.0+typescript@4.6.2
       requireindex: 1.2.0
+    devDependencies:
+      '@babel/core': 7.17.5
+      jest: 27.5.1
+      jest-cli: 27.5.1
+      rimraf: 3.0.2
+      ts-jest: 27.1.3_e0136da8ea7c802a721b6bb3c039eded
       typescript: 4.6.2
 
   packages/experimental:
     specifiers:
+      '@babel/core': ^7.17.5
       '@babel/runtime': ^7.17.2
+      '@storybook/addon-actions': ^6.4.0
       '@storybook/addon-console': ^1.2.3
       '@storybook/react': ^6.4.19
+      '@testing-library/dom': ^8.11.3
       '@testing-library/react': ^12.1.3
       '@testing-library/user-event': ^13.5.0
       '@types/dompurify': ^2.3.3
       '@types/react-transition-group': ^4.4.4
       '@woocommerce/components': workspace:*
       '@woocommerce/style-build': workspace:*
+      '@wordpress/browserslist-config': ^4.1.1
       '@wordpress/components': ^19.5.0
       '@wordpress/element': ^4.1.1
       '@wordpress/i18n': ^4.3.1
@@ -660,11 +816,21 @@ importers:
       '@wordpress/keycodes': ^3.3.1
       classnames: ^2.3.1
       concurrently: ^5.3.0
+      css-loader: ^3.6.0
       dompurify: ^2.3.6
       gridicons: ^3.4.0
+      jest: ^27.5.1
+      jest-cli: ^27.5.1
       moment: ^2.29.1
+      postcss-loader: ^3.0.0
       react-transition-group: ^4.4.2
       react-visibility-sensor: ^5.1.1
+      rimraf: ^3.0.2
+      sass-loader: ^10.2.1
+      ts-jest: ^27.1.3
+      typescript: ^4.6.2
+      webpack: ^4.46.0
+      webpack-cli: ^3.3.12
     dependencies:
       '@woocommerce/components': link:../components
       '@wordpress/components': 19.5.0_33bdac975a6e334c49640fab91e2abb4
@@ -679,24 +845,46 @@ importers:
       react-transition-group: 4.4.2_react-dom@17.0.2+react@17.0.2
       react-visibility-sensor: 5.1.1_react-dom@17.0.2+react@17.0.2
     devDependencies:
+      '@babel/core': 7.17.5
       '@babel/runtime': 7.17.2
+      '@storybook/addon-actions': 6.4.19_react-dom@17.0.2+react@17.0.2
       '@storybook/addon-console': 1.2.3_@storybook+addon-actions@6.4.19
       '@storybook/react': 6.4.19_3f9c2633716c6116b17102446a21a981
+      '@testing-library/dom': 8.11.3
       '@testing-library/react': 12.1.3_react-dom@17.0.2+react@17.0.2
       '@testing-library/user-event': 13.5.0_@testing-library+dom@8.11.3
       '@types/dompurify': 2.3.3
       '@types/react-transition-group': 4.4.4
       '@woocommerce/style-build': link:../style-build
+      '@wordpress/browserslist-config': 4.1.1
       concurrently: 5.3.0
+      css-loader: 3.6.0_webpack@4.46.0
+      jest: 27.5.1
+      jest-cli: 27.5.1
+      postcss-loader: 3.0.0
+      rimraf: 3.0.2
+      sass-loader: 10.2.1_sass@1.49.9+webpack@4.46.0
+      ts-jest: 27.1.3_e0136da8ea7c802a721b6bb3c039eded
+      typescript: 4.6.2
+      webpack: 4.46.0_webpack-cli@3.3.12
+      webpack-cli: 3.3.12_webpack@4.46.0
 
   packages/explat:
     specifiers:
       '@automattic/explat-client': ^0.0.3
       '@automattic/explat-client-react-helpers': ^0.0.3
+      '@babel/core': ^7.17.5
       '@types/cookie': ^0.4.1
+      '@types/node': ^17.0.21
+      '@types/qs': ^6.9.7
       '@wordpress/hooks': ^2.12.3
       cookie: ^0.4.2
+      jest: ^27.5.1
+      jest-cli: ^27.5.1
       qs: ^6.10.3
+      rimraf: ^3.0.2
+      ts-jest: ^27.1.3
+      typescript: ^4.6.2
     dependencies:
       '@automattic/explat-client': 0.0.3
       '@automattic/explat-client-react-helpers': 0.0.3
@@ -704,16 +892,30 @@ importers:
       cookie: 0.4.2
       qs: 6.10.3
     devDependencies:
+      '@babel/core': 7.17.5
       '@types/cookie': 0.4.1
+      '@types/node': 17.0.21
+      '@types/qs': 6.9.7
+      jest: 27.5.1
+      jest-cli: 27.5.1
+      rimraf: 3.0.2
+      ts-jest: 27.1.3_e0136da8ea7c802a721b6bb3c039eded
+      typescript: 4.6.2
 
   packages/js-tests:
     specifiers:
+      '@babel/core': ^7.17.5
       '@testing-library/jest-dom': ^5.16.2
       '@testing-library/react': ^12.1.3
       '@wordpress/data': ^6.3.0
       '@wordpress/i18n': ^4.3.1
       '@wordpress/jest-console': ^5.0.1
+      jest: ^27.5.1
+      jest-cli: ^27.5.1
       regenerator-runtime: ^0.13.9
+      rimraf: ^3.0.2
+      ts-jest: ^27.1.3
+      typescript: ^4.6.2
     dependencies:
       '@testing-library/jest-dom': 5.16.2
       '@testing-library/react': 12.1.3_react-dom@17.0.2+react@17.0.2
@@ -721,9 +923,17 @@ importers:
       '@wordpress/i18n': 4.3.1
       '@wordpress/jest-console': 5.0.1_jest@27.5.1
       regenerator-runtime: 0.13.9
+    devDependencies:
+      '@babel/core': 7.17.5
+      jest: 27.5.1
+      jest-cli: 27.5.1
+      rimraf: 3.0.2
+      ts-jest: 27.1.3_e0136da8ea7c802a721b6bb3c039eded
+      typescript: 4.6.2
 
   packages/navigation:
     specifiers:
+      '@babel/core': ^7.17.5
       '@wordpress/api-fetch': ^6.0.1
       '@wordpress/components': ^19.5.0
       '@wordpress/compose': ^5.1.2
@@ -732,7 +942,12 @@ importers:
       '@wordpress/notices': ^3.3.2
       '@wordpress/url': ^3.4.1
       history: ^4.10.1
+      jest: ^27.5.1
+      jest-cli: ^27.5.1
       qs: ^6.10.3
+      rimraf: ^3.0.2
+      ts-jest: ^27.1.3
+      typescript: ^4.6.2
     dependencies:
       '@wordpress/api-fetch': 6.0.1
       '@wordpress/components': 19.5.0_33bdac975a6e334c49640fab91e2abb4
@@ -743,35 +958,80 @@ importers:
       '@wordpress/url': 3.4.1
       history: 4.10.1
       qs: 6.10.3
+    devDependencies:
+      '@babel/core': 7.17.5
+      jest: 27.5.1
+      jest-cli: 27.5.1
+      rimraf: 3.0.2
+      ts-jest: 27.1.3_e0136da8ea7c802a721b6bb3c039eded
+      typescript: 4.6.2
 
   packages/notices:
     specifiers:
+      '@babel/core': ^7.17.5
       '@wordpress/a11y': ^2.15.3
       '@wordpress/data': ^6.3.0
       '@wordpress/notices': ^3.3.2
+      jest: ^27.5.1
+      jest-cli: ^27.5.1
+      rimraf: ^3.0.2
+      ts-jest: ^27.1.3
+      typescript: ^4.6.2
     dependencies:
       '@wordpress/a11y': 2.15.3
       '@wordpress/data': 6.3.0_react@17.0.2
       '@wordpress/notices': 3.3.2_react@17.0.2
+    devDependencies:
+      '@babel/core': 7.17.5
+      jest: 27.5.1
+      jest-cli: 27.5.1
+      rimraf: 3.0.2
+      ts-jest: 27.1.3_e0136da8ea7c802a721b6bb3c039eded
+      typescript: 4.6.2
 
   packages/number:
     specifiers:
+      '@babel/core': ^7.17.5
+      jest: ^27.5.1
+      jest-cli: ^27.5.1
       locutus: ^2.0.16
+      rimraf: ^3.0.2
+      ts-jest: ^27.1.3
+      typescript: ^4.6.2
     dependencies:
       locutus: 2.0.16
+    devDependencies:
+      '@babel/core': 7.17.5
+      jest: 27.5.1
+      jest-cli: 27.5.1
+      rimraf: 3.0.2
+      ts-jest: 27.1.3_e0136da8ea7c802a721b6bb3c039eded
+      typescript: 4.6.2
 
   packages/onboarding:
     specifiers:
       '@automattic/interpolate-components': ^1.2.0
+      '@babel/core': ^7.17.5
       '@woocommerce/components': workspace:*
       '@woocommerce/experimental': workspace:*
       '@woocommerce/style-build': workspace:*
       '@woocommerce/tracks': workspace:*
+      '@wordpress/browserslist-config': ^4.1.1
       '@wordpress/components': ^19.5.0
       '@wordpress/element': ^4.1.1
       '@wordpress/i18n': ^4.3.1
       concurrently: ^5.3.0
+      css-loader: ^3.6.0
       gridicons: ^3.4.0
+      jest: ^27.5.1
+      jest-cli: ^27.5.1
+      postcss-loader: ^3.0.0
+      rimraf: ^3.0.2
+      sass-loader: ^10.2.1
+      ts-jest: ^27.1.3
+      typescript: ^4.6.2
+      webpack: ^4.46.0
+      webpack-cli: ^3.3.12
     dependencies:
       '@automattic/interpolate-components': 1.2.0_react@17.0.2
       '@woocommerce/components': link:../components
@@ -783,17 +1043,36 @@ importers:
       concurrently: 5.3.0
       gridicons: 3.4.0_react@17.0.2
     devDependencies:
+      '@babel/core': 7.17.5
       '@woocommerce/style-build': link:../style-build
+      '@wordpress/browserslist-config': 4.1.1
+      css-loader: 3.6.0_webpack@4.46.0
+      jest: 27.5.1
+      jest-cli: 27.5.1
+      postcss-loader: 3.0.0
+      rimraf: 3.0.2
+      sass-loader: 10.2.1_sass@1.49.9+webpack@4.46.0
+      ts-jest: 27.1.3_e0136da8ea7c802a721b6bb3c039eded
+      typescript: 4.6.2
+      webpack: 4.46.0_webpack-cli@3.3.12
+      webpack-cli: 3.3.12_webpack@4.46.0
 
   packages/style-build:
     specifiers:
       '@automattic/color-studio': ^2.5.0
       '@automattic/mini-css-extract-plugin-with-rtl': ^0.8.0
+      '@babel/core': ^7.17.5
       '@wordpress/base-styles': ^3.6.0
       '@wordpress/postcss-plugins-preset': ^1.6.0
       css-loader: ^3.6.0
+      jest: ^27.5.1
+      jest-cli: ^27.5.1
       postcss-loader: ^3.0.0
+      rimraf: ^3.0.2
       sass-loader: ^10.2.1
+      ts-jest: ^27.1.3
+      typescript: ^4.6.2
+      webpack: ^4.46.0
       webpack-fix-style-only-entries: ^0.6.1
       webpack-rtl-plugin: ^2.0.0
     dependencies:
@@ -806,12 +1085,33 @@ importers:
       sass-loader: 10.2.1_sass@1.49.9+webpack@4.46.0
       webpack-fix-style-only-entries: 0.6.1
       webpack-rtl-plugin: 2.0.0
+    devDependencies:
+      '@babel/core': 7.17.5
+      jest: 27.5.1
+      jest-cli: 27.5.1
+      rimraf: 3.0.2
+      ts-jest: 27.1.3_e0136da8ea7c802a721b6bb3c039eded
+      typescript: 4.6.2
+      webpack: 4.46.0_webpack-cli@3.3.12
 
   packages/tracks:
     specifiers:
+      '@babel/core': ^7.17.5
       debug: ^4.3.3
+      jest: ^27.5.1
+      jest-cli: ^27.5.1
+      rimraf: ^3.0.2
+      ts-jest: ^27.1.3
+      typescript: ^4.6.2
     dependencies:
       debug: 4.3.3
+    devDependencies:
+      '@babel/core': 7.17.5
+      jest: 27.5.1
+      jest-cli: 27.5.1
+      rimraf: 3.0.2
+      ts-jest: 27.1.3_e0136da8ea7c802a721b6bb3c039eded
+      typescript: 4.6.2
 
 packages:
 
@@ -2591,7 +2891,7 @@ packages:
     engines: {node: ^10.13.0 || ^12.13.0 || ^14.15.0 || >=15.0.0}
     dependencies:
       '@jest/types': 27.5.1
-      '@types/node': 17.0.19
+      '@types/node': 17.0.21
       chalk: 4.1.2
       jest-message-util: 27.5.1
       jest-util: 27.5.1
@@ -2686,7 +2986,7 @@ packages:
       '@jest/test-result': 27.5.1
       '@jest/transform': 27.5.1
       '@jest/types': 27.5.1
-      '@types/node': 17.0.19
+      '@types/node': 17.0.21
       ansi-escapes: 4.3.2
       chalk: 4.1.2
       emittery: 0.8.1
@@ -2743,7 +3043,7 @@ packages:
     dependencies:
       '@jest/fake-timers': 26.6.2
       '@jest/types': 26.6.2
-      '@types/node': 17.0.19
+      '@types/node': 17.0.21
       jest-mock: 26.6.2
     dev: false
 
@@ -2753,7 +3053,7 @@ packages:
     dependencies:
       '@jest/fake-timers': 27.5.1
       '@jest/types': 27.5.1
-      '@types/node': 17.0.19
+      '@types/node': 17.0.21
       jest-mock: 27.5.1
     dev: true
 
@@ -2782,7 +3082,7 @@ packages:
     dependencies:
       '@jest/types': 26.6.2
       '@sinonjs/fake-timers': 6.0.1
-      '@types/node': 17.0.19
+      '@types/node': 17.0.21
       jest-message-util: 26.6.2
       jest-mock: 26.6.2
       jest-util: 26.6.2
@@ -2794,7 +3094,7 @@ packages:
     dependencies:
       '@jest/types': 27.5.1
       '@sinonjs/fake-timers': 8.1.0
-      '@types/node': 17.0.19
+      '@types/node': 17.0.21
       jest-message-util: 27.5.1
       jest-mock: 27.5.1
       jest-util: 27.5.1
@@ -2902,7 +3202,7 @@ packages:
       '@jest/test-result': 27.5.1
       '@jest/transform': 27.5.1
       '@jest/types': 27.5.1
-      '@types/node': 17.0.19
+      '@types/node': 17.0.21
       chalk: 4.1.2
       collect-v8-coverage: 1.0.1
       exit: 0.1.2
@@ -3135,7 +3435,7 @@ packages:
     dependencies:
       '@types/istanbul-lib-coverage': 2.0.4
       '@types/istanbul-reports': 3.0.1
-      '@types/node': 17.0.19
+      '@types/node': 17.0.21
       '@types/yargs': 15.0.14
       chalk: 4.1.2
 
@@ -3145,7 +3445,7 @@ packages:
     dependencies:
       '@types/istanbul-lib-coverage': 2.0.4
       '@types/istanbul-reports': 3.0.1
-      '@types/node': 17.0.19
+      '@types/node': 17.0.21
       '@types/yargs': 16.0.4
       chalk: 4.1.2
     dev: true
@@ -3465,14 +3765,14 @@ packages:
     resolution: {integrity: sha512-OkIJpiU2fz6HOJujhlhfIGrc8hB4ibqtf7nnbJQDerG0BqwZCfmgtK5sWzZ0TkXVRBKD5MpLrTmCYyMxoMCgPw==}
     engines: {node: '>= 8.9.0', npm: '>= 5.5.1'}
     dependencies:
-      '@types/node': 17.0.19
+      '@types/node': 17.0.21
     dev: false
 
   /@slack/logger/3.0.0:
     resolution: {integrity: sha512-DTuBFbqu4gGfajREEMrkq5jBhcnskinhr4+AnfJEk48zhVeEv3XnUKGIX98B74kxhYsIMfApGGySTn7V3b5yBA==}
     engines: {node: '>= 12.13.0', npm: '>= 6.12.0'}
     dependencies:
-      '@types/node': 17.0.19
+      '@types/node': 17.0.21
     dev: false
 
   /@slack/types/1.10.0:
@@ -3492,7 +3792,7 @@ packages:
       '@slack/logger': 2.0.0
       '@slack/types': 1.10.0
       '@types/is-stream': 1.1.0
-      '@types/node': 17.0.19
+      '@types/node': 17.0.21
       axios: 0.21.4_debug@4.3.3
       eventemitter3: 3.1.2
       form-data: 2.5.1
@@ -3510,7 +3810,7 @@ packages:
       '@slack/logger': 3.0.0
       '@slack/types': 2.4.0
       '@types/is-stream': 1.1.0
-      '@types/node': 17.0.19
+      '@types/node': 17.0.21
       axios: 0.25.0_debug@4.3.3
       eventemitter3: 3.1.2
       form-data: 2.5.1
@@ -4924,14 +5224,14 @@ packages:
     dependencies:
       '@types/http-cache-semantics': 4.0.1
       '@types/keyv': 3.1.3
-      '@types/node': 17.0.19
+      '@types/node': 17.0.21
       '@types/responselike': 1.0.0
     dev: false
 
   /@types/cheerio/0.22.31:
     resolution: {integrity: sha512-Kt7Cdjjdi2XWSfrZ53v4Of0wG3ZcmaegFXjMmz9tfNrZSkzzo36G0AL1YqSdcIA78Etjt6E609pt5h1xnQkPUw==}
     dependencies:
-      '@types/node': 17.0.19
+      '@types/node': 17.0.21
 
   /@types/color-convert/2.0.0:
     resolution: {integrity: sha512-m7GG7IKKGuJUXvkZ1qqG3ChccdIM/qBBo913z+Xft0nKCX4hAU/IxKwZBU4cpRZ7GS5kV4vOblUkILtSShCPXQ==}
@@ -4964,13 +5264,13 @@ packages:
     resolution: {integrity: sha512-ZUxbzKl0IfJILTS6t7ip5fQQM/J3TJYubDm3nMbgubNNYS62eXeUpoLUC8/7fJNiFYHTrGPQn7hspDUzIHX3UA==}
     dependencies:
       '@types/minimatch': 3.0.5
-      '@types/node': 17.0.19
+      '@types/node': 17.0.21
     dev: true
 
   /@types/graceful-fs/4.1.5:
     resolution: {integrity: sha512-anKkLmZZ+xm4p8JWBf4hElkM4XR+EZeA2M9BAkkTldmcyDY4mbdIJnRghDJH3Ov5ooY7/UAoENtmdMSkaAd7Cw==}
     dependencies:
-      '@types/node': 17.0.19
+      '@types/node': 17.0.21
 
   /@types/hast/2.3.4:
     resolution: {integrity: sha512-wLEm0QvaoawEDoTRwzTXp4b4jpwiJDvR5KMnFnVodm3scufTlBOWRD6N1OBf9TZMhjlNsSfcO5V+7AF4+Vy+9g==}
@@ -4997,7 +5297,7 @@ packages:
   /@types/is-stream/1.1.0:
     resolution: {integrity: sha512-jkZatu4QVbR60mpIzjINmtS1ZF4a/FqdTUTBeQDVOQ2PYyidtwFKr0B5G6ERukKwliq+7mIXvxyppwzG5EgRYg==}
     dependencies:
-      '@types/node': 17.0.19
+      '@types/node': 17.0.21
     dev: false
 
   /@types/istanbul-lib-coverage/2.0.4:
@@ -5034,7 +5334,7 @@ packages:
   /@types/keyv/3.1.3:
     resolution: {integrity: sha512-FXCJgyyN3ivVgRoml4h94G/p3kY+u/B86La+QptcqJaWtBWtmc6TtkNfS40n9bIvyLteHh7zXOtgbobORKPbDg==}
     dependencies:
-      '@types/node': 17.0.19
+      '@types/node': 17.0.21
     dev: false
 
   /@types/lodash/4.14.178:
@@ -5069,7 +5369,7 @@ packages:
   /@types/node-fetch/2.6.1:
     resolution: {integrity: sha512-oMqjURCaxoSIsHSr1E47QHzbmzNR5rK8McHuNb11BOM9cHcIK3Avy0s/b2JlXHoQGTYS3NsvWzV1M0iK7l0wbA==}
     dependencies:
-      '@types/node': 17.0.19
+      '@types/node': 17.0.21
       form-data: 3.0.1
     dev: true
 
@@ -5079,6 +5379,10 @@ packages:
 
   /@types/node/17.0.19:
     resolution: {integrity: sha512-PfeQhvcMR4cPFVuYfBN4ifG7p9c+Dlh3yUZR6k+5yQK7wX3gDgVxBly4/WkBRs9x4dmcy1TVl08SY67wwtEvmA==}
+    dev: true
+
+  /@types/node/17.0.21:
+    resolution: {integrity: sha512-DBZCJbhII3r90XbQxI8Y9IjjiiOGlZ0Hr32omXIZvwwZ7p4DMMXGrKXVyPfuoBOri9XNtL0UK69jYIBIsRX3QQ==}
 
   /@types/normalize-package-data/2.4.1:
     resolution: {integrity: sha512-Gj7cI7z+98M282Tqmp2K5EIsoouUEzbBJhQQzDE3jSIRk6r9gsz0oUokqIUR4u1R3dMHo0pDHM7sNOHyhulypw==}
@@ -5193,7 +5497,7 @@ packages:
   /@types/responselike/1.0.0:
     resolution: {integrity: sha512-85Y2BjiufFzaMIlvJDvTTB8Fxl2xfLo4HgmHzVBz08w4wDePCTjYw66PdrolO0kzli3yam/YCgRufyo1DdQVTA==}
     dependencies:
-      '@types/node': 17.0.19
+      '@types/node': 17.0.21
     dev: false
 
   /@types/retry/0.12.1:
@@ -5250,7 +5554,7 @@ packages:
   /@types/vfile/3.0.2:
     resolution: {integrity: sha512-b3nLFGaGkJ9rzOcuXRfHkZMdjsawuDD0ENL9fzTophtBg8FJHSGbH7daXkEpcwy3v7Xol3pAvsmlYyFhR4pqJw==}
     dependencies:
-      '@types/node': 17.0.19
+      '@types/node': 17.0.21
       '@types/unist': 2.0.6
       '@types/vfile-message': 2.0.0
     dev: true
@@ -5262,7 +5566,7 @@ packages:
   /@types/webpack-sources/3.2.0:
     resolution: {integrity: sha512-Ft7YH3lEVRQ6ls8k4Ff1oB4jN6oy/XmU6tQISKdhfh+1mR+viZFphS6WL0IrtDOzvefmJg5a0s7ZQoRXwqTEFg==}
     dependencies:
-      '@types/node': 17.0.19
+      '@types/node': 17.0.21
       '@types/source-list-map': 0.1.2
       source-map: 0.7.3
     dev: true
@@ -5270,7 +5574,7 @@ packages:
   /@types/webpack/4.41.32:
     resolution: {integrity: sha512-cb+0ioil/7oz5//7tZUSwbrSAN/NWHrQylz5cW8G0dWTcF/g+/dSdMlKVZspBYuMAN1+WnwHrkxiRrLcwd0Heg==}
     dependencies:
-      '@types/node': 17.0.19
+      '@types/node': 17.0.21
       '@types/tapable': 1.0.8
       '@types/uglify-js': 3.13.1
       '@types/webpack-sources': 3.2.0
@@ -5361,7 +5665,7 @@ packages:
     resolution: {integrity: sha512-8uALY5LTvSuHgloDVUvWP3pIauILm+8/0pDMokuDYIoNsOkSwd5AiHBTSEJjKTDcZr5z8UpgOWZkxBF4iJftoA==}
     requiresBuild: true
     dependencies:
-      '@types/node': 17.0.19
+      '@types/node': 17.0.21
     dev: true
     optional: true
 
@@ -13628,7 +13932,7 @@ packages:
       '@jest/environment': 27.5.1
       '@jest/test-result': 27.5.1
       '@jest/types': 27.5.1
-      '@types/node': 17.0.19
+      '@types/node': 17.0.21
       chalk: 4.1.2
       co: 4.6.0
       dedent: 0.7.0
@@ -13975,7 +14279,7 @@ packages:
       '@jest/environment': 27.5.1
       '@jest/fake-timers': 27.5.1
       '@jest/types': 27.5.1
-      '@types/node': 17.0.19
+      '@types/node': 17.0.21
       jest-mock: 27.5.1
       jest-util: 27.5.1
       jsdom: 16.7.0
@@ -14093,7 +14397,7 @@ packages:
     dependencies:
       '@jest/types': 26.6.2
       '@types/graceful-fs': 4.1.5
-      '@types/node': 17.0.19
+      '@types/node': 17.0.21
       anymatch: 3.1.2
       fb-watchman: 2.0.1
       graceful-fs: 4.2.9
@@ -14113,7 +14417,7 @@ packages:
     dependencies:
       '@jest/types': 27.5.1
       '@types/graceful-fs': 4.1.5
-      '@types/node': 17.0.19
+      '@types/node': 17.0.21
       anymatch: 3.1.2
       fb-watchman: 2.0.1
       graceful-fs: 4.2.9
@@ -14186,7 +14490,7 @@ packages:
       '@jest/source-map': 27.5.1
       '@jest/test-result': 27.5.1
       '@jest/types': 27.5.1
-      '@types/node': 17.0.19
+      '@types/node': 17.0.21
       chalk: 4.1.2
       co: 4.6.0
       expect: 27.5.1
@@ -14350,7 +14654,7 @@ packages:
     engines: {node: '>= 10.14.2'}
     dependencies:
       '@jest/types': 26.6.2
-      '@types/node': 17.0.19
+      '@types/node': 17.0.21
     dev: false
 
   /jest-mock/27.5.1:
@@ -14358,7 +14662,7 @@ packages:
     engines: {node: ^10.13.0 || ^12.13.0 || ^14.15.0 || >=15.0.0}
     dependencies:
       '@jest/types': 27.5.1
-      '@types/node': 17.0.19
+      '@types/node': 17.0.21
     dev: true
 
   /jest-pnp-resolver/1.2.2_jest-resolve@24.9.0:
@@ -14572,7 +14876,7 @@ packages:
       '@jest/test-result': 27.5.1
       '@jest/transform': 27.5.1
       '@jest/types': 27.5.1
-      '@types/node': 17.0.19
+      '@types/node': 17.0.21
       chalk: 4.1.2
       emittery: 0.8.1
       graceful-fs: 4.2.9
@@ -14709,14 +15013,14 @@ packages:
     resolution: {integrity: sha512-S5wqyz0DXnNJPd/xfIzZ5Xnp1HrJWBczg8mMfMpN78OJ5eDxXyf+Ygld9wX1DnUWbIbhM1YDY95NjR4CBXkb2g==}
     engines: {node: '>= 10.14.2'}
     dependencies:
-      '@types/node': 17.0.19
+      '@types/node': 17.0.21
       graceful-fs: 4.2.9
 
   /jest-serializer/27.5.1:
     resolution: {integrity: sha512-jZCyo6iIxO1aqUxpuBlwTDMkzOAJS4a3eYz3YzgxxVQFwLeSA7Jfq5cbqCY+JLvTDrWirgusI/0KwxKMgrdf7w==}
     engines: {node: ^10.13.0 || ^12.13.0 || ^14.15.0 || >=15.0.0}
     dependencies:
-      '@types/node': 17.0.19
+      '@types/node': 17.0.21
       graceful-fs: 4.2.9
     dev: true
 
@@ -14822,7 +15126,7 @@ packages:
     engines: {node: '>= 10.14.2'}
     dependencies:
       '@jest/types': 26.6.2
-      '@types/node': 17.0.19
+      '@types/node': 17.0.21
       chalk: 4.1.2
       graceful-fs: 4.2.9
       is-ci: 2.0.0
@@ -14833,7 +15137,7 @@ packages:
     engines: {node: ^10.13.0 || ^12.13.0 || ^14.15.0 || >=15.0.0}
     dependencies:
       '@jest/types': 27.5.1
-      '@types/node': 17.0.19
+      '@types/node': 17.0.21
       chalk: 4.1.2
       ci-info: 3.3.0
       graceful-fs: 4.2.9
@@ -14905,7 +15209,7 @@ packages:
     dependencies:
       '@jest/test-result': 27.5.1
       '@jest/types': 27.5.1
-      '@types/node': 17.0.19
+      '@types/node': 17.0.21
       ansi-escapes: 4.3.2
       chalk: 4.1.2
       jest-util: 27.5.1
@@ -14931,7 +15235,7 @@ packages:
     resolution: {integrity: sha512-KWYVV1c4i+jbMpaBC+U++4Va0cp8OisU185o73T1vo99hqi7w8tSJfUXYswwqqrjzwxa6KpRK54WhPvwf5w6PQ==}
     engines: {node: '>= 10.13.0'}
     dependencies:
-      '@types/node': 17.0.19
+      '@types/node': 17.0.21
       merge-stream: 2.0.0
       supports-color: 7.2.0
 
@@ -14939,7 +15243,7 @@ packages:
     resolution: {integrity: sha512-7vuh85V5cdDofPyxn58nrPjBktZo0u9x1g8WtjQol+jZDaE+fhN+cIvTj11GndBnMnyfrUOG1sZQxCdjKh+DKg==}
     engines: {node: '>= 10.13.0'}
     dependencies:
-      '@types/node': 17.0.19
+      '@types/node': 17.0.21
       merge-stream: 2.0.0
       supports-color: 8.1.1
     dev: true
@@ -21471,6 +21775,7 @@ packages:
     resolution: {integrity: sha512-HM/hFigTBHZhLXshn9sN37H085+hQGeJHJ/X7LpBWLID/fbc2acUMfU+lGD98X81sKP+pFa9f0DZmCwB9GnbAg==}
     engines: {node: '>=4.2.0'}
     hasBin: true
+    dev: true
 
   /uc.micro/1.0.6:
     resolution: {integrity: sha512-8Y75pvTYkLJW2hWQHXxoqRgV7qb9B+9vFEtidML+7koHUFapnVJAZ6cKs+Qjz5Aw3aZWHMC6u0wJE3At+nSGwA==}

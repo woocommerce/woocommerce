@@ -1,8 +1,12 @@
 /**
  * External dependencies
  */
-import { CompareFilter } from '@woocommerce/components';
 import { createElement } from '@wordpress/element';
+
+/**
+ * Internal dependencies
+ */
+import { CompareFilter } from '../';
 
 const query = {};
 const compareFilter = {
