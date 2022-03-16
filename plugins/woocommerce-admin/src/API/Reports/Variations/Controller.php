@@ -16,6 +16,7 @@ use \Automattic\WooCommerce\Admin\API\Reports\ExportableTraits;
 /**
  * REST API Reports products controller class.
  *
+ * @internal
  * @extends WC_REST_Reports_Controller
  */
 class Controller extends ReportsController implements ExportableInterface {

@@ -12,6 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * REST API Reports taxes stats controller class.
  *
+ * @internal
  * @extends WC_REST_Reports_Controller
  */
 class Controller extends \WC_REST_Reports_Controller {
@@ -40,6 +41,7 @@ class Controller extends \WC_REST_Reports_Controller {
 	/**
 	 * Set the default results to 0 if API returns an empty array
 	 *
+	 * @internal
 	 * @param Mixed $results Report data.
 	 * @return object
 	 */

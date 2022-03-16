@@ -12,6 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Coupons controller.
  *
+ * @internal
  * @extends WC_REST_Coupons_Controller
  */
 class Coupons extends \WC_REST_Coupons_Controller {
@@ -72,6 +73,7 @@ class Coupons extends \WC_REST_Coupons_Controller {
 	/**
 	 * Add code searching to the WP Query
 	 *
+	 * @internal
 	 * @param string $where Where clause used to search posts.
 	 * @param object $wp_query WP_Query object.
 	 * @return string

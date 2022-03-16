@@ -14,6 +14,7 @@ use \Automattic\WooCommerce\Admin\API\Reports\ParameterException;
 /**
  * REST API Reports products stats controller class.
  *
+ * @internal
  * @extends WC_REST_Reports_Controller
  */
 class Controller extends \WC_REST_Reports_Controller {
@@ -284,6 +285,7 @@ class Controller extends \WC_REST_Reports_Controller {
 	/**
 	 * Set the default results to 0 if API returns an empty array
 	 *
+	 * @internal
 	 * @param Mixed $results Report data.
 	 * @return object
 	 */

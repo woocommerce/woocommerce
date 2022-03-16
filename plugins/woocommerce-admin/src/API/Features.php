@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Admin\Features\Features as FeaturesClass;
 /**
  * Features Controller.
  *
+ * @internal
  * @extends WC_REST_Data_Controller
  */
 class Features extends \WC_REST_Data_Controller {

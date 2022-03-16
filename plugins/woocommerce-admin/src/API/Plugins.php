@@ -16,6 +16,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Plugins Controller.
  *
+ * @internal
  * @extends WC_REST_Data_Controller
  */
 class Plugins extends \WC_REST_Data_Controller {
@@ -309,6 +310,7 @@ class Plugins extends \WC_REST_Data_Controller {
 	/**
 	 * Returns a list of active plugins.
 	 *
+	 * @internal
 	 * @return array Active plugins
 	 */
 	public static function get_active_plugins() {

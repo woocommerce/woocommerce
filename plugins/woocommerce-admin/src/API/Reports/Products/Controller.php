@@ -14,6 +14,7 @@ use \Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
 /**
  * REST API Reports products controller class.
  *
+ * @internal
  * @extends WC_REST_Reports_Controller
  */
 class Controller extends \WC_REST_Reports_Controller implements ExportableInterface {
@@ -354,7 +355,7 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 	 * @param array $status Stock status from report row.
 	 * @return string
 	 */
-	protected function _get_stock_status( $status ) {
+	protected function get_stock_status( $status ) {
 		$statuses = wc_get_product_stock_status_options();
 
 		return isset( $statuses[ $status ] ) ? $statuses[ $status ] : '';
@@ -366,7 +367,7 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 	 * @param array $category_ids Category IDs from report row.
 	 * @return string
 	 */
-	protected function _get_categories( $category_ids ) {
+	protected function get_categories( $category_ids ) {
 		$category_names = get_terms(
 			array(
 				'taxonomy' => 'product_cat',
@@ -424,13 +425,13 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 			'items_sold'   => $item['items_sold'],
 			'net_revenue'  => $item['net_revenue'],
 			'orders_count' => $item['orders_count'],
-			'product_cat'  => $this->_get_categories( $item['extended_info']['category_ids'] ),
+			'product_cat'  => $this->get_categories( $item['extended_info']['category_ids'] ),
 			'variations'   => isset( $item['extended_info']['variations'] ) ? count( $item['extended_info']['variations'] ) : 0,
 		);
 
 		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
 			if ( $item['extended_info']['manage_stock'] ) {
-				$export_item['stock_status'] = $this->_get_stock_status( $item['extended_info']['stock_status'] );
+				$export_item['stock_status'] = $this->get_stock_status( $item['extended_info']['stock_status'] );
 				$export_item['stock']        = $item['extended_info']['stock_quantity'];
 			} else {
 				$export_item['stock_status'] = __( 'N/A', 'woocommerce-admin' );

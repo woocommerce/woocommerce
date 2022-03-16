@@ -12,6 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Product categories controller.
  *
+ * @internal
  * @extends WC_REST_Product_Attributes_Controller
  */
 class ProductAttributes extends \WC_REST_Product_Attributes_Controller {
@@ -107,7 +108,7 @@ class ProductAttributes extends \WC_REST_Product_Attributes_Controller {
 	 * @param array $custom_attributes - CustomAttributeTraits::get_custom_attributes().
 	 * @return array
 	 */
-	public function format_custom_attribute_items_for_response( $custom_attributes ) {
+	protected function format_custom_attribute_items_for_response( $custom_attributes ) {
 		$response = array();
 
 		foreach ( $custom_attributes as $attribute_key => $attribute_value ) {

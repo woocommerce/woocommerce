@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Admin\Notes\Notes as NotesRepository;
 /**
  * REST API Admin Notes controller class.
  *
+ * @internal
  * @extends WC_REST_CRUD_Controller
  */
 class Notes extends \WC_REST_CRUD_Controller {
@@ -399,7 +400,7 @@ class Notes extends \WC_REST_CRUD_Controller {
 	 * @param WP_REST_Request $request  Request object.
 	 * @return array A list of the requested updates values.
 	 */
-	public function get_requested_updates( $request ) {
+	protected function get_requested_updates( $request ) {
 		$requested_updates = array();
 		if ( ! is_null( $request->get_param( 'status' ) ) ) {
 			$requested_updates['status'] = $request->get_param( 'status' );
@@ -418,17 +419,6 @@ class Notes extends \WC_REST_CRUD_Controller {
 		}
 
 		return $requested_updates;
-	}
-
-	/**
-	 * Batch update a set of notes.
-	 *
-	 * @param WP_REST_Request $request Request object.
-	 * @return WP_REST_Request|WP_Error
-	 */
-	public function undoremove_items( $request ) {
-		wc_deprecated_function( 'undoremove_items', '4.4', '\Automattic\WooCommerce\Admin\API\Notes()->undoremove_items' );
-		return self::batch_update_items( $request );
 	}
 
 	/**

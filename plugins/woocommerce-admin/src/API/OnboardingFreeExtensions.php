@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions\Init as RemoteFre
 /**
  * Onboarding Payments Controller.
  *
+ * @internal
  * @extends WC_REST_Data_Controller
  */
 class OnboardingFreeExtensions extends \WC_REST_Data_Controller {

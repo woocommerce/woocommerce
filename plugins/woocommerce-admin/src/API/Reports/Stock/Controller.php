@@ -14,6 +14,7 @@ use \Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
 /**
  * REST API Reports stock controller class.
  *
+ * @internal
  * @extends WC_REST_Reports_Controller
  */
 class Controller extends \WC_REST_Reports_Controller implements ExportableInterface {
@@ -164,6 +165,7 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 	/**
 	 * Add in conditional search filters for products.
 	 *
+	 * @internal
 	 * @param string $where Where clause used to search posts.
 	 * @param object $wp_query WP_Query object.
 	 * @return string
@@ -208,6 +210,7 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 	/**
 	 * Join posts meta tables when product search or low stock query is present.
 	 *
+	 * @internal
 	 * @param string $join Join clause used to search posts.
 	 * @param object $wp_query WP_Query object.
 	 * @return string
@@ -231,6 +234,7 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 	/**
 	 * Join wc_product_meta_lookup to posts if not already joined.
 	 *
+	 * @internal
 	 * @param string $sql SQL join.
 	 * @return string
 	 */
@@ -246,6 +250,7 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 	/**
 	 * Group by post ID to prevent duplicates.
 	 *
+	 * @internal
 	 * @param string $groupby Group by clause used to organize posts.
 	 * @param object $wp_query WP_Query object.
 	 * @return string
@@ -262,6 +267,7 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 	/**
 	 * Custom orderby clauses using the lookup tables.
 	 *
+	 * @internal
 	 * @param array  $args Query args.
 	 * @param object $wp_query WP_Query object.
 	 * @return array

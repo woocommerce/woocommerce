@@ -12,6 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * ProductsLowInStock controller.
  *
+ * @internal
  * @extends WC_REST_Products_Controller
  */
 final class ProductsLowInStock extends \WC_REST_Products_Controller {

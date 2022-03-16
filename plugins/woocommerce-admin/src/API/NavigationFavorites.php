@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Admin\Features\Navigation\Favorites;
 /**
  * REST API Favorites controller class.
  *
+ * @internal
  * @extends WC_REST_CRUD_Controller
  */
 class NavigationFavorites extends \WC_REST_Data_Controller {

@@ -9,11 +9,14 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * CustomAttributeTraits class.
+ *
+ * @internal
  */
 trait CustomAttributeTraits {
 	/**
 	 * Get a single attribute by its slug.
 	 *
+	 * @internal
 	 * @param string $slug The attribute slug.
 	 * @return WP_Error|object The matching attribute object or WP_Error if not found.
 	 */

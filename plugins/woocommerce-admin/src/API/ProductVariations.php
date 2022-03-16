@@ -12,6 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Product variations controller.
  *
+ * @internal
  * @extends WC_REST_Product_Variations_Controller
  */
 class ProductVariations extends \WC_REST_Product_Variations_Controller {
@@ -62,6 +63,7 @@ class ProductVariations extends \WC_REST_Product_Variations_Controller {
 	/**
 	 * Add in conditional search filters for variations.
 	 *
+	 * @internal
 	 * @param string $where Where clause used to search posts.
 	 * @param object $wp_query WP_Query object.
 	 * @return string
@@ -90,6 +92,7 @@ class ProductVariations extends \WC_REST_Product_Variations_Controller {
 	/**
 	 * Join posts meta tables when variation search query is present.
 	 *
+	 * @internal
 	 * @param string $join Join clause used to search posts.
 	 * @param object $wp_query WP_Query object.
 	 * @return string

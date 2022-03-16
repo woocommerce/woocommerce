@@ -12,6 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * REST API Reports stock stats controller class.
  *
+ * @internal
  * @extends WC_REST_Reports_Controller
  */
 class Controller extends \WC_REST_Reports_Controller {

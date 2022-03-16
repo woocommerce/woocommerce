@@ -15,6 +15,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Marketing Controller.
  *
+ * @internal
  * @extends WC_REST_Data_Controller
  */
 class Marketing extends \WC_REST_Data_Controller {

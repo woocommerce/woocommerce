@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Admin\API\Reports\Controller as ReportsController;
 /**
  * Orders controller.
  *
+ * @internal
  * @extends WC_REST_Orders_Controller
  */
 class Orders extends \WC_REST_Orders_Controller {

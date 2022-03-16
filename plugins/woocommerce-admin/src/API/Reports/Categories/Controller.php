@@ -15,6 +15,7 @@ use \Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
 /**
  * REST API Reports categories controller class.
  *
+ * @internal
  * @extends \Automattic\WooCommerce\Admin\API\Reports\Controller
  */
 class Controller extends ReportsController implements ExportableInterface {

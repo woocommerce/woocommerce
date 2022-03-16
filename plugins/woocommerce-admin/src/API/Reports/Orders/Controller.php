@@ -15,6 +15,7 @@ use \Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
 /**
  * REST API Reports orders controller class.
  *
+ * @internal
  * @extends \Automattic\WooCommerce\Admin\API\Reports\Controller
  */
 class Controller extends ReportsController implements ExportableInterface {
@@ -498,7 +499,7 @@ class Controller extends ReportsController implements ExportableInterface {
 	 * @param array $products Products from report row.
 	 * @return string
 	 */
-	protected function _get_products( $products ) {
+	protected function get_products( $products ) {
 		$products_list = array();
 
 		foreach ( $products as $product ) {
@@ -519,7 +520,7 @@ class Controller extends ReportsController implements ExportableInterface {
 	 * @param array $coupons Coupons from report row.
 	 * @return string
 	 */
-	protected function _get_coupons( $coupons ) {
+	protected function get_coupons( $coupons ) {
 		return implode( ', ', wp_list_pluck( $coupons, 'code' ) );
 	}
 
@@ -568,9 +569,9 @@ class Controller extends ReportsController implements ExportableInterface {
 			'status'          => $item['status'],
 			'customer_name'   => isset( $item['extended_info']['customer'] ) ? $this->get_customer_name( $item['extended_info']['customer'] ) : null,
 			'customer_type'   => $item['customer_type'],
-			'products'        => isset( $item['extended_info']['products'] ) ? $this->_get_products( $item['extended_info']['products'] ) : null,
+			'products'        => isset( $item['extended_info']['products'] ) ? $this->get_products( $item['extended_info']['products'] ) : null,
 			'num_items_sold'  => $item['num_items_sold'],
-			'coupons'         => isset( $item['extended_info']['coupons'] ) ? $this->_get_coupons( $item['extended_info']['coupons'] ) : null,
+			'coupons'         => isset( $item['extended_info']['coupons'] ) ? $this->get_coupons( $item['extended_info']['coupons'] ) : null,
 			'net_total'       => $item['net_total'],
 		);
 

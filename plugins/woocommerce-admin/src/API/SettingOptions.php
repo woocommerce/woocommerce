@@ -14,6 +14,7 @@ use \Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
 /**
  * Setting Options controller.
  *
+ * @internal
  * @extends WC_REST_Setting_Options_Controller
  */
 class SettingOptions extends \WC_REST_Setting_Options_Controller {

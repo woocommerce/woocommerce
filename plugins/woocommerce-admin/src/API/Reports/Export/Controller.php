@@ -16,6 +16,7 @@ use \Automattic\WooCommerce\Admin\ReportExporter;
 /**
  * Reports Export controller.
  *
+ * @internal
  * @extends \Automattic\WooCommerce\Admin\API\Reports\Controller
  */
 class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
@@ -70,7 +71,7 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 	 *
 	 * @return array
 	 */
-	public function get_export_collection_params() {
+	protected function get_export_collection_params() {
 		$params                = array();
 		$params['report_args'] = array(
 			'description'       => __( 'Parameters to pass on to the exported report.', 'woocommerce-admin' ),
@@ -162,7 +163,7 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 
 		$default_export_id = str_replace( '.', '', microtime( true ) );
 		$export_id         = apply_filters( 'woocommerce_admin_export_id', $default_export_id );
-		$export_id 		   = (string) sanitize_file_name( $export_id );
+		$export_id         = (string) sanitize_file_name( $export_id );
 
 		$total_rows = ReportExporter::queue_report_export( $export_id, $report_type, $report_args, $send_email );
 

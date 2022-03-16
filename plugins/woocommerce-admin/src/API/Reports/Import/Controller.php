@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Admin\ReportsSync;
 /**
  * Reports Imports controller.
  *
+ * @internal
  * @extends \Automattic\WooCommerce\Admin\API\Reports\Controller
  */
 class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {

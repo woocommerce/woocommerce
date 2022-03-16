@@ -15,6 +15,7 @@ use \Automattic\WooCommerce\Admin\Notes\Notes as NotesFactory;
 /**
  * REST API Admin Note Action controller class.
  *
+ * @internal
  * @extends WC_REST_CRUD_Controller
  */
 class NoteActions extends Notes {

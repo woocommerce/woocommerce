@@ -14,6 +14,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Onboarding Product Types Controller.
  *
+ * @internal
  * @extends WC_REST_Data_Controller
  */
 class OnboardingProductTypes extends \WC_REST_Data_Controller {

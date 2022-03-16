@@ -13,6 +13,8 @@ use \Automattic\WooCommerce\Internal\Admin\Loader;
 
 /**
  * Init class.
+ *
+ * @internal
  */
 class Init {
 	/**
@@ -129,6 +131,7 @@ class Init {
 	/**
 	 * Adds data stores.
 	 *
+	 * @internal
 	 * @param array $data_stores List of data stores.
 	 * @return array
 	 */
@@ -162,6 +165,7 @@ class Init {
 	 * Add the currency symbol (in addition to currency code) to each Order
 	 * object in REST API responses. For use in formatAmount().
 	 *
+	 * @internal
 	 * @param {WP_REST_Response} $response REST response object.
 	 * @returns {WP_REST_Response}
 	 */

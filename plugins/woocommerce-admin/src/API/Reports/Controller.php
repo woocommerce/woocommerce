@@ -12,6 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * REST API Reports controller class.
  *
+ * @internal
  * @extends WC_REST_Reports_Controller
  */
 class Controller extends \WC_REST_Reports_Controller {
@@ -187,7 +188,7 @@ class Controller extends \WC_REST_Reports_Controller {
 	 * @param  int $order_id Order ID.
 	 * @return string
 	 */
-	public function get_order_number( $order_id ) {
+	protected function get_order_number( $order_id ) {
 		$order = wc_get_order( $order_id );
 
 		if ( ! $order instanceof \WC_Order && ! $order instanceof \WC_Order_Refund ) {
@@ -212,7 +213,7 @@ class Controller extends \WC_REST_Reports_Controller {
 	 * @param  int $order_id Order ID.
 	 * @return string
 	 */
-	public function get_total_formatted( $order_id ) {
+	protected function get_total_formatted( $order_id ) {
 		$order = wc_get_order( $order_id );
 
 		if ( ! $order instanceof \WC_Order && ! $order instanceof \WC_Order_Refund ) {
@@ -322,6 +323,7 @@ class Controller extends \WC_REST_Reports_Controller {
 	 * Get order statuses without prefixes.
 	 * Includes unregistered statuses that have been marked "actionable".
 	 *
+	 * @internal
 	 * @return array
 	 */
 	public static function get_order_statuses() {
@@ -341,6 +343,7 @@ class Controller extends \WC_REST_Reports_Controller {
 	/**
 	 * Get order statuses (and labels) without prefixes.
 	 *
+	 * @internal
 	 * @return array
 	 */
 	public static function get_order_status_labels() {

@@ -12,6 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Data controller.
  *
+ * @internal
  * @extends WC_REST_Data_Controller
  */
 class Data extends \WC_REST_Data_Controller {

@@ -15,6 +15,7 @@ use \Automattic\Jetpack\Connection\Manager as Jetpack_Connection_Manager;
 /**
  * Onboarding Profile controller.
  *
+ * @internal
  * @extends WC_REST_Data_Controller
  */
 class OnboardingProfile extends \WC_REST_Data_Controller {
@@ -137,7 +138,7 @@ class OnboardingProfile extends \WC_REST_Data_Controller {
 	 * @param  array $industries list of industries.
 	 * @return array
 	 */
-	public function filter_industries( $industries ) {
+	protected function filter_industries( $industries ) {
 		return apply_filters(
 			'woocommerce_admin_onboarding_industries',
 			$industries

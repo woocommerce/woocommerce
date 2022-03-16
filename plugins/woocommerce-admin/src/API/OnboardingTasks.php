@@ -17,6 +17,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Onboarding Tasks Controller.
  *
+ * @internal
  * @extends WC_REST_Data_Controller
  */
 class OnboardingTasks extends \WC_REST_Data_Controller {
@@ -334,6 +335,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	/**
 	 * Import sample products from WooCommerce sample CSV.
 	 *
+	 * @internal
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public static function import_sample_products() {
@@ -347,6 +349,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	/**
 	 * Creates a product from a template name passed in through the template_name param.
 	 *
+	 * @internal
 	 * @param WP_REST_Request $request Request data.
 	 * @return WP_REST_Response|WP_Error
 	 */
@@ -380,6 +383,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	/**
 	 * Get header mappings from CSV columns.
 	 *
+	 * @internal
 	 * @param string $file File path.
 	 * @return array Mapped headers.
 	 */
@@ -415,6 +419,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	/**
 	 * Sanitize special column name regex.
 	 *
+	 * @internal
 	 * @param  string $value Raw special column name.
 	 * @return string
 	 */
@@ -425,6 +430,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	/**
 	 * Returns a valid cover block with an image, if one exists, or background as a fallback.
 	 *
+	 * @internal
 	 * @param  array $image Image to use for the cover block. Should contain a media ID and image URL.
 	 * @return string Block content.
 	 */
@@ -464,6 +470,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	/**
 	 * Returns a valid media block with an image, if one exists, or a uninitialized media block the user can set.
 	 *
+	 * @internal
 	 * @param  array  $image Image to use for the cover block. Should contain a media ID and image URL.
 	 * @param  string $align If the image should be aligned to the left or right.
 	 * @return string Block content.
@@ -490,6 +497,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	/**
 	 * Returns a homepage template to be inserted into a post. A different template will be used depending on the number of products.
 	 *
+	 * @internal
 	 * @param int $post_id ID of the homepage template.
 	 * @return string Template contents.
 	 */
@@ -555,6 +563,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	/**
 	 * Gets the possible industry images from the plugin folder for sideloading. If an image doesn't exist, other.jpg is used a fallback.
 	 *
+	 * @internal
 	 * @return array An array of images by industry.
 	 */
 	private static function get_available_homepage_images() {
@@ -569,6 +578,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	/**
 	 * Uploads a number of images to a homepage template, depending on the selected industry from the profile wizard.
 	 *
+	 * @internal
 	 * @param  int $post_id ID of the homepage template.
 	 * @param  int $number_of_images The number of images that should be sideloaded (depending on how many media slots are in the template).
 	 * @return array An array of images that have been attached to the post.

@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Admin\Overrides\ThemeUpgraderSkin;
 /**
  * Themes controller.
  *
+ * @internal
  * @extends WC_REST_Data_Controller
  */
 class Themes extends \WC_REST_Data_Controller {
@@ -73,7 +74,7 @@ class Themes extends \WC_REST_Data_Controller {
 	 */
 	public function upload_theme( $request ) {
 		if (
-			! isset( $_FILES['pluginzip'] ) || ! isset( $_FILES['pluginzip']['tmp_name'] ) || ! is_uploaded_file( $_FILES['pluginzip']['tmp_name'] ) || ! is_file( $_FILES['pluginzip']['tmp_name'] ) ) { // WPCS: sanitization ok.
+			! isset( $_FILES['pluginzip'] ) || ! isset( $_FILES['pluginzip']['tmp_name'] ) || ! is_uploaded_file( $_FILES['pluginzip']['tmp_name'] ) || ! is_file( $_FILES['pluginzip']['tmp_name'] ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,  WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			return new \WP_Error( 'woocommerce_rest_invalid_file', __( 'Specified file failed upload test.', 'woocommerce-admin' ) );
 		}
 

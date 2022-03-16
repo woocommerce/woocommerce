@@ -14,6 +14,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * REST API Reports Performance indicators controller class.
  *
+ * @internal
  * @extends WC_REST_Reports_Controller
  */
 class Controller extends \WC_REST_Reports_Controller {
@@ -131,7 +132,7 @@ class Controller extends \WC_REST_Reports_Controller {
 	/**
 	 * Get analytics report data and endpoints.
 	 */
-	public function get_analytics_report_data() {
+	private function get_analytics_report_data() {
 		$request  = new \WP_REST_Request( 'GET', '/wc-analytics/reports' );
 		$response = rest_do_request( $request );
 
@@ -185,7 +186,7 @@ class Controller extends \WC_REST_Reports_Controller {
 	 *
 	 * @return array List of active Jetpack module slugs.
 	 */
-	public function get_active_jetpack_modules() {
+	private function get_active_jetpack_modules() {
 		if ( is_null( $this->active_jetpack_modules ) ) {
 			if ( class_exists( '\Jetpack' ) && method_exists( '\Jetpack', 'get_active_modules' ) ) {
 				$active_modules               = \Jetpack::get_active_modules();
@@ -201,6 +202,7 @@ class Controller extends \WC_REST_Reports_Controller {
 	/**
 	 * Set active Jetpack modules.
 	 *
+	 * @internal
 	 * @param array $modules List of active Jetpack module slugs.
 	 */
 	public function set_active_jetpack_modules( $modules ) {
@@ -210,7 +212,7 @@ class Controller extends \WC_REST_Reports_Controller {
 	/**
 	 * Get active Jetpack modules and endpoints.
 	 */
-	public function get_jetpack_modules_data() {
+	private function get_jetpack_modules_data() {
 		$active_modules = $this->get_active_jetpack_modules();
 
 		if ( empty( $active_modules ) ) {
@@ -316,6 +318,7 @@ class Controller extends \WC_REST_Reports_Controller {
 	/**
 	 * Sorts the list of stats. Sorted by custom arrangement.
 	 *
+	 * @internal
 	 * @see https://github.com/woocommerce/woocommerce-admin/issues/1282
 	 * @param object $a First item.
 	 * @param object $b Second item.
@@ -368,7 +371,7 @@ class Controller extends \WC_REST_Reports_Controller {
 	 * @param array  $query_args Report query args.
 	 * @return WP_REST_Response|WP_Error Report stats data.
 	 */
-	public function get_stats_data( $report, $query_args ) {
+	private function get_stats_data( $report, $query_args ) {
 		// Return from cache if we've already requested these report stats.
 		if ( isset( $this->stats_data[ $report ] ) ) {
 			return $this->stats_data[ $report ];

@@ -12,6 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Products controller.
  *
+ * @internal
  * @extends WC_REST_Products_Controller
  */
 class Products extends \WC_REST_Products_Controller {
@@ -207,6 +208,7 @@ class Products extends \WC_REST_Products_Controller {
 	/**
 	 * Add in conditional select fields to the query.
 	 *
+	 * @internal
 	 * @param string $select Select clause used to select fields from the query.
 	 * @param object $wp_query WP_Query object.
 	 * @return string
@@ -226,6 +228,7 @@ class Products extends \WC_REST_Products_Controller {
 	/**
 	 * Add in conditional search filters for products.
 	 *
+	 * @internal
 	 * @param string $where Where clause used to search posts.
 	 * @param object $wp_query WP_Query object.
 	 * @return string
@@ -265,6 +268,7 @@ class Products extends \WC_REST_Products_Controller {
 	/**
 	 * Join posts meta tables when product search or low stock query is present.
 	 *
+	 * @internal
 	 * @param string $join Join clause used to search posts.
 	 * @param object $wp_query WP_Query object.
 	 * @return string
@@ -294,6 +298,7 @@ class Products extends \WC_REST_Products_Controller {
 	/**
 	 * Join wc_product_meta_lookup to posts if not already joined.
 	 *
+	 * @internal
 	 * @param string $sql SQL join.
 	 * @return string
 	 */
@@ -309,6 +314,7 @@ class Products extends \WC_REST_Products_Controller {
 	/**
 	 * Group by post ID to prevent duplicates.
 	 *
+	 * @internal
 	 * @param string $groupby Group by clause used to organize posts.
 	 * @param object $wp_query WP_Query object.
 	 * @return string
