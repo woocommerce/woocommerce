@@ -43,6 +43,13 @@ class WPPostToCOTMigrator {
 	private $shipping_address_table_migrator;
 
 	/**
+	 * Migrator instance to migrate operational data.
+	 *
+	 * @var MetaToCustomTableMigrator
+	 */
+	private $operation_data_table_migrator;
+
+	/**
 	 * Names of different order tables.
 	 *
 	 * @var array
@@ -62,13 +69,17 @@ class WPPostToCOTMigrator {
 			'op_data'   => $wpdb->prefix . 'wc_order_operational_data',
 		);
 
-		$order_config                          = $this->get_config_for_order_table();
-		$billing_address_config                = $this->get_config_for_address_table_billing();
-		$shipping_address_config               = $this->get_config_for_address_table_shipping();
+		$order_config            = $this->get_config_for_order_table();
+		$billing_address_config  = $this->get_config_for_address_table_billing();
+		$shipping_address_config = $this->get_config_for_address_table_shipping();
+		$operation_data_config   = $this->get_config_for_operational_data_table();
+
 		$this->order_table_migrator            = new MetaToCustomTableMigrator( $order_config['schema'], $order_config['meta'], $order_config['core'] );
 		$this->billing_address_table_migrator  = new MetaToCustomTableMigrator( $billing_address_config['schema'], $billing_address_config['meta'], $billing_address_config['core'] );
 		$this->shipping_address_table_migrator = new MetaToCustomTableMigrator( $shipping_address_config['schema'], $shipping_address_config['meta'], $shipping_address_config['core'] );
-		$this->error_logger                    = new MigrationErrorLogger();
+		$this->operation_data_table_migrator   = new MetaToCustomTableMigrator( $operation_data_config['schema'], $operation_data_config['meta'], $operation_data_config['core'] );
+
+		$this->error_logger = new MigrationErrorLogger();
 	}
 
 	/**
@@ -76,7 +87,7 @@ class WPPostToCOTMigrator {
 	 *
 	 * @return array Config for order table.
 	 */
-	public function get_config_for_order_table() {
+	private function get_config_for_order_table() {
 		global $wpdb;
 		$order_table_schema_config = array(
 			'entity_schema'        => array(
@@ -170,7 +181,7 @@ class WPPostToCOTMigrator {
 	 *
 	 * @return array Billing address migration config.
 	 */
-	public function get_config_for_address_table_billing() {
+	private function get_config_for_address_table_billing() {
 		return $this->get_config_for_address_table( 'billing' );
 	}
 
@@ -179,7 +190,7 @@ class WPPostToCOTMigrator {
 	 *
 	 * @return array Shipping address migration config.
 	 */
-	public function get_config_for_address_table_shipping() {
+	private function get_config_for_address_table_shipping() {
 		return $this->get_config_for_address_table( 'shipping' );
 	}
 
@@ -278,6 +289,108 @@ class WPPostToCOTMigrator {
 	}
 
 	/**
+	 * Generate config for operational data.
+	 *
+	 * @return array Config for operational data table.
+	 */
+	private function get_config_for_operational_data_table() {
+		global $wpdb;
+
+		$schema_config = array(
+			'entity_schema'        => array(
+				'primary_id' => 'post_id',
+				'table_name' => $this->table_names['orders'],
+			),
+			'entity_meta_schema'   => array(
+				'meta_key_column'   => 'meta_key',
+				'meta_value_column' => 'meta_value',
+				'table_name'        => $wpdb->postmeta,
+			),
+			'destination_table'    => $this->table_names['op_data'],
+			'entity_meta_relation' => array(
+				'entity_rel_column' => 'post_id',
+				'meta_rel_column'   => 'post_id',
+			),
+		);
+
+		$core_config = array(
+			'id' => array(
+				'type'        => 'int',
+				'destination' => 'order_id',
+			),
+		);
+
+		$meta_config = array(
+			'_created_via'                  => array(
+				'type'        => 'string',
+				'destination' => 'created_via',
+			),
+			'_order_version'                => array(
+				'type'        => 'string',
+				'destination' => 'woocommerce_version',
+			),
+			'_prices_include_tax'           => array(
+				'type'        => 'bool',
+				'destination' => 'prices_include_tax',
+			),
+			'_recorded_coupon_usage_counts' => array(
+				'type'        => 'bool',
+				'destination' => 'coupon_usages_are_counted',
+			),
+			'_download_permissions_granted' => array(
+				'type'        => 'bool',
+				'destination' => 'download_permissions_granted',
+			),
+			'_cart_hash'                    => array(
+				'type'        => 'string',
+				'destination' => 'cart_hash',
+			),
+			'_new_order_email_sent'         => array(
+				'type'        => 'bool',
+				'destination' => 'new_order_email_sent',
+			),
+			'_order_key'                    => array(
+				'type'        => 'string',
+				'destination' => 'order_key',
+			),
+			'_order_stock_reduced'          => array(
+				'type'        => 'bool',
+				'destination' => 'order_stock_reduced',
+			),
+			'_date_paid'                    => array(
+				'type'        => 'date_epoch',
+				'destination' => 'date_paid_gmt',
+			),
+			'_date_completed'               => array(
+				'type'        => 'date_epoch',
+				'destination' => 'date_completed_gmt',
+			),
+			'_order_shipping_tax'           => array(
+				'type'        => 'decimal',
+				'destination' => 'shipping_tax_amount',
+			),
+			'_order_shipping'               => array(
+				'type'        => 'decimal',
+				'destination' => 'shipping_total_amount',
+			),
+			'_cart_discount_tax'            => array(
+				'type'        => 'decimal',
+				'destination' => 'discount_tax_amount',
+			),
+			'_cart_discount'                => array(
+				'type'        => 'decimal',
+				'destination' => 'discount_total_amount',
+			),
+		);
+
+		return array(
+			'schema' => $schema_config,
+			'core'   => $core_config,
+			'meta'   => $meta_config,
+		);
+	}
+
+	/**
 	 * Process next migration batch, uses option `wc_cot_migration` to checkpoints of what have been processed so far.
 	 *
 	 * @param int $batch_size Batch size of records to migrate.
@@ -307,8 +420,9 @@ class WPPostToCOTMigrator {
 		}
 
 		$order_post_ids = array_column( $order_data['data'], 'post_id' );
-		$this->process_next_address_batch( $this->billing_address_table_migrator, $order_post_ids, $order_by );
-		$this->process_next_address_batch( $this->shipping_address_table_migrator, $order_post_ids, $order_by );
+		$this->process_next_migrator_batch( $this->billing_address_table_migrator, $order_post_ids, $order_by );
+		$this->process_next_migrator_batch( $this->shipping_address_table_migrator, $order_post_ids, $order_by );
+		$this->process_next_migrator_batch( $this->operation_data_table_migrator, $order_post_ids, $order_by );
 
 		$last_post_migrated = max( array_keys( $order_data['data'] ) );
 		$this->update_checkpoint( $last_post_migrated );
@@ -323,17 +437,18 @@ class WPPostToCOTMigrator {
 	 * @param array                     $order_post_ids Array of post IDs for orders.
 	 * @param string                    $order_by Order by clause.
 	 */
-	private function process_next_address_batch( $migrator, $order_post_ids, $order_by ) {
+	private function process_next_migrator_batch( $migrator, $order_post_ids, $order_by ) {
 		global $wpdb;
 		$post_ids_where_clause = $this->get_where_id_clause( $order_post_ids, 'post_id' );
 		$batch_size            = count( $order_post_ids );
-		$address_data          = $migrator->fetch_data_for_migration( $post_ids_where_clause, $batch_size, $order_by );
-		foreach ( $address_data['errors'] as $order_id => $error ) {
-			$this->error_logger->log( 'info', "Error in importing address data for Order ID $order_id: " . print_r( $error, true ) );
+		$data                  = $migrator->fetch_data_for_migration( $post_ids_where_clause, $batch_size, $order_by );
+		foreach ( $data['errors'] as $order_id => $error ) {
+			// TODO: Add name of the migrator in error message.
+			$this->error_logger->log( 'info', "Error in importing data for Order ID $order_id: " . print_r( $error, true ) );
 		}
-		$address_queries = $migrator->generate_insert_sql_for_batch( $address_data['data'], 'insert' );
-		$result          = $wpdb->query( $address_queries ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Insert statements should already be escaped.
-		if ( count( $address_data['data'] ) !== $result ) {
+		$queries = $migrator->generate_insert_sql_for_batch( $data['data'], 'insert' );
+		$result  = $wpdb->query( $queries ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Insert statements should already be escaped.
+		if ( count( $data['data'] ) !== $result ) {
 			// Some rows were not inserted.
 			// TODO: Find and log the entity ids that were not inserted.
 			echo 'error';
