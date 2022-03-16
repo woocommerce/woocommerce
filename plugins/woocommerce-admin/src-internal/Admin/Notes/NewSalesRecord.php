@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Internal\Admin\Notes;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\Notes\Note;
+use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Admin\Notes\NoteTraits;
 
 /**
@@ -94,9 +95,17 @@ class NewSalesRecord {
 			update_option( self::RECORD_DATE_OPTION_KEY, $yesterday );
 			update_option( self::RECORD_AMOUNT_OPTION_KEY, $total );
 
-			$formatted_yesterday   = gmdate( 'F jS', strtotime( $yesterday ) );
+			// Use F jS (March 7th) format for English speaking countries.
+			if ( substr( get_locale(), 0, 2 ) === 'en' ) {
+				$date_format = 'F jS';
+			} else {
+				// otherwise, fallback to the system date format.
+				$date_format = get_option( 'date_format' );
+			}
+
+			$formatted_yesterday   = date_i18n( $date_format, strtotime( $yesterday ) );
 			$formatted_total       = html_entity_decode( wp_strip_all_tags( wc_price( $total ) ) );
-			$formatted_record_date = gmdate( 'F jS', strtotime( $record_date ) );
+			$formatted_record_date = date_i18n( $date_format, strtotime( $record_date ) );
 			$formatted_record_amt  = html_entity_decode( wp_strip_all_tags( wc_price( $record_amt ) ) );
 
 			$content = sprintf(
