@@ -175,9 +175,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		try {
-
-			throw new ErrorException('message', 0, 1, __FILE__, 179);
-
 			/**
 			 * Trigger action before saving to the DB. Allows you to adjust object props before save.
 			 *
