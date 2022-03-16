@@ -26,6 +26,7 @@ Automated end-to-end tests for WooCommerce.
   - [Creating test structure](#creating-test-structure)
   - [Writing the test](#writing-the-test)
   - [Best practices](#best-practices)
+  - [Writing tests for WooCommerce extensions](#Writing-tests-for-WooCommerce-extensions)
 - [Debugging tests](#debugging-tests)
 
 ## Pre-requisites
@@ -370,6 +371,12 @@ FAIL ../specs/front-end/front-end-my-account.test.js (9.219s)
 ```
 
 In the example above, you can see that `allows customer to see downloads` part of the test failed and can start looking at it right away. Without steps the test goes through being detailed, it is more difficult to debug it. 
+
+### Writing tests for WooCommerce extensions
+
+If you want to set up E2E tests for your WooCommerce extension you can make use of the default WooCommerce E2E package.
+
+The [WooCommerce E2E Tests Boilerplate repo](https://github.com/woocommerce/woocommerce-e2e-boilerplate) aims to provide a stripped down version of the default WooCommerce E2E test suite along with basic set up instructions to get started.
 
 ## Debugging tests
 
