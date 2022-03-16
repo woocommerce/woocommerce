@@ -120,7 +120,7 @@
 		"@typescript-eslint/eslint-plugin": "4.14.1",
 		"@typescript-eslint/parser": "4.14.1",
 		"@woocommerce/api": "0.2.0",
-		"@woocommerce/e2e-utils": "^0.2.0",
+		"@woocommerce/e2e-utils": "0.2.0",
 		"@woocommerce/eslint-plugin": "1.2.0",
 		"@woocommerce/woocommerce-rest-api": "1.0.1",
 		"@wordpress/api-fetch": "5.2.6",
