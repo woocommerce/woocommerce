@@ -322,19 +322,19 @@ class CustomOrdersTableController {
 
 			if ( $sync_is_pending ) {
 				$initial_pending_count = $sync_status['initial_pending_count'];
+				$current_pending_count = $sync_status['current_pending_count'];
 				if ( $initial_pending_count ) {
-					$text = sprintf(
-						/* translators: %1$s=current number of orders pending sync, %2$s=initial number of orders pending sync */
-						__( 'There are %1$s orders (out of a total of %2$s) pending sync!', 'woocommerce' ),
-						$sync_status['current_pending_count'],
-						$initial_pending_count
-					);
+					$text =
+						sprintf(
+							/* translators: %1$s=current number of orders pending sync, %2$s=initial number of orders pending sync */
+							_n( 'There\'s %1$s order (out of a total of %2$s) pending sync!', 'There are %1$s orders (out of a total of %2$s) pending sync!', $current_pending_count, 'woocommerce' ),
+							$current_pending_count,
+							$initial_pending_count
+						);
 				} else {
-					$text = sprintf(
-						/* translators: %1$s=current number of orders pending sync */
-						__( 'There are %1$s orders pending sync!', 'woocommerce' ),
-						$sync_status['current_pending_count']
-					);
+					$text =
+						/* translators: %s=initial number of orders pending sync */
+						sprintf( _n( 'There\'s %s order pending sync!', 'There are %s orders pending sync!', $current_pending_count, 'woocommerce' ), $current_pending_count, 'woocommerce' );
 				}
 
 				if ( $this->data_synchronizer->pending_data_sync_is_in_progress() ) {

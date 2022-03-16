@@ -275,7 +275,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						break;
 
 					case 'info':
-						echo '<tr><th scope="row" class="titledesc"/><td style="' . esc_html( $value['css'] ) . '">';
+						echo '<tr><th scope="row" class="titledesc"/><td style="' . esc_attr( $value['css'] ) . '">';
 						echo wp_kses_post( wpautop( wptexturize( $value['text'] ) ) );
 						echo '</td></tr>';
 						break;
@@ -443,7 +443,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 												name="<?php echo esc_attr( $value['id'] ); ?>"
 												value="<?php echo esc_attr( $key ); ?>"
 												type="radio"
-												<?php if(in_array($key, $disabled_values)) { echo 'disabled'; } ?>
+												<?php if( in_array( $key, $disabled_values ) ) { echo 'disabled'; } ?>
 												style="<?php echo esc_attr( $value['css'] ); ?>"
 												class="<?php echo esc_attr( $value['class'] ); ?>"
 												<?php echo implode( ' ', $custom_attributes ); // WPCS: XSS ok. ?>

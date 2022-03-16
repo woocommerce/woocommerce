@@ -159,12 +159,10 @@ class DataSynchronizer {
 			$missing_orders_count_sql = "SELECT COUNT(1) FROM $orders_table WHERE post_id IS NULL";
 		} else {
 			$missing_orders_count_sql = "
-SELECT COUNT(1) FROM (
-	SELECT posts.ID,orders.post_id FROM $wpdb->posts posts
-	LEFT JOIN $orders_table orders ON posts.ID = orders.post_id
-	WHERE posts.post_type='shop_order' AND orders.post_id IS NULL
-	AND posts.post_status != 'auto-draft'
-) x";
+SELECT COUNT( posts.ID ) FROM $wpdb->posts posts
+LEFT JOIN $orders_table orders ON posts.ID = orders.post_id
+WHERE posts.post_type='shop_order' AND orders.post_id IS NULL
+AND posts.post_status != 'auto-draft'";
 		}
 
 		$sql = "
