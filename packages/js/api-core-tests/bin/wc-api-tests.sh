@@ -32,6 +32,7 @@ cd "$SCRIPTPATH/$(dirname "$REALPATH")/.."
 case $1 in
 	'test')
 		jest --group=$2 --runInBand
+		"$SCRIPTPATH/wc-api-report.sh"
 		TESTRESULT=$?
 		;;
 	'make:collection')
