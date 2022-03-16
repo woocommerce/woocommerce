@@ -81,6 +81,44 @@ class DatabaseUtil {
 	public function drop_table_index( string $table_name, string $index_name ): bool {
 		global $wpdb;
 
+		if ( ! $this->index_exists( $table_name, $index_name ) ) {
+			return false;
+		}
+
+		// phpcs:ignore WordPress.DB.PreparedSQL
+		$wpdb->query( "ALTER TABLE $table_name DROP INDEX $index_name" );
+		return true;
+	}
+
+	/**
+	 * Create a primary key for a table, only if the table doesn't have a primary key already.
+	 *
+	 * @param string $table_name Table name.
+	 * @param array  $columns An array with the index column names.
+	 * @return bool True if the key has been created, false if the table already had a primary key.
+	 */
+	public function create_primary_key( string $table_name, array $columns ) {
+		global $wpdb;
+
+		if ( $this->index_exists( $table_name, 'PRIMARY' ) ) {
+			return false;
+		}
+
+		// phpcs:ignore WordPress.DB.PreparedSQL
+		$wpdb->query( "ALTER TABLE $table_name ADD PRIMARY KEY(`" . join( '`,`', $columns ) . '`)' );
+		return true;
+	}
+
+	/**
+	 * Does a given index exist for a given table?
+	 *
+	 * @param string $table_name Table name.
+	 * @param string $index_name Index name, or "PRIMARY" for the primary index.
+	 * @return bool
+	 */
+	private function index_exists( string $table_name, string $index_name ): bool {
+		global $wpdb;
+
 		// phpcs:disable WordPress.DB.PreparedSQL
 
 		$index_count = intval(
@@ -93,14 +131,8 @@ AND index_name='$index_name'"
 			)
 		);
 
-		if ( 0 === $index_count ) {
-			return false;
-		}
-
-		$wpdb->query( "ALTER TABLE $table_name DROP INDEX $index_name" );
+		return 0 !== $index_count;
 
 		// phpcs:enable WordPress.DB.PreparedSQL
-
-		return true;
 	}
 }
