@@ -879,6 +879,7 @@ importers:
       '@types/cookie': ^0.4.1
       '@types/node': ^17.0.21
       '@types/qs': ^6.9.7
+      '@wordpress/api-fetch': ^6.0.1
       '@wordpress/hooks': ^2.12.3
       cookie: ^0.4.2
       jest: ^27.5.1
@@ -890,6 +891,7 @@ importers:
     dependencies:
       '@automattic/explat-client': 0.0.3
       '@automattic/explat-client-react-helpers': 0.0.3
+      '@wordpress/api-fetch': 6.0.1
       '@wordpress/hooks': 2.12.3
       cookie: 0.4.2
       qs: 6.10.3

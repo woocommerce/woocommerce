@@ -29,4 +29,14 @@ const LoadingExperience = <div>⏰</div>;
 	treatmentExperience={ TreatmentExperience }
 	loadingExperience={ LoadingExperience }
 />;
+
+// Get the experiment assignment with authentication as a WPCOM user.
+import { ExperimentWithAuth } from '@woocommerce/explat';
+
+<ExperimentWithAuth
+	name="woocommerce_example_experiment"
+	defaultExperience={ DefaultExperience }
+	treatmentExperience={ TreatmentExperience }
+	loadingExperience={ LoadingExperience }
+/>;
 ```

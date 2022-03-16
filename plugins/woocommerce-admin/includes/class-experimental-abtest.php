@@ -18,6 +18,9 @@
 
 namespace WooCommerce\Admin;
 
+use Automattic\Jetpack\Connection\Manager as Jetpack_Connection_Manager;
+use Automattic\Jetpack\Connection\Client as Jetpack_Connection_client;
+
 /**
  * This class provides an interface to the Explat A/B tests.
  *
@@ -54,16 +57,25 @@ final class Experimental_Abtest {
 	private $consent = false;
 
 	/**
+	 * Request variation as a auth wpcom user or not.
+	 *
+	 * @var boolean
+	 */
+	private $as_auth_wpcom_user = false;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param string $anon_id ExPlat anonymous ID.
 	 * @param string $platform ExPlat platform name.
 	 * @param bool   $consent Whether tracking consent is given.
+	 * @param bool   $as_auth_wpcom_user  Request variation as a auth wp user or not.
 	 */
-	public function __construct( string $anon_id, string $platform, bool $consent ) {
-		$this->anon_id  = $anon_id;
-		$this->platform = $platform;
-		$this->consent  = $consent;
+	public function __construct( string $anon_id, string $platform, bool $consent, bool $as_auth_wpcom_user = false ) {
+		$this->anon_id            = $anon_id;
+		$this->platform           = $platform;
+		$this->consent            = $consent;
+		$this->as_auth_wpcom_user = $as_auth_wpcom_user;
 	}
 
 	/**
@@ -86,6 +98,41 @@ final class Experimental_Abtest {
 		}
 
 		return $variation;
+	}
+
+
+	/**
+	 * Perform the request for a experiment assignment of a provided A/B test from WP.com.
+	 *
+	 * @param array $args Arguments to pass to the request for A/B test.
+	 * @return array|\WP_Error A/B test variation error on failure.
+	 */
+	public function request_assignment( $args ) {
+		// Request as authenticated wp user.
+		if ( $this->as_auth_wpcom_user && class_exists( Jetpack_Connection_Manager::class ) ) {
+			$jetpack_connection_manager = new Jetpack_Connection_Manager();
+			if ( $jetpack_connection_manager->is_user_connected() ) {
+				$response = Jetpack_Connection_client::wpcom_json_api_request_as_user(
+					'/experiments/0.1.0/assignments/' . $this->platform,
+					'2',
+					$args
+				);
+			}
+		}
+
+		// Request as anonymous user.
+		if ( ! isset( $response ) ) {
+			$url      = add_query_arg(
+				$args,
+				sprintf(
+					'https://public-api.wordpress.com/wpcom/v2/experiments/0.1.0/assignments/%s',
+					$this->platform
+				)
+			);
+			$response = wp_remote_get( $url );
+		}
+
+		return $response;
 	}
 
 	/**
@@ -120,7 +167,13 @@ final class Experimental_Abtest {
 		}
 
 		// Make the request to the WP.com API.
-		$response = $this->request_variation( $test_name );
+		$args     = array(
+			'experiment_name'  => $test_name,
+			'anon_id'          => rawurlencode( $this->anon_id ),
+			'woo_country_code' => rawurlencode( get_option( 'woocommerce_default_country', 'US:CA' ) ),
+		);
+		$args     = apply_filters( 'woocommerce_explat_request_args', $args );
+		$response = $this->request_assignment( $args );
 
 		// Bail if there was an error or malformed response.
 		if ( is_wp_error( $response ) || ! is_array( $response ) || ! isset( $response['body'] ) ) {
@@ -139,41 +192,12 @@ final class Experimental_Abtest {
 		$this->tests[ $test_name ] = $results['variations'][ $test_name ] ?? null;
 
 		$variation = $results['variations'][ $test_name ] ?? 'control';
-
 		// Store the variation in our external cache.
 		if ( ! empty( $results['ttl'] ) ) {
 			set_transient( 'abtest_variation_' . $test_name, $variation, $results['ttl'] );
 		}
 
 		return $variation;
-	}
-
-	/**
-	 * Perform the request for a variation of a provided A/B test from WP.com.
-	 *
-	 * @param string $test_name Name of the A/B test.
-	 * @return array|\WP_Error A/B test variation error on failure.
-	 */
-	protected function request_variation( $test_name ) {
-		$args = array(
-			'experiment_name'  => $test_name,
-			'anon_id'          => rawurlencode( $this->anon_id ),
-			'woo_country_code' => rawurlencode( get_option( 'woocommerce_default_country', 'US:CA' ) ),
-		);
-
-		$args = apply_filters( 'woocommerce_explat_request_args', $args );
-
-		$url = add_query_arg(
-			$args,
-			sprintf(
-				'https://public-api.wordpress.com/wpcom/v2/experiments/0.1.0/assignments/%s',
-				$this->platform
-			)
-		);
-
-		$get = wp_remote_get( $url );
-
-		return $get;
 	}
 }
 

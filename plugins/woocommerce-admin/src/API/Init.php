@@ -59,6 +59,7 @@ class Init {
 			'Automattic\WooCommerce\Admin\API\Data',
 			'Automattic\WooCommerce\Admin\API\DataCountries',
 			'Automattic\WooCommerce\Admin\API\DataDownloadIPs',
+			'Automattic\WooCommerce\Admin\API\Experiments',
 			'Automattic\WooCommerce\Admin\API\Marketing',
 			'Automattic\WooCommerce\Admin\API\MarketingOverview',
 			'Automattic\WooCommerce\Admin\API\Options',

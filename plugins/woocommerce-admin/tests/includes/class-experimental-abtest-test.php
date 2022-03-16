@@ -13,7 +13,7 @@ use WooCommerce\Admin\Experimental_Abtest;
  *
  * @package WooCommerce\Admin
  */
-class Experimental_Abtest_Test extends WP_UnitTestCase {
+class Experimental_Abtest_Test extends WC_Unit_Test_Case {
 
 	/**
 	 * Tests woocommerce_explat_request_args filter is used to construct
@@ -48,5 +48,46 @@ class Experimental_Abtest_Test extends WP_UnitTestCase {
 
 		$exp = new Experimental_Abtest( 'anon', 'platform', true );
 		$exp->get_variation( 'control' );
+	}
+
+	/**
+	 * Tests retrieve the test variation when consent is false
+	 */
+	public function test_get_variation_return_control_when_no_consent() {
+		$exp = new Experimental_Abtest( 'anon', 'platform', false );
+		$this->assertEquals(
+			$exp->get_variation( 'test_experiment_name' ),
+			'control'
+		);
+	}
+
+		/**
+		 * Tests retrieve the test variation when consent is false
+		 */
+	public function test_get_variation() {
+		delete_transient( 'abtest_variation_control' );
+		add_filter(
+			'pre_http_request',
+			function( $preempt, $parsed_args, $url ) {
+				return array(
+					'response'    => 200,
+					'status_code' => 200,
+					'success'     => 1,
+					'body'        => '{
+						"variations": {
+							"test_experiment_name": "treatment"
+						}
+					}',
+				);
+			},
+			10,
+			3
+		);
+
+		$exp = new Experimental_Abtest( 'anon', 'platform', true );
+		$this->assertEquals(
+			$exp->get_variation( 'test_experiment_name' ),
+			'treatment'
+		);
 	}
 }

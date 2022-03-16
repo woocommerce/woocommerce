@@ -9,7 +9,10 @@ import createExPlatClientReactHelpers from '@automattic/explat-client-react-help
  */
 import { isDevelopmentMode } from './utils';
 import { logError } from './error';
-import { fetchExperimentAssignment } from './assignment';
+import {
+	fetchExperimentAssignment,
+	fetchExperimentAssignmentWithAuth,
+} from './assignment';
 import { getAnonId, initializeAnonId } from './anon';
 declare global {
 	interface Window {
@@ -38,9 +41,28 @@ export const {
 	loadExperimentAssignment,
 	dangerouslyGetExperimentAssignment,
 } = exPlatClient;
-const exPlatClientReactHelpers = createExPlatClientReactHelpers( exPlatClient );
+
 export const {
 	useExperiment,
 	Experiment,
 	ProvideExperimentData,
-} = exPlatClientReactHelpers;
+} = createExPlatClientReactHelpers( exPlatClient );
+
+// Create another auth client that send request to wpcom as auth user.
+const exPlatClientWithAuth = createExPlatClient( {
+	fetchExperimentAssignment: fetchExperimentAssignmentWithAuth,
+	getAnonId,
+	logError,
+	isDevelopmentMode,
+} );
+
+export const {
+	loadExperimentAssignment: loadExperimentAssignmentWithAuth,
+	dangerouslyGetExperimentAssignment: dangerouslyGetExperimentAssignmentWithAuth,
+} = exPlatClientWithAuth;
+
+export const {
+	useExperiment: useExperimentWithAuth,
+	Experiment: ExperimentWithAuth,
+	ProvideExperimentData: ProvideExperimentDataWithAuth,
+} = createExPlatClientReactHelpers( exPlatClientWithAuth );
