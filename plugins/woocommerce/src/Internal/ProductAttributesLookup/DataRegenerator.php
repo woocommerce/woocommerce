@@ -479,19 +479,9 @@ class DataRegenerator {
 	 * @return void
 	 */
 	public function create_table_primary_index() {
-		global $wpdb;
-
-		// phpcs:disable WordPress.DB.PreparedSQL
-		$wpdb->query(
-			"
-ALTER TABLE {$this->lookup_table_name}
-ADD PRIMARY KEY IF NOT EXISTS ( `product_or_parent_id`, `term_id`, `product_id`, `taxonomy` )"
-		);
-		// phpcs:enable WordPress.DB.PreparedSQL
-
-		wc_get_container()
-			->get( DatabaseUtil::class )
-			->drop_table_index( $this->lookup_table_name, 'product_or_parent_id_term_id' );
+		$database_util = wc_get_container()->get( DatabaseUtil::class );
+		$database_util->create_primary_key( $this->lookup_table_name, array( 'product_or_parent_id', 'term_id', 'product_id', 'taxonomy' ) );
+		$database_util->drop_table_index( $this->lookup_table_name, 'product_or_parent_id_term_id' );
 	}
 
 	/**
