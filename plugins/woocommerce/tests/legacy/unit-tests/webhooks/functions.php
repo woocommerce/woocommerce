@@ -172,6 +172,10 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 		$webhook_one = $this->create_webhook( 'action.woocommerce_one_test' );
 		$webhook_two = $this->create_webhook( 'action.woocommerce_two_test' );
 
+		$this->assertFalse( wc_load_webhooks( '', 0 ) );
+		$this->assertFalse( isset( $wp_filter['woocommerce_one_test'] ) );
+		$this->assertFalse( isset( $wp_filter['woocommerce_two_test'] ) );
+
 		$this->assertTrue( wc_load_webhooks( '', 1 ) );
 		$this->assertFalse( isset( $wp_filter['woocommerce_one_test'] ) );
 		$this->assertTrue( isset( $wp_filter['woocommerce_two_test'] ) );

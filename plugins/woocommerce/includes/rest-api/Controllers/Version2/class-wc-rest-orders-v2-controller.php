@@ -209,7 +209,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		unset( $data['type'] );
 
 		// Expand meta_data to include user-friendly values.
-		$formatted_meta_data = $item->get_formatted_meta_data( null, true );
+		$formatted_meta_data = $item->get_all_formatted_meta_data( null );
 		$data['meta_data'] = array_map(
 			array( $this, 'merge_meta_item_with_formatted_meta_display_attributes' ),
 			$data['meta_data'],
@@ -224,7 +224,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	 * {@link WC_Meta_Data}. Returns the merged array.
 	 *
 	 * @param WC_Meta_Data $meta_item           An object from {@link WC_Order_Item::get_meta_data()}.
-	 * @param array        $formatted_meta_data An object result from {@link WC_Order_Item::get_formatted_meta_data}.
+	 * @param array        $formatted_meta_data An object result from {@link WC_Order_Item::get_all_formatted_meta_data}.
 	 * The keys are the IDs of {@link WC_Meta_Data}.
 	 *
 	 * @return array

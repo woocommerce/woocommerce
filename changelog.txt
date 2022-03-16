@@ -1,5 +1,141 @@
 == Changelog ==
 
+= 6.3.1 2022-03-10 =
+
+**WooCommerce**
+
+* Security - Address an issue with the PayPal Standard Payment Gateway. See https://developer.woocommerce.com/2022/03/10/woocommerce-3-5-10-6-3-1-security-releases/. ([#32057](https://github.com/woocommerce/woocommerce/pull/32057))
+
+= 6.3.0 2022-03-08 =
+
+**WooCommerce**
+
+* Add - Add states for Germany. ([#31825](https://github.com/woocommerce/woocommerce/pull/31825))
+* Add - Track WcPay settings in WC Tracker. ([#31663](https://github.com/woocommerce/woocommerce/pull/31663))
+* Add - Add filter woocommerce_set_cookie_enabled to allow disabling specific cookies.([#31317](https://github.com/woocommerce/woocommerce/pull/31317))
+* Tweak - Enhancement - Add indices to the product attributes lookup table. ([#31819](https://github.com/woocommerce/woocommerce/pull/31819))
+* Tweak - Adjust input styles for the Twenty Twenty One theme. ([#31734](https://github.com/woocommerce/woocommerce/pull/31734))
+* Tweak - Adjust input styles for the Twenty Twenty theme. ([#31698](https://github.com/woocommerce/woocommerce/pull/31698))
+* Tweak - 2022 theme store notice styling. ([#31683](https://github.com/woocommerce/woocommerce/pull/31683))
+* Tweak - Guatemalan postcode field is now visible by default but remains unrequired. ([#31303](https://github.com/woocommerce/woocommerce/pull/31303))
+* Tweak - Ensure the WC_CSV_Batch_Exporter::get_percent_complete() method returns an int. ([#31138](https://github.com/woocommerce/woocommerce/pull/31138))
+* Fix - Support custom Product Taxonomies in block template loader. ([#31610](https://github.com/woocommerce/woocommerce/pull/31610))
+* Fix - Support special chars in email subjects using wp_specialchars_decode. ([#31589](https://github.com/woocommerce/woocommerce/pull/31589))
+* Fix - Ensure that WooCommerce panel within the Customizer is showing a back button. ([#31508](https://github.com/woocommerce/woocommerce/pull/31508))
+* Fix - Avoids incorrectly setting the search argument under some conditions, when the Customers endpoint of the REST API is used. ([#31295](https://github.com/woocommerce/woocommerce/pull/31295))
+* Fix - Reverted #31593 that caused the returned line item price to be a string instead of a float. ([#31935](https://github.com/woocommerce/woocommerce/pull/31935))
+* Fix - Add prefix to easy identify guest sessions.
+* Dev - The cart session is now updated later on during the woocommerce_after_calculate_totals action (priority 1000, instead of priority 10 as previously). ([#31711](https://github.com/woocommerce/woocommerce/pull/31711))
+* Dev - Enable browser-suggested passwords on checkout signup. ([#31701](https://github.com/woocommerce/woocommerce/pull/31701))
+* Dev - Add method can_view_woocommerce_menu_item to check if the user can access the top-level WooCommerce menu item. ([#31689](https://github.com/woocommerce/woocommerce/pull/31689))
+* Dev - Wrap terms and conditions required asterisk symbol with <abbr> tag. ([#31673](https://github.com/woocommerce/woocommerce/pull/31673))
+* Dev - Allow to use use all get_image function parameters by woocommerce_get_product_thumbnail to customize image. ([#31605](https://github.com/woocommerce/woocommerce/pull/31605))
+* Dev - Format price decimal places correctly in the order API. ([#31593](https://github.com/woocommerce/woocommerce/pull/31593))
+* Dev - Update text for generating an account in admin menu to be more clear. ([#31590](https://github.com/woocommerce/woocommerce/pull/31590))
+* Dev - Adds the option to filter coupons by status when calling the GET /coupons endpoint. ([#31577](https://github.com/woocommerce/woocommerce/pull/31577))
+* Dev - Made the $loop position counter available via the 'woocommerce_variation_header' hook. ([#31565](https://github.com/woocommerce/woocommerce/pull/31565))
+* Dev - Change '__return_true' to true in the apply_filters() call for the woocommerce_product_recount_terms filter. ([#31506](https://github.com/woocommerce/woocommerce/pull/31506))
+* Dev - Add $key field as well to woocommerce_checkout_required_field_notice filter. ([#31435](https://github.com/woocommerce/woocommerce/pull/31435))
+* Dev - Add product meta data to published product tracks. ([#31355](https://github.com/woocommerce/woocommerce/pull/31355))
+* Dev - Allow auto-draft in API orders. ([#31290](https://github.com/woocommerce/woocommerce/pull/31290))
+* Dev - A $file param is now available via the woocommerce_[product_]csv_importer_check_import_file_path filter hooks. ([#31266](https://github.com/woocommerce/woocommerce/pull/31266))
+* Dev - Data migration to create and activate the product attributes lookup table. ([#31256](https://github.com/woocommerce/woocommerce/pull/31256))
+* Dev - A new filter hook woocommerce_cart_item_removed_because_modified_message($message, $product) which allows to update the notice message if a product is modified and page is loaded while product is in cart. ([#31193](https://github.com/woocommerce/woocommerce/pull/31193))
+* Security - Add prefix to identify guest sessions.
+
+**WooCommerce Admin - 3.2.0 & 3.2.1**
+
+* Fix - Adjusted task list logic to fix conflict between current and experimental task list. ([#8321](https://github.com/woocommerce/woocommerce-admin/pull/8321))
+* Fix - changed email validation in Store Details onboarding task to more closely match PHP backend validation. ([#8197](https://github.com/woocommerce/woocommerce-admin/pull/8197))
+* Fix - Disallow whitespace as the platform name input. ([#8090](https://github.com/woocommerce/woocommerce-admin/pull/8090))
+* Fix - Ensure setup-wizard redirection on homescreen is stable. ([#8114](https://github.com/woocommerce/woocommerce-admin/pull/8114))
+* Fix - Fix category report query returns invalid net sales. ([#8153](https://github.com/woocommerce/woocommerce-admin/pull/8153))
+* Fix - Fix clicking the error message opens the dropdown. ([#8094](https://github.com/woocommerce/woocommerce-admin/pull/8094))
+* Fix - Fix country/region selection not preserved in store details task. ([#8228](https://github.com/woocommerce/woocommerce-admin/pull/8228))
+* Fix - Fixed email address not being optional in OBW ([#8263](https://github.com/woocommerce/woocommerce-admin/pull/8263))
+* Fix - Fix get_automated_tax_supported_countries doesn't include UK. ([#8180](https://github.com/woocommerce/woocommerce-admin/pull/8180))
+* Fix - Fix incorrect date options when the "Default Date Range" is set from Analytics settings. ([#8189](https://github.com/woocommerce/woocommerce-admin/pull/8189))
+* Fix - Fix incorrectly displayed note created date. ([#8179](https://github.com/woocommerce/woocommerce-admin/pull/8179))
+* Fix - Fix incorrect screen reader text generated for data points on charts table. ([#8181](https://github.com/woocommerce/woocommerce-admin/pull/8181))
+* Fix - Fix incorrect total count of downloads on the analytics download report. ([#8182](https://github.com/woocommerce/woocommerce-admin/pull/8182))
+* Fix - Fix misaligned status column on order report. ([#8121](https://github.com/woocommerce/woocommerce-admin/pull/8121))
+* Fix - Fix shipping rate error message overlaps with the 'Proceed' button. ([#8165](https://github.com/woocommerce/woocommerce-admin/pull/8165))
+* Fix - Fix Shipping task sometimes skipping the set shipping costs step. ([#8260](https://github.com/woocommerce/woocommerce-admin/pull/8260))
+* Fix - Fix Uncaught TypeError count(NULL) for php8+ in Marketing.php. ([#8213](https://github.com/woocommerce/woocommerce-admin/pull/8213))
+* Fix - Fix undefined derived_currency value for the track 'wcadmin_storeprofiler_store_details_continue'. ([#8193](https://github.com/woocommerce/woocommerce-admin/pull/8193))
+* Fix - Fix variations table product filter query. ([#8120](https://github.com/woocommerce/woocommerce-admin/pull/8120))
+* Fix - Make sure free subscriptions does not show when cbd industry is selected. ([#8323](https://github.com/woocommerce/woocommerce-admin/pull/8323))
+* Fix - Make sure WooCommerce Payments tasklist_payment_setup is triggered again. ([#8146](https://github.com/woocommerce/woocommerce-admin/pull/8146))
+* Fix - Preserve HTML markup in server-side error messages received from sample product import request. ([#8173](https://github.com/woocommerce/woocommerce-admin/pull/8173))
+* Fix - Remove border between email input and newsletter checkbox in OBW store details. ([#8148](https://github.com/woocommerce/woocommerce-admin/pull/8148))
+* Fix - Reset "install_timestamp" if it's not numeric to avoid TypeError. ([#8100](https://github.com/woocommerce/woocommerce-admin/pull/8100))
+* Fix - Truncate the long site title with an ellipses on the second line. ([#8112](https://github.com/woocommerce/woocommerce-admin/pull/8112))
+* Fix - Fix backwards compatibility with SkyVerge payment gateway.([#8371](https://github.com/woocommerce/woocommerce-admin/pull/8371))
+* Add - Add additional store profiler track for the business details tab. ([#8265](https://github.com/woocommerce/woocommerce-admin/pull/8265))
+* Add - Add countries data store ([#8119](https://github.com/woocommerce/woocommerce-admin/pull/8119))
+* Add - Add extra tracking for plugin installation performance during onboarding. ([#8042](https://github.com/woocommerce/woocommerce-admin/pull/8042))
+* Add - Adding tooltip to describe the lack of refund deductions from revenue summaries. ([#8187](https://github.com/woocommerce/woocommerce-admin/pull/8187))
+* Add - Add localized validation to store address ([#8123](https://github.com/woocommerce/woocommerce-admin/pull/8123))
+* Add - Add Magento migration note ([#8145](https://github.com/woocommerce/woocommerce-admin/pull/8145))
+* Add - Add REST endpoint to retrieve address locales ([#8116](https://github.com/woocommerce/woocommerce-admin/pull/8116))
+* Add - Add Spain to Square country suggestion list. ([#8210](https://github.com/woocommerce/woocommerce-admin/pull/8210))
+* Add - Add wc_version property to the store profile onboarding tracks for view and complete steps. ([#8290](https://github.com/woocommerce/woocommerce-admin/pull/8290))
+* Add - Change the reviews empty state panels logic ([#8147](https://github.com/woocommerce/woocommerce-admin/pull/8147))
+* Update - Add custom error for store details email and allow continue ([#8110](https://github.com/woocommerce/woocommerce-admin/pull/8110))
+* Update - Adding "allow-plugins" property for composer configuration. ([#8139](https://github.com/woocommerce/woocommerce-admin/pull/8139))
+* Dev - Remove wc-admin-settings package and rename getSetting to getAdminSetting. ([#8057](https://github.com/woocommerce/woocommerce-admin/pull/8057))
+* Tweak - Fix WCPay in core texts and promo slug ([#8296](https://github.com/woocommerce/woocommerce-admin/pull/8296))
+* Tweak - Grow and center buttons in all WooCommerce ellipsis menu popover containers. ([#8168](https://github.com/woocommerce/woocommerce-admin/pull/8168))
+* Tweak - Hide store address fields in regions that specify hidden ([#8172](https://github.com/woocommerce/woocommerce-admin/pull/8172))
+* Tweak - Make activity panel badges margin consistent. ([#8152](https://github.com/woocommerce/woocommerce-admin/pull/8152))
+* Tweak - Padding tweak for marketing tools plugin list headings. ([#8171](https://github.com/woocommerce/woocommerce-admin/pull/8171))
+* Performance - Speed up customer syncing action. ([#8021](https://github.com/woocommerce/woocommerce-admin/pull/8021))
+* Enhancement - Enhance report chart i18n support. ([#8129](https://github.com/woocommerce/woocommerce-admin/pull/8129))
+* Enhancement - Make ExPlat request URL args filterable. Added woocommerce_explat_request_args filter. ([#8231](https://github.com/woocommerce/woocommerce-admin/pull/8231))
+* Enhancement - Show MailPoet in Installed marketing extensions. ([#8091](https://github.com/woocommerce/woocommerce-admin/pull/8091))
+* Enhancement - Update headercard to use filter to add ExPlat parameter ([#8233](https://github.com/woocommerce/woocommerce-admin/pull/8233))
+
+**WooCommerce Blocks - 6.8.0 & 6.9.0**
+
+* Add - Add support for the global style for the Price Filter block. ([#5559](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5559))
+* Add - Hold stock for 60mins if the order is pending payment. ([#5546](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5546))
+* Add - Allow users to reinsert the WooCommerce Legacy Template block in their block template if it is a WooCommerce block template. ([#5545](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5545))
+* Add - Add support for the global style for the Stock Indicator block. ([#5525](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5525))
+* Add - Add support for the global style for the Summary Product block. ([#5524](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5524))
+* Add - Add support for the global style for the Product Title block. ([#5515](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5515))
+* Add - Store API: Throw errors when attempting to pay with a non-available payment method. ([#5440](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5440))
+* Add - Add support for the wide and full alignment for the legacy template block. ([#5433](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5433))
+* Add - Store API and Cart block now support defining a quantity stepper and a minimum quantity. ([#5406](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5406))
+* Add - Added controls to product grid blocks for filtering by stock levels. ([#4943](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4943))
+* Add - Add support for the global style for the Featured Category block. ([#5542](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5542))
+* Fix duplicated checkout error notices. ([#5476](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5476))
+* Fix - Use consistent HTML code for all rating sections, so that screen readers pronounce the rating correctly. ([#5552](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5552))
+* Fix - All Products block displays thumbnails. ([#5551](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5551))
+* Fix - Fixed a styling issue in the Checkout block when an order has multiple shipping packages. ([#5529](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5529))
+* Fix - Fixed a visual bug (#5152) with the points and rewards plugin. ([#5430](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5430))
+* Fix - Filter Products By Price block: Don't allow to insert negative values on inputs. ([#5123](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5123))
+* Fix - Enable Mini Cart template-parts only for experimental builds. ([#5606](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5606))
+* Fix - Show express payment button in full width if only one express payment method is available. ([#5601](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5601))
+* Fix - Wrapped cart item product contents in inner div. ([#5240](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5240))
+* Fix - Fix alignment issue with the "create account" section on the checkout block in the editor ([#5633](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5633))
+* Dev - Remove invalid `$wpdb->prepare()` statement in Featured Category Block. ([#5471](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5471))
+* Dev - Remove Stripe Payment Method Integration (which is now part of the Stripe Payment Method extension itself). ([#5449](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5449))
+* Dev - Update the block theme folders to latest Gutenberg convention (i.e. `templates` and `parts`). ([#5464](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5464))
+* Dev - Revert "Allow LegacyTemplate block to be reinserted, only on WooCommerce block templates.". ([#5643](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5643))
+
+= 6.2.2 2022-03-10 =
+
+**WooCommerce**
+
+* Security - Address an issue with the PayPal Standard Payment Gateway. See https://developer.woocommerce.com/2022/03/10/woocommerce-3-5-10-6-3-1-security-releases/. ([#32057](https://github.com/woocommerce/woocommerce/pull/32057))
+
+= 6.2.1 2022-02-22 =
+
+**WooCommerce**
+
+* Security - Fixed permission check for reviews in v1 & v2 REST API.
+* Security - Fixed Path Traversal in Importers.
+
 = 6.2.0 2022-02-08 =
 
 **WooCommerce**
@@ -71,6 +207,12 @@
 * Tweak - Update loading skeleton animations. ([5362](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5362))
 * Tweak - Add error handling to `get_routes_from_namespace` method. ([5319](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5319))
 * Tweak - Update WooCommerce plugin slug for Block Templates. ([#5519](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5519))
+
+= 6.1.2 2022-03-10 =
+
+**WooCommerce**
+
+* Security - Address an issue with the PayPal Standard Payment Gateway. See https://developer.woocommerce.com/2022/03/10/woocommerce-3-5-10-6-3-1-security-releases/. ([#32057](https://github.com/woocommerce/woocommerce/pull/32057))
 
 = 6.1.1 2022-01-20 =
 
@@ -190,6 +332,12 @@
 * Fix - Fix error when reverting WooCommerce templates. ( [#5342](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5342) )
 * Fix - Fix: WooCommerce block templates loading for WP 5.9 without Gutenberg plugin. ( [#5335](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5335) )
 
+= 6.0.1 2022-03-10 =
+
+**WooCommerce**
+
+* Security - Address an issue with the PayPal Standard Payment Gateway. See https://developer.woocommerce.com/2022/03/10/woocommerce-3-5-10-6-3-1-security-releases/. ([#32057](https://github.com/woocommerce/woocommerce/pull/32057))
+
 = 6.0.0 2021-12-14 =
 
 **WooCommerce**
@@ -295,6 +443,12 @@
 * Fix - Store API – Ensure returned customer address state is valid. ( [#4844](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4844) )
 * Fix - fatal error in certain WP 5.9 pre-release versions. ( [#5183](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5183) )
 
+= 5.9.1 2022-03-10 =
+
+**WooCommerce**
+
+* Security - Address an issue with the PayPal Standard Payment Gateway. See https://developer.woocommerce.com/2022/03/10/woocommerce-3-5-10-6-3-1-security-releases/. ([#32057](https://github.com/woocommerce/woocommerce/pull/32057))
+
 = 5.9.0 2021-11-09 =
 
 **WooCommerce**
@@ -351,6 +505,12 @@
 * Fix - Filter button from Filter Products by Attribute block is not aligned with the input field. #4814
 * Fix - Remove IntersectionObserver shim in favor of dropping IE11 support. #4808
 * Enhancement - Added global styles to All Reviews, Reviews by Category and Reviews by Product blocks. Now it's possible to change the text color and font size of those blocks. #4323
+
+= 5.8.2 2022-03-10 =
+
+**WooCommerce**
+
+* Security - Address an issue with the PayPal Standard Payment Gateway. See https://developer.woocommerce.com/2022/03/10/woocommerce-3-5-10-6-3-1-security-releases/. ([#32057](https://github.com/woocommerce/woocommerce/pull/32057))
 
 = 5.8.0 2021-10-12 =
 
@@ -424,6 +584,12 @@
 * Dev - Minimum requirements for WordPress and PHP bumped (to 5.2 and 5.6 respectively). #723
 * Fix - Improves compatibility with environments where NO_ZERO_DATE is enabled. #519
 * Fix - Adds safety checks to guard against errors when our database tables cannot be created. #645
+
+= 5.7.2 2022-03-10 =
+
+**WooCommerce**
+
+* Security - Address an issue with the PayPal Standard Payment Gateway. See https://developer.woocommerce.com/2022/03/10/woocommerce-3-5-10-6-3-1-security-releases/. ([#32057](https://github.com/woocommerce/woocommerce/pull/32057))
 
 = 5.7.1 2021-09-23 =
 
@@ -532,6 +698,12 @@
 - Fix - Fix memory leak when previewing transform options for the All reviews block. #4428
 - Fix - Disable Cart, Checkout, All Products & filters blocks from the widgets screen. #4646
 
+= 5.6.2 2022-03-10 =
+
+**WooCommerce**
+
+* Security - Address an issue with the PayPal Standard Payment Gateway. See https://developer.woocommerce.com/2022/03/10/woocommerce-3-5-10-6-3-1-security-releases/. ([#32057](https://github.com/woocommerce/woocommerce/pull/32057))
+
 = 5.6.0 2021-08-17 =
 
 **WooCommerce**
@@ -637,6 +809,12 @@
 - Tweak - Add documentation for the IntegrationInterface which extension developers can use to register scripts, styles, and data with WooCommerce Blocks. #4394
 - Tweak - Allow products to be added by SKU in the Hand-Picked Products block. #4366
 - Tweak - Add Slot in the Discounts section of the Checkout sidebar to allow third party extensions to render their own components there. #4310
+
+= 5.5.4 2022-03-10 =
+
+**WooCommerce**
+
+* Security - Address an issue with the PayPal Standard Payment Gateway. See https://developer.woocommerce.com/2022/03/10/woocommerce-3-5-10-6-3-1-security-releases/. ([#32057](https://github.com/woocommerce/woocommerce/pull/32057))
 
 = 5.5.2 2021-07-22 =
 
@@ -841,6 +1019,12 @@
 * Fix - Add extra safety/account for different versions of AS and different loading patterns. #714
 * Fix - Handle hidden columns (Tools → Scheduled Actions) | #600.
 
+= 5.4.4 2022-03-10 =
+
+**WooCommerce**
+
+* Security - Address an issue with the PayPal Standard Payment Gateway. See https://developer.woocommerce.com/2022/03/10/woocommerce-3-5-10-6-3-1-security-releases/. ([#32057](https://github.com/woocommerce/woocommerce/pull/32057))
+
 = 5.4.2 2021-07-14 =
 
 **WooCommerce**
@@ -939,6 +1123,12 @@
 * Tweak - Switched to `rest_preload_api_request` for API hydration in cart and checkout blocks. #4090
 * Fix - Prevent parts of old addresses being displayed in the shipping calculator when changing countries. #4038
 * Fix - issue in which email and phone fields are cleared when using a separate billing address. #4162
+
+= 5.3.3 2022-03-10 =
+
+**WooCommerce**
+
+* Security - Address an issue with the PayPal Standard Payment Gateway. See https://developer.woocommerce.com/2022/03/10/woocommerce-3-5-10-6-3-1-security-releases/. ([#32057](https://github.com/woocommerce/woocommerce/pull/32057))
 
 = 5.3.1 2021-07-14 =
 
@@ -1076,6 +1266,12 @@
 * Tweak - Revert WCPay international support for bundled package #6901
 * Tweak - Store profiler - Changed MailPoet's title and description #6886
 * Tweak - Update PayU logo #6829
+
+= 5.2.5 2022-03-10 =
+
+**WooCommerce**
+
+* Security - Address an issue with the PayPal Standard Payment Gateway. See https://developer.woocommerce.com/2022/03/10/woocommerce-3-5-10-6-3-1-security-releases/. ([#32057](https://github.com/woocommerce/woocommerce/pull/32057))
 
 = 5.2.3 2021-07-14 =
 
@@ -1246,6 +1442,12 @@
 * Fix - Ensure sale badges have a uniform height in the Cart block. ([3897](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3897))
 * Note - Internally, this release has modified how `AbstractBlock` (the base class for all of our blocks) functions, and how it loads assets. `AbstractBlock` is internal to this project and does not seem like something that would ever need to be extended by 3rd parties, but note if you are doing so for whatever reason, your implementation would need to be updated to match. ([3829](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3829))
 
+= 5.1.3 2022-03-10 =
+
+**WooCommerce**
+
+* Security - Address an issue with the PayPal Standard Payment Gateway. See https://developer.woocommerce.com/2022/03/10/woocommerce-3-5-10-6-3-1-security-releases/. ([#32057](https://github.com/woocommerce/woocommerce/pull/32057))
+
 = 5.1.1 2021-07-14 =
 
 **WooCommerce**
@@ -1360,6 +1562,12 @@
 * Dev - Added formatting classes to the Store API for extensions to consume.
 * Dev - Refactored and reordered Store API checkout processing to handle various edge cases and better support future extensibility. ([3454](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3454))
 
+= 5.0.3 2022-03-10 =
+
+**WooCommerce**
+
+* Security - Address an issue with the PayPal Standard Payment Gateway. See https://developer.woocommerce.com/2022/03/10/woocommerce-3-5-10-6-3-1-security-releases/. ([#32057](https://github.com/woocommerce/woocommerce/pull/32057))
+
 = 5.0.1 2021-07-14 =
 
 **WooCommerce**
@@ -1432,6 +1640,12 @@
 * Add - Note for users coming from Calypso. #6030
 * Enhancement - Add an "unread" indicator to inbox messages. #6047 
 * Add - Manage activity from home screen inbox message. #6072
+
+= 4.9.5 2022-03-10 =
+
+**WooCommerce**
+
+* Security - Address an issue with the PayPal Standard Payment Gateway. See https://developer.woocommerce.com/2022/03/10/woocommerce-3-5-10-6-3-1-security-releases/. ([#32057](https://github.com/woocommerce/woocommerce/pull/32057))
 
 = 4.9.3 2021-07-14 =
 
@@ -1563,6 +1777,12 @@
 * Dev - Expose store/cart via ExtendRestApi to extensions. ([3445](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3445))
 * Dev - Added formatting classes to the Store API for extensions to consume.
 
+= 4.8.3 2022-03-10 =
+
+**WooCommerce**
+
+* Security - Address an issue with the PayPal Standard Payment Gateway. See https://developer.woocommerce.com/2022/03/10/woocommerce-3-5-10-6-3-1-security-releases/. ([#32057](https://github.com/woocommerce/woocommerce/pull/32057))
+
 = 4.8.1 2021-07-14 =
 
 **WooCommerce**
@@ -1682,6 +1902,12 @@
 * Fix - Twenty Twenty One Button and Placeholder Styling. #3443
 * Fix - checkbox and textarea styles in Twenty Twenty One when it has dark controls active. #3450
 
+= 4.7.4 2022-03-10 =
+
+**WooCommerce**
+
+* Security - Address an issue with the PayPal Standard Payment Gateway. See https://developer.woocommerce.com/2022/03/10/woocommerce-3-5-10-6-3-1-security-releases/. ([#32057](https://github.com/woocommerce/woocommerce/pull/32057))
+
 = 4.7.2 2021-07-14 =
 
 **WooCommerce**
@@ -1749,6 +1975,12 @@
 
 * Tweak: Add BR and IN to list of stripe countries [#5377](https://github.com/woocommerce/woocommerce-admin/pull/5377)
 * Fix: Redirect instead of stalling on WCPay Inbox note action [#5413](https://github.com/woocommerce/woocommerce-admin/pull/5413)
+
+= 4.6.5 2022-03-10 =
+
+**WooCommerce**
+
+* Security - Address an issue with the PayPal Standard Payment Gateway. See https://developer.woocommerce.com/2022/03/10/woocommerce-3-5-10-6-3-1-security-releases/. ([#32057](https://github.com/woocommerce/woocommerce/pull/32057))
 
 = 4.6.3 2021-07-14 =
 
@@ -1878,6 +2110,12 @@
 - Create DebouncedValidatedTextInput component. ([3108](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3108))
 - Merge ProductPrice atomic block and component. ([3065](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3065))
 
+= 4.5.5 2022-03-10 =
+
+**WooCommerce**
+
+* Security - Address an issue with the PayPal Standard Payment Gateway. See https://developer.woocommerce.com/2022/03/10/woocommerce-3-5-10-6-3-1-security-releases/. ([#32057](https://github.com/woocommerce/woocommerce/pull/32057))
+
 = 4.5.3 2021-07-14 =
 
 **WooCommerce**
@@ -1931,6 +2169,12 @@
 * Dev - Display modal with more info about the new homescreen. #4890
 * Dev - Task list - add a shortcut back to store setup. #4853
 * Dev - Update the colors of the illustrations in the welcome modal. #4945
+
+= 4.4.4 2022-03-10 =
+
+**WooCommerce**
+
+* Security - Address an issue with the PayPal Standard Payment Gateway. See https://developer.woocommerce.com/2022/03/10/woocommerce-3-5-10-6-3-1-security-releases/. ([#32057](https://github.com/woocommerce/woocommerce/pull/32057))
 
 = 4.4.2 2021-07-14 =
 
@@ -2085,6 +2329,12 @@
 * Fix - Missing permissions_callback arg in StoreApi route definitions. #2926
 * Fix - 'Product Summary' in All Products block is not pulling in the short description of the product. #2913
 * Dev - Add query filter when searching for a table. #2886
+
+= 4.3.6 2022-03-10 =
+
+**WooCommerce**
+
+* Security - Address an issue with the PayPal Standard Payment Gateway. See https://developer.woocommerce.com/2022/03/10/woocommerce-3-5-10-6-3-1-security-releases/. ([#32057](https://github.com/woocommerce/woocommerce/pull/32057))
 
 = 4.3.4 2021-07-14 =
 
@@ -2273,6 +2523,12 @@
 * Dev - Table creation validation for install routine #2287
 * Dev - Update the icons used in the blocks. #1644
 
+= 4.2.5 2022-03-10 =
+
+**WooCommerce**
+
+* Security - Address an issue with the PayPal Standard Payment Gateway. See https://developer.woocommerce.com/2022/03/10/woocommerce-3-5-10-6-3-1-security-releases/. ([#32057](https://github.com/woocommerce/woocommerce/pull/32057))
+
 = 4.2.3 2021-07-14 =
 
 **WooCommerce**
@@ -2357,6 +2613,12 @@
 * Dev - Dynamic Currency with Context API #4027
 * Dev - Remove Duplicate array entry #4049
 
+= 4.1.4 2022-03-10 =
+
+**WooCommerce**
+
+* Security - Address an issue with the PayPal Standard Payment Gateway. See https://developer.woocommerce.com/2022/03/10/woocommerce-3-5-10-6-3-1-security-releases/. ([#32057](https://github.com/woocommerce/woocommerce/pull/32057))
+
 = 4.1.2 2021-07-14 =
 
 **WooCommerce**
@@ -2421,6 +2683,12 @@
 * Dev - Make WC_Product_Data_Store_CPT::update_product_stock operations atomic. #26039
 * Dev - Adds usage data for the of cart & checkout blocks (currently in development in WooCommmerce Blocks plugin) to the WC Tracker snapshot. #26084
 * Dev - Implement some additional tracks for coupons, orders, and products. #26085
+
+= 4.0.4 2022-03-10 =
+
+**WooCommerce**
+
+* Security - Address an issue with the PayPal Standard Payment Gateway. See https://developer.woocommerce.com/2022/03/10/woocommerce-3-5-10-6-3-1-security-releases/. ([#32057](https://github.com/woocommerce/woocommerce/pull/32057))
 
 = 4.0.2 2021-07-14 =
 
@@ -2546,6 +2814,12 @@
 * Dev - Applies woocommerce_maxmind_geolocation_database_path in MaxMind database migration. #25681
 * Dev - Support both .data() and .dataset for formdata in add to cart requests. #25726
 
+= 3.9.5 2022-03-10 =
+
+**WooCommerce**
+
+* Security - Address an issue with the PayPal Standard Payment Gateway. See https://developer.woocommerce.com/2022/03/10/woocommerce-3-5-10-6-3-1-security-releases/. ([#32057](https://github.com/woocommerce/woocommerce/pull/32057))
+
 = 3.9.4 2021-07-14 =
 
 **WooCommerce**
@@ -2660,6 +2934,12 @@
 * Localization - Fixed translatable string in WooCommerce's libraries. #24892 #24894
 * Localization - Fixed translatable string comments for translators. #24928
 * Localization - Add postcode validation for Slovenia. #25174
+
+= 3.8.3 2022-03-10 =
+
+**WooCommerce**
+
+* Security - Address an issue with the PayPal Standard Payment Gateway. See https://developer.woocommerce.com/2022/03/10/woocommerce-3-5-10-6-3-1-security-releases/. ([#32057](https://github.com/woocommerce/woocommerce/pull/32057))
 
 = 3.8.2 2021-07-14 =
 
@@ -2783,6 +3063,12 @@
 * Security - Add an exit after the redirect when checking author archive capabilities for customers.
 * Security - Ensure 404 pages with single product urls cannot be exploited using Open Redirect.
 
+= 3.7.3 2022-03-10 =
+
+**WooCommerce**
+
+* Security - Address an issue with the PayPal Standard Payment Gateway. See https://developer.woocommerce.com/2022/03/10/woocommerce-3-5-10-6-3-1-security-releases/. ([#32057](https://github.com/woocommerce/woocommerce/pull/32057))
+
 = 3.7.2 2021-07-14 =
 
 **WooCommerce**
@@ -2894,6 +3180,12 @@
 * Localization - OBW: Make postal code optional based on locale data. #23915
 * Localization - Add new currency for São Tomé, Príncipe dobra and Mauritanian ouguiya. #23950
 * Localization - Change Canada poscode label to `Postal code`. #23740
+
+= 3.6.7 2022-03-10 =
+
+**WooCommerce**
+
+* Security - Address an issue with the PayPal Standard Payment Gateway. See https://developer.woocommerce.com/2022/03/10/woocommerce-3-5-10-6-3-1-security-releases/. ([#32057](https://github.com/woocommerce/woocommerce/pull/32057))
 
 = 3.6.6 2021-07-14 =
 
@@ -3223,6 +3515,12 @@
 * Localization - Update Peruvian currency. #22602
 * Localization - Update CA address format. #22692
 * Localization - Updated JP field order. #22774
+
+= 3.5.10 2022-03-10 =
+
+**WooCommerce**
+
+* Security - Address an issue with the PayPal Standard Payment Gateway. See https://developer.woocommerce.com/2022/03/10/woocommerce-3-5-10-6-3-1-security-releases/. ([#32057](https://github.com/woocommerce/woocommerce/pull/32057))
 
 = 3.5.9 2021-07-14 =
 

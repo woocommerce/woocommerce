@@ -100,28 +100,16 @@ const resolvePackagePath = ( filename, packageName = '' ) => {
  * @param {Array} exclude An array of directories that won't be removed in the event that duplicates exist.
  * @return {string}
  */
-const resolveSingleE2EPath = ( filePath, exclude = [ 'woocommerce' ] ) => {
-	const { SMOKE_TEST_URL } = process.env;
-	let prunedPath;
+const resolveSingleE2EPath = ( filePath ) => {
+	const { SMOKE_TEST_URL, GITHUB_ACTIONS } = process.env;
+	const localPath = resolveLocalE2ePath( filePath );
 
-	// Removes 'plugins/woocommerce/' from path only for tests against a smoke test site.
-	if ( SMOKE_TEST_URL ) {
-		prunedPath = filePath.replace( 'plugins/woocommerce/', '' );
+	if ( fs.existsSync( localPath ) ) {
+		return localPath;
 	} else {
-		prunedPath = filePath;
+		const prunedPath = filePath.replace( 'tests/e2e', '' );
+		return resolveLocalE2ePath( prunedPath );
 	}
-
-	const pathArray = resolveLocalE2ePath( prunedPath ).split( '/' );
-
-	// removes duplicate directories from the path
-	return pathArray
-		.filter( ( element, index, arr ) => {
-			return (
-				arr.indexOf( element ) === index ||
-				exclude.indexOf( element ) !== -1
-			);
-		} )
-		.join( '/' );
 };
 
 // Copy local test configuration file if it exists.

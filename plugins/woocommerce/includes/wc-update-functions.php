@@ -2,7 +2,15 @@
 /**
  * WooCommerce Updates
  *
- * Functions for updating data, used by the background updater.
+ * Functions for updating data, used by the background updater. These functions must be included
+ * in the list returned by WC_Install::get_db_update_callbacks.
+ *
+ * Please note that these functions are invoked when WooCommerce is updated from a previous version,
+ * but NOT when WooCommerce is newly installed.
+ *
+ * Database schema changes must be incorporated to the SQL returned by WC_Install::get_schema, which is applied
+ * via dbDelta at both install and update time. If any other kind of database change is required
+ * at install time (e.g. populating tables), use the 'woocommerce_installed' hook.
  *
  * @package WooCommerce\Functions
  * @version 3.3.0
@@ -346,8 +354,6 @@ function wc_update_200_line_items() {
 						$order_tax_row->post_id
 					)
 				);
-
-				unset( $tax_amount );
 			}
 		}
 	}
