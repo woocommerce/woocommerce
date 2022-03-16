@@ -107,7 +107,7 @@
 		"@types/gtag.js": "0.0.9",
 		"@types/jest": "26.0.24",
 		"@types/jquery": "3.5.14",
-		"@types/lodash": "4.14.179",
+		"@types/lodash": "4.14.180",
 		"@types/puppeteer": "5.4.5",
 		"@types/react": "17.0.39",
 		"@types/react-dom": "17.0.13",
