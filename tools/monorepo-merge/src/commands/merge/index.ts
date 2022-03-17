@@ -95,7 +95,7 @@ export default class Merge extends Command {
 	 */
 	private async validateArgs( source: string, destination: string ): Promise< void > {
 		// We only support pulling from GitHub so the format needs to match that.
-		if ( ! source.match( /^[a-z0-9\-]+\/[a-z0-9\-]+$/ ) ) {
+		if ( ! source.match( /^[a-zA-Z0-9\-_]+\/[a-zA-Z0-9\-_]+$/ ) ) {
 			this.error(
 				'The "source" argument must be in "organization/repository" format'
 			);
