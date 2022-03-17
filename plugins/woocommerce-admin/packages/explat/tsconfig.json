@@ -2,9 +2,6 @@
 	"extends": "../tsconfig",
 	"compilerOptions": {
 		"rootDir": "src",
-		"outDir": "build-module",
-		"paths": {
-			"@automattic/explat-client": [ "../../node_modules/@automattic/explat-client/src" ],
-		}
+		"outDir": "build-module"
 	},
 }
