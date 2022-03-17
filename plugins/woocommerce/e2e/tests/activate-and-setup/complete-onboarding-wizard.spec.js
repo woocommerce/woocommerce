@@ -182,3 +182,46 @@ test.describe('A japanese store can complete the selective bundle install but do
 		expect(listItem).not.toContain('Set up WooCommerce Payments');
 	});
 });
+
+test.describe('Store owner can go through setup Task List', () => {
+	test.use({ storageState: 'e2e/storage/adminState.json' });
+
+	test.beforeEach(async ({ page }) => {
+		await page.goto('wp-admin/admin.php?page=wc-admin&path=/setup-wizard');
+		await page.fill('#inspector-text-control-0', 'addr 1');
+		await page.fill('#inspector-text-control-1', 'addr 2');
+		await page.click('#woocommerce-select-control-0__control-input');
+		await page.fill('#woocommerce-select-control-0__control-input', 'United States (US) — California');
+		await page.click('button >> text=United States (US) — California');
+		await page.fill('#inspector-text-control-2', 'San Francisco');
+		await page.fill('#inspector-text-control-3', '94107');
+		await page.fill('#inspector-text-control-4', 'admin@woocommercecoree2etestsuite.com');
+		await page.check('#inspector-checkbox-control-0');
+		await page.click('button >> text=Continue');
+		await page.click('button >> text=No thanks');
+		await page.waitForLoadState('networkidle'); // not autowaiting for form submission
+	});
+
+	test('can setup shipping', async ({ page }) => {
+		await page.goto('/wp-admin/admin.php?page=wc-admin');
+		// Close the welcome dialog if it's present
+		await page.waitForLoadState('networkidle'); // explictly wait because the welcome dialog loads last
+		const welcomeDialog = await page.$('.components-modal__header');
+		if (welcomeDialog != null) {
+		 	await page.click('div.components-modal__header >> button.components-button');
+		}
+		await expect(welcomeDialog).not.toBeVisible;
+		await page.locator('li[role="button"]:has-text("Set up shipping1 minute")').click();
+
+		const shippingPage = await page.textContent('h1');
+		if (shippingPage == 'Shipping') {
+			// click the Add shipping zone button on the shipping settings page
+			await page.locator('.page-title-action').click();
+
+			const shipZonesPage = await page.locator('h2', { hasText: 'Shipping zones' });
+			expect(shipZonesPage).toBeVisible;
+		} else {
+			await page.locator('button.components-button.is-primary').click();
+		}
+	});
+});
