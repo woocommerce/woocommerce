@@ -5,28 +5,26 @@ import { CliUx, Command, Flags } from '@oclif/core';
 import { graphql, GraphqlResponseError } from '@octokit/graphql';
 
 /**
- * Describes the information for a user that the command needs to operate.
+ * Make sure we aren't hardcoding the monorepo into the command.
  */
-interface APIUser {
+const MONOREPO_OWNER = 'woocommerce';
+const MONOREPO_NAME = 'woocommerce';
+
+/**
+ * Describes the label object containing the label name as the key
+ * and the GitHub node ID as the value.
+ */
+interface GitHubLabels {
+	[ name: string ]: string;
+}
+
+/**
+ * Describes the issue object containing the issue ID
+ * as the key and the title as the value.
+ */
+interface GitHubIssue {
 	id: string;
-	monorepoID: string;
-	token: string;
-}
-
-/**
- * Describes the changes we want to make to the issues after we transfer them.
- */
-interface IssueChanges {
-    addLabelIDs: string[];
-}
-
-/**
- * Describes the results from an issue lookup.
- */
-interface IssueResults {
-	totalIssues: number;
-	cursor: string;
-	issues: { id: string; title: string }[];
+	title: string;
 }
 
 export default class TransferIssues extends Command {
@@ -42,15 +40,14 @@ export default class TransferIssues extends Command {
 	];
 
 	static flags = {
-		filter: Flags.string( {
+		searchFilter: Flags.string( {
 			description:
-				'A search filter to apply when searching for issues to transfer.',
+				'The search filter to apply when searching for issues to transfer.',
 			default: 'is:open',
 		} ),
 		labels: Flags.string( {
 			description:
-				'A label that should be added to the issue post-migration.',
-			multiple: true,
+				'A comma-delimited list of labels that should be added to the issue post-migration.',
 		} ),
 	};
 
@@ -59,8 +56,6 @@ export default class TransferIssues extends Command {
 	 */
 	async run(): Promise< void > {
 		const { args, flags } = await this.parse( TransferIssues );
-
-		this.validateArgs( args.source );
 
 		let confirmation = await CliUx.ux.confirm(
 			'Are you sure you want to transfer issues from ' +
@@ -71,78 +66,62 @@ export default class TransferIssues extends Command {
 			this.exit( 0 );
 		}
 
-        CliUx.ux.action.start('Validating API arguments');
+		const authenticatedGraphQL = await this.authenticateGraphQL();
 
-		const apiUser = await this.getAPIUser();
-		const issueChanges = await this.checkAPIArguments( apiUser, args.source, flags.labels );
+		const numberOfIssues = await this.getNumberOfIssues(
+			authenticatedGraphQL,
+			args.source,
+			flags.searchFilter
+		);
+		confirmation = await CliUx.ux.confirm(
+			'This will transfer ' +
+				numberOfIssues +
+				' issues. There is no command to reverse this, are you sure? (y/n)'
+		);
+		if ( ! confirmation ) {
+			this.exit( 0 );
+		}
 
-        CliUx.ux.action.stop();
+		const monorepoNodeID = await this.getMonorepoNodeID(
+			authenticatedGraphQL
+		);
+		const labelsToAdd = await this.getLabelsToAdd(
+			authenticatedGraphQL,
+			flags.labels
+		);
+		const issuesToTransfer = await this.getIssues(
+			authenticatedGraphQL,
+			args.source,
+			flags.searchFilter
+		);
 
-		// Iterate over all of the issues and transfer them to the monorepo.
-		let cursor: string | null = null;
-		let totalTransferred = 0;
-		let totalIssues = 0;
-		do {
-			const issues: IssueResults = await this.loadIssues(
-				apiUser,
-				args.source,
-				flags.filter,
-				cursor
+		let transferredIssues = 0;
+		for ( const issue of issuesToTransfer ) {
+			const success = await this.transferIssue(
+				authenticatedGraphQL,
+				issue,
+				monorepoNodeID,
+				labelsToAdd
 			);
-			if ( issues.issues.length === 0 ) {
-				break;
+
+			if ( success ) {
+				transferredIssues++;
 			}
-
-			if ( totalIssues === 0 ) {
-				totalIssues = issues.totalIssues;
-
-				confirmation = await CliUx.ux.confirm(
-					'This will transfer ' +
-						totalIssues +
-						' issues. There is no command to reverse this, are you sure? (y/n)'
-				);
-				if ( ! confirmation ) {
-					this.exit( 0 );
-				}
-			}
-
-			totalTransferred += await this.transferIssues(
-				apiUser,
-				issueChanges,
-                issues
-			);
-			cursor = issues.cursor;
-		} while ( cursor !== null );
-		{
 		}
 
 		this.log(
 			'Successfully transferred ' +
-				totalTransferred +
+				transferredIssues +
 				'/' +
-				totalIssues +
+				numberOfIssues +
 				' issues.'
 		);
 	}
 
 	/**
-	 * Validates all of the arguments to make sure they're compatible with the command.
-	 *
-	 * @param {string} source The GitHub repository we are transferring from.
+	 * Requests a token and verifies that it can be used to query the API.
 	 */
-	private validateArgs( source: string ): void {
-		// We only support pulling from GitHub so the format needs to match that.
-		if ( ! source.match( /^[a-zA-Z0-9\-_]+\/[a-zA-Z0-9\-_]+$/ ) ) {
-			this.error(
-				'The "source" argument must be in "organization/repository" format'
-			);
-		}
-	}
-
-	/**
-	 * Requests an API token from the user, validates it, and returns information about them if successful.
-	 */
-	private async getAPIUser(): Promise< APIUser > {
+	private async authenticateGraphQL(): Promise< typeof graphql > {
 		// Prompt them for a token, rather than storing one. This reduces the likelihood that the command can be accidentally executed.
 		const token: string = await CliUx.ux.prompt(
 			'Please supply a GitHub API token',
@@ -152,197 +131,267 @@ export default class TransferIssues extends Command {
 			this.error( 'You must enter a valid GitHub API token' );
 		}
 
+		CliUx.ux.action.start( 'Validating GitHub API token' );
+
+		const authenticatedGraphQL = graphql.defaults( {
+			headers: {
+				authorization: 'token ' + token,
+			},
+		} );
+
 		try {
-			const { viewer } = await graphql( '{ viewer { id } }', {
-				headers: {
-					authorization: 'token ' + token,
-				},
-			} );
-
-			const { repository } = await graphql(
-				'{ repository (owner: "woocommerce", name: "woocommerce" ) { id } }',
-				{
-					headers: {
-						authorization: 'token ' + token,
-					},
-				}
-			);
-
-			return {
-				id: viewer.id,
-				monorepoID: repository.id,
-				token,
-			};
+			await authenticatedGraphQL( '{ viewer { id } }' );
 		} catch ( err: any ) {
 			if ( err?.status === 401 ) {
 				this.error( 'The given token is invalid' );
 			}
 
 			throw err;
-		}
-	}
-
-	/**
-	 * Checks the arguments that will be sent to the GitHub API for validity.
-	 *
-	 * @param {APIUser} apiUser The API user that is making the transfer request.
-	 * @param {string} source The GitHub repository we are transferring issues from.
-	 * @param {Array.<string>} labels The labels to be applied to the issues post-transfer.
-	 */
-	private async checkAPIArguments(
-		apiUser: APIUser,
-		source: string,
-		labels: string[]
-	): Promise< IssueChanges > {
-        const changes: IssueChanges = {
-            addLabelIDs: []
-        };
-
-		const [ owner, name ] = source.split( '/' );
-
-		try {
-			await graphql(
-				`{ repository (owner: "${ owner }", name: "${ name }" ) { id } }`,
-				{
-					headers: {
-						authorization: 'token ' + apiUser.token,
-					},
-				}
-			);
-		} catch {
-			this.error( 'Unable to find repository ' + source );
-		}
-
-		// Paginate all of the labels in the repository to check against the input.
-		if (labels && labels.length > 0) {
-            const allLabels: { [ key: string ]: string } = {};
-            let cursor: string | null = null;
-            do {
-                const cursorString: string = cursor
-                    ? ', after: "' + cursor + '"'
-                    : '';
-                const { repository } = await graphql(
-                    `
-                    {
-                        repository (owner: "woocommerce", name: "woocommerce" ) {
-                            labels (first: 10${ cursorString }) {
-                                nodes {
-                                    id,
-                                    name
-                                },
-                                pageInfo {
-                                    endCursor
-                                }
-                                }
-                        }
-                    }
-                    `,
-                    {
-                        headers: {
-                            authorization: 'token ' + apiUser.token,
-                        },
-                    }
-                );
-
-                if ( repository.labels.nodes.length === 0 ) {
-                    break;
-                }
-
-                cursor = repository.labels.pageInfo.endCursor;
-                for ( const label of repository.labels.nodes ) {
-                    allLabels[ label.name ] = label.id;
-                }
-            } while ( cursor !== null );
-
-            for (const label of labels) {
-                if ( ! allLabels[ label ] ) {
-                    this.error( 'The monorepo does not have the label ' + label + '.' );
-                }
-
-                changes.addLabelIDs.push( allLabels[ label ] );
-            }
-        }
-
-        return changes;
-	}
-
-	/**
-	 * Loads a set of issues from the
-	 *
-	 * @param {APIUser} apiUser The API user that is making the transfer request.
-	 * @param {string} source The GitHub repository we are transferring issues from.
-	 * @param {string} filter The search filter for the issue search.
-	 * @param {string|null} cursor The cursor for the current in-progress issue search.
-	 */
-	private async loadIssues(
-		apiUser: APIUser,
-		source: string,
-		filter: string,
-		cursor: string | null
-	): Promise< IssueResults > {
-		const cursorString = cursor ? ', after: "' + cursor + '"' : '';
-
-		const { search } = await graphql(
-			`
-            {
-                search(type: ISSUE, query: "repo:${ source } is:issue ${ filter }", first: 50${ cursorString }) {
-                    nodes {
-                      ... on Issue {
-                        id,
-                        title
-                      }
-                    },
-                    issueCount,
-                    pageInfo {
-                      endCursor
-                    }
-                  }
-            }
-            `,
-			{
-				headers: {
-					authorization: 'token ' + apiUser.token,
-				},
-			}
-		);
-
-		const nextCursor = search.pageInfo.endCursor;
-		const issues: { id: string; title: string }[] = [];
-		for ( const issue of search.nodes ) {
-			issues.push( {
-				id: issue.id,
-				title: issue.title,
-			} );
-		}
-
-		return {
-			totalIssues: search.issueCount,
-			cursor: nextCursor,
-			issues,
-		};
-	}
-
-	/**
-	 * Transfers a set of issues to the monorepo.
-	 *
-	 * @param {APIUser} apiUser The API user making the transfer request.
-     * @param {IssueChanges} issueChanges The changes we should make to the issues during the transfer.
-	 * @param {IssueResults} issues The issues to be transferred to the monorepo.
-	 */
-	private async transferIssues(
-		apiUser: APIUser,
-        issueChanges: IssueChanges,
-		issues: IssueResults
-	): Promise< number > {
-		// Track the number of issues so that we can keep up with them.
-		let issuesTransferred = 0;
-		for ( const issue of issues.issues ) {
-			CliUx.ux.action.start( 'Transferring "' + issue.title + '"' );
-
-			issuesTransferred++;
+		} finally {
 			CliUx.ux.action.stop();
 		}
 
-		return issuesTransferred;
+		return authenticatedGraphQL;
+	}
+
+	/**
+	 * Fetches the node ID of the monorepo from GitHub.
+	 *
+	 * @param {graphql} authenticatedGraphQL The graphql object for making requests.
+	 */
+	private async getMonorepoNodeID(
+		authenticatedGraphQL: typeof graphql
+	): Promise< string > {
+		CliUx.ux.action.start( 'Finding Monorepo' );
+
+		try {
+			const { repository } = await authenticatedGraphQL(
+				`
+                query ( $monorepoOwner: String!, $monorepoName: String! ) {
+                    repository ( owner: $monorepoOwner, name: $monorepoName ) {
+                        id,
+                        nameWithOwner
+                    }
+                }
+                `,
+				{
+					monorepoOwner: MONOREPO_OWNER,
+					monorepoName: MONOREPO_NAME,
+				}
+			);
+
+			CliUx.ux.action.stop();
+
+			return repository.id;
+		} catch ( err ) {
+			CliUx.ux.action.stop();
+
+			if ( err instanceof GraphqlResponseError ) {
+				this.error(
+					'Could not find the repository "' +
+						MONOREPO_OWNER +
+						'/' +
+						MONOREPO_NAME +
+						'"'
+				);
+			}
+
+			throw err;
+		} finally {
+			CliUx.ux.action.stop();
+		}
+	}
+
+	/**
+	 * Gets all of the labels we want to add from GitHub.
+	 *
+	 * @param {graphql} authenticatedGraphQL The graphql object for making requests.
+	 * @param {Array.<string>} labels The labels we want to add after the transfer.
+	 */
+	private async getLabelsToAdd(
+		authenticatedGraphQL: typeof graphql,
+		labels?: string
+	): Promise< GitHubLabels > {
+		if ( ! labels ) {
+			return {};
+		}
+		const addLabels = labels.split( ',' );
+
+		CliUx.ux.action.start( 'Getting labels to add' );
+
+		// Gather all of the labels from the monorepo so that
+		// we can validate the labels we want to add and
+		// get the IDs of them to assign on transfer.
+		const allLabels: GitHubLabels = {};
+		let cursor: string | null = null;
+		do {
+			const { repository } = await authenticatedGraphQL(
+				`
+                query ( $monorepoOwner: String!, $monorepoName: String!, $cursor: String ) {
+                    repository ( owner: $monorepoOwner, name: $monorepoName ) {
+                        labels ( first: 100, after: $cursor ) {
+                            nodes {
+                                id,
+                                name
+                            },
+                            pageInfo {
+                                hasNextPage,
+                                endCursor
+                            }
+                        }
+                    }
+                }
+                `,
+				{
+					monorepoOwner: MONOREPO_OWNER,
+					monorepoName: MONOREPO_NAME,
+					cursor,
+				}
+			);
+
+			// Record all of the labels so that we can scan for the ones we are adding.
+			for ( const label of repository.labels.nodes ) {
+				allLabels[ label.name ] = label.id;
+			}
+
+			// Continue following the cursor until we have no labels left to get.
+			if ( repository.labels.pageInfo.hasNextPage ) {
+				cursor = repository.labels.pageInfo.endCursor as string;
+			} else {
+				cursor = null;
+			}
+		} while ( cursor !== null );
+
+		// Find all of the labels we are going to add to the issues after the transfer.
+		const gitHubLabels: GitHubLabels = {};
+		for ( const label of addLabels ) {
+			if ( ! allLabels[ label ] ) {
+				this.error(
+					'The monorepo does not have the label ' + label + '.'
+				);
+			}
+
+			gitHubLabels[ label ] = allLabels[ label ];
+		}
+
+		CliUx.ux.action.stop();
+
+		return gitHubLabels;
+	}
+
+	/**
+	 * Gets the number of issues that this command is going to migrate.
+	 *
+	 * @param {graphql} authenticatedGraphQL The graphql object for making requests.
+	 * @param {string} source The repository to transfer issues from.
+	 * @param {string} searchFilter The GitHub search filters for the issues to transfer.
+	 */
+	private async getNumberOfIssues(
+		authenticatedGraphQL: typeof graphql,
+		source: string,
+		searchFilter: string
+	): Promise< number > {
+		const searchQuery = 'repo:' + source + ' is:issue ' + searchFilter;
+
+		const { search } = await authenticatedGraphQL(
+			`
+            query ($searchQuery: String!) {
+                search ( 
+                    type: ISSUE, 
+                    query: $searchQuery,
+                    first: 0
+                ) {
+                    issueCount,
+                }
+            }
+            `,
+			{ searchQuery }
+		);
+
+		return search.issueCount;
+	}
+
+	/**
+	 * Gets all of the issues that we are going to transfer into the monorepo.
+	 *
+	 * @param {graphql} authenticatedGraphQL The graphql object for making requests.
+	 * @param {string} source The repository to transfer issues from.
+	 * @param {string} searchFilter The GitHub search filters for the issues to transfer.
+	 */
+	private async getIssues(
+		authenticatedGraphQL: typeof graphql,
+		source: string,
+		searchFilter: string
+	): Promise< GitHubIssue[] > {
+		const searchQuery = 'repo:' + source + ' is:issue ' + searchFilter;
+
+		const issues: GitHubIssue[] = [];
+		let cursor: string | null = null;
+		do {
+			const { search } = await authenticatedGraphQL(
+				`
+                query ($searchQuery: String!, $cursor: String) {
+                    search ( 
+                        type: ISSUE, 
+                        query: $searchQuery,
+                        first: 100,
+                        after: $cursor
+                    ) {
+                        nodes {
+                            ... on Issue {
+                                id,
+                                title
+                            }
+                        },
+                        pageInfo {
+                            hasNextPage,
+                            endCursor
+                        }
+                    }
+                }
+                `,
+				{
+					searchQuery,
+					cursor,
+				}
+			);
+
+			// Record all of the issues that we've found
+			for ( const issue of search.nodes ) {
+				issues.push( {
+					id: issue.id,
+					title: issue.title,
+				} );
+			}
+
+			// Continue following the cursor until we have no issues left to get.
+			if ( search.pageInfo.hasNextPage ) {
+				cursor = search.pageInfo.endCursor as string;
+			} else {
+				cursor = null;
+			}
+		} while ( cursor !== null );
+
+		return issues;
+	}
+
+	/**
+	 * Transfers an issue into the monorepo.
+	 *
+	 * @param {graphql} authenticatedGraphQL The graphql object for making requests.
+	 * @param {GitHubIssue} issue The issue that we are going to transfer.
+	 * @param {string} monorepoNodeID The global node ID of the monorepo.
+	 * @param {GitHubLabels} labelsToAdd The labels we want to apply after the transfer.
+	 */
+	private async transferIssue(
+		authenticatedGraphQL: typeof graphql,
+		issue: GitHubIssue,
+		monorepoNodeID: string,
+		labelsToAdd: GitHubLabels
+	): Promise< boolean > {
+		CliUx.ux.action.start( 'Transferring "' + issue.title + '"' );
+
+		CliUx.ux.action.stop();
+		return true;
 	}
 }
