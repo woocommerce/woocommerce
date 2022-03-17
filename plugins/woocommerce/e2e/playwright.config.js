@@ -4,13 +4,13 @@ const { devices } = require('@playwright/test');
 
 /** @type {import('@playwright/test').PlaywrightTestConfig} */
 const config = {
-	timeout: 30000,
-	outputDir: './output',
+	timeout: 10000,
+	outputDir: './report',
 	globalSetup: require.resolve('./global-setup'),
 	testDir: 'tests',
+	retries: 1,
 	reporter: [['list'], ['html', { outputFolder: 'e2e/output' }]],
 	use: {
-	  retries: 2,
 	  screenshot: 'only-on-failure',
 	  video: 'retain-on-failure',
 	  trace: 'retain-on-failure',
