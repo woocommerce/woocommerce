@@ -81,7 +81,7 @@ class DatabaseUtil {
 	public function drop_table_index( string $table_name, string $index_name ): bool {
 		global $wpdb;
 
-		if ( ! $this->index_exists( $table_name, $index_name ) ) {
+		if ( empty( $this->get_index_columns( $table_name, $index_name ) ) ) {
 			return false;
 		}
 
@@ -100,7 +100,7 @@ class DatabaseUtil {
 	public function create_primary_key( string $table_name, array $columns ) {
 		global $wpdb;
 
-		if ( $this->index_exists( $table_name, 'PRIMARY' ) ) {
+		if ( ! empty( $this->get_index_columns( $table_name ) ) ) {
 			return false;
 		}
 
@@ -110,29 +110,27 @@ class DatabaseUtil {
 	}
 
 	/**
-	 * Does a given index exist for a given table?
+	 * Get the columns of a given table index, or of the primary key.
 	 *
 	 * @param string $table_name Table name.
-	 * @param string $index_name Index name, or "PRIMARY" for the primary index.
-	 * @return bool
+	 * @param string $index_name Index name, empty string for the primary key.
+	 * @return array The index columns. Empty array if the table or the index don't exist.
 	 */
-	private function index_exists( string $table_name, string $index_name ): bool {
+	public function get_index_columns( string $table_name, string $index_name = '' ): array {
 		global $wpdb;
 
-		// phpcs:disable WordPress.DB.PreparedSQL
+		if ( empty( $index_name ) ) {
+			$index_name = 'PRIMARY';
+		}
 
-		$index_count = intval(
-			$wpdb->get_var(
-				"
-SELECT COUNT(1) FROM INFORMATION_SCHEMA.STATISTICS
+		// phpcs:disable WordPress.DB.PreparedSQL
+		return $wpdb->get_col(
+			"
+SELECT column_name FROM INFORMATION_SCHEMA.STATISTICS
 WHERE table_name='$table_name'
 AND table_schema='" . DB_NAME . "'
 AND index_name='$index_name'"
-			)
 		);
-
-		return 0 !== $index_count;
-
 		// phpcs:enable WordPress.DB.PreparedSQL
 	}
 }

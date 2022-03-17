@@ -482,6 +482,14 @@ class DataRegenerator {
 		$database_util = wc_get_container()->get( DatabaseUtil::class );
 		$database_util->create_primary_key( $this->lookup_table_name, array( 'product_or_parent_id', 'term_id', 'product_id', 'taxonomy' ) );
 		$database_util->drop_table_index( $this->lookup_table_name, 'product_or_parent_id_term_id' );
+
+		if ( empty( $database_util->get_index_columns( $this->lookup_table_name ) ) ) {
+			wc_get_logger()->error( "The creation of the primary key for the {$this->lookup_table_name} table failed" );
+		}
+
+		if ( ! empty( $database_util->get_index_columns( $this->lookup_table_name, 'product_or_parent_id_term_id' ) ) ) {
+			wc_get_logger()->error( "Dropping the product_or_parent_id_term_id index from the {$this->lookup_table_name} table failed" );
+		}
 	}
 
 	/**
