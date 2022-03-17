@@ -182,6 +182,10 @@ class WC_Install {
 			'wc_update_630_create_product_attributes_lookup_table',
 			'wc_update_630_db_version',
 		),
+		'6.4.0' => array(
+			'wc_update_640_add_primary_key_to_product_attributes_lookup_table',
+			'wc_update_640_db_version',
+		),
 	);
 
 	/**
