@@ -9,9 +9,9 @@ namespace Automattic\WooCommerce\Internal\Admin\Notes;
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Admin\Features\Onboarding;
 use \Automattic\WooCommerce\Admin\Notes\Note;
 use \Automattic\WooCommerce\Admin\Notes\NoteTraits;
+use \Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 
 /**
  * WooCommerce_Subscriptions.
@@ -33,7 +33,7 @@ class WooCommerceSubscriptions {
 	 * @return Note|null
 	 */
 	public static function get_note() {
-		$onboarding_data = get_option( Onboarding::PROFILE_DATA_OPTION, array() );
+		$onboarding_data = get_option( OnboardingProfile::DATA_OPTION, array() );
 
 		if ( ! isset( $onboarding_data['product_types'] ) || ! in_array( 'subscriptions', $onboarding_data['product_types'], true ) ) {
 			return;

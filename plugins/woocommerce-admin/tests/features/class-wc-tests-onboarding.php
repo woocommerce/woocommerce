@@ -2,10 +2,10 @@
 /**
  * Onboarding Themes Tests.
  *
- * @package WooCommerce\Admin\Tests\OnboardingThemes
+ * @package WooCommerce\Internal\Admin\Tests\OnboardingThemes
  */
 
-use \Automattic\WooCommerce\Admin\Features\Onboarding;
+use \Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingThemes;
 
 /**
  * Class WC_Tests_Onboarding
@@ -33,7 +33,7 @@ class WC_Tests_Onboarding extends WC_Unit_Test_Case {
 			'slug' => 'poutine',
 		);
 		$some_themes   = array( $theme1, $theme2, $theme3, $theme4 );
-		$sorted_themes = \Automattic\WooCommerce\Admin\Features\Onboarding::sort_woocommerce_themes( $some_themes );
+		$sorted_themes = OnboardingThemes::sort_woocommerce_themes( $some_themes );
 		$this->assertEquals( 'Storefront', $sorted_themes[0]->slug );
 	}
 

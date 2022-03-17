@@ -2,7 +2,7 @@
 
 namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks;
 
-use Automattic\WooCommerce\Admin\Features\Onboarding;
+use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 
@@ -106,7 +106,7 @@ class WooCommercePayments extends Task {
 	 * @return bool
 	 */
 	public static function is_requested() {
-		$profiler_data       = get_option( Onboarding::PROFILE_DATA_OPTION, array() );
+		$profiler_data       = get_option( OnboardingProfile::DATA_OPTION, array() );
 		$product_types       = isset( $profiler_data['product_types'] ) ? $profiler_data['product_types'] : array();
 		$business_extensions = isset( $profiler_data['business_extensions'] ) ? $profiler_data['business_extensions'] : array();
 

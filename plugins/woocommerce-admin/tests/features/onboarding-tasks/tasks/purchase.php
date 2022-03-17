@@ -5,7 +5,8 @@
  * @package WooCommerce\Admin\Tests\OnboardingTasks
  */
 
-use Automattic\WooCommerce\Admin\Features\Onboarding;
+use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingThemes;
+use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskList;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\Purchase;
 
@@ -29,7 +30,7 @@ class WC_Tests_OnboardingTasks_Task_Purchase extends WC_Unit_Test_Case {
 
 		$this->task = new Purchase( new TaskList() );
 		set_transient(
-			Onboarding::THEMES_TRANSIENT,
+			OnboardingThemes::THEMES_TRANSIENT,
 			array(
 				'free'            => array( 'slug' => 'free' ),
 				'paid'            => array(
@@ -60,15 +61,15 @@ class WC_Tests_OnboardingTasks_Task_Purchase extends WC_Unit_Test_Case {
 	 */
 	public function tearDown() {
 		parent::tearDown();
-		delete_transient( Onboarding::THEMES_TRANSIENT );
-		delete_option( Onboarding::PROFILE_DATA_OPTION );
+		delete_transient( OnboardingThemes::THEMES_TRANSIENT );
+		delete_option( OnboardingProfile::DATA_OPTION );
 	}
 
 	/**
 	 * Test is_complete function of Purchase task.
 	 */
 	public function test_is_complete_if_no_remaining_products() {
-		update_option( Onboarding::PROFILE_DATA_OPTION, array( 'product_types' => array( 'physical' ) ) );
+		update_option( OnboardingProfile::DATA_OPTION, array( 'product_types' => array( 'physical' ) ) );
 		$this->assertEquals( true, $this->task->is_complete() );
 	}
 
@@ -76,7 +77,7 @@ class WC_Tests_OnboardingTasks_Task_Purchase extends WC_Unit_Test_Case {
 	 * Test is_complete function of Purchase task.
 	 */
 	public function test_is_not_complete_if_remaining_paid_products() {
-		update_option( Onboarding::PROFILE_DATA_OPTION, array( 'product_types' => array( 'memberships' ) ) );
+		update_option( OnboardingProfile::DATA_OPTION, array( 'product_types' => array( 'memberships' ) ) );
 		$this->assertEquals( false, $this->task->is_complete() );
 	}
 
@@ -85,7 +86,7 @@ class WC_Tests_OnboardingTasks_Task_Purchase extends WC_Unit_Test_Case {
 	 */
 	public function test_is_complete_if_no_paid_themes() {
 		update_option(
-			Onboarding::PROFILE_DATA_OPTION,
+			OnboardingProfile::DATA_OPTION,
 			array(
 				'product_types' => array(),
 				'theme'         => 'free',
@@ -99,7 +100,7 @@ class WC_Tests_OnboardingTasks_Task_Purchase extends WC_Unit_Test_Case {
 	 */
 	public function test_is_not_complete_if_paid_theme_that_is_not_installed() {
 		update_option(
-			Onboarding::PROFILE_DATA_OPTION,
+			OnboardingProfile::DATA_OPTION,
 			array(
 				'product_types' => array(),
 				'theme'         => 'paid',
@@ -113,7 +114,7 @@ class WC_Tests_OnboardingTasks_Task_Purchase extends WC_Unit_Test_Case {
 	 */
 	public function test_is_complete_if_paid_theme_that_is_installed() {
 		update_option(
-			Onboarding::PROFILE_DATA_OPTION,
+			OnboardingProfile::DATA_OPTION,
 			array(
 				'product_types' => array(),
 				'theme'         => 'paid_installed',
@@ -127,7 +128,7 @@ class WC_Tests_OnboardingTasks_Task_Purchase extends WC_Unit_Test_Case {
 	 */
 	public function test_is_complete_if_free_theme_with_set_price() {
 		update_option(
-			Onboarding::PROFILE_DATA_OPTION,
+			OnboardingProfile::DATA_OPTION,
 			array(
 				'product_types' => array(),
 				'theme'         => 'free_with_price',
@@ -141,7 +142,7 @@ class WC_Tests_OnboardingTasks_Task_Purchase extends WC_Unit_Test_Case {
 	 */
 	public function test_get_title_if_single_paid_item() {
 		update_option(
-			Onboarding::PROFILE_DATA_OPTION,
+			OnboardingProfile::DATA_OPTION,
 			array(
 				'product_types' => array(),
 				'theme'         => 'paid',
@@ -155,7 +156,7 @@ class WC_Tests_OnboardingTasks_Task_Purchase extends WC_Unit_Test_Case {
 	 */
 	public function test_get_title_if_multiple_paid_themes() {
 		update_option(
-			Onboarding::PROFILE_DATA_OPTION,
+			OnboardingProfile::DATA_OPTION,
 			array(
 				'product_types' => array( 'memberships' ),
 				'theme'         => 'paid',

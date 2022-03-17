@@ -6,7 +6,7 @@
  */
 
 use \Automattic\WooCommerce\Admin\API\OnboardingThemes;
-use \Automattic\WooCommerce\Admin\Features\Onboarding;
+use \Automattic\WooCommerce\Internal\Admin\Onboarding;
 
 /**
  * WC Tests API Onboarding Themes

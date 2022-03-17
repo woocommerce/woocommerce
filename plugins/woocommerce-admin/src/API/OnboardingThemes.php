@@ -7,7 +7,7 @@
 
 namespace Automattic\WooCommerce\Admin\API;
 
-use Automattic\WooCommerce\Admin\Features\Onboarding;
+use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingThemes as Themes;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -83,7 +83,7 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 	 * @return WP_Error|array Theme installation status.
 	 */
 	public function install_theme( $request ) {
-		$allowed_themes = Onboarding::get_allowed_themes();
+		$allowed_themes = Themes::get_allowed_themes();
 		$theme          = sanitize_text_field( $request['theme'] );
 
 		if ( ! in_array( $theme, $allowed_themes, true ) ) {
@@ -157,7 +157,7 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 	 * @return WP_Error|array Theme activation status.
 	 */
 	public function activate_theme( $request ) {
-		$allowed_themes = Onboarding::get_allowed_themes();
+		$allowed_themes = Themes::get_allowed_themes();
 		$theme          = sanitize_text_field( $request['theme'] );
 		if ( ! in_array( $theme, $allowed_themes, true ) ) {
 			return new \WP_Error( 'woocommerce_rest_invalid_theme', __( 'Invalid theme.', 'woocommerce-admin' ), 404 );

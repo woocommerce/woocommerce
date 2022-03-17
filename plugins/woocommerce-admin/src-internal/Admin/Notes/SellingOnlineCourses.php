@@ -9,9 +9,9 @@ namespace Automattic\WooCommerce\Internal\Admin\Notes;
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Admin\Features\Onboarding;
 use \Automattic\WooCommerce\Admin\Notes\Note;
 use \Automattic\WooCommerce\Admin\Notes\NoteTraits;
+use \Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 
 /**
  * Selling_Online_Courses
@@ -32,7 +32,7 @@ class SellingOnlineCourses {
 	 */
 	public function __construct() {
 		add_action(
-			'update_option_' . Onboarding::PROFILE_DATA_OPTION,
+			'update_option_' . OnboardingProfile::DATA_OPTION,
 			array( $this, 'check_onboarding_profile' ),
 			10,
 			3

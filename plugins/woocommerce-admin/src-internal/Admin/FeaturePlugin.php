@@ -30,6 +30,7 @@ use Automattic\WooCommerce\Admin\ReportExporter;
 use Automattic\WooCommerce\Admin\ReportsSync;
 use Automattic\WooCommerce\Internal\Admin\CategoryLookup;
 use Automattic\WooCommerce\Internal\Admin\Events;
+use Automattic\WooCommerce\Internal\Admin\Onboarding\Onboarding;
 
 /**
  * Feature plugin main class.
@@ -181,6 +182,10 @@ class FeaturePlugin {
 
 		// Initialize API.
 		API\Init::instance();
+
+		if ( Features::is_enabled( 'onboarding' ) ) {
+			Onboarding::init();
+		}
 
 		if ( Features::is_enabled( 'analytics' ) ) {
 			// Initialize Reports syncing.

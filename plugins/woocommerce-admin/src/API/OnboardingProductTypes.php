@@ -7,7 +7,7 @@
 
 namespace Automattic\WooCommerce\Admin\API;
 
-use Automattic\WooCommerce\Admin\Features\Onboarding;
+use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProducts;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -73,7 +73,7 @@ class OnboardingProductTypes extends \WC_REST_Data_Controller {
 	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function get_product_types( $request ) {
-		return Onboarding::get_product_data( Onboarding::get_allowed_product_types() );
+		return OnboardingProducts::get_product_types_with_data();
 	}
 
 }

@@ -7,7 +7,8 @@
 
 namespace Automattic\WooCommerce\Admin\API;
 
-use Automattic\WooCommerce\Admin\Features\Onboarding;
+use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingIndustries;
+use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Init as OnboardingTasksFeature;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\DeprecatedExtendedTask;
@@ -568,7 +569,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	 */
 	private static function get_available_homepage_images() {
 		$industry_images = array();
-		$industries      = Onboarding::get_allowed_industries();
+		$industries      = OnboardingIndustries::get_allowed_industries();
 		foreach ( $industries as $industry_slug => $label ) {
 			$industry_images[ $industry_slug ] = apply_filters( 'woocommerce_admin_onboarding_industry_image', WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/other-small.jpg', $industry_slug );
 		}
@@ -584,7 +585,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	 * @return array An array of images that have been attached to the post.
 	 */
 	private static function sideload_homepage_images( $post_id, $number_of_images ) {
-		$profile            = get_option( Onboarding::PROFILE_DATA_OPTION, array() );
+		$profile            = get_option( OnboardingProfile::DATA_OPTION, array() );
 		$images_to_sideload = array();
 		$available_images   = self::get_available_homepage_images();
 

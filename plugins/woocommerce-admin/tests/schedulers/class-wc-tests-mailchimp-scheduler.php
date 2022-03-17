@@ -2,11 +2,12 @@
 /**
  * MailchimpScheduler tests
  *
- * @package Automattic\WooCommerce\Admin\Schedulers
+ * @package Automattic\WooCommerce\Internal\Admin\Schedulers
  */
 
-use Automattic\WooCommerce\Admin\Features\Onboarding;
+use Automattic\WooCommerce\Internal\Admin\Onboarding;
 use Automattic\WooCommerce\Internal\Admin\Schedulers\MailchimpScheduler;
+use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 
 /**
  * Class WC_Tests_Mailchimp_Scheduler
@@ -57,14 +58,14 @@ class WC_Tests_Mailchimp_Scheduler extends WC_Unit_Test_Case {
 	public function test_it_aborts_if_is_agree_marketing_is_false_or_missing() {
 		// When.
 		$profile_data = array( 'store_email' => 'test@test.com' );
-		update_option( Onboarding::PROFILE_DATA_OPTION, $profile_data );
+		update_option( OnboardingProfile::DATA_OPTION, $profile_data );
 		$this->assertFalse( $this->instance->run() );
 
 		$profile_data = array(
 			'is_agree_marketing' => false,
 			'store_email'        => 'test@test.com',
 		);
-		update_option( Onboarding::PROFILE_DATA_OPTION, $profile_data );
+		update_option( OnboardingProfile::DATA_OPTION, $profile_data );
 
 		// Then.
 		$this->assertFalse( $this->instance->run() );
@@ -77,7 +78,7 @@ class WC_Tests_Mailchimp_Scheduler extends WC_Unit_Test_Case {
 	public function test_it_aborts_if_store_email_is_missing() {
 		// When.
 		$profile_data = array( 'is_agree_marketing' => true );
-		update_option( Onboarding::PROFILE_DATA_OPTION, $profile_data );
+		update_option( OnboardingProfile::DATA_OPTION, $profile_data );
 
 		// Then.
 		$this->assertFalse( $this->instance->run() );
@@ -94,7 +95,7 @@ class WC_Tests_Mailchimp_Scheduler extends WC_Unit_Test_Case {
 			'is_agree_marketing' => true,
 			'store_email'        => 'test@test.com',
 		);
-		update_option( Onboarding::PROFILE_DATA_OPTION, $profile_data );
+		update_option( OnboardingProfile::DATA_OPTION, $profile_data );
 
 		// When.
 		update_option(
@@ -117,7 +118,7 @@ class WC_Tests_Mailchimp_Scheduler extends WC_Unit_Test_Case {
 			'is_agree_marketing' => true,
 			'store_email'        => 'test@test.com',
 		);
-		update_option( Onboarding::PROFILE_DATA_OPTION, $profile_data );
+		update_option( OnboardingProfile::DATA_OPTION, $profile_data );
 
 		// When.
 		$wp_error = new WP_Error();
@@ -150,7 +151,7 @@ class WC_Tests_Mailchimp_Scheduler extends WC_Unit_Test_Case {
 			'is_agree_marketing' => true,
 			'store_email'        => 'test@test.com',
 		);
-		update_option( Onboarding::PROFILE_DATA_OPTION, $profile_data );
+		update_option( OnboardingProfile::DATA_OPTION, $profile_data );
 
 		// When.
 		$body = wp_json_encode( array() );
@@ -180,7 +181,7 @@ class WC_Tests_Mailchimp_Scheduler extends WC_Unit_Test_Case {
 			'is_agree_marketing' => true,
 			'store_email'        => 'test@test.com',
 		);
-		update_option( Onboarding::PROFILE_DATA_OPTION, $profile_data );
+		update_option( OnboardingProfile::DATA_OPTION, $profile_data );
 
 		// When.
 		$body = wp_json_encode( array( 'success' => true ) );

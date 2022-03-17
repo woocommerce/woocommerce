@@ -5,8 +5,8 @@
  * @package WooCommerce\Admin\Tests\API
  */
 
-use \Automattic\WooCommerce\Admin\API\OnboardingProductTypes;
-use Automattic\WooCommerce\Admin\Features\Onboarding;
+use Automattic\WooCommerce\Admin\API\OnboardingProductTypes;
+use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProducts;
 
 /**
  * WC Tests API Onboarding Product Types
@@ -44,7 +44,7 @@ class WC_Tests_API_Onboarding_Product_Types extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 
-		$properties = Onboarding::get_allowed_product_types();
+		$properties = OnboardingProducts::get_allowed_product_types();
 		foreach ( $properties as $key => $property ) {
 			$this->assertArrayHasKey( $key, $data );
 		}

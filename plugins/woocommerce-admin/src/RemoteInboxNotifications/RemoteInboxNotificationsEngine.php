@@ -8,7 +8,7 @@ namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;
 defined( 'ABSPATH' ) || exit;
 
 use \Automattic\WooCommerce\Admin\PluginsProvider\PluginsProvider;
-use \Automattic\WooCommerce\Admin\Features\Onboarding;
+use \Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 
 /**
  * Remote Inbox Notifications engine.
@@ -31,7 +31,7 @@ class RemoteInboxNotificationsEngine {
 
 		// Trigger when the profile data option is updated (during onboarding).
 		add_action(
-			'update_option_' . Onboarding::PROFILE_DATA_OPTION,
+			'update_option_' . OnboardingProfile::DATA_OPTION,
 			array( __CLASS__, 'update_profile_option' ),
 			10,
 			2

@@ -5,6 +5,8 @@
 
 namespace Automattic\WooCommerce\Internal\Admin\Notes;
 
+use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
+
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\Features\Onboarding;
@@ -29,7 +31,7 @@ class MagentoMigration {
 	 * Attach hooks.
 	 */
 	public function __construct() {
-		add_action( 'update_option_' . Onboarding::PROFILE_DATA_OPTION, array( __CLASS__, 'possibly_add_note' ) );
+		add_action( 'update_option_' . OnboardingProfile::DATA_OPTION, array( __CLASS__, 'possibly_add_note' ) );
 		add_action( 'woocommerce_admin_magento_migration_note', array( __CLASS__, 'save_note' ) );
 	}
 
@@ -37,7 +39,7 @@ class MagentoMigration {
 	 * Add the note if it passes predefined conditions.
 	 */
 	public static function possibly_add_note() {
-		$onboarding_profile = get_option( Onboarding::PROFILE_DATA_OPTION, array() );
+		$onboarding_profile = get_option( OnboardingProfile::DATA_OPTION, array() );
 
 		if ( empty( $onboarding_profile ) ) {
 			return;
