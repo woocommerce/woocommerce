@@ -4,12 +4,14 @@
   "description": "API tests for WooCommerce",
   "main": "index.js",
   "scripts": {
-    "test": "jest; pnpm run make:report",
-    "test:api": "jest --group=api; pnpm run make:report",
-    "test:hello": "jest --group=hello; pnpm run make:report",
+    "test": "jest",
+    "test:api": "jest --group=api",
+    "test:hello": "jest --group=hello",
     "make:collection": "node utils/api-collection/build-collection.js",
-    "make:report": "./bin/wc-api-report.sh",
-    "serve:report": "allure serve"
+    "report": "allure generate --clean",
+    "report:trend": "./bin/wc-api-report.sh",
+    "report:serve": "allure serve",
+    "report:clear": "rm -rf allure-report allure-results/history"
   },
   "repository": {
     "type": "git",
@@ -21,6 +23,7 @@
   },
   "homepage": "https://github.com/woocommerce/woocommerce#readme",
   "dependencies": {
+    "allure-commandline": "^2.17.2",
     "dotenv": "^10.0.0",
     "jest": "^25.1.0",
     "jest-allure": "^0.1.3",

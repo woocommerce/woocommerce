@@ -1,19 +1,20 @@
 #!/usr/bin/env bash
 
 #
-# Script for generating Allure reports.
+# Script for generating Allure report.
 #
 
 echo "Generating Allure report..."
 
-# Prepare the allure-results/history directory
-mkdir -p allure-results/history
-
-# Copy contents of allure-report/history to allure-results/history to preserve historical trend
+# Copy contents of allure-report/history to allure-results/history to save previous results.
 if [[ -d "allure-report/history" ]]; then
-	echo "Previous report detected. Saving previous results for historical analysis..."
+	echo "Previous report detected. Saving previous results..."
+
+	# Create the allure-results/history directory if it doesn't exist yet.
+	mkdir -p allure-results/history
+
 	cp -r allure-report/history/* allure-results/history
 fi
 
-# Generate the report
+# Generate the report.
 allure generate --clean
