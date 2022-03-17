@@ -212,7 +212,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		$formatted_meta_data = $item->get_all_formatted_meta_data( null );
 
 		// Filter out product variations.
-		if ( $product && 'true' === $this->request['order_item_display_meta'] ) {
+		if ( isset( $product ) && 'true' === $this->request['order_item_display_meta'] ) {
 			$order_item_name   = $data['name'];
 			$data['meta_data'] = array_filter(
 				$data['meta_data'],
