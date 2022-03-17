@@ -204,6 +204,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$this->handle_exception( $e,
 				wp_kses_post(
 					sprintf(
+						/* translators: 1: Order ID or "(no ID)" if not known. */
 						__( 'Error saving order ID %1$s.', 'woocommerce' ),
 						$message_id
 					)
