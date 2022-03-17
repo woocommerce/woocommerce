@@ -44,7 +44,6 @@ dist/
 
 # Project files
 node_modules/
-vendor/
 
 # TypeScript files
 tsconfig.tsbuildinfo
