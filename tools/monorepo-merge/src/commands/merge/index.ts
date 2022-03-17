@@ -184,9 +184,9 @@ export default class Merge extends Command {
 			await exec( filterCommand, { cwd: cloneDir } );
 		} catch {
 			this.error( 'Failed to alter the repository history' );
+		} finally {
+			CliUx.ux.action.stop();
 		}
-
-		CliUx.ux.action.stop();
 	}
 
 	/**
@@ -207,12 +207,16 @@ export default class Merge extends Command {
 		try {
 			await exec( 'git remote add ' + source + ' "' + cloneDir + '"' );
 		} catch {
+			CliUx.ux.action.stop();
+
 			this.error( 'Failed to add clone repository as remote' );
 		}
 
 		try {
 			await exec( 'git fetch ' + source );
 		} catch {
+			CliUx.ux.action.stop();
+
 			this.error( 'Failed to fetch clone repository' );
 		}
 
@@ -224,6 +228,8 @@ export default class Merge extends Command {
 					branchToMerge
 			);
 		} catch {
+			CliUx.ux.action.stop();
+
 			this.error( 'Failed to merge the repositories' );
 		}
 
@@ -232,6 +238,8 @@ export default class Merge extends Command {
 			await exec( 'git remote remove ' + source );
 			await exec( 'rm -rf ' + cloneDir );
 		} catch {
+			CliUx.ux.action.stop();
+
 			this.error( 'Failed to remove clone repository remote' );
 		}
 
