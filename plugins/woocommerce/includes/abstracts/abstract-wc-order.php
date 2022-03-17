@@ -200,7 +200,16 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			do_action( 'woocommerce_after_' . $this->object_type . '_object_save', $this, $this->data_store );
 
 		} catch ( Exception $e ) {
-			$this->handle_exception( $e, __( 'Error saving order.', 'woocommerce' ) );
+			$message_id = $this->get_id() ? $this->get_id() : __( '(no ID)', 'woocommerce' );
+			$this->handle_exception( $e,
+				wp_kses_post(
+					sprintf(
+						/* translators: 1: Order ID or "(no ID)" if not known. */
+						__( 'Error saving order ID %1$s.', 'woocommerce' ),
+						$message_id
+					)
+				)
+			);
 		}
 
 		return $this->get_id();
