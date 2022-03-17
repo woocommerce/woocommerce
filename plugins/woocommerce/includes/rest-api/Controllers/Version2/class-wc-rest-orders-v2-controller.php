@@ -211,24 +211,26 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		// Expand meta_data to include user-friendly values.
 		$formatted_meta_data = $item->get_formatted_meta_data( null, true );
 
-		// Filter out product variations
-		// TODO: Add a query arg to activate this. Default should be to keep variation meta for back-compat
-		if ( $product ) {
-			$order_item_name = $data['name'];
-			$data['meta_data'] = array_filter( $data['meta_data'], function( $meta ) use ( $product, $order_item_name ) {
-				$meta->key     = rawurldecode( (string) $meta->key );
-				$meta->value   = rawurldecode( (string) $meta->value );
-				$attribute_key = str_replace( 'attribute_', '', $meta->key );
-				$display_key   = wc_attribute_label( $attribute_key, $product );
-				$display_value = wp_kses_post( $meta->value );
+		// Filter out product variations.
+		if ( $product && 'true' === $this->request['order_item_display_meta'] ) {
+			$order_item_name   = $data['name'];
+			$data['meta_data'] = array_filter(
+				$data['meta_data'],
+				function( $meta ) use ( $product, $order_item_name ) {
+					$meta->key     = rawurldecode( (string) $meta->key );
+					$meta->value   = rawurldecode( (string) $meta->value );
+					$attribute_key = str_replace( 'attribute_', '', $meta->key );
+					$display_key   = wc_attribute_label( $attribute_key, $product );
+					$display_value = wp_kses_post( $meta->value );
 
-				// Skip items with values already in the product details area of the product name.
-				if ( $product && $product->is_type( 'variation' ) && wc_is_attribute_in_product_name( $display_value, $order_item_name ) ) {
-					return false;
+					// Skip items with values already in the product details area of the product name.
+					if ( $product && $product->is_type( 'variation' ) && wc_is_attribute_in_product_name( $display_value, $order_item_name ) ) {
+						return false;
+					}
+
+					return true;
 				}
-
-				return true;
-			} );
+			);
 		}
 
 		$data['meta_data'] = array_map(
