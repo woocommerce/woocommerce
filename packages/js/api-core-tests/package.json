@@ -35,7 +35,6 @@
     "access": "public"
   },
   "bin": {
-    "wc-api-tests": "bin/wc-api-tests.sh",
-    "wc-api-report": "bin/wc-api-report.sh"
+    "wc-api-tests": "bin/wc-api-tests.sh"
   }
 }
