@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# Script for generating Allure report.
+# Script for generating Allure report with historical trend.
 #
 
 echo "Generating Allure report..."
