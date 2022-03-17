@@ -9,7 +9,7 @@
     "test:hello": "jest --group=hello",
     "make:collection": "node utils/api-collection/build-collection.js",
     "report": "allure generate --clean",
-    "report:trend": "./bin/generate-report-trend.sh",
+    "report:trend": "./bin/wc-api-report.sh",
     "report:serve": "allure serve",
     "report:clear": "rm -rf allure-report allure-results/history"
   },
@@ -35,6 +35,7 @@
     "access": "public"
   },
   "bin": {
-    "wc-api-tests": "bin/wc-api-tests.sh"
+    "wc-api-tests": "bin/wc-api-tests.sh",
+    "wc-api-report": "bin/wc-api-report.sh"
   }
 }
