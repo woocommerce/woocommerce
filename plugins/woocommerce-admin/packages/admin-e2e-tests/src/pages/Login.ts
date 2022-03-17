@@ -11,7 +11,7 @@ const config = require( 'config' );
 export class Login extends BasePage {
 	url = 'wp-login.php';
 
-	async login() {
+	async login(): Promise< void > {
 		await this.navigate();
 
 		await getElementByText( 'label', 'Username or Email Address' );
@@ -35,7 +35,7 @@ export class Login extends BasePage {
 		] );
 	}
 
-	async logout() {
+	async logout(): Promise< void > {
 		// Log out link in admin bar is not visible so can't be clicked directly.
 		const logoutLinks = await this.page.$$eval(
 			'#wp-admin-bar-logout a',

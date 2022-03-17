@@ -21,11 +21,11 @@ export class Analytics extends BasePage {
 	url = 'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview';
 
 	// If you need to go to a specific single page of the analytics use `navigateToSection`
-	async navigateToSection( section: AnalyticsSection ) {
+	async navigateToSection( section: AnalyticsSection ): Promise< void > {
 		await this.goto( this.url.replace( 'overview', section ) );
 	}
 
-	async isDisplayed() {
+	async isDisplayed(): Promise< void > {
 		// This is a smoke test that ensures the single page was rendered without crashing
 		await this.page.waitForSelector( '#woocommerce-layout__primary' );
 	}

@@ -5,7 +5,7 @@ import { BasePage } from '../../pages/BasePage';
 import { waitForElementByText } from '../../utils/actions';
 
 export class ProductTypeSection extends BasePage {
-	async isDisplayed( productCount: number ) {
+	async isDisplayed( productCount: number ): Promise< void > {
 		await waitForElementByText(
 			'h2',
 			'What type of products will be listed?'
@@ -17,11 +17,11 @@ export class ProductTypeSection extends BasePage {
 		expect( length === productCount ).toBeTruthy();
 	}
 
-	async uncheckProducts() {
+	async uncheckProducts(): Promise< void > {
 		await this.unsetAllCheckboxes( '.components-checkbox-control__input' );
 	}
 
-	async selectProduct( productLabel: string ) {
+	async selectProduct( productLabel: string ): Promise< void > {
 		await this.setCheckboxWithText( productLabel );
 	}
 }

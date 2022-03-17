@@ -30,11 +30,13 @@ export class StoreDetailsSection extends BasePage {
 		return this.getDropdownTypeahead( '#woocommerce-select-control' );
 	}
 
-	async isDisplayed() {
+	async isDisplayed(): Promise< void > {
 		await waitForElementByText( 'h2', 'Welcome to WooCommerce' );
 	}
 
-	async completeStoreDetailsSection( storeDetails: StoreDetails = {} ) {
+	async completeStoreDetailsSection(
+		storeDetails: StoreDetails = {}
+	): Promise< void > {
 		// const onboardingWizard = new OnboardingWizard( page );
 		// Fill store's address - first line
 		await this.fillAddress(
@@ -81,36 +83,36 @@ export class StoreDetailsSection extends BasePage {
 		await this.checkMarketingCheckbox( true );
 	}
 
-	async fillAddress( address: string ) {
+	async fillAddress( address: string ): Promise< void > {
 		await clearAndFillInput( '#inspector-text-control-0', address );
 	}
 
-	async fillAddressLineTwo( address: string ) {
+	async fillAddressLineTwo( address: string ): Promise< void > {
 		await clearAndFillInput( '#inspector-text-control-1', address );
 	}
 
-	async selectCountry( search: string, selector: string ) {
+	async selectCountry( search: string, selector: string ): Promise< void > {
 		await this.countryDropdown.search( search );
 		await this.countryDropdown.select( selector );
 	}
 
-	async checkCountrySelected( country: string ) {
+	async checkCountrySelected( country: string ): Promise< void > {
 		await this.countryDropdown.checkSelected( country );
 	}
 
-	async fillCity( city: string ) {
+	async fillCity( city: string ): Promise< void > {
 		await clearAndFillInput( '#inspector-text-control-2', city );
 	}
 
-	async fillPostalCode( postalCode: string ) {
+	async fillPostalCode( postalCode: string ): Promise< void > {
 		await clearAndFillInput( '#inspector-text-control-3', postalCode );
 	}
 
-	async fillEmailAddress( email: string ) {
+	async fillEmailAddress( email: string ): Promise< void > {
 		await clearAndFillInput( '#inspector-text-control-4', email );
 	}
 
-	async checkMarketingCheckbox( selected: boolean ) {
+	async checkMarketingCheckbox( selected: boolean ): Promise< void > {
 		if ( selected ) {
 			await verifyCheckboxIsSet( '.components-checkbox-control__input' );
 		} else {

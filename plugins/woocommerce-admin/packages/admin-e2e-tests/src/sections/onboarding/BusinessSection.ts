@@ -14,15 +14,15 @@ const {
 /* eslint-enable @typescript-eslint/no-var-requires */
 
 export class BusinessSection extends BasePage {
-	async isDisplayed() {
+	async isDisplayed(): Promise< void > {
 		await waitForElementByText( 'h2', 'Tell us about your business' );
 	}
 
-	async freeFeaturesIsDisplayed() {
+	async freeFeaturesIsDisplayed(): Promise< void > {
 		await waitForElementByText( 'h2', 'Included business features' );
 	}
 
-	async selectProductNumber( productLabel: string ) {
+	async selectProductNumber( productLabel: string ): Promise< void > {
 		const howManyProductsDropdown = this.getDropdownField(
 			'.woocommerce-profile-wizard__product-count'
 		);
@@ -30,7 +30,7 @@ export class BusinessSection extends BasePage {
 		await howManyProductsDropdown.select( productLabel );
 	}
 
-	async selectCurrentlySelling( currentlySelling: string ) {
+	async selectCurrentlySelling( currentlySelling: string ): Promise< void > {
 		const sellingElsewhereDropdown = this.getDropdownField(
 			'.woocommerce-profile-wizard__selling-venues'
 		);
@@ -59,7 +59,9 @@ export class BusinessSection extends BasePage {
 		await otherPlatformNameDropdown.select( otherPlatformName );
 	}
 
-	async selectInstallFreeBusinessFeatures( select: boolean ) {
+	async selectInstallFreeBusinessFeatures(
+		select: boolean
+	): Promise< void > {
 		if ( select ) {
 			await setCheckbox( '#woocommerce-business-extensions__checkbox' );
 		} else {
@@ -67,7 +69,7 @@ export class BusinessSection extends BasePage {
 		}
 	}
 
-	async expandRecommendedBusinessFeatures() {
+	async expandRecommendedBusinessFeatures(): Promise< void > {
 		const expandButtonSelector =
 			'.woocommerce-admin__business-details__selective-extensions-bundle__expand';
 
@@ -85,22 +87,22 @@ export class BusinessSection extends BasePage {
 		} );
 	}
 
-	async uncheckAllRecommendedBusinessFeatures() {
+	async uncheckAllRecommendedBusinessFeatures(): Promise< void > {
 		await this.unsetAllCheckboxes( '.components-checkbox-control__input' );
 	}
 
 	// The old list displayed on the dropdown page
-	async uncheckBusinessFeatures() {
+	async uncheckBusinessFeatures(): Promise< void > {
 		await this.unsetAllCheckboxes(
 			'.woocommerce-profile-wizard__benefit .components-form-toggle__input'
 		);
 	}
 
-	async selectSetupForClient() {
+	async selectSetupForClient(): Promise< void > {
 		await setCheckbox( '.components-checkbox-control__input' );
 	}
 
-	async checkClientSetupCheckbox( selected: boolean ) {
+	async checkClientSetupCheckbox( selected: boolean ): Promise< void > {
 		if ( selected ) {
 			await verifyCheckboxIsSet( '.components-checkbox-control__input' );
 		} else {

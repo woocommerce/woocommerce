@@ -26,7 +26,7 @@ export class BankAccountTransferSetup extends BasePage {
 		sortCode,
 		iban,
 		swiftCode,
-	}: AccountDetails ) {
+	}: AccountDetails ): Promise< void > {
 		await clearAndFillInput( '[placeholder="Account name"]', accountName );
 		await clearAndFillInput(
 			'[placeholder="Account number"]',

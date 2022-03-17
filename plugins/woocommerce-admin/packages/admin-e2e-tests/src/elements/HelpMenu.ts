@@ -15,17 +15,17 @@ export class HelpMenu extends BaseElement {
 		super( page, '' );
 	}
 
-	async openHelpMenu() {
+	async openHelpMenu(): Promise< void > {
 		const el = await getElementByText( 'button', 'Help' );
 		await el?.click();
 	}
 
-	async openSetupWizardTab() {
+	async openSetupWizardTab(): Promise< void > {
 		const el = await waitForElementByText( '*', 'Setup wizard' );
 		await el?.click();
 	}
 
-	async enableTaskList() {
+	async enableTaskList(): Promise< void > {
 		await this.openSetupWizardTab();
 
 		const enableLink = await getElementByText(

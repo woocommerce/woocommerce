@@ -11,7 +11,7 @@ const { setCheckbox } = require( '@woocommerce/e2e-utils' );
 export class WcSettings extends BasePage {
 	url = 'wp-admin/admin.php?page=wc-settings';
 
-	async navigate( tab = 'general', section = '' ) {
+	async navigate( tab = 'general', section = '' ): Promise< void > {
 		let settingsUrl = this.url + `&tab=${ tab }`;
 
 		if ( section ) {
@@ -22,16 +22,16 @@ export class WcSettings extends BasePage {
 		await waitForElementByText( 'a', 'General' );
 	}
 
-	async enableTaxRates() {
+	async enableTaxRates(): Promise< void > {
 		await waitForElementByText( 'th', 'Enable taxes' );
 		await setCheckbox( '#woocommerce_calc_taxes' );
 	}
 
-	async getTaxRateValue() {
+	async getTaxRateValue(): Promise< unknown > {
 		return await getAttribute( '#woocommerce_calc_taxes', 'checked' );
 	}
 
-	async saveSettings() {
+	async saveSettings(): Promise< void > {
 		this.clickButtonWithText( 'Save changes' );
 		await this.page.waitForNavigation( {
 			waitUntil: 'networkidle0',
@@ -42,7 +42,7 @@ export class WcSettings extends BasePage {
 		);
 	}
 
-	async cleanPaymentMethods() {
+	async cleanPaymentMethods(): Promise< void > {
 		this.navigate( 'checkout' );
 		await waitForElementByText( 'h2', 'Payment methods' );
 		const paymentMethods = await page.$$( 'span.woocommerce-input-toggle' );

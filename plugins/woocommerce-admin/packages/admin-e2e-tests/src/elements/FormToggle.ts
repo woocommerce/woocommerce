@@ -1,4 +1,8 @@
 /**
+ * External dependencies
+ */
+import type { ElementHandle } from 'puppeteer';
+/**
  * Internal dependencies
  */
 import { BaseElement } from './BaseElement';
@@ -6,7 +10,7 @@ import { hasClass } from '../utils/actions';
 
 export class FormToggle extends BaseElement {
 	// Represents a FormToggle input. Use `selector` to represent the container its found in.
-	async switchOn() {
+	async switchOn(): Promise< void > {
 		const container = await this.getCheckboxContainer();
 		if ( container && ! ( await hasClass( container, 'is-checked' ) ) ) {
 			const input = await this.getCheckboxInput();
@@ -25,7 +29,7 @@ export class FormToggle extends BaseElement {
 		}
 	}
 
-	async switchOff() {
+	async switchOff(): Promise< void > {
 		const container = await this.getCheckboxContainer();
 		if ( container && ( await hasClass( container, 'is-checked' ) ) ) {
 			const input = await this.getCheckboxInput();
@@ -48,17 +52,17 @@ export class FormToggle extends BaseElement {
 		}
 	}
 
-	async getCheckboxContainer() {
+	async getCheckboxContainer(): Promise< ElementHandle< Element > | null > {
 		return this.page.$( `${ this.selector } .components-form-toggle` );
 	}
 
-	async getCheckboxInput() {
+	async getCheckboxInput(): Promise< ElementHandle< Element > | null > {
 		return this.page.$(
 			`${ this.selector } .components-form-toggle__input`
 		);
 	}
 
-	async isEnabled() {
+	async isEnabled(): Promise< void > {
 		await this.page.waitForSelector(
 			`${ this.selector } .components-form-toggle.is-checked`
 		);

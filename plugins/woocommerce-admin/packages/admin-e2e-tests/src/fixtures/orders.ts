@@ -9,7 +9,7 @@ import { httpClient } from './http-client';
 
 const repository = Order.restRepository( httpClient );
 
-export async function createOrder( status = 'completed' ) {
+export async function createOrder( status = 'completed' ): Promise< Order > {
 	// The repository can now be used to create models.
 	return await repository.create( {
 		paymentMethod: 'cod',
@@ -17,7 +17,7 @@ export async function createOrder( status = 'completed' ) {
 	} );
 }
 
-export async function removeAllOrders() {
+export async function removeAllOrders(): Promise< ( boolean | undefined )[] > {
 	const products = await repository.list();
 	return await Promise.all(
 		products

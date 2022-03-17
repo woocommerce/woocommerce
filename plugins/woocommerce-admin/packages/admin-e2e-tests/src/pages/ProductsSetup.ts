@@ -7,11 +7,13 @@ import { BasePage } from './BasePage';
 export class ProductsSetup extends BasePage {
 	url = 'wp-admin/admin.php?page=wc-admin&task=products';
 
-	async isDisplayed() {
+	async isDisplayed(): Promise< void > {
 		await waitForElementByText( 'h1', 'Add my products' );
 	}
 
-	async isStartWithATemplateDisplayed( templatesCount: number ) {
+	async isStartWithATemplateDisplayed(
+		templatesCount: number
+	): Promise< void > {
 		await waitForElementByText( 'h1', 'Start with a template' );
 		const length = await this.page.$$eval(
 			'.components-radio-control__input',
@@ -20,7 +22,7 @@ export class ProductsSetup extends BasePage {
 		expect( length === templatesCount ).toBeTruthy();
 	}
 
-	async clickStartWithTemplate() {
+	async clickStartWithTemplate(): Promise< void > {
 		await this.clickElementWithText( '*', 'Start with a template' );
 	}
 }

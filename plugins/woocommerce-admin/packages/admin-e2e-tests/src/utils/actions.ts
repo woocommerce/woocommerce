@@ -16,7 +16,7 @@ const config = require( 'config' );
 /**
  * Wait for UI blocking to end.
  */
-const uiUnblocked = async () => {
+const uiUnblocked = async (): Promise< void > => {
 	await page.waitForFunction(
 		() => ! Boolean( document.querySelector( '.blockUI' ) )
 	);
@@ -27,7 +27,7 @@ const uiUnblocked = async () => {
  *
  * @param {number} timeout in milliseconds
  */
-const waitForTimeout = async ( timeout: number ) => {
+const waitForTimeout = async ( timeout: number ): Promise< void > => {
 	await new Promise( ( resolve ) => setTimeout( resolve, timeout ) );
 };
 
@@ -43,7 +43,7 @@ const verifyPublishAndTrash = async (
 	publishNotice: string,
 	publishVerification: string,
 	trashVerification: string
-) => {
+): Promise< void > => {
 	// Wait for auto save
 	await waitForTimeout( 2000 );
 	// Publish
@@ -77,14 +77,17 @@ const verifyPublishAndTrash = async (
 	} );
 };
 
-const hasClass = async ( element: ElementHandle, elementClass: string ) => {
+const hasClass = async (
+	element: ElementHandle,
+	elementClass: string
+): Promise< boolean > => {
 	const classNameProp = await element.getProperty( 'className' );
 	const classNameValue = ( await classNameProp.jsonValue() ) as string;
 
 	return classNameValue.includes( elementClass );
 };
 
-const getInputValue = async ( selector: string ) => {
+const getInputValue = async ( selector: string ): Promise< unknown > => {
 	const field = await page.$( selector );
 	if ( field ) {
 		const fieldValue = await (
@@ -96,7 +99,10 @@ const getInputValue = async ( selector: string ) => {
 	return null;
 };
 
-const getAttribute = async ( selector: string, attribute: string ) => {
+const getAttribute = async (
+	selector: string,
+	attribute: string
+): Promise< unknown > => {
 	await page.focus( selector );
 	const field = await page.$( selector );
 	if ( field ) {
@@ -156,7 +162,7 @@ export const waitForElementByTextWithoutThrow = async (
 	element: string,
 	text: string,
 	timeoutInSeconds = 5
-) => {
+): Promise< boolean > => {
 	let selected = await getElementByText( element, text );
 	for ( let s = 0; s < timeoutInSeconds; s++ ) {
 		if ( selected ) {
@@ -197,7 +203,9 @@ const waitUntilElementStopsMoving = async ( selector: string ) => {
 	);
 };
 
-const deactivateAndDeleteExtension = async ( extension: string ) => {
+const deactivateAndDeleteExtension = async (
+	extension: string
+): Promise< void > => {
 	const baseUrl = config.get( 'url' );
 	const pluginsAdmin = 'wp-admin/plugins.php?plugin_status=all&paged=1&s';
 	await page.goto( baseUrl + pluginsAdmin, {

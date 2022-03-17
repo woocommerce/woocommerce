@@ -34,16 +34,16 @@ export class OnboardingWizard extends BasePage {
 		this.themes = new ThemeSection( page );
 	}
 
-	async skipStoreSetup() {
+	async skipStoreSetup(): Promise< void > {
 		await this.clickButtonWithText( 'Skip setup store details' );
 		await this.optionallySelectUsageTracking( false );
 	}
 
-	async continue() {
+	async continue(): Promise< void > {
 		await this.clickButtonWithText( 'Continue' );
 	}
 
-	async optionallySelectUsageTracking( select = false ) {
+	async optionallySelectUsageTracking( select = false ): Promise< void > {
 		const usageTrackingHeader = await this.page.waitForSelector(
 			'.components-modal__header-heading',
 			{
@@ -76,7 +76,7 @@ export class OnboardingWizard extends BasePage {
 		} );
 	}
 
-	async goToOBWStep( step: string ) {
+	async goToOBWStep( step: string ): Promise< void > {
 		await this.clickElementWithText( 'span', step );
 	}
 }
