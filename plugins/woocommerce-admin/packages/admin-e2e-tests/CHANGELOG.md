@@ -14,6 +14,8 @@
 
 -   Update all js packages with minor/patch version changes. #8392
 
+-   Add E2E test for checking onboarding tab clickable after going back. #8469
+
 # 0.1.2
 
 -   Add Customers to analytics pages tested #7573

@@ -18,6 +18,7 @@ export default class ProfileWizardHeader extends Component {
 			showUnsavedChangesModal: false,
 		};
 		this.lastClickedStepKey = null;
+		this.onStepClick = this.onStepClick.bind( this );
 	}
 
 	shouldWarnForUnsavedChanges( step ) {
@@ -71,27 +72,28 @@ export default class ProfileWizardHeader extends Component {
 			( step ) => step.key === currentStep
 		);
 
-		visibleSteps.map( ( step, index ) => {
+		visibleSteps.forEach( ( step, index ) => {
 			const previousStep = visibleSteps[ index - 1 ];
+			step.isComplete = step.isComplete || index < currentStepIndex;
 
-			if ( index < currentStepIndex ) {
-				step.isComplete = true;
-			}
+			const canClickStepLabel =
+				! previousStep || previousStep.isComplete || step.isComplete;
 
-			if ( ! previousStep || previousStep.isComplete ) {
-				step.onClick = ( key ) => {
-					if ( this.shouldWarnForUnsavedChanges( currentStep ) ) {
-						this.setState( { showUnsavedChangesModal: true } );
-						this.lastClickedStepKey = key;
-					} else {
-						updateQueryString( { step: key } );
-					}
-				};
+			if ( canClickStepLabel ) {
+				step.onClick = this.onStepClick;
 			}
-			return step;
 		} );
-
 		return <Stepper steps={ visibleSteps } currentStep={ currentStep } />;
+	}
+
+	onStepClick( key ) {
+		const { currentStep } = this.props;
+		if ( this.shouldWarnForUnsavedChanges( currentStep ) ) {
+			this.setState( { showUnsavedChangesModal: true } );
+			this.lastClickedStepKey = key;
+		} else {
+			updateQueryString( { step: key } );
+		}
 	}
 
 	render() {
