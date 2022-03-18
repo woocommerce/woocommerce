@@ -12,11 +12,11 @@ RUN apk --no-cache add \
 	mariadb-client \
 	ncurses \
 	nodejs \
-	pnpm \
 	subversion \
 	unzip \
 	wget
 
+RUN curl -f https://get.pnpm.io/v6.16.js | node - add --global pnpm
 COPY install-php-version.sh /tmp/
 RUN chmod u+x /tmp/install-php-version.sh && /tmp/install-php-version.sh
 
