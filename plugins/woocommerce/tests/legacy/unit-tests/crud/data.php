@@ -51,7 +51,7 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 	 */
 	public function test_get_data() {
 		$object = new WC_Mock_WC_Data();
-		$this->assertInternalType( 'array', $object->get_data() );
+		$this->assertIsArray( $object->get_data() );
 	}
 
 	/**

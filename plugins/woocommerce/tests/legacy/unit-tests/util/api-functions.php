@@ -124,8 +124,7 @@ class WC_Tests_API_Functions extends WC_Unit_Test_Case {
 	 * @since 2.6.0
 	 */
 	public function test_wc_rest_set_uploaded_image_as_attachment() {
-		$this->assertInternalType(
-			'int',
+		$this->assertIsInt(
 			wc_rest_set_uploaded_image_as_attachment(
 				array(
 					'file' => '',

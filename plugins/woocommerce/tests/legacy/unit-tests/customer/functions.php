@@ -66,11 +66,11 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 		$id       = wc_create_new_customer( 'fred@mail.com', '', 'testpassword' );
 		$userdata = get_userdata( $id );
 		$this->assertNotEquals( 'fred', $userdata->user_login );
-		$this->assertContains( 'fred', $userdata->user_login );
+		$this->assertStringContainsString( 'fred', $userdata->user_login );
 		$id       = wc_create_new_customer( 'fred@test.com', '', 'testpassword' );
 		$userdata = get_userdata( $id );
 		$this->assertNotEquals( 'fred', $userdata->user_login );
-		$this->assertContains( 'fred', $userdata->user_login );
+		$this->assertStringContainsString( 'fred', $userdata->user_login );
 
 		// Test extra arguments to generate display_name.
 		$id       = wc_create_new_customer(
@@ -107,7 +107,7 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 		wc_create_new_customer( 'mike@fakemail.com', '', 'testpassword' );
 		$username = wc_create_new_customer_username( 'mike@fakemail.com', array() );
 		$this->assertNotEquals( 'mike', $username, $username );
-		$this->assertContains( 'mike', $username, $username );
+		$this->assertStringContainsString( 'mike', $username, $username );
 
 		// Test common email prefix avoidance.
 		$this->assertEquals( 'somecompany.com', wc_create_new_customer_username( 'info@somecompany.com', array() ) );

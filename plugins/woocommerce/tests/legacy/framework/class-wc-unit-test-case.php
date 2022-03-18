@@ -328,6 +328,6 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 * @return bool mixed True if the value is of integer type, false otherwise.
 	 */
 	public static function assertIsInteger( $actual, $message = '' ) {
-		return self::assertInternalType( 'int', $actual, $message );
+		return self::assertIsInt( $actual, $message );
 	}
 }
