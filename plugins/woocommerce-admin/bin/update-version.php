@@ -34,7 +34,7 @@ function replace_version( $filename, $package_json ) {
 }
 
 replace_version( 'woocommerce-admin.php', $package );
-replace_version( 'src-internal/Admin/FeaturePlugin.php', $package );
-replace_version( 'src/Composer/Package.php', $package );
+replace_version( '../woocommerce/src/Internal/Admin/FeaturePlugin.php', $package );
+replace_version( '../woocommerce/src/Admin/Composer/Package.php', $package );
 replace_version( 'readme.txt', $package );
 replace_version( 'composer.json', $package );
