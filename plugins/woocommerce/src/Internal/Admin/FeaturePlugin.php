@@ -72,7 +72,7 @@ class FeaturePlugin {
 		// Load the page controller functions file first to prevent fatal errors when disabling WooCommerce Admin.
 		$this->define_constants();
 		require_once WC_ADMIN_ABSPATH . '/includes/react-admin/page-controller-functions.php';
-		require_once WC_ADMIN_ABSPATH . '/src/Notes/DeprecatedNotes.php';
+		require_once WC_ADMIN_ABSPATH . '/src/Admin/Notes/DeprecatedNotes.php';
 		require_once WC_ADMIN_ABSPATH . '/includes/react-admin/core-functions.php';
 		require_once WC_ADMIN_ABSPATH . '/includes/react-admin/feature-config.php';
 		require_once WC_ADMIN_ABSPATH . '/includes/react-admin/wc-admin-update-functions.php';
