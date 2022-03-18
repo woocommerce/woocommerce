@@ -1,0 +1,4 @@
+Significance: minor
+Type: Fix
+
+OBW: fix copy on Business Details when "WooCommerce Shipping" is not listed #8324

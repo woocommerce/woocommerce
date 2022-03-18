@@ -1,0 +1,4 @@
+Significance: minor
+Type: Dev
+
+Internalize our API controllers by using the @internal jsdoc. #8429

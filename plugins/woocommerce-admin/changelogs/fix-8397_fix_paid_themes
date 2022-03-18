@@ -1,0 +1,4 @@
+Significance: patch
+Type: Fix
+
+Make sure the paid extension task is also shown for themes. #8412

@@ -1,0 +1,4 @@
+Significance: minor
+Type: Dev
+
+Merge payment gateway suggestion classes into single source of truth #8252

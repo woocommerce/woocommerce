@@ -1,0 +1,4 @@
+Significance: major
+Type: Dev
+
+Update dependencies to support react 17 and drop support for IE11. #8305

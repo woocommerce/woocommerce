@@ -1,0 +1,14 @@
+{
+     "root": "packages/js/style-build",
+     "sourceRoot": "packages/js/style-build/src",
+     "projectType": "library",
+     "targets": {
+         "changelog": {
+             "executor": "./tools/executors/changelogger:changelog",
+             "options": {
+                 "action": "add",
+                 "cwd": "packages/js/style-build"
+             }
+         }
+     }
+ }
