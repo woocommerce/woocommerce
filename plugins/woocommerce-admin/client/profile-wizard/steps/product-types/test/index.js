@@ -75,16 +75,16 @@ describe( 'ProductTypes', () => {
 		userEvent.click( continueButton );
 		await waitFor( () => {
 			expect( mockGoToNextStep ).not.toHaveBeenCalled();
-			expect( mockUpdateProfileItems ).not.toHaveBeenCalled();
 		} );
+		expect( mockUpdateProfileItems ).not.toHaveBeenCalled();
 
 		// Click on a product type to pass validation.
 		userEvent.click( productType );
 		userEvent.click( continueButton );
 		await waitFor( () => {
 			expect( mockUpdateProfileItems ).toHaveBeenCalled();
-			expect( mockGoToNextStep ).toHaveBeenCalled();
 		} );
+		expect( mockGoToNextStep ).toHaveBeenCalled();
 	} );
 	test( 'should show a warning message at the bottom of the step', () => {
 		const productTypes = {

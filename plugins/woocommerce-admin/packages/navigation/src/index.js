@@ -144,10 +144,10 @@ export function getSearchWords( query = navUtils.getQuery() ) {
 /**
  * Return a URL with set query parameters.
  *
- * @param {Object} query object of params to be updated.
- * @param {string} path Relative path (defaults to current path).
+ * @param {Object} query        object of params to be updated.
+ * @param {string} path         Relative path (defaults to current path).
  * @param {Object} currentQuery object of current query params (defaults to current querystring).
- * @param {string} page Page key (defaults to "wc-admin")
+ * @param {string} page         Page key (defaults to "wc-admin")
  * @return {string}  Updated URL merging query params into existing params.
  */
 export function getNewPath(
@@ -180,7 +180,7 @@ export function getQuery() {
  * This function returns an event handler for the given `param`
  *
  * @param {string} param The parameter in the querystring which should be updated (ex `page`, `per_page`)
- * @param {string} path Relative path (defaults to current path).
+ * @param {string} path  Relative path (defaults to current path).
  * @param {string} query object of current query params (defaults to current querystring).
  * @return {Function} A callback which will update `param` to the passed value when called.
  */
@@ -209,10 +209,10 @@ export function onQueryChange( param, path = getPath(), query = getQuery() ) {
 /**
  * Updates the query parameters of the current page.
  *
- * @param {Object} query object of params to be updated.
- * @param {string} path Relative path (defaults to current path).
+ * @param {Object} query        object of params to be updated.
+ * @param {string} path         Relative path (defaults to current path).
  * @param {Object} currentQuery object of current query params (defaults to current querystring).
- * @param {string} page Page key (defaults to "wc-admin")
+ * @param {string} page         Page key (defaults to "wc-admin")
  */
 export function updateQueryString(
 	query,
@@ -271,9 +271,9 @@ export const addHistoryListener = ( listener ) => {
  *
  * @slotFill WooNavigationItem
  * @scope woocommerce-navigation
- * @param {Object} props React props.
- * @param {Array} props.children Node children.
- * @param {string} props.item Navigation item slug.
+ * @param {Object} props          React props.
+ * @param {Array}  props.children Node children.
+ * @param {string} props.item     Navigation item slug.
  */
 export const WooNavigationItem = ( { children, item } ) => {
 	return <Fill name={ 'woocommerce_navigation_' + item }>{ children }</Fill>;

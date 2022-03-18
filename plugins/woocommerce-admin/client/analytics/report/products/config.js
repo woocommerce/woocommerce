@@ -183,8 +183,8 @@ const variationsConfig = {
  * Produts Report Advanced Filters.
  *
  * @filter woocommerce_admin_products_report_advanced_filters
- * @param {Object} advancedFilters Report Advanced Filters.
- * @param {string} advancedFilters.title Interpolated component string for Advanced Filters title.
+ * @param {Object} advancedFilters         Report Advanced Filters.
+ * @param {string} advancedFilters.title   Interpolated component string for Advanced Filters title.
  * @param {Object} advancedFilters.filters An object specifying a report's Advanced Filters.
  */
 export const advancedFilters = applyFilters(

@@ -1,9 +1,7 @@
 /**
  * External dependencies
  */
-import { withA11y } from '@storybook/addon-a11y';
-import { withKnobs } from '@storybook/addon-knobs';
-import { addDecorator } from '@storybook/react';
+import { createElement } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -25,12 +23,12 @@ import './wordpress/css/site-icon.min.css';
 import './wordpress/css/l10n.min.css';
 import './wordpress/css/site-health.min.css';
 
-addDecorator( withA11y );
-addDecorator( withKnobs );
-addDecorator( ( Story ) => (
-	<div id="wpwrap">
-		<div className="woocommerce-layout woocommerce-page">
-			<Story />
+export const decorators = [
+	( Story ) => (
+		<div id="wpwrap">
+			<div className="woocommerce-layout woocommerce-page">
+				<Story />
+			</div>
 		</div>
-	</div>
-) );
+	),
+];

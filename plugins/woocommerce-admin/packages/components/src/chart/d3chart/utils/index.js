@@ -8,8 +8,8 @@ import { utcParse as d3UTCParse } from 'd3-time-format';
 /**
  * Allows an overriding formatter or defaults to d3Format or d3TimeFormat
  *
- * @param {string|Function} format - either a format string for the D3 formatters or an overriding fomatting method
- * @param {Function} formatter - default d3Format or another formatting method, which accepts the string `format`
+ * @param {string|Function} format    - either a format string for the D3 formatters or an overriding fomatting method
+ * @param {Function}        formatter - default d3Format or another formatting method, which accepts the string `format`
  * @return {Function} to be used to format an input given the format and formatter
  */
 export const getFormatter = ( format, formatter = d3Format ) =>
@@ -51,7 +51,7 @@ export const getOrderedKeys = ( data ) => {
 /**
  * Describes `getUniqueDates`
  *
- * @param {Array} data - the chart component's `data` prop.
+ * @param {Array}  data       - the chart component's `data` prop.
  * @param {string} dateParser - D3 time format
  * @return {Array} an array of unique date values sorted from earliest to latest
  */
@@ -64,7 +64,7 @@ export const getUniqueDates = ( data, dateParser ) => {
 /**
  * Check whether data is empty.
  *
- * @param {Array} data - the chart component's `data` prop.
+ * @param {Array}  data      - the chart component's `data` prop.
  * @param {number} baseValue - base value to test data values against.
  * @return {boolean} `false` if there was at least one data value different than
  * the baseValue.

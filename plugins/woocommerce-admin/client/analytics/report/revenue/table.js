@@ -293,8 +293,8 @@ RevenueReportTable.contextType = CurrencyContext;
  *
  * @param {boolean} isError
  * @param {boolean} isRequesting
- * @param {Object} tableQuery
- * @param {Object} revenueData
+ * @param {Object}  tableQuery
+ * @param {Object}  revenueData
  * @return {Object} formatted tableData prop
  */
 const formatProps = memoize(

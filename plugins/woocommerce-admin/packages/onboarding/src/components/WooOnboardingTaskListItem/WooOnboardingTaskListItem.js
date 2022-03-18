@@ -9,7 +9,7 @@ import { Slot, Fill } from '@wordpress/components';
  *
  * @slotFill WooOnboardingTaskListItem
  * @scope woocommerce-tasks
- * @param {Object} props React props.
+ * @param {Object} props    React props.
  * @param {string} props.id Task id.
  */
 export const WooOnboardingTaskListItem = ( { id, ...props } ) => (

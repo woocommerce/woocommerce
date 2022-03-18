@@ -26,11 +26,11 @@
 	],
 	"main": "index.js",
 	"dependencies": {
-		"@typescript-eslint/parser": "^4.33.0",
-		"@wordpress/eslint-plugin": "^8.0.2",
-		"eslint": "^7.32.0",
+		"@typescript-eslint/parser": "^5.14.0",
+		"@wordpress/eslint-plugin": "^11.0.0",
+		"eslint": "^8.10.0",
 		"eslint-plugin-react-hooks": "^4.3.0",
-		"eslint-plugin-testing-library": "^3.10.2",
+		"eslint-plugin-testing-library": "^5.1.0",
 		"requireindex": "^1.2.0"
 	},
 	"publishConfig": {

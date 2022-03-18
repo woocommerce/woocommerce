@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { useDispatch, useSelect } from '@wordpress/data';
 import userEvent from '@testing-library/user-event';
 
@@ -73,9 +73,7 @@ describe( 'ShippingRecommendations', () => {
 		expect( installAndActivatePluginsMock ).not.toHaveBeenCalled();
 		expect( successNoticeMock ).not.toHaveBeenCalled();
 
-		act( () => {
-			userEvent.click( screen.getByText( 'Get started' ) );
-		} );
+		userEvent.click( screen.getByText( 'Get started' ) );
 
 		expect( installAndActivatePluginsMock ).toHaveBeenCalled();
 		await waitFor( () => {

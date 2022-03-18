@@ -22,8 +22,8 @@ import { isWpVersion } from '@woocommerce/settings';
 /**
  * NOTE: This can be removed after WP version 6.0 and replaced with a div.
  *
- * @param {Object} props React props.
- * @param {Node} [props.children] Children of react component.
+ * @param {Object} props             React props.
+ * @param {Node}   [props.children]  Children of react component.
  * @param {string} [props.className] Additional class name to style the component.
  */
 const DropZoneWrapper = ( { children, className } ) => {

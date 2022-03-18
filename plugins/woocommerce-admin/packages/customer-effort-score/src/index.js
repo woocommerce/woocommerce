@@ -20,14 +20,14 @@ const noop = () => {};
  * NOTE: This should live in @woocommerce/customer-effort-score to allow
  * reuse.
  *
- * @param {Object} props                             Component props.
+ * @param {Object}   props                           Component props.
  * @param {Function} props.recordScoreCallback       Function to call when the score should be recorded.
- * @param {string} props.label                       The label displayed in the modal.
+ * @param {string}   props.label                     The label displayed in the modal.
  * @param {Function} props.createNotice              Create a notice (snackbar).
  * @param {Function} props.onNoticeShownCallback     Function to call when the notice is shown.
  * @param {Function} props.onNoticeDismissedCallback Function to call when the notice is dismissed.
  * @param {Function} props.onModalShownCallback      Function to call when the modal is shown.
- * @param {Object} props.icon                        Icon (React component) to be shown on the notice.
+ * @param {Object}   props.icon                      Icon (React component) to be shown on the notice.
  */
 export function CustomerEffortScore( {
 	recordScoreCallback,

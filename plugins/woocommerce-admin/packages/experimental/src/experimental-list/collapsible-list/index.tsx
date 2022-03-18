@@ -60,9 +60,9 @@ function getContainerHeight( collapseContainer: HTMLDivElement | null ) {
  * If one is removed, it will remove it from the show array.
  * If one is added, it will add it back to the shown list, making use of the new children list to keep order.
  *
- * @param {Array.<import('react').ReactElement>} currentChildren a list of the current children.
+ * @param {Array.<import('react').ReactElement>} currentChildren      a list of the current children.
  * @param {Array.<import('react').ReactElement>} currentShownChildren a list of the current shown children.
- * @param {Array.<import('react').ReactElement>} newChildren a list of the new children.
+ * @param {Array.<import('react').ReactElement>} newChildren          a list of the new children.
  * @return {Array.<import('react').ReactElement>} new list of children that should be shown.
  */
 function getUpdatedShownChildren(

@@ -17,7 +17,7 @@ import Menu from './menu';
  * the mobile format on smaller screens.
  *
  * @param {Object} props
- * @param {Node} props.children
+ * @param {Node}   props.children
  * @param {string} props.isDropdownBreakpoint
  * @param {string} props.label
  * @return {Object} -

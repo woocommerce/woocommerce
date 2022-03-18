@@ -162,13 +162,13 @@ const ReportTable = ( props ) => {
 		 * Enables manipulation of data used to create the report CSV.
 		 *
 		 * @filter woocommerce_admin_report_table
-		 * @param {Object} reportTableData - data used to create the table.
+		 * @param {Object} reportTableData          - data used to create the table.
 		 * @param {string} reportTableData.endpoint - table api endpoint.
-		 * @param {Array} reportTableData.headers - table headers data.
-		 * @param {Array} reportTableData.rows - table rows data.
-		 * @param {Object} reportTableData.totals - total aggregates for request.
-		 * @param {Array} reportTableData.summary - summary numbers data.
-		 * @param {Object} reportTableData.items - response from api requerst.
+		 * @param {Array}  reportTableData.headers  - table headers data.
+		 * @param {Array}  reportTableData.rows     - table rows data.
+		 * @param {Object} reportTableData.totals   - total aggregates for request.
+		 * @param {Array}  reportTableData.summary  - summary numbers data.
+		 * @param {Object} reportTableData.items    - response from api requerst.
 		 */
 		return applyFilters( TABLE_FILTER, {
 			endpoint,

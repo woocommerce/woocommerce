@@ -8,7 +8,7 @@ import { find } from 'lodash';
  * of charts. If the chart is not found it will return the first chart.
  *
  * @param {string} chartName - the name of the chart to get configuration for
- * @param {Array} charts - list of charts for a particular report
+ * @param {Array}  charts    - list of charts for a particular report
  * @return {Object} - chart configuration object
  */
 export default function getSelectedChart( chartName, charts = [] ) {

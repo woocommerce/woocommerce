@@ -11,7 +11,7 @@ const tracksDebug = debug( 'wc-admin:tracks' );
 /**
  * Record an event to Tracks
  *
- * @param {string} eventName The name of the event to record, don't include the wcadmin_ prefix
+ * @param {string} eventName       The name of the event to record, don't include the wcadmin_ prefix
  * @param {Object} eventProperties event properties to include in the event
  */
 export function recordEvent( eventName, eventProperties ) {
@@ -111,7 +111,7 @@ const tracksQueue = {
  * `window.location`. This is an example of a race condition that should be avoided by enqueueing the event,
  * and therefore running it on the next pageview.
  *
- * @param {string} eventName The name of the event to record, don't include the wcadmin_ prefix
+ * @param {string} eventName       The name of the event to record, don't include the wcadmin_ prefix
  * @param {Object} eventProperties event properties to include in the event
  */
 
@@ -122,7 +122,7 @@ export function queueRecordEvent( eventName, eventProperties ) {
 /**
  * Record a page view to Tracks
  *
- * @param {string} path the page/path to record a page view for
+ * @param {string} path            the page/path to record a page view for
  * @param {Object} extraProperties extra event properties to include in the event
  */
 

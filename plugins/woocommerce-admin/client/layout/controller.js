@@ -303,9 +303,9 @@ export class Controller extends Component {
  * Update an anchor's link in sidebar to include persisted queries. Leave excluded screens
  * as is.
  *
- * @param {HTMLElement} item - Sidebar anchor link.
- * @param {Object} nextQuery - A query object to be added to updated hrefs.
- * @param {Array} excludedScreens - wc-admin screens to avoid updating.
+ * @param {HTMLElement} item            - Sidebar anchor link.
+ * @param {Object}      nextQuery       - A query object to be added to updated hrefs.
+ * @param {Array}       excludedScreens - wc-admin screens to avoid updating.
  */
 export function updateLinkHref( item, nextQuery, excludedScreens ) {
 	if ( isWCAdmin( item.href ) ) {

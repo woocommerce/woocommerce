@@ -7,7 +7,7 @@ import GraphemeSplitter from 'grapheme-splitter';
 /**
  * Get the count of the unread notes from the received list.
  *
- * @param {Array} notes - List of notes, contains read and unread notes.
+ * @param {Array}  notes    - List of notes, contains read and unread notes.
  * @param {number} lastRead - The timestamp that the user read a note.
  * @return {number} - Unread notes count.
  */
@@ -46,8 +46,8 @@ export function hasValidNotes( notes ) {
 /**
  * Truncates array of text characters.
  *
- * @param {Array} letters The letter array to truncate.
- * @param {number} limit number of characters to limit to
+ * @param {Array}  letters   The letter array to truncate.
+ * @param {number} limit     number of characters to limit to
  * @param {string} separator The separator string to truncate to.
  */
 export const truncate = ( letters, limit, separator = ' ' ) => {
@@ -68,7 +68,7 @@ export const truncate = ( letters, limit, separator = ' ' ) => {
  * Currently does not count <br> as a character even though it should.
  *
  * @param {HTMLElement} element HTML element
- * @param {number} limit number of characters to limit to
+ * @param {number}      limit   number of characters to limit to
  */
 const truncateElement = ( element, limit ) => {
 	const truncatedNode = document.createElement( 'div' );
@@ -108,7 +108,7 @@ const truncateElement = ( element, limit ) => {
  * Truncates characters from a HTML string excluding markup. Truncated strings will be appended with ellipsis.
  *
  * @param {string} originalHTML HTML string
- * @param {number} limit number of characters to limit to
+ * @param {number} limit        number of characters to limit to
  */
 export const truncateRenderableHTML = ( originalHTML, limit ) => {
 	const tempNode = document.createElement( 'div' );

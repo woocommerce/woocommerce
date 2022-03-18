@@ -89,8 +89,8 @@ export const charts = applyFilters( REVENUE_REPORT_CHARTS_FILTER, [
  * Revenue Report Advanced Filters.
  *
  * @filter woocommerce_admin_revenue_report_advanced_filters
- * @param {Object} advancedFilters Report Advanced Filters.
- * @param {string} advancedFilters.title Interpolated component string for Advanced Filters title.
+ * @param {Object} advancedFilters         Report Advanced Filters.
+ * @param {string} advancedFilters.title   Interpolated component string for Advanced Filters title.
  * @param {Object} advancedFilters.filters An object specifying a report's Advanced Filters.
  */
 export const advancedFilters = applyFilters(

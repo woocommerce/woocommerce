@@ -20,15 +20,15 @@ const ADMIN_SETTINGS_SOURCE = Object.keys( adminSettings ).reduce(
 /**
  * Retrieves a setting value from the setting state.
  *
- * @param {string}   name                         The identifier for the setting.
- * @param {*}    [fallback=false]             The value to use as a fallback
- *                                                if the setting is not in the
- *                                                state.
- * @param {Function} [filter=( val ) => val]  	  A callback for filtering the
- *                                                value before it's returned.
- *                                                Receives both the found value
- *                                                (if it exists for the key) and
- *                                                the provided fallback arg.
+ * @param {string}   name                    The identifier for the setting.
+ * @param {*}        [fallback=false]        The value to use as a fallback
+ *                                           if the setting is not in the
+ *                                           state.
+ * @param {Function} [filter=( val ) => val] A callback for filtering the
+ *                                           value before it's returned.
+ *                                           Receives both the found value
+ *                                           (if it exists for the key) and
+ *                                           the provided fallback arg.
  *
  * @return {*}  The value present in the settings state for the given
  *                   name.
@@ -65,12 +65,12 @@ export const ORDER_STATUSES = getAdminSetting( 'orderStatuses' );
  *
  * @deprecated
  *
- * @param {string}   name                        The setting property key for the
- *                                               setting being mutated.
- * @param {*}    value                       The value to set.
- * @param {Function} [filter=( val ) => val]     Allows for providing a callback
- *                                               to sanitize the setting (eg.
- *                                               ensure it's a number)
+ * @param {string}   name                    The setting property key for the
+ *                                           setting being mutated.
+ * @param {*}        value                   The value to set.
+ * @param {Function} [filter=( val ) => val] Allows for providing a callback
+ *                                           to sanitize the setting (eg.
+ *                                           ensure it's a number)
  */
 export function setAdminSetting( name, value, filter = ( val ) => val ) {
 	if ( mutableSources.includes( name ) ) {

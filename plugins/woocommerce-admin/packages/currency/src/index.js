@@ -42,8 +42,8 @@ const CurrencyFactory = function ( currencySetting ) {
 	/**
 	 * Formats money value.
 	 *
-	 * @param   {number|string} number number to format
-	 * @param   {boolean} [useCode=false] Set to `true` to use the currency code instead of the symbol.
+	 * @param {number|string} number          number to format
+	 * @param {boolean}       [useCode=false] Set to `true` to use the currency code instead of the symbol.
 	 * @return {?string} A formatted string.
 	 */
 	function formatAmount( number, useCode = false ) {
@@ -64,7 +64,7 @@ const CurrencyFactory = function ( currencySetting ) {
 	 *
 	 * @deprecated
 	 *
-	 * @param   {number|string} number number to format
+	 * @param {number|string} number number to format
 	 * @return {?string} A formatted string.
 	 */
 	function formatCurrency( number ) {
@@ -105,8 +105,8 @@ const CurrencyFactory = function ( currencySetting ) {
 	/**
 	 * Get formatted data for a country from supplied locale and symbol info.
 	 *
-	 * @param {string} countryCode Country code.
-	 * @param {Object} localeInfo Locale info by country code.
+	 * @param {string} countryCode     Country code.
+	 * @param {Object} localeInfo      Locale info by country code.
 	 * @param {Object} currencySymbols Currency symbols by symbol code.
 	 * @return {Object} Formatted currency data for country.
 	 */
@@ -167,7 +167,7 @@ const CurrencyFactory = function ( currencySetting ) {
 		 * Get the string representation of a floating point number to the precision used by the current currency.
 		 * This is different from `formatAmount` by not returning the currency symbol.
 		 *
-		 * @param  {number|string} number A floating point number (or integer), or string that converts to a number
+		 * @param {number|string} number A floating point number (or integer), or string that converts to a number
 		 * @return {string}               The original number rounded to a decimal point
 		 */
 		formatDecimalString( number ) {
@@ -184,7 +184,7 @@ const CurrencyFactory = function ( currencySetting ) {
 		/**
 		 * Render a currency for display in a component.
 		 *
-		 * @param  {number|string} number A floating point number (or integer), or string that converts to a number
+		 * @param {number|string} number A floating point number (or integer), or string that converts to a number
 		 * @return {Node|string} The number formatted as currency and rendered for display.
 		 */
 		render( number ) {

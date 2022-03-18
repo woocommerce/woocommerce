@@ -42,7 +42,7 @@ export const EmbeddedBodyLayout = () => {
 	 *
 	 * @filter woocommerce_admin_embedded_layout_components
 	 * @param {Array.<Node>} embeddedBodyComponentList Array of body components.
-	 * @param {Object} query url query parameters.
+	 * @param {Object}       query                     url query parameters.
 	 */
 	const componentList = applyFilters(
 		'woocommerce_admin_embedded_layout_components',

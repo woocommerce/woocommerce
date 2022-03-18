@@ -27,15 +27,15 @@ export function flattenFilters( filters ) {
  * Describe activeFilter object.
  *
  * @typedef {Object} activeFilter
- * @property {string} key - filter key.
+ * @property {string} key    - filter key.
  * @property {string} [rule] - a modifying rule for a filter, eg 'includes' or 'is_not'.
- * @property {string} value - filter value(s).
+ * @property {string} value  - filter value(s).
  */
 
 /**
  * Given a query object, return an array of activeFilters, if any.
  *
- * @param {Object} query - query oject
+ * @param {Object} query  - query oject
  * @param {Object} config - config object
  * @return {Array} - array of activeFilters
  */
@@ -104,8 +104,8 @@ export function getActiveFiltersFromQuery( query, config ) {
  * Get the default option's value from the configuration object for a given filter. The first
  * option is used as default if no `defaultOption` is provided.
  *
- * @param {Object} config - a filter config object.
- * @param {Array} options - select options.
+ * @param {Object} config  - a filter config object.
+ * @param {Array}  options - select options.
  * @return {string|undefined}  - the value of the default option.
  */
 export function getDefaultOptionValue( config, options ) {
@@ -129,9 +129,9 @@ export function getDefaultOptionValue( config, options ) {
  * Given activeFilters, create a new query object to update the url. Use previousFilters to
  * Remove unused params.
  *
- * @param {Array} activeFilters - Array of activeFilters shown in the UI
- * @param {Object} query - the current url query object
- * @param {Object} config - config object
+ * @param {Array}  activeFilters - Array of activeFilters shown in the UI
+ * @param {Object} query         - the current url query object
+ * @param {Object} config        - config object
  * @return {Object} - query object representing the new parameters
  */
 export function getQueryFromActiveFilters( activeFilters, query, config ) {
@@ -170,7 +170,7 @@ export function getQueryFromActiveFilters( activeFilters, query, config ) {
 /**
  * Get the url query key from the filter key and rule.
  *
- * @param {string} key - filter key.
+ * @param {string} key  - filter key.
  * @param {string} rule - filter rule.
  * @return {string} - url query key.
  */

@@ -29,7 +29,7 @@ type Option = { key: string; label: string };
  * Check if a given address field is required for the locale.
  *
  * @param {string} fieldName Name of the field to check.
- * @param {Object} locale Locale data.
+ * @param {Object} locale    Locale data.
  * @return {boolean} Field requirement.
  */
 export function isAddressFieldRequired(
@@ -147,7 +147,7 @@ export const normalizeState = ( state: string ): string => {
 /**
  * Get state filter
  *
- * @param {string} isStateAbbreviation Whether to use state abbreviation or not.
+ * @param {string} isStateAbbreviation     Whether to use state abbreviation or not.
  * @param {string} normalizedAutofillState The value of the autofillState field.
  * @return {Function} filter function.
  */
@@ -189,9 +189,9 @@ export const getStateFilter = (
 /**
  * Get the autofill countryState fields and set value from filtered options.
  *
- * @param {Array} options Array of filterable options.
- * @param {string} countryState The value of the countryState field.
- * @param {Function} setValue Set value of the countryState input.
+ * @param {Array}    options      Array of filterable options.
+ * @param {string}   countryState The value of the countryState field.
+ * @param {Function} setValue     Set value of the countryState input.
  * @return {Object} React component.
  */
 export function useGetCountryStateAutofill(
@@ -328,9 +328,9 @@ type StoreAddressProps = {
 /**
  * Store address fields.
  *
- * @param {Object} props Props for input components.
+ * @param {Object}   props               Props for input components.
  * @param {Function} props.getInputProps Get input props.
- * @param {Function} props.setValue Set value of the countryState input.
+ * @param {Function} props.setValue      Set value of the countryState input.
  * @return {Object} -
  */
 export function StoreAddress( {

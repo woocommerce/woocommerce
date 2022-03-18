@@ -57,26 +57,20 @@ describe( 'getActiveFiltersFromQuery', () => {
 		expect( Array.isArray( activeFilters ) ).toBeTruthy();
 		expect( activeFilters.length ).toBe( 3 );
 
-		// with_select
-		// eslint-disable-next-line camelcase
-		const with_select = activeFilters[ 0 ];
-		expect( with_select.key ).toBe( 'with_select' );
-		expect( with_select.rule ).toBe( 'is' );
-		expect( with_select.value ).toBe( 'pending' );
+		const withSelect = activeFilters[ 0 ];
+		expect( withSelect.key ).toBe( 'with_select' );
+		expect( withSelect.rule ).toBe( 'is' );
+		expect( withSelect.value ).toBe( 'pending' );
 
-		// with_search
-		// eslint-disable-next-line camelcase
-		const with_search = activeFilters[ 1 ];
-		expect( with_search.key ).toBe( 'with_search' );
-		expect( with_search.rule ).toBe( 'includes' );
-		expect( with_search.value ).toEqual( '1,2,3' );
+		const withSearch = activeFilters[ 1 ];
+		expect( withSearch.key ).toBe( 'with_search' );
+		expect( withSearch.rule ).toBe( 'includes' );
+		expect( withSearch.value ).toEqual( '1,2,3' );
 
-		// with_search
-		// eslint-disable-next-line camelcase
-		const with_no_rules = activeFilters[ 2 ];
-		expect( with_no_rules.key ).toBe( 'with_no_rules' );
-		expect( with_no_rules.rule ).toBeUndefined();
-		expect( with_no_rules.value ).toEqual( 'pending' );
+		const withNoRules = activeFilters[ 2 ];
+		expect( withNoRules.key ).toBe( 'with_no_rules' );
+		expect( withNoRules.rule ).toBeUndefined();
+		expect( withNoRules.value ).toEqual( 'pending' );
 	} );
 
 	it( 'should handle multiple filter instances', () => {

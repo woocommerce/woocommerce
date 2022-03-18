@@ -26,12 +26,12 @@ import { getResourceName } from '../utils';
 /**
  * Add filters and advanced filters values to a query object.
  *
- * @param  {Object} options                   arguments
- * @param  {string} options.endpoint          Report API Endpoint
- * @param  {Object} options.query             Query parameters in the url
- * @param  {Array}  options.limitBy           Properties used to limit the results. It will be used in the API call to send the IDs.
- * @param  {Array}  [options.filters]         config filters
- * @param  {Object} [options.advancedFilters] config advanced filters
+ * @param {Object} options                   arguments
+ * @param {string} options.endpoint          Report API Endpoint
+ * @param {Object} options.query             Query parameters in the url
+ * @param {Array}  options.limitBy           Properties used to limit the results. It will be used in the API call to send the IDs.
+ * @param {Array}  [options.filters]         config filters
+ * @param {Object} [options.advancedFilters] config advanced filters
  * @return {Object} A query object with the values from filters and advanced fitlters applied.
  */
 export function getFilterQuery( options ) {
@@ -67,7 +67,7 @@ const noIntervalEndpoints = [ 'stock', 'customers' ];
  * Add timestamp to advanced filter parameters involving date. The api
  * expects a timestamp for these values similar to `before` and `after`.
  *
- * @param {Object} config - advancedFilters config object.
+ * @param {Object} config       - advancedFilters config object.
  * @param {Object} activeFilter - an active filter.
  * @return {Object} - an active filter with timestamp added to date values.
  */
@@ -158,8 +158,8 @@ export function getQueryFromConfig( config, advancedFilters, query ) {
 /**
  * Returns true if a report object is empty.
  *
- * @param  {Object}  report   Report to check
- * @param  {string}  endpoint Endpoint slug
+ * @param {Object} report   Report to check
+ * @param {string} endpoint Endpoint slug
  * @return {boolean}        True if report is data is empty.
  */
 export function isReportDataEmpty( report, endpoint ) {
@@ -186,12 +186,12 @@ export function isReportDataEmpty( report, endpoint ) {
 /**
  * Constructs and returns a query associated with a Report data request.
  *
- * @param  {Object} options           arguments
- * @param  {string} options.endpoint  Report API Endpoint
- * @param  {string} options.dataType  'primary' or 'secondary'.
- * @param  {Object} options.query     Query parameters in the url.
- * @param  {Array}  options.limitBy   Properties used to limit the results. It will be used in the API call to send the IDs.
- * @param  {string}  options.defaultDateRange   User specified default date range.
+ * @param {Object} options                  arguments
+ * @param {string} options.endpoint         Report API Endpoint
+ * @param {string} options.dataType         'primary' or 'secondary'.
+ * @param {Object} options.query            Query parameters in the url.
+ * @param {Array}  options.limitBy          Properties used to limit the results. It will be used in the API call to send the IDs.
+ * @param {string} options.defaultDateRange User specified default date range.
  * @return {Object} data request query parameters.
  */
 function getRequestQuery( options ) {
@@ -222,12 +222,12 @@ function getRequestQuery( options ) {
 /**
  * Returns summary number totals needed to render a report page.
  *
- * @param  {Object} options           arguments
- * @param  {string} options.endpoint  Report API Endpoint
- * @param  {Object} options.query     Query parameters in the url
- * @param  {Object} options.select    Instance of @wordpress/select
- * @param  {Array}  options.limitBy   Properties used to limit the results. It will be used in the API call to send the IDs.
- * @param  {string}  options.defaultDateRange   User specified default date range.
+ * @param {Object} options                  arguments
+ * @param {string} options.endpoint         Report API Endpoint
+ * @param {Object} options.query            Query parameters in the url
+ * @param {Object} options.select           Instance of @wordpress/select
+ * @param {Array}  options.limitBy          Properties used to limit the results. It will be used in the API call to send the IDs.
+ * @param {string} options.defaultDateRange User specified default date range.
  * @return {Object} Object containing summary number responses.
  */
 export function getSummaryNumbers( options ) {
@@ -339,14 +339,14 @@ const getReportChartDataResponse = memoize(
 /**
  * Returns all of the data needed to render a chart with summary numbers on a report page.
  *
- * @param  {Object} options           arguments
- * @param  {string} options.endpoint  Report API Endpoint
- * @param  {string} options.dataType  'primary' or 'secondary'
- * @param  {Object} options.query     Query parameters in the url
- * @param  {Object} options.selector    Instance of @wordpress/select response
- * @param  {Object} options.select    (Depreciated) Instance of @wordpress/select
- * @param  {Array}  options.limitBy   Properties used to limit the results. It will be used in the API call to send the IDs.
- * @param  {string}  options.defaultDateRange   User specified default date range.
+ * @param {Object} options                  arguments
+ * @param {string} options.endpoint         Report API Endpoint
+ * @param {string} options.dataType         'primary' or 'secondary'
+ * @param {Object} options.query            Query parameters in the url
+ * @param {Object} options.selector         Instance of @wordpress/select response
+ * @param {Object} options.select           (Depreciated) Instance of @wordpress/select
+ * @param {Array}  options.limitBy          Properties used to limit the results. It will be used in the API call to send the IDs.
+ * @param {string} options.defaultDateRange User specified default date range.
  * @return {Object}  Object containing API request information (response, fetching, and error details)
  */
 export function getReportChartData( options ) {
@@ -445,8 +445,8 @@ export function getReportChartData( options ) {
 /**
  * Returns a formatting function or string to be used by d3-format
  *
- * @param  {string} type Type of number, 'currency', 'number', 'percent', 'average'
- * @param  {Function} formatAmount format currency function
+ * @param {string}   type         Type of number, 'currency', 'number', 'percent', 'average'
+ * @param {Function} formatAmount format currency function
  * @return {string|Function}  returns a number format based on the type or an overriding formatting function
  */
 export function getTooltipValueFormat( type, formatAmount ) {
@@ -467,10 +467,10 @@ export function getTooltipValueFormat( type, formatAmount ) {
 /**
  * Returns query needed for a request to populate a table.
  *
- * @param  {Object} options              arguments
- * @param  {Object} options.query        Query parameters in the url
- * @param  {Object} options.tableQuery   Query parameters specific for that endpoint
- * @param  {string} options.defaultDateRange   User specified default date range.
+ * @param {Object} options                  arguments
+ * @param {Object} options.query            Query parameters in the url
+ * @param {Object} options.tableQuery       Query parameters specific for that endpoint
+ * @param {string} options.defaultDateRange User specified default date range.
  * @return {Object} Object    Table data response
  */
 export function getReportTableQuery( options ) {
@@ -499,13 +499,13 @@ export function getReportTableQuery( options ) {
 /**
  * Returns table data needed to render a report page.
  *
- * @param  {Object} options                arguments
- * @param  {string} options.endpoint       Report API Endpoint
- * @param  {Object} options.query          Query parameters in the url
- * @param  {Object} options.selector       Instance of @wordpress/select response
- * @param  {Object} options.select         (depreciated) Instance of @wordpress/select
- * @param  {Object} options.tableQuery     Query parameters specific for that endpoint
- * @param  {string}  options.defaultDateRange   User specified default date range.
+ * @param {Object} options                  arguments
+ * @param {string} options.endpoint         Report API Endpoint
+ * @param {Object} options.query            Query parameters in the url
+ * @param {Object} options.selector         Instance of @wordpress/select response
+ * @param {Object} options.select           (depreciated) Instance of @wordpress/select
+ * @param {Object} options.tableQuery       Query parameters specific for that endpoint
+ * @param {string} options.defaultDateRange User specified default date range.
  * @return {Object} Object    Table data response
  */
 export function getReportTableData( options ) {

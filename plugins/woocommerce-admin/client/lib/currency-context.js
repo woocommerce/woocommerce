@@ -18,7 +18,7 @@ export const getFilteredCurrencyInstance = ( query ) => {
 	 *
 	 * @filter woocommerce_admin_report_currency
 	 * @param {Object} config Currency configuration.
-	 * @param {Object} query Url query parameters.
+	 * @param {Object} query  Url query parameters.
 	 */
 	const filteredConfig = applyFilters(
 		'woocommerce_admin_report_currency',

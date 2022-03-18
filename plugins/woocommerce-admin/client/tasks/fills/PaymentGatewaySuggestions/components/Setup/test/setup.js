@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { act, render } from '@testing-library/react';
+import { render } from '@testing-library/react';
 
 /**
  * Internal dependencies
@@ -70,9 +70,8 @@ describe( 'Setup', () => {
 				postInstallScripts: [ 'mock-post-install-script' ],
 			},
 		};
-		await act( async () => {
-			render( <Setup { ...props } /> );
-		} );
+
+		render( <Setup { ...props } /> );
 
 		expect( enqueueScript ).toHaveBeenCalledTimes( 1 );
 		expect( enqueueScript ).toHaveBeenCalledWith(

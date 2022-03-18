@@ -138,8 +138,8 @@ module.exports = {
 		/**
 		 * Tests if the locality is defined in the correct order (External, WooCommerce, Internal).
 		 *
-		 * @param {espree.Node}       child    Node to test.
-		 * @param {WCPackageLocality} locality Package locality.
+		 * @param {espree.Node}       child            Node to test.
+		 * @param {WCPackageLocality} locality         Package locality.
 		 * @param {WCPackageLocality} previousLocality Previous package locality.
 		 */
 		function checkLocalityOrder( child, locality, previousLocality ) {

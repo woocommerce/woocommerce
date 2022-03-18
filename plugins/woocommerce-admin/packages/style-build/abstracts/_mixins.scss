@@ -132,13 +132,11 @@
 		@media ( prefers-reduced-motion: reduce ) {
 			transition-duration: 0s;
 		}
-	}
-	@else if $property == 'animation' {
+	} @else if $property == 'animation' {
 		@media ( prefers-reduced-motion: reduce ) {
 			animation-duration: 1ms;
 		}
-	}
-	@else {
+	} @else {
 		@media ( prefers-reduced-motion: reduce ) {
 			transition-duration: 0s;
 			animation-duration: 1ms;
@@ -147,11 +145,6 @@
 }
 /* stylelint-enable */
 
-@mixin break-small() {
-	@media (min-width: #{ ($break-small) }) {
-		@content;
-	}
-}
 
 // Gutenberg Switch.
 @mixin switch-style__focus-active() {

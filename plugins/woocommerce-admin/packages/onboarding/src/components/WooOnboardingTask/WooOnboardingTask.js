@@ -33,7 +33,7 @@ export const trackView = ( taskId ) => {
  *
  * @slotFill WooOnboardingTask
  * @scope woocommerce-tasks
- * @param {Object} props React props.
+ * @param {Object} props    React props.
  * @param {string} props.id Task id.
  */
 const WooOnboardingTask = ( { id, ...props } ) => {

@@ -88,6 +88,8 @@ describe( 'Search', () => {
 				// Wait for async options procesing.
 				await waitFor( () => {
 					expect( optionsSpy ).toBeCalledWith( 'A' );
+				} );
+				await waitFor( () => {
 					expect( queryAllByRole( 'option' ) ).toHaveLength( 3 );
 				} );
 			} );
@@ -118,6 +120,8 @@ describe( 'Search', () => {
 				// Wait for async options procesing.
 				await waitFor( () => {
 					expect( optionsSpy ).toBeCalledWith( 'A' );
+				} );
+				await waitFor( () => {
 					expect( queryAllByRole( 'option' ) ).toHaveLength( 3 );
 				} );
 			} );

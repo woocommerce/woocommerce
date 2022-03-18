@@ -7,9 +7,9 @@ import { cloneElement } from '@wordpress/element';
 /**
  * Ordered header item.
  *
- * @param {Node} children - Node children.
- * @param {number} order - Node order.
- * @param {Array} props - Fill props.
+ * @param {Node}   children - Node children.
+ * @param {number} order    - Node order.
+ * @param {Array}  props    - Fill props.
  * @return {Node} Node.
  */
 const createOrderedChildren = ( children, order, props ) => {
@@ -33,8 +33,8 @@ const createOrderedChildren = ( children, order, props ) => {
  * scope: 'woocommerce-admin',
  * } );
  * @param {Object} param0
- * @param {Array} param0.children - Node children.
- * @param {Array} param0.order - Node order.
+ * @param {Array}  param0.children - Node children.
+ * @param {Array}  param0.order    - Node order.
  */
 export const WooHeaderItem = ( { children, order = 1 } ) => {
 	return (
@@ -72,8 +72,8 @@ WooHeaderItem.Slot = ( { fillProps } ) => (
  * scope: 'woocommerce-admin',
  * } );
  * @param {Object} param0
- * @param {Array} param0.children - Node children.
- * @param {Array} param0.order - Node order.
+ * @param {Array}  param0.children - Node children.
+ * @param {Array}  param0.order    - Node order.
  */
 export const WooHeaderNavigationItem = ( { children, order = 1 } ) => {
 	return (
@@ -110,7 +110,7 @@ WooHeaderNavigationItem.Slot = ( { fillProps } ) => (
  * 	scope: 'woocommerce-admin',
  * } );
  * @param {Object} param0
- * @param {Array} param0.children - Node children.
+ * @param {Array}  param0.children - Node children.
  */
 export const WooHeaderPageTitle = ( { children } ) => {
 	return <Fill name={ 'woocommerce_header_page_title' }>{ children }</Fill>;

@@ -137,8 +137,8 @@ export default function ProductTemplateModal( { onClose } ) {
 	 * An object defining a product template.
 	 *
 	 * @typedef {Object} template
-	 * @property {string} key Icon to render.
-	 * @property {string} title Url.
+	 * @property {string} key      Icon to render.
+	 * @property {string} title    Url.
 	 * @property {string} subtitle Link title.
 	 */
 

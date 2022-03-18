@@ -211,9 +211,9 @@ class VariationsReportTable extends Component {
 				 *
 				 * @filter experimental_woocommerce_admin_variations_report_table_summary_variations_count_label
 				 *
-				 * @param {string} label Label used for the count.
+				 * @param {string} label           Label used for the count.
 				 * @param {string} variationsCount Number of variations.
-				 * @param {Array} query Query parameters.
+				 * @param {Array}  query           Query parameters.
 				 */
 				label: applyFilters(
 					EXPERIMENTAL_VARIATIONS_REPORT_TABLE_SUMMARY_VARIATIONS_COUNT_LABEL_FILTER,
@@ -305,7 +305,7 @@ class VariationsReportTable extends Component {
 				 * @filter experimental_woocommerce_admin_variations_report_table_title
 				 *
 				 * @param {string} title Title used for the report table.
-				 * @param {Array} query Query parameters.
+				 * @param {Array}  query Query parameters.
 				 */
 				title={ applyFilters(
 					EXPERIMENTAL_VARIATIONS_REPORT_TABLE_TITLE_FILTER,

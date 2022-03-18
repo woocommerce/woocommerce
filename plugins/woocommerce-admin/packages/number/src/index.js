@@ -4,11 +4,11 @@ const numberFormatter = require( 'locutus/php/strings/number_format' );
  * Formats a number using site's current locale
  *
  * @see http://locutus.io/php/strings/number_format/
- * @param {Object} numberConfig number formatting configuration object.
- * @param {number} numberConfig.precision
- * @param {string} numberConfig.decimalSeparator
- * @param {string} numberConfig.thousandSeparator
- * @param {number|string} number number to format
+ * @param {Object}        numberConfig                   number formatting configuration object.
+ * @param {number}        numberConfig.precision
+ * @param {string}        numberConfig.decimalSeparator
+ * @param {string}        numberConfig.thousandSeparator
+ * @param {number|string} number                         number to format
  * @return {?string} A formatted string.
  */
 export function numberFormat(
@@ -42,8 +42,8 @@ export function numberFormat(
  * Formats a number string based on type of `average` or `number`.
  *
  * @param {Object} numberConfig number formatting configuration object.
- * @param {string} type of number to format, average or number
- * @param {number} value to format.
+ * @param {string} type         of number to format, average or number
+ * @param {number} value        to format.
  * @return {?string} A formatted string.
  */
 export function formatValue( numberConfig, type, value ) {
@@ -62,7 +62,7 @@ export function formatValue( numberConfig, type, value ) {
 /**
  * Calculates the delta/percentage change between two numbers.
  *
- * @param {number} primaryValue the value to calculate change for.
+ * @param {number} primaryValue   the value to calculate change for.
  * @param {number} secondaryValue the baseline which to calculdate the change against.
  * @return {?number} Percent change between the primaryValue from the secondaryValue.
  */

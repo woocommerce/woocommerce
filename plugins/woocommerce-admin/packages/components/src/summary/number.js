@@ -19,21 +19,21 @@ import { Text } from '../experimental';
 /**
  * A component to show a value, label, and optionally a change percentage and children node. Can also act as a link to a specific report focus.
  *
- * @param {Object} props
- * @param {Node} props.children
- * @param {number} props.delta Change percentage. Float precision is rendered as given.
- * @param {string} props.href
- * @param {string} props.hrefType
- * @param {boolean} props.isOpen
- * @param {string} props.label
- * @param {string} props.labelTooltipText
- * @param {Function} props.onToggle
- * @param {string} props.prevLabel
+ * @param {Object}        props
+ * @param {Node}          props.children
+ * @param {number}        props.delta               Change percentage. Float precision is rendered as given.
+ * @param {string}        props.href
+ * @param {string}        props.hrefType
+ * @param {boolean}       props.isOpen
+ * @param {string}        props.label
+ * @param {string}        props.labelTooltipText
+ * @param {Function}      props.onToggle
+ * @param {string}        props.prevLabel
  * @param {number|string} props.prevValue
- * @param {boolean} props.reverseTrend
- * @param {boolean} props.selected
+ * @param {boolean}       props.reverseTrend
+ * @param {boolean}       props.selected
  * @param {number|string} props.value
- * @param {Function} props.onLinkClickCallback
+ * @param {Function}      props.onLinkClickCallback
  * @return {Object} -
  */
 const SummaryNumber = ( {

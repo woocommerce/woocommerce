@@ -1,9 +1,9 @@
 /**
  * Adds a script to the page if it has not already been loaded. JS version of `wp_enqueue_script`.
  *
- * @param {Object} script WP_Script
+ * @param {Object} script        WP_Script
  * @param {string} script.handle Script handle.
- * @param {string} script.src Script URL.
+ * @param {string} script.src    Script URL.
  */
 export function enqueueScript( script ) {
 	return new Promise( ( resolve, reject ) => {

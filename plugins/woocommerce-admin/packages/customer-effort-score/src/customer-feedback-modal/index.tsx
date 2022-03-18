@@ -23,9 +23,9 @@ import { __ } from '@wordpress/i18n';
  *
  * Upon completion, the score and comments is sent to a callback function.
  *
- * @param {Object} props                       Component props.
+ * @param {Object}   props                     Component props.
  * @param {Function} props.recordScoreCallback Function to call when the results are sent.
- * @param {string} props.label                 Question to ask the customer.
+ * @param {string}   props.label               Question to ask the customer.
  */
 function CustomerFeedbackModal( {
 	recordScoreCallback,

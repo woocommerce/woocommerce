@@ -163,8 +163,8 @@ export const StoreManagementLinks = () => {
 		 * An object defining an extension link.
 		 *
 		 * @typedef {Object} link
-		 * @property {Node} icon Icon to render.
-		 * @property {string} href Url.
+		 * @property {Node}   icon  Icon to render.
+		 * @property {string} href  Url.
 		 * @property {string} title Link title.
 		 */
 

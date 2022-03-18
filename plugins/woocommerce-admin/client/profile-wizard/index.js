@@ -102,10 +102,10 @@ class ProfileWizard extends Component {
 	 * Set the initial and current values of a step to track the state of the step.
 	 * This is used to determine if the step has been changes or not.
 	 *
-	 * @param {string} step key of the step
-	 * @param {*} initialValues the initial values of the step
-	 * @param {*} currentValues the current values of the step
-	 * @param {Function} onSave a function to call when the step is saved
+	 * @param {string}   step          key of the step
+	 * @param {*}        initialValues the initial values of the step
+	 * @param {*}        currentValues the current values of the step
+	 * @param {Function} onSave        a function to call when the step is saved
 	 */
 	trackStepValueChanges( step, initialValues, currentValues, onSave ) {
 		this.stepValueChanges[ step ] = {
@@ -118,8 +118,8 @@ class ProfileWizard extends Component {
 	/**
 	 * Update currentValues of the given step.
 	 *
-	 * @param {string} step key of the step
-	 * @param {*} currentValues the current values of the step
+	 * @param {string} step          key of the step
+	 * @param {*}      currentValues the current values of the step
 	 */
 	updateCurrentStepValues( step, currentValues ) {
 		if ( ! this.stepValueChanges[ step ] ) {

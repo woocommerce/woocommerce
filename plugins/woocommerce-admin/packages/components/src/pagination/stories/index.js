@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { number, boolean } from '@storybook/addon-knobs';
+
 import { createElement, useState } from '@wordpress/element';
 
 /**
@@ -12,9 +12,15 @@ import Pagination from '../';
 export default {
 	title: 'WooCommerce Admin/components/Pagination',
 	component: Pagination,
+	args: {
+		total: 500,
+		showPagePicker: true,
+		showPerPagePicker: true,
+		showPageArrowsLabel: true,
+	},
 };
 
-export const Default = () => {
+export const Default = ( args ) => {
 	const [ statePage, setPage ] = useState( 2 );
 	const [ statePerPage, setPerPage ] = useState( 50 );
 
@@ -22,12 +28,9 @@ export const Default = () => {
 		<Pagination
 			page={ statePage }
 			perPage={ statePerPage }
-			total={ number( 'Total', 500 ) }
-			showPagePicker={ boolean( 'Page Picker', true ) }
-			showPerPagePicker={ boolean( 'Per Page Picker', true ) }
-			showPageArrowsLabel={ boolean( 'Page Arrows Label', true ) }
 			onPageChange={ ( newPage ) => setPage( newPage ) }
 			onPerPageChange={ ( newPerPage ) => setPerPage( newPerPage ) }
+			{ ...args }
 		/>
 	);
 };

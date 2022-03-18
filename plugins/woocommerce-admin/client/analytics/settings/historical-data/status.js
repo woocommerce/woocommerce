@@ -14,14 +14,14 @@ function HistoricalDataStatus( { importDate, status } ) {
 	 *
 	 * @filter woocommerce_admin_import_status
 	 *
-	 * @param {Object} statuses Import statuses.
-	 * @param {string} statuses.nothing Nothing to import.
-	 * @param {string} statuses.ready Ready to import.
-	 * @param {Array} statuses.initializing Initializing string and spinner.
-	 * @param {Array} statuses.customers Importing customers string and spinner.
-	 * @param {Array} statuses.orders Importing orders string and spinner.
-	 * @param {Array} statuses.finalizing Finalizing string and spinner.
-	 * @param {string} statuses.finished Message displayed after import.
+	 * @param {Object} statuses              Import statuses.
+	 * @param {string} statuses.nothing      Nothing to import.
+	 * @param {string} statuses.ready        Ready to import.
+	 * @param {Array}  statuses.initializing Initializing string and spinner.
+	 * @param {Array}  statuses.customers    Importing customers string and spinner.
+	 * @param {Array}  statuses.orders       Importing orders string and spinner.
+	 * @param {Array}  statuses.finalizing   Finalizing string and spinner.
+	 * @param {string} statuses.finished     Message displayed after import.
 	 */
 	const statusLabels = applyFilters( HISTORICAL_DATA_STATUS_FILTER, {
 		nothing: __( 'Nothing To Import', 'woocommerce-admin' ),

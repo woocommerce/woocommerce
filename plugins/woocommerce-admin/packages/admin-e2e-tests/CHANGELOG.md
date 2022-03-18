@@ -17,6 +17,12 @@
 -   Update all js packages with minor/patch version changes. #8392
 
 -   Add E2E test for checking onboarding tab clickable after going back. #8469
+## Breaking changes
+
+-   Update `@types/jest` to v27
+-   Update the peer dependency constraint `@typescript-eslint/eslint-plugin` to ^5.
+    - eslint-plugin: ban-types no longer reports object by default.
+
 
 # 0.1.2
 

@@ -9,7 +9,7 @@ import { createElement } from '@wordpress/element';
  * (so this should not be used in place of the `EllipsisMenu` prop `label`).
  *
  * @param {Object} props
- * @param {Node} props.children
+ * @param {Node}   props.children
  * @return {Object} -
  */
 const MenuTitle = ( { children } ) => {

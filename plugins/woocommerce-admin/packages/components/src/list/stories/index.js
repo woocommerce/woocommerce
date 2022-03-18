@@ -11,7 +11,7 @@ import {
 	ArgsTable,
 	Stories,
 	PRIMARY_STORY,
-} from '@storybook/addon-docs/blocks';
+} from '@storybook/addon-docs';
 import { withLinks } from '@storybook/addon-links';
 import { createElement } from '@wordpress/element';
 

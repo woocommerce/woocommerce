@@ -9,7 +9,7 @@ import { decodeEntities } from '@wordpress/html-entities';
  * Used to display matched partial in bold.
  *
  * @param {string} suggestion The item's label as returned from the API.
- * @param {string} query The search term to match in the string.
+ * @param {string} query      The search term to match in the string.
  * @return {Object} A list in three parts: before, match, and after.
  */
 export function computeSuggestionMatch( suggestion, query ) {

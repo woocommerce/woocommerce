@@ -45,11 +45,11 @@ const DEFAULT_SECTIONS_FILTER = 'woocommerce_dashboard_default_sections';
  * An object defining a dashboard section.
  *
  * @typedef {Object} section
- * @property {string} key Unique identifying string.
- * @property {Node} component React component to render.
- * @property {string} title Title.
- * @property {boolean} isVisible The default visibilty.
- * @property {Node} icon Section icon.
+ * @property {string}         key          Unique identifying string.
+ * @property {Node}           component    React component to render.
+ * @property {string}         title        Title.
+ * @property {boolean}        isVisible    The default visibilty.
+ * @property {Node}           icon         Section icon.
  * @property {Array.<string>} hiddenBlocks Blocks that are hidden by default.
  */
 

@@ -1,9 +1,4 @@
 /**
- * External dependencies
- */
-import { select } from '@storybook/addon-knobs';
-
-/**
  * Internal dependencies
  */
 import Chart from '../';
@@ -186,15 +181,17 @@ const data = [
 export default {
 	title: 'WooCommerce Admin/components/Chart',
 	component: Chart,
+	args: {
+		legendPosition: undefined,
+	},
+	argTypes: {
+		legendPosition: {
+			control: { type: 'select' },
+			options: [ undefined, 'bottom', 'side', 'top', 'hidden' ],
+		},
+	},
 };
 
-export const Default = () => (
-	<Chart
-		data={ data }
-		legendPosition={ select(
-			'Legend Position',
-			[ undefined, 'bottom', 'side', 'top', 'hidden' ],
-			undefined
-		) }
-	/>
+export const Default = ( { legendPosition } ) => (
+	<Chart data={ data } legendPosition={ legendPosition } />
 );

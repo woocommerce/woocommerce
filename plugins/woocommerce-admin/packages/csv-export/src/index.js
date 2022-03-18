@@ -51,8 +51,8 @@ function getCSVRows( rows ) {
 /**
  * Generates a CSV string from table contents
  *
- * @param   {Array.<Object>}        headers    Object with table header information
- * @param   {Array.Array.<Object>}  rows       Object with table rows information
+ * @param {Array.<Object>}       headers Object with table header information
+ * @param {Array.Array.<Object>} rows    Object with table rows information
  * @return {string}                           Table contents in a CSV format
  */
 export function generateCSVDataFromTable( headers, rows ) {
@@ -65,8 +65,8 @@ export function generateCSVDataFromTable( headers, rows ) {
  * Generates a file name for CSV files based on the provided name, the current date
  * and the provided params, which are all appended with hyphens.
  *
- * @param   {string}  [name='']     Name of the file
- * @param   {Object}  [params={}]   Object of key-values to append to the file name
+ * @param {string} [name='']   Name of the file
+ * @param {Object} [params={}] Object of key-values to append to the file name
  * @return {string}                Formatted file name
  */
 export function generateCSVFileName( name = '', params = {} ) {
@@ -91,8 +91,8 @@ export function generateCSVFileName( name = '', params = {} ) {
 /**
  * Downloads a CSV file with the given file name and contents
  *
- * @param   {string}  fileName     Name of the file to download
- * @param   {string}  content      Contents of the file to download
+ * @param {string} fileName Name of the file to download
+ * @param {string} content  Contents of the file to download
  */
 export function downloadCSVFile( fileName, content ) {
 	// eslint-disable-next-line no-undef

@@ -14,11 +14,11 @@ import { smallBreak, wideBreak } from './breakpoints';
 /**
  * Describes getDateSpaces
  *
- * @param {Array} data - The chart component's `data` prop.
- * @param {Array} uniqueDates - from `getUniqueDates`
- * @param {Array} visibleKeys - visible keys from the input data for the chart
- * @param {number} width - calculated width of the charting space
- * @param {Function} xScale - from `getXLineScale`
+ * @param {Array}    data        - The chart component's `data` prop.
+ * @param {Array}    uniqueDates - from `getUniqueDates`
+ * @param {Array}    visibleKeys - visible keys from the input data for the chart
+ * @param {number}   width       - calculated width of the charting space
+ * @param {Function} xScale      - from `getXLineScale`
  * @return {Array} that includes the date, start (x position) and width to mode the mouseover rectangles
  */
 export const getDateSpaces = (
@@ -82,7 +82,7 @@ export const getLine = ( xScale, yScale ) =>
 /**
  * Describes `getLineData`
  *
- * @param {Array} data - The chart component's `data` prop.
+ * @param {Array} data        - The chart component's `data` prop.
  * @param {Array} orderedKeys - from `getOrderedKeys`.
  * @return {Array} an array objects with a category `key` and an array of `values` with `date` and `value` properties
  */

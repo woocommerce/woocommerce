@@ -2,7 +2,7 @@
  * Get option from state tree.
  *
  * @param {Object} state - Reducer state
- * @param {Array} name - Option name
+ * @param {Array}  name  - Option name
  */
 export const getOption = ( state, name ) => {
 	return state[ name ];
@@ -12,7 +12,7 @@ export const getOption = ( state, name ) => {
  * Determine if an options request resulted in an error.
  *
  * @param {Object} state - Reducer state
- * @param {string} name - Option name
+ * @param {string} name  - Option name
  */
 export const getOptionsRequestingError = ( state, name ) => {
 	return state.requestingErrors[ name ] || false;

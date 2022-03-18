@@ -11,7 +11,7 @@ import TYPES from './action-types';
 /**
  * Initialize the state
  *
- * @param {Object} queue	initial queue
+ * @param {Object} queue initial queue
  */
 export function setCesSurveyQueue( queue ) {
 	return {
@@ -23,19 +23,19 @@ export function setCesSurveyQueue( queue ) {
 /**
  * Add a new CES track to the state.
  *
- * @param {string} action action name for the survey
- * @param {string} label label for the snackback
- * @param {string} pageNow value of window.pagenow
- * @param {string} adminPage value of window.adminpage
- * @param {string} onsubmit_label label for the snackback onsubmit
- * @param {Object} props object for optional props
+ * @param {string} action        action name for the survey
+ * @param {string} label         label for the snackback
+ * @param {string} pageNow       value of window.pagenow
+ * @param {string} adminPage     value of window.adminpage
+ * @param {string} onsubmitLabel label for the snackback onsubmit
+ * @param {Object} props         object for optional props
  */
 export function addCesSurvey(
 	action,
 	label,
 	pageNow = window.pagenow,
 	adminPage = window.adminpage,
-	onsubmit_label = undefined,
+	onsubmitLabel = undefined,
 	props = {}
 ) {
 	return {
@@ -44,7 +44,7 @@ export function addCesSurvey(
 		label,
 		pageNow,
 		adminPage,
-		onsubmit_label,
+		onsubmit_label: onsubmitLabel,
 		props,
 	};
 }

@@ -355,9 +355,9 @@ function getListItems( props ) {
 	 * Filter an array of help items for the setup task.
 	 *
 	 * @filter woocommerce_admin_setup_task_help_items
-	 * @param {Array.<Object>} items Array items object based on task.
-	 * @param {('products'|'appearance'|'shipping'|'tax'|'payments'|'marketing')} task url query parameters.
-	 * @param {Object} props React component props.
+	 * @param {Array.<Object>}                                                    items Array items object based on task.
+	 * @param {('products'|'appearance'|'shipping'|'tax'|'payments'|'marketing')} task  url query parameters.
+	 * @param {Object}                                                            props React component props.
 	 */
 	const filteredItems = applyFilters(
 		SETUP_TASK_HELP_ITEMS_FILTER,

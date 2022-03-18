@@ -134,10 +134,10 @@ export default () => {
 	 * An object defining a report page.
 	 *
 	 * @typedef {Object} report
-	 * @property {string} report Report slug.
-	 * @property {string} title Report title.
-	 * @property {Node} component React Component to render.
-	 * @property {Object} navArgs Arguments supplied to WooCommerce Navigation.
+	 * @property {string} report    Report slug.
+	 * @property {string} title     Report title.
+	 * @property {Node}   component React Component to render.
+	 * @property {Object} navArgs   Arguments supplied to WooCommerce Navigation.
 	 */
 
 	/**

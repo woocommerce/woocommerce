@@ -1,6 +1,6 @@
-@import './stylesheets/variables';
-@import './components/container/style';
-@import './components/header/style';
+@import './stylesheets/variables.scss';
+@import './components/container/style.scss';
+@import './components/header/style.scss';
 
 .woocommerce-navigation {
 	position: relative;

@@ -9,7 +9,7 @@ import { Slot, Fill } from '@wordpress/components';
  *
  * @slotFill WooPaymentGatewaySetup
  * @scope woocommerce-admin
- * @param {Object} props React props.
+ * @param {Object} props    React props.
  * @param {string} props.id Setup id.
  */
 export const WooPaymentGatewaySetup = ( { id, ...props } ) => (

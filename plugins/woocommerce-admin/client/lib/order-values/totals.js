@@ -22,7 +22,7 @@ export function getOrderDiscountTotal( order ) {
  * Get the value for a single fee on a given order
  *
  * @param {Object} order An order as returned from API
- * @param {number} id The ID of the fee_line
+ * @param {number} id    The ID of the fee_line
  * @return {number} The total fee amount as a decimal number
  */
 export function getOrderFeeCost( order, id ) {
@@ -52,7 +52,7 @@ export function getOrderFeeTotal( order ) {
  * Get the individual price for a given item, pre-discounts.
  *
  * @param {Object} order An order as returned from API
- * @param {number} id The ID of the line_item
+ * @param {number} id    The ID of the line_item
  * @return {number} Total amount as a decimal number
  */
 export function getOrderItemCost( order, id ) {

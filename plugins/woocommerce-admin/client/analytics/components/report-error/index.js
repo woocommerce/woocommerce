@@ -9,7 +9,7 @@ import { EmptyContent } from '@woocommerce/components';
  * Component to render when there is an error in a report component due to data
  * not being loaded or being invalid.
  *
- * @param {Object} props React props.
+ * @param {Object} props             React props.
  * @param {string} [props.className] Additional class name to style the component.
  */
 function ReportError( { className } ) {

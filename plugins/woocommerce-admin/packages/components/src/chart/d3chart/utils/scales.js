@@ -11,10 +11,10 @@ import moment from 'moment';
 /**
  * Describes getXScale
  *
- * @param {Array} uniqueDates - from `getUniqueDates`
- * @param {number} width - calculated width of the charting space
- * @param {boolean} compact - whether the chart must be compact (without padding
- between days)
+ * @param {Array}   uniqueDates - from `getUniqueDates`
+ * @param {number}  width       - calculated width of the charting space
+ * @param {boolean} compact     - whether the chart must be compact (without padding
+                                between days)
  * @return {Function} a D3 scale of the dates
  */
 export const getXScale = ( uniqueDates, width, compact = false ) =>
@@ -26,10 +26,10 @@ export const getXScale = ( uniqueDates, width, compact = false ) =>
 /**
  * Describes getXGroupScale
  *
- * @param {Array} orderedKeys - from `getOrderedKeys`
- * @param {Function} xScale - from `getXScale`
- * @param {boolean} compact - whether the chart must be compact (without padding
- between days)
+ * @param {Array}    orderedKeys - from `getOrderedKeys`
+ * @param {Function} xScale      - from `getXScale`
+ * @param {boolean}  compact     - whether the chart must be compact (without padding
+                                 between days)
  * @return {Function} a D3 scale for each category within the xScale range
  */
 export const getXGroupScale = ( orderedKeys, xScale, compact = false ) =>
@@ -43,8 +43,8 @@ export const getXGroupScale = ( orderedKeys, xScale, compact = false ) =>
 /**
  * Describes getXLineScale
  *
- * @param {Array} uniqueDates - from `getUniqueDates`
- * @param {number} width - calculated width of the charting space
+ * @param {Array}  uniqueDates - from `getUniqueDates`
+ * @param {number} width       - calculated width of the charting space
  * @return {Function} a D3 scaletime for each date
  */
 export const getXLineScale = ( uniqueDates, width ) =>
@@ -139,8 +139,8 @@ export const getYScaleLimits = ( data ) => {
  * Describes getYScale
  *
  * @param {number} height - calculated height of the charting space
- * @param {number} yMin - minimum y value
- * @param {number} yMax - maximum y value
+ * @param {number} yMin   - minimum y value
+ * @param {number} yMax   - maximum y value
  * @return {Function} the D3 linear scale from 0 to the value from `getYMax`
  */
 export const getYScale = ( height, yMin, yMax ) =>

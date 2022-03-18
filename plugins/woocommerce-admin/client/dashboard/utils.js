@@ -40,10 +40,10 @@ export function getCurrencyRegion( countryState ) {
 /**
  * Gets the product IDs for items based on the product types and theme selected in the onboarding profiler.
  *
- * @param {Object} productTypes Product Types.
- * @param {Object} profileItems Onboarding profile.
+ * @param {Object}  productTypes          Product Types.
+ * @param {Object}  profileItems          Onboarding profile.
  * @param {boolean} includeInstalledItems Include installed items in returned product IDs.
- * @param {Array} installedPlugins Installed plugins.
+ * @param {Array}   installedPlugins      Installed plugins.
  * @return {Array} Product Ids.
  */
 export function getProductIdsForCart(
@@ -67,9 +67,9 @@ export function getProductIdsForCart(
 /**
  * Gets the labeled/categorized product names and types for items based on the product types and theme selected in the onboarding profiler.
  *
- * @param {Object} productTypes Product Types.
- * @param {Object} profileItems Onboarding profile.
- * @param {Array} installedPlugins Installed plugins.
+ * @param {Object} productTypes     Product Types.
+ * @param {Object} profileItems     Onboarding profile.
+ * @param {Array}  installedPlugins Installed plugins.
  * @return {Array} Objects with labeled/categorized product names and types.
  */
 export function getCategorizedOnboardingProducts(
@@ -114,10 +114,10 @@ export function getCategorizedOnboardingProducts(
 /**
  * Gets a product list for items based on the product types and theme selected in the onboarding profiler.
  *
- * @param {Object} profileItems Onboarding profile.
+ * @param {Object}  profileItems          Onboarding profile.
  * @param {boolean} includeInstalledItems Include installed items in returned product list.
- * @param {Array} installedPlugins Installed plugins.
- * @param {Object} productTypes Product Types.
+ * @param {Array}   installedPlugins      Installed plugins.
+ * @param {Object}  productTypes          Product Types.
  * @return {Array} Products.
  */
 export function getProductList(

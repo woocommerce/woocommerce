@@ -21,7 +21,7 @@ const mostPoints = 31;
  * Calculate the maximum number of ticks allowed in the x-axis based on the width and mode of the chart
  *
  * @param {number} width - calculated page width
- * @param {string} mode - item-comparison or time-comparison
+ * @param {string} mode  - item-comparison or time-comparison
  * @return {number} number of x-axis ticks based on width and chart mode
  */
 const calculateMaxXTicks = ( width, mode ) => {
@@ -102,8 +102,8 @@ const getFactors = ( inputNum ) => {
 /**
  * Calculates the increment factor between ticks so there aren't more than maxTicks.
  *
- * @param {Array} uniqueDates - all the unique dates from the input data for the chart
- * @param {number} maxTicks - maximum number of ticks that can be displayed in the x-axis
+ * @param {Array}  uniqueDates - all the unique dates from the input data for the chart
+ * @param {number} maxTicks    - maximum number of ticks that can be displayed in the x-axis
  * @return {number} x-axis ticks increment factor
  */
 const calculateXTicksIncrementFactor = ( uniqueDates, maxTicks ) => {
@@ -123,7 +123,7 @@ const calculateXTicksIncrementFactor = ( uniqueDates, maxTicks ) => {
 /**
  * Get x-axis ticks given the unique dates and the increment factor.
  *
- * @param {Array} uniqueDates - all the unique dates from the input data for the chart
+ * @param {Array}  uniqueDates     - all the unique dates from the input data for the chart
  * @param {number} incrementFactor - increment factor for the visible ticks.
  * @return {Array} Ticks for the x-axis.
  */
@@ -145,10 +145,10 @@ const getXTicksFromIncrementFactor = ( uniqueDates, incrementFactor ) => {
 /**
  * Returns ticks for the x-axis.
  *
- * @param {Array} uniqueDates - all the unique dates from the input data for the chart
- * @param {number} width - calculated page width
- * @param {string} mode - item-comparison or time-comparison
- * @param {string} interval - string of the interval used in the graph (hour, day, week...)
+ * @param {Array}  uniqueDates - all the unique dates from the input data for the chart
+ * @param {number} width       - calculated page width
+ * @param {string} mode        - item-comparison or time-comparison
+ * @param {string} interval    - string of the interval used in the graph (hour, day, week...)
  * @return {number} number of x-axis ticks based on width and chart mode
  */
 export const getXTicks = ( uniqueDates, width, mode, interval ) => {
@@ -180,8 +180,8 @@ export const getXTicks = ( uniqueDates, width, mode, interval ) => {
 /**
  * Compares 2 strings and returns a list of words that are unique from s2
  *
- * @param {string} s1 - base string to compare against
- * @param {string} s2 - string to compare against the base string
+ * @param {string}        s1        - base string to compare against
+ * @param {string}        s2        - string to compare against the base string
  * @param {string|Object} splitChar - character or RegExp to use to deliminate words
  * @return {Array} of unique words that appear in s2 but not in s1, the base string
  */

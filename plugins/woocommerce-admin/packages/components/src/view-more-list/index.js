@@ -14,7 +14,7 @@ import Tag from '../tag';
  * This component displays a 'X more' button that displays a list of items on a popover when clicked.
  *
  * @param {Object} props
- * @param {Array} props.items
+ * @param {Array}  props.items
  * @return {Object} -
  */
 const ViewMoreList = ( { items } ) => {

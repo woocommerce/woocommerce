@@ -34,7 +34,7 @@ const waitForTimeout = async ( timeout: number ): Promise< void > => {
 /**
  * Publish, verify that item was published. Trash, verify that item was trashed.
  *
- * @param {string} button (Publish)
+ * @param {string} button              (Publish)
  * @param {string} publishNotice
  * @param {string} publishVerification
  */

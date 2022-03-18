@@ -10,7 +10,7 @@ import { createElement } from '@wordpress/element';
  * It mimics the same height a table would have according to the `numberOfRows` prop.
  *
  * @param {Object} props
- * @param {Node} props.children
+ * @param {Node}   props.children
  * @param {number} props.numberOfRows
  * @return {Object} -
  */

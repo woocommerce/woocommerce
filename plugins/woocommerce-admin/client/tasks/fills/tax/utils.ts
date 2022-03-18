@@ -12,10 +12,10 @@ export const AUTOMATION_PLUGINS = [ 'jetpack', 'woocommerce-services' ];
 /**
  * Check if a store has a complete address given general settings.
  *
- * @param {Object} generalSettings General settings.
- * @param {Object} generalSettings.woocommerce_store_address Store address.
+ * @param {Object} generalSettings                             General settings.
+ * @param {Object} generalSettings.woocommerce_store_address   Store address.
  * @param {Object} generalSettings.woocommerce_default_country Store default country.
- * @param {Object} generalSettings.woocommerce_store_postcode Store postal code.
+ * @param {Object} generalSettings.woocommerce_store_postcode  Store postal code.
  */
 export const hasCompleteAddress = ( generalSettings: {
 	woocommerce_store_address?: string;
