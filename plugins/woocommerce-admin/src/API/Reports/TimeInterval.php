@@ -319,31 +319,22 @@ class TimeInterval {
 	/**
 	 * Returns DateTime object representing the next week start, or previous week end if reversed.
 	 *
+	 * The next week start is the first day of the next week at 00:00:00.
+	 * The previous week end is the last day of the previous week at 23:59:59.
+	 * The start day is determined by the "start_of_week" wp_option.
+	 *
 	 * @param DateTime $datetime Date and time.
 	 * @param bool     $reversed Going backwards in time instead of forward.
 	 * @return DateTime
 	 */
 	public static function next_week_start( $datetime, $reversed = false ) {
-		$first_day_of_week = absint( get_option( 'start_of_week' ) );
-		$initial_week_no   = self::week_number( $datetime, $first_day_of_week );
-		$failsafe_count    = 0;
+		$seven_days = new \DateInterval( 'P7D' );
+		$start_end  = get_weekstartend( $datetime->format( 'Y-m-d' ) );
 
-		do {
-			if ( $failsafe_count++ >= 7 ) {
-				break;
-			}
-			$datetime        = self::next_day_start( $datetime, $reversed );
-			$current_week_no = self::week_number( $datetime, $first_day_of_week );
-		} while ( $current_week_no === $initial_week_no );
-
-		// The week boundary is actually next midnight when going in reverse, so set it to day -1 at 23:59:59.
 		if ( $reversed ) {
-			$timestamp            = (int) $datetime->format( 'U' );
-			$end_of_day_timestamp = floor( $timestamp / DAY_IN_SECONDS ) * DAY_IN_SECONDS + DAY_IN_SECONDS - 1;
-			$datetime->setTimestamp( $end_of_day_timestamp );
+			return \DateTime::createFromFormat( 'U', $start_end['end'] )->sub( $seven_days );
 		}
-
-		return $datetime;
+		return \DateTime::createFromFormat( 'U', $start_end['start'] )->add( $seven_days );
 	}
 
 	/**

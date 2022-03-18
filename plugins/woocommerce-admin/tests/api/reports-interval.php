@@ -705,7 +705,7 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test function that returns beginning of next week, for weeks starting on Monday.
+	 * Test function that returns beginning of next week  or previous week end if reversed, for weeks starting on Monday.
 	 */
 	public function test_next_week_start_ISO_week() {
 		update_option( 'start_of_week', 1 );
@@ -753,7 +753,7 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test function that returns beginning of next week, for weeks starting on Sunday.
+	 * Test function that returns beginning of next week or previous week end if reversed, for weeks starting on Sunday.
 	 */
 	public function test_next_week_start_Sunday_based_week() {
 		update_option( 'start_of_week', 7 );
@@ -763,12 +763,12 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 				1 => '2010-12-18T23:59:59',
 			),
 			'2010-12-26T10:00:00' => array(
-				0 => '2011-01-01T00:00:00',
+				0 => '2011-01-02T00:00:00',
 				1 => '2010-12-25T23:59:59',
 			),
 			'2011-01-01T00:00:00' => array(
 				0 => '2011-01-02T00:00:00',
-				1 => '2010-12-31T23:59:59',
+				1 => '2010-12-25T23:59:59',
 			),
 			'2011-01-02T00:00:00' => array(
 				0 => '2011-01-09T00:00:00',
