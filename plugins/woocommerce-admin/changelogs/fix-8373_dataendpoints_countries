@@ -1,0 +1,4 @@
+Significance: minor
+Type: Dev
+
+Remove preloaded countries from data endpoints and use data store instead. #8380

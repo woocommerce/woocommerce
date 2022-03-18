@@ -1,0 +1,4 @@
+Significance: patch
+Type: Fix
+
+Fix industry tab not clickable after going back. #8469

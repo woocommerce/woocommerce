@@ -1,0 +1,394 @@
+// Set up some local color variables to make the CSS more clear
+$border: $gray-200;
+
+// A local mixin to generate the grid template and border logic
+@mixin make-cols( $i ) {
+	grid-template-columns: repeat($i, 1fr);
+
+	.woocommerce-summary__item-container:nth-of-type(#{$i}n)
+	.woocommerce-summary__item {
+		border-right-color: $border;
+	}
+
+	.woocommerce-summary__item-container:nth-of-type(#{$i}n
++ 1):nth-last-of-type(-n + #{$i}) {
+		.woocommerce-summary__item,
+		& ~ .woocommerce-summary__item-container .woocommerce-summary__item {
+			border-bottom-color: $border;
+		}
+	}
+}
+
+@mixin wrap-contents() {
+	.woocommerce-summary__item-value,
+	&.is-placeholder {
+		.woocommerce-summary__item-prev-label {
+			margin-right: calc(100% - 80px);
+		}
+	}
+}
+
+.woocommerce-summary {
+	margin: $gap 0;
+	display: grid;
+	border-width: 1px 0 0 1px;
+	border-style: solid;
+	border-color: $border;
+	background-color: $gray-100;
+	box-shadow: inset -1px -1px 0 $border;
+	width: 100%;
+
+	@include breakpoint( '<782px' ) {
+		& {
+			border-width: 0;
+		}
+
+		&.is-placeholder {
+			border-top: 0;
+		}
+
+		.woocommerce-summary__item-container.is-placeholder {
+			border-top: 1px solid $border;
+		}
+	}
+
+	// Specificity
+	.components-popover:not(.components-tooltip) {
+		// !important to override element-level styles
+		position: static !important;
+		top: auto !important;
+		left: auto !important;
+		right: auto !important;
+		bottom: auto !important;
+		margin-top: 0 !important;
+		margin-left: 0;
+
+		.components-popover__header {
+			display: none;
+		}
+
+		.components-popover__content {
+			position: static;
+			left: auto;
+			right: auto;
+			margin: 0;
+			width: 100%;
+			max-width: 100% !important;
+			max-height: 100% !important;
+			box-shadow: none;
+			border: none;
+			transform: none;
+
+			.woocommerce-summary__item.is-selected {
+				display: none;
+			}
+		}
+	}
+
+	.components-popover__content & {
+		max-height: 100%;
+		margin-top: 0;
+		margin-bottom: 0;
+		overflow-y: auto;
+		border: none;
+	}
+
+	.woocommerce-summary__item-value,
+	.woocommerce-summary__item-delta {
+		flex: 1 0 auto;
+	}
+
+	.woocommerce-summary__item-delta {
+		flex: 0 1 auto;
+		display: flex;
+	}
+
+	&,
+	&.has-one-item,
+	&.has-1-items {
+		grid-template-columns: 1fr;
+	}
+
+	&.has-2-items {
+		@include make-cols( 2 );
+	}
+
+	&.has-3-items {
+		@include make-cols( 3 );
+	}
+
+	&.has-4-items,
+	&.has-7-items,
+	&.has-8-items {
+		@include make-cols( 4 );
+	}
+
+	&.has-5-items {
+		@include make-cols( 5 );
+		@include wrap-contents;
+	}
+
+	@include breakpoint( '>1440px' ) {
+		&.has-6-items {
+			@include make-cols( 6 );
+			@include wrap-contents;
+		}
+
+		&.has-9-items,
+		&.has-10-items {
+			@include make-cols( 5 );
+			@include wrap-contents;
+		}
+	}
+
+	@include breakpoint( '<1440px' ) {
+		&.has-4-items,
+		&.has-7-items,
+		&.has-8-items {
+			@include wrap-contents;
+		}
+
+		&.has-6-items,
+		&.has-9-items {
+			@include make-cols( 3 );
+		}
+
+		&.has-10-items {
+			@include make-cols( 4 );
+			@include wrap-contents;
+		}
+
+		&.has-9-items,
+		&.has-10-items {
+			.woocommerce-summary__item-container:nth-of-type(5n)
+			.woocommerce-summary__item {
+				border-right-color: $border;
+			}
+		}
+	}
+
+	@include breakpoint( '<960px' ) {
+		.woocommerce-summary__item {
+			// One-col layout for all items means right border is always "outer"
+			border-right-color: $border;
+		}
+	}
+
+	@include breakpoint( '<782px' ) {
+		.woocommerce-summary__item-container {
+			margin-left: -16px;
+			margin-right: -16px;
+			width: auto;
+
+			.woocommerce-summary__item {
+				// Remove the border when the button is edge-to-edge
+				border-right: none;
+			}
+		}
+		.components-popover.components-popover {
+			margin-left: -16px;
+			margin-right: -16px;
+
+			.woocommerce-summary__item-container {
+				margin-left: 0;
+				margin-right: 0;
+			}
+		}
+	}
+}
+
+.woocommerce-summary__item-container {
+	margin-bottom: 0;
+
+	&:last-of-type .woocommerce-summary__item {
+		// Make sure the last item always uses the outer-border color.
+		border-bottom-color: $border !important;
+	}
+
+	&.is-dropdown-button {
+		padding: 0;
+		list-style: none;
+		border-right: 1px solid $border;
+
+		.components-button {
+			border-bottom: 1px solid $border;
+			text-align: left;
+			display: block;
+		}
+
+		@include breakpoint( '<782px' ) {
+			border-right: none;
+		}
+	}
+
+	&.is-placeholder {
+		.woocommerce-summary__item {
+			height: 117px;
+		}
+
+		.woocommerce-summary__item-label {
+			@include placeholder();
+			display: inline-block;
+			height: 20px;
+			margin-top: 2.2px;
+			max-width: 110px;
+			width: 70%;
+		}
+
+		.woocommerce-summary__item-data {
+			justify-content: space-between;
+		}
+
+		.woocommerce-summary__item-value {
+			@include placeholder();
+			display: inline-block;
+			height: 28px;
+			width: 60px;
+			max-width: 60px;
+		}
+
+		.woocommerce-summary__item-delta {
+			@include placeholder();
+			width: 60px;
+			border-radius: 2px;
+		}
+	}
+}
+
+.woocommerce-summary__item {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	padding: $gap-large;
+	background-color: #f8f9fa;
+	border-bottom: 1px solid $border;
+	border-right: 1px solid $border;
+	line-height: 1.4em;
+	text-decoration: none;
+	color: $gray-900;
+
+	&.components-button {
+		height: auto;
+		padding: $spacing;
+		align-items: normal;
+	}
+
+	&:hover {
+		background-color: $gray-100;
+		color: var(--wp-admin-theme-color);
+
+		.woocommerce-summary__item-label {
+			color: var(--wp-admin-theme-color);
+		}
+	}
+
+	&:active {
+		background-color: $gray-100;
+	}
+
+	&:focus {
+		// !important to override button styles
+		box-shadow: inset -1px 1px 0 $gray-700, inset 1px -1px 0 $gray-700 !important;
+	}
+
+	&.is-selected {
+		&:focus {
+			// !important to override button styles
+			box-shadow: inset -1px -1px 0 $gray-700, inset 1px 0 0 $gray-700,
+				inset 0 4px 0 var(--wp-admin-theme-color) !important;
+		}
+	}
+
+	.is-dropdown-button & {
+		position: relative;
+		width: 100%;
+		padding-right: 2 * $gap + 24px;
+
+		@include breakpoint( '<782px' ) {
+			border-right: none;
+		}
+	}
+
+	.woocommerce-summary__item-data {
+		display: flex;
+		justify-content: space-between;
+	}
+
+	.woocommerce-summary__item-label {
+		display: flex;
+		margin-bottom: $gap;
+
+		color: $gray-700;
+	}
+
+	.woocommerce-summary__info-tooltip {
+		color: $gray-600;
+		line-height: 1em;
+		margin-left: $gap-smallest;
+
+		svg {
+			fill: currentColor;
+		}
+	}
+
+	.woocommerce-summary__item-value {
+		margin-bottom: $gap-smallest;
+		font-weight: 500;
+		color: $gray-900;
+	}
+
+	.woocommerce-summary__item-delta {
+		padding: 5px;
+		border-radius: 3px;
+		height: min-content;
+		background-color: $gray-100;
+		color: $gray-900;
+	}
+
+	&.is-selected {
+		background: $studio-white;
+		box-shadow: inset 0 4px 0 var(--wp-admin-theme-color);
+
+		.woocommerce-summary__item-value {
+			font-weight: 600;
+		}
+
+		.woocommerce-summary__item-delta {
+			font-weight: 400;
+		}
+	}
+
+	&.is-good-trend .woocommerce-summary__item-delta {
+		background-color: $alert-green;
+		color: $white;
+	}
+
+	&.is-bad-trend .woocommerce-summary__item-delta {
+		background-color: $alert-red;
+		color: $white;
+	}
+
+	.woocommerce-summary__toggle {
+		position: absolute;
+		top: 44px;
+		right: $gap;
+		@include animate-transform;
+	}
+
+	.is-dropdown-expanded & {
+		.woocommerce-summary__toggle {
+			transform: rotate(-180deg);
+		}
+	}
+
+	.components-popover__content & {
+		.woocommerce-summary__item-label {
+			margin-bottom: 0;
+		}
+
+		.woocommerce-summary__item-value,
+		.woocommerce-summary__item-delta {
+			margin-bottom: 0;
+		}
+	}
+}

@@ -1,0 +1,4 @@
+Significance: minor
+Type: Enhancement
+
+Added Typescript type declarations to build for @woocommerce/components #8282

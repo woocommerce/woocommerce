@@ -1,0 +1,47 @@
+.woocommerce-tax-partner-card {
+	border: 1px solid $gray-300;
+	border-radius: 3px;
+	margin: 0 $gap-smaller $gap $gap-smaller;
+	padding: 20px;
+	display: flex;
+	flex-direction: column;
+
+	a {
+		text-decoration: none;
+	}
+}
+
+.woocommerce-tax-partner-card__logo {
+	margin-bottom: $gap-smaller;
+	img {
+		max-height: 35px;
+	}
+}
+
+.woocommerce-tax-partner-card__description {
+	color: $gray-700;
+}
+
+.woocommerce-tax-partner-card__benefits {
+	color: $gray-900;
+	list-style: none;
+	li {
+		margin-bottom: $gap-smaller;
+		display: flex;
+
+		svg {
+			margin-right: 10px;
+		}
+	}
+}
+
+.woocommerce-tax-partner-card__action {
+	margin-top: auto;
+}
+
+.woocommerce-tax-partner-card__terms {
+	color: $gray-600;
+	font-size: 9px;
+	margin-bottom: $gap-smaller;
+}
+

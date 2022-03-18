@@ -1,0 +1,227 @@
+.woocommerce-legend {
+	&.has-total {
+		padding-bottom: 50px;
+		position: relative;
+	}
+
+	&.woocommerce-legend__direction-column {
+		border-right: 1px solid $gray-400;
+		min-width: 320px;
+
+		.woocommerce-chart__footer & {
+			border-right: none;
+		}
+	}
+
+	&.woocommerce-legend__direction-row {
+		flex-grow: 1;
+		flex-direction: row;
+	}
+}
+
+.woocommerce-legend__list {
+	color: $wp-admin-sidebar;
+	display: flex;
+	height: 100%;
+	margin: 0;
+	flex-flow: row wrap;
+	flex-wrap: wrap;
+
+	.woocommerce-legend__direction-column & {
+		flex-direction: column;
+		height: 300px;
+		overflow: auto;
+
+		.woocommerce-chart__footer & {
+			border-top: 1px solid $gray-400;
+			height: 100%;
+			max-height: none;
+			min-height: none;
+		}
+	}
+
+	.has-total.woocommerce-legend__direction-column & {
+		height: 250px;
+
+		.woocommerce-chart__footer & {
+			height: auto;
+			max-height: 220px;
+			min-height: none;
+		}
+	}
+
+	.woocommerce-legend__direction-row & {
+		flex-direction: row;
+	}
+}
+
+.woocommerce-legend__item {
+	& > button {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		background-color: $studio-white;
+		color: $gray-700;
+		cursor: pointer;
+		display: inline-flex;
+		flex-direction: row;
+		flex-wrap: nowrap;
+		justify-content: space-between;
+		width: 100%;
+		border: none;
+		padding: 0;
+
+		.woocommerce-legend__item-container {
+			display: flex;
+			flex-direction: row;
+			flex-wrap: nowrap;
+			position: relative;
+			padding: 3px 0 3px 24px;
+			font-size: 13px;
+			user-select: none;
+			width: 100%;
+
+			&:hover {
+				input {
+					~ .woocommerce-legend__item-checkmark {
+						background-color: $gray-200;
+					}
+				}
+			}
+
+			.woocommerce-legend__item-checkmark {
+				border: 1px solid $gray-400;
+				position: absolute;
+				top: 4px;
+				left: 0;
+				height: 16px;
+				width: 16px;
+				background-color: $studio-white;
+
+				&::after {
+					content: '';
+					position: absolute;
+					display: none;
+				}
+
+				&.woocommerce-legend__item-checkmark-checked {
+					background-color: currentColor;
+					border-color: currentColor;
+
+					&::after {
+						display: block;
+						left: 5px;
+						top: 2px;
+						width: 3px;
+						height: 6px;
+						border: solid $studio-white;
+						border-width: 0 2px 2px 0;
+						transform: rotate(45deg);
+
+						/*!rtl:ignore*/
+						.rtl & {
+							transform: rotate(45deg) scaleX(-1);
+						}
+					}
+				}
+			}
+
+			.woocommerce-legend__item-total {
+				margin-left: auto;
+				font-weight: bold;
+			}
+		}
+
+		&:focus {
+			outline: none;
+
+			.woocommerce-legend__item-container {
+				.woocommerce-legend__item-checkmark {
+					outline: 2px solid $gray-400;
+				}
+			}
+		}
+
+		&:hover {
+			background-color: $gray-100;
+		}
+	}
+
+	.woocommerce-legend__direction-column & {
+		margin: 0;
+		padding: 0;
+
+		& > button {
+			min-height: 36px;
+			padding: 0 17px;
+			text-align: left;
+		}
+
+		&:first-child {
+			margin-top: $gap-small;
+		}
+
+		&:last-child::after {
+			content: '';
+			display: block;
+			height: $gap-small;
+			width: 100%;
+		}
+	}
+
+	.woocommerce-legend__direction-row & {
+		padding: 0;
+		margin: 0;
+		flex: 1 0 20%;
+		max-width: 338px;
+
+		& > button {
+			padding: 0 17px;
+
+			.woocommerce-legend__item-container {
+				height: 50px;
+				align-items: center;
+
+				.woocommerce-legend__item-checkmark {
+					top: 17px;
+				}
+
+				.woocommerce-legend__item-title {
+					margin-right: 17px;
+				}
+			}
+		}
+	}
+}
+
+.woocommerce-legend__total {
+	align-items: center;
+	background: $studio-white;
+	border-top: 1px solid $gray-400;
+	bottom: 0;
+	color: $gray-700;
+	display: flex;
+	height: 50px;
+	justify-content: center;
+	left: 0;
+	position: absolute;
+	right: 0;
+	text-transform: uppercase;
+
+	&::before {
+		background: linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.2));
+		bottom: 100%;
+		content: '';
+		height: 20px;
+		left: 0;
+		opacity: 0;
+		pointer-events: none;
+		position: absolute;
+		right: 0;
+		transition: opacity 0.3s;
+	}
+
+	.is-scrollable &::before {
+		opacity: 1;
+	}
+}

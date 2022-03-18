@@ -1,0 +1,15 @@
+{
+	"extends": [ "config:base", ":preserveSemverRanges" ],
+	"lockFileMaintenance": { "enabled": true },
+	"ignoreDeps": [ "phpunit/phpunit" ],
+	"schedule": [ "before 3am on wednesday" ],
+	"composer": {
+		"enabled": false
+	},
+	"packageRules": [
+		{
+			"depTypeList": [ "devDependencies" ],
+			"automerge": true
+		}
+	]
+}

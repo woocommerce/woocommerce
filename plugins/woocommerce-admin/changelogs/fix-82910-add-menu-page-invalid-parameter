@@ -1,0 +1,4 @@
+Significance: patch
+Type: Fix
+
+Fix invalid parameter passed to add_menu_page() for wordpress >= 6.0. #8399
