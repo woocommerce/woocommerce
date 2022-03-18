@@ -14,7 +14,7 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 	/**
 	 * Perform any common setup work.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 
 		// For these tests, we are not concerned with Approved Download Directory functionality.

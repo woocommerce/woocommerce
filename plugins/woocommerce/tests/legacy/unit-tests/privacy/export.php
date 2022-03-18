@@ -27,7 +27,7 @@ class WC_Test_Privacy_Export extends WC_Unit_Test_Case {
 	/**
 	 * Load up the importer classes since they aren't loaded by default.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 
 		$customer1 = WC_Helper_Customer::create_customer( 'customer1', 'password', 'test1@test.com' );

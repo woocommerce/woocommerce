@@ -15,7 +15,7 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 	 *
 	 * @since 2.2
 	 */
-	public function tearDown() {
+	public function tearDown(): void {
 
 		WC()->session->set( 'wc_notices', null );
 	}

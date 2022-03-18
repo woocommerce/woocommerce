@@ -18,7 +18,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	 *
 	 * @return void
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 		$this->wc = WC();
 	}
