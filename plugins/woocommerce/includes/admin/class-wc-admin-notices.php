@@ -7,6 +7,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Utilities\Users;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -28,18 +29,19 @@ class WC_Admin_Notices {
 	 * @var array
 	 */
 	private static $core_notices = array(
-		'update'                           => 'update_notice',
-		'template_files'                   => 'template_file_check_notice',
-		'legacy_shipping'                  => 'legacy_shipping_notice',
-		'no_shipping_methods'              => 'no_shipping_methods_notice',
-		'regenerating_thumbnails'          => 'regenerating_thumbnails_notice',
-		'regenerating_lookup_table'        => 'regenerating_lookup_table_notice',
-		'no_secure_connection'             => 'secure_connection_notice',
-		WC_PHP_MIN_REQUIREMENTS_NOTICE     => 'wp_php_min_requirements_notice',
-		'maxmind_license_key'              => 'maxmind_missing_license_key_notice',
-		'redirect_download_method'         => 'redirect_download_method_notice',
-		'uploads_directory_is_unprotected' => 'uploads_directory_is_unprotected_notice',
-		'base_tables_missing'              => 'base_tables_missing_notice',
+		'update'                             => 'update_notice',
+		'template_files'                     => 'template_file_check_notice',
+		'legacy_shipping'                    => 'legacy_shipping_notice',
+		'no_shipping_methods'                => 'no_shipping_methods_notice',
+		'regenerating_thumbnails'            => 'regenerating_thumbnails_notice',
+		'regenerating_lookup_table'          => 'regenerating_lookup_table_notice',
+		'no_secure_connection'               => 'secure_connection_notice',
+		WC_PHP_MIN_REQUIREMENTS_NOTICE       => 'wp_php_min_requirements_notice',
+		'maxmind_license_key'                => 'maxmind_missing_license_key_notice',
+		'redirect_download_method'           => 'redirect_download_method_notice',
+		'uploads_directory_is_unprotected'   => 'uploads_directory_is_unprotected_notice',
+		'base_tables_missing'                => 'base_tables_missing_notice',
+		'download_directories_sync_complete' => 'download_directories_sync_complete',
 	);
 
 	/**
@@ -523,6 +525,24 @@ class WC_Admin_Notices {
 			self::add_notice( 'redirect_download_method' );
 		} else {
 			self::remove_notice( 'redirect_download_method' );
+		}
+	}
+
+	/**
+	 * Notice about the completion of the product downloads sync, with further advice for the site operator.
+	 */
+	public static function download_directories_sync_complete() {
+		$notice_dismissed = apply_filters(
+				'woocommerce_hide_download_directories_sync_complete',
+				get_user_meta( get_current_user_id(), 'download_directories_sync_complete', true )
+			);
+
+		if ( $notice_dismissed ) {
+			self::remove_notice( 'download_directories_sync_complete' );
+		}
+
+		if ( Users::is_site_administrator() ) {
+			include __DIR__ . '/views/html-notice-download-dir-sync-complete.php';
 		}
 	}
 

@@ -286,3 +286,17 @@
 		text-decoration: none !important;
 	}
 }
+
+@mixin table-marks() {
+	mark {
+		background: transparent none;
+	}
+
+	mark.yes {
+		color: $green;
+	}
+
+	mark.no {
+		color: #999;
+	}
+}
