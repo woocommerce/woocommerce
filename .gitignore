@@ -40,6 +40,7 @@ npm-debug.log
 build/
 build-module/
 build-style/
+build-types/
 dist/
 
 # Project files
