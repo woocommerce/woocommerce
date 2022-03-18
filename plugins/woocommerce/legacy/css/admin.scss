@@ -2426,6 +2426,14 @@ ul.wc_coupon_list_block {
 	}
 }
 
+#side-sortables #woocommerce-order-downloads {
+
+	.buttons,
+	.select2-container {
+		max-width: 100%;
+	}
+}
+
 #poststuff #woocommerce-order-actions .inside {
 	margin: 0;
 	padding: 0;
