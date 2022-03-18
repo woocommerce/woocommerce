@@ -1,0 +1,15 @@
+name: 'Label Pull Request Project'
+on:
+  pull_request_target:
+    types:
+      - opened
+      - synchronize
+
+jobs:
+  label_project:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/labeler@v3
+      with:
+        repo-token: "${{ secrets.GITHUB_TOKEN }}"
+        configuration-path: .github/project-pr-labeler.yml
