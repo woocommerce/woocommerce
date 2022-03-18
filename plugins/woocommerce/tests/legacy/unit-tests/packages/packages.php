@@ -15,7 +15,6 @@ class WC_Tests_Packages extends WC_Unit_Test_Case {
 	 */
 	public function test_packages_exist() {
 		$this->assertTrue( \Automattic\WooCommerce\Packages::package_exists( 'woocommerce-blocks' ) );
-		$this->assertTrue( \Automattic\WooCommerce\Packages::package_exists( 'woocommerce-admin' ) );
 	}
 
 	/**
