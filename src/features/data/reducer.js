@@ -8,8 +8,8 @@ const DEFAULT_STATE = {
 	modifiedFeatures: [],
 };
 
-const reducer = (state = DEFAULT_STATE, action) => {
-	switch (action.type) {
+const reducer = ( state = DEFAULT_STATE, action ) => {
+	switch ( action.type ) {
 		case TYPES.SET_MODIFIED_FEATURES:
 			return {
 				...state,

@@ -11,25 +11,25 @@ import { STORE_KEY } from './data/constants';
 import './data';
 
 function Features() {
-	const { features = {}, modifiedFeatures = [] } = useSelect((select) => {
-		const { getFeatures, getModifiedFeatures } = select(STORE_KEY);
+	const { features = {}, modifiedFeatures = [] } = useSelect( ( select ) => {
+		const { getFeatures, getModifiedFeatures } = select( STORE_KEY );
 		return {
 			features: getFeatures(),
 			modifiedFeatures: getModifiedFeatures(),
 		};
-	});
+	} );
 
-	const { toggleFeature, resetModifiedFeatures } = useDispatch(STORE_KEY);
+	const { toggleFeature, resetModifiedFeatures } = useDispatch( STORE_KEY );
 
 	return (
 		<div id="wc-admin-test-helper-features">
 			<h2>
 				Features
 				<Button
-					disabled={modifiedFeatures.length === 0}
-					onClick={() => resetModifiedFeatures()}
+					disabled={ modifiedFeatures.length === 0 }
+					onClick={ () => resetModifiedFeatures() }
 					isSecondary
-					style={{ marginLeft: '24px' }}
+					style={ { marginLeft: '24px' } }
 				>
 					Reset to defaults
 				</Button>
@@ -43,16 +43,18 @@ function Features() {
 					</tr>
 				</thead>
 				<tbody>
-					{Object.keys(features).map((feature_name) => {
+					{ Object.keys( features ).map( ( feature_name ) => {
 						return (
-							<tr key={feature_name}>
-								<td className="feature-name">{feature_name}</td>
-								<td>{features[feature_name].toString()}</td>
+							<tr key={ feature_name }>
+								<td className="feature-name">
+									{ feature_name }
+								</td>
+								<td>{ features[ feature_name ].toString() }</td>
 								<td>
 									<Button
-										onClick={() => {
-											toggleFeature(feature_name);
-										}}
+										onClick={ () => {
+											toggleFeature( feature_name );
+										} }
 										isPrimary
 									>
 										Toggle
@@ -60,7 +62,7 @@ function Features() {
 								</td>
 							</tr>
 						);
-					})}
+					} ) }
 				</tbody>
 			</table>
 		</div>

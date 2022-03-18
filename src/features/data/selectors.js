@@ -1,7 +1,7 @@
-export function getFeatures(state) {
+export function getFeatures( state ) {
 	return state.features;
 }
 
-export function getModifiedFeatures(state) {
+export function getModifiedFeatures( state ) {
 	return state.modifiedFeatures;
 }
