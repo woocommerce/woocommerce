@@ -22,6 +22,8 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 	 * Initialize the log table list.
 	 */
 	public function __construct() {
+		add_action( 'admin_footer', array( $this, 'inline_edit' ) );
+
 		parent::__construct(
 			array(
 				'singular' => 'log',
@@ -104,6 +106,7 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 			'level'     => __( 'Level', 'woocommerce' ),
 			'message'   => __( 'Message', 'woocommerce' ),
 			'source'    => __( 'Source', 'woocommerce' ),
+			'details'    => __( 'Details', 'woocommerce' ),
 		);
 	}
 
@@ -178,6 +181,85 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 	 */
 	public function column_source( $log ) {
 		return esc_html( $log['source'] );
+	}
+
+	public function column_details( $log ) {
+		?>
+		<button>View Details</button>
+		<?php
+	}
+
+	/**
+	 * Context column.
+	 *
+	 * @param  array $log
+	 * @return string
+	 */
+	public function render_log( $log ) {
+		// Note that this unserializing "safe" data from the database, not user input.
+		$context = unserialize( $log['context'] );
+		$context = $this->arrayify( $context );
+
+		// Exclude unneeded values.
+		$exclude = array( '*default_data', '*data_store', 'xdebug_message' );
+		$exclude = apply_filters( 'woocommerce_log_exlude_error_fields', $exclude );
+
+		$context = $this->array_to_string( $context, $exclude );
+
+		echo '<p style="font-weight: bold">Error Details</p><textarea class="widefat" rows="20" style="width:100%;white-space:pre;white-space:pre-wrap;">' . print_r( $context, 1 ) . '</textarea>';
+	}
+
+	public function arrayify( $input ) {
+		$out   = array();
+		$input = is_object( $input ) ? (array) $input : $input;
+		if ( is_array( $input ) ) {
+
+			$out = array_map( function( $value ) {
+
+				if ( is_array( $value ) || is_object( $value ) ) {
+					return $this->arrayify( $value );
+				} else {
+					return $value;
+				}
+
+				return '';
+			}, $input );
+		}
+
+		return $out;
+	}
+
+	public function array_to_string( $input, $exclude = array(), $depth = 0 ) {
+		$out   = '';
+		$input = is_object( $input )  ? (array) $input : $input;
+		if ( is_array( $input ) ) {
+
+			foreach ( $input as $key => $val ) {
+
+				$key = strip_tags( (string) $key );
+
+				if ( in_array( (string) $key, $exclude ) ) {
+					continue;
+				}
+
+				$tabs = '';
+				for ( $i = 0; $i < $depth; $i++ ) {
+					$tabs .= '&#09;';
+				}
+
+				$out .= $tabs . '[' . $key . '] => ';
+
+				if ( is_array( $val ) || is_object( $val ) ) {
+					$new_depth = $depth + 1;
+					$out .= '[&#010;' . $this->array_to_string( $val, $exclude, $new_depth ) . $tabs . ']';
+				} else {
+					$out .= "'" . $val . "'";
+				}
+				$out .= '&#013;&#010;';
+			}
+		}
+		$out .= '';
+		return $out;
 	}
 
 	/**
@@ -256,6 +338,84 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 	}
 
 	/**
+	 * Generates and displays row action links.
+	 *
+	 * @param WP_Post $item        Post being acted upon.
+	 * @param string  $column_name Current column name.
+	 * @param string  $primary     Primary column name.
+	 * @return string Row actions output for posts, or an empty string
+	 *                if the current column is not the primary column.
+	 */
+	protected function handle_row_actions( $item, $column_name, $primary ) {
+		if ( $primary !== $column_name ) {
+			return '';
+		}
+		$actions = array();
+		$actions['inline hide-if-no-js'] = sprintf(
+			'<button type="button" class="button-link editinline" aria-label="%1$s" aria-expanded="false" data-log-id="%2$s">%3$s</button>',
+			__( 'Expand to view details', 'woocommerce' ),
+			$item['log_id'],
+			__( 'View Details', 'woocommerce' )
+		);
+
+		return $this->row_actions( $actions );
+	}
+
+	/**
+	 * Outputs the hidden row displayed when inline editing
+	 */
+	public function inline_edit() {
+		?>
+		<table>
+			<tbody id="inlineedit">
+				<tr id="inline-edit" class="quick-edit-row">
+					<td>// The TABLE and TR will display none by default.
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		<script>
+			(function($) {
+				$( '#the-list' ).on( 'click', '.editinline', function() {
+					$( this ).attr( 'aria-expanded', 'true' );
+					console.log( 'clicked' );
+
+					var logId = $( this ).attr( 'data-id' );
+
+				});
+			})(jQuery);
+		</script>
+		<?php
+	}
+
+	/**
+	 * Generates the table rows.
+	 *
+	 * @since 3.1.0
+	 */
+	public function display_rows() {
+		foreach ( $this->items as $item ) {
+			$this->single_row( $item );
+			$this->single_row_log( $item );
+		}
+	}
+
+	/**
+	 * Generates content for a single row of the table.
+	 *
+	 * @since 3.1.0
+	 *
+	 * @param object|array $item The current item
+	 */
+	public function single_row_log( $item ) {
+		// Maintains alternating row background colors.
+		echo '<tr style="display: none"><td></td></tr>';
+		echo '<tr><td colspan="' . intval( $this->get_column_count() ) . '">';
+		$this->render_log( $item );
+		echo '</td></tr>';
+	}
+
+	/**
 	 * Prepare table list items.
 	 *
 	 * @global wpdb $wpdb
@@ -273,7 +433,7 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 		$offset = $this->get_items_query_offset();
 
 		$query_items = "
-			SELECT log_id, timestamp, level, message, source
+			SELECT log_id, timestamp, level, message, source, context
 			FROM {$wpdb->prefix}woocommerce_log
 			{$where} {$order} {$limit} {$offset}
 		";
