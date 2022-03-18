@@ -1,6 +1,9 @@
 const webpackOverride = require( '../webpack.config' );
 
 module.exports = {
+	core: {
+		builder: 'webpack5',
+	},
 	stories: [
 		// WooCommerce Admin / @woocommerce/components components
 		'../../packages/components/src/**/stories/*.@(js|tsx)',

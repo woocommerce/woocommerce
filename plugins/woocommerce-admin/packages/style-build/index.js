@@ -1,10 +1,10 @@
 /**
  * External dependencies
  */
-const MiniCssExtractPlugin = require( '@automattic/mini-css-extract-plugin-with-rtl' );
+const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
 const path = require( 'path' );
 const WebpackRTLPlugin = require( 'webpack-rtl-plugin' );
-const FixStyleOnlyEntriesPlugin = require( 'webpack-fix-style-only-entries' );
+const RemoveEmptyScriptsPlugin = require( 'webpack-remove-empty-scripts' );
 const postcssPlugins = require( '@wordpress/postcss-plugins-preset' );
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
@@ -46,7 +46,7 @@ module.exports = {
 			},
 		],
 		plugins: [
-			new FixStyleOnlyEntriesPlugin(),
+			new RemoveEmptyScriptsPlugin(),
 			new MiniCssExtractPlugin( {
 				filename: '[name]/style.css',
 				chunkFilename: 'chunks/[id].style.css',

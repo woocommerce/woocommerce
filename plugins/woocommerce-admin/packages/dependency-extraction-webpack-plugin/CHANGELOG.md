@@ -2,6 +2,10 @@
 
 -   Update all js packages with minor/patch version changes. #8392
 
+## Breaking changes
+    -   Updated to webpack 5 compatible #8476
+    -   Will need to change webpack config output.libraryTarget from 'this' to 'window' #8476
+
 # 1.6.0
 
 -   Add new `bundledPackages` option to bundle in specific packages.

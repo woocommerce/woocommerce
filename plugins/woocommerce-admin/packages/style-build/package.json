@@ -19,13 +19,13 @@
 	"main": "src/index.js",
 	"dependencies": {
 		"@automattic/color-studio": "^2.5.0",
-		"@automattic/mini-css-extract-plugin-with-rtl": "^0.8.0",
 		"@wordpress/base-styles": "^3.6.0",
 		"@wordpress/postcss-plugins-preset": "^1.6.0",
 		"css-loader": "^3.6.0",
 		"postcss-loader": "^3.0.0",
 		"sass-loader": "^10.2.1",
-		"webpack-fix-style-only-entries": "^0.6.1",
+		"webpack-remove-empty-scripts": "^0.7.3",
+		"mini-css-extract-plugin": "^2.6.0",
 		"webpack-rtl-plugin": "^2.0.0"
 	},
 	"private": true,
@@ -36,6 +36,6 @@
 		"rimraf": "^3.0.2",
 		"ts-jest": "^27.1.3",
 		"typescript": "^4.6.2",
-		"webpack": "^4.46.0"
+		"webpack": "^5.70.0"
 	}
 }

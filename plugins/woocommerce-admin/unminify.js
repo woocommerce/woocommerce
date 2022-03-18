@@ -8,19 +8,20 @@
  * 2. Remove check for development mode - we always want unminified files.
  * 3. Remove BannerPlugin support - we don't use it.
  * 4. Remove the 'min' suffix from the chunk loaded in the new `mainEntry` option.
- * 5. Hook into compilation later so we're running after Source Map generation.
+ * 5. Hook into compilation later so we're running after Source Map generation. (https://webpack.js.org/api/compilation-hooks/: PROCESS_ASSETS_STAGE_OPTIMIZE_INLINE) 
  */
 const path = require( 'path' );
 const ModuleFilenameHelpers = require( 'webpack/lib/ModuleFilenameHelpers' );
+const webpack = require( 'webpack' );
 
 const getFileName = ( name, ext, opts ) => {
-	if ( name.match(/([-_.]min)[-_.]/ ) ) {
+	if ( name.match( /([-_.]min)[-_.]/ ) ) {
 		return name.replace( /[-_.]min/, '' );
 	}
 
 	const suffix = ( opts.postfix || 'nomin' ) + '.' + ext;
-	if ( name.match( new RegExp( '\.' + ext + '$' ) ) ) {
-		return name.replace( new RegExp( ext + '$' ), suffix )
+	if ( name.match( new RegExp( '.' + ext + '$' ) ) ) {
+		return name.replace( new RegExp( ext + '$' ), suffix );
 	}
 
 	return name + suffix;
@@ -37,44 +38,80 @@ class UnminifyWebpackPlugin {
 	}
 
 	apply( compiler ) {
-		// Hook after asset optimization if we're using a devtool (source map).
-		// @todo: Update to afterFinishAssets for Webpack 5.x?
-		const compilationHook = compiler.options.devtool ? 'afterOptimizeAssets' : 'additionalAssets';
+		const options = this.options;
+		const outputNormal = {};
 
-		compiler.hooks.compilation.tap( 'UnminifyWebpackPlugin', ( compilation ) => {
-			compilation.hooks[ compilationHook ].tap( 'UnminifyWebpackPlugin', () => {
-				const files = [
-					...compilation.additionalChunkAssets
-				];
-	
-				compilation.chunks.forEach( chunk => files.push( ...chunk.files ) );
+		compiler.hooks.compilation.tap(
+			'UnminifyWebpackPlugin',
+			( compilation ) => {
+				compilation.hooks.processAssets.tap(
+					{
+						name: 'UnminifyWebpackPlugin',
+						stage: webpack.Compilation.PROCESS_ASSETS_STAGE_OPTIMIZE_INLINE,
+					},
+					( assets ) => {
+						Object.entries( assets ).forEach(
+							( [ pathname, source ] ) => {
+								if (
+									! ModuleFilenameHelpers.matchObject(
+										options,
+										pathname
+									)
+								) {
+									return;
+								}
 
-				const finalFiles = files.filter( ModuleFilenameHelpers.matchObject.bind( null, this.options ) );
+								let sourceCode = source.source();
+								if (
+									options.mainEntry &&
+									pathname === options.mainEntry
+								) {
+									sourceCode = sourceCode.replace(
+										/ \+ "\.min\.js"$/m,
+										' + ".js"'
+									);
+								}
 
-				finalFiles.forEach( ( minified ) => {
-					const asset = compilation.assets[ minified ];
-					let source = asset.source();
-					const ext = path.extname( minified ).substr( 1 );
-					const unminified = getFileName( minified, ext, this.options );
-	
-					// Remove the ".min" suffix from the lazy loaded chunk filenames.
-					if ( this.options.mainEntry && minified === this.options.mainEntry ) {
-						// See: https://github.com/webpack/webpack/blob/v4.43.0/lib/web/JsonpMainTemplatePlugin.js#L129
-						// NOTE: This will break with Webpack 5.x!
-						source = source.replace( / \+ "\.min\.js"$/m, ' + ".js"' );
+								const dest = compiler.options.output.path;
+								const outputPath = path.resolve(
+									dest,
+									getFileName(
+										pathname,
+										path.extname( pathname ).substr( 1 ),
+										options
+									)
+								);
+
+								outputNormal[ outputPath ] = {
+									filename: getFileName(
+										pathname,
+										path.extname( pathname ).substr( 1 ),
+										options
+									),
+									content: sourceCode,
+									size: Buffer.from( sourceCode, 'utf-8' )
+										.length,
+								};
+							}
+						);
 					}
-	
-					compilation.assets[ unminified ] = {
-						source: () => {
-							return source;
-						},
-						size: () => {
-							return source.length;
+				);
+
+				compilation.hooks.afterProcessAssets.tap(
+					'UnminifiedWebpackPlugin',
+					() => {
+						for ( const [ key, value ] of Object.entries(
+							outputNormal
+						) ) {
+							compilation.emitAsset(
+								value.filename,
+								new webpack.sources.RawSource( value.content )
+							);
 						}
-					};
-				} );
-			} );
-		} );
+					}
+				);
+			}
+		);
 	}
 }
 
