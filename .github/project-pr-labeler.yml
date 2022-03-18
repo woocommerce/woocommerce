@@ -15,3 +15,8 @@
 
 'plugin: woocommerce':
 - plugins/woocommerce/**/*
+
+'focus: react admin':
+- plugins/woocommerce/src/Admin/**/*
+- plugins/woocommerce/src/Internal/Admin/**/*
+- plugins/woocommerce-admin/**/*
