@@ -100,7 +100,10 @@ class DateFilter extends Component {
 		this.setState( { before: date, beforeText: text, beforeError: error } );
 
 		if ( date ) {
-			onFilterChange( 'value', date.format( isoDateFormat ) );
+			onFilterChange( {
+				property: 'value',
+				value: date.format( isoDateFormat ),
+			} );
 		}
 	}
 
@@ -129,7 +132,10 @@ class DateFilter extends Component {
 			}
 
 			if ( nextAfter && nextBefore ) {
-				onFilterChange( 'value', [ nextAfter, nextBefore ] );
+				onFilterChange( {
+					property: 'value',
+					value: [ nextAfter, nextBefore ],
+				} );
 			}
 		}
 	}
@@ -159,7 +165,11 @@ class DateFilter extends Component {
 			...newDateState,
 		} );
 
-		onFilterChange( 'rule', newRule, shouldResetValue );
+		onFilterChange( {
+			property: 'rule',
+			value: newRule,
+			shouldResetValue,
+		} );
 	}
 
 	isFutureDate( dateString ) {

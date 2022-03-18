@@ -3,7 +3,6 @@
  */
 import PropTypes from 'prop-types';
 import { SelectControl as Select, Spinner } from '@wordpress/components';
-import { partial } from 'lodash';
 import interpolateComponents from '@automattic/interpolate-components';
 import classnames from 'classnames';
 import {
@@ -167,7 +166,12 @@ const AttributeFilter = ( props ) => {
 								) }
 								options={ rules }
 								value={ rule }
-								onChange={ partial( onFilterChange, 'rule' ) }
+								onChange={ ( selectedValue ) =>
+									onFilterChange( {
+										property: 'rule',
+										value: selectedValue,
+									} )
+								}
 								aria-label={ labels.rule }
 							/>
 						),
@@ -188,12 +192,12 @@ const AttributeFilter = ( props ) => {
 												attr ? [ attr ] : []
 											);
 											setSelectedAttributeTerm( '' );
-											onFilterChange(
-												'value',
-												[ attr && attr.key ].filter(
-													Boolean
-												)
-											);
+											onFilterChange( {
+												property: 'value',
+												value: [
+													attr && attr.key,
+												].filter( Boolean ),
+											} );
 										} }
 										type="attributes"
 										placeholder={ __(
@@ -241,14 +245,14 @@ const AttributeFilter = ( props ) => {
 													setSelectedAttributeTerm(
 														term
 													);
-													onFilterChange(
-														'value',
-														[
+													onFilterChange( {
+														property: 'value',
+														value: [
 															selectedAttribute[ 0 ]
 																.key,
 															term,
-														].filter( Boolean )
-													);
+														].filter( Boolean ),
+													} );
 												} }
 											/>
 										</Fragment>

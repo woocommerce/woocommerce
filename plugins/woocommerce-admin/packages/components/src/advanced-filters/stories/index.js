@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { AdvancedFilters } from '@woocommerce/components';
-import { getSetting } from '@woocommerce/settings';
 
 const ORDER_STATUSES = {
 	cancelled: 'Cancelled',
@@ -15,7 +14,15 @@ const ORDER_STATUSES = {
 };
 
 const siteLocale = 'en_US';
-const currency = getSetting( 'currency' );
+const currency = {
+	code: 'USD',
+	decimalSeparator: '.',
+	precision: 2,
+	priceFormat: '%1$s%2$s',
+	symbol: '$',
+	symbolPosition: 'left',
+	thousandSeparator: ',',
+};
 const path = new URL( document.location ).searchParams.get( 'path' );
 const query = {
 	component: 'advanced-filters',

@@ -4,7 +4,7 @@
 import { createElement, Component, Fragment } from '@wordpress/element';
 import { SelectControl } from '@wordpress/components';
 import { getIdsFromQuery } from '@woocommerce/navigation';
-import { find, isEqual, partial } from 'lodash';
+import { find, isEqual } from 'lodash';
 import PropTypes from 'prop-types';
 import interpolateComponents from '@automattic/interpolate-components';
 import classnames from 'classnames';
@@ -72,7 +72,7 @@ class SearchFilter extends Component {
 		} );
 		const { onFilterChange } = this.props;
 		const idList = values.map( ( value ) => value.key ).join( ',' );
-		onFilterChange( 'value', idList );
+		onFilterChange( { property: 'value', value: idList } );
 	}
 
 	getScreenReaderText( filter, config ) {
@@ -120,7 +120,9 @@ class SearchFilter extends Component {
 						) }
 						options={ rules }
 						value={ rule }
-						onChange={ partial( onFilterChange, 'rule' ) }
+						onChange={ ( value ) =>
+							onFilterChange( { property: 'rule', value } )
+						}
 						aria-label={ labels.rule }
 					/>
 				),

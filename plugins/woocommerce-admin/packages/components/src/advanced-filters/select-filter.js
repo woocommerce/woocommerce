@@ -3,7 +3,7 @@
  */
 import { createElement, Component, Fragment } from '@wordpress/element';
 import { SelectControl, Spinner } from '@wordpress/components';
-import { find, partial } from 'lodash';
+import { find } from 'lodash';
 import PropTypes from 'prop-types';
 import interpolateComponents from '@automattic/interpolate-components';
 import classnames from 'classnames';
@@ -33,7 +33,7 @@ class SelectFilter extends Component {
 							config,
 							returnedOptions
 						);
-						onFilterChange( 'value', value );
+						onFilterChange( { property: 'value', value } );
 					}
 				} );
 		}
@@ -88,7 +88,12 @@ class SelectFilter extends Component {
 						) }
 						options={ rules }
 						value={ rule }
-						onChange={ partial( onFilterChange, 'rule' ) }
+						onChange={ ( selectedValue ) =>
+							onFilterChange( {
+								property: 'rule',
+								value: selectedValue,
+							} )
+						}
 						aria-label={ labels.rule }
 					/>
 				),
@@ -100,7 +105,12 @@ class SelectFilter extends Component {
 						) }
 						options={ options }
 						value={ value }
-						onChange={ partial( onFilterChange, 'value' ) }
+						onChange={ ( selectedValue ) =>
+							onFilterChange( {
+								property: 'value',
+								value: selectedValue,
+							} )
+						}
 						aria-label={ labels.filter }
 					/>
 				) : (

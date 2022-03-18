@@ -3,7 +3,7 @@
  */
 import { createElement, Component, Fragment } from '@wordpress/element';
 import { SelectControl, TextControl } from '@wordpress/components';
-import { get, find, partial, isArray } from 'lodash';
+import { get, find, isArray } from 'lodash';
 import interpolateComponents from '@automattic/interpolate-components';
 import classnames from 'classnames';
 import { sprintf, __, _x } from '@wordpress/i18n';
@@ -137,7 +137,10 @@ class NumberFilter extends Component {
 		if ( Boolean( rangeEnd ) ) {
 			// If there's a value for rangeEnd, we've just changed from "between"
 			// to "less than" or "more than" and need to transition the value
-			onFilterChange( 'value', rangeStart || rangeEnd );
+			onFilterChange( {
+				property: 'value',
+				value: rangeStart || rangeEnd,
+			} );
 		}
 
 		let labelFormat = '';
@@ -166,7 +169,8 @@ class NumberFilter extends Component {
 			label: sprintf( labelFormat, {
 				field: get( config, [ 'labels', 'add' ] ),
 			} ),
-			onChange: partial( onFilterChange, 'value' ),
+			onChange: ( value ) =>
+				onFilterChange( { property: 'value', value } ),
 			currencySymbol,
 			symbolPosition,
 		} );
@@ -181,11 +185,17 @@ class NumberFilter extends Component {
 			: [ filter.value ];
 
 		const rangeStartOnChange = ( newRangeStart ) => {
-			onFilterChange( 'value', [ newRangeStart, rangeEnd ] );
+			onFilterChange( {
+				property: 'value',
+				key: [ newRangeStart, rangeEnd ],
+			} );
 		};
 
 		const rangeEndOnChange = ( newRangeEnd ) => {
-			onFilterChange( 'value', [ rangeStart, newRangeEnd ] );
+			onFilterChange( {
+				property: 'value',
+				key: [ rangeStart, newRangeEnd ],
+			} );
 		};
 
 		return interpolateComponents( {
@@ -245,7 +255,9 @@ class NumberFilter extends Component {
 						) }
 						options={ rules }
 						value={ rule }
-						onChange={ partial( onFilterChange, 'rule' ) }
+						onChange={ ( value ) =>
+							onFilterChange( { property: 'rule', value } )
+						}
 						aria-label={ labels.rule }
 					/>
 				),

@@ -4,7 +4,10 @@
 -   Add missing dependencies. #8349
 -   Update all js packages with minor/patch version changes. #8392
 -   Add moment-timezone to package.json. #6483
+## Breaking changes
 
+-   Refactor the `onFilterChange` method in the `AdvancedFilters` component. #8459
+    - change: `onFilterChange( index, property, value, shouldResetValue = false );` to `onFilterChange( index, { property, value, shouldResetValue = false } )`;
 # 9.0.0
 
 -   Update line-height of SelectControl label to avoid truncated descenders in some typefaces and zoom levels. #8186
