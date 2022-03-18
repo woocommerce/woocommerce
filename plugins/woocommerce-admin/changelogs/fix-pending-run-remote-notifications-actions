@@ -1,0 +1,4 @@
+Significance: patch
+Type: Fix
+
+Fix too many pending run_remote_notifications actions. #8285

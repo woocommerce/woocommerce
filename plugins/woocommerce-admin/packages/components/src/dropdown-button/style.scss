@@ -1,0 +1,83 @@
+.woocommerce-page .woocommerce-dropdown-button {
+	background-color: $studio-white;
+	position: relative;
+	border: 1px solid $gray-700;
+	color: $gray-900;
+	border-radius: 4px;
+	padding: 0 40px 0 0;
+	width: 100%;
+	height: auto;
+
+	&::after {
+		content: '';
+		background: $gray-900;
+		mask: url(data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M5%206l5%205%205-5%202%201-7%207-7-7%202-1z%22%20%2F%3E%3C%2Fsvg%3E)
+			no-repeat right 0 top 55%;
+		position: absolute;
+		right: 14px;
+		width: 32px;
+		height: 48px;
+	}
+
+	&.is-open {
+		&::after {
+			transform: translateX(12px) translateY(2px) rotate(180deg);
+		}
+	}
+
+	&:hover,
+	&:active,
+	&.is-open {
+		color: var(--wp-admin-theme-color);
+		&::after {
+			background: var(--wp-admin-theme-color);
+		}
+	}
+
+	&.is-multi-line .woocommerce-dropdown-button__labels {
+		flex-direction: column;
+	}
+
+	&:not(:focus):not(.is-open) {
+		border-color: $gray-700;
+	}
+}
+
+.woocommerce-dropdown-button__labels {
+	text-align: left;
+	padding: 8px 12px;
+	min-height: 48px;
+	display: flex;
+	align-items: center;
+	width: 100%;
+	justify-content: space-around;
+
+	@include breakpoint( '<400px' ) {
+		min-height: 46px;
+	}
+
+	span {
+		width: 100%;
+		text-align: left;
+
+		&:last-child {
+			@include font-size( 12 );
+			margin: 0;
+		}
+
+		&:first-child {
+			@include font-size( 13 );
+			font-weight: 600;
+		}
+
+		@include breakpoint( '<400px' ) {
+			&:last-child {
+				@include font-size( 10 );
+			}
+
+			&:first-child {
+				@include font-size( 12 );
+			}
+		}
+	}
+}

@@ -1,0 +1,4 @@
+Significance: minor
+Type: Add
+
+Add asynchronous plugin install and activation endpoints #8079
