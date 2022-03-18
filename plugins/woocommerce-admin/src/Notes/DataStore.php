@@ -213,7 +213,7 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 
 		$db_actions = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT action_id, name, label, query, status, is_primary, actioned_text, nonce_action, nonce_name
+				"SELECT action_id, name, label, query, status, actioned_text, nonce_action, nonce_name
 				FROM {$wpdb->prefix}wc_admin_note_actions
 				WHERE note_id = %d",
 				$note->get_id()
@@ -230,7 +230,6 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 					'label'         => $action->label,
 					'query'         => $action->query,
 					'status'        => $action->status,
-					'primary'       => (bool) $action->is_primary,
 					'actioned_text' => $action->actioned_text,
 					'nonce_action'  => $action->nonce_action,
 					'nonce_name'    => $action->nonce_name,
@@ -289,7 +288,6 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 				'label'         => $action->label,
 				'query'         => $action->query,
 				'status'        => $action->status,
-				'is_primary'    => $action->primary,
 				'actioned_text' => $action->actioned_text,
 				'nonce_action'  => $action->nonce_action,
 				'nonce_name'    => $action->nonce_name,

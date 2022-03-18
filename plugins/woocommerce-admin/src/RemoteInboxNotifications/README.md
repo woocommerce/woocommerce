@@ -93,7 +93,6 @@ These are the actions that can be interacted with on the note. This might be a l
 	],
 	"url": "?page=automatewoo-dashboard",
 	"url_is_admin_query": true,
-	"is_primary": true,
 	"status": "actioned"
 },
 {
@@ -106,7 +105,6 @@ These are the actions that can be interacted with on the note. This might be a l
 	],
 	"url": "https://wordpress.com/me/concierge",
 	"url_is_admin_query": false,
-	"is_primary": false,
 	"status": "actioned"
 },
 ```

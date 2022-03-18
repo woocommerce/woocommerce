@@ -77,6 +77,10 @@ class Install {
 			'wc_admin_update_300_update_is_read_from_last_read',
 			'wc_admin_update_300_db_version',
 		),
+		'3.4.0'  => array(
+			'wc_admin_update_340_remove_is_primary_from_note_action',
+			'wc_admin_update_340_db_version',
+		),
 	);
 
 	/**
@@ -327,7 +331,6 @@ class Install {
 			label varchar(255) NOT NULL,
 			query longtext NOT NULL,
 			status varchar(255) NOT NULL,
-			is_primary boolean DEFAULT 0 NOT NULL,
 			actioned_text varchar(255) NOT NULL,
 			nonce_action varchar(255) NULL DEFAULT NULL,
 			nonce_name varchar(255) NULL DEFAULT NULL,
@@ -459,7 +462,6 @@ class Install {
 		foreach ( self::get_db_update_callbacks() as $version => $update_callbacks ) {
 			if ( version_compare( $current_db_version, $version, '<' ) ) {
 				$completed_version_updates = 0;
-
 				foreach ( $update_callbacks as $update_callback ) {
 					$pending_jobs = WC()->queue()->search(
 						array(

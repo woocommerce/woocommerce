@@ -355,3 +355,20 @@ function wc_admin_update_300_update_is_read_from_last_read() {
 function wc_admin_update_300_db_version() {
 	Installer::update_db_version( '3.0.0' );
 }
+
+
+
+/**
+ * Delete "is_primary" column from the wc_admin_notes table.
+ */
+function wc_admin_update_340_remove_is_primary_from_note_action() {
+	global $wpdb;
+	$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_admin_note_actions DROP COLUMN `is_primary`" );
+}
+
+/**
+ * Update DB Version.
+ */
+function wc_admin_update_340_db_version() {
+	Installer::update_db_version( '3.4.0' );
+}

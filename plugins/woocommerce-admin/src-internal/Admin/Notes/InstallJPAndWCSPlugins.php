@@ -60,8 +60,7 @@ class InstallJPAndWCSPlugins {
 			'install-jp-and-wcs-plugins',
 			__( 'Install plugins', 'woocommerce-admin' ),
 			false,
-			Note::E_WC_ADMIN_NOTE_ACTIONED,
-			true
+			Note::E_WC_ADMIN_NOTE_ACTIONED
 		);
 		return $note;
 	}

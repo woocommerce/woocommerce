@@ -51,8 +51,7 @@ class DeactivatePlugin {
 			'deactivate-feature-plugin',
 			__( 'Deactivate', 'woocommerce-admin' ),
 			wc_admin_url( '&action=deactivate-feature-plugin' ),
-			Note::E_WC_ADMIN_NOTE_UNACTIONED,
-			true
+			Note::E_WC_ADMIN_NOTE_UNACTIONED
 		);
 		$note->add_nonce_to_action( 'deactivate-feature-plugin', 'deactivate-plugin_' . WC_ADMIN_PLUGIN_FILE, '' );
 		return $note;

@@ -72,8 +72,7 @@ class MigrateFromShopify {
 			'migrate-from-shopify',
 			__( 'Learn more', 'woocommerce-admin' ),
 			'https://woocommerce.com/posts/migrate-from-shopify-to-woocommerce/?utm_source=inbox&utm_medium=product',
-			Note::E_WC_ADMIN_NOTE_ACTIONED,
-			true
+			Note::E_WC_ADMIN_NOTE_ACTIONED
 		);
 		return $note;
 	}

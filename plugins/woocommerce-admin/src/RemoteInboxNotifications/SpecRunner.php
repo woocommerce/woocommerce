@@ -81,8 +81,7 @@ class SpecRunner {
 					? ''
 					: $action_locale->label,
 				$url,
-				$action->status,
-				isset( $action->is_primary ) ? $action->is_primary : false
+				$action->status
 			);
 		}
 

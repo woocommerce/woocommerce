@@ -98,7 +98,7 @@ class WC_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 		// Create a new note containing an action with a nonce.
 		$note = new \Automattic\WooCommerce\Admin\Notes\Note();
 		$note->set_name( 'nonce-note' );
-		$note->add_action( 'learn-more', __( 'Learn More', 'woocommerce-admin' ), 'https://woocommerce.com/', 'unactioned', true );
+		$note->add_action( 'learn-more', __( 'Learn More', 'woocommerce-admin' ), 'https://woocommerce.com/', 'unactioned' );
 		$note->add_nonce_to_action( 'learn-more', 'foo', 'bar' );
 		$note->save();
 
@@ -121,7 +121,7 @@ class WC_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 		// Create a new note containing an action with a nonce.
 		$note = new \Automattic\WooCommerce\Admin\Notes\Note();
 		$note->set_name( 'nonce-note' );
-		$note->add_action( 'learn-more', __( 'Learn More', 'woocommerce-admin' ), 'https://example.com/?x=1&y=2', 'unactioned', true );
+		$note->add_action( 'learn-more', __( 'Learn More', 'woocommerce-admin' ), 'https://example.com/?x=1&y=2', 'unactioned' );
 		$note->add_nonce_to_action( 'learn-more', 'foo', 'bar' );
 		$note->save();
 
@@ -142,11 +142,13 @@ class WC_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->user );
 
 		// Suppress deliberately caused errors.
+		// phpcs:ignore WordPress.PHP.IniSet.Risky
 		$log_file = ini_set( 'error_log', '/dev/null' );
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint . '/999' ) );
 		$note     = $response->get_data();
 
+		// phpcs:ignore WordPress.PHP.IniSet.Risky
 		ini_set( 'error_log', $log_file );
 
 		$this->assertEquals( 404, $response->get_status() );

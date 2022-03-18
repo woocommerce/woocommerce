@@ -83,8 +83,7 @@ class CouponPageMoved {
 			'remove-legacy-coupon-menu',
 			__( 'Remove legacy coupon menu', 'woocommerce-admin' ),
 			wc_admin_url( '&action=remove-coupon-menu' ),
-			Note::E_WC_ADMIN_NOTE_ACTIONED,
-			true
+			Note::E_WC_ADMIN_NOTE_ACTIONED
 		);
 
 		return $note;

@@ -19,7 +19,7 @@ class WC_Tests_Note extends WC_Unit_Test_Case {
 		// Create a new note containing an action with a nonce.
 		$note = new Note();
 		$note->set_name( 'nonce-note' );
-		$note->add_action( 'learn-more', __( 'Learn More', 'woocommerce-admin' ), 'https://example.com/', 'unactioned', true );
+		$note->add_action( 'learn-more', __( 'Learn More', 'woocommerce-admin' ), 'https://example.com/', 'unactioned' );
 		$note->add_nonce_to_action( 'learn-more', 'foo', 'bar' );
 
 		$actions = $note->get_actions();
@@ -35,7 +35,7 @@ class WC_Tests_Note extends WC_Unit_Test_Case {
 		// Create a new note containing an action with a nonce.
 		$note = new Note();
 		$note->set_name( 'nonce-note' );
-		$note->add_action( 'learn-more', __( 'Learn More', 'woocommerce-admin' ), 'https://example.com/', 'unactioned', true );
+		$note->add_action( 'learn-more', __( 'Learn More', 'woocommerce-admin' ), 'https://example.com/', 'unactioned' );
 
 		$actions = $note->get_actions();
 
@@ -51,7 +51,7 @@ class WC_Tests_Note extends WC_Unit_Test_Case {
 
 		$note = new Note();
 		$note->set_name( 'nonce-note' );
-		$note->add_action( 'learn-more', __( 'Learn More', 'woocommerce-admin' ), 'https://example.com/', 'unactioned', true );
+		$note->add_action( 'learn-more', __( 'Learn More', 'woocommerce-admin' ), 'https://example.com/', 'unactioned' );
 
 		// Cause an exception by adding the nonce to an invalid action.
 		$note->add_nonce_to_action( 'learn-mor', 'foo', 'bar' );

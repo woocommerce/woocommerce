@@ -77,8 +77,7 @@ class SellingOnlineCourses {
 			'learn-more',
 			__( 'Learn more', 'woocommerce-admin' ),
 			'https://woocommerce.com/posts/how-to-sell-online-courses-wordpress/?utm_source=inbox&utm_medium=product',
-			Note::E_WC_ADMIN_NOTE_ACTIONED,
-			true
+			Note::E_WC_ADMIN_NOTE_ACTIONED
 		);
 
 		return $note;
