@@ -7,11 +7,11 @@
   "prefer-stable": true,
   "minimum-stability": "dev",
   "require": {
-    "composer/installers": "~1.2"
+    "composer/installers": "~1.7"
   },
   "require-dev": {
     "phpunit/phpunit": "6.5.14",
-    "woocommerce/woocommerce-sniffs": "0.0.6"
+    "woocommerce/woocommerce-sniffs": "^0.1.2"
   },
   "scripts": {
     "test": [
@@ -32,6 +32,12 @@
       "test": "Run unit tests",
       "phpcs": "Analyze code against the WordPress coding standards with PHP_CodeSniffer",
       "phpcbf": "Fix coding standards warnings/errors automatically with PHP Code Beautifier"
+    }
+  },
+  "config": {
+    "allow-plugins": {
+      "composer/installers": true,
+      "dealerdirect/phpcodesniffer-composer-installer": true
     }
   }
 }
