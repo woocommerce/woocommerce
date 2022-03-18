@@ -329,10 +329,16 @@ abstract class WC_Settings_API {
 
 			if ( method_exists( $this, 'generate_' . $type . '_html' ) ) {
 				$html .= $this->{'generate_' . $type . '_html'}( $k, $v );
-			} elseif ( has_action( 'woocommerce_generate_' . $type . '_html' ) ) {
-				ob_start();
-				do_action( 'woocommerce_generate_' . $type . '_html', $k, $v, $this );
-				$html .= ob_get_clean();
+			} elseif ( has_filter( 'woocommerce_generate_' . $type . '_html' ) ) {
+				/**
+				 * Allow the generation of custom field types on the settings screen
+				 *
+				 * @param string $field_html The markup of the field being generated (initiated as an empty string)
+				 * @param string $key The key of the field
+				 * @param array  $data The attributes of the field as an associative array
+				 * @param object $wc_settings The current WC_Settings_API object
+				 */
+				$html .= apply_filters( 'woocommerce_generate_' . $type . '_html', '', $k, $v, $this );
 			} else {
 				$html .= $this->generate_text_html( $k, $v );
 			}
