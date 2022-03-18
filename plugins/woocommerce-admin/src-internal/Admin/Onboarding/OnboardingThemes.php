@@ -60,7 +60,7 @@ class OnboardingThemes {
 		$themes    = self::get_themes();
 		$theme_key = array_search( $slug, array_column( $themes, 'slug' ), true );
 		$theme     = false !== $theme_key ? $themes[ $theme_key ] : null;
-		if ( $theme && isset( $theme['id'] ) && isset( $theme['price'] ) && ( ! isset( $theme['is_installed'] ) || ! $theme['is_installed'] ) ) {
+		if ( $theme && isset( $theme['id'] ) && isset( $theme['price'] ) ) {
 			$price = self::get_price_from_string( $theme['price'] );
 			if ( $price && $price > 0 ) {
 				return $themes[ $theme_key ];
@@ -123,8 +123,13 @@ class OnboardingThemes {
 			$active_theme     = get_option( 'stylesheet' );
 
 			foreach ( $installed_themes as $slug => $theme ) {
-				$theme_data      = self::get_theme_data( $theme );
-				$themes[ $slug ] = $theme_data;
+				$theme_data = self::get_theme_data( $theme );
+				if ( isset( $themes[ $slug ] ) ) {
+					$themes[ $slug ]['is_installed'] = true;
+					$themes[ $slug ]['image']        = $theme_data['image'];
+				} else {
+					$themes[ $slug ] = $theme_data;
+				}
 			}
 
 			// Add the WooCommerce support tag for default themes that don't explicitly declare support.

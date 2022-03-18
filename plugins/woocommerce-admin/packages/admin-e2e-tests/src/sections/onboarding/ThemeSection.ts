@@ -13,4 +13,17 @@ export class ThemeSection extends BasePage {
 	async continueWithActiveTheme(): Promise< void > {
 		await this.clickButtonWithText( 'Continue with my active theme' );
 	}
+
+	async continueWithTheme( themeTitle: string ): Promise< void > {
+		const title = await waitForElementByText( 'h2', themeTitle );
+		const card = await title?.evaluateHandle( ( element ) => {
+			return element.closest( '.components-card' );
+		} );
+		const chooseButton = await card
+			?.asElement()
+			?.$x( `//button[contains(text(), "Choose")]` );
+		if ( chooseButton && chooseButton.length > 0 ) {
+			await chooseButton[ 0 ].click();
+		}
+	}
 }

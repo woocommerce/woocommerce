@@ -14,7 +14,7 @@ const {
 const config = require( 'config' );
 /* eslint-enable @typescript-eslint/no-var-requires */
 
-interface StoreDetails {
+export interface StoreDetails {
 	addressLine1?: string;
 	addressLine2?: string;
 	countryRegionSubstring?: string;

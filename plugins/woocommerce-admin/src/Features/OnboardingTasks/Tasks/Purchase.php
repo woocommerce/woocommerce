@@ -6,7 +6,6 @@ use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProducts;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingThemes;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
-use Automattic\WooCommerce\Admin\PluginsHelper;
 
 /**
  * Purchase Task
@@ -55,7 +54,7 @@ class Purchase extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		$products = $this->get_products();
+		$products = $this->get_paid_products_and_themes();
 
 		return count( $products['remaining'] ) === 1
 			? sprintf(
@@ -78,19 +77,20 @@ class Purchase extends Task {
 	 * @return string
 	 */
 	public function get_content() {
-		$products = $this->get_products();
+		$products = $this->get_paid_products_and_themes();
 
-		return count( $products['remaining'] ) === 1
-			? $products['purchaseable'][0]['description']
-			: sprintf(
-				/* translators: %1$s: list of product names comma separated, %2%s the last product name */
-				__(
-					'Good choice! You chose to add %1$s and %2$s to your store.',
-					'woocommerce-admin'
-				),
-				implode( ', ', array_slice( $products['remaining'], 0, -1 ) ) . ( count( $products['remaining'] ) > 2 ? ',' : '' ),
-				end( $products['remaining'] )
-			);
+		if ( count( $products['remaining'] ) === 1 ) {
+			return isset( $products['purchaseable'][0]['description'] ) ? $products['purchaseable'][0]['description'] : $products['purchaseable'][0]['excerpt'];
+		}
+		return sprintf(
+		/* translators: %1$s: list of product names comma separated, %2%s the last product name */
+			__(
+				'Good choice! You chose to add %1$s and %2$s to your store.',
+				'woocommerce-admin'
+			),
+			implode( ', ', array_slice( $products['remaining'], 0, -1 ) ) . ( count( $products['remaining'] ) > 2 ? ',' : '' ),
+			end( $products['remaining'] )
+		);
 	}
 
 	/**
@@ -118,7 +118,7 @@ class Purchase extends Task {
 	 * @return bool
 	 */
 	public function is_complete() {
-		$products = $this->get_products();
+		$products = $this->get_paid_products_and_themes();
 		return count( $products['remaining'] ) === 0;
 	}
 
@@ -137,7 +137,7 @@ class Purchase extends Task {
 	 * @return bool
 	 */
 	public function can_view() {
-		$products = $this->get_products();
+		$products = $this->get_paid_products_and_themes();
 		return count( $products['purchaseable'] ) > 0;
 	}
 
@@ -146,18 +146,17 @@ class Purchase extends Task {
 	 *
 	 * @return array purchaseable and remaining products and themes.
 	 */
-	public static function get_products() {
+	public static function get_paid_products_and_themes() {
 		$relevant_products = OnboardingProducts::get_relevant_products();
 
 		$profiler_data = get_option( OnboardingProfile::DATA_OPTION, array() );
 		$theme         = isset( $profiler_data['theme'] ) ? $profiler_data['theme'] : null;
 		$paid_theme    = $theme ? OnboardingThemes::get_paid_theme_by_slug( $theme ) : null;
-		$installed     = PluginsHelper::get_installed_plugin_slugs();
 		if ( $paid_theme ) {
 
 			$relevant_products['purchaseable'][] = $paid_theme;
 
-			if ( ! in_array( $paid_theme['slug'], $installed, true ) ) {
+			if ( isset( $paid_theme['is_installed'] ) && false === $paid_theme['is_installed'] ) {
 				$relevant_products['remaining'][] = $paid_theme['title'];
 			}
 		}

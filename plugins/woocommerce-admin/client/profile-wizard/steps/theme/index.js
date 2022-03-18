@@ -92,12 +92,10 @@ class Theme extends Component {
 			location,
 		} );
 
-		if ( slug !== activeTheme && getPriceValue( price ) <= 0 ) {
-			if ( isInstalled ) {
-				this.activateTheme( slug );
-			} else {
-				this.installTheme( slug );
-			}
+		if ( slug !== activeTheme && isInstalled ) {
+			this.activateTheme( slug );
+		} else if ( slug !== activeTheme && getPriceValue( price ) <= 0 ) {
+			this.installTheme( slug );
 		} else {
 			updateProfileItems( { theme: slug } );
 		}
