@@ -6,6 +6,7 @@
 
 namespace Automattic\WooCommerce\Internal\Admin\Onboarding;
 
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Admin\WCAdminHelper;
 
