@@ -17,7 +17,7 @@ $phase = getenv( 'WC_ADMIN_PHASE' );
 if ( ! in_array( $phase, array( 'development', 'plugin', 'core' ), true ) ) {
 	$phase = 'plugin'; // Default to plugin when running `pnpm run build`.
 }
-$config_json = file_get_contents( __DIR__ . '/../../../packages/config/' . $phase . '.json' );
+$config_json = file_get_contents( __DIR__ . '/../config/' . $phase . '.json' );
 $config      = json_decode( $config_json );
 
 $write  = "<?php\n";
@@ -33,7 +33,7 @@ $write .= "\t\t);\n";
 $write .= "\t}\n";
 $write .= "}\n";
 
-$config_file = fopen( 'includes/feature-config.php', 'w' );
+$config_file = fopen( __DIR__ . '/../../woocommerce/includes/react-admin/feature-config.php', 'w' );
 
 fwrite( $config_file, $write );
 fclose( $config_file );

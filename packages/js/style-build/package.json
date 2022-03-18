@@ -16,7 +16,7 @@
 	"bugs": {
 		"url": "https://github.com/woocommerce/woocommerce-admin/issues"
 	},
-	"main": "src/index.js",
+	"main": "index.js",
 	"dependencies": {
 		"@automattic/color-studio": "^2.5.0",
 		"@wordpress/base-styles": "^3.6.0",

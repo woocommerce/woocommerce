@@ -498,7 +498,7 @@ class PageController {
 	 * @todo The entry point for the embed needs moved to this class as well.
 	 */
 	public function register_page_handler() {
-		require_once WC_ADMIN_ABSPATH . 'includes/connect-existing-pages.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/react-admin/connect-existing-pages.php';
 	}
 
 	/**

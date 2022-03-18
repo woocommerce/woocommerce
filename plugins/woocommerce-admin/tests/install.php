@@ -8,7 +8,7 @@
 use Automattic\WooCommerce\Internal\Admin\Install;
 
 /**
- * Tests for \Automattic\WooCommerce\Admin\Install class.
+ * Tests for \Automattic\WooCommerce\Internal\Admin\Install class.
  */
 class WC_Admin_Tests_Install extends WP_UnitTestCase {
 
