@@ -5,6 +5,7 @@
 # All JS
 /assets/js/**
 /assets/js/*.js
+/assets/client
 
 # Behat/CLI Tests
 tests/cli/installer

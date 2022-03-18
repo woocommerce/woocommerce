@@ -16,7 +16,7 @@ const ForkTsCheckerWebpackPlugin = require( 'fork-ts-checker-webpack-plugin' );
 const AsyncChunkSrcVersionParameterPlugin = require( './chunk-src-version-param' );
 const UnminifyWebpackPlugin = require( './unminify' );
 const { webpackConfig: styleConfig } = require( '@woocommerce/style-build' );
-const WooCommerceDependencyExtractionWebpackPlugin = require( './packages/dependency-extraction-webpack-plugin/src/index' );
+const WooCommerceDependencyExtractionWebpackPlugin = require( '../../packages/js/dependency-extraction-webpack-plugin/src/index' );
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const WC_ADMIN_PHASE = process.env.WC_ADMIN_PHASE || 'development';
@@ -39,7 +39,7 @@ const wcAdminPackages = [
 
 const entryPoints = {};
 wcAdminPackages.forEach( ( name ) => {
-	entryPoints[ name ] = `./packages/${ name }`;
+	entryPoints[ name ] = `../../packages/js/${ name }`;
 } );
 
 const wpAdminScripts = [
@@ -72,7 +72,7 @@ const webpackConfig = {
 				: `[name]/index${ suffix }.js`;
 		},
 		chunkFilename: `chunks/[name]${ suffix }.js`,
-		path: path.join( __dirname, 'dist' ),
+		path: path.join( __dirname, '/../woocommerce/assets/client/admin' ),
 		library: [ 'wc', '[modulename]' ],
 		libraryTarget: 'window',
 		uniqueName: '__wcAdmin_webpackJsonp',
@@ -148,7 +148,7 @@ const webpackConfig = {
 		new CopyWebpackPlugin({
 
 			patterns: wcAdminPackages.map( ( packageName ) => ( {
-				from: `./packages/${ packageName }/build-style/*.css`,
+				from: `../../packages/js/${ packageName }/build-style/*.css`,
 				to: `./${ packageName }/[name][ext]`,
 				noErrorOnMissing: true
 			} ) )

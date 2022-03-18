@@ -9,18 +9,6 @@
                  "action": "add",
                  "cwd": "packages/js/dependency-extraction-webpack-plugin"
              }
-         },
-         "build": {
-             "executor": "@nrwl/workspace:run-script",
-             "options": {
-                 "script": "build"
-             }
-         },
-         "test": {
-             "executor": "@nrwl/workspace:run-script",
-             "options": {
-                 "script": "test"
-             }
          }
      }
  }
