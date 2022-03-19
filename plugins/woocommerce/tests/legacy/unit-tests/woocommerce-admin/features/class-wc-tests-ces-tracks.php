@@ -11,9 +11,9 @@ use Automattic\WooCommerce\Internal\Admin\CustomerEffortScoreTracks;
 define( 'WP_ADMIN', true );
 
 /**
- * Class WC_Tests_CES_Tracks
+ * Class WC_Admin_Tests_CES_Tracks
  */
-class WC_Tests_CES_Tracks extends WC_Unit_Test_Case {
+class WC_Admin_Tests_CES_Tracks extends WC_Unit_Test_Case {
 
 	/**
 	 * @var CustomerEffortScoreTracks

@@ -8,9 +8,9 @@
 use Automattic\WooCommerce\Admin\ReportCSVExporter;
 
 /**
- * Class WC_Tests_Reports
+ * Class WC_Admin_Tests_Reports
  */
-class WC_Tests_Reports extends WC_Unit_Test_Case {
+class WC_Admin_Tests_Reports extends WC_Unit_Test_Case {
 
 	/**
 	 * @var Directory

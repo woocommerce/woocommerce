@@ -10,9 +10,9 @@ use Automattic\WooCommerce\Internal\Admin\Schedulers\MailchimpScheduler;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 
 /**
- * Class WC_Tests_Mailchimp_Scheduler
+ * Class WC_Admin_Tests_Mailchimp_Scheduler
  */
-class WC_Tests_Mailchimp_Scheduler extends WC_Unit_Test_Case {
+class WC_Admin_Tests_Mailchimp_Scheduler extends WC_Unit_Test_Case {
 	/**
 	 * @var \Automattic\WooCommerce\Internal\Admin\Schedulers\MailchimpScheduler MailchimpScheduler instance to test
 	 */

@@ -10,9 +10,9 @@ use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskList;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\StoreDetails;
 
 /**
- * class WC_Tests_OnboardingTasks_TaskList
+ * class WC_Admin_Tests_OnboardingTasks_TaskList
  */
-class WC_Tests_OnboardingTasks_Task_StoreDetails extends WC_Unit_Test_Case {
+class WC_Admin_Tests_OnboardingTasks_Task_StoreDetails extends WC_Unit_Test_Case {
 
 
 	/**

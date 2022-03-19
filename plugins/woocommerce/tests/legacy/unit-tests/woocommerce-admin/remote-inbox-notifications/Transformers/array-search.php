@@ -8,9 +8,9 @@
 use Automattic\WooCommerce\Admin\RemoteInboxNotifications\Transformers\ArraySearch;
 
 /**
- * class WC_Tests_RemoteInboxNotifications_Transformers_ArraySearch
+ * class WC_Admin_Tests_RemoteInboxNotifications_Transformers_ArraySearch
  */
-class WC_Tests_RemoteInboxNotifications_Transformers_ArraySearch extends WC_Unit_Test_Case {
+class WC_Admin_Tests_RemoteInboxNotifications_Transformers_ArraySearch extends WC_Unit_Test_Case {
 	/**
 	 * Test validate method returns false when 'value' argument is missing
 	 */

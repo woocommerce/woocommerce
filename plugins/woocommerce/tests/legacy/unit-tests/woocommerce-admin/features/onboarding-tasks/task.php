@@ -11,9 +11,9 @@ use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskList;
 
 /**
- * class WC_Tests_OnboardingTasks_Task
+ * class WC_Admin_Tests_OnboardingTasks_Task
  */
-class WC_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
+class WC_Admin_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 
 	/**
 	 * Tests that a task is visible by default.

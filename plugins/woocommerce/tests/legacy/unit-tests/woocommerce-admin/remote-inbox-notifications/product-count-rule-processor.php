@@ -8,9 +8,9 @@
 use Automattic\WooCommerce\Admin\RemoteInboxNotifications\ProductCountRuleProcessor;
 
 /**
- * class WC_Tests_RemoteInboxNotifications_ProductCountRuleProcessor
+ * class WC_Admin_Tests_RemoteInboxNotifications_ProductCountRuleProcessor
  */
-class WC_Tests_RemoteInboxNotifications_ProductCountRuleProcessor extends WC_Unit_Test_Case {
+class WC_Admin_Tests_RemoteInboxNotifications_ProductCountRuleProcessor extends WC_Unit_Test_Case {
 	/**
 	 * Get a product_count rule that passes when the product count is > 5.
 	 *

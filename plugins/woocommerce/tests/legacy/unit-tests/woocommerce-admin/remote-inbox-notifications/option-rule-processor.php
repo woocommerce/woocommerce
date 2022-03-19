@@ -8,9 +8,9 @@
 use Automattic\WooCommerce\Admin\RemoteInboxNotifications\OptionRuleProcessor;
 
 /**
- * class WC_Tests_RemoteInboxNotifications_OptionRuleProcessor
+ * class WC_Admin_Tests_RemoteInboxNotifications_OptionRuleProcessor
  */
-class WC_Tests_RemoteInboxNotifications_OptionRuleProcessor extends WC_Unit_Test_Case {
+class WC_Admin_Tests_RemoteInboxNotifications_OptionRuleProcessor extends WC_Unit_Test_Case {
 	/**
 	 * No default option resolves to false.
 	 *

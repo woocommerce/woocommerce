@@ -8,9 +8,9 @@
 use Automattic\WooCommerce\Admin\RemoteInboxNotifications\PluginVersionRuleProcessor;
 
 /**
- * class WC_Tests_RemoteInboxNotifications_PluginVersionRuleProcessor
+ * class WC_Admin_Tests_RemoteInboxNotifications_PluginVersionRuleProcessor
  */
-class WC_Tests_RemoteInboxNotifications_PluginVersionRuleProcessor extends WC_Unit_Test_Case {
+class WC_Admin_Tests_RemoteInboxNotifications_PluginVersionRuleProcessor extends WC_Unit_Test_Case {
 	/**
 	 * Test that the processor does not pass if the plugin is not activated.
 	 *

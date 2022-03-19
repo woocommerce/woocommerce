@@ -13,7 +13,7 @@ use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile as Profil
 /**
  * WC Tests API Onboarding Profile
  */
-class WC_Tests_API_Onboarding_Profiles extends WC_REST_Unit_Test_Case {
+class WC_Admin_Tests_API_Onboarding_Profiles extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Endpoints.

@@ -10,9 +10,9 @@ use \Automattic\WooCommerce\Admin\Notes\Note;
 use \Automattic\WooCommerce\Internal\Admin\Notes\WooCommercePayments;
 
 /**
- * Class WC_Tests_Marketing_Notes
+ * Class WC_Admin_Tests_Marketing_Notes
  */
-class WC_Tests_Marketing_Notes extends WC_Unit_Test_Case {
+class WC_Admin_Tests_Marketing_Notes extends WC_Unit_Test_Case {
 
 	/**
 	 * Tests that a marketing note can be added.

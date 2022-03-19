@@ -7,9 +7,9 @@
  */
 
 /**
- * WC_Tests_API_Reports_Taxes_Stats
+ * WC_Admin_Tests_API_Reports_Taxes_Stats
  */
-class WC_Tests_API_Reports_Taxes_Stats extends WC_REST_Unit_Test_Case {
+class WC_Admin_Tests_API_Reports_Taxes_Stats extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Endpoints.

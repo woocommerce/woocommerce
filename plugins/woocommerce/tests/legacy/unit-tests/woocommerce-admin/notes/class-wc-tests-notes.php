@@ -9,9 +9,9 @@ use Automattic\WooCommerce\Admin\Notes\NotesUnavailableException;
 use Automattic\WooCommerce\Admin\Notes\Notes;
 
 /**
- * Class WC_Tests_Notes
+ * Class WC_Admin_Tests_Notes
  */
-class WC_Tests_Notes extends WC_Unit_Test_Case {
+class WC_Admin_Tests_Notes extends WC_Unit_Test_Case {
 
 	/**
 	 * If the "admin-note" data store exists, the data store should be

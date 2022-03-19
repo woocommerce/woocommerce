@@ -8,9 +8,9 @@
 use \Automattic\WooCommerce\Admin\Features\TransientNotices;
 
 /**
- * Class WC_Tests_Transient_Notices
+ * Class WC_Admin_Tests_Transient_Notices
  */
-class WC_Tests_Transient_Notices extends WC_Unit_Test_Case {
+class WC_Admin_Tests_Transient_Notices extends WC_Unit_Test_Case {
 
 	/**
 	 * Test that notices can be added.

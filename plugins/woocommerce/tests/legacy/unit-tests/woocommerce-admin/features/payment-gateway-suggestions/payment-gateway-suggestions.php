@@ -11,9 +11,9 @@ use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\DefaultPayme
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\PaymentGatewaySuggestionsDataSourcePoller;
 
 /**
- * class WC_Tests_PaymentGatewaySuggestions_Init
+ * class WC_Admin_Tests_PaymentGatewaySuggestions_Init
  */
-class WC_Tests_PaymentGatewaySuggestions_Init extends WC_Unit_Test_Case {
+class WC_Admin_Tests_PaymentGatewaySuggestions_Init extends WC_Unit_Test_Case {
 
 	/**
 	 * Set up.

@@ -10,7 +10,7 @@ use \Automattic\WooCommerce\Admin\API\Plugins;
 /**
  * WC Tests API Plugins
  */
-class WC_Tests_API_Plugins extends WC_REST_Unit_Test_Case {
+class WC_Admin_Tests_API_Plugins extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Endpoints.

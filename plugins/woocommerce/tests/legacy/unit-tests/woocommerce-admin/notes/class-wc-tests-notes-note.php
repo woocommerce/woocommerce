@@ -8,9 +8,9 @@
 use \Automattic\WooCommerce\Admin\Notes\Note;
 
 /**
- * Class WC_Tests_Notes_Note
+ * Class WC_Admin_Tests_Notes_Note
  */
-class WC_Tests_Notes_Note extends WC_Unit_Test_Case {
+class WC_Admin_Tests_Notes_Note extends WC_Unit_Test_Case {
 
 	/**
 	 * Tests a note can be created with timestamp.

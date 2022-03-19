@@ -10,9 +10,9 @@ use \Automattic\WooCommerce\Admin\Notes\Note;
 
 
 /**
- * Class WC_Tests_Marketing_Notes
+ * Class WC_Admin_Tests_Marketing_Notes
  */
-class WC_Tests_Customizing_Product_Catalog extends WC_Unit_Test_Case {
+class WC_Admin_Tests_Customizing_Product_Catalog extends WC_Unit_Test_Case {
 
 	/**
 	 * @var CustomizingProductCatalog

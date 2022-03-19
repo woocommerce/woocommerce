@@ -9,9 +9,9 @@ use Automattic\WooCommerce\Admin\RemoteInboxNotifications\Transformers\ArrayColu
 
 
 /**
- * class WC_Tests_RemoteInboxNotifications_Transformers_ArrayColumn
+ * class WC_Admin_Tests_RemoteInboxNotifications_Transformers_ArrayColumn
  */
-class WC_Tests_RemoteInboxNotifications_Transformers_ArrayColumn extends WC_Unit_Test_Case {
+class WC_Admin_Tests_RemoteInboxNotifications_Transformers_ArrayColumn extends WC_Unit_Test_Case {
 	/**
 	 * Test validate method returns false when 'key' argument is missing
 	 */

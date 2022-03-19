@@ -9,9 +9,9 @@ use Automattic\WooCommerce\Admin\Features\Navigation\Menu;
 
 
 /**
- * Class WC_Tests_Navigation_Menu
+ * Class WC_Admin_Tests_Navigation_Menu
  */
-class WC_Tests_Navigation_Menu extends WC_Unit_Test_Case {
+class WC_Admin_Tests_Navigation_Menu extends WC_Unit_Test_Case {
 
 	/**
 	 * @var Menu

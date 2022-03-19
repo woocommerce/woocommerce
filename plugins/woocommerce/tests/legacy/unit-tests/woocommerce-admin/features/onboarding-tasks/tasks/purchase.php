@@ -11,9 +11,9 @@ use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskList;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\Purchase;
 
 /**
- * class WC_Tests_OnboardingTasks_TaskList
+ * class WC_Admin_Tests_OnboardingTasks_TaskList
  */
-class WC_Tests_OnboardingTasks_Task_Purchase extends WC_Unit_Test_Case {
+class WC_Admin_Tests_OnboardingTasks_Task_Purchase extends WC_Unit_Test_Case {
 
 	/**
 	 * Task list.

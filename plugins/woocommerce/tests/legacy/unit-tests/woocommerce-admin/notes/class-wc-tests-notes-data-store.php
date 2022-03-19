@@ -9,9 +9,9 @@ use \Automattic\WooCommerce\Admin\Notes\Notes;
 use \Automattic\WooCommerce\Admin\Notes\Note;
 
 /**
- * Class WC_Tests_Notes_Data_Store
+ * Class WC_Admin_Tests_Notes_Data_Store
  */
-class WC_Tests_Notes_Data_Store extends WC_Unit_Test_Case {
+class WC_Admin_Tests_Notes_Data_Store extends WC_Unit_Test_Case {
 
 	/**
 	 * Tests that the read data store method works as expected.

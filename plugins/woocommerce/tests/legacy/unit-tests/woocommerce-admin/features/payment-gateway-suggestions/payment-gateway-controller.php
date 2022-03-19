@@ -8,9 +8,9 @@
 use Automattic\WooCommerce\Admin\Features\RemotePaymentMethods\PaymentGatewaysController;
 
 /**
- * class WC_Tests_PaymentGatewaySuggestions_PaymentGatewaysController
+ * class WC_Admin_Tests_PaymentGatewaySuggestions_PaymentGatewaysController
  */
-class WC_Tests_PaymentGatewaySuggestions_PaymentGatewaysController extends WC_REST_Unit_Test_Case {
+class WC_Admin_Tests_PaymentGatewaySuggestions_PaymentGatewaysController extends WC_REST_Unit_Test_Case {
 	/**
 	 * Endpoints.
 	 *

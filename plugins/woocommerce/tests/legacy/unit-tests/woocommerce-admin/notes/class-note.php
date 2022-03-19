@@ -8,9 +8,9 @@
 use \Automattic\WooCommerce\Admin\Notes\Note;
 
 /**
- * Class WC_Tests_Note
+ * Class WC_Admin_Tests_Note
  */
-class WC_Tests_Note extends WC_Unit_Test_Case {
+class WC_Admin_Tests_Note extends WC_Unit_Test_Case {
 
 	/**
 	 * Tests nonce data is added to the action.

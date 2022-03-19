@@ -8,9 +8,9 @@
 use \Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingThemes;
 
 /**
- * Class WC_Tests_Onboarding
+ * Class WC_Admin_Tests_Onboarding
  */
-class WC_Tests_Onboarding extends WC_Unit_Test_Case {
+class WC_Admin_Tests_Onboarding extends WC_Unit_Test_Case {
 
 	/**
 	 * Verifies that given an array of theme objects, the object containing Storefront will be sorted to the first position.

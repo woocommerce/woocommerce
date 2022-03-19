@@ -8,9 +8,9 @@
 use Automattic\WooCommerce\Admin\RemoteInboxNotifications\Transformers\ArrayKeys;
 
 /**
- * class WC_Tests_RemoteInboxNotifications_Transformers_ArrayKeys
+ * class WC_Admin_Tests_RemoteInboxNotifications_Transformers_ArrayKeys
  */
-class WC_Tests_RemoteInboxNotifications_Transformers_ArrayKeys extends WC_Unit_Test_Case {
+class WC_Admin_Tests_RemoteInboxNotifications_Transformers_ArrayKeys extends WC_Unit_Test_Case {
 	/**
 	 * Test it returns array values.
 	 */

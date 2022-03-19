@@ -6,9 +6,9 @@
  */
 
 /**
- * WC_Tests_API_Reports_Downloads
+ * WC_Admin_Tests_API_Reports_Downloads
  */
-class WC_Tests_API_Reports_Downloads extends WC_REST_Unit_Test_Case {
+class WC_Admin_Tests_API_Reports_Downloads extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Endpoints.

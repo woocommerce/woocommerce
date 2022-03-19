@@ -8,9 +8,9 @@
 use Automattic\WooCommerce\Admin\RemoteInboxNotifications\WCAdminActiveForRuleProcessor;
 
 /**
- * class WC_Tests_RemoteInboxNotifications_WCAdminActiveForRuleProcessor
+ * class WC_Admin_Tests_RemoteInboxNotifications_WCAdminActiveForRuleProcessor
  */
-class WC_Tests_RemoteInboxNotifications_WCAdminActiveForRuleProcessor extends WC_Unit_Test_Case {
+class WC_Admin_Tests_RemoteInboxNotifications_WCAdminActiveForRuleProcessor extends WC_Unit_Test_Case {
 	/**
 	 * Greater than 7 days evaluates to true
 	 *

@@ -11,7 +11,7 @@ use Automattic\WooCommerce\Admin\API\Reports\Controller as ReportsController;
 /**
  * WC Tests API Orders
  */
-class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
+class WC_Admin_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Endpoints.

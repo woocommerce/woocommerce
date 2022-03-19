@@ -11,9 +11,9 @@ use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
 use \Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
 
 /**
- * Class WC_Tests_API_Init
+ * Class WC_Admin_Tests_API_Init
  */
-class WC_Tests_API_Init extends WC_REST_Unit_Test_Case {
+class WC_Admin_Tests_API_Init extends WC_REST_Unit_Test_Case {
 	/**
 	 * Set up.
 	 */

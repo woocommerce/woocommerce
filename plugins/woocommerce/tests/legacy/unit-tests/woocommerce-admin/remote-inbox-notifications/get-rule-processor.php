@@ -8,9 +8,9 @@
 use Automattic\WooCommerce\Admin\RemoteInboxNotifications\GetRuleProcessor;
 
 /**
- * class WC_Tests_RemoteInboxNotifications_GetRuleProcessor
+ * class WC_Admin_Tests_RemoteInboxNotifications_GetRuleProcessor
  */
-class WC_Tests_RemoteInboxNotifications_GetRuleProcessor extends WC_Unit_Test_Case {
+class WC_Admin_Tests_RemoteInboxNotifications_GetRuleProcessor extends WC_Unit_Test_Case {
 	/**
 	 * Tests that an unknown rule processor returns a FailRuleProcessor
 	 *
