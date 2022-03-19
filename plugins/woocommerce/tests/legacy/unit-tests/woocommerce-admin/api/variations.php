@@ -8,7 +8,7 @@
 /**
  * WC Tests API Variations
  */
-class WC_Tests_API_Variations extends WC_REST_Unit_Test_Case {
+class WC_Admin_Tests_API_Variations extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Endpoints.

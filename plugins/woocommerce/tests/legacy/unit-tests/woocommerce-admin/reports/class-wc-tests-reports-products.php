@@ -16,7 +16,7 @@ use \Automattic\WooCommerce\Admin\ReportCSVExporter;
  * @package WooCommerce\Admin\Tests\Orders
  * @todo Finish up unit testing to verify bug-free product reports.
  */
-class WC_Tests_Reports_Products extends WC_Unit_Test_Case {
+class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 
 	/**
 	 * Test the calculations and querying works correctly for the base case of 1 product.

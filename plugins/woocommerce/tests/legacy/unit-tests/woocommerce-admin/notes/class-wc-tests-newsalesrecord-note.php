@@ -9,9 +9,9 @@ use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Internal\Admin\Notes\NewSalesRecord;
 
 /**
- * Class WC_Tests_NewSalesRecord_Note
+ * Class WC_Admin_Tests_NewSalesRecord_Note
  */
-class WC_Tests_NewSalesRecord_Note extends WC_Unit_Test_Case {
+class WC_Admin_Tests_NewSalesRecord_Note extends WC_Unit_Test_Case {
 
 	/**
 	 * @var string

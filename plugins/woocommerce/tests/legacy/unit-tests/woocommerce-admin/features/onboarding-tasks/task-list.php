@@ -10,9 +10,9 @@ require_once __DIR__ . '/test-task.php';
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskList;
 
 /**
- * class WC_Tests_OnboardingTasks_TaskList
+ * class WC_Admin_Tests_OnboardingTasks_TaskList
  */
-class WC_Tests_OnboardingTasks_TaskList extends WC_Unit_Test_Case {
+class WC_Admin_Tests_OnboardingTasks_TaskList extends WC_Unit_Test_Case {
 
 	/**
 	 * Task list.

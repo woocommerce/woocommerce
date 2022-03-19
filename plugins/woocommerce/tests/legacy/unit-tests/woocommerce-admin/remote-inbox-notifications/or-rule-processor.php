@@ -9,9 +9,9 @@ use Automattic\WooCommerce\Admin\RemoteInboxNotifications\OrRuleProcessor;
 use Automattic\WooCommerce\Admin\RemoteInboxNotifications\RuleEvaluator;
 
 /**
- * class WC_Tests_RemoteInboxNotifications_OrRuleProcessor
+ * class WC_Admin_Tests_RemoteInboxNotifications_OrRuleProcessor
  */
-class WC_Tests_RemoteInboxNotifications_OrRuleProcessor extends WC_Unit_Test_Case {
+class WC_Admin_Tests_RemoteInboxNotifications_OrRuleProcessor extends WC_Unit_Test_Case {
 	/**
 	 * Both operands evaluating to false and ORed together evaluates to false.
 	 *

@@ -14,7 +14,7 @@ require_once __DIR__ . '/../features/onboarding-tasks/test-task.php';
 /**
  * WC Tests API Onboarding Tasks
  */
-class WC_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
+class WC_Admin_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Endpoints.

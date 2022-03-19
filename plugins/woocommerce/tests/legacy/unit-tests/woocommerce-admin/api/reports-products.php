@@ -12,7 +12,7 @@
  * @package WooCommerce\Admin\Tests\API
  * @since 3.5.0
  */
-class WC_Tests_API_Reports_Products extends WC_REST_Unit_Test_Case {
+class WC_Admin_Tests_API_Reports_Products extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Endpoints.

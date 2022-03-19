@@ -12,7 +12,7 @@
  * @package WooCommerce\Admin\Tests\API
  * @since 3.6.4
  */
-class WC_Tests_API_Report_Controllers extends WC_REST_Unit_Test_Case {
+class WC_Admin_Tests_API_Report_Controllers extends WC_REST_Unit_Test_Case {
 	/**
 	 * Setup test admin notes data. Called before every test.
 	 *

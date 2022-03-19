@@ -9,9 +9,9 @@ use Automattic\WooCommerce\Admin\RemoteInboxNotifications\StoredStateRuleProcess
 use Automattic\WooCommerce\Admin\RemoteInboxNotifications\RuleEvaluator;
 
 /**
- * class WC_Tests_RemoteInboxNotifications_StoredStateRuleProcessor
+ * class WC_Admin_Tests_RemoteInboxNotifications_StoredStateRuleProcessor
  */
-class WC_Tests_RemoteInboxNotifications_StoredStateRuleProcessor extends WC_Unit_Test_Case {
+class WC_Admin_Tests_RemoteInboxNotifications_StoredStateRuleProcessor extends WC_Unit_Test_Case {
 	/**
 	 * Empty $stored_state evaluates to false.
 	 *

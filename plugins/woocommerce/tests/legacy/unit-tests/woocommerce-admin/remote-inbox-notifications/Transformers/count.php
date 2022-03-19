@@ -8,9 +8,9 @@
 use Automattic\WooCommerce\Admin\RemoteInboxNotifications\Transformers\Count;
 
 /**
- * class WC_Tests_RemoteInboxNotifications_Transformers_ArrayValues
+ * class WC_Admin_Tests_RemoteInboxNotifications_Transformers_ArrayValues
  */
-class WC_Tests_RemoteInboxNotifications_Transformers_ArrayCount extends WC_Unit_Test_Case {
+class WC_Admin_Tests_RemoteInboxNotifications_Transformers_ArrayCount extends WC_Unit_Test_Case {
 	/**
 	 * Test it returns array count.
 	 */

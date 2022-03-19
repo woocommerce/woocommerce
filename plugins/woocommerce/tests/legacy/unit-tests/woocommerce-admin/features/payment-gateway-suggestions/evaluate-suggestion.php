@@ -8,9 +8,9 @@
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\EvaluateSuggestion;
 
 /**
- * class WC_Tests_PaymentGatewaySuggestions_EvaluateSuggestion
+ * class WC_Admin_Tests_PaymentGatewaySuggestions_EvaluateSuggestion
  */
-class WC_Tests_PaymentGatewaySuggestions_EvaluateSuggestion extends WC_Unit_Test_Case {
+class WC_Admin_Tests_PaymentGatewaySuggestions_EvaluateSuggestion extends WC_Unit_Test_Case {
 	/**
 	 * Mock gateway option.
 	 */

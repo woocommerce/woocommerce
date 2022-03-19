@@ -9,9 +9,9 @@ use Automattic\WooCommerce\Admin\RemoteInboxNotifications\PublishBeforeTimeRuleP
 use Automattic\WooCommerce\Admin\DateTimeProvider\DateTimeProviderInterface;
 
 /**
- * class WC_Tests_RemoteInboxNotifications_PublishBeforeTimeRuleProcessor
+ * class WC_Admin_Tests_RemoteInboxNotifications_PublishBeforeTimeRuleProcessor
  */
-class WC_Tests_RemoteInboxNotifications_PublishBeforeTimeRuleProcessor extends WC_Unit_Test_Case {
+class WC_Admin_Tests_RemoteInboxNotifications_PublishBeforeTimeRuleProcessor extends WC_Unit_Test_Case {
 	/**
 	 * Get the publish_before rule.
 	 *

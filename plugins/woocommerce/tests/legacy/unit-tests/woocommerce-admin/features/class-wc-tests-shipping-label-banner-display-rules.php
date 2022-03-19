@@ -8,9 +8,9 @@
 use Automattic\WooCommerce\Internal\Admin\ShippingLabelBannerDisplayRules;
 
 /**
- * Class WC_Tests_Shipping_Label_Banner_Display_Rules
+ * Class WC_Admin_Tests_Shipping_Label_Banner_Display_Rules
  */
-class WC_Tests_Shipping_Label_Banner_Display_Rules extends WC_Unit_Test_Case {
+class WC_Admin_Tests_Shipping_Label_Banner_Display_Rules extends WC_Unit_Test_Case {
 
 	/**
 	 * Jetpack version to test the display manager.

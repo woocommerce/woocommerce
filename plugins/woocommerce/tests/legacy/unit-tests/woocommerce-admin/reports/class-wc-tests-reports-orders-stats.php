@@ -10,9 +10,9 @@ use \Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\Query as OrdersStatsQ
 use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 
 /**
- * Class WC_Tests_Reports_Orders_Stats
+ * Class WC_Admin_Tests_Reports_Orders_Stats
  */
-class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
+class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 	/**
 	 * Don't cache report data during these tests.
 	 */

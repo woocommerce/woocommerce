@@ -15,7 +15,7 @@ use \Automattic\WooCommerce\Admin\API\Reports\Variations\Query as VariationsQuer
  * @package WooCommerce\Admin\Tests\Orders
  * @todo Finish up unit testing to verify bug-free order reports.
  */
-class WC_Tests_Reports_Variations extends WC_Unit_Test_Case {
+class WC_Admin_Tests_Reports_Variations extends WC_Unit_Test_Case {
 
 	/**
 	 * Test the calculations and querying works correctly for the base case of 1 order.

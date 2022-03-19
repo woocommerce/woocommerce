@@ -10,9 +10,9 @@ use Automattic\WooCommerce\Admin\DataSourcePoller;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\PaymentGatewaySuggestionsDataSourcePoller;
 
 /**
- * class WC_Tests_PaymentGatewaySuggestions_DataSourcePoller
+ * class WC_Admin_Tests_PaymentGatewaySuggestions_DataSourcePoller
  */
-class WC_Tests_PaymentGatewaySuggestions_DataSourcePoller extends WC_Unit_Test_Case {
+class WC_Admin_Tests_PaymentGatewaySuggestions_DataSourcePoller extends WC_Unit_Test_Case {
 	/**
 	 * Set up.
 	 */

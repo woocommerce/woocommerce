@@ -7,7 +7,7 @@ use Automattic\WooCommerce\Admin\Notes\Note;
  *
  * @package WooCommerce\Admin\Tests\DBUpdates
  */
-class WC_Tests_Update_Is_Read_From_Last_Read extends WC_Unit_Test_Case {
+class WC_Admin_Tests_Update_Is_Read_From_Last_Read extends WC_Unit_Test_Case {
 	/**
 	 * @var object current user
 	 */

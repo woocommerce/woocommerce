@@ -9,9 +9,9 @@ use Automattic\WooCommerce\Admin\Features\Navigation\Favorites;
 
 
 /**
- * Class WC_Tests_Navigation_Favorites
+ * Class WC_Admin_Tests_Navigation_Favorites
  */
-class WC_Tests_Navigation_Favorites extends WC_Unit_Test_Case {
+class WC_Admin_Tests_Navigation_Favorites extends WC_Unit_Test_Case {
 
 	/**
 	 * @var Favorites

@@ -9,9 +9,9 @@ use Automattic\WooCommerce\Admin\RemoteInboxNotifications\NotRuleProcessor;
 use Automattic\WooCommerce\Admin\RemoteInboxNotifications\RuleEvaluator;
 
 /**
- * class WC_Tests_RemoteInboxNotifications_NotRuleProcessor
+ * class WC_Admin_Tests_RemoteInboxNotifications_NotRuleProcessor
  */
-class WC_Tests_RemoteInboxNotifications_NotRuleProcessor extends WC_Unit_Test_Case {
+class WC_Admin_Tests_RemoteInboxNotifications_NotRuleProcessor extends WC_Unit_Test_Case {
 	/**
 	 * An empty operand evaluates to false, so negating that should
 	 * evaluate to true.

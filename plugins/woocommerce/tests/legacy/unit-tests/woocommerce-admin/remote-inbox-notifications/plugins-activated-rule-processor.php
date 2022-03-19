@@ -9,9 +9,9 @@ use Automattic\WooCommerce\Admin\RemoteInboxNotifications\PluginsActivatedRulePr
 use Automattic\WooCommerce\Admin\PluginsProvider\PluginsProviderInterface;
 
 /**
- * class WC_Tests_RemoteInboxNotifications_PluginsActivatedRuleProcessor
+ * class WC_Admin_Tests_RemoteInboxNotifications_PluginsActivatedRuleProcessor
  */
-class WC_Tests_RemoteInboxNotifications_PluginsActivatedRuleProcessor extends WC_Unit_Test_Case {
+class WC_Admin_Tests_RemoteInboxNotifications_PluginsActivatedRuleProcessor extends WC_Unit_Test_Case {
 	/**
 	 * Tests that the processor does not pass a plugins_activated rule with
 	 * no plugins to verify.

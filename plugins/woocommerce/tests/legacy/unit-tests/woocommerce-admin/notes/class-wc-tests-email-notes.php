@@ -11,9 +11,9 @@ use \Automattic\WooCommerce\Admin\Notes\Notes;
 use \Automattic\WooCommerce\Internal\Admin\Notes\EmailNotification;
 
 /**
- * Class WC_Tests_Email_Notes
+ * Class WC_Admin_Tests_Email_Notes
  */
-class WC_Tests_Email_Notes extends WC_Unit_Test_Case {
+class WC_Admin_Tests_Email_Notes extends WC_Unit_Test_Case {
 
 	/**
 	 * Setup test admin notes data. Called before every test.

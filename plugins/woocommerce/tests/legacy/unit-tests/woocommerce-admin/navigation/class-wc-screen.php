@@ -13,9 +13,9 @@ use Automattic\WooCommerce\Admin\Features\Navigation\Screen;
  */
 
 /**
- * Class WC_Tests_Navigation_Screen
+ * Class WC_Admin_Tests_Navigation_Screen
  */
-class WC_Tests_Navigation_Screen extends WC_Unit_Test_Case {
+class WC_Admin_Tests_Navigation_Screen extends WC_Unit_Test_Case {
 
 	/**
 	 * @var Screen

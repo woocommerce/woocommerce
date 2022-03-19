@@ -10,9 +10,9 @@ use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\NoteTraits;
 
 /**
- * Class WC_Tests_NoteTraits
+ * Class WC_Admin_Tests_NoteTraits
  */
-class WC_Tests_NoteTraits extends WC_Unit_Test_Case {
+class WC_Admin_Tests_NoteTraits extends WC_Unit_Test_Case {
 
 	/** Host the traits class we are testing */
 	use NoteTraits;

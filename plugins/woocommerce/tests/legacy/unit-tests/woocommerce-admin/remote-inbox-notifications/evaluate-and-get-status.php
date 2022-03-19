@@ -8,9 +8,9 @@
 use Automattic\WooCommerce\Admin\RemoteInboxNotifications\EvaluateAndGetStatus;
 
 /**
- * class WC_Tests_RemoteInboxNotifications_EvaluateAndGetStatus
+ * class WC_Admin_Tests_RemoteInboxNotifications_EvaluateAndGetStatus
  */
-class WC_Tests_RemoteInboxNotifications_EvaluateAndGetStatus extends WC_Unit_Test_Case {
+class WC_Admin_Tests_RemoteInboxNotifications_EvaluateAndGetStatus extends WC_Unit_Test_Case {
 	/**
 	 * Build up a spec given the supplied parameters.
 	 *

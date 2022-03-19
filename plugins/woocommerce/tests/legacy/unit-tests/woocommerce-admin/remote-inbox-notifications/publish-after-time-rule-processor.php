@@ -9,9 +9,9 @@ use Automattic\WooCommerce\Admin\RemoteInboxNotifications\PublishAfterTimeRulePr
 use Automattic\WooCommerce\Admin\DateTimeProvider\DateTimeProviderInterface;
 
 /**
- * class WC_Tests_RemoteInboxNotifications_PublishAfterTimeRuleProcessor
+ * class WC_Admin_Tests_RemoteInboxNotifications_PublishAfterTimeRuleProcessor
  */
-class WC_Tests_RemoteInboxNotifications_PublishAfterTimeRuleProcessor extends WC_Unit_Test_Case {
+class WC_Admin_Tests_RemoteInboxNotifications_PublishAfterTimeRuleProcessor extends WC_Unit_Test_Case {
 	/**
 	 * Get the publish_after rule.
 	 *

@@ -9,9 +9,9 @@ use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\Notes;
 
 /**
- * Class WC_Tests_API_Admin_Notes
+ * Class WC_Admin_Tests_API_Admin_Notes
  */
-class WC_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
+class WC_Admin_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Endpoints.

@@ -10,7 +10,7 @@ use \Automattic\WooCommerce\Admin\API\Options;
 /**
  * WC Tests API Options
  */
-class WC_Tests_API_Options extends WC_REST_Unit_Test_Case {
+class WC_Admin_Tests_API_Options extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Endpoints.

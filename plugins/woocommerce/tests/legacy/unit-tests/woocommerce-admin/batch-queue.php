@@ -15,7 +15,7 @@ use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
  * @package WooCommerce\Admin\Tests\Reports
  * @since 3.5.0
  */
-class WC_Tests_Reports_Regenerate_Batching extends WC_REST_Unit_Test_Case {
+class WC_Admin_Tests_Reports_Regenerate_Batching extends WC_REST_Unit_Test_Case {
 	/**
 	 * Queue batch size.
 	 *
