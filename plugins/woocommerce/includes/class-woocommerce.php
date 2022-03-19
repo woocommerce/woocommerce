@@ -8,6 +8,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\Jetpack\My_Jetpack\Initializer as My_Jetpack;
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DownloadPermissionsAdjuster;
@@ -220,6 +221,10 @@ final class WooCommerce {
 		wc_get_container()->get( LookupDataStore::class );
 		wc_get_container()->get( RestockRefundedItemsAdjuster::class );
 		wc_get_container()->get( CustomOrdersTableController::class );
+
+		add_action( 'init', function() {
+			My_Jetpack::init();
+		} );
 	}
 
 	/**
