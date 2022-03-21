@@ -51,6 +51,7 @@ class InsightFirstProductAndPayment {
 			__( 'Yes', 'woocommerce-admin' ),
 			false,
 			Note::E_WC_ADMIN_NOTE_ACTIONED,
+			false,
 			__( 'Thanks for your feedback', 'woocommerce-admin' )
 		);
 
@@ -59,6 +60,7 @@ class InsightFirstProductAndPayment {
 			__( 'No', 'woocommerce-admin' ),
 			false,
 			Note::E_WC_ADMIN_NOTE_ACTIONED,
+			false,
 			__( 'Thanks for your feedback', 'woocommerce-admin' )
 		);
 
