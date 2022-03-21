@@ -34,5 +34,5 @@ module.exports = {
 	 *
 	 * @see https://github.com/zaqqaz/jest-allure#uses-jest-circus-or-jest--v-27-
 	 */
-	testRunner: 'jest-jasmine2',
+	testRunner: 'jasmine2',
 };
