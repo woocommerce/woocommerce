@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "95b6d7da4314500d65c7f840bf173dde",
+    "content-hash": "d2f240bf6cb97fa2dcacdbf8c5703a7a",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -39,12 +39,12 @@
                 }
             },
             "autoload": {
-                "classmap": [
-                    "src/AutoloadGenerator.php"
-                ],
                 "psr-4": {
                     "Automattic\\Jetpack\\Autoloader\\": "src"
-                }
+                },
+                "classmap": [
+                    "src/AutoloadGenerator.php"
+                ]
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -543,16 +543,16 @@
         },
         {
             "name": "woocommerce/woocommerce-admin",
-            "version": "3.2.1",
+            "version": "3.3.0-rc.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-admin.git",
-                "reference": "5988146485fb915236dae0f46120f5c8d26256c8"
+                "reference": "4bb1b565463b260b542209e23df8236b8b3b975f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/5988146485fb915236dae0f46120f5c8d26256c8",
-                "reference": "5988146485fb915236dae0f46120f5c8d26256c8",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/4bb1b565463b260b542209e23df8236b8b3b975f",
+                "reference": "4bb1b565463b260b542209e23df8236b8b3b975f",
                 "shasum": ""
             },
             "require": {
@@ -597,7 +597,8 @@
             },
             "autoload": {
                 "psr-4": {
-                    "Automattic\\WooCommerce\\Admin\\": "src/"
+                    "Automattic\\WooCommerce\\Admin\\": "src/",
+                    "Automattic\\WooCommerce\\Internal\\Admin\\": "src-internal/Admin/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -608,9 +609,9 @@
             "homepage": "https://github.com/woocommerce/woocommerce-admin",
             "support": {
                 "issues": "https://github.com/woocommerce/woocommerce-admin/issues",
-                "source": "https://github.com/woocommerce/woocommerce-admin/tree/v3.2.1"
+                "source": "https://github.com/woocommerce/woocommerce-admin/tree/v3.3.0-rc.1"
             },
-            "time": "2022-02-24T02:22:41+00:00"
+            "time": "2022-03-15T20:23:32+00:00"
         },
         {
             "name": "woocommerce/woocommerce-blocks",
@@ -727,16 +728,16 @@
         },
         {
             "name": "bamarni/composer-bin-plugin",
-            "version": "1.4.1",
+            "version": "v1.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/bamarni/composer-bin-plugin.git",
-                "reference": "9329fb0fbe29e0e1b2db8f4639a193e4f5406225"
+                "reference": "49934ffea764864788334c1485fbb08a4b852031"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/bamarni/composer-bin-plugin/zipball/9329fb0fbe29e0e1b2db8f4639a193e4f5406225",
-                "reference": "9329fb0fbe29e0e1b2db8f4639a193e4f5406225",
+                "url": "https://api.github.com/repos/bamarni/composer-bin-plugin/zipball/49934ffea764864788334c1485fbb08a4b852031",
+                "reference": "49934ffea764864788334c1485fbb08a4b852031",
                 "shasum": ""
             },
             "require": {
@@ -771,9 +772,9 @@
             ],
             "support": {
                 "issues": "https://github.com/bamarni/composer-bin-plugin/issues",
-                "source": "https://github.com/bamarni/composer-bin-plugin/tree/master"
+                "source": "https://github.com/bamarni/composer-bin-plugin/tree/v1.5.0"
             },
-            "time": "2020-05-03T08:27:20+00:00"
+            "time": "2022-02-22T21:01:25+00:00"
         },
         {
             "name": "doctrine/instantiator",
@@ -857,12 +858,12 @@
             },
             "type": "library",
             "autoload": {
-                "psr-4": {
-                    "DeepCopy\\": "src/DeepCopy/"
-                },
                 "files": [
                     "src/DeepCopy/deep_copy.php"
-                ]
+                ],
+                "psr-4": {
+                    "DeepCopy\\": "src/DeepCopy/"
+                }
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -2511,12 +2512,12 @@
                 }
             },
             "autoload": {
-                "psr-4": {
-                    "Symfony\\Polyfill\\Ctype\\": ""
-                },
                 "files": [
                     "bootstrap.php"
-                ]
+                ],
+                "psr-4": {
+                    "Symfony\\Polyfill\\Ctype\\": ""
+                }
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -2590,12 +2591,12 @@
                 }
             },
             "autoload": {
-                "psr-4": {
-                    "Symfony\\Polyfill\\Mbstring\\": ""
-                },
                 "files": [
                     "bootstrap.php"
-                ]
+                ],
+                "psr-4": {
+                    "Symfony\\Polyfill\\Mbstring\\": ""
+                }
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -2824,12 +2825,12 @@
             },
             "type": "library",
             "autoload": {
-                "psr-4": {
-                    "Wikimedia\\AtEase\\": "src/Wikimedia/AtEase/"
-                },
                 "files": [
                     "src/Wikimedia/Functions.php"
-                ]
+                ],
+                "psr-4": {
+                    "Wikimedia\\AtEase\\": "src/Wikimedia/AtEase/"
+                }
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -2926,5 +2927,5 @@
     "platform-overrides": {
         "php": "7.0.33"
     },
-    "plugin-api-version": "2.1.0"
+    "plugin-api-version": "2.2.0"
 }
