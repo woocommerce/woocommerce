@@ -11,6 +11,7 @@ import { AdminNotes } from '../admin-notes';
 import { default as Tools } from '../tools';
 import { default as Options } from '../options';
 import { default as Experiments } from '../experiments';
+import { default as Features } from '../features';
 
 const tabs = applyFilters('woocommerce_admin_test_helper_tabs', [
 	{
@@ -32,6 +33,11 @@ const tabs = applyFilters('woocommerce_admin_test_helper_tabs', [
 		name: 'experiments',
 		title: 'Experiments',
 		content: <Experiments />,
+	},
+	{
+		name: 'features',
+		title: 'Features',
+		content: <Features />,
 	},
 ]);
 
