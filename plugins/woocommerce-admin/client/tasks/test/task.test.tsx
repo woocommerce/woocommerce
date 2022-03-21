@@ -12,12 +12,30 @@ import { WooOnboardingTask } from '@woocommerce/onboarding';
  */
 import { Task } from '../task';
 
-jest.mock( '@wordpress/data' );
+jest.mock( '@wordpress/data', () => {
+	// Require the original module to not be mocked...
+	const originalModule = jest.requireActual( '@wordpress/data' );
 
-jest.mock( '@woocommerce/navigation', () => ( {
-	getHistory: jest.fn(),
-	getNewPath: () => 'new-path',
-} ) );
+	return {
+		__esModule: true, // Use it when dealing with esModules
+		...originalModule,
+		useDispatch: jest.fn(),
+		useSelect: jest.fn().mockReturnValue( {} ),
+	};
+} );
+
+jest.mock( '@woocommerce/navigation', () => {
+	// Require the original module to not be mocked...
+	const originalModule = jest.requireActual( '@woocommerce/navigation' );
+
+	return {
+		__esModule: true, // Use it when dealing with esModules
+		...originalModule,
+		getPersistedQuery: jest.fn().mockReturnValue( {} ),
+		getHistory: jest.fn(),
+		getNewPath: () => 'new-path',
+	};
+} );
 
 jest.mock( '@woocommerce/onboarding', () => ( {
 	WooOnboardingTask: {
