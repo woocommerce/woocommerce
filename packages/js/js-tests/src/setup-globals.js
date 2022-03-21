@@ -107,7 +107,7 @@ wooCommercePackages.forEach( ( lib ) => {
 	} );
 } );
 
-const config = require( '../../../config/development.json' );
+const config = require( '../../../../plugins/woocommerce-admin/config/development.json' );
 
 // Check if test is jsdom or node
 if ( global.window ) {
