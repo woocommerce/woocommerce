@@ -363,7 +363,7 @@ function wc_admin_update_300_db_version() {
  */
 function wc_admin_update_340_remove_is_primary_from_note_action() {
 	global $wpdb;
-	$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_admin_note_actions DROP COLUMN `is_primary`" );
+	// $wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_admin_note_actions DROP COLUMN `is_primary`" );
 }
 
 /**
