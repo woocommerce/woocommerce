@@ -1,0 +1,48 @@
+version: '3'
+
+services:
+    phpunit:
+        build:
+            context: '.'
+            args:
+                - PHP_VERSION=${PHP_VERSION:-7}
+        image: wc-admin-php-${PHP_VERSION:-7}-test-suite-phpunit:1.2.2
+        volumes:
+            - 'test-suite-php-${PHP_VERSION:-7}:/tmp'
+            - '../../:/app'
+        environment:
+            - WC_CORE_DIR=/tmp/wordpress/wp-content/plugins/woocommerce
+            - WC_VERSION=${WC_VERSION:-4.8.0}
+            - WP_VERSION=${WP_VERSION:-5.4}
+            - PHP_VERSION=${PHP_VERSION:-7}
+            - DB_USER=root
+            - DB_PASS=password
+            - DB_NAME=wordpress_test
+            - DB_HOST=phpunit-db
+        depends_on:
+            - phpunit-db
+
+    phpunit-db:
+        image: mariadb:10.8.2
+        hostname: 'phpunit-db'
+        environment:
+            MYSQL_DATABASE: 'wordpress_test'
+            MYSQL_ROOT_PASSWORD: 'password'
+        healthcheck:
+            test:
+                [
+                    'CMD',
+                    'mysqladmin',
+                    'ping',
+                    '-h',
+                    'localhost',
+                    '-u',
+                    'root',
+                    '-ppassword',
+                ]
+            interval: 10s
+            timeout: 5s
+
+volumes:
+    test-suite-php-7: {}
+    test-suite-php-8: {}

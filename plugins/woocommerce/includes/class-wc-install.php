@@ -8,6 +8,8 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
+use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
+use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize as Download_Directories_Sync;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper as WCConnectionHelper;
 
@@ -184,6 +186,7 @@ class WC_Install {
 		),
 		'6.4.0' => array(
 			'wc_update_640_add_primary_key_to_product_attributes_lookup_table',
+			'wc_update_640_approved_download_directories',
 			'wc_update_640_db_version',
 		),
 	);
@@ -681,6 +684,9 @@ class WC_Install {
 			// Define initial tax classes.
 			WC_Tax::create_tax_class( __( 'Reduced rate', 'woocommerce' ) );
 			WC_Tax::create_tax_class( __( 'Zero rate', 'woocommerce' ) );
+
+			// For new installs, setup and enable Approved Product Download Directories.
+			wc_get_container()->get( Download_Directories_Sync::class )->init_feature( false, true );
 		}
 	}
 
@@ -1084,6 +1090,13 @@ CREATE TABLE {$wpdb->prefix}wc_rate_limits (
   UNIQUE KEY rate_limit_key (rate_limit_key($max_index_length))
 ) $collate;
 $product_attributes_lookup_table_creation_sql
+CREATE TABLE {$wpdb->prefix}wc_product_download_directories (
+	url_id BIGINT UNSIGNED NOT NULL auto_increment,
+	url varchar(256) NOT NULL,
+	enabled TINYINT(1) NOT NULL DEFAULT 0,
+	PRIMARY KEY (url_id),
+	KEY `url` (`url`)
+) $collate;
 		";
 
 		return $tables;
@@ -1100,6 +1113,7 @@ $product_attributes_lookup_table_creation_sql
 
 		$tables = array(
 			"{$wpdb->prefix}wc_download_log",
+			"{$wpdb->prefix}wc_product_download_directories",
 			"{$wpdb->prefix}wc_product_meta_lookup",
 			"{$wpdb->prefix}wc_tax_rate_classes",
 			"{$wpdb->prefix}wc_webhooks",

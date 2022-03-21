@@ -447,7 +447,12 @@ export default class TransferIssues extends Command {
 
 			return transferIssue.issue.id;
 		} catch ( err ) {
-			CliUx.ux.action.stop( 'Failed to migrate issue' );
+			if ( err instanceof GraphqlResponseError && err.errors ) {
+				CliUx.ux.action.stop( err.errors[0].message );
+			} else {
+				CliUx.ux.action.stop( 'Failed to migrate issue' );
+			}
+
 			return null;
 		} finally {
 			CliUx.ux.action.stop();

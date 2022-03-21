@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "369384114486b5ec560e8481185344d5",
+    "content-hash": "9b47cf03d758a6131bd2b4686b1b2003",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -540,77 +540,6 @@
                 "source": "https://github.com/woocommerce/action-scheduler/tree/3.4.0"
             },
             "time": "2021-10-28T17:09:12+00:00"
-        },
-        {
-            "name": "woocommerce/woocommerce-admin",
-            "version": "3.2.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/woocommerce/woocommerce-admin.git",
-                "reference": "5988146485fb915236dae0f46120f5c8d26256c8"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-admin/zipball/5988146485fb915236dae0f46120f5c8d26256c8",
-                "reference": "5988146485fb915236dae0f46120f5c8d26256c8",
-                "shasum": ""
-            },
-            "require": {
-                "automattic/jetpack-autoloader": "^2.9.1",
-                "composer/installers": "^1.9.0",
-                "php": ">=7.0"
-            },
-            "require-dev": {
-                "automattic/jetpack-changelogger": "^1.1",
-                "bamarni/composer-bin-plugin": "^1.4",
-                "suin/phpcs-psr4-sniff": "^2.2",
-                "woocommerce/woocommerce-sniffs": "0.1.0",
-                "yoast/phpunit-polyfills": "^1.0"
-            },
-            "type": "wordpress-plugin",
-            "extra": {
-                "scripts-description": {
-                    "test": "Run unit tests",
-                    "phpcs": "Analyze code against the WordPress coding standards with PHP_CodeSniffer",
-                    "phpcbf": "Fix coding standards warnings/errors automatically with PHP Code Beautifier"
-                },
-                "bamarni-bin": {
-                    "target-directory": "bin/composer"
-                },
-                "changelogger": {
-                    "changelog": "./changelog.txt",
-                    "formatter": {
-                        "filename": "bin/changelogger/WCAdminFormatter.php"
-                    },
-                    "versioning": "semver",
-                    "changes-dir": "./changelogs",
-                    "types": [
-                        "Fix",
-                        "Add",
-                        "Update",
-                        "Dev",
-                        "Tweak",
-                        "Performance",
-                        "Enhancement"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Automattic\\WooCommerce\\Admin\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "GPL-3.0-or-later"
-            ],
-            "description": "A modern, javascript-driven WooCommerce Admin experience.",
-            "homepage": "https://github.com/woocommerce/woocommerce-admin",
-            "support": {
-                "issues": "https://github.com/woocommerce/woocommerce-admin/issues",
-                "source": "https://github.com/woocommerce/woocommerce-admin/tree/v3.2.1"
-            },
-            "time": "2022-02-24T02:22:41+00:00"
         },
         {
             "name": "woocommerce/woocommerce-blocks",
@@ -2931,5 +2860,5 @@
     "platform-overrides": {
         "php": "7.0.33"
     },
-    "plugin-api-version": "2.0.0"
+    "plugin-api-version": "2.2.0"
 }

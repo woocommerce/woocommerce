@@ -1,0 +1,5 @@
+Significance: patch
+Type: Dev
+Comment: This is an insignificant change that adds TypeScript type annotations. #8020
+
+
