@@ -58,6 +58,17 @@ class WC_Tests_NoteTraits extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test should convert to array if it's a stdClass object.
+	 * @return void
+	 */
+	public function test_possibly_convert_object_to_array() {
+		$this->assertEquals( self::possibly_convert_object_to_array( new stdClass() ), array() );
+		$this->assertEquals( self::possibly_convert_object_to_array( 1 ), 1 );
+		$this->assertEquals( self::possibly_convert_object_to_array( 'string' ), 'string' );
+	}
+
+
+	/**
 	 * Method required to use NoteTraits.
 	 *
 	 * @return Note
