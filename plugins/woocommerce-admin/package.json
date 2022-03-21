@@ -101,7 +101,6 @@
 		"@wordpress/components": "^19.5.0",
 		"@wordpress/compose": "^5.1.2",
 		"@wordpress/core-data": "^4.1.2",
-		"@wordpress/data": "^6.3.0",
 		"@wordpress/data-controls": "^2.3.2",
 		"@wordpress/date": "^4.3.1",
 		"@wordpress/dom": "^3.3.2",
@@ -277,6 +276,9 @@
 		"webpack-fix-style-only-entries": "^0.6.1",
 		"webpack-merge": "^5.8.0",
 		"webpack-rtl-plugin": "^2.0.0"
+	},
+	"peerDependencies": {
+		"@wordpress/data": "^6.3.0"
 	},
 	"engines": {
 		"node": ">=12.20.1 <15",
