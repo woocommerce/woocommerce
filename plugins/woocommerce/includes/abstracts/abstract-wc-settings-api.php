@@ -331,12 +331,18 @@ abstract class WC_Settings_API {
 				$html .= $this->{'generate_' . $type . '_html'}( $k, $v );
 			} elseif ( has_filter( 'woocommerce_generate_' . $type . '_html' ) ) {
 				/**
-				 * Allow the generation of custom field types on the settings screen
+				 * Allow the generation of custom field types on the settings screen.
 				 *
-				 * @param string $field_html The markup of the field being generated (initiated as an empty string)
-				 * @param string $key The key of the field
-				 * @param array  $data The attributes of the field as an associative array
-				 * @param object $wc_settings The current WC_Settings_API object
+				 * The dynamic portion of the hook name refers to the slug of the custom field type.
+				 * For instance, to introduce a new field type `fancy_lazy_dropdown` you would use
+				 * the hook `woocommerce_generate_fancy_lazy_dropdown_html`.
+				 *
+				 * @since 6.5.0
+				 *
+				 * @param string $field_html The markup of the field being generated (initiated as an empty string).
+				 * @param string $key The key of the field.
+				 * @param array  $data The attributes of the field as an associative array.
+				 * @param object $wc_settings The current WC_Settings_API object.
 				 */
 				$html .= apply_filters( 'woocommerce_generate_' . $type . '_html', '', $k, $v, $this );
 			} else {
