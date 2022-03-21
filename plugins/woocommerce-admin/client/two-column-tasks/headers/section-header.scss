@@ -1,0 +1,12 @@
+.woocommerce-task-section-header__container {
+	display: flex;
+
+	.illustration-background {
+		max-width: 150px;
+		margin-left: $gap;
+	}
+
+	.woocommerce-task-header__contents p {
+		font-size: 16px;
+	}
+}

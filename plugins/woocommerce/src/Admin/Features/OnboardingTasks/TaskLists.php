@@ -93,7 +93,7 @@ class TaskLists {
 					'Appearance',
 				),
 				'event_prefix' => 'tasklist_',
-				'visible'      => ! Features::is_enabled( 'tasklist-setup-experiment-1' ),
+				'visible'      => ! Features::is_enabled( 'tasklist-setup-experiment-1' ) && ! Features::is_enabled( 'tasklist-setup-experiment-2' ),
 			)
 		);
 
@@ -118,6 +118,62 @@ class TaskLists {
 					'use_completed_title' => true,
 				),
 				'visible'                 => Features::is_enabled( 'tasklist-setup-experiment-1' ),
+			)
+		);
+
+		self::add_list(
+			array(
+				'id'           => 'setup_experiment_2',
+				'hidden_id'    => 'setup',
+				'title'        => __( 'Get ready to start selling', 'woocommerce-admin' ),
+				'tasks'        => array(
+					'StoreCreation',
+					'StoreDetails',
+					'Products',
+					'WooCommercePayments',
+					'Payments',
+					'Tax',
+					'Shipping',
+					'Marketing',
+					'Appearance',
+				),
+				'event_prefix' => 'tasklist_',
+				'visible'      => Features::is_enabled( 'tasklist-setup-experiment-2' ),
+				'options'      => array(
+					'use_completed_title' => true,
+				),
+				'sections'     => array(
+					array(
+						'id'          => 'basics',
+						'title'       => __( 'Cover the basics', 'woocommerce-admin' ),
+						'description' => __( 'Make sure you’ve got everything you need to start selling—from business details to products.', 'woocommerce-admin' ),
+						'image'       => plugins_url(
+							'/images/task_list/basics-section-illustration.png',
+							WC_ADMIN_PLUGIN_FILE
+						),
+						'task_names'  => array( 'StoreCreation', 'StoreDetails', 'Products', 'Payments', 'WooCommercePayments' ),
+					),
+					array(
+						'id'          => 'sales',
+						'title'       => __( 'Get ready to sell', 'woocommerce-admin' ),
+						'description' => __( 'Easily set up the backbone of your store’s operations and get ready to accept first orders.', 'woocommerce-admin' ),
+						'image'       => plugins_url(
+							'/images/task_list/sales-section-illustration.png',
+							WC_ADMIN_PLUGIN_FILE
+						),
+						'task_names'  => array( 'Shipping', 'Tax' ),
+					),
+					array(
+						'id'          => 'expand',
+						'title'       => __( 'Customize & expand', 'woocommerce-admin' ),
+						'description' => __( 'Personalize your store’s design and grow your business by enabling new sales channels.', 'woocommerce-admin' ),
+						'image'       => plugins_url(
+							'/images/task_list/expand-section-illustration.png',
+							WC_ADMIN_PLUGIN_FILE
+						),
+						'task_names'  => array( 'Appearance', 'Marketing' ),
+					),
+				),
 			)
 		);
 
