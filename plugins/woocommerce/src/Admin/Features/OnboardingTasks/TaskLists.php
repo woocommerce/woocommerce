@@ -98,10 +98,10 @@ class TaskLists {
 
 		self::add_list(
 			array(
-				'id'           => 'setup_experiment_1',
-				'hidden_id'    => 'setup',
-				'title'        => __( 'Get ready to start selling', 'woocommerce-admin' ),
-				'tasks'        => array(
+				'id'                      => 'setup_experiment_1',
+				'hidden_id'               => 'setup',
+				'title'                   => __( 'Get ready to start selling', 'woocommerce-admin' ),
+				'tasks'                   => array(
 					'StoreDetails',
 					'Products',
 					'WooCommercePayments',
@@ -111,11 +111,12 @@ class TaskLists {
 					'Marketing',
 					'Appearance',
 				),
-				'event_prefix' => 'tasklist_',
-				'options'      => array(
+				'display_progress_header' => true,
+				'event_prefix'            => 'tasklist_',
+				'options'                 => array(
 					'use_completed_title' => true,
 				),
-				'visible'      => Features::is_enabled( 'tasklist-setup-experiment-1' ),
+				'visible'                 => Features::is_enabled( 'tasklist-setup-experiment-1' ),
 			)
 		);
 

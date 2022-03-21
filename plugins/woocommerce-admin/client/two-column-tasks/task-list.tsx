@@ -24,6 +24,7 @@ import taskHeaders from './task-headers';
 import DismissModal from './dismiss-modal';
 import TaskListCompleted from './completed';
 import { TaskListProps } from '~/tasks/task-list';
+import { ProgressHeader } from '~/task-lists/progress-header';
 
 export const TaskList: React.FC< TaskListProps > = ( {
 	query,
@@ -33,6 +34,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 	twoColumns,
 	keepCompletedTaskList,
 	isComplete,
+	displayProgressHeader,
 } ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
 	const { updateOptions, dismissTask, undoDismissTask } = useDispatch(
@@ -223,6 +225,9 @@ export const TaskList: React.FC< TaskListProps > = ( {
 					hideTasks={ hideTasks }
 				/>
 			) }
+			{ displayProgressHeader ? (
+				<ProgressHeader taskListId={ id } />
+			) : null }
 			<div
 				className={ classnames(
 					`woocommerce-task-dashboard__container two-column-experiment woocommerce-task-list__${ id }`,
@@ -241,7 +246,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 									headerData
 								) }
 						</div>
-						{ renderMenu() }
+						{ ! displayProgressHeader && renderMenu() }
 					</div>
 					<List animation="custom">
 						{ visibleTasks.map( ( task, index ) => {

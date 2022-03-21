@@ -6,8 +6,9 @@ export type TaskType = {
 	isComplete: boolean;
 	isDismissable: boolean;
 	isDismissed: boolean;
-	isVisible: boolean;
 	isSnoozed: boolean;
+	isVisible: boolean;
+	isVisited: boolean;
 	isSnoozable: boolean;
 	snoozedUntil: number;
 	time: string;
@@ -24,4 +25,5 @@ export type TaskListType = {
 	tasks: TaskType[];
 	title: string;
 	eventPrefix: string;
+	displayProgressHeader: boolean;
 };
