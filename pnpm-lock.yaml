@@ -119,14 +119,18 @@ importers:
 
   packages/js/api-core-tests:
     specifiers:
+      allure-commandline: ^2.17.2
       dotenv: ^10.0.0
       jest: ^25.1.0
+      jest-allure: ^0.1.3
       jest-runner-groups: ^2.1.0
       postman-collection: ^4.1.0
       supertest: ^6.1.4
     dependencies:
+      allure-commandline: 2.17.2
       dotenv: 10.0.0
       jest: 25.5.4
+      jest-allure: 0.1.3
       jest-runner-groups: 2.1.0
       postman-collection: 4.1.0
       supertest: 6.1.6
@@ -6554,12 +6558,12 @@ packages:
     dependencies:
       ajv: 6.12.6
       debug: 4.3.3
-      espree: 9.0.0
+      espree: 9.3.1
       globals: 13.12.0
       ignore: 4.0.6
       import-fresh: 3.3.0
       js-yaml: 3.14.1
-      minimatch: 3.0.4
+      minimatch: 3.1.2
       strip-json-comments: 3.1.1
     transitivePeerDependencies:
       - supports-color
@@ -11891,6 +11895,10 @@ packages:
     resolution: {integrity: sha512-eZxlbI8GZscaGS7kkc/trHTT5xgrjH3/1n2JDwusC9iahPKWMRvRjJSAN5mCXviuTGQ/lHnhvv8Q1YTpnfz9gA==}
     dev: true
 
+  /@types/allure-js-commons/0.0.0:
+    resolution: {integrity: sha512-LvREMEGmh0oZIQ11d/vt6BSv6CD0w3berVRRFrpgDVkRhAu+UFkreDrRrdl+01PFjf7/J0lJV1UrhVyRS2tOWA==}
+    dev: false
+
   /@types/aria-query/4.2.2:
     resolution: {integrity: sha512-HnYpAE1Y6kRyKM/XkEuiRQhTHvkzMBurTHnpFLYLBGPIylZNPs9jJcuOOYWxPLJCSEtmZT0Y8rHDokKN7rRTig==}
 
@@ -12060,7 +12068,7 @@ packages:
   /@types/is-stream/1.1.0:
     resolution: {integrity: sha512-jkZatu4QVbR60mpIzjINmtS1ZF4a/FqdTUTBeQDVOQ2PYyidtwFKr0B5G6ERukKwliq+7mIXvxyppwzG5EgRYg==}
     dependencies:
-      '@types/node': 16.10.3
+      '@types/node': 17.0.21
     dev: false
 
   /@types/istanbul-lib-coverage/2.0.3:
@@ -12081,6 +12089,10 @@ packages:
     resolution: {integrity: sha512-c3mAZEuK0lvBp8tmuL74XRKn1+y2dcwOUpH7x4WrF6gk1GIgiluDRgMYQtw2OFcBvAJWlt6ASU3tSqxp0Uu0Aw==}
     dependencies:
       '@types/istanbul-lib-report': 3.0.0
+
+  /@types/jest/22.2.3:
+    resolution: {integrity: sha512-e74sM9W/4qqWB6D4TWV9FQk0WoHtX1X4FJpbjxucMSVJHtFjbQOH3H6yp+xno4br0AKG0wz/kPtaN599GUOvAg==}
+    dev: false
 
   /@types/jest/26.0.23:
     resolution: {integrity: sha512-ZHLmWMJ9jJ9PTiT58juykZpL7KjwJywFN3Rr2pTSkyQfydf/rk22yS7W8p5DaVUMQ2BQC7oYiU3FjbTM/mYrOA==}
@@ -12144,6 +12156,10 @@ packages:
       '@types/node': 17.0.21
       form-data: 3.0.1
     dev: true
+
+  /@types/node/10.17.60:
+    resolution: {integrity: sha512-F0KIgDJfy2nA3zMLmWGKxcH2ZVEtCZXHHdOQs2gSaQ27+lNeEfGxzkIw90aXswATX7AZ33tahPbzy6KAfUreVw==}
+    dev: false
 
   /@types/node/13.13.5:
     resolution: {integrity: sha512-3ySmiBYJPqgjiHA7oEaIo2Rzz0HrOZ7yrNO5HWyaE5q0lQ3BppDZ3N53Miz8bw2I7gh1/zir2MGVZBvpb1zq9g==}
@@ -12298,6 +12314,10 @@ packages:
 
   /@types/stack-utils/2.0.1:
     resolution: {integrity: sha512-Hl219/BT5fLAaz6NDkSuhzasy49dwQS/DSdu4MdggFB8zcXv7vflBI3xp7FEmkmdDkBUI2bPUNeMttp2knYdxw==}
+
+  /@types/strip-ansi/3.0.0:
+    resolution: {integrity: sha1-m2PUU6a1SqhJGCIHcRoIvo7qSK4=}
+    dev: false
 
   /@types/tapable/1.0.8:
     resolution: {integrity: sha512-ipixuVrh2OdNmauvtT51o3d8z12p6LtFW9in7U79der/kwejjdNchQC5UMn5u/KxNoM7VHHOs/l8KS8uHxhODQ==}
@@ -15149,6 +15169,22 @@ packages:
       json-schema-traverse: 1.0.0
       require-from-string: 2.0.2
       uri-js: 4.4.1
+
+  /allure-commandline/2.17.2:
+    resolution: {integrity: sha512-2a0M0nX1KtVrg4y0rWEFn/OQkv7AaQSMBOEtlKfQl3heZoTEo0IdB08Uk5vU390+qPsEv3EO5igjyCrS0gX+FQ==}
+    hasBin: true
+    dev: false
+
+  /allure-js-commons/1.3.2:
+    resolution: {integrity: sha512-FTmoqP36ZjHFT4iLdYamyCFhyj1jqD6BIdiZ5pBlyafDJrFRV76XIXNxwRqbHpSw40o1vHzYi4vGpmREnhnHVw==}
+    dependencies:
+      file-type: 7.7.1
+      fs-extra: 6.0.1
+      js2xmlparser: 3.0.0
+      mime: 2.5.2
+      object-assign: 4.1.1
+      uuid: 3.4.0
+    dev: false
 
   /alphanum-sort/1.0.2:
     resolution: {integrity: sha1-l6ERlkmyEa0zaR2fn0hqjsn74KM=}
@@ -21716,6 +21752,11 @@ packages:
     engines: {node: '>=0.10.0'}
     dev: false
 
+  /file-type/7.7.1:
+    resolution: {integrity: sha512-bTrKkzzZI6wH+NXhyD3SOXtb2zXTw2SbwI2RxUlRcXVsnN7jNL5hJzVQLYv7FOQhxFkK4XWdAflEaWFpaLLWpQ==}
+    engines: {node: '>=4'}
+    dev: false
+
   /file-uri-to-path/1.0.0:
     resolution: {integrity: sha512-0Zt+s3L7Vf1biwWZ29aARiVYLx7iMGnEUl9x33fbB/j3jR81u/O2LbqK+Bm1CDSNDKVtJ/YjwY7TUd5SkeLQLw==}
 
@@ -22294,10 +22335,9 @@ packages:
   /fs-extra/6.0.1:
     resolution: {integrity: sha512-GnyIkKhhzXZUWFCaJzvyDLEEgDkPfb4/TPvJCJVuS8MWZgoSsErf++QpiAlDnKFcqhRlm+tIOcencCjyJE6ZCA==}
     dependencies:
-      graceful-fs: 4.2.8
+      graceful-fs: 4.2.9
       jsonfile: 4.0.0
       universalify: 0.1.2
-    dev: true
 
   /fs-extra/8.1.0:
     resolution: {integrity: sha512-yhlQgA6mnOJUKOsRUFsgJdQCvkKhcz8tlZG5HBQfReYZy46OwLcY+Zia0mtdHsOo9y/hP+CxMN0TU9QxoOtG4g==}
@@ -25164,6 +25204,17 @@ packages:
       filelist: 1.0.2
       minimatch: 3.0.4
 
+  /jest-allure/0.1.3:
+    resolution: {integrity: sha512-EkO3LmkPx/a4VDg81JKtdy6kFXI0D1rHRIJ5Sa9MZaGtFYpgiCJFa6XwTgIySaVN+3+QBbIt1558CEkIW7FKFA==}
+    dependencies:
+      '@types/allure-js-commons': 0.0.0
+      '@types/jest': 22.2.3
+      '@types/node': 10.17.60
+      '@types/strip-ansi': 3.0.0
+      allure-js-commons: 1.3.2
+      strip-ansi: 4.0.0
+    dev: false
+
   /jest-changed-files/24.9.0:
     resolution: {integrity: sha512-6aTWpe2mHF0DhL28WjdkO8LyGjs3zItPET4bMSeXU6T3ub4FPMw+mcOcbdGXQOAfmLcxofD23/5Bl9Z4AkFwqg==}
     engines: {node: '>= 6'}
@@ -27205,6 +27256,12 @@ packages:
     dependencies:
       argparse: 2.0.1
 
+  /js2xmlparser/3.0.0:
+    resolution: {integrity: sha1-P7YOqgicVED5MZ9RdgzNB+JJlzM=}
+    dependencies:
+      xmlcreate: 1.0.2
+    dev: false
+
   /jsbn/0.1.1:
     resolution: {integrity: sha1-peZUwuWi3rXyAdls77yoDA7y9RM=}
 
@@ -27411,7 +27468,6 @@ packages:
     resolution: {integrity: sha1-h3Gq4HmbZAdrdmQPygWPnBDjPss=}
     optionalDependencies:
       graceful-fs: 4.2.9
-    dev: true
 
   /jsonfile/6.1.0:
     resolution: {integrity: sha512-5dgndWOriYSm5cnYaJNhalLNDKOqFwyDB/rr1E9ZsGciGvKPs8R2xYGCacuf3z6K1YKDz182fd+fY3cn3pMqXQ==}
@@ -37328,7 +37384,6 @@ packages:
   /universalify/0.1.2:
     resolution: {integrity: sha512-rBJeI5CXAlmy1pV+617WB9J63U6XcazHHF2f2dbJix4XzpUF0RS3Zbj0FGIOCAva5P/d/GBOYaACQ1w+0azUkg==}
     engines: {node: '>= 4.0.0'}
-    dev: true
 
   /universalify/2.0.0:
     resolution: {integrity: sha512-hAZsKq7Yy11Zu1DE0OzWjw7nnLZmJZYTDZZyEFHZdUhV8FkH5MCfoU1XMaxXovpyW5nq5scPqq0ZDP9Zyl04oQ==}
@@ -38835,6 +38890,10 @@ packages:
 
   /xmlchars/2.2.0:
     resolution: {integrity: sha512-JZnDKK8B0RCDw84FNdDAIpZK+JuJw+s7Lz8nksI7SIuU3UXJJslUthsi+uWBUYOwPFwW7W7PRLRfUKpxjtjFCw==}
+
+  /xmlcreate/1.0.2:
+    resolution: {integrity: sha1-+mv3YqYKQT+z3Y9LA8WyaSONMI8=}
+    dev: false
 
   /xtend/4.0.2:
     resolution: {integrity: sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ==}
