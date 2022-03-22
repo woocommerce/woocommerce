@@ -1,5 +1,5 @@
 {
-  "name": "blocks-template",
+  "name": "@woocommerce/create-block-template",
   "version": "1.21.0",
   "description": "",
   "main": "index.js",
@@ -8,13 +8,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/woocommerce/blocks-template.git"
+    "url": "git+https://github.com/woocommerce/woocommerce.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/woocommerce/blocks-template/issues"
+    "url": "https://github.com/woocommerce/woocommerce/issues"
   },
-  "homepage": "https://github.com/woocommerce/blocks-template#readme"
+  "homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/create-block-template#readme"
 }

@@ -359,6 +359,9 @@ importers:
       webpack: 5.70.0_webpack-cli@3.3.12
       webpack-cli: 3.3.12_webpack@5.70.0
 
+  packages/js/create-block-template:
+    specifiers: {}
+
   packages/js/csv-export:
     specifiers:
       '@babel/core': ^7.17.5
