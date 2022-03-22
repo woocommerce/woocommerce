@@ -195,13 +195,13 @@ class WC_Tests_NoteTraits extends WC_Unit_Test_Case {
 			->willReturn( $actions1 );
 
 		$note1->expects( $this->once() )
-		->method( 'set_actions' )
-		->with( $actions2 );
+			->method( 'set_actions' )
+			->with( $actions2 );
 
 		$note2 = $this->createMock( Note::class );
 		$note2->expects( $this->exactly( 2 ) )
-		->method( 'get_actions' )
-		->willReturn( $actions2 );
+			->method( 'get_actions' )
+			->willReturn( $actions2 );
 
 		$this->assertTrue( self::update_note_field_if_changed( $note1, $note2, 'actions' ) );
 	}
