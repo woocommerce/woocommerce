@@ -1,5 +1,7 @@
 # Unreleased
 
+# 2.1.0
+
 -   Add missing dependencies. #8349
 -   Update all js packages with minor/patch version changes. #8392
 -   Add `@wordpress/api-fetch` as dependencies. #8428

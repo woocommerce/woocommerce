@@ -1,5 +1,7 @@
 # Unreleased
 
+# 3.1.0
+
 -   Add "moment" to peerDependencies. #8349
 -   Update all js packages with minor/patch version changes. #8392
 -   Fix type errors. #8392

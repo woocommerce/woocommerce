@@ -1,5 +1,7 @@
 # Unreleased
 
+# 1.0.0
+
 -   Add returned type annotations and remove unused vars. #8020
 
 -   Add E2E tests for checking store currency if it matches the onboarded country. #7712
