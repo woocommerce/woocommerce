@@ -279,7 +279,7 @@ class WC_Download_Handler {
 			$file_path = (is_ssl() ? 'https:' : 'http:') . $file_path;
 			return array(
 				'remote_file' => true,
-				'file_path'   => apply_filters( 'woocommerce_download_parse_file_path', $file_path, true ),
+				'file_path'   => apply_filters( 'woocommerce_download_parse_remote_file_path', $file_path, true ),
 			);
 		}
 
