@@ -45,6 +45,15 @@ export async function getElementData( selector, dataKey, root = page ) {
  * If the element is an `input` it will get the `value`, otherwise,
  * it will get the `textContent`.
  *
+ * @example
+ * ```js
+ * const text = await getTextContent( '.my-element' );
+ * ```
+ * @example
+ * ```js
+ * const [ singleText ] = await getTextContent( '.my-single-element' );
+ * ```
+ *
  * @param {string} selector The selector for the desired element
  * @param {Page | ElementHandle} [root=page] The root from which to search for the selector
  *
