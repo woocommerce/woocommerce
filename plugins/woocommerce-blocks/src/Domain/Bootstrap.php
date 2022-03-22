@@ -264,31 +264,84 @@ class Bootstrap {
 		$this->container->register(
 			'Automattic\WooCommerce\Blocks\StoreApi\Formatters',
 			function( Container $container ) {
-				_deprecated_function( 'Automattic\WooCommerce\Blocks\StoreApi\Formatters', '7.2.0', 'Automattic\WooCommerce\StoreApi\Formatters' );
+				$this->deprecated_dependency( 'Automattic\WooCommerce\Blocks\StoreApi\Formatters', '7.2.0', 'Automattic\WooCommerce\StoreApi\Formatters', '7.4.0' );
 				return $container->get( StoreApi::class )::container()->get( \Automattic\WooCommerce\StoreApi\Formatters::class );
 			}
 		);
 		$this->container->register(
 			'Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi',
 			function( Container $container ) {
-				_deprecated_function( 'Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi', '7.2.0', 'Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema' );
+				$this->deprecated_dependency( 'Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi', '7.2.0', 'Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema', '7.4.0' );
 				return $container->get( StoreApi::class )::container()->get( \Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema::class );
 			}
 		);
 		$this->container->register(
 			'Automattic\WooCommerce\Blocks\StoreApi\SchemaController',
 			function( Container $container ) {
-				_deprecated_function( 'Automattic\WooCommerce\Blocks\StoreApi\SchemaController', '7.2.0', 'Automattic\WooCommerce\StoreApi\SchemaController' );
+				$this->deprecated_dependency( 'Automattic\WooCommerce\Blocks\StoreApi\SchemaController', '7.2.0', 'Automattic\WooCommerce\StoreApi\SchemaController', '7.4.0' );
 				return $container->get( StoreApi::class )::container()->get( SchemaController::class );
 			}
 		);
 		$this->container->register(
 			'Automattic\WooCommerce\Blocks\StoreApi\RoutesController',
 			function( Container $container ) {
-				_deprecated_function( 'Automattic\WooCommerce\Blocks\StoreApi\RoutesController', '7.2.0', 'Automattic\WooCommerce\StoreApi\RoutesController' );
+				$this->deprecated_dependency( 'Automattic\WooCommerce\Blocks\StoreApi\RoutesController', '7.2.0', 'Automattic\WooCommerce\StoreApi\RoutesController', '7.4.0' );
 				return $container->get( StoreApi::class )::container()->get( RoutesController::class );
 			}
 		);
+	}
+
+	/**
+	 * Throws a deprecation notice for a dependency without breaking requests.
+	 *
+	 * @param string $function Class or function being deprecated.
+	 * @param string $version Version in which it was deprecated.
+	 * @param string $replacement Replacement class or function, if applicable.
+	 * @param string $trigger_error_version Optional version to start surfacing this as a PHP error rather than a log. Defaults to $version.
+	 */
+	protected function deprecated_dependency( $function, $version, $replacement = '', $trigger_error_version = '' ) {
+		if ( ! defined( 'WP_DEBUG' ) || ! WP_DEBUG ) {
+			return;
+		}
+
+		$trigger_error_version = $trigger_error_version ? $trigger_error_version : $version;
+		$error_message         = $replacement ? sprintf(
+			'%1$s is <strong>deprecated</strong> since version %2$s! Use %3$s instead.',
+			$function,
+			$version,
+			$replacement
+		) : sprintf(
+			'%1$s is <strong>deprecated</strong> since version %2$s with no alternative available.',
+			$function,
+			$version
+		);
+
+		do_action( 'deprecated_function_run', $function, $replacement, $version );
+
+		$log_error = false;
+
+		// If headers have not been sent yet, log to avoid breaking the request.
+		if ( ! headers_sent() ) {
+			$log_error = true;
+		}
+
+		// If the $trigger_error_version was not yet reached, only log the error.
+		if ( version_compare( $this->package->get_version(), $trigger_error_version, '<' ) ) {
+			$log_error = true;
+		}
+
+		// Apply same filter as WP core.
+		if ( ! apply_filters( 'deprecated_function_trigger_error', true ) ) {
+			$log_error = true;
+		}
+
+		if ( $log_error ) {
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			error_log( $error_message );
+		} else {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped, WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+			trigger_error( $error_message, E_USER_DEPRECATED );
+		}
 	}
 
 	/**
