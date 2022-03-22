@@ -8,7 +8,11 @@
 use Automattic\WooCommerce\Internal\Admin\CustomerEffortScoreTracks;
 
 // CustomerEffortScoreTracks only works in wp-admin, so let's fake it.
-define( 'WP_ADMIN', true );
+class CurrentScreenMock {
+	public function in_admin() {
+	    return true;
+	}
+}
 
 /**
  * Class WC_Admin_Tests_CES_Tracks
@@ -21,11 +25,28 @@ class WC_Admin_Tests_CES_Tracks extends WC_Unit_Test_Case {
 	private $ces;
 
 	/**
+	 * @var object Backup object of $GLOBALS['current_screen'];
+	 */
+	private $current_screen_backup;
+
+	/**
 	 * Overridden setUp method from PHPUnit
 	 */
 	public function setUp() {
 		parent::setUp();
 		update_option( 'woocommerce_allow_tracking', 'yes' );
+		if ( isset( $GLOBALS['current_screen'] ) ) {
+			$this->current_screen_backup = $GLOBALS['current_screen'];
+		}
+		$GLOBALS['current_screen'] = new CurrentScreenMock();
+	}
+
+	public function tearDown() {
+	    parent::tearDown();
+		if ( $this->current_screen_backup ) {
+			$GLOBALS['current_screen'] = $this->current_screen_backup;
+		}
+		update_option( 'woocommerce_allow_tracking', 'no' );
 	}
 
 	/**
