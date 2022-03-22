@@ -708,7 +708,7 @@ apply_filters( 'woocommerce_show_page_title' )
 ### Source
 
 
- - [BlockTypes/LegacyTemplate.php](../src/BlockTypes/LegacyTemplate.php)
+ - [BlockTypes/ClassicTemplate.php](../src/BlockTypes/ClassicTemplate.php)
 
 ---
 

@@ -160,7 +160,7 @@ class BlockTemplateUtils {
 			}
 		}
 
-		// We are checking 'woocommerce' to maintain legacy templates which are saved to the DB,
+		// We are checking 'woocommerce' to maintain classic templates which are saved to the DB,
 		// prior to updating to use the correct slug.
 		// More information found here: https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/5423.
 		if ( self::PLUGIN_SLUG === $theme || self::DEPRECATED_PLUGIN_SLUG === strtolower( $theme ) ) {

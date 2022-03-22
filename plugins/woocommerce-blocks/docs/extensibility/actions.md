@@ -93,8 +93,8 @@ do_action( 'woocommerce_after_main_content' )
 ### Source
 
 
- - [BlockTypes/LegacyTemplate.php](../src/BlockTypes/LegacyTemplate.php)
- - [BlockTypes/LegacyTemplate.php](../src/BlockTypes/LegacyTemplate.php)
+ - [BlockTypes/ClassicTemplate.php](../src/BlockTypes/ClassicTemplate.php)
+ - [BlockTypes/ClassicTemplate.php](../src/BlockTypes/ClassicTemplate.php)
 
 ---
 
@@ -115,7 +115,7 @@ do_action( 'woocommerce_after_shop_loop' )
 ### Source
 
 
- - [BlockTypes/LegacyTemplate.php](../src/BlockTypes/LegacyTemplate.php)
+ - [BlockTypes/ClassicTemplate.php](../src/BlockTypes/ClassicTemplate.php)
 
 ---
 
@@ -162,7 +162,7 @@ do_action( 'woocommerce_archive_description' )
 ### Source
 
 
- - [BlockTypes/LegacyTemplate.php](../src/BlockTypes/LegacyTemplate.php)
+ - [BlockTypes/ClassicTemplate.php](../src/BlockTypes/ClassicTemplate.php)
 
 ---
 
@@ -189,8 +189,8 @@ do_action( 'woocommerce_before_main_content' )
 ### Source
 
 
- - [BlockTypes/LegacyTemplate.php](../src/BlockTypes/LegacyTemplate.php)
- - [BlockTypes/LegacyTemplate.php](../src/BlockTypes/LegacyTemplate.php)
+ - [BlockTypes/ClassicTemplate.php](../src/BlockTypes/ClassicTemplate.php)
+ - [BlockTypes/ClassicTemplate.php](../src/BlockTypes/ClassicTemplate.php)
 
 ---
 
@@ -213,7 +213,7 @@ do_action( 'woocommerce_before_shop_loop' )
 ### Source
 
 
- - [BlockTypes/LegacyTemplate.php](../src/BlockTypes/LegacyTemplate.php)
+ - [BlockTypes/ClassicTemplate.php](../src/BlockTypes/ClassicTemplate.php)
 
 ---
 
@@ -414,7 +414,7 @@ do_action( 'woocommerce_no_products_found' )
 ### Source
 
 
- - [BlockTypes/LegacyTemplate.php](../src/BlockTypes/LegacyTemplate.php)
+ - [BlockTypes/ClassicTemplate.php](../src/BlockTypes/ClassicTemplate.php)
 
 ---
 
@@ -489,7 +489,7 @@ do_action( 'woocommerce_shop_loop' )
 ### Source
 
 
- - [BlockTypes/LegacyTemplate.php](../src/BlockTypes/LegacyTemplate.php)
+ - [BlockTypes/ClassicTemplate.php](../src/BlockTypes/ClassicTemplate.php)
 
 ---
 

@@ -4,11 +4,11 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 
 /**
- * Legacy Single Product class
+ * Classic Single Product class
  *
  * @internal
  */
-class LegacyTemplate extends AbstractDynamicBlock {
+class ClassicTemplate extends AbstractDynamicBlock {
 	/**
 	 * Block name.
 	 *
@@ -32,7 +32,7 @@ class LegacyTemplate extends AbstractDynamicBlock {
 	}
 
 	/**
-	 * Render method for the Legacy Template block. This method will determine which template to render.
+	 * Render method for the Classic Template block. This method will determine which template to render.
 	 *
 	 * @param array  $attributes Block attributes.
 	 * @param string $content    Block content.
@@ -64,7 +64,7 @@ class LegacyTemplate extends AbstractDynamicBlock {
 		} else {
 			ob_start();
 
-			echo "You're using the LegacyTemplate block";
+			echo "You're using the ClassicTemplate block";
 
 			wp_reset_postdata();
 			return ob_get_clean();

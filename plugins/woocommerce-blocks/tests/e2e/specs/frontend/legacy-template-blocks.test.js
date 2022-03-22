@@ -34,7 +34,7 @@ function extractPaginationData() {
 	} );
 }
 
-describe( 'Legacy Template blocks', () => {
+describe( 'Classic Template blocks', () => {
 	useTheme( 'emptytheme' );
 
 	describe( 'Product Archive block', () => {
