@@ -55,6 +55,8 @@ class WC_Admin_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 	public function tearDown() {
 		parent::tearDown();
 		$this->remove_color_or_logo_attribute_taxonomy();
+		TaskLists::clear_lists();
+		TaskLists::init_default_lists();
 	}
 
 	/**
