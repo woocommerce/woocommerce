@@ -171,7 +171,7 @@ final class BlockTypesController {
 			'AttributeFilter',
 			'StockFilter',
 			'ActiveFilters',
-			'LegacyTemplate',
+			'ClassicTemplate',
 			'ProductAddToCart',
 			'ProductButton',
 			'ProductCategoryList',

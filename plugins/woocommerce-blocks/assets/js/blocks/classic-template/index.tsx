@@ -31,10 +31,10 @@ const Edit = ( { attributes }: Props ) => {
 			<Placeholder
 				icon={ box }
 				label={ templateTitle }
-				className="wp-block-woocommerce-legacy-template__placeholder"
+				className="wp-block-woocommerce-classic-template__placeholder"
 			>
-				<div className="wp-block-woocommerce-legacy-template__placeholder-copy">
-					<p className="wp-block-woocommerce-legacy-template__placeholder-warning">
+				<div className="wp-block-woocommerce-classic-template__placeholder-copy">
+					<p className="wp-block-woocommerce-classic-template__placeholder-warning">
 						<strong>
 							{ __(
 								'Attention: Do not remove this block!',
@@ -57,9 +57,9 @@ const Edit = ( { attributes }: Props ) => {
 						) }
 					</p>
 				</div>
-				<div className="wp-block-woocommerce-legacy-template__placeholder-wireframe">
+				<div className="wp-block-woocommerce-classic-template__placeholder-wireframe">
 					<img
-						className="wp-block-woocommerce-legacy-template__placeholder-image"
+						className="wp-block-woocommerce-classic-template__placeholder-image"
 						src={ `${ WC_BLOCKS_IMAGE_URL }template-placeholders/${ templatePlaceholder }.svg` }
 						alt={ templateTitle }
 					/>
@@ -69,8 +69,16 @@ const Edit = ( { attributes }: Props ) => {
 	);
 };
 
+/**
+ * The 'WooCommerce Legacy Template' block was renamed to 'WooCommerce Classic Template', however, the internal block
+ * name 'woocommerce/legacy-template' needs to remain the same. Otherwise, it would result in a corrupt block when
+ * loaded for users who have customized templates using the legacy-template (since the internal block name is
+ * stored in the database).
+ *
+ * See https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/5861 for more context
+ */
 registerBlockType( 'woocommerce/legacy-template', {
-	title: __( 'WooCommerce Legacy Template', 'woo-gutenberg-products-block' ),
+	title: __( 'WooCommerce Classic Template', 'woo-gutenberg-products-block' ),
 	icon: (
 		<Icon icon={ box } className="wc-block-editor-components-block-icon" />
 	),
@@ -78,7 +86,7 @@ registerBlockType( 'woocommerce/legacy-template', {
 	apiVersion: 2,
 	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],
 	description: __(
-		'Renders legacy WooCommerce PHP templates.',
+		'Renders classic WooCommerce PHP templates.',
 		'woo-gutenberg-products-block'
 	),
 	supports: {
