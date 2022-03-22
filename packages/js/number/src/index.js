@@ -45,12 +45,14 @@ export function numberFormat(
 }
 
 /**
- * Formats a number string based on `type` as average or number.
+ * Formats a number as average or number string according to the given `type`.
+ *  - `type = 'average'` returns a rounded `Number`
+ *  - `type = 'number'` returns a formatted `String`
  *
  * @param {NumberConfig} numberConfig number formatting configuration object.
  * @param {string}       type         of number to format, `'average'` or `'number'`
  * @param {number}       value        to format.
- * @return {?string} A formatted string.
+ * @return {string | number | null} A formatted string.
  */
 export function formatValue( numberConfig, type, value ) {
 	if ( ! Number.isFinite( value ) ) {
