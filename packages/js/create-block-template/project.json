@@ -1,0 +1,5 @@
+{
+  "root": "packages/js/create-block-template/",
+  "sourceRoot": "packages/js/create-block-template",
+  "projectType": "library"
+}
