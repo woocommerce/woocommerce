@@ -18,6 +18,7 @@ import {
 	WooHeaderItem,
 	WooHeaderPageTitle,
 } from './utils';
+import { TasksReminderBar } from '../tasks';
 
 export const PAGE_TITLE_FILTER = 'woocommerce_admin_header_page_title';
 
@@ -92,8 +93,17 @@ export const Header = ( { sections, isEmbedded = false, query } ) => {
 		}
 	}, [ isEmbedded, sections, siteTitle ] );
 
+	const tasksReminderFeature =
+		window.wcAdminFeatures[ 'tasklist-setup-experiment-1' ];
+
 	return (
 		<div className={ className } ref={ headerElement }>
+			{ tasksReminderFeature && (
+				<TasksReminderBar
+					pageTitle={ pageTitle }
+					updateBodyMargin={ updateBodyMargin }
+				/>
+			) }
 			<div className="woocommerce-layout__header-wrapper">
 				<WooHeaderNavigationItem.Slot
 					fillProps={ { isEmbedded, query } }

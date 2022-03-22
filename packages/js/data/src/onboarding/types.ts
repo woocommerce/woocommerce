@@ -12,12 +12,14 @@ export type TaskType = {
 	snoozedUntil: number;
 	time: string;
 	title: string;
+	isVisited?: boolean;
 };
 
 export type TaskListType = {
 	id: string;
 	isCollapsible?: boolean;
 	isComplete: boolean;
+	isHidden: boolean;
 	isExpandable?: boolean;
 	tasks: TaskType[];
 	title: string;
