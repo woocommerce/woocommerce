@@ -67,6 +67,7 @@ class WC_Admin_Tests_API_Reports_Export extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_taxes_report_export() {
 		global $wpdb;
+		add_filter( 'wc_tax_enabled', '__return_true' );
 		wp_set_current_user( $this->user );
 		WC_Helper_Reports::reset_stats_dbs();
 
@@ -152,5 +153,6 @@ class WC_Admin_Tests_API_Reports_Export extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 100, $status['percent_complete'] );
 		$this->assertStringMatchesFormat( '%s/wp-admin/?action=woocommerce_admin_download_report_csv&filename=wc-taxes-report-export-%d', $status['download_url'] );
 		$this->assertStringMatchesFormat( '%s/wc-analytics/reports/taxes/export/%d/status', $status['_links']['self'][0]['href'] );
+		remove_filter( 'wc_tax_enabled', '__return_true' );
 	}
 }
