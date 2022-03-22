@@ -276,7 +276,7 @@ class WC_Download_Handler {
 
 		// Paths that begin with '//' are always remote URLs.
 		if ( '//' === substr( $file_path, 0, 2 ) ) {
-			$file_path = (is_ssl() ? 'https:' : 'http:') . $file_path;
+			$file_path = ( is_ssl() ? 'https:' : 'http:' ) . $file_path;
 			return array(
 				'remote_file' => true,
 				'file_path'   => apply_filters( 'woocommerce_download_parse_remote_file_path', $file_path ),
