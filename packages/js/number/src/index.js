@@ -15,7 +15,7 @@ const numberFormatter = require( 'locutus/php/strings/number_format' );
  * @see http://locutus.io/php/strings/number_format/
  * @param {NumberConfig}  numberConfig Number formatting configuration object.
  * @param {number|string} number       number to format
- * @return {?string} A formatted string.
+ * @return {string} A formatted string.
  */
 export function numberFormat(
 	{ precision = null, decimalSeparator = '.', thousandSeparator = ',' },
