@@ -18,11 +18,11 @@ class WC_Admin_Tests_Plugin_Version extends WP_UnitTestCase {
 	 */
 	public function test_version_numbers() {
 		// Get package.json version.
-		$package_json = file_get_contents( 'package.json' );
+		$package_json = file_get_contents( '../woocommerce-admin/package.json' );
 		$package      = json_decode( $package_json );
 
 		// Get main plugin file header version.
-		$plugin = get_file_data( 'woocommerce-admin.php', array( 'Version' => 'Version' ) );
+		$plugin = get_file_data( '../woocommerce-admin/woocommerce-admin.php', array( 'Version' => 'Version' ) );
 
 		// Get plugin DB version.
 		$db_version = defined( 'WC_ADMIN_VERSION_NUMBER' ) ? constant( 'WC_ADMIN_VERSION_NUMBER' ) : false;

@@ -33,8 +33,6 @@ class WC_Admin_Tests_Plugins_Helper extends WP_UnitTestCase {
 	public function test_get_plugin_path_from_slug() {
 
 		// Installed plugin checks.
-		$wc_path = PluginsHelper::get_plugin_path_from_slug( 'woocommerce' );
-		$this->assertEquals( 'woocommerce/woocommerce.php', $wc_path, 'Path returned is not as expected.' );
 		$ak_path = PluginsHelper::get_plugin_path_from_slug( 'akismet' );
 		$this->assertEquals( 'akismet/akismet.php', $ak_path, 'Path returned is not as expected.' );
 
@@ -59,16 +57,16 @@ class WC_Admin_Tests_Plugins_Helper extends WP_UnitTestCase {
 		$this->assertEquals( array(), $active_slugs, 'Should not be any active slugs.' );
 
 		// Get facebook plugin path.
-		$fb_path = PluginsHelper::get_plugin_path_from_slug( 'facebook-for-woocommerce' );
+		$akismet_path = PluginsHelper::get_plugin_path_from_slug( 'akismet' );
 
 		// Activate facebook plugin.
-		activate_plugin( $fb_path );
+		activate_plugin( $akismet_path );
 
 		// Get active slugs.
 		$active_slugs = PluginsHelper::get_active_plugin_slugs();
 
 		// Phpunit test environment active plugins option is empty.
-		$this->assertEquals( array( 'facebook-for-woocommerce' ), $active_slugs, 'Facebook for WooCommerce should be listed as active.' );
+		$this->assertEquals( array( 'akismet' ), $active_slugs, 'Akismet should be listed as active.' );
 	}
 
 	/**
@@ -76,9 +74,9 @@ class WC_Admin_Tests_Plugins_Helper extends WP_UnitTestCase {
 	 */
 	public function test_is_plugin_installed() {
 
-		// WooCommerce is installed in the test environment.
-		$installed = PluginsHelper::is_plugin_installed( 'woocommerce' );
-		$this->assertEquals( true, $installed, 'WooCommerce should be installed.' );
+		// Akismet is installed in the test environment.
+		$installed = PluginsHelper::is_plugin_installed( 'akismet' );
+		$this->assertEquals( true, $installed, 'Akismet should be installed.' );
 
 		// Invalid plugin is not.
 		$installed = PluginsHelper::is_plugin_installed( 'invalid-plugin' );
@@ -91,18 +89,18 @@ class WC_Admin_Tests_Plugins_Helper extends WP_UnitTestCase {
 	public function test_is_plugin_active() {
 
 		// Check if facebook is not active. Phpunit test environment active plugins option is empty.
-		$active = PluginsHelper::is_plugin_active( 'facebook-for-woocommerce' );
+		$active = PluginsHelper::is_plugin_active( 'akismet' );
 		$this->assertEquals( false, $active, 'Should not be any active slugs.' );
 
-		// Get facebook plugin path.
-		$fb_path = PluginsHelper::get_plugin_path_from_slug( 'facebook-for-woocommerce' );
+		// Get Akismet plugin path.
+		$akismet_path = PluginsHelper::get_plugin_path_from_slug( 'akismet' );
 
-		// Activate facebook plugin.
-		activate_plugin( $fb_path );
+		// Activate akismet plugin.
+		activate_plugin( $akismet_path );
 
-		// Check if facebook is now active.
-		$activated = PluginsHelper::is_plugin_active( 'facebook-for-woocommerce' );
-		$this->assertEquals( true, $activated, 'Facebook for WooCommerce should be installed.' );
+		// Check if akismet is now active.
+		$activated = PluginsHelper::is_plugin_active( 'akismet' );
+		$this->assertEquals( true, $activated, 'Akismet for WooCommerce should be installed.' );
 	}
 
 	/**
@@ -110,7 +108,7 @@ class WC_Admin_Tests_Plugins_Helper extends WP_UnitTestCase {
 	 */
 	public function test_get_plugin_data() {
 
-		$actual_data = PluginsHelper::get_plugin_data( 'woocommerce' );
+		$actual_data = PluginsHelper::get_plugin_data( 'akismet' );
 
 		$expected_keys = array(
 			'WC requires at least',
