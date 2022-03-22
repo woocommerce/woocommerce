@@ -124,6 +124,170 @@ class WC_Tests_NoteTraits extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test update_note_field_if_changed method should update note1 and return true.
+	 * @return void
+	 */
+	public function test_should_update_note_name_and_return_true() {
+		// Test name is different from note1.
+		$note1 = $this->createMock( Note::class );
+		$note1->expects( $this->once() )
+			->method( 'get_name' )
+			->willReturn( 'old name' );
+
+		$note1->expects( $this->once() )
+			->method( 'set_name' )
+			->with( 'new name' );
+
+		$note2 = $this->createMock( Note::class );
+		$note2->expects( $this->exactly( 2 ) )
+			->method( 'get_name' )
+			->willReturn( 'new name' );
+
+		$this->assertTrue( self::update_note_field_if_changed( $note1, $note2, 'name' ) );
+
+		// Test actions are the same as note1.
+		$actions1 = array(
+			(object) array(
+				'id'            => '1',
+				'name'          => 'action1',
+				'label'         => 'wca',
+				'query'         => '?query',
+				'status'        => Note::E_WC_ADMIN_NOTE_ACTIONED,
+				'actioned_text' => '',
+				'nonce_name'    => 0,
+				'nonce_action'  => 0,
+			),
+			(object) array(
+				'id'            => '2',
+				'name'          => 'action2',
+				'label'         => 'wca',
+				'query'         => '?query',
+				'status'        => Note::E_WC_ADMIN_NOTE_ACTIONED,
+				'actioned_text' => 'text',
+				'nonce_name'    => 0,
+				'nonce_action'  => 0,
+			),
+		);
+
+		$actions2 = array(
+			(object) array(
+				'name'          => 'action1',
+				'label'         => 'wca',
+				'query'         => '?query',
+				'status'        => Note::E_WC_ADMIN_NOTE_ACTIONED,
+				'actioned_text' => '',
+				'nonce_name'    => null,
+				'nonce_action'  => null,
+			),
+			(object) array(
+				'name'          => 'new action',
+				'label'         => 'wca',
+				'query'         => '?query',
+				'status'        => Note::E_WC_ADMIN_NOTE_ACTIONED,
+				'actioned_text' => 'text',
+				'nonce_name'    => null,
+				'nonce_action'  => null,
+			),
+		);
+
+		$note1->expects( $this->once() )
+			->method( 'get_actions' )
+			->willReturn( $actions1 );
+
+		$note1->expects( $this->once() )
+		->method( 'set_actions' )
+		->with( $actions2 );
+
+		$note2 = $this->createMock( Note::class );
+		$note2->expects( $this->exactly( 2 ) )
+		->method( 'get_actions' )
+		->willReturn( $actions2 );
+
+		$this->assertTrue( self::update_note_field_if_changed( $note1, $note2, 'actions' ) );
+	}
+
+	/**
+	 * Test update_note_field_if_changed method should not update the note1 and return false.
+	 * @return void
+	 */
+	public function test_should_not_update_note_name_and_return_false() {
+		// Test name is same as note1.
+		$note1 = $this->createMock( Note::class );
+		$note1->expects( $this->once() )
+			->method( 'get_name' )
+			->willReturn( 'name' );
+
+		$note1->expects( $this->exactly( 0 ) )
+			->method( 'set_name' );
+
+		$note2 = $this->createMock( Note::class );
+		$note2->expects( $this->once() )
+			->method( 'get_name' )
+			->willReturn( 'name' );
+
+		$this->assertFalse( self::update_note_field_if_changed( $note1, $note2, 'name' ) );
+
+		// Test actions are the same as note1.
+		$actions1 = array(
+			(object) array(
+				'id'            => '1',
+				'name'          => 'action1',
+				'label'         => 'wca',
+				'query'         => '?query',
+				'status'        => Note::E_WC_ADMIN_NOTE_ACTIONED,
+				'actioned_text' => '',
+				'nonce_name'    => 0,
+				'nonce_action'  => 0,
+			),
+			(object) array(
+				'id'            => '2',
+				'name'          => 'action2',
+				'label'         => 'wca',
+				'query'         => '?query',
+				'status'        => Note::E_WC_ADMIN_NOTE_ACTIONED,
+				'actioned_text' => 'text',
+				'nonce_name'    => 0,
+				'nonce_action'  => 0,
+			),
+		);
+
+		$actions2 = array(
+			(object) array(
+				'name'          => 'action1',
+				'label'         => 'wca',
+				'query'         => '?query',
+				'status'        => Note::E_WC_ADMIN_NOTE_ACTIONED,
+				'actioned_text' => '',
+				'nonce_name'    => null,
+				'nonce_action'  => null,
+			),
+			(object) array(
+				'name'          => 'action2',
+				'label'         => 'wca',
+				'query'         => '?query',
+				'status'        => Note::E_WC_ADMIN_NOTE_ACTIONED,
+				'actioned_text' => 'text',
+				'nonce_name'    => null,
+				'nonce_action'  => null,
+			),
+		);
+
+		$note1->expects( $this->once() )
+			->method( 'get_actions' )
+			->willReturn( $actions1 );
+
+		$note1->expects( $this->exactly( 0 ) )
+			->method( 'set_actions' );
+
+		$note2 = $this->createMock( Note::class );
+		$note2->expects( $this->exactly( 1 ) )
+			->method( 'get_actions' )
+			->willReturn( $actions2 );
+
+		$this->assertFalse( self::update_note_field_if_changed( $note1, $note2, 'actions' ) );
+	}
+
+	/**
 	 * Data provider providing methods that should not throw
 	 * an exception regardless of the data store being available.
 	 *
