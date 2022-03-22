@@ -164,14 +164,19 @@ trait NoteTraits {
 			return;
 		}
 
-		$need_save = false;
-		$need_save = self::update_note_field_if_changed( $note_in_db, $note, 'title' );
-		$need_save = self::update_note_field_if_changed( $note_in_db, $note, 'content' ) || $need_save;
-		$need_save = self::update_note_field_if_changed( $note_in_db, $note, 'content_data' ) || $need_save;
-		$need_save = self::update_note_field_if_changed( $note_in_db, $note, 'type' ) || $need_save;
-		$need_save = self::update_note_field_if_changed( $note_in_db, $note, 'locale' ) || $need_save;
-		$need_save = self::update_note_field_if_changed( $note_in_db, $note, 'source' ) || $need_save;
-		$need_save = self::update_note_field_if_changed( $note_in_db, $note, 'actions' ) || $need_save;
+		$need_save = in_array(
+			true,
+			array(
+				self::update_note_field_if_changed( $note_in_db, $note, 'title' ),
+				self::update_note_field_if_changed( $note_in_db, $note, 'content' ),
+				self::update_note_field_if_changed( $note_in_db, $note, 'content_data' ),
+				self::update_note_field_if_changed( $note_in_db, $note, 'type' ),
+				self::update_note_field_if_changed( $note_in_db, $note, 'locale' ),
+				self::update_note_field_if_changed( $note_in_db, $note, 'source' ),
+				self::update_note_field_if_changed( $note_in_db, $note, 'actions' )
+			),
+			true
+		);
 
 		if ( $need_save ) {
 			$note_in_db->save();
