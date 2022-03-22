@@ -9,14 +9,14 @@
 		"html": false,
 		"multiple": false,
 		"reusable": false,
-		"inserter": true 
+		"inserter": true
 	},
 	"attributes": {
 		"lock": {
 			"type": "object",
 			"default": {
 				"remove": false,
-				"move": false 
+				"move": false
 			}
 		}
 	},

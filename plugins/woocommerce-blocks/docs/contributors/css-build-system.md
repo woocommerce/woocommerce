@@ -12,7 +12,7 @@ CSS files are built with Webpack, which gathers all SCSS files in the app and pr
 
 In the past, when building WC Blocks, special builds targeting old versions of WordPress were generated. Those builds were named 'legacy builds' and might have a smaller set of blocks available. For example, All Products and Filter blocks were not available on WP 5.2.
 
-Currently, those builds are no longer generated since WC Blocks doesn't support WP 5.2 anymore, but the built system is still in place in case we need legacy builds in the future.
+Currently, those builds are no longer generated since WC Blocks doesn't support WP 5.2 anymore, but the build system is still in place in case we need legacy builds in the future.
 
 Legacy builds used their own CSS files with the suffix `-legacy`, this allowed saving some bytes because non-legacy block styles were not included.
 
