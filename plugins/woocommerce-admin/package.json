@@ -64,7 +64,7 @@
 		"test:debug": "node --inspect-brk ./node_modules/.bin/jest --config client/jest.config.js --watch --runInBand --no-cache",
 		"test:client": "jest --config client/jest.config.js",
 		"test:packages": "pnpm run:packages -- test",
-		"test": "pnpm run:packages -- build && pnpm run test:client && pnpm run:packages -- test:nobuild",
+		"test": "pnpm nx build @woocommerce/js-tests && pnpm run test:client",
 		"test:e2e": "pnpm run build && test -z \"$(docker ps | grep woocommerce-admin-e2e)\" || pnpm exec wc-e2e docker:down && pnpm run e2e:docker-up && pnpm exec wc-e2e test:e2e",
 		"e2e:docker-up": "WC_E2E_FOLDER=../../../ pnpm exec wc-e2e docker:up ./tests/e2e/docker/initialize.sh",
 		"test-staged": "pnpm run test:client -- --bail --findRelatedTests",
@@ -101,7 +101,6 @@
 		"@wordpress/components": "^19.5.0",
 		"@wordpress/compose": "^5.1.2",
 		"@wordpress/core-data": "^4.1.2",
-		"@wordpress/data": "^6.3.0",
 		"@wordpress/data-controls": "^2.3.2",
 		"@wordpress/date": "^4.3.1",
 		"@wordpress/dom": "^3.3.2",
@@ -277,6 +276,9 @@
 		"webpack-fix-style-only-entries": "^0.6.1",
 		"webpack-merge": "^5.8.0",
 		"webpack-rtl-plugin": "^2.0.0"
+	},
+	"peerDependencies": {
+		"@wordpress/data": "^6.3.0"
 	},
 	"engines": {
 		"node": ">=12.20.1 <15",

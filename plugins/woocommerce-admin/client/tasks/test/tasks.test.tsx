@@ -12,7 +12,18 @@ import userEvent from '@testing-library/user-event';
  */
 import { Tasks } from '../tasks';
 
-jest.mock( '@wordpress/data' );
+jest.mock( '@wordpress/data', () => {
+	// Require the original module to not be mocked...
+	const originalModule = jest.requireActual( '@wordpress/data' );
+
+	return {
+		__esModule: true, // Use it when dealing with esModules
+		...originalModule,
+		useDispatch: jest.fn().mockReturnValue( {} ),
+		useSelect: jest.fn().mockReturnValue( {} ),
+	};
+} );
+
 jest.mock( '@woocommerce/explat' );
 jest.mock( '@woocommerce/tracks' );
 

@@ -9,7 +9,17 @@ import { useSelect, useDispatch } from '@wordpress/data';
  */
 import TransientNotices from '..';
 
-jest.mock( '@wordpress/data' );
+jest.mock( '@wordpress/data', () => {
+	// Require the original module to not be mocked...
+	const originalModule = jest.requireActual( '@wordpress/data' );
+
+	return {
+		__esModule: true, // Use it when dealing with esModules
+		...originalModule,
+		useDispatch: jest.fn(),
+		useSelect: jest.fn().mockReturnValue( {} ),
+	};
+} );
 
 useDispatch.mockReturnValue( {
 	removeNotice: jest.fn(),
