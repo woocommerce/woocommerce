@@ -61,6 +61,10 @@ jobs:
             npm install -g pnpm
             pnpm install
             pnpm nx composer-install woocommerce
+      - name: Build Admin feature config
+        working-directory: ./
+        run: |
+          pnpm nx build:feature-config woocommerce-admin
 
       - name: Add PHP8 Compatibility.
         run: |
