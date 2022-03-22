@@ -106,7 +106,7 @@ class TransientNotices {
 	public static function remove( $notice_id ) {
 		$queue = self::get_queue();
 		unset( $queue[ $notice_id ] );
-		update_option( self::QUEUE_OPTION, $queue );
+		return update_option( self::QUEUE_OPTION, $queue );
 	}
 
 	/**

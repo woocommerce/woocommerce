@@ -14,6 +14,7 @@ import type { USER_STORE_NAME } from './user';
 import type { OPTIONS_STORE_NAME } from './options';
 import type { NAVIGATION_STORE_NAME } from './navigation';
 import type { NOTES_STORE_NAME } from './notes';
+import type { NOTICES_STORE_NAME } from './notices';
 import type { REPORTS_STORE_NAME } from './reports';
 import type { ITEMS_STORE_NAME } from './items';
 import type { COUNTRIES_STORE_NAME } from './countries';
@@ -50,6 +51,8 @@ export {
 export { REVIEWS_STORE_NAME } from './reviews';
 
 export { NOTES_STORE_NAME } from './notes';
+
+export { NOTICES_STORE_NAME } from './notices';
 
 export { REPORTS_STORE_NAME } from './reports';
 
@@ -120,6 +123,8 @@ export type WCSelectorType< T > = T extends typeof REVIEWS_STORE_NAME
 	: T extends typeof NAVIGATION_STORE_NAME
 	? WPDataSelectors
 	: T extends typeof NOTES_STORE_NAME
+	? WPDataSelectors
+	: T extends typeof NOTICES_STORE_NAME
 	? WPDataSelectors
 	: T extends typeof REPORTS_STORE_NAME
 	? WPDataSelectors

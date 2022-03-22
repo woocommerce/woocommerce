@@ -57,6 +57,7 @@ class Init {
 			'Automattic\WooCommerce\Admin\API\Features',
 			'Automattic\WooCommerce\Admin\API\Notes',
 			'Automattic\WooCommerce\Admin\API\NoteActions',
+			'Automattic\WooCommerce\Admin\API\Notices',
 			'Automattic\WooCommerce\Admin\API\Coupons',
 			'Automattic\WooCommerce\Admin\API\Data',
 			'Automattic\WooCommerce\Admin\API\DataCountries',

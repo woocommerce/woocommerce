@@ -3,7 +3,7 @@
  */
 import { applyFilters } from '@wordpress/hooks';
 import classnames from 'classnames';
-import { OPTIONS_STORE_NAME, USER_STORE_NAME } from '@woocommerce/data';
+import { NOTICES_STORE_NAME, USER_STORE_NAME } from '@woocommerce/data';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useEffect } from '@wordpress/element';
@@ -14,7 +14,6 @@ import { useEffect } from '@wordpress/element';
 import SnackbarList from './snackbar/list';
 import './style.scss';
 
-const QUEUE_OPTION = 'woocommerce_admin_transient_notices_queue';
 const QUEUED_NOTICE_FILTER = 'woocommerce_admin_queued_notice_filter';
 
 function TransientNotices( props ) {
@@ -23,41 +22,41 @@ function TransientNotices( props ) {
 		createNotice: createNotice2,
 		removeNotice: onRemove2,
 	} = useDispatch( 'core/notices2' );
-	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
+	const { dismissNotice } = useDispatch( NOTICES_STORE_NAME );
 	const {
-		currentUser = {},
+		hasFinishedResolution,
 		notices = [],
 		notices2 = [],
-		noticesQueue = {},
+		noticesQueue = [],
 	} = useSelect( ( select ) => {
+		const currentUser = select( USER_STORE_NAME ).getCurrentUser();
+
 		// NOTE: This uses core/notices2, if this file is copied back upstream
 		// to Gutenberg this needs to be changed back to just core/notices.
 		return {
-			currentUser: select( USER_STORE_NAME ).getCurrentUser(),
+			currentUser,
+			hasFinishedResolution: select(
+				NOTICES_STORE_NAME
+			).hasFinishedResolution( 'getNotices', [ currentUser.id ] ),
 			notices: select( 'core/notices' ).getNotices(),
 			notices2: select( 'core/notices2' ).getNotices(),
-			noticesQueue: select( OPTIONS_STORE_NAME ).getOption(
-				QUEUE_OPTION
-			),
+			noticesQueue:
+				currentUser && currentUser.id
+					? Object.values(
+							select( NOTICES_STORE_NAME ).getNotices(
+								currentUser.id
+							)
+					  )
+					: [],
 		};
 	} );
 
-	const getCurrentUserNotices = () => {
-		return Object.values( noticesQueue ).filter(
-			( notice ) => notice.user_id === currentUser.id || ! notice.user_id
-		);
-	};
-
-	const dequeueNotice = ( id ) => {
-		const remainingNotices = { ...noticesQueue };
-		delete remainingNotices[ id ];
-		updateOptions( {
-			[ QUEUE_OPTION ]: remainingNotices,
-		} );
-	};
-
 	useEffect( () => {
-		getCurrentUserNotices().forEach( ( queuedNotice ) => {
+		if ( ! hasFinishedResolution ) {
+			return;
+		}
+
+		noticesQueue.forEach( ( queuedNotice ) => {
 			/**
 			 * Filter each transient notice.
 			 *
@@ -68,12 +67,12 @@ function TransientNotices( props ) {
 
 			createNotice2( notice.status, notice.content, {
 				onDismiss: () => {
-					dequeueNotice( notice.id );
+					dismissNotice( notice.id );
 				},
 				...( notice.options || {} ),
 			} );
 		} );
-	}, [] );
+	}, [ hasFinishedResolution ] );
 
 	/**
 	 * Combines the two notices in the component vs in the useSelect, as we don't want to
