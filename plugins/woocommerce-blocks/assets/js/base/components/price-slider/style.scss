@@ -63,8 +63,7 @@
 		}
 	}
 
-	&.is-loading,
-	&.is-disabled {
+	&.is-loading.is-disabled {
 		.wc-block-components-price-slider__range-input-wrapper,
 		.wc-block-components-price-slider__amount,
 		.wc-block-components-price-slider__button {
@@ -267,8 +266,7 @@
 	}
 
 	.wc-block-components-price-slider {
-		&.is-loading,
-		&.is-disabled {
+		&.is-loading.is-disabled {
 			.wc-block-components-price-slider__range-input-wrapper {
 				@include placeholder();
 				box-shadow: none;
