@@ -22,15 +22,6 @@ class WC_Formatting_Functions_Test extends \WC_Unit_Test_Case {
 	 * Test wc_format_postcode() function.
 	 */
 	public function test_wc_format_postcode() {
-		// Generic postcode.
-		$this->assertEquals( '02111', wc_format_postcode( ' 02111	', 'US' ) );
-
-		// US 9-digit postcode.
-		$this->assertEquals( '02111-9999', wc_format_postcode( ' 021119999	', 'US' ) );
-
-		// UK postcode.
-		$this->assertEquals( 'PCRN 1ZZ', wc_format_postcode( 'pcrn1zz', 'GB' ) );
-
 		// IE postcode.
 		$this->assertEquals( 'D02 AF30', wc_format_postcode( 'D02AF30', 'IE' ) );
 
@@ -51,5 +42,6 @@ class WC_Formatting_Functions_Test extends \WC_Unit_Test_Case {
 
 		// Test empty NL postcode.
 		$this->assertEquals( '', wc_format_postcode( '', 'NL' ) );
+
 	}
 }
