@@ -16,7 +16,7 @@ jobs:
         name: Add Milestone
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v3
             - name: Latest milestone
               uses: woocommerce/automations@v1
               with:
