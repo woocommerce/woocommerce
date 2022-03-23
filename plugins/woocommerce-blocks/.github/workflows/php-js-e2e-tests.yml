@@ -10,28 +10,15 @@ jobs:
         name: JavaScript E2E Tests (WP latest with Gutenberg plugin)
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v2
-
-            - name: Cache node modules
-              uses: actions/cache@v2
-              env:
-                  cache-name: cache-node-modules
+            - uses: actions/checkout@v3
+            - name: Setup node version and npm cache
+              uses: actions/setup-node@v3
               with:
-                  # npm cache files are stored in `~/.npm` on Linux/macOS
-                  path: ~/.npm
-                  key: ${{ runner.OS }}-build-${{ secrets.CACHE_VERSION }}-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-                  restore-keys: |
-                      ${{ runner.OS }}-build-${{ secrets.CACHE_VERSION }}-${{ env.cache-name }}-
-                      ${{ runner.OS }}-build-${{ secrets.CACHE_VERSION }}-
-
-            - name: Use Node.js 16.13.2
-              uses: actions/setup-node@v1
-              with:
-                  node-version: 16.13.2
-
+                  node-version-file: '.nvmrc'
+                  cache: 'npm'
             - name: Npm install and build
               run: |
-                  npm ci
+                  npm ci --no-optional
                   FORCE_REDUCED_MOTION=true npm run build:e2e-test
 
             - name: blocks.ini setup
@@ -72,7 +59,7 @@ jobs:
 
             - name: Upload artifacts on failure
               if: ${{ failure() }}
-              uses: actions/upload-artifact@v2
+              uses: actions/upload-artifact@v3
               with:
                   name: e2e-with-gutenberg-test-report
                   path: reports/e2e
@@ -81,28 +68,15 @@ jobs:
         name: JavaScript E2E Tests (latest)
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v2
-
-            - name: Cache node modules
-              uses: actions/cache@v2
-              env:
-                  cache-name: cache-node-modules
+            - uses: actions/checkout@v3
+            - name: Setup node version and npm cache
+              uses: actions/setup-node@v3
               with:
-                  # npm cache files are stored in `~/.npm` on Linux/macOS
-                  path: ~/.npm
-                  key: ${{ runner.OS }}-build-${{ secrets.CACHE_VERSION }}-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-                  restore-keys: |
-                      ${{ runner.OS }}-build-${{ secrets.CACHE_VERSION }}-${{ env.cache-name }}-
-                      ${{ runner.OS }}-build-${{ secrets.CACHE_VERSION }}-
-
-            - name: Use Node.js 16.13.2
-              uses: actions/setup-node@v1
-              with:
-                  node-version: 16.13.2
-
+                  node-version-file: '.nvmrc'
+                  cache: 'npm'
             - name: Npm install and build
               run: |
-                  npm ci
+                  npm ci --no-optional
                   FORCE_REDUCED_MOTION=true npm run build:e2e-test
 
             - name: blocks.ini setup
@@ -140,7 +114,7 @@ jobs:
 
             - name: Upload artifacts on failure
               if: ${{ failure() }}
-              uses: actions/upload-artifact@v2
+              uses: actions/upload-artifact@v3
               with:
                   name: e2e-test-report
                   path: reports/e2e
