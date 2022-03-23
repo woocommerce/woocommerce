@@ -6,11 +6,18 @@ import {
 	uiUnblocked,
 	SHOP_CART_PAGE,
 } from '@woocommerce/e2e-utils';
+import { pressKeyWithModifier } from '@wordpress/e2e-test-utils';
 
 /**
  * Internal dependencies
  */
 import { BASE_URL } from '../e2e/utils';
+import {
+	getCartItemPathExpression,
+	getQtyInputPathExpression,
+	getQtyPlusButtonPathExpression,
+	getQtyMinusButtonPathExpression,
+} from './path-expressions';
 
 export const shopper = {
 	...wcShopper,
@@ -301,6 +308,51 @@ export const shopper = {
 					text: payment,
 				}
 			);
+		},
+
+		setCartQuantity: async ( productTitle, quantityValue ) => {
+			const cartItemXPath = getCartItemPathExpression( productTitle );
+			const quantityInputXPath =
+				cartItemXPath + '//' + getQtyInputPathExpression();
+
+			const [ quantityInput ] = await page.$x( quantityInputXPath );
+			await quantityInput.focus();
+			await pressKeyWithModifier( 'primary', 'a' );
+			await quantityInput.type( quantityValue.toString() );
+			await quantityInput.evaluate( ( e ) => e.blur() );
+		},
+
+		increaseCartQuantityByOne: async ( productTitle ) => {
+			const cartItemXPath = getCartItemPathExpression( productTitle );
+
+			const quantityPlusButtonXPath =
+				cartItemXPath + '//' + getQtyPlusButtonPathExpression();
+
+			const [ quantityPlusButton ] = await page.$x(
+				quantityPlusButtonXPath
+			);
+			await quantityPlusButton.click();
+		},
+
+		decreaseCartQuantityByOne: async ( productTitle ) => {
+			const cartItemXPath = getCartItemPathExpression( productTitle );
+			const quantityMinusButtonXPath =
+				cartItemXPath + '//' + getQtyMinusButtonPathExpression();
+
+			const [ quantityMinusButton ] = await page.$x(
+				quantityMinusButtonXPath
+			);
+			await quantityMinusButton.click();
+		},
+
+		productIsInCart: async ( productTitle, quantity = null ) => {
+			const cartItemArgs = quantity ? { qty: quantity } : {};
+			const cartItemXPath = getCartItemPathExpression(
+				productTitle,
+				cartItemArgs
+			);
+
+			await expect( page.$x( cartItemXPath ) ).resolves.toHaveLength( 1 );
 		},
 	},
 };
