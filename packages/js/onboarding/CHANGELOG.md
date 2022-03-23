@@ -1,5 +1,7 @@
 # Unreleased
 
+# 3.0.1
+
 -   Add missing dependency.
 
 # 3.0.0
