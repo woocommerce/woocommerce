@@ -164,13 +164,26 @@ trait NoteTraits {
 			return;
 		}
 
-		// Update note content if it's changed.
-		$latest_note_content = $note->get_content();
-		if ( $note_in_db->get_content() !== $latest_note_content ) {
-			$note_in_db->set_content( $latest_note_content );
+		$need_save = in_array(
+			true,
+			array(
+				self::update_note_field_if_changed( $note_in_db, $note, 'title' ),
+				self::update_note_field_if_changed( $note_in_db, $note, 'content' ),
+				self::update_note_field_if_changed( $note_in_db, $note, 'content_data' ),
+				self::update_note_field_if_changed( $note_in_db, $note, 'type' ),
+				self::update_note_field_if_changed( $note_in_db, $note, 'locale' ),
+				self::update_note_field_if_changed( $note_in_db, $note, 'source' ),
+				self::update_note_field_if_changed( $note_in_db, $note, 'actions' )
+			),
+			true
+		);
+
+		if ( $need_save ) {
 			$note_in_db->save();
 		}
 	}
+
+
 	/**
 	 * Get if the note has been actioned.
 	 *
@@ -190,5 +203,66 @@ trait NoteTraits {
 		}
 
 		return false;
+	}
+
+/**
+	 * Update a note field of note1 if it's different from note2 with getter and setter.
+	 *
+	 * @param Note   $note1 Note to update.
+	 * @param Note   $note2 Note to compare against.
+	 * @param string $field_name Field to update.
+	 * @return bool True if the field was updated.
+	 */
+	private static function update_note_field_if_changed( $note1, $note2, $field_name ) {
+		// We need to serialize the stdObject to compare it.
+		$note1_field_value = self::possibly_convert_object_to_array(
+			call_user_func( array( $note1, 'get_' . $field_name ) )
+		);
+		$note2_field_value = self::possibly_convert_object_to_array(
+			call_user_func( array( $note2, 'get_' . $field_name ) )
+		);
+
+		if ( 'actions' === $field_name ) {
+			// We need to individually compare the action fields because action object from db is different from action object of note.
+			// For example, action object from db has "id".
+			$diff        = array_udiff(
+				$note1_field_value,
+				$note2_field_value,
+				function( $action1, $action2 ) {
+					if ( $action1->name === $action2->name &&
+						$action1->label === $action2->label &&
+						$action1->query === $action2->query ) {
+						return 0;
+					}
+					return -1;
+				}
+			);
+			$need_update = count( $diff ) > 0;
+		} else {
+			$need_update = $note1_field_value !== $note2_field_value;
+		}
+
+		if ( $need_update ) {
+			call_user_func(
+				array( $note1, 'set_' . $field_name ),
+				// Get note2 field again because it may have been changed during the comparison.
+				call_user_func( array( $note2, 'get_' . $field_name ) )
+			);
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Convert a value to array if it's a stdClass.
+	 *
+	 * @param mixed $obj variable to convert.
+	 * @return mixed
+	 */
+	private static function possibly_convert_object_to_array( $obj ) {
+		if ( $obj instanceof \stdClass ) {
+			return (array) $obj;
+		}
+		return $obj;
 	}
 }
