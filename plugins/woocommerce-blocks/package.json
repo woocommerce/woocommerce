@@ -109,7 +109,7 @@
 		"@types/jquery": "3.5.14",
 		"@types/lodash": "4.14.180",
 		"@types/puppeteer": "5.4.5",
-		"@types/react": "17.0.39",
+		"@types/react": "17.0.41",
 		"@types/react-dom": "17.0.13",
 		"@types/wordpress__block-editor": "6.0.5",
 		"@types/wordpress__compose": "4.0.1",
