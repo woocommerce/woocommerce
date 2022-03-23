@@ -49,6 +49,7 @@ jobs:
             - name: E2E Tests (WP latest with Gutenberg plugin)
               env:
                   WOOCOMMERCE_BLOCKS_PHASE: 3
+                  GUTENBERG_EDITOR_CONTEXT: 'gutenberg'
               run: |
                   chmod -R 767 ./ #needed for permissions issues
                   JSON='{"plugins": ["https://downloads.wordpress.org/plugin/woocommerce.latest-stable.zip","https://github.com/WP-API/Basic-Auth/archive/master.zip","https://downloads.wordpress.org/plugin/gutenberg.latest-stable.zip", "."] }'

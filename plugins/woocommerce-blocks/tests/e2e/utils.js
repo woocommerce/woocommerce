@@ -9,9 +9,8 @@ import {
 	pressKeyWithModifier,
 	switchUserToAdmin,
 	visitAdminPage,
-	visitSiteEditor,
 } from '@wordpress/e2e-test-utils';
-import { getQueryArgs } from '@wordpress/url';
+import { addQueryArgs } from '@wordpress/url';
 import { WP_ADMIN_DASHBOARD } from '@woocommerce/e2e-utils';
 
 /**
@@ -29,6 +28,8 @@ import { elementExists, getElementData, getTextContent } from './page-utils';
  */
 
 export const BASE_URL = config.get( 'url' );
+export const GUTENBERG_EDITOR_CONTEXT =
+	process.env.GUTENBERG_EDITOR_CONTEXT || 'core';
 export const DEFAULT_TIMEOUT = 30000;
 
 const SELECTORS = {
@@ -143,21 +144,33 @@ export const isBlockInsertedInWidgetsArea = async ( blockName ) => {
  *
  * There are two different possible site editor pages:
  *
- * 1. `themes.php?page=gutenberg-edit-site` is the one used and available if the Gutenberg plugin is enabled.
- * 2. `site-editor.php` is the one available in WP Core.
+ * 1. `themes.php?page=gutenberg-edit-site` this is a legacy editor access used for WP <=5.8.
+ * 2. `site-editor.php` is the new way of accessing the editor in WP >=5.9+.
  *
  * @param {string} query String to be serialized as query portion of URL.
  * @param {'core' | 'gutenberg'} [editorContext='core'] Whether to go to the Gutenberg URL or the Core one.
  */
-export async function goToSiteEditor( query, editorContext = 'core' ) {
-	if ( editorContext === 'gutenberg' ) {
-		const queryArgs = getQueryArgs( query );
+export async function goToSiteEditor(
+	query,
+	editorContext = GUTENBERG_EDITOR_CONTEXT
+) {
+	// There is a bug in Gutenberg/WPCore now that makes it impossible to rely on site-editor.php on setups
+	// with locally installed Gutenberg. Details in https://github.com/WordPress/gutenberg/issues/39639.
+	// TODO: Update to always use site-editor.php once WordPress 6.0 is released and fix is verified.
+	// 		 Remove usage of GUTENBERG_EDITOR_CONTEXT from from here and from workflows.
 
-		await visitSiteEditor( queryArgs );
-	} else {
-		await visitAdminPage( 'site-editor.php', query );
-		await disableSiteEditorWelcomeGuide();
+	let editorPath = 'site-editor.php';
+	let queryString = query;
+
+	if ( editorContext === 'gutenberg' ) {
+		editorPath = 'themes.php';
+		queryString = addQueryArgs( queryString, {
+			page: 'gutenberg-edit-site',
+		} );
 	}
+
+	await visitAdminPage( editorPath, queryString );
+	await disableSiteEditorWelcomeGuide();
 }
 
 /**
@@ -179,8 +192,13 @@ export async function saveTemplate() {
 
 	await page.click( saveButton );
 	await page.waitForSelector( savePrompt );
+
 	await page.click( confirmSave );
 	await page.waitForSelector( `${ saveButton }[aria-disabled="true"]` );
+	await page.waitForResponse( ( res ) => {
+		// Will match both templates and template_parts endpoints.
+		return res.url().includes( '/wp/v2/template' );
+	} );
 }
 
 /**
