@@ -217,11 +217,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			$data['meta_data'] = array_filter(
 				$data['meta_data'],
 				function( $meta ) use ( $product, $order_item_name ) {
-					$meta->key     = rawurldecode( (string) $meta->key );
-					$meta->value   = rawurldecode( (string) $meta->value );
-					$attribute_key = str_replace( 'attribute_', '', $meta->key );
-					$display_key   = wc_attribute_label( $attribute_key, $product );
-					$display_value = wp_kses_post( $meta->value );
+					$display_value = wp_kses_post( rawurldecode( (string) $meta->value ) );
 
 					// Skip items with values already in the product details area of the product name.
 					if ( $product && $product->is_type( 'variation' ) && wc_is_attribute_in_product_name( $display_value, $order_item_name ) ) {
