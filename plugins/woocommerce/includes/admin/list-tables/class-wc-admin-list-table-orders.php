@@ -76,7 +76,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	 * @return array
 	 */
 	protected function get_row_actions( $actions, $post ) {
-		return array();
+		return $actions;
 	}
 
 	/**
