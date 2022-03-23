@@ -18,6 +18,8 @@ wp user create customer customer@woocommercecoree2etestsuite.com \
 # we cannot create API keys for the API, so we using basic auth, this plugin allows that.
 wp plugin install https://github.com/WP-API/Basic-Auth/archive/master.zip --activate
 
+wp plugin install https://github.com/woocommerce/woocommerce-reset/zipball/trunk/ --activate
+
 # install the WP Mail Logging plugin to test emails
 wp plugin install wp-mail-logging --activate
 
