@@ -3,10 +3,9 @@ namespace Automattic\WooCommerce\Blocks\Utils;
 
 use Automattic\WooCommerce\Blocks\Domain\Services\FeatureGating;
 
-
 /**
- * BlockTemplateUtils class used for serving block templates from Woo Blocks.
- * IMPORTANT: These methods have been duplicated from Gutenberg/lib/full-site-editing/block-templates.php as those functions are not for public usage.
+ * Utility methods used for serving block templates from WooCommerce Blocks.
+ * {@internal This class and its methods should only be used within the BlockTemplateController.php and is not intended for public use.}
  */
 class BlockTemplateUtils {
 	/**
@@ -57,7 +56,7 @@ class BlockTemplateUtils {
 	 *
 	 * @return array block references to the passed blocks and their inner blocks.
 	 */
-	public static function gutenberg_flatten_blocks( &$blocks ) {
+	public static function flatten_blocks( &$blocks ) {
 		$all_blocks = array();
 		$queue      = array();
 		foreach ( $blocks as &$block ) {
@@ -90,12 +89,12 @@ class BlockTemplateUtils {
 	 *
 	 * @return string Updated wp_template content.
 	 */
-	public static function gutenberg_inject_theme_attribute_in_content( $template_content ) {
+	public static function inject_theme_attribute_in_content( $template_content ) {
 		$has_updated_content = false;
 		$new_content         = '';
 		$template_blocks     = parse_blocks( $template_content );
 
-		$blocks = self::gutenberg_flatten_blocks( $template_blocks );
+		$blocks = self::flatten_blocks( $template_blocks );
 		foreach ( $blocks as &$block ) {
 			if (
 				'core/template-part' === $block['blockName'] &&
@@ -119,12 +118,13 @@ class BlockTemplateUtils {
 
 	/**
 	 * Build a unified template object based a post Object.
+	 * Important: This method is an almost identical duplicate from wp-includes/block-template-utils.php as it was not intended for public use. It has been modified to build templates from plugins rather than themes.
 	 *
 	 * @param \WP_Post $post Template post.
 	 *
 	 * @return \WP_Block_Template|\WP_Error Template.
 	 */
-	public static function gutenberg_build_template_result_from_post( $post ) {
+	public static function build_template_result_from_post( $post ) {
 		$terms = get_the_terms( $post, 'wp_theme' );
 
 		if ( is_wp_error( $terms ) ) {
@@ -172,6 +172,7 @@ class BlockTemplateUtils {
 
 	/**
 	 * Build a unified template object based on a theme file.
+	 * Important: This method is an almost identical duplicate from wp-includes/block-template-utils.php as it was not intended for public use. It has been modified to build templates from plugins rather than themes.
 	 *
 	 * @param array|object $template_file Theme file.
 	 * @param string       $template_type wp_template or wp_template_part.
@@ -191,7 +192,7 @@ class BlockTemplateUtils {
 		$template          = new \WP_Block_Template();
 		$template->id      = $template_is_from_theme ? $theme_name . '//' . $template_file->slug : self::PLUGIN_SLUG . '//' . $template_file->slug;
 		$template->theme   = $template_is_from_theme ? $theme_name : self::PLUGIN_SLUG;
-		$template->content = self::gutenberg_inject_theme_attribute_in_content( $template_content );
+		$template->content = self::inject_theme_attribute_in_content( $template_content );
 		// Plugin was agreed as a valid source value despite existing inline docs at the time of creating: https://github.com/WordPress/gutenberg/issues/36597#issuecomment-976232909.
 		$template->source         = $template_file->source ? $template_file->source : 'plugin';
 		$template->slug           = $template_file->slug;
@@ -241,7 +242,7 @@ class BlockTemplateUtils {
 	 * @param string $base_directory The theme's file path.
 	 * @return array $path_list A list of paths to all template part files.
 	 */
-	public static function gutenberg_get_template_paths( $base_directory ) {
+	public static function get_template_paths( $base_directory ) {
 		$path_list = array();
 		if ( file_exists( $base_directory ) ) {
 			$nested_files      = new \RecursiveIteratorIterator( new \RecursiveDirectoryIterator( $base_directory ) );
@@ -478,4 +479,43 @@ class BlockTemplateUtils {
 		);
 	}
 
+	/**
+	 * Removes templates that were added to a theme's block-templates directory, but already had a customised version saved in the database.
+	 *
+	 * @param \WP_Block_Template[]|\stdClass[] $templates List of templates to run the filter on.
+	 *
+	 * @return array List of templates with duplicates removed. The customised alternative is preferred over the theme default.
+	 */
+	public function remove_theme_templates_with_custom_alternative( $templates ) {
+
+		// Get the slugs of all templates that have been customised and saved in the database.
+		$customised_template_slugs = array_map(
+			function( $template ) {
+				return $template->slug;
+			},
+			array_values(
+				array_filter(
+					$templates,
+					function( $template ) {
+						// This template has been customised and saved as a post.
+						return 'custom' === $template->source;
+					}
+				)
+			)
+		);
+
+		// Remove theme (i.e. filesystem) templates that have the same slug as a customised one. We don't need to check
+		// for `woocommerce` in $template->source here because woocommerce templates won't have been added to $templates
+		// if a saved version was found in the db. This only affects saved templates that were saved BEFORE a theme
+		// template with the same slug was added.
+		return array_values(
+			array_filter(
+				$templates,
+				function( $template ) use ( $customised_template_slugs ) {
+					// This template has been customised and saved as a post, so return it.
+					return ! ( 'theme' === $template->source && in_array( $template->slug, $customised_template_slugs, true ) );
+				}
+			)
+		);
+	}
 }
