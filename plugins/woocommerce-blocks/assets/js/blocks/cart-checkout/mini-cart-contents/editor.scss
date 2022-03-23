@@ -4,6 +4,11 @@
 	the mini cart contents on the front end. */
 	margin: 0 auto !important;
 
+	.wp-block-woocommerce-empty-mini-cart-contents-block[hidden],
+	.wp-block-woocommerce-filled-mini-cart-contents-block[hidden] {
+		display: none;
+	}
+
 	.wp-block-woocommerce-filled-mini-cart-contents-block > .block-editor-inner-blocks > .block-editor-block-list__layout {
 		display: flex;
 		flex-direction: column;
