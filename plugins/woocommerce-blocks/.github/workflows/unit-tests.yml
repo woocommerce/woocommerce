@@ -10,28 +10,15 @@ jobs:
         runs-on: ubuntu-latest
         name: Setup
         steps:
-            - uses: actions/checkout@v2
-
-            - name: Cache node modules
-              uses: actions/cache@v2
-              env:
-                  cache-name: cache-node-modules
+            - uses: actions/checkout@v3
+            - name: Setup node version and npm cache
+              uses: actions/setup-node@v3
               with:
-                  # npm cache files are stored in `~/.npm` on Linux/macOS
-                  path: ~/.npm
-                  key: ${{ runner.OS }}-build-${{ secrets.CACHE_VERSION }}-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-                  restore-keys: |
-                      ${{ runner.OS }}-build-${{ secrets.CACHE_VERSION }}-${{ env.cache-name }}-
-                      ${{ runner.OS }}-build-${{ secrets.CACHE_VERSION }}-
-
-            - name: Use Node.js 16.13.2
-              uses: actions/setup-node@v1
-              with:
-                  node-version: 16.13.2
-
+                  node-version-file: '.nvmrc'
+                  cache: 'npm'
             - name: Npm install and build
               run: |
-                  npm ci
+                  npm ci --no-optional
                   FORCE_REDUCED_MOTION=true npm run build:e2e-test
 
             - name: Get Composer Cache Directory
@@ -58,29 +45,19 @@ jobs:
 
     PHPUnitTests:
         name: PHP Unit Tests
+        needs: Setup
         runs-on: ubuntu-latest
+
         steps:
-            - uses: actions/checkout@v2
-
-            - name: Cache node modules
-              uses: actions/cache@v2
-              env:
-                  cache-name: cache-node-modules
+            - uses: actions/checkout@v3
+            - name: Setup node version and npm cache
+              uses: actions/setup-node@v3
               with:
-                  # npm cache files are stored in `~/.npm` on Linux/macOS
-                  path: ~/.npm
-                  key: ${{ runner.OS }}-build-${{ secrets.CACHE_VERSION }}-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-                  restore-keys: |
-                      ${{ runner.OS }}-build-${{ secrets.CACHE_VERSION }}-${{ env.cache-name }}-
-                      ${{ runner.OS }}-build-${{ secrets.CACHE_VERSION }}-
-            - name: Use Node.js 16.13.2
-              uses: actions/setup-node@v1
-              with:
-                  node-version: 16.13.2
-
+                  node-version-file: '.nvmrc'
+                  cache: 'npm'
             - name: Npm install #build is not needed
               run: |
-                  npm ci
+                  npm ci --no-optional
             - name: blocks.ini setup
               run: |
                   echo 'woocommerce_blocks_phase = 3' > blocks.ini
@@ -100,32 +77,18 @@ jobs:
     JSUnitTests:
         name: JS Unit Tests
         needs: Setup
-
         runs-on: ubuntu-latest
 
         steps:
-            - uses: actions/checkout@v2
-
-            - name: Cache node modules
-              uses: actions/cache@v2
-              env:
-                  cache-name: cache-node-modules
+            - uses: actions/checkout@v3
+            - name: Setup node version and npm cache
+              uses: actions/setup-node@v3
               with:
-                  # npm cache files are stored in `~/.npm` on Linux/macOS
-                  path: ~/.npm
-                  key: ${{ runner.OS }}-build-${{ secrets.CACHE_VERSION }}-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-                  restore-keys: |
-                      ${{ runner.OS }}-build-${{ secrets.CACHE_VERSION }}-${{ env.cache-name }}-
-                      ${{ runner.OS }}-build-${{ secrets.CACHE_VERSION }}-
-
-            - name: Use Node.js 16.13.2
-              uses: actions/setup-node@v1
-              with:
-                  node-version: 16.13.2
-
+                  node-version-file: '.nvmrc'
+                  cache: 'npm'
             - name: Npm install and build
               run: |
-                  npm ci
+                  npm ci --no-optional
                   FORCE_REDUCED_MOTION=true npm run build:e2e-test
 
             - name: blocks.ini setup
