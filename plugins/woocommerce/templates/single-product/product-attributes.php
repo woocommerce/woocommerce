@@ -26,8 +26,12 @@ if ( ! $product_attributes ) {
 <table class="woocommerce-product-attributes shop_attributes">
 	<?php foreach ( $product_attributes as $product_attribute_key => $product_attribute ) : ?>
 		<tr class="woocommerce-product-attributes-item woocommerce-product-attributes-item--<?php echo esc_attr( $product_attribute_key ); ?>">
-			<th class="woocommerce-product-attributes-item__label"><?php echo wp_kses_post( $product_attribute['label'] ); ?></th>
-			<td class="woocommerce-product-attributes-item__value"><?php echo wp_kses_post( $product_attribute['value'] ); ?></td>
+			<th class="woocommerce-product-attributes-item__label">
+				<?php echo wp_kses_post( apply_filters( 'woocommerce_product_attribute_label_html', wp_kses_post( $product_attribute['label'] ), $product_attribute, $product_attribute_key ) ); ?>
+			</th>
+			<td class="woocommerce-product-attributes-item__value">
+				<?php echo wp_kses_post( apply_filters( 'woocommerce_product_attribute_value_html', wp_kses_post( $product_attribute['value'] ), $product_attribute, $product_attribute_key ) ); ?>
+			</td>
 		</tr>
 	<?php endforeach; ?>
 </table>
