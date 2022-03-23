@@ -101,6 +101,10 @@ const SELECTORS = {
 			'WooCommerce Single Product Block'
 		),
 	},
+	templates: {
+		templateActions:
+			'[aria-label="Templates list - Content"] [aria-label="Actions"]',
+	},
 };
 
 const CUSTOMIZED_STRING = 'My awesome customization';
@@ -120,7 +124,6 @@ describe( 'Store Editing Templates', () => {
 			const EXPECTED_TEMPLATE = defaultTemplateProps( 'Single Product' );
 
 			await goToSiteEditor( '?postType=wp_template' );
-
 			const templates = await getAllTemplates();
 
 			try {
@@ -167,6 +170,8 @@ describe( 'Store Editing Templates', () => {
 			await visitTemplateAndAddCustomParagraph( 'single-product' );
 
 			await goToSiteEditor( '?postType=wp_template' );
+			// we need to wait for the selector to show up, sometimes the loading is delayed and test becomes flaky
+			await page.waitForSelector( SELECTORS.templates.templateActions );
 			const templates = await getAllTemplates();
 
 			try {
@@ -220,7 +225,6 @@ describe( 'Store Editing Templates', () => {
 			const EXPECTED_TEMPLATE = defaultTemplateProps( 'Product Catalog' );
 
 			await goToSiteEditor( '?postType=wp_template' );
-
 			const templates = await getAllTemplates();
 
 			try {
@@ -264,6 +268,7 @@ describe( 'Store Editing Templates', () => {
 			await visitTemplateAndAddCustomParagraph( 'archive-product' );
 
 			await goToSiteEditor( '?postType=wp_template' );
+			await page.waitForSelector( SELECTORS.templates.templateActions );
 			const templates = await getAllTemplates();
 
 			try {
@@ -320,7 +325,6 @@ describe( 'Store Editing Templates', () => {
 			);
 
 			await goToSiteEditor( '?postType=wp_template' );
-
 			const templates = await getAllTemplates();
 
 			try {
@@ -365,6 +369,7 @@ describe( 'Store Editing Templates', () => {
 			await visitTemplateAndAddCustomParagraph( 'taxonomy-product_cat' );
 
 			await goToSiteEditor( '?postType=wp_template' );
+			await page.waitForSelector( SELECTORS.templates.templateActions );
 			const templates = await getAllTemplates();
 
 			try {
@@ -415,7 +420,6 @@ describe( 'Store Editing Templates', () => {
 			const EXPECTED_TEMPLATE = defaultTemplateProps( 'Products by Tag' );
 
 			await goToSiteEditor( '?postType=wp_template' );
-
 			const templates = await getAllTemplates();
 
 			try {
@@ -460,6 +464,7 @@ describe( 'Store Editing Templates', () => {
 			await visitTemplateAndAddCustomParagraph( 'taxonomy-product_tag' );
 
 			await goToSiteEditor( '?postType=wp_template' );
+			await page.waitForSelector( SELECTORS.templates.templateActions );
 			const templates = await getAllTemplates();
 
 			try {
