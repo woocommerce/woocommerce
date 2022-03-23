@@ -102,9 +102,9 @@ export const TasksReminderBar: React.FC< ReminderBarProps > = ( {
 				( ! task.isSnoozed || task.snoozedUntil < Date.now() )
 		);
 
-		const completedTasks = visibleTasks?.filter(
+		const completedTasks = (visibleTasks?.filter(
 			( task ) => task.isComplete
-		);
+		) || []);
 
 		const isResolved = taskListIsResolved && optionIsResolved;
 
