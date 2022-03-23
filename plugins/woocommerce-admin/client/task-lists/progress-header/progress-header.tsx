@@ -22,12 +22,12 @@ export const ProgressHeader: React.FC< ProgressHeaderProps > = ( {
 } ) => {
 	const { loading, tasksCount, completedCount, hasVisitedTasks } = useSelect(
 		( select ) => {
-			const isResolving = select( ONBOARDING_STORE_NAME ).isResolving(
-				'getTaskList'
-			);
 			const taskList: TaskListType = select(
 				ONBOARDING_STORE_NAME
 			).getTaskList( taskListId );
+			const finishedResolution = select( ONBOARDING_STORE_NAME ).hasFinishedResolution(
+				'getTaskList', [ taskListId ]
+			);
 			const nowTimestamp = Date.now();
 			const visibleTasks = taskList?.tasks.filter(
 				( task ) =>
@@ -36,7 +36,7 @@ export const ProgressHeader: React.FC< ProgressHeaderProps > = ( {
 			);
 
 			return {
-				loading: isResolving,
+				loading: ! finishedResolution,
 				tasksCount: visibleTasks?.length,
 				completedCount: visibleTasks?.filter(
 					( task ) => task.isComplete
@@ -49,7 +49,7 @@ export const ProgressHeader: React.FC< ProgressHeaderProps > = ( {
 	);
 
 	const progressTitle = useMemo( () => {
-		if ( ! hasVisitedTasks || completedCount === tasksCount ) {
+		if ( ( ! hasVisitedTasks && completedCount < 2 ) || completedCount === tasksCount ) {
 			const siteTitle = getSetting( 'siteTitle' );
 			return siteTitle
 				? sprintf(
@@ -58,12 +58,14 @@ export const ProgressHeader: React.FC< ProgressHeaderProps > = ( {
 						siteTitle
 				  )
 				: __( 'Welcome', 'woocommerce-admin' );
-		} else if ( completedCount > 0 && completedCount < 3 ) {
-			return __( "Let's get you set up", 'woocommerce-admin' ) + '   🚀';
-		} else if ( completedCount > 2 && completedCount < 5 ) {
+		}
+		if ( completedCount > 0 && completedCount < 4 ) {
+			return __( "Let's get you started", 'woocommerce-admin' ) + '   🚀';
+		}
+		if ( completedCount > 3 && completedCount < 7 ) {
 			return __( 'You are on the right track', 'woocommerce-admin' );
 		}
-		return __( 'Just a few tasks left', 'woocommerce-admin' );
+		return __( 'You are almost there', 'woocommerce-admin' );
 	}, [ completedCount, hasVisitedTasks ] );
 
 	if ( loading || completedCount === tasksCount ) {

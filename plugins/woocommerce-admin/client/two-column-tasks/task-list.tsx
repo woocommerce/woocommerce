@@ -11,6 +11,7 @@ import {
 	OPTIONS_STORE_NAME,
 	ONBOARDING_STORE_NAME,
 	TaskType,
+	useUserPreferences
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { List, TaskItem } from '@woocommerce/experimental';
@@ -46,7 +47,8 @@ export const TaskList: React.FC< TaskListProps > = ( {
 			profileItems: getProfileItems(),
 		};
 	} );
-	const { hideTaskList } = useDispatch( ONBOARDING_STORE_NAME );
+	const { hideTaskList, visitedTask } = useDispatch( ONBOARDING_STORE_NAME );
+	const userPreferences = useUserPreferences();
 	const [ headerData, setHeaderData ] = useState< {
 		task?: TaskType;
 		goToTask?: () => void;
@@ -163,6 +165,30 @@ export const TaskList: React.FC< TaskListProps > = ( {
 		selectedHeaderCard = visibleTasks[ visibleTasks.length - 1 ];
 	}
 
+	const getTaskStartedCount = ( taskId: string ) => {
+		const trackedStartedTasks =
+			userPreferences.task_list_tracked_started_tasks;
+		if ( ! trackedStartedTasks || ! trackedStartedTasks[ taskId ] ) {
+			return 0;
+		}
+		return trackedStartedTasks[ taskId ];
+	};
+
+	// @todo This would be better as a task endpoint that handles updating the count.
+	const updateTrackStartedCount = ( taskId: string ) => {
+		const newCount = getTaskStartedCount( taskId ) + 1;
+		const trackedStartedTasks =
+			userPreferences.task_list_tracked_started_tasks || {};
+
+		visitedTask( taskId );
+		userPreferences.updateUserPreferences( {
+			task_list_tracked_started_tasks: {
+				...( trackedStartedTasks || {} ),
+				[ taskId ]: newCount,
+			},
+		} );
+	};
+
 	const trackClick = ( task: TaskType ) => {
 		recordEvent( `${ eventName }_click`, {
 			task_name: task.id,
@@ -171,6 +197,9 @@ export const TaskList: React.FC< TaskListProps > = ( {
 
 	const goToTask = ( task: TaskType ) => {
 		trackClick( task );
+		if ( ! task.isComplete ) {
+			updateTrackStartedCount( task.id );
+		}
 		updateQueryString( { task: task.id } );
 	};
 
