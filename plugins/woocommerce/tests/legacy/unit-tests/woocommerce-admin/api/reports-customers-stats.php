@@ -8,7 +8,8 @@
 
 /**
  * Reports Customers Stats REST API Test Class
- *
+ * @runTestsInSeparateProcesses
+ * @preserveGlobalState disabled
  * @package WooCommerce\Admin\Tests\API
  * @since 3.5.0
  */

@@ -10,7 +10,8 @@ use \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDa
 
 /**
  * Reports Customers REST API Test Class
- *
+ * @runTestsInSeparateProcesses
+ * @preserveGlobalState disabled
  * @package WooCommerce\Admin\Tests\API
  * @since 3.5.0
  */

@@ -9,6 +9,8 @@ use \Automattic\WooCommerce\Admin\API\Reports\Customers\Stats\DataStore;
 
 /**
  * Class WC_Admin_Tests_Reports_Customers
+ * @runTestsInSeparateProcesses
+ * @preserveGlobalState disabled
  */
 class WC_Admin_Tests_Reports_Customer extends WC_Unit_Test_Case {
 
