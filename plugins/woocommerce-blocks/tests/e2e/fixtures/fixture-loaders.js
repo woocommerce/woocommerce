@@ -271,6 +271,21 @@ const enableCashOnDelivery = () =>
 	} );
 
 /**
+ * Enable Direct bank transfer payments.
+ *
+ * This is not called directly but is called within enablePaymentGateways.
+ *
+ * @return {Promise} a promise that resolves to an server response data, or
+ * rejects if the request failed.
+ */
+const enableDirectBankTransfer = () =>
+	WooCommerce.post( 'payment_gateways/bacs', {
+		description: 'Direct bank transfer',
+		enabled: true,
+		settings: { instructions: 'Direct bank transfer' },
+	} );
+
+/**
  * Enable Cheque payments.
  *
  * This is not called directly but is called within enablePaymentGateways.
@@ -280,7 +295,9 @@ const enableCashOnDelivery = () =>
  */
 const enableCheque = () =>
 	WooCommerce.post( 'payment_gateways/cheque', {
+		description: 'Check payments',
 		enabled: true,
+		settings: { instructions: 'Check payments' },
 	} );
 
 /**
@@ -292,7 +309,11 @@ const enableCheque = () =>
  * data, or rejects if the request failed.
  */
 const enablePaymentGateways = () =>
-	Promise.all( [ enableCashOnDelivery(), enableCheque() ] );
+	Promise.all( [
+		enableCashOnDelivery(),
+		enableDirectBankTransfer(),
+		enableCheque(),
+	] );
 
 /**
  * Create shipping zones.

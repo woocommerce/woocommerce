@@ -293,5 +293,14 @@ export const shopper = {
 				}
 			);
 		},
+
+		selectPayment: async ( payment ) => {
+			await expect( page ).toClick(
+				'.wc-block-components-payment-method-label',
+				{
+					text: payment,
+				}
+			);
+		},
 	},
 };
