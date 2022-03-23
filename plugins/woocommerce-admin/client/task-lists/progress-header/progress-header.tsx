@@ -62,7 +62,7 @@ export const ProgressHeader: React.FC< ProgressHeaderProps > = ( {
 		if ( completedCount > 0 && completedCount < 4 ) {
 			return __( "Let's get you started", 'woocommerce-admin' ) + '   🚀';
 		}
-		if ( completedCount > 3 && completedCount < 7 ) {
+		if ( completedCount > 3 && completedCount < 6 ) {
 			return __( 'You are on the right track', 'woocommerce-admin' );
 		}
 		return __( 'You are almost there', 'woocommerce-admin' );
