@@ -104,7 +104,7 @@ export const TasksReminderBar: React.FC< ReminderBarProps > = ( {
 
 		const completedTasks = visibleTasks?.filter(
 			( task ) => task.isComplete
-		).length;
+		);
 
 		const isResolved = taskListIsResolved && optionIsResolved;
 
@@ -113,9 +113,9 @@ export const TasksReminderBar: React.FC< ReminderBarProps > = ( {
 			taskListHidden: isResolved ? taskList.isHidden : false,
 			taskListComplete: isResolved ? taskList.isComplete : false,
 			loading: ! isResolved,
-			completedTasksCount: completedTasks,
+			completedTasksCount: completedTasks.length,
 			remainingCount: isResolved
-				? visibleTasks?.length - completedTasks
+				? visibleTasks?.length - completedTasks.length
 				: null,
 		};
 	} );
