@@ -6,7 +6,7 @@ import { useEffect, useRef, useState, createElement } from '@wordpress/element';
 import { Button, Card } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { EllipsisMenu } from '@woocommerce/components';
-import { updateQueryString } from '@woocommerce/navigation';
+import { updateQueryString, getHistory, getNewPath } from '@woocommerce/navigation';
 import {
 	OPTIONS_STORE_NAME,
 	ONBOARDING_STORE_NAME,
@@ -199,6 +199,14 @@ export const TaskList: React.FC< TaskListProps > = ( {
 		trackClick( task );
 		if ( ! task.isComplete ) {
 			updateTrackStartedCount( task.id );
+		}
+		if ( task.actionUrl ) {
+			if ( task.actionUrl.startsWith( 'http' ) ) {
+				window.location.href = actionUrl;
+			} else {
+				getHistory().push( getNewPath( {}, task.actionUrl, {} ) );
+			}
+			return;
 		}
 		updateQueryString( { task: task.id } );
 	};
