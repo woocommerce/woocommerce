@@ -7,6 +7,8 @@
 
 /**
  * WC Tests API Products
+ * @runTestsInSeparateProcesses
+ * @preserveGlobalState disabled
  */
 class WC_Admin_Tests_API_Products extends WC_REST_Unit_Test_Case {
 
