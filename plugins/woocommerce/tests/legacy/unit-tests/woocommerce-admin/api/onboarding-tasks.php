@@ -11,6 +11,10 @@ use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 
 require_once __DIR__ . '/../features/onboarding-tasks/test-task.php';
 
+// Wrokaround to suppress exif_read_data errors from
+// https://github.com/WordPress/WordPress/blob/master/wp-admin/includes/image.php#L835
+define('WP_RUN_CORE_TESTS', false);
+
 /**
  * WC Tests API Onboarding Tasks
  * @runTestsInSeparateProcesses
