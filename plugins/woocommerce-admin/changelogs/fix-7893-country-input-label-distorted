@@ -1,0 +1,4 @@
+Significance: patch
+Type: Tweak
+
+OBW: Override Country/Region label line-height style to avoid truncated descenders. #8186

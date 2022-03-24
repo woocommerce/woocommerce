@@ -1,0 +1,4 @@
+Significance: minor
+Type: Enhancement
+
+Made @woocommerce/components/Stepper a Typescript file #8286

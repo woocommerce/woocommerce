@@ -1,0 +1,69 @@
+// The welcome modal is presented outside the homescreen class namespace
+.components-guide.woocommerce__welcome-modal {
+	max-width: 517px;
+	height: 460px;
+
+	.components-modal__header {
+		height: 0;
+
+		.components-button {
+			color: $white;
+		}
+	}
+
+	.components-guide__container {
+		margin-top: 0;
+
+		.woocommerce__welcome-modal__page-content {
+			padding: 0 24px;
+
+			.woocommerce__welcome-modal__page-content__header {
+				font-size: 24px;
+				line-height: 32px;
+				margin: 0 0 24px 0;
+			}
+
+			.woocommerce__welcome-modal__page-content__body {
+				font-size: 16px;
+				line-height: 24px;
+				margin: 0 0 24px 0;
+			}
+		}
+	}
+
+	.components-guide__footer {
+		padding: 0;
+		margin: 0 24px 24px 24px;
+		justify-content: flex-end;
+		width: initial;
+
+		.components-guide__finish-button,
+		.components-guide__forward-button,
+		.components-guide__back-button {
+			position: initial;
+			padding: 0 16px;
+			font-weight: 500;
+			font-size: 14px;
+			line-height: 18px;
+		}
+
+		.components-guide__forward-button,
+		.components-guide__back-button {
+			color: var(--wp-admin-theme-color);
+		}
+
+		.components-guide__forward-button,
+		.components-guide__finish-button {
+			margin-left: 10px;
+		}
+
+		.components-guide__forward-button {
+			box-shadow: inset 0 0 0 1px var(--wp-admin-theme-color);
+			outline: 1px solid transparent;
+		}
+	}
+
+	.fill-theme-color {
+		fill: var(--wp-admin-theme-color);
+	}
+}

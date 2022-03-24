@@ -1,0 +1,4 @@
+Significance: patch
+Type: Fix
+
+Fix handling of paid themes in purchase task. #8493

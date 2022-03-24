@@ -1,0 +1,4 @@
+Significance: patch
+Type: Fix
+
+Fix missing product name in variation analytic page for the deleted products. #8255

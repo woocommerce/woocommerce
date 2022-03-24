@@ -1,0 +1,4 @@
+Significance: patch
+Type: Update
+
+Implement MailChimp API request threshold for MailchimpScheduler. #8342

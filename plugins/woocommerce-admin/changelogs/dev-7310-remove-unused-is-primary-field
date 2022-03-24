@@ -1,0 +1,4 @@
+Significance: minor
+Type: Update
+
+Remove is_primary column from the wp_wc_admin_notes table. #8474

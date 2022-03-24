@@ -21,6 +21,8 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
+use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
+use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize as Download_Directories_Sync;
 
 /**
  * Update file paths for 2.0
@@ -2371,6 +2373,15 @@ function wc_update_630_create_product_attributes_lookup_table() {
  */
 function wc_update_630_db_version() {
 	WC_Install::update_db_version( '6.3.0' );
+}
+
+/**
+ * Add the standard WooCommerce upload directories to the Approved Product Download Directories list
+ * and start populating it based on existing product download URLs, but do not enable the feature
+ * (for existing installations, a site admin should review and make a conscious decision to enable).
+ */
+function wc_update_640_approved_download_directories() {
+	wc_get_container()->get( Download_Directories_Sync::class )->init_feature( true, false );
 }
 
 /**

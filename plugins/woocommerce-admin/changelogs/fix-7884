@@ -1,0 +1,4 @@
+Significance: patch
+Type: Fix
+
+Only add product data on REST requests and task list #8235

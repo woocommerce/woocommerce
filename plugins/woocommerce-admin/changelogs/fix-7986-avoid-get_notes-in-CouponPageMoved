@@ -1,0 +1,4 @@
+Significance: minor
+Type: Performance
+
+Avoid expensive get_notes() queries in CouponPageMoved admin_init actions by using new Notes::get_note_by_name() helper method. #8202
