@@ -5,7 +5,7 @@
 
 namespace Automattic\WooCommerce\DataBase\Migrations\CustomOrderTable;
 
-use MigrationHelper;
+use Automattic\WooCommerce\DataBase\Migrations\MigrationHelper;
 
 /**
  * Class MetaToCustomTableMigrator.
@@ -94,7 +94,7 @@ class MetaToCustomTableMigrator {
 	/**
 	 * Generate SQL for data insertion.
 	 *
-	 * @param array  $batch Data to generate queries for. Will be 'data' array returned by `$this->fetch_data_for_migration()` method.
+	 * @param array $batch Data to generate queries for. Will be 'data' array returned by `$this->fetch_data_for_migration()` method.
 	 * @param string $insert_switch Insert command to use in generating queries, could be insert, insert_ignore, or replace.
 	 *
 	 * @return string Generated queries for insertion for this batch, would be of the form:
@@ -107,7 +107,7 @@ class MetaToCustomTableMigrator {
 		global $wpdb;
 
 		// TODO: Add code to validate params.
-		$table = $this->schema_config['destination_table'];
+		$table        = $this->schema_config['destination']['table_name'];
 		$insert_query = MigrationHelper::get_insert_switch( $insert_switch );
 
 		$columns      = array();
@@ -187,10 +187,14 @@ class MetaToCustomTableMigrator {
 	 */
 	private function build_entity_table_query( $where_clause, $batch_size, $order_by ) {
 		global $wpdb;
-		$entity_table      = MigrationHelper::escape_backtick( $this->schema_config['entity_schema']['table_name'] );
-		$primary_id_column = MigrationHelper::escape_backtick( $this->schema_config['entity_schema']['primary_id'] );
-		$entity_rel_column = MigrationHelper::escape_backtick( $this->schema_config['entity_meta_relation']['entity_rel_column'] );
-		$entity_keys       = array();
+		$source_entity_table                     = MigrationHelper::escape_backtick( $this->schema_config['source']['entity']['table_name'] );
+		$source_meta_rel_id_column        = MigrationHelper::escape_backtick( $this->schema_config['source']['entity']['meta_rel_column'] );
+		$source_destination_rel_id_column = MigrationHelper::escape_backtick( $this->schema_config['source']['entity']['destination_rel_column'] );
+
+		$destination_table                = MigrationHelper::escape_backtick( $this->schema_config['destination']['table_name'] );
+		$destination_source_rel_id_column = MigrationHelper::escape_backtick( $this->schema_config['destination']['source_rel_column'] );
+
+		$entity_keys = array();
 		foreach ( $this->core_column_mapping as $column_name => $column_schema ) {
 			if ( isset( $column_schema['select_clause'] ) ) {
 				$select_clause = $column_schema['select_clause'];
@@ -200,10 +204,20 @@ class MetaToCustomTableMigrator {
 			}
 		}
 		$entity_column_string = implode( ', ', $entity_keys );
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $entity_table, $primary_id_column and $entity_column_string is escaped for backticks. $where clause and $order_by should already be escaped.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $source_meta_rel_id_column, $source_destination_rel_id_column etc is escaped for backticks. $where clause and $order_by should already be escaped.
 		$query = $wpdb->prepare(
 			"
-SELECT `$primary_id_column` as primary_key_id, `$entity_rel_column` AS entity_rel_column, $entity_column_string FROM $entity_table WHERE $where_clause ORDER BY $order_by LIMIT %d;
+SELECT
+	`$source_entity_table`.`$source_meta_rel_id_column` as entity_meta_rel_id,
+	`$source_entity_table`.`$source_destination_rel_id_column` AS destination_rel_id,
+	CASE
+		WHEN EXISTS( `$destination_table`.`$destination_source_rel_id_column` ) THEN 'replace'
+		ELSE 'insert'
+	END as insert_switch,
+	$entity_column_string
+FROM `$source_entity_table`
+LEFT JOIN `$destination_table` ON `$destination_table`.`$destination_source_rel_id_column` = `$source_entity_table`.`$source_destination_rel_id_column`
+WHERE $where_clause ORDER BY $order_by LIMIT %d;
 ",
 			array(
 				$batch_size,
@@ -224,11 +238,11 @@ SELECT `$primary_id_column` as primary_key_id, `$entity_rel_column` AS entity_re
 	 */
 	private function build_meta_data_query( $entity_ids ) {
 		global $wpdb;
-		$meta_table                = MigrationHelper::escape_backtick( $this->schema_config['entity_meta_schema']['table_name'] );
+		$meta_table                = MigrationHelper::escape_backtick( $this->schema_config['source']['meta']['table_name'] );
 		$meta_keys                 = array_keys( $this->meta_column_mapping );
-		$meta_key_column           = MigrationHelper::escape_backtick( $this->schema_config['entity_meta_schema']['meta_key_column'] );
-		$meta_value_column         = MigrationHelper::escape_backtick( $this->schema_config['entity_meta_schema']['meta_value_column'] );
-		$meta_table_relational_key = MigrationHelper::escape_backtick( $this->schema_config['entity_meta_relation']['meta_rel_column'] );
+		$meta_key_column           = MigrationHelper::escape_backtick( $this->schema_config['source']['meta']['meta_key_column'] );
+		$meta_value_column         = MigrationHelper::escape_backtick( $this->schema_config['source']['meta']['meta_value_column'] );
+		$meta_table_relational_key = MigrationHelper::escape_backtick( $this->schema_config['source']['entity']['meta_rel_column'] );
 
 		$meta_column_string = implode( ', ', array_fill( 0, count( $meta_keys ), '%s' ) );
 		$entity_id_string   = implode( ', ', array_fill( 0, count( $entity_ids ), '%d' ) );
@@ -324,7 +338,7 @@ WHERE
 	/**
 	 * Validate and transform data so that we catch as many errors as possible before inserting.
 	 *
-	 * @param mixed  $value Actual data value.
+	 * @param mixed $value Actual data value.
 	 * @param string $type Type of data, could be decimal, int, date, string.
 	 *
 	 * @return float|int|mixed|string|\WP_Error
