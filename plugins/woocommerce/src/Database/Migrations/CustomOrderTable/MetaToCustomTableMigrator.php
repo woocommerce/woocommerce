@@ -94,7 +94,7 @@ class MetaToCustomTableMigrator {
 	/**
 	 * Generate SQL for data insertion.
 	 *
-	 * @param array $batch Data to generate queries for. Will be 'data' array returned by `$this->fetch_data_for_migration()` method.
+	 * @param array  $batch Data to generate queries for. Will be 'data' array returned by `$this->fetch_data_for_migration()` method.
 	 * @param string $insert_switch Insert command to use in generating queries, could be insert, insert_ignore, or replace.
 	 *
 	 * @return string Generated queries for insertion for this batch, would be of the form:
@@ -338,7 +338,7 @@ WHERE
 	/**
 	 * Validate and transform data so that we catch as many errors as possible before inserting.
 	 *
-	 * @param mixed $value Actual data value.
+	 * @param mixed  $value Actual data value.
 	 * @param string $type Type of data, could be decimal, int, date, string.
 	 *
 	 * @return float|int|mixed|string|\WP_Error
