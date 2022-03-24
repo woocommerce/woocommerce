@@ -1086,17 +1086,7 @@ table.wc_status_table {
 			margin-bottom: 0.5em;
 		}
 
-		mark {
-			background: transparent none;
-		}
-
-		mark.yes {
-			color: $green;
-		}
-
-		mark.no {
-			color: #999;
-		}
+		@include table-marks();
 
 		mark.error,
 		.red {
@@ -1110,6 +1100,13 @@ table.wc_status_table {
 
 	.help_tip {
 		cursor: help;
+	}
+}
+
+table.wp-list-table.urls {
+	td,
+	th {
+		@include table-marks();
 	}
 }
 
@@ -4293,7 +4290,7 @@ img.help_tip {
 		margin: 1.5em 0 1em;
 	}
 
-	.subsubsub {
+	.subsubsub:not(.list-table-filters) {
 		margin: -8px 0 0;
 	}
 

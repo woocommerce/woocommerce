@@ -40,6 +40,7 @@ npm-debug.log
 build/
 build-module/
 build-style/
+build-types/
 dist/
 
 # Project files
@@ -73,3 +74,6 @@ nbproject/private/
 
 # Test Results
 test-results.json
+
+# Admin Feature config
+plugins/woocommerce/includes/react-admin/feature-config.php

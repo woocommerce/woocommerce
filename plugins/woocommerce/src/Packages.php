@@ -25,8 +25,7 @@ class Packages {
 	 * @var array Key is the package name/directory, value is the main package class which handles init.
 	 */
 	protected static $packages = array(
-		'woocommerce-blocks'   => '\\Automattic\\WooCommerce\\Blocks\\Package',
-		'woocommerce-admin'    => '\\Automattic\\WooCommerce\\Admin\\Composer\\Package',
+		'woocommerce-blocks'   => '\\Automattic\\WooCommerce\\Blocks\\Package'
 	);
 
 	/**
@@ -61,6 +60,9 @@ class Packages {
 	 * Each package should include an init file which loads the package so it can be used by core.
 	 */
 	protected static function load_packages() {
+		// Initialize WooCommerce Admin.
+		\Automattic\WooCommerce\Admin\Composer\Package::init();
+
 		foreach ( self::$packages as $package_name => $package_class ) {
 			if ( ! self::package_exists( $package_name ) ) {
 				self::missing_package( $package_name );

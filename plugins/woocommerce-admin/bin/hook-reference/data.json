@@ -1,0 +1,1003 @@
+[
+    {
+        "description": "Filter an array of help items for the setup task.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/activity-panel/panels/help.js#L354-L361",
+        "name": "woocommerce_admin_setup_task_help_items",
+        "type": "filter",
+        "params": [
+            {
+                "name": "items",
+                "type": "Array.<Object>",
+                "description": "Array items object based on task."
+            },
+            {
+                "name": "task",
+                "type": "('products'|'appearance'|'shipping'|'tax'|'payments'|'marketing')",
+                "description": "url query parameters."
+            },
+            {
+                "name": "props",
+                "type": "Object",
+                "description": "React component props."
+            }
+        ]
+    },
+    {
+        "description": "Filter report table for the CSV download. Enables manipulation of data used to create the report CSV.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/analytics/components/report-table/index.js#L159-L172",
+        "name": "woocommerce_admin_report_table",
+        "type": "filter",
+        "params": [
+            {
+                "name": "reportTableData",
+                "type": "Object",
+                "description": "- data used to create the table."
+            },
+            {
+                "name": "reportTableData.endpoint",
+                "type": "string",
+                "description": "- table api endpoint."
+            },
+            {
+                "name": "reportTableData.headers",
+                "type": "Array",
+                "description": "- table headers data."
+            },
+            {
+                "name": "reportTableData.rows",
+                "type": "Array",
+                "description": "- table rows data."
+            },
+            {
+                "name": "reportTableData.totals",
+                "type": "Object",
+                "description": "- total aggregates for request."
+            },
+            {
+                "name": "reportTableData.summary",
+                "type": "Array",
+                "description": "- summary numbers data."
+            },
+            {
+                "name": "reportTableData.items",
+                "type": "Object",
+                "description": "- response from api requerst."
+            }
+        ]
+    },
+    {
+        "description": "Category Report charts filter.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/analytics/report/categories/config.js#L27-L32",
+        "name": "woocommerce_admin_categories_report_charts",
+        "type": "filter",
+        "params": [
+            {
+                "name": "charts",
+                "type": "Array.<chart>",
+                "description": "Category Report charts."
+            }
+        ]
+    },
+    {
+        "description": "Category Report Advanced Filters.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/analytics/report/categories/config.js#L57-L64",
+        "name": "woocommerce_admin_category_report_advanced_filters",
+        "type": "filter",
+        "params": [
+            {
+                "name": "advancedFilters",
+                "type": "Object",
+                "description": "Report Advanced Filters."
+            },
+            {
+                "name": "advancedFilters.title",
+                "type": "string",
+                "description": "Interpolated component string for Advanced Filters title."
+            },
+            {
+                "name": "advancedFilters.filters",
+                "type": "Object",
+                "description": "An object specifying a report's Advanced Filters."
+            }
+        ]
+    },
+    {
+        "description": "Category Report Filters.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/analytics/report/categories/config.js#L143-L148",
+        "name": "woocommerce_admin_categories_report_filters",
+        "type": "filter",
+        "params": [
+            {
+                "name": "filters",
+                "type": "Array.<filter>",
+                "description": "Report filters."
+            }
+        ]
+    },
+    {
+        "description": "Coupons Report charts filter.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/analytics/report/coupons/config.js#L25-L30",
+        "name": "woocommerce_admin_coupons_report_charts",
+        "type": "filter",
+        "params": [
+            {
+                "name": "charts",
+                "type": "Array.<chart>",
+                "description": "Report charts."
+            }
+        ]
+    },
+    {
+        "description": "Coupons Report Advanced Filters.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/analytics/report/coupons/config.js#L48-L55",
+        "name": "woocommerce_admin_coupon_report_advanced_filters",
+        "type": "filter",
+        "params": [
+            {
+                "name": "advancedFilters",
+                "type": "Object",
+                "description": "Report Advanced Filters."
+            },
+            {
+                "name": "advancedFilters.title",
+                "type": "string",
+                "description": "Interpolated component string for Advanced Filters title."
+            },
+            {
+                "name": "advancedFilters.filters",
+                "type": "Object",
+                "description": "An object specifying a report's Advanced Filters."
+            }
+        ]
+    },
+    {
+        "description": "Coupons Report Filters.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/analytics/report/coupons/config.js#L126-L131",
+        "name": "woocommerce_admin_coupons_report_filters",
+        "type": "filter",
+        "params": [
+            {
+                "name": "filters",
+                "type": "Array.<filter>",
+                "description": "Report filters."
+            }
+        ]
+    },
+    {
+        "description": "Customers Report Filters.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/analytics/report/customers/config.js#L29-L34",
+        "name": "woocommerce_admin_customers_report_filters",
+        "type": "filter",
+        "params": [
+            {
+                "name": "filters",
+                "type": "Array.<filter>",
+                "description": "Report filters."
+            }
+        ]
+    },
+    {
+        "description": "Customers Report Advanced Filters.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/analytics/report/customers/config.js#L80-L87",
+        "name": "woocommerce_admin_customers_report_advanced_filters",
+        "type": "filter",
+        "params": [
+            {
+                "name": "advancedFilters",
+                "type": "Object",
+                "description": "Report Advanced Filters."
+            },
+            {
+                "name": "advancedFilters.title",
+                "type": "string",
+                "description": "Interpolated component string for Advanced Filters title."
+            },
+            {
+                "name": "advancedFilters.filters",
+                "type": "Object",
+                "description": "An object specifying a report's Advanced Filters."
+            }
+        ]
+    },
+    {
+        "description": "Downloads Report charts filter.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/analytics/report/downloads/config.js#L26-L31",
+        "name": "woocommerce_admin_downloads_report_charts",
+        "type": "filter",
+        "params": [
+            {
+                "name": "charts",
+                "type": "Array.<chart>",
+                "description": "Report charts."
+            }
+        ]
+    },
+    {
+        "description": "Downloads Report Filters.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/analytics/report/downloads/config.js#L44-L49",
+        "name": "woocommerce_admin_downloads_report_filters",
+        "type": "filter",
+        "params": [
+            {
+                "name": "filters",
+                "type": "Array.<filter>",
+                "description": "Report filters."
+            }
+        ]
+    },
+    {
+        "description": "Downloads Report Advanced Filters.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/analytics/report/downloads/config.js#L68-L75",
+        "name": "woocommerce_admin_downloads_report_advanced_filters",
+        "type": "filter",
+        "params": [
+            {
+                "name": "advancedFilters",
+                "type": "Object",
+                "description": "Report Advanced Filters."
+            },
+            {
+                "name": "advancedFilters.title",
+                "type": "string",
+                "description": "Interpolated component string for Advanced Filters title."
+            },
+            {
+                "name": "advancedFilters.filters",
+                "type": "Object",
+                "description": "An object specifying a report's Advanced Filters."
+            }
+        ]
+    },
+    {
+        "description": "Filter Report pages list.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/analytics/report/get-reports.js#L143-L148",
+        "name": "woocommerce_admin_reports_list",
+        "type": "filter",
+        "params": [
+            {
+                "name": "reports",
+                "type": "Array.<report>",
+                "description": "Report pages list."
+            }
+        ]
+    },
+    {
+        "description": "Orders Report charts filter.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/analytics/report/orders/config.js#L27-L32",
+        "name": "woocommerce_admin_orders_report_charts",
+        "type": "filter",
+        "params": [
+            {
+                "name": "charts",
+                "type": "Array.<chart>",
+                "description": "Report charts."
+            }
+        ]
+    },
+    {
+        "description": "Orders Report Filters.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/analytics/report/orders/config.js#L64-L69",
+        "name": "woocommerce_admin_orders_report_filters",
+        "type": "filter",
+        "params": [
+            {
+                "name": "filters",
+                "type": "Array.<filter>",
+                "description": "Report filters."
+            }
+        ]
+    },
+    {
+        "description": "Orders Report Advanced Filters.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/analytics/report/orders/config.js#L88-L95",
+        "name": "woocommerce_admin_orders_report_advanced_filters",
+        "type": "filter",
+        "params": [
+            {
+                "name": "advancedFilters",
+                "type": "Object",
+                "description": "Report Advanced Filters."
+            },
+            {
+                "name": "advancedFilters.title",
+                "type": "string",
+                "description": "Interpolated component string for Advanced Filters title."
+            },
+            {
+                "name": "advancedFilters.filters",
+                "type": "Object",
+                "description": "An object specifying a report's Advanced Filters."
+            }
+        ]
+    },
+    {
+        "description": "Products Report charts filter.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/analytics/report/products/config.js#L30-L35",
+        "name": "woocommerce_admin_products_report_charts",
+        "type": "filter",
+        "params": [
+            {
+                "name": "charts",
+                "type": "Array.<chart>",
+                "description": "Report charts."
+            }
+        ]
+    },
+    {
+        "description": "Produts Report Advanced Filters.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/analytics/report/products/config.js#L182-L189",
+        "name": "woocommerce_admin_products_report_advanced_filters",
+        "type": "filter",
+        "params": [
+            {
+                "name": "advancedFilters",
+                "type": "Object",
+                "description": "Report Advanced Filters."
+            },
+            {
+                "name": "advancedFilters.title",
+                "type": "string",
+                "description": "Interpolated component string for Advanced Filters title."
+            },
+            {
+                "name": "advancedFilters.filters",
+                "type": "Object",
+                "description": "An object specifying a report's Advanced Filters."
+            }
+        ]
+    },
+    {
+        "description": "Products Report Filters.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/analytics/report/products/config.js#L217-L222",
+        "name": "woocommerce_admin_products_report_filters",
+        "type": "filter",
+        "params": [
+            {
+                "name": "filters",
+                "type": "Array.<filter>",
+                "description": "Report filters."
+            }
+        ]
+    },
+    {
+        "description": "Revenue Report charts filter.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/analytics/report/revenue/config.js#L17-L22",
+        "name": "woocommerce_admin_revenue_report_charts",
+        "type": "filter",
+        "params": [
+            {
+                "name": "charts",
+                "type": "Array.<chart>",
+                "description": "Report charts."
+            }
+        ]
+    },
+    {
+        "description": "Revenue Report Advanced Filters.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/analytics/report/revenue/config.js#L88-L95",
+        "name": "woocommerce_admin_revenue_report_advanced_filters",
+        "type": "filter",
+        "params": [
+            {
+                "name": "advancedFilters",
+                "type": "Object",
+                "description": "Report Advanced Filters."
+            },
+            {
+                "name": "advancedFilters.title",
+                "type": "string",
+                "description": "Interpolated component string for Advanced Filters title."
+            },
+            {
+                "name": "advancedFilters.filters",
+                "type": "Object",
+                "description": "An object specifying a report's Advanced Filters."
+            }
+        ]
+    },
+    {
+        "description": "Revenue Report Filters.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/analytics/report/revenue/config.js#L125-L130",
+        "name": "woocommerce_admin_revenue_report_filters",
+        "type": "filter",
+        "params": [
+            {
+                "name": "filters",
+                "type": "Array.<filter>",
+                "description": "Report filters."
+            }
+        ]
+    },
+    {
+        "description": "Stock Report Advanced Filters.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/analytics/report/stock/config.js#L13-L20",
+        "name": "woocommerce_admin_stock_report_advanced_filters",
+        "type": "filter",
+        "params": [
+            {
+                "name": "advancedFilters",
+                "type": "Object",
+                "description": "Report Advanced Filters."
+            },
+            {
+                "name": "advancedFilters.title",
+                "type": "string",
+                "description": "Interpolated component string for Advanced Filters title."
+            },
+            {
+                "name": "advancedFilters.filters",
+                "type": "Object",
+                "description": "An object specifying a report's Advanced Filters."
+            }
+        ]
+    },
+    {
+        "description": "Stock Report Filters.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/analytics/report/stock/config.js#L37-L42",
+        "name": "woocommerce_admin_stock_report_filters",
+        "type": "filter",
+        "params": [
+            {
+                "name": "filters",
+                "type": "Array.<filter>",
+                "description": "Report filters."
+            }
+        ]
+    },
+    {
+        "description": "Taxes Report charts filter.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/analytics/report/taxes/config.js#L27-L32",
+        "name": "woocommerce_admin_taxes_report_charts",
+        "type": "filter",
+        "params": [
+            {
+                "name": "charts",
+                "type": "Array.<chart>",
+                "description": "Report charts."
+            }
+        ]
+    },
+    {
+        "description": "Taxes Report Advanced Filters.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/analytics/report/taxes/config.js#L64-L71",
+        "name": "woocommerce_admin_taxes_report_advanced_filters",
+        "type": "filter",
+        "params": [
+            {
+                "name": "advancedFilters",
+                "type": "Object",
+                "description": "Report Advanced Filters."
+            },
+            {
+                "name": "advancedFilters.title",
+                "type": "string",
+                "description": "Interpolated component string for Advanced Filters title."
+            },
+            {
+                "name": "advancedFilters.filters",
+                "type": "Object",
+                "description": "An object specifying a report's Advanced Filters."
+            }
+        ]
+    },
+    {
+        "description": "Coupons Report Filters.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/analytics/report/taxes/config.js#L129-L134",
+        "name": "woocommerce_admin_taxes_report_filters",
+        "type": "filter",
+        "params": [
+            {
+                "name": "filters",
+                "type": "Array.<filter>",
+                "description": "Report filters."
+            }
+        ]
+    },
+    {
+        "description": "Variations Report charts filter.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/analytics/report/variations/config.js#L31-L36",
+        "name": "woocommerce_admin_variations_report_charts",
+        "type": "filter",
+        "params": [
+            {
+                "name": "charts",
+                "type": "Array.<chart>",
+                "description": "Report charts."
+            }
+        ]
+    },
+    {
+        "description": "Variations Report Filters.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/analytics/report/variations/config.js#L65-L70",
+        "name": "woocommerce_admin_variations_report_filters",
+        "type": "filter",
+        "params": [
+            {
+                "name": "filters",
+                "type": "Array.<filter>",
+                "description": "Report filters."
+            }
+        ]
+    },
+    {
+        "description": "Variations Report Advanced Filters.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/analytics/report/variations/config.js#L140-L147",
+        "name": "woocommerce_admin_variations_report_advanced_filters",
+        "type": "filter",
+        "params": [
+            {
+                "name": "advancedFilters",
+                "type": "Object",
+                "description": "Report Advanced Filters."
+            },
+            {
+                "name": "advancedFilters.title",
+                "type": "string",
+                "description": "Interpolated component string for Advanced Filters title."
+            },
+            {
+                "name": "advancedFilters.filters",
+                "type": "Object",
+                "description": "An object specifying a report's Advanced Filters."
+            }
+        ]
+    },
+    {
+        "description": "Filter Analytics Report settings. Add a UI element to the Analytics Settings page.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/analytics/settings/config.js#L78-L83",
+        "name": "woocommerce_admin_analytics_settings",
+        "type": "filter",
+        "params": [
+            {
+                "name": "reportSettings",
+                "type": "Object",
+                "description": "Report settings."
+            }
+        ]
+    },
+    {
+        "description": "Historical data import statuses.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/analytics/settings/historical-data/status.js#L12-L25",
+        "name": "woocommerce_admin_import_status",
+        "type": "filter",
+        "params": [
+            {
+                "name": "statuses",
+                "type": "Object",
+                "description": "Import statuses."
+            },
+            {
+                "name": "statuses.nothing",
+                "type": "string",
+                "description": "Nothing to import."
+            },
+            {
+                "name": "statuses.ready",
+                "type": "string",
+                "description": "Ready to import."
+            },
+            {
+                "name": "statuses.initializing",
+                "type": "Array",
+                "description": "Initializing string and spinner."
+            },
+            {
+                "name": "statuses.customers",
+                "type": "Array",
+                "description": "Importing customers string and spinner."
+            },
+            {
+                "name": "statuses.orders",
+                "type": "Array",
+                "description": "Importing orders string and spinner."
+            },
+            {
+                "name": "statuses.finalizing",
+                "type": "Array",
+                "description": "Finalizing string and spinner."
+            },
+            {
+                "name": "statuses.finished",
+                "type": "string",
+                "description": "Message displayed after import."
+            }
+        ]
+    },
+    {
+        "description": "Add Report filters to the dashboard. None are added by default.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/dashboard/customizable.js#L40-L45",
+        "name": "woocommerce_admin_dashboard_filters",
+        "type": "filter",
+        "params": [
+            {
+                "name": "filters",
+                "type": "Array.<filter>",
+                "description": "Report filters."
+            }
+        ]
+    },
+    {
+        "description": "Dashboard Charts section charts.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/dashboard/dashboard-charts/config.js#L96-L101",
+        "name": "woocommerce_admin_dashboard_charts_filter",
+        "type": "filter",
+        "params": [
+            {
+                "name": "charts",
+                "type": "Array.<Object>",
+                "description": "Array of visible charts."
+            }
+        ]
+    },
+    {
+        "description": "Default Dashboard sections. Defaults are Store Performance, Charts, and Leaderboards",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/dashboard/default-sections.js#L56-L61",
+        "name": "woocommerce_dashboard_default_sections",
+        "type": "filter",
+        "params": [
+            {
+                "name": "sections",
+                "type": "Array.<section>",
+                "description": "Report filters."
+            }
+        ]
+    },
+    {
+        "description": "Filter an array of body components for WooCommerce non-react pages.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/embedded-body-layout/embedded-body-layout.tsx#L40-L46",
+        "name": "woocommerce_admin_embedded_layout_components",
+        "type": "filter",
+        "params": [
+            {
+                "name": "embeddedBodyComponentList",
+                "type": "Array.<Node>",
+                "description": "Array of body components."
+            },
+            {
+                "name": "query",
+                "type": "Object",
+                "description": "url query parameters."
+            }
+        ]
+    },
+    {
+        "description": "Create a Fill for extensions to add items to the WooCommerce Admin header.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/header/utils.js#L21-L38",
+        "name": "WooHeaderItem",
+        "type": "slotFill",
+        "params": [
+            {
+                "name": "param0",
+                "type": "Object",
+                "description": ""
+            },
+            {
+                "name": "param0.children",
+                "type": "Array",
+                "description": "- Node children."
+            },
+            {
+                "name": "param0.order",
+                "type": "Array",
+                "description": "- Node order."
+            }
+        ],
+        "scope": "woocommerce-admin"
+    },
+    {
+        "description": "Create a Fill for extensions to add items to the WooCommerce Admin navigation area left of the page title.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/header/utils.js#L59-L77",
+        "name": "WooHeaderNavigationItem",
+        "type": "slotFill",
+        "params": [
+            {
+                "name": "param0",
+                "type": "Object",
+                "description": ""
+            },
+            {
+                "name": "param0.children",
+                "type": "Array",
+                "description": "- Node children."
+            },
+            {
+                "name": "param0.order",
+                "type": "Array",
+                "description": "- Node order."
+            }
+        ],
+        "scope": "woocommerce-admin"
+    },
+    {
+        "description": "Create a Fill for extensions to add custom page titles.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/header/utils.js#L98-L114",
+        "name": "WooHeaderPageTitle",
+        "type": "slotFill",
+        "params": [
+            {
+                "name": "param0",
+                "type": "Object",
+                "description": ""
+            },
+            {
+                "name": "param0.children",
+                "type": "Array",
+                "description": "- Node children."
+            }
+        ],
+        "scope": "woocommerce-admin"
+    },
+    {
+        "description": "List of homepage stats enabled by default",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/homescreen/stats-overview/defaults.js#L5-L10",
+        "name": "woocommerce_admin_homepage_default_stats",
+        "type": "filter",
+        "params": [
+            {
+                "name": "stats",
+                "type": "Array.<string>",
+                "description": "Array of homepage stat slugs."
+            }
+        ]
+    },
+    {
+        "description": "List of WooCommerce Admin pages.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/layout/controller.js#L230-L235",
+        "name": "woocommerce_admin_pages_list",
+        "type": "filter",
+        "params": [
+            {
+                "name": "pages",
+                "type": "Array.<Object>",
+                "description": "Array page objects."
+            }
+        ]
+    },
+    {
+        "description": "Filter each transient notice.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/layout/transient-notices/index.js#L61-L66",
+        "name": "woocommerce_admin_queued_notice_filter",
+        "type": "filter",
+        "params": [
+            {
+                "name": "notice",
+                "type": "Object",
+                "description": "A transient notice."
+            }
+        ]
+    },
+    {
+        "description": "Filter the currency context. This affects all WooCommerce Admin currency formatting.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/lib/currency-context.js#L16-L22",
+        "name": "woocommerce_admin_report_currency",
+        "type": "filter",
+        "params": [
+            {
+                "name": "config",
+                "type": "Object",
+                "description": "Currency configuration."
+            },
+            {
+                "name": "query",
+                "type": "Object",
+                "description": "Url query parameters."
+            }
+        ]
+    },
+    {
+        "description": "Navigation's exit button WooCommerce label.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/navigation/components/container/primary-menu.js#L24-L29",
+        "name": "woocommerce_navigation_root_back_label",
+        "type": "filter",
+        "params": [
+            {
+                "name": "label",
+                "type": "string",
+                "description": "Back button label."
+            }
+        ]
+    },
+    {
+        "description": "Navigation's exit button url.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/navigation/components/container/primary-menu.js#L35-L40",
+        "name": "woocommerce_navigation_root_back_url",
+        "type": "filter",
+        "params": [
+            {
+                "name": "url",
+                "type": "string",
+                "description": "Back button url."
+            }
+        ]
+    },
+    {
+        "description": "Filter for Onboarding steps configuration.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/profile-wizard/index.js#L140-L145",
+        "name": "woocommerce_admin_profile_wizard_steps",
+        "type": "filter",
+        "params": [
+            {
+                "name": "steps",
+                "type": "Array.<Object>",
+                "description": "Array of steps for Onboarding Wizard."
+            }
+        ]
+    },
+    {
+        "description": "Store Management extensions links",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/store-management-links/index.js#L171-L176",
+        "name": "woocommerce_admin_homescreen_quicklinks",
+        "type": "filter",
+        "params": [
+            {
+                "name": "links",
+                "type": "Array.<link>",
+                "description": "Array of links."
+            }
+        ]
+    },
+    {
+        "description": "Store product templates.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/tasks/fills/products/product-template-modal.js#L145-L150",
+        "name": "woocommerce_admin_onboarding_product_templates",
+        "type": "filter",
+        "params": [
+            {
+                "name": "templates",
+                "type": "Array.<template>",
+                "description": "Array of product templates."
+            }
+        ]
+    },
+    {
+        "description": "Navigation Menu Items.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/packages/data/src/navigation/selectors.js#L9-L14",
+        "name": "woocommerce_navigation_menu_items",
+        "type": "filter",
+        "params": [
+            {
+                "name": "menuItems",
+                "type": "Array.<Object>",
+                "description": "Array of Navigation menu items."
+            }
+        ]
+    },
+    {
+        "description": "**Deprecated** Filter Onboarding tasks.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/packages/data/src/onboarding/deprecated-tasks.js#L23-L30",
+        "name": "woocommerce_admin_onboarding_task_list",
+        "type": "filter",
+        "params": [
+            {
+                "name": "tasks",
+                "type": "Array",
+                "description": "Array of tasks."
+            },
+            {
+                "name": "query",
+                "type": "Array",
+                "description": "Url query parameters."
+            }
+        ]
+    },
+    {
+        "description": "List of URL query parameters to be sent to the server.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/packages/explat/src/assignment.ts#L22-L35",
+        "name": "woocommerce_explat_request_args",
+        "type": "filter",
+        "params": []
+    },
+    {
+        "description": "Filter persisted queries. These query parameters remain in the url when other parameters are updated.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/packages/navigation/src/index.js#L41-L46",
+        "name": "woocommerce_admin_persisted_queries",
+        "type": "filter",
+        "params": [
+            {
+                "name": "persistedQueries",
+                "type": "Array.<string>",
+                "description": "Array of persisted queries."
+            }
+        ]
+    },
+    {
+        "description": "A Fill for extensions to add client facing custom Navigation Items.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/packages/navigation/src/index.js#L269-L277",
+        "name": "WooNavigationItem",
+        "type": "slotFill",
+        "params": [
+            {
+                "name": "props",
+                "type": "Object",
+                "description": "React props."
+            },
+            {
+                "name": "props.children",
+                "type": "Array",
+                "description": "Node children."
+            },
+            {
+                "name": "props.item",
+                "type": "string",
+                "description": "Navigation item slug."
+            }
+        ],
+        "scope": "woocommerce-navigation"
+    },
+    {
+        "description": "A Fill for adding Onboarding tasks.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/packages/onboarding/src/components/WooOnboardingTask/WooOnboardingTask.js#L31-L38",
+        "name": "WooOnboardingTask",
+        "type": "slotFill",
+        "params": [
+            {
+                "name": "props",
+                "type": "Object",
+                "description": "React props."
+            },
+            {
+                "name": "props.id",
+                "type": "string",
+                "description": "Task id."
+            }
+        ],
+        "scope": "woocommerce-tasks"
+    },
+    {
+        "description": "A Fill for adding Onboarding Task List items.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/packages/onboarding/src/components/WooOnboardingTaskListItem/WooOnboardingTaskListItem.js#L7-L14",
+        "name": "WooOnboardingTaskListItem",
+        "type": "slotFill",
+        "params": [
+            {
+                "name": "props",
+                "type": "Object",
+                "description": "React props."
+            },
+            {
+                "name": "props.id",
+                "type": "string",
+                "description": "Task id."
+            }
+        ],
+        "scope": "woocommerce-tasks"
+    },
+    {
+        "description": "WooCommerce Payment Gateway configuration",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/packages/onboarding/src/components/WooPaymentGatewayConfigure/WooPaymentGatewayConfigure.js#L7-L14",
+        "name": "WooPaymentGatewayConfigure",
+        "type": "slotFill",
+        "params": [
+            {
+                "name": "props",
+                "type": "Object",
+                "description": "React props."
+            },
+            {
+                "name": "props.id",
+                "type": "string",
+                "description": "gateway id."
+            }
+        ],
+        "scope": "woocommerce-admin"
+    },
+    {
+        "description": "WooCommerce Payment Gateway setup.",
+        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/packages/onboarding/src/components/WooPaymentGatewaySetup/WooPaymentGatewaySetup.js#L7-L14",
+        "name": "WooPaymentGatewaySetup",
+        "type": "slotFill",
+        "params": [
+            {
+                "name": "props",
+                "type": "Object",
+                "description": "React props."
+            },
+            {
+                "name": "props.id",
+                "type": "string",
+                "description": "Setup id."
+            }
+        ],
+        "scope": "woocommerce-admin"
+    }
+]

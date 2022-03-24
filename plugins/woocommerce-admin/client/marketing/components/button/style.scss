@@ -1,0 +1,6 @@
+.components-button.woocommerce-admin-marketing-button {
+	&:not([disabled]) {
+		border-color: var(--wp-admin-theme-color) !important;
+		color: var(--wp-admin-theme-color) !important;
+	}
+}

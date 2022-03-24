@@ -1,0 +1,3 @@
+Packages: [ "/packages/*" ]
+Components: /packages/components
+Build: [ "/.*", "*.config.js", "bin/*", "composer.json", "Gruntfile.js", "package.json" ]

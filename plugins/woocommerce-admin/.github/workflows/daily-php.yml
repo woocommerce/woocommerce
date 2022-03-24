@@ -1,0 +1,40 @@
+name: 'Daily PHP Tests'
+
+on:
+  schedule:
+    - cron:  '0 0 * * *'
+
+jobs:
+    daily-test-php:
+        name: "Test PHP"
+        runs-on: ubuntu-18.04
+        strategy:
+            fail-fast: false
+            matrix:
+                wordpress: ['latest', 'nightly']
+                woocommerce: ['latest', 'nightly']
+                exclude:
+                    - {'wordpress': 'nightly', 'woocommerce': 'nightly'}
+        steps:
+            - name: Check out repository code
+              uses: actions/checkout@v2
+            - name: Setup Node.js
+              uses: actions/setup-node@v2-beta
+              with:
+                  node-version: '14'
+            - name: Install PNPM and install dependencies
+              uses: pnpm/action-setup@v2.2.1
+              with:
+                version: ^6.24.2
+                run_install: true
+            - name: Build
+              run: |
+                  pnpm run build:feature-config	
+                  composer install  --no-dev
+              shell: bash
+            - name: Run the PHP unit tests
+              env:
+                  WP_VERSION: ${{ matrix.wordpress }}
+                  WC_VERSION: ${{ matrix.woocommerce }}
+              run: pnpm run test:php
+              shell: bash

@@ -1,0 +1,4 @@
+Significance: minor
+Type: Enhancement
+
+Prompts a modal to save any unsaved changes when the users try to move to a different step #8278

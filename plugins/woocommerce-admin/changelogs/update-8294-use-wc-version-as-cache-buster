@@ -1,0 +1,4 @@
+Significance: minor
+Type: Tweak
+
+Use WC_VERSION as cache buster for assets #8308

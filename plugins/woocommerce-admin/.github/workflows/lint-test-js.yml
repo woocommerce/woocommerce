@@ -1,0 +1,25 @@
+name: Lint and test JS
+on: [pull_request]
+
+jobs:
+    test-lint-js:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Cancel Previous Runs
+              uses: styfle/cancel-workflow-action@0.7.0
+              with:
+                  access_token: ${{ github.token }}
+            - name: Check out repository code
+              uses: actions/checkout@v2
+            - name: Setup Node.js
+              uses: actions/setup-node@v2.5.1
+              with:
+                  node-version: '14'
+            - name: Install PNPM and install dependencies
+              uses: pnpm/action-setup@v2.2.1
+              with:
+                version: ^6.24.2
+                run_install: true
+            - name: Lint and test the JS
+              run: bin/js_lint_test.sh
+              shell: bash

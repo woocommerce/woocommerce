@@ -1,0 +1,57 @@
+name: 'Daily E2E Tests'
+
+on:
+   schedule:
+     - cron:  '0 0 * * *'
+
+jobs:
+    e2e-tests:
+        runs-on: ubuntu-18.04
+        strategy:
+            fail-fast: false
+            matrix:
+                wordpress: ['https://wordpress.org/latest.zip', 'https://wordpress.org/nightly-builds/wordpress-latest.zip']
+                woocommerce: ['https://downloads.wordpress.org/plugin/woocommerce.zip', 'https://github.com/woocommerce/woocommerce/releases/download/nightly/woocommerce-trunk-nightly.zip']
+                exclude: 
+                    - {'wordpress': 'https://wordpress.org/nightly-builds/wordpress-latest.zip', 'woocommerce': 'https://github.com/woocommerce/woocommerce/releases/download/nightly/woocommerce-trunk-nightly.zip'}
+        steps:
+            - name: Check out repository code
+              uses: actions/checkout@v2
+            - name: Install PHP dependencies
+              run: |
+                  composer install  --no-dev
+            - name: Setup Node.js
+              uses: actions/setup-node@v2-beta
+              with:
+                  node-version: '14'      
+            - name: Install PNPM and install dependencies
+              uses: pnpm/action-setup@v2.2.1
+              with:
+                version: ^6.24.2
+                run_install: true
+            - name: Build
+              run: |
+                  composer require wp-cli/i18n-command
+                  pnpm run build:feature-config
+                  pnpm run build
+            - name: Setup wp-env
+              env:
+                  WP_ENV_CONFIG: '{ core: "${{ matrix.wordpress }}", plugins: [ ".", "${{ matrix.woocommerce }}" ] }'
+              run: |
+                  pnpm -g i @wordpress/env
+                  printf '%s\n' "$WP_ENV_CONFIG" > .wp-env-override.json
+                  WP_ENV_TESTS_PORT=8084 wp-env start
+                  wp-env run tests-cli "wp post create --post_type=page --post_status=publish --post_title='Ready' --post_content='E2E-tests.'"
+            - name: Test
+              env:
+                  WC_E2E_SCREENSHOTS: 1
+              run: |
+                  pnpm exec wc-e2e test:e2e
+            - name: Archive e2e test screenshots
+              if: ${{ always() }}
+              uses: actions/upload-artifact@v2
+              with:
+                  name: e2e-screenshots
+                  path: tests/e2e/screenshots
+                  if-no-files-found: ignore
+                  retention-days: 5

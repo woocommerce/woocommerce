@@ -2,7 +2,10 @@
 	"root": "plugins/woocommerce/",
 	"sourceRoot": "plugins/woocommerce",
 	"projectType": "application",
-	"implicitDependencies": [ "woocommerce-legacy-assets" ],
+	"implicitDependencies": [ 
+		"woocommerce-legacy-assets",
+		"woocommerce-admin" 
+	],
 	"targets": {
 		"changelog": {
 			"executor": "./tools/executors/changelogger:changelog",
