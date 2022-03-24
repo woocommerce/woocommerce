@@ -30,6 +30,8 @@
 		"clean": "rimraf ./dist && pnpm run:packages -- clean --parallel",
 		"predev": "pnpm run -s install-if-deps-outdated && php ./bin/update-version.php",
 		"dev": "cross-env WC_ADMIN_PHASE=development pnpm run build:feature-config && cross-env WC_ADMIN_PHASE=development pnpm run build:packages && cross-env WC_ADMIN_PHASE=development webpack",
+		"client:watch": "cross-env WC_ADMIN_PHASE=development pnpm run build:feature-config && cross-env WC_ADMIN_PHASE=development webpack --watch",
+		"packages:watch": "cross-env WC_ADMIN_PHASE=development pnpm run build:packages && cross-env WC_ADMIN_PHASE=development pnpm run:packages -- start --parallel",
 		"docs": "./bin/import-wp-css-storybook.sh && BABEL_ENV=storybook STORYBOOK=true pnpm exec build-storybook -c storybook/.storybook -o ./docs/components/storybook",
 		"i18n": "pnpm run -s i18n:js && pnpm run -s i18n:check && pnpm run -s i18n:pot && pnpm run -s i18n:build",
 		"i18n:build": "php bin/combine-pot-files.php languages/woocommerce-admin.po languages/woocommerce-admin.pot",
