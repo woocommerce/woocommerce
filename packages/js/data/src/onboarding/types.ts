@@ -8,12 +8,11 @@ export type TaskType = {
 	isDismissed: boolean;
 	isSnoozed: boolean;
 	isVisible: boolean;
-	isVisited: boolean;
 	isSnoozable: boolean;
 	snoozedUntil: number;
 	time: string;
 	title: string;
-	isVisited?: boolean;
+	isVisited: boolean;
 };
 
 export type TaskListType = {
