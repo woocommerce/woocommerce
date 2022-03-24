@@ -58,7 +58,7 @@ const Block = ( { color, backgroundColor, className }: Props ): JSX.Element => {
 						href={ CART_URL }
 						style={ {
 							color,
-							borderColor: color,
+							boxShadow: `inset 0 0 0 1px ${ color }`,
 						} }
 						variant="outlined"
 					>
