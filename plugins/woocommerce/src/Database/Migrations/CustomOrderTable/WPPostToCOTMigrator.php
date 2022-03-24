@@ -101,21 +101,25 @@ class WPPostToCOTMigrator {
 	private function get_config_for_order_table() {
 		global $wpdb;
 		$order_table_schema_config = array(
-			'entity_schema'        => array(
-				'primary_id' => 'ID',
-				'table_name' => $wpdb->posts,
+			'source' => array(
+				'entity' => array(
+					'table_name' => $wpdb->posts,
+					'meta_rel_column' => 'ID',
+					'destination_rel_column' => 'ID',
+				),
+				'meta' => array(
+					'table_name' => $wpdb->postmeta,
+					'meta_key_column' => 'meta_key',
+					'meta_value_column' => 'meta_value',
+					'entity_id_column' => 'post_id',
+				),
 			),
-			'entity_meta_schema'   => array(
-				'meta_key_column'   => 'meta_key',
-				'meta_value_column' => 'meta_value',
-				'table_name'        => $wpdb->postmeta,
+			'destination' => array(
+				array(
+					'table_name' => $this->table_names['orders'],
+					'source_rel_column' => 'post_id',
+				),
 			),
-			'destination_table'    => $wpdb->prefix . 'wc_orders',
-			'entity_meta_relation' => array(
-				'entity_rel_column' => 'ID',
-				'meta_rel_column'   => 'post_id',
-			),
-
 		);
 
 		$order_table_core_config = array(
@@ -217,19 +221,22 @@ class WPPostToCOTMigrator {
 		// We join order core table and post meta table to get data  for address, since we need order ID.
 		// So order core record needs to be already present.
 		$schema_config = array(
-			'entity_schema'        => array(
-				'primary_id' => 'post_id',
-				'table_name' => $this->table_names['orders'],
+			'source' => array(
+				'entity' => array(
+					'table_name' => $this->table_names['orders'],
+					'meta_rel_column' => 'post_id',
+					'destination_rel_column' => 'id',
+				),
+				'meta' => array(
+					'table_name' => $wpdb->postmeta,
+					'meta_key_column' => 'meta_key',
+					'meta_value_column' => 'meta_value',
+					'entity_id_column' => 'post_id',
+				),
 			),
-			'entity_meta_schema'   => array(
-				'meta_key_column'   => 'meta_key',
-				'meta_value_column' => 'meta_value',
-				'table_name'        => $wpdb->postmeta,
-			),
-			'destination_table'    => $this->table_names['addresses'],
-			'entity_meta_relation' => array(
-				'entity_rel_column' => 'post_id',
-				'meta_rel_column'   => 'post_id',
+			'destination' => array(
+				'table_name' => $this->table_names['addresses'],
+				'source_rel_column' => 'order_id',
 			),
 		);
 
@@ -308,19 +315,22 @@ class WPPostToCOTMigrator {
 		global $wpdb;
 
 		$schema_config = array(
-			'entity_schema'        => array(
-				'primary_id' => 'post_id',
-				'table_name' => $this->table_names['orders'],
+			'source' => array(
+				'entity' => array(
+					'table_name' => $this->table_names['orders'],
+					'meta_rel_column' => 'post_id',
+					'destination_rel_column' => 'id',
+				),
+				'meta' => array(
+					'table_name' => $wpdb->postmeta,
+					'meta_key_column' => 'meta_key',
+					'meta_value_column' => 'meta_value',
+					'entity_id_column' => 'post_id',
+				),
 			),
-			'entity_meta_schema'   => array(
-				'meta_key_column'   => 'meta_key',
-				'meta_value_column' => 'meta_value',
-				'table_name'        => $wpdb->postmeta,
-			),
-			'destination_table'    => $this->table_names['op_data'],
-			'entity_meta_relation' => array(
-				'entity_rel_column' => 'post_id',
-				'meta_rel_column'   => 'post_id',
+			'destination' => array(
+				'table_name' => $this->table_names['op_data'],
+				'source_rel_column' => 'order_id',
 			),
 		);
 
