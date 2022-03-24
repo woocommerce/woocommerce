@@ -49,6 +49,11 @@ class WPPostToCOTMigrator {
 	 */
 	private $operation_data_table_migrator;
 
+	/**
+	 * Migrator instance to migrate meta data.
+	 *
+	 * @var MetaToMetaTableMigrator
+	 */
 	private $meta_table_migrator;
 
 	/**
@@ -396,6 +401,11 @@ class WPPostToCOTMigrator {
 		);
 	}
 
+	/**
+	 * Generate config for meta data migration.
+	 *
+	 * @return array Meta data migration config.
+	 */
 	private function get_config_for_meta_table() {
 		global $wpdb;
 
@@ -427,7 +437,7 @@ class WPPostToCOTMigrator {
 					'source_id_column' => 'post_id',
 					'id_column'        => 'id',
 				),
-			)
+			),
 		);
 	}
 
@@ -476,8 +486,8 @@ class WPPostToCOTMigrator {
 	 * Process next batch for a given address type.
 	 *
 	 * @param MetaToCustomTableMigrator $migrator Migrator instance for address type.
-	 * @param array $order_post_ids Array of post IDs for orders.
-	 * @param string $order_by Order by clause.
+	 * @param array                     $order_post_ids Array of post IDs for orders.
+	 * @param string                    $order_by Order by clause.
 	 */
 	private function process_next_migrator_batch( $migrator, $order_post_ids, $order_by ) {
 		global $wpdb;
@@ -497,13 +507,19 @@ class WPPostToCOTMigrator {
 		}
 	}
 
+	/**
+	 * Process migration for metadata for given post ids.\
+	 *
+	 * @param array $order_post_ids Post IDs.
+	 */
 	private function process_meta_migration( $order_post_ids ) {
 		global $wpdb;
 		$post_ids_where_clause = $this->get_where_id_clause( $order_post_ids, 'post_id' );
 		$data_to_migrate = $this->meta_table_migrator->fetch_data_for_migration( $post_ids_where_clause );
 		$insert_queries = $this->meta_table_migrator->generate_insert_sql_for_batch( $data_to_migrate['data'], 'insert' );
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $insert_queries should already be escaped in the generating function.
 		$result = $wpdb->query( $insert_queries );
-		if ( count( $data_to_migrate['data'] )  !== $result ) {
+		if ( count( $data_to_migrate['data'] ) !== $result ) {
 			// TODO: Find and log entity ids that were not inserted.
 			echo 'error';
 		}
@@ -557,7 +573,7 @@ class WPPostToCOTMigrator {
 	/**
 	 * Helper method to create `ID in (.., .., ...)` clauses.
 	 *
-	 * @param array $ids List of IDs.
+	 * @param array  $ids List of IDs.
 	 * @param string $column_name Name of the ID column.
 	 *
 	 * @return string Prepared clause for where.
