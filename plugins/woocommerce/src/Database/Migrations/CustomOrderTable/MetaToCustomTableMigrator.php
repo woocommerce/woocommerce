@@ -5,6 +5,8 @@
 
 namespace Automattic\WooCommerce\DataBase\Migrations\CustomOrderTable;
 
+use MigrationHelper;
+
 /**
  * Class MetaToCustomTableMigrator.
  *
@@ -32,20 +34,6 @@ class MetaToCustomTableMigrator {
 	 * @var array
 	 */
 	private $core_column_mapping;
-
-	/**
-	 * Placeholders that we will use in building $wpdb queries.
-	 *
-	 * @var string[]
-	 */
-	private $wpdb_placeholder_for_type = array(
-		'int'        => '%d',
-		'decimal'    => '%f',
-		'string'     => '%s',
-		'date'       => '%s',
-		'date_epoch' => '%s',
-		'bool'       => '%d',
-	);
 
 	/**
 	 * MetaToCustomTableMigrator constructor.
@@ -120,24 +108,13 @@ class MetaToCustomTableMigrator {
 
 		// TODO: Add code to validate params.
 		$table = $this->schema_config['destination_table'];
-
-		switch ( $insert_switch ) {
-			case 'insert_ignore':
-				$insert_query = 'INSERT IGNORE';
-				break;
-			case 'replace':
-				$insert_query = 'REPLACE';
-				break;
-			case 'insert':
-			default:
-				$insert_query = 'INSERT';
-		}
+		$insert_query = MigrationHelper::get_insert_switch( $insert_switch );
 
 		$columns      = array();
 		$placeholders = array();
 		foreach ( array_merge( $this->core_column_mapping, $this->meta_column_mapping ) as $prev_column => $schema ) {
 			$columns[]      = $schema['destination'];
-			$placeholders[] = $this->wpdb_placeholder_for_type[ $schema['type'] ];
+			$placeholders[] = MigrationHelper::get_wpdb_placeholder_for_type( $schema['type'] );
 		}
 		$placeholders = "'" . implode( "', '", $placeholders ) . "'";
 
@@ -147,14 +124,14 @@ class MetaToCustomTableMigrator {
 			foreach ( $columns as $column ) {
 				$query_params[] = $row[ $column ] ?? null;
 			}
-			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $placeholders can only contain combination of placeholders described in $this->>wpdb_placeholder_for_type.
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $placeholders can only contain combination of placeholders described in MigrationHelper::get_wpdb_placeholder_for_type
 			$value_string = '(' . $wpdb->prepare( $placeholders, $query_params ) . ')';
 			$values[]     = $value_string;
 		}
 
 		$value_sql = implode( ',', $values );
 
-		$column_sql = implode( '`, `', $this->escape_backtick( $columns ) );
+		$column_sql = implode( '`, `', MigrationHelper::escape_backtick( $columns ) );
 
 		return "$insert_query INTO $table (`$column_sql`) VALUES $value_sql;"; // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, -- $insert_query is hardcoded, $value_sql is already escaped.
 	}
@@ -210,16 +187,16 @@ class MetaToCustomTableMigrator {
 	 */
 	private function build_entity_table_query( $where_clause, $batch_size, $order_by ) {
 		global $wpdb;
-		$entity_table      = $this->escape_backtick( $this->schema_config['entity_schema']['table_name'] );
-		$primary_id_column = $this->escape_backtick( $this->schema_config['entity_schema']['primary_id'] );
-		$entity_rel_column = $this->escape_backtick( $this->schema_config['entity_meta_relation']['entity_rel_column'] );
+		$entity_table      = MigrationHelper::escape_backtick( $this->schema_config['entity_schema']['table_name'] );
+		$primary_id_column = MigrationHelper::escape_backtick( $this->schema_config['entity_schema']['primary_id'] );
+		$entity_rel_column = MigrationHelper::escape_backtick( $this->schema_config['entity_meta_relation']['entity_rel_column'] );
 		$entity_keys       = array();
 		foreach ( $this->core_column_mapping as $column_name => $column_schema ) {
 			if ( isset( $column_schema['select_clause'] ) ) {
 				$select_clause = $column_schema['select_clause'];
 				$entity_keys[] = "$select_clause AS $column_name";
 			} else {
-				$entity_keys[] = '`' . $this->escape_backtick( $column_name ) . '`';
+				$entity_keys[] = '`' . MigrationHelper::escape_backtick( $column_name ) . '`';
 			}
 		}
 		$entity_column_string = implode( ', ', $entity_keys );
@@ -239,18 +216,6 @@ SELECT `$primary_id_column` as primary_key_id, `$entity_rel_column` AS entity_re
 	}
 
 	/**
-	 * Helper method to escape backtick in column and table names.
-	 * WP does not provide a method to escape table/columns names yet, but hopefully soon in @link https://core.trac.wordpress.org/ticket/52506
-	 *
-	 * @param string|array $identifier Column or table name.
-	 *
-	 * @return array|string|string[] Escaped identifier.
-	 */
-	private function escape_backtick( $identifier ) {
-		return str_replace( '`', '``', $identifier );
-	}
-
-	/**
 	 * Helper method to build query that will be used to fetch data from source meta table.
 	 *
 	 * @param array $entity_ids List of IDs to fetch metadata for.
@@ -259,11 +224,11 @@ SELECT `$primary_id_column` as primary_key_id, `$entity_rel_column` AS entity_re
 	 */
 	private function build_meta_data_query( $entity_ids ) {
 		global $wpdb;
-		$meta_table                = $this->escape_backtick( $this->schema_config['entity_meta_schema']['table_name'] );
+		$meta_table                = MigrationHelper::escape_backtick( $this->schema_config['entity_meta_schema']['table_name'] );
 		$meta_keys                 = array_keys( $this->meta_column_mapping );
-		$meta_key_column           = $this->escape_backtick( $this->schema_config['entity_meta_schema']['meta_key_column'] );
-		$meta_value_column         = $this->escape_backtick( $this->schema_config['entity_meta_schema']['meta_value_column'] );
-		$meta_table_relational_key = $this->escape_backtick( $this->schema_config['entity_meta_relation']['meta_rel_column'] );
+		$meta_key_column           = MigrationHelper::escape_backtick( $this->schema_config['entity_meta_schema']['meta_key_column'] );
+		$meta_value_column         = MigrationHelper::escape_backtick( $this->schema_config['entity_meta_schema']['meta_value_column'] );
+		$meta_table_relational_key = MigrationHelper::escape_backtick( $this->schema_config['entity_meta_relation']['meta_rel_column'] );
 
 		$meta_column_string = implode( ', ', array_fill( 0, count( $meta_keys ), '%s' ) );
 		$entity_id_string   = implode( ', ', array_fill( 0, count( $entity_ids ), '%d' ) );
