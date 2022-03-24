@@ -43,6 +43,7 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 		snoozeTask,
 		undoDismissTask,
 		undoSnoozeTask,
+		visitedTask,
 	} = useDispatch( ONBOARDING_STORE_NAME );
 	const userPreferences = useUserPreferences();
 
@@ -106,6 +107,7 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 		const trackedStartedTasks =
 			userPreferences.task_list_tracked_started_tasks || {};
 
+		visitedTask( id );
 		userPreferences.updateUserPreferences( {
 			task_list_tracked_started_tasks: {
 				...( trackedStartedTasks || {} ),
