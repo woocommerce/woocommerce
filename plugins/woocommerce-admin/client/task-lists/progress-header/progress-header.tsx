@@ -20,37 +20,43 @@ type ProgressHeaderProps = {
 export const ProgressHeader: React.FC< ProgressHeaderProps > = ( {
 	taskListId,
 } ) => {
-	const { loading, tasksCount, completedCount, hasVisitedTasks } = useSelect(
-		( select ) => {
-			const taskList: TaskListType = select(
-				ONBOARDING_STORE_NAME
-			).getTaskList( taskListId );
-			const finishedResolution = select(
-				ONBOARDING_STORE_NAME
-			).hasFinishedResolution( 'getTaskList', [ taskListId ] );
-			const nowTimestamp = Date.now();
-			const visibleTasks = taskList?.tasks.filter(
-				( task ) =>
-					! task.isDismissed &&
-					( ! task.isSnoozed || task.snoozedUntil < nowTimestamp )
-			);
+	const {
+		loading,
+		tasksCount,
+		completedCount,
+		hasVisitedTasks,
+		disabledCompletedCount,
+	} = useSelect( ( select ) => {
+		const taskList: TaskListType = select(
+			ONBOARDING_STORE_NAME
+		).getTaskList( taskListId );
+		const finishedResolution = select(
+			ONBOARDING_STORE_NAME
+		).hasFinishedResolution( 'getTaskList', [ taskListId ] );
+		const nowTimestamp = Date.now();
+		const visibleTasks = taskList?.tasks.filter(
+			( task ) =>
+				! task.isDismissed &&
+				( ! task.isSnoozed || task.snoozedUntil < nowTimestamp )
+		);
 
-			return {
-				loading: ! finishedResolution,
-				tasksCount: visibleTasks?.length,
-				completedCount: visibleTasks?.filter(
-					( task ) => task.isComplete
-				).length,
-				hasVisitedTasks:
-					visibleTasks?.filter( ( task ) => task.isVisited ).length >
-					0,
-			};
-		}
-	);
+		return {
+			loading: ! finishedResolution,
+			tasksCount: visibleTasks?.length,
+			completedCount: visibleTasks?.filter( ( task ) => task.isComplete )
+				.length,
+			disabledCompletedCount: visibleTasks?.filter(
+				( task ) => task.isComplete && task.isDisabled
+			).length,
+			hasVisitedTasks:
+				visibleTasks?.filter( ( task ) => task.isVisited ).length > 0,
+		};
+	} );
 
 	const progressTitle = useMemo( () => {
 		if (
-			( ! hasVisitedTasks && completedCount < 2 ) ||
+			( ! hasVisitedTasks &&
+				completedCount < 2 + disabledCompletedCount ) ||
 			completedCount === tasksCount
 		) {
 			const siteTitle = getSetting( 'siteTitle' );

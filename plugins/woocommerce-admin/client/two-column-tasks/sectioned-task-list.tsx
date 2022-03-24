@@ -26,6 +26,7 @@ import './sectioned-task-list.scss';
 import TaskListCompleted from './completed';
 import { TaskListProps } from '~/tasks/task-list';
 import SectionHeader from './headers/section-header';
+import { ProgressHeader } from '~/task-lists/progress-header';
 
 type PanelBodyProps = Omit< PanelBody.Props, 'title' | 'onToggle' > & {
 	title: string | React.ReactNode | undefined;
@@ -41,6 +42,7 @@ export const SectionedTaskList: React.FC< TaskListProps > = ( {
 	keepCompletedTaskList,
 	isComplete,
 	sections,
+	displayProgressHeader,
 } ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
 	const { updateOptions, dismissTask, undoDismissTask } = useDispatch(
@@ -191,6 +193,9 @@ export const SectionedTaskList: React.FC< TaskListProps > = ( {
 
 	return (
 		<>
+			{ displayProgressHeader ? (
+				<ProgressHeader taskListId={ id } />
+			) : null }
 			<div
 				className={ classnames(
 					`woocommerce-task-dashboard__container woocommerce-sectioned-task-list two-column-experiment woocommerce-task-list__${ id }`

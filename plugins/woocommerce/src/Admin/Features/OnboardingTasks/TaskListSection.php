@@ -87,7 +87,7 @@ class TaskListSection {
 		foreach ( $this->task_names as $task_name ) {
 			if ( null !== $this->task_list && isset( $this->task_list->task_class_id_map[ $task_name ] ) ) {
 				$task = $this->task_list->get_task( $this->task_list->task_class_id_map[ $task_name ] );
-				if ( ! $task->is_complete() ) {
+				if ( $task->can_view() && ! $task->is_complete() ) {
 					$complete = false;
 					break;
 				}
