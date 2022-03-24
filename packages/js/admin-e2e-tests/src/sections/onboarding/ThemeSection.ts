@@ -16,14 +16,12 @@ export class ThemeSection extends BasePage {
 
 	async continueWithTheme( themeTitle: string ): Promise< void > {
 		const title = await waitForElementByText( 'h2', themeTitle );
-		const card = await title?.evaluateHandle( ( element ) => {
-			return element.closest( '.components-card' );
+		const chooseButton = await title?.evaluateHandle( ( element ) => {
+			const card = element.closest( '.components-card' );
+			return Array.from( card?.querySelectorAll('button') || [] ).find( el => el.textContent === 'Choose');
 		} );
-		const chooseButton = await card
-			?.asElement()
-			?.$x( `//button[contains(text(), "Choose")]` );
-		if ( chooseButton && chooseButton.length > 0 ) {
-			await chooseButton[ 0 ].click();
+		if ( chooseButton ) {
+			await chooseButton.asElement()?.click();
 		}
 	}
 }

@@ -21,6 +21,18 @@
              "options": {
                  "script": "test"
              }
-         }
+		 },
+	   "clean": {
+		 "executor": "@nrwl/workspace:run-script",
+		 "options": {
+		   "script": "clean"
+		 }
+	   },
+	   "prepare": {
+		 "executor": "@nrwl/workspace:run-script",
+		 "options": {
+		   "script": "prepare"
+		 }
+	   }
      }
  }

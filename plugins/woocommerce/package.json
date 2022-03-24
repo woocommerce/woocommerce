@@ -39,7 +39,7 @@
     "@typescript-eslint/eslint-plugin": "3.10.1",
     "@typescript-eslint/experimental-utils": "3.10.1",
     "@typescript-eslint/parser": "3.10.1",
-    "@woocommerce/admin-e2e-tests": "0.1.1",
+    "@woocommerce/admin-e2e-tests": "workspace:*",
     "@woocommerce/api": "workspace:*",
     "@woocommerce/api-core-tests": "workspace:*",
     "@woocommerce/e2e-core-tests": "workspace:*",
