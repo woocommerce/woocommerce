@@ -458,6 +458,35 @@ describe( 'Shopper → Mini Cart', () => {
 		} );
 	} );
 
+	describe( 'Remove product', () => {
+		beforeAll( async () => {
+			await shopper.emptyCart();
+		} );
+
+		afterAll( async () => {
+			await shopper.emptyCart();
+		} );
+
+		it( 'Can remove product from Mini Cart', async () => {
+			await page.click( '.add_to_cart_button' );
+
+			await expect( page ).toMatchElement( '.wc-block-mini-cart__title', {
+				text: 'Your cart (1 item)',
+			} );
+
+			await page.waitForTimeout( 500 ); // Ensure the drawer is fully opened.
+
+			await page.click( '.wc-block-cart-item__remove-link' );
+
+			await expect( page ).toMatchElement(
+				'.wc-block-mini-cart__drawer',
+				{
+					text: 'Your cart is currently empty!',
+				}
+			);
+		} );
+	} );
+
 	describe( 'Cart page', () => {
 		beforeAll( async () => {
 			await shopper.block.emptyCart();
