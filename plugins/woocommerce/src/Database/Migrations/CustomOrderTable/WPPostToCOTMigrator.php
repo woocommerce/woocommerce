@@ -49,6 +49,8 @@ class WPPostToCOTMigrator {
 	 */
 	private $operation_data_table_migrator;
 
+	private $meta_table_migrator;
+
 	/**
 	 * Names of different order tables.
 	 *
@@ -67,17 +69,21 @@ class WPPostToCOTMigrator {
 			'orders'    => $wpdb->prefix . 'wc_orders',
 			'addresses' => $wpdb->prefix . 'wc_order_addresses',
 			'op_data'   => $wpdb->prefix . 'wc_order_operational_data',
+			'meta'      => $wpdb->prefix . 'wc_orders_meta',
 		);
 
 		$order_config            = $this->get_config_for_order_table();
 		$billing_address_config  = $this->get_config_for_address_table_billing();
 		$shipping_address_config = $this->get_config_for_address_table_shipping();
 		$operation_data_config   = $this->get_config_for_operational_data_table();
+		$meta_data_config        = $this->get_config_for_meta_table();
 
 		$this->order_table_migrator            = new MetaToCustomTableMigrator( $order_config['schema'], $order_config['meta'], $order_config['core'] );
 		$this->billing_address_table_migrator  = new MetaToCustomTableMigrator( $billing_address_config['schema'], $billing_address_config['meta'], $billing_address_config['core'] );
 		$this->shipping_address_table_migrator = new MetaToCustomTableMigrator( $shipping_address_config['schema'], $shipping_address_config['meta'], $shipping_address_config['core'] );
 		$this->operation_data_table_migrator   = new MetaToCustomTableMigrator( $operation_data_config['schema'], $operation_data_config['meta'], $operation_data_config['core'] );
+
+		$this->meta_table_migrator = new MetaToMetaTableMigrator( $meta_data_config );
 
 		$this->error_logger = new MigrationErrorLogger();
 	}
@@ -390,6 +396,41 @@ class WPPostToCOTMigrator {
 		);
 	}
 
+	private function get_config_for_meta_table() {
+		global $wpdb;
+
+		$excluded_columns = array_keys( $this->get_config_for_order_table()['meta'] );
+		$excluded_columns = array_merge( $excluded_columns, array_keys( $this->get_config_for_operational_data_table()['meta'] ) );
+		$excluded_columns = array_merge( $excluded_columns, array_keys( $this->get_config_for_address_table_billing()['meta'] ) );
+		$excluded_columns = array_merge( $excluded_columns, array_keys( $this->get_config_for_address_table_shipping()['meta'] ) );
+
+		return array(
+			'source'      => array(
+				'meta'          => array(
+					'table_name'        => $wpdb->postmeta,
+					'entity_id_column'  => 'post_id',
+					'meta_key_column'   => 'meta_key',
+					'meta_value_column' => 'meta_value',
+				),
+				'excluded_keys' => $excluded_columns,
+			),
+			'destination' => array(
+				'meta'   => array(
+					'table_name'        => $this->table_names['meta'],
+					'entity_id_column'  => 'order_id',
+					'meta_key_column'   => 'meta_key',
+					'meta_value_column' => 'meta_value',
+					'entity_id_type'    => 'int',
+				),
+				'entity' => array(
+					'table_name'       => $this->table_names['orders'],
+					'source_id_column' => 'post_id',
+					'id_column'        => 'id',
+				),
+			)
+		);
+	}
+
 	/**
 	 * Process next migration batch, uses option `wc_cot_migration` to checkpoints of what have been processed so far.
 	 *
@@ -423,6 +464,7 @@ class WPPostToCOTMigrator {
 		$this->process_next_migrator_batch( $this->billing_address_table_migrator, $order_post_ids, $order_by );
 		$this->process_next_migrator_batch( $this->shipping_address_table_migrator, $order_post_ids, $order_by );
 		$this->process_next_migrator_batch( $this->operation_data_table_migrator, $order_post_ids, $order_by );
+		$this->process_meta_migration( $order_post_ids );
 
 		$last_post_migrated = max( array_keys( $order_data['data'] ) );
 		$this->update_checkpoint( $last_post_migrated );
@@ -434,8 +476,8 @@ class WPPostToCOTMigrator {
 	 * Process next batch for a given address type.
 	 *
 	 * @param MetaToCustomTableMigrator $migrator Migrator instance for address type.
-	 * @param array                     $order_post_ids Array of post IDs for orders.
-	 * @param string                    $order_by Order by clause.
+	 * @param array $order_post_ids Array of post IDs for orders.
+	 * @param string $order_by Order by clause.
 	 */
 	private function process_next_migrator_batch( $migrator, $order_post_ids, $order_by ) {
 		global $wpdb;
@@ -451,6 +493,18 @@ class WPPostToCOTMigrator {
 		if ( count( $data['data'] ) !== $result ) {
 			// Some rows were not inserted.
 			// TODO: Find and log the entity ids that were not inserted.
+			echo 'error';
+		}
+	}
+
+	private function process_meta_migration( $order_post_ids ) {
+		global $wpdb;
+		$post_ids_where_clause = $this->get_where_id_clause( $order_post_ids, 'post_id' );
+		$data_to_migrate = $this->meta_table_migrator->fetch_data_for_migration( $post_ids_where_clause );
+		$insert_queries = $this->meta_table_migrator->generate_insert_sql_for_batch( $data_to_migrate['data'], 'insert' );
+		$result = $wpdb->query( $insert_queries );
+		if ( count( $data_to_migrate['data'] )  !== $result ) {
+			// TODO: Find and log entity ids that were not inserted.
 			echo 'error';
 		}
 	}
@@ -503,7 +557,7 @@ class WPPostToCOTMigrator {
 	/**
 	 * Helper method to create `ID in (.., .., ...)` clauses.
 	 *
-	 * @param array  $ids List of IDs.
+	 * @param array $ids List of IDs.
 	 * @param string $column_name Name of the ID column.
 	 *
 	 * @return string Prepared clause for where.
