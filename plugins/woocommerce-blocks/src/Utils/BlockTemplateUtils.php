@@ -486,7 +486,7 @@ class BlockTemplateUtils {
 	 *
 	 * @return array List of templates with duplicates removed. The customised alternative is preferred over the theme default.
 	 */
-	public function remove_theme_templates_with_custom_alternative( $templates ) {
+	public static function remove_theme_templates_with_custom_alternative( $templates ) {
 
 		// Get the slugs of all templates that have been customised and saved in the database.
 		$customised_template_slugs = array_map(
