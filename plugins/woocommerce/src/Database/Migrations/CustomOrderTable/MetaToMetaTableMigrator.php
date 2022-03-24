@@ -5,42 +5,43 @@
 
 namespace Automattic\WooCommerce\DataBase\Migrations\CustomOrderTable;
 
-use MigrationHelper;
+use Automattic\WooCommerce\DataBase\Migrations\MigrationHelper;
 
+/**
+ * Class MetaToMetaTableMigrator.
+ *
+ * Generic class for powering migrations from one meta table to another table.
+ *
+ * @package Automattic\WooCommerce\DataBase\Migrations\CustomOrderTable
+ */
 class MetaToMetaTableMigrator {
 
+	/**
+	 * Schema config, see __construct for more details.
+	 *
+	 * @var array
+	 */
 	private $schema_config;
 
 	/**
 	 * MetaToMetaTableMigrator constructor.
 	 *
 	 * @param array $schema_config This parameters provides general but essential information about tables under migrations. Must be of the form-
-	 * array(
-	 *  'entity_schema' =>
-	 *      array (
-	 *          'primary_id' => 'primary_id column name of source table',
-	 *          'table_name' => 'name of the source table'.
-	 *      ),
-	 *  'entity_meta_schema' =>
-	 *      array (
-	 *          'meta_key_column' => 'name of meta_key column in source meta table',
-	 *          'meta_value_column' => 'name of meta_value column in source meta table',
-	 *          'table_name' => 'name of source meta table',
-	 *      ),
-	 *  'destination_table' => 'name of destination custom table',
-	 *  'entity_meta_relation' =>
-	 *      array (
-	 *          'entity' => 'name of column in source table which is used in source meta table',
-	 *          'meta' => 'name of column in source meta table which contains key of records in source table',
-	 *      )
-	 *  )
-	 * ).
-	 * @param array $exclude_columns List of columns to exclude.
+	 * TODO: Add structure.
 	 */
 	public function __construct( $schema_config ) {
+		// TODO: Validate params.
 		$this->schema_config = $schema_config;
 	}
 
+	/**
+	 * Generate insert sql queries for batches.
+	 *
+	 * @param array  $batch Data to generate queries for.
+	 * @param string $insert_switch Insert switch to use.
+	 *
+	 * @return string
+	 */
 	public function generate_insert_sql_for_batch( $batch, $insert_switch ) {
 		global $wpdb;
 
@@ -59,10 +60,11 @@ class MetaToMetaTableMigrator {
 			$query_params = array(
 				$row['destination_entity_id'],
 				$row['meta_key'],
-				$row['meta_value']
+				$row['meta_value'],
 			);
-			$value_sql    = $wpdb->prepare( "( $placeholder_string )", $query_params );
-			$values[]     = $value_sql;
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $placeholder_string is hardcoded.
+			$value_sql = $wpdb->prepare( "( $placeholder_string )", $query_params );
+			$values[]  = $value_sql;
 		}
 
 		$values_sql = implode( ',', $values );
@@ -70,13 +72,30 @@ class MetaToMetaTableMigrator {
 		return "$insert_query INTO $table $column_sql VALUES $values_sql";
 	}
 
+	/**
+	 * Fetch data for migration.
+	 *
+	 * @param string $where_clause Where conditions to use while selecting data from source table.
+	 *
+	 * @return array[] Data along with errors (if any), will of the form:
+	 * array(
+	 *  'data' => array(
+	 *      'id_1' => array( 'column1' => value1, 'column2' => value2, ...),
+	 *      ...,
+	 *   ),
+	 *  'errors' => array(
+	 *      'id_1' => array( 'column1' => error1, 'column2' => value2, ...),
+	 *      ...,
+	 * )
+	 */
 	public function fetch_data_for_migration( $where_clause ) {
 		global $wpdb;
 
 		$meta_query = $this->build_meta_table_query( $where_clause );
 
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Meta query has interpolated variables, but they should all be escaped for backticks.
 		$meta_data_rows = $wpdb->get_results( $meta_query );
-		if ( empty ( $meta_data_rows ) ) {
+		if ( empty( $meta_data_rows ) ) {
 			return array(
 				'data'   => array(),
 				'errors' => array(),
@@ -86,6 +105,13 @@ class MetaToMetaTableMigrator {
 		return $meta_data_rows;
 	}
 
+	/**
+	 * Helper method to build query used to fetch data from source meta table.
+	 *
+	 * @param string $where_clause Where conditions to use while selecting data from source table.
+	 *
+	 * @return string Query that can be used to fetch data.
+	 */
 	private function build_meta_table_query( $where_clause ) {
 		global $wpdb;
 		$source_meta_key_column   = MigrationHelper::escape_backtick( $this->schema_config['source']['meta_key_column'] );
@@ -94,13 +120,14 @@ class MetaToMetaTableMigrator {
 		$source_meta_table_name   = MigrationHelper::escape_backtick( $this->schema_config['source']['meta_table_name'] );
 		$order_by                 = "`$source_meta_table_name`.`$source_entity_id_column` ASC";
 
-		$destination_entity_table             = $this->schema_config['destination']['entity_table_name'];
-		$destination_entity_id_column         = $this->schema_config['destination']['entity_id_column'];
-		$destination_source_id_mapping_column = $this->schema_config['destination']['source_id_column'];
+		$destination_entity_table             = MigrationHelper::escape_backtick( $this->schema_config['destination']['entity_table_name'] );
+		$destination_entity_id_column         = MigrationHelper::escape_backtick( $this->schema_config['destination']['entity_id_column'] );
+		$destination_source_id_mapping_column = MigrationHelper::escape_backtick( $this->schema_config['destination']['source_id_column'] );
 
 		if ( $this->schema_config['source']['excluded_keys'] ) {
 			$key_placeholder = implode( ',', array_fill( 0, count( $this->schema_config['source']['excluded_keys'] ), '%s' ) );
-			$exclude_clause  = $wpdb->prepare( "$source_meta_key_column NOT IN ( $key_placeholder )", $this->schema_config['source']['excluded_keys'] );
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $source_meta_key_column is escated for backticks, $key_placeholder is hardcoded.
+			$exclude_clause  = $wpdb->prepare( "`$source_meta_key_column` NOT IN ( $key_placeholder )", $this->schema_config['source']['excluded_keys'] );
 			$where_clause    = "$where_clause AND $exclude_clause";
 		}
 
