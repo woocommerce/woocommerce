@@ -1,6 +1,6 @@
 module.exports = {
 	rootDir: './',
-	preset: '../packages/js-tests/jest.config.js',
+	preset: '../../../packages/js/js-tests/jest.config.js',
 	globals: {
 		'ts-jest': {
 			diagnostics: {

@@ -52,6 +52,11 @@ jobs:
 
       - name: Setup and install composer
         run: pnpm nx composer-install woocommerce
+        
+      - name: Build Admin feature config
+        working-directory: ./
+        run: |
+          pnpm nx build:feature-config woocommerce-admin
 
       - name: Init DB and WP
         run: pnpm nx install-unit-test-db woocommerce

@@ -6,6 +6,8 @@
 namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks;
 
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
+use Automattic\WooCommerce\Admin\WCAdminHelper;
+
 
 /**
  * Task List class.
@@ -25,6 +27,11 @@ class TaskList {
 	 * Option name of completed task lists.
 	 */
 	const COMPLETED_OPTION = 'woocommerce_task_list_completed_lists';
+
+	/**
+	 * Option name of hidden reminder bar.
+	 */
+	const REMINDER_BAR_HIDDEN_OPTION = 'woocommerce_task_list_reminder_bar_hidden';
 
 	/**
 	 * ID.
@@ -114,6 +121,8 @@ class TaskList {
 			$task  = new $class( $this );
 			$this->add_task( $task );
 		}
+
+		$this->possibly_remove_reminder_bar();
 	}
 
 	/**
@@ -309,6 +318,20 @@ class TaskList {
 			return $this->event_prefix . $event_name;
 		}
 		return $this->get_list_id() . '_tasklist_' . $event_name;
+	}
+
+	/**
+	 * Remove reminder bar four weeks after store creation.
+	 */
+	public static function possibly_remove_reminder_bar() {
+		$bar_hidden            = get_option( self::REMINDER_BAR_HIDDEN_OPTION, 'no' );
+		$active_for_four_weeks = WCAdminHelper::is_wc_admin_active_for( WEEK_IN_SECONDS * 4 );
+
+		if ( 'yes' === $bar_hidden || ! $active_for_four_weeks ) {
+			return;
+		}
+
+		update_option( self::REMINDER_BAR_HIDDEN_OPTION, 'yes' );
 	}
 
 	/**

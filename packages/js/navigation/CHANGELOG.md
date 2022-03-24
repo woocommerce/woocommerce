@@ -1,5 +1,7 @@
 # Unreleased
 
+# 7.0.1
+
 -   Add missing dependencies. #8349
 -   Update all js packages with minor/patch version changes. #8392
 # 7.0.0

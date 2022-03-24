@@ -54,6 +54,7 @@ class InsightFirstSale {
 			__( 'Yes', 'woocommerce-admin' ),
 			false,
 			Note::E_WC_ADMIN_NOTE_ACTIONED,
+			false,
 			__( 'Thanks for your feedback', 'woocommerce-admin' )
 		);
 		$note->add_action(
@@ -61,6 +62,7 @@ class InsightFirstSale {
 			__( 'No', 'woocommerce-admin' ),
 			false,
 			Note::E_WC_ADMIN_NOTE_ACTIONED,
+			false,
 			__( 'Thanks for your feedback', 'woocommerce-admin' )
 		);
 

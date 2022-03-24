@@ -74,3 +74,6 @@ nbproject/private/
 
 # Test Results
 test-results.json
+
+# Admin Feature config
+plugins/woocommerce/includes/react-admin/feature-config.php

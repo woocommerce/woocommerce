@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+### Display Reminder Bar while completing the primary task list
+
+1. Checkout branch on a fresh site (if your store is > 4 weeks old it will automatically hide the reminder bar)
+2. Complete the onboarding wizard with standard options.
+3. Complete a single step of the primary task list.
+4. You should _not_ see the reminder bar on the Homescreen or any other page related to the tasks. You _should_ see it everywhere else.
+5. Go to a  non-task related page, such as _Orders_, and you should see the bar appear above the header. Ensure the copy starts with "You're doing great!"
+6. Click the "Continue Setup" link, which should redirect you to the Homescreen.
+7. Complete all but one task remaining.
+8. Go back to the _Orders_ page to view the reminder bar. It should appear similar but have different copy, starting with "Almost there."
+9. Click the "Finish setup" link to ensure that it returns you to the homescreen. 
+10. Hide the list by clicking the '...' menu, and then return to the _Orders_ page. The bar should now be hidden. 
+11. Re-enable task list by going to Orders -> Help -> Setup Wizard -> Task List -> Enable. 
+12. The reminder bar should now appear when viewing the _Orders_ page.
+13. Complete the task list.
+14. The reminder bar will no longer display on the _Orders_ page. 
+
 ### Display WCPay task when installed via subscriptions option on profiler
 
 1. Start with a fresh install.
