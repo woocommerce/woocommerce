@@ -49,7 +49,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 */
 	public static function get_meta_table_name() {
 		global $wpdb;
-		return $wpdb->prefix . 'wc_ordes_meta';
+		return $wpdb->prefix . 'wc_orders_meta';
 	}
 
 	/**
@@ -62,6 +62,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 			$this->get_orders_table_name(),
 			$this->get_addresses_table_name(),
 			$this->get_operational_data_table_name(),
+			$this->get_meta_table_name(),
 		);
 	}
 
