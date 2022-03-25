@@ -118,3 +118,49 @@ jobs:
                   issue_number: context.issue.number,
                   state: 'closed'
                 })
+  fill-template-comment:
+    if: "github.event.label.name == 'needs: template'"
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Add reply to fill template
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{ secrets.WC_BOT_TRIAGE_TOKEN }}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: "Hi @${{ github.event.issue.user.login }},\n\n\
+              Thank you for submitting the issue. However, you didn't fill out the details of the bug report template that we ask for. Without these details, we can't fully evaluate this issue. Please provide us with the information requested so we could take a look further.\n\n\
+              **Describe the bug**\n\n\
+              A clear and concise description of what the bug is. Please be as descriptive as possible; issues lacking detail, or for any other reason than to report a bug, may be closed without action.\n\n\
+              **To Reproduce**\n\n\
+              Steps to reproduce the behavior:\n\n\
+              1. Go to '...'\n\
+              2. Click on '....'\n\
+              3. Scroll down to '....'\n\
+              4. See error\n\n\
+              **Screenshots**\n\n\
+              If applicable, add screenshots to help explain your problem.\n\n\
+              **Expected behavior**\n\n\
+              A clear and concise description of what you expected to happen.\n\n\
+              **Isolating the problem (mark completed items with an [x]):**\n\n\
+              - [ ] I have deactivated other plugins and confirmed this bug occurs when only WooCommerce plugin is active.\n\
+              - [ ] This bug happens with a default WordPress theme active, or [Storefront](https://woocommerce.com/storefront/).\n\
+              - [ ] I can reproduce this bug consistently using the steps above.\n\n\
+              **WordPress Environment**\n\n\
+              Copy and paste the system status report from **WooCommerce > System Status** in WordPress admin."
+            })
+      - name: remove-needs-template-label
+        uses: actions-ecosystem/action-remove-labels@v1
+        with:
+          github-token: ${{ secrets.WC_BOT_TRIAGE_TOKEN }}
+          labels: 'needs: template'
+      - name: add-needs-author-feedback-label
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          github-token: ${{ secrets.WC_BOT_TRIAGE_TOKEN }}
+          labels: 'needs: author feedback'
