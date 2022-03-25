@@ -198,7 +198,7 @@ class URLTest extends WC_Unit_Test_Case {
 				'file://./',
 			),
 			( new URL( 'relative/to/abspath' ) )->get_all_parent_urls(),
-			'When obtaining all parent URLs for a relative filepath, we never return the root directory and never return a URL containing traversals. '
+			'When obtaining all parent URLs for a relative filepath, we never return the root directory and never return a URL containing traversals if there were none to begin with.'
 		);
 
 		$this->assertEquals(
