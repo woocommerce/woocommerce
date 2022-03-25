@@ -41,7 +41,7 @@ export class CustomTransformation implements ModelTransformation {
 	public constructor(
 		order: number,
 		toHook: TransformationCallback | null,
-		fromHook: TransformationCallback | null,
+		fromHook: TransformationCallback | null
 	) {
 		this.fromModelOrder = order;
 		this.toHook = toHook;
