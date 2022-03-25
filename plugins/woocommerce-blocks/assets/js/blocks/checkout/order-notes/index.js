@@ -4,8 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 import { CheckboxControl } from '@woocommerce/blocks-checkout';
-import Textarea from '@woocommerce/base-components/textarea';
-import PropTypes from 'prop-types';
+import { Textarea } from '@woocommerce/base-components/textarea';
 
 /**
  * Internal dependencies
@@ -56,13 +55,6 @@ const CheckoutOrderNotes = ( { disabled, onChange, placeholder, value } ) => {
 			) }
 		</div>
 	);
-};
-
-Textarea.propTypes = {
-	onTextChange: PropTypes.func.isRequired,
-	disabled: PropTypes.bool,
-	placeholder: PropTypes.string,
-	value: PropTypes.string,
 };
 
 export default CheckoutOrderNotes;
