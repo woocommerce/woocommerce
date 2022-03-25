@@ -41,10 +41,16 @@ test.describe('Payment setup task', () => {
 		);
 		await page.locator('text=Set up payments').click();
 		await expect(page.locator('h1')).toHaveText('Set up payments');
-		await expect(page.locator('a:right-of(h3:has-text("Direct bank transfer")) >> nth=0')).toHaveText('Manage');
+		await expect(
+			page.locator(
+				'a:right-of(h3:has-text("Direct bank transfer")) >> nth=0'
+			)
+		).toHaveText('Manage');
 
 		// clean up
-		await page.goto('wp-admin/admin.php?page=wc-settings&tab=checkout&section=bacs');
+		await page.goto(
+			'wp-admin/admin.php?page=wc-settings&tab=checkout&section=bacs'
+		);
 		await page.locator('text="Enable bank transfer"').click();
 		await page.locator('text="Save changes"').click();
 	});
@@ -56,10 +62,16 @@ test.describe('Payment setup task', () => {
 		await page.locator('text=Enable').click(); // enable COD payment option
 		await page.goto('wp-admin/admin.php?page=wc-admin&task=payments');
 		await expect(page.locator('h1')).toHaveText('Set up payments');
-		await expect(page.locator('a:right-of(h3:has-text("Cash on delivery")) >> nth=0')).toHaveText('Manage');
+		await expect(
+			page.locator(
+				'a:right-of(h3:has-text("Cash on delivery")) >> nth=0'
+			)
+		).toHaveText('Manage');
 
 		// clean up
-		await page.goto('wp-admin/admin.php?page=wc-settings&tab=checkout&section=cod');
+		await page.goto(
+			'wp-admin/admin.php?page=wc-settings&tab=checkout&section=cod'
+		);
 		await page.locator('text="Enable cash on delivery"').click();
 		await page.locator('text="Save changes"').click();
 	});
