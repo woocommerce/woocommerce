@@ -25,9 +25,9 @@ export const ProgressHeader: React.FC< ProgressHeaderProps > = ( {
 			const taskList: TaskListType = select(
 				ONBOARDING_STORE_NAME
 			).getTaskList( taskListId );
-			const finishedResolution = select( ONBOARDING_STORE_NAME ).hasFinishedResolution(
-				'getTaskList', [ taskListId ]
-			);
+			const finishedResolution = select(
+				ONBOARDING_STORE_NAME
+			).hasFinishedResolution( 'getTaskList', [ taskListId ] );
 			const nowTimestamp = Date.now();
 			const visibleTasks = taskList?.tasks.filter(
 				( task ) =>
@@ -49,7 +49,10 @@ export const ProgressHeader: React.FC< ProgressHeaderProps > = ( {
 	);
 
 	const progressTitle = useMemo( () => {
-		if ( ( ! hasVisitedTasks && completedCount < 2 ) || completedCount === tasksCount ) {
+		if (
+			( ! hasVisitedTasks && completedCount < 2 ) ||
+			completedCount === tasksCount
+		) {
 			const siteTitle = getSetting( 'siteTitle' );
 			return siteTitle
 				? sprintf(
