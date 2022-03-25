@@ -161,7 +161,8 @@ class URL {
 			 * Consider allowing directory traversals to be resolved (ie, the process that converts 'foo/bar/../baz' to
 			 * 'foo/baz').
 			 *
-			 * 1. We are only concerned with file URLs, for all other types unwinding of traversals is already allowed.
+			 * 1. For this decision point, we are only concerned with relative filepaths (in all other cases,
+			 *    $resolve_traversals will already be true).
 			 * 2. This is a 'one time' and unidirectional operation. We only wish to flip from false to true, and we
 			 *    never wish to do this more than once.
 			 * 3. We only flip the switch after we have examined all leading '..' traversal segments.
@@ -170,7 +171,10 @@ class URL {
 				$resolve_traversals = true;
 			}
 
-			// At this point, if we are committing a traversal to the path then we will wish to retain the next traversal, too.
+			/*
+			 * Set a flag indicating that traversals should be retained. This is done to ensure we don't prematurely
+			 * discard traversals at the start of the path.
+			 */
 			$retain_traversals = $resolve_traversals && '..' === $part;
 
 			// Retain this part of the path.
