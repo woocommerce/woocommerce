@@ -23,6 +23,21 @@ OLDPATH=$(pwd)
 # Return value for CI test runs
 TESTRESULT=0
 
+# Function to generate report
+report() {
+	echo "Generating report..."
+	allure generate --clean
+	REPORT_EXIT_CODE=$?
+
+	# Suggest opening the report
+	if [ $REPORT_EXIT_CODE -eq 0 ]; then
+		echo "To view the report on your browser, run:"
+		echo ""
+		echo "pnpx allure open \"$PWD/allure-report\""
+		echo ""
+	fi
+}
+
 # Use the script symlink to find and change directory to the root of the package
 SCRIPTPATH=$(dirname "$0")
 REALPATH=$(readlink "$0")
@@ -33,6 +48,7 @@ case $1 in
 	'test')
 		jest --group=$2 --runInBand
 		TESTRESULT=$?
+		report
 		;;
 	'make:collection')
 		node utils/api-collection/build-collection.js $2
