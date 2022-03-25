@@ -225,7 +225,7 @@ class WPPostToCOTMigrator {
 					'table_name'             => $this->table_names['orders'],
 					'meta_rel_column'        => 'post_id',
 					'destination_rel_column' => 'id',
-					'primary_key'            => 'id',
+					'primary_key'            => 'post_id',
 				),
 				'meta'   => array(
 					'table_name'        => $wpdb->postmeta,
@@ -320,7 +320,7 @@ class WPPostToCOTMigrator {
 					'table_name'             => $this->table_names['orders'],
 					'meta_rel_column'        => 'post_id',
 					'destination_rel_column' => 'id',
-					'primary_key'            => 'id',
+					'primary_key'            => 'post_id',
 				),
 				'meta'   => array(
 					'table_name'        => $wpdb->postmeta,
@@ -361,7 +361,7 @@ class WPPostToCOTMigrator {
 			),
 			'_download_permissions_granted' => array(
 				'type'        => 'bool',
-				'destination' => 'download_permissions_granted',
+				'destination' => 'download_permission_granted',
 			),
 			'_cart_hash'                    => array(
 				'type'        => 'string',
@@ -474,6 +474,7 @@ class WPPostToCOTMigrator {
 
 		$queries = $this->order_table_migrator->generate_insert_sql_for_batch( $order_data['data'], 'insert' );
 		$result  = $wpdb->query( $queries ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $queries is already prepared.
+		$wpdb->query("COMMIT;"); // For some reason, this seems necessary on some hosts? Maybe a MySQL configuration?
 		if ( count( $order_data['data'] ) !== $result ) {
 			// Some rows were not inserted.
 			// TODO: Find and log the entity ids that were not inserted.

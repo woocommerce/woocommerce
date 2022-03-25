@@ -54,22 +54,22 @@ class MetaToMetaTableMigrator {
 		$table             = $this->schema_config['destination']['meta']['table_name'];
 
 		$entity_id_column_placeholder = MigrationHelper::get_wpdb_placeholder_for_type( $this->schema_config['destination']['meta']['entity_id_type'] );
-		$placeholder_string           = "( $entity_id_column_placeholder, %s, %s )";
+		$placeholder_string           = "$entity_id_column_placeholder, %s, %s";
 		$values                       = array();
 		foreach ( array_values( $batch ) as $row ) {
 			$query_params = array(
-				$row['destination_entity_id'],
-				$row['meta_key'],
-				$row['meta_value'],
+				$row->destination_entity_id,
+				$row->meta_key,
+				$row->meta_value,
 			);
 			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $placeholder_string is hardcoded.
-			$value_sql = $wpdb->prepare( "( $placeholder_string )", $query_params );
+			$value_sql = $wpdb->prepare( "$placeholder_string", $query_params );
 			$values[]  = $value_sql;
 		}
 
-		$values_sql = implode( ',', $values );
+		$values_sql = implode( '), (', $values );
 
-		return "$insert_query INTO $table $column_sql VALUES $values_sql";
+		return "$insert_query INTO $table $column_sql VALUES ($values_sql)";
 	}
 
 	/**
@@ -102,7 +102,7 @@ class MetaToMetaTableMigrator {
 			);
 		}
 
-		return $meta_data_rows;
+		return array( 'data' => $meta_data_rows, 'errors' => array() );
 	}
 
 	/**
@@ -147,5 +147,4 @@ WHERE $where_clause ORDER BY $order_by
 			$entity_ids
 		);
 	}
-
 }

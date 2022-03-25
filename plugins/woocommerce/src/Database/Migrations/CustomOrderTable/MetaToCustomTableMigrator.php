@@ -313,7 +313,7 @@ WHERE
 					$row_data[ $custom_table_column_name ] = $value;
 				}
 			}
-			$sanitized_entity_data[ $entity->destination_rel_id ] = $row_data;
+			$sanitized_entity_data[ $entity->entity_meta_rel_id ] = $row_data;
 		}
 	}
 
