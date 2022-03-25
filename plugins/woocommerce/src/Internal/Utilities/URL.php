@@ -35,11 +35,15 @@ class URL {
 	private $is_absolute;
 
 	/**
-	 * If the URL (or filepath) represents a directory.
+	 * If the URL (or filepath) represents a directory other than the root directory.
+	 *
+	 * This is useful at different points in the process, when deciding whether to re-apply
+	 * a trailing slash at the end of processing or when we need to calculate how many
+	 * directory traversals are needed to form a (grand-)parent URL.
 	 *
 	 * @var bool
 	 */
-	private $is_directory;
+	private $is_non_root_directory;
 
 	/**
 	 * The components of the URL's path.
@@ -131,11 +135,11 @@ class URL {
 	 * without touching the filesystem.
 	 */
 	private function process_path() {
-		$segments           = explode( '/', $this->components['path'] );
-		$this->is_absolute  = substr( $this->components['path'], 0, 1 ) === '/' || ! empty( $this->components['host'] );
-		$this->is_directory = substr( $this->components['path'], -1, 1 ) === '/' && strlen( $this->components['path'] ) > 1;
-		$resolve_traversals = 'file' !== $this->components['scheme'] || $this->is_absolute;
-		$retain_traversals  = false;
+		$segments                    = explode( '/', $this->components['path'] );
+		$this->is_absolute           = substr( $this->components['path'], 0, 1 ) === '/' || ! empty( $this->components['host'] );
+		$this->is_non_root_directory = substr( $this->components['path'], -1, 1 ) === '/' && strlen( $this->components['path'] ) > 1;
+		$resolve_traversals          = 'file' !== $this->components['scheme'] || $this->is_absolute;
+		$retain_traversals           = false;
 
 		// Clean the path.
 		foreach ( $segments as $part ) {
@@ -183,7 +187,7 @@ class URL {
 
 		// Reform the path from the processed segments, appending a leading slash if it is absolute and restoring
 		// the Windows drive letter if we have one.
-		$this->components['path'] = ( $this->is_absolute ? '/' : '' ) . implode( '/', $this->path_parts ) . ( $this->is_directory ? '/' : '' );
+		$this->components['path'] = ( $this->is_absolute ? '/' : '' ) . implode( '/', $this->path_parts ) . ( $this->is_non_root_directory ? '/' : '' );
 	}
 
 	/**
@@ -261,7 +265,7 @@ class URL {
 
 		if ( $parts_count > 0 && '..' === $this->path_parts[0] ) {
 			// In the case where we have a filepath already starting with one or more traversals, we need to add additional traversals.
-			$last_traversal = max( array_keys( $this->path_parts, '..', true ) ) + ( $this->is_directory ? 1 : 0 );
+			$last_traversal = max( array_keys( $this->path_parts, '..', true ) ) + ( $this->is_non_root_directory ? 1 : 0 );
 			$parent_path    = str_repeat( '../', $level ) . join( '/', array_slice( $this->path_parts, 0, $last_traversal ) );
 		} elseif ( $parent_path_parts_to_keep < 0 ) {
 			// For relative filepaths only, we use traversals to describe the requested parent.
