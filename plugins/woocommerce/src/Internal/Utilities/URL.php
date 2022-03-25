@@ -124,8 +124,11 @@ class URL {
 	 * without touching the filesystem.
 	 */
 	private function process_path() {
-		$segments          = explode( '/', $this->components['path'] );
-		$this->is_absolute = substr( $this->components['path'], 0, 1 ) === '/';
+		$segments           = explode( '/', $this->components['path'] );
+		$this->is_absolute  = substr( $this->components['path'], 0, 1 ) === '/' || ! empty( $this->components['host'] );
+		$is_directory       = substr( $this->components['path'], -1, 1 ) === '/' && strlen( $this->components['path'] ) > 1;
+		$resolve_traversals = 'file' !== $this->components['scheme'] || $this->is_absolute;
+		$retain_traversals  = false;
 
 		// Clean the path.
 		foreach ( $segments as $part ) {
@@ -137,11 +140,31 @@ class URL {
 			// Directory traversals created with percent-encoding syntax should also be detected.
 			$is_traversal = str_ireplace( '%2e', '.', $part ) === '..';
 
-			// Unwind directory traversals.
-			if ( $is_traversal && count( $this->path_parts ) > 0 ) {
-				$this->path_parts = array_slice( $this->path_parts, 0, count( $this->path_parts ) - 1 );
-				continue;
+			// Resolve directory traversals (if allowed: see further comment relating to this).
+			if ( $resolve_traversals && $is_traversal ) {
+				if ( count( $this->path_parts ) > 0 && ! $retain_traversals ) {
+					$this->path_parts = array_slice( $this->path_parts, 0, count( $this->path_parts ) - 1 );
+					continue;
+				} elseif ( $this->is_absolute ) {
+					continue;
+				}
 			}
+
+			/*
+			 * Consider allowing directory traversals to be resolved (ie, the process that converts 'foo/bar/../baz' to
+			 * 'foo/baz').
+			 *
+			 * 1. We are only concerned with file URLs, for all other types unwinding of traversals is already allowed.
+			 * 2. This is a 'one time' and unidirectional operation. We only wish to flip from false to true, and we
+			 *    never wish to do this more than once.
+			 * 3. We only flip the switch after we have examined all leading '..' traversal segments.
+			 */
+			if ( false === $resolve_traversals && '..' !== $part && 'file' === $this->components['scheme'] && ! $this->is_absolute ) {
+				$resolve_traversals = true;
+			}
+
+			// At this point, if we are committing a traversal to the path then we will wish to retain the next traversal, too.
+			$retain_traversals = $resolve_traversals && '..' === $part;
 
 			// Retain this part of the path.
 			$this->path_parts[] = $part;
@@ -149,7 +172,7 @@ class URL {
 
 		// Reform the path from the processed segments, appending a leading slash if it is absolute and restoring
 		// the Windows drive letter if we have one.
-		$this->components['path'] = ( $this->is_absolute ? '/' : '' ) . implode( '/', $this->path_parts );
+		$this->components['path'] = ( $this->is_absolute ? '/' : '' ) . implode( '/', $this->path_parts ) . ( $is_directory ? '/' : '' );
 	}
 
 	/**
@@ -187,16 +210,47 @@ class URL {
 	 * this is set to 1 (parent). 2 will yield the grand-parent, 3 will yield the great
 	 * grand-parent, etc.
 	 *
+	 * If a level is specified that exceeds the number of path segments, this method will
+	 * return false.
+	 *
 	 * @param int $level Used to indicate the level of parent.
 	 *
-	 * @return string
+	 * @return string|false
 	 */
-	public function get_parent_url( int $level = 1 ): string {
+	public function get_parent_url( int $level = 1 ) {
 		if ( $level < 1 ) {
 			$level = 1;
 		}
 
-		$parent_path = implode( '/', array_slice( $this->path_parts, 0, count( $this->path_parts ) - $level ) ) . '/';
+		$parent_path_parts_to_keep = count( $this->path_parts ) - $level;
+
+		/*
+		 * With the exception of file URLs, we do not allow obtaining (grand-)parent directories that require
+		 * us to describe them using directory traversals. For example, given "http://hostname/foo/bar/baz.png" we do
+		 * not permit determining anything more than 2 levels up (we cannot go beyond "http://hostname/").
+		 */
+		if ( 'file' !== $this->components['scheme'] && $parent_path_parts_to_keep < 0 ) {
+			return false;
+		}
+
+		// In the specific case of an absolute filepath describing the root directory, there can be no parent.
+		if ( 'file' === $this->components['scheme'] && $this->is_absolute && empty( $this->path_parts ) ) {
+			return false;
+		}
+
+		if ( $parent_path_parts_to_keep >= 0 ) {
+			$parent_path = implode( '/', array_slice( $this->path_parts, 0, $parent_path_parts_to_keep ) );
+		} else {
+			// For relative filepaths only, we use traversals to describe the requested parent.
+			$parent_path = untrailingslashit( str_repeat( '../', $parent_path_parts_to_keep * -1 ) );
+		}
+
+		if ( $this->is_relative() && '' === $parent_path ) {
+			$parent_path = '.';
+		}
+
+		// Append a trailing slash, since a parent is always a directory. The only exception is the current working directory.
+		$parent_path .= '/';
 
 		// For absolute paths, apply a leading slash (does not apply if we have a root path).
 		if ( $this->is_absolute && 0 !== strpos( $parent_path, '/' ) ) {
@@ -219,12 +273,17 @@ class URL {
 		$scheme = null !== $this->components['scheme'] ? $this->components['scheme'] . '://' : '';
 		$host   = null !== $this->components['host'] ? $this->components['host'] : '';
 		$port   = null !== $this->components['port'] ? ':' . $this->components['port'] : '';
+		$path   = $path_override ?? $this->get_path();
+
+		// Special handling for hostless URLs (typically, filepaths) referencing the current working directory.
+		if ( '' === $host && ( '' === $path || '.' === $path ) ) {
+			$path = './';
+		}
 
 		$user      = null !== $this->components['user'] ? $this->components['user'] : '';
 		$pass      = null !== $this->components['pass'] ? ':' . $this->components['pass'] : '';
 		$user_pass = ( ! empty( $user ) || ! empty( $pass ) ) ? $user . $pass . '@' : '';
 
-		$path     = $path_override ?? $this->get_path();
 		$query    = null !== $this->components['query'] ? '?' . $this->components['query'] : '';
 		$fragment = null !== $this->components['fragment'] ? '#' . $this->components['fragment'] : '';
 

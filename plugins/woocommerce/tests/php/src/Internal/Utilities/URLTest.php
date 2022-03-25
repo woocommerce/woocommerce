@@ -42,7 +42,19 @@ class URLTest extends WC_Unit_Test_Case {
 		$this->assertEquals(
 			'../should/remain/relative',
 			( new URL( 'relative/../../should/remain/relative' ) )->get_path(),
-			'Simplifies a relative path containing directory traversals to the extent possible (without inspecting the filesystem).'
+			'Simplifies a relative path containing directory traversals to the extent possible (without inspecting the filesystem - scenario #1).'
+		);
+
+		$this->assertEquals(
+			'../../should/remain/relative',
+			( new URL( 'relative/../../../should/remain/relative' ) )->get_path(),
+			'Simplifies a relative path containing directory traversals to the extent possible (without inspecting the filesystem - scenario #2).'
+		);
+
+		$this->assertEquals(
+			'file:///foo/bar/baz',
+			( new URL( '/../foo/bar/baz/bazooka/../../baz' ) )->get_url(),
+			'Directory traversals are appropriately resolved even in complex cases with multiple separate traversals. When the original path is absolute, the output will be absolute.'
 		);
 	}
 
@@ -119,10 +131,9 @@ class URLTest extends WC_Unit_Test_Case {
 	}
 
 	public function test_can_obtain_parent_url() {
-		$this->assertEquals(
-			'file:///',
+		$this->assertFalse(
 			( new URL( '/' ) )->get_parent_url(),
-			'The parent of root directory "/" is "/".'
+			'Root directory "/" is considered to have no parent.'
 		);
 
 		$this->assertEquals(
@@ -131,10 +142,9 @@ class URLTest extends WC_Unit_Test_Case {
 			'The parent URL will be trailingslashed.'
 		);
 
-		$this->assertEquals(
-			'https://example.com/',
+		$this->assertFalse(
 			( new URL( 'https://example.com' ) )->get_parent_url(),
-			'The host name (for non-file URLs) is distinct from the path and will not be removed.'
+			'In the case of non-file URLs, if we only have a host name and no path then the parent cannot be derived.'
 		);
 	}
 
@@ -172,6 +182,47 @@ class URLTest extends WC_Unit_Test_Case {
 			),
 			( new URL( 'C:\\Documents\\Web\\TestSite\\BackgroundTrack.mp3' ) )->get_all_parent_urls(),
 			'All parent URLs can be derived for a filepath, up to and including the root directory plus drive letter (Windows).'
+		);
+	}
+
+	public function test_obtaining_parent_urls_from_relative_urls() {
+		$this->assertEquals(
+			array(
+				'file://relative/to/',
+				'file://relative/',
+				'file://./',
+			),
+			( new URL( 'relative/to/abspath' ) )->get_all_parent_urls(),
+			'When obtaining all parent URLs for a relative filepath, we never return the root directory and never return a URL containing traversals. '
+		);
+
+		$this->assertEquals(
+			'file://./',
+			( new URL( 'just-a-file.png' ) )->get_parent_url(),
+			'The parent URL of an unqualified, relative file is simply an empty relative path (generally, though not always, this is equivalent to ABSPATH).'
+		);
+
+		$this->assertEquals(
+			'file://../../',
+			( new URL( '../../relatively-placed-file.pdf' ) )->get_parent_url()
+		);
+
+		$this->assertEquals(
+			'file://../',
+			( new URL( 'relatively-placed-file.pdf' ) )->get_parent_url( 2 ),
+			'For filepaths, we can successfully determine the (grand-)parent directories of relative filepaths (when explicitly requested).'
+		);
+
+		$this->assertEquals(
+			'file://../../',
+			( new URL( 'relatively-placed-file.pdf' ) )->get_parent_url( 3 ),
+			'For filepaths, we can successfully determine the (grand-)parent directories of relative filepaths (when explicitly requested).'
+		);
+
+		$this->assertEquals(
+			'file://../foo/bar/baz',
+			( new URL( '../foo/bar/cat/dog/../../baz' ) )->get_url(),
+			'Directory traversals are appropriately resolved even in complex cases with multiple separate traversals.'
 		);
 	}
 }
