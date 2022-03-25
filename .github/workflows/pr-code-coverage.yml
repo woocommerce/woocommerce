@@ -8,7 +8,7 @@ defaults:
 jobs:
   test:
     name: Code coverage (PHP 7.4, WP Latest)
-    timeout-minutes: 15
+    timeout-minutes: 20
     runs-on: ubuntu-latest
     services:
       database:
