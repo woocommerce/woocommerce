@@ -25,15 +25,20 @@ TESTRESULT=0
 
 # Function to generate report
 report() {
+
+	# Set the ALLURE_OUTPUT_DIR to $PWD if it wasn't set
+	ALLURE_RESULTS_DIR="${ALLURE_OUTPUT_DIR:-$PWD}/allure-results"
+	ALLURE_REPORT_DIR="${ALLURE_OUTPUT_DIR:-$PWD}/allure-report"
+
 	echo "Generating report..."
-	allure generate --clean
+	allure generate --clean "$ALLURE_RESULTS_DIR" --output "$ALLURE_REPORT_DIR"
 	REPORT_EXIT_CODE=$?
 
 	# Suggest opening the report
 	if [ $REPORT_EXIT_CODE -eq 0 ]; then
 		echo "To view the report on your browser, run:"
 		echo ""
-		echo "pnpx allure open \"$PWD/allure-report\""
+		echo "pnpx allure open \"$ALLURE_REPORT_DIR\""
 		echo ""
 	fi
 }
@@ -45,18 +50,18 @@ cd "$SCRIPTPATH/$(dirname "$REALPATH")/.."
 
 # Run scripts
 case $1 in
-	'test')
-		jest --group=$2 --runInBand
-		TESTRESULT=$?
-		report
-		;;
-	'make:collection')
-		node utils/api-collection/build-collection.js $2
-		TESTRESULT=$?
-		;;
-	*)
-		usage
-		;;
+'test')
+	jest --group=$2 --runInBand
+	TESTRESULT=$?
+	report
+	;;
+'make:collection')
+	node utils/api-collection/build-collection.js $2
+	TESTRESULT=$?
+	;;
+*)
+	usage
+	;;
 esac
 
 # Restore working path
