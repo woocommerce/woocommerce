@@ -5,7 +5,7 @@ jobs:
     name: Daily k6 smoke test on trunk.
     runs-on: ubuntu-18.04
     steps:
-/home/runner/work/woocommerce/woocommerce/package/woocommerce/plugins/woocommerce/tests/e2e/plugins/woocommerce-trunk-nightly.zip
+
       - name: Create dirs.
         run: |
               mkdir -p code/woocommerce
