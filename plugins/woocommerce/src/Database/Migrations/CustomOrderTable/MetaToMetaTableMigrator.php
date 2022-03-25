@@ -51,7 +51,7 @@ class MetaToMetaTableMigrator {
 		$meta_value_column = MigrationHelper::escape_backtick( $this->schema_config['destination']['meta']['meta_value_column'] );
 		$entity_id_column  = MigrationHelper::escape_backtick( $this->schema_config['destination']['meta']['entity_id_column'] );
 		$column_sql        = "(`$entity_id_column`, `$meta_key_column`, `$meta_value_column`)";
-		$table             = $this->schema_config['destination']['meta_table_name'];
+		$table             = $this->schema_config['destination']['meta']['table_name'];
 
 		$entity_id_column_placeholder = MigrationHelper::get_wpdb_placeholder_for_type( $this->schema_config['destination']['meta']['entity_id_type'] );
 		$placeholder_string           = "( $entity_id_column_placeholder, %s, %s )";
@@ -88,10 +88,10 @@ class MetaToMetaTableMigrator {
 	 *      ...,
 	 * )
 	 */
-	public function fetch_data_for_migration( $where_clause ) {
+	public function fetch_data_for_migration_for_ids( $order_post_ids ) {
 		global $wpdb;
 
-		$meta_query = $this->build_meta_table_query( $where_clause );
+		$meta_query = $this->build_meta_table_query( $order_post_ids );
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Meta query has interpolated variables, but they should all be escaped for backticks.
 		$meta_data_rows = $wpdb->get_results( $meta_query );
@@ -112,37 +112,40 @@ class MetaToMetaTableMigrator {
 	 *
 	 * @return string Query that can be used to fetch data.
 	 */
-	private function build_meta_table_query( $where_clause ) {
+	private function build_meta_table_query( $entity_ids ) {
 		global $wpdb;
-		$source_meta_key_column   = MigrationHelper::escape_backtick( $this->schema_config['source']['meta_key_column'] );
-		$source_meta_value_column = MigrationHelper::escape_backtick( $this->schema_config['source']['meta_value_column'] );
-		$source_entity_id_column  = MigrationHelper::escape_backtick( $this->schema_config['source']['meta_entity_id_column'] );
-		$source_meta_table_name   = MigrationHelper::escape_backtick( $this->schema_config['source']['meta_table_name'] );
-		$order_by                 = "`$source_meta_table_name`.`$source_entity_id_column` ASC";
+		$source_meta_table   = MigrationHelper::escape_backtick( $this->schema_config['source']['meta']['table_name'] );
+		$source_meta_key_column   = MigrationHelper::add_table_name_to_column( $source_meta_table, $this->schema_config['source']['meta']['meta_key_column'] );
+		$source_meta_value_column = MigrationHelper::add_table_name_to_column( $source_meta_table, $this->schema_config['source']['meta']['meta_value_column'] );
+		$source_entity_id_column  = MigrationHelper::add_table_name_to_column( $source_meta_table, $this->schema_config['source']['meta']['entity_id_column'] );
+		$order_by                 = "$source_entity_id_column ASC";
 
-		$destination_entity_table             = MigrationHelper::escape_backtick( $this->schema_config['destination']['entity_table_name'] );
-		$destination_entity_id_column         = MigrationHelper::escape_backtick( $this->schema_config['destination']['entity_id_column'] );
-		$destination_source_id_mapping_column = MigrationHelper::escape_backtick( $this->schema_config['destination']['source_id_column'] );
+		$where_clause = "$source_entity_id_column IN (" . implode( array_fill( 0, count( $entity_ids ), '%d') ) . ')';
+
+		$destination_entity_table             = MigrationHelper::escape_backtick( $this->schema_config['destination']['entity']['table_name'] );
+		$destination_entity_id_column         = MigrationHelper::add_table_name_to_column( $destination_entity_table, $this->schema_config['destination']['entity']['id_column'] );
+		$destination_source_id_mapping_column = MigrationHelper::add_table_name_to_column( $destination_entity_table, $this->schema_config['destination']['entity']['source_id_column'] );
 
 		if ( $this->schema_config['source']['excluded_keys'] ) {
 			$key_placeholder = implode( ',', array_fill( 0, count( $this->schema_config['source']['excluded_keys'] ), '%s' ) );
 			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $source_meta_key_column is escated for backticks, $key_placeholder is hardcoded.
-			$exclude_clause  = $wpdb->prepare( "`$source_meta_key_column` NOT IN ( $key_placeholder )", $this->schema_config['source']['excluded_keys'] );
+			$exclude_clause  = $wpdb->prepare( "$source_meta_key_column NOT IN ( $key_placeholder )", $this->schema_config['source']['excluded_keys'] );
 			$where_clause    = "$where_clause AND $exclude_clause";
 		}
 
-		$meta_data_sql = "
+		return $wpdb->prepare(
+			"
 SELECT
-	`$source_meta_table_name`.`$source_entity_id_column` as source_entity_id,
-	`$destination_entity_table`.`$destination_entity_id_column` as destination_entity_id,
-	`$source_meta_table_name`.`$source_meta_key_column` as meta_key,
-	`$source_meta_table_name`.`$source_meta_value_column` as meta_value
-FROM `$source_meta_table_name`
-JOIN `$destination_entity_table` ON `$destination_entity_table`.`$destination_source_id_mapping_column` = `$source_meta_table_name`.`$source_entity_id_column`
+	$source_entity_id_column as source_entity_id,
+	$destination_entity_id_column as destination_entity_id,
+	$source_meta_key_column as meta_key,
+	$source_meta_value_column as meta_value
+FROM `$source_meta_table`
+JOIN `$destination_entity_table` ON $destination_source_id_mapping_column = $source_entity_id_column
 WHERE $where_clause ORDER BY $order_by
-";
-
-		return $meta_data_sql;
+",
+			$entity_ids
+		);
 	}
 
 }

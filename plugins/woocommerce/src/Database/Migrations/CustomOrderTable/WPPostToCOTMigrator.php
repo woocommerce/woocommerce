@@ -101,24 +101,23 @@ class WPPostToCOTMigrator {
 	private function get_config_for_order_table() {
 		global $wpdb;
 		$order_table_schema_config = array(
-			'source' => array(
+			'source'      => array(
 				'entity' => array(
-					'table_name' => $wpdb->posts,
-					'meta_rel_column' => 'ID',
+					'table_name'             => $wpdb->posts,
+					'meta_rel_column'        => 'ID',
 					'destination_rel_column' => 'ID',
+					'primary_key'            => 'ID',
 				),
-				'meta' => array(
-					'table_name' => $wpdb->postmeta,
-					'meta_key_column' => 'meta_key',
+				'meta'   => array(
+					'table_name'        => $wpdb->postmeta,
+					'meta_key_column'   => 'meta_key',
 					'meta_value_column' => 'meta_value',
-					'entity_id_column' => 'post_id',
+					'entity_id_column'  => 'post_id',
 				),
 			),
 			'destination' => array(
-				array(
-					'table_name' => $this->table_names['orders'],
-					'source_rel_column' => 'post_id',
-				),
+				'table_name'        => $this->table_names['orders'],
+				'source_rel_column' => 'post_id',
 			),
 		);
 
@@ -221,21 +220,22 @@ class WPPostToCOTMigrator {
 		// We join order core table and post meta table to get data  for address, since we need order ID.
 		// So order core record needs to be already present.
 		$schema_config = array(
-			'source' => array(
+			'source'      => array(
 				'entity' => array(
-					'table_name' => $this->table_names['orders'],
-					'meta_rel_column' => 'post_id',
+					'table_name'             => $this->table_names['orders'],
+					'meta_rel_column'        => 'post_id',
 					'destination_rel_column' => 'id',
+					'primary_key'            => 'id',
 				),
-				'meta' => array(
-					'table_name' => $wpdb->postmeta,
-					'meta_key_column' => 'meta_key',
+				'meta'   => array(
+					'table_name'        => $wpdb->postmeta,
+					'meta_key_column'   => 'meta_key',
 					'meta_value_column' => 'meta_value',
-					'entity_id_column' => 'post_id',
+					'entity_id_column'  => 'post_id',
 				),
 			),
 			'destination' => array(
-				'table_name' => $this->table_names['addresses'],
+				'table_name'        => $this->table_names['addresses'],
 				'source_rel_column' => 'order_id',
 			),
 		);
@@ -315,21 +315,22 @@ class WPPostToCOTMigrator {
 		global $wpdb;
 
 		$schema_config = array(
-			'source' => array(
+			'source'      => array(
 				'entity' => array(
-					'table_name' => $this->table_names['orders'],
-					'meta_rel_column' => 'post_id',
+					'table_name'             => $this->table_names['orders'],
+					'meta_rel_column'        => 'post_id',
 					'destination_rel_column' => 'id',
+					'primary_key'            => 'id',
 				),
-				'meta' => array(
-					'table_name' => $wpdb->postmeta,
-					'meta_key_column' => 'meta_key',
+				'meta'   => array(
+					'table_name'        => $wpdb->postmeta,
+					'meta_key_column'   => 'meta_key',
 					'meta_value_column' => 'meta_value',
-					'entity_id_column' => 'post_id',
+					'entity_id_column'  => 'post_id',
 				),
 			),
 			'destination' => array(
-				'table_name' => $this->table_names['op_data'],
+				'table_name'        => $this->table_names['op_data'],
 				'source_rel_column' => 'order_id',
 			),
 		);
@@ -460,9 +461,8 @@ class WPPostToCOTMigrator {
 	 */
 	public function process_next_migration_batch( $batch_size = 100 ) {
 		global $wpdb;
-		$order_by = 'ID ASC';
 
-		$order_data = $this->order_table_migrator->fetch_data_for_migration( $this->get_where_clause(), $batch_size, $order_by );
+		$order_data = $this->order_table_migrator->fetch_data_for_migration_for_ids( $this->get_next_batch_ids( $batch_size ) );
 
 		foreach ( $order_data['errors'] as $post_id => $error ) {
 			$this->error_logger->log( 'info', "Error in importing post id $post_id: " . print_r( $error, true ) );
@@ -481,9 +481,9 @@ class WPPostToCOTMigrator {
 		}
 
 		$order_post_ids = array_column( $order_data['data'], 'post_id' );
-		$this->process_next_migrator_batch( $this->billing_address_table_migrator, $order_post_ids, $order_by );
-		$this->process_next_migrator_batch( $this->shipping_address_table_migrator, $order_post_ids, $order_by );
-		$this->process_next_migrator_batch( $this->operation_data_table_migrator, $order_post_ids, $order_by );
+		$this->process_next_migrator_batch( $this->billing_address_table_migrator, $order_post_ids );
+		$this->process_next_migrator_batch( $this->shipping_address_table_migrator, $order_post_ids );
+		$this->process_next_migrator_batch( $this->operation_data_table_migrator, $order_post_ids );
 		$this->process_meta_migration( $order_post_ids );
 
 		$last_post_migrated = max( array_keys( $order_data['data'] ) );
@@ -496,14 +496,12 @@ class WPPostToCOTMigrator {
 	 * Process next batch for a given address type.
 	 *
 	 * @param MetaToCustomTableMigrator $migrator Migrator instance for address type.
-	 * @param array                     $order_post_ids Array of post IDs for orders.
-	 * @param string                    $order_by Order by clause.
+	 * @param array $order_post_ids Array of post IDs for orders.
+	 * @param string $order_by Order by clause.
 	 */
-	private function process_next_migrator_batch( $migrator, $order_post_ids, $order_by ) {
+	private function process_next_migrator_batch( $migrator, $order_post_ids ) {
 		global $wpdb;
-		$post_ids_where_clause = $this->get_where_id_clause( $order_post_ids, 'post_id' );
-		$batch_size            = count( $order_post_ids );
-		$data                  = $migrator->fetch_data_for_migration( $post_ids_where_clause, $batch_size, $order_by );
+		$data                  = $migrator->fetch_data_for_migration_for_ids( $order_post_ids  );
 		foreach ( $data['errors'] as $order_id => $error ) {
 			// TODO: Add name of the migrator in error message.
 			$this->error_logger->log( 'info', "Error in importing data for Order ID $order_id: " . print_r( $error, true ) );
@@ -524,9 +522,8 @@ class WPPostToCOTMigrator {
 	 */
 	private function process_meta_migration( $order_post_ids ) {
 		global $wpdb;
-		$post_ids_where_clause = $this->get_where_id_clause( $order_post_ids, 'post_id' );
-		$data_to_migrate = $this->meta_table_migrator->fetch_data_for_migration( $post_ids_where_clause );
-		$insert_queries = $this->meta_table_migrator->generate_insert_sql_for_batch( $data_to_migrate['data'], 'insert' );
+		$data_to_migrate       = $this->meta_table_migrator->fetch_data_for_migration_for_ids( $order_post_ids );
+		$insert_queries        = $this->meta_table_migrator->generate_insert_sql_for_batch( $data_to_migrate['data'], 'insert' );
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $insert_queries should already be escaped in the generating function.
 		$result = $wpdb->query( $insert_queries );
 		if ( count( $data_to_migrate['data'] ) !== $result ) {
@@ -546,7 +543,7 @@ class WPPostToCOTMigrator {
 		global $wpdb;
 
 		$where_clause = $wpdb->prepare( 'ID = %d', $post_id );
-		$data         = $this->order_table_migrator->fetch_data_for_migration( $where_clause, 1, 'ID ASC' );
+		$data         = $this->order_table_migrator->fetch_data_for_migration_for_ids( $where_clause, 1, 'ID ASC' );
 		if ( isset( $data['errors'][ $post_id ] ) ) {
 			return new \WP_Error( $data['errors'][ $post_id ] );
 		}
@@ -566,24 +563,28 @@ class WPPostToCOTMigrator {
 	/**
 	 * Helper function to get where clause to send to MetaToCustomTableMigrator instance.
 	 *
-	 * @return string|void Where clause.
+	 * @return array Where clause.
 	 */
-	private function get_where_clause() {
+	private function get_next_batch_ids( $batch_size ) {
 		global $wpdb;
 
 		$checkpoint   = $this->get_checkpoint();
-		$where_clause = $wpdb->prepare(
-			'post_type = "shop_order" AND ID > %d',
-			$checkpoint['id']
+		$post_ids = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT ID FROM $wpdb->posts WHERE ID > %d AND post_type = '%s' LIMIT %d",
+				$checkpoint['id'],
+				'shop_order',
+				$batch_size
+			)
 		);
 
-		return $where_clause;
+		return $post_ids;
 	}
 
 	/**
 	 * Helper method to create `ID in (.., .., ...)` clauses.
 	 *
-	 * @param array  $ids List of IDs.
+	 * @param array $ids List of IDs.
 	 * @param string $column_name Name of the ID column.
 	 *
 	 * @return string Prepared clause for where.
@@ -615,6 +616,10 @@ class WPPostToCOTMigrator {
 	 * @param int $id Order ID.
 	 */
 	public function update_checkpoint( $id ) {
-		update_option( 'wc_cot_migration', array( 'id' => $id ) );
+		return update_option( 'wc_cot_migration', array( 'id' => $id ) );
+	}
+
+	public function delete_checkpoint() {
+		return delete_option( 'wp_cot_migration' );
 	}
 }

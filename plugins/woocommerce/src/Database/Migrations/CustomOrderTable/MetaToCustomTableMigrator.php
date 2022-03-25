@@ -94,7 +94,7 @@ class MetaToCustomTableMigrator {
 	/**
 	 * Generate SQL for data insertion.
 	 *
-	 * @param array  $batch Data to generate queries for. Will be 'data' array returned by `$this->fetch_data_for_migration()` method.
+	 * @param array $batch Data to generate queries for. Will be 'data' array returned by `$this->fetch_data_for_migration()` method.
 	 * @param string $insert_switch Insert command to use in generating queries, could be insert, insert_ignore, or replace.
 	 *
 	 * @return string Generated queries for insertion for this batch, would be of the form:
@@ -154,11 +154,11 @@ class MetaToCustomTableMigrator {
 	 *      ...,
 	 * )
 	 */
-	public function fetch_data_for_migration( $where_clause, $batch_size, $order_by ) {
+	public function fetch_data_for_migration_for_ids( $entity_ids ) {
 		global $wpdb;
 
 		// TODO: Add code to validate params.
-		$entity_table_query = $this->build_entity_table_query( $where_clause, $batch_size, $order_by );
+		$entity_table_query = $this->build_entity_table_query( $entity_ids );
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Output of $this->build_entity_table_query is already prepared.
 		$entity_data = $wpdb->get_results( $entity_table_query );
 		if ( empty( $entity_data ) ) {
@@ -167,14 +167,15 @@ class MetaToCustomTableMigrator {
 				'errors' => array(),
 			);
 		}
-		$entity_ids = array_column( $entity_data, 'entity_rel_column' );
+		$entity_meta_rel_ids = array_column( $entity_data, 'entity_meta_rel_id' );
 
-		$meta_table_query = $this->build_meta_data_query( $entity_ids );
+		$meta_table_query = $this->build_meta_data_query( $entity_meta_rel_ids );
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Output of $this->build_meta_data_query is already prepared.
 		$meta_data = $wpdb->get_results( $meta_table_query );
 
 		return $this->process_and_sanitize_data( $entity_data, $meta_data );
 	}
+
 
 	/**
 	 * Helper method to build query used to fetch data from core source table.
@@ -185,22 +186,24 @@ class MetaToCustomTableMigrator {
 	 *
 	 * @return string Query that can be used to fetch data.
 	 */
-	private function build_entity_table_query( $where_clause, $batch_size, $order_by ) {
+	private function build_entity_table_query( $entity_ids ) {
 		global $wpdb;
-		$source_entity_table                     = MigrationHelper::escape_backtick( $this->schema_config['source']['entity']['table_name'] );
-		$source_meta_rel_id_column        = MigrationHelper::escape_backtick( $this->schema_config['source']['entity']['meta_rel_column'] );
-		$source_destination_rel_id_column = MigrationHelper::escape_backtick( $this->schema_config['source']['entity']['destination_rel_column'] );
+		$source_entity_table              = MigrationHelper::escape_backtick( $this->schema_config['source']['entity']['table_name'] );
+		$source_meta_rel_id_column        = MigrationHelper::add_table_name_to_column( $source_entity_table, $this->schema_config['source']['entity']['meta_rel_column'] );
+		$source_destination_rel_id_column = MigrationHelper::add_table_name_to_column( $source_entity_table, $this->schema_config['source']['entity']['destination_rel_column'] );
+		$source_primary_key_column = MigrationHelper::add_table_name_to_column( $source_entity_table, $this->schema_config['source']['entity']['primary_key'] );
 
 		$destination_table                = MigrationHelper::escape_backtick( $this->schema_config['destination']['table_name'] );
-		$destination_source_rel_id_column = MigrationHelper::escape_backtick( $this->schema_config['destination']['source_rel_column'] );
+		$destination_source_rel_id_column = MigrationHelper::add_table_name_to_column( $destination_table, $this->schema_config['destination']['source_rel_column'] );
 
+		$where_clause = "$source_primary_key_column IN (" . implode( ',', array_fill( 0, count( $entity_ids ), '%d' ) ) . ')';
 		$entity_keys = array();
 		foreach ( $this->core_column_mapping as $column_name => $column_schema ) {
 			if ( isset( $column_schema['select_clause'] ) ) {
 				$select_clause = $column_schema['select_clause'];
 				$entity_keys[] = "$select_clause AS $column_name";
 			} else {
-				$entity_keys[] = '`' . MigrationHelper::escape_backtick( $column_name ) . '`';
+				$entity_keys[] = MigrationHelper::add_table_name_to_column( $source_entity_table, $column_name );
 			}
 		}
 		$entity_column_string = implode( ', ', $entity_keys );
@@ -208,20 +211,18 @@ class MetaToCustomTableMigrator {
 		$query = $wpdb->prepare(
 			"
 SELECT
-	`$source_entity_table`.`$source_meta_rel_id_column` as entity_meta_rel_id,
-	`$source_entity_table`.`$source_destination_rel_id_column` AS destination_rel_id,
+	$source_meta_rel_id_column as entity_meta_rel_id,
+	$source_destination_rel_id_column AS destination_rel_id,
 	CASE
-		WHEN EXISTS( `$destination_table`.`$destination_source_rel_id_column` ) THEN 'replace'
+		WHEN $destination_source_rel_id_column IS NOT NULL THEN 'replace'
 		ELSE 'insert'
 	END as insert_switch,
 	$entity_column_string
 FROM `$source_entity_table`
-LEFT JOIN `$destination_table` ON `$destination_table`.`$destination_source_rel_id_column` = `$source_entity_table`.`$source_destination_rel_id_column`
-WHERE $where_clause ORDER BY $order_by LIMIT %d;
+LEFT JOIN `$destination_table` ON $destination_source_rel_id_column = $source_destination_rel_id_column
+WHERE $where_clause;
 ",
-			array(
-				$batch_size,
-			)
+			$entity_ids
 		);
 
 		// phpcs:enable
@@ -242,7 +243,7 @@ WHERE $where_clause ORDER BY $order_by LIMIT %d;
 		$meta_keys                 = array_keys( $this->meta_column_mapping );
 		$meta_key_column           = MigrationHelper::escape_backtick( $this->schema_config['source']['meta']['meta_key_column'] );
 		$meta_value_column         = MigrationHelper::escape_backtick( $this->schema_config['source']['meta']['meta_value_column'] );
-		$meta_table_relational_key = MigrationHelper::escape_backtick( $this->schema_config['source']['entity']['meta_rel_column'] );
+		$meta_table_relational_key = MigrationHelper::escape_backtick( $this->schema_config['source']['meta']['entity_id_column'] );
 
 		$meta_column_string = implode( ', ', array_fill( 0, count( $meta_keys ), '%s' ) );
 		$entity_id_string   = implode( ', ', array_fill( 0, count( $entity_ids ), '%d' ) );
@@ -312,7 +313,7 @@ WHERE
 					$row_data[ $custom_table_column_name ] = $value;
 				}
 			}
-			$sanitized_entity_data[ $entity->primary_key_id ] = $row_data;
+			$sanitized_entity_data[ $entity->destination_rel_id ] = $row_data;
 		}
 	}
 
@@ -338,7 +339,7 @@ WHERE
 	/**
 	 * Validate and transform data so that we catch as many errors as possible before inserting.
 	 *
-	 * @param mixed  $value Actual data value.
+	 * @param mixed $value Actual data value.
 	 * @param string $type Type of data, could be decimal, int, date, string.
 	 *
 	 * @return float|int|mixed|string|\WP_Error

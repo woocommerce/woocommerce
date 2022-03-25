@@ -5,6 +5,8 @@
 
 namespace Automattic\WooCommerce\DataBase\Migrations;
 
+use function DeliciousBrains\WP_Offload_Media\Aws3\JmesPath\search;
+
 /**
  * Class MigrationHelper.
  *
@@ -70,6 +72,12 @@ class MigrationHelper {
 	 */
 	public static function get_wpdb_placeholder_for_type( $type ) {
 		return self::$wpdb_placeholder_for_type[ $type ];
+	}
+
+	public static function add_table_name_to_column( $table_name, $column_name ) {
+		$table_name = self::escape_backtick( $table_name );
+		$column_name = self::escape_backtick( $column_name );
+		return "`$table_name`.`$column_name`";
 	}
 
 }
