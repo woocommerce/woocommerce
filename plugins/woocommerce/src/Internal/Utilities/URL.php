@@ -35,6 +35,13 @@ class URL {
 	private $is_absolute;
 
 	/**
+	 * If the URL (or filepath) represents a directory.
+	 *
+	 * @var bool
+	 */
+	private $is_directory;
+
+	/**
 	 * The components of the URL's path.
 	 *
 	 * For instance, in the case of "file:///srv/www/wp.site" (noting that a file URL has
@@ -126,7 +133,7 @@ class URL {
 	private function process_path() {
 		$segments           = explode( '/', $this->components['path'] );
 		$this->is_absolute  = substr( $this->components['path'], 0, 1 ) === '/' || ! empty( $this->components['host'] );
-		$is_directory       = substr( $this->components['path'], -1, 1 ) === '/' && strlen( $this->components['path'] ) > 1;
+		$this->is_directory = substr( $this->components['path'], -1, 1 ) === '/' && strlen( $this->components['path'] ) > 1;
 		$resolve_traversals = 'file' !== $this->components['scheme'] || $this->is_absolute;
 		$retain_traversals  = false;
 
@@ -172,7 +179,7 @@ class URL {
 
 		// Reform the path from the processed segments, appending a leading slash if it is absolute and restoring
 		// the Windows drive letter if we have one.
-		$this->components['path'] = ( $this->is_absolute ? '/' : '' ) . implode( '/', $this->path_parts ) . ( $is_directory ? '/' : '' );
+		$this->components['path'] = ( $this->is_absolute ? '/' : '' ) . implode( '/', $this->path_parts ) . ( $this->is_directory ? '/' : '' );
 	}
 
 	/**
@@ -192,6 +199,15 @@ class URL {
 	public function get_all_parent_urls(): array {
 		$max_parent = count( $this->path_parts );
 		$parents    = array();
+
+		/*
+		 * If we are looking at a relative path that begins with at least one traversal (example: "../../foo")
+		 * then we should only return one parent URL (otherwise, we'd potentially have to return an infinite
+		 * number of parent URLs since we can't know how far the tree extends).
+		 */
+		if ( $max_parent > 0 && ! $this->is_absolute && '..' === $this->path_parts[0] ) {
+			$max_parent = 1;
+		}
 
 		for ( $level = 1; $level <= $max_parent; $level++ ) {
 			$parents[] = $this->get_parent_url( $level );
@@ -222,7 +238,8 @@ class URL {
 			$level = 1;
 		}
 
-		$parent_path_parts_to_keep = count( $this->path_parts ) - $level;
+		$parts_count               = count( $this->path_parts );
+		$parent_path_parts_to_keep = $parts_count - $level;
 
 		/*
 		 * With the exception of file URLs, we do not allow obtaining (grand-)parent directories that require
@@ -238,11 +255,16 @@ class URL {
 			return false;
 		}
 
-		if ( $parent_path_parts_to_keep >= 0 ) {
-			$parent_path = implode( '/', array_slice( $this->path_parts, 0, $parent_path_parts_to_keep ) );
-		} else {
+		if ( $parts_count > 0 && '..' === $this->path_parts[0] ) {
+			// In the case where we have a filepath already starting with one or more traversals, we need to add additional traversals.
+			$last_traversal = max( array_keys( $this->path_parts, '..', true ) ) + ( $this->is_directory ? 1 : 0 );
+			$parent_path    = str_repeat( '../', $level ) . join( '/', array_slice( $this->path_parts, 0, $last_traversal ) );
+		} elseif ( $parent_path_parts_to_keep < 0 ) {
 			// For relative filepaths only, we use traversals to describe the requested parent.
 			$parent_path = untrailingslashit( str_repeat( '../', $parent_path_parts_to_keep * -1 ) );
+		} else {
+			// Otherwise, in a very simple case, we just remove existing parts.
+			$parent_path = implode( '/', array_slice( $this->path_parts, 0, $parent_path_parts_to_keep ) );
 		}
 
 		if ( $this->is_relative() && '' === $parent_path ) {
@@ -257,7 +279,9 @@ class URL {
 			$parent_path = '/' . $parent_path;
 		}
 
-		return $this->get_url( $this->get_path( $parent_path ) );
+		// Form the parent URL, then process it exactly as we would any other URL for consistency.
+		$parent_url = $this->get_url( $this->get_path( $parent_path ) );
+		return ( new self( $parent_url ) )->get_url();
 	}
 
 	/**

@@ -133,7 +133,12 @@ class URLTest extends WC_Unit_Test_Case {
 	public function test_can_obtain_parent_url() {
 		$this->assertFalse(
 			( new URL( '/' ) )->get_parent_url(),
-			'Root directory "/" is considered to have no parent.'
+			'Root directory "/" is considered to have no parent (scenario #1).'
+		);
+
+		$this->assertFalse(
+			( new URL( '/' ) )->get_parent_url( 2 ),
+			'Root directory "/" is considered to have no parent (scenario #2).'
 		);
 
 		$this->assertEquals(
@@ -194,6 +199,38 @@ class URLTest extends WC_Unit_Test_Case {
 			),
 			( new URL( 'relative/to/abspath' ) )->get_all_parent_urls(),
 			'When obtaining all parent URLs for a relative filepath, we never return the root directory and never return a URL containing traversals. '
+		);
+
+		$this->assertEquals(
+			array(
+				'file://../../'
+			),
+			( new URL( '../../some.file' ) )->get_all_parent_urls(),
+			'When obtaining all parent URLs for a path that begins with directory traversals, we only go up one more level.'
+		);
+
+		$this->assertEquals(
+			'file://../../',
+			( new URL( '../' ) )->get_parent_url(),
+			'If a relative *directory* beginning with a traversal is provided, we can successfully derive its parent (scenario #1).'
+		);
+
+		$this->assertEquals(
+			'file://../../../',
+			( new URL( '../' ) )->get_parent_url( 2 ),
+			'If a relative *directory* beginning with a traversal is provided, we can successfully derive its parent (scenario #2).'
+		);
+
+		$this->assertEquals(
+			'file://../../../',
+			( new URL( '../../some.file' ) )->get_parent_url( 2 ),
+			'If the grandparent of a relative path that begins with one or more traversals is requested, we should receive the expected result (scenario #1).'
+		);
+
+		$this->assertEquals(
+			'file://../../../../',
+			( new URL( '../../some.file' ) )->get_parent_url( 3 ),
+			'If the grandparent of a relative path that begins with one or more traversals is requested, we should receive the expected result (scenario #2).'
 		);
 
 		$this->assertEquals(
