@@ -31,6 +31,7 @@ import './style.scss';
  * @param {boolean} props.multiple Whether multi-select is allowed.
  * @param {function():any} props.onChange Function to be called when onChange event fires.
  * @param {Array} props.options The option values to show in the select.
+ * @param {boolean} [props.isCaseSensitive=false] Whether the dropdown search should be case-sensitive.
  */
 const DropdownSelector = ( {
 	attributeLabel = '',
@@ -43,6 +44,7 @@ const DropdownSelector = ( {
 	multiple = false,
 	onChange = () => {},
 	options = [],
+	isCaseSensitive = false,
 } ) => {
 	const inputRef = useRef( null );
 
@@ -182,11 +184,18 @@ const DropdownSelector = ( {
 							getItemProps={ getItemProps }
 							getMenuProps={ getMenuProps }
 							highlightedIndex={ highlightedIndex }
-							options={ options.filter(
-								( option ) =>
-									! inputValue ||
-									option.value.startsWith( inputValue )
-							) }
+							options={ options.filter( ( option ) => {
+								let optionName = option.name;
+								let nameQuery = inputValue?.trim();
+								if ( ! isCaseSensitive ) {
+									optionName = optionName.toLowerCase();
+									nameQuery = nameQuery?.toLowerCase();
+								}
+								return (
+									! nameQuery ||
+									optionName.includes( nameQuery )
+								);
+							} ) }
 						/>
 					) }
 				</div>
@@ -210,6 +219,7 @@ DropdownSelector.propTypes = {
 			value: PropTypes.string.isRequired,
 		} )
 	),
+	isCaseSensitive: PropTypes.bool,
 };
 
 export default DropdownSelector;
