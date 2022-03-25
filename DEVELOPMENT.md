@@ -102,13 +102,12 @@ You can get the current MySQL port from the output of `wp-env start` command.
 
 1. Open your choice of MySQL tool.
 2. Use the following values to access the MySQL container.
-3. You can omit the username and password.
 
 | Name     | Value                 |
 | -------- | --------------------- |
 | Host     | 127.0.0.1             |
-| Username |                       |
-| Password |                       |
+| Username | root                  |
+| Password | password              |
 | Port     | Port from the command |
 
 ## HOWTOs

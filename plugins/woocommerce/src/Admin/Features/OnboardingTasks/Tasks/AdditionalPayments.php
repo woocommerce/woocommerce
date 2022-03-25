@@ -73,7 +73,7 @@ class AdditionalPayments extends Payments {
 
 		$woocommerce_payments = new WooCommercePayments();
 
-		if ( $woocommerce_payments->is_requested() && $woocommerce_payments->is_supported() && ! $woocommerce_payments->is_connected() ) {
+		if ( ! $woocommerce_payments->is_requested() || ( $woocommerce_payments->is_supported() && ! $woocommerce_payments->is_connected() ) ) {
 			// Hide task if WC Pay is installed via OBW, in supported country, but not connected.
 			return false;
 		}

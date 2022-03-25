@@ -5,6 +5,8 @@
 
 namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks;
 
+use Automattic\WooCommerce\Internal\Admin\WCAdminUser;
+
 /**
  * Task class.
  */
@@ -414,6 +416,18 @@ abstract class Task {
 		return self::is_actioned();
 	}
 
+	/**
+	 * Check if the task has been visited.
+	 *
+	 * @return bool
+	 */
+	public function is_visited() {
+		$user_id       = get_current_user_id();
+		$response      = WCAdminUser::get_user_data_field( $user_id, 'task_list_tracked_started_tasks' );
+		$tracked_tasks = $response ? json_decode( $response, true ) : array();
+
+		return isset( $tracked_tasks[ $this->get_id() ] ) && $tracked_tasks[ $this->get_id() ] > 0;
+	}
 
 	/**
 	 * Get the task as JSON.
@@ -440,6 +454,7 @@ abstract class Task {
 			'isDismissable'  => $this->is_dismissable(),
 			'isSnoozed'      => $this->is_snoozed(),
 			'isSnoozeable'   => $this->is_snoozeable(),
+			'isVisited'      => $this->is_visited(),
 			'snoozedUntil'   => $this->get_snoozed_until(),
 			'additionalData' => self::convert_object_to_camelcase( $this->get_additional_data() ),
 			'eventPrefix'    => $this->prefix_event( '' ),
