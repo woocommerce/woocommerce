@@ -44,6 +44,10 @@ const settings = {
 			default: false,
 			save: false,
 		},
+		addToCartBehaviour: {
+			type: 'string',
+			default: 'none',
+		},
 	},
 
 	edit,

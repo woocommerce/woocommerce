@@ -460,11 +460,11 @@ describe( 'Shopper → Mini Cart', () => {
 
 	describe( 'Remove product', () => {
 		beforeAll( async () => {
-			await shopper.emptyCart();
+			await shopper.block.emptyCart();
 		} );
 
 		afterAll( async () => {
-			await shopper.emptyCart();
+			await shopper.block.emptyCart();
 		} );
 
 		it( 'Can remove product from Mini Cart', async () => {
