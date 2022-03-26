@@ -5,7 +5,7 @@ import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import type { ReactElement } from 'react';
 import { formatPrice } from '@woocommerce/price-format';
 import { CartCheckoutCompatibilityNotice } from '@woocommerce/editor-components/compatibility-notices';
-import { PanelBody, ExternalLink } from '@wordpress/components';
+import { PanelBody, ExternalLink, SelectControl } from '@wordpress/components';
 import { getSetting } from '@woocommerce/settings';
 import { __ } from '@wordpress/i18n';
 import Noninteractive from '@woocommerce/base-components/noninteractive';
@@ -15,7 +15,20 @@ import Noninteractive from '@woocommerce/base-components/noninteractive';
  */
 import QuantityBadge from './quantity-badge';
 
-const MiniCartBlock = (): ReactElement => {
+interface Attributes {
+	addToCartBehaviour: string;
+}
+
+interface Props {
+	attributes: Attributes;
+	setAttributes: ( attributes: Record< string, unknown > ) => void;
+}
+
+const MiniCartBlock = ( {
+	attributes,
+	setAttributes,
+}: Props ): ReactElement => {
+	const { addToCartBehaviour } = attributes;
 	const blockProps = useBlockProps( {
 		className: `wc-block-mini-cart`,
 	} );
@@ -31,6 +44,43 @@ const MiniCartBlock = (): ReactElement => {
 	return (
 		<div { ...blockProps }>
 			<InspectorControls>
+				<PanelBody
+					title={ __(
+						'Mini Cart Settings',
+						'woo-gutenberg-products-block'
+					) }
+				>
+					<SelectControl
+						label={ __(
+							'Add-to-Cart behaviour',
+							'woo-gutenberg-products-block'
+						) }
+						value={ addToCartBehaviour }
+						onChange={ ( value ) => {
+							setAttributes( { addToCartBehaviour: value } );
+						} }
+						help={ __(
+							'Select what happens when a customer adds a product to the cart.',
+							'woo-gutenberg-products-block'
+						) }
+						options={ [
+							{
+								value: 'none',
+								label: __(
+									'Do nothing',
+									'woo-gutenberg-products-block'
+								),
+							},
+							{
+								value: 'open_drawer',
+								label: __(
+									'Open cart drawer',
+									'woo-gutenberg-products-block'
+								),
+							},
+						] }
+					/>
+				</PanelBody>
 				{ templatePartEditUri && (
 					<PanelBody
 						title={ __(
