@@ -15,6 +15,26 @@
 			"options": {
 				"script": "build"
 			}
+		},
+		"build-watch": {
+			"executor": "@nrwl/workspace:run-commands",
+			"options": {
+				"commands": [
+					"WC_ADMIN_PHASE=development pnpm nx dev woocommerce-admin",
+					"pnpm nx watch woocommerce-admin"
+				],
+				"parallel": false
+			}
+		},
+		"watch": {
+			"executor": "@nrwl/workspace:run-commands",
+			"options": {
+				"commands": [
+					"pnpm nx packages:watch woocommerce-admin",
+					"pnpm nx client:watch woocommerce-admin"
+				],
+				"parallel": true
+			}
 		}
 	}
 }

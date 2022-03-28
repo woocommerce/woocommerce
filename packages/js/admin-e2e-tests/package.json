@@ -50,6 +50,7 @@
 	"scripts": {
 	  	"prepare": "pnpm run build",
 		"build": "tsc --build",
+	  	"start": "tsc --build --watch",
 		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
 		"prepack": "pnpm run clean && pnpm run build"
 	}
