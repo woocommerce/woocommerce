@@ -17,11 +17,11 @@
 		"typeRoots": [
 			"./typings",
 			"./node_modules/@types",
-			"../../../packages/js/**/node_modules/@types"
+			"../../packages/js/**/node_modules/@types"
 		],
 		"baseUrl": "./",
 		"paths": {
-			"@woocommerce/*": [ "../../../packages/js/*/src" ],
+			"@woocommerce/*": [ "../../packages/js/*/src" ],
 			"~/*": [ "client/*" ]
 		}
 	},
