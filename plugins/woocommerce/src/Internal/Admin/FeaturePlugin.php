@@ -156,12 +156,12 @@ class FeaturePlugin {
 		$this->define( 'WC_ADMIN_IMAGES_FOLDER_URL', plugins_url( 'assets/images', WC_PLUGIN_FILE ) );
 
 		/**
-		 * Define the current WV Admin version.
+		 * Define the current WC Admin version.
 		 *
 		 * @deprecated 3.3.0
 		 * @var string
 		 */
-		define( 'WC_ADMIN_VERSION_NUMBER', '3.3.0' );		
+		define( 'WC_ADMIN_VERSION_NUMBER', '3.3.0' );
 	}
 
 	/**
