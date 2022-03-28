@@ -138,6 +138,7 @@ jobs:
 
             - name: Upload API test report
               working-directory: package/woocommerce/plugins/woocommerce/tests/api
+              uses: actions/upload-artifact@v2
               with:
                   name: api-test-report
                   path: |
