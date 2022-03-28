@@ -81,7 +81,7 @@ jobs:
 
             - name: Archive E2E test screenshots
               working-directory: package/woocommerce/plugins/woocommerce
-              if: ${{ always() }}
+              if: always()
               uses: actions/upload-artifact@v2
               with:
                   name: E2E Screenshots
