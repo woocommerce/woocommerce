@@ -189,10 +189,6 @@ final class BlockTypesController {
 		if ( Package::feature()->is_feature_plugin_build() ) {
 			$block_types[] = 'Checkout';
 			$block_types[] = 'Cart';
-		}
-
-		if ( Package::feature()->is_experimental_build() ) {
-			$block_types[] = 'SingleProduct';
 
 			/**
 			 * Mini Cart blocks should be available in Site Editor, Widgets and frontend (is_admin function checks this) only.
@@ -205,6 +201,10 @@ final class BlockTypesController {
 				$block_types[] = 'MiniCart';
 				$block_types[] = 'MiniCartContents';
 			}
+		}
+
+		if ( Package::feature()->is_experimental_build() ) {
+			$block_types[] = 'SingleProduct';
 		}
 
 		/**

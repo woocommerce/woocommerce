@@ -40,6 +40,7 @@ Use this plugin if you want access to the bleeding edge of available blocks for 
 - **Active Product Filters**
 - **Cart**
 - **Checkout**
+- **Mini Cart**
 
 == Getting Started ==
 
