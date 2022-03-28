@@ -9,7 +9,7 @@ import classnames from 'classnames';
 import './style.scss';
 
 interface TextareaProps {
-	className: string;
+	className?: string;
 	disabled: boolean;
 	onTextChange: ( newText: string ) => void;
 	placeholder: string;
