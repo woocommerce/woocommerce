@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { cart } from '@woocommerce/icons';
 import { Icon } from '@wordpress/icons';
-import { registerExperimentalBlockType } from '@woocommerce/block-settings';
+import { registerFeaturePluginBlockType } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
@@ -57,4 +57,4 @@ const settings = {
 	},
 };
 
-registerExperimentalBlockType( 'woocommerce/mini-cart', settings );
+registerFeaturePluginBlockType( 'woocommerce/mini-cart', settings );
