@@ -7,12 +7,13 @@
  */
 
 use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\Internal\Admin\FeaturePlugin;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\CodeHacker;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\BypassFinalsHack;
 use Automattic\WooCommerce\Testing\Tools\DependencyManagement\MockableLegacyProxy;
-
+\PHPUnit\Framework\Error\Deprecated::$enabled = false;
 /**
  * Class WC_Unit_Tests_Bootstrap
  */
@@ -46,6 +47,9 @@ class WC_Unit_Tests_Bootstrap {
 		ini_set( 'display_errors', 'on' ); // phpcs:ignore WordPress.PHP.IniSet.display_errors_Blacklisted
 		error_reporting( E_ALL ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_error_reporting, WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_error_reporting
 
+		// Ensure theme install tests use direct filesystem method.
+		define( 'FS_METHOD', 'direct' );
+
 		// Ensure server variable is set for WP email functions.
 		// phpcs:disable WordPress.VIP.SuperGlobalInputUsage.AccessDetected
 		if ( ! isset( $_SERVER['SERVER_NAME'] ) ) {
@@ -66,6 +70,9 @@ class WC_Unit_Tests_Bootstrap {
 
 		// install WC.
 		tests_add_filter( 'setup_theme', array( $this, 'install_wc' ) );
+
+		// Set up WC-Admin config.
+		tests_add_filter( 'woocommerce_admin_get_feature_config', array( $this, 'add_development_features' ) );
 
 		/*
 		* Load PHPUnit Polyfills for the WP testing suite.
@@ -168,7 +175,12 @@ class WC_Unit_Tests_Bootstrap {
 	public function load_wc() {
 		define( 'WC_TAX_ROUNDING_MODE', 'auto' );
 		define( 'WC_USE_TRANSACTIONS', false );
+		update_option( 'woocommerce_enable_coupons', 'yes' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_onboarding_opt_in', 'yes' );
+
 		require_once $this->plugin_dir . '/woocommerce.php';
+		FeaturePlugin::instance()->init();
 	}
 
 	/**
@@ -177,7 +189,6 @@ class WC_Unit_Tests_Bootstrap {
 	 * @since 2.2
 	 */
 	public function install_wc() {
-
 		// Clean existing install first.
 		define( 'WP_UNINSTALL_PLUGIN', true );
 		define( 'WC_REMOVE_ALL_DATA', true );
@@ -206,13 +217,13 @@ class WC_Unit_Tests_Bootstrap {
 	 * @since 2.2
 	 */
 	public function includes() {
-
 		// framework.
 		require_once $this->tests_dir . '/framework/class-wc-unit-test-factory.php';
 		require_once $this->tests_dir . '/framework/class-wc-mock-session-handler.php';
 		require_once $this->tests_dir . '/framework/class-wc-mock-wc-data.php';
 		require_once $this->tests_dir . '/framework/class-wc-mock-wc-object-query.php';
 		require_once $this->tests_dir . '/framework/class-wc-mock-payment-gateway.php';
+		require_once $this->tests_dir . '/framework/class-wc-mock-enhanced-payment-gateway.php';
 		require_once $this->tests_dir . '/framework/class-wc-payment-token-stub.php';
 		require_once $this->tests_dir . '/framework/vendor/class-wp-test-spy-rest-server.php';
 
@@ -232,9 +243,27 @@ class WC_Unit_Tests_Bootstrap {
 		require_once $this->tests_dir . '/framework/helpers/class-wc-helper-shipping-zones.php';
 		require_once $this->tests_dir . '/framework/helpers/class-wc-helper-payment-token.php';
 		require_once $this->tests_dir . '/framework/helpers/class-wc-helper-settings.php';
+		require_once $this->tests_dir . '/framework/helpers/class-wc-helper-reports.php';
+		require_once $this->tests_dir . '/framework/helpers/class-wc-helper-admin-notes.php';
+		require_once $this->tests_dir . '/framework/helpers/class-wc-test-action-queue.php';
+		require_once $this->tests_dir . '/framework/helpers/class-wc-helper-queue.php';
 
 		// Traits.
 		require_once $this->tests_dir . '/framework/traits/trait-wc-rest-api-complex-meta.php';
+	}
+
+	/**
+	 * Use the `development` features for testing.
+	 *
+	 * @param array $flags Existing feature flags.
+	 * @return array Filtered feature flags.
+	 */
+	public function add_development_features( $flags ) {
+		$config = json_decode( file_get_contents( $this->plugin_dir . '/../woocommerce-admin/config/development.json' ) ); // @codingStandardsIgnoreLine.
+		foreach ( $config->features as $feature => $bool ) {
+			$flags[ $feature ] = $bool;
+		}
+		return $flags;
 	}
 
 	/**
