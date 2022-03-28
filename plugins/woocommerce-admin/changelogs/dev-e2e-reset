@@ -1,4 +1,0 @@
-Significance: minor
-Type: Dev
-
-Add reset WooCommerce functionality to E2E tests, so tests have a fresh state. #8219
