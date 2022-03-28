@@ -93,17 +93,20 @@ const cachedFilterRuns: Record<
 	{
 		arg?: CheckoutFilterArguments;
 		extensions?: Record< string, unknown > | null;
+		defaultValue: unknown;
 	} & Record< string, unknown >
 > = {};
 
-const updatePreviousFilterRun = (
+const updatePreviousFilterRun = < T >(
 	filterName: string,
 	arg: CheckoutFilterArguments,
-	extensions: Record< string, unknown > | null
+	extensions: Record< string, unknown > | null,
+	defaultValue: T
 ): void => {
 	cachedFilterRuns[ filterName ] = {
 		arg,
 		extensions,
+		defaultValue,
 	};
 };
 
@@ -143,27 +146,36 @@ const checkMembersShallowEqual = <
  * If they are shallowly equal, then return the cached value and prevent third party code running. If they are
  * different then the third party filters are run and the result is cached.
  */
-const shouldReRunFilters = (
+const shouldReRunFilters = < T >(
 	filterName: string,
 	arg: CheckoutFilterArguments,
-	extensions: Record< string, unknown > | null
+	extensions: Record< string, unknown > | null,
+	defaultValue: T
 ): boolean => {
 	const previousFilterRun = cachedFilterRuns[ filterName ];
 
 	if ( ! previousFilterRun ) {
 		// This is the first time the filter is running so let it continue;
-		updatePreviousFilterRun( filterName, arg, extensions );
+		updatePreviousFilterRun( filterName, arg, extensions, defaultValue );
 		return true;
 	}
 	const {
 		arg: previousArg = {} as Record< string, unknown >,
 		extensions: previousExtensions = {} as Record< string, unknown >,
+		defaultValue: previousDefaultValue = null,
 	} = previousFilterRun;
 
 	// Check length of arg and previousArg, and that all keys are present in both arg and previousArg
 	const argIsEqual = checkMembersShallowEqual( arg, previousArg );
 	if ( ! argIsEqual ) {
-		updatePreviousFilterRun( filterName, arg, extensions );
+		updatePreviousFilterRun( filterName, arg, extensions, defaultValue );
+		return true;
+	}
+
+	// Check length of arg and previousArg, and that all keys are present in both arg and previousArg
+	const defaultValueIsEqual = defaultValue === previousDefaultValue;
+	if ( ! defaultValueIsEqual ) {
+		updatePreviousFilterRun( filterName, arg, extensions, defaultValue );
 		return true;
 	}
 
@@ -172,7 +184,7 @@ const shouldReRunFilters = (
 		previousExtensions
 	);
 	if ( ! extensionsIsEqual ) {
-		updatePreviousFilterRun( filterName, arg, extensions );
+		updatePreviousFilterRun( filterName, arg, extensions, defaultValue );
 		return true;
 	}
 	return false;
@@ -203,7 +215,7 @@ export const __experimentalApplyCheckoutFilter = < T >( {
 
 	return useMemo( () => {
 		if (
-			! shouldReRunFilters( filterName, arg, extensions ) &&
+			! shouldReRunFilters( filterName, arg, extensions, defaultValue ) &&
 			cachedValues.current[ filterName ] !== undefined
 		) {
 			return cachedValues.current[ filterName ];
