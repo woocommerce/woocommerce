@@ -81,11 +81,10 @@ jobs:
 
             - name: Archive E2E test screenshots
               uses: actions/upload-artifact@v2
-              working-directory: package/woocommerce/plugins/woocommerce
               if: always()
               with:
                   name: E2E Screenshots
-                  path: tests/e2e/screenshots
+                  path: package/woocommerce/plugins/woocommerce/tests/e2e/screenshots
                   if-no-files-found: ignore
                   retention-days: 5
 
