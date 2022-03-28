@@ -209,7 +209,7 @@ export default class Analyzer extends Command {
 		output: string
 	): Promise<void> {
 		const templates = await this.scanTemplates(content, version);
-		// const hooks = await this.scanHooks(content, version);
+		const hooks = await this.scanHooks(content, version);
 		// @todo: Scan for changes to database schema.
 
 		if (templates) {
@@ -222,16 +222,16 @@ export default class Analyzer extends Command {
 			this.log('No template changes found');
 		}
 
-		// if (hooks) {
-		// 	await this.printHookResults(hooks, output, 'HOOKS');
-		// 	this.log(
-		// 		JSON.stringify(hooks, (key, value) =>
-		// 			value instanceof Map ? [...value] : value
-		// 		)
-		// 	);
-		// } else {
-		// 	this.log('No template changes found');
-		// }
+		if (hooks) {
+			await this.printHookResults(hooks, output, 'HOOKS');
+			this.log(
+				JSON.stringify(hooks, (key, value) =>
+					value instanceof Map ? [...value] : value
+				)
+			);
+		} else {
+			this.log('No template changes found');
+		}
 	}
 
 	/**
@@ -358,5 +358,73 @@ export default class Analyzer extends Command {
 
 		CliUx.ux.action.stop();
 		return report;
+	}
+
+	/**
+	 * Scan patches for hooks
+	 *
+	 * @param {string} content Patch content.
+	 * @param {string} version Current product version.
+	 * @return {Promise<Map<string, Map<string, string[]>>>}
+	 */
+	private async scanHooks(
+		content: string,
+		version: string
+	): Promise<Map<string, Map<string, string[]>>> {
+		CliUx.ux.action.start('Scanning for new hooks');
+
+		let report: Map<string, Map<string, string[]>> = new Map<string, Map<string, string[]>>();
+		let hooks = report;
+
+		if (!content.match(/diff --git a\/(.+).php/g)) {
+			CliUx.ux.action.stop();
+			return report;
+		}
+
+		const matchPatches = /^a\/(.+).php/g;
+		const title = ''; // @todo
+		const patches = await this.getPatches(content, matchPatches);
+
+		for (let p in patches) {
+			const patch = patches[p];
+			const lines = patch.split('\n');
+			const filepath = await this.getFilename(lines[0]);
+			let code = 'warning';
+			let message = 'New filter found!';
+			let found = false;
+			let hook: Map<string, string[]> = new Map<string, string[]>();
+
+			for (let l in lines) {
+				const line = lines[l];
+				let type = 'filter';
+
+				if (line.match(/^(\+.+)(do_action|apply_filters)\(/g)) {
+					let name = line.match(/.*(apply_filters|do_action)\(\s+(\'|\")(.*)(\'|\")/);
+					let hookName = name![3];
+					if (line.match(/.*do_action\(/)) {
+						type = 'action';
+						message = 'New action found!';
+					}
+					code = 'notice';
+
+					hook.set(hookName, ['1', code, title, message, type]);
+					found = true;
+				}
+				// else if (line.match(/^(\+.+)(do_action|apply_filters)\(/g)) {
+				// @todo check for @since to confirm if it's a new hook.
+				//}
+			}
+
+			if ('notice' === code && hooks.get(filepath)) {
+				// @remove: updates
+				hooks.set(filepath, hook);
+			} else if (found && !hooks.get(filepath)) {
+				// @remove: creates
+				hooks.set(filepath, hook);
+			}
+		}
+
+		CliUx.ux.action.stop();
+		return hooks;
 	}
 }
