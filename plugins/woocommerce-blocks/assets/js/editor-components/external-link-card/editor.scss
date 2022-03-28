@@ -6,7 +6,7 @@
 	color: inherit;
 	align-items: flex-start;
 
-	& + .wc-block-editor-components-external-link-card {
+	+ .wc-block-editor-components-external-link-card {
 		margin-top: -($gap-large - $gap);
 	}
 	.wc-block-editor-components-external-link-card__content {

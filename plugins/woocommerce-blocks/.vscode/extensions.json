@@ -9,6 +9,7 @@
 		"bmewburn.vscode-intelephense-client",
 		"neilbrayfield.php-docblocker",
 		"valeryanm.vscode-phpsab",
-		"editorconfig.editorconfig"
+		"editorconfig.editorconfig",
+		"stylelint.vscode-stylelint"
 	]
 }

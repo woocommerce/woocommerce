@@ -44,7 +44,7 @@
 	// Currently, max() CSS function calls need to be wrapped with unquote.
 	// See: https://github.com/sass/sass/issues/2378#issuecomment-367490840
 	// These values should be the same as the control input height.
-	line-height: unquote("max(1.5rem, 24px)");
+	line-height: string.unquote("max(1.5rem, 24px)");
 }
 
 .wc-block-components-radio-control__description,
