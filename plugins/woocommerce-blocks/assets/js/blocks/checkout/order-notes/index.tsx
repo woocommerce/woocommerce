@@ -11,7 +11,19 @@ import { Textarea } from '@woocommerce/base-components/textarea';
  */
 import './style.scss';
 
-const CheckoutOrderNotes = ( { disabled, onChange, placeholder, value } ) => {
+interface CheckoutOrderNotesProps {
+	disabled: boolean;
+	onChange: ( orderNotes: string ) => void;
+	placeholder: string;
+	value: string;
+}
+
+const CheckoutOrderNotes = ( {
+	disabled,
+	onChange,
+	placeholder,
+	value,
+}: CheckoutOrderNotesProps ): JSX.Element => {
 	const [ withOrderNotes, setWithOrderNotes ] = useState( false );
 	// Store order notes when the textarea is hidden. This allows us to recover
 	// text entered previously by the user when the checkbox is re-enabled
