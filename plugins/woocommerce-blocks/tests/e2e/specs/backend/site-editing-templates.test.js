@@ -6,7 +6,6 @@ import {
 	getCurrentSiteEditorContent,
 	insertBlock,
 } from '@wordpress/e2e-test-utils';
-import { addQueryArgs } from '@wordpress/url';
 import {
 	getNormalPagePermalink,
 	visitPostOfType,
@@ -16,23 +15,20 @@ import {
 	DEFAULT_TIMEOUT,
 	filterCurrentBlocks,
 	getAllTemplates,
-	goToSiteEditor,
+	goToTemplateEditor,
+	goToTemplatesList,
 	saveTemplate,
 	useTheme,
-	waitForCanvas,
 } from '../../utils';
 
 async function visitTemplateAndAddCustomParagraph(
 	templateSlug,
 	customText = CUSTOMIZED_STRING
 ) {
-	const templateQuery = addQueryArgs( '', {
+	await goToTemplateEditor( {
 		postId: `woocommerce/woocommerce//${ templateSlug }`,
-		postType: 'wp_template',
 	} );
 
-	await goToSiteEditor( templateQuery );
-	await waitForCanvas();
 	await insertBlock( 'Paragraph' );
 	await page.keyboard.type( customText );
 	await saveTemplate();
@@ -123,7 +119,8 @@ describe( 'Store Editing Templates', () => {
 		it( 'default template from WooCommerce Blocks is available on an FSE theme', async () => {
 			const EXPECTED_TEMPLATE = defaultTemplateProps( 'Single Product' );
 
-			await goToSiteEditor( '?postType=wp_template' );
+			await goToTemplatesList();
+
 			const templates = await getAllTemplates();
 
 			try {
@@ -140,13 +137,9 @@ describe( 'Store Editing Templates', () => {
 		} );
 
 		it( 'should contain the "WooCommerce Single Product Block" classic template', async () => {
-			const templateQuery = addQueryArgs( '', {
+			await goToTemplateEditor( {
 				postId: 'woocommerce/woocommerce//single-product',
-				postType: 'wp_template',
 			} );
-
-			await goToSiteEditor( templateQuery );
-			await waitForCanvas();
 
 			const [ classicBlock ] = await filterCurrentBlocks(
 				( block ) => block.name === BLOCK_DATA[ 'single-product' ].name
@@ -169,9 +162,8 @@ describe( 'Store Editing Templates', () => {
 
 			await visitTemplateAndAddCustomParagraph( 'single-product' );
 
-			await goToSiteEditor( '?postType=wp_template' );
-			// we need to wait for the selector to show up, sometimes the loading is delayed and test becomes flaky
-			await page.waitForSelector( SELECTORS.templates.templateActions );
+			await goToTemplatesList( { waitFor: 'actions' } );
+
 			const templates = await getAllTemplates();
 
 			try {
@@ -188,13 +180,9 @@ describe( 'Store Editing Templates', () => {
 		} );
 
 		it( 'should preserve and correctly show the user customization on the back-end', async () => {
-			const templateQuery = addQueryArgs( '', {
+			await goToTemplateEditor( {
 				postId: 'woocommerce/woocommerce//single-product',
-				postType: 'wp_template',
 			} );
-
-			await goToSiteEditor( templateQuery );
-			await waitForCanvas();
 
 			await expect( canvas() ).toMatchElement(
 				SELECTORS.blocks.paragraph,
@@ -224,7 +212,8 @@ describe( 'Store Editing Templates', () => {
 		it( 'default template from WooCommerce Blocks is available on an FSE theme', async () => {
 			const EXPECTED_TEMPLATE = defaultTemplateProps( 'Product Catalog' );
 
-			await goToSiteEditor( '?postType=wp_template' );
+			await goToTemplatesList();
+
 			const templates = await getAllTemplates();
 
 			try {
@@ -241,13 +230,9 @@ describe( 'Store Editing Templates', () => {
 		} );
 
 		it( 'should contain the "WooCommerce Product Grid Block" classic template', async () => {
-			const templateQuery = addQueryArgs( '', {
+			await goToTemplateEditor( {
 				postId: 'woocommerce/woocommerce//archive-product',
-				postType: 'wp_template',
 			} );
-
-			await goToSiteEditor( templateQuery );
-			await waitForCanvas();
 
 			const [ classicBlock ] = await filterCurrentBlocks(
 				( block ) => block.name === BLOCK_DATA[ 'archive-product' ].name
@@ -267,8 +252,8 @@ describe( 'Store Editing Templates', () => {
 
 			await visitTemplateAndAddCustomParagraph( 'archive-product' );
 
-			await goToSiteEditor( '?postType=wp_template' );
-			await page.waitForSelector( SELECTORS.templates.templateActions );
+			await goToTemplatesList( { waitFor: 'actions' } );
+
 			const templates = await getAllTemplates();
 
 			try {
@@ -285,13 +270,9 @@ describe( 'Store Editing Templates', () => {
 		} );
 
 		it( 'should preserve and correctly show the user customization on the back-end', async () => {
-			const templateQuery = addQueryArgs( '', {
+			await goToTemplateEditor( {
 				postId: 'woocommerce/woocommerce//archive-product',
-				postType: 'wp_template',
 			} );
-
-			await goToSiteEditor( templateQuery );
-			await waitForCanvas();
 
 			await expect( canvas() ).toMatchElement(
 				SELECTORS.blocks.paragraph,
@@ -324,7 +305,8 @@ describe( 'Store Editing Templates', () => {
 				'Products by Category'
 			);
 
-			await goToSiteEditor( '?postType=wp_template' );
+			await goToTemplatesList();
+
 			const templates = await getAllTemplates();
 
 			try {
@@ -341,13 +323,9 @@ describe( 'Store Editing Templates', () => {
 		} );
 
 		it( 'should contain the "WooCommerce Product Taxonomy Block" classic template', async () => {
-			const templateQuery = addQueryArgs( '', {
+			await goToTemplateEditor( {
 				postId: 'woocommerce/woocommerce//taxonomy-product_cat',
-				postType: 'wp_template',
 			} );
-
-			await goToSiteEditor( templateQuery );
-			await waitForCanvas();
 
 			const [ classicBlock ] = await filterCurrentBlocks(
 				( block ) =>
@@ -368,8 +346,8 @@ describe( 'Store Editing Templates', () => {
 
 			await visitTemplateAndAddCustomParagraph( 'taxonomy-product_cat' );
 
-			await goToSiteEditor( '?postType=wp_template' );
-			await page.waitForSelector( SELECTORS.templates.templateActions );
+			await goToTemplatesList( { waitFor: 'actions' } );
+
 			const templates = await getAllTemplates();
 
 			try {
@@ -386,13 +364,9 @@ describe( 'Store Editing Templates', () => {
 		} );
 
 		it( 'should preserve and correctly show the user customization on the back-end', async () => {
-			const templateQuery = addQueryArgs( '', {
+			await goToTemplateEditor( {
 				postId: 'woocommerce/woocommerce//taxonomy-product_cat',
-				postType: 'wp_template',
 			} );
-
-			await goToSiteEditor( templateQuery );
-			await waitForCanvas();
 
 			await expect( canvas() ).toMatchElement(
 				SELECTORS.blocks.paragraph,
@@ -419,7 +393,8 @@ describe( 'Store Editing Templates', () => {
 		it( 'default template from WooCommerce Blocks is available on an FSE theme', async () => {
 			const EXPECTED_TEMPLATE = defaultTemplateProps( 'Products by Tag' );
 
-			await goToSiteEditor( '?postType=wp_template' );
+			await goToTemplatesList();
+
 			const templates = await getAllTemplates();
 
 			try {
@@ -436,13 +411,9 @@ describe( 'Store Editing Templates', () => {
 		} );
 
 		it( 'should contain the "WooCommerce Product Taxonomy Block" classic template', async () => {
-			const templateQuery = addQueryArgs( '', {
+			await goToTemplateEditor( {
 				postId: 'woocommerce/woocommerce//taxonomy-product_tag',
-				postType: 'wp_template',
 			} );
-
-			await goToSiteEditor( templateQuery );
-			await waitForCanvas();
 
 			const [ classicBlock ] = await filterCurrentBlocks(
 				( block ) =>
@@ -463,8 +434,8 @@ describe( 'Store Editing Templates', () => {
 
 			await visitTemplateAndAddCustomParagraph( 'taxonomy-product_tag' );
 
-			await goToSiteEditor( '?postType=wp_template' );
-			await page.waitForSelector( SELECTORS.templates.templateActions );
+			await goToTemplatesList( { waitFor: 'actions' } );
+
 			const templates = await getAllTemplates();
 
 			try {
@@ -481,13 +452,9 @@ describe( 'Store Editing Templates', () => {
 		} );
 
 		it( 'should preserve and correctly show the user customization on the back-end', async () => {
-			const templateQuery = addQueryArgs( '', {
+			await goToTemplateEditor( {
 				postId: 'woocommerce/woocommerce//taxonomy-product_tag',
-				postType: 'wp_template',
 			} );
-
-			await goToSiteEditor( templateQuery );
-			await waitForCanvas();
 
 			await expect( canvas() ).toMatchElement(
 				SELECTORS.blocks.paragraph,
