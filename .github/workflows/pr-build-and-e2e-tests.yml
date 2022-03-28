@@ -137,13 +137,12 @@ jobs:
               run: pnpx wc-api-tests test api
 
             - name: Upload API test report
-              working-directory: package/woocommerce/plugins/woocommerce/tests/api
               uses: actions/upload-artifact@v2
               with:
                   name: api-test-report
                   path: |
-                        allure-results
-                        allure-report
+                        package/woocommerce/plugins/woocommerce/tests/api/allure-results
+                        package/woocommerce/plugins/woocommerce/tests/api/allure-report
                   retention-days: 7
 
     k6-tests-run:
