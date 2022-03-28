@@ -138,7 +138,7 @@ jobs:
             - name: Upload API test report
               uses: actions/upload-artifact@v2
               with:
-                  name: api-test-report
+                  name: api-test-report---${{ github.ref_name }}
                   path: |
                         package/woocommerce/packages/js/api-core-tests/allure-results
                         package/woocommerce/packages/js/api-core-tests/allure-report
