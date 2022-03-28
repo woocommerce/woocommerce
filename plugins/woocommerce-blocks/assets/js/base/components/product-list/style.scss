@@ -37,7 +37,7 @@
 	display: flex;
 	flex-wrap: wrap;
 	padding: 0;
-	margin: 0 (-$gap*0.5) $gap;
+	margin: 0 (-$gap * 0.5) $gap;
 	background-clip: padding-box;
 }
 
@@ -49,8 +49,8 @@
 	width: auto;
 	position: relative;
 	text-align: center;
-	border-left: $gap*0.5 solid transparent;
-	border-right: $gap*0.5 solid transparent;
+	border-left: $gap * 0.5 solid transparent;
+	border-right: $gap * 0.5 solid transparent;
 	border-bottom: $gap solid transparent;
 	list-style: none;
 }
@@ -75,7 +75,7 @@
 	}
 	@for $i from 1 to 9 {
 		&.has-#{$i}-columns .wc-block-grid__product {
-			flex: 1 0 calc(#{ math.div(100%, $i) });
+			flex: 1 0 #{ math.div(100%, $i) };
 			max-width: math.div(100%, $i);
 		}
 	}
@@ -130,10 +130,10 @@
 					margin: 0 0 $gap-large 0;
 				}
 				.wc-block-grid__product:nth-child(odd) {
-					padding-right: $gap*0.5;
+					padding-right: $gap * 0.5;
 				}
 				.wc-block-grid__product:nth-child(even) {
-					padding-left: $gap*0.5;
+					padding-left: $gap * 0.5;
 				}
 			}
 		}

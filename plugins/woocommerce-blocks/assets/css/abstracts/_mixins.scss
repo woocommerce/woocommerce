@@ -9,7 +9,7 @@ $fontSizes: (
 // Maps a named font-size to its predefined size. Units default to em, but can
 // be changed using the multiplier parameter.
 @mixin font-size($sizeName, $multiplier: 1em) {
-	font-size: map-get($fontSizes, $sizeName) * $multiplier;
+	font-size: map.get($fontSizes, $sizeName) * $multiplier;
 }
 
 @keyframes spinner__animation {
@@ -211,10 +211,10 @@ $fontSizes: (
 
 // Encodes hex colors so they can be used in URL content.
 @function encode-color($color) {
-	@if type-of($color) != "color" or str-index(#{$color}, "#") != 1 {
+	@if type-of($color) != "color" or string.index(#{$color}, "#") != 1 {
 		@return $color;
 	}
 
-	$hex: str-slice(ie-hex-str($color), 4);
+	$hex: string.slice(color.ie-hex-str($color), 4);
 	@return "%23" + unquote("#{$hex}");
 }
