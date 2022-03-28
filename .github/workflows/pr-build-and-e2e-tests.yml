@@ -133,7 +133,6 @@ jobs:
                   BASE_URL: http://localhost:8084
                   USER_KEY: admin
                   USER_SECRET: password
-                  ALLURE_OUTPUT_DIR: "./tests/api"
               run: pnpx wc-api-tests test api
 
             - name: Upload API test report
@@ -141,8 +140,8 @@ jobs:
               with:
                   name: api-test-report
                   path: |
-                        package/woocommerce/plugins/woocommerce/tests/api/allure-results
-                        package/woocommerce/plugins/woocommerce/tests/api/allure-report
+                        package/woocommerce/packages/js/api-core-tests/allure-results
+                        package/woocommerce/packages/js/api-core-tests/allure-report
                   retention-days: 7
 
     k6-tests-run:
