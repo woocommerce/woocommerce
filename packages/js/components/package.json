@@ -115,7 +115,7 @@
 		"build:js": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
 		"build:css": "webpack",
 		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
-		"lint": "eslint src",
+		"lint": "eslint src --ext=js,ts,tsx",
 		"prepack": "pnpm run clean && pnpm run build",
 		"start": "concurrently \"tsc --build ./tsconfig.json --watch\" \"webpack --watch\"",
 		"test": "pnpm run build && pnpm run test:nobuild",
