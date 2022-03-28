@@ -26,7 +26,10 @@ module.exports = {
 	 *
 	 * @see https://www.npmjs.com/package/jest-allure#jest--v-24-
 	 */
-	setupFilesAfterEnv: [ 'jest-allure/dist/setup' ],
+	setupFilesAfterEnv: [
+		'jest-allure/dist/setup',
+		'<rootDir>/allure.config.js',
+	],
 
 	/**
 	 * Make sure Jest is using Jasmine as its test runner.

@@ -47,15 +47,18 @@ async function deactivateAndDeletePlugin( pluginName: string ) {
 }
 export async function deactivateAndDeleteAllPlugins( except: string[] = [] ) {
 	let plugins = await getPlugins();
+	let skippedPlugins = [];
 	const promises = [];
 	for ( const plugin of plugins ) {
 		const splitPluginName = plugin.plugin.split( '/' );
 		const slug = splitPluginName[ 1 ] || splitPluginName[ 0 ];
 		if ( ! except.includes( slug ) ) {
 			promises.push( deactivateAndDeletePlugin( plugin.plugin ) );
+		} else {
+			skippedPlugins.push( slug );
 		}
 	}
 	await Promise.all( promises );
 	plugins = await getPlugins();
-	expect( plugins.length ).toEqual( except.length );
+	expect( plugins.length ).toEqual( skippedPlugins.length );
 }

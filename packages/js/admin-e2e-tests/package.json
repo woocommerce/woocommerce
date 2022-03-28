@@ -48,6 +48,7 @@
 		"access": "public"
 	},
 	"scripts": {
+	  	"prepare": "pnpm run build",
 		"build": "tsc --build",
 		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
 		"prepack": "pnpm run clean && pnpm run build"

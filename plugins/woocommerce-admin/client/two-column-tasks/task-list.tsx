@@ -6,11 +6,12 @@ import { useEffect, useRef, useState, createElement } from '@wordpress/element';
 import { Button, Card } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { EllipsisMenu } from '@woocommerce/components';
-import { updateQueryString } from '@woocommerce/navigation';
+import { updateQueryString, getHistory, getNewPath } from '@woocommerce/navigation';
 import {
 	OPTIONS_STORE_NAME,
 	ONBOARDING_STORE_NAME,
 	TaskType,
+	useUserPreferences
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { List, TaskItem } from '@woocommerce/experimental';
@@ -24,6 +25,7 @@ import taskHeaders from './task-headers';
 import DismissModal from './dismiss-modal';
 import TaskListCompleted from './completed';
 import { TaskListProps } from '~/tasks/task-list';
+import { ProgressHeader } from '~/task-lists/progress-header';
 
 export const TaskList: React.FC< TaskListProps > = ( {
 	query,
@@ -33,6 +35,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 	twoColumns,
 	keepCompletedTaskList,
 	isComplete,
+	displayProgressHeader,
 } ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
 	const { updateOptions, dismissTask, undoDismissTask } = useDispatch(
@@ -44,7 +47,8 @@ export const TaskList: React.FC< TaskListProps > = ( {
 			profileItems: getProfileItems(),
 		};
 	} );
-	const { hideTaskList } = useDispatch( ONBOARDING_STORE_NAME );
+	const { hideTaskList, visitedTask } = useDispatch( ONBOARDING_STORE_NAME );
+	const userPreferences = useUserPreferences();
 	const [ headerData, setHeaderData ] = useState< {
 		task?: TaskType;
 		goToTask?: () => void;
@@ -161,6 +165,30 @@ export const TaskList: React.FC< TaskListProps > = ( {
 		selectedHeaderCard = visibleTasks[ visibleTasks.length - 1 ];
 	}
 
+	const getTaskStartedCount = ( taskId: string ) => {
+		const trackedStartedTasks =
+			userPreferences.task_list_tracked_started_tasks;
+		if ( ! trackedStartedTasks || ! trackedStartedTasks[ taskId ] ) {
+			return 0;
+		}
+		return trackedStartedTasks[ taskId ];
+	};
+
+	// @todo This would be better as a task endpoint that handles updating the count.
+	const updateTrackStartedCount = ( taskId: string ) => {
+		const newCount = getTaskStartedCount( taskId ) + 1;
+		const trackedStartedTasks =
+			userPreferences.task_list_tracked_started_tasks || {};
+
+		visitedTask( taskId );
+		userPreferences.updateUserPreferences( {
+			task_list_tracked_started_tasks: {
+				...( trackedStartedTasks || {} ),
+				[ taskId ]: newCount,
+			},
+		} );
+	};
+
 	const trackClick = ( task: TaskType ) => {
 		recordEvent( `${ eventName }_click`, {
 			task_name: task.id,
@@ -169,6 +197,17 @@ export const TaskList: React.FC< TaskListProps > = ( {
 
 	const goToTask = ( task: TaskType ) => {
 		trackClick( task );
+		if ( ! task.isComplete ) {
+			updateTrackStartedCount( task.id );
+		}
+		if ( task.actionUrl ) {
+			if ( task.actionUrl.startsWith( 'http' ) ) {
+				window.location.href = actionUrl;
+			} else {
+				getHistory().push( getNewPath( {}, task.actionUrl, {} ) );
+			}
+			return;
+		}
 		updateQueryString( { task: task.id } );
 	};
 
@@ -223,6 +262,9 @@ export const TaskList: React.FC< TaskListProps > = ( {
 					hideTasks={ hideTasks }
 				/>
 			) }
+			{ displayProgressHeader ? (
+				<ProgressHeader taskListId={ id } />
+			) : null }
 			<div
 				className={ classnames(
 					`woocommerce-task-dashboard__container two-column-experiment woocommerce-task-list__${ id }`,
@@ -241,7 +283,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 									headerData
 								) }
 						</div>
-						{ renderMenu() }
+						{ ! displayProgressHeader && renderMenu() }
 					</div>
 					<List animation="custom">
 						{ visibleTasks.map( ( task, index ) => {

@@ -380,6 +380,14 @@ const onboarding = (
 					isComplete: true,
 				} ),
 			};
+		case TYPES.VISITED_TASK:
+			return {
+				...state,
+				taskLists: getUpdatedTaskLists( state.taskLists, {
+					id: taskId,
+					isVisited: true,
+				} ),
+			};
 		case TYPES.ACTION_TASK_ERROR:
 			return {
 				...state,
