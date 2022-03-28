@@ -80,9 +80,9 @@ jobs:
               run: pnpx wc-e2e test:e2e
 
             - name: Archive E2E test screenshots
+              uses: actions/upload-artifact@v2
               working-directory: package/woocommerce/plugins/woocommerce
               if: always()
-              uses: actions/upload-artifact@v2
               with:
                   name: E2E Screenshots
                   path: tests/e2e/screenshots
