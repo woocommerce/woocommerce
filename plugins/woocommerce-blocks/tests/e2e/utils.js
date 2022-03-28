@@ -44,6 +44,7 @@ const SELECTORS = {
 		headings: 'thead th.edit-site-list-table-column',
 		root: '.edit-site-list-table',
 		rows: '.edit-site-list-table-row',
+		templateActions: '.edit-site-list-table button[aria-label="Actions"]',
 		templateTitle: '[data-wp-component="Heading"]',
 	},
 	themesPage: {
@@ -140,37 +141,78 @@ export const isBlockInsertedInWidgetsArea = async ( blockName ) => {
 };
 
 /**
- * Visits the Site Editor main page in Core WordPress
- *
- * There are two different possible site editor pages:
+ * Visits site editor dependening on used WordPress version and how Gutenberg is installed.
  *
  * 1. `themes.php?page=gutenberg-edit-site` this is a legacy editor access used for WP <=5.8.
  * 2. `site-editor.php` is the new way of accessing the editor in WP >=5.9+.
  *
- * @param {string} query String to be serialized as query portion of URL.
  * @param {'core' | 'gutenberg'} [editorContext='core'] Whether to go to the Gutenberg URL or the Core one.
+ * @param {Object} params Query parameters to add to the URL.
+ * @param {string} [params.postId] ID of the template if we want to access template editor.
+ * @param {'wp_template' | 'wp_template_part'} [params.postType='wp_template'] Type of template.
  */
-export async function goToSiteEditor(
-	query,
-	editorContext = GUTENBERG_EDITOR_CONTEXT
-) {
+async function goToSiteEditor( editorContext = 'core', params ) {
 	// There is a bug in Gutenberg/WPCore now that makes it impossible to rely on site-editor.php on setups
 	// with locally installed Gutenberg. Details in https://github.com/WordPress/gutenberg/issues/39639.
 	// TODO: Update to always use site-editor.php once WordPress 6.0 is released and fix is verified.
-	// 		 Remove usage of GUTENBERG_EDITOR_CONTEXT from from here and from workflows.
-
-	let editorPath = 'site-editor.php';
-	let queryString = query;
+	// 		 Remove usage of goToSiteEditor and GUTENBERG_EDITOR_CONTEXT from from here and from workflows.
+	let editorPath;
+	const queryParams = { ...params };
 
 	if ( editorContext === 'gutenberg' ) {
 		editorPath = 'themes.php';
-		queryString = addQueryArgs( queryString, {
-			page: 'gutenberg-edit-site',
-		} );
+		queryParams.page = 'gutenberg-edit-site';
+	} else {
+		editorPath = 'site-editor.php';
 	}
 
-	await visitAdminPage( editorPath, queryString );
+	return await visitAdminPage( editorPath, addQueryArgs( '', queryParams ) );
+}
+
+/**
+ * Visits the Site Editor template edit view.
+ *
+ * @param {Object} params
+ * @param {string} params.postId ID of the template if we want to access template editor.
+ * @param {'core' | 'gutenberg'} [params.editorContext='core'] Whether to go to the Gutenberg URL or the Core one.
+ * @param {'wp_template' | 'wp_template_part'} [params.postType='wp_template'] Type of template.
+ */
+export async function goToTemplateEditor( {
+	postId,
+	postType = 'wp_template',
+	editorContext = GUTENBERG_EDITOR_CONTEXT,
+} = {} ) {
+	await goToSiteEditor( editorContext, {
+		postType,
+		postId,
+	} );
+
 	await disableSiteEditorWelcomeGuide();
+	await waitForCanvas();
+}
+
+/**
+ * Visits the Site Editor templates list view.
+ *
+ * @param {Object} params
+ * @param {'core' | 'gutenberg'} [params.editorContext='core'] Whether to go to the Gutenberg URL or the Core one.
+ * @param {'wp_template' | 'wp_template_part'} [params.postType='wp_template'] Type of template.
+ * @param {'list' | 'actions'} [params.waitFor='false'] Wait for list or for actions to be present - tempalte actions can take a moment to load, we can wait for them to be present if needed.
+ */
+export async function goToTemplatesList( {
+	postType = 'wp_template',
+	editorContext = GUTENBERG_EDITOR_CONTEXT,
+	waitFor = 'list',
+} = {} ) {
+	await goToSiteEditor( editorContext, { postType } );
+
+	if ( waitFor === 'actions' ) {
+		await page.waitForSelector(
+			SELECTORS.templatesListTable.templateActions
+		);
+	} else {
+		await page.waitForSelector( SELECTORS.templatesListTable.root );
+	}
 }
 
 /**
@@ -192,7 +234,6 @@ export async function saveTemplate() {
 
 	await page.click( saveButton );
 	await page.waitForSelector( savePrompt );
-
 	await page.click( confirmSave );
 	await page.waitForSelector( `${ saveButton }[aria-disabled="true"]` );
 	await page.waitForResponse( ( res ) => {
@@ -209,8 +250,7 @@ export async function saveTemplate() {
 export async function getAllTemplates() {
 	const { templatesListTable } = SELECTORS;
 
-	await page.waitForSelector( templatesListTable.root );
-	const table = await page.$( templatesListTable.root );
+	const table = await page.waitForSelector( templatesListTable.root );
 
 	if ( ! table ) throw new Error( 'Templates table not found' );
 
