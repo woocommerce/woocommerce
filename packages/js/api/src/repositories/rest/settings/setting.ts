@@ -24,15 +24,35 @@ function createTransformer(): ModelTransformer< Setting > {
  * @param {HTTPClient} httpClient The HTTP client for the REST requests to be made using.
  * @return {ListsSettings|ReadsSettings|UpdatesSettings} The created repository.
  */
-export default function settingRESTRepository( httpClient: HTTPClient ): ListsSettings & ReadsSettings & UpdatesSettings {
-	const buildURL = ( parent: ParentID< SettingRepositoryParams >, id: ModelID ) => '/wc/v3/settings/' + parent + '/' + id;
+export default function settingRESTRepository(
+	httpClient: HTTPClient
+): ListsSettings & ReadsSettings & UpdatesSettings {
+	const buildURL = (
+		parent: ParentID< SettingRepositoryParams >,
+		id: ModelID
+	) => '/wc/v3/settings/' + parent + '/' + id;
 	const transformer = createTransformer();
 
 	return new ModelRepository(
-		restListChild< SettingRepositoryParams >( ( parent ) => '/wc/v3/settings/' + parent, Setting, httpClient, transformer ),
+		restListChild< SettingRepositoryParams >(
+			( parent ) => '/wc/v3/settings/' + parent,
+			Setting,
+			httpClient,
+			transformer
+		),
 		null,
-		restReadChild< SettingRepositoryParams >( buildURL, Setting, httpClient, transformer ),
-		restUpdateChild< SettingRepositoryParams >( buildURL, Setting, httpClient, transformer ),
-		null,
+		restReadChild< SettingRepositoryParams >(
+			buildURL,
+			Setting,
+			httpClient,
+			transformer
+		),
+		restUpdateChild< SettingRepositoryParams >(
+			buildURL,
+			Setting,
+			httpClient,
+			transformer
+		),
+		null
 	);
 }

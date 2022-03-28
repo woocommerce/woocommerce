@@ -116,20 +116,29 @@ export class PropertyTypeTransformation implements ModelTransformation {
 	 * @return {*} The converted type.
 	 * @private
 	 */
-	private convertTo( value: any, type: PropertyType ): PropertyTypeTypes | PropertyTypeTypes[] {
+	private convertTo(
+		value: any,
+		type: PropertyType
+	): PropertyTypeTypes | PropertyTypeTypes[] {
 		if ( Array.isArray( value ) ) {
-			return value.map( ( v: string ) => this.convertTo( v, type ) as PropertyTypeTypes );
+			return value.map(
+				( v: string ) => this.convertTo( v, type ) as PropertyTypeTypes
+			);
 		}
 
-		if ( null === value ) {
+		if ( value === null ) {
 			return null;
 		}
 
 		switch ( type ) {
-			case PropertyType.String: return String( value );
-			case PropertyType.Integer: return parseInt( value );
-			case PropertyType.Float: return parseFloat( value );
-			case PropertyType.Boolean: return Boolean( value );
+			case PropertyType.String:
+				return String( value );
+			case PropertyType.Integer:
+				return parseInt( value );
+			case PropertyType.Float:
+				return parseFloat( value );
+			case PropertyType.Boolean:
+				return Boolean( value );
 			case PropertyType.Date:
 				return new Date( value );
 		}
@@ -143,12 +152,15 @@ export class PropertyTypeTransformation implements ModelTransformation {
 	 * @return {*} The converted type.
 	 * @private
 	 */
-	private convertFrom( value: PropertyTypeTypes | PropertyTypeTypes[], type: PropertyType ): any {
+	private convertFrom(
+		value: PropertyTypeTypes | PropertyTypeTypes[],
+		type: PropertyType
+	): any {
 		if ( Array.isArray( value ) ) {
 			return value.map( ( v ) => this.convertFrom( v, type ) );
 		}
 
-		if ( null === value ) {
+		if ( value === null ) {
 			return null;
 		}
 

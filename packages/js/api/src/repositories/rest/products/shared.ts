@@ -37,11 +37,9 @@ import { createMetaDataTransformer } from '../shared';
  * @return {ModelTransformer} The created transformer.
  */
 function createProductTermTransformer(): ModelTransformer< ProductTerm > {
-	return new ModelTransformer(
-		[
-			new PropertyTypeTransformation( { id: PropertyType.Integer } ),
-		],
-	);
+	return new ModelTransformer( [
+		new PropertyTypeTransformation( { id: PropertyType.Integer } ),
+	] );
 }
 
 /**
@@ -50,25 +48,19 @@ function createProductTermTransformer(): ModelTransformer< ProductTerm > {
  * @return {ModelTransformer} The created transformer.
  */
 function createProductAttributeTransformer(): ModelTransformer< ProductAttribute > {
-	return new ModelTransformer(
-		[
-			new PropertyTypeTransformation(
-				{
-					id: PropertyType.Integer,
-					sortOrder: PropertyType.Integer,
-					isVisibleOnProductPage: PropertyType.Boolean,
-					isForVariations: PropertyType.Boolean,
-				},
-			),
-			new KeyChangeTransformation< ProductAttribute >(
-				{
-					sortOrder: 'position',
-					isVisibleOnProductPage: 'visible',
-					isForVariations: 'variation',
-				},
-			),
-		],
-	);
+	return new ModelTransformer( [
+		new PropertyTypeTransformation( {
+			id: PropertyType.Integer,
+			sortOrder: PropertyType.Integer,
+			isVisibleOnProductPage: PropertyType.Boolean,
+			isForVariations: PropertyType.Boolean,
+		} ),
+		new KeyChangeTransformation< ProductAttribute >( {
+			sortOrder: 'position',
+			isVisibleOnProductPage: 'visible',
+			isForVariations: 'variation',
+		} ),
+	] );
 }
 
 /**
@@ -77,26 +69,20 @@ function createProductAttributeTransformer(): ModelTransformer< ProductAttribute
  * @return {ModelTransformer} The created transformer.
  */
 function createProductImageTransformer(): ModelTransformer< ProductImage > {
-	return new ModelTransformer(
-		[
-			new IgnorePropertyTransformation( [ 'date_created', 'date_modified' ] ),
-			new PropertyTypeTransformation(
-				{
-					id: PropertyType.Integer,
-					created: PropertyType.Date,
-					modified: PropertyType.Date,
-				},
-			),
-			new KeyChangeTransformation< ProductImage >(
-				{
-					created: 'date_created_gmt',
-					modified: 'date_modified_gmt',
-					url: 'src',
-					altText: 'altText',
-				},
-			),
-		],
-	);
+	return new ModelTransformer( [
+		new IgnorePropertyTransformation( [ 'date_created', 'date_modified' ] ),
+		new PropertyTypeTransformation( {
+			id: PropertyType.Integer,
+			created: PropertyType.Date,
+			modified: PropertyType.Date,
+		} ),
+		new KeyChangeTransformation< ProductImage >( {
+			created: 'date_created_gmt',
+			modified: 'date_modified_gmt',
+			url: 'src',
+			altText: 'altText',
+		} ),
+	] );
 }
 
 /**
@@ -105,11 +91,9 @@ function createProductImageTransformer(): ModelTransformer< ProductImage > {
  * @return {ModelTransformer} The created transformer.
  */
 function createProductDownloadTransformer(): ModelTransformer< ProductDownload > {
-	return new ModelTransformer(
-		[
-			new KeyChangeTransformation< ProductDownload >( { url: 'file' } ),
-		],
-	);
+	return new ModelTransformer( [
+		new KeyChangeTransformation< ProductDownload >( { url: 'file' } ),
+	] );
 }
 
 /**
@@ -119,43 +103,42 @@ function createProductDownloadTransformer(): ModelTransformer< ProductDownload >
  * @return {ModelTransformer} The created transformer.
  */
 export function createProductDataTransformer< T extends AbstractProductData >(
-	transformations?: ModelTransformation[],
+	transformations?: ModelTransformation[]
 ): ModelTransformer< T > {
 	if ( ! transformations ) {
 		transformations = [];
 	}
 
 	transformations.push(
-		new IgnorePropertyTransformation(
-			[
-				'date_created',
-				'date_modified',
-			],
+		new IgnorePropertyTransformation( [ 'date_created', 'date_modified' ] ),
+		new ModelTransformerTransformation(
+			'images',
+			ProductImage,
+			createProductImageTransformer()
 		),
-		new ModelTransformerTransformation( 'images', ProductImage, createProductImageTransformer() ),
-		new ModelTransformerTransformation( 'metaData', MetaData, createMetaDataTransformer() ),
-		new PropertyTypeTransformation(
-			{
-				created: PropertyType.Date,
-				modified: PropertyType.Date,
-				isPurchasable: PropertyType.Boolean,
-				parentId: PropertyType.Integer,
-				menuOrder: PropertyType.Integer,
-				permalink: PropertyType.String,
-			},
+		new ModelTransformerTransformation(
+			'metaData',
+			MetaData,
+			createMetaDataTransformer()
 		),
-		new KeyChangeTransformation< AbstractProductData >(
-			{
-				created: 'date_created_gmt',
-				modified: 'date_modified_gmt',
-				postStatus: 'status',
-				isPurchasable: 'purchasable',
-				metaData: 'meta_data',
-				parentId: 'parent_id',
-				menuOrder: 'menu_order',
-				links: '_links',
-			},
-		),
+		new PropertyTypeTransformation( {
+			created: PropertyType.Date,
+			modified: PropertyType.Date,
+			isPurchasable: PropertyType.Boolean,
+			parentId: PropertyType.Integer,
+			menuOrder: PropertyType.Integer,
+			permalink: PropertyType.String,
+		} ),
+		new KeyChangeTransformation< AbstractProductData >( {
+			created: 'date_created_gmt',
+			modified: 'date_modified_gmt',
+			postStatus: 'status',
+			isPurchasable: 'purchasable',
+			metaData: 'meta_data',
+			parentId: 'parent_id',
+			menuOrder: 'menu_order',
+			links: '_links',
+		} )
 	);
 
 	return new ModelTransformer( transformations );
@@ -170,7 +153,7 @@ export function createProductDataTransformer< T extends AbstractProductData >(
  */
 export function createProductTransformer< T extends AbstractProduct >(
 	type: string,
-	transformations?: ModelTransformation[],
+	transformations?: ModelTransformation[]
 ): ModelTransformer< T > {
 	if ( ! transformations ) {
 		transformations = [];
@@ -178,31 +161,39 @@ export function createProductTransformer< T extends AbstractProduct >(
 
 	transformations.push(
 		new AddPropertyTransformation( {}, { type } ),
-		new ModelTransformerTransformation( 'categories', ProductTerm, createProductTermTransformer() ),
-		new ModelTransformerTransformation( 'tags', ProductTerm, createProductTermTransformer() ),
-		new ModelTransformerTransformation( 'attributes', ProductAttribute, createProductAttributeTransformer() ),
-		new PropertyTypeTransformation(
-			{
-				isFeatured: PropertyType.Boolean,
-				allowReviews: PropertyType.Boolean,
-				averageRating: PropertyType.Integer,
-				numRatings: PropertyType.Integer,
-				totalSales: PropertyType.Integer,
-				relatedIds: PropertyType.Integer,
-			},
+		new ModelTransformerTransformation(
+			'categories',
+			ProductTerm,
+			createProductTermTransformer()
 		),
-		new KeyChangeTransformation< AbstractProduct >(
-			{
-				shortDescription: 'short_description',
-				isFeatured: 'featured',
-				catalogVisibility: 'catalog_visibility',
-				allowReviews: 'reviews_allowed',
-				averageRating: 'average_rating',
-				numRatings: 'rating_count',
-				totalSales: 'total_sales',
-				relatedIds: 'related_ids',
-			},
+		new ModelTransformerTransformation(
+			'tags',
+			ProductTerm,
+			createProductTermTransformer()
 		),
+		new ModelTransformerTransformation(
+			'attributes',
+			ProductAttribute,
+			createProductAttributeTransformer()
+		),
+		new PropertyTypeTransformation( {
+			isFeatured: PropertyType.Boolean,
+			allowReviews: PropertyType.Boolean,
+			averageRating: PropertyType.Integer,
+			numRatings: PropertyType.Integer,
+			totalSales: PropertyType.Integer,
+			relatedIds: PropertyType.Integer,
+		} ),
+		new KeyChangeTransformation< AbstractProduct >( {
+			shortDescription: 'short_description',
+			isFeatured: 'featured',
+			catalogVisibility: 'catalog_visibility',
+			allowReviews: 'reviews_allowed',
+			averageRating: 'average_rating',
+			numRatings: 'rating_count',
+			totalSales: 'total_sales',
+			relatedIds: 'related_ids',
+		} )
 	);
 
 	return createProductDataTransformer< T >( transformations );
@@ -213,30 +204,24 @@ export function createProductTransformer< T extends AbstractProduct >(
  */
 export function createProductPriceTransformation(): ModelTransformation[] {
 	const transformations = [
-		new IgnorePropertyTransformation(
-			[
-				'date_on_sale_from',
-				'date_on_sale_to',
-			],
-		),
-		new PropertyTypeTransformation(
-			{
-				onSale: PropertyType.Boolean,
-				saleStart: PropertyType.Date,
-				saleEnd: PropertyType.Date,
-				priceHtml: PropertyType.String,
-			},
-		),
-		new KeyChangeTransformation< IProductPrice >(
-			{
-				regularPrice: 'regular_price',
-				onSale: 'on_sale',
-				salePrice: 'sale_price',
-				saleStart: 'date_on_sale_from_gmt',
-				saleEnd: 'date_on_sale_to_gmt',
-				priceHtml: 'price_html',
-			},
-		),
+		new IgnorePropertyTransformation( [
+			'date_on_sale_from',
+			'date_on_sale_to',
+		] ),
+		new PropertyTypeTransformation( {
+			onSale: PropertyType.Boolean,
+			saleStart: PropertyType.Date,
+			saleEnd: PropertyType.Date,
+			priceHtml: PropertyType.String,
+		} ),
+		new KeyChangeTransformation< IProductPrice >( {
+			regularPrice: 'regular_price',
+			onSale: 'on_sale',
+			salePrice: 'sale_price',
+			saleStart: 'date_on_sale_from_gmt',
+			saleEnd: 'date_on_sale_to_gmt',
+			priceHtml: 'price_html',
+		} ),
 	];
 
 	return transformations;
@@ -247,16 +232,12 @@ export function createProductPriceTransformation(): ModelTransformation[] {
  */
 export function createProductCrossSellsTransformation(): ModelTransformation[] {
 	const transformations = [
-		new PropertyTypeTransformation(
-			{
-				crossSellIds: PropertyType.Integer,
-			},
-		),
-		new KeyChangeTransformation< IProductCrossSells >(
-			{
-				crossSellIds: 'cross_sell_ids',
-			},
-		),
+		new PropertyTypeTransformation( {
+			crossSellIds: PropertyType.Integer,
+		} ),
+		new KeyChangeTransformation< IProductCrossSells >( {
+			crossSellIds: 'cross_sell_ids',
+		} ),
 	];
 
 	return transformations;
@@ -267,16 +248,12 @@ export function createProductCrossSellsTransformation(): ModelTransformation[] {
  */
 export function createProductUpSellsTransformation(): ModelTransformation[] {
 	const transformations = [
-		new PropertyTypeTransformation(
-			{
-				upSellIds: PropertyType.Integer,
-			},
-		),
-		new KeyChangeTransformation< IProductUpSells >(
-			{
-				upSellIds: 'upsell_ids',
-			},
-		),
+		new PropertyTypeTransformation( {
+			upSellIds: PropertyType.Integer,
+		} ),
+		new KeyChangeTransformation< IProductUpSells >( {
+			upSellIds: 'upsell_ids',
+		} ),
 	];
 
 	return transformations;
@@ -287,16 +264,12 @@ export function createProductUpSellsTransformation(): ModelTransformation[] {
  */
 export function createProductGroupedTransformation(): ModelTransformation[] {
 	const transformations = [
-		new PropertyTypeTransformation(
-			{
-				groupedProducts: PropertyType.Integer,
-			},
-		),
-		new KeyChangeTransformation< IProductGrouped >(
-			{
-				groupedProducts: 'grouped_products',
-			},
-		),
+		new PropertyTypeTransformation( {
+			groupedProducts: PropertyType.Integer,
+		} ),
+		new KeyChangeTransformation< IProductGrouped >( {
+			groupedProducts: 'grouped_products',
+		} ),
 	];
 
 	return transformations;
@@ -307,25 +280,25 @@ export function createProductGroupedTransformation(): ModelTransformation[] {
  */
 export function createProductDeliveryTransformation(): ModelTransformation[] {
 	const transformations = [
-		new ModelTransformerTransformation( 'downloads', ProductDownload, createProductDownloadTransformer() ),
-		new PropertyTypeTransformation(
-			{
-				isVirtual: PropertyType.Boolean,
-				isDownloadable: PropertyType.Boolean,
-				downloadLimit: PropertyType.Integer,
-				daysToDownload: PropertyType.Integer,
-				purchaseNote: PropertyType.String,
-			},
+		new ModelTransformerTransformation(
+			'downloads',
+			ProductDownload,
+			createProductDownloadTransformer()
 		),
-		new KeyChangeTransformation< IProductDelivery >(
-			{
-				isVirtual: 'virtual',
-				isDownloadable: 'downloadable',
-				downloadLimit: 'download_limit',
-				daysToDownload: 'download_expiry',
-				purchaseNote: 'purchase_note',
-			},
-		),
+		new PropertyTypeTransformation( {
+			isVirtual: PropertyType.Boolean,
+			isDownloadable: PropertyType.Boolean,
+			downloadLimit: PropertyType.Integer,
+			daysToDownload: PropertyType.Integer,
+			purchaseNote: PropertyType.String,
+		} ),
+		new KeyChangeTransformation< IProductDelivery >( {
+			isVirtual: 'virtual',
+			isDownloadable: 'downloadable',
+			downloadLimit: 'download_limit',
+			daysToDownload: 'download_expiry',
+			purchaseNote: 'purchase_note',
+		} ),
 	];
 
 	return transformations;
@@ -336,30 +309,26 @@ export function createProductDeliveryTransformation(): ModelTransformation[] {
  */
 export function createProductInventoryTransformation(): ModelTransformation[] {
 	const transformations = [
-		new PropertyTypeTransformation(
-			{
-				trackInventory: PropertyType.Boolean,
-				remainingStock: PropertyType.Integer,
-				canBackorder: PropertyType.Boolean,
-				isOnBackorder: PropertyType.Boolean,
-				onePerOrder: PropertyType.Boolean,
-				stockStatus: PropertyType.String,
-				backOrderStatus: PropertyType.String,
-				lowStockThreshold: PropertyType.Integer,
-			},
-		),
-		new KeyChangeTransformation< IProductInventory >(
-			{
-				trackInventory: 'manage_stock',
-				remainingStock: 'stock_quantity',
-				stockStatus: 'stock_status',
-				onePerOrder: 'sold_individually',
-				backorderStatus: 'backorders',
-				canBackorder: 'backorders_allowed',
-				isOnBackorder: 'backordered',
-				lowStockThreshold: 'low_stock_amount',
-			},
-		),
+		new PropertyTypeTransformation( {
+			trackInventory: PropertyType.Boolean,
+			remainingStock: PropertyType.Integer,
+			canBackorder: PropertyType.Boolean,
+			isOnBackorder: PropertyType.Boolean,
+			onePerOrder: PropertyType.Boolean,
+			stockStatus: PropertyType.String,
+			backOrderStatus: PropertyType.String,
+			lowStockThreshold: PropertyType.Integer,
+		} ),
+		new KeyChangeTransformation< IProductInventory >( {
+			trackInventory: 'manage_stock',
+			remainingStock: 'stock_quantity',
+			stockStatus: 'stock_status',
+			onePerOrder: 'sold_individually',
+			backorderStatus: 'backorders',
+			canBackorder: 'backorders_allowed',
+			isOnBackorder: 'backordered',
+			lowStockThreshold: 'low_stock_amount',
+		} ),
 	];
 
 	return transformations;
@@ -370,18 +339,14 @@ export function createProductInventoryTransformation(): ModelTransformation[] {
  */
 export function createProductSalesTaxTransformation(): ModelTransformation[] {
 	const transformations = [
-		new PropertyTypeTransformation(
-			{
-				taxClass: PropertyType.String,
-				taxStatus: PropertyType.String,
-			},
-		),
-		new KeyChangeTransformation< IProductSalesTax >(
-			{
-				taxStatus: 'tax_status',
-				taxClass: 'tax_class',
-			},
-		),
+		new PropertyTypeTransformation( {
+			taxClass: PropertyType.String,
+			taxStatus: PropertyType.String,
+		} ),
+		new KeyChangeTransformation< IProductSalesTax >( {
+			taxStatus: 'tax_status',
+			taxClass: 'tax_class',
+		} ),
 	];
 
 	return transformations;
@@ -405,9 +370,11 @@ export function createProductShippingTransformation(): ModelTransformation[] {
 				return properties;
 			},
 			( properties: any ) => {
-				if ( properties.hasOwnProperty( 'length ' ) ||
+				if (
+					properties.hasOwnProperty( 'length ' ) ||
 					properties.hasOwnProperty( 'width' ) ||
-					properties.hasOwnProperty( 'height' ) ) {
+					properties.hasOwnProperty( 'height' )
+				) {
 					properties.dimensions = {
 						length: properties.length,
 						width: properties.width,
@@ -419,25 +386,21 @@ export function createProductShippingTransformation(): ModelTransformation[] {
 				}
 
 				return properties;
-			},
+			}
 		),
-		new PropertyTypeTransformation(
-			{
-				requiresShipping: PropertyType.Boolean,
-				isShippingTaxable: PropertyType.Boolean,
-				shippingClass: PropertyType.String,
-				shippingClassId: PropertyType.Integer,
-				weight: PropertyType.String,
-			},
-		),
-		new KeyChangeTransformation< IProductShipping >(
-			{
-				requiresShipping: 'shipping_required',
-				isShippingTaxable: 'shipping_taxable',
-				shippingClass: 'shipping_class',
-				shippingClassId: 'shipping_class_id',
-			},
-		),
+		new PropertyTypeTransformation( {
+			requiresShipping: PropertyType.Boolean,
+			isShippingTaxable: PropertyType.Boolean,
+			shippingClass: PropertyType.String,
+			shippingClassId: PropertyType.Integer,
+			weight: PropertyType.String,
+		} ),
+		new KeyChangeTransformation< IProductShipping >( {
+			requiresShipping: 'shipping_required',
+			isShippingTaxable: 'shipping_taxable',
+			shippingClass: 'shipping_class',
+			shippingClassId: 'shipping_class_id',
+		} ),
 	];
 
 	return transformations;
@@ -448,19 +411,15 @@ export function createProductShippingTransformation(): ModelTransformation[] {
  */
 export function createProductVariableTransformation(): ModelTransformation[] {
 	const transformations = [
-		new PropertyTypeTransformation(
-			{
-				id: PropertyType.Integer,
-				name: PropertyType.String,
-				option: PropertyType.String,
-				variations: PropertyType.Integer,
-			},
-		),
-		new KeyChangeTransformation< VariableProduct >(
-			{
-				defaultAttributes: 'default_attributes',
-			},
-		),
+		new PropertyTypeTransformation( {
+			id: PropertyType.Integer,
+			name: PropertyType.String,
+			option: PropertyType.String,
+			variations: PropertyType.Integer,
+		} ),
+		new KeyChangeTransformation< VariableProduct >( {
+			defaultAttributes: 'default_attributes',
+		} ),
 	];
 
 	return transformations;
@@ -471,18 +430,14 @@ export function createProductVariableTransformation(): ModelTransformation[] {
  */
 export function createProductExternalTransformation(): ModelTransformation[] {
 	const transformations = [
-		new PropertyTypeTransformation(
-			{
-				buttonText: PropertyType.String,
-				externalUrl: PropertyType.String,
-			},
-		),
-		new KeyChangeTransformation< IProductExternal >(
-			{
-				buttonText: 'button_text',
-				externalUrl: 'external_url',
-			},
-		),
+		new PropertyTypeTransformation( {
+			buttonText: PropertyType.String,
+			externalUrl: PropertyType.String,
+		} ),
+		new KeyChangeTransformation< IProductExternal >( {
+			buttonText: 'button_text',
+			externalUrl: 'external_url',
+		} ),
 	];
 
 	return transformations;

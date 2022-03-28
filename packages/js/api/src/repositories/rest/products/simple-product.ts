@@ -42,11 +42,13 @@ import {
  * 	DeletesSimpleProducts
  * } The created repository.
  */
-export function simpleProductRESTRepository( httpClient: HTTPClient ): ListsSimpleProducts
-	& CreatesSimpleProducts
-	& ReadsSimpleProducts
-	& UpdatesSimpleProducts
-	& DeletesSimpleProducts {
+export function simpleProductRESTRepository(
+	httpClient: HTTPClient
+): ListsSimpleProducts &
+	CreatesSimpleProducts &
+	ReadsSimpleProducts &
+	UpdatesSimpleProducts &
+	DeletesSimpleProducts {
 	const crossSells = createProductCrossSellsTransformation();
 	const delivery = createProductDeliveryTransformation();
 	const inventory = createProductInventoryTransformation();
@@ -64,13 +66,39 @@ export function simpleProductRESTRepository( httpClient: HTTPClient ): ListsSimp
 		...upsells,
 	];
 
-	const transformer = createProductTransformer<SimpleProduct>( 'simple', transformations );
+	const transformer = createProductTransformer< SimpleProduct >(
+		'simple',
+		transformations
+	);
 
 	return new ModelRepository(
-		restList< SimpleProductRepositoryParams >( baseProductURL, SimpleProduct, httpClient, transformer ),
-		restCreate< SimpleProductRepositoryParams >( baseProductURL, SimpleProduct, httpClient, transformer ),
-		restRead< SimpleProductRepositoryParams >( buildProductURL, SimpleProduct, httpClient, transformer ),
-		restUpdate< SimpleProductRepositoryParams >( buildProductURL, SimpleProduct, httpClient, transformer ),
-		restDelete< SimpleProductRepositoryParams >( deleteProductURL, httpClient ),
+		restList< SimpleProductRepositoryParams >(
+			baseProductURL,
+			SimpleProduct,
+			httpClient,
+			transformer
+		),
+		restCreate< SimpleProductRepositoryParams >(
+			baseProductURL,
+			SimpleProduct,
+			httpClient,
+			transformer
+		),
+		restRead< SimpleProductRepositoryParams >(
+			buildProductURL,
+			SimpleProduct,
+			httpClient,
+			transformer
+		),
+		restUpdate< SimpleProductRepositoryParams >(
+			buildProductURL,
+			SimpleProduct,
+			httpClient,
+			transformer
+		),
+		restDelete< SimpleProductRepositoryParams >(
+			deleteProductURL,
+			httpClient
+		)
 	);
 }

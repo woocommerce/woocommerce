@@ -24,5 +24,9 @@ export function buildURL( request: AxiosRequestConfig ): string {
  * @return {string} The merged URL.
  */
 export function buildURLWithParams( request: AxiosRequestConfig ): string {
-	return appendParams( buildURL( request ), request.params, request.paramsSerializer );
+	return appendParams(
+		buildURL( request ),
+		request.params,
+		request.paramsSerializer
+	);
 }

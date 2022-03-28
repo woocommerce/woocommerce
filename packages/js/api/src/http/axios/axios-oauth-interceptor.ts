@@ -32,7 +32,9 @@ export class AxiosOAuthInterceptor extends AxiosInterceptor {
 			},
 			signature_method: 'HMAC-SHA256',
 			hash_function: ( base: any, key: any ) => {
-				return createHmac( 'sha256', key ).update( base ).digest( 'base64' );
+				return createHmac( 'sha256', key )
+					.update( base )
+					.digest( 'base64' );
 			},
 		} );
 	}
@@ -55,7 +57,7 @@ export class AxiosOAuthInterceptor extends AxiosInterceptor {
 				this.oauth.authorize( {
 					url,
 					method: request.method!,
-				} ),
+				} )
 			).Authorization;
 		}
 
