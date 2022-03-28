@@ -29,14 +29,14 @@
 	.wc-block-components-product-sale-badge {
 		&--align-left {
 			position: absolute;
-			left: $gap-smaller*0.5;
-			top: $gap-smaller*0.5;
+			left: $gap-smaller * 0.5;
+			top: $gap-smaller * 0.5;
 			right: auto;
 			margin: 0;
 		}
 		&--align-center {
 			position: absolute;
-			top: $gap-smaller*0.5;
+			top: $gap-smaller * 0.5;
 			left: 50%;
 			right: auto;
 			transform: translateX(-50%);
@@ -44,8 +44,8 @@
 		}
 		&--align-right {
 			position: absolute;
-			right: $gap-smaller*0.5;
-			top: $gap-smaller*0.5;
+			right: $gap-smaller * 0.5;
+			top: $gap-smaller * 0.5;
 			left: auto;
 			margin: 0;
 		}

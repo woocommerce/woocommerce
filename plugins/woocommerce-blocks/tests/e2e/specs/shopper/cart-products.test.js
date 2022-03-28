@@ -20,7 +20,10 @@ describe( 'Shopper → Cart → Can remove product', () => {
 		const removeProductLink = await page.$(
 			'.wc-block-cart-item__remove-link'
 		);
+
 		await removeProductLink.click();
+		// we need to wait to ensure the cart is updated
+		await page.waitForSelector( '.wc-block-cart__empty-cart__title' );
 
 		// Verify product is removed from the cart'
 		await expect( page ).toMatchElement( 'h2', {

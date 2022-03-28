@@ -45,7 +45,7 @@
 		"<rootDir>/vendor/"
 	],
 	"transformIgnorePatterns": [ "node_modules/(?!(simple-html-tokenizer)/)" ],
-	"testEnvironment": "jest-environment-jsdom-sixteen",
+	"testEnvironment": "jsdom",
 	"preset": "@wordpress/jest-preset-default",
 	"transform": {
 		"^.+\\.(js|ts|tsx)$": "<rootDir>/tests/js/jestPreprocess.js"

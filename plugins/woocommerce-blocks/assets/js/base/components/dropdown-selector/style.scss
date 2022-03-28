@@ -36,7 +36,7 @@ $dropdown-selector-line-height: math.div(18, 14);
 .wc-block-components-dropdown-selector__input {
 	@include font-size(small);
 	line-height: $dropdown-selector-line-height;
-	margin: em($gap-small*0.25) 0;
+	margin: em($gap-small * 0.25) 0;
 	min-width: 0;
 	padding: em($gap-smallest * 0.75) 0 em($gap-smallest * 0.75);
 
@@ -105,7 +105,7 @@ $dropdown-selector-line-height: math.div(18, 14);
 		align-items: center;
 		color: $gray-700;
 		display: inline-flex;
-		margin: em($gap-small*0.25) 0;
+		margin: em($gap-small * 0.25) 0;
 		padding: em($gap-smallest * 0.75) 0 em($gap-smallest * 0.75);
 		width: 100%;
 	}
@@ -131,8 +131,8 @@ $dropdown-selector-line-height: math.div(18, 14);
 
 	.wc-block-components-dropdown-selector__selected-chip {
 		@include font-size(small);
-		margin-top: em($gap-small*0.25);
-		margin-bottom: em($gap-small*0.25);
+		margin-top: em($gap-small * 0.25);
+		margin-bottom: em($gap-small * 0.25);
 		line-height: $dropdown-selector-line-height;
 	}
 }

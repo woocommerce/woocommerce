@@ -283,7 +283,7 @@ table.wc-block-cart-items {
 	.wp-block-woocommerce-cart-items-block {
 		box-sizing: border-box;
 		margin: 0;
-		padding-right: percentage(math.div($gap-largest, 1060px)); // ~1060px is the default width of the content area in Storefront.
+		padding-right: math.percentage(math.div($gap-largest, 1060px)); // ~1060px is the default width of the content area in Storefront.
 		width: 65%;
 		min-height: 10em;
 	}
@@ -297,7 +297,7 @@ table.wc-block-cart-items {
 	.wp-block-woocommerce-cart-totals-block {
 		box-sizing: border-box;
 		margin: 0;
-		padding-left: percentage(math.div($gap-large, 1060px));
+		padding-left: math.percentage(math.div($gap-large, 1060px));
 		width: 35%;
 		min-height: 12em;
 	}

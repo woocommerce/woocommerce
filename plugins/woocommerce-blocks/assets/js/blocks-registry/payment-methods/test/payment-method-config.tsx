@@ -31,6 +31,7 @@ describe( 'PaymentMethodConfig', () => {
 		registerPaymentMethodExtensionCallbacks(
 			'woocommerce-marketplace-extension',
 			{
+				// eslint-disable-next-line @typescript-eslint/naming-convention
 				'unrelated-payment-method': () => true,
 			}
 		);
@@ -46,6 +47,7 @@ describe( 'PaymentMethodConfig', () => {
 		registerPaymentMethodExtensionCallbacks(
 			'other-woocommerce-marketplace-extension',
 			{
+				// eslint-disable-next-line @typescript-eslint/naming-convention
 				'test-payment-method': () => true,
 			}
 		);

@@ -23,15 +23,13 @@ $breakpoints: 480px, 600px, 782px, 960px, 1280px, 1440px;
 					@media (max-width: $breakpoint) {
 						@content;
 					}
-				}
-				@else {
+				} @else {
 					@if $size == $and-larger {
 						$approved-value: 2;
 						@media (min-width: $breakpoint + 1) {
 							@content;
 						}
-					}
-					@else {
+					} @else {
 						@each $breakpoint-end in $breakpoints {
 							$range: $breakpoint + "-" + $breakpoint-end;
 							@if $size == $range {
@@ -51,8 +49,7 @@ $breakpoints: 480px, 600px, 782px, 960px, 1280px, 1440px;
 				}
 				@warn "ERROR in breakpoint(#{ $size }) : You can only use these sizes[ #{$sizes} ] using the following syntax [ <#{ nth($breakpoints, 1) } >#{ nth($breakpoints, 1) } #{ nth($breakpoints, 1) }-#{ nth($breakpoints, 2) } ]";
 			}
-		}
-		@else {
+		} @else {
 			$sizes: "";
 			@each $breakpoint in $breakpoints {
 				$sizes: $sizes + " " + $breakpoint;

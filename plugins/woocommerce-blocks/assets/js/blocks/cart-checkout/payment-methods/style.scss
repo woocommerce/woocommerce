@@ -16,13 +16,13 @@
 		flex-basis: 15em;
 		flex-grow: 1;
 		// Currently, min() CSS function calls need to be wrapped with unquote.
-		min-width: unquote("min(15em, 60%)");
+		min-width: string.unquote("min(15em, 60%)");
 	}
 
 	&.wc-card-expiry-element {
 		flex-basis: 7em;
 		margin-left: $gap-small;
-		min-width: unquote("min(7em, calc(24% - #{$gap-small}))");
+		min-width: string.unquote("min(7em, calc(24% - #{$gap-small}))");
 	}
 
 	&.wc-card-cvc-element {
@@ -31,7 +31,7 @@
 		// Notice the min width ems value is smaller than flex-basis. That's because
 		// by default we want it to have the same width as `expiry-element`, but
 		// if available space is scarce, `cvc-element` should get smaller faster.
-		min-width: unquote("min(5em, calc(16% - #{$gap-small}))");
+		min-width: string.unquote("min(5em, calc(16% - #{$gap-small}))");
 	}
 
 	.wc-block-gateway-input {
@@ -89,12 +89,12 @@
 		}
 		.wc-block-gateway-input.focused.empty,
 		.wc-block-gateway-input:not(.empty) {
-			& + label {
+			+ label {
 				margin-left: $gap;
 				transform: translateY(#{$gap-smallest}) scale(0.75);
 			}
 		}
-		& + .wc-block-components-validation-error {
+		+ .wc-block-components-validation-error {
 			position: static;
 			margin-top: -$gap-large;
 		}
@@ -103,7 +103,7 @@
 	.wc-block-gateway-input.focused.empty,
 	.wc-block-gateway-input:not(.empty) {
 		padding: em($gap-large) 0 em($gap-smallest) $gap;
-		& + label {
+		+ label {
 			transform: translateY(#{$gap-smallest}) scale(0.75);
 		}
 	}
