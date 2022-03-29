@@ -571,10 +571,10 @@ class WC_Email extends WC_Settings_API {
 
 					do_action( 'woocommerce_emogrifier', $css_inliner, $this );
 
-					$domDocument = $css_inliner->getDomDocument();
+					$dom_document = $css_inliner->getDomDocument();
 
-					HtmlPruner::fromDomDocument( $domDocument )->removeElementsWithDisplayNone();
-					$content = CssToAttributeConverter::fromDomDocument( $domDocument )
+					HtmlPruner::fromDomDocument( $dom_document )->removeElementsWithDisplayNone();
+					$content = CssToAttributeConverter::fromDomDocument( $dom_document )
 						->convertCssToVisualAttributes()
 						->render();
 				} catch ( Exception $e ) {
