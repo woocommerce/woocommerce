@@ -10,7 +10,9 @@ import type { TemplateArray } from '@wordpress/blocks';
 import { getMiniCartAllowedBlocks } from '../allowed-blocks';
 
 export const Edit = (): JSX.Element => {
-	const blockProps = useBlockProps();
+	const blockProps = useBlockProps( {
+		className: 'wc-block-mini-cart__items',
+	} );
 
 	const defaultTemplate = ( [
 		[ 'woocommerce/mini-cart-products-table-block', {} ],
