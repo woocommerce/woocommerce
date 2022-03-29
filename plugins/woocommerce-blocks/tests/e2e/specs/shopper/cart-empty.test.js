@@ -3,9 +3,10 @@
  */
 import { shopper } from '../../../utils';
 
-if ( process.env.WOOCOMMERCE_BLOCKS_PHASE < 2 )
+if ( process.env.WOOCOMMERCE_BLOCKS_PHASE < 2 ) {
 	// eslint-disable-next-line jest/no-focused-tests
 	test.only( `skipping ${ block.name } tests`, () => {} );
+}
 
 describe( 'Shopper → Cart → Can view empty cart message', () => {
 	beforeAll( async () => {
