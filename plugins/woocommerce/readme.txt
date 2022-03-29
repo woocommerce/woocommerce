@@ -201,6 +201,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 - Update - Implement MailChimp API request threshold for MailchimpScheduler. ([#8342](https://github.com/woocommerce/woocommerce-admin/pull/8342))
 - Update - Reintroduce CES on product add, product update, and order update. ([#8238](https://github.com/woocommerce/woocommerce-admin/pull/8238))
 - Update - Replace mysql image with mariadb ([#8220](https://github.com/woocommerce/woocommerce-admin/pull/8220))
+- Fix: Fix handling of paid themes in purchase task. ([#8493](https://github.com/woocommerce/woocommerce-admin/pull/8493))
 - Fix - Make sure the paid extension task is also shown for themes. ([#8412](https://github.com/woocommerce/woocommerce-admin/pull/8412))
 - Fix - Reintroduce emphasis on inbox note action button. ([#8411](https://github.com/woocommerce/woocommerce-admin/pull/8411))
 - Fix - Remove class ExtendedPayments. ([#8461](https://github.com/woocommerce/woocommerce-admin/pull/8461))
@@ -227,7 +228,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 - Dev - Update dependencies to support react 17 and drop support for IE11. ([#8305](https://github.com/woocommerce/woocommerce-admin/pull/8305))
 - Dev - Update task list data structure to better handle new designs. ([#8332](https://github.com/woocommerce/woocommerce-admin/pull/8332))
 
-**WooCommerce Blocks - 7.2.0**
+**WooCommerce Blocks - 7.2.0 & 7.2.1**
 
 - Enhancement - Add Global Styles support to the Product Price block. ([5950](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5950))
 - Enhancement - Add Global Styles support to the Add To Cart Button block. ([5816](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5816))
@@ -245,6 +246,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 - Fix - Add to Cart button on Products listing blocks will respect the "Redirect to the cart page after successful addition" setting. ([5708](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5708))
 - Fix - Fixes Twenty Twenty Two issues with sales price and added to cart "View Cart" call out styling in the "Products by Category" block. ([5684](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5684))
 - Fix - StoreAPI: Clear all wc notice types in the cart validation context [#5983](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5983)
+- Fix - Don't trigger class deprecations notices if headers are already sent [#6074](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/6074)
 - Various - Remove v1 string from Store Keys. ([5987](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5987))
 - Various - Introduce the `InvalidCartException` for handling cart validation. ([5904](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5904))
 - Various - Renamed Store API custom headers to remove `X-WC-Store-API` prefixes. [#5983](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5983)
