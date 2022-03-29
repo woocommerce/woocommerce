@@ -2,7 +2,7 @@
  * External dependencies
  */
 import classNames from 'classnames';
-import PropTypes from 'prop-types';
+import { ReactNode } from 'react';
 
 /**
  * Internal dependencies
@@ -20,12 +20,17 @@ import './style.scss';
  * @param {string} props.headingLevel Heading level for title.
  * @param {Object} [props.props] Rest of props passed through to component.
  */
-const Title = ( { children, className, headingLevel, ...props } ) => {
+const Title = ( {
+	children,
+	className,
+	headingLevel,
+	...props
+}: TitleProps ): JSX.Element => {
 	const buttonClassName = classNames(
 		'wc-block-components-title',
 		className
 	);
-	const TagName = `h${ headingLevel }`;
+	const TagName = `h${ headingLevel }` as keyof JSX.IntrinsicElements;
 
 	return (
 		<TagName className={ buttonClassName } { ...props }>
@@ -34,11 +39,10 @@ const Title = ( { children, className, headingLevel, ...props } ) => {
 	);
 };
 
-Title.propTypes = {
-	headingLevel: PropTypes.oneOf( [ '1', '2', '3', '4', '5', '6' ] )
-		.isRequired,
-	className: PropTypes.string,
-	children: PropTypes.node,
-};
+interface TitleProps {
+	headingLevel: '1' | '2' | '3' | '4' | '5' | '6';
+	className: string;
+	children: ReactNode;
+}
 
 export default Title;
