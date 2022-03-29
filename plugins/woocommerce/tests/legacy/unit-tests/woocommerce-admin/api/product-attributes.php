@@ -30,6 +30,13 @@ class WC_Admin_Tests_API_Product_Attributes extends WC_REST_Unit_Test_Case {
 		);
 	}
 
+	public static function tearDownAfterClass() {
+		global $wpdb;
+		parent::tearDownAfterClass(); //
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_attribute_taxonomies" );
+		$wpdb->query('commit');
+	}
+
 	/**
 	 * Setup test product attributes data.
 	 */
