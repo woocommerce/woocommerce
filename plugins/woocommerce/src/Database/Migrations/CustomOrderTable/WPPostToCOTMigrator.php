@@ -181,6 +181,10 @@ class WPPostToCOTMigrator {
 				'type'        => 'string',
 				'destination' => 'user_agent',
 			),
+			'_transaction_id' => array(
+				'type' => 'string',
+				'destination' => 'transaction_id',
+			),
 		);
 
 		return array(
@@ -509,6 +513,7 @@ class WPPostToCOTMigrator {
 		}
 		$queries = $migrator->generate_insert_sql_for_batch( $data['data'], 'insert' );
 		$result  = $wpdb->query( $queries ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Insert statements should already be escaped.
+		$wpdb->query('COMMIT;'); // For some reason, this seems necessary on some hosts? Maybe a MySQL configuration?
 		if ( count( $data['data'] ) !== $result ) {
 			// Some rows were not inserted.
 			// TODO: Find and log the entity ids that were not inserted.
