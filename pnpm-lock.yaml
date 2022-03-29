@@ -141,6 +141,7 @@ importers:
     specifiers:
       '@automattic/interpolate-components': ^1.2.0
       '@babel/core': ^7.17.5
+      '@babel/runtime': ^7.17.2
       '@storybook/addon-actions': ^6.4.0
       '@storybook/addon-console': ^1.2.3
       '@storybook/addon-controls': ^6.4.19
@@ -253,6 +254,7 @@ importers:
       react-transition-group: 4.4.2
     devDependencies:
       '@babel/core': 7.17.8
+      '@babel/runtime': 7.17.7
       '@storybook/addon-actions': 6.4.19
       '@storybook/addon-console': 1.2.3_@storybook+addon-actions@6.4.19
       '@storybook/addon-controls': 6.4.19_ad5fc232a476648e022b673b2e1293fc
@@ -408,6 +410,7 @@ importers:
   packages/js/data:
     specifiers:
       '@babel/core': ^7.17.5
+      '@babel/runtime': ^7.17.2
       '@testing-library/react': ^12.1.3
       '@testing-library/react-hooks': ^7.0.2
       '@types/wordpress__data-controls': ^2.2.0
@@ -453,6 +456,7 @@ importers:
       rememo: 4.0.0
     devDependencies:
       '@babel/core': 7.17.8
+      '@babel/runtime': 7.17.7
       '@testing-library/react': 12.1.4
       '@testing-library/react-hooks': 7.0.2
       '@types/wordpress__data-controls': 2.2.0
@@ -852,6 +856,7 @@ importers:
   packages/js/navigation:
     specifiers:
       '@babel/core': ^7.17.5
+      '@babel/runtime': ^7.17.2
       '@wordpress/api-fetch': ^6.0.1
       '@wordpress/components': ^19.5.0
       '@wordpress/compose': ^5.1.2
@@ -882,6 +887,7 @@ importers:
       '@babel/core': 7.17.8
       '@wordpress/eslint-plugin': 11.0.1_7c040a9b494a33cf8bf9079642892fb1
       eslint: 8.12.0
+      '@babel/runtime': 7.17.7
       jest: 27.5.1
       jest-cli: 27.5.1
       rimraf: 3.0.2
@@ -920,6 +926,7 @@ importers:
       '@babel/core': ^7.17.5
       '@wordpress/eslint-plugin': ^11.0.0
       eslint: ^8.12.0
+      '@babel/runtime': ^7.17.2
       jest: ^27.5.1
       jest-cli: ^27.5.1
       locutus: ^2.0.16
@@ -932,6 +939,7 @@ importers:
       '@babel/core': 7.17.8
       '@wordpress/eslint-plugin': 11.0.1_7c040a9b494a33cf8bf9079642892fb1
       eslint: 8.12.0
+      '@babel/runtime': 7.17.7
       jest: 27.5.1
       jest-cli: 27.5.1
       rimraf: 3.0.2
@@ -1268,6 +1276,7 @@ importers:
       eslint-import-resolver-webpack: ^0.13.2
       eslint-plugin-import: ^2.25.4
       eslint-plugin-react: ^7.29.2
+      expose-loader: ^3.1.0
       fork-ts-checker-webpack-plugin: ^6.5.0
       fs-extra: ^8.1.0
       github-label-sync: ^2.0.2
@@ -1471,6 +1480,7 @@ importers:
       eslint-import-resolver-webpack: 0.13.2_bac363bc2c2f46a65300020741b6cf5e
       eslint-plugin-import: 2.25.4_eslint@8.11.0
       eslint-plugin-react: 7.29.4_eslint@8.11.0
+      expose-loader: 3.1.0_webpack@5.70.0
       fork-ts-checker-webpack-plugin: 6.5.0_10568ae13669cc833891d65cd6879aa0
       fs-extra: 8.1.0
       grunt: 1.4.1
@@ -2488,9 +2498,9 @@ packages:
     engines: {node: '>=6.9.0'}
     dependencies:
       '@babel/helper-function-name': 7.16.0
-      '@babel/template': 7.16.0
-      '@babel/traverse': 7.16.3
-      '@babel/types': 7.16.0
+      '@babel/template': 7.16.7
+      '@babel/traverse': 7.17.3
+      '@babel/types': 7.17.0
     transitivePeerDependencies:
       - supports-color
 
@@ -22074,6 +22084,15 @@ packages:
       jest-message-util: 27.5.1
     dev: true
 
+  /expose-loader/3.1.0_webpack@5.70.0:
+    resolution: {integrity: sha512-2RExSo0yJiqP+xiUue13jQa2IHE8kLDzTI7b6kn+vUlBVvlzNSiLDzo4e5Pp5J039usvTUnxZ8sUOhv0Kg15NA==}
+    engines: {node: '>= 12.13.0'}
+    peerDependencies:
+      webpack: ^5.0.0
+    dependencies:
+      webpack: 5.70.0_webpack-cli@4.9.2
+    dev: true
+
   /express/4.17.1:
     resolution: {integrity: sha512-mHJ9O79RqluphRrcw2X/GTh3k9tVv8YcoyY4Kkh4WDMUYKRZUq0h1o0w2rrrxBqM7VoeUVqgb27xlEMXTnYt4g==}
     engines: {node: '>= 0.10.0'}
@@ -34066,7 +34085,7 @@ packages:
     resolution: {integrity: sha512-1JU/8q+VgFZyxwrJ+SVIOsh+KywWGpds3NTqikiKpDMZWScmAYyKIgqkO+ARvNWJfXeXR1zxz7aHF4u4CyH6vQ==}
     engines: {node: '>=0.10'}
     dependencies:
-      graceful-fs: 4.2.8
+      graceful-fs: 4.2.9
       micromatch: 3.1.10
       readable-stream: 2.3.7
     dev: true
@@ -36933,7 +36952,7 @@ packages:
       serialize-javascript: 6.0.0
       source-map: 0.6.1
       terser: 5.10.0_acorn@8.7.0
-      webpack: 5.70.0_webpack-cli@3.3.12
+      webpack: 5.70.0
     transitivePeerDependencies:
       - acorn
     dev: true
@@ -37760,6 +37779,7 @@ packages:
     resolution: {integrity: sha512-qZukoSxOG0urUTvjc2ERMTcAy+BiFh3weWAkeurLwjrCba73poHmG3E36XEjd/JGukMzwTL7uCxZiAexj8ppvQ==}
     engines: {node: '>=0.8.0'}
     hasBin: true
+    requiresBuild: true
     dev: true
 
   /unbox-primitive/1.0.1:
