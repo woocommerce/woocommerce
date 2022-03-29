@@ -187,7 +187,6 @@ class WC_Admin_Tests_API_Reports_Categories extends WC_REST_Unit_Test_Case {
 		$order->save();
 
 		WC_Helper_Queue::run_all_pending();
-		CategoryLookup::instance()->regenerate();
 
 		$uncategorized_term = get_term_by( 'slug', 'uncategorized', 'product_cat' );
 		$params             = array(
