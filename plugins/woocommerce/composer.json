@@ -21,7 +21,7 @@
 		"pelago/emogrifier": "3.1.0",
 		"psr/container": "1.0.0",
 		"woocommerce/action-scheduler": "3.4.0",
-		"woocommerce/woocommerce-blocks": "7.2.0"
+		"woocommerce/woocommerce-blocks": "7.2.1"
 	},
 	"require-dev": {
 		"bamarni/composer-bin-plugin": "^1.4",
