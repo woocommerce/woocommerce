@@ -21,7 +21,7 @@ class WC_Admin_Tests_Navigation_Menu extends WC_Unit_Test_Case {
 	/**
 	 * setUp
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 		$this->instance = new Menu();
 

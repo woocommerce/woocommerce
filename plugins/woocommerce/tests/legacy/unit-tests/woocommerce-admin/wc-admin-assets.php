@@ -16,14 +16,14 @@ class WC_Admin_Tests_WCAdminAssets extends WP_UnitTestCase {
 	/**
 	 * Setup
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		add_filter( 'woocommerce_admin_features', array( $this, 'turn_on_unminified_js_feature' ), 20, 1 );
 	}
 
 	/**
 	 * Tear Down
 	 */
-	public function tearDown() {
+	public function tearDown(): void {
 		remove_filter( 'woocommerce_admin_features', array( $this, 'turn_on_unminified_js_feature' ), 20 );
 	}
 

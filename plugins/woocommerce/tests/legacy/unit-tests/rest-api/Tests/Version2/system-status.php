@@ -16,7 +16,7 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	/**
 	 * Setup our test server.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 		$this->endpoint = new WC_REST_System_Status_Controller();
 		$this->user     = $this->factory->user->create(

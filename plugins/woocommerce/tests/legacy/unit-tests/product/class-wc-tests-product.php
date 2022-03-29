@@ -20,7 +20,7 @@ class WC_Tests_Product extends WC_Unit_Test_Case {
 	/**
 	 * Runs before every test.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 
 		$this->product = new WC_Product();

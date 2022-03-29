@@ -20,7 +20,7 @@ class WC_Admin_Tests_API_Reports_Coupons extends WC_REST_Unit_Test_Case {
 	/**
 	 * Setup test reports products data.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 
 		$this->user = $this->factory->user->create(

@@ -24,7 +24,7 @@ class WC_Admin_Tests_Category_Lookup extends WP_UnitTestCase {
 	/**
 	 * Setup
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 		$parent                = wp_insert_term( 'test_parent', 'product_cat' );
 		$parent2               = wp_insert_term( 'test_parent_2', 'product_cat' );
@@ -44,7 +44,7 @@ class WC_Admin_Tests_Category_Lookup extends WP_UnitTestCase {
 	/**
 	 * Tear Down
 	 */
-	public function tearDown() {
+	public function tearDown(): void {
 		parent::tearDown();
 		wp_delete_term( $this->parent_term_id, 'product_cat' );
 		wp_delete_term( $this->parent2_term_id, 'product_cat' );

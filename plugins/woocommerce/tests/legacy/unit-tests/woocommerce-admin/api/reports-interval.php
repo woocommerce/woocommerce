@@ -23,7 +23,7 @@ class WC_Admin_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 	/**
 	 * Set current local timezone.
 	 */
-	public static function setUpBeforeClass() {
+	public static function setUpBeforeClass(): void {
 		self::$local_tz = new DateTimeZone( wc_timezone_string() );
 	}
 

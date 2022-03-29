@@ -33,7 +33,7 @@ class WC_Admin_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 	/**
 	 * Setup test data. Called before every test.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 
 		$this->user = $this->factory->user->create(
@@ -59,7 +59,7 @@ class WC_Admin_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 	/**
 	 * Tear down.
 	 */
-	public function tearDown() {
+	public function tearDown(): void {
 		parent::tearDown();
 		$this->remove_color_or_logo_attribute_taxonomy();
 		TaskLists::clear_lists();
