@@ -16,7 +16,7 @@ class WC_Admin_Tests_Update_Is_Read_From_Last_Read extends WC_Unit_Test_Case {
 	/**
 	 * setUp
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 		$this->user = $this->factory->user->create(
 			array(
@@ -35,7 +35,7 @@ class WC_Admin_Tests_Update_Is_Read_From_Last_Read extends WC_Unit_Test_Case {
 
 		$wpdb->query(
 			"
-			delete from {$wpdb->prefix}usermeta where meta_key = 'woocommerce_admin_activity_panel_inbox_last_read' 
+			delete from {$wpdb->prefix}usermeta where meta_key = 'woocommerce_admin_activity_panel_inbox_last_read'
 		"
 		);
 

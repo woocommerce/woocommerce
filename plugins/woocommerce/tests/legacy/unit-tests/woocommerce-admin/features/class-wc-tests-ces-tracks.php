@@ -32,7 +32,7 @@ class WC_Admin_Tests_CES_Tracks extends WC_Unit_Test_Case {
 	/**
 	 * Overridden setUp method from PHPUnit
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 		update_option( 'woocommerce_allow_tracking', 'yes' );
 		if ( isset( $GLOBALS['current_screen'] ) ) {
@@ -41,7 +41,7 @@ class WC_Admin_Tests_CES_Tracks extends WC_Unit_Test_Case {
 		$GLOBALS['current_screen'] = new CurrentScreenMock();
 	}
 
-	public function tearDown() {
+	public function tearDown(): void {
 	    parent::tearDown();
 		if ( $this->current_screen_backup ) {
 			$GLOBALS['current_screen'] = $this->current_screen_backup;

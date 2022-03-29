@@ -16,7 +16,7 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_DataSourcePoller extends WC_Unit_
 	/**
 	 * Set up.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 
 		add_filter(
@@ -73,7 +73,7 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_DataSourcePoller extends WC_Unit_
 	/**
 	 * Tear down.
 	 */
-	public function tearDown() {
+	public function tearDown(): void {
 		parent::tearDown();
 		remove_all_filters( DataSourcePoller::FILTER_NAME );
 	}

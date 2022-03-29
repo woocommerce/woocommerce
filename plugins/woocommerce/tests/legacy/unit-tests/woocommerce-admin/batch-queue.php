@@ -53,7 +53,7 @@ class WC_Admin_Tests_Reports_Regenerate_Batching extends WC_REST_Unit_Test_Case 
 	/**
 	 * Set up.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 		$this->queue = new WC_Admin_Test_Action_Queue();
 		CustomersScheduler::set_queue( $this->queue );
@@ -64,7 +64,7 @@ class WC_Admin_Tests_Reports_Regenerate_Batching extends WC_REST_Unit_Test_Case 
 	/**
 	 * Tear down.
 	 */
-	public function tearDown() {
+	public function tearDown(): void {
 		parent::tearDown();
 		CustomersScheduler::set_queue( null );
 		OrdersScheduler::set_queue( null );

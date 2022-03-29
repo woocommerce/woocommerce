@@ -26,7 +26,7 @@ class WC_Admin_Tests_Mailchimp_Scheduler extends WC_Unit_Test_Case {
 	/**
 	 * Overridden setUp() method.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		$this->logger_mock = $this->getMockBuilder( \WC_Logger_Interface::class )->getMock();
 
 		$this->instance = $this->getMockBuilder( MailchimpScheduler::class )

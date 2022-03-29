@@ -20,7 +20,7 @@ class WC_Admin_Tests_API_Reports_Performance_Indicators extends WC_REST_Unit_Tes
 	/**
 	 * Setup tests.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 
 		$this->user = $this->factory->user->create(

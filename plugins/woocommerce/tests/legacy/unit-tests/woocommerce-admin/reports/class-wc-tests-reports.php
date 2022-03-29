@@ -20,7 +20,7 @@ class WC_Admin_Tests_Reports extends WC_Unit_Test_Case {
 	/**
 	 * setUp
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 
 		require_once ABSPATH . 'wp-admin/includes/file.php';

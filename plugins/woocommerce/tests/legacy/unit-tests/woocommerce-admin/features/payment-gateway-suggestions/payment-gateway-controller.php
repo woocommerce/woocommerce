@@ -21,7 +21,7 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_PaymentGatewaysController extends
 	/**
 	 * Set up.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 
 		$this->user = $this->factory->user->create(

@@ -23,7 +23,7 @@ class WC_Admin_Tests_API_Reports_Variations extends WC_REST_Unit_Test_Case {
 	 *
 	 * @since 3.5.0
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 		$this->product = new WC_Product_Variable();
 		$this->product->set_name( 'Variable Product' );

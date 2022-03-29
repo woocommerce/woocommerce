@@ -347,7 +347,7 @@ class WC_Admin_Tests_Notes_Data_Store extends WC_Unit_Test_Case {
 	/**
 	 * Delete notes created by this class's tests.
 	 */
-	public function tearDown() {
+	public function tearDown(): void {
 		global $wpdb;
 
 		parent::tearDown();
