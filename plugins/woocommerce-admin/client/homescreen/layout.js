@@ -289,8 +289,8 @@ export default compose(
 		const taskLists = getTaskLists();
 
 		const welcomeFromCalypsoModalDismissed =
-			getOption( WELCOME_FROM_CALYPSO_MODAL_DISMISSED_OPTION_NAME ) ===
-			'yes';
+			getOption( WELCOME_FROM_CALYPSO_MODAL_DISMISSED_OPTION_NAME ) !==
+			'no';
 		const welcomeFromCalypsoModalDismissedResolved = hasFinishedResolution(
 			'getOption',
 			[ WELCOME_FROM_CALYPSO_MODAL_DISMISSED_OPTION_NAME ]
@@ -305,7 +305,7 @@ export default compose(
 			fromCalypsoUrlArgIsPresent;
 
 		const welcomeModalDismissed =
-			getOption( WELCOME_MODAL_DISMISSED_OPTION_NAME ) === 'yes';
+			getOption( WELCOME_MODAL_DISMISSED_OPTION_NAME ) !== 'no';
 
 		const installTimestamp = getOption(
 			WOOCOMMERCE_ADMIN_INSTALL_TIMESTAMP_OPTION_NAME
