@@ -20,7 +20,8 @@
 		"build": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
 		"ts:check": "tsc --noEmit --project ./tsconfig.json",
 		"clean": "pnpm exec rimraf *.tsbuildinfo build build-*",
-		"prepack": "pnpm run clean && pnpm run build"
+		"prepack": "pnpm run clean && pnpm run build",
+		"lint": "eslint src"
 	},
 	"dependencies": {
 		"@testing-library/jest-dom": "^5.16.2",
@@ -32,6 +33,8 @@
 	},
 	"devDependencies": {
 		"@babel/core": "^7.17.5",
+		"@wordpress/eslint-plugin": "^11.0.0",
+		"eslint": "^8.12.0",
 		"jest": "^27.5.1",
 		"jest-cli": "^27.5.1",
 		"rimraf": "^3.0.2",

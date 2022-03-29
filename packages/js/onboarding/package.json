@@ -38,7 +38,9 @@
 		"@babel/core": "^7.17.5",
 		"@woocommerce/style-build": "workspace:*",
 		"@wordpress/browserslist-config": "^4.1.1",
+		"@wordpress/eslint-plugin": "^11.0.0",
 		"css-loader": "^3.6.0",
+		"eslint": "^8.12.0",
 		"jest": "^27.5.1",
 		"jest-cli": "^27.5.1",
 		"postcss-loader": "^3.0.0",
@@ -55,6 +57,7 @@
 		"build:js": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
 		"build:css": "webpack",
 		"start": "concurrently \"tsc --build --watch\" \"webpack --watch\"",
-		"prepack": "pnpm run clean && pnpm run build"
+		"prepack": "pnpm run clean && pnpm run build",
+		"lint": "eslint src"
 	}
 }

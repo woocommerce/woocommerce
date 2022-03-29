@@ -37,6 +37,8 @@
 		"@types/puppeteer": "^5.4.5",
 		"@typescript-eslint/eslint-plugin": "^5.14.0",
 		"@woocommerce/api": "^0.2.0",
+		"@wordpress/eslint-plugin": "^11.0.0",
+		"eslint": "^8.12.0",
 		"jest": "^27.5.1",
 		"jest-cli": "^27.5.1",
 		"jest-mock-extended": "^1.0.18",
@@ -48,10 +50,11 @@
 		"access": "public"
 	},
 	"scripts": {
-	  	"prepare": "pnpm run build",
+		"prepare": "pnpm run build",
 		"build": "tsc --build",
 	  	"start": "tsc --build --watch",
 		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
+		"lint": "eslint src",
 		"prepack": "pnpm run clean && pnpm run build"
 	}
 }
