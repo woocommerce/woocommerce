@@ -1,6 +1,6 @@
 # WooCommerce API Client
 
-An API client for interacting with WooCommerce installations that works both on Browser and Node environments. Here are the current and planned
+An API client for interacting with WooCommerce installations that works both in the browser and in Node environments. Here are the current and planned
 features:
 
 - [x] TypeScript Definitions \*
