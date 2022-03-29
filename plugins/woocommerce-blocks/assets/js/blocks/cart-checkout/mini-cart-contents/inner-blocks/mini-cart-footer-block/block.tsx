@@ -26,12 +26,10 @@ const PaymentMethodIconsElement = (): JSX.Element => {
 };
 
 interface Props {
-	color?: string;
-	backgroundColor?: string;
-	className: string;
+	className?: string;
 }
 
-const Block = ( { color, backgroundColor, className }: Props ): JSX.Element => {
+const Block = ( { className }: Props ): JSX.Element => {
 	const { cartTotals } = useStoreCart();
 	const subTotal = getSetting( 'displayCartPricesIncludingTax', false )
 		? parseInt( cartTotals.total_items, 10 ) +
@@ -56,10 +54,6 @@ const Block = ( { color, backgroundColor, className }: Props ): JSX.Element => {
 					<Button
 						className="wc-block-mini-cart__footer-cart"
 						href={ CART_URL }
-						style={ {
-							color,
-							boxShadow: `inset 0 0 0 1px ${ color }`,
-						} }
 						variant="outlined"
 					>
 						{ __( 'View my cart', 'woo-gutenberg-products-block' ) }
@@ -69,11 +63,6 @@ const Block = ( { color, backgroundColor, className }: Props ): JSX.Element => {
 					<Button
 						className="wc-block-mini-cart__footer-checkout"
 						href={ CHECKOUT_URL }
-						style={ {
-							color: backgroundColor,
-							borderColor: color,
-							backgroundColor: color,
-						} }
 					>
 						{ __(
 							'Go to checkout',
