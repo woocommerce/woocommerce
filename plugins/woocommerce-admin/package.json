@@ -51,7 +51,7 @@
 		"lint:js-fix": "pnpm run lint:js -- --fix --ext=js,ts,tsx",
 		"lint:php": "./vendor/bin/phpcs --standard=phpcs.xml.dist $(git ls-files | grep .php$)",
 		"lint:php-fix": "./vendor/bin/phpcbf --standard=phpcs.xml.dist $(git ls-files | grep .php$)",
-		"ts:check": "tsc --build ./tsconfig.json",
+		"ts:check": "tsc --build ./tsconfig.json --pretty",
 		"ts:check:watch": "npm run ts:check -- --watch",
 		"reformat-files": "wp-scripts format-js -- --ignore-path .eslintignore",
 		"prepack": "pnpm install && pnpm run lint && pnpm run test && cross-env WC_ADMIN_PHASE=core pnpm run build",
