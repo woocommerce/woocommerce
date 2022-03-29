@@ -22,15 +22,20 @@
 		"@wordpress/base-styles": "^3.6.0",
 		"@wordpress/postcss-plugins-preset": "^1.6.0",
 		"css-loader": "^3.6.0",
+		"mini-css-extract-plugin": "^2.6.0",
 		"postcss-loader": "^3.0.0",
 		"sass-loader": "^10.2.1",
 		"webpack-remove-empty-scripts": "^0.7.3",
-		"mini-css-extract-plugin": "^2.6.0",
 		"webpack-rtl-plugin": "^2.0.0"
+	},
+	"scripts": {
+		"lint": "eslint index.js"
 	},
 	"private": true,
 	"devDependencies": {
 		"@babel/core": "^7.17.5",
+		"@wordpress/eslint-plugin": "^11.0.0",
+		"eslint": "^8.12.0",
 		"jest": "^27.5.1",
 		"jest-cli": "^27.5.1",
 		"rimraf": "^3.0.2",

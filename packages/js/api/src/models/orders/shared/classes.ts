@@ -1,5 +1,5 @@
 import { MetaData } from '../../shared-types';
-import {Model, ModelID} from '../../model';
+import { Model, ModelID } from '../../model';
 import { TaxStatus } from './types';
 
 /**

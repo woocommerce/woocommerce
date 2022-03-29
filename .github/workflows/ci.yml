@@ -11,7 +11,7 @@ defaults:
 jobs:
   test:
     name: PHP ${{ matrix.php }} WP ${{ matrix.wp }}
-    timeout-minutes: 15
+    timeout-minutes: 20
     runs-on: ubuntu-latest
     continue-on-error: ${{ matrix.wp == 'nightly' }}
     strategy:
@@ -66,6 +66,10 @@ jobs:
 
       - name: Setup and install composer
         run: pnpm nx composer-install woocommerce
+
+      - name: Build Admin feature config
+        working-directory: ./
+        run: pnpm nx build:feature-config woocommerce-admin
 
       - name: Add PHP8 Compatibility.
         run: |

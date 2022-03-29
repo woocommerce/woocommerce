@@ -24,15 +24,19 @@ import {
 /**
  * The parameters that Grouped products can update.
  */
-type GroupedProductUpdateParams = ProductCommonUpdateParams
-	& ProductGroupedUpdateParams
-	& ProductUpSellUpdateParams;
+type GroupedProductUpdateParams = ProductCommonUpdateParams &
+	ProductGroupedUpdateParams &
+	ProductUpSellUpdateParams;
 /**
  * The parameters embedded in this generic can be used in the ModelRepository in order to give
  * type-safety in an incredibly granular way.
  */
-export type GroupedProductRepositoryParams =
-	ModelRepositoryParams< GroupedProduct, never, ProductSearchParams, GroupedProductUpdateParams >;
+export type GroupedProductRepositoryParams = ModelRepositoryParams<
+	GroupedProduct,
+	never,
+	ProductSearchParams,
+	GroupedProductUpdateParams
+>;
 
 /**
  * An interface for listing Grouped products using the repository.
@@ -77,19 +81,18 @@ export type DeletesGroupedProducts = DeletesModels< GroupedProductRepositoryPara
 /**
  * The base for the Grouped product object.
  */
-export class GroupedProduct extends AbstractProduct implements
-	IProductCommon,
-	IProductGrouped,
-	IProductUpSells {
+export class GroupedProduct
+	extends AbstractProduct
+	implements IProductCommon, IProductGrouped, IProductUpSells {
 	/**
 	 * @see ./abstracts/grouped.ts
 	 */
-	public readonly groupedProducts: Array<number> = [];
+	public readonly groupedProducts: Array< number > = [];
 
 	/**
 	 * @see ./abstracts/upsell.ts
 	 */
-	public readonly upSellIds: Array<number> = [];
+	public readonly upSellIds: Array< number > = [];
 
 	/**
 	 * Creates a new Grouped product instance with the given properties
@@ -106,7 +109,9 @@ export class GroupedProduct extends AbstractProduct implements
 	 *
 	 * @param {HTTPClient} httpClient The client for communicating via HTTP.
 	 */
-	public static restRepository( httpClient: HTTPClient ): ReturnType< typeof groupedProductRESTRepository > {
+	public static restRepository(
+		httpClient: HTTPClient
+	): ReturnType< typeof groupedProductRESTRepository > {
 		return groupedProductRESTRepository( httpClient );
 	}
 }

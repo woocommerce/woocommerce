@@ -20,11 +20,7 @@ import {
 	// @ts-ignore
 	ModelParentID,
 } from '../../framework';
-import {
-	ModelID,
-	MetaData,
-	ModelConstructor,
-} from '../../models';
+import { ModelID, MetaData, ModelConstructor } from '../../models';
 
 /**
  * Creates a new transformer for metadata models.
@@ -32,17 +28,13 @@ import {
  * @return {ModelTransformer} The created transformer.
  */
 export function createMetaDataTransformer(): ModelTransformer< MetaData > {
-	return new ModelTransformer(
-		[
-			new IgnorePropertyTransformation( [ 'id' ] ),
-			new KeyChangeTransformation< MetaData >(
-				{
-					displayKey: 'display_key',
-					displayValue: 'display_value',
-				},
-			),
-		],
-	);
+	return new ModelTransformer( [
+		new IgnorePropertyTransformation( [ 'id' ] ),
+		new KeyChangeTransformation< MetaData >( {
+			displayKey: 'display_key',
+			displayValue: 'display_value',
+		} ),
+	] );
 }
 
 /**
@@ -52,7 +44,11 @@ export function createMetaDataTransformer(): ModelTransformer< MetaData > {
  * @param {ModelID} [id] The ID of the model we're dealing with if used for the request.
  * @return {string} The URL to make the request to.
  */
-type BuildURLFn< T extends ( 'list' | 'general' ) = 'general' > = [ T ] extends [ 'list' ] ? () => string : ( id: ModelID ) => string;
+type BuildURLFn< T extends 'list' | 'general' = 'general' > = [ T ] extends [
+	'list'
+]
+	? () => string
+	: ( id: ModelID ) => string;
 
 /**
  * A callback to build a URL for a request.
@@ -63,7 +59,10 @@ type BuildURLFn< T extends ( 'list' | 'general' ) = 'general' > = [ T ] extends 
  * @return {string} The URL to make the request to.
  * @template {ModelParentID} P
  */
-type BuildURLWithParentFn< P extends ModelRepositoryParams, T extends ( 'list' | 'general' ) = 'general' > = [ T ] extends [ 'list' ]
+type BuildURLWithParentFn<
+	P extends ModelRepositoryParams,
+	T extends 'list' | 'general' = 'general'
+> = [ T ] extends [ 'list' ]
 	? ( parent: ParentID< P > ) => string
 	: ( parent: ParentID< P >, id: ModelID ) => string;
 
@@ -80,7 +79,7 @@ export function restList< T extends ModelRepositoryParams >(
 	buildURL: HasParent< T, never, BuildURLFn< 'list' > >,
 	modelClass: ModelConstructor< ModelClass< T > >,
 	httpClient: HTTPClient,
-	transformer: ModelTransformer< ModelClass< T > >,
+	transformer: ModelTransformer< ModelClass< T > >
 ): ListFn< T > {
 	return async ( params ) => {
 		const response = await httpClient.get( buildURL(), params );
@@ -107,7 +106,7 @@ export function restListChild< T extends ModelRepositoryParams >(
 	buildURL: HasParent< T, BuildURLWithParentFn< T, 'list' >, never >,
 	modelClass: ModelConstructor< ModelClass< T > >,
 	httpClient: HTTPClient,
-	transformer: ModelTransformer< ModelClass< T > >,
+	transformer: ModelTransformer< ModelClass< T > >
 ): ListChildFn< T > {
 	return async ( parent, params ) => {
 		const response = await httpClient.get( buildURL( parent ), params );
@@ -134,15 +133,17 @@ export function restCreate< T extends ModelRepositoryParams >(
 	buildURL: ( properties: Partial< ModelClass< T > > ) => string,
 	modelClass: ModelConstructor< ModelClass< T > >,
 	httpClient: HTTPClient,
-	transformer: ModelTransformer< ModelClass< T > >,
+	transformer: ModelTransformer< ModelClass< T > >
 ): CreateFn< T > {
 	return async ( properties ) => {
 		const response = await httpClient.post(
 			buildURL( properties ),
-			transformer.fromModel( properties ),
+			transformer.fromModel( properties )
 		);
 
-		return Promise.resolve( transformer.toModel( modelClass, response.data ) );
+		return Promise.resolve(
+			transformer.toModel( modelClass, response.data )
+		);
 	};
 }
 
@@ -156,18 +157,23 @@ export function restCreate< T extends ModelRepositoryParams >(
  * @return {CreateChildFn} The callback for the repository.
  */
 export function restCreateChild< T extends ModelRepositoryParams >(
-	buildURL: ( parent: ParentID< T >, properties: Partial< ModelClass< T > > ) => string,
+	buildURL: (
+		parent: ParentID< T >,
+		properties: Partial< ModelClass< T > >
+	) => string,
 	modelClass: ModelConstructor< ModelClass< T > >,
 	httpClient: HTTPClient,
-	transformer: ModelTransformer< ModelClass< T > >,
+	transformer: ModelTransformer< ModelClass< T > >
 ): CreateChildFn< T > {
 	return async ( parent, properties ) => {
 		const response = await httpClient.post(
 			buildURL( parent, properties ),
-			transformer.fromModel( properties ),
+			transformer.fromModel( properties )
 		);
 
-		return Promise.resolve( transformer.toModel( modelClass, response.data ) );
+		return Promise.resolve(
+			transformer.toModel( modelClass, response.data )
+		);
 	};
 }
 
@@ -184,11 +190,13 @@ export function restRead< T extends ModelRepositoryParams >(
 	buildURL: HasParent< T, never, BuildURLFn >,
 	modelClass: ModelConstructor< ModelClass< T > >,
 	httpClient: HTTPClient,
-	transformer: ModelTransformer< ModelClass< T > >,
+	transformer: ModelTransformer< ModelClass< T > >
 ): ReadFn< T > {
 	return async ( id ) => {
 		const response = await httpClient.get( buildURL( id ) );
-		return Promise.resolve( transformer.toModel( modelClass, response.data ) );
+		return Promise.resolve(
+			transformer.toModel( modelClass, response.data )
+		);
 	};
 }
 
@@ -205,11 +213,13 @@ export function restReadChild< T extends ModelRepositoryParams >(
 	buildURL: HasParent< T, BuildURLWithParentFn< T >, never >,
 	modelClass: ModelConstructor< ModelClass< T > >,
 	httpClient: HTTPClient,
-	transformer: ModelTransformer< ModelClass< T > >,
+	transformer: ModelTransformer< ModelClass< T > >
 ): ReadChildFn< T > {
 	return async ( parent, id ) => {
 		const response = await httpClient.get( buildURL( parent, id ) );
-		return Promise.resolve( transformer.toModel( modelClass, response.data ) );
+		return Promise.resolve(
+			transformer.toModel( modelClass, response.data )
+		);
 	};
 }
 
@@ -226,15 +236,17 @@ export function restUpdate< T extends ModelRepositoryParams >(
 	buildURL: HasParent< T, never, BuildURLFn >,
 	modelClass: ModelConstructor< ModelClass< T > >,
 	httpClient: HTTPClient,
-	transformer: ModelTransformer< ModelClass< T > >,
+	transformer: ModelTransformer< ModelClass< T > >
 ): UpdateFn< T > {
 	return async ( id, params ) => {
 		const response = await httpClient.patch(
 			buildURL( id ),
-			transformer.fromModel( params as any ),
+			transformer.fromModel( params as any )
 		);
 
-		return Promise.resolve( transformer.toModel( modelClass, response.data ) );
+		return Promise.resolve(
+			transformer.toModel( modelClass, response.data )
+		);
 	};
 }
 
@@ -251,15 +263,17 @@ export function restUpdateChild< T extends ModelRepositoryParams >(
 	buildURL: HasParent< T, BuildURLWithParentFn< T >, never >,
 	modelClass: ModelConstructor< ModelClass< T > >,
 	httpClient: HTTPClient,
-	transformer: ModelTransformer< ModelClass< T > >,
+	transformer: ModelTransformer< ModelClass< T > >
 ): UpdateChildFn< T > {
 	return async ( parent, id, params ) => {
 		const response = await httpClient.patch(
 			buildURL( parent, id ),
-			transformer.fromModel( params as any ),
+			transformer.fromModel( params as any )
 		);
 
-		return Promise.resolve( transformer.toModel( modelClass, response.data ) );
+		return Promise.resolve(
+			transformer.toModel( modelClass, response.data )
+		);
 	};
 }
 
@@ -272,7 +286,7 @@ export function restUpdateChild< T extends ModelRepositoryParams >(
  */
 export function restDelete< T extends ModelRepositoryParams >(
 	buildURL: HasParent< T, never, BuildURLFn >,
-	httpClient: HTTPClient,
+	httpClient: HTTPClient
 ): DeleteFn {
 	return ( id ) => {
 		return httpClient.delete( buildURL( id ) ).then( () => true );
@@ -288,7 +302,7 @@ export function restDelete< T extends ModelRepositoryParams >(
  */
 export function restDeleteChild< T extends ModelRepositoryParams >(
 	buildURL: HasParent< T, BuildURLWithParentFn< T >, never >,
-	httpClient: HTTPClient,
+	httpClient: HTTPClient
 ): DeleteChildFn< T > {
 	return ( parent, id ) => {
 		return httpClient.delete( buildURL( parent, id ) ).then( () => true );

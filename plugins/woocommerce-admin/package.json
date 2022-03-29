@@ -30,6 +30,8 @@
 		"clean": "rimraf ./dist && pnpm run:packages -- clean --parallel",
 		"predev": "pnpm run -s install-if-deps-outdated && php ./bin/update-version.php",
 		"dev": "cross-env WC_ADMIN_PHASE=development pnpm run build:feature-config && cross-env WC_ADMIN_PHASE=development pnpm run build:packages && cross-env WC_ADMIN_PHASE=development webpack",
+		"client:watch": "cross-env WC_ADMIN_PHASE=development pnpm run build:feature-config && cross-env WC_ADMIN_PHASE=development webpack --watch",
+		"packages:watch": "cross-env WC_ADMIN_PHASE=development pnpm run:packages -- start --parallel",
 		"docs": "./bin/import-wp-css-storybook.sh && BABEL_ENV=storybook STORYBOOK=true pnpm exec build-storybook -c storybook/.storybook -o ./docs/components/storybook",
 		"i18n": "pnpm run -s i18n:js && pnpm run -s i18n:check && pnpm run -s i18n:pot && pnpm run -s i18n:build",
 		"i18n:build": "php bin/combine-pot-files.php languages/woocommerce-admin.po languages/woocommerce-admin.pot",
@@ -44,13 +46,12 @@
 		"lint": "pnpm run lint:js && pnpm run lint:css",
 		"lint:css": "stylelint '**/*.scss'",
 		"lint:css-fix": "stylelint '**/*.scss' --fix --ip 'storybook/wordpress'",
-		"lint:js": "wp-scripts lint-js ./packages ./client --ext=js,ts,tsx",
-		"lint:js:packages": "wp-scripts lint-js ./packages --ext=js,ts,tsx",
-		"lint:js:client": "wp-scripts lint-js ./client --ext=js,ts,tsx",
-		"lint:js-fix": "pnpm run lint:js --fix --ext=js,ts,tsx",
+		"lint:js": "wp-scripts lint-js ./client --ext=js,ts,tsx",
+		"lint:js:packages": "wp-scripts lint-js ../../packages/js --ext=js,ts,tsx",
+		"lint:js-fix": "pnpm run lint:js -- --fix --ext=js,ts,tsx",
 		"lint:php": "./vendor/bin/phpcs --standard=phpcs.xml.dist $(git ls-files | grep .php$)",
 		"lint:php-fix": "./vendor/bin/phpcbf --standard=phpcs.xml.dist $(git ls-files | grep .php$)",
-		"ts:check": "tsc --build ./tsconfig.json",
+		"ts:check": "tsc --build ./tsconfig.json --pretty",
 		"ts:check:watch": "npm run ts:check -- --watch",
 		"reformat-files": "wp-scripts format-js -- --ignore-path .eslintignore",
 		"prepack": "pnpm install && pnpm run lint && pnpm run test && cross-env WC_ADMIN_PHASE=core pnpm run build",
@@ -281,7 +282,7 @@
 		"@wordpress/data": "^6.3.0"
 	},
 	"engines": {
-		"node": ">=12.20.1 <15",
+		"node": "^16.13.1",
 		"pnpm": "^6.24.2"
 	}
 }

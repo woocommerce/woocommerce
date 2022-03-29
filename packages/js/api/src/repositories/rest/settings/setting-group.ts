@@ -12,11 +12,11 @@ import {
 import { restList } from '../shared';
 
 function createTransformer(): ModelTransformer< SettingGroup > {
-	return new ModelTransformer(
-		[
-			new KeyChangeTransformation< SettingGroup >( { parentID: 'parent_id' } ),
-		],
-	);
+	return new ModelTransformer( [
+		new KeyChangeTransformation< SettingGroup >( {
+			parentID: 'parent_id',
+		} ),
+	] );
 }
 
 /**
@@ -25,14 +25,21 @@ function createTransformer(): ModelTransformer< SettingGroup > {
  * @param {HTTPClient} httpClient The HTTP client for the REST requests to be made using.
  * @return {ListsSettingGroups} The created repository.
  */
-export default function settingGroupRESTRepository( httpClient: HTTPClient ): ListsSettingGroups {
+export default function settingGroupRESTRepository(
+	httpClient: HTTPClient
+): ListsSettingGroups {
 	const transformer = createTransformer();
 
 	return new ModelRepository(
-		restList< SettingGroupRepositoryParams >( () => '/wc/v3/settings', SettingGroup, httpClient, transformer ),
+		restList< SettingGroupRepositoryParams >(
+			() => '/wc/v3/settings',
+			SettingGroup,
+			httpClient,
+			transformer
+		),
 		null,
 		null,
 		null,
-		null,
+		null
 	);
 }
