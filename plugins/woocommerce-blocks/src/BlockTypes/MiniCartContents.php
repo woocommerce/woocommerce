@@ -88,25 +88,14 @@ class MiniCartContents extends AbstractBlock {
 				),
 			),
 			array(
-				'selector'   => '.wc-block-mini-cart__footer .wc-block-mini-cart__footer-actions .wc-block-mini-cart__footer-cart',
-				'properties' => array(
-					array(
-						'property' => 'color',
-						'value'    => $text_color ? $text_color['value'] : false,
-					),
-					array(
-						'property' => 'box-shadow',
-						'value'    => $text_color ? "inset 0 0 0 1px {$text_color['value']}" : false,
-					),
-				),
-			),
-			array(
 				'selector'   => array(
 					'.wc-block-mini-cart__footer .wc-block-mini-cart__footer-actions .wc-block-mini-cart__footer-checkout',
-					'.wc-block-mini-cart__footer .wc-block-mini-cart__footer-actions .wc-block-mini-cart__footer-cart:hover',
-					'.wc-block-mini-cart__footer .wc-block-mini-cart__footer-actions .wc-block-mini-cart__footer-cart:focus',
 					'.wc-block-mini-cart__footer .wc-block-mini-cart__footer-actions .wc-block-mini-cart__footer-checkout:hover',
 					'.wc-block-mini-cart__footer .wc-block-mini-cart__footer-actions .wc-block-mini-cart__footer-checkout:focus',
+					'.wc-block-mini-cart__footer .wc-block-mini-cart__footer-actions .wc-block-mini-cart__footer-cart:hover',
+					'.wc-block-mini-cart__footer .wc-block-mini-cart__footer-actions .wc-block-mini-cart__footer-cart:focus',
+					'.wc-block-mini-cart__shopping-button a:hover',
+					'.wc-block-mini-cart__shopping-button a:focus',
 				),
 				'properties' => array(
 					array(
