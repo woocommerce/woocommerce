@@ -26,240 +26,174 @@ class URLTest extends WC_Unit_Test_Case {
 		);
 	}
 
-	public function test_directory_traversal_resolution() {
-		$this->assertEquals(
-			'/var/foo/foobar',
-			( new URL( '/var/foo/bar/baz/../../foobar' ) )->get_path(),
-			'Correctly resolves a path containing a directory traversal.'
-		);
+	/**
+	 * @dataProvider path_expectations
+	 *
+	 * @param string $source_path
+	 * @param string $expected_resolution
+	 */
+	public function test_path_resolution( $source_path, $expected_resolution ) {
+		$this->assertEquals( $expected_resolution, ( new URL( $source_path ) )->get_path() );
+	}
 
-		$this->assertEquals(
-			'/bazbar',
-			( new URL( '/var/foo/../../../../bazbar' ) )->get_path(),
-			'Correctly resolves a path containing a directory traversal, even if the traversals attempt to backtrack beyond the root directory.'
-		);
-
-		$this->assertEquals(
-			'../should/remain/relative',
-			( new URL( 'relative/../../should/remain/relative' ) )->get_path(),
-			'Simplifies a relative path containing directory traversals to the extent possible (without inspecting the filesystem - scenario #1).'
-		);
-
-		$this->assertEquals(
-			'../../should/remain/relative',
-			( new URL( 'relative/../../../should/remain/relative' ) )->get_path(),
-			'Simplifies a relative path containing directory traversals to the extent possible (without inspecting the filesystem - scenario #2).'
-		);
-
-		$this->assertEquals(
-			'file:///foo/bar/baz',
-			( new URL( '/../foo/bar/baz/bazooka/../../baz' ) )->get_url(),
-			'Directory traversals are appropriately resolved even in complex cases with multiple separate traversals. When the original path is absolute, the output will be absolute.'
+	/**
+	 * Expectations when requesting the path of a URL.
+	 *
+	 * @return string[][]
+	 */
+	public function path_expectations(): array {
+		return array(
+			array( '/var/foo/bar/baz/../../foobar',            '/var/foo/foobar' ),
+			array( '/var/foo/../../../../bazbar',              '/bazbar' ),
+			array( '././././.',                                './' ),
+			array( 'empty/segments//are/stripped',             'empty/segments/are/stripped' ),
+			array( '///nonempty/  /whitespace/   /is//kept',   '/nonempty/  /whitespace/   /is/kept' ),
+			array( 'relative/../../should/remain/relative',    '../should/remain/relative' ),
+			array( 'relative/../../../should/remain/relative', '../../should/remain/relative' ),
+			array( 'c:\\Windows\Server\HTTP\dump.xml',         'c:/Windows/Server/HTTP/dump.xml')
 		);
 	}
 
-	public function test_can_get_normalized_string_representation() {
-		$this->assertEquals(
-			'foo/bar/baz',
-			( new URL( 'foo/bar//baz' ) )->get_path(),
-			'Empty segments are discarded, remains as a relative path.'
-		);
+	/**
+	 * @dataProvider url_expectations
+	 *
+	 * @param string $source_url
+	 * @param string $expected_resolution
+	 */
+	public function test_url_resolution( $source_url, $expected_resolution ) {
+		$this->assertEquals( $expected_resolution, ( new URL( $source_url ) )->get_url() );
+	}
 
-		$this->assertEquals(
-			'/foo/  /bar/   /baz/foobarbaz',
-			( new URL( '///foo/  /bar/   /baz//foobarbaz' ) )->get_path(),
-			'Empty segments are discarded, non-empty segments containing only whitespace are preserved, remains as an absolute path.'
-		);
-
-		$this->assertEquals(
-			'c:/Windows/Server/HTTP/dump.xml',
-			( new URL( 'c:\\Windows\Server\HTTP\dump.xml' ) )->get_path(),
-			'String representations of Windows filepaths have forward slash separators and preserve the drive letter.'
+	/**
+	 * Expectations when resolving URLs.
+	 *
+	 * @return string[][]
+	 */
+	public function url_expectations(): array {
+		return array(
+			array( '/../foo/bar/baz/bazooka/../../baz',       'file:///foo/bar/baz' ),
+			array( './a/b/c/./../././../b/c',                 'file://a/b/c' ),
+			array( 'relative/path',                           'file://relative/path' ),
+			array( '/absolute/path',                          'file:///absolute/path' ),
+			array( '/var/www/network/%2econfig',              'file:///var/www/network/%2econfig' ),
+			array( '///foo',                                  'file:///foo' ),
+			array( '~/foo.txt',                               'file://~/foo.txt' ),
+			array( 'baz///foo',                               'file://baz/foo' ),
+			array( 'file:///etc/foo/bar',                     'file:///etc/foo/bar' ),
+			array( 'foo://bar',                               'foo://bar/' ),
+			array( 'foo://bar/baz-file',                      'foo://bar/baz-file' ),
+			array( 'foo://bar/baz-dir/',                      'foo://bar/baz-dir/' ),
+			array( 'https://foo.bar/parent/.%2e/asset.txt',   'https://foo.bar/asset.txt' ),
+			array( 'https://foo.bar/parent/%2E./asset.txt',   'https://foo.bar/asset.txt' ),
+			array( 'https://foo.bar/parent/%2E%2e/asset.txt', 'https://foo.bar/asset.txt' ),
+			array( 'https://foo.bar/parent/%2E.%2fasset.txt', 'https://foo.bar/parent/%2E.%2fasset.txt' ),
+			array( 'http://localhost?../../bar',              'http://localhost/?../../bar' ),
 		);
 	}
 
-	public function test_can_get_normalized_url_representation() {
-		$this->assertEquals(
-			'file://relative/path',
-			( new URL( 'relative/path' ) )->get_url(),
-			'Can obtain a URL representation of a relative filepath, even when the initial string was a plain filepath.'
-		);
+	/**
+	 * @dataProvider parent_url_expectations
+	 *
+	 * @param string       $source_path
+	 * @param int          $parent_level
+	 * @param string|false $expectation
+	 */
+	public function test_can_obtain_parent_url( string $source_path, int $parent_level, $expectation ) {
+		$this->assertEquals( $expectation, ( new URL( $source_path ) )->get_parent_url( $parent_level ) );
+	}
 
-		$this->assertEquals(
-			'file:///absolute/path',
-			( new URL( '/absolute/path' ) )->get_url(),
-			'Can obtain a URL representation of an absolute filepath, even when the initial string was a plain filepath.'
-		);
-
-		$this->assertEquals(
-			'file:///etc/foo/bar',
-			( new URL( 'file:///etc/foo/bar' ) )->get_url(),
-			'Can obtain a URL representation of a filepath, when the source filepath was also expressed as a URL.'
+	/**
+	 * Expectations when resolving (grand-)parent URLs.
+	 *
+	 * @return array[]
+	 */
+	public function parent_url_expectations(): array {
+		return array(
+			array( '/',                                           1, false ),
+			array( '/',                                           2, false ),
+			array( './',                                          1, 'file://../' ),
+			array( '../',                                         1, 'file://../../' ),
+			array( 'relative-file.png',                           1, 'file://./' ),
+			array( 'relative-file.png',                           2, 'file://../' ),
+			array( '/var/dev/',                                   1, 'file:///var/' ),
+			array( '/var/../dev/./../foo/bar',                    1, 'file:///foo/' ),
+			array( 'https://example.com',                         1, false ),
+			array( 'https://example.com/foo',                     1, 'https://example.com/' ),
+			array( 'https://example.com/foo/bar/baz/../cat/',     2, 'https://example.com/foo/' ),
+			array( 'https://example.com/foo/bar/baz/%2E%2E/dog/', 2, 'https://example.com/foo/' ),
+			array( 'file://./',                                   1, 'file://../' ),
+			array( 'file://./',                                   2, 'file://../../' ),
+			array( 'file://../../foo',                            1, 'file://../../' ),
+			array( 'file://../../foo',                            2, 'file://../../../' ),
+			array( 'file://../../',                               1, 'file://../../../' ),
+			array( 'file://./../',                                2, 'file://../../../' ),
 		);
 	}
 
-	public function test_handling_of_percent_encoded_periods() {
-		$this->assertEquals(
-			'https://foo.bar/asset.txt',
-			( new URL( 'https://foo.bar/parent/.%2e/asset.txt' ) )->get_url(),
-			'Directory traversals expressed using percent-encoding are still resolved (lowercase, one encoded period).'
-		);
-
-		$this->assertEquals(
-			'https://foo.bar/asset.txt',
-			( new URL( 'https://foo.bar/parent/%2E./asset.txt' ) )->get_url(),
-			'Directory traversals expressed using percent-encoding are still resolved (uppercase, one encoded period).'
-		);
-
-		$this->assertEquals(
-			'https://foo.bar/asset.txt',
-			( new URL( 'https://foo.bar/parent/%2E%2e/asset.txt' ) )->get_url(),
-			'Directory traversals expressed using percent-encoding are still resolved (mixed case, both periods encoded).'
-		);
-
-		$this->assertEquals(
-			'https://foo.bar/parent/%2E.%2fasset.txt',
-			( new URL( 'https://foo.bar/parent/%2E.%2fasset.txt' ) )->get_url(),
-			'If the forward slash after a double period is URL encoded, there is no directory traversal (since this means the slash is a part of the segment and is not a separator).'
-		);
-
-		$this->assertEquals(
-			'file:///var/www/network/%2econfig',
-			( new URL( '/var/www/network/%2econfig' ) )->get_url(),
-			'Use of percent-encoding in URLs is accepted and unnecessary conversion does not take place.'
-		);
+	/**
+	 * @dataProvider all_parent_url_expectations
+	 *
+	 * @param string $source_path
+	 * @param array  $expectation
+	 */
+	public function test_can_obtain_all_parent_urls( string $source_path, array $expectation ) {
+		$this->assertEquals( $expectation, ( new URL( $source_path ) )->get_all_parent_urls() );
 	}
 
-	public function test_can_obtain_parent_url() {
-		$this->assertFalse(
-			( new URL( '/' ) )->get_parent_url(),
-			'Root directory "/" is considered to have no parent (scenario #1).'
-		);
-
-		$this->assertFalse(
-			( new URL( '/' ) )->get_parent_url( 2 ),
-			'Root directory "/" is considered to have no parent (scenario #2).'
-		);
-
-		$this->assertEquals(
-			'file:///var/',
-			( new URL( '/var/dev/' ) )->get_parent_url(),
-			'The parent URL will be trailingslashed.'
-		);
-
-		$this->assertFalse(
-			( new URL( 'https://example.com' ) )->get_parent_url(),
-			'In the case of non-file URLs, if we only have a host name and no path then the parent cannot be derived.'
-		);
-	}
-
-	public function test_can_obtain_all_parent_urls() {
-		$this->assertEquals(
+	/**
+	 * Expectations when obtaining all possible parent URLs of a given URL/path.
+	 *
+	 * @return array[]
+	 */
+	public function all_parent_urL_expectations(): array {
+		return array(
 			array(
-				'https://local.web/wp-content/uploads/woocommerce_uploads/pdf_bucket/',
-				'https://local.web/wp-content/uploads/woocommerce_uploads/',
-				'https://local.web/wp-content/uploads/',
-				'https://local.web/wp-content/',
-				'https://local.web/',
+				'https://local.web/wp-content/uploads/woocommerce_uploads/pdf_bucket/secret-sauce.pdf',
+				array(
+					'https://local.web/wp-content/uploads/woocommerce_uploads/pdf_bucket/',
+					'https://local.web/wp-content/uploads/woocommerce_uploads/',
+					'https://local.web/wp-content/uploads/',
+					'https://local.web/wp-content/',
+					'https://local.web/',
+				),
 			),
-			( new URL( 'https://local.web/wp-content/uploads/woocommerce_uploads/pdf_bucket/secret-sauce.pdf' ) )->get_all_parent_urls(),
-			'All parent URLs can be derived, but the host name is never stripped.'
-		);
-
-		$this->assertEquals(
 			array(
-				'file:///srv/websites/my.wp.site/public/',
-				'file:///srv/websites/my.wp.site/',
-				'file:///srv/websites/',
-				'file:///srv/',
+				'/srv/websites/my.wp.site/public/test-file.doc',
+				array(
+					'file:///srv/websites/my.wp.site/public/',
+					'file:///srv/websites/my.wp.site/',
+					'file:///srv/websites/',
+					'file:///srv/',
+					'file:///',
+				),
+			),
+			array(
+				'C:\\Documents\\Web\\TestSite\\BackgroundTrack.mp3',
+				array(
+					'file://C:/Documents/Web/TestSite/',
+					'file://C:/Documents/Web/',
+					'file://C:/Documents/',
+					'file://C:/',
+				),
+			),
+			array(
 				'file:///',
+				array(),
 			),
-			( new URL( '/srv/websites/my.wp.site/public/test-file.doc' ) )->get_all_parent_urls(),
-			'All parent URLs can be derived for a filepath, up to and including the root directory.'
-		);
-
-		$this->assertEquals(
 			array(
-				'file://C:/Documents/Web/TestSite/',
-				'file://C:/Documents/Web/',
-				'file://C:/Documents/',
-				'file://C:/',
+				'relative/to/abspath',
+				array(
+					'file://relative/to/',
+					'file://relative/',
+					'file://./',
+				),
 			),
-			( new URL( 'C:\\Documents\\Web\\TestSite\\BackgroundTrack.mp3' ) )->get_all_parent_urls(),
-			'All parent URLs can be derived for a filepath, up to and including the root directory plus drive letter (Windows).'
-		);
-	}
-
-	public function test_obtaining_parent_urls_from_relative_urls() {
-		$this->assertEquals(
 			array(
-				'file://relative/to/',
-				'file://relative/',
-				'file://./',
+				'../../some.file',
+				array(
+					'file://../../'
+				),
 			),
-			( new URL( 'relative/to/abspath' ) )->get_all_parent_urls(),
-			'When obtaining all parent URLs for a relative filepath, we never return the root directory and never return a URL containing traversals if there were none to begin with.'
-		);
-
-		$this->assertEquals(
-			array(
-				'file://../../'
-			),
-			( new URL( '../../some.file' ) )->get_all_parent_urls(),
-			'When obtaining all parent URLs for a path that begins with directory traversals, we only go up one more level.'
-		);
-
-		$this->assertEquals(
-			'file://../../',
-			( new URL( '../' ) )->get_parent_url(),
-			'If a relative *directory* beginning with a traversal is provided, we can successfully derive its parent (scenario #1).'
-		);
-
-		$this->assertEquals(
-			'file://../../../',
-			( new URL( '../' ) )->get_parent_url( 2 ),
-			'If a relative *directory* beginning with a traversal is provided, we can successfully derive its parent (scenario #2).'
-		);
-
-		$this->assertEquals(
-			'file://../../../',
-			( new URL( '../../some.file' ) )->get_parent_url( 2 ),
-			'If the grandparent of a relative path that begins with one or more traversals is requested, we should receive the expected result (scenario #1).'
-		);
-
-		$this->assertEquals(
-			'file://../../../../',
-			( new URL( '../../some.file' ) )->get_parent_url( 3 ),
-			'If the grandparent of a relative path that begins with one or more traversals is requested, we should receive the expected result (scenario #2).'
-		);
-
-		$this->assertEquals(
-			'file://./',
-			( new URL( 'just-a-file.png' ) )->get_parent_url(),
-			'The parent URL of an unqualified, relative file is simply an empty relative path (generally, though not always, this is equivalent to ABSPATH).'
-		);
-
-		$this->assertEquals(
-			'file://../../',
-			( new URL( '../../relatively-placed-file.pdf' ) )->get_parent_url()
-		);
-
-		$this->assertEquals(
-			'file://../',
-			( new URL( 'relatively-placed-file.pdf' ) )->get_parent_url( 2 ),
-			'For filepaths, we can successfully determine the (grand-)parent directories of relative filepaths (when explicitly requested).'
-		);
-
-		$this->assertEquals(
-			'file://../../',
-			( new URL( 'relatively-placed-file.pdf' ) )->get_parent_url( 3 ),
-			'For filepaths, we can successfully determine the (grand-)parent directories of relative filepaths (when explicitly requested).'
-		);
-
-		$this->assertEquals(
-			'file://../foo/bar/baz',
-			( new URL( '../foo/bar/cat/dog/../../baz' ) )->get_url(),
-			'Directory traversals are appropriately resolved even in complex cases with multiple separate traversals.'
 		);
 	}
 }

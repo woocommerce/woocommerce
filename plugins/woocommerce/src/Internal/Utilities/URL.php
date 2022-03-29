@@ -144,7 +144,7 @@ class URL {
 		// Clean the path.
 		foreach ( $segments as $part ) {
 			// Drop empty segments.
-			if ( strlen( $part ) === 0 ) {
+			if ( strlen( $part ) === 0 || '.' === $part ) {
 				continue;
 			}
 
@@ -183,6 +183,12 @@ class URL {
 
 			// Retain this part of the path.
 			$this->path_parts[] = $part;
+		}
+
+		// Protect against empty relative paths.
+		if ( count( $this->path_parts ) === 0 && ! $this->is_absolute ) {
+			$this->path_parts = array( '.' );
+			$this->is_non_root_directory = true;
 		}
 
 		// Reform the path from the processed segments, appending a leading slash if it is absolute and restoring
@@ -263,9 +269,16 @@ class URL {
 			return false;
 		}
 
-		if ( $parts_count > 0 && '..' === $this->path_parts[0] ) {
-			// In the case where we have a filepath already starting with one or more traversals, we need to add additional traversals.
-			$last_traversal = max( array_keys( $this->path_parts, '..', true ) ) + ( $this->is_non_root_directory ? 1 : 0 );
+		// Handle cases where the path starts with one or more 'dot segments'. Since the path has already been
+		// processed, we can be confident that any such segments are at the start of the path.
+		if ( $parts_count > 0 && ( '.' === $this->path_parts[0] || '..' === $this->path_parts[0] ) ) {
+			// Determine the index of the last dot segment (ex: given the path '/../../foo' it would be 1).
+			$single_dots   = array_keys( $this->path_parts, '.', true );
+			$double_dots   = array_keys( $this->path_parts, '..', true );
+			$max_dot_index = max( array_merge( $single_dots, $double_dots ) );
+
+			// Prepend the required number of traversals and discard unnessary trailing segments.
+			$last_traversal = $max_dot_index + ( $this->is_non_root_directory ? 1 : 0 );
 			$parent_path    = str_repeat( '../', $level ) . join( '/', array_slice( $this->path_parts, 0, $last_traversal ) );
 		} elseif ( $parent_path_parts_to_keep < 0 ) {
 			// For relative filepaths only, we use traversals to describe the requested parent.
