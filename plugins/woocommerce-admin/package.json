@@ -47,7 +47,7 @@
 		"lint:css": "stylelint '**/*.scss'",
 		"lint:css-fix": "stylelint '**/*.scss' --fix --ip 'storybook/wordpress'",
 		"lint:js": "wp-scripts lint-js ./client --ext=js,ts,tsx",
-		"lint:js:packages": "wp-scripts lint-js ../../packages/js --ext=js,ts,tsx",
+		"lint:js-packages": "wp-scripts lint-js ../../packages/js --ext=js,ts,tsx",
 		"lint:js-fix": "pnpm run lint:js -- --fix --ext=js,ts,tsx",
 		"lint:php": "./vendor/bin/phpcs --standard=phpcs.xml.dist $(git ls-files | grep .php$)",
 		"lint:php-fix": "./vendor/bin/phpcbf --standard=phpcs.xml.dist $(git ls-files | grep .php$)",
