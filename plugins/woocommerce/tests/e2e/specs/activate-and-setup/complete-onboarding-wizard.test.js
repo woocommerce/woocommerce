@@ -1,11 +1,11 @@
 const {
 	testAdminOnboardingWizard,
 	testSelectiveBundleWCPay,
+	testDifferentStoreCurrenciesWCPay,
+	testSubscriptionsInclusion,
+	testBusinessDetailsForm,
 } = require( '@woocommerce/admin-e2e-tests' );
-const {
-	withRestApi,
-	IS_RETEST_MODE,
-} = require( '@woocommerce/e2e-utils' );
+const { withRestApi, IS_RETEST_MODE } = require( '@woocommerce/e2e-utils' );
 
 // Reset onboarding profile when re-running tests on a site
 if ( IS_RETEST_MODE ) {
@@ -14,3 +14,6 @@ if ( IS_RETEST_MODE ) {
 
 testAdminOnboardingWizard();
 testSelectiveBundleWCPay();
+testDifferentStoreCurrenciesWCPay();
+testSubscriptionsInclusion();
+testBusinessDetailsForm();
