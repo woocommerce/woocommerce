@@ -1,4 +1,0 @@
-Significance: major
-Type: Dev
-
-Refactor and cleanup the Loader.php class and move it to the Internal namespace. #8416
