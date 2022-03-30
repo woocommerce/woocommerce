@@ -4,12 +4,12 @@
  *
  */
 
-// ALLURE_OUTPUT_DIR is the environment variable for the directory where you want the "allure-results" and "allure-report" folders to be generated in.
-const { ALLURE_OUTPUT_DIR } = process.env;
+// API_TEST_REPORT_DIR is the environment variable for the directory where you want the "allure-results" and "allure-report" folders to be generated in.
+const { API_TEST_REPORT_DIR } = process.env;
 
-// If ALLURE_OUTPUT_DIR was specified, use it as the target for the "allure-results" directory.
-if ( ALLURE_OUTPUT_DIR ) {
+// If API_TEST_REPORT_DIR was specified, use it as the target for the "allure-results" directory.
+if ( API_TEST_REPORT_DIR ) {
 	reporter.allure.setOptions( {
-		targetDir: `${ ALLURE_OUTPUT_DIR }/allure-results`,
+		targetDir: `${ API_TEST_REPORT_DIR }/allure-results`,
 	} );
 }

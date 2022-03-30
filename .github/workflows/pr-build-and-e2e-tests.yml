@@ -98,7 +98,7 @@ jobs:
         runs-on: ubuntu-18.04
         needs: [build]
         env:
-            ALLURE_OUTPUT_DIR: ${{ github.workspace }}/api-test-report
+            API_TEST_REPORT_DIR: ${{ github.workspace }}/api-test-report
         steps:
             - name: Create dirs.
               run: |
@@ -156,8 +156,8 @@ jobs:
               with:
                   name: api-test-report---pr-${{ github.event.number }}
                   path: |
-                        ${{ env.ALLURE_OUTPUT_DIR }}/allure-results
-                        ${{ env.ALLURE_OUTPUT_DIR }}/allure-report
+                        ${{ env.API_TEST_REPORT_DIR }}/allure-results
+                        ${{ env.API_TEST_REPORT_DIR }}/allure-report
                   retention-days: 7
 
     k6-tests-run:
