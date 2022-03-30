@@ -98,7 +98,7 @@ jobs:
         runs-on: ubuntu-18.04
         needs: [build]
         env:
-            ALLURE_OUTPUT_DIR: $GITHUB_WORKSPACE/api-test-report
+            ALLURE_OUTPUT_DIR: ${{ env.GITHUB_WORKSPACE }}/api-test-report
         steps:
             - name: Create dirs.
               run: |
