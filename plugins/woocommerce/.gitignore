@@ -30,3 +30,7 @@ tests/cli/vendor
 
 # Language files
 i18n/languages/woocommerce.pot
+
+# Allure directories
+allure-report
+allure-results
