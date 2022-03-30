@@ -368,7 +368,9 @@ const FeaturedProduct = ( {
 				template={ [
 					[
 						'core/buttons',
-						{},
+						{
+							layout: { type: 'flex', justifyContent: 'center' },
+						},
 						[
 							[
 								'core/button',
@@ -378,7 +380,6 @@ const FeaturedProduct = ( {
 										'woo-gutenberg-products-block'
 									),
 									url: product.permalink,
-									align: 'center',
 								},
 							],
 						],

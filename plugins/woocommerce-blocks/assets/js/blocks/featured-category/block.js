@@ -271,7 +271,9 @@ const FeaturedCategory = ( {
 				template={ [
 					[
 						'core/buttons',
-						{},
+						{
+							layout: { type: 'flex', justifyContent: 'center' },
+						},
 						[
 							[
 								'core/button',
@@ -281,7 +283,6 @@ const FeaturedCategory = ( {
 										'woo-gutenberg-products-block'
 									),
 									url: category.permalink,
-									align: 'center',
 								},
 							],
 						],
