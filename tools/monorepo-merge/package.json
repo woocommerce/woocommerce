@@ -26,6 +26,7 @@
     "@types/node": "^16.9.4",
     "eslint": "^7.32.0",
     "globby": "^11",
+    "jscodeshift": "^0.13.1",
     "oclif": "^2",
     "shx": "^0.3.3",
     "ts-node": "^10.2.1",
