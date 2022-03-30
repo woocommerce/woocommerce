@@ -886,7 +886,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 *
 	 * @since  3.0.0
 	 * @param  int  $item_id ID of item to get.
-	 * @param  bool $load_from_db Prior to 3.2 this item was loaded direct from WC_Order_Factory, not this object. This param is here for backwards compatility with that. If false, uses the local items variable instead.
+	 * @param  bool $load_from_db Prior to 3.2 this item was loaded direct from WC_Order_Factory, not this object. This param is here for backwards compatibility with that. If false, uses the local items variable instead.
 	 * @return WC_Order_Item|false
 	 */
 	public function get_item( $item_id, $load_from_db = true ) {
@@ -1148,7 +1148,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		$data_store = $coupon->get_data_store();
 
-		// Check specific for guest checkouts here as well since WC_Cart handles that seperately in check_customer_coupons.
+		// Check specific for guest checkouts here as well since WC_Cart handles that separately in check_customer_coupons.
 		if ( $data_store && 0 === $this->get_customer_id() ) {
 			$usage_count = $data_store->get_usage_by_email( $coupon, $this->get_billing_email() );
 			if ( 0 < $coupon->get_usage_limit_per_user() && $usage_count >= $coupon->get_usage_limit_per_user() ) {
@@ -1260,7 +1260,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			}
 
 			/**
-			 * Allow developers to filter this coupon before it get's re-applied to the order.
+			 * Allow developers to filter this coupon before it gets re-applied to the order.
 			 *
 			 * @since 3.2.0
 			 */

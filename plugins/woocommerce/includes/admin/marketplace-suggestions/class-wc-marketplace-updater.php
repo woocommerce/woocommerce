@@ -68,7 +68,7 @@ class WC_Marketplace_Updater {
 	}
 
 	/**
-	 * Used when an error has occured when fetching suggestions.
+	 * Used when an error has occurred when fetching suggestions.
 	 * Re-schedules the job earlier than the main weekly one.
 	 */
 	public static function retry() {

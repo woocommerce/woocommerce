@@ -611,7 +611,7 @@ class WC_Product_CSV_Importer_Controller {
 	}
 
 	/**
-	 * Map columns using the user's lastest import mappings.
+	 * Map columns using the user's latest import mappings.
 	 *
 	 * @param  array $headers Header columns.
 	 * @return array
