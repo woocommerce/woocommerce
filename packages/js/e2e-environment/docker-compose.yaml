@@ -15,7 +15,7 @@ services:
     healthcheck:
         test: ["CMD-SHELL", "mysqladmin ping -P 3306 --user=${WORDPRESS_DB_USER} --password=${WORDPRESS_DB_PASSWORD} | grep 'mysqld is alive' || exit 1"]
         interval: 2s
-        retries: 15
+        retries: 30
 
   php:
     container_name: "${APP_NAME}_php"
