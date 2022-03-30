@@ -11,6 +11,8 @@ use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 
 /**
  * Class WC_Admin_Tests_Reports_Orders_Stats
+ * Excluding it from code coverage until we refactor this test.
+ * @group run-in-separate-process
  */
 class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 	/**
