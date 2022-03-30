@@ -29,11 +29,7 @@
 		"watch": {
 			"executor": "@nrwl/workspace:run-commands",
 			"options": {
-				"commands": [
-					"pnpm nx packages:watch woocommerce-admin",
-					"pnpm nx client:watch woocommerce-admin"
-				],
-				"parallel": true
+				"command": "pnpm nx client:watch woocommerce-admin"
 			}
 		},
 		"lint": {
