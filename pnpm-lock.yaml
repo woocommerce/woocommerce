@@ -27936,12 +27936,6 @@ packages:
       xmlcreate: 1.0.2
     dev: false
 
-  /js2xmlparser/3.0.0:
-    resolution: {integrity: sha1-P7YOqgicVED5MZ9RdgzNB+JJlzM=}
-    dependencies:
-      xmlcreate: 1.0.2
-    dev: false
-
   /jsbn/0.1.1:
     resolution: {integrity: sha1-peZUwuWi3rXyAdls77yoDA7y9RM=}
 
