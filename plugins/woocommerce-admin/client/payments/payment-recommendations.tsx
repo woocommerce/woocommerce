@@ -79,10 +79,20 @@ const PaymentRecommendations: React.FC = () => {
 		[ isInstalled ]
 	);
 
+	const supportsWCPayments =
+		paymentGatewaySuggestions.filter( ( paymentGatewaySuggestion ) => {
+			return (
+				paymentGatewaySuggestion.id.indexOf(
+					'woocommerce_payments'
+				) === 0
+			);
+		} ).length === 1;
+
 	const triggeredPageViewRef = useRef( false );
 	const shouldShowRecommendations =
 		paymentGatewaySuggestions &&
 		paymentGatewaySuggestions.length > 0 &&
+		! supportsWCPayments &&
 		! isDismissed;
 
 	useEffect( () => {
