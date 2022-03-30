@@ -80,7 +80,7 @@ export const Header = ( { sections, isEmbedded = false, query } ) => {
 					/* translators: 1: document title. 2: page title */
 					__(
 						'%1$s &lsaquo; %2$s &#8212; WooCommerce',
-						'woocommerce-admin'
+						'woocommerce'
 					),
 					documentTitle,
 					siteTitle

@@ -28,12 +28,12 @@ export const UsageModal = () => {
 
 	const title = __(
 		'Help us build a better WooCommerce Payments experience',
-		'woocommerce-admin'
+		'woocommerce'
 	);
 	const trackingMessage = interpolateComponents( {
 		mixedString: __(
 			'By agreeing to share non-sensitive {{link}}usage data{{/link}}, you’ll help us improve features and optimize the WooCommerce Payments experience. You can opt out at any time.',
-			'woocommerce-admin'
+			'woocommerce'
 		),
 		components: {
 			link: (
@@ -51,8 +51,8 @@ export const UsageModal = () => {
 			isDismissible={ false }
 			title={ title }
 			message={ trackingMessage }
-			acceptActionText={ __( 'I agree', 'woocommerce-admin' ) }
-			dismissActionText={ __( 'No thanks', 'woocommerce-admin' ) }
+			acceptActionText={ __( 'I agree', 'woocommerce' ) }
+			dismissActionText={ __( 'No thanks', 'woocommerce' ) }
 			onContinue={ closeModal }
 			onClose={ closeModal }
 		/>

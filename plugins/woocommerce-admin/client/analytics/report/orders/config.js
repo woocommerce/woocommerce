@@ -33,24 +33,24 @@ const ORDERS_REPORT_ADVANCED_FILTERS_FILTER =
 export const charts = applyFilters( ORDERS_REPORT_CHARTS_FILTER, [
 	{
 		key: 'orders_count',
-		label: __( 'Orders', 'woocommerce-admin' ),
+		label: __( 'Orders', 'woocommerce' ),
 		type: 'number',
 	},
 	{
 		key: 'net_revenue',
-		label: __( 'Net sales', 'woocommerce-admin' ),
+		label: __( 'Net sales', 'woocommerce' ),
 		order: 'desc',
 		orderby: 'net_total',
 		type: 'currency',
 	},
 	{
 		key: 'avg_order_value',
-		label: __( 'Average order value', 'woocommerce-admin' ),
+		label: __( 'Average order value', 'woocommerce' ),
 		type: 'currency',
 	},
 	{
 		key: 'avg_items_per_order',
-		label: __( 'Average items per order', 'woocommerce-admin' ),
+		label: __( 'Average items per order', 'woocommerce' ),
 		order: 'desc',
 		orderby: 'num_items_sold',
 		type: 'average',
@@ -69,14 +69,14 @@ export const charts = applyFilters( ORDERS_REPORT_CHARTS_FILTER, [
  */
 export const filters = applyFilters( ORDERS_REPORT_FILTERS_FILTER, [
 	{
-		label: __( 'Show', 'woocommerce-admin' ),
+		label: __( 'Show', 'woocommerce' ),
 		staticParams: [ 'chartType', 'paged', 'per_page' ],
 		param: 'filter',
 		showFilters: () => true,
 		filters: [
-			{ label: __( 'All orders', 'woocommerce-admin' ), value: 'all' },
+			{ label: __( 'All orders', 'woocommerce' ), value: 'all' },
 			{
-				label: __( 'Advanced filters', 'woocommerce-admin' ),
+				label: __( 'Advanced filters', 'woocommerce' ),
 				value: 'advanced',
 			},
 		],
@@ -99,41 +99,34 @@ export const advancedFilters = applyFilters(
 		title: _x(
 			'Orders match {{select /}} filters',
 			'A sentence describing filters for Orders. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ',
-			'woocommerce-admin'
+			'woocommerce'
 		),
 		filters: {
 			status: {
 				labels: {
-					add: __( 'Order Status', 'woocommerce-admin' ),
-					remove: __(
-						'Remove order status filter',
-						'woocommerce-admin'
-					),
+					add: __( 'Order Status', 'woocommerce' ),
+					remove: __( 'Remove order status filter', 'woocommerce' ),
 					rule: __(
 						'Select an order status filter match',
-						'woocommerce-admin'
+						'woocommerce'
 					),
 					/* translators: A sentence describing an Order Status filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ */
 					title: __(
 						'{{title}}Order Status{{/title}} {{rule /}} {{filter /}}',
-						'woocommerce-admin'
+						'woocommerce'
 					),
-					filter: __( 'Select an order status', 'woocommerce-admin' ),
+					filter: __( 'Select an order status', 'woocommerce' ),
 				},
 				rules: [
 					{
 						value: 'is',
 						/* translators: Sentence fragment, logical, "Is" refers to searching for orders matching a chosen order status. Screenshot for context: https://cloudup.com/cSsUY9VeCVJ */
-						label: _x( 'Is', 'order status', 'woocommerce-admin' ),
+						label: _x( 'Is', 'order status', 'woocommerce' ),
 					},
 					{
 						value: 'is_not',
 						/* translators: Sentence fragment, logical, "Is Not" refers to searching for orders that don\'t match a chosen order status. Screenshot for context: https://cloudup.com/cSsUY9VeCVJ */
-						label: _x(
-							'Is Not',
-							'order status',
-							'woocommerce-admin'
-						),
+						label: _x( 'Is Not', 'order status', 'woocommerce' ),
 					},
 				],
 				input: {
@@ -146,38 +139,27 @@ export const advancedFilters = applyFilters(
 			},
 			product: {
 				labels: {
-					add: __( 'Products', 'woocommerce-admin' ),
-					placeholder: __( 'Search products', 'woocommerce-admin' ),
-					remove: __( 'Remove products filter', 'woocommerce-admin' ),
-					rule: __(
-						'Select a product filter match',
-						'woocommerce-admin'
-					),
+					add: __( 'Products', 'woocommerce' ),
+					placeholder: __( 'Search products', 'woocommerce' ),
+					remove: __( 'Remove products filter', 'woocommerce' ),
+					rule: __( 'Select a product filter match', 'woocommerce' ),
 					/* translators: A sentence describing a Product filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ */
 					title: __(
 						'{{title}}Product{{/title}} {{rule /}} {{filter /}}',
-						'woocommerce-admin'
+						'woocommerce'
 					),
-					filter: __( 'Select products', 'woocommerce-admin' ),
+					filter: __( 'Select products', 'woocommerce' ),
 				},
 				rules: [
 					{
 						value: 'includes',
 						/* translators: Sentence fragment, logical, "Includes" refers to orders including a given product(s). Screenshot for context: https://cloudup.com/cSsUY9VeCVJ */
-						label: _x(
-							'Includes',
-							'products',
-							'woocommerce-admin'
-						),
+						label: _x( 'Includes', 'products', 'woocommerce' ),
 					},
 					{
 						value: 'excludes',
 						/* translators: Sentence fragment, logical, "Excludes" refers to orders excluding a given product(s). Screenshot for context: https://cloudup.com/cSsUY9VeCVJ */
-						label: _x(
-							'Excludes',
-							'products',
-							'woocommerce-admin'
-						),
+						label: _x( 'Excludes', 'products', 'woocommerce' ),
 					},
 				],
 				input: {
@@ -188,41 +170,30 @@ export const advancedFilters = applyFilters(
 			},
 			variation: {
 				labels: {
-					add: __( 'Variations', 'woocommerce-admin' ),
-					placeholder: __( 'Search variations', 'woocommerce-admin' ),
-					remove: __(
-						'Remove variations filter',
-						'woocommerce-admin'
-					),
+					add: __( 'Variations', 'woocommerce' ),
+					placeholder: __( 'Search variations', 'woocommerce' ),
+					remove: __( 'Remove variations filter', 'woocommerce' ),
 					rule: __(
 						'Select a variation filter match',
-						'woocommerce-admin'
+						'woocommerce'
 					),
 					/* translators: A sentence describing a Variation filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ */
 					title: __(
 						'{{title}}Variation{{/title}} {{rule /}} {{filter /}}',
-						'woocommerce-admin'
+						'woocommerce'
 					),
-					filter: __( 'Select variation', 'woocommerce-admin' ),
+					filter: __( 'Select variation', 'woocommerce' ),
 				},
 				rules: [
 					{
 						value: 'includes',
 						/* translators: Sentence fragment, logical, "Includes" refers to orders including a given variation(s). Screenshot for context: https://cloudup.com/cSsUY9VeCVJ */
-						label: _x(
-							'Includes',
-							'variations',
-							'woocommerce-admin'
-						),
+						label: _x( 'Includes', 'variations', 'woocommerce' ),
 					},
 					{
 						value: 'excludes',
 						/* translators: Sentence fragment, logical, "Excludes" refers to orders excluding a given variation(s). Screenshot for context: https://cloudup.com/cSsUY9VeCVJ */
-						label: _x(
-							'Excludes',
-							'variations',
-							'woocommerce-admin'
-						),
+						label: _x( 'Excludes', 'variations', 'woocommerce' ),
 					},
 				],
 				input: {
@@ -233,38 +204,27 @@ export const advancedFilters = applyFilters(
 			},
 			coupon: {
 				labels: {
-					add: __( 'Coupon Codes', 'woocommerce-admin' ),
-					placeholder: __( 'Search coupons', 'woocommerce-admin' ),
-					remove: __( 'Remove coupon filter', 'woocommerce-admin' ),
-					rule: __(
-						'Select a coupon filter match',
-						'woocommerce-admin'
-					),
+					add: __( 'Coupon Codes', 'woocommerce' ),
+					placeholder: __( 'Search coupons', 'woocommerce' ),
+					remove: __( 'Remove coupon filter', 'woocommerce' ),
+					rule: __( 'Select a coupon filter match', 'woocommerce' ),
 					/* translators: A sentence describing a Coupon filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ */
 					title: __(
 						'{{title}}Coupon code{{/title}} {{rule /}} {{filter /}}',
-						'woocommerce-admin'
+						'woocommerce'
 					),
-					filter: __( 'Select coupon codes', 'woocommerce-admin' ),
+					filter: __( 'Select coupon codes', 'woocommerce' ),
 				},
 				rules: [
 					{
 						value: 'includes',
 						/* translators: Sentence fragment, logical, "Includes" refers to orders including a given coupon code(s). Screenshot for context: https://cloudup.com/cSsUY9VeCVJ */
-						label: _x(
-							'Includes',
-							'coupon code',
-							'woocommerce-admin'
-						),
+						label: _x( 'Includes', 'coupon code', 'woocommerce' ),
 					},
 					{
 						value: 'excludes',
 						/* translators: Sentence fragment, logical, "Excludes" refers to orders excluding a given coupon code(s). Screenshot for context: https://cloudup.com/cSsUY9VeCVJ */
-						label: _x(
-							'Excludes',
-							'coupon code',
-							'woocommerce-admin'
-						),
+						label: _x( 'Excludes', 'coupon code', 'woocommerce' ),
 					},
 				],
 				input: {
@@ -275,29 +235,26 @@ export const advancedFilters = applyFilters(
 			},
 			customer_type: {
 				labels: {
-					add: __( 'Customer type', 'woocommerce-admin' ),
-					remove: __( 'Remove customer filter', 'woocommerce-admin' ),
-					rule: __(
-						'Select a customer filter match',
-						'woocommerce-admin'
-					),
+					add: __( 'Customer type', 'woocommerce' ),
+					remove: __( 'Remove customer filter', 'woocommerce' ),
+					rule: __( 'Select a customer filter match', 'woocommerce' ),
 					/* translators: A sentence describing a Customer filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ */
 					title: __(
 						'{{title}}Customer is{{/title}} {{filter /}}',
-						'woocommerce-admin'
+						'woocommerce'
 					),
-					filter: __( 'Select a customer type', 'woocommerce-admin' ),
+					filter: __( 'Select a customer type', 'woocommerce' ),
 				},
 				input: {
 					component: 'SelectControl',
 					options: [
 						{
 							value: 'new',
-							label: __( 'New', 'woocommerce-admin' ),
+							label: __( 'New', 'woocommerce' ),
 						},
 						{
 							value: 'returning',
-							label: __( 'Returning', 'woocommerce-admin' ),
+							label: __( 'Returning', 'woocommerce' ),
 						},
 					],
 					defaultOption: 'new',
@@ -305,39 +262,33 @@ export const advancedFilters = applyFilters(
 			},
 			refunds: {
 				labels: {
-					add: __( 'Refunds', 'woocommerce-admin' ),
-					remove: __( 'Remove refunds filter', 'woocommerce-admin' ),
-					rule: __(
-						'Select a refund filter match',
-						'woocommerce-admin'
-					),
+					add: __( 'Refunds', 'woocommerce' ),
+					remove: __( 'Remove refunds filter', 'woocommerce' ),
+					rule: __( 'Select a refund filter match', 'woocommerce' ),
 					title: __(
 						'{{title}}Refunds{{/title}} {{filter /}}',
-						'woocommerce-admin'
+						'woocommerce'
 					),
-					filter: __( 'Select a refund type', 'woocommerce-admin' ),
+					filter: __( 'Select a refund type', 'woocommerce' ),
 				},
 				input: {
 					component: 'SelectControl',
 					options: [
 						{
 							value: 'all',
-							label: __( 'All', 'woocommerce-admin' ),
+							label: __( 'All', 'woocommerce' ),
 						},
 						{
 							value: 'partial',
-							label: __(
-								'Partially refunded',
-								'woocommerce-admin'
-							),
+							label: __( 'Partially refunded', 'woocommerce' ),
 						},
 						{
 							value: 'full',
-							label: __( 'Fully refunded', 'woocommerce-admin' ),
+							label: __( 'Fully refunded', 'woocommerce' ),
 						},
 						{
 							value: 'none',
-							label: __( 'None', 'woocommerce-admin' ),
+							label: __( 'None', 'woocommerce' ),
 						},
 					],
 					defaultOption: 'all',
@@ -345,38 +296,27 @@ export const advancedFilters = applyFilters(
 			},
 			tax_rate: {
 				labels: {
-					add: __( 'Tax Rates', 'woocommerce-admin' ),
-					placeholder: __( 'Search tax rates', 'woocommerce-admin' ),
-					remove: __( 'Remove tax rate filter', 'woocommerce-admin' ),
-					rule: __(
-						'Select a tax rate filter match',
-						'woocommerce-admin'
-					),
+					add: __( 'Tax Rates', 'woocommerce' ),
+					placeholder: __( 'Search tax rates', 'woocommerce' ),
+					remove: __( 'Remove tax rate filter', 'woocommerce' ),
+					rule: __( 'Select a tax rate filter match', 'woocommerce' ),
 					/* translators: A sentence describing a tax rate filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ */
 					title: __(
 						'{{title}}Tax Rate{{/title}} {{rule /}} {{filter /}}',
-						'woocommerce-admin'
+						'woocommerce'
 					),
-					filter: __( 'Select tax rates', 'woocommerce-admin' ),
+					filter: __( 'Select tax rates', 'woocommerce' ),
 				},
 				rules: [
 					{
 						value: 'includes',
 						/* translators: Sentence fragment, logical, "Includes" refers to orders including a given tax rate(s). Screenshot for context: https://cloudup.com/cSsUY9VeCVJ */
-						label: _x(
-							'Includes',
-							'tax rate',
-							'woocommerce-admin'
-						),
+						label: _x( 'Includes', 'tax rate', 'woocommerce' ),
 					},
 					{
 						value: 'excludes',
 						/* translators: Sentence fragment, logical, "Excludes" refers to orders excluding a given tax rate(s). Screenshot for context: https://cloudup.com/cSsUY9VeCVJ */
-						label: _x(
-							'Excludes',
-							'tax rate',
-							'woocommerce-admin'
-						),
+						label: _x( 'Excludes', 'tax rate', 'woocommerce' ),
 					},
 				],
 				input: {
@@ -388,32 +328,25 @@ export const advancedFilters = applyFilters(
 			attribute: {
 				allowMultiple: true,
 				labels: {
-					add: __( 'Attribute', 'woocommerce-admin' ),
-					placeholder: __( 'Search attributes', 'woocommerce-admin' ),
-					remove: __(
-						'Remove attribute filter',
-						'woocommerce-admin'
-					),
+					add: __( 'Attribute', 'woocommerce' ),
+					placeholder: __( 'Search attributes', 'woocommerce' ),
+					remove: __( 'Remove attribute filter', 'woocommerce' ),
 					rule: __(
 						'Select a product attribute filter match',
-						'woocommerce-admin'
+						'woocommerce'
 					),
 					/* translators: A sentence describing a Product filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ */
 					title: __(
 						'{{title}}Attribute{{/title}} {{rule /}} {{filter /}}',
-						'woocommerce-admin'
+						'woocommerce'
 					),
-					filter: __( 'Select attributes', 'woocommerce-admin' ),
+					filter: __( 'Select attributes', 'woocommerce' ),
 				},
 				rules: [
 					{
 						value: 'is',
 						/* translators: Sentence fragment, logical, "Is" refers to searching for products matching a chosen attribute. Screenshot for context: https://cloudup.com/cSsUY9VeCVJ */
-						label: _x(
-							'Is',
-							'product attribute',
-							'woocommerce-admin'
-						),
+						label: _x( 'Is', 'product attribute', 'woocommerce' ),
 					},
 					{
 						value: 'is_not',
@@ -421,7 +354,7 @@ export const advancedFilters = applyFilters(
 						label: _x(
 							'Is Not',
 							'product attribute',
-							'woocommerce-admin'
+							'woocommerce'
 						),
 					},
 				],

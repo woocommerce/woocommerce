@@ -31,14 +31,14 @@ const { addCesSurveyForAnalytics } = dispatch( CES_STORE_KEY );
 export const charts = applyFilters( COUPON_REPORT_CHARTS_FILTER, [
 	{
 		key: 'orders_count',
-		label: __( 'Discounted orders', 'woocommerce-admin' ),
+		label: __( 'Discounted orders', 'woocommerce' ),
 		order: 'desc',
 		orderby: 'orders_count',
 		type: 'number',
 	},
 	{
 		key: 'amount',
-		label: __( 'Amount', 'woocommerce-admin' ),
+		label: __( 'Amount', 'woocommerce' ),
 		order: 'desc',
 		orderby: 'amount',
 		type: 'currency',
@@ -60,15 +60,15 @@ export const advancedFilters = applyFilters(
 		title: _x(
 			'Coupons match {{select /}} filters',
 			'A sentence describing filters for Coupons. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ',
-			'woocommerce-admin'
+			'woocommerce'
 		),
 	}
 );
 
 const filterValues = [
-	{ label: __( 'All coupons', 'woocommerce-admin' ), value: 'all' },
+	{ label: __( 'All coupons', 'woocommerce' ), value: 'all' },
 	{
-		label: __( 'Single coupon', 'woocommerce-admin' ),
+		label: __( 'Single coupon', 'woocommerce' ),
 		value: 'select_coupon',
 		chartMode: 'item-comparison',
 		subFilters: [
@@ -84,27 +84,27 @@ const filterValues = [
 					labels: {
 						placeholder: __(
 							'Type to search for a coupon',
-							'woocommerce-admin'
+							'woocommerce'
 						),
-						button: __( 'Single Coupon', 'woocommerce-admin' ),
+						button: __( 'Single Coupon', 'woocommerce' ),
 					},
 				},
 			},
 		],
 	},
 	{
-		label: __( 'Comparison', 'woocommerce-admin' ),
+		label: __( 'Comparison', 'woocommerce' ),
 		value: 'compare-coupons',
 		settings: {
 			type: 'coupons',
 			param: 'coupons',
 			getLabels: getCouponLabels,
 			labels: {
-				title: __( 'Compare Coupon Codes', 'woocommerce-admin' ),
-				update: __( 'Compare', 'woocommerce-admin' ),
+				title: __( 'Compare Coupon Codes', 'woocommerce' ),
+				update: __( 'Compare', 'woocommerce' ),
 				helpText: __(
 					'Check at least two coupon codes below to compare',
-					'woocommerce-admin'
+					'woocommerce'
 				),
 			},
 			onClick: addCesSurveyForAnalytics,
@@ -114,7 +114,7 @@ const filterValues = [
 
 if ( Object.keys( advancedFilters.filters ).length ) {
 	filterValues.push( {
-		label: __( 'Advanced filters', 'woocommerce-admin' ),
+		label: __( 'Advanced filters', 'woocommerce' ),
 		value: 'advanced',
 	} );
 }
@@ -131,7 +131,7 @@ if ( Object.keys( advancedFilters.filters ).length ) {
  */
 export const filters = applyFilters( COUPON_REPORT_FILTERS_FILTER, [
 	{
-		label: __( 'Show', 'woocommerce-admin' ),
+		label: __( 'Show', 'woocommerce' ),
 		staticParams: [ 'chartType', 'paged', 'per_page' ],
 		param: 'filter',
 		showFilters: () => true,

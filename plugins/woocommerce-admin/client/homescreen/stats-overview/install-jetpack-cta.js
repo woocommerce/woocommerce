@@ -17,9 +17,9 @@ import { createErrorNotice } from '@woocommerce/data/src/plugins/actions';
 const getJetpackInstallText = ( jetpackInstallState ) => {
 	return (
 		{
-			unavailable: __( 'Get Jetpack', 'woocommerce-admin' ),
-			installed: __( 'Activate Jetpack', 'woocommerce-admin' ),
-			activated: __( 'Connect Jetpack', 'woocommerce-admin' ),
+			unavailable: __( 'Get Jetpack', 'woocommerce' ),
+			installed: __( 'Activate Jetpack', 'woocommerce' ),
+			activated: __( 'Connect Jetpack', 'woocommerce' ),
 		}[ jetpackInstallState ] || ''
 	);
 };
@@ -33,18 +33,13 @@ export const JetpackCTA = ( {
 	return (
 		<article className="woocommerce-stats-overview__install-jetpack-promo">
 			<div className="woocommerce-stats-overview__install-jetpack-promo__content">
-				<H>
-					{ __(
-						'Get traffic stats with Jetpack',
-						'woocommerce-admin'
-					) }
-				</H>
+				<H>{ __( 'Get traffic stats with Jetpack', 'woocommerce' ) }</H>
 				<p>
 					{ __(
 						'Keep an eye on your views and visitors metrics with ' +
 							'Jetpack. Requires Jetpack plugin and a WordPress.com ' +
 							'account.',
-						'woocommerce-admin'
+						'woocommerce'
 					) }
 				</p>
 			</div>
@@ -69,7 +64,7 @@ export const JetpackCTA = ( {
 					disabled={ isBusy }
 					isBusy={ isBusy }
 				>
-					{ __( 'No thanks', 'woocommerce-admin' ) }
+					{ __( 'No thanks', 'woocommerce' ) }
 				</Button>
 			</footer>
 		</article>

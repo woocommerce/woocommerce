@@ -35,7 +35,7 @@ function CustomerEffortScoreTracks( {
 	action,
 	trackProps,
 	label,
-	onSubmitLabel = __( 'Thank you for your feedback!', 'woocommerce-admin' ),
+	onSubmitLabel = __( 'Thank you for your feedback!', 'woocommerce' ),
 	cesShownForActions,
 	allowTracking,
 	resolving,
@@ -126,7 +126,7 @@ function CustomerEffortScoreTracks( {
 				<span
 					style={ { height: 21, width: 21 } }
 					role="img"
-					aria-label={ __( 'Pencil icon', 'woocommerce-admin' ) }
+					aria-label={ __( 'Pencil icon', 'woocommerce' ) }
 				>
 					✏️
 				</span>

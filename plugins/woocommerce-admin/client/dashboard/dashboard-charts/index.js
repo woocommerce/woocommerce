@@ -65,12 +65,12 @@ const renderIntervalSelector = ( {
 	}
 
 	const intervalLabels = {
-		hour: __( 'By hour', 'woocommerce-admin' ),
-		day: __( 'By day', 'woocommerce-admin' ),
-		week: __( 'By week', 'woocommerce-admin' ),
-		month: __( 'By month', 'woocommerce-admin' ),
-		quarter: __( 'By quarter', 'woocommerce-admin' ),
-		year: __( 'By year', 'woocommerce-admin' ),
+		hour: __( 'By hour', 'woocommerce' ),
+		day: __( 'By day', 'woocommerce' ),
+		week: __( 'By week', 'woocommerce' ),
+		month: __( 'By month', 'woocommerce' ),
+		quarter: __( 'By quarter', 'woocommerce' ),
+		year: __( 'By year', 'woocommerce' ),
 	};
 
 	return (
@@ -159,15 +159,10 @@ const DashboardCharts = ( props ) => {
 
 	const renderMenu = () => (
 		<EllipsisMenu
-			label={ __(
-				'Choose which charts to display',
-				'woocommerce-admin'
-			) }
+			label={ __( 'Choose which charts to display', 'woocommerce' ) }
 			renderContent={ ( { onToggle } ) => (
 				<Fragment>
-					<MenuTitle>
-						{ __( 'Charts', 'woocommerce-admin' ) }
-					</MenuTitle>
+					<MenuTitle>{ __( 'Charts', 'woocommerce' ) }</MenuTitle>
 					{ renderChartToggles( {
 						hiddenBlocks,
 						onToggleHiddenBlock,
@@ -199,7 +194,7 @@ const DashboardCharts = ( props ) => {
 	return (
 		<div className="woocommerce-dashboard__dashboard-charts">
 			<SectionHeader
-				title={ title || __( 'Charts', 'woocommerce-admin' ) }
+				title={ title || __( 'Charts', 'woocommerce' ) }
 				menu={ renderMenu() }
 				className={ 'has-interval-select' }
 			>
@@ -223,7 +218,7 @@ const DashboardCharts = ( props ) => {
 									query.chartType === 'line',
 							}
 						) }
-						title={ __( 'Line chart', 'woocommerce-admin' ) }
+						title={ __( 'Line chart', 'woocommerce' ) }
 						aria-checked={ query.chartType === 'line' }
 						role="menuitemradio"
 						tabIndex={ query.chartType === 'line' ? 0 : -1 }
@@ -239,7 +234,7 @@ const DashboardCharts = ( props ) => {
 									query.chartType === 'bar',
 							}
 						) }
-						title={ __( 'Bar chart', 'woocommerce-admin' ) }
+						title={ __( 'Bar chart', 'woocommerce' ) }
 						aria-checked={ query.chartType === 'bar' }
 						role="menuitemradio"
 						tabIndex={ query.chartType === 'bar' ? 0 : -1 }

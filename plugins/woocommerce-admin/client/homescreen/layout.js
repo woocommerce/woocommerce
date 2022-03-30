@@ -145,11 +145,11 @@ export const Layout = ( {
 								className="your-store-today"
 								title={ __(
 									'Your store today',
-									'woocommerce-admin'
+									'woocommerce'
 								) }
 								subtitle={ __(
 									"To do's, tips, and insights for your business",
-									'woocommerce-admin'
+									'woocommerce'
 								) }
 							/>
 						) }

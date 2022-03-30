@@ -75,7 +75,7 @@ class Theme extends Component {
 				'error',
 				__(
 					'There was a problem selecting your store theme',
-					'woocommerce-admin'
+					'woocommerce'
 				)
 			);
 		}
@@ -131,7 +131,7 @@ class Theme extends Component {
 						/* translators: The name of the theme that was installed and activated */
 						__(
 							'%s was installed and activated on your site',
-							'woocommerce-admin'
+							'woocommerce'
 						),
 						response.name
 					)
@@ -201,7 +201,7 @@ class Theme extends Component {
 							<Tooltip
 								text={ __(
 									'This theme does not support WooCommerce.',
-									'woocommerce-admin'
+									'woocommerce'
 								) }
 							>
 								<span>
@@ -228,7 +228,7 @@ class Theme extends Component {
 						>
 							{ __(
 								'Continue with my active theme',
-								'woocommerce-admin'
+								'woocommerce'
 							) }
 						</Button>
 					) : (
@@ -238,7 +238,7 @@ class Theme extends Component {
 							isBusy={ chosen === slug }
 							disabled={ chosen === slug }
 						>
-							{ __( 'Choose', 'woocommerce-admin' ) }
+							{ __( 'Choose', 'woocommerce' ) }
 						</Button>
 					) }
 					{ demoUrl && (
@@ -246,7 +246,7 @@ class Theme extends Component {
 							isTertiary
 							onClick={ () => this.openDemo( theme ) }
 						>
-							{ __( 'Live demo', 'woocommerce-admin' ) }
+							{ __( 'Live demo', 'woocommerce' ) }
 						</Button>
 					) }
 				</CardFooter>
@@ -259,16 +259,16 @@ class Theme extends Component {
 		const { activeTheme = '' } = getAdminSetting( 'onboarding', {} );
 
 		if ( activeTheme === slug ) {
-			return __( 'Currently active theme', 'woocommerce-admin' );
+			return __( 'Currently active theme', 'woocommerce' );
 		}
 		if ( isInstalled ) {
-			return __( 'Installed', 'woocommerce-admin' );
+			return __( 'Installed', 'woocommerce' );
 		} else if ( getPriceValue( price ) <= 0 ) {
-			return __( 'Free', 'woocommerce-admin' );
+			return __( 'Free', 'woocommerce' );
 		}
 
 		return sprintf(
-			__( '%s per year', 'woocommerce-admin' ),
+			__( '%s per year', 'woocommerce' ),
 			decodeEntities( price )
 		);
 	}
@@ -353,12 +353,12 @@ class Theme extends Component {
 						size="20"
 						lineHeight="28px"
 					>
-						{ __( 'Choose a theme', 'woocommerce-admin' ) }
+						{ __( 'Choose a theme', 'woocommerce' ) }
 					</Text>
 					<Text variant="body" as="p">
 						{ __(
 							"Choose how your store appears to customers. And don't worry, you can always switch themes and edit them later.",
-							'woocommerce-admin'
+							'woocommerce'
 						) }
 					</Text>
 				</div>
@@ -369,15 +369,15 @@ class Theme extends Component {
 					tabs={ [
 						{
 							name: 'all',
-							title: __( 'All themes', 'woocommerce-admin' ),
+							title: __( 'All themes', 'woocommerce' ),
 						},
 						{
 							name: 'paid',
-							title: __( 'Paid themes', 'woocommerce-admin' ),
+							title: __( 'Paid themes', 'woocommerce' ),
 						},
 						{
 							name: 'free',
-							title: __( 'Free themes', 'woocommerce-admin' ),
+							title: __( 'Free themes', 'woocommerce' ),
 						},
 					] }
 				>
@@ -408,7 +408,7 @@ class Theme extends Component {
 							className="woocommerce-profile-wizard__skip"
 							onClick={ () => this.skipStep() }
 						>
-							{ __( 'Skip this step', 'woocommerce-admin' ) }
+							{ __( 'Skip this step', 'woocommerce' ) }
 						</Button>
 					</p>
 				) }

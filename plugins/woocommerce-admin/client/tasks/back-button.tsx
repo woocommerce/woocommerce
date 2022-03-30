@@ -18,7 +18,7 @@ export type BackButtonProps = {
 };
 
 export const BackButton: React.FC< BackButtonProps > = ( { title } ) => {
-	const homeText = __( 'WooCommerce Home', 'woocommerce-admin' );
+	const homeText = __( 'WooCommerce Home', 'woocommerce' );
 
 	const navigateHome = () => {
 		recordEvent( 'topbar_back_button', {

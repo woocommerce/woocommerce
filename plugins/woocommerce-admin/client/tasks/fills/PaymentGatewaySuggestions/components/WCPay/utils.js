@@ -14,7 +14,7 @@ import { createNoticesFromResponse } from '~/lib/notices';
 export function connectWcpay( createNotice, onCatch ) {
 	const errorMessage = __(
 		'There was an error connecting to WooCommerce Payments. Please try again or connect later in store settings.',
-		'woocommerce-admin'
+		'woocommerce'
 	);
 	apiFetch( {
 		path: WC_ADMIN_NAMESPACE + '/plugins/connect-wcpay',

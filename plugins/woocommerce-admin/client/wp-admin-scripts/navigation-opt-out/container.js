@@ -25,14 +25,14 @@ export class NavigationOptOutContainer extends Component {
 
 		return (
 			<Modal
-				title={ __( 'Help us improve', 'woocommerce-admin' ) }
+				title={ __( 'Help us improve', 'woocommerce' ) }
 				onRequestClose={ () => this.setState( { isModalOpen: false } ) }
 				className="woocommerce-navigation-opt-out-modal"
 			>
 				<p>
 					{ __(
 						"Take this 2-minute survey to share why you're opting out of the new navigation",
-						'woocommerce-admin'
+						'woocommerce'
 					) }
 				</p>
 
@@ -43,7 +43,7 @@ export class NavigationOptOutContainer extends Component {
 							this.setState( { isModalOpen: false } )
 						}
 					>
-						{ __( 'No thanks', 'woocommerce-admin' ) }
+						{ __( 'No thanks', 'woocommerce' ) }
 					</Button>
 
 					<Button
@@ -54,7 +54,7 @@ export class NavigationOptOutContainer extends Component {
 							this.setState( { isModalOpen: false } )
 						}
 					>
-						{ __( 'Share feedback', 'woocommerce-admin' ) }
+						{ __( 'Share feedback', 'woocommerce' ) }
 					</Button>
 				</div>
 			</Modal>

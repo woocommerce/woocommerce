@@ -61,14 +61,11 @@ class ReviewsPanel extends Component {
 					clearReviewsCache();
 					createNotice(
 						'success',
-						__(
-							'Review successfully deleted.',
-							'woocommerce-admin'
-						),
+						__( 'Review successfully deleted.', 'woocommerce' ),
 						{
 							actions: [
 								{
-									label: __( 'Undo', 'woocommerce-admin' ),
+									label: __( 'Undo', 'woocommerce' ),
 									onClick: () => {
 										updateReview(
 											reviewId,
@@ -88,10 +85,7 @@ class ReviewsPanel extends Component {
 				.catch( () => {
 					createNotice(
 						'error',
-						__(
-							'Review could not be deleted.',
-							'woocommerce-admin'
-						)
+						__( 'Review could not be deleted.', 'woocommerce' )
 					);
 				} );
 		}
@@ -105,14 +99,11 @@ class ReviewsPanel extends Component {
 					clearReviewsCache();
 					createNotice(
 						'success',
-						__(
-							'Review successfully updated.',
-							'woocommerce-admin'
-						),
+						__( 'Review successfully updated.', 'woocommerce' ),
 						{
 							actions: [
 								{
-									label: __( 'Undo', 'woocommerce-admin' ),
+									label: __( 'Undo', 'woocommerce' ),
 									onClick: () => {
 										updateReview(
 											reviewId,
@@ -132,10 +123,7 @@ class ReviewsPanel extends Component {
 				.catch( () => {
 					createNotice(
 						'error',
-						__(
-							'Review could not be updated.',
-							'woocommerce-admin'
-						)
+						__( 'Review could not be updated.', 'woocommerce' )
 					);
 				} );
 		}
@@ -168,7 +156,7 @@ class ReviewsPanel extends Component {
 			mixedString: sprintf(
 				__(
 					'{{authorLink}}%s{{/authorLink}}{{verifiedCustomerIcon/}} reviewed {{productLink}}%s{{/productLink}}',
-					'woocommerce-admin'
+					'woocommerce'
 				),
 				review.reviewer,
 				product.name
@@ -193,9 +181,7 @@ class ReviewsPanel extends Component {
 				),
 				verifiedCustomerIcon: review.verified ? (
 					<span className="woocommerce-review-activity-card__verified">
-						<Tooltip
-							text={ __( 'Verified owner', 'woocommerce-admin' ) }
-						>
+						<Tooltip text={ __( 'Verified owner', 'woocommerce' ) }>
 							<span>
 								<CheckmarkCircleIcon />
 							</span>
@@ -254,7 +240,7 @@ class ReviewsPanel extends Component {
 					);
 				} }
 			>
-				{ __( 'Approve', 'woocommerce-admin' ) }
+				{ __( 'Approve', 'woocommerce' ) }
 			</Button>,
 			<Button
 				key="spam-action"
@@ -264,7 +250,7 @@ class ReviewsPanel extends Component {
 					this.updateReviewStatus( review.id, 'spam', review.status );
 				} }
 			>
-				{ __( 'Mark as spam', 'woocommerce-admin' ) }
+				{ __( 'Mark as spam', 'woocommerce' ) }
 			</Button>,
 			<Button
 				key="delete-action"
@@ -275,7 +261,7 @@ class ReviewsPanel extends Component {
 					this.deleteReview( review.id );
 				} }
 			>
-				{ __( 'Delete', 'woocommerce-admin' ) }
+				{ __( 'Delete', 'woocommerce' ) }
 			</Button>,
 		];
 
@@ -314,7 +300,7 @@ class ReviewsPanel extends Component {
 					className="woocommerce-layout__activity-panel-outbound-link woocommerce-layout__activity-panel-empty"
 					type="wp-admin"
 				>
-					{ __( 'Manage all reviews', 'woocommerce-admin' ) }
+					{ __( 'Manage all reviews', 'woocommerce' ) }
 				</Link>
 			</>
 		);
@@ -326,9 +312,9 @@ class ReviewsPanel extends Component {
 		if ( isError ) {
 			const title = __(
 				'There was an error getting your reviews. Please try again.',
-				'woocommerce-admin'
+				'woocommerce'
 			);
-			const actionLabel = __( 'Reload', 'woocommerce-admin' );
+			const actionLabel = __( 'Reload', 'woocommerce' );
 			const actionCallback = () => {
 				// @todo Add tracking for how often an error is displayed, and the reload action is clicked.
 				window.location.reload();

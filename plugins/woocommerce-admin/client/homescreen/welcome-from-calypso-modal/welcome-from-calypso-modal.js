@@ -22,12 +22,12 @@ const page = {
 		<PageContent
 			title={ __(
 				'Welcome to your new store management experience',
-				'woocommerce-admin'
+				'woocommerce'
 			) }
 			body={ interpolateComponents( {
 				mixedString: __(
 					"We've designed your navigation and home screen to help you focus on the things that matter most in managing your online store. {{link}}Learn more{{/link}} about these changes – or explore on your own.",
-					'woocommerce-admin'
+					'woocommerce'
 				),
 				components: {
 					link: (
@@ -70,7 +70,7 @@ export default function WelcomeFromCalypsoModal( { onClose } ) {
 				recordEvent( 'welcome_from_calypso_modal_close' );
 			} }
 			className={ guideClassNames }
-			finishButtonText={ __( "Let's go", 'woocommerce-admin' ) }
+			finishButtonText={ __( "Let's go", 'woocommerce' ) }
 			pages={ [ page ] }
 		/>
 	);

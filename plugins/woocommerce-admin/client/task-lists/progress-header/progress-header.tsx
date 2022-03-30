@@ -57,18 +57,18 @@ export const ProgressHeader: React.FC< ProgressHeaderProps > = ( {
 			return siteTitle
 				? sprintf(
 						/* translators: %s = site title */
-						__( 'Welcome to %s', 'woocommerce-admin' ),
+						__( 'Welcome to %s', 'woocommerce' ),
 						siteTitle
 				  )
-				: __( 'Welcome', 'woocommerce-admin' );
+				: __( 'Welcome', 'woocommerce' );
 		}
 		if ( completedCount > 0 && completedCount < 4 ) {
-			return __( "Let's get you started", 'woocommerce-admin' ) + '   🚀';
+			return __( "Let's get you started", 'woocommerce' ) + '   🚀';
 		}
 		if ( completedCount > 3 && completedCount < 6 ) {
-			return __( 'You are on the right track', 'woocommerce-admin' );
+			return __( 'You are on the right track', 'woocommerce' );
 		}
-		return __( 'You are almost there', 'woocommerce-admin' );
+		return __( 'You are almost there', 'woocommerce' );
 	}, [ completedCount, hasVisitedTasks ] );
 
 	if ( loading || completedCount === tasksCount ) {
@@ -79,10 +79,7 @@ export const ProgressHeader: React.FC< ProgressHeaderProps > = ( {
 		<div className="woocommerce-task-progress-header">
 			<TaskListMenu
 				id={ taskListId }
-				hideTaskListText={ __(
-					'Hide setup list',
-					'woocommerce-admin'
-				) }
+				hideTaskListText={ __( 'Hide setup list', 'woocommerce' ) }
 			/>
 			<div className="woocommerce-task-progress-header__contents">
 				<h1 className="woocommerce-task-progress-header__title">
@@ -93,7 +90,7 @@ export const ProgressHeader: React.FC< ProgressHeaderProps > = ( {
 						/* translators: 1: completed tasks, 2: total tasks */
 						__(
 							'Follow these steps to start selling quickly. %1$d out of %2$d complete.',
-							'woocommerce-admin'
+							'woocommerce'
 						),
 						completedCount,
 						tasksCount

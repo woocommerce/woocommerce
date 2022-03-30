@@ -15,9 +15,9 @@ import { EmptyContent } from '@woocommerce/components';
 function ReportError( { className } ) {
 	const title = __(
 		'There was an error getting your stats. Please try again.',
-		'woocommerce-admin'
+		'woocommerce'
 	);
-	const actionLabel = __( 'Reload', 'woocommerce-admin' );
+	const actionLabel = __( 'Reload', 'woocommerce' );
 	const actionCallback = () => {
 		// @todo Add tracking for how often an error is displayed, and the reload action is clicked.
 		window.location.reload();

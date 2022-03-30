@@ -54,7 +54,7 @@ const StoreLocation = ( {
 				'error',
 				__(
 					'There was a problem saving your store location',
-					'woocommerce-admin'
+					'woocommerce'
 				)
 			);
 		}
@@ -101,7 +101,7 @@ const StoreLocation = ( {
 						setValue={ setValue }
 					/>
 					<Button isPrimary onClick={ handleSubmit }>
-						{ __( 'Continue', 'woocommerce-admin' ) }
+						{ __( 'Continue', 'woocommerce' ) }
 					</Button>
 				</Fragment>
 			) }

@@ -33,28 +33,28 @@ const { addCesSurveyForAnalytics } = dispatch( CES_STORE_KEY );
 export const charts = applyFilters( TAXES_REPORT_CHARTS_FILTER, [
 	{
 		key: 'total_tax',
-		label: __( 'Total tax', 'woocommerce-admin' ),
+		label: __( 'Total tax', 'woocommerce' ),
 		order: 'desc',
 		orderby: 'total_tax',
 		type: 'currency',
 	},
 	{
 		key: 'order_tax',
-		label: __( 'Order tax', 'woocommerce-admin' ),
+		label: __( 'Order tax', 'woocommerce' ),
 		order: 'desc',
 		orderby: 'order_tax',
 		type: 'currency',
 	},
 	{
 		key: 'shipping_tax',
-		label: __( 'Shipping tax', 'woocommerce-admin' ),
+		label: __( 'Shipping tax', 'woocommerce' ),
 		order: 'desc',
 		orderby: 'shipping_tax',
 		type: 'currency',
 	},
 	{
 		key: 'orders_count',
-		label: __( 'Orders', 'woocommerce-admin' ),
+		label: __( 'Orders', 'woocommerce' ),
 		order: 'desc',
 		orderby: 'orders_count',
 		type: 'number',
@@ -76,15 +76,15 @@ export const advancedFilters = applyFilters(
 		title: _x(
 			'Taxes match {{select /}} filters',
 			'A sentence describing filters for Taxes. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ',
-			'woocommerce-admin'
+			'woocommerce'
 		),
 	}
 );
 
 const filterValues = [
-	{ label: __( 'All taxes', 'woocommerce-admin' ), value: 'all' },
+	{ label: __( 'All taxes', 'woocommerce' ), value: 'all' },
 	{
-		label: __( 'Comparison', 'woocommerce-admin' ),
+		label: __( 'Comparison', 'woocommerce' ),
 		value: 'compare-taxes',
 		chartMode: 'item-comparison',
 		settings: {
@@ -101,14 +101,14 @@ const filterValues = [
 			labels: {
 				helpText: __(
 					'Check at least two tax codes below to compare',
-					'woocommerce-admin'
+					'woocommerce'
 				),
 				placeholder: __(
 					'Search for tax codes to compare',
-					'woocommerce-admin'
+					'woocommerce'
 				),
-				title: __( 'Compare Tax Codes', 'woocommerce-admin' ),
-				update: __( 'Compare', 'woocommerce-admin' ),
+				title: __( 'Compare Tax Codes', 'woocommerce' ),
+				update: __( 'Compare', 'woocommerce' ),
 			},
 			onClick: addCesSurveyForAnalytics,
 		},
@@ -117,7 +117,7 @@ const filterValues = [
 
 if ( Object.keys( advancedFilters.filters ).length ) {
 	filterValues.push( {
-		label: __( 'Advanced filters', 'woocommerce-admin' ),
+		label: __( 'Advanced filters', 'woocommerce' ),
 		value: 'advanced',
 	} );
 }
@@ -134,7 +134,7 @@ if ( Object.keys( advancedFilters.filters ).length ) {
  */
 export const filters = applyFilters( TAXES_REPORT_FILTERS_FILTER, [
 	{
-		label: __( 'Show', 'woocommerce-admin' ),
+		label: __( 'Show', 'woocommerce' ),
 		staticParams: [ 'chartType', 'paged', 'per_page' ],
 		param: 'filter',
 		showFilters: () => true,

@@ -186,7 +186,7 @@ const Marketing: React.FC< MarketingProps > = ( { onComplete } ) => {
 						>
 							{ __(
 								'Installed marketing extensions',
-								'woocommerce-admin'
+								'woocommerce'
 							) }
 						</Text>
 					</CardHeader>
@@ -207,13 +207,13 @@ const Marketing: React.FC< MarketingProps > = ( { onComplete } ) => {
 						>
 							{ __(
 								'Recommended marketing extensions',
-								'woocommerce-admin'
+								'woocommerce'
 							) }
 						</Text>
 						<Text as="span">
 							{ __(
 								'We recommend adding one of the following marketing tools for your store. The extension will be installed and activated for you when you click "Get started".',
-								'woocommerce-admin'
+								'woocommerce'
 							) }
 						</Text>
 					</CardHeader>

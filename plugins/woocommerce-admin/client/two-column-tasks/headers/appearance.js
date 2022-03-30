@@ -15,11 +15,11 @@ const AppearanceHeader = ( { task, goToTask } ) => {
 		<div className="woocommerce-task-header__contents-container">
 			<PersonalizeMyStore className="svg-background" />
 			<div className="woocommerce-task-header__contents">
-				<h1>{ __( 'Personalize my store', 'woocommerce-admin' ) }</h1>
+				<h1>{ __( 'Personalize my store', 'woocommerce' ) }</h1>
 				<p>
 					{ __(
 						'Add your logo, create a homepage, and start designing your store',
-						'woocommerce-admin'
+						'woocommerce'
 					) }
 				</p>
 				<Button
@@ -28,8 +28,8 @@ const AppearanceHeader = ( { task, goToTask } ) => {
 					onClick={ goToTask }
 				>
 					{ task.isComplete
-						? __( 'Modify choices', 'woocommerce-admin' )
-						: __( 'Personalize', 'woocommerce-admin' ) }
+						? __( 'Modify choices', 'woocommerce' )
+						: __( 'Personalize', 'woocommerce' ) }
 				</Button>
 				<p className="woocommerce-task-header__timer">
 					<img src={ TimerImage } alt="Timer" />{ ' ' }

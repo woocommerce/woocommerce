@@ -121,7 +121,7 @@ class Appearance extends Component {
 						'error',
 						__(
 							'There was an error importing some of the sample products',
-							'woocommerce-admin'
+							'woocommerce'
 						)
 					);
 				} else {
@@ -129,7 +129,7 @@ class Appearance extends Component {
 						'success',
 						__(
 							'All sample products have been imported',
-							'woocommerce-admin'
+							'woocommerce'
 						)
 					);
 				}
@@ -143,7 +143,7 @@ class Appearance extends Component {
 					message ||
 						__(
 							'There was an error importing the sample products',
-							'woocommerce-admin'
+							'woocommerce'
 						),
 					{ __unstableHTML: true }
 				);
@@ -168,10 +168,7 @@ class Appearance extends Component {
 					actions: response.edit_post_link
 						? [
 								{
-									label: __(
-										'Customize',
-										'woocommerce-admin'
-									),
+									label: __( 'Customize', 'woocommerce' ),
 									onClick: () => {
 										queueRecordEvent(
 											'tasklist_appearance_customize_homepage',
@@ -213,7 +210,7 @@ class Appearance extends Component {
 			this.setState( { isUpdatingLogo: false } );
 			createNotice(
 				'success',
-				__( 'Store logo updated sucessfully', 'woocommerce-admin' )
+				__( 'Store logo updated sucessfully', 'woocommerce' )
 			);
 			this.completeStep();
 		} else {
@@ -241,7 +238,7 @@ class Appearance extends Component {
 				'success',
 				__(
 					"🎨 Your store is looking great! Don't forget to continue personalizing it",
-					'woocommerce-admin'
+					'woocommerce'
 				)
 			);
 			this.completeStep();
@@ -262,10 +259,10 @@ class Appearance extends Component {
 		const steps = [
 			{
 				key: 'import',
-				label: __( 'Import sample products', 'woocommerce-admin' ),
+				label: __( 'Import sample products', 'woocommerce' ),
 				description: __(
 					'We’ll add some products that will make it easier to see what your store looks like',
-					'woocommerce-admin'
+					'woocommerce'
 				),
 				content: (
 					<Fragment>
@@ -274,10 +271,10 @@ class Appearance extends Component {
 							isBusy={ isPending }
 							isPrimary
 						>
-							{ __( 'Import products', 'woocommerce-admin' ) }
+							{ __( 'Import products', 'woocommerce' ) }
 						</Button>
 						<Button onClick={ () => this.completeStep() }>
-							{ __( 'Skip', 'woocommerce-admin' ) }
+							{ __( 'Skip', 'woocommerce' ) }
 						</Button>
 					</Fragment>
 				),
@@ -285,10 +282,10 @@ class Appearance extends Component {
 			},
 			{
 				key: 'homepage',
-				label: __( 'Create a custom homepage', 'woocommerce-admin' ),
+				label: __( 'Create a custom homepage', 'woocommerce' ),
 				description: __(
 					'Create a new homepage and customize it to suit your needs',
-					'woocommerce-admin'
+					'woocommerce'
 				),
 				content: (
 					<Fragment>
@@ -297,7 +294,7 @@ class Appearance extends Component {
 							isBusy={ isPending }
 							onClick={ this.createHomepage }
 						>
-							{ __( 'Create homepage', 'woocommerce-admin' ) }
+							{ __( 'Create homepage', 'woocommerce' ) }
 						</Button>
 						<Button
 							isTertiary
@@ -309,7 +306,7 @@ class Appearance extends Component {
 								this.completeStep();
 							} }
 						>
-							{ __( 'Skip', 'woocommerce-admin' ) }
+							{ __( 'Skip', 'woocommerce' ) }
 						</Button>
 					</Fragment>
 				),
@@ -317,10 +314,10 @@ class Appearance extends Component {
 			},
 			{
 				key: 'logo',
-				label: __( 'Upload a logo', 'woocommerce-admin' ),
+				label: __( 'Upload a logo', 'woocommerce' ),
 				description: __(
 					'Ensure your store is on-brand by adding your logo',
-					'woocommerce-admin'
+					'woocommerce'
 				),
 				content: isPending ? null : (
 					<Fragment>
@@ -336,13 +333,13 @@ class Appearance extends Component {
 							isBusy={ isUpdatingLogo }
 							isPrimary
 						>
-							{ __( 'Proceed', 'woocommerce-admin' ) }
+							{ __( 'Proceed', 'woocommerce' ) }
 						</Button>
 						<Button
 							isTertiary
 							onClick={ () => this.completeStep() }
 						>
-							{ __( 'Skip', 'woocommerce-admin' ) }
+							{ __( 'Skip', 'woocommerce' ) }
 						</Button>
 					</Fragment>
 				),
@@ -350,21 +347,18 @@ class Appearance extends Component {
 			},
 			{
 				key: 'notice',
-				label: __( 'Set a store notice', 'woocommerce-admin' ),
+				label: __( 'Set a store notice', 'woocommerce' ),
 				description: __(
 					'Optionally display a prominent notice across all pages of your store',
-					'woocommerce-admin'
+					'woocommerce'
 				),
 				content: (
 					<Fragment>
 						<TextControl
-							label={ __(
-								'Store notice text',
-								'woocommerce-admin'
-							) }
+							label={ __( 'Store notice text', 'woocommerce' ) }
 							placeholder={ __(
 								'Store notice text',
-								'woocommerce-admin'
+								'woocommerce'
 							) }
 							value={ storeNoticeText }
 							onChange={ ( value ) =>
@@ -372,7 +366,7 @@ class Appearance extends Component {
 							}
 						/>
 						<Button onClick={ this.updateNotice } isPrimary>
-							{ __( 'Complete task', 'woocommerce-admin' ) }
+							{ __( 'Complete task', 'woocommerce' ) }
 						</Button>
 					</Fragment>
 				),

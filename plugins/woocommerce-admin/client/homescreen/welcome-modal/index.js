@@ -22,11 +22,11 @@ const pages = [
 			<PageContent
 				title={ __(
 					'Welcome to your WooCommerce store’s online HQ!',
-					'woocommerce-admin'
+					'woocommerce'
 				) }
 				body={ __(
 					"Here's where you’ll find setup suggestions, tips and tools, and key data on your store’s performance and earnings — all the basics for store management and growth.",
-					'woocommerce-admin'
+					'woocommerce'
 				) }
 			/>
 		),
@@ -37,11 +37,11 @@ const pages = [
 			<PageContent
 				title={ __(
 					'A personalized inbox full of relevant advice',
-					'woocommerce-admin'
+					'woocommerce'
 				) }
 				body={ __(
 					'Check your inbox for helpful growth tips tailored to your store and notifications about key traffic and sales milestones. We look forward to celebrating them with you!',
-					'woocommerce-admin'
+					'woocommerce'
 				) }
 			/>
 		),
@@ -52,11 +52,11 @@ const pages = [
 			<PageContent
 				title={ __(
 					'Good data leads to smart business decisions',
-					'woocommerce-admin'
+					'woocommerce'
 				) }
 				body={ __(
 					'Monitor your stats to improve performance, increase sales, and track your progress toward revenue goals. The more you know, the better you can serve your customers and grow your store.',
-					'woocommerce-admin'
+					'woocommerce'
 				) }
 			/>
 		),
@@ -80,7 +80,7 @@ export const WelcomeModal = ( { onClose } ) => {
 						recordEvent( 'task_list_welcome_modal_close' );
 					} }
 					className={ 'woocommerce__welcome-modal' }
-					finishButtonText={ __( "Let's go", 'woocommerce-admin' ) }
+					finishButtonText={ __( "Let's go", 'woocommerce' ) }
 					pages={ pages }
 				/>
 			) }

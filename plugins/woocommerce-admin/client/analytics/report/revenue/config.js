@@ -23,7 +23,7 @@ const REVENUE_REPORT_ADVANCED_FILTERS_FILTER =
 export const charts = applyFilters( REVENUE_REPORT_CHARTS_FILTER, [
 	{
 		key: 'gross_sales',
-		label: __( 'Gross sales', 'woocommerce-admin' ),
+		label: __( 'Gross sales', 'woocommerce' ),
 		order: 'desc',
 		orderby: 'gross_sales',
 		type: 'currency',
@@ -31,7 +31,7 @@ export const charts = applyFilters( REVENUE_REPORT_CHARTS_FILTER, [
 	},
 	{
 		key: 'refunds',
-		label: __( 'Returns', 'woocommerce-admin' ),
+		label: __( 'Returns', 'woocommerce' ),
 		order: 'desc',
 		orderby: 'refunds',
 		type: 'currency',
@@ -39,7 +39,7 @@ export const charts = applyFilters( REVENUE_REPORT_CHARTS_FILTER, [
 	},
 	{
 		key: 'coupons',
-		label: __( 'Coupons', 'woocommerce-admin' ),
+		label: __( 'Coupons', 'woocommerce' ),
 		order: 'desc',
 		orderby: 'coupons',
 		type: 'currency',
@@ -47,37 +47,37 @@ export const charts = applyFilters( REVENUE_REPORT_CHARTS_FILTER, [
 	},
 	{
 		key: 'net_revenue',
-		label: __( 'Net sales', 'woocommerce-admin' ),
+		label: __( 'Net sales', 'woocommerce' ),
 		orderby: 'net_revenue',
 		type: 'currency',
 		isReverseTrend: false,
 		labelTooltipText: __(
 			'Full refunds are not deducted from tax or net sales totals',
-			'woocommerce-admin'
+			'woocommerce'
 		),
 	},
 	{
 		key: 'taxes',
-		label: __( 'Taxes', 'woocommerce-admin' ),
+		label: __( 'Taxes', 'woocommerce' ),
 		order: 'desc',
 		orderby: 'taxes',
 		type: 'currency',
 		isReverseTrend: false,
 		labelTooltipText: __(
 			'Full refunds are not deducted from tax or net sales totals',
-			'woocommerce-admin'
+			'woocommerce'
 		),
 	},
 	{
 		key: 'shipping',
-		label: __( 'Shipping', 'woocommerce-admin' ),
+		label: __( 'Shipping', 'woocommerce' ),
 		orderby: 'shipping',
 		type: 'currency',
 		isReverseTrend: false,
 	},
 	{
 		key: 'total_sales',
-		label: __( 'Total sales', 'woocommerce-admin' ),
+		label: __( 'Total sales', 'woocommerce' ),
 		order: 'desc',
 		orderby: 'total_sales',
 		type: 'currency',
@@ -100,7 +100,7 @@ export const advancedFilters = applyFilters(
 		title: _x(
 			'Revenue Matches {{select /}} Filters',
 			'A sentence describing filters for Revenue. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ',
-			'woocommerce-admin'
+			'woocommerce'
 		),
 	}
 );
@@ -109,11 +109,11 @@ const filterValues = [];
 
 if ( Object.keys( advancedFilters.filters ).length ) {
 	filterValues.push( {
-		label: __( 'All Revenue', 'woocommerce-admin' ),
+		label: __( 'All Revenue', 'woocommerce' ),
 		value: 'all',
 	} );
 	filterValues.push( {
-		label: __( 'Advanced Filters', 'woocommerce-admin' ),
+		label: __( 'Advanced Filters', 'woocommerce' ),
 		value: 'advanced',
 	} );
 }
@@ -130,7 +130,7 @@ if ( Object.keys( advancedFilters.filters ).length ) {
  */
 export const filters = applyFilters( REVENUE_REPORT_FILTERS_FILTER, [
 	{
-		label: __( 'Show', 'woocommerce-admin' ),
+		label: __( 'Show', 'woocommerce' ),
 		staticParams: [ 'chartType', 'paged', 'per_page' ],
 		param: 'filter',
 		showFilters: () => filterValues.length > 0,

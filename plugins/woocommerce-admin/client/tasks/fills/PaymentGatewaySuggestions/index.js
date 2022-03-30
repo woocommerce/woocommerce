@@ -241,10 +241,7 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 
 			{ !! enabledGateways.length && (
 				<List
-					heading={ __(
-						'Enabled payment gateways',
-						'woocommerce-admin'
-					) }
+					heading={ __( 'Enabled payment gateways', 'woocommerce' ) }
 					recommendation={ recommendation }
 					paymentGateways={ enabledGateways }
 				/>
@@ -254,7 +251,7 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 				<List
 					heading={ __(
 						'Additional payment gateways',
-						'woocommerce-admin'
+						'woocommerce'
 					) }
 					recommendation={ recommendation }
 					paymentGateways={ additionalGateways }

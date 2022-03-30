@@ -254,7 +254,7 @@ class BusinessDetails extends Component {
 					'error',
 					__(
 						'There was a problem updating your business details',
-						'woocommerce-admin'
+						'woocommerce'
 					)
 				);
 			} );
@@ -302,7 +302,7 @@ class BusinessDetails extends Component {
 				'error',
 				__(
 					'There was a problem updating your business details',
-					'woocommerce-admin'
+					'woocommerce'
 				)
 			);
 		} );
@@ -314,14 +314,14 @@ class BusinessDetails extends Component {
 		if ( ! values.product_count.length ) {
 			errors.product_count = __(
 				'This field is required',
-				'woocommerce-admin'
+				'woocommerce'
 			);
 		}
 
 		if ( ! values.selling_venues.length ) {
 			errors.selling_venues = __(
 				'This field is required',
-				'woocommerce-admin'
+				'woocommerce'
 			);
 		}
 
@@ -331,7 +331,7 @@ class BusinessDetails extends Component {
 		) {
 			errors.other_platform = __(
 				'This field is required',
-				'woocommerce-admin'
+				'woocommerce'
 			);
 		}
 		if (
@@ -341,7 +341,7 @@ class BusinessDetails extends Component {
 		) {
 			errors.other_platform_name = __(
 				'This field is required',
-				'woocommerce-admin'
+				'woocommerce'
 			);
 		}
 
@@ -351,7 +351,7 @@ class BusinessDetails extends Component {
 		) {
 			errors.number_employees = __(
 				'This field is required',
-				'woocommerce-admin'
+				'woocommerce'
 			);
 		}
 
@@ -359,10 +359,7 @@ class BusinessDetails extends Component {
 			! values.revenue.length &&
 			isSellingElsewhere( values.selling_venues )
 		) {
-			errors.revenue = __(
-				'This field is required',
-				'woocommerce-admin'
-			);
+			errors.revenue = __( 'This field is required', 'woocommerce' );
 		}
 
 		if ( Object.keys( errors ).length === 0 ) {
@@ -461,13 +458,13 @@ class BusinessDetails extends Component {
 								>
 									{ __(
 										'Tell us about your business',
-										'woocommerce-admin'
+										'woocommerce'
 									) }
 								</Text>
 								<Text variant="body" as="p">
 									{ __(
 										"We'd love to know if you are just getting started or you already have a business in place.",
-										'woocommerce-admin'
+										'woocommerce'
 									) }
 								</Text>
 							</div>
@@ -477,7 +474,7 @@ class BusinessDetails extends Component {
 										excludeSelectedOptions={ false }
 										label={ __(
 											'How many products do you plan to display?',
-											'woocommerce-admin'
+											'woocommerce'
 										) }
 										options={ productCountOptions }
 										required
@@ -491,7 +488,7 @@ class BusinessDetails extends Component {
 										excludeSelectedOptions={ false }
 										label={ __(
 											'Currently selling elsewhere?',
-											'woocommerce-admin'
+											'woocommerce'
 										) }
 										options={ sellingVenueOptions }
 										required
@@ -508,7 +505,7 @@ class BusinessDetails extends Component {
 											excludeSelectedOptions={ false }
 											label={ __(
 												'How many employees do you have?',
-												'woocommerce-admin'
+												'woocommerce'
 											) }
 											options={ employeeOptions }
 											required
@@ -526,7 +523,7 @@ class BusinessDetails extends Component {
 											excludeSelectedOptions={ false }
 											label={ __(
 												"What's your current annual revenue?",
-												'woocommerce-admin'
+												'woocommerce'
 											) }
 											options={ getRevenueOptions(
 												getCurrencyConfig(),
@@ -553,7 +550,7 @@ class BusinessDetails extends Component {
 													}
 													label={ __(
 														'Which platform is the store using?',
-														'woocommerce-admin'
+														'woocommerce'
 													) }
 													options={ platformOptions }
 													required
@@ -567,7 +564,7 @@ class BusinessDetails extends Component {
 													<TextControl
 														label={ __(
 															'What is the platform name?',
-															'woocommerce-admin'
+															'woocommerce'
 														) }
 														required
 														{ ...this.getSelectControlProps(
@@ -586,7 +583,7 @@ class BusinessDetails extends Component {
 											<CheckboxControl
 												label={ __(
 													"I'm setting up a store for a client",
-													'woocommerce-admin'
+													'woocommerce'
 												) }
 												{ ...getInputProps(
 													'setup_client'
@@ -606,14 +603,8 @@ class BusinessDetails extends Component {
 										isBusy={ isInstallingActivating }
 									>
 										{ ! hasInstallActivateError
-											? __(
-													'Continue',
-													'woocommerce-admin'
-											  )
-											: __(
-													'Retry',
-													'woocommerce-admin'
-											  ) }
+											? __( 'Continue', 'woocommerce' )
+											: __( 'Retry', 'woocommerce' ) }
 									</Button>
 									{ hasInstallActivateError && (
 										<Button
@@ -626,7 +617,7 @@ class BusinessDetails extends Component {
 										>
 											{ __(
 												'Continue without installing',
-												'woocommerce-admin'
+												'woocommerce'
 											) }
 										</Button>
 									) }
@@ -654,21 +645,18 @@ class BusinessDetails extends Component {
 						size="20"
 						lineHeight="28px"
 					>
-						{ __(
-							'Included business features',
-							'woocommerce-admin'
-						) }
+						{ __( 'Included business features', 'woocommerce' ) }
 					</Text>
 					<Text variant="body" as="p">
 						{ __(
 							'We recommend enhancing your store with these free extensions',
-							'woocommerce-admin'
+							'woocommerce'
 						) }
 					</Text>
 					<Text variant="body" as="p">
 						{ __(
 							'No commitment required - you can remove them at any time.',
-							'woocommerce-admin'
+							'woocommerce'
 						) }
 					</Text>
 				</div>
@@ -715,7 +703,7 @@ class BusinessDetails extends Component {
 								? 'current-tab'
 								: BUSINESS_DETAILS_TAB_NAME,
 						id: BUSINESS_DETAILS_TAB_NAME,
-						title: __( 'Business details', 'woocommerce-admin' ),
+						title: __( 'Business details', 'woocommerce' ),
 					},
 					{
 						name:
@@ -723,7 +711,7 @@ class BusinessDetails extends Component {
 								? 'current-tab'
 								: BUSINESS_FEATURES_TAB_NAME,
 						id: BUSINESS_FEATURES_TAB_NAME,
-						title: __( 'Free features', 'woocommerce-admin' ),
+						title: __( 'Free features', 'woocommerce' ),
 						className: this.state.isValid ? '' : 'is-disabled',
 					},
 				] }

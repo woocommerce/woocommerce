@@ -72,10 +72,7 @@ export const StatsList = ( {
 						hrefType={ reportUrlType }
 						label={ item.label }
 						value={ primaryValue }
-						prevLabel={ __(
-							'Previous period:',
-							'woocommerce-admin'
-						) }
+						prevLabel={ __( 'Previous period:', 'woocommerce' ) }
 						prevValue={ secondaryValue }
 						delta={ delta }
 						onLinkClickCallback={ () => {

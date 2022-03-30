@@ -42,8 +42,8 @@ class ProductsReport extends Component {
 				: 'products';
 		const label =
 			isSingleProductView && isSingleProductVariable
-				? __( '%d variations', 'woocommerce-admin' )
-				: __( '%d products', 'woocommerce-admin' );
+				? __( '%d variations', 'woocommerce' )
+				: __( '%d products', 'woocommerce' );
 
 		return {
 			compareObject,

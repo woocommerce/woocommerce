@@ -22,11 +22,11 @@ const DismissAllModal = ( { onClose } ) => {
 			} );
 			createNotice(
 				'success',
-				__( 'All messages dismissed', 'woocommerce-admin' ),
+				__( 'All messages dismissed', 'woocommerce' ),
 				{
 					actions: [
 						{
-							label: __( 'Undo', 'woocommerce-admin' ),
+							label: __( 'Undo', 'woocommerce' ),
 							onClick: () => {
 								batchUpdateNotes(
 									notesRemoved.map( ( note ) => note.id ),
@@ -42,7 +42,7 @@ const DismissAllModal = ( { onClose } ) => {
 		} catch ( e ) {
 			createNotice(
 				'error',
-				__( 'Messages could not be dismissed', 'woocommerce-admin' )
+				__( 'Messages could not be dismissed', 'woocommerce' )
 			);
 			onClose();
 		}
@@ -50,7 +50,7 @@ const DismissAllModal = ( { onClose } ) => {
 	return (
 		<>
 			<Modal
-				title={ __( 'Dismiss all messages', 'woocommerce-admin' ) }
+				title={ __( 'Dismiss all messages', 'woocommerce' ) }
 				className="woocommerce-inbox-dismiss-all-modal"
 				onRequestClose={ onClose }
 			>
@@ -58,12 +58,12 @@ const DismissAllModal = ( { onClose } ) => {
 					<div className="woocommerce-usage-modal__message">
 						{ __(
 							'Are you sure? Inbox messages will be dismissed forever.',
-							'woocommerce-admin'
+							'woocommerce'
 						) }
 					</div>
 					<div className="woocommerce-usage-modal__actions">
 						<Button onClick={ onClose }>
-							{ __( 'Cancel', 'woocommerce-admin' ) }
+							{ __( 'Cancel', 'woocommerce' ) }
 						</Button>
 						<Button
 							isPrimary
@@ -72,7 +72,7 @@ const DismissAllModal = ( { onClose } ) => {
 								onClose();
 							} }
 						>
-							{ __( 'Yes, dismiss all', 'woocommerce-admin' ) }
+							{ __( 'Yes, dismiss all', 'woocommerce' ) }
 						</Button>
 					</div>
 				</div>

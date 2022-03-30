@@ -26,7 +26,7 @@ const ALLOWED_PLUGIN_CATEGORIES = [ 'obw/basics', 'obw/grow' ];
 const FreeBadge = () => {
 	return (
 		<div className="woocommerce-admin__business-details__free-badge">
-			{ __( 'Free', 'woocommerce-admin' ) }
+			{ __( 'Free', 'woocommerce' ) }
 		</div>
 	);
 };
@@ -59,7 +59,7 @@ const renderBusinessExtensionHelpText = ( values, isInstallingActivating ) => {
 							'Installing the following plugin: %s',
 							'Installing the following plugins: %s',
 							extensions.length,
-							'woocommerce-admin'
+							'woocommerce'
 						),
 						extensionsList
 					) }
@@ -70,7 +70,7 @@ const renderBusinessExtensionHelpText = ( values, isInstallingActivating ) => {
 
 	const accountRequiredText = __(
 		'User accounts are required to use these features.',
-		'woocommerce-admin'
+		'woocommerce'
 	);
 
 	const extensionsWithToS = extensions.filter(
@@ -94,7 +94,7 @@ const renderBusinessExtensionHelpText = ( values, isInstallingActivating ) => {
 			'By installing %s plugin for free you agree to our {{link}}Terms of Service{{/link}}.',
 			'By installing %s plugins for free you agree to our {{link}}Terms of Service{{/link}}.',
 			extensionsWithToS.length,
-			'woocommerce-admin'
+			'woocommerce'
 		),
 		extensionsListText
 	);
@@ -108,7 +108,7 @@ const renderBusinessExtensionHelpText = ( values, isInstallingActivating ) => {
 						'The following plugin will be installed for free: %1$s. %2$s',
 						'The following plugins will be installed for free: %1$s. %2$s',
 						extensions.length,
-						'woocommerce-admin'
+						'woocommerce'
 					),
 					extensionsList,
 					accountRequiredText
@@ -343,7 +343,7 @@ export const SelectiveExtensionsBundle = ( {
 						<p className="woocommerce-admin__business-details__selective-extensions-bundle__description">
 							{ __(
 								'Add recommended business features to my site',
-								'woocommerce-admin'
+								'woocommerce'
 							) }
 						</p>
 						<Button
@@ -399,7 +399,7 @@ export const SelectiveExtensionsBundle = ( {
 						disabled={ isInstallingActivating || isResolving }
 						isPrimary
 					>
-						{ __( 'Continue', 'woocommerce-admin' ) }
+						{ __( 'Continue', 'woocommerce' ) }
 					</Button>
 				</div>
 			</Card>

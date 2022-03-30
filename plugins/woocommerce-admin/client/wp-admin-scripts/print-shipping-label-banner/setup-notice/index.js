@@ -13,11 +13,11 @@ export const setupErrorTypes = {
 };
 
 const setupErrorDescriptions = {
-	[ setupErrorTypes.DOWNLOAD ]: __( 'download', 'woocommerce-admin' ),
-	[ setupErrorTypes.INSTALL ]: __( 'install', 'woocommerce-admin' ),
-	[ setupErrorTypes.ACTIVATE ]: __( 'activate', 'woocommerce-admin' ),
-	[ setupErrorTypes.SETUP ]: __( 'set up', 'woocommerce-admin' ),
-	[ setupErrorTypes.START ]: __( 'start', 'woocommerce-admin' ),
+	[ setupErrorTypes.DOWNLOAD ]: __( 'download', 'woocommerce' ),
+	[ setupErrorTypes.INSTALL ]: __( 'install', 'woocommerce' ),
+	[ setupErrorTypes.ACTIVATE ]: __( 'activate', 'woocommerce' ),
+	[ setupErrorTypes.SETUP ]: __( 'set up', 'woocommerce' ),
+	[ setupErrorTypes.START ]: __( 'start', 'woocommerce' ),
 };
 
 export default function SetupNotice( { isSetupError, errorReason } ) {
@@ -31,7 +31,7 @@ export default function SetupNotice( { isSetupError, errorReason } ) {
 		return sprintf(
 			__(
 				'Unable to %s the plugin. Refresh the page and try again.',
-				'woocommerce-admin'
+				'woocommerce'
 			),
 			description
 		);

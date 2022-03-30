@@ -28,7 +28,7 @@ export const Partners: React.FC< TaxChildProps > = ( {
 	return (
 		<Card className={ classes }>
 			<CardHeader>
-				{ __( 'Choose a tax partner', 'woocommerce-admin' ) }
+				{ __( 'Choose a tax partner', 'woocommerce' ) }
 			</CardHeader>
 			<CardBody>
 				<div className="woocommerce-tax-partners__partners">
@@ -44,10 +44,7 @@ export const Partners: React.FC< TaxChildProps > = ( {
 								onManual();
 							} }
 						>
-							{ __(
-								'Set up taxes manually',
-								'woocommerce-admin'
-							) }
+							{ __( 'Set up taxes manually', 'woocommerce' ) }
 						</Button>
 					</li>
 					<li>
@@ -59,10 +56,7 @@ export const Partners: React.FC< TaxChildProps > = ( {
 								onDisable();
 							} }
 						>
-							{ __(
-								"I don't charge sales tax",
-								'woocommerce-admin'
-							) }
+							{ __( "I don't charge sales tax", 'woocommerce' ) }
 						</Button>
 					</li>
 				</ul>

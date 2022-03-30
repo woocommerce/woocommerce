@@ -24,7 +24,7 @@ class CouponsReport extends Component {
 			query.coupons.split( ',' ).length > 1;
 
 		const mode = isCompareView ? 'item-comparison' : 'time-comparison';
-		const itemsLabel = __( '%d coupons', 'woocommerce-admin' );
+		const itemsLabel = __( '%d coupons', 'woocommerce' );
 
 		return {
 			itemsLabel,
