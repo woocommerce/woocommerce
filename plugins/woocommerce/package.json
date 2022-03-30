@@ -27,8 +27,7 @@
     "test:e2e-dev": "pnpx wc-e2e test:e2e-dev",
     "test:unit": "./vendor/bin/phpunit -c ./phpunit.xml",
     "makepot": "composer run-script makepot",
-    "packages:fix:textdomain": "node ./bin/package-update-textdomain.js",
-    "git:update-hooks": "rm -r .git/hooks && mkdir -p .git/hooks && node ./node_modules/husky/husky.js install"
+    "packages:fix:textdomain": "node ./bin/package-update-textdomain.js"
   },
   "devDependencies": {
     "@babel/cli": "7.12.8",
@@ -60,10 +59,8 @@
     "eslint-config-wpcalypso": "5.0.0",
     "eslint-plugin-jest": "23.20.0",
     "github-contributors-list": "https://github.com/woocommerce/github-contributors-list/tarball/master",
-    "husky": "4.3.0",
     "istanbul": "1.0.0-alpha.2",
     "jest": "^25.1.0",
-    "lint-staged": "9.5.0",
     "mocha": "7.2.0",
     "prettier": "npm:wp-prettier@2.0.5",
     "stylelint": "^13.8.0",
@@ -75,31 +72,6 @@
   "engines": {
     "node": "^16.13.1",
     "pnpm": "^6.24.2"
-  },
-  "husky": {
-    "hooks": {
-      "post-merge": "./bin/post-merge.sh",
-      "pre-commit": "lint-staged",
-      "pre-push": "./bin/pre-push.sh"
-    }
-  },
-  "lint-staged": {
-    "*.php": [
-      "php -d display_errors=1 -l",
-      "composer run-script phpcs-pre-commit"
-    ],
-    "*.scss": [
-      "stylelint --syntax=scss --fix",
-      "git add"
-    ],
-    "*.js": [
-      "eslint --fix",
-      "git add"
-    ],
-    "*.ts": [
-      "eslint --fix",
-      "git add"
-    ]
   },
   "browserslist": [
     "> 0.1%",

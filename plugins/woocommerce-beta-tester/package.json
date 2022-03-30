@@ -11,8 +11,6 @@
   "homepage": "http://github.com/woocommerce/woocommerce-beta-tester",
   "devDependencies": {
     "eslint": "5.16.0",
-    "husky": "1.3.1",
-    "lint-staged": "8.1.5",
     "uglify-js": "^3.5.3"
   },
   "assets": {
@@ -31,26 +29,6 @@
   "engines": {
     "node": ">=10.15.0",
     "npm": ">=6.4.1"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
-  "lint-staged": {
-    "linters": {
-      "*.php": [
-        "php -d display_errors=1 -l",
-        "composer run-script phpcs-pre-commit"
-      ],
-      "*.js": [
-        "eslint --fix",
-        "git add"
-      ]
-    },
-    "ignore": [
-      "*.min.js"
-    ]
   },
   "woorelease": {
     "svn_reauth": "true",
