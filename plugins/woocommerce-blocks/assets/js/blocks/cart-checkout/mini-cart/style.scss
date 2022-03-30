@@ -171,7 +171,15 @@ h2.wc-block-mini-cart__title {
 	a {
 		border: 2px solid;
 		color: currentColor;
+		font-weight: 600;
 		padding: $gap-small $gap-large;
 		text-decoration: none;
+
+		&:hover,
+		&:focus {
+			background-color: $gray-900;
+			border-color: $gray-900;
+			color: $white;
+		}
 	}
 }
