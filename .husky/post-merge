@@ -1,4 +1,4 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-node bin/pre-push-hook.js
+./bin/post-merge.sh
