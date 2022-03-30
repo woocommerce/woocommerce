@@ -77,11 +77,20 @@ const getLatestReleaseZipUrl = async (
 					}
 				} );
 			} else if ( authorizationToken ) {
-				// If it's a private repo, we need to download the archive this way
-				const tagName = body.tag_name;
-				resolve(
-					`https://github.com/${ repository }/archive/${ tagName }.zip`
-				);
+				// If it's a private repo, we need to download the archive this way.
+				// Use uploaded assets over downloading the zip archive.
+				if (
+					body.assets &&
+					body.assets.length > 0 &&
+					body.assets[ 0 ].browser_download_url
+				) {
+					resolve( body.assets[ 0 ].browser_download_url );
+				} else {
+					const tagName = body.tag_name;
+					resolve(
+						`https://github.com/${ repository }/archive/${ tagName }.zip`
+					);
+				}
 			} else {
 				resolve( body.assets[ 0 ].browser_download_url );
 			}
