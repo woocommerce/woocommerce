@@ -5,7 +5,7 @@ const fs = require('fs');
 test.describe('WooCommerce plugin can be uploaded and activated', () => {
 	test.use({ storageState: 'e2e/storage/adminState.json' });
 
-	test.only('can upload and activate the WooCommerce plugin', async ({
+	test('can upload and activate the WooCommerce plugin', async ({
 		page,
 	}) => {
 		request.get(
@@ -40,7 +40,7 @@ test.describe('WooCommerce plugin can be uploaded and activated', () => {
 		await page.locator('#install-plugin-submit').click();
 
 		// Activate the plugin
-		await page.locator('.button.primary').click();
+		await page.locator('.button-primary').click();
 	});
 
 	test('can run the database update', async ({ page }) => {
