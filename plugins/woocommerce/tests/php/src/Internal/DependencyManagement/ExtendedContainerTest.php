@@ -25,7 +25,7 @@ class ExtendedContainerTest extends \WC_Unit_Test_Case {
 	/**
 	 * Runs before each test.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		$this->sut = new ExtendedContainer();
 	}
 

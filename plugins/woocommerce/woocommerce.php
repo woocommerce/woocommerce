@@ -9,7 +9,7 @@
  * Text Domain: woocommerce
  * Domain Path: /i18n/languages/
  * Requires at least: 5.7
- * Requires PHP: 7.0
+ * Requires PHP: 7.2
  *
  * @package WooCommerce
  */

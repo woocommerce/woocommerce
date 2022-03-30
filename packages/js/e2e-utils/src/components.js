@@ -23,9 +23,11 @@ import { Coupon, Order } from '@woocommerce/api';
 const client = factories.api.withDefaultPermalinks;
 const config = require( 'config' );
 const simpleProductName = config.get( 'products.simple.name' );
-const simpleProductPrice = config.has('products.simple.price') ? config.get('products.simple.price') : '9.99';
-const defaultVariableProduct = config.get('products.variable');
-const defaultGroupedProduct = config.get('products.grouped');
+const simpleProductPrice = config.has( 'products.simple.price' )
+	? config.get( 'products.simple.price' )
+	: '9.99';
+const defaultVariableProduct = config.get( 'products.variable' );
+const defaultGroupedProduct = config.get( 'products.grouped' );
 
 const uuid = require( 'uuid' );
 
@@ -43,14 +45,16 @@ const verifyAndPublish = async ( noticeText ) => {
 	await page.waitForSelector( '.updated.notice' );
 
 	// Verify
-	await expect( page ).toMatchElement( '.updated.notice', { text: noticeText } );
+	await expect( page ).toMatchElement( '.updated.notice', {
+		text: noticeText,
+	} );
 };
 
 /**
  * Wait for primary button to be enabled and click.
  *
  * @param waitForNetworkIdle - Wait for network idle after click
- * @returns {Promise<void>}
+ * @return {Promise<void>}
  */
 const waitAndClickPrimary = async ( waitForNetworkIdle = true ) => {
 	// Wait for "Continue" button to become active
@@ -68,19 +72,34 @@ const completeOnboardingWizard = async () => {
 	await merchant.runSetupWizard();
 
 	// Fill store's address - first line
-	await expect( page ).toFill( '#inspector-text-control-0', config.get( 'addresses.admin.store.addressfirstline' ) );
+	await expect( page ).toFill(
+		'#inspector-text-control-0',
+		config.get( 'addresses.admin.store.addressfirstline' )
+	);
 
 	// Fill store's address - second line
-	await expect( page ).toFill( '#inspector-text-control-1', config.get( 'addresses.admin.store.addresssecondline' ) );
+	await expect( page ).toFill(
+		'#inspector-text-control-1',
+		config.get( 'addresses.admin.store.addresssecondline' )
+	);
 
 	// Fill country and state where the store is located
-	await expect( page ).toFill( '.woocommerce-select-control__control-input', config.get( 'addresses.admin.store.countryandstate' ) );
+	await expect( page ).toFill(
+		'.woocommerce-select-control__control-input',
+		config.get( 'addresses.admin.store.countryandstate' )
+	);
 
 	// Fill the city where the store is located
-	await expect( page ).toFill( '#inspector-text-control-2', config.get( 'addresses.admin.store.city' ) );
+	await expect( page ).toFill(
+		'#inspector-text-control-2',
+		config.get( 'addresses.admin.store.city' )
+	);
 
 	// Fill postcode of the store
-	await expect( page ).toFill( '#inspector-text-control-3', config.get( 'addresses.admin.store.postcode' ) );
+	await expect( page ).toFill(
+		'#inspector-text-control-3',
+		config.get( 'addresses.admin.store.postcode' )
+	);
 
 	// Verify that checkbox next to "I'm setting up a store for a client" is not selected
 	await verifyCheckboxIsUnset( '.components-checkbox-control__input' );
@@ -92,33 +111,45 @@ const completeOnboardingWizard = async () => {
 	await page.click( 'button.is-primary', { text: 'Continue' } );
 
 	// Wait for usage tracking pop-up window to appear on a new site
-	const usageTrackingHeader = await page.$('.components-modal__header-heading');
+	const usageTrackingHeader = await page.$(
+		'.components-modal__header-heading'
+	);
 	if ( usageTrackingHeader ) {
-		await expect(page).toMatchElement(
-			'.components-modal__header-heading', {text: 'Build a better WooCommerce'}
+		await expect( page ).toMatchElement(
+			'.components-modal__header-heading',
+			{
+				text: 'Build a better WooCommerce',
+			}
 		);
 
 		// Query for "No Thanks" buttons
-		const continueButtons = await page.$$( '.woocommerce-usage-modal__actions button.is-secondary' );
+		const continueButtons = await page.$$(
+			'.woocommerce-usage-modal__actions button.is-secondary'
+		);
 		expect( continueButtons ).toHaveLength( 1 );
 
-		await continueButtons[0].click();
+		await continueButtons[ 0 ].click();
 	}
 	await page.waitForNavigation( { waitUntil: 'networkidle0' } );
 
 	// Industry section
 
 	// Query for the industries checkboxes
-	const industryCheckboxes = await page.$$( '.components-checkbox-control__input' );
+	const industryCheckboxes = await page.$$(
+		'.components-checkbox-control__input'
+	);
 	expect( industryCheckboxes ).toHaveLength( 8 );
 
 	// Select all industries including "Other"
 	for ( let i = 0; i < 8; i++ ) {
-		await industryCheckboxes[i].click();
+		await industryCheckboxes[ i ].click();
 	}
 
 	// Fill "Other" industry
-	await expect( page ).toFill( '.components-text-control__input', config.get( 'onboardingwizard.industry' ) );
+	await expect( page ).toFill(
+		'.components-text-control__input',
+		config.get( 'onboardingwizard.industry' )
+	);
 
 	// Wait for "Continue" button to become active
 	await waitAndClickPrimary();
@@ -126,12 +157,14 @@ const completeOnboardingWizard = async () => {
 	// Product types section
 
 	// Query for the product types checkboxes
-	const productTypesCheckboxes = await page.$$( '.components-checkbox-control__input' );
+	const productTypesCheckboxes = await page.$$(
+		'.components-checkbox-control__input'
+	);
 	expect( productTypesCheckboxes ).toHaveLength( 7 );
 
 	// Select Physical and Downloadable products
 	for ( let i = 1; i < 2; i++ ) {
-		await productTypesCheckboxes[i].click();
+		await productTypesCheckboxes[ i ].click();
 	}
 
 	// Wait for "Continue" button to become active
@@ -147,14 +180,18 @@ const completeOnboardingWizard = async () => {
 	expect( selectControls ).toHaveLength( 2 );
 
 	// Fill the number of products you plan to sell
-	await selectControls[0].click();
+	await selectControls[ 0 ].click();
 	await page.waitForSelector( '.woocommerce-select-control__control' );
-	await expect( page ).toClick( '.woocommerce-select-control__option', { text: config.get( 'onboardingwizard.numberofproducts' ) } );
+	await expect( page ).toClick( '.woocommerce-select-control__option', {
+		text: config.get( 'onboardingwizard.numberofproducts' ),
+	} );
 
 	// Fill currently selling elsewhere
-	await selectControls[1].click();
+	await selectControls[ 1 ].click();
 	await page.waitForSelector( '.woocommerce-select-control__control' );
-	await expect( page ).toClick( '.woocommerce-select-control__option', { text: config.get( 'onboardingwizard.sellingelsewhere' ) } );
+	await expect( page ).toClick( '.woocommerce-select-control__option', {
+		text: config.get( 'onboardingwizard.sellingelsewhere' ),
+	} );
 
 	// Wait for "Continue" button to become active
 	await waitAndClickPrimary( false );
@@ -174,15 +211,17 @@ const completeOnboardingWizard = async () => {
 	}
 
 	// Wait for homescreen welcome modal to appear
-	let welcomeHeader = await waitForSelectorWithoutThrow( '.woocommerce__welcome-modal__page-content' );
+	const welcomeHeader = await waitForSelectorWithoutThrow(
+		'.woocommerce__welcome-modal__page-content'
+	);
 	if ( ! welcomeHeader ) {
 		return;
 	}
 
 	// Click two Next buttons
 	for ( let b = 0; b < 2; b++ ) {
-		await page.waitForSelector('button.components-guide__forward-button');
-		await page.click('button.components-guide__forward-button');
+		await page.waitForSelector( 'button.components-guide__forward-button' );
+		await page.click( 'button.components-guide__forward-button' );
 	}
 	// Wait for "Let's go" button to become active
 	await page.waitForSelector( 'button.components-guide__finish-button' );
@@ -217,7 +256,11 @@ const createSimpleProduct = async (
  * @param productPrice Product's price which can be changed when writing a test
  * @param categoryName Product's category which can be changed when writing a test
  */
-const createSimpleProductWithCategory = async ( productName, productPrice, categoryName ) => {
+const createSimpleProductWithCategory = async (
+	productName,
+	productPrice,
+	categoryName
+) => {
 	// Get the category ID so we can add it to the product below
 	const categoryId = await withRestApi.createProductCategory( categoryName );
 
@@ -227,7 +270,7 @@ const createSimpleProductWithCategory = async ( productName, productPrice, categ
 		categories: [
 			{
 				id: categoryId,
-			}
+			},
 		],
 		isVirtual: true,
 	} );
@@ -243,15 +286,23 @@ const createSimpleProductWithCategory = async ( productName, productPrice, categ
  * @param downloadName Product's download name. Defaults to 'Single'.
  * @param price Product's price. Defaults to '$9.99' (see createSimpleProduct definition).
  */
- const createSimpleDownloadableProduct = async ( name, downloadLimit = -1, downloadName = 'Single', price ) => {
+const createSimpleDownloadableProduct = async (
+	name,
+	downloadLimit = -1,
+	downloadName = 'Single',
+	price
+) => {
 	const productDownloadDetails = {
 		downloadable: true,
-		downloads: [ {
-			id: uuid.v4(),
-			name: downloadName,
-			file: 'https://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2017/08/single.jpg'
-		   } ],
-		download_limit: downloadLimit
+		downloads: [
+			{
+				id: uuid.v4(),
+				name: downloadName,
+				file:
+					'https://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2017/08/single.jpg',
+			},
+		],
+		download_limit: downloadLimit,
 	};
 
 	return await createSimpleProduct( name, price, productDownloadDetails );
@@ -262,68 +313,68 @@ const createSimpleProductWithCategory = async ( productName, productPrice, categ
  * Also, create variations for all attributes.
  *
  * @param varProduct Defaults to the variable product object in `default.json`
- * @returns the ID of the created variable product
+ * @return the ID of the created variable product
  */
-const createVariableProduct = async (varProduct = defaultVariableProduct) => {
+const createVariableProduct = async ( varProduct = defaultVariableProduct ) => {
 	const { attributes } = varProduct;
-	const { id } = await factories.products.variable.create(varProduct); // create the variable product
+	const { id } = await factories.products.variable.create( varProduct ); // create the variable product
 	const variations = [];
 	const buffer = []; // accumulated attributes while looping
 	const aIdx = 0; // attributes[] index
 
 	// Create variation for all attributes
-	const createVariation = (aIdx) => {
-		const { name, options } = attributes[aIdx];
+	const createVariation = ( aIdx ) => {
+		const { name, options } = attributes[ aIdx ];
 		const isLastAttribute = aIdx === attributes.length - 1;
 
 		// Add each attribute value to the buffer.
-		options.forEach((opt) => {
-			buffer.push({
-				name: name,
-				option: opt
-			});
+		options.forEach( ( opt ) => {
+			buffer.push( {
+				name,
+				option: opt,
+			} );
 
-			if (isLastAttribute) {
+			if ( isLastAttribute ) {
 				// If this is the last attribute, it means the variation is now complete.
 				// Save whatever's been accumulated in the buffer to the `variations[]` array.
-				variations.push({
-					attributes: [...buffer]
-				});
+				variations.push( {
+					attributes: [ ...buffer ],
+				} );
 			} else {
 				// Otherwise, move to the next attribute first
 				// before proceeding to the next value in this attribute.
-				createVariation(aIdx + 1);
+				createVariation( aIdx + 1 );
 			}
 
 			buffer.pop();
-		});
+		} );
 	};
-	createVariation(aIdx);
+	createVariation( aIdx );
 
 	// Set some properties of 1st variation
-	variations[0].regularPrice = '9.99';
-	variations[0].virtual = true;
+	variations[ 0 ].regularPrice = '9.99';
+	variations[ 0 ].virtual = true;
 
 	// Set some properties of 2nd variation
-	variations[1].regularPrice = '11.99';
-	variations[1].virtual = true;
+	variations[ 1 ].regularPrice = '11.99';
+	variations[ 1 ].virtual = true;
 
 	// Set some properties of 3rd variation
-	variations[2].regularPrice = '20';
-	variations[2].weight = '200';
-	variations[2].dimensions = {
+	variations[ 2 ].regularPrice = '20';
+	variations[ 2 ].weight = '200';
+	variations[ 2 ].dimensions = {
 		length: '10',
 		width: '20',
-		height: '15'
+		height: '15',
 	};
-	variations[2].manage_stock = true;
+	variations[ 2 ].manage_stock = true;
 
 	// Use API to create each variation
-	for (const v of variations) {
-		await factories.products.variation.create({
+	for ( const v of variations ) {
+		await factories.products.variation.create( {
 			productId: id,
-			variation: v
-		});
+			variation: v,
+		} );
 	}
 
 	return id;
@@ -333,23 +384,25 @@ const createVariableProduct = async (varProduct = defaultVariableProduct) => {
  * Create grouped product.
  *
  * @param groupedProduct Defaults to the grouped product object in `default.json`
- * @returns ID of the grouped product
+ * @return ID of the grouped product
  */
-const createGroupedProduct = async (groupedProduct = defaultGroupedProduct) => {
+const createGroupedProduct = async (
+	groupedProduct = defaultGroupedProduct
+) => {
 	const { name, groupedProducts } = groupedProduct;
 	const simpleProductIds = [];
 	let groupedProductRequest;
 
 	// Using the api, create simple products to be grouped
-	for (const simpleProduct of groupedProducts) {
-		const { id } = await factories.products.simple.create(simpleProduct);
-		simpleProductIds.push(id);
+	for ( const simpleProduct of groupedProducts ) {
+		const { id } = await factories.products.simple.create( simpleProduct );
+		simpleProductIds.push( id );
 	}
 
 	// Using the api, create the grouped product
 	groupedProductRequest = {
-		name: name,
-		groupedProducts: simpleProductIds
+		name,
+		groupedProducts: simpleProductIds,
 	};
 	const { id } = await factories.products.grouped.create(
 		groupedProductRequest
@@ -361,8 +414,8 @@ const createGroupedProduct = async (groupedProduct = defaultGroupedProduct) => {
 /**
  * Use the API to create an order with the provided details.
  *
- * @param {object} orderOptions
- * @returns {Promise<number>} ID of the created order.
+ * @param {Object} orderOptions
+ * @return {Promise<number>} ID of the created order.
  */
 const createOrder = async ( orderOptions = {} ) => {
 	const newOrder = {
@@ -413,10 +466,14 @@ const createSimpleOrder = async ( orderStatus = 'Pending payment' ) => {
 	await page.waitForSelector( '#message' );
 
 	// Verify
-	await expect( page ).toMatchElement( '#message', { text: 'Order updated.' } );
+	await expect( page ).toMatchElement( '#message', {
+		text: 'Order updated.',
+	} );
 
 	const variablePostId = await page.$( '#post_ID' );
-	let variablePostIdValue = ( await ( await variablePostId.getProperty( 'value' ) ).jsonValue() );
+	const variablePostIdValue = await (
+		await variablePostId.getProperty( 'value' )
+	 ).jsonValue();
 	return variablePostIdValue;
 };
 
@@ -426,23 +483,23 @@ const createSimpleOrder = async ( orderStatus = 'Pending payment' ) => {
  *
  * @param statuses Array of order statuses
  */
-const batchCreateOrders = async (statuses) => {
-	const defaultOrder = config.get('orders.basicPaidOrder');
+const batchCreateOrders = async ( statuses ) => {
+	const defaultOrder = config.get( 'orders.basicPaidOrder' );
 	const path = '/wc/v3/orders/batch';
 
 	// Create an order per status
-	const orders = statuses.map((s) => {
+	const orders = statuses.map( ( s ) => {
 		return {
 			...defaultOrder,
-			status: s
+			status: s,
 		};
-	});
+	} );
 
 	// Set the request payload from the created orders.
 	// Then send the API request.
 	const payload = { create: orders };
-	const response = await client.post(path, payload);
-	expect( response.status ).toEqual(200);
+	const response = await client.post( path, payload );
+	expect( response.status ).toEqual( 200 );
 };
 
 /**
@@ -458,17 +515,26 @@ const addProductToOrder = async ( orderId, productName ) => {
 	await expect( page ).toClick( 'button.add-line-item' );
 	await expect( page ).toClick( 'button.add-order-item' );
 	await page.waitForSelector( '.wc-backbone-modal-header' );
-	await expect( page ).toClick( '.wc-backbone-modal-content .wc-product-search' );
-	await expect( page ).toFill('#wc-backbone-modal-dialog + .select2-container .select2-search__field', productName);
-	await page.waitForSelector( 'li[aria-selected="true"]', { timeout: 10000 } );
+	await expect( page ).toClick(
+		'.wc-backbone-modal-content .wc-product-search'
+	);
+	await expect( page ).toFill(
+		'#wc-backbone-modal-dialog + .select2-container .select2-search__field',
+		productName
+	);
+	await page.waitForSelector( 'li[aria-selected="true"]', {
+		timeout: 10000,
+	} );
 	await expect( page ).toClick( 'li[aria-selected="true"]' );
 	await page.click( '.wc-backbone-modal-content #btn-ok' );
 
 	await backboneUnblocked();
 
 	// Verify the product we added shows as a line item now
-	await expect( page ).toMatchElement( '.wc-order-item-name', { text: productName } );
-}
+	await expect( page ).toMatchElement( '.wc-order-item-name', {
+		text: productName,
+	} );
+};
 
 /**
  * Creates a basic coupon with the provided coupon amount. Returns the coupon code.
@@ -476,16 +542,19 @@ const addProductToOrder = async ( orderId, productName ) => {
  * @param couponAmount Amount to be applied. Defaults to 5.
  * @param discountType Type of a coupon. Defaults to Fixed cart discount.
  */
-const createCoupon = async ( couponAmount = '5', discountType = 'Fixed cart discount' ) => {
+const createCoupon = async (
+	couponAmount = '5',
+	discountType = 'Fixed cart discount'
+) => {
 	let couponType;
 	switch ( discountType ) {
-		case "Fixed cart discount":
+		case 'Fixed cart discount':
 			couponType = 'fixed_cart';
 			break;
-		case "Fixed product discount":
+		case 'Fixed product discount':
 			couponType = 'fixed_product';
 			break;
-		case "Percentage discount":
+		case 'Percentage discount':
 			couponType = 'percent';
 			break;
 		default:
@@ -493,13 +562,13 @@ const createCoupon = async ( couponAmount = '5', discountType = 'Fixed cart disc
 	}
 
 	// Fill in coupon code
-	let couponCode = 'code-' + couponType + new Date().getTime().toString();
+	const couponCode = 'code-' + couponType + new Date().getTime().toString();
 	const repository = Coupon.restRepository( client );
 	await repository.create( {
 		code: couponCode,
 		discountType: couponType,
 		amount: couponAmount,
-	});
+	} );
 
 	return couponCode;
 };
@@ -512,34 +581,44 @@ const createCoupon = async ( couponAmount = '5', discountType = 'Fixed cart disc
  * @param zipCode Shipping zone zip code. Defaults to empty one space.
  * @param zoneMethod Shipping method type. Defaults to flat_rate (use also: free_shipping or local_pickup)
  */
-const addShippingZoneAndMethod = async ( zoneName, zoneLocation = 'country:US', zipCode = ' ', zoneMethod = 'flat_rate' ) => {
+const addShippingZoneAndMethod = async (
+	zoneName,
+	zoneLocation = 'country:US',
+	zipCode = ' ',
+	zoneMethod = 'flat_rate'
+) => {
 	await merchant.openNewShipping();
 
 	// Fill shipping zone name
-	await page.waitForSelector('input#zone_name');
-	await expect(page).toFill('input#zone_name', zoneName);
+	await page.waitForSelector( 'input#zone_name' );
+	await expect( page ).toFill( 'input#zone_name', zoneName );
 
 	// Select shipping zone location
-	await expect(page).toSelect('select[name="zone_locations"]', zoneLocation);
+	await expect( page ).toSelect(
+		'select[name="zone_locations"]',
+		zoneLocation
+	);
 
 	await uiUnblocked();
 
 	// Fill shipping zone postcode if needed otherwise just put empty space
-	await page.waitForSelector('a.wc-shipping-zone-postcodes-toggle');
-	await expect(page).toClick('a.wc-shipping-zone-postcodes-toggle');
-	await expect(page).toFill('#zone_postcodes', zipCode);
-	await expect(page).toMatchElement('#zone_postcodes', zipCode);
-	await expect(page).toClick('button#submit');
+	await page.waitForSelector( 'a.wc-shipping-zone-postcodes-toggle' );
+	await expect( page ).toClick( 'a.wc-shipping-zone-postcodes-toggle' );
+	await expect( page ).toFill( '#zone_postcodes', zipCode );
+	await expect( page ).toMatchElement( '#zone_postcodes', zipCode );
+	await expect( page ).toClick( 'button#submit' );
 
 	await uiUnblocked();
 
 	// Add shipping zone method
-	await page.waitFor(1000);
-	await expect(page).toClick('button.wc-shipping-zone-add-method', {text:'Add shipping method'});
-	await page.waitForSelector('.wc-shipping-zone-method-selector');
-	await expect(page).toSelect('select[name="add_method_id"]', zoneMethod);
-	await expect(page).toClick('button#btn-ok');
-	await page.waitForSelector('#zone_locations');
+	await page.waitFor( 1000 );
+	await expect( page ).toClick( 'button.wc-shipping-zone-add-method', {
+		text: 'Add shipping method',
+	} );
+	await page.waitForSelector( '.wc-shipping-zone-method-selector' );
+	await expect( page ).toSelect( 'select[name="add_method_id"]', zoneMethod );
+	await expect( page ).toClick( 'button#btn-ok' );
+	await page.waitForSelector( '#zone_locations' );
 
 	await uiUnblocked();
 };
@@ -560,7 +639,9 @@ const clickUpdateOrder = async ( noticeText, waitForSave = false ) => {
 	await page.waitForSelector( '.updated.notice' );
 
 	// Verify
-	await expect( page ).toMatchElement( '.updated.notice', { text: noticeText } );
+	await expect( page ).toMatchElement( '.updated.notice', {
+		text: noticeText,
+	} );
 };
 
 /**
@@ -570,7 +651,7 @@ const deleteAllEmailLogs = async () => {
 	await merchant.openEmailLog();
 
 	// Make sure we have emails to delete. If we don't, this selector will return null.
-	if ( await page.$( '#bulk-action-selector-top' ) !== null ) {
+	if ( ( await page.$( '#bulk-action-selector-top' ) ) !== null ) {
 		await setCheckbox( '#cb-select-all-1' );
 		await expect( page ).toSelect( '#bulk-action-selector-top', 'Delete' );
 		await Promise.all( [
@@ -584,27 +665,27 @@ const deleteAllEmailLogs = async () => {
  * Delete all the existing shipping zones.
  */
 const deleteAllShippingZones = async () => {
-	await merchant.openSettings('shipping');
+	await merchant.openSettings( 'shipping' );
 
 	// Delete existing shipping zones.
 	try {
 		let zone = await page.$( '.wc-shipping-zone-delete' );
 		if ( zone ) {
 			// WP action links aren't clickable because they are hidden with a left=-9999 style.
-			await page.evaluate(() => {
-				document.querySelector('.wc-shipping-zone-name .row-actions')
-					.style
-					.left = '0';
-			});
+			await page.evaluate( () => {
+				document.querySelector(
+					'.wc-shipping-zone-name .row-actions'
+				).style.left = '0';
+			} );
 			while ( zone ) {
 				await evalAndClick( '.wc-shipping-zone-delete' );
 				await uiUnblocked();
 				zone = await page.$( '.wc-shipping-zone-delete' );
-			};
-		};
-	} catch (error) {
+			}
+		}
+	} catch ( error ) {
 		// Prevent an error here causing the test to fail.
-	};
+	}
 };
 
 export {

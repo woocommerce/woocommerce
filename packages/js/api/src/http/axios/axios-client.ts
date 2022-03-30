@@ -29,7 +29,10 @@ export class AxiosClient implements HTTPClient {
 	 * @param {AxiosRequestConfig} config The request configuration.
 	 * @param {AxiosInterceptor[]} extraInterceptors An array of additional interceptors to apply to the client.
 	 */
-	public constructor( config: AxiosRequestConfig, extraInterceptors: AxiosInterceptor[] = [] ) {
+	public constructor(
+		config: AxiosRequestConfig,
+		extraInterceptors: AxiosInterceptor[] = []
+	) {
 		this.client = axios.create( config );
 
 		this.interceptors = extraInterceptors;
@@ -52,8 +55,8 @@ export class AxiosClient implements HTTPClient {
 	 */
 	public get< T = any >(
 		path: string,
-		params?: object,
-	): Promise< HTTPResponse< T >> {
+		params?: object
+	): Promise< HTTPResponse< T > > {
 		return this.client.get( path, { params } );
 	}
 
@@ -66,8 +69,8 @@ export class AxiosClient implements HTTPClient {
 	 */
 	public post< T = any >(
 		path: string,
-		data?: object,
-	): Promise< HTTPResponse< T >> {
+		data?: object
+	): Promise< HTTPResponse< T > > {
 		return this.client.post( path, data );
 	}
 
@@ -80,8 +83,8 @@ export class AxiosClient implements HTTPClient {
 	 */
 	public put< T = any >(
 		path: string,
-		data?: object,
-	): Promise< HTTPResponse< T >> {
+		data?: object
+	): Promise< HTTPResponse< T > > {
 		return this.client.put( path, data );
 	}
 
@@ -94,8 +97,8 @@ export class AxiosClient implements HTTPClient {
 	 */
 	public patch< T = any >(
 		path: string,
-		data?: object,
-	): Promise< HTTPResponse< T >> {
+		data?: object
+	): Promise< HTTPResponse< T > > {
 		return this.client.patch( path, data );
 	}
 
@@ -108,8 +111,8 @@ export class AxiosClient implements HTTPClient {
 	 */
 	public delete< T = any >(
 		path: string,
-		data?: object,
-	): Promise< HTTPResponse< T >> {
+		data?: object
+	): Promise< HTTPResponse< T > > {
 		return this.client.delete( path, { data } );
 	}
 }

@@ -6,9 +6,9 @@ module.exports = {
 	},
 	stories: [
 		// WooCommerce Admin / @woocommerce/components components
-		'../../packages/components/src/**/stories/*.@(js|tsx)',
+		'../../../../packages/js/components/src/**/stories/*.@(js|tsx)',
 		// WooCommerce Admin / @woocommerce/experimental components
-		'../../packages/experimental/src/**/stories/*.@(js|tsx)',
+		'../../../../packages/js/experimental/src/**/stories/*.@(js|tsx)',
 		'../../client/**/stories/*.js',
 	],
 	addons: [

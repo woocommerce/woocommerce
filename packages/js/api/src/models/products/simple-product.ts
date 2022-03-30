@@ -38,19 +38,24 @@ import {
 /**
  * The parameters that simple products can update.
  */
-type SimpleProductUpdateParams = ProductDeliveryUpdateParams
-	& ProductCommonUpdateParams
-	& ProductCrossUpdateParams
-	& ProductInventoryUpdateParams
-	& ProductPriceUpdateParams
-	& ProductSalesTaxUpdateParams
-	& ProductShippingUpdateParams
-	& ProductUpSellUpdateParams;
+type SimpleProductUpdateParams = ProductDeliveryUpdateParams &
+	ProductCommonUpdateParams &
+	ProductCrossUpdateParams &
+	ProductInventoryUpdateParams &
+	ProductPriceUpdateParams &
+	ProductSalesTaxUpdateParams &
+	ProductShippingUpdateParams &
+	ProductUpSellUpdateParams;
 /**
  * The parameters embedded in this generic can be used in the ModelRepository in order to give
  * type-safety in an incredibly granular way.
  */
-export type SimpleProductRepositoryParams = ModelRepositoryParams< SimpleProduct, never, ProductSearchParams, SimpleProductUpdateParams >;
+export type SimpleProductRepositoryParams = ModelRepositoryParams<
+	SimpleProduct,
+	never,
+	ProductSearchParams,
+	SimpleProductUpdateParams
+>;
 
 /**
  * An interface for listing simple products using the repository.
@@ -95,24 +100,26 @@ export type DeletesSimpleProducts = DeletesModels< SimpleProductRepositoryParams
 /**
  * The base for the simple product object.
  */
-export class SimpleProduct extends AbstractProduct implements
-	IProductCommon,
-	IProductCrossSells,
-	IProductDelivery,
-	IProductInventory,
-	IProductPrice,
-	IProductSalesTax,
-	IProductShipping,
-	IProductUpSells {
+export class SimpleProduct
+	extends AbstractProduct
+	implements
+		IProductCommon,
+		IProductCrossSells,
+		IProductDelivery,
+		IProductInventory,
+		IProductPrice,
+		IProductSalesTax,
+		IProductShipping,
+		IProductUpSells {
 	/**
 	 * @see ./abstracts/cross-sells.ts
 	 */
-	public readonly crossSellIds: Array<number> = [];
+	public readonly crossSellIds: Array< number > = [];
 
 	/**
 	 * @see ./abstracts/upsell.ts
 	 */
-	public readonly upSellIds: Array<number> = [];
+	public readonly upSellIds: Array< number > = [];
 
 	/**
 	 * @see ./abstracts/delivery.ts
@@ -180,7 +187,9 @@ export class SimpleProduct extends AbstractProduct implements
 	 *
 	 * @param {HTTPClient} httpClient The client for communicating via HTTP.
 	 */
-	public static restRepository( httpClient: HTTPClient ): ReturnType< typeof simpleProductRESTRepository > {
+	public static restRepository(
+		httpClient: HTTPClient
+	): ReturnType< typeof simpleProductRESTRepository > {
 		return simpleProductRESTRepository( httpClient );
 	}
 }

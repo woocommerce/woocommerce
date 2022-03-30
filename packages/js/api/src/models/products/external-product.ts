@@ -29,17 +29,21 @@ import {
 /**
  * The parameters that external products can update.
  */
-type ExternalProductUpdateParams = ProductCommonUpdateParams
-	& ProductExternalUpdateParams
-	& ProductPriceUpdateParams
-	& ProductSalesTaxUpdateParams
-	& ProductUpSellUpdateParams;
+type ExternalProductUpdateParams = ProductCommonUpdateParams &
+	ProductExternalUpdateParams &
+	ProductPriceUpdateParams &
+	ProductSalesTaxUpdateParams &
+	ProductUpSellUpdateParams;
 /**
  * The parameters embedded in this generic can be used in the ModelRepository in order to give
  * type-safety in an incredibly granular way.
  */
-export type ExternalProductRepositoryParams =
-	ModelRepositoryParams< ExternalProduct, never, ProductSearchParams, ExternalProductUpdateParams >;
+export type ExternalProductRepositoryParams = ModelRepositoryParams<
+	ExternalProduct,
+	never,
+	ProductSearchParams,
+	ExternalProductUpdateParams
+>;
 
 /**
  * An interface for listing external products using the repository.
@@ -84,17 +88,19 @@ export type DeletesExternalProducts = DeletesModels< ExternalProductRepositoryPa
 /**
  * The base for the external product object.
  */
-export class ExternalProduct extends AbstractProduct implements
-	IProductCommon,
-	IProductExternal,
-	IProductPrice,
-	IProductSalesTax,
-	IProductUpSells {
+export class ExternalProduct
+	extends AbstractProduct
+	implements
+		IProductCommon,
+		IProductExternal,
+		IProductPrice,
+		IProductSalesTax,
+		IProductUpSells {
 	/**
 	 * @see ./abstracts/external.ts
 	 */
-	public readonly buttonText: string = ''
-	public readonly externalUrl: string = ''
+	public readonly buttonText: string = '';
+	public readonly externalUrl: string = '';
 
 	/**
 	 * @see ./abstracts/price.ts
@@ -110,7 +116,7 @@ export class ExternalProduct extends AbstractProduct implements
 	/**
 	 * @see ./abstracts/upsell.ts
 	 */
-	public readonly upSellIds: Array<number> = [];
+	public readonly upSellIds: Array< number > = [];
 
 	/**
 	 * @see ./abstracts/sales-tax.ts
@@ -133,7 +139,9 @@ export class ExternalProduct extends AbstractProduct implements
 	 *
 	 * @param {HTTPClient} httpClient The client for communicating via HTTP.
 	 */
-	public static restRepository( httpClient: HTTPClient ): ReturnType< typeof externalProductRESTRepository > {
+	public static restRepository(
+		httpClient: HTTPClient
+	): ReturnType< typeof externalProductRESTRepository > {
 		return externalProductRESTRepository( httpClient );
 	}
 }
