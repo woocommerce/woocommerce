@@ -35,12 +35,11 @@ export async function deletePlugin( pluginName: string ) {
 }
 
 export async function deactivatePlugin( pluginName: string ) {
-	const response = await httpClient.post(
-		wpPluginsEndpoint + '/' + pluginName,
-		{
-			status: 'inactive',
-		}
-	);
+	const pluginSlug = pluginName.split( '/' )[ 1 ];
+	const response = await httpClient.post( wpPluginsEndpoint, {
+		slug: pluginSlug || pluginName,
+		status: 'inactive',
+	} );
 	expect( response.statusCode ).toEqual( 200 );
 }
 
