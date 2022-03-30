@@ -156,8 +156,8 @@ jobs:
               with:
                   name: api-test-report---pr-${{ github.event.number }}
                   path: |
-                        $ALLURE_OUTPUT_DIR/allure-results
-                        $ALLURE_OUTPUT_DIR/allure-report
+                        ${{ env.ALLURE_OUTPUT_DIR }}/allure-results
+                        ${{ env.ALLURE_OUTPUT_DIR }}/allure-report
                   retention-days: 7
 
     k6-tests-run:
