@@ -80,3 +80,6 @@ test-results.json
 
 # Admin Feature config
 plugins/woocommerce/includes/react-admin/feature-config.php
+
+# PHP lint
+phpcs-report.xml
