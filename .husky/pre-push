@@ -1,4 +1,4 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-./bin/post-push.sh
+./bin/pre-push.sh

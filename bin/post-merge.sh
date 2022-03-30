@@ -9,5 +9,7 @@ runOnChange() {
 	fi
 }
 
-runOnChange "package-lock.json" "pnpm install"
+runOnChange "pnpm-lock.yaml" "pnpm install"
 runOnChange "composer.lock" "SKIP_UPDATE_TEXTDOMAINS=true composer install"
+runOnChange "plugins/woocommerce/composer.lock" "SKIP_UPDATE_TEXTDOMAINS=true composer --working-dir=plugins/woocommerce install"
+runOnChange "plugins/woocommerce-beta-tester/composer.lock" "SKIP_UPDATE_TEXTDOMAINS=true composer --working-dir=plugins/woocommerce-beta-tester install"
