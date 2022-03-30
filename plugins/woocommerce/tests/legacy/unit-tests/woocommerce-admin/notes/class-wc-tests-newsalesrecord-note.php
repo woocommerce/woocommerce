@@ -22,7 +22,7 @@ class WC_Admin_Tests_NewSalesRecord_Note extends WC_Unit_Test_Case {
 	 * Set up
 	 * @return void
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 		Notes::delete_notes_with_name( NewSalesRecord::NOTE_NAME );
 		$this->yesterday = gmdate( 'Y-m-d', time() - DAY_IN_SECONDS );

@@ -18,14 +18,14 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 	/**
 	 * Don't cache report data during these tests.
 	 */
-	public static function setUpBeforeClass() {
+	public static function setUpBeforeClass(): void {
 		add_filter( 'woocommerce_analytics_report_should_use_cache', '__return_false' );
 	}
 
 	/**
 	 * Restore cache for other tests.
 	 */
-	public static function tearDownAfterClass() {
+	public static function tearDownAfterClass(): void {
 		remove_filter( 'woocommerce_analytics_report_should_use_cache', '__return_false' );
 	}
 

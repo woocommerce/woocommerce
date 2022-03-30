@@ -44,7 +44,7 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 
 		$order_notes = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
 		$latest_note = current( $order_notes );
-		$this->assertContains( $this->error_message_26960, $latest_note->content );
+		$this->assertStringContainsString( $this->error_message_26960, $latest_note->content );
 	}
 
 	/**
@@ -74,7 +74,7 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 		remove_filter( 'pre_http_request', array( $this, '__return_paypal_error' ) );
 
 		$this->assertWPError( $response );
-		$this->assertContains( $this->error_message_26960, $response->get_error_message() );
+		$this->assertStringContainsString( $this->error_message_26960, $response->get_error_message() );
 	}
 
 	/**

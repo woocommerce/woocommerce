@@ -22,7 +22,7 @@ class WC_Admin_Tests_Customizing_Product_Catalog extends WC_Unit_Test_Case {
 	/**
 	 * setUp
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 		$this->empty_posts();
 		$this->instance = new CustomizingProductCatalog();

@@ -16,7 +16,7 @@ class WC_Tests_Tax_CSV_Importer extends WC_Unit_Test_Case {
 	/**
 	 * Load up the importer classes since they aren't loaded by default.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 
 		$this->csv_file = dirname( __FILE__ ) . '/sample_tax_rates.csv';

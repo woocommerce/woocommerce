@@ -25,7 +25,7 @@ class WC_Admin_Tests_OnboardingTasks_Task_Purchase extends WC_Unit_Test_Case {
 	/**
 	 * Setup test data. Called before every test.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 
 		$this->task = new Purchase( new TaskList() );
@@ -64,7 +64,7 @@ class WC_Admin_Tests_OnboardingTasks_Task_Purchase extends WC_Unit_Test_Case {
 	/**
 	 * Tear down.
 	 */
-	public function tearDown() {
+	public function tearDown(): void {
 		parent::tearDown();
 		delete_transient( OnboardingThemes::THEMES_TRANSIENT );
 		delete_option( OnboardingProfile::DATA_OPTION );

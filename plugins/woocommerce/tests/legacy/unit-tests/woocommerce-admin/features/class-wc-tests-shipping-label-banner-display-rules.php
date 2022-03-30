@@ -34,7 +34,7 @@ class WC_Admin_Tests_Shipping_Label_Banner_Display_Rules extends WC_Unit_Test_Ca
 	/**
 	 * Setup for every single test.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setup();
 
 		update_option( 'woocommerce_default_country', 'US' );
@@ -44,7 +44,7 @@ class WC_Admin_Tests_Shipping_Label_Banner_Display_Rules extends WC_Unit_Test_Ca
 	/**
 	 * Setup for the whole test class.
 	 */
-	public static function setUpBeforeClass() {
+	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
 
 		foreach ( self::$modified_options as $option_name => $option_value ) {
@@ -55,7 +55,7 @@ class WC_Admin_Tests_Shipping_Label_Banner_Display_Rules extends WC_Unit_Test_Ca
 	/**
 	 * Cleans up test data once all test have run.
 	 */
-	public static function tearDownAfterClass() {
+	public static function tearDownAfterClass(): void {
 		parent::tearDownAfterClass();
 
 		foreach ( self::$modified_options as $option_name => $option_value ) {

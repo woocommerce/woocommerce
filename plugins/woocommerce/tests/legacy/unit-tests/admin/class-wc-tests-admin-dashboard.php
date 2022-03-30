@@ -13,7 +13,7 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 	/**
 	 * Set up for tests.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 		$this->user = $this->factory->user->create(
 			array(
@@ -28,7 +28,7 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 	/**
 	 * Tear down.
 	 */
-	public function tearDown() {
+	public function tearDown(): void {
 		parent::tearDown();
 		remove_filter( 'rest_pre_dispatch', array( $this, 'mock_rest_responses' ), 10 );
 	}

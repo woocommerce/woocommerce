@@ -18,7 +18,9 @@ export class ThemeSection extends BasePage {
 		const title = await waitForElementByText( 'h2', themeTitle );
 		const chooseButton = await title?.evaluateHandle( ( element ) => {
 			const card = element.closest( '.components-card' );
-			return Array.from( card?.querySelectorAll('button') || [] ).find( el => el.textContent === 'Choose');
+			return Array.from( card?.querySelectorAll( 'button' ) || [] ).find(
+				( el ) => el.textContent === 'Choose'
+			);
 		} );
 		if ( chooseButton ) {
 			await chooseButton.asElement()?.click();
