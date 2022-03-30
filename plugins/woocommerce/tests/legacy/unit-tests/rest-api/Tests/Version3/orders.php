@@ -28,7 +28,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	/**
 	 * Setup our test server.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 		$this->endpoint = new WC_REST_Orders_Controller();
 		$this->user     = $this->factory->user->create(

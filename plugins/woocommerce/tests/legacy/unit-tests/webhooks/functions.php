@@ -154,10 +154,9 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 		$this->assertFalse( wc_load_webhooks( $status ) );
 	}
 
-	/**
-	 * @expectedException InvalidArgumentException
-	 */
 	public function test_wc_load_webhooks_status_invalid() {
+		$this->expectException( InvalidArgumentException::class );
+
 		wc_load_webhooks( 'invalid_status' );
 	}
 

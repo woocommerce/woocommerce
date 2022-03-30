@@ -17,7 +17,7 @@ class WC_Admin_Tests_Plugins_Helper extends WP_UnitTestCase {
 	/**
 	 * Setup test data. Called before every test.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 
 		$this->user = $this->factory->user->create(

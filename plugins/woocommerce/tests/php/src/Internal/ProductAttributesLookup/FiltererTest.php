@@ -14,7 +14,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	/**
 	 * Runs before all the tests in the class.
 	 */
-	public static function setupBeforeClass() {
+	public static function setUpBeforeClass(): void {
 		global $wpdb, $wp_post_types;
 
 		parent::setUpBeforeClass();
@@ -41,7 +41,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	/**
 	 * Runs after each test.
 	 */
-	public function tearDown() {
+	public function tearDown(): void {
 		global $wpdb;
 
 		parent::tearDown();

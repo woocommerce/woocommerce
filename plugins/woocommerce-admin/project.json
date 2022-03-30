@@ -35,6 +35,12 @@
 				],
 				"parallel": true
 			}
+		},
+		"lint": {
+			"executor": "@nrwl/workspace:run-script",
+			"options": {
+				"script": "lint"
+			}
 		}
 	}
 }

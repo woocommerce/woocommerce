@@ -40,7 +40,7 @@ class WC_REST_Product_Reviews_V1_Controller_Tests extends WC_Unit_Test_Case {
 	/**
 	 * Creates test users with varying permissions.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 
 		$this->sut             = new WC_REST_Product_Reviews_V1_Controller();

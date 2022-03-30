@@ -14,7 +14,7 @@ class WC_Tests_Shipping_Zones extends WC_Unit_Test_Case {
 	/**
 	 * Set up tests.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 
 		WC_Helper_Shipping_Zones::create_mock_zones();

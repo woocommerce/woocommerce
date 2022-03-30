@@ -24,6 +24,7 @@ class WC_Admin_Tests_Category_Lookup extends WP_UnitTestCase {
 	/**
 	 * Setup
 	 */
+
 	public function setUp() {
 		delete_transient('wc_installing');
 		parent::setUp();
@@ -45,7 +46,7 @@ class WC_Admin_Tests_Category_Lookup extends WP_UnitTestCase {
 	/**
 	 * Tear Down
 	 */
-	public function tearDown() {
+	public function tearDown(): void {
 		parent::tearDown();
 		wp_delete_term( $this->parent_term_id, 'product_cat' );
 		wp_delete_term( $this->parent2_term_id, 'product_cat' );
