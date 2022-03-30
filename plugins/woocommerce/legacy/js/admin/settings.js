@@ -70,8 +70,14 @@
 		// Edit prompt
 		$( function() {
 			var changed = false;
+			let $check_column = $( '.wp-list-table .check-column' );
 
-			$( 'input, textarea, select, checkbox' ).on( 'change', function() {
+			$( 'input, textarea, select, checkbox' ).on( 'change', function( event ) {
+				// Toggling WP List Table checkboxes should not trigger navigation warnings.
+				if ( $check_column.length && $check_column.has( event.target ) ) {
+					return;
+				}
+
 				if ( ! changed ) {
 					window.onbeforeunload = function() {
 						return params.i18n_nav_warning;
@@ -80,7 +86,7 @@
 				}
 			});
 
-			$( '.submit :input' ).on( 'click', function() {
+			$( '.submit :input, input#search-submit' ).on( 'click', function() {
 				window.onbeforeunload = '';
 			});
 		});
