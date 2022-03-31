@@ -31,7 +31,7 @@ class WPPostToCOTMigratorTest extends \WC_Unit_Test_Case {
 	 */
 	private $data_store;
 
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 		$this->create_order_custom_table_if_not_exist();
 		$this->data_store = wc_get_container()->get( OrdersTableDataStore::class );
