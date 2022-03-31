@@ -141,6 +141,10 @@ jobs:
                   npm install -g pnpm
                   pnpm install
 
+            - name: Wait for the Docker container to be built
+              working-directory: package/woocommerce/plugins/woocommerce
+              run: pnpx wc-e2e docker:wait
+
             - name: Run tests command.
               working-directory: package/woocommerce/plugins/woocommerce
               env:
