@@ -188,85 +188,90 @@ export const shopper = {
 			);
 		},
 
+		// prettier-ignore
 		fillInCheckoutAddress: async (
 			address,
 			shippingOrBilling = 'shipping'
 		) => {
-			await expect( page ).toFill(
-				`#${ shippingOrBilling }-first_name`,
-				address.first_name
-			);
-			await expect( page ).toFill(
-				`#${ shippingOrBilling }-first_name`,
-				address.first_name
-			);
-			await expect( page ).toFill(
-				`#${ shippingOrBilling }-last_name`,
-				address.last_name
-			);
-			await expect( page ).toFill(
-				`#${ shippingOrBilling }-address_1`,
-				address.shipping_address_1
-			);
-			await expect( page ).toFill(
-				`#${ shippingOrBilling }-country input`,
-				address.country
-			);
-			await expect( page ).toFill(
-				`#${ shippingOrBilling }-city`,
-				address.city
-			);
-			await expect( page ).toFill(
-				`#${ shippingOrBilling }-state input`,
-				address.state
-			);
-			await expect( page ).toFill(
-				`#${ shippingOrBilling }-postcode`,
-				address.postcode
-			);
+			await expect( page ).toFill( `#${ shippingOrBilling }-first_name`, address.first_name );
+			await expect( page ).toFill( `#${ shippingOrBilling }-first_name`, address.first_name );
+			await expect( page ).toFill( `#${ shippingOrBilling }-last_name`, address.last_name );
+			await expect( page ).toFill( `#${ shippingOrBilling }-address_1`, address.shipping_address_1 );
+			await expect( page ).toFill( `#${ shippingOrBilling }-country input`, address.country );
+			await expect( page ).toFill( `#${ shippingOrBilling }-city`, address.city );
+			await expect( page ).toFill( `#${ shippingOrBilling }-state input`, address.state );
+			await expect( page ).toFill( `#${ shippingOrBilling }-postcode`, address.postcode );
 		},
 
+		// prettier-ignore
 		fillBillingDetails: async ( customerBillingDetails ) => {
-			await expect( page ).toFill(
-				'#billing-first_name',
-				customerBillingDetails.firstname
-			);
-			await expect( page ).toFill(
-				'#billing-last_name',
-				customerBillingDetails.lastname
-			);
-			await expect( page ).toFill(
-				'#components-form-token-input-0',
-				customerBillingDetails.country
-			);
-			await expect( page ).toFill(
-				'#billing-address_1',
-				customerBillingDetails.addressfirstline
-			);
-			await expect( page ).toFill(
-				'#billing-address_2',
-				customerBillingDetails.addresssecondline
-			);
-			await expect( page ).toFill(
-				'#billing-city',
-				customerBillingDetails.city
-			);
-			await expect( page ).toFill(
-				'#components-form-token-input-2',
-				customerBillingDetails.state
-			);
-			await expect( page ).toFill(
-				'#billing-postcode',
-				customerBillingDetails.postcode
-			);
-			await expect( page ).toFill(
-				'#phone',
-				customerBillingDetails.phone
-			);
-			await expect( page ).toFill(
-				'#email',
-				customerBillingDetails.email
-			);
+			const companyInputField = await page.$( '#billing-company' );
+
+			if ( companyInputField ) {
+				await expect( page ).toFill( '#billing-company', customerBillingDetails.company );
+			}
+
+			await expect( page ).toFill( '#billing-first_name', customerBillingDetails.firstname );
+			await expect( page ).toFill( '#billing-last_name', customerBillingDetails.lastname );
+			await expect( page ).toFill( '#billing-country input', customerBillingDetails.country );
+			await expect( page ).toFill( '#billing-address_1', customerBillingDetails.addressfirstline );
+			await expect( page ).toFill( '#billing-address_2', customerBillingDetails.addresssecondline );
+			await expect( page ).toFill( '#billing-city', customerBillingDetails.city );
+			await expect( page ).toFill( '#billing-state input', customerBillingDetails.state );
+			await expect( page ).toFill( '#billing-postcode', customerBillingDetails.postcode );
+			await expect( page ).toFill( '#phone', customerBillingDetails.phone );
+			await expect( page ).toFill( '#email', customerBillingDetails.email );
+		},
+
+		// prettier-ignore
+		fillShippingDetails: async ( customerShippingDetails ) => {
+			const companyInputField = await page.$( '#shipping-company' );
+
+			if ( companyInputField ) {
+				await expect( page ).toFill( '#shipping-company', customerShippingDetails.company );
+			}
+
+			await expect( page ).toFill( '#shipping-first_name', customerShippingDetails.firstname );
+			await expect( page ).toFill( '#shipping-last_name', customerShippingDetails.lastname );
+			await expect( page ).toFill( '#shipping-country input', customerShippingDetails.country );
+			await expect( page ).toFill( '#shipping-address_1', customerShippingDetails.addressfirstline );
+			await expect( page ).toFill( '#shipping-address_2', customerShippingDetails.addresssecondline );
+			await expect( page ).toFill( '#shipping-city', customerShippingDetails.city );
+			await expect( page ).toFill( '#shipping-state input', customerShippingDetails.state );
+			await expect( page ).toFill( '#shipping-postcode', customerShippingDetails.postcode );
+			await expect( page ).toFill( '#shipping-phone', customerShippingDetails.phone );
+		},
+
+		// prettier-ignore
+		verifyBillingDetails: async ( customerBillingDetails ) => {
+			await Promise.all( [
+				expect( page ).toMatch( customerBillingDetails.firstname ),
+				expect( page ).toMatch( customerBillingDetails.lastname ),
+				expect( page ).toMatch( customerBillingDetails.company ),
+				expect( page ).toMatch( customerBillingDetails.addressfirstline ),
+				expect( page ).toMatch( customerBillingDetails.addresssecondline ),
+				// expect( page ).toMatch( customerBillingDetails.country ),
+				expect( page ).toMatch( customerBillingDetails.city ),
+				expect( page ).toMatch( customerBillingDetails.state ),
+				expect( page ).toMatch( customerBillingDetails.postcode ),
+				expect( page ).toMatch( customerBillingDetails.phone ),
+			] );
+		},
+
+		// prettier-ignore
+		verifyShippingDetails: async ( customerShippingDetails ) => {
+			await Promise.all( [
+				expect( page ).toMatch( customerShippingDetails.firstname ),
+				expect( page ).toMatch( customerShippingDetails.lastname ),
+				expect( page ).toMatch( customerShippingDetails.company ),
+				expect( page ).toMatch( customerShippingDetails.addressfirstline ),
+				expect( page ).toMatch( customerShippingDetails.addresssecondline ),
+				// expect( page ).toMatch( customerShippingDetails.country ),
+				expect( page ).toMatch( customerShippingDetails.city ),
+				expect( page ).toMatch( customerShippingDetails.state ),
+				expect( page ).toMatch( customerShippingDetails.postcode ),
+				expect( page ).toMatch( customerShippingDetails.phone ),
+			] );
 		},
 
 		/**
