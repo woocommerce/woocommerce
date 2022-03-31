@@ -156,9 +156,15 @@ jobs:
               with:
                   name: api-test-report---pr-${{ github.event.number }}
                   path: |
-                        ${{ env.API_TEST_REPORT_DIR }}/allure-results
-                        ${{ env.API_TEST_REPORT_DIR }}/allure-report
+                      ${{ env.API_TEST_REPORT_DIR }}/allure-results
+                      ${{ env.API_TEST_REPORT_DIR }}/allure-report
                   retention-days: 7
+
+            - name: Clone API test reports repository
+              uses: actions/checkout@v2
+              with:
+                  repository: 'rodelgc/wip-woocommerce-api-test-reports'
+                  ssh-key: ''
 
     k6-tests-run:
         name: Runs k6 Performance tests
