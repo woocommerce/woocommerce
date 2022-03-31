@@ -40,7 +40,7 @@ export function* getNotes( query = {} ) {
 						/* translators: %s = link to developer blog */
 						__(
 							'WooCommerce Admin will soon limit inbox note contents to 320 characters. For more information, please visit %s. The following notes currently exceeds that limit:',
-							'woocommerce-admin'
+							'woocommerce'
 						),
 						'https://developer.woocommerce.com/?p=10749'
 					) +

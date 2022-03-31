@@ -68,7 +68,7 @@ async function fetchLatestTagFromPage( image, nameSearch, page ) {
 			});
 			req.end();
 		}
-	)
+	);
 }
 
 /**

@@ -77,10 +77,7 @@ const Tag = ( {
 				<Button
 					className="woocommerce-tag__remove"
 					onClick={ remove( id ) }
-					label={ sprintf(
-						__( 'Remove %s', 'woocommerce-admin' ),
-						label
-					) }
+					label={ sprintf( __( 'Remove %s', 'woocommerce' ), label ) }
 					aria-describedby={ labelId }
 				>
 					<Icon

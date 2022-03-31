@@ -76,7 +76,7 @@ class ImageUpload extends Component {
 							className="woocommerce-image-upload__remove-image"
 							onClick={ this.removeImage }
 						>
-							{ __( 'Remove image', 'woocommerce-admin' ) }
+							{ __( 'Remove image', 'woocommerce' ) }
 						</Button>
 					</div>
 				) }
@@ -94,7 +94,7 @@ class ImageUpload extends Component {
 							isSecondary
 						>
 							<Icon icon={ upload } />
-							{ __( 'Add an image', 'woocommerce-admin' ) }
+							{ __( 'Add an image', 'woocommerce' ) }
 						</Button>
 					</div>
 				) }

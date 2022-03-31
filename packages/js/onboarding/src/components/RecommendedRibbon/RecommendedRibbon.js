@@ -6,8 +6,8 @@ import { createElement } from '@wordpress/element';
 
 export const RecommendedRibbon = ( { isLocalPartner = false } ) => {
 	const text = isLocalPartner
-		? __( 'Local Partner', 'woocommerce-admin' )
-		: __( 'Recommended', 'woocommerce-admin' );
+		? __( 'Local Partner', 'woocommerce' )
+		: __( 'Recommended', 'woocommerce' );
 
 	return (
 		<div className={ 'woocommerce-task-payment__recommended-ribbon' }>

@@ -21,7 +21,7 @@ class NumberFilter extends Component {
 		return _x(
 			'{{rangeStart /}}{{span}} and {{/span}}{{rangeEnd /}}',
 			'Numerical range inputs arranged on a single line',
-			'woocommerce-admin'
+			'woocommerce'
 		);
 	}
 
@@ -151,7 +151,7 @@ class NumberFilter extends Component {
 			labelFormat = _x(
 				'%(field)s maximum amount',
 				'maximum value input',
-				'woocommerce-admin'
+				'woocommerce'
 			);
 		} else {
 			/* eslint-disable-next-line max-len */
@@ -159,7 +159,7 @@ class NumberFilter extends Component {
 			labelFormat = _x(
 				'%(field)s minimum amount',
 				'minimum value input',
-				'woocommerce-admin'
+				'woocommerce'
 			);
 		}
 
@@ -207,7 +207,7 @@ class NumberFilter extends Component {
 					label: sprintf(
 						/* eslint-disable-next-line max-len */
 						/* translators: Sentence fragment, "range start" refers to the first of two numeric values the field must be between. Screenshot for context: https://cloudup.com/cmv5CLyMPNQ */
-						__( '%(field)s range start', 'woocommerce-admin' ),
+						__( '%(field)s range start', 'woocommerce' ),
 						{ field: get( config, [ 'labels', 'add' ] ) }
 					),
 					onChange: rangeStartOnChange,
@@ -220,7 +220,7 @@ class NumberFilter extends Component {
 					label: sprintf(
 						/* eslint-disable-next-line max-len */
 						/* translators: Sentence fragment, "range end" refers to the second of two numeric values the field must be between. Screenshot for context: https://cloudup.com/cmv5CLyMPNQ */
-						__( '%(field)s range end', 'woocommerce-admin' ),
+						__( '%(field)s range end', 'woocommerce' ),
 						{ field: get( config, [ 'labels', 'add' ] ) }
 					),
 					onChange: rangeEndOnChange,

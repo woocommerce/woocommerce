@@ -25,7 +25,7 @@ class PresetPeriods extends Component {
 				selected={ period }
 				onSelect={ onSelect }
 				name="period"
-				legend={ __( 'select a preset period', 'woocommerce-admin' ) }
+				legend={ __( 'select a preset period', 'woocommerce' ) }
 			/>
 		);
 	}

@@ -96,7 +96,7 @@ const formatErrorMessage = (
 			'Could not %(actionType)s %(pluginName)s plugin, %(error)s',
 			'Could not %(actionType)s the following plugins: %(pluginName)s with these Errors: %(error)s',
 			Object.keys( pluginErrors ).length || 1,
-			'woocommerce-admin'
+			'woocommerce'
 		),
 		{
 			actionType,

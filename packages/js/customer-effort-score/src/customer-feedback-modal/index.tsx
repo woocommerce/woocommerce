@@ -36,23 +36,23 @@ function CustomerFeedbackModal( {
 } ): JSX.Element | null {
 	const options = [
 		{
-			label: __( 'Very difficult', 'woocommerce-admin' ),
+			label: __( 'Very difficult', 'woocommerce' ),
 			value: '1',
 		},
 		{
-			label: __( 'Somewhat difficult', 'woocommerce-admin' ),
+			label: __( 'Somewhat difficult', 'woocommerce' ),
 			value: '2',
 		},
 		{
-			label: __( 'Neutral', 'woocommerce-admin' ),
+			label: __( 'Neutral', 'woocommerce' ),
 			value: '3',
 		},
 		{
-			label: __( 'Somewhat easy', 'woocommerce-admin' ),
+			label: __( 'Somewhat easy', 'woocommerce' ),
 			value: '4',
 		},
 		{
-			label: __( 'Very easy', 'woocommerce-admin' ),
+			label: __( 'Very easy', 'woocommerce' ),
 			value: '5',
 		},
 	];
@@ -86,7 +86,7 @@ function CustomerFeedbackModal( {
 	return (
 		<Modal
 			className="woocommerce-customer-effort-score"
-			title={ __( 'Please share your feedback', 'woocommerce-admin' ) }
+			title={ __( 'Please share your feedback', 'woocommerce' ) }
 			onRequestClose={ closeModal }
 			shouldCloseOnClickOutside={ false }
 		>
@@ -111,13 +111,10 @@ function CustomerFeedbackModal( {
 			{ ( score === 1 || score === 2 ) && (
 				<div className="woocommerce-customer-effort-score__comments">
 					<TextareaControl
-						label={ __(
-							'Comments (Optional)',
-							'woocommerce-admin'
-						) }
+						label={ __( 'Comments (Optional)', 'woocommerce' ) }
 						help={ __(
 							'Your feedback will go to the WooCommerce development team',
-							'woocommerce-admin'
+							'woocommerce'
 						) }
 						value={ comments }
 						onChange={ ( value: string ) => setComments( value ) }
@@ -134,7 +131,7 @@ function CustomerFeedbackModal( {
 					<Text variant="body" as="p">
 						{ __(
 							'Please provide feedback by selecting an option above.',
-							'woocommerce-admin'
+							'woocommerce'
 						) }
 					</Text>
 				</div>
@@ -142,10 +139,10 @@ function CustomerFeedbackModal( {
 
 			<div className="woocommerce-customer-effort-score__buttons">
 				<Button isTertiary onClick={ closeModal } name="cancel">
-					{ __( 'Cancel', 'woocommerce-admin' ) }
+					{ __( 'Cancel', 'woocommerce' ) }
 				</Button>
 				<Button isPrimary onClick={ sendScore } name="send">
-					{ __( 'Send', 'woocommerce-admin' ) }
+					{ __( 'Send', 'woocommerce' ) }
 				</Button>
 			</div>
 		</Modal>

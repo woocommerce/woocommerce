@@ -126,7 +126,7 @@ export class CompareFilter extends Component {
 					</CompareButton>
 					{ selected.length > 0 && (
 						<Button isLink={ true } onClick={ this.clearQuery }>
-							{ __( 'Clear all', 'woocommerce-admin' ) }
+							{ __( 'Clear all', 'woocommerce' ) }
 						</Button>
 					) }
 				</CardFooter>
