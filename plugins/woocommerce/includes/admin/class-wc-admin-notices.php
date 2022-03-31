@@ -7,6 +7,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Utilities\Users;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -28,18 +29,19 @@ class WC_Admin_Notices {
 	 * @var array
 	 */
 	private static $core_notices = array(
-		'update'                           => 'update_notice',
-		'template_files'                   => 'template_file_check_notice',
-		'legacy_shipping'                  => 'legacy_shipping_notice',
-		'no_shipping_methods'              => 'no_shipping_methods_notice',
-		'regenerating_thumbnails'          => 'regenerating_thumbnails_notice',
-		'regenerating_lookup_table'        => 'regenerating_lookup_table_notice',
-		'no_secure_connection'             => 'secure_connection_notice',
-		WC_PHP_MIN_REQUIREMENTS_NOTICE     => 'wp_php_min_requirements_notice',
-		'maxmind_license_key'              => 'maxmind_missing_license_key_notice',
-		'redirect_download_method'         => 'redirect_download_method_notice',
-		'uploads_directory_is_unprotected' => 'uploads_directory_is_unprotected_notice',
-		'base_tables_missing'              => 'base_tables_missing_notice',
+		'update'                             => 'update_notice',
+		'template_files'                     => 'template_file_check_notice',
+		'legacy_shipping'                    => 'legacy_shipping_notice',
+		'no_shipping_methods'                => 'no_shipping_methods_notice',
+		'regenerating_thumbnails'            => 'regenerating_thumbnails_notice',
+		'regenerating_lookup_table'          => 'regenerating_lookup_table_notice',
+		'no_secure_connection'               => 'secure_connection_notice',
+		WC_PHP_MIN_REQUIREMENTS_NOTICE       => 'wp_php_min_requirements_notice',
+		'maxmind_license_key'                => 'maxmind_missing_license_key_notice',
+		'redirect_download_method'           => 'redirect_download_method_notice',
+		'uploads_directory_is_unprotected'   => 'uploads_directory_is_unprotected_notice',
+		'base_tables_missing'                => 'base_tables_missing_notice',
+		'download_directories_sync_complete' => 'download_directories_sync_complete',
 	);
 
 	/**
@@ -52,13 +54,7 @@ class WC_Admin_Notices {
 		add_action( 'woocommerce_installed', array( __CLASS__, 'reset_admin_notices' ) );
 		add_action( 'wp_loaded', array( __CLASS__, 'add_redirect_download_method_notice' ) );
 		add_action( 'admin_init', array( __CLASS__, 'hide_notices' ), 20 );
-		add_action(
-			'admin_init',
-			function() {
-				self::maybe_remove_php72_required_notice();
-			},
-			20
-		);
+
 		// @TODO: This prevents Action Scheduler async jobs from storing empty list of notices during WC installation.
 		// That could lead to OBW not starting and 'Run setup wizard' notice not appearing in WP admin, which we want
 		// to avoid.
@@ -120,41 +116,6 @@ class WC_Admin_Notices {
 		self::add_notice( 'template_files' );
 		self::add_min_version_notice();
 		self::add_maxmind_missing_license_key_notice();
-		self::maybe_add_php72_required_notice();
-	}
-
-	/**
-	 * Add an admin notice about the bump of the required PHP version in WooCommerce 6.5
-	 * if the current PHP version is too old.
-	 *
-	 * TODO: Remove this method in WooCommerce 6.5.
-	 */
-	private static function maybe_add_php72_required_notice() {
-		if ( version_compare( phpversion(), '7.2', '>=' ) ) {
-			return;
-		}
-
-		self::add_custom_notice(
-			'php72_required_in_woo_65',
-			__( '<h4>PHP version requirements will change soon</h4><p>WooCommerce 6.5, scheduled for <b>May 2022</b>, will require PHP 7.2 or newer to work. Your server is currently running an older version of PHP, so this change will impact your store. Upgrading to at least PHP 7.4 is recommended. <b><a href="https://developer.woocommerce.com/2022/01/05/new-requirement-for-woocommerce-6-5-php-7-2/">Learn more about this change.</a></b></p>', 'woocommerce' )
-		);
-
-		$wp_version_is_ok = version_compare( get_bloginfo( 'version' ), WC_NOTICE_MIN_WP_VERSION, '>=' );
-		if ( $wp_version_is_ok ) {
-			self::hide_notice( WC_PHP_MIN_REQUIREMENTS_NOTICE );
-		}
-	}
-
-	/**
-	 * Remove the admin notice about the bump of the required PHP version in WooCommerce 6.5
-	 * if the current PHP version is good.
-	 *
-	 * TODO: Remove this method in WooCommerce 6.5.
-	 */
-	private static function maybe_remove_php72_required_notice() {
-		if ( version_compare( phpversion(), '7.2', '>=' ) && self::has_notice( 'php72_required_in_woo_65' ) ) {
-			self::remove_notice( 'php72_required_in_woo_65' );
-		}
 	}
 
 	/**
@@ -432,7 +393,7 @@ class WC_Admin_Notices {
 	 * @since 3.6.0
 	 */
 	public static function regenerating_lookup_table_notice() {
-		// See if this is still relevent.
+		// See if this is still relevant.
 		if ( ! wc_update_product_lookup_tables_is_running() ) {
 			self::remove_notice( 'regenerating_lookup_table' );
 			return;
@@ -523,6 +484,24 @@ class WC_Admin_Notices {
 			self::add_notice( 'redirect_download_method' );
 		} else {
 			self::remove_notice( 'redirect_download_method' );
+		}
+	}
+
+	/**
+	 * Notice about the completion of the product downloads sync, with further advice for the site operator.
+	 */
+	public static function download_directories_sync_complete() {
+		$notice_dismissed = apply_filters(
+				'woocommerce_hide_download_directories_sync_complete',
+				get_user_meta( get_current_user_id(), 'download_directories_sync_complete', true )
+			);
+
+		if ( $notice_dismissed ) {
+			self::remove_notice( 'download_directories_sync_complete' );
+		}
+
+		if ( Users::is_site_administrator() ) {
+			include __DIR__ . '/views/html-notice-download-dir-sync-complete.php';
 		}
 	}
 

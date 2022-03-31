@@ -2,7 +2,10 @@
 	"root": "plugins/woocommerce/",
 	"sourceRoot": "plugins/woocommerce",
 	"projectType": "application",
-	"implicitDependencies": [ "woocommerce-legacy-assets" ],
+	"implicitDependencies": [
+		"woocommerce-legacy-assets",
+		"woocommerce-admin"
+	],
 	"targets": {
 		"changelog": {
 			"executor": "./tools/executors/changelogger:changelog",
@@ -51,6 +54,15 @@
 			}
 		},
 		"build-watch": {
+			"executor": "@nrwl/workspace:run-commands",
+			"options": {
+				"commands": [
+					"pnpm nx build:feature-config woocommerce-admin",
+					"pnpm nx watch-assets woocommerce"
+				]
+			}
+		},
+		"watch-assets": {
 			"executor": "@nrwl/workspace:run-commands",
 			"options": {
 				"command": "pnpx grunt watch",

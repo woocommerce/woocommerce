@@ -150,6 +150,54 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	}
 
 	/**
+	 * Check if a given request has access to read an item.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|boolean
+	 */
+	public function get_item_permissions_check( $request ) {
+		$object = $this->get_object( (int) $request['id'] );
+
+		if ( ( ! $object || 0 === $object->get_id() ) && ! wc_rest_check_post_permissions( $this->post_type, 'read' ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		return parent::get_item_permissions_check( $request );
+	}
+
+	/**
+	 * Check if a given request has access to update an item.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|boolean
+	 */
+	public function update_item_permissions_check( $request ) {
+		$object = $this->get_object( (int) $request['id'] );
+
+		if ( ( ! $object || 0 === $object->get_id() ) && ! wc_rest_check_post_permissions( $this->post_type, 'read' ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you are not allowed to edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		return parent::update_item_permissions_check( $request );
+	}
+
+	/**
+	 * Check if a given request has access to delete an item.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return bool|WP_Error
+	 */
+	public function delete_item_permissions_check( $request ) {
+		$object = $this->get_object( (int) $request['id'] );
+
+		if ( ( ! $object || 0 === $object->get_id() ) && ! wc_rest_check_post_permissions( $this->post_type, 'read' ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		return parent::delete_item_permissions_check( $request );
+	}
+
+	/**
 	 * Expands an order item to get its data.
 	 *
 	 * @param WC_Order_item $item Order item data.
@@ -209,7 +257,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		unset( $data['type'] );
 
 		// Expand meta_data to include user-friendly values.
-		$formatted_meta_data = $item->get_formatted_meta_data( null, true );
+		$formatted_meta_data = $item->get_all_formatted_meta_data( null );
 		$data['meta_data'] = array_map(
 			array( $this, 'merge_meta_item_with_formatted_meta_display_attributes' ),
 			$data['meta_data'],
@@ -224,7 +272,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	 * {@link WC_Meta_Data}. Returns the merged array.
 	 *
 	 * @param WC_Meta_Data $meta_item           An object from {@link WC_Order_Item::get_meta_data()}.
-	 * @param array        $formatted_meta_data An object result from {@link WC_Order_Item::get_formatted_meta_data}.
+	 * @param array        $formatted_meta_data An object result from {@link WC_Order_Item::get_all_formatted_meta_data}.
 	 * The keys are the IDs of {@link WC_Meta_Data}.
 	 *
 	 * @return array

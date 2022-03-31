@@ -169,7 +169,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	}
 
 	/**
-	 * Render columm: order_number.
+	 * Render column: order_number.
 	 */
 	protected function render_order_number_column() {
 		$buyer = '';
@@ -202,7 +202,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	}
 
 	/**
-	 * Render columm: order_status.
+	 * Render column: order_status.
 	 */
 	protected function render_order_status_column() {
 		$tooltip                 = '';
@@ -239,7 +239,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	}
 
 	/**
-	 * Render columm: order_date.
+	 * Render column: order_date.
 	 */
 	protected function render_order_date_column() {
 		$order_timestamp = $this->object->get_date_created() ? $this->object->get_date_created()->getTimestamp() : '';
@@ -268,7 +268,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	}
 
 	/**
-	 * Render columm: order_total.
+	 * Render column: order_total.
 	 */
 	protected function render_order_total_column() {
 		if ( $this->object->get_payment_method_title() ) {
@@ -280,7 +280,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	}
 
 	/**
-	 * Render columm: wc_actions.
+	 * Render column: wc_actions.
 	 */
 	protected function render_wc_actions_column() {
 		echo '<p>';
@@ -315,7 +315,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	}
 
 	/**
-	 * Render columm: billing_address.
+	 * Render column: billing_address.
 	 */
 	protected function render_billing_address_column() {
 		$address = $this->object->get_formatted_billing_address();
@@ -333,7 +333,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	}
 
 	/**
-	 * Render columm: shipping_address.
+	 * Render column: shipping_address.
 	 */
 	protected function render_shipping_address_column() {
 		$address = $this->object->get_formatted_shipping_address();
@@ -507,7 +507,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 							$html .= '<div class="wc-order-item-sku">' . esc_html( $product_object->get_sku() ) . '</div>';
 						}
 
-						$meta_data = $item->get_formatted_meta_data( '' );
+						$meta_data = $item->get_all_formatted_meta_data( '' );
 
 						if ( $meta_data ) {
 							$html .= '<table cellspacing="0" class="wc-order-item-meta">';

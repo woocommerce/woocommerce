@@ -8,6 +8,8 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
+use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
+use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize as Download_Directories_Sync;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper as WCConnectionHelper;
 
@@ -20,6 +22,13 @@ class WC_Install {
 
 	/**
 	 * DB updates and callbacks that need to be run per version.
+	 *
+	 * Please note that these functions are invoked when WooCommerce is updated from a previous version,
+	 * but NOT when WooCommerce is newly installed.
+	 *
+	 * Database schema changes must be incorporated to the SQL returned by get_schema, which is applied
+	 * via dbDelta at both install and update time. If any other kind of database change is required
+	 * at install time (e.g. populating tables), use the 'woocommerce_installed' hook.
 	 *
 	 * @var array
 	 */
@@ -174,6 +183,11 @@ class WC_Install {
 		'6.3.0' => array(
 			'wc_update_630_create_product_attributes_lookup_table',
 			'wc_update_630_db_version',
+		),
+		'6.4.0' => array(
+			'wc_update_640_add_primary_key_to_product_attributes_lookup_table',
+			'wc_update_640_approved_download_directories',
+			'wc_update_640_db_version',
 		),
 	);
 
@@ -670,6 +684,9 @@ class WC_Install {
 			// Define initial tax classes.
 			WC_Tax::create_tax_class( __( 'Reduced rate', 'woocommerce' ) );
 			WC_Tax::create_tax_class( __( 'Zero rate', 'woocommerce' ) );
+
+			// For new installs, setup and enable Approved Product Download Directories.
+			wc_get_container()->get( Download_Directories_Sync::class )->init_feature( false, true );
 		}
 	}
 
@@ -1068,10 +1085,18 @@ CREATE TABLE {$wpdb->prefix}wc_rate_limits (
   rate_limit_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   rate_limit_key varchar(200) NOT NULL,
   rate_limit_expiry BIGINT UNSIGNED NOT NULL,
+  rate_limit_remaining smallint(10) NOT NULL DEFAULT '0',
   PRIMARY KEY  (rate_limit_id),
   UNIQUE KEY rate_limit_key (rate_limit_key($max_index_length))
 ) $collate;
 $product_attributes_lookup_table_creation_sql
+CREATE TABLE {$wpdb->prefix}wc_product_download_directories (
+	url_id BIGINT UNSIGNED NOT NULL auto_increment,
+	url varchar(256) NOT NULL,
+	enabled TINYINT(1) NOT NULL DEFAULT 0,
+	PRIMARY KEY (url_id),
+	KEY `url` (`url`)
+) $collate;
 		";
 
 		return $tables;
@@ -1088,6 +1113,7 @@ $product_attributes_lookup_table_creation_sql
 
 		$tables = array(
 			"{$wpdb->prefix}wc_download_log",
+			"{$wpdb->prefix}wc_product_download_directories",
 			"{$wpdb->prefix}wc_product_meta_lookup",
 			"{$wpdb->prefix}wc_tax_rate_classes",
 			"{$wpdb->prefix}wc_webhooks",
@@ -1706,7 +1732,7 @@ $product_attributes_lookup_table_creation_sql
 	 * Gets the content of the sample refunds and return policy page.
 	 *
 	 * @since 5.6.0
-	 * @return HTML The content for the page
+	 * @return string The content for the page
 	 */
 	private static function get_refunds_return_policy_page_content() {
 		return <<<EOT

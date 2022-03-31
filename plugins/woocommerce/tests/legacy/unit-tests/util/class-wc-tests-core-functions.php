@@ -18,7 +18,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	 *
 	 * @return void
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 		$this->wc = WC();
 	}
@@ -229,7 +229,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 
 		// Each case.
 		foreach ( array_keys( get_woocommerce_currencies() ) as $currency_code ) {
-			$this->assertInternalType( 'string', get_woocommerce_currency_symbol( $currency_code ) );
+			$this->assertIsString( get_woocommerce_currency_symbol( $currency_code ) );
 		}
 	}
 
@@ -728,14 +728,14 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 		ob_start();
 		wc_print_js();
 		$printed_js = ob_get_clean();
-		$this->assertNotContains( $js, $printed_js );
+		$this->assertStringNotContainsString( $js, $printed_js );
 
 		wc_enqueue_js( $js );
 
 		ob_start();
 		wc_print_js();
 		$printed_js = ob_get_clean();
-		$this->assertContains( $js, $printed_js );
+		$this->assertStringContainsString( $js, $printed_js );
 	}
 
 	/**

@@ -7,7 +7,7 @@
  */
 class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 
-	public function tearDown() {
+	public function tearDown(): void {
 		$log_files = array(
 			'unit-tests',
 			'log',

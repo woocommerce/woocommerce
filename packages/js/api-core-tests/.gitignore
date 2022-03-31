@@ -1,2 +1,6 @@
 # Collection output
 collection.json
+
+# Allure directories
+allure-report
+allure-results

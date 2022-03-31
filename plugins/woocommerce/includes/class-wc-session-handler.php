@@ -88,11 +88,17 @@ class WC_Session_Handler extends WC_Session {
 		$cookie = $this->get_session_cookie();
 
 		if ( $cookie ) {
+			// Customer ID will be an MD5 hash id this is a guest session.
 			$this->_customer_id        = $cookie[0];
 			$this->_session_expiration = $cookie[1];
 			$this->_session_expiring   = $cookie[2];
 			$this->_has_cookie         = true;
 			$this->_data               = $this->get_session_data();
+
+			if ( ! $this->is_session_cookie_valid() ) {
+				$this->destroy_session();
+				$this->set_session_expiration();
+			}
 
 			// If the user logs in, update session.
 			if ( is_user_logged_in() && strval( get_current_user_id() ) !== $this->_customer_id ) {
@@ -113,6 +119,30 @@ class WC_Session_Handler extends WC_Session {
 			$this->_customer_id = $this->generate_customer_id();
 			$this->_data        = $this->get_session_data();
 		}
+	}
+
+	/**
+	 * Checks if session cookie is expired, or belongs to a logged out user.
+	 *
+	 * @return bool Whether session cookie is valid.
+	 */
+	private function is_session_cookie_valid() {
+		// If session is expired, session cookie is invalid.
+		if ( time() > $this->_session_expiration ) {
+			return false;
+		}
+
+		// If user has logged out, session cookie is invalid.
+		if ( ! is_user_logged_in() && ! $this->is_customer_guest( $this->_customer_id ) ) {
+			return false;
+		}
+
+		// Session from a different user is not valid. (Although from a guest user will be valid)
+		if ( is_user_logged_in() && ! $this->is_customer_guest( $this->_customer_id ) && strval( get_current_user_id() ) !== $this->_customer_id ) {
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
@@ -181,10 +211,52 @@ class WC_Session_Handler extends WC_Session {
 		if ( empty( $customer_id ) ) {
 			require_once ABSPATH . 'wp-includes/class-phpass.php';
 			$hasher      = new PasswordHash( 8, false );
-			$customer_id = md5( $hasher->get_random_bytes( 32 ) );
+			$customer_id = 't_' . substr( md5( $hasher->get_random_bytes( 32 ) ), 2 );
 		}
 
 		return $customer_id;
+	}
+
+	/**
+	 * Checks if this is an auto-generated customer ID.
+	 *
+	 * @param string|int $customer_id Customer ID to check.
+	 *
+	 * @return bool Whether customer ID is randomly generated.
+	 */
+	private function is_customer_guest( $customer_id ) {
+		$customer_id = strval( $customer_id );
+
+		if ( empty( $customer_id ) ) {
+			return true;
+		}
+
+		if ( 't_' === substr( $customer_id, 0, 2 ) ) {
+			return true;
+		}
+
+		/**
+		 * Legacy checks. This is to handle sessions that were created from a previous release.
+		 * Maybe we can get rid of them after a few releases.
+		 */
+
+		// Almost all random $customer_ids will have some letters in it, while all actual ids will be integers.
+		if ( strval( (int) $customer_id ) !== $customer_id ) {
+			return true;
+		}
+
+		// Performance hack to potentially save a DB query, when same user as $customer_id is logged in.
+		if ( is_user_logged_in() && strval( get_current_user_id() ) === $customer_id ) {
+			return false;
+		} else {
+			$customer = new WC_Customer( $customer_id );
+
+			if ( 0 === $customer->get_id() ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -350,7 +422,7 @@ class WC_Session_Handler extends WC_Session {
 	/**
 	 * Returns the session.
 	 *
-	 * @param string $customer_id Custo ID.
+	 * @param string $customer_id Customer ID.
 	 * @param mixed  $default Default session value.
 	 * @return string|array
 	 */

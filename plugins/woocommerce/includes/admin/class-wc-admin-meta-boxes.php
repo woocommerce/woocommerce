@@ -226,14 +226,15 @@ class WC_Admin_Meta_Boxes {
 	}
 
 	/**
-	 * Remove block-based templates from the list of available templates for products.
+	 * Remove irrelevant block templates from the list of available templates for products.
+	 * This will also remove custom created templates.
 	 *
 	 * @param string[] $templates Array of template header names keyed by the template file name.
 	 *
 	 * @return string[] Templates array excluding block-based templates.
 	 */
 	public function remove_block_templates( $templates ) {
-		if ( count( $templates ) === 0 || ! function_exists( 'gutenberg_get_block_template' ) ) {
+		if ( count( $templates ) === 0 || ! wc_current_theme_is_fse_theme() || ( ! function_exists( 'gutenberg_get_block_template' ) && ! function_exists( 'get_block_template' ) ) ) {
 			return $templates;
 		}
 
@@ -241,9 +242,17 @@ class WC_Admin_Meta_Boxes {
 		$filtered_templates = array();
 
 		foreach ( $templates as $template_key => $template_name ) {
-			$gutenberg_template = gutenberg_get_block_template( $theme . '//' . $template_key );
+			// Filter out the single-product.html template as this is a duplicate of "Default Template".
+			if ( 'single-product' === $template_key ) {
+				continue;
+			}
 
-			if ( ! $gutenberg_template ) {
+			$block_template = function_exists( 'gutenberg_get_block_template' ) ?
+				gutenberg_get_block_template( $theme . '//' . $template_key ) :
+				get_block_template( $theme . '//' . $template_key );
+
+			// If the block template has the product post type specified, include it.
+			if ( $block_template && in_array( 'product', $block_template->post_types ) ) {
 				$filtered_templates[ $template_key ] = $template_name;
 			}
 		}

@@ -1154,7 +1154,7 @@ class WC_Helper {
 		/**
 		 * Check if plugins have WC headers, if not then clear cache and fetch again.
 		 * WC Headers will not be present if `wc_enable_wc_plugin_headers` hook was added after a `get_plugins` call -- for example when WC is activated/updated.
-		 * Also, get_plugins call is expensive so we should clear this cache very conservatively.
+		 * Also, get_plugins call is expensive, so we should clear this cache very conservatively.
 		 */
 		if ( ! empty( $plugins ) && ! array_key_exists( 'Woo', current( $plugins ) ) ) {
 			wp_clean_plugins_cache( false );

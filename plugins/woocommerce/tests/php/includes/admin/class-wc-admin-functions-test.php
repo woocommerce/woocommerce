@@ -13,7 +13,7 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 	/**
 	 * Load up the importer classes since they aren't loaded by default.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 
 		$bootstrap = \WC_Unit_Tests_Bootstrap::instance();

@@ -789,7 +789,7 @@ function wc_query_string_form_fields( $values = null, $exclude = array(), $curre
 }
 
 /**
- * Get the terms and conditons page ID.
+ * Get the terms and conditions page ID.
  *
  * @since 3.4.0
  * @return int
@@ -823,7 +823,7 @@ function wc_terms_and_conditions_checkbox_enabled() {
 }
 
 /**
- * Get the terms and conditons checkbox text, if set.
+ * Get the terms and conditions checkbox text, if set.
  *
  * @since 3.4.0
  * @return string
@@ -1408,15 +1408,15 @@ if ( ! function_exists( 'woocommerce_get_product_thumbnail' ) ) {
 	 */
 	function woocommerce_get_product_thumbnail( $size = 'woocommerce_thumbnail', $attr = array(), $placeholder = true ) {
 		global $product;
-		
+
 		if ( ! is_array( $attr ) ) {
 			$attr = array();
 		}
-		
+
 		if ( ! is_bool( $placeholder ) ) {
 			$placeholder = true;
 		}
-		
+
 		$image_size = apply_filters( 'single_product_archive_thumbnail_size', $size );
 
 		return $product ? $product->get_image( $image_size, $attr, $placeholder ) : '';
@@ -3344,7 +3344,7 @@ if ( ! function_exists( 'wc_display_item_meta' ) ) {
 			)
 		);
 
-		foreach ( $item->get_formatted_meta_data() as $meta_id => $meta ) {
+		foreach ( $item->get_all_formatted_meta_data() as $meta_id => $meta ) {
 			$value     = $args['autop'] ? wp_kses_post( $meta->display_value ) : wp_kses_post( make_clickable( trim( $meta->display_value ) ) );
 			$strings[] = $args['label_before'] . wp_kses_post( $meta->display_key ) . $args['label_after'] . $value;
 		}

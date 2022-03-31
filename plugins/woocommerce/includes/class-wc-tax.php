@@ -485,7 +485,7 @@ class WC_Tax {
 	}
 
 	/**
-	 * Get's an arrau of matching rates from location and tax class. $customer parameter is used to preserve backward compatibility for filter.
+	 * Get's an array of matching rates from location and tax class. $customer parameter is used to preserve backward compatibility for filter.
 	 *
 	 * @param string $tax_class Tax class to get rates for.
 	 * @param array  $location  Location to compute rates for. Should be in form: array( country, state, postcode, city).
@@ -1224,7 +1224,7 @@ class WC_Tax {
 
 		// Drop the locations into the rates array.
 		foreach ( $locations as $location ) {
-			// Don't set them for unexistent rates.
+			// Don't set them for nonexistent rates.
 			if ( ! isset( $rates[ $location->tax_rate_id ] ) ) {
 				continue;
 			}

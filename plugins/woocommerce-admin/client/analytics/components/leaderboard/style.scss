@@ -1,0 +1,17 @@
+.woocommerce-leaderboard {
+	&.woocommerce-empty-content {
+		margin-bottom: $gap-large;
+	}
+
+	.woocommerce-card__body {
+		padding: 0;
+	}
+
+	.woocommerce-table__table {
+		margin-bottom: 0;
+
+		tr:last-child {
+			border-bottom-style: none;
+		}
+	}
+}

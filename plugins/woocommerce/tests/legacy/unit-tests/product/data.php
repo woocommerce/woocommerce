@@ -278,17 +278,17 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 		$image   = $this->set_product_image( $product );
 		$needle  = 'width="186" height="144" src="' . $image['url'] . '" class="%s"';
 
-		$this->assertContains(
+		$this->assertStringContainsString(
 			sprintf( $needle, 'attachment-woocommerce_thumbnail size-woocommerce_thumbnail' ),
 			$product->get_image()
 		);
 
-		$this->assertContains(
+		$this->assertStringContainsString(
 			sprintf( $needle, 'attachment-single size-single' ),
 			$product->get_image( 'single' )
 		);
 
-		$this->assertContains(
+		$this->assertStringContainsString(
 			sprintf( $needle, 'custom-class' ),
 			$product->get_image( 'single', array( 'class' => 'custom-class' ) )
 		);
@@ -306,17 +306,17 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 		$image            = $this->set_product_image( $variable_product );
 		$needle           = 'width="186" height="144" src="' . $image['url'] . '" class="%s"';
 
-		$this->assertContains(
+		$this->assertStringContainsString(
 			sprintf( $needle, 'attachment-woocommerce_thumbnail size-woocommerce_thumbnail' ),
 			$variation_1->get_image()
 		);
 
-		$this->assertContains(
+		$this->assertStringContainsString(
 			sprintf( $needle, 'attachment-single size-single' ),
 			$variation_1->get_image( 'single' )
 		);
 
-		$this->assertContains(
+		$this->assertStringContainsString(
 			sprintf( $needle, 'custom-class' ),
 			$variation_1->get_image( 'single', array( 'class' => 'custom-class' ) )
 		);
@@ -330,11 +330,11 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 	public function test_get_image_should_return_place_holder_image() {
 		$product = new WC_Product();
 
-		$this->assertContains( wc_placeholder_img_src(), $product->get_image() );
+		$this->assertStringContainsString( wc_placeholder_img_src(), $product->get_image() );
 
 		// Test custom class attribute is honoured.
 		$image = $product->get_image( 'woocommerce_thumbnail', array( 'class' => 'custom-class' ) );
-		$this->assertContains( 'class="custom-class"', $image );
+		$this->assertStringContainsString( 'class="custom-class"', $image );
 	}
 
 	/**

@@ -29,7 +29,7 @@ class WC_Tests_API_Functions extends WC_Unit_Test_Case {
 	/**
 	 * Run setup code for unit tests.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 
 		// Callback used by WP_HTTP_TestCase to decide whether to perform HTTP requests or to provide a mocked response.
@@ -44,7 +44,7 @@ class WC_Tests_API_Functions extends WC_Unit_Test_Case {
 	/**
 	 * Run tear down code for unit tests.
 	 */
-	public function tearDown() {
+	public function tearDown(): void {
 		parent::tearDown();
 
 		// remove files created in the wc_rest_upload_image_from_url() tests.
@@ -124,8 +124,7 @@ class WC_Tests_API_Functions extends WC_Unit_Test_Case {
 	 * @since 2.6.0
 	 */
 	public function test_wc_rest_set_uploaded_image_as_attachment() {
-		$this->assertInternalType(
-			'int',
+		$this->assertIsInt(
 			wc_rest_set_uploaded_image_as_attachment(
 				array(
 					'file' => '',

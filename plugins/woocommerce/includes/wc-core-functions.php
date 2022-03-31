@@ -801,7 +801,7 @@ function get_woocommerce_currency_symbols() {
 			'SSP' => '&pound;',
 			'STN' => 'Db',
 			'SYP' => '&#x644;.&#x633;',
-			'SZL' => 'L',
+			'SZL' => 'E',
 			'THB' => '&#3647;',
 			'TJS' => '&#x405;&#x41c;',
 			'TMT' => 'm',

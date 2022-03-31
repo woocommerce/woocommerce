@@ -14,7 +14,7 @@ Let's go through an example.
 
 First, create a file named `class-wc-admin-foobar.php` in `includes/admin` with the following code:
 
-```
+```php
 <?php
 
 class WC_Admin_Foobar {
@@ -40,7 +40,7 @@ Now, modify `tests/legacy/mockable-functions.php` so that the returned array con
 
 Create a file named `class-wc-tests-admin-foobar.php` in `tests/unit-tests/admin` with this code:
 
-```
+```php
 <?php
 
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
@@ -91,7 +91,7 @@ If you ever need to remove the configured function mocks from inside a test, you
 
 Note that the code hacker is configured so that only the production code files are modified, the tests code itself is **not** modified. This means that you can use the original functions within your tests even if you have mocked them, for example the following would work:
 
-```
+```php
 //Mock get_option but only if the requested option name is 'foo'
 FunctionsMockerHack::add_function_mocks([
     'get_option' => function($name, $default = false) {
@@ -110,7 +110,7 @@ If you ever need to remove the configured static method mocks from inside a test
  
 Note that the code hacker is configured so that only the production code files are modified, the tests code itself is **not** modified. This means that you can use the original static methods within your tests even if you have mocked them, for example the following would work:
 
-```
+```php
 StaticMockerHack::add_method_mocks([
     'WC_Some_Legacy_Service' => [
         //Mock WC_Some_Legacy_Service::do_something but only if the supplied parameter is 'foo'

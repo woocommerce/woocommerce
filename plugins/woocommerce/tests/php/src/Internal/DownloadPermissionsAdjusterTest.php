@@ -6,6 +6,7 @@
 namespace Automattic\WooCommerce\Tests\Internal;
 
 use Automattic\WooCommerce\Internal\DownloadPermissionsAdjuster;
+use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
 
 /**
@@ -23,7 +24,7 @@ class DownloadPermissionsAdjusterTest extends \WC_Unit_Test_Case {
 	/**
 	 * Runs before each test.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		$this->sut = new DownloadPermissionsAdjuster();
 		$this->sut->init();
 
@@ -42,6 +43,9 @@ class DownloadPermissionsAdjusterTest extends \WC_Unit_Test_Case {
 			10,
 			2
 		);
+
+		// In these tests, we are not directly concerned with Approved Download Directory functionality.
+		wc_get_container()->get( Download_Directories::class )->set_mode( Download_Directories::MODE_DISABLED );
 	}
 
 	/**

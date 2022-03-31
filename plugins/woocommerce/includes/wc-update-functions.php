@@ -2,7 +2,15 @@
 /**
  * WooCommerce Updates
  *
- * Functions for updating data, used by the background updater.
+ * Functions for updating data, used by the background updater. These functions must be included
+ * in the list returned by WC_Install::get_db_update_callbacks.
+ *
+ * Please note that these functions are invoked when WooCommerce is updated from a previous version,
+ * but NOT when WooCommerce is newly installed.
+ *
+ * Database schema changes must be incorporated to the SQL returned by WC_Install::get_schema, which is applied
+ * via dbDelta at both install and update time. If any other kind of database change is required
+ * at install time (e.g. populating tables), use the 'woocommerce_installed' hook.
  *
  * @package WooCommerce\Functions
  * @version 3.3.0
@@ -13,6 +21,8 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
+use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
+use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize as Download_Directories_Sync;
 
 /**
  * Update file paths for 2.0
@@ -346,8 +356,6 @@ function wc_update_200_line_items() {
 						$order_tax_row->post_id
 					)
 				);
-
-				unset( $tax_amount );
 			}
 		}
 	}
@@ -2365,4 +2373,32 @@ function wc_update_630_create_product_attributes_lookup_table() {
  */
 function wc_update_630_db_version() {
 	WC_Install::update_db_version( '6.3.0' );
+}
+
+/**
+ * Add the standard WooCommerce upload directories to the Approved Product Download Directories list
+ * and start populating it based on existing product download URLs, but do not enable the feature
+ * (for existing installations, a site admin should review and make a conscious decision to enable).
+ */
+function wc_update_640_approved_download_directories() {
+	wc_get_container()->get( Download_Directories_Sync::class )->init_feature( true, false );
+}
+
+/**
+ * Create the primary key for the product attributes lookup table if it doesn't exist already.
+ *
+ * @return bool Always false.
+ */
+function wc_update_640_add_primary_key_to_product_attributes_lookup_table() {
+	wc_get_container()->get( DataRegenerator::class )->create_table_primary_index();
+
+	return false;
+}
+
+/**
+ *
+ * Update DB version to 6.4.0.
+ */
+function wc_update_640_db_version() {
+	WC_Install::update_db_version( '6.4.0' );
 }
