@@ -2,7 +2,7 @@ name: Smoke test daily (dummy run)
 on:
   pull_request:
     branches:
-      - 'try/pr-32418'
+      - trunk
     types:
       - labeled
 jobs:
