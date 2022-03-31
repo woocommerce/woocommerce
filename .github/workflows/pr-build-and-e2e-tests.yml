@@ -153,11 +153,6 @@ jobs:
               with:
                   path: package/woocommerce
 
-            - name: Workaround to use initialization file with prepopulated data.
-              working-directory: package/woocommerce/plugins/woocommerce/tests/e2e/docker
-              run: |
-                  cp init-sample-products.sh initialize.sh
-
             - name: Move current directory to code. We will install zip file in this dir later.
               run: mv ./package/woocommerce/plugins/woocommerce/* ./code/woocommerce
 
@@ -178,6 +173,11 @@ jobs:
               run: |
                   npm install -g pnpm
                   pnpm install
+            
+            - name: Workaround to use initialization file with prepopulated data.
+              working-directory: package/woocommerce/plugins/woocommerce/tests/e2e/docker
+              run: |
+                  cp init-sample-products.sh initialize.sh
             
             - name: Load docker images and start containers.
               working-directory: package/woocommerce/plugins/woocommerce
