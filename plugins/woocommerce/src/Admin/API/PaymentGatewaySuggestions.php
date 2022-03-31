@@ -73,7 +73,7 @@ class PaymentGatewaySuggestions extends \WC_REST_Data_Controller {
 	 */
 	public function get_permission_check( $request ) {
 		if ( ! current_user_can( 'install_plugins' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_update', __( 'Sorry, you cannot manage plugins.', 'woocommerce-admin' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_update', __( 'Sorry, you cannot manage plugins.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 		return true;
 	}
@@ -114,43 +114,43 @@ class PaymentGatewaySuggestions extends \WC_REST_Data_Controller {
 			'type'       => 'array',
 			'properties' => array(
 				'content'                 => array(
-					'description' => __( 'Suggestion description.', 'woocommerce-admin' ),
+					'description' => __( 'Suggestion description.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'id'                      => array(
-					'description' => __( 'Suggestion ID.', 'woocommerce-admin' ),
+					'description' => __( 'Suggestion ID.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'image'                   => array(
-					'description' => __( 'Gateway image.', 'woocommerce-admin' ),
+					'description' => __( 'Gateway image.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'is_visible'              => array(
-					'description' => __( 'Suggestion visibility.', 'woocommerce-admin' ),
+					'description' => __( 'Suggestion visibility.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'plugins'                 => array(
-					'description' => __( 'Array of plugin slugs.', 'woocommerce-admin' ),
+					'description' => __( 'Array of plugin slugs.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'recommendation_priority' => array(
-					'description' => __( 'Priority of recommendation.', 'woocommerce-admin' ),
+					'description' => __( 'Priority of recommendation.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'title'                   => array(
-					'description' => __( 'Gateway title.', 'woocommerce-admin' ),
+					'description' => __( 'Gateway title.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,

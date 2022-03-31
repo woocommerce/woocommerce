@@ -91,11 +91,11 @@ class SetUpAdditionalPaymentTypes {
 	 * @return Note
 	 */
 	public static function get_note() {
-		$content = __( 'Set up additional payment providers, using third-party services or other methods.', 'woocommerce-admin' );
+		$content = __( 'Set up additional payment providers, using third-party services or other methods.', 'woocommerce' );
 
 		$note = new Note();
 
-		$note->set_title( __( 'Set up additional payment providers', 'woocommerce-admin' ) );
+		$note->set_title( __( 'Set up additional payment providers', 'woocommerce' ) );
 		$note->set_content( $content );
 		$note->set_content_data( (object) array() );
 		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
@@ -103,7 +103,7 @@ class SetUpAdditionalPaymentTypes {
 		$note->set_source( 'woocommerce-admin' );
 		$note->add_action(
 			'set-up-payments',
-			__( 'Set up payments', 'woocommerce-admin' ),
+			__( 'Set up payments', 'woocommerce' ),
 			wc_admin_url( '&task=payments' ),
 			Note::E_WC_ADMIN_NOTE_UNACTIONED,
 			true

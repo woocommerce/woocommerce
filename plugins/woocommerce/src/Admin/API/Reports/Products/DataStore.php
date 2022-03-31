@@ -224,7 +224,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 					}
 
 					/* translators: %s is product name */
-					$products_data[ $key ]['extended_info']['name'] = $product_names[ $product_id ] ? sprintf( __( '%s (Deleted)', 'woocommerce-admin' ), $product_names[ $product_id ] ) : __( '(Deleted)', 'woocommerce-admin' );
+					$products_data[ $key ]['extended_info']['name'] = $product_names[ $product_id ] ? sprintf( __( '%s (Deleted)', 'woocommerce' ), $product_names[ $product_id ] ) : __( '(Deleted)', 'woocommerce' );
 					continue;
 				}
 

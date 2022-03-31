@@ -26,11 +26,11 @@ class Shipping extends Task {
 	public function get_title() {
 		if ( true === $this->get_parent_option( 'use_completed_title' ) ) {
 			if ( $this->is_complete() ) {
-				return __( 'You added shipping costs', 'woocommerce-admin' );
+				return __( 'You added shipping costs', 'woocommerce' );
 			}
-			return __( 'Add shipping costs', 'woocommerce-admin' );
+			return __( 'Add shipping costs', 'woocommerce' );
 		}
-		return __( 'Set up shipping', 'woocommerce-admin' );
+		return __( 'Set up shipping', 'woocommerce' );
 	}
 
 	/**
@@ -41,7 +41,7 @@ class Shipping extends Task {
 	public function get_content() {
 		return __(
 			"Set your store location and where you'll ship to.",
-			'woocommerce-admin'
+			'woocommerce'
 		);
 	}
 
@@ -51,7 +51,7 @@ class Shipping extends Task {
 	 * @return string
 	 */
 	public function get_time() {
-		return __( '1 minute', 'woocommerce-admin' );
+		return __( '1 minute', 'woocommerce' );
 	}
 
 	/**

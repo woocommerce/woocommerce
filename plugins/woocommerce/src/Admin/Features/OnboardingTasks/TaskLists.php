@@ -79,7 +79,7 @@ class TaskLists {
 		self::add_list(
 			array(
 				'id'           => 'setup',
-				'title'        => __( 'Get ready to start selling', 'woocommerce-admin' ),
+				'title'        => __( 'Get ready to start selling', 'woocommerce' ),
 				'tasks'        => array(
 					'StoreDetails',
 					'Purchase',
@@ -100,7 +100,7 @@ class TaskLists {
 			array(
 				'id'                      => 'setup_experiment_1',
 				'hidden_id'               => 'setup',
-				'title'                   => __( 'Get ready to start selling', 'woocommerce-admin' ),
+				'title'                   => __( 'Get ready to start selling', 'woocommerce' ),
 				'tasks'                   => array(
 					'StoreDetails',
 					'Products',
@@ -123,7 +123,7 @@ class TaskLists {
 		self::add_list(
 			array(
 				'id'      => 'extended',
-				'title'   => __( 'Things to do next', 'woocommerce-admin' ),
+				'title'   => __( 'Things to do next', 'woocommerce' ),
 				'sort_by' => array(
 					array(
 						'key'   => 'is_complete',
@@ -143,7 +143,7 @@ class TaskLists {
 			array(
 				'id'           => 'setup_two_column',
 				'hidden_id'    => 'setup',
-				'title'        => __( 'Get ready to start selling', 'woocommerce-admin' ),
+				'title'        => __( 'Get ready to start selling', 'woocommerce' ),
 				'tasks'        => array(
 					'Products',
 					'WooCommercePayments',
@@ -160,7 +160,7 @@ class TaskLists {
 			array(
 				'id'           => 'extended_two_column',
 				'hidden_id'    => 'extended',
-				'title'        => __( 'Things to do next', 'woocommerce-admin' ),
+				'title'        => __( 'Things to do next', 'woocommerce' ),
 				'sort_by'      => array(
 					array(
 						'key'   => 'is_complete',
@@ -227,7 +227,7 @@ class TaskLists {
 		if ( isset( self::$lists[ $args['id'] ] ) ) {
 			return new \WP_Error(
 				'woocommerce_task_list_exists',
-				__( 'Task list ID already exists', 'woocommerce-admin' )
+				__( 'Task list ID already exists', 'woocommerce' )
 			);
 		}
 
@@ -246,7 +246,7 @@ class TaskLists {
 		if ( ! isset( self::$lists[ $list_id ] ) ) {
 			return new \WP_Error(
 				'woocommerce_task_list_invalid_list',
-				__( 'Task list ID does not exist', 'woocommerce-admin' )
+				__( 'Task list ID does not exist', 'woocommerce' )
 			);
 		}
 

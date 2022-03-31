@@ -465,7 +465,7 @@ class Notes {
 		} catch ( \Exception $e ) {
 			throw new NotesUnavailableException(
 				'woocommerce_admin_notes_unavailable',
-				__( 'Notes are unavailable because the "admin-note" data store cannot be loaded.', 'woocommerce-admin' )
+				__( 'Notes are unavailable because the "admin-note" data store cannot be loaded.', 'woocommerce' )
 			);
 		}
 	}

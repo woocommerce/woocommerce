@@ -46,7 +46,7 @@ class ReportsSync {
 
 		foreach ( $schedulers as $scheduler ) {
 			if ( ! is_subclass_of( $scheduler, 'Automattic\WooCommerce\Internal\Admin\Schedulers\ImportScheduler' ) ) {
-				throw new \Exception( __( 'Report sync schedulers should be derived from the Automattic\WooCommerce\Internal\Admin\Schedulers\ImportScheduler class.', 'woocommerce-admin' ) );
+				throw new \Exception( __( 'Report sync schedulers should be derived from the Automattic\WooCommerce\Internal\Admin\Schedulers\ImportScheduler class.', 'woocommerce' ) );
 			}
 		}
 
@@ -76,7 +76,7 @@ class ReportsSync {
 	 */
 	public static function regenerate_report_data( $days, $skip_existing ) {
 		if ( self::is_importing() ) {
-			return new \WP_Error( 'wc_admin_import_in_progress', __( 'An import is already in progress. Please allow the previous import to complete before beginning a new one.', 'woocommerce-admin' ) );
+			return new \WP_Error( 'wc_admin_import_in_progress', __( 'An import is already in progress. Please allow the previous import to complete before beginning a new one.', 'woocommerce' ) );
 		}
 
 		self::reset_import_stats( $days, $skip_existing );
@@ -92,7 +92,7 @@ class ReportsSync {
 		 */
 		do_action( 'woocommerce_analytics_regenerate_init', $days, $skip_existing );
 
-		return __( 'Report table data is being rebuilt. Please allow some time for data to fully populate.', 'woocommerce-admin' );
+		return __( 'Report table data is being rebuilt. Please allow some time for data to fully populate.', 'woocommerce' );
 	}
 
 	/**
@@ -176,7 +176,7 @@ class ReportsSync {
 		// Delete import options.
 		delete_option( ImportScheduler::IMPORT_STATS_OPTION );
 
-		return __( 'Report table data is being deleted.', 'woocommerce-admin' );
+		return __( 'Report table data is being deleted.', 'woocommerce' );
 	}
 
 	/**

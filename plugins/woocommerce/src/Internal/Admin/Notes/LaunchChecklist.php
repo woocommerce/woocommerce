@@ -45,16 +45,16 @@ class LaunchChecklist {
 			return;
 		}
 
-		$content = __( 'To make sure you never get that sinking "what did I forget" feeling, we\'ve put together the essential pre-launch checklist.', 'woocommerce-admin' );
+		$content = __( 'To make sure you never get that sinking "what did I forget" feeling, we\'ve put together the essential pre-launch checklist.', 'woocommerce' );
 
 		$note = new Note();
-		$note->set_title( __( 'Ready to launch your store?', 'woocommerce-admin' ) );
+		$note->set_title( __( 'Ready to launch your store?', 'woocommerce' ) );
 		$note->set_content( $content );
 		$note->set_content_data( (object) array() );
 		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_source( 'woocommerce-admin' );
-		$note->add_action( 'learn-more', __( 'Learn more', 'woocommerce-admin' ), 'https://woocommerce.com/posts/pre-launch-checklist-the-essentials/?utm_source=inbox&utm_medium=product' );
+		$note->add_action( 'learn-more', __( 'Learn more', 'woocommerce' ), 'https://woocommerce.com/posts/pre-launch-checklist-the-essentials/?utm_source=inbox&utm_medium=product' );
 		return $note;
 	}
 }

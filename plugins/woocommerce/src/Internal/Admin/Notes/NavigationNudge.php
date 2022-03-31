@@ -54,14 +54,14 @@ class NavigationNudge {
 		}
 
 		$note = new Note();
-		$note->set_title( __( 'You now have access to the WooCommerce navigation', 'woocommerce-admin' ) );
-		$note->set_content( __( 'We’re introducing a new navigation for a more intuitive and improved user experience. You can enable the beta version of the new experience in the Advanced Settings. Enable it now for your store.', 'woocommerce-admin' ) );
+		$note->set_title( __( 'You now have access to the WooCommerce navigation', 'woocommerce' ) );
+		$note->set_content( __( 'We’re introducing a new navigation for a more intuitive and improved user experience. You can enable the beta version of the new experience in the Advanced Settings. Enable it now for your store.', 'woocommerce' ) );
 		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_source( 'woocommerce-admin' );
 		$note->add_action(
 			'enable-navigation',
-			__( 'Enable in Settings', 'woocommerce-admin' ),
+			__( 'Enable in Settings', 'woocommerce' ),
 			admin_url( 'admin.php?page=wc-settings&tab=advanced&section=features' )
 		);
 		return $note;

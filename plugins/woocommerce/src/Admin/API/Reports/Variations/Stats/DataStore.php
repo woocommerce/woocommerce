@@ -221,7 +221,7 @@ class DataStore extends VariationsDataStore implements DataStoreInterface {
 			$totals[0]['segments'] = $segmenter->get_totals_segments( $totals_query, $table_name );
 
 			if ( null === $totals ) {
-				return new \WP_Error( 'woocommerce_analytics_variations_stats_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce-admin' ) );
+				return new \WP_Error( 'woocommerce_analytics_variations_stats_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce' ) );
 			}
 
 			$this->interval_query->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
@@ -239,7 +239,7 @@ class DataStore extends VariationsDataStore implements DataStoreInterface {
 			/* phpcs:enable */
 
 			if ( null === $intervals ) {
-				return new \WP_Error( 'woocommerce_analytics_variations_stats_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce-admin' ) );
+				return new \WP_Error( 'woocommerce_analytics_variations_stats_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce' ) );
 			}
 
 			$totals = (object) $this->cast_numbers( $totals[0] );

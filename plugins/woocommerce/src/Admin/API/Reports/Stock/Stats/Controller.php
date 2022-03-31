@@ -83,13 +83,13 @@ class Controller extends \WC_REST_Reports_Controller {
 	public function get_item_schema() {
 		$totals = array(
 			'products' => array(
-				'description' => __( 'Number of products.', 'woocommerce-admin' ),
+				'description' => __( 'Number of products.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
 			'lowstock' => array(
-				'description' => __( 'Number of low stock products.', 'woocommerce-admin' ),
+				'description' => __( 'Number of low stock products.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
@@ -100,7 +100,7 @@ class Controller extends \WC_REST_Reports_Controller {
 		foreach ( $status_options as $status => $label ) {
 			$totals[ $status ] = array(
 				/* translators: Stock status. Example: "Number of low stock products */
-				'description' => sprintf( __( 'Number of %s products.', 'woocommerce-admin' ), $label ),
+				'description' => sprintf( __( 'Number of %s products.', 'woocommerce' ), $label ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
@@ -113,7 +113,7 @@ class Controller extends \WC_REST_Reports_Controller {
 			'type'       => 'object',
 			'properties' => array(
 				'totals' => array(
-					'description' => __( 'Totals data.', 'woocommerce-admin' ),
+					'description' => __( 'Totals data.', 'woocommerce' ),
 					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,

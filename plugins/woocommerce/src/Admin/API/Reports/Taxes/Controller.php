@@ -155,61 +155,61 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 			'type'       => 'object',
 			'properties' => array(
 				'tax_rate_id'  => array(
-					'description' => __( 'Tax rate ID.', 'woocommerce-admin' ),
+					'description' => __( 'Tax rate ID.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'name'         => array(
-					'description' => __( 'Tax rate name.', 'woocommerce-admin' ),
+					'description' => __( 'Tax rate name.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'tax_rate'     => array(
-					'description' => __( 'Tax rate.', 'woocommerce-admin' ),
+					'description' => __( 'Tax rate.', 'woocommerce' ),
 					'type'        => 'number',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'country'      => array(
-					'description' => __( 'Country / Region.', 'woocommerce-admin' ),
+					'description' => __( 'Country / Region.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'state'        => array(
-					'description' => __( 'State.', 'woocommerce-admin' ),
+					'description' => __( 'State.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'priority'     => array(
-					'description' => __( 'Priority.', 'woocommerce-admin' ),
+					'description' => __( 'Priority.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'total_tax'    => array(
-					'description' => __( 'Total tax.', 'woocommerce-admin' ),
+					'description' => __( 'Total tax.', 'woocommerce' ),
 					'type'        => 'number',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'order_tax'    => array(
-					'description' => __( 'Order tax.', 'woocommerce-admin' ),
+					'description' => __( 'Order tax.', 'woocommerce' ),
 					'type'        => 'number',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'shipping_tax' => array(
-					'description' => __( 'Shipping tax.', 'woocommerce-admin' ),
+					'description' => __( 'Shipping tax.', 'woocommerce' ),
 					'type'        => 'number',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'orders_count' => array(
-					'description' => __( 'Number of orders.', 'woocommerce-admin' ),
+					'description' => __( 'Number of orders.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -229,7 +229,7 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 		$params             = array();
 		$params['context']  = $this->get_context_param( array( 'default' => 'view' ) );
 		$params['page']     = array(
-			'description'       => __( 'Current page of the collection.', 'woocommerce-admin' ),
+			'description'       => __( 'Current page of the collection.', 'woocommerce' ),
 			'type'              => 'integer',
 			'default'           => 1,
 			'sanitize_callback' => 'absint',
@@ -237,7 +237,7 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 			'minimum'           => 1,
 		);
 		$params['per_page'] = array(
-			'description'       => __( 'Maximum number of items to be returned in result set.', 'woocommerce-admin' ),
+			'description'       => __( 'Maximum number of items to be returned in result set.', 'woocommerce' ),
 			'type'              => 'integer',
 			'default'           => 10,
 			'minimum'           => 1,
@@ -246,26 +246,26 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['after']    = array(
-			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['before']   = array(
-			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'woocommerce' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['order']    = array(
-			'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce-admin' ),
+			'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => 'desc',
 			'enum'              => array( 'asc', 'desc' ),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['orderby']  = array(
-			'description'       => __( 'Sort collection by object attribute.', 'woocommerce-admin' ),
+			'description'       => __( 'Sort collection by object attribute.', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => 'tax_rate_id',
 			'enum'              => array(
@@ -281,7 +281,7 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['taxes']    = array(
-			'description'       => __( 'Limit result set to items assigned one or more tax rates.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit result set to items assigned one or more tax rates.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
@@ -300,12 +300,12 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 	 */
 	public function get_export_columns() {
 		return array(
-			'tax_code'     => __( 'Tax code', 'woocommerce-admin' ),
-			'rate'         => __( 'Rate', 'woocommerce-admin' ),
-			'total_tax'    => __( 'Total tax', 'woocommerce-admin' ),
-			'order_tax'    => __( 'Order tax', 'woocommerce-admin' ),
-			'shipping_tax' => __( 'Shipping tax', 'woocommerce-admin' ),
-			'orders_count' => __( 'Orders', 'woocommerce-admin' ),
+			'tax_code'     => __( 'Tax code', 'woocommerce' ),
+			'rate'         => __( 'Rate', 'woocommerce' ),
+			'total_tax'    => __( 'Total tax', 'woocommerce' ),
+			'order_tax'    => __( 'Order tax', 'woocommerce' ),
+			'shipping_tax' => __( 'Shipping tax', 'woocommerce' ),
+			'orders_count' => __( 'Orders', 'woocommerce' ),
 		);
 	}
 

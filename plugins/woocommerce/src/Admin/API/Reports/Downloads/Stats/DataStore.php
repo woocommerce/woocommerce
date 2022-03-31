@@ -117,7 +117,7 @@ class DataStore extends DownloadsDataStore implements DataStoreInterface {
 				ARRAY_A
 			); // phpcs:ignore cache ok, DB call ok, unprepared SQL ok.
 			if ( null === $totals ) {
-				return new \WP_Error( 'woocommerce_analytics_downloads_stats_result_failed', __( 'Sorry, fetching downloads data failed.', 'woocommerce-admin' ) );
+				return new \WP_Error( 'woocommerce_analytics_downloads_stats_result_failed', __( 'Sorry, fetching downloads data failed.', 'woocommerce' ) );
 			}
 
 			$this->interval_query->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
@@ -133,7 +133,7 @@ class DataStore extends DownloadsDataStore implements DataStoreInterface {
 			); // phpcs:ignore cache ok, DB call ok, unprepared SQL ok.
 
 			if ( null === $intervals ) {
-				return new \WP_Error( 'woocommerce_analytics_downloads_stats_result_failed', __( 'Sorry, fetching downloads data failed.', 'woocommerce-admin' ) );
+				return new \WP_Error( 'woocommerce_analytics_downloads_stats_result_failed', __( 'Sorry, fetching downloads data failed.', 'woocommerce' ) );
 			}
 
 			$totals = (object) $this->cast_numbers( $totals[0] );

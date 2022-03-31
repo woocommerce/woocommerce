@@ -38,11 +38,11 @@ class Products extends Task {
 	public function get_title() {
 		if ( true === $this->get_parent_option( 'use_completed_title' ) ) {
 			if ( $this->is_complete() ) {
-				return __( 'You added products', 'woocommerce-admin' );
+				return __( 'You added products', 'woocommerce' );
 			}
-			return __( 'Add products', 'woocommerce-admin' );
+			return __( 'Add products', 'woocommerce' );
 		}
-		return __( 'Add my products', 'woocommerce-admin' );
+		return __( 'Add my products', 'woocommerce' );
 	}
 
 	/**
@@ -53,7 +53,7 @@ class Products extends Task {
 	public function get_content() {
 		return __(
 			'Start by adding the first product to your store. You can add your products manually, via CSV, or import them from another service.',
-			'woocommerce-admin'
+			'woocommerce'
 		);
 	}
 
@@ -63,7 +63,7 @@ class Products extends Task {
 	 * @return string
 	 */
 	public function get_time() {
-		return __( '1 minute per product', 'woocommerce-admin' );
+		return __( '1 minute per product', 'woocommerce' );
 	}
 
 	/**

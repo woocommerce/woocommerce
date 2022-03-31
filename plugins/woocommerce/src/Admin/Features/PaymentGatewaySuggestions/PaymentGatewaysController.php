@@ -130,7 +130,7 @@ class PaymentGatewaysController {
 				'status'  => 'success',
 				'content' => sprintf(
 					/* translators: the title of the payment gateway */
-					__( '%s connected successfully', 'woocommerce-admin' ),
+					__( '%s connected successfully', 'woocommerce' ),
 					$payment_gateway->method_title
 				),
 			)

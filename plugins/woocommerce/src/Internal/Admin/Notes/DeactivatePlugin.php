@@ -41,15 +41,15 @@ class DeactivatePlugin {
 	 */
 	public static function get_note() {
 		$note = new Note();
-		$note->set_title( __( 'Deactivate old WooCommerce Admin version', 'woocommerce-admin' ) );
-		$note->set_content( __( 'Your current version of WooCommerce Admin is outdated and a newer version is included with WooCommerce. We recommend deactivating the plugin and using the stable version included with WooCommerce.', 'woocommerce-admin' ) );
+		$note->set_title( __( 'Deactivate old WooCommerce Admin version', 'woocommerce' ) );
+		$note->set_content( __( 'Your current version of WooCommerce Admin is outdated and a newer version is included with WooCommerce. We recommend deactivating the plugin and using the stable version included with WooCommerce.', 'woocommerce' ) );
 		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_content_data( (object) array() );
 		$note->set_source( 'woocommerce-admin' );
 		$note->add_action(
 			'deactivate-feature-plugin',
-			__( 'Deactivate', 'woocommerce-admin' ),
+			__( 'Deactivate', 'woocommerce' ),
 			wc_admin_url( '&action=deactivate-feature-plugin' ),
 			Note::E_WC_ADMIN_NOTE_UNACTIONED
 		);

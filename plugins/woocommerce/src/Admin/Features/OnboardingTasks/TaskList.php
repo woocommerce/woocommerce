@@ -236,7 +236,7 @@ class TaskList {
 		if ( ! is_subclass_of( $task, 'Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task' ) ) {
 			return new \WP_Error(
 				'woocommerce_task_list_invalid_task',
-				__( 'Task is not a subclass of `Task`', 'woocommerce-admin' )
+				__( 'Task is not a subclass of `Task`', 'woocommerce' )
 			);
 		}
 		if ( array_search( $task, $this->tasks, true ) ) {

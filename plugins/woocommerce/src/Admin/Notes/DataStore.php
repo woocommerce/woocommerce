@@ -121,7 +121,7 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 			 */
 			do_action( 'woocommerce_note_loaded', $note );
 		} else {
-			throw new \Exception( __( 'Invalid admin note', 'woocommerce-admin' ) );
+			throw new \Exception( __( 'Invalid admin note', 'woocommerce' ) );
 		}
 	}
 

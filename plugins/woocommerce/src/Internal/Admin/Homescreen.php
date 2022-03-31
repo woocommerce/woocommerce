@@ -81,7 +81,7 @@ class Homescreen {
 			wc_admin_register_page(
 				array(
 					'id'         => 'woocommerce-home',
-					'title'      => __( 'WooCommerce', 'woocommerce-admin' ),
+					'title'      => __( 'WooCommerce', 'woocommerce' ),
 					'path'       => self::MENU_SLUG,
 					'capability' => 'read',
 				)
@@ -92,7 +92,7 @@ class Homescreen {
 		wc_admin_register_page(
 			array(
 				'id'         => 'woocommerce-home',
-				'title'      => __( 'Home', 'woocommerce-admin' ),
+				'title'      => __( 'Home', 'woocommerce' ),
 				'parent'     => 'woocommerce',
 				'path'       => self::MENU_SLUG,
 				'order'      => 0,

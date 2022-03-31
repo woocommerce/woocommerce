@@ -32,7 +32,7 @@ class Coupons extends \WC_REST_Coupons_Controller {
 	public function get_collection_params() {
 		$params           = parent::get_collection_params();
 		$params['search'] = array(
-			'description'       => __( 'Limit results to coupons with codes matching a given string.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit results to coupons with codes matching a given string.', 'woocommerce' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
 		);

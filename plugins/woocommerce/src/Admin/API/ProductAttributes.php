@@ -37,7 +37,7 @@ class ProductAttributes extends \WC_REST_Product_Attributes_Controller {
 			array(
 				'args'   => array(
 					'slug' => array(
-						'description' => __( 'Slug identifier for the resource.', 'woocommerce-admin' ),
+						'description' => __( 'Slug identifier for the resource.', 'woocommerce' ),
 						'type'        => 'string',
 					),
 				),
@@ -59,7 +59,7 @@ class ProductAttributes extends \WC_REST_Product_Attributes_Controller {
 	public function get_collection_params() {
 		$params           = parent::get_collection_params();
 		$params['search'] = array(
-			'description'       => __( 'Search by similar attribute name.', 'woocommerce-admin' ),
+			'description'       => __( 'Search by similar attribute name.', 'woocommerce' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
 		);

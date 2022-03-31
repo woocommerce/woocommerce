@@ -573,7 +573,7 @@ class TimeInterval {
 			return new \WP_Error(
 				'rest_invalid_param',
 				/* translators: 1: parameter name */
-				sprintf( __( '%1$s is not a numerically indexed array.', 'woocommerce-admin' ), $param )
+				sprintf( __( '%1$s is not a numerically indexed array.', 'woocommerce' ), $param )
 			);
 		}
 
@@ -585,7 +585,7 @@ class TimeInterval {
 			return new \WP_Error(
 				'rest_invalid_param',
 				/* translators: %s: parameter name */
-				sprintf( __( '%s must contain 2 numbers.', 'woocommerce-admin' ), $param )
+				sprintf( __( '%s must contain 2 numbers.', 'woocommerce' ), $param )
 			);
 		}
 
@@ -605,7 +605,7 @@ class TimeInterval {
 			return new \WP_Error(
 				'rest_invalid_param',
 				/* translators: 1: parameter name */
-				sprintf( __( '%1$s is not a numerically indexed array.', 'woocommerce-admin' ), $param )
+				sprintf( __( '%1$s is not a numerically indexed array.', 'woocommerce' ), $param )
 			);
 		}
 
@@ -617,7 +617,7 @@ class TimeInterval {
 			return new \WP_Error(
 				'rest_invalid_param',
 				/* translators: %s: parameter name */
-				sprintf( __( '%s must contain 2 valid dates.', 'woocommerce-admin' ), $param )
+				sprintf( __( '%s must contain 2 valid dates.', 'woocommerce' ), $param )
 			);
 		}
 
