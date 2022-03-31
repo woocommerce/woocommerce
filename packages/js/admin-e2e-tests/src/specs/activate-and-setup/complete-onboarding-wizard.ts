@@ -449,10 +449,6 @@ const testSubscriptionsInclusion = () => {
 			await resetWooCommerceState();
 		} );
 
-		afterAll( async () => {
-			await login.logout();
-		} );
-
 		it( 'can complete the store details section', async () => {
 			await profileWizard.navigate();
 			await profileWizard.storeDetails.completeStoreDetailsSection( {
@@ -533,7 +529,6 @@ const testBusinessDetailsForm = () => {
 		const login = new Login( page );
 
 		beforeAll( async () => {
-			await login.login();
 			await resetWooCommerceState();
 		} );
 
