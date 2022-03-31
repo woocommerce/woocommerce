@@ -158,7 +158,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	 *
 	 * @param WC_Webhook $webhook
 	 */
-	do_action( 'woocommerce_webhook_options', $webhook ); 
+	do_action( 'woocommerce_webhook_options', $webhook );
 	?>
 </div>
 
