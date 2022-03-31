@@ -80,7 +80,7 @@ jobs:
               retention-days: 7
     
   test-plugins:
-    name: Smoke tests with ${{ matrix.plugin }} plugin installed
+    name: daily tests with ${{ matrix.plugin }} plugin installed
     runs-on: ubuntu-18.04
     needs: [build]
     strategy:
@@ -156,3 +156,12 @@ jobs:
         run: |
           pnpx wc-e2e test:e2e tests/e2e/specs/smoke-tests/upload-plugin.js
           pnpx wc-e2e test:e2e
+
+      - name: Remove label from pull request.
+        if: |
+          always() 
+           && contains( github.event.pull_request.labels.*.name, format('run{0} daily tests', ':')) 
+        uses: actions-ecosystem/action-remove-labels@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          labels: 'run: daily tests'
