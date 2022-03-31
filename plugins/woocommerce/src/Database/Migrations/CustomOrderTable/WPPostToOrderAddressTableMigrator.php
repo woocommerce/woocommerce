@@ -1,17 +1,39 @@
 <?php
+/**
+ * Class for WPPost to wc_order_address table migrator.
+ */
 
 namespace Automattic\WooCommerce\DataBase\Migrations\CustomOrderTable;
 
+/**
+ * Class WPPostToOrderAddressTableMigrator
+ *
+ * @package Automattic\WooCommerce\DataBase\Migrations\CustomOrderTable
+ */
 class WPPostToOrderAddressTableMigrator extends MetaToCustomTableMigrator {
+	/**
+	 * Type of addresses being migrated, could be billing|shipping.
+	 *
+	 * @var $type
+	 */
+	protected $type;
 
-	var $type;
-
-	function __construct( $type ) {
+	/**
+	 * WPPostToOrderAddressTableMigrator constructor.
+	 *
+	 * @param string $type Type of addresses being migrated, could be billing|shipping.
+	 */
+	public function __construct( $type ) {
 		$this->type = $type;
 		parent::__construct();
 	}
 
-	function get_schema_config() {
+	/**
+	 * Get schema config for wp_posts and wc_order_address table.
+	 *
+	 * @return array Config.
+	 */
+	public function get_schema_config() {
 		global $wpdb;
 		// TODO: Remove hardcoding.
 		$this->table_names = array(
@@ -45,8 +67,14 @@ class WPPostToOrderAddressTableMigrator extends MetaToCustomTableMigrator {
 		);
 	}
 
-	function get_core_column_mapping() {
+	/**
+	 * Get columns config.
+	 *
+	 * @return \string[][] Config.
+	 */
+	public function get_core_column_mapping() {
 		$type = $this->type;
+
 		return array(
 			'id'   => array(
 				'type'        => 'int',
@@ -60,8 +88,14 @@ class WPPostToOrderAddressTableMigrator extends MetaToCustomTableMigrator {
 		);
 	}
 
-	function get_meta_column_config() {
+	/**
+	 * Get meta data config.
+	 *
+	 * @return \string[][] Config.
+	 */
+	public function get_meta_column_config() {
 		$type = $this->type;
+
 		return array(
 			"_{$type}_first_name" => array(
 				'type'        => 'string',
@@ -110,6 +144,20 @@ class WPPostToOrderAddressTableMigrator extends MetaToCustomTableMigrator {
 		);
 	}
 
+	/**
+	 * We overwrite this method to add a subclause to only fetch address of current type.
+	 *
+	 * @param array $entity_ids List of entity IDs to verify.
+	 *
+	 * @return array Already migrated entities, would be of the form
+	 * array(
+	 *      '$source_id1' => array(
+	 *          'source_id' => $source_id1,
+	 *          'destination_id' => $destination_id1,
+	 *      ),
+	 *      ...
+	 * )
+	 */
 	public function get_already_migrated_records( $entity_ids ) {
 		global $wpdb;
 		$source_table                   = $this->schema_config['source']['entity']['table_name'];
@@ -126,6 +174,7 @@ class WPPostToOrderAddressTableMigrator extends MetaToCustomTableMigrator {
 
 		$already_migrated_entity_ids = $wpdb->get_results(
 			$wpdb->prepare(
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- All columns and table names are hardcoded.
 				"
 SELECT source.`$source_primary_key_column` as source_id, destination.`$destination_primary_key_column` as destination_id
 FROM `$destination_table` destination
@@ -134,6 +183,7 @@ WHERE source.`$source_primary_key_column` IN ( $entity_id_placeholder ) AND dest
 				",
 				$entity_ids
 			)
+		// phpcs:enable
 		);
 
 		return array_column( $already_migrated_entity_ids, null, 'source_id' );
