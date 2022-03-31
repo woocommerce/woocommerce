@@ -19,21 +19,23 @@ abstract class MetaToCustomTableMigrator {
 	 *
 	 * @var array
 	 */
-	private $schema_config;
+	protected $schema_config;
 
 	/**
 	 * Meta config, see __construct for detailed config.
 	 *
 	 * @var array
 	 */
-	private $meta_column_mapping;
+	protected $meta_column_mapping;
 
 	/**
 	 * Column mapping from source table to destination custom table. See __construct for detailed config.
 	 *
 	 * @var array
 	 */
-	private $core_column_mapping;
+	protected $core_column_mapping;
+
+	protected $errors;
 
 	/**
 	 * MetaToCustomTableMigrator constructor.
@@ -84,12 +86,20 @@ abstract class MetaToCustomTableMigrator {
 	 *  ....
 	 * ).
 	 */
-	public function __construct( $schema_config, $meta_column_mapping, $core_column_mapping ) {
+	public function __construct() {
 		// TODO: Add code to validate params.
-		$this->schema_config       = $schema_config;
-		$this->meta_column_mapping = $meta_column_mapping;
-		$this->core_column_mapping = $core_column_mapping;
+		$this->schema_config       = MigrationHelper::escape_schema_for_backtick( $this->get_schema_config() );
+		$this->meta_column_mapping = $this->get_meta_column_config();
+		$this->core_column_mapping = $this->get_core_column_mapping();
+		$this->errors              = array();
 	}
+
+	abstract function get_schema_config();
+
+	abstract function get_core_column_mapping();
+
+	abstract function get_meta_column_config();
+
 
 	/**
 	 * Generate SQL for data insertion.
@@ -112,10 +122,13 @@ abstract class MetaToCustomTableMigrator {
 		return "INSERT IGNORE INTO $table (`$column_sql`) VALUES $value_sql;"; // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, -- $insert_query is hardcoded, $value_sql is already escaped.
 	}
 
-	public function generate_update_sql_for_batch( $batch ) {
+	public function generate_update_sql_for_batch( $batch, $entity_row_mapping ) {
 		$table = $this->schema_config['destination']['table_name'];
 
 		$destination_primary_id_schema = $this->get_destination_table_primary_id_schema();
+		foreach ( $batch as $entity_id => $row ) {
+			$batch[ $entity_id ][ $destination_primary_id_schema['destination_primary_key']['destination'] ] = $entity_row_mapping[ $entity_id ]->destination_id;
+		}
 
 		list( $value_sql, $column_sql, $columns ) = $this->generate_column_clauses(
 			array_merge( $destination_primary_id_schema, $this->core_column_mapping, $this->meta_column_mapping ),
@@ -127,7 +140,7 @@ abstract class MetaToCustomTableMigrator {
 		return "INSERT INTO $table (`$column_sql`) VALUES $value_sql $duplicate_update_key_statement;";
 	}
 
-	private function get_destination_table_primary_id_schema() {
+	protected function get_destination_table_primary_id_schema() {
 		return array(
 			'destination_primary_key' => array(
 				'destination' => $this->schema_config['destination']['primary_key'],
@@ -136,7 +149,7 @@ abstract class MetaToCustomTableMigrator {
 		);
 	}
 
-	private function generate_column_clauses( $columns_schema, $batch ) {
+	protected function generate_column_clauses( $columns_schema, $batch ) {
 		global $wpdb;
 
 		$columns      = array();
@@ -160,7 +173,7 @@ abstract class MetaToCustomTableMigrator {
 
 		$value_sql = implode( ',', $values );
 
-		$column_sql = implode( '`, `', MigrationHelper::escape_backtick( $columns ) );
+		$column_sql = implode( '`, `', $columns );
 
 		return array( $value_sql, $column_sql, $columns );
 	}
@@ -174,6 +187,67 @@ abstract class MetaToCustomTableMigrator {
 
 		return "ON DUPLICATE KEY UPDATE $update_value_clause";
 	}
+
+	/**
+	 * Process next migration batch, uses option `wc_cot_migration` to checkpoints of what have been processed so far.
+	 *
+	 * @param int $batch_size Batch size of records to migrate.
+	 *
+	 * @return array True if migration is completed, false if there are still records to process.
+	 */
+	public function process_migration_batch_for_ids( $entity_ids ) {
+		$data = $this->fetch_data_for_migration_for_ids( $entity_ids );
+
+		foreach ( $data['errors'] as $entity_id => $error ) {
+			$this->errors[ $entity_id ] = "Error in importing post id $entity_id: " . print_r( $error, true );
+		}
+
+		if ( count( $data['data'] ) === 0 ) {
+			return array();
+		}
+
+		$entity_ids       = array_keys( $data['data'] );
+		$already_migrated = $this->get_already_migrated_records( $entity_ids );
+
+		$to_insert = array_diff_key( $data['data'], $already_migrated );
+		$this->process_insert_batch( $to_insert );
+
+		$to_update = array_intersect_key( $data['data'], $already_migrated );
+		$this->process_update_batch( $to_update, $already_migrated );
+
+		return array(
+			'errors' => $this->errors
+		);
+	}
+
+	protected function process_insert_batch( $batch ) {
+		global $wpdb;
+		if ( 0 === count( $batch ) ) {
+			return;
+		}
+		$queries = $this->generate_insert_sql_for_batch( $batch );
+		$result  = $wpdb->query( $queries );
+		$wpdb->query( "COMMIT;" ); // For some reason, this seems necessary on some hosts? Maybe a MySQL configuration?
+		if ( count( $batch ) !== $result ) {
+			// Some rows were not inserted.
+			// TODO: Find and log the entity ids that were not inserted.
+		}
+	}
+
+	protected function process_update_batch( $batch, $already_migrated ) {
+		global $wpdb;
+		if ( 0 === count( $batch ) ) {
+			return;
+		}
+		$queries = $this->generate_update_sql_for_batch( $batch, $already_migrated );
+		$result  = $wpdb->query( $queries );
+		$wpdb->query( "COMMIT;" ); // For some reason, this seems necessary on some hosts? Maybe a MySQL configuration?
+		if ( count( $batch ) !== $result ) {
+			// Some rows were not inserted.
+			// TODO: Find and log the entity ids that were not updateed.
+		}
+	}
+
 
 	/**
 	 * Fetch data for migration.
@@ -221,6 +295,33 @@ abstract class MetaToCustomTableMigrator {
 		return $this->process_and_sanitize_data( $entity_data, $meta_data );
 	}
 
+	public function get_already_migrated_records( $entity_ids ) {
+		global $wpdb;
+		$source_table                   = $this->schema_config['source']['entity']['table_name'];
+		$source_destination_join_column = $this->schema_config['source']['entity']['destination_rel_column'];
+		$source_primary_key_column      = $this->schema_config['source']['entity']['primary_key'];
+
+		$destination_table              = $this->schema_config['destination']['table_name'];
+		$destination_source_join_column = $this->schema_config['destination']['source_rel_column'];
+		$destination_primary_key_column = $this->schema_config['destination']['primary_key'];
+
+		$entity_id_placeholder = implode( ',', array_fill( 0, count( $entity_ids ), '%d' ) );
+
+		$already_migrated_entity_ids = $wpdb->get_results(
+			$wpdb->prepare(
+				"
+SELECT source.`$source_primary_key_column` as source_id, destination.`$destination_primary_key_column` as destination_id
+FROM `$destination_table` destination
+JOIN `$source_table` source ON source.`$source_destination_join_column` = destination.`$destination_source_join_column`
+WHERE source.`$source_primary_key_column` IN ( $entity_id_placeholder )
+				",
+				$entity_ids
+			)
+		);
+
+		return array_column( $already_migrated_entity_ids, null, 'source_id' );
+	}
+
 
 	/**
 	 * Helper method to build query used to fetch data from core source table.
@@ -231,16 +332,11 @@ abstract class MetaToCustomTableMigrator {
 	 *
 	 * @return string Query that can be used to fetch data.
 	 */
-	private function build_entity_table_query( $entity_ids ) {
+	protected function build_entity_table_query( $entity_ids ) {
 		global $wpdb;
-		$source_entity_table              = MigrationHelper::escape_backtick( $this->schema_config['source']['entity']['table_name'] );
-		$source_meta_rel_id_column        = MigrationHelper::add_table_name_to_column( $source_entity_table, $this->schema_config['source']['entity']['meta_rel_column'] );
-		$source_destination_rel_id_column = MigrationHelper::add_table_name_to_column( $source_entity_table, $this->schema_config['source']['entity']['destination_rel_column'] );
-		$source_primary_key_column        = MigrationHelper::add_table_name_to_column( $source_entity_table, $this->schema_config['source']['entity']['primary_key'] );
-
-		$destination_table                = MigrationHelper::escape_backtick( $this->schema_config['destination']['table_name'] );
-		$destination_source_rel_id_column = MigrationHelper::add_table_name_to_column( $destination_table, $this->schema_config['destination']['source_rel_column'] );
-		$destination_primary_key = MigrationHelper::add_table_name_to_column( $destination_table, $this->schema_config['destination']['primary_key'] );
+		$source_entity_table       = $this->schema_config['source']['entity']['table_name'];
+		$source_meta_rel_id_column = "`$source_entity_table`.`{$this->schema_config['source']['entity']['meta_rel_column']}`";
+		$source_primary_key_column = "`$source_entity_table`.`{$this->schema_config['source']['entity']['primary_key']}`";
 
 		$where_clause = "$source_primary_key_column IN (" . implode( ',', array_fill( 0, count( $entity_ids ), '%d' ) ) . ')';
 		$entity_keys  = array();
@@ -249,7 +345,7 @@ abstract class MetaToCustomTableMigrator {
 				$select_clause = $column_schema['select_clause'];
 				$entity_keys[] = "$select_clause AS $column_name";
 			} else {
-				$entity_keys[] = MigrationHelper::add_table_name_to_column( $source_entity_table, $column_name );
+				$entity_keys[] = "$source_entity_table.$column_name";
 			}
 		}
 		$entity_column_string = implode( ', ', $entity_keys );
@@ -258,15 +354,8 @@ abstract class MetaToCustomTableMigrator {
 			"
 SELECT
 	$source_meta_rel_id_column as entity_meta_rel_id,
-	$source_destination_rel_id_column AS destination_rel_id,
-	$destination_primary_key AS destination_primary_key,
-	CASE
-		WHEN $destination_source_rel_id_column IS NOT NULL THEN 'update'
-		ELSE 'insert'
-	END as insert_switch,
 	$entity_column_string
 FROM `$source_entity_table`
-LEFT JOIN `$destination_table` ON $destination_source_rel_id_column = $source_destination_rel_id_column
 WHERE $where_clause;
 ",
 			$entity_ids
@@ -284,13 +373,13 @@ WHERE $where_clause;
 	 *
 	 * @return string|void Query for fetching meta data.
 	 */
-	private function build_meta_data_query( $entity_ids ) {
+	protected function build_meta_data_query( $entity_ids ) {
 		global $wpdb;
-		$meta_table                = MigrationHelper::escape_backtick( $this->schema_config['source']['meta']['table_name'] );
+		$meta_table                = $this->schema_config['source']['meta']['table_name'];
 		$meta_keys                 = array_keys( $this->meta_column_mapping );
-		$meta_key_column           = MigrationHelper::escape_backtick( $this->schema_config['source']['meta']['meta_key_column'] );
-		$meta_value_column         = MigrationHelper::escape_backtick( $this->schema_config['source']['meta']['meta_value_column'] );
-		$meta_table_relational_key = MigrationHelper::escape_backtick( $this->schema_config['source']['meta']['entity_id_column'] );
+		$meta_key_column           = $this->schema_config['source']['meta']['meta_key_column'];
+		$meta_value_column         = $this->schema_config['source']['meta']['meta_value_column'];
+		$meta_table_relational_key = $this->schema_config['source']['meta']['entity_id_column'];
 
 		$meta_column_string = implode( ', ', array_fill( 0, count( $meta_keys ), '%s' ) );
 		$entity_id_string   = implode( ', ', array_fill( 0, count( $entity_ids ), '%d' ) );
@@ -331,9 +420,8 @@ WHERE
 		 */
 		$sanitized_entity_data = array();
 		$error_records         = array();
-		$insert_switch         = array();
-		$this->process_and_sanitize_entity_data( $sanitized_entity_data, $error_records, $insert_switch, $entity_data );
-		$this->processs_and_sanitize_meta_data( $sanitized_entity_data, $error_records, $insert_switch, $meta_data );
+		$this->process_and_sanitize_entity_data( $sanitized_entity_data, $error_records, $entity_data );
+		$this->processs_and_sanitize_meta_data( $sanitized_entity_data, $error_records, $meta_data );
 
 		return array(
 			'data'   => $sanitized_entity_data,
@@ -348,10 +436,10 @@ WHERE
 	 * @param array $error_records Error records.
 	 * @param array $entity_data Original source data.
 	 */
-	private function process_and_sanitize_entity_data( &$sanitized_entity_data, &$error_records, &$insert_switch, $entity_data ) {
+	private function process_and_sanitize_entity_data( &$sanitized_entity_data, &$error_records, $entity_data ) {
 		foreach ( $entity_data as $entity ) {
 			$row_data = array();
-			foreach ( array_merge( $this->get_destination_table_primary_id_schema(), $this->core_column_mapping ) as $column_name => $schema ) {
+			foreach ( $this->core_column_mapping as $column_name => $schema ) {
 				$custom_table_column_name = $schema['destination'] ?? $column_name;
 				$value                    = $entity->$column_name;
 				$value                    = $this->validate_data( $value, $schema['type'] );
@@ -361,8 +449,6 @@ WHERE
 					$row_data[ $custom_table_column_name ] = $value;
 				}
 			}
-			$insert_switch[ $entity->entity_meta_rel_id ] = $entity->insert_switch; // Save the insert_switch in row data so that we can use it later.
-
 			$sanitized_entity_data[ $entity->entity_meta_rel_id ] = $row_data;
 		}
 	}
@@ -374,16 +460,14 @@ WHERE
 	 * @param array $error_records Error records.
 	 * @param array $meta_data Original source data.
 	 */
-	private function processs_and_sanitize_meta_data( &$sanitized_entity_data, &$error_records, &$insert_switch, $meta_data ) {
+	private function processs_and_sanitize_meta_data( &$sanitized_entity_data, &$error_records, $meta_data ) {
 		foreach ( $meta_data as $datum ) {
 			$column_schema = $this->meta_column_mapping[ $datum->meta_key ];
 			$value         = $this->validate_data( $datum->meta_value, $column_schema['type'] );
 			if ( is_wp_error( $value ) ) {
 				$error_records[ $datum->entity_id ][ $column_schema['destination'] ] = "{$value->get_error_code()}: {$value->get_error_message()}";
 			} else {
-				$insert_switch_string = $insert_switch[ $datum->entity_id ];
-
-				$sanitized_entity_data[ $insert_switch_string ][ $datum->entity_id ][ $column_schema['destination'] ] = $value;
+				$sanitized_entity_data[ $datum->entity_id ][ $column_schema['destination'] ] = $value;
 			}
 		}
 	}

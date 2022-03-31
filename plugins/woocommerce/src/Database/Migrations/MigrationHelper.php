@@ -40,15 +40,25 @@ class MigrationHelper {
 			case 'insert_ignore':
 				$insert_query = 'INSERT IGNORE';
 				break;
-			case 'replace':
+			case 'replace': // delete and then insert.
 				$insert_query = 'REPLACE';
 				break;
+			case 'update':
+				$insert_query = 'UPDATE';
+				 break;
 			case 'insert':
 			default:
 				$insert_query = 'INSERT';
 		}
 
 		return $insert_query;
+	}
+
+	public static function escape_schema_for_backtick( $schema_config ) {
+		array_walk( $schema_config['source']['entity'], array( self::class, 'escape_and_add_backtick' ) );
+		array_walk( $schema_config['source']['meta'], array( self::class, 'escape_and_add_backtick' ) );
+		array_walk( $schema_config['destination'], array( self::class, 'escape_and_add_backtick' ) );
+		return $schema_config;
 	}
 
 	/**
@@ -59,8 +69,8 @@ class MigrationHelper {
 	 *
 	 * @return array|string|string[] Escaped identifier.
 	 */
-	public static function escape_backtick( $identifier ) {
-		return str_replace( '`', '``', $identifier );
+	public static function escape_and_add_backtick( $identifier ) {
+		return '`' . str_replace( '`', '``', $identifier ) . '`';
 	}
 
 	/**
@@ -72,12 +82,6 @@ class MigrationHelper {
 	 */
 	public static function get_wpdb_placeholder_for_type( $type ) {
 		return self::$wpdb_placeholder_for_type[ $type ];
-	}
-
-	public static function add_table_name_to_column( $table_name, $column_name ) {
-		$table_name = self::escape_backtick( $table_name );
-		$column_name = self::escape_backtick( $column_name );
-		return "`$table_name`.`$column_name`";
 	}
 
 }
