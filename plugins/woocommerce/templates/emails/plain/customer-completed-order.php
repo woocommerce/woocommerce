@@ -24,7 +24,7 @@ echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 /* translators: %s: Customer first name */
 echo sprintf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $order->get_billing_first_name() ) ) . "\n\n";
 /* translators: %s: Site title */
-echo esc_html__( 'We have finished processing your order.', 'woocommerce' ) . "\n\n";
+echo esc_html__( apply_filters(	'woocommerce_email_order_completed_text', 'We have finished processing your order.', $order, $sent_to_admin ), 'woocommerce' ) . "\n\n";
 
 /*
  * @hooked WC_Emails::order_details() Shows the order details table.
