@@ -25,6 +25,7 @@ const getProductsRequests = ( {
 	const defaultArgs = {
 		per_page: isLargeCatalog ? 100 : 0,
 		catalog_visibility: 'any',
+		stock_status: [ 'instock', 'outofstock', 'onbackorder' ],
 		search,
 		orderby: 'title',
 		order: 'asc',
