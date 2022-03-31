@@ -47,9 +47,9 @@ class MetaToMetaTableMigrator {
 
 		$insert_query = MigrationHelper::get_insert_switch( $insert_switch );
 
-		$meta_key_column   = MigrationHelper::escape_backtick( $this->schema_config['destination']['meta']['meta_key_column'] );
-		$meta_value_column = MigrationHelper::escape_backtick( $this->schema_config['destination']['meta']['meta_value_column'] );
-		$entity_id_column  = MigrationHelper::escape_backtick( $this->schema_config['destination']['meta']['entity_id_column'] );
+		$meta_key_column   = $this->schema_config['destination']['meta']['meta_key_column'];
+		$meta_value_column = $this->schema_config['destination']['meta']['meta_value_column'];
+		$entity_id_column  = $this->schema_config['destination']['meta']['entity_id_column'];
 		$column_sql        = "(`$entity_id_column`, `$meta_key_column`, `$meta_value_column`)";
 		$table             = $this->schema_config['destination']['meta']['table_name'];
 

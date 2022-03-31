@@ -1,9 +1,22 @@
 <?php
+/**
+ * Class for WPPost to wc_order_operational_details migrator.
+ */
 
 namespace Automattic\WooCommerce\DataBase\Migrations\CustomOrderTable;
 
+/**
+ * Class WPPostToOrderOpTableMigrator
+ *
+ * @package Automattic\WooCommerce\DataBase\Migrations\CustomOrderTable
+ */
 class WPPostToOrderOpTableMigrator extends MetaToCustomTableMigrator {
 
+	/**
+	 * Get schema config for wp_posts and wc_order_operational_detail table.
+	 *
+	 * @return array Config.
+	 */
 	public function get_schema_config() {
 		global $wpdb;
 		// TODO: Remove hardcoding.
@@ -38,6 +51,12 @@ class WPPostToOrderOpTableMigrator extends MetaToCustomTableMigrator {
 		);
 	}
 
+
+	/**
+	 * Get columns config.
+	 *
+	 * @return \string[][] Config.
+	 */
 	public function get_core_column_mapping() {
 		return array(
 			'id' => array(
@@ -47,8 +66,14 @@ class WPPostToOrderOpTableMigrator extends MetaToCustomTableMigrator {
 		);
 	}
 
+
+	/**
+	 * Get meta data config.
+	 *
+	 * @return \string[][] Config.
+	 */
 	public function get_meta_column_config() {
-		return  array(
+		return array(
 			'_created_via'                  => array(
 				'type'        => 'string',
 				'destination' => 'created_via',
