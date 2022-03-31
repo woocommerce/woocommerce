@@ -156,7 +156,7 @@ export const Configure = ( { markConfigured, paymentGateway } ) => {
 				</p>
 			) }
 			<Button isPrimary href={ settingsUrl }>
-				{ __( 'Set up', 'woocommerce' ) }
+				{ __( 'Get started', 'woocommerce-admin' ) }
 			</Button>
 		</>
 	);
