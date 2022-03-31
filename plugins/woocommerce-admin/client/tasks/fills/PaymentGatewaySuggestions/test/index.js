@@ -49,6 +49,7 @@ const paymentGatewaySuggestions = [
 		image:
 			'http://localhost:8888/wp-content/plugins/woocommerce-admin/images/onboarding/cod.svg',
 		is_visible: true,
+		is_offline: true,
 	},
 	{
 		id: 'bacs',
@@ -57,6 +58,7 @@ const paymentGatewaySuggestions = [
 		image:
 			'http://localhost:8888/wp-content/plugins/woocommerce-admin/images/onboarding/bacs.svg',
 		is_visible: true,
+		is_offline: true,
 	},
 	{
 		id: 'woocommerce_payments:non-us',

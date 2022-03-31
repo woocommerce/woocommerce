@@ -198,6 +198,7 @@ class DefaultPaymentGateways {
 				'is_visible' => array(
 					self::get_rules_for_cbd( false ),
 				),
+				'is_offline' => true,
 			),
 			array(
 				'id'         => 'bacs',
@@ -207,6 +208,7 @@ class DefaultPaymentGateways {
 				'is_visible' => array(
 					self::get_rules_for_cbd( false ),
 				),
+				'is_offline' => true,
 			),
 			array(
 				'id'                      => 'woocommerce_payments',

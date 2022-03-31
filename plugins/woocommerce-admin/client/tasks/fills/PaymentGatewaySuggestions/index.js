@@ -179,7 +179,7 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 		return gateway;
 	}, [ isResolving, query, paymentGateways ] );
 
-	const [ wcPayGateway, enabledGateways, additionalGateways ] = useMemo(
+	const [ wcPayGateway, enabledGateways, offlineGateways, additionalGateways  ] = useMemo(
 		() =>
 			Array.from( paymentGateways.values() )
 				.sort( ( a, b ) => {
@@ -196,7 +196,7 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 				} )
 				.reduce(
 					( all, gateway ) => {
-						const [ wcPay, enabled, additional ] = all;
+						const [ wcPay, enabled, offline, additional ] = all;
 
 						// WCPay is handled separately when not installed and configured
 						if (
@@ -207,13 +207,15 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 							wcPay.push( gateway );
 						} else if ( gateway.enabled ) {
 							enabled.push( gateway );
+						} else if ( gateway.is_offline ) {
+							offline.push( gateway );
 						} else {
 							additional.push( gateway );
 						}
 
 						return all;
 					},
-					[ [], [], [] ]
+					[ [], [], [], [] ]
 				),
 		[ paymentGateways ]
 	);
@@ -250,11 +252,23 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 			{ !! additionalGateways.length && (
 				<List
 					heading={ __(
-						'Additional payment gateways',
-						'woocommerce'
+						'Choose a payment provider',
+						'woocommerce-admin'
 					) }
 					recommendation={ recommendation }
 					paymentGateways={ additionalGateways }
+					markConfigured={ markConfigured }
+				/>
+			) }
+
+			{ !! offlineGateways.length && (
+				<List
+					heading={ __(
+						'Offline payment methods',
+						'woocommerce-admin'
+					) }
+					recommendation={ recommendation }
+					paymentGateways={ offlineGateways }
 					markConfigured={ markConfigured }
 				/>
 			) }
