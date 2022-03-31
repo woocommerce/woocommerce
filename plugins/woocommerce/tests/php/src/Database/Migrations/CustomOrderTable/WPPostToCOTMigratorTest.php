@@ -14,7 +14,7 @@ use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ShippingHelper;
 /**
  * Class WPPostToCOTMigratorTest.
  */
-class WPPostToCOTMigratorTest extends \WC_Unit_Test_Case {
+class WPPostToCOTMigratorTest extends WC_Unit_Test_Case {
 
 	/**
 	 * @var DataSynchronizer
