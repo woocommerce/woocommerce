@@ -35,34 +35,72 @@ abstract class MetaToCustomTableMigrator {
 	 */
 	protected $core_column_mapping;
 
+	/**
+	 * Store errors along with entity IDs from migrations.
+	 *
+	 * @var array
+	 */
 	protected $errors;
 
 	/**
 	 * MetaToCustomTableMigrator constructor.
+	 */
+	public function __construct() {
+		$this->schema_config       = MigrationHelper::escape_schema_for_backtick( $this->get_schema_config() );
+		$this->meta_column_mapping = $this->get_meta_column_config();
+		$this->core_column_mapping = $this->get_core_column_mapping();
+		$this->errors              = array();
+	}
+
+	/**
+	 * Specify schema config the source and destination table.
 	 *
-	 * @param array $schema_config This parameters provides general but essential information about tables under migrations. Must be of the form-
+	 * @return array Schema, must of the form:
 	 * array(
-	 *  'entity_schema' =>
-	 *      array (
-	 *          'primary_id' => 'primary_id column name of source table',
-	 *          'table_name' => 'name of the source table'.
-	 *      ),
-	 *  'entity_meta_schema' =>
-	 *      array (
-	 *          'meta_key_column' => 'name of meta_key column in source meta table',
-	 *          'meta_value_column' => 'name of meta_value column in source meta table',
-	 *          'table_name' => 'name of source meta table',
-	 *      ),
-	 *  'destination_table' => 'name of destination custom table',
-	 *  'entity_meta_relation' =>
-	 *      array (
-	 *          'entity' => 'name of column in source table which is used in source meta table',
-	 *          'meta' => 'name of column in source meta table which contains key of records in source table',
-	 *      )
-	 *  )
-	 * ).
+		'source' => array(
+			'entity' => array(
+				'table_name' => $source_table_name,
+				'meta_rel_column' => $column_meta, Name of column in source table which is referenced by meta table.
+				'destination_rel_column' => $column_dest, Name of column in source table which is refenced by destination table,
+				'primary_key' => $primary_key, Primary key of the source table
+			),
+			'meta' => array(
+				'table' => $meta_table_name,
+				'meta_key_column' => $meta_key_column_name,
+				'meta_value_column' => $meta_value_column_name,
+				'entity_id_column' => $entity_id_column, Name of the column having entity IDs.
+			),
+		),
+		'destination' => array(
+			'table_name' => $table_name, Name of destination table,
+			'source_rel_column' => $column_source_id, Name of the column in destination table which is referenced by source table.
+			'primary_key' => $table_primary_key,
+			'primary_key_type' => $type bool|int|string|decimal
+		)
+	 */
+	abstract public function get_schema_config();
+
+	/**
+	 * Specify column config from the source table.
 	 *
-	 * @param array $meta_column_mapping Mapping information of keys in source meta table. Must be of the form:
+	 * @return array Config, must be of the form:
+	 * array(
+	 *  '$source_column_name_1' => array( // $source_column_name_1 is column name in source table, or a select statement.
+	 *      'type' => 'type of value, could be string/int/date/float.',
+	 *      'destination' => 'name of the column in column name where this data should be inserted in.',
+	 *  ),
+	 *  '$source_column_name_2' => array(
+	 *          ......
+	 *  ),
+	 *  ....
+	 * ).
+	 */
+	abstract public function get_core_column_mapping();
+
+	/**
+	 * Specify meta keys config from source meta table.
+	 *
+	 * @return array Config, must be of the form.
 	 * array(
 	 *  '$meta_key_1' => array(  // $meta_key_1 is the name of meta_key in source meta table.
 	 *          'type' => 'type of value, could be string/int/date/float',
@@ -73,42 +111,16 @@ abstract class MetaToCustomTableMigrator {
 	 *  ),
 	 *  ....
 	 * ).
-	 *
-	 * @param array $core_column_mapping Mapping of keys in source table, similar to meta_column_mapping param, must be of the form:
-	 * array(
-	 *  '$source_column_name_1' => array( // $source_column_name_1 is column name in source table.
-	 *      'type' => 'type of value, could be string/int/date/float.',
-	 *      'destination' => 'name of the column in column name where this data should be inserted in.',
-	 *  ),
-	 *  '$source_column_name_2' => array(
-	 *          ......
-	 *  ),
-	 *  ....
-	 * ).
 	 */
-	public function __construct() {
-		// TODO: Add code to validate params.
-		$this->schema_config       = MigrationHelper::escape_schema_for_backtick( $this->get_schema_config() );
-		$this->meta_column_mapping = $this->get_meta_column_config();
-		$this->core_column_mapping = $this->get_core_column_mapping();
-		$this->errors              = array();
-	}
-
-	abstract function get_schema_config();
-
-	abstract function get_core_column_mapping();
-
-	abstract function get_meta_column_config();
-
+	abstract public function get_meta_column_config();
 
 	/**
 	 * Generate SQL for data insertion.
 	 *
-	 * @param array $batch Data to generate queries for. Will be 'data' array returned by `$this->fetch_data_for_migration()` method.
-	 * @param string $insert_switch Insert command to use in generating queries, could be insert, insert_ignore, or replace.
+	 * @param array $batch Data to generate queries for. Will be 'data' array returned by `$this->fetch_data_for_migration_for_ids()` method.
 	 *
 	 * @return string Generated queries for insertion for this batch, would be of the form:
-	 * INSERT/INSERT IGNORE/REPLACE INTO $table_name ($columns) values
+	 * INSERT IGNORE INTO $table_name ($columns) values
 	 *  ($value for row 1)
 	 *  ($value for row 2)
 	 * ...
@@ -118,10 +130,26 @@ abstract class MetaToCustomTableMigrator {
 
 		list( $value_sql, $column_sql ) = $this->generate_column_clauses( array_merge( $this->core_column_mapping, $this->meta_column_mapping ), $batch );
 
-
 		return "INSERT IGNORE INTO $table (`$column_sql`) VALUES $value_sql;"; // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, -- $insert_query is hardcoded, $value_sql is already escaped.
 	}
 
+	/**
+	 * Generate SQL for data updating.
+	 *
+	 * @param array $batch Data to generate queries for. Will be `data` array returned by fetch_data_for_migration_for_ids() method.
+	 *
+	 * @param array $entity_row_mapping Maps rows to update data with their original IDs. Will be returned by `generate_update_sql_for_batch`.
+	 *
+	 * @return string Generated queries for batch update. Would be of the form:
+	 * INSERT INTO $table ( $columns ) VALUES
+	 *  ($value for row 1)
+	 *  ($valye for row 2)
+	 * ...
+	 * ON DUPLICATE KEY UPDATE
+	 * $column1 = VALUES($column1)
+	 * $column2 = VALUES($column2)
+	 * ...
+	 */
 	public function generate_update_sql_for_batch( $batch, $entity_row_mapping ) {
 		$table = $this->schema_config['destination']['table_name'];
 
@@ -140,6 +168,11 @@ abstract class MetaToCustomTableMigrator {
 		return "INSERT INTO $table (`$column_sql`) VALUES $value_sql $duplicate_update_key_statement;";
 	}
 
+	/**
+	 * Generate schema for primary ID column of destination table.
+	 *
+	 * @return array[] Schema for primary ID column.
+	 */
 	protected function get_destination_table_primary_id_schema() {
 		return array(
 			'destination_primary_key' => array(
@@ -149,6 +182,14 @@ abstract class MetaToCustomTableMigrator {
 		);
 	}
 
+	/**
+	 * Generate values and columns clauses to be used in INSERT and INSERT..ON DUPLICATE KEY UPDATE statements.
+	 *
+	 * @param array $columns_schema Columns config for destination table.
+	 * @param array $batch Actual data to migrate as returned by `data` in `fetch_data_for_migration_for_ids` method.
+	 *
+	 * @return array SQL clause for values, columns placeholders, and columns.
+	 */
 	protected function generate_column_clauses( $columns_schema, $batch ) {
 		global $wpdb;
 
@@ -178,8 +219,15 @@ abstract class MetaToCustomTableMigrator {
 		return array( $value_sql, $column_sql, $columns );
 	}
 
+	/**
+	 * Generates ON DUPLICATE KEY UPDATE clause to be used in migration.
+	 *
+	 * @param array $columns List of column names.
+	 *
+	 * @return string SQL clause for INSERT...ON DUPLICATE KEY UPDATE
+	 */
 	private function generate_on_duplicate_statement_clause( $columns ) {
-		$update_value_statements = [];
+		$update_value_statements = array();
 		foreach ( $columns as $column ) {
 			$update_value_statements[] = "$column = VALUES( $column )";
 		}
@@ -191,15 +239,15 @@ abstract class MetaToCustomTableMigrator {
 	/**
 	 * Process next migration batch, uses option `wc_cot_migration` to checkpoints of what have been processed so far.
 	 *
-	 * @param int $batch_size Batch size of records to migrate.
+	 * @param array $entity_ids List of entity IDs to perform migrations for.
 	 *
-	 * @return array True if migration is completed, false if there are still records to process.
+	 * @return array List of errors happened during migration.
 	 */
 	public function process_migration_batch_for_ids( $entity_ids ) {
 		$data = $this->fetch_data_for_migration_for_ids( $entity_ids );
 
 		foreach ( $data['errors'] as $entity_id => $error ) {
-			$this->errors[ $entity_id ] = "Error in importing post id $entity_id: " . print_r( $error, true );
+			$this->errors[ $entity_id ] = "Error in importing post id $entity_id: " . $error->get_message();
 		}
 
 		if ( count( $data['data'] ) === 0 ) {
@@ -216,32 +264,45 @@ abstract class MetaToCustomTableMigrator {
 		$this->process_update_batch( $to_update, $already_migrated );
 
 		return array(
-			'errors' => $this->errors
+			'errors' => $this->errors,
 		);
 	}
 
+	/**
+	 * Process batch for insertion into destination table.
+	 *
+	 * @param array $batch Data to insert, will be of the form as returned by `data` in `fetch_data_for_migration_for_ids`.
+	 */
 	protected function process_insert_batch( $batch ) {
 		global $wpdb;
 		if ( 0 === count( $batch ) ) {
 			return;
 		}
 		$queries = $this->generate_insert_sql_for_batch( $batch );
-		$result  = $wpdb->query( $queries );
-		$wpdb->query( "COMMIT;" ); // For some reason, this seems necessary on some hosts? Maybe a MySQL configuration?
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Queries should already be prepared.
+		$result = $wpdb->query( $queries );
+		$wpdb->query( 'COMMIT;' ); // For some reason, this seems necessary on some hosts? Maybe a MySQL configuration?
 		if ( count( $batch ) !== $result ) {
 			// Some rows were not inserted.
 			// TODO: Find and log the entity ids that were not inserted.
 		}
 	}
 
+	/**
+	 * Process batch for update into destination table.
+	 *
+	 * @param array $batch Data to insert, will be of the form as returned by `data` in `fetch_data_for_migration_for_ids`.
+	 * @param array $already_migrated Maps rows to update data with their original IDs.
+	 */
 	protected function process_update_batch( $batch, $already_migrated ) {
 		global $wpdb;
 		if ( 0 === count( $batch ) ) {
 			return;
 		}
 		$queries = $this->generate_update_sql_for_batch( $batch, $already_migrated );
-		$result  = $wpdb->query( $queries );
-		$wpdb->query( "COMMIT;" ); // For some reason, this seems necessary on some hosts? Maybe a MySQL configuration?
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Queries should already be prepared.
+		$result = $wpdb->query( $queries );
+		$wpdb->query( 'COMMIT;' ); // For some reason, this seems necessary on some hosts? Maybe a MySQL configuration?
 		if ( count( $batch ) !== $result ) {
 			// Some rows were not inserted.
 			// TODO: Find and log the entity ids that were not updateed.
@@ -252,9 +313,7 @@ abstract class MetaToCustomTableMigrator {
 	/**
 	 * Fetch data for migration.
 	 *
-	 * @param string $where_clause Where conditions to use while selecting data from source table.
-	 * @param string $batch_size Batch size, will be used in LIMIT clause.
-	 * @param string $order_by Will be used in ORDER BY clause.
+	 * @param array $entity_ids Entity IDs to fetch data for.
 	 *
 	 * @return array[] Data along with errors (if any), will of the form:
 	 * array(
@@ -295,6 +354,20 @@ abstract class MetaToCustomTableMigrator {
 		return $this->process_and_sanitize_data( $entity_data, $meta_data );
 	}
 
+	/**
+	 * Fetch id mappings for records that are already inserted, or can be considered duplicates.
+	 *
+	 * @param array $entity_ids List of entity IDs to verify.
+	 *
+	 * @return array Already migrated entities, would be of the form
+	 * array(
+	 *      '$source_id1' => array(
+	 *          'source_id' => $source_id1,
+	 *          'destination_id' => $destination_id1,
+	 *      ),
+	 *      ...
+	 * )
+	 */
 	public function get_already_migrated_records( $entity_ids ) {
 		global $wpdb;
 		$source_table                   = $this->schema_config['source']['entity']['table_name'];
@@ -309,6 +382,7 @@ abstract class MetaToCustomTableMigrator {
 
 		$already_migrated_entity_ids = $wpdb->get_results(
 			$wpdb->prepare(
+				// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- All columns and table names are hardcoded.
 				"
 SELECT source.`$source_primary_key_column` as source_id, destination.`$destination_primary_key_column` as destination_id
 FROM `$destination_table` destination
@@ -317,6 +391,7 @@ WHERE source.`$source_primary_key_column` IN ( $entity_id_placeholder )
 				",
 				$entity_ids
 			)
+			// phpcs:enable
 		);
 
 		return array_column( $already_migrated_entity_ids, null, 'source_id' );
@@ -326,9 +401,7 @@ WHERE source.`$source_primary_key_column` IN ( $entity_id_placeholder )
 	/**
 	 * Helper method to build query used to fetch data from core source table.
 	 *
-	 * @param string $where_clause Where conditions to use while selecting data from source table.
-	 * @param string $batch_size Batch size, will be used in LIMIT clause.
-	 * @param string $order_by Will be used in ORDER BY clause.
+	 * @param array $entity_ids List of entity IDs to fetch.
 	 *
 	 * @return string Query that can be used to fetch data.
 	 */
@@ -349,7 +422,7 @@ WHERE source.`$source_primary_key_column` IN ( $entity_id_placeholder )
 			}
 		}
 		$entity_column_string = implode( ', ', $entity_keys );
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $source_meta_rel_id_column, $source_destination_rel_id_column etc is escaped for backticks. $where clause and $order_by should already be escaped.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $source_meta_rel_id_column, $source_destination_rel_id_column etc is escaped for backticks. $where clause and $order_by should already be escaped.
 		$query = $wpdb->prepare(
 			"
 SELECT
@@ -371,7 +444,7 @@ WHERE $where_clause;
 	 *
 	 * @param array $entity_ids List of IDs to fetch metadata for.
 	 *
-	 * @return string|void Query for fetching meta data.
+	 * @return string Query for fetching meta data.
 	 */
 	protected function build_meta_data_query( $entity_ids ) {
 		global $wpdb;
@@ -384,7 +457,7 @@ WHERE $where_clause;
 		$meta_column_string = implode( ', ', array_fill( 0, count( $meta_keys ), '%s' ) );
 		$entity_id_string   = implode( ', ', array_fill( 0, count( $entity_ids ), '%d' ) );
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $meta_table_relational_key, $meta_key_column, $meta_value_column and $meta_table is escaped for backticks. $entity_id_string and $meta_column_string are placeholders.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $meta_table_relational_key, $meta_key_column, $meta_value_column and $meta_table is escaped for backticks. $entity_id_string and $meta_column_string are placeholders.
 		$query = $wpdb->prepare(
 			"
 SELECT `$meta_table_relational_key` as entity_id, `$meta_key_column` as meta_key, `$meta_value_column` as meta_value
@@ -475,7 +548,7 @@ WHERE
 	/**
 	 * Validate and transform data so that we catch as many errors as possible before inserting.
 	 *
-	 * @param mixed $value Actual data value.
+	 * @param mixed  $value Actual data value.
 	 * @param string $type Type of data, could be decimal, int, date, string.
 	 *
 	 * @return float|int|mixed|string|\WP_Error
