@@ -13,6 +13,8 @@ import { useMemo, useCallback, useEffect } from '@wordpress/element';
 import { registerPlugin } from '@wordpress/plugins';
 import { WooOnboardingTask } from '@woocommerce/onboarding';
 import { getNewPath } from '@woocommerce/navigation';
+import { Button } from '@wordpress/components';
+import ExternalIcon from 'gridicons/dist/external';
 
 /**
  * Internal dependencies
@@ -23,6 +25,9 @@ import { WCPaySuggestion } from './components/WCPay';
 import { getPluginSlug } from '~/utils';
 import './plugins/Bacs';
 import './payment-gateway-suggestions.scss';
+
+const SEE_MORE_LINK =
+	'https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations';
 
 const comparePaymentGatewaysByPriority = ( a, b ) =>
 	a.recommendation_priority - b.recommendation_priority;
@@ -179,7 +184,12 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 		return gateway;
 	}, [ isResolving, query, paymentGateways ] );
 
-	const [ wcPayGateway, enabledGateways, offlineGateways, additionalGateways  ] = useMemo(
+	const [
+		wcPayGateway,
+		enabledGateways,
+		offlineGateways,
+		additionalGateways,
+	] = useMemo(
 		() =>
 			Array.from( paymentGateways.values() )
 				.sort( ( a, b ) => {
@@ -258,7 +268,17 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 					recommendation={ recommendation }
 					paymentGateways={ additionalGateways }
 					markConfigured={ markConfigured }
-				/>
+					footerLink={
+						<Button
+							href={ SEE_MORE_LINK }
+							target="_blank"
+							isTertiary
+						>
+							{ __( 'See more', 'woocommerce-admin' ) }
+							<ExternalIcon size={ 18 } />
+						</Button>
+					}
+				></List>
 			) }
 
 			{ !! offlineGateways.length && (

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Card, CardHeader } from '@wordpress/components';
+import { Card, CardHeader, CardFooter } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -15,6 +15,7 @@ export const List = ( {
 	markConfigured,
 	recommendation,
 	paymentGateways,
+	footerLink,
 } ) => {
 	return (
 		<Card>
@@ -30,6 +31,11 @@ export const List = ( {
 					/>
 				);
 			} ) }
+			{ footerLink ? (
+				<CardFooter isBorderless>{ footerLink }</CardFooter>
+			) : (
+				''
+			) }
 		</Card>
 	);
 };
