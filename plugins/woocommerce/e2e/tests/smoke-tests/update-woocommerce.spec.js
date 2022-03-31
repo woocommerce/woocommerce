@@ -17,10 +17,11 @@ test.describe('WooCommerce plugin can be uploaded and activated', () => {
 		// Deactivate and delete the plugin if it exists
 		if ((await page.$('#deactivate-woocommerce')) !== null) {
 			await page.locator('#deactivate-woocommerce').click();
-			if ((await page.$('#delete-woocommerce')) !== null) {
-				page.on('dialog', dialog => dialog.accept());
-				await page.locator('#delete-woocommerce').click();
-			}
+			// This was the logic in the original test, but deleting the plugin also deletes the tests here.
+			//	if ((await page.$('#delete-woocommerce')) !== null) {
+			//		page.on('dialog', dialog => dialog.accept());
+			//		await page.locator('#delete-woocommerce').click();
+			//	}
 		}
 
 		// Open the plugin install page
