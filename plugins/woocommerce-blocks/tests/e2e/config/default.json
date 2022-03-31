@@ -39,8 +39,8 @@
 				"lastname": "Doe",
 				"company": "Automattic",
 				"country": "United States (US)",
-				"addressfirstline": "addr 1",
-				"addresssecondline": "addr 2",
+				"addressfirstline": "123 Main Road",
+				"addresssecondline": "Unit 23",
 				"city": "San Francisco",
 				"state": "CA",
 				"postcode": "94107",
@@ -48,15 +48,16 @@
 				"email": "john.doe@example.com"
 			},
 			"shipping": {
-				"firstname": "John",
+				"firstname": "Jane",
 				"lastname": "Doe",
-				"company": "Automattic",
+				"company": "WooCommerce",
 				"country": "United States (US)",
-				"addressfirstline": "addr 1",
-				"addresssecondline": "addr 2",
-				"city": "San Francisco",
+				"addressfirstline": "123 Main Avenue",
+				"addresssecondline": "Unit 42",
+				"city": "Los Angeles",
 				"state": "CA",
-				"postcode": "94107"
+				"postcode": "90010",
+				"phone": "987654321"
 			}
 		}
 	}
