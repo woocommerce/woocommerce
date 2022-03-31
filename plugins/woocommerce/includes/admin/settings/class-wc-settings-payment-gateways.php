@@ -124,6 +124,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 						);
 
 						$columns = apply_filters( 'woocommerce_payment_gateways_setting_columns', $default_columns );
+						$additional_rows = apply_filters( 'woocommerce_payment_gateways_setting_additional_rows', array(), count( $columns ) );
 
 						foreach ( $columns as $key => $column ) {
 							echo '<th class="' . esc_attr( $key ) . '">' . esc_html( $column ) . '</th>';
@@ -200,6 +201,9 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 							}
 
 							echo '</tr>';
+						}
+						foreach ( $additional_rows as $additional_row ) {
+							echo $additional_row;
 						}
 						?>
 					</tbody>
