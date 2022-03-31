@@ -115,8 +115,8 @@ if ( global.window ) {
 }
 
 setLocaleData(
-	{ '': { domain: 'woocommerce-admin', lang: 'en_US' } },
-	'woocommerce-admin'
+	{ '': { domain: 'woocommerce', lang: 'en_US' } },
+	'woocommerce'
 );
 
 // Mock core/notices store for components dispatching core notices
