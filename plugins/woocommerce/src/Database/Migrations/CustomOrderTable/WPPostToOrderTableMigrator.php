@@ -10,6 +10,11 @@ namespace Automattic\WooCommerce\DataBase\Migrations\CustomOrderTable;
  */
 class WPPostToOrderTableMigrator extends MetaToCustomTableMigrator {
 
+	/**
+	 * Get schema config for wp_posts and wc_order table.
+	 *
+	 * @return array Config.
+	 */
 	public function get_schema_config() {
 		global $wpdb;
 
@@ -45,6 +50,11 @@ class WPPostToOrderTableMigrator extends MetaToCustomTableMigrator {
 		);
 	}
 
+	/**
+	 * Get columns config.
+	 *
+	 * @return \string[][] Config.
+	 */
 	public function get_core_column_mapping() {
 		return array(
 			'ID'                => array(
@@ -70,6 +80,11 @@ class WPPostToOrderTableMigrator extends MetaToCustomTableMigrator {
 		);
 	}
 
+	/**
+	 * Get meta data config.
+	 *
+	 * @return \string[][] Config.
+	 */
 	public function get_meta_column_config() {
 		return array(
 			'_order_currency'       => array(
