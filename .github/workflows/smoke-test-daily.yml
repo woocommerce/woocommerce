@@ -1,10 +1,14 @@
-name: Smoke test daily
+name: Smoke test daily (dummy run)
 on:
-  schedule:
-    - cron: '25 3 * * *'
+  pull_request:
+    branches:
+      - 'try/pr-32418'
+    types:
+      - labeled
 jobs:
   login-run:
     name: Daily smoke test on trunk.
+    if: "${{ contains(github.event.label.name, 'run: daily tests') }}"
     runs-on: ubuntu-18.04
     steps:
 
