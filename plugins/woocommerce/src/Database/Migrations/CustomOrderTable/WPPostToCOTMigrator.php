@@ -6,9 +6,6 @@
 namespace Automattic\WooCommerce\DataBase\Migrations\CustomOrderTable;
 
 use Automattic\WooCommerce\DataBase\Migrations\MigrationErrorLogger;
-use Automattic\WooCommerce\DataBase\Migrations\CustomOrderTable\WPPostToOrderAddressTableMigrator;
-use Automattic\WooCommerce\DataBase\Migrations\CustomOrderTable\WPPostToOrderOpTableMigrator;
-use Automattic\WooCommerce\DataBase\Migrations\CustomOrderTable\WPPostToOrderTableMigrator;
 
 /**
  * Class WPPostToCOTMigrator
@@ -27,28 +24,28 @@ class WPPostToCOTMigrator {
 	/**
 	 * Migrator instance to migrate data into wc_order table.
 	 *
-	 * @var MetaToCustomTableMigrator
+	 * @var WPPostToOrderTableMigrator
 	 */
 	private $order_table_migrator;
 
 	/**
 	 * Migrator instance to migrate billing data into address table.
 	 *
-	 * @var MetaToCustomTableMigrator
+	 * @var WPPostToOrderAddressTableMigrator
 	 */
 	private $billing_address_table_migrator;
 
 	/**
 	 * Migrator instance to migrate shipping data into address table.
 	 *
-	 * @var MetaToCustomTableMigrator
+	 * @var WPPostToOrderAddressTableMigrator
 	 */
 	private $shipping_address_table_migrator;
 
 	/**
 	 * Migrator instance to migrate operational data.
 	 *
-	 * @var MetaToCustomTableMigrator
+	 * @var WPPostToOrderOpTableMigrator
 	 */
 	private $operation_data_table_migrator;
 
@@ -124,66 +121,6 @@ class WPPostToCOTMigrator {
 	}
 
 	/**
-	 * @param MetaToCustomTableMigrator $migrator
-	 * @param $type
-	 * @param $order_post_ids
-	 */
-	private function process_next_address_batch( $migrator, $type, $order_post_ids ) {
-		global $wpdb;
-
-		if ( 0 === count( $order_post_ids ) ) {
-			return;
-		}
-
-		$data = $migrator->fetch_data_for_migration_for_ids( $order_post_ids );
-
-		foreach ( $data['errors'] as $order_id => $error ) {
-			// TODO: Add name of the migrator in error message.
-			$this->error_logger->log( 'info', "Error in importing data for Order ID $order_id: " . print_r( $error, true ) );
-		}
-
-		$to_insert = isset( $data['data']['insert'] ) ? $data['data']['insert'] : array();
-		$to_update = isset( $data['data']['update'] ) ? $data['data']['update'] : array();
-
-		if ( 0 === count( $to_insert ) && 0 === count( $to_update ) ) {
-			return;
-		}
-
-		$order_post_ids_placeholders = implode( ',', array_fill( 0, count( $order_post_ids ), '%d' ) );
-
-		$already_migrated = $wpdb->get_results(
-			$wpdb->prepare(
-				"
-SELECT addresses.id, addresses.order_id, orders.post_id FROM {$this->table_names['addresses']} as addresses
-JOIN {$this->table_names['orders']} orders ON addresses.order_id = orders.id
-WHERE
-      address_type = %s AND
-      orders.post_id IN ( $order_post_ids_placeholders )
-				",
-				$type,
-				$order_post_ids
-			)
-		);
-
-		$order_post_ids_to_migrate = array_diff( $order_post_ids, array_column( $already_migrated, 'post_id' ) );
-		$to_insert                 = array_intersect_key( $to_insert, array_flip( $order_post_ids_to_migrate ) );
-		$this->execute_action_for_batch( $migrator, $to_insert, 'insert' );
-
-		if ( 0 < count( $to_update ) ) {
-			echo 'comes here';
-		}
-		$to_update_intersect = array();
-		$ids_to_update       = array_flip( array_column( $already_migrated, 'id' ) );
-		foreach ( $to_update as $post_id => $address_record ) {
-			if ( isset( $ids_to_update[ $address_record['id'] ] ) ) {
-				$to_update_intersect[ $post_id ] = $address_record;
-			}
-		}
-
-		$this->execute_action_for_batch( $migrator, $to_update_intersect, 'update' );
-	}
-
-	/**
 	 * Process next migration batch, uses option `wc_cot_migration` to checkpoints of what have been processed so far.
 	 *
 	 * @param int $batch_size Batch size of records to migrate.
@@ -195,38 +132,24 @@ WHERE
 		if ( 0 === count( $order_post_ids ) ) {
 			return true;
 		}
+		$this->process_migration_for_ids( $order_post_ids );
+		$last_post_migrated = max( $order_post_ids );
+		$this->update_checkpoint( $last_post_migrated );
+	}
 
+	/**
+	 * Process migration for specific order post IDs.
+	 *
+	 * @param array $order_post_ids List of post IDs to migrate.
+	 */
+	public function process_migration_for_ids( $order_post_ids ) {
 		$this->order_table_migrator->process_migration_batch_for_ids( $order_post_ids );
 		$this->billing_address_table_migrator->process_migration_batch_for_ids( $order_post_ids );
 		$this->shipping_address_table_migrator->process_migration_batch_for_ids( $order_post_ids );
 		$this->operation_data_table_migrator->process_migration_batch_for_ids( $order_post_ids );
-
-		$last_post_migrated = max( $order_post_ids );
-		$this->update_checkpoint( $last_post_migrated );
-
-		return false;
-	}
-
-	/**
-	 * Process next batch for a given address type.
-	 *
-	 * @param MetaToCustomTableMigrator $migrator Migrator instance for address type.
-	 * @param array $order_post_ids Array of post IDs for orders.
-	 * @param string $order_by Order by clause.
-	 */
-	private function process_next_migrator_batch( $migrator, $order_post_ids ) {
-		$data = $migrator->fetch_data_for_migration_for_ids( $order_post_ids );
-
-		foreach ( $data['errors'] as $order_id => $error ) {
-			// TODO: Add name of the migrator in error message.
-			$this->error_logger->log( 'info', "Error in importing data for Order ID $order_id: " . print_r( $error, true ) );
-		}
-
-		$to_replace = isset( $data['data']['update'] ) ? $data['data']['update'] : array();
-		$this->execute_action_for_batch( $migrator, $to_replace, 'update' );
-
-		$to_insert = isset( $data['data']['insert'] ) ? $data['data']['insert'] : array();
-		$this->execute_action_for_batch( $migrator, $to_insert, 'insert' );
+		// TODO: Add resilience for meta migrations.
+		// $this->process_meta_migration( $order_post_ids );
+		// TODO: Return merged error array.
 	}
 
 	/**
@@ -250,34 +173,18 @@ WHERE
 	 * Method to migrate single record.
 	 *
 	 * @param int $post_id Post ID of record to migrate.
-	 *
-	 * @return bool|\WP_Error
 	 */
 	public function process_single( $post_id ) {
-		global $wpdb;
-
-		$where_clause = $wpdb->prepare( 'ID = %d', $post_id );
-		$data         = $this->order_table_migrator->fetch_data_for_migration_for_ids( $where_clause, 1, 'ID ASC' );
-		if ( isset( $data['errors'][ $post_id ] ) ) {
-			return new \WP_Error( $data['errors'][ $post_id ] );
-		}
-
-		$queries = $this->order_table_migrator->generate_insert_sql_for_batch( $data['data'], 'replace' );
-		$result  = $wpdb->query( $queries ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $queries is already prepared.
-		if ( 1 !== $result ) {
-			// TODO: Fetch and return last error.
-			echo 'error';
-
-			return new \WP_Error( 'error' );
-		}
-
-		return true;
+		$this->process_migration_for_ids( array( $post_id ) );
+		// TODO: Return error.
 	}
 
 	/**
 	 * Helper function to get where clause to send to MetaToCustomTableMigrator instance.
 	 *
-	 * @return array Where clause.
+	 * @param int $batch_size Number of orders in batch.
+	 *
+	 * @return array List of IDs in the current patch.
 	 */
 	private function get_next_batch_ids( $batch_size ) {
 		global $wpdb;
@@ -285,7 +192,7 @@ WHERE
 		$checkpoint = $this->get_checkpoint();
 		$post_ids   = $wpdb->get_col(
 			$wpdb->prepare(
-				"SELECT ID FROM $wpdb->posts WHERE ID > %d AND post_type = '%s' LIMIT %d",
+				"SELECT ID FROM $wpdb->posts WHERE ID > %d AND post_type = %s LIMIT %d",
 				$checkpoint['id'],
 				'shop_order',
 				$batch_size
@@ -293,26 +200,6 @@ WHERE
 		);
 
 		return $post_ids;
-	}
-
-	/**
-	 * Helper method to create `ID in (.., .., ...)` clauses.
-	 *
-	 * @param array $ids List of IDs.
-	 * @param string $column_name Name of the ID column.
-	 *
-	 * @return string Prepared clause for where.
-	 */
-	private function get_where_id_clause( $ids, $column_name = 'ID' ) {
-		global $wpdb;
-
-		if ( 0 === count( $ids ) ) {
-			return '';
-		}
-
-		$id_placeholder_array = '(' . implode( ',', array_fill( 0, count( $ids ), '%d' ) ) . ')';
-
-		return $wpdb->prepare( "`$column_name` IN $id_placeholder_array", $ids ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Both $column_name and $id_placeholder_array should already be prepared.
 	}
 
 	/**
@@ -333,6 +220,11 @@ WHERE
 		return update_option( 'wc_cot_migration', array( 'id' => $id ), false );
 	}
 
+	/**
+	 * Remove checkpoint.
+	 *
+	 * @return bool Whether checkpoint was removed.
+	 */
 	public function delete_checkpoint() {
 		return delete_option( 'wp_cot_migration' );
 	}
