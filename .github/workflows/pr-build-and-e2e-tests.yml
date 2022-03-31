@@ -116,10 +116,6 @@ jobs:
                   npm install -g pnpm
                   pnpm install
 
-            - name: Load docker images and start containers.
-              working-directory: package/woocommerce/plugins/woocommerce
-              run: pnpx wc-e2e docker:up && pnpx wc-e2e docker:wait
-
             - name: Move current directory to code. We will install zip file in this dir later.
               run: mv ./package/woocommerce/plugins/woocommerce/* ./code/woocommerce
 
@@ -140,6 +136,10 @@ jobs:
               run: |
                   npm install -g pnpm
                   pnpm install
+
+            - name: Load docker images and start containers.
+              working-directory: package/woocommerce/plugins/woocommerce
+              run: pnpx wc-e2e docker:up && pnpx wc-e2e docker:wait
 
             - name: Run tests command.
               working-directory: package/woocommerce/plugins/woocommerce
