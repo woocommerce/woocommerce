@@ -285,7 +285,7 @@ WHERE order_id = {$order_id}
 			$order->get_date_completed()->date( DATE_ISO8601 ),
 			( new WC_DateTime( $db_order_op_data->date_completed_gmt ) )->date( DATE_ISO8601 )
 		);
-		$this->assertEquals( $order->get_shipping_tax(), $db_order_op_data->shipping_tax_amount );
+		$this->assertEquals( (float) $order->get_shipping_tax(), (float) $db_order_op_data->shipping_tax_amount );
 		$this->assertEquals( (float) $order->get_shipping_total(), (float) $db_order_op_data->shipping_total_amount );
 		$this->assertEquals( (float) $order->get_discount_tax(), (float) $db_order_op_data->discount_tax_amount );
 		$this->assertEquals( (float) $order->get_discount_total(), (float) $db_order_op_data->discount_total_amount );
