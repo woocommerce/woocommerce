@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { Coupon, HTTPClientFactory } from '@woocommerce/api';
 import config from 'config';
 import {
 	activateTheme,
@@ -29,6 +30,11 @@ import { elementExists, getElementData, getTextContent } from './page-utils';
  */
 
 export const BASE_URL = config.get( 'url' );
+export const adminUsername = config.get( 'users.admin.username' );
+export const adminPassword = config.get( 'users.admin.password' );
+export const client = HTTPClientFactory.build( BASE_URL )
+	.withBasicAuth( adminUsername, adminPassword )
+	.create();
 export const GUTENBERG_EDITOR_CONTEXT =
 	process.env.GUTENBERG_EDITOR_CONTEXT || 'core';
 export const DEFAULT_TIMEOUT = 30000;
@@ -351,4 +357,47 @@ export const addBlockToFSEArea = async ( blockName ) => {
 		`//button//span[contains(text(), '${ blockName }')]`
 	);
 	await insertButton.click();
+};
+
+/**
+ * Creates a basic coupon with the provided coupon amount. Returns the coupon code.
+ *
+ * @param {Object} [coupon] Coupon object. Default to fixed cart type and amount = 5.
+ * @param {string}  [coupon.amount] Amount to be applied. Defaults to 5.
+ * @param {string} [coupon.discountType] Type of a coupon. Defaults to Fixed cart discount.
+ * @param {number} [coupon.usageLimit] How many times the coupon can be used in total. Defaults to -1.
+ */
+export const createCoupon = async ( coupon ) => {
+	const {
+		amount = '5',
+		discountType = 'Fixed cart discount',
+		usageLimit = -1,
+	} = coupon || { amount: '5', discountType: 'Fixed cart discount' };
+
+	let couponType;
+	switch ( discountType ) {
+		case 'Fixed cart discount':
+			couponType = 'fixed_cart';
+			break;
+		case 'Fixed product discount':
+			couponType = 'fixed_product';
+			break;
+		case 'Percentage discount':
+			couponType = 'percent';
+			break;
+		default:
+			couponType = discountType;
+	}
+
+	// Fill in coupon code
+	const couponCode = 'code-' + couponType + new Date().getTime().toString();
+	const repository = Coupon.restRepository( client );
+	const createdCoupon = await repository.create( {
+		code: couponCode,
+		discountType: couponType,
+		amount,
+		usageLimit,
+	} );
+
+	return createdCoupon;
 };
