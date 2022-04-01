@@ -127,8 +127,8 @@ foreach ( $composer_projects as $project_path ) {
 	}
 	$data  = isset( $data['extra']['changelogger'] ) ? $data['extra']['changelogger'] : array();
 	$data += array(
-		'changelog'   => 'CHANGELOG.md',
-		'changes-dir' => 'changelog',
+		'changelog'   => $project_path . '/CHANGELOG.md',
+		'changes-dir' => $project_patch . '/changelog',
 	);
 	$changelogger_projects[ $project_path ] = $data;
 }
