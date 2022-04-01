@@ -1,4 +1,0 @@
-Significance: patch
-Type: Dev
-
-Enabled optional typescript checking on ./client subfolder #8372

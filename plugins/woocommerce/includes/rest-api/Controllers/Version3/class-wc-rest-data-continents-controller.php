@@ -210,7 +210,7 @@ class WC_REST_Data_Continents_Controller extends WC_REST_Data_Controller {
 		/**
 		 * Filter the location list returned from the API.
 		 *
-		 * Allows modification of the loction data right before it is returned.
+		 * Allows modification of the location data right before it is returned.
 		 *
 		 * @param WP_REST_Response $response The response object.
 		 * @param array            $item     The original list of continent(s), countries, and states.

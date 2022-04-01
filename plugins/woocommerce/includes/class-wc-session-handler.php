@@ -422,7 +422,7 @@ class WC_Session_Handler extends WC_Session {
 	/**
 	 * Returns the session.
 	 *
-	 * @param string $customer_id Custo ID.
+	 * @param string $customer_id Customer ID.
 	 * @param mixed  $default Default session value.
 	 * @return string|array
 	 */

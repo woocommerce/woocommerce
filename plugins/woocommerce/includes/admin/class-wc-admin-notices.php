@@ -393,7 +393,7 @@ class WC_Admin_Notices {
 	 * @since 3.6.0
 	 */
 	public static function regenerating_lookup_table_notice() {
-		// See if this is still relevent.
+		// See if this is still relevant.
 		if ( ! wc_update_product_lookup_tables_is_running() ) {
 			self::remove_notice( 'regenerating_lookup_table' );
 			return;

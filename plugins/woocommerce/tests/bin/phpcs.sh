@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-COMMIT_RANGE="${1}...${2}"
-CHANGED_FILES=`git diff --name-only --diff-filter=ACMR $COMMIT_RANGE | grep \\\\.php | awk '{print}' ORS=' '`
+COMMIT_RANGE="${1} ${2}"
+CHANGED_FILES=`git diff --name-only --diff-filter=ACMR $COMMIT_RANGE | grep '\.php' | grep 'plugins/woocommerce/' | sed -e 's/^plugins\/woocommerce\///' | awk '{print}' ORS=' '`
 IGNORE="tests/cli/,includes/libraries/,includes/api/legacy/"
 
 if [ "$CHANGED_FILES" != "" ]; then
