@@ -1,11 +1,10 @@
-version: '3.3'
+version: '3.8'
 
 services:
 
   db:
     container_name: "${APP_NAME}_db"
     image: mariadb:${DC_MARIADB_VERSION}
-    restart: on-failure
     environment:
       MYSQL_DATABASE: ${WORDPRESS_DB_NAME}
       MYSQL_USER: ${WORDPRESS_DB_USER}
@@ -27,7 +26,6 @@ services:
 
   wordpress-www:
     container_name: "${APP_NAME}_wordpress-www"
-    restart: on-failure
     depends_on:
         db:
             condition: service_healthy
@@ -48,7 +46,6 @@ services:
 
   wordpress-cli:
     container_name: "${APP_NAME}_wordpress-cli"
-    restart: on-failure
     depends_on:
         - wordpress-www
     build:
