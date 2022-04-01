@@ -41,7 +41,9 @@ describe( 'Classic Template blocks', () => {
 		it( 'renders a list of products with their count and pagination', async () => {
 			const { productArchivePage } = SELECTORS;
 
-			await page.goto( new URL( '/?post_type=product', BASE_URL ) );
+			await page.goto(
+				new URL( '/?post_type=product', BASE_URL ).toString()
+			);
 
 			await page.waitForSelector( productArchivePage.productsList );
 			await page.waitForSelector( productArchivePage.resultsCount );
@@ -74,7 +76,7 @@ describe( 'Classic Template blocks', () => {
 				new URL(
 					`/product-category/${ CATEGORY_NAME.toLowerCase() }`,
 					BASE_URL
-				)
+				).toString()
 			);
 
 			await expect( page ).toMatchElement( productArchivePage.title, {
@@ -109,7 +111,10 @@ describe( 'Classic Template blocks', () => {
 			const { productArchivePage } = SELECTORS;
 
 			await page.goto(
-				new URL( `/product-tag/${ TAG_NAME.toLowerCase() }`, BASE_URL )
+				new URL(
+					`/product-tag/${ TAG_NAME.toLowerCase() }`,
+					BASE_URL
+				).toString()
 			);
 
 			await expect( page ).toMatchElement( productArchivePage.title, {
