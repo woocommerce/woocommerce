@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -eu
 
-declare -p WORDPRESS_HOST
-wait-for-it ${WORDPRESS_HOST} -t 120
+# If WordPress is installed and the page "ready" exists, we bail the initialization.
+if [ $(wp --allow-root core is-installed) ] && [ $(wp --allow-root post exists $(wp --allow-root post list --format=ids --post_name=ready)) ];
 
 ## if file exists then exit early because initialization already happened.
 if [ -f /var/www/html/.initialized ];
