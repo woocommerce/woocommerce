@@ -133,6 +133,16 @@ class MiniCart extends AbstractBlock {
 			);
 		}
 
+		/**
+		 * Temporary remove the this filter so $wp_scripts->print_translations
+		 * calls won't accident print the translations scripts for the block
+		 * when inserted as a widget.
+		 *
+		 * $wp_scripts->print_translations() calls load_script_textdomain()
+		 * which calls load_script_translations() containing the below filter.
+		 */
+		remove_filter( 'pre_load_script_translations', 'woocommerce_blocks_get_i18n_data_json', 10, 4 );
+
 		$script_data = $this->asset_api->get_script_data( 'build/mini-cart-component-frontend.js' );
 
 		$num_dependencies = count( $script_data['dependencies'] );
@@ -161,9 +171,13 @@ class MiniCart extends AbstractBlock {
 		}
 
 		$this->scripts_to_lazy_load['wc-block-mini-cart-component-frontend'] = array(
-			'src'     => $script_data['src'],
-			'version' => $script_data['version'],
+			'src'          => $script_data['src'],
+			'version'      => $script_data['version'],
+			'translations' => $this->get_inner_blocks_translations(),
 		);
+
+		// Re-add the filter.
+		add_filter( 'pre_load_script_translations', 'woocommerce_blocks_get_i18n_data_json', 10, 4 );
 
 		$this->asset_data_registry->add(
 			'mini_cart_block_frontend_dependencies',
@@ -441,5 +455,35 @@ class MiniCart extends AbstractBlock {
 	 */
 	protected function get_cart_payload() {
 		return WC()->api->get_endpoint_data( '/wc/store/cart' );
+	}
+
+	/**
+	 * Prepare translations for inner blocks and dependencies.
+	 */
+	protected function get_inner_blocks_translations() {
+		$wp_scripts   = wp_scripts();
+		$translations = array();
+
+		$blocks = [
+			'mini-cart-contents-block/filled-cart',
+			'mini-cart-contents-block/empty-cart',
+			'mini-cart-contents-block/title',
+			'mini-cart-contents-block/items',
+			'mini-cart-contents-block/products-table',
+			'mini-cart-contents-block/footer',
+			'mini-cart-contents-block/shopping-button',
+		];
+		$chunks = preg_filter( '/$/', '-frontend', $blocks );
+
+		foreach ( $chunks as $chunk ) {
+			$handle = 'wc-blocks-' . $chunk . '-chunk';
+			$this->asset_api->register_script( $handle, $this->asset_api->get_block_asset_build_path( $chunk ), [], true );
+			$translations[] = $wp_scripts->print_translations( $handle, false );
+			wp_deregister_script( $handle );
+		}
+
+		$translations = array_filter( $translations );
+
+		return implode( '', $translations );
 	}
 }
