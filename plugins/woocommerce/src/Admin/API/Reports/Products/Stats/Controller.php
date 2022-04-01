@@ -157,22 +157,22 @@ class Controller extends \WC_REST_Reports_Controller {
 	public function get_item_schema() {
 		$data_values = array(
 			'items_sold'   => array(
-				'title'       => __( 'Products sold', 'woocommerce-admin' ),
-				'description' => __( 'Number of product items sold.', 'woocommerce-admin' ),
+				'title'       => __( 'Products sold', 'woocommerce' ),
+				'description' => __( 'Number of product items sold.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 				'indicator'   => true,
 			),
 			'net_revenue'  => array(
-				'description' => __( 'Net sales.', 'woocommerce-admin' ),
+				'description' => __( 'Net sales.', 'woocommerce' ),
 				'type'        => 'number',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 				'format'      => 'currency',
 			),
 			'orders_count' => array(
-				'description' => __( 'Number of orders.', 'woocommerce-admin' ),
+				'description' => __( 'Number of orders.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
@@ -181,7 +181,7 @@ class Controller extends \WC_REST_Reports_Controller {
 
 		$segments = array(
 			'segments' => array(
-				'description' => __( 'Reports data grouped by segment condition.', 'woocommerce-admin' ),
+				'description' => __( 'Reports data grouped by segment condition.', 'woocommerce' ),
 				'type'        => 'array',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
@@ -189,20 +189,20 @@ class Controller extends \WC_REST_Reports_Controller {
 					'type'       => 'object',
 					'properties' => array(
 						'segment_id'    => array(
-							'description' => __( 'Segment identificator.', 'woocommerce-admin' ),
+							'description' => __( 'Segment identificator.', 'woocommerce' ),
 							'type'        => 'integer',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 						),
 						'segment_label' => array(
-							'description' => __( 'Human readable segment label, either product or variation name.', 'woocommerce-admin' ),
+							'description' => __( 'Human readable segment label, either product or variation name.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 							'enum'        => array( 'day', 'week', 'month', 'year' ),
 						),
 						'subtotals'     => array(
-							'description' => __( 'Interval subtotals.', 'woocommerce-admin' ),
+							'description' => __( 'Interval subtotals.', 'woocommerce' ),
 							'type'        => 'object',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
@@ -221,14 +221,14 @@ class Controller extends \WC_REST_Reports_Controller {
 			'type'       => 'object',
 			'properties' => array(
 				'totals'    => array(
-					'description' => __( 'Totals data.', 'woocommerce-admin' ),
+					'description' => __( 'Totals data.', 'woocommerce' ),
 					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 					'properties'  => $totals,
 				),
 				'intervals' => array(
-					'description' => __( 'Reports data grouped by intervals.', 'woocommerce-admin' ),
+					'description' => __( 'Reports data grouped by intervals.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -236,38 +236,38 @@ class Controller extends \WC_REST_Reports_Controller {
 						'type'       => 'object',
 						'properties' => array(
 							'interval'       => array(
-								'description' => __( 'Type of interval.', 'woocommerce-admin' ),
+								'description' => __( 'Type of interval.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 								'enum'        => array( 'day', 'week', 'month', 'year' ),
 							),
 							'date_start'     => array(
-								'description' => __( "The date the report start, in the site's timezone.", 'woocommerce-admin' ),
+								'description' => __( "The date the report start, in the site's timezone.", 'woocommerce' ),
 								'type'        => 'date-time',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'date_start_gmt' => array(
-								'description' => __( 'The date the report start, as GMT.', 'woocommerce-admin' ),
+								'description' => __( 'The date the report start, as GMT.', 'woocommerce' ),
 								'type'        => 'date-time',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'date_end'       => array(
-								'description' => __( "The date the report end, in the site's timezone.", 'woocommerce-admin' ),
+								'description' => __( "The date the report end, in the site's timezone.", 'woocommerce' ),
 								'type'        => 'date-time',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'date_end_gmt'   => array(
-								'description' => __( 'The date the report end, as GMT.', 'woocommerce-admin' ),
+								'description' => __( 'The date the report end, as GMT.', 'woocommerce' ),
 								'type'        => 'date-time',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'subtotals'      => array(
-								'description' => __( 'Interval subtotals.', 'woocommerce-admin' ),
+								'description' => __( 'Interval subtotals.', 'woocommerce' ),
 								'type'        => 'object',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
@@ -313,7 +313,7 @@ class Controller extends \WC_REST_Reports_Controller {
 		$params               = array();
 		$params['context']    = $this->get_context_param( array( 'default' => 'view' ) );
 		$params['page']       = array(
-			'description'       => __( 'Current page of the collection.', 'woocommerce-admin' ),
+			'description'       => __( 'Current page of the collection.', 'woocommerce' ),
 			'type'              => 'integer',
 			'default'           => 1,
 			'sanitize_callback' => 'absint',
@@ -321,7 +321,7 @@ class Controller extends \WC_REST_Reports_Controller {
 			'minimum'           => 1,
 		);
 		$params['per_page']   = array(
-			'description'       => __( 'Maximum number of items to be returned in result set.', 'woocommerce-admin' ),
+			'description'       => __( 'Maximum number of items to be returned in result set.', 'woocommerce' ),
 			'type'              => 'integer',
 			'default'           => 10,
 			'minimum'           => 1,
@@ -330,26 +330,26 @@ class Controller extends \WC_REST_Reports_Controller {
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['after']      = array(
-			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['before']     = array(
-			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'woocommerce' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['order']      = array(
-			'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce-admin' ),
+			'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => 'desc',
 			'enum'              => array( 'asc', 'desc' ),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['orderby']    = array(
-			'description'       => __( 'Sort collection by object attribute.', 'woocommerce-admin' ),
+			'description'       => __( 'Sort collection by object attribute.', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => 'date',
 			'enum'              => array(
@@ -366,7 +366,7 @@ class Controller extends \WC_REST_Reports_Controller {
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['interval']   = array(
-			'description'       => __( 'Time interval to use for buckets in the returned data.', 'woocommerce-admin' ),
+			'description'       => __( 'Time interval to use for buckets in the returned data.', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => 'week',
 			'enum'              => array(
@@ -380,7 +380,7 @@ class Controller extends \WC_REST_Reports_Controller {
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['categories'] = array(
-			'description'       => __( 'Limit result to items from the specified categories.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit result to items from the specified categories.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
@@ -389,7 +389,7 @@ class Controller extends \WC_REST_Reports_Controller {
 			),
 		);
 		$params['products']   = array(
-			'description'       => __( 'Limit result to items with specified product ids.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit result to items with specified product ids.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
@@ -398,7 +398,7 @@ class Controller extends \WC_REST_Reports_Controller {
 			),
 		);
 		$params['variations'] = array(
-			'description'       => __( 'Limit result to items with specified variation ids.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit result to items with specified variation ids.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
@@ -407,7 +407,7 @@ class Controller extends \WC_REST_Reports_Controller {
 			),
 		);
 		$params['segmentby']  = array(
-			'description'       => __( 'Segment the response by additional constraint.', 'woocommerce-admin' ),
+			'description'       => __( 'Segment the response by additional constraint.', 'woocommerce' ),
 			'type'              => 'string',
 			'enum'              => array(
 				'product',
@@ -417,7 +417,7 @@ class Controller extends \WC_REST_Reports_Controller {
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['fields']     = array(
-			'description'       => __( 'Limit stats fields to the specified items.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit stats fields to the specified items.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_slug_list',
 			'validate_callback' => 'rest_validate_request_arg',

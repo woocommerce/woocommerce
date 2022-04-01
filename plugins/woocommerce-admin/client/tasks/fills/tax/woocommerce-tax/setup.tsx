@@ -96,33 +96,30 @@ export const Setup: React.FC< SetupProps > = ( {
 	const steps = [
 		{
 			key: 'store_location',
-			label: __( 'Set store location', 'woocommerce-admin' ),
+			label: __( 'Set store location', 'woocommerce' ),
 			description: __(
 				'The address from which your business operates',
-				'woocommerce-admin'
+				'woocommerce'
 			),
 			content: <StoreLocation { ...stepProps } />,
 		},
 		{
 			key: 'plugins',
 			label: pluginsToActivate.includes( 'woocommerce-services' )
-				? __(
-						'Install Jetpack and WooCommerce Tax',
-						'woocommerce-admin'
-				  )
-				: __( 'Install Jetpack', 'woocommerce-admin' ),
+				? __( 'Install Jetpack and WooCommerce Tax', 'woocommerce' )
+				: __( 'Install Jetpack', 'woocommerce' ),
 			description: __(
 				'Jetpack and WooCommerce Tax allow you to automate sales tax calculations',
-				'woocommerce-admin'
+				'woocommerce'
 			),
 			content: <Plugins { ...stepProps } />,
 		},
 		{
 			key: 'connect',
-			label: __( 'Connect your store', 'woocommerce-admin' ),
+			label: __( 'Connect your store', 'woocommerce' ),
 			description: __(
 				'Connect your store to WordPress.com to enable automated sales tax calculations',
-				'woocommerce-admin'
+				'woocommerce'
 			),
 			content: <Connect { ...stepProps } />,
 		},

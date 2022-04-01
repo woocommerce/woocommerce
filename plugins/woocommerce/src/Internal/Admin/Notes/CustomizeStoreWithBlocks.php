@@ -69,15 +69,15 @@ class CustomizeStoreWithBlocks {
 		}
 
 		$note = new Note();
-		$note->set_title( __( 'Customize your online store with WooCommerce blocks', 'woocommerce-admin' ) );
-		$note->set_content( __( 'With our blocks, you can select and display products, categories, filters, and more virtually anywhere on your site — no need to use shortcodes or edit lines of code. Learn more about how to use each one of them.', 'woocommerce-admin' ) );
+		$note->set_title( __( 'Customize your online store with WooCommerce blocks', 'woocommerce' ) );
+		$note->set_content( __( 'With our blocks, you can select and display products, categories, filters, and more virtually anywhere on your site — no need to use shortcodes or edit lines of code. Learn more about how to use each one of them.', 'woocommerce' ) );
 		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_content_data( (object) array() );
 		$note->set_source( 'woocommerce-admin' );
 		$note->add_action(
 			'customize-store-with-blocks',
-			__( 'Learn more', 'woocommerce-admin' ),
+			__( 'Learn more', 'woocommerce' ),
 			'https://woocommerce.com/posts/how-to-customize-your-online-store-with-woocommerce-blocks/?utm_source=inbox&utm_medium=product',
 			Note::E_WC_ADMIN_NOTE_ACTIONED
 		);

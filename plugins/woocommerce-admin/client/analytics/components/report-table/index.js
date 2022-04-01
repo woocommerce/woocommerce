@@ -209,7 +209,7 @@ const ReportTable = ( props ) => {
 							/* translators: %s = type of report */
 							__(
 								'Your %s Report will be emailed to you.',
-								'woocommerce-admin'
+								'woocommerce'
 							),
 							title
 						)
@@ -223,7 +223,7 @@ const ReportTable = ( props ) => {
 								/* translators: %s = type of report */
 								__(
 									'There was a problem exporting your %s Report. Please try again.',
-									'woocommerce-admin'
+									'woocommerce'
 								),
 								title
 							)
@@ -401,14 +401,14 @@ const ReportTable = ( props ) => {
 								labels.helpText ||
 								__(
 									'Check at least two items below to compare',
-									'woocommerce-admin'
+									'woocommerce'
 								)
 							}
 							onClick={ onCompare }
 							disabled={ ! downloadable }
 						>
 							{ labels.compareButton ||
-								__( 'Compare', 'woocommerce-admin' ) }
+								__( 'Compare', 'woocommerce' ) }
 						</CompareButton>
 					),
 					searchBy && (
@@ -419,7 +419,7 @@ const ReportTable = ( props ) => {
 							onChange={ onSearchChange }
 							placeholder={
 								labels.placeholder ||
-								__( 'Search by item name', 'woocommerce-admin' )
+								__( 'Search by item name', 'woocommerce' )
 							}
 							selected={ searchedLabels }
 							showClearButton={ true }
@@ -437,7 +437,7 @@ const ReportTable = ( props ) => {
 							<DownloadIcon />
 							<span className="woocommerce-table__download-button__label">
 								{ labels.downloadButton ||
-									__( 'Download', 'woocommerce-admin' ) }
+									__( 'Download', 'woocommerce' ) }
 							</span>
 						</Button>
 					),

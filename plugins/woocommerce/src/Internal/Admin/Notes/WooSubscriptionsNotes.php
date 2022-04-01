@@ -182,15 +182,15 @@ class WooSubscriptionsNotes {
 	 */
 	public function add_no_connection_note() {
 		$note = new Note();
-		$note->set_title( __( 'Connect to WooCommerce.com', 'woocommerce-admin' ) );
-		$note->set_content( __( 'Connect to get important product notifications and updates.', 'woocommerce-admin' ) );
+		$note->set_title( __( 'Connect to WooCommerce.com', 'woocommerce' ) );
+		$note->set_content( __( 'Connect to get important product notifications and updates.', 'woocommerce' ) );
 		$note->set_content_data( (object) array() );
 		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 		$note->set_name( self::CONNECTION_NOTE_NAME );
 		$note->set_source( 'woocommerce-admin' );
 		$note->add_action(
 			'connect',
-			__( 'Connect', 'woocommerce-admin' ),
+			__( 'Connect', 'woocommerce' ),
 			'?page=wc-addons&section=helper',
 			Note::E_WC_ADMIN_NOTE_UNACTIONED
 		);
@@ -311,13 +311,13 @@ class WooSubscriptionsNotes {
 
 		$note_title = sprintf(
 			/* translators: name of the extension subscription expiring soon */
-			__( '%s subscription expiring soon', 'woocommerce-admin' ),
+			__( '%s subscription expiring soon', 'woocommerce' ),
 			$product_name
 		);
 
 		$note_content = sprintf(
 			/* translators: number of days until the subscription expires */
-			__( 'Your subscription expires in %d days. Enable autorenew to avoid losing updates and access to support.', 'woocommerce-admin' ),
+			__( 'Your subscription expires in %d days. Enable autorenew to avoid losing updates and access to support.', 'woocommerce' ),
 			$days_until_expiration
 		);
 
@@ -340,7 +340,7 @@ class WooSubscriptionsNotes {
 		$note->clear_actions();
 		$note->add_action(
 			'enable-autorenew',
-			__( 'Enable Autorenew', 'woocommerce-admin' ),
+			__( 'Enable Autorenew', 'woocommerce' ),
 			'https://woocommerce.com/my-account/my-subscriptions/?utm_medium=product'
 		);
 		$note->set_content( $note_content );
@@ -372,13 +372,13 @@ class WooSubscriptionsNotes {
 
 		$note_title = sprintf(
 			/* translators: name of the extension subscription that expired */
-			__( '%s subscription expired', 'woocommerce-admin' ),
+			__( '%s subscription expired', 'woocommerce' ),
 			$product_name
 		);
 
 		$note_content = sprintf(
 			/* translators: date the subscription expired, e.g. Jun 7th 2018 */
-			__( 'Your subscription expired on %s. Get a new subscription to continue receiving updates and access to support.', 'woocommerce-admin' ),
+			__( 'Your subscription expired on %s. Get a new subscription to continue receiving updates and access to support.', 'woocommerce' ),
 			$expires_date
 		);
 
@@ -403,7 +403,7 @@ class WooSubscriptionsNotes {
 		$note->clear_actions();
 		$note->add_action(
 			'renew-subscription',
-			__( 'Renew Subscription', 'woocommerce-admin' ),
+			__( 'Renew Subscription', 'woocommerce' ),
 			$product_page
 		);
 		$note->save();

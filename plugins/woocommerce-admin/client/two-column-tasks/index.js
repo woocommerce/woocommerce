@@ -109,10 +109,7 @@ const TaskDashboard = ( { query, twoColumns } ) => {
 					isComplete={ isTaskListComplete }
 					query={ query }
 					tasks={ setupTasks }
-					title={ __(
-						'Get ready to start selling',
-						'woocommerce-admin'
-					) }
+					title={ __( 'Get ready to start selling', 'woocommerce' ) }
 				/>
 			) }
 		</>

@@ -52,12 +52,12 @@ class StorePerformance extends Component {
 			<EllipsisMenu
 				label={ __(
 					'Choose which analytics to display and the section name',
-					'woocommerce-admin'
+					'woocommerce'
 				) }
 				renderContent={ ( { onToggle } ) => (
 					<Fragment>
 						<MenuTitle>
-							{ __( 'Display stats:', 'woocommerce-admin' ) }
+							{ __( 'Display stats:', 'woocommerce' ) }
 						</MenuTitle>
 						{ indicators.map( ( indicator, i ) => {
 							const checked = ! hiddenBlocks.includes(
@@ -126,8 +126,8 @@ class StorePerformance extends Component {
 		const { compare } = getDateParamsFromQuery( query, defaultDateRange );
 		const prevLabel =
 			compare === 'previous_period'
-				? __( 'Previous period:', 'woocommerce-admin' )
-				: __( 'Previous year:', 'woocommerce-admin' );
+				? __( 'Previous period:', 'woocommerce' )
+				: __( 'Previous year:', 'woocommerce' );
 		const { formatAmount, getCurrencyConfig } = this.context;
 		const currency = getCurrencyConfig();
 		return (
@@ -177,9 +177,7 @@ class StorePerformance extends Component {
 		return (
 			<Fragment>
 				<SectionHeader
-					title={
-						title || __( 'Store Performance', 'woocommerce-admin' )
-					}
+					title={ title || __( 'Store Performance', 'woocommerce' ) }
 					menu={ this.renderMenu() }
 				/>
 				{ userIndicators.length > 0 && (

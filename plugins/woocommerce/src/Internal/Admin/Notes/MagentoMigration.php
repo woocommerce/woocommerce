@@ -83,15 +83,15 @@ class MagentoMigration {
 	public static function get_note() {
 		$note = new Note();
 
-		$note->set_title( __( 'How to Migrate from Magento to WooCommerce', 'woocommerce-admin' ) );
-		$note->set_content( __( 'Changing platforms might seem like a big hurdle to overcome, but it is easier than you might think to move your products, customers, and orders to WooCommerce. This article will help you with going through this process.', 'woocommerce-admin' ) );
+		$note->set_title( __( 'How to Migrate from Magento to WooCommerce', 'woocommerce' ) );
+		$note->set_content( __( 'Changing platforms might seem like a big hurdle to overcome, but it is easier than you might think to move your products, customers, and orders to WooCommerce. This article will help you with going through this process.', 'woocommerce' ) );
 		$note->set_content_data( (object) array() );
 		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_source( 'woocommerce-admin' );
 		$note->add_action(
 			'learn-more',
-			__( 'Learn more', 'woocommerce-admin' ),
+			__( 'Learn more', 'woocommerce' ),
 			'https://woocommerce.com/posts/how-migrate-from-magento-to-woocommerce/?utm_source=inbox'
 		);
 

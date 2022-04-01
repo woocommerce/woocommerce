@@ -53,7 +53,7 @@ class ProductVariations extends \WC_REST_Product_Variations_Controller {
 	public function get_collection_params() {
 		$params           = parent::get_collection_params();
 		$params['search'] = array(
-			'description'       => __( 'Search by similar product name, sku, or attribute value.', 'woocommerce-admin' ),
+			'description'       => __( 'Search by similar product name, sku, or attribute value.', 'woocommerce' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
@@ -163,19 +163,19 @@ class ProductVariations extends \WC_REST_Product_Variations_Controller {
 		$schema = parent::get_item_schema();
 
 		$schema['properties']['name']      = array(
-			'description' => __( 'Product parent name.', 'woocommerce-admin' ),
+			'description' => __( 'Product parent name.', 'woocommerce' ),
 			'type'        => 'string',
 			'context'     => array( 'view', 'edit' ),
 		);
 		$schema['properties']['type']      = array(
-			'description' => __( 'Product type.', 'woocommerce-admin' ),
+			'description' => __( 'Product type.', 'woocommerce' ),
 			'type'        => 'string',
 			'default'     => 'variation',
 			'enum'        => array( 'variation' ),
 			'context'     => array( 'view', 'edit' ),
 		);
 		$schema['properties']['parent_id'] = array(
-			'description' => __( 'Product parent ID.', 'woocommerce-admin' ),
+			'description' => __( 'Product parent ID.', 'woocommerce' ),
 			'type'        => 'integer',
 			'context'     => array( 'view', 'edit' ),
 		);

@@ -48,7 +48,7 @@ export const Plugin: React.FC< PluginProps > = ( {
 						src={ imageUrl }
 						alt={ sprintf(
 							/* translators: %s = name of the plugin */
-							__( '%s logo', 'woocommerce-admin' ),
+							__( '%s logo', 'woocommerce' ),
 							name
 						) }
 					/>
@@ -59,10 +59,7 @@ export const Plugin: React.FC< PluginProps > = ( {
 					{ name }
 					{ isBuiltByWC && (
 						<Pill>
-							{ __(
-								'Built by WooCommerce',
-								'woocommerce-admin'
-							) }
+							{ __( 'Built by WooCommerce', 'woocommerce' ) }
 						</Pill>
 					) }
 				</Text>

@@ -55,7 +55,7 @@ export const DynamicForm: React.FC< DynamicFormProps > = ( {
 	onSubmit = () => {},
 	onChange = () => {},
 	validate = () => ( {} ),
-	submitLabel = __( 'Proceed', 'woocommerce-admin' ),
+	submitLabel = __( 'Proceed', 'woocommerce' ),
 } ) => {
 	// Support accepting fields in the format provided by the API (object), but transform to Array
 	const fields =

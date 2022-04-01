@@ -38,16 +38,16 @@ class MobileApp {
 			return;
 		}
 
-		$content = __( 'Install the WooCommerce mobile app to manage orders, receive sales notifications, and view key metrics — wherever you are.', 'woocommerce-admin' );
+		$content = __( 'Install the WooCommerce mobile app to manage orders, receive sales notifications, and view key metrics — wherever you are.', 'woocommerce' );
 
 		$note = new Note();
-		$note->set_title( __( 'Install Woo mobile app', 'woocommerce-admin' ) );
+		$note->set_title( __( 'Install Woo mobile app', 'woocommerce' ) );
 		$note->set_content( $content );
 		$note->set_content_data( (object) array() );
 		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_source( 'woocommerce-admin' );
-		$note->add_action( 'learn-more', __( 'Learn more', 'woocommerce-admin' ), 'https://woocommerce.com/mobile/?utm_medium=product' );
+		$note->add_action( 'learn-more', __( 'Learn more', 'woocommerce' ), 'https://woocommerce.com/mobile/?utm_medium=product' );
 		return $note;
 	}
 }

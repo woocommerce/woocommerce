@@ -15,11 +15,11 @@ const PaymentsHeader = ( { task, goToTask } ) => {
 		<div className="woocommerce-task-header__contents-container">
 			<GetPaid className="svg-background" />
 			<div className="woocommerce-task-header__contents">
-				<h1>{ __( 'Choose payment methods', 'woocommerce-admin' ) }</h1>
+				<h1>{ __( 'Choose payment methods', 'woocommerce' ) }</h1>
 				<p>
 					{ __(
 						'Choose payment providers and enable payment methods at checkout',
-						'woocommerce-admin'
+						'woocommerce'
 					) }
 				</p>
 				<Button
@@ -27,7 +27,7 @@ const PaymentsHeader = ( { task, goToTask } ) => {
 					isPrimary={ ! task.isComplete }
 					onClick={ goToTask }
 				>
-					{ __( 'Set up payments', 'woocommerce-admin' ) }
+					{ __( 'Set up payments', 'woocommerce' ) }
 				</Button>
 				<p className="woocommerce-task-header__timer">
 					<img src={ TimerImage } alt="Timer" />{ ' ' }

@@ -53,7 +53,7 @@ class Tags extends Component {
 							return null;
 						}
 						const screenReaderLabel = sprintf(
-							__( '%1$s (%2$s of %3$s)', 'woocommerce-admin' ),
+							__( '%1$s (%2$s of %3$s)', 'woocommerce' ),
 							item.label,
 							i + 1,
 							selected.length
@@ -80,7 +80,7 @@ class Tags extends Component {
 							className="clear-icon"
 						/>
 						<span className="screen-reader-text">
-							{ __( 'Clear all', 'woocommerce-admin' ) }
+							{ __( 'Clear all', 'woocommerce' ) }
 						</span>
 					</Button>
 				) }

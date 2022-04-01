@@ -89,7 +89,7 @@ const KnowledgeBase = ( {
 					<div className="woocommerce-marketing-knowledgebase-card__post-text">
 						<h3>{ post.title }</h3>
 						<p className="woocommerce-marketing-knowledgebase-card__post-meta">
-							{ __( 'By', 'woocommerce-admin' ) + ' ' }
+							{ __( 'By', 'woocommerce' ) + ' ' }
 							{ post.author_name }
 							{ post.author_avatar && (
 								<img
@@ -113,7 +113,7 @@ const KnowledgeBase = ( {
 	};
 
 	const renderEmpty = () => {
-		const emptyTitle = __( 'No posts yet', 'woocommerce-admin' );
+		const emptyTitle = __( 'No posts yet', 'woocommerce' );
 
 		return (
 			<EmptyContent
@@ -128,7 +128,7 @@ const KnowledgeBase = ( {
 	const renderError = () => {
 		const errorTitle = __(
 			"Oops, our posts aren't loading right now",
-			'woocommerce-admin'
+			'woocommerce'
 		);
 
 		return (
@@ -228,10 +228,10 @@ KnowledgeBase.propTypes = {
 };
 
 KnowledgeBase.defaultProps = {
-	title: __( 'WooCommerce knowledge base', 'woocommerce-admin' ),
+	title: __( 'WooCommerce knowledge base', 'woocommerce' ),
 	description: __(
 		'Learn the ins and outs of successful marketing from the experts at WooCommerce.',
-		'woocommerce-admin'
+		'woocommerce'
 	),
 };
 

@@ -27,7 +27,7 @@ class AdditionalPayments extends Payments {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Set up additional payment providers', 'woocommerce-admin' );
+		return __( 'Set up additional payment providers', 'woocommerce' );
 	}
 
 	/**
@@ -38,7 +38,7 @@ class AdditionalPayments extends Payments {
 	public function get_content() {
 		return __(
 			'Choose payment providers and enable payment methods at checkout.',
-			'woocommerce-admin'
+			'woocommerce'
 		);
 	}
 
@@ -48,7 +48,7 @@ class AdditionalPayments extends Payments {
 	 * @return string
 	 */
 	public function get_time() {
-		return __( '2 minutes', 'woocommerce-admin' );
+		return __( '2 minutes', 'woocommerce' );
 	}
 
 	/**

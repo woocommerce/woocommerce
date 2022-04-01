@@ -37,21 +37,21 @@ const { addCesSurveyForAnalytics } = dispatch( CES_STORE_KEY );
 export const charts = applyFilters( VARIATIONS_REPORT_CHARTS_FILTER, [
 	{
 		key: 'items_sold',
-		label: __( 'Items sold', 'woocommerce-admin' ),
+		label: __( 'Items sold', 'woocommerce' ),
 		order: 'desc',
 		orderby: 'items_sold',
 		type: 'number',
 	},
 	{
 		key: 'net_revenue',
-		label: __( 'Net sales', 'woocommerce-admin' ),
+		label: __( 'Net sales', 'woocommerce' ),
 		order: 'desc',
 		orderby: 'net_revenue',
 		type: 'currency',
 	},
 	{
 		key: 'orders_count',
-		label: __( 'Orders', 'woocommerce-admin' ),
+		label: __( 'Orders', 'woocommerce' ),
 		order: 'desc',
 		orderby: 'orders_count',
 		type: 'number',
@@ -70,18 +70,18 @@ export const charts = applyFilters( VARIATIONS_REPORT_CHARTS_FILTER, [
  */
 export const filters = applyFilters( VARIATIONS_REPORT_FILTERS_FILTER, [
 	{
-		label: __( 'Show', 'woocommerce-admin' ),
+		label: __( 'Show', 'woocommerce' ),
 		staticParams: [ 'chartType', 'paged', 'per_page' ],
 		param: 'filter-variations',
 		showFilters: () => true,
 		filters: [
 			{
-				label: __( 'All variations', 'woocommerce-admin' ),
+				label: __( 'All variations', 'woocommerce' ),
 				chartMode: 'item-comparison',
 				value: 'all',
 			},
 			{
-				label: __( 'Single variation', 'woocommerce-admin' ),
+				label: __( 'Single variation', 'woocommerce' ),
 				value: 'select_variation',
 				subFilters: [
 					{
@@ -95,19 +95,16 @@ export const filters = applyFilters( VARIATIONS_REPORT_FILTERS_FILTER, [
 							labels: {
 								placeholder: __(
 									'Type to search for a variation',
-									'woocommerce-admin'
+									'woocommerce'
 								),
-								button: __(
-									'Single variation',
-									'woocommerce-admin'
-								),
+								button: __( 'Single variation', 'woocommerce' ),
 							},
 						},
 					},
 				],
 			},
 			{
-				label: __( 'Comparison', 'woocommerce-admin' ),
+				label: __( 'Comparison', 'woocommerce' ),
 				chartMode: 'item-comparison',
 				value: 'compare-variations',
 				settings: {
@@ -117,20 +114,20 @@ export const filters = applyFilters( VARIATIONS_REPORT_FILTERS_FILTER, [
 					labels: {
 						helpText: __(
 							'Check at least two variations below to compare',
-							'woocommerce-admin'
+							'woocommerce'
 						),
 						placeholder: __(
 							'Search for variations to compare',
-							'woocommerce-admin'
+							'woocommerce'
 						),
-						title: __( 'Compare Variations', 'woocommerce-admin' ),
-						update: __( 'Compare', 'woocommerce-admin' ),
+						title: __( 'Compare Variations', 'woocommerce' ),
+						update: __( 'Compare', 'woocommerce' ),
 					},
 					onClick: addCesSurveyForAnalytics,
 				},
 			},
 			{
-				label: __( 'Advanced filters', 'woocommerce-admin' ),
+				label: __( 'Advanced filters', 'woocommerce' ),
 				value: 'advanced',
 			},
 		],
@@ -151,38 +148,31 @@ export const advancedFilters = applyFilters(
 		title: _x(
 			'Variations match {{select /}} filters',
 			'A sentence describing filters for Variations. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ',
-			'woocommerce-admin'
+			'woocommerce'
 		),
 		filters: {
 			attribute: {
 				allowMultiple: true,
 				labels: {
-					add: __( 'Attribute', 'woocommerce-admin' ),
-					placeholder: __( 'Search attributes', 'woocommerce-admin' ),
-					remove: __(
-						'Remove attribute filter',
-						'woocommerce-admin'
-					),
+					add: __( 'Attribute', 'woocommerce' ),
+					placeholder: __( 'Search attributes', 'woocommerce' ),
+					remove: __( 'Remove attribute filter', 'woocommerce' ),
 					rule: __(
 						'Select a product attribute filter match',
-						'woocommerce-admin'
+						'woocommerce'
 					),
 					/* translators: A sentence describing a Product filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ */
 					title: __(
 						'{{title}}Attribute{{/title}} {{rule /}} {{filter /}}',
-						'woocommerce-admin'
+						'woocommerce'
 					),
-					filter: __( 'Select attributes', 'woocommerce-admin' ),
+					filter: __( 'Select attributes', 'woocommerce' ),
 				},
 				rules: [
 					{
 						value: 'is',
 						/* translators: Sentence fragment, logical, "Is" refers to searching for product variations matching a chosen attribute. Screenshot for context: https://cloudup.com/cSsUY9VeCVJ */
-						label: _x(
-							'Is',
-							'product attribute',
-							'woocommerce-admin'
-						),
+						label: _x( 'Is', 'product attribute', 'woocommerce' ),
 					},
 					{
 						value: 'is_not',
@@ -190,7 +180,7 @@ export const advancedFilters = applyFilters(
 						label: _x(
 							'Is Not',
 							'product attribute',
-							'woocommerce-admin'
+							'woocommerce'
 						),
 					},
 				],
@@ -200,41 +190,27 @@ export const advancedFilters = applyFilters(
 			},
 			category: {
 				labels: {
-					add: __( 'Categories', 'woocommerce-admin' ),
-					placeholder: __( 'Search categories', 'woocommerce-admin' ),
-					remove: __(
-						'Remove categories filter',
-						'woocommerce-admin'
-					),
-					rule: __(
-						'Select a category filter match',
-						'woocommerce-admin'
-					),
+					add: __( 'Categories', 'woocommerce' ),
+					placeholder: __( 'Search categories', 'woocommerce' ),
+					remove: __( 'Remove categories filter', 'woocommerce' ),
+					rule: __( 'Select a category filter match', 'woocommerce' ),
 					/* translators: A sentence describing a Category filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ */
 					title: __(
 						'{{title}}Category{{/title}} {{rule /}} {{filter /}}',
-						'woocommerce-admin'
+						'woocommerce'
 					),
-					filter: __( 'Select categories', 'woocommerce-admin' ),
+					filter: __( 'Select categories', 'woocommerce' ),
 				},
 				rules: [
 					{
 						value: 'includes',
 						/* translators: Sentence fragment, logical, "Includes" refers to variations including a given category. Screenshot for context: https://cloudup.com/cSsUY9VeCVJ */
-						label: _x(
-							'Includes',
-							'categories',
-							'woocommerce-admin'
-						),
+						label: _x( 'Includes', 'categories', 'woocommerce' ),
 					},
 					{
 						value: 'excludes',
 						/* translators: Sentence fragment, logical, "Excludes" refers to variations excluding a given category. Screenshot for context: https://cloudup.com/cSsUY9VeCVJ */
-						label: _x(
-							'Excludes',
-							'categories',
-							'woocommerce-admin'
-						),
+						label: _x( 'Excludes', 'categories', 'woocommerce' ),
 					},
 				],
 				input: {
@@ -245,38 +221,27 @@ export const advancedFilters = applyFilters(
 			},
 			product: {
 				labels: {
-					add: __( 'Products', 'woocommerce-admin' ),
-					placeholder: __( 'Search products', 'woocommerce-admin' ),
-					remove: __( 'Remove products filter', 'woocommerce-admin' ),
-					rule: __(
-						'Select a product filter match',
-						'woocommerce-admin'
-					),
+					add: __( 'Products', 'woocommerce' ),
+					placeholder: __( 'Search products', 'woocommerce' ),
+					remove: __( 'Remove products filter', 'woocommerce' ),
+					rule: __( 'Select a product filter match', 'woocommerce' ),
 					/* translators: A sentence describing a Product filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ */
 					title: __(
 						'{{title}}Product{{/title}} {{rule /}} {{filter /}}',
-						'woocommerce-admin'
+						'woocommerce'
 					),
-					filter: __( 'Select products', 'woocommerce-admin' ),
+					filter: __( 'Select products', 'woocommerce' ),
 				},
 				rules: [
 					{
 						value: 'includes',
 						/* translators: Sentence fragment, logical, "Includes" refers to orders including a given product(s). Screenshot for context: https://cloudup.com/cSsUY9VeCVJ */
-						label: _x(
-							'Includes',
-							'products',
-							'woocommerce-admin'
-						),
+						label: _x( 'Includes', 'products', 'woocommerce' ),
 					},
 					{
 						value: 'excludes',
 						/* translators: Sentence fragment, logical, "Excludes" refers to orders excluding a given product(s). Screenshot for context: https://cloudup.com/cSsUY9VeCVJ */
-						label: _x(
-							'Excludes',
-							'products',
-							'woocommerce-admin'
-						),
+						label: _x( 'Excludes', 'products', 'woocommerce' ),
 					},
 				],
 				input: {

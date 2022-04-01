@@ -51,7 +51,7 @@ export default () => {
 	const reports = [
 		{
 			report: 'revenue',
-			title: __( 'Revenue', 'woocommerce-admin' ),
+			title: __( 'Revenue', 'woocommerce' ),
 			component: RevenueReport,
 			navArgs: {
 				id: 'woocommerce-analytics-revenue',
@@ -59,7 +59,7 @@ export default () => {
 		},
 		{
 			report: 'products',
-			title: __( 'Products', 'woocommerce-admin' ),
+			title: __( 'Products', 'woocommerce' ),
 			component: ProductsReport,
 			navArgs: {
 				id: 'woocommerce-analytics-products',
@@ -67,7 +67,7 @@ export default () => {
 		},
 		{
 			report: 'variations',
-			title: __( 'Variations', 'woocommerce-admin' ),
+			title: __( 'Variations', 'woocommerce' ),
 			component: VariationsReport,
 			navArgs: {
 				id: 'woocommerce-analytics-variations',
@@ -75,7 +75,7 @@ export default () => {
 		},
 		{
 			report: 'orders',
-			title: __( 'Orders', 'woocommerce-admin' ),
+			title: __( 'Orders', 'woocommerce' ),
 			component: OrdersReport,
 			navArgs: {
 				id: 'woocommerce-analytics-orders',
@@ -83,7 +83,7 @@ export default () => {
 		},
 		{
 			report: 'categories',
-			title: __( 'Categories', 'woocommerce-admin' ),
+			title: __( 'Categories', 'woocommerce' ),
 			component: CategoriesReport,
 			navArgs: {
 				id: 'woocommerce-analytics-categories',
@@ -91,7 +91,7 @@ export default () => {
 		},
 		{
 			report: 'coupons',
-			title: __( 'Coupons', 'woocommerce-admin' ),
+			title: __( 'Coupons', 'woocommerce' ),
 			component: CouponsReport,
 			navArgs: {
 				id: 'woocommerce-analytics-coupons',
@@ -99,7 +99,7 @@ export default () => {
 		},
 		{
 			report: 'taxes',
-			title: __( 'Taxes', 'woocommerce-admin' ),
+			title: __( 'Taxes', 'woocommerce' ),
 			component: TaxesReport,
 			navArgs: {
 				id: 'woocommerce-analytics-taxes',
@@ -108,7 +108,7 @@ export default () => {
 		manageStock === 'yes'
 			? {
 					report: 'stock',
-					title: __( 'Stock', 'woocommerce-admin' ),
+					title: __( 'Stock', 'woocommerce' ),
 					component: StockReport,
 					navArgs: {
 						id: 'woocommerce-analytics-stock',
@@ -117,12 +117,12 @@ export default () => {
 			: null,
 		{
 			report: 'customers',
-			title: __( 'Customers', 'woocommerce-admin' ),
+			title: __( 'Customers', 'woocommerce' ),
 			component: CustomersReport,
 		},
 		{
 			report: 'downloads',
-			title: __( 'Downloads', 'woocommerce-admin' ),
+			title: __( 'Downloads', 'woocommerce' ),
 			component: DownloadsReport,
 			navArgs: {
 				id: 'woocommerce-analytics-downloads',

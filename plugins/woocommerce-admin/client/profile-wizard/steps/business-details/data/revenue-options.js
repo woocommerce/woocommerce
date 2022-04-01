@@ -46,7 +46,7 @@ export const getRevenueOptions = ( numberConfig, country, formatAmount ) => [
 		key: 'none',
 		label: sprintf(
 			/* translators: %s: $0 revenue amount */
-			__( "%s (I'm just getting started)", 'woocommerce-admin' ),
+			__( "%s (I'm just getting started)", 'woocommerce' ),
 			formatAmount( 0 )
 		),
 	},
@@ -54,7 +54,7 @@ export const getRevenueOptions = ( numberConfig, country, formatAmount ) => [
 		key: 'up-to-2500',
 		label: sprintf(
 			/* translators: %s: A given revenue amount, e.g., $2500 */
-			__( 'Up to %s', 'woocommerce-admin' ),
+			__( 'Up to %s', 'woocommerce' ),
 			formatAmount( convertCurrency( 2500, country ) )
 		),
 	},
@@ -89,12 +89,12 @@ export const getRevenueOptions = ( numberConfig, country, formatAmount ) => [
 		key: 'more-than-250000',
 		label: sprintf(
 			/* translators: %s: A given revenue amount, e.g., $250000 */
-			__( 'More than %s', 'woocommerce-admin' ),
+			__( 'More than %s', 'woocommerce' ),
 			formatAmount( convertCurrency( 250000, country ) )
 		),
 	},
 	{
 		key: 'rather-not-say',
-		label: __( "I'd rather not say", 'woocommerce-admin' ),
+		label: __( "I'd rather not say", 'woocommerce' ),
 	},
 ];

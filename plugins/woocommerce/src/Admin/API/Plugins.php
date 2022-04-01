@@ -217,7 +217,7 @@ class Plugins extends \WC_REST_Data_Controller {
 	 */
 	public function update_item_permissions_check( $request ) {
 		if ( ! current_user_can( 'install_plugins' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_update', __( 'Sorry, you cannot manage plugins.', 'woocommerce-admin' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_update', __( 'Sorry, you cannot manage plugins.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 		return true;
 	}
@@ -245,7 +245,7 @@ class Plugins extends \WC_REST_Data_Controller {
 		$plugins = explode( ',', $request['plugins'] );
 
 		if ( empty( $request['plugins'] ) || ! is_array( $plugins ) ) {
-			return new \WP_Error( 'woocommerce_rest_invalid_plugins', __( 'Plugins must be a non-empty array.', 'woocommerce-admin' ), 404 );
+			return new \WP_Error( 'woocommerce_rest_invalid_plugins', __( 'Plugins must be a non-empty array.', 'woocommerce' ), 404 );
 		}
 
 		if ( isset( $request['async'] ) && $request['async'] ) {
@@ -256,7 +256,7 @@ class Plugins extends \WC_REST_Data_Controller {
 					'job_id'  => $job_id,
 					'plugins' => $plugins,
 				),
-				'message' => __( 'Plugin installation has been scheduled.', 'woocommerce-admin' ),
+				'message' => __( 'Plugin installation has been scheduled.', 'woocommerce' ),
 			);
 		}
 
@@ -271,8 +271,8 @@ class Plugins extends \WC_REST_Data_Controller {
 			'errors'  => $data['errors'],
 			'success' => count( $data['errors']->errors ) === 0,
 			'message' => count( $data['errors']->errors ) === 0
-				? __( 'Plugins were successfully installed.', 'woocommerce-admin' )
-				: __( 'There was a problem installing some of the requested plugins.', 'woocommerce-admin' ),
+				? __( 'Plugins were successfully installed.', 'woocommerce' )
+				: __( 'There was a problem installing some of the requested plugins.', 'woocommerce' ),
 		);
 	}
 
@@ -340,7 +340,7 @@ class Plugins extends \WC_REST_Data_Controller {
 		$plugins = explode( ',', $request['plugins'] );
 
 		if ( empty( $request['plugins'] ) || ! is_array( $plugins ) ) {
-			return new \WP_Error( 'woocommerce_rest_invalid_plugins', __( 'Plugins must be a non-empty array.', 'woocommerce-admin' ), 404 );
+			return new \WP_Error( 'woocommerce_rest_invalid_plugins', __( 'Plugins must be a non-empty array.', 'woocommerce' ), 404 );
 		}
 
 		if ( isset( $request['async'] ) && $request['async'] ) {
@@ -351,7 +351,7 @@ class Plugins extends \WC_REST_Data_Controller {
 					'job_id'  => $job_id,
 					'plugins' => $plugins,
 				),
-				'message' => __( 'Plugin activation has been scheduled.', 'woocommerce-admin' ),
+				'message' => __( 'Plugin activation has been scheduled.', 'woocommerce' ),
 			);
 		}
 
@@ -365,8 +365,8 @@ class Plugins extends \WC_REST_Data_Controller {
 			'errors'  => $data['errors'],
 			'success' => count( $data['errors']->errors ) === 0,
 			'message' => count( $data['errors']->errors ) === 0
-				? __( 'Plugins were successfully activated.', 'woocommerce-admin' )
-				: __( 'There was a problem activating some of the requested plugins.', 'woocommerce-admin' ),
+				? __( 'Plugins were successfully activated.', 'woocommerce' )
+				: __( 'There was a problem activating some of the requested plugins.', 'woocommerce' ),
 		) );
 	}
 
@@ -400,7 +400,7 @@ class Plugins extends \WC_REST_Data_Controller {
 	 */
 	public function connect_jetpack( $request ) {
 		if ( ! class_exists( '\Jetpack' ) ) {
-			return new \WP_Error( 'woocommerce_rest_jetpack_not_active', __( 'Jetpack is not installed or active.', 'woocommerce-admin' ), 404 );
+			return new \WP_Error( 'woocommerce_rest_jetpack_not_active', __( 'Jetpack is not installed or active.', 'woocommerce' ), 404 );
 		}
 
 		$redirect_url = apply_filters( 'woocommerce_admin_onboarding_jetpack_connect_redirect_url', esc_url_raw( $request['redirect_url'] ) );
@@ -411,7 +411,7 @@ class Plugins extends \WC_REST_Data_Controller {
 
 		return( array(
 			'slug'          => 'jetpack',
-			'name'          => __( 'Jetpack', 'woocommerce-admin' ),
+			'name'          => __( 'Jetpack', 'woocommerce' ),
 			'connectAction' => $connect_url,
 		) );
 	}
@@ -424,7 +424,7 @@ class Plugins extends \WC_REST_Data_Controller {
 	public function request_wccom_connect() {
 		include_once WC_ABSPATH . 'includes/admin/helper/class-wc-helper-api.php';
 		if ( ! class_exists( 'WC_Helper_API' ) ) {
-			return new \WP_Error( 'woocommerce_rest_helper_not_active', __( 'There was an error loading the WooCommerce.com Helper API.', 'woocommerce-admin' ), 404 );
+			return new \WP_Error( 'woocommerce_rest_helper_not_active', __( 'There was an error loading the WooCommerce.com Helper API.', 'woocommerce' ), 404 );
 		}
 
 		$redirect_uri = wc_admin_url( '&task=connect&wccom-connected=1' );
@@ -441,12 +441,12 @@ class Plugins extends \WC_REST_Data_Controller {
 
 		$code = wp_remote_retrieve_response_code( $request );
 		if ( 200 !== $code ) {
-			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to WooCommerce.com. Please try again.', 'woocommerce-admin' ), 500 );
+			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to WooCommerce.com. Please try again.', 'woocommerce' ), 500 );
 		}
 
 		$secret = json_decode( wp_remote_retrieve_body( $request ) );
 		if ( empty( $secret ) ) {
-			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to WooCommerce.com. Please try again.', 'woocommerce-admin' ), 500 );
+			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to WooCommerce.com. Please try again.', 'woocommerce' ), 500 );
 		}
 
 		do_action( 'woocommerce_helper_connect_start' );
@@ -487,7 +487,7 @@ class Plugins extends \WC_REST_Data_Controller {
 		include_once WC_ABSPATH . 'includes/admin/helper/class-wc-helper-updater.php';
 		include_once WC_ABSPATH . 'includes/admin/helper/class-wc-helper-options.php';
 		if ( ! class_exists( 'WC_Helper_API' ) ) {
-			return new \WP_Error( 'woocommerce_rest_helper_not_active', __( 'There was an error loading the WooCommerce.com Helper API.', 'woocommerce-admin' ), 404 );
+			return new \WP_Error( 'woocommerce_rest_helper_not_active', __( 'There was an error loading the WooCommerce.com Helper API.', 'woocommerce' ), 404 );
 		}
 
 		// Obtain an access token.
@@ -503,12 +503,12 @@ class Plugins extends \WC_REST_Data_Controller {
 
 		$code = wp_remote_retrieve_response_code( $request );
 		if ( 200 !== $code ) {
-			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to WooCommerce.com. Please try again.', 'woocommerce-admin' ), 500 );
+			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to WooCommerce.com. Please try again.', 'woocommerce' ), 500 );
 		}
 
 		$access_token = json_decode( wp_remote_retrieve_body( $request ), true );
 		if ( ! $access_token ) {
-			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to WooCommerce.com. Please try again.', 'woocommerce-admin' ), 500 );
+			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to WooCommerce.com. Please try again.', 'woocommerce' ), 500 );
 		}
 
 		\WC_Helper_Options::update(
@@ -524,7 +524,7 @@ class Plugins extends \WC_REST_Data_Controller {
 
 		if ( ! \WC_Helper::_flush_authentication_cache() ) {
 			\WC_Helper_Options::update( 'auth', array() );
-			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to WooCommerce.com. Please try again.', 'woocommerce-admin' ), 500 );
+			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to WooCommerce.com. Please try again.', 'woocommerce' ), 500 );
 		}
 
 		delete_transient( '_woocommerce_helper_subscriptions' );
@@ -545,7 +545,7 @@ class Plugins extends \WC_REST_Data_Controller {
 	 */
 	public function connect_square() {
 		if ( ! class_exists( '\WooCommerce\Square\Handlers\Connection' ) ) {
-			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to Square.', 'woocommerce-admin' ), 500 );
+			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to Square.', 'woocommerce' ), 500 );
 		}
 
 		if ( 'US' === WC()->countries->get_base_country() ) {
@@ -597,7 +597,7 @@ class Plugins extends \WC_REST_Data_Controller {
 	 */
 	public function connect_wcpay() {
 		if ( ! class_exists( 'WC_Payments_Account' ) ) {
-			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error communicating with the WooCommerce Payments plugin.', 'woocommerce-admin' ), 500 );
+			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error communicating with the WooCommerce Payments plugin.', 'woocommerce' ), 500 );
 		}
 
 		$connect_url = add_query_arg(
@@ -625,19 +625,19 @@ class Plugins extends \WC_REST_Data_Controller {
 			'type'       => 'object',
 			'properties' => array(
 				'slug'   => array(
-					'description' => __( 'Plugin slug.', 'woocommerce-admin' ),
+					'description' => __( 'Plugin slug.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'name'   => array(
-					'description' => __( 'Plugin name.', 'woocommerce-admin' ),
+					'description' => __( 'Plugin name.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'status' => array(
-					'description' => __( 'Plugin status.', 'woocommerce-admin' ),
+					'description' => __( 'Plugin status.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -657,7 +657,7 @@ class Plugins extends \WC_REST_Data_Controller {
 		$schema = $this->get_item_schema();
 		unset( $schema['properties']['status'] );
 		$schema['properties']['connectAction'] = array(
-			'description' => __( 'Action that should be completed to connect Jetpack.', 'woocommerce-admin' ),
+			'description' => __( 'Action that should be completed to connect Jetpack.', 'woocommerce' ),
 			'type'        => 'string',
 			'context'     => array( 'view', 'edit' ),
 			'readonly'    => true,

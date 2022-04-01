@@ -71,8 +71,8 @@ class Coupons {
 
 		add_submenu_page(
 			'woocommerce',
-			__( 'Coupons', 'woocommerce-admin' ),
-			__( 'Coupons', 'woocommerce-admin' ),
+			__( 'Coupons', 'woocommerce' ),
+			__( 'Coupons', 'woocommerce' ),
 			'manage_options',
 			'coupons-moved',
 			[ $this, 'coupon_menu_moved' ]

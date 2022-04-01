@@ -23,7 +23,7 @@ module.exports = function( grunt ) {
 
 		checktextdomain: {
 			options: {
-				text_domain: 'woocommerce-admin',
+				text_domain: 'woocommerce',
 				keywords: [
 					'__:1,2d',
 					'_e:1,2d',

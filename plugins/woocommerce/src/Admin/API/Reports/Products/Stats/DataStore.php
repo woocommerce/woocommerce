@@ -183,7 +183,7 @@ class DataStore extends ProductsDataStore implements DataStoreInterface {
 			$totals[0]['segments'] = $segmenter->get_totals_segments( $totals_query, $table_name );
 
 			if ( null === $totals ) {
-				return new \WP_Error( 'woocommerce_analytics_products_stats_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce-admin' ) );
+				return new \WP_Error( 'woocommerce_analytics_products_stats_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce' ) );
 			}
 
 			$this->interval_query->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
@@ -199,7 +199,7 @@ class DataStore extends ProductsDataStore implements DataStoreInterface {
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
 			if ( null === $intervals ) {
-				return new \WP_Error( 'woocommerce_analytics_products_stats_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce-admin' ) );
+				return new \WP_Error( 'woocommerce_analytics_products_stats_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce' ) );
 			}
 
 			$totals = (object) $this->cast_numbers( $totals[0] );

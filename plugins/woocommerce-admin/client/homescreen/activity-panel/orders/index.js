@@ -49,10 +49,7 @@ const renderEmptyCard = () => {
 					🎉
 				</span>
 				<H id="woocommerce-order-empty-message">
-					{ __(
-						'You’ve fulfilled all your orders',
-						'woocommerce-admin'
-					) }
+					{ __( 'You’ve fulfilled all your orders', 'woocommerce' ) }
 				</H>
 			</ActivityCard>
 			<Link
@@ -61,7 +58,7 @@ const renderEmptyCard = () => {
 				className="woocommerce-layout__activity-panel-outbound-link woocommerce-layout__activity-panel-empty"
 				type="wp-admin"
 			>
-				{ __( 'Manage all orders', 'woocommerce-admin' ) }
+				{ __( 'Manage all orders', 'woocommerce' ) }
 			</Link>
 		</>
 	);
@@ -104,7 +101,7 @@ function renderOrders( orders ) {
 					mixedString: sprintf(
 						__(
 							'{{orderLink}}Order #%(orderNumber)s{{/orderLink}} %(customerString)s',
-							'woocommerce-admin'
+							'woocommerce'
 						),
 						{
 							orderNumber,
@@ -178,7 +175,7 @@ function renderOrders( orders ) {
 									'%d product',
 									'%d products',
 									productsCount,
-									'woocommerce-admin'
+									'woocommerce'
 								),
 								productsCount
 							) }
@@ -203,7 +200,7 @@ function renderOrders( orders ) {
 				onClick={ () => recordOrderEvent( 'orders_manage' ) }
 				type="wp-admin"
 			>
-				{ __( 'Manage all orders', 'woocommerce-admin' ) }
+				{ __( 'Manage all orders', 'woocommerce' ) }
 			</Link>
 		</>
 	);
@@ -278,9 +275,9 @@ function OrdersPanel( { unreadOrdersCount, orderStatuses } ) {
 					title={ __(
 						"You currently don't have any actionable statuses. " +
 							'To display orders here, select orders that require further review in settings.',
-						'woocommerce-admin'
+						'woocommerce'
 					) }
-					actionLabel={ __( 'Settings', 'woocommerce-admin' ) }
+					actionLabel={ __( 'Settings', 'woocommerce' ) }
 					actionURL={ getAdminLink(
 						'admin.php?page=wc-admin&path=/analytics/settings'
 					) }
@@ -290,9 +287,9 @@ function OrdersPanel( { unreadOrdersCount, orderStatuses } ) {
 
 		const title = __(
 			'There was an error getting your orders. Please try again.',
-			'woocommerce-admin'
+			'woocommerce'
 		);
-		const actionLabel = __( 'Reload', 'woocommerce-admin' );
+		const actionLabel = __( 'Reload', 'woocommerce' );
 		const actionCallback = () => {
 			// @todo Add tracking for how often an error is displayed, and the reload action is clicked.
 			window.location.reload();

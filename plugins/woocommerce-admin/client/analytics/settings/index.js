@@ -35,7 +35,7 @@ const Settings = ( { createNotice, query } ) => {
 			if ( isDirty ) {
 				event.returnValue = __(
 					'You have unsaved changes. If you proceed, they will be lost.',
-					'woocommerce-admin'
+					'woocommerce'
 				);
 				return event.returnValue;
 			}
@@ -56,7 +56,7 @@ const Settings = ( { createNotice, query } ) => {
 					'success',
 					__(
 						'Your settings have been successfully saved.',
-						'woocommerce-admin'
+						'woocommerce'
 					)
 				);
 			} else {
@@ -64,7 +64,7 @@ const Settings = ( { createNotice, query } ) => {
 					'error',
 					__(
 						'There was an error saving your settings. Please try again.',
-						'woocommerce-admin'
+						'woocommerce'
 					)
 				);
 			}
@@ -78,7 +78,7 @@ const Settings = ( { createNotice, query } ) => {
 			window.confirm(
 				__(
 					'Are you sure you want to reset all settings to default values?',
-					'woocommerce-admin'
+					'woocommerce'
 				)
 			)
 		) {
@@ -130,7 +130,7 @@ const Settings = ( { createNotice, query } ) => {
 	return (
 		<Fragment>
 			<SectionHeader
-				title={ __( 'Analytics settings', 'woocommerce-admin' ) }
+				title={ __( 'Analytics settings', 'woocommerce' ) }
 			/>
 			<div className="woocommerce-settings__wrapper">
 				{ Object.keys( config ).map( ( setting ) => (
@@ -144,14 +144,14 @@ const Settings = ( { createNotice, query } ) => {
 				) ) }
 				<div className="woocommerce-settings__actions">
 					<Button isSecondary onClick={ resetDefaults }>
-						{ __( 'Reset defaults', 'woocommerce-admin' ) }
+						{ __( 'Reset defaults', 'woocommerce' ) }
 					</Button>
 					<Button
 						isPrimary
 						isBusy={ isRequesting }
 						onClick={ saveChanges }
 					>
-						{ __( 'Save settings', 'woocommerce-admin' ) }
+						{ __( 'Save settings', 'woocommerce' ) }
 					</Button>
 				</div>
 			</div>

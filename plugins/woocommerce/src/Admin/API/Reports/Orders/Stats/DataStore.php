@@ -332,7 +332,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				ARRAY_A
 			); // phpcs:ignore cache ok, DB call ok, unprepared SQL ok.
 			if ( null === $totals ) {
-				return new \WP_Error( 'woocommerce_analytics_revenue_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce-admin' ) );
+				return new \WP_Error( 'woocommerce_analytics_revenue_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce' ) );
 			}
 
 			// @todo Remove these assignements when refactoring segmenter classes to use query objects.
@@ -385,7 +385,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			); // phpcs:ignore cache ok, DB call ok, unprepared SQL ok.
 
 			if ( null === $intervals ) {
-				return new \WP_Error( 'woocommerce_analytics_revenue_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce-admin' ) );
+				return new \WP_Error( 'woocommerce_analytics_revenue_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce' ) );
 			}
 
 			if ( isset( $intervals[0] ) ) {

@@ -20,7 +20,7 @@ class TaxesReport extends Component {
 		const { query } = this.props;
 		const isCompareTaxView = query.filter === 'compare-taxes';
 		const mode = isCompareTaxView ? 'item-comparison' : 'time-comparison';
-		const itemsLabel = __( '%d taxes', 'woocommerce-admin' );
+		const itemsLabel = __( '%d taxes', 'woocommerce' );
 
 		return {
 			itemsLabel,

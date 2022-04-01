@@ -198,7 +198,7 @@ class PageController {
 			}
 		}
 
-		$woocommerce_breadcrumb = array( 'admin.php?page=' . self::PAGE_ROOT, __( 'WooCommerce', 'woocommerce-admin' ) );
+		$woocommerce_breadcrumb = array( 'admin.php?page=' . self::PAGE_ROOT, __( 'WooCommerce', 'woocommerce' ) );
 
 		array_unshift( $breadcrumbs, $woocommerce_breadcrumb );
 
@@ -220,7 +220,7 @@ class PageController {
 		// If 'current_screen' hasn't fired yet, the current page calculation
 		// will fail which causes `false` to be returned for all subsquent calls.
 		if ( ! did_action( 'current_screen' ) ) {
-			_doing_it_wrong( __FUNCTION__, esc_html__( 'Current page retrieval should be called on or after the `current_screen` hook.', 'woocommerce-admin' ), '0.16.0' );
+			_doing_it_wrong( __FUNCTION__, esc_html__( 'Current page retrieval should be called on or after the `current_screen` hook.', 'woocommerce' ), '0.16.0' );
 		}
 
 		if ( is_null( $this->current_page ) ) {
@@ -507,7 +507,7 @@ class PageController {
 	public function register_store_details_page() {
 		wc_admin_register_page(
 			array(
-				'title'  => __( 'Setup Wizard', 'woocommerce-admin' ),
+				'title'  => __( 'Setup Wizard', 'woocommerce' ),
 				'parent' => '',
 				'path'   => '/setup-wizard',
 			)

@@ -25,7 +25,7 @@ export const advancedFilters = applyFilters(
 		title: _x(
 			'Products Match {{select /}} Filters',
 			'A sentence describing filters for Products. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ',
-			'woocommerce-admin'
+			'woocommerce'
 		),
 	}
 );
@@ -42,36 +42,36 @@ export const advancedFilters = applyFilters(
  */
 export const filters = applyFilters( STOCK_REPORT_FILTERS_FILTER, [
 	{
-		label: __( 'Show', 'woocommerce-admin' ),
+		label: __( 'Show', 'woocommerce' ),
 		staticParams: [ 'paged', 'per_page' ],
 		param: 'type',
 		showFilters: () => true,
 		filters: [
-			{ label: __( 'All products', 'woocommerce-admin' ), value: 'all' },
+			{ label: __( 'All products', 'woocommerce' ), value: 'all' },
 			{
-				label: __( 'Out of stock', 'woocommerce-admin' ),
+				label: __( 'Out of stock', 'woocommerce' ),
 				value: 'outofstock',
 			},
 			{
-				label: __( 'Low stock', 'woocommerce-admin' ),
+				label: __( 'Low stock', 'woocommerce' ),
 				value: 'lowstock',
 			},
-			{ label: __( 'In stock', 'woocommerce-admin' ), value: 'instock' },
+			{ label: __( 'In stock', 'woocommerce' ), value: 'instock' },
 			{
-				label: __( 'On backorder', 'woocommerce-admin' ),
+				label: __( 'On backorder', 'woocommerce' ),
 				value: 'onbackorder',
 			},
 		],
 	},
 	{
-		label: __( 'Filter by', 'woocommerce-admin' ),
+		label: __( 'Filter by', 'woocommerce' ),
 		staticParams: [ 'paged', 'per_page' ],
 		param: 'filter',
 		showFilters: () => Object.keys( advancedFilters.filters ).length,
 		filters: [
-			{ label: __( 'All Products', 'woocommerce-admin' ), value: 'all' },
+			{ label: __( 'All Products', 'woocommerce' ), value: 'all' },
 			{
-				label: __( 'Advanced Filters', 'woocommerce-admin' ),
+				label: __( 'Advanced Filters', 'woocommerce' ),
 				value: 'advanced',
 			},
 		],

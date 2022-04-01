@@ -47,10 +47,10 @@ class InstallJPAndWCSPlugins {
 	 * @return Note
 	 */
 	public static function get_note() {
-		$content = __( 'We noticed that there was a problem during the Jetpack and WooCommerce Shipping & Tax install. Please try again and enjoy all the advantages of having the plugins connected to your store! Sorry for the inconvenience. The "Jetpack" and "WooCommerce Shipping & Tax" plugins will be installed & activated for free.', 'woocommerce-admin' );
+		$content = __( 'We noticed that there was a problem during the Jetpack and WooCommerce Shipping & Tax install. Please try again and enjoy all the advantages of having the plugins connected to your store! Sorry for the inconvenience. The "Jetpack" and "WooCommerce Shipping & Tax" plugins will be installed & activated for free.', 'woocommerce' );
 
 		$note = new Note();
-		$note->set_title( __( 'Uh oh... There was a problem during the Jetpack and WooCommerce Shipping & Tax install. Please try again.', 'woocommerce-admin' ) );
+		$note->set_title( __( 'Uh oh... There was a problem during the Jetpack and WooCommerce Shipping & Tax install. Please try again.', 'woocommerce' ) );
 		$note->set_content( $content );
 		$note->set_content_data( (object) array() );
 		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
@@ -58,7 +58,7 @@ class InstallJPAndWCSPlugins {
 		$note->set_source( 'woocommerce-admin' );
 		$note->add_action(
 			'install-jp-and-wcs-plugins',
-			__( 'Install plugins', 'woocommerce-admin' ),
+			__( 'Install plugins', 'woocommerce' ),
 			false,
 			Note::E_WC_ADMIN_NOTE_ACTIONED
 		);

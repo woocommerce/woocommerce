@@ -34,10 +34,7 @@ class InstalledExtensions extends Component {
 			return null;
 		}
 
-		const title = __(
-			'Installed marketing extensions',
-			'woocommerce-admin'
-		);
+		const title = __( 'Installed marketing extensions', 'woocommerce' );
 
 		return (
 			<Card className="woocommerce-marketing-installed-extensions-card">

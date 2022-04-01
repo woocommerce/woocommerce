@@ -27,67 +27,67 @@ const charts = {
 
 const defaultCharts = [
 	{
-		label: __( 'Total sales', 'woocommerce-admin' ),
+		label: __( 'Total sales', 'woocommerce' ),
 		report: 'revenue',
 		key: 'total_sales',
 	},
 	{
-		label: __( 'Net sales', 'woocommerce-admin' ),
+		label: __( 'Net sales', 'woocommerce' ),
 		report: 'revenue',
 		key: 'net_revenue',
 	},
 	{
-		label: __( 'Orders', 'woocommerce-admin' ),
+		label: __( 'Orders', 'woocommerce' ),
 		report: 'orders',
 		key: 'orders_count',
 	},
 	{
-		label: __( 'Average order value', 'woocommerce-admin' ),
+		label: __( 'Average order value', 'woocommerce' ),
 		report: 'orders',
 		key: 'avg_order_value',
 	},
 	{
-		label: __( 'Items sold', 'woocommerce-admin' ),
+		label: __( 'Items sold', 'woocommerce' ),
 		report: 'products',
 		key: 'items_sold',
 	},
 	{
-		label: __( 'Returns', 'woocommerce-admin' ),
+		label: __( 'Returns', 'woocommerce' ),
 		report: 'revenue',
 		key: 'refunds',
 	},
 	{
-		label: __( 'Discounted orders', 'woocommerce-admin' ),
+		label: __( 'Discounted orders', 'woocommerce' ),
 		report: 'coupons',
 		key: 'orders_count',
 	},
 	{
-		label: __( 'Gross discounted', 'woocommerce-admin' ),
+		label: __( 'Gross discounted', 'woocommerce' ),
 		report: 'coupons',
 		key: 'amount',
 	},
 	{
-		label: __( 'Total tax', 'woocommerce-admin' ),
+		label: __( 'Total tax', 'woocommerce' ),
 		report: 'taxes',
 		key: 'total_tax',
 	},
 	{
-		label: __( 'Order tax', 'woocommerce-admin' ),
+		label: __( 'Order tax', 'woocommerce' ),
 		report: 'taxes',
 		key: 'order_tax',
 	},
 	{
-		label: __( 'Shipping tax', 'woocommerce-admin' ),
+		label: __( 'Shipping tax', 'woocommerce' ),
 		report: 'taxes',
 		key: 'shipping_tax',
 	},
 	{
-		label: __( 'Shipping', 'woocommerce-admin' ),
+		label: __( 'Shipping', 'woocommerce' ),
 		report: 'revenue',
 		key: 'shipping',
 	},
 	{
-		label: __( 'Downloads', 'woocommerce-admin' ),
+		label: __( 'Downloads', 'woocommerce' ),
 		report: 'downloads',
 		key: 'download_count',
 	},

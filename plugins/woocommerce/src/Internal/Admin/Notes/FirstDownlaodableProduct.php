@@ -49,11 +49,11 @@ class FirstDownlaodableProduct {
 		}
 
 		$note = new Note();
-		$note->set_title( __( 'Learn more about digital/downloadable products', 'woocommerce-admin' ) );
+		$note->set_title( __( 'Learn more about digital/downloadable products', 'woocommerce' ) );
 		$note->set_content(
 			__(
 				'Congrats on adding your first digital product! You can learn more about how to handle digital or downloadable products in our documentation.',
-				'woocommerce-admin'
+				'woocommerce'
 			)
 		);
 		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
@@ -62,7 +62,7 @@ class FirstDownlaodableProduct {
 		$note->set_source( 'woocommerce-admin' );
 		$note->add_action(
 			'first-downloadable-product-handling',
-			__( 'Learn more', 'woocommerce-admin' ),
+			__( 'Learn more', 'woocommerce' ),
 			'https://woocommerce.com/document/digital-downloadable-product-handling/?utm_source=inbox&utm_medium=product'
 		);
 

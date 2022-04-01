@@ -36,21 +36,21 @@ const { addCesSurveyForAnalytics } = dispatch( CES_STORE_KEY );
 export const charts = applyFilters( PRODUCTS_REPORT_CHARTS_FILTER, [
 	{
 		key: 'items_sold',
-		label: __( 'Items sold', 'woocommerce-admin' ),
+		label: __( 'Items sold', 'woocommerce' ),
 		order: 'desc',
 		orderby: 'items_sold',
 		type: 'number',
 	},
 	{
 		key: 'net_revenue',
-		label: __( 'Net sales', 'woocommerce-admin' ),
+		label: __( 'Net sales', 'woocommerce' ),
 		order: 'desc',
 		orderby: 'net_revenue',
 		type: 'currency',
 	},
 	{
 		key: 'orders_count',
-		label: __( 'Orders', 'woocommerce-admin' ),
+		label: __( 'Orders', 'woocommerce' ),
 		order: 'desc',
 		orderby: 'orders_count',
 		type: 'number',
@@ -58,14 +58,14 @@ export const charts = applyFilters( PRODUCTS_REPORT_CHARTS_FILTER, [
 ] );
 
 const filterConfig = {
-	label: __( 'Show', 'woocommerce-admin' ),
+	label: __( 'Show', 'woocommerce' ),
 	staticParams: [ 'chartType', 'paged', 'per_page' ],
 	param: 'filter',
 	showFilters: () => true,
 	filters: [
-		{ label: __( 'All products', 'woocommerce-admin' ), value: 'all' },
+		{ label: __( 'All products', 'woocommerce' ), value: 'all' },
 		{
-			label: __( 'Single product', 'woocommerce-admin' ),
+			label: __( 'Single product', 'woocommerce' ),
 			value: 'select_product',
 			chartMode: 'item-comparison',
 			subFilters: [
@@ -81,16 +81,16 @@ const filterConfig = {
 						labels: {
 							placeholder: __(
 								'Type to search for a product',
-								'woocommerce-admin'
+								'woocommerce'
 							),
-							button: __( 'Single product', 'woocommerce-admin' ),
+							button: __( 'Single product', 'woocommerce' ),
 						},
 					},
 				},
 			],
 		},
 		{
-			label: __( 'Comparison', 'woocommerce-admin' ),
+			label: __( 'Comparison', 'woocommerce' ),
 			value: 'compare-products',
 			chartMode: 'item-comparison',
 			settings: {
@@ -100,14 +100,14 @@ const filterConfig = {
 				labels: {
 					helpText: __(
 						'Check at least two products below to compare',
-						'woocommerce-admin'
+						'woocommerce'
 					),
 					placeholder: __(
 						'Search for products to compare',
-						'woocommerce-admin'
+						'woocommerce'
 					),
-					title: __( 'Compare Products', 'woocommerce-admin' ),
-					update: __( 'Compare', 'woocommerce-admin' ),
+					title: __( 'Compare Products', 'woocommerce' ),
+					update: __( 'Compare', 'woocommerce' ),
 				},
 				onClick: addCesSurveyForAnalytics,
 			},
@@ -124,12 +124,12 @@ const variationsConfig = {
 	param: 'filter-variations',
 	filters: [
 		{
-			label: __( 'All variations', 'woocommerce-admin' ),
+			label: __( 'All variations', 'woocommerce' ),
 			chartMode: 'item-comparison',
 			value: 'all',
 		},
 		{
-			label: __( 'Single variation', 'woocommerce-admin' ),
+			label: __( 'Single variation', 'woocommerce' ),
 			value: 'select_variation',
 			subFilters: [
 				{
@@ -143,19 +143,16 @@ const variationsConfig = {
 						labels: {
 							placeholder: __(
 								'Type to search for a variation',
-								'woocommerce-admin'
+								'woocommerce'
 							),
-							button: __(
-								'Single variation',
-								'woocommerce-admin'
-							),
+							button: __( 'Single variation', 'woocommerce' ),
 						},
 					},
 				},
 			],
 		},
 		{
-			label: __( 'Comparison', 'woocommerce-admin' ),
+			label: __( 'Comparison', 'woocommerce' ),
 			chartMode: 'item-comparison',
 			value: 'compare-variations',
 			settings: {
@@ -165,14 +162,14 @@ const variationsConfig = {
 				labels: {
 					helpText: __(
 						'Check at least two variations below to compare',
-						'woocommerce-admin'
+						'woocommerce'
 					),
 					placeholder: __(
 						'Search for variations to compare',
-						'woocommerce-admin'
+						'woocommerce'
 					),
-					title: __( 'Compare Variations', 'woocommerce-admin' ),
-					update: __( 'Compare', 'woocommerce-admin' ),
+					title: __( 'Compare Variations', 'woocommerce' ),
+					update: __( 'Compare', 'woocommerce' ),
 				},
 			},
 		},
@@ -194,18 +191,18 @@ export const advancedFilters = applyFilters(
 		title: _x(
 			'Products Match {{select /}} Filters',
 			'A sentence describing filters for Products. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ',
-			'woocommerce-admin'
+			'woocommerce'
 		),
 	}
 );
 
 if ( Object.keys( advancedFilters.filters ).length ) {
 	filterConfig.filters.push( {
-		label: __( 'Advanced Filters', 'woocommerce-admin' ),
+		label: __( 'Advanced Filters', 'woocommerce' ),
 		value: 'advanced',
 	} );
 	variationsConfig.filters.push( {
-		label: __( 'Advanced Filters', 'woocommerce-admin' ),
+		label: __( 'Advanced Filters', 'woocommerce' ),
 		value: 'advanced',
 	} );
 }

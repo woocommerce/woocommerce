@@ -10,64 +10,49 @@ export const PAYPAL_NAMESPACE = '/wc-paypal/v1';
  * Plugin slugs and names as key/value pairs.
  */
 export const pluginNames = {
-	'facebook-for-woocommerce': __(
-		'Facebook for WooCommerce',
-		'woocommerce-admin'
-	),
-	jetpack: __( 'Jetpack', 'woocommerce-admin' ),
+	'facebook-for-woocommerce': __( 'Facebook for WooCommerce', 'woocommerce' ),
+	jetpack: __( 'Jetpack', 'woocommerce' ),
 	'klarna-checkout-for-woocommerce': __(
 		'Klarna Checkout for WooCommerce',
-		'woocommerce-admin'
+		'woocommerce'
 	),
 	'klarna-payments-for-woocommerce': __(
 		'Klarna Payments for WooCommerce',
-		'woocommerce-admin'
+		'woocommerce'
 	),
 	'mailchimp-for-woocommerce': __(
 		'Mailchimp for WooCommerce',
-		'woocommerce-admin'
+		'woocommerce'
 	),
 	'creative-mail-by-constant-contact': __(
 		'Creative Mail for WooCommerce',
-		'woocommerce-admin'
+		'woocommerce'
 	),
 	'woocommerce-gateway-paypal-express-checkout': __(
 		'WooCommerce PayPal',
-		'woocommerce-admin'
+		'woocommerce'
 	),
-	'woocommerce-gateway-stripe': __(
-		'WooCommerce Stripe',
-		'woocommerce-admin'
-	),
-	'woocommerce-payfast-gateway': __(
-		'WooCommerce PayFast',
-		'woocommerce-admin'
-	),
-	'woocommerce-payments': __( 'WooCommerce Payments', 'woocommerce-admin' ),
-	'woocommerce-services': __(
-		'WooCommerce Shipping & Tax',
-		'woocommerce-admin'
-	),
+	'woocommerce-gateway-stripe': __( 'WooCommerce Stripe', 'woocommerce' ),
+	'woocommerce-payfast-gateway': __( 'WooCommerce PayFast', 'woocommerce' ),
+	'woocommerce-payments': __( 'WooCommerce Payments', 'woocommerce' ),
+	'woocommerce-services': __( 'WooCommerce Shipping & Tax', 'woocommerce' ),
 	'woocommerce-services:shipping': __(
 		'WooCommerce Shipping & Tax',
-		'woocommerce-admin'
+		'woocommerce'
 	),
 	'woocommerce-services:tax': __(
 		'WooCommerce Shipping & Tax',
-		'woocommerce-admin'
+		'woocommerce'
 	),
 	'woocommerce-shipstation-integration': __(
 		'WooCommerce ShipStation Gateway',
-		'woocommerce-admin'
+		'woocommerce'
 	),
 	'woocommerce-mercadopago': __(
 		'Mercado Pago payments for WooCommerce',
-		'woocommerce-admin'
+		'woocommerce'
 	),
-	'google-listings-and-ads': __(
-		'Google Listings and Ads',
-		'woocommerce-admin'
-	),
-	'woo-razorpay': __( 'Razorpay', 'woocommerce-admin' ),
-	mailpoet: __( 'MailPoet', 'woocommerce-admin' ),
+	'google-listings-and-ads': __( 'Google Listings and Ads', 'woocommerce' ),
+	'woo-razorpay': __( 'Razorpay', 'woocommerce' ),
+	mailpoet: __( 'MailPoet', 'woocommerce' ),
 };

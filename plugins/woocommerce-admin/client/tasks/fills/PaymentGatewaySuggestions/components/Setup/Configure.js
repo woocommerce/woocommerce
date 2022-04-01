@@ -72,10 +72,7 @@ export const Configure = ( { markConfigured, paymentGateway } ) => {
 						'success',
 						sprintf(
 							/* translators: %s = title of the payment gateway */
-							__(
-								'%s configured successfully',
-								'woocommerce-admin'
-							),
+							__( '%s configured successfully', 'woocommerce' ),
 							title
 						)
 					);
@@ -86,7 +83,7 @@ export const Configure = ( { markConfigured, paymentGateway } ) => {
 					'error',
 					__(
 						'There was a problem saving your payment settings',
-						'woocommerce-admin'
+						'woocommerce'
 					)
 				);
 			} );
@@ -100,7 +97,7 @@ export const Configure = ( { markConfigured, paymentGateway } ) => {
 			fields={ fields }
 			isBusy={ isUpdating }
 			onSubmit={ handleSubmit }
-			submitLabel={ __( 'Proceed', 'woocommerce-admin' ) }
+			submitLabel={ __( 'Proceed', 'woocommerce' ) }
 			validate={ ( values ) => validateFields( values, fields ) }
 		/>
 	);
@@ -133,7 +130,7 @@ export const Configure = ( { markConfigured, paymentGateway } ) => {
 					}
 					href={ connectionUrl }
 				>
-					{ __( 'Connect', 'woocommerce-admin' ) }
+					{ __( 'Connect', 'woocommerce' ) }
 				</Button>
 			</>
 		);
@@ -154,12 +151,12 @@ export const Configure = ( { markConfigured, paymentGateway } ) => {
 				<p>
 					{ __(
 						"You can manage this payment gateway's settings by clicking the button below",
-						'woocommerce-admin'
+						'woocommerce'
 					) }
 				</p>
 			) }
 			<Button isPrimary href={ settingsUrl }>
-				{ __( 'Set up', 'woocommerce-admin' ) }
+				{ __( 'Set up', 'woocommerce' ) }
 			</Button>
 		</>
 	);

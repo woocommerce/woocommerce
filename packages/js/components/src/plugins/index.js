@@ -91,13 +91,10 @@ export class Plugins extends Component {
 						isBusy={ isRequesting }
 						onClick={ this.installAndActivate }
 					>
-						{ __( 'Retry', 'woocommerce-admin' ) }
+						{ __( 'Retry', 'woocommerce' ) }
 					</Button>
 					<Button onClick={ this.skipInstaller }>
-						{ __(
-							'Continue without installing',
-							'woocommerce-admin'
-						) }
+						{ __( 'Continue without installing', 'woocommerce' ) }
 					</Button>
 				</Fragment>
 			);
@@ -115,7 +112,7 @@ export class Plugins extends Component {
 						isBusy={ isRequesting }
 						onClick={ this.skipInstaller }
 					>
-						{ __( 'Continue', 'woocommerce-admin' ) }
+						{ __( 'Continue', 'woocommerce' ) }
 					</Button>
 				</Fragment>
 			);
@@ -128,14 +125,14 @@ export class Plugins extends Component {
 					isPrimary
 					onClick={ this.installAndActivate }
 				>
-					{ __( 'Install & enable', 'woocommerce-admin' ) }
+					{ __( 'Install & enable', 'woocommerce' ) }
 				</Button>
 				<Button isTertiary onClick={ this.skipInstaller }>
-					{ skipText || __( 'No thanks', 'woocommerce-admin' ) }
+					{ skipText || __( 'No thanks', 'woocommerce' ) }
 				</Button>
 				{ onAbort && (
 					<Button isTertiary onClick={ onAbort }>
-						{ abortText || __( 'Abort', 'woocommerce-admin' ) }
+						{ abortText || __( 'Abort', 'woocommerce' ) }
 					</Button>
 				) }
 			</Fragment>

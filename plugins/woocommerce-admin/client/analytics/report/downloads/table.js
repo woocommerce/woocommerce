@@ -32,7 +32,7 @@ class DownloadsReportTable extends Component {
 	getHeadersContent() {
 		return [
 			{
-				label: __( 'Date', 'woocommerce-admin' ),
+				label: __( 'Date', 'woocommerce' ),
 				key: 'date',
 				defaultSort: true,
 				required: true,
@@ -40,26 +40,26 @@ class DownloadsReportTable extends Component {
 				isSortable: true,
 			},
 			{
-				label: __( 'Product title', 'woocommerce-admin' ),
+				label: __( 'Product title', 'woocommerce' ),
 				key: 'product',
 				isSortable: true,
 				required: true,
 			},
 			{
-				label: __( 'File name', 'woocommerce-admin' ),
+				label: __( 'File name', 'woocommerce' ),
 				key: 'file_name',
 			},
 			{
-				label: __( 'Order #', 'woocommerce-admin' ),
-				screenReaderLabel: __( 'Order Number', 'woocommerce-admin' ),
+				label: __( 'Order #', 'woocommerce' ),
+				screenReaderLabel: __( 'Order Number', 'woocommerce' ),
 				key: 'order_number',
 			},
 			{
-				label: __( 'Username', 'woocommerce-admin' ),
+				label: __( 'Username', 'woocommerce' ),
 				key: 'user_id',
 			},
 			{
-				label: __( 'IP', 'woocommerce-admin' ),
+				label: __( 'IP', 'woocommerce' ),
 				key: 'ip_address',
 			},
 		];
@@ -94,8 +94,8 @@ class DownloadsReportTable extends Component {
 
 			// Handle deleted products.
 			if ( errorCode === 'woocommerce_rest_product_invalid_id' ) {
-				productDisplay = __( '(Deleted)', 'woocommerce-admin' );
-				productValue = __( '(Deleted)', 'woocommerce-admin' );
+				productDisplay = __( '(Deleted)', 'woocommerce' );
+				productValue = __( '(Deleted)', 'woocommerce' );
 			} else {
 				const productURL = getNewPath(
 					persistedQuery,
@@ -169,7 +169,7 @@ class DownloadsReportTable extends Component {
 
 		return [
 			{
-				label: _n( 'day', 'days', days, 'woocommerce-admin' ),
+				label: _n( 'day', 'days', days, 'woocommerce' ),
 				value: formatValue( currency, 'number', days ),
 			},
 			{
@@ -177,7 +177,7 @@ class DownloadsReportTable extends Component {
 					'Download',
 					'Downloads',
 					downloadCount,
-					'woocommerce-admin'
+					'woocommerce'
 				),
 				value: formatValue( currency, 'number', downloadCount ),
 			},
@@ -198,7 +198,7 @@ class DownloadsReportTable extends Component {
 				tableQuery={ {
 					_embed: true,
 				} }
-				title={ __( 'Downloads', 'woocommerce-admin' ) }
+				title={ __( 'Downloads', 'woocommerce' ) }
 				columnPrefsKey="downloads_report_columns"
 				filters={ filters }
 				advancedFilters={ advancedFilters }

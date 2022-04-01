@@ -23,7 +23,7 @@ domReady( () => {
 			'href',
 			getAdminLink( 'admin.php?page=wc-admin' )
 		);
-		continueButton.innerText = __( 'Continue setup', 'woocommerce-admin' );
+		continueButton.innerText = __( 'Continue setup', 'woocommerce' );
 
 		actionButtons.appendChild( continueButton );
 	}

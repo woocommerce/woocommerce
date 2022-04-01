@@ -15,9 +15,7 @@ const TaxHeader = ( { task, goToTask } ) => {
 		<div className="woocommerce-task-header__contents-container">
 			<AddTaxRates className="svg-background" />
 			<div className="woocommerce-task-header__contents">
-				<h1>
-					{ __( 'Next up, add your tax rates', 'woocommerce-admin' ) }
-				</h1>
+				<h1>{ __( 'Next up, add your tax rates', 'woocommerce' ) }</h1>
 				<p>{ task.content }</p>
 				<Button
 					isSecondary={ task.isComplete }

@@ -22,7 +22,7 @@ import UnionPay from '../images/cards/unionpay.js';
 export const WCPayAcceptedMethods = () => (
 	<>
 		<Text as="h3" variant="label" weight="600" size="12" lineHeight="16px">
-			{ __( 'Accepted payment methods', 'woocommerce-admin' ) }
+			{ __( 'Accepted payment methods', 'woocommerce' ) }
 		</Text>
 
 		<div className="woocommerce-task-payment-wcpay__accepted">

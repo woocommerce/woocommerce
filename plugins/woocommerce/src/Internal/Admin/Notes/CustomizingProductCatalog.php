@@ -66,15 +66,15 @@ class CustomizingProductCatalog {
 		}
 
 		$note = new Note();
-		$note->set_title( __( 'How to customize your product catalog', 'woocommerce-admin' ) );
-		$note->set_content( __( 'You want your product catalog and images to look great and align with your brand. This guide will give you all the tips you need to get your products looking great in your store.', 'woocommerce-admin' ) );
+		$note->set_title( __( 'How to customize your product catalog', 'woocommerce' ) );
+		$note->set_content( __( 'You want your product catalog and images to look great and align with your brand. This guide will give you all the tips you need to get your products looking great in your store.', 'woocommerce' ) );
 		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_content_data( (object) array() );
 		$note->set_source( 'woocommerce-admin' );
 		$note->add_action(
 			'day-after-first-product',
-			__( 'Learn more', 'woocommerce-admin' ),
+			__( 'Learn more', 'woocommerce' ),
 			'https://woocommerce.com/document/woocommerce-customizer/?utm_source=inbox&utm_medium=product'
 		);
 

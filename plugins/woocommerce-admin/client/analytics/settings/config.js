@@ -31,7 +31,7 @@ const filteredOrderStatuses = Object.keys( ORDER_STATUSES )
 			value: key,
 			label: ORDER_STATUSES[ key ],
 			description: sprintf(
-				__( 'Exclude the %s status from reports', 'woocommerce-admin' ),
+				__( 'Exclude the %s status from reports', 'woocommerce' ),
 				ORDER_STATUSES[ key ]
 			),
 		};
@@ -51,23 +51,20 @@ const orderStatusOptions = [
 	},
 	{
 		key: 'customStatuses',
-		label: __( 'Custom Statuses', 'woocommerce-admin' ),
+		label: __( 'Custom Statuses', 'woocommerce' ),
 		options: filteredOrderStatuses.filter(
 			( status ) => ! DEFAULT_ORDER_STATUSES.includes( status.value )
 		),
 	},
 	{
 		key: 'unregisteredStatuses',
-		label: __( 'Unregistered Statuses', 'woocommerce-admin' ),
+		label: __( 'Unregistered Statuses', 'woocommerce' ),
 		options: Object.keys( unregisteredOrderStatuses ).map( ( key ) => {
 			return {
 				value: key,
 				label: key,
 				description: sprintf(
-					__(
-						'Exclude the %s status from reports',
-						'woocommerce-admin'
-					),
+					__( 'Exclude the %s status from reports', 'woocommerce' ),
 					key
 				),
 			};
@@ -83,14 +80,14 @@ const orderStatusOptions = [
  */
 export const config = applyFilters( SETTINGS_FILTER, {
 	woocommerce_excluded_report_order_statuses: {
-		label: __( 'Excluded statuses:', 'woocommerce-admin' ),
+		label: __( 'Excluded statuses:', 'woocommerce' ),
 		inputType: 'checkboxGroup',
 		options: orderStatusOptions,
 		helpText: interpolateComponents( {
 			mixedString: __(
 				'Orders with these statuses are excluded from the totals in your reports. ' +
 					'The {{strong}}Refunded{{/strong}} status can not be excluded.',
-				'woocommerce-admin'
+				'woocommerce'
 			),
 			components: {
 				strong: <strong />,
@@ -99,25 +96,25 @@ export const config = applyFilters( SETTINGS_FILTER, {
 		defaultValue: [ 'pending', 'cancelled', 'failed' ],
 	},
 	woocommerce_actionable_order_statuses: {
-		label: __( 'Actionable statuses:', 'woocommerce-admin' ),
+		label: __( 'Actionable statuses:', 'woocommerce' ),
 		inputType: 'checkboxGroup',
 		options: orderStatusOptions,
 		helpText: __(
 			'Orders with these statuses require action on behalf of the store admin. ' +
 				'These orders will show up in the Home Screen - Orders task.',
-			'woocommerce-admin'
+			'woocommerce'
 		),
 		defaultValue: DEFAULT_ACTIONABLE_STATUSES,
 	},
 	woocommerce_default_date_range: {
 		name: 'woocommerce_default_date_range',
-		label: __( 'Default date range:', 'woocommerce-admin' ),
+		label: __( 'Default date range:', 'woocommerce' ),
 		inputType: 'component',
 		component: DefaultDate,
 		helpText: __(
 			'Select a default date range. When no range is selected, reports will be viewed by ' +
 				'the default date range.',
-			'woocommerce-admin'
+			'woocommerce'
 		),
 		defaultValue: DEFAULT_DATE_RANGE,
 	},

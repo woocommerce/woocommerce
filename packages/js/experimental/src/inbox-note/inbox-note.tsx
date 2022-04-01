@@ -95,7 +95,7 @@ const InboxNoteCard: React.FC< InboxNoteProps > = ( {
 				className="woocommerce-admin-dismiss-notification"
 				onClick={ () => onDismiss && onDismiss( note ) }
 			>
-				{ __( 'Dismiss', 'woocommerce-admin' ) }
+				{ __( 'Dismiss', 'woocommerce' ) }
 			</Button>
 		);
 	};

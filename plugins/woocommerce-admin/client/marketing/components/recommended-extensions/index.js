@@ -96,10 +96,10 @@ RecommendedExtensions.propTypes = {
 };
 
 RecommendedExtensions.defaultProps = {
-	title: __( 'Recommended extensions', 'woocommerce-admin' ),
+	title: __( 'Recommended extensions', 'woocommerce' ),
 	description: __(
 		'Great marketing requires the right tools. Take your marketing to the next level with our recommended marketing extensions.',
-		'woocommerce-admin'
+		'woocommerce'
 	),
 };
 

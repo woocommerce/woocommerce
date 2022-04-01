@@ -190,7 +190,7 @@ abstract class Task {
 	 * @return string
 	 */
 	public function get_action_label() {
-		return __( "Let's go", 'woocommerce-admin' );
+		return __( "Let's go", 'woocommerce' );
 	}
 
 	/**

@@ -51,15 +51,15 @@ class PerformanceOnMobile {
 
 		$note = new Note();
 
-		$note->set_title( __( 'Track your store performance on mobile', 'woocommerce-admin' ) );
-		$note->set_content( __( 'Monitor your sales and high performing products with the Woo app.', 'woocommerce-admin' ) );
+		$note->set_title( __( 'Track your store performance on mobile', 'woocommerce' ) );
+		$note->set_content( __( 'Monitor your sales and high performing products with the Woo app.', 'woocommerce' ) );
 		$note->set_content_data( (object) array() );
 		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_source( 'woocommerce-admin' );
 		$note->add_action(
 			'learn-more',
-			__( 'Learn more', 'woocommerce-admin' ),
+			__( 'Learn more', 'woocommerce' ),
 			'https://woocommerce.com/mobile/?utm_source=inbox&utm_medium=product'
 		);
 

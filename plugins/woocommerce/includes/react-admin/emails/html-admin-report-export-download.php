@@ -16,7 +16,7 @@ do_action( 'woocommerce_email_header', $email_heading, $email );
 <a href="<?php echo esc_url( $download_url ); ?>">
 	<?php
 		/* translators: %s: report name */
-		echo esc_html( sprintf( __( 'Download your %s Report', 'woocommerce-admin' ), $report_name ) );
+		echo esc_html( sprintf( __( 'Download your %s Report', 'woocommerce' ), $report_name ) );
 	?>
 </a>
 <?php

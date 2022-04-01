@@ -61,13 +61,13 @@ class Purchase extends Task {
 				/* translators: %1$s: list of product names comma separated, %2%s the last product name */
 				__(
 					'Add %s to my store',
-					'woocommerce-admin'
+					'woocommerce'
 				),
 				$products['remaining'][0]
 			)
 			: __(
 				'Add paid extensions to my store',
-				'woocommerce-admin'
+				'woocommerce'
 			);
 	}
 
@@ -86,7 +86,7 @@ class Purchase extends Task {
 		/* translators: %1$s: list of product names comma separated, %2%s the last product name */
 			__(
 				'Good choice! You chose to add %1$s and %2$s to your store.',
-				'woocommerce-admin'
+				'woocommerce'
 			),
 			implode( ', ', array_slice( $products['remaining'], 0, -1 ) ) . ( count( $products['remaining'] ) > 2 ? ',' : '' ),
 			end( $products['remaining'] )
@@ -99,7 +99,7 @@ class Purchase extends Task {
 	 * @return string
 	 */
 	public function get_action_label() {
-		return __( 'Purchase & install now', 'woocommerce-admin' );
+		return __( 'Purchase & install now', 'woocommerce' );
 	}
 
 
@@ -109,7 +109,7 @@ class Purchase extends Task {
 	 * @return string
 	 */
 	public function get_time() {
-		return __( '2 minutes', 'woocommerce-admin' );
+		return __( '2 minutes', 'woocommerce' );
 	}
 
 	/**

@@ -178,10 +178,7 @@ class Table extends Component {
 						{ caption }
 						{ tabIndex === '0' && (
 							<small>
-								{ __(
-									'(scroll to see more)',
-									'woocommerce-admin'
-								) }
+								{ __( '(scroll to see more)', 'woocommerce' ) }
 							</small>
 						) }
 					</caption>
@@ -226,14 +223,14 @@ class Table extends Component {
 										? sprintf(
 												__(
 													'Sort by %s in ascending order',
-													'woocommerce-admin'
+													'woocommerce'
 												),
 												screenReaderLabel || label
 										  )
 										: sprintf(
 												__(
 													'Sort by %s in descending order',
-													'woocommerce-admin'
+													'woocommerce'
 												),
 												screenReaderLabel || label
 										  );
@@ -349,7 +346,7 @@ class Table extends Component {
 								>
 									{ __(
 										'No data to display',
-										'woocommerce-admin'
+										'woocommerce'
 									) }
 								</td>
 							</tr>

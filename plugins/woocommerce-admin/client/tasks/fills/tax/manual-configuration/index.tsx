@@ -42,19 +42,19 @@ export const ManualConfiguration: React.FC< ManualConfigurationProps > = ( {
 	const steps = [
 		{
 			key: 'store_location',
-			label: __( 'Set store location', 'woocommerce-admin' ),
+			label: __( 'Set store location', 'woocommerce' ),
 			description: __(
 				'The address from which your business operates',
-				'woocommerce-admin'
+				'woocommerce'
 			),
 			content: <StoreLocation { ...stepProps } />,
 		},
 		{
 			key: 'manual_configuration',
-			label: __( 'Configure tax rates', 'woocommerce-admin' ),
+			label: __( 'Configure tax rates', 'woocommerce' ),
 			description: __(
 				'Head over to the tax rate settings screen to configure your tax rates',
-				'woocommerce-admin'
+				'woocommerce'
 			),
 			content: <Configure { ...stepProps } />,
 		},

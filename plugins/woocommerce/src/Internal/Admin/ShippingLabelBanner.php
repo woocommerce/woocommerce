@@ -87,7 +87,7 @@ class ShippingLabelBanner {
 		if ( $this->should_show_meta_box() ) {
 			add_meta_box(
 				'woocommerce-admin-print-label',
-				__( 'Shipping Label', 'woocommerce-admin' ),
+				__( 'Shipping Label', 'woocommerce' ),
 				array( $this, 'meta_box' ),
 				null,
 				'normal',

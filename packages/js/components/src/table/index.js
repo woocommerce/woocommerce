@@ -177,15 +177,12 @@ class TableCard extends Component {
 						<EllipsisMenu
 							label={ __(
 								'Choose which values to display',
-								'woocommerce-admin'
+								'woocommerce'
 							) }
 							renderContent={ () => (
 								<Fragment>
 									<MenuTitle>
-										{ __(
-											'Columns:',
-											'woocommerce-admin'
-										) }
+										{ __( 'Columns:', 'woocommerce' ) }
 									</MenuTitle>
 									{ allHeaders.map(
 										( { key, label, required } ) => {
@@ -220,7 +217,7 @@ class TableCard extends Component {
 							<span className="screen-reader-text">
 								{ __(
 									'Your requested data is loading',
-									'woocommerce-admin'
+									'woocommerce'
 								) }
 							</span>
 							<TablePlaceholder

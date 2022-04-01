@@ -101,8 +101,8 @@ class MarketingJetpack {
 	 */
 	public static function get_note() {
 		$note = new Note();
-		$note->set_title( __( 'Protect your WooCommerce Store with Jetpack Backup.', 'woocommerce-admin' ) );
-		$note->set_content( __( 'Store downtime means lost sales. One-click restores get you back online quickly if something goes wrong.', 'woocommerce-admin' ) );
+		$note->set_title( __( 'Protect your WooCommerce Store with Jetpack Backup.', 'woocommerce' ) );
+		$note->set_content( __( 'Store downtime means lost sales. One-click restores get you back online quickly if something goes wrong.', 'woocommerce' ) );
 		$note->set_type( Note::E_WC_ADMIN_NOTE_MARKETING );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_layout( 'thumbnail' );
@@ -113,7 +113,7 @@ class MarketingJetpack {
 		$note->set_source( 'woocommerce-admin-notes' );
 		$note->add_action(
 			'jetpack-backup-woocommerce',
-			__( 'Get backups', 'woocommerce-admin' ),
+			__( 'Get backups', 'woocommerce' ),
 			esc_url( 'https://jetpack.com/upgrade/backup-woocommerce/?utm_source=inbox&utm_medium=automattic_referred&utm_campaign=jp_backup_to_woo' ),
 			Note::E_WC_ADMIN_NOTE_ACTIONED
 		);

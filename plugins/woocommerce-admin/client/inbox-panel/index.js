@@ -33,13 +33,13 @@ import './index.scss';
 const renderEmptyCard = () => (
 	<ActivityCard
 		className="woocommerce-empty-activity-card"
-		title={ __( 'Your inbox is empty', 'woocommerce-admin' ) }
+		title={ __( 'Your inbox is empty', 'woocommerce' ) }
 		icon={ false }
 	>
 		{ __(
 			'As things begin to happen in your store your inbox will start to fill up. ' +
 				"You'll see things like achievements, new feature announcements, extension recommendations and more!",
-			'woocommerce-admin'
+			'woocommerce'
 		) }
 	</ActivityCard>
 );
@@ -97,15 +97,12 @@ const renderNotes = ( {
 				<CardHeader size="medium">
 					<div className="wooocommerce-inbox-card__header">
 						<Text size="20" lineHeight="28px" variant="title.small">
-							{ __( 'Inbox', 'woocommerce-admin' ) }
+							{ __( 'Inbox', 'woocommerce' ) }
 						</Text>
 						<Badge count={ notesArray.length } />
 					</div>
 					<EllipsisMenu
-						label={ __(
-							'Inbox Notes Options',
-							'woocommerce-admin'
-						) }
+						label={ __( 'Inbox Notes Options', 'woocommerce' ) }
 						renderContent={ ( { onToggle } ) => (
 							<div className="woocommerce-inbox-card__section-controls">
 								<Button
@@ -114,7 +111,7 @@ const renderNotes = ( {
 										onToggle();
 									} }
 								>
-									{ __( 'Dismiss all', 'woocommerce-admin' ) }
+									{ __( 'Dismiss all', 'woocommerce' ) }
 								</Button>
 							</div>
 						) }
@@ -247,22 +244,18 @@ const InboxPanel = ( { showHeader = true } ) => {
 		const noteId = note.id;
 		try {
 			removeNote( noteId );
-			createNotice(
-				'success',
-				__( 'Message dismissed', 'woocommerce-admin' ),
-				{
-					actions: [
-						{
-							label: __( 'Undo', 'woocommerce-admin' ),
-							onClick: () => {
-								updateNote( noteId, {
-									is_deleted: 0,
-								} );
-							},
+			createNotice( 'success', __( 'Message dismissed', 'woocommerce' ), {
+				actions: [
+					{
+						label: __( 'Undo', 'woocommerce' ),
+						onClick: () => {
+							updateNote( noteId, {
+								is_deleted: 0,
+							} );
 						},
-					],
-				}
-			);
+					},
+				],
+			} );
 		} catch ( e ) {
 			createNotice(
 				'error',
@@ -270,7 +263,7 @@ const InboxPanel = ( { showHeader = true } ) => {
 					'Message could not be dismissed',
 					'Messages could not be dismissed',
 					1,
-					'woocommerce-admin'
+					'woocommerce'
 				)
 			);
 		}
@@ -279,9 +272,9 @@ const InboxPanel = ( { showHeader = true } ) => {
 	if ( isError ) {
 		const title = __(
 			'There was an error getting your inbox. Please try again.',
-			'woocommerce-admin'
+			'woocommerce'
 		);
-		const actionLabel = __( 'Reload', 'woocommerce-admin' );
+		const actionLabel = __( 'Reload', 'woocommerce' );
 		const actionCallback = () => {
 			// @todo Add tracking for how often an error is displayed, and the reload action is clicked.
 			window.location.reload();

@@ -108,7 +108,7 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 	 */
 	public function import_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'edit' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you cannot edit this resource.', 'woocommerce-admin' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you cannot edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 		return true;
 	}
@@ -185,14 +185,14 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 	public function get_import_collection_params() {
 		$params                  = array();
 		$params['days']          = array(
-			'description'       => __( 'Number of days to import.', 'woocommerce-admin' ),
+			'description'       => __( 'Number of days to import.', 'woocommerce' ),
 			'type'              => 'integer',
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
 			'minimum'           => 0,
 		);
 		$params['skip_existing'] = array(
-			'description'       => __( 'Skip importing existing order data.', 'woocommerce-admin' ),
+			'description'       => __( 'Skip importing existing order data.', 'woocommerce' ),
 			'type'              => 'boolean',
 			'default'           => false,
 			'sanitize_callback' => 'wc_string_to_bool',
@@ -213,13 +213,13 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 			'type'       => 'object',
 			'properties' => array(
 				'status'  => array(
-					'description' => __( 'Regeneration status.', 'woocommerce-admin' ),
+					'description' => __( 'Regeneration status.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'message' => array(
-					'description' => __( 'Regenerate data message.', 'woocommerce-admin' ),
+					'description' => __( 'Regenerate data message.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -241,7 +241,7 @@ class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 
 		$result = array(
 			'status'  => 'success',
-			'message' => __( 'All pending and in-progress import actions have been cancelled.', 'woocommerce-admin' ),
+			'message' => __( 'All pending and in-progress import actions have been cancelled.', 'woocommerce' ),
 		);
 
 		$response = $this->prepare_item_for_response( $result, $request );

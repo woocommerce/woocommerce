@@ -72,7 +72,7 @@ class ThemePreview extends Component {
 							mixedString: sprintf(
 								__(
 									'{{strong}}%s{{/strong}} developed by WooCommerce',
-									'woocommerce-admin'
+									'woocommerce'
 								),
 								title
 							),
@@ -108,7 +108,7 @@ class ThemePreview extends Component {
 						onClick={ () => onChoose( slug, 'preview' ) }
 						isBusy={ isBusy }
 					>
-						{ __( 'Choose', 'woocommerce-admin' ) }
+						{ __( 'Choose', 'woocommerce' ) }
 					</Button>
 				</div>
 				<WebPreview

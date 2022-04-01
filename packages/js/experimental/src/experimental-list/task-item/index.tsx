@@ -69,12 +69,12 @@ const OptionalTaskTooltip: React.FC< {
 	if ( level === 1 && ! completed ) {
 		tooltip = __(
 			'This task is required to keep your store running',
-			'woocommerce-admin'
+			'woocommerce'
 		);
 	} else if ( level === 2 && ! completed ) {
 		tooltip = __(
 			'This task is required to set up your extension',
-			'woocommerce-admin'
+			'woocommerce'
 		);
 	}
 	if ( tooltip === '' ) {
@@ -236,7 +236,7 @@ export const TaskItem: React.FC< TaskItemProps > = ( {
 			</div>
 			{ showEllipsisMenu && (
 				<EllipsisMenu
-					label={ __( 'Task Options', 'woocommerce-admin' ) }
+					label={ __( 'Task Options', 'woocommerce' ) }
 					className="woocommerce-task-list__item-after"
 					onToggle={ ( e: React.MouseEvent | React.KeyboardEvent ) =>
 						e.stopPropagation()
@@ -254,7 +254,7 @@ export const TaskItem: React.FC< TaskItemProps > = ( {
 										onDismiss();
 									} }
 								>
-									{ __( 'Dismiss', 'woocommerce-admin' ) }
+									{ __( 'Dismiss', 'woocommerce' ) }
 								</Button>
 							) }
 							{ onSnooze && ! completed && (
@@ -264,10 +264,7 @@ export const TaskItem: React.FC< TaskItemProps > = ( {
 										onSnooze();
 									} }
 								>
-									{ __(
-										'Remind me later',
-										'woocommerce-admin'
-									) }
+									{ __( 'Remind me later', 'woocommerce' ) }
 								</Button>
 							) }
 							{ onDelete && completed && (
@@ -281,7 +278,7 @@ export const TaskItem: React.FC< TaskItemProps > = ( {
 										onDelete();
 									} }
 								>
-									{ __( 'Delete', 'woocommerce-admin' ) }
+									{ __( 'Delete', 'woocommerce' ) }
 								</Button>
 							) }
 						</div>

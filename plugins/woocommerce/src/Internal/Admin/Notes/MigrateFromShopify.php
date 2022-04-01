@@ -62,15 +62,15 @@ class MigrateFromShopify {
 		}
 
 		$note = new Note();
-		$note->set_title( __( 'Do you want to migrate from Shopify to WooCommerce?', 'woocommerce-admin' ) );
-		$note->set_content( __( 'Changing eCommerce platforms might seem like a big hurdle to overcome, but it is easier than you might think to move your products, customers, and orders to WooCommerce. This article will help you with going through this process.', 'woocommerce-admin' ) );
+		$note->set_title( __( 'Do you want to migrate from Shopify to WooCommerce?', 'woocommerce' ) );
+		$note->set_content( __( 'Changing eCommerce platforms might seem like a big hurdle to overcome, but it is easier than you might think to move your products, customers, and orders to WooCommerce. This article will help you with going through this process.', 'woocommerce' ) );
 		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_content_data( (object) array() );
 		$note->set_source( 'woocommerce-admin' );
 		$note->add_action(
 			'migrate-from-shopify',
-			__( 'Learn more', 'woocommerce-admin' ),
+			__( 'Learn more', 'woocommerce' ),
 			'https://woocommerce.com/posts/migrate-from-shopify-to-woocommerce/?utm_source=inbox&utm_medium=product',
 			Note::E_WC_ADMIN_NOTE_ACTIONED
 		);

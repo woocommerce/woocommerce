@@ -171,7 +171,7 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 						<DisplayOption>
 							<MenuGroup
 								className="woocommerce-layout__homescreen-display-options"
-								label={ __( 'Display', 'woocommerce-admin' ) }
+								label={ __( 'Display', 'woocommerce' ) }
 							>
 								<MenuItem
 									className="woocommerce-layout__homescreen-extension-tasklist-toggle"
@@ -182,7 +182,7 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 								>
 									{ __(
 										'Show things to do next',
-										'woocommerce-admin'
+										'woocommerce'
 									) }
 								</MenuItem>
 							</MenuGroup>

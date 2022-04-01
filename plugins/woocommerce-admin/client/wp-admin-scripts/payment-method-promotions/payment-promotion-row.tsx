@@ -164,7 +164,7 @@ export const PaymentPromotionRow: React.FC< PaymentPromotionRowProps > = ( {
 								<EllipsisMenu
 									label={ __(
 										'Payment Promotion Options',
-										'woocommerce-admin'
+										'woocommerce'
 									) }
 									className="pre-install-payment-gateway__actions-menu"
 									onToggle={ (
@@ -177,7 +177,7 @@ export const PaymentPromotionRow: React.FC< PaymentPromotionRowProps > = ( {
 											<Button onClick={ onDismiss }>
 												{ __(
 													'Dismiss',
-													'woocommerce-admin'
+													'woocommerce'
 												) }
 											</Button>
 										</div>
@@ -190,7 +190,7 @@ export const PaymentPromotionRow: React.FC< PaymentPromotionRowProps > = ( {
 									isBusy={ installing }
 									aria-disabled={ installing }
 								>
-									{ __( 'Install', 'woocommerce-admin' ) }
+									{ __( 'Install', 'woocommerce' ) }
 								</Button>
 							</div>
 						</td>

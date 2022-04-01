@@ -53,7 +53,7 @@ const NavigationPlugin = () => {
 			if ( page.path === '/analytics/settings' ) {
 				return {
 					...page,
-					breadcrumbs: [ __( 'Analytics', 'woocommerce-admin' ) ],
+					breadcrumbs: [ __( 'Analytics', 'woocommerce' ) ],
 				};
 			}
 			return page;

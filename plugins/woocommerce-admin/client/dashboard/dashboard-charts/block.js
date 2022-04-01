@@ -75,7 +75,7 @@ class ChartBlock extends Component {
 							{
 								/* translators: %s is the chart type */
 								sprintf(
-									__( '%s Report', 'woocommerce-admin' ),
+									__( '%s Report', 'woocommerce' ),
 									selectedChart.label
 								)
 							}

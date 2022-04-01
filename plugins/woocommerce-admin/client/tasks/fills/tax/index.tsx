@@ -112,7 +112,7 @@ const Tax = ( { onComplete, query, task } ) => {
 			'success',
 			__(
 				"You're awesome! One less item on your to-do list ✅",
-				'woocommerce-admin'
+				'woocommerce'
 			)
 		);
 		onComplete();

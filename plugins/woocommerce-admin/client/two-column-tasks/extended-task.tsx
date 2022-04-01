@@ -108,7 +108,7 @@ const ExtendedTask: React.FC< TasksProps > = ( { query } ) => {
 				<DisplayOption>
 					<MenuGroup
 						className="woocommerce-layout__homescreen-display-options"
-						label={ __( 'Display', 'woocommerce-admin' ) }
+						label={ __( 'Display', 'woocommerce' ) }
 					>
 						<MenuItem
 							className="woocommerce-layout__homescreen-extension-tasklist-toggle"
@@ -117,10 +117,7 @@ const ExtendedTask: React.FC< TasksProps > = ( { query } ) => {
 							role="menuitemcheckbox"
 							onClick={ () => toggleTaskList( extendedTaskList ) }
 						>
-							{ __(
-								'Show things to do next',
-								'woocommerce-admin'
-							) }
+							{ __( 'Show things to do next', 'woocommerce' ) }
 						</MenuItem>
 					</MenuGroup>
 				</DisplayOption>

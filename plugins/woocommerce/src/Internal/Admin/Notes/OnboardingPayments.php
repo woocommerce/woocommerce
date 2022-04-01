@@ -50,15 +50,15 @@ class OnboardingPayments {
 		}
 
 		$note = new Note();
-		$note->set_title( __( 'Start accepting payments on your store!', 'woocommerce-admin' ) );
-		$note->set_content( __( 'Take payments with the provider that’s right for you - choose from 100+ payment gateways for WooCommerce.', 'woocommerce-admin' ) );
+		$note->set_title( __( 'Start accepting payments on your store!', 'woocommerce' ) );
+		$note->set_content( __( 'Take payments with the provider that’s right for you - choose from 100+ payment gateways for WooCommerce.', 'woocommerce' ) );
 		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_content_data( (object) array() );
 		$note->set_source( 'woocommerce-admin' );
 		$note->add_action(
 			'view-payment-gateways',
-			__( 'Learn more', 'woocommerce-admin' ),
+			__( 'Learn more', 'woocommerce' ),
 			'https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/?utm_medium=product',
 			Note::E_WC_ADMIN_NOTE_ACTIONED,
 			true

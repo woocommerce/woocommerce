@@ -295,7 +295,7 @@ class WCAdminAssets {
 				);
 
 				if ( in_array( $script, $translated_scripts, true ) ) {
-					wp_set_script_translations( $script, 'woocommerce-admin' );
+					wp_set_script_translations( $script, 'woocommerce' );
 				}
 			} catch ( \Exception $e ) {
 				// Avoid crashing WordPress if an asset file could not be loaded.

@@ -27,11 +27,11 @@ class Marketing extends Task {
 	public function get_title() {
 		if ( true === $this->get_parent_option( 'use_completed_title' ) ) {
 			if ( $this->is_complete() ) {
-				return __( 'You added sales channels', 'woocommerce-admin' );
+				return __( 'You added sales channels', 'woocommerce' );
 			}
-			return __( 'Get more sales', 'woocommerce-admin' );
+			return __( 'Get more sales', 'woocommerce' );
 		}
-		return __( 'Set up marketing tools', 'woocommerce-admin' );
+		return __( 'Set up marketing tools', 'woocommerce' );
 	}
 
 	/**
@@ -42,7 +42,7 @@ class Marketing extends Task {
 	public function get_content() {
 		return __(
 			'Add recommended marketing tools to reach new customers and grow your business',
-			'woocommerce-admin'
+			'woocommerce'
 		);
 	}
 
@@ -52,7 +52,7 @@ class Marketing extends Task {
 	 * @return string
 	 */
 	public function get_time() {
-		return __( '1 minute', 'woocommerce-admin' );
+		return __( '1 minute', 'woocommerce' );
 	}
 
 	/**

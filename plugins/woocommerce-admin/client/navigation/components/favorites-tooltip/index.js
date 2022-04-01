@@ -43,12 +43,12 @@ export const FavoritesTooltip = () => {
 	return (
 		<HighlightTooltip
 			delay={ 1000 }
-			title={ __( 'Introducing favorites', 'woocommerce-admin' ) }
+			title={ __( 'Introducing favorites', 'woocommerce' ) }
 			content={ __(
 				'You can now favorite your extensions to pin them in the top level of the navigation.',
-				'woocommerce-admin'
+				'woocommerce'
 			) }
-			closeButtonText={ __( 'Got it', 'woocommerce-admin' ) }
+			closeButtonText={ __( 'Got it', 'woocommerce' ) }
 			id="woocommerce-navigation-favorite-button"
 			onClose={ () =>
 				updateOptions( {

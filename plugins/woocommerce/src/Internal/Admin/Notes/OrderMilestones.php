@@ -182,7 +182,7 @@ class OrderMilestones {
 	public function get_note_title_for_milestone( $milestone ) {
 		switch ( $milestone ) {
 			case 1:
-				return __( 'First order received', 'woocommerce-admin' );
+				return __( 'First order received', 'woocommerce' );
 			case 10:
 			case 100:
 			case 250:
@@ -194,7 +194,7 @@ class OrderMilestones {
 			case 1000000:
 				return sprintf(
 					/* translators: Number of orders processed. */
-					__( 'Congratulations on processing %s orders!', 'woocommerce-admin' ),
+					__( 'Congratulations on processing %s orders!', 'woocommerce' ),
 					wc_format_decimal( $milestone )
 				);
 			default:
@@ -211,9 +211,9 @@ class OrderMilestones {
 	public function get_note_content_for_milestone( $milestone ) {
 		switch ( $milestone ) {
 			case 1:
-				return __( 'Congratulations on getting your first order! Now is a great time to learn how to manage your orders.', 'woocommerce-admin' );
+				return __( 'Congratulations on getting your first order! Now is a great time to learn how to manage your orders.', 'woocommerce' );
 			case 10:
-				return __( "You've hit the 10 orders milestone! Look at you go. Browse some WooCommerce success stories for inspiration.", 'woocommerce-admin' );
+				return __( "You've hit the 10 orders milestone! Look at you go. Browse some WooCommerce success stories for inspiration.", 'woocommerce' );
 			case 100:
 			case 250:
 			case 500:
@@ -222,7 +222,7 @@ class OrderMilestones {
 			case 10000:
 			case 500000:
 			case 1000000:
-				return __( 'Another order milestone! Take a look at your Orders Report to review your orders to date.', 'woocommerce-admin' );
+				return __( 'Another order milestone! Take a look at your Orders Report to review your orders to date.', 'woocommerce' );
 			default:
 				return '';
 		}
@@ -239,13 +239,13 @@ class OrderMilestones {
 			case 1:
 				return array(
 					'name'  => 'learn-more',
-					'label' => __( 'Learn more', 'woocommerce-admin' ),
+					'label' => __( 'Learn more', 'woocommerce' ),
 					'query' => 'https://woocommerce.com/document/managing-orders/?utm_source=inbox&utm_medium=product',
 				);
 			case 10:
 				return array(
 					'name'  => 'browse',
-					'label' => __( 'Browse', 'woocommerce-admin' ),
+					'label' => __( 'Browse', 'woocommerce' ),
 					'query' => 'https://woocommerce.com/success-stories/?utm_source=inbox&utm_medium=product',
 				);
 			case 100:
@@ -258,7 +258,7 @@ class OrderMilestones {
 			case 1000000:
 				return array(
 					'name'  => 'review-orders',
-					'label' => __( 'Review your orders', 'woocommerce-admin' ),
+					'label' => __( 'Review your orders', 'woocommerce' ),
 					'query' => '?page=wc-admin&path=/analytics/orders',
 				);
 			default:

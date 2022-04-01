@@ -70,7 +70,7 @@ const ShippingRateInput = ( {
 			) }
 			{ ( ! zone.toggleable || values[ `${ zone.id }_enabled` ] ) && (
 				<TextControlWithAffixes
-					label={ __( 'Shipping cost', 'woocommerce-admin' ) }
+					label={ __( 'Shipping cost', 'woocommerce' ) }
 					required
 					className={ textControlClassName }
 					{ ...restInputProps }
@@ -192,7 +192,7 @@ class ShippingRates extends Component {
 
 		createNotice(
 			'success',
-			__( 'Your shipping rates have been updated', 'woocommerce-admin' )
+			__( 'Your shipping rates have been updated', 'woocommerce' )
 		);
 
 		this.props.onComplete();
@@ -222,7 +222,7 @@ class ShippingRates extends Component {
 
 		return parseFloat( rate ) === parseFloat( 0 ) ? (
 			<span className="woocommerce-shipping-rate__control-suffix">
-				{ __( 'Free shipping', 'woocommerce-admin' ) }
+				{ __( 'Free shipping', 'woocommerce' ) }
 			</span>
 		) : null;
 	}
@@ -272,7 +272,7 @@ class ShippingRates extends Component {
 			if ( values[ rate ] < 0 ) {
 				errors[ rate ] = __(
 					'Shipping rates can not be negative numbers.',
-					'woocommerce-admin'
+					'woocommerce'
 				);
 			}
 		} );
@@ -341,8 +341,7 @@ class ShippingRates extends Component {
 							</div>
 
 							<Button isPrimary onClick={ handleSubmit }>
-								{ buttonText ||
-									__( 'Update', 'woocommerce-admin' ) }
+								{ buttonText || __( 'Update', 'woocommerce' ) }
 							</Button>
 						</Fragment>
 					);

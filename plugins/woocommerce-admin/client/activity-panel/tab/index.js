@@ -37,7 +37,7 @@ export const Tab = ( {
 			{ title }{ ' ' }
 			{ unread && (
 				<span className="screen-reader-text">
-					{ __( 'unread activity', 'woocommerce-admin' ) }
+					{ __( 'unread activity', 'woocommerce' ) }
 				</span>
 			) }
 		</Button>

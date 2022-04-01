@@ -65,11 +65,11 @@ class Analytics {
 	public static function add_feature_toggle( $features ) {
 		$description = __(
 			'Enables WooCommerce Analytics',
-			'woocommerce-admin'
+			'woocommerce'
 		);
 
 		$features[] = array(
-			'title'   => __( 'Analytics', 'woocommerce-admin' ),
+			'title'   => __( 'Analytics', 'woocommerce' ),
 			'desc'    => $description,
 			'id'      => self::TOGGLE_OPTION_NAME,
 			'type'    => 'checkbox',
@@ -151,11 +151,11 @@ class Analytics {
 		);
 
 		$debug_tools[ self::CACHE_TOOL_ID ] = array(
-			'name'     => __( 'Clear analytics cache', 'woocommerce-admin' ),
-			'button'   => __( 'Clear', 'woocommerce-admin' ),
+			'name'     => __( 'Clear analytics cache', 'woocommerce' ),
+			'button'   => __( 'Clear', 'woocommerce' ),
 			'desc'     => sprintf(
 				/* translators: 1: opening link tag, 2: closing tag */
-				__( 'This tool will reset the cached values used in WooCommerce Analytics. If numbers still look off, try %1$sReimporting Historical Data%2$s.', 'woocommerce-admin' ),
+				__( 'This tool will reset the cached values used in WooCommerce Analytics. If numbers still look off, try %1$sReimporting Historical Data%2$s.', 'woocommerce' ),
 				'<a href="' . esc_url( $settings_url ) . '">',
 				'</a>'
 			),
@@ -183,7 +183,7 @@ class Analytics {
 	public static function get_report_pages() {
 		$overview_page = array(
 			'id'       => 'woocommerce-analytics',
-			'title'    => __( 'Analytics', 'woocommerce-admin' ),
+			'title'    => __( 'Analytics', 'woocommerce' ),
 			'path'     => '/analytics/overview',
 			'icon'     => 'dashicons-chart-bar',
 			'position' => 57, // After WooCommerce & Product menu items.
@@ -193,7 +193,7 @@ class Analytics {
 			$overview_page,
 			array(
 				'id'       => 'woocommerce-analytics-overview',
-				'title'    => __( 'Overview', 'woocommerce-admin' ),
+				'title'    => __( 'Overview', 'woocommerce' ),
 				'parent'   => 'woocommerce-analytics',
 				'path'     => '/analytics/overview',
 				'nav_args' => array(
@@ -203,7 +203,7 @@ class Analytics {
 			),
 			array(
 				'id'       => 'woocommerce-analytics-products',
-				'title'    => __( 'Products', 'woocommerce-admin' ),
+				'title'    => __( 'Products', 'woocommerce' ),
 				'parent'   => 'woocommerce-analytics',
 				'path'     => '/analytics/products',
 				'nav_args' => array(
@@ -213,7 +213,7 @@ class Analytics {
 			),
 			array(
 				'id'       => 'woocommerce-analytics-revenue',
-				'title'    => __( 'Revenue', 'woocommerce-admin' ),
+				'title'    => __( 'Revenue', 'woocommerce' ),
 				'parent'   => 'woocommerce-analytics',
 				'path'     => '/analytics/revenue',
 				'nav_args' => array(
@@ -223,7 +223,7 @@ class Analytics {
 			),
 			array(
 				'id'       => 'woocommerce-analytics-orders',
-				'title'    => __( 'Orders', 'woocommerce-admin' ),
+				'title'    => __( 'Orders', 'woocommerce' ),
 				'parent'   => 'woocommerce-analytics',
 				'path'     => '/analytics/orders',
 				'nav_args' => array(
@@ -233,7 +233,7 @@ class Analytics {
 			),
 			array(
 				'id'       => 'woocommerce-analytics-variations',
-				'title'    => __( 'Variations', 'woocommerce-admin' ),
+				'title'    => __( 'Variations', 'woocommerce' ),
 				'parent'   => 'woocommerce-analytics',
 				'path'     => '/analytics/variations',
 				'nav_args' => array(
@@ -243,7 +243,7 @@ class Analytics {
 			),
 			array(
 				'id'       => 'woocommerce-analytics-categories',
-				'title'    => __( 'Categories', 'woocommerce-admin' ),
+				'title'    => __( 'Categories', 'woocommerce' ),
 				'parent'   => 'woocommerce-analytics',
 				'path'     => '/analytics/categories',
 				'nav_args' => array(
@@ -253,7 +253,7 @@ class Analytics {
 			),
 			array(
 				'id'       => 'woocommerce-analytics-coupons',
-				'title'    => __( 'Coupons', 'woocommerce-admin' ),
+				'title'    => __( 'Coupons', 'woocommerce' ),
 				'parent'   => 'woocommerce-analytics',
 				'path'     => '/analytics/coupons',
 				'nav_args' => array(
@@ -263,7 +263,7 @@ class Analytics {
 			),
 			array(
 				'id'       => 'woocommerce-analytics-taxes',
-				'title'    => __( 'Taxes', 'woocommerce-admin' ),
+				'title'    => __( 'Taxes', 'woocommerce' ),
 				'parent'   => 'woocommerce-analytics',
 				'path'     => '/analytics/taxes',
 				'nav_args' => array(
@@ -273,7 +273,7 @@ class Analytics {
 			),
 			array(
 				'id'       => 'woocommerce-analytics-downloads',
-				'title'    => __( 'Downloads', 'woocommerce-admin' ),
+				'title'    => __( 'Downloads', 'woocommerce' ),
 				'parent'   => 'woocommerce-analytics',
 				'path'     => '/analytics/downloads',
 				'nav_args' => array(
@@ -283,7 +283,7 @@ class Analytics {
 			),
 			'yes' === get_option( 'woocommerce_manage_stock' ) ? array(
 				'id'       => 'woocommerce-analytics-stock',
-				'title'    => __( 'Stock', 'woocommerce-admin' ),
+				'title'    => __( 'Stock', 'woocommerce' ),
 				'parent'   => 'woocommerce-analytics',
 				'path'     => '/analytics/stock',
 				'nav_args' => array(
@@ -293,17 +293,17 @@ class Analytics {
 			) : null,
 			array(
 				'id'     => 'woocommerce-analytics-customers',
-				'title'  => __( 'Customers', 'woocommerce-admin' ),
+				'title'  => __( 'Customers', 'woocommerce' ),
 				'parent' => 'woocommerce',
 				'path'   => '/customers',
 			),
 			array(
 				'id'       => 'woocommerce-analytics-settings',
-				'title'    => __( 'Settings', 'woocommerce-admin' ),
+				'title'    => __( 'Settings', 'woocommerce' ),
 				'parent'   => 'woocommerce-analytics',
 				'path'     => '/analytics/settings',
 				'nav_args' => array(
-					'title'  => __( 'Analytics', 'woocommerce-admin' ),
+					'title'  => __( 'Analytics', 'woocommerce' ),
 					'parent' => 'woocommerce-settings',
 				),
 			),
@@ -318,6 +318,6 @@ class Analytics {
 	public function run_clear_cache_tool() {
 		Cache::invalidate();
 
-		return __( 'Analytics cache cleared.', 'woocommerce-admin' );
+		return __( 'Analytics cache cleared.', 'woocommerce' );
 	}
 }

@@ -35,13 +35,13 @@ const getSubTasks = () => [
 		key: 'addProductTemplate',
 		title: (
 			<>
-				{ __( 'Start with a template', 'woocommerce-admin' ) }
-				<Pill>{ __( 'Recommended', 'woocommerce-admin' ) }</Pill>
+				{ __( 'Start with a template', 'woocommerce' ) }
+				<Pill>{ __( 'Recommended', 'woocommerce' ) }</Pill>
 			</>
 		),
 		content: __(
 			'Use a template to add physical, digital, and variable products',
-			'woocommerce-admin'
+			'woocommerce'
 		),
 		before: <Icon icon={ sidebar }></Icon>,
 		after: <Icon icon={ chevronRight } />,
@@ -52,10 +52,10 @@ const getSubTasks = () => [
 	},
 	{
 		key: 'addProductManually',
-		title: __( 'Add manually', 'woocommerce-admin' ),
+		title: __( 'Add manually', 'woocommerce' ),
 		content: __(
 			'For small stores we recommend adding products manually',
-			'woocommerce-admin'
+			'woocommerce'
 		),
 		before: <Icon icon={ plusCircle } />,
 		after: <Icon icon={ chevronRight } />,
@@ -67,10 +67,10 @@ const getSubTasks = () => [
 	},
 	{
 		key: 'importProducts',
-		title: __( 'Import via CSV', 'woocommerce-admin' ),
+		title: __( 'Import via CSV', 'woocommerce' ),
 		content: __(
 			'For larger stores we recommend importing all products at once via CSV file',
-			'woocommerce-admin'
+			'woocommerce'
 		),
 		before: <Icon icon={ archive } />,
 		after: <Icon icon={ chevronRight } />,
@@ -82,10 +82,10 @@ const getSubTasks = () => [
 	},
 	{
 		key: 'migrateProducts',
-		title: __( 'Import from another service', 'woocommerce-admin' ),
+		title: __( 'Import from another service', 'woocommerce' ),
 		content: __(
 			'For stores currently selling elsewhere we suggest using a product migration service',
-			'woocommerce-admin'
+			'woocommerce'
 		),
 		before: <Icon icon={ download } />,
 		after: <Icon icon={ chevronRight } />,
@@ -131,7 +131,7 @@ const Products = () => {
 		);
 		task.content = __(
 			'Use a template to add physical, digital, variable, and subscription products',
-			'woocommerce-admin'
+			'woocommerce'
 		);
 	}
 

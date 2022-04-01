@@ -15,11 +15,11 @@ const MarketingHeader = ( { task, goToTask } ) => {
 		<div className="woocommerce-task-header__contents-container">
 			<GetMoreSales className="svg-background" />
 			<div className="woocommerce-task-header__contents">
-				<h1>{ __( 'Get more sales', 'woocommerce-admin' ) }</h1>
+				<h1>{ __( 'Get more sales', 'woocommerce' ) }</h1>
 				<p>
 					{ __(
 						'Add tools to grow your store such as email, social, and in-person selling',
-						'woocommerce-admin'
+						'woocommerce'
 					) }
 				</p>
 				<Button
@@ -27,7 +27,7 @@ const MarketingHeader = ( { task, goToTask } ) => {
 					isPrimary={ ! task.isComplete }
 					onClick={ goToTask }
 				>
-					{ __( 'Add selling tools', 'woocommerce-admin' ) }
+					{ __( 'Add selling tools', 'woocommerce' ) }
 				</Button>
 				<p className="woocommerce-task-header__timer">
 					<img src={ TimerImage } alt="Timer" />{ ' ' }
