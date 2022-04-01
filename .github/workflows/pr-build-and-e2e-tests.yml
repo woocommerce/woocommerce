@@ -137,6 +137,15 @@ jobs:
                   USER_SECRET: password
               run: pnpx wc-api-tests test api
 
+            - name: Upload API test report
+              uses: actions/upload-artifact@v2
+              with:
+                  name: api-test-report---pr-${{ github.event.number }}
+                  path: |
+                        package/woocommerce/packages/js/api-core-tests/allure-results
+                        package/woocommerce/packages/js/api-core-tests/allure-report
+                  retention-days: 7
+
     k6-tests-run:
         name: Runs k6 Performance tests
         runs-on: ubuntu-18.04
