@@ -616,12 +616,12 @@ class Note extends \WC_Data {
 	/**
 	 * Add an action to the note
 	 *
-	 * @param string $name           Action name (not presented to user).
-	 * @param string $label          Action label (presented as button label).
-	 * @param string $url            Action URL, if navigation needed. Optional.
-	 * @param string $status         Status to transition parent Note to upon click. Defaults to 'actioned'.
+	 * @param string  $name           Action name (not presented to user).
+	 * @param string  $label          Action label (presented as button label).
+	 * @param string  $url            Action URL, if navigation needed. Optional.
+	 * @param string  $status         Status to transition parent Note to upon click. Defaults to 'actioned'.
 	 * @param boolean $primary        Deprecated since version 3.4.0.
-	 * @param string $actioned_text The label to display after the note has been actioned but before it is dismissed in the UI.
+	 * @param string  $actioned_text The label to display after the note has been actioned but before it is dismissed in the UI.
 	 */
 	public function add_action(
 		$name,
