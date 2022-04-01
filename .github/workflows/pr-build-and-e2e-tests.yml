@@ -45,16 +45,6 @@ jobs:
               with:
                   path: package/woocommerce
 
-            - name: Install PNPM and install dependencies
-              working-directory: package/woocommerce
-              run: |
-                  npm install -g pnpm
-                  pnpm install
-
-            - name: Load docker images and start containers.
-              working-directory: package/woocommerce/plugins/woocommerce
-              run: pnpx wc-e2e docker:up
-
             - name: Move current directory to code. We will install zip file in this dir later.
               run: mv ./package/woocommerce/plugins/woocommerce/* ./code/woocommerce
 
@@ -70,11 +60,15 @@ jobs:
                   unzip woocommerce.zip -d woocommerce
                   mv woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
 
-            - name: Install dependencies again
+            - name: Install dependencies
               working-directory: package/woocommerce
               run: |
                   npm install -g pnpm
                   pnpm install
+
+            - name: Load docker images and start containers.
+              working-directory: package/woocommerce/plugins/woocommerce
+              run: pnpx wc-e2e docker:up && pnpx wc-e2e docker:wait
 
             - name: Run tests command.
               working-directory: package/woocommerce/plugins/woocommerce
@@ -110,16 +104,6 @@ jobs:
               with:
                   path: package/woocommerce
 
-            - name: Install PNPM and install dependencies
-              working-directory: package/woocommerce
-              run: |
-                  npm install -g pnpm
-                  pnpm install
-
-            - name: Load docker images and start containers.
-              working-directory: package/woocommerce/plugins/woocommerce
-              run: pnpx wc-e2e docker:up
-
             - name: Move current directory to code. We will install zip file in this dir later.
               run: mv ./package/woocommerce/plugins/woocommerce/* ./code/woocommerce
 
@@ -135,15 +119,15 @@ jobs:
                   unzip woocommerce.zip -d woocommerce
                   mv woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
 
-            - name: Install dependencies again
+            - name: Install dependencies
               working-directory: package/woocommerce
               run: |
                   npm install -g pnpm
                   pnpm install
 
-            - name: Wait for the Docker container to be built
+            - name: Load docker images and start containers.
               working-directory: package/woocommerce/plugins/woocommerce
-              run: pnpx wc-e2e docker:wait
+              run: pnpx wc-e2e docker:up && pnpx wc-e2e docker:wait
 
             - name: Run tests command.
               working-directory: package/woocommerce/plugins/woocommerce
@@ -169,21 +153,6 @@ jobs:
               with:
                   path: package/woocommerce
 
-            - name: Install PNPM and install dependencies
-              working-directory: package/woocommerce
-              run: |
-                  npm install -g pnpm
-                  pnpm install
-
-            - name: Workaround to use initialization file with prepopulated data.
-              working-directory: package/woocommerce/plugins/woocommerce/tests/e2e/docker
-              run: |
-                  cp init-sample-products.sh initialize.sh
-
-            - name: Load docker images and start containers.
-              working-directory: package/woocommerce/plugins/woocommerce
-              run: pnpx wc-e2e docker:up
-
             - name: Move current directory to code. We will install zip file in this dir later.
               run: mv ./package/woocommerce/plugins/woocommerce/* ./code/woocommerce
 
@@ -199,15 +168,20 @@ jobs:
                   unzip woocommerce.zip -d woocommerce
                   mv woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
 
-            - name: Install dependencies again
+            - name: Install dependencies
               working-directory: package/woocommerce
               run: |
                   npm install -g pnpm
                   pnpm install
-
-            - name: Wait for the Docker container to be built
+            
+            - name: Workaround to use initialization file with prepopulated data.
+              working-directory: package/woocommerce/plugins/woocommerce/tests/e2e/docker
+              run: |
+                  cp init-sample-products.sh initialize.sh
+            
+            - name: Load docker images and start containers.
               working-directory: package/woocommerce/plugins/woocommerce
-              run: pnpx wc-e2e docker:wait
+              run: pnpx wc-e2e docker:up && pnpx wc-e2e docker:wait
 
             - name: Install k6
               run: |
