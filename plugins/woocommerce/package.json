@@ -65,6 +65,7 @@
     "jest": "^25.1.0",
     "lint-staged": "9.5.0",
     "mocha": "7.2.0",
+	"@playwright/test": "^1.20",
     "prettier": "npm:wp-prettier@2.0.5",
     "stylelint": "^13.8.0",
     "typescript": "3.9.7",
