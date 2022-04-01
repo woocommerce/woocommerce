@@ -139,12 +139,12 @@ describe( `${ block.name } Block`, () => {
 				beforeEach( async () => {
 					await openDocumentSettingsSidebar();
 					await selectBlockByName(
-						'woocommerce/cart-order-summary-block'
+						'woocommerce/cart-order-summary-shipping-block'
 					);
 				} );
 
 				it( 'can toggle Shipping calculator', async () => {
-					const selector = `${ block.class } .wc-block-components-totals-shipping__change-address-button`;
+					const selector = ` .wc-block-components-totals-shipping__change-address-button`;
 					const toggleLabel = await findLabelWithText(
 						'Shipping calculator'
 					);

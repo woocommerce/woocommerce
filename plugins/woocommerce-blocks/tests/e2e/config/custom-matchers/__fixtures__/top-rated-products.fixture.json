@@ -1,4 +1,1 @@
-{
-	"title": "Top Rated Products Block",
-	"pageContent": "<!-- wp:woocommerce/product-top-rated /-->"
-}
+{"title":"Top Rated Products Block","pageContent":"<!-- wp:woocommerce/product-top-rated /-->"}

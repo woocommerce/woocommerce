@@ -40,9 +40,7 @@ const blocks = {
 	'attribute-filter': {},
 	'stock-filter': {},
 	'active-filters': {},
-	cart: {
-		customDir: 'cart-checkout/cart',
-	},
+	cart: {},
 	checkout: {},
 	'mini-cart': {
 		customDir: 'cart-checkout/mini-cart',
