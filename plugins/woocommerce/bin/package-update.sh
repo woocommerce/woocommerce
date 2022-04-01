@@ -30,7 +30,7 @@ if [ -z "$SKIP_UPDATE_TEXTDOMAINS" ]; then
 	output 3 "Updating package PHP textdomains..."
 
 	# Replace text domains within packages with woocommerce
-	npm run packages:fix:textdomain
+	pnpm run packages:fix:textdomain
 	output 2 "Done!"
 
 	output 3 "Updating package JS textdomains..."

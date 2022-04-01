@@ -15,7 +15,6 @@ contributors.html
 docker-compose.yaml
 Dockerfile
 Gruntfile.js
-lerna.json
 none
 package-lock.json
 package.json
