@@ -18,9 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 $current_section_name = __( 'Browse Categories', 'woocommerce' );
 ?>
-<div class="woocommerce wc-addons-wrap">
-	<h1 class="screen-reader-text"><?php esc_html_e( 'Marketplace', 'woocommerce' ); ?></h1>
-
+<div class="wrap woocommerce wc_addons_wrap">
 	<?php if ( $sections ) : ?>
 	<div class="marketplace-header">
 		<h1 class="marketplace-header__title"><?php esc_html_e( 'WooCommerce Marketplace', 'woocommerce' ); ?></h1>
@@ -39,7 +37,6 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 			<input type="hidden" name="section" value="_all">
 		</form>
 	</div>
-
 	<div class="top-bar">
 		<ul class="marketplace-header__tabs">
 			<li class="marketplace-header__tab">
@@ -60,13 +57,18 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 					/* translators: %s: WooCommerce.com Subscriptions tab count HTML. */
 					echo ( sprintf( __( 'My Subscriptions %s', 'woocommerce' ), $count_html ) );
 					?>
-				</a>
-			</li>
-		</ul>
-	</div>
-
-	<div class="wp-header-end"></div>
-
+					<li>
+						<a
+							class="<?php echo $current_section === $section->slug ? 'current' : ''; ?>"
+							href="<?php echo esc_url( admin_url( 'admin.php?page=wc-addons&section=' . esc_attr( $section->slug ) ) ); ?>">
+							<?php echo esc_html( $section->label ); ?>
+						</a>
+					</li>
+				<?php endforeach; ?>
+			</ul>
+			<div id="marketplace-current-section-name" class="current-section-name"><?php echo esc_html( $current_section_name ); ?></div>
+		</div>
+		</div>
 	<div class="wrap">
 		<div class="marketplace-content-wrapper">
 			<?php require __DIR__ . '/html-admin-page-addons-category-nav.php'; ?>
@@ -122,11 +124,85 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 								}
 							}
 
-							WC_Admin_Addons::render_product_card( $addon );
-							?>
-						<?php endforeach; ?>
-					</ul>
-				<?php endif; ?>
+						WC_Admin_Addons::render_product_card( $addon );
+						?>
+						<li class="product">
+							<div class="product-details">
+								<?php if ( ! empty( $addon->icon ) ) : ?>
+									<span class="product-img-wrap">
+										<?php /* Show an icon if it exists */ ?>
+										<img src="<?php echo esc_url( $addon->icon ); ?>" />
+									</span>
+								<?php endif; ?>
+								<a href="<?php echo esc_url( WC_Admin_Addons::add_in_app_purchase_url_params( $addon->link ) ); ?>">
+									<h2><?php echo esc_html( $addon->title ); ?></h2>
+								</a>
+								<?php if ( ! empty( $addon->vendor_name ) && ! empty( $addon->vendor_url ) ) : ?>
+									<div class="product-developed-by">
+										<?php
+										$parsed_vendor_url = parse_url( $addon->vendor_url );
+										if ( null == $parsed_vendor_url['path'] ) {
+											$addon->vendor_url .= '/';
+										}
+										$separator         = ( null == $parsed_vendor_url['query'] ) ? '?' : '&';
+										$query             = http_build_query(
+											array(
+												'utm_source'   => 'extensionsscreen',
+												'utm_medium'   => 'product',
+												'utm_campaign' => 'wcaddons',
+												'utm_content'  => 'devpartner',
+											)
+										);
+										$addon->vendor_url .= $separator . $query;
+
+										printf(
+										/* translators: %s vendor link */
+											esc_html__( 'Developed by %s', 'woocommerce' ),
+											sprintf(
+												'<a class="product-vendor-link" href="%1$s" target="_blank">%2$s</a>',
+												esc_url_raw( $addon->vendor_url ),
+												wp_kses_post( $addon->vendor_name )
+											)
+										);
+										?>
+									</div>
+								<?php endif; ?>
+								<p><?php echo wp_kses_post( $addon->excerpt ); ?></p>
+							</div>
+							<div class="product-footer">
+								<div class="product-price-and-reviews-container">
+									<div class="product-price-block">
+										<?php if ( '&#36;0.00' === $addon->price ) : ?>
+											<span class="price"><?php esc_html_e( 'Free', 'woocommerce' ); ?></span>
+										<?php else : ?>
+											<?php
+											$price_suffix = __( 'per year', 'woocommerce' );
+											if ( ! empty( $addon->price_suffix ) ) {
+												$price_suffix = $addon->price_suffix;
+											}
+											?>
+											<span class="price"><?php echo wp_kses_post( $addon->price ); ?></span>
+											<span class="price-suffix"><?php echo esc_html( $price_suffix ); ?></span>
+										<?php endif; ?>
+									</div>
+									<?php if ( ! empty( $addon->reviews_count ) && ! empty( $addon->rating ) ) : ?>
+										<?php /* Show rating and the number of reviews */ ?>
+										<div class="product-reviews-block">
+											<?php for ( $index = 1; $index <= 5; ++$index ) : ?>
+												<?php $rating_star_class = 'product-rating-star product-rating-star__' . WC_Admin_Addons::get_star_class( $addon->rating, $index ); ?>
+												<div class="<?php echo esc_attr( $rating_star_class ); ?>"></div>
+											<?php endfor; ?>
+											<span class="product-reviews-count">(<?php echo wp_kses_post( $addon->reviews_count ); ?>)</span>
+										</div>
+									<?php endif; ?>
+								</div>
+								<a class="button" href="<?php echo esc_url( WC_Admin_Addons::add_in_app_purchase_url_params( $addon->link ) ); ?>">
+									<?php esc_html_e( 'View details', 'woocommerce' ); ?>
+								</a>
+							</div>
+						</li>
+					<?php endforeach; ?>
+				</ul>
 			<?php endif; ?>
 		</div>
 		<?php else : ?>

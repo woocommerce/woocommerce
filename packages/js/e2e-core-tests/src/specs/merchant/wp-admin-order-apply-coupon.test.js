@@ -28,8 +28,7 @@ const runOrderApplyCouponTest = () => {
 			couponCode = await createCoupon();
 			orderId = await createOrder( { productId, status: 'pending' } );
 
-			await merchant.login();
-			await merchant.goToOrder( orderId );
+			// We need to remove any listeners on the `dialog` event otherwise we can't catch the dialog below
 			await page.removeAllListeners('dialog');
 
 			// Make sure the simple product price is greater than the coupon amount

@@ -40,7 +40,7 @@ export type GroupedProductRepositoryParams =
  * @typedef ListsGroupedProducts
  * @alias ListsModels.<GroupedProduct>
  */
-export type ListsGroupedProducts = ListsModels< GroupedProductRepositoryParams >;
+export type ListsGroupedProducts = ListsModels< GroupedProductUpdateParams >;
 
 /**
  * An interface for creating Grouped products using the repository.
@@ -48,7 +48,7 @@ export type ListsGroupedProducts = ListsModels< GroupedProductRepositoryParams >
  * @typedef CreatesGroupedProducts
  * @alias CreatesModels.<GroupedProduct>
  */
-export type CreatesGroupedProducts = CreatesModels< GroupedProductRepositoryParams >;
+export type CreatesGroupedProducts = CreatesModels< GroupedProductUpdateParams >;
 
 /**
  * An interface for reading Grouped products using the repository.
@@ -56,7 +56,7 @@ export type CreatesGroupedProducts = CreatesModels< GroupedProductRepositoryPara
  * @typedef ReadsGroupedProducts
  * @alias ReadsModels.<GroupedProduct>
  */
-export type ReadsGroupedProducts = ReadsModels< GroupedProductRepositoryParams >;
+export type ReadsGroupedProducts = ReadsModels< GroupedProductUpdateParams >;
 
 /**
  * An interface for updating Grouped products using the repository.
@@ -64,7 +64,7 @@ export type ReadsGroupedProducts = ReadsModels< GroupedProductRepositoryParams >
  * @typedef UpdatesGroupedProducts
  * @alias UpdatesModels.<GroupedProduct>
  */
-export type UpdatesGroupedProducts = UpdatesModels< GroupedProductRepositoryParams >;
+export type UpdatesGroupedProducts = UpdatesModels< GroupedProductUpdateParams >;
 
 /**
  * An interface for deleting Grouped products using the repository.
@@ -72,7 +72,7 @@ export type UpdatesGroupedProducts = UpdatesModels< GroupedProductRepositoryPara
  * @typedef DeletesGroupedProducts
  * @alias DeletesModels.<GroupedProduct>
  */
-export type DeletesGroupedProducts = DeletesModels< GroupedProductRepositoryParams >;
+export type DeletesGroupedProducts = DeletesModels< GroupedProductUpdateParams >;
 
 /**
  * The base for the Grouped product object.

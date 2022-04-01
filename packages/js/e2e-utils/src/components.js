@@ -11,9 +11,7 @@ import {
 	verifyCheckboxIsUnset,
 	setCheckbox,
 	unsetCheckbox,
-	evalAndClick,
-	backboneUnblocked,
-	waitForSelectorWithoutThrow,
+	clearAndFillInput,
 } from './page-utils';
 import factories from './factories';
 import { waitForTimeout } from './flows/utils';
@@ -505,46 +503,6 @@ const createCoupon = async ( couponAmount = '5', discountType = 'Fixed cart disc
 };
 
 /**
- * Adds a shipping zone along with a shipping method.
- *
- * @param zoneName Shipping zone name.
- * @param zoneLocation Shiping zone location. Defaults to country:US. For states use: state:US:CA
- * @param zipCode Shipping zone zip code. Defaults to empty one space.
- * @param zoneMethod Shipping method type. Defaults to flat_rate (use also: free_shipping or local_pickup)
- */
-const addShippingZoneAndMethod = async ( zoneName, zoneLocation = 'country:US', zipCode = ' ', zoneMethod = 'flat_rate' ) => {
-	await merchant.openNewShipping();
-
-	// Fill shipping zone name
-	await page.waitForSelector('input#zone_name');
-	await expect(page).toFill('input#zone_name', zoneName);
-
-	// Select shipping zone location
-	await expect(page).toSelect('select[name="zone_locations"]', zoneLocation);
-
-	await uiUnblocked();
-
-	// Fill shipping zone postcode if needed otherwise just put empty space
-	await page.waitForSelector('a.wc-shipping-zone-postcodes-toggle');
-	await expect(page).toClick('a.wc-shipping-zone-postcodes-toggle');
-	await expect(page).toFill('#zone_postcodes', zipCode);
-	await expect(page).toMatchElement('#zone_postcodes', zipCode);
-	await expect(page).toClick('button#submit');
-
-	await uiUnblocked();
-
-	// Add shipping zone method
-	await page.waitFor(1000);
-	await expect(page).toClick('button.wc-shipping-zone-add-method', {text:'Add shipping method'});
-	await page.waitForSelector('.wc-shipping-zone-method-selector');
-	await expect(page).toSelect('select[name="add_method_id"]', zoneMethod);
-	await expect(page).toClick('button#btn-ok');
-	await page.waitForSelector('#zone_locations');
-
-	await uiUnblocked();
-};
-
-/**
  * Click the Update button on the order details page.
  *
  * @param noticeText The text that appears in the notice after updating the order.
@@ -555,7 +513,7 @@ const clickUpdateOrder = async ( noticeText, waitForSave = false ) => {
 		await page.waitFor( 2000 );
 	}
 
-	// Update order
+	// PUpdate order
 	await expect( page ).toClick( 'button.save_order' );
 	await page.waitForSelector( '.updated.notice' );
 
@@ -616,12 +574,5 @@ export {
 	verifyAndPublish,
 	addProductToOrder,
 	createCoupon,
-	addShippingZoneAndMethod,
 	createSimpleProductWithCategory,
-	createSimpleDownloadableProduct,
-	clickUpdateOrder,
-	deleteAllEmailLogs,
-	deleteAllShippingZones,
-	batchCreateOrders,
-	createOrder,
 };

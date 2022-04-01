@@ -144,8 +144,11 @@ const runAddSimpleProductTest = () => {
 
 const runAddVariableProductTest = () => {
 	describe('Add New Variable Product Page', () => {
-		it('can create product with variations', async () => {
+		beforeAll(async () => {
 			await merchant.login();
+		});
+
+		it('can create variable product', async () => {
 			await openNewProductAndVerify();
 
 			// Set product data

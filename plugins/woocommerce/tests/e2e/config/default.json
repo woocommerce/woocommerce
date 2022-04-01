@@ -123,12 +123,6 @@
           "regularPrice": "18.97"
         }
       ]
-    },
-    "external": {
-      "name": "External product",
-      "regularPrice": "24.99",
-      "buttonText": "Buy now",
-      "externalUrl": "https://wordpress.org/plugins/woocommerce"
     }
   },
   "coupons": {

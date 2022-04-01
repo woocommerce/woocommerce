@@ -1,3 +1,5 @@
+/* eslint-disable jest/no-export, jest/no-disabled-tests, */
+
 /**
  * Internal dependencies
  */
@@ -6,7 +8,6 @@ const {
 	searchForOrder,
 	createSimpleProduct,
 	factories,
-	createOrder,
 } = require( '@woocommerce/e2e-utils' );
 
 const searchString = 'John Doe';
@@ -92,7 +93,9 @@ const runOrderSearchingTest = () => {
 	describe('WooCommerce Orders > Search orders', () => {
 		let productId;
 		let orderId;
-		let customerId;
+		beforeAll( async () => {
+			await createSimpleProduct(itemName);
+			await updateCustomerBilling();
 
 		beforeAll( async () => {
 			productId = await createSimpleProduct('Wanted Product');
@@ -106,6 +109,23 @@ const runOrderSearchingTest = () => {
 
 			// Login and open All Orders view
 			await merchant.login();
+			await merchant.openNewOrder();
+			await page.waitForSelector('#order_status');
+			await page.click('#customer_user');
+			await page.click('span.select2-search > input.select2-search__field');
+			await page.type('span.select2-search > input.select2-search__field', 'Jane Smith');
+			await page.waitFor(2000); // to avoid flakyness
+			await page.keyboard.press('Enter');
+
+			// Get the post id
+			const variablePostId = await page.$('#post_ID');
+			orderId = (await(await variablePostId.getProperty('value')).jsonValue());
+
+			// Save new order and add desired product to order
+			await clickUpdateOrder('Order updated.', true);
+			await addProductToOrder(orderId, itemName);
+
+			// Open All Orders view
 			await merchant.openAllOrdersView();
 		});
 

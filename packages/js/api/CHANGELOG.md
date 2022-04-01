@@ -1,29 +1,13 @@
 # Unreleased
 
-## Added
+- Added support for grouped product type
 
-- Added low stock threshold field for products
-
-# 0.2.0
-
-## Added
-
-- Support for orders.
-
-## Changed
-
-- `delete()` now deletes products and coupons instead of moving to `trash`.
-
-# 0.1.2
+# 0.1.1
 
 ## Added
 
 - Support for the external product type.
-- Support for grouped product type.
-- Support for variable products and product variations.
 - Support for coupons.
-
-# 0.1.1
 
 ## Breaking Changes
 

@@ -11,30 +11,45 @@ const {
 const statusColumnTextSelector = 'mark.order-status > span';
 
 // Define order statuses to filter against
-const orderStatus = [
-	['Pending payment', 'wc-pending'],
-	['Processing', 'wc-processing'],
-	['On hold', 'wc-on-hold'],
-	['Completed', 'wc-completed'],
-	['Cancelled', 'wc-cancelled'],
-	['Refunded', 'wc-refunded'],
-	['Failed', 'wc-failed'],
-];
-const defaultOrder = {
-	payment_method: 'cod',
-	billing: {
-		first_name: 'John',
-		last_name: 'Doe',
-		email: 'john.doe@example.com',
+const orderStatus = {
+	pending: {
+		name: 'wc-pending',
+		description: { text: 'Pending payment' },
+	},
+	processing: {
+		name: 'wc-processing',
+		description: { text: 'Processing' },
+	},
+	onHold: {
+		name: 'wc-on-hold',
+		description: { text: 'On hold' },
+	},
+	completed: {
+		name: 'wc-completed',
+		description: { text: 'Completed' },
+	},
+	cancelled: {
+		name: 'wc-cancelled',
+		description: { text: 'Cancelled' },
+	},
+	refunded: {
+		name: 'wc-refunded',
+		description: { text: 'Refunded' },
+	},
+	failed: {
+		name: 'wc-failed',
+		description: { text: 'Failed' },
 	}
 };
+const defaultOrder = config.get('orders.basicPaidOrder');
+
 
 const runOrderStatusFiltersTest = () => {
 	describe('WooCommerce Orders > Filter Orders by Status', () => {
-		beforeAll(async () => {
+		beforeAll( async () => {
 			// First, let's create some orders we can filter against
-			const orders = orderStatus.map((entryPair) => {
-				const statusName = entryPair[1].replace('wc-', '');
+			const orders = Object.entries(orderStatus).map((entryPair) => {
+				const statusName = entryPair[1].name.replace('wc-', '');
 
 				return {
 					...defaultOrder,

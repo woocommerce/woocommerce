@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "95b6d7da4314500d65c7f840bf173dde",
+    "content-hash": "e64e55e1c225f67644184deac06a1fc8",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -51,10 +51,7 @@
                 "GPL-2.0-or-later"
             ],
             "description": "Creates a custom autoloader for a plugin or theme.",
-            "support": {
-                "source": "https://github.com/Automattic/jetpack-autoloader/tree/2.10.1"
-            },
-            "time": "2021-03-30T15:15:59+00:00"
+            "time": "2021-02-05T19:07:06+00:00"
         },
         {
             "name": "automattic/jetpack-constants",
@@ -660,11 +657,7 @@
                 "gutenberg",
                 "woocommerce"
             ],
-            "support": {
-                "issues": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues",
-                "source": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/v6.9.0"
-            },
-            "time": "2022-02-02T10:37:29+00:00"
+            "time": "2021-04-13T16:06:16+00:00"
         }
     ],
     "packages-dev": [

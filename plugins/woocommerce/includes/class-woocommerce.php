@@ -208,6 +208,7 @@ final class WooCommerce {
 		add_action( 'switch_blog', array( $this, 'wpdb_table_fix' ), 0 );
 		add_action( 'activated_plugin', array( $this, 'activated_plugin' ) );
 		add_action( 'deactivated_plugin', array( $this, 'deactivated_plugin' ) );
+		add_filter( 'woocommerce_rest_prepare_note', array( 'WC_Admin_Notices', 'prepare_note_with_nonce' ) );
 		add_action( 'woocommerce_installed', array( $this, 'add_woocommerce_inbox_variant' ) );
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_inbox_variant' ) );
 
@@ -215,9 +216,6 @@ final class WooCommerce {
 		wc_get_container()->get( DownloadPermissionsAdjuster::class );
 		wc_get_container()->get( AssignDefaultCategory::class );
 		wc_get_container()->get( DataRegenerator::class );
-		wc_get_container()->get( LookupDataStore::class );
-		wc_get_container()->get( RestockRefundedItemsAdjuster::class );
-		wc_get_container()->get( CustomOrdersTableController::class );
 	}
 
 	/**
