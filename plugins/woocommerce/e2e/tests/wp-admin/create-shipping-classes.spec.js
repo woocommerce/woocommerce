@@ -3,7 +3,7 @@ const { test, expect } = require('@playwright/test');
 test.describe('Merchant can add shipping classes', () => {
 	test.use({ storageState: 'e2e/storage/adminState.json' });
 
-	test.only('can add shipping classes', async ({ page }) => {
+	test('can add shipping classes', async ({ page }) => {
 		page.goto(
 			'wp-admin/admin.php?page=wc-settings&tab=shipping&section=classes'
 		);
