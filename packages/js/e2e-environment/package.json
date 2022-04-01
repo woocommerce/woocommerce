@@ -65,7 +65,7 @@
     "compile": "node ./../bin/build.js",
     "build": "pnpm run clean && pnpm run compile",
     "prepare": "pnpm run build",
-    "docker:up": "./bin/docker-compose.sh up && pnpm run docker:wait",
+    "docker:up": "./bin/docker-compose.sh up",
 	"docker:wait": "bash ./bin/wait-for-build.sh",
     "docker:down": "./bin/docker-compose.sh down",
     "docker:clear-all": "docker rmi --force $(docker images -q)",
