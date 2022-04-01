@@ -25,6 +25,17 @@
 
 - `utils.waitForTimeout( delay )` pause processing for `delay` milliseconds
 - `AdminEdit` class with utility functions for the respective edit screens
+- Update `shopper.addToCartFromShopPage()` and `.removeFromCart()` to accept product Id or Title
+- Added `deleteAllProductAttributes()`, `deleteAllProductCategories()`, and `deleteAllProductTags()` to clean up meta data added when products are imported
+- Added `withRestApi.createProductCategory()` that creates a product category and returns the ID
+- `withRestApi.deleteCoupon()` that deletes a single coupon
+- `withRestApi.addTaxClasses()` that adds an array of tax classes if they do not exist
+- `withRestApi.addTaxRates()` that adds an array of tax rates if they do not exist
+- `clickAndWaitForSelector( buttonSelector, resultSelector, timeout )` to click a button and wait for response
+- Optional parameter `testResponse` to `withRestApi` functions that contain an `expect()`
+- `shopper.logout()` to log out the shopper account
+- `merchant.dismissOnboardingWizard()` to dismiss the onboarding wizard
+- `merchant.collapseAdminMenu()` to expand or collapse the WP admin menu
 
 # 0.1.6
 
@@ -41,12 +52,22 @@
 - Added `describeIf()` to conditionally run a test suite
 - Added `itIf()` to conditionally run a test case.
 - Added merchant workflows around plugins: `uploadAndActivatePlugin()`, `activatePlugin()`, `deactivatePlugin()`, `deletePlugin()`
+- Added merchant workflows checking for a database update and performing the update if needed: `runDatabaseUpdate()`
+- Added `deleteAllOrders()` that goes through and deletes all orders
+- Added `deleteAllShippingClasses()` which permanently deletes all shipping classes using the API
+- Added `statuses` optional parameter to `deleteAllRepositoryObjects()` to delete on specific statuses
+- Added `createOrder()` component util that creates an order using the API with the passed in details
+- Updated `addShippingZoneAndMethod()` to use the API instead of UI to create shipping zones
+- Added `updateSettingOption()` to use the API to update a setting option
+- Added `updatePaymentGateway()` to use the API to update a payment gateway
+- Added `getSystemEnvironment()` that gets the current environment from the WooCommerce API.
 
 # 0.1.5
 
 ## Added
 
 - `emptyCart()` Shopper flow helper that empties the cart
+- `deleteAllShippingZones()` Delete all the existing shipping zones
 - constants
   - `WP_ADMIN_POST_TYPE`
   - `WP_ADMIN_NEW_POST_TYPE`
@@ -97,9 +118,6 @@
 - `addProductToOrder( orderId, productName )` component which adds the provided productName to the passed in orderId
 - `createCoupon( couponAmount )` component which accepts a coupon amount string (it defaults to 5) and creates a basic coupon. Returns the generated coupon code.
 - `evalAndClick( selector )` use Puppeteer page.$eval to select and click and element.
-- `selectOptionInSelect2( selector, value )` util helper method that search and select in any select2 type field
-- `applyCoupon( couponName )` util helper method which applies previously created coupon to cart or checkout
-- `removeCoupon()` util helper method that removes a single coupon within cart or checkout
 
 ## Changes
 

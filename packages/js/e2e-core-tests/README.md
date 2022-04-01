@@ -62,6 +62,8 @@ The functions to access the core tests are:
 ### Merchant
 
 - `runMerchantTests` - Run all merchant tests
+  - `runAddShippingClassesTest` - Merchant can create shipping classes and let shopper test them
+  - `runAddNewShippingZoneTest` - Merchant can create shipping zones and let shopper test them
   - `runAddSimpleProductTest` - Merchant can create a simple product
   - `runAddVariableProductTest` - Merchant can create a variable product
   - `runCreateCouponTest` - Merchant can create coupon
@@ -72,11 +74,17 @@ The functions to access the core tests are:
   - `runOrderStatusFilterTest` - Merchant can filter orders by order status
   - `runOrderRefundTest` - Merchant can refund an order
   - `runOrderApplyCouponTest` - Merchant can apply a coupon to an order
+  - `runOrderSearchingTest` - Merchant can search for order via different terms
   - `runProductEditDetailsTest` - Merchant can edit an existing product
   - `runProductSearchTest` - Merchant can search for a product and view it
   - `runProductSettingsTest` - Merchant can update product settings
   - `runTaxSettingsTest` - Merchant can update tax settings
   - `runUpdateGeneralSettingsTest` - Merchant can update general settings
+  - `runMerchantOrderEmailsTest` - Merchant can receive order emails and resend emails by Order Actions
+  - `runAnalyticsPageLoadsTest` - Merchant can load and see all pages in Analytics
+  - `runImportProductsTest` - Merchant can import products via CSV file
+  - `runInitiateWccomConnectionTest` - Merchant can initiate connection to WooCommerce.com
+  - `runAdminPageLoadTests` - Merchant can load pages from the WP Admin sidebar
 
 ### Shopper
 
@@ -86,8 +94,16 @@ The functions to access the core tests are:
   - `runCheckoutApplyCouponsTest` - Shopper can use coupons on checkout
   - `runCheckoutPageTest` - Shopper can complete checkout
   - `runMyAccountPageTest` - Shopper can access my account page
+  - `runMyAccountPayOrderTest` - Shopper can pay for their order in My Account
+  - `runProductBrowseSearchSortTest` - Shopper can browse, search & sort products
   - `runSingleProductPageTest` - Shopper can view single product page in many variations (simple, variable, grouped)
-  -  `runVariableProductUpdateTest` - Shopper can view and update variations on a variable product
+  - `runVariableProductUpdateTest` - Shopper can view and update variations on a variable product
+  - `runCheckoutCreateAccountTest` - Shopper can create an account during checkout
+  - `runCheckoutLoginAccountTest` - Shopper can login to an account during checkout
+  - `runMyAccountCreateAccountTest` - Shopper can create an account via my account page
+  - `runCartCalculateShippingTest` - Shopper can calculate shipping in the cart
+  - `runCartRedirectionTest` - Shopper is redirected to the cart page after adding to cart
+  - `runOrderEmailReceivingTest` - Shopper can receive an email for his order
 
 ### REST API
 

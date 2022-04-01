@@ -70,3 +70,8 @@ yarn.lock
 
 # Editors
 nbproject/private/
+
+# Test Results
+test-results.json
+/plugins/woocommerce/e2e/output/index.html
+/plugins/woocommerce/e2e/storage/*.json

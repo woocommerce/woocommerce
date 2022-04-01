@@ -15,6 +15,7 @@ import {
 	AbstractProductData,
 	IProductCrossSells,
 	IProductDelivery,
+	IProductExternal,
 	IProductGrouped,
 	IProductInventory,
 	IProductPrice,
@@ -141,7 +142,6 @@ export function createProductDataTransformer< T extends AbstractProductData >(
 				parentId: PropertyType.Integer,
 				menuOrder: PropertyType.Integer,
 				permalink: PropertyType.String,
-				priceHtml: PropertyType.String,
 			},
 		),
 		new KeyChangeTransformation< AbstractProductData >(
@@ -150,15 +150,9 @@ export function createProductDataTransformer< T extends AbstractProductData >(
 				modified: 'date_modified_gmt',
 				postStatus: 'status',
 				isPurchasable: 'purchasable',
-				regularPrice: 'regular_price',
-				onSale: 'on_sale',
-				salePrice: 'sale_price',
-				saleStart: 'date_on_sale_from_gmt',
-				saleEnd: 'date_on_sale_to_gmt',
 				metaData: 'meta_data',
 				parentId: 'parent_id',
 				menuOrder: 'menu_order',
-				priceHtml: 'price_html',
 				links: '_links',
 			},
 		),
@@ -214,6 +208,43 @@ export function createProductTransformer< T extends AbstractProduct >(
 	return createProductDataTransformer< T >( transformations );
 }
 
+/**
+ * Create a transformer for the product price properties.
+ */
+export function createProductPriceTransformation(): ModelTransformation[] {
+	const transformations = [
+		new IgnorePropertyTransformation(
+			[
+				'date_on_sale_from',
+				'date_on_sale_to',
+			],
+		),
+		new PropertyTypeTransformation(
+			{
+				onSale: PropertyType.Boolean,
+				saleStart: PropertyType.Date,
+				saleEnd: PropertyType.Date,
+				priceHtml: PropertyType.String,
+			},
+		),
+		new KeyChangeTransformation< IProductPrice >(
+			{
+				regularPrice: 'regular_price',
+				onSale: 'on_sale',
+				salePrice: 'sale_price',
+				saleStart: 'date_on_sale_from_gmt',
+				saleEnd: 'date_on_sale_to_gmt',
+				priceHtml: 'price_html',
+			},
+		),
+	];
+
+	return transformations;
+}
+
+/**
+ * Create a transformer for the product cross sells property.
+ */
 export function createProductCrossSellsTransformation(): ModelTransformation[] {
 	const transformations = [
 		new PropertyTypeTransformation(
@@ -271,6 +302,9 @@ export function createProductGroupedTransformation(): ModelTransformation[] {
 	return transformations;
 }
 
+/**
+ * Create a transformer for product delivery properties.
+ */
 export function createProductDeliveryTransformation(): ModelTransformation[] {
 	const transformations = [
 		new ModelTransformerTransformation( 'downloads', ProductDownload, createProductDownloadTransformer() ),
@@ -425,6 +459,28 @@ export function createProductVariableTransformation(): ModelTransformation[] {
 		new KeyChangeTransformation< VariableProduct >(
 			{
 				defaultAttributes: 'default_attributes',
+			},
+		),
+	];
+
+	return transformations;
+}
+
+/**
+ * Transformer for the properties unique to the external product type.
+ */
+export function createProductExternalTransformation(): ModelTransformation[] {
+	const transformations = [
+		new PropertyTypeTransformation(
+			{
+				buttonText: PropertyType.String,
+				externalUrl: PropertyType.String,
+			},
+		),
+		new KeyChangeTransformation< IProductExternal >(
+			{
+				buttonText: 'button_text',
+				externalUrl: 'external_url',
 			},
 		),
 	];

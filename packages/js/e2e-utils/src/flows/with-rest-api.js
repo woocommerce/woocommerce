@@ -4,10 +4,7 @@ import {Coupon, Setting, SimpleProduct, Order} from '@woocommerce/api';
 
 const client = factories.api.withDefaultPermalinks;
 const onboardingProfileEndpoint = '/wc-admin/onboarding/profile';
-const shippingZoneEndpoint = '/wc/v3/shipping/zones';
-const shippingClassesEndpoint = '/wc/v3/products/shipping_classes';
-const userEndpoint = '/wp/v2/users';
-const systemStatusEndpoint = '/wc/v3/system_status';
+const productsEndpoint = '/wc/v3/products';
 const productCategoriesEndpoint = '/wc/v3/products/categories';
 const shippingClassesEndpoint = '/wc/v3/products/shipping_classes';
 const shippingZoneEndpoint = '/wc/v3/shipping/zones';
@@ -408,7 +405,7 @@ export const withRestApi = {
 	 * @param orders Array of orders to be created
 	 * @param {boolean} testResponse Test the response status code.
 	 */
-	batchCreateOrders: async ( orders ) => {
+	batchCreateOrders: async ( orders, testResponse = true ) => {
 		const path = '/wc/v3/orders/batch';
 		const payload = { create: orders };
 
@@ -417,7 +414,6 @@ export const withRestApi = {
 			expect( response.status ).toBe( 200 );
 		}
 	},
-
 	/**
 	 * Add tax classes.
 	 *

@@ -103,7 +103,21 @@ This package provides support for enabling retries in tests:
 | `runSetupWizard` | | Open the onboarding profiler |
 | `updateOrderStatus` | `orderId, status` | Update the status of an order |
 | `openEmailLog` | | Open the WP Mail Log page |
+| `openAnalyticsPage` | | Open any Analytics page |
 | `openAllUsersView` | | Open the All Users page |
+| `openImportProducts` | | Open the Import Products page |
+| `openExtensions` | | Go to WooCommerce -> Extensions |
+| `openWordPressUpdatesPage` | | Go to Dashboard -> Updates |
+| `revokeDownloadableProductPermission` | `productName` | Remove a downloadable product permission from order |
+| `installAllUpdates` | | Install all pending updates on Dashboard -> Updates|
+| `updateDownloadableProductPermission` | `productName, expirationDate, downloadsRemaining` | Update the attributes of a downloadable product permission in order |
+| `updateWordPress` | | Install pending WordPress updates on Dashboard -> Updates|
+| `updatePlugins` | | Install all pending plugin updates on Dashboard -> Updates|
+| `updateThemes` | | Install all pending theme updates on Dashboard -> Updates|
+| `verifyCannotDownloadFromBecause` | `page, reason` | Verify that cannot download a product from `page` because of `reason`  |
+| `verifyDownloadableProductPermission` | `productName, expirationDate, downloadsRemaining` | Verify the attributes of a downloadable product permission in order |
+| `runDatabaseUpdate` || Runs the database update if needed |
+| `openDownloadLink` | | Open the download link of a product |
 
 ### Shopper `shopper`
 
@@ -147,17 +161,16 @@ Please note: if you're using a non-SSL environment (such as a Docker container f
 | `deleteAllProductAttributes` | `testResponse` | Permanently delete all product attributes |
 | `deleteAllProductCategories` | `testResponse` | Permanently delete all product categories |
 | `deleteAllProducts` | | Permanently delete all products |
-| `deleteAllProductTags` | | Permanently delete all product tags |
-| `deleteAllShippingClasses` | | Permanently delete all shipping classes |
-| `deleteAllShippingZones` | | Permanently delete all shipping zones except the default |
+| `deleteAllProductTags` | `testResponse` | Permanently delete all product tags |
+| `deleteAllShippingClasses` | `testResponse` | Permanently delete all shipping classes |
+| `deleteAllShippingZones` | `testResponse` | Permanently delete all shipping zones except the default |
 | `deleteCoupon` | `couponId` | Permanently delete a coupon |
 | `deleteCustomerByEmail` | `emailAddress` | Delete customer user account. Posts are reassigned to user ID 1 |
 | `deleteOrder` | `orderId` | Permanently delete an order |
 | `deleteProduct` | `productId` | Permanently delete a simple product |
 | `getSystemEnvironment` | | Get the current environment from the WooCommerce system status API. |
 | `resetOnboarding` | | Reset onboarding settings |
-| `resetSettingsGroupToDefault` | `settingsGroup` | Reset settings in settings group to default except `select` fields |
-| `deleteAllOrders` | | Permanently delete all orders |
+| `resetSettingsGroupToDefault` | `settingsGroup`, `testResponse` | Reset settings in settings group to default except `select` fields |
 | `updateSettingOption` | `settingsGroup`, `settingID`, `payload` | Update a settings group |
 | `updatePaymentGateway`| `paymentGatewayId`, `payload`, `testResponse` | Update a payment gateway |
 
@@ -216,17 +229,26 @@ There is a general utilities object `utils` with the following functions:
 | `settingsPageSaveChanges` |  | Save the current WooCommerce settings page |
 | `uiUnblocked` |  | Wait until the page is unblocked |
 | `unsetCheckbox` | `selector` | Uncheck a checkbox |
-trashVerification` | Verify that an item can be published and trashed |
 | `verifyAndPublish` | `noticeText` | Verify that an item can be published |
 | `verifyCheckboxIsSet` | `selector` | Verify that a checkbox is checked |
 | `verifyCheckboxIsUnset` | `selector` | Verify that a checkbox is unchecked |
+| `verifyPublishAndTrash` | `button, publishNotice, publishVerification, trashVerification` | Verify that an item can be published and trashed |
+| `verifyValueOfElementAttribute` | `selector, attribute, expectedValue` | Assert the value of the desired HTML attribute of a selector |
 | `verifyValueOfInputField` | `selector, value` | Verify an input contains the passed value |
 | `clickFilter` | `selector` | Click on a list page filter |
 | `moveAllItemsToTrash` |  | Moves all items in a list view to the Trash |
 | `verifyAndPublish` | `noticeText` | Verify that an item can be published |
-| `selectOptionInSelect2` | `selector, value` | helper method that searchs for select2 type fields and select plus insert value inside
-| `applyCoupon` | `couponName` | helper method which applies a coupon in cart or checkout
-| `removeCoupon` | | helper method that removes a single coupon within cart or checkout
+| `selectOptionInSelect2` | `selector, value` | helper method that searchs for select2 type fields and select plus insert value inside |
+| `searchForOrder` | `value, orderId, customerName` | helper method that searchs for an order via many different terms |
+| `addShippingZoneAndMethod` | `zoneName, zoneLocation, zipCode, zoneMethod` | util helper method for adding shipping zones with shipping methods |
+| `applyCoupon` | `couponName` | helper method which applies a coupon in cart or checkout |
+| `removeCoupon` | | helper method that removes a single coupon within cart or checkout |
+| `selectOrderAction` | `action` | Helper method to select an order action in the `Order Actions` postbox |
+| `clickUpdateOrder` | `noticeText`, `waitForSave` | Helper method to click the Update button on the order details page |
+| `deleteAllShippingZones` | | Delete all the existing shipping zones |
+| `waitForSelectorWithoutThrow` | `selector`, `timeoutInSeconds` | conditionally wait for a selector without throwing an error. Default timeout is 5 seconds |
+| `createOrder` | `orderOptions` | Creates an order using the API with the passed in details |
+| `clickAndWaitForSelector` | `buttonSelector`, `resultSelector`, `timeout` | Click a button and wait for response |
 
 ### Test Utilities
 

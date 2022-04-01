@@ -791,9 +791,25 @@ class WC_AJAX {
 		$file_counter = 0;
 		$order        = wc_get_order( $order_id );
 
-		foreach ( $product_ids as $product_id ) {
-			$product = wc_get_product( $product_id );
-			$files   = $product->get_downloads();
+		if ( ! $order->get_billing_email() ) {
+			wp_die();
+		}
+
+		$data  = array();
+		$items = $order->get_items();
+
+		// Check against order items first.
+		foreach ( $items as $item ) {
+			$product = $item->get_product();
+
+			if ( $product && $product->exists() && in_array( $product->get_id(), $product_ids, true ) && $product->is_downloadable() ) {
+				$data[ $product->get_id() ] = array(
+					'files'      => $product->get_downloads(),
+					'quantity'   => $item->get_quantity(),
+					'order_item' => $item,
+				);
+			}
+		}
 
 		foreach ( $product_ids as $product_id ) {
 			$product = wc_get_product( $product_id );
@@ -808,9 +824,9 @@ class WC_AJAX {
 				);
 			}
 
-			if ( ! empty( $files ) ) {
-				foreach ( $files as $download_id => $file ) {
-					$inserted_id = wc_downloadable_file_permission( $download_id, $product_id, $order );
+			if ( ! empty( $download_data['files'] ) ) {
+				foreach ( $download_data['files'] as $download_id => $file ) {
+					$inserted_id = wc_downloadable_file_permission( $download_id, $product->get_id(), $order, $download_data['quantity'], $download_data['order_item'] );
 					if ( $inserted_id ) {
 						$download = new WC_Customer_Download( $inserted_id );
 						$loop ++;

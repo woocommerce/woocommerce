@@ -29,7 +29,8 @@ const ordersApi = {
 		method: 'GET',
 		path: 'orders/<id>',
 		responseCode: 200,
-		order: async ( orderId ) => getRequest( `orders/${ orderId }` ),
+		order: async ( orderId, ordersQuery = {} ) =>
+			getRequest( `orders/${ orderId }`, ordersQuery ),
 	},
 	listAll: {
 		name: 'List all orders',

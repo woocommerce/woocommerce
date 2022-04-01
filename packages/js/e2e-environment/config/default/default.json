@@ -1,5 +1,6 @@
 {
   "url": "http://localhost:8084/",
+  "appName": "woocommerce_e2e",
   "users": {
 	"admin": {
 	  "username": "admin",
@@ -11,12 +12,23 @@
 	}
   },
   "products": {
-    "simple": {
-      "name": "Simple product",
-      "price": "9.99"
-    },
-    "variable": {
-      "name": "Variable Product with Three Variations",
+	"simple": {
+	  "name": "Simple product"
+	},
+	"variable": {
+	  "name": "Variable Product with Three Attributes",
+	  "defaultAttributes": [
+		{
+		  "id": 0,
+		  "name": "Size",
+		  "option": "Medium"
+		},
+		{
+		  "id": 0,
+		  "name": "Colour",
+		  "option": "Blue"
+		}
+	  ],
 	  "attributes": [
 		{
 		  "id": 0,

@@ -93,6 +93,7 @@ class WC_REST_Product_Reviews_V1_Controller_Tests extends WC_Unit_Test_Case {
 
 		$nonexistent_product_id = $this->product_id * 10;
 		$api_request->set_route( "/wc/v1/products/{$nonexistent_product_id}/reviews/" . $this->review_id );
+
 		$this->assertEquals(
 			'woocommerce_rest_product_invalid_id',
 			$this->sut->update_item( $api_request )->get_error_code(),

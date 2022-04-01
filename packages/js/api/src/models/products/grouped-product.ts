@@ -40,7 +40,7 @@ export type GroupedProductRepositoryParams =
  * @typedef ListsGroupedProducts
  * @alias ListsModels.<GroupedProduct>
  */
-export type ListsGroupedProducts = ListsModels< GroupedProductUpdateParams >;
+export type ListsGroupedProducts = ListsModels< GroupedProductRepositoryParams >;
 
 /**
  * An interface for creating Grouped products using the repository.
@@ -48,7 +48,7 @@ export type ListsGroupedProducts = ListsModels< GroupedProductUpdateParams >;
  * @typedef CreatesGroupedProducts
  * @alias CreatesModels.<GroupedProduct>
  */
-export type CreatesGroupedProducts = CreatesModels< GroupedProductUpdateParams >;
+export type CreatesGroupedProducts = CreatesModels< GroupedProductRepositoryParams >;
 
 /**
  * An interface for reading Grouped products using the repository.
@@ -56,7 +56,7 @@ export type CreatesGroupedProducts = CreatesModels< GroupedProductUpdateParams >
  * @typedef ReadsGroupedProducts
  * @alias ReadsModels.<GroupedProduct>
  */
-export type ReadsGroupedProducts = ReadsModels< GroupedProductUpdateParams >;
+export type ReadsGroupedProducts = ReadsModels< GroupedProductRepositoryParams >;
 
 /**
  * An interface for updating Grouped products using the repository.
@@ -64,7 +64,7 @@ export type ReadsGroupedProducts = ReadsModels< GroupedProductUpdateParams >;
  * @typedef UpdatesGroupedProducts
  * @alias UpdatesModels.<GroupedProduct>
  */
-export type UpdatesGroupedProducts = UpdatesModels< GroupedProductUpdateParams >;
+export type UpdatesGroupedProducts = UpdatesModels< GroupedProductRepositoryParams >;
 
 /**
  * An interface for deleting Grouped products using the repository.
@@ -72,7 +72,7 @@ export type UpdatesGroupedProducts = UpdatesModels< GroupedProductUpdateParams >
  * @typedef DeletesGroupedProducts
  * @alias DeletesModels.<GroupedProduct>
  */
-export type DeletesGroupedProducts = DeletesModels< GroupedProductUpdateParams >;
+export type DeletesGroupedProducts = DeletesModels< GroupedProductRepositoryParams >;
 
 /**
  * The base for the Grouped product object.

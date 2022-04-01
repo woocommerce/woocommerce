@@ -29,7 +29,6 @@
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
-		margin-bottom: 32px;
 		min-height: 216px;
 		padding: 24px 16px;
 		width: 100%;
@@ -444,13 +443,10 @@
 	}
 
 	.marketplace-content-wrapper {
-		margin: 0 auto 0 0;
+		font-family: $font-sf-pro-text;
+		margin: 0 auto;
 		max-width: 1032px;
 		width: 100%;
-
-		@media only screen and ( min-width: 1300px ) {
-			margin-left: 64px;
-		}
 	}
 
 	.addon-product-group {
@@ -642,8 +638,20 @@
 				}
 
 				.product-developed-by {
+					color: #50575e; /* Gray 60 */
+					font-size: 12px;
+					line-height: 20px;
+					margin-top: 4px;
+
+					.product-vendor-link {
+						color: #50575e; /* Gray 60 */
+					}
+				}
+
+				.product-developed-by {
 					color: #50575e; // Gray 60
 					font-size: 12px;
+					font-family: sans-serif;
 					line-height: 20px;
 					margin-top: 4px;
 
@@ -698,6 +706,7 @@
 					.product-reviews-count {
 						color: #646970; // Gray 50
 						font-size: 12px;
+						font-family: sans-serif;
 						line-height: 24px;
 						letter-spacing: -0.154px;
 						margin-left: 4px;

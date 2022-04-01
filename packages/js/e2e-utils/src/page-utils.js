@@ -18,9 +18,7 @@ import { waitForTimeout } from './flows/utils';
 export const clearAndFillInput = async ( selector, value ) => {
 	await page.waitForSelector( selector );
 	await page.focus( selector );
-	await page.waitFor(2000); // avoiding flakiness
 	await pressKeyWithModifier( 'primary', 'a' );
-	await page.waitFor(2000); // avoiding flakiness
 	await page.type( selector, value );
 };
 
@@ -238,6 +236,21 @@ export const selectOptionInSelect2 = async ( value, selector = 'input.select2-se
 };
 
 /**
+ * Search by any term for an order
+ *
+ * @param {string} value Value to be entered into the search field
+ * @param {string} orderId Order ID
+ * @param {string} customerName Customer's full name attached to order ID.
+ */
+export const searchForOrder = async ( value, orderId, customerName) => {
+	await clearAndFillInput( '#post-search-input', value );
+	await expect( page ).toMatchElement( '#post-search-input', value );
+	await expect( page ).toClick( '#search-submit' );
+	await page.waitForSelector( '#the-list', { timeout: 10000 } );
+	await expect( page ).toMatchElement( '.order_number > a.order-view', { text: `#${orderId} ${customerName}` } );
+};
+
+/**
  * Apply a coupon code within cart or checkout.
  * Method will try to apply a coupon in the checkout, otherwise will try to apply in the cart.
  *
@@ -278,24 +291,39 @@ export const removeCoupon = async ( couponCode ) => {
 	await expect( page ).toMatchElement( '.woocommerce-message', {text: 'Coupon has been removed.' } );
 };
 
-export {
-	clearAndFillInput,
-	clickTab,
-	settingsPageSaveChanges,
-	permalinkSettingsPageSaveChanges,
-	setCheckbox,
-	unsetCheckbox,
-	uiUnblocked,
-	verifyPublishAndTrash,
-	verifyCheckboxIsSet,
-	verifyCheckboxIsUnset,
-	verifyValueOfInputField,
-	clickFilter,
-	moveAllItemsToTrash,
-	evalAndClick,
-	selectOptionInSelect2,
-	applyCoupon,
-	removeCoupon,
+/**
+ *
+ * Select and perform an order action in the `Order actions` postbox.
+ *
+ * @param {string} action The action to take on the order.
+ */
+export const selectOrderAction = async ( action ) => {
+	await page.select( 'select[name=wc_order_action]', action );
+	await Promise.all( [
+		page.click( '.wc-reload' ),
+		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+	] );
+}
+
+
+/**
+ * Evaluate and click a button selector then wait for a result selector.
+ * This is a work around for what appears to be intermittent delays in handling confirm dialogs.
+ *
+ * @param {string} buttonSelector Selector of button to click
+ * @param {string} resultSelector Selector to wait for after click
+ * @param {number} timeout Timeout length in milliseconds. Default 5000.
+ * @returns {Promise<void>}
+ */
+export const clickAndWaitForSelector = async ( buttonSelector, resultSelector, timeout = 5000 ) => {
+	await evalAndClick( buttonSelector );
+	await waitForSelector(
+		page,
+		resultSelector,
+		{
+			timeout
+		}
+	);
 };
 /**
  * Waits for selector to be present in DOM.
