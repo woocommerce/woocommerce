@@ -6,7 +6,6 @@
 use Automattic\WooCommerce\DataBase\Migrations\CustomOrderTable\WPPostToCOTMigrator;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
-use Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ShippingHelper;
@@ -287,9 +286,9 @@ WHERE order_id = {$order_id}
 			( new WC_DateTime( $db_order_op_data->date_completed_gmt ) )->date( DATE_ISO8601 )
 		);
 		$this->assertEquals( $order->get_shipping_tax(), $db_order_op_data->shipping_tax_amount );
-		$this->assertEquals( $order->get_shipping_total(), $db_order_op_data->shipping_total_amount );
-		$this->assertEquals( $order->get_discount_tax(), $db_order_op_data->discount_tax_amount );
-		$this->assertEquals( $order->get_discount_total(), $db_order_op_data->discount_total_amount );
+		$this->assertEquals( (float) $order->get_shipping_total(), (float) $db_order_op_data->shipping_total_amount );
+		$this->assertEquals( (float) $order->get_discount_tax(), (float) $db_order_op_data->discount_tax_amount );
+		$this->assertEquals( (float) $order->get_discount_total(), (float) $db_order_op_data->discount_total_amount );
 	}
 
 	private function clear_all_orders_and_reset_checkpoint() {
