@@ -154,18 +154,26 @@ export const SectionedTaskList: React.FC< TaskListProps > = ( {
 	};
 
 	const getPanelTitle = ( section: TaskListSection ) => {
-		return openPanel === section.id ? (
-			<div className="wooocommerce-task-card__header-container">
-				<div className="wooocommerce-task-card__header">
-					<SectionHeader { ...section } />
+		if ( openPanel === section.id ) {
+			return (
+				<div className="wooocommerce-task-card__header-container">
+					<div className="wooocommerce-task-card__header">
+						<SectionHeader { ...section } />
+					</div>
 				</div>
-			</div>
-		) : (
+			);
+		}
+		const completedTasksCount = tasks.filter(
+			( task ) => ! task.isComplete && section.tasks.includes( task.id )
+		).length;
+		return (
 			<>
 				<Text variant="title.small" size="20" lineHeight="28px">
 					{ section.title }
 				</Text>
-				<Badge count={ section.tasks.length } />
+				{ ! section.isComplete && (
+					<Badge count={ completedTasksCount } />
+				) }
 				{ section.isComplete && (
 					<div className="woocommerce-task__icon">
 						<Icon icon={ check } />
