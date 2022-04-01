@@ -21,6 +21,10 @@
 				padding-top: 20px;
 				padding-bottom: 20px;
 			}
+
+			.components-panel__arrow {
+				right: $gap-large;
+			}
 		}
 		.wooocommerce-task-card__header-container {
 			width: 100%;
@@ -28,14 +32,13 @@
 		}
 		.components-panel__body-toggle {
 			box-shadow: none;
+			padding-left: $gap-large;
 		}
 		&.is-opened .components-panel__body-toggle {
 			width: 100%;
 			padding: 0;
-			> span {
-				position: absolute;
-				right: 0;
-				top: $gap-large;
+			.components-panel__arrow {
+				top: 32px;
 			}
 		}
 
