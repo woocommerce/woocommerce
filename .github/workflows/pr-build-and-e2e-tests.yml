@@ -160,11 +160,16 @@ jobs:
                       ${{ env.API_TEST_REPORT_DIR }}/allure-report
                   retention-days: 7
 
-            - name: Clone API test reports repository
+            - name: Publish API test report to GH Pages
               uses: actions/checkout@v2
               with:
                   repository: 'rodelgc/wip-woocommerce-api-test-reports'
-                  ssh-key: ''
+                  path: ${{ env.API_TEST_REPORT_DIR }}
+                  clean: 'false'
+              run: |
+                  ls $GITHUB_WORKSPACE
+                  ls -R $API_TEST_REPORT_DIR
+                  pwd
 
     k6-tests-run:
         name: Runs k6 Performance tests
