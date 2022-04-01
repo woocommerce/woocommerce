@@ -34,12 +34,11 @@ test.describe('Payment setup task', () => {
 		await page.locator('text=Save').click();
 		await expect(
 			page.locator(
-				'li.woocommerce-task-list__item:has-text("Set up payments")'
+				'div.components-snackbar__content'
 			)
-		).toHaveClass(
-			'woocommerce-experimental-list__item has-action transitions-disabled woocommerce-task-list__item complete'
+		).toHaveText(
+			'Direct bank transfer details added successfully'
 		);
-		await page.locator('text=Set up payments').click();
 		await expect(page.locator('h1')).toHaveText('Set up payments');
 		await expect(
 			page.locator(
