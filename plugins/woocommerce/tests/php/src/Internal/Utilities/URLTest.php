@@ -88,6 +88,8 @@ class URLTest extends WC_Unit_Test_Case {
 			array( 'https://foo.bar/parent/%2E%2e/asset.txt', 'https://foo.bar/asset.txt' ),
 			array( 'https://foo.bar/parent/%2E.%2fasset.txt', 'https://foo.bar/parent/%2E.%2fasset.txt' ),
 			array( 'http://localhost?../../bar',              'http://localhost/?../../bar' ),
+			array( '//http.or.https/',                        '//http.or.https/' ),
+			array( '//schemaless/with-path',                  '//schemaless/with-path' ),
 		);
 	}
 

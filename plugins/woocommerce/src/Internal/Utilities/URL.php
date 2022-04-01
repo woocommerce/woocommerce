@@ -97,8 +97,12 @@ class URL {
 			$this->components['drive'] = $matches[2];
 		}
 
-		// If there is no scheme, assume and prepend "file://".
-		if ( ! preg_match( '#^[a-z]+://#i', $this->url ) ) {
+		/*
+		 * If there is no scheme, assume and prepend "file://". An exception is made for cases where the URL simply
+		 * starts with exactly two forward slashes, which indicates 'any scheme' (most commonly, that is used when
+		 * there is freedom to switch between 'http' and 'https').
+		 */
+		if ( ! preg_match( '#^[a-z]+://#i', $this->url ) && ! preg_match( '#^//(?!/)#', $this->url ) ) {
 			$this->url = 'file://' . $this->url;
 		}
 
@@ -115,19 +119,19 @@ class URL {
 			);
 		}
 
+		$this->components = array_merge( $this->components, $parsed_components );
+
 		// File URLs cannot have a host. However, the initial path segment *or* the Windows drive letter
 		// (if present) may be incorrectly be interpreted as the host name.
-		if ( 'file' === $parsed_components['scheme'] && ! empty( $parsed_components['host'] ) ) {
+		if ( 'file' === $this->components['scheme'] && ! empty( $this->components['host'] ) ) {
 			// If we do not have a drive letter, then simply merge the host and the path together.
 			if ( null === $this->components['drive'] ) {
-				$parsed_components['path'] = $parsed_components['host'] . ( $parsed_components['path'] ?? '' );
+				$this->components['path'] = $this->components['host'] . ( $this->components['path'] ?? '' );
 			}
 
-			// Always unset the host in this situation.
-			unset( $parsed_components['host'] );
+			// Restore the host to null in this situation.
+			$this->components['host'] = null;
 		}
-
-		$this->components = array_merge( $this->components, $parsed_components );
 	}
 
 	/**
@@ -325,7 +329,7 @@ class URL {
 	public function get_url( array $component_overrides = array() ): string {
 		$components = array_merge( $this->components, $component_overrides );
 
-		$scheme = null !== $components['scheme'] ? $components['scheme'] . '://' : '';
+		$scheme = null !== $components['scheme'] ? $components['scheme'] . '://' : '//';
 		$host   = null !== $components['host'] ? $components['host'] : '';
 		$port   = null !== $components['port'] ? ':' . $components['port'] : '';
 		$path   = $this->get_path( $components['path'] );
