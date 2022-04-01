@@ -135,6 +135,7 @@ class WPPostToCOTMigrator {
 		$this->process_migration_for_ids( $order_post_ids );
 		$last_post_migrated = max( $order_post_ids );
 		$this->update_checkpoint( $last_post_migrated );
+		return false;
 	}
 
 	/**
@@ -192,7 +193,7 @@ class WPPostToCOTMigrator {
 		$checkpoint = $this->get_checkpoint();
 		$post_ids   = $wpdb->get_col(
 			$wpdb->prepare(
-				"SELECT ID FROM $wpdb->posts WHERE ID > %d AND post_type = %s LIMIT %d",
+				"SELECT ID FROM $wpdb->posts WHERE ID > %d AND post_type = %s ORDER BY ID ASC LIMIT %d ",
 				$checkpoint['id'],
 				'shop_order',
 				$batch_size
