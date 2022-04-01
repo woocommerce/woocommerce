@@ -6,10 +6,10 @@ const {
 } = require( '../../endpoints' );
 const {
 	getOrderExample,
-	getExampleTaxRate,
+	getTaxRateExamples,
+	getVariationExample,
 	simpleProduct: defaultSimpleProduct,
 	variableProduct: defaultVariableProduct,
-	variation: defaultVariation,
 	groupedProduct: defaultGroupedProduct,
 	externalProduct: defaultExternalProduct,
 } = require( '../../data' );
@@ -32,7 +32,7 @@ const variableProduct = {
 };
 
 const variation = {
-	...defaultVariation,
+	...getVariationExample(),
 	regular_price: '20.00',
 	tax_class: 'reduced-rate',
 };
@@ -54,17 +54,7 @@ const groupedProduct = defaultGroupedProduct;
 /**
  * Tax rates for each tax class
  */
-const standardTaxRate = getExampleTaxRate();
-const reducedTaxRate = {
-	name: 'Reduced Rate',
-	rate: '1.0000',
-	class: 'reduced-rate',
-};
-const zeroTaxRate = {
-	name: 'Zero Rate',
-	rate: '0.0000',
-	class: 'zero-rate',
-};
+const { standardTaxRate, reducedTaxRate, zeroTaxRate } = getTaxRateExamples();
 
 /**
  * Delete all pre-existing tax rates.
