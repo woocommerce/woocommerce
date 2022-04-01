@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-const { merchant } = require('@woocommerce/e2e-utils');
+const { merchant, withRestApi } = require('@woocommerce/e2e-utils');
 const { lorem, helpers } = require('faker');
 
 const runAddShippingClassesTest = () => {
@@ -11,6 +11,10 @@ const runAddShippingClassesTest = () => {
 
 			// Go to Shipping Classes page
 			await merchant.openSettings('shipping', 'classes');
+		});
+
+		afterAll(async () => {
+			await withRestApi.deleteAllShippingClasses();
 		});
 
 		it('can add shipping classes', async () => {
