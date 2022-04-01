@@ -7,7 +7,7 @@ import classNames from 'classnames';
 /**
  * Internal dependencies
  */
-import CartLineItemsTable from '../../../cart/cart-line-items-table';
+import CartLineItemsTable from '../../../../cart/cart-line-items-table';
 
 type MiniCartContentsBlockProps = {
 	className: string;

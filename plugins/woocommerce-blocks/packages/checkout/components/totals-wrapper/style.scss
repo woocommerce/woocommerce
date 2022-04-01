@@ -2,13 +2,17 @@
 	@include with-translucent-border(1px 0 0);
 	padding: $gap 0;
 
-	&:last-child {
-		padding-bottom: 0;
-	}
-
 	&.has-bottom-border {
 		&::after {
 			border-bottom-width: 1px;
+		}
+	}
+	// TotalWrappers like Discount and Fee are sometimes empty
+	// this prevents displaying the empty areas in Order Summary
+	&:empty {
+		padding: 0;
+		&::after {
+			content: none;
 		}
 	}
 
@@ -19,6 +23,8 @@
 			@include with-translucent-border(0 0 1px);
 			padding: $gap 0;
 
+
+			// removes the border bottom for the last slot inserted
 			&:last-child::after {
 				border-bottom-width: 0;
 			}
