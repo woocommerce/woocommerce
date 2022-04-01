@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 set -eu
 
-declare -p WORDPRESS_HOST
-wait-for-it ${WORDPRESS_HOST} -t 120
-
 ## if file exists then exit early because initialization already happened.
 if [ -f /var/www/html/.initialized ];
 then
