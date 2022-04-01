@@ -42,13 +42,3 @@
 	content: ", ";
 	white-space: pre;
 }
-
-// Target the shipping selection in checkout only, the Cart block has enough spacing because of the buttons on the panel.
-.wc-block-checkout .wc-block-components-shipping-rates-control__package {
-	margin-bottom: em($gap-large);
-
-	&:last-of-type {
-		margin-bottom: 0;
-	}
-
-}

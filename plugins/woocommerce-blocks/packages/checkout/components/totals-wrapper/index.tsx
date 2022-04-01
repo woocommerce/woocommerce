@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import classnames from 'classnames';
 import { Children, ReactNode } from 'react';
 
 /**
@@ -12,17 +13,23 @@ interface TotalsWrapperProps {
 	children: ReactNode;
 	/* If this TotalsWrapper is being used to wrap a Slot */
 	slotWrapper?: boolean;
+	className?: string;
 }
 
 const TotalsWrapper = ( {
 	children,
 	slotWrapper = false,
+	className,
 }: TotalsWrapperProps ): JSX.Element | null => {
 	return Children.count( children ) ? (
 		<div
-			className={ `wc-block-components-totals-wrapper${
-				slotWrapper ? ' slot-wrapper' : ''
-			}` }
+			className={ classnames(
+				className,
+				'wc-block-components-totals-wrapper',
+				{
+					'slot-wrapper': slotWrapper,
+				}
+			) }
 		>
 			{ children }
 		</div>

@@ -44,18 +44,16 @@ export async function getTaxesFromCurrentPage(): Promise<
 		value: string;
 	} >
 > {
-	return await page.$$eval(
-		'.wc-block-components-totals-taxes .wc-block-components-totals-item',
-		( nodes ) =>
-			nodes.map( ( node ) => {
-				const label = node.querySelector(
-					'.wc-block-components-totals-item__label'
-				)?.innerHTML;
-				const value = node.querySelector(
-					'.wc-block-components-totals-item__value'
-				)?.innerHTML;
-				return { label, value };
-			} )
+	return await page.$$eval( '.wc-block-components-totals-taxes', ( nodes ) =>
+		nodes.map( ( node ) => {
+			const label = node.querySelector(
+				'.wc-block-components-totals-item__label'
+			)?.innerHTML;
+			const value = node.querySelector(
+				'.wc-block-components-totals-item__value'
+			)?.innerHTML;
+			return { label, value };
+		} )
 	);
 }
 
