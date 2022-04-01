@@ -6,9 +6,10 @@ import {
 	activateTheme,
 	disableSiteEditorWelcomeGuide,
 	openGlobalBlockInserter,
-	pressKeyWithModifier,
 	switchUserToAdmin,
 	visitAdminPage,
+	pressKeyWithModifier,
+	searchForBlock as searchForFSEBlock,
 } from '@wordpress/e2e-test-utils';
 import { addQueryArgs } from '@wordpress/url';
 import { WP_ADMIN_DASHBOARD } from '@woocommerce/e2e-utils';
@@ -151,7 +152,7 @@ export const isBlockInsertedInWidgetsArea = async ( blockName ) => {
  * @param {string} [params.postId] ID of the template if we want to access template editor.
  * @param {'wp_template' | 'wp_template_part'} [params.postType='wp_template'] Type of template.
  */
-async function goToSiteEditor( editorContext = 'core', params ) {
+export async function goToSiteEditor( editorContext = 'core', params ) {
 	// There is a bug in Gutenberg/WPCore now that makes it impossible to rely on site-editor.php on setups
 	// with locally installed Gutenberg. Details in https://github.com/WordPress/gutenberg/issues/39639.
 	// TODO: Update to always use site-editor.php once WordPress 6.0 is released and fix is verified.
@@ -336,3 +337,18 @@ export function useTheme( themeSlug ) {
 		await activateTheme( previousTheme );
 	} );
 }
+
+/**
+ * Add a block to Full Site Editing.
+ *
+ * *Note:* insertBlock function gets focused on the canvas, this could prevent some dialogs from being displayed. e.g. compatibility notice.
+ *
+ * @param {string} blockName Block name.
+ */
+export const addBlockToFSEArea = async ( blockName ) => {
+	await searchForFSEBlock( blockName );
+	const insertButton = await page.waitForXPath(
+		`//button//span[contains(text(), '${ blockName }')]`
+	);
+	await insertButton.click();
+};
