@@ -1,7 +1,5 @@
-const { ordersApi } = require( '../../endpoints/orders' );
-const { productsApi } = require( '../../endpoints/products' );
+const { ordersApi, productsApi } = require( '../../endpoints' );
 const { order } = require( '../../data' );
-const { simpleProduct } = require( '../../data/products-crud' );
 
 /**
  * Billing properties to update.
@@ -50,6 +48,14 @@ const statusesDataTable = [
 ];
 
 /**
+ * A simple product that will be added to an order.
+ */
+const simpleProduct = {
+	name: 'Incredible Plastic Table',
+	regular_price: '48',
+};
+
+/**
  * Tests for the WooCommerce Orders API.
  *
  * @group api
@@ -60,22 +66,19 @@ describe( 'Orders API tests: CRUD', () => {
 	let orderId;
 
 	describe( 'Create an order', () => {
-		const createdOrders = [];
-
-		afterAll( async () => {
-			// Delete the created orders in the it.each() block.
-			// Unlike the `orderId` variable, these orders will not be needed by other tests.
-			await ordersApi.batch.orders( { delete: createdOrders } );
-		} );
-
 		it( 'can create a pending order by default', async () => {
-			const { body, status } = await ordersApi.create.order( {
+			// Create an order that has a null status
+			const requestPayload = {
 				...order,
 				status: null,
-			} );
+			};
+			const { body, status } = await ordersApi.create.order(
+				requestPayload
+			);
 			// Save the order ID. It will be used by the retrieve, update, and delete tests.
 			orderId = body.id;
 
+			// Verify that the order status is 'pending'
 			expect( status ).toEqual( ordersApi.create.responseCode );
 			expect( typeof body.id ).toEqual( 'number' );
 			expect( body.status ).toEqual( 'pending' );
@@ -96,8 +99,8 @@ describe( 'Orders API tests: CRUD', () => {
 				expect( typeof body.id ).toEqual( 'number' );
 				expect( body.status ).toEqual( expectedStatus );
 
-				// Save the order id to be deleted later
-				createdOrders.push( body.id );
+				// Cleanup: Delete this order
+				await ordersApi.delete.order( body.id, true );
 			}
 		);
 	} );
@@ -113,19 +116,15 @@ describe( 'Orders API tests: CRUD', () => {
 	} );
 
 	describe( 'Update an order', () => {
-		let productId;
-
 		beforeAll( async () => {
-			// Setup a product that will be added later to the order
-			const { body } = await productsApi.create.product( {
-				...simpleProduct,
-			} );
-			productId = body.id;
+			// Create the product and save its id
+			const { body } = await productsApi.create.product( simpleProduct );
+			simpleProduct.id = body.id;
 		} );
 
 		afterAll( async () => {
 			// Delete the created product
-			await productsApi.delete.product( productId, true );
+			await productsApi.delete.product( simpleProduct.id, true );
 		} );
 
 		it.each( statusesDataTable )(
@@ -160,16 +159,17 @@ describe( 'Orders API tests: CRUD', () => {
 		it( 'can add a product to an order', async () => {
 			// Add the product to the order
 			const requestPayload = {
-				line_items: [ { product_id: productId } ],
+				line_items: [ { product_id: simpleProduct.id } ],
 			};
 			const { body, status } = await ordersApi.update.order(
 				orderId,
 				requestPayload
 			);
 
+			// Verify that the added product has the correct values
 			expect( status ).toEqual( ordersApi.update.responseCode );
 			expect( body.line_items ).toHaveLength( 1 );
-			expect( body.line_items[ 0 ].product_id ).toEqual( productId );
+			expect( body.line_items[ 0 ] ).toMatchObject( simpleProduct );
 		} );
 
 		it( 'can pay for an order', async () => {
@@ -186,7 +186,6 @@ describe( 'Orders API tests: CRUD', () => {
 				orderId,
 				updateRequestPayload
 			);
-
 			expect( status ).toEqual( ordersApi.update.responseCode );
 			expect( body.id ).toEqual( orderId );
 
@@ -201,9 +200,11 @@ describe( 'Orders API tests: CRUD', () => {
 
 	describe( 'Delete an order', () => {
 		it( 'can permanently delete an order', async () => {
+			// Delete the order.
 			const response = await ordersApi.delete.order( orderId, true );
 			expect( response.status ).toEqual( ordersApi.delete.responseCode );
 
+			// Verify that the order can no longer be retrieved.
 			const getOrderResponse = await ordersApi.retrieve.order( orderId );
 			expect( getOrderResponse.status ).toEqual( 404 );
 		} );
