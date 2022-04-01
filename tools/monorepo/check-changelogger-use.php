@@ -14,60 +14,53 @@
 function usage() {
 	global $argv;
 	echo <<<EOH
-USAGE: {$argv[0]} [--debug|-v] [--list] <base-ref> <head-ref>
+USAGE: {$argv[0]} [--debug|-v] [--list] [-p <path>|--path=<path>] <base-ref> <head-ref>
 Checks that a monorepo commit contains a Changelogger change entry for each
 project touched.
-  --debug, -v  Display verbose output.
-  --list       Just list projects, no explanatory output.
-  <base-ref>   Base git ref to compare for changed files.
-  <head-ref>   Head git ref to compare for changed files.
+  --debug, -v     Display verbose output.
+  --list          Just list projects, no explanatory output.
+  --path=<path>,  Project path to check for changed files.
+    -p <path>
+  <base-ref>      Base git ref to compare for changed files.
+  <head-ref>      Head git ref to compare for changed files.
 EOH;
 	exit( 1 );
 }
 
-$idx     = 0;
-$verbose = false;
-$list    = false;
-$base    = null;
-$head    = null;
-for ( $i = 1; $i < $argc; $i++ ) {
-	switch ( $argv[ $i ] ) {
-		case '-v':
-		case '--debug':
-			$verbose = true;
-			break;
-		case '--list':
-			$list = true;
-			break;
-		case '-h':
-		case '--help':
-			usage();
-			break;
-		default:
-			if ( substr( $argv[ $i ], 0, 1 ) !== '-' ) {
-				switch ( $idx++ ) {
-					case 0:
-						$base = $argv[ $i ];
-						break;
-					case 1:
-						$head = $argv[ $i ];
-						break;
-					default:
-						fprintf( STDERR, "\e[1;31mToo many arguments.\e[0m\n" );
-						usage();
-				}
-			} else {
-				fprintf( STDERR, "\e[1;31mUnrecognized parameter `%s`.\e[0m\n", $argv[ $i ] );
-				usage();
-			}
-			break;
-	}
+// Options followed by a single colon have a required value.
+$short_options = 'vhp:';
+$long_options = array(
+	'debug',
+	'list',
+	'help',
+	'path:',
+);
+$options = getopt( $short_options, $long_options, $remain_index );
+$arg_count = count( $argv ) - $remain_index;
+
+if ( isset( $options['h'] ) || isset( $options['help'] ) ) {
+	usage();
 }
 
-if ( null === $head ) {
+$list = isset( $options['l'] ) || isset( $options['list'] );
+$verbose = isset( $options['v'] ) || isset( $options['debug'] );
+$path = false;
+if ( isset( $options['p'] ) || isset( $options['path'] ) ) {
+	$path = isset( $options['path'] ) ? $options['path'] : $options['p'];
+}
+
+if ( $arg_count > 2 ) {
+	fprintf( STDERR, "\e[1;31mToo many arguments.\e[0m\n" );
+	usage();
+}
+
+if ( $arg_count < 2 ) {
 	fprintf( STDERR, "\e[1;31mBase and head refs are required.\e[0m\n" );
 	usage();
 }
+
+$base = $argv[ count( $argv ) - 2 ];
+$head = $argv[ count( $argv ) - 1 ];
 
 if ( $verbose ) {
 	/**
@@ -106,9 +99,17 @@ if ( ! $workspace || ! is_array( $workspace['projects'] ) ) {
 
 $composer_projects = array();
 foreach( $workspace['projects'] as $project => $directory ) {
+	if ( $path && $directory !== $path ) {
+		continue;
+	}
 	if ( file_exists( $base_path . '/' . $directory . '/composer.json' ) ) {
 		$composer_projects[] = $directory;
 	}
+}
+
+if ( $path && ! count( $composer_projects ) ) {
+	debug( sprintf( 'The provided project path, %s, did not contain a composer file.', $path ) );
+	exit( 1 );
 }
 
 // Find projects that use changelogger, and read the relevant config.
@@ -128,7 +129,7 @@ foreach ( $composer_projects as $project_path ) {
 	$data  = isset( $data['extra']['changelogger'] ) ? $data['extra']['changelogger'] : array();
 	$data += array(
 		'changelog'   => $project_path . '/CHANGELOG.md',
-		'changes-dir' => $project_patch . '/changelog',
+		'changes-dir' => $project_path . '/changelog',
 	);
 	$changelogger_projects[ $project_path ] = $data;
 }
