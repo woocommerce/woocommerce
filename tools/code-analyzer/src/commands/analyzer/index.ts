@@ -53,6 +53,12 @@ export default class Analyzer extends Command {
 			description: 'GitHub organization/repository.',
 			default: 'woocommerce/woocommerce',
 		}),
+		plugin: Flags.string({
+			char: 'p',
+			description: 'Plugin to check for',
+			options: ['core', 'admin', 'beta'],
+			default: 'core',
+		}),
 	};
 
 	/**
@@ -69,10 +75,10 @@ export default class Analyzer extends Command {
 			flags.base
 		);
 
-		const version = await this.getPluginVersion();
-		this.log(`WooCommerce Version: ${version}`);
+		const pluginData = await this.getPluginData(flags.plugin);
+		this.log(`${pluginData[1]} Version: ${pluginData[0]}`);
 
-		await this.scanChanges(patchContent, version, flags.output);
+		await this.scanChanges(patchContent, pluginData[0], flags.output);
 	}
 
 	/**
@@ -90,29 +96,60 @@ export default class Analyzer extends Command {
 	}
 
 	/**
-	 * Get current plugin version
+	 * Get plugin data
 	 *
-	 * @return {Promise<string>}
+	 * @param {string} plugin Plugin slug.
+	 * @return {Promise<string[]>}
 	 */
-	private async getPluginVersion(): Promise<string> {
-		CliUx.ux.action.start('Getting current WooCommerce version');
+	private async getPluginData(plugin: string): Promise<string[]> {
+		/**
+		 * List of plugins from our monorepo.
+		 */
+		const plugins = <any> {
+			core: {
+				name: 'WooCommerce',
+				mainFile: join(
+					MONOREPO_ROOT,
+					'plugins',
+					'woocommerce',
+					'woocommerce.php'
+				),
+			},
+			admin: {
+				name: 'WooCommerce Admin',
+				mainFile: join(
+					MONOREPO_ROOT,
+					'plugins',
+					'woocommerce-admin',
+					'woocommerce-admin.php'
+				),
+			},
+			beta: {
+				name: 'WooCommerce Beta Tester',
+				mainFile: join(
+					MONOREPO_ROOT,
+					'plugins',
+					'woocommerce-beta-tester',
+					'woocommerce-beta-tester.php'
+				),
+			},
+		};
 
-		const filepath = join(
-			MONOREPO_ROOT,
-			'plugins',
-			'woocommerce',
-			'woocommerce.php'
-		);
+		const pluginData = plugins[plugin];
 
-		const content = readFileSync(filepath).toString();
-		const data = content.match(/^\s+\*\s+Version:\s+(.*)/m);
+		CliUx.ux.action.start(`Getting ${pluginData.name} version`);
 
-		if (!data) {
+		const content = readFileSync(pluginData.mainFile).toString();
+		const rawVer = content.match(/^\s+\*\s+Version:\s+(.*)/m);
+
+		if (!rawVer) {
 			this.error('Failed to find plugin version!');
 		}
+		const version = rawVer![1].replace(/\-.*/, '');
 
 		CliUx.ux.action.stop();
-		return data![1].replace(/\-.*/, '');
+
+		return [version, pluginData.name, pluginData.mainFile];
 	}
 
 	/**
@@ -193,7 +230,7 @@ export default class Analyzer extends Command {
 	 * @return {Promise<string>}
 	 */
 	private async getFilename(str: string): Promise<string> {
-		return str.replace(/a(.*)\s.*/g, '$1');
+		return str.replace(/^a(.*)\s.*/, '$1');
 	}
 
 	/**
@@ -224,11 +261,6 @@ export default class Analyzer extends Command {
 
 		if (hooks) {
 			await this.printHookResults(hooks, output, 'HOOKS');
-			this.log(
-				JSON.stringify(hooks, (key, value) =>
-					value instanceof Map ? [...value] : value
-				)
-			);
 		} else {
 			this.log('No template changes found');
 		}
@@ -249,7 +281,7 @@ export default class Analyzer extends Command {
 		if ('github' === output) {
 			for (const [key, value] of data) {
 				this.log(
-					`::${value[1]} file=${key},line=${value[0]},title=${value[2]}::${value[3]}`
+					`::${value[0]} file=${key},line=1,title=${value[1]}::${value[2]}`
 				);
 			}
 		} else {
@@ -258,9 +290,7 @@ export default class Analyzer extends Command {
 				this.log('FILE: ' + key);
 				this.log('---------------------------------------------------');
 				this.log(
-					` ${value[0]} | ${value[1].toUpperCase()} | ${value[2]} | ${
-						value[3]
-					}`
+					` ${value[0].toUpperCase()} | ${value[1]} | ${value[2]}`
 				);
 				this.log('---------------------------------------------------');
 			}
@@ -283,7 +313,7 @@ export default class Analyzer extends Command {
 			for (const [key, value] of data) {
 				for (const [k, v] of value) {
 					this.log(
-						`::${v[1]} file=${key},line=${v[0]},title=${v[2]} - ${k}::${v[3]}`
+						`::${v[0]} file=${key},line=1,title=${v[1]} - ${k}::${v[2]}`
 					);
 				}
 			}
@@ -297,9 +327,7 @@ export default class Analyzer extends Command {
 					this.log(
 						'---------------------------------------------------'
 					);
-					this.log(
-						` ${v[0]} | ${v[1].toUpperCase()} | ${v[2]} | ${v[3]}`
-					);
+					this.log(` ${v[0].toUpperCase()} | ${v[1]} | ${v[2]}`);
 					this.log(
 						'---------------------------------------------------'
 					);
@@ -331,28 +359,32 @@ export default class Analyzer extends Command {
 		const matchPatches = /^a\/(.+)\/templates\/(.+)/g;
 		const title = 'Template change detected';
 		const patches = await this.getPatches(content, matchPatches);
+		const matchVersion = `^(\\+.+\\*.+)(@version)\\s+(${version.replace(
+			/\./g,
+			'\\.'
+		)}).*`;
+		const versionRegex = new RegExp(matchVersion, 'g');
 
-		for (let p in patches) {
+		for (const p in patches) {
 			const patch = patches[p];
 			const lines = patch.split('\n');
 			const filepath = await this.getFilename(lines[0]);
 			let code = 'warning';
 			let message = 'This template may require a version bump!';
 
-			for (let l in lines) {
+			for (const l in lines) {
 				const line = lines[l];
 
-				if (line.match(/^(\+.+\*.+)(@version)/g)) {
-					// @todo: Compare with current product version.
+				if (line.match(versionRegex)) {
 					code = 'notice';
 					message = 'Version bump found';
 				}
 			}
 
 			if ('notice' === code && report.get(filepath)) {
-				report.set(filepath, ['1', code, title, message]);
+				report.set(filepath, [code, title, message]);
 			} else if (!report.get(filepath)) {
-				report.set(filepath, ['1', code, title, message]);
+				report.set(filepath, [code, title, message]);
 			}
 		}
 
@@ -373,8 +405,10 @@ export default class Analyzer extends Command {
 	): Promise<Map<string, Map<string, string[]>>> {
 		CliUx.ux.action.start('Scanning for new hooks');
 
-		let report: Map<string, Map<string, string[]>> = new Map<string, Map<string, string[]>>();
-		let hooks = report;
+		let report: Map<string, Map<string, string[]>> = new Map<
+			string,
+			Map<string, string[]>
+		>();
 
 		if (!content.match(/diff --git a\/(.+).php/g)) {
 			CliUx.ux.action.stop();
@@ -382,49 +416,41 @@ export default class Analyzer extends Command {
 		}
 
 		const matchPatches = /^a\/(.+).php/g;
-		const title = ''; // @todo
 		const patches = await this.getPatches(content, matchPatches);
+		const matchHooks = `@since\\s+(${version.replace(
+			/\./g,
+			'\\.'
+		)})(.*?)(apply_filters|do_action)\\(\\s+(\\'|\\")(.*?)(\\'|\\")`;
+		const newRegEx = new RegExp(matchHooks, 'gs');
 
-		for (let p in patches) {
+		for (const p in patches) {
 			const patch = patches[p];
+			const results = patch.match(newRegEx);
+			let hooksList: Map<string, string[]> = new Map<string, string[]>();
+
+			if (!results) {
+				continue;
+			}
+
 			const lines = patch.split('\n');
 			const filepath = await this.getFilename(lines[0]);
-			let code = 'warning';
-			let message = 'New filter found!';
-			let found = false;
-			let hook: Map<string, string[]> = new Map<string, string[]>();
 
-			for (let l in lines) {
-				const line = lines[l];
-				let type = 'filter';
+			for (const raw of results) {
+				// Extract hook name and type.
+				const hookName = raw.match(
+					/(do_action|apply_filters)\(\s+(\'|\")(.*)(\'|\")/
+				);
+				const kind = hookName![1] === 'do_action' ? 'action' : 'filter';
+				const message = `'${hookName![3]}' introduced in ${version}`;
+				const title = `New ${kind} found`;
 
-				if (line.match(/^(\+.+)(do_action|apply_filters)\(/g)) {
-					let name = line.match(/.*(apply_filters|do_action)\(\s+(\'|\")(.*)(\'|\")/);
-					let hookName = name![3];
-					if (line.match(/.*do_action\(/)) {
-						type = 'action';
-						message = 'New action found!';
-					}
-					code = 'notice';
-
-					hook.set(hookName, ['1', code, title, message, type]);
-					found = true;
-				}
-				// else if (line.match(/^(\+.+)(do_action|apply_filters)\(/g)) {
-				// @todo check for @since to confirm if it's a new hook.
-				//}
+				hooksList.set(hookName![3], ['NOTICE', title, message]);
 			}
 
-			if ('notice' === code && hooks.get(filepath)) {
-				// @remove: updates
-				hooks.set(filepath, hook);
-			} else if (found && !hooks.get(filepath)) {
-				// @remove: creates
-				hooks.set(filepath, hook);
-			}
+			report.set(filepath, hooksList);
 		}
 
 		CliUx.ux.action.stop();
-		return hooks;
+		return report;
 	}
 }
