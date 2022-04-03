@@ -14,7 +14,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 	/**
 	 * Setup our test server, endpoints, and user info.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 		$this->endpoint = new WC_REST_Setting_Options_Controller();
 		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\SettingsHelper::register();

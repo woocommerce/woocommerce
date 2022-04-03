@@ -19,12 +19,14 @@
   "dependencies": {
     "@oclif/core": "^1",
     "@oclif/plugin-help": "^5",
-    "@oclif/plugin-plugins": "^2.0.1"
+    "@oclif/plugin-plugins": "^2.0.1",
+    "@octokit/graphql": "4.8.0"
   },
   "devDependencies": {
     "@types/node": "^16.9.4",
     "eslint": "^7.32.0",
     "globby": "^11",
+    "jscodeshift": "^0.13.1",
     "oclif": "^2",
     "shx": "^0.3.3",
     "ts-node": "^10.2.1",
@@ -43,6 +45,9 @@
     "topics": {
       "merge": {
         "description": "Merges other repositories into the monorepo."
+      },
+      "transfer-issues": {
+        "description": "Transfers issues from other repositories into the monorepo."
       }
     }
   },

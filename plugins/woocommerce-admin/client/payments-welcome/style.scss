@@ -1,0 +1,255 @@
+.connect-account-page {
+	.woocommerce-payments-page {
+		margin: 0 auto;
+
+		&.is-narrow {
+			max-width: 680px;
+		}
+	}
+
+	.wcpay-connect-account-page-payment-methods {
+		svg {
+			display: inline-block;
+			height: 35px;
+			width: 52px;
+			margin-right: 0.5em;
+			margin-bottom: 0.5em;
+		}
+	}
+
+	.wcpay-connect-account-page-terms-of-service {
+		display: block;
+		margin: 0.5em 0;
+	}
+
+	.connect-account {
+		h2 {
+			font-size: 24px;
+			font-weight: normal;
+		}
+
+		h3 {
+			font-size: 16px;
+			line-height: 24px;
+			padding-top: 15px;
+		}
+
+		.connect-account__card,
+		.woocommerce-payments-banner,
+		.faq__card {
+			box-shadow: none;
+			border: 1px solid #e2e4e7;
+			border-radius: 2px;
+			margin-top: 24px;
+		}
+
+		.faq__card {
+			margin-bottom: var(--large-gap);
+			background-color: #fff;
+
+			h3 {
+				padding: 0 24px;
+				font-weight: normal;
+			}
+
+			.components-panel__body {
+				&.is-opened {
+					padding: 24px 24px 8px 24px;
+					> .components-panel__body-title {
+						margin: -24px;
+						margin-bottom: 13px;
+					}
+				}
+			}
+
+			.components-panel__body-toggle.components-button {
+				padding-left: 24px;
+				line-height: 20px;
+			}
+
+			.components-panel {
+				border-left: 0;
+				border-right: 0;
+			}
+
+			p {
+				font-size: 14px;
+				line-height: 20px;
+			}
+
+			ul {
+				margin-left: 34px;
+				li {
+					list-style: disc;
+					line-height: 20px;
+					font-size: 14px;
+					margin: 5px 0 0 0;
+					ul li {
+						list-style: circle;
+					}
+				}
+			}
+
+			.help-section {
+				font-size: 16px;
+				background: #f7edf7;
+				padding: 16px 24px;
+				color: #533582;
+				svg path {
+					fill: #533582;
+				}
+				span {
+					vertical-align: 6px;
+					margin-left: 10px;
+				}
+				a {
+					text-decoration: none;
+					vertical-align: 6px;
+					margin-left: 10px;
+				}
+			}
+		}
+
+		.connect-account__card {
+			> .components-card__header {
+				align-items: baseline;
+			}
+
+			// Phone-ish sizes.
+			@media (max-width: 680px) {
+				> .components-card__header {
+					flex-direction: column;
+				}
+
+				.connect-account__action {
+					margin-top: 15px;
+				}
+			}
+
+			// Applies for non-gutenberg
+			> .components-card__body {
+				padding: 0;
+
+				.content {
+					padding: 9px 24px 24px 24px;
+
+					a {
+						text-decoration: none;
+					}
+				}
+			}
+
+			// Applies for gutenberg
+			.components-card-body {
+				.onboarding-description {
+					margin-top: 0.5em;
+				}
+				.connect-account__action {
+					// margin-bottom: 0.5em;
+				}
+			}
+
+			.onboarding-description {
+				font-size: 16px;
+				color: #555;
+			}
+
+			.accepted-payment-methods {
+				font-size: 12px;
+			}
+		}
+
+		.connect-account__action {
+			margin: 0;
+			white-space: nowrap;
+			button.btn-nothanks {
+				margin-left: 0;
+				margin-right: 10px !important;
+			}
+			button.btn-install {
+				padding: 0 35px 0 35px;
+				border-radius: 3px;
+			}
+		}
+	}
+
+	.banner-heading-copy {
+		font-size: 26px;
+		line-height: 34px;
+	}
+}
+
+.woocommerce-payments-banner {
+	&.account-page {
+		border: none;
+		border-bottom: 1px solid #e2e4e7;
+		border-radius: 0;
+		box-shadow: none;
+		.components-card__body {
+			padding: 24px;
+		}
+	}
+
+	.limited-time-offer {
+		.flag-icon {
+			display: inline-block;
+			width: 14px;
+			height: 14px;
+			margin-right: 8px;
+		}
+	}
+
+
+	.offer-copy {
+		font-size: 16px;
+		line-height: 24px;
+		width: 380px;
+		font-weight: normal;
+	}
+
+	.discount-copy {
+		width: 380px;
+		margin-top: 6px;
+	}
+
+	.components-card__body {
+		background: url(./wcpay-banner.png) no-repeat right;
+	}
+}
+
+.wc-calypso-bridge-payments-welcome-survey {
+	p {
+		margin-bottom: 1em;
+	}
+}
+
+.wc-calypso-bridge-payments-welcome-survey__intro {
+	max-width: 500px;
+}
+
+.wc-calypso-bridge-payments-welcome-survey__question {
+	font-weight: bold;
+}
+
+.wc-calypso-bridge-payments-welcome-survey__selection {
+	margin: 1em 0;
+}
+.wc-calypso-bridge-payments-welcome-survey__comment {
+	margin-top: 1em;
+}
+
+.wc-calypso-bridge-payments-welcome-survey__buttons {
+	text-align: right;
+
+	button {
+		margin-left: 0.5em;
+	}
+
+	button.is-destructive {
+		background-color: #cc1818;
+		color: #fff;
+		&:hover {
+			color: #fff !important;
+		}
+	}
+}

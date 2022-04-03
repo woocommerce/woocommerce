@@ -1,0 +1,59 @@
+{
+  "name": "woocommerce-beta-tester",
+  "description": "Setting up the local beta tester scripts.",
+  "license": "GPL-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/woocommerce/woocommerce-beta-tester.git"
+  },
+  "title": "WooCommerce Beta Tester",
+  "version": "2.0.5",
+  "homepage": "http://github.com/woocommerce/woocommerce-beta-tester",
+  "devDependencies": {
+    "eslint": "5.16.0",
+    "husky": "1.3.1",
+    "lint-staged": "8.1.5",
+    "uglify-js": "^3.5.3"
+  },
+  "assets": {
+    "js": {
+      "min": "assets/js/*.min.js",
+      "js": "assets/js/*.js"
+    }
+  },
+  "scripts": {
+    "build": "./bin/build-zip.sh",
+    "build:dev": "npm run lint:js && npm run uglify",
+    "preuglify": "rm -f $npm_package_assets_js_min",
+    "uglify": "for f in $npm_package_assets_js_js; do file=${f%.js}; node_modules/.bin/uglifyjs $f -c -m > $file.min.js; done",
+    "lint:js": "eslint assets/js --ext=js"
+  },
+  "engines": {
+    "node": ">=10.15.0",
+    "npm": ">=6.4.1"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "linters": {
+      "*.php": [
+        "php -d display_errors=1 -l",
+        "composer run-script phpcs-pre-commit"
+      ],
+      "*.js": [
+        "eslint --fix",
+        "git add"
+      ]
+    },
+    "ignore": [
+      "*.min.js"
+    ]
+  },
+  "woorelease": {
+    "svn_reauth": "true",
+    "wp_org_slug": "woocommerce-beta-tester"
+  }
+}

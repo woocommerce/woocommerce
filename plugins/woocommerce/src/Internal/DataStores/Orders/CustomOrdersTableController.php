@@ -21,7 +21,7 @@ class CustomOrdersTableController {
 	/**
 	 * The name of the option for enabling the usage of the custom orders tables
 	 */
-	const CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION = 'woocommerce_custom_orders_table_enabled';
+	private const CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION = 'woocommerce_custom_orders_table_enabled';
 
 	/**
 	 * The data store object to use.

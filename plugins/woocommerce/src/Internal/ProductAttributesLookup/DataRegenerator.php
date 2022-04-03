@@ -6,6 +6,7 @@
 namespace Automattic\WooCommerce\Internal\ProductAttributesLookup;
 
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
+use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -30,7 +31,7 @@ defined( 'ABSPATH' ) || exit;
  */
 class DataRegenerator {
 
-	const PRODUCTS_PER_GENERATION_STEP = 10;
+	public const PRODUCTS_PER_GENERATION_STEP = 10;
 
 	/**
 	 * The data store to use.
@@ -440,44 +441,64 @@ class DataRegenerator {
 		}
 	}
 
-   /*
-	* Get the name of the product attributes lookup table.
-	*
-	* @return string
-	*/
-   public function get_lookup_table_name() {
-	   return $this->lookup_table_name;
-   }
+	/**
+	 * Get the name of the product attributes lookup table.
+	 *
+	 * @return string
+	 */
+	public function get_lookup_table_name() {
+		return $this->lookup_table_name;
+	}
 
-   /**
-	* Get the SQL statement that creates the product attributes lookup table, including the indices.
-	*
-	* @return string
-	*/
-   public function get_table_creation_sql() {
-	   global $wpdb;
+	/**
+	 * Get the SQL statement that creates the product attributes lookup table, including the indices.
+	 *
+	 * @return string
+	 */
+	public function get_table_creation_sql() {
+		global $wpdb;
 
-	   $collate = $wpdb->has_cap( 'collation' ) ? $wpdb->get_charset_collate() : '';
+		$collate = $wpdb->has_cap( 'collation' ) ? $wpdb->get_charset_collate() : '';
 
-	   return "CREATE TABLE {$this->lookup_table_name} (
+		return "CREATE TABLE {$this->lookup_table_name} (
  product_id bigint(20) NOT NULL,
  product_or_parent_id bigint(20) NOT NULL,
  taxonomy varchar(32) NOT NULL,
  term_id bigint(20) NOT NULL,
  is_variation_attribute tinyint(1) NOT NULL,
  in_stock tinyint(1) NOT NULL,
- INDEX product_or_parent_id_term_id (product_or_parent_id, term_id),
- INDEX is_variation_attribute_term_id (is_variation_attribute, term_id)
+ INDEX is_variation_attribute_term_id (is_variation_attribute, term_id),
+ PRIMARY KEY  ( `product_or_parent_id`, `term_id`, `product_id`, `taxonomy` )
 ) $collate;";
-   }
+	}
 
-   /**
-	* Run additional setup needed after a clean WooCommerce install finishes.
-	*/
-   private function run_woocommerce_installed_callback() {
-	   // The table must exist at this point (created via dbDelta), but we check just in case.
-	   if ( $this->data_store->check_lookup_table_exists() ) {
-		   $this->finalize_regeneration( true );
-	   }
+	/**
+	 * Create the primary key for the table if it doesn't exist already.
+	 * It also deletes the product_or_parent_id_term_id index if it exists, since it's now redundant.
+	 *
+	 * @return void
+	 */
+	public function create_table_primary_index() {
+		$database_util = wc_get_container()->get( DatabaseUtil::class );
+		$database_util->create_primary_key( $this->lookup_table_name, array( 'product_or_parent_id', 'term_id', 'product_id', 'taxonomy' ) );
+		$database_util->drop_table_index( $this->lookup_table_name, 'product_or_parent_id_term_id' );
+
+		if ( empty( $database_util->get_index_columns( $this->lookup_table_name ) ) ) {
+			wc_get_logger()->error( "The creation of the primary key for the {$this->lookup_table_name} table failed" );
+		}
+
+		if ( ! empty( $database_util->get_index_columns( $this->lookup_table_name, 'product_or_parent_id_term_id' ) ) ) {
+			wc_get_logger()->error( "Dropping the product_or_parent_id_term_id index from the {$this->lookup_table_name} table failed" );
+		}
+	}
+
+	/**
+	 * Run additional setup needed after a clean WooCommerce install finishes.
+	 */
+	private function run_woocommerce_installed_callback() {
+		// The table must exist at this point (created via dbDelta), but we check just in case.
+		if ( $this->data_store->check_lookup_table_exists() ) {
+			$this->finalize_regeneration( true );
+		}
 	}
 }

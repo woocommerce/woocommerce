@@ -8,13 +8,13 @@ defaults:
 jobs:
   test:
     name: PHP ${{ matrix.php }} WP ${{ matrix.wp }}
-    timeout-minutes: 15
+    timeout-minutes: 20
     runs-on: ubuntu-latest
     continue-on-error: ${{ matrix.wp == 'nightly' }}
     strategy:
       fail-fast: false
       matrix:
-        php: [ '7.0', '7.1', '7.2', '7.3', '7.4', '8.0' ]
+        php: [ '7.2', '7.3', '7.4', '8.0' ]
         wp: [ "latest" ]
         include:
           - wp: nightly
@@ -32,6 +32,11 @@ jobs:
           - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
     steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.7.0
+        with:
+            access_token: ${{ github.token }}
+
       - name: Checkout code
         uses: actions/checkout@v2
 
@@ -61,6 +66,10 @@ jobs:
             npm install -g pnpm
             pnpm install
             pnpm nx composer-install woocommerce
+      - name: Build Admin feature config
+        working-directory: ./
+        run: |
+          pnpm nx build:feature-config woocommerce-admin
 
       - name: Add PHP8 Compatibility.
         run: |

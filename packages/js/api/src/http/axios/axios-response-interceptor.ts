@@ -13,7 +13,11 @@ export class AxiosResponseInterceptor extends AxiosInterceptor {
 	 * @return {HTTPResponse} The HTTP response.
 	 */
 	protected onResponseSuccess( response: AxiosResponse ): HTTPResponse {
-		return new HTTPResponse( response.status, response.headers, response.data );
+		return new HTTPResponse(
+			response.status,
+			response.headers,
+			response.data
+		);
 	}
 
 	/**
@@ -24,7 +28,11 @@ export class AxiosResponseInterceptor extends AxiosInterceptor {
 	protected onResponseRejected( error: any ): never {
 		// Convert HTTP response errors into a form that we can handle them with.
 		if ( error.response ) {
-			throw new HTTPResponse( error.response.status, error.response.headers, error.response.data );
+			throw new HTTPResponse(
+				error.response.status,
+				error.response.headers,
+				error.response.data
+			);
 		}
 
 		throw error;

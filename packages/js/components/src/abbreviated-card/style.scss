@@ -1,0 +1,17 @@
+.woocommerce-abbreviated-card {
+	a {
+		display: flex;
+		flex-direction: row;
+		border-bottom: 1px solid $gray-200;
+		text-decoration: none;
+	}
+
+	&__icon {
+		display: flex;
+		align-items: center;
+		padding: $gap $gap-large;
+		svg {
+			fill: var(--wp-admin-theme-color);
+		}
+	}
+}

@@ -8,7 +8,7 @@ defaults:
 jobs:
   test:
     name: Code coverage (PHP 7.4, WP Latest)
-    timeout-minutes: 15
+    timeout-minutes: 20
     runs-on: ubuntu-latest
     services:
       database:
@@ -19,6 +19,11 @@ jobs:
           - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
     steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.7.0
+        with:
+            access_token: ${{ github.token }}
+
       - name: Checkout code
         uses: actions/checkout@v2
         with:
@@ -52,6 +57,11 @@ jobs:
 
       - name: Setup and install composer
         run: pnpm nx composer-install woocommerce
+        
+      - name: Build Admin feature config
+        working-directory: ./
+        run: |
+          pnpm nx build:feature-config woocommerce-admin
 
       - name: Init DB and WP
         run: pnpm nx install-unit-test-db woocommerce

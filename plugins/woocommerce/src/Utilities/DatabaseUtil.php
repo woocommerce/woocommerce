@@ -70,4 +70,67 @@ class DatabaseUtil {
 		//phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		return $wpdb->query( "DROP TABLE IF EXISTS `{$table_name}`" );
 	}
+
+	/**
+	 * Drops a table index, if both the table and the index exist.
+	 *
+	 * @param string $table_name The name of the table that contains the index.
+	 * @param string $index_name The name of the index to be dropped.
+	 * @return bool True if the index has been dropped, false if either the table or the index don't exist.
+	 */
+	public function drop_table_index( string $table_name, string $index_name ): bool {
+		global $wpdb;
+
+		if ( empty( $this->get_index_columns( $table_name, $index_name ) ) ) {
+			return false;
+		}
+
+		// phpcs:ignore WordPress.DB.PreparedSQL
+		$wpdb->query( "ALTER TABLE $table_name DROP INDEX $index_name" );
+		return true;
+	}
+
+	/**
+	 * Create a primary key for a table, only if the table doesn't have a primary key already.
+	 *
+	 * @param string $table_name Table name.
+	 * @param array  $columns An array with the index column names.
+	 * @return bool True if the key has been created, false if the table already had a primary key.
+	 */
+	public function create_primary_key( string $table_name, array $columns ) {
+		global $wpdb;
+
+		if ( ! empty( $this->get_index_columns( $table_name ) ) ) {
+			return false;
+		}
+
+		// phpcs:ignore WordPress.DB.PreparedSQL
+		$wpdb->query( "ALTER TABLE $table_name ADD PRIMARY KEY(`" . join( '`,`', $columns ) . '`)' );
+		return true;
+	}
+
+	/**
+	 * Get the columns of a given table index, or of the primary key.
+	 *
+	 * @param string $table_name Table name.
+	 * @param string $index_name Index name, empty string for the primary key.
+	 * @return array The index columns. Empty array if the table or the index don't exist.
+	 */
+	public function get_index_columns( string $table_name, string $index_name = '' ): array {
+		global $wpdb;
+
+		if ( empty( $index_name ) ) {
+			$index_name = 'PRIMARY';
+		}
+
+		// phpcs:disable WordPress.DB.PreparedSQL
+		return $wpdb->get_col(
+			"
+SELECT column_name FROM INFORMATION_SCHEMA.STATISTICS
+WHERE table_name='$table_name'
+AND table_schema='" . DB_NAME . "'
+AND index_name='$index_name'"
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL
+	}
 }
