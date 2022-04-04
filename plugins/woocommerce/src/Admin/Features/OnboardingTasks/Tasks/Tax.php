@@ -66,7 +66,7 @@ class Tax extends Task {
 	 */
 	public function get_title() {
 		if ( count( $this->task_list->get_sections() ) > 0 && ! $this->is_complete() ) {
-			return __( 'Get taxes out of your mind', 'woocommerce-admin' );
+			return __( 'Get taxes out of your mind', 'woocommerce' );
 		}
 		if ( true === $this->get_parent_option( 'use_completed_title' ) ) {
 			if ( $this->is_complete() ) {
@@ -84,7 +84,7 @@ class Tax extends Task {
 	 */
 	public function get_content() {
 		if ( count( $this->task_list->get_sections() ) > 0 ) {
-			return __( 'Have sales tax calculated automatically, or add the rates manually.', 'woocommerce-admin' );
+			return __( 'Have sales tax calculated automatically, or add the rates manually.', 'woocommerce' );
 		}
 		return self::can_use_automated_taxes()
 			? __(

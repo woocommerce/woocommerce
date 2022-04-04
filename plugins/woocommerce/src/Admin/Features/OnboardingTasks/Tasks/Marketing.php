@@ -26,7 +26,7 @@ class Marketing extends Task {
 	 */
 	public function get_title() {
 		if ( count( $this->task_list->get_sections() ) > 0 && ! $this->is_complete() ) {
-			return __( 'Grow your business with marketing tools', 'woocommerce-admin' );
+			return __( 'Grow your business with marketing tools', 'woocommerce' );
 		}
 		if ( true === $this->get_parent_option( 'use_completed_title' ) ) {
 			if ( $this->is_complete() ) {
@@ -44,7 +44,7 @@ class Marketing extends Task {
 	 */
 	public function get_content() {
 		if ( count( $this->task_list->get_sections() ) > 0 ) {
-			return __( 'Promote your store in other sales channels, like email, Google, and Facebook.', 'woocommerce-admin' );
+			return __( 'Promote your store in other sales channels, like email, Google, and Facebook.', 'woocommerce' );
 		}
 		return __(
 			'Add recommended marketing tools to reach new customers and grow your business',

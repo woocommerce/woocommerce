@@ -125,7 +125,7 @@ class TaskLists {
 			array(
 				'id'           => 'setup_experiment_2',
 				'hidden_id'    => 'setup',
-				'title'        => __( 'Get ready to start selling', 'woocommerce-admin' ),
+				'title'        => __( 'Get ready to start selling', 'woocommerce' ),
 				'tasks'        => array(
 					'StoreCreation',
 					'StoreDetails',
@@ -146,8 +146,8 @@ class TaskLists {
 				'sections'     => array(
 					array(
 						'id'          => 'basics',
-						'title'       => __( 'Cover the basics', 'woocommerce-admin' ),
-						'description' => __( 'Make sure you’ve got everything you need to start selling—from business details to products.', 'woocommerce-admin' ),
+						'title'       => __( 'Cover the basics', 'woocommerce' ),
+						'description' => __( 'Make sure you’ve got everything you need to start selling—from business details to products.', 'woocommerce' ),
 						'image'       => plugins_url(
 							'/assets/images/task_list/basics-section-illustration.png',
 							WC_ADMIN_PLUGIN_FILE
@@ -156,8 +156,8 @@ class TaskLists {
 					),
 					array(
 						'id'          => 'sales',
-						'title'       => __( 'Get ready to sell', 'woocommerce-admin' ),
-						'description' => __( 'Easily set up the backbone of your store’s operations and get ready to accept first orders.', 'woocommerce-admin' ),
+						'title'       => __( 'Get ready to sell', 'woocommerce' ),
+						'description' => __( 'Easily set up the backbone of your store’s operations and get ready to accept first orders.', 'woocommerce' ),
 						'image'       => plugins_url(
 							'/assets/images/task_list/sales-section-illustration.png',
 							WC_ADMIN_PLUGIN_FILE
@@ -166,8 +166,8 @@ class TaskLists {
 					),
 					array(
 						'id'          => 'expand',
-						'title'       => __( 'Customize & expand', 'woocommerce-admin' ),
-						'description' => __( 'Personalize your store’s design and grow your business by enabling new sales channels.', 'woocommerce-admin' ),
+						'title'       => __( 'Customize & expand', 'woocommerce' ),
+						'description' => __( 'Personalize your store’s design and grow your business by enabling new sales channels.', 'woocommerce' ),
 						'image'       => plugins_url(
 							'/assets/images/task_list/expand-section-illustration.png',
 							WC_ADMIN_PLUGIN_FILE
