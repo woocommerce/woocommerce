@@ -353,6 +353,20 @@ export default class Analyzer extends Command {
 	}
 
 	/**
+	 * Get hook name.
+	 *
+	 * @param {string} raw Raw hook name.
+	 * @return {Promise<string>}
+	 */
+	private async getHookName(name: string): Promise<string> {
+		if (name.indexOf(',') > -1) {
+			name = name.substring(0, name.indexOf(','));
+		}
+
+		return name.replace(/(\'|\")/g, '').trim();
+	}
+
+	/**
 	 * Scan patches for changes in templates
 	 *
 	 * @param {string} content Patch content.
@@ -434,7 +448,7 @@ export default class Analyzer extends Command {
 		const matchPatches = /^a\/(.+).php/g;
 		const patches = await this.getPatches(content, matchPatches);
 		const verRegEx = await this.getVersionRegex(version);
-		const matchHooks = `@since\\s+(${verRegEx})(.*?)(apply_filters|do_action)\\(\\s+(\\'|\\")(.*?)(\\'|\\")`;
+		const matchHooks = `@since\\s+(${verRegEx})(.*?)(apply_filters|do_action)\\((\\s+)?(\\'|\\")(.*?)(\\'|\\")(.+)?\\)`;
 		const newRegEx = new RegExp(matchHooks, 'gs');
 
 		for (const p in patches) {
@@ -452,13 +466,14 @@ export default class Analyzer extends Command {
 			for (const raw of results) {
 				// Extract hook name and type.
 				const hookName = raw.match(
-					/(do_action|apply_filters)\(\s+(\'|\")(.*)(\'|\")/
+					/(do_action|apply_filters)\((\s+)?(\'|\")(.+)\)/
 				);
+				let name = await this.getHookName(hookName![4]);
 				const kind = hookName![1] === 'do_action' ? 'action' : 'filter';
-				const message = `'${hookName![3]}' introduced in ${version}`;
+				const message = `'${name}' introduced in ${version}`;
 				const title = `New ${kind} found`;
 
-				hooksList.set(hookName![3], ['NOTICE', title, message]);
+				hooksList.set(name, ['NOTICE', title, message]);
 			}
 
 			report.set(filepath, hooksList);
