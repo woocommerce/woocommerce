@@ -45,7 +45,7 @@ class MigrationHelper {
 				break;
 			case 'update':
 				$insert_query = 'UPDATE';
-				 break;
+				break;
 			case 'insert':
 			default:
 				$insert_query = 'INSERT';
@@ -54,6 +54,13 @@ class MigrationHelper {
 		return $insert_query;
 	}
 
+	/**
+	 * Helper method to escape backtick in various schema fields.
+	 *
+	 * @param array $schema_config Schema config.
+	 *
+	 * @return array Schema config escaped for backtick.
+	 */
 	public static function escape_schema_for_backtick( $schema_config ) {
 		array_walk( $schema_config['source']['entity'], array( self::class, 'escape_and_add_backtick' ) );
 		array_walk( $schema_config['source']['meta'], array( self::class, 'escape_and_add_backtick' ) );

@@ -1,6 +1,6 @@
 <?php
 /**
- *
+ * Service provider for COTMigration.
  */
 
 namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;
@@ -8,10 +8,20 @@ namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;
 use Automattic\WooCommerce\DataBase\Migrations\CustomOrderTable\WPPostToCOTMigrator;
 use Automattic\WooCommerce\Internal\DependencyManagement\AbstractServiceProvider;
 
+/**
+ * Class COTMigrationServiceProvider
+ *
+ * @package Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders
+ */
 class COTMigrationServiceProvider extends AbstractServiceProvider {
 
+	/**
+	 * Services provided by this provider.
+	 *
+	 * @var string[]
+	 */
 	protected $provides = array(
-		WPPostToCOTMigrator::class
+		WPPostToCOTMigrator::class,
 	);
 
 	/**
