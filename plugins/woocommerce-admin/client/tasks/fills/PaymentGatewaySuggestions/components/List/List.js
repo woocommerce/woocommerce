@@ -19,7 +19,7 @@ export const List = ( {
 } ) => {
 	return (
 		<Card>
-			<CardHeader as="h2">{ heading }</CardHeader>
+			{ heading ? <CardHeader as="h2">{ heading }</CardHeader> : null }
 			{ paymentGateways.map( ( paymentGateway ) => {
 				const { id } = paymentGateway;
 				return (

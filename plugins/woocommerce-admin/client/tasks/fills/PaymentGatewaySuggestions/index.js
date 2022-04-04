@@ -21,6 +21,7 @@ import ExternalIcon from 'gridicons/dist/external';
  */
 import { List, Placeholder as ListPlaceholder } from './components/List';
 import { Setup, Placeholder as SetupPlaceholder } from './components/Setup';
+import { Toggle } from './components/Toggle/Toggle';
 import { WCPaySuggestion } from './components/WCPay';
 import { getPluginSlug } from '~/utils';
 import './plugins/Bacs';
@@ -230,6 +231,8 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 		[ paymentGateways ]
 	);
 
+	const isEligibleWCPay = !! wcPayGateway.length;
+
 	if ( query.id && ! currentGateway ) {
 		return <SetupPlaceholder />;
 	}
@@ -243,54 +246,63 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 		);
 	}
 
+	const enabledSection = !! enabledGateways.length && (
+		<List
+			heading={ __( 'Enabled payment gateways', 'woocommerce' ) }
+			recommendation={ recommendation }
+			paymentGateways={ enabledGateways }
+		/>
+	);
+
+	const additionalSection = !! additionalGateways.length && (
+		<List
+			heading={
+				isEligibleWCPay
+					? null
+					: __( 'Choose a payment provider', 'woocommerce' )
+			}
+			recommendation={ recommendation }
+			paymentGateways={ additionalGateways }
+			markConfigured={ markConfigured }
+			footerLink={
+				<Button href={ SEE_MORE_LINK } target="_blank" isTertiary>
+					{ __( 'See more', 'woocommerce' ) }
+					<ExternalIcon size={ 18 } />
+				</Button>
+			}
+		></List>
+	);
+
+	const offlineSection = !! offlineGateways.length && (
+		<List
+			heading={ __( 'Offline payment methods', 'woocommerce' ) }
+			recommendation={ recommendation }
+			paymentGateways={ offlineGateways }
+			markConfigured={ markConfigured }
+		/>
+	);
+
 	return (
 		<div className="woocommerce-task-payments">
 			{ ! paymentGateways.size && <ListPlaceholder /> }
 
-			{ !! wcPayGateway.length && (
-				<WCPaySuggestion paymentGateway={ wcPayGateway[ 0 ] } />
-			) }
-
-			{ !! enabledGateways.length && (
-				<List
-					heading={ __( 'Enabled payment gateways', 'woocommerce' ) }
-					recommendation={ recommendation }
-					paymentGateways={ enabledGateways }
-				/>
-			) }
-
-			{ !! additionalGateways.length && (
-				<List
-					heading={ __(
-						'Choose a payment provider',
-						'woocommerce-admin'
-					) }
-					recommendation={ recommendation }
-					paymentGateways={ additionalGateways }
-					markConfigured={ markConfigured }
-					footerLink={
-						<Button
-							href={ SEE_MORE_LINK }
-							target="_blank"
-							isTertiary
-						>
-							{ __( 'See more', 'woocommerce-admin' ) }
-							<ExternalIcon size={ 18 } />
-						</Button>
-					}
-				></List>
-			) }
-
-			{ !! offlineGateways.length && (
-				<List
-					heading={ __(
-						'Offline payment methods',
-						'woocommerce-admin'
-					) }
-					recommendation={ recommendation }
-					paymentGateways={ offlineGateways }
-					markConfigured={ markConfigured }
-				/>
+			{ isEligibleWCPay ? (
+				<>
+					<WCPaySuggestion paymentGateway={ wcPayGateway[ 0 ] } />
+					<Toggle
+						heading={ __( 'Other payment methods', 'woocommerce' ) }
+					>
+						{ enabledSection }
+						{ additionalSection }
+						{ offlineSection }
+					</Toggle>
+				</>
+			) : (
+				<>
+					{ enabledSection }
+					{ additionalSection }
+					{ offlineSection }
+				</>
 			) }
 		</div>
 	);
