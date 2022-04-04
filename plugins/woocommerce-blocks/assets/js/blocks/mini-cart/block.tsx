@@ -31,9 +31,9 @@ import classnames from 'classnames';
  * Internal dependencies
  */
 import QuantityBadge from './quantity-badge';
-import { MiniCartContentsBlock } from '../mini-cart-contents/block';
+import { MiniCartContentsBlock } from './mini-cart-contents/block';
 import './style.scss';
-import { blockName } from '../mini-cart-contents/attributes';
+import { blockName } from './mini-cart-contents/attributes';
 
 interface Props {
 	isInitiallyOpen?: boolean;
