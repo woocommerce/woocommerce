@@ -185,7 +185,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 - Dev - Added has_options() to REST API v3 product endpoint response. ([#32031](https://github.com/woocommerce/woocommerce/pull/32031))
 - Dev - Added woocommerce_admin_order_should_render_refunds hook to allow control over the refunds UI within the order editor. ([#31414](https://github.com/woocommerce/woocommerce/pull/31414))
 
-**WooCommerce Admin - 3.3.0**
+**WooCommerce Admin - 3.3.0 & 3.3.1**
 
 - Add - Add asynchronous plugin install and activation endpoints ([#8079](https://github.com/woocommerce/woocommerce-admin/pull/8079))
 - Performance - Avoid expensive get_notes() queries in CouponPageMoved admin_init actions by using new Notes::get_note_by_name() helper method. ([#8202](https://github.com/woocommerce/woocommerce-admin/pull/8202))
