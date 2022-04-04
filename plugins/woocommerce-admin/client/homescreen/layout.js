@@ -286,8 +286,7 @@ export default compose(
 		const { getOption, hasFinishedResolution } = select(
 			OPTIONS_STORE_NAME
 		);
-		const { getTaskList, getTaskLists } = select( ONBOARDING_STORE_NAME );
-		const taskLists = getTaskLists();
+		const { getTaskList } = select( ONBOARDING_STORE_NAME );
 
 		const welcomeFromCalypsoModalDismissed =
 			getOption( WELCOME_FROM_CALYPSO_MODAL_DISMISSED_OPTION_NAME ) !==

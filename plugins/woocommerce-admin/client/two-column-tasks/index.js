@@ -54,7 +54,7 @@ const TaskDashboard = ( { query, twoColumns } ) => {
 		return null;
 	}
 
-	if ( isResolving || isResolvingOptions || ! taskLists[ 0 ] ) {
+	if ( isResolving || ! taskLists[ 0 ] ) {
 		return <TaskListPlaceholder twoColumns={ twoColumns } />;
 	}
 
