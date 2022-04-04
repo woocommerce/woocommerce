@@ -9,4 +9,5 @@ export {
 	reactivateCompatibilityNotice,
 } from './compatibility-notice';
 export { shopper } from './shopper';
+export { getLoadingDurations } from './performance';
 export { selectBlockByName } from './select-block-by-name';

@@ -2,7 +2,7 @@
  * Internal dependencies
  */
 import { shopper } from '../../../utils';
-import { SIMPLE_PRODUCT_NAME } from '../../../utils/constants';
+import { SIMPLE_VIRTUAL_PRODUCT_NAME } from '../../../utils/constants';
 
 if ( process.env.WOOCOMMERCE_BLOCKS_PHASE < 2 )
 	// eslint-disable-next-line jest/no-focused-tests
@@ -15,7 +15,7 @@ describe( 'Shopper → Cart → Can remove product', () => {
 
 	it( 'Can remove product from cart', async () => {
 		await shopper.goToShop();
-		await shopper.addToCartFromShopPage( SIMPLE_PRODUCT_NAME );
+		await shopper.addToCartFromShopPage( SIMPLE_VIRTUAL_PRODUCT_NAME );
 		await shopper.block.goToCart();
 		const removeProductLink = await page.$(
 			'.wc-block-cart-item__remove-link'
