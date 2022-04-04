@@ -75,7 +75,7 @@ class MetaToMetaTableMigrator {
 	/**
 	 * Fetch data for migration.
 	 *
-	 * @param string $where_clause Where conditions to use while selecting data from source table.
+	 * @param array $order_post_ids Array of IDs to fetch data for.
 	 *
 	 * @return array[] Data along with errors (if any), will of the form:
 	 * array(
@@ -92,7 +92,7 @@ class MetaToMetaTableMigrator {
 		global $wpdb;
 		if ( empty( $order_post_ids ) ) {
 			return array(
-				'data' => array(),
+				'data'   => array(),
 				'errors' => array(),
 			);
 		}
@@ -108,25 +108,28 @@ class MetaToMetaTableMigrator {
 			);
 		}
 
-		return array( 'data' => $meta_data_rows, 'errors' => array() );
+		return array(
+			'data'   => $meta_data_rows,
+			'errors' => array(),
+		);
 	}
 
 	/**
 	 * Helper method to build query used to fetch data from source meta table.
 	 *
-	 * @param string $where_clause Where conditions to use while selecting data from source table.
+	 * @param string $entity_ids List of entity IDs to build meta query for.
 	 *
 	 * @return string Query that can be used to fetch data.
 	 */
 	private function build_meta_table_query( $entity_ids ) {
 		global $wpdb;
-		$source_meta_table   = $this->schema_config['source']['meta']['table_name'];
+		$source_meta_table        = $this->schema_config['source']['meta']['table_name'];
 		$source_meta_key_column   = $this->schema_config['source']['meta']['meta_key_column'];
 		$source_meta_value_column = $this->schema_config['source']['meta']['meta_value_column'];
 		$source_entity_id_column  = $this->schema_config['source']['meta']['entity_id_column'];
 		$order_by                 = "$source_entity_id_column ASC";
 
-		$where_clause = "$source_entity_id_column IN (" . implode( ', ', array_fill( 0, count( $entity_ids ), '%d') ) . ')';
+		$where_clause = "$source_entity_id_column IN (" . implode( ', ', array_fill( 0, count( $entity_ids ), '%d' ) ) . ')';
 
 		$destination_entity_table             = $this->schema_config['destination']['entity']['table_name'];
 		$destination_entity_id_column         = $this->schema_config['destination']['entity']['id_column'];
@@ -134,11 +137,12 @@ class MetaToMetaTableMigrator {
 
 		if ( $this->schema_config['source']['excluded_keys'] ) {
 			$key_placeholder = implode( ',', array_fill( 0, count( $this->schema_config['source']['excluded_keys'] ), '%s' ) );
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $source_meta_key_column is escated for backticks, $key_placeholder is hardcoded.
-			$exclude_clause  = $wpdb->prepare( "source.$source_meta_key_column NOT IN ( $key_placeholder )", $this->schema_config['source']['excluded_keys'] );
-			$where_clause    = "$where_clause AND $exclude_clause";
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $source_meta_key_column is escated for backticks, $key_placeholder is hardcoded.
+			$exclude_clause = $wpdb->prepare( "source.$source_meta_key_column NOT IN ( $key_placeholder )", $this->schema_config['source']['excluded_keys'] );
+			$where_clause   = "$where_clause AND $exclude_clause";
 		}
 
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		return $wpdb->prepare(
 			"
 SELECT
@@ -152,5 +156,6 @@ WHERE $where_clause ORDER BY $order_by
 ",
 			$entity_ids
 		);
+		// phpcs:enable
 	}
 }
