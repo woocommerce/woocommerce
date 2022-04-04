@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { MenuGroup, MenuItem } from '@wordpress/components';
 import { check } from '@wordpress/icons';
-import { Fragment, useEffect, Suspense } from '@wordpress/element';
+import { Fragment, useEffect } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { ONBOARDING_STORE_NAME, OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { useExperiment } from '@woocommerce/explat';
@@ -147,17 +147,14 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 
 			return (
 				<Fragment key={ id }>
-					<Suspense fallback={ null }>
-						<TaskListComponent
-							isExpandable={
-								experimentAssignment?.variationName ===
-								'treatment'
-							}
-							query={ query }
-							twoColumns={ false }
-							{ ...taskList }
-						/>
-					</Suspense>
+					<TaskListComponent
+						isExpandable={
+							experimentAssignment?.variationName === 'treatment'
+						}
+						query={ query }
+						twoColumns={ false }
+						{ ...taskList }
+					/>
 					{ isToggleable && (
 						<DisplayOption>
 							<MenuGroup
