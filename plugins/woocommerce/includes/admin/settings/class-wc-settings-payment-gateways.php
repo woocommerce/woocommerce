@@ -25,6 +25,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 		$this->id    = 'checkout'; // @todo In future versions this may make more sense as 'payment' however to avoid breakage lets leave this alone until we refactor settings APIs in general.
 		$this->label = _x( 'Payments', 'Settings tab label', 'woocommerce' );
 
+		add_action( 'woocommerce_admin_field_payment_gateways_banner', array( $this, 'payment_gateways_banner' ) );
 		add_action( 'woocommerce_admin_field_payment_gateways', array( $this, 'payment_gateways_setting' ) );
 		parent::__construct();
 	}
@@ -54,6 +55,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 					'type'  => 'title',
 					'id'    => 'payment_gateways_options',
 				),
+				array('type' => 'payment_gateways_banner'),
 				array(
 					'type' => 'payment_gateways',
 				),
@@ -104,6 +106,11 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 	 */
 	protected function run_gateway_admin_options( $gateway ) {
 		$gateway->admin_options();
+	}
+	public function payment_gateways_banner() {
+		?>
+		<div class="wc_payment_gateways_banner_slotfill"> </div>
+		<?php
 	}
 
 	/**
