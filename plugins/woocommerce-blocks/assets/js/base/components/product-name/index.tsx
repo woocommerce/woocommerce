@@ -42,6 +42,7 @@ export const ProductName = ( {
 	disabled = false,
 	name,
 	permalink = '',
+	target,
 	rel,
 	style,
 	onClick,
@@ -65,7 +66,7 @@ export const ProductName = ( {
 		<a
 			className={ classes }
 			href={ permalink }
-			rel={ rel }
+			target={ target }
 			{ ...props }
 			dangerouslySetInnerHTML={ {
 				__html: decodeEntities( name ),

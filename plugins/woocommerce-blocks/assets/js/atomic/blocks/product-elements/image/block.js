@@ -84,7 +84,6 @@ export const Block = ( props ) => {
 	);
 	const anchorProps = {
 		href: product.permalink,
-		rel: 'nofollow',
 		...( ! hasProductImages && { 'aria-label': anchorLabel } ),
 		onClick: () => {
 			dispatchStoreEvent( 'product-view-link', {
