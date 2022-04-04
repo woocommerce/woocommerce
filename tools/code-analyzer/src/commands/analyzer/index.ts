@@ -105,7 +105,7 @@ export default class Analyzer extends Command {
 		/**
 		 * List of plugins from our monorepo.
 		 */
-		const plugins = <any> {
+		const plugins = <any>{
 			core: {
 				name: 'WooCommerce',
 				mainFile: join(
@@ -231,6 +231,22 @@ export default class Analyzer extends Command {
 	 */
 	private async getFilename(str: string): Promise<string> {
 		return str.replace(/^a(.*)\s.*/, '$1');
+	}
+
+	/**
+	 * Format version string for regex.
+	 *
+	 * @param {string} rawVersion Raw version number.
+	 * @return {Promise<string>}
+	 */
+	 private async getVersionRegex(rawVersion: string): Promise<string> {
+		const version = rawVersion.replace(/\./g, '\\.');
+
+		if (rawVersion.endsWith('.0')) {
+			return version + '|' + version.slice(0, -3);
+		}
+
+		return version;
 	}
 
 	/**
@@ -417,10 +433,8 @@ export default class Analyzer extends Command {
 
 		const matchPatches = /^a\/(.+).php/g;
 		const patches = await this.getPatches(content, matchPatches);
-		const matchHooks = `@since\\s+(${version.replace(
-			/\./g,
-			'\\.'
-		)})(.*?)(apply_filters|do_action)\\(\\s+(\\'|\\")(.*?)(\\'|\\")`;
+		const verRegEx = await this.getVersionRegex(version);
+		const matchHooks = `@since\\s+(${verRegEx})(.*?)(apply_filters|do_action)\\(\\s+(\\'|\\")(.*?)(\\'|\\")`;
 		const newRegEx = new RegExp(matchHooks, 'gs');
 
 		for (const p in patches) {
