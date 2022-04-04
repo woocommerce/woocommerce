@@ -283,8 +283,7 @@ abstract class MetaToCustomTableMigrator {
 		$result = $wpdb->query( $queries );
 		$wpdb->query( 'COMMIT;' ); // For some reason, this seems necessary on some hosts? Maybe a MySQL configuration?
 		if ( count( $batch ) !== $result ) {
-			// Some rows were not inserted.
-			// TODO: Find and log the entity ids that were not inserted.
+			$this->errors[] = 'Error with batch: ' . $wpdb->last_error;
 		}
 	}
 
@@ -304,8 +303,7 @@ abstract class MetaToCustomTableMigrator {
 		$result = $wpdb->query( $queries );
 		$wpdb->query( 'COMMIT;' ); // For some reason, this seems necessary on some hosts? Maybe a MySQL configuration?
 		if ( count( $batch ) !== $result ) {
-			// Some rows were not inserted.
-			// TODO: Find and log the entity ids that were not updateed.
+			$this->errors[] = 'Error with batch: ' . $wpdb->last_error;
 		}
 	}
 
@@ -486,11 +484,6 @@ WHERE
 	 * @return array[] Validated and combined data with errors.
 	 */
 	private function process_and_sanitize_data( $entity_data, $meta_data ) {
-		/**
-		 * TODO: Add more validations for:
-		 * 1. Column size
-		 * 2. Value limits
-		 */
 		$sanitized_entity_data = array();
 		$error_records         = array();
 		$this->process_and_sanitize_entity_data( $sanitized_entity_data, $error_records, $entity_data );
@@ -565,7 +558,6 @@ WHERE
 				$value = wc_string_to_bool( $value );
 				break;
 			case 'date':
-				// TODO: Test this validation in unit tests.
 				try {
 					if ( '' === $value ) {
 						$value = null;
