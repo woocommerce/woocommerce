@@ -34,3 +34,6 @@ i18n/languages/woocommerce.pot
 # Allure directories
 allure-report
 allure-results
+
+# Work in progress performance test
+**/tests/performance/**/wip.js
