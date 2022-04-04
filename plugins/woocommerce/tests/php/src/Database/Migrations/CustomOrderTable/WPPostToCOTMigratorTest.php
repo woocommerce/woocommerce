@@ -30,6 +30,9 @@ class WPPostToCOTMigratorTest extends WC_Unit_Test_Case {
 	 */
 	private $data_store;
 
+	/**
+	 * Setup data_store and sut.
+	 */
 	public function setUp(): void {
 		parent::setUp();
 		$this->create_order_custom_table_if_not_exist();
@@ -37,6 +40,9 @@ class WPPostToCOTMigratorTest extends WC_Unit_Test_Case {
 		$this->sut        = wc_get_container()->get( WPPostToCOTMigrator::class );
 	}
 
+	/**
+	 * Test that migration for a normal order happens as expected.
+	 */
 	public function test_process_next_migration_batch_normal_order() {
 		$order = wc_get_order( $this->create_complex_wp_post_order() );
 		$this->clear_all_orders_and_reset_checkpoint();
@@ -47,6 +53,9 @@ class WPPostToCOTMigratorTest extends WC_Unit_Test_Case {
 		$this->assert_order_op_data_is_migrated( $order );
 	}
 
+	/**
+	 * Test that already migrated order isn't migrated twice.
+	 */
 	public function test_process_next_migration_batch_already_migrated_order() {
 		global $wpdb;
 		$order = wc_get_order( $this->create_complex_wp_post_order() );
@@ -59,6 +68,7 @@ class WPPostToCOTMigratorTest extends WC_Unit_Test_Case {
 		$this->sut->update_checkpoint( 0 );
 		$this->sut->process_next_migration_batch( 100 );
 
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$this->assertEquals(
 			1,
 			$wpdb->get_var(
@@ -96,52 +106,88 @@ WHERE order_id = {$order_id}
 "
 			)
 		);
+		// phpcs:enable
 	}
 
+	/**
+	 * Test that when an order is partially migrated, it can still be resumed as expected.
+	 */
 	public function test_process_next_migration_batch_interrupted_migrating_order() {
 		$this->markTestSkipped();
 	}
 
+	/**
+	 * Test that invalid order data is not migrated but logged.
+	 */
 	public function test_process_next_migration_batch_invalid_order_data() {
 		$this->markTestSkipped();
 	}
 
+	/**
+	 * Test when one order is invalid but other one is valid in a migration batch.
+	 */
 	public function test_process_next_migration_batch_invalid_valid_order_combo() {
 		$this->markTestSkipped();
 	}
 
-	public function test_process_next_migration_batch_stale_order() {
-		$this->markTestSkipped();
-	}
-
+	/**
+	 * Helper method to get order object from COT.
+	 *
+	 * @param WP_Post $post_order Post object for order.
+	 *
+	 * @return array|object|void|null DB object from COT.
+	 */
 	private function get_order_from_cot( $post_order ) {
 		global $wpdb;
 		$order_table = $this->data_store::get_orders_table_name();
 		$query       = "SELECT * FROM $order_table WHERE post_id = {$post_order->get_id()};";
 
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		return $wpdb->get_row( $query );
 	}
 
+	/**
+	 * Helper method to get address details from DB.
+	 *
+	 * @param int    $order_id Order ID.
+	 * @param string $address_type Address Type.
+	 *
+	 * @return array|object|void|null DB object.
+	 */
 	private function get_address_details_from_cot( $order_id, $address_type ) {
 		global $wpdb;
 		$address_table = $this->data_store::get_addresses_table_name();
 
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		return $wpdb->get_row( "SELECT * FROM $address_table WHERE order_id = $order_id AND address_type = '$address_type';" );
 	}
 
+	/**
+	 * Helper method to get operational details from COT.
+	 *
+	 * @param int $order_id Order ID.
+	 *
+	 * @return array|object|void|null DB Object.
+	 */
 	private function get_order_operational_data_from_cot( $order_id ) {
 		global $wpdb;
 		$operational_data_table = $this->data_store::get_operational_data_table_name();
 
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		return $wpdb->get_row( "SELECT * FROM $operational_data_table WHERE order_id = $order_id;" );
 	}
 
+	/**
+	 * Helper method to create complex wp_post based order.
+	 *
+	 * @return int Order ID
+	 */
 	private function create_complex_wp_post_order() {
 		update_option( 'woocommerce_prices_include_tax', 'yes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		$uniq_cust_id = wp_generate_password( 10, false );
-		$customer = CustomerHelper::create_customer( "user$uniq_cust_id", $uniq_cust_id, "user$uniq_cust_id@example.com" );
-		$tax_rate = array(
+		$customer     = CustomerHelper::create_customer( "user$uniq_cust_id", $uniq_cust_id, "user$uniq_cust_id@example.com" );
+		$tax_rate     = array(
 			'tax_rate_country'  => '',
 			'tax_rate_state'    => '',
 			'tax_rate'          => '15.0000',
@@ -204,6 +250,11 @@ WHERE order_id = {$order_id}
 		return $order->get_id();
 	}
 
+	/**
+	 * Helper method to assert core data is migrated.
+	 *
+	 * @param WC_Order $order Order object.
+	 */
 	private function assert_core_data_is_migrated( $order ) {
 		$db_order = $this->get_order_from_cot( $order );
 
@@ -226,6 +277,11 @@ WHERE order_id = {$order_id}
 		$this->assertEquals( $order->get_customer_user_agent(), $db_order->user_agent );
 	}
 
+	/**
+	 * Helper method to assert addresses are migrated.
+	 *
+	 * @param WC_Order $order Order object.
+	 */
 	private function assert_order_addresses_are_migrated( $order ) {
 		$db_order = $this->get_order_from_cot( $order );
 
@@ -255,6 +311,11 @@ WHERE order_id = {$order_id}
 		$this->assertEquals( $order->get_shipping_phone(), $db_order_address->phone );
 	}
 
+	/**
+	 * Helper method to assert operational data is migrated.
+	 *
+	 * @param WC_Order $order Order object.
+	 */
 	private function assert_order_op_data_is_migrated( $order ) {
 		$db_order = $this->get_order_from_cot( $order );
 		// Verify order operational data.
@@ -291,15 +352,22 @@ WHERE order_id = {$order_id}
 		$this->assertEquals( (float) $order->get_discount_total(), (float) $db_order_op_data->discount_total_amount );
 	}
 
+	/**
+	 * Helper method to clear checkout and truncate order tables.
+	 */
 	private function clear_all_orders_and_reset_checkpoint() {
 		global $wpdb;
 		$order_tables = $this->data_store->get_all_table_names();
 		foreach ( $order_tables as $table ) {
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$wpdb->query( "TRUNCATE table $table;" );
 		}
 		$this->sut->delete_checkpoint();
 	}
 
+	/**
+	 * Helper method to create custom tables if not present.
+	 */
 	private function create_order_custom_table_if_not_exist() {
 		$order_table_controller = wc_get_container()
 			->get( 'Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController' );
