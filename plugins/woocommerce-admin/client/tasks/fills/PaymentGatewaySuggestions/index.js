@@ -161,6 +161,16 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 		[ paymentGateways ]
 	);
 
+	const trackSeeMore = () => {
+		recordEvent( 'tasklist_payment_see_more', {} );
+	};
+
+	const trackToggle = ( isShow ) => {
+		recordEvent( 'tasklist_payment_show_toggle', {
+			toggle: isShow ? 'hide' : 'show',
+		} );
+	};
+
 	const recommendation = useMemo(
 		() =>
 			Array.from( paymentGateways.values() )
@@ -265,7 +275,12 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 			paymentGateways={ additionalGateways }
 			markConfigured={ markConfigured }
 			footerLink={
-				<Button href={ SEE_MORE_LINK } target="_blank" isTertiary>
+				<Button
+					href={ SEE_MORE_LINK }
+					target="_blank"
+					onClick={ trackSeeMore }
+					isTertiary
+				>
 					{ __( 'See more', 'woocommerce' ) }
 					<ExternalIcon size={ 18 } />
 				</Button>
@@ -291,6 +306,7 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 					<WCPaySuggestion paymentGateway={ wcPayGateway[ 0 ] } />
 					<Toggle
 						heading={ __( 'Other payment methods', 'woocommerce' ) }
+						onToggle={ trackToggle }
 					>
 						{ enabledSection }
 						{ additionalSection }

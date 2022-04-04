@@ -11,29 +11,30 @@ import { useState } from '@wordpress/element';
  */
 import './Toggle.scss';
 
-export const Toggle = ( { children, heading } ) => {
-	const [ isOpen, setIsOpen ] = useState( false );
-	const onToggle = () => {
-		setIsOpen( ! isOpen );
+export const Toggle = ( { children, heading, onToggle } ) => {
+	const [ isShow, setIsShow ] = useState( false );
+	const onClick = () => {
+		onToggle( isShow );
+		setIsShow( ! isShow );
 	};
 
 	return (
 		<div className="toggle">
 			<Button
 				isTertiary
-				onClick={ onToggle }
-				aria-expanded={ isOpen }
+				onClick={ onClick }
+				aria-expanded={ isShow }
 				frameBorder={ 0 }
 				className="toggle-button"
 			>
 				{ heading }
-				{ isOpen ? (
+				{ isShow ? (
 					<ChevronUpIcon size={ 18 } />
 				) : (
 					<ChevronDownIcon size={ 18 } />
 				) }
 			</Button>
-			{ isOpen ? children : null }
+			{ isShow ? children : null }
 		</div>
 	);
 };
