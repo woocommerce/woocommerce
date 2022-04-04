@@ -64,12 +64,17 @@ if ( appRoot ) {
 
 	// Render notices just above the WP content div.
 	const wpBody = document.getElementById( 'wpbody-content' );
+	console.log( 'mainform', mainform );
 
 	const wrap =
 		wpBody.querySelector( '.wrap.woocommerce' ) ||
 		wpBody.querySelector( '.wrap' );
 	const noticeContainer = document.createElement( 'div' );
 
+	render(
+		<div>HOOKED</div>,
+		mainform
+	)
 	render(
 		<div className="woocommerce-layout">
 			<NoticeArea />

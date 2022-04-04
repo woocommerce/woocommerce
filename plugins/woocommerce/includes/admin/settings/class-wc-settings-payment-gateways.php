@@ -109,7 +109,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 	}
 	public function payment_gateways_banner() {
 		?>
-		<div class="wc_payment_gateways_banner_slotfill"> </div>
+		<div id="wc_payment_gateways_banner_slotfill"> </div>
 		<?php
 	}
 
