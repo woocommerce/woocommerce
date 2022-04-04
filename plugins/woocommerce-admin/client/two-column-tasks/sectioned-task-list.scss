@@ -54,7 +54,8 @@
 		&.task-disabled {
 			pointer-events: none;
 		}
-	    &:not(.complete) .woocommerce-task-list__item-before .woocommerce-task__icon	{
+
+		&:not(.complete) .woocommerce-task-list__item-before .woocommerce-task__icon {
 			border-color: $gray-300;
 		}
 	}
