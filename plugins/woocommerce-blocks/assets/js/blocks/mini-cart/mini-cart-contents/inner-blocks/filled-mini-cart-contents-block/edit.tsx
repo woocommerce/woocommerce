@@ -10,7 +10,7 @@ import { previewCart } from '@woocommerce/resource-previews';
 /**
  * Internal dependencies
  */
-import { useForcedLayout, getAllowedBlocks } from '../../../shared';
+import { useForcedLayout, getAllowedBlocks } from '../../../../shared';
 
 export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 	const blockProps = useBlockProps();

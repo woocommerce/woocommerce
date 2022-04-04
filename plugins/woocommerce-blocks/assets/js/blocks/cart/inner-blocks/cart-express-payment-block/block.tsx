@@ -7,7 +7,7 @@ import classnames from 'classnames';
 /**
  * Internal dependencies
  */
-import { CartExpressPayment } from '../../../cart-checkout/payment-methods';
+import { CartExpressPayment } from '../../../shared/payment-methods';
 
 const Block = ( { className }: { className: string } ): JSX.Element | null => {
 	const { cartNeedsPayment } = useStoreCart();

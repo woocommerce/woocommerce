@@ -10,10 +10,7 @@ import type { TemplateArray } from '@wordpress/blocks';
  * Internal dependencies
  */
 import './style.scss';
-import {
-	useForcedLayout,
-	getAllowedBlocks,
-} from '../../../cart-checkout/shared';
+import { useForcedLayout, getAllowedBlocks } from '../../../shared';
 
 export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 	const blockProps = useBlockProps( { className: 'wc-block-cart__sidebar' } );

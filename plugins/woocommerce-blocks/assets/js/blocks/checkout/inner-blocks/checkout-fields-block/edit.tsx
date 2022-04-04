@@ -11,10 +11,7 @@ import type { TemplateArray } from '@wordpress/blocks';
  * Internal dependencies
  */
 import { useCheckoutBlockControlsContext } from '../../context';
-import {
-	useForcedLayout,
-	getAllowedBlocks,
-} from '../../../cart-checkout/shared';
+import { useForcedLayout, getAllowedBlocks } from '../../../shared';
 import './style.scss';
 
 export const Edit = ( {
