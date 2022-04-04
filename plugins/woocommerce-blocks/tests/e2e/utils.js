@@ -14,11 +14,13 @@ import {
 } from '@wordpress/e2e-test-utils';
 import { addQueryArgs } from '@wordpress/url';
 import { WP_ADMIN_DASHBOARD } from '@woocommerce/e2e-utils';
+import fs from 'fs';
 
 /**
  * Internal dependencies
  */
 import { elementExists, getElementData, getTextContent } from './page-utils';
+import { PERFORMANCE_REPORT_FILENAME } from '../utils/constants';
 
 /**
  * @typedef {import('@types/puppeteer').ElementHandle} ElementHandle
@@ -345,7 +347,35 @@ export function useTheme( themeSlug ) {
 }
 
 /**
- * Add a block to Full Site Editing.
+ * Takes an average value of all items in an array.
+ *
+ * @param {Array} array An array of numbers to take an average from.
+ * @return {number} The average value of all members of the array.
+ */
+const average = ( array ) => array.reduce( ( a, b ) => a + b ) / array.length;
+
+/**
+ * Writes a line to the e2e performance result for the current test containing longest, shortest, and average run times.
+ *
+ * @param {string} description Message to describe what you're logging the performance of.
+ * @param {Array} times array of times to record.
+ */
+export const logPerformanceResult = ( description, times ) => {
+	const roundedTimes = times.map(
+		( time ) => Math.round( time + Number.EPSILON * 100 ) / 100
+	);
+	fs.appendFileSync(
+		PERFORMANCE_REPORT_FILENAME,
+		JSON.stringify( {
+			description,
+			longest: Math.max( ...roundedTimes ),
+			shortest: Math.min( ...roundedTimes ),
+			average: average( roundedTimes ),
+		} ) + '\n'
+	);
+};
+
+/* Add a block to Full Site Editing.
  *
  * *Note:* insertBlock function gets focused on the canvas, this could prevent some dialogs from being displayed. e.g. compatibility notice.
  *

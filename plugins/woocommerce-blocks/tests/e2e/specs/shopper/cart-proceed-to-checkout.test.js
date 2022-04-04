@@ -2,7 +2,7 @@
  * Internal dependencies
  */
 import { shopper } from '../../../utils';
-import { SIMPLE_PRODUCT_NAME } from '../../../utils/constants';
+import { SIMPLE_VIRTUAL_PRODUCT_NAME } from '../../../utils/constants';
 
 const block = {
 	name: 'Cart',
@@ -23,7 +23,7 @@ describe( 'Shopper → Cart → Can proceed to checkout', () => {
 
 	it( 'allows customer to proceed to checkout', async () => {
 		await shopper.goToShop();
-		await shopper.addToCartFromShopPage( SIMPLE_PRODUCT_NAME );
+		await shopper.addToCartFromShopPage( SIMPLE_VIRTUAL_PRODUCT_NAME );
 		await shopper.block.goToCart();
 
 		// Click on "Proceed to Checkout" button

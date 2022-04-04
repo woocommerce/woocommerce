@@ -3,7 +3,7 @@
  */
 import { shopper } from '../../../utils';
 
-import { SIMPLE_PRODUCT_NAME } from '../../../utils/constants';
+import { SIMPLE_VIRTUAL_PRODUCT_NAME } from '../../../utils/constants';
 
 const PAYMENT_COD = 'Cash on delivery';
 const PAYMENT_BACS = 'Direct bank transfer';
@@ -24,7 +24,7 @@ describe( 'Shopper → Checkout → Can choose payment option', () => {
 
 	it( 'allows customer to pay using Direct bank transfer', async () => {
 		await shopper.goToShop();
-		await shopper.addToCartFromShopPage( SIMPLE_PRODUCT_NAME );
+		await shopper.addToCartFromShopPage( SIMPLE_VIRTUAL_PRODUCT_NAME );
 		await shopper.block.goToCheckout();
 		await shopper.block.selectPayment( PAYMENT_BACS );
 		await shopper.block.fillInCheckoutWithTestData();
@@ -35,7 +35,7 @@ describe( 'Shopper → Checkout → Can choose payment option', () => {
 
 	it( 'allows customer to pay using Cash on delivery', async () => {
 		await shopper.goToShop();
-		await shopper.addToCartFromShopPage( SIMPLE_PRODUCT_NAME );
+		await shopper.addToCartFromShopPage( SIMPLE_VIRTUAL_PRODUCT_NAME );
 		await shopper.block.goToCheckout();
 		await shopper.block.selectPayment( PAYMENT_COD );
 		await shopper.block.fillInCheckoutWithTestData();
@@ -46,7 +46,7 @@ describe( 'Shopper → Checkout → Can choose payment option', () => {
 
 	it( 'allows customer to pay using Check payments', async () => {
 		await shopper.goToShop();
-		await shopper.addToCartFromShopPage( SIMPLE_PRODUCT_NAME );
+		await shopper.addToCartFromShopPage( SIMPLE_VIRTUAL_PRODUCT_NAME );
 		await shopper.block.goToCheckout();
 		await shopper.block.selectPayment( PAYMENT_CHEQUE );
 		await shopper.block.fillInCheckoutWithTestData();
