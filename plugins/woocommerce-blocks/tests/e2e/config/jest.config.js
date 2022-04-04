@@ -14,6 +14,7 @@ module.exports = {
 			'jest-html-reporters',
 			{ publicPath: './reports/e2e', filename: 'index.html' },
 		],
+		'<rootDir>/tests/e2e/config/performance-reporter.js',
 	],
 
 	testEnvironment: '<rootDir>/tests/e2e/config/environment.js',
