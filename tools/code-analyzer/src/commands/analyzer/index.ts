@@ -239,7 +239,7 @@ export default class Analyzer extends Command {
 	 * @param {string} rawVersion Raw version number.
 	 * @return {Promise<string>}
 	 */
-	 private async getVersionRegex(rawVersion: string): Promise<string> {
+	private async getVersionRegex(rawVersion: string): Promise<string> {
 		const version = rawVersion.replace(/\./g, '\\.');
 
 		if (rawVersion.endsWith('.0')) {
