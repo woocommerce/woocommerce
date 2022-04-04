@@ -330,6 +330,15 @@ class TaskList {
 	}
 
 	/**
+	 * Returns option to keep completed task list.
+	 *
+	 * @return string
+	 */
+	public function get_keep_completed_task_list() {
+		return get_option( 'woocommerce_task_list_keep_completed', 'no' );
+	}
+
+	/**
 	 * Remove reminder bar four weeks after store creation.
 	 */
 	public static function possibly_remove_reminder_bar() {
@@ -364,6 +373,7 @@ class TaskList {
 			),
 			'eventPrefix'           => $this->prefix_event( '' ),
 			'displayProgressHeader' => $this->display_progress_header,
+			'keepCompletedTaskList' => $this->get_keep_completed_task_list(),
 		);
 	}
 }

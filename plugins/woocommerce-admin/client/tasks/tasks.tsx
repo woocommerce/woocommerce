@@ -18,26 +18,15 @@ import { Task } from './task';
 import { TasksPlaceholder } from './placeholder';
 import './tasks.scss';
 import { TaskListProps } from './task-list';
+import { TaskList } from './task-list';
+import { TaskList as TwoColumnTaskList } from '../two-column-tasks/task-list';
 import '../two-column-tasks/style.scss';
 
 export type TasksProps = {
 	query: { task?: string };
 };
 
-const TaskList = lazy(
-	() => import( /* webpackChunkName: "task-list" */ './task-list' )
-);
-
-const TwoColumnTaskList = lazy(
-	() =>
-		import(
-			/* webpackChunkName: "two-column-task-list" */ '../two-column-tasks/task-list'
-		)
-);
-
-function getTaskListComponent(
-	taskListId: string
-): React.LazyExoticComponent< React.FC< TaskListProps > > {
+function getTaskListComponent( taskListId: string ): React.FC< TaskListProps > {
 	switch ( taskListId ) {
 		case 'setup_experiment_1':
 			return TwoColumnTaskList;
@@ -56,9 +45,9 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 
 	const { isResolving, taskLists } = useSelect( ( select ) => {
 		return {
-			isResolving: select( ONBOARDING_STORE_NAME ).isResolving(
-				'getTaskLists'
-			),
+			isResolving: ! select(
+				ONBOARDING_STORE_NAME
+			).hasFinishedResolution( 'getTaskLists' ),
 			taskLists: select( ONBOARDING_STORE_NAME ).getTaskLists(),
 		};
 	} );
@@ -131,17 +120,7 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 				: ! id.endsWith( 'two_column' )
 		)
 		.map( ( taskList ) => {
-			const {
-				id,
-				eventPrefix,
-				isComplete,
-				isHidden,
-				isVisible,
-				isToggleable,
-				title,
-				tasks,
-				displayProgressHeader,
-			} = taskList;
+			const { id, isHidden, isVisible, isToggleable } = taskList;
 
 			if ( ! isVisible ) {
 				return null;
@@ -153,18 +132,13 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 				<Fragment key={ id }>
 					<Suspense fallback={ null }>
 						<TaskListComponent
-							id={ id }
-							eventPrefix={ eventPrefix }
-							isComplete={ isComplete }
 							isExpandable={
 								experimentAssignment?.variationName ===
 								'treatment'
 							}
 							query={ query }
-							tasks={ tasks }
-							title={ title }
 							twoColumns={ false }
-							displayProgressHeader={ displayProgressHeader }
+							{ ...taskList }
 						/>
 					</Suspense>
 					{ isToggleable && (
