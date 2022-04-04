@@ -243,7 +243,7 @@ export default class Analyzer extends Command {
 		const version = rawVersion.replace(/\./g, '\\.');
 
 		if (rawVersion.endsWith('.0')) {
-			return version + '|' + version.slice(0, -3);
+			return version + '|' + version.slice(0, -3) + '\\n';
 		}
 
 		return version;
