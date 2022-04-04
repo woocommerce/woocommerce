@@ -42,6 +42,7 @@ import { WelcomeModal } from './welcome-modal';
 import { useHeadercardExperimentHook } from './hooks/use-headercard-experiment-hook';
 import './style.scss';
 import '../dashboard/style.scss';
+import { getAdminSetting } from '~/utils/admin-settings';
 
 const Tasks = lazy( () =>
 	import( /* webpackChunkName: "tasks" */ '../tasks' )
@@ -337,7 +338,7 @@ export default compose(
 			shouldShowWelcomeModal,
 			shouldShowWelcomeFromCalypsoModal,
 			isTaskListHidden: getTaskList( 'setup' )?.isHidden,
-			hasTaskList: !! taskLists.find( ( list ) => list.isVisible ),
+			hasTaskList: getAdminSetting( 'visibleTaskListIds', [] ).length > 0,
 			taskListComplete: getTaskList( 'setup' )?.isComplete,
 			installTimestamp,
 			installTimestampHasResolved,
