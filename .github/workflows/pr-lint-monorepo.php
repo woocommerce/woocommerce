@@ -1,4 +1,4 @@
-name: Changelogger
+name: Run lint checks potentially affecting projects across the monorepo
 on: pull_request
 concurrency:
   group: changelogger-${{ github.event_name }}-${{ github.ref }}
