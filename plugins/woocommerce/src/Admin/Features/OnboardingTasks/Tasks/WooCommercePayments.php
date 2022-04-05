@@ -20,15 +20,6 @@ class WooCommercePayments extends Task {
 	}
 
 	/**
-	 * Parent ID.
-	 *
-	 * @return string
-	 */
-	public function get_parent_id() {
-		return 'setup';
-	}
-
-	/**
 	 * Title.
 	 *
 	 * @return string
@@ -130,6 +121,7 @@ class WooCommercePayments extends Task {
 	 * @return bool
 	 */
 	public static function is_connected() {
+		return true;
 		if ( class_exists( '\WC_Payments' ) ) {
 			$wc_payments_gateway = \WC_Payments::get_gateway();
 			return method_exists( $wc_payments_gateway, 'is_connected' )

@@ -350,6 +350,13 @@ class TaskList {
 	 */
 	public function get_json() {
 		$this->possibly_track_completion();
+		// Track completion of non viewable tasks.
+		foreach ( $this->tasks as $task ) {
+			if ( ! $task->can_view() ) {
+				$task->possibly_track_completion();
+			}
+		}
+
 		return array(
 			'id'                    => $this->get_list_id(),
 			'title'                 => $this->title,
