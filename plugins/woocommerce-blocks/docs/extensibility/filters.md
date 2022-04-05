@@ -58,7 +58,7 @@ apply_filters( '__experimental_woocommerce_blocks_add_data_attributes_to_block',
 ### Source
 
 
- - [BlockTypesController.php](../src/BlockTypesController.php)
+ - [BlockTypesController.php](../../src/BlockTypesController.php)
 
 ---
 
@@ -84,7 +84,7 @@ apply_filters( '__experimental_woocommerce_blocks_add_data_attributes_to_namespa
 ### Source
 
 
- - [BlockTypesController.php](../src/BlockTypesController.php)
+ - [BlockTypesController.php](../../src/BlockTypesController.php)
 
 ---
 
@@ -128,7 +128,7 @@ add_filter( '__experimental_woocommerce_blocks_payment_gateway_features_list', '
 ### Source
 
 
- - [Payments/Integrations/PayPal.php](../src/Payments/Integrations/PayPal.php)
+ - [Payments/Integrations/PayPal.php](../../src/Payments/Integrations/PayPal.php)
 
 ---
 
@@ -159,7 +159,7 @@ apply_filters( 'woocommerce_add_cart_item', array $cart_item_data, string $cart_
 ### Source
 
 
- - [StoreApi/Utilities/CartController.php](../src/StoreApi/Utilities/CartController.php)
+ - [StoreApi/Utilities/CartController.php](../../src/StoreApi/Utilities/CartController.php)
 
 ---
 
@@ -192,7 +192,7 @@ apply_filters( 'woocommerce_add_cart_item_data', array $cart_item_data, integer 
 ### Source
 
 
- - [StoreApi/Utilities/CartController.php](../src/StoreApi/Utilities/CartController.php)
+ - [StoreApi/Utilities/CartController.php](../../src/StoreApi/Utilities/CartController.php)
 
 ---
 
@@ -226,7 +226,7 @@ apply_filters( 'woocommerce_add_to_cart_sold_individually_quantity', integer $so
 ### Source
 
 
- - [StoreApi/Utilities/CartController.php](../src/StoreApi/Utilities/CartController.php)
+ - [StoreApi/Utilities/CartController.php](../../src/StoreApi/Utilities/CartController.php)
 
 ---
 
@@ -264,7 +264,7 @@ apply_filters( 'woocommerce_add_to_cart_validation', boolean $passed_validation,
 ### Source
 
 
- - [StoreApi/Utilities/CartController.php](../src/StoreApi/Utilities/CartController.php)
+ - [StoreApi/Utilities/CartController.php](../../src/StoreApi/Utilities/CartController.php)
 
 ---
 
@@ -298,7 +298,7 @@ apply_filters( 'woocommerce_adjust_non_base_location_prices', boolean $adjust_no
 ### Source
 
 
- - [StoreApi/Utilities/ProductQuery.php](../src/StoreApi/Utilities/ProductQuery.php)
+ - [StoreApi/Utilities/ProductQuery.php](../../src/StoreApi/Utilities/ProductQuery.php)
 
 ---
 
@@ -314,7 +314,7 @@ apply_filters( 'woocommerce_admin_disabled' )
 ### Source
 
 
- - [InboxNotifications.php](../src/InboxNotifications.php)
+ - [InboxNotifications.php](../../src/InboxNotifications.php)
 
 ---
 
@@ -346,7 +346,7 @@ apply_filters( 'woocommerce_apply_individual_use_coupon', array $coupons, \WC_Co
 ### Source
 
 
- - [StoreApi/Utilities/CartController.php](../src/StoreApi/Utilities/CartController.php)
+ - [StoreApi/Utilities/CartController.php](../../src/StoreApi/Utilities/CartController.php)
 
 ---
 
@@ -379,7 +379,7 @@ apply_filters( 'woocommerce_apply_with_individual_use_coupon', boolean $apply_wi
 ### Source
 
 
- - [StoreApi/Utilities/CartController.php](../src/StoreApi/Utilities/CartController.php)
+ - [StoreApi/Utilities/CartController.php](../../src/StoreApi/Utilities/CartController.php)
 
 ---
 
@@ -407,7 +407,7 @@ apply_filters( 'woocommerce_blocks_product_grid_is_cacheable', boolean $is_cache
 ### Source
 
 
- - [BlockTypes/AbstractProductGrid.php](../src/BlockTypes/AbstractProductGrid.php)
+ - [BlockTypes/AbstractProductGrid.php](../../src/BlockTypes/AbstractProductGrid.php)
 
 ---
 
@@ -436,7 +436,7 @@ apply_filters( 'woocommerce_blocks_product_grid_item_html', string $html, array 
 ### Source
 
 
- - [BlockTypes/AbstractProductGrid.php](../src/BlockTypes/AbstractProductGrid.php)
+ - [BlockTypes/AbstractProductGrid.php](../../src/BlockTypes/AbstractProductGrid.php)
 
 ---
 
@@ -464,7 +464,7 @@ apply_filters( 'woocommerce_blocks_register_script_dependencies', array $depende
 ### Source
 
 
- - [Assets/Api.php](../src/Assets/Api.php)
+ - [Assets/Api.php](../../src/Assets/Api.php)
 
 ---
 
@@ -494,7 +494,7 @@ apply_filters( 'woocommerce_cart_contents_changed', array $cart_contents )
 ### Source
 
 
- - [StoreApi/Utilities/CartController.php](../src/StoreApi/Utilities/CartController.php)
+ - [StoreApi/Utilities/CartController.php](../../src/StoreApi/Utilities/CartController.php)
 
 ---
 
@@ -519,7 +519,7 @@ apply_filters( 'woocommerce_ga_disable_tracking', boolean $disable_tracking )
 ### Source
 
 
- - [Domain/Services/GoogleAnalytics.php](../src/Domain/Services/GoogleAnalytics.php)
+ - [Domain/Services/GoogleAnalytics.php](../../src/Domain/Services/GoogleAnalytics.php)
 
 ---
 
@@ -554,7 +554,7 @@ apply_filters( 'woocommerce_get_item_data', array $item_data, array $cart_item )
 ### Source
 
 
- - [StoreApi/Schemas/V1/CartItemSchema.php](../src/StoreApi/Schemas/V1/CartItemSchema.php)
+ - [StoreApi/Schemas/V1/CartItemSchema.php](../../src/StoreApi/Schemas/V1/CartItemSchema.php)
 
 ---
 
@@ -585,7 +585,7 @@ apply_filters( 'woocommerce_new_customer_data', array $customer_data )
 ### Source
 
 
- - [StoreApi/Routes/V1/Checkout.php](../src/StoreApi/Routes/V1/Checkout.php)
+ - [StoreApi/Routes/V1/Checkout.php](../../src/StoreApi/Routes/V1/Checkout.php)
 
 ---
 
@@ -621,7 +621,7 @@ apply_filters( 'woocommerce_registration_errors', \WP_Error $errors, string $use
 ### Source
 
 
- - [StoreApi/Routes/V1/Checkout.php](../src/StoreApi/Routes/V1/Checkout.php)
+ - [StoreApi/Routes/V1/Checkout.php](../../src/StoreApi/Routes/V1/Checkout.php)
 
 ---
 
@@ -655,7 +655,7 @@ apply_filters( 'woocommerce_shared_settings', array $data )
 ### Source
 
 
- - [Assets/AssetDataRegistry.php](../src/Assets/AssetDataRegistry.php)
+ - [Assets/AssetDataRegistry.php](../../src/Assets/AssetDataRegistry.php)
 
 ---
 
@@ -687,7 +687,7 @@ apply_filters( 'woocommerce_shipping_package_name', string $shipping_package_nam
 ### Source
 
 
- - [StoreApi/Utilities/CartController.php](../src/StoreApi/Utilities/CartController.php)
+ - [StoreApi/Utilities/CartController.php](../../src/StoreApi/Utilities/CartController.php)
 
 ---
 
@@ -708,7 +708,7 @@ apply_filters( 'woocommerce_show_page_title' )
 ### Source
 
 
- - [BlockTypes/ClassicTemplate.php](../src/BlockTypes/ClassicTemplate.php)
+ - [BlockTypes/ClassicTemplate.php](../../src/BlockTypes/ClassicTemplate.php)
 
 ---
 
@@ -739,7 +739,7 @@ apply_filters( 'woocommerce_store_api_disable_nonce_check', boolean $disable_non
 ### Source
 
 
- - [StoreApi/Routes/V1/AbstractCartRoute.php](../src/StoreApi/Routes/V1/AbstractCartRoute.php)
+ - [StoreApi/Routes/V1/AbstractCartRoute.php](../../src/StoreApi/Routes/V1/AbstractCartRoute.php)
 
 ---
 
@@ -771,7 +771,7 @@ apply_filters( 'woocommerce_store_api_product_quantity_limit', integer $quantity
 ### Source
 
 
- - [StoreApi/Utilities/QuantityLimits.php](../src/StoreApi/Utilities/QuantityLimits.php)
+ - [StoreApi/Utilities/QuantityLimits.php](../../src/StoreApi/Utilities/QuantityLimits.php)
 
 ---
 
@@ -804,7 +804,7 @@ apply_filters( 'woocommerce_store_api_product_quantity_{$value_type}', mixed $va
 ### Source
 
 
- - [StoreApi/Utilities/QuantityLimits.php](../src/StoreApi/Utilities/QuantityLimits.php)
+ - [StoreApi/Utilities/QuantityLimits.php](../../src/StoreApi/Utilities/QuantityLimits.php)
 
 ---
 
@@ -841,7 +841,7 @@ apply_filters( 'woocommerce_variation_option_name', string $value, null $unused,
 ### Source
 
 
- - [StoreApi/Schemas/V1/CartItemSchema.php](../src/StoreApi/Schemas/V1/CartItemSchema.php)
+ - [StoreApi/Schemas/V1/CartItemSchema.php](../../src/StoreApi/Schemas/V1/CartItemSchema.php)
 
 ---
 <!-- FEEDBACK -->
