@@ -1,22 +1,13 @@
 {
 	"name": "@woocommerce/admin-library",
 	"version": "3.3.0",
-	"homepage": "https://woocommerce.github.io/woocommerce-admin/",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com:woocommerce/woocommerce-admin.git"
-	},
 	"license": "GPL-3.0-or-later",
 	"author": "Automattic",
-	"files": [
-		"dist/**/*.css",
-		"dist/**/*.js",
-		"dist/feature-config-core.php",
-		"includes/class-wc-admin-loader.php",
-		"includes/features/**/*.php",
-		"languages/**/*.json",
-		"license.txt"
-	],
+	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce-admin/README.md",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com:woocommerce/woocommerce.git"
+	},
 	"scripts": {
 		"preinstall": "npx only-allow pnpm",
 		"prebuild": "pnpm run install-if-deps-outdated",
@@ -27,7 +18,6 @@
 		"postbuild": "pnpm run -s i18n:pot && pnpm run -s i18n:build",
 		"build:feature-config": "php ../woocommerce/bin/generate-feature-config.php",
 		"build:packages": "cross-env NODE_ENV=production pnpm run:packages -- build",
-		"build:release": "./bin/build-plugin-zip.sh",
 		"clean": "rimraf ./dist && pnpm run:packages -- clean --parallel",
 		"predev": "pnpm run -s install-if-deps-outdated",
 		"dev": "cross-env WC_ADMIN_PHASE=development pnpm run build:feature-config && cross-env WC_ADMIN_PHASE=development pnpm run build:packages && cross-env WC_ADMIN_PHASE=development webpack",
@@ -42,8 +32,6 @@
 		"i18n:pot": "grunt makepot",
 		"install-if-deps-outdated": "node bin/install-if-deps-outdated.js",
 		"install-if-no-packages": "node bin/install-if-no-packages.js",
-		"labels:dry": "github-label-sync --labels ./.github/label-sync-config.json --allow-added-labels --dry-run woocommerce/woocommerce-admin",
-		"labels:sync": "github-label-sync --labels ./.github/label-sync-config.json --allow-added-labels woocommerce/woocommerce-admin",
 		"lint": "pnpm run lint:js && pnpm run lint:css",
 		"lint:css": "stylelint '**/*.scss'",
 		"lint:css-fix": "stylelint '**/*.scss' --fix --ip 'storybook/wordpress'",
@@ -51,8 +39,6 @@
 		"lint:js-pre-commit": "wp-scripts lint-js --ext=js,ts,tsx",
 		"lint:js-packages": "wp-scripts lint-js ../../packages/js --ext=js,ts,tsx",
 		"lint:js-fix": "pnpm run lint:js -- --fix --ext=js,ts,tsx",
-		"lint:php": "./vendor/bin/phpcs --standard=phpcs.xml.dist $(git ls-files | grep .php$)",
-		"lint:php-fix": "./vendor/bin/phpcbf --standard=phpcs.xml.dist $(git ls-files | grep .php$)",
 		"ts:check": "tsc --build ./tsconfig.json --pretty",
 		"ts:check:watch": "npm run ts:check -- --watch",
 		"reformat-files": "wp-scripts format-js -- --ignore-path .eslintignore",
@@ -68,26 +54,17 @@
 		"test:client": "jest --config client/jest.config.js",
 		"test:packages": "pnpm run --filter ../../packages/js/ --filter !api-core-tests test",
 		"test": "pnpm nx build @woocommerce/js-tests && pnpm run test:client",
-		"test:e2e": "pnpm run build && test -z \"$(docker ps | grep woocommerce-admin-e2e)\" || pnpm exec wc-e2e docker:down && pnpm run e2e:docker-up && pnpm exec wc-e2e test:e2e",
-		"e2e:docker-up": "WC_E2E_FOLDER=../../../ pnpm exec wc-e2e docker:up ./tests/e2e/docker/initialize.sh",
 		"test-staged": "pnpm run test:client -- --bail --findRelatedTests",
 		"test:help": "wp-scripts test-unit-js --help",
-		"test:php": "docker-compose -f docker/wc-admin-php-test-suite/docker-compose.yml run --rm phpunit",
-		"posttest:php": "docker-compose -f docker/wc-admin-php-test-suite/docker-compose.yml down",
 		"test:update-snapshots": "pnpm run test:client -- --updateSnapshot && pnpm run --filter @woocommerce/components test:update-snapshots",
 		"test:watch": "tsc --build || concurrently \"pnpm run test:client -- --watch\" \"pnpm run:packages -- test:nobuild --parallel -- --watch\"",
-		"test:zip": "pnpm run clean && composer i && ./bin/build-test-zip.sh",
 		"example": "webpack --config docs/examples/extensions/examples.config.js --watch",
 		"pre-release": "./bin/pre-release.sh",
 		"create-wc-extension": "node ./bin/starter-pack/starter-pack.js",
 		"storybook": "./bin/import-wp-css-storybook.sh && BABEL_ENV=storybook STORYBOOK=true start-storybook -c ./storybook/.storybook -p 6007 --ci",
 		"storybook-rtl": "USE_RTL_STYLE=true pnpm run storybook",
 		"build-storybook": "build-storybook  -c ./storybook/.storybook",
-		"changelog": "node ./bin/changelog --changelogSrcType='ZENHUB_RELEASE'",
-		"wp-env-mysql-port": "node ./docker/wc-admin-wp-env/mysql-port.js",
-		"create-hook-reference": "node ./bin/hook-reference/index.js",
-		"changelogger": "./vendor/bin/changelogger",
-		"test-instruction-logger": "./bin/test-instruction-logger/bin/test-instruction-logger"
+		"create-hook-reference": "node ./bin/hook-reference/index.js"
 	},
 	"dependencies": {
 		"@automattic/explat-client": "^0.0.3",
