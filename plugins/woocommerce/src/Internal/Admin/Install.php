@@ -205,8 +205,6 @@ class Install {
 		// If we made it till here nothing is running yet, lets set the transient now.
 		set_transient( 'wc_admin_installing', 'yes', MINUTE_IN_SECONDS * 10 );
 
-		self::maybe_update_db_version();
-
 		delete_transient( 'wc_admin_installing' );
 
 		// Use add_option() here to avoid overwriting this value with each
@@ -366,27 +364,6 @@ class Install {
 	}
 
 	/**
-	 * Return a list of tables. Used to make sure all WC Admin tables are dropped
-	 * when uninstalling the plugin in a single site or multi site environment.
-	 *
-	 * @return array WC tables.
-	 */
-	public static function get_tables() {
-		global $wpdb;
-
-		return array(
-			"{$wpdb->prefix}wc_order_stats",
-			"{$wpdb->prefix}wc_order_product_lookup",
-			"{$wpdb->prefix}wc_order_tax_lookup",
-			"{$wpdb->prefix}wc_order_coupon_lookup",
-			"{$wpdb->prefix}wc_admin_notes",
-			"{$wpdb->prefix}wc_admin_note_actions",
-			"{$wpdb->prefix}wc_customer_lookup",
-			"{$wpdb->prefix}wc_category_lookup",
-		);
-	}
-
-	/**
 	 * Get list of DB update callbacks.
 	 *
 	 * @return array
@@ -412,7 +389,7 @@ class Install {
 	/**
 	 * See if we need to show or run database updates during install.
 	 */
-	private static function maybe_update_db_version() {
+	public static function maybe_update_db_version() {
 		if ( self::needs_db_update() ) {
 			self::update();
 		} else {
