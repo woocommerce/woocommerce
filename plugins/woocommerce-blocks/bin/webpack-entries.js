@@ -43,10 +43,11 @@ const blocks = {
 	cart: {},
 	checkout: {},
 	'mini-cart': {
+		customDir: 'cart-checkout/mini-cart',
 		isExperimental: true,
 	},
 	'mini-cart-contents': {
-		customDir: 'mini-cart/mini-cart-contents',
+		customDir: 'cart-checkout/mini-cart-contents',
 		isExperimental: true,
 	},
 	'single-product': {
@@ -129,7 +130,7 @@ const entries = {
 		reviews: './assets/js/blocks/reviews/frontend.js',
 		...getBlockEntries( 'frontend.{t,j}s{,x}' ),
 		'mini-cart-component':
-			'./assets/js/blocks/mini-cart/component-frontend.tsx',
+			'./assets/js/blocks/cart-checkout/mini-cart/component-frontend.tsx',
 	},
 	payments: {
 		'wc-payment-method-cheque':

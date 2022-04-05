@@ -5,118 +5,171 @@ import { lazy } from '@wordpress/element';
 import { WC_BLOCKS_BUILD_URL } from '@woocommerce/block-settings';
 import { registerCheckoutBlock } from '@woocommerce/blocks-checkout';
 
+/**
+ * Internal dependencies
+ */
+import metadata from './component-metadata';
+
 // Modify webpack publicPath at runtime based on location of WordPress Plugin.
 // eslint-disable-next-line no-undef,camelcase
 __webpack_public_path__ = WC_BLOCKS_BUILD_URL;
 
-/**
- * Internal dependencies
- */
-import filledCartMetadata from './filled-cart-block/block.json';
-import emptyCartMetadata from './empty-cart-block/block.json';
-import cartItemsMetadata from './cart-items-block/block.json';
-import cartExpressPaymentMetadata from './cart-express-payment-block/block.json';
-import cartLineItemsMetadata from './cart-line-items-block/block.json';
-import cartOrderSummaryMetadata from './cart-order-summary-block/block.json';
-import cartTotalsMetadata from './cart-totals-block/block.json';
-import cartProceedToCheckoutMetadata from './proceed-to-checkout-block/block.json';
-import cartAcceptedPaymentMethodsMetadata from './cart-accepted-payment-methods-block/block.json';
-
 registerCheckoutBlock( {
-	metadata: filledCartMetadata,
+	metadata: metadata.FILLED_CART,
 	component: lazy( () =>
 		import(
-			/* webpackChunkName: "cart-blocks/filled-cart" */ './filled-cart-block/frontend'
+			/* webpackChunkName: "cart-blocks/filled-cart" */
+			'./filled-cart-block/frontend'
 		)
 	),
 } );
 
 registerCheckoutBlock( {
-	metadata: emptyCartMetadata,
+	metadata: metadata.EMPTY_CART,
 	component: lazy( () =>
 		import(
-			/* webpackChunkName: "cart-blocks/empty-cart" */ './empty-cart-block/frontend'
+			/* webpackChunkName: "cart-blocks/empty-cart" */
+			'./empty-cart-block/frontend'
 		)
 	),
 } );
 
 registerCheckoutBlock( {
-	metadata: filledCartMetadata,
+	metadata: metadata.CART_ITEMS,
 	component: lazy( () =>
 		import(
-			/* webpackChunkName: "cart-blocks/filled-cart" */ './filled-cart-block/frontend'
+			/* webpackChunkName: "cart-blocks/cart-items" */
+			'./cart-items-block/frontend'
 		)
 	),
 } );
 
 registerCheckoutBlock( {
-	metadata: emptyCartMetadata,
+	metadata: metadata.CART_LINE_ITEMS,
 	component: lazy( () =>
 		import(
-			/* webpackChunkName: "cart-blocks/empty-cart" */ './empty-cart-block/frontend'
+			/* webpackChunkName: "cart-blocks/cart-line-items" */
+			'./cart-line-items-block/frontend'
 		)
 	),
 } );
 
 registerCheckoutBlock( {
-	metadata: cartItemsMetadata,
+	metadata: metadata.CART_TOTALS,
 	component: lazy( () =>
 		import(
-			/* webpackChunkName: "cart-blocks/items" */ './cart-items-block/frontend'
+			/* webpackChunkName: "cart-blocks/cart-totals" */
+			'./cart-totals-block/frontend'
 		)
 	),
 } );
 
 registerCheckoutBlock( {
-	metadata: cartLineItemsMetadata,
+	metadata: metadata.CART_EXPRESS_PAYMENT,
 	component: lazy( () =>
 		import(
-			/* webpackChunkName: "cart-blocks/line-items" */ './cart-line-items-block/block'
+			/* webpackChunkName: "cart-blocks/cart-express-payment" */
+			'./cart-express-payment-block/frontend'
 		)
 	),
 } );
 
 registerCheckoutBlock( {
-	metadata: cartTotalsMetadata,
+	metadata: metadata.PROCEED_TO_CHECKOUT,
 	component: lazy( () =>
 		import(
-			/* webpackChunkName: "cart-blocks/totals" */ './cart-totals-block/frontend'
+			/* webpackChunkName: "cart-blocks/proceed-to-checkout" */
+			'./proceed-to-checkout-block/frontend'
 		)
 	),
 } );
 
 registerCheckoutBlock( {
-	metadata: cartOrderSummaryMetadata,
+	metadata: metadata.CART_ACCEPTED_PAYMENT_METHODS,
 	component: lazy( () =>
 		import(
-			/* webpackChunkName: "cart-blocks/order-summary" */ './cart-order-summary-block/frontend'
+			/* webpackChunkName: "cart-blocks/cart-accepted-payment-methods" */
+			'./cart-accepted-payment-methods-block/frontend'
 		)
 	),
 } );
 
 registerCheckoutBlock( {
-	metadata: cartExpressPaymentMetadata,
+	metadata: metadata.CART_ORDER_SUMMARY,
 	component: lazy( () =>
 		import(
-			/* webpackChunkName: "cart-blocks/express-payment" */ './cart-express-payment-block/block'
+			/* webpackChunkName: "cart-blocks/cart-order-summary" */
+			'./cart-order-summary-block/frontend'
 		)
 	),
 } );
 
 registerCheckoutBlock( {
-	metadata: cartProceedToCheckoutMetadata,
+	metadata: metadata.CART_ORDER_SUMMARY_SUBTOTAL,
 	component: lazy( () =>
 		import(
-			/* webpackChunkName: "cart-blocks/checkout-button" */ './proceed-to-checkout-block/frontend'
+			/* webpackChunkName: "cart-blocks/order-summary-subtotal" */
+			'./cart-order-summary-subtotal/frontend'
 		)
 	),
 } );
 
 registerCheckoutBlock( {
-	metadata: cartAcceptedPaymentMethodsMetadata,
+	metadata: metadata.CART_ORDER_SUMMARY_FEE,
 	component: lazy( () =>
 		import(
-			/* webpackChunkName: "cart-blocks/accepted-payment-methods" */ './cart-accepted-payment-methods-block/frontend'
+			/* webpackChunkName: "cart-blocks/order-summary-fee" */
+			'./cart-order-summary-fee/frontend'
+		)
+	),
+} );
+
+registerCheckoutBlock( {
+	metadata: metadata.CART_ORDER_SUMMARY_DISCOUNT,
+	component: lazy( () =>
+		import(
+			/* webpackChunkName: "cart-blocks/order-summary-discount" */
+			'./cart-order-summary-discount/frontend'
+		)
+	),
+} );
+
+registerCheckoutBlock( {
+	metadata: metadata.CART_ORDER_SUMMARY_SHIPPING,
+	component: lazy( () =>
+		import(
+			/* webpackChunkName: "cart-blocks/order-summary-shipping" */
+			'./cart-order-summary-shipping/frontend'
+		)
+	),
+} );
+
+registerCheckoutBlock( {
+	metadata: metadata.CART_ORDER_SUMMARY_COUPON_FORM,
+	component: lazy( () =>
+		import(
+			/* webpackChunkName: "cart-blocks/order-summary-coupon-form" */
+			'./cart-order-summary-coupon-form/frontend'
+		)
+	),
+} );
+
+registerCheckoutBlock( {
+	metadata: metadata.CART_ORDER_SUMMARY_TAXES,
+	component: lazy( () =>
+		import(
+			/* webpackChunkName: "cart-blocks/order-summary-taxes" */
+			'./cart-order-summary-taxes/frontend'
+		)
+	),
+} );
+
+registerCheckoutBlock( {
+	metadata: metadata.CART_ORDER_SUMMARY_HEADING,
+	component: lazy( () =>
+		import(
+			/* webpackChunkName: "cart-blocks/order-summary-heading" */
+			'./cart-order-summary-heading/frontend'
 		)
 	),
 } );

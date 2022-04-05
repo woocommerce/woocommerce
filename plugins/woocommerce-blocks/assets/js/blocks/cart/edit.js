@@ -36,7 +36,7 @@ import {
 	useViewSwitcher,
 	useBlockPropsWithLocking,
 	useForcedLayout,
-} from '../shared';
+} from '../cart-checkout/shared';
 import { CartBlockContext } from './context';
 
 // This is adds a class to body to signal if the selected block is locked
