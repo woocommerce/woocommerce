@@ -341,6 +341,7 @@ class WC_Install {
 		self::setup_environment();
 		self::create_terms();
 		self::create_cron_jobs();
+		WCA_Install::create_cron_jobs();
 		self::create_files();
 		self::maybe_create_pages();
 		self::maybe_set_activation_transients();
