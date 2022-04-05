@@ -9,7 +9,8 @@
   },
   "license": "GPL-3.0+",
   "config": {
-    "wp_org_slug": "woocommerce"
+    "wp_org_slug": "woocommerce",
+    "build_step": "pnpm install && pnpm nx build-zip woocommerce"
   },
   "scripts": {
     "preinstall": "npx only-allow pnpm",
