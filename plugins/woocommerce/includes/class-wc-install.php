@@ -353,8 +353,13 @@ class WC_Install {
 
 		delete_transient( 'wc_installing' );
 
+		// Use add_option() here to avoid overwriting this value with each
+		// plugin version update. We base plugin age off of this value.
+		add_option( 'woocommerce_admin_install_timestamp', time() );
+
 		do_action( 'woocommerce_flush_rewrite_rules' );
 		do_action( 'woocommerce_installed' );
+		do_action( 'woocommerce_admin_installed' );
 	}
 
 	/**

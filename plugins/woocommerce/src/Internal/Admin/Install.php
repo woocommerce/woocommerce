@@ -190,39 +190,6 @@ class Install {
 	}
 
 	/**
-	 * Install WC Admin.
-	 */
-	public static function install() {
-		if ( ! is_blog_installed() ) {
-			return;
-		}
-
-		// Check if we are not already running this routine.
-		if ( self::is_installing() ) {
-			return;
-		}
-
-		// If we made it till here nothing is running yet, lets set the transient now.
-		set_transient( 'wc_admin_installing', 'yes', MINUTE_IN_SECONDS * 10 );
-
-		delete_transient( 'wc_admin_installing' );
-
-		// Use add_option() here to avoid overwriting this value with each
-		// plugin version update. We base plugin age off of this value.
-		add_option( 'woocommerce_admin_install_timestamp', time() );
-		do_action( 'woocommerce_admin_installed' );
-	}
-
-	/**
-	 * Check if the installer is installing.
-	 *
-	 * @return bool
-	 */
-	public static function is_installing() {
-		return 'yes' === get_transient( 'wc_admin_installing' );
-	}
-
-	/**
 	 * Get database schema.
 	 *
 	 * @return string
