@@ -214,6 +214,7 @@
 		"@wordpress/plugins": "4.0.7",
 		"@wordpress/primitives": "3.0.4",
 		"@wordpress/server-side-render": "3.0.17",
+		"@wordpress/url": "^3.6.0",
 		"@wordpress/wordcount": "3.2.3",
 		"classnames": "2.3.1",
 		"compare-versions": "3.6.0",

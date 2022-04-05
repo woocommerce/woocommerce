@@ -12,12 +12,51 @@ import PriceSlider from '@woocommerce/base-components/price-slider';
 import { useDebouncedCallback } from 'use-debounce';
 import PropTypes from 'prop-types';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
+import { getSetting } from '@woocommerce/settings';
+import { getQueryArg, addQueryArgs, removeQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
  */
 import usePriceConstraints from './use-price-constraints.js';
 import './style.scss';
+
+/**
+ * Returns specified parameter from URL
+ *
+ * @param {string} paramName Parameter you want the value of.
+ */
+function findGetParameter( paramName ) {
+	if ( ! window ) {
+		return null;
+	}
+	return getQueryArg( window.location.href, paramName );
+}
+
+/**
+ * Formats filter values into a string for the URL parameters needed for filtering PHP templates.
+ *
+ * @param {string} url Current page URL.
+ * @param {Object} params Parameters and their constraints.
+ *
+ * @return {string} New URL with query parameters in it.
+ */
+function formatParams( url, params ) {
+	const paramObject = {};
+
+	for ( const [ key, value ] of Object.entries( params ) ) {
+		if ( value ) {
+			paramObject[ key ] = ( value / 100 ).toString();
+		} else {
+			delete paramObject[ key ];
+		}
+	}
+
+	// Clean the URL before we add our new query parameters to it.
+	const cleanUrl = removeQueryArgs( url, ...Object.keys( params ) );
+
+	return addQueryArgs( cleanUrl, paramObject );
+}
 
 /**
  * Component displaying a price filter.
@@ -27,13 +66,21 @@ import './style.scss';
  * @param {boolean} props.isEditor Whether in editor context or not.
  */
 const PriceFilterBlock = ( { attributes, isEditor = false } ) => {
+	const filteringForPhpTemplate = getSetting(
+		'is_rendering_php_template',
+		''
+	);
+
+	const minPriceParam = findGetParameter( 'min_price' );
+	const maxPriceParam = findGetParameter( 'max_price' );
+
 	const [ minPriceQuery, setMinPriceQuery ] = useQueryStateByKey(
 		'min_price',
-		null
+		Number( minPriceParam ) * 100 || null
 	);
 	const [ maxPriceQuery, setMaxPriceQuery ] = useQueryStateByKey(
 		'max_price',
-		null
+		Number( maxPriceParam ) * 100 || null
 	);
 	const [ queryState ] = useQueryStateByContext();
 	const { results, isLoading } = useCollectionData( {
@@ -41,8 +88,12 @@ const PriceFilterBlock = ( { attributes, isEditor = false } ) => {
 		queryState,
 	} );
 
-	const [ minPrice, setMinPrice ] = useState();
-	const [ maxPrice, setMaxPrice ] = useState();
+	const [ minPrice, setMinPrice ] = useState(
+		Number( minPriceParam ) * 100 || null
+	);
+	const [ maxPrice, setMaxPrice ] = useState(
+		Number( maxPriceParam ) * 100 || null
+	);
 
 	const currency = getCurrencyFromPriceResponse( results.price_range );
 
@@ -59,14 +110,38 @@ const PriceFilterBlock = ( { attributes, isEditor = false } ) => {
 	// Updates the query based on slider values.
 	const onSubmit = useCallback(
 		( newMinPrice, newMaxPrice ) => {
-			setMinPriceQuery(
-				newMinPrice === minConstraint ? undefined : newMinPrice
-			);
-			setMaxPriceQuery(
-				newMaxPrice === maxConstraint ? undefined : newMaxPrice
-			);
+			const finalMaxPrice =
+				newMaxPrice >= Number( maxConstraint )
+					? undefined
+					: newMaxPrice;
+			const finalMinPrice =
+				newMinPrice <= Number( minConstraint )
+					? undefined
+					: newMinPrice;
+
+			// For block templates that render the PHP Classic Template block we need to add the filters as params and reload the page.
+			if ( filteringForPhpTemplate && window ) {
+				const newUrl = formatParams( window.location.href, {
+					min_price: finalMinPrice,
+					max_price: finalMaxPrice,
+				} );
+
+				// If the params have changed, lets reload the page.
+				if ( window.location.href !== newUrl ) {
+					window.location.href = newUrl;
+				}
+			} else {
+				setMinPriceQuery( finalMinPrice );
+				setMaxPriceQuery( finalMaxPrice );
+			}
 		},
-		[ minConstraint, maxConstraint, setMinPriceQuery, setMaxPriceQuery ]
+		[
+			minConstraint,
+			maxConstraint,
+			setMinPriceQuery,
+			setMaxPriceQuery,
+			filteringForPhpTemplate,
+		]
 	);
 
 	// Updates the query after a short delay.
