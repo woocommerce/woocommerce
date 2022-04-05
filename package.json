@@ -32,6 +32,7 @@
     "@wordpress/prettier-config": "^1.1.1",
     "chalk": "^4.1.2",
     "glob": "^7.2.0",
+    "husky": "^7.0.4",
     "jest": "^27.3.1",
     "mkdirp": "^1.0.4",
     "node-stream-zip": "^1.15.0",

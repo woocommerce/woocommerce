@@ -1,4 +1,5 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-./bin/post-merge.sh
+pnpm install
+pnpm nx affected --target="composer-install" --base=ORIG_HEAD --head=HEAD
