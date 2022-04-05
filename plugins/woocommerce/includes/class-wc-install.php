@@ -335,7 +335,7 @@ class WC_Install {
 		}
 
 		// Check if we are not already running this routine.
-		if ( 'yes' === get_transient( 'wc_installing' ) ) {
+		if ( self::is_installing() ) {
 			return;
 		}
 
@@ -373,6 +373,10 @@ class WC_Install {
 		do_action( 'woocommerce_flush_rewrite_rules' );
 		do_action( 'woocommerce_installed' );
 		do_action( 'woocommerce_admin_installed' );
+	}
+
+	public static function is_installing() {
+	    return 'yes' === get_transient( 'wc_installing' );
 	}
 
 	/**
