@@ -342,6 +342,7 @@ class WC_Install {
 		self::create_terms();
 		self::create_cron_jobs();
 		WCA_Install::create_cron_jobs();
+		WCA_Install::delete_obsolete_notes();
 		self::create_files();
 		self::maybe_create_pages();
 		self::maybe_set_activation_transients();

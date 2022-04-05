@@ -205,7 +205,6 @@ class Install {
 		// If we made it till here nothing is running yet, lets set the transient now.
 		set_transient( 'wc_admin_installing', 'yes', MINUTE_IN_SECONDS * 10 );
 
-		self::delete_obsolete_notes();
 		self::maybe_update_db_version();
 
 		delete_transient( 'wc_admin_installing' );
@@ -502,7 +501,7 @@ class Install {
 	/**
 	 * Delete obsolete notes.
 	 */
-	protected static function delete_obsolete_notes() {
+	public static function delete_obsolete_notes() {
 		$obsolete_notes_names = array(
 			'wc-admin-welcome-note',
 			'wc-admin-store-notice-setting-moved',
