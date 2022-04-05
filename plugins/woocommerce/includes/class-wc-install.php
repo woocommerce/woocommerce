@@ -349,6 +349,7 @@ class WC_Install {
 		self::set_paypal_standard_load_eligibility();
 		self::update_wc_version();
 		self::maybe_update_db_version();
+		WCA_Install::maybe_update_db_version();
 
 		delete_transient( 'wc_installing' );
 
