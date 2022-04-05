@@ -216,9 +216,22 @@ class WC_Install {
 	 * This check is done on all requests and runs if the versions do not match.
 	 */
 	public static function check_version() {
-		if ( ! Constants::is_defined( 'IFRAME_REQUEST' ) && version_compare( get_option( 'woocommerce_version' ), WC()->version, '<' ) ) {
+		$wc_db_version = get_option( 'woocommerce_version' );
+		$wc_current_version = WC()->version;
+		$requires_update = version_compare( $wc_db_version, $wc_current_version, '<' );
+		if ( ! Constants::is_defined( 'IFRAME_REQUEST' ) &&  $requires_update ) {
 			self::install();
 			do_action( 'woocommerce_updated' );
+			do_action_deprecated( 'woocommerce_admin_updated' , array(), $wc_current_version);
+			// If there is no woocommerce_version option, consider it as a new install.
+			if ( ! $wc_db_version ) {
+				do_action( 'woocommerce_newly_installed' );
+				do_action_deprecated( 'woocommerce_admin_newly_installed', array(), $wc_current_version );
+			} else {
+				// if there is already a version and we're install, we're updating an existing install.
+				do_action( 'woocommerce_updated_existing' );
+				do_action_deprecated( 'woocommerce_admin_updated_existing', array(), $wc_current_version );
+			}
 		}
 	}
 

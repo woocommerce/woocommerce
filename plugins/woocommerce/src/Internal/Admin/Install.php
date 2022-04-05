@@ -104,15 +104,6 @@ class Install {
 	);
 
 	/**
-	 * Hook in tabs.
-	 */
-	public static function init() {
-		if ( ( is_admin() && ! wp_doing_ajax() ) || wp_doing_cron() || defined( 'WP_CLI' ) ) {
-			add_action( 'init', array( __CLASS__, 'check_version' ), 5 );
-		}
-	}
-
-	/**
 	 * Migrate option values to their new keys/names.
 	 */
 	public static function migrate_options() {
@@ -136,56 +127,6 @@ class Install {
 			if ( $new_option !== $old_option ) {
 				delete_option( $old_option );
 			}
-		}
-	}
-
-	/**
-	 * Check WC Admin version and run the updater is required.
-	 *
-	 * This check is done on all requests and runs if the versions do not match.
-	 */
-	public static function check_version() {
-		if ( defined( 'IFRAME_REQUEST' ) ) {
-			return;
-		}
-
-		$version_option  = get_option( self::VERSION_OPTION );
-		$requires_update = version_compare( get_option( self::VERSION_OPTION ), WC_ADMIN_VERSION_NUMBER, '<' );
-
-		/*
-		 * When included as part of Core, no `on_activation` hook as been called
-		 * so there is no version in options. Make sure install gets called in this
-		 * case as well as a regular version update
-		 */
-		if ( ! $version_option || $requires_update ) {
-			self::install();
-			/**
-			 * WooCommerce Admin has been installed or updated.
-			 */
-			do_action( 'woocommerce_admin_updated' );
-
-			if ( ! $version_option ) {
-				/**
-				 * WooCommerce Admin has been installed.
-				 */
-				do_action( 'woocommerce_admin_newly_installed' );
-			}
-
-			if ( $requires_update ) {
-				/**
-				 * An existing installation of WooCommerce Admin has been
-				 * updated.
-				 */
-				do_action( 'woocommerce_admin_updated_existing' );
-			}
-		}
-
-		/*
-		 * Add the version option if none is found, as would be the case when
-		 * initialized via Core for the first time.
-		 */
-		if ( ! $version_option ) {
-			add_option( self::VERSION_OPTION, WC_ADMIN_VERSION_NUMBER );
 		}
 	}
 

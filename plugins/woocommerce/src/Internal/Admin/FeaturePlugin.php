@@ -155,7 +155,6 @@ class FeaturePlugin {
 	 */
 	public function includes() {
 		// Initialize Database updates, option migrations, and Notes.
-		Install::init();
 		Events::instance()->init();
 		Notes::init();
 
