@@ -205,7 +205,6 @@ class Install {
 		// If we made it till here nothing is running yet, lets set the transient now.
 		set_transient( 'wc_admin_installing', 'yes', MINUTE_IN_SECONDS * 10 );
 
-		self::migrate_options();
 		self::create_tables();
 		self::create_events();
 		self::delete_obsolete_notes();

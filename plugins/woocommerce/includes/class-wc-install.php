@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Registe
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize as Download_Directories_Sync;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper as WCConnectionHelper;
+use Automattic\WooCommerce\Internal\Admin\Install as WCA_Install;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -334,6 +335,7 @@ class WC_Install {
 		self::create_tables();
 		self::verify_base_tables();
 		self::create_options();
+		WCA_Install::migrate_options();
 		self::create_roles();
 		self::setup_environment();
 		self::create_terms();
