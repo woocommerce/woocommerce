@@ -110,10 +110,6 @@ class Install {
 		if ( ( is_admin() && ! wp_doing_ajax() ) || wp_doing_cron() || defined( 'WP_CLI' ) ) {
 			add_action( 'init', array( __CLASS__, 'check_version' ), 5 );
 		}
-		add_filter( 'wpmu_drop_tables', array( __CLASS__, 'wpmu_drop_tables' ) );
-
-		// Add wc-admin report tables to list of WooCommerce tables.
-		add_filter( 'woocommerce_install_get_tables', array( __CLASS__, 'add_tables' ) );
 	}
 
 	/**
@@ -395,30 +391,6 @@ class Install {
 	}
 
 	/**
-	 * Adds new tables.
-	 *
-	 * @param array $wc_tables List of WooCommerce tables.
-	 * @return array
-	 */
-	public static function add_tables( $wc_tables ) {
-		return array_merge(
-			$wc_tables,
-			self::get_tables()
-		);
-	}
-
-	/**
-	 * Uninstall tables when MU blog is deleted.
-	 *
-	 * @param array $tables List of tables that will be deleted by WP.
-	 *
-	 * @return string[]
-	 */
-	public static function wpmu_drop_tables( $tables ) {
-		return array_merge( $tables, self::get_tables() );
-	}
-
-	/**
 	 * Get list of DB update callbacks.
 	 *
 	 * @return array
@@ -570,22 +542,5 @@ class Install {
 		}
 
 		Notes::delete_notes_with_name( $obsolete_notes_names );
-	}
-
-	/**
-	 * Drop WooCommerce Admin tables.
-	 *
-	 * @return void
-	 */
-	public static function drop_tables() {
-		global $wpdb;
-
-		$tables = self::get_tables();
-
-		foreach ( $tables as $table ) {
-			/* phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
-			$wpdb->query( "DROP TABLE IF EXISTS {$table}" );
-			/* phpcs:enable */
-		}
 	}
 }

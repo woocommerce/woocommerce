@@ -1136,6 +1136,17 @@ CREATE TABLE {$wpdb->prefix}wc_product_download_directories (
 			wc_get_container()->get( DataRegenerator::class )->get_lookup_table_name(),
 		);
 
+		$wca_tables = array(
+			"{$wpdb->prefix}wc_order_stats",
+			"{$wpdb->prefix}wc_order_product_lookup",
+			"{$wpdb->prefix}wc_order_tax_lookup",
+			"{$wpdb->prefix}wc_order_coupon_lookup",
+			"{$wpdb->prefix}wc_admin_notes",
+			"{$wpdb->prefix}wc_admin_note_actions",
+			"{$wpdb->prefix}wc_customer_lookup",
+			"{$wpdb->prefix}wc_category_lookup",
+		);
+
 		/**
 		 * Filter the list of known WooCommerce tables.
 		 *
@@ -1143,7 +1154,7 @@ CREATE TABLE {$wpdb->prefix}wc_product_download_directories (
 		 *
 		 * @param array $tables An array of WooCommerce-specific database table names.
 		 */
-		$tables = apply_filters( 'woocommerce_install_get_tables', $tables );
+		$tables = apply_filters( 'woocommerce_install_get_tables', array_merge( $tables, $wca_tables ) );
 
 		return $tables;
 	}

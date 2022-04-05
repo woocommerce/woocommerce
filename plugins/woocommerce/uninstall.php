@@ -29,8 +29,6 @@ wp_clear_scheduled_hook( 'woocommerce_cleanup_rate_limits' );
 if ( defined( 'WC_REMOVE_ALL_DATA' ) && true === WC_REMOVE_ALL_DATA ) {
 	// Drop WC Admin tables.
 	include_once dirname( __FILE__ ) . '/src/Internal/Admin/Install.php';
-	\Automattic\WooCommerce\Internal\Admin\Install::drop_tables();
-
 	include_once dirname( __FILE__ ) . '/includes/class-wc-install.php';
 
 	// Roles + caps.
