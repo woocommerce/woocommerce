@@ -5,7 +5,7 @@
 /**
  * Internal dependencies
  */
-import { PaymentMethods } from '../../../shared/payment-methods';
+import { PaymentMethods } from '../../../cart-checkout/payment-methods';
 
 const Block = (): JSX.Element | null => {
 	return <PaymentMethods />;

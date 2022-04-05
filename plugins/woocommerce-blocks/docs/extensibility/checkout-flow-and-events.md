@@ -4,21 +4,21 @@ This document gives an overview of the flow for the checkout in the WooCommerce 
 
 ## Table of Contents <!-- omit in toc -->
 
--   [General Concepts](#general-concepts)
-    -   [Tracking flow through status](#tracking-flow-through-status)
-        -   [`CheckoutProvider` Exposed Statuses](#checkoutprovider-exposed-statuses)
-            -   [Special States:](#special-states)
-        -   [`ShippingProvider` Exposed Statuses](#shippingprovider-exposed-statuses)
-        -   [`PaymentMethodDataProvider` Exposed Statuses](#paymentmethoddataprovider-exposed-statuses)
-    -   [Emitting Events](#emitting-events)
-        -   [`onCheckoutValidationBeforeProcessing`](#oncheckoutvalidationbeforeprocessing)
-        -   [`onPaymentProcessing`](#onpaymentprocessing)
-        -   [`onCheckoutAfterProcessingWithSuccess`](#oncheckoutafterprocessingwithsuccess)
-        -   [`onCheckoutAfterProcessingWithError`](#oncheckoutafterprocessingwitherror)
-        -   [`onShippingRateSuccess`](#onshippingratesuccess)
-        -   [`onShippingRateFail`](#onshippingratefail)
-        -   [`onShippingRateSelectSuccess`](#onshippingrateselectsuccess)
-        -   [`onShippingRateSelectFail`](#onshippingrateselectfail)
+- [General Concepts](#general-concepts)
+  - [Tracking flow through status](#tracking-flow-through-status)
+    - [`CheckoutProvider` Exposed Statuses](#checkoutprovider-exposed-statuses)
+      - [Special States:](#special-states)
+    - [`ShippingProvider` Exposed Statuses](#shippingprovider-exposed-statuses)
+    - [`PaymentMethodDataProvider` Exposed Statuses](#paymentmethoddataprovider-exposed-statuses)
+  - [Emitting Events](#emitting-events)
+    - [`onCheckoutValidationBeforeProcessing`](#oncheckoutvalidationbeforeprocessing)
+    - [`onPaymentProcessing`](#onpaymentprocessing)
+    - [`onCheckoutAfterProcessingWithSuccess`](#oncheckoutafterprocessingwithsuccess)
+    - [`onCheckoutAfterProcessingWithError`](#oncheckoutafterprocessingwitherror)
+    - [`onShippingRateSuccess`](#onshippingratesuccess)
+    - [`onShippingRateFail`](#onshippingratefail)
+    - [`onShippingRateSelectSuccess`](#onshippingrateselectsuccess)
+    - [`onShippingRateSelectFail`](#onshippingrateselectfail)
 
 The architecture of the Checkout Block is derived from the following principles:
 
@@ -182,7 +182,7 @@ const Component = () => {
 
 The properties of the object returned by this hook are:
 
--   `isSuccessResponse`, `isErrorResponse` and `isFailResponse`: These are helper functions that receive a value and report via boolean whether the object is a type of response expected. For event emitters that receive responses from registered observers, a `type` property on the returned object from the observer indicates what type of response it is and event emitters will react according to that type. So for instance if an observer returned `{ type: 'success' }` the emitter could feed that to `isSuccessResponse` and it would return `true`. You can see an example of this being implemented for the payment processing emitted event [here](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/34e17c3622637dbe8b02fac47b5c9b9ebf9e3596/assets/js/base/context/shared/payment-methods/payment-method-data-context.js#L281-L307).
+-   `isSuccessResponse`, `isErrorResponse` and `isFailResponse`: These are helper functions that receive a value and report via boolean whether the object is a type of response expected. For event emitters that receive responses from registered observers, a `type` property on the returned object from the observer indicates what type of response it is and event emitters will react according to that type. So for instance if an observer returned `{ type: 'success' }` the emitter could feed that to `isSuccessResponse` and it would return `true`. You can see an example of this being implemented for the payment processing emitted event [here](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/34e17c3622637dbe8b02fac47b5c9b9ebf9e3596/assets/js/base/context/cart-checkout/payment-methods/payment-method-data-context.js#L281-L307).
 -   `noticeContexts`: This is an object containing properties referencing areas where notices can be targeted in the checkout. The object has the following properties:
     -   `PAYMENTS`: This is a reference to the notice area in the payment methods step.
     -   `EXPRESS_PAYMENTS`: This is a reference to the notice area in the express payment methods step.
@@ -473,10 +473,11 @@ This event emitter is fired when a shipping rate selection is not being persiste
 
 This event emitter doesn't care about any registered observer response and will simply execute all registered observers passing them the current error status in the context.
 
-## <!-- FEEDBACK -->
+<!-- FEEDBACK -->
+---
 
 [We're hiring!](https://woocommerce.com/careers/) Come work with us!
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/extensibility/checkout-flow-and-events.md)
-
 <!-- /FEEDBACK -->
+

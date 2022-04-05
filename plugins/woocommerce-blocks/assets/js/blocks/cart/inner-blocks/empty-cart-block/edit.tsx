@@ -11,7 +11,10 @@ import { SHOP_URL } from '@woocommerce/block-settings';
 /**
  * Internal dependencies
  */
-import { useForcedLayout, getAllowedBlocks } from '../../../shared';
+import {
+	useForcedLayout,
+	getAllowedBlocks,
+} from '../../../cart-checkout/shared';
 import iconDataUri from './icon-data-uri.js';
 import './style.scss';
 
