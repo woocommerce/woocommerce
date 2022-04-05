@@ -42,7 +42,7 @@ class OptionRuleProcessor implements RuleProcessorInterface {
 		}
 
 		if ( isset( $rule->transformers ) && is_array( $rule->transformers ) ) {
-			$option_value = TransformerService::apply( $option_value, $rule->transformers, $rule->default );
+			$option_value = TransformerService::apply( $option_value, $rule->transformers, $default );
 		}
 
 		return ComparisonOperation::compare(
