@@ -60,6 +60,12 @@ class ClassicTemplate extends AbstractDynamicBlock {
 		if ( 'single-product' === $attributes['template'] ) {
 			return $this->render_single_product();
 		} elseif ( in_array( $attributes['template'], $archive_templates, true ) ) {
+			// We need to set this so that our product filters can detect if it's a PHP template.
+			$this->asset_data_registry->add(
+				'is_rendering_php_template',
+				true,
+				null
+			);
 			return $this->render_archive_product();
 		} else {
 			ob_start();
