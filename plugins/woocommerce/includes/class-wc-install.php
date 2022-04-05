@@ -334,6 +334,7 @@ class WC_Install {
 		self::remove_admin_notices();
 		self::create_tables();
 		self::verify_base_tables();
+		WCA_Install::create_tables();
 		self::create_options();
 		WCA_Install::migrate_options();
 		self::create_roles();
