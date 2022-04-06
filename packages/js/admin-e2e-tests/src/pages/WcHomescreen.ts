@@ -24,12 +24,7 @@ export class WcHomescreen extends BasePage {
 	}
 
 	async possiblyDismissWelcomeModal(): Promise< void > {
-		const modalText = 'Welcome to your WooCommerce store’s online HQ!';
-		const modal = await waitForElementByTextWithoutThrow(
-			'h2',
-			modalText,
-			10
-		);
+		const modal = await this.isWelcomeModalVisible();
 
 		if ( modal ) {
 			await this.clickButtonWithText( 'Next' );
@@ -40,6 +35,17 @@ export class WcHomescreen extends BasePage {
 			await waitForTimeout( 500 );
 		}
 	}
+
+	async isWelcomeModalVisible(): Promise< boolean > {
+		const modalText = 'Welcome to your WooCommerce store’s online HQ!';
+		const modal = await waitForElementByTextWithoutThrow(
+			'h2',
+			modalText,
+			10
+		);
+		return modal;
+	}
+
 
 	async getTaskList(): Promise< Array< string | null > > {
 		await page.waitForSelector(
