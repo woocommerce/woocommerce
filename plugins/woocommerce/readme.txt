@@ -185,7 +185,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 - Dev - Added has_options() to REST API v3 product endpoint response. ([#32031](https://github.com/woocommerce/woocommerce/pull/32031))
 - Dev - Added woocommerce_admin_order_should_render_refunds hook to allow control over the refunds UI within the order editor. ([#31414](https://github.com/woocommerce/woocommerce/pull/31414))
 
-**WooCommerce Admin - 3.3.0 & 3.3.1**
+**WooCommerce Admin - 3.3.0 & 3.3.1 & 3.3.2**
 
 - Add - Add asynchronous plugin install and activation endpoints ([#8079](https://github.com/woocommerce/woocommerce-admin/pull/8079))
 - Performance - Avoid expensive get_notes() queries in CouponPageMoved admin_init actions by using new Notes::get_note_by_name() helper method. ([#8202](https://github.com/woocommerce/woocommerce-admin/pull/8202))
@@ -201,7 +201,8 @@ WooCommerce comes with some sample data you can use to see how products look; im
 - Update - Implement MailChimp API request threshold for MailchimpScheduler. ([#8342](https://github.com/woocommerce/woocommerce-admin/pull/8342))
 - Update - Reintroduce CES on product add, product update, and order update. ([#8238](https://github.com/woocommerce/woocommerce-admin/pull/8238))
 - Update - Replace mysql image with mariadb ([#8220](https://github.com/woocommerce/woocommerce-admin/pull/8220))
-- Fix: Fix handling of paid themes in purchase task. ([#8493](https://github.com/woocommerce/woocommerce-admin/pull/8493))
+- Update - Update country support list for WooCommerce Payments Task. ([#8517](https://github.com/woocommerce/woocommerce-admin/pull/8517))
+- Fix - Fix handling of paid themes in purchase task. ([#8493](https://github.com/woocommerce/woocommerce-admin/pull/8493))
 - Fix - Make sure the paid extension task is also shown for themes. ([#8412](https://github.com/woocommerce/woocommerce-admin/pull/8412))
 - Fix - Reintroduce emphasis on inbox note action button. ([#8411](https://github.com/woocommerce/woocommerce-admin/pull/8411))
 - Fix - Remove class ExtendedPayments. ([#8461](https://github.com/woocommerce/woocommerce-admin/pull/8461))
@@ -216,6 +217,8 @@ WooCommerce comes with some sample data you can use to see how products look; im
 - Fix - OBW: fix copy on Business Details when "WooCommerce Shipping" is not listed ([#8324](https://github.com/woocommerce/woocommerce-admin/pull/8324))
 - Fix - Only add product data on REST requests and task list ([#8235](https://github.com/woocommerce/woocommerce-admin/pull/8235))
 - Fix - Stop showing actioned inbox items ([#8394](https://github.com/woocommerce/woocommerce-admin/pull/8394))
+- Fix - WC Payments task is not visible after installing the plugin ([#8514](https://github.com/woocommerce/woocommerce-admin/pull/8514))
+- Fix - PHP warning when default param is missing in payments spec. ([#8519](https://github.com/woocommerce/woocommerce-admin/pull/8519))
 - Dev - Added a test for tracks event recording for PaymentGatewaySuggestions ([#8306](https://github.com/woocommerce/woocommerce-admin/pull/8306))
 - Dev - Add README to hook reference generation script ([#8004](https://github.com/woocommerce/woocommerce-admin/pull/8004))
 - Dev - Add reset WooCommerce functionality to E2E tests, so tests have a fresh state. ([#8219](https://github.com/woocommerce/woocommerce-admin/pull/8219))
