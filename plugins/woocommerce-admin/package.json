@@ -25,7 +25,7 @@
 		"build": "pnpm run build:feature-config && cross-env NODE_ENV=production webpack",
 		"analyze": "cross-env NODE_ENV=production ANALYZE=true webpack",
 		"postbuild": "pnpm run -s i18n:pot && pnpm run -s i18n:build",
-		"build:feature-config": "php bin/generate-feature-config.php",
+		"build:feature-config": "php ../woocommerce/bin/generate-feature-config.php",
 		"build:packages": "cross-env NODE_ENV=production pnpm run:packages -- build",
 		"build:release": "./bin/build-plugin-zip.sh",
 		"clean": "rimraf ./dist && pnpm run:packages -- clean --parallel",
