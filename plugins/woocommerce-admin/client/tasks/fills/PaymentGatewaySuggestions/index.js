@@ -308,15 +308,15 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 						heading={ __( 'Other payment methods', 'woocommerce' ) }
 						onToggle={ trackToggle }
 					>
-						{ enabledSection }
 						{ additionalSection }
+						{ enabledSection }
 						{ offlineSection }
 					</Toggle>
 				</>
 			) : (
 				<>
-					{ enabledSection }
 					{ additionalSection }
+					{ enabledSection }
 					{ offlineSection }
 				</>
 			) }
