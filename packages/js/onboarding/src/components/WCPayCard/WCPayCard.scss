@@ -3,6 +3,7 @@
 		.vstack,
 		.hstack {
 			display: flex;
+
 			&.content-center {
 				justify-content: center;
 			}
@@ -24,9 +25,19 @@
 			flex-direction: row;
 		}
 
-		.wcpay-hero-image {
-			margin-right: -32px;
-			margin-bottom: -28px;
+		.woocommerce-task-payment-wcpay__hero-image-container {
+			display: flex;
+			flex-direction: column;
+			justify-content: flex-end;
+
+			svg {
+				margin-right: -32px;
+				margin-bottom: -24px;
+			}
+
+			@media screen and (max-width: 600px) {
+				max-width: 200px;
+			}
 		}
 
 		.woocommerce-task-payment-wcpay__heading {
@@ -96,6 +107,7 @@
 			svg {
 				margin: 0 auto;
 			}
+
 			max-width: 170px;
 			text-align: center;
 			font-size: 15px;

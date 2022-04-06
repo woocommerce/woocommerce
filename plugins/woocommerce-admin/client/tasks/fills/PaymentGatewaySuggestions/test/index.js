@@ -118,8 +118,10 @@ describe( 'PaymentGatewaySuggestions', () => {
 		expect( paymentTitles ).toEqual( [] );
 
 		expect(
-			container.getElementsByTagName( 'title' )[ 0 ].textContent
-		).toBe( 'WooCommerce Payments' );
+			container.getElementsByClassName(
+				'woocommerce-task-payment-wcpay'
+			)[ 0 ].textContent
+		).toContain( 'By using WooCommerce Payments' );
 	} );
 
 	test( 'should render all payment gateways if no WCPay', () => {

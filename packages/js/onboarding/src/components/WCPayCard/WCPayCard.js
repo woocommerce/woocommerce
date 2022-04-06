@@ -17,22 +17,19 @@ import WCPayBenefit1 from '../../images/wcpay-benefit-1';
 import WCPayBenefit2 from '../../images/wcpay-benefit-2';
 import WCPayBenefit3 from '../../images/wcpay-benefit-3';
 
-export const WCPayCardBody = ( {
-	heading,
-	children,
-	onLinkClick = () => {},
-} ) => (
+export const WCPayCardBody = ( { children, onLinkClick = () => {} } ) => (
 	<CardBody>
 		<div className="hstack">
 			<div className="vstack content-center flex-1">
-				{ heading && (
-					<Text
-						as="h1"
-						className="woocommerce-task-payment-wcpay__heading"
-					>
-						{ heading }
-					</Text>
-				) }
+				<Text
+					as="h1"
+					className="woocommerce-task-payment-wcpay__heading"
+				>
+					{ __(
+						'Accept payments and manage your business.',
+						'woocommerce'
+					) }
+				</Text>
 				<Text
 					className="woocommerce-task-payment-wcpay__description"
 					as="p"
@@ -72,8 +69,8 @@ export const WCPayCardBody = ( {
 				</Text>
 				<div>{ children }</div>
 			</div>
-			<div>
-				<WCPayHeroImage className="wcpay-hero-image" />
+			<div className="woocommerce-task-payment-wcpay__hero-image-container">
+				<WCPayHeroImage />
 			</div>
 		</div>
 	</CardBody>
