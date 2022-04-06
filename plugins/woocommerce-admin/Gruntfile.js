@@ -1,5 +1,5 @@
 /* eslint-disable */
-module.exports = function( grunt ) {
+module.exports = function ( grunt ) {
 	'use strict';
 
 	// Project configuration
@@ -9,7 +9,7 @@ module.exports = function( grunt ) {
 				options: {
 					domainPath: '/languages',
 					exclude: [ '.git/*', 'bin/*', 'node_modules/*', 'tests/*' ],
-					mainFile: 'woocommerce-admin.php',
+					mainFile: '../woocommerce/woocommerce.php',
 					potFilename: 'woocommerce-admin.pot',
 					potHeaders: {
 						poedit: true,
