@@ -1,5 +1,41 @@
+.woocommerce-recommended-payments-banner {
+	margin: 0 15px 10px 0;
+	animation: isLoaded;
+	animation-duration: 250ms;
+
+	.woocommerce-recommended-payments-banner__body {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding-bottom: 0px;
+	}
+
+	.woocommerce-recommended-payments-banner__text_container {
+		width: 40%;
+		margin-inline: 24px;
+
+		* {
+			margin-block: 1rem
+		}
+	}
+
+	.woocommerce-recommended-payments-banner__image_container {
+
+	}
+
+	.woocommerce-recommended-payments-banner__footer {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.wcpay-connect-account-page-payment-methods > svg {
+		height: 28px
+	}
+}
+
 .woocommerce-recommended-payments-card {
-	margin: 0 0 10px 0;
+	margin: 0 15px 10px 0;
 	animation: isLoaded;
 	animation-duration: 250ms;
 
