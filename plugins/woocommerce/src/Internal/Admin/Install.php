@@ -262,6 +262,10 @@ class Install {
 		return $tables;
 	}
 
+	public static function init() {
+		add_action( 'woocommerce_adminupdate_db_to_current_version', array( __CLASS__, 'update_db_version' ) );
+	}
+
 	/**
 	 * Create database tables.
 	 */
@@ -314,52 +318,29 @@ class Install {
 
 		foreach ( self::get_db_update_callbacks() as $version => $update_callbacks ) {
 			if ( version_compare( $current_db_version, $version, '<' ) ) {
-				$completed_version_updates = 0;
 				foreach ( $update_callbacks as $update_callback ) {
-					$pending_jobs = WC()->queue()->search(
-						array(
-							'per_page' => 1,
-							'hook'     => 'woocommerce_run_update_callback',
-							'search'   => wp_json_encode( array( $update_callback ) ),
-							'group'    => 'woocommerce-db-updates',
-							'status'   => 'pending',
-						)
+					WC()->queue()->schedule_single(
+						time() + $loop,
+						'woocommerce_run_update_callback',
+						array( $update_callback ),
+						'woocommerce-db-updates'
 					);
-
-					$complete_jobs = WC()->queue()->search(
-						array(
-							'per_page' => 1,
-							'hook'     => 'woocommerce_run_update_callback',
-							'search'   => wp_json_encode( array( $update_callback ) ),
-							'group'    => 'woocommerce-db-updates',
-							'status'   => 'complete',
-						)
-					);
-
-					$completed_version_updates += count( $complete_jobs );
-
-					if ( empty( $pending_jobs ) && empty( $complete_jobs ) ) {
-						WC()->queue()->schedule_single(
-							time() + $loop,
-							'woocommerce_run_update_callback',
-							array( $update_callback ),
-							'woocommerce-db-updates'
-						);
-						Cache::invalidate();
-					}
-
+					Cache::invalidate();
 					$loop++;
-
-				}
-
-				// Users have experienced concurrency issues where all update callbacks
-				// have run but the version option hasn't been updated. If all the updates
-				// for a version are complete, update the version option to reflect that.
-				// See: https:// github.com/woocommerce/woocommerce-admin/issues/5058.
-				if ( count( $update_callbacks ) === $completed_version_updates ) {
-					self::update_db_version( $version );
 				}
 			}
+		}
+
+		if ( version_compare( $current_db_version, WC_ADMIN_PLUGIN_FILE, '<' ) &&
+		     ! WC()->queue()->get_next( 'woocommerce_adminupdate_db_to_current_version' ) ) {
+			WC()->queue()->schedule_single(
+				time() + $loop,
+				'woocommerce_adminupdate_db_to_current_version',
+				array(
+					'version' => WC_ADMIN_PLUGIN_FILE,
+				),
+				'woocommerce-db-updates'
+			);
 		}
 	}
 
