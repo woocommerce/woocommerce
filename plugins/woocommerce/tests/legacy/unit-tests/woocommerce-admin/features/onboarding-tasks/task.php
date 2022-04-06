@@ -5,10 +5,10 @@
  * @package WooCommerce\Admin\Tests\OnboardingTasks
  */
 
-require_once __DIR__ . '/test-task.php';
-
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskList;
+
+require_once __DIR__ . '/test-task.php';
 
 /**
  * class WC_Admin_Tests_OnboardingTasks_Task
