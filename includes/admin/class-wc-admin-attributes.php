@@ -4,7 +4,7 @@
  *
  * The attributes section lets users add custom attributes to assign to products - they can also be used in the "Filter Products by Attribute" widget.
  *
- * @package WooCommerce/Admin
+ * @package WooCommerce\Admin
  * @version 2.3.0
  */
 
@@ -462,7 +462,7 @@ class WC_Admin_Attributes {
 			<script type="text/javascript">
 			/* <![CDATA[ */
 
-				jQuery( 'a.delete' ).click( function() {
+				jQuery( 'a.delete' ).on( 'click', function() {
 					if ( window.confirm( '<?php esc_html_e( 'Are you sure you want to delete this attribute?', 'woocommerce' ); ?>' ) ) {
 						return true;
 					}

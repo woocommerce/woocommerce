@@ -7,7 +7,7 @@
  *
  * @class       WC_Settings_API
  * @version     2.6.0
- * @package     WooCommerce/Abstracts
+ * @package     WooCommerce\Abstracts
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @class    WC_Integration
  * @extends  WC_Settings_API
  * @version  2.6.0
- * @package  WooCommerce/Abstracts
+ * @package  WooCommerce\Abstracts
  */
 abstract class WC_Integration extends WC_Settings_API {
 

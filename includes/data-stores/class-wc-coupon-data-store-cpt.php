@@ -2,7 +2,7 @@
 /**
  * Class WC_Coupon_Data_Store_CPT file.
  *
- * @package WooCommerce\DataStore
+ * @package WooCommerce\DataStores
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -69,7 +69,9 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 * @param WC_Coupon $coupon Coupon object.
 	 */
 	public function create( &$coupon ) {
-		$coupon->set_date_created( time() );
+		if ( ! $coupon->get_date_created( 'edit' ) ) {
+			$coupon->set_date_created( time() );
+		}
 
 		$coupon_id = wp_insert_post(
 			apply_filters(
@@ -121,8 +123,8 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			array(
 				'code'                        => $post_object->post_title,
 				'description'                 => $post_object->post_excerpt,
-				'date_created'                => 0 < $post_object->post_date_gmt ? wc_string_to_timestamp( $post_object->post_date_gmt ) : null,
-				'date_modified'               => 0 < $post_object->post_modified_gmt ? wc_string_to_timestamp( $post_object->post_modified_gmt ) : null,
+				'date_created'                => $this->string_to_timestamp( $post_object->post_date_gmt ),
+				'date_modified'               => $this->string_to_timestamp( $post_object->post_modified_gmt ),
 				'date_expires'                => metadata_exists( 'post', $coupon_id, 'date_expires' ) ? get_post_meta( $coupon_id, 'date_expires', true ) : get_post_meta( $coupon_id, 'expiry_date', true ), // @todo: Migrate expiry_date meta to date_expires in upgrade routine.
 				'discount_type'               => get_post_meta( $coupon_id, 'discount_type', true ),
 				'amount'                      => get_post_meta( $coupon_id, 'coupon_amount', true ),
@@ -420,12 +422,13 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			$this->get_tentative_usage_query( $coupon_id )
 		);
 	}
+
 	/**
 	 * Get the number of uses for a coupon by user ID.
 	 *
 	 * @since 3.0.0
 	 * @param WC_Coupon $coupon Coupon object.
-	 * @param id        $user_id User ID.
+	 * @param int       $user_id User ID.
 	 * @return int
 	 */
 	public function get_usage_by_user_id( &$coupon, $user_id ) {
@@ -719,7 +722,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		return $wpdb->get_col(
 			$wpdb->prepare(
 				"SELECT ID FROM $wpdb->posts WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish' ORDER BY post_date DESC",
-				$code
+				wc_sanitize_coupon_code( $code )
 			)
 		);
 	}

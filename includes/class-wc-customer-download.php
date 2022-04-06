@@ -2,7 +2,7 @@
 /**
  * Class for customer download permissions.
  *
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  * @version 3.0.0
  * @since   3.0.0
  */

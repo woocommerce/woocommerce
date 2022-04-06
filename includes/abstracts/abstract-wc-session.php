@@ -4,7 +4,7 @@
  *
  * @class       WC_Session
  * @version     2.0.0
- * @package     WooCommerce/Abstracts
+ * @package     WooCommerce\Abstracts
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

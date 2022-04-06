@@ -2,7 +2,7 @@
 /**
  * WCCOM Site Installer Errors Class
  *
- * @package WooCommerce\WooCommerce_Site\Rest_Api
+ * @package WooCommerce\WCCom\API
  * @since   3.9.0
  */
 

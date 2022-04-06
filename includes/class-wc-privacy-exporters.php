@@ -27,10 +27,11 @@ class WC_Privacy_Exporters {
 			$customer_personal_data = self::get_customer_personal_data( $user );
 			if ( ! empty( $customer_personal_data ) ) {
 				$data_to_export[] = array(
-					'group_id'    => 'woocommerce_customer',
-					'group_label' => __( 'Customer Data', 'woocommerce' ),
-					'item_id'     => 'user',
-					'data'        => $customer_personal_data,
+					'group_id'          => 'woocommerce_customer',
+					'group_label'       => __( 'Customer Data', 'woocommerce' ),
+					'group_description' => __( 'User&#8217;s WooCommerce customer data.', 'woocommerce' ),
+					'item_id'           => 'user',
+					'data'              => $customer_personal_data,
 				);
 			}
 		}
@@ -71,10 +72,11 @@ class WC_Privacy_Exporters {
 		if ( 0 < count( $orders ) ) {
 			foreach ( $orders as $order ) {
 				$data_to_export[] = array(
-					'group_id'    => 'woocommerce_orders',
-					'group_label' => __( 'Orders', 'woocommerce' ),
-					'item_id'     => 'order-' . $order->get_id(),
-					'data'        => self::get_order_personal_data( $order ),
+					'group_id'          => 'woocommerce_orders',
+					'group_label'       => __( 'Orders', 'woocommerce' ),
+					'group_description' => __( 'User&#8217;s WooCommerce orders data.', 'woocommerce' ),
+					'item_id'           => 'order-' . $order->get_id(),
+					'data'              => self::get_order_personal_data( $order ),
 				);
 			}
 			$done = 10 > count( $orders );
@@ -118,22 +120,24 @@ class WC_Privacy_Exporters {
 		if ( 0 < count( $downloads ) ) {
 			foreach ( $downloads as $download ) {
 				$data_to_export[] = array(
-					'group_id'    => 'woocommerce_downloads',
+					'group_id'          => 'woocommerce_downloads',
 					/* translators: This is the headline for a list of downloads purchased from the store for a given user. */
-					'group_label' => __( 'Purchased Downloads', 'woocommerce' ),
-					'item_id'     => 'download-' . $download->get_id(),
-					'data'        => self::get_download_personal_data( $download ),
+					'group_label'       => __( 'Purchased Downloads', 'woocommerce' ),
+					'group_description' => __( 'User&#8217;s WooCommerce purchased downloads data.', 'woocommerce' ),
+					'item_id'           => 'download-' . $download->get_id(),
+					'data'              => self::get_download_personal_data( $download ),
 				);
 
 				$download_logs = $customer_download_log_data_store->get_download_logs_for_permission( $download->get_id() );
 
 				foreach ( $download_logs as $download_log ) {
 					$data_to_export[] = array(
-						'group_id'    => 'woocommerce_download_logs',
+						'group_id'          => 'woocommerce_download_logs',
 						/* translators: This is the headline for a list of access logs for downloads purchased from the store for a given user. */
-						'group_label' => __( 'Access to Purchased Downloads', 'woocommerce' ),
-						'item_id'     => 'download-log-' . $download_log->get_id(),
-						'data'        => array(
+						'group_label'       => __( 'Access to Purchased Downloads', 'woocommerce' ),
+						'group_description' => __( 'User&#8217;s WooCommerce access to purchased downloads data.', 'woocommerce' ),
+						'item_id'           => 'download-log-' . $download_log->get_id(),
+						'data'              => array(
 							array(
 								'name'  => __( 'Download ID', 'woocommerce' ),
 								'value' => $download_log->get_permission_id(),
@@ -413,10 +417,11 @@ class WC_Privacy_Exporters {
 		if ( 0 < count( $tokens ) ) {
 			foreach ( $tokens as $token ) {
 				$data_to_export[] = array(
-					'group_id'    => 'woocommerce_tokens',
-					'group_label' => __( 'Payment Tokens', 'woocommerce' ),
-					'item_id'     => 'token-' . $token->get_id(),
-					'data'        => array(
+					'group_id'          => 'woocommerce_tokens',
+					'group_label'       => __( 'Payment Tokens', 'woocommerce' ),
+					'group_description' => __( 'User&#8217;s WooCommerce payment tokens data.', 'woocommerce' ),
+					'item_id'           => 'token-' . $token->get_id(),
+					'data'              => array(
 						array(
 							'name'  => __( 'Token', 'woocommerce' ),
 							'value' => $token->get_display_name(),

@@ -1,0 +1,51 @@
+name: Run code coverage on PR
+on:
+  pull_request
+jobs:
+  test:
+    name: Code coverage (PHP 7.4, WP Latest)
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    services:
+      database:
+        image: mysql:5.6
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 7.4
+          tools: composer
+          extensions: mysql
+          coverage: none
+
+      - name: Tool versions
+        run: |
+          php --version
+          composer --version
+
+      - name: Get cached composer directories
+        uses: actions/cache@v2
+        with:
+          path: |
+            ./packages
+            ./vendor
+          key: ${{ runner.os }}-${{ hashFiles('./composer.lock') }}
+
+      - name: Setup and install composer
+        run: composer install
+
+      - name: Init DB and WP
+        run: ./tests/bin/install.sh woo_test root root 127.0.0.1 latest
+
+      - name: Run unit tests with code coverage. Allow to fail.
+        run: |
+          RUN_CODE_COVERAGE=1 bash ./tests/bin/phpunit.sh
+          exit 0

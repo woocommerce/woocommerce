@@ -22,7 +22,12 @@ jQuery( function( $ ) {
 		this.hideSaveNewCheckbox   = this.hideSaveNewCheckbox.bind( this );
 
 		// When a radio button is changed, make sure to show/hide our new CC info area.
-		this.$target.on( 'click change', ':input.woocommerce-SavedPaymentMethods-tokenInput', { tokenizationForm: this }, this.onTokenChange );
+		this.$target.on(
+			'click change',
+			':input.woocommerce-SavedPaymentMethods-tokenInput',
+			{ tokenizationForm: this },
+			this.onTokenChange
+		);
 
 		// OR if create account is checked.
 		$( 'input#createaccount' ).change( { tokenizationForm: this }, this.onCreateAccountChange );

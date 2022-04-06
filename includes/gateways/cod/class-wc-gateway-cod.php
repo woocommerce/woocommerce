@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @class       WC_Gateway_COD
  * @extends     WC_Payment_Gateway
  * @version     2.1.0
- * @package     WooCommerce/Classes/Payment
+ * @package     WooCommerce\Classes\Payment
  */
 class WC_Gateway_COD extends WC_Payment_Gateway {
 

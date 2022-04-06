@@ -10,9 +10,10 @@ project.properties
 *.sublime-project
 *.sublime-workspace
 .sublimelinterrc
+*.swp
 
 # Grunt
-/node_modules/
+node_modules/
 none
 
 # Sass
@@ -23,8 +24,7 @@ none
 /assets/css/photoswipe/**/*.min.css
 
 # Minified JS
-/assets/js/admin/*.min.js
-/assets/js/frontend/*.min.js
+/assets/js/**/*.min.js
 
 # OS X metadata
 .DS_Store
@@ -42,15 +42,26 @@ tests/cli/vendor
 # Unit tests
 /tmp
 /tests/bin/tmp
-/tests/e2e-tests/config/local-*.json
-/tests/e2e-tests/config/local.json
+/tests/e2e/config/local-*.json
+/tests/e2e/config/local.json
+/tests/e2e/config/default.json
+/tests/e2e/env/config/default.json
+/tests/e2e/docker
+/tests/e2e/env/docker/wp-cli/initialize.sh
+/tests/e2e/env/build/
+/tests/e2e/env/build-module/
+/tests/e2e/utils/build/
+/tests/e2e/utils/build-module/
 
 # Logs
 /logs
 
 # Composer
 /vendor/
+/bin/composer/**/vendor/
+/lib/vendor/
 contributors.md
+contributors.html
 
 # Packages
 /packages/*
@@ -61,3 +72,7 @@ contributors.md
 
 # Language files
 i18n/languages/woocommerce.pot
+
+# Build
+build/
+woocommerce.zip

@@ -17,6 +17,38 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store_Interface {
 
 	/**
+	 * Names of the database fields for the download permissions table.
+	 */
+	const DOWNLOAD_PERMISSION_DB_FIELDS = array(
+		'download_id',
+		'product_id',
+		'user_id',
+		'user_email',
+		'order_id',
+		'order_key',
+		'downloads_remaining',
+		'access_granted',
+		'download_count',
+		'access_expires',
+	);
+
+	/**
+	 * Create download permission for a user, from an array of data.
+	 *
+	 * @param array $data Data to create the permission for.
+	 * @returns int The database id of the created permission, or false if the permission creation failed.
+	 */
+	public function create_from_data( $data ) {
+		$data = array_intersect_key( $data, array_flip( self::DOWNLOAD_PERMISSION_DB_FIELDS ) );
+
+		$id = $this->insert_new_download_permission( $data );
+
+		do_action( 'woocommerce_grant_product_download_access', $data );
+
+		return $id;
+	}
+
+	/**
 	 * Create download permission for a user.
 	 *
 	 * @param WC_Customer_Download $download WC_Customer_Download object.
@@ -29,18 +61,41 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 			$download->set_access_granted( time() );
 		}
 
-		$data = array(
-			'download_id'         => $download->get_download_id( 'edit' ),
-			'product_id'          => $download->get_product_id( 'edit' ),
-			'user_id'             => $download->get_user_id( 'edit' ),
-			'user_email'          => $download->get_user_email( 'edit' ),
-			'order_id'            => $download->get_order_id( 'edit' ),
-			'order_key'           => $download->get_order_key( 'edit' ),
-			'downloads_remaining' => $download->get_downloads_remaining( 'edit' ),
-			'access_granted'      => date( 'Y-m-d', $download->get_access_granted( 'edit' )->getTimestamp() ),
-			'download_count'      => $download->get_download_count( 'edit' ),
-			'access_expires'      => ! is_null( $download->get_access_expires( 'edit' ) ) ? date( 'Y-m-d', $download->get_access_expires( 'edit' )->getTimestamp() ) : null,
-		);
+		$data = array();
+		foreach ( self::DOWNLOAD_PERMISSION_DB_FIELDS as $db_field_name ) {
+			$value                  = call_user_func( array( $download, 'get_' . $db_field_name ), 'edit' );
+			$data[ $db_field_name ] = $value;
+		}
+
+		$inserted_id = $this->insert_new_download_permission( $data );
+		if ( $inserted_id ) {
+			$download->set_id( $inserted_id );
+			$download->apply_changes();
+		}
+
+		do_action( 'woocommerce_grant_product_download_access', $data );
+	}
+
+	/**
+	 * Create download permission for a user, from an array of data.
+	 * Assumes that all the keys in the passed data are valid.
+	 *
+	 * @param array $data Data to create the permission for.
+	 * @return int The database id of the created permission, or false if the permission creation failed.
+	 */
+	private function insert_new_download_permission( $data ) {
+		global $wpdb;
+
+		// Always set a access granted date.
+		if ( ! isset( $data['access_granted'] ) ) {
+			$data['access_granted'] = time();
+		}
+
+		$data['access_granted'] = $this->adjust_date_for_db( $data['access_granted'] );
+
+		if ( isset( $data['access_expires'] ) ) {
+			$data['access_expires'] = $this->adjust_date_for_db( $data['access_expires'] );
+		}
 
 		$format = array(
 			'%s',
@@ -61,12 +116,29 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 			apply_filters( 'woocommerce_downloadable_file_permission_format', $format, $data )
 		);
 
-		if ( $result ) {
-			$download->set_id( $wpdb->insert_id );
-			$download->apply_changes();
+		return $result ? $wpdb->insert_id : false;
+	}
+
+	/**
+	 * Adjust a date value to be inserted in the database.
+	 *
+	 * @param mixed $date The date value. Can be a WC_DateTime, a timestamp, or anything else that "date" recognizes.
+	 * @return string The date converted to 'Y-m-d' format.
+	 * @throws Exception The passed value can't be converted to a date.
+	 */
+	private function adjust_date_for_db( $date ) {
+		if ( 'WC_DateTime' === get_class( $date ) ) {
+			$date = $date->getTimestamp();
 		}
 
-		do_action( 'woocommerce_grant_product_download_access', $data );
+		$adjusted_date = date( 'Y-m-d', $date ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+
+		if ( $adjusted_date ) {
+			return $adjusted_date;
+		}
+
+		$msg = sprintf( __( "I don't know how to get a date from a %s", 'woocommerce' ), is_object( $date ) ? get_class( $date ) : gettype( $date ) );
+		throw new Exception( $msg );
 	}
 
 	/**
@@ -128,8 +200,10 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 			'order_id'            => $download->get_order_id( 'edit' ),
 			'order_key'           => $download->get_order_key( 'edit' ),
 			'downloads_remaining' => $download->get_downloads_remaining( 'edit' ),
+			// phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
 			'access_granted'      => date( 'Y-m-d', $download->get_access_granted( 'edit' )->getTimestamp() ),
 			'download_count'      => $download->get_download_count( 'edit' ),
+			// phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
 			'access_expires'      => ! is_null( $download->get_access_expires( 'edit' ) ) ? date( 'Y-m-d', $download->get_access_expires( 'edit' )->getTimestamp() ) : null,
 		);
 
@@ -412,7 +486,7 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 					)
 				ORDER BY permissions.order_id, permissions.product_id, permissions.permission_id;",
 				$customer_id,
-				date( 'Y-m-d', current_time( 'timestamp' ) )
+				date( 'Y-m-d', current_time( 'timestamp' ) )  // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
 			)
 		);
 	}

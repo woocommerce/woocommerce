@@ -1,60 +1,84 @@
+version: ~> 1.0
+
+# Specifies that Travis should create builds for master and release branches and also tags.
+branches:
+  only:
+    - master
+    - /^\d+\.\d+(\.\d+)?(-\S*)?$/
+    - /^release\//
+
 language: php
+os:
+  - linux
 dist: xenial
-
-# Since Xenial services are not started by default, we need to instruct it below to start.
-services:
-  - xvfb
-  - mysql
-  - docker
-  - docker-compose
-
-sudo: false
-
-cache:
-  directories:
-    - vendor
-    - $HOME/.composer/cache
 
 # Test main supported versions of PHP against latest WP.
 php:
-  - 5.6
-  - 7.0
-  - 7.1
-  - 7.2
-  - 7.3
-  - 7.4
+  - "7.0"
+  - "7.1"
+  - "7.2"
+  - "7.3"
+  - "7.4"
+  - "8.0"
 
 env:
   - WP_VERSION=latest WP_MULTISITE=0
 
-# Additional tests against stable PHP (min version is 5.6)
+# Additional tests against stable PHP (min version is 7.0)
 # and code coverage report.
-matrix:
+jobs:
   fast_finish: true
   include:
-  - name: "Coding standard check"
-    php: 7.4
-    env: WP_VERSION=latest WP_MULTISITE=0 RUN_PHPCS=1
-  - name: "E2E tests"
-    php: 7.4
+  - name: "Core E2E Tests"
+    env: WP_VERSION=latest WP_MULTISITE=0 RUN_E2E=1
+    install:
+     - nvm install
+     - npm install
+     - composer install --no-dev
     script:
-      - composer require wp-cli/i18n-command
-      - npm run build
-      - docker-compose up --build -d
-      - bash tests/bin/run-e2e-CI.sh
+      - npm run build:assets
+      - npm run docker:up
+      - npm run test:e2e
     after_script:
-      - docker-compose down -v
-  - name: "Unit tests code coverage"
-    php: 7.4
-    env: WP_VERSION=latest WP_MULTISITE=0 RUN_CODE_COVERAGE=1
-  - name: "WooCommerce unit tests using WordPress nightly"
-    php: 7.4
+      - npm run docker:down
+  - name: "WP Nightly"
+    php: "7.4"
     env: WP_VERSION=nightly WP_MULTISITE=0
+  - name: "WP Latest - 1"
+    php: "7.2"
+    env: WP_VERSION=5.5 WP_MULTISITE=0
+  - name: "WP Latest - 2"
+    php: "7.2"
+    env: WP_VERSION=5.4 WP_MULTISITE=0
+  - name: "Code Standards"
+    php: "7.4"
+    env: WP_VERSION=latest WP_MULTISITE=0 RUN_PHPCS=1
+  - name: "Code Coverage"
+    php: "7.4"
+    env: WP_VERSION=latest WP_MULTISITE=0 RUN_CODE_COVERAGE=1
   allow_failures:
-  - php: 7.4
+  - php: "7.4"
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_CODE_COVERAGE=1
 
-before_script:
+# Git clone depth
+# By default Travis CI clones repositories to a depth of 50 commits. Using a depth of 1 makes this step a bit faster.
+git:
+  depth: 1
+
+# Since Xenial services are not started by default, we need to instruct it below to start.
+services:
+  - mysql
+  - docker
+
+cache:
+  directories:
+    - $HOME/.composer/cache
+
+# Composer 2.0.7 introduced a change that broke the jetpack autoloader in PHP 7.0 - 7.3.
+before_install:
+  - composer self-update 2.0.6
+
+install:
   - export PATH="$HOME/.composer/vendor/bin:$PATH"
   - |
     # Remove Xdebug for a huge performance increase:
@@ -63,16 +87,20 @@ before_script:
     else
       echo "xdebug.ini does not exist"
     fi
-  - nvm install 10
-  - npm install
-  - composer install --no-dev
+  - composer install
   - |
-    # Install WP Test suite, install PHPUnit globally:
+    if [ "$(php -r "echo version_compare(PHP_VERSION,'8.0','>=');")" ]; then
+      curl -L https://github.com/woocommerce/phpunit/archive/add-compatibility-with-php8-to-phpunit-7.zip -o /tmp/phpunit-7.5-fork.zip
+      unzip -d /tmp/phpunit-7.5-fork /tmp/phpunit-7.5-fork.zip
+      composer bin phpunit config --unset platform
+      composer bin phpunit config repositories.0 '{"type": "path", "url": "/tmp/phpunit-7.5-fork/phpunit-add-compatibility-with-php8-to-phpunit-7", "options": {"symlink": false}}'
+      composer bin phpunit require --dev -W phpunit/phpunit:@dev --ignore-platform-reqs    
+    fi
+  - |
+    # Install WP Test suite:
     if [[ ! -z "$WP_VERSION" ]]; then
       bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
-      composer global require "phpunit/phpunit=5.7.*|7.5.*"
     fi
-  - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1280x1024x16"
 
 script:
   - bash tests/bin/phpunit.sh
@@ -80,10 +108,3 @@ script:
 
 after_script:
   - bash tests/bin/travis.sh after
-
-# Specifies that Travis should create builds for master and release branches and also tags.
-branches:
-  only:
-    - master
-    - /^\d+\.\d+(\.\d+)?(-\S*)?$/
-    - /^release\//

@@ -38,17 +38,24 @@ jQuery( function( $ ) {
 			var nextpostid = ui.item.next().find( '.check-column input' ).val();
 
 			// Show Spinner
-			ui.item.find( '.check-column input' ).hide().after( '<img alt="processing" src="images/wpspin_light.gif" class="waiting" style="margin-left: 6px;" />' );
+			ui.item
+				.find( '.check-column input' )
+				.hide()
+				.after( '<img alt="processing" src="images/wpspin_light.gif" class="waiting" style="margin-left: 6px;" />' );
 
 			// Go do the sorting stuff via ajax
-			$.post( ajaxurl, { action: 'woocommerce_product_ordering', id: postid, previd: prevpostid, nextid: nextpostid }, function( response ) {
-				$.each( response, function( key, value ) {
-					$( '#inline_' + key + ' .menu_order' ).html( value );
-				});
-				ui.item.find( '.check-column input' ).show().siblings( 'img' ).remove();
-				$( 'table.widefat tbody th, table.widefat tbody td' ).css( 'cursor', 'move' );
-				$( 'table.widefat tbody' ).sortable( 'enable' );
-			});
+			$.post(
+				ajaxurl,
+				{ action: 'woocommerce_product_ordering', id: postid, previd: prevpostid, nextid: nextpostid },
+				function( response ) {
+					$.each( response, function( key, value ) {
+						$( '#inline_' + key + ' .menu_order' ).html( value );
+					});
+					ui.item.find( '.check-column input' ).show().siblings( 'img' ).remove();
+					$( 'table.widefat tbody th, table.widefat tbody td' ).css( 'cursor', 'move' );
+					$( 'table.widefat tbody' ).sortable( 'enable' );
+				}
+			);
 
 			// fix cell colors
 			$( 'table.widefat tbody tr' ).each( function() {

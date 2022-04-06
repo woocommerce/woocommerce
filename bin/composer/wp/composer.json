@@ -1,0 +1,12 @@
+{
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "require-dev": {
+    "wp-cli/i18n-command": "^2.2"
+  },
+  "config": {
+    "platform": {
+      "php": "7.0"
+    }
+  }
+}

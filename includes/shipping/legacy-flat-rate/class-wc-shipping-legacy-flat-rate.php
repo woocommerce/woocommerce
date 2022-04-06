@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @deprecated  2.6.0
  * @version     2.4.0
- * @package     WooCommerce/Classes/Shipping
+ * @package     WooCommerce\Classes\Shipping
  */
 class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 
@@ -78,14 +78,14 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 		$this->tax_status   = $this->get_option( 'tax_status' );
 		$this->cost         = $this->get_option( 'cost' );
 		$this->type         = $this->get_option( 'type', 'class' );
-		$this->options      = $this->get_option( 'options', false ); // @deprecated in 2.4.0
+		$this->options      = $this->get_option( 'options', false ); // @deprecated 2.4.0
 	}
 
 	/**
 	 * Initialise Settings Form Fields.
 	 */
 	public function init_form_fields() {
-		$this->form_fields = include 'includes/settings-flat-rate.php';
+		$this->form_fields = include __DIR__ . '/includes/settings-flat-rate.php';
 	}
 
 	/**

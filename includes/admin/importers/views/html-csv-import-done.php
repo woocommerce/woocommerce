@@ -50,6 +50,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 			$results[] = '<a href="#" class="woocommerce-importer-done-view-errors">' . __( 'View import log', 'woocommerce' ) . '</a>';
 		}
 
+		if ( ! empty( $file_name ) ) {
+			$results[] = sprintf(
+				/* translators: %s: File name */
+				__( 'File uploaded: %s', 'woocommerce' ),
+				'<strong>' . $file_name . '</strong>'
+			);
+		}
+
 		/* translators: %d: import results */
 		echo wp_kses_post( __( 'Import complete!', 'woocommerce' ) . ' ' . implode( '. ', $results ) );
 		?>

@@ -2,7 +2,7 @@
 jQuery( function( $ ) {
 	// Orderby
 	$( '.woocommerce-ordering' ).on( 'change', 'select.orderby', function() {
-		$( this ).closest( 'form' ).submit();
+		$( this ).closest( 'form' ).trigger( 'submit' );
 	});
 
 	// Target quantity inputs on product pages
@@ -25,7 +25,7 @@ jQuery( function( $ ) {
 	}
 
 	// Set a cookie and hide the store notice when the dismiss button is clicked
-	$( '.woocommerce-store-notice__dismiss-link' ).click( function( event ) {
+	$( '.woocommerce-store-notice__dismiss-link' ).on( 'click', function( event ) {
 		Cookies.set( cookieName, 'hidden', { path: '/' } );
 		$( '.woocommerce-store-notice' ).hide();
 		event.preventDefault();
@@ -81,15 +81,17 @@ jQuery( function( $ ) {
 
 	// Show password visiblity hover icon on woocommerce forms
 	$( '.woocommerce form .woocommerce-Input[type="password"]' ).wrap( '<span class="password-input"></span>' );
+	// Add 'password-input' class to the password wrapper in checkout page.
+	$( '.woocommerce form input' ).filter(':password').parent('span').addClass('password-input');
 	$( '.password-input' ).append( '<span class="show-password-input"></span>' );
 
-	$( '.show-password-input' ).click(
+	$( '.show-password-input' ).on( 'click',
 		function() {
 			$( this ).toggleClass( 'display-password' );
 			if ( $( this ).hasClass( 'display-password' ) ) {
-				$( this ).siblings( ['input[name="password"]', 'input[type="password"]'] ).prop( 'type', 'text' );
+				$( this ).siblings( ['input[type="password"]'] ).prop( 'type', 'text' );
 			} else {
-				$( this ).siblings( 'input[name="password"]' ).prop( 'type', 'password' );
+				$( this ).siblings( 'input[type="text"]' ).prop( 'type', 'password' );
 			}
 		}
 	);

@@ -3,8 +3,11 @@
 changedFiles="$(git diff-tree -r --name-only --no-commit-id ORIG_HEAD HEAD)"
 
 runOnChange() {
-	echo "$changedFiles" | grep -q "$1" && eval "$2"
+	if echo "$changedFiles" | grep -q "$1"
+	then
+		eval "$2"
+	fi
 }
 
-runOnChange "package-lock.json" "npm install"
-runOnChange "composer.lock" "composer install"
+runOnChange "package-lock.json" "npm run install:no-e2e"
+runOnChange "composer.lock" "SKIP_UPDATE_TEXTDOMAINS=true composer install"

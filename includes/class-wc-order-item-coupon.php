@@ -2,7 +2,7 @@
 /**
  * Order Line Item (coupon)
  *
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  * @version 3.0.0
  * @since   3.0.0
  */
@@ -136,11 +136,12 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
 	/**
 	 * OffsetGet for ArrayAccess/Backwards compatibility.
 	 *
-	 * @deprecated Add deprecation notices in future release.
+	 * @deprecated 4.4.0
 	 * @param string $offset Offset.
 	 * @return mixed
 	 */
 	public function offsetGet( $offset ) {
+		wc_deprecated_function( 'WC_Order_Item_Coupon::offsetGet', '4.4.0', '' );
 		if ( 'discount_amount' === $offset ) {
 			$offset = 'discount';
 		} elseif ( 'discount_amount_tax' === $offset ) {
@@ -152,11 +153,12 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
 	/**
 	 * OffsetSet for ArrayAccess/Backwards compatibility.
 	 *
-	 * @deprecated Add deprecation notices in future release.
+	 * @deprecated 4.4.0
 	 * @param string $offset Offset.
 	 * @param mixed  $value  Value.
 	 */
 	public function offsetSet( $offset, $value ) {
+		wc_deprecated_function( 'WC_Order_Item_Coupon::offsetSet', '4.4.0', '' );
 		if ( 'discount_amount' === $offset ) {
 			$offset = 'discount';
 		} elseif ( 'discount_amount_tax' === $offset ) {

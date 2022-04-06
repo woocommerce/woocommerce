@@ -11,12 +11,13 @@ defined( 'ABSPATH' ) || exit;
  * This class adds actions to track usage of WooCommerce Settings.
  */
 class WC_Settings_Tracking {
+
 	/**
-	 * Whitelisted WooCommerce settings to potentially track updates for.
+	 * List of allowed WooCommerce settings to potentially track updates for.
 	 *
 	 * @var array
 	 */
-	protected $whitelist = array();
+	protected $allowed_options = array();
 
 	/**
 	 * WooCommerce settings that have been updated (and will be tracked).
@@ -30,22 +31,22 @@ class WC_Settings_Tracking {
 	 */
 	public function init() {
 		add_action( 'woocommerce_settings_page_init', array( $this, 'track_settings_page_view' ) );
-		add_action( 'woocommerce_update_option', array( $this, 'add_option_to_whitelist' ) );
+		add_action( 'woocommerce_update_option', array( $this, 'add_option_to_list' ) );
 		add_action( 'woocommerce_update_options', array( $this, 'send_settings_change_event' ) );
 	}
 
 	/**
-	 * Add a WooCommerce option name to our whitelist and attach
+	 * Add a WooCommerce option name to our allowed options list and attach
 	 * the `update_option` hook. Rather than inspecting every updated
 	 * option and pattern matching for "woocommerce", just build a dynamic
-	 * whitelist for WooCommerce options that might get updated.
+	 * list for WooCommerce options that might get updated.
 	 *
 	 * See `woocommerce_update_option` hook.
 	 *
 	 * @param array $option WooCommerce option (config) that might get updated.
 	 */
-	public function add_option_to_whitelist( $option ) {
-		$this->whitelist[] = $option['id'];
+	public function add_option_to_list( $option ) {
+		$this->allowed_options[] = $option['id'];
 
 		// Delay attaching this action since it could get fired a lot.
 		if ( false === has_action( 'update_option', array( $this, 'track_setting_change' ) ) ) {
@@ -62,7 +63,7 @@ class WC_Settings_Tracking {
 	 */
 	public function track_setting_change( $option_name, $old_value, $new_value ) {
 		// Make sure this is a WooCommerce option.
-		if ( ! in_array( $option_name, $this->whitelist, true ) ) {
+		if ( ! in_array( $option_name, $this->allowed_options, true ) ) {
 			return;
 		}
 

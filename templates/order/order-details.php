@@ -11,13 +11,13 @@
  * the readme will list any important changes.
  *
  * @see     https://docs.woocommerce.com/document/template-structure/
- * @package WooCommerce/Templates
- * @version 3.7.0
+ * @package WooCommerce\Templates
+ * @version 4.6.0
  */
 
 defined( 'ABSPATH' ) || exit;
 
-$order = wc_get_order( $order_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.OverrideProhibited
+$order = wc_get_order( $order_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
 if ( ! $order ) {
 	return;
@@ -101,6 +101,14 @@ if ( $show_downloads ) {
 </section>
 
 <?php
+/**
+ * Action hook fired after the order details.
+ *
+ * @since 4.4.0
+ * @param WC_Order $order Order data.
+ */
+do_action( 'woocommerce_after_order_details', $order );
+
 if ( $show_customer_details ) {
 	wc_get_template( 'order/order-details-customer.php', array( 'order' => $order ) );
 }

@@ -41,8 +41,9 @@ If you have questions about the process to contribute code or want to discuss de
 - Make sure to write good and detailed commit messages (see [this post](https://chris.beams.io/posts/git-commit/) for more on this) and follow all the applicable sections of the pull request template.
 - Please avoid modifying the changelog directly or updating the .pot files. These will be updated by the WooCommerce team.
 
-If you are contributing code to the REST API or editor blocks, these are developed in external packages.
-- [WooCommerce REST API package](https://github.com/woocommerce/woocommerce-rest-api)
+If you are contributing code to the (Javascript-driven) WooCommerce Admin project or to Gutenberg blocks, note that these are developed in external packages.
+
+- [WooCommerce Admin](https://github.com/woocommerce/woocommerce-admin)
 - [Blocks](https://github.com/woocommerce/woocommerce-gutenberg-products-block)
 
 ## Feature Requests 🚀
@@ -51,4 +52,4 @@ Feature requests can be [submitted to our issue tracker](https://github.com/wooc
 
 Feature request issues will remain closed until we see sufficient interest via comments and [👍 reactions](https://help.github.com/articles/about-discussions-in-issues-and-pull-requests/) from the community.
 
-You can see a [list of current feature requests which require votes here](https://github.com/woocommerce/woocommerce/issues?q=label%3A%22votes+needed%22+label%3Aenhancement+sort%3Areactions-%2B1-desc+is%3Aclosed).
+You can see a [list of current feature requests which require votes here](https://github.com/woocommerce/woocommerce/issues?q=is%3Aclosed+label%3A%22type%3A+enhancement%22+label%3A%22votes+needed%22+sort%3Areactions-%2B1-desc).

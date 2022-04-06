@@ -20,7 +20,7 @@ if ( class_exists( 'WC_Email', false ) ) {
  *
  * @class       WC_Email
  * @version     2.5.0
- * @package     WooCommerce/Classes/Emails
+ * @package     WooCommerce\Classes\Emails
  * @extends     WC_Settings_API
  */
 class WC_Email extends WC_Settings_API {
@@ -233,6 +233,7 @@ class WC_Email extends WC_Settings_API {
 			array(
 				'{site_title}'   => $this->get_blogname(),
 				'{site_address}' => wp_parse_url( home_url(), PHP_URL_HOST ),
+				'{site_url}'     => wp_parse_url( home_url(), PHP_URL_HOST ),
 			),
 			$this->placeholders
 		);
@@ -567,6 +568,9 @@ class WC_Email extends WC_Settings_API {
 					do_action( 'woocommerce_emogrifier', $emogrifier, $this );
 
 					$content    = $emogrifier->emogrify();
+					$html_prune = \Pelago\Emogrifier\HtmlProcessor\HtmlPruner::fromHtml( $content );
+					$html_prune->removeElementsWithDisplayNone();
+					$content    = $html_prune->render();
 				} catch ( Exception $e ) {
 					$logger = wc_get_logger();
 					$logger->error( $e->getMessage(), array( 'source' => 'emogrifier' ) );
@@ -1044,15 +1048,18 @@ class WC_Email extends WC_Settings_API {
 				var view = '" . esc_js( __( 'View template', 'woocommerce' ) ) . "';
 				var hide = '" . esc_js( __( 'Hide template', 'woocommerce' ) ) . "';
 
-				jQuery( 'a.toggle_editor' ).text( view ).toggle( function() {
-					jQuery( this ).text( hide ).closest(' .template' ).find( '.editor' ).slideToggle();
-					return false;
-				}, function() {
-					jQuery( this ).text( view ).closest( '.template' ).find( '.editor' ).slideToggle();
+				jQuery( 'a.toggle_editor' ).text( view ).on( 'click', function() {
+					var label = hide;
+
+					if ( jQuery( this ).closest(' .template' ).find( '.editor' ).is(':visible') ) {
+						var label = view;
+					}
+
+					jQuery( this ).text( label ).closest(' .template' ).find( '.editor' ).slideToggle();
 					return false;
 				} );
 
-				jQuery( 'a.delete_template' ).click( function() {
+				jQuery( 'a.delete_template' ).on( 'click', function() {
 					if ( window.confirm('" . esc_js( __( 'Are you sure you want to delete this template file?', 'woocommerce' ) ) . "') ) {
 						return true;
 					}

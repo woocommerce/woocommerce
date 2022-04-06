@@ -2,7 +2,7 @@
 /**
  * Shipping zone admin
  *
- * @package WooCommerce/Admin/Shipping
+ * @package WooCommerce\Admin\Shipping
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -66,7 +66,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<div class="wc-shipping-zone-postcodes">
 						<textarea name="zone_postcodes" data-attribute="zone_postcodes" id="zone_postcodes" placeholder="<?php esc_attr_e( 'List 1 postcode per line', 'woocommerce' ); ?>" class="input-text large-text" cols="25" rows="5"><?php echo esc_textarea( implode( "\n", $postcodes ) ); ?></textarea>
 						<?php /* translators: WooCommerce link to setting up shipping zones */ ?>
-						<span class="description"><?php printf( __( 'Postcodes containing wildcards (e.g. CB23*) or fully numeric ranges (e.g. <code>90210...99000</code>) are also supported. Please see the shipping zones <a href="%s" target="_blank">documentation</a>) for more information.', 'woocommerce' ), 'https://docs.woocommerce.com/document/setting-up-shipping-zones/#section-3' ); ?></span><?php // @codingStandardsIgnoreLine. ?>
+						<span class="description"><?php printf( __( 'Postcodes containing wildcards (e.g. CB23*) or fully numeric ranges (e.g. <code>90210...99000</code>) are also supported. Please see the shipping zones <a href="%s" target="_blank">documentation</a> for more information.', 'woocommerce' ), 'https://docs.woocommerce.com/document/setting-up-shipping-zones/#section-3' ); ?></span><?php // @codingStandardsIgnoreLine. ?>
 					</div>
 				</td>
 			<?php endif; ?>
@@ -189,7 +189,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 									if ( ! $method->supports( 'shipping-zones' ) ) {
 										continue;
 									}
-									echo '<option data-description="' . esc_attr( wp_kses_post( wpautop( $method->get_method_description() ) ) ) . '" value="' . esc_attr( $method->id ) . '">' . esc_attr( $method->get_method_title() ) . '</li>';
+									echo '<option data-description="' . esc_attr( wp_kses_post( wpautop( $method->get_method_description() ) ) ) . '" value="' . esc_attr( $method->id ) . '">' . esc_html( $method->get_method_title() ) . '</li>';
 								}
 								?>
 							</select>

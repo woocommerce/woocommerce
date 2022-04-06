@@ -5,6 +5,8 @@
  * @package WooCommerce\Shipping
  */
 
+use Automattic\WooCommerce\Utilities\NumberUtil;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -16,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @class   WC_Shipping_Free_Shipping
  * @version 2.6.0
- * @package WooCommerce/Classes/Shipping
+ * @package WooCommerce\Classes\Shipping
  */
 class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 
@@ -77,14 +79,14 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 	 */
 	public function init_form_fields() {
 		$this->instance_form_fields = array(
-			'title'      => array(
+			'title'            => array(
 				'title'       => __( 'Title', 'woocommerce' ),
 				'type'        => 'text',
 				'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
 				'default'     => $this->method_title,
 				'desc_tip'    => true,
 			),
-			'requires'   => array(
+			'requires'         => array(
 				'title'   => __( 'Free shipping requires...', 'woocommerce' ),
 				'type'    => 'select',
 				'class'   => 'wc-enhanced-select',
@@ -97,7 +99,7 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 					'both'       => __( 'A minimum order amount AND a coupon', 'woocommerce' ),
 				),
 			),
-			'min_amount' => array(
+			'min_amount'       => array(
 				'title'       => __( 'Minimum order amount', 'woocommerce' ),
 				'type'        => 'price',
 				'placeholder' => wc_format_localized_price( 0 ),
@@ -106,9 +108,10 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 				'desc_tip'    => true,
 			),
 			'ignore_discounts' => array(
-				'title'       => __( 'Ignore coupons discounts', 'woocommerce' ),
+				'title'       => __( 'Coupons discounts', 'woocommerce' ),
+				'label'       => __( 'Apply minimum order rule before coupon discount', 'woocommerce' ),
 				'type'        => 'checkbox',
-				'description' => __( 'Discounts will not be applied to the minimum order amount.', 'woocommerce' ),
+				'description' => __( 'If checked, free shipping would be available based on pre-discount order amount.', 'woocommerce' ),
 				'default'     => 'no',
 				'desc_tip'    => true,
 			),
@@ -158,7 +161,7 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 				$total = $total - WC()->cart->get_discount_total();
 			}
 
-			$total = round( $total, wc_get_price_decimals() );
+			$total = NumberUtil::round( $total, wc_get_price_decimals() );
 
 			if ( $total >= $this->min_amount ) {
 				$has_met_min_amount = true;

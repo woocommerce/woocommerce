@@ -4,12 +4,12 @@
  *
  * @since   2.6.0
  * @version 3.0.0
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  */
 
 defined( 'ABSPATH' ) || exit;
 
-require_once 'legacy/class-wc-legacy-shipping-zone.php';
+require_once __DIR__ . '/legacy/class-wc-legacy-shipping-zone.php';
 
 /**
  * WC_Shipping_Zone class.

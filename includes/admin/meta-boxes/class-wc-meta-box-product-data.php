@@ -4,7 +4,7 @@
  *
  * Displays the product data box, tabbed, with several panels covering price, stock etc.
  *
- * @package  WooCommerce/Admin/Meta Boxes
+ * @package  WooCommerce\Admin\Meta Boxes
  * @version  3.0.0
  */
 
@@ -30,7 +30,7 @@ class WC_Meta_Box_Product_Data {
 
 		wp_nonce_field( 'woocommerce_save_data', 'woocommerce_meta_nonce' );
 
-		include 'views/html-product-data-panel.php';
+		include __DIR__ . '/views/html-product-data-panel.php';
 	}
 
 	/**
@@ -39,12 +39,12 @@ class WC_Meta_Box_Product_Data {
 	private static function output_tabs() {
 		global $post, $thepostid, $product_object;
 
-		include 'views/html-product-data-general.php';
-		include 'views/html-product-data-inventory.php';
-		include 'views/html-product-data-shipping.php';
-		include 'views/html-product-data-linked-products.php';
-		include 'views/html-product-data-attributes.php';
-		include 'views/html-product-data-advanced.php';
+		include __DIR__ . '/views/html-product-data-general.php';
+		include __DIR__ . '/views/html-product-data-inventory.php';
+		include __DIR__ . '/views/html-product-data-shipping.php';
+		include __DIR__ . '/views/html-product-data-linked-products.php';
+		include __DIR__ . '/views/html-product-data-attributes.php';
+		include __DIR__ . '/views/html-product-data-advanced.php';
 	}
 
 	/**
@@ -116,7 +116,7 @@ class WC_Meta_Box_Product_Data {
 				'variations'     => array(
 					'label'    => __( 'Variations', 'woocommerce' ),
 					'target'   => 'variable_product_options',
-					'class'    => array( 'variations_tab', 'show_if_variable' ),
+					'class'    => array( 'show_if_variable' ),
 					'priority' => 60,
 				),
 				'advanced'       => array(
@@ -177,7 +177,7 @@ class WC_Meta_Box_Product_Data {
 		$variations_per_page    = absint( apply_filters( 'woocommerce_admin_meta_boxes_variations_per_page', 15 ) );
 		$variations_total_pages = ceil( $variations_count / $variations_per_page );
 
-		include 'views/html-product-data-variations.php';
+		include __DIR__ . '/views/html-product-data-variations.php';
 	}
 
 	/**
@@ -244,7 +244,7 @@ class WC_Meta_Box_Product_Data {
 					continue;
 				}
 				$attribute_id   = 0;
-				$attribute_name = wc_clean( $attribute_names[ $i ] );
+				$attribute_name = wc_clean( esc_html( $attribute_names[ $i ] ) );
 
 				if ( 'pa_' === substr( $attribute_name, 0, 3 ) ) {
 					$attribute_id = wc_attribute_taxonomy_id_by_name( $attribute_name );
@@ -257,7 +257,7 @@ class WC_Meta_Box_Product_Data {
 					$options = wp_parse_id_list( $options );
 				} else {
 					// Terms or text sent in textarea.
-					$options = 0 < $attribute_id ? wc_sanitize_textarea( wc_sanitize_term_text_based( $options ) ) : wc_sanitize_textarea( $options );
+					$options = 0 < $attribute_id ? wc_sanitize_textarea( esc_html( wc_sanitize_term_text_based( $options ) ) ) : wc_sanitize_textarea( esc_html( $options ) );
 					$options = wc_get_text_attributes( $options );
 				}
 
@@ -349,7 +349,7 @@ class WC_Meta_Box_Product_Data {
 			$date_on_sale_from = wc_clean( wp_unslash( $_POST['_sale_price_dates_from'] ) );
 
 			if ( ! empty( $date_on_sale_from ) ) {
-				$date_on_sale_from = date( 'Y-m-d 00:00:00', strtotime( $date_on_sale_from ) );
+				$date_on_sale_from = date( 'Y-m-d 00:00:00', strtotime( $date_on_sale_from ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
 			}
 		}
 
@@ -358,7 +358,7 @@ class WC_Meta_Box_Product_Data {
 			$date_on_sale_to = wc_clean( wp_unslash( $_POST['_sale_price_dates_to'] ) );
 
 			if ( ! empty( $date_on_sale_to ) ) {
-				$date_on_sale_to = date( 'Y-m-d 23:59:59', strtotime( $date_on_sale_to ) );
+				$date_on_sale_to = date( 'Y-m-d 23:59:59', strtotime( $date_on_sale_to ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
 			}
 		}
 
@@ -371,7 +371,7 @@ class WC_Meta_Box_Product_Data {
 				'featured'           => isset( $_POST['_featured'] ),
 				'catalog_visibility' => isset( $_POST['_visibility'] ) ? wc_clean( wp_unslash( $_POST['_visibility'] ) ) : null,
 				'tax_status'         => isset( $_POST['_tax_status'] ) ? wc_clean( wp_unslash( $_POST['_tax_status'] ) ) : null,
-				'tax_class'          => isset( $_POST['_tax_class'] ) ? wc_clean( wp_unslash( $_POST['_tax_class'] ) ) : null,
+				'tax_class'          => isset( $_POST['_tax_class'] ) ? sanitize_title( wp_unslash( $_POST['_tax_class'] ) ) : null,
 				'weight'             => isset( $_POST['_weight'] ) ? wc_clean( wp_unslash( $_POST['_weight'] ) ) : null,
 				'length'             => isset( $_POST['_length'] ) ? wc_clean( wp_unslash( $_POST['_length'] ) ) : null,
 				'width'              => isset( $_POST['_width'] ) ? wc_clean( wp_unslash( $_POST['_width'] ) ) : null,
@@ -475,7 +475,7 @@ class WC_Meta_Box_Product_Data {
 					$date_on_sale_from = wc_clean( wp_unslash( $_POST['variable_sale_price_dates_from'][ $i ] ) );
 
 					if ( ! empty( $date_on_sale_from ) ) {
-						$date_on_sale_from = date( 'Y-m-d 00:00:00', strtotime( $date_on_sale_from ) );
+						$date_on_sale_from = date( 'Y-m-d 00:00:00', strtotime( $date_on_sale_from ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
 					}
 				}
 
@@ -484,7 +484,7 @@ class WC_Meta_Box_Product_Data {
 					$date_on_sale_to = wc_clean( wp_unslash( $_POST['variable_sale_price_dates_to'][ $i ] ) );
 
 					if ( ! empty( $date_on_sale_to ) ) {
-						$date_on_sale_to = date( 'Y-m-d 23:59:59', strtotime( $date_on_sale_to ) );
+						$date_on_sale_to = date( 'Y-m-d 23:59:59', strtotime( $date_on_sale_to ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
 					}
 				}
 

@@ -18,7 +18,7 @@ if ( ! class_exists( 'WC_Email_Customer_On_Hold_Order', false ) ) :
 	 *
 	 * @class       WC_Email_Customer_On_Hold_Order
 	 * @version     2.6.0
-	 * @package     WooCommerce/Classes/Emails
+	 * @package     WooCommerce\Classes\Emails
 	 * @extends     WC_Email
 	 */
 	class WC_Email_Customer_On_Hold_Order extends WC_Email {

@@ -2,7 +2,7 @@
 /**
  * WooCommerce Email Settings
  *
- * @package WooCommerce/Admin
+ * @package WooCommerce\Admin
  * @version 2.1.0
  */
 
@@ -128,7 +128,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				array(
 					'title'       => __( 'Footer text', 'woocommerce' ),
 					/* translators: %s: Available placeholders for use */
-					'desc'        => __( 'The text to appear in the footer of all WooCommerce emails.', 'woocommerce' ) . ' ' . sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '{site_title} {site_address}' ),
+					'desc'        => __( 'The text to appear in the footer of all WooCommerce emails.', 'woocommerce' ) . ' ' . sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '{site_title} {site_url}' ),
 					'id'          => 'woocommerce_email_footer_text',
 					'css'         => 'width:400px; height: 75px;',
 					'placeholder' => __( 'N/A', 'woocommerce' ),
@@ -189,6 +189,22 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				array(
 					'type' => 'sectionend',
 					'id'   => 'email_template_options',
+				),
+
+				array(
+					'title' => __( 'Store management insights', 'woocommerce' ),
+					'type'  => 'title',
+					'id'    => 'email_merchant_notes',
+				),
+
+				array(
+					'title'         => __( 'Enable email insights', 'woocommerce' ),
+					'desc'          => __( 'Receive email notifications with additional guidance to complete the basic store setup and helpful insights', 'woocommerce' ),
+					'id'            => 'woocommerce_merchant_email_notifications',
+					'type'          => 'checkbox',
+					'checkboxgroup' => 'start',
+					'default'       => 'no',
+					'autoload'      => false,
 				),
 
 			)

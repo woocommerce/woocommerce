@@ -2,7 +2,7 @@
 /**
  * Handle frontend scripts
  *
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  * @version 2.3.0
  */
 
@@ -308,7 +308,7 @@ class WC_Frontend_Scripts {
 	}
 
 	/**
-	 * Register all WC sty;es.
+	 * Register all WC styles.
 	 */
 	private static function register_styles() {
 		$version = Constants::get_constant( 'WC_VERSION' );

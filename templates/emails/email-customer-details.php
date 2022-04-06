@@ -13,7 +13,7 @@
  * the readme will list any important changes.
  *
  * @see     https://docs.woocommerce.com/document/template-structure/
- * @package WooCommerce/Templates/Emails
+ * @package WooCommerce\Templates\Emails
  * @version 2.5.0
  */
 

@@ -2,7 +2,7 @@
 /**
  * Admin View: Product import form
  *
- * @package WooCommerce/Admin
+ * @package WooCommerce\Admin
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <form class="wc-progress-form-content woocommerce-importer" enctype="multipart/form-data" method="post">
 	<header>
 		<h2><?php esc_html_e( 'Import products from a CSV file', 'woocommerce' ); ?></h2>
-		<p><?php esc_html_e( 'This tool allows you to import (or merge) product data to your store from a CSV file.', 'woocommerce' ); ?></p>
+		<p><?php esc_html_e( 'This tool allows you to import (or merge) product data to your store from a CSV or TXT file.', 'woocommerce' ); ?></p>
 	</header>
 	<section>
 		<table class="form-table woocommerce-importer-options">

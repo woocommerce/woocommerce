@@ -4,7 +4,7 @@
  *
  * Generates a range slider to filter products by price.
  *
- * @package WooCommerce/Widgets
+ * @package WooCommerce\Widgets
  * @version 2.3.0
  */
 

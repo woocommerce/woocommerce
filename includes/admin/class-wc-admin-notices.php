@@ -28,17 +28,18 @@ class WC_Admin_Notices {
 	 * @var array
 	 */
 	private static $core_notices = array(
-		'install'                      => 'install_notice',
-		'update'                       => 'update_notice',
-		'template_files'               => 'template_file_check_notice',
-		'legacy_shipping'              => 'legacy_shipping_notice',
-		'no_shipping_methods'          => 'no_shipping_methods_notice',
-		'regenerating_thumbnails'      => 'regenerating_thumbnails_notice',
-		'regenerating_lookup_table'    => 'regenerating_lookup_table_notice',
-		'no_secure_connection'         => 'secure_connection_notice',
-		WC_PHP_MIN_REQUIREMENTS_NOTICE => 'wp_php_min_requirements_notice',
-		'maxmind_license_key'          => 'maxmind_missing_license_key_notice',
-		'redirect_download_method'     => 'redirect_download_method_notice',
+		'update'                           => 'update_notice',
+		'template_files'                   => 'template_file_check_notice',
+		'legacy_shipping'                  => 'legacy_shipping_notice',
+		'no_shipping_methods'              => 'no_shipping_methods_notice',
+		'regenerating_thumbnails'          => 'regenerating_thumbnails_notice',
+		'regenerating_lookup_table'        => 'regenerating_lookup_table_notice',
+		'no_secure_connection'             => 'secure_connection_notice',
+		WC_PHP_MIN_REQUIREMENTS_NOTICE     => 'wp_php_min_requirements_notice',
+		'maxmind_license_key'              => 'maxmind_missing_license_key_notice',
+		'redirect_download_method'         => 'redirect_download_method_notice',
+		'uploads_directory_is_unprotected' => 'uploads_directory_is_unprotected_notice',
+		'base_tables_missing'              => 'base_tables_missing_notice',
 	);
 
 	/**
@@ -61,6 +62,51 @@ class WC_Admin_Notices {
 		if ( current_user_can( 'manage_woocommerce' ) ) {
 			add_action( 'admin_print_styles', array( __CLASS__, 'add_notices' ) );
 		}
+	}
+
+	/**
+	 * Parses query to create nonces when available.
+	 *
+	 * @param object $response The WP_REST_Response we're working with.
+	 * @return object $response The prepared WP_REST_Response object.
+	 */
+	public static function prepare_note_with_nonce( $response ) {
+		if ( 'wc-update-db-reminder' !== $response->data['name'] || ! isset( $response->data['actions'] ) ) {
+			return $response;
+		}
+
+		foreach ( $response->data['actions'] as $action_key => $action ) {
+			$url_parts = ! empty( $action->query ) ? wp_parse_url( $action->query ) : '';
+
+			if ( ! isset( $url_parts['query'] ) ) {
+				continue;
+			}
+
+			wp_parse_str( $url_parts['query'], $params );
+
+			if ( array_key_exists( '_nonce_action', $params ) && array_key_exists( '_nonce_name', $params ) ) {
+				$org_params = $params;
+
+				// Check to make sure we're acting on the whitelisted nonce actions.
+				if ( 'wc_db_update' !== $params['_nonce_action'] && 'woocommerce_hide_notices_nonce' !== $params['_nonce_action'] ) {
+					continue;
+				}
+
+				unset( $org_params['_nonce_action'] );
+				unset( $org_params['_nonce_name'] );
+
+				$url = $url_parts['scheme'] . '://' . $url_parts['host'] . $url_parts['path'];
+
+				$nonce         = array( $params['_nonce_name'] => wp_create_nonce( $params['_nonce_action'] ) );
+				$merged_params = array_merge( $nonce, $org_params );
+				$parsed_query  = add_query_arg( $merged_params, $url );
+
+				$response->data['actions'][ $action_key ]->query = $parsed_query;
+				$response->data['actions'][ $action_key ]->url   = $parsed_query;
+			}
+		}
+
+		return $response;
 	}
 
 	/**
@@ -92,6 +138,9 @@ class WC_Admin_Notices {
 	public static function reset_admin_notices() {
 		if ( ! self::is_ssl() ) {
 			self::add_notice( 'no_secure_connection' );
+		}
+		if ( ! self::is_uploads_directory_protected() ) {
+			self::add_notice( 'uploads_directory_is_unprotected' );
 		}
 		self::add_notice( 'template_files' );
 		self::add_min_version_notice();
@@ -248,16 +297,17 @@ class WC_Admin_Notices {
 				include dirname( __FILE__ ) . '/views/html-notice-update.php';
 			}
 		} else {
-			WC_Install::update_db_version();
 			include dirname( __FILE__ ) . '/views/html-notice-updated.php';
 		}
 	}
 
 	/**
 	 * If we have just installed, show a message with the install pages button.
+	 *
+	 * @deprecated 4.6.0
 	 */
 	public static function install_notice() {
-		include dirname( __FILE__ ) . '/views/html-notice-install.php';
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.6.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 	}
 
 	/**
@@ -489,6 +539,35 @@ class WC_Admin_Notices {
 	}
 
 	/**
+	 * Notice about uploads directory begin unprotected.
+	 *
+	 * @since 4.2.0
+	 */
+	public static function uploads_directory_is_unprotected_notice() {
+		if ( get_user_meta( get_current_user_id(), 'dismissed_uploads_directory_is_unprotected_notice', true ) || self::is_uploads_directory_protected() ) {
+			self::remove_notice( 'uploads_directory_is_unprotected' );
+			return;
+		}
+
+		include dirname( __FILE__ ) . '/views/html-notice-uploads-directory-is-unprotected.php';
+	}
+
+	/**
+	 * Notice about base tables missing.
+	 */
+	public static function base_tables_missing_notice() {
+		$notice_dismissed = apply_filters(
+			'woocommerce_hide_base_tables_missing_nag',
+			get_user_meta( get_current_user_id(), 'dismissed_base_tables_missing_notice', true )
+		);
+		if ( $notice_dismissed ) {
+			self::remove_notice( 'base_tables_missing' );
+		}
+
+		include dirname( __FILE__ ) . '/views/html-notice-base-table-missing.php';
+	}
+
+	/**
 	 * Determine if the store is running SSL.
 	 *
 	 * @return bool Flag SSL enabled.
@@ -529,6 +608,42 @@ class WC_Admin_Notices {
 	 */
 	public static function theme_check_notice() {
 		wc_deprecated_function( 'WC_Admin_Notices::theme_check_notice', '3.3.0' );
+	}
+
+	/**
+	 * Check if uploads directory is protected.
+	 *
+	 * @since 4.2.0
+	 * @return bool
+	 */
+	protected static function is_uploads_directory_protected() {
+		$cache_key = '_woocommerce_upload_directory_status';
+		$status    = get_transient( $cache_key );
+
+		// Check for cache.
+		if ( false !== $status ) {
+			return 'protected' === $status;
+		}
+
+		// Get only data from the uploads directory.
+		$uploads = wp_get_upload_dir();
+
+		// Check for the "uploads/woocommerce_uploads" directory.
+		$response         = wp_safe_remote_get(
+			esc_url_raw( $uploads['baseurl'] . '/woocommerce_uploads/' ),
+			array(
+				'redirection' => 0,
+			)
+		);
+		$response_code    = intval( wp_remote_retrieve_response_code( $response ) );
+		$response_content = wp_remote_retrieve_body( $response );
+
+		// Check if returns 200 with empty content in case can open an index.html file,
+		// and check for non-200 codes in case the directory is protected.
+		$is_protected = ( 200 === $response_code && empty( $response_content ) ) || ( 200 !== $response_code );
+		set_transient( $cache_key, $is_protected ? 'protected' : 'unprotected', 1 * DAY_IN_SECONDS );
+
+		return $is_protected;
 	}
 }
 

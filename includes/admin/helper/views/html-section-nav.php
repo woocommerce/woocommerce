@@ -2,7 +2,7 @@
 /**
  * Helper admin navigation.
  *
- * @package WooCommerce/Helper
+ * @package WooCommerce\Helper
  */
 
 defined( 'ABSPATH' ) || exit(); ?>

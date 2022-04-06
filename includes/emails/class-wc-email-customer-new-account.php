@@ -18,7 +18,7 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) :
 	 *
 	 * @class       WC_Email_Customer_New_Account
 	 * @version     3.5.0
-	 * @package     WooCommerce/Classes/Emails
+	 * @package     WooCommerce\Classes\Emails
 	 * @extends     WC_Email
 	 */
 	class WC_Email_Customer_New_Account extends WC_Email {

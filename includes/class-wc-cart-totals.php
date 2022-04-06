@@ -9,9 +9,11 @@
  * - if something is being stored e.g. item total, store unrounded. This is so taxes can be recalculated later accurately.
  * - if calculating a total, round (if settings allow).
  *
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  * @version 3.2.0
  */
+
+use Automattic\WooCommerce\Utilities\NumberUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -133,7 +135,7 @@ final class WC_Cart_Totals {
 	}
 
 	/**
-	 * Run all calculations methods on the given items in sequence.
+	 * Run all calculation methods on the given items in sequence.
 	 *
 	 * @since 3.2.0
 	 */
@@ -280,7 +282,7 @@ final class WC_Cart_Totals {
 
 			// Negative fees should not make the order total go negative.
 			if ( 0 > $fee->total ) {
-				$max_discount = round( $this->get_total( 'items_total', true ) + $fee_running_total + $this->get_total( 'shipping_total', true ) ) * -1;
+				$max_discount = NumberUtil::round( $this->get_total( 'items_total', true ) + $fee_running_total + $this->get_total( 'shipping_total', true ) ) * -1;
 
 				if ( $fee->total < $max_discount ) {
 					$fee->total = $max_discount;
@@ -341,7 +343,8 @@ final class WC_Cart_Totals {
 			$shipping_line->taxable   = true;
 			$shipping_line->total     = wc_add_number_precision_deep( $shipping_object->cost );
 			$shipping_line->taxes     = wc_add_number_precision_deep( $shipping_object->taxes, false );
-			$shipping_line->total_tax = array_sum( array_map( array( $this, 'round_line_tax' ), $shipping_line->taxes ) );
+			$shipping_line->taxes     = array_map( array( $this, 'round_item_subtotal' ), $shipping_line->taxes );
+			$shipping_line->total_tax = array_sum( $shipping_line->taxes );
 
 			$this->shipping[ $key ] = $shipping_line;
 		}
@@ -428,7 +431,7 @@ final class WC_Cart_Totals {
 			$taxes = WC_Tax::calc_tax( $item->price, $base_tax_rates, true );
 
 			// Now we have a new item price (excluding TAX).
-			$item->price              = round( $item->price - array_sum( $taxes ) );
+			$item->price              = NumberUtil::round( $item->price - array_sum( $taxes ) );
 			$item->price_includes_tax = false;
 		}
 		return $item;
@@ -538,7 +541,7 @@ final class WC_Cart_Totals {
 	 * @param string $key Total name you want to set.
 	 * @param int    $total Total to set.
 	 */
-	protected function set_total( $key = 'total', $total ) {
+	protected function set_total( $key, $total ) {
 		$this->totals[ $key ] = $total;
 	}
 
@@ -606,10 +609,8 @@ final class WC_Cart_Totals {
 	 * @return array
 	 */
 	protected function round_merged_taxes( $taxes ) {
-		if ( $this->round_at_subtotal() ) {
-			foreach ( $taxes as $rate_id => $tax ) {
-				$taxes[ $rate_id ] = wc_round_tax_total( $tax, 0 );
-			}
+		foreach ( $taxes as $rate_id => $tax ) {
+			$taxes[ $rate_id ] = $this->round_line_tax( $tax );
 		}
 
 		return $taxes;
@@ -686,7 +687,7 @@ final class WC_Cart_Totals {
 
 		$items_total = $this->get_rounded_items_total( $this->get_values_for_total( 'total' ) );
 
-		$this->set_total( 'items_total', round( $items_total ) );
+		$this->set_total( 'items_total', $items_total );
 		$this->set_total( 'items_total_tax', array_sum( array_values( wp_list_pluck( $this->items, 'total_tax' ) ) ) );
 
 		$this->cart->set_cart_contents_total( $this->get_total( 'items_total' ) );
@@ -697,11 +698,11 @@ final class WC_Cart_Totals {
 	/**
 	 * Subtotals are costs before discounts.
 	 *
-	 * To prevent rounding issues we need to work with the inclusive price where possible.
-	 * otherwise we'll see errors such as when working with a 9.99 inc price, 20% VAT which would.
+	 * To prevent rounding issues we need to work with the inclusive price where possible
+	 * otherwise we'll see errors such as when working with a 9.99 inc price, 20% VAT which would
 	 * be 8.325 leading to totals being 1p off.
 	 *
-	 * Pre tax coupons come off the price the customer thinks they are paying - tax is calculated.
+	 * Pre tax coupons come off the price the customer thinks they are paying - tax is calculated
 	 * afterwards.
 	 *
 	 * e.g. $100 bike with $10 coupon = customer pays $90 and tax worked backwards from that.
@@ -749,7 +750,7 @@ final class WC_Cart_Totals {
 
 		$items_subtotal = $this->get_rounded_items_total( $this->get_values_for_total( 'subtotal' ) );
 
-		$this->set_total( 'items_subtotal', round( $items_subtotal ) );
+		$this->set_total( 'items_subtotal', NumberUtil::round( $items_subtotal ) );
 		$this->set_total( 'items_subtotal_tax', wc_round_tax_total( array_sum( $merged_subtotal_taxes ), 0 ) );
 
 		$this->cart->set_subtotal( $this->get_total( 'items_subtotal' ) );
@@ -860,7 +861,7 @@ final class WC_Cart_Totals {
 	 * @since 3.2.0
 	 */
 	protected function calculate_totals() {
-		$this->set_total( 'total', round( $this->get_total( 'items_total', true ) + $this->get_total( 'fees_total', true ) + $this->get_total( 'shipping_total', true ) + wc_round_tax_total( array_sum( $this->get_merged_taxes( true ) ), 0 ), 0 ) );
+		$this->set_total( 'total', NumberUtil::round( $this->get_total( 'items_total', true ) + $this->get_total( 'fees_total', true ) + $this->get_total( 'shipping_total', true ) + array_sum( $this->get_merged_taxes( true ) ), 0 ) );
 		$this->cart->set_total_tax( array_sum( $this->get_merged_taxes( false ) ) );
 
 		// Allow plugins to hook and alter totals before final total is calculated.

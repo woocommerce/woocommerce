@@ -8,6 +8,9 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\DownloadPermissionsAdjuster;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
+
 /**
  * Main WooCommerce Class.
  *
@@ -20,7 +23,16 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '4.1.0';
+	public $version = '5.1.0';
+
+	/**
+	 * WooCommerce Schema version.
+	 *
+	 * @since 4.3 started with version string 430.
+	 *
+	 * @var string
+	 */
+	public $db_version = '430';
 
 	/**
 	 * The single instance of the class.
@@ -187,9 +199,14 @@ final class WooCommerce {
 		add_action( 'init', array( 'WC_Shortcodes', 'init' ) );
 		add_action( 'init', array( 'WC_Emails', 'init_transactional_emails' ) );
 		add_action( 'init', array( $this, 'add_image_sizes' ) );
+		add_action( 'init', array( $this, 'load_rest_api' ) );
 		add_action( 'switch_blog', array( $this, 'wpdb_table_fix' ), 0 );
 		add_action( 'activated_plugin', array( $this, 'activated_plugin' ) );
 		add_action( 'deactivated_plugin', array( $this, 'deactivated_plugin' ) );
+		add_filter( 'woocommerce_rest_prepare_note', array( 'WC_Admin_Notices', 'prepare_note_with_nonce' ) );
+
+		// These classes set up hooks on instantiation.
+		wc_get_container()->get( DownloadPermissionsAdjuster::class );
 	}
 
 	/**
@@ -229,8 +246,8 @@ final class WooCommerce {
 		$this->define( 'WC_LOG_DIR', $upload_dir['basedir'] . '/wc-logs/' );
 		$this->define( 'WC_SESSION_CACHE_GROUP', 'wc_session_id' );
 		$this->define( 'WC_TEMPLATE_DEBUG_MODE', false );
-		$this->define( 'WC_NOTICE_MIN_PHP_VERSION', '7.0' );
-		$this->define( 'WC_NOTICE_MIN_WP_VERSION', '5.0' );
+		$this->define( 'WC_NOTICE_MIN_PHP_VERSION', '7.2' );
+		$this->define( 'WC_NOTICE_MIN_WP_VERSION', '5.2' );
 		$this->define( 'WC_PHP_MIN_REQUIREMENTS_NOTICE', 'wp_php_min_requirements_' . WC_NOTICE_MIN_PHP_VERSION . '_' . WC_NOTICE_MIN_WP_VERSION );
 	}
 
@@ -246,6 +263,7 @@ final class WooCommerce {
 			'order_itemmeta'         => 'woocommerce_order_itemmeta',
 			'wc_product_meta_lookup' => 'wc_product_meta_lookup',
 			'wc_tax_rate_classes'    => 'wc_tax_rate_classes',
+			'wc_reserved_stock'      => 'wc_reserved_stock',
 		);
 
 		foreach ( $tables as $name => $table ) {
@@ -284,6 +302,13 @@ final class WooCommerce {
 		$is_rest_api_request = ( false !== strpos( $_SERVER['REQUEST_URI'], $rest_prefix ) ); // phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		return apply_filters( 'woocommerce_is_rest_api_request', $is_rest_api_request );
+	}
+
+	/**
+	 * Load REST API.
+	 */
+	public function load_rest_api() {
+		\Automattic\WooCommerce\RestApi\Server::instance()->init();
 	}
 
 	/**
@@ -401,6 +426,7 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/queue/class-wc-action-queue.php';
 		include_once WC_ABSPATH . 'includes/queue/class-wc-queue.php';
 		include_once WC_ABSPATH . 'includes/admin/marketplace-suggestions/class-wc-marketplace-updater.php';
+		include_once WC_ABSPATH . 'includes/blocks/class-wc-blocks-utils.php';
 
 		/**
 		 * Data stores - used to store and retrieve CRUD object data from the database.
@@ -510,6 +536,9 @@ final class WooCommerce {
 				case 'twentytwenty':
 					include_once WC_ABSPATH . 'includes/theme-support/class-wc-twenty-twenty.php';
 					break;
+				case 'twentytwentyone':
+					include_once WC_ABSPATH . 'includes/theme-support/class-wc-twenty-twenty-one.php';
+					break;
 			}
 		}
 	}
@@ -579,13 +608,7 @@ final class WooCommerce {
 	 *      - WP_LANG_DIR/plugins/woocommerce-LOCALE.mo
 	 */
 	public function load_plugin_textdomain() {
-		if ( function_exists( 'determine_locale' ) ) {
-			$locale = determine_locale();
-		} else {
-			// @todo Remove when start supporting WP 5.0 or later.
-			$locale = is_admin() ? get_user_locale() : get_locale();
-		}
-
+		$locale = determine_locale();
 		$locale = apply_filters( 'plugin_locale', $locale, 'woocommerce' );
 
 		unload_textdomain( 'woocommerce' );
@@ -643,7 +666,7 @@ final class WooCommerce {
 		/**
 		 * Legacy image sizes.
 		 *
-		 * @deprecated These sizes will be removed in 4.0.
+		 * @deprecated 3.3.0 These sizes will be removed in 4.6.0.
 		 */
 		add_image_size( 'shop_catalog', $thumbnail['width'], $thumbnail['height'], $thumbnail['crop'] );
 		add_image_size( 'shop_single', $single['width'], $single['height'], $single['crop'] );
@@ -784,6 +807,10 @@ final class WooCommerce {
 	public function activated_plugin( $filename ) {
 		include_once dirname( __FILE__ ) . '/admin/helper/class-wc-helper.php';
 
+		if ( '/woocommerce.php' === substr( $filename, -16 ) ) {
+			set_transient( 'woocommerce_activated_plugin', $filename );
+		}
+
 		WC_Helper::activated_plugin( $filename );
 	}
 
@@ -880,7 +907,7 @@ final class WooCommerce {
 			'https://wordpress.org/plugins/woocommerce/',
 			'https://github.com/woocommerce/woocommerce/releases'
 		);
-		printf( '<div class="error"><p>%s %s</p></div>', $message_one, $message_two ); /* WPCS: xss ok. */
+		printf( '<div class="error"><p>%s %s</p></div>', $message_one, $message_two ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 	/**
@@ -891,5 +918,61 @@ final class WooCommerce {
 	 */
 	public function is_wc_admin_active() {
 		return function_exists( 'wc_admin_url' );
+	}
+
+	/**
+	 * Call a user function. This should be used to execute any non-idempotent function, especially
+	 * those in the `includes` directory or provided by WordPress.
+	 *
+	 * This method can be useful for unit tests, since functions called using this method
+	 * can be easily mocked by using WC_Unit_Test_Case::register_legacy_proxy_function_mocks.
+	 *
+	 * @param string $function_name The function to execute.
+	 * @param mixed  ...$parameters The parameters to pass to the function.
+	 *
+	 * @return mixed The result from the function.
+	 *
+	 * @since 4.4
+	 */
+	public function call_function( $function_name, ...$parameters ) {
+		return wc_get_container()->get( LegacyProxy::class )->call_function( $function_name, ...$parameters );
+	}
+
+	/**
+	 * Call a static method in a class. This should be used to execute any non-idempotent method in classes
+	 * from the `includes` directory.
+	 *
+	 * This method can be useful for unit tests, since methods called using this method
+	 * can be easily mocked by using WC_Unit_Test_Case::register_legacy_proxy_static_mocks.
+	 *
+	 * @param string $class_name The name of the class containing the method.
+	 * @param string $method_name The name of the method.
+	 * @param mixed  ...$parameters The parameters to pass to the method.
+	 *
+	 * @return mixed The result from the method.
+	 *
+	 * @since 4.4
+	 */
+	public function call_static( $class_name, $method_name, ...$parameters ) {
+		return wc_get_container()->get( LegacyProxy::class )->call_static( $class_name, $method_name, ...$parameters );
+	}
+
+	/**
+	 * Gets an instance of a given legacy class.
+	 * This must not be used to get instances of classes in the `src` directory.
+	 *
+	 * This method can be useful for unit tests, since objects obtained using this method
+	 * can be easily mocked by using WC_Unit_Test_Case::register_legacy_proxy_class_mocks.
+	 *
+	 * @param string $class_name The name of the class to get an instance for.
+	 * @param mixed  ...$args Parameters to be passed to the class constructor or to the appropriate internal 'get_instance_of_' method.
+	 *
+	 * @return object The instance of the class.
+	 * @throws \Exception The requested class belongs to the `src` directory, or there was an error creating an instance of the class.
+	 *
+	 * @since 4.4
+	 */
+	public function get_instance_of( string $class_name, ...$args ) {
+		return wc_get_container()->get( LegacyProxy::class )->get_instance_of( $class_name, ...$args );
 	}
 }

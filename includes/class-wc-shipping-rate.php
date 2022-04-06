@@ -4,7 +4,7 @@
  *
  * Simple Class for storing rates.
  *
- * @package WooCommerce/Classes/Shipping
+ * @package WooCommerce\Classes\Shipping
  * @since   2.6.0
  */
 

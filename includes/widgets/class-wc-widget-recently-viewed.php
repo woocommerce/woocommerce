@@ -2,7 +2,7 @@
 /**
  * Recent Products Widget.
  *
- * @package WooCommerce/Widgets
+ * @package WooCommerce\Widgets
  * @version 3.3.0
  */
 

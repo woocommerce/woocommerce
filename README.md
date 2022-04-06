@@ -5,8 +5,7 @@
 <a href="https://packagist.org/packages/woocommerce/woocommerce"><img src="https://poser.pugx.org/woocommerce/woocommerce/v/stable" alt="Latest Stable Version"></a>
 <img src="https://img.shields.io/wordpress/plugin/dt/woocommerce.svg" alt="WordPress.org downloads">
 <img src="https://img.shields.io/wordpress/plugin/r/woocommerce.svg" alt="WordPress.org rating">
-<a href="https://travis-ci.org/woocommerce/woocommerce"><img src="https://travis-ci.org/woocommerce/woocommerce.svg?branch=master" alt="Build Status"></a>
-<a href="https://scrutinizer-ci.com/g/woocommerce/woocommerce/?branch=master"><img src="https://scrutinizer-ci.com/g/woocommerce/woocommerce/badges/quality-score.png?b=master" alt="Scrutinizer Code Quality"></a>
+<a href="https://travis-ci.com/woocommerce/woocommerce"><img src="https://travis-ci.com/woocommerce/woocommerce.svg?branch=master" alt="Build Status"></a>
 <a href="https://codecov.io/gh/woocommerce/woocommerce"><img src="https://codecov.io/gh/woocommerce/woocommerce/branch/master/graph/badge.svg" alt="codecov"></a>
 </p>
 
@@ -15,7 +14,7 @@ Welcome to the WooCommerce repository on GitHub. Here you can browse the source,
 If you are not a developer, please use the [WooCommerce plugin page](https://wordpress.org/plugins/woocommerce/) on WordPress.org.
 
 ## Documentation
-* [WooCommerce Documentation](https://docs.woocommerce.com/documentation/plugins/woocommerce/)
+* [WooCommerce Documentation](https://docs.woocommerce.com/)
 * [WooCommerce Developer Documentation](https://github.com/woocommerce/woocommerce/wiki)
 * [WooCommerce Code Reference](https://docs.woocommerce.com/wc-apidocs/)
 * [WooCommerce REST API Docs](https://woocommerce.github.io/woocommerce-rest-api-docs/)

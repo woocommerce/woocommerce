@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @class       WC_Payment_Token_CC
  * @version     3.0.0
  * @since       2.6.0
- * @package     WooCommerce/PaymentTokens
+ * @package     WooCommerce\PaymentTokens
  */
 class WC_Payment_Token_CC extends WC_Payment_Token {
 

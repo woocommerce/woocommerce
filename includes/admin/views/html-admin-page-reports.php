@@ -9,6 +9,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 ?>
 <div class="wrap woocommerce">
+	<?php if ( WC()->is_wc_admin_active() ) { ?>
+	<div id="message" class="error inline" style="margin-top:30px">
+		<p>
+			<strong>
+			<?php
+			/* translators: 1: Link URL */
+			echo wp_kses_post( sprintf( __( 'With the release of WooCommerce 4.0, these reports are being replaced. There is a new and better Analytics section available for users running WordPress 5.3+. Head on over to the <a href="%1$s">WooCommerce Analytics</a> or learn more about the new experience in the <a href="https://docs.woocommerce.com/document/woocommerce-analytics/" target="_blank">WooCommerce Analytics documentation</a>.', 'woocommerce' ), esc_url( wc_admin_url( '&path=/analytics/overview' ) ) ) );
+			?>
+			</strong>
+		</p>
+	</div>
+	<?php } ?>
 	<nav class="nav-tab-wrapper woo-nav-tab-wrapper">
 		<?php
 		foreach ( $reports as $key => $report_group ) {
@@ -23,7 +35,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		?>
 	</nav>
 	<?php
-	if ( sizeof( $reports[ $current_tab ]['reports'] ) > 1 ) {
+	if ( count( $reports[ $current_tab ]['reports'] ) > 1 ) {
 		?>
 		<ul class="subsubsub">
 			<li>

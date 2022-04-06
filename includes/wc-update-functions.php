@@ -4,7 +4,7 @@
  *
  * Functions for updating data, used by the background updater.
  *
- * @package WooCommerce/Functions
+ * @package WooCommerce\Functions
  * @version 3.3.0
  */
 
@@ -28,6 +28,7 @@ function wc_update_200_file_paths() {
 			$old_file_path = trim( $existing_file_path->meta_value );
 
 			if ( ! empty( $old_file_path ) ) {
+				// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
 				$file_paths = serialize( array( md5( $old_file_path ) => $old_file_path ) );
 
 				$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_key = '_file_paths', meta_value = %s WHERE meta_id = %d", $file_paths, $existing_file_path->meta_id ) );
@@ -53,11 +54,11 @@ function wc_update_200_permalinks() {
 
 		$base_slug = $shop_page_id > 0 && get_post( $shop_page_id ) ? get_page_uri( $shop_page_id ) : 'shop';
 
-		$category_base = get_option( 'woocommerce_prepend_shop_page_to_urls' ) == 'yes' ? trailingslashit( $base_slug ) : '';
+		$category_base = 'yes' === get_option( 'woocommerce_prepend_shop_page_to_urls' ) ? trailingslashit( $base_slug ) : '';
 		$category_slug = get_option( 'woocommerce_product_category_slug' ) ? get_option( 'woocommerce_product_category_slug' ) : _x( 'product-category', 'slug', 'woocommerce' );
 		$tag_slug      = get_option( 'woocommerce_product_tag_slug' ) ? get_option( 'woocommerce_product_tag_slug' ) : _x( 'product-tag', 'slug', 'woocommerce' );
 
-		if ( 'yes' == get_option( 'woocommerce_prepend_shop_page_to_products' ) ) {
+		if ( 'yes' === get_option( 'woocommerce_prepend_shop_page_to_products' ) ) {
 			$product_base = trailingslashit( $base_slug );
 		} else {
 			$product_slug = get_option( 'woocommerce_product_slug' );
@@ -68,7 +69,7 @@ function wc_update_200_permalinks() {
 			}
 		}
 
-		if ( get_option( 'woocommerce_prepend_category_to_products' ) == 'yes' ) {
+		if ( 'yes' === get_option( 'woocommerce_prepend_category_to_products' ) ) {
 			$product_base .= trailingslashit( '%product_cat%' );
 		}
 
@@ -90,16 +91,16 @@ function wc_update_200_permalinks() {
  */
 function wc_update_200_subcat_display() {
 	// Update subcat display settings.
-	if ( get_option( 'woocommerce_shop_show_subcategories' ) == 'yes' ) {
-		if ( get_option( 'woocommerce_hide_products_when_showing_subcategories' ) == 'yes' ) {
+	if ( 'yes' === get_option( 'woocommerce_shop_show_subcategories' ) ) {
+		if ( 'yes' === get_option( 'woocommerce_hide_products_when_showing_subcategories' ) ) {
 			update_option( 'woocommerce_shop_page_display', 'subcategories' );
 		} else {
 			update_option( 'woocommerce_shop_page_display', 'both' );
 		}
 	}
 
-	if ( get_option( 'woocommerce_show_subcategories' ) == 'yes' ) {
-		if ( get_option( 'woocommerce_hide_products_when_showing_subcategories' ) == 'yes' ) {
+	if ( 'yes' === get_option( 'woocommerce_show_subcategories' ) ) {
+		if ( 'yes' === get_option( 'woocommerce_hide_products_when_showing_subcategories' ) ) {
 			update_option( 'woocommerce_category_archive_display', 'subcategories' );
 		} else {
 			update_option( 'woocommerce_category_archive_display', 'both' );
@@ -128,7 +129,7 @@ function wc_update_200_taxrates() {
 
 				foreach ( $states as $state ) {
 
-					if ( '*' == $state ) {
+					if ( '*' === $state ) {
 						$state = '';
 					}
 
@@ -160,7 +161,7 @@ function wc_update_200_taxrates() {
 
 			$location_type = ( 'postcode' === $tax_rate['location_type'] ) ? 'postcode' : 'city';
 
-			if ( '*' == $tax_rate['state'] ) {
+			if ( '*' === $tax_rate['state'] ) {
 				$tax_rate['state'] = '';
 			}
 
@@ -246,7 +247,7 @@ function wc_update_200_line_items() {
 				)
 			);
 
-			 // Add line item meta.
+			// Add line item meta.
 			if ( $item_id ) {
 				wc_add_order_item_meta( $item_id, '_qty', absint( $order_item['qty'] ) );
 				wc_add_order_item_meta( $item_id, '_tax_class', $order_item['tax_class'] );
@@ -324,7 +325,7 @@ function wc_update_200_line_items() {
 					)
 				);
 
-				 // Add line item meta.
+				// Add line item meta.
 				if ( $item_id ) {
 					wc_add_order_item_meta( $item_id, 'compound', absint( isset( $order_tax['compound'] ) ? $order_tax['compound'] : 0 ) );
 					wc_add_order_item_meta( $item_id, 'tax_amount', wc_clean( $order_tax['cart_tax'] ) );
@@ -393,6 +394,8 @@ function wc_update_200_db_version() {
 function wc_update_209_brazillian_state() {
 	global $wpdb;
 
+	// phpcs:disable WordPress.DB.SlowDBQuery
+
 	// Update brazillian state codes.
 	$wpdb->update(
 		$wpdb->postmeta,
@@ -434,6 +437,8 @@ function wc_update_209_brazillian_state() {
 			'meta_value' => 'BH',
 		)
 	);
+
+	// phpcs:enable WordPress.DB.SlowDBQuery
 }
 
 /**
@@ -492,6 +497,7 @@ function wc_update_210_file_paths() {
 					}
 				}
 				if ( $needs_update ) {
+					// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
 					$new_value = serialize( $new_value );
 
 					$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_key = %s, meta_value = %s WHERE meta_id = %d", '_downloadable_files', $new_value, $existing_file_path->meta_id ) );
@@ -695,6 +701,7 @@ function wc_update_230_options() {
 	// _money_spent and _order_count may be out of sync - clear them
 	delete_metadata( 'user', 0, '_money_spent', '', true );
 	delete_metadata( 'user', 0, '_order_count', '', true );
+	delete_metadata( 'user', 0, '_last_order', '', true );
 
 	// To prevent taxes being hidden when using a default 'no address' in a store with tax inc prices, set the woocommerce_default_customer_address to use the store base address by default.
 	if ( '' === get_option( 'woocommerce_default_customer_address', false ) && wc_prices_include_tax() ) {
@@ -857,6 +864,8 @@ function wc_update_240_api_keys() {
  * @return void
  */
 function wc_update_240_webhooks() {
+	// phpcs:disable WordPress.DB.SlowDBQuery
+
 	/**
 	 * Webhooks.
 	 * Make sure order.update webhooks get the woocommerce_order_edit_status hook.
@@ -873,6 +882,8 @@ function wc_update_240_webhooks() {
 		$webhook = new WC_Webhook( $order_update_webhook->ID );
 		$webhook->set_topic( 'order.updated' );
 	}
+
+	// phpcs:enable WordPress.DB.SlowDBQuery
 }
 
 /**
@@ -993,6 +1004,8 @@ function wc_update_250_currency() {
 		update_option( 'woocommerce_currency', 'LAK' );
 	}
 
+	// phpcs:disable WordPress.DB.SlowDBQuery
+
 	// Update LAK currency code.
 	$wpdb->update(
 		$wpdb->postmeta,
@@ -1005,6 +1018,7 @@ function wc_update_250_currency() {
 		)
 	);
 
+	// phpcs:enable WordPress.DB.SlowDBQuery
 }
 
 /**
@@ -1184,6 +1198,8 @@ function wc_update_260_db_version() {
  * @return void
  */
 function wc_update_300_webhooks() {
+	// phpcs:disable WordPress.DB.SlowDBQuery
+
 	/**
 	 * Make sure product.update webhooks get the woocommerce_product_quick_edit_save
 	 * and woocommerce_product_bulk_edit_save hooks.
@@ -1200,6 +1216,8 @@ function wc_update_300_webhooks() {
 		$webhook = new WC_Webhook( $product_update_webhook->ID );
 		$webhook->set_topic( 'product.updated' );
 	}
+
+	// phpcs:enable WordPress.DB.SlowDBQuery
 }
 
 /**
@@ -1601,7 +1619,7 @@ function wc_update_330_product_stock_status() {
 				AND t3.meta_key = '_backorders' AND ( t3.meta_value = 'yes' OR t3.meta_value = 'notify' )",
 			$min_stock_amount
 		)
-	); // WPCS: db call ok, unprepared SQL ok, cache ok.
+	);
 
 	if ( empty( $post_ids ) ) {
 		return;
@@ -1609,12 +1627,14 @@ function wc_update_330_product_stock_status() {
 
 	$post_ids = array_map( 'absint', $post_ids );
 
+	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 	// Set the status to onbackorder for those products.
 	$wpdb->query(
 		"UPDATE $wpdb->postmeta
 		SET meta_value = 'onbackorder'
 		WHERE meta_key = '_stock_status' AND post_id IN ( " . implode( ',', $post_ids ) . ' )'
-	); // WPCS: db call ok, unprepared SQL ok, cache ok.
+	);
+	// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 }
 
 /**
@@ -2065,7 +2085,8 @@ function wc_update_390_move_maxmind_database() {
 	$new_path    = apply_filters( 'woocommerce_geolocation_local_database_path', $new_path, 2 );
 	$new_path    = apply_filters( 'woocommerce_maxmind_geolocation_database_path', $new_path );
 
-	@rename( $old_path, $new_path ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
+	// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+	@rename( $old_path, $new_path );
 }
 
 /**
@@ -2095,7 +2116,7 @@ function wc_update_400_increase_size_of_column() {
 /**
  * Reset ActionScheduler migration status. Needs AS >= 3.0 shipped with WC >= 4.0.
  */
-function wc_reset_action_scheduler_migration_status() {
+function wc_update_400_reset_action_scheduler_migration_status() {
 	if (
 		class_exists( 'ActionScheduler_DataController' ) &&
 		method_exists( 'ActionScheduler_DataController', 'mark_migration_incomplete' )
@@ -2109,4 +2130,156 @@ function wc_reset_action_scheduler_migration_status() {
  */
 function wc_update_400_db_version() {
 	WC_Install::update_db_version( '4.0.0' );
+}
+
+/**
+ * Register attributes as terms for variable products, in increments of 100 products.
+ *
+ * This migration was added to support a new mechanism to improve the filtering of
+ * variable products by attribute (https://github.com/woocommerce/woocommerce/pull/26260),
+ * however that mechanism was later reverted (https://github.com/woocommerce/woocommerce/pull/27625)
+ * due to numerous issues found. Thus the migration is no longer needed.
+ *
+ * @return bool true if the migration needs to be run again.
+ */
+function wc_update_440_insert_attribute_terms_for_variable_products() {
+	return false;
+}
+
+/**
+ * Update DB version.
+ */
+function wc_update_440_db_version() {
+	WC_Install::update_db_version( '4.4.0' );
+}
+
+/**
+ * Update DB version to 4.5.0.
+ */
+function wc_update_450_db_version() {
+	WC_Install::update_db_version( '4.5.0' );
+}
+
+/**
+ * Sanitize all coupons code.
+ *
+ * @return bool True to run again, false if completed.
+ */
+function wc_update_450_sanitize_coupons_code() {
+	global $wpdb;
+
+	$coupon_id      = 0;
+	$last_coupon_id = get_option( 'woocommerce_update_450_last_coupon_id', '0' );
+
+	$coupons = $wpdb->get_results(
+		$wpdb->prepare(
+			"SELECT ID, post_title FROM $wpdb->posts WHERE ID > %d AND post_type = 'shop_coupon' LIMIT 10",
+			$last_coupon_id
+		),
+		ARRAY_A
+	);
+
+	if ( empty( $coupons ) ) {
+		delete_option( 'woocommerce_update_450_last_coupon_id' );
+		return false;
+	}
+
+	foreach ( $coupons as $key => $data ) {
+		$coupon_id = intval( $data['ID'] );
+		$code      = trim( wp_filter_kses( $data['post_title'] ) );
+
+		if ( ! empty( $code ) && $data['post_title'] !== $code ) {
+			$wpdb->update(
+				$wpdb->posts,
+				array(
+					'post_title' => $code,
+				),
+				array(
+					'ID' => $coupon_id,
+				),
+				array(
+					'%s',
+				),
+				array(
+					'%d',
+				)
+			);
+
+			// Clean cache.
+			clean_post_cache( $coupon_id );
+			wp_cache_delete( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $data['post_title'], 'coupons' );
+		}
+	}
+
+	// Start the run again.
+	if ( $coupon_id ) {
+		return update_option( 'woocommerce_update_450_last_coupon_id', $coupon_id );
+	}
+
+	delete_option( 'woocommerce_update_450_last_coupon_id' );
+	return false;
+}
+
+/**
+ * Fixes product review count that might have been incorrect.
+ *
+ * See @link https://github.com/woocommerce/woocommerce/issues/27688.
+ */
+function wc_update_500_fix_product_review_count() {
+	global $wpdb;
+
+	$product_id      = 0;
+	$last_product_id = get_option( 'woocommerce_update_500_last_product_id', '0' );
+
+	$products_data = $wpdb->get_results(
+		$wpdb->prepare(
+			"
+				SELECT post_id, meta_value
+				FROM $wpdb->postmeta
+				JOIN $wpdb->posts
+					ON $wpdb->postmeta.post_id = $wpdb->posts.ID
+				WHERE
+					post_type = 'product'
+					AND post_status = 'publish'
+					AND post_id > %d
+					AND meta_key = '_wc_review_count'
+				ORDER BY post_id ASC
+				LIMIT 10
+			",
+			$last_product_id
+		),
+		ARRAY_A
+	);
+
+	if ( empty( $products_data ) ) {
+		delete_option( 'woocommerce_update_500_last_product_id' );
+		return false;
+	}
+
+	$product_ids_to_check = array_column( $products_data, 'post_id' );
+	$actual_review_counts = WC_Comments::get_review_counts_for_product_ids( $product_ids_to_check );
+
+	foreach ( $products_data as $product_data ) {
+		$product_id           = intval( $product_data['post_id'] );
+		$current_review_count = intval( $product_data['meta_value'] );
+
+		if ( intval( $actual_review_counts[ $product_id ] ) !== $current_review_count ) {
+			WC_Comments::clear_transients( $product_id );
+		}
+	}
+
+	// Start the run again.
+	if ( $product_id ) {
+		return update_option( 'woocommerce_update_500_last_product_id', $product_id );
+	}
+
+	delete_option( 'woocommerce_update_500_last_product_id' );
+	return false;
+}
+
+/**
+ * Update DB version to 5.0.0.
+ */
+function wc_update_500_db_version() {
+	WC_Install::update_db_version( '5.0.0' );
 }

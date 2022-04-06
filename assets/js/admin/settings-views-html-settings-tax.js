@@ -165,7 +165,8 @@
 						minLength: 3
 					});
 
-					// Postcode and city don't have `name` values by default. They're only created if the contents changes, to save on database queries (I think)
+					// Postcode and city don't have `name` values by default.
+					// They're only created if the contents changes, to save on database queries (I think)
 					this.$el.find( 'td.postcode input, td.city input' ).change( function() {
 						$( this ).attr( 'name', $( this ).data( 'name' ) );
 					});
@@ -232,7 +233,9 @@
 
 						reordered_rates = _.map( rates_to_reorder, function( rate ) {
 							rate.tax_rate_order++;
-							changes[ rate.tax_rate_id ] = _.extend( changes[ rate.tax_rate_id ] || {}, { tax_rate_order : rate.tax_rate_order } );
+							changes[ rate.tax_rate_id ] = _.extend(
+								changes[ rate.tax_rate_id ] || {}, { tax_rate_order : rate.tax_rate_order }
+							);
 							return rate;
 						} );
 					} else {

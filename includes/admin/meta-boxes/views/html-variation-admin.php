@@ -6,7 +6,7 @@
  * @var int $variation_id
  * @var WP_POST $variation
  * @var WC_Product_Variation $variation_object
- * @var array $variation_data array of variation data @deprecated.
+ * @var array $variation_data array of variation data @deprecated 4.4.0.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -378,7 +378,7 @@ defined( 'ABSPATH' ) || exit;
 
 							if ( $downloads ) {
 								foreach ( $downloads as $key => $file ) {
-									include 'html-product-variation-download.php';
+									include __DIR__ . '/html-product-variation-download.php';
 								}
 							}
 							?>
@@ -394,7 +394,7 @@ defined( 'ABSPATH' ) || exit;
 										'name' => '',
 									);
 									ob_start();
-									require 'html-product-variation-download.php';
+									require __DIR__ . '/html-product-variation-download.php';
 									echo esc_attr( ob_get_clean() );
 									?>
 									"><?php esc_html_e( 'Add file', 'woocommerce' ); ?></a>

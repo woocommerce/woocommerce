@@ -64,6 +64,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		'syntax_highlighting',
 		'_order_count',
 		'_money_spent',
+		'_last_order',
 		'_woocommerce_tracks_anon_id',
 	);
 
@@ -152,10 +153,11 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 
 		$customer_id = $customer->get_id();
 
-		// Load meta but exclude deprecated props.
+		// Load meta but exclude deprecated props and parent keys.
 		$user_meta = array_diff_key(
 			array_change_key_case( array_map( 'wc_flatten_meta_callback', get_user_meta( $customer_id ) ) ),
-			array_flip( array( 'country', 'state', 'postcode', 'city', 'address', 'address_2', 'default', 'location' ) )
+			array_flip( array( 'country', 'state', 'postcode', 'city', 'address', 'address_2', 'default', 'location' ) ),
+			array_change_key_case( (array) $user_object->data )
 		);
 
 		$customer->set_props( $user_meta );
@@ -324,20 +326,29 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * @return WC_Order|false
 	 */
 	public function get_last_order( &$customer ) {
-		global $wpdb;
-
-		$last_order = $wpdb->get_var(
-			// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
-			"SELECT posts.ID
-			FROM $wpdb->posts AS posts
-			LEFT JOIN {$wpdb->postmeta} AS meta on posts.ID = meta.post_id
-			WHERE meta.meta_key = '_customer_user'
-			AND   meta.meta_value = '" . esc_sql( $customer->get_id() ) . "'
-			AND   posts.post_type = 'shop_order'
-			AND   posts.post_status IN ( '" . implode( "','", array_map( 'esc_sql', array_keys( wc_get_order_statuses() ) ) ) . "' )
-			ORDER BY posts.ID DESC"
-			// phpcs:enable
+		$last_order = apply_filters(
+			'woocommerce_customer_get_last_order',
+			get_user_meta( $customer->get_id(), '_last_order', true ),
+			$customer
 		);
+
+		if ( '' === $last_order ) {
+			global $wpdb;
+
+			$last_order = $wpdb->get_var(
+				// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+				"SELECT posts.ID
+				FROM $wpdb->posts AS posts
+				LEFT JOIN {$wpdb->postmeta} AS meta on posts.ID = meta.post_id
+				WHERE meta.meta_key = '_customer_user'
+				AND   meta.meta_value = '" . esc_sql( $customer->get_id() ) . "'
+				AND   posts.post_type = 'shop_order'
+				AND   posts.post_status IN ( '" . implode( "','", array_map( 'esc_sql', array_keys( wc_get_order_statuses() ) ) ) . "' )
+				ORDER BY posts.ID DESC"
+				// phpcs:enable
+			);
+			update_user_meta( $customer->get_id(), '_last_order', $last_order );
+		}
 
 		if ( ! $last_order ) {
 			return false;
@@ -354,7 +365,11 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * @return integer
 	 */
 	public function get_order_count( &$customer ) {
-		$count = get_user_meta( $customer->get_id(), '_order_count', true );
+		$count = apply_filters(
+			'woocommerce_customer_get_order_count',
+			get_user_meta( $customer->get_id(), '_order_count', true ),
+			$customer
+		);
 
 		if ( '' === $count ) {
 			global $wpdb;

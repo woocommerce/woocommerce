@@ -3,7 +3,7 @@
  * Twenty Eleven support.
  *
  * @since   3.3.0
- * @package WooCommerce/Classes
+ * @package WooCommerce\Classes
  */
 
 defined( 'ABSPATH' ) || exit;

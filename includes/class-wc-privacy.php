@@ -9,7 +9,7 @@
 defined( 'ABSPATH' ) || exit;
 
 if ( ! class_exists( 'WC_Privacy_Background_Process', false ) ) {
-	include_once dirname( __FILE__ ) . '/class-wc-privacy-background-process.php';
+	include_once __DIR__ . '/class-wc-privacy-background-process.php';
 }
 
 /**
@@ -28,27 +28,10 @@ class WC_Privacy extends WC_Abstract_Privacy {
 	 * Init - hook into events.
 	 */
 	public function __construct() {
-		parent::__construct( __( 'WooCommerce', 'woocommerce' ) );
+		parent::__construct();
 
-		if ( ! self::$background_process ) {
-			self::$background_process = new WC_Privacy_Background_Process();
-		}
-
-		// Include supporting classes.
-		include_once 'class-wc-privacy-erasers.php';
-		include_once 'class-wc-privacy-exporters.php';
-
-		// This hook registers WooCommerce data exporters.
-		$this->add_exporter( 'woocommerce-customer-data', __( 'WooCommerce Customer Data', 'woocommerce' ), array( 'WC_Privacy_Exporters', 'customer_data_exporter' ) );
-		$this->add_exporter( 'woocommerce-customer-orders', __( 'WooCommerce Customer Orders', 'woocommerce' ), array( 'WC_Privacy_Exporters', 'order_data_exporter' ) );
-		$this->add_exporter( 'woocommerce-customer-downloads', __( 'WooCommerce Customer Downloads', 'woocommerce' ), array( 'WC_Privacy_Exporters', 'download_data_exporter' ) );
-		$this->add_exporter( 'woocommerce-customer-tokens', __( 'WooCommerce Customer Payment Tokens', 'woocommerce' ), array( 'WC_Privacy_Exporters', 'customer_tokens_exporter' ) );
-
-		// This hook registers WooCommerce data erasers.
-		$this->add_eraser( 'woocommerce-customer-data', __( 'WooCommerce Customer Data', 'woocommerce' ), array( 'WC_Privacy_Erasers', 'customer_data_eraser' ) );
-		$this->add_eraser( 'woocommerce-customer-orders', __( 'WooCommerce Customer Orders', 'woocommerce' ), array( 'WC_Privacy_Erasers', 'order_data_eraser' ) );
-		$this->add_eraser( 'woocommerce-customer-downloads', __( 'WooCommerce Customer Downloads', 'woocommerce' ), array( 'WC_Privacy_Erasers', 'download_data_eraser' ) );
-		$this->add_eraser( 'woocommerce-customer-tokens', __( 'WooCommerce Customer Payment Tokens', 'woocommerce' ), array( 'WC_Privacy_Erasers', 'customer_tokens_eraser' ) );
+		// Initialize data exporters and erasers.
+		add_action( 'plugins_loaded', array( $this, 'register_erasers_exporters' ) );
 
 		// Cleanup orders daily - this is a callback on a daily cron event.
 		add_action( 'woocommerce_cleanup_personal_data', array( $this, 'queue_cleanup_personal_data' ) );
@@ -61,17 +44,44 @@ class WC_Privacy extends WC_Abstract_Privacy {
 	}
 
 	/**
+	 * Initial registration of privacy erasers and exporters.
+	 *
+	 * Due to the use of translation functions, this should run only after plugins loaded.
+	 */
+	public function register_erasers_exporters() {
+		$this->name = __( 'WooCommerce', 'woocommerce' );
+
+		if ( ! self::$background_process ) {
+			self::$background_process = new WC_Privacy_Background_Process();
+		}
+
+		// Include supporting classes.
+		include_once __DIR__ . '/class-wc-privacy-erasers.php';
+		include_once __DIR__ . '/class-wc-privacy-exporters.php';
+
+		// This hook registers WooCommerce data exporters.
+		$this->add_exporter( 'woocommerce-customer-data', __( 'WooCommerce Customer Data', 'woocommerce' ), array( 'WC_Privacy_Exporters', 'customer_data_exporter' ) );
+		$this->add_exporter( 'woocommerce-customer-orders', __( 'WooCommerce Customer Orders', 'woocommerce' ), array( 'WC_Privacy_Exporters', 'order_data_exporter' ) );
+		$this->add_exporter( 'woocommerce-customer-downloads', __( 'WooCommerce Customer Downloads', 'woocommerce' ), array( 'WC_Privacy_Exporters', 'download_data_exporter' ) );
+		$this->add_exporter( 'woocommerce-customer-tokens', __( 'WooCommerce Customer Payment Tokens', 'woocommerce' ), array( 'WC_Privacy_Exporters', 'customer_tokens_exporter' ) );
+
+		// This hook registers WooCommerce data erasers.
+		$this->add_eraser( 'woocommerce-customer-data', __( 'WooCommerce Customer Data', 'woocommerce' ), array( 'WC_Privacy_Erasers', 'customer_data_eraser' ) );
+		$this->add_eraser( 'woocommerce-customer-orders', __( 'WooCommerce Customer Orders', 'woocommerce' ), array( 'WC_Privacy_Erasers', 'order_data_eraser' ) );
+		$this->add_eraser( 'woocommerce-customer-downloads', __( 'WooCommerce Customer Downloads', 'woocommerce' ), array( 'WC_Privacy_Erasers', 'download_data_eraser' ) );
+		$this->add_eraser( 'woocommerce-customer-tokens', __( 'WooCommerce Customer Payment Tokens', 'woocommerce' ), array( 'WC_Privacy_Erasers', 'customer_tokens_eraser' ) );
+	}
+
+	/**
 	 * Add privacy policy content for the privacy policy page.
 	 *
 	 * @since 3.4.0
 	 */
 	public function get_privacy_message() {
-		$content = '
-			<div contenteditable="false">' .
-				'<p class="wp-policy-help">' .
-					__( 'This sample language includes the basics around what personal data your store may be collecting, storing and sharing, as well as who may have access to that data. Depending on what settings are enabled and which additional plugins are used, the specific information shared by your store will vary. We recommend consulting with a lawyer when deciding what information to disclose on your privacy policy.', 'woocommerce' ) .
-				'</p>' .
-			'</div>' .
+		$content = '<div class="wp-suggested-text">' .
+			'<p class="privacy-policy-tutorial">' .
+				__( 'This sample language includes the basics around what personal data your store may be collecting, storing and sharing, as well as who may have access to that data. Depending on what settings are enabled and which additional plugins are used, the specific information shared by your store will vary. We recommend consulting with a lawyer when deciding what information to disclose on your privacy policy.', 'woocommerce' ) .
+			'</p>' .
 			'<p>' . __( 'We collect information about you during the checkout process on our store.', 'woocommerce' ) . '</p>' .
 			'<h2>' . __( 'What we collect and store', 'woocommerce' ) . '</h2>' .
 			'<p>' . __( 'While you visit our site, we’ll track:', 'woocommerce' ) . '</p>' .
@@ -81,9 +91,9 @@ class WC_Privacy extends WC_Abstract_Privacy {
 				'<li>' . __( 'Shipping address: we’ll ask you to enter this so we can, for instance, estimate shipping before you place an order, and send you the order!', 'woocommerce' ) . '</li>' .
 			'</ul>' .
 			'<p>' . __( 'We’ll also use cookies to keep track of cart contents while you’re browsing our site.', 'woocommerce' ) . '</p>' .
-			'<div contenteditable="false">' .
-				'<p class="wp-policy-help">' . __( 'Note: you may want to further detail your cookie policy, and link to that section from here.', 'woocommerce' ) . '</p>' .
-			'</div>' .
+			'<p class="privacy-policy-tutorial">' .
+				__( 'Note: you may want to further detail your cookie policy, and link to that section from here.', 'woocommerce' ) .
+			'</p>' .
 			'<p>' . __( 'When you purchase from us, we’ll ask you to provide information including your name, billing address, shipping address, email address, phone number, credit card/payment details and optional account information like username and password. We’ll use this information for purposes, such as, to:', 'woocommerce' ) . '</p>' .
 			'<ul>' .
 				'<li>' . __( 'Send you information about your account and order', 'woocommerce' ) . '</li>' .
@@ -105,16 +115,17 @@ class WC_Privacy extends WC_Abstract_Privacy {
 			'</ul>' .
 			'<p>' . __( 'Our team members have access to this information to help fulfill orders, process refunds and support you.', 'woocommerce' ) . '</p>' .
 			'<h2>' . __( 'What we share with others', 'woocommerce' ) . '</h2>' .
-			'<div contenteditable="false">' .
-				'<p class="wp-policy-help">' . __( 'In this section you should list who you’re sharing data with, and for what purpose. This could include, but may not be limited to, analytics, marketing, payment gateways, shipping providers, and third party embeds.', 'woocommerce' ) . '</p>' .
-			'</div>' .
+			'<p class="privacy-policy-tutorial">' .
+				__( 'In this section you should list who you’re sharing data with, and for what purpose. This could include, but may not be limited to, analytics, marketing, payment gateways, shipping providers, and third party embeds.', 'woocommerce' ) .
+			'</p>' .
 			'<p>' . __( 'We share information with third parties who help us provide our orders and store services to you; for example --', 'woocommerce' ) . '</p>' .
 			'<h3>' . __( 'Payments', 'woocommerce' ) . '</h3>' .
-			'<div contenteditable="false">' .
-				'<p class="wp-policy-help">' . __( 'In this subsection you should list which third party payment processors you’re using to take payments on your store since these may handle customer data. We’ve included PayPal as an example, but you should remove this if you’re not using PayPal.', 'woocommerce' ) . '</p>' .
-			'</div>' .
+			'<p class="privacy-policy-tutorial">' .
+				__( 'In this subsection you should list which third party payment processors you’re using to take payments on your store since these may handle customer data. We’ve included PayPal as an example, but you should remove this if you’re not using PayPal.', 'woocommerce' ) .
+			'</p>' .
 			'<p>' . __( 'We accept payments through PayPal. When processing payments, some of your data will be passed to PayPal, including information required to process or support the payment, such as the purchase total and billing information.', 'woocommerce' ) . '</p>' .
-			'<p>' . __( 'Please see the <a href="https://www.paypal.com/us/webapps/mpp/ua/privacy-full">PayPal Privacy Policy</a> for more details.', 'woocommerce' ) . '</p>';
+			'<p>' . __( 'Please see the <a href="https://www.paypal.com/us/webapps/mpp/ua/privacy-full">PayPal Privacy Policy</a> for more details.', 'woocommerce' ) . '</p>' .
+			'</div>';
 
 		return apply_filters( 'wc_privacy_policy_content', $content );
 	}

@@ -2,7 +2,7 @@
 /**
  * Add some content to the help tab
  *
- * @package     WooCommerce/Admin
+ * @package     WooCommerce\Admin
  * @version     2.1.0
  */
 
@@ -67,18 +67,6 @@ class WC_Admin_Help {
 					/* translators: 1: GitHub issues URL 2: GitHub contribution guide URL 3: System status report URL */
 					'<p>' . sprintf( __( 'If you find a bug within WooCommerce core you can create a ticket via <a href="%1$s">Github issues</a>. Ensure you read the <a href="%2$s">contribution guide</a> prior to submitting your report. To help us solve your issue, please be as descriptive as possible and include your <a href="%3$s">system status report</a>.', 'woocommerce' ), 'https://github.com/woocommerce/woocommerce/issues?state=open', 'https://github.com/woocommerce/woocommerce/blob/master/.github/CONTRIBUTING.md', admin_url( 'admin.php?page=wc-status' ) ) . '</p>' .
 					'<p><a href="https://github.com/woocommerce/woocommerce/issues/new?template=4-Bug-report.md" class="button button-primary">' . __( 'Report a bug', 'woocommerce' ) . '</a> <a href="' . admin_url( 'admin.php?page=wc-status' ) . '" class="button">' . __( 'System status', 'woocommerce' ) . '</a></p>',
-
-			)
-		);
-
-		$screen->add_help_tab(
-			array(
-				'id'      => 'woocommerce_onboard_tab',
-				'title'   => __( 'Setup wizard', 'woocommerce' ),
-				'content' =>
-					'<h2>' . __( 'Setup wizard', 'woocommerce' ) . '</h2>' .
-					'<p>' . __( 'If you need to access the setup wizard again, please click on the button below.', 'woocommerce' ) . '</p>' .
-					'<p><a href="' . admin_url( 'index.php?page=wc-setup' ) . '" class="button button-primary">' . __( 'Setup wizard', 'woocommerce' ) . '</a></p>',
 
 			)
 		);

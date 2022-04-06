@@ -2,7 +2,7 @@
 /**
  * Admin View: Quick Edit Product
  *
- * @package admin.
+ * @package WooCommerce\Admin\Notices
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -140,7 +140,8 @@ defined( 'ABSPATH' ) || exit;
 					<select class="visibility" name="_visibility">
 						<?php
 						$options = apply_filters(
-							'woocommerce_product_visibility_options', array(
+							'woocommerce_product_visibility_options',
+							array(
 								'visible' => __( 'Catalog &amp; search', 'woocommerce' ),
 								'catalog' => __( 'Catalog', 'woocommerce' ),
 								'search'  => __( 'Search', 'woocommerce' ),
@@ -174,11 +175,15 @@ defined( 'ABSPATH' ) || exit;
 			<span class="input-text-wrap">
 				<select class="stock_status" name="_stock_status">
 					<?php
+					echo '<option value="" id="stock_status_no_change">' . esc_html__( '— No Change —', 'woocommerce' ) . '</option>';
 					foreach ( wc_get_product_stock_status_options() as $key => $value ) {
 						echo '<option value="' . esc_attr( $key ) . '">' . esc_html( $value ) . '</option>';
 					}
 					?>
 				</select>
+				<div class="wc-quick-edit-warning" style="display:none">
+					<?php echo esc_html__( 'This will change the stock status of all variations.', 'woocommerce' ); ?></p>
+				</div>
 			</span>
 		</label>
 

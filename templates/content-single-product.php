@@ -11,7 +11,7 @@
  * the readme will list any important changes.
  *
  * @see     https://docs.woocommerce.com/document/template-structure/
- * @package WooCommerce/Templates
+ * @package WooCommerce\Templates
  * @version 3.6.0
  */
 
@@ -22,7 +22,7 @@ global $product;
 /**
  * Hook: woocommerce_before_single_product.
  *
- * @hooked wc_print_notices - 10
+ * @hooked woocommerce_output_all_notices - 10
  */
 do_action( 'woocommerce_before_single_product' );
 
