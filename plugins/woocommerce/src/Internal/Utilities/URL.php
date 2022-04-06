@@ -300,8 +300,16 @@ class URL {
 			$parent_path = '/' . $parent_path;
 		}
 
-		// Form the parent URL, then process it exactly as we would any other URL for consistency.
-		$parent_url = $this->get_url( $this->get_path( $parent_path ) );
+		// Form the parent URL (ditching the query and fragment, if set).
+		$parent_url = $this->get_url(
+			array(
+				'path'     => $parent_path,
+				'query'    => null,
+				'fragment' => null,
+			)
+		);
+
+		// We process the parent URL through a fresh instance of this class, for consistency.
 		return ( new self( $parent_url ) )->get_url();
 	}
 
@@ -310,27 +318,29 @@ class URL {
 	 *
 	 * Borrows from https://www.php.net/manual/en/function.parse-url.php#106731
 	 *
-	 * @param string $path_override If provided this will be used as the URL path.
+	 * @param array $component_overrides If provided, these will override values set in $this->components.
 	 *
 	 * @return string
 	 */
-	public function get_url( string $path_override = null ): string {
-		$scheme = null !== $this->components['scheme'] ? $this->components['scheme'] . '://' : '';
-		$host   = null !== $this->components['host'] ? $this->components['host'] : '';
-		$port   = null !== $this->components['port'] ? ':' . $this->components['port'] : '';
-		$path   = $path_override ?? $this->get_path();
+	public function get_url( array $component_overrides = array() ): string {
+		$components = array_merge( $this->components, $component_overrides );
+
+		$scheme = null !== $components['scheme'] ? $components['scheme'] . '://' : '';
+		$host   = null !== $components['host'] ? $components['host'] : '';
+		$port   = null !== $components['port'] ? ':' . $components['port'] : '';
+		$path   = $this->get_path( $components['path'] );
 
 		// Special handling for hostless URLs (typically, filepaths) referencing the current working directory.
 		if ( '' === $host && ( '' === $path || '.' === $path ) ) {
 			$path = './';
 		}
 
-		$user      = null !== $this->components['user'] ? $this->components['user'] : '';
-		$pass      = null !== $this->components['pass'] ? ':' . $this->components['pass'] : '';
+		$user      = null !== $components['user'] ? $components['user'] : '';
+		$pass      = null !== $components['pass'] ? ':' . $components['pass'] : '';
 		$user_pass = ( ! empty( $user ) || ! empty( $pass ) ) ? $user . $pass . '@' : '';
 
-		$query    = null !== $this->components['query'] ? '?' . $this->components['query'] : '';
-		$fragment = null !== $this->components['fragment'] ? '#' . $this->components['fragment'] : '';
+		$query    = null !== $components['query'] ? '?' . $components['query'] : '';
+		$fragment = null !== $components['fragment'] ? '#' . $components['fragment'] : '';
 
 		return $scheme . $user_pass . $host . $port . $path . $query . $fragment;
 	}

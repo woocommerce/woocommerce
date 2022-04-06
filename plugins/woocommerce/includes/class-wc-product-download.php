@@ -201,7 +201,17 @@ class WC_Product_Download implements ArrayAccess {
 			return;
 		}
 
-		$download_file           = $this->get_file();
+		$download_file = $this->get_file();
+
+		/**
+		 * Controls whether shortcodes should be resolved and validated using the Approved Download Directory feature.
+		 *
+		 * @param bool $should_validate
+		 */
+		if ( apply_filters( 'woocommerce_product_downloads_approved_directory_validation_for_shortcodes', true ) && 'shortcode' === $this->get_type_of_file_path() ) {
+			$download_file = do_shortcode( $download_file );
+		}
+
 		$is_site_administrator   = is_multisite() ? current_user_can( 'manage_sites' ) : current_user_can( 'manage_options' );
 		$valid_storage_directory = $download_directories->is_valid_path( $download_file );
 
