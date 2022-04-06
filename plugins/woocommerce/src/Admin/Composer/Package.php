@@ -62,10 +62,6 @@ class Package {
 		}
 
 		$feature_plugin_instance = FeaturePlugin::instance();
-		$satisfied_dependencies  = is_callable( array( $feature_plugin_instance, 'has_satisfied_dependencies' ) ) && $feature_plugin_instance->has_satisfied_dependencies();
-		if ( ! $satisfied_dependencies ) {
-			return;
-		}
 
 		// Indicate to the feature plugin that the core package exists.
 		if ( ! defined( 'WC_ADMIN_PACKAGE_EXISTS' ) ) {

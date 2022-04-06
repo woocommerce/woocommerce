@@ -113,12 +113,6 @@ class FeaturePlugin {
 			return;
 		}
 
-		// Check if we are deactivating due to dependencies not being satisfied.
-		// If WooCommerce is disabled we can't include files that depend upon it.
-		if ( ! $this->has_satisfied_dependencies() ) {
-			return;
-		}
-
 		$this->includes();
 		ReportsSync::clear_queued_actions();
 		Notes::clear_queued_actions();
@@ -133,12 +127,6 @@ class FeaturePlugin {
 	 */
 	public function on_plugins_loaded() {
 		$this->load_plugin_textdomain();
-
-		if ( ! $this->has_satisfied_dependencies() ) {
-			add_action( 'admin_init', array( $this, 'deactivate_self' ) );
-			add_action( 'admin_notices', array( $this, 'render_dependencies_notice' ) );
-			return;
-		}
 
 		$this->hooks();
 		$this->includes();
@@ -229,65 +217,6 @@ class FeaturePlugin {
 		WCAdminAssets::get_instance();
 	}
 
-	/**
-	 * Get an array of dependency error messages.
-	 *
-	 * @return array
-	 */
-	protected function get_dependency_errors() {
-		$errors                      = array();
-		$wordpress_version           = get_bloginfo( 'version' );
-		$minimum_wordpress_version   = '5.4';
-		$minimum_woocommerce_version = '4.8';
-		$wordpress_minimum_met       = version_compare( $wordpress_version, $minimum_wordpress_version, '>=' );
-		$woocommerce_minimum_met     = class_exists( 'WooCommerce' ) && version_compare( WC_VERSION, $minimum_woocommerce_version, '>=' );
-
-		if ( ! $woocommerce_minimum_met ) {
-			$errors[] = sprintf(
-				/* translators: 1: URL of WooCommerce plugin, 2: The minimum WooCommerce version number */
-				__( 'The WooCommerce Admin feature plugin requires <a href="%1$s">WooCommerce</a> %2$s or greater to be installed and active.', 'woocommerce' ),
-				'https://wordpress.org/plugins/woocommerce/',
-				$minimum_woocommerce_version
-			);
-		}
-
-		if ( ! $wordpress_minimum_met ) {
-			$errors[] = sprintf(
-				/* translators: 1: URL of WordPress.org, 2: The minimum WordPress version number */
-				__( 'The WooCommerce Admin feature plugin requires <a href="%1$s">WordPress</a> %2$s or greater to be installed and active.', 'woocommerce' ),
-				'https://wordpress.org/',
-				$minimum_wordpress_version
-			);
-		}
-
-		return $errors;
-	}
-
-	/**
-	 * Returns true if all dependencies for the wc-admin plugin are loaded.
-	 *
-	 * @return bool
-	 */
-	public function has_satisfied_dependencies() {
-		$dependency_errors = $this->get_dependency_errors();
-		return 0 === count( $dependency_errors );
-	}
-
-	/**
-	 * Deactivates this plugin.
-	 */
-	public function deactivate_self() {
-		deactivate_plugins( plugin_basename( WC_ADMIN_PLUGIN_FILE ) );
-		unset( $_GET['activate'] ); // phpcs:ignore CSRF ok.
-	}
-
-	/**
-	 * Notify users of the plugin requirements.
-	 */
-	public function render_dependencies_notice() {
-		$message = $this->get_dependency_errors();
-		printf( '<div class="error"><p>%s</p></div>', implode( ' ', $message ) ); /* phpcs:ignore xss ok. */
-	}
 
 	/**
 	 * Overwrites the allowed features array using a local `feature-config.php` file.
