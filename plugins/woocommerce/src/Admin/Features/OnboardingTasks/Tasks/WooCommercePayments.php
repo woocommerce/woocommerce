@@ -147,10 +147,15 @@ class WooCommercePayments extends Task {
 	 * @return bool
 	 */
 	public static function is_supported() {
-		$suggestions = Suggestions::get_suggestions();
-		$suggestion_plugins = array_merge( ...array_filter( array_column( $suggestions, 'plugins' ), function( $plugins ) {
-			return is_array( $plugins );
-		} ) );
+		$suggestions              = Suggestions::get_suggestions();
+		$suggestion_plugins       = array_merge(
+			...array_filter(
+				array_column( $suggestions, 'plugins' ),
+				function( $plugins ) {
+					return is_array( $plugins );
+				}
+			)
+		);
 		$woocommerce_payments_ids = array_search( 'woocommerce-payments', $suggestion_plugins, true );
 		if ( false !== $woocommerce_payments_ids ) {
 			return true;
