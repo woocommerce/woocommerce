@@ -3,15 +3,13 @@
  */
 import { __ } from '@wordpress/i18n';
 import interpolateComponents from '@automattic/interpolate-components';
-import { Link, Pill } from '@woocommerce/components';
+import { Link } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
-import { Text } from '@woocommerce/experimental';
 import {
 	WCPayCard,
-	WCPayCardHeader,
 	WCPayCardFooter,
 	WCPayCardBody,
-	SetupRequired,
+	WCPayBenefitCard,
 } from '@woocommerce/onboarding';
 import { useDispatch } from '@wordpress/data';
 
@@ -41,7 +39,6 @@ const TosPrompt = () =>
 
 export const Suggestion = ( { paymentGateway, onSetupCallback = null } ) => {
 	const {
-		description,
 		id,
 		needsSetup,
 		installed,
@@ -62,27 +59,14 @@ export const Suggestion = ( { paymentGateway, onSetupCallback = null } ) => {
 	}
 
 	return (
-		<WCPayCard>
-			<WCPayCardHeader>
-				{ installed && needsSetup ? (
-					<SetupRequired />
-				) : (
-					<Pill>{ __( 'Recommended', 'woocommerce' ) }</Pill>
-				) }
-			</WCPayCardHeader>
-
-			<WCPayCardBody
-				description={ description }
-				onLinkClick={ () => {
-					recordEvent( 'tasklist_payment_learn_more' );
-				} }
-			/>
-
-			<WCPayCardFooter>
-				<>
-					<Text lineHeight="1.5em">
-						<TosPrompt />
-					</Text>
+		<>
+			<WCPayCard>
+				<WCPayCardBody
+					heading={ 'Accept payments and manage your business.' }
+					onLinkClick={ () => {
+						recordEvent( 'tasklist_payment_learn_more' );
+					} }
+				>
 					<Action
 						id={ id }
 						hasSetup={ true }
@@ -91,11 +75,17 @@ export const Suggestion = ( { paymentGateway, onSetupCallback = null } ) => {
 						isRecommended={ true }
 						isInstalled={ isInstalled }
 						hasPlugins={ true }
-						setupButtonText={ __( 'Get started', 'woocommerce' ) }
+						setupButtonText={
+							installed && needsSetup
+								? __( 'Finish setup', 'woocommerce' )
+								: __( 'Install', 'woocommerce' )
+						}
 						onSetupCallback={ onSetupCallback }
 					/>
-				</>
-			</WCPayCardFooter>
-		</WCPayCard>
+				</WCPayCardBody>
+				<WCPayCardFooter />
+			</WCPayCard>
+			<WCPayBenefitCard />
+		</>
 	);
 };

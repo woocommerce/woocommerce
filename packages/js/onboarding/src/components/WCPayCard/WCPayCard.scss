@@ -1,6 +1,44 @@
 .woocommerce-task-payments .woocommerce-task-payment-wcpay {
+
+	.vstack, .hstack {
+		display: flex;
+		&.content-center {
+			justify-content: center;
+		}
+
+		&.content-around {
+			justify-content: space-around;
+		}
+
+		&.flex-1 {
+			flex: 1;
+		}
+	}
+
+	.vstack {
+		flex-direction: column;
+	}
+
+	.hstack {
+		flex-direction: row;
+	}
+
+	.wcpay-hero-image {
+		margin-right: -32px;
+		margin-bottom: -28px;
+	}
+
+	.woocommerce-task-payment-wcpay__heading {
+		letter-spacing: 0.6px;
+		max-width: 250px;
+		margin-right: $gap-small;
+		margin-bottom: $gap;
+	}
+
 	.woocommerce-task-payment-wcpay__description {
-		font-size: 16px;
+		font-size: 13px;
+		max-width: 325px;
+		margin-right: $gap-small;
 		margin-bottom: $gap-large;
 	}
 
@@ -39,5 +77,16 @@
 		h3 {
 			color: #40464d;
 		}
+	}
+
+	.woocommerce-task-payment-wcpay__benefit {
+		svg {
+			margin: 0 auto;
+		}
+		max-width: 170px;
+		text-align: center;
+		font-size: 15px;
+		line-height: 24px;
+		letter-spacing: normal;
 	}
 }
