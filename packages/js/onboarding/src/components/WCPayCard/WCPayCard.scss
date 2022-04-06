@@ -60,6 +60,14 @@
 			margin-top: $gap;
 			margin-left: 0;
 		}
+
+		&, h3 {
+			color: #757575;
+		}
+
+		svg {
+			height: 24px;
+		}
 	}
 
 	.components-card__body {
