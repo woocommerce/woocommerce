@@ -1,13 +1,13 @@
 /**
  * External dependencies
  */
-const { readFileSync, statSync } = require( 'fs' );
+const { readFileSync, existsSync } = require( 'fs' );
 const chalk = require( 'chalk' );
 const { PERFORMANCE_REPORT_FILENAME } = require( '../../utils/constants' );
 
 class PerformanceReporter {
 	onRunComplete() {
-		if ( statSync( PERFORMANCE_REPORT_FILENAME ).size === 0 ) {
+		if ( ! existsSync( PERFORMANCE_REPORT_FILENAME ) ) {
 			return;
 		}
 		const reportFileContents = readFileSync( PERFORMANCE_REPORT_FILENAME )
