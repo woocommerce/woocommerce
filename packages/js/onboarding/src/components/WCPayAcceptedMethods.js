@@ -10,14 +10,16 @@ import { __ } from '@wordpress/i18n';
  */
 import Visa from '../images/cards/visa.js';
 import MasterCard from '../images/cards/mastercard.js';
-import Maestro from '../images/cards/maestro.js';
 import Amex from '../images/cards/amex.js';
 import ApplePay from '../images/cards/applepay.js';
+import GooglePay from '../images/cards/googlepay.js';
 import CB from '../images/cards/cb.js';
 import DinersClub from '../images/cards/diners.js';
 import Discover from '../images/cards/discover.js';
 import JCB from '../images/cards/jcb.js';
 import UnionPay from '../images/cards/unionpay.js';
+import GiroPay from '../images/cards/giropay.js';
+import Sofort from '../images/cards/sofort.js';
 
 export const WCPayAcceptedMethods = () => (
 	<>
@@ -28,14 +30,19 @@ export const WCPayAcceptedMethods = () => (
 		<div className="woocommerce-task-payment-wcpay__accepted">
 			<Visa />
 			<MasterCard />
-			<Maestro />
 			<Amex />
-			<DinersClub />
+			<ApplePay />
+			<GooglePay />
 			<CB />
+			<GiroPay />
+			<DinersClub />
 			<Discover />
 			<UnionPay />
 			<JCB />
-			<ApplePay />
+			<Sofort />
+			<div className="woocommerce-task-payment-wcpay__accepted__and-more">
+				& more.
+			</div>
 		</div>
 	</>
 );

@@ -79,14 +79,17 @@
 		}
 
 		.woocommerce-task-payment-wcpay__accepted {
-			display: flex;
-			margin-top: $gap-small;
-			flex-wrap: wrap;
-			gap: $gap-small;
-
 			h3 {
 				color: #40464d;
 			}
+
+			display: flex;
+			flex-wrap: wrap;
+			margin-top: $gap-small;
+			margin-left: 0;
+			gap: 8px;
+			justify-content: flex-start;
+			align-items: flex-end;
 		}
 
 		.woocommerce-task-payment-wcpay__benefit {
@@ -98,6 +101,10 @@
 			font-size: 15px;
 			line-height: 24px;
 			letter-spacing: normal;
+		}
+
+		.woocommerce-task-payment-wcpay__accepted__and-more {
+			white-space: nowrap;
 		}
 	}
 
