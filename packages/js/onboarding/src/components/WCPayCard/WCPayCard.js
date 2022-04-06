@@ -49,7 +49,7 @@ export const WCPayCardBody = ( {
 									target="_blank"
 									type="external"
 									rel="noreferrer"
-									href="https://woocommerce.com/payments/?utm_medium=product"
+									href="https://wordpress.com/tos/"
 									onClick={ onLinkClick }
 								>
 									{ __( 'Terms of Service', 'woocommerce' ) }
@@ -60,7 +60,7 @@ export const WCPayCardBody = ( {
 									target="_blank"
 									type="external"
 									rel="noreferrer"
-									href="https://woocommerce.com/payments/?utm_medium=product"
+									href="https://automattic.com/privacy/"
 									onClick={ onLinkClick }
 								>
 									{ __( 'Privacy Policy', 'woocommerce' ) }

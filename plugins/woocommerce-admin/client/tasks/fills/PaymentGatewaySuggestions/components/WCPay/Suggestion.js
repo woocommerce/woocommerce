@@ -2,8 +2,6 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import interpolateComponents from '@automattic/interpolate-components';
-import { Link } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 import {
 	WCPayCard,
@@ -19,23 +17,6 @@ import { useDispatch } from '@wordpress/data';
 
 import { Action } from '../Action';
 import { connectWcpay } from './utils';
-
-const TosPrompt = () =>
-	interpolateComponents( {
-		mixedString: __(
-			'Upon clicking "Get started", you agree to the {{link}}Terms of service{{/link}}. Next we’ll ask you to share a few details about your business to create your account.',
-			'woocommerce'
-		),
-		components: {
-			link: (
-				<Link
-					href={ 'https://wordpress.com/tos/' }
-					target="_blank"
-					type="external"
-				/>
-			),
-		},
-	} );
 
 export const Suggestion = ( { paymentGateway, onSetupCallback = null } ) => {
 	const {
