@@ -497,8 +497,6 @@ class WC_Install {
 	 */
 	private static function update_wc_version() {
 		update_option( 'woocommerce_version', WC()->version );
-		// last version of the WCA is 3.3.1. We'll no longer release WCA separately.
-		update_option( 'woocommerce_admin_version', '3.3.1');
 	}
 
 	/**

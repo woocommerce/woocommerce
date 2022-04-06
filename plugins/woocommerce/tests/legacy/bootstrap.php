@@ -196,7 +196,6 @@ class WC_Unit_Tests_Bootstrap {
 
 		// Initialize the WC API extensions.
 		\Automattic\WooCommerce\Internal\Admin\Install::create_tables();
-		\Automattic\WooCommerce\Internal\Admin\Install::create_events();
 
 		WC_Install::install();
 
