@@ -33,5 +33,14 @@
   "woorelease": {
     "svn_reauth": "true",
     "wp_org_slug": "woocommerce-beta-tester"
+  },
+  "lint-staged": {
+    "*.php": [
+      "php -d display_errors=1 -l",
+      "composer --working-dir=./plugins/woocommerce-beta-tester run-script phpcs-pre-commit"
+    ],
+    "!(*min).js": [
+      "eslint --fix"
+    ]
   }
 }

@@ -56,5 +56,10 @@
 		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
 		"lint": "eslint src",
 		"prepack": "pnpm run clean && pnpm run build"
+	},
+	"lint-staged": {
+		"*.(t|j)s?(x)": [
+			"eslint --fix"
+		]
 	}
 }

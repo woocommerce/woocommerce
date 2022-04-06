@@ -69,6 +69,15 @@
     "webpack-cli": "3.3.12",
     "wp-textdomain": "1.0.1"
   },
+  "lint-staged": {
+    "*.php": [
+      "php -d display_errors=1 -l",
+      "composer --working-dir=./plugins/woocommerce run-script phpcs-pre-commit"
+    ],
+    "!(*min).js": [
+      "eslint --fix"
+    ]
+  },
   "engines": {
     "node": "^16.13.1",
     "pnpm": "^6.24.2"
