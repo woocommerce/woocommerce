@@ -394,7 +394,7 @@ class WC_Admin_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 	 */
 	public function test_get_list_id() {
 		$task = new TestTask(
-			new TaskList( array( 'id' => 'setup' ) ),
+			new TaskList( array( 'id' => 'extended' ) ),
 			array(
 				'id' => 'wc-unit-test-task',
 			)

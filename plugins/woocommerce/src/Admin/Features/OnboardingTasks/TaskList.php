@@ -350,10 +350,11 @@ class TaskList {
 	 */
 	public function get_json() {
 		$this->possibly_track_completion();
-		// Track completion of non viewable tasks.
+		$tasks_json = array();
 		foreach ( $this->tasks as $task ) {
-			if ( ! $task->can_view() ) {
-				$task->possibly_track_completion();
+			$json = $task->get_json();
+			if ( $json['canView'] ) {
+				$tasks_json[] = $json;
 			}
 		}
 
@@ -363,12 +364,7 @@ class TaskList {
 			'isHidden'              => $this->is_hidden(),
 			'isVisible'             => $this->is_visible(),
 			'isComplete'            => $this->is_complete(),
-			'tasks'                 => array_map(
-				function( $task ) {
-					return $task->get_json();
-				},
-				$this->get_viewable_tasks()
-			),
+			'tasks'                 => $tasks_json,
 			'eventPrefix'           => $this->prefix_event( '' ),
 			'displayProgressHeader' => $this->display_progress_header,
 		);
