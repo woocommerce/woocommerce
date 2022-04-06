@@ -55,7 +55,7 @@
     "chai-as-promised": "7.1.1",
     "config": "3.3.3",
     "cross-env": "6.0.3",
-    "deasync": "0.1.21",
+    "deasync": "0.1.26",
     "eslint": "6.8.0",
     "eslint-config-wpcalypso": "5.0.0",
     "eslint-plugin-jest": "23.20.0",

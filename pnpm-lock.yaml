@@ -889,9 +889,9 @@ importers:
       qs: 6.10.3
     devDependencies:
       '@babel/core': 7.17.8
+      '@babel/runtime': 7.17.7
       '@wordpress/eslint-plugin': 11.0.1_7c040a9b494a33cf8bf9079642892fb1
       eslint: 8.12.0
-      '@babel/runtime': 7.17.7
       jest: 27.5.1
       jest-cli: 27.5.1
       rimraf: 3.0.2
@@ -928,9 +928,9 @@ importers:
   packages/js/number:
     specifiers:
       '@babel/core': ^7.17.5
+      '@babel/runtime': ^7.17.2
       '@wordpress/eslint-plugin': ^11.0.0
       eslint: ^8.12.0
-      '@babel/runtime': ^7.17.2
       jest: ^27.5.1
       jest-cli: ^27.5.1
       locutus: ^2.0.16
@@ -941,9 +941,9 @@ importers:
       locutus: 2.0.16
     devDependencies:
       '@babel/core': 7.17.8
+      '@babel/runtime': 7.17.7
       '@wordpress/eslint-plugin': 11.0.1_7c040a9b494a33cf8bf9079642892fb1
       eslint: 8.12.0
-      '@babel/runtime': 7.17.7
       jest: 27.5.1
       jest-cli: 27.5.1
       rimraf: 3.0.2
@@ -1093,7 +1093,7 @@ importers:
       chai-as-promised: 7.1.1
       config: 3.3.3
       cross-env: 6.0.3
-      deasync: 0.1.21
+      deasync: 0.1.26
       eslint: 6.8.0
       eslint-config-wpcalypso: 5.0.0
       eslint-plugin-jest: 23.20.0
@@ -1134,7 +1134,7 @@ importers:
       chai-as-promised: 7.1.1_chai@4.2.0
       config: 3.3.3
       cross-env: 6.0.3
-      deasync: 0.1.21
+      deasync: 0.1.26
       eslint: 6.8.0
       eslint-config-wpcalypso: 5.0.0_eslint@6.8.0
       eslint-plugin-jest: 23.20.0_eslint@6.8.0+typescript@3.9.7
@@ -3812,7 +3812,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.16.0
-      '@babel/helper-plugin-utils': 7.16.7
+      '@babel/helper-plugin-utils': 7.14.5
     dev: true
 
   /@babel/plugin-syntax-nullish-coalescing-operator/7.8.3_@babel+core@7.16.12:
@@ -3821,7 +3821,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.16.12
-      '@babel/helper-plugin-utils': 7.16.7
+      '@babel/helper-plugin-utils': 7.14.5
 
   /@babel/plugin-syntax-nullish-coalescing-operator/7.8.3_@babel+core@7.17.8:
     resolution: {integrity: sha512-aSff4zPII1u2QD7y+F8oDsz19ew4IGEJg9SVW+bqwpwtfFleiQDMdzA/R+UlWDzfnHFCxxleFT0PMIrR36XLNQ==}
@@ -3829,7 +3829,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.17.8
-      '@babel/helper-plugin-utils': 7.16.7
+      '@babel/helper-plugin-utils': 7.14.5
 
   /@babel/plugin-syntax-numeric-separator/7.10.4_@babel+core@7.12.9:
     resolution: {integrity: sha512-9H6YdfkcK/uOnY/K7/aA2xpzaAgkQn37yzWUMRK7OaPOqOpGS1+n0H5hxT9AUw9EsSjPW8SVyMJwYRtWs3X3ug==}
@@ -3944,7 +3944,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.16.0
-      '@babel/helper-plugin-utils': 7.16.7
+      '@babel/helper-plugin-utils': 7.14.5
     dev: true
 
   /@babel/plugin-syntax-optional-chaining/7.8.3_@babel+core@7.16.12:
@@ -3953,7 +3953,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.16.12
-      '@babel/helper-plugin-utils': 7.16.7
+      '@babel/helper-plugin-utils': 7.14.5
 
   /@babel/plugin-syntax-optional-chaining/7.8.3_@babel+core@7.17.8:
     resolution: {integrity: sha512-KoK9ErH1MBlCPxV0VANkXW2/dw4vlbGDrFgz8bmUsBGYkFRcbRwMh6cIJubdPrkxRwuGdtCk0v/wPTKbQgBjkg==}
@@ -3961,7 +3961,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.17.8
-      '@babel/helper-plugin-utils': 7.16.7
+      '@babel/helper-plugin-utils': 7.14.5
 
   /@babel/plugin-syntax-private-property-in-object/7.14.5_@babel+core@7.16.0:
     resolution: {integrity: sha512-0wVnp9dxJ72ZUJDV27ZfbSj6iHLoytYZmh3rFcxNnvsJF3ktkzLDZPy/mA17HGsaQT3/DQsWYX1f1QGWkCoVUg==}
@@ -19322,8 +19322,8 @@ packages:
     resolution: {integrity: sha512-2P0p0pFGzHS5EMnhdxQi7aJN+iMheud0UhG4dlE1DLAlvL8JHjJJTX/CSm4JXwV0Ka5nGk3zC5mcb5bUQUxxMA==}
     dev: true
 
-  /deasync/0.1.21:
-    resolution: {integrity: sha512-kUmM8Y+PZpMpQ+B4AuOW9k2Pfx/mSupJtxOsLzmnHY2WqZUYRFccFn2RhzPAqt3Xb+sorK/badW2D4zNzqZz5w==}
+  /deasync/0.1.26:
+    resolution: {integrity: sha512-YKw0BmJSWxkjtQsbgn6Q9CHSWB7DKMen8vKrgyC006zy0UZ6nWyGidB0IzZgqkVRkOglAeUaFtiRTeLyel72bg==}
     engines: {node: '>=0.11.0'}
     requiresBuild: true
     dependencies:
@@ -29940,6 +29940,7 @@ packages:
 
   /nan/2.15.0:
     resolution: {integrity: sha512-8ZtvEnA2c5aYCZYd1cvgdnU6cqwixRoYg70xPLWUws5ORTa/lnw+u4amixRS/Ac5U5mQVgp9pnlSUnbNWFaWZQ==}
+    requiresBuild: true
     optional: true
 
   /nanoid/3.1.30:
