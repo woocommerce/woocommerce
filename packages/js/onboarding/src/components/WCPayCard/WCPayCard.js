@@ -95,7 +95,10 @@ export const WCPayCard = ( { children } ) => {
 
 export const WCPayBenefitCard = () => {
 	return (
-		<Card className="woocommerce-task-payment-wcpay" size="large">
+		<Card
+			className="woocommerce-task-payment-wcpay woocommerce-task-payment-wcpay__benefits-card"
+			size="large"
+		>
 			<CardBody>
 				<div className="hstack content-around">
 					<div className="woocommerce-task-payment-wcpay__benefit vstack">
