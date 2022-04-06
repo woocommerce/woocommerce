@@ -1,6 +1,6 @@
 <?php
 /**
- * Test the Task class.
+ * Class for testing the Task class.
  *
  * @package WooCommerce\Admin\Tests\OnboardingTasks
  */
