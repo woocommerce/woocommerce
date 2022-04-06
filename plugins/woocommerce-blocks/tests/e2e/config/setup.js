@@ -3,7 +3,7 @@
  * External dependencies
  */
 import { setup as setupPuppeteer } from 'jest-environment-puppeteer';
-import fs from 'fs';
+const { truncateSync, existsSync } = require( 'fs' );
 /**
  * Internal dependencies
  */
@@ -67,7 +67,9 @@ module.exports = async ( globalConfig ) => {
 		} );
 
 		// Wipe the performance e2e file at the start of every run
-		fs.truncateSync( PERFORMANCE_REPORT_FILENAME );
+		if ( existsSync( PERFORMANCE_REPORT_FILENAME ) ) {
+			truncateSync( PERFORMANCE_REPORT_FILENAME );
+		}
 
 		global.fixtureData = {
 			taxes,
