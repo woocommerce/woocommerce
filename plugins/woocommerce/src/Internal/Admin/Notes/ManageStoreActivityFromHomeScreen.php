@@ -29,7 +29,7 @@ class ManageStoreActivityFromHomeScreen {
 	 */
 	public function __construct() {
 		add_action(
-			'woocommerce_admin_updated_existing',
+			'woocommerce_updated_existing',
 			array( $this, 'possibly_add_note' )
 		);
 	}
