@@ -980,6 +980,8 @@ class WC_Checkout {
 			}
 
 			wp_send_json( $result );
+		}else{
+			do_action( 'woocommerce_payment_failed', $result, $order_id );
 		}
 	}
 
