@@ -7,7 +7,7 @@ import { createElement } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { CustomerEffortScore } from '../index';
+import { CustomerEffortScore } from '../customer-effort-score';
 
 const noop = () => {};
 
