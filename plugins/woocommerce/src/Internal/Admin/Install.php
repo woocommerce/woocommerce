@@ -19,71 +19,6 @@ class Install {
 	const VERSION_OPTION = 'woocommerce_admin_version';
 
 	/**
-	 * DB updates and callbacks that need to be run per version.
-	 *
-	 * @var array
-	 */
-	protected static $db_updates = array(
-		'0.20.1' => array(
-			'wc_admin_update_0201_order_status_index',
-			'wc_admin_update_0201_db_version',
-		),
-		'0.23.0' => array(
-			'wc_admin_update_0230_rename_gross_total',
-			'wc_admin_update_0230_db_version',
-		),
-		'0.25.1' => array(
-			'wc_admin_update_0251_remove_unsnooze_action',
-			'wc_admin_update_0251_db_version',
-		),
-		'1.1.0'  => array(
-			'wc_admin_update_110_remove_facebook_note',
-			'wc_admin_update_110_db_version',
-		),
-		'1.3.0'  => array(
-			'wc_admin_update_130_remove_dismiss_action_from_tracking_opt_in_note',
-			'wc_admin_update_130_db_version',
-		),
-		'1.4.0'  => array(
-			'wc_admin_update_140_change_deactivate_plugin_note_type',
-			'wc_admin_update_140_db_version',
-		),
-		'1.6.0'  => array(
-			'wc_admin_update_160_remove_facebook_note',
-			'wc_admin_update_160_db_version',
-		),
-		'1.7.0'  => array(
-			'wc_admin_update_170_homescreen_layout',
-			'wc_admin_update_170_db_version',
-		),
-		'2.7.0'  => array(
-			'wc_admin_update_270_delete_report_downloads',
-			'wc_admin_update_270_db_version',
-		),
-		'2.7.1'  => array(
-			'wc_admin_update_271_update_task_list_options',
-			'wc_admin_update_271_db_version',
-		),
-		'2.8.0'  => array(
-			'wc_admin_update_280_order_status',
-			'wc_admin_update_280_db_version',
-		),
-		'2.9.0'  => array(
-			'wc_admin_update_290_update_apperance_task_option',
-			'wc_admin_update_290_delete_default_homepage_layout_option',
-			'wc_admin_update_290_db_version',
-		),
-		'3.0.0'  => array(
-			'wc_admin_update_300_update_is_read_from_last_read',
-			'wc_admin_update_300_db_version',
-		),
-		'3.4.0'  => array(
-			'wc_admin_update_340_remove_is_primary_from_note_action',
-			'wc_admin_update_340_db_version',
-		),
-	);
-
-	/**
 	 * Migrated option names mapping. New => old.
 	 *
 	 * @var array
@@ -262,10 +197,6 @@ class Install {
 		return $tables;
 	}
 
-	public static function init() {
-		add_action( 'woocommerce_adminupdate_db_to_current_version', array( __CLASS__, 'update_db_version' ) );
-	}
-
 	/**
 	 * Create database tables.
 	 */
@@ -282,75 +213,6 @@ class Install {
 	 */
 	public static function get_db_update_callbacks() {
 		return self::$db_updates;
-	}
-
-	/**
-	 * Is a DB update needed?
-	 *
-	 * @return boolean
-	 */
-	public static function needs_db_update() {
-		$current_db_version = get_option( self::VERSION_OPTION, null );
-		$updates            = self::get_db_update_callbacks();
-		$update_versions    = array_keys( $updates );
-		usort( $update_versions, 'version_compare' );
-
-		return ! is_null( $current_db_version ) && version_compare( $current_db_version, end( $update_versions ), '<' );
-	}
-
-	/**
-	 * See if we need to show or run database updates during install.
-	 */
-	public static function maybe_update_db_version() {
-		if ( self::needs_db_update() ) {
-			self::update();
-		} else {
-			self::update_db_version();
-		}
-	}
-
-	/**
-	 * Push all needed DB updates to the queue for processing.
-	 */
-	private static function update() {
-		$current_db_version = get_option( self::VERSION_OPTION );
-		$loop               = 0;
-
-		foreach ( self::get_db_update_callbacks() as $version => $update_callbacks ) {
-			if ( version_compare( $current_db_version, $version, '<' ) ) {
-				foreach ( $update_callbacks as $update_callback ) {
-					WC()->queue()->schedule_single(
-						time() + $loop,
-						'woocommerce_run_update_callback',
-						array( $update_callback ),
-						'woocommerce-db-updates'
-					);
-					Cache::invalidate();
-					$loop++;
-				}
-			}
-		}
-
-		if ( version_compare( $current_db_version, WC_ADMIN_PLUGIN_FILE, '<' ) &&
-		     ! WC()->queue()->get_next( 'woocommerce_adminupdate_db_to_current_version' ) ) {
-			WC()->queue()->schedule_single(
-				time() + $loop,
-				'woocommerce_adminupdate_db_to_current_version',
-				array(
-					'version' => WC_ADMIN_PLUGIN_FILE,
-				),
-				'woocommerce-db-updates'
-			);
-		}
-	}
-
-	/**
-	 * Update WC Admin version to current.
-	 *
-	 * @param string|null $version New WooCommerce Admin DB version or null.
-	 */
-	public static function update_db_version( $version = null ) {
-		update_option( self::VERSION_OPTION, is_null( $version ) ? WC_ADMIN_VERSION_NUMBER : $version );
 	}
 
 	/**
