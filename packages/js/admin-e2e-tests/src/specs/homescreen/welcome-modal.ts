@@ -1,19 +1,10 @@
 /**
- * External dependencies
- */
-import { withRestApi } from '@woocommerce/e2e-utils';
-
-/**
  * Internal dependencies
  */
  import { Login } from '../../pages/Login';
  import { OnboardingWizard } from '../../pages/OnboardingWizard';
  import { WcHomescreen } from '../../pages/WcHomescreen';
 import {
-	removeAllOrders,
-	unhideTaskList,
-	runActionScheduler,
-	updateOption,
 	resetWooCommerceState,
 } from '../../fixtures';
 
@@ -35,11 +26,6 @@ const testAdminHomescreenWelcomeModal = () => {
 		} );
 
 		afterAll( async () => {
-			await withRestApi.deleteAllProducts();
-			await removeAllOrders();
-			await unhideTaskList( 'setup' );
-			await runActionScheduler();
-			await updateOption( 'woocommerce_task_list_hidden', 'no' );
 			await login.logout();
 		} );
 
