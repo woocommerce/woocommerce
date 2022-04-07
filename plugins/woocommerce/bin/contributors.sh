@@ -1,5 +1,5 @@
 #!/bin/bash
-
+# A new comment.
 read -p 'What date (YYYY-MM-DD) should we get contributions since? (i.e. date of previous release): ' from_date
 read -sp 'Provide a personal access token (you must): ' auth_token
 
