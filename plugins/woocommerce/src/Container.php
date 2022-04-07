@@ -1,6 +1,6 @@
 <?php
 /**
- * Container class file.
+ * Classy container class file.
  */
 
 namespace Automattic\WooCommerce;
