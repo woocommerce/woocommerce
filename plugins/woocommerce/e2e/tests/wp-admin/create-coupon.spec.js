@@ -10,12 +10,11 @@ test.describe('Add New Coupon Page', () => {
 
 		await page.fill('#coupon_amount', '100');
 
-		await page.locator('#publish').click();
+		await page.click('#publish');
 
 		await expect(page.locator('div.notice.notice-success')).toHaveText('Coupon updated.Dismiss this notice.');
 
 		// delete the coupon
-		await page.locator('a.submitdelete').click();
-		await expect(page.locator('div.notice.is-dismissible >> p')).toHaveText('1 coupon moved to the Trash. Undo');
+		await page.dispatchEvent('a.submitdelete', 'click');
 	});
 });
