@@ -1,0 +1,62 @@
+# From https://raw.githubusercontent.com/Automattic/jetpack/3642768c7b1cc88c94066fb2da62a11dafb3e604/.github/actions/deepen-to-merge-base/action.yml
+name: "Deepen to merge-base"
+description: "Deepens a checkout to the merge-base with another branch."
+inputs:
+  head:
+    description: "Branch (or other git refspec) to be checked out."
+    default: ${{ github.event.pull_request.head.sha }}
+  branch:
+    description: "Branch (or other git refspec) to deepen with respect to."
+    default: ${{ github.event.pull_request.base.sha }}
+  checkout:
+    description: "Whether to check out the head. Default is true."
+    default: true
+  initial-depth:
+    description: "Initial depth to check out."
+    default: 10
+outputs:
+  merge-base:
+    description: "The merge-base sha found."
+    value: ${{ steps.end.outputs.merge-base }}
+runs:
+  using: composite
+  steps:
+    - name: "Deepen"
+      shell: bash
+      env:
+        DEPTH: ${{ inputs.initial-depth }}
+        HEAD: ${{ inputs.head }}
+        BRANCH: ${{ inputs.branch }}
+      run: |
+        depth=$DEPTH
+        echo "::group::Initial fetch to $depth"
+        echo "/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --progress --no-recurse-submodules --depth=$depth origin $HEAD $BRANCH"
+        /usr/bin/git -c protocol.version=2 fetch --no-tags --prune --progress --no-recurse-submodules --depth=$depth origin "$HEAD" "$BRANCH"
+        echo "::endgroup::"
+        while ! /usr/bin/git merge-base "$HEAD" "$BRANCH" >/dev/null 2>&1; do
+          depth=$((depth * 2))
+          echo "::group::Deepen to $depth"
+          echo "/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --progress --no-recurse-submodules --depth=$depth origin $HEAD $BRANCH"
+          /usr/bin/git -c protocol.version=2 fetch --no-tags --prune --progress --no-recurse-submodules --depth=$depth origin "$HEAD" "$BRANCH"
+          echo "::endgroup::"
+        done
+    - name: "Check out new head"
+      shell: bash
+      env:
+        CHECKOUT: ${{ inputs.checkout }}
+        HEAD: ${{ inputs.head }}
+      run: |
+        if [[ "$CHECKOUT" == "true" ]]; then
+          echo "/usr/bin/git checkout $HEAD"
+          /usr/bin/git checkout "$HEAD"
+        fi
+    - name: "Output"
+      id: end
+      shell: bash
+      env:
+        HEAD: ${{ inputs.head }}
+        BRANCH: ${{ inputs.branch }}
+      run: |
+        MERGE_BASE=$( /usr/bin/git merge-base "$HEAD" "$BRANCH" )
+        echo "Merge base is $MERGE_BASE"
+        echo "::set-output name=merge-base::$MERGE_BASE"
