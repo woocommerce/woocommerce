@@ -36,6 +36,7 @@ class DefaultFreeExtensions {
 				'plugins' => [
 					self::get_plugin( 'mailpoet' ),
 					self::get_plugin( 'google-listings-and-ads' ),
+					self::get_plugin( 'pinterest-for-woocommerce' ),
 				],
 			],
 			[
@@ -52,6 +53,7 @@ class DefaultFreeExtensions {
 				'title'   => __( 'Grow your store', 'woocommerce' ),
 				'plugins' => [
 					self::get_plugin( 'google-listings-and-ads:alt' ),
+					self::get_plugin( 'pinterest-for-woocommerce:alt' ),
 				],
 			],
 		];
@@ -97,6 +99,36 @@ class DefaultFreeExtensions {
 				'image_url'      => plugins_url( 'images/onboarding/google-listings-and-ads.png', WC_ADMIN_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=wc-admin&path=%2Fgoogle%2Fstart',
 				'is_built_by_wc' => true,
+			],
+			'pinterest-for-woocommerce'         => [
+				'name'           => __( 'Pinterest for WooCommerce', 'woocommerce' ),
+				'description'    => sprintf(
+					/* translators: 1: opening product link tag. 2: closing link tag */
+					__( 'aaaa Inspire shoppers with %1$sPinterest for WooCommerce%2$s', 'woocommerce' ),
+					'<a href="https://woocommerce.com/products/pinterest-for-woocommerce" target="_blank">',
+					'</a>'
+				),
+				'image_url'      => plugins_url( 'images/onboarding/creative-mail-by-constant-contact.png', WC_ADMIN_PLUGIN_FILE ),
+				'manage_url'     => 'admin.php?page=pinterest-for-woocommerce',
+				'is_visible'     => [
+					[
+						'type'    => 'not',
+						'operand' => [
+							[
+								'type'    => 'plugins_activated',
+								'plugins' => [ 'pinterest-for-woocommerce' ],
+							],
+						],
+					],
+				],
+				'is_built_by_wc' => false,
+			],
+			'pinterest-for-woocommerce:alt'     => [
+				'name'           => __( 'Pinterest for WooCommerce', 'woocommerce' ),
+				'description'    => __( 'Get your products in front of Pinterest users searching for ideas and things to buy. Get started with Pinterest and make your entire product catalog browsable.', 'woocommerce-admin' ),
+				'image_url'      => plugins_url( 'images/onboarding/creative-mail-by-constant-contact.png', WC_ADMIN_PLUGIN_FILE ),
+				'manage_url'     => 'admin.php?page=wc-admin&path=%2Fpinterest%2Flanding',
+				'is_built_by_wc' => false,
 			],
 			'mailpoet'                          => [
 				'name'           => __( 'MailPoet', 'woocommerce' ),
