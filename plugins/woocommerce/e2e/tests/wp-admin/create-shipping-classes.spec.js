@@ -4,7 +4,7 @@ test.describe('Merchant can add shipping classes', () => {
 	test.use({ storageState: 'e2e/storage/adminState.json' });
 
 	test('can add shipping classes', async ({ page }) => {
-		page.goto(
+		await page.goto(
 			'wp-admin/admin.php?page=wc-settings&tab=shipping&section=classes'
 		);
 
@@ -22,7 +22,7 @@ test.describe('Merchant can add shipping classes', () => {
 
 		// Add shipping classes
 		for (const { name, slug, description } of shippingClasses) {
-			await page.locator('text=Add shipping class').click();
+			await page.click('text=Add shipping class');
 			await page.fill(
 				'.editing:last-child [data-attribute="name"]',
 				name
@@ -36,7 +36,7 @@ test.describe('Merchant can add shipping classes', () => {
 				description
 			);
 		}
-		await page.locator('text=Save shipping classes').click();
+		await page.click('text=Save shipping classes');
 
 		// Set the expected auto-generated slug
 		shippingClassNoSlug.slug = 'poster-pack';
