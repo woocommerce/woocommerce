@@ -14,7 +14,7 @@ import { SHOP_URL } from '@woocommerce/block-settings';
 import {
 	useForcedLayout,
 	getAllowedBlocks,
-} from '../../../cart-checkout/shared';
+} from '../../../cart-checkout-shared';
 import iconDataUri from './icon-data-uri.js';
 import './style.scss';
 

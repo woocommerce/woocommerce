@@ -13,7 +13,7 @@ import './style.scss';
 import {
 	useForcedLayout,
 	getAllowedBlocks,
-} from '../../../cart-checkout/shared';
+} from '../../../cart-checkout-shared';
 
 export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 	const blockProps = useBlockProps( { className: 'wc-block-cart__sidebar' } );
