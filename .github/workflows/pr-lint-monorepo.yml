@@ -9,10 +9,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 10
+
+      - uses: ./.github/actions/deepen-to-merge-base
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
