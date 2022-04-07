@@ -29,19 +29,17 @@ test.describe('Analytics pages', () => {
 		);
 		// clicks the first button to the right of the Performance heading
 		await page
-			.locator('button:right-of(:text("Performance")) >> nth=0')
-			.click();
-		await page.locator('text=Remove section').click();
+			.click('button:right-of(:text("Performance")) >> nth=0');
+		await page.click('text=Remove section');
 		// Grab all of the section headings
 		const sections = await page.$$(
 			'h2.woocommerce-section-header__title'
 		);
 		await expect(sections.length).toEqual(2);
 		// add section back in
-		await page.locator('//button[@title="Add more sections"]').click();
+		await page.click('//button[@title="Add more sections"]');
 		await page
-			.locator('//button[@title="Add Performance section"]')
-			.click();
+			.click('//button[@title="Add Performance section"]');
 	});
 
 	test('should allow a user to add a section back in', async ({ page }) => {
@@ -50,14 +48,12 @@ test.describe('Analytics pages', () => {
 		);
 		// button only shows when not all sections visible
 		await page
-			.locator('button:right-of(:text("Performance")) >> nth=0')
-			.click();
-		await page.locator('text=Remove section').click();
+			.click('button:right-of(:text("Performance")) >> nth=0');
+		await page.click('text=Remove section');
 		// add section
-		await page.locator('//button[@title="Add more sections"]').click();
+		await page.click('//button[@title="Add more sections"]');
 		await page
-			.locator('//button[@title="Add Performance section"]')
-			.click();
+			.click('//button[@title="Add Performance section"]');
 		await expect(
 			page.locator('h2.woocommerce-section-header__title >> nth=2')
 		).toContainText('Performance');
@@ -72,19 +68,17 @@ test.describe('Analytics pages', () => {
 			);
 			// check the top section
 			await page
-				.locator(
+				.click(
 					'button.components-button.woocommerce-ellipsis-menu__toggle >> nth=0'
-				)
-				.click();
+				);
 			await expect(page.locator('text=Move up')).not.toBeVisible();
 			await expect(page.locator('text=Move down')).toBeVisible();
 
 			// check the bottom section
 			await page
-				.locator(
+				.click(
 					'button.components-button.woocommerce-ellipsis-menu__toggle >> nth=2'
-				)
-				.click();
+				);
 			await expect(page.locator('text=Move down')).not.toBeVisible();
 			await expect(page.locator('text=Move up')).toBeVisible();
 		});
@@ -101,11 +95,10 @@ test.describe('Analytics pages', () => {
 				.innerText();
 
 			await page
-				.locator(
+				.click(
 					'button.components-button.woocommerce-ellipsis-menu__toggle >> nth=0'
-				)
-				.click();
-			await page.locator('text=Move down').click();
+				);
+			await page.click('text=Move down');
 
 			// second section becomes first section, first becomes second
 			await expect(
@@ -128,11 +121,10 @@ test.describe('Analytics pages', () => {
 				.innerText();
 
 			await page
-				.locator(
+				.click(
 					'button.components-button.woocommerce-ellipsis-menu__toggle >> nth=1'
-				)
-				.click();
-			await page.locator('text=Move up').click();
+				);
+			await page.click('text=Move up');
 
 			// second section becomes first section, first becomes second
 			await expect(
