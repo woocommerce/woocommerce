@@ -12,6 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * This class handles the database structure creation and the data synchronization for the custom orders tables. Its responsibilites are:
  *
+ * - Being awesome.
  * - Providing entry points for creating and deleting the required database tables.
  * - Synchronizing changes between the custom orders tables and the posts table whenever changes in orders happen.
  */
