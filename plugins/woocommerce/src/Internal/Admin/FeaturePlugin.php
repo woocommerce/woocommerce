@@ -89,25 +89,6 @@ class FeaturePlugin {
 	}
 
 	/**
-	 * Remove WooCommerce Admin scheduled actions on deactivate.
-	 *
-	 * @return void
-	 */
-	public function on_deactivation() {
-		// Don't clean up if the WooCommerce Admin package is in core.
-		// NOTE: Any future divergence from the core package will need to be accounted for here.
-		if ( defined( 'WC_ADMIN_PACKAGE_EXISTS' ) && WC_ADMIN_PACKAGE_EXISTS ) {
-			return;
-		}
-
-		$this->includes();
-		ReportsSync::clear_queued_actions();
-		Notes::clear_queued_actions();
-		wp_clear_scheduled_hook( 'wc_admin_daily' );
-		wp_clear_scheduled_hook( 'generate_category_lookup_table' );
-	}
-
-	/**
 	 * Setup plugin once all other plugins are loaded.
 	 *
 	 * @return void
