@@ -19,53 +19,6 @@ class Install {
 	const VERSION_OPTION = 'woocommerce_admin_version';
 
 	/**
-	 * Migrated option names mapping. New => old.
-	 *
-	 * @var array
-	 */
-	protected static $migrated_options = array(
-		'woocommerce_onboarding_profile'           => 'wc_onboarding_profile',
-		'woocommerce_admin_install_timestamp'      => 'wc_admin_install_timestamp',
-		'woocommerce_onboarding_opt_in'            => 'wc_onboarding_opt_in',
-		'woocommerce_admin_import_stats'           => 'wc_admin_import_stats',
-		'woocommerce_admin_version'                => 'wc_admin_version',
-		'woocommerce_admin_last_orders_milestone'  => 'wc_admin_last_orders_milestone',
-		'woocommerce_admin-wc-helper-last-refresh' => 'wc-admin-wc-helper-last-refresh',
-		'woocommerce_admin_report_export_status'   => 'wc_admin_report_export_status',
-		'woocommerce_task_list_complete'           => 'woocommerce_task_list_complete',
-		'woocommerce_task_list_hidden'             => 'woocommerce_task_list_hidden',
-		'woocommerce_extended_task_list_complete'  => 'woocommerce_extended_task_list_complete',
-		'woocommerce_extended_task_list_hidden'    => 'woocommerce_extended_task_list_hidden',
-	);
-
-	/**
-	 * Migrate option values to their new keys/names.
-	 */
-	public static function migrate_options() {
-		wc_maybe_define_constant( 'WC_ADMIN_MIGRATING_OPTIONS', true );
-
-		foreach ( self::$migrated_options as $new_option => $old_option ) {
-			$old_option_value = get_option( $old_option, false );
-
-			// Continue if no option value was previously set.
-			if ( false === $old_option_value ) {
-				continue;
-			}
-
-			if ( '1' === $old_option_value ) {
-				$old_option_value = 'yes';
-			} elseif ( '0' === $old_option_value ) {
-				$old_option_value = 'no';
-			}
-
-			update_option( $new_option, $old_option_value );
-			if ( $new_option !== $old_option ) {
-				delete_option( $old_option );
-			}
-		}
-	}
-
-	/**
 	 * Delete obsolete notes.
 	 */
 	public static function delete_obsolete_notes() {
