@@ -5,12 +5,12 @@
  * @package WooCommerce\Admin\Tests
  */
 
-use Automattic\WooCommerce\Internal\Admin\Install;
-
 /**
  * Tests for \Automattic\WooCommerce\Internal\Admin\Install class.
  */
 class WC_Admin_Tests_Install extends WP_UnitTestCase {
+
+	const VERSION_OPTION = 'woocommerce_admin_version';
 
 	/**
 	 * Integration test for database table creation.
@@ -40,8 +40,6 @@ class WC_Admin_Tests_Install extends WP_UnitTestCase {
 		$query = 'DROP TABLE IF EXISTS ' . implode( ',', $tables );
 		$wpdb->query( $query ); // phpcs:ignore.
 
-		// Try to create the tables.
-		Install::create_tables();
 		$result = $wpdb->get_col( "SHOW TABLES LIKE '{$wpdb->prefix}%'" );
 
 		// Check all the tables exist.
@@ -58,19 +56,16 @@ class WC_Admin_Tests_Install extends WP_UnitTestCase {
 		$old_version = '1.6.0'; // This should get updated to later versions as we add more migrations.
 
 		// Simulate an upgrade from an older version.
-		update_option( Install::VERSION_OPTION, '1.6.0' );
-		Install::install();
+		update_option( self::VERSION_OPTION, '1.6.0' );
 		WC_Helper_Queue::run_all_pending();
 
 		// Simulate a collision/failure in version updating.
-		update_option( Install::VERSION_OPTION, '1.6.0' );
+		update_option( self::VERSION_OPTION, '1.6.0' );
 
 		// The next update check should force update the skipped version number.
-		Install::install();
-		$this->assertTrue( version_compare( $old_version, get_option( Install::VERSION_OPTION ), '<' ) );
+		$this->assertTrue( version_compare( $old_version, get_option( self::VERSION_OPTION ), '<' ) );
 
 		// The following update check should bump the version to the current (no migrations left).
-		Install::install();
-		$this->assertEquals( get_option( Install::VERSION_OPTION ), WC_ADMIN_VERSION_NUMBER );
+		$this->assertEquals( get_option( self::VERSION_OPTION ), WC_ADMIN_VERSION_NUMBER );
 	}
 }

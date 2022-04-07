@@ -6,7 +6,6 @@
 namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks;
 
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\TaskList;
-use Automattic\WooCommerce\Internal\Admin\Install;
 use WC_Install;
 
 /**

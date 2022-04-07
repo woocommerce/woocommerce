@@ -13,7 +13,6 @@ use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Registe
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize as Download_Directories_Sync;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper as WCConnectionHelper;
-use Automattic\WooCommerce\Internal\Admin\Install as WCA_Install;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -160,25 +159,17 @@ class WC_Install {
 			'wc_update_product_lookup_tables',
 			'wc_update_400_increase_size_of_column',
 			'wc_update_400_reset_action_scheduler_migration_status',
-			'wc_update_400_db_version',
-
 			'wc_admin_update_0201_order_status_index',
-			'wc_admin_update_0201_db_version',
 			'wc_admin_update_0230_rename_gross_total',
-			'wc_admin_update_0230_db_version',
 			'wc_admin_update_0251_remove_unsnooze_action',
-			'wc_admin_update_0251_db_version',
+			'wc_update_400_db_version',
 		),
 		'4.4.0' => array(
 			'wc_update_440_insert_attribute_terms_for_variable_products',
-			'wc_update_440_db_version',
-
 			'wc_admin_update_110_remove_facebook_note',
-			'wc_admin_update_110_db_version',
 			'wc_admin_update_130_remove_dismiss_action_from_tracking_opt_in_note',
-			'wc_admin_update_130_db_version',
 			'wc_admin_update_140_change_deactivate_plugin_note_type',
-			'wc_admin_update_140_db_version',
+			'wc_update_440_db_version',
 		),
 		'4.5.0' => array(
 			'wc_update_450_sanitize_coupons_code',
@@ -186,12 +177,9 @@ class WC_Install {
 		),
 		'5.0.0' => array(
 			'wc_update_500_fix_product_review_count',
-			'wc_update_500_db_version',
-
 			'wc_admin_update_160_remove_facebook_note',
-			'wc_admin_update_160_db_version',
 			'wc_admin_update_170_homescreen_layout',
-			'wc_admin_update_170_db_version',
+			'wc_update_500_db_version',
 		),
 		'5.6.0' => array(
 			'wc_update_560_create_refund_returns_page',
@@ -199,31 +187,23 @@ class WC_Install {
 		),
 		'6.0.0' => array(
 			'wc_update_600_migrate_rate_limit_options',
-			'wc_update_600_db_version',
-
 			'wc_admin_update_270_delete_report_downloads',
-			'wc_admin_update_270_db_version',
 			'wc_admin_update_271_update_task_list_options',
-			'wc_admin_update_271_db_version',
 			'wc_admin_update_280_order_status',
-			'wc_admin_update_280_db_version',
 			'wc_admin_update_290_update_apperance_task_option',
 			'wc_admin_update_290_delete_default_homepage_layout_option',
-			'wc_admin_update_290_db_version',
+			'wc_update_600_db_version',
 		),
 		'6.3.0' => array(
 			'wc_update_630_create_product_attributes_lookup_table',
-			'wc_update_630_db_version',
 			'wc_admin_update_300_update_is_read_from_last_read',
-			'wc_admin_update_300_db_version',
+			'wc_update_630_db_version',
 		),
 		'6.4.0' => array(
 			'wc_update_640_add_primary_key_to_product_attributes_lookup_table',
 			'wc_update_640_approved_download_directories',
-			'wc_update_640_db_version',
-
 			'wc_admin_update_340_remove_is_primary_from_note_action',
-			'wc_admin_update_340_db_version',
+			'wc_update_640_db_version',
 		),
 	);
 

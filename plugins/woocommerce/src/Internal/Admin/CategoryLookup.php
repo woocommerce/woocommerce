@@ -5,8 +5,6 @@
 
 namespace Automattic\WooCommerce\Internal\Admin;
 
-use Automattic\WooCommerce\Internal\Admin\Install;
-
 defined( 'ABSPATH' ) || exit;
 
 /**
