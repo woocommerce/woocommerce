@@ -65,7 +65,7 @@ class CategoryLookup {
 		global $wpdb;
 
 		// Delete existing data and ensure schema is current.
-		Install::create_tables();
+		\WC_Install::create_tables();
 		$wpdb->query( "TRUNCATE TABLE $wpdb->wc_category_lookup" );
 
 		$terms = get_terms(

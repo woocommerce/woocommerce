@@ -78,8 +78,6 @@ class FeaturePlugin {
 		require_once WC_ADMIN_ABSPATH . '/includes/react-admin/wc-admin-update-functions.php';
 		require_once WC_ADMIN_ABSPATH . '/includes/react-admin/class-experimental-abtest.php';
 
-		register_activation_hook( WC_ADMIN_PLUGIN_FILE, array( $this, 'on_activation' ) );
-		register_deactivation_hook( WC_ADMIN_PLUGIN_FILE, array( $this, 'on_deactivation' ) );
 		if ( did_action( 'plugins_loaded' ) ) {
 			self::on_plugins_loaded();
 		} else {
@@ -89,16 +87,6 @@ class FeaturePlugin {
 			// See: https://github.com/woocommerce/woocommerce-admin/issues/3869.
 			add_action( 'plugins_loaded', array( $this, 'on_plugins_loaded' ), 9 );
 		}
-	}
-
-	/**
-	 * Install DB and create cron events when activated.
-	 *
-	 * @return void
-	 */
-	public function on_activation() {
-		Install::create_tables();
-		Install::create_events();
 	}
 
 	/**
