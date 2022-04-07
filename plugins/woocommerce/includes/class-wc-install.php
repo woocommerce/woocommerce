@@ -1374,9 +1374,8 @@ CREATE TABLE {$wpdb->prefix}wc_category_lookup (
 			"{$wpdb->prefix}wc_reserved_stock",
 			"{$wpdb->prefix}wc_rate_limits",
 			wc_get_container()->get( DataRegenerator::class )->get_lookup_table_name(),
-		);
 
-		$wca_tables = array(
+			// WCA Tables
 			"{$wpdb->prefix}wc_order_stats",
 			"{$wpdb->prefix}wc_order_product_lookup",
 			"{$wpdb->prefix}wc_order_tax_lookup",
@@ -1394,7 +1393,7 @@ CREATE TABLE {$wpdb->prefix}wc_category_lookup (
 		 *
 		 * @param array $tables An array of WooCommerce-specific database table names.
 		 */
-		$tables = apply_filters( 'woocommerce_install_get_tables', array_merge( $tables, $wca_tables ) );
+		$tables = apply_filters( 'woocommerce_install_get_tables', $tables );
 
 		return $tables;
 	}
