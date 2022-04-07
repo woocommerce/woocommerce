@@ -6,11 +6,11 @@ test.describe('Store owner can finish initial store setup', () => {
 		await page.goto('/wp-admin/admin.php?page=wc-settings');
 		// Check the enable taxes checkbox
 		await page.check('#woocommerce_calc_taxes');
-		await page.locator('text=Save changes').click();
+		await page.click('text=Save changes');
 		// Verify changes have been saved
-		const checked = await page.isChecked('#woocommerce_calc_taxes');
-		expect(checked).toBeTruthy();
+		expect(page.isChecked('#woocommerce_calc_taxes')).toBeTruthy();
 	});
+
 	test('can configure permalink settings', async ({ page }) => {
 		await page.goto('/wp-admin/options-permalink.php');
 		// Select "Post name" option in common settings section
@@ -22,11 +22,8 @@ test.describe('Store owner can finish initial store setup', () => {
 		await page.click('#submit');
 		// Verify that settings have been saved
 		await page.waitForLoadState('networkidle'); // not autowaiting for form submission
-		const notice = await page.textContent('#setting-error-settings_updated');
-		expect(notice).toContain('Permalink structure updated.');
-		const postSlug = await page.getAttribute('#permalink_structure', 'value');
-		expect(postSlug).toBe('/%postname%/');
-		const wcSlug = await page.getAttribute('#woocommerce_permalink_structure', 'value');
-		expect(wcSlug).toBe('/product/');
+		expect(page.textContent('#setting-error-settings_updated')).toContain('Permalink structure updated.');
+		expect(page.getAttribute('#permalink_structure', 'value')).toBe('/%postname%/');
+		expect(page.getAttribute('#woocommerce_permalink_structure', 'value')).toBe('/product/');
 	});
 });
