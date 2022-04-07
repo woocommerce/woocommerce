@@ -27,7 +27,7 @@ type ReminderBarProps = {
 };
 
 type ReminderTextProps = {
-	remainingCount: number;
+	remainingCount: number | null;
 };
 
 const REMINDER_BAR_HIDDEN_OPTION = 'woocommerce_task_list_reminder_bar_hidden';
@@ -125,7 +125,14 @@ export const TasksReminderBar: React.FC< ReminderBarProps > = ( {
 		taskListComplete ||
 		reminderBarHidden ||
 		completedTasksCount === 0 ||
-		[ 'Home', 'Shipping', 'Tax', 'Payments' ].includes( pageTitle );
+		[
+			'Home',
+			'Shipping',
+			'Tax',
+			'Payments',
+			'Edit Product',
+			'Add New',
+		].includes( pageTitle );
 
 	useEffect( () => {
 		updateBodyMargin();
