@@ -5,6 +5,7 @@
 
 namespace Automattic\WooCommerce;
 
+// Exit if accessed directly.
 defined( 'ABSPATH' ) || exit;
 
 /**
