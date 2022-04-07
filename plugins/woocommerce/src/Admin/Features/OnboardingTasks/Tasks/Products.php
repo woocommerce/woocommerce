@@ -98,7 +98,7 @@ class Products extends Task {
 			return;
 		}
 
-		if ( ! $this->is_active() || $this->is_complete() ) {
+		if ( ! $this->is_active() || ! $this->is_complete() ) {
 			return;
 		}
 
@@ -112,6 +112,9 @@ class Products extends Task {
 			WC_VERSION,
 			true
 		);
+
+		// Clear the active task transient to only show notice once per active session.
+		delete_transient( self::ACTIVE_TASK_TRANSIENT );
 	}
 
 	/**
