@@ -66,35 +66,6 @@ class Install {
 	}
 
 	/**
-	 * Get database schema.
-	 *
-	 * @return string
-	 */
-	protected static function get_schema() {
-		global $wpdb;
-
-		$collate = $wpdb->has_cap( 'collation' ) ? $wpdb->get_charset_collate() : '';
-
-		// Max DB index length. See wp_get_db_schema().
-		$max_index_length = 191;
-
-		$tables = "
-
-		";
-
-		return $tables;
-	}
-
-	/**
-	 * Create database tables.
-	 */
-	public static function create_tables() {
-		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-
-		dbDelta( self::get_schema() );
-	}
-
-	/**
 	 * Delete obsolete notes.
 	 */
 	public static function delete_obsolete_notes() {
