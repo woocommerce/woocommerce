@@ -177,7 +177,7 @@ importers:
       '@wordpress/dom': ^3.3.2
       '@wordpress/element': ^4.1.1
       '@wordpress/eslint-plugin': ^11.0.0
-      '@wordpress/hooks': ^2.12.3
+      '@wordpress/hooks': ^3.5.0
       '@wordpress/html-entities': ^3.3.1
       '@wordpress/i18n': ^4.3.1
       '@wordpress/icons': ^6.3.0
@@ -230,7 +230,7 @@ importers:
       '@wordpress/deprecated': 3.4.1
       '@wordpress/dom': 3.4.1
       '@wordpress/element': 4.2.1
-      '@wordpress/hooks': 2.12.3
+      '@wordpress/hooks': 3.5.0
       '@wordpress/html-entities': 3.4.1
       '@wordpress/i18n': 4.4.1
       '@wordpress/icons': 6.3.0
@@ -428,7 +428,7 @@ importers:
       '@wordpress/deprecated': ^3.3.1
       '@wordpress/element': ^4.1.1
       '@wordpress/eslint-plugin': ^11.0.0
-      '@wordpress/hooks': ^2.12.3
+      '@wordpress/hooks': ^3.5.0
       '@wordpress/i18n': ^4.3.1
       '@wordpress/url': ^3.4.1
       dompurify: ^2.3.6
@@ -451,7 +451,7 @@ importers:
       '@wordpress/data-controls': 2.4.1
       '@wordpress/deprecated': 3.4.1
       '@wordpress/element': 4.2.1
-      '@wordpress/hooks': 2.12.3
+      '@wordpress/hooks': 3.5.0
       '@wordpress/i18n': 4.4.1
       '@wordpress/url': 3.5.1
       dompurify: 2.3.6
@@ -795,7 +795,7 @@ importers:
       '@types/qs': ^6.9.7
       '@wordpress/api-fetch': ^6.0.1
       '@wordpress/eslint-plugin': ^11.0.0
-      '@wordpress/hooks': ^2.12.3
+      '@wordpress/hooks': ^3.5.0
       cookie: ^0.4.2
       eslint: ^8.12.0
       jest: ^27.5.1
@@ -808,7 +808,7 @@ importers:
       '@automattic/explat-client': 0.0.3
       '@automattic/explat-client-react-helpers': 0.0.4
       '@wordpress/api-fetch': 6.1.1
-      '@wordpress/hooks': 2.12.3
+      '@wordpress/hooks': 3.5.0
       cookie: 0.4.2
       qs: 6.10.3
     devDependencies:
@@ -866,7 +866,7 @@ importers:
       '@wordpress/compose': ^5.1.2
       '@wordpress/element': ^4.1.1
       '@wordpress/eslint-plugin': ^11.0.0
-      '@wordpress/hooks': ^2.12.3
+      '@wordpress/hooks': ^3.5.0
       '@wordpress/notices': ^3.3.2
       '@wordpress/url': ^3.4.1
       eslint: ^8.12.0
@@ -882,7 +882,7 @@ importers:
       '@wordpress/components': 19.6.1_@babel+core@7.17.8
       '@wordpress/compose': 5.2.1
       '@wordpress/element': 4.2.1
-      '@wordpress/hooks': 2.12.3
+      '@wordpress/hooks': 3.5.0
       '@wordpress/notices': 3.4.1
       '@wordpress/url': 3.5.1
       history: 4.10.1
@@ -1242,7 +1242,7 @@ importers:
       '@wordpress/dom-ready': ^3.3.1
       '@wordpress/element': ^4.1.1
       '@wordpress/eslint-plugin': ^11.0.0
-      '@wordpress/hooks': ^2.12.3
+      '@wordpress/hooks': ^3.5.0
       '@wordpress/html-entities': ^3.3.1
       '@wordpress/i18n': ^4.3.1
       '@wordpress/icons': ^6.3.0
@@ -1359,7 +1359,7 @@ importers:
       '@wordpress/dom': 3.4.1
       '@wordpress/dom-ready': 3.4.1
       '@wordpress/element': 4.2.1
-      '@wordpress/hooks': 2.12.3
+      '@wordpress/hooks': 3.5.0
       '@wordpress/html-entities': 3.4.1
       '@wordpress/i18n': 4.4.1
       '@wordpress/icons': 6.3.0
@@ -13983,7 +13983,7 @@ packages:
       '@wordpress/deprecated': 3.4.1
       '@wordpress/dom': 3.4.1
       '@wordpress/element': 4.2.1
-      '@wordpress/hooks': 3.4.1
+      '@wordpress/hooks': 3.5.0
       '@wordpress/html-entities': 3.4.1
       '@wordpress/i18n': 4.4.1
       '@wordpress/is-shallow-equal': 4.4.1
@@ -14012,7 +14012,7 @@ packages:
       '@wordpress/deprecated': 3.4.1
       '@wordpress/dom': 3.4.1
       '@wordpress/element': 4.2.1
-      '@wordpress/hooks': 3.4.1
+      '@wordpress/hooks': 3.5.0
       '@wordpress/html-entities': 3.4.1
       '@wordpress/i18n': 4.4.1
       '@wordpress/is-shallow-equal': 4.4.1
@@ -14062,7 +14062,7 @@ packages:
       '@wordpress/dom': 3.4.1
       '@wordpress/element': 4.2.1
       '@wordpress/escape-html': 2.4.1
-      '@wordpress/hooks': 3.4.1
+      '@wordpress/hooks': 3.5.0
       '@wordpress/i18n': 4.4.1
       '@wordpress/icons': 8.0.1
       '@wordpress/is-shallow-equal': 4.4.1
@@ -14115,7 +14115,7 @@ packages:
       '@wordpress/dom': 3.4.1
       '@wordpress/element': 4.2.1
       '@wordpress/escape-html': 2.4.1
-      '@wordpress/hooks': 3.4.1
+      '@wordpress/hooks': 3.5.0
       '@wordpress/i18n': 4.4.1
       '@wordpress/icons': 8.0.1
       '@wordpress/is-shallow-equal': 4.4.1
@@ -14364,7 +14364,7 @@ packages:
     engines: {node: '>=12'}
     dependencies:
       '@babel/runtime': 7.17.7
-      '@wordpress/hooks': 3.4.1
+      '@wordpress/hooks': 3.5.0
     dev: false
 
   /@wordpress/dom-ready/3.4.1:
@@ -14973,7 +14973,7 @@ packages:
       '@babel/runtime': 7.17.7
       '@wordpress/compose': 5.2.1_react@17.0.2
       '@wordpress/element': 4.2.1
-      '@wordpress/hooks': 3.4.1
+      '@wordpress/hooks': 3.5.0
       '@wordpress/icons': 8.0.1
       lodash: 4.17.21
       memize: 1.1.0

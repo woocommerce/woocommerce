@@ -39,7 +39,7 @@
 		"@wordpress/deprecated": "^3.3.1",
 		"@wordpress/dom": "^3.3.2",
 		"@wordpress/element": "^4.1.1",
-		"@wordpress/hooks": "^2.12.3",
+		"@wordpress/hooks": "^3.5.0",
 		"@wordpress/html-entities": "^3.3.1",
 		"@wordpress/i18n": "^4.3.1",
 		"@wordpress/icons": "^6.3.0",

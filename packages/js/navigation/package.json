@@ -25,7 +25,7 @@
 		"@wordpress/components": "^19.5.0",
 		"@wordpress/compose": "^5.1.2",
 		"@wordpress/element": "^4.1.1",
-		"@wordpress/hooks": "^2.12.3",
+		"@wordpress/hooks": "^3.5.0",
 		"@wordpress/notices": "^3.3.2",
 		"@wordpress/url": "^3.4.1",
 		"history": "^4.10.1",
