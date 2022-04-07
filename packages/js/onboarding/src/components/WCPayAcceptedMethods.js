@@ -22,12 +22,12 @@ import GiroPay from '../images/cards/giropay.js';
 import Sofort from '../images/cards/sofort.js';
 
 export const WCPayAcceptedMethods = () => (
-	<>
+	<div className="woocommerce-task-payment-wcpay__accepted-section">
 		<Text as="h3" variant="label" size="12" lineHeight="16px">
 			{ __( 'Accepted payment methods include:', 'woocommerce' ) }
 		</Text>
 
-		<div className="woocommerce-task-payment-wcpay__accepted">
+		<div className="woocommerce-task-payment-wcpay__accepted-icons">
 			<Visa />
 			<MasterCard />
 			<Amex />
@@ -40,9 +40,9 @@ export const WCPayAcceptedMethods = () => (
 			<UnionPay />
 			<JCB />
 			<Sofort />
-			<div className="woocommerce-task-payment-wcpay__accepted__and-more">
+			<div className="woocommerce-task-payment-wcpay__accepted-and-more">
 				& more.
 			</div>
 		</div>
-	</>
+	</div>
 );
