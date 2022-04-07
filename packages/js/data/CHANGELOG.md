@@ -1,5 +1,7 @@
 # Unreleased
 
+-   Update dependency `@wordpress/hooks` to ^3.5.0
+
 # 3.1.0
 
 -   Add "moment" to peerDependencies. #8349
