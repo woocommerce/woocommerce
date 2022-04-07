@@ -745,6 +745,7 @@ class WC_Install {
 	 * Delete obsolete notes.
 	 */
 	public static function delete_obsolete_notes() {
+		global $wpdb;
 		$obsolete_notes_names = array(
 			'wc-admin-welcome-note',
 			'wc-admin-store-notice-setting-moved',
@@ -780,7 +781,10 @@ class WC_Install {
 			);
 		}
 
-		Notes::delete_notes_with_name( $obsolete_notes_names );
+		foreach ( $obsolete_notes_names as $obsolete_notes_name ) {
+			$wpdb->delete( $wpdb->prefix . 'wc_admin_notes', array( 'name' => $obsolete_notes_name ) );
+			$wpdb->delete( $wpdb->prefix . 'wc_admin_note_actions', array( 'name' => $obsolete_notes_name ) );
+		}
 	}
 
 	/**
