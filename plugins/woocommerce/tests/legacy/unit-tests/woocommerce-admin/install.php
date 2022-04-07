@@ -40,6 +40,7 @@ class WC_Admin_Tests_Install extends WP_UnitTestCase {
 		$query = 'DROP TABLE IF EXISTS ' . implode( ',', $tables );
 		$wpdb->query( $query ); // phpcs:ignore.
 
+		WC_Install::create_tables();
 		$result = $wpdb->get_col( "SHOW TABLES LIKE '{$wpdb->prefix}%'" );
 
 		// Check all the tables exist.
@@ -53,19 +54,23 @@ class WC_Admin_Tests_Install extends WP_UnitTestCase {
 	 * See: https:// github.com/woocommerce/woocommerce-admin/issues/5058
 	 */
 	public function test_missed_version_number_update() {
+		$this->markTestSkipped('We no longer update WooCommerce Admin versions');
 		$old_version = '1.6.0'; // This should get updated to later versions as we add more migrations.
 
 		// Simulate an upgrade from an older version.
 		update_option( self::VERSION_OPTION, '1.6.0' );
+		WC_Install::install();
 		WC_Helper_Queue::run_all_pending();
 
 		// Simulate a collision/failure in version updating.
 		update_option( self::VERSION_OPTION, '1.6.0' );
 
 		// The next update check should force update the skipped version number.
+		WC_Install::install();
 		$this->assertTrue( version_compare( $old_version, get_option( self::VERSION_OPTION ), '<' ) );
 
 		// The following update check should bump the version to the current (no migrations left).
+		WC_Install::install();
 		$this->assertEquals( get_option( self::VERSION_OPTION ), WC_ADMIN_VERSION_NUMBER );
 	}
 }
