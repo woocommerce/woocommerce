@@ -388,7 +388,6 @@ class WC_Install {
 		self::setup_environment();
 		self::create_terms();
 		self::create_cron_jobs();
-		WCA_Install::create_cron_jobs();
 		WCA_Install::delete_obsolete_notes();
 		self::create_files();
 		self::maybe_create_pages();
@@ -642,6 +641,12 @@ class WC_Install {
 		wp_schedule_event( time() + MINUTE_IN_SECONDS, 'fifteendays', 'woocommerce_geoip_updater' );
 		wp_schedule_event( time() + 10, apply_filters( 'woocommerce_tracker_event_recurrence', 'daily' ), 'woocommerce_tracker_send_event' );
 		wp_schedule_event( time() + ( 3 * HOUR_IN_SECONDS ), 'daily', 'woocommerce_cleanup_rate_limits' );
+
+		if ( ! wp_next_scheduled( 'wc_admin_daily' ) ) {
+			wp_schedule_event( time(), 'daily', 'wc_admin_daily' );
+		}
+		// Note: this is potentially redundant when the core package exists.
+		wp_schedule_single_event( time() + 10, 'generate_category_lookup_table' );
 	}
 
 	/**
