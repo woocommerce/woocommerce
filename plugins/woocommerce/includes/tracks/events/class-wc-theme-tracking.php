@@ -47,7 +47,7 @@ class WC_Theme_Tracking {
 
 		$properties = array(
 			'block_theme' => $is_block_theme,
-			'theme_domain' => $theme_object->get( 'TextDomain' ),
+			'theme_name' => $theme_object->get( 'Name' ),
 		);
 
 		WC_Tracks::record_event( 'activated_theme', $properties );
