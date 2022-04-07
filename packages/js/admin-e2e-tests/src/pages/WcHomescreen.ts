@@ -46,7 +46,6 @@ export class WcHomescreen extends BasePage {
 		return modal;
 	}
 
-
 	async getTaskList(): Promise< Array< string | null > > {
 		await page.waitForSelector(
 			'.woocommerce-task-card .woocommerce-task-list__item-title'

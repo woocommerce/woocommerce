@@ -1,12 +1,10 @@
 /**
  * Internal dependencies
  */
- import { Login } from '../../pages/Login';
- import { OnboardingWizard } from '../../pages/OnboardingWizard';
- import { WcHomescreen } from '../../pages/WcHomescreen';
-import {
-	resetWooCommerceState,
-} from '../../fixtures';
+import { Login } from '../../pages/Login';
+import { OnboardingWizard } from '../../pages/OnboardingWizard';
+import { WcHomescreen } from '../../pages/WcHomescreen';
+import { resetWooCommerceState } from '../../fixtures';
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 const { afterAll, beforeAll, describe, it } = require( '@jest/globals' );
