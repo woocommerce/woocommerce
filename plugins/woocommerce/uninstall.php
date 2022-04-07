@@ -24,7 +24,7 @@ wp_clear_scheduled_hook( 'woocommerce_cleanup_rate_limits' );
 /*
  * Only remove ALL product and page data if WC_REMOVE_ALL_DATA constant is set to true in user's
  * wp-config.php. This is to prevent data loss when deleting the plugin from the backend
- * and to ensure only the site owner can perform this action.
+ * and to ensure only the site owner can perform this potentially dangerious action.
  */
 if ( defined( 'WC_REMOVE_ALL_DATA' ) && true === WC_REMOVE_ALL_DATA ) {
 	// Drop WC Admin tables.
