@@ -201,7 +201,17 @@ class WC_Product_Download implements ArrayAccess {
 			return;
 		}
 
-		$download_file           = $this->get_file();
+		$download_file = $this->get_file();
+
+		/**
+		 * Controls whether shortcodes should be resolved and validated using the Approved Download Directory feature.
+		 *
+		 * @param bool $should_validate
+		 */
+		if ( apply_filters( 'woocommerce_product_downloads_approved_directory_validation_for_shortcodes', true ) && 'shortcode' === $this->get_type_of_file_path() ) {
+			$download_file = do_shortcode( $download_file );
+		}
+
 		$is_site_administrator   = is_multisite() ? current_user_can( 'manage_sites' ) : current_user_can( 'manage_options' );
 		$valid_storage_directory = $download_directories->is_valid_path( $download_file );
 
@@ -216,7 +226,7 @@ class WC_Product_Download implements ArrayAccess {
 						/* translators: %1$s is the downloadable file path, %2$s is an opening link tag, %3%s is a closing link tag. */
 						__( 'The downloadable file %1$s cannot be used: it is not located in an approved directory. Please contact a site administrator and request their approval. %2$sLearn more.%3$s', 'woocommerce' ),
 						'<code>' . $download_file . '</code>',
-						'<a href="https://woocommerce.com/documentation/approved-download-directories">', // @todo update to working link (see https://github.com/Automattic/woocommerce/issues/181)
+						'<a href="https://woocommerce.com/document/approved-download-directories">',
 						'</a>'
 					)
 				);
@@ -229,7 +239,7 @@ class WC_Product_Download implements ArrayAccess {
 					/* translators: %1$s is the downloadable file path, %2$s is an opening link tag, %3%s is a closing link tag. */
 					__( 'The downloadable file %1$s cannot be used: it is not located in an approved directory. Please contact a site administrator for help. %2$sLearn more.%3$s', 'woocommerce' ),
 					'<code>' . $download_file . '</code>',
-					'<a href="https://woocommerce.com/documentation/approved-download-directories">', // @todo update to working link (see https://github.com/Automattic/woocommerce/issues/181)
+					'<a href="https://woocommerce.com/document/approved-download-directories">',
 					'</a>'
 				)
 			);

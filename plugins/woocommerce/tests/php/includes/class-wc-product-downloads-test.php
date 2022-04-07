@@ -63,4 +63,48 @@ class WC_Product_Download_Test extends WC_Unit_Test_Case {
 		$this->expectExceptionMessage( 'cannot be used: it is not located in an approved directory' );
 		$download->check_is_valid();
 	}
+
+	/**
+	 * Test handling of filepaths described via shortcodes in relation to the Approved Download Directory
+	 * feature. This is to simulate scenarios such as encountered when using the S3 Downloads extension.
+	 */
+	public function test_shortcode_resolution_for_approved_directory_rules() {
+		/** @var Download_Directories $download_directories */
+		$download_directories = wc_get_container()->get( Download_Directories::class );
+		$download_directories->set_mode( Download_Directories::MODE_ENABLED );
+		$dynamic_filepath = 'https://fast.reliable.external.fileserver.com/bucket-123/textbook.pdf';
+
+		// We select an admin user because we wish to automatically add Approved Directory rules.
+		$admin_user = wp_insert_user( array( 'user_login' => uniqid(), 'role' => 'administrator', 'user_pass' => 'x' ) );
+		wp_set_current_user( $admin_user );
+
+		add_shortcode( 'dynamic-download', function () {
+			return 'https://fast.reliable.external.fileserver.com/bucket-123/textbook.pdf';
+		} );
+
+		$this->assertFalse(
+			$download_directories->is_valid_path( $dynamic_filepath ),
+			'Confirm the filepath returned by the test URL is not yet valid.'
+		);
+
+		$download = new WC_Product_Download();
+		$download->set_file( '[dynamic-download]' );
+
+		$this->assertNull(
+			$download->check_is_valid(),
+			'The downloadable file successfully validates (if it did not, an exception would be thrown).'
+		);
+
+		$this->assertTrue(
+			$download_directories->is_valid_path( $dynamic_filepath ),
+			'Confirm the filepath returned by the test URL is now considered valid.'
+		);
+
+		remove_shortcode( 'dynamic-download' );
+
+		// Now the shortcode is removed (perhaps the parent plugin has been removed/disabled) it will not resolve
+		// and so the filepath will not validate.
+		$this->expectException( 'Error' );
+		$download_directories->check_is_valid();
+	}
 }
