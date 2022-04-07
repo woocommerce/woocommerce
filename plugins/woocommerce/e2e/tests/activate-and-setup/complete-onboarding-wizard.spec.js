@@ -8,10 +8,11 @@ test.describe('Store owner can complete onboarding wizard', () => {
 		await page.goto(
 			'wp-admin/admin.php?page=wc-admin&path=/setup-wizard'
 		);
-		const pageHeading = await page.textContent(
-			'div.woocommerce-profile-wizard__step-header > h2'
-		);
-		expect(pageHeading).toContain('Welcome to WooCommerce');
+		expect(
+			page.textContent(
+				'div.woocommerce-profile-wizard__step-header > h2'
+			)
+		).toContain('Welcome to WooCommerce');
 		// Fill store's address - first line
 		await page.fill('#inspector-text-control-0', 'addr 1');
 		// Fill store's address - second line
@@ -37,10 +38,9 @@ test.describe('Store owner can complete onboarding wizard', () => {
 		// Click continue button
 		await page.click('button >> text=Continue');
 		// Usage tracking dialog
-		const dialogHeading = await page.textContent(
-			'.components-modal__header-heading'
-		);
-		expect(dialogHeading).toContain('Build a better WooCommerce');
+		expect(
+			page.textContent('.components-modal__header-heading')
+		).toContain('Build a better WooCommerce');
 		await page.click('button >> text=No thanks');
 		await page.waitForLoadState('networkidle'); // not autowaiting for form submission
 	});
@@ -51,17 +51,18 @@ test.describe('Store owner can complete onboarding wizard', () => {
 		await page.goto(
 			'wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard&step=industry'
 		);
-		const pageHeading = await page.textContent(
-			'div.woocommerce-profile-wizard__step-header > h2'
-		);
-		expect(pageHeading).toContain(
-			'In which industry does the store operate?'
-		);
+		expect(
+			page.textContent(
+				'div.woocommerce-profile-wizard__step-header > h2'
+			)
+		).toContain('In which industry does the store operate?');
 		// Check that there are the correct number of options listed
 		const numCheckboxes = await page.$$(
 			'.components-checkbox-control__input'
 		);
-		expect(numCheckboxes.length === expectedIndustries).toBeTruthy();
+		await expect(
+			numCheckboxes.length === expectedIndustries
+		).toBeTruthy();
 		// Uncheck any currently checked industries
 		for (let i = 0; i < expectedIndustries; i++) {
 			let currentCheck = `#inspector-checkbox-control-${i}`;
@@ -79,12 +80,11 @@ test.describe('Store owner can complete onboarding wizard', () => {
 		await page.goto(
 			'wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard&step=product-types'
 		);
-		const pageHeading = await page.textContent(
-			'div.woocommerce-profile-wizard__step-header > h2'
-		);
-		expect(pageHeading).toContain(
-			'What type of products will be listed?'
-		);
+		expect(
+			page.textContent(
+				'div.woocommerce-profile-wizard__step-header > h2'
+			)
+		).toContain('What type of products will be listed?');
 		// Check that there are the correct number of options listed
 		const numCheckboxes = await page.$$(
 			'.components-checkbox-control__input'
@@ -105,10 +105,11 @@ test.describe('Store owner can complete onboarding wizard', () => {
 		await page.goto(
 			'wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard&step=business-details'
 		);
-		const pageHeading = await page.textContent(
-			'div.woocommerce-profile-wizard__step-header > h2'
-		);
-		expect(pageHeading).toContain('Tell us about your business');
+		expect(
+			await page.textContent(
+				'div.woocommerce-profile-wizard__step-header > h2'
+			)
+		).toContain('Tell us about your business');
 		// Select 1 - 10 for products
 		await page.click('#woocommerce-select-control-0__control-input', {
 			force: true,
@@ -122,25 +123,27 @@ test.describe('Store owner can complete onboarding wizard', () => {
 		await page.click('button >> text=Continue');
 	});
 
-	test('can unselect all business features and continue', async ({ page }) => {
+	test('can unselect all business features and continue', async ({
+		page,
+	}) => {
 		await page.goto(
 			'wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard&step=business-details'
 		);
 		// Click the Free features tab
 		await page.click('#tab-panel-0-business-features');
-		const pageHeading = await page.textContent(
-			'div.woocommerce-profile-wizard__step-header > h2'
-		);
-		expect(pageHeading).toContain('Included business features');
+		expect(
+			page.textContent(
+				'div.woocommerce-profile-wizard__step-header > h2'
+			)
+		).toContain('Included business features');
 		// Expand list of features
 		await page.click(
 			'button.woocommerce-admin__business-details__selective-extensions-bundle__expand'
 		);
 		// Check to see if WC Payments is present
-		const wcPay = await page.locator(
-			'a:has-text("WooCommerce Payments")'
-		);
-		expect(wcPay).toBeVisible();
+		expect(
+			page.locator('a:has-text("WooCommerce Payments")')
+		).toBeVisible();
 		// Uncheck all business features
 		if (page.isChecked('#inspector-checkbox-control-1')) {
 			await page.click('#inspector-checkbox-control-1');
@@ -152,10 +155,11 @@ test.describe('Store owner can complete onboarding wizard', () => {
 		await page.goto(
 			'wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard&step=theme'
 		);
-		const pageHeading = await page.textContent(
-			'div.woocommerce-profile-wizard__step-header > h2'
-		);
-		expect(pageHeading).toContain('Choose a theme');
+		expect(
+			page.textContent(
+				'div.woocommerce-profile-wizard__step-header > h2'
+			)
+		).toContain('Choose a theme');
 		// Just continue with the current theme
 		await page.click('button >> text=Continue with my active theme');
 	});
@@ -196,12 +200,11 @@ test.describe(
 			await page.goto(
 				'wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard&step=industry'
 			);
-			const pageHeading = await page.textContent(
-				'div.woocommerce-profile-wizard__step-header > h2'
-			);
-			expect(pageHeading).toContain(
-				'In which industry does the store operate?'
-			);
+			expect(
+				page.textContent(
+					'div.woocommerce-profile-wizard__step-header > h2'
+				)
+			).toContain('In which industry does the store operate?');
 			// Uncheck all industries
 			for (let i = 0; i < expectedIndustries; i++) {
 				let currentCheck = `#inspector-checkbox-control-${i}`;
@@ -212,18 +215,19 @@ test.describe(
 			await page.click('button >> text=Continue');
 		});
 
-		test('can choose not to install any extensions', async ({ page }) => {
+		test('can choose not to install any extensions', async ({
+			page,
+		}) => {
 			await page.goto(
 				'wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard&step=business-details'
 			);
 			// Click the Free features tab
 			await page.click('#tab-panel-0-business-features');
-			const pageHeading = await page.textContent(
-				'div.woocommerce-profile-wizard__step-header > h2'
-			);
-			await expect(pageHeading).toContain(
-				'Included business features'
-			);
+			await expect(
+				page.textContent(
+					'div.woocommerce-profile-wizard__step-header > h2'
+				)
+			).toContain('Included business features');
 			// Expand list of features
 			await page.click(
 				'button.woocommerce-admin__business-details__selective-extensions-bundle__expand'
@@ -239,7 +243,9 @@ test.describe(
 			await page.click('button >> text=Continue');
 		});
 
-		test('should display the choose payments task, and not the WC Pay task', async ({ page }) => {
+		test('should display the choose payments task, and not the WC Pay task', async ({
+			page,
+		}) => {
 			// Setup
 			await page.goto(
 				'wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard&step=theme'
