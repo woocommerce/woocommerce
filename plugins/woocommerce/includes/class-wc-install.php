@@ -231,13 +231,13 @@ class WC_Install {
 	 * This check is done on all requests and runs if the versions do not match.
 	 */
 	public static function check_version() {
-		$wc_version = get_option( 'woocommerce_version' );
+		$wc_version      = get_option( 'woocommerce_version' );
 		$wc_code_version = WC()->version;
 		$requires_update = version_compare( $wc_version, $wc_code_version, '<' );
-		if ( ! Constants::is_defined( 'IFRAME_REQUEST' ) &&  $requires_update ) {
+		if ( ! Constants::is_defined( 'IFRAME_REQUEST' ) && $requires_update ) {
 			self::install();
 			do_action( 'woocommerce_updated' );
-			do_action_deprecated( 'woocommerce_admin_updated' , array(), $wc_code_version);
+			do_action_deprecated( 'woocommerce_admin_updated', array(), $wc_code_version );
 			// If there is no woocommerce_version option, consider it as a new install.
 			if ( ! $wc_version ) {
 				do_action( 'woocommerce_newly_installed' );
@@ -387,8 +387,13 @@ class WC_Install {
 		do_action( 'woocommerce_admin_installed' );
 	}
 
+	/**
+	 * Returns true if we're installing.
+	 *
+	 * @return bool
+	 */
 	public static function is_installing() {
-	    return 'yes' === get_transient( 'wc_installing' );
+		return 'yes' === get_transient( 'wc_installing' );
 	}
 
 	/**
@@ -736,6 +741,9 @@ class WC_Install {
 		}
 	}
 
+	/**
+	 * Delete obsolete notes.
+	 */
 	public static function delete_obsolete_notes() {
 		$obsolete_notes_names = array(
 			'wc-admin-welcome-note',
@@ -1375,7 +1383,7 @@ CREATE TABLE {$wpdb->prefix}wc_category_lookup (
 			"{$wpdb->prefix}wc_rate_limits",
 			wc_get_container()->get( DataRegenerator::class )->get_lookup_table_name(),
 
-			// WCA Tables
+			// WCA Tables.
 			"{$wpdb->prefix}wc_order_stats",
 			"{$wpdb->prefix}wc_order_product_lookup",
 			"{$wpdb->prefix}wc_order_tax_lookup",

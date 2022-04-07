@@ -49,10 +49,16 @@ class WC_Admin_Tests_Install extends WP_UnitTestCase {
 		}
 	}
 
+
 	/**
 	 * Run maybe_update_db_version and confirm the expected jobs are pushed to the queue.
 	 *
 	 * @dataProvider db_update_version_provider
+	 *
+	 * @param string $db_update_version WC version to test.
+	 * @param int    $expected_jobs_count # of expected jobs.
+	 *
+	 * @return void
 	 */
 	public function test_running_db_updates( $db_update_version, $expected_jobs_count ) {
 		update_option( 'woocommerce_db_version', $db_update_version );
