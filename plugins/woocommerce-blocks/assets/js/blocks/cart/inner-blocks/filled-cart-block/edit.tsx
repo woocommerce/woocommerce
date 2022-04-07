@@ -14,7 +14,7 @@ import { useEditorContext } from '@woocommerce/base-context';
 import {
 	useForcedLayout,
 	getAllowedBlocks,
-} from '../../../cart-checkout/shared';
+} from '../../../cart-checkout-shared';
 import './editor.scss';
 import { useCartBlockContext } from '../../context';
 

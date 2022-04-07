@@ -10,7 +10,8 @@
 		"../../base/utils/",
 		"../../data/",
 		"../../types/",
-		"../components"
+		"../components",
+		"../../blocks/cart-checkout-shared/payment-methods"
 	],
 	"exclude": [ "**/test/**" ]
 }

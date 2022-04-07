@@ -15,7 +15,7 @@ import { useStoreCart } from '@woocommerce/base-context/hooks';
 import {
 	useForcedLayout,
 	getAllowedBlocks,
-} from '../../../cart-checkout/shared';
+} from '../../../cart-checkout-shared';
 import { OrderMetaSlotFill } from './slotfills';
 
 export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {

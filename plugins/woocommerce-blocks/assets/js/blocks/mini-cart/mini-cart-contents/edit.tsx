@@ -17,7 +17,7 @@ import type { TemplateArray } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
-import { useViewSwitcher, useForcedLayout } from '../shared';
+import { useViewSwitcher, useForcedLayout } from '../../cart-checkout-shared';
 import { MiniCartInnerBlocksStyle } from './inner-blocks-style';
 import './editor.scss';
 

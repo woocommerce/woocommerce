@@ -14,7 +14,7 @@ import './style.scss';
 import {
 	useForcedLayout,
 	getAllowedBlocks,
-} from '../../../cart-checkout/shared';
+} from '../../../cart-checkout-shared';
 
 export const Edit = ( {
 	clientId,

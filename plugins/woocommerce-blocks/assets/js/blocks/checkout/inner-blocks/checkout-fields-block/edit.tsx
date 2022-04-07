@@ -14,7 +14,7 @@ import { useCheckoutBlockControlsContext } from '../../context';
 import {
 	useForcedLayout,
 	getAllowedBlocks,
-} from '../../../cart-checkout/shared';
+} from '../../../cart-checkout-shared';
 import './style.scss';
 
 export const Edit = ( {
