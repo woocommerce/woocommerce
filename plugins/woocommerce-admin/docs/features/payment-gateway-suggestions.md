@@ -41,7 +41,7 @@ The data source schema defines the recommended payment gateways and required plu
 ]
 ```
 
-The specs use the [rule processor](https://github.com/woocommerce/woocommerce-admin/blob/main/src/RemoteInboxNotifications/README.md#rule) to determine if a gateway should be shown using the `is_visible` property.
+The specs use the [rule processor](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/src/Admin/RemoteInboxNotifications#rule) to determine if a gateway should be shown using the `is_visible` property.
 
 ## Payment Gateway Configs
 
@@ -64,13 +64,13 @@ By default, the client will generate a payment gateway setup form from the setti
 
 ### WooPaymentGatewayConfigure
 
-To customize the configuration form used in the payment setup, you can use [WooPaymentGatewayConfigure](https://github.com/woocommerce/woocommerce-admin/tree/main/packages/onboarding/src/components/WooPaymentGatewayConfigure). 
+To customize the configuration form used in the payment setup, you can use [WooPaymentGatewayConfigure](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/onboarding/src/components/WooPaymentGatewayConfigure). 
 
 This will leave the default gateway installation and stepper in place, but allow the form to be customized as needed.
 
 ### WooPaymentGatewaySetup
 
-To completely override the stepper and default installation behavior, the gateway can be SlotFilled using [WooPaymentGatewaySetup](https://github.com/woocommerce/woocommerce-admin/tree/main/packages/onboarding/src/components/WooPaymentGatewaySetup).
+To completely override the stepper and default installation behavior, the gateway can be SlotFilled using [WooPaymentGatewaySetup](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/onboarding/src/components/WooPaymentGatewaySetup).
 
 ## Post install setup
 
