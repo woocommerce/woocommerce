@@ -57,7 +57,7 @@
 			"executor": "@nrwl/workspace:run-commands",
 			"options": {
 				"commands": [
-					"pnpm nx build:feature-config woocommerce-admin",
+					"pnpm nx build:feature-config woocommerce",
 					"pnpm nx watch-assets woocommerce"
 				]
 			}
