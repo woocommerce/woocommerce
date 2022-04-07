@@ -98,7 +98,7 @@
 		"@woocommerce/e2e-utils": "^0.2.0",
 		"@wordpress/a11y": "^3.5.0",
 		"@wordpress/api-fetch": "^6.0.1",
-		"@wordpress/base-styles": "^3.6.0",
+		"@wordpress/base-styles": "^4.3.0",
 		"@wordpress/components": "^19.5.0",
 		"@wordpress/compose": "^5.1.2",
 		"@wordpress/core-data": "^4.1.2",
