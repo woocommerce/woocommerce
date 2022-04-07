@@ -7,7 +7,7 @@ import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
  * Internal dependencies
  */
 import './editor.scss';
-import { useForcedLayout, getAllowedBlocks } from '../../cart-checkout/shared';
+import { useForcedLayout, getAllowedBlocks } from '../../cart-checkout-shared';
 
 export const AdditionalFields = ( {
 	block,

@@ -6,7 +6,7 @@ import { useStoreCart } from '@woocommerce/base-context/hooks';
 /**
  * Internal dependencies
  */
-import { CheckoutExpressPayment } from '../../../cart-checkout/payment-methods';
+import { CheckoutExpressPayment } from '../../../cart-checkout-shared/payment-methods';
 
 const Block = ( { className }: { className?: string } ): JSX.Element | null => {
 	const { cartNeedsPayment } = useStoreCart();
