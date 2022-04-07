@@ -72,7 +72,7 @@
   "lint-staged": {
     "*.php": [
       "php -d display_errors=1 -l",
-      "composer --working-dir=./plugins/woocommerce run-script phpcs-pre-commit"
+      "composer run-script phpcs-pre-commit"
     ],
     "!(*min).js": [
       "eslint --fix"
