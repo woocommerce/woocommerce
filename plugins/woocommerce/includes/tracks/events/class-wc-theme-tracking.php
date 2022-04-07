@@ -46,8 +46,8 @@ class WC_Theme_Tracking {
 		}
 
 		$properties = array(
-			'block_theme' => $is_block_theme,
-			'theme_name' => $theme_object->get( 'Name' ),
+			'block_theme'   => $is_block_theme,
+			'theme_name'    => $theme_object->get( 'Name' ),
 			'theme_version' => $theme_object->get( 'Version' ),
 		);
 
