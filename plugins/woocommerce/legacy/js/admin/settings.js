@@ -185,5 +185,20 @@
 			}
 		} );
 
+		$('#settings-other-payment-methods').on('click', function( e ) {
+			if ( typeof window.wcTracks.recordEvent === 'undefined' ) {
+				return;
+			}
+
+			var payment_methods = $.map( $( "td.wc_payment_gateways_wrapper tbody tr[data-gateway_id] "), function( tr ) {
+				return $( tr ).attr( 'data-gateway_id' );
+			});
+
+			window.wcTracks.recordEvent( 'wcadmin_settings_payments_recommendations_other_options' , {
+				available_payment_methods: payment_methods
+			});
+
+		});
+
 	});
 })( jQuery, woocommerce_settings_params, wp );
