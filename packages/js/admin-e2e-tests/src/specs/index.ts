@@ -7,4 +7,3 @@ export * from './tasks/payment';
 export * from './tasks/purchase';
 export * from './homescreen/task-list';
 export * from './homescreen/activity-panel';
-export * from './homescreen/welcome-modal';

@@ -597,10 +597,37 @@ const testBusinessDetailsForm = () => {
 	} );
 };
 
+const testAdminHomescreenWelcomeModal = () => {
+	describe( 'Homescreen', () => {
+		const profileWizard = new OnboardingWizard( page );
+		const homeScreen = new WcHomescreen( page );
+		const login = new Login( page );
+
+		beforeAll( async () => {
+			await login.login();
+			await resetWooCommerceState();
+			await profileWizard.navigate();
+			await profileWizard.skipStoreSetup();
+		} );
+
+		afterAll( async () => {
+			await login.logout();
+		} );
+
+		it( 'should not show welcome modal', async () => {
+			await homeScreen.isDisplayed();
+			await expect( homeScreen.isWelcomeModalVisible() ).resolves.toBe(
+				false
+			);
+		} );
+	} );
+};
+
 module.exports = {
 	testAdminOnboardingWizard,
 	testSelectiveBundleWCPay,
 	testDifferentStoreCurrenciesWCPay,
 	testSubscriptionsInclusion,
 	testBusinessDetailsForm,
+	testAdminHomescreenWelcomeModal,
 };
