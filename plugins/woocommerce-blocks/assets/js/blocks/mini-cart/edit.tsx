@@ -24,10 +24,7 @@ interface Props {
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
 }
 
-const MiniCartBlock = ( {
-	attributes,
-	setAttributes,
-}: Props ): ReactElement => {
+const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 	const { addToCartBehaviour } = attributes;
 	const blockProps = useBlockProps( {
 		className: `wc-block-mini-cart`,
@@ -116,4 +113,4 @@ const MiniCartBlock = ( {
 	);
 };
 
-export default MiniCartBlock;
+export default Edit;

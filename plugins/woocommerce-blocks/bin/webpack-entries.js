@@ -42,12 +42,9 @@ const blocks = {
 	'active-filters': {},
 	cart: {},
 	checkout: {},
-	'mini-cart': {
-		isExperimental: true,
-	},
+	'mini-cart': {},
 	'mini-cart-contents': {
 		customDir: 'mini-cart/mini-cart-contents',
-		isExperimental: true,
 	},
 	'single-product': {
 		isExperimental: true,
