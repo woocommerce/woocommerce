@@ -142,12 +142,6 @@
 				"script": "packages:fix:textdomain"
 			}
 		},
-		"git-update-hooks": {
-			"executor": "@nrwl/workspace:run-script",
-			"options": {
-				"script": "git:update-hooks"
-			}
-		},
 		"make-collection": {
 			"executor": "@nrwl/workspace:run-script",
 			"options": {

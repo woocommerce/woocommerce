@@ -123,5 +123,11 @@
 		"test:nobuild": "jest --config ./jest.config.json",
 		"test:update-snapshots": "pnpm run test:nobuild -- --updateSnapshot",
 		"test-staged": "jest --bail --config ./jest.config.json --findRelatedTests"
+	},
+	"lint-staged": {
+		"*.(t|j)s?(x)": [
+			"eslint --fix",
+			"pnpm test-staged"
+		]
 	}
 }

@@ -48,6 +48,7 @@
 		"lint:css": "stylelint '**/*.scss'",
 		"lint:css-fix": "stylelint '**/*.scss' --fix --ip 'storybook/wordpress'",
 		"lint:js": "wp-scripts lint-js ./client --ext=js,ts,tsx",
+		"lint:js-pre-commit": "wp-scripts lint-js --ext=js,ts,tsx",
 		"lint:js-packages": "wp-scripts lint-js ../../packages/js --ext=js,ts,tsx",
 		"lint:js-fix": "pnpm run lint:js -- --fix --ext=js,ts,tsx",
 		"lint:php": "./vendor/bin/phpcs --standard=phpcs.xml.dist $(git ls-files | grep .php$)",
@@ -241,11 +242,9 @@
 		"grunt": "^1.4.1",
 		"grunt-checktextdomain": "^1.0.1",
 		"grunt-wp-i18n": "^1.0.3",
-		"husky": "^7.0.0",
 		"jest": "^27.5.1",
 		"jest-environment-jsdom": "~27.5.0",
 		"jest-environment-node": "^27.5.1",
-		"lint-staged": "^12.3.5",
 		"md5": "^2.3.0",
 		"merge-config": "^2.0.0",
 		"mini-css-extract-plugin": "^2.6.0",
@@ -281,6 +280,14 @@
 	},
 	"peerDependencies": {
 		"@wordpress/data": "^6.3.0"
+	},
+	"lint-staged": {
+		"*.scss": [ "pnpm lint:css-fix" ],
+		"client/**/*.(t|j)s?(x)": [
+			"pnpm reformat-files",
+			"pnpm wp-scripts lint-js",
+			"pnpm test-staged"
+		]
 	},
 	"engines": {
 		"node": "^16.13.1",
