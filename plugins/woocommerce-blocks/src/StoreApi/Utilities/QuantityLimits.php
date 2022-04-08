@@ -133,14 +133,14 @@ final class QuantityLimits {
 	/**
 	 * Get the limit for the total number of a product allowed in the cart.
 	 *
-	 * This is based on product properties, including remaining stock, and defaults to a maximum of 99 of any product
+	 * This is based on product properties, including remaining stock, and defaults to a maximum of 9999 of any product
 	 * in the cart at once.
 	 *
 	 * @param \WC_Product $product Product instance.
 	 * @return int
 	 */
 	protected function get_product_quantity_limit( \WC_Product $product ) {
-		$limits = [ 99 ];
+		$limits = [ 9999 ];
 
 		if ( $product->is_sold_individually() ) {
 			$limits[] = 1;
@@ -153,7 +153,7 @@ final class QuantityLimits {
 		 *
 		 * Filters the variation option name for custom option slugs.
 		 *
-		 * @param integer $quantity_limit Quantity limit which defaults to 99 unless sold individually.
+		 * @param integer $quantity_limit Quantity limit which defaults to 9999 unless sold individually.
 		 * @param \WC_Product $product Product instance.
 		 * @return integer
 		 */
