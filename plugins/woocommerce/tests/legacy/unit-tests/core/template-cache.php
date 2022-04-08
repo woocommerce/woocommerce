@@ -33,7 +33,8 @@ class WC_Template_Cache extends WC_Unit_Test_Case {
 					)
 				)
 			);
-			$templates[ $cache_key ] = $template;
+			// Tokenize the path since it is expected to be.
+			$templates[ $cache_key ] = wc_tokenize_path( $template, wc_get_path_define_tokens() );
 			wc_get_template_part( 'content', $name );
 		}
 		remove_filter( 'wc_get_template_part', '__return_false' );
