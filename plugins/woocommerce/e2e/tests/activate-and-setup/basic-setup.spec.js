@@ -22,8 +22,11 @@ test.describe('Store owner can finish initial store setup', () => {
 		await page.click('#submit');
 		// Verify that settings have been saved
 		await page.waitForLoadState('networkidle'); // not autowaiting for form submission
-		expect(page.textContent('#setting-error-settings_updated')).toContain('Permalink structure updated.');
-		expect(page.getAttribute('#permalink_structure', 'value')).toBe('/%postname%/');
-		expect(page.getAttribute('#woocommerce_permalink_structure', 'value')).toBe('/product/');
+		const notice = await page.textContent('#setting-error-settings_updated');
+		expect(notice).toContain('Permalink structure updated.');
+		const postSlug = await page.getAttribute('#permalink_structure', 'value');
+		expect(postSlug).toBe('/%postname%/');
+		const wcSlug = await page.getAttribute('#woocommerce_permalink_structure', 'value');
+		expect(wcSlug).toBe('/product/');
 	});
 });
