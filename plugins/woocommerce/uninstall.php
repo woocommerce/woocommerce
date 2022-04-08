@@ -20,6 +20,10 @@ wp_clear_scheduled_hook( 'woocommerce_cleanup_logs' );
 wp_clear_scheduled_hook( 'woocommerce_geoip_updater' );
 wp_clear_scheduled_hook( 'woocommerce_tracker_send_event' );
 wp_clear_scheduled_hook( 'woocommerce_cleanup_rate_limits' );
+wp_clear_scheduled_hook( 'wc_admin_daily' );
+wp_clear_scheduled_hook( 'generate_category_lookup_table' );
+ReportsSync::clear_queued_actions();
+Notes::clear_queued_actions();
 
 /*
  * Only remove ALL product and page data if WC_REMOVE_ALL_DATA constant is set to true in user's
