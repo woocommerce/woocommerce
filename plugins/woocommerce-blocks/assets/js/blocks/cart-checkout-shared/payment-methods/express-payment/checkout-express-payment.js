@@ -7,7 +7,7 @@ import {
 	useExpressPaymentMethods,
 } from '@woocommerce/base-context/hooks';
 import {
-	StoreNoticesProvider,
+	StoreNoticesContainer,
 	useCheckoutContext,
 	usePaymentMethodDataContext,
 	useEditorContext,
@@ -44,9 +44,9 @@ const CheckoutExpressPayment = () => {
 		// when a payment method fails to register.
 		if ( isEditor || CURRENT_USER_IS_ADMIN ) {
 			return (
-				<StoreNoticesProvider
+				<StoreNoticesContainer
 					context={ noticeContexts.EXPRESS_PAYMENTS }
-				></StoreNoticesProvider>
+				/>
 			);
 		}
 		return null;
@@ -81,17 +81,16 @@ const CheckoutExpressPayment = () => {
 						</Title>
 					</div>
 					<div className="wc-block-components-express-payment__content">
-						<StoreNoticesProvider
+						<StoreNoticesContainer
 							context={ noticeContexts.EXPRESS_PAYMENTS }
-						>
-							<p>
-								{ __(
-									'In a hurry? Use one of our express checkout options:',
-									'woo-gutenberg-products-block'
-								) }
-							</p>
-							<ExpressPaymentMethods />
-						</StoreNoticesProvider>
+						/>
+						<p>
+							{ __(
+								'In a hurry? Use one of our express checkout options:',
+								'woo-gutenberg-products-block'
+							) }
+						</p>
+						<ExpressPaymentMethods />
 					</div>
 				</div>
 			</LoadingMask>

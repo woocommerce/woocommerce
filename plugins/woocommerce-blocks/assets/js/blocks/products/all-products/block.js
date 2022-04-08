@@ -6,6 +6,10 @@ import PropTypes from 'prop-types';
 import { ProductListContainer } from '@woocommerce/base-components/product-list';
 import { InnerBlockLayoutContextProvider } from '@woocommerce/shared-context';
 import { gridBlockPreview } from '@woocommerce/resource-previews';
+import {
+	StoreNoticesProvider,
+	StoreNoticesContainer,
+} from '@woocommerce/base-context';
 
 /**
  * The All Products Block.
@@ -36,6 +40,9 @@ class Block extends Component {
 				parentName="woocommerce/all-products"
 				parentClassName="wc-block-grid"
 			>
+				<StoreNoticesProvider>
+					<StoreNoticesContainer context={ 'wc/all-products' } />
+				</StoreNoticesProvider>
 				<ProductListContainer
 					attributes={ attributes }
 					urlParameterSuffix={ urlParameterSuffix }

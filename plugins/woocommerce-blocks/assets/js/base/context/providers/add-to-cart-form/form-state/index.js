@@ -14,7 +14,7 @@ import {
 	productIsPurchasable,
 	productSupportsAddToCartForm,
 } from '@woocommerce/base-utils';
-
+import { useDispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
@@ -29,8 +29,8 @@ import {
 	reducer as emitReducer,
 } from './event-emit';
 import { useValidationContext } from '../../validation';
-import { useStoreNotices } from '../../../hooks/use-store-notices';
 import { useEmitResponse } from '../../../hooks/use-emit-response';
+import { removeNoticesByStatus } from '../../../../../utils/notices';
 
 /**
  * @typedef {import('@woocommerce/type-defs/add-to-cart-form').AddToCartFormDispatchActions} AddToCartFormDispatchActions
@@ -99,7 +99,7 @@ export const AddToCartFormStateContextProvider = ( {
 	);
 	const [ observers, observerDispatch ] = useReducer( emitReducer, {} );
 	const currentObservers = useShallowEqual( observers );
-	const { addErrorNotice, removeNotices } = useStoreNotices();
+	const { createErrorNotice } = useDispatch( 'core/notices' );
 	const { setValidationErrors } = useValidationContext();
 	const {
 		isSuccessResponse,
@@ -167,7 +167,7 @@ export const AddToCartFormStateContextProvider = ( {
 		const status = addToCartFormState.status;
 
 		if ( status === STATUS.BEFORE_PROCESSING ) {
-			removeNotices( 'error' );
+			removeNoticesByStatus( 'error', 'wc/add-to-cart' );
 			emitEvent(
 				currentObservers,
 				EMIT_TYPES.ADD_TO_CART_BEFORE_PROCESSING,
@@ -178,7 +178,10 @@ export const AddToCartFormStateContextProvider = ( {
 						response.forEach(
 							( { errorMessage, validationErrors } ) => {
 								if ( errorMessage ) {
-									addErrorNotice( errorMessage );
+									createErrorNotice(
+										errorMessage,
+										'wc/add-to-cart'
+									);
 								}
 								if ( validationErrors ) {
 									setValidationErrors( validationErrors );
@@ -195,10 +198,10 @@ export const AddToCartFormStateContextProvider = ( {
 	}, [
 		addToCartFormState.status,
 		setValidationErrors,
-		addErrorNotice,
-		removeNotices,
+		createErrorNotice,
 		dispatch,
 		currentObservers,
+		product?.id,
 	] );
 
 	/**
@@ -227,7 +230,7 @@ export const AddToCartFormStateContextProvider = ( {
 							? { context: messageContext }
 							: undefined;
 						handled = true;
-						addErrorNotice( message, errorOptions );
+						createErrorNotice( message, errorOptions );
 					}
 				} );
 				return handled;
@@ -248,8 +251,11 @@ export const AddToCartFormStateContextProvider = ( {
 								'Something went wrong. Please contact us to get assistance.',
 								'woo-gutenberg-products-block'
 							);
-						addErrorNotice( message, {
+						createErrorNotice( message, {
 							id: 'add-to-cart',
+							context: `woocommerce/single-product/${
+								product?.id || 0
+							}`,
 						} );
 					}
 					dispatch( actions.setIdle() );
@@ -277,11 +283,12 @@ export const AddToCartFormStateContextProvider = ( {
 		addToCartFormState.hasError,
 		addToCartFormState.processingResponse,
 		dispatchActions,
-		addErrorNotice,
+		createErrorNotice,
 		isErrorResponse,
 		isFailResponse,
 		isSuccessResponse,
 		currentObservers,
+		product?.id,
 	] );
 
 	const supportsFormElements = productSupportsAddToCartForm( product );

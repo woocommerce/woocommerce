@@ -5,16 +5,14 @@ import classnames from 'classnames';
 import { useStoreCart, useEmitResponse } from '@woocommerce/base-context/hooks';
 import { withFilteredAttributes } from '@woocommerce/shared-hocs';
 import { FormStep } from '@woocommerce/base-components/cart-checkout';
-import {
-	useCheckoutContext,
-	StoreNoticesProvider,
-} from '@woocommerce/base-context';
+import { useCheckoutContext } from '@woocommerce/base-context';
 
 /**
  * Internal dependencies
  */
 import Block from './block';
 import attributes from './attributes';
+import { StoreNoticesContainer } from '../../../../base/context/providers';
 
 const FrontendBlock = ( {
 	title,
@@ -48,9 +46,8 @@ const FrontendBlock = ( {
 			description={ description }
 			showStepNumber={ showStepNumber }
 		>
-			<StoreNoticesProvider context={ noticeContexts.PAYMENTS }>
-				<Block />
-			</StoreNoticesProvider>
+			<StoreNoticesContainer context={ noticeContexts.PAYMENTS } />
+			<Block />
 			{ children }
 		</FormStep>
 	);
