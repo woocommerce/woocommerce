@@ -13,14 +13,6 @@ jobs:
     name: Code coverage (PHP 7.4, WP Latest)
     timeout-minutes: 30
     runs-on: ubuntu-20.04
-    services:
-      database:
-        image: mysql:5.6
-        env:
-          MYSQL_ROOT_PASSWORD: root
-        ports:
-          - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
     steps:
       - uses: actions/checkout@v3
         with:
@@ -51,11 +43,11 @@ jobs:
         run: |
           pnpm nx build:feature-config woocommerce
 
-      - name: Init DB and WP
-        run: pnpm nx install-unit-test-db woocommerce
-
-      - name: Run unit tests with code coverage. Allow to fail.
+      - name: Run Tests With Code Coverage
         run: |
+          echo "{ \"phpVersion\": \"7.4\", \"core\": null }" > .wp-env.override.json
+          npm -g install @wordpress/env
+          wp-env start
           pnpm nx test-code-coverage woocommerce
           exit 0
       

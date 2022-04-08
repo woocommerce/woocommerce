@@ -150,10 +150,9 @@
 			}
 		},
 		"test-code-coverage": {
-			"executor": "@nrwl/workspace:run-commands",
+			"executor": "@nrwl/workspace:run-script",
 			"options": {
-				"command": "RUN_CODE_COVERAGE=1 bash tests/bin/phpunit.sh",
-				"cwd": "plugins/woocommerce"
+				"script": "test:unit-coverage"
 			}
 		}
 	}
