@@ -3122,5 +3122,5 @@ class WC_AJAX {
 		wp_die();
 	}
 }
-
+// Add comment.
 WC_AJAX::init();
