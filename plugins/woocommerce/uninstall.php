@@ -25,7 +25,6 @@ wp_clear_scheduled_hook( 'woocommerce_tracker_send_event' );
 wp_clear_scheduled_hook( 'woocommerce_cleanup_rate_limits' );
 wp_clear_scheduled_hook( 'wc_admin_daily' );
 wp_clear_scheduled_hook( 'generate_category_lookup_table' );
-ReportsSync::clear_queued_actions();
 Notes::clear_queued_actions();
 
 /*
