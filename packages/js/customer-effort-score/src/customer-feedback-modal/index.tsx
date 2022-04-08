@@ -30,9 +30,11 @@ import { __ } from '@wordpress/i18n';
 function CustomerFeedbackModal( {
 	recordScoreCallback,
 	label,
+	defaultScore = NaN,
 }: {
 	recordScoreCallback: ( score: number, comments: string ) => void;
 	label: string;
+	defaultScore?: number;
 } ): JSX.Element | null {
 	const options = [
 		{
@@ -57,7 +59,7 @@ function CustomerFeedbackModal( {
 		},
 	];
 
-	const [ score, setScore ] = useState( NaN );
+	const [ score, setScore ] = useState( defaultScore || NaN );
 	const [ comments, setComments ] = useState( '' );
 	const [ showNoScoreMessage, setShowNoScoreMessage ] = useState( false );
 	const [ isOpen, setOpen ] = useState( true );
@@ -152,6 +154,7 @@ function CustomerFeedbackModal( {
 CustomerFeedbackModal.propTypes = {
 	recordScoreCallback: PropTypes.func.isRequired,
 	label: PropTypes.string.isRequired,
+	score: PropTypes.number,
 };
 
-export default CustomerFeedbackModal;
+export { CustomerFeedbackModal };

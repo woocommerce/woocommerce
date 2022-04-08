@@ -4,7 +4,7 @@
 import { useState } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import { recordEvent } from '@woocommerce/tracks';
-import CustomerEffortScore from '@woocommerce/customer-effort-score';
+import { CustomerEffortScore } from '@woocommerce/customer-effort-score';
 import { compose } from '@wordpress/compose';
 import { withSelect, withDispatch } from '@wordpress/data';
 import { OPTIONS_STORE_NAME, WEEK } from '@woocommerce/data';

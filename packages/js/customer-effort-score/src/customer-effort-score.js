@@ -10,7 +10,7 @@ import { withDispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import CustomerFeedbackModal from './customer-feedback-modal';
+import { CustomerFeedbackModal } from './customer-feedback-modal';
 
 const noop = () => {};
 
@@ -29,7 +29,7 @@ const noop = () => {};
  * @param {Function} props.onModalShownCallback      Function to call when the modal is shown.
  * @param {Object}   props.icon                      Icon (React component) to be shown on the notice.
  */
-export function CustomerEffortScore( {
+function CustomerEffortScoreComponent( {
 	recordScoreCallback,
 	label,
 	createNotice,
@@ -82,7 +82,7 @@ export function CustomerEffortScore( {
 	);
 }
 
-CustomerEffortScore.propTypes = {
+CustomerEffortScoreComponent.propTypes = {
 	/**
 	 * The function to call to record the score.
 	 */
@@ -113,7 +113,7 @@ CustomerEffortScore.propTypes = {
 	icon: PropTypes.element,
 };
 
-export default compose(
+const CustomerEffortScore = compose(
 	withDispatch( ( dispatch ) => {
 		const { createNotice } = dispatch( 'core/notices2' );
 
@@ -121,4 +121,6 @@ export default compose(
 			createNotice,
 		};
 	} )
-)( CustomerEffortScore );
+)( CustomerEffortScoreComponent );
+
+export { CustomerEffortScore };

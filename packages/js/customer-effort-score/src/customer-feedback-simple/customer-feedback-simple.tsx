@@ -15,6 +15,7 @@ import { __ } from '@wordpress/i18n';
 type CustomerFeedbackSimpleProps = {
 	recordScoreCallback: ( score: number ) => void;
 	label: string;
+	showFeedback?: boolean;
 };
 
 /**
@@ -31,10 +32,12 @@ type CustomerFeedbackSimpleProps = {
  * @param {Object}   props                     Component props.
  * @param {Function} props.recordScoreCallback Function to call when the results are sent.
  * @param {string}   props.label               Question to ask the customer.
+ * @param {string}   props.showFeedback        To show feedback message.
  */
 const CustomerFeedbackSimple: React.FC< CustomerFeedbackSimpleProps > = ( {
 	recordScoreCallback,
 	label,
+	showFeedback = false,
 } ) => {
 	const options = [
 		{
@@ -67,14 +70,14 @@ const CustomerFeedbackSimple: React.FC< CustomerFeedbackSimpleProps > = ( {
 	const [ score, setScore ] = useState( NaN );
 
 	useEffect( () => {
-		if ( score !== NaN ) {
+		if ( ! isNaN( score ) ) {
 			recordScoreCallback( score );
 		}
 	}, [ score ] );
 
 	return (
 		<div className="customer-feedback-simple__container">
-			{ isNaN( score ) ? (
+			{ isNaN( score ) && ! showFeedback ? (
 				<Fragment>
 					<Text
 						variant="subtitle.small"
@@ -101,9 +104,7 @@ const CustomerFeedbackSimple: React.FC< CustomerFeedbackSimpleProps > = ( {
 						) ) }
 					</div>
 				</Fragment>
-			) : null }
-
-			{ score >= 3 && (
+			) : (
 				<div className="woocommerce-customer-effort-score__comments">
 					<Text
 						variant="subtitle.small"
@@ -123,6 +124,7 @@ const CustomerFeedbackSimple: React.FC< CustomerFeedbackSimpleProps > = ( {
 CustomerFeedbackSimple.propTypes = {
 	recordScoreCallback: PropTypes.func.isRequired,
 	label: PropTypes.string.isRequired,
+	showFeedback: PropTypes.bool,
 };
 
 export { CustomerFeedbackSimple };
