@@ -8,7 +8,7 @@ import { withRestApi } from '@woocommerce/e2e-utils';
  */
 import { shopper } from '../../../utils';
 import { createCoupon } from '../../utils';
-import { SIMPLE_PRODUCT_NAME } from '../../../utils/constants';
+import { SIMPLE_VIRTUAL_PRODUCT_NAME } from '../../../utils/constants';
 
 if ( process.env.WOOCOMMERCE_BLOCKS_PHASE < 2 )
 	// eslint-disable-next-line jest/no-focused-tests
@@ -29,7 +29,7 @@ afterAll( async () => {
 describe( 'Shopper → Checkout → Can apply single-use coupon once', () => {
 	it( 'allows checkout to apply single-use coupon once', async () => {
 		await shopper.goToShop();
-		await shopper.addToCartFromShopPage( SIMPLE_PRODUCT_NAME );
+		await shopper.addToCartFromShopPage( SIMPLE_VIRTUAL_PRODUCT_NAME );
 		await shopper.block.goToCheckout();
 		await shopper.block.applyCouponFromCheckout( coupon.code );
 
@@ -63,7 +63,7 @@ describe( 'Shopper → Checkout → Can apply single-use coupon once', () => {
 
 	it( 'Prevents checkout applying single-use coupon twice', async () => {
 		await shopper.goToShop();
-		await shopper.addToCartFromShopPage( SIMPLE_PRODUCT_NAME );
+		await shopper.addToCartFromShopPage( SIMPLE_VIRTUAL_PRODUCT_NAME );
 		await shopper.block.goToCheckout();
 		await shopper.block.applyCouponFromCheckout( coupon.code );
 		await expect( page ).toMatch( 'Coupon usage limit has been reached.' );

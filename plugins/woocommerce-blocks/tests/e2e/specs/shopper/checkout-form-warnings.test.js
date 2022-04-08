@@ -3,7 +3,7 @@
  */
 import { shopper } from '../../../utils';
 import {
-	SIMPLE_PRODUCT_NAME,
+	SIMPLE_VIRTUAL_PRODUCT_NAME,
 	CUSTOMER_USERNAME,
 	CUSTOMER_PASSWORD,
 } from '../../../utils/constants';
@@ -48,7 +48,7 @@ describe( 'Shopper → Checkout → Can see warnings when form is incomplete', (
 
 	it( 'Shows warnings when form is incomplete', async () => {
 		await shopper.goToShop();
-		await shopper.addToCartFromShopPage( SIMPLE_PRODUCT_NAME );
+		await shopper.addToCartFromShopPage( SIMPLE_VIRTUAL_PRODUCT_NAME );
 		await shopper.block.goToCheckout();
 
 		// Click on "Place Order" button
