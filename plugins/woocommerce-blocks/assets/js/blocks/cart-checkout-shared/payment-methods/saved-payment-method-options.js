@@ -8,10 +8,10 @@ import RadioControl from '@woocommerce/base-components/radio-control';
 import {
 	usePaymentMethodInterface,
 	usePaymentMethods,
-	useStoreNotices,
 	useStoreEvents,
 	useEmitResponse,
 } from '@woocommerce/base-context/hooks';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * @typedef {import('@woocommerce/type-defs/contexts').CustomerPaymentMethod} CustomerPaymentMethod
@@ -61,7 +61,7 @@ const SavedPaymentMethodOptions = () => {
 	const { paymentMethods } = usePaymentMethods();
 	const paymentMethodInterface = usePaymentMethodInterface();
 	const { noticeContexts } = useEmitResponse();
-	const { removeNotice } = useStoreNotices();
+	const { removeNotice } = useDispatch( 'core/notices' );
 	const { dispatchCheckoutEvent } = useStoreEvents();
 
 	const options = useMemo( () => {

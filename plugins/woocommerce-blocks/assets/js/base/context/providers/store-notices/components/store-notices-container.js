@@ -4,11 +4,13 @@
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import { Notice } from 'wordpress-components';
+import { useDispatch, useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
+import { useStoreNoticesContext } from '../context';
 
 const getWooClassName = ( { status = 'default' } ) => {
 	switch ( status ) {
@@ -23,10 +25,23 @@ const getWooClassName = ( { status = 'default' } ) => {
 	return '';
 };
 
-const StoreNoticesContainer = ( { className, notices, removeNotice } ) => {
-	const regularNotices = notices.filter(
-		( notice ) => notice.type !== 'snackbar'
-	);
+export const StoreNoticesContainer = ( {
+	className,
+	context = 'default',
+	additionalNotices = [],
+} ) => {
+	const { isSuppressed } = useStoreNoticesContext();
+
+	const { notices } = useSelect( ( select ) => {
+		const store = select( 'core/notices' );
+		return {
+			notices: store.getNotices( context ),
+		};
+	} );
+	const { removeNotice } = useDispatch( 'core/notices' );
+	const regularNotices = notices
+		.filter( ( notice ) => notice.type !== 'snackbar' )
+		.concat( additionalNotices );
 
 	if ( ! regularNotices.length ) {
 		return null;
@@ -34,7 +49,7 @@ const StoreNoticesContainer = ( { className, notices, removeNotice } ) => {
 
 	const wrapperClass = classnames( className, 'wc-block-components-notices' );
 
-	return (
+	return isSuppressed ? null : (
 		<div className={ wrapperClass }>
 			{ regularNotices.map( ( props ) => (
 				<Notice
@@ -46,7 +61,7 @@ const StoreNoticesContainer = ( { className, notices, removeNotice } ) => {
 					) }
 					onRemove={ () => {
 						if ( props.isDismissible ) {
-							removeNotice( props.id );
+							removeNotice( props.id, context );
 						}
 					} }
 				>
@@ -69,5 +84,3 @@ StoreNoticesContainer.propTypes = {
 		} )
 	),
 };
-
-export default StoreNoticesContainer;

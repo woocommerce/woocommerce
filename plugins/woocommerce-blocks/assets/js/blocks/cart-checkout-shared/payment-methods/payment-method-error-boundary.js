@@ -6,6 +6,7 @@ import { Component } from 'react';
 import PropTypes from 'prop-types';
 import { CURRENT_USER_IS_ADMIN } from '@woocommerce/settings';
 import { StoreNoticesContainer } from '@woocommerce/base-context';
+import { noticeContexts } from '@woocommerce/base-context/hooks';
 
 class PaymentMethodErrorBoundary extends Component {
 	state = { errorMessage: '', hasError: false };
@@ -44,7 +45,12 @@ class PaymentMethodErrorBoundary extends Component {
 					status: 'error',
 				},
 			];
-			return <StoreNoticesContainer notices={ notices } />;
+			return (
+				<StoreNoticesContainer
+					additionalNotices={ notices }
+					context={ noticeContexts.PAYMENTS }
+				/>
+			);
 		}
 
 		return this.props.children;

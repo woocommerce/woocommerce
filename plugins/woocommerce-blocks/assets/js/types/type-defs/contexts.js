@@ -214,13 +214,8 @@
 /**
  * @typedef NoticeContext
  *
- * @property {Array<StoreNoticeObject>}              notices              An array of notice objects.
- * @property {function(string,string,any):undefined} createNotice         Creates a notice for the given arguments.
- * @property {function(string, any):undefined}       createSnackbarNotice Creates a snackbar notice type.
- * @property {function(string,string=):undefined}    removeNotice         Removes a notice with the given id and context
- * @property {string}                                context              The current context identifier for the notice
- *                                                                        provider
- * @property {function(boolean):void}                setIsSuppressed      Consumers can use this setter to suppress
+ * @property {function(boolean):void}                setIsSuppressed      Consumers can use this setter to suppress notices.
+ * @property {boolean}                				 isSuppressed      	  Whether notices should be hidden/suppressed.
  */
 
 /**

@@ -7,7 +7,7 @@ import {
 	useExpressPaymentMethods,
 } from '@woocommerce/base-context/hooks';
 import {
-	StoreNoticesProvider,
+	StoreNoticesContainer,
 	useCheckoutContext,
 	usePaymentMethodDataContext,
 } from '@woocommerce/base-context';
@@ -57,11 +57,10 @@ const CartExpressPayment = () => {
 			>
 				<div className="wc-block-components-express-payment wc-block-components-express-payment--cart">
 					<div className="wc-block-components-express-payment__content">
-						<StoreNoticesProvider
+						<StoreNoticesContainer
 							context={ noticeContexts.EXPRESS_PAYMENTS }
-						>
-							<ExpressPaymentMethods />
-						</StoreNoticesProvider>
+						/>
+						<ExpressPaymentMethods />
 					</div>
 				</div>
 			</LoadingMask>

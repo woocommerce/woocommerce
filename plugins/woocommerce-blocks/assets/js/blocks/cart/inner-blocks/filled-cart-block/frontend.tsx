@@ -3,9 +3,10 @@
  */
 import classnames from 'classnames';
 import { SidebarLayout } from '@woocommerce/base-components/sidebar-layout';
-import { useStoreCart, useStoreNotices } from '@woocommerce/base-context/hooks';
+import { useStoreCart } from '@woocommerce/base-context/hooks';
 import { useEffect } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -21,17 +22,17 @@ const FrontendBlock = ( {
 } ): JSX.Element | null => {
 	const { cartItems, cartIsLoading, cartItemErrors } = useStoreCart();
 	const { hasDarkControls } = useCartBlockContext();
-	const { addErrorNotice } = useStoreNotices();
+	const { createErrorNotice } = useDispatch( 'core/notices' );
 
 	// Ensures any cart errors listed in the API response get shown.
 	useEffect( () => {
 		cartItemErrors.forEach( ( error ) => {
-			addErrorNotice( decodeEntities( error.message ), {
+			createErrorNotice( decodeEntities( error.message ), {
 				isDismissible: true,
 				id: error.code,
 			} );
 		} );
-	}, [ addErrorNotice, cartItemErrors ] );
+	}, [ createErrorNotice, cartItemErrors ] );
 
 	if ( cartIsLoading || cartItems.length >= 1 ) {
 		return (

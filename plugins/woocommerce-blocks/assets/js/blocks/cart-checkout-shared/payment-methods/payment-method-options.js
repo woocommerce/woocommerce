@@ -5,7 +5,6 @@ import {
 	usePaymentMethods,
 	usePaymentMethodInterface,
 	useEmitResponse,
-	useStoreNotices,
 	useStoreEvents,
 } from '@woocommerce/base-context/hooks';
 import { cloneElement, useCallback } from '@wordpress/element';
@@ -15,6 +14,7 @@ import {
 } from '@woocommerce/base-context';
 import classNames from 'classnames';
 import RadioControlAccordion from '@woocommerce/base-components/radio-control-accordion';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -39,7 +39,7 @@ const PaymentMethodOptions = () => {
 		...paymentMethodInterface
 	} = usePaymentMethodInterface();
 	const { noticeContexts } = useEmitResponse();
-	const { removeNotice } = useStoreNotices();
+	const { removeNotice } = useDispatch( 'core/notices' );
 	const { dispatchCheckoutEvent } = useStoreEvents();
 	const { isEditor } = useEditorContext();
 

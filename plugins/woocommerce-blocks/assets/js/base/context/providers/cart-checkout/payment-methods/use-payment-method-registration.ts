@@ -16,6 +16,7 @@ import type {
 	ExpressPaymentMethodConfigInstance,
 } from '@woocommerce/type-defs/payments';
 import { useDebouncedCallback } from 'use-debounce';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -23,7 +24,6 @@ import { useDebouncedCallback } from 'use-debounce';
 import { useEditorContext } from '../../editor-context';
 import { useCustomerDataContext } from '../customer';
 import { useStoreCart } from '../../../hooks/cart/use-store-cart';
-import { useStoreNotices } from '../../../hooks/use-store-notices';
 import { useEmitResponse } from '../../../hooks/use-emit-response';
 import type { PaymentMethodsDispatcherType } from './types';
 import { useShippingData } from '../../../hooks/shipping/use-shipping-data';
@@ -68,7 +68,7 @@ const usePaymentMethodRegistration = (
 		selectedShippingMethods,
 		paymentRequirements,
 	} );
-	const { addErrorNotice } = useStoreNotices();
+	const { createErrorNotice } = useDispatch( 'core/notices' );
 
 	useEffect( () => {
 		canPayArgument.current = {
@@ -142,7 +142,7 @@ const usePaymentMethodRegistration = (
 						),
 						paymentMethod.paymentMethodId
 					);
-					addErrorNotice( `${ errorText } ${ e }`, {
+					createErrorNotice( `${ errorText } ${ e }`, {
 						context: noticeContext,
 						id: `wc-${ paymentMethod.paymentMethodId }-registration-error`,
 					} );
@@ -157,7 +157,7 @@ const usePaymentMethodRegistration = (
 		// That's why we track "is initialized" state here.
 		setIsInitialized( true );
 	}, [
-		addErrorNotice,
+		createErrorNotice,
 		dispatcher,
 		isEditor,
 		noticeContext,

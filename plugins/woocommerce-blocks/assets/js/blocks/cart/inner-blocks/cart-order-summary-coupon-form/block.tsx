@@ -9,7 +9,7 @@ import { TotalsWrapper } from '@woocommerce/blocks-checkout';
 const Block = ( { className }: { className: string } ): JSX.Element | null => {
 	const couponsEnabled = getSetting( 'couponsEnabled', true );
 
-	const { applyCoupon, isApplyingCoupon } = useStoreCartCoupons();
+	const { applyCoupon, isApplyingCoupon } = useStoreCartCoupons( 'wc/cart' );
 
 	if ( ! couponsEnabled ) {
 		return null;
