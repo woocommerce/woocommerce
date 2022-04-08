@@ -38,8 +38,7 @@ class WC_Admin_Addons {
 			$raw_featured = wp_safe_remote_get(
 				'https://woocommerce.com/wp-json/wccom-extensions/1.0/featured',
 				array(
-					'headers'    => $headers,
-					'user-agent' => 'WooCommerce Addons Page',
+					'headers' => $headers,
 				)
 			);
 
@@ -82,8 +81,7 @@ class WC_Admin_Addons {
 			$raw_featured = wp_safe_remote_get(
 				'https://woocommerce.com/wp-json/wccom-extensions/2.0/featured' . $parameter_string,
 				array(
-					'headers'    => $headers,
-					'user-agent' => 'WooCommerce Addons Page',
+					'headers' => $headers,
 				)
 			);
 
@@ -258,7 +256,7 @@ class WC_Admin_Addons {
 		if ( ! empty( $section->endpoint ) ) {
 			$section_data = get_transient( 'wc_addons_section_' . $section_id );
 			if ( false === $section_data ) {
-				$raw_section = wp_safe_remote_get( esc_url_raw( $section->endpoint ), array( 'user-agent' => 'WooCommerce Addons Page' ) );
+				$raw_section = wp_safe_remote_get( esc_url_raw( $section->endpoint ) );
 
 				if ( ! is_wp_error( $raw_section ) ) {
 					$section_data = json_decode( wp_remote_retrieve_body( $raw_section ) );
