@@ -1850,6 +1850,13 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
+		$params['order_item_display_meta'] = array(
+			'default' => false,
+			'description' => __( 'Only show meta which is meant to be displayed for an order.', 'woocomerce' ),
+			'type' => 'boolean',
+			'sanitize_callback' => 'rest_sanitize_boolean',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
 
 		return $params;
 	}
