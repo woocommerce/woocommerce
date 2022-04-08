@@ -51,6 +51,7 @@ export type TaskListType = {
 	eventPrefix: string;
 	displayProgressHeader: boolean;
 	keepCompletedTaskList: 'yes' | 'no';
+	showCESFeedback: boolean;
 	sections?: TaskListSection[];
 	isToggleable?: boolean;
 	isCollapsible?: boolean;

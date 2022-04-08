@@ -24,7 +24,7 @@ import HeaderImage from './completed-celebration-header.svg';
 type TaskListCompletedHeaderProps = {
 	hideTasks: () => void;
 	keepTasks: () => void;
-	allowTracking: boolean;
+	showCES: boolean;
 };
 
 const ADMIN_INSTALL_TIMESTAMP_OPTION_NAME =
@@ -48,7 +48,7 @@ function getStoreAgeInWeeks( adminInstallTimestamp: number ) {
 export const TaskListCompletedHeaderWithCES: React.FC< TaskListCompletedHeaderProps > = ( {
 	hideTasks,
 	keepTasks,
-	allowTracking,
+	showCES,
 } ) => {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const [ showCesModal, setShowCesModal ] = useState( false );
@@ -57,20 +57,23 @@ export const TaskListCompletedHeaderWithCES: React.FC< TaskListCompletedHeaderPr
 	const { storeAgeInWeeks, cesShownForActions } = useSelect( ( select ) => {
 		const { getOption } = select( OPTIONS_STORE_NAME );
 
-		const adminInstallTimestamp: number =
-			getOption( ADMIN_INSTALL_TIMESTAMP_OPTION_NAME ) || 0;
-		return {
-			storeAgeInWeeks: getStoreAgeInWeeks( adminInstallTimestamp ),
-			cesShownForActions:
-				getOption( SHOWN_FOR_ACTIONS_OPTION_NAME ) || [],
-		};
+		if ( showCES ) {
+			const adminInstallTimestamp: number =
+				getOption( ADMIN_INSTALL_TIMESTAMP_OPTION_NAME ) || 0;
+			return {
+				storeAgeInWeeks: getStoreAgeInWeeks( adminInstallTimestamp ),
+				cesShownForActions:
+					getOption( SHOWN_FOR_ACTIONS_OPTION_NAME ) || [],
+			};
+		}
+		return {};
 	} );
 
-	const recordScore = ( score: number ) => {
-		if ( score > 2 ) {
+	const recordScore = ( recordedScore: number ) => {
+		if ( recordedScore > 2 ) {
 			recordEvent( 'ces_feedback', {
 				action: CES_ACTION,
-				score,
+				score: recordedScore,
 				store_age: storeAgeInWeeks,
 			} );
 			updateOptions( {
@@ -80,16 +83,20 @@ export const TaskListCompletedHeaderWithCES: React.FC< TaskListCompletedHeaderPr
 				],
 			} );
 		} else {
-			setScore( score );
+			setScore( recordedScore );
 			setShowCesModal( true );
+			recordEvent( 'ces_view', {
+				action: CES_ACTION,
+				store_age: storeAgeInWeeks,
+			} );
 		}
 	};
 
-	const recordModalScore = ( score: number, comments: string ) => {
+	const recordModalScore = ( recordedScore: number, comments: string ) => {
 		setShowCesModal( false );
 		recordEvent( 'ces_feedback', {
 			action: 'store_setup',
-			score,
+			score: recordedScore,
 			comments: comments || '',
 			store_age: storeAgeInWeeks,
 		} );
@@ -165,7 +172,7 @@ export const TaskListCompletedHeaderWithCES: React.FC< TaskListCompletedHeaderPr
 							</div>
 						</div>
 					</CardHeader>
-					{ allowTracking && (
+					{ showCES && (
 						<CustomerFeedbackSimple
 							label={ __(
 								'How was your experience?',

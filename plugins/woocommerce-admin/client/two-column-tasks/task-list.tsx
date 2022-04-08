@@ -36,8 +36,6 @@ import { ProgressHeader } from '~/task-lists/progress-header';
 import { TaskListItemTwoColumn } from './task-list-item-two-column';
 import { TaskListCompletedHeaderWithCES } from './completed-header-with-ces';
 
-export const ALLOW_TRACKING_OPTION_NAME = 'woocommerce_allow_tracking';
-
 export type TaskListProps = TaskListType & {
 	eventName?: string;
 	twoColumns?: boolean;
@@ -57,23 +55,19 @@ export const TaskList: React.FC< TaskListProps > = ( {
 	isComplete,
 	displayProgressHeader,
 	cesHeader = true,
+	showCESFeedback = false,
 } ) => {
 	const listEventPrefix = eventName ? eventName + '_' : eventPrefix;
 	const { createNotice } = useDispatch( 'core/notices' );
 	const { updateOptions, dismissTask, undoDismissTask } = useDispatch(
 		OPTIONS_STORE_NAME
 	);
-	const { profileItems, allowTracking } = useSelect(
-		( select: WCDataSelector ) => {
-			const { getProfileItems } = select( ONBOARDING_STORE_NAME );
-			const { getOption } = select( OPTIONS_STORE_NAME );
-			return {
-				allowTracking:
-					getOption( ALLOW_TRACKING_OPTION_NAME ) === 'yes',
-				profileItems: getProfileItems(),
-			};
-		}
-	);
+	const { profileItems } = useSelect( ( select: WCDataSelector ) => {
+		const { getProfileItems } = select( ONBOARDING_STORE_NAME );
+		return {
+			profileItems: getProfileItems(),
+		};
+	} );
 	const { hideTaskList, visitedTask } = useDispatch( ONBOARDING_STORE_NAME );
 	const userPreferences = useUserPreferences();
 	const [ headerData, setHeaderData ] = useState< {
@@ -239,14 +233,14 @@ export const TaskList: React.FC< TaskListProps > = ( {
 		return <div className="woocommerce-task-dashboard__container"></div>;
 	}
 
-	if ( isComplete && ! keepCompletedTaskList ) {
+	if ( isComplete && keepCompletedTaskList !== 'yes' ) {
 		return (
 			<>
 				{ cesHeader ? (
 					<TaskListCompletedHeaderWithCES
 						hideTasks={ hideTasks }
 						keepTasks={ keepTasks }
-						allowTracking={ allowTracking }
+						showCES={ showCESFeedback }
 					/>
 				) : (
 					<TaskListCompleted
