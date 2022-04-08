@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Icon, list } from '@wordpress/icons';
-import { registerFeaturePluginBlockType } from '@woocommerce/block-settings';
+import { registerBlockType } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -10,7 +10,7 @@ import { registerFeaturePluginBlockType } from '@woocommerce/block-settings';
 import { Edit, Save } from './edit';
 import metadata from './block.json';
 
-registerFeaturePluginBlockType( metadata, {
+registerBlockType( metadata, {
 	icon: (
 		<Icon icon={ list } className="wc-block-editor-components-block-icon" />
 	),

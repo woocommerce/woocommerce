@@ -464,9 +464,7 @@ class BlockTemplateUtils {
 		 *
 		 * @var array
 		*/
-		$block_templates_with_feature_gate = array(
-			'mini-cart' => $feature_gating->get_experimental_flag(),
-		);
+		$block_templates_with_feature_gate = array();
 
 		return array_filter(
 			$block_templates,
