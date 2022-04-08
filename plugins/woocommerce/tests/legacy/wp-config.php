@@ -67,4 +67,4 @@ define( 'WP_TESTS_TITLE', 'WooCommerce Unit Tests' );
 
 define( 'WP_PHP_BINARY', 'php' );
 
-define( 'WPLANG', '' );
+define( 'WPLANG', 'en_US' );
