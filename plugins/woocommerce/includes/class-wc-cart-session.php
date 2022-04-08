@@ -9,7 +9,7 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
-
+// Add comment.
 /**
  * WC_Cart_Session class.
  *
