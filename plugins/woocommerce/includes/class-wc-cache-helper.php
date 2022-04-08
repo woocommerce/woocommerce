@@ -6,7 +6,7 @@
  */
 
 defined( 'ABSPATH' ) || exit;
-
+// Add comment.
 /**
  * WC_Cache_Helper.
  */
