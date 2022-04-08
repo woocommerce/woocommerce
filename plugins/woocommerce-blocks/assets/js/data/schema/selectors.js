@@ -20,10 +20,10 @@ import { STORE_KEY } from './constants';
  *                              the route request. It is not for any query
  *                              parameters.
  *
- * Ids example:
- * If you are looking for the route for a single product on the `wc/blocks`
- * namespace, then you'd have `[ 20 ]` as the ids.  This would produce something
- * like `/wc/blocks/products/20`
+ *                              Ids example:
+ *                              If you are looking for the route for a single product on the `wc/blocks`
+ *                              namespace, then you'd have `[ 20 ]` as the ids.  This would produce something
+ *                              like `/wc/blocks/products/20`
  *
  *
  * @throws {Error}  If there is no route for the given arguments, then this will
@@ -116,7 +116,7 @@ export const getRoutes = createRegistrySelector(
  *
  * @param {Object} stateSlice This will be a slice of the route state from a
  *                            given namespace and resource name.
- * @param {Array} [ids=[]]  Any id references that are to be replaced in
+ * @param {Array}  [ids=[]]   Any id references that are to be replaced in
  *                            route placeholders.
  *
  * @return {string}  The route or an empty string if nothing found.

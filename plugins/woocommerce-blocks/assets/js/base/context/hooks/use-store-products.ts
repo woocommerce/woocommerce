@@ -13,9 +13,9 @@ import { useCollectionHeader, useCollection } from './collections';
  * will ensure a component is kept up to date with the products matching that
  * query in the store state.
  *
- * @param {Object} query   An object containing any query arguments to be
- *                         included with the collection request for the
- *                         products. Does not have to be included.
+ * @param {Object} query An object containing any query arguments to be
+ *                       included with the collection request for the
+ *                       products. Does not have to be included.
  *
  * @return {Object} This hook will return an object with three properties:
  *                  - products        An array of product objects.

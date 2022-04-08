@@ -22,10 +22,10 @@ import {
 /**
  * Product Price Block Component.
  *
- * @param {Object} props                          Incoming props.
- * @param {string} [props.className]              CSS Class name for the component.
- * @param {string} [props.textAlign]              Text alignment.
- * context will be used if this is not provided.
+ * @param {Object} props             Incoming props.
+ * @param {string} [props.className] CSS Class name for the component.
+ * @param {string} [props.textAlign] Text alignment.
+ *                                   context will be used if this is not provided.
  * @return {*} The component.
  */
 const Block = ( props ) => {

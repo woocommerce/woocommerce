@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { dispatch, select } from '@wordpress/data';
-import { Notice } from '@wordpress/notices';
+import type { Notice } from '@wordpress/notices';
 
 export const hasNoticesOfType = (
 	context = '',

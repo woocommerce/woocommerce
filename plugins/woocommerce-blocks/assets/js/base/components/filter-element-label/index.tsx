@@ -16,8 +16,8 @@ interface FilterElementLabelProps {
 /**
  * The label for an filter elements.
  *
- * @param {Object} props Incoming props for the component.
- * @param {string} props.name The name for the label.
+ * @param {Object} props       Incoming props for the component.
+ * @param {string} props.name  The name for the label.
  * @param {number} props.count The count of products this status is attached to.
  */
 const FilterElementLabel = ( {

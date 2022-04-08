@@ -1,3 +1,6 @@
+// We need to disable the following eslint check as it's only applicable
+// to testing-library/react not `react-test-renderer` used here
+/* eslint-disable testing-library/await-async-query */
 /**
  * External dependencies
  */

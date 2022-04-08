@@ -26,7 +26,14 @@ export const useStoreNoticesContext = () => {
 /**
  * Provides an interface for blocks to add notices to the frontend UI.
  *
- * @param {Object} props Incoming props for the component.
+ * Statuses map to https://github.com/WordPress/gutenberg/tree/master/packages/components/src/notice
+ *  - Default (no status)
+ *  - Error
+ *  - Warning
+ *  - Info
+ *  - Success
+ *
+ * @param {Object}      props          Incoming props for the component.
  * @param {JSX.Element} props.children The Elements wrapped by this component.
  */
 export const StoreNoticesProvider = ( { children } ) => {

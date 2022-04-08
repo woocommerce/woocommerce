@@ -14,7 +14,6 @@ interface dependencyData {
 	translations?: string;
 }
 
-// eslint-disable-next-line @wordpress/no-global-event-listener
 window.addEventListener( 'load', () => {
 	const miniCartBlocks = document.querySelectorAll( '.wc-block-mini-cart' );
 	let wasLoadScriptsCalled = false;

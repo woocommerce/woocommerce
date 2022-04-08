@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { registerBlockType, BlockConfiguration } from '@wordpress/blocks';
+import { registerBlockType } from '@wordpress/blocks';
+import type { BlockConfiguration } from '@wordpress/blocks';
 import { isFeaturePluginBuild } from '@woocommerce/block-settings';
 
 /**

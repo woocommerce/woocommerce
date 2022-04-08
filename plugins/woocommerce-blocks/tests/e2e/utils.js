@@ -155,9 +155,9 @@ export const isBlockInsertedInWidgetsArea = async ( blockName ) => {
  * 1. `themes.php?page=gutenberg-edit-site` this is a legacy editor access used for WP <=5.8.
  * 2. `site-editor.php` is the new way of accessing the editor in WP >=5.9+.
  *
- * @param {'core' | 'gutenberg'} [editorContext='core'] Whether to go to the Gutenberg URL or the Core one.
- * @param {Object} params Query parameters to add to the URL.
- * @param {string} [params.postId] ID of the template if we want to access template editor.
+ * @param {'core' | 'gutenberg'}               [editorContext='core']          Whether to go to the Gutenberg URL or the Core one.
+ * @param {Object}                             params                          Query parameters to add to the URL.
+ * @param {string}                             [params.postId]                 ID of the template if we want to access template editor.
  * @param {'wp_template' | 'wp_template_part'} [params.postType='wp_template'] Type of template.
  */
 export async function goToSiteEditor( editorContext = 'core', params ) {
@@ -181,9 +181,9 @@ export async function goToSiteEditor( editorContext = 'core', params ) {
 /**
  * Visits the Site Editor template edit view.
  *
- * @param {Object} params
- * @param {string} params.postId ID of the template if we want to access template editor.
- * @param {'core' | 'gutenberg'} [params.editorContext='core'] Whether to go to the Gutenberg URL or the Core one.
+ * @param {Object}                             params
+ * @param {string}                             params.postId                   ID of the template if we want to access template editor.
+ * @param {'core' | 'gutenberg'}               [params.editorContext='core']   Whether to go to the Gutenberg URL or the Core one.
  * @param {'wp_template' | 'wp_template_part'} [params.postType='wp_template'] Type of template.
  */
 export async function goToTemplateEditor( {
@@ -203,10 +203,10 @@ export async function goToTemplateEditor( {
 /**
  * Visits the Site Editor templates list view.
  *
- * @param {Object} params
- * @param {'core' | 'gutenberg'} [params.editorContext='core'] Whether to go to the Gutenberg URL or the Core one.
+ * @param {Object}                             params
+ * @param {'core' | 'gutenberg'}               [params.editorContext='core']   Whether to go to the Gutenberg URL or the Core one.
  * @param {'wp_template' | 'wp_template_part'} [params.postType='wp_template'] Type of template.
- * @param {'list' | 'actions'} [params.waitFor='false'] Wait for list or for actions to be present - tempalte actions can take a moment to load, we can wait for them to be present if needed.
+ * @param {'list' | 'actions'}                 [params.waitFor='false']        Wait for list or for actions to be present - tempalte actions can take a moment to load, we can wait for them to be present if needed.
  */
 export async function goToTemplatesList( {
 	postType = 'wp_template',
@@ -358,7 +358,7 @@ const average = ( array ) => array.reduce( ( a, b ) => a + b ) / array.length;
  * Writes a line to the e2e performance result for the current test containing longest, shortest, and average run times.
  *
  * @param {string} description Message to describe what you're logging the performance of.
- * @param {Array} times array of times to record.
+ * @param {Array}  times       array of times to record.
  */
 export const logPerformanceResult = ( description, times ) => {
 	const roundedTimes = times.map(
@@ -392,10 +392,10 @@ export const addBlockToFSEArea = async ( blockName ) => {
 /**
  * Creates a basic coupon with the provided coupon amount. Returns the coupon code.
  *
- * @param {Object} [coupon] Coupon object. Default to fixed cart type and amount = 5.
- * @param {string}  [coupon.amount] Amount to be applied. Defaults to 5.
+ * @param {Object} [coupon]              Coupon object. Default to fixed cart type and amount = 5.
+ * @param {string} [coupon.amount]       Amount to be applied. Defaults to 5.
  * @param {string} [coupon.discountType] Type of a coupon. Defaults to Fixed cart discount.
- * @param {number} [coupon.usageLimit] How many times the coupon can be used in total. Defaults to -1.
+ * @param {number} [coupon.usageLimit]   How many times the coupon can be used in total. Defaults to -1.
  */
 export const createCoupon = async ( coupon ) => {
 	const {

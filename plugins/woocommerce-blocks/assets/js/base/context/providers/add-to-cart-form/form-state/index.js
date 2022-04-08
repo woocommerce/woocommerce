@@ -85,7 +85,7 @@ export const useAddToCartFormContext = () => {
  *
  * @param {Object}  props                    Incoming props for the provider.
  * @param {Object}  props.children           The children being wrapped.
- * @param {Object} [props.product]           The product for which the form belongs to.
+ * @param {Object}  [props.product]          The product for which the form belongs to.
  * @param {boolean} [props.showFormElements] Should form elements be shown.
  */
 export const AddToCartFormStateContextProvider = ( {

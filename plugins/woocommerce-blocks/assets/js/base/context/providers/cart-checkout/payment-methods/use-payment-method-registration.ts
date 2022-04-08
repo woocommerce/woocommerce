@@ -33,10 +33,10 @@ import { useShippingData } from '../../../hooks/shipping/use-shipping-data';
  * registered payment methods that can be used in the current environment (via
  * the payment method's `canMakePayment` property).
  *
- * @param  {function(Object):undefined} dispatcher               A dispatcher for setting registered payment methods to an external state.
- * @param  {Object}                     registeredPaymentMethods Registered payment methods to process.
- * @param  {Array}                      paymentMethodsSortOrder  Array of payment method names to sort by. This should match keys of registeredPaymentMethods.
- * @param  {string}                     noticeContext            Id of the context to append notices to.
+ * @param {function(Object):undefined} dispatcher               A dispatcher for setting registered payment methods to an external state.
+ * @param {Object}                     registeredPaymentMethods Registered payment methods to process.
+ * @param {Array}                      paymentMethodsSortOrder  Array of payment method names to sort by. This should match keys of registeredPaymentMethods.
+ * @param {string}                     noticeContext            Id of the context to append notices to.
  *
  * @return {boolean} Whether the payment methods have been initialized or not. True when all payment methods have been initialized.
  */
@@ -194,7 +194,7 @@ const usePaymentMethodRegistration = (
 /**
  * Custom hook for setting up payment methods (standard, non-express).
  *
- * @param  {function(Object):undefined} dispatcher
+ * @param {function(Object):undefined} dispatcher
  *
  * @return {boolean} True when standard payment methods have been initialized.
  */
@@ -221,7 +221,7 @@ export const usePaymentMethods = (
 /**
  * Custom hook for setting up express payment methods.
  *
- * @param  {function(Object):undefined} dispatcher
+ * @param {function(Object):undefined} dispatcher
  *
  * @return {boolean} True when express payment methods have been initialized.
  */

@@ -9,7 +9,7 @@ import { addFilter } from '@wordpress/hooks';
 /**
  * withDefaultAttributes HOC for editor.BlockListBlock.
  *
- * @param	object BlockListBlock The BlockListBlock element.
+ * @param  object BlockListBlock The BlockListBlock element.
  */
 const withDefaultAttributes = createHigherOrderComponent(
 	( BlockListBlock ) => {

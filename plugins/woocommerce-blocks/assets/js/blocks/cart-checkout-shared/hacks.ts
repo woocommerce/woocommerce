@@ -26,8 +26,8 @@ import { getBlockType } from '@wordpress/blocks';
 /**
  * Toggle class on body.
  *
- * @param {string} className CSS Class name.
- * @param {boolean} add True to add, false to remove.
+ * @param {string}  className CSS Class name.
+ * @param {boolean} add       True to add, false to remove.
  */
 const toggleBodyClass = ( className: string, add = true ) => {
 	if ( add ) {

@@ -95,6 +95,7 @@ describe( 'useStoreCartItemQuantity', () => {
 				);
 			} );
 
+			//eslint-disable-next-line testing-library/await-async-query
 			const { setItemQuantity, quantity } = renderer.root.findByType(
 				'div'
 			).props;
@@ -105,6 +106,7 @@ describe( 'useStoreCartItemQuantity', () => {
 				setItemQuantity( 2 );
 			} );
 
+			//eslint-disable-next-line testing-library/await-async-query
 			const { quantity: newQuantity } = renderer.root.findByType(
 				'div'
 			).props;
@@ -124,6 +126,7 @@ describe( 'useStoreCartItemQuantity', () => {
 				);
 			} );
 
+			//eslint-disable-next-line testing-library/await-async-query
 			const { removeItem } = renderer.root.findByType( 'div' ).props;
 
 			act( () => {
@@ -145,6 +148,7 @@ describe( 'useStoreCartItemQuantity', () => {
 				);
 			} );
 
+			//eslint-disable-next-line testing-library/await-async-query
 			const { setItemQuantity } = renderer.root.findByType( 'div' ).props;
 
 			act( () => {
@@ -159,7 +163,10 @@ describe( 'useStoreCartItemQuantity', () => {
 
 	it( 'should expose store errors', () => {
 		const mockCartErrors = [ { message: 'Test error' } ];
-		setupMocks( { isPendingDelete: false, isPendingQuantity: false } );
+		setupMocks( {
+			isPendingDelete: false,
+			isPendingQuantity: false,
+		} );
 		mockUseStoreCart.useStoreCart.mockReturnValue( {
 			cartErrors: mockCartErrors,
 		} );
@@ -175,6 +182,7 @@ describe( 'useStoreCartItemQuantity', () => {
 			);
 		} );
 
+		//eslint-disable-next-line testing-library/await-async-query
 		const { cartItemQuantityErrors } = renderer.root.findByType(
 			'div'
 		).props;
@@ -183,7 +191,10 @@ describe( 'useStoreCartItemQuantity', () => {
 	} );
 
 	it( 'isPendingDelete should depend on the value provided by the store', () => {
-		setupMocks( { isPendingDelete: true, isPendingQuantity: false } );
+		setupMocks( {
+			isPendingDelete: true,
+			isPendingQuantity: false,
+		} );
 		mockUseStoreCart.useStoreCart.mockReturnValue( {
 			cartErrors: {},
 		} );
@@ -199,6 +210,7 @@ describe( 'useStoreCartItemQuantity', () => {
 			);
 		} );
 
+		//eslint-disable-next-line testing-library/await-async-query
 		const { isPendingDelete } = renderer.root.findByType( 'div' ).props;
 
 		expect( isPendingDelete ).toBe( true );

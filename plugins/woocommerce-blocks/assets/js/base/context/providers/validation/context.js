@@ -40,7 +40,7 @@ export const useValidationContext = () => {
  * Any children of this context will be exposed to validation state and helpers
  * for tracking validation.
  *
- * @param {Object} props Incoming props for the component.
+ * @param {Object}      props          Incoming props for the component.
  * @param {JSX.Element} props.children What react elements are wrapped by this component.
  */
 export const ValidationContextProvider = ( { children } ) => {
@@ -82,8 +82,8 @@ export const ValidationContextProvider = ( { children } ) => {
 	 * Clears any validation error that exists in state for the given property
 	 * name.
 	 *
-	 * @param {string} property  The name of the property to clear if exists in
-	 *                           validation error state.
+	 * @param {string} property The name of the property to clear if exists in
+	 *                          validation error state.
 	 */
 	const clearValidationError = useCallback(
 		/**
@@ -182,8 +182,8 @@ export const ValidationContextProvider = ( { children } ) => {
 	 * Given a property name and if an associated error exists, it sets its
 	 * `hidden` value to true.
 	 *
-	 * @param {string} property  The name of the property to set the `hidden`
-	 *                           value to true.
+	 * @param {string} property The name of the property to set the `hidden`
+	 *                          value to true.
 	 */
 	const hideValidationError = useCallback(
 		( property ) =>
@@ -197,8 +197,8 @@ export const ValidationContextProvider = ( { children } ) => {
 	 * Given a property name and if an associated error exists, it sets its
 	 * `hidden` value to false.
 	 *
-	 * @param {string} property  The name of the property to set the `hidden`
-	 *                           value to false.
+	 * @param {string} property The name of the property to set the `hidden`
+	 *                          value to false.
 	 */
 	const showValidationError = useCallback(
 		( property ) =>

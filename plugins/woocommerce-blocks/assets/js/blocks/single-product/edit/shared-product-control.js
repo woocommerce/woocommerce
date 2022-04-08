@@ -6,8 +6,8 @@ import ProductControl from '@woocommerce/editor-components/product-control';
 /**
  * Allows a product to be selected for display.
  *
- * @param {Object} props Incoming props for the component.
- * @param {Object} props.attributes Incoming block attributes.
+ * @param {Object}            props               Incoming props for the component.
+ * @param {Object}            props.attributes    Incoming block attributes.
  * @param {function(any):any} props.setAttributes Setter for block attributes.
  */
 const SharedProductControl = ( { attributes, setAttributes } ) => (

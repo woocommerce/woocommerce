@@ -14,7 +14,7 @@ interface ProductLowStockBadgeProps {
 /**
  * Returns a low stock badge.
  *
- * @param {Object}  props                   Incoming props for the component.
+ * @param {Object} props                   Incoming props for the component.
  * @param {number} props.lowStockRemaining Whether or not there is low stock remaining.
  */
 const ProductLowStockBadge = ( {

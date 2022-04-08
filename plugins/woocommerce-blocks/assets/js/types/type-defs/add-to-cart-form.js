@@ -26,18 +26,18 @@
 /**
  * @typedef {Object} AddToCartFormStatusConstants
  *
- * @property {string} PRISTINE                   Form is in it's initialized state.
- * @property {string} IDLE                       When form state has changed but there is no
- *                                               activity happening.
- * @property {string} DISABLED                   If the form cannot be submitted due to missing
- *                                               constraints, this status is assigned.
- * @property {string} BEFORE_PROCESSING          This is the state before form processing
- *                                               begins after the add to cart button has been
- *                                               pressed. Validation occurs at point point.
- * @property {string} PROCESSING                 After BEFORE_PROCESSING status emitters have
- *                                               finished successfully.
- * @property {string} AFTER_PROCESSING           After server side processing is completed
- *                                               this status is set.
+ * @property {string} PRISTINE          Form is in it's initialized state.
+ * @property {string} IDLE              When form state has changed but there is no
+ *                                      activity happening.
+ * @property {string} DISABLED          If the form cannot be submitted due to missing
+ *                                      constraints, this status is assigned.
+ * @property {string} BEFORE_PROCESSING This is the state before form processing
+ *                                      begins after the add to cart button has been
+ *                                      pressed. Validation occurs at point point.
+ * @property {string} PROCESSING        After BEFORE_PROCESSING status emitters have
+ *                                      finished successfully.
+ * @property {string} AFTER_PROCESSING  After server side processing is completed
+ *                                      this status is set.
  */
 
 export {};

@@ -12,10 +12,9 @@ import { dirname } from 'path';
 import kebabCase from 'lodash/kebabCase';
 
 /**
+ * This will visit a GB page or post, and will hide the welcome guide.
  *
  * @param {string} link the page or post you want to visit.
- *
- * This will visit a GB page or post, and will hide the welcome guide.
  */
 async function visitPage( link ) {
 	await page.goto( link );
@@ -34,13 +33,12 @@ async function visitPage( link ) {
 }
 
 /**
- *
- * @param {string} title the page title, written as `BLOCK_NAME block`
- *
  * This function will attempt to search for a page with the `title`
  * if that block is found, it will open it, if it's not found, it will open
  * a new page, insert the block, save the page content and title as a fixture file.
  * In both cases, this page will end up with a page open with the block inserted.
+ *
+ * @param {string} title the page title, written as `BLOCK_NAME block`
  */
 export async function visitBlockPage( title ) {
 	let link = '';
@@ -92,9 +90,8 @@ export async function visitBlockPage( title ) {
 /**
  * This function will attempt to navigate to a page in the WordPress dashboard
  *
- * @param {string} title 	The title of the page/post you want to visit.
+ * @param {string} title    The title of the page/post you want to visit.
  * @param {string} postType The post type of the entity you want to visit.
- * @return {Promise<void>}
  */
 export async function visitPostOfType( title, postType ) {
 	let link = '';

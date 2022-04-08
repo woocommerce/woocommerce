@@ -12,7 +12,7 @@ interface ShippingLocationProps {
 /**
  * Shows a formatted shipping location.
  *
- * @param {Object} props Incoming props for the component.
+ * @param {Object} props         Incoming props for the component.
  * @param {Object} props.address Incoming address information.
  */
 const ShippingLocation = ( {

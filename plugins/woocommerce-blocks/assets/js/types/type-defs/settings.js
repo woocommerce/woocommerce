@@ -1,17 +1,17 @@
 /**
  * @typedef {Object} WooCommerceSiteCurrency
  *
- * @property {string} code               The ISO code for the currency.
- * @property {number} precision          The precision (decimal places).
- * @property {string} symbol             The symbol for the currency (eg '$')
- * @property {string} symbolPosition     The position for the symbol ('left',
- *                                       or 'right')
- * @property {string} decimalSeparator   The string used for the decimal
- *                                       separator.
+ * @property {string} code              The ISO code for the currency.
+ * @property {number} precision         The precision (decimal places).
+ * @property {string} symbol            The symbol for the currency (eg '$')
+ * @property {string} symbolPosition    The position for the symbol ('left',
+ *                                      or 'right')
+ * @property {string} decimalSeparator  The string used for the decimal
+ *                                      separator.
  * @property {string} thousandSeparator The string used for the thousands
- *                                       separator.
- * @property {string} priceFormat        The format string use for displaying
- *                                       an amount in this currency.
+ *                                      separator.
+ * @property {string} priceFormat       The format string use for displaying
+ *                                      an amount in this currency.
  */
 
 /**

@@ -26,8 +26,8 @@ import './style.scss';
 /**
  * Component displaying an stock status filter.
  *
- * @param {Object} props Incoming props for the component.
- * @param {Object} props.attributes Incoming block attributes.
+ * @param {Object}  props            Incoming props for the component.
+ * @param {Object}  props.attributes Incoming block attributes.
  * @param {boolean} props.isEditor
  */
 const StockStatusFilterBlock = ( {

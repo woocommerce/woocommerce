@@ -71,7 +71,7 @@ const CheckoutOrderError = () => {
 /**
  * Get the error message to display.
  *
- * @param {Object} props Incoming props for the component.
+ * @param {Object} props           Incoming props for the component.
  * @param {Object} props.errorData Object containing code and message.
  */
 const ErrorTitle = ( { errorData } ) => {
@@ -92,7 +92,7 @@ const ErrorTitle = ( { errorData } ) => {
 /**
  * Get the error message to display.
  *
- * @param {Object} props Incoming props for the component.
+ * @param {Object} props           Incoming props for the component.
  * @param {Object} props.errorData Object containing code and message.
  */
 const ErrorMessage = ( { errorData } ) => {
@@ -114,7 +114,7 @@ const ErrorMessage = ( { errorData } ) => {
 /**
  * Get the CTA button to display.
  *
- * @param {Object} props Incoming props for the component.
+ * @param {Object} props           Incoming props for the component.
  * @param {Object} props.errorData Object containing code and message.
  */
 const ErrorButton = ( { errorData } ) => {

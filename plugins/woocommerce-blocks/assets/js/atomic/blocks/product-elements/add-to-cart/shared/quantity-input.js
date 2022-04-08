@@ -10,7 +10,7 @@ import { useDebouncedCallback } from 'use-debounce';
  * @param {boolean}        props.disabled Whether input is disabled or not.
  * @param {number}         props.min      Minimum value for input.
  * @param {number}         props.max      Maximum value for input.
- * @param {number}         props.step Step attribute for input.
+ * @param {number}         props.step     Step attribute for input.
  * @param {number}         props.value    Value for input.
  * @param {function():any} props.onChange Function to call on input change event.
  */

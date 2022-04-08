@@ -91,9 +91,7 @@ describe( 'Testing cart', () => {
 	} );
 
 	it( 'renders cart if there are items in the cart', async () => {
-		act( () => {
-			render( <CartBlock /> );
-		} );
+		render( <CartBlock /> );
 		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
 		expect(
 			screen.getByText( /Proceed to Checkout/i )
@@ -106,9 +104,7 @@ describe( 'Testing cart', () => {
 		allSettings.displayCartPricesIncludingTax = false;
 		// The criteria for showing the Taxes section is:
 		// Display prices during basket and checkout: 'Excluding tax'.
-		act( () => {
-			render( <CartBlock /> );
-		} );
+		render( <CartBlock /> );
 
 		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
 		expect( screen.getByText( /Tax/i ) ).toBeInTheDocument();
@@ -120,9 +116,7 @@ describe( 'Testing cart', () => {
 		// The criteria for showing the lines in the Taxes section is:
 		// Display prices during basket and checkout: 'Excluding tax'.
 		// Display tax totals: 'Itemized';
-		act( () => {
-			render( <CartBlock /> );
-		} );
+		render( <CartBlock /> );
 		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
 		expect( screen.getByText( /Sales tax/i ) ).toBeInTheDocument();
 	} );
@@ -155,9 +149,7 @@ describe( 'Testing cart', () => {
 				return Promise.resolve( '' );
 			} );
 		} );
-		act( () => {
-			render( <CartBlock /> );
-		} );
+		render( <CartBlock /> );
 
 		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
 		expect( screen.getByText( /Empty Cart/i ) ).toBeInTheDocument();
@@ -189,9 +181,7 @@ describe( 'Testing cart', () => {
 				return Promise.resolve( JSON.stringify( cart ) );
 			}
 		} );
-		act( () => {
-			render( <CartBlock /> );
-		} );
+		render( <CartBlock /> );
 
 		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
 		expect( screen.getAllByRole( 'cell' )[ 1 ] ).toHaveTextContent( '16€' );
@@ -209,9 +199,7 @@ describe( 'Testing cart', () => {
 			],
 		};
 		const itemName = cart.items[ 0 ].name;
-		act( () => {
-			render( <CartBlock /> );
-		} );
+		render( <CartBlock /> );
 
 		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
 		const quantityInput = screen.getByLabelText(

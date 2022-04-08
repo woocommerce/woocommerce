@@ -1,10 +1,10 @@
 /**
  * External dependencies
  */
-import { NumberFormatValues } from 'react-number-format';
+import type { NumberFormatValues } from 'react-number-format';
 
 /**
- Check if that the value is minor than the max price and greater than 0.
+  Check if that the value is minor than the max price and greater than 0.
  */
 export const isValidMaxValue = ( {
 	maxConstraint,
@@ -19,7 +19,7 @@ export const isValidMaxValue = ( {
 };
 
 /**
- Check if that the value is minor than the max price and greater than 0.
+  Check if that the value is minor than the max price and greater than 0.
  */
 export const isValidMinValue = ( {
 	minConstraint,

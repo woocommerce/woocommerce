@@ -31,7 +31,7 @@ export const useEditorContext = () => {
  * @param {*}      props.children        The children being wrapped.
  * @param {Object} [props.previewData]   The preview data for editor.
  * @param {number} [props.currentPostId] The post being edited.
- * @param {string} [props.currentView] Current view, if using a view switcher.
+ * @param {string} [props.currentView]   Current view, if using a view switcher.
  */
 export const EditorProvider = ( {
 	children,

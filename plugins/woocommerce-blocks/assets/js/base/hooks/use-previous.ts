@@ -9,7 +9,7 @@ interface Validation< T > {
 /**
  * Use Previous based on https://usehooks.com/usePrevious/.
  *
- * @param {*}    value
+ * @param {*}        value
  * @param {Function} [validation] Function that needs to validate for the value
  *                                to be updated.
  */

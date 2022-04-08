@@ -151,8 +151,8 @@ export const getCouponBeingRemoved = ( state: CartState ): string => {
 /**
  * Returns cart item matching specified key.
  *
- * @param {CartState} state The current state.
- * @param {string} cartItemKey Key for a cart item.
+ * @param {CartState} state       The current state.
+ * @param {string}    cartItemKey Key for a cart item.
  * @return {CartItem | void} Cart item object, or undefined if not found.
  */
 export const getCartItem = (
@@ -167,8 +167,8 @@ export const getCartItem = (
 /**
  * Returns true if the specified cart item quantity is being updated.
  *
- * @param {CartState} state The current state.
- * @param {string} cartItemKey Key for a cart item.
+ * @param {CartState} state       The current state.
+ * @param {string}    cartItemKey Key for a cart item.
  * @return {boolean} True if a item has a pending request to be updated.
  */
 export const isItemPendingQuantity = (
@@ -181,8 +181,8 @@ export const isItemPendingQuantity = (
 /**
  * Returns true if the specified cart item quantity is being updated.
  *
- * @param {CartState} state The current state.
- * @param {string} cartItemKey Key for a cart item.
+ * @param {CartState} state       The current state.
+ * @param {string}    cartItemKey Key for a cart item.
  * @return {boolean} True if a item has a pending request to be updated.
  */
 export const isItemPendingDelete = (

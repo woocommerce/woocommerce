@@ -45,7 +45,7 @@ export const useShippingDataContext = () => {
 /**
  * The shipping data provider exposes the interface for shipping in the checkout/cart.
  *
- * @param {Object} props Incoming props for provider
+ * @param {Object}             props          Incoming props for provider
  * @param {React.ReactElement} props.children
  */
 export const ShippingDataProvider = ( { children } ) => {

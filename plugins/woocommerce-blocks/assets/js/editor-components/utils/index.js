@@ -11,9 +11,9 @@ import { blocksConfig } from '@woocommerce/block-settings';
 /**
  * Get product query requests for the Store API.
  *
- * @param {Object} request A query object with the list of selected products and search term.
- * @param {number[]} request.selected Currently selected products.
- * @param {string=} request.search Search string.
+ * @param {Object}                     request           A query object with the list of selected products and search term.
+ * @param {number[]}                   request.selected  Currently selected products.
+ * @param {string=}                    request.search    Search string.
  * @param {(Record<string, unknown>)=} request.queryArgs Query args to pass in.
  */
 const getProductsRequests = ( {
@@ -54,9 +54,9 @@ const getProductsRequests = ( {
 /**
  * Get a promise that resolves to a list of products from the Store API.
  *
- * @param {Object} request A query object with the list of selected products and search term.
- * @param {number[]} request.selected Currently selected products.
- * @param {string=} request.search Search string.
+ * @param {Object}                     request           A query object with the list of selected products and search term.
+ * @param {number[]}                   request.selected  Currently selected products.
+ * @param {string=}                    request.search    Search string.
  * @param {(Record<string, unknown>)=} request.queryArgs Query args to pass in.
  * @return {Promise<unknown>} Promise resolving to a Product list.
  * @throws Exception if there is an error.
@@ -116,9 +116,9 @@ export const getTerms = ( attribute ) => {
 /**
  * Get product tag query requests for the Store API.
  *
- * @param {Object} request A query object with the list of selected products and search term.
- * @param {Array} request.selected Currently selected tags.
- * @param {string} request.search Search string.
+ * @param {Object} request          A query object with the list of selected products and search term.
+ * @param {Array}  request.selected Currently selected tags.
+ * @param {string} request.search   Search string.
  */
 const getProductTagsRequests = ( { selected = [], search } ) => {
 	const limitTags = getSetting( 'limitTags', false );
@@ -146,8 +146,8 @@ const getProductTagsRequests = ( { selected = [], search } ) => {
 /**
  * Get a promise that resolves to a list of tags from the Store API.
  *
- * @param {Object} props A query object with the list of selected products and search term.
- * @param {Array} props.selected
+ * @param {Object} props          A query object with the list of selected products and search term.
+ * @param {Array}  props.selected
  * @param {string} props.search
  */
 export const getProductTags = ( { selected = [], search } ) => {
@@ -203,11 +203,11 @@ export const getProductVariations = ( product ) => {
 /**
  * Given a page object and an array of page, format the title.
  *
- * @param  {Object} page           Page object.
- * @param  {Object} page.title     Page title object.
- * @param  {string} page.title.raw Page title.
- * @param  {string} page.slug      Page slug.
- * @param  {Array}  pages          Array of all pages.
+ * @param {Object} page           Page object.
+ * @param {Object} page.title     Page title object.
+ * @param {string} page.title.raw Page title.
+ * @param {string} page.slug      Page slug.
+ * @param {Array}  pages          Array of all pages.
  * @return {string}                Formatted page title to display.
  */
 export const formatTitle = ( page, pages ) => {

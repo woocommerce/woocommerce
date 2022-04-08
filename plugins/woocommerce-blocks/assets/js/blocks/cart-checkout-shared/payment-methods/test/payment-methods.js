@@ -129,11 +129,17 @@ describe( 'PaymentMethods', () => {
 			const savedPaymentMethodOptions = screen.queryByText(
 				/Saved payment method options/
 			);
+			expect( savedPaymentMethodOptions ).not.toBeNull();
+		} );
+
+		await waitFor( () => {
 			const paymentMethodOptions = screen.queryByText(
 				/Payment method options/
 			);
-			expect( savedPaymentMethodOptions ).not.toBeNull();
 			expect( paymentMethodOptions ).not.toBeNull();
+		} );
+
+		await waitFor( () => {
 			const savedToken = screen.queryByText(
 				/Active Payment Method: credit-card/
 			);

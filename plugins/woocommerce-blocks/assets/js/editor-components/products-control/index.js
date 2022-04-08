@@ -11,8 +11,8 @@ import ErrorMessage from '@woocommerce/editor-components/error-placeholder/error
  * The products control exposes a custom selector for searching and selecting
  * products.
  *
- * @param {Object} props Component props.
- * @param {string} props.error
+ * @param {Object}   props           Component props.
+ * @param {string}   props.error
  * @param {Function} props.onChange  Callback fired when the selected item changes
  * @param {Function} props.onSearch  Callback fired when a search is triggered
  * @param {Array}    props.selected  An array of selected products.

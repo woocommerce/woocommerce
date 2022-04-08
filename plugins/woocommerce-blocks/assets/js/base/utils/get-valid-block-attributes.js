@@ -2,7 +2,7 @@
  * Given some block attributes, gets attributes from the dataset or uses defaults.
  *
  * @param {Object} blockAttributes Object containing block attributes.
- * @param {Array} rawAttributes Dataset from DOM.
+ * @param {Array}  rawAttributes   Dataset from DOM.
  * @return {Array} Array of parsed attributes.
  */
 export const getValidBlockAttributes = ( blockAttributes, rawAttributes ) => {

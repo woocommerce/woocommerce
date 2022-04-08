@@ -11,11 +11,9 @@ import { useSelect, useDispatch } from '@wordpress/data';
 import {
 	createBlock,
 	getBlockType,
-	Block,
-	AttributeSource,
 	createBlocksFromInnerBlocksTemplate,
-	TemplateArray,
 } from '@wordpress/blocks';
+import type { Block, AttributeSource, TemplateArray } from '@wordpress/blocks';
 import { isEqual } from 'lodash';
 
 const isBlockLocked = ( {

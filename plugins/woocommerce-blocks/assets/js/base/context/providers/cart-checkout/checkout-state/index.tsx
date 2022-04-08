@@ -58,10 +58,10 @@ export const useCheckoutContext = (): CheckoutStateContextType => {
  * Checkout state provider
  * This provides an API interface exposing checkout state for use with cart or checkout blocks.
  *
- * @param {Object}  props                     Incoming props for the provider.
- * @param {Object}  props.children            The children being wrapped.
- * @param {string}  props.redirectUrl         Initialize what the checkout will redirect to after successful submit.
- * @param {boolean} props.isCart              If context provider is being used in cart context.
+ * @param {Object}  props             Incoming props for the provider.
+ * @param {Object}  props.children    The children being wrapped.
+ * @param {string}  props.redirectUrl Initialize what the checkout will redirect to after successful submit.
+ * @param {boolean} props.isCart      If context provider is being used in cart context.
  */
 export const CheckoutStateProvider = ( {
 	children,

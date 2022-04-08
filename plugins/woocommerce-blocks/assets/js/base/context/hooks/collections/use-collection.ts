@@ -15,24 +15,24 @@ import { isError, Query } from '@woocommerce/types';
  * @throws {Object} Throws an exception object if there was a problem with the
  * 					API request, to be picked up by BlockErrorBoundry.
  *
- * @param {Object} options                  An object declaring the various
- *                                          collection arguments.
- * @param {string} options.namespace        The namespace for the collection.
- *                                          Example: `'/wc/blocks'`
- * @param {string} options.resourceName     The name of the resource for the
- *                                          collection. Example:
- *                                          `'products/attributes'`
- * @param {Array}  [options.resourceValues] An array of values (in correct order)
- *                                          that are substituted in the route
- *                                          placeholders for the collection route.
- *                                          Example: `[10, 20]`
- * @param {Object} [options.query]          An object of key value pairs for the
- *                                          query to execute on the collection
- *                                          Example:
- *                                         `{ order: 'ASC', order_by: 'price' }`
- * @param {boolean} [options.shouldSelect]  If false, the previous results will be
- *                                          returned and internal selects will not
- *                                          fire.
+ * @param {Object}  options                  An object declaring the various
+ *                                           collection arguments.
+ * @param {string}  options.namespace        The namespace for the collection.
+ *                                           Example: `'/wc/blocks'`
+ * @param {string}  options.resourceName     The name of the resource for the
+ *                                           collection. Example:
+ *                                           `'products/attributes'`
+ * @param {Array}   [options.resourceValues] An array of values (in correct order)
+ *                                           that are substituted in the route
+ *                                           placeholders for the collection route.
+ *                                           Example: `[10, 20]`
+ * @param {Object}  [options.query]          An object of key value pairs for the
+ *                                           query to execute on the collection
+ *                                           Example:
+ *                                           `{ order: 'ASC', order_by: 'price' }`
+ * @param {boolean} [options.shouldSelect]   If false, the previous results will be
+ *                                           returned and internal selects will not
+ *                                           fire.
  *
  * @return {Object} This hook will return an object with two properties:
  *                  - results   An array of collection items returned.

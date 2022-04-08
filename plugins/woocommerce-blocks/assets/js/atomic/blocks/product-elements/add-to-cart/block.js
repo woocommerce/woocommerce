@@ -26,8 +26,8 @@ import {
 /**
  * Product Add to Form Block Component.
  *
- * @param {Object} props                     Incoming props.
- * @param {string} [props.className]         CSS Class name for the component.
+ * @param {Object}  props                    Incoming props.
+ * @param {string}  [props.className]        CSS Class name for the component.
  * @param {boolean} [props.showFormElements] Should form elements be shown?
  * @return {*} The component.
  */

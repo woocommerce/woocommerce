@@ -5,7 +5,7 @@ import {
 	isFeaturePluginBuild,
 	registerExperimentalBlockType,
 } from '@woocommerce/block-settings';
-import { BlockConfiguration } from '@wordpress/blocks';
+import type { BlockConfiguration } from '@wordpress/blocks';
 
 /**
  * Internal dependencies

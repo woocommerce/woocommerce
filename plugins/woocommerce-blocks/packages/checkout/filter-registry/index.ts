@@ -5,7 +5,8 @@ import { useMemo, useRef } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { CURRENT_USER_IS_ADMIN } from '@woocommerce/settings';
 import deprecated from '@wordpress/deprecated';
-import isShallowEqual, { ComparableObject } from '@wordpress/is-shallow-equal';
+import isShallowEqual from '@wordpress/is-shallow-equal';
+import type { ComparableObject } from '@wordpress/is-shallow-equal';
 import { isNull, isObject, objectHasProp } from '@woocommerce/types';
 
 /**
@@ -76,7 +77,7 @@ export const __experimentalRegisterCheckoutFilters = (
 /**
  * Get all filters with a specific name.
  *
- * @param {string} filterName   Name of the filter to search for.
+ * @param {string} filterName Name of the filter to search for.
  * @return {Function[]} Array of functions that are registered for that filter
  *                      name.
  */

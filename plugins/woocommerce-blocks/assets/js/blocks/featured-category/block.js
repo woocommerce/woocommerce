@@ -48,16 +48,16 @@ import { withCategory } from '../../hocs';
 /**
  * Component to handle edit mode of "Featured Category".
  *
- * @param {Object} props Incoming props for the component.
- * @param {Object} props.attributes Incoming block attributes.
- * @param {boolean} props.isSelected Whether block is selected or not.
- * @param {function(any):any} props.setAttributes Function for setting new attributes.
- * @param {string} props.error Error message
- * @param {function(any):any} props.getCategory Function for getting category details.
- * @param {boolean} props.isLoading Whether loading or not.
- * @param {Object} props.category The product category object.
- * @param {function(any):any} props.debouncedSpeak Function for delayed speak.
- * @param {function():void} props.triggerUrlUpdate Function to update Shop now button Url.
+ * @param {Object}            props                  Incoming props for the component.
+ * @param {Object}            props.attributes       Incoming block attributes.
+ * @param {boolean}           props.isSelected       Whether block is selected or not.
+ * @param {function(any):any} props.setAttributes    Function for setting new attributes.
+ * @param {string}            props.error            Error message
+ * @param {function(any):any} props.getCategory      Function for getting category details.
+ * @param {boolean}           props.isLoading        Whether loading or not.
+ * @param {Object}            props.category         The product category object.
+ * @param {function(any):any} props.debouncedSpeak   Function for delayed speak.
+ * @param {function():void}   props.triggerUrlUpdate Function to update Shop now button Url.
  */
 const FeaturedCategory = ( {
 	attributes,
