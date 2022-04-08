@@ -2226,7 +2226,7 @@ class WC_AJAX {
 			echo '<button type="button" class="notice-dismiss"><span class="screen-reader-text">' . esc_html__( 'Dismiss this notice.', 'woocommerce' ) . '</span></button>';
 			echo '</div>';
 
-			delete_option( 'woocommerce_meta_box_errors' );
+			delete_option( WC_Admin_Meta_Boxes::ERROR_STORE );
 		}
 
 		wp_die();
