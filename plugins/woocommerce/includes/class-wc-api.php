@@ -165,7 +165,7 @@ class WC_API extends WC_Legacy_API {
 			die( '-1' );
 		}
 	}
-
+// Add comment.
 	/**
 	 * Register WC settings from WP-API to the REST API.
 	 *
