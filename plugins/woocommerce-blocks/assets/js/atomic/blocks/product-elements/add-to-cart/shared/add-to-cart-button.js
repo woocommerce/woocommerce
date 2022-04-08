@@ -76,7 +76,9 @@ const AddToCartButton = () => {
 			isProcessing={ isProcessing }
 			isDone={ addedToCart }
 			onClick={ () => {
-				dispatchActions.submitForm();
+				dispatchActions.submitForm(
+					`woocommerce/single-product/${ product?.id || 0 }`
+				);
 				dispatchStoreEvent( 'cart-add-item', {
 					product,
 					listName: parentName,
