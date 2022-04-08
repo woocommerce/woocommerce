@@ -106,11 +106,11 @@ const AddToCartButton = () => {
 /**
  * Button component for non-purchasable products.
  *
- * @param {Object} props           Incoming props.
- * @param {string} props.className Css classnames.
- * @param {string} props.href      Link for button.
- * @param {string} props.text      Text content for button.
- * @param {function():any} props.onClick Callback to execute when button is clicked.
+ * @param {Object}         props           Incoming props.
+ * @param {string}         props.className Css classnames.
+ * @param {string}         props.href      Link for button.
+ * @param {string}         props.text      Text content for button.
+ * @param {function():any} props.onClick   Callback to execute when button is clicked.
  */
 const LinkComponent = ( { className, href, text, onClick } ) => {
 	return (
@@ -128,13 +128,13 @@ const LinkComponent = ( { className, href, text, onClick } ) => {
 /**
  * Button for purchasable products.
  *
- * @param {Object} props                 Incoming props for component
- * @param {string} props.className       Incoming css class name.
- * @param {number} props.quantityInCart  Quantity of item in cart.
- * @param {boolean} props.isProcessing   Whether processing action is occurring.
- * @param {boolean} props.isDisabled     Whether the button is disabled or not.
- * @param {boolean} props.isDone         Whether processing is done.
- * @param {function():any} props.onClick Callback to execute when button is clicked.
+ * @param {Object}         props                Incoming props for component
+ * @param {string}         props.className      Incoming css class name.
+ * @param {number}         props.quantityInCart Quantity of item in cart.
+ * @param {boolean}        props.isProcessing   Whether processing action is occurring.
+ * @param {boolean}        props.isDisabled     Whether the button is disabled or not.
+ * @param {boolean}        props.isDone         Whether processing is done.
+ * @param {function():any} props.onClick        Callback to execute when button is clicked.
  */
 const ButtonComponent = ( {
 	className,

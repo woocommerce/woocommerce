@@ -97,8 +97,8 @@ const countryAddressFields: CountryAddressFields = Object.entries( coreLocale )
 /**
  * Combines address fields, including fields from the locale, and sorts them by index.
  *
- * @param {Array} fields List of field keys--only address fields matching these will be returned.
- * @param {Object} fieldConfigs Fields config contains field specific overrides at block level which may, for example, hide a field.
+ * @param {Array}  fields         List of field keys--only address fields matching these will be returned.
+ * @param {Object} fieldConfigs   Fields config contains field specific overrides at block level which may, for example, hide a field.
  * @param {string} addressCountry Address country code. If unknown, locale fields will not be merged.
  * @return {CountryAddressFields} Object containing address fields.
  */

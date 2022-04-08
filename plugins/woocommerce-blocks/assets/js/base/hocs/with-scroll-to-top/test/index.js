@@ -1,3 +1,6 @@
+// We need to disable the following eslint check as it's only applicable
+// to testing-library/react not `react-test-renderer` used here
+/* eslint-disable testing-library/await-async-query */
 /**
  * External dependencies
  */
@@ -59,7 +62,9 @@ describe( 'withScrollToTop Component', () => {
 		beforeEach( () => {
 			const renderer = render( { inView: false } );
 			const props = renderer.root.findByType( 'span' ).props;
-			props.scrollToTop( { focusableSelector: 'button' } );
+			props.scrollToTop( {
+				focusableSelector: 'button',
+			} );
 		} );
 
 		it( 'scrolls to top of the component when scrollToTop is called', () => {
@@ -75,7 +80,9 @@ describe( 'withScrollToTop Component', () => {
 		beforeEach( () => {
 			const renderer = render( { inView: true } );
 			const props = renderer.root.findByType( 'span' ).props;
-			props.scrollToTop( { focusableSelector: 'button' } );
+			props.scrollToTop( {
+				focusableSelector: 'button',
+			} );
 		} );
 
 		it( "doesn't scroll to top of the component when scrollToTop is called", () => {

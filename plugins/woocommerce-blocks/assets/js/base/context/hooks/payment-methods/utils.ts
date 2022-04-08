@@ -19,7 +19,7 @@ export interface CartTotalItem {
  * Prepares the total items into a shape usable for display as passed on to
  * registered payment methods.
  *
- * @param {Object} totals Current cart total items
+ * @param {Object}  totals        Current cart total items
  * @param {boolean} needsShipping Whether or not shipping is needed.
  */
 export const prepareTotalItems = (

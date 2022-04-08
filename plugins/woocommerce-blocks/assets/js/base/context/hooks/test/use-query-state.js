@@ -29,13 +29,14 @@ describe( 'Testing Query State Hooks', () => {
 	 * Test helper to return a tuple containing the expected query value and the
 	 * expected query state action creator from the given rendered test instance.
 	 *
-	 * @param {Object} testRenderer   An instance of the created test component.
+	 * @param {Object} testRenderer An instance of the created test component.
 	 *
 	 * @return {Array} A tuple containing the expected query value as the first
 	 *                 element and the expected query action creator as the
 	 *                 second argument.
 	 */
 	const getProps = ( testRenderer ) => {
+		//eslint-disable-next-line testing-library/await-async-query
 		const props = testRenderer.root.findByType( 'div' ).props;
 		return [ props.queryState, props.setQueryState ];
 	};

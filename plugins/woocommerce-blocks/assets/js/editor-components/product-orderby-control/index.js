@@ -8,8 +8,8 @@ import PropTypes from 'prop-types';
 /**
  * A pre-configured SelectControl for product orderby settings.
  *
- * @param {Object} props Incoming props for the component.
- * @param {string} props.value
+ * @param {Object}            props               Incoming props for the component.
+ * @param {string}            props.value
  * @param {function(any):any} props.setAttributes Setter for block attributes.
  */
 const ProductOrderbyControl = ( { value, setAttributes } ) => {

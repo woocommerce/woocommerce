@@ -119,11 +119,11 @@ export const defaultCartData: StoreCart = {
  * This is a custom hook that is wired up to the `wc/store/cart` data
  * store.
  *
- * @param {Object} options                An object declaring the various
- *                                        collection arguments.
- * @param {boolean} options.shouldSelect  If false, the previous results will be
- *                                        returned and internal selects will not
- *                                        fire.
+ * @param {Object}  options              An object declaring the various
+ *                                       collection arguments.
+ * @param {boolean} options.shouldSelect If false, the previous results will be
+ *                                       returned and internal selects will not
+ *                                       fire.
  *
  * @return {StoreCart} Object containing cart data.
  */

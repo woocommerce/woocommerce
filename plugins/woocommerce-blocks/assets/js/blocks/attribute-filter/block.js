@@ -32,8 +32,8 @@ import './style.scss';
 /**
  * Component displaying an attribute filter.
  *
- * @param {Object} props Incoming props for the component.
- * @param {Object} props.attributes Incoming block attributes.
+ * @param {Object}  props            Incoming props for the component.
+ * @param {Object}  props.attributes Incoming block attributes.
  * @param {boolean} props.isEditor
  */
 const AttributeFilterBlock = ( {

@@ -7,8 +7,8 @@ import { hasInState, updateState } from '../utils';
 /**
  * Reducer for receiving items to a collection.
  *
- * @param   {Object}  state   The current state in the store.
- * @param   {Object}  action  Action object.
+ * @param {Object} state  The current state in the store.
+ * @param {Object} action Action object.
  *
  * @return  {Object}          New or existing state depending on if there are
  *                            any changes.

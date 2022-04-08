@@ -11,7 +11,7 @@
 /**
  * Checks whether an element exists under a certain context
  *
- * @param {string} selector The selector for the desired element
+ * @param {string}               selector    The selector for the desired element
  * @param {Page | ElementHandle} [root=page] The root from which to search for the selector
  *
  * @return {Promise<boolean>} Whether the element exists or not
@@ -23,9 +23,9 @@ export async function elementExists( selector, root = page ) {
 /**
  * Gets data from an HTML element
  *
- * @param {string} selector The selector for the desired element
- * @param {string} dataKey The key in the element data to look for
- * @param {Page | ElementHandle} root The root from which to search for the selector
+ * @param {string}               selector The selector for the desired element
+ * @param {string}               dataKey  The key in the element data to look for
+ * @param {Page | ElementHandle} root     The root from which to search for the selector
  *
  * @return {Promise<string | undefined>} The data of that element if it exists
  */
@@ -54,7 +54,7 @@ export async function getElementData( selector, dataKey, root = page ) {
  * const [ singleText ] = await getTextContent( '.my-single-element' );
  * ```
  *
- * @param {string} selector The selector for the desired element
+ * @param {string}               selector    The selector for the desired element
  * @param {Page | ElementHandle} [root=page] The root from which to search for the selector
  *
  * @return {Promise<string[]>} An array of text contained in those selected elements

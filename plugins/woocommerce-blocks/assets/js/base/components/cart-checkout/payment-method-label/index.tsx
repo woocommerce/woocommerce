@@ -40,9 +40,9 @@ interface PaymentMethodLabelProps {
  * Exposed to payment methods for the label shown on checkout. Allows icons to be added as well as
  * text.
  *
- * @param {Object} props Component props.
- * @param {*} props.icon Show an icon beside the text if provided. Can be a string to use a named
- *                       icon, or an SVG element.
+ * @param {Object} props      Component props.
+ * @param {*}      props.icon Show an icon beside the text if provided. Can be a string to use a named
+ *                            icon, or an SVG element.
  * @param {string} props.text Text shown next to icon.
  */
 export const PaymentMethodLabel = ( {

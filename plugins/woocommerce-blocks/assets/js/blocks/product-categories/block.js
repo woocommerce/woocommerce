@@ -33,10 +33,10 @@ const EmptyPlaceholder = () => (
 /**
  * Component displaying the categories as dropdown or list.
  *
- * @param {Object} props Incoming props for the component.
- * @param {Object} props.attributes Incoming block attributes.
+ * @param {Object}            props               Incoming props for the component.
+ * @param {Object}            props.attributes    Incoming block attributes.
  * @param {function(any):any} props.setAttributes Setter for block attributes.
- * @param {string} props.name Name for block.
+ * @param {string}            props.name          Name for block.
  */
 const ProductCategoriesBlock = ( { attributes, setAttributes, name } ) => {
 	const getInspectorControls = () => {

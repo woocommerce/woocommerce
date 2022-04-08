@@ -67,9 +67,7 @@ describe( 'Testing Mini Cart', () => {
 	it( 'opens Mini Cart drawer when clicking on button', async () => {
 		render( <MiniCartBlock /> );
 		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
-		act( () => {
-			userEvent.click( screen.getByLabelText( /items/i ) );
-		} );
+		userEvent.click( screen.getByLabelText( /items/i ) );
 
 		expect( fetchMock ).toHaveBeenCalledTimes( 1 );
 	} );
@@ -79,9 +77,7 @@ describe( 'Testing Mini Cart', () => {
 		render( <MiniCartBlock /> );
 
 		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
-		act( () => {
-			userEvent.click( screen.getByLabelText( /items/i ) );
-		} );
+		userEvent.click( screen.getByLabelText( /items/i ) );
 
 		expect( fetchMock ).toHaveBeenCalledTimes( 1 );
 	} );

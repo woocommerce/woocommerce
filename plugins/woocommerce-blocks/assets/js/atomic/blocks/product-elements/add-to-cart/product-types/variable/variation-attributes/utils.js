@@ -55,9 +55,9 @@ export const getVariationAttributes = ( variations ) => {
  * Allows an attribute to be excluded by name. This is used to filter displayed options for
  * individual attribute selects.
  *
- * @param {Object} attributes List of attribute names and terms.
+ * @param {Object} attributes          List of attribute names and terms.
  * @param {Object} variationAttributes Attributes for each variation keyed by variation ID.
- * @param {Object} selectedAttributes Attribute Name Value pairs of current selections by the user.
+ * @param {Object} selectedAttributes  Attribute Name Value pairs of current selections by the user.
  * @return {Array} List of matching variation IDs.
  */
 export const getVariationsMatchingSelectedAttributes = (
@@ -105,9 +105,9 @@ export const getVariationsMatchingSelectedAttributes = (
 /**
  * Given a list of variations and a list of attribute values, returns the first matched variation ID.
  *
- * @param {Object} attributes List of attribute names and terms.
+ * @param {Object} attributes          List of attribute names and terms.
  * @param {Object} variationAttributes Attributes for each variation keyed by variation ID.
- * @param {Object} selectedAttributes Attribute Name Value pairs of current selections by the user.
+ * @param {Object} selectedAttributes  Attribute Name Value pairs of current selections by the user.
  * @return {number} Variation ID.
  */
 export const getVariationMatchingSelectedAttributes = (
@@ -127,7 +127,7 @@ export const getVariationMatchingSelectedAttributes = (
  * Given a list of terms, filter them and return valid options for the select boxes.
  *
  * @see getActiveSelectControlOptions
- * @param {Object} attributeTerms List of attribute term objects.
+ * @param {Object} attributeTerms      List of attribute term objects.
  * @param {?Array} validAttributeTerms Valid values if selections have been made already.
  * @return {Array} Value/Label pairs of select box options.
  */
@@ -156,9 +156,9 @@ const getValidSelectControlOptions = (
  * Given a list of terms, filter them and return active options for the select boxes. This factors in
  * which options should be hidden due to current selections.
  *
- * @param {Object} attributes List of attribute names and terms.
+ * @param {Object} attributes          List of attribute names and terms.
  * @param {Object} variationAttributes Attributes for each variation keyed by variation ID.
- * @param {Object} selectedAttributes Attribute Name Value pairs of current selections by the user.
+ * @param {Object} selectedAttributes  Attribute Name Value pairs of current selections by the user.
  * @return {Object} Select box options.
  */
 export const getActiveSelectControlOptions = (

@@ -9,15 +9,15 @@ import { RangeControl, ToggleControl } from '@wordpress/components';
 /**
  * A combination of range controls for product grid layout settings.
  *
- * @param {Object} props Incoming props for the component.
- * @param {number} props.columns
- * @param {number} props.rows
+ * @param {Object}            props               Incoming props for the component.
+ * @param {number}            props.columns
+ * @param {number}            props.rows
  * @param {function(any):any} props.setAttributes Setter for block attributes.
- * @param {string} props.alignButtons
- * @param {number} props.minColumns
- * @param {number} props.maxColumns
- * @param {number} props.minRows
- * @param {number} props.maxRows
+ * @param {string}            props.alignButtons
+ * @param {number}            props.minColumns
+ * @param {number}            props.maxColumns
+ * @param {number}            props.minRows
+ * @param {number}            props.maxRows
  */
 const GridLayoutControl = ( {
 	columns,
