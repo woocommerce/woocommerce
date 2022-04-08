@@ -9,7 +9,7 @@
  */
 
 defined( 'ABSPATH' ) || exit;
-
+// Add comment.
 /**
  * Auth class.
  */
