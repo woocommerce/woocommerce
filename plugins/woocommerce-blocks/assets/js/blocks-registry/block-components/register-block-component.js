@@ -46,8 +46,8 @@ export function registerBlockComponent( options ) {
  * Asserts that an option is a valid react element or lazy callback. Otherwise, throws an error.
  *
  * @throws Will throw an error if the type of the option doesn't match the expected type.
- * @param {Object} options      Object containing the option to validate.
- * @param {string} optionName   Name of the option to validate.
+ * @param {Object} options    Object containing the option to validate.
+ * @param {string} optionName Name of the option to validate.
  */
 const assertBlockComponent = ( options, optionName ) => {
 	if ( options[ optionName ] ) {

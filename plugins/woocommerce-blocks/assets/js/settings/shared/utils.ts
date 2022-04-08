@@ -45,8 +45,8 @@ export const getSettingWithCoercion = < T >(
  * For the purpose of these comparisons all pre-release versions are normalized
  * to `rc`.
  *
- * @param {string} setting Setting name (e.g. wpVersion or wcVersion).
- * @param {string} version Version to compare.
+ * @param {string}                          setting  Setting name (e.g. wpVersion or wcVersion).
+ * @param {string}                          version  Version to compare.
  * @param {compareVersions.CompareOperator} operator Comparison operator.
  */
 const compareVersionSettingIgnorePrerelease = (

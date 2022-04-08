@@ -79,12 +79,12 @@ const Block = ( props ) => {
 /**
  * Product Button Block Component.
  *
- * @param {Object} props             Incoming props.
- * @param {Object} [props.product] Product.
- * @param {Object} [props.colorStyles] Object contains CSS class and CSS style for color.
- * @param {Object} [props.borderStyles] Object contains CSS class and CSS style for border.
+ * @param {Object} props                    Incoming props.
+ * @param {Object} [props.product]          Product.
+ * @param {Object} [props.colorStyles]      Object contains CSS class and CSS style for color.
+ * @param {Object} [props.borderStyles]     Object contains CSS class and CSS style for border.
  * @param {Object} [props.typographyStyles] Object contains CSS class and CSS style for typography.
- * @param {Object} [props.spacingStyles] Object contains CSS style for spacing.
+ * @param {Object} [props.spacingStyles]    Object contains CSS style for spacing.
  *
  * @return {*} The component.
  */
@@ -187,11 +187,11 @@ const AddToCartButton = ( {
 /**
  * Product Button Block Component.
  *
- * @param {Object} props             Incoming props.
- * @param {Object} [props.colorStyles] Object contains CSS class and CSS style for color.
- * @param {Object} [props.borderStyles] Object contains CSS class and CSS style for border.
+ * @param {Object} props                    Incoming props.
+ * @param {Object} [props.colorStyles]      Object contains CSS class and CSS style for color.
+ * @param {Object} [props.borderStyles]     Object contains CSS class and CSS style for border.
  * @param {Object} [props.typographyStyles] Object contains CSS class and CSS style for typography.
- * @param {Object} [props.spacingStyles] Object contains CSS style for spacing.
+ * @param {Object} [props.spacingStyles]    Object contains CSS style for spacing.
  *
  * @return {*} The component.
  */

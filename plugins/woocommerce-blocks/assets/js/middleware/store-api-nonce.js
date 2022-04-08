@@ -54,7 +54,7 @@ const setNonce = ( headers ) => {
 /**
  * Updates the stored nonce within localStorage so it is persisted between page loads.
  *
- * @param {string} nonce Incoming nonce string.
+ * @param {string} nonce     Incoming nonce string.
  * @param {number} timestamp Timestamp from server of nonce.
  */
 const updateNonce = ( nonce, timestamp ) => {

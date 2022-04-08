@@ -1,14 +1,11 @@
 /**
  * External dependencies
  */
-import { MatcherFunction } from '@testing-library/react';
+import type { MatcherFunction } from '@testing-library/react';
 
 /**
  * This function will match text over several elements, the standard matcher
  * will only find strings if they are within the same element.
- *
- * @param {string} text The text to find.
- * @return {function(*, ?)} The matcher function for RTL to use.
  */
 export const textContentMatcher = ( text: string ): MatcherFunction => {
 	return ( _content, node ) => {
@@ -29,9 +26,6 @@ export const textContentMatcher = ( text: string ): MatcherFunction => {
  *     <span>is</span>
  *     <span>present</span>
  * </div>
- *
- * @param {string} text The text to find
- * @return {function(*, ?)} the matcher function for RTL to use.
  */
 export const textContentMatcherAcrossSiblings = (
 	text: string

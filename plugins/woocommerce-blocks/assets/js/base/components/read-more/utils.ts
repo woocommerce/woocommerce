@@ -12,8 +12,8 @@ type Markers = {
 /**
  * Truncate some HTML content to a given length.
  *
- * @param {string} html HTML that will be truncated.
- * @param {number} length Length to truncate the string to.
+ * @param {string} html     HTML that will be truncated.
+ * @param {number} length   Length to truncate the string to.
  * @param {string} ellipsis Character to append to truncated content.
  */
 export const truncateHtml = (
@@ -32,9 +32,9 @@ export const truncateHtml = (
 /**
  * Move string markers. Used by calculateLength.
  *
- * @param {Markers} markers Markers for clamped content.
- * @param {number} currentHeight Current height of clamped content.
- * @param {number} maxHeight Max height of the clamped content.
+ * @param {Markers} markers       Markers for clamped content.
+ * @param {number}  currentHeight Current height of clamped content.
+ * @param {number}  maxHeight     Max height of the clamped content.
  */
 const moveMarkers = (
 	markers: Markers,
@@ -53,9 +53,9 @@ const moveMarkers = (
 /**
  * Calculate how long the content can be based on the maximum number of lines allowed, and client height.
  *
- * @param {string} originalContent Content to be clamped.
- * @param {HTMLElement} targetElement Element which will contain the clamped content.
- * @param {number} maxHeight Max height of the clamped content.
+ * @param {string}      originalContent Content to be clamped.
+ * @param {HTMLElement} targetElement   Element which will contain the clamped content.
+ * @param {number}      maxHeight       Max height of the clamped content.
  */
 const calculateLength = (
 	originalContent: string,
@@ -87,10 +87,10 @@ const calculateLength = (
  * Clamp lines calculates the height of a line of text and then limits it to the
  * value of the lines prop. Content is updated once limited.
  *
- * @param {string} originalContent Content to be clamped.
- * @param {HTMLElement} targetElement Element which will contain the clamped content.
- * @param {number} maxHeight Max height of the clamped content.
- * @param {string} ellipsis Character to append to clamped content.
+ * @param {string}      originalContent Content to be clamped.
+ * @param {HTMLElement} targetElement   Element which will contain the clamped content.
+ * @param {number}      maxHeight       Max height of the clamped content.
+ * @param {string}      ellipsis        Character to append to clamped content.
  * @return {string} clamped content
  */
 export const clampLines = (

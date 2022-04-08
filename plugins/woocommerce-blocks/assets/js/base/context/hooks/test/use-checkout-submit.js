@@ -55,6 +55,7 @@ describe( 'useCheckoutSubmit', () => {
 			);
 		} );
 
+		//eslint-disable-next-line testing-library/await-async-query
 		const { onSubmit } = renderer.root.findByType( 'div' ).props;
 
 		onSubmit();

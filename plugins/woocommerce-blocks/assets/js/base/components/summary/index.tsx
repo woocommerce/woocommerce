@@ -20,12 +20,12 @@ interface SummaryProps {
 /**
  * Summary component.
  *
- * @param {Object} props Component props.
- * @param {string} props.source Source text.
- * @param {number} props.maxLength Max length of the summary, using countType.
- * @param {string} props.countType One of words, characters_excluding_spaces, or characters_including_spaces.
- * @param {string} props.className Class name for rendered component.
- * @param {CSSProperties} props.style Style Object for rendered component.
+ * @param {Object}        props           Component props.
+ * @param {string}        props.source    Source text.
+ * @param {number}        props.maxLength Max length of the summary, using countType.
+ * @param {string}        props.countType One of words, characters_excluding_spaces, or characters_including_spaces.
+ * @param {string}        props.className Class name for rendered component.
+ * @param {CSSProperties} props.style     Style Object for rendered component.
  *
  */
 export const Summary = ( {

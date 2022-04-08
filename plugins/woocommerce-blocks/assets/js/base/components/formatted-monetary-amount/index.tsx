@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import NumberFormat, {
+import NumberFormat from 'react-number-format';
+import type {
 	NumberFormatValues,
 	NumberFormatProps,
 } from 'react-number-format';

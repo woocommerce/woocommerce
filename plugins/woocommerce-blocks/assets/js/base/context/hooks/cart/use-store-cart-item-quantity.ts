@@ -39,7 +39,7 @@ const cartItemHasQuantityAndKey = (
  *
  * @see https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/trunk/src/RestApi/StoreApi
  *
- * @param {CartItem} cartItem      The cartItem to get quantity info from and will have quantity updated on.
+ * @param {CartItem} cartItem The cartItem to get quantity info from and will have quantity updated on.
  * @return {StoreCartItemQuantity} An object exposing data and actions relating to cart items.
  */
 export const useStoreCartItemQuantity = (

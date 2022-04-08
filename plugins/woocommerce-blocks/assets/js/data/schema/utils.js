@@ -26,7 +26,7 @@ export const extractResourceNameFromRoute = ( namespace, route ) => {
  * ...then the following would get returned
  * [ 'attribute_id', 'id' ]
  *
- * @param  {string} route - The route to extract identifier names from.
+ * @param {string} route - The route to extract identifier names from.
  *
  * @return {Array}  An array of named route identifier names.
  */
@@ -48,8 +48,8 @@ export const getRouteIds = ( route ) => {
  * ..ends up as:
  * /wc/blocks/products/attributes/{attribute_id}/terms/{id}
  *
- * @param {string} route     The route to manipulate
- * @param {Array}  matchIds  An array of named ids ( [ attribute_id, id ] )
+ * @param {string} route    The route to manipulate
+ * @param {Array}  matchIds An array of named ids ( [ attribute_id, id ] )
  *
  * @return {string} The route with new id placeholders
  */

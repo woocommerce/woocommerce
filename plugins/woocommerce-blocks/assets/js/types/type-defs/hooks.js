@@ -8,64 +8,64 @@
 /**
  * @typedef {Object} StoreCart
  *
- * @property {Array}               cartCoupons          An array of coupons applied
- *                                                      to the cart.
- * @property {Array}               cartItems            An array of items in the
- *                                                      cart.
- * @property {Array}               cartFees             An array of fees in the
- *                                                      cart.
- * @property {number}              cartItemsCount       The number of items in the
- *                                                      cart.
- * @property {number}              cartItemsWeight      The weight of all items in
- *                                                      the cart.
- * @property {boolean}             cartNeedsPayment     True when the cart will
- *                                                      require payment.
- * @property {boolean}             cartNeedsShipping    True when the cart will
- *                                                      require shipping.
- * @property {Array}               cartItemErrors       Item validation errors.
- * @property {Object}              cartTotals           Cart and line total
- *                                                      amounts.
- * @property {boolean}             cartIsLoading        True when cart data is
- *                                                      being loaded.
- * @property {Array}               cartErrors           An array of errors thrown
- *                                                      by the cart.
- * @property {CartBillingAddress}  billingAddress       Billing address for the
- *                                                      cart.
- * @property {CartShippingAddress} shippingAddress      Shipping address for the
- *                                                      cart.
- * @property {Array}               shippingRates        array of selected shipping
- *                                                      rates.
- * @property {Object}              extensions           Values provided by  *                                                      extensions.
- * @property {boolean}             shippingRatesLoading Whether or not the
- *                                                      shipping rates are
- *                                                      being loaded.
- * @property {boolean}             cartHasCalculatedShipping Whether or not the cart has calculated shipping yet.
- * @property {Array}               paymentRequirements  List of features required from payment gateways.
- * @property {function(Object):any} receiveCart         Dispatcher to receive
- *                                                      updated cart.
+ * @property {Array}                cartCoupons               An array of coupons applied
+ *                                                            to the cart.
+ * @property {Array}                cartItems                 An array of items in the
+ *                                                            cart.
+ * @property {Array}                cartFees                  An array of fees in the
+ *                                                            cart.
+ * @property {number}               cartItemsCount            The number of items in the
+ *                                                            cart.
+ * @property {number}               cartItemsWeight           The weight of all items in
+ *                                                            the cart.
+ * @property {boolean}              cartNeedsPayment          True when the cart will
+ *                                                            require payment.
+ * @property {boolean}              cartNeedsShipping         True when the cart will
+ *                                                            require shipping.
+ * @property {Array}                cartItemErrors            Item validation errors.
+ * @property {Object}               cartTotals                Cart and line total
+ *                                                            amounts.
+ * @property {boolean}              cartIsLoading             True when cart data is
+ *                                                            being loaded.
+ * @property {Array}                cartErrors                An array of errors thrown
+ *                                                            by the cart.
+ * @property {CartBillingAddress}   billingAddress            Billing address for the
+ *                                                            cart.
+ * @property {CartShippingAddress}  shippingAddress           Shipping address for the
+ *                                                            cart.
+ * @property {Array}                shippingRates             array of selected shipping
+ *                                                            rates.
+ * @property {Object}               extensions                Values provided by  *                                                      extensions.
+ * @property {boolean}              shippingRatesLoading      Whether or not the
+ *                                                            shipping rates are
+ *                                                            being loaded.
+ * @property {boolean}              cartHasCalculatedShipping Whether or not the cart has calculated shipping yet.
+ * @property {Array}                paymentRequirements       List of features required from payment gateways.
+ * @property {function(Object):any} receiveCart               Dispatcher to receive
+ *                                                            updated cart.
  */
 
 /**
  * @typedef {Object} StoreCartCoupon
  *
- * @property {Array}    appliedCoupons    Collection of applied coupons from the
- *                                        API.
- * @property {boolean}  isLoading         True when coupon data is being loaded.
- * @property {Function} applyCoupon       Callback for applying a coupon by code.
- * @property {Function} removeCoupon      Callback for removing a coupon by code.
- * @property {boolean}  isApplyingCoupon  True when a coupon is being applied.
- * @property {boolean}  isRemovingCoupon  True when a coupon is being removed.
+ * @property {Array}    appliedCoupons   Collection of applied coupons from the
+ *                                       API.
+ * @property {boolean}  isLoading        True when coupon data is being loaded.
+ * @property {Function} applyCoupon      Callback for applying a coupon by code.
+ * @property {Function} removeCoupon     Callback for removing a coupon by code.
+ * @property {boolean}  isApplyingCoupon True when a coupon is being applied.
+ * @property {boolean}  isRemovingCoupon True when a coupon is being removed.
  */
 
 /**
  * @typedef {Object} StoreCartItemAddToCart
  *
- * @property {number}   cartQuantity           The quantity of the item in the
- *                                             cart.
- * @property {boolean}  addingToCart           Whether the cart item is still
- *                                             being added or not.
- * @property {boolean}  cartIsLoading          Whether the cart is being loaded.
- * @property {Function} addToCart              Callback for adding a cart item.
+ * @property {number}   cartQuantity  The quantity of the item in the
+ *                                    cart.
+ * @property {boolean}  addingToCart  Whether the cart item is still
+ *                                    being added or not.
+ * @property {boolean}  cartIsLoading Whether the cart is being loaded.
+ * @property {Function} addToCart     Callback for adding a cart item.
  */
 
 /**

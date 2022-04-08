@@ -61,7 +61,7 @@ const setupPageSettings = () => {
  * Create taxes.
  *
  * @param {Object[]} fixture An array of objects describing our data, defaults
- * to our fixture.
+ *                           to our fixture.
  * @return {Promise} a promise that resolves to an array of newly created taxes,
  * or rejects if the request failed.
  */
@@ -88,7 +88,7 @@ const deleteTaxes = ( ids ) =>
  * Create Coupons.
  *
  * @param {Object[]} fixture An array of objects describing our data, defaults
- * to our fixture.
+ *                           to our fixture.
  * @return {Promise} a promise that resolves to an array of newly created coupons,
  * or rejects if the request failed.
  */
@@ -116,7 +116,7 @@ const deleteCoupons = ( ids ) =>
  * Create Product Categories.
  *
  * @param {Object[]} fixture An array of objects describing our data, defaults
- * to our fixture.
+ *                           to our fixture.
  * @return {Promise} a promise that resolves to an array of newly created categories,
  * or rejects if the request failed.
  */
@@ -145,7 +145,7 @@ const deleteCategories = ( categories ) => {
  * Create Product Tags.
  *
  * @param {Object[]} fixture An array of objects describing our data, defaults
- * to our fixture.
+ *                           to our fixture.
  * @return {Promise} a promise that resolves to an array of newly created tags,
  * or rejects if the request failed.
  */
@@ -178,10 +178,10 @@ const deleteTags = ( tags ) => {
  * @todo  add more products to e2e fixtures data.
  *
  * @param {Array}    categories Array of category objects so we can replace names with ids in the request.
- * @param {Array}    tags Array of category objects so we can replace names with ids in the request.
+ * @param {Array}    tags       Array of category objects so we can replace names with ids in the request.
  * @param {Array}    attributes Array of attribute objects so we can replace names with ids in the request.
- * @param {Object[]} fixture An array of objects describing our data, defaults
- * to our fixture.
+ * @param {Object[]} fixture    An array of objects describing our data, defaults
+ *                              to our fixture.
  * @return {Promise} a promise that resolves to an array of newly created products,
  * or rejects if the request failed.
  */

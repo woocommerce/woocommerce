@@ -27,12 +27,12 @@ import {
 /**
  * Product Image Block Component.
  *
- * @param {Object} props                  Incoming props.
- * @param {string} [props.className]      CSS Class name for the component.
- * @param {string} [props.imageSizing]    Size of image to use.
- * @param {boolean} [props.showProductLink]   Whether or not to display a link to the product page.
- * @param {boolean} [props.showSaleBadge] Whether or not to display the on sale badge.
- * @param {string} [props.saleBadgeAlign] How should the sale badge be aligned if displayed.
+ * @param {Object}  props                   Incoming props.
+ * @param {string}  [props.className]       CSS Class name for the component.
+ * @param {string}  [props.imageSizing]     Size of image to use.
+ * @param {boolean} [props.showProductLink] Whether or not to display a link to the product page.
+ * @param {boolean} [props.showSaleBadge]   Whether or not to display the on sale badge.
+ * @param {string}  [props.saleBadgeAlign]  How should the sale badge be aligned if displayed.
  * @return {*} The component.
  */
 export const Block = ( props ) => {

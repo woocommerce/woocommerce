@@ -22,7 +22,7 @@ describe( 'useStoreProducts', () => {
 			products,
 			totalProducts,
 			productsLoading,
-		} = testRenderer.root.findByType( 'div' ).props;
+		} = testRenderer.root.findByType( 'div' ).props; //eslint-disable-line testing-library/await-async-query
 		return {
 			products,
 			totalProducts,

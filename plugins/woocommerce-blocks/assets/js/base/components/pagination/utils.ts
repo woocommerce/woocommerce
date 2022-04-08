@@ -3,8 +3,8 @@
  * returns the min and max index of the pages to display in the pagination component.
  *
  * @param {number} pagesToDisplay Maximum number of pages to display in the pagination component.
- * @param {number} currentPage Page currently visible.
- * @param {number} totalPages Total pages available.
+ * @param {number} currentPage    Page currently visible.
+ * @param {number} totalPages     Total pages available.
  * @return {Object} Object containing the min and max index to display in the pagination component.
  */
 type minMaxIndex = {

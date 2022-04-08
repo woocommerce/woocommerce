@@ -18,16 +18,16 @@ import './style.scss';
 /**
  * Component displaying a product search form.
  *
- * @param {Object} props Incoming props for the component.
- * @param {Object} props.attributes Incoming block attributes.
- * @param {string} props.attributes.label
- * @param {string} props.attributes.placeholder
- * @param {string} props.attributes.formId
- * @param {string} props.attributes.className
- * @param {boolean} props.attributes.hasLabel
- * @param {string} props.attributes.align
- * @param {string} props.instanceId
- * @param {function(any):any} props.setAttributes Setter for block attributes.
+ * @param {Object}            props                        Incoming props for the component.
+ * @param {Object}            props.attributes             Incoming block attributes.
+ * @param {string}            props.attributes.label
+ * @param {string}            props.attributes.placeholder
+ * @param {string}            props.attributes.formId
+ * @param {string}            props.attributes.className
+ * @param {boolean}           props.attributes.hasLabel
+ * @param {string}            props.attributes.align
+ * @param {string}            props.instanceId
+ * @param {function(any):any} props.setAttributes          Setter for block attributes.
  */
 const Edit = ( {
 	attributes: { label, placeholder, formId, className, hasLabel, align },

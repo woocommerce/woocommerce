@@ -49,9 +49,9 @@ export const useStoreSnackbarNoticesContext = () => {
  *  - Info
  *  - Success
  *
- * @param {Object} props Incoming props for the component.
+ * @param {Object}              props          Incoming props for the component.
  * @param {React.ReactChildren} props.children The Elements wrapped by this component.
- * @param {string} props.context The notice context for notices being rendered.
+ * @param {string}              props.context  The notice context for notices being rendered.
  */
 export const StoreSnackbarNoticesProvider = ( {
 	children,

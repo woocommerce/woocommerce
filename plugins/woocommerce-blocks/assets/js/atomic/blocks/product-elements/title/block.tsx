@@ -48,7 +48,7 @@ const TagName = ( {
  * @param {boolean} [props.showProductLink] Whether or not to display a link to the product page.
  * @param {string}  [props.linkTarget]      Specifies where to open the linked URL.
  * @param {string}  [props.align]           Title alignment.
- * will be used if this is not provided.
+ *                                          will be used if this is not provided.
  * @return {*} The component.
  */
 export const Block = ( props: Props ): JSX.Element => {

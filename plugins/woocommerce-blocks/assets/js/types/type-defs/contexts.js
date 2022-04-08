@@ -1,3 +1,5 @@
+// Disabling eslint here as we are moving to typescript and this file will soon be redundant
+/* eslint-disable jsdoc/valid-types */
 /**
  * @typedef {import('./billing').BillingData} BillingData
  * @typedef {import('./cart').CartShippingOption} CartShippingOption
@@ -141,9 +143,9 @@
 /**
  * @typedef {Object} EditorDataContext
  *
- * @property {boolean} isEditor      Indicates whether in the editor context.
- * @property {number}  currentPostId The post ID being edited.
- * @property {Object}  previewData   Object containing preview data for the editor.
+ * @property {boolean}                 isEditor       Indicates whether in the editor context.
+ * @property {number}                  currentPostId  The post ID being edited.
+ * @property {Object}                  previewData    Object containing preview data for the editor.
  * @property {function(string):Object} getPreviewData Get data by name.
  */
 
@@ -181,26 +183,26 @@
 /**
  * @typedef {Object} ValidationContextError
  *
- * @property {number} id Error ID.
- * @property {string} message Error message.
- * @property {boolean} hidden Error visibility.
+ * @property {number}  id      Error ID.
+ * @property {string}  message Error message.
+ * @property {boolean} hidden  Error visibility.
  *
  */
 
 /**
  * @typedef {Object} ValidationContext
  *
- * @property {(id:string)=>ValidationContextError} getValidationError     Return validation error for the given property.
- * @property {function(Object)}         setValidationErrors      Receive an object of properties and  error messages as
- *                                                               strings and adds to the validation error state.
- * @property {function(string)}         clearValidationError     Clears a validation error for the given property name.
- * @property {function()}               clearAllValidationErrors Clears all validation errors currently in state.
- * @property {function(string)}         getValidationErrorId     Returns the css id for the
- *                                                               validation error using the given inputId string.
- * @property {function(string)}         hideValidationError      Sets the hidden prop of a specific error to true.
- * @property {function(string)}         showValidationError      Sets the hidden prop of a specific error to false.
- * @property {function()}               showAllValidationErrors  Sets the hidden prop of all errors to false.
- * @property {boolean}                  hasValidationErrors      True if there is at least one error.
+ * @property {(id:string)=>ValidationContextError} getValidationError       Return validation error for the given property.
+ * @property {function(Object)}                    setValidationErrors      Receive an object of properties and  error messages as
+ *                                                                          strings and adds to the validation error state.
+ * @property {function(string)}                    clearValidationError     Clears a validation error for the given property name.
+ * @property {function()}                          clearAllValidationErrors Clears all validation errors currently in state.
+ * @property {function(string)}                    getValidationErrorId     Returns the css id for the
+ *                                                                          validation error using the given inputId string.
+ * @property {function(string)}                    hideValidationError      Sets the hidden prop of a specific error to true.
+ * @property {function(string)}                    showValidationError      Sets the hidden prop of a specific error to false.
+ * @property {function()}                          showAllValidationErrors  Sets the hidden prop of all errors to false.
+ * @property {boolean}                             hasValidationErrors      True if there is at least one error.
  */
 
 /**
@@ -214,8 +216,8 @@
 /**
  * @typedef NoticeContext
  *
- * @property {function(boolean):void}                setIsSuppressed      Consumers can use this setter to suppress notices.
- * @property {boolean}                				 isSuppressed      	  Whether notices should be hidden/suppressed.
+ * @property {function(boolean):void} setIsSuppressed Consumers can use this setter to suppress notices.
+ * @property {boolean}                isSuppressed    Whether notices should be hidden/suppressed.
  */
 
 /**

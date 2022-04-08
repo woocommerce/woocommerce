@@ -7,7 +7,7 @@ import { autop } from '@wordpress/autop';
 /**
  * Generates the summary text from a string of text.
  *
- * @param {string} source Source text.
+ * @param {string} source    Source text.
  * @param {number} maxLength Limit number of countType returned if text has multiple paragraphs.
  * @param {string} countType What is being counted. One of words, characters_excluding_spaces, or characters_including_spaces.
  * @return {string} Generated summary.
@@ -72,8 +72,8 @@ const removeTags = ( htmlString ) => {
 /**
  * Remove trailing punctuation and append some characters to a string.
  *
- * @param {string} text Text to append to.
- * @param {string} moreText  Text to append.
+ * @param {string} text     Text to append to.
+ * @param {string} moreText Text to append.
  * @return {string} String with appended characters.
  */
 const appendMoreText = ( text, moreText ) => {
@@ -83,9 +83,9 @@ const appendMoreText = ( text, moreText ) => {
 /**
  * Limit words in string and returned trimmed version.
  *
- * @param {string} text Text to trim.
+ * @param {string} text      Text to trim.
  * @param {number} maxLength Number of countType to limit to.
- * @param {string} moreText Appended to the trimmed string.
+ * @param {string} moreText  Appended to the trimmed string.
  * @return {string} Trimmed string.
  */
 const trimWords = ( text, maxLength, moreText = '&hellip;' ) => {
@@ -101,10 +101,10 @@ const trimWords = ( text, maxLength, moreText = '&hellip;' ) => {
 /**
  * Limit characters in string and returned trimmed version.
  *
- * @param {string} text Text to trim.
- * @param {number} maxLength Number of countType to limit to.
+ * @param {string}  text          Text to trim.
+ * @param {number}  maxLength     Number of countType to limit to.
  * @param {boolean} includeSpaces Should spaces be included in the count.
- * @param {string} moreText Appended to the trimmed string.
+ * @param {string}  moreText      Appended to the trimmed string.
  * @return {string} Trimmed string.
  */
 const trimCharacters = (

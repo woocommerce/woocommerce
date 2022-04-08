@@ -12,9 +12,9 @@ import { formatError } from '../base/utils/errors.js';
 /**
  * Get attribute data (name, taxonomy etc) from server data.
  *
- * @param {number} attributeId Attribute ID to look for.
+ * @param {number}     attributeId   Attribute ID to look for.
  * @param {Array|null} attributeList List of attributes.
- * @param {string} matchField Field to match on. e.g. id or slug.
+ * @param {string}     matchField    Field to match on. e.g. id or slug.
  */
 const getAttributeData = ( attributeId, attributeList, matchField = 'id' ) => {
 	return Array.isArray( attributeList )

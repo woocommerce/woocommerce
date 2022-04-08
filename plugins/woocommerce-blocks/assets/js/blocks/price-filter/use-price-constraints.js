@@ -11,8 +11,8 @@ import { ROUND_UP, ROUND_DOWN } from './constants';
 /**
  * Return the price constraint.
  *
- * @param {number} price Price in minor unit, e.g. cents.
- * @param {number} minorUnit Price minor unit (number of digits after the decimal separator).
+ * @param {number}              price     Price in minor unit, e.g. cents.
+ * @param {number}              minorUnit Price minor unit (number of digits after the decimal separator).
  * @param {ROUND_UP|ROUND_DOWN} direction Rounding flag whether we round up or down.
  */
 export const usePriceConstraint = ( price, minorUnit, direction ) => {
