@@ -7,7 +7,7 @@
  */
 
 use Automattic\Jetpack\Constants;
-
+// Add comment.
 defined( 'ABSPATH' ) || exit;
 
 if ( ! class_exists( 'WC_Background_Process', false ) ) {
