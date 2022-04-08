@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { MenuGroup, MenuItem } from '@wordpress/components';
 import { check } from '@wordpress/icons';
-import { Fragment, useEffect, lazy, Suspense } from '@wordpress/element';
+import { Fragment, useEffect } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { ONBOARDING_STORE_NAME, OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { useExperiment } from '@woocommerce/explat';
@@ -15,34 +15,35 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import { DisplayOption } from '~/activity-panel/display-options';
 import { Task } from './task';
-import { TasksPlaceholder } from './placeholder';
+import { TasksPlaceholder, TasksPlaceholderProps } from './placeholder';
 import './tasks.scss';
-import { TaskListProps } from './task-list';
+import { TaskListProps, TaskList } from './task-list';
+import { TaskList as TwoColumnTaskList } from '../two-column-tasks/task-list';
+import TwoColumnTaskListPlaceholder from '../two-column-tasks/placeholder';
 import '../two-column-tasks/style.scss';
+import { getAdminSetting } from '~/utils/admin-settings';
 
 export type TasksProps = {
 	query: { task?: string };
 };
 
-const TaskList = lazy(
-	() => import( /* webpackChunkName: "task-list" */ './task-list' )
-);
-
-const TwoColumnTaskList = lazy(
-	() =>
-		import(
-			/* webpackChunkName: "two-column-task-list" */ '../two-column-tasks/task-list'
-		)
-);
-
-function getTaskListComponent(
-	taskListId: string
-): React.LazyExoticComponent< React.FC< TaskListProps > > {
+function getTaskListComponent( taskListId: string ): React.FC< TaskListProps > {
 	switch ( taskListId ) {
 		case 'setup_experiment_1':
 			return TwoColumnTaskList;
 		default:
 			return TaskList;
+	}
+}
+
+function getTaskListPlaceholderComponent(
+	taskListId: string
+): React.FC< TasksPlaceholderProps > {
+	switch ( taskListId ) {
+		case 'setup_experiment_1':
+			return TwoColumnTaskListPlaceholder;
+		default:
+			return TasksPlaceholder;
 	}
 }
 
@@ -56,9 +57,9 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 
 	const { isResolving, taskLists } = useSelect( ( select ) => {
 		return {
-			isResolving: select( ONBOARDING_STORE_NAME ).isResolving(
-				'getTaskLists'
-			),
+			isResolving: ! select(
+				ONBOARDING_STORE_NAME
+			).hasFinishedResolution( 'getTaskLists' ),
 			taskLists: select( ONBOARDING_STORE_NAME ).getTaskLists(),
 		};
 	} );
@@ -108,8 +109,13 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 		return null;
 	}
 
+	const taskListIds = getAdminSetting( 'visibleTaskListIds', [] );
+	const TaskListPlaceholderComponent = getTaskListPlaceholderComponent(
+		taskListIds[ 0 ]
+	);
+
 	if ( isResolving ) {
-		return <TasksPlaceholder query={ query } />;
+		return <TaskListPlaceholderComponent query={ query } />;
 	}
 
 	if ( currentTask ) {
@@ -121,7 +127,7 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 	}
 
 	if ( isLoadingExperiment ) {
-		return <TasksPlaceholder query={ query } />;
+		return <TaskListPlaceholderComponent query={ query } />;
 	}
 
 	return taskLists
@@ -131,17 +137,7 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 				: ! id.endsWith( 'two_column' )
 		)
 		.map( ( taskList ) => {
-			const {
-				id,
-				eventPrefix,
-				isComplete,
-				isHidden,
-				isVisible,
-				isToggleable,
-				title,
-				tasks,
-				displayProgressHeader,
-			} = taskList;
+			const { id, isHidden, isVisible, isToggleable } = taskList;
 
 			if ( ! isVisible ) {
 				return null;
@@ -151,22 +147,14 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 
 			return (
 				<Fragment key={ id }>
-					<Suspense fallback={ null }>
-						<TaskListComponent
-							id={ id }
-							eventPrefix={ eventPrefix }
-							isComplete={ isComplete }
-							isExpandable={
-								experimentAssignment?.variationName ===
-								'treatment'
-							}
-							query={ query }
-							tasks={ tasks }
-							title={ title }
-							twoColumns={ false }
-							displayProgressHeader={ displayProgressHeader }
-						/>
-					</Suspense>
+					<TaskListComponent
+						isExpandable={
+							experimentAssignment?.variationName === 'treatment'
+						}
+						query={ query }
+						twoColumns={ false }
+						{ ...taskList }
+					/>
 					{ isToggleable && (
 						<DisplayOption>
 							<MenuGroup
