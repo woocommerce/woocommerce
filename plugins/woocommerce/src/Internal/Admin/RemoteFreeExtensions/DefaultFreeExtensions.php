@@ -108,7 +108,7 @@ class DefaultFreeExtensions {
 					'<a href="https://woocommerce.com/products/pinterest-for-woocommerce" target="_blank">',
 					'</a>'
 				),
-				'image_url'      => plugins_url( 'images/onboarding/creative-mail-by-constant-contact.png', WC_ADMIN_PLUGIN_FILE ),
+				'image_url'      => plugins_url( 'images/onboarding/pinterest.png', WC_ADMIN_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=pinterest-for-woocommerce',
 				'is_visible'     => [
 					[
@@ -126,7 +126,7 @@ class DefaultFreeExtensions {
 			'pinterest-for-woocommerce:alt'     => [
 				'name'           => __( 'Pinterest for WooCommerce', 'woocommerce' ),
 				'description'    => __( 'Get your products in front of Pinterest users searching for ideas and things to buy. Get started with Pinterest and make your entire product catalog browsable.', 'woocommerce-admin' ),
-				'image_url'      => plugins_url( 'images/onboarding/creative-mail-by-constant-contact.png', WC_ADMIN_PLUGIN_FILE ),
+				'image_url'      => plugins_url( 'images/onboarding/pinterest.png', WC_ADMIN_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=wc-admin&path=%2Fpinterest%2Flanding',
 				'is_built_by_wc' => false,
 			],
