@@ -193,7 +193,7 @@ Sometimes tests may fail for different reasons such as network issues, or lost c
 
 ```
 cd plugins/woocommerce
-E2E_RETRY_TIMES=2 pnpx wc-e2e test:e2e
+E2E_RETRY_TIMES=2 pnpm exec wc-e2e test:e2e
 ```
 
 ### How to run tests in debug mode
@@ -212,7 +212,7 @@ To run an individual test, use the direct path to the spec. For example:
 
 ```bash
 cd plugins/woocommerce
-pnpx wc-e2e test:e2e ./tests/e2e/specs/wp-admin/create-order.test.js
+pnpm exec wc-e2e test:e2e ./tests/e2e/specs/wp-admin/create-order.test.js
 ``` 
 
 ### How to skip tests
