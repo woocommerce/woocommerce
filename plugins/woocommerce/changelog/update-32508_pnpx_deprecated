@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Updating instance of now-deprecated pnpx to pnpm dlx/exec
