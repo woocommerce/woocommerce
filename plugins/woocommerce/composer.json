@@ -25,10 +25,11 @@
 		"woocommerce/woocommerce-blocks": "7.6.0"
 	},
 	"require-dev": {
+		"automattic/jetpack-changelogger": "3.0.2",
 		"bamarni/composer-bin-plugin": "^1.4",
-		"yoast/phpunit-polyfills": "^1.0",
 		"phpunit/phpunit": "7.5.20",
-		"automattic/jetpack-changelogger": "3.0.2"
+		"wp-phpunit/wp-phpunit": "^5.9",
+		"yoast/phpunit-polyfills": "^1.0"
 	},
 	"config": {
 		"optimize-autoloader": true,

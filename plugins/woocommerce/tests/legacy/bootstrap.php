@@ -37,6 +37,12 @@ class WC_Unit_Tests_Bootstrap {
 	 * @since 2.2
 	 */
 	public function __construct() {
+		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_putenv
+		putenv( 'WP_PHPUNIT__TESTS_CONFIG=' . __DIR__ . '/wp-config.php' );
+
+		// Load the dependencies first so that we have the unit test autoloader.
+		require_once __DIR__ . '/../../vendor/autoload.php';
+
 		$this->tests_dir  = dirname( __FILE__ );
 		$this->plugin_dir = dirname( dirname( $this->tests_dir ) );
 
@@ -57,7 +63,7 @@ class WC_Unit_Tests_Bootstrap {
 		}
 		// phpcs:enable WordPress.VIP.SuperGlobalInputUsage.AccessDetected
 
-		$this->wp_tests_dir = getenv( 'WP_TESTS_DIR' ) ? getenv( 'WP_TESTS_DIR' ) : sys_get_temp_dir() . '/wordpress-tests-lib';
+		$this->wp_tests_dir = getenv( 'WP_TESTS_DIR' ) ? getenv( 'WP_TESTS_DIR' ) : getenv( 'WP_PHPUNIT__DIR' );
 
 		// load test function so tests_add_filter() is available.
 		require_once $this->wp_tests_dir . '/includes/functions.php';

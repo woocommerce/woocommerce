@@ -2948,6 +2948,54 @@
             "time": "2018-10-10T15:39:06+00:00"
         },
         {
+            "name": "wp-phpunit/wp-phpunit",
+            "version": "5.9.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/wp-phpunit/wp-phpunit.git",
+                "reference": "ceece1ed4f2d0732c4a4f2603f4376d85547a50f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/wp-phpunit/wp-phpunit/zipball/ceece1ed4f2d0732c4a4f2603f4376d85547a50f",
+                "reference": "ceece1ed4f2d0732c4a4f2603f4376d85547a50f",
+                "shasum": ""
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "__loaded.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "Evan Mattson",
+                    "email": "me@aaemnnost.tv"
+                },
+                {
+                    "name": "WordPress Community",
+                    "homepage": "https://wordpress.org/about/"
+                }
+            ],
+            "description": "WordPress core PHPUnit library",
+            "homepage": "https://github.com/wp-phpunit",
+            "keywords": [
+                "phpunit",
+                "test",
+                "wordpress"
+            ],
+            "support": {
+                "docs": "https://github.com/wp-phpunit/docs",
+                "issues": "https://github.com/wp-phpunit/issues",
+                "source": "https://github.com/wp-phpunit/wp-phpunit"
+            },
+            "time": "2022-02-22T20:53:17+00:00"
+        },
+        {
             "name": "yoast/phpunit-polyfills",
             "version": "1.0.3",
             "source": {
