@@ -26,14 +26,6 @@ jobs:
             php: 7.2
           - wp: '5.8'
             php: 7.2
-    services:
-      database:
-        image: mysql:5.6
-        env:
-          MYSQL_ROOT_PASSWORD: root
-        ports:
-          - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
     steps:
       - uses: actions/checkout@v2
 
@@ -75,9 +67,20 @@ jobs:
              pnpm nx composer-dump-autoload woocommerce
            fi
 
-      - name: Init DB and WP
-        working-directory: plugins/woocommerce
-        run: ./tests/bin/install.sh woo_test root root 127.0.0.1 ${{ matrix.wp }}
+      - name: Prepare Test Environment
+        run: |
+          WP_VERSION="${{ matrix.wp }}"
+          if [[ $WP_VERSION == 'latest' ]]; then
+            WP_VERSION="null"
+          elif [[ $WP_VERSION == 'nightly' ]]; then
+            WP_VERSION="\"WordPress/WordPress#master\""
+          else
+            WP_VERSION="\"WordPress/WordPress#$WP_VERSION\""
+          fi
+          echo "{ \"phpVersion\": \"${{ matrix.php }}\", \"core\": $WP_VERSION }" > .wp-env.override.json
 
-      - name: Run tests
-        run: pnpm nx test-unit woocommerce
+      - name: Run Tests
+        run: |
+          npm -g install @wordpress/env
+          wp-env start
+          pnpm nx test-unit woocommerce
