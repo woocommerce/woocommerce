@@ -190,8 +190,8 @@ final class BlockTypesController {
 		 * Mini Cart blocks should be available in Site Editor, Widgets and frontend (is_admin function checks this) only.
 		 */
 		if (
-			'widgets.php' === $pagenow ||
-			'site-editor.php' === $pagenow || ! is_admin() ||
+			! is_admin() ||
+			in_array( $pagenow, [ 'widgets.php', 'customize.php', 'site-editor.php' ], true ) ||
 			! empty( $_GET['page'] ) && 'gutenberg-edit-site' === $_GET['page'] // phpcs:ignore WordPress.Security.NonceVerification
 		) {
 			$block_types[] = 'MiniCart';
@@ -201,7 +201,6 @@ final class BlockTypesController {
 		if ( Package::feature()->is_feature_plugin_build() ) {
 			$block_types[] = 'Checkout';
 			$block_types[] = 'Cart';
-
 		}
 
 		if ( Package::feature()->is_experimental_build() ) {
