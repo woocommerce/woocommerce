@@ -8,6 +8,9 @@
  * @version 2.3.0
  */
 
+use Automattic\WooCommerce\Admin\Notes\Notes;
+use Automattic\WooCommerce\Admin\ReportsSync;
+
 defined( 'WP_UNINSTALL_PLUGIN' ) || exit;
 
 global $wpdb, $wp_version;
