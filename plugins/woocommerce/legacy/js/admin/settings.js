@@ -194,7 +194,7 @@
 				return $( tr ).attr( 'data-gateway_id' );
 			});
 
-			window.wcTracks.recordEvent( 'wcadmin_settings_payments_recommendations_other_options' , {
+			window.wcTracks.recordEvent( 'settings_payments_recommendations_other_options' , {
 				available_payment_methods: payment_methods
 			});
 
