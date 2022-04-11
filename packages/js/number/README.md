@@ -15,19 +15,19 @@ _This package assumes that your code will run in an **ES2015+** environment. If 
 ## Usage
 
 ```JS
-import { formatNumber, formatValue, calculateDelta } from '@woocommerce/number';
+import { numberFormat, formatValue, calculateDelta } from '@woocommerce/number';
 
 // It's best to retrieve the site currency settings and compose them with the format functions.
 import { partial } from 'lodash';
 // Retrieve this from the API or a global settings object.
 const siteNumberOptions = {
-    precision: 2,
-	decimalSeparator: '.',
-	thousandSeparator: ',',
+  precision: 2,
+  decimalSeparator: '.',
+  thousandSeparator: ',',
 };
 // Compose.
-const formatStoreNumber = partial( siteNumberOptions, formatNumber );
-const formatStoreValue = partial( siteNumberOptions, formatValue );
+const formatStoreNumber = partial( numberFormat, siteNumberOptions );
+const formatStoreValue = partial( formatValue, siteNumberOptions );
 
 // Formats a number using site's current locale.
 const localizedNumber = formatStoreNumber( 1337 ); // '1,377'
