@@ -1,0 +1,38 @@
+name: Highlight templates and hooks changes
+on: pull_request
+jobs:
+  analyze:
+    name: Check pull request changes to highlight
+    runs-on: ubuntu-latest
+    outputs:
+      results: ${{ steps.results.outputs.results }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Install prerequisites
+        run: |
+          npm install -g pnpm
+          pnpm install
+      - name: Run analyzer
+        id: run
+        run: ./tools/code-analyzer/bin/dev analyzer "$GITHUB_HEAD_REF" -o github -s claudiosanches/test-gh
+      - name: Print results
+        id: results
+        run: echo "::set-output name=results::${{ steps.run.outputs.templates }}${{ steps.run.outputs.wphooks }}"
+  comment:
+    name: Add comment to hightlight changes
+    needs: analyze
+    runs-on: ubuntu-latest
+    if: needs.analyze.outputs.results
+    steps:
+      - name: Add comment
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{ secrets.WC_BOT_TRIAGE_TOKEN }}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '## New changes in this PR${{ needs.analyze.outputs.results }}'
+            })
