@@ -1,6 +1,6 @@
 # Number
 
-A collection of utilities to propery localize numerical values in WooCommerce
+A collection of utilities to properly localize numerical values in WooCommerce
 
 ## Installation
 
