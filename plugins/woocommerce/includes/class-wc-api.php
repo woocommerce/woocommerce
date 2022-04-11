@@ -12,7 +12,7 @@
  */
 
 defined( 'ABSPATH' ) || exit;
-
+// Add comment.
 /**
  * WC_API class.
  */
