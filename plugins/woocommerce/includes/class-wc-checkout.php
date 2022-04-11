@@ -403,7 +403,7 @@ class WC_Checkout {
 			 * @since 4.3.0
 			 */
 			do_action( 'woocommerce_checkout_order_created', $order );
-
+// Add comment.
 			return $order_id;
 		} catch ( Exception $e ) {
 			if ( $order && $order instanceof WC_Order ) {
