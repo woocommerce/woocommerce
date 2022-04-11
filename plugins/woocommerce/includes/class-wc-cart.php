@@ -1308,7 +1308,7 @@ class WC_Cart extends WC_Legacy_Cart {
 		}
 		return false;
 	}
-
+// Add comment.
 	/**
 	 * Restore a cart item.
 	 *
