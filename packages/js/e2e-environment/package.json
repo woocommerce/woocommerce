@@ -77,5 +77,10 @@
   },
   "bin": {
     "wc-e2e": "bin/wc-e2e.sh"
+  },
+  "lint-staged": {
+	"*.(t|j)s?(x)": [
+		"eslint --fix"
+	]
   }
 }

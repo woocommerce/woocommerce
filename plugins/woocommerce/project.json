@@ -57,7 +57,7 @@
 			"executor": "@nrwl/workspace:run-commands",
 			"options": {
 				"commands": [
-					"pnpm nx build:feature-config woocommerce-admin",
+					"pnpm nx build:feature-config woocommerce",
 					"pnpm nx watch-assets woocommerce"
 				]
 			}
@@ -140,12 +140,6 @@
 			"executor": "@nrwl/workspace:run-script",
 			"options": {
 				"script": "packages:fix:textdomain"
-			}
-		},
-		"git-update-hooks": {
-			"executor": "@nrwl/workspace:run-script",
-			"options": {
-				"script": "git:update-hooks"
 			}
 		},
 		"make-collection": {

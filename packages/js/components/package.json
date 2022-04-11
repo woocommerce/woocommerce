@@ -39,10 +39,10 @@
 		"@wordpress/deprecated": "^3.3.1",
 		"@wordpress/dom": "^3.3.2",
 		"@wordpress/element": "^4.1.1",
-		"@wordpress/hooks": "^2.12.3",
+		"@wordpress/hooks": "^3.5.0",
 		"@wordpress/html-entities": "^3.3.1",
 		"@wordpress/i18n": "^4.3.1",
-		"@wordpress/icons": "^6.3.0",
+		"@wordpress/icons": "^8.1.0",
 		"@wordpress/keycodes": "^3.3.1",
 		"@wordpress/url": "^3.4.1",
 		"@wordpress/viewport": "^4.1.2",
@@ -123,5 +123,11 @@
 		"test:nobuild": "jest --config ./jest.config.json",
 		"test:update-snapshots": "pnpm run test:nobuild -- --updateSnapshot",
 		"test-staged": "jest --bail --config ./jest.config.json --findRelatedTests"
+	},
+	"lint-staged": {
+		"*.(t|j)s?(x)": [
+			"eslint --fix",
+			"pnpm test-staged"
+		]
 	}
 }

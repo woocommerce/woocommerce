@@ -33,5 +33,10 @@
   },
   "bin": {
     "wc-api-tests": "bin/wc-api-tests.sh"
+  },
+  "lint-staged": {
+	"*.(t|j)s?(x)": [
+		"eslint --fix"
+	]
   }
 }
