@@ -3,14 +3,14 @@
  * Class for implementing migration from wp_posts and wp_postmeta to custom order tables.
  */
 
-namespace Automattic\WooCommerce\DataBase\Migrations\CustomOrderTable;
+namespace Automattic\WooCommerce\Database\Migrations\CustomOrderTable;
 
-use Automattic\WooCommerce\DataBase\Migrations\MigrationErrorLogger;
+use Automattic\WooCommerce\Database\Migrations\MigrationErrorLogger;
 
 /**
  * Class WPPostToCOTMigrator
  *
- * @package Automattic\WooCommerce\DataBase\Migrations\CustomOrderTable
+ * @package Automattic\WooCommerce\Database\Migrations\CustomOrderTable
  */
 class WPPostToCOTMigrator {
 
@@ -154,7 +154,7 @@ class WPPostToCOTMigrator {
 	}
 
 	/**
-	 * Process migration for metadata for given post ids.\
+	 * Process migration for metadata for given post ids.
 	 *
 	 * @param array $order_post_ids Post IDs.
 	 */

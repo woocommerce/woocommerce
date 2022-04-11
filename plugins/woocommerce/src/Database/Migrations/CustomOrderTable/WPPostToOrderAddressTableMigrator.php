@@ -3,12 +3,12 @@
  * Class for WPPost to wc_order_address table migrator.
  */
 
-namespace Automattic\WooCommerce\DataBase\Migrations\CustomOrderTable;
+namespace Automattic\WooCommerce\Database\Migrations\CustomOrderTable;
 
 /**
  * Class WPPostToOrderAddressTableMigrator
  *
- * @package Automattic\WooCommerce\DataBase\Migrations\CustomOrderTable
+ * @package Automattic\WooCommerce\Database\Migrations\CustomOrderTable
  */
 class WPPostToOrderAddressTableMigrator extends MetaToCustomTableMigrator {
 	/**

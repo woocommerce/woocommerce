@@ -3,16 +3,16 @@
  * Generic Migration class to move any meta data associated to an entity, to a different meta table associated with a custom entity table.
  */
 
-namespace Automattic\WooCommerce\DataBase\Migrations\CustomOrderTable;
+namespace Automattic\WooCommerce\Database\Migrations\CustomOrderTable;
 
-use Automattic\WooCommerce\DataBase\Migrations\MigrationHelper;
+use Automattic\WooCommerce\Database\Migrations\MigrationHelper;
 
 /**
  * Class MetaToMetaTableMigrator.
  *
  * Generic class for powering migrations from one meta table to another table.
  *
- * @package Automattic\WooCommerce\DataBase\Migrations\CustomOrderTable
+ * @package Automattic\WooCommerce\Database\Migrations\CustomOrderTable
  */
 class MetaToMetaTableMigrator {
 

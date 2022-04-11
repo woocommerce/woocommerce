@@ -3,14 +3,12 @@
  * Helper class with utility functions for migrations.
  */
 
-namespace Automattic\WooCommerce\DataBase\Migrations;
-
-use function DeliciousBrains\WP_Offload_Media\Aws3\JmesPath\search;
+namespace Automattic\WooCommerce\Database\Migrations;
 
 /**
  * Class MigrationHelper.
  *
- * Helper class to asist with migration related operations.
+ * Helper class to assist with migration related operations.
  */
 class MigrationHelper {
 

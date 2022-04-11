@@ -3,7 +3,7 @@
  * Tests for WPPostToCOTMigrator class.
  */
 
-use Automattic\WooCommerce\DataBase\Migrations\CustomOrderTable\WPPostToCOTMigrator;
+use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\WPPostToCOTMigrator;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper;

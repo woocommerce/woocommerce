@@ -5,7 +5,7 @@
 
 namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;
 
-use Automattic\WooCommerce\DataBase\Migrations\CustomOrderTable\WPPostToCOTMigrator;
+use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\WPPostToCOTMigrator;
 use Automattic\WooCommerce\Internal\DependencyManagement\AbstractServiceProvider;
 
 /**

@@ -3,12 +3,12 @@
  * Class for WPPost to wc_order_operational_details migrator.
  */
 
-namespace Automattic\WooCommerce\DataBase\Migrations\CustomOrderTable;
+namespace Automattic\WooCommerce\Database\Migrations\CustomOrderTable;
 
 /**
  * Class WPPostToOrderOpTableMigrator
  *
- * @package Automattic\WooCommerce\DataBase\Migrations\CustomOrderTable
+ * @package Automattic\WooCommerce\Database\Migrations\CustomOrderTable
  */
 class WPPostToOrderOpTableMigrator extends MetaToCustomTableMigrator {
 

@@ -3,14 +3,14 @@
  * Generic migration class to move any entity, entity_meta table combination to custom table.
  */
 
-namespace Automattic\WooCommerce\DataBase\Migrations\CustomOrderTable;
+namespace Automattic\WooCommerce\Database\Migrations\CustomOrderTable;
 
-use Automattic\WooCommerce\DataBase\Migrations\MigrationHelper;
+use Automattic\WooCommerce\Database\Migrations\MigrationHelper;
 
 /**
  * Class MetaToCustomTableMigrator.
  *
- * @package Automattic\WooCommerce\DataBase\Migrations\CustomOrderTable
+ * @package Automattic\WooCommerce\Database\Migrations\CustomOrderTable
  */
 abstract class MetaToCustomTableMigrator {
 

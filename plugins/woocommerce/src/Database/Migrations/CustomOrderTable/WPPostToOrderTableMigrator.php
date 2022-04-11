@@ -3,7 +3,7 @@
  * Class for WPPost To order table migrator.
  */
 
-namespace Automattic\WooCommerce\DataBase\Migrations\CustomOrderTable;
+namespace Automattic\WooCommerce\Database\Migrations\CustomOrderTable;
 
 /**
  * Class WPPostToOrderTableMigrator.
