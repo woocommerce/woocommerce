@@ -97,7 +97,7 @@ class WC_Product_CSV_Importer_Controller {
 		 * @param bool   $check_import_file_path If the import file path should be checked.
 		 * @param string $file                   Path of the file to be checked.
 		 */
-		return wc_is_file_valid_csv($file, $check_path);
+		return wc_is_file_valid_csv( $file, $check_path );
 	}
 
 	/**
