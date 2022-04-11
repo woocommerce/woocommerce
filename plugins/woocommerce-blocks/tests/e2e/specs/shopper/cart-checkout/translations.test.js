@@ -1,16 +1,14 @@
 /**
  * Internal dependencies
  */
-import { cli } from '../../../utils/run-cli-from-test';
-import { merchant } from '../../../utils/merchant';
-import { shopper } from '../../../utils/shopper';
+import { cli, merchant, shopper } from '../../../../utils';
 
 if ( process.env.WOOCOMMERCE_BLOCKS_PHASE < 2 ) {
 	// eslint-disable-next-line jest/no-focused-tests
-	test.only( 'Skipping Checkout tests', () => {} );
+	test.only( 'Skipping Cart & Checkout tests', () => {} );
 }
 
-describe( 'Shopper → Cart → Can view translated cart & checkout blocks', () => {
+describe( 'Shopper → Cart & Checkout → Translations', () => {
 	// We need to install the language files for the blocks plugin.
 	// We also need to install the plugin from w.org via the cli. This is because
 	// on w.org, the slug is `woo-gutenberg-products-block` where as here it's
@@ -42,7 +40,7 @@ describe( 'Shopper → Cart → Can view translated cart & checkout blocks', () 
 		expect( resultUninstallLanguages.code ).toEqual( 0 );
 	} );
 
-	it( 'should be able to view translated Cart block ', async () => {
+	it( 'User can view translated Cart block ', async () => {
 		await shopper.goToShop();
 		await shopper.addToCartFromShopPage( '128GB USB Stick' );
 		await shopper.block.goToCart();
@@ -73,7 +71,7 @@ describe( 'Shopper → Cart → Can view translated cart & checkout blocks', () 
 		await expect( orderSummary ).toMatch( 'Coupon code' );
 	} );
 
-	it( 'should be able to view translated Checkout block', async () => {
+	it( 'USer can view translated Checkout block', async () => {
 		await shopper.block.goToCheckout();
 
 		const contactHeading = await page.$(

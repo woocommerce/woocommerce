@@ -1,35 +1,36 @@
 /**
  * Internal dependencies
  */
-import { shopper } from '../../../utils';
-import { Taxes, Products } from '../../fixtures/fixture-data';
 import {
+	shopper,
 	getExpectedTaxes,
 	getTaxesFromCurrentPage,
 	getTaxesFromOrderSummaryPage,
 	showTaxes,
-} from '../../../utils/taxes';
+	SIMPLE_VIRTUAL_PRODUCT_NAME,
+} from '../../../../utils';
+import { Taxes, Products } from '../../../fixtures/fixture-data';
 
 const taxRates = Taxes();
 const productWooSingle1 = Products().find(
 	( prod ) => prod.name === 'Woo Single #1'
 );
 
-if ( process.env.WOOCOMMERCE_BLOCKS_PHASE < 2 )
+if ( process.env.WOOCOMMERCE_BLOCKS_PHASE < 2 ) {
 	// eslint-disable-next-line jest/no-focused-tests
-	test.only( `skipping ${ block.name } tests`, () => {} );
+	test.only( `Skipping Cart & Checkout tests`, () => {} );
+}
 
-describe( 'Shopper -> Tax', () => {
+describe( 'Shopper → Cart & Checkout → Taxes', () => {
 	beforeEach( async () => {
 		await shopper.block.emptyCart();
 	} );
 
 	describe( '"Enable tax rate calculations" is unchecked in WC settings -> general', () => {
-		it( 'Tax is not displayed', async () => {
+		it( 'User cannot view the tax on Cart, Checkout & Order Summary', async () => {
 			await showTaxes( false );
 			await shopper.goToShop();
-			await shopper.block.searchForProduct( productWooSingle1.name );
-			await shopper.addToCart();
+			await shopper.addToCartFromShopPage( SIMPLE_VIRTUAL_PRODUCT_NAME );
 			await shopper.block.goToCart();
 
 			const cartTaxes = await getTaxesFromCurrentPage();
@@ -50,11 +51,10 @@ describe( 'Shopper -> Tax', () => {
 	} );
 
 	describe( '"Enable tax rate calculations" is checked in WC settings -> general', () => {
-		it( 'Tax is displayed correctly on Cart & Checkout ', async () => {
+		it( 'User can view the tax on Cart, Checkout & Order Summary', async () => {
 			await showTaxes( true );
 			await shopper.goToShop();
-			await shopper.block.searchForProduct( productWooSingle1.name );
-			await shopper.addToCart();
+			await shopper.addToCartFromShopPage( SIMPLE_VIRTUAL_PRODUCT_NAME );
 			await shopper.block.goToCart();
 
 			const expectedTaxes = getExpectedTaxes( taxRates, 'US', [

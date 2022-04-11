@@ -1,18 +1,14 @@
 /**
  * Internal dependencies
  */
-import { shopper } from '../../../utils';
-import { SIMPLE_VIRTUAL_PRODUCT_NAME } from '../../../utils/constants';
+import { shopper, SIMPLE_VIRTUAL_PRODUCT_NAME } from '../../../../utils';
 
-const block = {
-	name: 'Cart',
-};
-
-if ( process.env.WOOCOMMERCE_BLOCKS_PHASE < 2 )
+if ( process.env.WOOCOMMERCE_BLOCKS_PHASE < 2 ) {
 	// eslint-disable-next-line jest/no-focused-tests
-	test.only( `skipping ${ block.name } tests`, () => {} );
+	test.only( `Skipping Cart & Checkout tests`, () => {} );
+}
 
-describe( 'Shopper → Cart → Can update product quantity', () => {
+describe( 'Shopper → Cart', () => {
 	beforeAll( async () => {
 		await shopper.block.emptyCart();
 	} );
@@ -21,7 +17,34 @@ describe( 'Shopper → Cart → Can update product quantity', () => {
 		await shopper.block.emptyCart();
 	} );
 
-	it( 'allows customer to update product quantity via the input field', async () => {
+	it( 'User can view empty cart message', async () => {
+		await shopper.block.goToCart();
+
+		// Verify cart is empty'
+		await expect( page ).toMatchElement( 'h2', {
+			text: 'Your cart is currently empty!',
+		} );
+	} );
+
+	it( 'User can remove a product from cart', async () => {
+		await shopper.goToShop();
+		await shopper.addToCartFromShopPage( SIMPLE_VIRTUAL_PRODUCT_NAME );
+		await shopper.block.goToCart();
+		const removeProductLink = await page.$(
+			'.wc-block-cart-item__remove-link'
+		);
+
+		await removeProductLink.click();
+		// we need to wait to ensure the cart is updated
+		await page.waitForSelector( '.wc-block-cart__empty-cart__title' );
+
+		// Verify product is removed from the cart'
+		await expect( page ).toMatchElement( 'h2', {
+			text: 'Your cart is currently empty!',
+		} );
+	} );
+
+	it( 'User can update product quantity via the input field', async () => {
 		await shopper.goToShop();
 		await shopper.addToCartFromShopPage( SIMPLE_VIRTUAL_PRODUCT_NAME );
 		await shopper.block.goToCart();
@@ -38,7 +61,7 @@ describe( 'Shopper → Cart → Can update product quantity', () => {
 		await shopper.block.productIsInCart( SIMPLE_VIRTUAL_PRODUCT_NAME, 4 );
 	} );
 
-	it( 'allows customer to increase product quantity via the plus button', async () => {
+	it( 'User can increase product quantity via the plus button', async () => {
 		await shopper.block.increaseCartQuantityByOne(
 			SIMPLE_VIRTUAL_PRODUCT_NAME
 		);
@@ -53,7 +76,7 @@ describe( 'Shopper → Cart → Can update product quantity', () => {
 		await shopper.block.productIsInCart( SIMPLE_VIRTUAL_PRODUCT_NAME, 5 );
 	} );
 
-	it( 'allows customer to decrease product quantity via the minus button', async () => {
+	it( 'User can decrease product quantity via the minus button', async () => {
 		await shopper.block.decreaseCartQuantityByOne(
 			SIMPLE_VIRTUAL_PRODUCT_NAME
 		);
@@ -66,5 +89,17 @@ describe( 'Shopper → Cart → Can update product quantity', () => {
 		await expect( page ).toMatchElement( 'a.wc-block-cart__submit-button' );
 
 		await shopper.block.productIsInCart( SIMPLE_VIRTUAL_PRODUCT_NAME, 4 );
+	} );
+
+	it( 'User can proceed to checkout', async () => {
+		await shopper.goToShop();
+		await shopper.addToCartFromShopPage( SIMPLE_VIRTUAL_PRODUCT_NAME );
+		await shopper.block.goToCart();
+
+		// Click on "Proceed to Checkout" button
+		await shopper.block.proceedToCheckout();
+
+		// Verify that you see the Checkout Block page
+		await expect( page ).toMatchElement( 'h1', { text: 'Checkout' } );
 	} );
 } );

@@ -54,7 +54,7 @@ const WooCommerce = new WooCommerceRestApi( {
 
 if ( process.env.WOOCOMMERCE_BLOCKS_PHASE < 3 ) {
 	// eslint-disable-next-line jest/no-focused-tests
-	test.only( `skipping ${ block.name } tests`, () => {} );
+	test.only( `Skipping ${ block.name } tests`, () => {} );
 }
 
 describe( 'Shopper → Mini Cart', () => {
