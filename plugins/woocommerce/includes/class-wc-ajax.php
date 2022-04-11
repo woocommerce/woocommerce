@@ -3095,7 +3095,7 @@ class WC_AJAX {
 				}
 				$enabled = $gateway->get_option( 'enabled', 'no' );
 				$option  = array(
-					'id' => $gateway->get_option_key()
+					'id' => $gateway->get_option_key(),
 				);
 
 				if ( ! wc_string_to_bool( $enabled ) ) {
