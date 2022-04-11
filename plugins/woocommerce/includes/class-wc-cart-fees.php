@@ -9,7 +9,7 @@
  * @package WooCommerce\Classes
  * @version 3.2.0
  */
-
+// Add comment.
 defined( 'ABSPATH' ) || exit;
 
 /**
