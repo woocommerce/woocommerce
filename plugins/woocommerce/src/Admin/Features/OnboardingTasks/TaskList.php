@@ -359,18 +359,21 @@ class TaskList {
 	 */
 	public function get_json() {
 		$this->possibly_track_completion();
+		$tasks_json = array();
+		foreach ( $this->tasks as $task ) {
+			$json = $task->get_json();
+			if ( $json['canView'] ) {
+				$tasks_json[] = $json;
+			}
+		}
+
 		return array(
 			'id'                    => $this->get_list_id(),
 			'title'                 => $this->title,
 			'isHidden'              => $this->is_hidden(),
 			'isVisible'             => $this->is_visible(),
 			'isComplete'            => $this->is_complete(),
-			'tasks'                 => array_map(
-				function( $task ) {
-					return $task->get_json();
-				},
-				$this->get_viewable_tasks()
-			),
+			'tasks'                 => $tasks_json,
 			'eventPrefix'           => $this->prefix_event( '' ),
 			'displayProgressHeader' => $this->display_progress_header,
 			'keepCompletedTaskList' => $this->get_keep_completed_task_list(),
