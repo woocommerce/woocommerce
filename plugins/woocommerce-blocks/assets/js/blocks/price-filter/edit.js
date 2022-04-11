@@ -3,19 +3,22 @@
  */
 import { __ } from '@wordpress/i18n';
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+import { getAdminLink } from '@woocommerce/settings';
+import { blocksConfig } from '@woocommerce/block-settings';
+import HeadingToolbar from '@woocommerce/editor-components/heading-toolbar';
+import BlockTitle from '@woocommerce/editor-components/block-title';
+import { Icon, currencyDollar, external } from '@wordpress/icons';
 import {
 	Placeholder,
 	Disabled,
 	PanelBody,
 	ToggleControl,
 	Button,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToggleGroupControl as ToggleGroupControl,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
 } from '@wordpress/components';
-import { getAdminLink } from '@woocommerce/settings';
-import { blocksConfig } from '@woocommerce/block-settings';
-import HeadingToolbar from '@woocommerce/editor-components/heading-toolbar';
-import BlockTitle from '@woocommerce/editor-components/block-title';
-import ToggleButtonControl from '@woocommerce/editor-components/toggle-button-control';
-import { Icon, currencyDollar, external } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -42,34 +45,33 @@ export default function ( { attributes, setAttributes } ) {
 						'woo-gutenberg-products-block'
 					) }
 				>
-					<ToggleButtonControl
+					<ToggleGroupControl
 						label={ __(
 							'Price Range',
 							'woo-gutenberg-products-block'
 						) }
 						value={ showInputFields ? 'editable' : 'text' }
-						options={ [
-							{
-								label: __(
-									'Editable',
-									'woo-gutenberg-products-block'
-								),
-								value: 'editable',
-							},
-							{
-								label: __(
-									'Text',
-									'woo-gutenberg-products-block'
-								),
-								value: 'text',
-							},
-						] }
 						onChange={ ( value ) =>
 							setAttributes( {
 								showInputFields: value === 'editable',
 							} )
 						}
-					/>
+					>
+						<ToggleGroupControlOption
+							value="editable"
+							label={ __(
+								'Editable',
+								'woo-gutenberg-products-block'
+							) }
+						/>
+						<ToggleGroupControlOption
+							value="text"
+							label={ __(
+								'Text',
+								'woo-gutenberg-products-block'
+							) }
+						/>
+					</ToggleGroupControl>
 					<ToggleControl
 						label={ __(
 							'Filter button',
