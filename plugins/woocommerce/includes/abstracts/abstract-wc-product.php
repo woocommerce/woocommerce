@@ -1202,7 +1202,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Set downloads.
 	 *
-	 * @throws WC_Data_Exception
+	 * @throws WC_Data_Exception If an error relating to one of the downloads is encountered.
 	 *
 	 * @param array $downloads_array Array of WC_Product_Download objects or arrays.
 	 *
