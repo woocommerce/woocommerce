@@ -1775,19 +1775,8 @@ function wc_uasort_comparison( $a, $b ) {
  * @return int
  */
 function wc_ascii_uasort_comparison( $a, $b ) {
-	// 'setlocale' is required for compatibility with PHP 8.
-	// Without it, 'iconv' will return '?'s instead of transliterated characters.
-	$prev_locale = setlocale( LC_CTYPE, 0 );
-	setlocale( LC_ALL, 'C.UTF-8' );
-
-	// phpcs:disable WordPress.PHP.NoSilencedErrors.Discouraged
-	if ( function_exists( 'iconv' ) && defined( 'ICONV_IMPL' ) && @strcasecmp( ICONV_IMPL, 'unknown' ) !== 0 ) {
-		$a = @iconv( 'UTF-8', 'ASCII//TRANSLIT//IGNORE', $a );
-		$b = @iconv( 'UTF-8', 'ASCII//TRANSLIT//IGNORE', $b );
-	}
-	// phpcs:enable WordPress.PHP.NoSilencedErrors.Discouraged
-
-	setlocale( LC_ALL, $prev_locale );
+	$a = remove_accents( $a );
+	$b = remove_accents( $b );
 	return strcmp( $a, $b );
 }
 
