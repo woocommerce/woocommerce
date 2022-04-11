@@ -270,6 +270,7 @@ describe( 'PaymentGatewaySuggestions', () => {
 			'tasklist_payment_show_toggle',
 			{
 				toggle: 'show',
+				payment_method_count: paymentGatewaySuggestions.length - 1, // Minus one for WCPay since it's not counted in "other payment methods".
 			}
 		);
 	} );

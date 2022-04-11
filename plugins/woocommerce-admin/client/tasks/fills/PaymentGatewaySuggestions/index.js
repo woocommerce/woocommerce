@@ -161,16 +161,6 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 		[ paymentGateways ]
 	);
 
-	const trackSeeMore = () => {
-		recordEvent( 'tasklist_payment_see_more', {} );
-	};
-
-	const trackToggle = ( isShow ) => {
-		recordEvent( 'tasklist_payment_show_toggle', {
-			toggle: isShow ? 'hide' : 'show',
-		} );
-	};
-
 	const recommendation = useMemo(
 		() =>
 			Array.from( paymentGateways.values() )
@@ -242,6 +232,18 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 	);
 
 	const isEligibleWCPay = !! wcPayGateway.length;
+
+	const trackSeeMore = () => {
+		recordEvent( 'tasklist_payment_see_more', {} );
+	};
+
+	const trackToggle = ( isShow ) => {
+		recordEvent( 'tasklist_payment_show_toggle', {
+			toggle: isShow ? 'hide' : 'show',
+			payment_method_count:
+				offlineGateways.length + additionalGateways.length,
+		} );
+	};
 
 	if ( query.id && ! currentGateway ) {
 		return <SetupPlaceholder />;
