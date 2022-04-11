@@ -19,7 +19,7 @@ class WC_CLI {
 		$this->includes();
 		$this->hooks();
 	}
-
+// Add comment.
 	/**
 	 * Load command files.
 	 */
