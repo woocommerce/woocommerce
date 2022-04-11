@@ -80,6 +80,7 @@ const PaymentRecommendations: React.FC = () => {
 	);
 
 	const supportsWCPayments =
+		paymentGatewaySuggestions &&
 		paymentGatewaySuggestions.filter( ( paymentGatewaySuggestion ) => {
 			return (
 				paymentGatewaySuggestion.id.indexOf(
