@@ -265,7 +265,7 @@ export default class Analyzer extends Command {
 		const hooks = await this.scanHooks(content, version);
 		// @todo: Scan for changes to database schema.
 
-		if (templates) {
+		if (templates.size) {
 			await this.printTemplateResults(
 				templates,
 				output,
@@ -275,10 +275,10 @@ export default class Analyzer extends Command {
 			this.log('No template changes found');
 		}
 
-		if (hooks) {
+		if (hooks.size) {
 			await this.printHookResults(hooks, output, 'HOOKS');
 		} else {
-			this.log('No template changes found');
+			this.log('No new hooks found');
 		}
 	}
 
@@ -295,11 +295,16 @@ export default class Analyzer extends Command {
 		title: string
 	): Promise<void> {
 		if ('github' === output) {
+			let opt = '\\n\\n### Template changes:\\n';
 			for (const [key, value] of data) {
+				opt += `- **file:** ${key}\\n`;
+				opt += `  - ${value[0].toUpperCase()}: ${value[2]}\\n`;
 				this.log(
 					`::${value[0]} file=${key},line=1,title=${value[1]}::${value[2]}`
 				);
 			}
+
+			this.log(`::set-output name=templates::${opt}`);
 		} else {
 			this.log(`\n## ${title}:`);
 			for (const [key, value] of data) {
@@ -326,13 +331,18 @@ export default class Analyzer extends Command {
 		title: string
 	): Promise<void> {
 		if ('github' === output) {
+			let opt = '\\n\\n### New hooks:\\n';
 			for (const [key, value] of data) {
+				opt += `- **file:** ${key}\\n`;
 				for (const [k, v] of value) {
+					opt += `  - ${v[0].toUpperCase()}: ${v[2]}\\n`;
 					this.log(
 						`::${v[0]} file=${key},line=1,title=${v[1]} - ${k}::${v[2]}`
 					);
 				}
 			}
+
+			this.log(`::set-output name=wphooks::${opt}`);
 		} else {
 			this.log(`\n## ${title}:`);
 			for (const [key, value] of data) {
@@ -470,7 +480,7 @@ export default class Analyzer extends Command {
 				);
 				let name = await this.getHookName(hookName![4]);
 				const kind = hookName![1] === 'do_action' ? 'action' : 'filter';
-				const message = `'${name}' introduced in ${version}`;
+				const message = `\'${name}\' introduced in ${version}`;
 				const title = `New ${kind} found`;
 
 				hooksList.set(name, ['NOTICE', title, message]);
