@@ -28,7 +28,7 @@ if ( ! \Automattic\WooCommerce\Autoloader::init() ) {
 	return;
 }
 \Automattic\WooCommerce\Packages::init();
-
+// Add comment.
 // Include the main WooCommerce class.
 if ( ! class_exists( 'WooCommerce', false ) ) {
 	include_once dirname( WC_PLUGIN_FILE ) . '/includes/class-woocommerce.php';
