@@ -309,15 +309,15 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 						onToggle={ trackToggle }
 					>
 						{ additionalSection }
-						{ enabledSection }
 						{ offlineSection }
+						{ enabledSection }
 					</Toggle>
 				</>
 			) : (
 				<>
 					{ additionalSection }
-					{ enabledSection }
 					{ offlineSection }
+					{ enabledSection }
 				</>
 			) }
 		</div>
