@@ -7,7 +7,7 @@
  */
 
 defined( 'ABSPATH' ) || exit;
-
+// Add comment.
 /**
  * Autoloader class.
  */
