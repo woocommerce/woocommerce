@@ -1,5 +1,10 @@
 # Unreleased
 
+## Fixed
+- Removed the restart policy from e2e containers
+- Makes sure that the php containers are only spun up when the db containers is healthy and ready to accept connections
+- Wait for WordPress itself to be "healthy and ready" when running `pnpm docker:up`
+
 ## Changed
 - Updated `resolveSingleE2EPath` 
   - it resolves the full path if the filePath is valid

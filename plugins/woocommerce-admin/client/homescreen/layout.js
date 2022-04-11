@@ -42,6 +42,7 @@ import { WelcomeModal } from './welcome-modal';
 import { useHeadercardExperimentHook } from './hooks/use-headercard-experiment-hook';
 import './style.scss';
 import '../dashboard/style.scss';
+import { getAdminSetting } from '~/utils/admin-settings';
 
 const Tasks = lazy( () =>
 	import( /* webpackChunkName: "tasks" */ '../tasks' )
@@ -285,8 +286,7 @@ export default compose(
 		const { getOption, hasFinishedResolution } = select(
 			OPTIONS_STORE_NAME
 		);
-		const { getTaskList, getTaskLists } = select( ONBOARDING_STORE_NAME );
-		const taskLists = getTaskLists();
+		const { getTaskList } = select( ONBOARDING_STORE_NAME );
 
 		const welcomeFromCalypsoModalDismissed =
 			getOption( WELCOME_FROM_CALYPSO_MODAL_DISMISSED_OPTION_NAME ) !==
@@ -337,7 +337,7 @@ export default compose(
 			shouldShowWelcomeModal,
 			shouldShowWelcomeFromCalypsoModal,
 			isTaskListHidden: getTaskList( 'setup' )?.isHidden,
-			hasTaskList: !! taskLists.find( ( list ) => list.isVisible ),
+			hasTaskList: getAdminSetting( 'visibleTaskListIds', [] ).length > 0,
 			taskListComplete: getTaskList( 'setup' )?.isComplete,
 			installTimestamp,
 			installTimestampHasResolved,

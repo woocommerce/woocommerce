@@ -30,7 +30,7 @@
 		"@wordpress/data-controls": "^2.3.2",
 		"@wordpress/deprecated": "^3.3.1",
 		"@wordpress/element": "^4.1.1",
-		"@wordpress/hooks": "^2.12.3",
+		"@wordpress/hooks": "^3.5.0",
 		"@wordpress/i18n": "^4.3.1",
 		"@wordpress/url": "^3.4.1",
 		"dompurify": "^2.3.6",
@@ -70,5 +70,11 @@
 		"test": "pnpm run build && pnpm run test:nobuild",
 		"test:nobuild": "jest --config ./jest.config.json",
 		"test-staged": "jest --bail --config ./jest.config.json --findRelatedTests"
+	},
+	"lint-staged": {
+		"*.(t|j)s?(x)": [
+			"eslint --fix",
+			"pnpm test-staged"
+		]
 	}
 }

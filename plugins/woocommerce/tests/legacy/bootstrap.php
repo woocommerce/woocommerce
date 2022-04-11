@@ -259,7 +259,7 @@ class WC_Unit_Tests_Bootstrap {
 	 * @return array Filtered feature flags.
 	 */
 	public function add_development_features( $flags ) {
-		$config = json_decode( file_get_contents( $this->plugin_dir . '/../woocommerce-admin/config/development.json' ) ); // @codingStandardsIgnoreLine.
+		$config = json_decode( file_get_contents( $this->plugin_dir . '/client/admin/config/development.json' ) ); // @codingStandardsIgnoreLine.
 		foreach ( $config->features as $feature => $bool ) {
 			$flags[ $feature ] = $bool;
 		}

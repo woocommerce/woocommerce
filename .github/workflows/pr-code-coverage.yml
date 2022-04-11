@@ -61,7 +61,7 @@ jobs:
       - name: Build Admin feature config
         working-directory: ./
         run: |
-          pnpm nx build:feature-config woocommerce-admin
+          pnpm nx build:feature-config woocommerce
 
       - name: Init DB and WP
         run: pnpm nx install-unit-test-db woocommerce

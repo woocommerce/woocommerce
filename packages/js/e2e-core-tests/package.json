@@ -48,5 +48,10 @@
 	"clean": "rm -rf ./build ./build-module",
 	"compile": "node ./../bin/build.js",
 	"build": "./bin/build.sh && pnpm run clean && pnpm run compile"
+  },
+  "lint-staged": {
+	"*.(t|j)s?(x)": [
+		"eslint --fix"
+	]
   }
 }

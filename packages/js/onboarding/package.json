@@ -59,5 +59,10 @@
 		"start": "concurrently \"tsc --build --watch\" \"webpack --watch\"",
 		"prepack": "pnpm run clean && pnpm run build",
 		"lint": "eslint src"
+	},
+	"lint-staged": {
+		"*.(t|j)s?(x)": [
+			"eslint --fix"
+		]
 	}
 }

@@ -1,5 +1,7 @@
 # Unreleased
 
+-   Update dependency `@wordpress/hooks` to ^3.5.0
+
 # 7.0.1
 
 -   Add missing dependencies. #8349

@@ -70,6 +70,7 @@ class TaskLists {
 		self::init_default_lists();
 		add_action( 'admin_init', array( __CLASS__, 'set_active_task' ), 5 );
 		add_action( 'init', array( __CLASS__, 'init_tasks' ) );
+		add_filter( 'woocommerce_admin_shared_settings', array( __CLASS__, 'task_list_preloaded_settings' ), 20 );
 	}
 
 	/**
@@ -321,7 +322,7 @@ class TaskLists {
 		return array_filter(
 			self::get_lists(),
 			function ( $task_list ) {
-				return ! $task_list->is_hidden();
+				return $task_list->is_visible();
 			}
 		);
 	}
@@ -372,5 +373,18 @@ class TaskLists {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Add visible list ids to component settings.
+	 *
+	 * @param array $settings Component settings.
+	 *
+	 * @return array
+	 */
+	public static function task_list_preloaded_settings( $settings ) {
+		$settings['visibleTaskListIds'] = array_keys( self::get_visible() );
+
+		return $settings;
 	}
 }

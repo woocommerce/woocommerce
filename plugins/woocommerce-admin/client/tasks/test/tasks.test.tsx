@@ -27,10 +27,13 @@ jest.mock( '@wordpress/data', () => {
 jest.mock( '@woocommerce/explat' );
 jest.mock( '@woocommerce/tracks' );
 
-jest.mock( '../task-list', () => ( { id } ) => <div>task-list:{ id }</div> );
-jest.mock( '../../two-column-tasks/task-list', () => ( { id } ) => (
-	<div>two-column-list:{ id }</div>
-) );
+jest.mock( '../task-list', () => ( {
+	TaskList: ( { id } ) => <div>task-list:{ id }</div>,
+} ) );
+
+jest.mock( '../../two-column-tasks/task-list', () => ( {
+	TaskList: ( { id } ) => <div>two-column-list:{ id }</div>,
+} ) );
 
 jest.mock( '../task', () => ( {
 	Task: ( { query } ) => <div>task:{ query.task }</div>,

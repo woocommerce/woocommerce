@@ -1,14 +1,14 @@
 <?php
 /**
- * Test the Task class.
+ * Class for testing the Task class.
  *
  * @package WooCommerce\Admin\Tests\OnboardingTasks
  */
 
-require_once __DIR__ . '/test-task.php';
-
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskList;
+
+require_once __DIR__ . '/test-task.php';
 
 /**
  * class WC_Admin_Tests_OnboardingTasks_Task
@@ -394,7 +394,7 @@ class WC_Admin_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 	 */
 	public function test_get_list_id() {
 		$task = new TestTask(
-			new TaskList( array( 'id' => 'setup' ) ),
+			new TaskList( array( 'id' => 'extended' ) ),
 			array(
 				'id' => 'wc-unit-test-task',
 			)
