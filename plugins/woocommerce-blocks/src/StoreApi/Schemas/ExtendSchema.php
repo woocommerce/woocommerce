@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\StoreApi\Schemas;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\CartItemSchema;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\CartSchema;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\CheckoutSchema;
+use Automattic\WooCommerce\StoreApi\Schemas\V1\ProductSchema;
 use Automattic\WooCommerce\StoreApi\Formatters;
 
 /**
@@ -26,6 +27,7 @@ final class ExtendSchema {
 		CartItemSchema::IDENTIFIER,
 		CartSchema::IDENTIFIER,
 		CheckoutSchema::IDENTIFIER,
+		ProductSchema::IDENTIFIER,
 	];
 
 	/**
