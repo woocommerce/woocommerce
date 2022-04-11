@@ -10,7 +10,7 @@ use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 
 defined( 'ABSPATH' ) || exit;
-
+// Add comment.
 /**
  * WC_Ajax class.
  */
